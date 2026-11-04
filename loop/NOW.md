@@ -1,35 +1,27 @@
 # 現在做哪一個循環（這個檔要短：≤ 3 KB，只放「現在在哪、下一步」；每輪的紀錄寫 STATE.md，不寫這裡）
 
-## ✅ 11/04 主管 #1 驗收＋缺分計數修復（round 956）
-`audits/e016_verdict_pipeline.py`：slice 修復（endswith）與 done/ 門已在案（1821-1 票）；
-兩驗收判準實跑達標（selftest ALL OK、live 48/102 正確非 0）。剩餘缺口＝「連 -r1 目錄都缺」
-的格不計 missing（完賽後缺 ≥21 格仍對剩餘格出裁決＝靜默忽略缺格）⇒TDD 修復：
-`missing_total＝missing_scored＋max(0,102−total)`，run() 於 INCOMPLETE 門後套用；
-selftest 10 組 ALL OK（case 10＝5 計數斷言＋80 格⇒UNKNOWN）；live INCOMPLETE 48/102 RC=10
-（進行中行為不變）；cost unittest 4/4；ops 1c54b4a／Vacant db745925（md5 位元組一致）。
-argon 合併審查：c9a811fe 已為 qwen27b 祖先⇒無待合 commit；CI 0527d915 綠 4670，
-e70ec0ec＋db745925 待下窗口（產品碼自綠後未變）。
+## ✅ 11/04 收口 runbook 預備完成（round 957）
+`staging/e016_closeout_runbook_r957.md`（**staging、非 packet、零產品改動、零發射**）：
+§0 前置（done/ 門＋rescore 不一致 0，非 0⇒停不裁決）→§1 裁決（`audits/e016_verdict_pipeline.py`
+exit 0＝非 UNKNOWN／20＝UNKNOWN／10＝仍 INCOMPLETE；輸出 `e016_failed_step_ablation_verdict.json`）
+→§2 五態逐字表（packet §4 條件＋讀法｜L007 §4 後續；round 957 逐字核對原檔、packet md5 兩 repo 一致）
+→§3 結案寫三處（L006 §6 追加／L007 §4 標記不改原文／FINDINGS 正典＝Vacant repo、格式照 e015 條目）
+＋兩 repo 鏡像 md5＋§4 共同紅線（L007 §4 逐字）＋attempt-1 排除。管線 selftest 10 組 ALL OK（本輪重跑 RC=0）。
 
-## ✅ 11/04 分支 3（MECHANISM_CONFIRMED⇒強化）預備草稿（round 955）
-`staging/next_cycle_reinforcement_draft_r955.md`（**草稿、非 packet、零產品改動、零發射**）：
-發射前置＝e016 裁決＝MECHANISM_CONFIRMED（硬門；其餘四態⇒擱置、走 L007 §4 對應分支）。
-假說空間 H-a（TEST_FAILED_MAX_ROUNDS 1→2、弱證據在案）／H-b（收斂語境回饋）／H-c（外端 referee）
-＋選擇規則＋預註冊判準（留／撤＋成本紅線 2×A＋Holm＋H-12）＋六門承 e016。
-助手工單 `R20261104_0124-1`（草稿引用只讀審計）在 doing/（助手已接走、全 PASS 才結案）。
-
-## 🔴 下一步（e016 完賽後，依序；完賽前不准說 failed_step 是 C 勝 A 的來源）
-1. `python3 /srv/vlab/bin/report.py e016_failed_step_ablation --rescore`（驗收 0 不一致）
-2. `python3 audits/e016_verdict_pipeline.py` → 五態之一（成本紅線＋完賽缺分計數現在真正生效）
-3. L006 §6（狀態節）追加結案行＋L007 §4 條件分支（優先序 1>2>3>4>5、照表原文）：
-   1 UNKNOWN＝非負結果、infra 修復後重裁決、不寫任何機制結論；
+## 🔴 下一步（e016 完賽那一輪，照 runbook 依序執行；完賽前只監控）
+1. `ls /srv/vlab/done/16_e016_failed_step_ablation.json`（labd 已完賽；缺＝還在跑）
+2. `python3 /srv/vlab/bin/report.py e016_failed_step_ablation --rescore`（驗收不一致 0；非 0⇒停）
+3. `python3 audits/e016_verdict_pipeline.py` → 五態之一
+4. 照 runbook §2 對應行**逐字**執行：
+   1 UNKNOWN＝非負結果、infra 修復後重裁決、不寫機制結論；
    2 COST_BREACH＝機制判定不成立、不改產品、併讀 §2.5 成本病態；
-   3 MECHANISM_CONFIRMED＝強化＝新 cycle＋新 packet（r955 草稿）＋TDD 先；
-   4 NO_MECHANISM＝C 勝＝採樣⇒不改產品、誠實記錄；候選 (b) 外端 referee／(a) H-harness-budget（低優先）；
-   5 UNRESOLVED＝未建立（非負非正）、不改產品；候選同 4
-   ＋FINDINGS e016 條目（正典＝`~/dev/Vacant/ops/vlab/FINDINGS.md`，542 行、現最後條 e015；
-   格式＝日期·主軸·標題＋實驗／完賽／裁決／成本／口徑—不可說／證據鏈）
-- e016 attempt-2：48/102 在位（47 出分、A16/C16/C-nf16）；pace ~12–16 分/格、餘 54 格
-  ⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派
-- CI auto/qwen27b：e70ec0ec/db745925 待出（輪末複核；紅燈先修紀律）
-- attempt-1 的 15 格（`…attempt1_envleak/`）不進裁決；`recompute_results.json`（全是 0）
-  與 `e016_failed_step_ablation_recompute.py` 不能當證據、不要引用
+   3 MECHANISM_CONFIRMED＝強化＝新 cycle＋新 packet（r955 草稿、TDD 先、六門＋senior 審查後才提升）；
+   4 NO_MECHANISM＝C 勝＝採樣⇒不改產品、誠實記錄（不寫「kickback 無用」因果）；
+   5 UNRESOLVED＝未建立（非負非正）、不改產品；候選 (b) 外端 referee／(a) H-harness-budget（低優先）
+   ＋結案寫三處（L006 §6／L007 §4／FINDINGS e016 條目）＋兩 repo 鏡像＋commit
+- e016 attempt-2：54/102 在位（49 出分）、02:14 events 活躍＝健康；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午；
+  盤餘 62G、queue 空、无双分派
+- CI auto/qwen27b：271169fa 待出（輪末複核、紅燈先修紀律）；argon/worker 綠 4670
+- 助手票 `R20261104_0124-1`（r955 草稿引用審計）在 doing/（最後活躍 01:46、不接手；全 PASS＋R&D 核驗後移 done/）
+- attempt-1 的 15 格（`…attempt1_envleak/`）不進裁決；`recompute_results.json`（全是 0）與
+  `e016_failed_step_ablation_recompute.py` 不能當證據、不要引用

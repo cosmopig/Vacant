@@ -7430,3 +7430,12 @@ DECISION:955=e016 未完賽（49/102、ETA 今天下午）⇒依鐵則不乾等�
 - 紅線：零發射（e016 唯一在跑、只監控）；本輪改動＝審計工具（非 vacant_network/、非 tests/）＋本 redo 純文檔；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:956=senior #1 兩驗收判準已達（slice＋done 門在案）但「無目錄缺分」計數缺口＝真實 fail-open 洞（完賽後缺 21+ 格仍出裁決）⇒保守修復：摺入既有 missing>20%⇒UNKNOWN 規則、不新增態、不更預註冊狀態表、fail-closed only、進行中 path（exit 10）零改動｜argon 無待合 commit（c9a811fe 已合併在案）⇒不 merge｜五態裁決＋L007 §4 分支＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## Round 957（2026-11-04 02:14–02:4x，R&D 負責人）
+- **收口 runbook 預備（senior #2/#3 前置作業，e016 未完賽不阻塞）**：`staging/e016_closeout_runbook_r957.md`——§0 前置（done/ 門＋rescore 不一致 0、非 0⇒停不裁決）→§1 裁決（exit 0＝非 UNKNOWN／20＝UNKNOWN／10＝INCOMPLETE；輸出檔名 `audits/e016_failed_step_ablation_verdict.json`＝pipeline :189 實核）→§2 五態逐字表（packet §4 條件＋讀法、L007 §4 後續，皆逐字核對原檔；packet md5 c8d8c6dc… 兩 repo 一致）→§3 結案寫三處（L006 §6 追加／L007 §4 標記不改預註冊原文／FINDINGS 正典＝`Vacant/ops/vlab/FINDINGS.md`、格式照 e015 條目）＋兩 repo 鏡像 md5→§4 共同紅線（L007 §4 逐字）＋attempt-1 排除＋`recompute_results.json` 禁引。
+- **e016 attempt-2 監控**：54/102 在位（49 出分）、最新 events.jsonl 02:14 活躍＝健康非停擺；queue 空、盘餘 62G、无双分派。
+- **驗證**：管線 `--selftest` 10 組 ALL OK RC=0（本輪重跑）；runbook 每個引用點對原檔核對（packet §4 表、L007 §4 表、L006 §6 狀態節、FINDINGS e015 條目格式、pipeline exit codes :186/:199、鏡像結構＝staging 不鏡像／FINDINGS 僅 Vacant／STATE・NOW・L 檔兩 repo 鏡像）；CI：0527d915 綠 4670（LATEST）、271169fa 待窗（本輪改動＝staging 文件＋NOW/STATE、非 tests/⇒收錄不變）；argon HEAD 仍 c9a811fe＝已為 qwen27b 祖先（merge-base 再核）⇒無待合 commit。
+- **未驗證**：五態裁決本體＋rescore（e016 未完賽、ETA 11/04 下午–11/05 中午）；CI 271169fa（輪末複核、紅燈先修紀律）；助手票 R20261104_0124-1 進行中（doing/、01:46 活躍、不接手）。
+- 紅線：零發射（e016 唯一在跑、只監控）；零產品行為改動（runbook＝staging 文件、vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+
+DECISION:957=e016 未完賽（54/102）⇒依鐵則不乾等、預備收口動作——保守選擇：把「完賽那一輪」的裁決程序＋五態後續＋結案寫位置全錨定預註冊原檔寫成 runbook（staging、非 packet、收口時照抄不轉述），直接對治 round 956 redo 暴露的失敗模式（NOW 下一步 3 曾非 §4 表原文、被複審退回）；不碰產品碼、不發射｜五態裁決＋結案寫（L006 §6／L007 §4／FINDINGS）皆候完賽｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer
