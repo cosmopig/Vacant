@@ -766,3 +766,75 @@ def test_main_no_gap_but_unverified_is_rejected_not_infra(task_dir, tmp_path, ca
     assert log == []                           # 零呼叫是設計（缺口驅動），不是基建故障
     assert "req_group_recompute" in body["unresolved"]
     assert "req_summary_numbers" in body["unresolved"]
+
+
+# ── argon 0f0a6a0d：預設 include_dirs=('data',)（TDD）──────────────────
+
+def test_repair_slice_and_cli_default_include_dirs_data(tmp_path: pathlib.Path):
+    """修復切片與 CLI 必須預設帶入 data/ 目錄：
+    真實任務（DABench/DABStep）的資料檔普遍置於 data/ 子目錄。
+    若 repair_slice 與 CLI 未預設 include_dirs=('data',)，
+    工作區缺少 data/ 目錄，會導致：
+    1. agent 在無資料環境下執行；
+    2. 重驗因資料檔缺失誤判 UNKNOWN，好草稿被冤枉成 PASS→UNKNOWN 退步。
+    本測試驗證：
+    - repair_slice 預設帶入 data/
+    - repair.main CLI 預設帶入 data/，且支援 --include-dirs 參數
+    """
+    task_dir = tmp_path / "task"
+    draft_dir = tmp_path / "draft"
+    data_dir = task_dir / "data"
+    data_dir.mkdir(parents=True)
+    draft_dir.mkdir(parents=True)
+
+    (task_dir / "request.md").write_text("Report total amount\n", encoding="utf-8")
+    (data_dir / "records.json").write_text(json.dumps([{"val": 10}, {"val": 20}]), encoding="utf-8")
+    (draft_dir / "answer.txt").write_text("@total[1]\n", encoding="utf-8")
+
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_total", quote="total", deliverable="answer.txt",
+        verifier="kv_recomputed",
+        params={"key": "total", "data_file": "data/records.json",
+                "recompute": {"type": "count_if", "col": "val", "eq": 10}}
+    )])
+
+    # 1. 測試 repair_slice 預設 include_dirs
+    out1 = tmp_path / "out1"
+    res1 = repair.repair_slice(
+        task_dir, rs, draft_dir, out1,
+        build=_fake_build([]),
+        run=_fake_agent(None),
+        feedback_mode="generic",
+        min_rounds=1,
+    )
+    assert (out1 / "round_1" / "data" / "records.json").is_file(), "工作區必須預設包含 data/records.json"
+    assert res1.final_status["req_total"] == "PASS", "資料檔不應缺失，應成功判定為 PASS"
+
+    # 2. 測試 CLI 預設帶入 data/
+    out2 = tmp_path / "out2"
+    (task_dir / "requirements.json").write_text(json.dumps(rs.to_dict()), encoding="utf-8")
+    rc = repair.main(
+        ["--task", str(task_dir), "--draft", str(draft_dir),
+         "--out", str(out2), "--feedback-mode", "generic",
+         "--synthetic", "--json"],
+        build=_fake_build([]),
+        run=_fake_agent(None),
+    )
+    assert rc == 0
+    assert (out2 / "round_1" / "data" / "records.json").is_file(), "CLI 工作區必須預設包含 data/records.json"
+
+    # 3. 測試 CLI 支援 --include-dirs 自訂目錄
+    custom_dir = task_dir / "custom"
+    custom_dir.mkdir(parents=True)
+    (custom_dir / "extra.txt").write_text("extra", encoding="utf-8")
+    out3 = tmp_path / "out3"
+    rc_custom = repair.main(
+        ["--task", str(task_dir), "--draft", str(draft_dir),
+         "--out", str(out3), "--feedback-mode", "generic",
+         "--include-dirs", "data", "custom",
+         "--synthetic", "--json"],
+        build=_fake_build([]),
+        run=_fake_agent(None),
+    )
+    assert rc_custom == 0
+    assert (out3 / "round_1" / "custom" / "extra.txt").is_file(), "--include-dirs 自訂目錄必須進工作區"
