@@ -192,6 +192,8 @@ def build_repair_prompt(
 
     lines.append("")
     lines.append("【工作區邊界】所有操作僅限於當前工作目錄；交付物請在當前工作目錄建立或修改，請勿遍歷或讀取工作區外部目錄。")
+    lines.append("【環境說明】本工作環境已安裝 scipy/numpy 等科學運算庫；需要的函式庫已安裝時請直接調用產出交付物，"
+                 "不得因草稿內過時的註解或文字假設套件缺失而手刻替代演算法；某套件是否可用，以實際 import 的結果為準。")
 
     if feedback_mode == "localized":
         lines.append("")

@@ -167,6 +167,21 @@ def test_localized_prompt_has_requirement_counterexample_and_scope(task_dir):
     assert "報銷總金額" in generic                     # 原始需求兩臂都有
 
 
+def test_prompt_tells_env_has_sciplib_and_verify_by_import(task_dir):
+    """dab_039 真實停因：草稿 solution.py 舊註解聲稱 scipy 缺失，模型誤信後
+    手刻 Royston 演算法＋搜尋工作區外部目錄，300s 預算耗盡（r976 複跑 549k tok 仍 stalled）。
+    修復請求（兩臂一致）必須明示：環境已裝 scipy/numpy，直接調用產出交付物；
+    是否可用以實際 import 為準，不得因草稿內過時註解而手刻替代演算法。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    for mode in ("generic", "localized"):
+        p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                       feedback_mode=mode)
+        assert "scipy" in p and "numpy" in p, mode
+        assert "import" in p, mode                    # 以實際 import 為準
+        assert "手刻" in p or "替代演算法" in p, mode   # 禁止假設缺失而手刻
+
+
 def test_prompt_never_names_hidden_sources(task_dir):
     """修復請求不得出現 hidden／scorer 等隱藏來源字眼。"""
     rs = load_req_set(task_dir)
