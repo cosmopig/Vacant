@@ -1,0 +1,95 @@
+{
+ "schema": "vacant.reqloop.g2.manifest/1",
+ "status": "selection_frozen_NOT_fired",
+ "frozen_at": "2026-11-04T13:38:00Z",
+ "ticket": "vq-5nz（G2 e014 第二批）",
+ "purpose": "G2 小批真實交付物（e014/dabstep factoid）：3 真草稿 × generic/localized＝6 格；只驗管線，不宣稱任何提升。2 bad（dabstep-23/dabstep-1753，lab reward 0）＋1 good（dabstep-13，lab reward 1）",
+ "arms": ["generic", "localized"],
+ "model": {
+  "provider": "lms1003qwen",
+  "model": "qwen/qwen3.8-27b",
+  "note": "兩臂同一模型；若一臂換強模型，另一臂必須有同模型/成本對照（紅線）"
+ },
+ "budget": {
+  "max_rounds_per_cell": 2,
+  "timeout_s_per_round": 300,
+  "hard_token_cap": false,
+  "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+  "min_rounds": {"generic": 1, "localized": 0},
+  "note": "generic 臂對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+ },
+ "scoring": {
+  "readable": "可見宣言（格式＋按題目公開規則對凍結資料重算）；裁判不持有 hidden 參考",
+  "hidden_before": "引用 lab 既有記錄（score.json：pass/reward），不在本地重跑",
+  "hidden_after": "UNKNOWN——本地無權重跑 hidden scorer；缺失即 UNKNOWN，絕不填 0"
+ },
+ "leak_guard": "修復模型只看得到原始問題（events.jsonl user prompt 原文）、凍結資料與「值不符重算」的事實；重算值/hidden 參考值永不進證據或提示（同 e013 口徑）",
+ "data_source": {
+  "dir": "~/dev/ops/ref/bm_dabstep_data（本地參考庫；與 e014 lab cell 快照 /srv/vlab/cells/e014_dabstep_block-dabstep-1871-* 同源）",
+  "files": {
+   "payments.csv": "5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25",
+   "fees.json": "9a833666ae9be5a8e756dd1fe076c72e7c502d64161315ffa8fee9e5bf2599dc",
+   "merchant_data.json": "f158e834de27ee8407e99d9c32da690357981d2770958fd302a9bb79ced83581",
+   "merchant_category_codes.csv": "83247d79f5ddcdd180e02f184b644f4912731942a2fc58d91f2a06b911d04b41",
+   "acquirer_countries.csv": "6744cf1962e4b5086342821e627f4557c32f06c3c58e8b0ff3b449dcc634f37f",
+   "manual.md": "bb7f4ca6fdc759af1f480702b3a3b12e17e9293b0d38a1dbfbbc8ffc1e572d2c",
+   "payments-readme.md": "8754b92d0b3127856ff72266ea482995d2a1f6a34d0a12732f7c26f527f2c4a5"
+  }
+ },
+ "drafts": [
+  {
+   "name": "dabstep-13-pi-A",
+   "role": "good",
+   "task_id": "dabstep-13",
+   "question": "During which hour of the day do the most transactions occur?（Answer must be just a number representing the hour of the day）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-13-pi-A-r1",
+    "score_file": "score.json",
+    "score": {"task_id": "dabstep-13", "pass": true, "reward": "1", "answer_exists": true, "status": "ok"},
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {"answer_txt_sha256": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61", "value": "14"},
+   "lab_note": "e014 記錄 pass=True（reward 1）；A/C/CB 三臂皆過"
+  },
+  {
+   "name": "dabstep-23-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-23",
+   "question": "What is the fraud rate for in-person transactions for the year 2023?（Answer must be just a number）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-23-pi-C-r1",
+    "score_file": "score.json",
+    "score": {"task_id": "dabstep-23", "pass": false, "reward": "0", "answer_exists": true, "status": "ok"},
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {"answer_txt_sha256": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628", "value": "0.00152745"},
+   "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
+  },
+  {
+   "name": "dabstep-1753-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-1753",
+   "question": "What are the applicable fee IDs for Belles_cookbook_store in March 2023?（comma separated list; empty list → empty string）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-1753-pi-C-r1",
+    "score_file": "score.json",
+    "score": {"task_id": "dabstep-1753", "pass": false, "reward": "0", "answer_exists": true, "status": "ok"},
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {"answer_txt_sha256": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91", "value": "None"},
+   "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
+  }
+ ],
+ "pending_before_fire": {
+  "recompute_rules_TDD": [
+   "dabstep-13：mode_col（payments.csv hour 欄計數最大者；平手決定規則照 manual.md/資料語義，TDD 前凍結）",
+   "dabstep-23：fraud_rate_2023_inperson（payments.csv，語義照 manual.md＋資料欄位定義，TDD 前凍結）",
+   "dabstep-1753：fee_ids_lookup（fees.json＋merchant_data.json：Belles_cookbook_store、2023-03 適用 fee ID 集合，語義照 manual.md，TDD 前凍結）"
+  ],
+  "format_note": "dabstep 答案為 plain value（非 @kv 標籤）：requirements.json 依實際格式寫（數值/逗號列表）；現有 check_answer_kv/check_kv_recomputed 為 @kv 語義，本批格式檢查依需求逐條定義",
+  "redline": "重算規則未 TDD 過（含負例）不得發射；發射＝下一輪第一步，本凍結清單不得事後改動"
+ }
+}
