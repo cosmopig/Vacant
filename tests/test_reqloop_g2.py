@@ -436,3 +436,63 @@ def test_manifest_budget_reaches_executor(tmp_path):
     assert by[("dab_039-pi-C", "generic")]["stopped"] in (
         repair.STOP_MAX_ROUNDS, repair.STOP_STALLED)
     assert by[("dab_039-pi-C", "generic")]["final_readable_status"]["req_answer_kv"] != "PASS"
+
+
+# ── G2 正式效果比較預註冊（vq-5nz.15）────────────────────────────
+
+EFFECT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "effect_manifest.json"
+
+
+def test_effect_manifest_preregistration():
+    """G2 正式效果比較預註冊鎖（vq-5nz.15，RLOOP_PLAN G2：10–20 錯＋5 對）：
+    9 份 ready（6 錯＋3 對）＝已凍結真草稿原地引用，hash 必須與盤一致（verify_frozen）；
+    6 份 pending（4 錯＋2 對）全 BLOCKED_PENDING_FREEZE 且有已記錄分（引用、不重跑）；
+    全凍結後達規格下界 10 錯＋5 對。兩臂同模型（1004 gemma）、同總預算（2×300s）。
+    未點名＝未發射：本測試只驗凍結完整性與規格缺口，不發射、不呼叫模型。
+    """
+    man = g2.G2Manifest.load(EFFECT_MANIFEST)
+    raw = man.raw
+
+    # 9 份 ready：6 錯＋3 對，全部為真草稿（e008/e013/e014 來源）
+    assert len(man.drafts) == 9
+    assert sum(1 for d in man.drafts if d["role"] == "bad") == 6
+    assert sum(1 for d in man.drafts if d["role"] == "good") == 3
+    srcs = {d["source"]["run"] for d in man.drafts}
+    assert srcs == {"e008_dabench_pi_AC", "e013_dabench_pi_AC_full", "e014_dabstep_block"}
+
+    # 凍結完整性：hash 與盤一致（base＝manifest 所在目錄，原地引用）
+    man.verify_frozen(EFFECT_MANIFEST.parent)
+    base = EFFECT_MANIFEST.parent
+    for d in man.drafts:
+        assert (base / d["draft"]["dir"]).is_dir(), d["draft"]["dir"]
+        assert d["task"]["dir"].startswith(("smoke/", "smoke_e013/", "smoke_e014/"))
+
+    # 6 份 pending：4 錯＋2 對，全部 BLOCKED_PENDING_FREEZE、有已記錄分（缺值不填 0）
+    pending = raw["pending"]
+    assert len(pending) == 6
+    assert sum(1 for p in pending if p["role"] == "bad") == 4
+    assert sum(1 for p in pending if p["role"] == "good") == 2
+    for p in pending:
+        assert p["status"] == "BLOCKED_PENDING_FREEZE"
+        assert p["source"]["score"] is not None and p["source"]["score"].get("pass") is not None
+        assert p["block_reason"]
+
+    # 全凍結後達 RLOOP_PLAN 規格下界（10–20 錯＋5 對）；缺口與待凍結點名都寫在 manifest
+    spec = raw["spec_gap"]
+    assert spec["ready"] == {"bad": 6, "good": 3}
+    assert spec["pending"] == {"bad": 4, "good": 2}
+    assert spec["total_if_all_frozen"] == {"bad": 10, "good": 5}
+
+    # 兩臂同模型（1004 gemma）、同總預算（2 輪×300s）；無硬 token 上限（缺值 UNKNOWN 不填 0）
+    assert man.arms == ("generic", "localized")
+    assert man.model["provider"] == "lms1004nothink"
+    assert man.model["model"] == "gemma-4-12b-it-qat"
+    assert man.budget["max_rounds_per_cell"] == 2
+    assert man.budget["timeout_s_per_round"] == 300
+    assert man.budget["min_rounds"] == {"generic": 1, "localized": 0}
+    assert man.budget["hard_token_cap"] is False
+
+    # 未點名＝未發射；只發射 9 份 ready 不得呈現為 G2 正式效果比較
+    assert raw["status"] == "FROZEN_PENDING_NAMING"
+    assert "15" in raw["naming_required"]  # 完整清單＝9 ready＋6 pending
+    assert "10–20" in raw["naming_required"] or "5 對" in raw["naming_required"]

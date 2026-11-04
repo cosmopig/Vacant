@@ -1,0 +1,508 @@
+{
+ "schema": "vacant.reqloop.g2.manifest/1",
+ "ticket": "vq-5nz.15（G2 正式效果比較預註冊）",
+ "classification": "【本 manifest＝RLOOP_PLAN.md G2 正式效果比較預註冊（10 錯＋5 對）】：9 份 ready 草稿（6 錯＋3 對）為 ops/reqloop/g2/{smoke,smoke_e013,smoke_e014}/ 已凍結目錄的原地引用（單一來源、零副本、hash 已驗證）；6 份 pending（4 錯＋2 對）為候選池、BLOCKED_PENDING_FREEZE（requirements.json 未凍結，未進 drafts 陣列）。**不是** ops/reqloop/g3/ 的停滯換方法驗證（那 8 格、2×600s、待點名）；也**不是** G1。未點名＝未發射（紅線維持）。",
+ "purpose": "RLOOP_PLAN G2 正式效果比較：同一份草稿，localized 臂（帶可見反例、只修缺口）vs generic 臂（原生重驗一次）；兩臂同模型（1004 gemma）、同總預算（2 輪×300s/格）；輸出前後差異（fixed/regressed/unresolved）＋成本（raw usage，缺值 UNKNOWN 不填 0）；hidden_after 全 UNKNOWN（本地無權重跑 hidden scorer）。效果結論依預註冊 scoring 裁決，口徑與成本並列；冒煙口徑（只驗管線）適用於 r988–r994 已跑批次，本 manifest 發射前不得宣稱任何效果。",
+ "status": "FROZEN_PENDING_NAMING",
+ "naming_required": "發射需對完整 15 份清單（9 ready＋6 pending 全部凍結）明確點名；只發射 9 份 ready＝另一個較小實驗，不得呈現為 G2 正式效果比較（10–20 錯＋5 對規格未滿足）。發射前重跑 verify_frozen。",
+ "spec_gap": {
+  "target": "10–20 錯＋5 對（RLOOP_PLAN.md）",
+  "ready": {
+   "bad": 6,
+   "good": 3
+  },
+  "pending": {
+   "bad": 4,
+   "good": 2
+  },
+  "total_if_all_frozen": {
+   "bad": 10,
+   "good": 5
+  },
+  "note": "達標＝10 錯＋5 對（規格下界）；每份 pending 凍結（requirements.json TDD＋before-check 一致）後移入 drafts 並重凍 hash，再點名"
+ },
+ "arms": [
+  "generic",
+  "localized"
+ ],
+ "model": {
+  "provider": "lms1004nothink",
+  "model": "gemma-4-12b-it-qat",
+  "note": "RLOOP_PLAN G2「1004 gemma」；兩臂同一 provider／model（non-thinking 基線，與 R532 non-thinking 口徑一致）；若一臂換模型，另一臂必須同模型對照（紅線）。既有 pi 設定（~/.pi/agent/models.json 的 lms1004nothink），不新裝、不改設定。"
+ },
+ "budget": {
+  "max_rounds_per_cell": 2,
+  "timeout_s_per_round": 300,
+  "hard_token_cap": false,
+  "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+  "min_rounds": {
+   "generic": 1,
+   "localized": 0
+  },
+  "note": "G2 基準 2 輪×300s（非 g3 的 600s 換方法；600s 是否有效是另一實驗）；min_rounds 同 G2：generic 對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+ },
+ "scoring": {
+  "before": "凍結草稿按原始要求可讀狀態（PASS/FAIL/UNKNOWN；UNKNOWN=無法判定，非 0/FAIL）",
+  "after": "同格末輪答案重驗同一條目",
+  "fixed": "原 FAIL 的必需項本輪新確認轉 PASS（FAIL→UNKNOWN 不算修好；振蕩不算）",
+  "gap_closed": "before 有非 PASS、after 全 PASS（fixed 列明）",
+  "regressed": "before PASS、after 非 PASS（紅線；任何一格 regressed 即本批不達標，必須逐格記錄，不得用淨改善掩蓋）",
+  "not_complete": "缺項／UNKNOWN／CONFLICT 不得宣告完成；原始需求未覆蓋的部分仍未驗證",
+  "hidden_after": "全格 UNKNOWN（本地無權重跑 hidden scorer；缺值不填 0）"
+ },
+ "leak_guard": "修復模型只看原始問題原文、凍結資料與逐條 FAIL/UNKNOWN 條目（含其 quote 與 verifier 名）；重算值/hidden 參考值/期望值永不進證據或提示；兩臂同一套規則（自造案例僅限離線修復單元測試，標 synthetic）",
+ "drafts": [
+  {
+   "name": "dab_507-pi-A",
+   "role": "bad",
+   "task_id": "dab_507",
+   "dir": "dab_507",
+   "arm_letter": "A",
+   "lab_note": "e008 記錄 0/1（值錯：48；對公開資料按題目規則重算＝46——重算值只給裁判，不給修復模型）",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_507-pi-A-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_507",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "smoke/dab_507/draft",
+    "files": {
+     "answer.txt": "565bb303946c41ddd0d9b353901e96fdc715f2c57f07a8c31f6b07cc85456b44"
+    }
+   },
+   "task": {
+    "dir": "smoke/dab_507/task",
+    "requirements": {
+     "sha256": "8414e7c0ae27384f733bc686982df6d22cd0890b30afeea24d50750523d24045"
+    },
+    "request": {
+     "sha256": "05092e7ce837a682f9e6624bc60ac4a588cec8a390f079b01a8223ea15b9eb96"
+    },
+    "contract": {
+     "sha256": "9a197bd1b56fa93337389c520d17ba10e733e8b9dbc4a7f5013e7182eefe363e"
+    },
+    "data_files": {
+     "data/hotel_data.csv": "581144a1a813e187abc75c3db8f71c25cbec27afe7956e9be9de369acde1c0f7"
+    }
+   }
+  },
+  {
+   "name": "dab_039-pi-C",
+   "role": "bad",
+   "task_id": "dab_039",
+   "dir": "dab_039",
+   "arm_letter": "C",
+   "lab_note": "e008 記錄 missing（answer.txt 缺失）",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_039-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_039",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "missing"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "smoke/dab_039/draft",
+    "files": {
+     "solution.py": "8004ec0514e2844fdb1135e7a0376f977f6545332f757dbf701eb633bff748c7"
+    }
+   },
+   "task": {
+    "dir": "smoke/dab_039/task",
+    "requirements": {
+     "sha256": "9b3890c0173f3528bddec2c0a3e71780fce83f8882ab43dcd180cf59be5260cb"
+    },
+    "request": {
+     "sha256": "5a345ad82d7de791a931fa1f8c792740ae48944d25f1ff97098d1005f9c66088"
+    },
+    "contract": {
+     "sha256": "58d50d18feba09ce413949aded32eabf78375f4b784e7384b27607bd43b62592"
+    },
+    "data_files": {
+     "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+    }
+   }
+  },
+  {
+   "name": "dab_035-pi-C",
+   "role": "good",
+   "task_id": "dab_035",
+   "dir": "dab_035",
+   "arm_letter": "C",
+   "lab_note": "e008 記錄 1/1（@removed_outliers_count[0]；ddof=0/1 兩慣例重算皆 0）",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_035-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_035",
+     "pass": true,
+     "n_correct": "1/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "smoke/dab_035/draft",
+    "files": {
+     "answer.txt": "d725a6a2c6aad655d32d0ce7ec84a84feed60e84cc93acb4219f127e0f78967d",
+     "process_data.py": "d222003f1b715e0df47acca9821cdbd65b2cd22a10b3f44f79cc1255732075c2"
+    }
+   },
+   "task": {
+    "dir": "smoke/dab_035/task",
+    "requirements": {
+     "sha256": "0ad6ecd290316a66031bd82985d69328478f6c74a5c2890284760a87f8a40c4b"
+    },
+    "request": {
+     "sha256": "d7f36d41901ec35d2f38f7cc7870418b1df761ae6491d662650554711193c1fe"
+    },
+    "contract": {
+     "sha256": "3cd61ac5be274b7d4b31ca69847ff9a50bbe83279ed67e3e6bed853671256ae6"
+    },
+    "data_files": {
+     "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+    }
+   }
+  },
+  {
+   "name": "dab_055-pi-C",
+   "role": "bad",
+   "task_id": "dab_055",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_055-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_055",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "smoke_e013/dab_055-pi-C/draft",
+    "files": {
+     "answer.txt": "c778b235f6b6f7928c5c2839f41d173aa5a816b1a71637d8f17bad9ec7852e56"
+    }
+   },
+   "task": {
+    "dir": "smoke_e013/dab_055-pi-C/task",
+    "requirements": {
+     "sha256": "51502b32ff40eb5b770248a2cf0a76d6ae0f47b4256d2d1738727e8700a867b9"
+    },
+    "data_files": {
+     "estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+    }
+   },
+   "lab_note": "e013 記錄 pass=False（0/1）"
+  },
+  {
+   "name": "dab_426-pi-C",
+   "role": "bad",
+   "task_id": "dab_426",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_426-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_426",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "smoke_e013/dab_426-pi-C/draft",
+    "files": {
+     "answer.txt": "594f973d96aa72ea9fc6a210b9d433c42fee6e5e9855edbb9855dc30f2f1ad2b"
+    }
+   },
+   "task": {
+    "dir": "smoke_e013/dab_426-pi-C/task",
+    "requirements": {
+     "sha256": "fd8a392af0da93558501d45b1012bf11657d70060cb0c3b0eb585ff251303d34"
+    },
+    "data_files": {
+     "cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+    }
+   },
+   "lab_note": "e013 記錄 pass=False（0/1）"
+  },
+  {
+   "name": "dab_105-pi-C",
+   "role": "good",
+   "task_id": "dab_105",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_105-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_105",
+     "pass": true,
+     "n_correct": "1/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "smoke_e013/dab_105-pi-C/draft",
+    "files": {
+     "answer.txt": "41ee62a5b67745f130a2feb3ddc48660690c1954ab3d0d48ca4a213c0a96d877"
+    }
+   },
+   "task": {
+    "dir": "smoke_e013/dab_105-pi-C/task",
+    "requirements": {
+     "sha256": "74ddf809991113901485a80022d22093fe68a0182457ef57cf92fc400232ea59"
+    },
+    "data_files": {
+     "test_Y3wMUE5_7gLdaTN.csv": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8"
+    }
+   },
+   "lab_note": "e013 記錄 pass=True（1/1）"
+  },
+  {
+   "name": "dabstep-13-pi-A",
+   "role": "good",
+   "task_id": "dabstep-13",
+   "question": "During which hour of the day do the most transactions occur?（Answer must be just a number representing the hour of the day）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-13-pi-A-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-13",
+     "pass": true,
+     "reward": "1",
+     "answer_exists": true,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "answer_txt_sha256": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61",
+    "value": "14",
+    "dir": "smoke_e014/dabstep-13-pi-A/draft",
+    "files": {
+     "answer.txt": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61"
+    }
+   },
+   "task": {
+    "dir": "smoke_e014/dabstep-13-pi-A/task",
+    "requirements": {
+     "sha256": "2681be3b540f63cbb444ecc930b9d2b0a6307bcd60e81e05039a6e86b4864fc9"
+    }
+   },
+   "lab_note": "e014 記錄 pass=True（reward 1）；A/C/CB 三臂皆過"
+  },
+  {
+   "name": "dabstep-23-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-23",
+   "question": "What is the fraud rate for in-person transactions for the year 2023?（Answer must be just a number）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-23-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-23",
+     "pass": false,
+     "reward": "0",
+     "answer_exists": true,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "answer_txt_sha256": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628",
+    "value": "0.00152745",
+    "dir": "smoke_e014/dabstep-23-pi-C/draft",
+    "files": {
+     "answer.txt": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628"
+    }
+   },
+   "task": {
+    "dir": "smoke_e014/dabstep-23-pi-C/task",
+    "requirements": {
+     "sha256": "a59f86e5c6c844a4546a60ee840cbf8609daa8be92ad53d6d7b0432b72bfadd6"
+    }
+   },
+   "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
+  },
+  {
+   "name": "dabstep-1753-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-1753",
+   "question": "What are the applicable fee IDs for Belles_cookbook_store in March 2023?（comma separated list; empty list → empty string）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-1753-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-1753",
+     "pass": false,
+     "reward": "0",
+     "answer_exists": true,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "answer_txt_sha256": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+    "value": "None",
+    "dir": "smoke_e014/dabstep-1753-pi-C/draft",
+    "files": {
+     "answer.txt": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91"
+    }
+   },
+   "task": {
+    "dir": "smoke_e014/dabstep-1753-pi-C/task",
+    "requirements": {
+     "sha256": "24fe95511b99ef1bfee0127da650a8bae79c3b282e2b00ded48c18541963f142"
+    }
+   },
+   "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
+  }
+ ],
+ "pending": [
+  {
+   "name": "dab_378-pi-C",
+   "role": "bad",
+   "task_id": "dab_378",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_378-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_378",
+     "pass": false,
+     "n_correct": "6/8",
+     "psaq": 0.75,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "status": "BLOCKED_PENDING_FREEZE",
+   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
+   "note": "e008 記錄 pass=False（6/8）；未凍結"
+  },
+  {
+   "name": "dab_427-pi-A",
+   "role": "bad",
+   "task_id": "dab_427",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_427-pi-A-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_427",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "no_items"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "status": "BLOCKED_PENDING_FREEZE",
+   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
+   "note": "e013 記錄 pass=False（status=no_items；n_correct 0/1）；未凍結"
+  },
+  {
+   "name": "dabstep-10-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-10",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-10-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-10",
+     "pass": false,
+     "reward": "0",
+     "answer_exists": true,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "status": "BLOCKED_PENDING_FREEZE",
+   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
+   "note": "e014 記錄 reward 0；未凍結"
+  },
+  {
+   "name": "dabstep-1273-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-1273",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-1273-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-1273",
+     "pass": false,
+     "reward": "0",
+     "answer_exists": true,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "status": "BLOCKED_PENDING_FREEZE",
+   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
+   "note": "e014 記錄 reward 0；未凍結"
+  },
+  {
+   "name": "dab_057-pi-A",
+   "role": "good",
+   "task_id": "dab_057",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_057-pi-A-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_057",
+     "pass": true,
+     "n_correct": "1/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "status": "BLOCKED_PENDING_FREEZE",
+   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
+   "note": "e013 記錄 pass=True（1/1）；未凍結"
+  },
+  {
+   "name": "dabstep-11-pi-A",
+   "role": "good",
+   "task_id": "dabstep-11",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-11-pi-A-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-11",
+     "pass": true,
+     "reward": "1",
+     "answer_exists": true,
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "status": "BLOCKED_PENDING_FREEZE",
+   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
+   "note": "e014 記錄 reward 1；未凍結"
+  }
+ ],
+ "fire_command": ".venv/bin/python -m vacant_network.reqloop.g2 --manifest ops/reqloop/g2/effect_manifest.json --out ~/dev/ops/audits/<點名目錄>（發射前重跑 verify_frozen；未點名不自動燒錢）"
+}
