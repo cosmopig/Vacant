@@ -1509,6 +1509,8 @@ def check_plain_recomputed(
     防洩漏語意同 kv_recomputed：重算值絕不進 detail/evidence——修復模型只看到
     「你的值與按公開規則對公開資料重算不符」，不會被直接給答案。
     - 資料檔缺失 / recompute 規則不支援 → UNKNOWN（不猜）
+    - 資料檔：.csv 走 csv.DictReader；.json 走 json.load（必須為 row 物件列表，否則 UNKNOWN；
+      審查#2 強化——禁止 .json 走 csv.DictReader 產生垃圾字典）
     - 交付值缺失/空 → FAIL
     - 值不符重算 → FAIL（mismatch_with_recomputation；不顯示期望值）
     - 一致 → PASS
@@ -1525,8 +1527,18 @@ def check_plain_recomputed(
     if not isinstance(rc, dict):
         return _result(item, "UNKNOWN", "plain_recomputed.params.recompute 缺失；不自評", {"reason": "no recompute"})
     try:
-        with data_file.open(newline="", encoding="utf-8") as f:
-            rows = list(csv.DictReader(f))
+        if data_file.suffix.lower() == ".json":
+            # 審查#2 強化：.json data_file 用 json.load 解析；走 csv.DictReader 會把首行
+            # 當表頭、剩餘行全成垃圾字典。必須是 row 物件列表，否則 UNKNOWN（不自評）。
+            with data_file.open(encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, list) or not all(isinstance(r, dict) for r in data):
+                raise UnknownSource(
+                    f"JSON 資料檔 {data_rel} 非 row 物件列表；無法可靠重算")
+            rows = data
+        else:
+            with data_file.open(newline="", encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype == "mode_col":
             expected: Any = _mode_col(rows, rc)
@@ -1536,7 +1548,7 @@ def check_plain_recomputed(
             expected = _fee_ids_lookup(rows, rc, task_dir)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
-    except (UnknownSource, OSError) as e:
+    except (UnknownSource, OSError, json.JSONDecodeError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
     deliv_file = deliverable_dir / item.deliverable

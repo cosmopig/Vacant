@@ -1234,3 +1234,49 @@ def test_plain_recomputed_numeric_equivalence(tmp_path: pathlib.Path):
     _write(d_wrong / "answer.txt", "14.5\n")
     res_wrong = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d_wrong)}
     assert res_wrong["req_main"].status == "FAIL"
+
+
+def test_plain_recomputed_json_data_file(tmp_path: pathlib.Path):
+    """審查#2 強化：data_file 後綴 .json 必須用 json.load 解析，禁止走 csv.DictReader 產生垃圾字典
+    （CSV 首行會把 JSON 開頭當「表頭」）。row 物件列表→規則可判定；錯值→FAIL（非空轉 PASS）。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "hourly.json", json.dumps([
+        {"hour": "14", "n": 9430},
+        {"hour": "15", "n": 9100},
+        {"hour": "16", "n": 9100},
+        {"hour": "15", "n": 8800},
+    ], indent=1))
+    req_set = _req_set("plain_recomputed",
+                       {"data_file": "hourly.json",
+                        "recompute": {"type": "mode_col", "col": "hour"}},
+                       "answer.txt")
+
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "15\n")          # 眾數 15（2 行）→ PASS
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "14\n")           # 非眾數 → FAIL（證明值真從 JSON 算出）
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_plain_recomputed_json_data_file_malformed_unknown(tmp_path: pathlib.Path):
+    """.json data_file 但非 row 物件列表（JSON 物件）或壞 JSON→UNKNOWN（不自評、不崩潰）。"""
+    params = lambda name: _req_set("plain_recomputed",
+                                   {"data_file": name,
+                                    "recompute": {"type": "mode_col", "col": "hour"}},
+                                   "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "1\n")
+
+    task_dir = tmp_path / "task"
+    _write(task_dir / "obj.json", json.dumps({"a": 1}))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, params("obj.json"), d)}
+    assert res["req_main"].status == "UNKNOWN"
+
+    task_dir2 = tmp_path / "task2"
+    _write(task_dir2 / "broken.json", "{not json")
+    res2 = {r.claim_id: r for r in run_requirement_checks(task_dir2, params("broken.json"), d)}
+    assert res2["req_main"].status == "UNKNOWN"

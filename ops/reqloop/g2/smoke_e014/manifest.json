@@ -1,7 +1,17 @@
 {
  "schema": "vacant.reqloop.g2.manifest/1",
- "status": "selection_frozen_TDD_complete_record_complete_NOT_fired",
+ "status": "selection_frozen_TDD_complete_fired_closed_audit_ok",
+ "status_note": "舊值 NOT_fired 為過時記錄（manifest 寫於 TDD 完成時 13:38，發射在 r988 完成）；r991 校正",
  "frozen_at": "2026-11-04T13:38:00Z",
+ "closed": {
+  "at": "2026-11-04（r988 發射收口）",
+  "evidence": "~/dev/ops/audits/g2_smoke_20261104_e014/（g2_result.json、fire_console.log、README.md）",
+  "audit": "python3 ~/dev/ops/audits/e014_audit_check.py → AUDIT_OK rc=0（8 calls/727583 tok 吻合、0 退步、4 stalled 停因列明）",
+  "results": "gap_closed×2（23-generic FAIL→PASS 0.0；13-generic PASS→PASS）/ no_gap×1（13-localized 0 呼叫）/ stalled×3（23-localized 0.00152745 不變；1753×2 'None' 不變）"
+ },
+ "checker_hardening": {
+  "json_data_file": "r991（vq-5nz.12，審查指示#2）：check_plain_recomputed 的 data_file 後綴 .json → json.load（禁止 csv.DictReader 垃圾字典）；必須為 row 物件列表否則 UNKNOWN；壞 JSON → UNKNOWN；TDD 測試 test_plain_recomputed_json_data_file* 全綠"
+ },
  "ticket": "vq-5nz（G2 e014 第二批）",
  "purpose": "G2 小批真實交付物（e014/dabstep factoid）：3 真草稿 × generic/localized＝6 格；只驗管線，不宣稱任何提升。2 bad（dabstep-23/dabstep-1753，lab reward 0）＋1 good（dabstep-13，lab reward 1）",
  "arms": ["generic", "localized"],
