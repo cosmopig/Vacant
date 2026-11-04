@@ -220,6 +220,90 @@ def test_recompute_and_checks(tmp_path: pathlib.Path):
 
 
 # ---------------------------------------------------------------------------
+# summary_metrics_consistency：數值必須綁到「合計淨銷售總額」條目（P000-01b）
+# ---------------------------------------------------------------------------
+
+
+def _make_orders_task(tmp_path: pathlib.Path) -> pathlib.Path:
+    task_dir = tmp_path / "task"
+    task_dir.mkdir()
+    (task_dir / "orders.csv").write_text(
+        "order_id,order_date,status,product_name,net_amount\n"
+        "ORD01,2026-09-05,COMPLETED,Keyboard,3000.0\n"
+        "ORD02,2026-09-12,CANCELLED,Keyboard,3000.0\n"
+        "ORD03,2026-09-15,COMPLETED,Mouse,1500.0\n"
+        "ORD03,2026-09-15,COMPLETED,Mouse,1500.0\n"
+        "ORD04,2026-10-02,COMPLETED,Monitor,8000.0\n"
+        "ORD05,2026-10-18,COMPLETED,Sticker,50.0\n"
+        "ORD06,2026-10-20,COMPLETED,Sticker,50.0\n",
+        encoding="utf-8",
+    )
+    return task_dir
+
+
+def _summary_req_set() -> RequirementSet:
+    return RequirementSet(
+        task_id="t",
+        items=[
+            RequirementItem(
+                id="req_summary",
+                quote="內文中需明確載明「兩月合計淨銷售總額」（精確數值）",
+                deliverable="summary.md",
+                verifier="summary_metrics_consistency",
+                params={"input_csv": "orders.csv"},
+            ),
+        ],
+    )
+
+
+def _summary_status(tmp_path: pathlib.Path, task_dir: pathlib.Path, text: str) -> str:
+    d = tmp_path / "d"
+    d.mkdir(exist_ok=True)
+    (d / "summary.md").write_text(text, encoding="utf-8")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, _summary_req_set(), d)}
+    return res["req_summary"].status
+
+
+def test_summary_wrong_total_not_rescued_by_correct_number_elsewhere(tmp_path: pathlib.Path):
+    """P000-01b 反例：合計條目寫錯值時，不得因全文其他地方出現正確金額（參考代碼）而 PASS。"""
+    task_dir = _make_orders_task(tmp_path)
+    status = _summary_status(
+        tmp_path, task_dir,
+        "兩月合計淨銷售總額：99,999.00 元。\n參考代碼：12,600.00。\n",
+    )
+    assert status == "FAIL"
+
+
+def test_summary_contradictory_totals_cannot_pass(tmp_path: pathlib.Path):
+    """同一指標的多個陳述互相矛盾（一個對一個錯）不得 PASS。"""
+    task_dir = _make_orders_task(tmp_path)
+    status = _summary_status(
+        tmp_path, task_dir,
+        "兩月合計淨銷售總額為 12,600.00 元。\n兩月合計金額：88,000.00 元。\n",
+    )
+    assert status == "FAIL"
+
+
+def test_summary_no_bound_total_is_unknown(tmp_path: pathlib.Path):
+    """數字沒有綁到「合計淨銷售總額」條目（看不到可對應欄位）＝UNKNOWN，不是 PASS。"""
+    task_dir = _make_orders_task(tmp_path)
+    status = _summary_status(tmp_path, task_dir, "本期淨銷售額 12,600.00 元。\n")
+    assert status == "UNKNOWN"
+
+
+def test_summary_number_formats_still_pass(tmp_path: pathlib.Path):
+    """數字格式回歸：$、千分位、無小數、總計+元 等寫法仍應 PASS。"""
+    task_dir = _make_orders_task(tmp_path)
+    for i, text in enumerate([
+        "兩月合計淨銷售總額為 $12,600.00 元。",
+        "兩月合計淨銷售總額為 12600.00。",
+        "兩月合計淨銷售總額：12,600 元",
+        "兩月總計 12,600.00 元。",
+    ]):
+        assert _summary_status(tmp_path, task_dir, text) == "PASS", text
+
+
+# ---------------------------------------------------------------------------
 # 通用重算檢查器：rowset_filter / group_aggregate / summary_numbers
 # ---------------------------------------------------------------------------
 

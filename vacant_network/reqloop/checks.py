@@ -401,12 +401,51 @@ def check_monthly_top_products(
     )
 
 
+_SUMMARY_TOTAL_KEYWORDS = [
+    "合計淨銷售總額", "合計淨銷售額", "合計銷售總額", "合計銷售額",
+    "合計淨額", "合計金額", "總計淨銷售額", "總計銷售額", "總計淨額", "總計金額", "總計",
+]
+
+# 關鍵詞與數字之間允許的分隔（含 markdown 粗體符號）；不含子句標點，
+# 避免把「合計…如下：9 月 42,400 元」裡的月份數字抓成總額陳述。
+_SUMMARY_CLAIM_GAP = r"[\s:：、,，為是約共即達=*（）()\-\u2014\u2013/／]*"
+# 千位分組必須「至少一個 ,ddd」，否則 12600.00 會被拆成 126 + 00。
+_SUMMARY_CLAIM_NUM = r"([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)"
+_SUMMARY_UNIT_RE = re.compile(r"^\s*(?:元|圓|美元|人民幣|新臺幣|TWD|USD|HKD|JPY|EUR|SGD)")
+
+
+def _extract_summary_total_claims(content: str, keywords: list[str]) -> list[dict[str, Any]]:
+    """找出「合計/總計 + 金額詞 + 數字」的總額陳述，回傳 [{phrase, value}]。
+
+    只認綁定在合計關鍵詞上的數字；無金額詞時要求數字帶 $/¥ 前綴或
+    貨幣單位後綴，避免把「訂單總計 25 筆」這類計數誤當成金額。
+    """
+    kw_alt = "|".join(re.escape(k) for k in sorted(keywords, key=len, reverse=True))
+    rx = re.compile(
+        rf"({kw_alt}){_SUMMARY_CLAIM_GAP}([\$¥])?\s*{_SUMMARY_CLAIM_NUM}"
+    )
+    claims: list[dict[str, Any]] = []
+    for m in rx.finditer(content):
+        phrase, currency, num = m.group(1), m.group(2), m.group(3)
+        amount_word = any(w in phrase for w in ("銷售", "淨額", "金額"))
+        unit_after = bool(_SUMMARY_UNIT_RE.match(content[m.end():m.end() + 8]))
+        if not (amount_word or currency is not None or unit_after):
+            continue
+        claims.append({"phrase": m.group(0), "value": _parse_float(num)})
+    return claims
+
+
 def check_summary_metrics_consistency(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
     item: RequirementItem,
 ) -> ClaimResult:
-    """檢查繁體中文文字報告 summary.md 中的合計淨額等數字是否與重算完全一致。"""
+    """檢查文字報告中「合計淨銷售總額」條目上的數字是否與重算一致。
+
+    數值必須綁定在合計關鍵詞的陳述上：條目寫錯值＝FAIL；多個陳述互相
+    矛盾（任一與重算不符）＝FAIL；全文找不到可對應的合計陳述＝UNKNOWN
+    （看不到可可靠對應的欄位，不准自評，也不准因其他地方出現正確數字而 PASS）。
+    """
     deliv_file = deliverable_dir / item.deliverable
     if not deliv_file.is_file():
         return ClaimResult(
@@ -424,28 +463,45 @@ def check_summary_metrics_consistency(
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
     total_expected_sales = sum(m["net_sales"] for m in expected_metrics.values())
 
-    # 搜尋文字中的金額數字，允許常見格式如 12345.67 或 12,345.67 或 $12345
-    # 將整篇內容中出現的數字與 total_expected_sales 比對
     atol = float(item.params.get("atol", 0.05))
-    number_pattern = re.compile(r"[\$¥]?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)")
-    found_numbers = []
-    for match in number_pattern.finditer(content):
-        val = _parse_float(match.group(1))
-        if val > 0:
-            found_numbers.append(val)
+    keywords = list(item.params.get("metric_keywords") or _SUMMARY_TOTAL_KEYWORDS)
+    claims = _extract_summary_total_claims(content, keywords)
 
-    # 檢查是否含有精確總銷售額
-    matched = any(abs(num - total_expected_sales) <= atol for num in found_numbers)
+    if not claims:
+        return ClaimResult(
+            claim_id=item.id,
+            status="UNKNOWN",
+            detail=(
+                f"摘要中找不到綁定在合計條目上的總額陳述（重算值 {total_expected_sales:.2f}）；"
+                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
+            ),
+            evidence={
+                "expected_total_sales": total_expected_sales,
+                "reason": "no metric-bound total claim found",
+            },
+            verifier=item.verifier,
+            verifier_version=VERIFIER_VERSION,
+            required=item.required,
+            authority=item.authority,
+        )
 
-    if not matched:
+    wrong = [c for c in claims if abs(c["value"] - total_expected_sales) > atol]
+    if wrong:
+        values = [c["value"] for c in claims]
+        detail = f"合計淨銷售總額條目與重算值 {total_expected_sales:.2f} 不符"
+        if len({round(v, 6) for v in values}) > 1:
+            detail += "；且多個合計陳述互相矛盾"
         return ClaimResult(
             claim_id=item.id,
             status="FAIL",
-            detail=f"文字摘要未包含正確的兩月合計淨銷售總額 {total_expected_sales:.2f}",
+            detail=detail,
             evidence={
                 "expected_total_sales": total_expected_sales,
-                "found_numbers_in_summary": found_numbers[:10],
-                "reason": "摘要中的數字抄錯、或誤算了包含取消訂單的銷售額",
+                "counterexamples": [
+                    {"phrase": c["phrase"], "value": c["value"],
+                     "expected": total_expected_sales}
+                    for c in wrong
+                ],
             },
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
@@ -456,8 +512,11 @@ def check_summary_metrics_consistency(
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail=f"文字摘要中的合計淨銷售額核對正確 ({total_expected_sales:.2f})",
-        evidence={"expected_total_sales": total_expected_sales},
+        detail=f"文字摘要中的合計淨銷售總額核對正確 ({total_expected_sales:.2f})",
+        evidence={
+            "expected_total_sales": total_expected_sales,
+            "matched_claims": [c["phrase"] for c in claims],
+        },
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
