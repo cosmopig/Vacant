@@ -182,7 +182,7 @@ def g1_task(tmp_path: pathlib.Path) -> pathlib.Path:
     return d
 
 
-def test_min_rounds_zero_no_gap_zero_calls(g1_task):
+def test_min_rounds_zero_no_gap_zero_calls(g1_task, tmp_path: pathlib.Path):
     """localized 語義（min_rounds=0）：無缺口 ⇒ 0 模型呼叫。"""
     rs = RequirementSet.load(g1_task / "requirements.json")
     good = g1_task / "good"
@@ -195,7 +195,7 @@ def test_min_rounds_zero_no_gap_zero_calls(g1_task):
     assert out.cost["model_calls"] == 0
 
 
-def test_min_rounds_one_no_gap_runs_one_recheck(g1_task):
+def test_min_rounds_one_no_gap_runs_one_recheck(g1_task, tmp_path: pathlib.Path):
     """generic 語義（min_rounds=1）：無缺口也要重驗 1 次，重驗後仍全 PASS ⇒ 停 GAP_CLOSED。"""
     rs = RequirementSet.load(g1_task / "requirements.json")
     good = g1_task / "good"
@@ -208,7 +208,7 @@ def test_min_rounds_one_no_gap_runs_one_recheck(g1_task):
     assert out.cost["model_calls"] == 1
 
 
-def test_min_rounds_one_recheck_breaks_then_repair(g1_task):
+def test_min_rounds_one_recheck_breaks_then_repair(g1_task, tmp_path: pathlib.Path):
     """generic 重驗把對的改壞 ⇒ 記錄 regressed；第 2 輪修回 ⇒ GAP_CLOSED。"""
     rs = RequirementSet.load(g1_task / "requirements.json")
     good = g1_task / "good"

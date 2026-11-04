@@ -1,0 +1,40 @@
+{
+  "task_id": "dab_507",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Answer format: @total_hotels[count] where \"count\" is a non-negative integer representing the total number of hotels with a star rating of 5.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {"key": "total_hotels", "type": "nonneg_int"}
+        ]
+      },
+      "description": "答案檔存在且 @total_hotels 為單一非負整數（格式；值正確性不在此宣告）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_total_hotels_recomputed",
+      "quote": "Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5? Count only hotels that have a star rating exactly equal to 5.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "total_hotels",
+        "data_file": "data/hotel_data.csv",
+        "recompute": {"type": "count_if", "col": "star_rating", "eq": 5,
+                      "note": "star_rating 可解析為數字且等於 5 的行才算；空白/不可解析不算"}
+      },
+      "description": "答案值必須等於對凍結資料 data/hotel_data.csv 的公開規則重算；重算值不進證據（防洩漏）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

@@ -1117,6 +1117,112 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
                    {"checked_keys": checked})
 
 
+def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
+                     key: str) -> tuple[str | None, list[str]]:
+    """讀交付檔中 @key[value]；回傳 (value|None, 問題清單)——與 answer_kv 同一解析規則。"""
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return None, [f"missing_file:{item.deliverable}"]
+    content = deliv_file.read_text(encoding="utf-8")
+    vals = [m.group(2).strip() for m in _ANSWER_KV_RE.finditer(content)
+            if m.group(1).strip().lower() == key.lower()]
+    if not vals:
+        return None, ["missing"]
+    if len(vals) > 1:
+        return None, ["ambiguous"]
+    return vals[0], []
+
+
+def check_kv_recomputed(
+    task_dir: pathlib.Path,
+    deliverable_dir: pathlib.Path,
+    item: RequirementItem,
+) -> ClaimResult:
+    """G2 真草稿冒煙（工單 P000-20261104-02）：@key[value] 值必須與對凍結資料的重算一致。
+
+    所有輸入皆可見：規則（quote/params）＋資料（任務目錄、凍結進 repo 並帶 sha）。
+    **防洩漏**：重算值絕不進 detail/evidence——修復模型只看到「你的值與按公開規則
+    對公開資料重算不符」，不會被直接給答案（紅線：不向修復模型提供隱藏答案）。
+    - 資料檔缺失 / recompute 規則不支援 → UNKNOWN（不猜）
+    - 交付值缺失/重複 → FAIL（missing/ambiguous）
+    - 值不符重算 → FAIL（mismatch_with_recomputation；不顯示期望值）
+    - 一致 → PASS
+    """
+    p = item.params
+    key = str(p.get("key", "")).strip()
+    if not key:
+        return _result(item, "UNKNOWN", "kv_recomputed.params.key 缺失；不自評", {"reason": "no key"})
+    data_rel = str(p.get("data_file", "")).strip()
+    if not data_rel:
+        return _result(item, "UNKNOWN", "kv_recomputed.params.data_file 缺失；不自評", {"reason": "no data_file"})
+    data_file = (task_dir / data_rel)
+    if not data_file.is_file():
+        return _result(item, "UNKNOWN",
+                       f"資料檔 {data_rel} 缺失；無法重算，標 UNKNOWN", {"data_file": data_rel})
+    rc = p.get("recompute")
+    if not isinstance(rc, dict):
+        return _result(item, "UNKNOWN", "kv_recomputed.params.recompute 缺失；不自評", {"reason": "no recompute"})
+    try:
+        with data_file.open(newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        rtype = str(rc.get("type", "")).strip().lower()
+        if rtype == "count_if":
+            col = str(rc.get("col", "")).strip()
+            eq = rc.get("eq")
+            if not col or eq is None:
+                raise UnknownSource("count_if 需要 col 與 eq")
+            expected = 0.0
+            for r in rows:
+                cell = r.get(col)
+                try:
+                    if float(str(cell).strip()) == float(eq):
+                        expected += 1.0
+                except (TypeError, ValueError):
+                    continue
+        elif rtype == "zcount3":
+            col = str(rc.get("col", "")).strip()
+            if not col:
+                raise UnknownSource("zcount3 需要 col")
+            vals: list[float] = []
+            for r in rows:
+                try:
+                    vals.append(float(str(r.get(col, "")).strip()))
+                except (TypeError, ValueError):
+                    continue
+            if len(vals) < 2:
+                raise UnknownSource("zcount3: 可解析數值不足 2 個")
+            mean = sum(vals) / len(vals)
+            sd = (sum((v - mean) ** 2 for v in vals) / len(vals)) ** 0.5  # 母體慣例；見 params.note
+            if sd == 0.0:
+                raise UnknownSource("zcount3: 標準差為 0")
+            expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
+        else:
+            raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+    except (UnknownSource, OSError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
+    if val_str is None:
+        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
+                       {"key": key, "problem": problems[0], "data_file": data_rel})
+    try:
+        got = float(val_str)
+    except ValueError:
+        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
+    atol = float(p.get("atol", 1e-6))
+    rule_desc = f"{str(rc.get('type'))}: {data_rel} {json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}"
+    if abs(got - expected) > atol:
+        return _result(item, "FAIL",
+                       f"答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）",
+                       {"key": key, "deliverable_value": val_str,
+                        "problem": "mismatch_with_recomputation",
+                        "rule": rule_desc,
+                        "expected_in_evidence": False})
+    return _result(item, "PASS",
+                   f"答案值與按公開規則（{rule_desc}）的重算一致",
+                   {"key": key, "rule": rule_desc, "expected_in_evidence": False})
+
+
 def check_summary_numbers(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -1232,6 +1338,10 @@ def run_requirement_checks(
             res = check_group_aggregate(t_dir, d_dir, item)
         elif vname == "summary_numbers":
             res = check_summary_numbers(t_dir, d_dir, item)
+        elif vname == "answer_kv":
+            res = check_answer_kv(t_dir, d_dir, item)
+        elif vname == "kv_recomputed":
+            res = check_kv_recomputed(t_dir, d_dir, item)
         else:
             # 未知檢查器：依規則一律標記為 UNKNOWN，不得假裝 PASS
             results.append(

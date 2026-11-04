@@ -219,10 +219,11 @@ def build_repair_prompt(
 # ── 工作區（原草稿保留）──────────────────────────────────────────────
 
 def prepare_workspace(
-    out_root: str | pathlib.Path,
-    round_n: int,
     task_dir: str | pathlib.Path,
     draft_dir: str | pathlib.Path,
+    out_root: str | pathlib.Path,
+    *,
+    round_n: int = 1,
     include_dirs: tuple[str, ...] = (),
 ) -> pathlib.Path:
     """建立第 round_n 輪的工作目錄：task 顶层檔案（源資料等）＋白名單子目錄＋草稿檔案。
@@ -350,7 +351,8 @@ def run_repair_round(
     include_dirs: tuple[str, ...] = (),
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。原草稿不被改動。"""
-    ws = prepare_workspace(out_root, n, task_dir, draft_dir, include_dirs=include_dirs)
+    ws = prepare_workspace(task_dir, draft_dir, out_root,
+                           round_n=n, include_dirs=include_dirs)
     prompt = build_repair_prompt(task_dir, req_set, draft_dir, before,
                                  feedback_mode=feedback_mode, include_dirs=include_dirs)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
@@ -411,11 +413,11 @@ def repair_slice(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
     draft_dir: str | pathlib.Path,
-    *,
     out_root: str | pathlib.Path,
     build: BuildFn,
     run: RunFn,
     feedback_mode: str = "localized",
+    *,
     max_rounds: int = 2,
     timeout_s: float = 300.0,
     synthetic: bool = False,
@@ -492,6 +494,7 @@ def repair_slice(
         token_source = "unavailable"
     cost: dict[str, Any] = {
         "calls": calls,
+        "model_calls": calls,   # 同一數量的明確名稱（G2 冒煙契約用 model_calls）
         "wall_ms_total": int(wall_total) if wall_total else None,  # 無呼叫＝無 wall time
         "tokens": tokens,
         "token_source": token_source,

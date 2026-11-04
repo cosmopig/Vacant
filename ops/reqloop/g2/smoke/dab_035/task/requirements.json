@@ -1,0 +1,40 @@
+{
+  "task_id": "dab_035",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Answer format: @removed_outliers_count[count] where \"count\" is a non-negative integer representing the number of data points removed as outliers.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {"key": "removed_outliers_count", "type": "nonneg_int"}
+        ]
+      },
+      "description": "答案檔存在且 @removed_outliers_count 為單一非負整數（格式）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_removed_outliers_recomputed",
+      "quote": "Identify and remove any outliers (data points with a Z-score greater than 3 or less than -3).",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "removed_outliers_count",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {"type": "zcount3", "col": "row retention time",
+                      "note": "Z=(x-mean)/sd，sd 用母體標準差(ddof=0)；|Z|>3 的點數；空白/不可解析不算。ddof=1 給同一結果（已核）"}
+      },
+      "description": "答案值必須等於對凍結資料的公開規則重算；重算值不進證據（防洩漏）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

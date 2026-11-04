@@ -1,0 +1,24 @@
+{
+  "task_id": "dab_039",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Answer format: @is_normal[p_value] where \"p_value\" is a number between 0 and 1, rounded to four decimal places. @transformed_importance_score_mean[mean] where \"mean\" is a number rounded to two decimal places. @transformed_importance_score_std[std] where \"std\" is a number rounded to two decimal places.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {"key": "is_normal", "type": "number_in_01"},
+          {"key": "transformed_importance_score_mean", "type": "number"},
+          {"key": "transformed_importance_score_std", "type": "number"}
+        ]
+      },
+      "description": "答案檔存在且三個 key 皆為合法數值、is_normal∈[0,1]（格式；統計正確性不在此宣告）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

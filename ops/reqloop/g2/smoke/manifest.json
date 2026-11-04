@@ -1,0 +1,155 @@
+{
+  "schema": "vacant.reqloop.g2.manifest/1",
+  "frozen_at": "2026-11-04T08:52:00Z",
+  "ticket": "P000-20261104-02-real-draft-smoke",
+  "purpose": "G2 真草稿冒煙：6 格只驗管線，不宣稱任何提升（工單紅線）",
+  "arms": [
+    "generic",
+    "localized"
+  ],
+  "model": {
+    "provider": "lms1003qwen",
+    "model": "qwen/qwen3.8-27b",
+    "note": "兩臂同一模型；若一臂換強模型，另一臂必須有同模型/成本對照（工單紅線）"
+  },
+  "budget": {
+    "max_rounds_per_cell": 2,
+    "timeout_s_per_round": 300,
+    "hard_token_cap": false,
+    "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+    "min_rounds": {
+      "generic": 1,
+      "localized": 0
+    },
+    "note": "generic 臂對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+  },
+  "scoring": {
+    "readable": "可見宣言（格式 + 公開資料按題目規則重算）；裁判不持有 hidden 參考",
+    "hidden_before": "引用 lab 受權量表的既有記錄（score.json），不在本地重跑",
+    "hidden_after": "UNKNOWN——本地無權重跑 hidden scorer；缺失即 UNKNOWN，絕不填 0"
+  },
+  "leak_guard": "修復模型只看得到原始需求、凍結資料與『值不符重算』的事實；重算值/hidden 參考值永不進證據或提示（checks.check_kv_recomputed 與 repair.build_repair_prompt 均遵守）",
+  "drafts": [
+    {
+      "name": "dab_507-pi-A",
+      "role": "bad",
+      "task_id": "dab_507",
+      "dir": "dab_507",
+      "arm_letter": "A",
+      "lab_note": "e008 記錄 0/1（值錯：48；對公開資料按題目規則重算＝46——重算值只給裁判，不給修復模型）",
+      "source": {
+        "run": "e008_dabench_pi_AC",
+        "cell": "dabench-dab_507-pi-A-r1",
+        "score_file": "score.json",
+        "score": {
+          "task_id": "dab_507",
+          "pass": true,
+          "n_correct": "0/1"
+        },
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dab_507/draft",
+        "files": {
+          "answer.txt": "565bb303946c41ddd0d9b353901e96fdc715f2c57f07a8c31f6b07cc85456b44"
+        }
+      },
+      "task": {
+        "dir": "dab_507/task",
+        "requirements": {
+          "sha256": "8414e7c0ae27384f733bc686982df6d22cd0890b30afeea24d50750523d24045"
+        },
+        "request": {
+          "sha256": "05092e7ce837a682f9e6624bc60ac4a588cec8a390f079b01a8223ea15b9eb96"
+        },
+        "contract": {
+          "sha256": "9a197bd1b56fa93337389c520d17ba10e733e8b9dbc4a7f5013e7182eefe363e"
+        },
+        "data_files": {
+          "data/hotel_data.csv": "581144a1a813e187abc75c3db8f71c25cbec27afe7956e9be9de369acde1c0f7"
+        }
+      }
+    },
+    {
+      "name": "dab_039-pi-C",
+      "role": "bad",
+      "task_id": "dab_039",
+      "dir": "dab_039",
+      "arm_letter": "C",
+      "lab_note": "e008 記錄 missing（answer.txt 缺失）",
+      "source": {
+        "run": "e008_dabench_pi_AC",
+        "cell": "dabench-dab_039-pi-C-r1",
+        "score_file": "score.json",
+        "score": {
+          "task_id": "dab_039",
+          "pass": true,
+          "n_correct": "missing"
+        },
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dab_039/draft",
+        "files": {
+          "solution.py": "8004ec0514e2844fdb1135e7a0376f977f6545332f757dbf701eb633bff748c7"
+        }
+      },
+      "task": {
+        "dir": "dab_039/task",
+        "requirements": {
+          "sha256": "9b3890c0173f3528bddec2c0a3e71780fce83f8882ab43dcd180cf59be5260cb"
+        },
+        "request": {
+          "sha256": "5a345ad82d7de791a931fa1f8c792740ae48944d25f1ff97098d1005f9c66088"
+        },
+        "contract": {
+          "sha256": "58d50d18feba09ce413949aded32eabf78375f4b784e7384b27607bd43b62592"
+        },
+        "data_files": {
+          "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+        }
+      }
+    },
+    {
+      "name": "dab_035-pi-C",
+      "role": "good",
+      "task_id": "dab_035",
+      "dir": "dab_035",
+      "arm_letter": "C",
+      "lab_note": "e008 記錄 1/1（@removed_outliers_count[0]；ddof=0/1 兩慣例重算皆 0）",
+      "source": {
+        "run": "e008_dabench_pi_AC",
+        "cell": "dabench-dab_035-pi-C-r1",
+        "score_file": "score.json",
+        "score": {
+          "task_id": "dab_035",
+          "pass": false,
+          "n_correct": "1/1"
+        },
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dab_035/draft",
+        "files": {
+          "answer.txt": "d725a6a2c6aad655d32d0ce7ec84a84feed60e84cc93acb4219f127e0f78967d",
+          "process_data.py": "d222003f1b715e0df47acca9821cdbd65b2cd22a10b3f44f79cc1255732075c2"
+        }
+      },
+      "task": {
+        "dir": "dab_035/task",
+        "requirements": {
+          "sha256": "0ad6ecd290316a66031bd82985d69328478f6c74a5c2890284760a87f8a40c4b"
+        },
+        "request": {
+          "sha256": "d7f36d41901ec35d2f38f7cc7870418b1df761ae6491d662650554711193c1fe"
+        },
+        "contract": {
+          "sha256": "3cd61ac5be274b7d4b31ca69847ff9a50bbe83279ed67e3e6bed853671256ae6"
+        },
+        "data_files": {
+          "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+        }
+      }
+    }
+  ]
+}
