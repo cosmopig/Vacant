@@ -891,6 +891,11 @@ def check_group_aggregate(
                         v = float(sum(nums))
                     else:
                         v = float(sum(nums) / len(nums)) if nums else None
+                elif t in ("max", "min"):
+                    nums = _agg_values(grows, spec, skip_empty=False)
+                    if not nums:
+                        raise UnknownSource(f"{t}: 組內無資料")
+                    v = float(max(nums)) if t == "max" else float(min(nums))
                 elif t == "count_if":
                     v = float(sum(1 for r in grows if bool(safe_eval_expr(str(spec.get("expr", "")), r))))
                 elif t == "ratio":
@@ -1006,6 +1011,11 @@ def check_summary_numbers(
                     v = float(sum(nums))
                 else:
                     v = float(sum(nums) / len(nums)) if nums else None
+            elif t in ("max", "min"):
+                nums = _agg_values(rows, n, skip_empty=False)
+                if not nums:
+                    raise UnknownSource(f"{t}: 無資料")
+                v = float(max(nums)) if t == "max" else float(min(nums))
             elif t == "pct_if":
                 total = len(rows)
                 if total == 0:

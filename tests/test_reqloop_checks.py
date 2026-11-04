@@ -611,3 +611,133 @@ def test_new_verifiers_missing_input_is_unknown(tmp_path: pathlib.Path):
     _write(d / "out.csv", "a,n\nx,1\n")
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
     assert res["req_main"].status == "UNKNOWN"
+
+
+def test_group_aggregate_max_min(tmp_path: pathlib.Path):
+    """max/min 聚合：組內極值必須逐組核對；空白值不允許被吞掉（⇒UNKNOWN）。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "tickets.csv",
+        "ticket_id,channel,sla_target_hours,resolved_hours\n"
+        "T1,web,4,2.5\n"
+        "T2,web,4,6\n"
+        "T3,mail,8,1.5\n"
+        "T4,mail,8,8\n"
+        "T5,chat,2,\n"
+    )
+    params = {
+        "input_csv": "tickets.csv",
+        "include": [{"col": "resolved_hours", "op": "ne", "value": ""}],  # 只核對有數值的列
+        "group_by": ["channel"],
+        "aggregates": [
+            {"name": "n", "type": "count"},
+            {"name": "worst_hours", "type": "max", "col": "resolved_hours"},
+            {"name": "best_hours", "type": "min", "col": "resolved_hours"},
+        ],
+        "atol": 0.01,
+    }
+    req_set = _req_set("group_aggregate", params, "sla_report.csv")
+
+    # web: T1 2.5, T2 6 → n2 worst6 best2.5；mail: T3 1.5, T4 8 → n2 worst8 best1.5
+    good = tmp_path / "good"
+    _write(
+        good / "sla_report.csv",
+        "channel,n,worst_hours,best_hours\n"
+        "web,2,6,2.5\n"
+        "mail,2,8,1.5\n"
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：worst_hours 抄成平均值（6→4.25、8→4.75）
+    bad_max = tmp_path / "bad_max"
+    _write(
+        bad_max / "sla_report.csv",
+        "channel,n,worst_hours,best_hours\n"
+        "web,2,4.25,2.5\n"
+        "mail,2,4.75,1.5\n"
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_max)}
+    assert res["req_main"].status == "FAIL"
+    assert any("worst_hours" in str(c) for c in res["req_main"].evidence["counterexamples"])
+
+    # bad：min/max 互換（best 抄成 worst）
+    bad_swap = tmp_path / "bad_swap"
+    _write(
+        bad_swap / "sla_report.csv",
+        "channel,n,worst_hours,best_hours\n"
+        "web,2,6,6\n"
+        "mail,2,8,8\n"
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_swap)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_group_aggregate_max_empty_value_is_unknown(tmp_path: pathlib.Path):
+    """max 遇到空白值＝看不到 ⇒ UNKNOWN（不得拿其餘值假裝算出極值）。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "tickets.csv",
+        "ticket_id,channel,resolved_hours\n"
+        "T1,web,2.5\n"
+        "T2,web,\n"
+    )
+    params = {
+        "input_csv": "tickets.csv",
+        "group_by": ["channel"],
+        "aggregates": [{"name": "worst_hours", "type": "max", "col": "resolved_hours"}],
+    }
+    req_set = _req_set("group_aggregate", params, "sla_report.csv")
+    d = tmp_path / "d"
+    _write(d / "sla_report.csv", "channel,worst_hours\nweb,2.5\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "UNKNOWN"
+
+
+def test_summary_numbers_max_min(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "tickets.csv",
+        "ticket_id,channel,resolved_hours\n"
+        "T1,web,2.5\n"
+        "T2,web,6\n"
+        "T3,mail,1.5\n"
+    )
+    params = {
+        "input_csv": "tickets.csv",
+        "numbers": [
+            {"type": "count", "label": "結案工單數"},
+            {"type": "max", "col": "resolved_hours", "label": "最長處理時數"},
+            {"type": "min", "col": "resolved_hours", "label": "最短處理時數"},
+        ],
+        "atol": 0.01,
+    }
+    req_set = _req_set("summary_numbers", params, "summary.md")
+
+    good = tmp_path / "good"
+    _write(good / "summary.md", "# 摘要\n結案工單數：3 張\n最長處理時數：6 小時\n最短處理時數：1.5 小時\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：最長時數寫成平均（3.5）
+    bad_max = tmp_path / "bad_max"
+    _write(bad_max / "summary.md", "# 摘要\n結案工單數：3 張\n最長處理時數：3.5 小時\n最短處理時數：1.5 小時\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_max)}
+    assert res["req_main"].status == "FAIL"
+    assert any("最長處理時數" in str(c) for c in res["req_main"].evidence["counterexamples"])
+
+
+def test_unknown_aggregate_type_stays_unknown(tmp_path: pathlib.Path):
+    """未實作的聚合類型一律 UNKNOWN，不得 FAIL 更不得 PASS。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "t.csv", "a,b\nx,1\n")
+    params = {
+        "input_csv": "t.csv",
+        "group_by": ["a"],
+        "aggregates": [{"name": "m", "type": "median", "col": "b"}],
+    }
+    req_set = _req_set("group_aggregate", params, "out.csv")
+    d = tmp_path / "d"
+    _write(d / "out.csv", "a,m\nx,1\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "UNKNOWN"
