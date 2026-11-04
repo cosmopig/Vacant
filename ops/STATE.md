@@ -7409,3 +7409,13 @@ DECISION:911=e016 未完賽（27/102、ETA 明晨）⇒不阻塞監控；本輪�
 - 紅線：零發射（e016 為唯一在跑實驗、只監控）；零產品行為改動（audits 工具、非 vacant_network/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:954=🔴 成本來源修復完成（TDD 4/4 fail→pass、selftest 9 組、兩 repo 位元組一致）——保守選擇：成本 UNKNOWN 摺入既有五態之 UNKNOWN（不新增第六態、保預註冊狀態表）；UNKNOWN 優於 COST_BREACH（有未知在場、紅線既不能說「過」也不能說「破」）｜e016 46/102（45 出分、成本 UNKNOWN 0 格）ETA 今天 ~12:30、五態裁決＋L007 §4＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## Round 955（2026-11-04 01:2x–01:4x，R&D 負責人）
+- **L007 §4 分支 3 預備（e016 未完賽、不阻塞）**：草稿 `staging/next_cycle_reinforcement_draft_r955.md`——發射前置＝e016 裁決＝MECHANISM_CONFIRMED（硬門、其餘四態⇒擱置不返工）；機制本體實讀 zerostop.py（:47 TEST_FAILED_MAX_ROUNDS=1、:211-222 failed_step_review_on、:247-248 pushable_for 判定點）＋kickback 文實例 e002 pg_food_chain C events.jsonl:2306；假說空間 H-a（上限 1→2，**弱證據在案**：該格 kickback 後 122 次 unittest 仍敗）／H-b（收斂語境回饋）／H-c（外端 referee 低優先）＋選擇規則＋預註冊判準（留／撤、成本紅線 2×A、Holm、H-12、refusal 計失敗）＋六門承 e016。
+- **e016 attempt-2（監控）**：49/102 格在位（46 出分）；pg_paasio A 01:24 出分、C 在跑（PAR=1 串行、非停擺）；pace ~12 分/格⇒ETA 今天 ~12:3x–13:3x；queue 空、盤餘 62G、无双分派。
+- **驗證**：草稿事實條目逐條對原始檔（:2306 內容、122 次 unittest、zerostop 行號）；NOW.md/STATE.md 覆寫＋追加；草稿 md5 待 commit 核。
+- **未驗證**：五態裁決本體（e016 未完賽）；rescore；CI auto/qwen27b 245d0b32 尚未出（輪首查＝還在跑、紅燈先修紀律在案）；H-a/H-b 種子格存在性（候 e016 完賽＋步驟 2 讀現場）。
+- **下一步**：監控 e016；完賽後依序 rescore（0 不一致）→五態裁決→L006 §6＋L007 §4 分支＋FINDINGS e016 條目；若 MECHANISM_CONFIRMED 則按 r955 草稿走新循環（六門＋senior 審查後才提升 packets/）。
+- 紅線：零發射；零產品行為改動（草稿＝staging 文件、非 vacant_network/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+
+DECISION:955=e016 未完賽（49/102、ETA 今天下午）⇒依鐵則不乾等、預備 L007 §4 分支 3——保守選擇：只寫草稿（staging、非 packet、發射前置＝MECHANISM_CONFIRMED 硬門、判準先寫、六門在後），不碰產品碼、不發實驗；假說空間如實列 H-a 弱證據（pg_food_chain 122 次仍敗）、不預判；選一個假說＝候步驟 2 現場證據（≥1 格檔＋行）｜五態裁決＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
