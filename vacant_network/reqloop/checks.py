@@ -1145,6 +1145,9 @@ def check_kv_recomputed(
     **防洩漏**：重算值絕不進 detail/evidence——修復模型只看到「你的值與按公開規則
     對公開資料重算不符」，不會被直接給答案（紅線：不向修復模型提供隱藏答案）。
     - 資料檔缺失 / recompute 規則不支援 → UNKNOWN（不猜）
+    - 資料檔：.csv 走 csv.DictReader；.json 走 json.load（必須為 row 物件列表，否則 UNKNOWN；
+      vq-5nz.13 與 vq-5nz.12（check_plain_recomputed）同型——禁止 .json 走 csv.DictReader
+      產生垃圾字典：count_if 類規則會誤算 expected=0，交付 0 即假 PASS）
     - 交付值缺失/重複 → FAIL（missing/ambiguous）
     - 值不符重算 → FAIL（mismatch_with_recomputation；不顯示期望值）
     - 一致 → PASS
@@ -1164,8 +1167,19 @@ def check_kv_recomputed(
     if not isinstance(rc, dict):
         return _result(item, "UNKNOWN", "kv_recomputed.params.recompute 缺失；不自評", {"reason": "no recompute"})
     try:
-        with data_file.open(newline="", encoding="utf-8") as f:
-            rows = list(csv.DictReader(f))
+        if data_file.suffix.lower() == ".json":
+            # vq-5nz.13：.json data_file 用 json.load 解析；走 csv.DictReader 會把首行當
+            # 「表頭」、剩餘行全成垃圾字典（count_if 誤算 expected=0 → 交付 0 假 PASS）。
+            # 必須是 row 物件列表，否則 UNKNOWN（不自評）。
+            with data_file.open(encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, list) or not all(isinstance(r, dict) for r in data):
+                raise UnknownSource(
+                    f"JSON 資料檔 {data_rel} 非 row 物件列表；無法可靠重算")
+            rows = data
+        else:
+            with data_file.open(newline="", encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype == "count_if":
             col = str(rc.get("col", "")).strip()
@@ -1268,7 +1282,7 @@ def check_kv_recomputed(
         rnd = rc.get("round")
         if isinstance(rnd, int) and not isinstance(rnd, bool):
             expected = round(expected, rnd)
-    except (UnknownSource, OSError) as e:
+    except (UnknownSource, OSError, json.JSONDecodeError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
     val_str, problems = _kv_answer_value(deliverable_dir, item, key)

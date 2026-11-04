@@ -934,6 +934,82 @@ def test_kv_recomputed_pearson2_constant_column_is_unknown(tmp_path: pathlib.Pat
     assert res["req_main"].status == "UNKNOWN"
 
 
+# ── kv_recomputed .json data_file（vq-5nz.13：vq-5nz.12 同型缺口，2026-11-04）────────
+
+def test_kv_recomputed_json_data_file_mean_int_col(tmp_path: pathlib.Path):
+    """vq-5nz.13：.json data_file 必須用 json.load 解析，禁止走 csv.DictReader 產生垃圾字典
+    （CSV 首行會把 JSON 開頭當「表頭」）。row 物件列表→規則可判定；錯值→FAIL（非空轉 PASS）。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.json", json.dumps([
+        {"Country": "A", "No. of cases": 100},
+        {"Country": "B", "No. of cases": "200[10-30]"},
+        {"Country": "C", "No. of cases": None},
+        {"Country": "D", "No. of cases": 300},
+    ], indent=1))
+    params = {
+        "key": "mean_cases",
+        "data_file": "cases.json",
+        "recompute": {"type": "mean_int_col", "col": "No. of cases",
+                      "note": "轉 Int64；Null/空/不可解析忽略"},
+    }
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+300)/2
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "@mean_cases[250]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+
+
+def test_kv_recomputed_json_data_file_count_if_zero_not_false_pass(tmp_path: pathlib.Path):
+    """vq-5nz.13 假 PASS 風險：.json 若走 DictReader，所有行成垃圾→count_if 誤算 expected=0，
+    交付 0 即假 PASS。修復後：真計數＞0 時答案 0 必須 FAIL、正確計數才 PASS。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "tickets.json", json.dumps([
+        {"day": 1, "late": 1},
+        {"day": 2, "late": 1},
+        {"day": 3, "late": 0},
+    ], indent=1))
+    params = {"key": "late_count", "data_file": "tickets.json",
+              "recompute": {"type": "count_if", "col": "late", "eq": 1}}
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+
+    zero = tmp_path / "zero"
+    _write(zero / "answer.txt", "@late_count[0]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, zero)}
+    assert res["req_main"].status == "FAIL"
+
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@late_count[2]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+
+def test_kv_recomputed_json_data_file_malformed_unknown(tmp_path: pathlib.Path):
+    """.json data_file 但非 row 物件列表（JSON 物件）或壞 JSON→UNKNOWN（不自評、不崩潰）。"""
+    params = lambda name: _req_set("kv_recomputed",
+                                   {"key": "k", "data_file": name,
+                                    "recompute": {"type": "count_if", "col": "a", "eq": 1}},
+                                   "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "@k[1]\n")
+
+    task_dir = tmp_path / "task"
+    _write(task_dir / "obj.json", json.dumps({"a": 1}))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, params("obj.json"), d)}
+    assert res["req_main"].status == "UNKNOWN"
+
+    task_dir2 = tmp_path / "task2"
+    _write(task_dir2 / "broken.json", "{not json")
+    res2 = {r.claim_id: r for r in run_requirement_checks(task_dir2, params("broken.json"), d)}
+    assert res2["req_main"].status == "UNKNOWN"
+
+
 # ── plain_recomputed＋mode_col（G2 小批：e014/dabstep 真實草稿，2026-11-04）──────
 
 def test_plain_recomputed_mode_col_pass_and_fail(tmp_path: pathlib.Path):
