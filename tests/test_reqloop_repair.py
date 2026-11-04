@@ -1,0 +1,387 @@
+"""
+G2 局部修復切片測試（工單 P000-20261104-01-repair-slice，2026-11-04）。
+
+全部使用 G1 自造案例（expense_category），fake agent 離線接線——**synthetic**，
+只驗管線（修復請求帶什麼、重驗、前後差異、停因、成本），不宣稱任何真實修復效果。
+
+規則（RD_FOCUS_20261104）：
+- 保留原候選：原草稿目錄永遠不被改動。
+- FAIL→UNKNOWN 不算修好；缺項/UNKNOWN/CONFLICT 不宣告完成。
+- 任何原有 PASS 退步（PASS→FAIL/UNKNOWN）都要記錄。
+- 連續兩次修復沒有消除已確認缺口 ⇒ 停止，回傳停因及未解決項。
+- 成本缺值＝UNKNOWN（None），絕不填 0。
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import pathlib
+import shutil
+
+import pytest
+
+from vacant_network.adapters.agents import Launch
+from vacant_network.reqloop import repair
+from vacant_network.reqloop.checks import run_requirement_checks
+from vacant_network.reqloop.requirements import RequirementSet
+
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+G1_TASK = REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks" / "expense_category"
+
+#: G1 bad 草稿：3 條需求，2 PASS + 1 FAIL（req_summary_numbers）
+BAD_DRAFT = "bad_grand_total_wrong"
+FAIL_CLAIM = "req_summary_numbers"
+PASS_CLAIMS = ("req_csv_structure", "req_group_recompute")
+
+
+@pytest.fixture()
+def task_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+    """G1 任務目錄拷貝到 tmp（測試對它只讀；工作區一律寫 tmp）。標 synthetic。"""
+    d = tmp_path / "task"
+    shutil.copytree(G1_TASK, d)
+    return d
+
+
+def load_req_set(task_dir: pathlib.Path) -> RequirementSet:
+    return RequirementSet.load(task_dir / "requirements.json")
+
+
+def _fake_build(log: list[dict]):
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        log.append({"prompt": prompt, "ws": str(ws)})
+        return Launch(argv=["true"], note="fake")
+    return build
+
+
+def _fake_agent(ws_files: dict[str, str] | None, *, wall_ms: int = 1200,
+                stdout_json: str | None = None):
+    """fake run：把 ws_files 寫進 workspace（模擬修復模型改交付物），回 run_agent 同款 dict。"""
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        for name, text in (ws_files or {}).items():
+            p = pathlib.Path(workspace) / name
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(text, encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(stdout_json or "{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": wall_ms,
+                "spawn_error": None, "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+    return run
+
+
+def _good_summary(task_dir: pathlib.Path) -> str:
+    return (task_dir / "good" / "summary.md").read_text(encoding="utf-8")
+
+
+def _good_csv(task_dir: pathlib.Path) -> str:
+    return (task_dir / "good" / "expense_summary.csv").read_text(encoding="utf-8")
+
+
+def test_module_documented_rules():
+    """切片必須把 11/04 的規則寫進模組文件（防骨架化：只交抽象接口不算完成）。"""
+    doc = repair.__doc__ or ""
+    for needle in ("FAIL→UNKNOWN", "PASS", "停", "原草稿", "UNKNOWN"):
+        assert needle in doc, f"模組文件缺規則說明：{needle}"
+
+
+# ── 前後差異（FAIL/UNKNOWN/PASS）──────────────────────────────────────
+
+def test_diff_fail_to_pass_is_fixed(task_dir):
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    after = run_requirement_checks(task_dir, rs, task_dir / "good")
+    d = repair.diff_results(before, after)
+    assert FAIL_CLAIM in d.fixed
+    assert FAIL_CLAIM not in d.not_fixed
+    assert d.regressed == ()
+    assert d.required_fail_before == 1
+    assert d.required_fail_after == 0
+    assert d.closed_any_gap is True
+    assert d.transitions[FAIL_CLAIM] == ("FAIL", "PASS")
+
+
+def test_diff_fail_to_unknown_not_fixed(task_dir):
+    """FAIL→UNKNOWN 不算修好（規則明列）。"""
+    rs = load_req_set(task_dir)
+    before = [
+        _cr("a", "FAIL"), _cr("b", "PASS"),
+    ]
+    after = [
+        _cr("a", "UNKNOWN"), _cr("b", "PASS"),
+    ]
+    d = repair.diff_results(before, after)
+    assert d.fixed == ()
+    assert "a" in d.not_fixed
+    assert d.closed_any_gap is False
+
+
+def test_diff_pass_to_fail_regressed(task_dir):
+    """原有 PASS 退步必須被記錄，不能被淨改善掩蓋。"""
+    before = [_cr("a", "PASS"), _cr("b", "FAIL")]
+    after = [_cr("a", "FAIL"), _cr("b", "PASS")]
+    d = repair.diff_results(before, after)
+    assert d.fixed == ("b",)
+    assert d.regressed == ("a",)
+    assert d.transitions["a"] == ("PASS", "FAIL")
+
+
+def test_diff_missing_claim_not_completion(task_dir):
+    """重驗後缺項＝沒完成，不算 PASS、也不算修好。"""
+    before = [_cr("a", "FAIL")]
+    after = []  # 該條目在重驗中消失了
+    d = repair.diff_results(before, after)
+    assert d.fixed == ()
+    assert d.not_fixed == ("a",)
+    assert d.transitions["a"][1] == "MISSING"
+
+
+def _cr(cid: str, status: str):
+    from vacant_network.intake.verifiers import ClaimResult
+    return ClaimResult(claim_id=cid, status=status, detail="", evidence={},
+                       verifier="t", verifier_version="t", required=True,
+                       authority="client")
+
+
+# ── 修復請求內容（原生 pi 會收到的提示）─────────────────────────────
+
+def test_localized_prompt_has_requirement_counterexample_and_scope(task_dir):
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    prompt = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                        feedback_mode="localized")
+    assert "報銷總金額" in prompt                      # 原始需求原文（request.md）
+    assert "10674.83" in prompt                        # 可見反例（重算的正確值）
+    assert FAIL_CLAIM in prompt                        # 哪一條沒過
+    assert "expense_summary.csv" in prompt             # 可改的交付物檔
+    assert "summary.md" in prompt
+    assert "expenses.csv" in prompt                    # 源資料檔（不可改）
+    assert "req_csv_structure" in prompt               # 已 PASS、必須保持
+    # 兩臂對照（generic/localized）的差異必須真實存在：generic 不得帶失敗證據
+    generic = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                         feedback_mode="generic")
+    assert "10674.83" not in generic
+    assert FAIL_CLAIM not in generic
+    assert "報銷總金額" in generic                     # 原始需求兩臂都有
+
+
+def test_prompt_never_names_hidden_sources(task_dir):
+    """修復請求不得出現 hidden／scorer 等隱藏來源字眼。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    for mode in ("generic", "localized"):
+        p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                       feedback_mode=mode)
+        for bad in ("hidden/", "scorer.py", "/srv/eval"):
+            assert bad not in p, (mode, bad)
+
+
+# ── 完整切片（fake agent，synthetic 離線接線）──────────────────────
+
+def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    draft_hashes = _dir_hashes(draft)
+    log: list[dict] = []
+    run = _fake_agent({"summary.md": _good_summary(task_dir)})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build(log), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    # 修好：FAIL→PASS，缺口關閉
+    assert out.stopped == "gap_closed"
+    assert FAIL_CLAIM in out.fixed
+    assert out.final_status[FAIL_CLAIM] == "PASS"
+    assert out.unresolved == ()
+    # 原草稿逐位元組未動（保留原候選）
+    assert _dir_hashes(draft) == draft_hashes
+    # 成本：1 次呼叫、wall_ms 來自執行器實際攔截
+    assert out.cost["calls"] == 1
+    assert out.cost["wall_ms_total"] == 1200
+    assert out.cost["tokens"] is None                  # 缺值＝UNKNOWN，不填 0
+    # 標 synthetic
+    assert out.synthetic is True
+    # 提示是 localized（帶反例）
+    assert "10674.83" in log[0]["prompt"]
+
+
+def test_repair_fail_to_unknown_counts_as_not_fixed(task_dir, tmp_path):
+    """fake agent 把源資料弄壞 ⇒ 重算變 UNKNOWN：不算修好、缺口仍在。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    run = _fake_agent({"expenses.csv": "corrupted,not,a,valid\ngarbage"})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out.stopped != "gap_closed"
+    assert FAIL_CLAIM not in out.fixed
+    assert out.final_status[FAIL_CLAIM] == "UNKNOWN"
+    assert FAIL_CLAIM in out.unresolved                # UNKNOWN 不得宣告完成
+    assert out.cost["calls"] == 1
+
+
+def test_repair_records_pass_to_fail_regression(task_dir, tmp_path):
+    """fake agent 修了摘要但弄壞 CSV 結構 ⇒ 退步必須被記錄。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    broken_csv = "category,total_amount\nit,3380.25\n"  # 缺 subcategory 欄位
+    run = _fake_agent({"summary.md": _good_summary(task_dir),
+                       "expense_summary.csv": broken_csv})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert "req_csv_structure" in out.regressed
+    assert out.final_status["req_csv_structure"] == "FAIL"
+    assert out.stopped != "gap_closed"                 # 新出現的 FAIL ⇒ 缺口未閉
+
+
+def test_repair_stops_after_two_no_progress_rounds(task_dir, tmp_path):
+    """連續兩次修復沒有消除已確認缺口 ⇒ 停止，回傳停因及未解決項（不花第 3 次）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    run = _fake_agent(None)  # no-op：什麼都沒改
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="generic", max_rounds=4, synthetic=True,
+    )
+    assert out.stopped == "stalled"
+    assert len(out.rounds) == 2                        # 不是 4：兩次無進展即停
+    assert out.cost["calls"] == 2
+    assert out.cost["wall_ms_total"] == 2400
+    assert FAIL_CLAIM in out.unresolved                # 停因＋未解決項都回傳
+    assert out.final_status[FAIL_CLAIM] == "FAIL"
+
+
+def test_repair_no_gap_makes_no_agent_call(task_dir, tmp_path):
+    """草稿全部必需條目 PASS ⇒ 不呼叫模型（零成本、零呼叫）。"""
+    rs = load_req_set(task_dir)
+    run = _fake_agent(None)
+    out = repair.repair_slice(
+        task_dir, rs, task_dir / "good",
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped == "no_gap"
+    assert out.rounds == []
+    assert out.cost["calls"] == 0
+    assert out.cost["wall_ms_total"] is None           # 沒有呼叫＝沒有 wall time，不填 0
+
+
+def test_repair_agent_crash_is_no_progress_and_reported(task_dir, tmp_path):
+    """agent 執行失敗（spawn_error）＝該輪無進展、如實記錄，不假裝修好。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        return {"rc": None, "timed_out": False, "wall_ms": None,
+                "spawn_error": "FileNotFoundError: no-such-agent"}
+
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped == "stalled"
+    assert out.rounds[0].agent["spawn_error"]
+    assert FAIL_CLAIM in out.unresolved
+
+
+def test_usage_parsed_from_agent_stdout(tmp_path):
+    """成本從 agent 原始 usage 讀；有值才記錄，沒有就是 None。"""
+    log = tmp_path / "agent_stdout.log"
+    log.write_text(json.dumps({"message": "done",
+                               "usage": {"inputTokens": 100, "outputTokens": 50}}),
+                   encoding="utf-8")
+    u = repair.parse_usage_from_log(log)
+    assert u == {"input": 100, "output": 50, "total": 150}
+    # 沒有 usage 的輸出 ⇒ None（UNKNOWN），不是 0
+    log2 = tmp_path / "plain.log"
+    log2.write_text("just text output\n", encoding="utf-8")
+    assert repair.parse_usage_from_log(log2) is None
+    assert repair.parse_usage_from_log(tmp_path / "missing.log") is None
+
+
+def test_usage_parsed_from_pi_jsonl_stream(tmp_path):
+    """pi --mode json 的 JSONL 事件流：逐事件 usage 加總；全零事件＝UNKNOWN。"""
+    log = tmp_path / "agent_stdout.log"
+    lines = [
+        json.dumps({"type": "session", "id": "x"}),
+        json.dumps({"type": "message_update",
+                    "usage": {"input": 7479, "output": 419, "cacheRead": 0,
+                              "totalTokens": 7898}}),
+        json.dumps({"type": "message_update",
+                    "usage": {"input": 10, "output": 5}}),
+        json.dumps({"type": "agent_settled"}),
+    ]
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    u = repair.parse_usage_from_log(log)
+    assert u == {"input": 7489, "output": 424, "total": 7913}
+    # 只有全零 usage 事件 ⇒ 沒有真實 token 數 ⇒ None（不填 0）
+    log2 = tmp_path / "zeros.log"
+    log2.write_text(json.dumps({"type": "message_update",
+                                "usage": {"input": 0, "output": 0, "totalTokens": 0}})
+                    + "\n", encoding="utf-8")
+    assert repair.parse_usage_from_log(log2) is None
+
+
+def test_usage_counts_into_cost(task_dir, tmp_path):
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    run = _fake_agent({"summary.md": _good_summary(task_dir)},
+                      stdout_json=json.dumps({"usage": {"inputTokens": 10, "outputTokens": 5}}))
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out.cost["tokens"] == 15
+    assert out.cost["token_source"] == "agent_stdout"
+
+
+def _dir_hashes(d: pathlib.Path) -> dict[str, str]:
+    return {str(p.relative_to(d)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(d.rglob("*")) if p.is_file()}
+
+
+# ── CLI（可重跑的原生 pi 命令的離線對照）────────────────────────────
+
+def test_main_exit_codes_and_json(task_dir, tmp_path, capsys):
+    rs = load_req_set(task_dir)  # noqa: F841  (main 自己載)
+    draft = task_dir / BAD_DRAFT
+    # 修好 ⇒ exit 0
+    run = _fake_agent({"summary.md": _good_summary(task_dir)})
+    rc = repair.main(["--task", str(task_dir), "--draft", str(draft),
+                      "--out", str(tmp_path / "out0"), "--rounds", "1",
+                      "--synthetic", "--json"],
+                     build=_fake_build([]), run=run)
+    assert rc == 0
+    body = json.loads(capsys.readouterr().out)
+    assert body["stopped"] == "gap_closed"
+    assert body["synthetic"] is True
+    # 修不好 ⇒ exit 20
+    tmp2 = tmp_path / "t2"
+    shutil.copytree(G1_TASK, tmp2)
+    rc2 = repair.main(["--task", str(tmp2), "--draft", str(tmp2 / BAD_DRAFT),
+                       "--out", str(tmp_path / "out2"), "--rounds", "1",
+                       "--synthetic", "--json"],
+                      build=_fake_build([]), run=_fake_agent(None))
+    assert rc2 == 20
+    # agent 根本沒跑起來 ⇒ exit 22（infra）
+    def dead(launch, *, workspace, timeout_s, log_dir):
+        return {"rc": None, "timed_out": False, "wall_ms": None,
+                "spawn_error": "FileNotFoundError: no-such-agent"}
+    tmp3 = tmp_path / "t3"
+    shutil.copytree(G1_TASK, tmp3)
+    rc3 = repair.main(["--task", str(tmp3), "--draft", str(tmp3 / BAD_DRAFT),
+                       "--out", str(tmp_path / "out3"), "--rounds", "1",
+                       "--synthetic", "--json"],
+                      build=_fake_build([]), run=dead)
+    assert rc3 == 22
