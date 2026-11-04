@@ -7,7 +7,7 @@
 NO_MECHANISM / UNRESOLVED；優先序見 packet §4）。
 
 用法：
-  python3 e016_verdict_pipeline.py --selftest      # 合成資料自測（9 組：五態＋成本 UNKNOWN＋數值）
+  python3 e016_verdict_pipeline.py --selftest      # 合成資料自測（10 組：五態＋成本 UNKNOWN＋完賽缺分＋數值）
   python3 e016_verdict_pipeline.py                 # 讀正式 run 目錄
 exit：0＝已判定（含五態）、10＝run 未完成（格子未齊）、20＝UNKNOWN（infra>20%）
 """
@@ -167,6 +167,13 @@ def _cell_cost(cell_dir: pathlib.Path) -> tuple[int | None, int | None]:
     return calls, itok + otok
 
 
+def missing_total(total: int, missing_scored: int) -> int:
+    """缺合格分的格（滿 N_CELLS）＝「有目錄但無有效分」＋「連目錄都沒有」。
+    senior 11/04 #1.2：run 完賽（進 done/）後不以目錄數 <102 阻斷，而是把缺合格
+    -r1 的格全數記入 missing 交 decide()（missing > 20% ⇒ UNKNOWN；未測≠通過）。"""
+    return missing_scored + max(0, N_CELLS - total)
+
+
 def run(runs_root: pathlib.Path, exp: str) -> dict:
     rows, total, missing = load(runs_root, exp)
 
@@ -177,6 +184,7 @@ def run(runs_root: pathlib.Path, exp: str) -> dict:
     if total < N_CELLS and not is_done:
         print(f"INCOMPLETE: 只到 {total}/{N_CELLS} 格在位（等 job 結束再判決）")
         sys.exit(10)
+    missing = missing_total(total, missing)   # 無目錄的格也計缺分（senior 11/04 #1.2）
     v = decide(rows, total, missing)
     out = pathlib.Path(__file__).parent / f"{exp}_verdict.json"
     out.write_text(json.dumps(v, ensure_ascii=False, indent=2))
@@ -244,7 +252,16 @@ def selftest() -> None:
     r9[1]["calls"] = None; r9[1]["tok"] = None
     v = decide(r9, 102, 0)
     assert v["state"] == "UNKNOWN" and "成本" in v["why"], v
-    print("ALL OK（9 組自測：五態＋零通過邊界＋成本 UNKNOWN 兩態＋McNemar/Holm 數值）")
+    # 10) 完賽缺分：無目錄的格也計入 missing（senior 11/04 #1.2：缺分 > 20% ⇒ UNKNOWN，
+    #     不得對缺格靜默出裁決）
+    assert missing_total(102, 0) == 0
+    assert missing_total(98, 0) == 4      # 4 格連 -r1 目錄都沒有
+    assert missing_total(80, 2) == 24     # 22 格無目錄＋2 格無分
+    assert missing_total(90, 15) == 27    # 12 格無目錄＋15 格無分
+    assert missing_total(105, 3) == 3     # total>N_CELLS（重試命名）不出負數
+    v = decide(rows_from({"A": base, "C": c2, "C-nf": c2}), 102, missing_total(80, 2))
+    assert v["state"] == "UNKNOWN" and "缺分" in v["why"], v
+    print("ALL OK（10 組自測：五態＋零通過邊界＋成本 UNKNOWN 兩態＋完賽缺分計數＋McNemar/Holm 數值）")
 
 
 if __name__ == "__main__":
