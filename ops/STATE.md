@@ -7415,7 +7415,7 @@ DECISION:954=🔴 成本來源修復完成（TDD 4/4 fail→pass、selftest 9 �
 - **e016 attempt-2（監控）**：49/102 格在位（46 出分）；pg_paasio A 01:24 出分、C 在跑（PAR=1 串行、非停擺）；pace ~12 分/格⇒ETA 今天 ~12:3x–13:3x；queue 空、盤餘 62G、无双分派。
 - **驗證**：草稿事實條目逐條對原始檔（:2306 內容、122 次 unittest、zerostop 行號）；NOW.md/STATE.md 覆寫＋追加；草稿 md5 待 commit 核。
 - **未驗證**：五態裁決本體（e016 未完賽）；rescore；CI auto/qwen27b 245d0b32 尚未出（輪首查＝還在跑、紅燈先修紀律在案）；H-a/H-b 種子格存在性（候 e016 完賽＋步驟 2 讀現場）。
-- **下一步**：監控 e016；完賽後依序 rescore（0 不一致）→五態裁決→L006 §6＋L007 §4 分支＋FINDINGS e016 條目；若 MECHANISM_CONFIRMED 則按 r955 草稿走新循環（六門＋senior 審查後才提升 packets/）。
+- **下一步**：監控 e016；完賽後依序 rescore（0 不一致）→五態裁決→L006 §6＋L007 §4 分支＋FINDINGS e016 條目；若 MECHANISM_CONFIRMED 則按 r955 草稿走新循環（六門＋senior 審查後才提升 packets/）；助手票 `R20261104_0124-1`（草稿引用只讀審計）候完成、R&D 核驗後移 done/。
 - 紅線：零發射；零產品行為改動（草稿＝staging 文件、非 vacant_network/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:955=e016 未完賽（49/102、ETA 今天下午）⇒依鐵則不乾等、預備 L007 §4 分支 3——保守選擇：只寫草稿（staging、非 packet、發射前置＝MECHANISM_CONFIRMED 硬門、判準先寫、六門在後），不碰產品碼、不發實驗；假說空間如實列 H-a 弱證據（pg_food_chain 122 次仍敗）、不預判；選一個假說＝候步驟 2 現場證據（≥1 格檔＋行）｜五態裁決＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer

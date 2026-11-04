@@ -15,6 +15,7 @@ ops 251c06a／Vacant df28034e（位元組一致）。
 e002 pg_food_chain C kickback 後 122 次 unittest 仍敗）／H-b（收斂語境回饋文案）／H-c（外端 referee，
 低優先、新設計非 e015 重跑）＋選擇規則（步驟 2 後取 ≥1 格現場證據者；皆無⇒如實記錄、不強改）。
 預註冊判準（留／撤＋成本紅線 2×A＋Holm＋H-12）＋六門承 e016。
+助手工單：`tickets/open/R20261104_0124-1-audit-r955-draft-citations.md`（只讀審計草稿引用，全 PASS 才結案）。
 
 ## 🔴 下一步（e016 完賽後，依序；完賽前不准說 failed_step 是 C 勝 A 的來源）
 1. `python3 /srv/vlab/bin/report.py e016_failed_step_ablation --rescore`（驗收 0 不一致）
