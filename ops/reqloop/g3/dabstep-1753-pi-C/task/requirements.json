@@ -1,0 +1,29 @@
+{
+  "task_id": "dabstep-1753",
+  "items": [
+    {
+      "id": "req_fee_ids_2023_03",
+      "quote": "What are the applicable fee IDs for Belles_cookbook_store in March 2023? Answer must be a list of values in comma separated list, eg: A, B, C. If the answer is an empty list, reply with an empty string.",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "fee_ids_lookup",
+          "fees_file": "data/fees.json",
+          "merchants_file": "data/merchant_data.json",
+          "merchant": "Belles_cookbook_store",
+          "year": 2023,
+          "month": 3,
+          "note": "語義 TDD 前凍結（依 manual.md 公開規則）：null/空列表＝applies to all；商戶 MCC/account_type/capture_delay 取 merchant_data.json（數值 delay 對類別：immediate⟺0 天、<3⟺0<d<3、3-5⟺3≤d≤5、>5⟺d>5）；monthly_volume/monthly_fraud_level 依該自然月 payments.csv 重算檔位（manual.md：computed always in natural months）；is_credit/aci 為交易層條件、商戶層查詢不據以排除（凍結解讀，替代讀法見 manifest）；順序無關比較；空集＝空字串；期望 ID 集永不進證據"
+        }
+      },
+      "description": "答案必須等於按公開規則（data/fees.json＋data/merchant_data.json＋data/payments.csv）重算的適用 fee ID 集（順序無關）；期望 ID 集不進證據（防洩漏）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

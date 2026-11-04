@@ -1,0 +1,137 @@
+{
+  "schema": "vacant.reqloop.g2.manifest/1",
+  "ticket": "vq-5nz.6（G3 候選預註冊）",
+  "purpose": "G3 預先登記（待點名才准發射）：4 停滯草稿 × generic/localized 兩臂＝8 格＝6 缺口格〔dab_055×2、dabstep-23-localized、dabstep-1753×2、dab_039-generic〕＋2 已閉複驗格〔dabstep-23-generic、dab_039-localized〕；換方法＝輪次預算重設 300s→600s（vq-5nz.6 預註冊法(2)，r993 首選；對 generic 臂有 10:23 預算內 PASS 前例：dab_039-generic 1 呼叫 58.7k tok 收）。本 manifest 只驗管線＋記錄前後差異與成本，不宣稱任何效果提升。",
+  "status": "FROZEN_PENDING_NAMING",
+  "naming_required": "本 manifest 凍結完成、dry-run 通過；但未點名 G3 前禁止發射（紅線：G3 未點名＝未授權發射）。點名後以 fire_command 發射。",
+  "arms": ["generic", "localized"],
+  "model": {
+    "provider": "lms1003qwen",
+    "model": "qwen/qwen3.8-27b",
+    "note": "兩臂同一模型；若一臂換強模型，另一臂必須有同模型/成本對照（紅線）"
+  },
+  "budget": {
+    "max_rounds_per_cell": 2,
+    "timeout_s_per_round": 600,
+    "hard_token_cap": false,
+    "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+    "min_rounds": {"generic": 1, "localized": 0},
+    "note": "換方法＝300s→600s（G2 同 2 輪，單輪預算翻倍）；min_rounds 同 G2：generic 臂對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+  },
+  "scoring": {
+    "before": "凍結草稿按原始要求可讀狀態（PASS/FAIL/UNKNOWN；UNKNOWN=無法判定，非 0/FAIL）",
+    "after": "同格末輪答案重驗同一條目",
+    "gap_closed": "before 有非 PASS、after 全 PASS（fixed 列明）",
+    "regressed": "before PASS、after 非 PASS（紅線，任何一格 regressed 即本批不達標）"
+  },
+  "leak_guard": "修復模型只看原始問題原文、凍結資料與逐條 FAIL/UNKNOWN 條目（含其 quote 與 verifier 名）；重算值/hidden 參考值/期望值永不進證據或提示；兩臂同一套規則",
+  "stall_cause_reference": "r990 停因證據：6 缺口格全部 2×300s 用盡（wall 600010–600128ms）、無一輪產出有效新答案→停因＝預算耗盡於工作中，非拒絕/困惑（5/6 純預算類；dab_039 環境缺口假設已於 r993 推翻：pinned .venv scipy 1.18.1 可 import、shapiro rc=0；模型自述不可信）",
+  "drafts": [
+    {
+      "name": "dab_055-pi-C",
+      "role": "bad",
+      "task_id": "dab_055",
+      "source": {
+        "run": "e013_dabench_pi_AC_full",
+        "cell": "dabench-dab_055-pi-C-r1",
+        "score_file": "score.json",
+        "score": {"task_id": "dab_055", "pass": false, "n_correct": "0/1", "status": "ok"},
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dab_055-pi-C/draft",
+        "files": {"answer.txt": "c778b235f6b6f7928c5c2839f41d173aa5a816b1a71637d8f17bad9ec7852e56"}
+      },
+      "task": {
+        "dir": "dab_055-pi-C/task",
+        "requirements": {"sha256": "51502b32ff40eb5b770248a2cf0a76d6ae0f47b4256d2d1738727e8700a867b9"},
+        "data_files": {"data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"}
+      },
+      "lab_note": "e013 記錄 pass=False（0/1）；G2 兩臂皆 stalled（2×300s 用盡，r2 sha==draft）",
+      "cell_class": "gap"
+    },
+    {
+      "name": "dab_039-pi-C",
+      "role": "bad",
+      "task_id": "dab_039",
+      "source": {
+        "run": "e008_dabench_pi_AC",
+        "cell": "dabench-dab_039-pi-C-r1",
+        "score_file": "score.json",
+        "score": {"task_id": "dab_039", "pass": false, "n_correct": "0/1", "status": "missing"},
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dab_039-pi-C/draft",
+        "files": {"solution.py": "8004ec0514e2844fdb1135e7a0376f977f6545332f757dbf701eb633bff748c7"}
+      },
+      "task": {
+        "dir": "dab_039-pi-C/task",
+        "requirements": {"sha256": "9b3890c0173f3528bddec2c0a3e71780fce83f8882ab43dcd180cf59be5260cb"},
+        "data_files": {"data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"}
+      },
+      "lab_note": "e008 記錄 missing（answer.txt 缺失）；G2 generic 臂 stalled（2×300s、零 answer.txt）、localized 臂 12:10 prompt-fix run 已 gap_closed",
+      "cell_class": "generic=gap, localized=recheck"
+    },
+    {
+      "name": "dabstep-23-pi-C",
+      "role": "bad",
+      "task_id": "dabstep-23",
+      "source": {
+        "run": "e014_dabstep_block",
+        "cell": "dabstep-23-pi-C-r1",
+        "score_file": "score.json",
+        "score": {"task_id": "dabstep-23", "pass": false, "reward": "0", "answer_exists": true, "status": "ok"},
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dabstep-23-pi-C/draft",
+        "files": {"answer.txt": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628"}
+      },
+      "task": {
+        "dir": "dabstep-23-pi-C/task",
+        "requirements": {"sha256": "a59f86e5c6c844a4546a60ee840cbf8609daa8be92ad53d6d7b0432b72bfadd6"},
+        "data_files_note": "task/data/* 為指向 _data/ 的相對符號連結（_data 又指向 ../g2/smoke_e014/_data，單一來源）；data/payments.csv 5fbb2621…（見 data_source）"
+      },
+      "lab_note": "e014 記錄 pass=False（reward 0）；G2 generic 臂 gap_closed（FAIL→PASS 0.0）、localized 臂 stalled（最終值=草稿原值 0.00152745）",
+      "question": "What is the fraud rate for in-person transactions for the year 2023?（Answer must be just a number）",
+      "cell_class": "generic=recheck, localized=gap"
+    },
+    {
+      "name": "dabstep-1753-pi-C",
+      "role": "bad",
+      "task_id": "dabstep-1753",
+      "source": {
+        "run": "e014_dabstep_block",
+        "cell": "dabstep-1753-pi-C-r1",
+        "score_file": "score.json",
+        "score": {"task_id": "dabstep-1753", "pass": false, "reward": "0", "answer_exists": true, "status": "ok"},
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "dabstep-1753-pi-C/draft",
+        "files": {"answer.txt": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91"}
+      },
+      "task": {
+        "dir": "dabstep-1753-pi-C/task",
+        "requirements": {"sha256": "24fe95511b99ef1bfee0127da650a8bae79c3b282e2b00ded48c18541963f142"},
+        "data_files_note": "同 dabstep-23：task/data/* 相對符號連結→_data；fees.json 9a833666…、merchant_data.json f158e834…（見 data_source）"
+      },
+      "lab_note": "e014 記錄 pass=False（reward 0）；G2 兩臂皆 stalled（最終值=草稿原值 None）",
+      "question": "What are the applicable fee IDs for Belles_cookbook_store in March 2023?（comma separated list; empty list → empty string）",
+      "cell_class": "gap"
+    }
+  ],
+  "data_source": {
+    "note": "資料檔＝凍結快照 sha256（r994 自盤上凍結檔實測，資訊性欄位，verify_frozen 不核對）",
+    "files": {
+      "dabstep-23/1753 data/payments.csv": "5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25",
+      "dabstep-1753 data/fees.json": "9a833666ae9be5a8e756dd1fe076c72e7c502d64161315ffa8fee9e5bf2599dc",
+      "dabstep-1753 data/merchant_data.json": "f158e834de27ee8407e99d9c32da690357981d2770958fd302a9bb79ced83581",
+      "dab_055 data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c",
+      "dab_039 data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+    }
+  },
+  "fire_command": "cd ~/dev/Vacant && .venv/bin/python -m vacant_network.reqloop.g2 --manifest ops/reqloop/g3/manifest.json --out ~/dev/ops/audits/<G3 點名目錄>（dry-run 已驗證；發射前再跑一次 verify_frozen）",
+  "provenance": "草稿目錄 cp -a 自 ops/reqloop/g2/{smoke_e013/dab_055-pi-C, smoke/dab_039→dab_039-pi-C, smoke_e014/dabstep-23-pi-C, smoke_e014/dabstep-1753-pi-C}（r994，原凍結目錄零改動；4 份草稿 sha256 已逐份核對與源 manifest 一致）"
+}
