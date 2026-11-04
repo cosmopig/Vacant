@@ -7453,3 +7453,12 @@ DECISION:958=e016 未完賽（51/102 live 格、50 出分、infra 6%＜20%）⇒
 - 實開 `Vacant/ops/vlab/FINDINGS.md`（542 行）：末條目 e015（L535–542，e015_h_multi_review NOT_BETTER_THAN_RANDOM）、無 e016 條目＝「候完賽」一致；`~/dev/ops/vlab/` 不存在（ls rc≠0）＝runbook「ops repo 無此檔」聲明**成立**。
 - **發現不準處並修正**：runbook §3.3「格式照 e015 條目」的欄位清單含「對下一步的意義」——FINDINGS 全檔無此欄名（grep 核：e015 用「**核心研究問題狀態更新**」、e013/e014 用「**對下一步**」；證據欄 e015＝「**證據鏈**」、e013/e014＝「**證據**」；「**完賽**」欄 e013/e014 獨立、e015 折入「實驗」）。runbook §3.3 已改為逐欄對齊實文＋標明 e016 建議欄式。
 - NOW.md 同步記 redo 段。commit 於 ops（runbook＋NOW＋STATE）＋Vacant 鏡像（NOW＋STATE）。
+
+## Round 959（2026-11-04 02:49–02:5x，R&D 負責人）
+- **senior #1 驗收再核（兩判準皆達）**：`audits/e016_verdict_pipeline.py --selftest` ALL OK RC=0（10 組）；對當前 run 輸出 `INCOMPLETE: 只到 54/102 格在位`（計數非 0、RC=10、進行中 path 正確）⇒slice＋done 門修復在案且驗收滿足。
+- **助手票 R20261104_0124-1（r955 草稿引用審計）裁處**：停擺（01:46 後無進展/無進程/無結果）⇒BACKLOG r958 規則觸發（下輪仍停擺⇒R&D 裁處），選 (a) 自行執行（純只讀、不碰產品碼、無發射）：**7 條全 PASS**（逐條開原檔＋片段；第 2 條票面 211-222 範圍多包 3 行＝函式體止 219、起始行準，已註記不藏）；票移 done/、doing/ 清空。⇒**L007 §4 分支 3（MECHANISM_CONFIRMED）packet 提升門（runbook §2 態 3）已滿足**；草稿 r955 候發射（六門未全綠、e016 未完賽）。
+- **e016 attempt-2 監控**：54/102 在位（02:2x 為 51、+3/30 分）；events 活躍（pg_pig_latin C-nf 02:54、C 02:49）＝健康非停擺；infra 快照 3/50＝6%＜20% 閾；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派。
+- **未驗證**：五態裁決本體＋rescore（e016 未完賽）；CI d082539d（r958 鏡像、pending；前 HEAD 5576107c 綠 4670；輪末複核、紅燈先修紀律）。
+- 紅線：零發射（e016 唯一在跑、只監控）；零產品行為改動（本輪改動＝tickets/BACKLOG/NOW/STATE＋審計記錄、vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+
+DECISION:959=助手票停擺且 BACKLOG 規則已預授權裁處點（下輪仍停擺⇒R&D 裁處）⇒選 (a) R&D 自行執行此只讀審計（不違反任何紅線、最快解封、對 12B 助手重發票＝再賭一次停擺）；7 條全 PASS 後同輪移 done/（執行者即核驗者、逐條片段在案可複核）｜e016 未完賽（54/102）⇒五態裁決＋結案三處皆候完賽、照 runbook 不預判｜argon 無待合 commit（c9a811fe 已為祖先）⇒不 merge｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
