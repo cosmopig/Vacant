@@ -242,6 +242,44 @@ def test_repair_records_pass_to_fail_regression(task_dir, tmp_path):
     assert out.stopped != "gap_closed"                 # 新出現的 FAIL ⇒ 缺口未閉
 
 
+def test_repair_outcome_fixed_must_be_pass_in_final_status_and_disjoint_from_unresolved(task_dir, tmp_path):
+    """若某輪修好某條目但後續輪次未維持（或改壞），最終 outcome.fixed 嚴禁包含最終仍為 FAIL 的條目。
+    outcome.fixed 與 outcome.unresolved 必須嚴格互斥。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    calls = {"n": 0}
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float, log_dir: pathlib.Path) -> dict:
+        calls["n"] += 1
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        if calls["n"] == 1:
+            # 第 1 輪修好 summary.md，但弄壞 expense_summary.csv
+            (workspace / "summary.md").write_text(_good_summary(task_dir), encoding="utf-8")
+            (workspace / "expense_summary.csv").write_text("corrupted", encoding="utf-8")
+        elif calls["n"] == 2:
+            pass
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    # fixed 與 unresolved 必須互斥，嚴禁虛假宣告 fixed
+    assert not (set(out.fixed) & set(out.unresolved)), (
+        f"fixed {out.fixed} and unresolved {out.unresolved} must be disjoint!"
+    )
+    for cid in out.fixed:
+        assert out.final_status.get(cid) == "PASS", (
+            f"fixed claim {cid} must have final status PASS, got {out.final_status.get(cid)}"
+        )
+
+
+
 def test_repair_stops_after_two_no_progress_rounds(task_dir, tmp_path):
     """連續兩次修復沒有消除已確認缺口 ⇒ 停止，回傳停因及未解決項（不花第 3 次）。"""
     rs = load_req_set(task_dir)

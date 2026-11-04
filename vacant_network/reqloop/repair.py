@@ -190,6 +190,9 @@ def build_repair_prompt(
         lines.append("【工作區裡的參考資料（可讀、不可改）】")
         lines.append("\n".join(f"- {f}" for f in ref_all))
 
+    lines.append("")
+    lines.append("【工作區邊界】所有操作僅限於當前工作目錄；交付物請在當前工作目錄建立或修改，請勿遍歷或讀取工作區外部目錄。")
+
     if feedback_mode == "localized":
         lines.append("")
         lines.append("【逐條需求驗證結果（程式重算，非模型自評）】")
@@ -480,8 +483,18 @@ def repair_slice(
     for item in req_set.items:
         final_status.setdefault(item.id, "MISSING")
     unresolved = tuple(cid for cid, st in final_status.items() if st != "PASS")
-    fixed = tuple(cid for r in rounds for cid in r.diff.fixed)
-    regressed = tuple(cid for r in rounds for cid in r.diff.regressed)
+
+    # 缺口真正修好＝最初為 FAIL 且最終重驗明確為 PASS（嚴禁未修好卻列入 fixed）
+    initial_fail = {c.claim_id for c in before if c.status == "FAIL"}
+    fixed = tuple(sorted(cid for cid in initial_fail if final_status.get(cid) == "PASS"))
+
+    # 原有 PASS 退步＝最初為 PASS 且過程中或最終變為非 PASS（嚴禁淨改善掩蓋）
+    initial_pass = {c.claim_id for c in before if c.status == "PASS"}
+    regressed_set = {cid for r in rounds for cid in r.diff.regressed if cid in initial_pass}
+    for cid in initial_pass:
+        if final_status.get(cid) != "PASS":
+            regressed_set.add(cid)
+    regressed = tuple(sorted(regressed_set))
 
     calls = len(rounds)
     wall = [r.agent.get("wall_ms") for r in rounds]
