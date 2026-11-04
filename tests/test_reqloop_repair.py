@@ -303,6 +303,94 @@ def test_repair_records_pass_to_fail_regression(task_dir, tmp_path):
     assert out.stopped != "gap_closed"                 # 新出現的 FAIL ⇒ 缺口未閉
 
 
+def test_kv_json_repair_slice_fail_to_pass_and_leak_guard(tmp_path: pathlib.Path):
+    """G2 依賴核對（repair.py × checks.kv_recomputed .json，r992 redo）：.json 資料檔走完整切片——
+    before 重算（FAIL，非垃圾 CSV 假 PASS）→ localized 提示 leak guard → fake agent 修正→
+    工作區重驗（PASS，資料檔由 prepare_workspace 帶入）→ 原草稿未動。重算值（真計數 7）
+    絕不進任何一臂提示。synthetic 離線接線，只驗管線。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text(
+        "How many tickets were late?\n（Answer must be just a number）\n", encoding="utf-8")
+    rows = [{"day": str(i + 1), "late": 1} for i in range(7)] \
+        + [{"day": "8", "late": 0}, {"day": "9", "late": 0}]
+    (task_dir / "tickets.json").write_text(json.dumps(rows, indent=1), encoding="utf-8")  # 真計數＝7
+    (draft / "answer.txt").write_text("@late_count[0]\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_main", quote="late_ticket_count", deliverable="answer.txt",
+        verifier="kv_recomputed",
+        params={"key": "late_count", "data_file": "tickets.json",
+                "recompute": {"type": "count_if", "col": "late", "eq": 1}})])
+
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_main"] == "FAIL"   # .json 真重算（舊行為＝假 PASS）
+
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "req_main" in loc
+    assert "late_ticket_count" in loc
+    assert "0" in loc                # 交付物自身的值（可見反例）
+    assert "7" not in loc            # 重算值不得進提示（leak guard）
+
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "late" in gen             # 原始需求兩臂都有
+    assert "req_main" not in gen     # generic 不帶失敗證據
+    assert "7" not in gen
+    for p in (loc, gen):
+        for bad in ("hidden/", "scorer.py", "/srv/eval"):
+            assert bad not in p, bad
+
+    # 完整切片：fake agent 寫對值→工作區重驗 PASS；原草稿逐位元組未動
+    draft_hashes = _dir_hashes(draft)
+    log: list[dict] = []
+    run = _fake_agent({"answer.txt": "@late_count[7]\n"})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build(log), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out.stopped == "gap_closed"
+    assert "req_main" in out.fixed
+    assert out.final_status["req_main"] == "PASS"   # 重驗從工作區的 .json 算出
+    assert out.unresolved == ()
+    assert (tmp_path / "out" / "round_1" / "tickets.json").is_file()  # 資料檔已帶入工作區
+    assert _dir_hashes(draft) == draft_hashes       # 保留原候選
+    assert out.cost["calls"] == 1
+    assert out.cost["tokens"] is None               # 缺值＝UNKNOWN，不填 0
+    assert out.synthetic is True
+    assert "late_ticket_count" in log[0]["prompt"]  # 提示是 localized（帶條目）
+
+
+def test_kv_json_corrupted_in_workspace_is_unknown_not_fixed(tmp_path: pathlib.Path):
+    """fake agent 弄壞 .json 源資料⇒重驗 UNKNOWN（壞 JSON 分支）：不算修好、不得宣告完成。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text("How many tickets were late?\n", encoding="utf-8")
+    (task_dir / "tickets.json").write_text(
+        json.dumps([{"day": "1", "late": 1}, {"day": "2", "late": 1}, {"day": "3", "late": 0}]),
+        encoding="utf-8")
+    (draft / "answer.txt").write_text("@late_count[0]\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_main", quote="late_ticket_count", deliverable="answer.txt",
+        verifier="kv_recomputed",
+        params={"key": "late_count", "data_file": "tickets.json",
+                "recompute": {"type": "count_if", "col": "late", "eq": 1}})])
+    run = _fake_agent({"tickets.json": "{not json"})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out.stopped != "gap_closed"
+    assert "req_main" not in out.fixed
+    assert out.final_status["req_main"] == "UNKNOWN"
+    assert "req_main" in out.unresolved              # UNKNOWN 不得宣告完成
+    assert out.cost["calls"] == 1
+
+
 def test_repair_outcome_fixed_must_be_pass_in_final_status_and_disjoint_from_unresolved(task_dir, tmp_path):
     """若某輪修好某條目但後續輪次未維持（或改壞），最終 outcome.fixed 嚴禁包含最終仍為 FAIL 的條目。
     outcome.fixed 與 outcome.unresolved 必須嚴格互斥。"""
