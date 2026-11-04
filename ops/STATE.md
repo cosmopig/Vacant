@@ -7425,6 +7425,8 @@ DECISION:955=e016 未完賽（49/102、ETA 今天下午）⇒依鐵則不乾等�
 - argon 合併審查（senior 前言）：argon HEAD c9a811fe（round 905 WIP、DECISION_20261103_E016_ENVLEAK_FIX.md +88）已為 qwen27b 祖先（merge-base 驗證）⇒**無待合 argon commit**、本輪零 merge 動作；CI：0527d915 綠 4670（01:52 出）、state idle、e70ec0ec＋db745925 待下窗口跑（產品碼自綠後未變、本輪改動非 tests/⇒收錄 4741 不變）。
 - e016 attempt-2 監控：48/102 在位（47 出分、A16/C16/C-nf16）；pace ~12–16 分/格、餘 54 格⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派、無新 infra。
 - 未驗證：五態裁決本體（e016 未完賽）；rescore；e70ec0ec/db745925 CI（輪末複核、紅燈先修紀律）；助手票 R20261104_0124-1 進行中（doing/、01:46 活躍、不接手）。
-- 紅線：零發射（e016 唯一在跑、只監控）；本輪改動＝審計工具（非 vacant_network/、非 tests/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+- Redo（stop review、11/04）：點名三檔「任務提及但未開」⇒逐檔打開核對——`loop/L006.md` §4 預註冊狀態表＋§6＝狀態節（結案位置確認）、`loop/L007.md` §3 結論＋§4 條件分支表（優先序 UNKNOWN>COST_BREACH>MECHANISM_CONFIRMED>NO_MECHANISM>UNRESOLVED）＋§6 開檔驗證來源、`~/dev/Vacant/ops/vlab/FINDINGS.md`（542 行、最後條 e015、e016 條目尚不存在＝與 NOW「待完賽」一致；**正典在 Vacant repo、ops repo 無此檔**）。
+  核對結果：(a) 本輪 `missing_total` 修復語義與 L007 §4 態 1（infra/缺分>20%⇒UNKNOWN）一致、不返工；(b) NOW.md 下一步 3 原寫「NO_MECHANISM/UNRESOLVED⇒通用任務／資料題新機制」非 §4 表原文（§4 實際候選＝(b) 外端 referee／(a) H-harness-budget 低優先、態 4/5 均「不改產品」）⇒已改照表原文＋五態全列＋FINDINGS 正典路徑；(c) STATE 本輪條目之 L006 §6/L007 §4 引用經核皆準。
+- 紅線：零發射（e016 唯一在跑、只監控）；本輪改動＝審計工具（非 vacant_network/、非 tests/）＋本 redo 純文檔；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:956=senior #1 兩驗收判準已達（slice＋done 門在案）但「無目錄缺分」計數缺口＝真實 fail-open 洞（完賽後缺 21+ 格仍出裁決）⇒保守修復：摺入既有 missing>20%⇒UNKNOWN 規則、不新增態、不更預註冊狀態表、fail-closed only、進行中 path（exit 10）零改動｜argon 無待合 commit（c9a811fe 已合併在案）⇒不 merge｜五態裁決＋L007 §4 分支＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer

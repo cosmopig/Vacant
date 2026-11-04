@@ -20,9 +20,14 @@ e70ec0ec＋db745925 待下窗口（產品碼自綠後未變）。
 ## 🔴 下一步（e016 完賽後，依序；完賽前不准說 failed_step 是 C 勝 A 的來源）
 1. `python3 /srv/vlab/bin/report.py e016_failed_step_ablation --rescore`（驗收 0 不一致）
 2. `python3 audits/e016_verdict_pipeline.py` → 五態之一（成本紅線＋完賽缺分計數現在真正生效）
-3. L006 §6 結案＋L007 §4 分支（MECHANISM_CONFIRMED⇒按 r955 草稿走新循環；
-   NO_MECHANISM／UNRESOLVED⇒通用任務／資料題新機制；COST_BREACH／UNKNOWN⇒照 L007 §4 表）
-   ＋FINDINGS e016 條目
+3. L006 §6（狀態節）追加結案行＋L007 §4 條件分支（優先序 1>2>3>4>5、照表原文）：
+   1 UNKNOWN＝非負結果、infra 修復後重裁決、不寫任何機制結論；
+   2 COST_BREACH＝機制判定不成立、不改產品、併讀 §2.5 成本病態；
+   3 MECHANISM_CONFIRMED＝強化＝新 cycle＋新 packet（r955 草稿）＋TDD 先；
+   4 NO_MECHANISM＝C 勝＝採樣⇒不改產品、誠實記錄；候選 (b) 外端 referee／(a) H-harness-budget（低優先）；
+   5 UNRESOLVED＝未建立（非負非正）、不改產品；候選同 4
+   ＋FINDINGS e016 條目（正典＝`~/dev/Vacant/ops/vlab/FINDINGS.md`，542 行、現最後條 e015；
+   格式＝日期·主軸·標題＋實驗／完賽／裁決／成本／口徑—不可說／證據鏈）
 - e016 attempt-2：48/102 在位（47 出分、A16/C16/C-nf16）；pace ~12–16 分/格、餘 54 格
   ⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派
 - CI auto/qwen27b：e70ec0ec/db745925 待出（輪末複核；紅燈先修紀律）
