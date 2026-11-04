@@ -1196,8 +1196,77 @@ def check_kv_recomputed(
             if sd == 0.0:
                 raise UnknownSource("zcount3: 標準差為 0")
             expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
+        elif rtype == "mean_int_col":
+            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」——Int64 轉換
+            # 失敗（如 '100[10-30]'）等同 null，一并忽略；規則文字見 params.note。
+            col = str(rc.get("col", "")).strip()
+            if not col:
+                raise UnknownSource("mean_int_col 需要 col")
+            ints: list[int] = []
+            for r in rows:
+                cell = str(r.get(col, "")).strip()
+                if not cell:
+                    continue
+                try:
+                    ints.append(int(cell))
+                except ValueError:
+                    continue
+            if not ints:
+                raise UnknownSource("mean_int_col: 無可解析整數")
+            expected = float(sum(ints) / len(ints))
+        elif rtype == "max_row_first":
+            # G2 小批（e013 dab_426）：sel_col 最大值、平手取檔案序第一列、
+            # 輸出該列 out_col——「neglecting ties…choose the one that appears
+            # first」的文字直譯。
+            sel_col = str(rc.get("sel_col", "")).strip()
+            out_col = str(rc.get("out_col", "")).strip()
+            if not sel_col or not out_col:
+                raise UnknownSource("max_row_first 需要 sel_col 與 out_col")
+            best: tuple[float, dict[str, Any]] | None = None
+            for r in rows:
+                try:
+                    v = float(str(r.get(sel_col, "")).strip())
+                except (TypeError, ValueError):
+                    continue
+                if best is None or v > best[0]:
+                    best = (v, r)
+            if best is None:
+                raise UnknownSource("max_row_first: 無可解析選取欄")
+            try:
+                expected = float(str(best[1].get(out_col, "")).strip())
+            except (TypeError, ValueError):
+                raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+        elif rtype == "pearson2":
+            # G2 小批（e013 dab_105）：兩欄成對可解析行（缺值行忽略）、Pearson r。
+            col_a = str(rc.get("col_a", "")).strip()
+            col_b = str(rc.get("col_b", "")).strip()
+            if not col_a or not col_b:
+                raise UnknownSource("pearson2 需要 col_a 與 col_b")
+            xs: list[float] = []
+            ys: list[float] = []
+            for r in rows:
+                try:
+                    x = float(str(r.get(col_a, "")).strip())
+                    y = float(str(r.get(col_b, "")).strip())
+                except (TypeError, ValueError):
+                    continue
+                xs.append(x)
+                ys.append(y)
+            if len(xs) < 2:
+                raise UnknownSource("pearson2: 可用成對數值不足 2")
+            ma = sum(xs) / len(xs)
+            mb = sum(ys) / len(ys)
+            cov = sum((x - ma) * (y - mb) for x, y in zip(xs, ys))
+            va = sum((x - ma) ** 2 for x in xs)
+            vb = sum((y - mb) ** 2 for y in ys)
+            if va == 0.0 or vb == 0.0:
+                raise UnknownSource("pearson2: 常數欄，相關係數未定義")
+            expected = cov / ((va ** 0.5) * (vb ** 0.5))
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        rnd = rc.get("round")
+        if isinstance(rnd, int) and not isinstance(rnd, bool):
+            expected = round(expected, rnd)
     except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 

@@ -1,0 +1,133 @@
+{
+ "schema": "vacant.reqloop.g2.manifest/1",
+ "frozen_at": "2026-11-04T12:32:45Z",
+ "ticket": "P000-20261104-04-e013-smallbatch",
+ "purpose": "G2 小批真實交付物（e013）：3 真草稿 × generic/localized＝6 格；只驗管線，不宣稱任何提升。2 bad（dab_055/dab_426，lab 0/1）＋1 good（dab_105，lab 1/1）",
+ "arms": [
+  "generic",
+  "localized"
+ ],
+ "model": {
+  "provider": "lms1003qwen",
+  "model": "qwen/qwen3.8-27b",
+  "note": "兩臂同一模型；若一臂換強模型，另一臂必須有同模型/成本對照（紅線）"
+ },
+ "budget": {
+  "max_rounds_per_cell": 2,
+  "timeout_s_per_round": 300,
+  "hard_token_cap": false,
+  "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+  "min_rounds": {
+   "generic": 1,
+   "localized": 0
+  },
+  "note": "generic 臂對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+ },
+ "scoring": {
+  "readable": "可見宣言（格式 + 公開資料按題目規則重算）；裁判不持有 hidden 參考",
+  "hidden_before": "引用 lab 受權量表的既有記錄（score.json），不在本地重跑",
+  "hidden_after": "UNKNOWN——本地無權重跑 hidden scorer；缺失即 UNKNOWN，絕不填 0"
+ },
+ "leak_guard": "修復模型只看得到原始需求、凍結資料與『值不符重算』的事實；重算值/hidden 參考值永不進證據或提示（checks.check_kv_recomputed 與 repair.build_repair_prompt 均遵守）",
+ "drafts": [
+  {
+   "name": "dab_105-pi-C",
+   "role": "good",
+   "task_id": "dab_105",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_105-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_105",
+     "pass": true,
+     "n_correct": "1/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "dab_105-pi-C/draft",
+    "files": {
+     "answer.txt": "41ee62a5b67745f130a2feb3ddc48660690c1954ab3d0d48ca4a213c0a96d877"
+    }
+   },
+   "task": {
+    "dir": "dab_105-pi-C/task",
+    "requirements": {
+     "sha256": "74ddf809991113901485a80022d22093fe68a0182457ef57cf92fc400232ea59"
+    },
+    "data_files": {
+     "test_Y3wMUE5_7gLdaTN.csv": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8"
+    }
+   },
+   "lab_note": "e013 記錄 pass=True（1/1）"
+  },
+  {
+   "name": "dab_055-pi-C",
+   "role": "bad",
+   "task_id": "dab_055",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_055-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_055",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "dab_055-pi-C/draft",
+    "files": {
+     "answer.txt": "c778b235f6b6f7928c5c2839f41d173aa5a816b1a71637d8f17bad9ec7852e56"
+    }
+   },
+   "task": {
+    "dir": "dab_055-pi-C/task",
+    "requirements": {
+     "sha256": "51502b32ff40eb5b770248a2cf0a76d6ae0f47b4256d2d1738727e8700a867b9"
+    },
+    "data_files": {
+     "estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+    }
+   },
+   "lab_note": "e013 記錄 pass=False（0/1）"
+  },
+  {
+   "name": "dab_426-pi-C",
+   "role": "bad",
+   "task_id": "dab_426",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_426-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_426",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "ok"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "dab_426-pi-C/draft",
+    "files": {
+     "answer.txt": "594f973d96aa72ea9fc6a210b9d433c42fee6e5e9855edbb9855dc30f2f1ad2b"
+    }
+   },
+   "task": {
+    "dir": "dab_426-pi-C/task",
+    "requirements": {
+     "sha256": "fd8a392af0da93558501d45b1012bf11657d70060cb0c3b0eb585ff251303d34"
+    },
+    "data_files": {
+     "cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+    }
+   },
+   "lab_note": "e013 記錄 pass=False（0/1）"
+  }
+ ]
+}

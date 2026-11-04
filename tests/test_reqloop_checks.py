@@ -825,3 +825,110 @@ def test_unknown_aggregate_type_stays_unknown(tmp_path: pathlib.Path):
     _write(d / "out.csv", "a,m\nx,1\n")
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
     assert res["req_main"].status == "UNKNOWN"
+
+
+# ── kv_recomputed 新重算規則（G2 小批：e013 真實草稿，2026-11-04）────────
+
+def test_kv_recomputed_mean_int_col_pass_and_fail(tmp_path: pathlib.Path):
+    """mean_int_col：Int64 語意——空白/不可解析（如 '100[10-30]'）忽略，其餘取均值。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "cases.csv",
+        "Country,No. of cases\nA,100\nB,200[10-30]\nC,\nD,300\n",
+    )
+    params = {
+        "key": "mean_cases",
+        "data_file": "cases.csv",
+        "recompute": {"type": "mean_int_col", "col": "No. of cases",
+                      "note": "轉 Int64；Null/空/不可解析忽略"},
+    }
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+300)/2
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "@mean_cases[250]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+
+
+def test_kv_recomputed_mean_int_col_no_parseable_is_unknown(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.csv", "Country,No. of cases\nA,\nB,xx[1-2]\n")
+    params = {"key": "k", "data_file": "cases.csv",
+              "recompute": {"type": "mean_int_col", "col": "No. of cases"}}
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "@k[1]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "UNKNOWN"
+
+
+def test_kv_recomputed_max_row_first_first_tie_wins(tmp_path: pathlib.Path):
+    """max_row_first：選取欄最大值、平手取檔案序第一列、輸出該列 out_col。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "storms.csv",
+        "name,max_storm_cat,max_sust_wind\n"
+        "BRET,1,43.45\n"
+        "IRMA,6,156.41568\n"
+        "OTA,6,165.10544\n",   # OTA 同為最高類別但 IRMA 在前
+    )
+    params = {
+        "key": "max_wind_speed",
+        "data_file": "storms.csv",
+        "recompute": {"type": "max_row_first", "sel_col": "max_storm_cat",
+                      "out_col": "max_sust_wind", "round": 2},
+    }
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@max_wind_speed[156.42]\n")   # IRMA（先出現）
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "@max_wind_speed[165.11]\n")   # 取了組內最大風速（錯）
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_kv_recomputed_pearson2_pass_and_fail(tmp_path: pathlib.Path):
+    """pearson2：成對可解析行、Pearson r、可依 round。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "loans.csv",
+        "ApplicantIncome,LoanAmount\n1,2\n2,4\n3,5\n,99\n4,8\n",   # 缺值行忽略
+    )
+    params = {
+        "key": "corr",
+        "data_file": "loans.csv",
+        "recompute": {"type": "pearson2", "col_a": "ApplicantIncome",
+                      "col_b": "LoanAmount", "round": 2},
+    }
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    # r = sqrt(27/28) ≈ 0.98198 → round 2 = 0.98
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@corr[0.98]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "@corr[0.97]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_kv_recomputed_pearson2_constant_column_is_unknown(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(task_dir / "x.csv", "a,b\n1,5\n2,5\n3,5\n")
+    params = {"key": "k", "data_file": "x.csv",
+              "recompute": {"type": "pearson2", "col_a": "a", "col_b": "b"}}
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "@k[0]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "UNKNOWN"
