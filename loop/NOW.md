@@ -5,9 +5,10 @@
   infra 快照 3/50＝6%＜20% 閾；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午。
 - **senior #1 驗收（r959 再核）**：`audits/e016_verdict_pipeline.py --selftest` ALL OK RC=0；
   對當前 run 輸出 `INCOMPLETE: 只到 54/102 格在位`（計數非 0、RC=10）⇒兩判準滿足。
-- **助手票 R20261104_0124-1（r955 草稿引用審計）**：停擺⇒r959 R&D 裁處自行執行（只讀、不犯紅線）：
-  **7 條全 PASS**（逐條開原檔、片段在案；第 2 條票面 211-222 多包 3 行已註記）；票移 done/、doing/ 空。
-  ⇒ **L007 §4 分支 3（MECHANISM_CONFIRMED）packet 提升門已滿足**（runbook §2 態 3；草稿 r955 在 staging）。
+- **助手票 R20261104_0124-1（r955 草稿引用審計）**：停擺⇒r959 R&D 裁處自行執行：6 條 PASS＋第 7 條公式 PASS／**引用 FAIL**
+  （redo 實開 FINDINGS.md：「CB 2.26×」不存在先例、e014 實測紅線內 cost_ok；真鏈＝e007＋e014 §2＋e006 H/M 越線）：
+  草稿已修正、runbook 加註記、packet 鎖檔不改（結案用修正先例）；票在 done/（Done 段含 7b 修正）。
+  ⇒ **分支 3（MECHANISM_CONFIRMED）packet 提升門意已滿足**（草稿現行引用逐條核準；runbook §2 態 3）。
 - argon c9a811fe 已為 qwen27b 祖先（merge-base 核）⇒無待合；worker 69c50dba 綠。
 - CI：d082539d（r958 鏡像）pending；前 HEAD 5576107c 綠 4670（LATEST_qwen27b）。
 - 收口 runbook 在案：`staging/e016_closeout_runbook_r957.md`（§0 前置→§1 裁決→§2 五態逐字表→§3 結案三處→§4 紅線）。

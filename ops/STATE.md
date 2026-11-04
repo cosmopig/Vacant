@@ -7462,3 +7462,12 @@ DECISION:958=e016 未完賽（51/102 live 格、50 出分、infra 6%＜20%）⇒
 - 紅線：零發射（e016 唯一在跑、只監控）；零產品行為改動（本輪改動＝tickets/BACKLOG/NOW/STATE＋審計記錄、vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:959=助手票停擺且 BACKLOG 規則已預授權裁處點（下輪仍停擺⇒R&D 裁處）⇒選 (a) R&D 自行執行此只讀審計（不違反任何紅線、最快解封、對 12B 助手重發票＝再賭一次停擺）；7 條全 PASS 後同輪移 done/（執行者即核驗者、逐條片段在案可複核）｜e016 未完賽（54/102）⇒五態裁決＋結案三處皆候完賽、照 runbook 不預判｜argon 無待合 commit（c9a811fe 已為祖先）⇒不 merge｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## Round 959 redo（2026-11-04 03:0x，審查退回：「FINDINGS.md 被點名但未開」）
+- **實開 `ops/vlab/FINDINGS.md`（542 行）核對依賴它的事實**：e014 條目（L522–533）實測成本 CB/A 0.522×/0.501×、C/A 0.584×/0.564×＝**皆 ≤2× 紅線內（cost_ok）**；e015＝末條目、無 e016 條目（與 r958 核對一致）；e006 條目（L428）＝實際越線先例（H 1.94×/2.48×、M 1.49×/2.02× 超 2×A 紅線）。
+- **發現引用缺陷（7b FAIL）**：e016 packet L84／草稿 r955 §4／runbook r957 §2 所引「e014 §5 先例：CB 2.26× ⇒ 不划算」＝**不存在的先例**（2.26× 全庫＋/srv/vlab 固定搜尋無出處；e014 §5＝回填分支表、紅線在 e014 §2 L107；e014 本身紅線內）⇒「7 條全 PASS」之記錄不準，票 Done 段已改 7a PASS（公式同式）＋7b FAIL（引用）。
+- **修正（照權限）**：草稿 §4 引用改真鏈（e007「無用」事先定義＋e014 §2 預註冊＋e006 H/M 越線先例）；runbook §2 表後加 r959 修正註記（態表逐字引用保留）；**packet 鎖檔（「出結果前不得修改」、e015 先例）不改**——結案時用修正先例並記入 FINDINGS e016 條目；BACKLOG/NOW 同步。
+- **不變項**：成本紅線公式（C 或 C-nf 任一成本指標 > 2×A⇒COST_BREACH）三處同式且與管線 `decide()` 機械化一致＝判定不受影響；e016 attempt-2 續跑（54/102）；票仍 done/、doing/ 空。
+- 紅線：零發射、零產品行為改動（本輪改動＝staging 草稿/runbook＋票/BACKLOG/NOW/STATE 記錄；vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+
+DECISION:959-redo=審查指「FINDINGS.md 未開」⇒本輪實開（542 行）重核依賴項，發現 r959 票面「7 條全 PASS」不準：第 7 條所引「CB 2.26×」先例不存在（e014 實測紅線內 cost_ok、2.26× 全庫無出處）⇒照票工作流修草稿（staging、R&D 權限）、runbook 加修正註記、packet 因「出結果前不得修改」鎖檔不改（結案記錄用修正先例）、票 Done 段改 7a/7b 雙行（誠實記錄 FAIL＋修正）｜紅線公式與管線同式不變、e016 裁決不受影響｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
