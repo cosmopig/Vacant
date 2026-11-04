@@ -1058,6 +1058,131 @@ def check_summary_numbers(
     return _result(item, "PASS", "摘要各數字均與重算一致", {"recomputed": {l: _fmt_val(v) for l, v in expected}})
 
 
+def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> ClaimResult:
+    """檢查文字交付物中的格式化標籤（例如 @name[value]）。
+
+    支援參數:
+    - file: 檔案名稱（預設 "answer.txt"）
+    - tag: 標籤名稱（例如 "mean_cases" 或 "null_entries_count"）
+    - value_type: "integer" | "int" | "float" | "str"（預設 "str"）
+    - min_value: 最小值限制（數值類型適用，選填）
+    - max_value: 最大值限制（數值類型適用，選填）
+    """
+    file_name = item.params.get("file", "answer.txt")
+    target_file = deliverable_dir / file_name
+    if not target_file.is_file():
+        return _result(
+            item,
+            "FAIL",
+            f"交付物缺少指定檔案: {file_name}",
+            {"missing_file": file_name},
+        )
+
+    tag = item.params.get("tag", "")
+    val_type = item.params.get("value_type", "str").lower()
+
+    try:
+        content = target_file.read_text(encoding="utf-8", errors="replace")
+    except Exception as e:
+        return _result(
+            item,
+            "FAIL",
+            f"無法讀取交付物檔案 {file_name}: {e}",
+            {"read_error": str(e)},
+        )
+
+    if not tag:
+        return _result(item, "UNKNOWN", "未指定要檢查的 tag 名稱", {"missing_param": "tag"})
+
+    pattern_correct = rf"@{re.escape(tag)}\[([^\]]*)\]"
+    pattern_bracketless = rf"@{re.escape(tag)}([^\s\[\]\r\n]+)"
+
+    m_correct = list(re.finditer(pattern_correct, content))
+    m_bracketless = list(re.finditer(pattern_bracketless, content))
+
+    if not m_correct:
+        if m_bracketless:
+            actual = m_bracketless[0].group(0)
+            val = m_bracketless[0].group(1)
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 格式不符：缺少方括號包裹值，找到 '{actual}'，預期格式為 @{tag}[<value>]",
+                {"actual": actual, "extracted_raw": val, "expected_format": f"@{tag}[<value>]", "reason": "missing_brackets"},
+            )
+        return _result(
+            item,
+            "FAIL",
+            f"交付物檔案 {file_name} 未包含必要標籤 @{tag}[...]",
+            {"missing_tag": tag, "expected_format": f"@{tag}[<value>]"},
+        )
+
+    raw_val = m_correct[0].group(1).strip()
+
+    if val_type in ("int", "integer"):
+        if "." in raw_val:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 '{raw_val}' 包含小數點，不符整數要求",
+                {"actual": raw_val, "expected_type": "integer", "reason": "contains_decimal"},
+            )
+        try:
+            int_val = int(raw_val)
+        except ValueError:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 '{raw_val}' 無法解析為整數",
+                {"actual": raw_val, "expected_type": "integer"},
+            )
+        if "min_value" in item.params and int_val < item.params["min_value"]:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 {int_val} 小於下限 {item.params['min_value']}",
+                {"actual": int_val, "min_value": item.params["min_value"]},
+            )
+        if "max_value" in item.params and int_val > item.params["max_value"]:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 {int_val} 大於上限 {item.params['max_value']}",
+                {"actual": int_val, "max_value": item.params["max_value"]},
+            )
+    elif val_type == "float":
+        try:
+            flt_val = float(raw_val)
+        except ValueError:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 '{raw_val}' 無法解析為浮點數",
+                {"actual": raw_val, "expected_type": "float"},
+            )
+        if "min_value" in item.params and flt_val < item.params["min_value"]:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 {flt_val} 小於下限 {item.params['min_value']}",
+                {"actual": flt_val, "min_value": item.params["min_value"]},
+            )
+        if "max_value" in item.params and flt_val > item.params["max_value"]:
+            return _result(
+                item,
+                "FAIL",
+                f"標籤 @{tag} 的值 {flt_val} 大於上限 {item.params['max_value']}",
+                {"actual": flt_val, "max_value": item.params["max_value"]},
+            )
+
+    return _result(
+        item,
+        "PASS",
+        f"標籤 @{tag}[{raw_val}] 符合指定格式及型別要求",
+        {"tag": tag, "value": raw_val, "value_type": val_type},
+    )
+
+
 def run_requirement_checks(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
@@ -1099,6 +1224,8 @@ def run_requirement_checks(
             res = check_group_aggregate(t_dir, d_dir, item)
         elif vname == "summary_numbers":
             res = check_summary_numbers(t_dir, d_dir, item)
+        elif vname == "tag_format":
+            res = check_tag_format(d_dir, item)
         else:
             # 未知檢查器：依規則一律標記為 UNKNOWN，不得假裝 PASS
             results.append(
