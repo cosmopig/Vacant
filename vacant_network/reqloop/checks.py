@@ -1151,6 +1151,9 @@ def check_kv_recomputed(
     - 交付值缺失/重複 → FAIL（missing/ambiguous）
     - 值不符重算 → FAIL（mismatch_with_recomputation；不顯示期望值）
     - 一致 → PASS
+
+    vq-5nz.16 新增重算規則：col_stats（mean/median/樣本sd/bias-corrected 偏度與超额峰度，
+    pandas 口徑；dab_378）、null_count（null 細胞計數；dab_427）。
     """
     p = item.params
     key = str(p.get("key", "")).strip()
@@ -1277,6 +1280,10 @@ def check_kv_recomputed(
             if va == 0.0 or vb == 0.0:
                 raise UnknownSource("pearson2: 常數欄，相關係數未定義")
             expected = cov / ((va ** 0.5) * (vb ** 0.5))
+        elif rtype == "col_stats":
+            expected = _col_stats(rows, rc)
+        elif rtype == "null_count":
+            expected = _null_count(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
         rnd = rc.get("round")
@@ -1305,6 +1312,155 @@ def check_kv_recomputed(
     return _result(item, "PASS",
                    f"答案值與按公開規則（{rule_desc}）的重算一致",
                    {"key": key, "rule": rule_desc, "expected_in_evidence": False})
+
+
+def _col_values(rows: list[dict[str, Any]], col: str) -> list[float]:
+    """取欄（可解析為 float 的值，保留檔案序）；欄不存在或全不可解析 → UnknownSource。"""
+    if not rows or col not in rows[0]:
+        raise UnknownSource(f"資料檔找不到欄 {col!r}")
+    vals: list[float] = []
+    for r in rows:
+        raw = r.get(col)
+        if raw is None:
+            continue
+        try:
+            vals.append(float(str(raw).strip()))
+        except ValueError:
+            continue
+    if not vals:
+        raise UnknownSource(f"欄 {col!r} 沒有可解析為數值的值")
+    return vals
+
+
+def _col_stats(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """col_stats（vq-5nz.16，dab_378）：mean/median/樣本標準差/bias-corrected 偏度/超额峰度。
+
+    口徑 TDD 前凍結（與 pandas 預設一致，2026-11-04 以 pandas 3.1 對照驗證）：
+    - sd        = sqrt(Σ(x−m)²/(n−1))                          （n≥2）
+    - skewness  G1 = (m3/m2^1.5)·√(n(n−1))/(n−2)               （n≥3，m2>0）
+    - kurtosis  G2 = ((n+1)(m4/m2²−3)+6)·(n−1)/((n−2)(n−3))    （n≥4，m2>0，超额峰度）
+    m2=0（常數欄）或 n 不足 → UnknownSource（不自評）。round 由呼叫端統一處理。
+    """
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("col_stats.col 缺失")
+    stat = str(rc.get("stat", "")).strip().lower()
+    if stat not in ("mean", "median", "sd", "skewness", "kurtosis"):
+        raise UnknownSource(
+            "col_stats.stat 須為 mean/median/sd/skewness/kurtosis 之一（不猜）")
+    x = _col_values(rows, col)
+    n = len(x)
+    m = sum(x) / n
+    d = [v - m for v in x]
+    if stat == "mean":
+        val: float = m
+    elif stat == "median":
+        s = sorted(x)
+        mid = n // 2
+        val = s[mid] if n % 2 == 1 else (s[mid - 1] + s[mid]) / 2
+    else:
+        m2 = sum(v * v for v in d) / n
+        if m2 <= 0:
+            raise UnknownSource(f"欄為常數（m2=0）；無法計算 {stat}（不自評）")
+        if stat == "sd":
+            if n < 2:
+                raise UnknownSource("sd 需要 n≥2")
+            val = math.sqrt(sum(v * v for v in d) / (n - 1))
+        elif stat == "skewness":
+            if n < 3:
+                raise UnknownSource("skewness 需要 n≥3")
+            m3 = sum(v ** 3 for v in d) / n
+            val = (m3 / m2 ** 1.5) * math.sqrt(n * (n - 1)) / (n - 2)
+        else:  # kurtosis
+            if n < 4:
+                raise UnknownSource("kurtosis 需要 n≥4")
+            m4 = sum(v ** 4 for v in d) / n
+            val = ((n + 1) * (m4 / m2 ** 2 - 3) + 6) * (n - 1) / ((n - 2) * (n - 3))
+    return val
+
+
+_DEFAULT_NULL_VALUES = ("", "none", "null", "nan", "na", "n/a")
+
+
+def _null_count(rows: list[dict[str, Any]], rc: dict[str, Any]) -> int:
+    """null_count（vq-5nz.16，dab_427 min_p）：欄位 null 細胞計數。
+
+    預設 null 集合：''/'none'/'null'/'nan'/'na'/'n-a'（大小寫不敏感、去首尾空白）；
+    可用 rc["null_values"]（字串列表）覆蓋。只數 null，不數其他「錯誤資料」。
+    """
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("null_count.col 缺失")
+    if not rows or col not in rows[0]:
+        raise UnknownSource(f"資料檔找不到欄 {col!r}")
+    raw_set = rc.get("null_values")
+    if raw_set is None:
+        nulls = set(_DEFAULT_NULL_VALUES)
+    else:
+        if not isinstance(raw_set, list):
+            raise UnknownSource("null_count.null_values 須為字串列表")
+        nulls = {str(v).strip().lower() for v in raw_set}
+    n = 0
+    for r in rows:
+        v = r.get(col)
+        if v is None or str(v).strip().lower() in nulls:
+            n += 1
+    return n
+
+
+def _unique_count(rows: list[dict[str, Any]], rc: dict[str, Any]) -> int:
+    """unique_count（vq-5nz.16，dabstep-10 merchant）：欄位去重計數（字串層級；空值不算一個值）。"""
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("unique_count.col 缺失")
+    if not rows or col not in rows[0]:
+        raise UnknownSource(f"資料檔找不到欄 {col!r}")
+    vals = {str(r.get(col, "")).strip() for r in rows}
+    vals.discard("")
+    if not vals:
+        raise UnknownSource("欄沒有非空值")
+    return len(vals)
+
+
+def _col_max(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """col_max（vq-5nz.16，dabstep-11 eur_amount）：欄位最大值（不可解析值忽略）。"""
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("col_max.col 缺失")
+    return max(_col_values(rows, col))
+
+
+def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """scheme_fee_avg（vq-5nz.16，dabstep-1273）：card_scheme×is_credit 匹配規則上的平均費率。
+
+    公式依公開 manual.md：fee = fixed_amount + rate · amount / 10000。
+    rows 須為 fee 規則物件列表（json data_file）；無匹配規則 → UnknownSource。
+    """
+    scheme = str(rc.get("scheme", "")).strip()
+    if not scheme:
+        raise UnknownSource("scheme_fee_avg.scheme 缺失")
+    if "is_credit" not in rc:
+        raise UnknownSource("scheme_fee_avg.is_credit 缺失（bool）")
+    want_credit = bool(rc["is_credit"])
+    try:
+        amount = float(rc.get("amount"))
+    except (TypeError, ValueError):
+        raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
+    fees: list[float] = []
+    for r in rows:
+        if str(r.get("card_scheme", "")).strip() != scheme:
+            continue
+        if bool(r.get("is_credit")) is not want_credit:
+            continue
+        try:
+            fixed = float(r.get("fixed_amount"))
+            rate = float(r.get("rate"))
+        except (TypeError, ValueError):
+            raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
+        fees.append(fixed + rate * amount / 10000)
+    if not fees:
+        raise UnknownSource(f"無匹配 fee 規則 scheme={scheme!r} is_credit={want_credit}")
+    return sum(fees) / len(fees)
 
 
 def _mode_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> str:
@@ -1528,6 +1684,11 @@ def check_plain_recomputed(
     - 交付值缺失/空 → FAIL
     - 值不符重算 → FAIL（mismatch_with_recomputation；不顯示期望值）
     - 一致 → PASS
+
+    vq-5nz.16 新增重算規則：unique_count（dabstep-10 merchant 去重計數）、
+    col_max（dabstep-11 eur_amount 最大值）、
+    scheme_fee_avg（dabstep-1273，manual.md 公式 fee=fixed+rate·amount/10000 在
+    card_scheme×is_credit 匹配規則上的平均）。
     """
     p = item.params
     data_rel = str(p.get("data_file", "")).strip()
@@ -1560,6 +1721,12 @@ def check_plain_recomputed(
             expected = _cond_rate(rows, rc)
         elif rtype == "fee_ids_lookup":
             expected = _fee_ids_lookup(rows, rc, task_dir)
+        elif rtype == "unique_count":
+            expected = _unique_count(rows, rc)
+        elif rtype == "col_max":
+            expected = _col_max(rows, rc)
+        elif rtype == "scheme_fee_avg":
+            expected = _scheme_fee_avg(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
     except (UnknownSource, OSError, json.JSONDecodeError) as e:

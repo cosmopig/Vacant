@@ -1356,3 +1356,215 @@ def test_plain_recomputed_json_data_file_malformed_unknown(tmp_path: pathlib.Pat
     _write(task_dir2 / "broken.json", "{not json")
     res2 = {r.claim_id: r for r in run_requirement_checks(task_dir2, params("broken.json"), d)}
     assert res2["req_main"].status == "UNKNOWN"
+
+
+# ── col_stats / null_count（G2 vq-5nz.16：dab_378 / dab_427，2026-11-04）──────
+
+def test_kv_recomputed_col_stats_known_series(tmp_path: pathlib.Path):
+    """col_stats：mean/median/樣本標準差(ddof=1)/bias-corrected 偏度/超额峰度（pandas 口徑，
+    G1=m3/m2^1.5·√(n(n−1))/(n−2)、G2=((n+1)(m4/m2²−3)+6)(n−1)/((n−2)(n−3))，TDD 前凍結）。
+    [1,2,3,4,5]：mean=3、median=3、sd=√2.5、skew=0、超额峰度=−1.2。"""
+    import math
+    task_dir = tmp_path / "task"
+    _write(task_dir / "t.csv", "v\n1\n2\n3\n4\n5\n")
+    expected = {
+        "mean": "3",
+        "median": "3",
+        "sd": f"{math.sqrt(2.5):.10g}",
+        "skewness": "0",
+        "kurtosis": "-1.2",
+    }
+    for stat, exp in expected.items():
+        params = {"key": "k", "data_file": "t.csv",
+                  "recompute": {"type": "col_stats", "col": "v", "stat": stat}}
+        req_set = _req_set("kv_recomputed", params, "answer.txt")
+        d = tmp_path / f"d_{stat}"
+        _write(d / "answer.txt", f"@k[{exp}]\n")
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+        assert res["req_main"].status == "PASS", (stat, res["req_main"].message)
+
+    wrong = tmp_path / "wrong"
+    _write(wrong / "answer.txt", "@k[-1.0]\n")   # 峰度 −1.0≠−1.2
+    req_set = _req_set("kv_recomputed",
+                       {"key": "k", "data_file": "t.csv",
+                        "recompute": {"type": "col_stats", "col": "v", "stat": "kurtosis"}},
+                       "answer.txt")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, wrong)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_kv_recomputed_col_stats_asymmetric_round_and_unknown(tmp_path: pathlib.Path):
+    """[1,2,3,4,10] 非對稱：skew=1.6970563…、kurt=3.152；round 生效；
+    常數欄（m2=0）→ UNKNOWN（不自評）；未知 stat → UNKNOWN。"""
+    import math
+    task_dir = tmp_path / "task"
+    _write(task_dir / "t.csv", "v\n1\n2\n3\n4\n10\n")
+    # 中央矩由資料直接算（[1,2,3,4,10]：mean=4、m2=10、m3=36、m4=278.8）
+    xs = [1.0, 2.0, 3.0, 4.0, 10.0]
+    n = len(xs)
+    mu = sum(xs) / n
+    ds = [v - mu for v in xs]
+    m2 = sum(v * v for v in ds) / n
+    m3 = sum(v ** 3 for v in ds) / n
+    m4 = sum(v ** 4 for v in ds) / n
+    skew = (m3 / m2 ** 1.5) * math.sqrt(n * (n - 1)) / (n - 2)
+    kurt = ((n + 1) * (m4 / m2 ** 2 - 3) + 6) * (n - 1) / ((n - 2) * (n - 3))
+    # 外部錨（pandas 3.1 對照，2026-11-04）：防「測試與實作同錯」
+    assert abs(skew - 1.6970562748477143) < 1e-9
+    assert abs(kurt - 3.152) < 1e-9
+
+    params = {"key": "k", "data_file": "t.csv",
+              "recompute": {"type": "col_stats", "col": "v", "stat": "skewness", "round": 3}}
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", f"@k[{skew:.3f}]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "PASS"
+
+    params = {"key": "k", "data_file": "t.csv",
+              "recompute": {"type": "col_stats", "col": "v", "stat": "kurtosis"}}
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    d2 = tmp_path / "d2"
+    _write(d2 / "answer.txt", f"@k[{kurt:.10g}]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d2)}
+    assert res["req_main"].status == "PASS"
+
+    task_dir2 = tmp_path / "task2"
+    _write(task_dir2 / "c.csv", "v\n7\n7\n7\n7\n")
+    req_set2 = _req_set("kv_recomputed",
+                        {"key": "k", "data_file": "c.csv",
+                         "recompute": {"type": "col_stats", "col": "v", "stat": "skewness"}},
+                        "answer.txt")
+    d3 = tmp_path / "d3"
+    _write(d3 / "answer.txt", "@k[0]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir2, req_set2, d3)}
+    assert res["req_main"].status == "UNKNOWN"
+
+    req_set3 = _req_set("kv_recomputed",
+                        {"key": "k", "data_file": "t.csv",
+                         "recompute": {"type": "col_stats", "col": "v", "stat": "geomean"}},
+                        "answer.txt")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set3, d)}
+    assert res["req_main"].status == "UNKNOWN"
+
+
+def test_kv_recomputed_null_count(tmp_path: pathlib.Path):
+    """null_count：null 細胞計數（預設 null 集合：''/none/null/nan/na/n-a，大小寫不敏感；
+    dab_427 min_p 語意）。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "c.csv",
+        "a,b\nx,\ny,1\nz,None\nw,null\nv,2\nu,NaN\nt,3\ns,4\n",
+    )
+    # b 欄：''、'1'、'None'、'null'、'2'、'NaN'、'3'、'4' → null 計數 4
+    params = {"key": "n", "data_file": "c.csv",
+              "recompute": {"type": "null_count", "col": "b"}}
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@n[4]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "@n[3]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    assert res["req_main"].status == "FAIL"
+
+
+# ── unique_count / col_max / scheme_fee_avg（G2 vq-5nz.16：dabstep-10/11/1273）──
+
+def test_plain_recomputed_unique_count(tmp_path: pathlib.Path):
+    """unique_count：欄位去重計數（dabstep-10 merchant 語意）；空值不算一個值。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "payments.csv", "merchant\nA\nA\nB\nC\n\nB\n")
+    params = {"data_file": "payments.csv", "recompute": {"type": "unique_count", "col": "merchant"}}
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "3\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "4\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_plain_recomputed_col_max(tmp_path: pathlib.Path):
+    """col_max：欄位最大值（dabstep-11 eur_amount 語意）；不可解析值忽略；全不可解析→UNKNOWN。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "p.csv", "eur_amount\n10.5\n25.5\n7\nbad\n")
+    params = {"data_file": "p.csv", "recompute": {"type": "col_max", "col": "eur_amount"}}
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "25.5\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "25.50\n")   # 數值相等 → PASS（浮點比較）
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    assert res["req_main"].status == "PASS"
+
+    wrong = tmp_path / "wrong"
+    _write(wrong / "answer.txt", "10.5\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, wrong)}
+    assert res["req_main"].status == "FAIL"
+
+    task_dir2 = tmp_path / "task2"
+    _write(task_dir2 / "p2.csv", "eur_amount\nbad\nworse\n")
+    req_set2 = _req_set("plain_recomputed",
+                        {"data_file": "p2.csv", "recompute": {"type": "col_max", "col": "eur_amount"}},
+                        "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "1\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir2, req_set2, d)}
+    assert res["req_main"].status == "UNKNOWN"
+
+
+def test_plain_recomputed_scheme_fee_avg(tmp_path: pathlib.Path):
+    """scheme_fee_avg：fee=fixed_amount+rate·amount/10000（manual.md 公式）在
+    card_scheme×is_credit 匹配規則上的平均（dabstep-1273 語意）；無匹配→UNKNOWN。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "fees.json",
+        json.dumps([
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 10},
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.20, "rate": 20},
+            {"card_scheme": "GlobalCard", "is_credit": False, "fixed_amount": 0.99, "rate": 99},
+            {"card_scheme": "OtherCard", "is_credit": True, "fixed_amount": 0.88, "rate": 88},
+        ]),
+    )
+    # 匹配 2 則：0.10+10·10/10000=0.11；0.20+20·10/10000=0.22 → 平均 0.165
+    params = {
+        "data_file": "fees.json",
+        "recompute": {"type": "scheme_fee_avg", "scheme": "GlobalCard",
+                      "is_credit": True, "amount": 10.0},
+    }
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "0.165\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "0.166\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False
+
+    task_dir2 = tmp_path / "task2"
+    _write(task_dir2 / "fees.json", json.dumps(
+        [{"card_scheme": "X", "is_credit": True, "fixed_amount": 0.1, "rate": 1}]))
+    req_set2 = _req_set("plain_recomputed",
+                        dict(params, data_file="fees.json"), "answer.txt")
+    req_set2 = _req_set("plain_recomputed",
+                        {"data_file": "fees.json",
+                         "recompute": {"type": "scheme_fee_avg", "scheme": "GlobalCard",
+                                       "is_credit": True, "amount": 10.0}},
+                        "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "0.1\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir2, req_set2, d)}
+    assert res["req_main"].status == "UNKNOWN"
