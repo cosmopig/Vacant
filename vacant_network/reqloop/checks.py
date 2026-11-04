@@ -1043,6 +1043,80 @@ def check_group_aggregate(
     return _result(item, "PASS", f"{len(expected)} 組聚合重算核對完全一致", {"recomputed_groups": len(expected)})
 
 
+_ANSWER_KV_RE = re.compile(r"^\s*@([A-Za-z_][A-Za-z0-9_]*)\s*\[\s*([^\]]*?)\s*\]\s*$",
+                           re.MULTILINE)
+
+
+def _kv_type_ok(key: str, raw: str, cons: str) -> tuple[bool, str]:
+    """單一 @key[value] 的約束判定。回 (ok, problem_code)。"""
+    try:
+        v = float(raw.replace(",", "").strip())
+    except ValueError:
+        return False, "not_a_number"
+    if cons in ("integer", "nonneg_int") and abs(v - round(v)) > 1e-9:
+        return False, "not_an_integer"
+    if cons == "nonneg_int" and v < 0:
+        return False, "not_nonneg_int"
+    if cons == "number_in_01" and not (0.0 <= v <= 1.0):
+        return False, "out_of_01"
+    return True, ""
+
+
+def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
+                    item: RequirementItem) -> ClaimResult:
+    """G2 新增（工單 P000-20261104-02）：答案檔格式檢查（@key[value] 行，DABench 答案格式）。
+
+    只查**可見格式**：每個要求 key 恰出現一次、值可解析且滿足約束。
+    值的**正確性**屬於 hidden 領域——本驗證器不碰，也不得把 hidden 參考值
+    帶進修復（紅線：檢查沒看見時不得宣告修好）。
+    - 檔案不存在 → FAIL（evidence.missing_file）
+    - key 缺失 → FAIL（counterexamples[].problem=missing）
+    - key 重複 → FAIL（ambiguous）；值不合約束 → FAIL（not_a_number / not_an_integer /
+      not_nonneg_int / out_of_01）
+    約束型別：number（預設）/ integer / nonneg_int / number_in_01。
+    """
+    specs = item.params.get("keys", []) or []
+    if not isinstance(specs, list) or not specs:
+        return _result(item, "UNKNOWN",
+                       "answer_kv.params.keys 缺失；無法可靠檢查答案檔格式",
+                       {"reason": "no keys spec"})
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return _result(item, "FAIL", f"答案檔不存在：{item.deliverable}",
+                       {"missing_file": item.deliverable})
+    content = deliv_file.read_text(encoding="utf-8")
+    found: dict[str, list[str]] = {}
+    for m in _ANSWER_KV_RE.finditer(content):
+        found.setdefault(m.group(1).strip().lower(), []).append(m.group(2).strip())
+    counterexamples: list[dict[str, Any]] = []
+    checked: list[str] = []
+    for spec in specs:
+        key = str(spec.get("key", "")).strip().lower()
+        if not key:
+            raise UnknownSource("answer_kv.params.keys[].key 缺失")
+        cons = str(spec.get("type", "number")).strip().lower()
+        if cons not in ("number", "integer", "nonneg_int", "number_in_01"):
+            return _result(item, "UNKNOWN",
+                           f"未知約束型別：{cons}（不猜）", {"bad_constraint": cons})
+        checked.append(key)
+        vals = found.get(key)
+        if not vals:
+            counterexamples.append({"key": key, "problem": "missing"})
+            continue
+        if len(vals) > 1:
+            counterexamples.append({"key": key, "problem": "ambiguous", "values": vals})
+            continue
+        ok, problem = _kv_type_ok(key, vals[0], cons)
+        if not ok:
+            counterexamples.append({"key": key, "problem": problem, "value": vals[0]})
+    if counterexamples:
+        return _result(item, "FAIL", "答案檔格式未達要求（見 counterexamples）",
+                       {"counterexamples": counterexamples, "checked_keys": checked})
+    return _result(item, "PASS",
+                   f"答案檔 {item.deliverable} 含全部 {len(checked)} 個 key 且格式合法",
+                   {"checked_keys": checked})
+
+
 def check_summary_numbers(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,

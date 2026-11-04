@@ -35,6 +35,12 @@ CLI（可重跑的原生 pi 命令；provider/model 用既有 pi 設定，不輸
         --out <dir> --rounds 2 --timeout 300 --synthetic
 退出碼（照 `vacant run` 慣例）：0＝缺口關閉或無缺口；20＝跑過但缺口未閉；
 22＝agent 一次都沒跑起來（infra）。
+
+真草稿冒煙（G2，工單 P000-20261104-02，2026-11-04）新增兩個參數：
+- min_rounds：無已確認缺口時也至少跑幾輪（generic 臂＝1：對的草稿也要重驗，
+  看會不會被改壞；localized 臂＝0：缺口驅動，無缺口＝0 模型呼叫）。預設 0，行為不變。
+- include_dirs：把任務目錄下白名單子目錄（如 data/）帶進工作區；白名單外的
+  子目錄（good/、bad_*/ 參考答案）仍然永不入場。
 """
 
 from __future__ import annotations
@@ -143,6 +149,7 @@ def build_repair_prompt(
     before: list[ClaimResult],
     *,
     feedback_mode: str = "localized",
+    include_dirs: tuple[str, ...] = (),
 ) -> str:
     """組修復請求。只帶：相關原文、目前交付物、失敗證據（可見反例）、
     允許改的範圍、必須保持成立的條件。不帶任何隱藏答案／hidden／scorer。
@@ -170,12 +177,17 @@ def build_repair_prompt(
     lines.append("【原始需求（使用者原文）】")
     lines.append(request if request else "（缺 request.md）")
     lines.append("")
-    lines.append("【目前交付物檔案（只准改這些檔案）】")
+    lines.append("【目前交付物檔案（可以修改；若原始需求要求的交付物不存在，請依需求建立它）】")
     lines.append("\n".join(f"- {f}" for f in draft_files) if draft_files else "- （無）")
-    if ref_files:
+    ref_all = list(ref_files)
+    for dd in include_dirs:
+        dpath = t / dd
+        if dpath.is_dir():
+            ref_all += sorted(f"{dd}/{p.name}" for p in dpath.iterdir() if p.is_file())
+    if ref_all:
         lines.append("")
         lines.append("【工作區裡的參考資料（可讀、不可改）】")
-        lines.append("\n".join(f"- {f}" for f in ref_files))
+        lines.append("\n".join(f"- {f}" for f in ref_all))
 
     if feedback_mode == "localized":
         lines.append("")
@@ -200,6 +212,7 @@ def build_repair_prompt(
     else:
         lines.append("")
         lines.append("請對照原始需求，重新檢查並修正工作區裡的交付物檔案一次。")
+        lines.append("若原始需求要求的交付物（例如 answer.txt）不存在，請依原始需求把它建立出來。")
     return "\n".join(lines)
 
 
@@ -210,10 +223,12 @@ def prepare_workspace(
     round_n: int,
     task_dir: str | pathlib.Path,
     draft_dir: str | pathlib.Path,
+    include_dirs: tuple[str, ...] = (),
 ) -> pathlib.Path:
-    """建立第 round_n 輪的工作目錄：task 顶层檔案（源資料等）＋草稿檔案。
+    """建立第 round_n 輪的工作目錄：task 顶层檔案（源資料等）＋白名單子目錄＋草稿檔案。
 
-    原草稿目錄只讀；同名檔以草稿為準。task 底下的目錄（good／bad 等）不帶進工作區。
+    原草稿目錄只讀；同名檔以草稿為準。task 底下的目錄（good／bad 等參考答案）不帶進
+    工作區；只有 include_dirs 白名單裡的子目錄（如 data/）才進場。
     """
     t = pathlib.Path(task_dir)
     d = pathlib.Path(draft_dir)
@@ -224,6 +239,10 @@ def prepare_workspace(
     for p in sorted(t.iterdir()) if t.is_dir() else []:
         if p.is_file():
             shutil.copy2(p, ws / p.name)
+    for dd in include_dirs:
+        src = t / dd
+        if src.is_dir():
+            shutil.copytree(src, ws / dd, dirs_exist_ok=True)
     for p in sorted(d.rglob("*")) if d.is_dir() else []:
         if p.is_file():
             dest = ws / p.relative_to(d)
@@ -328,11 +347,12 @@ def run_repair_round(
     run: RunFn,
     feedback_mode: str,
     timeout_s: float,
+    include_dirs: tuple[str, ...] = (),
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。原草稿不被改動。"""
-    ws = prepare_workspace(out_root, n, task_dir, draft_dir)
+    ws = prepare_workspace(out_root, n, task_dir, draft_dir, include_dirs=include_dirs)
     prompt = build_repair_prompt(task_dir, req_set, draft_dir, before,
-                                 feedback_mode=feedback_mode)
+                                 feedback_mode=feedback_mode, include_dirs=include_dirs)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
     launch = build(prompt, ws)
     log_dir = pathlib.Path(out_root) / f"agent_round_{n}"
@@ -399,16 +419,24 @@ def repair_slice(
     max_rounds: int = 2,
     timeout_s: float = 300.0,
     synthetic: bool = False,
+    min_rounds: int = 0,
+    include_dirs: tuple[str, ...] = (),
 ) -> RepairOutcome:
     """有上限的修復入口（預算由這裡管，不靠提示詞）。
 
     每輪從**原草稿**起新工作區（保留原候選）；連續兩輪沒有消除已確認缺口
     （必需條目 FAIL 數沒減少）即停；無缺口則零呼叫。
+
+    min_rounds（真草稿冒煙，2026-11-04）：無已確認缺口時也至少跑幾輪。
+    - localized（預設 0）：無缺口 ⇒ 0 模型呼叫（缺口驅動）。
+    - generic（傳 1）：無缺口也重驗一次（看對的草稿會不會被改壞）。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
     if max_rounds < 1:
         raise ValueError("max_rounds must be >= 1")
+    if not 0 <= min_rounds <= max_rounds:
+        raise ValueError("min_rounds must be in 0..max_rounds")
     t_dir = pathlib.Path(task_dir)
     d_dir = pathlib.Path(draft_dir)
     o_root = pathlib.Path(out_root)
@@ -419,7 +447,7 @@ def repair_slice(
     rounds: list[RepairRound] = []
     stalled = 0
     stopped = STOP_MAX_ROUNDS
-    if not req_fail:
+    if not req_fail and min_rounds == 0:
         # 沒有已確認缺口（必需條目沒有 FAIL）：不呼叫模型。
         # 注意：若有必需條目是 UNKNOWN／缺項，unresolved 仍會列出、退出碼非 0——不得宣告完成。
         stopped = STOP_NO_GAP
@@ -429,6 +457,7 @@ def repair_slice(
                 n, t_dir, req_set, d_dir, before,
                 out_root=o_root, build=build, run=run,
                 feedback_mode=feedback_mode, timeout_s=timeout_s,
+                include_dirs=include_dirs,
             )
             rounds.append(r)
             if _required_all_pass(req_set, r.after):
