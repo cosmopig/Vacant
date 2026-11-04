@@ -1,0 +1,118 @@
+{
+  "task_id": "student_grades",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出 class_summary.csv，欄位：class_name, student_count, passing_count, pass_rate, average_score",
+      "deliverable": "class_summary.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "class_name",
+          "student_count",
+          "passing_count",
+          "pass_rate",
+          "average_score"
+        ]
+      },
+      "description": "分班統計 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_group_recompute",
+      "quote": "排除 WITHDRAWN、重複 student_id 只留第一筆、total_score = midterm×0.4 + final×0.6、≥60 及格、分班計算人數／及格數／及格率／平均",
+      "deliverable": "class_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "grades.csv",
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "dedup_by": "student_id",
+        "group_by": [
+          "class_name"
+        ],
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "student_count",
+            "type": "count"
+          },
+          {
+            "name": "passing_count",
+            "type": "count_if",
+            "expr": "total_score >= 60.0"
+          },
+          {
+            "name": "pass_rate",
+            "type": "ratio",
+            "num": "passing_count",
+            "den": "student_count",
+            "round": 2
+          },
+          {
+            "name": "average_score",
+            "type": "mean",
+            "expr": "total_score",
+            "round": 2
+          }
+        ],
+        "atol": 0.01
+      },
+      "description": "各班統計必須與原始成績嚴格重算一致",
+      "required": true
+    },
+    {
+      "id": "req_summary_numbers",
+      "quote": "summary.md 須明確載明「全年級及格率」（百分比，小數點後 2 位）與「全年級平均總評」（小數點後 2 位）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "grades.csv",
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "dedup_by": "student_id",
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
+        ],
+        "numbers": [
+          {
+            "type": "pct_if",
+            "expr": "total_score >= 60.0",
+            "label": "全年級及格率",
+            "round": 2
+          },
+          {
+            "type": "mean",
+            "expr": "total_score",
+            "label": "全年級平均總評",
+            "round": 2
+          }
+        ],
+        "atol": 0.01
+      },
+      "description": "摘要數字必須與重算一致",
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "task_id": "expense_category",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出 expense_summary.csv，欄位：category, subcategory, total_amount",
+      "deliverable": "expense_summary.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "category",
+          "subcategory",
+          "total_amount"
+        ]
+      },
+      "description": "分類加總 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_group_recompute",
+      "quote": "依 category/subcategory 分組（空白→unspecified、大小寫不分）、先加總後取整 2 位",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "group_normalize": {
+          "category": "lower",
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
+        "aggregates": [
+          {
+            "name": "total_amount",
+            "type": "sum",
+            "expr": "amount",
+            "round": 2
+          }
+        ],
+        "atol": 0.01
+      },
+      "description": "分組加總必須與原始明細嚴格重算一致（先加總後取整）",
+      "required": true
+    },
+    {
+      "id": "req_summary_numbers",
+      "quote": "summary.md 須明確載明「報銷總金額」（全部加總、小數點後 2 位）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "numbers": [
+          {
+            "type": "sum",
+            "expr": "amount",
+            "label": "報銷總金額",
+            "round": 2
+          }
+        ],
+        "atol": 0.01
+      },
+      "description": "摘要總金額必須與重算一致",
+      "required": true
+    }
+  ]
+}

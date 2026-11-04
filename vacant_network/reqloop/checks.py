@@ -11,11 +11,14 @@ vacant_network.reqloop.checks
 
 from __future__ import annotations
 
+import ast
 import csv
 import datetime
+import json
 import math
 import pathlib
 import re
+from collections import Counter
 from typing import Any
 
 from vacant_network.intake.verifiers import ClaimResult
@@ -462,6 +465,589 @@ def check_summary_metrics_consistency(
     )
 
 
+# ---------------------------------------------------------------------------
+# 通用重算核心（rowset_filter / group_aggregate / summary_numbers 共用）
+# ---------------------------------------------------------------------------
+
+class UnknownSource(ValueError):
+    """原始輸入缺失或格式不可解析＝看不到，依規則回 UNKNOWN。"""
+
+
+class UnsafeExpressionError(ValueError):
+    """運算式含不允許語法、未知欄位、或值不可解析＝無可靠重算能力。"""
+
+
+_ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod)
+_ALLOWED_CMPS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE)
+_ALLOWED_UNARY = (ast.UAdd, ast.USub)
+
+# 注意：千位分組選項必須「至少一個 ,ddd」，否則 4502.24 會被拆成 450 + 2.24。
+_NUMBER_RE = re.compile(
+    r"[\$¥]?\s*([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)"
+)
+
+
+def _to_num(value: Any) -> float:
+    if isinstance(value, bool):
+        raise UnsafeExpressionError("bool 不是數字")
+    if isinstance(value, (int, float)):
+        return float(value)
+    s = str(value).strip().replace("$", "").replace(",", "").replace("¥", "").replace("元", "")
+    if s == "":
+        raise UnsafeExpressionError("空白值不可作為數字")
+    try:
+        return float(s)
+    except ValueError as e:
+        raise UnsafeExpressionError(f"不可解析為數字: {value!r}") from e
+
+
+def safe_eval_expr(expr: str, row: dict[str, Any]) -> Any:
+    """安全運算式求值：只允許常數、欄位名、四則/整除/取餘、單一比較、and/or。
+
+    禁止函式呼叫、屬性、下標、字串運算等一切其他節點；未知欄位或值不可解析
+    一律拋 UnsafeExpressionError（呼叫端轉為 UNKNOWN，不得假裝 PASS/FAIL）。
+    """
+    if not isinstance(expr, str) or not expr.strip():
+        raise UnsafeExpressionError("運算式為空")
+    try:
+        tree = ast.parse(expr, mode="eval")
+    except SyntaxError as e:
+        raise UnsafeExpressionError(f"運算式語法錯誤: {e.msg}") from e
+
+    def ev(node: ast.AST) -> Any:
+        if isinstance(node, ast.Expression):
+            return ev(node.body)
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, (int, float)) and not isinstance(node.value, bool):
+                return node.value
+            if isinstance(node.value, str):
+                return node.value
+            raise UnsafeExpressionError(f"不允許的常數: {node.value!r}")
+        if isinstance(node, ast.Name):
+            if node.id in row:
+                return row[node.id]
+            raise UnsafeExpressionError(f"未知欄位: {node.id}")
+        if isinstance(node, ast.BinOp) and type(node.op) in _ALLOWED_BINOPS:
+            a, b = _to_num(ev(node.left)), _to_num(ev(node.right))
+            op = type(node.op)
+            if op is ast.Add:
+                return a + b
+            if op is ast.Sub:
+                return a - b
+            if op is ast.Mult:
+                return a * b
+            if b == 0:
+                raise UnsafeExpressionError("除以零")
+            if op is ast.Div:
+                return a / b
+            if op is ast.FloorDiv:
+                return a // b
+            return a % b
+        if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_UNARY:
+            v = _to_num(ev(node.operand))
+            return v if isinstance(node.op, ast.UAdd) else -v
+        if isinstance(node, ast.Compare):
+            if len(node.ops) != 1 or len(node.comparators) != 1:
+                raise UnsafeExpressionError("不支援鏈式比較")
+            a_raw, b_raw = ev(node.left), ev(node.comparators[0])
+            try:
+                a, b = _to_num(a_raw), _to_num(b_raw)
+            except UnsafeExpressionError:
+                a, b = str(a_raw).strip().lower(), str(b_raw).strip().lower()
+                op = type(node.ops[0])
+                if op is ast.Eq:
+                    return a == b
+                if op is ast.NotEq:
+                    return a != b
+                raise UnsafeExpressionError("非數字不可用順序比較")
+            op = type(node.ops[0])
+            if op is ast.Eq:
+                return a == b
+            if op is ast.NotEq:
+                return a != b
+            if op is ast.Lt:
+                return a < b
+            if op is ast.LtE:
+                return a <= b
+            if op is ast.Gt:
+                return a > b
+            return a >= b
+        if isinstance(node, ast.BoolOp):
+            vals = [bool(ev(v)) for v in node.values]
+            return all(vals) if isinstance(node.op, ast.And) else any(vals)
+        raise UnsafeExpressionError(f"不允許的語法: {type(node).__name__}")
+
+    return ev(tree)
+
+
+def load_table(task_dir: pathlib.Path, params: dict[str, Any]) -> list[dict[str, Any]]:
+    """依 params 讀原始資料（input_csv 或 input_json），再套用 flatten。"""
+    if "input_csv" in params:
+        p = task_dir / str(params["input_csv"])
+        if not p.is_file():
+            raise UnknownSource(f"原始輸入不存在: {params['input_csv']}")
+        rows = read_csv_rows(p)
+        if not rows:
+            raise UnknownSource(f"原始輸入為空: {params['input_csv']}")
+    elif "input_json" in params:
+        p = task_dir / str(params["input_json"])
+        if not p.is_file():
+            raise UnknownSource(f"原始輸入不存在: {params['input_json']}")
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as e:
+            raise UnknownSource(f"原始輸入 JSON 解析失敗: {e.msg}") from e
+        if not isinstance(data, list) or not data or not all(isinstance(e, dict) for e in data):
+            raise UnknownSource("input_json 必須是非空的物件列表")
+        rows = [dict(e) for e in data]
+    else:
+        raise UnknownSource("params 缺少 input_csv / input_json")
+    return apply_flatten(rows, params.get("flatten", []) or [])
+
+
+def apply_flatten(rows: list[dict[str, Any]], specs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """把 JSON 巢狀欄位（path=a.b.c）攤平到 row[as]；缺失依 impute 填補。"""
+    for spec in specs:
+        path = [p for p in str(spec.get("path", "")).split(".") if p]
+        if not path:
+            raise UnknownSource("flatten.path 缺失")
+        as_name = str(spec.get("as", path[-1]))
+        has_impute = "impute" in spec
+        for row in rows:
+            v: Any = row
+            for part in path:
+                v = v.get(part) if isinstance(v, dict) else None
+            row[as_name] = spec["impute"] if (v is None and has_impute) else v
+    return rows
+
+
+def _cond_holds(row: dict[str, Any], cond: dict[str, Any]) -> bool:
+    col = str(cond.get("col", "")).strip().lower()
+    op = str(cond.get("op", "eq")).strip().lower()
+    value = cond.get("value")
+    left_raw = row.get(col, "")
+    # value 若同時是該列的欄位名＝欄位對欄位比較（如 current_stock < safety_stock）
+    if isinstance(value, str) and value in row:
+        right_raw: Any = row[value]
+    else:
+        right_raw = value
+    try:
+        a, b = _to_num(left_raw), _to_num(right_raw)
+    except UnsafeExpressionError:
+        a = str(left_raw).strip().lower()
+        b = str(right_raw).strip().lower()
+    if op == "eq":
+        return a == b
+    if op == "ne":
+        return a != b
+    if op == "lt":
+        return a < b
+    if op == "le":
+        return a <= b
+    if op == "gt":
+        return a > b
+    if op == "ge":
+        return a >= b
+    raise UnknownSource(f"未知比較算子: {op}")
+
+
+def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
+    """exclude → dedup_by（保留第一筆）→ include。"""
+    for cond in params.get("exclude", []) or []:
+        rows = [r for r in rows if not _cond_holds(r, cond)]
+    dedup_by = params.get("dedup_by")
+    if dedup_by:
+        key = str(dedup_by).strip().lower()
+        seen: set[str] = set()
+        out: list[dict[str, Any]] = []
+        for r in rows:
+            k = str(r.get(key, "")).strip()
+            if k:
+                if k in seen:
+                    continue
+                seen.add(k)
+            out.append(r)
+        rows = out
+    for cond in params.get("include", []) or []:
+        rows = [r for r in rows if _cond_holds(r, cond)]
+    return rows
+
+
+def apply_compute(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
+    """逐列計算派生欄位（compute: name + 安全運算式）。"""
+    for spec in params.get("compute", []) or []:
+        name = str(spec.get("name", "")).strip()
+        if not name:
+            raise UnknownSource("compute.name 缺失")
+        expr = str(spec.get("expr", ""))
+        for r in rows:
+            r[name] = safe_eval_expr(expr, r)
+    return rows
+
+
+def _fmt_key(v: Any) -> str:
+    if v is None:
+        return ""
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v))
+    return str(v).strip()
+
+
+def _fmt_val(v: Any) -> str:
+    if isinstance(v, float):
+        return str(int(v)) if v.is_integer() else repr(v)
+    return str(v)
+
+
+def _norm_group_key(value: Any, spec: Any) -> str:
+    if value is None:
+        s = ""
+    elif isinstance(value, float) and value.is_integer():
+        s = str(int(value))
+    else:
+        s = str(value).strip()
+    if isinstance(spec, dict):
+        if spec.get("lower"):
+            s = s.lower()
+        if spec.get("upper"):
+            s = s.upper()
+        if not s and spec.get("default") is not None:
+            s = str(spec["default"])
+    elif isinstance(spec, str):
+        m = spec.strip().lower()
+        if m == "lower":
+            s = s.lower()
+        elif m == "upper":
+            s = s.upper()
+    return s
+
+
+def _agg_values(rows: list[dict[str, Any]], spec: dict[str, Any], skip_empty: bool) -> list[float]:
+    expr = spec.get("expr")
+    col = str(spec.get("col", "")).strip().lower()
+    out: list[float] = []
+    for r in rows:
+        raw: Any = safe_eval_expr(str(expr), r) if expr else r.get(col, "")
+        if raw is None:
+            if skip_empty:
+                continue
+            raise UnsafeExpressionError(f"聚合遇到 null: {col or expr!r}")
+        s = str(raw).strip()
+        if s == "":
+            if skip_empty:
+                continue
+            raise UnsafeExpressionError(f"聚合遇到空白值: {col or expr!r}")
+        out.append(_to_num(raw))
+    return out
+
+
+def _result(item: RequirementItem, status: str, detail: str, evidence: dict[str, Any]) -> ClaimResult:
+    return ClaimResult(
+        claim_id=item.id,
+        status=status,
+        detail=detail,
+        evidence=evidence,
+        verifier=item.verifier,
+        verifier_version=VERIFIER_VERSION,
+        required=item.required,
+        authority=item.authority,
+    )
+
+
+def check_rowset_filter(
+    task_dir: pathlib.Path,
+    deliverable_dir: pathlib.Path,
+    item: RequirementItem,
+) -> ClaimResult:
+    """逐列重算：exclude→dedup→include 後，行集（identity）與逐欄值必須與交付物一致。"""
+    params = dict(item.params)
+    try:
+        rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
+        identity = [str(c).strip().lower() for c in params.get("identity", []) or []]
+        if not identity:
+            raise UnknownSource("rowset_filter.params.identity 缺失")
+        values_spec: dict[str, Any] = params.get("values", {}) or {}
+        expected: list[dict[str, Any]] = []
+        for r in rows:
+            er = {c: r.get(c, "") for c in identity}
+            for out_col, spec in values_spec.items():
+                if isinstance(spec, str):
+                    er[out_col] = r.get(spec, "")
+                elif isinstance(spec, dict) and "expr" in spec:
+                    v = safe_eval_expr(str(spec["expr"]), r)
+                    if "round" in spec:
+                        v = round(float(v), int(spec["round"]))
+                    er[out_col] = v
+                else:
+                    raise UnknownSource(f"values[{out_col}] 形式不明: {spec!r}")
+            expected.append(er)
+    except (UnknownSource, UnsafeExpressionError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
+    deliv_rows = read_csv_rows(deliv_file)
+
+    exp_keys = Counter(tuple(_fmt_key(r[c]) for c in identity) for r in expected)
+    act_keys = Counter(tuple(_fmt_key(r.get(c, "")) for c in identity) for r in deliv_rows)
+    if exp_keys != act_keys:
+        only_exp = sorted(set(exp_keys) - set(act_keys))
+        only_act = sorted(set(act_keys) - set(exp_keys))
+        detail = "行集不符"
+        if only_exp:
+            detail += f"；缺少列 {[_fmt_key(k) for k in only_exp]}"
+        if only_act:
+            detail += f"；多出列 {[_fmt_key(k) for k in only_act]}"
+        detail += f"（預期 {sum(exp_keys.values())} 列、交付物 {sum(act_keys.values())} 列）"
+        return _result(
+            item, "FAIL", detail,
+            {"counterexamples": [{"kind": "rowset_mismatch",
+                                  "expected_keys": [list(k) for k in only_exp],
+                                  "actual_keys": [list(k) for k in only_act]}]},
+        )
+
+    atol = float(params.get("atol", 0.01))
+    mismatches: list[str] = []
+    counterexamples: list[dict[str, Any]] = []
+    used: set[int] = set()
+    for er in expected:
+        key = tuple(_fmt_key(er[c]) for c in identity)
+        idx = None
+        for i, dr in enumerate(deliv_rows):
+            if i in used:
+                continue
+            if tuple(_fmt_key(dr.get(c, "")) for c in identity) == key:
+                idx = i
+                break
+        if idx is None:
+            mismatches.append(f"列 {list(key)} 未找到對應交付行")
+            continue
+        used.add(idx)
+        dr = deliv_rows[idx]
+        for out_col, spec in values_spec.items():
+            exp_v = er[out_col]
+            act_raw = dr.get(out_col)
+            act_raw = "" if act_raw is None else str(act_raw).strip()
+            if isinstance(exp_v, str):
+                if exp_v.strip() != act_raw:
+                    mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {exp_v!r}，交付物為 {act_raw!r}")
+                    counterexamples.append({"row": list(key), "field": out_col, "expected": exp_v, "actual": act_raw})
+                continue
+            try:
+                act_v = _to_num(act_raw)
+            except UnsafeExpressionError:
+                mismatches.append(f"列 {list(key)} 欄 {out_col} 無法解析: 交付物為 {act_raw!r}")
+                counterexamples.append({"row": list(key), "field": out_col, "expected": _fmt_val(exp_v), "actual": act_raw})
+                continue
+            if abs(act_v - float(exp_v)) > atol:
+                mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {_fmt_val(exp_v)}，交付物為 {act_raw}")
+                counterexamples.append({"row": list(key), "field": out_col,
+                                       "expected": _fmt_val(exp_v), "actual": act_raw,
+                                       "diff": act_v - float(exp_v)})
+    if mismatches:
+        return _result(item, "FAIL", "; ".join(mismatches), {"counterexamples": counterexamples})
+    return _result(item, "PASS", f"{len(expected)} 列重算核對完全一致", {"recomputed_rows": len(expected)})
+
+
+def check_group_aggregate(
+    task_dir: pathlib.Path,
+    deliverable_dir: pathlib.Path,
+    item: RequirementItem,
+) -> ClaimResult:
+    """分組聚合重算：分組鍵（含 normalize）與各聚合值必須與交付物一致。"""
+    params = dict(item.params)
+    try:
+        rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
+        group_by = [str(g).strip().lower() for g in params.get("group_by", []) or []]
+        if not group_by:
+            raise UnknownSource("group_aggregate.params.group_by 缺失")
+        agg_specs = params.get("aggregates", []) or []
+        if not agg_specs:
+            raise UnknownSource("group_aggregate.params.aggregates 缺失")
+        norm = params.get("group_normalize", {}) or {}
+
+        groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
+        for r in rows:
+            key = tuple(_norm_group_key(r.get(g), norm.get(g)) for g in group_by)
+            groups.setdefault(key, []).append(r)
+
+        expected: dict[tuple[str, ...], dict[str, Any]] = {}
+        for key, grows in groups.items():
+            vals: dict[str, Any] = {}
+            for spec in agg_specs:
+                t = str(spec.get("type", "")).strip().lower()
+                name = str(spec.get("name", "")).strip()
+                if not name:
+                    raise UnknownSource("aggregate.name 缺失")
+                if t == "count":
+                    v: Any = float(len(grows))
+                elif t == "distinct":
+                    col = str(spec.get("col", "")).strip().lower()
+                    v = float(len({str(r.get(col, "")).strip() for r in grows if str(r.get(col, "")).strip()}))
+                elif t in ("sum", "mean", "mean_skip_empty"):
+                    nums = _agg_values(grows, spec, skip_empty=(t == "mean_skip_empty"))
+                    if t == "sum":
+                        v = float(sum(nums))
+                    else:
+                        v = float(sum(nums) / len(nums)) if nums else None
+                elif t == "count_if":
+                    v = float(sum(1 for r in grows if bool(safe_eval_expr(str(spec.get("expr", "")), r))))
+                elif t == "ratio":
+                    continue  # 第二趟算
+                else:
+                    raise UnknownSource(f"未知聚合類型: {t}")
+                vals[name] = v
+            for spec in agg_specs:  # ratio 第二趟（依已算出的聚合名）
+                if str(spec.get("type", "")).strip().lower() != "ratio":
+                    continue
+                name = str(spec.get("name", "")).strip()
+                num = vals.get(str(spec.get("num", "")))
+                den = vals.get(str(spec.get("den", "")))
+                if num is None or den is None or float(den) == 0:
+                    raise UnknownSource(f"ratio {name}: 分母為 0 或缺失")
+                vals[name] = float(num) / float(den)
+            for spec in agg_specs:
+                name = str(spec.get("name", "")).strip()
+                if "round" in spec and vals.get(name) is not None:
+                    vals[name] = round(float(vals[name]), int(spec["round"]))
+            expected[key] = vals
+    except (UnknownSource, UnsafeExpressionError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
+    deliv_rows = read_csv_rows(deliv_file)
+    if not deliv_rows:
+        return _result(item, "FAIL", f"交付物為空: {item.deliverable}", {"empty_csv": item.deliverable})
+    missing_cols = [g for g in group_by if g not in deliv_rows[0]]
+    if missing_cols:
+        return _result(item, "FAIL", f"交付物缺少分組欄位: {missing_cols}", {"missing_columns": missing_cols})
+
+    deliv_groups: dict[tuple[str, ...], list[dict[str, str]]] = {}
+    for dr in deliv_rows:
+        key = tuple(_norm_group_key(dr.get(g), norm.get(g)) for g in group_by)
+        deliv_groups.setdefault(key, []).append(dr)
+
+    exp_keys, act_keys = set(expected), set(deliv_groups)
+    dup = [k for k in exp_keys & act_keys if len(deliv_groups[k]) != 1]
+    if exp_keys != act_keys or dup:
+        detail = "分組集不符"
+        if exp_keys - act_keys:
+            detail += f"；缺少組 {sorted(exp_keys - act_keys)}"
+        if act_keys - exp_keys:
+            detail += f"；多出組 {sorted(act_keys - exp_keys)}"
+        if dup:
+            detail += f"；重複組 {sorted(dup)}"
+        return _result(
+            item, "FAIL", detail,
+            {"counterexamples": [{"kind": "group_mismatch",
+                                  "expected_groups": [list(k) for k in sorted(exp_keys)],
+                                  "actual_groups": [list(k) for k in sorted(act_keys)]}]},
+        )
+
+    atol = float(params.get("atol", 0.01))
+    mismatches: list[str] = []
+    counterexamples: list[dict[str, Any]] = []
+    for key, vals in expected.items():
+        dr = deliv_groups[key][0]
+        for name, exp_v in vals.items():
+            if name not in dr:
+                mismatches.append(f"組 {list(key)} 缺欄 {name}")
+                counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": None})
+                continue
+            act_raw = "" if dr[name] is None else str(dr[name]).strip()
+            if exp_v is None:
+                if act_raw != "":
+                    mismatches.append(f"組 {list(key)} 欄 {name} 預期空白，交付物為 {act_raw!r}")
+                    counterexamples.append({"group": list(key), "field": name, "expected": None, "actual": act_raw})
+                continue
+            try:
+                act_v = _to_num(act_raw)
+            except UnsafeExpressionError:
+                mismatches.append(f"組 {list(key)} 欄 {name} 無法解析: 交付物為 {act_raw!r}")
+                counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": act_raw})
+                continue
+            if abs(act_v - float(exp_v)) > atol:
+                mismatches.append(f"組 {list(key)} 欄 {name} 不符: 預期 {_fmt_val(exp_v)}，交付物為 {act_raw}")
+                counterexamples.append({"group": list(key), "field": name,
+                                       "expected": _fmt_val(exp_v), "actual": act_raw,
+                                       "diff": act_v - float(exp_v)})
+    if mismatches:
+        return _result(item, "FAIL", "; ".join(mismatches), {"counterexamples": counterexamples})
+    return _result(item, "PASS", f"{len(expected)} 組聚合重算核對完全一致", {"recomputed_groups": len(expected)})
+
+
+def check_summary_numbers(
+    task_dir: pathlib.Path,
+    deliverable_dir: pathlib.Path,
+    item: RequirementItem,
+) -> ClaimResult:
+    """摘要文字中的每個指定數字必須與程式重算一致（文字裡找得到該數值才算數）。"""
+    params = dict(item.params)
+    try:
+        rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
+        numbers = params.get("numbers", []) or []
+        if not numbers:
+            raise UnknownSource("summary_numbers.params.numbers 缺失")
+        expected: list[tuple[str, Any]] = []
+        for n in numbers:
+            t = str(n.get("type", "")).strip().lower()
+            label = str(n.get("label", t))
+            if t == "count":
+                v: Any = float(len(rows))
+            elif t == "distinct":
+                col = str(n.get("col", "")).strip().lower()
+                v = float(len({str(r.get(col, "")).strip() for r in rows if str(r.get(col, "")).strip()}))
+            elif t in ("sum", "mean"):
+                nums = _agg_values(rows, n, skip_empty=(t == "mean"))
+                if t == "sum":
+                    v = float(sum(nums))
+                else:
+                    v = float(sum(nums) / len(nums)) if nums else None
+            elif t == "pct_if":
+                total = len(rows)
+                if total == 0:
+                    raise UnknownSource("pct_if: 無資料")
+                hits = sum(1 for r in rows if bool(safe_eval_expr(str(n.get("expr", "")), r)))
+                v = 100.0 * hits / total
+            else:
+                raise UnknownSource(f"未知數字類型: {t}")
+            if "round" in n and v is not None:
+                v = round(float(v), int(n["round"]))
+            expected.append((label, v))
+    except (UnknownSource, UnsafeExpressionError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return _result(item, "FAIL", f"摘要文字報告不存在: {item.deliverable}", {"missing_file": item.deliverable})
+    content = deliv_file.read_text(encoding="utf-8")
+    atol = float(params.get("atol", 0.01))
+    found: list[float] = []
+    for m in _NUMBER_RE.finditer(content):
+        try:
+            found.append(float(m.group(1).replace(",", "")))
+        except ValueError:
+            continue
+
+    mismatches: list[str] = []
+    counterexamples: list[dict[str, Any]] = []
+    for label, exp_v in expected:
+        if exp_v is None:
+            mismatches.append(f"{label} 重算結果為空，無法核對")
+            counterexamples.append({"label": label, "expected": None})
+            continue
+        if not any(abs(x - float(exp_v)) <= atol for x in found):
+            mismatches.append(f"摘要未包含正確的{label} {_fmt_val(exp_v)}")
+            counterexamples.append({"label": label, "expected": _fmt_val(exp_v),
+                                    "found_numbers_in_summary": found[:10]})
+    if mismatches:
+        return _result(item, "FAIL", "; ".join(mismatches), {"counterexamples": counterexamples})
+    return _result(item, "PASS", "摘要各數字均與重算一致", {"recomputed": {l: _fmt_val(v) for l, v in expected}})
+
+
 def run_requirement_checks(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
@@ -497,6 +1083,12 @@ def run_requirement_checks(
             res = check_monthly_top_products(t_dir, d_dir, item)
         elif vname == "summary_metrics_consistency":
             res = check_summary_metrics_consistency(t_dir, d_dir, item)
+        elif vname == "rowset_filter":
+            res = check_rowset_filter(t_dir, d_dir, item)
+        elif vname == "group_aggregate":
+            res = check_group_aggregate(t_dir, d_dir, item)
+        elif vname == "summary_numbers":
+            res = check_summary_numbers(t_dir, d_dir, item)
         else:
             # 未知檢查器：依規則一律標記為 UNKNOWN，不得假裝 PASS
             results.append(

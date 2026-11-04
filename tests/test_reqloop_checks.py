@@ -217,3 +217,397 @@ def test_recompute_and_checks(tmp_path: pathlib.Path):
     res_bad_rank_map = {r.claim_id: r for r in results_bad_rank}
     assert res_bad_rank_map["req_ranking"].status == "FAIL"
     assert "排序依據錯誤" in res_bad_rank_map["req_ranking"].evidence["counterexamples"][0]["reason"]
+
+
+# ---------------------------------------------------------------------------
+# 通用重算檢查器：rowset_filter / group_aggregate / summary_numbers
+# ---------------------------------------------------------------------------
+
+def _req_set(verifier: str, params: dict, deliverable: str = "out.csv"):
+    return RequirementSet(
+        task_id="t",
+        items=[
+            RequirementItem(
+                id="req_main",
+                quote="測試需求",
+                deliverable=deliverable,
+                verifier=verifier,
+                params=params,
+            )
+        ],
+    )
+
+
+def _write(path: pathlib.Path, text: str, **_kwargs) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def test_rowset_filter_pass_and_catches(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "inventory.csv",
+        "item_id,item_name,current_stock,safety_stock,unit_cost,supplier_status\n"
+        "A1,電阻,8,40,0.05,ACTIVE\n"
+        "A2,MCU,5,20,10.0,ACTIVE\n"
+        "A2,MCU,5,20,10.0,ACTIVE\n"      # 重複列
+        "A3,電容,50,20,1.0,ACTIVE\n"      # 未低於安全量
+        "A4,晶片,3,30,2.0,DISCONTINUED\n"  # 停產，須排除
+        "A5,晶振,10,10,0.01,ACTIVE\n",    # 10 < 10 為假
+    )
+    params = {
+        "input_csv": "inventory.csv",
+        "exclude": [{"col": "supplier_status", "op": "eq", "value": "DISCONTINUED"}],
+        "dedup_by": "item_id",
+        "include": [{"col": "current_stock", "op": "lt", "value": "safety_stock"}],
+        "identity": ["item_id"],
+        "values": {
+            "item_name": "item_name",
+            "current_stock": "current_stock",
+            "safety_stock": "safety_stock",
+            "restock_needed": {"expr": "safety_stock - current_stock"},
+            "estimated_cost": {"expr": "(safety_stock - current_stock) * unit_cost", "round": 2},
+        },
+        "atol": 0.01,
+    }
+    req_set = _req_set("rowset_filter", params, "restock.csv")
+
+    # good：正確兩列（A1：32、1.60；A2：15、150.00）
+    good = tmp_path / "good"
+    _write(
+        good / "restock.csv",
+        "item_id,item_name,current_stock,safety_stock,restock_needed,estimated_cost\n"
+        "A1,電阻,8,40,32,1.60\n"
+        "A2,MCU,5,20,15,150.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：多帶了停產品項 A4（行集不符）
+    bad_extra = tmp_path / "bad_extra"
+    _write(
+        bad_extra / "restock.csv",
+        "item_id,item_name,current_stock,safety_stock,restock_needed,estimated_cost\n"
+        "A1,電阻,8,40,32,1.60\n"
+        "A2,MCU,5,20,15,150.00\n"
+        "A4,晶片,3,30,27,54.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_extra)}
+    assert res["req_main"].status == "FAIL"
+    assert res["req_main"].evidence.get("counterexamples")
+
+    # bad：金額算錯（150.00 → 140.00）
+    bad_val = tmp_path / "bad_val"
+    _write(
+        bad_val / "restock.csv",
+        "item_id,item_name,current_stock,safety_stock,restock_needed,estimated_cost\n"
+        "A1,電阻,8,40,32,1.60\n"
+        "A2,MCU,5,20,15,140.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_val)}
+    assert res["req_main"].status == "FAIL"
+    ce = res["req_main"].evidence["counterexamples"]
+    assert any(c.get("field") == "estimated_cost" for c in ce)
+
+
+def test_rowset_filter_unsafe_expr_is_unknown(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "inventory.csv",
+        "item_id,current_stock\nA1,8\n",
+    )
+    params = {
+        "input_csv": "inventory.csv",
+        "identity": ["item_id"],
+        "values": {"hacked": {"expr": "__import__('os').getcwd()"}},
+    }
+    req_set = _req_set("rowset_filter", params, "restock.csv")
+    good = tmp_path / "good"
+    _write(good / "restock.csv", "item_id,hacked\nA1,x\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    # 不安全運算式＝無可靠重算能力 ⇒ UNKNOWN，不得 PASS 也不得 FAIL
+    assert res["req_main"].status == "UNKNOWN"
+
+
+def test_group_aggregate_counts_ratio_mean(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "grades.csv",
+        "student_id,class_name,midterm_score,final_score,status\n"
+        "S1,Class_A,78,82,ENROLLED\n"
+        "S2,Class_A,55,60,ENROLLED\n"
+        "S2,Class_A,55,60,ENROLLED\n"   # 重複
+        "S3,Class_B,90,70,ENROLLED\n"
+        "S4,Class_B,40,50,WITHDRAWN\n",  # 退學，須排除
+    )
+    params = {
+        "input_csv": "grades.csv",
+        "exclude": [{"col": "status", "op": "eq", "value": "WITHDRAWN"}],
+        "dedup_by": "student_id",
+        "group_by": ["class_name"],
+        "compute": [{"name": "total_score", "expr": "midterm_score * 0.4 + final_score * 0.6"}],
+        "aggregates": [
+            {"name": "student_count", "type": "count"},
+            {"name": "passing_count", "type": "count_if", "expr": "total_score >= 60.0"},
+            {"name": "pass_rate", "type": "ratio", "num": "passing_count", "den": "student_count", "round": 2},
+            {"name": "average_score", "type": "mean", "expr": "total_score", "round": 2},
+        ],
+        "atol": 0.01,
+    }
+    req_set = _req_set("group_aggregate", params, "class_summary.csv")
+
+    # Class_A: S1 total 80.4 (pass), S2 total 58 (fail) → 2,1,0.50,69.20
+    # Class_B: S3 total 90*0.4+70*0.6 = 78.0 (pass) → 1,1,1.00,78.00
+    good = tmp_path / "good"
+    _write(
+        good / "class_summary.csv",
+        "class_name,student_count,passing_count,pass_rate,average_score\n"
+        "Class_A,2,1,0.50,69.20\n"
+        "Class_B,1,1,1.00,78.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：平均算錯
+    bad_mean = tmp_path / "bad_mean"
+    _write(
+        bad_mean / "class_summary.csv",
+        "class_name,student_count,passing_count,pass_rate,average_score\n"
+        "Class_A,2,1,0.50,60.20\n"
+        "Class_B,1,1,1.00,78.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_mean)}
+    assert res["req_main"].status == "FAIL"
+
+    # bad：Class_A 被大小寫拆成兩行（normalize 後同組重複）
+    bad_case = tmp_path / "bad_case"
+    _write(
+        bad_case / "class_summary.csv",
+        "class_name,student_count,passing_count,pass_rate,average_score\n"
+        "Class_A,1,1,1.00,80.40\n"
+        "class_a,1,0,0.00,58.00\n"
+        "Class_B,1,1,1.00,78.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_case)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_group_aggregate_normalize_and_default(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "expenses.csv",
+        "expense_id,category,subcategory,amount\n"
+        "E1,IT,hardware,100.00\n"
+        "E2,it,Hardware,50.25\n"
+        "E3,IT,,10.00\n"
+        "E4,IT,,10.00\n",
+    )
+    params = {
+        "input_csv": "expenses.csv",
+        "group_by": ["category", "subcategory"],
+        "group_normalize": {
+            "category": "lower",
+            "subcategory": {"lower": True, "default": "unspecified"},
+        },
+        "aggregates": [{"name": "total_amount", "type": "sum", "expr": "amount", "round": 2}],
+        "atol": 0.01,
+    }
+    req_set = _req_set("group_aggregate", params, "expense_summary.csv")
+
+    good = tmp_path / "good"
+    _write(
+        good / "expense_summary.csv",
+        "category,subcategory,total_amount\n"
+        "it,hardware,150.25\n"
+        "it,unspecified,20.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：subcategory 大小寫拆成兩組（同組重複計）
+    bad_split = tmp_path / "bad_split"
+    _write(
+        bad_split / "expense_summary.csv",
+        "category,subcategory,total_amount\n"
+        "it,hardware,100.00\n"
+        "it,Hardware,50.25\n"
+        "it,unspecified,20.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_split)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_group_aggregate_distinct_mean_skip_empty(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "traffic.csv",
+        "visit_id,user_id,day_index,hour,tz_offset_hours,dwell_seconds\n"
+        "V1,U1,1,9,8,120\n"
+        "V2,U2,1,23,8,85\n"
+        "V3,U1,1,23,8,\n"
+        "V4,U3,2,0,8,60\n"
+        "V5,U3,2,17,8,\n",
+    )
+    params = {
+        "input_csv": "traffic.csv",
+        "compute": [{"name": "local_day", "expr": "day_index + ((hour + tz_offset_hours) // 24)"}],
+        "group_by": ["local_day"],
+        "aggregates": [
+            {"name": "visits", "type": "count"},
+            {"name": "uv", "type": "distinct", "col": "user_id"},
+            {"name": "avg_dwell", "type": "mean_skip_empty", "col": "dwell_seconds", "round": 2},
+        ],
+        "atol": 0.01,
+    }
+    req_set = _req_set("group_aggregate", params, "daily_traffic.csv")
+
+    # local_day = day_index + ((hour+tz)//24)：
+    #   V1 d1 h9  → 1；V2 d1 h23 → 2；V3 d1 h23 → 2；V4 d2 h0 → 2；V5 d2 h17 → 3
+    # day1: {V1(U1,120)}          → visits 1, uv 1, avg 120.00
+    # day2: {V2(U2,85),V3(U1,),V4(U3,60)} → visits 3, uv 3, avg (85+60)/2=72.50
+    # day3: {V5(U3,)}             → visits 1, uv 1, avg 空
+    good = tmp_path / "good"
+    _write(
+        good / "daily_traffic.csv",
+        "local_day,visits,uv,avg_dwell\n"
+        "1,1,1,120.00\n"
+        "2,3,3,72.50\n"
+        "3,1,1,\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：未做時區換算（照 day_index 分組）
+    # d1: V1,V2,V3 → 3, uv2, avg (120+85)/2=102.50；d2: V4,V5 → 2, uv1, avg 60.00
+    bad_no_tz = tmp_path / "bad_no_tz"
+    _write(
+        bad_no_tz / "daily_traffic.csv",
+        "local_day,visits,uv,avg_dwell\n"
+        "1,3,2,102.50\n"
+        "2,2,1,60.00\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_no_tz)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_summary_numbers_csv_and_pct(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "grades.csv",
+        "student_id,midterm_score,final_score\n"
+        "S1,78,82\n"
+        "S2,55,60\n"
+        "S3,90,70\n",
+    )
+    params = {
+        "input_csv": "grades.csv",
+        "compute": [{"name": "total_score", "expr": "midterm_score * 0.4 + final_score * 0.6"}],
+        "numbers": [
+            {"type": "count", "label": "全年級修課人數"},
+            {"type": "pct_if", "expr": "total_score >= 60.0", "label": "全年級及格率", "round": 2},
+            {"type": "mean", "expr": "total_score", "label": "全年級平均總評", "round": 2},
+        ],
+        "atol": 0.01,
+    }
+    req_set = _req_set("summary_numbers", params, "summary.md")
+
+    # S1 80.4 pass / S2 58 fail / S3 78.0 pass → count 3, pct 66.67, mean 216.4/3=72.13
+    good = tmp_path / "good"
+    _write(
+        good / "summary.md",
+        "# 摘要\n全年級修課人數：3 人\n全年級及格率（總評 ≥ 60.0）：66.67%\n全年級平均總評：72.13 分\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：及格率寫錯
+    bad_pct = tmp_path / "bad_pct"
+    _write(
+        bad_pct / "summary.md",
+        "# 摘要\n全年級修課人數：3 人\n全年級及格率（總評 ≥ 60.0）：80.00%\n全年級平均總評：72.13 分\n",
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_pct)}
+    assert res["req_main"].status == "FAIL"
+    ce = res["req_main"].evidence["counterexamples"]
+    assert any("及格率" in str(c) for c in ce)
+
+
+def test_summary_numbers_json_flatten(tmp_path: pathlib.Path):
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "events.json",
+        json.dumps(
+            [
+                {"event_id": "e1", "event_type": "CLICK", "payload": {"duration_ms": 120}},
+                {"event_id": "e2", "event_type": "Click", "payload": {}},
+                {"event_id": "e3", "event_type": "VIEW", "payload": {"duration_ms": 80}},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    flatten = [{"path": "payload.duration_ms", "as": "duration_ms", "impute": 0}]
+    params_group = {
+        "input_json": "events.json",
+        "flatten": flatten,
+        "group_by": ["event_type"],
+        "group_normalize": {"event_type": "lower"},
+        "aggregates": [
+            {"name": "event_count", "type": "count"},
+            {"name": "total_duration_ms", "type": "sum", "expr": "duration_ms"},
+        ],
+        "atol": 0.5,
+    }
+    params_summary = {
+        "input_json": "events.json",
+        "flatten": flatten,
+        "numbers": [
+            {"type": "count", "label": "事件總數"},
+            {"type": "sum", "expr": "duration_ms", "label": "總時長"},
+        ],
+        "atol": 0.5,
+    }
+
+    req_set = RequirementSet(
+        task_id="t",
+        items=[
+            RequirementItem(id="req_g", quote="g", deliverable="event_stats.csv", verifier="group_aggregate", params=params_group),
+            RequirementItem(id="req_s", quote="s", deliverable="summary.md", verifier="summary_numbers", params=params_summary),
+        ],
+    )
+
+    good = tmp_path / "good"
+    _write(
+        good / "event_stats.csv",
+        "event_type,event_count,total_duration_ms\n"
+        "click,2,120\n"
+        "view,1,80\n",
+    )
+    _write(good / "summary.md", "# 摘要\n事件總數：3 筆（event_type 不分大小寫）\n總時長：200 ms\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_g"].status == "PASS"
+    assert res["req_s"].status == "PASS"
+
+    # bad：總時長抄錯（漏掉 impute 0 的那筆仍影響不了總和，但這裡直接寫錯數字）
+    bad_sum = tmp_path / "bad_sum"
+    _write(
+        bad_sum / "event_stats.csv",
+        "event_type,event_count,total_duration_ms\n"
+        "click,2,120\n"
+        "view,1,80\n",
+    )
+    _write(bad_sum / "summary.md", "# 摘要\n事件總數：3 筆\n總時長：210 ms\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_sum)}
+    assert res["req_g"].status == "PASS"
+    assert res["req_s"].status == "FAIL"
+
+
+def test_new_verifiers_missing_input_is_unknown(tmp_path: pathlib.Path):
+    # 原始輸入不存在＝看不到 ⇒ UNKNOWN，不得 FAIL（更不得 PASS）
+    task_dir = tmp_path / "task"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    params = {"input_csv": "missing.csv", "group_by": ["a"], "aggregates": [{"name": "n", "type": "count"}]}
+    req_set = _req_set("group_aggregate", params, "out.csv")
+    d = tmp_path / "d"
+    _write(d / "out.csv", "a,n\nx,1\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "UNKNOWN"
