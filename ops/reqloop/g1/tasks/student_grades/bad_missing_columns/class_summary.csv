@@ -1,7 +1,4 @@
-# 壞版本：CSV 缺少 pass_rate 欄位 (bad_missing_columns)
-# 此版本錯誤在於 class_summary.csv 缺少了 pass_rate 欄位。
-
 class_name,student_count,passing_count,average_score
-Class_A,8,7,70.08
-Class_B,9,8,75.04
-Class_C,9,8,76.98
+Class_A,9,8,77.67
+Class_B,10,9,73.30
+Class_C,10,9,77.55

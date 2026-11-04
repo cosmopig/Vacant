@@ -1,7 +1,4 @@
-# 壞版本：未排除退學生 (bad_include_withdrawn)
-# 此版本錯誤在於保留了 status == 'WITHDRAWN' 的記錄。
-
 class_name,student_count,passing_count,pass_rate,average_score
-Class_A,10,8,0.80,72.45
-Class_B,9,8,0.89,75.04
-Class_C,9,8,0.89,76.98
+Class_A,11,8,0.73,71.33
+Class_B,11,9,0.82,70.73
+Class_C,11,9,0.82,73.82
