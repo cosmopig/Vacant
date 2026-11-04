@@ -386,3 +386,53 @@ def test_result_manifest_sha_is_the_loaded_manifest(tmp_path):
                           include_dirs=("data",))
     assert res.manifest_sha256 == _sha(alt_p)
     assert res.manifest_sha256 != _sha(base / "manifest.json")
+
+
+def test_manifest_budget_reaches_executor(tmp_path):
+    """G3 預註冊預算契約（r995 回歸鎖，vq-5nz.6）：manifest 的 budget 必須逐字傳到
+    執行器 run()——fire 命令（python -m vacant_network.reqloop.g2）走的就是
+    run_g2_smoke→repair_slice 這條路。若回归把單輪 timeout 掉回硬編碼 300s、
+    或丟棄 manifest 的 min_rounds/max_rounds，本測試必須紅。
+    用 600s（G3 預註冊值 300s→600s）而非 300s：若實作只讀預設值，兩者無差別、
+    測試無牙。
+    """
+    base = tmp_path / "smoke"
+    shutil.copytree(SMOKE, base)
+    full = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    full["budget"]["timeout_s_per_round"] = 600
+    (base / "manifest.json").write_text(json.dumps(full, ensure_ascii=False),
+                                        encoding="utf-8")
+
+    man = g2.G2Manifest.load(base / "manifest.json")
+    seen_timeouts: list[float] = []
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        seen_timeouts.append(timeout_s)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    res = g2.run_g2_smoke(man, base, tmp_path / "out", build, run,
+                          include_dirs=("data",))
+
+    # 600s 預算真的傳到執行器（不是 300s 預設值）
+    assert seen_timeouts, "無模型呼叫，無法驗證預算傳遞"
+    assert all(t == 600 for t in seen_timeouts), seen_timeouts
+
+    by = {(c["draft"], c["arm"]): c for c in res.cells}
+    # min_rounds：generic 臂對的草稿也重驗 1 次；localized 缺口驅動 0 呼叫
+    assert by[("dab_035-pi-C", "generic")]["cost"]["model_calls"] == 1
+    assert by[("dab_035-pi-C", "localized")]["cost"]["model_calls"] == 0
+    # bad 草稿：兩輪預算用盡（max_rounds=2＝_STALL_LIMIT＝2），缺口仍在
+    assert by[("dab_507-pi-A", "generic")]["cost"]["model_calls"] == 2
+    assert by[("dab_507-pi-A", "localized")]["cost"]["model_calls"] == 2
+    assert by[("dab_039-pi-C", "generic")]["stopped"] in (
+        repair.STOP_MAX_ROUNDS, repair.STOP_STALLED)
+    assert by[("dab_039-pi-C", "generic")]["final_readable_status"]["req_answer_kv"] != "PASS"
