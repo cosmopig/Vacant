@@ -585,6 +585,8 @@ def main(argv: list[str] | None = None, *,
     ap.add_argument("--out", default=None, help="輸出根目錄（預設 /tmp 下新建）")
     ap.add_argument("--feedback-mode", choices=FEEDBACK_MODES, default="localized")
     ap.add_argument("--rounds", type=int, default=2, help="修復輪數上限（預設 2）")
+    ap.add_argument("--min-rounds", type=int, default=None,
+                    help="無已確認缺口時至少執行的輪數（預設：generic 臂為 1，localized 臂為 0）")
     ap.add_argument("--timeout", type=float, default=300.0, help="單輪 agent wall timeout（秒）")
     ap.add_argument("--provider", default=os.environ.get("VACANT_PI_PROVIDER"),
                     help="pi provider（預設讀 VACANT_PI_PROVIDER；不給＝pi 預設）")
@@ -611,11 +613,16 @@ def main(argv: list[str] | None = None, *,
     out_root = pathlib.Path(args.out) if args.out else \
         pathlib.Path(tempfile.mkdtemp(prefix="vacant-repair-"))
 
+    min_rounds = args.min_rounds
+    if min_rounds is None:
+        min_rounds = 1 if args.feedback_mode == "generic" else 0
+
     outcome = repair_slice(
         task_dir, req_set, draft_dir,
         out_root=out_root, build=build, run=run,
         feedback_mode=args.feedback_mode, max_rounds=args.rounds,
         timeout_s=args.timeout, synthetic=args.synthetic,
+        min_rounds=min_rounds,
     )
 
     if args.json:
