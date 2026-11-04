@@ -7419,3 +7419,12 @@ DECISION:954=🔴 成本來源修復完成（TDD 4/4 fail→pass、selftest 9 �
 - 紅線：零發射；零產品行為改動（草稿＝staging 文件、非 vacant_network/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:955=e016 未完賽（49/102、ETA 今天下午）⇒依鐵則不乾等、預備 L007 §4 分支 3——保守選擇：只寫草稿（staging、非 packet、發射前置＝MECHANISM_CONFIRMED 硬門、判準先寫、六門在後），不碰產品碼、不發實驗；假說空間如實列 H-a 弱證據（pg_food_chain 122 次仍敗）、不預判；選一個假說＝候步驟 2 現場證據（≥1 格檔＋行）｜五態裁決＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## Round 956（2026-11-04 01:48–02:0x，R&D 負責人）
+- 🔴（senior 11/04 指示 #1）：兩項驗收判準實跑皆達（selftest 9 組 ALL OK、live 48/102 正確非 0；slice endswith 與 done/ 門已在案＝1821-1）；剩餘缺口＝「連 -r1 目錄都缺」的格不計 missing（完賽後缺 ≥21 格仍對剩餘格出裁決＝靜默忽略缺格、違反未測≠通過）⇒TDD 修復 `missing_total(total, missing_scored)＝missing_scored＋max(0,102−total)`、run() 於 INCOMPLETE 門後套用（selftest 10→10 組 RED→GREEN、case 10＝5 計數斷言＋80 格⇒UNKNOWN；live INCOMPLETE 48/102 RC=10 行為不變；cost unittest 4/4）；ops 1c54b4a／Vacant db745925（md5 位元組一致）。
+- argon 合併審查（senior 前言）：argon HEAD c9a811fe（round 905 WIP、DECISION_20261103_E016_ENVLEAK_FIX.md +88）已為 qwen27b 祖先（merge-base 驗證）⇒**無待合 argon commit**、本輪零 merge 動作；CI：0527d915 綠 4670（01:52 出）、state idle、e70ec0ec＋db745925 待下窗口跑（產品碼自綠後未變、本輪改動非 tests/⇒收錄 4741 不變）。
+- e016 attempt-2 監控：48/102 在位（47 出分、A16/C16/C-nf16）；pace ~12–16 分/格、餘 54 格⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派、無新 infra。
+- 未驗證：五態裁決本體（e016 未完賽）；rescore；e70ec0ec/db745925 CI（輪末複核、紅燈先修紀律）；助手票 R20261104_0124-1 進行中（doing/、01:46 活躍、不接手）。
+- 紅線：零發射（e016 唯一在跑、只監控）；本輪改動＝審計工具（非 vacant_network/、非 tests/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+
+DECISION:956=senior #1 兩驗收判準已達（slice＋done 門在案）但「無目錄缺分」計數缺口＝真實 fail-open 洞（完賽後缺 21+ 格仍出裁決）⇒保守修復：摺入既有 missing>20%⇒UNKNOWN 規則、不新增態、不更預註冊狀態表、fail-closed only、進行中 path（exit 10）零改動｜argon 無待合 commit（c9a811fe 已合併在案）⇒不 merge｜五態裁決＋L007 §4 分支＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer
