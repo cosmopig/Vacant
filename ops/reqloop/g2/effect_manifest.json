@@ -39,15 +39,17 @@
    "generic": 1,
    "localized": 0
   },
-  "note": "G2 基準 2 輪×300s（非 g3 的 600s 換方法；600s 是否有效是另一實驗）；min_rounds 同 G2：generic 對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+  "note": "G2 基準 2 輪×300s（非 g3 的 600s 換方法；600s 是否有效是另一實驗）；min_rounds 同 G2：generic 對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；stall：連續 2 輪無必需項新確認進度⇒停止（stalled；_STALL_LIMIT=2，記入 cost.budget.stall_limit）；兩臂同模型、同總預算"
  },
  "scoring": {
-  "before": "凍結草稿按原始要求可讀狀態（PASS/FAIL/UNKNOWN；UNKNOWN=無法判定，非 0/FAIL）",
-  "after": "同格末輪答案重驗同一條目",
-  "fixed": "原 FAIL 的必需項本輪新確認轉 PASS（FAIL→UNKNOWN 不算修好；振蕩不算）",
-  "gap_closed": "before 有非 PASS、after 全 PASS（fixed 列明）",
-  "regressed": "before PASS、after 非 PASS（紅線；任何一格 regressed 即本批不達標，必須逐格記錄，不得用淨改善掩蓋）",
-  "not_complete": "缺項／UNKNOWN／CONFLICT 不得宣告完成；原始需求未覆蓋的部分仍未驗證",
+  "source": "裁決依據＝vacant_network/reqloop/repair.py 的實際輸出（2026-11-04 對照代碼核實）：逐格欄位 RepairOutcome.{stopped,fixed,regressed,unresolved,cost}；四態來自 intake.verifiers.ClaimResult（PASS/FAIL/UNKNOWN/CONFLICT）；缺項記 MISSING、計入 unresolved。g2 批跑（vacant_network/reqloop/g2.py main）管線跑通即回 0（冒煙口徑：缺口修沒修好是**結果**、不是失敗）——裁決看逐格欄位，不看批跑退出碼；0/20/22 退出碼屬 repair 單格 CLI（repair.py _exit_code：0＝缺口關閉且無 unresolved；20＝跑過但缺口未閉、或 no_gap＋unresolved（未驗證、拒收）；22＝agent 應該跑但一次都沒跑起來（infra））。",
+  "before": "凍結草稿按原始要求可讀狀態（run_requirement_checks；PASS/FAIL/UNKNOWN；缺項＝MISSING；UNKNOWN＝無法判定、非 0/FAIL）",
+  "after": "末輪重驗狀態（rounds[-1].after）；若零呼叫（localized 無缺口／min_rounds=0）則 after＝before（凍結草稿原狀）",
+  "gap_closed": "stopped==gap_closed ⇔ _required_all_pass：所有必需條目在末輪重驗明確 PASS（缺項／UNKNOWN 不算 PASS）",
+  "fixed": "管線 fixed 欄位：原 FAIL（必需或非必需）且末輪重驗明確 PASS；FAIL→UNKNOWN 不算修好；振蕩（修→退→再修同一項）不算新修復；停滯進度判據（原 FAIL 的必需項本輪新確認轉 PASS）只決定何時停止、不決定裁決",
+  "regressed": "管線 regressed 欄位：原 PASS 且過程任何一輪或最終非 PASS（紅線；任何一格 regressed 即本批不達標，必須逐格記錄，不得用淨改善掩蓋）",
+  "stopped": "no_gap（零呼叫；若必需項有 UNKNOWN／缺項，exit 仍是 20）／gap_closed／stalled（連續 2 輪無必需項新確認進度；_STALL_LIMIT=2）／max_rounds（預算用盡、缺口仍在）",
+  "not_complete": "unresolved（非 PASS、含 MISSING）不得宣告完成；原始需求未覆蓋的部分仍未驗證",
   "hidden_after": "全格 UNKNOWN（本地無權重跑 hidden scorer；缺值不填 0）"
  },
  "leak_guard": "修復模型只看原始問題原文、凍結資料與逐條 FAIL/UNKNOWN 條目（含其 quote 與 verifier 名）；重算值/hidden 參考值/期望值永不進證據或提示；兩臂同一套規則（自造案例僅限離線修復單元測試，標 synthetic）",

@@ -492,6 +492,16 @@ def test_effect_manifest_preregistration():
     assert man.budget["min_rounds"] == {"generic": 1, "localized": 0}
     assert man.budget["hard_token_cap"] is False
 
+    # scoring 與 repair.py 實際語義對齊（2026-11-04 對照代碼核實）：裁決看管線輸出，
+    # 不看批跑退出碼（g2 批跑管線跑通即回 0；0/20/22 屬 repair 單格 CLI）
+    sc = raw["scoring"]
+    assert "repair.py" in sc["source"] and "g2.py" in sc["source"]
+    assert "22" in sc["source"]  # infra 退出碼明確歸屬 repair CLI
+    assert "_required_all_pass" in sc["gap_closed"] and "必需條目" in sc["gap_closed"]
+    assert "末輪重驗" in sc["fixed"] and "FAIL→UNKNOWN 不算修好" in sc["fixed"]
+    assert "after＝before" in sc["after"]  # 零呼叫⇒after＝before
+    assert all(k in sc["stopped"] for k in ("no_gap", "gap_closed", "stalled", "max_rounds"))
+
     # 未點名＝未發射；只發射 9 份 ready 不得呈現為 G2 正式效果比較
     assert raw["status"] == "FROZEN_PENDING_NAMING"
     assert "15" in raw["naming_required"]  # 完整清單＝9 ready＋6 pending
