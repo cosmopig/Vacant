@@ -23,8 +23,8 @@ import pytest
 
 from vacant_network.adapters.agents import Launch
 from vacant_network.reqloop import repair
-from vacant_network.reqloop.checks import run_requirement_checks
-from vacant_network.reqloop.requirements import RequirementSet
+from vacant_network.reqloop.checks import check_tag_format, run_requirement_checks
+from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 G1_TASK = REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks" / "expense_category"
@@ -385,3 +385,38 @@ def test_main_exit_codes_and_json(task_dir, tmp_path, capsys):
                        "--synthetic", "--json"],
                       build=_fake_build([]), run=dead)
     assert rc3 == 22
+
+
+# --- check_tag_format（自 auto/argon 198e5043 移植；r974 merge 保留 qwen 實作）---
+
+def test_tag_format_verifier(tmp_path: pathlib.Path):
+    item = RequirementItem(
+        id="c1",
+        quote="quote",
+        deliverable="answer.txt",
+        verifier="tag_format",
+        kind="explicit",
+        params={"file": "answer.txt", "tag": "mean_val", "value_type": "integer"},
+    )
+
+    # 1. missing file
+    res = check_tag_format(tmp_path, item)
+    assert res.status == "FAIL"
+    assert "缺少指定檔案" in res.detail
+
+    # 2. missing brackets: @mean_val1234
+    (tmp_path / "answer.txt").write_text("@mean_val1234\n", encoding="utf-8")
+    res = check_tag_format(tmp_path, item)
+    assert res.status == "FAIL"
+    assert "缺少方括號" in res.detail
+
+    # 3. float with decimal when integer required: @mean_val[1234.56]
+    (tmp_path / "answer.txt").write_text("@mean_val[1234.56]\n", encoding="utf-8")
+    res = check_tag_format(tmp_path, item)
+    assert res.status == "FAIL"
+    assert "包含小數點" in res.detail
+
+    # 4. correct positive integer: @mean_val[1234]
+    (tmp_path / "answer.txt").write_text("@mean_val[1234]\n", encoding="utf-8")
+    res = check_tag_format(tmp_path, item)
+    assert res.status == "PASS"
