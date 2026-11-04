@@ -150,7 +150,7 @@ def build_repair_prompt(
     before: list[ClaimResult],
     *,
     feedback_mode: str = "localized",
-    include_dirs: tuple[str, ...] = (),
+    include_dirs: tuple[str, ...] = ("data",),
 ) -> str:
     """組修復請求。只帶：相關原文、目前交付物、失敗證據（可見反例）、
     允許改的範圍、必須保持成立的條件。不帶任何隱藏答案／hidden／scorer。
@@ -230,7 +230,7 @@ def prepare_workspace(
     out_root: str | pathlib.Path,
     *,
     round_n: int = 1,
-    include_dirs: tuple[str, ...] = (),
+    include_dirs: tuple[str, ...] = ("data",),
 ) -> pathlib.Path:
     """建立第 round_n 輪的工作目錄：task 顶层檔案（源資料等）＋白名單子目錄＋草稿檔案。
 
@@ -354,7 +354,7 @@ def run_repair_round(
     run: RunFn,
     feedback_mode: str,
     timeout_s: float,
-    include_dirs: tuple[str, ...] = (),
+    include_dirs: tuple[str, ...] = ("data",),
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。原草稿不被改動。"""
     ws = prepare_workspace(task_dir, draft_dir, out_root,
@@ -428,7 +428,7 @@ def repair_slice(
     timeout_s: float = 300.0,
     synthetic: bool = False,
     min_rounds: int = 0,
-    include_dirs: tuple[str, ...] = (),
+    include_dirs: tuple[str, ...] = ("data",),
 ) -> RepairOutcome:
     """有上限的修復入口（預算由這裡管，不靠提示詞）。
 
@@ -592,6 +592,8 @@ def main(argv: list[str] | None = None, *,
                     help="pi provider（預設讀 VACANT_PI_PROVIDER；不給＝pi 預設）")
     ap.add_argument("--model", default=os.environ.get("VACANT_PI_MODEL"),
                     help="pi model（預設讀 VACANT_PI_MODEL；不給＝provider 預設）")
+    ap.add_argument("--include-dirs", nargs="*", default=["data"],
+                    help="進工作區的子目錄白名單（預設 ['data']）")
     ap.add_argument("--no-hooks", action="store_true", help="pi 不載 Vacant 掛鉢")
     ap.add_argument("--synthetic", action="store_true",
                     help="此草稿為自造案例（G1）：本次只是離線接線測試，不作 G2 效果")
@@ -617,12 +619,15 @@ def main(argv: list[str] | None = None, *,
     if min_rounds is None:
         min_rounds = 1 if args.feedback_mode == "generic" else 0
 
+    include_dirs = tuple(args.include_dirs) if args.include_dirs else ()
+
     outcome = repair_slice(
         task_dir, req_set, draft_dir,
         out_root=out_root, build=build, run=run,
         feedback_mode=args.feedback_mode, max_rounds=args.rounds,
         timeout_s=args.timeout, synthetic=args.synthetic,
         min_rounds=min_rounds,
+        include_dirs=include_dirs,
     )
 
     if args.json:
