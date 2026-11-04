@@ -1,0 +1,46 @@
+{
+  "task_id": "dab_427",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Count the number of entries which have the null value in the \"min_p\" column. Only the null values should be counted, and not any irrelevant or erroneous data that might be present.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "null_entries_count",
+            "type": "nonneg_int"
+          }
+        ]
+      },
+      "description": "答案檔含 @null_entries_count 且值為非負整數（可見格式）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_null_entries_count",
+      "quote": "Count the number of entries which have the null value in the \"min_p\" column. Only the null values should be counted, and not any irrelevant or erroneous data that might be present.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "null_entries_count",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {
+          "type": "null_count",
+          "col": "min_p",
+          "note": "只數 null 細胞（''/none/null/nan/na/n-a，大小寫不敏感），不數其他錯誤資料——任務文字「Only the null values should be counted」"
+        }
+      },
+      "description": "@null_entries_count 的值須與對凍結資料重算一致（min_p 欄 null 計數）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

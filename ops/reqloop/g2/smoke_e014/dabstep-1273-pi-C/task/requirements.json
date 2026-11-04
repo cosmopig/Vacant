@@ -1,0 +1,28 @@
+{
+  "task_id": "dabstep-1273",
+  "items": [
+    {
+      "id": "req_globalcard_avg_fee",
+      "quote": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR? (Answer must be just a number expressed in EUR rounded to 6 decimals.)",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/fees.json",
+        "recompute": {
+          "type": "scheme_fee_avg",
+          "scheme": "GlobalCard",
+          "is_credit": true,
+          "amount": 10,
+          "round": 6,
+          "note": "公開 manual.md 公式 fee = fixed_amount + rate·amount/10000；在 card_scheme=GlobalCard 且 is_credit=true 的 fee 規則集上平均；6 位小數"
+        }
+      },
+      "description": "答案為單一數字（EUR），須與對凍結資料重算的 GlobalCard credit 10 EUR 平均費率一致",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

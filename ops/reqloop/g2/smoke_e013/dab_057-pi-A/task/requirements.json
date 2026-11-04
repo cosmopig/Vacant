@@ -1,0 +1,48 @@
+{
+  "task_id": "dab_057",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths. ... Do this for complete data rather than specific country or year.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "correlation_coefficient",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "答案檔含 @correlation_coefficient 且值為數字（-1 到 1；可見格式）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_correlation_coefficient",
+      "quote": "Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths. ... Do this for complete data rather than specific country or year.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "correlation_coefficient",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "pearson2",
+          "col_a": "No. of cases_median",
+          "col_b": "No. of deaths_median",
+          "round": 2,
+          "note": "點估計口徑（complete data＝全 856 列）：每行 'No. of cases' 的點估計即 'No. of cases_median'（字串前導數值，逐行相等），deaths 同；此口徑 r=0.97，與 lab 既有記錄（pass=True）一致。另一口徑（字面欄位 Int64 可解析的 312 列子集）r=-0.03；凍結選點估計口徑，因任務要求 complete data 且與記錄分一致。Pearson r，兩位小數"
+        }
+      },
+      "description": "@correlation_coefficient 的值須與對凍結資料重算一致（點估計口徑 Pearson r）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

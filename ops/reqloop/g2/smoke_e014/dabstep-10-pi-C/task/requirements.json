@@ -1,0 +1,25 @@
+{
+  "task_id": "dabstep-10",
+  "items": [
+    {
+      "id": "req_unique_merchants",
+      "quote": "How many unique merchants are present in the dataset? (Answer must be just a number of unique merchants.)",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "unique_count",
+          "col": "merchant",
+          "note": "payments.csv merchant 欄去重計數（字串層級；空值不算）——「How many unique merchants are present in the dataset?」"
+        }
+      },
+      "description": "答案為單一數字，須與對凍結資料重算的 unique merchant 數一致",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}
