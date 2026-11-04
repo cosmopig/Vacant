@@ -515,6 +515,58 @@ def test_effect_manifest_preregistration():
     assert "10–20" in raw["naming_required"] or "5 對" in raw["naming_required"]
 
 
+def test_verify_frozen_covers_data_files(tmp_path):
+    """回歸鎖（r1011，審計票 R20261104_2123-1）：verify_frozen 必須也驗 data_files。
+    舊門只驗交付檔＋requirements.json；data_files 的 hash 被凍結進 manifest 卻從不驗
+    路徑——effect_manifest 5 份 e013 條目 key 缺 data/ 前綴，檔案在、hash 對，官方門
+    卻發現不了（靠漏驗拿到的綠燈就是放過這個洞的條件；H-0 同型）。
+    凍結清單裡每一條 pin 都必須指向可解析、hash 相符的檔案，否則該 pin 只是裝飾。
+    """
+    base = tmp_path / "g2"
+    task_dir = base / "smoke" / "t1" / "task"
+    draft_dir = base / "smoke" / "t1" / "draft"
+    (task_dir / "data").mkdir(parents=True)
+    draft_dir.mkdir(parents=True)
+    (task_dir / "requirements.json").write_text("{}", encoding="utf-8")
+    (task_dir / "data" / "in.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+    (draft_dir / "answer.txt").write_text("42\n", encoding="utf-8")
+
+    def manifest(data_files: dict) -> pathlib.Path:
+        raw = {
+            "schema": "vacant.reqloop.g2.manifest/1",
+            "frozen_at": "t", "ticket": "t", "purpose": "t",
+            "arms": ["generic", "localized"],
+            "model": {}, "budget": {}, "scoring": {}, "leak_guard": "t",
+            "drafts": [{
+                "name": "t1-pi-A", "role": "bad", "task_id": "t1",
+                "source": {"run": "r", "cell": "c",
+                           "score": {"pass": False, "n_correct": "0/1"}},
+                "draft": {"dir": "smoke/t1/draft",
+                          "files": {"answer.txt": _sha(draft_dir / "answer.txt")}},
+                "task": {"dir": "smoke/t1/task",
+                         "requirements": {"sha256": _sha(task_dir / "requirements.json")},
+                         "data_files": data_files},
+            }],
+            "pending": [],
+        }
+        p = base / "manifest.json"
+        p.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+        return p
+
+    in_hash = _sha(task_dir / "data" / "in.csv")
+
+    # 路徑與 hash 都對 → 過
+    g2.G2Manifest.load(manifest({"data/in.csv": in_hash})).verify_frozen(base)
+
+    # key 缺 data/ 前綴（effect_manifest 5 份 e013 條目的實況）→ 必須拒
+    with pytest.raises((FileNotFoundError, ValueError, KeyError)):
+        g2.G2Manifest.load(manifest({"in.csv": in_hash})).verify_frozen(base)
+
+    # hash 不符 → 必須拒
+    with pytest.raises((ValueError, KeyError)):
+        g2.G2Manifest.load(manifest({"data/in.csv": "0" * 64})).verify_frozen(base)
+
+
 # ── vq-5nz.16：新凍結 6 份的 before-check 與已記錄分一致 ──────────────────
 
 # name → (role, task 目錄, draft 目錄, 期望 FAIL 的必需條目 id；None＝只要有必需 FAIL 即可；

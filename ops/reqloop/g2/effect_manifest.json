@@ -206,7 +206,7 @@
      "sha256": "51502b32ff40eb5b770248a2cf0a76d6ae0f47b4256d2d1738727e8700a867b9"
     },
     "data_files": {
-     "estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+     "data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
     }
    },
    "lab_note": "e013 記錄 pass=False（0/1）"
@@ -239,7 +239,7 @@
      "sha256": "fd8a392af0da93558501d45b1012bf11657d70060cb0c3b0eb585ff251303d34"
     },
     "data_files": {
-     "cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+     "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
     }
    },
    "lab_note": "e013 記錄 pass=False（0/1）"
@@ -272,7 +272,7 @@
      "sha256": "74ddf809991113901485a80022d22093fe68a0182457ef57cf92fc400232ea59"
     },
     "data_files": {
-     "test_Y3wMUE5_7gLdaTN.csv": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8"
+     "data/test_Y3wMUE5_7gLdaTN.csv": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8"
     }
    },
    "lab_note": "e013 記錄 pass=True（1/1）"
@@ -470,7 +470,7 @@
      "sha256": "c177f92c05c234b14cb6a84a38628a8c4fa93dc767c4633e48c4d5219f0c64e3"
     },
     "data_files": {
-     "estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+     "data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
     }
    }
   },
@@ -516,7 +516,7 @@
      "sha256": "ef15a3dcaca21d6cbb055241971af83083a6ecd291b2e5f9baaea7013b3bfc03"
     },
     "data_files": {
-     "cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+     "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
     }
    }
   },
