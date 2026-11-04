@@ -193,6 +193,52 @@ def test_prompt_never_names_hidden_sources(task_dir):
             assert bad not in p, (mode, bad)
 
 
+def test_plain_recomputed_fail_prompt_leak_guard(tmp_path: pathlib.Path):
+    """G2 依賴核對（repair.py × checks.cond_rate，r985 審查 redo）：
+    build_repair_prompt 是 cond_rate FAIL 輸出進入修復提示的唯一路徑——
+    localized 只帶「值不符重算」的事實＋公開規則＋交付物自身的值；
+    重算值（本例 2/4＝0.5）絕不進提示（leak guard，manifest 口徑，同 e013）；
+    generic 臂不帶失敗證據；兩臂皆不點名 hidden 來源。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text(
+        "What is the fraud rate for in-person transactions for the year 2023?\n"
+        "（Answer must be just a number）\n", encoding="utf-8")
+    (task_dir / "payments.csv").write_text(
+        "year,shopper_interaction,has_fraudulent_dispute\n"
+        "2023,POS,True\n2023,POS,True\n2023,POS,False\n2023,POS,False\n"
+        "2023,Ecommerce,True\n2022,POS,True\n", encoding="utf-8")   # 重算值＝2/4＝0.5
+    (draft / "answer.txt").write_text("0.4\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_main", quote="fraud_rate_2023_inperson", deliverable="answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv", "recompute": {
+            "type": "cond_rate",
+            "where": [{"col": "year", "op": "eq", "value": "2023"},
+                      {"col": "shopper_interaction", "op": "eq", "value": "POS"}],
+            "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}]}})])
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_main"] == "FAIL"
+
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "req_main" in loc                                # 哪一條沒過
+    assert "fraud_rate_2023_inperson" in loc                # 條目原文
+    assert "不符" in loc                                     # 失敗事實（detail 原文）
+    assert "0.4" in loc                                      # 交付物自身的值（可見反例）
+    assert "0.5" not in loc                                  # 重算值不得進提示（leak guard）
+
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "fraud rate" in gen                               # 原始需求兩臂都有
+    assert "req_main" not in gen                              # generic 不帶失敗證據
+    assert "0.5" not in gen
+    assert "0.4" not in gen
+    for p in (loc, gen):
+        for bad in ("hidden/", "scorer.py", "/srv/eval"):
+            assert bad not in p, bad
+
+
 # ── 完整切片（fake agent，synthetic 離線接線）──────────────────────
 
 def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):
