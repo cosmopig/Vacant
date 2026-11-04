@@ -7441,10 +7441,10 @@ DECISION:956=senior #1 兩驗收判準已達（slice＋done 門在案）但「�
 DECISION:957=e016 未完賽（54/102）⇒依鐵則不乾等、預備收口動作——保守選擇：把「完賽那一輪」的裁決程序＋五態後續＋結案寫位置全錨定預註冊原檔寫成 runbook（staging、非 packet、收口時照抄不轉述），直接對治 round 956 redo 暴露的失敗模式（NOW 下一步 3 曾非 §4 表原文、被複審退回）；不碰產品碼、不發射｜五態裁決＋結案寫（L006 §6／L007 §4／FINDINGS）皆候完賽｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer
 
 ## Round 958（2026-11-04 02:25–02:4x，R&D 負責人）
-- **e016 attempt-2 監控**：55/102 在位（50 出分：A 8p/8f/1 missing、C 6p/9f/1 timeout/1 missing、C-nf 7p/9f）；infra 快照 3/50＝6%＜20% 閾（pg_bowling C「suite timed out 60s」、pg_dominoes A/C「no dominoes.py in workspace」）；02:26 events 活躍＝健康非停擺；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派。
+- **e016 attempt-2 監控**：51/102 live 格在位（50 出分：A 8p/8f/1 missing、C 6p/9f/1 timeout/1 missing、C-nf 7p/9f；pg_phone_number C-nf 在跑）；計數口徑＝管線 `load()` live `-r1` 目錄（:146；2 個 pg_bowling A infra 存檔 `*.infra-20261103*` 不計、ls|wc -l＝55 項＝51 live＋2 存檔＋REPORT.json/REPORT.md）；infra 快照 3/50＝6%＜20% 閾（pg_bowling C「suite timed out 60s」、pg_dominoes A/C「no dominoes.py in workspace」）；02:26 events 活躍＝健康非停擺；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午；盤餘 62G、queue 空、无双分派。
 - **預備驗證（本輪重跑）**：管線 `--selftest` 10 組 ALL OK RC=0（ops cwd）；收口命令鏈式樣核實（report.py 位置參數 exp＋`--rescore`、e008/e010 先例在案）；CI d590821c（r956）綠 4670（LATEST_qwen27b 02:17、覆蓋全部產品碼）、5576107c（r957 純文檔）跑中（pytest 02:28 活躍、收錄 4741）；argon c9a811fe／worker 69c50dba 皆綠、無待合 commit。
 - **新事實＋新待辦**：助手票 R20261104_0124-1（r955 草稿引用審計）01:46 後無進展、無助手進程可見、無 PASS/FAIL 結果、無 Done 段⇒**停擺**；照 NOW「不接手」紀律本輪不接手；BACKLOG 已登（下輪仍停擺⇒R&D 裁處：自行執行此只讀審計或重發票；門＝L007 §4 分支 3 packet 提升前置、runbook §2 態 3）。
 - **未驗證**：五態裁決本體＋rescore（e016 未完賽）；CI 5576107c 結果（輪末複核、紅燈先修紀律）；助手票結果（未產出）。
 - 紅線：零發射（e016 唯一在跑、只監控）；零產品行為改動（vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
-DECISION:958=e016 未完賽（55/102、50 出分、infra 6%＜20%）⇒依鐵則不乾等、只驗預備與監控（selftest 重跑 ALL OK、命令鏈式樣核實、infra 快照、CI 在跑）＋記助手票停擺事實（無進程、無結果）但**不接手**（NOW 紀律在案、保守＝遵守既有指示並登記裁處點）｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer｜五態裁決＋結案寫（L006 §6／L007 §4／FINDINGS）皆候完賽
+DECISION:958=e016 未完賽（51/102 live 格、50 出分、infra 6%＜20%）⇒依鐵則不乾等、只驗預備與監控（selftest 重跑 ALL OK、命令鏈式樣核實、infra 快照、CI 在跑）＋記助手票停擺事實（無進程、無結果）但**不接手**（NOW 紀律在案、保守＝遵守既有指示並登記裁處點）｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer｜五態裁決＋結案寫（L006 §6／L007 §4／FINDINGS）皆候完賽

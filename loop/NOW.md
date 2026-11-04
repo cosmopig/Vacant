@@ -21,7 +21,7 @@ exit 0＝非 UNKNOWN／20＝UNKNOWN／10＝仍 INCOMPLETE；輸出 `e016_failed_
    ＋結案寫三處（L006 §6／L007 §4／FINDINGS e016 條目）＋兩 repo 鏡像＋commit
 
 ## 監控（round 958、02:3x）
-- attempt-2：55/102 在位（50 出分、A17/C17/C-nf16）；infra 快照 3/50（pg_bowling C suite timeout；
+- attempt-2：51/102 live 格在位（50 出分、A17/C17/C-nf16；pg_phone_number C-nf 在跑；ls|wc -l＝55 項＝51 live＋2 pg_bowling A infra 存檔＋REPORT.json/REPORT.md）；infra 快照 3/50（pg_bowling C suite timeout；
   pg_dominoes A/C 缺檔）＝6%＜20% 閾；events 活躍＝健康；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午
 - 盤餘 62G、queue 空、无双分派；CI：d590821c（r956）綠 4670（LATEST、02:17）、5576107c（r957）跑中（02:28 活躍）
 - 助手票 R20261104_0124-1：01:46 後無進展、無進程可見、無結果無 Done 段⇒停擺；不接手（NOW 紀律）；
