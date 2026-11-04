@@ -1,0 +1,4 @@
+class_name,student_count,passing_count,pass_rate,average_score
+Class_A,8,7,0.88,70.08
+Class_B,9,8,0.89,75.04
+Class_C,9,8,0.89,76.98
