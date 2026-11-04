@@ -111,3 +111,5 @@ ops/exhibit/twin/live/
 # 實測過）。2026-09-19 真的被 `git add -A` 撞進去一次，見 commit a8fb56ff。
 ops/gain/_r481_fixture_scope_*.md
 ops/gain/_r481_dup_*/
+ops/gain/_r47x_*
+
