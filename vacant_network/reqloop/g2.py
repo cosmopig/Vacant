@@ -287,16 +287,8 @@ def write_result(res: G2Result, out_root: str | pathlib.Path) -> pathlib.Path:
 # ── CLI（單一入口：--dry-run 列清單；否則真跑）────────────────────────
 
 def _default_build(provider: str | None, model: str | None, hooks: bool = True):
-    from vacant_network.adapters.agents import pi_build
-    extra: list[str] = []
-    if provider:
-        extra += ["--provider", provider]
-    if model:
-        extra += ["--model", model]
-
-    def build(prompt: str, ws: pathlib.Path):
-        return pi_build(prompt, ws, hooks=hooks, extra=extra or None)
-    return build
+    """與 repair._default_build 同一份（含直譯器 pin）——此處不許再有第二份副本（drift 來源）。"""
+    return repair._default_build(provider, model, hooks=hooks)
 
 
 def main(argv: Sequence[str] | None = None, *,

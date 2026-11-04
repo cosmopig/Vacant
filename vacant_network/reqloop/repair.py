@@ -52,6 +52,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 import tempfile
 from typing import Any, Callable
 
@@ -521,6 +522,29 @@ def repair_slice(
 
 # ── CLI：可重跑的原生 pi 命令 ────────────────────────────────────────
 
+def pin_agent_python(launch: Any, *, python: str | os.PathLike | None = None) -> Any:
+    """把修復 agent 的裸 `python`／`python3` pin 到明確直譯器（預設＝本程序 sys.executable）。
+
+    根因（2026-11-04 dab_039 冒煙停因）：agent 的 bash 裡裸 `python3` 依 PATH 解析；
+    venv 在 PATH 前但當時缺 scipy/numpy，模型誤判科學堆疊不可用，兩輪都未產出交付物。
+    pin 是 env 層保證（不是提示詞）：PATH 首位＝修復器與驗證重算同一個直譯器。
+    找不到該直譯器＝fail-open，不動 env。
+
+    ⚠ 故意**不** resolve 符號連結：venv 的 bin/python 是指向基礎直譯器的 symlink，
+    venv 的判定看的是「以哪條路徑啟動」（可執行檔目錄下的 pyvenv.cfg）；resolve 之後
+    pin 到的就是基礎直譯器、venv 的 site-packages 全部失效。
+    """
+    py = pathlib.Path(os.path.abspath(str(python) if python is not None else sys.executable))
+    if not py.is_file():
+        return launch
+    bindir = str(py.parent)
+    old = launch.env.get("PATH") or os.environ.get("PATH", "")
+    rest = [e for e in old.split(os.pathsep) if e and e != bindir]
+    launch.env["PATH"] = os.pathsep.join([bindir, *rest])
+    launch.env["VACANT_REPAIR_PYTHON"] = str(py)
+    return launch
+
+
 def _default_build(provider: str | None, model: str | None, hooks: bool = True):
     from vacant_network.adapters.agents import pi_build
     extra: list[str] = []
@@ -530,7 +554,7 @@ def _default_build(provider: str | None, model: str | None, hooks: bool = True):
         extra += ["--model", model]
 
     def build(prompt: str, ws: pathlib.Path):
-        return pi_build(prompt, ws, hooks=hooks, extra=extra or None)
+        return pin_agent_python(pi_build(prompt, ws, hooks=hooks, extra=extra or None))
     return build
 
 

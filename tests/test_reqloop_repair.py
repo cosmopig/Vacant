@@ -389,6 +389,73 @@ def test_main_exit_codes_and_json(task_dir, tmp_path, capsys):
 
 # --- check_tag_format（自 auto/argon 198e5043 移植；r974 merge 保留 qwen 實作）---
 
+# ── 直譯器 pin（dab_039 停因，r975；2026-11-04）────────────────────
+# 根因：agent 的裸 python3 走 PATH 解析；冒煙時 venv 在 PATH 前但缺 scipy/numpy，
+# 模型誤判科學堆疊不可用、兩輪均未產出交付物。pin＝env 層保證，不靠提示詞。
+
+def test_pin_agent_python_puts_executable_bin_first():
+    import os, sys
+    l = Launch(argv=["pi"], env={"PATH": "/usr/bin:/bin"})
+    repair.pin_agent_python(l)
+    # 啟動路徑（venv 身份靠它），不 resolve symlink
+    bindir = str(pathlib.Path(sys.executable).parent)
+    assert l.env["PATH"].split(":")[0] == bindir
+    assert l.env["VACANT_REPAIR_PYTHON"] == os.path.abspath(sys.executable)
+    assert "/usr/bin" in l.env["PATH"].split(":")          # 原 PATH 條目保留
+
+
+def test_pin_agent_python_dedupes_and_keeps_other_entries():
+    import sys
+    bindir = str(pathlib.Path(sys.executable).parent)
+    l = Launch(argv=["pi"], env={"PATH": f"{bindir}:/usr/bin"})
+    repair.pin_agent_python(l)
+    entries = l.env["PATH"].split(":")
+    assert entries.count(bindir) == 1                        # 不重複
+    assert "/usr/bin" in entries
+
+
+def test_pin_agent_python_failopen_when_interpreter_missing():
+    l = Launch(argv=["pi"], env={"PATH": "/usr/bin"})
+    before = dict(l.env)
+    repair.pin_agent_python(l, python="/nonexistent/python3.9")
+    assert l.env == before                                   # 找不到直譯器＝不動 env
+
+
+def test_default_build_pins_python_into_launch_env():
+    import sys
+    build = repair._default_build(None, None, hooks=False)
+    l = build("prompt", pathlib.Path("/tmp"))
+    bindir = str(pathlib.Path(sys.executable).parent)
+    assert l.env["PATH"].split(":")[0] == bindir
+
+
+def test_pin_survives_venv_symlink():
+    """venv 的 bin/python 是指向基礎直譯器的 symlink；pin 到的是啟動路徑（venv），
+    agent 端 import 到 venv 的 site-packages，不是基礎直譯器的。"""
+    import subprocess, sys
+    build = repair._default_build(None, None, hooks=False)
+    l = build("prompt", pathlib.Path("/tmp"))
+    r = subprocess.run(
+        ["bash", "-c", "command -v python3; python3 -c 'import scipy, numpy; print(scipy.__version__)'"],
+        env=dict(l.env), capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    first = r.stdout.splitlines()[0]
+    assert pathlib.Path(first).parent == pathlib.Path(sys.executable).parent, first
+    # 若 venv 與基礎直譯器的 scipy 版本不同，這裡就抓得到 pin 失效
+    import scipy as venv_scipy
+    assert venv_scipy.__version__ in r.stdout, r.stdout
+
+
+def test_g2_default_build_pins_python_too():
+    """g2 曾有一份未 pin 的 _default_build 副本（drift 來源）——兩處必須同一行為。"""
+    import sys
+    from vacant_network.reqloop import g2
+    build = g2._default_build(None, None, hooks=False)
+    l = build("prompt", pathlib.Path("/tmp"))
+    bindir = str(pathlib.Path(sys.executable).parent)
+    assert l.env["PATH"].split(":")[0] == bindir
+
+
 def test_tag_format_verifier(tmp_path: pathlib.Path):
     item = RequirementItem(
         id="c1",
