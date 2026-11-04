@@ -1572,14 +1572,23 @@ def check_plain_recomputed(
                         "rule": rule_desc, "expected_in_evidence": False})
     if not val_str:
         return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
+    exp_num: float | None = None
     if isinstance(expected, (int, float)) and not isinstance(expected, bool):
+        exp_num = float(expected)
+    elif isinstance(expected, str):
+        try:
+            exp_num = float(expected)
+        except ValueError:
+            exp_num = None
+
+    if exp_num is not None:
         try:
             got = float(val_str)
         except ValueError:
             return _result(item, "FAIL", "答案值不可解析為數字",
                            {"problem": "not_a_number", "value": val_str})
         atol = float(p.get("atol", 1e-6))
-        ok = abs(got - expected) <= atol
+        ok = abs(got - exp_num) <= atol
     else:
         ok = str(expected).strip() == val_str
     if not ok:

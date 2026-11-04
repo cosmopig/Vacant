@@ -486,6 +486,43 @@ def test_main_exit_codes_and_json(task_dir, tmp_path, capsys):
     assert rc3 == 22
 
 
+def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
+    """CLI 支援 --min-rounds：
+    - generic 臂預設 min_rounds=1（好草稿也至少跑 1 輪以重驗有無退步）
+    - 顯式傳入 --min-rounds 0 則不呼叫 agent
+    """
+    good_draft = task_dir / "good"
+    calls: list[int] = []
+
+    def counting_agent(launch, *, workspace, timeout_s, log_dir):
+        calls.append(1)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}")
+        return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None}
+
+    # 1. generic 臂未顯式給 --min-rounds：預設 1 輪（不能 0 呼叫逃逸）
+    rc = repair.main(
+        ["--task", str(task_dir), "--draft", str(good_draft),
+         "--out", str(tmp_path / "out_gen"), "--feedback-mode", "generic",
+         "--synthetic", "--json"],
+        build=_fake_build([]), run=counting_agent,
+    )
+    assert rc == 0
+    assert len(calls) == 1, "generic 臂預設 min_rounds 應為 1，至少重驗 1 輪"
+
+    # 2. 顯式給予 --min-rounds 0：好草稿直接 0 呼叫放行
+    calls.clear()
+    rc2 = repair.main(
+        ["--task", str(task_dir), "--draft", str(good_draft),
+         "--out", str(tmp_path / "out_zero"), "--feedback-mode", "generic",
+         "--min-rounds", "0", "--synthetic", "--json"],
+        build=_fake_build([]), run=counting_agent,
+    )
+    assert rc2 == 0
+    assert len(calls) == 0, "顯式 --min-rounds 0 應為 0 呼叫"
+
+
+
 # --- check_tag_format（自 auto/argon 198e5043 移植；r974 merge 保留 qwen 實作）---
 
 # ── 直譯器 pin（dab_039 停因，r975；2026-11-04）────────────────────

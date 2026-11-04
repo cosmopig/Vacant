@@ -1205,3 +1205,32 @@ def test_plain_recomputed_fee_ids_lookup_empty_and_unknown(tmp_path: pathlib.Pat
     _write(d3 / "answer.txt", "8\n")
     res3 = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set3, d3)}
     assert res3["req_main"].status == "UNKNOWN"
+
+
+def test_plain_recomputed_numeric_equivalence(tmp_path: pathlib.Path):
+    """plain_recomputed: 數值等價性（14.0 與 14 同等）避免字串完全比對導致數值答案被誤判 FAIL。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "payments.csv",
+        "hour_of_day\n14\n14\n14\n13\n13\n16\n",   # mode = 14
+    )
+    params = {
+        "data_file": "payments.csv",
+        "recompute": {"type": "mode_col", "col": "hour_of_day"},
+    }
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+
+    d_float = tmp_path / "d_float"
+    _write(d_float / "answer.txt", "14.0\n")
+    res_float = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d_float)}
+    assert res_float["req_main"].status == "PASS"
+
+    d_int = tmp_path / "d_int"
+    _write(d_int / "answer.txt", "14\n")
+    res_int = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d_int)}
+    assert res_int["req_main"].status == "PASS"
+
+    d_wrong = tmp_path / "d_wrong"
+    _write(d_wrong / "answer.txt", "14.5\n")
+    res_wrong = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d_wrong)}
+    assert res_wrong["req_main"].status == "FAIL"
