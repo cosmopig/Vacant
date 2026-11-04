@@ -1,6 +1,6 @@
 {
  "schema": "vacant.reqloop.g2.manifest/1",
- "status": "selection_frozen_NOT_fired",
+ "status": "selection_frozen_TDD_complete_NOT_fired",
  "frozen_at": "2026-11-04T13:38:00Z",
  "ticket": "vq-5nz（G2 e014 第二批）",
  "purpose": "G2 小批真實交付物（e014/dabstep factoid）：3 真草稿 × generic/localized＝6 格；只驗管線，不宣稱任何提升。2 bad（dabstep-23/dabstep-1753，lab reward 0）＋1 good（dabstep-13，lab reward 1）",
@@ -96,13 +96,29 @@
    "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
   }
  ],
+ "frozen": {
+  "frozen_at": "2026-11-04T14:35:00Z",
+  "layout": "smoke_e014/_data/（5 檔實體、sha256 見 data_source.files）＋ dabstep-{13-pi-A,23-pi-C,1753-pi-C}/task/{request.md,contract.md,requirements.json,data/（相對符號連結→../../../_data/）}＋ draft/answer.txt（無行尾換行，sha256 與 drafts[].draft 一致）",
+  "expected_visible": {
+   "dabstep-13": {"value": "14", "basis": "hour_of_day 眾數：14→9430 行（次高 13→9401，唯一勝出，無平手）／138236 行",
+    "lab_consistency": "lab 好草稿=14（reward 1）→ 本可見檢查 PASS；方向一致"},
+   "dabstep-23": {"value": "0.0", "basis": "2023∧POS 分母 12397 行、fraud 分子 0（本凍結快照 10765 筆 fraud 全在 Ecommerce）→ 行數比 0/12397=0.0（真實重算值，分母非 0，非 UNKNOWN、非填 0）",
+    "lab_consistency": "lab 差草稿=0.00152745（reward 0）→ 本可見檢查 FAIL；與「hidden 答案≠0.00152745」方向一致（hidden 值本身 UNKNOWN，本地無權重跑）"},
+   "dabstep-1753": {"value": "47 個 fee ID（集合，順序無關）", "basis": "Belles_cookbook_store（MCC 5942、R、delay 1 天）2023-03（doy 60..90）：總量 116436.32→'100k-1m'、fraud 11933.29→10.2488%→'>8.3%'；null/空列表＝無限制；is_credit/aci 交易層不限制",
+    "interpretation_note": "is_credit/aci 為交易層條件，商戶層查詢不據以排除＝本凍結解讀（manual.md 只定義欄位語義，未定義商戶層查詢如何處理交易層欄位）；較嚴讀法（只收 is_credit=null 且 aci 空）→1 筆（ID 454）；最嚴（交易層欄位全 null/空）→0 筆。三種讀法下真實草稿 'None' 皆 FAIL，方向一致；期望 ID 集永不進證據",
+    "lab_consistency": "lab 差草稿=None（reward 0）→ 本可見檢查 FAIL；方向一致"}
+  },
+  "data_quirks": "本凍結快照全 138236 行皆 year=2023；fraud 全部 Ecommerce→2023 in-person fraud rate＝0.0 是真實重算值，不是缺失",
+  "e2e_validation": "三題凍結目錄（經各自 requirements.json＋符號連結資料）：13：'14'→PASS、'13'→FAIL、'None'→FAIL；23：'0'→PASS、'0.01'→FAIL、'None'→FAIL；1753：47 ID 集→PASS、'None'→FAIL。全部符合預期",
+  "test": "tests/test_reqloop_checks.py 30 passed（含 fee_ids_lookup 2 個新測試、4 類斷言場景）＋tests/test_reqloop_repair.py 27 passed（合計 57）"
+ },
  "pending_before_fire": {
   "recompute_rules_TDD": [
    "dabstep-13：mode_col（payments.csv hour_of_day 欄計數最大者；平手規則已凍結＝數值最小（可解析為數時）、否則字典序最小；TDD 已完成 r984：checks.py mode_col＋plain_recomputed，測試紅→綠，真實資料 sanity：14→PASS、13→FAIL）",
    "dabstep-23：fraud_rate_2023_inperson（payments.csv；語義 TDD 前凍結＝分母 year==2023 ∧ shopper_interaction==POS（POS=in-person，payments-readme.md 明言）、分子 ∧ has_fraudulent_dispute==True、分母 0→UNKNOWN、比率唯一無平手；TDD 已完成 r985：checks.py cond_rate＋plain_recomputed dispatch，測試紅→綠，真實資料 sanity：0/12397=0.0→「0」PASS／草稿 0.00152745→FAIL，重算值不進證據）",
-   "dabstep-1753：fee_ids_lookup（fees.json＋merchant_data.json：Belles_cookbook_store、2023-03 適用 fee ID 集合，語義照 manual.md，TDD 前凍結）"
+   "dabstep-1753：fee_ids_lookup（fees.json＋merchant_data.json：Belles_cookbook_store、2023-03 適用 fee ID 集合，語義照 manual.md，TDD 前凍結；TDD 已完成 r986：checks.py fee_ids_lookup＋plain_recomputed dispatch，測試紅→綠（pass/fail、空集、UNKNOWN、洩漏紅線），真實資料 sanity：47 ID 集→PASS、真實草稿 'None'→FAIL、漏一筆→FAIL、商戶不存在／該月無行→UNKNOWN、期望 ID 不進 detail/evidence）"
   ],
   "format_note": "dabstep 答案為 plain value（非 @kv 標籤）：requirements.json 依實際格式寫（數值/逗號列表）；現有 check_answer_kv/check_kv_recomputed 為 @kv 語義，本批格式檢查依需求逐條定義",
-  "redline": "重算規則未 TDD 過（含負例）不得發射；發射＝下一輪第一步，本凍結清單不得事後改動"
+  "redline": "重算規則未 TDD 過（含負例）不得發射——3/3 已完成（r984/r985/r986）；發射＝下一輪第一步，本凍結清單（含期望值記錄）不得事後改動；期望值只作審計對照，永不進修復提示/證據"
  }
 }

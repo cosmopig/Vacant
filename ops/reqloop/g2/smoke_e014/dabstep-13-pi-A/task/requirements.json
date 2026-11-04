@@ -1,0 +1,25 @@
+{
+  "task_id": "dabstep-13",
+  "items": [
+    {
+      "id": "req_hour_mode",
+      "quote": "During which hour of the day do the most transactions occur? Answer must be just a number representing the hour of the day.",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "mode_col",
+          "col": "hour_of_day",
+          "note": "hour_of_day 眾數（計數最大者）；平手→數值最小（TDD 前凍結，見 smoke_e014 manifest 與 checks.py::_mode_col）"
+        }
+      },
+      "description": "答案值必須等於對凍結資料 data/payments.csv 按公開規則重算的 hour_of_day 眾數；重算值不進證據（防洩漏）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

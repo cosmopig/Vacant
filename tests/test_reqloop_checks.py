@@ -1066,3 +1066,142 @@ def test_plain_recomputed_cond_rate_zero_and_unknown(tmp_path: pathlib.Path):
     req_set3 = _req_set("plain_recomputed", no_num, "answer.txt")
     res3 = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set3, zero)}
     assert res3["req_main"].status == "UNKNOWN"
+
+
+# ── plain_recomputed＋fee_ids_lookup（G2 小批：e014/dabstep-1753，2026-11-04）──
+
+def _write_fee_fixture(task_dir: pathlib.Path) -> None:
+    """M1（Belles 同形）：MCC 5942、account R、delay '1' 天（→'<3'）；
+    2023-03（doy 60..90，平年）總量 250000→'100k-1m'、欺詐 30000→12%→'>8.3%'。
+    2 月（doy 30）、2022、其他商戶（M2/M3）行皆不入重算。
+    M2：MCC 9999／F／manual；M3：MCC 7777／F（無 fee 列 MCC）→適用集為空。"""
+    _write(
+        task_dir / "payments.csv",
+        "merchant,year,day_of_year,eur_amount,has_fraudulent_dispute\n"
+        "M1,2023,60,100000,False\n"
+        "M1,2023,90,150000,False\n"
+        "M1,2023,70,30000,True\n"
+        "M1,2023,30,999999,True\n"
+        "M1,2022,60,999999,True\n"
+        "M2,2023,60,500000,True\n"
+        "M3,2023,60,1000,False\n",
+    )
+    _write(task_dir / "merchant_data.json", json.dumps([
+        {"merchant": "M1", "merchant_category_code": 5942, "account_type": "R",
+         "capture_delay": "1", "acquirer": ["x"]},
+        {"merchant": "M2", "merchant_category_code": 9999, "account_type": "F",
+         "capture_delay": "manual", "acquirer": ["y"]},
+        {"merchant": "M3", "merchant_category_code": 7777, "account_type": "F",
+         "capture_delay": "2", "acquirer": ["z"]},
+    ]))
+    _write(task_dir / "fees.json", json.dumps([
+        # 命中 M1：MCC∋5942 ∧ acct∋R ∧ cd '<3' ∧ vol 100k-1m ∧ fraud >8.3%
+        {"ID": 7, "merchant_category_code": [5942, 5943], "account_type": ["R"],
+         "capture_delay": "<3", "monthly_volume": "100k-1m", "monthly_fraud_level": ">8.3%",
+         "is_credit": None, "aci": []},
+        # 全欄無限制（null/空列表＝applies to all，manual.md 明言）
+        {"ID": 8, "merchant_category_code": [], "account_type": ["R"],
+         "capture_delay": None, "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        # MCC 不含 5942 → 排除
+        {"ID": 9, "merchant_category_code": [9999], "account_type": [],
+         "capture_delay": None, "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        # acct 不含 R → 排除
+        {"ID": 10, "merchant_category_code": [5942], "account_type": ["F"],
+         "capture_delay": None, "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        # capture_delay 類別不符（1 天只落 '<3'；'immediate'⟺0、'3-5'、'>5'、'manual' 皆排除）
+        {"ID": 11, "merchant_category_code": [5942], "account_type": [],
+         "capture_delay": "3-5", "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        {"ID": 12, "merchant_category_code": [5942], "account_type": [],
+         "capture_delay": "immediate", "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        {"ID": 13, "merchant_category_code": [5942], "account_type": [],
+         "capture_delay": ">5", "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        # volume 檔位不符（250000 落 '100k-1m'，非 '>5m'）→ 排除
+        {"ID": 14, "merchant_category_code": [5942], "account_type": [],
+         "capture_delay": None, "monthly_volume": ">5m", "monthly_fraud_level": None,
+         "is_credit": None, "aci": []},
+        # fraud 檔位不符（12% 落 '>8.3%'，非 '7.7%-8.3%'）→ 排除
+        {"ID": 15, "merchant_category_code": [5942], "account_type": [],
+         "capture_delay": None, "monthly_volume": None, "monthly_fraud_level": "7.7%-8.3%",
+         "is_credit": None, "aci": []},
+        # is_credit/aci 為交易層條件（商戶同時有 credit/debit、任一 ACI）→ 不限制商戶層適用（凍結解讀）
+        {"ID": 16, "merchant_category_code": [5942], "account_type": [],
+         "capture_delay": None, "monthly_volume": None, "monthly_fraud_level": None,
+         "is_credit": True, "aci": ["A"]},
+    ]))
+
+
+def _fee_ids_params(merchant: str = "M1", year: int = 2023, month: int = 3) -> dict:
+    return {
+        "data_file": "payments.csv",
+        "recompute": {
+            "type": "fee_ids_lookup",
+            "fees_file": "fees.json",
+            "merchants_file": "merchant_data.json",
+            "merchant": merchant, "year": year, "month": month,
+            "note": "語義 TDD 前凍結（manual.md）：null/空列表＝無限制；自然月重算 volume/fraud 檔位；"
+                    "is_credit/aci 交易層條件不限制商戶層適用",
+        },
+    }
+
+
+def test_plain_recomputed_fee_ids_lookup_pass_and_fail(tmp_path: pathlib.Path):
+    """fee_ids_lookup：M1 適用集＝{7,8,16}（順序無關比較；2/2022/M2 行不入重算）。
+    真實 dabstep-1753 草稿值 'None'→FAIL；漏一筆（7,8）→FAIL；期望 ID 不進證據（紅線）。"""
+    task_dir = tmp_path / "task"
+    _write_fee_fixture(task_dir)
+    req_set = _req_set("plain_recomputed", _fee_ids_params(), "answer.txt")
+
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "8,7,16\n")   # 與期望同集、不同序 → PASS
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "None\n")      # dabstep-1753 真實草稿值
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False   # 期望 ID 不進證據
+    blob = json.dumps(r.evidence, ensure_ascii=False) + (r.detail or "")
+    assert "16" not in blob and "7,8" not in blob             # 期望集合不出現在 detail/evidence
+
+    partial = tmp_path / "partial"
+    _write(partial / "answer.txt", "7,8\n")   # 漏 16 → FAIL
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, partial)}
+    assert res["req_main"].status == "FAIL"
+
+
+def test_plain_recomputed_fee_ids_lookup_empty_and_unknown(tmp_path: pathlib.Path):
+    """適用集為空→答案＝空字串（題目自帶口徑 empty list→empty string），空檔 PASS、'None' FAIL。
+    商戶不存在／該自然月無行→UNKNOWN（看不到＝UNKNOWN，不自評）。"""
+    task_dir = tmp_path / "task"
+    _write_fee_fixture(task_dir)
+
+    req_set = _req_set("plain_recomputed", _fee_ids_params(merchant="M3"), "answer.txt")
+    d = tmp_path / "empty"
+    _write(d / "answer.txt", "")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "PASS"
+
+    none = tmp_path / "none"
+    _write(none / "answer.txt", "None\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, none)}
+    assert res["req_main"].status == "FAIL"
+
+    req_set2 = _req_set("plain_recomputed", _fee_ids_params(merchant="NOPE"), "answer.txt")
+    d2 = tmp_path / "d2"
+    _write(d2 / "answer.txt", "8\n")
+    res2 = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set2, d2)}
+    assert res2["req_main"].status == "UNKNOWN"
+
+    req_set3 = _req_set("plain_recomputed", _fee_ids_params(year=2024), "answer.txt")
+    d3 = tmp_path / "d3"
+    _write(d3 / "answer.txt", "8\n")
+    res3 = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set3, d3)}
+    assert res3["req_main"].status == "UNKNOWN"

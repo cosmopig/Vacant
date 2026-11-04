@@ -12,6 +12,7 @@ vacant_network.reqloop.checks
 from __future__ import annotations
 
 import ast
+import calendar
 import csv
 import datetime
 import json
@@ -1341,6 +1342,163 @@ def _cond_rate(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     return len(numer) / len(pop)
 
 
+def _volume_band(total: float) -> str:
+    """monthly_volume 檔位（manual.md：'100k-1m' is between 100.000 and 1.000.000；邊界含兩端，TDD 前凍結）。"""
+    if total < 100_000:
+        return "<100k"
+    if total <= 1_000_000:
+        return "100k-1m"
+    if total <= 5_000_000:
+        return "1m-5m"
+    return ">5m"
+
+
+def _fraud_band(rate_pct: float) -> str:
+    """monthly_fraud_level 檔位（manual.md：'7.7%-8.3%' means between 7.7 and 8.3 percent；邊界含兩端，TDD 前凍結）。"""
+    if rate_pct < 7.2:
+        return "<7.2%"
+    if rate_pct <= 7.7:
+        return "7.2%-7.7%"
+    if rate_pct <= 8.3:
+        return "7.7%-8.3%"
+    return ">8.3%"
+
+
+def _capture_delay_fits(merchant_cd: Any, fee_cd: Any) -> bool:
+    """capture_delay 類別匹配（TDD 前凍結）：immediate⟺0 天、'<3'⟺0<d<3、'3-5'⟺3≤d≤5、'>5'⟺d>5、'manual'⟺商戶值即 'manual'；
+    商戶值為字串（immediate/manual）時與類別同字串才算數；fee_cd 為 null＝無限制（manual.md：null applies to all）。"""
+    if fee_cd is None:
+        return True
+    fee_cd = str(fee_cd).strip()
+    m = str(merchant_cd).strip()
+    try:
+        d = float(m)
+    except ValueError:
+        return fee_cd == m
+    if fee_cd == "immediate":
+        return d == 0
+    if fee_cd == "<3":
+        return 0 < d < 3
+    if fee_cd == "3-5":
+        return 3 <= d <= 5
+    if fee_cd == ">5":
+        return d > 5
+    return False  # 'manual' 或其他未定義類別
+
+
+def _fee_ids_lookup(
+    rows: list[dict[str, Any]],
+    rc: dict[str, Any],
+    task_dir: pathlib.Path,
+) -> tuple[int, ...]:
+    """fee_ids_lookup（G2 小批 e014/dabstep-1753）：某商戶某自然月之適用 fee ID 集合。
+
+    語義 TDD 前凍結（依 manual.md 公開規則；詳見 ops/reqloop/g2/smoke_e014/manifest.json）：
+    - 列表欄位（merchant_category_code/account_type/aci）：null 或空列表＝無限制
+      （manual.md："If a field is set to null it means that it applies to all possible values"；
+      本 JSON 以 [] 表示無限制）；否則商戶值須在列表內。
+    - 標量欄位（capture_delay/monthly_volume/monthly_fraud_level）：null＝無限制；否則須匹配。
+    - 商戶 MCC/account_type/capture_delay 取 merchant_data.json；數值 delay（天）對類別映射見 _capture_delay_fits。
+    - monthly_volume/monthly_fraud_level 依 payments.csv 該自然月重算（manual.md：
+      "Monthly volumes and rates are computed always in natural months"）：
+      總量→檔位；fraud 量（has_fraudulent_dispute==True）/總量→比率→檔位。
+    - is_credit/aci 為交易層條件；商戶層查詢同時容許 credit/debit 與任一 ACI→不限制適用
+      （凍結解讀；較嚴讀法會把答案縮到 1 或 0 筆，差異已記錄於 manifest）。
+    - 商戶不存在／該月無行／總量 0→UNKNOWN（看不到＝UNKNOWN，不自評）。
+    - 期望 ID 集永不進 detail/evidence（紅線：不向修復模型提供隱藏答案）。
+    """
+    fees_file = str(rc.get("fees_file", "")).strip()
+    merchants_file = str(rc.get("merchants_file", "")).strip()
+    merchant_name = str(rc.get("merchant", "")).strip()
+    year = rc.get("year")
+    month = rc.get("month")
+    if not fees_file or not merchants_file or not merchant_name:
+        raise UnknownSource("fee_ids_lookup 需要 fees_file/merchants_file/merchant")
+    if not isinstance(year, int) or not isinstance(month, int) or not 1 <= month <= 12:
+        raise UnknownSource("fee_ids_lookup 需要 year/month（整數）")
+    fees_path = task_dir / fees_file
+    merchants_path = task_dir / merchants_file
+    if not fees_path.is_file():
+        raise UnknownSource(f"fees 檔 {fees_file} 缺失")
+    if not merchants_path.is_file():
+        raise UnknownSource(f"商戶檔 {merchants_file} 缺失")
+    with fees_path.open(encoding="utf-8") as f:
+        fees = json.load(f)
+    with merchants_path.open(encoding="utf-8") as f:
+        merchants = json.load(f)
+    if not isinstance(fees, list) or not isinstance(merchants, list):
+        raise UnknownSource("fee_ids_lookup: fees/商戶檔非 JSON 列表")
+    m = next(
+        (x for x in merchants
+         if isinstance(x, dict) and str(x.get("merchant", "")).strip() == merchant_name),
+        None,
+    )
+    if m is None:
+        raise UnknownSource(f"商戶 {merchant_name} 未找到")
+
+    start_doy = sum(calendar.monthrange(year, k)[1] for k in range(1, month)) + 1
+    end_doy = start_doy + calendar.monthrange(year, month)[1] - 1
+    mrows: list[dict[str, Any]] = []
+    for r in rows:
+        if str(r.get("merchant", "")).strip() != merchant_name:
+            continue
+        if str(r.get("year", "")).strip() != str(year):
+            continue
+        try:
+            doy = int(str(r.get("day_of_year", "")).strip())
+        except ValueError:
+            continue
+        if start_doy <= doy <= end_doy:
+            mrows.append(r)
+    if not mrows:
+        raise UnknownSource("該商戶該自然月無付款行；無法重算 volume/fraud")
+
+    total = 0.0
+    fraud = 0.0
+    have_amount = False
+    for r in mrows:
+        try:
+            amount = float(str(r.get("eur_amount", "")).strip())
+        except ValueError:
+            continue
+        have_amount = True
+        total += amount
+        if str(r.get("has_fraudulent_dispute", "")).strip().lower() == "true":
+            fraud += amount
+    if not have_amount or total <= 0:
+        raise UnknownSource("總量為 0 或不可解析；fraud 率未定義")
+    vol_band = _volume_band(total)
+    fraud_band = _fraud_band(fraud / total * 100.0)
+
+    mcc_raw = m.get("merchant_category_code")
+    try:
+        mcc: int | None = int(mcc_raw)
+    except (TypeError, ValueError):
+        mcc = None
+    acct = m.get("account_type")
+    merchant_cd = m.get("capture_delay")
+
+    def _fits(f: dict[str, Any]) -> bool:
+        ml = f.get("merchant_category_code")
+        if ml and (mcc is None or mcc not in ml):
+            return False
+        al = f.get("account_type")
+        if al and (acct is None or acct not in al):
+            return False
+        if not _capture_delay_fits(merchant_cd, f.get("capture_delay")):
+            return False
+        mv = f.get("monthly_volume")
+        if mv is not None and mv != vol_band:
+            return False
+        mf = f.get("monthly_fraud_level")
+        if mf is not None and mf != fraud_band:
+            return False
+        # is_credit/aci：交易層條件，不限制商戶層適用（凍結解讀）
+        return True
+
+    return tuple(sorted(int(f["ID"]) for f in fees if isinstance(f, dict) and "ID" in f and _fits(f)))
+
+
 def check_plain_recomputed(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -1374,6 +1532,8 @@ def check_plain_recomputed(
             expected: Any = _mode_col(rows, rc)
         elif rtype == "cond_rate":
             expected = _cond_rate(rows, rc)
+        elif rtype == "fee_ids_lookup":
+            expected = _fee_ids_lookup(rows, rc, task_dir)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
     except (UnknownSource, OSError) as e:
@@ -1383,10 +1543,35 @@ def check_plain_recomputed(
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）", {"problem": "missing_file"})
     val_str = deliv_file.read_text(encoding="utf-8").strip()
-    if not val_str:
-        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
     rule_desc = (f"{str(rc.get('type'))}: {data_rel} "
                  f"{json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}")
+    if rtype == "fee_ids_lookup":
+        # 列表答案（fee ID 集合）：順序無關比較；空集合＝空字串（題目自帶口徑 empty list→empty string）；
+        # 期望 ID 集永不進 detail/evidence（紅線）。
+        if not val_str:
+            got_ids: set[int] = set()
+        else:
+            got_ids = set()
+            for tok in (t.strip() for t in val_str.split(",")):
+                if not tok:
+                    continue
+                try:
+                    got_ids.add(int(tok))
+                except ValueError:
+                    return _result(item, "FAIL", "答案含非數字 fee ID 記號；按題目口徑應為逗號分隔的數字列表（或空字串）",
+                                   {"problem": "not_a_fee_id", "value": val_str,
+                                    "rule": rule_desc, "expected_in_evidence": False})
+        if got_ids == set(expected):
+            return _result(item, "PASS",
+                           f"答案與按公開規則（{rule_desc}）重算的適用 fee ID 集一致",
+                           {"rule": rule_desc, "expected_in_evidence": False})
+        return _result(item, "FAIL",
+                       f"答案與按公開規則對公開資料重算的適用 fee ID 集不符；請依原始需求與工作區資料自行重算（期望 ID 不在證據中）",
+                       {"deliverable_value": val_str,
+                        "problem": "mismatch_with_recomputation",
+                        "rule": rule_desc, "expected_in_evidence": False})
+    if not val_str:
+        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
     if isinstance(expected, (int, float)) and not isinstance(expected, bool):
         try:
             got = float(val_str)
