@@ -711,3 +711,58 @@ def test_tag_format_verifier(tmp_path: pathlib.Path):
     (tmp_path / "answer.txt").write_text("@mean_val[1234]\n", encoding="utf-8")
     res = check_tag_format(tmp_path, item)
     assert res.status == "PASS"
+
+
+# ── r996 兩個缺口（TDD 先紅）────────────────────────────────────────
+
+def test_stall_budget_not_reset_by_nonrequired_fix(task_dir, tmp_path):
+    """停滯決策只看已確認缺口（必需 FAIL）：非必需項 FAIL→PASS 不算進度。
+
+    若把它算進度（缺陷）：每輪 diff 都對照原草稿，一次非必需修復會**每一輪**都重置
+    停滯預算，迴圈燒盡 max_rounds。規則原文：「連續兩次修復沒有消除已確認缺口⇒停止」
+    ——已確認缺口（req_group_recompute）從未消除，第 2 次無進展就必須停（2 呼叫，不是 4）。
+    """
+    import dataclasses
+    rs = load_req_set(task_dir)
+    items = [dataclasses.replace(it, id="req_optional_total", required=False)
+             if it.id == FAIL_CLAIM else it for it in rs.items]
+    rs2 = RequirementSet(task_id=rs.task_id, items=items)
+
+    draft = task_dir / "bad_round_each_row"   # 必需 group FAIL ＋ 非必需 summary FAIL
+    before = run_requirement_checks(task_dir, rs2, draft)
+    st = {c.claim_id: c.status for c in before}
+    assert st["req_group_recompute"] == "FAIL"
+    assert st["req_optional_total"] == "FAIL"
+
+    # agent 每輪只修非必需的 summary（CSV 不碰）
+    run = _fake_agent({"summary.md": _good_summary(task_dir)})
+    out = repair.repair_slice(
+        task_dir, rs2, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=4, synthetic=True,
+    )
+    assert out.stopped == "stalled"            # 不是 max_rounds：已確認缺口從未消除
+    assert out.cost["calls"] == 2              # 兩次無進展即停，不燒 4 次
+    assert "req_group_recompute" in out.unresolved
+    assert "req_optional_total" in out.fixed   # 非必需的修復如實記錄（fixed 不受影響）
+
+
+def test_main_no_gap_but_unverified_is_rejected_not_infra(task_dir, tmp_path, capsys):
+    """無必需 FAIL（0 呼叫）但有必需項 UNKNOWN（源資料缺失）：退出碼＝20（未驗證、拒收），
+    不是 22（infra）。22 保留給「agent 應該跑但沒跑起來」；把『未驗證』誤報成 infra
+    會誤導呼叫方去重試/查基建——裁決是『未驗證』，不是『基建壞了』。
+    """
+    d = tmp_path / "t"
+    shutil.copytree(task_dir, d)
+    (d / "expenses.csv").unlink()              # 重算檢查 → UNKNOWN（不自評）
+    log: list[dict] = []
+    rc = repair.main(["--task", str(d), "--draft", str(d / "good"),
+                      "--out", str(tmp_path / "o"), "--rounds", "2",
+                      "--feedback-mode", "localized", "--synthetic", "--json"],
+                     build=_fake_build(log), run=_fake_agent(None))
+    body = json.loads(capsys.readouterr().out)
+    assert rc == 20                            # 現行為 22（誤標 infra）
+    assert body["stopped"] == "no_gap"
+    assert log == []                           # 零呼叫是設計（缺口驅動），不是基建故障
+    assert "req_group_recompute" in body["unresolved"]
+    assert "req_summary_numbers" in body["unresolved"]

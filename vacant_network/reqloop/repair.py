@@ -18,6 +18,8 @@ G2 局部修復切片（工單 P000-20261104-01-repair-slice，2026-11-04）。
 - **連續兩次修復沒有消除已確認缺口**（必需條目 FAIL 數沒減少）⇒ 停止，
   回傳停因（`stopped`）及未解決項（`unresolved`）。預算由本控制器管（輪數上限），
   不靠提示詞。
+  停滯判據＝原 FAIL 的**必需**項本輪新確認轉 PASS；非必需項 FAIL→PASS、
+  FAIL→UNKNOWN、振蕩（修→退→再修同一項）都不算進度、不重置停滯計數。
 - **成本**：wall_ms／呼叫數由執行器（`run_agent`）實際攔截；token 從 agent 原始
   stdout 的 usage 讀，缺值＝UNKNOWN（None），**絕不填 0**。
 - **自造 G1 案例**只用於離線修復單元測試，標 `synthetic=True`；不作為 G2 效果。
@@ -34,7 +36,8 @@ CLI（可重跑的原生 pi 命令；provider/model 用既有 pi 設定，不輸
         --provider lms1003qwen --model qwen/qwen3.8-27b \
         --out <dir> --rounds 2 --timeout 300 --synthetic
 退出碼（照 `vacant run` 慣例）：0＝缺口關閉或無缺口；20＝跑過但缺口未閉；
-22＝agent 一次都沒跑起來（infra）。
+22＝agent 應該跑但一次都沒跑起來（infra）。no_gap 但仍有未驗證項
+（UNKNOWN/缺項）＝零呼叫是設計，退出碼 20（未驗證、拒收），不是 22。
 
 真草稿冒煙（G2，工單 P000-20261104-02，2026-11-04）新增兩個參數：
 - min_rounds：無已確認缺口時也至少跑幾輪（generic 臂＝1：對的草稿也要重驗，
@@ -452,6 +455,8 @@ def repair_slice(
 
     before = run_requirement_checks(t_dir, req_set, d_dir)
     req_fail = [c.claim_id for c in before if c.required and c.status == "FAIL"]
+    initial_req_fail = set(req_fail)
+    confirmed: set[str] = set()   # 原 FAIL 的必需項中，已確認轉 PASS 的高水位
     rounds: list[RepairRound] = []
     stalled = 0
     stopped = STOP_MAX_ROUNDS
@@ -471,13 +476,24 @@ def repair_slice(
             if _required_all_pass(req_set, r.after):
                 stopped = STOP_GAP_CLOSED
                 break
-            if not r.diff.closed_any_gap:
+            # 停滯決策（規則原文：「連續兩次修復沒有消除已確認缺口⇒停止」）：
+            # 進度＝原 FAIL 的必需項本輪新確認轉 PASS。以下**不**算進度：
+            # - 非必需項 FAIL→PASS：不是已確認缺口。若算進度，一次非必需修復會
+            #   每輪都重置停滯預算（每輪 diff 對照原草稿，fixed 一直非空），迴圈燒盡
+            #   max_rounds——預算紀律失效。
+            # - FAIL→UNKNOWN：紅線明列不算修好（若用「必需 FAIL 數下降」計數式判據，
+            #   弄壞資料檔把 FAIL 變 UNKNOWN 也能偽裝成『進度』）。
+            # - 振蕩（修→退→再修同一項）：非新確認的修復，同樣不重置。
+            newly = {c.claim_id for c in r.after
+                     if c.required and c.status == "PASS"} & initial_req_fail
+            if newly - confirmed:
+                confirmed |= newly
+                stalled = 0
+            else:
                 stalled += 1
                 if stalled >= _STALL_LIMIT:
                     stopped = STOP_STALLED
                     break
-            else:
-                stalled = 0
 
     last_after = rounds[-1].after if rounds else before
     final_status = _status_map(last_after)
@@ -661,6 +677,11 @@ def main(argv: list[str] | None = None, *,
 def _exit_code(outcome: RepairOutcome) -> int:
     if outcome.stopped in (STOP_NO_GAP, STOP_GAP_CLOSED) and not outcome.unresolved:
         return 0
+    if not outcome.rounds:
+        # no_gap 但仍有未驗證項（UNKNOWN/缺項）：0 模型呼叫是**設計**（缺口驅動、
+        # min_rounds=0），不是基建故障——22 保留給「agent 應該跑但沒跑起來」。把
+        # 『未驗證』誤報成 infra 會誤導呼叫方重試/查基建；裁決是 20（未驗證、拒收）。
+        return 20
     agent_ok = any(not r.agent.get("spawn_error") and r.agent.get("rc") is not None
                    for r in outcome.rounds)
     return 20 if agent_ok else 22
