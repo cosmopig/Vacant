@@ -1,25 +1,25 @@
 {
  "schema": "vacant.reqloop.g2.manifest/1",
  "ticket": "vq-5nz.15（G2 正式效果比較預註冊）",
- "classification": "【本 manifest＝RLOOP_PLAN.md G2 正式效果比較預註冊（10 錯＋5 對）】：9 份 ready 草稿（6 錯＋3 對）為 ops/reqloop/g2/{smoke,smoke_e013,smoke_e014}/ 已凍結目錄的原地引用（單一來源、零副本、hash 已驗證）；6 份 pending（4 錯＋2 對）為候選池、BLOCKED_PENDING_FREEZE（requirements.json 未凍結，未進 drafts 陣列）。**不是** ops/reqloop/g3/ 的停滯換方法驗證（那 8 格、2×600s、待點名）；也**不是** G1。未點名＝未發射（紅線維持）。",
+ "classification": "【本 manifest＝RLOOP_PLAN.md G2 正式效果比較預註冊（10 錯＋5 對）】：15 份 ready 草稿（10 錯＋5 對）為 ops/reqloop/g2/{smoke,smoke_e013,smoke_e014}/ 已凍結目錄的原地引用（單一來源、零副本、hash 已驗證）；pending 空。其中 6 份（dab_378-pi-C、dab_057-pi-A、dab_427-pi-A、dabstep-10-pi-C、dabstep-11-pi-A、dabstep-1273-pi-C）於 vq-5nz.16 凍結：per-task requirements.json（TDD，測試先行）＋before-check 與 lab 記錄分一致（4 bad 有必需 FAIL、2 good 全 PASS、0 UNKNOWN）。**不是** ops/reqloop/g3/ 的停滯換方法驗證（那 8 格、2×600s、待點名）；也**不是** G1。未點名＝未發射（紅線維持）。",
  "purpose": "RLOOP_PLAN G2 正式效果比較：同一份草稿，localized 臂（帶可見反例、只修缺口）vs generic 臂（原生重驗一次）；兩臂同模型（1004 gemma）、同總預算（2 輪×300s/格）；輸出前後差異（fixed/regressed/unresolved）＋成本（raw usage，缺值 UNKNOWN 不填 0）；hidden_after 全 UNKNOWN（本地無權重跑 hidden scorer）。效果結論依預註冊 scoring 裁決，口徑與成本並列；冒煙口徑（只驗管線）適用於 r988–r994 已跑批次，本 manifest 發射前不得宣稱任何效果。",
  "status": "FROZEN_PENDING_NAMING",
- "naming_required": "發射需對完整 15 份清單（9 ready＋6 pending 全部凍結）明確點名；只發射 9 份 ready＝另一個較小實驗，不得呈現為 G2 正式效果比較（10–20 錯＋5 對規格未滿足）。發射前重跑 verify_frozen。",
+ "naming_required": "發射需對完整 15 份清單（已全數凍結）明確點名；15 份已達 10–20 錯＋5 對規格下界。發射前重跑 verify_frozen（15 份 draft/requirements hash 全部與盤一致才算數）。",
  "spec_gap": {
   "target": "10–20 錯＋5 對（RLOOP_PLAN.md）",
   "ready": {
-   "bad": 6,
-   "good": 3
+   "bad": 10,
+   "good": 5
   },
   "pending": {
-   "bad": 4,
-   "good": 2
+   "bad": 0,
+   "good": 0
   },
   "total_if_all_frozen": {
    "bad": 10,
    "good": 5
   },
-  "note": "達標＝10 錯＋5 對（規格下界）；每份 pending 凍結（requirements.json TDD＋before-check 一致）後移入 drafts 並重凍 hash，再點名"
+  "note": "已達規格下界＝10 錯＋5 對（15 份全凍結；vq-5nz.16 完成：6 份候選 per-task TDD 凍結，requirements.json＋草稿＋資料 hash 入 manifest，before-check 全與記錄分一致、0 UNKNOWN）"
  },
  "arms": [
   "generic",
@@ -378,13 +378,14 @@
     }
    },
    "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
-  }
- ],
- "pending": [
+  },
   {
    "name": "dab_378-pi-C",
    "role": "bad",
    "task_id": "dab_378",
+   "dir": "dab_378",
+   "arm_letter": "C",
+   "lab_note": "e008 記錄 pass=False（n_correct 6/8；psaq 0.75）；before-check 9 PASS＋2 FAIL（pre_kurtosis／post_kurtosis：草稿 -1.17 與 G2 超额峰度重算不符），與記錄部分錯誤同向",
    "source": {
     "run": "e008_dabench_pi_AC",
     "cell": "dabench-dab_378-pi-C-r1",
@@ -394,18 +395,90 @@
      "pass": false,
      "n_correct": "6/8",
      "psaq": 0.75,
-     "status": "ok"
+     "status": "ok",
+     "note": "status=ok; n_correct=6/8"
     },
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "status": "BLOCKED_PENDING_FREEZE",
-   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
-   "note": "e008 記錄 pass=False（6/8）；未凍結"
+   "before_check": {
+    "pass": 9,
+    "fail": 2,
+    "unknown": 0,
+    "consistent_with_recorded": true,
+    "note": "2026-11-04 本地 run_requirement_checks（11 條：1 格式＋10 值）；0 UNKNOWN；記錄 6/8 部分錯→本地 FAIL 同向",
+    "fail_ids": [
+     "pre_kurtosis",
+     "post_kurtosis"
+    ]
+   },
+   "draft": {
+    "dir": "smoke/dab_378/draft",
+    "files": {
+     "answer.txt": "16754dc396ead4d014b6377ec6b79637cafbd238af3e395394a206a001319d34"
+    }
+   },
+   "task": {
+    "dir": "smoke/dab_378/task",
+    "requirements": {
+     "sha256": "791f081e7cd4f7a63e0a1087c099ad6577cd7b13035bc69ba0093898d26bfcb1"
+    },
+    "request": {
+     "sha256": "71103d0aa33ed824dc15e80cee1ae218c3f42734b9a8bb86e5055f34314c8fb5"
+    },
+    "contract": {
+     "sha256": "a5f2dac625affe2930772d159f6314c895a6bf46db6cdc9bc108548e9011f9d3"
+    },
+    "data_files": {
+     "data/2014_q4.csv": "f1ec88490c4cf2fde96a2783f2962743a126e66e59b16d83378192941b5dbd82"
+    }
+   }
+  },
+  {
+   "name": "dab_057-pi-A",
+   "role": "good",
+   "task_id": "dab_057",
+   "lab_note": "e013 記錄 pass=True（1/1）；before-check 2/2 PASS（點估計口徑 Pearson r 重算一致）",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_057-pi-A-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_057",
+     "pass": true,
+     "n_correct": "1/1",
+     "status": "ok",
+     "note": null
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "before_check": {
+    "pass": 2,
+    "fail": 0,
+    "unknown": 0,
+    "consistent_with_recorded": true,
+    "note": "2026-11-04 本地 run_requirement_checks（2 條：格式＋值）；0 UNKNOWN；與記錄 pass=True 同向"
+   },
+   "draft": {
+    "dir": "smoke_e013/dab_057-pi-A/draft",
+    "files": {
+     "answer.txt": "7afd32715ca5288954a5c29b664bfd345f616c585581f7ec3f172a08a70284df"
+    }
+   },
+   "task": {
+    "dir": "smoke_e013/dab_057-pi-A/task",
+    "requirements": {
+     "sha256": "c177f92c05c234b14cb6a84a38628a8c4fa93dc767c4633e48c4d5219f0c64e3"
+    },
+    "data_files": {
+     "estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+    }
+   }
   },
   {
    "name": "dab_427-pi-A",
    "role": "bad",
    "task_id": "dab_427",
+   "lab_note": "e013 記錄 pass=False（status=no_items；n_correct 0/1）；before-check 0 PASS＋2 FAIL（@null_entries_count101 缺方括號→格式 FAIL、值 missing）",
    "source": {
     "run": "e013_dabench_pi_AC_full",
     "cell": "dabench-dab_427-pi-A-r1",
@@ -414,18 +487,45 @@
      "task_id": "dab_427",
      "pass": false,
      "n_correct": "0/1",
-     "status": "no_items"
+     "psaq": 0.0,
+     "status": "no_items",
+     "note": "status=no_items; n_correct=0/1"
     },
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "status": "BLOCKED_PENDING_FREEZE",
-   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
-   "note": "e013 記錄 pass=False（status=no_items；n_correct 0/1）；未凍結"
+   "before_check": {
+    "pass": 0,
+    "fail": 2,
+    "unknown": 0,
+    "consistent_with_recorded": true,
+    "note": "2026-11-04 本地 run_requirement_checks（2 條：格式＋值）；0 UNKNOWN；與記錄 0/1 同向",
+    "fail_ids": [
+     "req_answer_kv",
+     "req_null_entries_count"
+    ]
+   },
+   "draft": {
+    "dir": "smoke_e013/dab_427-pi-A/draft",
+    "files": {
+     "answer.txt": "9455bd212dd4c8104a4e5d8a327eedf6171a3c5a8a4add2135f980d9dc9a15f4"
+    }
+   },
+   "task": {
+    "dir": "smoke_e013/dab_427-pi-A/task",
+    "requirements": {
+     "sha256": "ef15a3dcaca21d6cbb055241971af83083a6ecd291b2e5f9baaea7013b3bfc03"
+    },
+    "data_files": {
+     "cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+    }
+   }
   },
   {
    "name": "dabstep-10-pi-C",
    "role": "bad",
    "task_id": "dabstep-10",
+   "question": "How many unique merchants are present in the dataset?（Answer must be just a number of unique merchants.）",
+   "lab_note": "e014 記錄 pass=False（reward 0）；before-check FAIL（草稿 30 與 payments.csv unique merchant 重算不符）",
    "source": {
     "run": "e014_dabstep_block",
     "cell": "dabstep-10-pi-C-r1",
@@ -435,59 +535,41 @@
      "pass": false,
      "reward": "0",
      "answer_exists": true,
-     "status": "ok"
+     "rc": 0
     },
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "status": "BLOCKED_PENDING_FREEZE",
-   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
-   "note": "e014 記錄 reward 0；未凍結"
-  },
-  {
-   "name": "dabstep-1273-pi-C",
-   "role": "bad",
-   "task_id": "dabstep-1273",
-   "source": {
-    "run": "e014_dabstep_block",
-    "cell": "dabstep-1273-pi-C-r1",
-    "score_file": "score.json",
-    "score": {
-     "task_id": "dabstep-1273",
-     "pass": false,
-     "reward": "0",
-     "answer_exists": true,
-     "status": "ok"
-    },
-    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   "before_check": {
+    "pass": 0,
+    "fail": 1,
+    "unknown": 0,
+    "consistent_with_recorded": true,
+    "note": "2026-11-04 本地 run_requirement_checks（1 條）；0 UNKNOWN；與記錄 reward 0 同向",
+    "fail_ids": [
+     "req_unique_merchants"
+    ]
    },
-   "status": "BLOCKED_PENDING_FREEZE",
-   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
-   "note": "e014 記錄 reward 0；未凍結"
-  },
-  {
-   "name": "dab_057-pi-A",
-   "role": "good",
-   "task_id": "dab_057",
-   "source": {
-    "run": "e013_dabench_pi_AC_full",
-    "cell": "dabench-dab_057-pi-A-r1",
-    "score_file": "score.json",
-    "score": {
-     "task_id": "dab_057",
-     "pass": true,
-     "n_correct": "1/1",
-     "status": "ok"
-    },
-    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   "draft": {
+    "answer_txt_sha256": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
+    "value": "30",
+    "dir": "smoke_e014/dabstep-10-pi-C/draft",
+    "files": {
+     "answer.txt": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4"
+    }
    },
-   "status": "BLOCKED_PENDING_FREEZE",
-   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
-   "note": "e013 記錄 pass=True（1/1）；未凍結"
+   "task": {
+    "dir": "smoke_e014/dabstep-10-pi-C/task",
+    "requirements": {
+     "sha256": "0b4cfd6fceafb4ef895186eb45c5e2201feb8eb17297786f3284c9b2fd2416c8"
+    }
+   }
   },
   {
    "name": "dabstep-11-pi-A",
    "role": "good",
    "task_id": "dabstep-11",
+   "question": "What is the highest transaction amount (in EUR) recorded?（Answer must be the exact number.）",
+   "lab_note": "e014 記錄 pass=True（reward 1）；before-check 1/1 PASS（eur_amount 最大值重算一致）",
    "source": {
     "run": "e014_dabstep_block",
     "cell": "dabstep-11-pi-A-r1",
@@ -497,14 +579,77 @@
      "pass": true,
      "reward": "1",
      "answer_exists": true,
-     "status": "ok"
+     "rc": 0
     },
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "status": "BLOCKED_PENDING_FREEZE",
-   "block_reason": "requirements.json 未凍結：需 per-task TDD（讀 contract.md→選 verifier/重算型→凍結草稿+資料 hash→before-check 與記錄分一致）；禁止 synthetic 頂替（紅線）",
-   "note": "e014 記錄 reward 1；未凍結"
+   "before_check": {
+    "pass": 1,
+    "fail": 0,
+    "unknown": 0,
+    "consistent_with_recorded": true,
+    "note": "2026-11-04 本地 run_requirement_checks（1 條）；0 UNKNOWN；與記錄 reward 1 同向"
+   },
+   "draft": {
+    "answer_txt_sha256": "7c9adb58dec56b33371d5b34ee523039874fa099490b378334106f33c5312a8c",
+    "value": "4811.76",
+    "dir": "smoke_e014/dabstep-11-pi-A/draft",
+    "files": {
+     "answer.txt": "7c9adb58dec56b33371d5b34ee523039874fa099490b378334106f33c5312a8c"
+    }
+   },
+   "task": {
+    "dir": "smoke_e014/dabstep-11-pi-A/task",
+    "requirements": {
+     "sha256": "45cd4ad76a4ab9a7b260d8ae82afcea59498806c9d8128b45d769f62bd7555b3"
+    }
+   }
+  },
+  {
+   "name": "dabstep-1273-pi-C",
+   "role": "bad",
+   "task_id": "dabstep-1273",
+   "question": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?（Answer must be just a number expressed in EUR rounded to 6 decimals.）",
+   "lab_note": "e014 記錄 pass=False（reward 0）；before-check FAIL（prose 答案不可解析為單一數字）",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-1273-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dabstep-1273",
+     "pass": false,
+     "reward": "0",
+     "answer_exists": true,
+     "rc": 0
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "before_check": {
+    "pass": 0,
+    "fail": 1,
+    "unknown": 0,
+    "consistent_with_recorded": true,
+    "note": "2026-11-04 本地 run_requirement_checks（1 條）；0 UNKNOWN；與記錄 reward 0 同向",
+    "fail_ids": [
+     "req_globalcard_avg_fee"
+    ]
+   },
+   "draft": {
+    "answer_txt_sha256": "b865862ae6c2cf2f32560f245395a0bb924da045bd52aae27caf93190431055c",
+    "value": "The average fee charged by the \"GlobalCard\" card scheme for a credit transaction with a value of 10 EUR is 0.120132.",
+    "dir": "smoke_e014/dabstep-1273-pi-C/draft",
+    "files": {
+     "answer.txt": "b865862ae6c2cf2f32560f245395a0bb924da045bd52aae27caf93190431055c"
+    }
+   },
+   "task": {
+    "dir": "smoke_e014/dabstep-1273-pi-C/task",
+    "requirements": {
+     "sha256": "3a5b4717b89216d824a86af2de03f1a586df515484db31d68cf7ccae6aa811b7"
+    }
+   }
   }
  ],
+ "pending": [],
  "fire_command": ".venv/bin/python -m vacant_network.reqloop.g2 --manifest ops/reqloop/g2/effect_manifest.json --out ~/dev/ops/audits/<點名目錄>（發射前重跑 verify_frozen；未點名不自動燒錢）"
 }
