@@ -1319,6 +1319,28 @@ def _mode_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> str:
     return winners[0]
 
 
+def _cond_rate(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """cond_rate（G2 小批 e014/dabstep-23）：rate＝|where∩num_where| / |where|。
+    where＝分母族群條件、num_where＝分子附加條件（均為 {col,op,value}，複用 _cond_holds）。
+    fraud_rate_2023_inperson 語義（TDD 前凍結）：where＝year==2023 ∧ shopper_interaction==POS
+    （POS=in-person，payments-readme.md 明言）；num_where＝has_fraudulent_dispute==True；
+    分母 0 行→UNKNOWN（不自評）；比率唯一，無平手規則。"""
+    where = rc.get("where")
+    num_where = rc.get("num_where")
+    if not isinstance(where, list) or not where:
+        raise UnknownSource("cond_rate 需要 where（分母族群條件）")
+    if not isinstance(num_where, list) or not num_where:
+        raise UnknownSource("cond_rate 需要 num_where（分子附加條件）")
+    for c in list(where) + list(num_where):
+        if not isinstance(c, dict) or not str(c.get("col", "")).strip():
+            raise UnknownSource("cond_rate 條件缺少 col")
+    pop = [r for r in rows if all(_cond_holds(r, c) for c in where)]
+    if not pop:
+        raise UnknownSource("cond_rate: 分母為 0 行；無法算比率")
+    numer = [r for r in pop if all(_cond_holds(r, c) for c in num_where)]
+    return len(numer) / len(pop)
+
+
 def check_plain_recomputed(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -1350,6 +1372,8 @@ def check_plain_recomputed(
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype == "mode_col":
             expected: Any = _mode_col(rows, rc)
+        elif rtype == "cond_rate":
+            expected = _cond_rate(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
     except (UnknownSource, OSError) as e:

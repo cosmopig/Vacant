@@ -986,3 +986,83 @@ def test_plain_recomputed_mode_col_tie_and_unknown(tmp_path: pathlib.Path):
     _write(d2 / "answer.txt", "1\n")
     res2 = {r.claim_id: r for r in run_requirement_checks(task_dir2, req_set2, d2)}
     assert res2["req_main"].status == "UNKNOWN"
+
+
+# ── plain_recomputed＋cond_rate（G2 小批：e014/dabstep-23，2026-11-04）────────
+
+def _cond_rate_params() -> dict:
+    """fraud_rate_2023_inperson（TDD 前凍結語義）：
+    分母＝year==2023 ∧ shopper_interaction==POS（POS=in-person，payments-readme.md 明言）；
+    分子＝分母中 has_fraudulent_dispute==True；rate＝分子/分母；分母 0→UNKNOWN；比率唯一無平手。"""
+    return {
+        "data_file": "payments.csv",
+        "recompute": {
+            "type": "cond_rate",
+            "where": [{"col": "year", "op": "eq", "value": "2023"},
+                      {"col": "shopper_interaction", "op": "eq", "value": "POS"}],
+            "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}],
+            "note": "fraud_rate_2023_inperson；POS=in-person（payments-readme.md）；語義 TDD 前凍結",
+        },
+    }
+
+
+def test_plain_recomputed_cond_rate_pass_and_fail(tmp_path: pathlib.Path):
+    """cond_rate：只數「2023∧POS」且 dispute=True（Ecommerce 與 2022 皆不入分母）。
+    重算值不進證據（紅線：不向修復模型提供隱藏答案）。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "payments.csv",
+        "year,shopper_interaction,has_fraudulent_dispute\n"
+        "2023,POS,True\n2023,POS,True\n2023,POS,False\n2023,POS,False\n"
+        "2023,Ecommerce,True\n2022,POS,True\n",   # 正確 rate=2/4=0.5；全表=4/6、漏 year=3/5，皆不同
+    )
+    req_set = _req_set("plain_recomputed", _cond_rate_params(), "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "0.5\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "0.4\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+
+
+def test_plain_recomputed_cond_rate_zero_and_unknown(tmp_path: pathlib.Path):
+    """cond_rate：分母內 dispute 全 False→rate 0.0（答案「0」PASS，真實 dabstep-23 即此形）；
+    分母 0 行→UNKNOWN（不自評）；缺 num_where→UNKNOWN。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "payments.csv",
+        "year,shopper_interaction,has_fraudulent_dispute\n"
+        "2023,POS,False\n2023,POS,False\n2023,Ecommerce,True\n",
+    )
+    req_set = _req_set("plain_recomputed", _cond_rate_params(), "answer.txt")
+    zero = tmp_path / "zero"
+    _write(zero / "answer.txt", "0\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, zero)}
+    assert res["req_main"].status == "PASS"
+
+    wrong = tmp_path / "wrong"
+    _write(wrong / "answer.txt", "0.00152745\n")   # dabstep-23 真實草稿值：非 0→FAIL
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, wrong)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False
+
+    _write(task_dir / "e.csv", "year,shopper_interaction,has_fraudulent_dispute\n2022,POS,True\n")
+    params = {"data_file": "e.csv", "recompute": dict(_cond_rate_params()["recompute"])}
+    req_set2 = _req_set("plain_recomputed", params, "answer.txt")
+    d2 = tmp_path / "d2"
+    _write(d2 / "answer.txt", "0\n")
+    res2 = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set2, d2)}
+    assert res2["req_main"].status == "UNKNOWN"
+
+    no_num = {"data_file": "payments.csv",
+              "recompute": {"type": "cond_rate",
+                            "where": [{"col": "year", "op": "eq", "value": "2023"}]}}
+    req_set3 = _req_set("plain_recomputed", no_num, "answer.txt")
+    res3 = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set3, zero)}
+    assert res3["req_main"].status == "UNKNOWN"
