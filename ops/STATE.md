@@ -7391,3 +7391,21 @@ DECISION:909=senior「審過再 merge」以 cherry-pick（非分支 merge）執�
 - **redo（交付前 review 點名 10 檔＋同類另 2 檔「任務提及但未開」、逐檔開啟＋對照，詳 NOW.md round 910 ⑤）**：12 檔（兩 e016/argon/stepchain DECISION＋L001＋C2 驗收腳本/收據＋FINDINGS＋e014 packet＋stepchain 三測試檔＋phasec＋L006/L007/e016 packet）開啟後 round 910 記錄**無矛盾主張需返工**；redo 增量＝stepchain 三測試檔本地實跑 20 passed（PYTEST_RC=0，佐證 CI 綠 4670p/4741c）＋結案路徑各節（L006 §6／L007 §4／packet §3-§4／FINDINGS）在位核實。
 
 DECISION:910=e016 未完賽（20/102、ETA 明日下午）⇒不阻塞監控；本輪實質＝senior #1 驗收判準複核 PASS＋CI 1e78dfe9 綠閉合 round 909 合併驗收（三分支同收錄 4741）｜鏡像同步留 BACKLOG（凍結規則：STATE.md 數字同步不作主產出）｜五態裁決＋L007 §4 分支＋L006 結案皆候完賽｜零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## Round 911（2026-11-03 20:57–21:2x，R&D 負責人）
+- **e016 attempt-2（不阻塞）**：27/102 格在位（26 出分）；pg_food_chain C-nf 在跑（程環境實測 `VACANT_FAILED_STEP_REVIEW=0`＝C-nf 消融臂有效）；18:19 後 0 新 infra（bowling A 兩 infra 重試後第 3 次出分）；單 labd＋單 cell 程＝无双分派；盤餘 64G／queue 空；pace ~10.7 分/格（加速中）⇒ETA 明晨（~10:3x）。
+- **鏡像同步（rounds 899/910 BACKLOG 債務、本輪無新 senior 指示且無產品行為項⇒fallback 執行，非主產出）**：ops repo（正典）→Vacant repo 鏡像 7 檔、md5 全數位元組一致（ops/STATE.md +187 行、loop/NOW.md、loop/L005.md、loop/L006.md 新、loop/L007.md 新、ops/vlab/packets/e015_h_multi_review.md 新、ops/vlab/packets/e016_failed_step_ablation.md 新；L001–L004 已一致）；Vacant repo 改動檔集＝恰 7 檔、產品代碼改動 0。
+- **範圍裁決**：同步範圍＝活躍週期（rounds 901–910）家族＋點名 STATE.md 債務；舊 packet 4 檔（argon_e002_smoke_v2/e009_replicate/e013_dabench_full/recompute_results.json）未回填（非點名債務、記錄在案）；worker 樹未動；FINDINGS e016 條候完賽。
+- **本地測試紀律**：全量套件本地背景實跑（CI 同命令）；綠了才 commit（senior 紅線 #4、避免 round 774 rc=124 情境）。
+- 紅線：零發射；零產品行為改動；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push；無 fake progress。
+
+DECISION:911=e016 未完賽（27/102、ETA 明晨）⇒不阻塞監控；本輪實質＝BACKLOG 鏡像同步（7 檔 md5 位元組一致、產品代碼 0、活躍週期範圍、舊 packet 未回填留痕）｜五態裁決＋L007 §4 分支＋L006 §6＋FINDINGS 皆候完賽｜零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## Round 954（2026-11-04 01:04–01:2x，R&D 負責人）
+- 🔴（監督者 11/04 NOW 頂點、e016 判決管線成本來源）：成本在 cell.json.metrics，score.json 只有 pass/tests_*；舊 load() 讀 score.json ⇒ 恆 None ⇒ int(x or 0) 靜默當 0 ⇒ 成本紅線（>2×A）形同沒在檢查——修復完成（TDD：新測試 4/4 於改前 FAIL）。
+- 修復：load() 經 _cell_cost() 讀 cell.json.metrics（tok=input+output）；該格成本欄位／cell.json 缺失 ⇒ 該格成本 None（UNKNOWN、不是 0）；decide()：任一格 UNKNOWN ⇒ 判定 UNKNOWN（優於 COST_BREACH、未測≠通過）；selftest 7 組照舊＋新增 8/9 ⇒ 9 組 ALL OK；新 e016_verdict_pipeline_cost_test.py（unittest 形式、round 836 紀律；fixture＝真實格 pg_affine_cipher A/C 位元組複製）。
+- 驗證：unittest 4/4 OK（ops＋Vacant 鏡像皆跑）；--selftest ALL OK RC=0；live INCOMPLETE 46/102 RC=10；6 檔 md5 位元組一致（兩 repo）；真實 45 出分格 cost_unknown=0（pass A7/C6/C-nf7）；commits ops 251c06a＋Vacant df28034e（非 tests/ ⇒ CI 收錄 4741 不變）。
+- 未驗證：五態裁決本體（e016 未完賽 46/102、pg_paasio A 在跑、ETA 今天 ~12:30–13:30）；rescore；成本紅線在 102 全格上的判定（fixture 只證明格式與 UNKNOWN 傳播）。
+- 紅線：零發射（e016 為唯一在跑實驗、只監控）；零產品行為改動（audits 工具、非 vacant_network/）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
+
+DECISION:954=🔴 成本來源修復完成（TDD 4/4 fail→pass、selftest 9 組、兩 repo 位元組一致）——保守選擇：成本 UNKNOWN 摺入既有五態之 UNKNOWN（不新增第六態、保預註冊狀態表）；UNKNOWN 優於 COST_BREACH（有未知在場、紅線既不能說「過」也不能說「破」）｜e016 46/102（45 出分、成本 UNKNOWN 0 格）ETA 今天 ~12:30、五態裁決＋L007 §4＋L006 §6＋FINDINGS 皆候完賽｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
