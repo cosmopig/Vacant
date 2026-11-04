@@ -43,8 +43,9 @@
         "score_file": "score.json",
         "score": {
           "task_id": "dab_507",
-          "pass": true,
-          "n_correct": "0/1"
+          "pass": false,
+          "n_correct": "0/1",
+          "status": "ok"
         },
         "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
       },
@@ -83,8 +84,9 @@
         "score_file": "score.json",
         "score": {
           "task_id": "dab_039",
-          "pass": true,
-          "n_correct": "missing"
+          "pass": false,
+          "n_correct": "0/1",
+          "status": "missing"
         },
         "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
       },
@@ -123,8 +125,9 @@
         "score_file": "score.json",
         "score": {
           "task_id": "dab_035",
-          "pass": false,
-          "n_correct": "1/1"
+          "pass": true,
+          "n_correct": "1/1",
+          "status": "ok"
         },
         "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
       },
