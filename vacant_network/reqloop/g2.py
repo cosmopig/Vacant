@@ -142,7 +142,7 @@ def dry_run_text(man: G2Manifest) -> str:
     lines.append(f"model  : {m.get('model', 'UNKNOWN')} (provider: {m.get('provider', 'UNKNOWN')})"
                  + (f"  ← {m['note']}" if m.get("note") else ""))
     lines.append(
-        "budget : max_rounds_per_cell=" + str(b.get("max_rounds", "UNKNOWN"))
+        "budget : max_rounds_per_cell=" + str(b.get("max_rounds_per_cell", "UNKNOWN"))
         + "  timeout_s_per_round=" + str(b.get("timeout_s_per_round", "UNKNOWN"))
         + "  hard_token_cap=" + str(bool(b.get("hard_token_cap", False))).lower()
         + "  min_rounds=" + json.dumps(b.get("min_rounds", {}), ensure_ascii=False)

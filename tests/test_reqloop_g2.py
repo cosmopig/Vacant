@@ -263,6 +263,8 @@ def test_dry_run_lists_3_drafts_6_cells_and_budget():
     for d in man.drafts:
         assert d["name"] in txt
         assert d["source"]["cell"] in txt
+    assert "max_rounds_per_cell=2" in txt
+    assert "timeout_s_per_round=300" in txt
     assert "hard_token_cap=false" in txt
     assert "qwen/qwen3.8-27b" in txt
 
