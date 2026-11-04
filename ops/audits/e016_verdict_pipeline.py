@@ -7,7 +7,7 @@
 NO_MECHANISM / UNRESOLVED；優先序見 packet §4）。
 
 用法：
-  python3 e016_verdict_pipeline.py --selftest      # 合成資料自測（6 態＋邊界）
+  python3 e016_verdict_pipeline.py --selftest      # 合成資料自測（9 組：五態＋成本 UNKNOWN＋數值）
   python3 e016_verdict_pipeline.py                 # 讀正式 run 目錄
 exit：0＝已判定（含五態）、10＝run 未完成（格子未齊）、20＝UNKNOWN（infra>20%）
 """
@@ -63,12 +63,16 @@ def _pairs(rows: list[dict], x: str, y: str) -> list[tuple[bool, bool]]:
 
 def cost(rows: list[dict], arm: str) -> dict:
     rs = [r for r in rows if r["arm"] == arm]
-    passed = sum(1 for r in rs if r["pass"])
-    calls = sum(int(r.get("calls") or 0) for r in rs)
-    tok = sum(int(r.get("tok") or 0) for r in rs)
-    return {"arm": arm, "n": len(rs), "pass": passed, "calls": calls, "tok": tok,
-            "calls_per_success": (calls / passed) if passed else None,
-            "tokens_per_success": (tok / passed) if passed else None}
+    # 成本 UNKNOWN 的格（calls/tok=None）不靜默當 0：單獨計數、只對已知格聚合。
+    known = [r for r in rs if r.get("calls") is not None and r.get("tok") is not None]
+    passed_known = sum(1 for r in known if r["pass"])
+    calls = sum(int(r["calls"]) for r in known)
+    tok = sum(int(r["tok"]) for r in known)
+    return {"arm": arm, "n": len(rs), "pass": sum(1 for r in rs if r["pass"]),
+            "cost_unknown_n": len(rs) - len(known),
+            "calls": calls, "tok": tok,
+            "calls_per_success": (calls / passed_known) if passed_known else None,
+            "tokens_per_success": (tok / passed_known) if passed_known else None}
 
 
 def decide(rows: list[dict], total_cells: int, missing: int) -> dict:
@@ -79,6 +83,15 @@ def decide(rows: list[dict], total_cells: int, missing: int) -> dict:
     for p, s in zip(pairs, sig):
         p["holm_significant"] = s
     costs = {a: cost(rows, a) for a in ARMS}
+    cost_unknown = sum(costs[a]["cost_unknown_n"] for a in ARMS)
+    if cost_unknown > 0:
+        # 任何一格成本 UNKNOWN ⇒ 成本判定 UNKNOWN（不是 0、不是通過；未測≠負結果）。
+        # 優於 COST_BREACH：有 UNKNOWN 在場時紅線既不能說「過」也不能說「破」。
+        return {"state": "UNKNOWN",
+                "why": (f"成本 UNKNOWN：{cost_unknown}/{len(rows)} 格成本欄位缺失"
+                        "（cell.json.metrics 缺 model_calls/input_tokens/output_tokens 或 cell.json 缺失；"
+                        "成本紅線不可評——未測≠0、≠通過）"),
+                "pairs": pairs, "costs": costs}
     ac, acnf, ccnf = pairs
     a_ok = costs["A"]["calls_per_success"]
     cost_breach = []
@@ -127,10 +140,31 @@ def load(runs_root: pathlib.Path, exp: str) -> tuple[list[dict], int, int]:
             if s.get("pass") is None:
                 missing += 1
                 continue
+            calls, tok = _cell_cost(d)
             rows.append({"task": task, "arm": arm, "pass": bool(s["pass"]),
-                         "calls": s.get("model_calls"), "tok": s.get("tokens")})
+                         "calls": calls, "tok": tok})
     total = sum(1 for d in root.iterdir() if d.is_dir() and not d.name.startswith(".") and d.name.endswith("-r1"))
     return rows, total, missing
+
+
+def _cell_cost(cell_dir: pathlib.Path) -> tuple[int | None, int | None]:
+    """成本在 cell.json.metrics（model_calls / input_tokens / output_tokens）；
+    score.json 只有 pass / tests_*，沒有成本欄位（舊版從 score.json 讀⇒恆 None⇒
+    成本紅線形同沒在檢查；round 954 監督者 11/04 點名修復）。
+    任一必要欄位缺失／非整數／cell.json 缺失 ⇒ (None, None)＝該格成本 UNKNOWN。"""
+    p = cell_dir / "cell.json"
+    if not p.exists():
+        return None, None
+    try:
+        m = json.loads(p.read_text()).get("metrics")
+    except (OSError, json.JSONDecodeError):
+        return None, None
+    if not isinstance(m, dict):
+        return None, None
+    calls, itok, otok = m.get("model_calls"), m.get("input_tokens"), m.get("output_tokens")
+    if not all(isinstance(x, int) and not isinstance(x, bool) for x in (calls, itok, otok)):
+        return None, None
+    return calls, itok + otok
 
 
 def run(runs_root: pathlib.Path, exp: str) -> dict:
@@ -200,7 +234,17 @@ def selftest() -> None:
     assert mcnemar_p(3, 3) == 1.0
     assert holm([0.015625, 0.015625, 1.0]) == [True, True, False]
     assert holm([0.03, 0.03, 0.03]) == [False, False, False]
-    print("ALL OK（7 組自測：五態＋零通過邊界＋McNemar/Holm 數值）")
+    # 8) 成本 UNKNOWN：任一格成本欄位缺失 ⇒ 成本判定 UNKNOWN（不是 0、不是通過）
+    r8 = rows_from({"A": base, "C": c2, "C-nf": c2})
+    r8[1]["calls"] = None; r8[1]["tok"] = None   # C 首格成本未知
+    v = decide(r8, 102, 0)
+    assert v["state"] == "UNKNOWN" and "成本" in v["why"], v
+    # 9) 成本 UNKNOWN 優於 COST_BREACH：有 UNKNOWN 在場，紅線既不能說「過」也不能說「破」
+    r9 = rows_from({"A": base, "C": c2, "C-nf": c2}, {"A": 10, "C": 99, "C-nf": 10})
+    r9[1]["calls"] = None; r9[1]["tok"] = None
+    v = decide(r9, 102, 0)
+    assert v["state"] == "UNKNOWN" and "成本" in v["why"], v
+    print("ALL OK（9 組自測：五態＋零通過邊界＋成本 UNKNOWN 兩態＋McNemar/Holm 數值）")
 
 
 if __name__ == "__main__":
