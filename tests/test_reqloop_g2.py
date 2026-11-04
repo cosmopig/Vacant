@@ -444,19 +444,19 @@ EFFECT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "effect_manifest.json"
 
 
 def test_effect_manifest_preregistration():
-    """G2 正式效果比較預註冊鎖（vq-5nz.15，RLOOP_PLAN G2：10–20 錯＋5 對）：
-    9 份 ready（6 錯＋3 對）＝已凍結真草稿原地引用，hash 必須與盤一致（verify_frozen）；
-    6 份 pending（4 錯＋2 對）全 BLOCKED_PENDING_FREEZE 且有已記錄分（引用、不重跑）；
-    全凍結後達規格下界 10 錯＋5 對。兩臂同模型（1004 gemma）、同總預算（2×300s）。
-    未點名＝未發射：本測試只驗凍結完整性與規格缺口，不發射、不呼叫模型。
+    """G2 正式效果比較預註冊鎖（vq-5nz.15 預註冊，vq-5nz.16 全凍結，RLOOP_PLAN G2：10–20 錯＋5 對）：
+    15 份 ready（10 錯＋5 對）＝已凍結真草稿原地引用，hash 必須與盤一致（verify_frozen）；
+    pending 空（原 6 份 4 錯＋2 對已於 vq-5nz.16 凍結，每份都有已記錄分＋before-check 一致性）；
+    達規格下界 10 錯＋5 對。兩臂同模型（1004 gemma）、同總預算（2×300s）。
+    未點名＝未發射：本測試只驗凍結完整性，不發射、不呼叫模型。
     """
     man = g2.G2Manifest.load(EFFECT_MANIFEST)
     raw = man.raw
 
-    # 9 份 ready：6 錯＋3 對，全部為真草稿（e008/e013/e014 來源）
-    assert len(man.drafts) == 9
-    assert sum(1 for d in man.drafts if d["role"] == "bad") == 6
-    assert sum(1 for d in man.drafts if d["role"] == "good") == 3
+    # 15 份 ready：10 錯＋5 對，全部為真草稿（e008/e013/e014 來源）
+    assert len(man.drafts) == 15
+    assert sum(1 for d in man.drafts if d["role"] == "bad") == 10
+    assert sum(1 for d in man.drafts if d["role"] == "good") == 5
     srcs = {d["source"]["run"] for d in man.drafts}
     assert srcs == {"e008_dabench_pi_AC", "e013_dabench_pi_AC_full", "e014_dabstep_block"}
 
@@ -467,20 +467,27 @@ def test_effect_manifest_preregistration():
         assert (base / d["draft"]["dir"]).is_dir(), d["draft"]["dir"]
         assert d["task"]["dir"].startswith(("smoke/", "smoke_e013/", "smoke_e014/"))
 
-    # 6 份 pending：4 錯＋2 對，全部 BLOCKED_PENDING_FREEZE、有已記錄分（缺值不填 0）
-    pending = raw["pending"]
-    assert len(pending) == 6
-    assert sum(1 for p in pending if p["role"] == "bad") == 4
-    assert sum(1 for p in pending if p["role"] == "good") == 2
-    for p in pending:
-        assert p["status"] == "BLOCKED_PENDING_FREEZE"
-        assert p["source"]["score"] is not None and p["source"]["score"].get("pass") is not None
-        assert p["block_reason"]
+    # pending 已清空：原 6 份（4 錯＋2 對）已凍結進 drafts，且每份都有已記錄分（引用、不重跑）
+    assert raw["pending"] == []
+    for d in man.drafts:
+        assert d["source"]["score"] is not None and d["source"]["score"].get("pass") is not None
 
-    # 全凍結後達 RLOOP_PLAN 規格下界（10–20 錯＋5 對）；缺口與待凍結點名都寫在 manifest
+    # 新凍結的 6 份（vq-5nz.16）每份都有 before-check 結果且與已記錄分一致（缺值不填 0）
+    new_names = {n for n in ("dab_378-pi-C", "dab_427-pi-A", "dab_057-pi-A",
+                             "dabstep-10-pi-C", "dabstep-1273-pi-C", "dabstep-11-pi-A")}
+    by_name = {d["name"]: d for d in man.drafts}
+    assert new_names <= set(by_name)
+    for n in new_names:
+        bc = by_name[n].get("before_check")
+        assert bc is not None, f"{n} 缺 before_check 結果"
+        assert bc["consistent_with_recorded"] is True, n
+        for k in ("pass", "fail", "unknown", "consistent_with_recorded"):
+            assert k in bc, (n, k)
+
+    # 達 RLOOP_PLAN 規格下界（10–20 錯＋5 對）
     spec = raw["spec_gap"]
-    assert spec["ready"] == {"bad": 6, "good": 3}
-    assert spec["pending"] == {"bad": 4, "good": 2}
+    assert spec["ready"] == {"bad": 10, "good": 5}
+    assert spec["pending"] == {"bad": 0, "good": 0}
     assert spec["total_if_all_frozen"] == {"bad": 10, "good": 5}
 
     # 兩臂同模型（1004 gemma）、同總預算（2 輪×300s）；無硬 token 上限（缺值 UNKNOWN 不填 0）
@@ -502,7 +509,80 @@ def test_effect_manifest_preregistration():
     assert "after＝before" in sc["after"]  # 零呼叫⇒after＝before
     assert all(k in sc["stopped"] for k in ("no_gap", "gap_closed", "stalled", "max_rounds"))
 
-    # 未點名＝未發射；只發射 9 份 ready 不得呈現為 G2 正式效果比較
+    # 未點名＝未發射；15 份全凍結仍不得呈現為 G2 正式效果比較（點名＋發射才是）
     assert raw["status"] == "FROZEN_PENDING_NAMING"
-    assert "15" in raw["naming_required"]  # 完整清單＝9 ready＋6 pending
+    assert "15" in raw["naming_required"]  # 完整清單＝15 ready（vq-5nz.16 全凍結後）
     assert "10–20" in raw["naming_required"] or "5 對" in raw["naming_required"]
+
+
+# ── vq-5nz.16：新凍結 6 份的 before-check 與已記錄分一致 ──────────────────
+
+# name → (role, task 目錄, draft 目錄, 期望 FAIL 的必需條目 id；None＝只要有必需 FAIL 即可；
+#        frozenset()＝好草稿，全部必需條目必須 PASS)
+NEW_DRAFTS: dict[str, tuple[str, str, str, set[str] | None]] = {
+    # 記錄 6/8（pass=False）：8 PASS＋2 FAIL（兩項 kurtosis），恰為 2 個錯項
+    "dab_378-pi-C": ("bad", "smoke/dab_378/task", "smoke/dab_378/draft",
+                     {"pre_kurtosis", "post_kurtosis"}),
+    # 記錄 no_items 0/1（pass=False）：@null_entries_count101 缺方括號→格式 FAIL
+    "dab_427-pi-A": ("bad", "smoke_e013/dab_427-pi-A/task", "smoke_e013/dab_427-pi-A/draft", None),
+    # 記錄 1/1（pass=True）：0.97＝Int64 點估計（median 列）口徑重算一致
+    "dab_057-pi-A": ("good", "smoke_e013/dab_057-pi-A/task", "smoke_e013/dab_057-pi-A/draft", frozenset()),
+    # 記錄 reward 0：答案 30 ≠ payments.csv（readme 明言即 dataset）unique merchant 5
+    "dabstep-10-pi-C": ("bad", "smoke_e014/dabstep-10-pi-C/task", "smoke_e014/dabstep-10-pi-C/draft", None),
+    # 記錄 reward 0：prose 答案不可解析為單一數字（且 0.120132≠按 manual.md 公式重算）
+    "dabstep-1273-pi-C": ("bad", "smoke_e014/dabstep-1273-pi-C/task", "smoke_e014/dabstep-1273-pi-C/draft", None),
+    # 記錄 reward 1：4811.76＝payments.csv eur_amount 最大值重算一致
+    "dabstep-11-pi-A": ("good", "smoke_e014/dabstep-11-pi-A/task", "smoke_e014/dabstep-11-pi-A/draft", frozenset()),
+}
+
+
+def test_vq5nz16_before_check_matches_recorded_score():
+    """before-check 一致性（紅線）：bad 草稿必須有必需 FAIL（pass=False 與記錄 pass=False 同向）；
+    good 草稿全部必需條目 PASS（無 UNKNOWN 頂包）；FAIL→UNKNOWN 不算修好；缺值標 UNKNOWN 不填 0。
+    本測試只跑本地重算檢查器，不呼叫模型、不讀 hidden。
+    """
+    base = EFFECT_MANIFEST.parent
+    for name, (role, task_rel, draft_rel, expected_fail_ids) in NEW_DRAFTS.items():
+        task_dir = base / task_rel
+        draft_dir = base / draft_rel
+        assert task_dir.is_dir(), f"{name}: task 目錄缺失 {task_dir}"
+        assert draft_dir.is_dir(), f"{name}: draft 目錄缺失 {draft_dir}"
+        rs = RequirementSet.load(task_dir / "requirements.json")
+        res = run_requirement_checks(task_dir, rs, draft_dir)
+        assert res, f"{name}: 無任何檢查結果"
+        statuses = {r.claim_id: r.status for r in res}
+        # 狀態只準三種；UNKNOWN 是「不能判定」，絕不用 0 頂包
+        assert set(statuses.values()) <= {"PASS", "FAIL", "UNKNOWN"}, (name, statuses)
+        required = {r.claim_id for r in res if r.required}
+        assert required, f"{name}: 無必需條目"
+        if role == "bad":
+            fails = {k for k in required if statuses.get(k) == "FAIL"}
+            assert fails, f"{name}: bad 草稿無必需 FAIL（與記錄 pass=False 不一致）"
+            if expected_fail_ids is not None:
+                assert fails == expected_fail_ids, (name, fails, expected_fail_ids)
+        else:
+            bad = {k: statuses[k] for k in required if statuses.get(k) != "PASS"}
+            assert not bad, f"{name}: good 草稿有必需條目未 PASS：{bad}"
+
+
+def test_vq5nz16_recorded_scores_are_cited_not_rerun():
+    """6 份的 lab 分只引用（score.json 既有記錄），不本地重跑 hidden scorer。"""
+    man = g2.G2Manifest.load(EFFECT_MANIFEST)
+    by_name = {d["name"]: d for d in man.drafts}
+    expect = {
+        # e008/e013 用 n_correct（pass=False/True）；e014 用 reward（"0"/"1"）
+        "dab_378-pi-C": (False, {"note_contains": "6/8"}),
+        "dab_427-pi-A": (False, {"note_contains": "no_items"}),
+        "dab_057-pi-A": (True, {}),
+        "dabstep-10-pi-C": (False, {"reward": "0"}),
+        "dabstep-1273-pi-C": (False, {"reward": "0"}),
+        "dabstep-11-pi-A": (True, {"reward": "1"}),
+    }
+    for n, (passed, chk) in expect.items():
+        sc = by_name[n]["source"]["score"]
+        assert sc["pass"] is passed, (n, sc)
+        if "reward" in chk:
+            assert str(sc.get("reward")) == chk["reward"], (n, sc)
+        if "note_contains" in chk:
+            assert chk["note_contains"] in str(sc.get("note") or ""), (n, sc)
+        assert by_name[n]["source"]["fetched_from"].startswith("/srv/vlab/runs"), n
