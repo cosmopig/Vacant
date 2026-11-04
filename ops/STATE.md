@@ -7448,3 +7448,8 @@ DECISION:957=e016 未完賽（54/102）⇒依鐵則不乾等、預備收口動�
 - 紅線：零發射（e016 唯一在跑、只監控）；零產品行為改動（vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:958=e016 未完賽（51/102 live 格、50 出分、infra 6%＜20%）⇒依鐵則不乾等、只驗預備與監控（selftest 重跑 ALL OK、命令鏈式樣核實、infra 快照、CI 在跑）＋記助手票停擺事實（無進程、無結果）但**不接手**（NOW 紀律在案、保守＝遵守既有指示並登記裁處點）｜零發射、零產品行為改動（vacant_network/ 未動）、未 push、未動 main/~/.vacant、未讀 hidden/scorer｜五態裁決＋結案寫（L006 §6／L007 §4／FINDINGS）皆候完賽
+
+### Redo（round 958 redo，FINDINGS 實開——審查點：FINDINGS.md 被點名但未開）
+- 實開 `Vacant/ops/vlab/FINDINGS.md`（542 行）：末條目 e015（L535–542，e015_h_multi_review NOT_BETTER_THAN_RANDOM）、無 e016 條目＝「候完賽」一致；`~/dev/ops/vlab/` 不存在（ls rc≠0）＝runbook「ops repo 無此檔」聲明**成立**。
+- **發現不準處並修正**：runbook §3.3「格式照 e015 條目」的欄位清單含「對下一步的意義」——FINDINGS 全檔無此欄名（grep 核：e015 用「**核心研究問題狀態更新**」、e013/e014 用「**對下一步**」；證據欄 e015＝「**證據鏈**」、e013/e014＝「**證據**」；「**完賽**」欄 e013/e014 獨立、e015 折入「實驗」）。runbook §3.3 已改為逐欄對齊實文＋標明 e016 建議欄式。
+- NOW.md 同步記 redo 段。commit 於 ops（runbook＋NOW＋STATE）＋Vacant 鏡像（NOW＋STATE）。

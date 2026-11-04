@@ -7,6 +7,7 @@ exit 0＝非 UNKNOWN／20＝UNKNOWN／10＝仍 INCOMPLETE；輸出 `e016_failed_
 →§2 五態逐字表（packet §4 條件＋讀法｜L007 §4 後續；round 957 逐字核對原檔、packet md5 兩 repo 一致）
 →§3 結案寫三處（L006 §6 追加／L007 §4 標記不改原文／FINDINGS 正典＝Vacant repo、格式照 e015 條目）
 ＋兩 repo 鏡像 md5＋§4 共同紅線（L007 §4 逐字）＋attempt-1 排除。管線 selftest 10 組 ALL OK（r958 重跑 RC=0）。
+**r958 redo（FINDINGS 實開）**：正典 `Vacant/ops/vlab/FINDINGS.md` 542 行、末條目 e015（L535）、無 e016 條目；`~/dev/ops/vlab/` 不存在＝「ops repo 無此檔」成立；runbook §3.3 欄位清單已校正（原列「對下一步的意義」——FINDINGS 無此欄：e015＝**核心研究問題狀態更新**/**證據鏈**，e013/e014＝**對下一步**/**證據**/**完賽** 獨立欄——現已逐欄對齊實文）。
 
 ## 🔴 下一步（e016 完賽那一輪，照 runbook 依序執行；完賽前只監控）
 1. `ls /srv/vlab/done/16_e016_failed_step_ablation.json`（labd 已完賽；缺＝還在跑）
