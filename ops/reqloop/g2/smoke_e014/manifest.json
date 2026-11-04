@@ -1,6 +1,6 @@
 {
  "schema": "vacant.reqloop.g2.manifest/1",
- "status": "selection_frozen_TDD_complete_NOT_fired",
+ "status": "selection_frozen_TDD_complete_record_complete_NOT_fired",
  "frozen_at": "2026-11-04T13:38:00Z",
  "ticket": "vq-5nz（G2 e014 第二批）",
  "purpose": "G2 小批真實交付物（e014/dabstep factoid）：3 真草稿 × generic/localized＝6 格；只驗管線，不宣稱任何提升。2 bad（dabstep-23/dabstep-1753，lab reward 0）＋1 good（dabstep-13，lab reward 1）",
@@ -62,7 +62,8 @@
     "score": {"task_id": "dabstep-13", "pass": true, "reward": "1", "answer_exists": true, "status": "ok"},
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "draft": {"answer_txt_sha256": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61", "value": "14"},
+   "draft": {"answer_txt_sha256": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61", "value": "14", "dir": "dabstep-13-pi-A/draft", "files": {"answer.txt": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61"}},
+   "task": {"dir": "dabstep-13-pi-A/task", "requirements": {"sha256": "2681be3b540f63cbb444ecc930b9d2b0a6307bcd60e81e05039a6e86b4864fc9"}},
    "lab_note": "e014 記錄 pass=True（reward 1）；A/C/CB 三臂皆過"
   },
   {
@@ -77,7 +78,8 @@
     "score": {"task_id": "dabstep-23", "pass": false, "reward": "0", "answer_exists": true, "status": "ok"},
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "draft": {"answer_txt_sha256": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628", "value": "0.00152745"},
+   "draft": {"answer_txt_sha256": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628", "value": "0.00152745", "dir": "dabstep-23-pi-C/draft", "files": {"answer.txt": "942b5852857ba5d00f1733de185784f88b9235f3ee8e37e44487d90305d41628"}},
+   "task": {"dir": "dabstep-23-pi-C/task", "requirements": {"sha256": "a59f86e5c6c844a4546a60ee840cbf8609daa8be92ad53d6d7b0432b72bfadd6"}},
    "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
   },
   {
@@ -92,12 +94,14 @@
     "score": {"task_id": "dabstep-1753", "pass": false, "reward": "0", "answer_exists": true, "status": "ok"},
     "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
    },
-   "draft": {"answer_txt_sha256": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91", "value": "None"},
+   "draft": {"answer_txt_sha256": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91", "value": "None", "dir": "dabstep-1753-pi-C/draft", "files": {"answer.txt": "dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91"}},
+   "task": {"dir": "dabstep-1753-pi-C/task", "requirements": {"sha256": "24fe95511b99ef1bfee0127da650a8bae79c3b282e2b00ded48c18541963f142"}},
    "lab_note": "e014 記錄 pass=False（reward 0）；A/C/CB 三臂皆未過"
   }
  ],
  "frozen": {
   "frozen_at": "2026-11-04T14:35:00Z",
+  "record_completed": "2026-11-04 r987：drafts[] 補齊 task/draft.dir/files（g2.py load/verify_frozen 所需欄位），全部 hash 取自 r986 凍結目錄實測（drafts[].draft.answer_txt_sha256 與 task/requirements.json 現行值）；選樣/模型/預算/期望值零改動", 
   "layout": "smoke_e014/_data/（5 檔實體、sha256 見 data_source.files）＋ dabstep-{13-pi-A,23-pi-C,1753-pi-C}/task/{request.md,contract.md,requirements.json,data/（相對符號連結→../../../_data/）}＋ draft/answer.txt（無行尾換行，sha256 與 drafts[].draft 一致）",
   "expected_visible": {
    "dabstep-13": {"value": "14", "basis": "hour_of_day 眾數：14→9430 行（次高 13→9401，唯一勝出，無平手）／138236 行",
