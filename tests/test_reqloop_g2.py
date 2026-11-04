@@ -348,3 +348,41 @@ def test_result_written_machine_readable(tmp_path):
     assert data["manifest"]["sha256"] == _sha(MANIFEST)
     assert len(data["cells"]) == 6
     assert data["totals"]["cells"] == 6
+
+
+def test_result_manifest_sha_is_the_loaded_manifest(tmp_path):
+    """結果的 manifest.sha256 必須是**實際載入**的 manifest（r976 修：
+    用過濾 manifest（manifest_alt.json）跑時，舊碼固定記 base/manifest.json，
+    把 1 草稿的複跑誤記成 3 草稿的原冒煙清單）。"""
+    base = tmp_path / "smoke"
+    for sub in ("dab_039/draft", "dab_039/task"):
+        shutil.copytree(SMOKE / sub, base / sub)
+    full = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    alt = dict(full)
+    alt["drafts"] = [d for d in alt["drafts"] if d["task_id"] == "dab_039"]
+    alt_p = base / "manifest_alt.json"
+    alt_p.write_text(json.dumps(alt, ensure_ascii=False), encoding="utf-8")
+    (base / "manifest.json").write_text(json.dumps(full, ensure_ascii=False),
+                                        encoding="utf-8")
+
+    man = g2.G2Manifest.load(alt_p)
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        (workspace / "answer.txt").write_text(
+            "@is_normal[0.31]\n@transformed_importance_score_mean[4.2]\n"
+            "@transformed_importance_score_std[1.1]\n", encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    res = g2.run_g2_smoke(man, base, tmp_path / "out", build, run,
+                          include_dirs=("data",))
+    assert res.manifest_sha256 == _sha(alt_p)
+    assert res.manifest_sha256 != _sha(base / "manifest.json")

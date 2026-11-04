@@ -59,6 +59,7 @@ class G2Manifest:
     leak_guard: str
     drafts: tuple[dict[str, Any], ...]
     raw: dict[str, Any]
+    manifest_path: str | None = None   # load() 設；結果檔用它記實際生效的 manifest
 
     @classmethod
     def load(cls, path: str | pathlib.Path) -> G2Manifest:
@@ -91,6 +92,7 @@ class G2Manifest:
             leak_guard=str(raw.get("leak_guard", "")),
             drafts=tuple(drafts),
             raw=raw,
+            manifest_path=str(p),
         )
 
     def verify_frozen(self, base: str | pathlib.Path) -> None:
@@ -265,8 +267,10 @@ def run_g2_smoke(
                 "draft_sha256": outcome.draft_sha256,
                 "prompt_sha256": [r.prompt_sha256 for r in outcome.rounds],
             })
+    manifest_used = (pathlib.Path(man.manifest_path)
+                     if man.manifest_path else base / "manifest.json")
     return G2Result(
-        manifest_sha256=_sha256(base / "manifest.json"),
+        manifest_sha256=_sha256(manifest_used),
         generated_at=time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         model=dict(man.model),
         budget=dict(man.budget),

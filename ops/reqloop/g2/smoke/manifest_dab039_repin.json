@@ -1,0 +1,80 @@
+{
+ "schema": "vacant.reqloop.g2.manifest/1",
+ "frozen_at": "2026-11-04T10:30:23Z",
+ "ticket": "vq-5nz.2（r976）：dab_039 停因修復（31a56307 直譯器 pin）後複跑",
+ "purpose": "dab_039 兩臂複跑（generic/localized）：驗直譯器 pin 是否消除『scipy 不可用』停因；只驗管線，不宣稱提升。原 6 格紀錄（g2_smoke_20261104_real）不動，dab_039 兩格原判定＝stalled 保留。",
+ "arms": [
+  "generic",
+  "localized"
+ ],
+ "model": {
+  "provider": "lms1003qwen",
+  "model": "qwen/qwen3.8-27b",
+  "note": "兩臂同一模型；若一臂換強模型，另一臂必須有同模型/成本對照（工單紅線）"
+ },
+ "budget": {
+  "max_rounds_per_cell": 2,
+  "timeout_s_per_round": 300,
+  "hard_token_cap": false,
+  "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+  "min_rounds": {
+   "generic": 1,
+   "localized": 0
+  },
+  "note": "generic 臂對的草稿也至少重驗 1 次；localized 缺口驅動（無缺口 0 呼叫）；兩臂同模型、同總預算"
+ },
+ "scoring": {
+  "readable": "可見宣言（格式 + 公開資料按題目規則重算）；裁判不持有 hidden 參考",
+  "hidden_before": "引用 lab 受權量表的既有記錄（score.json），不在本地重跑",
+  "hidden_after": "UNKNOWN——本地無權重跑 hidden scorer；缺失即 UNKNOWN，絕不填 0"
+ },
+ "leak_guard": "修復模型只看得到原始需求、凍結資料與『值不符重算』的事實；重算值/hidden 參考值永不進證據或提示（checks.check_kv_recomputed 與 repair.build_repair_prompt 均遵守）",
+ "drafts": [
+  {
+   "name": "dab_039-pi-C",
+   "role": "bad",
+   "task_id": "dab_039",
+   "dir": "dab_039",
+   "arm_letter": "C",
+   "lab_note": "e008 記錄 missing（answer.txt 缺失）",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_039-pi-C-r1",
+    "score_file": "score.json",
+    "score": {
+     "task_id": "dab_039",
+     "pass": false,
+     "n_correct": "0/1",
+     "status": "missing"
+    },
+    "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+   },
+   "draft": {
+    "dir": "dab_039/draft",
+    "files": {
+     "solution.py": "8004ec0514e2844fdb1135e7a0376f977f6545332f757dbf701eb633bff748c7"
+    }
+   },
+   "task": {
+    "dir": "dab_039/task",
+    "requirements": {
+     "sha256": "9b3890c0173f3528bddec2c0a3e71780fce83f8882ab43dcd180cf59be5260cb"
+    },
+    "request": {
+     "sha256": "5a345ad82d7de791a931fa1f8c792740ae48944d25f1ff97098d1005f9c66088"
+    },
+    "contract": {
+     "sha256": "58d50d18feba09ce413949aded32eabf78375f4b784e7384b27607bd43b62592"
+    },
+    "data_files": {
+     "data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+    }
+   }
+  }
+ ],
+ "parent_manifest": {
+  "path": "ops/reqloop/g2/smoke/manifest.json",
+  "sha256": "c19c3fa2073d071830b2da195639de202b0789a13b90a3d1f450b33416d63a97",
+  "note": "dab_039 條目逐字相同（自原 manifest 抽取）；模型/預算/arms/scoring 與原凍結一致"
+ }
+}
