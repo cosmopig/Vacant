@@ -98,7 +98,7 @@
  ],
  "pending_before_fire": {
   "recompute_rules_TDD": [
-   "dabstep-13：mode_col（payments.csv hour 欄計數最大者；平手決定規則照 manual.md/資料語義，TDD 前凍結）",
+   "dabstep-13：mode_col（payments.csv hour_of_day 欄計數最大者；平手規則已凍結＝數值最小（可解析為數時）、否則字典序最小；TDD 已完成 r984：checks.py mode_col＋plain_recomputed，測試紅→綠，真實資料 sanity：14→PASS、13→FAIL）",
    "dabstep-23：fraud_rate_2023_inperson（payments.csv，語義照 manual.md＋資料欄位定義，TDD 前凍結）",
    "dabstep-1753：fee_ids_lookup（fees.json＋merchant_data.json：Belles_cookbook_store、2023-03 適用 fee ID 集合，語義照 manual.md，TDD 前凍結）"
   ],

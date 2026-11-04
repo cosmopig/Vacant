@@ -932,3 +932,57 @@ def test_kv_recomputed_pearson2_constant_column_is_unknown(tmp_path: pathlib.Pat
     _write(d / "answer.txt", "@k[0]\n")
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
     assert res["req_main"].status == "UNKNOWN"
+
+
+# ── plain_recomputed＋mode_col（G2 小批：e014/dabstep 真實草稿，2026-11-04）──────
+
+def test_plain_recomputed_mode_col_pass_and_fail(tmp_path: pathlib.Path):
+    """mode_col：欄位值計數最大（dabstep-13 hour_of_day 語義）；交付物為 plain value（非 @kv）。
+    重算值不進證據（紅線：不向修復模型提供隱藏答案）。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "payments.csv",
+        "hour_of_day\n14\n14\n14\n13\n13\n16\n",   # mode = 14
+    )
+    params = {
+        "data_file": "payments.csv",
+        "recompute": {"type": "mode_col", "col": "hour_of_day",
+                      "note": "值計數最大者；平手→數值最小（可解析為數時），否則字典序最小（TDD 前凍結）"},
+    }
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "14\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "13\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+
+
+def test_plain_recomputed_mode_col_tie_and_unknown(tmp_path: pathlib.Path):
+    """mode_col 平手→數值最小（2 勝 10，非字典序 '10'）；無非空值→UNKNOWN（不自評）。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "t.csv", "v\n2\n10\n2\n10\n")   # 2:2 與 10:2 平手 → 數值最小 2
+    params = {"data_file": "t.csv", "recompute": {"type": "mode_col", "col": "v"}}
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    d = tmp_path / "d"
+    _write(d / "answer.txt", "2\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    assert res["req_main"].status == "PASS"
+
+    lexicographic_trap = tmp_path / "lex"
+    _write(lexicographic_trap / "answer.txt", "10\n")   # 字典序 '10' 最小≠規則
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, lexicographic_trap)}
+    assert res["req_main"].status == "FAIL"
+
+    task_dir2 = tmp_path / "task2"
+    _write(task_dir2 / "e.csv", "v\n\n\n")             # 無非空值 → UNKNOWN
+    req_set2 = _req_set("plain_recomputed", dict(params), "answer.txt")
+    d2 = tmp_path / "d2"
+    _write(d2 / "answer.txt", "1\n")
+    res2 = {r.claim_id: r for r in run_requirement_checks(task_dir2, req_set2, d2)}
+    assert res2["req_main"].status == "UNKNOWN"

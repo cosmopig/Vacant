@@ -1292,6 +1292,99 @@ def check_kv_recomputed(
                    {"key": key, "rule": rule_desc, "expected_in_evidence": False})
 
 
+def _mode_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> str:
+    """mode_col（G2 小批 e014/dabstep-13）：欄位值計數最大者。
+    平手→數值最小（可解析為數時），否則字典序最小（TDD 前凍結，見 smoke_e014 manifest）。"""
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("mode_col 需要 col")
+    counts: dict[str, int] = {}
+    for r in rows:
+        cell = str(r.get(col, "")).strip()
+        if not cell:
+            continue
+        counts[cell] = counts.get(cell, 0) + 1
+    if not counts:
+        raise UnknownSource("mode_col: 無非空值")
+    top = max(counts.values())
+    winners = [v for v, n in counts.items() if n == top]
+
+    def _key(v: str) -> tuple:
+        try:
+            return (0, float(v), "")
+        except ValueError:
+            return (1, 0.0, v)
+
+    winners.sort(key=_key)
+    return winners[0]
+
+
+def check_plain_recomputed(
+    task_dir: pathlib.Path,
+    deliverable_dir: pathlib.Path,
+    item: RequirementItem,
+) -> ClaimResult:
+    """G2 小批（e014/dabstep）：交付物為 plain value（非 @kv 標籤），值須與對凍結資料的重算一致。
+
+    防洩漏語意同 kv_recomputed：重算值絕不進 detail/evidence——修復模型只看到
+    「你的值與按公開規則對公開資料重算不符」，不會被直接給答案。
+    - 資料檔缺失 / recompute 規則不支援 → UNKNOWN（不猜）
+    - 交付值缺失/空 → FAIL
+    - 值不符重算 → FAIL（mismatch_with_recomputation；不顯示期望值）
+    - 一致 → PASS
+    """
+    p = item.params
+    data_rel = str(p.get("data_file", "")).strip()
+    if not data_rel:
+        return _result(item, "UNKNOWN", "plain_recomputed.params.data_file 缺失；不自評", {"reason": "no data_file"})
+    data_file = (task_dir / data_rel)
+    if not data_file.is_file():
+        return _result(item, "UNKNOWN",
+                       f"資料檔 {data_rel} 缺失；無法重算，標 UNKNOWN", {"data_file": data_rel})
+    rc = p.get("recompute")
+    if not isinstance(rc, dict):
+        return _result(item, "UNKNOWN", "plain_recomputed.params.recompute 缺失；不自評", {"reason": "no recompute"})
+    try:
+        with data_file.open(newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        rtype = str(rc.get("type", "")).strip().lower()
+        if rtype == "mode_col":
+            expected: Any = _mode_col(rows, rc)
+        else:
+            raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+    except (UnknownSource, OSError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）", {"problem": "missing_file"})
+    val_str = deliv_file.read_text(encoding="utf-8").strip()
+    if not val_str:
+        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
+    rule_desc = (f"{str(rc.get('type'))}: {data_rel} "
+                 f"{json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}")
+    if isinstance(expected, (int, float)) and not isinstance(expected, bool):
+        try:
+            got = float(val_str)
+        except ValueError:
+            return _result(item, "FAIL", "答案值不可解析為數字",
+                           {"problem": "not_a_number", "value": val_str})
+        atol = float(p.get("atol", 1e-6))
+        ok = abs(got - expected) <= atol
+    else:
+        ok = str(expected).strip() == val_str
+    if not ok:
+        return _result(item, "FAIL",
+                       f"答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）",
+                       {"deliverable_value": val_str,
+                        "problem": "mismatch_with_recomputation",
+                        "rule": rule_desc,
+                        "expected_in_evidence": False})
+    return _result(item, "PASS",
+                   f"答案值與按公開規則（{rule_desc}）的重算一致",
+                   {"rule": rule_desc, "expected_in_evidence": False})
+
+
 def check_summary_numbers(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -1537,6 +1630,8 @@ def run_requirement_checks(
             res = check_answer_kv(t_dir, d_dir, item)
         elif vname == "kv_recomputed":
             res = check_kv_recomputed(t_dir, d_dir, item)
+        elif vname == "plain_recomputed":
+            res = check_plain_recomputed(t_dir, d_dir, item)
         elif vname == "tag_format":
             res = check_tag_format(d_dir, item)
         else:
