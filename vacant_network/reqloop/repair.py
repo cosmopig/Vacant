@@ -35,6 +35,13 @@ CLI（可重跑的原生 pi 命令；provider/model 用既有 pi 設定，不輸
         --task <task_dir> --draft <draft_dir> \
         --provider lms1003qwen --model qwen/qwen3.8-27b \
         --out <dir> --rounds 2 --timeout 300 --synthetic
+
+一條指令離線 selftest（只驗管線，不宣稱效果；synthetic G1 案例＋fake agent，
+零模型呼叫、零網路、不碰任何凍結 manifest）：
+    .venv/bin/python -m vacant_network.reqloop.repair --selftest
+    逐條驗 11/04 紅線（兩臂反饋差異、FAIL→PASS=fixed、FAIL→UNKNOWN 不算修好、
+    PASS→FAIL 記錄、停滯停因、無缺口零呼叫、成本缺值 UNKNOWN、退出碼 0/20）；
+    全過 ⇒ 退出碼 0，任一不過 ⇒ 1。
 退出碼（照 `vacant run` 慣例）：0＝缺口關閉或無缺口；20＝跑過但缺口未閉；
 22＝agent 應該跑但一次都沒跑起來（infra）。no_gap 但仍有未驗證項
 （UNKNOWN/缺項）＝零呼叫是設計，退出碼 20（未驗證、拒收），不是 22。
@@ -589,9 +596,160 @@ def _default_build(provider: str | None, model: str | None, hooks: bool = True):
     return build
 
 
+# ── selftest（一條指令、離線、synthetic；只驗管線，不宣稱效果）──────────
+
+def _selftest_fake_build() -> BuildFn:
+    """離線 stand-in（selftest 專用，零模型呼叫）。與 pi_build 同簽名。"""
+    def build(prompt: str, ws: pathlib.Path) -> Any:
+        from vacant_network.adapters.agents import Launch
+        return Launch(argv=["true"], note="selftest-fake")
+    return build
+
+
+def _selftest_fake_agent(ws_files: dict[str, str] | None = None) -> RunFn:
+    """離線 stand-in：把 ws_files 寫進工作區（模擬修復模型改交付物），零模型呼叫。"""
+    def run(launch: Any, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict[str, Any]:
+        for name, text in (ws_files or {}).items():
+            p = pathlib.Path(workspace) / name
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(text, encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1200, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+    return run
+
+
+def _selftest() -> int:
+    """一條指令離線 selftest：synthetic G1 案例（expense_category）＋fake agent。
+
+    逐條驗 11/04 紅線，輸出每條一行；全過 ⇒ 0，任一不過 ⇒ 1。
+    不呼叫模型、不碰任何凍結 manifest（g2/g3 發射紅線不受影響）。
+    """
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    g1 = repo / "ops" / "reqloop" / "g1" / "tasks" / "expense_category"
+    if not (g1 / "requirements.json").is_file():
+        print(f"SELFTEST: FAIL — G1 synthetic 案例不存在：{g1}")
+        return 1
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="vacant-repair-selftest-"))
+    task_dir = tmp / "task"
+    shutil.copytree(g1, task_dir)
+    rs = RequirementSet.load(task_dir / "requirements.json")
+    draft = task_dir / "bad_grand_total_wrong"
+    before = run_requirement_checks(task_dir, rs, draft)
+    failed = [c.claim_id for c in before if c.required and c.status == "FAIL"]
+    if not failed:
+        print("SELFTEST: FAIL — G1 案例應有 1 條必需 FAIL 項，實際 0（案例已變？需重凍結案例）")
+        return 1
+    good_summary = (task_dir / "good" / "summary.md").read_text(encoding="utf-8")
+    broken_csv = "category,total_amount\nit,3380.25\n"   # 缺 subcategory 欄位（與測試同）
+    draft_hash0 = _dir_sha256(draft)
+    fake = _selftest_fake_build()
+
+    results: list[tuple[str, str | None]] = []   # (說明, None=ok / 失敗原因)
+
+    def check(name: str, cond: bool, reason: str = "斷言不成立") -> None:
+        results.append((name, None if cond else reason))
+
+    # 1) 兩臂反饋差異：localized 帶失敗條目＋可見反例；generic 不帶（對照必須真實）
+    loc = build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    gen = build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    check("兩臂反饋差異（localized 帶反例與失敗條目；generic 不帶）",
+          all(cid in loc for cid in failed)
+          and "10674.83" in loc                       # 可見反例（重算的正確值）
+          and not any(cid in gen for cid in failed)
+          and "10674.83" not in gen)
+
+    # 2) FAIL→PASS＝fixed；原草稿逐位元組保留；成本缺值＝UNKNOWN（不填 0）
+    o2 = repair_slice(task_dir, rs, draft, out_root=tmp / "s2",
+                      build=fake, run=_selftest_fake_agent({"summary.md": good_summary}),
+                      feedback_mode="localized", max_rounds=2, synthetic=True)
+    check("FAIL→PASS=fixed、原草稿未動、tokens 缺值=UNKNOWN",
+          o2.stopped == STOP_GAP_CLOSED
+          and set(failed) <= set(o2.fixed)
+          and o2.unresolved == ()
+          and _dir_sha256(draft) == draft_hash0
+          and o2.cost["tokens"] is None)
+
+    # 3) FAIL→UNKNOWN 不算修好；unresolved 列明（不得宣告完成）
+    o3 = repair_slice(task_dir, rs, draft, out_root=tmp / "s3",
+                      build=fake,
+                      run=_selftest_fake_agent({"expenses.csv": "corrupted,not,a,valid\ngarbage"}),
+                      feedback_mode="localized", max_rounds=1, synthetic=True)
+    check("FAIL→UNKNOWN 不算修好（unresolved 列明）",
+          o3.stopped != STOP_GAP_CLOSED
+          and o3.final_status[failed[0]] == "UNKNOWN"
+          and all(cid not in o3.fixed for cid in failed)
+          and all(cid in o3.unresolved for cid in failed))
+
+    # 4) 原有 PASS 退步（PASS→FAIL）必須記錄在 regressed，不能淨改善掩蓋
+    o4 = repair_slice(task_dir, rs, draft, out_root=tmp / "s4",
+                      build=fake,
+                      run=_selftest_fake_agent({"summary.md": good_summary,
+                                                "expense_summary.csv": broken_csv}),
+                      feedback_mode="localized", max_rounds=1, synthetic=True)
+    check("PASS→FAIL 記錄在 regressed",
+          "req_csv_structure" in o4.regressed and o4.stopped != STOP_GAP_CLOSED)
+
+    # 5) 連續兩次無進展 ⇒ 停止（2 輪，不是 4）；停因＋未解決項都回傳
+    o5 = repair_slice(task_dir, rs, draft, out_root=tmp / "s5",
+                      build=fake, run=_selftest_fake_agent(None),
+                      feedback_mode="generic", max_rounds=4, synthetic=True)
+    check("停滯停因＋未解決項（2 輪即停、不燒盡預算）",
+          o5.stopped == STOP_STALLED and len(o5.rounds) == 2
+          and all(cid in o5.unresolved for cid in failed))
+
+    # 6) 無缺口：localized 零呼叫（缺口驅動）；generic 至少重驗 1 輪
+    o6a = repair_slice(task_dir, rs, task_dir / "good", out_root=tmp / "s6a",
+                       build=fake, run=_selftest_fake_agent(None),
+                       feedback_mode="localized", max_rounds=2, synthetic=True)
+    o6b = repair_slice(task_dir, rs, task_dir / "good", out_root=tmp / "s6b",
+                       build=fake, run=_selftest_fake_agent(None),
+                       feedback_mode="generic", max_rounds=2, min_rounds=1,
+                       synthetic=True)
+    check("無缺口：localized 0 呼叫／generic 1 呼叫",
+          o6a.stopped == STOP_NO_GAP and o6a.cost["calls"] == 0
+          and o6a.cost["wall_ms_total"] is None
+          and o6b.cost["calls"] == 1)
+
+    # 7) CLI 退出碼 0/20＋成本缺值顯示 UNKNOWN（不填 0）
+    import contextlib
+    import io
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc_ok = main(["--task", str(task_dir), "--draft", str(draft),
+                      "--out", str(tmp / "rc_ok"), "--rounds", "1", "--synthetic",
+                      "--feedback-mode", "localized"],
+                     build=fake, run=_selftest_fake_agent({"summary.md": good_summary}))
+        rc_unverified = main(["--task", str(task_dir), "--draft", str(draft),
+                             "--out", str(tmp / "rc_unverified"), "--rounds", "1",
+                             "--synthetic", "--feedback-mode", "localized"],
+                            build=fake,
+                            run=_selftest_fake_agent({"expenses.csv": "corrupted,not,a,valid\ngarbage"}))
+    text = buf.getvalue()
+    check("退出碼 0（缺口關閉）/20（未驗證、拒收）＋tokens 顯示 UNKNOWN",
+          rc_ok == 0 and rc_unverified == 20
+          and "tokens=UNKNOWN" in text)
+
+    passed = sum(1 for _, err in results if err is None)
+    print("G2 repair-slice SELFTEST（synthetic G1、離線、0 模型呼叫；只驗管線，不宣稱效果）")
+    for i, (name, err) in enumerate(results, 1):
+        print(f"  [{i}/{len(results)}] {'ok' if err is None else 'FAIL'} — {name}"
+              + ("" if err is None else f"（{err}）"))
+    print(f"SELFTEST: {passed}/{len(results)} PASS")
+    return 0 if passed == len(results) else 1
+
+
 def main(argv: list[str] | None = None, *,
          build: BuildFn | None = None,
          run: RunFn | None = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    if argv and "--selftest" in argv:
+        return _selftest()
     ap = argparse.ArgumentParser(
         prog="python -m vacant_network.reqloop.repair",
         description="G2 局部修復切片：原生 pi 接收草稿與可見反例 → 修正 → 重驗 → 前後差異及成本。"

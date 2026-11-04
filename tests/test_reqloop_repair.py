@@ -574,6 +574,16 @@ def test_main_exit_codes_and_json(task_dir, tmp_path, capsys):
     assert rc3 == 22
 
 
+def test_selftest_command_all_green(capsys):
+    """一條指令離線 selftest（r1008）：`--selftest` 用 synthetic G1 案例跑完整管線。
+    全過 ⇒ rc=0、輸出每條一行＋成本缺值顯示 UNKNOWN（不填 0）；任一不過 ⇒ rc=1。"""
+    rc = repair.main(["--selftest"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "SELFTEST: 7/7 PASS" in out
+    assert "[7/7] ok" in out            # 退出碼 0/20＋成本缺值 UNKNOWN（check 7 內斷言）
+
+
 def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
     """CLI 支援 --min-rounds：
     - generic 臂預設 min_rounds=1（好草稿也至少跑 1 輪以重驗有無退步）
