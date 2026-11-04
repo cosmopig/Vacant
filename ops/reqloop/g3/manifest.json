@@ -1,6 +1,7 @@
 {
   "schema": "vacant.reqloop.g2.manifest/1",
   "ticket": "vq-5nz.6（G3 候選預註冊）",
+  "classification": "【名詞校正 2026-11-04 r998，依審查 20261104_1811 指示2】本清單是「G2 停滯草稿換方法驗證」（預註冊法(2)：單輪預算 300s→600s），**不是** RLOOP_PLAN.md 的 G3 門。RLOOP_PLAN 的 G3＝未見新題完整比較（原生 pi／只給需求清單／完整 R-loop 三組，用實驗室 scorer 評）；本清單 4 份草稿全部來自 G2 既有任務，評估方式仍是需求條目重驗，不是新題 scorer 比較。目錄名 g3 只是「G2 停滯換方法的第三階段」，不得解讀為『G2 已完賽、進入 G3』。G2 正式效果比較（10–20 錯＋5 對）尚未進行。",
   "purpose": "G3 預先登記（待點名才准發射）：4 停滯草稿 × generic/localized 兩臂＝8 格＝6 缺口格〔dab_055×2、dabstep-23-localized、dabstep-1753×2、dab_039-generic〕＋2 已閉複驗格〔dabstep-23-generic、dab_039-localized〕；換方法＝輪次預算重設 300s→600s（vq-5nz.6 預註冊法(2)，r993 首選；對 generic 臂有 10:23 預算內 PASS 前例：dab_039-generic 1 呼叫 58.7k tok 收）。本 manifest 只驗管線＋記錄前後差異與成本，不宣稱任何效果提升。",
   "status": "FROZEN_PENDING_NAMING",
   "naming_required": "本 manifest 凍結完成、dry-run 通過；但未點名 G3 前禁止發射（紅線：G3 未點名＝未授權發射）。點名後以 fire_command 發射。",
