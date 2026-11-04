@@ -24,6 +24,19 @@
   "hidden_after": "UNKNOWN——本地無權重跑 hidden scorer；缺失即 UNKNOWN，絕不填 0"
  },
  "leak_guard": "修復模型只看得到原始問題（events.jsonl user prompt 原文）、凍結資料與「值不符重算」的事實；重算值/hidden 參考值永不進證據或提示（同 e013 口徑）",
+ "fire_contract": {
+  "runner": "vacant_network.reqloop.repair.repair_slice（程式化呼叫，同 e013 發射模式；build/run 注入）",
+  "why_not_cli": "repair.py 的 CLI（main()）未暴露 --min-rounds：走 CLI 會把 min_rounds 迫為 0，generic 臂的 good 草稿會 0 呼叫（no_gap），靜默破壞「generic 臂對的草稿也至少重驗 1 次」的預算契約；本批必須程式化發射（或先 TDD 補 --min-rounds 旗標再發射）",
+  "per_arm": {
+   "generic": {"feedback_mode": "generic", "max_rounds": 2, "timeout_s": 300, "min_rounds": 1},
+   "localized": {"feedback_mode": "localized", "max_rounds": 2, "timeout_s": 300, "min_rounds": 0}
+  },
+  "build_run": "build=_default_build(provider=lms1003qwen, model=qwen/qwen3.8-27b)（含 pin_agent_python：裸 python/python3 pin 到明確直譯器＝dab_039 scipy 根因的環境層保證，非提示詞）；run=adapters.run.run_agent",
+  "workspace": "prepare_workspace：每輪從原草稿重建新工作區（原草稿目錄只讀、永不改動，draft_sha256 全程核對）；task 頂層檔案（request.md/requirements.json/資料檔）進工作區；白名單外子目錄（good/、bad_*/ 等參考答案）永不入場；本批資料檔放 task 頂層（同 e013），include_dirs=()",
+  "exit_codes": "0＝（no_gap 或 gap_closed）且無 unresolved；20＝agent 跑過但缺口未閉／有 unresolved；22＝agent 一次都沒跑起來（infra）",
+  "cost": "wall_ms/呼叫數由執行器實際攔截；tokens 從 agent 原始 stdout usage 讀（parse_usage_from_log）；缺值＝UNKNOWN(None)，絕不填 0",
+  "stop_semantics": "STOP_GAP_CLOSED／STOP_NO_GAP／STOP_STALLED／STOP_MAX_ROUNDS；任一輪有 FAIL→PASS 即重置 stall 計數（dab_055 即因此跑滿 2 輪＝max_rounds 而非 stalled）；連續兩輪無缺口消除＝stalled"
+ },
  "data_source": {
   "dir": "~/dev/ops/ref/bm_dabstep_data（本地參考庫；與 e014 lab cell 快照 /srv/vlab/cells/e014_dabstep_block-dabstep-1871-* 同源）",
   "files": {
