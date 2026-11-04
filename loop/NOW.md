@@ -23,7 +23,7 @@ exit 0＝非 UNKNOWN／20＝UNKNOWN／10＝仍 INCOMPLETE；輸出 `e016_failed_
 
 ## 監控（round 958、02:3x）
 - attempt-2：51/102 live 格在位（50 出分、A17/C17/C-nf16；pg_phone_number C-nf 在跑；ls 55 項＝51 live＋2 infra 存檔＋REPORT 兩檔）；
-  infra 快照 3/50（pg_bowling C timeout；pg_dominoes A/C 缺檔）＝6%＜20% 閾；events 活躍＝健康；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午
-- 盤餘 62G、queue 空、无双分派；CI：d590821c（r956）綠 4670（LATEST、02:17）、5576107c（r957）跑中（02:28 活躍）
+  infra 3/50（pg_bowling C timeout；pg_dominoes A/C 缺檔）＝6%＜20% 閾；events 活躍＝健康；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午
+- 盤餘 62G、queue 空、无双分派；CI：d590821c（r956）綠 4670（LATEST）、5576107c（r957）跑中
 - 助手票 R20261104_0124-1 停擺（無進展/無進程/無結果無 Done 段）；不接手（NOW 紀律）；下輪仍停擺⇒R&D 裁處（BACKLOG 已登；門＝分支 3 packet 提升前置）
 - attempt-1 15 格（`…attempt1_envleak/`）不進裁決；`recompute_results.json`（全 0）與 `e016_…_recompute.py` 不能當證據
