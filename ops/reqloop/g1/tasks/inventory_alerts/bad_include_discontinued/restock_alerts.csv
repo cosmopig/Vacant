@@ -1,0 +1,39 @@
+item_id,item_name,current_stock,safety_stock,restock_needed,estimated_cost
+102,Tablet Y,10,20,10,3000
+103,Blender Z,5,10,5,400
+106,Laptop C,8,15,7,6300
+112,Smartwatch I,12,15,3,600
+117,Iron N,3,6,3,135
+118,Camera O,9,12,3,1200
+122,Whiteboard S,5,8,3,240
+124,Router U,7,10,3,360
+125,Keyboard V,9,12,3,120
+127,Mouse X,11,15,4,100
+128,Printer Y,4,8,4,1000
+129,Air Purifier Z,6,10,4,520
+130,Docking Station A,8,12,4,320
+133,Webcam D,9,12,3,270
+134,Microphone E,6,8,2,300
+135,Electric Kettle F,3,6,3,120
+136,Gaming Chair G,7,10,3,750
+137,Desk Lamp H,5,8,3,105
+140,Scanner K,3,6,3,360
+141,Toaster L,8,12,4,180
+145,Power Bank P,9,12,3,180
+146,Laptop Stand Q,7,10,3,120
+147,Water Purifier R,3,6,3,600
+148,Wireless Mouse S,5,8,3,90
+149,External HDD T,6,8,2,200
+151,VR Headset V,4,8,4,2000
+152,Drawing Tablet W,7,10,3,450
+154,Gaming Mouse Y,8,12,4,320
+155,Monitor Arm Z,5,8,3,360
+104,Toaster A,20,15,0,0
+108,Lamp E,2,5,3,90
+114,Coffee Maker K,4,8,4,360
+120,Vacuum Q,6,10,4,120
+126,Microwave W,3,5,2,360
+132,Humidifier C,4,7,3,180
+138,Rice Cooker I,2,5,3,210
+144,Steam Iron O,4,8,4,200
+150,Sewing Machine U,2,5,330,9900
