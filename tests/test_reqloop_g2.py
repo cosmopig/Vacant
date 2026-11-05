@@ -861,3 +861,23 @@ def test_effects_20261105_summary_matches_source_files():
         assert v["right_to_wrong"] == sum(
             1 for c in cells if before_of[c["draft"]] is True and after_of[f"{c['draft']}-{c['arm']}"] is False)
         assert v["repair_sessions_total"] == sum(sessions_of.values()), ph
+
+
+def test_effects_20261105_summary_wall_ms_and_active_cost_totals():
+    """argon 20261105_0715 回歸：
+    policy30 含 5 份 good 草稿（no_gap，0 輪修復，單格 wall_ms_total=None），但另外 25 格有實際執行
+    （每格皆有真實 wall_ms_total）。階段級與 per_arm 的 wall_ms_total 必須加總所有實際執行格
+    （repair_sessions > 0），不得因 no_gap 格的 None 把整個 policy30 階段的 wall_ms_total 抹成 null。
+    同時 api_model_calls_recorded_d38d2eb2 必須反映舊 parser 的記錄值（或與 repair_sessions 區分），
+    no_gap 格不得把 tokens_true=0 與 wall_ms_total=None 混用導致階段加總邏輯不一致。
+    """
+    s = _load_summary()
+    p30 = s["phases"]["policy30"]
+    fb20 = s["phases"]["feedback_once20"]
+    assert p30["wall_ms_total"] == 4398675
+    assert p30["per_arm"]["generic"]["wall_ms_total"] == 2192195
+    assert p30["per_arm"]["localized"]["wall_ms_total"] == 2206480
+    assert fb20["wall_ms_total"] == 2482095
+    assert fb20["per_arm"]["generic"]["wall_ms_total"] == 867644
+    assert fb20["per_arm"]["localized"]["wall_ms_total"] == 1614451
+
