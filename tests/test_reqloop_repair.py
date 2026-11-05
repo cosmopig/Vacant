@@ -363,8 +363,10 @@ def test_regression_not_hidden_by_net_improvement(task_dir, tmp_path):
     assert "req_csv_structure" in out.final_diff.regressed
 
 
-def test_repair_fail_to_unknown_counts_as_not_fixed(task_dir, tmp_path):
-    """fake agent 把源資料弄壞 ⇒ 重算變 UNKNOWN：不算修好、缺口仍在。"""
+def test_repair_source_corrupt_is_unacceptable_not_fixed(task_dir, tmp_path):
+    """fake agent 把工作區的源資料弄壞 ⇒ 來源改動＝不可接受（P000-20261105-02）：
+    重驗讀權威快照（來源未動⇒仍按真來源裁決 bad 交付⇒FAIL）、改動記錄、拒收。
+    （舊行為＝重驗讀工作區壞 CSV→UNKNOWN；兩者都不得 PASS/fixed、不得宣告完成。）"""
     rs = load_req_set(task_dir)
     draft = task_dir / BAD_DRAFT
     run = _fake_agent({"expenses.csv": "corrupted,not,a,valid\ngarbage"})
@@ -375,8 +377,11 @@ def test_repair_fail_to_unknown_counts_as_not_fixed(task_dir, tmp_path):
     )
     assert out.stopped != "gap_closed"
     assert FAIL_CLAIM not in out.fixed
-    assert out.final_status[FAIL_CLAIM] == "UNKNOWN"
-    assert FAIL_CLAIM in out.unresolved                # UNKNOWN 不得宣告完成
+    assert out.final_status[FAIL_CLAIM] == "FAIL"      # 對權威快照重算仍 FAIL
+    assert FAIL_CLAIM in out.unresolved                # 非 PASS 不得宣告完成
+    assert out.source_tampered is True                 # 改動記錄為不可接受
+    assert "expenses.csv" in out.source_tampered_files
+    assert repair._exit_code(out) == 20
     assert out.cost["calls"] == 1
 
 
@@ -456,8 +461,10 @@ def test_kv_json_repair_slice_fail_to_pass_and_leak_guard(tmp_path: pathlib.Path
     assert "late_ticket_count" in log[0]["prompt"]  # 提示是 localized（帶條目）
 
 
-def test_kv_json_corrupted_in_workspace_is_unknown_not_fixed(tmp_path: pathlib.Path):
-    """fake agent 弄壞 .json 源資料⇒重驗 UNKNOWN（壞 JSON 分支）：不算修好、不得宣告完成。"""
+def test_kv_json_corrupted_in_workspace_is_unacceptable_not_fixed(tmp_path: pathlib.Path):
+    """fake agent 弄壞工作區的 .json 源資料⇒來源改動＝不可接受（P000-20261105-02）：
+    重驗讀權威快照（來源未動⇒仍按真來源裁決）、改動記錄、退出碼 20、不得宣告完成。
+    （舊行為＝重驗讀工作區壞 JSON→UNKNOWN；新行為＝按真來源裁決＋記錄改動，兩者都不得 PASS/fixed。）"""
     task_dir = tmp_path / "task"
     draft = tmp_path / "draft"
     task_dir.mkdir(parents=True)
@@ -480,8 +487,13 @@ def test_kv_json_corrupted_in_workspace_is_unknown_not_fixed(tmp_path: pathlib.P
     )
     assert out.stopped != "gap_closed"
     assert "req_main" not in out.fixed
-    assert out.final_status["req_main"] == "UNKNOWN"
-    assert "req_main" in out.unresolved              # UNKNOWN 不得宣告完成
+    # 重驗讀權威快照：來源未動⇒仍按真來源（計數 2）裁決 bad 交付（0）⇒ FAIL
+    assert out.final_status["req_main"] == "FAIL"
+    assert "req_main" in out.unresolved              # 非 PASS 不得宣告完成
+    # 來源改動記錄為不可接受（退出碼 20）
+    assert out.source_tampered is True
+    assert "tickets.json" in out.source_tampered_files
+    assert repair._exit_code(out) == 20
     assert out.cost["calls"] == 1
 
 
@@ -674,8 +686,10 @@ def test_selftest_command_all_green(capsys):
     rc = repair.main(["--selftest"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "SELFTEST: 8/8 PASS" in out
-    assert "[8/8] ok" in out            # 退出碼 0/20＋成本缺值 UNKNOWN（check 7 內斷言）
+    assert "SELFTEST: 10/10 PASS" in out
+    assert "[8/10] ok" in out           # 累積修復（check 8）
+    assert "[9/10] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
+    assert "[10/10] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
 
 
 def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
@@ -954,4 +968,215 @@ def test_selftest_cleans_up_scratch_temp_directory(capsys):
     after = set(glob.glob("/tmp/vacant-repair-selftest-*"))
     leaked = after - before
     assert not leaked, f"selftest 殘留暫存目錄：{leaked}"
+
+
+# ── 權威輸入（工單 P000-20261105-02）────────────────────────────────
+# 重驗的來源／需求必須讀控制器保存的權威快照，不得讀候選工作區：
+# Agent 改寫工作區裡的來源 CSV／requirements.json 迎合交付，不得翻 FAIL→PASS；
+# 來源改動記錄為不可接受；驗證器程式不可由候選覆寫；真正只修交付的候選仍通過。
+
+
+def _tampered_source(task_dir: pathlib.Path) -> str:
+    """造一份「改寫過的來源」：讓 expenses.csv 的加總恰好等於 bad 摘要的錯誤值。
+
+    在舊語義（工作區同時當 task_dir）下，這會使 req_summary_numbers 由 FAIL 翻成
+    PASS——即證明這是真實攻擊路徑，不是空洞測試。
+    """
+    import csv as _csv
+    import io as _io
+    import re as _re
+    bad_md = (task_dir / BAD_DRAFT / "summary.md").read_text(encoding="utf-8")
+    m = _re.search(r"報銷總金額：([\d,\.]+)", bad_md)
+    assert m, "bad 摘要必須含報銷總金額"
+    target = float(m.group(1).replace(",", ""))
+    text = (task_dir / "expenses.csv").read_text(encoding="utf-8")
+    rows = list(_csv.DictReader(_io.StringIO(text)))
+    original_sum = sum(float(r["amount"]) for r in rows)
+    assert abs(original_sum - target) > 0.005, "bad 草稿本質是錯的；案例已變需重凍結"
+    delta = target - original_sum
+    rows[-1]["amount"] = f"{float(rows[-1]['amount']) + delta:.4f}"
+    cols = list(rows[0].keys())
+    buf = _io.StringIO()
+    w = _csv.DictWriter(buf, fieldnames=cols)
+    w.writeheader()
+    w.writerows(rows)
+    return buf.getvalue()
+
+
+def test_source_tamper_would_pass_under_workspace_source_semantics(task_dir, tmp_path):
+    """攻擊真實性證明：同一份交付＋同一份改寫來源，
+    舊語義（來源讀工作區）req_summary_numbers 翻成 PASS；對權威來源重算仍 FAIL。"""
+    rs = load_req_set(task_dir)
+    d = tmp_path / "ws"
+    d.mkdir()
+    shutil.copy(task_dir / BAD_DRAFT / "summary.md", d / "summary.md")
+    shutil.copy(task_dir / BAD_DRAFT / "expense_summary.csv", d / "expense_summary.csv")
+    (d / "expenses.csv").write_text(_tampered_source(task_dir), encoding="utf-8")
+    old = {c.claim_id: c.status for c in run_requirement_checks(d, rs, d)}
+    assert old[FAIL_CLAIM] == "PASS", "舊語義下改來源應能翻 PASS（攻擊成立）"
+    new = {c.claim_id: c.status for c in run_requirement_checks(task_dir, rs, d)}
+    assert new[FAIL_CLAIM] == "FAIL", "對權威來源重算必須仍 FAIL"
+
+
+def test_source_csv_tamper_must_not_pass(task_dir, tmp_path):
+    """P000-20261105-02 驗收核心：fake agent 只改來源 CSV（迎合交付）⇒ 不得變 PASS。
+
+    候選不可接受：缺口不得關閉、該項不得列 fixed、退出碼 20；
+    來源改動記錄在逐輪與 outcome 層（不可接受）。
+    """
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    tampered = _tampered_source(task_dir)
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        (ws / "expenses.csv").write_text(tampered, encoding="utf-8")  # 只改來源，不修交付
+        return _run_result(log_dir)
+
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped != "gap_closed", "改來源迎合交付不得關閉缺口"
+    assert FAIL_CLAIM not in out.fixed
+    assert out.final_status[FAIL_CLAIM] == "FAIL"   # 對權威快照重算仍 FAIL
+    assert out.source_tampered is True
+    assert "expenses.csv" in out.source_tampered_files
+    assert out.rounds[0].source_tampered, "逐輪必須記錄來源改動"
+    assert "expenses.csv" in out.rounds[0].source_tampered
+    assert repair._exit_code(out) == 20, "來源改動＝不可接受（拒收）"
+
+
+def test_requirements_json_tamper_recorded_unacceptable(task_dir, tmp_path):
+    """fake agent 只改工作區 requirements.json（把必需項設為非必需）⇒ 記錄、不可接受。
+
+    需求條目由控制器載入並綁權威快照：工作區那份對重驗無效力，改動只被記錄。
+    """
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        req = json.loads((ws / "requirements.json").read_text(encoding="utf-8"))
+        for it in req["items"]:
+            if it["id"] == FAIL_CLAIM:
+                it["required"] = False
+        (ws / "requirements.json").write_text(json.dumps(req, ensure_ascii=False),
+                                              encoding="utf-8")
+        return _run_result(log_dir)
+
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out.stopped != "gap_closed"
+    assert FAIL_CLAIM not in out.fixed
+    assert out.source_tampered is True
+    assert "requirements.json" in out.source_tampered_files
+    assert repair._exit_code(out) == 20
+
+
+def test_true_fix_deliverable_only_still_passes(task_dir, tmp_path):
+    """真正只修交付物的候選仍通過：缺口關閉、無來源改動、退出碼 0。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    run = _fake_agent({"summary.md": _good_summary(task_dir)})  # 只修交付，不碰來源
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out.stopped == "gap_closed"
+    assert FAIL_CLAIM in out.fixed
+    assert out.unresolved == ()
+    assert out.source_tampered is False
+    assert out.source_tampered_files == ()
+    assert repair._exit_code(out) == 0
+
+
+def test_candidate_cannot_override_verifier_program(task_dir, tmp_path):
+    """驗證器程式不可由候選覆寫：候選在工作區寫同名 checks.py（恆 PASS）不改變裁決。
+
+    裁決與無 shadow 時逐條相同；shadow 新檔不計來源改動（非快照內檔案）。
+    """
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    shadow = (
+        "def run_requirement_checks(*a, **k):\n"
+        "    class _C:\n"
+        "        claim_id = 'req_summary_numbers'\n"
+        "        status = 'PASS'\n"
+        "        detail = 'shadow'\n"
+        "        evidence = {}\n"
+        "    return [_C()]\n"
+    )
+    run = _fake_agent({"checks.py": shadow})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    clean = {c.claim_id: c.status for c in run_requirement_checks(task_dir, rs, draft)}
+    assert out.final_status[FAIL_CLAIM] == clean[FAIL_CLAIM] == "FAIL"
+    assert out.stopped != "gap_closed"
+    assert out.source_tampered is False, "新檔（交付物）不計來源改動"
+    assert repair._exit_code(out) == 20
+
+
+def test_controller_saves_authoritative_snapshot(task_dir, tmp_path):
+    """控制器保存權威快照：out_root 下逐位元組等同任務輸入，manifest 帶 sha256。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    run = _fake_agent({"summary.md": _good_summary(task_dir)})
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    snap = tmp_path / "out" / "authoritative"
+    assert (snap / "expenses.csv").is_file()
+    assert (snap / "expenses.csv").read_bytes() == (task_dir / "expenses.csv").read_bytes()
+    assert (snap / "requirements.json").read_bytes() == \
+        (task_dir / "requirements.json").read_bytes()
+    man = json.loads((tmp_path / "out" / "authoritative_manifest.json").read_text(encoding="utf-8"))
+    h = hashlib.sha256((task_dir / "expenses.csv").read_bytes()).hexdigest()
+    assert man["files"]["expenses.csv"] == h
+    # 既有行為不變：缺口關閉
+    assert out.stopped == "gap_closed"
+
+
+def test_existing_good_draft_still_passes(task_dir, tmp_path):
+    """既有正確案例仍通過：好草稿零呼叫、全 PASS、無來源改動、退出碼 0。"""
+    rs = load_req_set(task_dir)
+    out = repair.repair_slice(
+        task_dir, rs, task_dir / "good",
+        out_root=tmp_path / "out", build=_fake_build([]), run=_fake_agent(None),
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped == "no_gap"
+    assert out.cost["calls"] == 0
+    assert all(v == "PASS" for v in out.final_status.values())
+    assert out.source_tampered is False
+    assert repair._exit_code(out) == 0
+
+
+def test_cli_exit_code_20_on_source_tamper(task_dir, tmp_path, capsys):
+    """CLI 層：來源改動 ⇒ 退出碼 20（拒收），輸出記錄 SOURCE_TAMPERED。"""
+    tampered = _tampered_source(task_dir)
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        (pathlib.Path(workspace) / "expenses.csv").write_text(tampered, encoding="utf-8")
+        return _run_result(log_dir)
+
+    rc = repair.main(
+        ["--task", str(task_dir), "--draft", str(task_dir / BAD_DRAFT),
+         "--out", str(tmp_path / "out"), "--rounds", "1", "--synthetic",
+         "--feedback-mode", "localized"],
+        build=_fake_build([]), run=run,
+    )
+    assert rc == 20
+    text = capsys.readouterr().out
+    assert "SOURCE_TAMPERED" in text and "expenses.csv" in text
 

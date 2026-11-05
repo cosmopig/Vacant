@@ -13,6 +13,11 @@ G2 局部修復切片（工單 P000-20261104-01-repair-slice，2026-11-04）。
 規則（RD_FOCUS_20261104，累積修復 P000-20261105-01；本模組的每個行為都在此約束下）：
 - **保留原候選**：原草稿目錄永遠不被改動；每一輪複製到新的工作目錄 round_N/ 才讓 agent 動；
   每輪工作區即該輪候選快照，保留供審計。
+- **權威輸入（P000-20261105-02）**：重驗的來源資料與需求讀**控制器保存的權威快照**
+  （out_root/authoritative/＋authoritative_manifest.json），產物才讀候選工作區——
+  agent 改寫工作區裡的來源 CSV／requirements.json 迎合交付，不得翻 FAIL→PASS。
+  來源改動記錄為不可接受（逐輪 source_tampered＋outcome.source_tampered，退出碼 20）；
+  驗證器程式是庫內閉集分派（未知 verifier→UNKNOWN），不可由候選工作區覆寫。
 - **累積修復（2026-11-05）**：第 1 輪從原草稿起；第 N 輪（N≥2）承接第 N−1 輪工作區的
   候選與該輪已驗證狀態——不是每輪重抽原草稿。提示與逐輪差異同樣反映當前候選：
   逐輪 diff＝相鄰輪差異（上一輪狀態→本輪重驗）；原始級差異（原草稿初始驗→最終重驗）
@@ -349,12 +354,83 @@ class RepairRound:
     prompt_sha256: str
     usage: dict[str, int] | None          # None＝UNKNOWN
     error: str | None = None
+    #: 來源改動（P000-20261105-02）：權威快照內檔案在工作區缺失或 hash 改變的相對路徑；
+    #: 空＝未改。任何非空值＝該輪候選不可接受（控制器不得宣告缺口關閉）。
+    source_tampered: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         d = dataclasses.asdict(self)
         d["before"] = [c.to_json() for c in self.before]
         d["after"] = [c.to_json() for c in self.after]
         return d
+
+
+def create_authoritative_snapshot(
+    task_dir: pathlib.Path,
+    out_root: pathlib.Path,
+    *,
+    include_dirs: tuple[str, ...] = ("data",),
+) -> pathlib.Path:
+    """P000-20261105-02：控制器保存權威快照（重驗的來源基準）。
+
+    把任務頂層檔案＋include_dirs 子樹逐位元組複製到 out_root/authoritative/，
+    並寫 authoritative_manifest.json（relpath→sha256）。之後：
+    - 重驗的來源資料與需求檔一律讀快照（agent 改工作區來源無效）；
+    - 每輪用快照 hash 比對工作區，偵測來源改動。
+    快照建一次、之後只讀；重驗與工作區準備都不得寫它。
+    """
+    import hashlib as _hashlib
+    import json as _json
+    snap = out_root / "authoritative"
+    if snap.exists():
+        shutil.rmtree(snap)
+    snap.mkdir(parents=True)
+    manifest: dict[str, str] = {}
+
+    def _copy_one(src: pathlib.Path, rel: str) -> None:
+        dst = snap / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        manifest[rel] = _hashlib.sha256(src.read_bytes()).hexdigest()
+
+    for p in sorted(task_dir.iterdir()):
+        if p.is_file():
+            _copy_one(p, p.name)
+    for d in include_dirs:
+        src_dir = task_dir / d
+        if src_dir.is_dir():
+            for f in sorted(src_dir.rglob("*")):
+                if f.is_file():
+                    _copy_one(f, str(f.relative_to(task_dir)))
+    (out_root / "authoritative_manifest.json").write_text(
+        _json.dumps({"schema": "vacant.reqloop.authoritative/1",
+                     "task": str(task_dir), "files": manifest},
+                    ensure_ascii=False, indent=1),
+        encoding="utf-8")
+    return snap
+
+
+def _source_tampered_files(authoritative: pathlib.Path, ws: pathlib.Path) -> tuple[str, ...]:
+    """P000-20261105-02：偵測候選改寫權威來源（快照內檔案缺失或 hash 改變）。
+
+    只比對快照內檔案（新交付物不在內，不誤報）；按相對路徑排序，確定性。
+    """
+    import hashlib as _hashlib
+    bad: list[str] = []
+    for rel, h in _load_manifest(authoritative).items():
+        f = ws / rel
+        if not f.is_file():
+            bad.append(rel)
+        elif _hashlib.sha256(f.read_bytes()).hexdigest() != h:
+            bad.append(rel)
+    return tuple(sorted(bad))
+
+
+def _load_manifest(authoritative: pathlib.Path) -> dict[str, str]:
+    """讀 authoritative_manifest.json（out_root 層）的 files 表。"""
+    import json as _json
+    man = _json.loads((authoritative.parent / "authoritative_manifest.json").read_text(encoding="utf-8"))
+    return dict(man["files"])
 
 
 def run_repair_round(
@@ -370,6 +446,7 @@ def run_repair_round(
     feedback_mode: str,
     timeout_s: float,
     include_dirs: tuple[str, ...] = ("data",),
+    authoritative: pathlib.Path | None = None,
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。來源目錄不被改動。
 
@@ -378,10 +455,24 @@ def run_repair_round(
       （承接上一輪候選）。重驗與重驗證據一律以本輪工作區為準。
     - `before`＝上一輪狀態：第 1 輪為原草稿初始驗；第 N 輪為上一輪 after。
       故本輪 `diff`＝相鄰輪差異（before→after），提示也反映當前候選狀態。
+
+    權威輸入（P000-20261105-02）：
+    - `authoritative`＝控制器保存的權威快照目錄（來源資料＋需求檔）。
+      重驗的來源一律讀快照、產物才讀候選工作區；給 `task_dir` 的舊呼叫方式
+      （工作區同時當來源）已禁用，防止 agent 改寫來源迎合交付。
+    - 重驗後比對快照：快照內檔案在工作區缺失或 hash 改變＝來源改動，
+      記錄在 `source_tampered`（逐輪），由控制器裁決為不可接受。
     """
+    if authoritative is None:
+        # 防呆：舊語義（工作區同時當來源）正是 P000-20261105-02 要堵的洞。
+        # 本函式是內部入口，唯一合法呼叫方是 repair_slice（會傳快照）。
+        raise ValueError(
+            "run_repair_round 需要 authoritative（權威快照目錄）："
+            "來源必須讀控制器保存的快照，不可用候選工作區當來源"
+        )
     ws = prepare_workspace(task_dir, draft_dir, out_root,
                            round_n=n, include_dirs=include_dirs)
-    prompt = build_repair_prompt(task_dir, req_set, draft_dir, before,
+    prompt = build_repair_prompt(authoritative, req_set, draft_dir, before,
                                  feedback_mode=feedback_mode, include_dirs=include_dirs)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
     launch = build(prompt, ws)
@@ -393,14 +484,17 @@ def run_repair_round(
         agent = {"rc": None, "timed_out": False, "wall_ms": None,
                  "spawn_error": f"{type(e).__name__}: {e}"}
         error = agent["spawn_error"]
-    # 重驗：工作區同時是 task_dir（源資料在）和 deliverable_dir（交付物在）
-    after = run_requirement_checks(ws, req_set, ws)
+    # 重驗：來源讀權威快照（控制器保存），交付物才讀候選工作區
+    # （P000-20261105-02：agent 改寫工作區來源不得翻 FAIL→PASS）
+    after = run_requirement_checks(authoritative, req_set, ws)
     diff = diff_results(before, after)
     usage = parse_usage_from_log(log_dir / "agent_stdout.log")
+    tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),
         before=before, after=after, diff=diff, agent=agent,
         prompt_sha256=prompt_sha, usage=usage, error=error,
+        source_tampered=tampered,
     )
 
 
@@ -422,6 +516,10 @@ class RepairOutcome:
     final_diff: RepairDiff                # 原始級差異（原草稿初始驗→最終重驗）
     cost: dict[str, Any]
     draft_sha256: str                     # 原草稿目錄內容指紋（保留證據）
+    #: 來源改動（P000-20261105-02）：任一輪候選改寫權威來源（快照內檔案缺失或 hash 改變）
+    #: 即為 True；True 時本候選不可接受（退出碼 20），不得宣告缺口關閉。
+    source_tampered: bool
+    source_tampered_files: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
         d = dataclasses.asdict(self)
@@ -463,6 +561,11 @@ def repair_slice(
     min_rounds（真草稿冒煙，2026-11-04）：無已確認缺口時也至少跑幾輪。
     - localized（預設 0）：無缺口 ⇒ 0 模型呼叫（缺口驅動）。
     - generic（傳 1）：無缺口也重驗一次（看對的草稿會不會被改壞）。
+
+    權威輸入（P000-20261105-02）：重驗的來源資料與需求一律讀本函式保存的權威快照
+    （out_root/authoritative/＋authoritative_manifest.json），產物才讀候選工作區——
+    agent 改寫工作區來源（CSV／requirements.json）不得翻 FAIL→PASS；任一輪來源改動
+    記錄在 source_tampered（不可接受，退出碼 20），且不得宣告缺口關閉。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
@@ -475,7 +578,13 @@ def repair_slice(
     o_root = pathlib.Path(out_root)
     o_root.mkdir(parents=True, exist_ok=True)
 
-    before = run_requirement_checks(t_dir, req_set, d_dir)
+    # 權威快照（P000-20261105-02）：重驗的來源基準，建一次、之後只讀。
+    # 之後：重驗的來源一律讀快照（agent 改工作區來源無效）；每輪用快照 hash
+    # 比對工作區，偵測來源改動。
+    auth = create_authoritative_snapshot(t_dir, o_root, include_dirs=include_dirs)
+
+    # 初始驗（原草稿）：來源讀權威快照，交付物讀原草稿
+    before = run_requirement_checks(auth, req_set, d_dir)
     req_fail = [c.claim_id for c in before if c.required and c.status == "FAIL"]
     rounds: list[RepairRound] = []
     stalled = 0
@@ -490,15 +599,21 @@ def repair_slice(
         # 每輪工作區 round_N/ 即該輪快照。
         source_dir = d_dir
         prev_after = before
+        tamper_seen = False   # P000-20261105-02：任一輪來源改動即不可接受
         for n in range(1, max_rounds + 1):
             r = run_repair_round(
                 n, t_dir, req_set, source_dir, prev_after,
                 out_root=o_root, build=build, run=run,
                 feedback_mode=feedback_mode, timeout_s=timeout_s,
                 include_dirs=include_dirs,
+                authoritative=auth,
             )
             rounds.append(r)
-            if _required_all_pass(req_set, r.after):
+            if r.source_tampered:
+                tamper_seen = True
+            # 缺口關閉：全部必需項 PASS，且全程無來源改動（P000-20261105-02：
+            # 改來源迎合交付不得關閉缺口）
+            if not tamper_seen and _required_all_pass(req_set, r.after):
                 stopped = STOP_GAP_CLOSED
                 break
             # 停滯決策（P000-20261105-01：按「相鄰輪可確認改善」計算）：
@@ -507,11 +622,12 @@ def repair_slice(
             # - 非必需項 FAIL→PASS：不是已確認缺口。若算進度，一次非必需修復會
             #   每輪都重置停滯預算，迴圈燒盡 max_rounds——預算紀律失效。
             # - FAIL→UNKNOWN：紅線明列不算修好（不得用狀態變化偽裝進度）。
+            # - 來源改動輪（P000-20261105-02）：不可接受，不算進度。
             prev_map = _status_map(prev_after)
             newly = {c.claim_id for c in r.after
                      if c.required and c.status == "PASS"
                      and prev_map.get(c.claim_id) != "PASS"}
-            if newly:
+            if newly and not r.source_tampered:
                 stalled = 0
             else:
                 stalled += 1
@@ -543,6 +659,10 @@ def repair_slice(
         if final_status.get(cid) != "PASS":
             regressed_set.add(cid)
     regressed = tuple(sorted(regressed_set))
+
+    # 來源改動（P000-20261105-02）：任一輪改寫權威來源即不可接受
+    source_tampered = any(r.source_tampered for r in rounds)
+    source_tampered_files = tuple(sorted({f for r in rounds for f in r.source_tampered}))
 
     calls = len(rounds)
     wall = [r.agent.get("wall_ms") for r in rounds]
@@ -579,6 +699,8 @@ def repair_slice(
         final_diff=final_diff,
         cost=cost,
         draft_sha256=_dir_sha256(d_dir),
+        source_tampered=source_tampered,
+        source_tampered_files=source_tampered_files,
     )
 
 
@@ -699,16 +821,20 @@ def _selftest() -> int:
               and _dir_sha256(draft) == draft_hash0
               and o2.cost["tokens"] is None)
 
-        # 3) FAIL→UNKNOWN 不算修好；unresolved 列明（不得宣告完成）
+        # 3) 來源改動＝不可接受（P000-20261105-02）：fake agent 弄壞工作區的來源
+        #    expenses.csv（舊語義下重驗讀工作區來源→UNKNOWN）。新語義：重驗讀權威
+        #    快照（來源未動→仍 FAIL）、改動記錄在 source_tampered、候選不可接受（20）。
         o3 = repair_slice(task_dir, rs, draft, out_root=tmp / "s3",
                           build=fake,
                           run=_selftest_fake_agent({"expenses.csv": "corrupted,not,a,valid\ngarbage"}),
                           feedback_mode="localized", max_rounds=1, synthetic=True)
-        check("FAIL→UNKNOWN 不算修好（unresolved 列明）",
+        check("來源改動＝不可接受（重驗讀快照仍 FAIL、改動記錄、退出碼 20）",
               o3.stopped != STOP_GAP_CLOSED
-              and o3.final_status[failed[0]] == "UNKNOWN"
+              and o3.final_status[failed[0]] == "FAIL"
+              and o3.source_tampered is True
+              and "expenses.csv" in o3.source_tampered_files
               and all(cid not in o3.fixed for cid in failed)
-              and all(cid in o3.unresolved for cid in failed))
+              and _exit_code(o3) == 20)
 
         # 4) 原有 PASS 退步（PASS→FAIL）必須記錄在 regressed，不能淨改善掩蓋
         o4 = repair_slice(task_dir, rs, draft, out_root=tmp / "s4",
@@ -798,6 +924,79 @@ def _selftest() -> int:
             check("累積修復：兩個獨立缺口每輪修一個 ⇒ 兩輪後全 PASS",
                   False,
                   f"G1 案例 bad_round_each_row 應有 2 條必需 FAIL，實際 {len(f2)}（案例已變？需重凍結案例）")
+
+        # 9) 來源改動不得翻 FAIL→PASS（P000-20261105-02 驗收核心）：fake agent
+        #    只改來源 CSV（把加總改成 bad 摘要的錯誤值）⇒ 缺口不得關閉、退出碼 20；
+        #    對照：同一份改寫來源在舊語義（工作區當來源）下會翻 PASS——攻擊真實存在。
+        import csv as _csv
+        import io as _io
+        import re as _re
+        bad_md = (draft / "summary.md").read_text(encoding="utf-8")
+        m = _re.search(r"報銷總金額：([\d,\.]+)", bad_md)
+        target = float(m.group(1).replace(",", ""))
+        src_text = (task_dir / "expenses.csv").read_text(encoding="utf-8")
+        src_rows = list(_csv.DictReader(_io.StringIO(src_text)))
+        src_sum = sum(float(r["amount"]) for r in src_rows)
+        if abs(src_sum - target) > 0.005:
+            src_rows[-1]["amount"] = f"{float(src_rows[-1]['amount']) + (target - src_sum):.4f}"
+            cols = list(src_rows[0].keys())
+            buf = _io.StringIO()
+            w = _csv.DictWriter(buf, fieldnames=cols)
+            w.writeheader()
+            w.writerows(src_rows)
+            tampered_src = buf.getvalue()
+            # 攻擊真實性：舊語義（工作區同時當來源）下改來源能翻 PASS
+            ws_probe = tmp / "probe_ws"
+            ws_probe.mkdir(exist_ok=True)
+            for f in ("summary.md", "expense_summary.csv"):
+                shutil.copy(draft / f, ws_probe / f)
+            (ws_probe / "expenses.csv").write_text(tampered_src, encoding="utf-8")
+            old_sem = {c.claim_id: c.status for c in run_requirement_checks(ws_probe, rs, ws_probe)}
+            new_sem = {c.claim_id: c.status for c in run_requirement_checks(task_dir, rs, ws_probe)}
+
+            def run_tamper(launch: Any, *, workspace: pathlib.Path,
+                           timeout_s: float, log_dir: pathlib.Path) -> dict[str, Any]:
+                (pathlib.Path(workspace) / "expenses.csv").write_text(tampered_src, encoding="utf-8")
+                log_dir.mkdir(parents=True, exist_ok=True)
+                (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+                (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+                return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None,
+                        "stdout_log": str(log_dir / "agent_stdout.log"),
+                        "stderr_log": str(log_dir / "agent_stderr.log")}
+            o9 = repair_slice(task_dir, rs, draft, out_root=tmp / "s9",
+                              build=fake, run=run_tamper,
+                              feedback_mode="localized", max_rounds=2, synthetic=True)
+            check("改來源迎合交付不得翻 PASS（舊語義會 PASS、新語義仍 FAIL、改動記錄、拒收）",
+                  old_sem[failed[0]] == "PASS" and new_sem[failed[0]] == "FAIL"
+                  and o9.stopped != STOP_GAP_CLOSED
+                  and failed[0] not in o9.fixed
+                  and o9.source_tampered is True
+                  and "expenses.csv" in o9.source_tampered_files
+                  and _exit_code(o9) == 20,
+                  f"old={old_sem[failed[0]]} new={new_sem[failed[0]]} stopped={o9.stopped}")
+        else:
+            check("改來源迎合交付不得翻 PASS", False,
+                  f"G1 案例加總 {src_sum} 與 bad 摘要值 {target} 太接近，無法造真實攻擊（案例已變？需重凍結案例）")
+
+        # 10) 驗證器程式不可由候選覆寫（P000-20261105-02）：候選寫同名 checks.py
+        #     （恆 PASS）不改變裁決；新檔不計來源改動。
+        shadow = (
+            "def run_requirement_checks(*a, **k):\n"
+            "    class _C:\n"
+            "        claim_id = 'req_summary_numbers'\n"
+            "        status = 'PASS'\n"
+            "        detail = 'shadow'\n"
+            "        evidence = {}\n"
+            "    return [_C()]\n"
+        )
+        o10 = repair_slice(task_dir, rs, draft, out_root=tmp / "s10",
+                           build=fake, run=_selftest_fake_agent({"checks.py": shadow}),
+                           feedback_mode="localized", max_rounds=1, synthetic=True)
+        check("候選覆寫驗證器無效（裁決不變、新檔不計來源改動、仍拒收）",
+              o10.final_status[failed[0]] == "FAIL"
+              and o10.stopped != STOP_GAP_CLOSED
+              and o10.source_tampered is False
+              and _exit_code(o10) == 20)
 
         passed = sum(1 for _, err in results if err is None)
         print("G2 repair-slice SELFTEST（synthetic G1、離線、0 模型呼叫；只驗管線，不宣稱效果）")
@@ -894,6 +1093,9 @@ def main(argv: list[str] | None = None, *,
             print(f"fixed   : {', '.join(outcome.fixed)}")
         if outcome.regressed:
             print(f"REGRESSED: {', '.join(outcome.regressed)}  ← 原有 PASS 退步，已記錄")
+        if outcome.source_tampered:
+            print(f"SOURCE_TAMPERED: {', '.join(outcome.source_tampered_files)}"
+                  f"  ← 來源資料被改寫，不可接受（P000-20261105-02）")
         if outcome.unresolved:
             print(f"unresolved: {', '.join(outcome.unresolved)}")
         c = outcome.cost
@@ -906,6 +1108,9 @@ def main(argv: list[str] | None = None, *,
 
 
 def _exit_code(outcome: RepairOutcome) -> int:
+    # P000-20261105-02：來源改動＝不可接受，即使表面全 PASS 也拒收
+    if outcome.source_tampered:
+        return 20
     if outcome.stopped in (STOP_NO_GAP, STOP_GAP_CLOSED) and not outcome.unresolved:
         return 0
     if not outcome.rounds:

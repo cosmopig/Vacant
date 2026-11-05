@@ -272,6 +272,9 @@ def run_g2_smoke(
                 "fixed": list(outcome.fixed),
                 "regressed": list(outcome.regressed),
                 "unresolved": list(outcome.unresolved),
+                # P000-20261105-02：來源改動＝不可接受（必須可見於實驗記錄）
+                "source_tampered": outcome.source_tampered,
+                "source_tampered_files": list(outcome.source_tampered_files),
                 "before_hidden": d["source"].get("score"),       # 已記錄（引用，不重跑）
                 "after_hidden": AFTER_HIDDEN_UNKNOWN,            # 本地無權重跑；絕不填 0
                 "cost": dict(outcome.cost),
