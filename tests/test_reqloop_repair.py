@@ -334,6 +334,72 @@ def test_count_rule_hint_pass_claim_and_evidence_edge_cases(tmp_path: pathlib.Pa
     assert isinstance(line, str) and "表頭行" in line
 
 
+def _count_if_fixture(tmp_path: pathlib.Path):
+    """dab_507 同型（synthetic）：star_rating=5.0 恰 3 行（其中 1 行 hotel_name
+    引號欄含逗號 → 裸逗號切分會錯列）；另有 1 行 star≠5 但 review_count=520
+    → grep ",5.0," 的正則 `.` 通配也會命中 ",520,"。草稿 4＝3+1 通配命中
+    （grep 型多算）→ FAIL（重算值 3）。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text(
+        "How many hotels have a star rating exactly equal to 5?\n"
+        "Answer format: @total_hotels[count]\n", encoding="utf-8")
+    (task_dir / "hotel_data.csv").write_text(
+        "hotel_id,hotel_name,city_name,star_rating,bubble_score,review_count\n"
+        "1,\"Mandarin Oriental, New York\",New York City,5.0,45.0,100\n"
+        "2,Plaza,New York City,5.0,45.0,200\n"
+        "3,Mark,New York City,5.0,45.0,300\n"
+        "4,Solita,New York City,3.0,40.0,520\n"
+        "5,Greenwich,New York City,4.0,45.0,582\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("@total_hotels[4]\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_total", quote="total_hotels", deliverable="answer.txt",
+        verifier="kv_recomputed",
+        params={"key": "total_hotels", "data_file": "hotel_data.csv",
+                "recompute": {"type": "count_if", "col": "star_rating", "eq": 5}})])
+    return task_dir, draft, rs
+
+
+def test_count_if_fail_prompt_column_alignment_shape_hint(tmp_path: pathlib.Path):
+    """effects_20261105 dab_507-localized 敗因（值解析口徑，vq-5nz.20）：
+    - policy30 r1：`grep ",5.0," | wc -l` → 48（正則 `.` 通配也命中 ",520,"、
+      未錨定模式打到另一欄）——模型把多算結果當「草稿正確」的確認、原樣保留；
+    - fb20 r1：`awk -F',' '$4=="5.0"'` → 40（裸逗號切分被 hotel_name 引號欄
+      內含逗號錯列，漏掉 6 行名稱含逗號的 5 星飯店）。
+    localized 提示必須補上計數規則的常見錯誤形狀（正則通配／打到別欄／引號欄
+    錯列），但不給重算值（leak guard 不變）；generic 對照臂定義不變
+    （無失敗證據、無提示行）。"""
+    task_dir, draft, rs = _count_if_fixture(tmp_path)
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_total"] == "FAIL"
+
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "req_total" in loc                              # 哪一條沒過
+    assert "4" in loc                                       # 交付物自身的值（可見反例）
+    assert "通配" in loc                                     # 正則 `.` 是通配（",5.0," 也命中 ",520,"）
+    assert "引號" in loc                                     # 含逗號的引號欄 → 裸切分錯列
+    assert "欄位名" in loc or "pandas" in loc               # 建議 CSV-aware 依欄位名過濾
+    assert "3" not in loc                                    # 重算值不得進提示（leak guard）
+
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "req_total" not in gen                           # generic 不帶失敗證據
+    assert "通配" not in gen                                 # generic 對照臂定義不變
+    assert "3" not in gen
+
+
+def test_count_if_hint_line_direct_and_non_count_rules(tmp_path: pathlib.Path):
+    """count_if 規則的 FAIL 證據直接命中形狀提示；其他規則（zcount3／cond_rate）
+    不補提示；重算值不得出現在提示裡。"""
+    line = repair._count_rule_hint_line(
+        {"rule": "count_if: data/hotel_data.csv {\"col\": \"star_rating\", \"eq\": 5}"})
+    assert isinstance(line, str) and "通配" in line and "引號" in line
+    assert "46" not in line and "48" not in line            # dab_507 的答案值／重算值都不進提示
+    assert repair._count_rule_hint_line({"rule": "zcount3: data/x.csv {\"col\": \"c\"}"}) is None
+    assert repair._count_rule_hint_line({"rule": "cond_rate: x"}) is None
+
+
 # ── 完整切片（fake agent，synthetic 離線接線）──────────────────────
 
 def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):
@@ -1748,3 +1814,159 @@ def test_second_round_prompt_carries_first_round_loop(task_dir, tmp_path):
     assert out.rounds[0].agent["tool_loop_suspected"] is not None
     assert out.rounds[0].agent["tool_loop_suspected"]["consecutive_repetitions"] == 5
     assert FAIL_CLAIM in out.fixed
+
+
+# ── argon 20261105_0715 回歸測試 ──────────────────────────────────────────
+
+def test_prepare_workspace_strips_verifier_params_from_requirements_json(task_dir, tmp_path):
+    """argon 20261105_0715 回歸：
+    prepare_workspace 複製進候選工作區 round_N/requirements.json 的檔案，只保留需求識別與原文
+    （task_id 與 items[].{id,quote,deliverable,required}），嚴禁把內部驗證器規格
+    （verifier、params、recompute、recompute.note）放進候選工作區：
+    - effects_20261105 中 37/55 輪（含 18/29 輪 generic 對照臂）agent 直接讀取工作區
+      requirements.json，在 dabstep-23 讀到 recompute.note 內的「期望 0.0」，在 dab_055 與
+      dabstep-1273 讀到過時 note 導致把正確草稿/推理改錯。
+    - 同時 out_root/authoritative/requirements.json 保持完整位元組；候選未動工作區
+      requirements.json 時不誤報 source_tampered，候選若竄改工作區 requirements.json 仍會被攔截。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    for rel, leak_str in (
+        ("ops/reqloop/g2/smoke_e014/dabstep-23-pi-C", "期望 0.0"),
+        ("ops/reqloop/g2/smoke_e013/dab_055-pi-C", "不可解析整數"),
+    ):
+        tdir = repo_root / rel / "task"
+        ddir = repo_root / rel / "draft"
+        ws1 = repair.prepare_workspace(tdir, ddir, tmp_path / rel, round_n=1)
+        ws2 = repair.prepare_workspace(tdir, ws1, tmp_path / rel, round_n=2)
+        for ws in (ws1, ws2):
+            raw_text = (ws / "requirements.json").read_text(encoding="utf-8")
+            assert leak_str not in raw_text, (rel, ws)
+            assert '"recompute"' not in raw_text, (rel, ws)
+            assert '"params"' not in raw_text, (rel, ws)
+            assert '"verifier"' not in raw_text, (rel, ws)
+            parsed = json.loads(raw_text)
+            assert parsed["items"] and all(
+                set(it.keys()) <= {"id", "quote", "deliverable", "required"}
+                for it in parsed["items"]
+            )
+
+    # 權威快照保留完整 requirements.json，且未改動時 source_tampered 為空、竄改時仍攔截
+    out_root = tmp_path / "auth_check"
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    assert (auth / "requirements.json").read_bytes() == (task_dir / "requirements.json").read_bytes()
+    ws = repair.prepare_workspace(task_dir, task_dir / BAD_DRAFT, out_root, round_n=1)
+    assert repair._source_tampered_files(auth, ws) == ()
+    (ws / "requirements.json").write_text('{"items": []}\n', encoding="utf-8")
+    assert "requirements.json" in repair._source_tampered_files(auth, ws)
+
+
+def test_detect_crash_giveup_ignores_untouched_draft_and_dedupes_pi_jsonl(tmp_path):
+    """argon 20261105_0715 回歸：
+    1. 若原草稿 answer.txt 本身就是 'None'（如 dabstep-1753-pi-C），且該輪 agent 直到超時從未寫入
+       或修改 answer.txt，最終工作區 answer.txt 的 'None' 只是 prepare_workspace 複製的原草稿，
+       不得誤報為「agent crash 後寫 None 放棄」。
+    2. 若原草稿是 'None'，但 agent 在本輪確實執行過寫入 answer.txt 的工具呼叫（write/edit/bash），
+       則仍正常標記 crash_giveup。
+    3. 真實 pi --mode json 日誌中，單次工具錯誤會在 tool_execution_update、tool_execution_end、
+       message_start、message_end、turn_end、agent_end 重複出現 6 次，且 isError=False 的正常輸出或
+       程式碼可能含 'ValueError:' 字樣；detect_crash_giveup 必須只掃描失敗的 tool_execution_end，
+       避免將 14 次錯誤膨脹為 136 次或誤抓正常程式碼。
+    """
+    log = tmp_path / "agent_stdout.log"
+    draft_ans = tmp_path / "draft_answer.txt"
+    ws_ans = tmp_path / "answer.txt"
+    draft_ans.write_text("None\n", encoding="utf-8")
+    ws_ans.write_text("None\n", encoding="utf-8")
+
+    err_text = ("Traceback (most recent call last):\n"
+                "  File \"calc.py\", line 2, in <module>\n"
+                "NameError: name 'foo' is not defined\n"
+                "Command exited with code 1")
+    # 模擬真實 pi --mode json：同一錯誤在 6 種事件中重複，另有一個 isError=False 的正常執行含 ValueError:
+    events = [
+        {"type": "tool_execution_start", "toolName": "bash", "args": {"command": "python3 calc.py"}},
+        {"type": "tool_execution_update", "partialResult": {"content": [{"type": "text", "text": err_text}]}},
+        {"type": "tool_execution_end", "toolName": "bash", "isError": True,
+         "result": {"content": [{"type": "text", "text": err_text}]}},
+        {"type": "message_start", "message": {"role": "toolResult", "isError": True,
+         "content": [{"type": "text", "text": err_text}]}},
+        {"type": "message_end", "message": {"role": "toolResult", "isError": True,
+         "content": [{"type": "text", "text": err_text}]}},
+        {"type": "turn_end", "toolResults": [{"role": "toolResult", "isError": True,
+         "content": [{"type": "text", "text": err_text}]}]},
+        {"type": "agent_end", "messages": [{"role": "toolResult", "isError": True,
+         "content": [{"type": "text", "text": err_text}]}]},
+        # 成功的工具執行，內部程式碼字串含 ValueError:，不應計入 crash
+        {"type": "tool_execution_end", "toolName": "bash", "isError": False,
+         "result": {"content": [{"type": "text", "text": "try:\n    pass\nexcept ValueError: pass\n"}]}},
+    ]
+    log.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n", encoding="utf-8")
+
+    # (1) 原草稿已是 None，且 agent 全程未碰 answer.txt ⇒ 回傳 None（未放棄，只是超時未寫檔）
+    assert repair.detect_crash_giveup(log, ws_ans, draft_answer_path=draft_ans) is None
+
+    # (2) 若無 draft_answer_path（或原草稿不是 None），只計 1 次 tool_execution_end 的 3 個簽名，不膨脹 6 倍，且不抓 ValueError
+    draft_other = tmp_path / "draft_other.txt"
+    draft_other.write_text("42\n", encoding="utf-8")
+    hit = repair.detect_crash_giveup(log, ws_ans, draft_answer_path=draft_other)
+    assert hit is not None
+    assert hit["crash_event_count"] == 3
+    assert "ValueError" not in " ".join(hit["crash_signatures"])
+
+    # (3) 若原草稿是 None，但 agent 本輪確實主動寫了 answer.txt ⇒ 仍應偵測到
+    events_with_write = events + [
+        {"type": "tool_execution_start", "toolName": "write",
+         "args": {"path": "answer.txt", "content": "None\n"}},
+    ]
+    log.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events_with_write) + "\n",
+                   encoding="utf-8")
+    hit2 = repair.detect_crash_giveup(log, ws_ans, draft_answer_path=draft_ans)
+    assert hit2 is not None
+    assert hit2["crash_event_count"] == 3
+
+
+def test_detect_tool_loop_catches_period2_alternating_loop(tmp_path):
+    """argon 20261105_0715 回歸：
+    effects_20261105 feedback_once20/dabstep-1753-pi-C/localized r1 中，模型陷入
+    (write find_fees.py, bash cat << 'EOF' > find_fees.py ...) 雙步交替死迴圈，
+    完全相同的參數連續重複 9 組（18 次工具呼叫）直到超時，舊 detect_tool_loop 只看
+    period-1 相鄰同 key 而回傳 None（被 STATE 誤判為「0 命中」）。
+    修正後必須能偵測連續 >= threshold 組完全相同參數的 period-2 交替死迴圈，且不誤報
+    少於 threshold 組的正常「改後重跑」。
+    """
+    log = tmp_path / "agent_stdout.log"
+    w_args = {"path": "find_fees.py", "content": "import json\n"}
+    b_args = {"command": "cat << 'EOF' > find_fees.py\nimport json\nEOF\npython3 find_fees.py"}
+    # 連續 9 組（18 次呼叫）完全相同的 (write, bash) 交替 ⇒ 必須偵測到
+    log.write_text(_tool_events([("write", w_args), ("bash", b_args)] * 9), encoding="utf-8")
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None
+    assert hit["consecutive_repetitions"] == 9
+    assert hit.get("period") == 2
+    assert "write" in hit["tool_name"] and "bash" in hit["tool_name"]
+    warn = repair._loop_warning_line(hit)
+    assert "9 次" in warn and "write" in warn and "bash" in warn
+
+    # 每次 write 內容不同（正常改程式碼再重跑）⇒ 不視為死迴圈
+    varied = []
+    for i in range(6):
+        varied.append(("write", {"path": "find_fees.py", "content": f"print({i})\n"}))
+        varied.append(("bash", {"command": "python3 find_fees.py"}))
+    log.write_text(_tool_events(varied), encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+
+
+def test_count_rule_hint_covers_count_if_and_quoted_csv_commas(task_dir):
+    """argon 20261105_0715 回歸：
+    effects_20261105 中 dab_507-pi-C（rule='count_if:...'）localized 在 policy30 r1（答 48）
+    與 feedback_once20 r1（答 40）皆因用 awk -F',' / cut -d',' 切含引號逗號的 CSV 欄位而算錯。
+    _count_rule_hint_line 必須同時覆蓋 unique_count 與 count_if，並提示雙引號欄位內含逗號時
+    cut/awk 會錯位。
+    """
+    h_u = repair._count_rule_hint_line({"rule": "unique_count: merchant"})
+    h_c = repair._count_rule_hint_line({"rule": "count_if: rating >= 4 and rooms > 100"})
+    assert h_u is not None and h_c is not None
+    assert "引號" in h_c and "逗號" in h_c
+    assert "csv" in h_c.lower()
+    assert repair._count_rule_hint_line({"rule": "sum_col: amount"}) is None
+
