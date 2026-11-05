@@ -1361,3 +1361,107 @@ def test_usage_parsed_from_real_pi_stream_ignores_zero_deltas_and_dedupes_messag
 
 
 
+
+
+# ── effects_20261105 產品行為修復：工具死迴圈偵測＋localized 提示詞收斂 ──
+# 來源：dabstep-23-pi-C localized 兩階段皆敗——同一條 python3 一行式重複 10+ 次
+# （同 args、同結果、中間無寫檔）直到 300s 耗盡，候選值 0.00152745 全程未變；
+# generic 臂同一任務第 1 輪即修對。假設：localized 長反例＋保持清單誘發過度驗證。
+
+def _tool_events(seq: list[tuple[str, dict]]) -> str:
+    """把 (toolName, args) 序列寫成 pi --mode json 的 tool_execution_start JSONL。"""
+    return "\n".join(
+        json.dumps({"type": "tool_execution_start", "toolCallId": str(i),
+                    "toolName": name, "args": args}, ensure_ascii=False)
+        for i, (name, args) in enumerate(seq))
+
+
+def test_detect_tool_loop_flags_consecutive_repetition(tmp_path):
+    """同一 (tool,args) 連續重複 ≥threshold＝迴圈；改動後重跑斷串，不算迴圈。"""
+    cmd = {"command": "python3 -c \"print(sum(1 for _ in []))\""}
+    log = tmp_path / "agent_stdout.log"
+    # 連續 5 次同一命令（dabstep-23 實際是 10+）⇒ 偵測到
+    log.write_text(_tool_events([("bash", cmd)] * 5), encoding="utf-8")
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None and hit["consecutive_repetitions"] == 5
+    assert hit["tool_name"] == "bash" and hit["args"] == cmd
+    # 改動（write）後重跑＝正常驗證 ⇒ 不偵測
+    log.write_text(_tool_events([("bash", cmd), ("write", {"path": "a.py"}),
+                                 ("bash", cmd), ("write", {"path": "a.py"}),
+                                 ("bash", cmd)]), encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+    # 不同命令各跑 5 次也不偵測（非同一 key）
+    log.write_text(_tool_events([("bash", {"command": f"echo {i}"}) for i in range(5)]),
+                   encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+    # 無日誌／非 JSONL 雜訊 ⇒ None（缺值不造假）
+    assert repair.detect_tool_loop(tmp_path / "nope.log") is None
+    log.write_text("not json at all\n", encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+
+
+def test_run_repair_round_records_tool_loop_suspected(task_dir, tmp_path):
+    """run_repair_round 把偵測結果記錄進該輪 agent 欄位（觀察，非裁決）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+    cmd = {"command": "python3 calc.py"}
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            _tool_events([("bash", cmd)] * 6), encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["tool_loop_suspected"] is not None
+    assert r.agent["tool_loop_suspected"]["consecutive_repetitions"] == 6
+    # 裁決不受影響：重驗照舊（這輪沒改交付，仍 FAIL）
+    assert r.after is not None
+
+
+def test_cap_prompt_text_truncates_long_evidence():
+    """單段驗證詳情／反例過長時被截斷，且截斷必須可見（不得靜默丟棄）。"""
+    assert repair._cap_prompt_text("short") == "short"
+    long = "x" * (repair._PROMPT_TEXT_CAP + 500)
+    out = repair._cap_prompt_text(long)
+    assert len(out) < repair._PROMPT_TEXT_CAP + 40
+    assert "已截斷" in out, "截斷必須可見"
+    assert repair._cap_prompt_text("") == ""
+
+
+def test_localized_prompt_caps_long_evidence(task_dir):
+    """長反例 JSON 被截斷（可見標記）；真實 claim id 與狀態仍在（小模型過載假設）。"""
+    from vacant_network.intake.verifiers import ClaimResult
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    big = {"table": [{"row": i, "cells": ["x" * 50] * 20} for i in range(30)]}
+    before = [ClaimResult(
+        claim_id=FAIL_CLAIM, status="FAIL",
+        detail="d" * 2000,
+        evidence=big,
+        verifier="t", verifier_version="t", required=True, authority="client",
+    )]
+    p = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "已截斷" in p, "過長證據必須被截斷且截斷可見"
+    assert FAIL_CLAIM in p
+    assert len(p) < 20000, "localized 提示詞不得被單段證據撐爆"
+
+
+def test_localized_prompt_has_anti_tool_loop_guidance(task_dir):
+    """localized 臂帶防工具迴圈指引；generic 對照臂不帶（兩臂差異必須真實）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    before = run_requirement_checks(task_dir, rs, draft)
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "不要重複同一命令" in loc
+    assert "不要重複同一命令" not in gen

@@ -1,0 +1,1884 @@
+{
+  "schema": "vacant.audit/effects_20261105_summary/1",
+  "snapshot_sha": "d38d2eb21d7ffbb927eb263e657d907dc112bc7d",
+  "scope_note": "本實驗為開發選樣（e008/e013/e014 已見題），不是未見任務效力證明；無硬 token 上限，不得宣稱等 token；小樣本（單 rep）不宣稱 localized 優於 generic。口徑：before_pass_independent＝實驗前獨立評分（manifest 生成時記錄，來源＝原草稿）；after_independent＝實驗後獨立評分（independent.json，來源＝該格最終候選）。local_*＝g2_result.json 於 d38d2eb2 以舊 checker／舊 usage parser 記錄的值；api_model_calls_true／tokens_true＝以當前（已併 auto/argon）parser 從每輪 agent_stdout.log 的 message_end usage 重數（1 message_end＝1 真實 API 呼叫）。local 與 after_independent 的 5 格分歧全部出於 d38d2eb2 舊 checker；以當前 checks 碼重驗（current_code_all_pass）與獨立評分 50/50 一致。repair_sessions（agent 啟動數）與 API 請求數是兩個量，本檔嚴格分開。hidden_after（本地重跑 hidden scorer）全格＝UNKNOWN（本地無權重跑），不填 0。所有缺值＝None（UNKNOWN），不填 0。",
+  "source_root": "/home/user1/dev/ops/effects_20261105",
+  "code_under_audit": "d38d2eb2 (snapshot) vs current auto/qwen27b (post auto/argon merge)",
+  "phases": {
+    "policy30": {
+      "cells": 30,
+      "wrong_to_right": 13,
+      "right_to_wrong": 0,
+      "preserved_good": 10,
+      "still_wrong": 7,
+      "movement_total": 13,
+      "per_arm": {
+        "generic": {
+          "cells": 15,
+          "wrong_to_right": 7,
+          "right_to_wrong": 0,
+          "preserved_good": 5,
+          "still_wrong": 3,
+          "repair_sessions": 19,
+          "api_model_calls_true": 365,
+          "tokens_true": 16284659
+        },
+        "localized": {
+          "cells": 15,
+          "wrong_to_right": 6,
+          "right_to_wrong": 0,
+          "preserved_good": 5,
+          "still_wrong": 4,
+          "repair_sessions": 16,
+          "api_model_calls_true": 550,
+          "tokens_true": 17385851
+        }
+      },
+      "local_vs_independent_mismatches": [
+        {
+          "cell": "dab_055-pi-C-localized",
+          "local_all_pass_d38d2eb2": false,
+          "after_independent": true
+        },
+        {
+          "cell": "dabstep-1273-pi-C-generic",
+          "local_all_pass_d38d2eb2": true,
+          "after_independent": false
+        },
+        {
+          "cell": "dabstep-1273-pi-C-localized",
+          "local_all_pass_d38d2eb2": true,
+          "after_independent": false
+        }
+      ],
+      "current_code_vs_independent_mismatches": [],
+      "local_matches": 27,
+      "current_code_matches": 30,
+      "repair_sessions_total": 35,
+      "api_model_calls_true_total": 915,
+      "tokens_true_total": 33670510,
+      "wall_ms_total": null,
+      "cells_detail": [
+        {
+          "draft": "dab_035-pi-C",
+          "arm": "generic",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 7,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 263394,
+          "tokens_recorded_d38d2eb2": 525018,
+          "wall_ms_total": 300006,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 246607,
+                "output": 16787,
+                "total": 263394,
+                "calls": 7
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 491459,
+                "output": 33559,
+                "total": 525018
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_035-pi-C",
+          "arm": "localized",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "no_gap",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 0,
+          "api_model_calls_true": 0,
+          "api_model_calls_recorded_d38d2eb2": 0,
+          "tokens_true": 0,
+          "tokens_recorded_d38d2eb2": null,
+          "wall_ms_total": null,
+          "rounds": []
+        },
+        {
+          "draft": "dab_039-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 24,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 2156045,
+          "tokens_recorded_d38d2eb2": 4310147,
+          "wall_ms_total": 300006,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 2149782,
+                "output": 6263,
+                "total": 2156045,
+                "calls": 24
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 4297647,
+                "output": 12500,
+                "total": 4310147
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_039-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 25,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 1058709,
+          "tokens_recorded_d38d2eb2": 2404052,
+          "wall_ms_total": 135054,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 1052758,
+                "output": 5951,
+                "total": 1058709,
+                "calls": 25
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 2389242,
+                "output": 14810,
+                "total": 2404052
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_055-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 28,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 1009299,
+          "tokens_recorded_d38d2eb2": 2317586,
+          "wall_ms_total": 127309,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 419690,
+                "output": 966,
+                "total": 420656,
+                "calls": 12
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 838277,
+                "output": 2043,
+                "total": 840320
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 586656,
+                "output": 1987,
+                "total": 588643,
+                "calls": 16
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1470364,
+                "output": 6902,
+                "total": 1477266
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_055-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": true,
+          "local_matches_independent": false,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 62,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 2491140,
+          "tokens_recorded_d38d2eb2": 5422555,
+          "wall_ms_total": 221384,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 980914,
+                "output": 3208,
+                "total": 984122,
+                "calls": 25
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 2004054,
+                "output": 6748,
+                "total": 2010802
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 1502215,
+                "output": 4803,
+                "total": 1507018,
+                "calls": 37
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 3399184,
+                "output": 12569,
+                "total": 3411753
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_057-pi-A",
+          "arm": "generic",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 9,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 291357,
+          "tokens_recorded_d38d2eb2": 953632,
+          "wall_ms_total": 35647,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 290748,
+                "output": 609,
+                "total": 291357,
+                "calls": 9
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 951169,
+                "output": 2463,
+                "total": 953632
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_057-pi-A",
+          "arm": "localized",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "no_gap",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 0,
+          "api_model_calls_true": 0,
+          "api_model_calls_recorded_d38d2eb2": 0,
+          "tokens_true": 0,
+          "tokens_recorded_d38d2eb2": null,
+          "wall_ms_total": null,
+          "rounds": []
+        },
+        {
+          "draft": "dab_105-pi-C",
+          "arm": "generic",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 9,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 119328,
+          "tokens_recorded_d38d2eb2": 322213,
+          "wall_ms_total": 24425,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 118512,
+                "output": 816,
+                "total": 119328,
+                "calls": 9
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 319258,
+                "output": 2955,
+                "total": 322213
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_105-pi-C",
+          "arm": "localized",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "no_gap",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 0,
+          "api_model_calls_true": 0,
+          "api_model_calls_recorded_d38d2eb2": 0,
+          "tokens_true": 0,
+          "tokens_recorded_d38d2eb2": null,
+          "wall_ms_total": null,
+          "rounds": []
+        },
+        {
+          "draft": "dab_378-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 16,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 248118,
+          "tokens_recorded_d38d2eb2": 557934,
+          "wall_ms_total": 75052,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 244172,
+                "output": 3946,
+                "total": 248118,
+                "calls": 16
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 548260,
+                "output": 9674,
+                "total": 557934
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_378-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 42,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 485088,
+          "tokens_recorded_d38d2eb2": 1001570,
+          "wall_ms_total": 357886,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 388537,
+                "output": 17652,
+                "total": 406189,
+                "calls": 29
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 774051,
+                "output": 34793,
+                "total": 808844
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 75446,
+                "output": 3453,
+                "total": 78899,
+                "calls": 13
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 183092,
+                "output": 9634,
+                "total": 192726
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_426-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 117,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 5813045,
+          "tokens_recorded_d38d2eb2": 11926178,
+          "wall_ms_total": 343877,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 5411155,
+                "output": 8573,
+                "total": 5419728,
+                "calls": 103
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 10820566,
+                "output": 17123,
+                "total": 10837689
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 391910,
+                "output": 1407,
+                "total": 393317,
+                "calls": 14
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1081779,
+                "output": 6710,
+                "total": 1088489
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_426-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 13,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 368195,
+          "tokens_recorded_d38d2eb2": 735242,
+          "wall_ms_total": 50335,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 366392,
+                "output": 1803,
+                "total": 368195,
+                "calls": 13
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 731398,
+                "output": 3844,
+                "total": 735242
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_427-pi-A",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 8,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 224396,
+          "tokens_recorded_d38d2eb2": 736160,
+          "wall_ms_total": 27797,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 223927,
+                "output": 469,
+                "total": 224396,
+                "calls": 8
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 734320,
+                "output": 1840,
+                "total": 736160
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_427-pi-A",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 8,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 225694,
+          "tokens_recorded_d38d2eb2": 640131,
+          "wall_ms_total": 28653,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 225235,
+                "output": 459,
+                "total": 225694,
+                "calls": 8
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 638647,
+                "output": 1484,
+                "total": 640131
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_507-pi-A",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 13,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 276731,
+          "tokens_recorded_d38d2eb2": 649661,
+          "wall_ms_total": 36942,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 275476,
+                "output": 1255,
+                "total": 276731,
+                "calls": 13
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 646111,
+                "output": 3550,
+                "total": 649661
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_507-pi-A",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 30,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 435712,
+          "tokens_recorded_d38d2eb2": 1188851,
+          "wall_ms_total": 79960,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 380703,
+                "output": 573,
+                "total": 381276,
+                "calls": 12
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1075379,
+                "output": 2040,
+                "total": 1077419
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 53487,
+                "output": 949,
+                "total": 54436,
+                "calls": 18
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 109230,
+                "output": 2202,
+                "total": 111432
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-10-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 18,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 776523,
+          "tokens_recorded_d38d2eb2": 1553791,
+          "wall_ms_total": 70979,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 775244,
+                "output": 1279,
+                "total": 776523,
+                "calls": 18
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1551119,
+                "output": 2672,
+                "total": 1553791
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-10-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "stalled",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 30,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 943924,
+          "tokens_recorded_d38d2eb2": 2323830,
+          "wall_ms_total": 74102,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 509184,
+                "output": 592,
+                "total": 509776,
+                "calls": 16
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1197718,
+                "output": 1602,
+                "total": 1199320
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 433204,
+                "output": 944,
+                "total": 434148,
+                "calls": 14
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1121424,
+                "output": 3086,
+                "total": 1124510
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-11-pi-A",
+          "arm": "generic",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 11,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 254888,
+          "tokens_recorded_d38d2eb2": 1045349,
+          "wall_ms_total": 31454,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 254385,
+                "output": 503,
+                "total": 254888,
+                "calls": 11
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1042465,
+                "output": 2884,
+                "total": 1045349
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-11-pi-A",
+          "arm": "localized",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "no_gap",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 0,
+          "api_model_calls_true": 0,
+          "api_model_calls_recorded_d38d2eb2": 0,
+          "tokens_true": 0,
+          "tokens_recorded_d38d2eb2": null,
+          "wall_ms_total": null,
+          "rounds": []
+        },
+        {
+          "draft": "dabstep-1273-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": false,
+          "local_matches_independent": false,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 34,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 930647,
+          "tokens_recorded_d38d2eb2": 2013154,
+          "wall_ms_total": 152081,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 303938,
+                "output": 1513,
+                "total": 305451,
+                "calls": 14
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 759885,
+                "output": 4495,
+                "total": 764380
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 620919,
+                "output": 4277,
+                "total": 625196,
+                "calls": 20
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1240235,
+                "output": 8539,
+                "total": 1248774
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-1273-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": false,
+          "local_matches_independent": false,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 20,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 1830050,
+          "tokens_recorded_d38d2eb2": 3658334,
+          "wall_ms_total": 189467,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 1829187,
+                "output": 863,
+                "total": 1830050,
+                "calls": 20
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 3656623,
+                "output": 1711,
+                "total": 3658334
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-13-pi-A",
+          "arm": "generic",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 11,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 33918,
+          "tokens_recorded_d38d2eb2": 69910,
+          "wall_ms_total": 16243,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 33293,
+                "output": 625,
+                "total": 33918,
+                "calls": 11
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 68420,
+                "output": 1490,
+                "total": 69910
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-13-pi-A",
+          "arm": "localized",
+          "role": "good",
+          "before_pass_independent": true,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "no_gap",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 0,
+          "api_model_calls_true": 0,
+          "api_model_calls_recorded_d38d2eb2": 0,
+          "tokens_true": 0,
+          "tokens_recorded_d38d2eb2": null,
+          "wall_ms_total": null,
+          "rounds": []
+        },
+        {
+          "draft": "dabstep-1753-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "stalled",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 38,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 3791917,
+          "tokens_recorded_d38d2eb2": 7580120,
+          "wall_ms_total": 600010,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 3172360,
+                "output": 2033,
+                "total": 3174393,
+                "calls": 26
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 6342880,
+                "output": 4051,
+                "total": 6346931
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 615533,
+                "output": 1991,
+                "total": 617524,
+                "calls": 12
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1229226,
+                "output": 3963,
+                "total": 1233189
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-1753-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "stalled",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 79,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 6814959,
+          "tokens_recorded_d38d2eb2": 15309059,
+          "wall_ms_total": 469627,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 3397133,
+                "output": 7252,
+                "total": 3404385,
+                "calls": 42
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 7016654,
+                "output": 15177,
+                "total": 7031831
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 3402898,
+                "output": 7676,
+                "total": 3410574,
+                "calls": 37
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 8258481,
+                "output": 18747,
+                "total": 8277228
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-23-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 22,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 95053,
+          "tokens_recorded_d38d2eb2": 206630,
+          "wall_ms_total": 50367,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 92431,
+                "output": 2622,
+                "total": 95053,
+                "calls": 22
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 199892,
+                "output": 6738,
+                "total": 206630
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-23-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "stalled",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 2,
+          "api_model_calls_true": 241,
+          "api_model_calls_recorded_d38d2eb2": 2,
+          "tokens_true": 2732380,
+          "tokens_recorded_d38d2eb2": 5460666,
+          "wall_ms_total": 600012,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 1383008,
+                "output": 14139,
+                "total": 1397147,
+                "calls": 123
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 2763984,
+                "output": 28263,
+                "total": 2792247
+              }
+            },
+            {
+              "round": 2,
+              "true_usage": {
+                "input": 1321345,
+                "output": 13888,
+                "total": 1335233,
+                "calls": 118
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 2640658,
+                "output": 27761,
+                "total": 2668419
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "feedback_once20": {
+      "cells": 20,
+      "wrong_to_right": 11,
+      "right_to_wrong": 0,
+      "preserved_good": 0,
+      "still_wrong": 9,
+      "movement_total": 11,
+      "per_arm": {
+        "generic": {
+          "cells": 10,
+          "wrong_to_right": 7,
+          "right_to_wrong": 0,
+          "preserved_good": 0,
+          "still_wrong": 3,
+          "repair_sessions": 10,
+          "api_model_calls_true": 165,
+          "tokens_true": 6210682
+        },
+        "localized": {
+          "cells": 10,
+          "wrong_to_right": 4,
+          "right_to_wrong": 0,
+          "preserved_good": 0,
+          "still_wrong": 6,
+          "repair_sessions": 10,
+          "api_model_calls_true": 292,
+          "tokens_true": 13293271
+        }
+      },
+      "local_vs_independent_mismatches": [
+        {
+          "cell": "dabstep-1273-pi-C-generic",
+          "local_all_pass_d38d2eb2": true,
+          "after_independent": false
+        },
+        {
+          "cell": "dabstep-1273-pi-C-localized",
+          "local_all_pass_d38d2eb2": false,
+          "after_independent": true
+        }
+      ],
+      "current_code_vs_independent_mismatches": [],
+      "local_matches": 18,
+      "current_code_matches": 20,
+      "repair_sessions_total": 20,
+      "api_model_calls_true_total": 457,
+      "tokens_true_total": 19503953,
+      "wall_ms_total": 2482095,
+      "cells_detail": [
+        {
+          "draft": "dab_039-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 19,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 1713122,
+          "tokens_recorded_d38d2eb2": 4599131,
+          "wall_ms_total": 177774,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 1709959,
+                "output": 3163,
+                "total": 1713122,
+                "calls": 19
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 4591118,
+                "output": 8013,
+                "total": 4599131
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_039-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 22,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 1032729,
+          "tokens_recorded_d38d2eb2": 2394980,
+          "wall_ms_total": 223538,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 1023316,
+                "output": 9413,
+                "total": 1032729,
+                "calls": 22
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 2372290,
+                "output": 22690,
+                "total": 2394980
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_055-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 15,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 660200,
+          "tokens_recorded_d38d2eb2": 1688368,
+          "wall_ms_total": 85463,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 658435,
+                "output": 1765,
+                "total": 660200,
+                "calls": 15
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1682640,
+                "output": 5728,
+                "total": 1688368
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_055-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 41,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 3129076,
+          "tokens_recorded_d38d2eb2": 7177637,
+          "wall_ms_total": 272389,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 3122570,
+                "output": 6506,
+                "total": 3129076,
+                "calls": 41
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 7162867,
+                "output": 14770,
+                "total": 7177637
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_378-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 10,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 103316,
+          "tokens_recorded_d38d2eb2": 404010,
+          "wall_ms_total": 36745,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 101567,
+                "output": 1749,
+                "total": 103316,
+                "calls": 10
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 397151,
+                "output": 6859,
+                "total": 404010
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_378-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 29,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 409720,
+          "tokens_recorded_d38d2eb2": 815903,
+          "wall_ms_total": 300005,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 391347,
+                "output": 18373,
+                "total": 409720,
+                "calls": 29
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 779669,
+                "output": 36234,
+                "total": 815903
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_426-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 9,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 226852,
+          "tokens_recorded_d38d2eb2": 745146,
+          "wall_ms_total": 32020,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 226113,
+                "output": 739,
+                "total": 226852,
+                "calls": 9
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 741597,
+                "output": 3549,
+                "total": 745146
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_426-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 13,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 369174,
+          "tokens_recorded_d38d2eb2": 771949,
+          "wall_ms_total": 66637,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 366334,
+                "output": 2840,
+                "total": 369174,
+                "calls": 13
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 765863,
+                "output": 6086,
+                "total": 771949
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_427-pi-A",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 8,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 224465,
+          "tokens_recorded_d38d2eb2": 606367,
+          "wall_ms_total": 26765,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 224021,
+                "output": 444,
+                "total": 224465,
+                "calls": 8
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 605133,
+                "output": 1234,
+                "total": 606367
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_427-pi-A",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 8,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 225934,
+          "tokens_recorded_d38d2eb2": 772835,
+          "wall_ms_total": 29847,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 225406,
+                "output": 528,
+                "total": 225934,
+                "calls": 8
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 770128,
+                "output": 2707,
+                "total": 772835
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_507-pi-A",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 16,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 361679,
+          "tokens_recorded_d38d2eb2": 861227,
+          "wall_ms_total": 41283,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 360336,
+                "output": 1343,
+                "total": 361679,
+                "calls": 16
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 857666,
+                "output": 3561,
+                "total": 861227
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dab_507-pi-A",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 9,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 177013,
+          "tokens_recorded_d38d2eb2": 475839,
+          "wall_ms_total": 26312,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 176370,
+                "output": 643,
+                "total": 177013,
+                "calls": 9
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 473564,
+                "output": 2275,
+                "total": 475839
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-10-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 13,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 331162,
+          "tokens_recorded_d38d2eb2": 918216,
+          "wall_ms_total": 37125,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 330480,
+                "output": 682,
+                "total": 331162,
+                "calls": 13
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 915482,
+                "output": 2734,
+                "total": 918216
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-10-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 10,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 322531,
+          "tokens_recorded_d38d2eb2": 712910,
+          "wall_ms_total": 33071,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 321997,
+                "output": 534,
+                "total": 322531,
+                "calls": 10
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 711748,
+                "output": 1162,
+                "total": 712910
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-1273-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": false,
+          "local_matches_independent": false,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 11,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 148759,
+          "tokens_recorded_d38d2eb2": 317797,
+          "wall_ms_total": 50373,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 146346,
+                "output": 2413,
+                "total": 148759,
+                "calls": 11
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 312599,
+                "output": 5198,
+                "total": 317797
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-1273-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": true,
+          "local_matches_independent": false,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 19,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 572796,
+          "tokens_recorded_d38d2eb2": 1771261,
+          "wall_ms_total": 62641,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 571019,
+                "output": 1777,
+                "total": 572796,
+                "calls": 19
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 1766977,
+                "output": 4284,
+                "total": 1771261
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-1753-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 29,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 2262726,
+          "tokens_recorded_d38d2eb2": 4523595,
+          "wall_ms_total": 300005,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 2257438,
+                "output": 5288,
+                "total": 2262726,
+                "calls": 29
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 4513034,
+                "output": 10561,
+                "total": 4523595
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-1753-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 54,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 4804127,
+          "tokens_recorded_d38d2eb2": 9605969,
+          "wall_ms_total": 300006,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 4796048,
+                "output": 8079,
+                "total": 4804127,
+                "calls": 54
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 9589241,
+                "output": 16728,
+                "total": 9605969
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-23-pi-C",
+          "arm": "generic",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": true,
+          "local_stopped_d38d2eb2": "gap_closed",
+          "local_all_pass_d38d2eb2": true,
+          "current_code_all_pass": true,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 35,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 178401,
+          "tokens_recorded_d38d2eb2": 384907,
+          "wall_ms_total": 80091,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 174205,
+                "output": 4196,
+                "total": 178401,
+                "calls": 35
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 375155,
+                "output": 9752,
+                "total": 384907
+              }
+            }
+          ]
+        },
+        {
+          "draft": "dabstep-23-pi-C",
+          "arm": "localized",
+          "role": "bad",
+          "before_pass_independent": false,
+          "after_independent": false,
+          "local_stopped_d38d2eb2": "max_rounds",
+          "local_all_pass_d38d2eb2": false,
+          "current_code_all_pass": false,
+          "local_matches_independent": true,
+          "current_code_matches_independent": true,
+          "repair_sessions": 1,
+          "api_model_calls_true": 87,
+          "api_model_calls_recorded_d38d2eb2": 1,
+          "tokens_true": 2250171,
+          "tokens_recorded_d38d2eb2": 4498293,
+          "wall_ms_total": 300005,
+          "rounds": [
+            {
+              "round": 1,
+              "true_usage": {
+                "input": 2240335,
+                "output": 9836,
+                "total": 2250171,
+                "calls": 87
+              },
+              "recorded_usage_d38d2eb2": {
+                "input": 4478636,
+                "output": 19657,
+                "total": 4498293
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "total_cells": 50,
+  "local_matches_total": 45,
+  "current_code_matches_total": 50
+}

@@ -255,9 +255,10 @@ def build_repair_prompt(
                 continue
             lines.append(f"- [{c.status}] {item.id}：{item.quote}")
             if c.status != "PASS":
-                lines.append(f"  驗證結果：{c.detail}")
+                lines.append(f"  驗證結果：{_cap_prompt_text(c.detail)}")
                 if c.evidence:
-                    lines.append(f"  可見反例：{json.dumps(c.evidence, ensure_ascii=False, default=str)}")
+                    ev = json.dumps(c.evidence, ensure_ascii=False, default=str)
+                    lines.append(f"  可見反例：{_cap_prompt_text(ev)}")
         lines.append("")
         lines.append("【必須保持成立的條件】")
         keep = [i.id for i in req_set.items
@@ -266,6 +267,8 @@ def build_repair_prompt(
             ("以下條目已 PASS，修正後必須仍然 PASS：" + "、".join(keep))
             if keep else "（沒有已 PASS 的條目）")
         lines.append("只修上面的缺口，不要重寫不相關的部分；改完後所有必需條目都要能通過重驗。")
+        lines.append("若同一條驗證命令重跑仍得相同結果，不要重複同一命令："
+                     "換一種計算方式（重新檢查過濾條件與公式），與重算值一致後才產出交付物。")
     else:
         lines.append("")
         lines.append("請對照原始需求，重新檢查並修正工作區裡的交付物檔案一次。")
@@ -398,6 +401,70 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
     if not seen or (tin == 0 and tout == 0):
         return None
     return {"input": tin, "output": tout, "total": tin + tout, "calls": n_calls}
+
+
+# 修復請求中單段驗證詳情／反例的長度上限：過長 JSON 對小模型是過載（
+# effects_20261105 假設：localized 長反例＋保持清單誘發過度驗證／工具迴圈）。
+_PROMPT_TEXT_CAP = 800
+
+
+def _cap_prompt_text(s: str) -> str:
+    """截斷修復請求裡的單段詳情／反例；截斷必須可見（不得靜默丟棄資訊）。"""
+    s = (s or "").strip()
+    if len(s) <= _PROMPT_TEXT_CAP:
+        return s
+    return s[:_PROMPT_TEXT_CAP].rstrip() + f"…（已截斷，共 {len(s)} 字）"
+
+
+def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
+    """偵測「工具死迴圈」：同一 (tool, args) 連續重複執行、中間沒有任何改動。
+
+    來源（effects_20261105，dabstep-23-pi-C localized 兩階段皆敗）：模型把同一條
+    python3 一行式重複執行 10 次以上（同 args、同結果、中間沒有寫檔）直到 300s
+    預算耗盡，候選值全程未變。本函式把這個事實變機器可讀：
+    - 依序掃 `tool_execution_start` 事件（pi --mode json JSONL）；
+    - key＝(toolName, 正規化 args)；相鄰同 key 累積為一個「重複串」；
+      中間出現不同 key（如 write／edit）即斷串——「改後重跑」是正常驗證，不是迴圈；
+    - 最長串 ≥ threshold → 回傳 {"tool_name","args","consecutive_repetitions","threshold"}，
+      否則 None（含無日誌）。
+
+    這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
+    只記錄在該輪 agent 欄位（`tool_loop_suspected`），讓審計不必人讀 1MB 日誌。
+    缺值＝None，不填假值。
+    """
+    p = pathlib.Path(log_path)
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    best: tuple[str, Any] | None = None
+    best_streak = 0
+    cur_key: tuple[str, Any] | None = None
+    cur_streak = 0
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            obj = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(obj, dict) or obj.get("type") != "tool_execution_start":
+            continue
+        key = (str(obj.get("toolName")), obj.get("args"))
+        if key == cur_key:
+            cur_streak += 1
+        else:
+            cur_key = key
+            cur_streak = 1
+        if cur_streak > best_streak:
+            best_streak = cur_streak
+            best = key
+    if best is None or best_streak < threshold:
+        return None
+    name, args = best
+    return {"tool_name": name, "args": args,
+            "consecutive_repetitions": best_streak, "threshold": threshold}
 
 
 # ── 單輪 ──────────────────────────────────────────────────────────────
@@ -549,6 +616,9 @@ def run_repair_round(
     after = run_requirement_checks(authoritative, req_set, ws)
     diff = diff_results(before, after)
     usage = parse_usage_from_log(log_dir / "agent_stdout.log")
+    # 工具死迴圈觀察（effects_20261105 dabstep-23）：同一命令連續重複＝疑似迴圈。
+    # 觀察與標記，不是裁決：不改變重驗結果與停滯判定（None＝未偵測到）。
+    agent = {**agent, "tool_loop_suspected": detect_tool_loop(log_dir / "agent_stdout.log")}
     tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),

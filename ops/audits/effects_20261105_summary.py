@@ -19,6 +19,8 @@ agent_round_N/agent_stdout.log，寫 ops/audits/effects_20261105_summary.json。
 """
 from __future__ import annotations
 
+import dataclasses
+import hashlib
 import json
 import pathlib
 import re
@@ -38,7 +40,8 @@ def _old_parser() -> "callable":
     """從效果快照（d38d2eb2）抽出舊 parse_usage_from_log，算「記錄當時」的膨脹值。"""
     src = (EFFECTS / "snapshot/vacant_network/reqloop/repair.py").read_text(encoding="utf-8")
     frag = src[src.index("_USAGE_INPUT_KEYS"):src.index("def repair_slice")]
-    ns: dict = {"pathlib": pathlib, "json": json}
+    ns: dict = {"pathlib": pathlib, "json": json, "dataclasses": dataclasses,
+                "hashlib": hashlib}
     exec(compile(frag, "snapshot_repair_frag", "exec"), ns)
     return ns["parse_usage_from_log"]
 
@@ -51,7 +54,7 @@ def _num(v):
 
 
 def cell_record(phase: str, draft: str, arm: str, man_draft: dict, g2_cell: dict,
-                indep: bool) -> dict:
+                indep: bool, ws_path: pathlib.Path) -> dict:
     role = man_draft["role"]
     before = man_draft["source"]["score"].get("pass")
     cost = g2_cell["cost"]
@@ -87,10 +90,16 @@ def cell_record(phase: str, draft: str, arm: str, man_draft: dict, g2_cell: dict
         })
 
     # 當前 checker 對快照 task 的重驗（與 r1029 驗收同一條路徑）
-    task_dir = SNAP / man_draft["dir"].removesuffix("task") / "task"
+    # manifest 的 task.dir 即相對 snapshot 的 task 目錄（如 smoke/dab_507/task）
+    task_dir = SNAP / man_draft["task"]["dir"]
     req_set = RequirementSet.load(task_dir / "requirements.json")
-    ws = EFFECTS / phase / draft / arm / "round_1"
-    cur_results = run_requirement_checks(task_dir, req_set, ws)
+    # d38d2eb2 記錄當時的本地門：從 final_readable_status 按「必需條目全 PASS」重算
+    # （g2_result.json 只存逐條狀態、沒存 gate 欄位）
+    required = [i.id for i in req_set.items if i.required]
+    local_gate_d38d2eb2 = bool(required) and all(
+        g2_cell["final_readable_status"].get(cid) == "PASS" for cid in required)
+    # 最終候選工作區以 independent.json 記錄的 workspace 為準（round_1／round_2／no_gap 為原草稿）
+    cur_results = run_requirement_checks(task_dir, req_set, ws_path)
     cur_gate = _required_all_pass(req_set, cur_results)
 
     return {
@@ -100,9 +109,9 @@ def cell_record(phase: str, draft: str, arm: str, man_draft: dict, g2_cell: dict
         "before_pass_independent": before,
         "after_independent": indep,
         "local_stopped_d38d2eb2": g2_cell["stopped"],
-        "local_all_pass_d38d2eb2": g2_cell["after_all_pass"],
+        "local_all_pass_d38d2eb2": local_gate_d38d2eb2,
         "current_code_all_pass": cur_gate,
-        "local_matches_independent": bool(g2_cell["after_all_pass"] == indep),
+        "local_matches_independent": bool(local_gate_d38d2eb2 == indep),
         "current_code_matches_independent": bool(cur_gate == indep),
         "repair_sessions": sessions,
         "api_model_calls_true": true_calls if true_ok and (sessions > 0 or true_calls > 0) else (true_calls if true_ok else None),
@@ -117,8 +126,11 @@ def cell_record(phase: str, draft: str, arm: str, man_draft: dict, g2_cell: dict
 def main() -> int:
     out = {
         "schema": "vacant.audit/effects_20261105_summary/1",
+        "snapshot_sha": "d38d2eb21d7ffbb927eb263e657d907dc112bc7d",
         "scope_note": (
-            "before_pass_independent＝實驗前獨立評分（manifest 生成時記錄，來源＝原草稿）；"
+            "本實驗為開發選樣（e008/e013/e014 已見題），不是未見任務效力證明；"
+            "無硬 token 上限，不得宣稱等 token；小樣本（單 rep）不宣稱 localized 優於 generic。"
+            "口徑：before_pass_independent＝實驗前獨立評分（manifest 生成時記錄，來源＝原草稿）；"
             "after_independent＝實驗後獨立評分（independent.json，來源＝該格最終候選）。"
             "local_*＝g2_result.json 於 d38d2eb2 以舊 checker／舊 usage parser 記錄的值；"
             "api_model_calls_true／tokens_true＝以當前（已併 auto/argon）parser 從每輪 "
@@ -126,7 +138,8 @@ def main() -> int:
             "local 與 after_independent 的 5 格分歧全部出於 d38d2eb2 舊 checker；"
             "以當前 checks 碼重驗（current_code_all_pass）與獨立評分 50/50 一致。"
             "repair_sessions（agent 啟動數）與 API 請求數是兩個量，本檔嚴格分開。"
-            "所有缺值＝None（UNKNOWN），不填 0。unknown_after 全部為 False。"
+            "hidden_after（本地重跑 hidden scorer）全格＝UNKNOWN（本地無權重跑），不填 0。"
+            "所有缺值＝None（UNKNOWN），不填 0。"
         ),
         "source_root": str(EFFECTS),
         "code_under_audit": "d38d2eb2 (snapshot) vs current auto/qwen27b (post auto/argon merge)",
@@ -140,7 +153,10 @@ def main() -> int:
     ):
         man = json.loads(man_path.read_text(encoding="utf-8"))
         g2 = json.loads((EFFECTS / phase / "g2_result.json").read_text(encoding="utf-8"))
-        indep = json.loads((EFFECTS / phase / "independent.json").read_text(encoding="utf-8"))
+        raw_ind = json.loads((EFFECTS / phase / "independent.json").read_text(encoding="utf-8"))
+        # independent.json 的結構＝{"complete", "source_result", "cells": [{draft, arm, independent_after:{pass,...}}]}
+        indep = {f"{c['draft']}-{c['arm']}": c["independent_after"]["pass"] for c in raw_ind["cells"]}
+        ws_of = {f"{c['draft']}-{c['arm']}": pathlib.Path(c["workspace"]) for c in raw_ind["cells"]}
         by_draft = {d["name"]: d for d in man["drafts"]}
         g2_cells = {(c["draft"], c["arm"]): c for c in g2["cells"]}
 
@@ -150,7 +166,7 @@ def main() -> int:
             if key not in indep:
                 raise SystemExit(f"missing independent cell: {phase}/{key}")
             cells.append(cell_record(phase, draft, arm, by_draft[draft],
-                                     g2_cells[(draft, arm)], bool(indep[key])))
+                                     g2_cells[(draft, arm)], bool(indep[key]), ws_of[key]))
             total += 1
 
         def move(b, a):
