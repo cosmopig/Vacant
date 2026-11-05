@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "requirements": [
     {
       "id": "CSV_STRUCTURE",
@@ -14,3 +15,111 @@
     }
   ]
 }
+=======
+  "task_id": "inventory_alerts",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出 restock_alerts.csv，欄位：item_id, item_name, current_stock, safety_stock, restock_needed, estimated_cost",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "item_id",
+          "item_name",
+          "current_stock",
+          "safety_stock",
+          "restock_needed",
+          "estimated_cost"
+        ]
+      },
+      "description": "補貨清單 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_rowset_recompute",
+      "quote": "排除 DISCONTINUED、重複 item_id 只留第一筆、current_stock < safety_stock、restock_needed = safety_stock - current_stock、estimated_cost = restock_needed × unit_cost",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "exclude": [
+          {
+            "col": "supplier_status",
+            "op": "eq",
+            "value": "DISCONTINUED"
+          }
+        ],
+        "dedup_by": "item_id",
+        "include": [
+          {
+            "col": "current_stock",
+            "op": "lt",
+            "value": "safety_stock"
+          }
+        ],
+        "identity": [
+          "item_id"
+        ],
+        "values": {
+          "item_name": "item_name",
+          "current_stock": "current_stock",
+          "safety_stock": "safety_stock",
+          "restock_needed": {
+            "expr": "safety_stock - current_stock"
+          },
+          "estimated_cost": {
+            "expr": "(safety_stock - current_stock) * unit_cost",
+            "round": 2
+          }
+        },
+        "atol": 0.01
+      },
+      "description": "補貨清單逐列必須與原始資料嚴格重算一致",
+      "required": true
+    },
+    {
+      "id": "req_summary_numbers",
+      "quote": "summary.md 須明確載明「需補貨品項數」與「預估補貨總金額」（精確數值）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "exclude": [
+          {
+            "col": "supplier_status",
+            "op": "eq",
+            "value": "DISCONTINUED"
+          }
+        ],
+        "dedup_by": "item_id",
+        "include": [
+          {
+            "col": "current_stock",
+            "op": "lt",
+            "value": "safety_stock"
+          }
+        ],
+        "numbers": [
+          {
+            "type": "count",
+            "label": "需補貨品項數"
+          },
+          {
+            "type": "sum",
+            "expr": "(safety_stock - current_stock) * unit_cost",
+            "label": "預估補貨總金額",
+            "round": 2
+          }
+        ],
+        "atol": 0.01
+      },
+      "description": "摘要數字必須與重算一致",
+      "required": true
+    }
+  ]
+}
+>>>>>>> auto/argon

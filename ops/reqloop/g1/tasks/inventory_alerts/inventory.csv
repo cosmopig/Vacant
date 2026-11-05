@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 item_id,category,item_name,current_stock,safety_stock,unit_cost,supplier_status
 101,Electronics,Smartphone X,50,30,500,ACTIVE
 102,Electronics,Tablet Y,10,20,300,ACTIVE
@@ -55,3 +56,37 @@ item_id,category,item_name,current_stock,safety_stock,unit_cost,supplier_status
 154,Electronics,Gaming Mouse Y,8,12,80,ACTIVE
 155,Office,Monitor Arm Z,5,8,120,ACTIVE
 101,Electronics,Smartphone X,50,30,500,ACTIVE
+=======
+item_id,category,item_name,current_stock,safety_stock,unit_cost,supplier_status
+EL-201,電子,電阻 10kΩ 1%,8,40,0.05,ACTIVE
+EL-202,電子,電容 100nF,60,40,0.08,ACTIVE
+EL-203,電子,MCU STM32F103,5,20,45.5,ACTIVE
+EL-204,電子,LED 紅 5mm,400,300,0.15,ACTIVE
+EL-205,電子,晶振 8MHz,6,25,2.3,ACTIVE
+EL-206,電子,FPC 排線,2,15,3.8,ACTIVE
+EL-207,電子,連接器 2.54,12,100,0.45,ACTIVE
+EL-902,電子,舊型晶振 4MHz,3,20,3.1,DISCONTINUED
+IT-101,五金,六角螺絲 M6,12,50,0.35,ACTIVE
+IT-101,五金,六角螺絲 M6,999,50,0.35,ACTIVE
+IT-102,五金,自攻螺絲 4x20,300,200,0.12,ACTIVE
+IT-103,五金,銅螺母 M6,3,30,0.22,ACTIVE
+IT-104,五金,華司墊片,900,500,0.03,ACTIVE
+IT-105,五金,鉚釘 4mm,250,100,0.09,ACTIVE
+IT-106,五金,角鋼 30x30,9,40,15.6,ACTIVE
+IT-901,五金,舊型螺絲 M4,5,50,0.2,DISCONTINUED
+PA-401,包材,瓦楞紙箱 中,45,30,3.2,ACTIVE
+PA-402,包材,保麗龍板,10,10,2.5,ACTIVE
+PA-403,包材,膠帶 48mm,5,25,4.8,ACTIVE
+PA-404,包材,氣泡袋 30x40,18,60,0.65,ACTIVE
+PA-405,包材,收縮膜,50,40,88.0,ACTIVE
+PA-406,包材,紙板襯墊,6,18,1.9,ACTIVE
+PC-301,塑膠,ABS 顆粒 黑,20,15,12.0,ACTIVE
+PC-302,塑膠,PC 板材 2mm,3,10,85.0,ACTIVE
+PC-303,塑膠,PP 管材 10mm,1,6,9.9,ACTIVE
+PC-304,塑膠,矽膠條,25,20,6.4,ACTIVE
+PC-305,塑膠,尼龍齒輪,14,30,22.0,ACTIVE
+TO-501,工具,電鑽批頭組,2,8,180.0,ACTIVE
+TO-502,工具,鉗子 8吋,15,10,65.0,ACTIVE
+TO-503,工具,內六角扳手組,4,12,120.0,ACTIVE
+TO-504,工具,水平尺,7,5,45.0,ACTIVE
+>>>>>>> auto/argon

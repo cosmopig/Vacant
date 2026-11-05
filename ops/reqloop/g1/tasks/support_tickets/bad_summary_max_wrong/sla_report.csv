@@ -1,0 +1,4 @@
+priority,ticket_count,avg_resolved_hours,sla_met_count,sla_rate,worst_hours
+P1,4,3.75,3,0.75,5.5
+P2,4,7.0,2,0.5,9.5
+P3,5,17.4,4,0.8,26.5

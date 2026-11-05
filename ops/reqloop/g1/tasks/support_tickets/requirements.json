@@ -1,0 +1,69 @@
+{
+  "task_id": "support_tickets",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出 sla_report.csv，欄位：priority, ticket_count, avg_resolved_hours, sla_met_count, sla_rate, worst_hours",
+      "deliverable": "sla_report.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "priority",
+          "ticket_count",
+          "avg_resolved_hours",
+          "sla_met_count",
+          "sla_rate",
+          "worst_hours"
+        ]
+      },
+      "description": "SLA 報告 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_sla_recompute",
+      "quote": "依 priority 分組計算 ticket_count、avg_resolved_hours、sla_met_count（resolved_hours <= sla_target_hours 者計達標）、sla_rate＝sla_met_count ÷ ticket_count、worst_hours＝resolved_hours 最大值",
+      "deliverable": "sla_report.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "tickets.csv",
+        "exclude": [
+          {"col": "status", "op": "eq", "value": "OPEN"}
+        ],
+        "group_by": ["priority"],
+        "aggregates": [
+          {"name": "ticket_count", "type": "count"},
+          {"name": "avg_resolved_hours", "type": "mean_skip_empty", "col": "resolved_hours", "round": 2},
+          {"name": "sla_met_count", "type": "count_if", "expr": "resolved_hours <= sla_target_hours"},
+          {"name": "sla_rate", "type": "ratio", "num": "sla_met_count", "den": "ticket_count", "round": 4},
+          {"name": "worst_hours", "type": "max", "col": "resolved_hours"}
+        ],
+        "atol": 0.01
+      },
+      "description": "SLA 指標必須與原始工單日誌嚴格重算一致",
+      "required": true
+    },
+    {
+      "id": "req_summary_numbers",
+      "quote": "summary.md 須明確載明「結案工單總數」、「整體 SLA 達標率（百分數）」與「最長處理時數」",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "tickets.csv",
+        "exclude": [
+          {"col": "status", "op": "eq", "value": "OPEN"}
+        ],
+        "numbers": [
+          {"type": "count", "label": "結案工單總數"},
+          {"type": "pct_if", "expr": "resolved_hours <= sla_target_hours", "label": "整體 SLA 達標率", "round": 2},
+          {"type": "max", "col": "resolved_hours", "label": "最長處理時數"}
+        ],
+        "atol": 0.01
+      },
+      "description": "摘要數字必須與重算一致",
+      "required": true
+    }
+  ]
+}

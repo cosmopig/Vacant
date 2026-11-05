@@ -1,0 +1,91 @@
+{
+  "task_id": "web_traffic",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出 daily_traffic.csv，欄位：local_day, visits, uv, avg_dwell",
+      "deliverable": "daily_traffic.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "local_day",
+          "visits",
+          "uv",
+          "avg_dwell"
+        ]
+      },
+      "description": "每日流量 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_group_recompute",
+      "quote": "local_day 換算、visits 筆數、uv 獨立 user_id、avg_dwell 平均（空白剔除）",
+      "deliverable": "daily_traffic.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "traffic.csv",
+        "compute": [
+          {
+            "name": "local_day",
+            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
+          }
+        ],
+        "group_by": [
+          "local_day"
+        ],
+        "aggregates": [
+          {
+            "name": "visits",
+            "type": "count"
+          },
+          {
+            "name": "uv",
+            "type": "distinct",
+            "col": "user_id"
+          },
+          {
+            "name": "avg_dwell",
+            "type": "mean_skip_empty",
+            "col": "dwell_seconds",
+            "round": 2
+          }
+        ],
+        "atol": 0.01
+      },
+      "description": "每日流量指標必須與原始日誌嚴格重算一致",
+      "required": true
+    },
+    {
+      "id": "req_summary_numbers",
+      "quote": "summary.md 須明確載明「全期獨立訪客數 UV」（跨日去重）與「全期造訪總數」",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "traffic.csv",
+        "compute": [
+          {
+            "name": "local_day",
+            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
+          }
+        ],
+        "numbers": [
+          {
+            "type": "distinct",
+            "col": "user_id",
+            "label": "全期獨立訪客數 UV"
+          },
+          {
+            "type": "count",
+            "label": "全期造訪總數"
+          }
+        ],
+        "atol": 0.5
+      },
+      "description": "摘要數字必須與重算一致（全期 UV 跨日去重，非每日加總）",
+      "required": true
+    }
+  ]
+}

@@ -35,6 +35,17 @@ def test_rc_semantics_on_real_data():
     assert rep["docs_scanned"] > 0 and rep["cert_headings"] > 0   # 安靜量不到 ⇒ 這裡就要紅
 
 
+def test_selftest_mutants_are_not_committed():
+    """M5/M6/M7 的承重突變體是 cert_drift_gate.py 同目錄的暫存檔（`_r47x_<tag>_mutant.py`，
+    finally 裡 unlink）。一輪在 selftest 中途被殺（rc=124）時暫存檔殘留，會被下一輪的
+    auto-commit 收進 repo（實例：r1004 收進的 `_r47x_m5_mutant.py`，709 行＝本檔刪掉 M5 段）。
+    結構性規則：repo 裡不准存在任何 `_r47x_*_mutant.py`。
+    """
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    stray = sorted((repo / "ops" / "gain").glob("_r47x_*_mutant.py"))
+    assert not stray, f"selftest 暫存突變體不得殘留在 repo：{[str(p) for p in stray]}"
+
+
 def test_exemption_cannot_silence_stale():
     """豁免名單只准處理 BROKEN_NO_TOOLS；碰到 CERT_STALE 必須拒絕並記數。"""
     groups = [dict(doc="D.md", heads=[dict(line=1, text="# x 原樣跑過")],

@@ -1,0 +1,1 @@
+@removed_outliers_count[0]

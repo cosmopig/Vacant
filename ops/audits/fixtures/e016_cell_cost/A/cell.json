@@ -1,0 +1,30 @@
+{
+  "exp": "e016_failed_step_ablation",
+  "cell": "polyglot_py-pg_affine_cipher-pi-A-r1",
+  "suite": "polyglot_py",
+  "task": "pg_affine_cipher",
+  "agent": "pi",
+  "arm": "A",
+  "rep": 1,
+  "model": {
+    "base": "http://100.86.226.21:1234/v1",
+    "id": "gemma-4-12b-it-qat"
+  },
+  "vacant_sha": null,
+  "workspace_sha256": "c3ccfaf152aad334f684359f69432bc8dc8d52756fc0dda136827dadad903c17",
+  "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "started": "2026-11-03T16:15:37+0000",
+  "timeout_s": 1800,
+  "agent_rc": 0,
+  "wall_s": 135.7,
+  "timed_out": false,
+  "finished": "2026-11-03T16:17:52+0000",
+  "metrics": {
+    "model_calls": 15,
+    "input_tokens": 160651,
+    "output_tokens": 8815,
+    "tool_calls": 14,
+    "stop": "stop",
+    "errors": 0
+  }
+}

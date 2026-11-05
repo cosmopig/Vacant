@@ -1,0 +1,191 @@
+[
+  {
+    "event_id": "e001",
+    "event_type": "click",
+    "ts": "2026-10-15T08:01:00Z",
+    "payload": {
+      "target": "btn_save",
+      "duration_ms": 120
+    }
+  },
+  {
+    "event_id": "e002",
+    "event_type": "CLICK",
+    "ts": "2026-10-15T08:02:00Z",
+    "payload": {
+      "target": "btn_ok",
+      "duration_ms": 80
+    }
+  },
+  {
+    "event_id": "e003",
+    "event_type": "view",
+    "ts": "2026-10-15T08:03:00Z",
+    "payload": {
+      "target": "page_home",
+      "duration_ms": 350
+    }
+  },
+  {
+    "event_id": "e004",
+    "event_type": "View",
+    "ts": "2026-10-15T08:04:00Z",
+    "payload": {
+      "target": "page_list",
+      "duration_ms": 210
+    }
+  },
+  {
+    "event_id": "e005",
+    "event_type": "error",
+    "ts": "2026-10-15T08:05:00Z",
+    "payload": {
+      "target": "api_x",
+      "duration_ms": 45
+    }
+  },
+  {
+    "event_id": "e006",
+    "event_type": "ERROR",
+    "ts": "2026-10-15T08:06:00Z",
+    "payload": {
+      "target": "api_y",
+      "duration_ms": 60
+    }
+  },
+  {
+    "event_id": "e007",
+    "event_type": "click",
+    "ts": "2026-10-15T08:07:00Z",
+    "payload": {
+      "target": "btn_x"
+    }
+  },
+  {
+    "event_id": "e008",
+    "event_type": "view",
+    "ts": "2026-10-15T08:08:00Z",
+    "payload": {
+      "target": "page_detail",
+      "duration_ms": 95
+    }
+  },
+  {
+    "event_id": "e009",
+    "event_type": "click",
+    "ts": "2026-10-15T08:09:00Z",
+    "payload": {
+      "target": "btn_pay",
+      "duration_ms": 200
+    }
+  },
+  {
+    "event_id": "e010",
+    "event_type": "error",
+    "ts": "2026-10-15T08:10:00Z",
+    "payload": {
+      "target": "api_z",
+      "duration_ms": 30
+    }
+  },
+  {
+    "event_id": "e011",
+    "event_type": "VIEW",
+    "ts": "2026-10-15T08:11:00Z",
+    "payload": {
+      "target": "page_home",
+      "duration_ms": 150
+    }
+  },
+  {
+    "event_id": "e012",
+    "event_type": "click",
+    "ts": "2026-10-15T08:12:00Z",
+    "payload": {
+      "target": "btn_save",
+      "duration_ms": 75
+    }
+  },
+  {
+    "event_id": "e013",
+    "event_type": "view",
+    "ts": "2026-10-15T08:13:00Z"
+  },
+  {
+    "event_id": "e014",
+    "event_type": "error",
+    "ts": "2026-10-15T08:14:00Z",
+    "payload": {
+      "target": "api_x",
+      "duration_ms": 40
+    }
+  },
+  {
+    "event_id": "e015",
+    "event_type": "Click",
+    "ts": "2026-10-15T08:15:00Z",
+    "payload": {
+      "target": "btn_ok",
+      "duration_ms": 55
+    }
+  },
+  {
+    "event_id": "e016",
+    "event_type": "view",
+    "ts": "2026-10-15T08:16:00Z",
+    "payload": {
+      "target": "page_list",
+      "duration_ms": 130
+    }
+  },
+  {
+    "event_id": "e017",
+    "event_type": "click",
+    "ts": "2026-10-15T08:17:00Z",
+    "payload": {
+      "target": "btn_search",
+      "duration_ms": 90
+    }
+  },
+  {
+    "event_id": "e018",
+    "event_type": "error",
+    "ts": "2026-10-15T08:18:00Z"
+  },
+  {
+    "event_id": "e019",
+    "event_type": "view",
+    "ts": "2026-10-15T08:19:00Z",
+    "payload": {
+      "target": "page_home",
+      "duration_ms": 260
+    }
+  },
+  {
+    "event_id": "e020",
+    "event_type": "CLICK",
+    "ts": "2026-10-15T08:20:00Z",
+    "payload": {
+      "target": "btn_pay",
+      "duration_ms": 40
+    }
+  },
+  {
+    "event_id": "e021",
+    "event_type": "error",
+    "ts": "2026-10-15T08:21:00Z",
+    "payload": {
+      "target": "api_y",
+      "duration_ms": 70
+    }
+  },
+  {
+    "event_id": "e022",
+    "event_type": "click",
+    "ts": "2026-10-15T08:22:00Z",
+    "payload": {
+      "target": "btn_save",
+      "duration_ms": 110
+    }
+  }
+]

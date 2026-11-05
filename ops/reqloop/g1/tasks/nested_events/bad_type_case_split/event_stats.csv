@@ -1,0 +1,9 @@
+event_type,event_count,total_duration_ms
+CLICK,2,120
+Click,1,55
+ERROR,1,60
+VIEW,1,150
+View,1,210
+click,6,595
+error,5,185
+view,5,835

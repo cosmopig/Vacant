@@ -1,0 +1,31 @@
+{
+  "task_id": "dab_055",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Answer format: @mean_cases[mean_value] where \"mean_value\" is a positive integer.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {"keys": [{"key": "mean_cases", "type": "integer"}]},
+      "description": "答案檔存在且 @mean_cases 為單一合法整數（格式；值正確性不在此宣告）",
+      "required": true, "authority": "user_request", "hidden": false, "unverified": false
+    },
+    {
+      "id": "req_mean_cases_recomputed",
+      "quote": "Calculate the mean of the column 'No. of cases'. Convert the data type of 'No. of cases' column from Object (string) to Int64 before performing calculations. Ignore those records where 'No. of cases' column value is Null or empty.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "mean_cases",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {"type": "mean_int_col", "col": "No. of cases",
+                      "note": "Int64 轉換語意：Null/空/不可解析整數（如 '630308[495000-801000]'）一律忽略；對剩餘整數取均值"},
+        "atol": 1e-6
+      },
+      "description": "答案值必須等於對凍結資料 data/estimated_numbers.csv 的公開規則重算；重算值不進證據（防洩漏）",
+      "required": true, "authority": "user_request", "hidden": false, "unverified": false
+    }
+  ]
+}

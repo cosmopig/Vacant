@@ -301,6 +301,11 @@ class Recorder:
         # Phase B（L2 冷壓縮）：封印當下對新封印卷 best-effort gzip（fail-open）；可關（測試顯式
         # 壓縮路徑／營運回退）；既有明文卷永不強遷（C2 向後相容）。
         self.compact_on_seal = True
+        # 活動卷行數＝分卷**觸發器**（完整性是 verify 的職責）。程內隨寫遞增；只在「未知，
+        # 或檔案大小已變（他程寫入／_repair_tail 截斷／set_aside 移卷）」時全量數一次。
+        # 否則每次 append 都付 O(檔大小) 計數（C6 封印開/關對照的唯一熱點，round 1015）。
+        self._vol_line_count: int | None = None
+        self._vol_size: int | None = None
 
     def _sealed_volume_paths(self) -> list[pathlib.Path]:
         """按卷號排序列舉封印卷：明文與 `.gz`（Phase B L2）都算。
@@ -407,6 +412,8 @@ class Recorder:
         saved.write_bytes(data[cut:])
         with self.chain_path.open("r+b") as f:
             f.truncate(cut)
+        self._vol_line_count = None
+        self._vol_size = None
         return {"torn_tail_bytes": len(data) - cut, "saved_as": saved.name}
 
     def _append(self, etype: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -439,8 +446,12 @@ class Recorder:
                 if sz >= self.volume_max_bytes:
                     should_seal = True
                 elif self.volume_max_entries is not None:
-                    with self.chain_path.open("rb") as f:
-                        line_count = sum(1 for ln in f if ln.strip())
+                    if self._vol_line_count is not None and self._vol_size == sz:
+                        line_count = self._vol_line_count
+                    else:
+                        with self.chain_path.open("rb") as f:
+                            line_count = sum(1 for ln in f if ln.strip())
+                        self._vol_line_count, self._vol_size = line_count, sz
                     if line_count >= self.volume_max_entries:
                         should_seal = True
             except OSError:
@@ -476,6 +487,8 @@ class Recorder:
                         f.flush()
                         os.fsync(f.fileno())
                     os.replace(self.chain_path, self.dir / sealed_name)
+                    self._vol_line_count = None    # 新卷開始：舊行數／舊大小不再適用
+                    self._vol_size = None
                     # Phase B（L2 冷壓縮）：對剛封印的卷 best-effort gzip（fail-open：失敗⇒留明文卷、
                     # 原因記上鏈、不擋寫入）。sha256_prefix 是未壓縮流的哈希⇒gunzip 後照舊驗＝零語義變化。
                     # 存量不強遷：只壓新封印卷；既有明文卷照讀（C2 向後相容）。
@@ -498,11 +511,17 @@ class Recorder:
                         ts_ms=ts)
         new.append(e)
         self.dir.mkdir(parents=True, exist_ok=True)
+        written = 0
         with self.chain_path.open("ab") as f:
             for x in new:
-                f.write(canonical_bytes(x.to_json()) + b"\n")
+                b = canonical_bytes(x.to_json()) + b"\n"
+                f.write(b)
+                written += len(b)
             f.flush()
             os.fsync(f.fileno())
+        if self._vol_line_count is not None:
+            self._vol_line_count += len(new)
+            self._vol_size += written
         # 鏈頭另外記一份：鏈被從尾巴截短時 verify 看得出來（recorder#4；收件端帳本另有一份）
         atomic_write_text(self.dir / "head.json", json.dumps({"seq": e.seq, "hash": e.hash()}))
         return {"seq": e.seq, "hash": e.hash()}
@@ -1380,6 +1399,8 @@ class Recorder:
             head = self.dir / "head.json"
             if head.is_file():
                 os.replace(head, self.dir / f"head.set-aside.{stamp}.json")
+            self._vol_line_count = None
+            self._vol_size = None
             atomic_write_text(self.dir / f"chain.set-aside.{stamp}.why.txt", str(why)[:2000] + "\n")
         return name or (names[0] if names else "")
 

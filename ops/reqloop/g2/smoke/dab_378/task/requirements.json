@@ -1,0 +1,291 @@
+{
+  "task_id": "dab_378",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "pre_mean",
+            "type": "number"
+          },
+          {
+            "key": "pre_median",
+            "type": "number"
+          },
+          {
+            "key": "pre_sd",
+            "type": "number"
+          },
+          {
+            "key": "pre_skewness",
+            "type": "number"
+          },
+          {
+            "key": "pre_kurtosis",
+            "type": "number"
+          },
+          {
+            "key": "post_mean",
+            "type": "number"
+          },
+          {
+            "key": "post_median",
+            "type": "number"
+          },
+          {
+            "key": "post_sd",
+            "type": "number"
+          },
+          {
+            "key": "post_skewness",
+            "type": "number"
+          },
+          {
+            "key": "post_kurtosis",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "答案檔含全部 10 個 @key（pre/post × mean/median/sd/skewness/kurtosis）且值為數字（可見格式；正確性另由 kv_recomputed 驗）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "pre_mean",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_mean",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "mean",
+          "round": 2,
+          "note": "imputation 前（pre）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@pre_mean 的值須與對凍結資料重算一致（imputation 前（pre） mean）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "pre_median",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_median",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "median",
+          "round": 2,
+          "note": "imputation 前（pre）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@pre_median 的值須與對凍結資料重算一致（imputation 前（pre） median）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "pre_sd",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_sd",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "sd",
+          "round": 2,
+          "note": "imputation 前（pre）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@pre_sd 的值須與對凍結資料重算一致（imputation 前（pre） sd）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "pre_skewness",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_skewness",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "skewness",
+          "round": 2,
+          "note": "imputation 前（pre）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@pre_skewness 的值須與對凍結資料重算一致（imputation 前（pre） skewness）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "pre_kurtosis",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_kurtosis",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "kurtosis",
+          "round": 2,
+          "note": "imputation 前（pre）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@pre_kurtosis 的值須與對凍結資料重算一致（imputation 前（pre） kurtosis）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "post_mean",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "post_mean",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "mean",
+          "round": 2,
+          "note": "imputation 後（post）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@post_mean 的值須與對凍結資料重算一致（imputation 後（post） mean）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "post_median",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "post_median",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "median",
+          "round": 2,
+          "note": "imputation 後（post）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@post_median 的值須與對凍結資料重算一致（imputation 後（post） median）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "post_sd",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "post_sd",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "sd",
+          "round": 2,
+          "note": "imputation 後（post）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@post_sd 的值須與對凍結資料重算一致（imputation 後（post） sd）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "post_skewness",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "post_skewness",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "skewness",
+          "round": 2,
+          "note": "imputation 後（post）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@post_skewness 的值須與對凍結資料重算一致（imputation 後（post） skewness）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "post_kurtosis",
+      "quote": "calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation, each rounded to two decimal places",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "post_kurtosis",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "kurtosis",
+          "round": 2,
+          "note": "imputation 後（post）：imputation 只填兩列 Pass 欄的缺失，Trips 欄本身不變，故 pre/post 同列同口徑（任務文字直譯）；sd=樣本(n−1)、skew=G1、kurt=G2 超额（pandas 3.1 預設，TDD 前凍結）；兩位小數"
+        }
+      },
+      "description": "@post_kurtosis 的值須與對凍結資料重算一致（imputation 後（post） kurtosis）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+The average fee charged by the "GlobalCard" card scheme for a credit transaction with a value of 10 EUR is 0.120132.

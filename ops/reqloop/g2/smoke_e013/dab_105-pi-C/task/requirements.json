@@ -1,0 +1,31 @@
+{
+  "task_id": "dab_105",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Answer format: @correlation_coefficient[corr_coeff] where \"corr_coeff\" is a number between -1 and 1, rounded to two decimal places.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {"keys": [{"key": "correlation_coefficient", "type": "number"}]},
+      "description": "答案檔存在且 @correlation_coefficient 為單一合法數值（格式；值正確性不在此宣告）",
+      "required": true, "authority": "user_request", "hidden": false, "unverified": false
+    },
+    {
+      "id": "req_corr_recomputed",
+      "quote": "Calculate the Pearson correlation coefficient to assess the strength and direction of linear relationship between ApplicantIncome and LoanAmount. Ignore the rows with missing values for either of the two columns. Round the correlation coefficient to two decimal places.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "correlation_coefficient",
+        "data_file": "data/test_Y3wMUE5_7gLdaTN.csv",
+        "recompute": {"type": "pearson2", "col_a": "ApplicantIncome", "col_b": "LoanAmount", "round": 2,
+                      "note": "兩欄皆可解析為數值的行才入計算（缺值行忽略）；Pearson r；兩位小數"},
+        "atol": 1e-6
+      },
+      "description": "答案值必須等於對凍結資料的公開規則重算（Pearson、缺值行忽略、兩位小數）；重算值不進證據",
+      "required": true, "authority": "user_request", "hidden": false, "unverified": false
+    }
+  ]
+}

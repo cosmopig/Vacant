@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 item_id,item_name,current_stock,safety_stock,restock_needed
 102,Tablet Y,10,20,10
 103,Blender Z,5,10,5
@@ -28,3 +29,22 @@ item_id,item_name,current_stock,safety_stock,restock_needed
 152,Drawing Tablet W,7,10,3
 154,Gaming Mouse Y,8,12,4
 155,Monitor Arm Z,5,8,3
+=======
+item_id,item_name,current_stock,safety_stock,restock_needed
+EL-201,電阻 10kΩ 1%,8,40,32
+EL-203,MCU STM32F103,5,20,15
+EL-205,晶振 8MHz,6,25,19
+EL-206,FPC 排線,2,15,13
+EL-207,連接器 2.54,12,100,88
+IT-101,六角螺絲 M6,12,50,38
+IT-103,銅螺母 M6,3,30,27
+IT-106,角鋼 30x30,9,40,31
+PA-403,膠帶 48mm,5,25,20
+PA-404,氣泡袋 30x40,18,60,42
+PA-406,紙板襯墊,6,18,12
+PC-302,PC 板材 2mm,3,10,7
+PC-303,PP 管材 10mm,1,6,5
+PC-305,尼龍齒輪,14,30,16
+TO-501,電鑽批頭組,2,8,6
+TO-503,內六角扳手組,4,12,8
+>>>>>>> auto/argon

@@ -1,0 +1,89 @@
+{
+  "task_id": "nested_events",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出 event_stats.csv，欄位：event_type, event_count, total_duration_ms",
+      "deliverable": "event_stats.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "event_type",
+          "event_count",
+          "total_duration_ms"
+        ]
+      },
+      "description": "事件統計 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_group_recompute",
+      "quote": "event_type 不分大小寫、duration_ms 缺失以 0 計且仍計數、分類型計數與加總",
+      "deliverable": "event_stats.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_json": "events.json",
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "duration_ms",
+            "impute": 0
+          }
+        ],
+        "group_by": [
+          "event_type"
+        ],
+        "group_normalize": {
+          "event_type": "lower"
+        },
+        "aggregates": [
+          {
+            "name": "event_count",
+            "type": "count"
+          },
+          {
+            "name": "total_duration_ms",
+            "type": "sum",
+            "expr": "duration_ms"
+          }
+        ],
+        "atol": 0.5
+      },
+      "description": "事件統計必須與原始 JSON 嚴格重算一致",
+      "required": true
+    },
+    {
+      "id": "req_summary_numbers",
+      "quote": "summary.md 須明確載明「事件總數」（精確數值）與「總時長」（ms）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_json": "events.json",
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "duration_ms",
+            "impute": 0
+          }
+        ],
+        "numbers": [
+          {
+            "type": "count",
+            "label": "事件總數"
+          },
+          {
+            "type": "sum",
+            "expr": "duration_ms",
+            "label": "總時長"
+          }
+        ],
+        "atol": 0.5
+      },
+      "description": "摘要數字必須與重算一致",
+      "required": true
+    }
+  ]
+}

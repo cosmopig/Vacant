@@ -1,0 +1,26 @@
+{
+  "task_id": "dabstep-11",
+  "items": [
+    {
+      "id": "req_max_eur_amount",
+      "quote": "What is the highest transaction amount (in EUR) recorded? (Answer must be the exact number.)",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "col_max",
+          "col": "eur_amount",
+          "round": 2,
+          "note": "payments.csv eur_amount 欄最大值（不可解析值忽略）——「the highest transaction amount (in EUR) recorded」；EUR 兩位小數"
+        }
+      },
+      "description": "答案為單一數字，須與對凍結資料重算的最高 EUR 交易金額一致",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

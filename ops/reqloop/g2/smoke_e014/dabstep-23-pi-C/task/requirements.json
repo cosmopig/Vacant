@@ -1,0 +1,32 @@
+{
+  "task_id": "dabstep-23",
+  "items": [
+    {
+      "id": "req_fraud_rate_2023_inperson",
+      "quote": "What is the fraud rate for in-person transactions for the year 2023? Answer must be just a number.",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "cond_rate",
+          "where": [
+            {"col": "year", "op": "eq", "value": "2023"},
+            {"col": "shopper_interaction", "op": "eq", "value": "POS"}
+          ],
+          "num_where": [
+            {"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}
+          ],
+          "note": "POS＝in-person（payments-readme.md：'POS means an in-person or in-store transaction'）；rate＝|where∩num_where|/|where|（行數比，TDD 前凍結）；分母 0 行→UNKNOWN。本凍結快照全 138236 行皆為 2023、且 10765 筆 fraud 全在 Ecommerce→2023 POS 分母 12397、分子 0→期望 0.0（真實重算值，非填 0）"
+        },
+        "atol": 1e-6
+      },
+      "description": "答案值必須等於對凍結資料 data/payments.csv 按公開規則重算的 2023 in-person（POS）fraud rate；重算值不進證據（防洩漏）",
+      "required": true,
+      "authority": "user_request",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}
