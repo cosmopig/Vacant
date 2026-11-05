@@ -1,4 +1,20 @@
 
+## r1043（11/05 09:26–09:50）讀 contrast3 全結果：4/6 格閉合、2 敗格精確歸因＋新票 vq-5nz.21
+
+**結果：P1 對照 6 格全讀完（本輪無 repo 改動、無 commit；證據 `~/dev/ops/contrast3_20261105/`）。**
+
+1. **contrast3（3 草稿×2 臂，單次重現 dev 樣本，不作效力宣稱）**：before(d38d2eb2) generic 3/3·localized 1/3；
+   after(8e6fa47d) generic 2/3·localized 2/3。dab_507 兩臂皆 PASS（after 成本 loc 1.19M→21.7K tok）；
+   dabstep-23 generic PASS/localized stalled；dabstep-10 generic stalled/localized PASS（翻轉，n=1 不可歸因）。
+   獨立 scorer 與本地門 6 格全同向（4 PASS/2 FAIL、零分歧）。成本真值見 before_after.json（api_model_calls_true/tokens_true/wall_ms_total）。
+2. **dabstep-23 localized 精確歸因**：r1 同一 python3 一行式重複 34 次、每次同一 SyntaxError（`;` 後接 `if` 非法）；
+   detect_tool_loop 已觸發、r2 提示已點名「本輪禁止重複該命令、已得到結果後直接推導」——但該命令每次都失敗、從無結果；
+   r2 模型寫出正確 calculate_fraud.py 並跑通（結果可得）後仍重複壞命令 15 次、未寫 answer.txt。
+   → 新票 **vq-5nz.21**（P2）：「重複命令每次都失敗」應針對性提示錯誤類＋具體語法規則（寫 .py 執行、跑通即寫入交付物）。
+3. **vq-5nz.19**：worker 29a10294 15→1（`test_reqloop_g1_gate.py::test_real_fixture_bank` assert 20==0）；
+   HEAD 已進 30e1e7de（CI 未跑完）——仍等助手修綠再驗收。vq-6rp：/srv/vlab/queue 仍空（0 任務）。
+4. 紀律：未讀 hidden/scorer、未寫離線審計腳本充當進度、未 push、未動 main、未跑全量 pytest。
+
 ## r1029（11/05）審查輪 20261105：P0 核對＋P1 單格對照發射＋P2 crash→giveup 提示（vq-kpb）
 
 **結果：P0 核對完成（2aa0c077 五項修復全數在樹）；P1 已發射（背景跑，待收）；P2 TDD 全綠。
