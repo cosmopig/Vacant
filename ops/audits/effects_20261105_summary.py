@@ -183,9 +183,11 @@ def main() -> int:
         mism = [c for c in cells if not c["local_matches_independent"]]
         cur_mism = [c for c in cells if not c["current_code_matches_independent"]]
 
+        active_cells = [c for c in cells if c["repair_sessions"] > 0]
         per_arm = {}
         for arm in ("generic", "localized"):
             ac = [c for c in cells if c["arm"] == arm]
+            ac_active = [c for c in ac if c["repair_sessions"] > 0]
             per_arm[arm] = {
                 "cells": len(ac),
                 "wrong_to_right": sum(1 for c in ac if c["before_pass_independent"] is False
@@ -197,11 +199,15 @@ def main() -> int:
                 "still_wrong": sum(1 for c in ac if c["before_pass_independent"] is False
                                    and c["after_independent"] is False),
                 "repair_sessions": sum(c["repair_sessions"] for c in ac),
-                "api_model_calls_true": (sum(c["api_model_calls_true"] for c in ac)
-                                         if all(c["api_model_calls_true"] is not None
-                                                for c in ac) else None),
-                "tokens_true": (sum(c["tokens_true"] for c in ac)
-                                if all(c["tokens_true"] is not None for c in ac) else None),
+                "api_model_calls_true": (sum(c["api_model_calls_true"] for c in ac_active)
+                                         if ac_active and all(c["api_model_calls_true"] is not None
+                                                              for c in ac_active) else None),
+                "tokens_true": (sum(c["tokens_true"] for c in ac_active)
+                                if ac_active and all(c["tokens_true"] is not None
+                                                     for c in ac_active) else None),
+                "wall_ms_total": (sum(c["wall_ms_total"] for c in ac_active)
+                                  if ac_active and all(c["wall_ms_total"] is not None
+                                                       for c in ac_active) else None),
             }
 
         out["phases"][phase] = {
@@ -224,13 +230,15 @@ def main() -> int:
             "local_matches": sum(1 for c in cells if c["local_matches_independent"]),
             "current_code_matches": sum(1 for c in cells if c["current_code_matches_independent"]),
             "repair_sessions_total": sum(c["repair_sessions"] for c in cells),
-            "api_model_calls_true_total": (sum(c["api_model_calls_true"] for c in cells)
-                                           if all(c["api_model_calls_true"] is not None
-                                                  for c in cells) else None),
-            "tokens_true_total": (sum(c["tokens_true"] for c in cells)
-                                  if all(c["tokens_true"] is not None for c in cells) else None),
-            "wall_ms_total": (sum(c["wall_ms_total"] for c in cells)
-                              if all(c["wall_ms_total"] is not None for c in cells) else None),
+            "api_model_calls_true_total": (sum(c["api_model_calls_true"] for c in active_cells)
+                                           if active_cells and all(c["api_model_calls_true"] is not None
+                                                                   for c in active_cells) else None),
+            "tokens_true_total": (sum(c["tokens_true"] for c in active_cells)
+                                  if active_cells and all(c["tokens_true"] is not None
+                                                          for c in active_cells) else None),
+            "wall_ms_total": (sum(c["wall_ms_total"] for c in active_cells)
+                              if active_cells and all(c["wall_ms_total"] is not None
+                                                      for c in active_cells) else None),
             "cells_detail": cells,
         }
 

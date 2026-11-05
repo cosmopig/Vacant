@@ -21,7 +21,8 @@
           "still_wrong": 3,
           "repair_sessions": 19,
           "api_model_calls_true": 365,
-          "tokens_true": 16284659
+          "tokens_true": 16284659,
+          "wall_ms_total": 2192195
         },
         "localized": {
           "cells": 15,
@@ -31,7 +32,8 @@
           "still_wrong": 4,
           "repair_sessions": 16,
           "api_model_calls_true": 550,
-          "tokens_true": 17385851
+          "tokens_true": 17385851,
+          "wall_ms_total": 2206480
         }
       },
       "local_vs_independent_mismatches": [
@@ -57,7 +59,7 @@
       "repair_sessions_total": 35,
       "api_model_calls_true_total": 915,
       "tokens_true_total": 33670510,
-      "wall_ms_total": null,
+      "wall_ms_total": 4398675,
       "cells_detail": [
         {
           "draft": "dab_035-pi-C",
@@ -1162,7 +1164,8 @@
           "still_wrong": 3,
           "repair_sessions": 10,
           "api_model_calls_true": 165,
-          "tokens_true": 6210682
+          "tokens_true": 6210682,
+          "wall_ms_total": 867644
         },
         "localized": {
           "cells": 10,
@@ -1172,7 +1175,8 @@
           "still_wrong": 6,
           "repair_sessions": 10,
           "api_model_calls_true": 292,
-          "tokens_true": 13293271
+          "tokens_true": 13293271,
+          "wall_ms_total": 1614451
         }
       },
       "local_vs_independent_mismatches": [

@@ -305,6 +305,38 @@ def build_repair_prompt(
 
 # ── 工作區（原草稿保留）──────────────────────────────────────────────
 
+_WS_REQ_ITEM_KEYS = ("id", "quote", "deliverable", "required")
+
+
+def _workspace_requirements_bytes(raw_bytes: bytes) -> bytes:
+    """移除控制器內部驗證規格（verifier、params、recompute、note），只把需求識別與原文放入工作區。"""
+    try:
+        obj = json.loads(raw_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+        return raw_bytes
+    if not isinstance(obj, dict) or not isinstance(obj.get("items"), list):
+        return raw_bytes
+    out: dict[str, Any] = {}
+    if "task_id" in obj:
+        out["task_id"] = obj["task_id"]
+    out["items"] = [
+        {k: it[k] for k in _WS_REQ_ITEM_KEYS if k in it}
+        if isinstance(it, dict) else it
+        for it in obj["items"]
+    ]
+    return (json.dumps(out, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+
+
+def _copy_task_top_files_to_workspace(t: pathlib.Path, ws: pathlib.Path) -> None:
+    for p in sorted(t.iterdir()) if t.is_dir() else []:
+        if not p.is_file():
+            continue
+        if p.name == "requirements.json":
+            (ws / p.name).write_bytes(_workspace_requirements_bytes(p.read_bytes()))
+        else:
+            shutil.copy2(p, ws / p.name)
+
+
 def prepare_workspace(
     task_dir: str | pathlib.Path,
     draft_dir: str | pathlib.Path,
@@ -317,6 +349,8 @@ def prepare_workspace(
 
     原草稿目錄只讀；同名檔以草稿為準。task 底下的目錄（good／bad 等參考答案）不帶進
     工作區；只有 include_dirs 白名單裡的子目錄（如 data/）才進場。
+    控制器內部的 requirements.json 寫入工作區時會剝離 verifier/params/recompute 等內部重算規格，
+    防止模型在工作區偷讀重算答案或被歷史備註誤導。
     """
     t = pathlib.Path(task_dir)
     d = pathlib.Path(draft_dir)
@@ -324,9 +358,7 @@ def prepare_workspace(
     if ws.exists():
         shutil.rmtree(ws)
     ws.mkdir(parents=True)
-    for p in sorted(t.iterdir()) if t.is_dir() else []:
-        if p.is_file():
-            shutil.copy2(p, ws / p.name)
+    _copy_task_top_files_to_workspace(t, ws)
     for dd in include_dirs:
         src = t / dd
         if src.is_dir():
@@ -338,9 +370,7 @@ def prepare_workspace(
             shutil.copy2(p, dest)
     if round_n >= 2:
         # 累積修復第 2+ 輪（d 為上一輪工作區）：確保權威來源檔案不被上一輪可能污染的副本覆寫
-        for p in sorted(t.iterdir()) if t.is_dir() else []:
-            if p.is_file():
-                shutil.copy2(p, ws / p.name)
+        _copy_task_top_files_to_workspace(t, ws)
         for dd in include_dirs:
             src = t / dd
             if src.is_dir():
@@ -472,7 +502,8 @@ def _count_rule_hint_line(evidence: Any) -> str | None:
             "其一：CSV 表頭行是否被當成一個值計入"
             "（cut|sort|uniq|wc 這類 shell 管線會把表頭行算進結果）；"
             "其二：行尾空行、空白值是否被計入；"
-            "其三：僅大小寫或前後空白不同的值是否被當成多個。"
+            "其三：僅大小寫或前後空白不同的值是否被當成多個；"
+            "其四：CSV 雙引號欄位內若含逗號（如名稱含 `,`），cut/awk 以逗號切欄會導致欄位錯位。"
             "請改用逐行解析檔案的方法（如 python csv 模組）重數一次再比對。"
         )
     if rule.startswith("count_if"):
@@ -519,15 +550,19 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
 
 
 def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
-    """偵測「工具死迴圈」：同一 (tool, args) 連續重複執行、中間沒有任何改動。
+    """偵測「工具死迴圈」：同一 (tool, args) 單步連續重複，或雙步 (k1, k2) 交替連續重複、中間沒有任何改動。
 
-    來源（effects_20261105，dabstep-23-pi-C localized 兩階段皆敗）：模型把同一條
-    python3 一行式重複執行 10 次以上（同 args、同結果、中間沒有寫檔）直到 300s
-    預算耗盡，候選值全程未變。本函式把這個事實變機器可讀：
+    來源：
+    - effects_20261105 dabstep-23-pi-C localized：模型把同一條 python3 一行式重複執行
+      10 次以上（period-1，同 args、同結果、中間沒有寫檔）直到 300s 預算耗盡；
+    - effects_20261105 feedback_once20/dabstep-1753-pi-C localized r1：模型把完全相同的
+      (write find_fees.py, bash cat << 'EOF' > find_fees.py ...) 雙步交替重複 9 組（18 次呼叫，
+      period-2，參數零改動）直到 300s 超時。
+    本函式把這個事實變機器可讀：
     - 依序掃 `tool_execution_start` 事件（pi --mode json JSONL）；
-    - key＝(toolName, 正規化 args)；相鄰同 key 累積為一個「重複串」；
-      中間出現不同 key（如 write／edit）即斷串——「改後重跑」是正常驗證，不是迴圈；
-    - 最長串 ≥ threshold → 回傳 {"tool_name","args","consecutive_repetitions","threshold"}，
+    - 先找相鄰同 key（period-1）最長重複串；
+    - 再找相鄰雙步 `(k1, k2)`（`k1 != k2`，period-2）完全相同參數連續重複組數；
+    - 達 `threshold` → 回傳 {"tool_name","args","consecutive_repetitions","threshold",...}，
       否則 None（含無日誌）。
 
     這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
@@ -539,6 +574,7 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         text = p.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
+    keys: list[tuple[str, Any]] = []
     best: tuple[str, Any] | None = None
     best_streak = 0
     cur_key: tuple[str, Any] | None = None
@@ -554,6 +590,7 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         if not isinstance(obj, dict) or obj.get("type") != "tool_execution_start":
             continue
         key = (str(obj.get("toolName")), obj.get("args"))
+        keys.append(key)
         if key == cur_key:
             cur_streak += 1
         else:
@@ -562,11 +599,37 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         if cur_streak > best_streak:
             best_streak = cur_streak
             best = key
-    if best is None or best_streak < threshold:
-        return None
-    name, args = best
-    return {"tool_name": name, "args": args,
-            "consecutive_repetitions": best_streak, "threshold": threshold}
+
+    best_p2_pair: tuple[tuple[str, Any], tuple[str, Any]] | None = None
+    best_p2_cycles = 0
+    n_keys = len(keys)
+    for i in range(n_keys - 1):
+        k1, k2 = keys[i], keys[i + 1]
+        if k1 == k2:
+            continue
+        cycles = 1
+        j = i + 2
+        while j + 1 < n_keys and keys[j] == k1 and keys[j + 1] == k2:
+            cycles += 1
+            j += 2
+        if cycles > best_p2_cycles:
+            best_p2_cycles = cycles
+            best_p2_pair = (k1, k2)
+
+    if best is not None and best_streak >= threshold and best_streak >= best_p2_cycles:
+        name, args = best
+        return {"tool_name": name, "args": args,
+                "consecutive_repetitions": best_streak, "threshold": threshold}
+    if best_p2_pair is not None and best_p2_cycles >= threshold:
+        k1, k2 = best_p2_pair
+        return {
+            "tool_name": f"{k1[0]}+{k2[0]}",
+            "args": {"first": k1[1], "second": k2[1]},
+            "consecutive_repetitions": best_p2_cycles,
+            "threshold": threshold,
+            "period": 2,
+        }
+    return None
 
 
 #: crash→放棄 偵測的崩潰簽名（effects_20261105 dabstep-1753 generic：
@@ -582,27 +645,47 @@ _CRASH_EXC_RE = re.compile(
 _GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
 
 
-def detect_crash_giveup(log_path: str | pathlib.Path,
-                        answer_path: str | pathlib.Path,
-                        *, max_signatures: int = 12) -> dict[str, Any] | None:
+def _extract_tool_end_text(obj: dict[str, Any]) -> str:
+    """從 tool_execution_end 事件抽出工具輸出文字（相容真實 pi --mode json 的 result 與測試的 output）。"""
+    parts: list[str] = []
+    out = obj.get("output")
+    if isinstance(out, str):
+        parts.append(out)
+    res = obj.get("result")
+    if isinstance(res, str):
+        parts.append(res)
+    elif isinstance(res, dict):
+        content = res.get("content")
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and isinstance(item.get("text"), str):
+                    parts.append(item["text"])
+        elif isinstance(res.get("text"), str):
+            parts.append(res["text"])
+    return "\n".join(parts)
+
+
+def detect_crash_giveup(
+    log_path: str | pathlib.Path,
+    answer_path: str | pathlib.Path,
+    *,
+    max_signatures: int = 12,
+    draft_answer_path: str | pathlib.Path | None = None,
+) -> dict[str, Any] | None:
     """偵測「crash→放棄」：session 內腳本崩潰，最終答案卻是一句放棄詞。
 
-    來源（effects_20261105，dabstep-1753-pi-C generic 兩輪）：r1 腳本 NameError
-    crash → 答「Not Applicable」；r2 四次 NameError crash → 答「None」＝模型在
-    崩潰後放棄、沒有重試，300s 預算被反覆重寫腳本耗掉。
-    - 條件一：該輪答案檔是放棄詞（空、None、N/A、Not Applicable、No answer）；
-    - 條件二：agent 日誌有崩潰證據（非零 `Command exited with code N`、
-      Python traceback、常見例外行）。
-    兩者皆具 → 回傳 {"giveup_answer","crash_event_count","crash_signatures"}；
-    任一缺 → None（不假設因果；無日誌／無答案檔同為 None＝缺值不造假）。
-
-    這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
-    只記錄在該輪 agent 欄位（`crash_giveup_suspected`）。合法答案恰好是
-    「None」時此標記可能為假陽性——審計時看 crash_signatures 自行裁決。
+    來源（effects_20261105，dabstep-1753-pi-C generic）：r1 腳本崩潰後答「Not Applicable」。
+    防誤報與防膨脹（argon 20261105_0715）：
+    - 若提供 `draft_answer_path` 且本輪結束時 `answer.txt` 與初始草稿完全相同（例如原草稿已是
+      `"None"`），但日誌中 agent 從未對 `answer.txt` 發出寫入或修改工具呼叫（只是超時未寫檔），
+      回傳 None，不得誤判為「crash 後寫 None 放棄」。
+    - 若日誌為 `pi --mode json` JSONL 且含 `tool_execution_end` 事件，只掃描 `isError` 非 False
+      的 `tool_execution_end` 輸出，避免同一錯誤在 6 種串流事件中被重複計數 6 倍，並避免誤抓
+      `isError=False` 正常程式碼內的 `except ValueError:` 字串。
     """
+    ans_p = pathlib.Path(answer_path)
     try:
-        answer = pathlib.Path(answer_path).read_text(encoding="utf-8",
-                                                     errors="replace").strip()
+        answer = ans_p.read_text(encoding="utf-8", errors="replace").strip()
     except OSError:
         return None
     if answer.lower() not in _GIVEUP_ANSWERS:
@@ -611,12 +694,60 @@ def detect_crash_giveup(log_path: str | pathlib.Path,
         text = pathlib.Path(log_path).read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
+
+    parsed: list[dict[str, Any]] = []
+    for line in text.splitlines():
+        s = line.strip()
+        if not s.startswith("{"):
+            continue
+        try:
+            obj = json.loads(s)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if isinstance(obj, dict):
+            parsed.append(obj)
+
+    if draft_answer_path is not None:
+        try:
+            draft_ans = pathlib.Path(draft_answer_path).read_text(
+                encoding="utf-8", errors="replace"
+            ).strip()
+        except OSError:
+            draft_ans = None
+        if draft_ans is not None and draft_ans == answer and parsed:
+            ans_name = ans_p.name
+            touched = False
+            for obj in parsed:
+                if obj.get("type") != "tool_execution_start":
+                    continue
+                tname = str(obj.get("toolName") or "")
+                args = obj.get("args") if isinstance(obj.get("args"), dict) else {}
+                if tname in ("write", "edit") and ans_name in str(args.get("path") or ""):
+                    touched = True
+                    break
+                if tname == "bash" and ans_name in str(args.get("command") or ""):
+                    touched = True
+                    break
+            if not touched:
+                return None
+
+    tool_ends = [obj for obj in parsed if obj.get("type") == "tool_execution_end"]
+    if tool_ends:
+        scan_texts = [
+            _extract_tool_end_text(obj)
+            for obj in tool_ends
+            if obj.get("isError") is not False
+        ]
+        scan_blob = "\n".join(t for t in scan_texts if t)
+    else:
+        scan_blob = text
+
     sigs: list[str] = []
-    for m in _CRASH_EXIT_RE.finditer(text):
+    for m in _CRASH_EXIT_RE.finditer(scan_blob):
         if int(m.group(1)) != 0:
             sigs.append(m.group(0))
-    sigs += _CRASH_TRACEBACK_RE.findall(text)
-    sigs += _CRASH_EXC_RE.findall(text)
+    sigs += _CRASH_TRACEBACK_RE.findall(scan_blob)
+    sigs += _CRASH_EXC_RE.findall(scan_blob)
     if not sigs:
         return None
     uniq = sorted(set(sigs))
@@ -702,6 +833,7 @@ def _source_tampered_files(authoritative: pathlib.Path, ws: pathlib.Path) -> tup
     """P000-20261105-02：偵測候選改寫權威來源（快照內檔案缺失或 hash 改變）。
 
     只比對快照內檔案（新交付物不在內，不誤報）；按相對路徑排序，確定性。
+    對 requirements.json 比對工作區應有的去內部規格版本（_workspace_requirements_bytes）。
     """
     import hashlib as _hashlib
     bad: list[str] = []
@@ -709,7 +841,15 @@ def _source_tampered_files(authoritative: pathlib.Path, ws: pathlib.Path) -> tup
         f = ws / rel
         if not f.is_file():
             bad.append(rel)
-        elif _hashlib.sha256(f.read_bytes()).hexdigest() != h:
+            continue
+        expected_h = (
+            _hashlib.sha256(
+                _workspace_requirements_bytes((authoritative / rel).read_bytes())
+            ).hexdigest()
+            if rel == "requirements.json" and (authoritative / rel).is_file()
+            else h
+        )
+        if _hashlib.sha256(f.read_bytes()).hexdigest() != expected_h:
             bad.append(rel)
     return tuple(sorted(bad))
 
@@ -791,7 +931,11 @@ def run_repair_round(
     # 不改變重驗結果與停滯判定（None＝未偵測到）。
     agent = {**agent,
              "crash_giveup_suspected":
-             detect_crash_giveup(log_dir / "agent_stdout.log", ws / "answer.txt")}
+             detect_crash_giveup(
+                 log_dir / "agent_stdout.log",
+                 ws / "answer.txt",
+                 draft_answer_path=pathlib.Path(draft_dir) / "answer.txt",
+             )}
     tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),
