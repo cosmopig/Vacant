@@ -75,6 +75,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import sys
 import tempfile
@@ -175,6 +176,7 @@ def build_repair_prompt(
     *,
     feedback_mode: str = "localized",
     include_dirs: tuple[str, ...] = ("data",),
+    prev_round_agent: dict[str, Any] | None = None,
 ) -> str:
     """組修復請求。只帶：相關原文、目前交付物、失敗證據（可見反例）、
     允許改的範圍、必須保持成立的條件。不帶任何隱藏答案／hidden／scorer。
@@ -182,6 +184,18 @@ def build_repair_prompt(
     兩臂（G2 對照）：
     - `localized`：逐條 FAIL 的驗證結果＋可見反例＋已 PASS 條目（必須保持）。
     - `generic`：只有原始需求＋「再檢查修正一次」（對照臂，不帶失敗證據）。
+
+    `prev_round_agent`（第 2+ 輪）：上一輪 agent 欄位。localized 臂若其
+    `tool_loop_suspected` 非空，提示點名上一輪重複的工具與次數（針對性反迴圈
+    指令）——effects_20261105 dabstep-23：通用「不要重複同一命令」行不足以打破
+    ×117 迴圈，具體證據才讓模型知道該避免哪一條。generic 對照臂不使用（定義不變）。
+
+    計數規則形狀提示（localized 臂、只對 FAIL 的 unique_count 型規則）：
+    effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆
+    恰為 +1）——模型用 cut|sort|uniq|wc 型管線計數、把 CSV 表頭行當成一個值。
+    規則本身（unique_count: col）已在證據中，但這類規則的常見錯誤形狀不在；
+    `_count_rule_hint_line` 補形狀提示（表頭行／空行／大小寫與空白），不給重算值
+    或任何答案（leak guard 不變），不改重驗／停滯／退出碼。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
@@ -255,9 +269,13 @@ def build_repair_prompt(
                 continue
             lines.append(f"- [{c.status}] {item.id}：{item.quote}")
             if c.status != "PASS":
-                lines.append(f"  驗證結果：{c.detail}")
+                lines.append(f"  驗證結果：{_cap_prompt_text(c.detail)}")
                 if c.evidence:
-                    lines.append(f"  可見反例：{json.dumps(c.evidence, ensure_ascii=False, default=str)}")
+                    ev = json.dumps(c.evidence, ensure_ascii=False, default=str)
+                    lines.append(f"  可見反例：{_cap_prompt_text(ev)}")
+                hint = _count_rule_hint_line(c.evidence)
+                if hint:
+                    lines.append(f"  {hint}")
         lines.append("")
         lines.append("【必須保持成立的條件】")
         keep = [i.id for i in req_set.items
@@ -266,6 +284,14 @@ def build_repair_prompt(
             ("以下條目已 PASS，修正後必須仍然 PASS：" + "、".join(keep))
             if keep else "（沒有已 PASS 的條目）")
         lines.append("只修上面的缺口，不要重寫不相關的部分；改完後所有必需條目都要能通過重驗。")
+        lines.append("若同一條驗證命令重跑仍得相同結果，不要重複同一命令："
+                     "換一種計算方式（重新檢查過濾條件與公式），與重算值一致後才產出交付物。")
+        # 上一輪工具死迴圈觀察 → 本輪針對性指令（點名工具＋次數＋命令例）。
+        # 只 localized 臂：generic 對照臂定義＝不帶任何逐輪觀察（保持兩臂差異乾淨）。
+        # 只帶執行觀察，不帶需求失敗證據或重算值；不影響重驗／停滯判定。
+        loop = (prev_round_agent or {}).get("tool_loop_suspected")
+        if isinstance(loop, dict) and loop:
+            lines.append(_loop_warning_line(loop))
     else:
         lines.append("")
         lines.append("請對照原始需求，重新檢查並修正工作區裡的交付物檔案一次。")
@@ -400,6 +426,184 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
     return {"input": tin, "output": tout, "total": tin + tout, "calls": n_calls}
 
 
+# 修復請求中單段驗證詳情／反例的長度上限：過長 JSON 對小模型是過載（
+# effects_20261105 假設：localized 長反例＋保持清單誘發過度驗證／工具迴圈）。
+_PROMPT_TEXT_CAP = 800
+
+
+def _cap_prompt_text(s: str) -> str:
+    """截斷修復請求裡的單段詳情／反例；截斷必須可見（不得靜默丟棄資訊）。"""
+    s = (s or "").strip()
+    if len(s) <= _PROMPT_TEXT_CAP:
+        return s
+    return s[:_PROMPT_TEXT_CAP].rstrip() + f"…（已截斷，共 {len(s)} 字）"
+
+
+def _count_rule_hint_line(evidence: Any) -> str | None:
+    """計數型重算規則（unique_count）FAIL 反例的形狀提示行——localized 臂專用。
+
+    effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆
+    恰為 +1）：模型用 `cut -d',' -f2 data/payments.csv | sort | uniq | wc -l` 計數，
+    把 CSV 表頭行 "merchant" 當成一個值。規則本身（unique_count: col）已在證據中、
+    但這類規則的常見錯誤形狀不在；本行只補形狀提示（表頭行／空行／大小寫與空白）。
+    紅線：不給重算值、不給任何答案（leak guard 不變）；只 localized 臂、只 FAIL
+    條目；不改重驗／停滯／退出碼。evidence 非 dict、無 rule、非 unique_count → None。
+    """
+    if not isinstance(evidence, dict):
+        return None
+    rule = evidence.get("rule")
+    if not isinstance(rule, str) or not rule.startswith("unique_count"):
+        return None
+    return (
+        "【計數規則常見錯誤形狀（逐項檢查，兩種獨立計數方法一致才產出交付物）】"
+        "其一：CSV 表頭行是否被當成一個值計入"
+        "（cut|sort|uniq|wc 這類 shell 管線會把表頭行算進結果）；"
+        "其二：行尾空行、空白值是否被計入；"
+        "其三：僅大小寫或前後空白不同的值是否被當成多個。"
+        "請改用逐行解析檔案的方法（如 python csv 模組）重數一次再比對。"
+    )
+
+
+def _loop_warning_line(loop: dict[str, Any]) -> str:
+    """上一輪工具死迴圈觀察（detect_tool_loop 回傳值）→ localized 提示的針對性行。
+
+    與提示裡既有的通用行（「不要重複同一命令」）不同：點名上一輪實際重複的
+    工具、次數與命令例，讓模型知道該避免**哪一條**。effects_20261105 證據：
+    通用行已在提示中，dabstep-23-localized 仍 ×117 重複至超時——通用警告不足
+    以打破迴圈。只帶執行觀察（工具名／參數／次數），不帶需求失敗證據或重算值；
+    參數例截斷必須可見。
+    """
+    name = str(loop.get("tool_name") or "工具")
+    reps = loop.get("consecutive_repetitions")
+    reps = f" {reps}" if isinstance(reps, int) else ""
+    try:
+        args_text = json.dumps(loop.get("args"), ensure_ascii=False, default=str)
+    except (TypeError, ValueError):
+        args_text = ""
+    if args_text in ("", "{}"):
+        example = ""
+    else:
+        if len(args_text) > 160:
+            args_text = args_text[:160].rstrip() + "…"
+        example = f"（例：{args_text}）"
+    return (
+        f"【上一輪執行觀察】上一輪偵測到 {name} 以相同參數連續執行{reps} 次、"
+        f"中間沒有改動（疑似工具死迴圈）{example}。"
+        "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"
+        "不要再次執行同一命令。"
+    )
+
+
+def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
+    """偵測「工具死迴圈」：同一 (tool, args) 連續重複執行、中間沒有任何改動。
+
+    來源（effects_20261105，dabstep-23-pi-C localized 兩階段皆敗）：模型把同一條
+    python3 一行式重複執行 10 次以上（同 args、同結果、中間沒有寫檔）直到 300s
+    預算耗盡，候選值全程未變。本函式把這個事實變機器可讀：
+    - 依序掃 `tool_execution_start` 事件（pi --mode json JSONL）；
+    - key＝(toolName, 正規化 args)；相鄰同 key 累積為一個「重複串」；
+      中間出現不同 key（如 write／edit）即斷串——「改後重跑」是正常驗證，不是迴圈；
+    - 最長串 ≥ threshold → 回傳 {"tool_name","args","consecutive_repetitions","threshold"}，
+      否則 None（含無日誌）。
+
+    這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
+    只記錄在該輪 agent 欄位（`tool_loop_suspected`），讓審計不必人讀 1MB 日誌。
+    缺值＝None，不填假值。
+    """
+    p = pathlib.Path(log_path)
+    try:
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    best: tuple[str, Any] | None = None
+    best_streak = 0
+    cur_key: tuple[str, Any] | None = None
+    cur_streak = 0
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            obj = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(obj, dict) or obj.get("type") != "tool_execution_start":
+            continue
+        key = (str(obj.get("toolName")), obj.get("args"))
+        if key == cur_key:
+            cur_streak += 1
+        else:
+            cur_key = key
+            cur_streak = 1
+        if cur_streak > best_streak:
+            best_streak = cur_streak
+            best = key
+    if best is None or best_streak < threshold:
+        return None
+    name, args = best
+    return {"tool_name": name, "args": args,
+            "consecutive_repetitions": best_streak, "threshold": threshold}
+
+
+#: crash→放棄 偵測的崩潰簽名（effects_20261105 dabstep-1753 generic：
+#: `NameError ... Command exited with code 1`，模型隨後把答案寫成「None」放棄）。
+_CRASH_EXIT_RE = re.compile(r"Command exited with code (\d+)")
+_CRASH_TRACEBACK_RE = re.compile(r"Traceback \(most recent call last\)")
+# 注意：不能加 `\b` 前綴錨——pi --mode json 的日誌把換行轉義為字面 `\n`，
+# 例外名可能緊接在字元 `n` 之後，`\b` 會漏掉（dabstep-1753 真實日誌即此形狀）。
+_CRASH_EXC_RE = re.compile(
+    r"(NameError|TypeError|AttributeError|KeyError|ValueError|IndexError"
+    r"|ZeroDivisionError|SyntaxError|UnboundLocalError|ModuleNotFoundError)\s*:")
+#: 最終答案＝放棄詞（strip+lower 比對）：空、None、N/A、Not Applicable、No answer。
+_GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
+
+
+def detect_crash_giveup(log_path: str | pathlib.Path,
+                        answer_path: str | pathlib.Path,
+                        *, max_signatures: int = 12) -> dict[str, Any] | None:
+    """偵測「crash→放棄」：session 內腳本崩潰，最終答案卻是一句放棄詞。
+
+    來源（effects_20261105，dabstep-1753-pi-C generic 兩輪）：r1 腳本 NameError
+    crash → 答「Not Applicable」；r2 四次 NameError crash → 答「None」＝模型在
+    崩潰後放棄、沒有重試，300s 預算被反覆重寫腳本耗掉。
+    - 條件一：該輪答案檔是放棄詞（空、None、N/A、Not Applicable、No answer）；
+    - 條件二：agent 日誌有崩潰證據（非零 `Command exited with code N`、
+      Python traceback、常見例外行）。
+    兩者皆具 → 回傳 {"giveup_answer","crash_event_count","crash_signatures"}；
+    任一缺 → None（不假設因果；無日誌／無答案檔同為 None＝缺值不造假）。
+
+    這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
+    只記錄在該輪 agent 欄位（`crash_giveup_suspected`）。合法答案恰好是
+    「None」時此標記可能為假陽性——審計時看 crash_signatures 自行裁決。
+    """
+    try:
+        answer = pathlib.Path(answer_path).read_text(encoding="utf-8",
+                                                     errors="replace").strip()
+    except OSError:
+        return None
+    if answer.lower() not in _GIVEUP_ANSWERS:
+        return None
+    try:
+        text = pathlib.Path(log_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    sigs: list[str] = []
+    for m in _CRASH_EXIT_RE.finditer(text):
+        if int(m.group(1)) != 0:
+            sigs.append(m.group(0))
+    sigs += _CRASH_TRACEBACK_RE.findall(text)
+    sigs += _CRASH_EXC_RE.findall(text)
+    if not sigs:
+        return None
+    uniq = sorted(set(sigs))
+    return {
+        "giveup_answer": answer,
+        "crash_event_count": len(sigs),
+        "crash_signatures": uniq[:max_signatures],
+        "signatures_truncated": len(uniq) > max_signatures,
+    }
+
+
 # ── 單輪 ──────────────────────────────────────────────────────────────
 
 @dataclasses.dataclass
@@ -507,8 +711,13 @@ def run_repair_round(
     timeout_s: float,
     include_dirs: tuple[str, ...] = ("data",),
     authoritative: pathlib.Path | None = None,
+    prev_round_agent: dict[str, Any] | None = None,
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。來源目錄不被改動。
+
+    `prev_round_agent`（第 2+ 輪）：上一輪 agent 欄位（第 1 輪＝None）。localized
+    臂若其 tool_loop_suspected 非空，本輪提示點名上一輪重複的工具與次數（針對性
+    反迴圈指令）；generic 臂不受影響。只進提示，不改重驗／停滯／退出碼。
 
     累積修復（P000-20261105-01）：
     - `draft_dir`＝本輪來源目錄：第 1 輪為原草稿；第 N 輪（N≥2）為上一輪工作區
@@ -533,7 +742,8 @@ def run_repair_round(
     ws = prepare_workspace(task_dir, draft_dir, out_root,
                            round_n=n, include_dirs=include_dirs)
     prompt = build_repair_prompt(authoritative, req_set, draft_dir, before,
-                                 feedback_mode=feedback_mode, include_dirs=include_dirs)
+                                 feedback_mode=feedback_mode, include_dirs=include_dirs,
+                                 prev_round_agent=prev_round_agent)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
     launch = build(prompt, ws)
     log_dir = pathlib.Path(out_root) / f"agent_round_{n}"
@@ -549,6 +759,15 @@ def run_repair_round(
     after = run_requirement_checks(authoritative, req_set, ws)
     diff = diff_results(before, after)
     usage = parse_usage_from_log(log_dir / "agent_stdout.log")
+    # 工具死迴圈觀察（effects_20261105 dabstep-23）：同一命令連續重複＝疑似迴圈。
+    # 觀察與標記，不是裁決：不改變重驗結果與停滯判定（None＝未偵測到）。
+    agent = {**agent, "tool_loop_suspected": detect_tool_loop(log_dir / "agent_stdout.log")}
+    # crash→放棄觀察（effects_20261105 dabstep-1753 generic）：session 內崩潰＋
+    # 最終答案是放棄詞（None/Not Applicable…）⇒ 標記。觀察與標記，不是裁決：
+    # 不改變重驗結果與停滯判定（None＝未偵測到）。
+    agent = {**agent,
+             "crash_giveup_suspected":
+             detect_crash_giveup(log_dir / "agent_stdout.log", ws / "answer.txt")}
     tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),
@@ -659,6 +878,7 @@ def repair_slice(
         # 每輪工作區 round_N/ 即該輪快照。
         source_dir = d_dir
         prev_after = before
+        prev_round_agent: dict[str, Any] | None = None
         tamper_seen = False   # P000-20261105-02：任一輪來源改動即不可接受
         for n in range(1, max_rounds + 1):
             r = run_repair_round(
@@ -667,8 +887,10 @@ def repair_slice(
                 feedback_mode=feedback_mode, timeout_s=timeout_s,
                 include_dirs=include_dirs,
                 authoritative=auth,
+                prev_round_agent=prev_round_agent,
             )
             rounds.append(r)
+            prev_round_agent = r.agent   # 第 N+1 輪提示可點名第 N 輪的工具死迴圈觀察
             if r.source_tampered:
                 tamper_seen = True
             # 缺口關閉：全部必需項 PASS，且全程無來源改動（P000-20261105-02：

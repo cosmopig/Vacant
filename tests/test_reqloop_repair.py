@@ -246,6 +246,94 @@ def test_plain_recomputed_fail_prompt_leak_guard(tmp_path: pathlib.Path):
             assert bad not in p, bad
 
 
+def _unique_count_fixture(tmp_path: pathlib.Path):
+    """dabstep-10 同型：3 個 merchant＋表頭行；草稿 4＝3+表頭（off-by-one）。標 synthetic。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text(
+        "How many unique merchants are present in the dataset?\n"
+        "(Answer must be just a number of unique merchants.)\n", encoding="utf-8")
+    (task_dir / "payments.csv").write_text(
+        "amount,merchant\n1.0,alpha\n2.0,beta\n3.0,gamma\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("4\n", encoding="utf-8")   # 3 merchant＋1 表頭行
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_merchants", quote="unique_merchants", deliverable="answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv",
+                "recompute": {"type": "unique_count", "col": "merchant"}})])
+    return task_dir, draft, rs
+
+
+def test_unique_count_fail_prompt_offbyone_shape_hint(tmp_path: pathlib.Path):
+    """effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆為
+    +1）：模型用 cut|sort|uniq|wc 型 shell 管線計數、把 CSV 表頭行 "merchant" 當成
+    一個值。localized 提示必須補上計數規則的常見錯誤形狀（表頭行／空行／大小寫與
+    空白），但不給重算值（leak guard 不變）；generic 對照臂定義不變（無失敗證據、
+    無提示行）。"""
+    task_dir, draft, rs = _unique_count_fixture(tmp_path)
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_merchants"] == "FAIL"
+
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "req_merchants" in loc                              # 哪一條沒過
+    assert "4" in loc                                           # 交付物自身的值（可見反例）
+    assert "表頭行" in loc                                       # 計數規則常見錯誤形狀
+    assert "uniq" in loc and "wc" in loc                         # 點名會連表頭計入的管線
+    assert "3" not in loc                                       # 重算值不得進提示（leak guard）
+
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "req_merchants" not in gen                           # generic 不帶失敗證據
+    assert "表頭行" not in gen                                   # generic 對照臂定義不變
+    assert "4" not in gen
+
+
+def test_count_rule_hint_not_applied_to_non_count_rule(tmp_path: pathlib.Path):
+    """計數規則形狀提示只對 unique_count 型規則生效；非計數規則（cond_rate）
+    的 FAIL 不得收到該提示（避免對小模型過度載入不相關警告）。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text("fraud rate 2023 in-person\n", encoding="utf-8")
+    (task_dir / "payments.csv").write_text(
+        "year,shopper_interaction,has_fraudulent_dispute\n"
+        "2023,POS,True\n2023,POS,True\n2023,POS,False\n2023,POS,False\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("0.4\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_rate", quote="fraud_rate", deliverable="answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv", "recompute": {
+            "type": "cond_rate",
+            "where": [{"col": "year", "op": "eq", "value": "2023"},
+                      {"col": "shopper_interaction", "op": "eq", "value": "POS"}],
+            "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}]}})])
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_rate"] == "FAIL"
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "表頭行" not in loc                                  # 非計數規則不補計數提示
+
+
+def test_count_rule_hint_pass_claim_and_evidence_edge_cases(tmp_path: pathlib.Path):
+    """PASS 條目不補提示（提示只對 FAIL 的計數規則反例）；evidence 非 dict／無 rule
+    不崩、不補提示。"""
+    task_dir, draft, rs = _unique_count_fixture(tmp_path)
+    (draft / "answer.txt").write_text("3\n", encoding="utf-8")   # 重算值 3 → PASS
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_merchants"] == "PASS"
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "表頭行" not in loc
+
+    assert repair._count_rule_hint_line(None) is None
+    assert repair._count_rule_hint_line("nope") is None
+    assert repair._count_rule_hint_line({}) is None
+    assert repair._count_rule_hint_line({"rule": 42}) is None
+    assert repair._count_rule_hint_line({"rule": "cond_rate: x"}) is None
+    line = repair._count_rule_hint_line({"rule": "unique_count: data/payments.csv {\"col\": \"merchant\"}"})
+    assert isinstance(line, str) and "表頭行" in line
+
+
 # ── 完整切片（fake agent，synthetic 離線接線）──────────────────────
 
 def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):
@@ -1361,3 +1449,302 @@ def test_usage_parsed_from_real_pi_stream_ignores_zero_deltas_and_dedupes_messag
 
 
 
+
+
+# ── effects_20261105 產品行為修復：工具死迴圈偵測＋localized 提示詞收斂 ──
+# 來源：dabstep-23-pi-C localized 兩階段皆敗——同一條 python3 一行式重複 10+ 次
+# （同 args、同結果、中間無寫檔）直到 300s 耗盡，候選值 0.00152745 全程未變；
+# generic 臂同一任務第 1 輪即修對。假設：localized 長反例＋保持清單誘發過度驗證。
+
+def _tool_events(seq: list[tuple[str, dict]]) -> str:
+    """把 (toolName, args) 序列寫成 pi --mode json 的 tool_execution_start JSONL。"""
+    return "\n".join(
+        json.dumps({"type": "tool_execution_start", "toolCallId": str(i),
+                    "toolName": name, "args": args}, ensure_ascii=False)
+        for i, (name, args) in enumerate(seq))
+
+
+def test_detect_tool_loop_flags_consecutive_repetition(tmp_path):
+    """同一 (tool,args) 連續重複 ≥threshold＝迴圈；改動後重跑斷串，不算迴圈。"""
+    cmd = {"command": "python3 -c \"print(sum(1 for _ in []))\""}
+    log = tmp_path / "agent_stdout.log"
+    # 連續 5 次同一命令（dabstep-23 實際是 10+）⇒ 偵測到
+    log.write_text(_tool_events([("bash", cmd)] * 5), encoding="utf-8")
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None and hit["consecutive_repetitions"] == 5
+    assert hit["tool_name"] == "bash" and hit["args"] == cmd
+    # 改動（write）後重跑＝正常驗證 ⇒ 不偵測
+    log.write_text(_tool_events([("bash", cmd), ("write", {"path": "a.py"}),
+                                 ("bash", cmd), ("write", {"path": "a.py"}),
+                                 ("bash", cmd)]), encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+    # 不同命令各跑 5 次也不偵測（非同一 key）
+    log.write_text(_tool_events([("bash", {"command": f"echo {i}"}) for i in range(5)]),
+                   encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+    # 無日誌／非 JSONL 雜訊 ⇒ None（缺值不造假）
+    assert repair.detect_tool_loop(tmp_path / "nope.log") is None
+    log.write_text("not json at all\n", encoding="utf-8")
+    assert repair.detect_tool_loop(log) is None
+
+
+def test_run_repair_round_records_tool_loop_suspected(task_dir, tmp_path):
+    """run_repair_round 把偵測結果記錄進該輪 agent 欄位（觀察，非裁決）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+    cmd = {"command": "python3 calc.py"}
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            _tool_events([("bash", cmd)] * 6), encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["tool_loop_suspected"] is not None
+    assert r.agent["tool_loop_suspected"]["consecutive_repetitions"] == 6
+    # 裁決不受影響：重驗照舊（這輪沒改交付，仍 FAIL）
+    assert r.after is not None
+
+
+def test_cap_prompt_text_truncates_long_evidence():
+    """單段驗證詳情／反例過長時被截斷，且截斷必須可見（不得靜默丟棄）。"""
+    assert repair._cap_prompt_text("short") == "short"
+    long = "x" * (repair._PROMPT_TEXT_CAP + 500)
+    out = repair._cap_prompt_text(long)
+    assert len(out) < repair._PROMPT_TEXT_CAP + 40
+    assert "已截斷" in out, "截斷必須可見"
+    assert repair._cap_prompt_text("") == ""
+
+
+def test_localized_prompt_caps_long_evidence(task_dir):
+    """長反例 JSON 被截斷（可見標記）；真實 claim id 與狀態仍在（小模型過載假設）。"""
+    from vacant_network.intake.verifiers import ClaimResult
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    big = {"table": [{"row": i, "cells": ["x" * 50] * 20} for i in range(30)]}
+    before = [ClaimResult(
+        claim_id=FAIL_CLAIM, status="FAIL",
+        detail="d" * 2000,
+        evidence=big,
+        verifier="t", verifier_version="t", required=True, authority="client",
+    )]
+    p = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "已截斷" in p, "過長證據必須被截斷且截斷可見"
+    assert FAIL_CLAIM in p
+    assert len(p) < 20000, "localized 提示詞不得被單段證據撐爆"
+
+
+def test_localized_prompt_has_anti_tool_loop_guidance(task_dir):
+    """localized 臂帶防工具迴圈指引；generic 對照臂不帶（兩臂差異必須真實）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    before = run_requirement_checks(task_dir, rs, draft)
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "不要重複同一命令" in loc
+    assert "不要重複同一命令" not in gen
+
+
+# ── effects_20261105 失效模式：crash→放棄（dabstep-1753-pi-C generic）──
+# 來源（policy30）：r1 腳本 NameError crash → 答「Not Applicable」；r2 四次
+# NameError crash → 答「None」＝模型在崩潰後放棄、未重試。fb20 r1 同款（答「None」）。
+# 觀察與標記，不是裁決：不改變重驗、停滯判定或退出碼；缺值＝None 不造假。
+
+_CRASH_OUTPUT = ("Traceback (most recent call last):\n  File \"a.py\", line 3, in <module>\n"
+                 "NameError: name 'is_in_range' is not defined\n"
+                 "Command exited with code 1")
+
+
+def test_detect_crash_giveup_flags_crashed_giveup(tmp_path):
+    """log 有崩潰證據＋最終答案是放棄詞 ⇒ 偵測；任一條件缺 ⇒ 不偵測（不造假）。"""
+    log = tmp_path / "agent_stdout.log"
+    ans = tmp_path / "answer.txt"
+    log.write_text(json.dumps({"type": "tool_execution_end", "output": _CRASH_OUTPUT})
+                   + "\nnot json noise\n", encoding="utf-8")
+    # crash + 放棄答案 ⇒ 偵測到（觀察）
+    for giveup in ("None\n", "Not Applicable\n", ""):
+        ans.write_text(giveup, encoding="utf-8")
+        hit = repair.detect_crash_giveup(log, ans)
+        assert hit is not None
+        assert hit["giveup_answer"].strip().lower() in {"none", "not applicable", ""}
+        assert hit["crash_event_count"] >= 3
+        assert any("NameError" in s for s in hit["crash_signatures"])
+        assert any("code 1" in s for s in hit["crash_signatures"])
+    # 有 crash 但仍交出真實答案 ⇒ 不是放棄 ⇒ 不偵測
+    ans.write_text("0.00152745\n", encoding="utf-8")
+    assert repair.detect_crash_giveup(log, ans) is None
+    # 放棄答案但 log 無崩潰證據 ⇒ 不偵測（不假設因果）
+    log.write_text(json.dumps({"type": "tool_execution_end", "output": "ok"}) + "\n",
+                   encoding="utf-8")
+    ans.write_text("None\n", encoding="utf-8")
+    assert repair.detect_crash_giveup(log, ans) is None
+    # 無日誌／無答案檔 ⇒ None（缺值不造假）
+    assert repair.detect_crash_giveup(tmp_path / "nope.log", ans) is None
+    log.write_text(_CRASH_OUTPUT + "\n", encoding="utf-8")
+    assert repair.detect_crash_giveup(log, tmp_path / "nope.txt") is None
+
+
+def test_run_repair_round_records_crash_giveup_suspected(task_dir, tmp_path):
+    """run_repair_round 把偵測結果記錄進該輪 agent 欄位（觀察，非裁決）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            json.dumps({"type": "tool_execution_end", "output": _CRASH_OUTPUT}) + "\n",
+            encoding="utf-8")
+        (workspace / "answer.txt").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["crash_giveup_suspected"] is not None
+    assert r.agent["crash_giveup_suspected"]["giveup_answer"].strip().lower() == "none"
+    # 裁決不受影響：重驗照舊（這輪把交付寫成 None，仍非 PASS）
+    assert r.after is not None
+    # 對照：無 crash 證據的同一放棄答案 ⇒ 標記為 None（不假設因果）
+    out2 = tmp_path / "out2"
+    out2.mkdir(parents=True, exist_ok=True)
+    auth2 = repair.create_authoritative_snapshot(task_dir, out2)
+
+    def run2(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            json.dumps({"type": "tool_execution_end", "output": "ok"}) + "\n",
+            encoding="utf-8")
+        (workspace / "answer.txt").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r2 = repair.run_repair_round(
+        1, task_dir, rs, draft, run_requirement_checks(auth2, rs, draft),
+        out_root=out2, build=_fake_build([]), run=run2,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth2,
+    )
+    assert r2.agent["crash_giveup_suspected"] is None
+
+
+# ── 上一輪工具死迴圈觀察 → 本輪 localized 針對性反迴圈指令 ──────────────
+# 來源（effects_20261105 dabstep-23 localized）：提示裡已有通用「不要重複同一
+# 命令」行，12B 仍把同一條 pandas 一行式重複 ×117 直到 300s 超時——通用警告
+# 不足以打破迴圈。detect_tool_loop（r1028）把迴圈變機器可讀，但只記錄、不回饋
+# 模型。本組測試要求：上一輪偵測到迴圈時，第 2 輪 localized 提示點名工具＋
+# 次數（具體證據，讓模型知道該避免**哪一條**）；generic 對照臂定義不變。
+
+
+def _loop_observation(reps: int = 11) -> dict:
+    return {"tool_loop_suspected": {
+        "tool_name": "bash",
+        "args": {"command": "python3 -c \"import pandas as pd; print(pd.read_csv('expenses.csv').sum())\""},
+        "consecutive_repetitions": reps,
+        "threshold": 4,
+    }}
+
+
+def test_localized_prompt_names_prev_round_loop_with_tool_and_count(task_dir):
+    """上一輪偵測到工具死迴圈 ⇒ 本輪 localized 提示點名工具、次數與命令例；
+    舊的通用行保留（不取代、只補強）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="localized",
+                                   prev_round_agent=_loop_observation(11))
+    assert "疑似工具死迴圈" in p
+    assert "連續執行 11 次" in p
+    assert "bash" in p
+    assert "禁止重複該命令" in p
+    assert "pd.read_csv" in p                       # 命令例（讓模型知道是哪一條）
+    assert "不要重複同一命令" in p                   # 通用行仍在
+
+
+def test_localized_prompt_without_prev_loop_is_unchanged(task_dir):
+    """無上一輪觀察（第 1 輪／未偵測到）⇒ 提示與舊行為逐字元相同（不新增行）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="localized")
+    for prev in (None, {"tool_loop_suspected": None}, {"other": 1}):
+        p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                       feedback_mode="localized",
+                                       prev_round_agent=prev)
+        assert p == base, prev
+        assert "疑似工具死迴圈" not in p
+
+
+def test_generic_prompt_ignores_prev_round_loop(task_dir):
+    """對照臂定義不變：generic 不帶任何逐輪觀察；即使上一輪有迴圈，generic
+    提示仍與舊行為逐字元相同（兩臂差異維持在設計定義上，不混入第三變數）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="generic")
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="generic",
+                                   prev_round_agent=_loop_observation(11))
+    assert p == base
+
+
+def test_second_round_prompt_carries_first_round_loop(task_dir, tmp_path):
+    """端到端（synthetic）：第 1 輪 agent 死迴圈（同一命令 ×5，detect_tool_loop
+    從真實 log 形狀偵測）且未修好 ⇒ 第 2 輪 localized 提示點名該迴圈；第 1 輪
+    提示不帶（無觀察可帶）。觀察只進提示、不改裁決：第 1 輪照樣計停滯、
+    第 2 輪修好仍關缺口。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    good_md = _good_summary(task_dir)
+    loop_log = "\n".join(json.dumps({
+        "type": "tool_execution_start", "toolName": "bash",
+        "args": {"command": "python3 -c \"import pandas as pd; print(1)\""},
+    }, ensure_ascii=False) for _ in range(5)) + "\n"
+
+    calls = {"n": 0}
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        calls["n"] += 1
+        log_dir.mkdir(parents=True, exist_ok=True)
+        if calls["n"] == 1:
+            (log_dir / "agent_stdout.log").write_text(loop_log, encoding="utf-8")
+        else:
+            (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+            (workspace / "summary.md").write_text(good_md, encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return _run_result(log_dir)
+
+    log: list[dict] = []
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build(log), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert calls["n"] == 2
+    assert out.stopped == "gap_closed"
+    # 第 1 輪：無上一輪觀察 ⇒ 不帶針對性行（通用行仍在）
+    assert "疑似工具死迴圈" not in log[0]["prompt"]
+    assert "不要重複同一命令" in log[0]["prompt"]
+    # 第 2 輪：點名第 1 輪的迴圈（工具＋次數＋命令例）
+    assert "疑似工具死迴圈" in log[1]["prompt"]
+    assert "連續執行 5 次" in log[1]["prompt"]
+    assert "bash" in log[1]["prompt"]
+    # 觀察進 agent 欄位（既有口徑），裁決不受影響
+    assert out.rounds[0].agent["tool_loop_suspected"] is not None
+    assert out.rounds[0].agent["tool_loop_suspected"]["consecutive_repetitions"] == 5
+    assert FAIL_CLAIM in out.fixed

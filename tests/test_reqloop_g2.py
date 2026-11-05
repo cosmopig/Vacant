@@ -364,11 +364,88 @@ def test_result_written_machine_readable(tmp_path):
     assert data["manifest"]["sha256"] == _sha(MANIFEST)
     assert len(data["cells"]) == 6
     assert data["totals"]["cells"] == 6
-    # P001-20261105-03：fake 不寫原始 usage ⇒ 任一格缺 ⇒ 總計 UNKNOWN，
-    # 不得把已知部分（部分格的 wall_ms）當完整總和
+    # R20261105_0346-1：dab_035-pi-C（good）的 localized 格 no_gap（0 呼叫，cost 全 None）
+    # 不得拖垮總計。smoke manifest max_rounds=2：4 個 bad 格各 2 輪（stall 止）＋good generic
+    # 1 輪（min_rounds=1，重驗後缺口關閉）＝9 個 session，wall 各 100 ⇒ 900。
+    # fake 不寫原始 usage ⇒ 任一 active 格缺 ⇒ model_calls/tokens 仍 UNKNOWN（P001-20261105-03）。
+    active = [c for c in data["cells"] if c["cost"]["calls"] > 0]
+    assert len(active) == 5
+    assert data["totals"]["repair_sessions"] == sum(c["cost"]["calls"] for c in data["cells"]) == 9
     assert data["totals"]["model_calls"] is None
     assert data["totals"]["tokens"] is None
-    assert data["totals"]["wall_ms_total"] is None
+    assert data["totals"]["wall_ms_total"] == sum(c["cost"]["wall_ms_total"] for c in active) == 900
+
+
+def test_totals_active_cells_only_usage_complete(tmp_path):
+    """R20261105_0346-1(a)：所有 calls>0 格都有完整 usage 時，即使存在 no_gap（calls==0）格，
+    totals.tokens／model_calls 仍是完整精確總和（不再恆 None）。"""
+    man = g2.G2Manifest.load(MANIFEST)
+    base = MANIFEST.parent
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        # 每輪 1 次 API 呼叫（message_end＝1 次真實呼叫）、100+15 tokens
+        (log_dir / "agent_stdout.log").write_text(
+            json.dumps({"type": "message_end",
+                        "message": {"role": "assistant",
+                                    "usage": {"input": 100, "output": 15}}}) + "\n",
+            encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    out = tmp_path / "out"
+    res = g2.run_g2_smoke(man, base, out, build, run, include_dirs=("data",))
+    data = res.to_dict()
+    active = [c for c in data["cells"] if c["cost"]["calls"] > 0]
+    assert len(active) == 5   # good 草稿的 localized 格 no_gap（0 呼叫）
+    # 9 個 session（4 bad×2 輪 + good generic 1 輪），每輪 1 次 API 呼叫、115 tokens
+    assert data["totals"]["repair_sessions"] == 9
+    assert data["totals"]["model_calls"] == 9      # 9 輪 × 1 次 API 呼叫
+    assert data["totals"]["tokens"] == 9 * 115     # 完整精確總和，不被 no_gap 格拖成 None
+    assert data["totals"]["wall_ms_total"] == 900
+
+
+def test_totals_any_active_cell_missing_usage_is_none(tmp_path):
+    """R20261105_0346-1(b)：任一 calls>0 格缺 usage ⇒ totals.tokens／model_calls 必須 None
+    （P001-20261105-03：不得把已知部分當完整總和）。"""
+    man = g2.G2Manifest.load(MANIFEST)
+    base = MANIFEST.parent
+    state = {"n": 0}
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        state["n"] += 1
+        if state["n"] == 1:
+            # 第一個 active 格不寫 usage（缺值）
+            (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        else:
+            (log_dir / "agent_stdout.log").write_text(
+                json.dumps({"type": "message_end",
+                            "message": {"role": "assistant",
+                                        "usage": {"input": 100, "output": 15}}}) + "\n",
+                encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    out = tmp_path / "out"
+    res = g2.run_g2_smoke(man, base, out, build, run, include_dirs=("data",))
+    data = res.to_dict()
+    assert data["totals"]["repair_sessions"] == 9
+    assert data["totals"]["model_calls"] is None   # 任一 active 格缺 ⇒ UNKNOWN
+    assert data["totals"]["tokens"] is None
+    assert data["totals"]["wall_ms_total"] == 900  # wall 各格齊全，不受 usage 缺值影響
 
 
 def test_result_manifest_sha_is_the_loaded_manifest(tmp_path):
@@ -699,3 +776,88 @@ def test_vq5nz16_recorded_scores_are_cited_not_rerun():
         if "note_contains" in chk:
             assert chk["note_contains"] in str(sc.get("note") or ""), (n, sc)
         assert by_name[n]["source"]["fetched_from"].startswith("/srv/vlab/runs"), n
+
+
+# ── R20261105_0346-2：effects_20261105 50 格誠實審計摘要 ────────────────────
+# 摘要檔是凍結審計工件（snapshot d38d2eb2）：本測試鎖住其完整性、無佔位、
+# 以及與 ~/dev/ops/effects_20261105/ 源檔的逐數一致（源檔在本地時）。
+
+EFFECTS_20261105 = pathlib.Path("/home/user1/dev/ops/effects_20261105")
+SUMMARY_JSON = (pathlib.Path(__file__).resolve().parents[1]
+                / "ops" / "audits" / "effects_20261105_summary.json")
+
+
+def _load_summary() -> dict:
+    assert SUMMARY_JSON.exists(), (
+        "ops/audits/effects_20261105_summary.json 缺——應與產生器 "
+        "ops/audits/effects_20261105_summary.py 同庫提交")
+    return json.loads(SUMMARY_JSON.read_text(encoding="utf-8"))
+
+
+def test_effects_20261105_summary_complete_no_placeholders():
+    """R20261105_0346-2 驗收：結構完整、無 placeholder、30+20 格、口徑字段齊全。"""
+    raw = SUMMARY_JSON.read_text(encoding="utf-8")
+    for bad in ("TODO", "FIXME", "placeholder", "占位", "待補", "TBD"):
+        assert bad not in raw, f"摘要含佔位文字 {bad!r}"
+    s = _load_summary()
+    assert s["snapshot_sha"] == "d38d2eb21d7ffbb927eb263e657d907dc112bc7d"
+    assert s["total_cells"] == 50
+    assert set(s["phases"]) == {"policy30", "feedback_once20"}
+    required_cell_keys = {
+        "draft", "arm", "role", "before_pass_independent", "after_independent",
+        "local_stopped_d38d2eb2", "local_all_pass_d38d2eb2", "current_code_all_pass",
+        "local_matches_independent", "current_code_matches_independent",
+        "repair_sessions", "api_model_calls_true", "api_model_calls_recorded_d38d2eb2",
+        "tokens_true", "tokens_recorded_d38d2eb2", "wall_ms_total", "rounds",
+    }
+    for ph, exp_n in (("policy30", 30), ("feedback_once20", 20)):
+        v = s["phases"][ph]
+        assert v["cells"] == exp_n == len(v["cells_detail"]), ph
+        for c in v["cells_detail"]:
+            missing = required_cell_keys - set(c)
+            assert not missing, (ph, c["draft"], c["arm"], missing)
+        for metric in ("wrong_to_right", "right_to_wrong", "preserved_good",
+                       "still_wrong"):
+            assert (sum(v["per_arm"][a][metric] for a in ("generic", "localized"))
+                    == v[metric]), (ph, metric)
+        assert (sum(v["per_arm"][a]["repair_sessions"] for a in ("generic", "localized"))
+                == v["repair_sessions_total"]), ph
+        # 動量守恆：bad 格非 W→R 即 still_wrong；good 格非 preserved 即 R→W
+        n_bad = sum(1 for c in v["cells_detail"] if c["before_pass_independent"] is False)
+        n_good = sum(1 for c in v["cells_detail"] if c["before_pass_independent"] is True)
+        assert v["wrong_to_right"] + v["still_wrong"] == n_bad, ph
+        assert v["preserved_good"] + v["right_to_wrong"] == n_good, ph
+    # r1029 驗收口徑：當前 checks 碼重驗與獨立 scorer 50/50 一致
+    assert s["current_code_matches_total"] == 50
+
+
+def test_effects_20261105_summary_matches_source_files():
+    """R20261105_0346-2 驗收：摘要數字與 effects 源檔（manifest／g2_result／independent）一致。"""
+    if not EFFECTS_20261105.is_dir():
+        pytest.skip("~/dev/ops/effects_20261105 不在本機（CI 環境）——逐數交叉核對需源檔")
+    s = _load_summary()
+    for ph, man_name in (("policy30", "effect_manifest.json"),
+                         ("feedback_once20", "feedback_once_manifest.json")):
+        snap = EFFECTS_20261105 / "snapshot/ops/reqloop/g2"
+        man = json.loads((snap / man_name).read_text(encoding="utf-8"))
+        g2 = json.loads((EFFECTS_20261105 / ph / "g2_result.json").read_text(encoding="utf-8"))
+        ind = json.loads((EFFECTS_20261105 / ph / "independent.json").read_text(encoding="utf-8"))
+        before_of = {d["name"]: d["source"]["score"].get("pass") for d in man["drafts"]}
+        after_of = {f"{c['draft']}-{c['arm']}": c["independent_after"]["pass"]
+                    for c in ind["cells"]}
+        sessions_of = {f"{c['draft']}-{c['arm']}": int(c["cost"].get("calls") or 0)
+                       for c in g2["cells"]}
+        v = s["phases"][ph]
+        cells = v["cells_detail"]
+        assert len(cells) == len(ind["cells"]) == len(g2["cells"]), ph
+        for c in cells:
+            key = f"{c['draft']}-{c['arm']}"
+            assert c["before_pass_independent"] == before_of[c["draft"]], (ph, key)
+            assert c["after_independent"] == after_of[key], (ph, key)
+            assert c["repair_sessions"] == sessions_of[key], (ph, key)
+        # 階段總數＝源檔重算
+        assert v["wrong_to_right"] == sum(
+            1 for c in cells if before_of[c["draft"]] is False and after_of[f"{c['draft']}-{c['arm']}"] is True)
+        assert v["right_to_wrong"] == sum(
+            1 for c in cells if before_of[c["draft"]] is True and after_of[f"{c['draft']}-{c['arm']}"] is False)
+        assert v["repair_sessions_total"] == sum(sessions_of.values()), ph

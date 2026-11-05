@@ -830,7 +830,8 @@ def test_unknown_aggregate_type_stays_unknown(tmp_path: pathlib.Path):
 # ── kv_recomputed 新重算規則（G2 小批：e013 真實草稿，2026-11-04）────────
 
 def test_kv_recomputed_mean_int_col_pass_and_fail(tmp_path: pathlib.Path):
-    """mean_int_col：Int64 語意——空白/不可解析（如 '100[10-30]'）忽略，其餘取均值。"""
+    """mean_int_col：Int64 語意——'200[10-30]' 型點估計取前導整數（同 dab_057 口徑），
+    Null/空與非數值字串忽略，其餘取均值（r1029 合併 d96a8dba 採 argon 語意）。"""
     task_dir = tmp_path / "task"
     _write(
         task_dir / "cases.csv",
@@ -840,11 +841,11 @@ def test_kv_recomputed_mean_int_col_pass_and_fail(tmp_path: pathlib.Path):
         "key": "mean_cases",
         "data_file": "cases.csv",
         "recompute": {"type": "mean_int_col", "col": "No. of cases",
-                      "note": "轉 Int64；Null/空/不可解析忽略"},
+                      "note": "轉 Int64；Null/空忽略"},
     }
     req_set = _req_set("kv_recomputed", params, "answer.txt")
     good = tmp_path / "good"
-    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+300)/2
+    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+200+300)/3
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
     assert res["req_main"].status == "PASS"
 
@@ -938,7 +939,8 @@ def test_kv_recomputed_pearson2_constant_column_is_unknown(tmp_path: pathlib.Pat
 
 def test_kv_recomputed_json_data_file_mean_int_col(tmp_path: pathlib.Path):
     """vq-5nz.13：.json data_file 必須用 json.load 解析，禁止走 csv.DictReader 產生垃圾字典
-    （CSV 首行會把 JSON 開頭當「表頭」）。row 物件列表→規則可判定；錯值→FAIL（非空轉 PASS）。"""
+    （CSV 首行會把 JSON 開頭當「表頭」）。row 物件列表→規則可判定；錯值→FAIL（非空轉 PASS）。
+    JSON null ＝明確 Null（題目語意：忽略）；'200[10-30]' 型點估計取前導整數。"""
     task_dir = tmp_path / "task"
     _write(task_dir / "cases.json", json.dumps([
         {"Country": "A", "No. of cases": 100},
@@ -950,11 +952,11 @@ def test_kv_recomputed_json_data_file_mean_int_col(tmp_path: pathlib.Path):
         "key": "mean_cases",
         "data_file": "cases.json",
         "recompute": {"type": "mean_int_col", "col": "No. of cases",
-                      "note": "轉 Int64；Null/空/不可解析忽略"},
+                      "note": "轉 Int64；Null/空忽略"},
     }
     req_set = _req_set("kv_recomputed", params, "answer.txt")
     good = tmp_path / "good"
-    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+300)/2
+    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+200+300)/3
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
     assert res["req_main"].status == "PASS"
 
