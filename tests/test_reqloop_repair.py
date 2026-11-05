@@ -2423,3 +2423,93 @@ def test_detect_tool_loop_catches_same_error_retry_streak_and_period3(tmp_path):
 
 
 
+
+
+# ── contrast055_1273_20261105 回歸（TDD，2026-11-05）─────────────────────────
+
+def test_detect_tool_loop_catches_error_class_repeat_with_interleaved_successes(task_dir, tmp_path):
+    """contrast055_1273_20261105 dabstep-1273-pi-C generic r1 歸因：
+    22 次 bash（python3 -c）呼叫中 7 次皆 SyntaxError——模型每次微調一行式，
+    錯誤輸出隨命令回顯而**逐次不同**——且 15 次成功探查交錯其間。舊
+    detect_tool_loop 的 same_error_streak 要求「連續＋同錯誤文本」，對這種
+    「微調參數、夾成功」的形狀回傳 None，該輪燒掉 18 次模型呼叫／~80 萬 token
+    的浪費原因在 g2_result 的 agent 欄位（tool_loop_suspected）完全不可見。
+    新最寬 fallback 路徑：同工具、同錯誤類、failure_count ≥ threshold ⇒ 記
+    error_class_repeat 觀察（有成功⇒all_failed=False；缺值不造假）。
+    裁決不受影響（觀察只進 agent 欄位／localized 提示，非裁決輸入）；
+    generic 對照臂定義不變。
+    """
+    def ev(i, args, is_err, text):
+        return [
+            {"type": "tool_execution_start", "toolCallId": f"c{i}", "toolName": "bash",
+             "args": args},
+            {"type": "tool_execution_end", "toolCallId": f"c{i}", "toolName": "bash",
+             "isError": is_err, "result": {"content": [{"text": text}]}},
+        ]
+    base = "python3 -c \"import json; data = json.load(open('data/fees.json')); "
+    fails = [
+        base + "rules = [r for r in data if r['card_scheme'] == 'GlobalCard' and r['transaction_type'] == 'credit' and r['amount_range'][0] <= 10 and r['amount_range'][1] >= 10]; print(rules)\"",
+        base + "rules = [r for r in data if r['card_scheme'] == 'GlobalCard']; total_fee = 0; total_count = 0\"",
+        base + "rules = [r for r in data if r['card_scheme'] == 'GlobalCard' and r['transaction_type'] == 'credit']; print(rules)\"",
+        base + "rules = [r for r in data if r.get('card_scheme') == 'GlobalCard']; print(len(rules))\"",
+    ]
+    ok_texts = [
+        "[{'id': 477, 'card_scheme': 'GlobalCard', 'transaction_type': 'credit', ...}]",
+        "1",
+        "[]",
+    ]
+    log = tmp_path / "agent_stdout.log"
+    lines = []
+    for i, cmd in enumerate(fails):
+        lines += ev(i, {"command": cmd}, True,
+                    f'  File "<string>", line 1\n    {cmd[21:]}\n'
+                    f"SyntaxError: invalid syntax\n\nCommand exited with code 1")
+        if i < len(ok_texts):
+            lines += ev(f"s{i}", {"command": f"grep -o GlobalCard data/fees.json | head -{i}"},
+                        False, ok_texts[i])
+    log.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in lines) + "\n",
+                   encoding="utf-8")
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None
+    assert hit.get("error_class_repeat") is True
+    assert hit["tool_name"] == "bash"
+    assert hit["error_class"] == "SyntaxError"
+    assert hit["failure_count"] == 4
+    assert hit["all_failed"] is False      # 有成功探查（非「每次都失敗」）
+    assert hit["success_count"] == 3
+    assert "SyntaxError" in hit["error_sample"]
+    assert hit.get("same_error_streak") is not True   # 不是連續同錯形狀，不冒稱
+
+    # 少於 threshold（3 < 4）⇒ 正常探索中的零星語法錯，不誤報
+    lines3 = []
+    for i in range(3):
+        lines3 += ev(i, {"command": fails[i]}, True,
+                     f'  File "<string>", line 1\nSyntaxError: invalid syntax\nCommand exited with code 1')
+        if i < 2:
+            lines3 += ev(f"s{i}", {"command": f"echo ok{i}"}, False, "ok")
+    log3 = tmp_path / "below.log"
+    log3.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in lines3) + "\n",
+                    encoding="utf-8")
+    assert repair.detect_tool_loop(log3) is None
+
+    # 警示行：點名錯誤類＋.py 逃逸，不帶「以相同參數」或「每次都失敗」的假前提
+    warn = repair._loop_warning_line(hit)
+    assert "SyntaxError" in warn
+    assert ".py" in warn
+    assert "以相同參數" not in warn
+    assert "每次都失敗" not in warn
+
+    # localized 臂：觀察進入本輪提示；generic 對照臂定義不變（逐字元相同）
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="localized",
+                                   prev_round_agent={"tool_loop_suspected": hit})
+    assert "疑似工具死迴圈" in p
+    assert "SyntaxError" in p
+    pg = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                    feedback_mode="generic",
+                                    prev_round_agent={"tool_loop_suspected": hit})
+    pg_base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                         feedback_mode="generic")
+    assert pg == pg_base

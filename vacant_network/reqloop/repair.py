@@ -691,6 +691,30 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         if len(args_text) > 360:
             args_text = args_text[:220].rstrip() + " … " + args_text[-120:].lstrip()
         example = f"（例：{args_text}）"
+    if loop.get("error_class_repeat") is True:
+        # contrast055_1273_20261105 dabstep-1273 generic r1 形狀：同類錯誤多次失敗、
+        # 成功探查交錯、每次錯誤文本微差。不帶「以相同參數」「每次都失敗」假前提。
+        err = str(loop.get("error_class") or "執行錯誤").strip()
+        sample = str(loop.get("error_sample") or "").strip()
+        if sample.startswith(f"{err}:"):
+            sample = sample[len(err) + 1:].strip()
+        sample_part = f"（{sample}）" if (sample and sample != err) else ""
+        n = loop.get("failure_count")
+        n = f" {n}" if isinstance(n, int) else ""
+        head = (
+            f"【上一輪執行觀察】上一輪偵測到 {name} 合計失敗{n} 次、皆屬同一類錯誤（{err}{sample_part}）"
+            f"（每次微調參數但未修根因，疑似工具死迴圈）{example}。"
+        )
+        if loop.get("all_failed") is True:
+            return head + (
+                f"本輪禁止重複該類命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
+                "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
+                "確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
+            )
+        return head + (
+            "本輪禁止重複該類失敗命令。先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行"
+            "（不要用一行式拼接多條語句），確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
+        )
     if loop.get("same_error_streak") is True:
         head = (
             f"【上一輪執行觀察】上一輪偵測到 {name} 連續執行{reps} 次皆因同一錯誤失敗"
@@ -806,7 +830,10 @@ def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
 
 def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
     """偵測「工具死迴圈」：同一 (tool, args) 單步連續重複、雙步 (k1, k2)／三步 (k1, k2, k3) 交替連續重複，
-    或同一工具連續多次微調參數但皆因同一錯誤失敗（same_error_streak）。
+    或同一工具連續多次微調參數但皆因同一錯誤失敗（same_error_streak）；
+    同工具同錯誤類多次失敗但成功探查交錯／每次錯誤文本微差（error_class_repeat；
+    contrast055_1273_20261105 dabstep-1273 generic r1：22 次 python3 -c 中 7 次
+    SyntaxError、15 次成功——strict same_error_streak 要求「連續＋同錯誤文本」而漏）。
 
     r1044（vq-5nz.21）：另自 tool_execution_end 依 toolCallId 關聯執行結果，
     區分「迴圈命令每次都失敗」（all_failed／error_class——contrast3 dabstep-23
@@ -1005,7 +1032,56 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         if err_sample:
             out["error_sample"] = err_sample
         return out
-    return None
+
+    # 同一工具、同一錯誤類多次失敗——允許成功探查交錯其間、每次錯誤文本可微差
+    # （contrast055_1273_20261105 dabstep-1273 generic r1：22 次 python3 -c 微調中 7 次皆
+    # SyntaxError、15 次成功；上方 strict same_error_streak 要求「連續＋同錯誤文本」而漏
+    # 掉這種形狀，該輪燒掉的模型呼叫在 g2_result 的 agent 欄位完全不可見）。
+    # 最寬的 fallback 路徑：只記錄觀察（agent 欄位／localized 提示），不改變裁決；
+    # 低於 threshold 的零星語法錯不誤報。
+    class_fail: dict[tuple[str, str], dict[str, Any]] = {}
+    for (tname, targs), cid_s in starts:
+        if cid_s is None or cid_s not in end_by_cid:
+            continue
+        _k, is_err, out_txt = end_by_cid[cid_s]
+        if not is_err:
+            continue
+        cls, sample = _extract_error_signature(out_txt)
+        if not cls:
+            continue
+        rec = class_fail.setdefault((tname, cls),
+                                    {"count": 0, "args": targs, "sample": sample})
+        rec["count"] += 1
+        if not rec["sample"] and sample:
+            rec["sample"] = sample
+    best_rec: tuple[tuple[str, str], dict[str, Any]] | None = None
+    for key, rec in class_fail.items():
+        if rec["count"] >= threshold and (
+                best_rec is None or rec["count"] > best_rec[1]["count"]):
+            best_rec = (key, rec)
+    if best_rec is None:
+        return None
+    (repeat_tool, repeat_cls), rec = best_rec
+    tool_success = 0
+    for _k, cid_s in starts:
+        if cid_s is None or cid_s not in end_by_cid:
+            continue
+        ek, is_err, _t = end_by_cid[cid_s]
+        if not is_err and ek[0] == repeat_tool:
+            tool_success += 1
+    out: dict[str, Any] = {
+        "tool_name": repeat_tool,
+        "args": rec["args"],
+        "error_class": repeat_cls,
+        "error_class_repeat": True,
+        "failure_count": rec["count"],
+        "threshold": threshold,
+        "all_failed": tool_success == 0,
+        "success_count": tool_success,
+    }
+    if rec["sample"]:
+        out["error_sample"] = rec["sample"]
+    return out
 
 
 #: crash→放棄 偵測的崩潰簽名（effects_20261105 dabstep-1753 generic：
