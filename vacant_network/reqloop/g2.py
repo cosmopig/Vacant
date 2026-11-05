@@ -38,6 +38,5 @@ class G2Result:
                 "model_calls": _total_active("model_calls"),  # 實際模型 API 呼叫數；任一格缺 ⇒ UNKNOWN（不填 0）
                 "tokens": _total_active("tokens"),
                 "wall_ms_total": _total_active("wall_ms_total"),
-                "repair_sessions": sum(int(c["cost"].get("calls", 0)) for c in self.cells),
             },
         }
