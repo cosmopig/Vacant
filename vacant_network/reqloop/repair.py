@@ -291,8 +291,11 @@ def build_repair_prompt(
             ("以下條目已 PASS，修正後必須仍然 PASS：" + "、".join(keep))
             if keep else "（沒有已 PASS 的條目）")
         lines.append("只修上面的缺口，不要重寫不相關的部分；改完後所有必需條目都要能通過重驗。")
-        lines.append("若同一條驗證命令重跑仍得相同結果，不要重複同一命令："
-                     "換一種計算方式（重新檢查過濾條件與公式），與重算值一致後才產出交付物。")
+        lines.append(
+            "不要重複同一命令：一旦腳本依原始需求的過濾條件與公式算出了與失敗草稿（deliverable_value）"
+            "不同的新結果（或獨立驗算一次確認無誤），請**立即先把新結果寫入交付物檔案（如 answer.txt）**；"
+            "嚴禁因反例未顯示隱藏期望值（expected_in_evidence=false）而遲遲不寫交付物或反覆重跑單行驗證命令。"
+        )
         # 上一輪工具死迴圈觀察 → 本輪針對性指令（點名工具＋次數＋命令例）。
         # 只 localized 臂：generic 對照臂定義＝不帶任何逐輪觀察（保持兩臂差異乾淨）。
         # 只帶執行觀察，不帶需求失敗證據或重算值；不影響重驗／停滯判定。
@@ -578,8 +581,8 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
     if args_text in ("", "{}"):
         example = ""
     else:
-        if len(args_text) > 160:
-            args_text = args_text[:160].rstrip() + "…"
+        if len(args_text) > 360:
+            args_text = args_text[:220].rstrip() + " … " + args_text[-120:].lstrip()
         example = f"（例：{args_text}）"
     head = (
         f"【上一輪執行觀察】上一輪偵測到 {name} 以相同參數連續執行{reps} 次、"
@@ -588,7 +591,9 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
     if loop.get("all_failed") is True:
         err = str(loop.get("error_class") or "執行錯誤").strip()
         sample = str(loop.get("error_sample") or "").strip()
-        sample_part = f"（{sample}）" if sample else ""
+        if sample.startswith(f"{err}:"):
+            sample = sample[len(err) + 1:].strip()
+        sample_part = f"（{sample}）" if (sample and sample != err) else ""
         return head + (
             f"本輪禁止重複該命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
             "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
@@ -622,26 +627,34 @@ def _crash_giveup_hint_line() -> str:
 
 def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
                          outcomes: list[tuple[tuple[str, Any], bool, str]]) -> dict[str, Any]:
-    """聚合迴圈 key（單 key 或 period-2 雙 key）的執行結果（r1044／vq-5nz.21）。
+    """聚合迴圈 key（單 key 或 period-2 雙 key）的執行結果（r1044／vq-5nz.21；argon 20261105_1047 修）。
 
-    outcomes＝依 toolCallId 關聯自 tool_execution_end 的 (key, isError, 輸出文字)。
+    outcomes＝依 toolCallId 關聯自該連勝串 tool_execution_end 的 (key, isError, 輸出文字)。
     - 該 key 無 end 事件⇒{}（未知，不造假）；
-    - 至少一次成功⇒all_failed=False；
+    - period-2 (k1, k2) 若任一步驟在迴圈串中每次皆失敗（如 write 成功但配對的 bash 每次都 SyntaxError），
+      代表每一組交替迴圈皆失敗、從未跑出結果，以該失敗步驟計入全敗（all_failed=True）；
+    - 至少一次完整成功⇒all_failed=False；
     - 全敗⇒all_failed=True，並自第一個失敗輸出提取 error_class＋error_sample
       （執行觀察：與提示中工具名／參數例同源，不含重算值／需求證據）。
     """
     rel = [o for o in outcomes if o[0] in loop_keys]
     if not rel:
         return {}
+    if len(loop_keys) > 1:
+        by_key = [[o for o in rel if o[0] == k] for k in loop_keys]
+        failing_steps = [step_outs for step_outs in by_key if step_outs and all(o[1] for o in step_outs)]
+        if failing_steps:
+            rel = failing_steps[0]
     failed = [o for o in rel if o[1]]
     if not failed:
         return {"all_failed": False, "failure_count": 0, "success_count": len(rel)}
+    all_failed = len(failed) == len(rel)
     out: dict[str, Any] = {
-        "all_failed": len(failed) == len(rel),
+        "all_failed": all_failed,
         "failure_count": len(failed),
         "success_count": len(rel) - len(failed),
     }
-    if len(failed) == len(rel):
+    if all_failed:
         for _key, _err, text in failed:
             m = _CRASH_EXC_RE.search(text)
             if not m:
@@ -655,6 +668,17 @@ def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
                         out["error_sample"] = s[:80]
                         break
             break
+        if "error_sample" not in out:
+            for _key, _err, text in failed:
+                lines = [ln.strip() for ln in text.replace("\\n", "\n").splitlines() if ln.strip()]
+                non_meta = [
+                    ln for ln in lines
+                    if not _CRASH_EXIT_RE.search(ln) and not _CRASH_TRACEBACK_RE.search(ln)
+                ]
+                pick = non_meta[0] if non_meta else (lines[0] if lines else "")
+                if pick:
+                    out["error_sample"] = pick[:80]
+                    break
     return out
 
 
@@ -689,11 +713,15 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
     except OSError:
         return None
     keys: list[tuple[str, Any]] = []
+    starts: list[tuple[tuple[str, Any], str | None]] = []
     best: tuple[str, Any] | None = None
     best_streak = 0
+    best_start_idx = 0
     cur_key: tuple[str, Any] | None = None
     cur_streak = 0
+    cur_start_idx = 0
     call_key: dict[str, tuple[str, Any]] = {}
+    end_by_cid: dict[str, tuple[tuple[str, Any], bool, str]] = {}
     end_outcomes: list[tuple[tuple[str, Any], bool, str]] = []
     for line in text.splitlines():
         line = line.strip()
@@ -708,27 +736,36 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         etype = obj.get("type")
         if etype == "tool_execution_start":
             key = (str(obj.get("toolName")), obj.get("args"))
+            idx = len(keys)
             keys.append(key)
             cid = obj.get("toolCallId")
-            if isinstance(cid, str) and cid:
-                call_key[cid] = key
+            cid_s = cid if (isinstance(cid, str) and cid) else None
+            starts.append((key, cid_s))
+            if cid_s is not None:
+                call_key[cid_s] = key
             if key == cur_key:
                 cur_streak += 1
             else:
                 cur_key = key
                 cur_streak = 1
+                cur_start_idx = idx
             if cur_streak > best_streak:
                 best_streak = cur_streak
                 best = key
+                best_start_idx = cur_start_idx
         elif etype == "tool_execution_end":
             cid = obj.get("toolCallId")
             if isinstance(cid, str) and cid in call_key:
-                end_outcomes.append(
-                    (call_key[cid], bool(obj.get("isError")),
-                     _extract_tool_end_text(obj)))
+                outcome_item = (
+                    call_key[cid], bool(obj.get("isError")),
+                    _extract_tool_end_text(obj),
+                )
+                end_by_cid[cid] = outcome_item
+                end_outcomes.append(outcome_item)
 
     best_p2_pair: tuple[tuple[str, Any], tuple[str, Any]] | None = None
     best_p2_cycles = 0
+    best_p2_start = 0
     n_keys = len(keys)
     for i in range(n_keys - 1):
         k1, k2 = keys[i], keys[i + 1]
@@ -742,12 +779,18 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         if cycles > best_p2_cycles:
             best_p2_cycles = cycles
             best_p2_pair = (k1, k2)
+            best_p2_start = i
 
     if best is not None and best_streak >= threshold and best_streak >= best_p2_cycles:
         name, args = best
         out: dict[str, Any] = {"tool_name": name, "args": args,
                                "consecutive_repetitions": best_streak, "threshold": threshold}
-        out.update(_loop_outcome_fields([best], end_outcomes))
+        streak_starts = starts[best_start_idx:best_start_idx + best_streak]
+        streak_outcomes = [
+            end_by_cid[cid] for _k, cid in streak_starts
+            if cid is not None and cid in end_by_cid
+        ]
+        out.update(_loop_outcome_fields([best], streak_outcomes if streak_outcomes else end_outcomes))
         return out
     if best_p2_pair is not None and best_p2_cycles >= threshold:
         k1, k2 = best_p2_pair
@@ -758,7 +801,12 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
             "threshold": threshold,
             "period": 2,
         }
-        out.update(_loop_outcome_fields([k1, k2], end_outcomes))
+        streak_starts = starts[best_p2_start:best_p2_start + 2 * best_p2_cycles]
+        streak_outcomes = [
+            end_by_cid[cid] for _k, cid in streak_starts
+            if cid is not None and cid in end_by_cid
+        ]
+        out.update(_loop_outcome_fields([k1, k2], streak_outcomes if streak_outcomes else end_outcomes))
         return out
     return None
 
@@ -771,7 +819,9 @@ _CRASH_TRACEBACK_RE = re.compile(r"Traceback \(most recent call last\)")
 # 例外名可能緊接在字元 `n` 之後，`\b` 會漏掉（dabstep-1753 真實日誌即此形狀）。
 _CRASH_EXC_RE = re.compile(
     r"(NameError|TypeError|AttributeError|KeyError|ValueError|IndexError"
-    r"|ZeroDivisionError|SyntaxError|UnboundLocalError|ModuleNotFoundError)\s*:")
+    r"|ZeroDivisionError|SyntaxError|IndentationError|TabError|UnboundLocalError"
+    r"|ModuleNotFoundError|ImportError|FileNotFoundError|PermissionError|OSError"
+    r"|JSONDecodeError|UnicodeDecodeError|RuntimeError)\s*:")
 #: 最終答案＝放棄詞（strip+lower 比對）：空、None、N/A、Not Applicable、No answer。
 _GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
 

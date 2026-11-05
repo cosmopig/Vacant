@@ -880,4 +880,13 @@ def test_effects_20261105_summary_wall_ms_and_active_cost_totals():
     assert fb20["wall_ms_total"] == 2482095
     assert fb20["per_arm"]["generic"]["wall_ms_total"] == 867644
     assert fb20["per_arm"]["localized"]["wall_ms_total"] == 1614451
+    # no_gap 格（repair_sessions == 0，無任何 agent 啟動、無 usage 來源）的 tokens_true 必須為 None（UNKNOWN，絕不填 0），
+    # 與 repair.py:1252-1256 及 tokens_recorded_d38d2eb2=None 一致
+    no_gap_cells = [c for c in p30["cells_detail"] if c["repair_sessions"] == 0]
+    assert len(no_gap_cells) == 5
+    for c in no_gap_cells:
+        assert c["api_model_calls_true"] == 0, c["draft"]
+        assert c["tokens_true"] is None, f"{c['draft']}-{c['arm']} no_gap cell must have tokens_true=None, got {c['tokens_true']}"
+        assert c["wall_ms_total"] is None, c["draft"]
+
 

@@ -109,7 +109,7 @@
           "repair_sessions": 0,
           "api_model_calls_true": 0,
           "api_model_calls_recorded_d38d2eb2": 0,
-          "tokens_true": 0,
+          "tokens_true": null,
           "tokens_recorded_d38d2eb2": null,
           "wall_ms_total": null,
           "rounds": []
@@ -326,7 +326,7 @@
           "repair_sessions": 0,
           "api_model_calls_true": 0,
           "api_model_calls_recorded_d38d2eb2": 0,
-          "tokens_true": 0,
+          "tokens_true": null,
           "tokens_recorded_d38d2eb2": null,
           "wall_ms_total": null,
           "rounds": []
@@ -379,7 +379,7 @@
           "repair_sessions": 0,
           "api_model_calls_true": 0,
           "api_model_calls_recorded_d38d2eb2": 0,
-          "tokens_true": 0,
+          "tokens_true": null,
           "tokens_recorded_d38d2eb2": null,
           "wall_ms_total": null,
           "rounds": []
@@ -828,7 +828,7 @@
           "repair_sessions": 0,
           "api_model_calls_true": 0,
           "api_model_calls_recorded_d38d2eb2": 0,
-          "tokens_true": 0,
+          "tokens_true": null,
           "tokens_recorded_d38d2eb2": null,
           "wall_ms_total": null,
           "rounds": []
@@ -963,7 +963,7 @@
           "repair_sessions": 0,
           "api_model_calls_true": 0,
           "api_model_calls_recorded_d38d2eb2": 0,
-          "tokens_true": 0,
+          "tokens_true": null,
           "tokens_recorded_d38d2eb2": null,
           "wall_ms_total": null,
           "rounds": []

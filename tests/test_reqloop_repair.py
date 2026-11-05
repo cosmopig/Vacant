@@ -2108,3 +2108,160 @@ def test_generic_prompt_ignores_crash_giveup(task_dir):
     assert p == base
     assert "except: return False" not in p
 
+
+# ── argon 20261105_1047 回歸測試（TDD）──────────────────────────────────────
+
+def test_detect_tool_loop_period2_all_failed_and_streak_scoped_outcomes(tmp_path):
+    """argon 20261105_1047 回歸：
+    1. Period-2 雙步迴圈（如 effects_20261105 feedback_once20/dabstep-1753-pi-C/localized r1 的
+       write find_fees.py + bash 'cat << EOF > find_fees.py && python3 find_fees.py' 連續 9 組）：
+       每組的 write 步驟 isError=False（9 次），但配對的 bash 執行步驟每次皆 isError=True（SyntaxError 9 次），
+       整組迴圈 9/9 次從未跑出計算結果。舊 _loop_outcome_fields 把兩個 key 混成一池判斷 len(failed)==len(rel)
+       （9 != 18），誤判 all_failed=False、無 error_class，導致 _loop_warning_line 退回「同一計算執行一次已得到結果後」
+       的假前提。修正後：period-2 任一步驟在迴圈串中全敗（每組皆失敗），必須判定 all_failed=True、
+       failure_count=9、success_count=0，並提取 error_class='SyntaxError' 與 error_sample。
+    2. 連勝串（streak）結果隔離：session 前段若有同 key 的單次呼叫（例如前段成功 1 次、後段連續 5 次同命令全敗，
+       或前段多跑了幾次），failure_count + success_count 必須只統計該連續迴圈串內的執行結果
+       （<= consecutive_repetitions），不得混入串外的歷史呼叫而污染 all_failed 或讓計數超過 consecutive_repetitions。
+    """
+    log = tmp_path / "p2_failed.log"
+    w_args = {"path": "find_fees.py", "content": "x = 1\n"}
+    b_args = {"command": "cat << 'EOF' > find_fees.py\nfor a in [1]:\nEOF\npython3 find_fees.py"}
+    err_text = ("  File \"/tmp/find_fees.py\", line 2\n"
+                "SyntaxError: invalid syntax\n"
+                "Command exited with code 1")
+    events = []
+    for i in range(9):
+        events.append({"type": "tool_execution_start", "toolCallId": f"w{i}",
+                       "toolName": "write", "args": w_args})
+        events.append({"type": "tool_execution_end", "toolCallId": f"w{i}",
+                       "toolName": "write", "isError": False,
+                       "result": {"content": [{"text": "Successfully wrote find_fees.py"}]}})
+        events.append({"type": "tool_execution_start", "toolCallId": f"b{i}",
+                       "toolName": "bash", "args": b_args})
+        events.append({"type": "tool_execution_end", "toolCallId": f"b{i}",
+                       "toolName": "bash", "isError": True,
+                       "result": {"content": [{"text": err_text}]}})
+    log.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n", encoding="utf-8")
+
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None
+    assert hit.get("period") == 2
+    assert hit["consecutive_repetitions"] == 9
+    assert hit["all_failed"] is True
+    assert hit["failure_count"] == 9
+    assert hit["success_count"] == 0
+    assert hit["error_class"] == "SyntaxError"
+    assert "invalid syntax" in hit["error_sample"]
+
+    warn = repair._loop_warning_line(hit)
+    assert "每次都失敗" in warn
+    assert "SyntaxError" in warn
+    assert "已得到結果後" not in warn
+    assert "SyntaxError（SyntaxError:" not in warn  # 不重複錯誤類名前綴
+
+    # (2) 連勝串隔離：前段 c0 成功 1 次 → 中間改寫 write → 後段 s0..s4 同一命令連續 5 次全敗
+    log2 = tmp_path / "streak_isolated.log"
+    cmd = {"command": "python3 calc.py"}
+    seq = [
+        {"type": "tool_execution_start", "toolCallId": "c0", "toolName": "bash", "args": cmd},
+        {"type": "tool_execution_end", "toolCallId": "c0", "toolName": "bash", "isError": False,
+         "result": {"content": [{"text": "0.123"}]}},
+        {"type": "tool_execution_start", "toolCallId": "edit1", "toolName": "write",
+         "args": {"path": "calc.py", "content": "broken("}},
+        {"type": "tool_execution_end", "toolCallId": "edit1", "toolName": "write", "isError": False,
+         "result": {"content": [{"text": "ok"}]}},
+    ]
+    for i in range(5):
+        seq.append({"type": "tool_execution_start", "toolCallId": f"s{i}", "toolName": "bash", "args": cmd})
+        seq.append({"type": "tool_execution_end", "toolCallId": f"s{i}", "toolName": "bash", "isError": True,
+                    "result": {"content": [{"text": err_text}]}})
+    log2.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in seq) + "\n", encoding="utf-8")
+
+    hit2 = repair.detect_tool_loop(log2)
+    assert hit2 is not None
+    assert hit2["consecutive_repetitions"] == 5
+    assert hit2["failure_count"] + hit2["success_count"] == 5
+    assert hit2["all_failed"] is True
+    assert hit2["failure_count"] == 5
+    assert hit2["success_count"] == 0
+
+
+def test_loop_outcome_extracts_filenotfound_and_shell_error_and_preserves_long_command_tail(tmp_path):
+    """argon 20261105_1047 回歸：
+    1. _CRASH_EXC_RE 必須涵蓋 FileNotFoundError / IndentationError / JSONDecodeError 等常見例外；
+       且當 all_failed=True 但錯誤為非 Python 例外（例如 bash 語法錯誤 `/bin/bash: -c: line 9: syntax error`）時，
+       仍須提取非空 error_sample，不得讓 error_class 與 error_sample 雙雙缺席。
+    2. _loop_warning_line 對 ~310 字元的長 `python3 -c` 命令例（如 contrast3 dabstep-23 localized r1/r2，
+       語法錯 `; if total > 0:` 在第 255+ 字元處）不得在 160 字元處粗暴截斷而把真正出錯的命令尾部切掉。
+    """
+    # 1a. FileNotFoundError
+    log_fnf = tmp_path / "fnf.log"
+    cmd = {"command": "python3 read_missing.py"}
+    fnf_err = ("Traceback (most recent call last):\n"
+               "  File \"read_missing.py\", line 1, in <module>\n"
+               "FileNotFoundError: [Errno 2] No such file or directory: 'payments.csv'\n"
+               "Command exited with code 1")
+    ev_fnf = []
+    for i in range(4):
+        ev_fnf.append({"type": "tool_execution_start", "toolCallId": f"f{i}", "toolName": "bash", "args": cmd})
+        ev_fnf.append({"type": "tool_execution_end", "toolCallId": f"f{i}", "toolName": "bash", "isError": True,
+                       "result": {"content": [{"text": fnf_err}]}})
+    log_fnf.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in ev_fnf) + "\n", encoding="utf-8")
+    hit_fnf = repair.detect_tool_loop(log_fnf)
+    assert hit_fnf is not None and hit_fnf["all_failed"] is True
+    assert hit_fnf["error_class"] == "FileNotFoundError"
+    assert "No such file or directory" in hit_fnf["error_sample"]
+
+    # 1b. 非 Python 的 bash syntax error（policy30/dab_378/localized/r2 真實形狀）
+    log_sh = tmp_path / "sh.log"
+    sh_err = ("/bin/bash: -c: line 9: syntax error near unexpected token `('\n"
+              "Command exited with code 2")
+    ev_sh = []
+    for i in range(4):
+        ev_sh.append({"type": "tool_execution_start", "toolCallId": f"b{i}", "toolName": "bash", "args": cmd})
+        ev_sh.append({"type": "tool_execution_end", "toolCallId": f"b{i}", "toolName": "bash", "isError": True,
+                      "result": {"content": [{"text": sh_err}]}})
+    log_sh.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in ev_sh) + "\n", encoding="utf-8")
+    hit_sh = repair.detect_tool_loop(log_sh)
+    assert hit_sh is not None and hit_sh["all_failed"] is True
+    assert "syntax error near unexpected token" in hit_sh.get("error_sample", "")
+
+    # 2. 312 字元長 python3 -c 命令尾部 `; if total > 0:` 不得被 160 字元截斷切掉
+    long_cmd = {
+        "command": (
+            "python3 -c \"import pandas as pd; df = pd.read_csv('data/payments.csv'); "
+            "in_person_2023 = df[(df['year'] == 2023) & (df['shopper_interaction'] == 'POS')]; "
+            "total = len(in_person_2023); fraudulent = len(in_person_2023[in_person_2023['has_fraudulent_dispute'] == True]); "
+            "print(f'Total: {total}, Fraudulent: {fraudulent}'); if total > 0: print(f'Rate: {fraudulent / total}')\""
+        )
+    }
+    warn_long = repair._loop_warning_line({
+        "tool_name": "bash",
+        "args": long_cmd,
+        "consecutive_repetitions": 22,
+        "all_failed": True,
+        "error_class": "SyntaxError",
+        "error_sample": "SyntaxError: invalid syntax",
+    })
+    assert "if total > 0:" in warn_long
+
+
+def test_localized_prompt_orders_immediate_deliverable_write_not_waiting_for_hidden_recomputed_value(task_dir):
+    """argon 20261105_1047 回歸：
+    effects_20261105 / effects_p1 / contrast3 中 dabstep-23 localized 共 6 輪有 5 輪模型在
+    第 5~8 次工具呼叫就寫出 calculate_fraud.py 並算出正確值 0.0（dab_378 localized r1 也在第 3 次呼叫算出 -1.13），
+    卻因 localized 提示詞寫了「與重算值一致後才產出交付物」，而 plain_recomputed / kv_recomputed 的
+    expected_in_evidence=false（提示中根本沒有重算值，只有錯誤的 deliverable_value），導致模型不敢寫入
+    answer.txt、反覆重跑 python3 -c 直到 300s 超時。
+    localized 提示詞嚴禁要求模型「與重算值一致後才產出交付物」，必須明確指示算出與失敗草稿不同的新結果並確認後
+    立即先把新結果寫入交付物檔案。
+    """
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before, feedback_mode="localized")
+    assert "不要重複同一命令" in loc
+    assert "與重算值一致後才產出交付物" not in loc
+    assert "立即" in loc and "寫入交付物" in loc
+
+
