@@ -1,4 +1,13 @@
 
+## r1044（11/05 09:50–10:17）vq-5nz.21 實作（TDD 紅→綠）＋vq-5nz.19 驗收關閉
+
+**結果：P1 完成（5748a6b9 @ auto/qwen27b；未 push——loop 輪末自動 push）。**
+1. **vq-5nz.21（已關）**：detect_tool_loop 自 tool_execution_end 依 toolCallId 關聯執行結果：全敗⇒all_failed＋error_class＋error_sample（無 end 事件＝未知、不造假）；
+   localized 提示全敗分支點名「每次都失敗（SyntaxError: invalid syntax）＋寫 .py 檔案執行＋跑通即寫入交付物」、不帶「已得到結果」假前提（contrast3 dabstep-23 localized：×34 全 SyntaxError、從無結果）；generic 臂不變；觀察只進提示不改裁決。
+2. **驗收**：1 TDD 測試先紅後綠；reqloop 4 檔 **156 passed**（上輪 155）；`repair --selftest` **11/11**；真實 log 驗證（34/34 失敗⇒SyntaxError 點名）。
+3. **vq-5nz.19（已驗收關）**：auto/worker 4b7a8749 CI 🟢 4827 passed / 71 skipped / 1 xpassed（collected 4898 ≥ 4870）、0 failed。
+4. 紀律：未讀 hidden/scorer、未跑全量 pytest、未 push、未動 main、缺值 UNKNOWN；vq-6rp 仍等 /srv/vlab/queue（空）。
+
 ## r1043（11/05 09:26–09:50）讀 contrast3 全結果：4/6 格閉合、2 敗格精確歸因＋新票 vq-5nz.21
 
 **結果：P1 對照 6 格全讀完（本輪無 repo 改動、無 commit；證據 `~/dev/ops/contrast3_20261105/`）。**
