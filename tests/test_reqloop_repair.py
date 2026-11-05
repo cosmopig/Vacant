@@ -1816,6 +1816,82 @@ def test_second_round_prompt_carries_first_round_loop(task_dir, tmp_path):
     assert FAIL_CLAIM in out.fixed
 
 
+def test_localized_prompt_names_failed_loop_error_class_and_escape(task_dir, tmp_path):
+    """r1044（vq-5nz.21；contrast3_20261105 dabstep-23 localized 歸因）：
+    上一輪重複命令**每次都失敗**（SyntaxError ×34、從無結果）時，舊提示
+    「執行一次已得到結果後」的前提不成立、提示失焦。新行為（只 localized 臂、
+    觀察只進提示不改裁決／停滯／退出碼）：
+    - detect_tool_loop 從 tool_execution_end 依 toolCallId 關聯執行結果：
+      全敗⇒all_failed=True＋error_class＋error_sample（執行觀察、非重算值）；
+      至少一次成功⇒all_failed=False；無 end 事件⇒未知（無該欄、不造假）。
+    - 全敗時提示點名「每次都失敗＋錯誤類」＋具體語法規則（寫 .py 執行）
+      ＋「跑通即寫入交付物」，且不帶「已得到結果」假前提。
+    - generic 對照臂定義不變。
+    """
+    cmd = {"command": "python3 -c \"import pandas as pd; df = pd.read_csv('data/payments.csv'); in_p = df[df['year'] == 2023]; print(in_p)\""}
+    err_text = ("  File \"<string>\", line 1\n"
+                "SyntaxError: invalid syntax\n"
+                "Command exited with code 1")
+    log = tmp_path / "agent_stdout.log"
+    lines = []
+    for i in range(5):
+        lines.append(json.dumps({"type": "tool_execution_start", "toolCallId": f"s{i}",
+                                 "toolName": "bash", "args": cmd}, ensure_ascii=False))
+        lines.append(json.dumps({"type": "tool_execution_end", "toolCallId": f"s{i}",
+                                 "toolName": "bash", "isError": True,
+                                 "result": {"content": [{"text": err_text}]}},
+                                ensure_ascii=False))
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None and hit["consecutive_repetitions"] == 5
+    assert hit["all_failed"] is True
+    assert hit["error_class"] == "SyntaxError"
+    assert "SyntaxError" in hit["error_sample"]
+
+    # 至少一次成功⇒非「每次都失敗」（不誤判）
+    lines[-1] = json.dumps({"type": "tool_execution_end", "toolCallId": "s4",
+                            "toolName": "bash", "isError": False,
+                            "result": {"content": [{"text": "ok"}]}})
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    hit2 = repair.detect_tool_loop(log)
+    assert hit2 is not None and hit2["all_failed"] is False
+
+    # 無 end 事件（未知）⇒不造假 all_failed 欄
+    log.write_text("\n".join(
+        json.dumps({"type": "tool_execution_start", "toolCallId": f"s{i}",
+                    "toolName": "bash", "args": cmd}, ensure_ascii=False)
+        for i in range(5)) + "\n", encoding="utf-8")
+    hit3 = repair.detect_tool_loop(log)
+    assert hit3 is not None and "all_failed" not in hit3
+
+    # 提示：全敗⇒點名錯誤類＋寫 .py 執行＋跑通即寫入交付物；不帶假前提
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="localized",
+                                   prev_round_agent={"tool_loop_suspected": hit})
+    assert "疑似工具死迴圈" in p
+    assert "每次都失敗" in p
+    assert "SyntaxError" in p
+    assert "從未得到結果" in p
+    assert "寫成 .py 檔案" in p
+    assert "寫入交付物" in p
+    assert "已得到結果後" not in p
+    # 舊形狀（至少一次成功）⇒維持舊措辭
+    p2 = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                    feedback_mode="localized",
+                                    prev_round_agent={"tool_loop_suspected": hit2})
+    assert "已得到結果後" in p2
+    assert "每次都失敗" not in p2
+    # generic 對照臂定義不變（不帶任何逐輪觀察）
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="generic")
+    pg = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                    feedback_mode="generic",
+                                    prev_round_agent={"tool_loop_suspected": hit})
+    assert pg == base
+
+
 # ── argon 20261105_0715 回歸測試 ──────────────────────────────────────────
 
 def test_prepare_workspace_strips_verifier_params_from_requirements_json(task_dir, tmp_path):
