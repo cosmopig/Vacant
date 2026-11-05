@@ -2599,3 +2599,74 @@ def test_detect_tool_loop_catches_error_class_repeat_with_interleaved_successes(
     pg_base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
                                          feedback_mode="generic")
     assert pg == pg_base
+
+
+def test_loop_warning_remediation_split_by_error_class_and_execution_mode(tmp_path):
+    """驗證迴圈警示處方依錯誤類與執行模式精確分流：
+    1. 非 Python 工具錯誤（如 edit 驗證失敗、jq 過濾器 parse 錯誤）走通用根因處方，
+       絕不開「把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句）」失焦處方。
+    2. Python 執行期例外（如 NameError、KeyError、IndexError、ZeroDivisionError，
+       或命令已是執行 .py 腳本如 python3 script.py）走通用根因處方，絕不開一行式處方。
+    3. 只有 Python 語法/編譯類錯誤（SyntaxError/IndentationError/TabError）且非既有 .py 腳本時，
+       才開「把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句）」針對性逃逸處方。
+    """
+    # 1. edit 工具驗證失敗
+    hit_edit = {
+        "tool_name": "edit",
+        "args": {"path": "answer.txt", "old_str": "foo", "new_str": "bar"},
+        "error_class": 'Validation failed for tool "edit"',
+        "error_sample": 'Validation failed for tool "edit": old_str not found',
+        "all_failed": True,
+        "failure_count": 5,
+        "error_class_repeat": True,
+    }
+    warn_edit = repair._loop_warning_line(hit_edit)
+    assert "先修掉錯誤的根因再執行" in warn_edit
+    assert ".py" not in warn_edit
+    assert "一行式" not in warn_edit
+
+    # 2. jq 過濾器錯誤
+    hit_jq = {
+        "tool_name": "bash",
+        "args": {"command": "jq -r '.[0]' fees.json"},
+        "error_class": "jq",
+        "error_sample": "jq: parse error",
+        "all_failed": True,
+        "failure_count": 4,
+        "error_class_repeat": True,
+    }
+    warn_jq = repair._loop_warning_line(hit_jq)
+    assert "先修掉錯誤的根因再執行" in warn_jq
+    assert ".py" not in warn_jq
+    assert "一行式" not in warn_jq
+
+    # 3. python3 執行已存在腳本時發生 NameError (如 dabstep-1753 generic r2)
+    hit_script = {
+        "tool_name": "bash",
+        "args": {"command": "python3 calculate.py"},
+        "error_class": "NameError",
+        "error_sample": "NameError: name 'is_in_range' is not defined",
+        "all_failed": True,
+        "failure_count": 4,
+        "error_class_repeat": True,
+    }
+    warn_script = repair._loop_warning_line(hit_script)
+    assert "先修掉錯誤的根因再執行" in warn_script
+    assert ".py 檔案後執行" not in warn_script
+    assert "一行式" not in warn_script
+
+    # 4. python3 -c 一行式語法錯誤 (如 dabstep-23 / dabstep-1273)
+    hit_syntax = {
+        "tool_name": "bash",
+        "args": {"command": "python3 -c 'import json; if 1: print(1)'"},
+        "error_class": "SyntaxError",
+        "error_sample": "SyntaxError: invalid syntax",
+        "all_failed": True,
+        "failure_count": 4,
+        "error_class_repeat": True,
+    }
+    warn_syntax = repair._loop_warning_line(hit_syntax)
+    assert "先修掉錯誤的根因再執行" in warn_syntax
+    assert ".py 檔案後執行" in warn_syntax
+    assert "不要用一行式拼接多條語句" in warn_syntax
+
