@@ -2,7 +2,9 @@
 
 G1–G4 補口（round 891 審查 DECISION_20261103_ROUND891_ARGON_PHASEA_REVIEW §3）：
 - G1＝C1 的 30k-step 規模測試（本檔 chain30k fixture＋G1 測試）。
-- G3＝C6 基準（30k-step verify ≤5s 實測；append P99 增量實測＋xfail 記錄未達）。
+- G3＝C6 基準（30k-step verify ≤5s 實測；per-append 成本平坦門
+  test_g3_c6_append_cost_flat_with_volume_growth；舊 append-P99 xfail 測試已於 2026-11-05
+  審查定案移除）。
 - G4＝負控制族別斷言（BROKEN 族 vs UNKNOWN 族）。
 - G2＝真鏈驗收入庫（tests/test_stepchain_c2_realchain.py＋ops/stepchain/）。
 """
@@ -584,49 +586,12 @@ def test_g3_c6_verify_30k_under_5s(chain30k):
 # 此處以實測＋xfail 記錄；**Phase A 不因本項宣告完成**（誠實邊界，見該審查 §8）。
 # 縮小尺度說明：P99 尾由封印門檻附近的局部行為決定，3000 步 A/B 與 30k 步同形；
 # 30k 步的 after 分布另見 chain30k fixture 的 step_ms_p99。
-@pytest.mark.xfail(
-    strict=False,
-    reason=("C6 append-P99 delta <=10% NOT MET on round-895 measurement "
-            "(3000-step A/B: base p99 5.81ms vs after p99 8.71ms = +49.7%; "
-            "seal event ~55ms + O(file-size) per-append scan near threshold). "
-            "Recorded per round-891 review G3 alternative; Phase A not declared complete on C6."),
-)
-def test_g3_c6_append_p99_delta_le_10pct(tmp_path):
-    """C6：append P99 延遲增量 ≤10%（前後對照）。before＝封印關閉（inf/None），
-    after＝預設封印。同機、同荷、3000 步（尾局部性，見上方註）。"""
-
-    def _p99_ms(n_steps, sealing):
-        vh = tmp_path / ("ab_after" if sealing else "ab_base")
-        ws = vh / "ws"
-        ws.mkdir(parents=True)
-        old = os.environ.get("VACANT_HOME")
-        os.environ["VACANT_HOME"] = str(vh)
-        try:
-            keys.init_local()
-            rec = R.Recorder(ws)
-            if not sealing:
-                rec.volume_max_bytes = float("inf")
-                rec.volume_max_entries = None
-            m = R.Actor("g3", "s1")
-            for i in range(5):
-                rec.pre(f"w{i}", m, "Write", {"file_path": "f.txt"})
-                rec.post(f"w{i}", m, "Write", {"file_path": "f.txt"}, "ok")
-            times = []
-            for i in range(n_steps):
-                t0 = time.perf_counter()
-                rec.pre(f"t{i}", m, "Write", {"file_path": f"f{i % 5}.txt"})
-                rec.post(f"t{i}", m, "Write", {"file_path": f"f{i % 5}.txt"}, "ok")
-                times.append((time.perf_counter() - t0) * 1000)
-        finally:
-            _restore_home(old)
-        times.sort()
-        return times[int(len(times) * 0.99)]
-
-    base = _p99_ms(3000, sealing=False)
-    after = _p99_ms(3000, sealing=True)
-    delta = (after - base) / base
-    assert delta <= 0.10, (
-        f"C6 P99 delta {delta * 100:.1f}% > 10% (base {base:.2f}ms, after {after:.2f}ms)")
+# 2026-11-05（審查定案、vq-ifn/vq-p9g 關閉）：原 test_g3_c6_append_p99_delta_le_10pct
+#（舊 10% P99 準則 xfail 測試）已移除——「前後兩 run 比 P99 尾」設計為 coin-flip
+#（r1018 實證：unfixed 4 跑 3 次 xpass），由下方 test_g3_c6_append_cost_flat_with_volume_growth
+# 取代（同一 run 內早期/晚期窗中位數差分；鑑別力實證 ops/audits/c6_discrim_check.py
+# 2/2 DISCRIMINATING；取代依據＝CI 41f5c64f 綠：新測試全套 CI 負載下 PASS、
+# 被移除者為該次 CI 唯一 xpassed）。
 
 
 # ── vq-ifn（C6 重設計候選）：per-append O(卷大小) 行數掃描的鑑別測試 ────────────────────
@@ -643,8 +608,8 @@ def test_g3_c6_append_p99_delta_le_10pct(tmp_path):
 #   未修 a85dd2a1^：delta ∈ [2.25, 2.45] ms/step ⇒ FAIL；修後：delta ∈ [0.42, 0.66] ms ⇒ PASS；
 #   兩帶不重疊（3/3 跑鑑別成立；舊 4000 步規模有一跑未修 1.41 < 1.5 未鑑別，故放大到 6000 步）。
 # 紅線：1.5 ms 門檻落在兩機制實測分離帶內（未修 ≥1.5× 過、修後 ≥2.3× 裕量）；改門檻
-#   （任何方向）須走審查輪（vq-ifn 驗收），不得單方調整。舊 10% P99 預註準則維持原狀
-#   （上方 xfail 測試未動）直到審查輪定案取代。
+#   （任何方向）須走審查輪，不得單方調整。舊 10% P99 預註準則的 xfail 測試已於
+#   2026-11-05 審查定案後移除（vq-ifn/vq-p9g 關閉；取代依據見上方移除註）。
 def test_g3_c6_append_cost_flat_with_volume_growth(tmp_path):
     """vq-ifn：per-append 成本必須隨活動卷增長保持平坦（回歸＝O(卷大小) 每次重數行）。
 
