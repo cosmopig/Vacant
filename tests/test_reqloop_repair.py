@@ -246,6 +246,94 @@ def test_plain_recomputed_fail_prompt_leak_guard(tmp_path: pathlib.Path):
             assert bad not in p, bad
 
 
+def _unique_count_fixture(tmp_path: pathlib.Path):
+    """dabstep-10 同型：3 個 merchant＋表頭行；草稿 4＝3+表頭（off-by-one）。標 synthetic。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text(
+        "How many unique merchants are present in the dataset?\n"
+        "(Answer must be just a number of unique merchants.)\n", encoding="utf-8")
+    (task_dir / "payments.csv").write_text(
+        "amount,merchant\n1.0,alpha\n2.0,beta\n3.0,gamma\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("4\n", encoding="utf-8")   # 3 merchant＋1 表頭行
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_merchants", quote="unique_merchants", deliverable="answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv",
+                "recompute": {"type": "unique_count", "col": "merchant"}})])
+    return task_dir, draft, rs
+
+
+def test_unique_count_fail_prompt_offbyone_shape_hint(tmp_path: pathlib.Path):
+    """effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆為
+    +1）：模型用 cut|sort|uniq|wc 型 shell 管線計數、把 CSV 表頭行 "merchant" 當成
+    一個值。localized 提示必須補上計數規則的常見錯誤形狀（表頭行／空行／大小寫與
+    空白），但不給重算值（leak guard 不變）；generic 對照臂定義不變（無失敗證據、
+    無提示行）。"""
+    task_dir, draft, rs = _unique_count_fixture(tmp_path)
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_merchants"] == "FAIL"
+
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "req_merchants" in loc                              # 哪一條沒過
+    assert "4" in loc                                           # 交付物自身的值（可見反例）
+    assert "表頭行" in loc                                       # 計數規則常見錯誤形狀
+    assert "uniq" in loc and "wc" in loc                         # 點名會連表頭計入的管線
+    assert "3" not in loc                                       # 重算值不得進提示（leak guard）
+
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "req_merchants" not in gen                           # generic 不帶失敗證據
+    assert "表頭行" not in gen                                   # generic 對照臂定義不變
+    assert "4" not in gen
+
+
+def test_count_rule_hint_not_applied_to_non_count_rule(tmp_path: pathlib.Path):
+    """計數規則形狀提示只對 unique_count 型規則生效；非計數規則（cond_rate）
+    的 FAIL 不得收到該提示（避免對小模型過度載入不相關警告）。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text("fraud rate 2023 in-person\n", encoding="utf-8")
+    (task_dir / "payments.csv").write_text(
+        "year,shopper_interaction,has_fraudulent_dispute\n"
+        "2023,POS,True\n2023,POS,True\n2023,POS,False\n2023,POS,False\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("0.4\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_rate", quote="fraud_rate", deliverable="answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv", "recompute": {
+            "type": "cond_rate",
+            "where": [{"col": "year", "op": "eq", "value": "2023"},
+                      {"col": "shopper_interaction", "op": "eq", "value": "POS"}],
+            "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}]}})])
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_rate"] == "FAIL"
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "表頭行" not in loc                                  # 非計數規則不補計數提示
+
+
+def test_count_rule_hint_pass_claim_and_evidence_edge_cases(tmp_path: pathlib.Path):
+    """PASS 條目不補提示（提示只對 FAIL 的計數規則反例）；evidence 非 dict／無 rule
+    不崩、不補提示。"""
+    task_dir, draft, rs = _unique_count_fixture(tmp_path)
+    (draft / "answer.txt").write_text("3\n", encoding="utf-8")   # 重算值 3 → PASS
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_merchants"] == "PASS"
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "表頭行" not in loc
+
+    assert repair._count_rule_hint_line(None) is None
+    assert repair._count_rule_hint_line("nope") is None
+    assert repair._count_rule_hint_line({}) is None
+    assert repair._count_rule_hint_line({"rule": 42}) is None
+    assert repair._count_rule_hint_line({"rule": "cond_rate: x"}) is None
+    line = repair._count_rule_hint_line({"rule": "unique_count: data/payments.csv {\"col\": \"merchant\"}"})
+    assert isinstance(line, str) and "表頭行" in line
+
+
 # ── 完整切片（fake agent，synthetic 離線接線）──────────────────────
 
 def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):

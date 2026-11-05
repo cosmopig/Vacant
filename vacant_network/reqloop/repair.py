@@ -189,6 +189,13 @@ def build_repair_prompt(
     `tool_loop_suspected` 非空，提示點名上一輪重複的工具與次數（針對性反迴圈
     指令）——effects_20261105 dabstep-23：通用「不要重複同一命令」行不足以打破
     ×117 迴圈，具體證據才讓模型知道該避免哪一條。generic 對照臂不使用（定義不變）。
+
+    計數規則形狀提示（localized 臂、只對 FAIL 的 unique_count 型規則）：
+    effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆
+    恰為 +1）——模型用 cut|sort|uniq|wc 型管線計數、把 CSV 表頭行當成一個值。
+    規則本身（unique_count: col）已在證據中，但這類規則的常見錯誤形狀不在；
+    `_count_rule_hint_line` 補形狀提示（表頭行／空行／大小寫與空白），不給重算值
+    或任何答案（leak guard 不變），不改重驗／停滯／退出碼。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
@@ -266,6 +273,9 @@ def build_repair_prompt(
                 if c.evidence:
                     ev = json.dumps(c.evidence, ensure_ascii=False, default=str)
                     lines.append(f"  可見反例：{_cap_prompt_text(ev)}")
+                hint = _count_rule_hint_line(c.evidence)
+                if hint:
+                    lines.append(f"  {hint}")
         lines.append("")
         lines.append("【必須保持成立的條件】")
         keep = [i.id for i in req_set.items
@@ -427,6 +437,31 @@ def _cap_prompt_text(s: str) -> str:
     if len(s) <= _PROMPT_TEXT_CAP:
         return s
     return s[:_PROMPT_TEXT_CAP].rstrip() + f"…（已截斷，共 {len(s)} 字）"
+
+
+def _count_rule_hint_line(evidence: Any) -> str | None:
+    """計數型重算規則（unique_count）FAIL 反例的形狀提示行——localized 臂專用。
+
+    effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆
+    恰為 +1）：模型用 `cut -d',' -f2 data/payments.csv | sort | uniq | wc -l` 計數，
+    把 CSV 表頭行 "merchant" 當成一個值。規則本身（unique_count: col）已在證據中、
+    但這類規則的常見錯誤形狀不在；本行只補形狀提示（表頭行／空行／大小寫與空白）。
+    紅線：不給重算值、不給任何答案（leak guard 不變）；只 localized 臂、只 FAIL
+    條目；不改重驗／停滯／退出碼。evidence 非 dict、無 rule、非 unique_count → None。
+    """
+    if not isinstance(evidence, dict):
+        return None
+    rule = evidence.get("rule")
+    if not isinstance(rule, str) or not rule.startswith("unique_count"):
+        return None
+    return (
+        "【計數規則常見錯誤形狀（逐項檢查，兩種獨立計數方法一致才產出交付物）】"
+        "其一：CSV 表頭行是否被當成一個值計入"
+        "（cut|sort|uniq|wc 這類 shell 管線會把表頭行算進結果）；"
+        "其二：行尾空行、空白值是否被計入；"
+        "其三：僅大小寫或前後空白不同的值是否被當成多個。"
+        "請改用逐行解析檔案的方法（如 python csv 模組）重數一次再比對。"
+    )
 
 
 def _loop_warning_line(loop: dict[str, Any]) -> str:
