@@ -356,13 +356,12 @@ def build_repair_prompt(
         # 同樣只 localized 臂、只帶執行觀察（崩潰發生＋放棄詞），不帶重算值；
         # 不影響重驗／停滯判定／退出碼。
         crash = (prev_round_agent or {}).get("crash_giveup_suspected")
+        empty = (prev_round_agent or {}).get("empty_result_giveup_suspected")
         if isinstance(crash, dict) and crash:
             lines.append(_crash_giveup_hint_line())
-        # 上一輪静默空结果 → 放弃观察 → 本輪針對性指令（空结果＝条件把资料都滤掉、非崩溃）。
-        # 同规则：只 localized 臂、只带执行观察（脚本跑过＋输出为空＋放弃词）、不帶重算值；
-        # 不影響重驗／停滯裁決／退出碼。
-        empty = (prev_round_agent or {}).get("empty_result_giveup_suspected")
-        if isinstance(empty, dict) and empty:
+        elif isinstance(empty, dict) and empty:
+            # 上一輪静默空结果 → 放弃观察 → 本輪針對性指令（空结果＝条件把资料都滤掉、非崩溃）。
+            # 若已有 crash 提示則不重複追加互斥的空結果提示（避免同時稱「崩潰吞錯」又稱「未崩潰空結果」產生矛盾失焦）
             lines.append(_empty_result_giveup_hint_line())
     else:
         lines.append("")
@@ -1189,7 +1188,12 @@ _CRASH_EXC_RE = re.compile(
 _GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
 # 静默空结果 → 放棄偵测：bash 命令中 python 解释器直接执行 .py 文件（不匹配
 # heredoc 重定向 `> solution.py`，也不匹配 `python3 -c "..."`）。
-_PY_SCRIPT_RUN_RE = re.compile(r"(?:^|[\s;|&])python3?\s+([^\s;|&<>]+\.py)")
+# 支援各種前綴路徑（如 /usr/bin/python3, ./.venv/bin/python）與執行參數（如 -u, -B）。
+_PY_SCRIPT_RUN_RE = re.compile(
+    r"(?:^|[\s;|&])(?:(?:\S+/)?python3?)(?:\s+-[a-zA-Z0-9]+)*\s+([^\s;|&<>]+\.py)"
+)
+# 偵測命令是否對 stdout 進行重導向或管道（> / >> / 1> / &> / |）
+_STDOUT_REDIRECT_RE = re.compile(r"(?:(?<![2-9a-zA-Z])(?:>|>>)|1>|&>|\|)")
 
 
 def _extract_tool_end_text(obj: dict[str, Any]) -> str:
@@ -1370,8 +1374,14 @@ def detect_empty_result_giveup(
         if str(start.get("toolName") or "") != "bash":
             continue
         args = start.get("args") if isinstance(start.get("args"), dict) else {}
-        m = _PY_SCRIPT_RUN_RE.search(str(args.get("command") or ""))
+        cmd = str(args.get("command") or "")
+        m = _PY_SCRIPT_RUN_RE.search(cmd)
         if not m:
+            continue
+        # 若該命令對 stdout 進行了重導向或管道（> / >> / 1> / &> / |），
+        # 則 bash 工具輸出為空屬重導向自然現象，不應誤判為「腳本無輸出」
+        after_py = cmd[m.end():].split("\n")[0]
+        if _STDOUT_REDIRECT_RE.search(after_py):
             continue
         end = ends.get(cid)
         if end is None or end.get("isError") is not False:
@@ -1557,27 +1567,45 @@ def run_repair_round(
     after = run_requirement_checks(authoritative, req_set, ws)
     diff = diff_results(before, after)
     usage = parse_usage_from_log(log_dir / "agent_stdout.log")
+    # 候選交付物路徑：優先納入 answer.txt 與需求集宣告的交付物（以存在者優先）
+    candidate_delivs: list[str] = []
+    if (ws / "answer.txt").exists():
+        candidate_delivs.append("answer.txt")
+    for it in req_set.items:
+        if it.deliverable and it.deliverable not in candidate_delivs and (ws / it.deliverable).exists():
+            candidate_delivs.append(it.deliverable)
+    if not candidate_delivs:
+        candidate_delivs = ["answer.txt"] + [it.deliverable for it in req_set.items if it.deliverable]
+
+    crash_suspected = None
+    empty_suspected = None
+    for deliv_name in candidate_delivs:
+        deliv_p = ws / deliv_name
+        draft_deliv_p = pathlib.Path(draft_dir) / deliv_name
+        if crash_suspected is None:
+            crash_suspected = detect_crash_giveup(
+                log_dir / "agent_stdout.log",
+                deliv_p,
+                draft_answer_path=draft_deliv_p,
+            )
+        if empty_suspected is None:
+            empty_suspected = detect_empty_result_giveup(
+                log_dir / "agent_stdout.log",
+                deliv_p,
+            )
+        if crash_suspected is not None and empty_suspected is not None:
+            break
+
     # 工具死迴圈觀察（effects_20261105 dabstep-23）：同一命令連續重複＝疑似迴圈。
     # 觀察與標記，不是裁決：不改變重驗結果與停滯判定（None＝未偵測到）。
     agent = {**agent, "tool_loop_suspected": detect_tool_loop(log_dir / "agent_stdout.log")}
     # crash→放棄觀察（effects_20261105 dabstep-1753 generic）：session 內崩潰＋
     # 最終答案是放棄詞（None/Not Applicable…）⇒ 標記。觀察與標記，不是裁決：
     # 不改變重驗結果與停滯判定（None＝未偵測到）。
-    agent = {**agent,
-             "crash_giveup_suspected":
-             detect_crash_giveup(
-                 log_dir / "agent_stdout.log",
-                 ws / "answer.txt",
-                 draft_answer_path=pathlib.Path(draft_dir) / "answer.txt",
-             )}
+    agent = {**agent, "crash_giveup_suspected": crash_suspected}
     # 静默空结果 → 放棄 觀察（contrast1753_20261105 dabstep-1753 localized r1：脚本
     # 成功跑过但输出为空＋最終答案為放棄詞 ⇒ 標記）。观察与標記、非裁決。
-    agent = {**agent,
-             "empty_result_giveup_suspected":
-             detect_empty_result_giveup(
-                 log_dir / "agent_stdout.log",
-                 ws / "answer.txt",
-             )}
+    agent = {**agent, "empty_result_giveup_suspected": empty_suspected}
     tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),
