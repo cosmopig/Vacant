@@ -562,6 +562,11 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
     通用行已在提示中，dabstep-23-localized 仍 ×117 重複至超時——通用警告不足
     以打破迴圈。只帶執行觀察（工具名／參數／次數），不帶需求失敗證據或重算值；
     參數例截斷必須可見。
+
+    r1044（vq-5nz.21；contrast3_20261105 dabstep-23 localized r2 歸因）：重複命令
+    **每次都失敗**（all_failed=True，如 SyntaxError ×34、從無結果）時，舊行
+    「執行一次已得到結果後」的前提不成立、提示失焦——改點名錯誤類＋具體語法
+    規則（寫 .py 檔案執行）＋「跑通即寫入交付物」，不帶該假前提。
     """
     name = str(loop.get("tool_name") or "工具")
     reps = loop.get("consecutive_repetitions")
@@ -576,9 +581,20 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         if len(args_text) > 160:
             args_text = args_text[:160].rstrip() + "…"
         example = f"（例：{args_text}）"
-    return (
+    head = (
         f"【上一輪執行觀察】上一輪偵測到 {name} 以相同參數連續執行{reps} 次、"
         f"中間沒有改動（疑似工具死迴圈）{example}。"
+    )
+    if loop.get("all_failed") is True:
+        err = str(loop.get("error_class") or "執行錯誤").strip()
+        sample = str(loop.get("error_sample") or "").strip()
+        sample_part = f"（{sample}）" if sample else ""
+        return head + (
+            f"本輪禁止重複該命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
+            "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
+            "確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
+        )
+    return head + (
         "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"
         "不要再次執行同一命令。"
     )
@@ -604,8 +620,51 @@ def _crash_giveup_hint_line() -> str:
     )
 
 
+def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
+                         outcomes: list[tuple[tuple[str, Any], bool, str]]) -> dict[str, Any]:
+    """聚合迴圈 key（單 key 或 period-2 雙 key）的執行結果（r1044／vq-5nz.21）。
+
+    outcomes＝依 toolCallId 關聯自 tool_execution_end 的 (key, isError, 輸出文字)。
+    - 該 key 無 end 事件⇒{}（未知，不造假）；
+    - 至少一次成功⇒all_failed=False；
+    - 全敗⇒all_failed=True，並自第一個失敗輸出提取 error_class＋error_sample
+      （執行觀察：與提示中工具名／參數例同源，不含重算值／需求證據）。
+    """
+    rel = [o for o in outcomes if o[0] in loop_keys]
+    if not rel:
+        return {}
+    failed = [o for o in rel if o[1]]
+    if not failed:
+        return {"all_failed": False, "failure_count": 0, "success_count": len(rel)}
+    out: dict[str, Any] = {
+        "all_failed": len(failed) == len(rel),
+        "failure_count": len(failed),
+        "success_count": len(rel) - len(failed),
+    }
+    if len(failed) == len(rel):
+        for _key, _err, text in failed:
+            m = _CRASH_EXC_RE.search(text)
+            if not m:
+                continue
+            cls = m.group(1)
+            out["error_class"] = cls
+            for line in text.replace("\\n", "\n").splitlines():
+                if cls in line:
+                    s = line.strip()
+                    if s:
+                        out["error_sample"] = s[:80]
+                        break
+            break
+    return out
+
+
 def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
     """偵測「工具死迴圈」：同一 (tool, args) 單步連續重複，或雙步 (k1, k2) 交替連續重複、中間沒有任何改動。
+
+    r1044（vq-5nz.21）：另自 tool_execution_end 依 toolCallId 關聯執行結果，
+    區分「迴圈命令每次都失敗」（all_failed／error_class——contrast3 dabstep-23
+    localized：同一行式 ×34 皆 SyntaxError、從無結果）與「成功後重複驗證」；
+    無 end 事件＝未知（無該欄），不造假。只記錄，不改變裁決。
 
     來源：
     - effects_20261105 dabstep-23-pi-C localized：模型把同一條 python3 一行式重複執行
@@ -634,6 +693,8 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
     best_streak = 0
     cur_key: tuple[str, Any] | None = None
     cur_streak = 0
+    call_key: dict[str, tuple[str, Any]] = {}
+    end_outcomes: list[tuple[tuple[str, Any], bool, str]] = []
     for line in text.splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -642,18 +703,29 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
             obj = json.loads(line)
         except (json.JSONDecodeError, ValueError):
             continue
-        if not isinstance(obj, dict) or obj.get("type") != "tool_execution_start":
+        if not isinstance(obj, dict):
             continue
-        key = (str(obj.get("toolName")), obj.get("args"))
-        keys.append(key)
-        if key == cur_key:
-            cur_streak += 1
-        else:
-            cur_key = key
-            cur_streak = 1
-        if cur_streak > best_streak:
-            best_streak = cur_streak
-            best = key
+        etype = obj.get("type")
+        if etype == "tool_execution_start":
+            key = (str(obj.get("toolName")), obj.get("args"))
+            keys.append(key)
+            cid = obj.get("toolCallId")
+            if isinstance(cid, str) and cid:
+                call_key[cid] = key
+            if key == cur_key:
+                cur_streak += 1
+            else:
+                cur_key = key
+                cur_streak = 1
+            if cur_streak > best_streak:
+                best_streak = cur_streak
+                best = key
+        elif etype == "tool_execution_end":
+            cid = obj.get("toolCallId")
+            if isinstance(cid, str) and cid in call_key:
+                end_outcomes.append(
+                    (call_key[cid], bool(obj.get("isError")),
+                     _extract_tool_end_text(obj)))
 
     best_p2_pair: tuple[tuple[str, Any], tuple[str, Any]] | None = None
     best_p2_cycles = 0
@@ -673,17 +745,21 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
 
     if best is not None and best_streak >= threshold and best_streak >= best_p2_cycles:
         name, args = best
-        return {"tool_name": name, "args": args,
-                "consecutive_repetitions": best_streak, "threshold": threshold}
+        out: dict[str, Any] = {"tool_name": name, "args": args,
+                               "consecutive_repetitions": best_streak, "threshold": threshold}
+        out.update(_loop_outcome_fields([best], end_outcomes))
+        return out
     if best_p2_pair is not None and best_p2_cycles >= threshold:
         k1, k2 = best_p2_pair
-        return {
+        out = {
             "tool_name": f"{k1[0]}+{k2[0]}",
             "args": {"first": k1[1], "second": k2[1]},
             "consecutive_repetitions": best_p2_cycles,
             "threshold": threshold,
             "period": 2,
         }
+        out.update(_loop_outcome_fields([k1, k2], end_outcomes))
+        return out
     return None
 
 

@@ -1,26 +1,32 @@
-# 當前狀態（2026-11-05，r1043 收 contrast3）
+# NOW.md — r1044（11/05）
 
-## 本輪（r1043，完成）
-- **P0 ✔**（r1042 已核）：2aa0c077 五項修復全數在樹（auto/qwen27b 8e6fa47d 祖先）；CI 🟢 4827。
-- **P1 ✔**：contrast3 6 格全讀（`~/dev/ops/contrast3_20261105/`，未觸凍結批 effects_20261105/）：
-  - before(d38d2eb2)：generic 3/3 PASS · localized 1/3；after(8e6fa47d)：generic 2/3 · localized 2/3。
-  - dab_507 兩臂皆 PASS（after 成本 loc 1.19M→21.7K tok、generic 649K→199K tok）；
-    dabstep-23 generic PASS / localized stalled；dabstep-10 generic stalled / localized PASS（翻轉）。
-  - 獨立 scorer 與本地門 6 格零分歧（4 PASS/2 FAIL）。真值：before_after.json
-    （api_model_calls_true/tokens_true/wall_ms_total，缺值皆無）。
-  - **單次重現 dev 樣本＝不作效力宣稱**；H（generic≈localized）未定（兩臂各 2/3、但閉合格不同）。
-- **歸因（新）**：dabstep-23 localized＝r1 同一行式 34× 同一 SyntaxError（`;` 後接 `if`）；
-  迴圈偵測已觸發、r2 提示已點名，但提示「以已有結果推導」失焦（該命令從無結果）；
-  r2 模型寫對 calculate_fraud.py 跑通後仍迴圈壞命令 15 次、未寫 answer.txt。
-- **vq-5nz.19**：worker 29a10294 15→1（test_reqloop_g1_gate.py::test_real_fixture_bank assert 20==0）；
-  HEAD 已進 30e1e7de（CI 未跑完）——未達驗收條件，維持 OPEN。
-- **vq-6rp**：/srv/vlab/queue 空（0 任務），無可派領；未寫任何 *_realdata_* 離線腳本。
-- 紀律：未讀 hidden/scorer、未 push、未動 main、未跑全量 pytest；本輪無 repo 改動＝無 commit。
+## 本輪完成
+- **vq-5nz.21（P1，已關）**：「重複命令每次都失敗」的針對性提示（contrast3 dabstep-23
+  localized 歸因：同一行式 ×34 全 SyntaxError、從無結果，舊提示「已得到結果後」前提不成立）。
+  5748a6b9（auto/qwen27b，未 push——loop 輪末自動 push）：
+  - `detect_tool_loop` 自 `tool_execution_end` 依 toolCallId 關聯執行結果：全敗⇒`all_failed`＋
+    `error_class`＋`error_sample`（無 end 事件＝未知、欄位缺省、不造假；至少一次成功⇒`all_failed=False`）。
+  - localized 提示全敗分支：點名「每次都失敗（SyntaxError: invalid syntax）」＋具體語法規則
+    「把程式碼寫成 .py 檔案後執行（不要一行式拼接多條語句）」＋「確認執行成功、結果正確後直接把結果寫入交付物檔案」；
+    不帶「已得到結果」假前提。generic 對照臂定義不變；觀察只進提示，不改裁決／停滯／退出碼。
+- **vq-5nz.19（P1，驗收已關）**：auto/worker `4b7a8749` CI 🟢 4827 passed / 71 skipped / 1 xpassed
+  （collected 4898 ≥ 4870）、0 failed——15 個 reqloop 紅測試全綠。
 
-## 待辦（按序）
-1. **vq-5nz.19**（P1）：等助手修綠 30e1e7de（剩 1 個 G1 fixture bank 失敗）→ 驗收
-   （ci json 🟢 收集≥4870＋15 reqloop 測試全綠）。
-2. **vq-5nz.21**（P2，新）：「重複命令每次都失敗」的針對性提示（錯誤類＋具體語法規則＋
-   跑通即寫交付物；可選：連續相同失敗命令提早停輪）。TDD 後在 dabstep-23 localized 單格驗證。
-3. **vq-6rp**（P2）：dabstep-1753 硬缺口——待需求方可執行 acceptance 口徑；無口徑＝H-1 前提不成立。
-4. **vq-5nz.6**（P3，預註冊待點名）：G2 停滯換方法 8 格——點名前不發射（未點名＝未發射紅線）。
+## 驗收（本輪）
+- 1 TDD 測試先紅後綠（`test_localized_prompt_names_failed_loop_error_class_and_escape`）；
+- reqloop 4 檔 **156 passed**（上輪 155）；`python -m vacant_network.reqloop.repair --selftest` **11/11**；
+- 真實 log 驗證：dabstep-23 localized r1 log⇒`all_failed=true`、34/34 失敗、`error_class=SyntaxError`、
+  提示點名錯誤類＋寫 .py 逃路＋跑通即寫交付物（舊提示該處是假前提）。
+
+## 未做／等
+- **vq-6rp**（dabstep-1753 模型側硬缺口）：/srv/vlab/queue 空（0 任務），等點名；未點名＝未發射。
+- **vq-5nz.6**（G2 停滯草稿換方法驗證）：未發射（未點名）。
+- **auto/qwen27b `5748a6b9` CI**：loop 輪末 push 後查一次（不輪詢；未完成＝UNKNOWN）。
+- dabstep-10 generic stalled（contrast3）：n=1 不歸因；未來 effects 再現同型再開票。
+- vq-p9g（xpass 除 marker）、vq-ifn（P99 門重設計）：待點名。
+
+## Next（r1045）
+1. 查 `5748a6b9` CI（一次；未完成記 UNKNOWN，不輪詢）。
+2. vq-6rp 若被點名（/srv/vlab/queue 有任務或 reviewer 點名）→ 按預註冊口徑發射 G2；
+   否則待命，不造進度、不寫離線審計腳本充當進度。
+3. 紀律：未讀 hidden/scorer；未跑全量 pytest；不 push（loop 自動 push）；不動 main；缺值 UNKNOWN。
