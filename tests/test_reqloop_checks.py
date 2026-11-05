@@ -1652,6 +1652,32 @@ def test_mean_int_col_point_estimate_and_integer_satisfiable(tmp_path: pathlib.P
     # 3. 錯誤答案（@mean_cases[2199]）必須 FAIL
     wrong = tmp_path / "wrong_055"
     _write(wrong / "answer.txt", "@mean_cases[2199]\n")
-    after_wrong = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, wrong)}
-    assert after_wrong["req_mean_cases_recomputed"] == "FAIL"
+    after_wrong_res = {r.claim_id: r for r in run_requirement_checks(dab055_task, rs, wrong)}
+    assert after_wrong_res["req_mean_cases_recomputed"].status == "FAIL"
+    assert after_wrong_res["req_mean_cases_recomputed"].evidence.get("problem") == "mismatch_with_recomputation"
+
+
+def test_mean_int_col_unrounded_float_reports_not_an_integer_instead_of_mismatch(tmp_path: pathlib.Path):
+    """argon 20261105_1407 回歸（dab_055 實況）：
+    dab_055 原草稿為 @mean_cases[2081990.36]，而真實未取整均值為 2081990.359813...（四捨五入為 2081990）。
+    原草稿的計算公式完全正確，唯一錯誤是「未取整數」；若 check_kv_recomputed 把 2081990.36 標成
+    problem='mismatch_with_recomputation'（「答案值與按公開規則對公開資料的重算不符」），會誤導
+    localized 修復模型以為 2081990.36 的均值公式算錯而改用 pd.to_numeric(..., errors='coerce') 丟棄
+    '630308[495000-801000]' 列、退化成錯誤的 @mean_cases[2199]（effects_20261105 policy30 r1 與 fb20 r1 實況）。
+    當 mean_int_col 未指定小數 round（要求整數均值）且候選值為非整數浮點數、但四捨五入後與重算整數均值一致時，
+    必須回傳 FAIL + problem='not_an_integer'（且不洩漏重算期望值）。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    dab055_task = repo_root / "ops" / "reqloop" / "g2" / "smoke_e013" / "dab_055-pi-C" / "task"
+    dab055_draft = repo_root / "ops" / "reqloop" / "g2" / "smoke_e013" / "dab_055-pi-C" / "draft"
+    rs = RequirementSet.load(dab055_task / "requirements.json")
+
+    before_res = {r.claim_id: r for r in run_requirement_checks(dab055_task, rs, dab055_draft)}
+    recomp = before_res["req_mean_cases_recomputed"]
+    assert recomp.status == "FAIL"
+    assert recomp.evidence.get("problem") == "not_an_integer"
+    assert recomp.evidence.get("expected_in_evidence") is False
+    assert "未取整數" in recomp.detail
+    assert "重算不符" not in recomp.detail
+
 
