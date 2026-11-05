@@ -2293,3 +2293,132 @@ def test_localized_prompt_orders_immediate_deliverable_write_not_waiting_for_hid
     assert "立即" in loc and "寫入交付物" in loc
 
 
+def test_localized_prompt_format_only_failure_does_not_demand_different_numeric_value_and_warns_inline_comment(tmp_path):
+    """argon 20261105_1407 回歸：
+    1. 當所有失敗條目皆為純格式／型別／取整問題（如 dabstep-1273 的 problem='not_a_number'，草稿句子
+       'The average fee ... is 0.120132.' 內含的 0.120132 已是正確重算值；或 dab_055 的 problem='not_an_integer'，
+       草稿 @mean_cases[2081990.36] 四捨五入即為 2081990），build_repair_prompt 不得要求腳本
+       「算出了與失敗草稿（deliverable_value）不同的新結果」或「印出與失敗草稿不同的新結果」，否則會誤導模型
+       拒絕草稿中原本已正確的數值。
+    2. 【python 一行式紅線】除點名 `;` + if/for/def/with 外，必須同時禁止在 `python -c` 單行內放 `#` 註解
+       （effects_20261105 feedback_once20/dab_055-pi-C localized r1 連續 27 次因 `python3 -c "...; # comment ...; print(...)"`
+       把 `#` 後方的程式碼與 print 全部註解掉而得到空輸出）。
+    """
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir()
+    draft.mkdir()
+    (task_dir / "request.md").write_text("Answer must be just a number.\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("The average fee is 0.120132.\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t_fmt", items=[
+        RequirementItem(id="req_fee", quote="just a number", deliverable="answer.txt",
+                        verifier="plain_recomputed", params={}),
+    ])
+    before_fmt = [
+        repair.ClaimResult(
+            claim_id="req_fee",
+            status="FAIL",
+            detail="答案值不可解析為數字",
+            evidence={"problem": "not_a_number", "value": "The average fee is 0.120132."},
+            verifier="plain_recomputed",
+            verifier_version="1",
+            required=True,
+            authority="recomputed",
+        )
+    ]
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before_fmt, feedback_mode="localized")
+    assert "不同的新結果" not in loc
+    assert "立即" in loc and "寫入交付物" in loc
+    assert "#" in loc and "註解" in loc
+
+
+def test_cond_rate_hint_line_for_csv_column_collision(tmp_path):
+    """argon 20261105_1407 回歸（dabstep-23 實況）：
+    dabstep-23（cond_rate: data/payments.csv）中，payments.csv 有 42 筆 2023 年 Ecommerce 交易的
+    base64 雜湊欄（ip_address / email_address / card_number）碰巧含子字串 'POS'，其中 19 筆為
+    has_fraudulent_dispute=True，導致未錨定欄位名的 `grep "POS" data/payments.csv | grep "2023" | cut -d',' -f18`
+    算出 19 / 12439 = 0.00152745（恰為失敗草稿錯值！），而 `grep "True"` 則命中 is_credit=True 算出 8978，
+    使 contrast23_20261105 localized r1（36 次呼叫）與 r2（甚至在第 24 次呼叫把 0.0 改回 0.00152745）
+    反覆懷疑 pandas 算出的 0.0。
+    _cond_rate_hint_line 與 build_repair_prompt 對 cond_rate FAIL 條目必須補上欄位錨定提示，警告不得用未錨定欄位的 grep 跨欄誤中子字串。
+    """
+    ev = {
+        "deliverable_value": "0.00152745",
+        "problem": "mismatch_with_recomputation",
+        "rule": 'cond_rate: data/payments.csv {"where": [{"col": "year", "op": "eq", "value": "2023"}, {"col": "shopper_interaction", "op": "eq", "value": "POS"}], "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}]}',
+        "expected_in_evidence": False,
+    }
+    hint = repair._cond_rate_hint_line(ev)
+    assert hint is not None
+    assert "grep" in hint
+    assert "欄位" in hint
+
+
+def test_detect_tool_loop_catches_same_error_retry_streak_and_period3(tmp_path):
+    """argon 20261105_1407 回歸：
+    1. contrast23_20261105 dabstep-23 localized r1 第 4~8 次呼叫：模型連續 5 次執行 bash `python3 -c "...; if total_count > 0: print(...)"`，
+       每次只微調中間的 `fraud_count = ...` 表達式，但 5 次全部因尾部的 `; if total_count > 0:` 觸發完全相同的
+       `SyntaxError: invalid syntax`（isError=True）。舊版 detect_tool_loop 因要求 args 完全相同而回傳 None，
+       導致第 2 輪沒有收到任何上一輪執行觀察警告。
+    2. contrast23_20261105 dabstep-23 generic r2 第 22~36 次呼叫：模型以 (write, bash python3, bash grep) 三步為一週期
+       （period-3）連續重複 5 組（15 次呼叫）。detect_tool_loop 必須支援 period-3 偵測。
+    """
+    # 1. 同一工具連續 5 次微調參數但皆因同一 SyntaxError 失敗
+    log_err_streak = tmp_path / "err_streak.log"
+    err_out = (
+        '  File "<string>", line 1\n'
+        '    import pandas as pd; if total_count > 0: print(rate)\n'
+        '                         ^^\n'
+        'SyntaxError: invalid syntax\n\n'
+        'Command exited with code 1'
+    )
+    exprs = [
+        "df['a'].sum()",
+        "df['a'].astype(str).eq('true').sum()",
+        "(df['a'] == True).sum()",
+        "df['a'].astype(bool).sum()",
+        "(df['a'].astype(str).str.lower() == 'true').sum()",
+    ]
+    evs = []
+    for i, ex in enumerate(exprs):
+        cmd = f"python3 -c \"import pandas as pd; fraud_count = {ex}; if total_count > 0: print(fraud_count)\""
+        evs.append({"type": "tool_execution_start", "toolCallId": f"e{i}", "toolName": "bash", "args": {"command": cmd}})
+        evs.append({"type": "tool_execution_end", "toolCallId": f"e{i}", "toolName": "bash", "isError": True,
+                    "result": {"content": [{"text": err_out}]}})
+    log_err_streak.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in evs) + "\n", encoding="utf-8")
+
+    hit_err = repair.detect_tool_loop(log_err_streak)
+    assert hit_err is not None
+    assert hit_err["tool_name"] == "bash"
+    assert hit_err["consecutive_repetitions"] == 5
+    assert hit_err["all_failed"] is True
+    assert hit_err.get("same_error_streak") is True
+    assert hit_err["error_class"] == "SyntaxError"
+    warn_err = repair._loop_warning_line(hit_err)
+    assert "SyntaxError" in warn_err
+    assert "每次都失敗" in warn_err
+
+    # 2. Period-3 (write + bash + bash) 連續 4 組
+    log_p3 = tmp_path / "p3.log"
+    k1_args = {"path": "calc.py", "content": "print(0.0)\n"}
+    k2_args = {"command": "python3 calc.py"}
+    k3_args = {"command": "grep POS data/payments.csv | wc -l"}
+    ev_p3 = []
+    for i in range(4):
+        for step_idx, (tname, targs) in enumerate([("write", k1_args), ("bash", k2_args), ("bash", k3_args)]):
+            cid = f"p3_{i}_{step_idx}"
+            ev_p3.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": tname, "args": targs})
+            ev_p3.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": tname, "isError": False,
+                          "result": {"content": [{"text": "ok"}]}})
+    log_p3.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in ev_p3) + "\n", encoding="utf-8")
+
+    hit_p3 = repair.detect_tool_loop(log_p3)
+    assert hit_p3 is not None
+    assert hit_p3.get("period") == 3
+    assert hit_p3["consecutive_repetitions"] == 4
+    assert hit_p3["tool_name"] == "write+bash+bash"
+    assert hit_p3["all_failed"] is False
+    assert hit_p3["success_count"] == 12
+
+
+

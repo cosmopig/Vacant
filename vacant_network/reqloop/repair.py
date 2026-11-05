@@ -280,7 +280,7 @@ def build_repair_prompt(
                 if c.evidence:
                     ev = json.dumps(c.evidence, ensure_ascii=False, default=str)
                     lines.append(f"  可見反例：{_cap_prompt_text(ev)}")
-                hint = _count_rule_hint_line(c.evidence)
+                hint = _count_rule_hint_line(c.evidence) or _cond_rate_hint_line(c.evidence)
                 if hint:
                     lines.append(f"  {hint}")
         lines.append("")
@@ -291,15 +291,31 @@ def build_repair_prompt(
             ("以下條目已 PASS，修正後必須仍然 PASS：" + "、".join(keep))
             if keep else "（沒有已 PASS 的條目）")
         lines.append("只修上面的缺口，不要重寫不相關的部分；改完後所有必需條目都要能通過重驗。")
-        lines.append(
-            "不要重複同一命令：一旦腳本依原始需求的過濾條件與公式算出了與失敗草稿（deliverable_value）"
-            "不同的新結果（或獨立驗算一次確認無誤），請**立即先把新結果寫入交付物檔案（如 answer.txt）**；"
-            "嚴禁因反例未顯示隱藏期望值（expected_in_evidence=false）而遲遲不寫交付物或反覆重跑單行驗證命令。"
+        non_pass_claims = [
+            by_id[i.id] for i in req_set.items
+            if by_id.get(i.id) is not None and by_id[i.id].status != "PASS"
+        ]
+        format_only_failure = bool(non_pass_claims) and all(
+            _is_format_only_claim(c) for c in non_pass_claims
         )
+        if format_only_failure:
+            lines.append(
+                "不要重複同一命令：一旦依原始需求與驗證結果修好格式／取整／缺漏問題並確認結果無誤，"
+                "請**立即先把修正後的結果寫入交付物檔案（如 answer.txt）**；"
+                "嚴禁遲遲不寫交付物或反覆重跑單行驗證命令。"
+            )
+        else:
+            lines.append(
+                "不要重複同一命令：一旦腳本依原始需求的過濾條件與公式算出了與失敗草稿（deliverable_value）"
+                "不同的新結果（或獨立驗算一次確認無誤），請**立即先把新結果寫入交付物檔案（如 answer.txt）**；"
+                "嚴禁因反例未顯示隱藏期望值（expected_in_evidence=false）而遲遲不寫交付物或反覆重跑單行驗證命令。"
+            )
         # 第 1 輪即可見的兩條紅線（不等上一輪觀察）：
         # contrast23_20261105 dabstep-23-pi-C localized r1（@26f23af5，vq-5nz.25）：
-        # 12 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError（35×）——
-        # -c 單行編譯下 `;` 後接 if/for/def 複合陳述即語法錯，重試永不成功；同期
+        # 7 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError（串流日誌 35×）——
+        # -c 單行編譯下 `;` 後接 if/for/def 複合陳述即語法錯，重試永不成功；另
+        # effects_20261105 feedback_once20 dab_055-pi-C localized r1 連續 27 次在 `python -c`
+        # 單行內寫 `# comment` 把同行後續 `;` 語句與 print 全部註解掉而產生空輸出；同期
         # `python3 calculate_fraud.py` → 0.0 成功 7 次卻從未寫入 answer.txt（r2 才以
         # `python3 calculate_fraud.py > answer.txt` 關閉缺口）。_loop_warning_line 的
         # 「寫 .py、不要一行式」逃路只從第 2 輪生效；第 1 輪必須自己帶這兩條。
@@ -309,14 +325,23 @@ def build_repair_prompt(
         lines.append(
             "【python 一行式紅線】`python -c` 只能執行小陳述；`;` 之後不得接 "
             "if / for / def / with 等複合陳述（例如 `data = read(); if data: print(len(data))` "
-            "會直接 SyntaxError，重試多少次都不會成功）。需要多分支驗證時，把程式碼寫成 .py 檔案後執行；"
+            "會直接 SyntaxError，重試多少次都不會成功），且單行內不得放 `#` 註解"
+            "（`#` 會把同行後續所有 `;` 語句與 `print` 全部註解掉而產生空輸出）。"
+            "需要多分支驗證或加註解時，把程式碼寫成 .py 檔案後執行；"
             "工作區裡已有能算出結果的腳本時，直接執行該腳本。"
         )
-        lines.append(
-            "計算腳本一旦成功印出與失敗草稿不同的新結果，下一個動作必須是把結果寫入交付物檔案："
-            "腳本輸出即結果本身時，直接重定向寫入（例如 `python <計算腳本> > answer.txt`）；"
-            "寫入交付物之前不要再執行任何驗證命令。"
-        )
+        if format_only_failure:
+            lines.append(
+                "計算或格式化腳本一旦成功印出符合原始需求格式的結果，下一個動作必須是把結果寫入交付物檔案："
+                "腳本輸出即結果本身時，直接重定向寫入（例如 `python <計算腳本> > answer.txt`）；"
+                "寫入交付物之前不要再執行任何驗證命令。"
+            )
+        else:
+            lines.append(
+                "計算腳本一旦成功印出與失敗草稿不同的新結果，下一個動作必須是把結果寫入交付物檔案："
+                "腳本輸出即結果本身時，直接重定向寫入（例如 `python <計算腳本> > answer.txt`）；"
+                "寫入交付物之前不要再執行任何驗證命令。"
+            )
         # 上一輪工具死迴圈觀察 → 本輪針對性指令（點名工具＋次數＋命令例）。
         # 只 localized 臂：generic 對照臂定義＝不帶任何逐輪觀察（保持兩臂差異乾淨）。
         # 只帶執行觀察，不帶需求失敗證據或重算值；不影響重驗／停滯判定。
@@ -524,6 +549,33 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
 _PROMPT_TEXT_CAP = 800
 
 
+_FORMAT_ONLY_PROBLEMS = frozenset({
+    "not_a_number",
+    "not_an_integer",
+    "missing_key",
+    "missing_file",
+    "empty_value",
+    "not_a_fee_id",
+})
+
+
+def _is_format_only_claim(c: ClaimResult) -> bool:
+    """判定一條非 PASS 的 ClaimResult 是否純屬格式／型別／取整／缺漏問題（而非重算數值不符）。"""
+    ev = c.evidence
+    if not isinstance(ev, dict):
+        return False
+    prob = ev.get("problem")
+    if isinstance(prob, str) and prob in _FORMAT_ONLY_PROBLEMS:
+        return True
+    cex = ev.get("counterexamples")
+    if isinstance(cex, list) and cex:
+        return all(
+            isinstance(it, dict) and isinstance(it.get("problem"), str) and it["problem"] in _FORMAT_ONLY_PROBLEMS
+            for it in cex
+        )
+    return False
+
+
 def _cap_prompt_text(s: str) -> str:
     """截斷修復請求裡的單段詳情／反例；截斷必須可見（不得靜默丟棄資訊）。"""
     s = (s or "").strip()
@@ -533,7 +585,7 @@ def _cap_prompt_text(s: str) -> str:
 
 
 def _count_rule_hint_line(evidence: Any) -> str | None:
-    """計數型重算規則（unique_count / count_if）FAIL 反例的形狀提示行——localized 臂專用。
+    """計數與條件比率型重算規則（unique_count / count_if / cond_rate）FAIL 反例的形狀提示行——localized 臂專用。
 
     unique_count（effects_20261105 dabstep-10-localized 兩輪皆敗，vq-5nz.15）：
     草稿 30→6，重算值 5，兩值皆恰為 +1：模型用 cut|sort|uniq|wc 型 shell 管線
@@ -544,11 +596,17 @@ def _count_rule_hint_line(evidence: Any) -> str | None:
     - fb20 r1：`awk -F',' '$4=="5.0"'` → 40——裸逗號切分被引號欄（飯店名稱）內含
       逗號錯列，漏掉名稱含逗號的 6 行 5 星飯店。成功修復（policy30 r2）＝
       pandas 依欄位名過濾 → 46。
-    規則本身（col eq）已在證據中、但這類規則的常見錯誤形狀不在；本行只補形狀
-    提示，不給重算值、不給任何答案（leak guard 不變）。
+    cond_rate（contrast23_20261105 dabstep-23-localized，argon 20261105_1407）：
+    - payments.csv 有 42 筆 2023 年 Ecommerce 交易的 base64 雜湊欄（ip_address／email_address／
+      card_number）碰巧含子字串 `POS`，其中 19 筆為 has_fraudulent_dispute=True，導致未錨定欄位名的
+      `grep "POS" data/payments.csv | grep "2023" | cut -d',' -f18` 算出 19 / 12439 = 0.00152745
+      （恰等於失敗草稿錯值！），而 `grep "True"` 則命中 is_credit=True 算出 8978，使模型在 r1 與 r2
+      反覆懷疑 pandas 算出的 0.0。
+    規則本身已在證據中、但這類規則的常見錯誤形狀不在；本行只補形狀
+    提示，不給重算值、不給任何答案（leak guard 不變，且提示文字不含任何阿拉伯數字）。
     紅線：不給重算值、不給任何答案（leak guard 不變）；只 localized 臂、只 FAIL
     條目；不改重驗／停滯／退出碼。evidence 非 dict、無 rule、非 unique_count／
-    count_if → None。
+    count_if／cond_rate → None。
     """
     if not isinstance(evidence, dict):
         return None
@@ -578,6 +636,34 @@ def _count_rule_hint_line(evidence: Any) -> str | None:
     return None
 
 
+def _cond_rate_hint_line(evidence: Any) -> str | None:
+    """條件比率重算規則（cond_rate）FAIL 反例的欄位錨定提示行——localized 臂專用。
+
+    來源（contrast23_20261105 dabstep-23-localized，argon 20261105_1407）：
+    payments.csv 有 42 筆 2023 年 Ecommerce 交易的 base64 雜湊欄（ip_address／email_address／
+    card_number）碰巧含子字串 `POS`，其中 19 筆為 has_fraudulent_dispute=True，導致未錨定欄位名的
+    `grep "POS" data/payments.csv | grep "2023" | cut -d',' -f18` 算出 19 / 12439 = 0.00152745
+    （恰等於失敗草稿錯值！），而 `grep "True"` 則命中 is_credit=True 算出 8978，使模型在 r1 與 r2
+    反覆懷疑 pandas 算出的 0.0。
+    紅線：不給重算值、不給任何答案、不含任何阿拉伯數字（防 leak guard 子串誤判）；
+    與 _count_rule_hint_line 分離，保持 _count_rule_hint_line 對非計數規則回傳 None。
+    """
+    if not isinstance(evidence, dict):
+        return None
+    rule = evidence.get("rule")
+    if not isinstance(rule, str) or not rule.startswith("cond_rate"):
+        return None
+    return (
+        "【條件比率規則常見錯誤形狀（逐項檢查，請用按欄位名解析的程式計算）】"
+        "其一：嚴禁用未錨定欄位的文字匹配（如 grep 子字串或 cut 按逗號切欄）"
+        "直接數分子／分母行數——CSV 其他欄位（如雜湊編碼欄、電郵欄、另一布林欄）"
+        "可能碰巧含目標子字串（如 POS、True 或年份字串），導致跨欄誤中而多算，"
+        "甚至碰巧湊出與失敗草稿完全相同的錯誤比率。"
+        "其二：CSV 引號欄若含逗號會讓裸逗號切欄錯位。"
+        "請一律用 pandas 或 python csv 模組依精確欄位名過濾分母與分子後計算比率。"
+    )
+
+
 def _loop_warning_line(loop: dict[str, Any]) -> str:
     """上一輪工具死迴圈觀察（detect_tool_loop 回傳值）→ localized 提示的針對性行。
 
@@ -605,10 +691,16 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         if len(args_text) > 360:
             args_text = args_text[:220].rstrip() + " … " + args_text[-120:].lstrip()
         example = f"（例：{args_text}）"
-    head = (
-        f"【上一輪執行觀察】上一輪偵測到 {name} 以相同參數連續執行{reps} 次、"
-        f"中間沒有改動（疑似工具死迴圈）{example}。"
-    )
+    if loop.get("same_error_streak") is True:
+        head = (
+            f"【上一輪執行觀察】上一輪偵測到 {name} 連續執行{reps} 次皆因同一錯誤失敗"
+            f"（雖微調參數但未修根因，疑似工具死迴圈）{example}。"
+        )
+    else:
+        head = (
+            f"【上一輪執行觀察】上一輪偵測到 {name} 以相同參數連續執行{reps} 次、"
+            f"中間沒有改動（疑似工具死迴圈）{example}。"
+        )
     if loop.get("all_failed") is True:
         err = str(loop.get("error_class") or "執行錯誤").strip()
         sample = str(loop.get("error_sample") or "").strip()
@@ -646,13 +738,33 @@ def _crash_giveup_hint_line() -> str:
     )
 
 
+def _extract_error_signature(text: str) -> tuple[str, str]:
+    """從失敗工具輸出提取 (error_class, error_sample)。"""
+    m = _CRASH_EXC_RE.search(text)
+    if m:
+        cls = m.group(1)
+        for line in text.replace("\\n", "\n").splitlines():
+            if cls in line:
+                s = line.strip()
+                if s:
+                    return (cls, s[:80])
+        return (cls, "")
+    lines = [ln.strip() for ln in text.replace("\\n", "\n").splitlines() if ln.strip()]
+    non_meta = [
+        ln for ln in lines
+        if not _CRASH_EXIT_RE.search(ln) and not _CRASH_TRACEBACK_RE.search(ln)
+    ]
+    pick = non_meta[0] if non_meta else (lines[0] if lines else "")
+    return ("", pick[:80] if pick else "")
+
+
 def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
                          outcomes: list[tuple[tuple[str, Any], bool, str]]) -> dict[str, Any]:
-    """聚合迴圈 key（單 key 或 period-2 雙 key）的執行結果（r1044／vq-5nz.21；argon 20261105_1047 修）。
+    """聚合迴圈 key（單 key 或 period-2/3 多 key）的執行結果（r1044／vq-5nz.21；argon 20261105_1047 修）。
 
     outcomes＝依 toolCallId 關聯自該連勝串 tool_execution_end 的 (key, isError, 輸出文字)。
     - 該 key 無 end 事件⇒{}（未知，不造假）；
-    - period-2 (k1, k2) 若任一步驟在迴圈串中每次皆失敗（如 write 成功但配對的 bash 每次都 SyntaxError），
+    - 多步週期若任一步驟在迴圈串中每次皆失敗（如 write 成功但配對的 bash 每次都 SyntaxError），
       代表每一組交替迴圈皆失敗、從未跑出結果，以該失敗步驟計入全敗（all_failed=True）；
     - 至少一次完整成功⇒all_failed=False；
     - 全敗⇒all_failed=True，並自第一個失敗輸出提取 error_class＋error_sample
@@ -677,34 +789,24 @@ def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
     }
     if all_failed:
         for _key, _err, text in failed:
-            m = _CRASH_EXC_RE.search(text)
-            if not m:
-                continue
-            cls = m.group(1)
-            out["error_class"] = cls
-            for line in text.replace("\\n", "\n").splitlines():
-                if cls in line:
-                    s = line.strip()
-                    if s:
-                        out["error_sample"] = s[:80]
-                        break
-            break
+            cls, sample = _extract_error_signature(text)
+            if cls:
+                out["error_class"] = cls
+                if sample:
+                    out["error_sample"] = sample
+                break
         if "error_sample" not in out:
             for _key, _err, text in failed:
-                lines = [ln.strip() for ln in text.replace("\\n", "\n").splitlines() if ln.strip()]
-                non_meta = [
-                    ln for ln in lines
-                    if not _CRASH_EXIT_RE.search(ln) and not _CRASH_TRACEBACK_RE.search(ln)
-                ]
-                pick = non_meta[0] if non_meta else (lines[0] if lines else "")
-                if pick:
-                    out["error_sample"] = pick[:80]
+                _cls, sample = _extract_error_signature(text)
+                if sample:
+                    out["error_sample"] = sample
                     break
     return out
 
 
 def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
-    """偵測「工具死迴圈」：同一 (tool, args) 單步連續重複，或雙步 (k1, k2) 交替連續重複、中間沒有任何改動。
+    """偵測「工具死迴圈」：同一 (tool, args) 單步連續重複、雙步 (k1, k2)／三步 (k1, k2, k3) 交替連續重複，
+    或同一工具連續多次微調參數但皆因同一錯誤失敗（same_error_streak）。
 
     r1044（vq-5nz.21）：另自 tool_execution_end 依 toolCallId 關聯執行結果，
     區分「迴圈命令每次都失敗」（all_failed／error_class——contrast3 dabstep-23
@@ -716,14 +818,11 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
       10 次以上（period-1，同 args、同結果、中間沒有寫檔）直到 300s 預算耗盡；
     - effects_20261105 feedback_once20/dabstep-1753-pi-C localized r1：模型把完全相同的
       (write find_fees.py, bash cat << 'EOF' > find_fees.py ...) 雙步交替重複 9 組（18 次呼叫，
-      period-2，參數零改動）直到 300s 超時。
-    本函式把這個事實變機器可讀：
-    - 依序掃 `tool_execution_start` 事件（pi --mode json JSONL）；
-    - 先找相鄰同 key（period-1）最長重複串；
-    - 再找相鄰雙步 `(k1, k2)`（`k1 != k2`，period-2）完全相同參數連續重複組數；
-    - 達 `threshold` → 回傳 {"tool_name","args","consecutive_repetitions","threshold",...}，
-      否則 None（含無日誌）。
-
+      period-2，參數零改動）直到 300s 超時；
+    - contrast23_20261105 dabstep-23-pi-C generic r2：模型把 (write, bash python3, bash grep)
+      三步週期（period-3）連續重複 5 組；
+    - contrast23_20261105 dabstep-23-pi-C localized r1：模型連續 5 次執行 bash `python3 -c "...; if ..."`，
+      每次微調中間 `fraud_count = ...` 但全部因尾部 `; if ...` 觸發相同 SyntaxError。
     這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
     只記錄在該輪 agent 欄位（`tool_loop_suspected`），讓審計不必人讀 1MB 日誌。
     缺值＝None，不填假值。
@@ -802,7 +901,24 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
             best_p2_pair = (k1, k2)
             best_p2_start = i
 
-    if best is not None and best_streak >= threshold and best_streak >= best_p2_cycles:
+    best_p3_triple: tuple[tuple[str, Any], tuple[str, Any], tuple[str, Any]] | None = None
+    best_p3_cycles = 0
+    best_p3_start = 0
+    for i in range(n_keys - 2):
+        k1, k2, k3 = keys[i], keys[i + 1], keys[i + 2]
+        if k1 == k2 == k3:
+            continue
+        cycles = 1
+        j = i + 3
+        while j + 2 < n_keys and keys[j] == k1 and keys[j + 1] == k2 and keys[j + 2] == k3:
+            cycles += 1
+            j += 3
+        if cycles > best_p3_cycles:
+            best_p3_cycles = cycles
+            best_p3_triple = (k1, k2, k3)
+            best_p3_start = i
+
+    if best is not None and best_streak >= threshold and best_streak >= max(best_p2_cycles, best_p3_cycles):
         name, args = best
         out: dict[str, Any] = {"tool_name": name, "args": args,
                                "consecutive_repetitions": best_streak, "threshold": threshold}
@@ -813,7 +929,7 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         ]
         out.update(_loop_outcome_fields([best], streak_outcomes if streak_outcomes else end_outcomes))
         return out
-    if best_p2_pair is not None and best_p2_cycles >= threshold:
+    if best_p2_pair is not None and best_p2_cycles >= threshold and best_p2_cycles >= best_p3_cycles:
         k1, k2 = best_p2_pair
         out = {
             "tool_name": f"{k1[0]}+{k2[0]}",
@@ -828,6 +944,66 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
             if cid is not None and cid in end_by_cid
         ]
         out.update(_loop_outcome_fields([k1, k2], streak_outcomes if streak_outcomes else end_outcomes))
+        return out
+    if best_p3_triple is not None and best_p3_cycles >= threshold:
+        k1, k2, k3 = best_p3_triple
+        out = {
+            "tool_name": f"{k1[0]}+{k2[0]}+{k3[0]}",
+            "args": {"first": k1[1], "second": k2[1], "third": k3[1]},
+            "consecutive_repetitions": best_p3_cycles,
+            "threshold": threshold,
+            "period": 3,
+        }
+        streak_starts = starts[best_p3_start:best_p3_start + 3 * best_p3_cycles]
+        streak_outcomes = [
+            end_by_cid[cid] for _k, cid in streak_starts
+            if cid is not None and cid in end_by_cid
+        ]
+        out.update(_loop_outcome_fields([k1, k2, k3], streak_outcomes if streak_outcomes else end_outcomes))
+        return out
+
+    # 同工具連續多次微調參數但每次皆因同一錯誤簽名失敗（如 contrast23 dabstep-23 localized r1 calls 4-8）
+    cur_err_sig: tuple[str, str, str] | None = None
+    cur_err_streak = 0
+    best_err_streak = 0
+    best_err_sig: tuple[str, str, str] | None = None
+    best_err_args: Any = None
+    for (tname, targs), cid_s in starts:
+        if cid_s is not None and cid_s in end_by_cid:
+            _k, is_err, out_txt = end_by_cid[cid_s]
+            if is_err:
+                cls, sample = _extract_error_signature(out_txt)
+                if cls or sample:
+                    sig = (tname, cls, sample)
+                    if sig == cur_err_sig:
+                        cur_err_streak += 1
+                    else:
+                        cur_err_sig = sig
+                        cur_err_streak = 1
+                    if cur_err_streak > best_err_streak:
+                        best_err_streak = cur_err_streak
+                        best_err_sig = sig
+                        best_err_args = targs
+                    continue
+        cur_err_sig = None
+        cur_err_streak = 0
+
+    if best_err_sig is not None and best_err_streak >= threshold:
+        err_tool, err_cls, err_sample = best_err_sig
+        out = {
+            "tool_name": err_tool,
+            "args": best_err_args,
+            "consecutive_repetitions": best_err_streak,
+            "threshold": threshold,
+            "same_error_streak": True,
+            "all_failed": True,
+            "failure_count": best_err_streak,
+            "success_count": 0,
+        }
+        if err_cls:
+            out["error_class"] = err_cls
+        if err_sample:
+            out["error_sample"] = err_sample
         return out
     return None
 

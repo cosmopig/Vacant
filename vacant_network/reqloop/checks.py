@@ -1197,6 +1197,7 @@ def check_kv_recomputed(
     except ValueError:
         return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
 
+    unrounded_int_expected: float | None = None
     try:
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype == "count_if":
@@ -1253,7 +1254,11 @@ def check_kv_recomputed(
             if not ints:
                 raise UnknownSource("mean_int_col: 無可解析整數")
             raw_mean = sum(ints) / len(ints)
-            expected = float(round(raw_mean)) if rc.get("round") is None else float(raw_mean)
+            if rc.get("round") is None:
+                unrounded_int_expected = float(raw_mean)
+                expected = float(round(raw_mean))
+            else:
+                expected = float(raw_mean)
         elif rtype == "max_row_first":
             # G2 小批（e013 dab_426）：sel_col 最大值、平手取檔案序第一列、
             # 輸出該列 out_col——「neglecting ties…choose the one that appears
@@ -1317,6 +1322,16 @@ def check_kv_recomputed(
     atol = float(p.get("atol", 1e-6))
     rule_desc = f"{str(rc.get('type'))}: {data_rel} {json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}"
     if abs(got - expected) > atol:
+        if (unrounded_int_expected is not None
+                and not re.match(r"^[+-]?\d+$", val_str)
+                and round(got) == int(expected)
+                and abs(got - unrounded_int_expected) <= max(atol, 0.05)):
+            return _result(item, "FAIL",
+                           "答案值未取整數（與按公開規則重算的未取整均值一致，但依原始需求須四捨五入為整數；期望值不在證據中）",
+                           {"key": key, "deliverable_value": val_str,
+                            "problem": "not_an_integer",
+                            "rule": rule_desc,
+                            "expected_in_evidence": False})
         return _result(item, "FAIL",
                        f"答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）",
                        {"key": key, "deliverable_value": val_str,
