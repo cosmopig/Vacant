@@ -1,0 +1,70 @@
+{
+  "state": "NO_MECHANISM",
+  "why": "C vs C-nf 未顯著（開關無可測效應；packet §4：不改產品、非「無用」結論、1 rep H-12）",
+  "pairs": [
+    {
+      "x": "A",
+      "y": "C",
+      "pairs": 34,
+      "x_only": 5,
+      "y_only": 4,
+      "p_raw": 1.0,
+      "holm_significant": false
+    },
+    {
+      "x": "A",
+      "y": "C-nf",
+      "pairs": 34,
+      "x_only": 6,
+      "y_only": 4,
+      "p_raw": 0.75390625,
+      "holm_significant": false
+    },
+    {
+      "x": "C",
+      "y": "C-nf",
+      "pairs": 34,
+      "x_only": 4,
+      "y_only": 3,
+      "p_raw": 1.0,
+      "holm_significant": false
+    }
+  ],
+  "costs": {
+    "A": {
+      "arm": "A",
+      "n": 34,
+      "pass": 18,
+      "cost_unknown_n": 0,
+      "calls": 1083,
+      "tok": 25668309,
+      "calls_per_success": 60.166666666666664,
+      "tokens_per_success": 1426017.1666666667
+    },
+    "C": {
+      "arm": "C",
+      "n": 34,
+      "pass": 17,
+      "cost_unknown_n": 0,
+      "calls": 1368,
+      "tok": 33944523,
+      "calls_per_success": 80.47058823529412,
+      "tokens_per_success": 1996736.6470588236
+    },
+    "C-nf": {
+      "arm": "C-nf",
+      "n": 34,
+      "pass": 16,
+      "cost_unknown_n": 0,
+      "calls": 1399,
+      "tok": 33500148,
+      "calls_per_success": 87.4375,
+      "tokens_per_success": 2093759.25
+    }
+  },
+  "target": {
+    "A": false,
+    "C": false,
+    "C-nf": false
+  }
+}
