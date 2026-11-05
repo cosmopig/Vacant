@@ -664,6 +664,32 @@ def _cond_rate_hint_line(evidence: Any) -> str | None:
     )
 
 
+def _loop_remediation_tail(loop: dict[str, Any]) -> str:
+    """「先修掉錯誤的根因再執行」之後的根因處方（r1063）。
+
+    .py 逃逸處方只給 Python 一行式／語句拼接形狀（dabstep-23 SyntaxError×34，
+    r1044 實證）：僅當觀察的錯誤類名是 Python 例外類名（SyntaxError 等，
+    來源 _extract_error_signature 的例外名清單）時保留。非 Python 工具錯誤類
+    （jq → "jq"；edit 驗證 → 'Validation failed for tool "edit"' 前綴類，或無
+    例外類）改通用根因處方——對 jq 過濾器 parse 錯／edit 內容驗證錯開
+    「寫 .py、不要用一行式」是失焦處方（jq 過濾器不是 Python 程式；edit 驗證錯
+    與一行式語法無關）。effects_20261105／contrast055_1273 真實形狀：
+    policy30/dabstep-1753-pi-C localized r1 jq×4、feedback_once20/dab_039-pi-C
+    localized r1 edit×5、contrast055_1273/dabstep-1273-pi-C generic r1
+    SyntaxError×7。
+    """
+    cls = str(loop.get("error_class") or "").strip()
+    if cls and cls.isidentifier() and (cls.endswith("Error") or cls.endswith("Exception")):
+        return (
+            "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
+            "確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
+        )
+    return (
+        "先修掉錯誤的根因再執行：先查明這類命令失敗的原因（參數、語法或內容不符），修正後再執行；"
+        "確認結果正確後，直接把結果寫入交付物檔案。"
+    )
+
+
 def _loop_warning_line(loop: dict[str, Any]) -> str:
     """上一輪工具死迴圈觀察（detect_tool_loop 回傳值）→ localized 提示的針對性行。
 
@@ -677,6 +703,9 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
     **每次都失敗**（all_failed=True，如 SyntaxError ×34、從無結果）時，舊行
     「執行一次已得到結果後」的前提不成立、提示失焦——改點名錯誤類＋具體語法
     規則（寫 .py 檔案執行）＋「跑通即寫入交付物」，不帶該假前提。
+
+    r1063：根因處方依錯誤類分流（_loop_remediation_tail）——.py 逃逸處方只給
+    Python 例外類名；jq／edit 驗證等非 Python 工具錯誤類給通用根因處方。
     """
     name = str(loop.get("tool_name") or "工具")
     reps = loop.get("consecutive_repetitions")
@@ -705,16 +734,13 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
             f"【上一輪執行觀察】上一輪偵測到 {name} 合計失敗{n} 次、皆屬同一類錯誤（{err}{sample_part}）"
             f"（每次微調參數但未修根因，疑似工具死迴圈）{example}。"
         )
+        tail = _loop_remediation_tail(loop)
         if loop.get("all_failed") is True:
             return head + (
                 f"本輪禁止重複該類命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
-                "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
-                "確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
+                + tail
             )
-        return head + (
-            "本輪禁止重複該類失敗命令。先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行"
-            "（不要用一行式拼接多條語句），確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
-        )
+        return head + "本輪禁止重複該類失敗命令。" + tail
     if loop.get("same_error_streak") is True:
         head = (
             f"【上一輪執行觀察】上一輪偵測到 {name} 連續執行{reps} 次皆因同一錯誤失敗"
@@ -733,8 +759,7 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         sample_part = f"（{sample}）" if (sample and sample != err) else ""
         return head + (
             f"本輪禁止重複該命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
-            "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
-            "確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
+            + _loop_remediation_tail(loop)
         )
     return head + (
         "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"

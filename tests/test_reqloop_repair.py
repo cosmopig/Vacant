@@ -2362,6 +2362,94 @@ def test_error_class_repeat_non_exception_tool_errors_jq_and_edit_family(tmp_pat
     assert repair.detect_tool_loop(log3) is None
 
 
+def test_loop_warning_remediation_split_by_error_class_kind(task_dir, tmp_path):
+    """r1063（審查核對 4 新命中 downstream）：error_class_repeat／all_failed 分支的
+    處方原先一律是 Python 專屬（「寫 .py 檔案、不要用一行式」——為 dabstep-23
+    SyntaxError×34 形狀而設，r1044 實證），但 jq／edit 驗證這類非 Python 工具錯誤
+    也走同一渲染路徑——對 jq 過濾器 parse 錯／edit 內容驗證錯，「寫 .py」處方失焦
+    （jq 過濾器不是 Python 程式；edit 驗證錯與一行式語法無關）。
+
+    修正：警示行的根因處方依錯誤類分流——Python 例外類名（SyntaxError 等）保留
+    .py 逃逸處方（r1044 形狀不改）；非 Python 工具錯誤類（jq／edit 前綴類、或無
+    例外類）改通用根因處方（先查明原因：參數、語法或內容不符），不含 .py／一行式。
+    真實形狀：policy30/dabstep-1753-pi-C localized r1 jq×4（交錯成功）；
+    feedback_once20/dab_039-pi-C localized r1 edit×5（交錯成功）；
+    dabstep-1273-pi-C generic r1 SyntaxError×7（交錯成功）。
+    """
+    def _write_log(path: pathlib.Path, events: list) -> None:
+        path.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n",
+                        encoding="utf-8")
+
+    # 1. jq parse error ×4 交錯成功（error_class_repeat 前綴類 "jq"）→ 通用處方、無 .py
+    ev: list = []
+    for n in range(8):
+        cid = f"c{n}"
+        ev.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                   "args": {"command": f"jq -r '.[{n}]' fees.json"}})
+        if n % 2 == 0:   # 4 次失敗、4 次成功探查交錯
+            col = 19 + 7 * (n // 2)
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "isError": True,
+                       "result": {"content": [{"text":
+                           "jq: parse error: Expected string key before ':' at line 1, "
+                           f"column {col}"}]}})
+        else:
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "result": {"content": [{"text": "ok"}]}})
+    log_jq = tmp_path / "jq.log"
+    _write_log(log_jq, ev)
+    hit = repair.detect_tool_loop(log_jq)
+    assert hit is not None and hit["error_class"] == "jq"
+    warn = repair._loop_warning_line(hit)
+    assert "jq" in warn
+    assert "先修掉錯誤的根因再執行" in warn and "寫入交付物檔案" in warn   # 通用根因處方在
+    assert ".py" not in warn and "一行式" not in warn                      # 無 Python 專屬處方
+
+    # 2. SyntaxError ×4 交錯成功（1273 真實形狀）→ Python 例外類：保留 .py 處方（r1044）
+    evp: list = []
+    for n in range(7):
+        cid = f"p{n}"
+        cmd = f"python3 -c \"data = json.load(open('fees.json')); x = data[{n}]\""
+        evp.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                    "args": {"command": cmd}})
+        if n % 2 == 0:   # 4 次失敗
+            evp.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                        "isError": True,
+                        "result": {"content": [{"text":
+                            '  File "<string>", line 1\nSyntaxError: invalid syntax\n'
+                            "Command exited with code 1"}]}})
+        else:
+            evp.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                        "result": {"content": [{"text": "ok"}]}})
+    log_py = tmp_path / "py.log"
+    _write_log(log_py, evp)
+    hitp = repair.detect_tool_loop(log_py)
+    assert hitp is not None and hitp["error_class"] == "SyntaxError"
+    warnp = repair._loop_warning_line(hitp)
+    assert "SyntaxError" in warnp
+    assert ".py" in warnp and "一行式" in warnp          # r1044 處方保留
+
+    # 3. 同一 jq 命令連續 ×4 全敗（plain streak、無例外類）→ 亦不帶 .py 處方
+    evs: list = []
+    for n in range(4):
+        cid = f"s{n}"
+        evs.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                    "args": {"command": "jq -r '.[0]' fees.json"}})
+        evs.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                    "isError": True,
+                    "result": {"content": [{"text":
+                        "jq: parse error: Expected string key before ':' at line 1, column 19"}]}})
+    log_s = tmp_path / "streak.log"
+    _write_log(log_s, evs)
+    hits = repair.detect_tool_loop(log_s)
+    assert hits is not None and hits.get("all_failed") is True
+    assert not hits.get("error_class")   # jq 錯誤無 Python 例外類
+    warns = repair._loop_warning_line(hits)
+    assert "每次都失敗" in warns
+    assert ".py" not in warns and "一行式" not in warns
+    assert "先修掉錯誤的根因再執行" in warns
+
+
 def test_localized_prompt_orders_immediate_deliverable_write_not_waiting_for_hidden_recomputed_value(task_dir):
     """argon 20261105_1047 回歸：
     effects_20261105 / effects_p1 / contrast3 中 dabstep-23 localized 共 6 輪有 5 輪模型在
