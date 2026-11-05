@@ -189,6 +189,34 @@ def test_prompt_tells_env_has_sciplib_and_verify_by_import(task_dir):
         assert "手刻" in p or "替代演算法" in p, mode   # 禁止假設缺失而手刻
 
 
+def test_localized_round1_prompt_names_c_one_liner_redline_and_redirect_form(task_dir):
+    """contrast23_20261105 dabstep-23-pi-C localized r1（@26f23af5，vq-5nz.25）：
+    - 12 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError（log 35×）：
+      -c 單行編譯下 `;` 後接 if/for/def 等複合陳述＝語法錯，重試永不成功；
+    - 同期 `python3 calculate_fraud.py` → 0.0 成功 7 次，卻從未重定向寫入 answer.txt
+      ⇒ Round 1 猶豫迴圈，缺口到 r2 才關閉。
+    26f23af5「立即先寫入」行在提示裡但沒打破迴圈；_loop_warning_line 的「寫 .py、
+    不要一行式」逃路只從第 2 輪才生效。第 1 輪沒有上一輪觀察，提示本身必須點名
+    一行式語法紅線＋「腳本 > 交付物」重定向式。generic 對照臂不帶該執行觀察行。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="localized")
+    # 紅線 1：點名 `;`＋複合陳述的 SyntaxError（35× 失敗根因）＋.py 逃路
+    # （措辭為 `python -c`：提示行不得含數字，防 leak guard 子串誤判）
+    assert "python -c" in loc
+    assert "SyntaxError" in loc
+    assert ".py" in loc
+    assert "if" in loc
+    # 紅線 2：算出成功 ⇒ 下一個命令＝寫入交付物（重定向式，非再驗證）
+    assert "> answer.txt" in loc
+    assert "重定向" in loc
+    # 臂分離：generic 對照臂不帶 localized 專屬的執行觀察行
+    gen = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="generic")
+    assert "SyntaxError" not in gen
+
+
 def test_prompt_never_names_hidden_sources(task_dir):
     """修復請求不得出現 hidden／scorer 等隱藏來源字眼。"""
     rs = load_req_set(task_dir)

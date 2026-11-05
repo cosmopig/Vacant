@@ -296,6 +296,27 @@ def build_repair_prompt(
             "不同的新結果（或獨立驗算一次確認無誤），請**立即先把新結果寫入交付物檔案（如 answer.txt）**；"
             "嚴禁因反例未顯示隱藏期望值（expected_in_evidence=false）而遲遲不寫交付物或反覆重跑單行驗證命令。"
         )
+        # 第 1 輪即可見的兩條紅線（不等上一輪觀察）：
+        # contrast23_20261105 dabstep-23-pi-C localized r1（@26f23af5，vq-5nz.25）：
+        # 12 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError（35×）——
+        # -c 單行編譯下 `;` 後接 if/for/def 複合陳述即語法錯，重試永不成功；同期
+        # `python3 calculate_fraud.py` → 0.0 成功 7 次卻從未寫入 answer.txt（r2 才以
+        # `python3 calculate_fraud.py > answer.txt` 關閉缺口）。_loop_warning_line 的
+        # 「寫 .py、不要一行式」逃路只從第 2 輪生效；第 1 輪必須自己帶這兩條。
+        # 只 localized 臂（generic 對照臂不帶執行觀察行）；不帶重算值、不影響裁決。
+        # 注意：這兩行不得含任何數字——leak guard 測試（如重算值 "3" 不得進提示）
+        # 以子串判斷，`python3` 的 "3" 會被誤判為重算值（故用 `python -c` 措辭）。
+        lines.append(
+            "【python 一行式紅線】`python -c` 只能執行小陳述；`;` 之後不得接 "
+            "if / for / def / with 等複合陳述（例如 `data = read(); if data: print(len(data))` "
+            "會直接 SyntaxError，重試多少次都不會成功）。需要多分支驗證時，把程式碼寫成 .py 檔案後執行；"
+            "工作區裡已有能算出結果的腳本時，直接執行該腳本。"
+        )
+        lines.append(
+            "計算腳本一旦成功印出與失敗草稿不同的新結果，下一個動作必須是把結果寫入交付物檔案："
+            "腳本輸出即結果本身時，直接重定向寫入（例如 `python <計算腳本> > answer.txt`）；"
+            "寫入交付物之前不要再執行任何驗證命令。"
+        )
         # 上一輪工具死迴圈觀察 → 本輪針對性指令（點名工具＋次數＋命令例）。
         # 只 localized 臂：generic 對照臂定義＝不帶任何逐輪觀察（保持兩臂差異乾淨）。
         # 只帶執行觀察，不帶需求失敗證據或重算值；不影響重驗／停滯判定。
