@@ -629,6 +629,65 @@ def test_g3_c6_append_p99_delta_le_10pct(tmp_path):
         f"C6 P99 delta {delta * 100:.1f}% > 10% (base {base:.2f}ms, after {after:.2f}ms)")
 
 
+# ── vq-ifn（C6 重設計候選）：per-append O(卷大小) 行數掃描的鑑別測試 ────────────────────
+# 回歸特徵（a85dd2a1^，未修）：entry-count 封印觸發器啟用時，每次 _append 都對整個活動卷
+#   全量數行（sum(1 for ln in f if ln.strip())）⇒ per-append 成本隨卷大小線性增長。
+# 修復（a85dd2a1，r1015）：行數隨寫遞增快取；只在未知或 st_size 已變時全量數一次 ⇒ 成本平坦。
+# 為何本測試鑑別而舊 P99-delta 不鑑別（vq-p9g r1018 註：修與未修皆過皆不過＝coin flip）：
+#   (a) 同一 run 內早期窗 vs 晚期窗——公共基礎成本在差分中消去，無跨 run 方差
+#       （舊測試比兩條獨立 3000 步 run 的 P99 尾，尾被 ~55 ms 封印事件主導）；
+#   (b) 封印事件結構性排除：entry 觸發器保持啟用（掃描路徑照跑）但
+#       volume_max_entries=10**9 / volume_max_bytes=10**12 ⇒ 基準期間不發生封印；
+#   (c) 每窗 100 連續步的中位數（對 GC 尖峰穩健；P99 不穩健）。
+# 實測分離度（2026-11-05 本機、ops/audits/c6_discrim_check.py；行均 ≈927B、掃描 ≈0.3 ms/MB）：
+#   未修 a85dd2a1^：delta ∈ [2.25, 2.45] ms/step ⇒ FAIL；修後：delta ∈ [0.42, 0.66] ms ⇒ PASS；
+#   兩帶不重疊（3/3 跑鑑別成立；舊 4000 步規模有一跑未修 1.41 < 1.5 未鑑別，故放大到 6000 步）。
+# 紅線：1.5 ms 門檻落在兩機制實測分離帶內（未修 ≥1.5× 過、修後 ≥2.3× 裕量）；改門檻
+#   （任何方向）須走審查輪（vq-ifn 驗收），不得單方調整。舊 10% P99 預註準則維持原狀
+#   （上方 xfail 測試未動）直到審查輪定案取代。
+def test_g3_c6_append_cost_flat_with_volume_growth(tmp_path):
+    """vq-ifn：per-append 成本必須隨活動卷增長保持平坦（回歸＝O(卷大小) 每次重數行）。
+
+    6000 步（pre+post，每步 2 筆）；早期窗＝第 600–1000 步（卷 ≈1200–2000 行 ≈1.4 MB）、
+    晚期窗＝第 5600–6000 步（卷 ≈11200–12000 行 ≈10.9 MB）；斷言 晚期中位 − 早期中位 ≤ 1.5 ms/step。
+    未修碼此差分 ≈ 2×(掃描 10.9MB − 掃描 1.4MB) ≈ 2.2–2.5 ms/step > 1.5 ms
+    （本機掃描實測 ≈0.3 ms/MB；round-895 機器更慢 6–9 ms/次）；修後碼快取命中、無隨卷
+    增長的掃描工作 ⇒ ≈0.4–0.7 ms（公共基礎成本殘差）。"""
+
+    def _median_ms(times: list[float], lo: int, hi: int) -> float:
+        seg = sorted(times[lo:hi])
+        return seg[len(seg) // 2]
+
+    vh = tmp_path / "vh"
+    ws = tmp_path / "ws"
+    ws.mkdir(parents=True)
+    for i in range(5):
+        (ws / f"f{i}.txt").write_text("x\n")
+    old = os.environ.get("VACANT_HOME")
+    os.environ["VACANT_HOME"] = str(vh)
+    try:
+        keys.init_local()
+        rec = R.Recorder(ws)
+        rec.volume_max_bytes = 10 ** 12    # byte 封印排除
+        rec.volume_max_entries = 10 ** 9   # entry 觸發器啟用（掃描路徑照跑）但不可能封印
+        m = R.Actor("c6f", "s1")
+        times: list[float] = []
+        for i in range(6000):
+            t0 = time.perf_counter()
+            rec.pre(f"t{i}", m, "Write", {"file_path": f"f{i % 5}.txt"})
+            rec.post(f"t{i}", m, "Write", {"file_path": f"f{i % 5}.txt"}, "ok")
+            times.append((time.perf_counter() - t0) * 1000)
+    finally:
+        _restore_home(old)
+    early = _median_ms(times, 600, 1000)
+    late = _median_ms(times, 5600, 6000)
+    delta = late - early
+    assert delta <= 1.5, (
+        f"C6-flat: append cost grows with volume size — late {late:.2f}ms vs early {early:.2f}ms "
+        f"(delta {delta:.2f}ms > 1.5ms) ⇒ per-append O(volume) recount regression present "
+        f"(see vq-ifn / ops/audits/c6_discrim_check.py)")
+
+
 def test_set_aside_and_repair_tail_invalidates_vol_cache(env):
     """set_aside 與 _repair_tail 截斷時必須失效活動卷快取（_vol_line_count 與 _vol_size）。
     否則舊鏈被移走或截斷後，Recorder 殘留舊行數／舊大小，新寫入碰巧撞同 byte 大小時會取到
