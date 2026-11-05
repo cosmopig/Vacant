@@ -194,12 +194,17 @@ class G2Result:
     cells: list[dict[str, Any]]
 
     def to_dict(self) -> dict[str, Any]:
+        # R20261105_0346-1：no_gap（0 呼叫）格本無 usage/wall（cost 為 None）——未執行
+        # 的格不該把整份總計拖成 UNKNOWN；只有「實際跑了 session（calls>0）」的格
+        # 才要求齊全。舊碼對所有格 all()，任何一格 localized no_gap 即令 totals 恆 None。
+        active = [c for c in self.cells if int(c["cost"].get("calls") or 0) > 0]
+
         def _total(key: str) -> int | None:
-            # P001-20261105-03：任一格的值缺（None）⇒ 總計＝UNKNOWN（None）——
-            # 不得把已知部分當完整總和。空清單（無格）⇒ 0（無數據可加，完整事實）。
-            vals = [c["cost"].get(key) for c in self.cells]
+            # P001-20261105-03 紅線保留：任一格實際跑了（calls>0）卻缺值 ⇒ UNKNOWN（None）
+            # ——不得把已知部分當完整總和。無任何 active 格 ⇒ 無可加總 ⇒ UNKNOWN（不填 0）。
+            vals = [c["cost"].get(key) for c in active]
             if not vals:
-                return 0
+                return None
             if all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in vals):
                 return int(sum(vals))
             return None
@@ -216,7 +221,9 @@ class G2Result:
             "cells": self.cells,
             "totals": {
                 "cells": len(self.cells),
-                "model_calls": _total("model_calls"),  # 實際模型 API 呼叫數；任一格缺 ⇒ UNKNOWN（不填 0）
+                # R20261105_0346-1：修復 session（agent 啟動）數；與 model_calls（API 請求數）嚴格區分
+                "repair_sessions": sum(int(c["cost"].get("calls") or 0) for c in self.cells),
+                "model_calls": _total("model_calls"),  # 實際模型 API 呼叫數；任一 active 格缺 ⇒ UNKNOWN（不填 0）
                 "tokens": _total("tokens"),
                 "wall_ms_total": _total("wall_ms_total"),
             },

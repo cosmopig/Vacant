@@ -364,11 +364,88 @@ def test_result_written_machine_readable(tmp_path):
     assert data["manifest"]["sha256"] == _sha(MANIFEST)
     assert len(data["cells"]) == 6
     assert data["totals"]["cells"] == 6
-    # P001-20261105-03：fake 不寫原始 usage ⇒ 任一格缺 ⇒ 總計 UNKNOWN，
-    # 不得把已知部分（部分格的 wall_ms）當完整總和
+    # R20261105_0346-1：dab_035-pi-C（good）的 localized 格 no_gap（0 呼叫，cost 全 None）
+    # 不得拖垮總計。smoke manifest max_rounds=2：4 個 bad 格各 2 輪（stall 止）＋good generic
+    # 1 輪（min_rounds=1，重驗後缺口關閉）＝9 個 session，wall 各 100 ⇒ 900。
+    # fake 不寫原始 usage ⇒ 任一 active 格缺 ⇒ model_calls/tokens 仍 UNKNOWN（P001-20261105-03）。
+    active = [c for c in data["cells"] if c["cost"]["calls"] > 0]
+    assert len(active) == 5
+    assert data["totals"]["repair_sessions"] == sum(c["cost"]["calls"] for c in data["cells"]) == 9
     assert data["totals"]["model_calls"] is None
     assert data["totals"]["tokens"] is None
-    assert data["totals"]["wall_ms_total"] is None
+    assert data["totals"]["wall_ms_total"] == sum(c["cost"]["wall_ms_total"] for c in active) == 900
+
+
+def test_totals_active_cells_only_usage_complete(tmp_path):
+    """R20261105_0346-1(a)：所有 calls>0 格都有完整 usage 時，即使存在 no_gap（calls==0）格，
+    totals.tokens／model_calls 仍是完整精確總和（不再恆 None）。"""
+    man = g2.G2Manifest.load(MANIFEST)
+    base = MANIFEST.parent
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        # 每輪 1 次 API 呼叫（message_end＝1 次真實呼叫）、100+15 tokens
+        (log_dir / "agent_stdout.log").write_text(
+            json.dumps({"type": "message_end",
+                        "message": {"role": "assistant",
+                                    "usage": {"input": 100, "output": 15}}}) + "\n",
+            encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    out = tmp_path / "out"
+    res = g2.run_g2_smoke(man, base, out, build, run, include_dirs=("data",))
+    data = res.to_dict()
+    active = [c for c in data["cells"] if c["cost"]["calls"] > 0]
+    assert len(active) == 5   # good 草稿的 localized 格 no_gap（0 呼叫）
+    # 9 個 session（4 bad×2 輪 + good generic 1 輪），每輪 1 次 API 呼叫、115 tokens
+    assert data["totals"]["repair_sessions"] == 9
+    assert data["totals"]["model_calls"] == 9      # 9 輪 × 1 次 API 呼叫
+    assert data["totals"]["tokens"] == 9 * 115     # 完整精確總和，不被 no_gap 格拖成 None
+    assert data["totals"]["wall_ms_total"] == 900
+
+
+def test_totals_any_active_cell_missing_usage_is_none(tmp_path):
+    """R20261105_0346-1(b)：任一 calls>0 格缺 usage ⇒ totals.tokens／model_calls 必須 None
+    （P001-20261105-03：不得把已知部分當完整總和）。"""
+    man = g2.G2Manifest.load(MANIFEST)
+    base = MANIFEST.parent
+    state = {"n": 0}
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        state["n"] += 1
+        if state["n"] == 1:
+            # 第一個 active 格不寫 usage（缺值）
+            (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        else:
+            (log_dir / "agent_stdout.log").write_text(
+                json.dumps({"type": "message_end",
+                            "message": {"role": "assistant",
+                                        "usage": {"input": 100, "output": 15}}}) + "\n",
+                encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    out = tmp_path / "out"
+    res = g2.run_g2_smoke(man, base, out, build, run, include_dirs=("data",))
+    data = res.to_dict()
+    assert data["totals"]["repair_sessions"] == 9
+    assert data["totals"]["model_calls"] is None   # 任一 active 格缺 ⇒ UNKNOWN
+    assert data["totals"]["tokens"] is None
+    assert data["totals"]["wall_ms_total"] == 900  # wall 各格齊全，不受 usage 缺值影響
 
 
 def test_result_manifest_sha_is_the_loaded_manifest(tmp_path):
