@@ -176,6 +176,7 @@ def build_repair_prompt(
     *,
     feedback_mode: str = "localized",
     include_dirs: tuple[str, ...] = ("data",),
+    prev_round_agent: dict[str, Any] | None = None,
 ) -> str:
     """組修復請求。只帶：相關原文、目前交付物、失敗證據（可見反例）、
     允許改的範圍、必須保持成立的條件。不帶任何隱藏答案／hidden／scorer。
@@ -183,6 +184,11 @@ def build_repair_prompt(
     兩臂（G2 對照）：
     - `localized`：逐條 FAIL 的驗證結果＋可見反例＋已 PASS 條目（必須保持）。
     - `generic`：只有原始需求＋「再檢查修正一次」（對照臂，不帶失敗證據）。
+
+    `prev_round_agent`（第 2+ 輪）：上一輪 agent 欄位。localized 臂若其
+    `tool_loop_suspected` 非空，提示點名上一輪重複的工具與次數（針對性反迴圈
+    指令）——effects_20261105 dabstep-23：通用「不要重複同一命令」行不足以打破
+    ×117 迴圈，具體證據才讓模型知道該避免哪一條。generic 對照臂不使用（定義不變）。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
@@ -270,6 +276,12 @@ def build_repair_prompt(
         lines.append("只修上面的缺口，不要重寫不相關的部分；改完後所有必需條目都要能通過重驗。")
         lines.append("若同一條驗證命令重跑仍得相同結果，不要重複同一命令："
                      "換一種計算方式（重新檢查過濾條件與公式），與重算值一致後才產出交付物。")
+        # 上一輪工具死迴圈觀察 → 本輪針對性指令（點名工具＋次數＋命令例）。
+        # 只 localized 臂：generic 對照臂定義＝不帶任何逐輪觀察（保持兩臂差異乾淨）。
+        # 只帶執行觀察，不帶需求失敗證據或重算值；不影響重驗／停滯判定。
+        loop = (prev_round_agent or {}).get("tool_loop_suspected")
+        if isinstance(loop, dict) and loop:
+            lines.append(_loop_warning_line(loop))
     else:
         lines.append("")
         lines.append("請對照原始需求，重新檢查並修正工作區裡的交付物檔案一次。")
@@ -415,6 +427,36 @@ def _cap_prompt_text(s: str) -> str:
     if len(s) <= _PROMPT_TEXT_CAP:
         return s
     return s[:_PROMPT_TEXT_CAP].rstrip() + f"…（已截斷，共 {len(s)} 字）"
+
+
+def _loop_warning_line(loop: dict[str, Any]) -> str:
+    """上一輪工具死迴圈觀察（detect_tool_loop 回傳值）→ localized 提示的針對性行。
+
+    與提示裡既有的通用行（「不要重複同一命令」）不同：點名上一輪實際重複的
+    工具、次數與命令例，讓模型知道該避免**哪一條**。effects_20261105 證據：
+    通用行已在提示中，dabstep-23-localized 仍 ×117 重複至超時——通用警告不足
+    以打破迴圈。只帶執行觀察（工具名／參數／次數），不帶需求失敗證據或重算值；
+    參數例截斷必須可見。
+    """
+    name = str(loop.get("tool_name") or "工具")
+    reps = loop.get("consecutive_repetitions")
+    reps = f" {reps}" if isinstance(reps, int) else ""
+    try:
+        args_text = json.dumps(loop.get("args"), ensure_ascii=False, default=str)
+    except (TypeError, ValueError):
+        args_text = ""
+    if args_text in ("", "{}"):
+        example = ""
+    else:
+        if len(args_text) > 160:
+            args_text = args_text[:160].rstrip() + "…"
+        example = f"（例：{args_text}）"
+    return (
+        f"【上一輪執行觀察】上一輪偵測到 {name} 以相同參數連續執行{reps} 次、"
+        f"中間沒有改動（疑似工具死迴圈）{example}。"
+        "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"
+        "不要再次執行同一命令。"
+    )
 
 
 def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
@@ -634,8 +676,13 @@ def run_repair_round(
     timeout_s: float,
     include_dirs: tuple[str, ...] = ("data",),
     authoritative: pathlib.Path | None = None,
+    prev_round_agent: dict[str, Any] | None = None,
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。來源目錄不被改動。
+
+    `prev_round_agent`（第 2+ 輪）：上一輪 agent 欄位（第 1 輪＝None）。localized
+    臂若其 tool_loop_suspected 非空，本輪提示點名上一輪重複的工具與次數（針對性
+    反迴圈指令）；generic 臂不受影響。只進提示，不改重驗／停滯／退出碼。
 
     累積修復（P000-20261105-01）：
     - `draft_dir`＝本輪來源目錄：第 1 輪為原草稿；第 N 輪（N≥2）為上一輪工作區
@@ -660,7 +707,8 @@ def run_repair_round(
     ws = prepare_workspace(task_dir, draft_dir, out_root,
                            round_n=n, include_dirs=include_dirs)
     prompt = build_repair_prompt(authoritative, req_set, draft_dir, before,
-                                 feedback_mode=feedback_mode, include_dirs=include_dirs)
+                                 feedback_mode=feedback_mode, include_dirs=include_dirs,
+                                 prev_round_agent=prev_round_agent)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
     launch = build(prompt, ws)
     log_dir = pathlib.Path(out_root) / f"agent_round_{n}"
@@ -795,6 +843,7 @@ def repair_slice(
         # 每輪工作區 round_N/ 即該輪快照。
         source_dir = d_dir
         prev_after = before
+        prev_round_agent: dict[str, Any] | None = None
         tamper_seen = False   # P000-20261105-02：任一輪來源改動即不可接受
         for n in range(1, max_rounds + 1):
             r = run_repair_round(
@@ -803,8 +852,10 @@ def repair_slice(
                 feedback_mode=feedback_mode, timeout_s=timeout_s,
                 include_dirs=include_dirs,
                 authoritative=auth,
+                prev_round_agent=prev_round_agent,
             )
             rounds.append(r)
+            prev_round_agent = r.agent   # 第 N+1 輪提示可點名第 N 輪的工具死迴圈觀察
             if r.source_tampered:
                 tamper_seen = True
             # 缺口關閉：全部必需項 PASS，且全程無來源改動（P000-20261105-02：

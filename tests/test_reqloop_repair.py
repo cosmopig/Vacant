@@ -1553,3 +1553,110 @@ def test_run_repair_round_records_crash_giveup_suspected(task_dir, tmp_path):
         authoritative=auth2,
     )
     assert r2.agent["crash_giveup_suspected"] is None
+
+
+# ── 上一輪工具死迴圈觀察 → 本輪 localized 針對性反迴圈指令 ──────────────
+# 來源（effects_20261105 dabstep-23 localized）：提示裡已有通用「不要重複同一
+# 命令」行，12B 仍把同一條 pandas 一行式重複 ×117 直到 300s 超時——通用警告
+# 不足以打破迴圈。detect_tool_loop（r1028）把迴圈變機器可讀，但只記錄、不回饋
+# 模型。本組測試要求：上一輪偵測到迴圈時，第 2 輪 localized 提示點名工具＋
+# 次數（具體證據，讓模型知道該避免**哪一條**）；generic 對照臂定義不變。
+
+
+def _loop_observation(reps: int = 11) -> dict:
+    return {"tool_loop_suspected": {
+        "tool_name": "bash",
+        "args": {"command": "python3 -c \"import pandas as pd; print(pd.read_csv('expenses.csv').sum())\""},
+        "consecutive_repetitions": reps,
+        "threshold": 4,
+    }}
+
+
+def test_localized_prompt_names_prev_round_loop_with_tool_and_count(task_dir):
+    """上一輪偵測到工具死迴圈 ⇒ 本輪 localized 提示點名工具、次數與命令例；
+    舊的通用行保留（不取代、只補強）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="localized",
+                                   prev_round_agent=_loop_observation(11))
+    assert "疑似工具死迴圈" in p
+    assert "連續執行 11 次" in p
+    assert "bash" in p
+    assert "禁止重複該命令" in p
+    assert "pd.read_csv" in p                       # 命令例（讓模型知道是哪一條）
+    assert "不要重複同一命令" in p                   # 通用行仍在
+
+
+def test_localized_prompt_without_prev_loop_is_unchanged(task_dir):
+    """無上一輪觀察（第 1 輪／未偵測到）⇒ 提示與舊行為逐字元相同（不新增行）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="localized")
+    for prev in (None, {"tool_loop_suspected": None}, {"other": 1}):
+        p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                       feedback_mode="localized",
+                                       prev_round_agent=prev)
+        assert p == base, prev
+        assert "疑似工具死迴圈" not in p
+
+
+def test_generic_prompt_ignores_prev_round_loop(task_dir):
+    """對照臂定義不變：generic 不帶任何逐輪觀察；即使上一輪有迴圈，generic
+    提示仍與舊行為逐字元相同（兩臂差異維持在設計定義上，不混入第三變數）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="generic")
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="generic",
+                                   prev_round_agent=_loop_observation(11))
+    assert p == base
+
+
+def test_second_round_prompt_carries_first_round_loop(task_dir, tmp_path):
+    """端到端（synthetic）：第 1 輪 agent 死迴圈（同一命令 ×5，detect_tool_loop
+    從真實 log 形狀偵測）且未修好 ⇒ 第 2 輪 localized 提示點名該迴圈；第 1 輪
+    提示不帶（無觀察可帶）。觀察只進提示、不改裁決：第 1 輪照樣計停滯、
+    第 2 輪修好仍關缺口。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    good_md = _good_summary(task_dir)
+    loop_log = "\n".join(json.dumps({
+        "type": "tool_execution_start", "toolName": "bash",
+        "args": {"command": "python3 -c \"import pandas as pd; print(1)\""},
+    }, ensure_ascii=False) for _ in range(5)) + "\n"
+
+    calls = {"n": 0}
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        calls["n"] += 1
+        log_dir.mkdir(parents=True, exist_ok=True)
+        if calls["n"] == 1:
+            (log_dir / "agent_stdout.log").write_text(loop_log, encoding="utf-8")
+        else:
+            (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+            (workspace / "summary.md").write_text(good_md, encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return _run_result(log_dir)
+
+    log: list[dict] = []
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build(log), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert calls["n"] == 2
+    assert out.stopped == "gap_closed"
+    # 第 1 輪：無上一輪觀察 ⇒ 不帶針對性行（通用行仍在）
+    assert "疑似工具死迴圈" not in log[0]["prompt"]
+    assert "不要重複同一命令" in log[0]["prompt"]
+    # 第 2 輪：點名第 1 輪的迴圈（工具＋次數＋命令例）
+    assert "疑似工具死迴圈" in log[1]["prompt"]
+    assert "連續執行 5 次" in log[1]["prompt"]
+    assert "bash" in log[1]["prompt"]
+    # 觀察進 agent 欄位（既有口徑），裁決不受影響
+    assert out.rounds[0].agent["tool_loop_suspected"] is not None
+    assert out.rounds[0].agent["tool_loop_suspected"]["consecutive_repetitions"] == 5
+    assert FAIL_CLAIM in out.fixed
