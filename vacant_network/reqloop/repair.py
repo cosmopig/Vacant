@@ -1156,7 +1156,7 @@ class RepairRound:
     usage: dict[str, int] | None          # None＝UNKNOWN
     error: str | None = None
     #: 來源改動（P000-20261105-02）：權威快照內檔案在工作區缺失或 hash 改變的相對路徑；
-    #: 空＝未改。任何非空值＝該輪候選不可接受（控制器不得宣告缺口關閉）。
+    垂直切片（RLOOP_PLAN.md G2，11/04 方向）：
     source_tampered: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
