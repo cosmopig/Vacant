@@ -1208,7 +1208,9 @@ def check_kv_recomputed(
             for r in rows:
                 cell = r.get(col)
                 try:
-                    if float(str(cell).strip()) == float(eq):
+                    # Handle cases where cell might be a list (e.g. from some JSON parsing) or other types
+                    val = float(str(cell).strip()) if cell is not None else 0.0
+                    if val == float(eq):
                         expected += 1.0
                 except (TypeError, ValueError):
                     continue
