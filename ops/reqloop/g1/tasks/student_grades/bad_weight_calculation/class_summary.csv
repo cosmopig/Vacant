@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-class_name,student_count,passing_count,pass_rate,average_score
-Class_A,9,8,0.89,77.67
-Class_B,10,9,0.90,73.30
-Class_C,10,9,0.90,77.55
-=======
 class_name,student_count,passing_count,pass_rate,average_score
 Class_A,13,8,0.62,66.04
 Class_B,12,8,0.67,67.29
 Class_C,10,7,0.70,67.20
->>>>>>> auto/argon

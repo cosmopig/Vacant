@@ -1,35 +1,3 @@
-<<<<<<< HEAD
-item_id,item_name,current_stock,safety_stock,restock_needed
-102,Tablet Y,10,20,10
-103,Blender Z,5,10,5
-106,Laptop C,8,15,7
-112,Smartwatch I,12,15,3
-117,Iron N,3,6,3
-118,Camera O,9,12,3
-122,Whiteboard S,5,8,3
-124,Router U,7,10,3
-125,Keyboard V,9,12,3
-127,Mouse X,11,15,4
-128,Printer Y,4,8,4
-129,Air Purifier Z,6,10,4
-130,Docking Station A,8,12,4
-133,Webcam D,9,12,3
-134,Microphone E,6,8,2
-135,Electric Kettle F,3,6,3
-136,Gaming Chair G,7,10,3
-137,Desk Lamp H,5,8,3
-140,Scanner K,3,6,3
-141,Toaster L,8,12,4
-145,Power Bank P,9,12,3
-146,Laptop Stand Q,7,10,3
-147,Water Purifier R,3,6,3
-148,Wireless Mouse S,5,8,3
-149,External HDD T,6,8,2
-151,VR Headset V,4,8,4
-152,Drawing Tablet W,7,10,3
-154,Gaming Mouse Y,8,12,4
-155,Monitor Arm Z,5,8,3
-=======
 item_id,item_name,current_stock,safety_stock,restock_needed
 EL-201,電阻 10kΩ 1%,8,40,32
 EL-203,MCU STM32F103,5,20,15
@@ -47,4 +15,3 @@ PC-303,PP 管材 10mm,1,6,5
 PC-305,尼龍齒輪,14,30,16
 TO-501,電鑽批頭組,2,8,6
 TO-503,內六角扳手組,4,12,8
->>>>>>> auto/argon

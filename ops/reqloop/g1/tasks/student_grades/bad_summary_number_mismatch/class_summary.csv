@@ -1,18 +1,4 @@
-<<<<<<< HEAD
-# 壞版本：summary.md 裡的及格率抄錯 (bad_summary_number_mismatch)
-# 此版本錯誤在於 summary.md 中的全年級全體及格率與 class_summary.csv 計算結果不一致。
-
-class_name,student_count,passing_count,pass_rate,average_score
-Class_A,8,7,0.88,70.08
-Class_B,9,8,0.89,75.04
-Class_C,9,8,0.89,76.98
-
-# 全年級成績摘要
-
-根據學期總評計算，全年級全體及格率為 99.99%，平均總評成績為 74.18。
-=======
 class_name,student_count,passing_count,pass_rate,average_score
 Class_A,13,11,0.85,66.72
 Class_B,12,10,0.83,67.82
 Class_C,10,9,0.90,67.92
->>>>>>> auto/argon
