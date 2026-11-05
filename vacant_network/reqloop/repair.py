@@ -787,9 +787,12 @@ def _error_family(sample: str) -> str | None:
     以錯誤文本第一個冒號前的穩定前綴（≤40 字元）作為錯誤類——
     jq parse/runtime 錯誤 → "jq"；edit 驗證 → 'Validation failed for tool "edit"'。
     前綴不合條件（無冒號／過長／空）回傳 None＝不歸組（維持原跳過行為，
-    避免把無關錯誤併成一類）。effects_20261105 實據：policy30/dabstep-1753
-    localized r1 四次 jq parse error（column 編號微差、成功探查交錯）與
-    feedback_once20/dab_039 四五次 edit 驗證失敗原先皆漏。
+    避免把無關錯誤併成一類）。effects_20261105 實據（r1062 逐 log 事件核對）：
+    policy30/dabstep-1753-pi-C localized r1 4 次 jq parse error（column 微差）
+    與 r2 4 次 jq 錯誤（parse×2＋index×2）、feedback_once20/dab_039-pi-C
+    localized r1 5 次＋policy30/dab_039-pi-C generic r1 4 次 edit 驗證失敗，
+    修正前 detect_tool_loop 皆回 None；feedback_once20/dab_039 generic r1
+    僅 2 次（低於 threshold、不歸組屬設計）。
     """
     if not sample:
         return None

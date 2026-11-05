@@ -2281,9 +2281,10 @@ def test_error_class_repeat_non_exception_tool_errors_jq_and_edit_family(tmp_pat
     error_class_repeat 原先要求例外類（cls）非空才歸組，但 jq／edit 驗證這類
     非 Python 工具錯誤沒有例外類，被整個跳過：
     - policy30/dabstep-1753-pi-C localized r1：4 次 jq parse error（僅 column 編號微差、
-      與成功探查交錯）→ 修正前 detect_tool_loop=None；
-    - feedback_once20/dab_039-pi-C generic/localized：4~5 次 edit
-      `Validation failed for tool "edit"` → 修正前 None。
+      與成功探查交錯）＋ r2 4 次 jq 錯誤（parse×2＋index×2）→ 修正前 None；
+    - feedback_once20/dab_039-pi-C localized r1 5 次＋policy30/dab_039-pi-C
+      generic r1 4 次 edit `Validation failed for tool "edit"` → 修正前 None
+      （feedback_once20/dab_039 generic r1 僅 2 次＝低於 threshold 4、不歸組屬設計）。
     修正：無例外類時以錯誤文本第一個冒號前的穩定前綴（≤40 字元）作為錯誤類
     （jq → "jq"；edit 驗證 → 'Validation failed for tool "edit"'）；前綴不合條件
     （無冒號／過長）不歸組（維持原跳過行為，避免把無關錯誤併成一類）。
