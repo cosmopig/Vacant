@@ -191,7 +191,8 @@ def test_prompt_tells_env_has_sciplib_and_verify_by_import(task_dir):
 
 def test_localized_round1_prompt_names_c_one_liner_redline_and_redirect_form(task_dir):
     """contrast23_20261105 dabstep-23-pi-C localized r1（@26f23af5，vq-5nz.25）：
-    - 12 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError（log 35×）：
+    - 7 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError
+      （7 個 tool_execution_end 輸出含 SyntaxError；原始 JSONL 字串計數 35＝7×5 串流事件膨脹）：
       -c 單行編譯下 `;` 後接 if/for/def 等複合陳述＝語法錯，重試永不成功；
     - 同期 `python3 calculate_fraud.py` → 0.0 成功 7 次，卻從未重定向寫入 answer.txt
       ⇒ Round 1 猶豫迴圈，缺口到 r2 才關閉。
@@ -202,7 +203,7 @@ def test_localized_round1_prompt_names_c_one_liner_redline_and_redirect_form(tas
     before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
     loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
                                      feedback_mode="localized")
-    # 紅線 1：點名 `;`＋複合陳述的 SyntaxError（35× 失敗根因）＋.py 逃路
+    # 紅線 1：點名 `;`＋複合陳述的 SyntaxError（7 次失敗根因；字串計數 35＝7×5 串流膨脹）＋.py 逃路
     # （措辭為 `python -c`：提示行不得含數字，防 leak guard 子串誤判）
     assert "python -c" in loc
     assert "SyntaxError" in loc
