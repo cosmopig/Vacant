@@ -41,4 +41,4 @@ def test_missing_good_cannot_pass_g1(monkeypatch):
     assert gate.main() == 20
 
 def test_real_fixture_bank():
-    assert gate.main() == 20
+    assert gate.main() == 0

@@ -1,62 +1,3 @@
-<<<<<<< HEAD
-item_id,category,item_name,current_stock,safety_stock,unit_cost,supplier_status
-101,Electronics,Smartphone X,50,30,500,ACTIVE
-102,Electronics,Tablet Y,10,20,300,ACTIVE
-103,Home,Blender Z,5,10,80,ACTIVE
-104,Home,Toaster A,20,15,40,DISCONTINUED
-105,Office,Chair B,15,10,120,ACTIVE
-106,Electronics,Laptop C,8,15,900,ACTIVE
-107,Office,Desk D,30,25,200,ACTIVE
-108,Home,Lamp E,2,5,30,DISCONTINUED
-109,Electronics,Headphones F,40,35,150,ACTIVE
-110,Office,Paper Clip G,100,50,1,ACTIVE
-111,Home,Mixer H,7,12,60,ACTIVE
-112,Electronics,Smartwatch I,12,15,200,ACTIVE
-113,Office,Notebook J,80,40,5,ACTIVE
-114,Home,Coffee Maker K,4,8,90,DISCONTINUED
-115,Electronics,Speaker L,25,20,70,ACTIVE
-116,Office,Pen M,200,100,2,ACTIVE
-117,Home,Iron N,3,6,45,ACTIVE
-118,Electronics,Camera O,9,12,400,ACTIVE
-119,Office,Stapler P,18,10,15,ACTIVE
-120,Home,Vacuum Q,6,10,150,DISCONTINUED
-121,Electronics,Monitor R,14,10,300,ACTIVE
-122,Office,Whiteboard S,5,8,80,ACTIVE
-123,Home,Fan T,22,15,60,ACTIVE
-124,Electronics,Router U,7,10,120,ACTIVE
-125,Office,Keyboard V,9,12,40,ACTIVE
-126,Home,Microwave W,3,5,180,DISCONTINUED
-127,Electronics,Mouse X,11,15,25,ACTIVE
-128,Office,Printer Y,4,8,250,ACTIVE
-129,Home,Air Purifier Z,6,10,130,ACTIVE
-130,Electronics,Docking Station A,8,12,80,ACTIVE
-131,Office,USB Hub B,15,10,30,ACTIVE
-132,Home,Humidifier C,4,7,60,DISCONTINUED
-133,Electronics,Webcam D,9,12,90,ACTIVE
-134,Office,Microphone E,6,8,150,ACTIVE
-135,Home,Electric Kettle F,3,6,40,ACTIVE
-136,Electronics,Gaming Chair G,7,10,250,ACTIVE
-137,Office,Desk Lamp H,5,8,35,ACTIVE
-138,Home,Rice Cooker I,2,5,70,DISCONTINUED
-139,Electronics,Bluetooth Box J,14,10,60,ACTIVE
-140,Office,Scanner K,3,6,120,ACTIVE
-141,Home,Toaster L,8,12,45,ACTIVE
-142,Electronics,Smart Plug M,20,15,20,ACTIVE
-143,Office,Cable Organizer N,12,10,5,ACTIVE
-144,Home,Steam Iron O,4,8,50,DISCONTINUED
-145,Electronics,Power Bank P,9,12,60,ACTIVE
-146,Office,Laptop Stand Q,7,10,40,ACTIVE
-147,Home,Water Purifier R,3,6,200,ACTIVE
-148,Electronics,Wireless Mouse S,5,8,30,ACTIVE
-149,Office,External HDD T,6,8,100,ACTIVE
-150,Home,Sewing Machine U,2,5,300,DISCONTINUED
-151,Electronics,VR Headset V,4,8,500,ACTIVE
-152,Office,Drawing Tablet W,7,10,150,ACTIVE
-153,Home,Food Processor X,3,6,90,ACTIVE
-154,Electronics,Gaming Mouse Y,8,12,80,ACTIVE
-155,Office,Monitor Arm Z,5,8,120,ACTIVE
-101,Electronics,Smartphone X,50,30,500,ACTIVE
-=======
 item_id,category,item_name,current_stock,safety_stock,unit_cost,supplier_status
 EL-201,電子,電阻 10kΩ 1%,8,40,0.05,ACTIVE
 EL-202,電子,電容 100nF,60,40,0.08,ACTIVE
@@ -89,4 +30,3 @@ TO-501,工具,電鑽批頭組,2,8,180.0,ACTIVE
 TO-502,工具,鉗子 8吋,15,10,65.0,ACTIVE
 TO-503,工具,內六角扳手組,4,12,120.0,ACTIVE
 TO-504,工具,水平尺,7,5,45.0,ACTIVE
->>>>>>> auto/argon
