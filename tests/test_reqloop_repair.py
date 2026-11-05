@@ -1883,6 +1883,109 @@ def test_localized_prompt_names_prev_round_empty_result_giveup(task_dir):
     assert hint not in gen
 
 
+def test_detect_empty_result_giveup_handles_interpreter_flags_and_paths(tmp_path):
+    """支援 python 各種直譯器路徑（/usr/bin/python3, ./venv/bin/python 等）與參數（-u, -B 等）。"""
+    log = tmp_path / "agent_stdout.log"
+    ans = tmp_path / "answer.txt"
+    ans.write_text("None\n", encoding="utf-8")
+    for cmd in (
+        "python3 -u solution.py",
+        "python3 -B solution.py",
+        "/usr/bin/python3 solution.py",
+        "/usr/bin/python3 -u solution.py",
+        "./.venv/bin/python solution.py",
+        "~/dev/Vacant/.venv/bin/python solution.py",
+    ):
+        log.write_text("\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": cmd}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+        hit = repair.detect_empty_result_giveup(log, ans)
+        assert hit is not None, f"Failed on command: {cmd}"
+        assert any("solution.py" in s for s in hit["empty_run_scripts"])
+
+
+def test_detect_empty_result_giveup_ignores_stdout_redirection(tmp_path):
+    """當命令對 stdout 進行重導向或管道時，bash 輸出為空屬重導向自然現象，不應誤判為腳本無輸出。"""
+    log = tmp_path / "agent_stdout.log"
+    ans = tmp_path / "answer.txt"
+    ans.write_text("None\n", encoding="utf-8")
+    for cmd in (
+        "python3 solve.py > output.txt",
+        "python3 solve.py >> output.txt",
+        "python3 solve.py 1> output.txt",
+        "python3 solve.py | tee output.txt",
+    ):
+        log.write_text("\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": cmd}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+        assert repair.detect_empty_result_giveup(log, ans) is None, f"False positive on redirected: {cmd}"
+
+
+def test_build_repair_prompt_avoids_conflicting_crash_and_empty_giveup_hints(task_dir):
+    """當同一輪中既有 crash 又有 empty_result_giveup 時，提示應優先取 crash 提示，避免同時出現矛盾提示。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    obs = {
+        "crash_giveup_suspected": {
+            "giveup_answer": "None", "crash_event_count": 1, "crash_signatures": ["Traceback"],
+        },
+        "empty_result_giveup_suspected": {
+            "giveup_answer": "None", "empty_run_count": 1, "empty_run_scripts": ["solution.py"],
+        },
+    }
+    loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="localized", prev_round_agent=obs)
+    crash_hint = repair._crash_giveup_hint_line()
+    empty_hint = repair._empty_result_giveup_hint_line()
+    assert crash_hint in loc
+    assert empty_hint not in loc
+
+
+def test_run_repair_round_checks_non_default_deliverables(tmp_path):
+    """run_repair_round 不應硬編碼 answer.txt，當需求宣告 output.csv 時應以 output.csv 為準。"""
+    task_dir = tmp_path / "task"
+    task_dir.mkdir(parents=True)
+    (task_dir / "request.md").write_text("write output.csv\n", encoding="utf-8")
+    req_file = task_dir / "requirements.json"
+    req_file.write_text(json.dumps({
+        "task_id": "custom_deliv",
+        "items": [{
+            "id": "r1", "quote": "output.csv", "deliverable": "output.csv",
+            "required": True, "verifier": "equals", "params": {"value": "47"},
+        }],
+    }), encoding="utf-8")
+    draft_dir = tmp_path / "draft"
+    draft_dir.mkdir(parents=True)
+    (draft_dir / "output.csv").write_text("None\n", encoding="utf-8")
+
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(auth, rs, draft_dir)
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(_empty_run_log(), encoding="utf-8")
+        (workspace / "output.csv").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft_dir, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["empty_result_giveup_suspected"] is not None
+    assert r.agent["empty_result_giveup_suspected"]["giveup_answer"].strip().lower() == "none"
+
+
 # ── 上一輪工具死迴圈觀察 → 本輪 localized 針對性反迴圈指令 ──────────────
 # 來源（effects_20261105 dabstep-23 localized）：提示裡已有通用「不要重複同一
 # 命令」行，12B 仍把同一條 pandas 一行式重複 ×117 直到 300s 超時——通用警告
