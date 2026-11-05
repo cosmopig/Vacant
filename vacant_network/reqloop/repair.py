@@ -75,6 +75,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import sys
 import tempfile
@@ -467,6 +468,65 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
             "consecutive_repetitions": best_streak, "threshold": threshold}
 
 
+#: crash→放棄 偵測的崩潰簽名（effects_20261105 dabstep-1753 generic：
+#: `NameError ... Command exited with code 1`，模型隨後把答案寫成「None」放棄）。
+_CRASH_EXIT_RE = re.compile(r"Command exited with code (\d+)")
+_CRASH_TRACEBACK_RE = re.compile(r"Traceback \(most recent call last\)")
+# 注意：不能加 `\b` 前綴錨——pi --mode json 的日誌把換行轉義為字面 `\n`，
+# 例外名可能緊接在字元 `n` 之後，`\b` 會漏掉（dabstep-1753 真實日誌即此形狀）。
+_CRASH_EXC_RE = re.compile(
+    r"(NameError|TypeError|AttributeError|KeyError|ValueError|IndexError"
+    r"|ZeroDivisionError|SyntaxError|UnboundLocalError|ModuleNotFoundError)\s*:")
+#: 最終答案＝放棄詞（strip+lower 比對）：空、None、N/A、Not Applicable、No answer。
+_GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
+
+
+def detect_crash_giveup(log_path: str | pathlib.Path,
+                        answer_path: str | pathlib.Path,
+                        *, max_signatures: int = 12) -> dict[str, Any] | None:
+    """偵測「crash→放棄」：session 內腳本崩潰，最終答案卻是一句放棄詞。
+
+    來源（effects_20261105，dabstep-1753-pi-C generic 兩輪）：r1 腳本 NameError
+    crash → 答「Not Applicable」；r2 四次 NameError crash → 答「None」＝模型在
+    崩潰後放棄、沒有重試，300s 預算被反覆重寫腳本耗掉。
+    - 條件一：該輪答案檔是放棄詞（空、None、N/A、Not Applicable、No answer）；
+    - 條件二：agent 日誌有崩潰證據（非零 `Command exited with code N`、
+      Python traceback、常見例外行）。
+    兩者皆具 → 回傳 {"giveup_answer","crash_event_count","crash_signatures"}；
+    任一缺 → None（不假設因果；無日誌／無答案檔同為 None＝缺值不造假）。
+
+    這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
+    只記錄在該輪 agent 欄位（`crash_giveup_suspected`）。合法答案恰好是
+    「None」時此標記可能為假陽性——審計時看 crash_signatures 自行裁決。
+    """
+    try:
+        answer = pathlib.Path(answer_path).read_text(encoding="utf-8",
+                                                     errors="replace").strip()
+    except OSError:
+        return None
+    if answer.lower() not in _GIVEUP_ANSWERS:
+        return None
+    try:
+        text = pathlib.Path(log_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    sigs: list[str] = []
+    for m in _CRASH_EXIT_RE.finditer(text):
+        if int(m.group(1)) != 0:
+            sigs.append(m.group(0))
+    sigs += _CRASH_TRACEBACK_RE.findall(text)
+    sigs += _CRASH_EXC_RE.findall(text)
+    if not sigs:
+        return None
+    uniq = sorted(set(sigs))
+    return {
+        "giveup_answer": answer,
+        "crash_event_count": len(sigs),
+        "crash_signatures": uniq[:max_signatures],
+        "signatures_truncated": len(uniq) > max_signatures,
+    }
+
+
 # ── 單輪 ──────────────────────────────────────────────────────────────
 
 @dataclasses.dataclass
@@ -619,6 +679,12 @@ def run_repair_round(
     # 工具死迴圈觀察（effects_20261105 dabstep-23）：同一命令連續重複＝疑似迴圈。
     # 觀察與標記，不是裁決：不改變重驗結果與停滯判定（None＝未偵測到）。
     agent = {**agent, "tool_loop_suspected": detect_tool_loop(log_dir / "agent_stdout.log")}
+    # crash→放棄觀察（effects_20261105 dabstep-1753 generic）：session 內崩潰＋
+    # 最終答案是放棄詞（None/Not Applicable…）⇒ 標記。觀察與標記，不是裁決：
+    # 不改變重驗結果與停滯判定（None＝未偵測到）。
+    agent = {**agent,
+             "crash_giveup_suspected":
+             detect_crash_giveup(log_dir / "agent_stdout.log", ws / "answer.txt")}
     tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),

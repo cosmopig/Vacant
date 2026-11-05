@@ -1465,3 +1465,91 @@ def test_localized_prompt_has_anti_tool_loop_guidance(task_dir):
     gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
     assert "不要重複同一命令" in loc
     assert "不要重複同一命令" not in gen
+
+
+# ── effects_20261105 失效模式：crash→放棄（dabstep-1753-pi-C generic）──
+# 來源（policy30）：r1 腳本 NameError crash → 答「Not Applicable」；r2 四次
+# NameError crash → 答「None」＝模型在崩潰後放棄、未重試。fb20 r1 同款（答「None」）。
+# 觀察與標記，不是裁決：不改變重驗、停滯判定或退出碼；缺值＝None 不造假。
+
+_CRASH_OUTPUT = ("Traceback (most recent call last):\n  File \"a.py\", line 3, in <module>\n"
+                 "NameError: name 'is_in_range' is not defined\n"
+                 "Command exited with code 1")
+
+
+def test_detect_crash_giveup_flags_crashed_giveup(tmp_path):
+    """log 有崩潰證據＋最終答案是放棄詞 ⇒ 偵測；任一條件缺 ⇒ 不偵測（不造假）。"""
+    log = tmp_path / "agent_stdout.log"
+    ans = tmp_path / "answer.txt"
+    log.write_text(json.dumps({"type": "tool_execution_end", "output": _CRASH_OUTPUT})
+                   + "\nnot json noise\n", encoding="utf-8")
+    # crash + 放棄答案 ⇒ 偵測到（觀察）
+    for giveup in ("None\n", "Not Applicable\n", ""):
+        ans.write_text(giveup, encoding="utf-8")
+        hit = repair.detect_crash_giveup(log, ans)
+        assert hit is not None
+        assert hit["giveup_answer"].strip().lower() in {"none", "not applicable", ""}
+        assert hit["crash_event_count"] >= 3
+        assert any("NameError" in s for s in hit["crash_signatures"])
+        assert any("code 1" in s for s in hit["crash_signatures"])
+    # 有 crash 但仍交出真實答案 ⇒ 不是放棄 ⇒ 不偵測
+    ans.write_text("0.00152745\n", encoding="utf-8")
+    assert repair.detect_crash_giveup(log, ans) is None
+    # 放棄答案但 log 無崩潰證據 ⇒ 不偵測（不假設因果）
+    log.write_text(json.dumps({"type": "tool_execution_end", "output": "ok"}) + "\n",
+                   encoding="utf-8")
+    ans.write_text("None\n", encoding="utf-8")
+    assert repair.detect_crash_giveup(log, ans) is None
+    # 無日誌／無答案檔 ⇒ None（缺值不造假）
+    assert repair.detect_crash_giveup(tmp_path / "nope.log", ans) is None
+    log.write_text(_CRASH_OUTPUT + "\n", encoding="utf-8")
+    assert repair.detect_crash_giveup(log, tmp_path / "nope.txt") is None
+
+
+def test_run_repair_round_records_crash_giveup_suspected(task_dir, tmp_path):
+    """run_repair_round 把偵測結果記錄進該輪 agent 欄位（觀察，非裁決）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            json.dumps({"type": "tool_execution_end", "output": _CRASH_OUTPUT}) + "\n",
+            encoding="utf-8")
+        (workspace / "answer.txt").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["crash_giveup_suspected"] is not None
+    assert r.agent["crash_giveup_suspected"]["giveup_answer"].strip().lower() == "none"
+    # 裁決不受影響：重驗照舊（這輪把交付寫成 None，仍非 PASS）
+    assert r.after is not None
+    # 對照：無 crash 證據的同一放棄答案 ⇒ 標記為 None（不假設因果）
+    out2 = tmp_path / "out2"
+    out2.mkdir(parents=True, exist_ok=True)
+    auth2 = repair.create_authoritative_snapshot(task_dir, out2)
+
+    def run2(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            json.dumps({"type": "tool_execution_end", "output": "ok"}) + "\n",
+            encoding="utf-8")
+        (workspace / "answer.txt").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r2 = repair.run_repair_round(
+        1, task_dir, rs, draft, run_requirement_checks(auth2, rs, draft),
+        out_root=out2, build=_fake_build([]), run=run2,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth2,
+    )
+    assert r2.agent["crash_giveup_suspected"] is None
