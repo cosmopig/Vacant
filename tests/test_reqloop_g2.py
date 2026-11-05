@@ -890,3 +890,34 @@ def test_effects_20261105_summary_wall_ms_and_active_cost_totals():
         assert c["wall_ms_total"] is None, c["draft"]
 
 
+def test_g2_result_totals_keeps_repair_sessions_and_model_calls_distinct():
+    """R20261105_1047-1：`G2Result.to_dict()["totals"]` 的 `repair_sessions`（agent 啟動數）
+    與 `model_calls`（真實 API 請求數）是兩個獨立鍵，絕不互相覆寫。
+    回歸形狀：contrast3_20261105/run_contrast.py 曾以
+    `payload['totals']['repair_sessions'] = payload['totals'].pop('model_calls')`
+    把 172 次 API 請求冒稱為 172 個 repair_sessions。單個 session 內可含多次
+    API 呼叫（如 1 session 3 個 message_end usage 事件），兩鍵數值必須不同。
+    """
+    def _cell(draft: str, calls: int, model_calls: int, tokens: int) -> dict:
+        return {
+            "draft": draft, "arm": "localized", "stopped": "STOP_GAP_CLOSED",
+            "cost": {"calls": calls, "model_calls": model_calls,
+                     "tokens": tokens, "wall_ms_total": 1000},
+        }
+
+    cells = [_cell("d1", 1, 3, 1000), _cell("d2", 2, 10, 5000)]
+    res = g2.G2Result(
+        manifest_sha256="0" * 64,
+        generated_at="2026-11-05T00:00:00Z",
+        model={"provider": "p", "model": "m"},
+        budget={"max_rounds_per_cell": 2, "timeout_s_per_round": 300.0},
+        scoring={"independent": "UNKNOWN"},
+        cells=cells,
+    )
+    totals = res.to_dict()["totals"]
+    assert "repair_sessions" in totals and "model_calls" in totals
+    assert totals["repair_sessions"] == sum(c["cost"]["calls"] for c in cells) == 3
+    assert totals["model_calls"] == sum(c["cost"]["model_calls"] for c in cells) == 13
+    assert totals["repair_sessions"] != totals["model_calls"]
+
+

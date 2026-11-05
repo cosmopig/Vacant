@@ -189,6 +189,35 @@ def test_prompt_tells_env_has_sciplib_and_verify_by_import(task_dir):
         assert "手刻" in p or "替代演算法" in p, mode   # 禁止假設缺失而手刻
 
 
+def test_localized_round1_prompt_names_c_one_liner_redline_and_redirect_form(task_dir):
+    """contrast23_20261105 dabstep-23-pi-C localized r1（@26f23af5，vq-5nz.25）：
+    - 7 條 `python3 -c "...; if cond: print(...)"` 一行式全部 SyntaxError
+      （7 個 tool_execution_end 輸出含 SyntaxError；原始 JSONL 字串計數 35＝7×5 串流事件膨脹）：
+      -c 單行編譯下 `;` 後接 if/for/def 等複合陳述＝語法錯，重試永不成功；
+    - 同期 `python3 calculate_fraud.py` → 0.0 成功 7 次，卻從未重定向寫入 answer.txt
+      ⇒ Round 1 猶豫迴圈，缺口到 r2 才關閉。
+    26f23af5「立即先寫入」行在提示裡但沒打破迴圈；_loop_warning_line 的「寫 .py、
+    不要一行式」逃路只從第 2 輪才生效。第 1 輪沒有上一輪觀察，提示本身必須點名
+    一行式語法紅線＋「腳本 > 交付物」重定向式。generic 對照臂不帶該執行觀察行。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="localized")
+    # 紅線 1：點名 `;`＋複合陳述的 SyntaxError（7 次失敗根因；字串計數 35＝7×5 串流膨脹）＋.py 逃路
+    # （措辭為 `python -c`：提示行不得含數字，防 leak guard 子串誤判）
+    assert "python -c" in loc
+    assert "SyntaxError" in loc
+    assert ".py" in loc
+    assert "if" in loc
+    # 紅線 2：算出成功 ⇒ 下一個命令＝寫入交付物（重定向式，非再驗證）
+    assert "> answer.txt" in loc
+    assert "重定向" in loc
+    # 臂分離：generic 對照臂不帶 localized 專屬的執行觀察行
+    gen = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="generic")
+    assert "SyntaxError" not in gen
+
+
 def test_prompt_never_names_hidden_sources(task_dir):
     """修復請求不得出現 hidden／scorer 等隱藏來源字眼。"""
     rs = load_req_set(task_dir)
@@ -2247,6 +2276,180 @@ def test_loop_outcome_extracts_filenotfound_and_shell_error_and_preserves_long_c
     assert "if total > 0:" in warn_long
 
 
+def test_error_class_repeat_non_exception_tool_errors_jq_and_edit_family(tmp_path: pathlib.Path):
+    """r1061 回歸（effects_20261105 真實形狀）：
+    error_class_repeat 原先要求例外類（cls）非空才歸組，但 jq／edit 驗證這類
+    非 Python 工具錯誤沒有例外類，被整個跳過：
+    - policy30/dabstep-1753-pi-C localized r1：4 次 jq parse error（僅 column 編號微差、
+      與成功探查交錯）＋ r2 4 次 jq 錯誤（parse×2＋index×2）→ 修正前 None；
+    - feedback_once20/dab_039-pi-C localized r1 5 次＋policy30/dab_039-pi-C
+      generic r1 4 次 edit `Validation failed for tool "edit"` → 修正前 None
+      （feedback_once20/dab_039 generic r1 僅 2 次＝低於 threshold 4、不歸組屬設計）。
+    修正：無例外類時以錯誤文本第一個冒號前的穩定前綴（≤40 字元）作為錯誤類
+    （jq → "jq"；edit 驗證 → 'Validation failed for tool "edit"'）；前綴不合條件
+    （無冒號／過長）不歸組（維持原跳過行為，避免把無關錯誤併成一類）。
+    仍是觀察與標記，不改變任何裁決。
+    """
+    def _write_log(path: pathlib.Path, events: list) -> None:
+        path.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n",
+                        encoding="utf-8")
+
+    # 1. jq parse error ×4（column 編號微差）與 4 次成功探查交錯 → 命中 "jq" 類
+    ev: list = []
+    for n in range(8):
+        cid = f"c{n}"
+        ev.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                   "args": {"command": f"jq -r '.[{n}]' fees.json"}})
+        if n % 2 == 0:   # 第 0,2,4,6 次失敗（4 次 jq parse error），其餘為成功探查
+            col = 19 + 7 * (n // 2)
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "isError": True,
+                       "result": {"content": [{"text":
+                           "jq: parse error: Expected string key before ':' at line 1, "
+                           f"column {col}"}]}})
+        else:
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "result": {"content": [{"text": "ok"}]}})
+    log_jq = tmp_path / "jq.log"
+    _write_log(log_jq, ev)
+    hit = repair.detect_tool_loop(log_jq)
+    assert hit is not None
+    assert hit["error_class"] == "jq"
+    assert hit["failure_count"] == 4
+    assert hit.get("error_class_repeat") is True
+    assert "皆屬同一類錯誤（jq" in repair._loop_warning_line(hit)
+
+    # 2. edit 驗證錯誤 ×5（args 每次微調、錯誤文本相同、成功探查交錯）
+    #    → 走 error_class_repeat 前綴類（非連續故 same_error_streak 不截獲）
+    ev2 = []
+    for n in range(9):
+        cid = f"e{n}"
+        ev2.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "edit",
+                    "args": {"path": "answer.txt", "oldText": f"old{n}", "newText": "new"}})
+        if n % 2 == 0:   # 第 0,2,4,6,8 次失敗（5 次驗證錯誤），其餘為成功探查
+            ev2.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "isError": True,
+                        "result": {"content": [{"text": 'Validation failed for tool "edit": "oldText" is required'}]}})
+        else:
+            ev2.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "result": {"content": [{"text": "updated"}]}})
+    log_edit = tmp_path / "edit.log"
+    _write_log(log_edit, ev2)
+    hit2 = repair.detect_tool_loop(log_edit)
+    assert hit2 is not None
+    assert hit2["error_class"] == 'Validation failed for tool "edit"'
+    assert hit2["failure_count"] == 5
+    assert hit2.get("error_class_repeat") is True
+
+    # 3. 無冒號前綴（"Could not find the exact text …"）無例外類、無前綴類可歸組
+    #    → 交錯成功也不命中（避免過度併類）
+    ev3 = []
+    for n in range(8):
+        cid = f"g{n}"
+        ev3.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "edit",
+                    "args": {"path": "answer.txt", "oldText": f"stale{n}", "newText": "x"}})
+        if n % 2 == 0:   # 第 0,2,4,6 次失敗（4 次同文本），其餘為成功探查
+            ev3.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "isError": True,
+                        "result": {"content": [{"text":
+                            "Could not find the exact text in answer.txt. Make sure the text matches "
+                            "exactly, including all whitespace and indentation."}]}})
+        else:
+            ev3.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "result": {"content": [{"text": "updated"}]}})
+    log3 = tmp_path / "no_family.log"
+    _write_log(log3, ev3)
+    assert repair.detect_tool_loop(log3) is None
+
+
+def test_loop_warning_remediation_split_by_error_class_kind(task_dir, tmp_path):
+    """r1063（審查核對 4 新命中 downstream）：error_class_repeat／all_failed 分支的
+    處方原先一律是 Python 專屬（「寫 .py 檔案、不要用一行式」——為 dabstep-23
+    SyntaxError×34 形狀而設，r1044 實證），但 jq／edit 驗證這類非 Python 工具錯誤
+    也走同一渲染路徑——對 jq 過濾器 parse 錯／edit 內容驗證錯，「寫 .py」處方失焦
+    （jq 過濾器不是 Python 程式；edit 驗證錯與一行式語法無關）。
+
+    修正：警示行的根因處方依錯誤類分流——Python 例外類名（SyntaxError 等）保留
+    .py 逃逸處方（r1044 形狀不改）；非 Python 工具錯誤類（jq／edit 前綴類、或無
+    例外類）改通用根因處方（先查明原因：參數、語法或內容不符），不含 .py／一行式。
+    真實形狀：policy30/dabstep-1753-pi-C localized r1 jq×4（交錯成功）；
+    feedback_once20/dab_039-pi-C localized r1 edit×5（交錯成功）；
+    dabstep-1273-pi-C generic r1 SyntaxError×7（交錯成功）。
+    """
+    def _write_log(path: pathlib.Path, events: list) -> None:
+        path.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n",
+                        encoding="utf-8")
+
+    # 1. jq parse error ×4 交錯成功（error_class_repeat 前綴類 "jq"）→ 通用處方、無 .py
+    ev: list = []
+    for n in range(8):
+        cid = f"c{n}"
+        ev.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                   "args": {"command": f"jq -r '.[{n}]' fees.json"}})
+        if n % 2 == 0:   # 4 次失敗、4 次成功探查交錯
+            col = 19 + 7 * (n // 2)
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "isError": True,
+                       "result": {"content": [{"text":
+                           "jq: parse error: Expected string key before ':' at line 1, "
+                           f"column {col}"}]}})
+        else:
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "result": {"content": [{"text": "ok"}]}})
+    log_jq = tmp_path / "jq.log"
+    _write_log(log_jq, ev)
+    hit = repair.detect_tool_loop(log_jq)
+    assert hit is not None and hit["error_class"] == "jq"
+    warn = repair._loop_warning_line(hit)
+    assert "jq" in warn
+    assert "先修掉錯誤的根因再執行" in warn and "寫入交付物檔案" in warn   # 通用根因處方在
+    assert ".py" not in warn and "一行式" not in warn                      # 無 Python 專屬處方
+
+    # 2. SyntaxError ×4 交錯成功（1273 真實形狀）→ Python 例外類：保留 .py 處方（r1044）
+    evp: list = []
+    for n in range(7):
+        cid = f"p{n}"
+        cmd = f"python3 -c \"data = json.load(open('fees.json')); x = data[{n}]\""
+        evp.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                    "args": {"command": cmd}})
+        if n % 2 == 0:   # 4 次失敗
+            evp.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                        "isError": True,
+                        "result": {"content": [{"text":
+                            '  File "<string>", line 1\nSyntaxError: invalid syntax\n'
+                            "Command exited with code 1"}]}})
+        else:
+            evp.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                        "result": {"content": [{"text": "ok"}]}})
+    log_py = tmp_path / "py.log"
+    _write_log(log_py, evp)
+    hitp = repair.detect_tool_loop(log_py)
+    assert hitp is not None and hitp["error_class"] == "SyntaxError"
+    warnp = repair._loop_warning_line(hitp)
+    assert "SyntaxError" in warnp
+    assert ".py" in warnp and "一行式" in warnp          # r1044 處方保留
+
+    # 3. 同一 jq 命令連續 ×4 全敗（plain streak、無例外類）→ 亦不帶 .py 處方
+    evs: list = []
+    for n in range(4):
+        cid = f"s{n}"
+        evs.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                    "args": {"command": "jq -r '.[0]' fees.json"}})
+        evs.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                    "isError": True,
+                    "result": {"content": [{"text":
+                        "jq: parse error: Expected string key before ':' at line 1, column 19"}]}})
+    log_s = tmp_path / "streak.log"
+    _write_log(log_s, evs)
+    hits = repair.detect_tool_loop(log_s)
+    assert hits is not None and hits.get("all_failed") is True
+    assert not hits.get("error_class")   # jq 錯誤無 Python 例外類
+    warns = repair._loop_warning_line(hits)
+    assert "每次都失敗" in warns
+    assert ".py" not in warns and "一行式" not in warns
+    assert "先修掉錯誤的根因再執行" in warns
+
+
 def test_localized_prompt_orders_immediate_deliverable_write_not_waiting_for_hidden_recomputed_value(task_dir):
     """argon 20261105_1047 回歸：
     effects_20261105 / effects_p1 / contrast3 中 dabstep-23 localized 共 6 輪有 5 輪模型在
@@ -2265,3 +2468,222 @@ def test_localized_prompt_orders_immediate_deliverable_write_not_waiting_for_hid
     assert "立即" in loc and "寫入交付物" in loc
 
 
+def test_localized_prompt_format_only_failure_does_not_demand_different_numeric_value_and_warns_inline_comment(tmp_path):
+    """argon 20261105_1407 回歸：
+    1. 當所有失敗條目皆為純格式／型別／取整問題（如 dabstep-1273 的 problem='not_a_number'，草稿句子
+       'The average fee ... is 0.120132.' 內含的 0.120132 已是正確重算值；或 dab_055 的 problem='not_an_integer'，
+       草稿 @mean_cases[2081990.36] 四捨五入即為 2081990），build_repair_prompt 不得要求腳本
+       「算出了與失敗草稿（deliverable_value）不同的新結果」或「印出與失敗草稿不同的新結果」，否則會誤導模型
+       拒絕草稿中原本已正確的數值。
+    2. 【python 一行式紅線】除點名 `;` + if/for/def/with 外，必須同時禁止在 `python -c` 單行內放 `#` 註解
+       （effects_20261105 feedback_once20/dab_055-pi-C localized r1 連續 27 次因 `python3 -c "...; # comment ...; print(...)"`
+       把 `#` 後方的程式碼與 print 全部註解掉而得到空輸出）。
+    """
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir()
+    draft.mkdir()
+    (task_dir / "request.md").write_text("Answer must be just a number.\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("The average fee is 0.120132.\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t_fmt", items=[
+        RequirementItem(id="req_fee", quote="just a number", deliverable="answer.txt",
+                        verifier="plain_recomputed", params={}),
+    ])
+    before_fmt = [
+        repair.ClaimResult(
+            claim_id="req_fee",
+            status="FAIL",
+            detail="答案值不可解析為數字",
+            evidence={"problem": "not_a_number", "value": "The average fee is 0.120132."},
+            verifier="plain_recomputed",
+            verifier_version="1",
+            required=True,
+            authority="recomputed",
+        )
+    ]
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before_fmt, feedback_mode="localized")
+    assert "不同的新結果" not in loc
+    assert "立即" in loc and "寫入交付物" in loc
+    assert "#" in loc and "註解" in loc
+
+
+def test_cond_rate_hint_line_for_csv_column_collision(tmp_path):
+    """argon 20261105_1407 回歸（dabstep-23 實況）：
+    dabstep-23（cond_rate: data/payments.csv）中，payments.csv 有 42 筆 2023 年 Ecommerce 交易的
+    base64 雜湊欄（ip_address / email_address / card_number）碰巧含子字串 'POS'，其中 19 筆為
+    has_fraudulent_dispute=True，導致未錨定欄位名的 `grep "POS" data/payments.csv | grep "2023" | cut -d',' -f18`
+    算出 19 / 12439 = 0.00152745（恰為失敗草稿錯值！），而 `grep "True"` 則命中 is_credit=True 算出 8978，
+    使 contrast23_20261105 localized r1（36 次呼叫）與 r2（甚至在第 24 次呼叫把 0.0 改回 0.00152745）
+    反覆懷疑 pandas 算出的 0.0。
+    _cond_rate_hint_line 與 build_repair_prompt 對 cond_rate FAIL 條目必須補上欄位錨定提示，警告不得用未錨定欄位的 grep 跨欄誤中子字串。
+    """
+    ev = {
+        "deliverable_value": "0.00152745",
+        "problem": "mismatch_with_recomputation",
+        "rule": 'cond_rate: data/payments.csv {"where": [{"col": "year", "op": "eq", "value": "2023"}, {"col": "shopper_interaction", "op": "eq", "value": "POS"}], "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}]}',
+        "expected_in_evidence": False,
+    }
+    hint = repair._cond_rate_hint_line(ev)
+    assert hint is not None
+    assert "grep" in hint
+    assert "欄位" in hint
+
+
+def test_detect_tool_loop_catches_same_error_retry_streak_and_period3(tmp_path):
+    """argon 20261105_1407 回歸：
+    1. contrast23_20261105 dabstep-23 localized r1 第 4~8 次呼叫：模型連續 5 次執行 bash `python3 -c "...; if total_count > 0: print(...)"`，
+       每次只微調中間的 `fraud_count = ...` 表達式，但 5 次全部因尾部的 `; if total_count > 0:` 觸發完全相同的
+       `SyntaxError: invalid syntax`（isError=True）。舊版 detect_tool_loop 因要求 args 完全相同而回傳 None，
+       導致第 2 輪沒有收到任何上一輪執行觀察警告。
+    2. contrast23_20261105 dabstep-23 generic r2 第 22~36 次呼叫：模型以 (write, bash python3, bash grep) 三步為一週期
+       （period-3）連續重複 5 組（15 次呼叫）。detect_tool_loop 必須支援 period-3 偵測。
+    """
+    # 1. 同一工具連續 5 次微調參數但皆因同一 SyntaxError 失敗
+    log_err_streak = tmp_path / "err_streak.log"
+    err_out = (
+        '  File "<string>", line 1\n'
+        '    import pandas as pd; if total_count > 0: print(rate)\n'
+        '                         ^^\n'
+        'SyntaxError: invalid syntax\n\n'
+        'Command exited with code 1'
+    )
+    exprs = [
+        "df['a'].sum()",
+        "df['a'].astype(str).eq('true').sum()",
+        "(df['a'] == True).sum()",
+        "df['a'].astype(bool).sum()",
+        "(df['a'].astype(str).str.lower() == 'true').sum()",
+    ]
+    evs = []
+    for i, ex in enumerate(exprs):
+        cmd = f"python3 -c \"import pandas as pd; fraud_count = {ex}; if total_count > 0: print(fraud_count)\""
+        evs.append({"type": "tool_execution_start", "toolCallId": f"e{i}", "toolName": "bash", "args": {"command": cmd}})
+        evs.append({"type": "tool_execution_end", "toolCallId": f"e{i}", "toolName": "bash", "isError": True,
+                    "result": {"content": [{"text": err_out}]}})
+    log_err_streak.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in evs) + "\n", encoding="utf-8")
+
+    hit_err = repair.detect_tool_loop(log_err_streak)
+    assert hit_err is not None
+    assert hit_err["tool_name"] == "bash"
+    assert hit_err["consecutive_repetitions"] == 5
+    assert hit_err["all_failed"] is True
+    assert hit_err.get("same_error_streak") is True
+    assert hit_err["error_class"] == "SyntaxError"
+    warn_err = repair._loop_warning_line(hit_err)
+    assert "SyntaxError" in warn_err
+    assert "每次都失敗" in warn_err
+
+    # 2. Period-3 (write + bash + bash) 連續 4 組
+    log_p3 = tmp_path / "p3.log"
+    k1_args = {"path": "calc.py", "content": "print(0.0)\n"}
+    k2_args = {"command": "python3 calc.py"}
+    k3_args = {"command": "grep POS data/payments.csv | wc -l"}
+    ev_p3 = []
+    for i in range(4):
+        for step_idx, (tname, targs) in enumerate([("write", k1_args), ("bash", k2_args), ("bash", k3_args)]):
+            cid = f"p3_{i}_{step_idx}"
+            ev_p3.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": tname, "args": targs})
+            ev_p3.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": tname, "isError": False,
+                          "result": {"content": [{"text": "ok"}]}})
+    log_p3.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in ev_p3) + "\n", encoding="utf-8")
+
+    hit_p3 = repair.detect_tool_loop(log_p3)
+    assert hit_p3 is not None
+    assert hit_p3.get("period") == 3
+    assert hit_p3["consecutive_repetitions"] == 4
+    assert hit_p3["tool_name"] == "write+bash+bash"
+    assert hit_p3["all_failed"] is False
+    assert hit_p3["success_count"] == 12
+
+
+
+
+
+# ── contrast055_1273_20261105 回歸（TDD，2026-11-05）─────────────────────────
+
+def test_detect_tool_loop_catches_error_class_repeat_with_interleaved_successes(task_dir, tmp_path):
+    """contrast055_1273_20261105 dabstep-1273-pi-C generic r1 歸因：
+    22 次 bash（python3 -c）呼叫中 7 次皆 SyntaxError——模型每次微調一行式，
+    錯誤輸出隨命令回顯而**逐次不同**——且 15 次成功探查交錯其間。舊
+    detect_tool_loop 的 same_error_streak 要求「連續＋同錯誤文本」，對這種
+    「微調參數、夾成功」的形狀回傳 None，該輪燒掉 18 次模型呼叫／~80 萬 token
+    的浪費原因在 g2_result 的 agent 欄位（tool_loop_suspected）完全不可見。
+    新最寬 fallback 路徑：同工具、同錯誤類、failure_count ≥ threshold ⇒ 記
+    error_class_repeat 觀察（有成功⇒all_failed=False；缺值不造假）。
+    裁決不受影響（觀察只進 agent 欄位／localized 提示，非裁決輸入）；
+    generic 對照臂定義不變。
+    """
+    def ev(i, args, is_err, text):
+        return [
+            {"type": "tool_execution_start", "toolCallId": f"c{i}", "toolName": "bash",
+             "args": args},
+            {"type": "tool_execution_end", "toolCallId": f"c{i}", "toolName": "bash",
+             "isError": is_err, "result": {"content": [{"text": text}]}},
+        ]
+    base = "python3 -c \"import json; data = json.load(open('data/fees.json')); "
+    fails = [
+        base + "rules = [r for r in data if r['card_scheme'] == 'GlobalCard' and r['transaction_type'] == 'credit' and r['amount_range'][0] <= 10 and r['amount_range'][1] >= 10]; print(rules)\"",
+        base + "rules = [r for r in data if r['card_scheme'] == 'GlobalCard']; total_fee = 0; total_count = 0\"",
+        base + "rules = [r for r in data if r['card_scheme'] == 'GlobalCard' and r['transaction_type'] == 'credit']; print(rules)\"",
+        base + "rules = [r for r in data if r.get('card_scheme') == 'GlobalCard']; print(len(rules))\"",
+    ]
+    ok_texts = [
+        "[{'id': 477, 'card_scheme': 'GlobalCard', 'transaction_type': 'credit', ...}]",
+        "1",
+        "[]",
+    ]
+    log = tmp_path / "agent_stdout.log"
+    lines = []
+    for i, cmd in enumerate(fails):
+        lines += ev(i, {"command": cmd}, True,
+                    f'  File "<string>", line 1\n    {cmd[21:]}\n'
+                    f"SyntaxError: invalid syntax\n\nCommand exited with code 1")
+        if i < len(ok_texts):
+            lines += ev(f"s{i}", {"command": f"grep -o GlobalCard data/fees.json | head -{i}"},
+                        False, ok_texts[i])
+    log.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in lines) + "\n",
+                   encoding="utf-8")
+    hit = repair.detect_tool_loop(log)
+    assert hit is not None
+    assert hit.get("error_class_repeat") is True
+    assert hit["tool_name"] == "bash"
+    assert hit["error_class"] == "SyntaxError"
+    assert hit["failure_count"] == 4
+    assert hit["all_failed"] is False      # 有成功探查（非「每次都失敗」）
+    assert hit["success_count"] == 3
+    assert "SyntaxError" in hit["error_sample"]
+    assert hit.get("same_error_streak") is not True   # 不是連續同錯形狀，不冒稱
+
+    # 少於 threshold（3 < 4）⇒ 正常探索中的零星語法錯，不誤報
+    lines3 = []
+    for i in range(3):
+        lines3 += ev(i, {"command": fails[i]}, True,
+                     f'  File "<string>", line 1\nSyntaxError: invalid syntax\nCommand exited with code 1')
+        if i < 2:
+            lines3 += ev(f"s{i}", {"command": f"echo ok{i}"}, False, "ok")
+    log3 = tmp_path / "below.log"
+    log3.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in lines3) + "\n",
+                    encoding="utf-8")
+    assert repair.detect_tool_loop(log3) is None
+
+    # 警示行：點名錯誤類＋.py 逃逸，不帶「以相同參數」或「每次都失敗」的假前提
+    warn = repair._loop_warning_line(hit)
+    assert "SyntaxError" in warn
+    assert ".py" in warn
+    assert "以相同參數" not in warn
+    assert "每次都失敗" not in warn
+
+    # localized 臂：觀察進入本輪提示；generic 對照臂定義不變（逐字元相同）
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="localized",
+                                   prev_round_agent={"tool_loop_suspected": hit})
+    assert "疑似工具死迴圈" in p
+    assert "SyntaxError" in p
+    pg = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                    feedback_mode="generic",
+                                    prev_round_agent={"tool_loop_suspected": hit})
+    pg_base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                         feedback_mode="generic")
+    assert pg == pg_base
