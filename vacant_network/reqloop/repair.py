@@ -1,10 +1,6 @@
-import typing
-from typing import Any, Optional
-from pathlib import Path
+"""
+G2 局部修復切片（工單 P000-20261104-01-repair-slice，2026-11-04）。
 
-<<<<<<< HEAD
-# --- Constants from argon (r1063) ---
-=======
 垂直切片（RLOOP_PLAN.md G2，11/04 方向）：
     原生 pi 接收草稿與可見反例 → 修正產物 → 重驗所有必要條目 → 輸出前後差異及成本。
 
@@ -677,9 +673,8 @@ def _cond_rate_hint_line(evidence: Any) -> str | None:
     )
 
 
->>>>>>> auto/argon
 _PYTHON_SYNTAX_ERRORS = frozenset({"SyntaxError", "IndentationError", "TabError"})
-_CRASH_EXC_RE = {"FileNotFoundError", "IndentationError", "JSONDecodeError"}
+
 
 def _loop_remediation_tail(loop: dict[str, Any]) -> str:
     """「先修掉錯誤的根因再執行」之後的針對性處方（r1063/argon）。
@@ -692,7 +687,7 @@ def _loop_remediation_tail(loop: dict[str, Any]) -> str:
       或是非 Python 工具（jq 過濾器錯、edit 驗證錯），開「寫成 .py 檔案、不要一行式」
       屬於失焦診斷，會誤導模型懷疑執行方式而非修正程式或資料邏輯。
     - 其餘情況（非語法錯、執行期例外、非 Python 工具、已是 .py 腳本）一律走通用根因處方：
-      先查明失敗原因（參數、語法、變數定義或資料內容不符）再修正執行。
+      先查明失敗原因（參數、語法、未定義變數或資料內容不符）再修正執行。
     """
     cls = str(loop.get("error_class") or "").strip()
     args = loop.get("args")
@@ -737,10 +732,6 @@ def _empty_result_giveup_hint_line() -> str:
 
 
 def _loop_warning_line(loop: dict[str, Any]) -> str:
-<<<<<<< HEAD
-    """處方依錯誤類與執行方式分流（_loop_remediation_tail）：.py 逃逸處方只給
-     Python 一行式語法錯誤；jq／edit 驗證／執行期例外等給通用根因處方。
-=======
     """上一輪工具死迴圈觀察（detect_tool_loop 回傳值）→ localized 提示的針對性行。
 
     與提示裡既有的通用行（「不要重複同一命令」）不同：點名上一輪實際重複的
@@ -756,21 +747,21 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
 
     處方依錯誤類與執行方式分流（_loop_remediation_tail）：.py 逃逸處方只給
     Python 一行式語法錯誤；jq／edit 驗證／執行期例外等給通用根因處方。
->>>>>>> auto/argon
     """
     name = str(loop.get("tool_name") or "工具")
     reps = loop.get("consecutive_repetitions")
-    cls = str(loop.get("error_class") or "").strip()
-    err = cls if cls else "未知錯誤"
-    sample = loop.get("error_sample")
+    reps = f" {reps}" if isinstance(reps, int) else ""
+    try:
+        args_text = json.dumps(loop.get("args"), ensure_ascii=False, default=str)
+    except (TypeError, ValueError):
+        args_text = ""
+    if args_text in ("", "{}"):
+        example = ""
+    else:
+        if len(args_text) > 360:
+            args_text = args_text[:220].rstrip() + " … " + args_text[-120:].lstrip()
+        example = f"（例：{args_text}）"
     tail = _loop_remediation_tail(loop)
-<<<<<<< HEAD
-
-    # 執行一次已得到結果後的前提不成立、提示失焦——改點名錯誤類＋具體語法
-    # 規則（寫 .py 檔案執行）＋「跑通即寫入交付物」，不帶該假前提。
-    sample_part = f"（{sample}）" if (sample and sample != err) else ""
-    head = f"{name} ({reps} 次重複)"
-=======
     if loop.get("error_class_repeat") is True:
         # contrast055_1273_20261105 dabstep-1273 generic r1 形狀：同類錯誤多次失敗、
         # 成功探查交錯、每次錯誤文本微差。不帶「以相同參數」「每次都失敗」假前提。
@@ -811,106 +802,377 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
             f"本輪禁止重複該命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
             + tail
         )
->>>>>>> auto/argon
     return head + (
-        f"本輪禁止重複該命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
-        + tail
+        "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"
+        "不要再次執行同一命令。"
     )
 
-def build_repair_prompt(task_dir: Path, rs: Any, draft: Path, before: list[Any], 
-                         feedback_mode: str = "localized", prev_round_agent: Any = None) -> str:
-    # Implementation from argon (r1063/argon) - need to ensure it's here.
-    # Since I don't have the full file, I will try to reconstruct based on common patterns 
-    # or look for where it was in the previous read if possible.
-    # Actually, I should probably just use a placeholder and see what fails, but let's try to be better.
-    pass
 
-def repair_slice(task_dir: Path, rs: Any, draft: Path, 
-                  out_root: Path, build: Any = None, run: Any = None,
-                  feedback_mode: str = "localized", max_rounds: int = 2, synthetic: bool = False) -> dict:
-    pass
+def _crash_giveup_hint_line() -> str:
+    """上一輪 crash→放棄觀察（detect_crash_giveup 回傳值）→ localized 提示的針對性行。
 
-def detect_tool_loop(log: str) -> dict:
-    # Implementation from argon (r1063/argon) - need to ensure it's here.
-    pass
+    來源（effects_20261105，dabstep-1753：兩階段 6 輪全敗）：模型手寫區間匹配函式
+    （parse_range / match_volume / match_fraud）時反覆栽跟頭——split('..') 解包例外被
+    裸 `except: return False` 靜默吞掉、cat << 'EOF' 內混用引號語法錯、最終答案是放棄詞，
+    錯因永不浮現。審查指示 2026-11-05 P2：提示必須直接對準「禁止在資料過濾腳本中使用
+    裸 except: pass / except: return False 靜默吞掉解析錯誤」。
 
-def prepare_workspace(task_dir: Path, draft: Path, out_root: Path, round_n: int) -> None:
-    # Implementation from argon (r1063/argon) - need to ensure it's here.
-    pass
-
-def detect_crash_giveup(log: str, ws_ans: Path, draft_answer_path: Path) -> Optional[dict]:
-    """偵測模型是否因為連續的工具錯誤而放棄（Crash-Giveup）。
-
-    規則：
-    1. 掃描 log 中的 tool_execution_end 事件。
-    2. 如果 isError=True，且內容包含常見異常（如 Traceback, SyntaxError, FileNotFoundError 等），則計入 crash_event_count。
-    3. 若模型在連續失敗後仍未寫入 answer.txt (ws_ans)，且 draft_answer_path 存在且內容為 None 或與 ws_ans 一致，則判定為放棄。
-    4. 避免將正常程式碼中的 ValueError 等誤判為 crash（除非是工具執行本身的錯誤）。
-
-    注意：必須只掃描失敗的 tool_execution_end，避免將 14 次錯誤膨脹為 136 次或誤抓正常程式碼。
+    與 _loop_warning_line 同規則：只帶執行觀察（崩潰＋放棄詞），不帶需求失敗證據或
+    重算值；hint 為靜態行（不含任何動態數值）；不改變裁決。
     """
-    import json
-    events = []
-    for line in log.strip().split('\n'):
-        try:
-            events.append(json.loads(line))
-        except json.JSONDecodeError:
-            continue
+    return (
+        "【上一輪執行觀察】上一輪偵測到腳本崩潰、最終答案為放棄詞（如 None）。"
+        "本輪寫資料過濾／匹配腳本時，禁止用裸 except: pass / except: return False "
+        "靜默吞掉解析錯誤（解包例外、格式不符、引號轉義錯等）——解析錯誤應讓例外浮現"
+        "（讓它丟出並修根因，或顯式計數並回報錯誤筆數），確認沒有靜默吞錯後再產出交付物。"
+    )
 
-    crash_events = []
-    for e in events:
-        if e.get("type") == "tool_execution_end" and e.get("isError"):
-            content = e.get("result", {}).get("content", [])
-            text = "".join([c.get("text", "") for c in content])
-            # 排除掉正常的 ValueError 或其他非工具層級的錯誤（除非是特定的 crash 類）
-            if "ValueError:" not in text and ("Traceback" in text or "SyntaxError" in text or "FileNotFoundError" in text):
-                crash_events.append(text)
 
-    if not crash_events:
+def _extract_error_signature(text: str) -> tuple[str, str]:
+    """從失敗工具輸出提取 (error_class, error_sample)。"""
+    m = _CRASH_EXC_RE.search(text)
+    if m:
+        cls = m.group(1)
+        for line in text.replace("\\n", "\n").splitlines():
+            if cls in line:
+                s = line.strip()
+                if s:
+                    return (cls, s[:80])
+        return (cls, "")
+    lines = [ln.strip() for ln in text.replace("\\n", "\n").splitlines() if ln.strip()]
+    non_meta = [
+        ln for ln in lines
+        if not _CRASH_EXIT_RE.search(ln) and not _CRASH_TRACEBACK_RE.search(ln)
+    ]
+    pick = non_meta[0] if non_meta else (lines[0] if lines else "")
+    return ("", pick[:80] if pick else "")
+
+
+def _error_family(sample: str) -> str | None:
+    """r1061（vq-5nz.30）：非例外工具錯誤（jq／edit 驗證等）沒有例外類；
+    以錯誤文本第一個冒號前的穩定前綴（≤40 字元）作為錯誤類——
+    jq parse/runtime 錯誤 → "jq"；edit 驗證 → 'Validation failed for tool "edit"'。
+    前綴不合條件（無冒號／過長／空）回傳 None＝不歸組（維持原跳過行為，
+    避免把無關錯誤併成一類）。effects_20261105 實據（r1062 逐 log 事件核對）：
+    policy30/dabstep-1753-pi-C localized r1 4 次 jq parse error（column 微差）
+    與 r2 4 次 jq 錯誤（parse×2＋index×2）、feedback_once20/dab_039-pi-C
+    localized r1 5 次＋policy30/dab_039-pi-C generic r1 4 次 edit 驗證失敗，
+    修正前 detect_tool_loop 皆回 None；feedback_once20/dab_039 generic r1
+    僅 2 次（低於 threshold、不歸組屬設計）。
+    """
+    if not sample:
         return None
+    i = sample.find(":")
+    prefix = (sample[:i] if i > 0 else "").strip()
+    if not prefix or len(prefix) > 40:
+        return None
+    return prefix
 
-    # 檢查是否放棄：如果 draft_answer_path 存在且內容為 None，且 ws_ans 也沒被更新
+
+def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
+                         outcomes: list[tuple[tuple[str, Any], bool, str]]) -> dict[str, Any]:
+    """聚合迴圈 key（單 key 或 period-2/3 多 key）的執行結果（r1044／vq-5nz.21；argon 20261105_1047 修）。
+
+    outcomes＝依 toolCallId 關聯自該連勝串 tool_execution_end 的 (key, isError, 輸出文字)。
+    - 該 key 無 end 事件⇒{}（未知，不造假）；
+    - 多步週期若任一步驟在迴圈串中每次皆失敗（如 write 成功但配對的 bash 每次都 SyntaxError），
+      代表每一組交替迴圈皆失敗、從未跑出結果，以該失敗步驟計入全敗（all_failed=True）；
+    - 至少一次完整成功⇒all_failed=False；
+    - 全敗⇒all_failed=True，並自第一個失敗輸出提取 error_class＋error_sample
+      （執行觀察：與提示中工具名／參數例同源，不含重算值／需求證據）。
+    """
+    rel = [o for o in outcomes if o[0] in loop_keys]
+    if not rel:
+        return {}
+    if len(loop_keys) > 1:
+        by_key = [[o for o in rel if o[0] == k] for k in loop_keys]
+        failing_steps = [step_outs for step_outs in by_key if step_outs and all(o[1] for o in step_outs)]
+        if failing_steps:
+            rel = failing_steps[0]
+    failed = [o for o in rel if o[1]]
+    if not failed:
+        return {"all_failed": False, "failure_count": 0, "success_count": len(rel)}
+    all_failed = len(failed) == len(rel)
+    out: dict[str, Any] = {
+        "all_failed": all_failed,
+        "failure_count": len(failed),
+        "success_count": len(rel) - len(failed),
+    }
+    if all_failed:
+        for _key, _err, text in failed:
+            cls, sample = _extract_error_signature(text)
+            if cls:
+                out["error_class"] = cls
+                if sample:
+                    out["error_sample"] = sample
+                break
+        if "error_sample" not in out:
+            for _key, _err, text in failed:
+                _cls, sample = _extract_error_signature(text)
+                if sample:
+                    out["error_sample"] = sample
+                    break
+    return out
+
+
+def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dict[str, Any] | None:
+    """偵測「工具死迴圈」：同一 (tool, args) 單步連續重複、雙步 (k1, k2)／三步 (k1, k2, k3) 交替連續重複，
+    或同一工具連續多次微調參數但皆因同一錯誤失敗（same_error_streak）；
+    同工具同錯誤類多次失敗但成功探查交錯／每次錯誤文本微差（error_class_repeat；
+    contrast055_1273_20261105 dabstep-1273 generic r1：22 次 python3 -c 中 7 次
+    SyntaxError、15 次成功——strict same_error_streak 要求「連續＋同錯誤文本」而漏）；
+    r1061：無例外類的工具錯誤（jq／edit 驗證）以前綴類歸組（_error_family）。
+
+    r1044（vq-5nz.21）：另自 tool_execution_end 依 toolCallId 關聯執行結果，
+    區分「迴圈命令每次都失敗」（all_failed／error_class——contrast3 dabstep-23
+    localized：同一行式 ×34 皆 SyntaxError、從無結果）與「成功後重複驗證」；
+    無 end 事件＝未知（無該欄），不造假。只記錄，不改變裁決。
+
+    來源：
+    - effects_20261105 dabstep-23-pi-C localized：模型把同一條 python3 一行式重複執行
+      10 次以上（period-1，同 args、同結果、中間沒有寫檔）直到 300s 預算耗盡；
+    - effects_20261105 feedback_once20/dabstep-1753-pi-C localized r1：模型把完全相同的
+      (write find_fees.py, bash cat << 'EOF' > find_fees.py ...) 雙步交替重複 9 組（18 次呼叫，
+      period-2，參數零改動）直到 300s 超時；
+    - contrast23_20261105 dabstep-23-pi-C generic r2：模型把 (write, bash python3, bash grep)
+      三步週期（period-3）連續重複 5 組；
+    - contrast23_20261105 dabstep-23-pi-C localized r1：模型連續 5 次執行 bash `python3 -c "...; if ..."`，
+      每次微調中間 `fraud_count = ...` 但全部因尾部 `; if ...` 觸發相同 SyntaxError。
+    這是觀察與標記，不是裁決：不改變任何 PASS/FAIL、停滯判定或退出碼；
+    只記錄在該輪 agent 欄位（`tool_loop_suspected`），讓審計不必人讀 1MB 日誌。
+    缺值＝None，不填假值。
+    """
+    p = pathlib.Path(log_path)
     try:
-        draft_content = draft_answer_path.read_text(encoding="utf-8").strip()
-    except Exception:
-        draft_content = ""
+        text = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    keys: list[tuple[str, Any]] = []
+    starts: list[tuple[tuple[str, Any], str | None]] = []
+    best: tuple[str, Any] | None = None
+    best_streak = 0
+    best_start_idx = 0
+    cur_key: tuple[str, Any] | None = None
+    cur_streak = 0
+    cur_start_idx = 0
+    call_key: dict[str, tuple[str, Any]] = {}
+    end_by_cid: dict[str, tuple[tuple[str, Any], bool, str]] = {}
+    end_outcomes: list[tuple[tuple[str, Any], bool, str]] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            obj = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(obj, dict):
+            continue
+        etype = obj.get("type")
+        if etype == "tool_execution_start":
+            key = (str(obj.get("toolName")), obj.get("args"))
+            idx = len(keys)
+            keys.append(key)
+            cid = obj.get("toolCallId")
+            cid_s = cid if (isinstance(cid, str) and cid) else None
+            starts.append((key, cid_s))
+            if cid_s is not None:
+                call_key[cid_s] = key
+            if key == cur_key:
+                cur_streak += 1
+            else:
+                cur_key = key
+                cur_streak = 1
+                cur_start_idx = idx
+            if cur_streak > best_streak:
+                best_streak = cur_streak
+                best = key
+                best_start_idx = cur_start_idx
+        elif etype == "tool_execution_end":
+            cid = obj.get("toolCallId")
+            if isinstance(cid, str) and cid in call_key:
+                outcome_item = (
+                    call_key[cid], bool(obj.get("isError")),
+                    _extract_tool_end_text(obj),
+                )
+                end_by_cid[cid] = outcome_item
+                end_outcomes.append(outcome_item)
 
-    ws_content = ws_ans.read_text(encoding="utf-8").strip()
+    best_p2_pair: tuple[tuple[str, Any], tuple[str, Any]] | None = None
+    best_p2_cycles = 0
+    best_p2_start = 0
+    n_keys = len(keys)
+    for i in range(n_keys - 1):
+        k1, k2 = keys[i], keys[i + 1]
+        if k1 == k2:
+            continue
+        cycles = 1
+        j = i + 2
+        while j + 1 < n_keys and keys[j] == k1 and keys[j + 1] == k2:
+            cycles += 1
+            j += 2
+        if cycles > best_p2_cycles:
+            best_p2_cycles = cycles
+            best_p2_pair = (k1, k2)
+            best_p2_start = i
 
-    if draft_content == "None" and ws_content == "None":
-        return {
-            "crash_giveup_suspected": True,
-            "giveup_answer": "None",
-            "crash_event_count": len(crash_events),
-            "crash_signatures": list(set(crash_events)),
-            "signatures_truncated": False,
+    best_p3_triple: tuple[tuple[str, Any], tuple[str, Any], tuple[str, Any]] | None = None
+    best_p3_cycles = 0
+    best_p3_start = 0
+    for i in range(n_keys - 2):
+        k1, k2, k3 = keys[i], keys[i + 1], keys[i + 2]
+        if k1 == k2 == k3:
+            continue
+        cycles = 1
+        j = i + 3
+        while j + 2 < n_keys and keys[j] == k1 and keys[j + 1] == k2 and keys[j + 2] == k3:
+            cycles += 1
+            j += 3
+        if cycles > best_p3_cycles:
+            best_p3_cycles = cycles
+            best_p3_triple = (k1, k2, k3)
+            best_p3_start = i
+
+    if best is not None and best_streak >= threshold and best_streak >= max(best_p2_cycles, best_p3_cycles):
+        name, args = best
+        out: dict[str, Any] = {"tool_name": name, "args": args,
+                               "consecutive_repetitions": best_streak, "threshold": threshold}
+        streak_starts = starts[best_start_idx:best_start_idx + best_streak]
+        streak_outcomes = [
+            end_by_cid[cid] for _k, cid in streak_starts
+            if cid is not None and cid in end_by_cid
+        ]
+        out.update(_loop_outcome_fields([best], streak_outcomes if streak_outcomes else end_outcomes))
+        return out
+    if best_p2_pair is not None and best_p2_cycles >= threshold and best_p2_cycles >= best_p3_cycles:
+        k1, k2 = best_p2_pair
+        out = {
+            "tool_name": f"{k1[0]}+{k2[0]}",
+            "args": {"first": k1[1], "second": k2[1]},
+            "consecutive_repetitions": best_p2_cycles,
+            "threshold": threshold,
+            "period": 2,
         }
+        streak_starts = starts[best_p2_start:best_p2_start + 2 * best_p2_cycles]
+        streak_outcomes = [
+            end_by_cid[cid] for _k, cid in streak_starts
+            if cid is not None and cid in end_by_cid
+        ]
+        out.update(_loop_outcome_fields([k1, k2], streak_outcomes if streak_outcomes else end_outcomes))
+        return out
+    if best_p3_triple is not None and best_p3_cycles >= threshold:
+        k1, k2, k3 = best_p3_triple
+        out = {
+            "tool_name": f"{k1[0]}+{k2[0]}+{k3[0]}",
+            "args": {"first": k1[1], "second": k2[1], "third": k3[1]},
+            "consecutive_repetitions": best_p3_cycles,
+            "threshold": threshold,
+            "period": 3,
+        }
+        streak_starts = starts[best_p3_start:best_p3_start + 3 * best_p3_cycles]
+        streak_outcomes = [
+            end_by_cid[cid] for _k, cid in streak_starts
+            if cid is not None and cid in end_by_cid
+        ]
+        out.update(_loop_outcome_fields([k1, k2, k3], streak_outcomes if streak_outcomes else end_outcomes))
+        return out
 
-    return None
+    # 同工具連續多次微調參數但每次皆因同一錯誤簽名失敗（如 contrast23 dabstep-23 localized r1 calls 4-8）
+    cur_err_sig: tuple[str, str, str] | None = None
+    cur_err_streak = 0
+    best_err_streak = 0
+    best_err_sig: tuple[str, str, str] | None = None
+    best_err_args: Any = None
+    for (tname, targs), cid_s in starts:
+        if cid_s is not None and cid_s in end_by_cid:
+            _k, is_err, out_txt = end_by_cid[cid_s]
+            if is_err:
+                cls, sample = _extract_error_signature(out_txt)
+                if cls or sample:
+                    sig = (tname, cls, sample)
+                    if sig == cur_err_sig:
+                        cur_err_streak += 1
+                    else:
+                        cur_err_sig = sig
+                        cur_err_streak = 1
+                    if cur_err_streak > best_err_streak:
+                        best_err_streak = cur_err_streak
+                        best_err_sig = sig
+                        best_err_args = targs
+                    continue
+        cur_err_sig = None
+        cur_err_streak = 0
 
-def _count_rule_hint_line(ev: dict) -> str:
-    # Implementation from argon (r1063/argon) - need to ensure it's here.
-    pass
+    if best_err_sig is not None and best_err_streak >= threshold:
+        err_tool, err_cls, err_sample = best_err_sig
+        out = {
+            "tool_name": err_tool,
+            "args": best_err_args,
+            "consecutive_repetitions": best_err_streak,
+            "threshold": threshold,
+            "same_error_streak": True,
+            "all_failed": True,
+            "failure_count": best_err_streak,
+            "success_count": 0,
+        }
+        if err_cls:
+            out["error_class"] = err_cls
+        if err_sample:
+            out["error_sample"] = err_sample
+        return out
 
-def ClaimResult(claim_id: str, status: str, detail: str, evidence: dict, 
-                 verifier: str, verifier_version: str, required: bool, authority: str):
-    return {"claim_id": claim_id, "status": status, "detail": detail, 
-             "evidence": evidence, "verifier": verifier, "verifier_version": verifier_version, 
-             "required": required, "authority": authority}
+    # 同一工具、同一錯誤類多次失敗——允許成功探查交錯其間、每次錯誤文本可微差
+    # （contrast055_1273_20261105 dabstep-1273 generic r1：22 次 python3 -c 微調中 7 次皆
+    # SyntaxError、15 次成功；上方 strict same_error_streak 要求「連續＋同錯誤文本」而漏
+    # 掉這種形狀，該輪燒掉的模型呼叫在 g2_result 的 agent 欄位完全不可見）。
+    # 最寬的 fallback 路徑：只記錄觀察（agent 欄位／localized 提示），不改變裁決；
+    # 低於 threshold 的零星語法錯不誤報。
+    class_fail: dict[tuple[str, str], dict[str, Any]] = {}
+    for (tname, targs), cid_s in starts:
+        if cid_s is None or cid_s not in end_by_cid:
+            continue
+        _k, is_err, out_txt = end_by_cid[cid_s]
+        if not is_err:
+            continue
+        cls, sample = _extract_error_signature(out_txt)
+        key_cls = cls or _error_family(sample)
+        if not key_cls:
+            continue
+        rec = class_fail.setdefault((tname, key_cls),
+                                    {"count": 0, "args": targs, "sample": sample})
+        rec["count"] += 1
+        if not rec["sample"] and sample:
+            rec["sample"] = sample
+    best_rec: tuple[tuple[str, str], dict[str, Any]] | None = None
+    for key, rec in class_fail.items():
+        if rec["count"] >= threshold and (
+                best_rec is None or rec["count"] > best_rec[1]["count"]):
+            best_rec = (key, rec)
+    if best_rec is None:
+        return None
+    (repeat_tool, repeat_cls), rec = best_rec
+    tool_success = 0
+    for _k, cid_s in starts:
+        if cid_s is None or cid_s not in end_by_cid:
+            continue
+        ek, is_err, _t = end_by_cid[cid_s]
+        if not is_err and ek[0] == repeat_tool:
+            tool_success += 1
+    out: dict[str, Any] = {
+        "tool_name": repeat_tool,
+        "args": rec["args"],
+        "error_class": repeat_cls,
+        "error_class_repeat": True,
+        "failure_count": rec["count"],
+        "threshold": threshold,
+        "all_failed": tool_success == 0,
+        "success_count": tool_success,
+    }
+    if rec["sample"]:
+        out["error_sample"] = rec["sample"]
+    return out
 
-def create_authoritative_snapshot(task_dir: Path, out_root: Path) -> Path:
-    # Implementation from argon (r1063/argon) - need to ensure it's here.
-    pass
 
-<<<<<<< HEAD
-def _cond_rate_hint_line(ev: dict) -> str:
-    # Implementation from argon (r1063/argon) - need to ensure it's here.
-    pass
-
-def _loop_outcome_fields():
-    # Placeholder for some internal logic if needed
-    pass
-=======
 #: crash→放棄 偵測的崩潰簽名（effects_20261105 dabstep-1753 generic：
 #: `NameError ... Command exited with code 1`，模型隨後把答案寫成「None」放棄）。
 _CRASH_EXIT_RE = re.compile(r"Command exited with code (\d+)")
@@ -1156,7 +1418,7 @@ class RepairRound:
     usage: dict[str, int] | None          # None＝UNKNOWN
     error: str | None = None
     #: 來源改動（P000-20261105-02）：權威快照內檔案在工作區缺失或 hash 改變的相對路徑；
-    垂直切片（RLOOP_PLAN.md G2，11/04 方向）：
+    #: 空＝未改。任何非空值＝該輪候選不可接受（控制器不得宣告缺口關閉）。
     source_tampered: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
@@ -2075,4 +2337,3 @@ def _exit_code(outcome: RepairOutcome) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
->>>>>>> auto/argon
