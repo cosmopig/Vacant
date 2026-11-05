@@ -32,6 +32,10 @@ G2 局部修復切片（工單 P000-20261104-01-repair-slice，2026-11-04）。
   不算進度、不重置停滯計數。
 - **成本**：wall_ms／呼叫數由執行器（`run_agent`）實際攔截；token 從 agent 原始
   stdout 的 usage 讀，缺值＝UNKNOWN（None），**絕不填 0**。
+  `cost.calls`＝修復 session（agent 啟動）數；`cost.model_calls`＝**實際模型 API 呼叫數**
+  （各輪原始 stdout 的 usage 事件數），兩者不是一回事，絕不拿 session 數頂替。
+  **任一輪 usage 缺值 ⇒ 總成本（model_calls/tokens）＝UNKNOWN**，已知部分不得被當成
+  完整總和呈現（已知部分仍逐輪記錄在 `rounds[].usage`）。
 - **自造 G1 案例**只用於離線修復單元測試，標 `synthetic=True`；不作為 G2 效果。
 - 原型保持 opt-in：不改任何預設使用者流程；不呼叫本模組時系統行為不變。
 
@@ -301,9 +305,12 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
     - JSONL 事件流（pi `--mode json`）：逐行解析，對每個含 `usage` 的事件
       把 input/output 加總（一次 agent 執行可能有多個 API 呼叫）。
 
-    讀到真實 token 數才回傳 {"input","output","total"}；沒有／解析不出／全為 0＝None
-    （呼叫端標 UNKNOWN）。**缺值不填 0。**
-    """
+    讀到真實 token 數才回傳 {"input","output","total","calls"}；沒有／解析不出／全為 0
+    ＝None（呼叫端標 UNKNOWN）。**缺值不填 0。**
+
+    calls＝本檔中「帶真實 usage 的事件數」——每個 usage 事件＝一次模型 API 呼叫。
+    這是從原始輸出數出來的真實量，不是修復 session 數（agent 啟動次數：一次啟動
+    可含多次 API 呼叫，也可能 0 次）。"""
     p = pathlib.Path(log_path)
     try:
         text = p.read_text(encoding="utf-8", errors="replace").strip()
@@ -322,7 +329,7 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
             continue
         if isinstance(obj, dict):
             parsed.append(obj)
-    tin = tout = 0
+    tin = tout = n_calls = 0
     seen = False
     for obj in parsed:
         u = obj.get("usage")
@@ -333,11 +340,12 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
         if i is None and o is None:
             continue
         seen = True
+        n_calls += 1
         tin += i or 0
         tout += o or 0
     if not seen or (tin == 0 and tout == 0):
         return None
-    return {"input": tin, "output": tout, "total": tin + tout}
+    return {"input": tin, "output": tout, "total": tin + tout, "calls": n_calls}
 
 
 # ── 單輪 ──────────────────────────────────────────────────────────────
@@ -664,22 +672,32 @@ def repair_slice(
     source_tampered = any(r.source_tampered for r in rounds)
     source_tampered_files = tuple(sorted({f for r in rounds for f in r.source_tampered}))
 
-    calls = len(rounds)
+    calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
     wall_total = sum(w for w in wall if isinstance(w, (int, float)))
-    token_parts = [r.usage for r in rounds if r.usage is not None]
-    if token_parts:
-        tokens = sum(u.get("total", sum(v for v in u.values())) for u in token_parts)
+    known = [r.usage for r in rounds if r.usage is not None]
+    if calls == 0:
+        # 零模型活動：0 次 API 呼叫是完整事實（agent 未啟動）；無 usage 來源 ⇒ tokens 仍 UNKNOWN
+        model_calls: int | None = 0
+        tokens: int | None = None
+        token_source = "unavailable"
+    elif len(known) == calls:
+        # 每輪原始 usage 都在 ⇒ 總和是完整量；呼叫數從各輪原始 usage 事件數出
+        model_calls = sum(u["calls"] for u in known)
+        tokens = sum(u["total"] for u in known)
         token_source = "agent_stdout"
     else:
-        tokens = None          # UNKNOWN：缺值不填 0
-        token_source = "unavailable"
+        # 至少一輪 usage 缺值 ⇒ 總成本不得把已知部分當完整總和 ⇒ UNKNOWN（P001-20261105-03）。
+        # 已知部分仍逐輪記錄在 rounds[].usage，總和欄位不混已知/未知。
+        model_calls = None
+        tokens = None
+        token_source = "partial" if known else "unavailable"
     cost: dict[str, Any] = {
-        "calls": calls,
-        "model_calls": calls,   # 同一數量的明確名稱（G2 冒煙契約用 model_calls）
+        "calls": calls,             # 修復 session（agent 啟動）數，不是模型 API 請求數
+        "model_calls": model_calls,  # 實際模型 API 呼叫數（各輪原始 stdout usage 事件數）；任一輪缺 ⇒ None（UNKNOWN）
         "wall_ms_total": int(wall_total) if wall_total else None,  # 無呼叫＝無 wall time
-        "tokens": tokens,
-        "token_source": token_source,
+        "tokens": tokens,           # 全部輪 usage 齊全才是完整總和；任一輪缺 ⇒ None（不填 0）
+        "token_source": token_source,  # agent_stdout | partial（部分輪缺）| unavailable（無任何輪有 usage 資料）
         "budget": {"max_rounds": max_rounds, "timeout_s_per_round": timeout_s,
                    "stall_limit": _STALL_LIMIT,
                    "note": "硬上限＝輪數×單輪 wall timeout＋輪數；無硬 token 限制能力，如實標記"},
@@ -998,6 +1016,54 @@ def _selftest() -> int:
               and o10.source_tampered is False
               and _exit_code(o10) == 20)
 
+        # 11) 成本誠實（P001-20261105-03）：model_calls＝實際模型 API 呼叫數
+        #     （各輪原始 stdout 的 usage 事件數），不是修復 session 數；任一輪 usage 缺值
+        #     ⇒ 總成本（model_calls/tokens）＝UNKNOWN，不得把已知部分當完整總和。
+        #     對照組：每輪都有 usage ⇒ 總和＝各輪 API 呼叫數的精確總和（3≠2 sessions）。
+        usage_r1 = ('{"type": "message_update", "usage": {"input": 100, "output": 50}}\n'
+                    '{"type": "message_update", "usage": {"input": 10, "output": 5}}\n')
+        usage_r2 = '{"type": "message_update", "usage": {"input": 100, "output": 50}}\n'
+        if len(f2) == 2:
+            def make_usage_agent(usage: dict[int, str]) -> RunFn:
+                def run(launch: Any, *, workspace: pathlib.Path,
+                        timeout_s: float, log_dir: pathlib.Path) -> dict[str, Any]:
+                    ws = pathlib.Path(workspace)
+                    if (ws / "summary.md").read_text(encoding="utf-8") != good_summary:
+                        (ws / "summary.md").write_text(good_summary, encoding="utf-8")
+                    else:
+                        (ws / "expense_summary.csv").write_text(good_csv, encoding="utf-8")
+                    log_dir.mkdir(parents=True, exist_ok=True)
+                    n = int(pathlib.Path(log_dir).name.rsplit("_", 1)[-1])
+                    (log_dir / "agent_stdout.log").write_text(usage.get(n, "{}"), encoding="utf-8")
+                    (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+                    return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                            "stdout_log": str(log_dir / "agent_stdout.log"),
+                            "stderr_log": str(log_dir / "agent_stderr.log")}
+                return run
+            o11a = repair_slice(task_dir, rs, draft2, out_root=tmp / "s11a",
+                                build=fake, run=make_usage_agent({1: usage_r1}),
+                                feedback_mode="localized", max_rounds=2, synthetic=True)
+            o11b = repair_slice(task_dir, rs, draft2, out_root=tmp / "s11b",
+                                build=fake,
+                                run=make_usage_agent({1: usage_r1, 2: usage_r2}),
+                                feedback_mode="localized", max_rounds=2, synthetic=True)
+            check("成本誠實：任一輪 usage 缺⇒總成本 UNKNOWN（已知部分不當完整總和）；"
+                  "每輪齊全⇒總和＝實際 API 呼叫數精確總和（非 session 數）",
+                  o11a.stopped == STOP_GAP_CLOSED and len(o11a.rounds) == 2
+                  and o11a.cost["calls"] == 2
+                  and o11a.cost["model_calls"] is None
+                  and o11a.cost["tokens"] is None
+                  and o11a.cost["token_source"] == "partial"
+                  and o11a.rounds[0].usage == {"input": 110, "output": 55, "total": 165, "calls": 2}
+                  and o11a.rounds[1].usage is None
+                  and o11b.cost["model_calls"] == 3
+                  and o11b.cost["tokens"] == 315
+                  and o11b.cost["token_source"] == "agent_stdout",
+                  f"partial={o11a.cost} full={o11b.cost}")
+        else:
+            check("成本誠實：任一輪 usage 缺⇒總成本 UNKNOWN", False,
+                  "G1 案例 bad_round_each_row 應有 2 條必需 FAIL（案例已變？需重凍結案例）")
+
         passed = sum(1 for _, err in results if err is None)
         print("G2 repair-slice SELFTEST（synthetic G1、離線、0 模型呼叫；只驗管線，不宣稱效果）")
         for i, (name, err) in enumerate(results, 1):
@@ -1101,7 +1167,8 @@ def main(argv: list[str] | None = None, *,
         c = outcome.cost
         tokens_s = str(c["tokens"]) if c["tokens"] is not None else "UNKNOWN（缺值不填 0）"
         wall_s = str(c["wall_ms_total"]) if c["wall_ms_total"] is not None else "UNKNOWN"
-        print(f"cost    : calls={c['calls']}  wall_ms={wall_s}  tokens={tokens_s} "
+        mc_s = str(c["model_calls"]) if c["model_calls"] is not None else "UNKNOWN（無原始 usage，不填 0）"
+        print(f"cost    : sessions={c['calls']}  model_calls={mc_s}  wall_ms={wall_s}  tokens={tokens_s} "
               f"(source: {c['token_source']})")
         print(f"stopped : {outcome.stopped}")
     return _exit_code(outcome)

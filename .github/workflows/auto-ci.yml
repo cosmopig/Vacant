@@ -1,0 +1,63 @@
+# auto/** 分支的最小 CI（P001-20261105-03）。
+#
+# 目的：auto 分支上的修復切片管線（reqloop）與凍結碼回歸（FROZEN_SOURCE_SHA）
+# 要有**真的會紅**的門——不是空跑。main 的 CI（ci.yml）**完全不動**：
+# 本檔只在 auto/** push、pull_request、workflow_dispatch 上觸發。
+#
+# ⚠ **job 的 `name:` 是對外的 check 名字，要清楚且穩定**（不要隨便改名，
+#    名字一改，引用這個 check 的東西就斷了）。
+#
+# 紀律（與 repo 其他量具同一套）：
+#   * **不為了變綠而空跑**：三組 pytest 都是真測試，任一組紅整格就紅。
+#   * **量不到不是通過**：這裡沒有「skip 掉」的捷徑——三組測試都不需要
+#     `.vacant-private/`，缺依賴就會直接紅，不是靜默跳過。
+name: auto CI
+
+on:
+  push:
+    branches: [auto/**]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auto-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    # 這個 name 就是 check 名字：清楚、穩定，引用方照此字串。
+    name: "auto core (reqloop + frozen hash + stepchain)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 與 ci.yml 同一套裝法（`.[dev]` 含 pytest>=8）：說明書壞了這裡就紅。
+      - name: 安裝
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      # (1) ReqLoop：G1 量具、G2 冒煙契約、修復切片（含成本誠實回歸：
+      #     model_calls＝實際模型 API 呼叫數／任一輪 usage 缺⇒總成本 UNKNOWN）。
+      - name: pytest — ReqLoop（test_reqloop*）
+        run: python -m pytest tests/test_reqloop_*.py -rs
+
+      # (2) 凍結碼回歸：FROZEN_SOURCE_SHA 釘住 ops/gain/gain_run.py 的 11 個具名
+      #     函式——auto 分支的修改不準讓既有臂逐位元組漂移（本機可重跑同一支）。
+      - name: pytest — 凍結碼（FROZEN_SOURCE_SHA）
+        run: python -m pytest tests/test_gain_harness_arms.py::test_t12_existing_arms_and_generate_are_byte_identical -rs
+
+      # (3) Stepchain 核心回歸：realchain / phaseb / phasec / sealing（本地 ~171s）。
+      - name: pytest — Stepchain 核心
+        run: python -m pytest tests/test_stepchain_*.py -rs
+
+      # (4) 修復切片自檢（10+1 項，含成本誠實對照組）：離線、0 模型呼叫、只驗管線。
+      - name: repair --selftest
+        run: python -m vacant_network.reqloop.repair --selftest

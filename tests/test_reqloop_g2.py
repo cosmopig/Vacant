@@ -197,7 +197,8 @@ def test_min_rounds_zero_no_gap_zero_calls(g1_task, tmp_path: pathlib.Path):
                               max_rounds=2, timeout_s=30, synthetic=True, min_rounds=0)
     assert out.stopped == repair.STOP_NO_GAP
     assert log == []
-    assert out.cost["model_calls"] == 0
+    assert out.cost["calls"] == 0
+    assert out.cost["model_calls"] == 0   # 零模型活動：0 次 API 呼叫是完整事實（agent 未啟動）
 
 
 def test_min_rounds_one_no_gap_runs_one_recheck(g1_task, tmp_path: pathlib.Path):
@@ -210,7 +211,8 @@ def test_min_rounds_one_no_gap_runs_one_recheck(g1_task, tmp_path: pathlib.Path)
                               max_rounds=2, timeout_s=30, synthetic=True, min_rounds=1)
     assert len(log) == 1
     assert out.stopped == repair.STOP_GAP_CLOSED
-    assert out.cost["model_calls"] == 1
+    assert out.cost["calls"] == 1                     # 修復 session（agent 啟動）數
+    assert out.cost["model_calls"] is None            # fake 無原始 usage ⇒ UNKNOWN（不拿 session 數頂替）
 
 
 def test_min_rounds_one_recheck_breaks_regression_recorded(g1_task, tmp_path: pathlib.Path):
@@ -323,10 +325,11 @@ def test_run_g2_smoke_fake_six_cells(tmp_path):
         assert c["after_hidden"] == g2.AFTER_HIDDEN_UNKNOWN
         assert c["before_hidden"] is not None          # 已記錄 hidden 分有引用來源
         assert c["cost"] is not None
-    # localized 好草稿格：0 模型呼叫（缺口驅動）
+    # localized 好草稿格：0 修復 session（缺口驅動）
     good_loc = [c for c in res.cells if c["arm"] == "localized"
                 and c["draft"].startswith("dab_035")][0]
-    assert good_loc["cost"]["model_calls"] == 0
+    assert good_loc["cost"]["calls"] == 0
+    assert good_loc["cost"]["model_calls"] == 0   # 零模型活動：0 次 API 呼叫是完整事實
     assert good_loc["stopped"] == repair.STOP_NO_GAP
     # bad 草稿格（answer 缺失）：修復後 readable 判定 PASS（值正確性＝hidden，不在此斷言）
     bad = [c for c in res.cells if c["draft"].startswith("dab_039")]
@@ -361,6 +364,11 @@ def test_result_written_machine_readable(tmp_path):
     assert data["manifest"]["sha256"] == _sha(MANIFEST)
     assert len(data["cells"]) == 6
     assert data["totals"]["cells"] == 6
+    # P001-20261105-03：fake 不寫原始 usage ⇒ 任一格缺 ⇒ 總計 UNKNOWN，
+    # 不得把已知部分（部分格的 wall_ms）當完整總和
+    assert data["totals"]["model_calls"] is None
+    assert data["totals"]["tokens"] is None
+    assert data["totals"]["wall_ms_total"] is None
 
 
 def test_result_manifest_sha_is_the_loaded_manifest(tmp_path):
@@ -440,12 +448,17 @@ def test_manifest_budget_reaches_executor(tmp_path):
     assert all(t == 600 for t in seen_timeouts), seen_timeouts
 
     by = {(c["draft"], c["arm"]): c for c in res.cells}
-    # min_rounds：generic 臂對的草稿也重驗 1 次；localized 缺口驅動 0 呼叫
-    assert by[("dab_035-pi-C", "generic")]["cost"]["model_calls"] == 1
+    # min_rounds：generic 臂對的草稿也重驗 1 次；localized 缺口驅動 0 session（calls＝修復 session 數）
+    assert by[("dab_035-pi-C", "generic")]["cost"]["calls"] == 1
+    assert by[("dab_035-pi-C", "localized")]["cost"]["calls"] == 0
+    # fake 不寫原始 usage ⇒ model_calls 一律 UNKNOWN（不拿 session 數頂替）
+    assert by[("dab_035-pi-C", "generic")]["cost"]["model_calls"] is None
     assert by[("dab_035-pi-C", "localized")]["cost"]["model_calls"] == 0
     # bad 草稿：兩輪預算用盡（max_rounds=2＝_STALL_LIMIT＝2），缺口仍在
-    assert by[("dab_507-pi-A", "generic")]["cost"]["model_calls"] == 2
-    assert by[("dab_507-pi-A", "localized")]["cost"]["model_calls"] == 2
+    assert by[("dab_507-pi-A", "generic")]["cost"]["calls"] == 2
+    assert by[("dab_507-pi-A", "localized")]["cost"]["calls"] == 2
+    assert by[("dab_507-pi-A", "generic")]["cost"]["model_calls"] is None
+    assert by[("dab_507-pi-A", "localized")]["cost"]["model_calls"] is None
     assert by[("dab_039-pi-C", "generic")]["stopped"] in (
         repair.STOP_MAX_ROUNDS, repair.STOP_STALLED)
     assert by[("dab_039-pi-C", "generic")]["final_readable_status"]["req_answer_kv"] != "PASS"

@@ -194,10 +194,16 @@ class G2Result:
     cells: list[dict[str, Any]]
 
     def to_dict(self) -> dict[str, Any]:
-        calls = [c["cost"].get("model_calls") for c in self.cells]
-        calls_known = [x for x in calls if isinstance(x, int)]
-        tokens = [c["cost"].get("tokens") for c in self.cells if c["cost"].get("tokens") is not None]
-        walls = [c["cost"].get("wall_ms_total") for c in self.cells if c["cost"].get("wall_ms_total") is not None]
+        def _total(key: str) -> int | None:
+            # P001-20261105-03：任一格的值缺（None）⇒ 總計＝UNKNOWN（None）——
+            # 不得把已知部分當完整總和。空清單（無格）⇒ 0（無數據可加，完整事實）。
+            vals = [c["cost"].get(key) for c in self.cells]
+            if not vals:
+                return 0
+            if all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in vals):
+                return int(sum(vals))
+            return None
+
         return {
             "schema": RESULT_SCHEMA,
             "mode": "run",
@@ -210,9 +216,9 @@ class G2Result:
             "cells": self.cells,
             "totals": {
                 "cells": len(self.cells),
-                "model_calls": sum(calls_known) if calls_known else None,   # 缺值不填 0
-                "tokens": sum(tokens) if tokens else None,
-                "wall_ms_total": sum(walls) if walls else None,
+                "model_calls": _total("model_calls"),  # 實際模型 API 呼叫數；任一格缺 ⇒ UNKNOWN（不填 0）
+                "tokens": _total("tokens"),
+                "wall_ms_total": _total("wall_ms_total"),
             },
         }
 
@@ -358,7 +364,7 @@ def main(argv: Sequence[str] | None = None, *,
         print(dry_run_text(man).splitlines()[0])
         for c in res.cells:
             print(f"  {c['draft']} × {c['arm']:<11} stopped={c['stopped']:<11} "
-                  f"calls={c['cost'].get('model_calls')} "
+                  f"sessions={c['cost'].get('calls')} model_calls={c['cost'].get('model_calls')} "
                   f"final={c['final_readable_status']} "
                   f"before_hidden={c['before_hidden'].get('n_correct')} "
                   f"after_hidden={c['after_hidden']}")
@@ -366,8 +372,9 @@ def main(argv: Sequence[str] | None = None, *,
                 print(f"      REGRESSED: {', '.join(c['regressed'])}")
         t = res.to_dict()["totals"]
         tokens_s = str(t["tokens"]) if t["tokens"] is not None else "UNKNOWN（缺值不填 0）"
-        print(f"totals: cells={t['cells']}  model_calls={t['model_calls']}  tokens={tokens_s}  "
-              f"wall_ms={t['wall_ms_total']}")
+        mc_s = str(t["model_calls"]) if t["model_calls"] is not None else "UNKNOWN（缺值不填 0）"
+        wall_s = str(t["wall_ms_total"]) if t["wall_ms_total"] is not None else "UNKNOWN"
+        print(f"totals: cells={t['cells']}  model_calls={mc_s}  tokens={tokens_s}  wall_ms={wall_s}")
     print(f"result: {p}")
     # 冒煙口徑：只要管線跑通（每格都有 readable 判定）即 0；缺口修沒修好是**結果**，不是失敗
     return 0

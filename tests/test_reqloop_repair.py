@@ -565,7 +565,9 @@ def test_repair_no_gap_makes_no_agent_call(task_dir, tmp_path):
     assert out.stopped == "no_gap"
     assert out.rounds == []
     assert out.cost["calls"] == 0
+    assert out.cost["model_calls"] == 0                # 0 次 API 呼叫是完整事實（agent 未啟動）
     assert out.cost["wall_ms_total"] is None           # 沒有呼叫＝沒有 wall time，不填 0
+    assert out.cost["tokens"] is None                   # 無 usage 來源 ⇒ UNKNOWN，不填 0
 
 
 def test_repair_agent_crash_is_no_progress_and_reported(task_dir, tmp_path):
@@ -594,7 +596,8 @@ def test_usage_parsed_from_agent_stdout(tmp_path):
                                "usage": {"inputTokens": 100, "outputTokens": 50}}),
                    encoding="utf-8")
     u = repair.parse_usage_from_log(log)
-    assert u == {"input": 100, "output": 50, "total": 150}
+    # calls＝帶真實 usage 的事件數（1 個事件＝1 次 API 呼叫），不是修復 session 數
+    assert u == {"input": 100, "output": 50, "total": 150, "calls": 1}
     # 沒有 usage 的輸出 ⇒ None（UNKNOWN），不是 0
     log2 = tmp_path / "plain.log"
     log2.write_text("just text output\n", encoding="utf-8")
@@ -616,7 +619,8 @@ def test_usage_parsed_from_pi_jsonl_stream(tmp_path):
     ]
     log.write_text("\n".join(lines) + "\n", encoding="utf-8")
     u = repair.parse_usage_from_log(log)
-    assert u == {"input": 7489, "output": 424, "total": 7913}
+    # 兩個帶 usage 的事件＝兩次 API 呼叫（一次 agent 執行可含多次 API 呼叫）
+    assert u == {"input": 7489, "output": 424, "total": 7913, "calls": 2}
     # 只有全零 usage 事件 ⇒ 沒有真實 token 數 ⇒ None（不填 0）
     log2 = tmp_path / "zeros.log"
     log2.write_text(json.dumps({"type": "message_update",
@@ -636,6 +640,79 @@ def test_usage_counts_into_cost(task_dir, tmp_path):
         feedback_mode="localized", max_rounds=1, synthetic=True,
     )
     assert out.cost["tokens"] == 15
+    assert out.cost["token_source"] == "agent_stdout"
+    assert out.cost["calls"] == 1                       # 修復 session（agent 啟動）數
+    assert out.cost["model_calls"] == 1                 # 實際 API 呼叫數（原始 usage 事件數），非 session 數頂替
+
+
+# ── 成本誠實（P001-20261105-03）：model_calls＝實際 API 呼叫數；缺值＝UNKNOWN ───────
+
+#: 第 1 輪：2 個 usage 事件（2 次 API 呼叫）；第 2 輪：1 個。
+_USAGE_R1 = (json.dumps({"type": "message_update", "usage": {"input": 100, "output": 50}})
+             + "\n" + json.dumps({"type": "message_update", "usage": {"input": 10, "output": 5}})
+             + "\n")
+_USAGE_R2 = json.dumps({"type": "message_update", "usage": {"input": 100, "output": 50}}) + "\n"
+
+
+def _two_round_agent(task_dir: pathlib.Path, usage: dict[int, str]):
+    """兩輪修復 fake（bad_round_each_row：2 個獨立缺口、每輪修一個 ⇒ 2 輪 GAP_CLOSED）。
+
+    usage：輪次號 → 該輪 agent_stdout.log 內容；未列出的輪寫 "{}"（無 usage）。
+    """
+    good_md = (task_dir / "good" / "summary.md").read_text(encoding="utf-8")
+    good_csv = (task_dir / "good" / "expense_summary.csv").read_text(encoding="utf-8")
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        n = int(pathlib.Path(log_dir).name.rsplit("_", 1)[-1])
+        (log_dir / "agent_stdout.log").write_text(usage.get(n, "{}"), encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        ws = pathlib.Path(workspace)
+        if (ws / "summary.md").read_text(encoding="utf-8") != good_md:
+            (ws / "summary.md").write_text(good_md, encoding="utf-8")        # 缺陷 1：只修摘要
+        else:
+            (ws / "expense_summary.csv").write_text(good_csv, encoding="utf-8")  # 缺陷 2：只修 CSV
+        return _run_result(log_dir)
+    return run
+
+
+def test_partial_usage_never_presents_known_as_total(task_dir, tmp_path):
+    """P001-20261105-03 回歸：多輪（2 輪）、第 2 輪 usage 缺值 ⇒
+    總成本（model_calls/tokens）必須 UNKNOWN——不得把第 1 輪的已知部分當成完整總和。
+    已知部分仍逐輪記錄（rounds[0].usage），總和欄位不混已知/未知。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / "bad_round_each_row"
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]),
+        run=_two_round_agent(task_dir, {1: _USAGE_R1}),
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped == "gap_closed" and len(out.rounds) == 2
+    assert out.cost["calls"] == 2                          # 修復 session 數
+    assert out.cost["model_calls"] is None                 # 任一輪缺 ⇒ UNKNOWN，不用 session 數頂替
+    assert out.cost["tokens"] is None                      # 已知部分不當完整總和，不填 0
+    assert out.cost["token_source"] == "partial"
+    # 已知部分仍逐輪在案
+    assert out.rounds[0].usage == {"input": 110, "output": 55, "total": 165, "calls": 2}
+    assert out.rounds[1].usage is None
+
+
+def test_full_usage_totals_count_api_calls_not_sessions(task_dir, tmp_path):
+    """P001-20261105-03 對照組：每輪 usage 齊全 ⇒ 總和＝各輪實際 API 呼叫數的精確總和。
+    這裡 2 個 session、3 次 API 呼叫——兩者不同，model_calls 必須是 3（不是 2）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / "bad_round_each_row"
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]),
+        run=_two_round_agent(task_dir, {1: _USAGE_R1, 2: _USAGE_R2}),
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped == "gap_closed" and len(out.rounds) == 2
+    assert out.cost["calls"] == 2                          # session 數
+    assert out.cost["model_calls"] == 3                    # 2＋1 次 API 呼叫（從原始 usage 事件數出）
+    assert out.cost["tokens"] == 315                       # 165＋150，完整總和
     assert out.cost["token_source"] == "agent_stdout"
 
 
@@ -686,10 +763,11 @@ def test_selftest_command_all_green(capsys):
     rc = repair.main(["--selftest"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "SELFTEST: 10/10 PASS" in out
-    assert "[8/10] ok" in out           # 累積修復（check 8）
-    assert "[9/10] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
-    assert "[10/10] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
+    assert "SELFTEST: 11/11 PASS" in out
+    assert "[8/11] ok" in out           # 累積修復（check 8）
+    assert "[9/11] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
+    assert "[10/11] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
+    assert "[11/11] ok" in out          # 成本誠實：model_calls＝實際 API 呼叫數、缺值⇒UNKNOWN（P001-20261105-03）
 
 
 def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
