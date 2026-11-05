@@ -1,39 +1,3 @@
-<<<<<<< HEAD
-student_id,class_name,student_name,midterm_score,final_score,status
-1001,Class_A,Alice Wang,85,90,ACTIVE
-1002,Class_A,Bob Chen,70,65,ACTIVE
-1003,Class_A,Charlie Lin,55,50,ACTIVE
-1004,Class_A,David Huang,92,95,ACTIVE
-1005,Class_A,Eve Liu,40,35,WITHDRAWN
-1006,Class_A,Frank Tan,78,82,ACTIVE
-1007,Class_A,Grace Wu,66,70,ACTIVE
-1008,Class_A,Hank Zhao,88,90,ACTIVE
-1009,Class_A,Iris Sun,50,45,WITHDRAWN
-1010,Class_A,Jack Lee,72,75,ACTIVE
-1011,Class_B,Kelly Yang,60,62,ACTIVE
-1012,Class_B,Liam Tan,80,85,ACTIVE
-1013,Class_B,Mia Wang,45,40,WITHDRAWN
-1014,Class_B,Noah Chen,95,98,ACTIVE
-1015,Class_B,Olivia Liu,77,80,ACTIVE
-1016,Class_B,Paul Huang,63,68,ACTIVE
-1017,Class_B,Queen Sun,82,88,ACTIVE
-1018,Class_B,Ryan Zhao,58,55,ACTIVE
-1019,Class_B,Sara Tan,74,78,ACTIVE
-1020,Class_B,Tom Lee,69,72,ACTIVE
-1021,Class_C,Uma Wang,88,92,ACTIVE
-1022,Class_C,Victor Chen,50,48,ACTIVE
-1023,Class_C,Wendy Liu,70,75,ACTIVE
-1024,Class_C,Xavier Huang,65,68,ACTIVE
-1025,Class_C,Yvonne Sun,90,95,ACTIVE
-1026,Class_C,Zane Zhao,30,35,WITHDRAWN
-1027,Class_C,Amy Wang,84,88,ACTIVE
-1028,Class_C,Ben Chen,76,80,ACTIVE
-1029,Class_C,Chris Lin,62,65,ACTIVE
-1030,Class_C,Diana Wu,89,94,ACTIVE
-1031,Class_A,Alice Wang,85,90,ACTIVE
-1032,Class_B,Kelly Yang,60,62,ACTIVE
-1033,Class_C,Amy Wang,84,88,ACTIVE
-=======
 student_id,class_name,student_name,midterm_score,final_score,status
 S1001,Class_A,學生01,78,82,ENROLLED
 S1002,Class_A,學生02,55,60,ENROLLED
@@ -74,4 +38,3 @@ S1036,Class_A,學生36,99,95,WITHDRAWN
 S1037,Class_B,學生37,97,99,WITHDRAWN
 S1038,Class_C,學生38,0,0,WITHDRAWN
 S1001,Class_A,學生01重複,99,99,ENROLLED
->>>>>>> auto/argon
