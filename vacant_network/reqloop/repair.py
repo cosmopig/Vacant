@@ -189,11 +189,38 @@ def build_repair_prompt(
     d = pathlib.Path(draft_dir)
     request_p = t / "request.md"
     request = request_p.read_text(encoding="utf-8").strip() if request_p.is_file() else ""
+    if not request and req_set.items:
+        quotes: list[str] = []
+        for it in req_set.items:
+            q = (it.quote or "").strip()
+            if q and q not in quotes:
+                quotes.append(q)
+        request = "\n".join(quotes)
 
-    draft_files = sorted(str(p.relative_to(d)) for p in d.rglob("*") if p.is_file()) \
-        if d.is_dir() else []
-    # 工作區裡的「參考檔」＝task 目錄的顶层檔案（源資料、需求檔）；交付物檔不在此列
-    ref_files = sorted(p.name for p in t.iterdir() if p.is_file()) if t.is_dir() else []
+    declared_deliverables = {it.deliverable for it in req_set.items if it.deliverable}
+    task_rels: set[str] = set()
+    if t.is_dir():
+        for p in t.iterdir():
+            if p.is_file() and p.name not in declared_deliverables:
+                task_rels.add(p.name)
+        for dd in include_dirs:
+            dpath = t / dd
+            if dpath.is_dir():
+                for p in dpath.rglob("*"):
+                    if p.is_file():
+                        rel = str(p.relative_to(t))
+                        if rel not in declared_deliverables:
+                            task_rels.add(rel)
+
+    draft_files = sorted(
+        str(p.relative_to(d)) for p in d.rglob("*")
+        if p.is_file() and str(p.relative_to(d)) not in task_rels
+    ) if d.is_dir() else []
+    # 工作區裡的「參考檔」＝task 目錄的顶层檔案（源資料、契約檔）；交付物檔與控制器內部 requirements.json 不在此列
+    ref_files = sorted(
+        p.name for p in t.iterdir()
+        if p.is_file() and p.name != "requirements.json"
+    ) if t.is_dir() else []
     draft_names = {pathlib.Path(f).name for f in draft_files}
     ref_files = [f for f in ref_files if f not in draft_names] or ref_files
 
@@ -279,6 +306,15 @@ def prepare_workspace(
             dest = ws / p.relative_to(d)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(p, dest)
+    if round_n >= 2:
+        # 累積修復第 2+ 輪（d 為上一輪工作區）：確保權威來源檔案不被上一輪可能污染的副本覆寫
+        for p in sorted(t.iterdir()) if t.is_dir() else []:
+            if p.is_file():
+                shutil.copy2(p, ws / p.name)
+        for dd in include_dirs:
+            src = t / dd
+            if src.is_dir():
+                shutil.copytree(src, ws / dd, dirs_exist_ok=True)
     return ws
 
 
@@ -329,15 +365,31 @@ def parse_usage_from_log(log_path: str | pathlib.Path) -> dict[str, int] | None:
             continue
         if isinstance(obj, dict):
             parsed.append(obj)
+    # 真實 `pi --mode json` 事件流：每次 assistant LLM API 回應結束時，會送出一個
+    # `type="message_end", message={"role":"assistant","usage":...}`；而流式過程中
+    # `type="message_update"` 會在 text_delta/toolcall_delta 帶 `usage={input:0, output:0}`，
+    # 並在同一次回應同時含文字與工具呼叫時於 text_end 與 toolcall_end 重複攜帶同一份 usage。
+    # 故若事件流含 assistant message_end usage，優先以其為準（1 個 message_end＝1 次真實 API 呼叫）；
+    # 否則退回掃描頂層 `obj["usage"]`（相容單一 JSON 或精簡測試事件流），且忽略全 0 streaming delta。
+    msg_end_usages: list[dict] = []
+    for obj in parsed:
+        if obj.get("type") == "message_end":
+            msg = obj.get("message")
+            if isinstance(msg, dict) and msg.get("role") in ("assistant", None):
+                u = msg.get("usage")
+                if isinstance(u, dict):
+                    msg_end_usages.append(u)
+    usage_candidates = msg_end_usages if msg_end_usages else [
+        obj["usage"] for obj in parsed if isinstance(obj.get("usage"), dict)
+    ]
     tin = tout = n_calls = 0
     seen = False
-    for obj in parsed:
-        u = obj.get("usage")
-        if not isinstance(u, dict):
-            continue
+    for u in usage_candidates:
         i = _usage_int(u, _USAGE_INPUT_KEYS)
         o = _usage_int(u, _USAGE_OUTPUT_KEYS)
         if i is None and o is None:
+            continue
+        if (i or 0) <= 0 and (o or 0) <= 0:
             continue
         seen = True
         n_calls += 1

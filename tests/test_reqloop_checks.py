@@ -830,11 +830,12 @@ def test_unknown_aggregate_type_stays_unknown(tmp_path: pathlib.Path):
 # ── kv_recomputed 新重算規則（G2 小批：e013 真實草稿，2026-11-04）────────
 
 def test_kv_recomputed_mean_int_col_pass_and_fail(tmp_path: pathlib.Path):
-    """mean_int_col：全為純整數的資料（無語意歧義）→ 均值；Null/空忽略。"""
+    """mean_int_col：Int64 語意——'200[10-30]' 型點估計取前導整數（同 dab_057 口徑），
+    Null/空與非數值字串忽略，其餘取均值（r1029 合併 d96a8dba 採 argon 語意）。"""
     task_dir = tmp_path / "task"
     _write(
         task_dir / "cases.csv",
-        "Country,No. of cases\nA,100\nC,\nD,300\n",
+        "Country,No. of cases\nA,100\nB,200[10-30]\nC,\nD,300\n",
     )
     params = {
         "key": "mean_cases",
@@ -844,7 +845,7 @@ def test_kv_recomputed_mean_int_col_pass_and_fail(tmp_path: pathlib.Path):
     }
     req_set = _req_set("kv_recomputed", params, "answer.txt")
     good = tmp_path / "good"
-    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+300)/2
+    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+200+300)/3
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
     assert res["req_main"].status == "PASS"
 
@@ -854,34 +855,6 @@ def test_kv_recomputed_mean_int_col_pass_and_fail(tmp_path: pathlib.Path):
     r = res["req_main"]
     assert r.status == "FAIL"
     assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
-
-
-def test_kv_recomputed_mean_int_col_ambiguous_cells_unknown(tmp_path: pathlib.Path):
-    """vq-5nz.18（dab_055 本地門 vs 獨立 scorer 分歧）：非空非純整數格（如 '200[10-30]'）
-    的轉換語意需求未指定——靜默忽略會產生假 FAIL（獨立 scorer 接受另一解讀
-    2081990＝首數值語意；本地舊行為 2199＝忽略語意）。依不變量「看不到的→UNKNOWN」：
-    任一格解讀歧義 → UNKNOWN，兩種解讀的值皆不得進 detail/evidence。"""
-    task_dir = tmp_path / "task"
-    _write(
-        task_dir / "cases.csv",
-        "Country,No. of cases\nA,100\nB,700[10-30]\nC,\nD,300\n",
-    )
-    params = {
-        "key": "mean_cases",
-        "data_file": "cases.csv",
-        "recompute": {"type": "mean_int_col", "col": "No. of cases",
-                      "note": "轉 Int64；Null/空忽略"},
-    }
-    req_set = _req_set("kv_recomputed", params, "answer.txt")
-    # 忽略語意均值＝(100+300)/2＝200；首數值語意均值＝(100+700+300)/3≈366.67
-    for name, val in ("ignore_sem", "@mean_cases[200]"), ("firsttok_sem", "@mean_cases[367]"):
-        d = tmp_path / name
-        _write(d / "answer.txt", val + "\n")
-        res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
-        r = res["req_main"]
-        assert r.status == "UNKNOWN"
-        assert "無法可靠重算" in r.detail
-        assert "200" not in r.detail and "367" not in r.detail  # 重算值不洩漏
 
 
 def test_kv_recomputed_mean_int_col_no_parseable_is_unknown(tmp_path: pathlib.Path):
@@ -967,36 +940,7 @@ def test_kv_recomputed_pearson2_constant_column_is_unknown(tmp_path: pathlib.Pat
 def test_kv_recomputed_json_data_file_mean_int_col(tmp_path: pathlib.Path):
     """vq-5nz.13：.json data_file 必須用 json.load 解析，禁止走 csv.DictReader 產生垃圾字典
     （CSV 首行會把 JSON 開頭當「表頭」）。row 物件列表→規則可判定；錯值→FAIL（非空轉 PASS）。
-    JSON null ＝明確 Null（題目語意：忽略），非解讀歧義。"""
-    task_dir = tmp_path / "task"
-    _write(task_dir / "cases.json", json.dumps([
-        {"Country": "A", "No. of cases": 100},
-        {"Country": "C", "No. of cases": None},
-        {"Country": "D", "No. of cases": 300},
-    ], indent=1))
-    params = {
-        "key": "mean_cases",
-        "data_file": "cases.json",
-        "recompute": {"type": "mean_int_col", "col": "No. of cases",
-                      "note": "轉 Int64；Null/空忽略"},
-    }
-    req_set = _req_set("kv_recomputed", params, "answer.txt")
-    good = tmp_path / "good"
-    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+300)/2
-    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
-    assert res["req_main"].status == "PASS"
-
-    bad = tmp_path / "bad"
-    _write(bad / "answer.txt", "@mean_cases[250]\n")
-    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
-    r = res["req_main"]
-    assert r.status == "FAIL"
-    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
-
-
-def test_kv_recomputed_json_data_file_mean_int_col_ambiguous_unknown(tmp_path: pathlib.Path):
-    """vq-5nz.18：.json 變體同型——非空字串格 '200[10-30]' 解讀歧義 → UNKNOWN
-    （JSON null 仍為明確 Null，不計入歧義）。"""
+    JSON null ＝明確 Null（題目語意：忽略）；'200[10-30]' 型點估計取前導整數。"""
     task_dir = tmp_path / "task"
     _write(task_dir / "cases.json", json.dumps([
         {"Country": "A", "No. of cases": 100},
@@ -1011,12 +955,17 @@ def test_kv_recomputed_json_data_file_mean_int_col_ambiguous_unknown(tmp_path: p
                       "note": "轉 Int64；Null/空忽略"},
     }
     req_set = _req_set("kv_recomputed", params, "answer.txt")
-    d = tmp_path / "d"
-    _write(d / "answer.txt", "@mean_cases[200]\n")
-    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@mean_cases[200]\n")   # (100+200+300)/3
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "@mean_cases[250]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
     r = res["req_main"]
-    assert r.status == "UNKNOWN"
-    assert "無法可靠重算" in r.detail
+    assert r.status == "FAIL"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
 
 
 def test_kv_recomputed_json_data_file_count_if_zero_not_false_pass(tmp_path: pathlib.Path):
@@ -1623,29 +1572,86 @@ def test_plain_recomputed_scheme_fee_avg(tmp_path: pathlib.Path):
     assert res["req_main"].status == "UNKNOWN"
 
 
-def test_plain_recomputed_scheme_fee_avg_null_is_credit_unknown(tmp_path: pathlib.Path):
-    """vq-5nz.18（dabstep-1273 本地門 vs 獨立 scorer 分歧）：匹配 scheme 的規則有
-    is_credit=null 時，null 語意（manual.md：null＝適用所有值 vs 嚴格排除）需求未指定；
-    舊行為靜默 bool(None)=False 排除 → 假 PASS（本地 0.117667 PASS，獨立 scorer 接受
-    含 null 的 0.120132）。任一行歧義 → UNKNOWN；兩種解讀的值皆不得進 detail。"""
+def test_plain_recomputed_scheme_fee_avg_null_is_credit_and_round(tmp_path: pathlib.Path):
+    """argon 20261105_0346 回歸：
+    1. manual.md 明訂 'If a field is set to null it means that it applies to all possible values'。
+       _scheme_fee_avg 舊碼用 `bool(r.get("is_credit")) is not want_credit`，把 `is_credit: null`
+       轉成 False，導致 want_credit=True（dabstep-1273）漏算 21 條 null 規則、算錯成 0.117667，
+       把真正正確的 0.120132 判成 FAIL 並在 round_2 改壞。
+    2. check_plain_recomputed 必須支援 recompute.round（與 check_kv_recomputed 一致）。
+    """
     task_dir = tmp_path / "task"
-    _write(task_dir / "fees.json", json.dumps([
-        {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 10},
-        {"card_scheme": "GlobalCard", "is_credit": None, "fixed_amount": 0.30, "rate": 30},
-        {"card_scheme": "OtherCard", "is_credit": True, "fixed_amount": 0.88, "rate": 88},
-    ]))
-    params = {
+    _write(
+        task_dir / "fees.json",
+        json.dumps([
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 10},   # 0.11
+            {"card_scheme": "GlobalCard", "is_credit": None, "fixed_amount": 0.20, "rate": 20},   # 0.22 (applies to all)
+            {"card_scheme": "GlobalCard", "is_credit": False, "fixed_amount": 0.50, "rate": 50},  # 0.55 (debit only)
+        ]),
+    )
+    # credit: (0.11 + 0.22) / 2 = 0.165；round=2 → 0.16（或 0.17）
+    # 用 (0.11 + 0.22 + 0.10) / 3 = 0.143333... 測 round=4 → 0.1433
+    _write(
+        task_dir / "fees.json",
+        json.dumps([
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 10},   # 0.11
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 0},    # 0.10
+            {"card_scheme": "GlobalCard", "is_credit": None, "fixed_amount": 0.20, "rate": 20},   # 0.22 (null applies to all)
+            {"card_scheme": "GlobalCard", "is_credit": False, "fixed_amount": 0.99, "rate": 99},
+        ]),
+    )
+    params_credit = {
         "data_file": "fees.json",
         "recompute": {"type": "scheme_fee_avg", "scheme": "GlobalCard",
-                      "is_credit": True, "amount": 10.0},
+                      "is_credit": True, "amount": 10.0, "round": 4},
     }
-    req_set = _req_set("plain_recomputed", params, "answer.txt")
-    # 嚴格解讀（排除 null）：0.11；wildcard 解讀（含 null）：(0.11+0.33)/2=0.22
-    for name, val in ("strict", "0.11"), ("wildcard", "0.22"):
-        d = tmp_path / name
-        _write(d / "answer.txt", val + "\n")
-        res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, d)}
-        r = res["req_main"]
-        assert r.status == "UNKNOWN"
-        assert "無法可靠重算" in r.detail
-        assert "0.11" not in r.detail and "0.22" not in r.detail  # 重算值不洩漏
+    req_credit = _req_set("plain_recomputed", params_credit, "answer.txt")
+    good_c = tmp_path / "good_c"
+    _write(good_c / "answer.txt", "0.1433\n")
+    res_c = {r.claim_id: r for r in run_requirement_checks(task_dir, req_credit, good_c)}
+    assert res_c["req_main"].status == "PASS"
+
+    # debit (is_credit=False): 匹配 is_credit=False (1.089) 與 is_credit=None (0.22) → 平均 0.6545
+    params_debit = {
+        "data_file": "fees.json",
+        "recompute": {"type": "scheme_fee_avg", "scheme": "GlobalCard",
+                      "is_credit": False, "amount": 10.0, "round": 4},
+    }
+    req_debit = _req_set("plain_recomputed", params_debit, "answer.txt")
+    good_d = tmp_path / "good_d"
+    _write(good_d / "answer.txt", "0.6545\n")
+    res_d = {r.claim_id: r for r in run_requirement_checks(task_dir, req_debit, good_d)}
+    assert res_d["req_main"].status == "PASS"
+
+
+def test_mean_int_col_point_estimate_and_integer_satisfiable(tmp_path: pathlib.Path):
+    """argon 20261105_0346 回歸（dab_055 實況）：
+    1. estimated_numbers.csv 的 'No. of cases' 含 '630308[495000-801000]'（前導整數即點估計，
+       與 No. of cases_median 同值）；只忽略 Null/空與非數值字串。
+    2. 當題目要求整數答案（answer_kv type=integer）且 mean_int_col 未顯式指定小數 round 時，
+       重算期望值必須取整，不得因未取整浮點數（如 2081990.3598）導致「任何整數與任何浮點數皆不通過」
+       的無解矛盾，更不得把真實正確答案 @mean_cases[2081990] 判成 FAIL。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    dab055_task = repo_root / "ops" / "reqloop" / "g2" / "smoke_e013" / "dab_055-pi-C" / "task"
+    dab055_draft = repo_root / "ops" / "reqloop" / "g2" / "smoke_e013" / "dab_055-pi-C" / "draft"
+    rs = RequirementSet.load(dab055_task / "requirements.json")
+
+    # 1. 原失敗草稿（@mean_cases[2081990.36]）仍為 FAIL
+    before = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, dab055_draft)}
+    assert before["req_answer_kv"] == "FAIL"
+    assert before["req_mean_cases_recomputed"] == "FAIL"
+
+    # 2. 獨立 scorer 認證的真實正確答案（@mean_cases[2081990]）必須兩項皆 PASS
+    good = tmp_path / "good_055"
+    _write(good / "answer.txt", "@mean_cases[2081990]\n")
+    after_good = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, good)}
+    assert after_good["req_answer_kv"] == "PASS"
+    assert after_good["req_mean_cases_recomputed"] == "PASS"
+
+    # 3. 錯誤答案（@mean_cases[2199]）必須 FAIL
+    wrong = tmp_path / "wrong_055"
+    _write(wrong / "answer.txt", "@mean_cases[2199]\n")
+    after_wrong = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, wrong)}
+    assert after_wrong["req_mean_cases_recomputed"] == "FAIL"
+

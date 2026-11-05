@@ -1230,46 +1230,30 @@ def check_kv_recomputed(
                 raise UnknownSource("zcount3: 標準差為 0")
             expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
         elif rtype == "mean_int_col":
-            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」。
-            # vq-5nz.18（effects 分歧，dab_055：本地假 FAIL 2199 vs 獨立 scorer 接受
-            # 2081990＝首數值語意）：非空非純整數格（如 '630308[495000-801000]'）的
-            # 轉換語意需求未指定——靜默忽略會產生假 FAIL。依不變量「看不到的→UNKNOWN」：
-            # 任一格解讀歧義 → UnknownSource；整數值浮點格（'100.0'→100）各語意一致，非歧義。
+            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」——支援純整數（如 '100'）
+            # 與附信賴區間的點估計字串（如 '630308[495000-801000]'，取前導整數點估計，與
+            # No. of cases_median 同值，同 dab_057 口徑）；Null/空與非數值字串（如 'xx[1-2]'）忽略。
+            # 未顯式指定 round 時取整（round），避免與 answer_kv type=integer 構成無解矛盾。
+            # （r1029 合併 d96a8dba：採 argon 語意——effects_20261105 50/50 驗收要求與獨立
+            # scorer 一致；點估計解讀與 dab_057/No. of cases_median 同口徑，非猜測。）
             col = str(rc.get("col", "")).strip()
             if not col:
                 raise UnknownSource("mean_int_col 需要 col")
             ints: list[int] = []
-            ambiguous = 0
-            example = ""
             for r in rows:
-                raw = r.get(col)
-                if raw is None:
-                    continue  # 明確 Null（JSON null）→ 題目語意：忽略
-                cell = str(raw).strip()
-                if not cell:
-                    continue  # 空
-                try:
-                    ints.append(int(cell))
+                raw_cell = r.get(col)
+                if raw_cell is None:
                     continue
-                except ValueError:
-                    pass
-                try:
-                    f = float(cell)
-                except ValueError:
-                    f = None
-                if f is not None and f.is_integer():
-                    ints.append(int(f))
-                else:
-                    ambiguous += 1
-                    if not example:
-                        example = cell
-            if ambiguous:
-                raise UnknownSource(
-                    f"mean_int_col: {ambiguous} 個非空格非純整數（如 {example!r}）；"
-                    f"需求未指定此類格的轉換語意；無法可靠重算（期望值不進證據）")
+                cell = str(raw_cell).strip()
+                if not cell:
+                    continue
+                m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
+                if m_int:
+                    ints.append(int(m_int.group(1)))
             if not ints:
                 raise UnknownSource("mean_int_col: 無可解析整數")
-            expected = float(sum(ints) / len(ints))
+            raw_mean = sum(ints) / len(ints)
+            expected = float(round(raw_mean)) if rc.get("round") is None else float(raw_mean)
         elif rtype == "max_row_first":
             # G2 小批（e013 dab_426）：sel_col 最大值、平手取檔案序第一列、
             # 輸出該列 out_col——「neglecting ties…choose the one that appears
@@ -1465,8 +1449,9 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
 
     公式依公開 manual.md：fee = fixed_amount + rate · amount / 10000。
     rows 須為 fee 規則物件列表（json data_file）；無匹配規則 → UnknownSource。
-    vq-5nz.18：匹配 scheme 的規則若有 is_credit=null，null 語意（wildcard vs 排除）
-    需求未指定 → UnknownSource（不猜；靜默 bool(None)=False 曾造成假 PASS）。
+    manual.md："If a field is set to null it means that it applies to all possible values"
+    ——is_credit=null 為 wildcard（r1029 合併 d96a8dba 採 argon 語意；舊
+    bool(None)=False 靜默排除曾造成 dabstep-1273 假 PASS 0.117667）。
     """
     scheme = str(rc.get("scheme", "")).strip()
     if not scheme:
@@ -1479,19 +1464,12 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     except (TypeError, ValueError):
         raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
     fees: list[float] = []
-    null_credit = 0
     for r in rows:
         if str(r.get("card_scheme", "")).strip() != scheme:
             continue
-        raw_credit = r.get("is_credit")
-        if raw_credit is None:
-            # vq-5nz.18（effects 分歧，dabstep-1273：本地假 PASS 0.117667 vs 獨立
-            # scorer 接受含 null 行的 0.120132；manual.md 明示 null＝適用所有值）：
-            # null 語意（wildcard vs 排除）需求未指定——靜默 bool(None)=False 會假 PASS。
-            # 依不變量「看不到的→UNKNOWN」：任一行歧義 → UnknownSource，不猜。
-            null_credit += 1
-            continue
-        if bool(raw_credit) is not want_credit:
+        # manual.md："If a field is set to null it means that it applies to all possible values"
+        ic = r.get("is_credit")
+        if ic is not None and bool(ic) is not want_credit:
             continue
         try:
             fixed = float(r.get("fixed_amount"))
@@ -1499,10 +1477,6 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
         except (TypeError, ValueError):
             raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
         fees.append(fixed + rate * amount / 10000)
-    if null_credit:
-        raise UnknownSource(
-            f"scheme_fee_avg: {null_credit} 筆匹配 scheme={scheme!r} 的規則 is_credit 為 null；"
-            f"需求未指定 null 語意（wildcard 或排除）；無法可靠重算（期望值不進證據）")
     if not fees:
         raise UnknownSource(f"無匹配 fee 規則 scheme={scheme!r} is_credit={want_credit}")
     return sum(fees) / len(fees)
@@ -1813,6 +1787,10 @@ def check_plain_recomputed(
             expected = _scheme_fee_avg(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        rnd = rc.get("round")
+        if (isinstance(rnd, int) and not isinstance(rnd, bool)
+                and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
+            expected = round(expected, rnd)
     except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
