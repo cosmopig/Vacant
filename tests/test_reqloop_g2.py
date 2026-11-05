@@ -38,6 +38,11 @@ def _sha(p: pathlib.Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def _dir_hashes(d: pathlib.Path) -> dict[str, str]:
+    return {str(p.relative_to(d)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(d.rglob("*")) if p.is_file()}
+
+
 def _fake_build(log: list[dict]):
     def build(prompt: str, ws: pathlib.Path) -> Launch:
         log.append({"prompt": prompt, "ws": str(ws)})
@@ -209,21 +214,25 @@ def test_min_rounds_one_no_gap_runs_one_recheck(g1_task, tmp_path: pathlib.Path)
 
 
 def test_min_rounds_one_recheck_breaks_regression_recorded(g1_task, tmp_path: pathlib.Path):
-    """generic 重驗把對的改壞 ⇒ 退步必須記錄；每輪從原草稿起新工作區（保留原候選），
-    第 2 輪不改 ⇒ 回到全 PASS ⇒ 停 GAP_CLOSED（第 1 輪的退步仍被記錄）。"""
+    """generic 重驗把對的改壞 ⇒ 退步必須記錄；且第 2 輪承接第 1 輪候選（累積修復，
+    P000-20261105-01）：第 1 輪改壞（PASS→FAIL 被記錄）；第 2 輪承接壞狀態、修回 ⇒
+    停 GAP_CLOSED。退步仍留在 regressed 與第 1 輪 diff（不被最終修回隱藏）。
+    原草稿逐位元組未動（保留原候選）。"""
     rs = RequirementSet.load(g1_task / "requirements.json")
     good = g1_task / "good"
+    good_md = (good / "summary.md").read_text(encoding="utf-8")
     bad_md = (g1_task / "bad_grand_total_wrong" / "summary.md").read_text(encoding="utf-8")
-
-    calls = {"n": 0}
+    good_hashes = _dir_hashes(good)
 
     def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
             log_dir: pathlib.Path) -> dict:
-        calls["n"] += 1
-        if calls["n"] == 1:
-            (pathlib.Path(workspace) / "summary.md").write_text(bad_md, encoding="utf-8")
-            # 重驗把它改壞（報銷總金額錯值）
-        # 第 2 輪：新工作區＝原草稿（好值），不改
+        ws = pathlib.Path(workspace)
+        if ws.name == "round_1":
+            # 第 1 輪（好草稿起）：把對的改壞 ⇒ PASS→FAIL 必須被記錄
+            (ws / "summary.md").write_text(bad_md, encoding="utf-8")
+        else:
+            # 第 2 輪承接第 1 輪的壞狀態（累積修復）：修回
+            (ws / "summary.md").write_text(good_md, encoding="utf-8")
         log_dir = pathlib.Path(log_dir)
         log_dir.mkdir(parents=True, exist_ok=True)
         (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
@@ -235,12 +244,16 @@ def test_min_rounds_one_recheck_breaks_regression_recorded(g1_task, tmp_path: pa
     out = repair.repair_slice(g1_task, rs, good, tmp_path / "o3",
                               _fake_build([]), run, "generic",
                               max_rounds=2, timeout_s=30, synthetic=True, min_rounds=1)
-    # 第 1 輪退步（PASS→FAIL）被記錄
+    # 第 1 輪退步（PASS→FAIL）被記錄，不被最終修回隱藏
     assert "req_summary_numbers" in out.regressed
     assert "req_summary_numbers" in out.rounds[0].diff.regressed
-    # 第 2 輪新工作區（原草稿好值）⇒ 全 PASS ⇒ 停 GAP_CLOSED
+    # 第 2 輪承接第 1 輪的壞狀態並修回（相鄰輪差異＝修復）⇒ 全 PASS ⇒ 停 GAP_CLOSED
+    assert out.rounds[1].diff.fixed == ("req_summary_numbers",)
     assert out.stopped == repair.STOP_GAP_CLOSED
     assert out.final_status["req_summary_numbers"] == "PASS"
+    # 原草稿保留（第 1 輪的改壞只發生在 round_1/ 工作區）
+    assert (tmp_path / "o3" / "round_1" / "summary.md").read_text(encoding="utf-8") == bad_md
+    assert _dir_hashes(good) == good_hashes
 
 
 def test_include_dirs_copies_data_but_not_reference_dirs(g1_task, tmp_path):

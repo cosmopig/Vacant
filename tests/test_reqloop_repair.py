@@ -72,6 +72,13 @@ def _fake_agent(ws_files: dict[str, str] | None, *, wall_ms: int = 1200,
     return run
 
 
+def _run_result(log_dir: pathlib.Path) -> dict:
+    """run_agent 回傳值的零呼叫版本（rc=0、無 timeout、無 token）。"""
+    return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+            "stdout_log": str(log_dir / "agent_stdout.log"),
+            "stderr_log": str(log_dir / "agent_stderr.log")}
+
+
 def _good_summary(task_dir: pathlib.Path) -> str:
     return (task_dir / "good" / "summary.md").read_text(encoding="utf-8")
 
@@ -267,6 +274,93 @@ def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):
     assert out.synthetic is True
     # 提示是 localized（帶反例）
     assert "10674.83" in log[0]["prompt"]
+
+
+def test_cumulative_second_round_inherits_first_round_candidate(task_dir, tmp_path):
+    """P000-20261105-01 驗收核心：兩個獨立內容缺陷、fake agent 每輪只修一項 ⇒ 兩輪後兩項皆 PASS。
+    第 2 輪必須承接第 1 輪候選（累積修復），不得每輪重抽原草稿：
+    舊行為（每輪重抽原草稿）會每輪只修到同一項、第二缺口永遠閉不上，本測試在舊行為下必紅。
+    synthetic 離線接線，只驗管線，不宣稱任何真模型效果。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / "bad_round_each_row"  # 2 必要 FAIL（摘要數值、CSV 分組）+ 1 必要 PASS（CSV 結構）
+    good_csv = (task_dir / "good" / "expense_summary.csv").read_text(encoding="utf-8")
+    good_md = (task_dir / "good" / "summary.md").read_text(encoding="utf-8")
+    draft_hashes = _dir_hashes(draft)
+
+    calls = {"n": 0}
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        calls["n"] += 1
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        ws = pathlib.Path(workspace)
+        if (ws / "summary.md").read_text(encoding="utf-8") != good_md:
+            (ws / "summary.md").write_text(good_md, encoding="utf-8")        # 缺陷 1：只修摘要
+        else:
+            (ws / "expense_summary.csv").write_text(good_csv, encoding="utf-8")  # 缺陷 2：只修 CSV
+        return _run_result(log_dir)
+
+    log: list[dict] = []
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build(log), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    # 兩輪把兩個獨立缺陷都修掉，缺口關閉
+    assert calls["n"] == 2
+    assert out.stopped == "gap_closed"
+    assert out.final_status["req_group_recompute"] == "PASS"
+    assert out.final_status["req_summary_numbers"] == "PASS"
+    assert set(out.fixed) == {"req_group_recompute", "req_summary_numbers"}
+    assert out.regressed == () and out.unresolved == ()
+    # 逐輪差異（相鄰輪）：第 1 輪只修摘要、第 2 輪只修 CSV（承接第 1 輪候選才可能）
+    assert out.rounds[0].diff.fixed == ("req_summary_numbers",)
+    assert out.rounds[1].diff.fixed == ("req_group_recompute",)
+    # 第 2 輪提示反映當前候選狀態（摘要已 PASS ⇒ 不再列為缺口）
+    assert "[PASS] req_summary_numbers" in log[1]["prompt"]
+    assert "[FAIL] req_summary_numbers" not in log[1]["prompt"]
+    # 每輪留快照；原草稿逐位元組未動
+    assert (tmp_path / "out" / "round_1" / "summary.md").is_file()
+    assert (tmp_path / "out" / "round_2" / "summary.md").read_text(encoding="utf-8") == good_md
+    assert (tmp_path / "out" / "round_2" / "expense_summary.csv").read_text(encoding="utf-8") == good_csv
+    assert _dir_hashes(draft) == draft_hashes
+
+
+def test_regression_not_hidden_by_net_improvement(task_dir, tmp_path):
+    """P000-20261105-01：原本 PASS 被破壞（淨改善：修 1 + 壞 1）⇒ 退步不得因淨改善被隱藏。
+    原始差異與逐輪差異都要同時記錄修復與退步。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / "bad_round_each_row"
+    good_md = (task_dir / "good" / "summary.md").read_text(encoding="utf-8")
+    broken_csv = "category,total_amount\nit,3380.25\n"  # 缺 subcategory 欄位 ⇒ CSV 結構 FAIL
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        (pathlib.Path(workspace) / "summary.md").write_text(good_md, encoding="utf-8")
+        (pathlib.Path(workspace) / "expense_summary.csv").write_text(broken_csv, encoding="utf-8")
+        return _run_result(log_dir)
+
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    # 淨改善：req_summary_numbers FAIL→PASS
+    assert "req_summary_numbers" in out.fixed
+    # 原本 PASS 被破壞：req_csv_structure PASS→FAIL，必須被記錄、不得被淨改善隱藏
+    assert "req_csv_structure" in out.regressed
+    assert "req_csv_structure" in out.unresolved
+    assert out.final_status["req_csv_structure"] == "FAIL"
+    assert out.stopped != "gap_closed"
+    # 逐輪差異（第 1 輪）：修復與退步都在場
+    assert "req_summary_numbers" in out.rounds[0].diff.fixed
+    assert "req_csv_structure" in out.rounds[0].diff.regressed
+    # 原始差異（原草稿→最終）：同樣兩面都在場
+    assert "req_summary_numbers" in out.final_diff.fixed
+    assert "req_csv_structure" in out.final_diff.regressed
 
 
 def test_repair_fail_to_unknown_counts_as_not_fixed(task_dir, tmp_path):
@@ -580,8 +674,8 @@ def test_selftest_command_all_green(capsys):
     rc = repair.main(["--selftest"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "SELFTEST: 7/7 PASS" in out
-    assert "[7/7] ok" in out            # 退出碼 0/20＋成本缺值 UNKNOWN（check 7 內斷言）
+    assert "SELFTEST: 8/8 PASS" in out
+    assert "[8/8] ok" in out            # 退出碼 0/20＋成本缺值 UNKNOWN（check 7 內斷言）
 
 
 def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
@@ -728,8 +822,9 @@ def test_tag_format_verifier(tmp_path: pathlib.Path):
 def test_stall_budget_not_reset_by_nonrequired_fix(task_dir, tmp_path):
     """停滯決策只看已確認缺口（必需 FAIL）：非必需項 FAIL→PASS 不算進度。
 
-    若把它算進度（缺陷）：每輪 diff 都對照原草稿，一次非必需修復會**每一輪**都重置
-    停滯預算，迴圈燒盡 max_rounds。規則原文：「連續兩次修復沒有消除已確認缺口⇒停止」
+    若把它算進度（缺陷）：一次非必需修復會**每一輪**都重置
+    停滯預算，迴圈燒盡 max_rounds。規則：「連續兩次修復沒有消除已確認缺口⇒停止」（停滯按
+    相鄰輪必要項可確認改善計算，P000-20261105-01）
     ——已確認缺口（req_group_recompute）從未消除，第 2 次無進展就必須停（2 呼叫，不是 4）。
     """
     import dataclasses

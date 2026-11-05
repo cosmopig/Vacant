@@ -10,16 +10,21 @@ G2 局部修復切片（工單 P000-20261104-01-repair-slice，2026-11-04）。
 - `intake.verifiers.ClaimResult` — 四態結果
 - `adapters.agents.pi_build` + `adapters.run.run_agent` — 原生 pi 執行（CLI 預設）
 
-規則（RD_FOCUS_20261104；本模組的每個行為都在此約束下）：
-- **保留原候選**：原草稿目錄永遠不被改動；每一輪複製到新的工作目錄才讓 agent 動。
+規則（RD_FOCUS_20261104，累積修復 P000-20261105-01；本模組的每個行為都在此約束下）：
+- **保留原候選**：原草稿目錄永遠不被改動；每一輪複製到新的工作目錄 round_N/ 才讓 agent 動；
+  每輪工作區即該輪候選快照，保留供審計。
+- **累積修復（2026-11-05）**：第 1 輪從原草稿起；第 N 輪（N≥2）承接第 N−1 輪工作區的
+  候選與該輪已驗證狀態——不是每輪重抽原草稿。提示與逐輪差異同樣反映當前候選：
+  逐輪 diff＝相鄰輪差異（上一輪狀態→本輪重驗）；原始級差異（原草稿初始驗→最終重驗）
+  另記在 `final_diff`。
 - **FAIL→UNKNOWN 不算修好**；缺項／UNKNOWN／CONFLICT 不得宣告完成（unresolved 裡列明）。
 - **任何原有 PASS 退步**（PASS→FAIL／PASS→UNKNOWN）都要記錄在 `regressed`，
   不能用淨改善掩蓋。
-- **連續兩次修復沒有消除已確認缺口**（必需條目 FAIL 數沒減少）⇒ 停止，
-  回傳停因（`stopped`）及未解決項（`unresolved`）。預算由本控制器管（輪數上限），
-  不靠提示詞。
-  停滯判據＝原 FAIL 的**必需**項本輪新確認轉 PASS；非必需項 FAIL→PASS、
-  FAIL→UNKNOWN、振蕩（修→退→再修同一項）都不算進度、不重置停滯計數。
+- **連續兩次修復沒有消除已確認缺口** ⇒ 停止，回傳停因（`stopped`）及未解決項
+  （`unresolved`）。預算由本控制器管（輪數上限），不靠提示詞。
+  停滯判據（P000-20261105-01）＝**相鄰輪可確認改善**：上一輪狀態（第 1 輪＝初始驗）
+  中非 PASS 的必需項，本輪確認轉 PASS 才算進度；非必需項 FAIL→PASS、FAIL→UNKNOWN
+  不算進度、不重置停滯計數。
 - **成本**：wall_ms／呼叫數由執行器（`run_agent`）實際攔截；token 從 agent 原始
   stdout 的 usage 讀，缺值＝UNKNOWN（None），**絕不填 0**。
 - **自造 G1 案例**只用於離線修復單元測試，標 `synthetic=True`；不作為 G2 效果。
@@ -366,7 +371,14 @@ def run_repair_round(
     timeout_s: float,
     include_dirs: tuple[str, ...] = ("data",),
 ) -> RepairRound:
-    """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。原草稿不被改動。"""
+    """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。來源目錄不被改動。
+
+    累積修復（P000-20261105-01）：
+    - `draft_dir`＝本輪來源目錄：第 1 輪為原草稿；第 N 輪（N≥2）為上一輪工作區
+      （承接上一輪候選）。重驗與重驗證據一律以本輪工作區為準。
+    - `before`＝上一輪狀態：第 1 輪為原草稿初始驗；第 N 輪為上一輪 after。
+      故本輪 `diff`＝相鄰輪差異（before→after），提示也反映當前候選狀態。
+    """
     ws = prepare_workspace(task_dir, draft_dir, out_root,
                            round_n=n, include_dirs=include_dirs)
     prompt = build_repair_prompt(task_dir, req_set, draft_dir, before,
@@ -407,6 +419,7 @@ class RepairOutcome:
     fixed: tuple[str, ...]
     regressed: tuple[str, ...]
     unresolved: tuple[str, ...]           # 非 PASS（含 UNKNOWN／CONFLICT／缺項）
+    final_diff: RepairDiff                # 原始級差異（原草稿初始驗→最終重驗）
     cost: dict[str, Any]
     draft_sha256: str                     # 原草稿目錄內容指紋（保留證據）
 
@@ -442,8 +455,10 @@ def repair_slice(
 ) -> RepairOutcome:
     """有上限的修復入口（預算由這裡管，不靠提示詞）。
 
-    每輪從**原草稿**起新工作區（保留原候選）；連續兩輪沒有消除已確認缺口
-    （必需條目 FAIL 數沒減少）即停；無缺口則零呼叫。
+    累積修復（P000-20261105-01）：第 1 輪從**原草稿**起新工作區（保留原候選）；
+    第 N 輪（N≥2）承接第 N−1 輪工作區的候選與該輪已驗證狀態——不是每輪重抽原草稿。
+    停滯按「相鄰輪可確認改善」計算：上一輪狀態（第 1 輪＝初始驗）中非 PASS 的必需項
+    本輪確認轉 PASS 才算進度；連續兩輪無可確認改善即停（STOP_STALLED）；無缺口則零呼叫。
 
     min_rounds（真草稿冒煙，2026-11-04）：無已確認缺口時也至少跑幾輪。
     - localized（預設 0）：無缺口 ⇒ 0 模型呼叫（缺口驅動）。
@@ -462,8 +477,6 @@ def repair_slice(
 
     before = run_requirement_checks(t_dir, req_set, d_dir)
     req_fail = [c.claim_id for c in before if c.required and c.status == "FAIL"]
-    initial_req_fail = set(req_fail)
-    confirmed: set[str] = set()   # 原 FAIL 的必需項中，已確認轉 PASS 的高水位
     rounds: list[RepairRound] = []
     stalled = 0
     stopped = STOP_MAX_ROUNDS
@@ -472,9 +485,14 @@ def repair_slice(
         # 注意：若有必需條目是 UNKNOWN／缺項，unresolved 仍會列出、退出碼非 0——不得宣告完成。
         stopped = STOP_NO_GAP
     else:
+        # 累積修復（P000-20261105-01）：第 1 輪來源＝原草稿；第 N 輪（N≥2）來源＝
+        # 上一輪工作區（承接候選）＋上一輪已驗證狀態（prev_after）。原草稿永不改動；
+        # 每輪工作區 round_N/ 即該輪快照。
+        source_dir = d_dir
+        prev_after = before
         for n in range(1, max_rounds + 1):
             r = run_repair_round(
-                n, t_dir, req_set, d_dir, before,
+                n, t_dir, req_set, source_dir, prev_after,
                 out_root=o_root, build=build, run=run,
                 feedback_mode=feedback_mode, timeout_s=timeout_s,
                 include_dirs=include_dirs,
@@ -483,27 +501,32 @@ def repair_slice(
             if _required_all_pass(req_set, r.after):
                 stopped = STOP_GAP_CLOSED
                 break
-            # 停滯決策（規則原文：「連續兩次修復沒有消除已確認缺口⇒停止」）：
-            # 進度＝原 FAIL 的必需項本輪新確認轉 PASS。以下**不**算進度：
+            # 停滯決策（P000-20261105-01：按「相鄰輪可確認改善」計算）：
+            # 進度＝上一輪狀態（第 1 輪＝初始驗）中非 PASS 的**必需**項，本輪確認轉 PASS。
+            # 以下**不**算進度：
             # - 非必需項 FAIL→PASS：不是已確認缺口。若算進度，一次非必需修復會
-            #   每輪都重置停滯預算（每輪 diff 對照原草稿，fixed 一直非空），迴圈燒盡
-            #   max_rounds——預算紀律失效。
-            # - FAIL→UNKNOWN：紅線明列不算修好（若用「必需 FAIL 數下降」計數式判據，
-            #   弄壞資料檔把 FAIL 變 UNKNOWN 也能偽裝成『進度』）。
-            # - 振蕩（修→退→再修同一項）：非新確認的修復，同樣不重置。
+            #   每輪都重置停滯預算，迴圈燒盡 max_rounds——預算紀律失效。
+            # - FAIL→UNKNOWN：紅線明列不算修好（不得用狀態變化偽裝進度）。
+            prev_map = _status_map(prev_after)
             newly = {c.claim_id for c in r.after
-                     if c.required and c.status == "PASS"} & initial_req_fail
-            if newly - confirmed:
-                confirmed |= newly
+                     if c.required and c.status == "PASS"
+                     and prev_map.get(c.claim_id) != "PASS"}
+            if newly:
                 stalled = 0
             else:
                 stalled += 1
                 if stalled >= _STALL_LIMIT:
                     stopped = STOP_STALLED
                     break
+            # 下一輪承接本輪候選與本輪狀態（累積，不重抽原草稿）
+            source_dir = pathlib.Path(r.workspace)
+            prev_after = r.after
 
     last_after = rounds[-1].after if rounds else before
     final_status = _status_map(last_after)
+    # 原始級差異（P000-20261105-01）：原草稿初始驗→最終重驗。逐輪 diff 是相鄰輪差異；
+    # 此處記錄整段相對原草稿的淨變化（fixed 與 regressed 不得相互掩蓋）。
+    final_diff = diff_results(before, last_after)
     # 缺項（在需求裡但最後重驗沒有）＝UNKNOWN 口徑，不得宣告完成
     for item in req_set.items:
         final_status.setdefault(item.id, "MISSING")
@@ -553,6 +576,7 @@ def repair_slice(
         fixed=fixed,
         regressed=regressed,
         unresolved=unresolved,
+        final_diff=final_diff,
         cost=cost,
         draft_sha256=_dir_sha256(d_dir),
     )
@@ -734,6 +758,46 @@ def _selftest() -> int:
         check("退出碼 0（缺口關閉）/20（未驗證、拒收）＋tokens 顯示 UNKNOWN",
               rc_ok == 0 and rc_unverified == 20
               and "tokens=UNKNOWN" in text)
+
+        # 8) 累積修復（P000-20261105-01）：bad_round_each_row 有兩個獨立必需 FAIL（
+        #    分組重算＋報表總額）。fake agent 每輪只修一個缺口：若第 2 輪重抽原草稿，
+        #    第 1 輪修好的 summary 會被覆蓋回去，兩個缺口永遠關不掉；只有第 2 輪
+        #    承接第 1 輪候選，兩輪後才全部 PASS。
+        draft2 = task_dir / "bad_round_each_row"
+        draft2_hash0 = _dir_sha256(draft2)
+        before2 = run_requirement_checks(task_dir, rs, draft2)
+        f2 = [c.claim_id for c in before2 if c.required and c.status == "FAIL"]
+        good_csv = (task_dir / "good" / "expense_summary.csv").read_text(encoding="utf-8")
+        if len(f2) == 2:
+            def run_one_per_round(launch: Any, *, workspace: pathlib.Path,
+                                  timeout_s: float, log_dir: pathlib.Path) -> dict[str, Any]:
+                ws = pathlib.Path(workspace)
+                if (ws / "summary.md").read_text(encoding="utf-8") != good_summary:
+                    (ws / "summary.md").write_text(good_summary, encoding="utf-8")  # 缺口①：只修 summary
+                else:
+                    (ws / "expense_summary.csv").write_text(good_csv, encoding="utf-8")  # 缺口②：只修 CSV
+                log_dir.mkdir(parents=True, exist_ok=True)
+                (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+                (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+                return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                        "stdout_log": str(log_dir / "agent_stdout.log"),
+                        "stderr_log": str(log_dir / "agent_stderr.log")}
+            o8 = repair_slice(task_dir, rs, draft2, out_root=tmp / "s8",
+                              build=fake, run=run_one_per_round,
+                              feedback_mode="localized", max_rounds=2, synthetic=True)
+            check("累積修復：兩個獨立缺口每輪修一個 ⇒ 兩輪後全 PASS（第 2 輪承接第 1 輪候選）",
+                  o8.stopped == STOP_GAP_CLOSED
+                  and set(f2) <= set(o8.fixed)
+                  and o8.unresolved == ()
+                  and len(o8.rounds) == 2
+                  and o8.rounds[0].diff.closed_any_gap
+                  and o8.rounds[1].diff.closed_any_gap
+                  and _dir_sha256(draft2) == draft2_hash0,
+                  f"stopped={o8.stopped} fixed={o8.fixed} unresolved={o8.unresolved}")
+        else:
+            check("累積修復：兩個獨立缺口每輪修一個 ⇒ 兩輪後全 PASS",
+                  False,
+                  f"G1 案例 bad_round_each_row 應有 2 條必需 FAIL，實際 {len(f2)}（案例已變？需重凍結案例）")
 
         passed = sum(1 for _, err in results if err is None)
         print("G2 repair-slice SELFTEST（synthetic G1、離線、0 模型呼叫；只驗管線，不宣稱效果）")
