@@ -1970,3 +1970,65 @@ def test_count_rule_hint_covers_count_if_and_quoted_csv_commas(task_dir):
     assert "csv" in h_c.lower()
     assert repair._count_rule_hint_line({"rule": "sum_col: amount"}) is None
 
+
+# ── 上一輪 crash→放棄觀察 → 本輪 localized 針對性「禁止靜默吞解析錯」指令 ──
+# 來源（effects_20261105，dabstep-1753 兩階段 6 輪全敗）：模型手寫區間匹配函式
+# （parse_range / match_volume / match_fraud）時反覆栽跟頭——split('..') 解包例外被
+# 裸 `except: return False` 靜默吞掉、cat << 'EOF' 內混用引號語法錯，最終答案是放棄詞，
+# 錯因永不浮現。審查指示 2026-11-05 P2：新提示必須直接對準「禁止在資料過濾腳本中
+# 使用裸 except: pass / except: return False 靜默吞掉解析錯誤」。detect_crash_giveup
+# （r1033/2aa0c077）已把該失效模式變機器可讀；本組測試要求它進入 localized 提示。
+
+
+def _crash_observation() -> dict:
+    return {"crash_giveup_suspected": {
+        "giveup_answer": "None",
+        "crash_event_count": 3,
+        "crash_signatures": ["ValueError: not enough values to unpack"],
+        "signatures_truncated": False,
+    }}
+
+
+def test_localized_prompt_warns_bare_except_after_crash_giveup(task_dir):
+    """上一輪偵測到 crash→放棄 ⇒ 本輪 localized 提示點名「裸 except 靜默吞解析錯」；
+    不帶重算值／hidden（hint 為靜態行，不含任何數字答案）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="localized",
+                                   prev_round_agent=_crash_observation())
+    assert "except: return False" in p
+    assert "靜默" in p and "解析" in p
+    assert "except: pass" in p
+    # 觀察只進提示、不帶重算值：hint 行不得含任何數值答案
+    hint = repair._crash_giveup_hint_line()
+    assert "46" not in hint and "48" not in hint
+
+
+def test_localized_prompt_without_crash_observation_is_unchanged(task_dir):
+    """無上一輪 crash 觀察（第 1 輪／未偵測到）⇒ 提示與舊行為逐字元相同（不新增行）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="localized")
+    for prev in (None, {"crash_giveup_suspected": None}, {"other": 1}):
+        p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                       feedback_mode="localized",
+                                       prev_round_agent=prev)
+        assert p == base, prev
+        assert "except: return False" not in p
+
+
+def test_generic_prompt_ignores_crash_giveup(task_dir):
+    """對照臂定義不變：generic 不帶任何逐輪觀察；即使上一輪 crash→放棄，generic
+    提示仍與舊行為逐字元相同（兩臂差異維持在設計定義上）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    base = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                      feedback_mode="generic")
+    p = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                   feedback_mode="generic",
+                                   prev_round_agent=_crash_observation())
+    assert p == base
+    assert "except: return False" not in p
+

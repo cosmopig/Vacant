@@ -1,4 +1,25 @@
 
+## r1029（11/05）審查輪 20261105：P0 核對＋P1 單格對照發射＋P2 crash→giveup 提示（vq-kpb）
+
+**結果：P0 核對完成（2aa0c077 五項修復全數在樹）；P1 已發射（背景跑，待收）；P2 TDD 全綠。
+
+1. **P0（審查指示）**：`2aa0c077`（auto/argon）已含於 auto/qwen27b——merge `ca5dce9c`＋
+   `c7077528`（EACCES 寫入修復）；五項修復逐項核對在樹：prepare_workspace 剝離
+   verifier/params/recompute/note（20431c0）、crash 偵測誤報排除＋`tool_execution_end`
+   且 `isError≠False` 才掃、period-2 交替死迴圈、`count_if`＋CSV 引號逗號 hint、
+   policy30 `wall_ms_total=4398675` 補齊。reqloop 152 測試全綠。
+2. **P1（審查指示）**：dabstep-23（迴圈）/dabstep-10（表頭+1）/dab_507（引號逗號）
+   3 草稿 × 兩臂 × 1 輪單格對照，獨立目錄 `~/dev/ops/effects_p1_20261105`（未觸凍結批）。
+   base 副本逐檔 hash 對照凍結一致（data 符號連結解引用；首次發射死連結失敗證據
+   `failure_0843_dangling_symlink.json`，修後重發）；before＝凍結 independent.json
+   （localized 敗：dab_507 fb20、dabstep-23 兩格、dabstep-10 兩格；generic 3 格皆 PASS＝
+   regression 檢查）；after＝當前 HEAD 重跑＋independent_score 獨立評分；缺值 UNKNOWN。
+3. **P2（審查指示）**：TDD（先紅後綠）——localized 提示在上一輪 `crash_giveup_suspected`
+   觀察時新增針對性行：禁止裸 `except: pass` / `except: return False` 靜默吞掉解析錯誤、
+   讓例外浮現或顯式計數（dabstep-1753 失效模式）；generic 對照臂定義不變；hint 靜態、
+   不帶重算值。reqloop 4 檔 **155 passed**＋repair selftest 11/11。
+4. 紀律：未 push、未讀 hidden/scorer.py、effects 快照只讀；P1 背景跑（progress.json 實時）。
+
 ## r1028（11/05）vq-5nz.18：本地門 vs 獨立 scorer 分歧根因修復（歧義→UNKNOWN，TDD）
 
 **結果：4 分歧格中 2 題（4 格）判定為檢查器缺陷並修復；dabstep-1753 判定非檢查器缺陷（轉 vq-6rp）。vq-5nz.18 已閉。
