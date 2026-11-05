@@ -1183,6 +1183,21 @@ def check_kv_recomputed(
         else:
             with data_file.open(newline="", encoding="utf-8") as f:
                 rows = list(csv.DictReader(f))
+    except (UnknownSource, OSError, json.JSONDecodeError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    # vq-5nz.18：先驗交付物格式（交付物事實，可見且無歧義），再重算資料（語意歧義可 UNKNOWN）。
+    # 缺失/格式錯答案仍 FAIL——不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
+    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
+    if val_str is None:
+        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
+                       {"key": key, "problem": problems[0], "data_file": data_rel})
+    try:
+        got = float(val_str)
+    except ValueError:
+        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
+
+    try:
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype == "count_if":
             col = str(rc.get("col", "")).strip()
@@ -1215,20 +1230,43 @@ def check_kv_recomputed(
                 raise UnknownSource("zcount3: 標準差為 0")
             expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
         elif rtype == "mean_int_col":
-            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」——Int64 轉換
-            # 失敗（如 '100[10-30]'）等同 null，一并忽略；規則文字見 params.note。
+            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」。
+            # vq-5nz.18（effects 分歧，dab_055：本地假 FAIL 2199 vs 獨立 scorer 接受
+            # 2081990＝首數值語意）：非空非純整數格（如 '630308[495000-801000]'）的
+            # 轉換語意需求未指定——靜默忽略會產生假 FAIL。依不變量「看不到的→UNKNOWN」：
+            # 任一格解讀歧義 → UnknownSource；整數值浮點格（'100.0'→100）各語意一致，非歧義。
             col = str(rc.get("col", "")).strip()
             if not col:
                 raise UnknownSource("mean_int_col 需要 col")
             ints: list[int] = []
+            ambiguous = 0
+            example = ""
             for r in rows:
-                cell = str(r.get(col, "")).strip()
+                raw = r.get(col)
+                if raw is None:
+                    continue  # 明確 Null（JSON null）→ 題目語意：忽略
+                cell = str(raw).strip()
                 if not cell:
-                    continue
+                    continue  # 空
                 try:
                     ints.append(int(cell))
-                except ValueError:
                     continue
+                except ValueError:
+                    pass
+                try:
+                    f = float(cell)
+                except ValueError:
+                    f = None
+                if f is not None and f.is_integer():
+                    ints.append(int(f))
+                else:
+                    ambiguous += 1
+                    if not example:
+                        example = cell
+            if ambiguous:
+                raise UnknownSource(
+                    f"mean_int_col: {ambiguous} 個非空格非純整數（如 {example!r}）；"
+                    f"需求未指定此類格的轉換語意；無法可靠重算（期望值不進證據）")
             if not ints:
                 raise UnknownSource("mean_int_col: 無可解析整數")
             expected = float(sum(ints) / len(ints))
@@ -1289,17 +1327,9 @@ def check_kv_recomputed(
         rnd = rc.get("round")
         if isinstance(rnd, int) and not isinstance(rnd, bool):
             expected = round(expected, rnd)
-    except (UnknownSource, OSError, json.JSONDecodeError) as e:
+    except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
-    if val_str is None:
-        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
-                       {"key": key, "problem": problems[0], "data_file": data_rel})
-    try:
-        got = float(val_str)
-    except ValueError:
-        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
     atol = float(p.get("atol", 1e-6))
     rule_desc = f"{str(rc.get('type'))}: {data_rel} {json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}"
     if abs(got - expected) > atol:
@@ -1435,6 +1465,8 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
 
     公式依公開 manual.md：fee = fixed_amount + rate · amount / 10000。
     rows 須為 fee 規則物件列表（json data_file）；無匹配規則 → UnknownSource。
+    vq-5nz.18：匹配 scheme 的規則若有 is_credit=null，null 語意（wildcard vs 排除）
+    需求未指定 → UnknownSource（不猜；靜默 bool(None)=False 曾造成假 PASS）。
     """
     scheme = str(rc.get("scheme", "")).strip()
     if not scheme:
@@ -1447,10 +1479,19 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     except (TypeError, ValueError):
         raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
     fees: list[float] = []
+    null_credit = 0
     for r in rows:
         if str(r.get("card_scheme", "")).strip() != scheme:
             continue
-        if bool(r.get("is_credit")) is not want_credit:
+        raw_credit = r.get("is_credit")
+        if raw_credit is None:
+            # vq-5nz.18（effects 分歧，dabstep-1273：本地假 PASS 0.117667 vs 獨立
+            # scorer 接受含 null 行的 0.120132；manual.md 明示 null＝適用所有值）：
+            # null 語意（wildcard vs 排除）需求未指定——靜默 bool(None)=False 會假 PASS。
+            # 依不變量「看不到的→UNKNOWN」：任一行歧義 → UnknownSource，不猜。
+            null_credit += 1
+            continue
+        if bool(raw_credit) is not want_credit:
             continue
         try:
             fixed = float(r.get("fixed_amount"))
@@ -1458,6 +1499,10 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
         except (TypeError, ValueError):
             raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
         fees.append(fixed + rate * amount / 10000)
+    if null_credit:
+        raise UnknownSource(
+            f"scheme_fee_avg: {null_credit} 筆匹配 scheme={scheme!r} 的規則 is_credit 為 null；"
+            f"需求未指定 null 語意（wildcard 或排除）；無法可靠重算（期望值不進證據）")
     if not fees:
         raise UnknownSource(f"無匹配 fee 規則 scheme={scheme!r} is_credit={want_credit}")
     return sum(fees) / len(fees)
@@ -1714,7 +1759,46 @@ def check_plain_recomputed(
         else:
             with data_file.open(newline="", encoding="utf-8") as f:
                 rows = list(csv.DictReader(f))
-        rtype = str(rc.get("type", "")).strip().lower()
+    except (UnknownSource, OSError, json.JSONDecodeError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    rtype = str(rc.get("type", "")).strip().lower()
+    # vq-5nz.18：先驗交付物格式（交付物事實，可見且無歧義），再重算資料
+    # （資料語意歧義可 UNKNOWN）。不可解析/空答案仍 FAIL——e014 prose 草稿被記錄
+    # pass=False；格式違規不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
+    deliv_file = deliverable_dir / item.deliverable
+    if not deliv_file.is_file():
+        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）", {"problem": "missing_file"})
+    val_str = deliv_file.read_text(encoding="utf-8").strip()
+    rule_desc = (f"{str(rc.get('type'))}: {data_rel} "
+                 f"{json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}")
+    got_ids: set[int] | None = None
+    if rtype == "fee_ids_lookup":
+        # 列表答案（fee ID 集合）：順序無關比較；空集合＝空字串（題目自帶口徑 empty list→empty string）；
+        # 期望 ID 集永不進 detail/evidence（紅線）。
+        if not val_str:
+            got_ids = set()
+        else:
+            got_ids = set()
+            for tok in (t.strip() for t in val_str.split(",")):
+                if not tok:
+                    continue
+                try:
+                    got_ids.add(int(tok))
+                except ValueError:
+                    return _result(item, "FAIL", "答案含非數字 fee ID 記號；按題目口徑應為逗號分隔的數字列表（或空字串）",
+                                   {"problem": "not_a_fee_id", "value": val_str,
+                                    "rule": rule_desc, "expected_in_evidence": False})
+    elif not val_str:
+        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
+    else:
+        try:
+            float(val_str)
+        except ValueError:
+            return _result(item, "FAIL", "答案值不可解析為數字",
+                           {"problem": "not_a_number", "value": val_str})
+
+    try:
         if rtype == "mode_col":
             expected: Any = _mode_col(rows, rc)
         elif rtype == "cond_rate":
@@ -1729,31 +1813,10 @@ def check_plain_recomputed(
             expected = _scheme_fee_avg(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
-    except (UnknownSource, OSError, json.JSONDecodeError) as e:
+    except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
-    if not deliv_file.is_file():
-        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）", {"problem": "missing_file"})
-    val_str = deliv_file.read_text(encoding="utf-8").strip()
-    rule_desc = (f"{str(rc.get('type'))}: {data_rel} "
-                 f"{json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}")
-    if rtype == "fee_ids_lookup":
-        # 列表答案（fee ID 集合）：順序無關比較；空集合＝空字串（題目自帶口徑 empty list→empty string）；
-        # 期望 ID 集永不進 detail/evidence（紅線）。
-        if not val_str:
-            got_ids: set[int] = set()
-        else:
-            got_ids = set()
-            for tok in (t.strip() for t in val_str.split(",")):
-                if not tok:
-                    continue
-                try:
-                    got_ids.add(int(tok))
-                except ValueError:
-                    return _result(item, "FAIL", "答案含非數字 fee ID 記號；按題目口徑應為逗號分隔的數字列表（或空字串）",
-                                   {"problem": "not_a_fee_id", "value": val_str,
-                                    "rule": rule_desc, "expected_in_evidence": False})
+    if got_ids is not None:
         if got_ids == set(expected):
             return _result(item, "PASS",
                            f"答案與按公開規則（{rule_desc}）重算的適用 fee ID 集一致",
@@ -1763,8 +1826,6 @@ def check_plain_recomputed(
                        {"deliverable_value": val_str,
                         "problem": "mismatch_with_recomputation",
                         "rule": rule_desc, "expected_in_evidence": False})
-    if not val_str:
-        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
     exp_num: float | None = None
     if isinstance(expected, (int, float)) and not isinstance(expected, bool):
         exp_num = float(expected)
