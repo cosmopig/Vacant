@@ -334,6 +334,72 @@ def test_count_rule_hint_pass_claim_and_evidence_edge_cases(tmp_path: pathlib.Pa
     assert isinstance(line, str) and "表頭行" in line
 
 
+def _count_if_fixture(tmp_path: pathlib.Path):
+    """dab_507 同型（synthetic）：star_rating=5.0 恰 3 行（其中 1 行 hotel_name
+    引號欄含逗號 → 裸逗號切分會錯列）；另有 1 行 star≠5 但 review_count=520
+    → grep ",5.0," 的正則 `.` 通配也會命中 ",520,"。草稿 4＝3+1 通配命中
+    （grep 型多算）→ FAIL（重算值 3）。"""
+    task_dir = tmp_path / "task"
+    draft = tmp_path / "draft"
+    task_dir.mkdir(parents=True)
+    draft.mkdir(parents=True)
+    (task_dir / "request.md").write_text(
+        "How many hotels have a star rating exactly equal to 5?\n"
+        "Answer format: @total_hotels[count]\n", encoding="utf-8")
+    (task_dir / "hotel_data.csv").write_text(
+        "hotel_id,hotel_name,city_name,star_rating,bubble_score,review_count\n"
+        "1,\"Mandarin Oriental, New York\",New York City,5.0,45.0,100\n"
+        "2,Plaza,New York City,5.0,45.0,200\n"
+        "3,Mark,New York City,5.0,45.0,300\n"
+        "4,Solita,New York City,3.0,40.0,520\n"
+        "5,Greenwich,New York City,4.0,45.0,582\n", encoding="utf-8")
+    (draft / "answer.txt").write_text("@total_hotels[4]\n", encoding="utf-8")
+    rs = RequirementSet(task_id="t", items=[RequirementItem(
+        id="req_total", quote="total_hotels", deliverable="answer.txt",
+        verifier="kv_recomputed",
+        params={"key": "total_hotels", "data_file": "hotel_data.csv",
+                "recompute": {"type": "count_if", "col": "star_rating", "eq": 5}})])
+    return task_dir, draft, rs
+
+
+def test_count_if_fail_prompt_column_alignment_shape_hint(tmp_path: pathlib.Path):
+    """effects_20261105 dab_507-localized 敗因（值解析口徑，vq-5nz.20）：
+    - policy30 r1：`grep ",5.0," | wc -l` → 48（正則 `.` 通配也命中 ",520,"、
+      未錨定模式打到另一欄）——模型把多算結果當「草稿正確」的確認、原樣保留；
+    - fb20 r1：`awk -F',' '$4=="5.0"'` → 40（裸逗號切分被 hotel_name 引號欄
+      內含逗號錯列，漏掉 6 行名稱含逗號的 5 星飯店）。
+    localized 提示必須補上計數規則的常見錯誤形狀（正則通配／打到別欄／引號欄
+    錯列），但不給重算值（leak guard 不變）；generic 對照臂定義不變
+    （無失敗證據、無提示行）。"""
+    task_dir, draft, rs = _count_if_fixture(tmp_path)
+    before = run_requirement_checks(task_dir, rs, draft)
+    assert {c.claim_id: c.status for c in before}["req_total"] == "FAIL"
+
+    loc = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="localized")
+    assert "req_total" in loc                              # 哪一條沒過
+    assert "4" in loc                                       # 交付物自身的值（可見反例）
+    assert "通配" in loc                                     # 正則 `.` 是通配（",5.0," 也命中 ",520,"）
+    assert "引號" in loc                                     # 含逗號的引號欄 → 裸切分錯列
+    assert "欄位名" in loc or "pandas" in loc               # 建議 CSV-aware 依欄位名過濾
+    assert "3" not in loc                                    # 重算值不得進提示（leak guard）
+
+    gen = repair.build_repair_prompt(task_dir, rs, draft, before, feedback_mode="generic")
+    assert "req_total" not in gen                           # generic 不帶失敗證據
+    assert "通配" not in gen                                 # generic 對照臂定義不變
+    assert "3" not in gen
+
+
+def test_count_if_hint_line_direct_and_non_count_rules(tmp_path: pathlib.Path):
+    """count_if 規則的 FAIL 證據直接命中形狀提示；其他規則（zcount3／cond_rate）
+    不補提示；重算值不得出現在提示裡。"""
+    line = repair._count_rule_hint_line(
+        {"rule": "count_if: data/hotel_data.csv {\"col\": \"star_rating\", \"eq\": 5}"})
+    assert isinstance(line, str) and "通配" in line and "引號" in line
+    assert "46" not in line and "48" not in line            # dab_507 的答案值／重算值都不進提示
+    assert repair._count_rule_hint_line({"rule": "zcount3: data/x.csv {\"col\": \"c\"}"}) is None
+    assert repair._count_rule_hint_line({"rule": "cond_rate: x"}) is None
+
+
 # ── 完整切片（fake agent，synthetic 離線接線）──────────────────────
 
 def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):

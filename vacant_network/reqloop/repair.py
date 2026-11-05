@@ -190,12 +190,16 @@ def build_repair_prompt(
     指令）——effects_20261105 dabstep-23：通用「不要重複同一命令」行不足以打破
     ×117 迴圈，具體證據才讓模型知道該避免哪一條。generic 對照臂不使用（定義不變）。
 
-    計數規則形狀提示（localized 臂、只對 FAIL 的 unique_count 型規則）：
-    effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆
-    恰為 +1）——模型用 cut|sort|uniq|wc 型管線計數、把 CSV 表頭行當成一個值。
-    規則本身（unique_count: col）已在證據中，但這類規則的常見錯誤形狀不在；
-    `_count_rule_hint_line` 補形狀提示（表頭行／空行／大小寫與空白），不給重算值
-    或任何答案（leak guard 不變），不改重驗／停滯／退出碼。
+    計數規則形狀提示（localized 臂、只對 FAIL 的 unique_count／count_if 型規則）：
+    effects_20261105 兩敗因（vq-5nz.15 / vq-5nz.20）：
+    - dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆恰為 +1）——
+      cut|sort|uniq|wc 型管線計數、把 CSV 表頭行當成一個值；
+    - dab_507-localized（值解析口徑）——policy30 r1 用 `grep ",5.0,"` 計數
+      得 48（正則 `.` 通配、未錨定打到別欄）並把它當「草稿正確」的確認；
+      fb20 r1 用 `awk -F','` 裸逗號切分、被名稱欄引號內含逗號錯列得 40。
+    規則本身（col eq）已在證據中，但這類規則的常見錯誤形狀不在；
+    `_count_rule_hint_line` 補形狀提示（表頭行／空行／正則通配／引號欄錯列），
+    不給重算值或任何答案（leak guard 不變），不改重驗／停滯／退出碼。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
@@ -440,28 +444,48 @@ def _cap_prompt_text(s: str) -> str:
 
 
 def _count_rule_hint_line(evidence: Any) -> str | None:
-    """計數型重算規則（unique_count）FAIL 反例的形狀提示行——localized 臂專用。
+    """計數型重算規則（unique_count / count_if）FAIL 反例的形狀提示行——localized 臂專用。
 
-    effects_20261105 dabstep-10-localized 兩輪皆敗（草稿 30→6，重算值 5，兩值皆
-    恰為 +1）：模型用 `cut -d',' -f2 data/payments.csv | sort | uniq | wc -l` 計數，
-    把 CSV 表頭行 "merchant" 當成一個值。規則本身（unique_count: col）已在證據中、
-    但這類規則的常見錯誤形狀不在；本行只補形狀提示（表頭行／空行／大小寫與空白）。
+    unique_count（effects_20261105 dabstep-10-localized 兩輪皆敗，vq-5nz.15）：
+    草稿 30→6，重算值 5，兩值皆恰為 +1：模型用 cut|sort|uniq|wc 型 shell 管線
+    計數，把 CSV 表頭行 "merchant" 當成一個值。
+    count_if（effects_20261105 dab_507-localized，值解析口徑，vq-5nz.20）：
+    - policy30 r1：`grep ",5.0," | wc -l` → 48——正則 `.` 是通配（也命中 ",520,"）、
+      未錨定模式打到另一欄；模型把多算結果當「草稿正確」的確認、原樣保留 48；
+    - fb20 r1：`awk -F',' '$4=="5.0"'` → 40——裸逗號切分被引號欄（飯店名稱）內含
+      逗號錯列，漏掉名稱含逗號的 6 行 5 星飯店。成功修復（policy30 r2）＝
+      pandas 依欄位名過濾 → 46。
+    規則本身（col eq）已在證據中、但這類規則的常見錯誤形狀不在；本行只補形狀
+    提示，不給重算值、不給任何答案（leak guard 不變）。
     紅線：不給重算值、不給任何答案（leak guard 不變）；只 localized 臂、只 FAIL
-    條目；不改重驗／停滯／退出碼。evidence 非 dict、無 rule、非 unique_count → None。
+    條目；不改重驗／停滯／退出碼。evidence 非 dict、無 rule、非 unique_count／
+    count_if → None。
     """
     if not isinstance(evidence, dict):
         return None
     rule = evidence.get("rule")
-    if not isinstance(rule, str) or not rule.startswith("unique_count"):
+    if not isinstance(rule, str):
         return None
-    return (
-        "【計數規則常見錯誤形狀（逐項檢查，兩種獨立計數方法一致才產出交付物）】"
-        "其一：CSV 表頭行是否被當成一個值計入"
-        "（cut|sort|uniq|wc 這類 shell 管線會把表頭行算進結果）；"
-        "其二：行尾空行、空白值是否被計入；"
-        "其三：僅大小寫或前後空白不同的值是否被當成多個。"
-        "請改用逐行解析檔案的方法（如 python csv 模組）重數一次再比對。"
-    )
+    if rule.startswith("unique_count"):
+        return (
+            "【計數規則常見錯誤形狀（逐項檢查，兩種獨立計數方法一致才產出交付物）】"
+            "其一：CSV 表頭行是否被當成一個值計入"
+            "（cut|sort|uniq|wc 這類 shell 管線會把表頭行算進結果）；"
+            "其二：行尾空行、空白值是否被計入；"
+            "其三：僅大小寫或前後空白不同的值是否被當成多個。"
+            "請改用逐行解析檔案的方法（如 python csv 模組）重數一次再比對。"
+        )
+    if rule.startswith("count_if"):
+        return (
+            "【計數規則常見錯誤形狀（逐項檢查，兩種獨立計數方法一致才產出交付物）】"
+            "其一：若用文字匹配計數（grep/awk/cut），模式是否錨定在目標欄位與目標值上——"
+            "正則 `.` 是通配（\",5.0,\" 這種模式也會命中 \",520,\"），未錨定的模式可能打到"
+            "恰好含同值的另一欄；多算或漏算都可能，且錯誤結果可能恰好「確認」了草稿的錯值。"
+            "其二：CSV 中有逗號的引號欄（如名稱欄）會讓裸逗號切分（awk -F',' / cut -d',' /"
+            "按欄位序數取欄）錯列——改用逐行解析檔案的方法（python csv 模組或 pandas"
+            "依欄位名）過濾目標欄位重數一次再比對。"
+        )
+    return None
 
 
 def _loop_warning_line(loop: dict[str, Any]) -> str:
