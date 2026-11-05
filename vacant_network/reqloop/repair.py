@@ -191,7 +191,11 @@ def build_repair_prompt(
     ×117 迴圈，具體證據才讓模型知道該避免哪一條；若其 `crash_giveup_suspected` 非空，
     提示點名「禁止裸 except: pass / except: return False 靜默吞掉解析錯誤」
     （effects_20261105 dabstep-1753：手寫匹配函式的解包例外被裸 except 吞掉、
-    最終答案為放棄詞，兩階段 6 輪全敗）。generic 對照臂不使用（定義不變）。
+    最終答案為放棄詞，兩階段 6 輪全敗）；若其 `empty_result_giveup_suspected` 非空，
+    提示點名「腳本成功執行但沒有輸出任何結果、最終答案為放棄詞——通常是過濾/匹配
+    條件把所有資料都排除了，不是腳本崩潰」（contrast1753_20261105 dabstep-1753
+    localized r1：跑一次、零匹配、答案 None，既有兩個偵測器均按設計未觸發）。
+    generic 對照臂不使用（定義不變）。
 
     計數規則形狀提示（localized 臂、只對 FAIL 的 unique_count／count_if 型規則）：
     effects_20261105 兩敗因（vq-5nz.15 / vq-5nz.20）：
@@ -354,6 +358,12 @@ def build_repair_prompt(
         crash = (prev_round_agent or {}).get("crash_giveup_suspected")
         if isinstance(crash, dict) and crash:
             lines.append(_crash_giveup_hint_line())
+        # 上一輪静默空结果 → 放弃观察 → 本輪針對性指令（空结果＝条件把资料都滤掉、非崩溃）。
+        # 同规则：只 localized 臂、只带执行观察（脚本跑过＋输出为空＋放弃词）、不帶重算值；
+        # 不影響重驗／停滯裁決／退出碼。
+        empty = (prev_round_agent or {}).get("empty_result_giveup_suspected")
+        if isinstance(empty, dict) and empty:
+            lines.append(_empty_result_giveup_hint_line())
     else:
         lines.append("")
         lines.append("請對照原始需求，重新檢查並修正工作區裡的交付物檔案一次。")
@@ -698,6 +708,27 @@ def _loop_remediation_tail(loop: dict[str, Any]) -> str:
     return (
         "先修掉錯誤的根因再執行：先查明這類命令失敗的原因（參數、語法、變數定義或資料內容不符），修正後再執行；"
         "確認結果正確後，直接把結果寫入交付物檔案。"
+    )
+
+
+def _empty_result_giveup_hint_line() -> str:
+    """上一輪静默空结果 → 放弃观察（detect_empty_result_giveup 回傳）→ localized 提示的針對性行。
+
+    来源（contrast1753_20261105，dabstep-1753-pi-C localized r1，r1068）：模型写
+    solution.py 并跑一次，输出为空（零条匹配记录），最终答案为放弃词 None；日誌无
+    Traceback、无重复命令——既有两个偵测器都按设计正确返回 None，但下一輪提示无
+    針對性线索。空结果通常不是崩溃，而是過濾/匹配条件把所有记录都排除了
+    （欄位型別、null 處理、字串 vs 数値、条件过严）。
+
+    规则同 _crash_giveup_hint_line：只带执行观察（脚本跑过＋输出为空＋放弃词），不带
+    需求失败证据或重算值；静态行（不含动态值、也不含数字——leak guard 是子串匹配，
+    提示行任何数字都会被誤判）；不改变裁決。
+    """
+    return (
+        "【上一輪執行觀察】上一輪偵測到：計算腳本成功執行但沒有輸出任何結果、最終答案為放棄詞（如 None）。"
+        "空結果通常不是腳本崩潰，而是過濾／匹配條件把所有資料都排除掉了（欄位型別、null 處理、"
+        "字串與數值比較、條件過嚴）。本輪先逐步印出過濾過程每步剩餘筆數、找出是哪一步把結果濾空，"
+        "修正根因並確認腳本真的產出非空結果後，再寫入交付物。"
     )
 
 
@@ -1156,6 +1187,9 @@ _CRASH_EXC_RE = re.compile(
     r"|JSONDecodeError|UnicodeDecodeError|RuntimeError)\s*:")
 #: 最終答案＝放棄詞（strip+lower 比對）：空、None、N/A、Not Applicable、No answer。
 _GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
+# 静默空结果 → 放棄偵测：bash 命令中 python 解释器直接执行 .py 文件（不匹配
+# heredoc 重定向 `> solution.py`，也不匹配 `python3 -c "..."`）。
+_PY_SCRIPT_RUN_RE = re.compile(r"(?:^|[\s;|&])python3?\s+([^\s;|&<>]+\.py)")
 
 
 def _extract_tool_end_text(obj: dict[str, Any]) -> str:
@@ -1269,6 +1303,93 @@ def detect_crash_giveup(
         "crash_event_count": len(sigs),
         "crash_signatures": uniq[:max_signatures],
         "signatures_truncated": len(uniq) > max_signatures,
+    }
+
+
+def detect_empty_result_giveup(
+    log_path: str | pathlib.Path,
+    answer_path: str | pathlib.Path,
+    *,
+    max_examples: int = 8,
+) -> dict[str, Any] | None:
+    """偵测「静默空结果 → 放弃」：session 内有 python 脚本成功执行（isError False）但
+    输出为空，且最终答案为放弃词。
+
+    来源（contrast1753_20261105，dabstep-1753-pi-C localized r1，r1068）：模型写
+    solution.py 并跑一次，输出为空（零条匹配记录），答案保持 None；日誌无 Traceback、
+    无非零退出、无重复命令——detect_crash_giveup（无崩溃签名）与 detect_tool_loop
+    （无重复）都按设计正确返回 None，但下一輪提示无針對性线索。空结果通常不是崩溃，
+    而是過濾/匹配条件把所有记录都排除了（欄位型別、null 處理、字串 vs 数値、条件过严）。
+
+    与 detect_crash_giveup 的区分：本形状是「agent 确实跑过一次计算脚本、什么都得到
+    不到」（isError False＋输出欄位存在但為空）；detect_crash_giveup 的 draft 未变
+    守卫在这里不适用——答案保持 draft 的「None」正是本形状本身。观察与標記、非裁決：
+    不改变重驗、停滯判断、退出碼；缺失（无日誌／无答案／无 pi-jsonl 事件／isError
+    未知）⇒ None，不捏造。
+    """
+    ans_p = pathlib.Path(answer_path)
+    try:
+        answer = ans_p.read_text(encoding="utf-8", errors="replace").strip()
+    except OSError:
+        return None
+    if answer.lower() not in _GIVEUP_ANSWERS:
+        return None
+    try:
+        text = pathlib.Path(log_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+
+    starts: dict[str, dict[str, Any]] = {}
+    ends: dict[str, dict[str, Any]] = {}
+    have_events = False
+    for line in text.splitlines():
+        s = line.strip()
+        if not s.startswith("{"):
+            continue
+        try:
+            obj = json.loads(s)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(obj, dict):
+            continue
+        etype = obj.get("type")
+        cid = obj.get("toolCallId")
+        if not (isinstance(cid, str) and cid):
+            continue
+        if etype == "tool_execution_start":
+            starts[cid] = obj
+            have_events = True
+        elif etype == "tool_execution_end":
+            ends[cid] = obj
+            have_events = True
+    if not have_events:
+        return None
+
+    hits: list[str] = []
+    for cid, start in starts.items():
+        if str(start.get("toolName") or "") != "bash":
+            continue
+        args = start.get("args") if isinstance(start.get("args"), dict) else {}
+        m = _PY_SCRIPT_RUN_RE.search(str(args.get("command") or ""))
+        if not m:
+            continue
+        end = ends.get(cid)
+        if end is None or end.get("isError") is not False:
+            continue  # 报错／未知 ⇒ crash 側形状或 UNKNOWN，不誤判
+        # 输出欄位存在（非缺失）但為空 ⇒「跑过但没输出」（缺失＝UNKNOWN，不算）
+        if not (isinstance(end.get("output"), str) or isinstance(end.get("result"), (str, dict))):
+            continue
+        if _extract_tool_end_text(end).strip():
+            continue
+        hits.append(m.group(1))
+    if not hits:
+        return None
+    uniq = sorted(set(hits))
+    return {
+        "giveup_answer": answer,
+        "empty_run_count": len(hits),
+        "empty_run_scripts": uniq[:max_examples],
+        "examples_truncated": len(uniq) > max_examples,
     }
 
 
@@ -1448,6 +1569,14 @@ def run_repair_round(
                  log_dir / "agent_stdout.log",
                  ws / "answer.txt",
                  draft_answer_path=pathlib.Path(draft_dir) / "answer.txt",
+             )}
+    # 静默空结果 → 放棄 觀察（contrast1753_20261105 dabstep-1753 localized r1：脚本
+    # 成功跑过但输出为空＋最終答案為放棄詞 ⇒ 標記）。观察与標記、非裁決。
+    agent = {**agent,
+             "empty_result_giveup_suspected":
+             detect_empty_result_giveup(
+                 log_dir / "agent_stdout.log",
+                 ws / "answer.txt",
              )}
     tampered = _source_tampered_files(authoritative, ws)
     return RepairRound(
@@ -2018,6 +2147,39 @@ def _selftest() -> int:
         else:
             check("成本誠實：任一輪 usage 缺⇒總成本 UNKNOWN", False,
                   "G1 案例 bad_round_each_row 應有 2 條必需 FAIL（案例已變？需重凍結案例）")
+
+        # 12) 静默空结果 → 放棄（contrast1753_20261105 dabstep-1753 localized r1 形状）：
+        #     脚本成功跑过但输出为空＋最終答案為放棄詞 ⇒ 偵测到、針對性提示只进
+        #     localized 臂（generic 对照臂不带）；交出实质答案 ⇒ 不偵测（不捏造）。
+        empty_log = tmp / "empty_run.log"
+        empty_log.write_text("\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": "cat << 'EOF' > solution.py\n...\nEOF\npython3 solution.py"}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+        ans12 = tmp / "empty_run_answer.txt"
+        ans12.write_text("None", encoding="utf-8")
+        hit12 = detect_empty_result_giveup(empty_log, ans12)
+        ans12.write_text("47", encoding="utf-8")
+        miss12 = detect_empty_result_giveup(empty_log, ans12)
+        ans12.write_text("None", encoding="utf-8")
+        hint12 = _empty_result_giveup_hint_line()
+        obs12 = {"empty_result_giveup_suspected": hit12} if hit12 else {}
+        loc12 = build_repair_prompt(task_dir, rs, draft, before,
+                                    feedback_mode="localized", prev_round_agent=obs12)
+        gen12 = build_repair_prompt(task_dir, rs, draft, before,
+                                    feedback_mode="generic", prev_round_agent=obs12)
+        check("静默空结果→放棄（脚本成功跑过＋输出为空＋放棄詞⇒偵测到且进 localized 提示；"
+              "generic 不带；实质答案⇒不偵测；提示行不含数字）",
+              hit12 is not None
+              and hit12["empty_run_count"] >= 1
+              and any("solution.py" in s for s in hit12["empty_run_scripts"])
+              and not any(ch.isdigit() for ch in hint12)
+              and hint12 in loc12
+              and hint12 not in gen12
+              and miss12 is None,
+              f"hit={hit12} miss={miss12}")
 
         passed = sum(1 for _, err in results if err is None)
         print("G2 repair-slice SELFTEST（synthetic G1、離線、0 模型呼叫；只驗管線，不宣稱效果）")

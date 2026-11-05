@@ -946,11 +946,12 @@ def test_selftest_command_all_green(capsys):
     rc = repair.main(["--selftest"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "SELFTEST: 11/11 PASS" in out
-    assert "[8/11] ok" in out           # 累積修復（check 8）
-    assert "[9/11] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
-    assert "[10/11] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
-    assert "[11/11] ok" in out          # 成本誠實：model_calls＝實際 API 呼叫數、缺值⇒UNKNOWN（P001-20261105-03）
+    assert "SELFTEST: 12/12 PASS" in out
+    assert "[8/12] ok" in out           # 累積修復（check 8）
+    assert "[9/12] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
+    assert "[10/12] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
+    assert "[11/12] ok" in out          # 成本誠實：model_calls＝實際 API 呼叫數、缺值⇒UNKNOWN（P001-20261105-03）
+    assert "[12/12] ok" in out          # 静默空结果→放棄偵测（contrast1753_20261105 dabstep-1753 localized r1）
 
 
 def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
@@ -1736,6 +1737,150 @@ def test_run_repair_round_records_crash_giveup_suspected(task_dir, tmp_path):
         authoritative=auth2,
     )
     assert r2.agent["crash_giveup_suspected"] is None
+
+
+# ── contrast1753_20261105 失效模式：静默空结果 → 放弃（dabstep-1753-pi-C localized r1）──
+# 来源（r1068）：模型写 solution.py 并跑一次，输出为空（零条匹配记录），答案保持 None；
+# 日誌无 Traceback、无非零退出、无重复命令——detect_crash_giveup（无崩溃签名）与
+# detect_tool_loop（无重复）都按设计正确返回 None，但下一輪提示无針對性线索。
+# 空结果通常不是崩溃，而是過濾/匹配条件把所有记录都排除了（欄位型別、null、
+# 字串 vs 数値、条件过严）。观察与標記、非裁決；缺失 ⇒ None，不捏造。
+
+
+def _empty_run_log() -> str:
+    """contrast1753 localized r1 形状：bash 一次调用＝heredoc 写 solution.py ＋
+    `python3 solution.py`，退出 0，输出为空行（真实日誌 result.content[0].text == "\\n"）。"""
+    start = {
+        "type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+        "args": {"command": "cat << 'EOF' > solution.py\nimport json\n...\nEOF\npython3 solution.py"},
+    }
+    end = {
+        "type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+        "result": {"content": [{"type": "text", "text": "\n"}]},
+        "isError": False,
+    }
+    return "\n".join(json.dumps(o) for o in (start, end)) + "\n"
+
+
+def test_detect_empty_result_giveup_flags_empty_output(tmp_path):
+    """python 脚本成功执行＋输出为空＋最终答案为放弃词 ⇒ 偵測到；任一条件缺 ⇒ 不偵測。"""
+    log = tmp_path / "agent_stdout.log"
+    ans = tmp_path / "answer.txt"
+    log.write_text(_empty_run_log(), encoding="utf-8")
+    for giveup in ("None\n", "Not Applicable\n", ""):
+        ans.write_text(giveup, encoding="utf-8")
+        hit = repair.detect_empty_result_giveup(log, ans)
+        assert hit is not None
+        assert hit["giveup_answer"].strip().lower() in {"none", "not applicable", ""}
+        assert hit["empty_run_count"] >= 1
+        assert any("solution.py" in s for s in hit["empty_run_scripts"])
+    # 跑了且有结果（非空输出）＋放弃 ⇒ 不是本形状（「有結果但没写」由静态行覆盖）
+    log.write_text(
+        "\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": "python3 solution.py"}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": "42\n"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+    ans.write_text("None\n", encoding="utf-8")
+    assert repair.detect_empty_result_giveup(log, ans) is None
+    # 成功跑＋输出为空，但交出了实质答案 ⇒ 非放弃 ⇒ 不偵測
+    log.write_text(_empty_run_log(), encoding="utf-8")
+    ans.write_text("47, 12, 8\n", encoding="utf-8")
+    assert repair.detect_empty_result_giveup(log, ans) is None
+    # 没有跑 python 脚本（只 read）＋放弃答案 ⇒ 不偵測（不假設因果）
+    log.write_text(
+        "\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "read",
+             "args": {"path": "data/fees.json"}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "read",
+             "result": {"content": [{"type": "text", "text": "[]"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+    ans.write_text("None\n", encoding="utf-8")
+    assert repair.detect_empty_result_giveup(log, ans) is None
+    # 脚本报错（isError=True）⇒ 归 crash 側形状（detect_crash_giveup），本偵测器不误判
+    log.write_text(
+        "\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": "python3 solution.py"}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": _CRASH_OUTPUT}]},
+             "isError": True},
+        )) + "\n", encoding="utf-8")
+    ans.write_text("None\n", encoding="utf-8")
+    assert repair.detect_empty_result_giveup(log, ans) is None
+    # 日誌／答案文件缺失 ⇒ None（缺值不捏造）
+    log.write_text(_empty_run_log(), encoding="utf-8")
+    assert repair.detect_empty_result_giveup(tmp_path / "nope.log", ans) is None
+    assert repair.detect_empty_result_giveup(log, tmp_path / "nope.txt") is None
+
+
+def test_run_repair_round_records_empty_result_giveup_suspected(task_dir, tmp_path):
+    """run_repair_round 把偵测结果记进该轮 agent 欄位（观察，非裁決）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(_empty_run_log(), encoding="utf-8")
+        (workspace / "answer.txt").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["empty_result_giveup_suspected"] is not None
+    assert r.agent["empty_result_giveup_suspected"]["giveup_answer"].strip().lower() == "none"
+    # 对照：同轮但脚本有输出 ⇒ 標記 None（不假設因果）
+    out2 = tmp_path / "out2"
+    out2.mkdir(parents=True, exist_ok=True)
+    auth2 = repair.create_authoritative_snapshot(task_dir, out2)
+
+    def run2(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text(
+            "\n".join(json.dumps(o) for o in (
+                {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+                 "args": {"command": "python3 solution.py"}},
+                {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+                 "result": {"content": [{"type": "text", "text": "42\n"}]}, "isError": False},
+            )) + "\n", encoding="utf-8")
+        (workspace / "answer.txt").write_text("None\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 1000, "spawn_error": None}
+
+    r2 = repair.run_repair_round(
+        1, task_dir, rs, draft, run_requirement_checks(auth2, rs, draft),
+        out_root=out2, build=_fake_build([]), run=run2,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth2,
+    )
+    assert r2.agent["empty_result_giveup_suspected"] is None
+
+
+def test_localized_prompt_names_prev_round_empty_result_giveup(task_dir):
+    """上一輪静默空结果 → 放弃 ⇒ 本輪 localized 提示有針對性行（空结果＝条件把
+    资料都滤掉、不是崩溃）；generic 对照臂不带（定义不变）。"""
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    obs = {"empty_result_giveup_suspected": {
+        "giveup_answer": "None",
+        "empty_run_count": 1,
+        "empty_run_scripts": ["solution.py"],
+    }}
+    loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="localized", prev_round_agent=obs)
+    gen = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="generic", prev_round_agent=obs)
+    hint = repair._empty_result_giveup_hint_line()
+    assert hint in loc
+    assert hint not in gen
 
 
 # ── 上一輪工具死迴圈觀察 → 本輪 localized 針對性反迴圈指令 ──────────────
