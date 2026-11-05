@@ -188,7 +188,10 @@ def build_repair_prompt(
     `prev_round_agent`（第 2+ 輪）：上一輪 agent 欄位。localized 臂若其
     `tool_loop_suspected` 非空，提示點名上一輪重複的工具與次數（針對性反迴圈
     指令）——effects_20261105 dabstep-23：通用「不要重複同一命令」行不足以打破
-    ×117 迴圈，具體證據才讓模型知道該避免哪一條。generic 對照臂不使用（定義不變）。
+    ×117 迴圈，具體證據才讓模型知道該避免哪一條；若其 `crash_giveup_suspected` 非空，
+    提示點名「禁止裸 except: pass / except: return False 靜默吞掉解析錯誤」
+    （effects_20261105 dabstep-1753：手寫匹配函式的解包例外被裸 except 吞掉、
+    最終答案為放棄詞，兩階段 6 輪全敗）。generic 對照臂不使用（定義不變）。
 
     計數規則形狀提示（localized 臂、只對 FAIL 的 unique_count／count_if 型規則）：
     effects_20261105 兩敗因（vq-5nz.15 / vq-5nz.20）：
@@ -296,6 +299,12 @@ def build_repair_prompt(
         loop = (prev_round_agent or {}).get("tool_loop_suspected")
         if isinstance(loop, dict) and loop:
             lines.append(_loop_warning_line(loop))
+        # 上一輪 crash→放棄觀察 → 本輪針對性指令（禁止裸 except 靜默吞解析錯）。
+        # 同樣只 localized 臂、只帶執行觀察（崩潰發生＋放棄詞），不帶重算值；
+        # 不影響重驗／停滯判定／退出碼。
+        crash = (prev_round_agent or {}).get("crash_giveup_suspected")
+        if isinstance(crash, dict) and crash:
+            lines.append(_crash_giveup_hint_line())
     else:
         lines.append("")
         lines.append("請對照原始需求，重新檢查並修正工作區裡的交付物檔案一次。")
@@ -572,6 +581,26 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         f"中間沒有改動（疑似工具死迴圈）{example}。"
         "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"
         "不要再次執行同一命令。"
+    )
+
+
+def _crash_giveup_hint_line() -> str:
+    """上一輪 crash→放棄觀察（detect_crash_giveup 回傳值）→ localized 提示的針對性行。
+
+    來源（effects_20261105，dabstep-1753：兩階段 6 輪全敗）：模型手寫區間匹配函式
+    （parse_range / match_volume / match_fraud）時反覆栽跟頭——split('..') 解包例外被
+    裸 `except: return False` 靜默吞掉、cat << 'EOF' 內混用引號語法錯、最終答案是放棄詞，
+    錯因永不浮現。審查指示 2026-11-05 P2：提示必須直接對準「禁止在資料過濾腳本中使用
+    裸 except: pass / except: return False 靜默吞掉解析錯誤」。
+
+    與 _loop_warning_line 同規則：只帶執行觀察（崩潰＋放棄詞），不帶需求失敗證據或
+    重算值；hint 為靜態行（不含任何動態數值）；不改變裁決。
+    """
+    return (
+        "【上一輪執行觀察】上一輪偵測到腳本崩潰、最終答案為放棄詞（如 None）。"
+        "本輪寫資料過濾／匹配腳本時，禁止用裸 except: pass / except: return False "
+        "靜默吞掉解析錯誤（解包例外、格式不符、引號轉義錯等）——解析錯誤應讓例外浮現"
+        "（讓它丟出並修根因，或顯式計數並回報錯誤筆數），確認沒有靜默吞錯後再產出交付物。"
     )
 
 
