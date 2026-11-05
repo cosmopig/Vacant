@@ -664,28 +664,39 @@ def _cond_rate_hint_line(evidence: Any) -> str | None:
     )
 
 
-def _loop_remediation_tail(loop: dict[str, Any]) -> str:
-    """「先修掉錯誤的根因再執行」之後的根因處方（r1063）。
+_PYTHON_SYNTAX_ERRORS = frozenset({"SyntaxError", "IndentationError", "TabError"})
 
-    .py 逃逸處方只給 Python 一行式／語句拼接形狀（dabstep-23 SyntaxError×34，
-    r1044 實證）：僅當觀察的錯誤類名是 Python 例外類名（SyntaxError 等，
-    來源 _extract_error_signature 的例外名清單）時保留。非 Python 工具錯誤類
-    （jq → "jq"；edit 驗證 → 'Validation failed for tool "edit"' 前綴類，或無
-    例外類）改通用根因處方——對 jq 過濾器 parse 錯／edit 內容驗證錯開
-    「寫 .py、不要用一行式」是失焦處方（jq 過濾器不是 Python 程式；edit 驗證錯
-    與一行式語法無關）。effects_20261105／contrast055_1273 真實形狀：
-    policy30/dabstep-1753-pi-C localized r1 jq×4、feedback_once20/dab_039-pi-C
-    localized r1 edit×5、contrast055_1273/dabstep-1273-pi-C generic r1
-    SyntaxError×7。
+
+def _loop_remediation_tail(loop: dict[str, Any]) -> str:
+    """「先修掉錯誤的根因再執行」之後的針對性處方（r1063/argon）。
+
+    - 「把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句）」專屬於 Python 一行式
+      語法/編譯錯誤（SyntaxError/IndentationError/TabError，如 dabstep-23 SyntaxError×34
+      或 dabstep-1273 SyntaxError×7）：在一行式 -c 中使用複合陳述直接被語法限制擋住。
+      若命令本身已是執行 .py 檔案（如 python3 script.py），或錯誤是執行期例外
+      （NameError、KeyError、ZeroDivisionError、ValueError、TypeError 等），
+      或是非 Python 工具（jq 過濾器錯、edit 驗證錯），開「寫成 .py 檔案、不要一行式」
+      屬於失焦診斷，會誤導模型懷疑執行方式而非修正程式或資料邏輯。
+    - 其餘情況（非語法錯、執行期例外、非 Python 工具、已是 .py 腳本）一律走通用根因處方：
+      先查明失敗原因（參數、語法、未定義變數或資料內容不符）再修正執行。
     """
     cls = str(loop.get("error_class") or "").strip()
-    if cls and cls.isidentifier() and (cls.endswith("Error") or cls.endswith("Exception")):
+    args = loop.get("args")
+    cmd = ""
+    if isinstance(args, dict):
+        cmd = str(args.get("command") or "")
+    elif isinstance(args, str):
+        cmd = args
+
+    is_syntax_err = cls in _PYTHON_SYNTAX_ERRORS
+    is_already_script = bool(cmd and (".py " in cmd or cmd.strip().endswith(".py")))
+    if is_syntax_err and not is_already_script:
         return (
             "先修掉錯誤的根因再執行：把程式碼寫成 .py 檔案後執行（不要用一行式拼接多條語句），"
             "確認執行成功、結果正確後，直接把結果寫入交付物檔案。"
         )
     return (
-        "先修掉錯誤的根因再執行：先查明這類命令失敗的原因（參數、語法或內容不符），修正後再執行；"
+        "先修掉錯誤的根因再執行：先查明這類命令失敗的原因（參數、語法、變數定義或資料內容不符），修正後再執行；"
         "確認結果正確後，直接把結果寫入交付物檔案。"
     )
 
@@ -704,8 +715,8 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
     「執行一次已得到結果後」的前提不成立、提示失焦——改點名錯誤類＋具體語法
     規則（寫 .py 檔案執行）＋「跑通即寫入交付物」，不帶該假前提。
 
-    r1063：根因處方依錯誤類分流（_loop_remediation_tail）——.py 逃逸處方只給
-    Python 例外類名；jq／edit 驗證等非 Python 工具錯誤類給通用根因處方。
+    處方依錯誤類與執行方式分流（_loop_remediation_tail）：.py 逃逸處方只給
+    Python 一行式語法錯誤；jq／edit 驗證／執行期例外等給通用根因處方。
     """
     name = str(loop.get("tool_name") or "工具")
     reps = loop.get("consecutive_repetitions")
@@ -720,6 +731,7 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         if len(args_text) > 360:
             args_text = args_text[:220].rstrip() + " … " + args_text[-120:].lstrip()
         example = f"（例：{args_text}）"
+    tail = _loop_remediation_tail(loop)
     if loop.get("error_class_repeat") is True:
         # contrast055_1273_20261105 dabstep-1273 generic r1 形狀：同類錯誤多次失敗、
         # 成功探查交錯、每次錯誤文本微差。不帶「以相同參數」「每次都失敗」假前提。
@@ -734,7 +746,6 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
             f"【上一輪執行觀察】上一輪偵測到 {name} 合計失敗{n} 次、皆屬同一類錯誤（{err}{sample_part}）"
             f"（每次微調參數但未修根因，疑似工具死迴圈）{example}。"
         )
-        tail = _loop_remediation_tail(loop)
         if loop.get("all_failed") is True:
             return head + (
                 f"本輪禁止重複該類命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
@@ -759,7 +770,7 @@ def _loop_warning_line(loop: dict[str, Any]) -> str:
         sample_part = f"（{sample}）" if (sample and sample != err) else ""
         return head + (
             f"本輪禁止重複該命令——它上一輪每次都失敗（{err}{sample_part}）、從未得到結果。"
-            + _loop_remediation_tail(loop)
+            + tail
         )
     return head + (
         "本輪禁止重複該命令；同一計算執行一次已得到結果後，直接以該結果推導並產出交付物，"
