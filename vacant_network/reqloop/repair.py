@@ -327,6 +327,29 @@ def _workspace_requirements_bytes(raw_bytes: bytes) -> bytes:
     return (json.dumps(out, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
 
 
+def _copy_into_workspace(src: str | pathlib.Path, dst: str | pathlib.Path) -> None:
+    """複製單檔進工作區，並保證目標可寫。
+
+    來源可能是唯讀共享檔（data/ symlink 指向 0444 的 _data 檔；草稿目錄本身
+    「只讀」是設計前提）——唯讀目標會讓 open(dst,'wb') 直接 EACCES，第 2+ 輪
+    「同名檔以草稿為準」的覆寫與後續「權威來源重拷」就崩掉。先解唯讀再複製、
+    複製後維持可寫；內容不變（sha256 不受影響）。
+    （copytree 的 copy_function 傳 str，這裡統一轉 Path。）
+    """
+    src = pathlib.Path(src)
+    dst = pathlib.Path(dst)
+    if dst.exists() or dst.is_symlink():
+        try:
+            os.chmod(dst, 0o644)
+        except OSError:
+            dst.unlink()
+    shutil.copy2(src, dst)
+    try:
+        os.chmod(dst, 0o644)
+    except OSError:
+        pass
+
+
 def _copy_task_top_files_to_workspace(t: pathlib.Path, ws: pathlib.Path) -> None:
     for p in sorted(t.iterdir()) if t.is_dir() else []:
         if not p.is_file():
@@ -334,7 +357,7 @@ def _copy_task_top_files_to_workspace(t: pathlib.Path, ws: pathlib.Path) -> None
         if p.name == "requirements.json":
             (ws / p.name).write_bytes(_workspace_requirements_bytes(p.read_bytes()))
         else:
-            shutil.copy2(p, ws / p.name)
+            _copy_into_workspace(p, ws / p.name)
 
 
 def prepare_workspace(
@@ -351,6 +374,7 @@ def prepare_workspace(
     工作區；只有 include_dirs 白名單裡的子目錄（如 data/）才進場。
     控制器內部的 requirements.json 寫入工作區時會剝離 verifier/params/recompute 等內部重算規格，
     防止模型在工作區偷讀重算答案或被歷史備註誤導。
+    工作區副本一律可寫（來源唯讀不影響覆寫；內容 sha256 不變）。
     """
     t = pathlib.Path(task_dir)
     d = pathlib.Path(draft_dir)
@@ -362,19 +386,21 @@ def prepare_workspace(
     for dd in include_dirs:
         src = t / dd
         if src.is_dir():
-            shutil.copytree(src, ws / dd, dirs_exist_ok=True)
+            shutil.copytree(src, ws / dd, dirs_exist_ok=True,
+                            copy_function=_copy_into_workspace)
     for p in sorted(d.rglob("*")) if d.is_dir() else []:
         if p.is_file():
             dest = ws / p.relative_to(d)
             dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(p, dest)
+            _copy_into_workspace(p, dest)
     if round_n >= 2:
         # 累積修復第 2+ 輪（d 為上一輪工作區）：確保權威來源檔案不被上一輪可能污染的副本覆寫
         _copy_task_top_files_to_workspace(t, ws)
         for dd in include_dirs:
             src = t / dd
             if src.is_dir():
-                shutil.copytree(src, ws / dd, dirs_exist_ok=True)
+                shutil.copytree(src, ws / dd, dirs_exist_ok=True,
+                                copy_function=_copy_into_workspace)
     return ws
 
 
