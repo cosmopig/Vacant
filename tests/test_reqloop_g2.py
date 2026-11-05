@@ -567,6 +567,41 @@ def test_verify_frozen_covers_data_files(tmp_path):
         g2.G2Manifest.load(manifest({"data/in.csv": "0" * 64})).verify_frozen(base)
 
 
+def test_all_repo_reqloop_manifests_resolve_frozen():
+    """全庫掃鎖（r1017）：repo 內每一份 g2 manifest schema 的凍結清單都必須過得自己的門。
+    r1011 補了 effect_manifest 5 份 e013 條目（key 缺 data/ 前綴），但同型缺陷還在
+    smoke_e013/manifest.json（dab_105/055/426 三份 pin 指向不存在的路徑，verify_frozen
+    直接「凍結資料檔缺失」）——一份過不了自己門的凍結記錄，pin 只是裝飾（H-0 同型：
+    靠漏驗拿到的綠燈就是放過洞的條件）。本測試不發射、不呼叫模型，只驗 pin 可解析。
+    """
+    reqloop = REPO_ROOT / "ops" / "reqloop"
+    mans = []
+    for p in sorted(reqloop.rglob("*.json")):
+        if not p.is_file():
+            continue
+        try:
+            raw = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(raw, dict) and raw.get("schema") == "vacant.reqloop.g2.manifest/1":
+            mans.append(p)
+
+    # 掃到的是真的那幾份（防 rglob 路徑漂移讓掃鎖空轉）
+    names = {str(p.relative_to(reqloop)) for p in mans}
+    assert {
+        "g2/effect_manifest.json",
+        "g2/smoke/manifest.json",
+        "g2/smoke/manifest_dab039_repin.json",
+        "g2/smoke_e013/manifest.json",
+        "g2/smoke_e014/manifest.json",
+        "g3/manifest.json",
+    } <= names
+
+    # 每份都要過 verify_frozen（交付檔＋requirements＋data_files 全部可解析、hash 相符）
+    for p in mans:
+        g2.G2Manifest.load(p).verify_frozen(p.parent)
+
+
 # ── vq-5nz.16：新凍結 6 份的 before-check 與已記錄分一致 ──────────────────
 
 # name → (role, task 目錄, draft 目錄, 期望 FAIL 的必需條目 id；None＝只要有必需 FAIL 即可；
