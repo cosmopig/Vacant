@@ -1568,3 +1568,88 @@ def test_plain_recomputed_scheme_fee_avg(tmp_path: pathlib.Path):
     _write(d / "answer.txt", "0.1\n")
     res = {r.claim_id: r for r in run_requirement_checks(task_dir2, req_set2, d)}
     assert res["req_main"].status == "UNKNOWN"
+
+
+def test_plain_recomputed_scheme_fee_avg_null_is_credit_and_round(tmp_path: pathlib.Path):
+    """argon 20261105_0346 回歸：
+    1. manual.md 明訂 'If a field is set to null it means that it applies to all possible values'。
+       _scheme_fee_avg 舊碼用 `bool(r.get("is_credit")) is not want_credit`，把 `is_credit: null`
+       轉成 False，導致 want_credit=True（dabstep-1273）漏算 21 條 null 規則、算錯成 0.117667，
+       把真正正確的 0.120132 判成 FAIL 並在 round_2 改壞。
+    2. check_plain_recomputed 必須支援 recompute.round（與 check_kv_recomputed 一致）。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "fees.json",
+        json.dumps([
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 10},   # 0.11
+            {"card_scheme": "GlobalCard", "is_credit": None, "fixed_amount": 0.20, "rate": 20},   # 0.22 (applies to all)
+            {"card_scheme": "GlobalCard", "is_credit": False, "fixed_amount": 0.50, "rate": 50},  # 0.55 (debit only)
+        ]),
+    )
+    # credit: (0.11 + 0.22) / 2 = 0.165；round=2 → 0.16（或 0.17）
+    # 用 (0.11 + 0.22 + 0.10) / 3 = 0.143333... 測 round=4 → 0.1433
+    _write(
+        task_dir / "fees.json",
+        json.dumps([
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 10},   # 0.11
+            {"card_scheme": "GlobalCard", "is_credit": True, "fixed_amount": 0.10, "rate": 0},    # 0.10
+            {"card_scheme": "GlobalCard", "is_credit": None, "fixed_amount": 0.20, "rate": 20},   # 0.22 (null applies to all)
+            {"card_scheme": "GlobalCard", "is_credit": False, "fixed_amount": 0.99, "rate": 99},
+        ]),
+    )
+    params_credit = {
+        "data_file": "fees.json",
+        "recompute": {"type": "scheme_fee_avg", "scheme": "GlobalCard",
+                      "is_credit": True, "amount": 10.0, "round": 4},
+    }
+    req_credit = _req_set("plain_recomputed", params_credit, "answer.txt")
+    good_c = tmp_path / "good_c"
+    _write(good_c / "answer.txt", "0.1433\n")
+    res_c = {r.claim_id: r for r in run_requirement_checks(task_dir, req_credit, good_c)}
+    assert res_c["req_main"].status == "PASS"
+
+    # debit (is_credit=False): 匹配 is_credit=False (1.089) 與 is_credit=None (0.22) → 平均 0.6545
+    params_debit = {
+        "data_file": "fees.json",
+        "recompute": {"type": "scheme_fee_avg", "scheme": "GlobalCard",
+                      "is_credit": False, "amount": 10.0, "round": 4},
+    }
+    req_debit = _req_set("plain_recomputed", params_debit, "answer.txt")
+    good_d = tmp_path / "good_d"
+    _write(good_d / "answer.txt", "0.6545\n")
+    res_d = {r.claim_id: r for r in run_requirement_checks(task_dir, req_debit, good_d)}
+    assert res_d["req_main"].status == "PASS"
+
+
+def test_mean_int_col_point_estimate_and_integer_satisfiable(tmp_path: pathlib.Path):
+    """argon 20261105_0346 回歸（dab_055 實況）：
+    1. estimated_numbers.csv 的 'No. of cases' 含 '630308[495000-801000]'（前導整數即點估計，
+       與 No. of cases_median 同值）；只忽略 Null/空與非數值字串。
+    2. 當題目要求整數答案（answer_kv type=integer）且 mean_int_col 未顯式指定小數 round 時，
+       重算期望值必須取整，不得因未取整浮點數（如 2081990.3598）導致「任何整數與任何浮點數皆不通過」
+       的無解矛盾，更不得把真實正確答案 @mean_cases[2081990] 判成 FAIL。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    dab055_task = repo_root / "ops" / "reqloop" / "g2" / "smoke_e013" / "dab_055-pi-C" / "task"
+    dab055_draft = repo_root / "ops" / "reqloop" / "g2" / "smoke_e013" / "dab_055-pi-C" / "draft"
+    rs = RequirementSet.load(dab055_task / "requirements.json")
+
+    # 1. 原失敗草稿（@mean_cases[2081990.36]）仍為 FAIL
+    before = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, dab055_draft)}
+    assert before["req_answer_kv"] == "FAIL"
+    assert before["req_mean_cases_recomputed"] == "FAIL"
+
+    # 2. 獨立 scorer 認證的真實正確答案（@mean_cases[2081990]）必須兩項皆 PASS
+    good = tmp_path / "good_055"
+    _write(good / "answer.txt", "@mean_cases[2081990]\n")
+    after_good = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, good)}
+    assert after_good["req_answer_kv"] == "PASS"
+    assert after_good["req_mean_cases_recomputed"] == "PASS"
+
+    # 3. 錯誤答案（@mean_cases[2199]）必須 FAIL
+    wrong = tmp_path / "wrong_055"
+    _write(wrong / "answer.txt", "@mean_cases[2199]\n")
+    after_wrong = {r.claim_id: r.status for r in run_requirement_checks(dab055_task, rs, wrong)}
+    assert after_wrong["req_mean_cases_recomputed"] == "FAIL"
+

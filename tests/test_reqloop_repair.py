@@ -1258,3 +1258,106 @@ def test_cli_exit_code_20_on_source_tamper(task_dir, tmp_path, capsys):
     text = capsys.readouterr().out
     assert "SOURCE_TAMPERED" in text and "expenses.csv" in text
 
+
+def test_round2_prompt_does_not_list_source_files_as_modifiable_deliverables(task_dir, tmp_path):
+    """argon 20261105_0346 回歸：
+    1. 累積修復第 2 輪（source_dir=round_1）時，round_1 含工作區內的源資料（expenses.csv、
+       data/*、request.md、requirements.json）；build_repair_prompt 嚴禁把它們列進
+       【目前交付物檔案（可以修改）】，否則提示詞直接教唆模型在第 2 輪修改權威來源。
+    2. build_repair_prompt 不得在【工作區裡的參考資料】向模型宣傳控制器內部的 requirements.json
+       （effects_20261105 中 generic 臂因看到 requirements.json 被列出而讀取重算備註，污染對照）。
+    3. prepare_workspace 在 round_n>=2 時必須保證權威來源檔為乾淨版本，不得被上一輪被污染的
+       來源檔覆寫。
+    """
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    clean_expenses = (task_dir / "expenses.csv").read_text(encoding="utf-8")
+    prompts: list[str] = []
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        prompts.append(prompt)
+        return Launch(argv=["true"], note="fake")
+
+    calls = {"n": 0}
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        calls["n"] += 1
+        ws = pathlib.Path(workspace)
+        if calls["n"] == 1:
+            # 第 1 輪：意外污染了來源檔
+            (ws / "expenses.csv").write_text("tampered\n", encoding="utf-8")
+        else:
+            # 第 2 輪工作區開局的權威來源檔必須被還原為乾淨版本，不能繼承第 1 輪的污染
+            assert (ws / "expenses.csv").read_text(encoding="utf-8") == clean_expenses
+        return _run_result(log_dir)
+
+    repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=build, run=run,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert len(prompts) == 2
+    for idx, p in enumerate(prompts, 1):
+        mod_section = p.split("【目前交付物檔案")[1].split("【工作區")[0]
+        assert "- summary.md" in mod_section, (idx, mod_section)
+        assert "- expense_summary.csv" in mod_section, (idx, mod_section)
+        for forbidden in ("- expenses.csv", "- request.md", "- requirements.json"):
+            assert forbidden not in mod_section, f"round {idx} 把權威來源列為可修改交付物: {mod_section}"
+        assert "- requirements.json" not in p, f"round {idx} 提示不應宣傳控制器內部 requirements.json"
+
+
+def test_build_repair_prompt_falls_back_to_item_quotes_when_request_md_missing(tmp_path):
+    """argon 20261105_0346 回歸：
+    vq-5nz.16 凍結的 3 份 DABStep 任務（dabstep-10/11/1273）task/ 目錄未附 request.md，
+    導致 effects_20261105 中兩臂提示皆印出「（缺 request.md）」，generic 臂完全失去原始題目。
+    當 request.md 缺失時，build_repair_prompt 必須退回使用 req_set.items 的原文 quote（使用者需求原文），
+    確保 generic 與 localized 兩臂都能收到題目。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    t1273 = repo_root / "ops" / "reqloop" / "g2" / "smoke_e014" / "dabstep-1273-pi-C" / "task"
+    d1273 = repo_root / "ops" / "reqloop" / "g2" / "smoke_e014" / "dabstep-1273-pi-C" / "draft"
+    rs = RequirementSet.load(t1273 / "requirements.json")
+    before = run_requirement_checks(t1273, rs, d1273)
+
+    for mode in ("generic", "localized"):
+        p = repair.build_repair_prompt(t1273, rs, d1273, before, feedback_mode=mode)
+        assert "（缺 request.md）" not in p, mode
+        assert "GlobalCard" in p and "10 EUR" in p, mode
+
+
+def test_usage_parsed_from_real_pi_stream_ignores_zero_deltas_and_dedupes_message_end(tmp_path):
+    """argon 20261105_0346 回歸（P001-20261105-03 實測缺陷）：
+    真實 `pi --mode json` 輸出中，單次 LLM API 回應會先送多個 `usage={input:0, output:0}` 的
+    streaming delta（text_start/text_delta/toolcall_start/toolcall_delta），最後在同一次回應同時含
+    文字與工具呼叫時，分別送出 `text_end` 與 `toolcall_end` 兩個帶相同 `usage` 的 `message_update`，
+    再送出唯一一個 `type=message_end`（`message.role=assistant, message.usage=...`）。
+    舊 `parse_usage_from_log`：
+    1. 把所有 `input=0, output=0` 的 streaming delta 也計入 `calls += 1`（7 次呼叫膨脹成 70 次）；
+    2. 把同一次回應的 `text_end` 與 `toolcall_end` 重複加總，導致 token 數虛胖超過 2 倍。
+    修正後必須精確回傳 1 次呼叫與單次真實 token 數。
+    """
+    log = tmp_path / "real_pi_stdout.log"
+    turn_usage = {"input": 1801, "output": 30, "totalTokens": 1831}
+    zero_usage = {"input": 0, "output": 0, "totalTokens": 0}
+    lines = [
+        json.dumps({"type": "message_update", "usage": zero_usage,
+                    "assistantMessageEvent": {"type": "text_start"}}),
+        json.dumps({"type": "message_update", "usage": zero_usage,
+                    "assistantMessageEvent": {"type": "text_delta"}}),
+        json.dumps({"type": "message_update", "usage": zero_usage,
+                    "assistantMessageEvent": {"type": "toolcall_start"}}),
+        json.dumps({"type": "message_update", "usage": zero_usage,
+                    "assistantMessageEvent": {"type": "toolcall_delta"}}),
+        json.dumps({"type": "message_update", "usage": turn_usage,
+                    "assistantMessageEvent": {"type": "text_end"}}),
+        json.dumps({"type": "message_update", "usage": turn_usage,
+                    "assistantMessageEvent": {"type": "toolcall_end"}}),
+        json.dumps({"type": "message_end",
+                    "message": {"role": "assistant", "usage": turn_usage}}),
+    ]
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    u = repair.parse_usage_from_log(log)
+    assert u == {"input": 1801, "output": 30, "total": 1831, "calls": 1}
+
+
+
