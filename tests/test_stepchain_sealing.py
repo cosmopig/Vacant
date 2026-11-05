@@ -627,3 +627,49 @@ def test_g3_c6_append_p99_delta_le_10pct(tmp_path):
     delta = (after - base) / base
     assert delta <= 0.10, (
         f"C6 P99 delta {delta * 100:.1f}% > 10% (base {base:.2f}ms, after {after:.2f}ms)")
+
+
+def test_set_aside_and_repair_tail_invalidates_vol_cache(env):
+    """set_aside 與 _repair_tail 截斷時必須失效活動卷快取（_vol_line_count 與 _vol_size）。
+    否則舊鏈被移走或截斷後，Recorder 殘留舊行數／舊大小，新寫入碰巧撞同 byte 大小時會取到
+    過時的舊行數，破壞分卷封印觸發器。"""
+    ws, rec = env
+    rec.volume_max_entries = 100
+    m = R.Actor("g3", "s1")
+    rec.pre("t1", m, "Write", {"file_path": "f1.txt"})
+    (ws / "f1.txt").write_text("1")
+    rec.post("t1", m, "Write", {"file_path": "f1.txt"}, "ok")
+    rec.pre("t2", m, "Write", {"file_path": "f2.txt"})
+    (ws / "f2.txt").write_text("2")
+    rec.post("t2", m, "Write", {"file_path": "f2.txt"}, "ok")
+
+    assert rec._vol_line_count is not None
+    assert rec._vol_size is not None
+
+    rec.set_aside("test invalidate")
+    assert rec._vol_line_count is None, "set_aside 後 _vol_line_count 必須被重設為 None"
+    assert rec._vol_size is None, "set_aside 後 _vol_size 必須被重設為 None"
+
+    # 新寫入建立新鏈
+    rec.pre("t3", m, "Write", {"file_path": "f3.txt"})
+    (ws / "f3.txt").write_text("3")
+    rec.post("t3", m, "Write", {"file_path": "f3.txt"}, "ok")
+    rec.pre("t4", m, "Write", {"file_path": "f4.txt"})
+    (ws / "f4.txt").write_text("4")
+    rec.post("t4", m, "Write", {"file_path": "f4.txt"}, "ok")
+    assert rec._vol_line_count is not None
+    assert rec._vol_size is not None
+
+    # 人工注入撕裂尾
+    with rec.chain_path.open("ab") as f:
+        f.write(b'{"torn_tail_incomplete": ')
+
+    # 執行 _repair_tail
+    repaired = rec._repair_tail()
+    assert repaired is not None
+    assert rec._vol_line_count is None, "_repair_tail 截斷後 _vol_line_count 必須重設為 None"
+    assert rec._vol_size is None, "_repair_tail 截斷後 _vol_size 必須重設為 None"
+
+
+
+

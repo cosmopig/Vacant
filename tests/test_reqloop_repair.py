@@ -848,3 +848,15 @@ def test_repair_slice_and_cli_default_include_dirs_data(tmp_path: pathlib.Path):
     )
     assert rc_custom == 0
     assert (out3 / "round_1" / "custom" / "extra.txt").is_file(), "--include-dirs 自訂目錄必須進工作區"
+
+
+def test_selftest_cleans_up_scratch_temp_directory(capsys):
+    """selftest 必須清理自己產生的暫存目錄，不能在 /tmp 殘留垃圾。"""
+    import glob
+    before = set(glob.glob("/tmp/vacant-repair-selftest-*"))
+    rc = repair._selftest()
+    assert rc == 0
+    after = set(glob.glob("/tmp/vacant-repair-selftest-*"))
+    leaked = after - before
+    assert not leaked, f"selftest 殘留暫存目錄：{leaked}"
+

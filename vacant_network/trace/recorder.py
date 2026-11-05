@@ -412,6 +412,8 @@ class Recorder:
         saved.write_bytes(data[cut:])
         with self.chain_path.open("r+b") as f:
             f.truncate(cut)
+        self._vol_line_count = None
+        self._vol_size = None
         return {"torn_tail_bytes": len(data) - cut, "saved_as": saved.name}
 
     def _append(self, etype: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -1397,6 +1399,8 @@ class Recorder:
             head = self.dir / "head.json"
             if head.is_file():
                 os.replace(head, self.dir / f"head.set-aside.{stamp}.json")
+            self._vol_line_count = None
+            self._vol_size = None
             atomic_write_text(self.dir / f"chain.set-aside.{stamp}.why.txt", str(why)[:2000] + "\n")
         return name or (names[0] if names else "")
 
