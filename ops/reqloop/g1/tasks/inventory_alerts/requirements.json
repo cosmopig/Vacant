@@ -1,21 +1,4 @@
 {
-<<<<<<< HEAD
-  "requirements": [
-    {
-      "id": "CSV_STRUCTURE",
-      "description": "產出的 restock_alerts.csv 必須包含正確的欄位：item_id, item_name, current_stock, safety_stock, restock_needed, estimated_cost。"
-    },
-    {
-      "id": "FILTERING_AND_CALCULATION",
-      "description": "必須排除 DISCONTINUED 項目與重複項，且僅包含 current_stock < safety_stock 的品項。restock_needed 應為 safety_stock - current_stock。"
-    },
-    {
-      "id": "SUMMARY_CONSISTENCY",
-      "description": "summary.md 中的總補貨數量與 restock_alerts.csv 的列數必須一致，且總金額必須與所有 restock_needed * unit_cost 之和相等。"
-    }
-  ]
-}
-=======
   "task_id": "inventory_alerts",
   "items": [
     {
@@ -122,4 +105,3 @@
     }
   ]
 }
->>>>>>> auto/argon

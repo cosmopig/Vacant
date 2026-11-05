@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-[
-  {
-    "requirement": "CSV 結構",
-    "description": "grades.csv 必須包含 student_id, class_name, student_name, midterm_score, final_score, status 六個欄位。"
-  },
-  {
-    "requirement": "各班級統計重算",
-    "description": "class_summary.csv 的數據必須正確排除 WITHDRAWN 狀態及重複的 student_id，並依照 0.4/0.6 權重計算總評成績。"
-  },
-  {
-    "requirement": "摘要一致性",
-    "description": "summary.md 中的全年級全體及格率與平均分必須與 class_summary.csv 的數據加總後完全一致。"
-  }
-]
-=======
 {
   "task_id": "student_grades",
   "items": [
@@ -132,4 +116,3 @@
     }
   ]
 }
->>>>>>> auto/argon
