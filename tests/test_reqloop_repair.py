@@ -2276,6 +2276,91 @@ def test_loop_outcome_extracts_filenotfound_and_shell_error_and_preserves_long_c
     assert "if total > 0:" in warn_long
 
 
+def test_error_class_repeat_non_exception_tool_errors_jq_and_edit_family(tmp_path: pathlib.Path):
+    """r1061 回歸（effects_20261105 真實形狀）：
+    error_class_repeat 原先要求例外類（cls）非空才歸組，但 jq／edit 驗證這類
+    非 Python 工具錯誤沒有例外類，被整個跳過：
+    - policy30/dabstep-1753-pi-C localized r1：4 次 jq parse error（僅 column 編號微差、
+      與成功探查交錯）→ 修正前 detect_tool_loop=None；
+    - feedback_once20/dab_039-pi-C generic/localized：4~5 次 edit
+      `Validation failed for tool "edit"` → 修正前 None。
+    修正：無例外類時以錯誤文本第一個冒號前的穩定前綴（≤40 字元）作為錯誤類
+    （jq → "jq"；edit 驗證 → 'Validation failed for tool "edit"'）；前綴不合條件
+    （無冒號／過長）不歸組（維持原跳過行為，避免把無關錯誤併成一類）。
+    仍是觀察與標記，不改變任何裁決。
+    """
+    def _write_log(path: pathlib.Path, events: list) -> None:
+        path.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n",
+                        encoding="utf-8")
+
+    # 1. jq parse error ×4（column 編號微差）與 4 次成功探查交錯 → 命中 "jq" 類
+    ev: list = []
+    for n in range(8):
+        cid = f"c{n}"
+        ev.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "bash",
+                   "args": {"command": f"jq -r '.[{n}]' fees.json"}})
+        if n % 2 == 0:   # 第 0,2,4,6 次失敗（4 次 jq parse error），其餘為成功探查
+            col = 19 + 7 * (n // 2)
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "isError": True,
+                       "result": {"content": [{"text":
+                           "jq: parse error: Expected string key before ':' at line 1, "
+                           f"column {col}"}]}})
+        else:
+            ev.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "bash",
+                       "result": {"content": [{"text": "ok"}]}})
+    log_jq = tmp_path / "jq.log"
+    _write_log(log_jq, ev)
+    hit = repair.detect_tool_loop(log_jq)
+    assert hit is not None
+    assert hit["error_class"] == "jq"
+    assert hit["failure_count"] == 4
+    assert hit.get("error_class_repeat") is True
+    assert "皆屬同一類錯誤（jq" in repair._loop_warning_line(hit)
+
+    # 2. edit 驗證錯誤 ×5（args 每次微調、錯誤文本相同、成功探查交錯）
+    #    → 走 error_class_repeat 前綴類（非連續故 same_error_streak 不截獲）
+    ev2 = []
+    for n in range(9):
+        cid = f"e{n}"
+        ev2.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "edit",
+                    "args": {"path": "answer.txt", "oldText": f"old{n}", "newText": "new"}})
+        if n % 2 == 0:   # 第 0,2,4,6,8 次失敗（5 次驗證錯誤），其餘為成功探查
+            ev2.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "isError": True,
+                        "result": {"content": [{"text": 'Validation failed for tool "edit": "oldText" is required'}]}})
+        else:
+            ev2.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "result": {"content": [{"text": "updated"}]}})
+    log_edit = tmp_path / "edit.log"
+    _write_log(log_edit, ev2)
+    hit2 = repair.detect_tool_loop(log_edit)
+    assert hit2 is not None
+    assert hit2["error_class"] == 'Validation failed for tool "edit"'
+    assert hit2["failure_count"] == 5
+    assert hit2.get("error_class_repeat") is True
+
+    # 3. 無冒號前綴（"Could not find the exact text …"）無例外類、無前綴類可歸組
+    #    → 交錯成功也不命中（避免過度併類）
+    ev3 = []
+    for n in range(8):
+        cid = f"g{n}"
+        ev3.append({"type": "tool_execution_start", "toolCallId": cid, "toolName": "edit",
+                    "args": {"path": "answer.txt", "oldText": f"stale{n}", "newText": "x"}})
+        if n % 2 == 0:   # 第 0,2,4,6 次失敗（4 次同文本），其餘為成功探查
+            ev3.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "isError": True,
+                        "result": {"content": [{"text":
+                            "Could not find the exact text in answer.txt. Make sure the text matches "
+                            "exactly, including all whitespace and indentation."}]}})
+        else:
+            ev3.append({"type": "tool_execution_end", "toolCallId": cid, "toolName": "edit",
+                        "result": {"content": [{"text": "updated"}]}})
+    log3 = tmp_path / "no_family.log"
+    _write_log(log3, ev3)
+    assert repair.detect_tool_loop(log3) is None
+
+
 def test_localized_prompt_orders_immediate_deliverable_write_not_waiting_for_hidden_recomputed_value(task_dir):
     """argon 20261105_1047 回歸：
     effects_20261105 / effects_p1 / contrast3 中 dabstep-23 localized 共 6 輪有 5 輪模型在

@@ -782,6 +782,24 @@ def _extract_error_signature(text: str) -> tuple[str, str]:
     return ("", pick[:80] if pick else "")
 
 
+def _error_family(sample: str) -> str | None:
+    """r1061（vq-5nz.30）：非例外工具錯誤（jq／edit 驗證等）沒有例外類；
+    以錯誤文本第一個冒號前的穩定前綴（≤40 字元）作為錯誤類——
+    jq parse/runtime 錯誤 → "jq"；edit 驗證 → 'Validation failed for tool "edit"'。
+    前綴不合條件（無冒號／過長／空）回傳 None＝不歸組（維持原跳過行為，
+    避免把無關錯誤併成一類）。effects_20261105 實據：policy30/dabstep-1753
+    localized r1 四次 jq parse error（column 編號微差、成功探查交錯）與
+    feedback_once20/dab_039 四五次 edit 驗證失敗原先皆漏。
+    """
+    if not sample:
+        return None
+    i = sample.find(":")
+    prefix = (sample[:i] if i > 0 else "").strip()
+    if not prefix or len(prefix) > 40:
+        return None
+    return prefix
+
+
 def _loop_outcome_fields(loop_keys: list[tuple[str, Any]],
                          outcomes: list[tuple[tuple[str, Any], bool, str]]) -> dict[str, Any]:
     """聚合迴圈 key（單 key 或 period-2/3 多 key）的執行結果（r1044／vq-5nz.21；argon 20261105_1047 修）。
@@ -833,7 +851,8 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
     或同一工具連續多次微調參數但皆因同一錯誤失敗（same_error_streak）；
     同工具同錯誤類多次失敗但成功探查交錯／每次錯誤文本微差（error_class_repeat；
     contrast055_1273_20261105 dabstep-1273 generic r1：22 次 python3 -c 中 7 次
-    SyntaxError、15 次成功——strict same_error_streak 要求「連續＋同錯誤文本」而漏）。
+    SyntaxError、15 次成功——strict same_error_streak 要求「連續＋同錯誤文本」而漏）；
+    r1061：無例外類的工具錯誤（jq／edit 驗證）以前綴類歸組（_error_family）。
 
     r1044（vq-5nz.21）：另自 tool_execution_end 依 toolCallId 關聯執行結果，
     區分「迴圈命令每次都失敗」（all_failed／error_class——contrast3 dabstep-23
@@ -1047,9 +1066,10 @@ def detect_tool_loop(log_path: str | pathlib.Path, *, threshold: int = 4) -> dic
         if not is_err:
             continue
         cls, sample = _extract_error_signature(out_txt)
-        if not cls:
+        key_cls = cls or _error_family(sample)
+        if not key_cls:
             continue
-        rec = class_fail.setdefault((tname, cls),
+        rec = class_fail.setdefault((tname, key_cls),
                                     {"count": 0, "args": targs, "sample": sample})
         rec["count"] += 1
         if not rec["sample"] and sample:
