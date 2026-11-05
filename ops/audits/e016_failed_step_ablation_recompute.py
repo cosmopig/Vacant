@@ -36,23 +36,18 @@ def get_arm_data(exp_dir, arm_name):
     vacant_shas = []
     agent_env = {}
 
-    # The score.json structure seems to be a single object for this arm
+    # The score.json structure seems to be a dict of cells or just the stats
     if isinstance(score_data, dict):
-        # Check if it's a dict of cells or just the stats
-        # If 'pass' is in top level, it's likely the stats directly
         if 'pass' in score_data and not any(isinstance(v, dict) for v in score_data.values()):
             n_valid = score_data.get('n', 0)
-            # If n is missing but pass is there, it's likely n=1
             if n_valid == 0 and (score_data.get('pass') is not None):
                 n_valid = 1
             pass_count = score_data.get('pass', 0) if score_data.get('pass') is not None else 0
-            if pass_count > 0 or (score_data.get('pass') is not None and score_data.get('pass') == False):
-                if score_data.get('pass') is not None:
-                    total_calls += score_data.get('calls_per_success', 0)
-                    total_tokens += score_data.get('tokens_per_success', 0)
+            if pass_count > 0 or (score_data.get('pass') is not None):
+                total_calls += score_data.get('calls_per_success', 0)
+                total_tokens += score_data.get('tokens_per_success', 0)
             timeouts = score_data.get('timeouts', 0)
         else:
-            # It's a dict of cells
             for k, v in score_data.items():
                 if not isinstance(v, dict): continue
                 n_valid += v.get('n', 0)
@@ -84,6 +79,7 @@ def get_arm_data(exp_dir, arm_name):
     }
 
 def main():
+    # Use the path from STATE.md / instructions
     exp_dir = "/srv/vlab/runs/e016_failed_step_ablation"
     arms = ["A", "C", "C-nf"]
     results = {}
