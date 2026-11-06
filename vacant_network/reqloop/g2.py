@@ -267,6 +267,8 @@ def run_g2_smoke(
         max_tool_calls = man.budget.get("max_tool_calls")
     if max_tokens is None:
         max_tokens = man.budget.get("max_tokens")
+    if build in (_default_build, repair._default_build):
+        build = _default_build(man.model.get("provider"), man.model.get("model"))
 
     cells: list[dict[str, Any]] = []
     for d in man.drafts:
@@ -307,6 +309,7 @@ def run_g2_smoke(
                 "source_tampered_files": list(outcome.source_tampered_files),
                 # r1088：逐輪硬預算殺因（None＝該輪未被殺；未啟用上限時全 None）
                 "budget_exceeded": [r.agent.get("budget_exceeded") for r in outcome.rounds],
+                "spawn_errors": [r.agent.get("spawn_error") for r in outcome.rounds],
                 "before_hidden": d["source"].get("score"),       # 已記錄（引用，不重跑）
                 "after_hidden": AFTER_HIDDEN_UNKNOWN,            # 本地無權重跑；絕不填 0
                 "cost": dict(outcome.cost),

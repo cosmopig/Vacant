@@ -1015,3 +1015,54 @@ def test_g2_result_totals_keeps_repair_sessions_and_model_calls_distinct():
     assert totals["repair_sessions"] != totals["model_calls"]
 
 
+def test_run_g2_smoke_records_spawn_errors_and_auto_binds_default_build_factory(tmp_path):
+    """argon 20261106_0800 回歸（effects2cap_20261106 實況）：
+    1. `g2_result.json` 的每格必須記錄 `spawn_errors`（逐輪 `r.agent.get("spawn_error")`），
+       不得靜默吞掉執行器啟動錯誤（否則 `spawn_error` 格在 `g2_result.json` 中看起來像正常跑完 2 輪卻
+       `tokens: null, stopped: stalled`）。
+    2. 若呼叫端把 `g2._default_build` 或 `repair._default_build`（未呼叫的工廠函式）直接作為 `build`
+       傳給 `run_g2_smoke`，`run_g2_smoke` 應自動以 `man.model` 綁定 `(provider, model)` 取得真正的
+       `BuildFn`，避免因簽名同為 2 個位置參數而把 `(prompt, ws)` 誤綁成 `(provider, model)`。
+    """
+    base = tmp_path / "smoke"
+    for sub in ("dab_035/draft", "dab_035/task"):
+        shutil.copytree(SMOKE / sub, base / sub)
+    full = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    full["drafts"] = [d for d in full["drafts"] if d["task_id"] == "dab_035"]
+    (base / "manifest.json").write_text(json.dumps(full, ensure_ascii=False), encoding="utf-8")
+    man = g2.G2Manifest.load(base / "manifest.json")
+
+    seen_launches: list[Launch] = []
+
+    def run_ok(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+               log_dir: pathlib.Path) -> dict:
+        assert isinstance(launch, Launch), f"expected Launch, got {type(launch)}"
+        seen_launches.append(launch)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 10, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    # 直接傳入未呼叫的 g2._default_build 工廠，應自動綁定 man.model 並成功產生 Launch
+    res = g2.run_g2_smoke(man, base, tmp_path / "out_factory", g2._default_build, run_ok,
+                          include_dirs=("data",))
+    assert len(seen_launches) == 1
+    assert "--provider" in seen_launches[0].argv
+    by = {(c["draft"], c["arm"]): c for c in res.cells}
+    assert by[("dab_035-pi-C", "generic")]["spawn_errors"] == [None]
+
+    # 當執行器回傳 spawn_error 時，g2_result.json 的 cell["spawn_errors"] 必須如實暴露
+    def run_err(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+                log_dir: pathlib.Path) -> dict:
+        return {"rc": None, "timed_out": False, "wall_ms": 1,
+                "spawn_error": "RuntimeError: simulated launch crash"}
+
+    res_err = g2.run_g2_smoke(man, base, tmp_path / "out_err", g2._default_build, run_err,
+                              include_dirs=("data",))
+    by_err = {(c["draft"], c["arm"]): c for c in res_err.cells}
+    assert by_err[("dab_035-pi-C", "generic")]["spawn_errors"] == ["RuntimeError: simulated launch crash"]
+
+
+

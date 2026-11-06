@@ -37,9 +37,10 @@ def _parse_float(val: Any) -> float:
         return 0.0
     s = str(val).strip().replace("$", "").replace(",", "").replace("¥", "").replace("元", "")
     try:
-        return float(s)
+        v = float(s)
     except ValueError:
         return 0.0
+    return v if math.isfinite(v) else 0.0
 
 
 def _parse_date(val: Any) -> datetime.date | None:
@@ -551,14 +552,20 @@ def _to_num(value: Any) -> float:
     if isinstance(value, bool):
         raise UnsafeExpressionError("bool 不是數字")
     if isinstance(value, (int, float)):
-        return float(value)
+        v = float(value)
+        if not math.isfinite(v):
+            raise UnsafeExpressionError(f"非有限數字: {value!r}")
+        return v
     s = str(value).strip().replace("$", "").replace(",", "").replace("¥", "").replace("元", "")
     if s == "":
         raise UnsafeExpressionError("空白值不可作為數字")
     try:
-        return float(s)
+        v = float(s)
     except ValueError as e:
         raise UnsafeExpressionError(f"不可解析為數字: {value!r}") from e
+    if not math.isfinite(v):
+        raise UnsafeExpressionError(f"非有限數字: {value!r}")
+    return v
 
 
 def safe_eval_expr(expr: str, row: dict[str, Any]) -> Any:
@@ -1054,6 +1061,8 @@ def _kv_type_ok(key: str, raw: str, cons: str) -> tuple[bool, str]:
         v = float(raw.replace(",", "").strip())
     except ValueError:
         return False, "not_a_number"
+    if not math.isfinite(v):
+        return False, "not_a_number"
     if cons in ("integer", "nonneg_int") and abs(v - round(v)) > 1e-9:
         return False, "not_an_integer"
     if cons == "nonneg_int" and v < 0:
@@ -1061,6 +1070,20 @@ def _kv_type_ok(key: str, raw: str, cons: str) -> tuple[bool, str]:
     if cons == "number_in_01" and not (0.0 <= v <= 1.0):
         return False, "out_of_01"
     return True, ""
+
+
+class _JsonPairs(list):
+    """標記頂層 JSON 物件的 (key, value) 序列，供偵測完全同名或大小寫重複鍵。"""
+
+
+def _parse_json_kv_found(content: str) -> dict[str, list[str]]:
+    """解析 JSON 交付物頂層物件鍵值：大小寫標準化並保留同名或大小寫重複鍵之所有值（供判定 ambiguous）。"""
+    data = json.loads(content, object_pairs_hook=_JsonPairs)
+    found: dict[str, list[str]] = {}
+    if isinstance(data, _JsonPairs):
+        for k, v in data:
+            found.setdefault(str(k).strip().lower(), []).append(str(v).strip())
+    return found
 
 
 def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
@@ -1091,15 +1114,11 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
         # 工單 P20261106_0632-2：結構化 JSON 交付物（如 result.json）直接讀字典鍵值，
         # 不再硬性限制 @key[value] 純文字正則；值轉字串後走同一 _kv_type_ok 約束檢查。
         try:
-            data = json.loads(content)
+            found = _parse_json_kv_found(content)
         except (json.JSONDecodeError, ValueError) as e:
             return _result(item, "FAIL", "答案檔不是合法 JSON（invalid_json）",
                            {"counterexamples": [{"key": "<file>", "problem": "invalid_json"}],
                             "reason": str(e)})
-        if not isinstance(data, dict):
-            data = {}
-        for k, v in data.items():
-            found.setdefault(str(k).strip().lower(), []).append(str(v))
     else:
         for m in _ANSWER_KV_RE.finditer(content):
             found.setdefault(m.group(1).strip().lower(), []).append(m.group(2).strip())
@@ -1143,16 +1162,13 @@ def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
         # 工單 P20261106_0632-2：JSON 交付物直接讀字典鍵值（大小寫不拘，與原正則路徑
         # 同口徑）；非 dict 視為 key 缺失；解析失敗回傳 invalid_json（下游標 FAIL）。
         try:
-            data = json.loads(content)
+            found = _parse_json_kv_found(content)
         except (json.JSONDecodeError, ValueError):
             return None, ["invalid_json"]
-        if isinstance(data, dict):
-            for k, v in data.items():
-                if str(k).strip().lower() == key.lower():
-                    return str(v), []
-        return None, ["missing"]
-    vals = [m.group(2).strip() for m in _ANSWER_KV_RE.finditer(content)
-            if m.group(1).strip().lower() == key.lower()]
+        vals = found.get(key.strip().lower(), [])
+    else:
+        vals = [m.group(2).strip() for m in _ANSWER_KV_RE.finditer(content)
+                if m.group(1).strip().lower() == key.lower()]
     if not vals:
         return None, ["missing"]
     if len(vals) > 1:
@@ -1219,8 +1235,10 @@ def check_kv_recomputed(
         return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
                        {"key": key, "problem": problems[0], "data_file": data_rel})
     try:
-        got = float(val_str)
+        got = float(val_str.replace(",", "").strip())
     except ValueError:
+        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
+    if not math.isfinite(got):
         return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
 
     unrounded_int_expected: float | None = None
@@ -1808,8 +1826,11 @@ def check_plain_recomputed(
         return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
     else:
         try:
-            float(val_str)
+            got_pre = float(val_str)
         except ValueError:
+            return _result(item, "FAIL", "答案值不可解析為數字",
+                           {"problem": "not_a_number", "value": val_str})
+        if not math.isfinite(got_pre):
             return _result(item, "FAIL", "答案值不可解析為數字",
                            {"problem": "not_a_number", "value": val_str})
 
@@ -1858,6 +1879,9 @@ def check_plain_recomputed(
         try:
             got = float(val_str)
         except ValueError:
+            return _result(item, "FAIL", "答案值不可解析為數字",
+                           {"problem": "not_a_number", "value": val_str})
+        if not math.isfinite(got):
             return _result(item, "FAIL", "答案值不可解析為數字",
                            {"problem": "not_a_number", "value": val_str})
         atol = float(p.get("atol", 1e-6))
@@ -2045,6 +2069,8 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
     elif val_type == "float":
         try:
             flt_val = float(raw_val)
+            if not math.isfinite(flt_val):
+                raise ValueError("non-finite float")
         except ValueError:
             return _result(
                 item,
