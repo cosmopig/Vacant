@@ -528,12 +528,15 @@ def test_satisfied_deliverable_byte_preservation(task_dir, tmp_path):
     assert out_a.satisfied_mutated == ()
 
     # Case B：同時竄改已滿足交付物（位元組改變）→ 記入 satisfied_mutated
+    # （P20261106_1237-2 起 localized 臂以 0o444 在 OS 層擋住 blind overwrite，
+    #   見 test_localized_workspace_write_protects_preserved_deliverables；
+    #   覆寫成功後的事後位元組對賬用未設保護的 generic 臂驗）
     out_b = repair.repair_slice(
         task_dir, rs, draft,
         out_root=tmp_path / "out_b", build=_fake_build([]),
         run=_fake_agent({"summary.md": _good_summary(task_dir),
                          "expense_summary.csv": csv_text + "\n# tampered-by-fake-agent\n"}),
-        feedback_mode="localized", max_rounds=2, synthetic=True,
+        feedback_mode="generic", max_rounds=2, synthetic=True,
     )
     assert "expense_summary.csv" not in out_b.satisfied_preserved
     assert out_b.satisfied_mutated == ("expense_summary.csv",)
@@ -710,7 +713,9 @@ def test_repair_marks_tampered_source_rejected_across_multiple_rounds(task_dir, 
 
 
 def test_repair_records_pass_to_fail_regression(task_dir, tmp_path):
-    """fake agent 修了摘要但弄壞 CSV 結構 ⇒ 退步必須被記錄。"""
+    """fake agent 修了摘要但弄壞 CSV 結構 ⇒ 退步必須被記錄。
+    （P20261106_1237-2 起 localized 臂以 0o444 在 OS 層擋住 blind overwrite，
+    此處用未設保護的 generic 臂驗覆寫成功後的 PASS→FAIL 記錄）"""
     rs = load_req_set(task_dir)
     draft = task_dir / BAD_DRAFT
     broken_csv = "category,total_amount\nit,3380.25\n"  # 缺 subcategory 欄位
@@ -719,7 +724,7 @@ def test_repair_records_pass_to_fail_regression(task_dir, tmp_path):
     out = repair.repair_slice(
         task_dir, rs, draft,
         out_root=tmp_path / "out", build=_fake_build([]), run=run,
-        feedback_mode="localized", max_rounds=1, synthetic=True,
+        feedback_mode="generic", max_rounds=1, synthetic=True,
     )
     assert "req_csv_structure" in out.regressed
     assert out.final_status["req_csv_structure"] == "FAIL"
@@ -823,7 +828,9 @@ def test_kv_json_corrupted_in_workspace_is_unacceptable_not_fixed(tmp_path: path
 
 def test_repair_outcome_fixed_must_be_pass_in_final_status_and_disjoint_from_unresolved(task_dir, tmp_path):
     """若某輪修好某條目但後續輪次未維持（或改壞），最終 outcome.fixed 嚴禁包含最終仍為 FAIL 的條目。
-    outcome.fixed 與 outcome.unresolved 必須嚴格互斥。"""
+    outcome.fixed 與 outcome.unresolved 必須嚴格互斥。
+    （P20261106_1237-2 起 localized 臂以 0o444 在 OS 層擋住 blind overwrite，
+    此處用未設保護的 generic 臂讓第 1 輪改壞得以發生）"""
     rs = load_req_set(task_dir)
     draft = task_dir / BAD_DRAFT
     calls = {"n": 0}
@@ -846,7 +853,7 @@ def test_repair_outcome_fixed_must_be_pass_in_final_status_and_disjoint_from_unr
     out = repair.repair_slice(
         task_dir, rs, draft,
         out_root=tmp_path / "out", build=_fake_build([]), run=run,
-        feedback_mode="localized", max_rounds=2, synthetic=True,
+        feedback_mode="generic", max_rounds=2, synthetic=True,
     )
     # fixed 與 unresolved 必須互斥，嚴禁虛假宣告 fixed
     assert not (set(out.fixed) & set(out.unresolved)), (
@@ -1605,10 +1612,13 @@ def test_exit_code_20_on_satisfied_mutated(task_dir, tmp_path, capsys):
         (ws / "expense_summary.csv").write_text(csv_text + "\n", encoding="utf-8")
         return _run_result(log_dir)
 
+    # P20261106_1237-2：localized 臂對已滿足交付物設 0o444（blind overwrite 當場
+    # PermissionError），事後位元組對賬＋exit 20 拒收用未設保護的 generic 臂驗
+    # （本測試真實回歸形狀本就出自 generic 臂）
     rc = repair.main(
         ["--task", str(task_dir), "--draft", str(draft),
          "--out", str(tmp_path / "out_mut"), "--rounds", "1", "--synthetic",
-         "--feedback-mode", "localized"],
+         "--feedback-mode", "generic"],
         build=_fake_build([]), run=run_mutate,
     )
     text = capsys.readouterr().out
@@ -3483,11 +3493,13 @@ def test_satisfied_mutated_prevents_early_gap_closed_and_round2_restores_clean_s
     mutated_csv = clean_csv + "\n"
 
     # (1) 單輪（max_rounds=1）修好未滿足但竄改已滿足 ⇒ stopped != "gap_closed"，_exit_code == 20
+    # （P20261106_1237-2 起 localized 臂以 0o444 在 OS 層擋住 blind overwrite；
+    #   覆寫成功後的事後位元組對賬用未設保護的 generic 臂驗）
     out_1r = repair.repair_slice(
         task_dir, rs, draft,
         out_root=tmp_path / "out_1r", build=_fake_build([]),
         run=_fake_agent({"summary.md": good_md, "expense_summary.csv": mutated_csv}),
-        feedback_mode="localized", max_rounds=1, synthetic=True,
+        feedback_mode="generic", max_rounds=1, synthetic=True,
     )
     assert out_1r.satisfied_mutated == ("expense_summary.csv",)
     assert out_1r.stopped != "gap_closed"
@@ -3512,7 +3524,7 @@ def test_satisfied_mutated_prevents_early_gap_closed_and_round2_restores_clean_s
         task_dir, rs, draft,
         out_root=tmp_path / "out_2r", build=_fake_build([]),
         run=run_2r,
-        feedback_mode="localized", max_rounds=2, synthetic=True,
+        feedback_mode="generic", max_rounds=2, synthetic=True,
     )
     assert len(out_2r.rounds) == 2
     # round_1 快照仍保留第 1 輪真實產物（未竄改歷史）
@@ -3521,5 +3533,71 @@ def test_satisfied_mutated_prevents_early_gap_closed_and_round2_restores_clean_s
     assert out_2r.satisfied_preserved == ("expense_summary.csv",)
     assert out_2r.satisfied_mutated == ()
     assert repair._exit_code(out_2r) == 0
+
+
+def test_localized_workspace_write_protects_preserved_deliverables(task_dir, tmp_path):
+    """P20261106_1237-2：已滿足交付物 OS 層級寫保護（0o444）。
+
+    多交付物部分修復（bad_grand_total_wrong：expense_summary.csv 已滿足、
+    summary.md 未滿足）：
+    - localized 臂工作區：tracked_preserved 檔權限恰為 0o444，blind overwrite
+      （open(..., "w")）當場 PermissionError——OS 層攔截，不等事後 hash 對賬＋
+      exit 20 拒收；未滿足交付物保持 0o644 可寫；
+    - generic 對照臂：兩檔都保持 0o644（行為不變；事後位元組對賬在那臂驗，
+      見 satisfied_mutated 系列測試）；
+    - 單交付物（dab_035 answer.txt）：localized 臂亦無保護、保持可寫。
+    保護的是工作區副本；原草稿不受影響。
+    """
+    import os
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    clean_csv = (draft / "expense_summary.csv").read_text(encoding="utf-8")
+
+    def noop_run(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return _run_result(log_dir)
+
+    # (1) localized 臂：已滿足交付物 0o444、寫入當場 PermissionError；未滿足 0o644 可寫
+    repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_loc", build=_fake_build([]), run=noop_run,
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    ws = tmp_path / "out_loc" / "round_1"
+    assert os.stat(ws / "expense_summary.csv").st_mode & 0o777 == 0o444
+    with pytest.raises(PermissionError):
+        with open(ws / "expense_summary.csv", "w", encoding="utf-8") as f:
+            f.write("blind overwrite must be blocked")
+    assert (ws / "expense_summary.csv").read_text(encoding="utf-8") == clean_csv  # 未遭改
+    assert os.stat(ws / "summary.md").st_mode & 0o777 == 0o644
+    (ws / "summary.md").write_text("repairable\n", encoding="utf-8")            # 可寫
+
+    # (2) generic 對照臂：兩檔都保持可寫（行為不變）
+    repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_gen", build=_fake_build([]), run=noop_run,
+        feedback_mode="generic", max_rounds=1, synthetic=True,
+    )
+    ws_g = tmp_path / "out_gen" / "round_1"
+    for name in ("expense_summary.csv", "summary.md"):
+        assert os.stat(ws_g / name).st_mode & 0o777 == 0o644
+    (ws_g / "expense_summary.csv").write_text("generic arm stays writable\n", encoding="utf-8")
+
+    # (3) 單交付物：localized 臂亦無保護、保持可寫
+    t035 = REPO_ROOT / "ops" / "reqloop" / "g2" / "smoke" / "dab_035" / "task"
+    d035 = REPO_ROOT / "ops" / "reqloop" / "g2" / "smoke" / "dab_035" / "draft"
+    rs035 = RequirementSet.load(t035 / "requirements.json")
+    ans035 = (d035 / "answer.txt").read_text(encoding="utf-8")
+    repair.repair_slice(
+        t035, rs035, d035,
+        out_root=tmp_path / "single_loc", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": ans035}),
+        feedback_mode="localized", max_rounds=2, min_rounds=1, synthetic=True,
+    )
+    ws_s = tmp_path / "single_loc" / "round_1"
+    assert os.stat(ws_s / "answer.txt").st_mode & 0o777 == 0o644
+    (ws_s / "answer.txt").write_text("single deliverable stays writable\n", encoding="utf-8")
 
 

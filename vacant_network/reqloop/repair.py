@@ -1631,6 +1631,18 @@ def run_repair_round(
                 dst_f = ws / rel
                 dst_f.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src_f, dst_f)
+    if feedback_mode == "localized" and preserved_from_draft is not None:
+        # P20261106_1237-2：已滿足交付物寫保護（OS 層守門）。
+        # localized 臂「只修未滿足交付物、其餘交付物保留」從事後 hash 對賬＋
+        # exit 20 拒收（事後路徑仍在，供 generic 臂等未設保護的情境）變成：模型
+        # 盲目覆寫（open(..., "w")／to_csv 等）時由核心直接 PermissionError。
+        # 未滿足交付物不受影響（0o644）；generic 臂與無保留對象（單交付物）不受影響。
+        # 累積修復相容：_copy_into_workspace 覆寫前已先 chmod 0o644，唯讀目標不阻擋。
+        _orig_d_dir, protected_rels = preserved_from_draft
+        for rel in protected_rels:
+            f = ws / rel
+            if f.is_file():
+                os.chmod(f, 0o444)
     prompt = build_repair_prompt(authoritative, req_set, draft_dir, before,
                                  feedback_mode=feedback_mode, include_dirs=include_dirs,
                                  prev_round_agent=prev_round_agent)
@@ -2167,11 +2179,13 @@ def _selftest() -> int:
               and _exit_code(o3) == 20)
 
         # 4) 原有 PASS 退步（PASS→FAIL）必須記錄在 regressed，不能淨改善掩蓋
+        #    （P20261106_1237-2 起 localized 臂對已滿足交付物設 0o444 寫保護，
+        #    此處用未設保護的 generic 臂驗覆寫成功後的 PASS→FAIL 記錄）
         o4 = repair_slice(task_dir, rs, draft, out_root=tmp / "s4",
                           build=fake,
                           run=_selftest_fake_agent({"summary.md": good_summary,
                                                     "expense_summary.csv": broken_csv}),
-                          feedback_mode="localized", max_rounds=1, synthetic=True)
+                          feedback_mode="generic", max_rounds=1, synthetic=True)
         check("PASS→FAIL 記錄在 regressed",
               "req_csv_structure" in o4.regressed and o4.stopped != STOP_GAP_CLOSED)
 
