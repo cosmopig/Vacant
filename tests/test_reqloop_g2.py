@@ -1207,4 +1207,49 @@ def test_run_g2_smoke_records_spawn_errors_and_auto_binds_default_build_factory(
     assert by_err[("dab_035-pi-C", "generic")]["spawn_errors"] == ["RuntimeError: simulated launch crash"]
 
 
+def test_g2_propagates_manifest_synthetic_flag_and_verifies_request_sha256(tmp_path):
+    """argon 20261106_1121 回歸（3b3f8f46 缺陷）：
+    1. 當 manifest 的 draft 明確標記 `"synthetic": true`（如 `ops/reqloop/g2/multideliv/manifest.json`）時，
+       `run_g2_smoke` 不得寫死 `synthetic=False`，必須把 `bool(d.get("synthetic", False))` 傳給
+       `repair.repair_slice`，並在 `g2_result.json` 的每格記錄 `"synthetic": True/False`，
+       遵守 2026-11-04 紅線「自造 G1 案例只能用於離線修復單元測試，標 synthetic」。
+    2. 當 manifest 的 `d["task"]["request"]["sha256"]` 釘住 `request.md` 指紋時，
+       `G2Manifest.verify_frozen` 必須實際核對 `request.md` 的存在與 sha256，不得漏驗。
+    """
+    multideliv_dir = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv"
+    base = tmp_path / "md"
+    shutil.copytree(multideliv_dir, base)
+    man_data = json.loads((base / "manifest.json").read_text(encoding="utf-8"))
+    man_data["drafts"] = man_data["drafts"][:1]
+    req_md = base / man_data["drafts"][0]["task"]["dir"] / "request.md"
+    req_sha = hashlib.sha256(req_md.read_bytes()).hexdigest()
+    man_data["drafts"][0]["task"]["request"] = {"sha256": req_sha}
+    (base / "manifest.json").write_text(json.dumps(man_data, ensure_ascii=False), encoding="utf-8")
+
+    man = g2.G2Manifest.load(base / "manifest.json")
+    man.verify_frozen(base)
+
+    def run_noop(launch, *, workspace, timeout_s, log_dir):
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 10, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    res = g2.run_g2_smoke(man, base, tmp_path / "out_syn", _fake_build([]), run_noop)
+    assert all(c["synthetic"] is True for c in res.cells)
+
+    # 竄改 request.md ⇒ verify_frozen 必須拒絕（ValueError）
+    req_md.write_text("tampered request\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="request"):
+        man.verify_frozen(base)
+
+    # 刪除 request.md ⇒ verify_frozen 必須拒絕（FileNotFoundError）
+    req_md.unlink()
+    with pytest.raises(FileNotFoundError, match="request"):
+        man.verify_frozen(base)
+
+
+
 
