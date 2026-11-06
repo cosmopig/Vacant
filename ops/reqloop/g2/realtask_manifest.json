@@ -1,10 +1,10 @@
 {
   "schema": "vacant.reqloop.g2.manifest/1",
   "status": "NOT_fired",
-  "status_note": "P20261106_1840-2（2026-11-06）：4 格真實任務切片最小對照計畫離線凍結——只凍結計畫與無洩漏驗證，不發射、0 模型呼叫；發射須另行授權（重大新成本另報）",
+  "status_note": "P20261106_1840-2（2026-11-06）：4 格真實任務切片最小對照計畫離線凍結——只凍結計畫與無洩漏驗證，不發射、0 模型呼叫；發射須另行授權（重大新成本另報）。P20261106_2040-2（2026-11-06）：補入 1 份真實正確草稿 dabstep-11-pi-A（e014 lab 記錄 pass=true、本地可見檢查全 PASS），擴展為 3 草稿×2 臂＝6 格；仍只凍結計畫、不發射、0 模型呼叫",
   "frozen_at": "2026-11-06T19:13:10Z",
-  "ticket": "P20261106_1840-2",
-  "purpose": "G2 需求驅動內容閉環真實任務切片最小對照（2026-11-06 指示 4）：e013 dab_055-pi-C（CSV data/estimated_numbers.csv 均值題）＋e014 dabstep-1273-pi-C（JSON data/fees.json 費率題）兩份真實歷史失敗草稿（synthetic=false、lab 記錄 pass=False）× generic/localized 兩臂＝4 格；單輪、硬上限釘住；驗「獨立可見檢查給出可重現的內容反例、修復只改未滿足產物並保留其餘成果」。先證明可修回一種內容錯誤才擴量；本 manifest 只凍結計畫，不發射、不宣稱效果",
+  "ticket": "P20261106_1840-2（初始凍結）；P20261106_2040-2（6 格擴展）",
+  "purpose": "G2 需求驅動內容閉環真實任務切片最小對照（2026-11-06 指示 4）：e013 dab_055-pi-C（CSV data/estimated_numbers.csv 均值題）＋e014 dabstep-1273-pi-C（JSON data/fees.json 費率題）兩份真實歷史失敗草稿（synthetic=false、lab 記錄 pass=False）＋e014 dabstep-11-pi-A（EUR 最大值題、真實正確草稿、lab 記錄 pass=true）共 3 份 × generic/localized 兩臂＝6 格；單輪、硬上限釘住；驗「獨立可見檢查給出可重現的內容反例、修復只改未滿足產物並保留其餘成果」及「正確成果是否退步（對→錯）」與 localized no_gap 零呼叫保溫。先證明可修回一種內容錯誤才擴量；本 manifest 只凍結計畫，不發射、不宣稱效果",
   "arms": [
     "generic",
     "localized"
@@ -25,14 +25,14 @@
       "generic": 1,
       "localized": 0
     },
-    "note": "單輪對照（max_rounds_per_cell=1）；兩臂同草稿、同上下文、同工具、同模型、同總預算；min_rounds：generic 臂也至少重驗 1 次，localized 缺口驅動（本批兩草稿初始驗皆有 FAIL⇒各 1 輪）"
+    "note": "單輪對照（max_rounds_per_cell=1）；兩臂同草稿、同上下文、同工具、同模型、同總預算；min_rounds：generic 臂也至少重驗 1 次，localized 缺口驅動（2 份 bad 草稿初始驗有 FAIL⇒各 1 輪；dabstep-11-pi-A 初始驗全 PASS⇒no_gap 0 呼叫保溫）"
   },
   "scoring": {
     "readable": "可見需求檢查（requirements.json＋凍結資料重算）；缺值=UNKNOWN",
     "hidden_before": "引用既有受權量表已記錄 score.json（e013_dabench_pi_AC_full／e014_dabstep_block）；只引用，不在本地重跑",
     "hidden_after": "UNKNOWN——本地無 hidden scorer 可重跑；缺失即 UNKNOWN，絕不填 0"
   },
-  "leak_guard": "修復模型只看得到原始問題（request.md／題目原文）、凍結資料（data/estimated_numbers.csv、data/fees.json）與可見檢查反例形狀；重算值/hidden 參考值永不進提示——本批驗收針＝「1628」與「0.020500」（兩題重算答案，絕不得出現於 localized 提示）；本地重算類證據已 opt-out 期望值（expected_in_evidence=false）",
+  "leak_guard": "修復模型只看得到原始問題（request.md／題目原文）、凍結資料（data/estimated_numbers.csv、data/fees.json、data/payments.csv）與可見檢查反例形狀；重算值/hidden 參考值永不進提示——本批驗收針＝「1628」、「0.020500」、「4811.76」（三題重算答案，絕不得出現於 localized 提示與 baseline 輸出）；本地重算類證據已 opt-out 期望值（expected_in_evidence=false）",
   "drafts": [
     {
       "name": "dab_055-pi-C",
@@ -101,6 +101,40 @@
         }
       },
       "lab_note": "e014 記錄 pass=False（reward 0）；本地可見檢查 FAIL（req_globalcard_avg_fee：not_a_number，草稿整句進證據、重算值不進）；JSON 費率題——本切片內容錯誤型"
+    },
+    {
+      "name": "dabstep-11-pi-A",
+      "role": "good",
+      "task_id": "dabstep-11",
+      "synthetic": false,
+      "source": {
+        "run": "e014_dabstep_block",
+        "cell": "dabstep-11-pi-A-r1",
+        "score_file": "score.json",
+        "score": {
+          "task_id": "dabstep-11",
+          "pass": true,
+          "reward": "1",
+          "answer_exists": true
+        },
+        "fetched_from": "/srv/vlab/runs（lab 既有已記錄結果；只引用，不在本地重跑）"
+      },
+      "draft": {
+        "dir": "smoke_e014/dabstep-11-pi-A/draft",
+        "files": {
+          "answer.txt": "7c9adb58dec56b33371d5b34ee523039874fa099490b378334106f33c5312a8c"
+        }
+      },
+      "task": {
+        "dir": "smoke_e014/dabstep-11-pi-A/task",
+        "requirements": {
+          "sha256": "45cd4ad76a4ab9a7b260d8ae82afcea59498806c9d8128b45d769f62bd7555b3"
+        },
+        "data_files": {
+          "data/payments.csv": "5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25"
+        }
+      },
+      "lab_note": "e014 記錄 pass=True（reward 1）；本地可見檢查 PASS（req_max_eur_amount：草稿值與凍結資料 col_max 重算一致，重算值不進證據）；EUR 最大值題——本切片正確草稿基準（觀測對→錯退步＋localized no_gap 零呼叫保溫）"
     }
   ]
 }
