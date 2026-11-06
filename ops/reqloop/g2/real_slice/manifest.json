@@ -1,0 +1,72 @@
+{
+  "schema": "vacant.reqloop.g2.manifest/1",
+  "frozen_at": "2026-11-07T02:37:00+0800",
+  "ticket": "P20261107_0237-1",
+  "status": "FROZEN_PENDING_NAMING",
+  "purpose": "CSV/JSON 真實任務最小對照規格（資深審查 2026-11-06 #3＋11-06 指示 #4）：dab_378（e008 真實 CSV 任務）1 真草稿 × 2 臂＝2 格。multideliv 已在 synthetic 證明「只修未滿足、保留其餘成果」管線；本規格把同一口徑搬到**真實 CSV 任務**，先證明可修回一種內容錯誤（kurtosis 重算錯）＋逐行保留，才談擴量。本檔只凍結離線規格（verify_frozen／dry-run／無洩漏三門）；發射是另一步授權（點名＋成本另報，11-06 #7），本批零模型呼叫。",
+  "six_elements": {
+    "original_user_requirement": {
+      "source": "task/request.md（凍結副本 dab_378-pi-C/task/request.md，sha256 已釘）",
+      "quote": "Then, calculate the mean, median, standard deviation, skewness, and kurtosis for the \"Trips over the past 24-hours (midnight to 11:59pm)\" column before and after imputation. … each rounded to two decimal places（answer 格式：@pre_*/@post_* 十條）"
+    },
+    "existing_real_failed_artifact": {
+      "draft": "dab_378-pi-C/draft/answer.txt（sha256=16754dc396ead4d014b6377ec6b79637cafbd238af3e395394a206a001319d34；effects2 acceptance_observation 的 draft_original_answer_sha256 同值＝原 lab 產物）",
+      "recorded_score": {"task_id": "dab_378", "pass": false, "n_correct": "6/8", "psaq": 0.75, "status": "ok"},
+      "before_visible": "9 PASS / 2 FAIL（pre_kurtosis、post_kurtosis 皆 -1.17；按公開規則對凍結 CSV 重算不符——可重現內容反例）"
+    },
+    "current_behavior": "effects2_20261106（凍結 4d4b8102）：localized gap_closed（1 session、30 model calls、673038 tok、300006 ms＝300s 截斷）、generic gap_closed（1 session、16 calls、235866 tok、74112 ms）；effects_20261105 policy30/feedback_once20 同形 gap_closed——kurtosis 形狀 2-rep 穩定（vq-5nz.6 穩定樣本表 378b/378c）。尚未測量：9 條已滿足行是否逐位元組保留、localized 提示是否無重算值洩漏、60/4M/300s 成本上限下是否仍收斂。",
+    "expected_demonstrable_improvement": "localized：pre_kurtosis/post_kurtosis FAIL→PASS（模型對凍結 CSV 自行重算，重算值 -1.13 絕不進提示）；0 回歸（9 條已滿足行逐位元組保留，satisfied_mutated=0）；0 竄改（source_tampered=false）；成本在 max_tool_calls=60 / max_tokens=4000000 / timeout=300s 內收斂。generic＝同草稿同預算對照。裁決＝gap_closed 且獨立 scorer pass 且 tamper/UNKNOWN 不計成功；本批是開發選樣單 rep，不宣稱 localized 較好。",
+    "cost_cap": {"max_tool_calls": 60, "max_tokens": 4000000, "timeout_s_per_round": 300, "max_rounds_per_cell": 1},
+    "independent_acceptance": "三線驗收：(1) 可見重算檢查 11/11 PASS（kv_recomputed col_stats，期望值不進證據）；(2) 行級保留審計＝9 條已滿足行 answer.txt 逐位元組一致（before/after 行 diff，audit 側計算，不靠模型自評）；(3) lab 既有 scorer（effects2 同口徑：離線、生成後才跑、hidden_read_by_agent=false、raw stdout sha 記錄；tamper 與 UNKNOWN 不計成功，缺值＝UNKNOWN 不填 0）。"
+  },
+  "arms": ["generic", "localized"],
+  "model": {
+    "provider": "lms1004nothink",
+    "model": "gemma-4-12b-it-qat",
+    "note": "與 effects2_20261106 同 provider/model（可比口徑）；不新裝、不改設定、不換模型（11-06 #2/#7：無新發射、無模型變動另報）"
+  },
+  "budget": {
+    "max_rounds_per_cell": 1,
+    "timeout_s_per_round": 300,
+    "max_tool_calls": 60,
+    "max_tokens": 4000000,
+    "hard_token_cap": false,
+    "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0；max_tool_calls/max_tokens 為執行器硬上限（超過即殺、如實記錄）",
+    "min_rounds": {"generic": 1, "localized": 0},
+    "note": "最小對照＝單輪×2 臂、同草稿同上下文同工具同模型同總預算（multideliv 同口徑）；min_rounds：generic 對的草稿也至少重驗 1 次，localized 缺口驅動（本草稿有缺口⇒1 輪）"
+  },
+  "scoring": {
+    "readable": "可見需求檢查（requirements.json＋凍結 CSV 重算）＋行級保留審計（9 滿足行逐位元組一致）",
+    "hidden_before": "已有記錄分數（lab 既有）：pass=false、n_correct=6/8、psaq=0.75——只引用，不在本地重跑",
+    "hidden_after": "UNKNOWN（本地無權重跑 hidden scorer；如點名發射，以 lab 既有 scorer 離線生成後跑，同 effects2 口徑；缺值＝UNKNOWN 不填 0）"
+  },
+  "leak_guard": "修復模型只看得到 request.md 原文、凍結 CSV（2014_q4.csv）、可見檢查反例形狀（mismatch_with_recomputation，無值）；重算峰度值 -1.13 永不進提示或證據（kv_recomputed 內建 expected_in_evidence=false）；不讀 /srv/eval/hidden/、不讀 scorer.py（紅線）",
+  "drafts": [
+    {
+      "name": "dab_378-pi-C",
+      "role": "bad",
+      "task_id": "dab_378",
+      "source": {
+        "run": "e008_dabench_pi_AC",
+        "cell": "dabench-dab_378-pi-C-r1",
+        "score": {"task_id": "dab_378", "pass": false, "n_correct": "6/8", "psaq": 0.75, "status": "ok"},
+        "fetched_from": "lab 既有已記錄結果（effects2_20261106 contrast/dab_378-pi-C 引證；只引用，不在本地重跑 hidden scorer）"
+      },
+      "draft": {
+        "dir": "dab_378-pi-C/draft",
+        "files": {"answer.txt": "16754dc396ead4d014b6377ec6b79637cafbd238af3e395394a206a001319d34"}
+      },
+      "task": {
+        "dir": "dab_378-pi-C/task",
+        "requirements": {"sha256": "791f081e7cd4f7a63e0a1087c099ad6577cd7b13035bc69ba0093898d26bfcb1"},
+        "request": {"sha256": "71103d0aa33ed824dc15e80cee1ae218c3f42734b9a8bb86e5055f34314c8fb5"},
+        "data_files": {"data/2014_q4.csv": "f1ec88490c4cf2fde96a2783f2962743a126e66e59b16d83378192941b5dbd82"}
+      },
+      "preservation": {
+        "satisfied_items": ["req_answer_kv", "pre_mean", "pre_median", "pre_sd", "pre_skewness", "post_mean", "post_median", "post_sd", "post_skewness"],
+        "unsatisfied_items": ["pre_kurtosis", "post_kurtosis"],
+        "note": "單檔多行產物（answer.txt 10 行）：保留口徑＝行級——9 條已滿足行（含 req_answer_kv 格式）逐位元組一致，只改 2 條未滿足行；multideliv 文件級保留指標對單檔退化，故審計側以行 diff 計（不靠模型自評）"
+      }
+    }
+  ]
+}
