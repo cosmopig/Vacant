@@ -2327,4 +2327,83 @@ def test_recomputed_verifiers_early_fail_include_expected_in_evidence_false(tmp_
         assert r.evidence.get("expected_in_evidence") is False
 
 
+def test_audit_kv_preservation_text_and_json(tmp_path):
+    """P20261106_2241-2：鍵值交付物的行級／鍵級保留審計（audit 側，免自評）。"""
+    from vacant_network.reqloop.checks import audit_kv_preservation
+
+    # --- 文字檔 @key[value] ---
+    d = tmp_path / "txt_draft"
+    f = tmp_path / "txt_final"
+    d.mkdir(parents=True)
+    f.mkdir(parents=True)
+    draft = d / "answer.txt"
+    final = f / "answer.txt"
+    draft.write_text("@mean_cases[2.0]\n@median_cases[3.5]\n@top_product[Alfa]\n", encoding="utf-8")
+    satisfied = ["mean_cases", "median_cases"]
+
+    # (a) 僅修改未滿足鍵 → 已滿足鍵全數 preserved
+    final.write_text("@mean_cases[2.0]\n@median_cases[3.5]\n@top_product[Omega]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("mean_cases", "median_cases")
+    assert mutated == ()
+
+    # (b) 已滿足鍵被覆寫修改 → mutated
+    final.write_text("@mean_cases[2.1]\n@median_cases[3.5]\n@top_product[Alfa]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("median_cases",)
+    assert mutated == ("mean_cases",)
+
+    # (b) 已滿足鍵被刪除 → mutated
+    final.write_text("@mean_cases[2.0]\n@top_product[Alfa]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("mean_cases",)
+    assert mutated == ("median_cases",)
+
+    # (b) 已滿足鍵重複出現（ambiguous）→ mutated
+    final.write_text("@mean_cases[2.0]\n@mean_cases[2.0]\n@median_cases[3.5]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("median_cases",)
+    assert mutated == ("mean_cases",)
+
+    # (c) final 檔案缺失 → 所有鍵 mutated
+    preserved, mutated = audit_kv_preservation(draft, f / "nope.txt", satisfied)
+    assert preserved == ()
+    assert mutated == tuple(satisfied)
+
+    # --- JSON 字典交付物 ---
+    jd = tmp_path / "json_draft"
+    jf = tmp_path / "json_final"
+    jd.mkdir(parents=True)
+    jf.mkdir(parents=True)
+    jdraft = jd / "result.json"
+    jfinal = jf / "result.json"
+    jdraft.write_text(json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "top_product": "Alfa"}),
+                      encoding="utf-8")
+
+    # (a) 僅修改未滿足鍵
+    jfinal.write_text(json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "top_product": "Omega"}),
+                      encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, satisfied)
+    assert preserved == ("mean_cases", "median_cases")
+    assert mutated == ()
+
+    # (b) 已滿足鍵值被修改
+    jfinal.write_text(json.dumps({"mean_cases": 2.1, "median_cases": 3.5, "top_product": "Alfa"}),
+                      encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, satisfied)
+    assert mutated == ("mean_cases",)
+
+    # (b) 值相等但型別不一致（float→int）→ mutated
+    jfinal.write_text(json.dumps({"mean_cases": 2, "median_cases": 3.5, "top_product": "Alfa"}),
+                      encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, satisfied)
+    assert preserved == ("median_cases",)
+    assert mutated == ("mean_cases",)
+
+    # (c) final 檔案缺失
+    preserved, mutated = audit_kv_preservation(jdraft, jf / "nope.json", satisfied)
+    assert preserved == ()
+    assert mutated == tuple(satisfied)
+
+
 

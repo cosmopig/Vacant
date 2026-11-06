@@ -20,7 +20,7 @@ import math
 import pathlib
 import re
 from collections import Counter
-from typing import Any
+from typing import Any, Sequence
 
 from vacant_network.intake.verifiers import ClaimResult
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
@@ -1426,6 +1426,59 @@ def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
     if len(vals) > 1:
         return None, ["ambiguous"]
     return vals[0], []
+
+
+def _kv_preservation_values(path: pathlib.Path) -> tuple[dict[str, list[Any]] | None, str | None]:
+    """鍵級保留審計讀鍵→值清單：.txt → 各 @key[value] 行之 raw 字串（與 check_answer_kv 同一正則）；
+    .json → 頂層 dict 值（保留原始型別供型別一致比較）。回 (found, problem|None)。"""
+    if not path.is_file():
+        return None, "missing_file"
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None, "unreadable"
+    if path.suffix.lower() == ".json":
+        try:
+            data = json.loads(content)
+        except (json.JSONDecodeError, ValueError):
+            return None, "invalid_json"
+        if not isinstance(data, dict):
+            return None, "not_a_dict"
+        found: dict[str, list[Any]] = {}
+        for k, v in data.items():
+            found.setdefault(str(k).strip().lower(), []).append(v)
+        return found, None
+    found = {}
+    for m in _ANSWER_KV_RE.finditer(content):
+        found.setdefault(m.group(1).strip().lower(), []).append(m.group(2).strip())
+    return found, None
+
+
+def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Path | str,
+                          satisfied_keys: Sequence[str]) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """鍵值交付物（@key[value] 文字檔或頂層 JSON 字典）的行級／鍵級保留審計。
+
+    audit 側計算、免模型自評、免正則猜測：對每個 satisfied key 比對原草稿與修復後產物，
+    兩側均恰好出現一次且值相等（.json 另需型別一致）→ preserved；值被覆寫、鍵被刪除
+    或重複、交付物檔案缺失/不可解析、或草稿中無此鍵（不可判定，保守歸類）→ mutated。
+    回 (preserved, mutated)，鍵順序跟隨輸入 satisfied_keys。
+    """
+    d_vals, _ = _kv_preservation_values(pathlib.Path(draft_path))
+    f_vals, _ = _kv_preservation_values(pathlib.Path(final_path))
+    preserved: list[str] = []
+    mutated: list[str] = []
+    for key in satisfied_keys:
+        k = str(key).strip().lower()
+        if (d_vals is None or f_vals is None
+                or len(d_vals.get(k, [])) != 1 or len(f_vals.get(k, [])) != 1):
+            mutated.append(str(key))
+            continue
+        dv, fv = d_vals[k][0], f_vals[k][0]
+        if dv == fv and type(dv) is type(fv):
+            preserved.append(str(key))
+        else:
+            mutated.append(str(key))
+    return tuple(preserved), tuple(mutated)
 
 
 def check_kv_recomputed(
