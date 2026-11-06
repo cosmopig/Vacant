@@ -1,32 +1,32 @@
-# NOW.md — r1044（11/05）
+# NOW
 
-## 本輪完成
-- **vq-5nz.21（P1，已關）**：「重複命令每次都失敗」的針對性提示（contrast3 dabstep-23
-  localized 歸因：同一行式 ×34 全 SyntaxError、從無結果，舊提示「已得到結果後」前提不成立）。
-  5748a6b9（auto/qwen27b，未 push——loop 輪末自動 push）：
-  - `detect_tool_loop` 自 `tool_execution_end` 依 toolCallId 關聯執行結果：全敗⇒`all_failed`＋
-    `error_class`＋`error_sample`（無 end 事件＝未知、欄位缺省、不造假；至少一次成功⇒`all_failed=False`）。
-  - localized 提示全敗分支：點名「每次都失敗（SyntaxError: invalid syntax）」＋具體語法規則
-    「把程式碼寫成 .py 檔案後執行（不要一行式拼接多條語句）」＋「確認執行成功、結果正確後直接把結果寫入交付物檔案」；
-    不帶「已得到結果」假前提。generic 對照臂定義不變；觀察只進提示，不改裁決／停滯／退出碼。
-- **vq-5nz.19（P1，驗收已關）**：auto/worker `4b7a8749` CI 🟢 4827 passed / 71 skipped / 1 xpassed
-  （collected 4898 ≥ 4870）、0 failed——15 個 reqloop 紅測試全綠。
+## r1135（2026-11-06，已提交 0fa90edd @ auto/qwen27b）
 
-## 驗收（本輪）
-- 1 TDD 測試先紅後綠（`test_localized_prompt_names_failed_loop_error_class_and_escape`）；
-- reqloop 4 檔 **156 passed**（上輪 155）；`python -m vacant_network.reqloop.repair --selftest` **11/11**；
-- 真實 log 驗證：dabstep-23 localized r1 log⇒`all_failed=true`、34/34 失敗、`error_class=SyntaxError`、
-  提示點名錯誤類＋寫 .py 逃路＋跑通即寫交付物（舊提示該處是假前提）。
+完成 11-06 最高優先 #2：effects2_20261106（28 格 @4d4b8102，排除 dabstep-1753）raw 彙整必答。
+交付：`ops/audits/effects2_20261106_analyze.py`（`--selftest` 負控先跑，SELFTEST_OK）＋
+`ops/audits/effects2_20261106_analysis.json`（RC=0，ANALYSIS_OK）。bd vq-5nz.49 已關（commit＋驗收行）。
 
-## 未做／等
-- **vq-6rp**（dabstep-1753 模型側硬缺口）：/srv/vlab/queue 空（0 任務），等點名；未點名＝未發射。
-- **vq-5nz.6**（G2 停滯草稿換方法驗證）：未發射（未點名）。
-- **auto/qwen27b `5748a6b9` CI**：loop 輪末 push 後查一次（不輪詢；未完成＝UNKNOWN）。
-- dabstep-10 generic stalled（contrast3）：n=1 不歸因；未來 effects 再現同型再開票。
-- vq-p9g（xpass 除 marker）、vq-ifn（P99 門重設計）：待點名。
+**三問（同起點草稿＋同預算，11-06#2）**
+- 同草稿公平性：14 題雙臂 `draft_sha256`（原草稿目錄指紋）全部相等；manifest 16 檔 pin 與快照檔案全相符。
+- ① localized 是否多修：本批 bad9 localized **9/9** vs generic **7/9**（generic blocked：dab_055 max_rounds、dabstep-10 stalled）→ 本批內 localized 多修 2 題（dabstep-10、dabstep-23）。
+- ② 對→錯：good5 雙臂全 pass（localized 全 no_gap 0 呼叫），對→錯 **0**、tamper **0**。跨批（同 9 題 vs d38d2eb2 逐臂）：generic 7/9→7/9（dabstep-10 退步、dabstep-1273 新增修復）；localized 6/9→9/9。
+- ③ 成本：bad9 localized 347 calls/9,691,033 tok vs generic 235 calls/5,576,588 tok（差 112 calls/4,114,445 tok，買 +2 題修復；差額最大格 dabstep-10 +5.82M tok/+132 calls）；good5 localized 0 呼叫 vs generic 49 calls/1.20M tok（省）。全 14 題 sessions 16(g) vs 11(l)。
 
-## Next（r1045）
-1. 查 `5748a6b9` CI（一次；未完成記 UNKNOWN，不輪詢）。
-2. vq-6rp 若被點名（/srv/vlab/queue 有任務或 reviewer 點名）→ 按預註冊口徑發射 G2；
-   否則待命，不造進度、不寫離線審計腳本充當進度。
-3. 紀律：未讀 hidden/scorer；未跑全量 pytest；不 push（loop 自動 push）；不動 main；缺值 UNKNOWN。
+**必附口徑**：開發選樣（e008/e013/e014 已見題）、單 rep、單碼態；本批排除 1753，跨批只比同 9 題；
+dabstep-10 逐臂方向在兩批間翻轉＝邊界題單 rep 變異 → **不宣稱 localized 較好**；無硬 token 上限；
+repair_sessions≠API 請求數；tokens 缺值＝UNKNOWN（localized good5 5 格 tokens=None，不填 0）；
+hidden_after 全 UNKNOWN（本地無權重跑）；tamper/UNKNOWN 不算成功。
+
+## 待辦（唯一）
+- 11-06#4 真實 CSV/JSON 任務切片：manifest `ops/reqloop/g2/effect_manifest.json`（sha **6550d7a8…**，
+  4 格 e008/e013/e014 最小對照）已凍結 **NOT_fired**，6 元素 ticket 齊；**待授權才跑**（要模型流量）。
+- 9329be88 manifest 待辦：已核實解除（該 sha 即 effect_manifest.json 實際 sha；舊 NOW 待辦已不在）。
+
+## 紅線（維持）
+- 不碰 main；不自 push（loop 自動 push auto/qwen27b）；不讀 /srv/eval hidden/、scorer.py；
+- 缺值=UNKNOWN 不填 0；不為「每輪有 commit」加 regex/靜態 prompt/未授權重跑/純文件修補；
+- 本輪未改產品碼（審計腳本＋JSON 為 11-06#2 指定交付物，非墊場）。
+
+## 下輪
+- 若授權：跑 6550d7a8 切片（verify_frozen＋--dry-run＋無洩漏檢查先過，再 fire）。
+- 未授權：維持 effects2 不動（不補快照、不排除失敗、不加重試換好結果）。
