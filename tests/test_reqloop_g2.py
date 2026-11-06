@@ -31,6 +31,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SMOKE = REPO_ROOT / "ops" / "reqloop" / "g2" / "smoke"
 MANIFEST = SMOKE / "manifest.json"
 MULTIDELIV_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv" / "manifest.json"
+REALTASK_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "realtask_manifest.json"
 
 
 # ── 工具 ─────────────────────────────────────────────────────────────
@@ -175,6 +176,47 @@ def test_multideliv_localized_prompt_leak_free():
         prompt = repair.build_repair_prompt(task_dir, req_set, draft_dir, before, feedback_mode="localized")
         assert any(c.claim_id in prompt for c in failing), \
             f"{d['name']}: 失敗條目未進 localized 提示（修復目標丟失）"
+        for n in NEEDLES:
+            assert n not in prompt, f"{d['name']}: localized 提示洩重算答案 {n!r}"
+
+
+def test_realtask_manifest_frozen_and_leakfree():
+    """P20261106_1840-2：真實 CSV/JSON 任務切片 4 格最小對照＝e013 dab_055-pi-C
+    （CSV estimated_numbers.csv 均值）＋e014 dabstep-1273-pi-C（JSON fees.json 費率）
+    兩份真實歷史失敗草稿（synthetic=false、lab 記錄 pass=False）× generic/localized＝4 格；
+    單輪硬上限釘住（300s/60 calls/4M tok）；NOT_fired（0 模型呼叫）。
+    localized 提示詞點名未滿足條目事實，但絕不洩漏重算答案（1628／0.020500）。"""
+    assert REALTASK_MANIFEST.is_file(), "真實任務切片 manifest 未凍結"
+    man = g2.G2Manifest.load(REALTASK_MANIFEST)
+    base = REALTASK_MANIFEST.parent
+    man.verify_frozen(base)   # 凍結副本（smoke_e013/smoke_e014 既有凍結目錄）hash 須全部對上
+    assert man.raw.get("status") == "NOT_fired", "本批只凍結計畫、不發射"
+    assert set(man.arms) == {"generic", "localized"}
+    names = {d["name"] for d in man.drafts}
+    assert names == {"dab_055-pi-C", "dabstep-1273-pi-C"}
+    cells = g2.plan_cells(man)
+    assert len(cells) == 4 and {c[1] for c in cells} == {"generic", "localized"}
+    b = man.budget
+    assert b["max_rounds_per_cell"] == 1
+    assert b["timeout_s_per_round"] == 300
+    assert b["max_tool_calls"] == 60
+    assert b["max_tokens"] == 4000000
+    assert b["hard_token_cap"] is False
+    NEEDLES = ("1628", "0.020500")   # 兩題重算答案（驗收針；絕不得進 localized 提示）
+    for d in man.drafts:
+        assert d["synthetic"] is False, f"{d['name']}: 真實任務切片須 synthetic=false"
+        assert d["source"]["score"] is not None and d["source"]["score"].get("pass") is False, \
+            f"{d['name']}: 來源須為已記錄 pass=False 的真實失敗草稿"
+        task_dir = base / d["task"]["dir"]
+        draft_dir = base / d["draft"]["dir"]
+        req_set = RequirementSet.load(task_dir / "requirements.json")
+        before = run_requirement_checks(task_dir, req_set, draft_dir)
+        failing = [c for c in before if c.status != "PASS"]
+        assert failing, f"{d['name']}: 初始驗無 FAIL 條目（測試空洞）"
+        prompt = repair.build_repair_prompt(task_dir, req_set, draft_dir, before,
+                                            feedback_mode="localized")
+        assert any(c.claim_id in prompt for c in failing), \
+            f"{d['name']}: 未滿足條目未進 localized 提示（修復目標丟失）"
         for n in NEEDLES:
             assert n not in prompt, f"{d['name']}: localized 提示洩重算答案 {n!r}"
 
