@@ -2126,3 +2126,205 @@ def test_check_csv_structure_supports_json_deliverable(tmp_path: pathlib.Path):
     assert results["req_alias"].status == "PASS"
 
 
+def test_json_table_deliverable_strict_validation_and_column_normalization(tmp_path: pathlib.Path):
+    """argon 20261106_2115 回歸：
+    1. read_table_deliverable 不得靜默丟棄 JSON 陣列中的非物件元素（字串、null、數字、陣列）、
+       不得把空物件 `{}` 或 `{"records": null}` 包成 1 列假表格、
+       不得放行單列 JSON 物件內的同名或大小寫重複鍵（如 `unit_cost` 與 `UNIT_COST`）。
+    2. check_csv_structure 與 check_group_aggregate 必須檢查所有列皆具備必要／分組欄位，
+       不得只看 `rows[0]` 而放行第 2 列缺欄的 JSON 交付物。
+    3. check_rowset_filter 與 check_group_aggregate 的欄位名稱（values 的 out_col 與來源欄、
+       aggregates[].name）必須大小寫不敏感對齊，且交付物缺欄時必須判 FAIL（missing_column），
+       不得因 `dr.get(out_col)` 與 `r.get(spec)` 皆回空字串而 `"" == ""` 假 PASS；
+       複製數值欄在 CSV 字串（如 `'10.00'`）與 JSON 浮點（`10.0`）間在 atol 內應視為相等。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "inventory.csv",
+        "Item_ID,Item_Name,Current_Stock,Safety_Stock,Unit_Cost\n"
+        "A1,電阻,8,40,10.00\n"
+        "A2,MCU,5,20,20.00\n",
+    )
+
+    rs_struct = _req_set("table_structure", {"required_columns": ["item_id", "unit_cost"]}, "out.json")
+    rs_rowset = _req_set(
+        "rowset_filter",
+        {
+            "input_csv": "inventory.csv",
+            "identity": ["item_id"],
+            "values": {
+                "Unit_Cost": "Unit_Cost",
+                "restock": {"expr": "safety_stock - current_stock"},
+            },
+            "atol": 0.01,
+        },
+        "out.json",
+    )
+    rs_group = _req_set(
+        "group_aggregate",
+        {
+            "input_csv": "inventory.csv",
+            "group_by": ["item_id"],
+            "aggregates": [{"name": "Total_Cost", "type": "sum", "col": "unit_cost"}],
+            "atol": 0.01,
+        },
+        "out.json",
+    )
+
+    # (a) 合法 JSON 表格交付物（含大小寫欄位與 JSON 浮點 10.0 vs CSV '10.00'）→ 皆 PASS
+    good_dir = tmp_path / "good"
+    _write(
+        good_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 10.0, "restock": 32, "Total_Cost": 10.0},
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0},
+        ]),
+    )
+    for rs in (rs_struct, rs_rowset, rs_group):
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, good_dir)}
+        assert res["req_main"].status == "PASS", f"{rs.items[0].verifier}: {res['req_main'].detail}"
+
+    # (b) JSON 陣列混入非 dict 損毀元素 → 結構、rowset、group 皆須 FAIL（不得靜默過濾後假 PASS）
+    mixed_dir = tmp_path / "mixed_non_dict"
+    _write(
+        mixed_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 10.0, "restock": 32, "Total_Cost": 10.0},
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0},
+            "CORRUPTED_ROW",
+            None,
+        ]),
+    )
+    for rs in (rs_struct, rs_rowset, rs_group):
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, mixed_dir)}
+        assert res["req_main"].status == "FAIL", f"{rs.items[0].verifier} should FAIL on non-dict elements"
+
+    # (c) 空物件 `{}` 或包裝鍵非陣列 `{"records": null}` → 即使 required_columns=[] 亦須 FAIL(empty_csv)
+    rs_empty_cols = _req_set("table_structure", {"required_columns": []}, "out.json")
+    for idx, bad_json in enumerate(["{}", '{"records": null}', "[{}]"]):
+        bad_dir = tmp_path / f"empty_obj_{idx}"
+        _write(bad_dir / "out.json", bad_json)
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_empty_cols, bad_dir)}
+        assert res["req_main"].status == "FAIL", f"payload={bad_json} should FAIL"
+
+    # (d) 單列 JSON 物件內含大小寫重複鍵或同名重複鍵（前錯後對）→ 皆須 FAIL
+    for idx, dup_json in enumerate([
+        '[{"Item_ID": "A1", " unit_cost": 999999, "UNIT_COST": 10.0, "restock": 32, "Total_Cost": 10.0}, '
+        '{"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0}]',
+        '[{"Item_ID": "A1", "Unit_Cost": 999999, "Unit_Cost": 10.0, "restock": 32, "Total_Cost": 10.0}, '
+        '{"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0}]',
+    ]):
+        dup_dir = tmp_path / f"dup_key_{idx}"
+        _write(dup_dir / "out.json", dup_json)
+        for rs in (rs_struct, rs_rowset, rs_group):
+            res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, dup_dir)}
+            assert res["req_main"].status == "FAIL", f"dup_key_{idx} {rs.items[0].verifier} should FAIL"
+
+    # (e) 第 2 列缺少必要欄或分組欄 → table_structure 與 group_aggregate 皆須 FAIL(missing_columns)
+    row2_missing_col = tmp_path / "row2_missing_col"
+    _write(
+        row2_missing_col / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 10.0, "Total_Cost": 10.0},
+            {"Item_ID": "A2", "Total_Cost": 20.0},  # 缺 Unit_Cost
+        ]),
+    )
+    res_st = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_struct, row2_missing_col)}
+    assert res_st["req_main"].status == "FAIL"
+    assert res_st["req_main"].evidence["missing_columns"] == ["unit_cost"]
+
+    row2_missing_grp = tmp_path / "row2_missing_grp"
+    _write(
+        row2_missing_grp / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Total_Cost": 10.0},
+            {"Total_Cost": 20.0},  # 第 2 列缺分組欄 Item_ID
+        ]),
+    )
+    res_gr = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_group, row2_missing_grp)}
+    assert res_gr["req_main"].status == "FAIL"
+    assert res_gr["req_main"].evidence["missing_columns"] == ["item_id"]
+
+    # (f) rowset_filter：Unit_Cost 寫錯（999999）或完全缺欄 → 必須 FAIL（不得因大小寫鍵產生 ""=="" 假 PASS）
+    wrong_val_dir = tmp_path / "wrong_val"
+    _write(
+        wrong_val_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 999999, "restock": 32},
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15},
+        ]),
+    )
+    res_wv = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_rowset, wrong_val_dir)}
+    assert res_wv["req_main"].status == "FAIL"
+
+    missing_val_col_dir = tmp_path / "missing_val_col"
+    _write(
+        missing_val_col_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "restock": 32},  # 缺 Unit_Cost
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15},
+        ]),
+    )
+    res_mc = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_rowset, missing_val_col_dir)}
+    assert res_mc["req_main"].status == "FAIL"
+
+
+def test_recomputed_verifiers_early_fail_include_expected_in_evidence_false(tmp_path: pathlib.Path):
+    """argon 20261106_2115 回歸：
+    check_kv_recomputed 與 check_plain_recomputed 在早退格式失敗分支
+    （missing_file、empty_value、not_a_number、missing、ambiguous）也必須標註
+    `expected_in_evidence: False`，與其餘分支一致。
+    """
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.csv", "Country,No. of cases\nA,100\nB,200\n")
+    rs = RequirementSet(
+        task_id="t_early_ev",
+        items=[
+            RequirementItem(
+                id="kv_recomp",
+                quote="kv",
+                deliverable="result.txt",
+                verifier="kv_recomputed",
+                params={
+                    "key": "mean_cases",
+                    "data_file": "cases.csv",
+                    "recompute": {"type": "mean_int_col", "col": "No. of cases"},
+                },
+            ),
+            RequirementItem(
+                id="plain_recomp",
+                quote="plain",
+                deliverable="plain.txt",
+                verifier="plain_recomputed",
+                params={
+                    "data_file": "cases.csv",
+                    "recompute": {"type": "unique_count", "col": "Country"},
+                },
+            ),
+        ],
+    )
+
+    # 1. missing_file
+    d_missing = tmp_path / "d_missing"
+    d_missing.mkdir()
+    for r in run_requirement_checks(task_dir, rs, d_missing):
+        assert r.status == "FAIL"
+        assert r.evidence.get("expected_in_evidence") is False
+
+    # 2. not_a_number / empty_value
+    d_nan = tmp_path / "d_nan"
+    _write(d_nan / "result.txt", "@mean_cases[prose_not_num]\n")
+    _write(d_nan / "plain.txt", "The answer is 2.\n")
+    for r in run_requirement_checks(task_dir, rs, d_nan):
+        assert r.status == "FAIL"
+        assert r.evidence.get("expected_in_evidence") is False
+
+    d_empty = tmp_path / "d_empty"
+    _write(d_empty / "result.txt", "no key here\n")
+    _write(d_empty / "plain.txt", "\n")
+    for r in run_requirement_checks(task_dir, rs, d_empty):
+        assert r.status == "FAIL"
+        assert r.evidence.get("expected_in_evidence") is False
+
+
+
