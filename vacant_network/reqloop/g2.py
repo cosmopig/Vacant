@@ -1,13 +1,10 @@
 """
-vacant_network.reqloop.g2
-G2 真草稿冒煙入口（工單 P000-20261104-02-real-draft-smoke，2026-11-04）。
+G2 真草稿冒煙測試（工單 P000-20261104-02-real-draft-smoke，2026-11-04）。
 
-紅線（工單原文，逐條對應到這裡的代碼）：
-- 6 格＝3 份**真實**交付草稿 × generic/localized；只驗管線，**不宣稱任何提升**。
-- 兩臂**同模型、同總預算**；模型/預算/凍結清單都寫在 manifest 裡（先凍結再跑）。
-- 缺值＝UNKNOWN（None），絕不填 0：token 讀不到就 None；hidden-after 一律 UNKNOWN
-  （本地無權重跑 lab 的 hidden scorer——那是受權量表，只在 lab 端跑）。
-- hidden 分只**引用**既有受權量表的已記錄結果（score.json），不餵給模型、不在本地重跑。
+範圍（工單紅線）：
+- 6 格（3 真草稿 × generic/localized）只驗管線，不宣稱任何提升。
+- 兩臂同模型、同總預算；成本缺值＝UNKNOWN（None），絕不填 0。
+- hidden 分只引用既有受權量表的已記錄結果（score.json），不餵給模型、不在本地重跑。
 - 不向修復模型提供隱藏答案：checks.check_kv_recomputed 的重算值不進證據；
   repair.build_repair_prompt 只帶可見反例。
 - 原型 opt-in：不呼叫本模組時，系統行為不變。
@@ -96,7 +93,7 @@ class G2Manifest:
         )
 
     def verify_frozen(self, base: str | pathlib.Path) -> None:
-        """凍結副本必須真的在 base 下、hash 對得上（工單：先凍結清單再跑）。"""
+        """凍結副本必須真的在 base 下、hash對得上（工單：先凍結清單再跑）。"""
         base = pathlib.Path(base)
         for d in self.drafts:
             for rel, h in d["draft"]["files"].items():
@@ -302,7 +299,7 @@ def run_g2_smoke(
                 # r1088：逐輪硬預算殺因（None＝該輪未被殺；未啟用上限時全 None）
                 "budget_exceeded": [r.agent.get("budget_exceeded") for r in outcome.rounds],
                 "before_hidden": d["source"].get("score"),       # 已記錄（引用，不重跑）
-                "after_hidden": AFTER_HIDDEN_UNKNOWN,            # 本地無權重跑；絕不填 0
+                "after_hidden": AFTER_HIDDEN_UNKNOWN,            # 本地無權重跑；絕不填 0，
                 "cost": dict(outcome.cost),
                 "draft_sha256": outcome.draft_sha256,
                 "prompt_sha256": [r.prompt_sha256 for r in outcome.rounds],
