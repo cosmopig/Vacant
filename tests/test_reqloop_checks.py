@@ -1869,4 +1869,78 @@ def test_nan_and_inf_never_false_pass_or_crash_across_verifiers(tmp_path: pathli
             assert claim.status == "FAIL", f"token={bad_token!r} claim={cid} got {claim.status}: {claim.detail}"
 
 
+def test_multideliv_verifiers_expected_in_evidence_false_omits_recomputed_values(tmp_path: pathlib.Path):
+    """R20261106_1121-1 / argon 20261106_1447：
+    `monthly_sales_metrics`、`monthly_top_products`、`summary_metrics_consistency`、
+    `rowset_filter`、`group_aggregate`、`summary_numbers` 支援 `params.expected_in_evidence=False`。
+    - 預設（未設或 True）：保留原行為（G1 / 既有單測向後相容）；
+    - 設為 False 時：`detail` 與 `evidence` 仍點名出錯的月份／列／分組／欄位與候選自身的值，
+      但不得包含任何重算標準答案（`expected`、`expected_top_3`、`expected_total_revenue`、
+      `expected_OrderCount_sum`、`recomputed`、`diff` 等）。
+    """
+    md_task = pathlib.Path(__file__).resolve().parents[1] / "ops" / "reqloop" / "g1" / "tasks" / "orders_monthly"
+    rs_default = RequirementSet.load(md_task / "requirements.json")
+
+    # 1. 預設（expected_in_evidence 未設 ⇒ True）：向後相容，evidence 含 expected
+    res_def_top = {r.claim_id: r for r in run_requirement_checks(
+        md_task, rs_default, md_task / "bad_missing_top_products")}
+    assert res_def_top["req_top_products_ranking"].status == "FAIL"
+    top_claim = res_def_top["req_top_products_ranking"]
+    assert "UltraWide Monitor" in json.dumps(
+        {"detail": top_claim.detail, "evidence": top_claim.evidence}, ensure_ascii=False)
+
+    # 2. 設 expected_in_evidence=False：orders_monthly 三個 verifier 皆不洩漏標準答案
+    items_no_leak = [
+        RequirementItem(
+            id=it.id,
+            quote=it.quote,
+            deliverable=it.deliverable,
+            verifier=it.verifier,
+            kind=it.kind,
+            required=it.required,
+            params={**it.params, "expected_in_evidence": False},
+        )
+        for it in rs_default.items
+    ]
+    rs_no_leak = RequirementSet(task_id=rs_default.task_id, items=items_no_leak)
+
+    for sub, needles in (
+        ("bad_missing_top_products", ("UltraWide Monitor", "Ergonomic Mouse", "Mechanical Keyboard")),
+        ("bad_summary_number_mismatch", ("88000", "88,000")),
+        ("bad_include_cancelled", ("38500", "49500")),
+    ):
+        res = {r.claim_id: r for r in run_requirement_checks(md_task, rs_no_leak, md_task / sub)}
+        failing = [r for r in res.values() if r.status == "FAIL"]
+        assert failing, sub
+        blob = json.dumps(
+            [{"detail": r.detail, "evidence": r.evidence} for r in failing], ensure_ascii=False)
+        for needle in needles:
+            assert needle not in blob, f"{sub}: {needle!r} leaked in {blob}"
+
+    # 3. 通用 verifier（rowset_filter / group_aggregate / summary_numbers）設 expected_in_evidence=False
+    exp_task = pathlib.Path(__file__).resolve().parents[1] / "ops" / "reqloop" / "g1" / "tasks" / "expense_category"
+    rs_exp = RequirementSet.load(exp_task / "requirements.json")
+    rs_exp_no_leak = RequirementSet(
+        task_id=rs_exp.task_id,
+        items=[
+            RequirementItem(
+                id=it.id, quote=it.quote, deliverable=it.deliverable,
+                verifier=it.verifier, kind=it.kind, required=it.required,
+                params={**it.params, "expected_in_evidence": False},
+            )
+            for it in rs_exp.items
+        ],
+    )
+    res_exp = {r.claim_id: r for r in run_requirement_checks(
+        exp_task, rs_exp_no_leak, exp_task / "bad_round_each_row")}
+    assert res_exp["req_group_recompute"].status == "FAIL"
+    assert res_exp["req_summary_numbers"].status == "FAIL"
+    blob_exp = json.dumps(
+        [{"detail": r.detail, "evidence": r.evidence} for r in res_exp.values() if r.status == "FAIL"],
+        ensure_ascii=False)
+    for secret in ("1860.75", "3380.25"):
+        assert secret not in blob_exp, f"secret {secret!r} leaked in {blob_exp}"
+
+
+
 

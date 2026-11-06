@@ -3601,3 +3601,78 @@ def test_localized_workspace_write_protects_preserved_deliverables(task_dir, tmp
     (ws_s / "answer.txt").write_text("single deliverable stays writable\n", encoding="utf-8")
 
 
+def test_round2_restored_preserved_deliverable_recomputes_before_and_preserves_stall_and_partition(task_dir, tmp_path):
+    """argon 20261106_1447 回歸（6da2f605 / 7dbc7c3b 跨輪還原與計帳缺陷）：
+    當第 1 輪 agent 破壞了初始已滿足交付物（例如 localized 臂 unlink 再重寫，或 generic 臂覆寫），
+    且未修好原本的失敗條目時，第 2 輪開局控制器會從原草稿將 `tracked_preserved`（`expense_summary.csv`）
+    還原進 `round_2` 工作區。此時：
+    1. 第 2 輪的 `before` 狀態必須反映還原後的 `round_2` 工作區（`req_csv_structure` 與 `req_group_recompute`
+       為 PASS），不得沿用第 1 輪結尾被弄壞的 `prev_after`（FAIL）；
+    2. 第 2 輪 `localized` 提示詞必須繼續呈現「【已滿足交付物（已完成——請勿修改）】」分區，
+       且不得把已還原且 0o444 唯讀的 `expense_summary.csv` 列入「本輪應修改」與 FAIL 證據；
+    3. 若第 2 輪 agent 為 no-op（未修好任何缺口），控制器開局自動還原的條目不得在 `r2.diff.fixed`
+       與 `repair_slice` 的 `newly` 中被冒充為第 2 輪 agent 的修復進展，必須在 2 輪無進展後以
+       `stopped == "stalled"` 停止（不得被假進展重置 `stalled = 0` 而變成 `"max_rounds"`）；
+    4. 若原草稿中的已滿足交付物本身帶有 `0o444` 唯讀權限，`generic` 對照臂在第 2 輪還原後工作區副本
+       仍須維持 `0o644` 可寫（不得因 `shutil.copy2` 把 `0o444` 帶進 `generic` 臂）。
+    """
+    import os
+    rs = load_req_set(task_dir)
+    draft = tmp_path / "draft_copy"
+    shutil.copytree(task_dir / BAD_DRAFT, draft)
+    # 模擬原草稿中已滿足交付物帶有 0o444 權限
+    os.chmod(draft / "expense_summary.csv", 0o444)
+
+    prompts_loc: list[str] = []
+
+    def build_loc(prompt: str, ws: pathlib.Path) -> Launch:
+        prompts_loc.append(prompt)
+        return Launch(argv=["true"], note="fake")
+
+    rounds_loc: list[int] = []
+
+    def run_corrupt_then_noop(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        rounds_loc.append(len(rounds_loc) + 1)
+        if len(rounds_loc) == 1:
+            # 第 1 輪：unlink 繞過檔案自身 0o444，寫入壞 CSV，且不修 summary.md
+            (ws / "expense_summary.csv").unlink()
+            (ws / "expense_summary.csv").write_text("bad_col\n1\n", encoding="utf-8")
+        return _run_result(log_dir)
+
+    out_loc = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_loc", build=build_loc, run=run_corrupt_then_noop,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert len(out_loc.rounds) == 2
+    # 控制器開局還原的 CSV 不得算作第 2 輪 agent 修好
+    assert out_loc.rounds[1].diff.fixed == ()
+    assert out_loc.stopped == "stalled"
+    # 第 2 輪提示詞仍須保留交付物分區，且不得把已還原的 CSV 報為 FAIL
+    assert "【已滿足交付物" in prompts_loc[1]
+    assert "[FAIL] req_csv_structure" not in prompts_loc[1]
+    assert "[FAIL] req_group_recompute" not in prompts_loc[1]
+
+    # generic 臂第 2 輪還原後仍須保持 0o644 可寫（即使原草稿為 0o444）
+    rounds_gen: list[int] = []
+
+    def run_gen_corrupt_then_check_mode(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        rounds_gen.append(len(rounds_gen) + 1)
+        if len(rounds_gen) == 1:
+            (ws / "expense_summary.csv").write_text("bad_col\n1\n", encoding="utf-8")
+        else:
+            assert os.stat(ws / "expense_summary.csv").st_mode & 0o777 == 0o644
+        return _run_result(log_dir)
+
+    out_gen = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_gen", build=_fake_build([]), run=run_gen_corrupt_then_check_mode,
+        feedback_mode="generic", max_rounds=2, synthetic=True,
+    )
+    assert out_gen.rounds[1].diff.fixed == ()
+    assert out_gen.stopped == "stalled"
+
+
+

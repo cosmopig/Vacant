@@ -1623,14 +1623,20 @@ def run_repair_round(
         )
     ws = prepare_workspace(task_dir, draft_dir, out_root,
                            round_n=n, include_dirs=include_dirs)
+    prompt_draft_dir = draft_dir
     if n >= 2 and preserved_from_draft is not None:
         orig_d_dir, preserved_rels = preserved_from_draft
+        restored_any = False
         for rel in preserved_rels:
             src_f = orig_d_dir / rel
             if src_f.is_file():
                 dst_f = ws / rel
                 dst_f.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(src_f, dst_f)
+                _copy_into_workspace(src_f, dst_f)
+                restored_any = True
+        if restored_any:
+            before = run_requirement_checks(authoritative, req_set, ws)
+            prompt_draft_dir = ws
     if feedback_mode == "localized" and preserved_from_draft is not None:
         # P20261106_1237-2：已滿足交付物寫保護（OS 層守門）。
         # localized 臂「只修未滿足交付物、其餘交付物保留」從事後 hash 對賬＋
@@ -1643,7 +1649,7 @@ def run_repair_round(
             f = ws / rel
             if f.is_file():
                 os.chmod(f, 0o444)
-    prompt = build_repair_prompt(authoritative, req_set, draft_dir, before,
+    prompt = build_repair_prompt(authoritative, req_set, prompt_draft_dir, before,
                                  feedback_mode=feedback_mode, include_dirs=include_dirs,
                                  prev_round_agent=prev_round_agent)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
@@ -1929,7 +1935,7 @@ def repair_slice(
             #   每輪都重置停滯預算，迴圈燒盡 max_rounds——預算紀律失效。
             # - FAIL→UNKNOWN：紅線明列不算修好（不得用狀態變化偽裝進度）。
             # - 來源改動輪（P000-20261105-02）或竄改已滿足交付物輪：不可接受，不算進度。
-            prev_map = _status_map(prev_after)
+            prev_map = _status_map(r.before)
             newly = {c.claim_id for c in r.after
                      if c.required and c.status == "PASS"
                      and prev_map.get(c.claim_id) != "PASS"}
