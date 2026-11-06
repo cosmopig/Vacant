@@ -172,8 +172,87 @@ def _kill_group(proc: subprocess.Popen) -> None:
         pass
 
 
+def _wait_budget(proc: subprocess.Popen, out_p: pathlib.Path, timeout_s: float,
+                 max_tool_calls: int | None, max_tokens: int | None
+                 ) -> tuple[int, str | None, int, int, bool]:
+    """每 0.2 秒輪詢一次 agent 的 stdout 日誌，逐行計數，超預算就殺。
+
+    只處理以 `\n` 結尾的完整行；`json.loads` 失敗的行略過。
+    口徑（與 reqloop/repair.py 的 usage 解析同形、但自寫不 import）：
+    - `type=="tool_execution_start"` ＝ 1 次工具呼叫；
+    - `type=="message_end"` 且 `message.role=="assistant"` 且 `message.usage` 是 dict
+      時，`input`＋`output`（只加 int，非 int 當缺值不加）累加成 token 用量。
+    工具呼叫數**大於** `max_tool_calls`、或 token 數**大於等於** `max_tokens` ⇒ 殺。
+    回傳 (rc, budget_exceeded, observed_tool_calls, observed_tokens, timed_out)。
+    """
+    tool_calls = 0
+    tokens = 0
+    budget: str | None = None
+    timed_out = False
+    deadline = time.monotonic() + timeout_s
+    with out_p.open("rb") as rd:
+        buf = b""
+        while True:
+            if time.monotonic() >= deadline:
+                timed_out = True
+                break
+            chunk = rd.read(1 << 20)
+            if chunk:
+                buf += chunk
+                if buf.endswith(b"\n"):
+                    complete, buf = buf, b""
+                else:  # 最後一行可能還沒寫完：只取完整行，殘留留到下輪
+                    idx = buf.rfind(b"\n")
+                    complete = buf[:idx + 1] if idx >= 0 else b""
+                    buf = buf[idx + 1:]
+                for raw in complete.splitlines():
+                    if not raw:
+                        continue
+                    try:
+                        ev = json.loads(raw)
+                    except (json.JSONDecodeError, ValueError):
+                        continue
+                    if not isinstance(ev, dict):
+                        continue
+                    if ev.get("type") == "tool_execution_start":
+                        tool_calls += 1
+                    elif ev.get("type") == "message_end":
+                        msg = ev.get("message")
+                        if isinstance(msg, dict) and msg.get("role") == "assistant":
+                            usage = msg.get("usage")
+                            if isinstance(usage, dict):
+                                for key in ("input", "output"):
+                                    v = usage.get(key)
+                                    if isinstance(v, int) and not isinstance(v, bool):
+                                        tokens += v
+            over_calls = max_tool_calls is not None and tool_calls > max_tool_calls
+            over_tokens = max_tokens is not None and tokens >= max_tokens
+            if over_calls or over_tokens:
+                budget = "tool_calls" if over_calls else "tokens"
+                break
+            if proc.poll() is not None:
+                break  # agent 自己正常結束：不殺、不記超限
+            time.sleep(0.2)
+    _kill_group(proc)
+    rc = proc.wait()
+    return rc, budget, tool_calls, tokens, timed_out
+
+
 def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
-              log_dir: pathlib.Path) -> dict[str, Any]:
+              log_dir: pathlib.Path,
+              max_tool_calls: int | None = None, max_tokens: int | None = None
+              ) -> dict[str, Any]:
+    """跑 agent，回 rc／timed_out／wall_ms／日誌路徑。
+
+    預算硬上限（兩者皆 None＝行為與以前逐位元組相同、不量、用量欄位為 None）：
+    - `max_tool_calls`：stdout 裡 `tool_execution_start` 事件數**大於**它時殺掉 agent；
+    - `max_tokens`：assistant `message_end` 的 usage input＋output 累計**大於等於**它時殺。
+      token 用量只能在一次 API 回應結束後才知道 ⇒ 最多超出一次回應的量；
+      這是「超過就殺」，不是「事前保證不超過」。
+    觸發時 `budget_exceeded`＝`"tool_calls"` 或 `"tokens"`，否則 None；
+    `observed_tool_calls`／`observed_tokens` 是實際量到的值，未啟用輪詢＝None（沒量就是 None，不填 0）。
+    輪詢迴圈同時照舊守 `timeout_s`（逾時＝`timed_out=True`，語義與以前相同）。
+    """
     env = {**os.environ, **launch.env, "PWD": str(workspace)}
     log_dir.mkdir(parents=True, exist_ok=True)
     out_p, err_p = log_dir / "agent_stdout.log", log_dir / "agent_stderr.log"
@@ -181,6 +260,9 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
     timed_out = False
     rc: int | None = None
     spawn_error = None
+    budget_exceeded: str | None = None
+    observed_tool_calls: int | None = None
+    observed_tokens: int | None = None
     with out_p.open("wb") as out, err_p.open("wb") as err:
         try:
             proc = subprocess.Popen(launch.argv, cwd=str(workspace), env=env,
@@ -189,24 +271,41 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
         except OSError as e:
             spawn_error = f"{type(e).__name__}: {e}"
         else:
-            try:
-                rc = proc.wait(timeout=timeout_s)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                _kill_group(proc)
-                rc = proc.wait()
-            except BaseException:
-                # Ctrl-C／SIGTERM：agent 在自己的 session 裡，終端機的訊號到不了它 ⇒
-                # 這裡不殺，它就成了孤兒，繼續寫工作區、繼續打外部 API。
-                _kill_group(proc)
+            if max_tool_calls is None and max_tokens is None:
                 try:
-                    proc.wait(timeout=5)
-                except Exception:  # noqa: BLE001
-                    pass
-                raise
+                    rc = proc.wait(timeout=timeout_s)
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+                    _kill_group(proc)
+                    rc = proc.wait()
+                except BaseException:
+                    # Ctrl-C／SIGTERM：agent 在自己的 session 裡，終端機的訊號到不了它 ⇒
+                    # 這裡不殺，它就成了孤兒，繼續寫工作區、繼續打外部 API。
+                    _kill_group(proc)
+                    try:
+                        proc.wait(timeout=5)
+                    except Exception:  # noqa: BLE001
+                        pass
+                    raise
+            else:
+                try:
+                    (rc, budget_exceeded, observed_tool_calls, observed_tokens,
+                     timed_out) = _wait_budget(proc, out_p, timeout_s,
+                                               max_tool_calls, max_tokens)
+                except BaseException:
+                    # Ctrl-C／SIGTERM 與原路徑同語義：先殺掉 agent 的行程群組再丟出去。
+                    _kill_group(proc)
+                    try:
+                        proc.wait(timeout=5)
+                    except Exception:  # noqa: BLE001
+                        pass
+                    raise
             _kill_group(proc)
     return {"rc": rc, "timed_out": timed_out, "wall_ms": int((time.time() - t0) * 1000),
-            "spawn_error": spawn_error, "stdout_log": str(out_p), "stderr_log": str(err_p)}
+            "spawn_error": spawn_error, "stdout_log": str(out_p), "stderr_log": str(err_p),
+            "budget_exceeded": budget_exceeded,
+            "observed_tool_calls": observed_tool_calls,
+            "observed_tokens": observed_tokens}
 
 
 def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Launch],
