@@ -10,3 +10,8 @@
 - 9329be88 manifest 待辦已核實解除：ops/reqloop/g2/effect_manifest.json 實際 sha 即 9329be88…，NOW.md 舊待辦已不存在，無新待辦。
 - 未動 main、未 push（loop 自動 push auto/qwen27b）、未讀 hidden/scorer、未改產品碼、未加 regex/prompt/重跑。
 - 下一步候選：11-06#4 真實 CSV/JSON 任務切片（manifest sha 6550d7a8… 已凍結 NOT_fired；離線三門 verify_frozen＋--dry-run＋--baseline 已就緒，待授權才 fire）；bd vq-5nz.49 已關。
+- r1138：審查三點核對＋雙切片離線門現樹驗證：①auto/argon 無需合併（d5105097 綠）；②9329be88 待辦確認已不在 NOW.md（僅 STATE 有解除紀錄）；③樹上原有兩份凍結真實切片——A=realtask_manifest.json（6550d7a8、4 格）＋B=real_slice/manifest.json（P20261107_0237-1、dab_378、2 格、r1131 auto 51ac77ec 入樹、7 測試）；NOW.md 原只列 A，已補列 B（ticket 檔缺失、六要素在 manifest）。
+- 做了什麼：0 產品改動、0 模型呼叫、0 發射；test_reqloop_real_slice.py＋test_reqloop_g2.py 46 passed（2.06s）；A/B --dry-run 皆 EXIT=0；A --baseline EXIT=0（0/2、0/1 required PASS、無洩漏）；B --baseline EXIT=0（9 PASS/2 FAIL＝pre/post_kurtosis -1.17、expected_in_evidence=false、無洩漏）。
+- 驗證了什麼：B 自 r1131 入樹後首次於現樹（含 r1136 g2.py --baseline 改動）全門綠；A 維持綠；B manifest 的 before_visible「9 PASS/2 FAIL」與 --baseline 實跑一致。
+- 沒驗證什麼：真實效果（A/B 皆 NOT_fired，發射要授權＋新成本另報）；auto/qwen27b CI（45527e97 未跑完、不阻塞）；未見任務效力（開發選樣、單 rep）。
+- 下一步：若授權 fire A（或 B，二擇一／分批、不並跑）；未授權維持雙凍結、0 新票、不製造工作。
