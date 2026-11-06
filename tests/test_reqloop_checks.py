@@ -413,6 +413,87 @@ def test_rowset_filter_unsafe_expr_is_unknown(tmp_path: pathlib.Path):
     assert res["req_main"].status == "UNKNOWN"
 
 
+def test_check_rowset_filter_supports_json_deliverable(tmp_path: pathlib.Path):
+    """JSON 交付物（物件陣列）須被 rowset_filter 直接解析並重算比對；改前以 CSV 讀取會誤判 FAIL。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "inventory.csv",
+        "item_id,item_name,current_stock,safety_stock,unit_cost,supplier_status\n"
+        "A1,電阻,8,40,0.05,ACTIVE\n"
+        "A2,MCU,5,20,10.0,ACTIVE\n"
+        "A2,MCU,5,20,10.0,ACTIVE\n"      # 重複列
+        "A4,晶片,3,30,2.0,DISCONTINUED\n",  # 停產，須排除
+    )
+    params = {
+        "input_csv": "inventory.csv",
+        "exclude": [{"col": "supplier_status", "op": "eq", "value": "DISCONTINUED"}],
+        "dedup_by": "item_id",
+        "include": [{"col": "current_stock", "op": "lt", "value": "safety_stock"}],
+        "identity": ["item_id"],
+        "values": {
+            "item_name": "item_name",
+            "current_stock": "current_stock",
+            "safety_stock": "safety_stock",
+            "restock_needed": {"expr": "safety_stock - current_stock"},
+            "estimated_cost": {"expr": "(safety_stock - current_stock) * unit_cost", "round": 2},
+        },
+        "atol": 0.01,
+    }
+
+    # good：JSON 物件陣列（數值為 JSON number）→ PASS
+    good = tmp_path / "good"
+    _write(
+        good / "restock.json",
+        json.dumps([
+            {"item_id": "A1", "item_name": "電阻", "current_stock": 8, "safety_stock": 40,
+             "restock_needed": 32, "estimated_cost": 1.6},
+            {"item_id": "A2", "item_name": "MCU", "current_stock": 5, "safety_stock": 20,
+             "restock_needed": 15, "estimated_cost": 150.0},
+        ], ensure_ascii=False),
+    )
+    req_set = _req_set("rowset_filter", params, "restock.json")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：行集不符（多帶停產 A4）→ FAIL
+    bad_extra = tmp_path / "bad_extra"
+    _write(
+        bad_extra / "restock.json",
+        json.dumps([
+            {"item_id": "A1", "item_name": "電阻", "current_stock": 8, "safety_stock": 40,
+             "restock_needed": 32, "estimated_cost": 1.6},
+            {"item_id": "A2", "item_name": "MCU", "current_stock": 5, "safety_stock": 20,
+             "restock_needed": 15, "estimated_cost": 150.0},
+            {"item_id": "A4", "item_name": "晶片", "current_stock": 3, "safety_stock": 30,
+             "restock_needed": 27, "estimated_cost": 54.0},
+        ], ensure_ascii=False),
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_extra)}
+    assert res["req_main"].status == "FAIL"
+    assert any(c.get("kind") == "rowset_mismatch" for c in res["req_main"].evidence["counterexamples"])
+
+    # bad：金額算錯（150.0 → 140.0），evidence 不帶預期值 ⇒ 無洩漏反例 actual + problem
+    bad_val = tmp_path / "bad_val"
+    _write(
+        bad_val / "restock.json",
+        json.dumps([
+            {"item_id": "A1", "item_name": "電阻", "current_stock": 8, "safety_stock": 40,
+             "restock_needed": 32, "estimated_cost": 1.6},
+            {"item_id": "A2", "item_name": "MCU", "current_stock": 5, "safety_stock": 20,
+             "restock_needed": 15, "estimated_cost": 140.0},
+        ], ensure_ascii=False),
+    )
+    params_ne = dict(params, expected_in_evidence=False)
+    req_set = _req_set("rowset_filter", params_ne, "restock.json")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_val)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    hit = [c for c in r.evidence["counterexamples"] if c.get("field") == "estimated_cost"]
+    assert hit and "actual" in hit[0]
+    assert hit[0]["problem"] == "mismatch_with_recomputation"
+    assert "expected" not in hit[0]
+
+
 def test_group_aggregate_counts_ratio_mean(tmp_path: pathlib.Path):
     task_dir = tmp_path / "task"
     _write(
@@ -474,6 +555,55 @@ def test_group_aggregate_counts_ratio_mean(tmp_path: pathlib.Path):
     )
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_case)}
     assert res["req_main"].status == "FAIL"
+
+
+def test_check_group_aggregate_supports_json_deliverable(tmp_path: pathlib.Path):
+    """JSON 交付物須被 group_aggregate 直接解析並重算比對；改前以 CSV 讀取會誤判 FAIL。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "grades.csv",
+        "student_id,class_name,midterm_score,final_score,status\n"
+        "S1,Class_A,78,82,ENROLLED\n"
+        "S2,Class_A,55,60,ENROLLED\n"
+        "S3,Class_B,90,70,ENROLLED\n",
+    )
+    params = {
+        "input_csv": "grades.csv",
+        "group_by": ["class_name"],
+        "compute": [{"name": "total_score", "expr": "midterm_score * 0.4 + final_score * 0.6"}],
+        "aggregates": [
+            {"name": "student_count", "type": "count"},
+            {"name": "passing_count", "type": "count_if", "expr": "total_score >= 60.0"},
+            {"name": "pass_rate", "type": "ratio", "num": "passing_count", "den": "student_count", "round": 2},
+            {"name": "average_score", "type": "mean", "expr": "total_score", "round": 2},
+        ],
+        "atol": 0.01,
+    }
+    rows = [
+        {"class_name": "Class_A", "student_count": 2, "passing_count": 1, "pass_rate": 0.5, "average_score": 69.2},
+        {"class_name": "Class_B", "student_count": 1, "passing_count": 1, "pass_rate": 1.0, "average_score": 78.0},
+    ]
+    req_set = _req_set("group_aggregate", params, "class_summary.json")
+
+    # good：JSON 物件陣列 → PASS
+    good = tmp_path / "good"
+    _write(good / "class_summary.json", json.dumps(rows))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # good：JSON 物件包 records 陣列 → PASS
+    wrapped = tmp_path / "wrapped"
+    _write(wrapped / "class_summary.json", json.dumps({"records": rows}))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, wrapped)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：平均算錯（69.2 → 60.2）→ FAIL 且帶反例
+    bad_mean = tmp_path / "bad_mean"
+    _write(bad_mean / "class_summary.json", json.dumps([dict(rows[0], average_score=60.2), rows[1]]))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_mean)}
+    assert res["req_main"].status == "FAIL"
+    ce = res["req_main"].evidence.get("counterexamples")
+    assert ce and any(c.get("field") == "average_score" for c in ce)
 
 
 def test_group_aggregate_normalize_and_default(tmp_path: pathlib.Path):
@@ -1868,5 +1998,131 @@ def test_nan_and_inf_never_false_pass_or_crash_across_verifiers(tmp_path: pathli
         for cid, claim in res.items():
             assert claim.status == "FAIL", f"token={bad_token!r} claim={cid} got {claim.status}: {claim.detail}"
 
+
+def test_multideliv_verifiers_expected_in_evidence_false_omits_recomputed_values(tmp_path: pathlib.Path):
+    """R20261106_1121-1 / argon 20261106_1447：
+    `monthly_sales_metrics`、`monthly_top_products`、`summary_metrics_consistency`、
+    `rowset_filter`、`group_aggregate`、`summary_numbers` 支援 `params.expected_in_evidence=False`。
+    - 預設（未設或 True）：保留原行為（G1 / 既有單測向後相容）；
+    - 設為 False 時：`detail` 與 `evidence` 仍點名出錯的月份／列／分組／欄位與候選自身的值，
+      但不得包含任何重算標準答案（`expected`、`expected_top_3`、`expected_total_revenue`、
+      `expected_OrderCount_sum`、`recomputed`、`diff` 等）。
+    """
+    md_task = pathlib.Path(__file__).resolve().parents[1] / "ops" / "reqloop" / "g1" / "tasks" / "orders_monthly"
+    rs_default = RequirementSet.load(md_task / "requirements.json")
+
+    # 1. 預設（expected_in_evidence 未設 ⇒ True）：向後相容，evidence 含 expected
+    res_def_top = {r.claim_id: r for r in run_requirement_checks(
+        md_task, rs_default, md_task / "bad_missing_top_products")}
+    assert res_def_top["req_top_products_ranking"].status == "FAIL"
+    top_claim = res_def_top["req_top_products_ranking"]
+    assert "UltraWide Monitor" in json.dumps(
+        {"detail": top_claim.detail, "evidence": top_claim.evidence}, ensure_ascii=False)
+
+    # 2. 設 expected_in_evidence=False：orders_monthly 三個 verifier 皆不洩漏標準答案
+    items_no_leak = [
+        RequirementItem(
+            id=it.id,
+            quote=it.quote,
+            deliverable=it.deliverable,
+            verifier=it.verifier,
+            kind=it.kind,
+            required=it.required,
+            params={**it.params, "expected_in_evidence": False},
+        )
+        for it in rs_default.items
+    ]
+    rs_no_leak = RequirementSet(task_id=rs_default.task_id, items=items_no_leak)
+
+    for sub, needles in (
+        ("bad_missing_top_products", ("UltraWide Monitor", "Ergonomic Mouse", "Mechanical Keyboard")),
+        ("bad_summary_number_mismatch", ("88000", "88,000")),
+        ("bad_include_cancelled", ("38500", "49500")),
+    ):
+        res = {r.claim_id: r for r in run_requirement_checks(md_task, rs_no_leak, md_task / sub)}
+        failing = [r for r in res.values() if r.status == "FAIL"]
+        assert failing, sub
+        blob = json.dumps(
+            [{"detail": r.detail, "evidence": r.evidence} for r in failing], ensure_ascii=False)
+        for needle in needles:
+            assert needle not in blob, f"{sub}: {needle!r} leaked in {blob}"
+
+    # 3. 通用 verifier（rowset_filter / group_aggregate / summary_numbers）設 expected_in_evidence=False
+    exp_task = pathlib.Path(__file__).resolve().parents[1] / "ops" / "reqloop" / "g1" / "tasks" / "expense_category"
+    rs_exp = RequirementSet.load(exp_task / "requirements.json")
+    rs_exp_no_leak = RequirementSet(
+        task_id=rs_exp.task_id,
+        items=[
+            RequirementItem(
+                id=it.id, quote=it.quote, deliverable=it.deliverable,
+                verifier=it.verifier, kind=it.kind, required=it.required,
+                params={**it.params, "expected_in_evidence": False},
+            )
+            for it in rs_exp.items
+        ],
+    )
+    res_exp = {r.claim_id: r for r in run_requirement_checks(
+        exp_task, rs_exp_no_leak, exp_task / "bad_round_each_row")}
+    assert res_exp["req_group_recompute"].status == "FAIL"
+    assert res_exp["req_summary_numbers"].status == "FAIL"
+    blob_exp = json.dumps(
+        [{"detail": r.detail, "evidence": r.evidence} for r in res_exp.values() if r.status == "FAIL"],
+        ensure_ascii=False)
+    for secret in ("1860.75", "3380.25"):
+        assert secret not in blob_exp, f"secret {secret!r} leaked in {blob_exp}"
+
+
+def test_check_csv_structure_supports_json_deliverable(tmp_path: pathlib.Path):
+    """P20261106_2040-1：JSON 表格交付物（records.json）須被 check_csv_structure 直接解析。
+
+    改前 read_csv_rows 以 CSV 解析 JSON 陣列→空列→誤判 FAIL(empty_csv)；
+    改後含全部必要欄位回 PASS、缺必要欄位回精確 missing_columns 反例；
+    table_structure 別名分派到同一檢查器。
+    """
+    from vacant_network.reqloop.checks import check_csv_structure
+
+    d_dir = tmp_path / "deliverable"
+    _write(d_dir / "records.json", json.dumps(
+        [{"item_id": "A1", "price": 10}, {"item_id": "A2", "price": 20}]))
+
+    item = RequirementItem(
+        id="req_json_structure",
+        quote="輸出 records.json（每筆一列，含 item_id 與 price）",
+        deliverable="records.json",
+        verifier="csv_structure",
+        params={"required_columns": ["item_id", "price"]},
+    )
+    res = check_csv_structure(d_dir, item)
+    assert res.status == "PASS"
+    assert res.evidence["row_count"] == 2
+    assert set(res.evidence["columns"]) >= {"item_id", "price"}
+
+    # 缺必要欄位 → 精確 missing_columns 反例（非 empty_csv 假失敗）
+    item_missing = RequirementItem(
+        id="req_json_missing",
+        quote="輸出 records.json（含 item_id 與 sku）",
+        deliverable="records.json",
+        verifier="csv_structure",
+        params={"required_columns": ["item_id", "sku"]},
+    )
+    res_missing = check_csv_structure(d_dir, item_missing)
+    assert res_missing.status == "FAIL"
+    assert res_missing.evidence["missing_columns"] == ["sku"]
+
+    # table_structure 別名分派到同一檢查器（改前未知檢查器→UNKNOWN）
+    rs = RequirementSet(
+        task_id="task_json_structure",
+        items=[
+            RequirementItem(
+                id="req_alias",
+                quote="輸出 records.json（含 item_id 與 price）",
+                deliverable="records.json",
+                verifier="table_structure",
+                params={"required_columns": ["item_id", "price"]},
+            ),
+        ],
+    )
+    results = {r.claim_id: r for r in run_requirement_checks(tmp_path, rs, d_dir)}
+    assert results["req_alias"].status == "PASS"
 
 

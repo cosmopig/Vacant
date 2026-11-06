@@ -31,6 +31,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SMOKE = REPO_ROOT / "ops" / "reqloop" / "g2" / "smoke"
 MANIFEST = SMOKE / "manifest.json"
 MULTIDELIV_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv" / "manifest.json"
+REALTASK_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "realtask_manifest.json"
 
 
 # ── 工具 ─────────────────────────────────────────────────────────────
@@ -143,6 +144,158 @@ def test_multideliv_manifest_frozen():
     assert b["max_rounds_per_cell"] == 1
     assert b["max_tool_calls"] == 60
     assert b["max_tokens"] == 4000000
+
+
+def test_multideliv_localized_prompt_leak_free():
+    """R20261106_1121-1（資深審查 2026-11-06 #3）：multideliv 的 localized 修復提示詞
+    不得攜帶重算答案（UltraWide Monitor / Ergonomic Mouse / 88000）。
+
+    兩份草稿：localized 提示詞仍點名未滿足交付物＋失敗條目（非空洞、修復目標仍在），
+    但任何重算答案都不出現。verify_frozen 在改動 requirements.json 後仍須通過
+    （requirements.sha256 更新、request.sha256 補釘）。零模型呼叫。"""
+    base = MULTIDELIV_MANIFEST.parent
+    man = g2.G2Manifest.load(MULTIDELIV_MANIFEST)
+    man.verify_frozen(base)   # 改動 requirements.json 後凍結仍須驗過
+    req_set = RequirementSet.load(base / "task" / "requirements.json")
+    # 本任務用到的重算類 verifier 必須全部 opt-out 洩漏（期望值不進 detail/evidence）
+    recomputing = {"monthly_sales_metrics", "monthly_top_products", "summary_metrics_consistency"}
+    assert recomputing & {it.verifier for it in req_set.items}, "測試空洞：multideliv 無重算類 verifier"
+    for it in req_set.items:
+        if it.verifier in recomputing:
+            assert it.params.get("expected_in_evidence") is False, \
+                f"{it.id}（{it.verifier}）須設 expected_in_evidence=false"
+    NEEDLES = ("UltraWide Monitor", "Ergonomic Mouse", "Mechanical Keyboard", "88000")
+    for d in man.drafts:
+        assert "request" in d["task"] and _is64(d["task"]["request"].get("sha256", "")), \
+            f"{d['name']}: manifest 須補釘 task.request.sha256"
+        task_dir = base / d["task"]["dir"]
+        draft_dir = base / d["draft"]["dir"]
+        before = run_requirement_checks(task_dir, req_set, draft_dir)
+        failing = [c for c in before if c.status != "PASS"]
+        assert failing, f"{d['name']}: 無 FAIL 條目（測試空洞）"
+        prompt = repair.build_repair_prompt(task_dir, req_set, draft_dir, before, feedback_mode="localized")
+        assert any(c.claim_id in prompt for c in failing), \
+            f"{d['name']}: 失敗條目未進 localized 提示（修復目標丟失）"
+        for n in NEEDLES:
+            assert n not in prompt, f"{d['name']}: localized 提示洩重算答案 {n!r}"
+
+
+def test_realtask_manifest_frozen_and_leakfree():
+    """P20261106_1840-2＋P20261106_2040-2：真實 CSV/JSON 任務切片 6 格最小對照＝
+    e013 dab_055-pi-C（CSV estimated_numbers.csv 均值）＋e014 dabstep-1273-pi-C
+    （JSON fees.json 費率）兩份真實歷史失敗草稿（synthetic=false、lab 記錄 pass=False）
+    ＋e014 dabstep-11-pi-A（EUR 最大值、真實正確草稿、lab 記錄 pass=true）共 3 份
+    × generic/localized＝6 格；單輪硬上限釘住（300s/60 calls/4M tok）；NOT_fired（0 模型呼叫）。
+    bad 草稿：localized 提示詞點名未滿足條目事實，但絕不洩漏重算答案（1628／0.020500）；
+    good 草稿：初始驗全 PASS（無未滿足條目、localized no_gap 零呼叫）。
+    驗收針「4811.76」＝dabstep-11 的實際重算答案（工單原寫 4990.0，非本切片任何題的
+    重算值——col_max(eur_amount)=4811.76 且 e014 lab pass=true 即此值；用錯誤值當針是空洞斷言）。"""
+    assert REALTASK_MANIFEST.is_file(), "真實任務切片 manifest 未凍結"
+    man = g2.G2Manifest.load(REALTASK_MANIFEST)
+    base = REALTASK_MANIFEST.parent
+    man.verify_frozen(base)   # 凍結副本（smoke_e013/smoke_e014 既有凍結目錄）hash 須全部對上
+    assert man.raw.get("status") == "NOT_fired", "本批只凍結計畫、不發射"
+    assert set(man.arms) == {"generic", "localized"}
+    names = {d["name"] for d in man.drafts}
+    assert names == {"dab_055-pi-C", "dabstep-1273-pi-C", "dabstep-11-pi-A"}
+    roles = {d["name"]: d["role"] for d in man.drafts}
+    assert roles["dabstep-11-pi-A"] == "good", "正確草稿須 role=good"
+    assert roles["dab_055-pi-C"] == "bad" and roles["dabstep-1273-pi-C"] == "bad"
+    cells = g2.plan_cells(man)
+    assert len(cells) == 6 and {c[1] for c in cells} == {"generic", "localized"}
+    b = man.budget
+    assert b["max_rounds_per_cell"] == 1
+    assert b["timeout_s_per_round"] == 300
+    assert b["max_tool_calls"] == 60
+    assert b["max_tokens"] == 4000000
+    assert b["hard_token_cap"] is False
+    NEEDLES = ("1628", "0.020500", "4811.76")   # 三題重算答案（驗收針；絕不得進 localized 提示）
+    for d in man.drafts:
+        assert d["synthetic"] is False, f"{d['name']}: 真實任務切片須 synthetic=false"
+        assert d["source"]["score"] is not None, f"{d['name']}: 來源須有已記錄 hidden 分"
+        task_dir = base / d["task"]["dir"]
+        draft_dir = base / d["draft"]["dir"]
+        req_set = RequirementSet.load(task_dir / "requirements.json")
+        before = run_requirement_checks(task_dir, req_set, draft_dir)
+        if d["role"] == "bad":
+            assert d["source"]["score"].get("pass") is False, \
+                f"{d['name']}: bad 草稿來源須為已記錄 pass=False 的真實失敗草稿"
+            failing = [c for c in before if c.status != "PASS"]
+            assert failing, f"{d['name']}: 初始驗無 FAIL 條目（測試空洞）"
+            prompt = repair.build_repair_prompt(task_dir, req_set, draft_dir, before,
+                                                feedback_mode="localized")
+            assert any(c.claim_id in prompt for c in failing), \
+                f"{d['name']}: 未滿足條目未進 localized 提示（修復目標丟失）"
+            for n in NEEDLES:
+                assert n not in prompt, f"{d['name']}: localized 提示洩重算答案 {n!r}"
+        else:
+            assert d["source"]["score"].get("pass") is True, \
+                f"{d['name']}: good 草稿來源須為已記錄 pass=True 的真實正確草稿"
+            reqs = [c for c in before if c.required]
+            assert reqs, f"{d['name']}: 無 required 條目（測試空洞）"
+            assert all(c.status == "PASS" for c in reqs), \
+                f"{d['name']}: 正確草稿初始驗須全 PASS（對→錯退步基準）"
+            assert not [c for c in before if c.status != "PASS"], \
+                f"{d['name']}: 無未滿足條目（localized no_gap 零呼叫前提）"
+
+
+def test_realtask_baseline_offline_and_leakfree():
+    """r1136：離線 baseline（11-06#4「獨立可見檢查給出可重現的內容反例」＋工單「目前行為」
+    要素）此前缺一個**命令**。本輪補 g2 --baseline：對**目前（未修復）**草稿跑獨立可見
+    檢查，逐條目輸出 status＋可重現內容反例——這是發射前的「before」基準；沒有它，就無
+    法在真跑後證明「修復只改未滿足產物並保留其餘成果」。
+
+    斷言（離線、零模型呼叫）：
+    1. baseline_json 結構：schema/mode/3 草稿；每個 required 條目都有 status；
+    2. 2 份 bad 草稿都是真的壞（各有至少一個 required FAIL、all_required_pass=False）；
+       1 份 good 草稿（dabstep-11-pi-A）all_required_pass=True——對→錯退步的基準；
+    3. 無洩漏：重算答案 1628／0.020500／4811.76 絕不出現在整段 JSON 字串；草稿自己的
+       錯誤值（2081990.36／0.120132）可以出現（那就是內容反例）；
+    4. baseline_text 渲染三份草稿名＋FAIL；
+    5. main --baseline 回傳 0（測量不是門：算出＝0；PASS/FAIL 是結果、不是失敗）。
+    """
+    man = g2.G2Manifest.load(REALTASK_MANIFEST)
+    base = REALTASK_MANIFEST.parent
+    man.verify_frozen(base)   # 凍結副本 hash 全對（離線）
+    assert man.raw.get("status") == "NOT_fired", "本批只凍結計畫、不發射"
+
+    j = g2.baseline_json(man, base)
+    assert j["schema"] == g2.BASELINE_SCHEMA
+    assert j["mode"] == "baseline"
+    assert j["manifest_sha256"] == _sha(REALTASK_MANIFEST)
+    assert [d["name"] for d in j["drafts"]] == \
+        ["dab_055-pi-C", "dabstep-1273-pi-C", "dabstep-11-pi-A"]
+
+    by_name = {d["name"]: d for d in j["drafts"]}
+    for name in ("dab_055-pi-C", "dabstep-1273-pi-C"):
+        d = by_name[name]
+        reqs = [i for i in d["items"] if i["required"]]
+        assert reqs, f"{name}: 無 required 條目（空洞）"
+        for i in reqs:
+            assert i["status"] in {"PASS", "FAIL", "UNKNOWN"}, f"{name} {i['id']}: 缺 status"
+        # bad 草稿是真的壞：至少一個 required FAIL（測試非空洞）
+        assert any(i["status"] == "FAIL" for i in reqs), f"{name}: 無 FAIL 條目（測試空洞）"
+        assert d["all_required_pass"] is False, f"{name}: 不應全過"
+    # good 草稿：全 PASS（對→錯退步的基準；缺了它 baseline 量不到「正確成果是否退步」）
+    good = by_name["dabstep-11-pi-A"]
+    reqs = [i for i in good["items"] if i["required"]]
+    assert reqs, "dabstep-11-pi-A: 無 required 條目（空洞）"
+    assert all(i["status"] == "PASS" for i in reqs), "dabstep-11-pi-A: 正確草稿基準應全 PASS"
+    assert good["all_required_pass"] is True, "dabstep-11-pi-A: 應全過"
+
+    # 無洩漏：三題重算答案絕不出現在整段 JSON 字串
+    blob = json.dumps(j, ensure_ascii=False)
+    for n in ("1628", "0.020500", "4811.76"):
+        assert n not in blob, f"baseline 洩重算答案 {n!r}"
+    # 草稿自己的錯誤值可以出現（內容反例）
+    assert "2081990.36" in blob and "0.120132" in blob
+
+    txt = g2.baseline_text(man, base)
+    assert "dab_055-pi-C" in txt and "dabstep-1273-pi-C" in txt and "dabstep-11-pi-A" in txt
+    assert "FAIL" in txt
+
+    rc = g2.main(["--manifest", str(REALTASK_MANIFEST), "--baseline"])
+    assert rc == 0
 
 
 # ── answer_kv 驗證器 ────────────────────────────────────────────────
@@ -496,6 +649,8 @@ def test_g2_totals_and_cli_include_exit_codes(tmp_path, capsys):
     assert out.count("exit=0") == 4
     assert out.count("exit=20") == 2
     assert "exit_0=4" in out and "exit_20=2" in out
+    # P20261106_1638-2：totals 行三態完整（基建失敗一眼可見）
+    assert "exit_22=0" in out
 
 
 def test_result_written_machine_readable(tmp_path):
@@ -1341,6 +1496,26 @@ def test_g2_propagates_manifest_synthetic_flag_and_verifies_request_sha256(tmp_p
     req_md.unlink()
     with pytest.raises(FileNotFoundError, match="request"):
         man.verify_frozen(base)
+
+
+def test_g2_dry_run_verifies_frozen_files(tmp_path):
+    """argon 20261106_1447 回歸：
+    `g2.main(["--manifest", ..., "--dry-run"])` 在列印計畫並回傳 0 之前，
+    必須先執行 `man.verify_frozen(base)`；若凍結檔案缺失或 sha256 不符，
+    `--dry-run` 必須當場拋錯拒絕，不得在凍結毀損時仍回傳 rc=0。
+    """
+    multideliv_dir = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv"
+    base = tmp_path / "md"
+    shutil.copytree(multideliv_dir, base)
+    man_path = base / "manifest.json"
+
+    # 正常凍結狀態：--dry-run 回傳 0
+    assert g2.main(["--manifest", str(man_path), "--dry-run"]) == 0
+
+    # 竄改 requirements.json：--dry-run 必須拋 ValueError 拒絕
+    (base / "task" / "requirements.json").write_text('{"corrupted": true}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="requirements"):
+        g2.main(["--manifest", str(man_path), "--dry-run"])
 
 
 

@@ -30,6 +30,7 @@ from vacant_network.reqloop.requirements import RequirementSet
 
 RESULT_SCHEMA = "vacant.reqloop.g2.result/1"
 MANIFEST_SCHEMA = "vacant.reqloop.g2.manifest/1"
+BASELINE_SCHEMA = "vacant.reqloop.g2.baseline/1"
 AFTER_HIDDEN_UNKNOWN = "UNKNOWN"   # 本地無權重跑 hidden scorer；缺失即 UNKNOWN，絕不填 0
 
 DEFAULT_MANIFEST = (pathlib.Path(__file__).resolve().parents[2]
@@ -189,6 +190,92 @@ def dry_run_text(man: G2Manifest) -> str:
         lines.append(f"  {i}. {n} × {a}")
     lines.append("")
     lines.append(f"hidden-after = {AFTER_HIDDEN_UNKNOWN}（本地無權重跑 hidden scorer；缺值不填 0）")
+    return "\n".join(lines)
+
+
+# ── baseline（離線，不呼叫模型、不發射）─────────────────────────────
+
+def baseline_json(man: G2Manifest, base: str | pathlib.Path) -> dict[str, Any]:
+    """離線 baseline（11-06#4「獨立可見檢查給出可重現的內容反例」＋工單「目前行為」要素）：
+
+    對每份**目前（未修復）**草稿跑獨立可見檢查（run_requirement_checks），逐條目輸出
+    status（PASS/FAIL/UNKNOWN）＋可重現內容反例（detail/evidence）。這是發射前的「before」
+    基準：沒有它，就無法在真跑後證明「修復只改未滿足產物並保留其餘成果」。
+
+    紅線（對齊 dry_run）：
+    - 不呼叫模型、不發射、不改任何凍結檔——純重算＋讀檔，零成本、零流量。
+    - evidence 天然無洩漏（檢查器 expected_in_evidence=false，重算答案永不進證據）。
+    - 這是**測量**、不是門：每個 required 條目有 status 即算「baseline 算出」；PASS/FAIL 是結果。
+    """
+    from vacant_network.reqloop.checks import run_requirement_checks   # 局部 import（避免環）
+    base = pathlib.Path(base)
+    drafts: list[dict[str, Any]] = []
+    for d in man.drafts:
+        tdir = base / d["task"]["dir"]
+        ddir = base / d["draft"]["dir"]
+        req_set = RequirementSet.load(tdir / "requirements.json")
+        results = run_requirement_checks(tdir, req_set, ddir)
+        items: list[dict[str, Any]] = []
+        for r in results:
+            items.append({
+                "id": r.claim_id,
+                "required": bool(r.required),
+                "status": r.status,
+                "detail": r.detail,
+                "evidence": r.evidence,
+            })
+        req_items = [i for i in items if i["required"]]
+        req_pass = [i for i in req_items if i["status"] == "PASS"]
+        drafts.append({
+            "name": d.get("name"),
+            "task_id": d.get("task_id"),
+            "draft_dir": d["draft"]["dir"],
+            "items": items,
+            "required_total": len(req_items),
+            "required_pass": len(req_pass),
+            # I-4 形狀：required 為空集不許冒稱全過（空集 vacuous pass 是 fail-open）
+            "all_required_pass": bool(req_items) and len(req_pass) == len(req_items),
+        })
+    man_p = pathlib.Path(man.manifest_path) if man.manifest_path else (base / "manifest.json")
+    return {
+        "schema": BASELINE_SCHEMA,
+        "mode": "baseline",
+        "note": "offline, no model, no fire; measurement not gate; evidence leak-free",
+        "manifest": str(man_p),
+        "manifest_sha256": _sha256(man_p),
+        "arms": list(man.arms),
+        "budget": man.budget,
+        "drafts": drafts,
+    }
+
+
+def baseline_text(man: G2Manifest, base: str | pathlib.Path) -> str:
+    """baseline 的人讀出口：逐草稿逐條目 status＋detail＋evidence（無洩漏）。"""
+    j = baseline_json(man, base)
+    b = man.budget
+    lines: list[str] = []
+    lines.append("G2 真草稿 — BASELINE（離線、不呼叫模型、不發射；測量、不是門）")
+    lines.append(f"manifest: {j['manifest']}  sha256={j['manifest_sha256']}")
+    mtc, mtk = b.get("max_tool_calls"), b.get("max_tokens")
+    lines.append(
+        "budget  : max_rounds_per_cell=" + str(b.get("max_rounds_per_cell", "UNKNOWN"))
+        + "  max_tool_calls=" + ("none" if mtc is None else str(mtc))
+        + "  max_tokens=" + ("none" if mtk is None else str(mtk))
+        + "  hard_token_cap=" + str(bool(b.get("hard_token_cap", False))).lower()
+    )
+    for d in j["drafts"]:
+        lines.append("")
+        lines.append(f"  {d['name']}  task={d['task_id']}  "
+                     f"required {d['required_pass']}/{d['required_total']} PASS  "
+                     f"all_required_pass={d['all_required_pass']}")
+        for i in d["items"]:
+            flag = "required" if i["required"] else "optional"
+            lines.append(f"    - [{i['status']:<6}] {i['id']} ({flag})")
+            lines.append(f"        detail  : {i['detail']}")
+            lines.append(f"        evidence: {json.dumps(i['evidence'], ensure_ascii=False)}")
+    lines.append("")
+    lines.append(f"hidden-after = {AFTER_HIDDEN_UNKNOWN}（本地無權重跑 hidden scorer；缺值不填 0）")
+    lines.append("evidence 無洩漏：重算答案永不進證據（expected_in_evidence=false）")
     return "\n".join(lines)
 
 
@@ -376,6 +463,9 @@ def main(argv: Sequence[str] | None = None, *,
                     help=f"凍結清單（預設 {DEFAULT_MANIFEST}）")
     ap.add_argument("--dry-run", action="store_true",
                     help="只列 3 草稿/6 格/hash/budget；不呼叫模型")
+    ap.add_argument("--baseline", action="store_true",
+                    help="離線 baseline：對目前（未修復）草稿跑獨立可見檢查，逐條目輸出 "
+                         "status＋可重現內容反例（目前行為）；不呼叫模型、不發射")
     ap.add_argument("--json", action="store_true", help="輸出 JSON（machine-readable）")
     ap.add_argument("--out", default=None, help="真跑輸出根目錄（預設 /tmp 下新建）")
     ap.add_argument("--provider", default=None, help="pi provider（預設讀 manifest）")
@@ -390,6 +480,15 @@ def main(argv: Sequence[str] | None = None, *,
     man_path = pathlib.Path(args.manifest)
     man = G2Manifest.load(man_path)
     base = man_path.parent
+    man.verify_frozen(base)
+
+    if args.baseline:
+        if args.json:
+            print(json.dumps(baseline_json(man, base), ensure_ascii=False, indent=1, default=str))
+        else:
+            print(baseline_text(man, base))
+        # baseline 是測量、不是門：0＝已算出（每個 required 條目都有 status）；PASS/FAIL 是結果
+        return 0
 
     if args.dry_run:
         if args.json:
@@ -416,7 +515,8 @@ def main(argv: Sequence[str] | None = None, *,
     if args.json:
         print(json.dumps(res.to_dict(), ensure_ascii=False, indent=1, default=str))
     else:
-        print(dry_run_text(man).splitlines()[0])
+        # r1122 修：真跑輸出誤印 DRY RUN 標題（dry_run_text 首行）——人讀日誌會誤判未執行。
+        print("G2 真草稿冒煙 — RUN（真執行、成本從 raw usage 如實記錄、缺值＝UNKNOWN 不填 0）")
         for c in res.cells:
             print(f"  {c['draft']} × {c['arm']:<11} stopped={c['stopped']:<11} "
                   f"sessions={c['cost'].get('calls')} model_calls={c['cost'].get('model_calls')} "
@@ -435,7 +535,8 @@ def main(argv: Sequence[str] | None = None, *,
         wall_s = str(t["wall_ms_total"]) if t["wall_ms_total"] is not None else "UNKNOWN"
         print(f"totals: cells={t['cells']}  model_calls={mc_s}  tokens={tokens_s}  wall_ms={wall_s}  "
               f"preserved={t['satisfied_preserved_total']} mutated={t['satisfied_mutated_total']}  "
-              f"exit_0={t['exit_0_total']} exit_20={t['exit_20_total']}")
+              f"exit_0={t['exit_0_total']} exit_20={t['exit_20_total']} "
+              f"exit_22={t['exit_22_total']}")
     print(f"result: {p}")
     # 冒煙口徑：只要管線跑通（每格都有 readable 判定）即 0；缺口修沒修好是**結果**，不是失敗
     return 0

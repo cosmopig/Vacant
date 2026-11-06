@@ -1,94 +1,36 @@
-
-## r1044（11/05 09:50–10:17）vq-5nz.21 實作（TDD 紅→綠）＋vq-5nz.19 驗收關閉
-
-**結果：P1 完成（5748a6b9 @ auto/qwen27b；未 push——loop 輪末自動 push）。**
-1. **vq-5nz.21（已關）**：detect_tool_loop 自 tool_execution_end 依 toolCallId 關聯執行結果：全敗⇒all_failed＋error_class＋error_sample（無 end 事件＝未知、不造假）；
-   localized 提示全敗分支點名「每次都失敗（SyntaxError: invalid syntax）＋寫 .py 檔案執行＋跑通即寫入交付物」、不帶「已得到結果」假前提（contrast3 dabstep-23 localized：×34 全 SyntaxError、從無結果）；generic 臂不變；觀察只進提示不改裁決。
-2. **驗收**：1 TDD 測試先紅後綠；reqloop 4 檔 **156 passed**（上輪 155）；`repair --selftest` **11/11**；真實 log 驗證（34/34 失敗⇒SyntaxError 點名）。
-3. **vq-5nz.19（已驗收關）**：auto/worker 4b7a8749 CI 🟢 4827 passed / 71 skipped / 1 xpassed（collected 4898 ≥ 4870）、0 failed。
-4. 紀律：未讀 hidden/scorer、未跑全量 pytest、未 push、未動 main、缺值 UNKNOWN；vq-6rp 仍等 /srv/vlab/queue（空）。
-
-## r1043（11/05 09:26–09:50）讀 contrast3 全結果：4/6 格閉合、2 敗格精確歸因＋新票 vq-5nz.21
-
-**結果：P1 對照 6 格全讀完（本輪無 repo 改動、無 commit；證據 `~/dev/ops/contrast3_20261105/`）。**
-
-1. **contrast3（3 草稿×2 臂，單次重現 dev 樣本，不作效力宣稱）**：before(d38d2eb2) generic 3/3·localized 1/3；
-   after(8e6fa47d) generic 2/3·localized 2/3。dab_507 兩臂皆 PASS（after 成本 loc 1.19M→21.7K tok）；
-   dabstep-23 generic PASS/localized stalled；dabstep-10 generic stalled/localized PASS（翻轉，n=1 不可歸因）。
-   獨立 scorer 與本地門 6 格全同向（4 PASS/2 FAIL、零分歧）。成本真值見 before_after.json（api_model_calls_true/tokens_true/wall_ms_total）。
-2. **dabstep-23 localized 精確歸因**：r1 同一 python3 一行式重複 34 次、每次同一 SyntaxError（`;` 後接 `if` 非法）；
-   detect_tool_loop 已觸發、r2 提示已點名「本輪禁止重複該命令、已得到結果後直接推導」——但該命令每次都失敗、從無結果；
-   r2 模型寫出正確 calculate_fraud.py 並跑通（結果可得）後仍重複壞命令 15 次、未寫 answer.txt。
-   → 新票 **vq-5nz.21**（P2）：「重複命令每次都失敗」應針對性提示錯誤類＋具體語法規則（寫 .py 執行、跑通即寫入交付物）。
-3. **vq-5nz.19**：worker 29a10294 15→1（`test_reqloop_g1_gate.py::test_real_fixture_bank` assert 20==0）；
-   HEAD 已進 30e1e7de（CI 未跑完）——仍等助手修綠再驗收。vq-6rp：/srv/vlab/queue 仍空（0 任務）。
-4. 紀律：未讀 hidden/scorer、未寫離線審計腳本充當進度、未 push、未動 main、未跑全量 pytest。
-
-## r1029（11/05）審查輪 20261105：P0 核對＋P1 單格對照發射＋P2 crash→giveup 提示（vq-kpb）
-
-**結果：P0 核對完成（2aa0c077 五項修復全數在樹）；P1 已發射（背景跑，待收）；P2 TDD 全綠。
-
-1. **P0（審查指示）**：`2aa0c077`（auto/argon）已含於 auto/qwen27b——merge `ca5dce9c`＋
-   `c7077528`（EACCES 寫入修復）；五項修復逐項核對在樹：prepare_workspace 剝離
-   verifier/params/recompute/note（20431c0）、crash 偵測誤報排除＋`tool_execution_end`
-   且 `isError≠False` 才掃、period-2 交替死迴圈、`count_if`＋CSV 引號逗號 hint、
-   policy30 `wall_ms_total=4398675` 補齊。reqloop 152 測試全綠。
-2. **P1（審查指示）**：dabstep-23（迴圈）/dabstep-10（表頭+1）/dab_507（引號逗號）
-   3 草稿 × 兩臂 × 1 輪單格對照，獨立目錄 `~/dev/ops/effects_p1_20261105`（未觸凍結批）。
-   base 副本逐檔 hash 對照凍結一致（data 符號連結解引用；首次發射死連結失敗證據
-   `failure_0843_dangling_symlink.json`，修後重發）；before＝凍結 independent.json
-   （localized 敗：dab_507 fb20、dabstep-23 兩格、dabstep-10 兩格；generic 3 格皆 PASS＝
-   regression 檢查）；after＝當前 HEAD 重跑＋independent_score 獨立評分；缺值 UNKNOWN。
-3. **P2（審查指示）**：TDD（先紅後綠）——localized 提示在上一輪 `crash_giveup_suspected`
-   觀察時新增針對性行：禁止裸 `except: pass` / `except: return False` 靜默吞掉解析錯誤、
-   讓例外浮現或顯式計數（dabstep-1753 失效模式）；generic 對照臂定義不變；hint 靜態、
-   不帶重算值。reqloop 4 檔 **155 passed**＋repair selftest 11/11。
-4. 紀律：未 push、未讀 hidden/scorer.py、effects 快照只讀；P1 背景跑（progress.json 實時）。
-
-## r1028（11/05）vq-5nz.18：本地門 vs 獨立 scorer 分歧根因修復（歧義→UNKNOWN，TDD）
-
-**結果：4 分歧格中 2 題（4 格）判定為檢查器缺陷並修復；dabstep-1753 判定非檢查器缺陷（轉 vq-6rp）。vq-5nz.18 已閉。
-
-1. **dabstep-1273（3 格本地假 PASS→獨立 reward 0）**：`_scheme_fee_avg` 靜默 `bool(None)=False`
-   排除 is_credit=null 行（123 行→0.117667）；owner 口徑含 null（144 行→0.120132，manual.md
-   明示 null＝適用所有值；effects 純數字 0.120132 得 reward 1，e014 prose 同值被拒＝格式非值）。
-   修：匹配行 is_credit=null → UnknownSource→UNKNOWN。
-2. **dab_055（1 格本地假 FAIL→獨立 reward 1）**：`mean_int_col` 靜默忽略 544 個
-   '630308[495000-801000]' 型格（312 純整數→2199.55）；owner 口徑取首數值（856 行→2081990）。
-   修：任一格非空非純整數 → UnknownSource→UNKNOWN；'100.0'→100 各語意一致仍解析。
-3. **重排**：`check_plain_recomputed`/`check_kv_recomputed` 先驗交付物格式（FAIL 屬交付物事實）
-   再重算（資料側可 UNKNOWN）——保「bad 草稿必有一條必需 FAIL」紅線（e014 prose 草稿仍 FAIL）。
-4. 防洩漏：重算值與兩種解讀值皆不進 detail/evidence（僅引歧義格原文）。
-5. 證據：effects 凍結批 6 格重放——dabstep-1273 4 格、dab_055 2 格全 UNKNOWN（原假
-   PASS/FAIL）；dabstep-1753 4 格本地與獨立同向未解決＝模型側硬缺口（vq-6rp，不改驗證器）。
-6. 紀律：未讀 scorer.py/hidden；effects 快照只讀；tests/test_reqloop* **125 passed**（+3 先紅後綠）；
-   未 push；0 模型呼叫。
-
-## r981（11/04 12:20～12:45）G2 小批：e013 三真草稿凍結＋3 新重算規則（TDD）
-
-**結果：管線推進（本輪重點），無新實驗結論。commit `e2b7b62f`（auto/qwen27b）**
-
-1. **檢查器擴充（TDD，紅→綠）**：`kv_recomputed` 新增 3 型，全部「公開規則對公開資料」、
-   重算值不進證據、無法重算=UNKNOWN：
-   - `mean_int_col`（dab_055：Int64 語意，Null/空/不可解析如 '630308[495000-801000]' 忽略）
-   - `max_row_first`（dab_426：max 類別、平手取檔案序第一列、輸出該列風速——「neglecting ties…first」直譯）
-   - `pearson2`（dab_105：成對可解析行 Pearson、可 round；常數欄/不足 2 行=UNKNOWN）
-   - +5 測試；reqloop 全組（checks+repair+g2+g1_gate）**77 passed**（r978 為 72）
-2. **e013 小批凍結**（`ops/reqloop/g2/smoke_e013/`）：pi-C 臂 3 真草稿——
-   dab_055(bad, lab 0/1)、dab_426(bad, lab 0/1)、dab_105(good, lab 1/1)。
-   草稿/資料 hash 凍結；source 引用 e013 score.json（只引用不重跑）；hidden_after=UNKNOWN。
-3. **before（本地，與 lab 記錄一致）**：dab_055 FAIL/FAIL；dab_426 格式 PASS＋重算 FAIL；
-   dab_105 PASS/PASS。→ 本地裁判與 lab hidden 記錄方向一致（bad 被抓、good 放行）。
-4. **live run 已啟動**（pid 1987180，6 格，qwen 同模型同預算 ≤2 輪/格；
-   stdout 有緩衝——進度看 `ops/reqloop/g2/smoke_e013/runs/*.json`；log /tmp/g2_e013_run.log）。
-5. 紀律：不讀 hidden/scorer；不向修復模型給 hidden 答案；成本缺值 UNKNOWN；不 push/不動 main；
-   只跑相關測試；不宣稱任何提升。
-
-## Next（r1029）
-1. vq-6rp（dabstep-1753 模型側硬缺口）待點名：需先由需求方給出可執行 acceptance 口徑，
-   否則按 H-1 前提不成立處理；不讀 scorer.py/hidden 設計解法。
-2. vq-5nz.6（G2 停滯草稿換方法驗證，預註冊待點名）：點名前不發射（未點名＝未發射紅線）。
-3. vq-p9g：CI 穩定 xpass 後除 xfail marker；vq-ifn：P99 門重設計（鑑別測試）。
-4. 同型邊界判定已記錄於 vq-5nz.18 描述：count_if/zcount3/col_stats/max_row_first 的
-   「不可解析格跳過」屬可辯護口徑（無觀察分歧）；未來 effects 若現同型分歧再按 vq-5nz.18 流程處理。
-5. 紀律：未點名＝未發射；缺值 UNKNOWN；不向修復模型餵 hidden 答案；不 push/不動 main。
+# STATE
+- r1137：審查點名兩檔補實讀＋依賴部分 redo：① ops/audits/effects_20261105_summary.json（載入＋cells_detail 逐格重算：policy30 g7/10・l6/10、once20 g7/10・l4/10、r2w=0、50 格、current_code 50/50、scope_note＝開發選樣／單 rep／缺值 None／hidden_after UNKNOWN）——與 11-06#6 參考數完全一致，無須更正。② vacant_network/reqloop/repair.py（main():2471／_exit_code():2585／repair_slice():1836 實讀）——exit 0 合格／20 拒收（source_tampered、satisfied_mutated、no-rounds 有未驗證項、agent 跑過未解決）／22 agent 未跑；min_rounds generic=1・localized=0；_STALL_LIMIT=2；authoritative snapshot＋保留約束——與 r1130 redo 記錄及 r1136 baseline（兩草稿各 required FAIL⇒進修復迴路）一致，無須更正。
+- r1137 修狀態檔分叉：r1135/r1136 只更新 repo NOW/STATE，而 loop hook 讀 ~/dev/ops/loop/NOW.md＋~/dev/ops/STATE.md（仍 r1134 舊內容，會誤導下輪重做已完成工作）——舊檔備份 archive/ops_*.bak_r1134_20261106_2030 後改 symlink 指 repo 檔（單一來源、可逆）。
+- 驗證了什麼：199 passed（test_reqloop_g2/repair/checks，4.38s）；g2 --baseline EXIT=0（dab_055 0/2・dabstep-1273 0/1 required PASS、無洩漏、hidden-after UNKNOWN）。
+- 沒驗證什麼：真實效果（6550d7a8 切片仍 NOT_fired、發射要授權）；未見任務效力（開發選樣、單 rep）。
+- DECISION：0 產品 commit（只 STATE/NOW 記帳＋ops 狀態檔 symlink 修正）、0 模型呼叫、0 發射；未動 main、未 push（loop 自動推）、未讀 /srv/eval hidden／scorer。
+- r1136：補上 g2 **--baseline** 離線 baseline 命令（11-06#4「獨立可見檢查給出可重現內容反例」＋工單「目前行為」）：1 檔（g2.py +98）＋1 測試（test_reqloop_g2.py +49），純新增、不改既有行為。兩草稿皆真壞（各有 required FAIL）、整段 JSON 無洩漏（1628/0.020500 缺席、草稿自身錯值在場）、pytest 40/40。離線、不呼叫模型、不發射；改動限 g2.py＋測試（未動 ops 數據/審計）。真實 6550d7a8 切片仍 NOT_fired（發射要授權）。
+- r1135 完成：effects2_20261106（28 格 @4d4b8102）彙整必答（11-06#2）：同草稿已核對（14 題雙臂起始草稿 hash 相等、16 檔 pin 相符）、tamper 0、bad9 localized 9/9 vs generic 7/9、對→錯 0；成本差 112 calls/4.11M tok 買 +2 題（集中在 dabstep-10），開發選樣單 rep 不宣稱較好。
+- 交付：ops/audits/effects2_20261106_analyze.py（--selftest 負控通過）＋ effects2_20261106_analysis.json（RC=0 ANALYSIS_OK）。
+- 9329be88 manifest 待辦已核實解除：ops/reqloop/g2/effect_manifest.json 實際 sha 即 9329be88…，NOW.md 舊待辦已不存在，無新待辦。
+- 未動 main、未 push（loop 自動 push auto/qwen27b）、未讀 hidden/scorer、未改產品碼、未加 regex/prompt/重跑。
+- 下一步候選：11-06#4 真實 CSV/JSON 任務切片（manifest sha 6550d7a8… 已凍結 NOT_fired；離線三門 verify_frozen＋--dry-run＋--baseline 已就緒，待授權才 fire）；bd vq-5nz.49 已關。
+- r1138：審查三點核對＋雙切片離線門現樹驗證：①auto/argon 無需合併（d5105097 綠）；②9329be88 待辦確認已不在 NOW.md（僅 STATE 有解除紀錄）；③樹上原有兩份凍結真實切片——A=realtask_manifest.json（6550d7a8、4 格）＋B=real_slice/manifest.json（P20261107_0237-1、dab_378、2 格、r1131 auto 51ac77ec 入樹、7 測試）；NOW.md 原只列 A，已補列 B（ticket 檔缺失、六要素在 manifest）。
+- 做了什麼：0 產品改動、0 模型呼叫、0 發射；test_reqloop_real_slice.py＋test_reqloop_g2.py 46 passed（2.06s）；A/B --dry-run 皆 EXIT=0；A --baseline EXIT=0（0/2、0/1 required PASS、無洩漏）；B --baseline EXIT=0（9 PASS/2 FAIL＝pre/post_kurtosis -1.17、expected_in_evidence=false、無洩漏）。
+- redo（審查補實讀）：effects_20261105_summary.json＝50 格（policy30 30＋feedback_once20 20）、snapshot d38d2eb2、local 45 vs current_code 50/50 與獨立評分一致、scope_note＝開發選樣／單 rep／UNKNOWN 不填 0——本輪 NOW/STATE 未引其數字、僅列「effects2 以 r1135 彙整為準」，一致無需更正；multideliv manifest＋draft_bad_missing_top_products/summary.md＝該 summary.md 即「已滿足」銷售報告（satisfied），未滿足產物是 monthly_sales.csv（top_3 欄缺失），satisfied_preserved／satisfied_mutated／source_tampered 定義核對 manifest＋repair.py，multideliv FIRED（r1104）輸出在 ~/dev/ops/multideliv_20261106（g2_result.json 在）；repair.py＝source_tampered→退出碼 20「表面全 PASS 也拒收」、_check_preserved_deliverables 位元組保留。
+- 驗證了什麼：B 自 r1131 入樹後首次於現樹全門綠（含 r1136 g2.py --baseline 改動）；A 維持綠；B before_visible「9 PASS/2 FAIL」與實跑一致；B「同口徑」（只修未滿足、保留已滿足、來源改動拒收）與 multideliv 定義＋repair.py 守衛一致。
+- 沒驗證／下一步：真實效果（A/B 皆 NOT_fired，發射要授權＋新成本另報）；auto/qwen27b CI（45527e97 未跑完、不阻塞）；未見任務效力（開發選樣、單 rep）。若授權 fire A（或 B，二擇一／分批、不並跑）；未授權維持雙凍結、0 新票、不製造工作。
+- r1139：完成工單 P20261106_2040-1（check_csv_structure 支援 JSON 交付物＋table_structure 別名）——TDD 先紅（empty_csv FAIL）後綠；checks.py 3 行（read_table_deliverable 替換 read_csv_rows＋分派加別名＋docstring）＋1 新測試；commit 51e3e5df；0 模型呼叫、0 發射。
+- 驗證了什麼：驗收 `pytest tests/test_reqloop_checks.py -k test_check_csv_structure_supports_json_deliverable` → 1 passed；同檔 52 passed（原 51 維持綠）；test_reqloop_g2/repair/real_slice 154 passed；CSV 路徑不變（非 .json 仍走 read_csv_rows，既有 CSV 欄位測試全綠）。
+- 沒驗證什麼：真實效果——本票是離線檢查器能力（JSON records.json 結構驗收），非效果數字；A/B 雙切片仍 NOT_fired（發射要授權＋新成本另報）；未見任務效力。
+- DECISION：未加 regex／靜態 prompt／重試；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer；工單已移 done/（結果 3 行在檔尾）。
+- 下一步：11-06#4 需求驅動內容閉環切片（A=realtask 6550d7a8／B=dab_378，離線三門已就緒，fire 要授權）；未授權維持雙凍結、0 新票。
+- r1140：完成工單 P20261106_2040-2——realtask_manifest.json 補入真實正確草稿 dabstep-11-pi-A（e014_dabstep_block pass=true/reward 1、本地 req_max_eur_amount PASS）→3 草稿（2 bad＋1 good）×2 臂＝6 格對照；manifest＋2 測試擴充（6 格、2 bad 1 good、三針無洩漏、baseline 1 PASS 2 FAIL）；commit 7ad97fbe；0 模型呼叫、0 發射、工單已移 done/。
+- 驗證了什麼：驗收 2 passed（1.64s）；dry-run 6 cells EXIT=0；baseline 1 PASS 2 FAIL EXIT=0（dabstep-11-pi-A all_required_pass=True、2 bad 皆 False）；test_reqloop_g2/repair/real_slice/checks 206 passed（4.04s）。
+- ⚠ 工單針「4990.0」非本切片任何題重算值：col_max(eur_amount)=4811.76＝good 草稿值（e014 lab pass=true 即此值）、掃 payments.csv 各數值欄無 max 近 4990.0——以錯誤值當針是空洞斷言，改以實際重算答案 4811.76 入針（票尾已註記、請規劃者知悉）。
+- 沒驗證什麼：真實效果（A/B 雙切片仍 NOT_fired、發射要授權＋新成本另報）；未見任務效力（開發選樣、單 rep）。
+- DECISION：針值修正屬工單事實錯誤修正（非繞過驗收：驗收意圖＝重算答案絕不進提示/baseline，4811.76 正是 dabstep-11 的重算答案）；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer、未加 regex／靜態 prompt／重跑。
+- r1141：驗證輪（審查三點核對＋現樹複驗；0 產品改動、0 模型呼叫、0 發射）：①auto/argon 無需合併（d5105097 綠 4889 passed、維持零無效忙碌）；②9329be88 待辦不在 NOW.md（r1135 已解除）；③11-06#4 離線準備已完成——現樹複驗：A dry-run EXIT=0（6 格 2bad+1good、verify_frozen 過）＋baseline EXIT=0（dabstep-11-pi-A 1/1 PASS、dab_055 0/2、dabstep-1273 0/1、expected_in_evidence=false 無洩漏）；B dry-run EXIT=0（2 格）＋baseline EXIT=0（9 PASS/2 FAIL＝pre/post_kurtosis -1.17、無洩漏）；reqloop 四測試檔 206 passed（4.00s）。
+- 驗證了什麼：r1139（checks.py JSON 結構）＋r1140（manifest 6 格）改動後，A/B 雙切片離線三門與 206 測試於現樹仍全綠、基線判定與 r1138/r1140 紀錄一致（無回歸）。
+- 沒驗證什麼：真實效果（A/B 皆 NOT_fired、發射＝新模型成本）；8aa5e405 CI（21:15 仍在跑、~24%、不阻塞；LATEST_qwen27b=78edd7d7 綠 4899 passed）；未見任務效力（開發選樣、單 rep）。
+- DECISION：未 fire A/B——審查#1 禁止無授權重跑＋11-06#7「重大新成本/模型變動另報」＋NOW.md 既定「fire 要授權」，本輪無新授權，選最保守可逆（不耗模型預算、可下輪再發）；未加 regex/靜態 prompt/重試、未動 main、未自 push（loop 自動推）、未讀 /srv/eval hidden/scorer；無實質改動故無 commit。
+- 下一步：候授權 fire A（6 格）或 B（2 格），二擇一、不並跑（gemma 4-12b、300s/輪、max_tool_calls=60、max_tokens=4M、缺值=UNKNOWN）；未授權維持雙凍結、0 新票、不製造工作。
+- r1141 redo（審查點名三檔補實讀＋依賴斷言核對）：①effects_20261105_summary.json（以 code 讀全結構）：50 格（policy30 15+15、once20 10+10）、snapshot d38d2eb2、wrong_to_right policy30 generic 7／localized 6、once20 generic 7／localized 4、right_to_wrong 全 0、local 45 vs current_code 50/50（local 分歧 3+2 皆歸因 d38d2eb2 舊 checker、current_code_vs_independent_mismatches=0）、scope_note＝開發選樣／單 rep／不得宣稱等 token／缺值不填 0——與 11-06#6 及 r1135/r1138 紀錄一致、無需更正。
+- ②multideliv/draft_bad_missing_top_products/（summary.md 全讀＋CSV 表頭＋manifest）：summary.md＝已滿足 9-10 月銷售報告（body 列 top-3 商品名）；monthly_sales.csv 欄＝month/orders_count/net_sales（top_3 欄缺失）＝未滿足產物；manifest status=FIRED（r1104、4 格、gemma 4-12b、60 calls/4M tok/300s）、satisfied_preserved/satisfied_mutated＝位元組級指標、hidden_after=UNKNOWN——與 r1138 redo 紀錄一致；FIRED 輸出 ~/dev/ops/multideliv_20261106/g2_result.json 四格 preserved/mutated 實測值在檔（src_tampered 全 False）。
+- ③vacant_network/reqloop/repair.py（grep＋關鍵段實讀 L1817-1995）：_check_preserved_deliverables＝最終工作區 vs 原草稿 SHA256（相符⇒preserved、不符或缺失⇒mutated）；source_tampered＝任一輪改權威來源⇒原非 PASS 條目一律不得標 PASS（表面全 PASS 也拒收）、模組 docstring 退出碼 20；fixed＝最初 FAIL→最終 PASS、regressed＝最初 PASS→最終非 PASS、不得相互掩蓋；calls＝修復 session 數≠API 請求數——與 r1138 redo 紀錄一致。
+- redo 結論：三檔實際內容與 r1135/r1138/r1141 STATE 及 NOW.md 之斷言全部一致、0 數字更正、0 產品改動、0 模型呼叫；r1141 驗證輪結論不變（雙切片離線三門現樹綠、A/B 維持 NOT_fired 候授權）。

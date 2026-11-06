@@ -35,7 +35,8 @@
         "date_col": "order_date",
         "amount_col": "net_amount",
         "status_col": "status",
-        "atol": 0.01
+        "atol": 0.01,
+        "expected_in_evidence": false
       },
       "description": "各月有效訂單數與淨銷售額必須與原始資料嚴格重算一致",
       "required": true
@@ -55,7 +56,8 @@
         "date_col": "order_date",
         "amount_col": "net_amount",
         "product_col": "product_name",
-        "top_n": 3
+        "top_n": 3,
+        "expected_in_evidence": false
       },
       "description": "各月商品前三名排行必須嚴格依淨銷售額重算一致",
       "required": true
@@ -74,9 +76,10 @@
         "dedup_by": "order_id",
         "date_col": "order_date",
         "amount_col": "net_amount",
-        "atol": 0.05
+        "atol": 0.05,
+        "expected_in_evidence": false
       },
-      "description": "摘要報告中兩月合計淨銷售總額必須與重算值完全一致 (88000.00)",
+      "description": "摘要報告中兩月合計淨銷售總額必須與重算值完全一致",
       "required": true
     }
   ]
