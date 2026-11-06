@@ -1,4 +1,9 @@
 # STATE
+- r1137：審查點名兩檔補實讀＋依賴部分 redo：① ops/audits/effects_20261105_summary.json（載入＋cells_detail 逐格重算：policy30 g7/10・l6/10、once20 g7/10・l4/10、r2w=0、50 格、current_code 50/50、scope_note＝開發選樣／單 rep／缺值 None／hidden_after UNKNOWN）——與 11-06#6 參考數完全一致，無須更正。② vacant_network/reqloop/repair.py（main():2471／_exit_code():2585／repair_slice():1836 實讀）——exit 0 合格／20 拒收（source_tampered、satisfied_mutated、no-rounds 有未驗證項、agent 跑過未解決）／22 agent 未跑；min_rounds generic=1・localized=0；_STALL_LIMIT=2；authoritative snapshot＋保留約束——與 r1130 redo 記錄及 r1136 baseline（兩草稿各 required FAIL⇒進修復迴路）一致，無須更正。
+- r1137 修狀態檔分叉：r1135/r1136 只更新 repo NOW/STATE，而 loop hook 讀 ~/dev/ops/loop/NOW.md＋~/dev/ops/STATE.md（仍 r1134 舊內容，會誤導下輪重做已完成工作）——舊檔備份 archive/ops_*.bak_r1134_20261106_2030 後改 symlink 指 repo 檔（單一來源、可逆）。
+- 驗證了什麼：199 passed（test_reqloop_g2/repair/checks，4.38s）；g2 --baseline EXIT=0（dab_055 0/2・dabstep-1273 0/1 required PASS、無洩漏、hidden-after UNKNOWN）。
+- 沒驗證什麼：真實效果（6550d7a8 切片仍 NOT_fired、發射要授權）；未見任務效力（開發選樣、單 rep）。
+- DECISION：0 產品 commit（只 STATE/NOW 記帳＋ops 狀態檔 symlink 修正）、0 模型呼叫、0 發射；未動 main、未 push（loop 自動推）、未讀 /srv/eval hidden／scorer。
 - r1136：補上 g2 **--baseline** 離線 baseline 命令（11-06#4「獨立可見檢查給出可重現內容反例」＋工單「目前行為」）：1 檔（g2.py +98）＋1 測試（test_reqloop_g2.py +49），純新增、不改既有行為。兩草稿皆真壞（各有 required FAIL）、整段 JSON 無洩漏（1628/0.020500 缺席、草稿自身錯值在場）、pytest 40/40。離線、不呼叫模型、不發射；改動限 g2.py＋測試（未動 ops 數據/審計）。真實 6550d7a8 切片仍 NOT_fired（發射要授權）。
 - r1135 完成：effects2_20261106（28 格 @4d4b8102）彙整必答（11-06#2）：同草稿已核對（14 題雙臂起始草稿 hash 相等、16 檔 pin 相符）、tamper 0、bad9 localized 9/9 vs generic 7/9、對→錯 0；成本差 112 calls/4.11M tok 買 +2 題（集中在 dabstep-10），開發選樣單 rep 不宣稱較好。
 - 交付：ops/audits/effects2_20261106_analyze.py（--selftest 負控通過）＋ effects2_20261106_analysis.json（RC=0 ANALYSIS_OK）。
