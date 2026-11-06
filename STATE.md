@@ -34,3 +34,9 @@
 - ②multideliv/draft_bad_missing_top_products/（summary.md 全讀＋CSV 表頭＋manifest）：summary.md＝已滿足 9-10 月銷售報告（body 列 top-3 商品名）；monthly_sales.csv 欄＝month/orders_count/net_sales（top_3 欄缺失）＝未滿足產物；manifest status=FIRED（r1104、4 格、gemma 4-12b、60 calls/4M tok/300s）、satisfied_preserved/satisfied_mutated＝位元組級指標、hidden_after=UNKNOWN——與 r1138 redo 紀錄一致；FIRED 輸出 ~/dev/ops/multideliv_20261106/g2_result.json 四格 preserved/mutated 實測值在檔（src_tampered 全 False）。
 - ③vacant_network/reqloop/repair.py（grep＋關鍵段實讀 L1817-1995）：_check_preserved_deliverables＝最終工作區 vs 原草稿 SHA256（相符⇒preserved、不符或缺失⇒mutated）；source_tampered＝任一輪改權威來源⇒原非 PASS 條目一律不得標 PASS（表面全 PASS 也拒收）、模組 docstring 退出碼 20；fixed＝最初 FAIL→最終 PASS、regressed＝最初 PASS→最終非 PASS、不得相互掩蓋；calls＝修復 session 數≠API 請求數——與 r1138 redo 紀錄一致。
 - redo 結論：三檔實際內容與 r1135/r1138/r1141 STATE 及 NOW.md 之斷言全部一致、0 數字更正、0 產品改動、0 模型呼叫；r1141 驗證輪結論不變（雙切片離線三門現樹綠、A/B 維持 NOT_fired 候授權）。
+- r1142：完成工單 P20261106_2121-1——切片 A（realtask_manifest.json）補齊六要素規格 six_elements（資深審查 2026-11-06 #3＋11-06#5；切片 B real_slice 已有且被測試鎖定、切片 A 缺席）＋機器可驗測試 test_realtask_six_elements_and_cost_cap（TDD 先紅：對原 manifest 1 failed）後綠；commit f4391686（2 檔：manifest＋test_reqloop_g2.py）；0 模型呼叫、0 發射、工單已移 done/。
+- 做了什麼：six_elements 六鍵全引在案事實（原始使用者要求＝凍結任務逐字引文；既有真實失敗產物＝2 bad＋1 good 在案 lab 分＋baseline 1 PASS/2 FAIL；目前行為＝e013 r998＋effects2_20261106 在案＋未測量項；預期可展示改善＝2 bad FAIL→PASS＋good 保溫＋0 偽造＋60/4M/300s 單輪＋判定口徑＋不宣稱 localized 更好；成本上限＝60/4M/300s/1 輪；獨立驗收＝五條）；cost_cap 與 budget 同值；drafts/task/data hash 全數不變（verify_frozen 複驗過）。
+- 驗證了什麼：test_reqloop_g2.py -k realtask 3 passed（2→3）；reqloop 四測試檔 207 passed（206+1，5.17s）；A --dry-run EXIT=0、--baseline EXIT=0（hidden-after UNKNOWN 維持）；B 切片未動。
+- 沒驗證什麼：真實效果（A/B 雙切片仍 NOT_fired、發射要授權＋新成本另報）；未見任務效力（開發選樣、單 rep）；f4391686 CI（loop 自動推後核）。
+- DECISION：純規格補齊＋測試鎖定（非純文檔修補：新增機器斷言、紅→綠在案）；未加 regex／靜態 prompt／重試；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer。
+- 下一步：候授權 fire A（6 格）或 B（2 格），二擇一、不並跑；未授權維持雙凍結、0 新票、不製造工作。
