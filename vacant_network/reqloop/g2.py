@@ -420,7 +420,8 @@ def main(argv: Sequence[str] | None = None, *,
     if args.json:
         print(json.dumps(res.to_dict(), ensure_ascii=False, indent=1, default=str))
     else:
-        print(dry_run_text(man).splitlines()[0])
+        # r1122 修：真跑輸出誤印 DRY RUN 標題（dry_run_text 首行）——人讀日誌會誤判未執行。
+        print("G2 真草稿冒煙 — RUN（真執行、成本從 raw usage 如實記錄、缺值＝UNKNOWN 不填 0）")
         for c in res.cells:
             print(f"  {c['draft']} × {c['arm']:<11} stopped={c['stopped']:<11} "
                   f"sessions={c['cost'].get('calls')} model_calls={c['cost'].get('model_calls')} "
