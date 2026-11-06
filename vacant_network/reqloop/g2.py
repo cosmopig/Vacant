@@ -241,6 +241,11 @@ class G2Result:
                                                  for c in self.cells),
                 "satisfied_mutated_total": sum(len(c.get("satisfied_mutated") or [])
                                                for c in self.cells),
+                # P20261106_1237-1：每格退出碼匯整（0＝受收錄合格／20＝拒收／22＝基建故障），
+                # 下游審計直接讀全批收錄率，不從 cells 重推
+                "exit_0_total": sum(1 for c in self.cells if c.get("exit_code") == 0),
+                "exit_20_total": sum(1 for c in self.cells if c.get("exit_code") == 20),
+                "exit_22_total": sum(1 for c in self.cells if c.get("exit_code") == 22),
             },
         }
 
@@ -308,6 +313,9 @@ def run_g2_smoke(
                 "arm": arm,
                 "synthetic": outcome.synthetic,
                 "stopped": outcome.stopped,
+                # 審查指示 3（2026-11-06）：重跑審計須如實報告每格 _exit_code——
+                # 直接記錄 repair._exit_code(outcome)（單一真相源），審計方不從結果欄位重推
+                "exit_code": repair._exit_code(outcome),
                 "before_readable_status": before_map,
                 "after_readable_status": {c.claim_id: c.status for c in last_after},
                 "final_readable_status": dict(outcome.final_status),
@@ -414,7 +422,7 @@ def main(argv: Sequence[str] | None = None, *,
                   f"sessions={c['cost'].get('calls')} model_calls={c['cost'].get('model_calls')} "
                   f"final={c['final_readable_status']} "
                   f"before_hidden={c['before_hidden'].get('n_correct')} "
-                  f"after_hidden={c['after_hidden']}")
+                  f"after_hidden={c['after_hidden']} exit={c.get('exit_code')}")
             if c["regressed"]:
                 print(f"      REGRESSED: {', '.join(c['regressed'])}")
             if c.get("satisfied_mutated"):
@@ -426,7 +434,8 @@ def main(argv: Sequence[str] | None = None, *,
         mc_s = str(t["model_calls"]) if t["model_calls"] is not None else "UNKNOWN（缺值不填 0）"
         wall_s = str(t["wall_ms_total"]) if t["wall_ms_total"] is not None else "UNKNOWN"
         print(f"totals: cells={t['cells']}  model_calls={mc_s}  tokens={tokens_s}  wall_ms={wall_s}  "
-              f"preserved={t['satisfied_preserved_total']} mutated={t['satisfied_mutated_total']}")
+              f"preserved={t['satisfied_preserved_total']} mutated={t['satisfied_mutated_total']}  "
+              f"exit_0={t['exit_0_total']} exit_20={t['exit_20_total']}")
     print(f"result: {p}")
     # 冒煙口徑：只要管線跑通（每格都有 readable 判定）即 0；缺口修沒修好是**結果**，不是失敗
     return 0
