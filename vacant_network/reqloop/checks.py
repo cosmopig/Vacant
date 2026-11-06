@@ -76,33 +76,52 @@ def read_csv_rows(path: pathlib.Path) -> list[dict[str, str]]:
         return rows
 
 
+def _strict_table_pairs_hook(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """表格 JSON 物件解析 hook：鍵小寫標準化，且拒絕同名或大小寫重複鍵。"""
+    out: dict[str, Any] = {}
+    for k, v in pairs:
+        norm_k = str(k).strip().lower()
+        if norm_k in out:
+            raise ValueError(f"duplicate or case-colliding JSON key: {k!r}")
+        out[norm_k] = v
+    return out
+
+
 def read_table_deliverable(path: pathlib.Path) -> list[dict[str, Any]]:
     """讀取表格交付物：.json 接受物件陣列或含 records/rows/data 物件陣列之物件；其餘副檔名走 read_csv_rows。
 
     鍵小寫標準化（與 CSV 同口徑）；值保留 JSON 原生型別（下游統一經 str() 轉換比對）。
-    JSON 解析失敗回傳空列表（交付物判為空/不符，絕不冒稱 PASS）。
+    JSON 解析失敗、含重複鍵、空物件、或陣列混入非物件元素時皆回傳空列表（絕不冒稱 PASS）。
     """
     if path.suffix.lower() != ".json":
         return read_csv_rows(path)
     if not path.is_file():
         return []
     try:
-        data: Any = json.loads(path.read_text(encoding="utf-8-sig"))
+        data: Any = json.loads(
+            path.read_text(encoding="utf-8-sig"),
+            object_pairs_hook=_strict_table_pairs_hook,
+        )
     except ValueError:
         return []
     if isinstance(data, dict):
+        if not data:
+            return []
         for key in ("records", "rows", "data"):
-            if isinstance(data.get(key), list):
+            if key in data:
+                if not isinstance(data[key], list):
+                    return []
                 data = data[key]
                 break
         else:
             data = [data]
-    if not isinstance(data, list):
+    if not isinstance(data, list) or not data:
         return []
     rows: list[dict[str, Any]] = []
     for r in data:
-        if isinstance(r, dict):
-            rows.append({str(k).strip().lower(): v for k, v in r.items()})
+        if not isinstance(r, dict) or not r:
+            return []
+        rows.append(r)
     return rows
 
 
@@ -137,9 +156,9 @@ def check_csv_structure(
             authority=item.authority,
         )
 
-    required_cols = [c.lower() for c in item.params.get("required_columns", [])]
-    existing_cols = list(rows[0].keys())
-    missing_cols = [c for c in required_cols if c not in existing_cols]
+    required_cols = [str(c).strip().lower() for c in item.params.get("required_columns", [])]
+    existing_cols = [k for k in rows[0].keys() if all(k in r for r in rows)]
+    missing_cols = [c for c in required_cols if not all(c in r for r in rows)]
 
     if missing_cols:
         return ClaimResult(
@@ -962,6 +981,19 @@ def _result(item: RequirementItem, status: str, detail: str, evidence: dict[str,
     )
 
 
+def _same_scalar_or_num(exp_str: str, act_str: str, atol: float) -> bool:
+    """字串相等，或雙邊皆為非前導零代碼之有效有限數值且差距不超過 atol。"""
+    if exp_str == act_str:
+        return True
+    for s in (exp_str, act_str):
+        if len(s) > 1 and s[0] == "0" and s[1].isdigit():
+            return False
+    try:
+        return abs(_to_num(act_str) - _to_num(exp_str)) <= atol
+    except UnsafeExpressionError:
+        return False
+
+
 def check_rowset_filter(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -980,7 +1012,10 @@ def check_rowset_filter(
             er = {c: r.get(c, "") for c in identity}
             for out_col, spec in values_spec.items():
                 if isinstance(spec, str):
-                    er[out_col] = r.get(spec, "")
+                    col_key = spec.strip().lower()
+                    if col_key not in r:
+                        raise UnknownSource(f"values[{out_col}] 來源欄位不存在: {spec!r}")
+                    er[out_col] = r.get(col_key, "")
                 elif isinstance(spec, dict) and "expr" in spec:
                     v = safe_eval_expr(str(spec["expr"]), r)
                     if "round" in spec:
@@ -1044,10 +1079,28 @@ def check_rowset_filter(
         dr = deliv_rows[idx]
         for out_col, spec in values_spec.items():
             exp_v = er[out_col]
-            act_raw = dr.get(out_col)
+            out_key = str(out_col).strip().lower()
+            if out_key not in dr:
+                mismatches.append(f"列 {list(key)} 缺欄 {out_col}")
+                if include_expected:
+                    counterexamples.append({
+                        "row": list(key),
+                        "field": out_col,
+                        "expected": exp_v if isinstance(exp_v, str) else _fmt_val(exp_v),
+                        "actual": None,
+                    })
+                else:
+                    counterexamples.append({
+                        "row": list(key),
+                        "field": out_col,
+                        "actual": None,
+                        "problem": "missing_column",
+                    })
+                continue
+            act_raw = dr.get(out_key)
             act_raw = "" if act_raw is None else str(act_raw).strip()
             if isinstance(exp_v, str):
-                if exp_v.strip() != act_raw:
+                if not _same_scalar_or_num(exp_v.strip(), act_raw, atol):
                     if include_expected:
                         mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {exp_v!r}，交付物為 {act_raw!r}")
                         counterexamples.append({"row": list(key), "field": out_col, "expected": exp_v, "actual": act_raw})
@@ -1137,15 +1190,19 @@ def check_group_aggregate(
                 else:
                     raise UnknownSource(f"未知聚合類型: {t}")
                 vals[name] = v
+            vals_lower = {k.lower(): v for k, v in vals.items()}
             for spec in agg_specs:  # ratio 第二趟（依已算出的聚合名）
                 if str(spec.get("type", "")).strip().lower() != "ratio":
                     continue
                 name = str(spec.get("name", "")).strip()
-                num = vals.get(str(spec.get("num", "")))
-                den = vals.get(str(spec.get("den", "")))
+                num_k = str(spec.get("num", "")).strip()
+                den_k = str(spec.get("den", "")).strip()
+                num = vals.get(num_k, vals_lower.get(num_k.lower()))
+                den = vals.get(den_k, vals_lower.get(den_k.lower()))
                 if num is None or den is None or float(den) == 0:
                     raise UnknownSource(f"ratio {name}: 分母為 0 或缺失")
                 vals[name] = float(num) / float(den)
+                vals_lower[name.lower()] = vals[name]
             for spec in agg_specs:
                 name = str(spec.get("name", "")).strip()
                 if "round" in spec and vals.get(name) is not None:
@@ -1160,7 +1217,7 @@ def check_group_aggregate(
     deliv_rows = read_table_deliverable(deliv_file)
     if not deliv_rows:
         return _result(item, "FAIL", f"交付物為空: {item.deliverable}", {"empty_csv": item.deliverable})
-    missing_cols = [g for g in group_by if g not in deliv_rows[0]]
+    missing_cols = [g for g in group_by if not all(g in dr for dr in deliv_rows)]
     if missing_cols:
         return _result(item, "FAIL", f"交付物缺少分組欄位: {missing_cols}", {"missing_columns": missing_cols})
 
@@ -1203,14 +1260,15 @@ def check_group_aggregate(
     for key, vals in expected.items():
         dr = deliv_groups[key][0]
         for name, exp_v in vals.items():
-            if name not in dr:
+            name_key = name.lower()
+            if name_key not in dr:
                 mismatches.append(f"組 {list(key)} 缺欄 {name}")
                 if include_expected:
                     counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": None})
                 else:
                     counterexamples.append({"group": list(key), "field": name, "actual": None, "problem": "missing_column"})
                 continue
-            act_raw = "" if dr[name] is None else str(dr[name]).strip()
+            act_raw = "" if dr[name_key] is None else str(dr[name_key]).strip()
             if exp_v is None:
                 if act_raw != "":
                     mismatches.append(f"組 {list(key)} 欄 {name} 預期空白，交付物為 {act_raw!r}")
@@ -1427,13 +1485,18 @@ def check_kv_recomputed(
     val_str, problems = _kv_answer_value(deliverable_dir, item, key)
     if val_str is None:
         return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
-                       {"key": key, "problem": problems[0], "data_file": data_rel})
+                       {"key": key, "problem": problems[0], "data_file": data_rel,
+                        "expected_in_evidence": False})
     try:
         got = float(val_str.replace(",", "").strip())
     except ValueError:
-        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
+        return _result(item, "FAIL", "答案值不可解析為數字",
+                       {"key": key, "problem": "not_a_number", "value": val_str,
+                        "expected_in_evidence": False})
     if not math.isfinite(got):
-        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
+        return _result(item, "FAIL", "答案值不可解析為數字",
+                       {"key": key, "problem": "not_a_number", "value": val_str,
+                        "expected_in_evidence": False})
 
     unrounded_int_expected: float | None = None
     try:
@@ -1995,7 +2058,8 @@ def check_plain_recomputed(
     # pass=False；格式違規不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
     deliv_file = deliverable_dir / item.deliverable
     if not deliv_file.is_file():
-        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）", {"problem": "missing_file"})
+        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）",
+                       {"problem": "missing_file", "expected_in_evidence": False})
     val_str = deliv_file.read_text(encoding="utf-8").strip()
     rule_desc = (f"{str(rc.get('type'))}: {data_rel} "
                  f"{json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}")
@@ -2017,16 +2081,19 @@ def check_plain_recomputed(
                                    {"problem": "not_a_fee_id", "value": val_str,
                                     "rule": rule_desc, "expected_in_evidence": False})
     elif not val_str:
-        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
+        return _result(item, "FAIL", "答案值缺失（空檔）",
+                       {"problem": "empty_value", "expected_in_evidence": False})
     else:
         try:
             got_pre = float(val_str)
         except ValueError:
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
         if not math.isfinite(got_pre):
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
 
     try:
         if rtype == "mode_col":
