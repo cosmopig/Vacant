@@ -13,13 +13,17 @@
 - ③ 成本：bad9 localized 347 calls/9,691,033 tok vs generic 235 calls/5,576,588 tok（差 112 calls/4,114,445 tok，買 +2 題修復；差額最大格 dabstep-10 +5.82M tok/+132 calls）；good5 localized 0 呼叫 vs generic 49 calls/1.20M tok（省）。全 14 題 sessions 16(g) vs 11(l)。
 
 **必附口徑**：開發選樣（e008/e013/e014 已見題）、單 rep、單碼態；本批排除 1753，跨批只比同 9 題；
+上列成本數（235/347 calls、5,576,588/9,691,033 tok、差 112 calls/4,114,445 tok）已逐格自
+contrast/g2_result_*.json raw cost 重算核實；multideliv 資料夾（summary.md 等）屬 r1104 另一
+FIRED 批次（draft 集合無重疊），不影響本批口徑。
 dabstep-10 逐臂方向在兩批間翻轉＝邊界題單 rep 變異 → **不宣稱 localized 較好**；無硬 token 上限；
 repair_sessions≠API 請求數；tokens 缺值＝UNKNOWN（localized good5 5 格 tokens=None，不填 0）；
 hidden_after 全 UNKNOWN（本地無權重跑）；tamper/UNKNOWN 不算成功。
 
 ## 待辦（唯一）
-- 11-06#4 真實 CSV/JSON 任務切片：manifest `ops/reqloop/g2/effect_manifest.json`（sha **6550d7a8…**，
-  4 格 e008/e013/e014 最小對照）已凍結 **NOT_fired**，6 元素 ticket 齊；**待授權才跑**（要模型流量）。
+- 11-06#4 真實 CSV/JSON 任務切片：manifest `ops/reqloop/g2/realtask_manifest.json`（sha **6550d7a8…**，
+  e013 dab_055 CSV 均值＋e014 dabstep-1273 JSON 費率，2 草稿×2 臂＝4 格）已凍結 **NOT_fired**，
+  6 元素 ticket 齊；**待授權才跑**（要模型流量）。
 - 9329be88 manifest 待辦：已核實解除（該 sha 即 effect_manifest.json 實際 sha；舊 NOW 待辦已不在）。
 
 ## 紅線（維持）
