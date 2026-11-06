@@ -568,6 +568,67 @@ def test_repair_source_corrupt_is_unacceptable_not_fixed(task_dir, tmp_path):
     assert out.cost["calls"] == 1
 
 
+def test_repair_marks_tampered_source_rejected_even_if_deliverable_passes(task_dir, tmp_path):
+    """fake agent 寫出正確交付物（對權威快照能 PASS），但同時改動了來源資料（expenses.csv）：
+    來源改動＝不可接受，依規則不得翻 PASS。FAIL_CLAIM 不得入 fixed、必須在 unresolved，
+    退出碼 20，stopped 絕非 gap_closed。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    good = G1_TASK / "good"
+    good_summary = (good / "summary.md").read_text(encoding="utf-8")
+    run = _fake_agent({
+        "summary.md": good_summary,
+        "expenses.csv": "date,category,subcategory,amount\n2026-01-01,it,software,100.00\n",
+    })
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="generic", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped != "gap_closed"
+    assert out.source_tampered is True
+    assert "expenses.csv" in out.source_tampered_files
+    assert FAIL_CLAIM not in out.fixed
+    assert out.fixed == ()
+    assert FAIL_CLAIM in out.unresolved
+    assert out.final_status[FAIL_CLAIM] == "FAIL"
+    assert repair._exit_code(out) == 20
+
+
+def test_repair_marks_tampered_source_rejected_across_multiple_rounds(task_dir, tmp_path):
+    """第 1 輪改動來源，第 2 輪未動來源但繼承產物：整段仍屬來源改動，FAIL_CLAIM 不得翻 PASS。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    good = G1_TASK / "good"
+    good_summary = (good / "summary.md").read_text(encoding="utf-8")
+
+    round_calls = 0
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        nonlocal round_calls
+        round_calls += 1
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        if round_calls == 1:
+            (workspace / "summary.md").write_text(good_summary, encoding="utf-8")
+            (workspace / "expenses.csv").write_text("tampered data\n", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None}
+
+    out = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out", build=_fake_build([]), run=run,
+        feedback_mode="generic", max_rounds=2, synthetic=True,
+    )
+    assert out.stopped != "gap_closed"
+    assert out.source_tampered is True
+    assert "expenses.csv" in out.source_tampered_files
+    assert FAIL_CLAIM not in out.fixed
+    assert out.fixed == ()
+    assert FAIL_CLAIM in out.unresolved
+    assert out.final_status[FAIL_CLAIM] == "FAIL"
+    assert repair._exit_code(out) == 20
+
+
 def test_repair_records_pass_to_fail_regression(task_dir, tmp_path):
     """fake agent 修了摘要但弄壞 CSV 結構 ⇒ 退步必須被記錄。"""
     rs = load_req_set(task_dir)

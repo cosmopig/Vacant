@@ -1607,6 +1607,30 @@ def run_repair_round(
     # 成功跑过但输出为空＋最終答案為放棄詞 ⇒ 標記）。观察与標記、非裁決。
     agent = {**agent, "empty_result_giveup_suspected": empty_suspected}
     tampered = _source_tampered_files(authoritative, ws)
+    if tampered:
+        # P000-20261105-02：改來源迎合交付不得翻 PASS。來源改動之輪，原非 PASS 的條目一律不得標為 PASS。
+        before_map = {c.claim_id: c.status for c in before}
+        sanitized_after = []
+        for c in after:
+            if c.status == "PASS" and before_map.get(c.claim_id) != "PASS":
+                orig_st = before_map.get(c.claim_id, "FAIL")
+                st = orig_st if orig_st in ("FAIL", "UNKNOWN", "CONFLICT") else "FAIL"
+                sanitized_after.append(
+                    ClaimResult(
+                        claim_id=c.claim_id,
+                        status=st,
+                        detail=f"來源改動（{', '.join(tampered)}）不可接受，依規則不得翻 PASS",
+                        evidence={**c.evidence, "source_tampered": list(tampered)},
+                        verifier=c.verifier,
+                        verifier_version=c.verifier_version,
+                        required=c.required,
+                        authority=c.authority,
+                    )
+                )
+            else:
+                sanitized_after.append(c)
+        after = sanitized_after
+        diff = diff_results(before, after)
     return RepairRound(
         n=n, feedback_mode=feedback_mode, workspace=str(ws),
         before=before, after=after, diff=diff, agent=agent,
@@ -1766,6 +1790,18 @@ def repair_slice(
     # 缺項（在需求裡但最後重驗沒有）＝UNKNOWN 口徑，不得宣告完成
     for item in req_set.items:
         final_status.setdefault(item.id, "MISSING")
+
+    # 來源改動（P000-20261105-02）：任一輪改寫權威來源即不可接受
+    source_tampered = any(r.source_tampered for r in rounds)
+    source_tampered_files = tuple(sorted({f for r in rounds for f in r.source_tampered}))
+    if source_tampered:
+        # P000-20261105-02：改來源迎合交付不得翻 PASS。若全段曾發生來源改動，原非 PASS 的條目一律不得標為 PASS。
+        before_map = {c.claim_id: c.status for c in before}
+        for cid in list(final_status.keys()):
+            if final_status[cid] == "PASS" and before_map.get(cid) != "PASS":
+                orig_st = before_map.get(cid, "FAIL")
+                final_status[cid] = orig_st if orig_st in ("FAIL", "UNKNOWN", "CONFLICT") else "FAIL"
+
     unresolved = tuple(cid for cid, st in final_status.items() if st != "PASS")
 
     # 缺口真正修好＝最初為 FAIL 且最終重驗明確為 PASS（嚴禁未修好卻列入 fixed）
@@ -1779,10 +1815,6 @@ def repair_slice(
         if final_status.get(cid) != "PASS":
             regressed_set.add(cid)
     regressed = tuple(sorted(regressed_set))
-
-    # 來源改動（P000-20261105-02）：任一輪改寫權威來源即不可接受
-    source_tampered = any(r.source_tampered for r in rounds)
-    source_tampered_files = tuple(sorted({f for r in rounds for f in r.source_tampered}))
 
     calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
