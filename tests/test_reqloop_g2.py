@@ -145,6 +145,38 @@ def test_multideliv_manifest_frozen():
     assert b["max_tokens"] == 4000000
 
 
+def test_multideliv_localized_prompt_leak_free():
+    """R20261106_1121-1（資深審查 2026-11-06 #3）：multideliv 的 localized 修復提示詞
+    不得攜帶重算答案（UltraWide Monitor / Ergonomic Mouse / 88000）。
+
+    兩份草稿：localized 提示詞仍點名未滿足交付物＋失敗條目（非空洞、修復目標仍在），
+    但任何重算答案都不出現。verify_frozen 在改動 requirements.json 後仍須通過
+    （requirements.sha256 更新、request.sha256 補釘）。零模型呼叫。"""
+    base = MULTIDELIV_MANIFEST.parent
+    man = g2.G2Manifest.load(MULTIDELIV_MANIFEST)
+    man.verify_frozen(base)   # 改動 requirements.json 後凍結仍須驗過
+    req_set = RequirementSet.load(base / "task" / "requirements.json")
+    # 本任務用到的重算類 verifier 必須全部 opt-out 洩漏（期望值不進 detail/evidence）
+    recomputing = {"monthly_sales_metrics", "monthly_top_products", "summary_metrics_consistency"}
+    assert recomputing & {it.verifier for it in req_set.items}, "測試空洞：multideliv 無重算類 verifier"
+    for it in req_set.items:
+        if it.verifier in recomputing:
+            assert it.params.get("expected_in_evidence") is False, \
+                f"{it.id}（{it.verifier}）須設 expected_in_evidence=false"
+    NEEDLES = ("UltraWide Monitor", "Ergonomic Mouse", "88000")
+    for d in man.drafts:
+        task_dir = base / d["task"]["dir"]
+        draft_dir = base / d["draft"]["dir"]
+        before = run_requirement_checks(task_dir, req_set, draft_dir)
+        failing = [c for c in before if c.status != "PASS"]
+        assert failing, f"{d['name']}: 無 FAIL 條目（測試空洞）"
+        prompt = repair.build_repair_prompt(task_dir, req_set, draft_dir, before, feedback_mode="localized")
+        assert any(c.claim_id in prompt for c in failing), \
+            f"{d['name']}: 失敗條目未進 localized 提示（修復目標丟失）"
+        for n in NEEDLES:
+            assert n not in prompt, f"{d['name']}: localized 提示洩重算答案 {n!r}"
+
+
 # ── answer_kv 驗證器 ────────────────────────────────────────────────
 
 @pytest.fixture()
