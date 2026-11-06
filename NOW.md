@@ -1,7 +1,8 @@
 # NOW
 
-## 現在在哪（r1140）
-- 工單 P20261106_2040-2 完成：realtask_manifest.json 補入真實正確草稿 `dabstep-11-pi-A`（e014 lab pass=true、本地 req_max_eur_amount PASS）→ 3 草稿（2 bad＋1 good）×2 臂＝6 格對照基準；status 維持 NOT_fired。
+## 現在在哪（r1141）
+- r1141 驗證輪：審查三點核對＋雙切片現樹複驗全綠（A/B dry-run＋baseline 皆 EXIT=0、無洩漏；reqloop 206 passed）；未 fire（無新授權、新成本另報）、0 產品改動、無 commit。
+- r1140：工單 P20261106_2040-2 完成：realtask_manifest.json 補入真實正確草稿 `dabstep-11-pi-A`（e014 lab pass=true、本地 req_max_eur_amount PASS）→ 3 草稿（2 bad＋1 good）×2 臂＝6 格對照基準；status 維持 NOT_fired。
 - commit 7ad97fbe（2 檔：manifest＋test_reqloop_g2.py 兩測試擴充）。驗收 2 passed；dry-run 6 cells EXIT=0；baseline 1 PASS 2 FAIL EXIT=0；reqloop 四測試檔 206 passed。0 模型呼叫、0 發射。
 - ⚠ 工單針「4990.0」非本切片任何題重算值（實際 col_max(eur_amount)=4811.76＝good 草稿值；無欄位 max 近 4990）——已改以 4811.76 入針並註記於票尾，避免空洞斷言。
 

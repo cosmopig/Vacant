@@ -25,3 +25,8 @@
 - ⚠ 工單針「4990.0」非本切片任何題重算值：col_max(eur_amount)=4811.76＝good 草稿值（e014 lab pass=true 即此值）、掃 payments.csv 各數值欄無 max 近 4990.0——以錯誤值當針是空洞斷言，改以實際重算答案 4811.76 入針（票尾已註記、請規劃者知悉）。
 - 沒驗證什麼：真實效果（A/B 雙切片仍 NOT_fired、發射要授權＋新成本另報）；未見任務效力（開發選樣、單 rep）。
 - DECISION：針值修正屬工單事實錯誤修正（非繞過驗收：驗收意圖＝重算答案絕不進提示/baseline，4811.76 正是 dabstep-11 的重算答案）；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer、未加 regex／靜態 prompt／重跑。
+- r1141：驗證輪（審查三點核對＋現樹複驗；0 產品改動、0 模型呼叫、0 發射）：①auto/argon 無需合併（d5105097 綠 4889 passed、維持零無效忙碌）；②9329be88 待辦不在 NOW.md（r1135 已解除）；③11-06#4 離線準備已完成——現樹複驗：A dry-run EXIT=0（6 格 2bad+1good、verify_frozen 過）＋baseline EXIT=0（dabstep-11-pi-A 1/1 PASS、dab_055 0/2、dabstep-1273 0/1、expected_in_evidence=false 無洩漏）；B dry-run EXIT=0（2 格）＋baseline EXIT=0（9 PASS/2 FAIL＝pre/post_kurtosis -1.17、無洩漏）；reqloop 四測試檔 206 passed（4.00s）。
+- 驗證了什麼：r1139（checks.py JSON 結構）＋r1140（manifest 6 格）改動後，A/B 雙切片離線三門與 206 測試於現樹仍全綠、基線判定與 r1138/r1140 紀錄一致（無回歸）。
+- 沒驗證什麼：真實效果（A/B 皆 NOT_fired、發射＝新模型成本）；8aa5e405 CI（21:15 仍在跑、~24%、不阻塞；LATEST_qwen27b=78edd7d7 綠 4899 passed）；未見任務效力（開發選樣、單 rep）。
+- DECISION：未 fire A/B——審查#1 禁止無授權重跑＋11-06#7「重大新成本/模型變動另報」＋NOW.md 既定「fire 要授權」，本輪無新授權，選最保守可逆（不耗模型預算、可下輪再發）；未加 regex/靜態 prompt/重試、未動 main、未自 push（loop 自動推）、未讀 /srv/eval hidden/scorer；無實質改動故無 commit。
+- 下一步：候授權 fire A（6 格）或 B（2 格），二擇一、不並跑（gemma 4-12b、300s/輪、max_tool_calls=60、max_tokens=4M、缺值=UNKNOWN）；未授權維持雙凍結、0 新票、不製造工作。
