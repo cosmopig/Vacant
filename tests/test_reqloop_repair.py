@@ -3103,3 +3103,113 @@ def test_loop_warning_remediation_split_by_error_class_and_execution_mode(tmp_pa
     assert ".py 檔案後執行" in warn_syntax
     assert "不要用一行式拼接多條語句" in warn_syntax
 
+
+
+# ── r1088：執行器硬預算上限（max_tool_calls／max_tokens）接進 repair ──
+# 來源：r1087 在 adapters.run.run_agent 加了兩支 opt-in 硬上限（超過就殺），
+# 但 g2/repair 入口尚不可達——本輪把兩支上限從 repair_slice→run_repair_round
+# →run() 接通。紀律：None＝原路徑逐位元組不變（不量、不殺、舊簽名 fake 照跑）；
+# 設定時如實轉發；執行器殺掉的輪次 budget_exceeded 必須可見（觀察，非裁決）。
+
+def test_run_repair_round_forwards_budget_caps(task_dir, tmp_path):
+    """設定上限 ⇒ 逐字轉發給執行器 run()（殺與否由執行器決定，本層只轉發）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+    seen: dict = {}
+
+    def run(launch, *, workspace, timeout_s, log_dir,
+            max_tool_calls=None, max_tokens=None):
+        seen.update(max_tool_calls=max_tool_calls, max_tokens=max_tokens)
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None}
+
+    repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+        max_tool_calls=5, max_tokens=100_000,
+    )
+    assert seen == {"max_tool_calls": 5, "max_tokens": 100_000}
+
+
+def test_run_repair_round_without_caps_keeps_legacy_call_shape(task_dir, tmp_path):
+    """未設定上限（None）⇒ 不帶新 kwarg，舊簽名 RunFn 實現不受影響。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+
+    def run(launch, *, workspace, timeout_s, log_dir):   # 舊簽名，不接新 kwarg
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth,
+    )
+    assert r.agent["rc"] == 0
+
+
+def test_repair_slice_forwards_budget_caps_and_records(task_dir, tmp_path):
+    """repair_slice（公開入口）轉發上限，且 cost.budget 如實記錄設定值（None＝未設）。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    seen: list = []
+
+    def run(launch, *, workspace, timeout_s, log_dir,
+            max_tool_calls=None, max_tokens=None):
+        seen.append((max_tool_calls, max_tokens))
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None}
+
+    outcome = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "o", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, timeout_s=60,
+        max_tool_calls=3, max_tokens=50_000,
+    )
+    assert len(seen) >= 1
+    assert all(s == (3, 50_000) for s in seen)
+    assert outcome.cost["budget"]["max_tool_calls"] == 3
+    assert outcome.cost["budget"]["max_tokens"] == 50_000
+
+    # 未設定時 cost.budget 如實標 None（不是 0、不是「沒這欄」）
+    outcome2 = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "o2", build=_fake_build([]), run=run,
+        feedback_mode="localized", max_rounds=1, timeout_s=60,
+    )
+    assert outcome2.cost["budget"]["max_tool_calls"] is None
+    assert outcome2.cost["budget"]["max_tokens"] is None
+
+
+def test_budget_exceeded_round_recorded(task_dir, tmp_path):
+    """執行器殺掉的輪次：budget_exceeded 必須逐輪可見（JSON 內），觀察非裁決。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    out_root = tmp_path / "out"
+    out_root.mkdir(parents=True, exist_ok=True)
+    auth = repair.create_authoritative_snapshot(task_dir, out_root)
+    before = run_requirement_checks(auth, rs, draft)
+
+    def run(launch, *, workspace, timeout_s, log_dir,
+            max_tool_calls=None, max_tokens=None):
+        return {"rc": 137, "timed_out": False, "wall_ms": 900, "spawn_error": None,
+                "budget_exceeded": "tool_calls",
+                "observed_tool_calls": 6, "observed_tokens": None}
+
+    r = repair.run_repair_round(
+        1, task_dir, rs, draft, before,
+        out_root=out_root, build=_fake_build([]), run=run,
+        feedback_mode="localized", timeout_s=60,
+        authoritative=auth, max_tool_calls=5,
+    )
+    assert r.agent["budget_exceeded"] == "tool_calls"
+    d = r.to_dict()
+    assert d["agent"]["budget_exceeded"] == "tool_calls"
