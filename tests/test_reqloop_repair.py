@@ -1585,6 +1585,53 @@ def test_cli_exit_code_20_on_source_tamper(task_dir, tmp_path, capsys):
     assert "SOURCE_TAMPERED" in text and "expenses.csv" in text
 
 
+def test_exit_code_20_on_satisfied_mutated(task_dir, tmp_path, capsys):
+    """P20261106_1035-2：agent 竄改初始驗即已滿足的交付物 ⇒ 退出碼 20（拒收），
+    與 source_tampered 同等嚴格的把關；CLI 文字輸出必須顯式印 SATISFIED_MUTATED，
+    保留者印 satisfied_preserved。
+    回歸形狀：multideliv_20261106 的 generic 臂 top_products 格修好了 CSV 缺口，
+    但同時覆寫了原本已通過的 summary.md（satisfied_mutated 非空）——舊 _exit_code
+    仍回 0、文字輸出完全不顯示 SATISFIED_MUTATED，人看輸出會誤以為全數合格。
+    此處竄改用「CSV 尾加空行」（位元組改變、claim 仍全 PASS）複現「內容對但位元組被改」
+    的真實形狀；synthetic 離線接線，只驗管線。"""
+    draft = task_dir / BAD_DRAFT
+    good_md = _good_summary(task_dir)
+    csv_text = (draft / "expense_summary.csv").read_text(encoding="utf-8")
+
+    def run_mutate(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        # 修未滿足交付物（summary.md）＋竄改已滿足交付物（CSV 尾加空行：位元組變、內容不變）
+        (ws / "summary.md").write_text(good_md, encoding="utf-8")
+        (ws / "expense_summary.csv").write_text(csv_text + "\n", encoding="utf-8")
+        return _run_result(log_dir)
+
+    rc = repair.main(
+        ["--task", str(task_dir), "--draft", str(draft),
+         "--out", str(tmp_path / "out_mut"), "--rounds", "1", "--synthetic",
+         "--feedback-mode", "localized"],
+        build=_fake_build([]), run=run_mutate,
+    )
+    text = capsys.readouterr().out
+    # 已滿足交付物被改寫＝拒收（舊碼回 0，此處必紅）
+    assert rc == 20
+    assert "SATISFIED_MUTATED" in text and "expense_summary.csv" in text
+
+    # 對照：只修未滿足交付物、其餘保留 ⇒ 保留約束滿足，印 satisfied_preserved、退出 0
+    def run_keep(launch, *, workspace, timeout_s, log_dir):
+        (pathlib.Path(workspace) / "summary.md").write_text(good_md, encoding="utf-8")
+        return _run_result(log_dir)
+
+    rc2 = repair.main(
+        ["--task", str(task_dir), "--draft", str(draft),
+         "--out", str(tmp_path / "out_keep"), "--rounds", "1", "--synthetic",
+         "--feedback-mode", "localized"],
+        build=_fake_build([]), run=run_keep,
+    )
+    text2 = capsys.readouterr().out
+    assert rc2 == 0
+    assert "satisfied_preserved" in text2 and "expense_summary.csv" in text2
+
+
 def test_round2_prompt_does_not_list_source_files_as_modifiable_deliverables(task_dir, tmp_path):
     """argon 20261105_0346 回歸：
     1. 累積修復第 2 輪（source_dir=round_1）時，round_1 含工作區內的源資料（expenses.csv、

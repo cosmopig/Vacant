@@ -232,6 +232,11 @@ class G2Result:
                 "model_calls": _total("model_calls"),  # 實際模型 API 呼叫數；任一 active 格缺 ⇒ UNKNOWN（不填 0）
                 "tokens": _total("tokens"),
                 "wall_ms_total": _total("wall_ms_total"),
+                # P20261106_1035-2：已滿足交付物位元組保留總計（保留/突變檔案數，跨格加總）
+                "satisfied_preserved_total": sum(len(c.get("satisfied_preserved") or [])
+                                                 for c in self.cells),
+                "satisfied_mutated_total": sum(len(c.get("satisfied_mutated") or [])
+                                               for c in self.cells),
             },
         }
 
@@ -407,11 +412,16 @@ def main(argv: Sequence[str] | None = None, *,
                   f"after_hidden={c['after_hidden']}")
             if c["regressed"]:
                 print(f"      REGRESSED: {', '.join(c['regressed'])}")
+            if c.get("satisfied_mutated"):
+                print(f"      SATISFIED_MUTATED: {', '.join(c['satisfied_mutated'])}")
+            if c.get("source_tampered"):
+                print(f"      SOURCE_TAMPERED: {', '.join(c.get('source_tampered_files') or [])}")
         t = res.to_dict()["totals"]
         tokens_s = str(t["tokens"]) if t["tokens"] is not None else "UNKNOWN（缺值不填 0）"
         mc_s = str(t["model_calls"]) if t["model_calls"] is not None else "UNKNOWN（缺值不填 0）"
         wall_s = str(t["wall_ms_total"]) if t["wall_ms_total"] is not None else "UNKNOWN"
-        print(f"totals: cells={t['cells']}  model_calls={mc_s}  tokens={tokens_s}  wall_ms={wall_s}")
+        print(f"totals: cells={t['cells']}  model_calls={mc_s}  tokens={tokens_s}  wall_ms={wall_s}  "
+              f"preserved={t['satisfied_preserved_total']} mutated={t['satisfied_mutated_total']}")
     print(f"result: {p}")
     # 冒煙口徑：只要管線跑通（每格都有 readable 判定）即 0；缺口修沒修好是**結果**，不是失敗
     return 0
