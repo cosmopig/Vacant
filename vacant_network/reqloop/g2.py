@@ -151,9 +151,15 @@ def dry_run_text(man: G2Manifest) -> str:
     lines.append(f"{len(man.drafts)} drafts · {len(cells)} cells（arms: {', '.join(man.arms)}）")
     lines.append(f"model  : {m.get('model', 'UNKNOWN')} (provider: {m.get('provider', 'UNKNOWN')})"
                  + (f"  ← {m['note']}" if m.get("note") else ""))
+    # 硬上限（6a360204）顯式顯示：none＝不量不殺（舊路徑逐位元組不變）、數值＝
+    # 超過即殺；dry_run_json 本就有（整包 budget）、文字行不得缺席（H-0：
+    # 漏掉的 flag 正是 dabstep-10 長尾 148 calls 要防的形狀）。未設不填 0。
+    mtc, mtk = b.get("max_tool_calls"), b.get("max_tokens")
     lines.append(
         "budget : max_rounds_per_cell=" + str(b.get("max_rounds_per_cell", "UNKNOWN"))
         + "  timeout_s_per_round=" + str(b.get("timeout_s_per_round", "UNKNOWN"))
+        + "  max_tool_calls=" + ("none" if mtc is None else str(mtc))
+        + "  max_tokens=" + ("none" if mtk is None else str(mtk))
         + "  hard_token_cap=" + str(bool(b.get("hard_token_cap", False))).lower()
         + "  min_rounds=" + json.dumps(b.get("min_rounds", {}), ensure_ascii=False)
     )

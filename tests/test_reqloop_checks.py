@@ -1012,6 +1012,65 @@ def test_kv_recomputed_json_data_file_malformed_unknown(tmp_path: pathlib.Path):
     assert res2["req_main"].status == "UNKNOWN"
 
 
+# ── JSON 交付物鍵值讀取（工單 P20261106_0632-2：result.json 類結構化產物）────
+
+def test_kv_recomputed_and_answer_kv_support_json_deliverable(tmp_path: pathlib.Path):
+    """交付物為 .json 時：kv_recomputed／answer_kv 直接讀 JSON 字典鍵值，
+    不再硬性限制 @key[value] 純文字正則（2026-11-06 指示 4：結構化 JSON 計算產物）。
+    重算值仍不進證據（leak guard 不變）；非 JSON 交付物行為不受影響。"""
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.csv", "Country,No. of cases\nA,100\nB,200\nC,300\n")
+    params = {
+        "key": "mean_cases",
+        "data_file": "cases.csv",
+        "recompute": {"type": "mean_int_col", "col": "No. of cases"},
+    }
+    req_set = _req_set("kv_recomputed", params, "result.json")
+
+    good = tmp_path / "good"
+    _write(good / "result.json", '{"mean_cases": 200}\n')   # (100+200+300)/3
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "result.json", '{"mean_cases": 250}\n')
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("deliverable_value") == "250"     # 可重現的內容反例
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+
+    broken = tmp_path / "broken"
+    _write(broken / "result.json", "{mean_cases: 200}")       # 非法 JSON
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, broken)}
+    assert res["req_main"].status == "FAIL"
+    assert res["req_main"].evidence.get("problem") == "invalid_json"
+
+    kv_set = _req_set("answer_kv", {"keys": [{"key": "mean_cases", "type": "integer"}]},
+                      "result.json")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, kv_set, good)}
+    assert res["req_main"].status == "PASS"                   # 同一 result.json 直接驗 JSON 字典
+
+    bad_kv = tmp_path / "bad_kv"
+    _write(bad_kv / "result.json", '{"mean_cases": 250.5}\n')
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, kv_set, bad_kv)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence["counterexamples"][0]["problem"] == "not_an_integer"
+
+    missing = tmp_path / "missing"
+    _write(missing / "result.json", '{"other_key": 200}\n')
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, kv_set, missing)}
+    assert res["req_main"].status == "FAIL"
+    assert res["req_main"].evidence["counterexamples"][0]["problem"] == "missing"
+
+    broken_kv = tmp_path / "broken_kv"
+    _write(broken_kv / "result.json", "not json at all")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, kv_set, broken_kv)}
+    assert res["req_main"].status == "FAIL"
+    assert res["req_main"].evidence["counterexamples"][0]["problem"] == "invalid_json"
+
+
 # ── plain_recomputed＋mode_col（G2 小批：e014/dabstep 真實草稿，2026-11-04）──────
 
 def test_plain_recomputed_mode_col_pass_and_fail(tmp_path: pathlib.Path):
