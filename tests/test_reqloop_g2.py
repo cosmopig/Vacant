@@ -541,6 +541,76 @@ def test_manifest_budget_reaches_executor(tmp_path):
     assert by[("dab_039-pi-C", "generic")]["final_readable_status"]["req_answer_kv"] != "PASS"
 
 
+def test_budget_caps_reach_executor_at_g2_level(tmp_path):
+    """r1094（審查指示 4/5「硬上限控本確立」）：硬上限鏈路的 g2 層此前無測試。
+    adapter 層（test_adapters_budget.py 殺程語義）與 repair 層（test_reqloop_repair.py
+    轉發＋cost.budget 記錄）已覆蓋；run_g2_smoke→repair_slice 這跳（CLI 發射走的路徑）
+    若回歸丟掉 max_tool_calls/max_tokens 或調換優先序，無測試會紅。
+    三語義：(1) 顯式引數到執行器且優於 manifest；(2) 顯式 None⇒回退 manifest
+    budget.max_tool_calls/max_tokens；(3) 皆 None＝不量不殺、呼叫不帶新 kwarg
+    （舊簽名 RunFn 照跑＝逐位元組不變量）。
+    離線 fake agent，零模型呼叫。
+    """
+    base = tmp_path / "smoke"
+    shutil.copytree(SMOKE, base)
+    full = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    # manifest budget 上限（與顯式值不同⇒優先序可驗）
+    full["budget"]["max_tool_calls"] = 21
+    full["budget"]["max_tokens"] = 2_100_000
+    (base / "manifest.json").write_text(json.dumps(full, ensure_ascii=False),
+                                        encoding="utf-8")
+    man = g2.G2Manifest.load(base / "manifest.json")
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def _mkrun(seen: list):
+        def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+                log_dir: pathlib.Path, **kw) -> dict:
+            seen.append((kw.get("max_tool_calls"), kw.get("max_tokens")))
+            log_dir.mkdir(parents=True, exist_ok=True)
+            (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+            (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+            return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None,
+                    "stdout_log": str(log_dir / "agent_stdout.log"),
+                    "stderr_log": str(log_dir / "agent_stderr.log")}
+        return run
+
+    # (1) 顯式引數到執行器，且優於 manifest budget（21/2_100_000 不得出現）
+    seen: list = []
+    g2.run_g2_smoke(man, base, tmp_path / "out1", build, _mkrun(seen),
+                    include_dirs=("data",),
+                    max_tool_calls=5, max_tokens=100_000)
+    assert seen, "無模型呼叫，無法驗證上限傳遞"
+    assert all(c == (5, 100_000) for c in seen), seen
+
+    # (2) 顯式 None⇒回退 manifest budget 上限
+    seen = []
+    g2.run_g2_smoke(man, base, tmp_path / "out2", build, _mkrun(seen),
+                    include_dirs=("data",))
+    assert seen and all(c == (21, 2_100_000) for c in seen), seen
+
+    # (3) 皆 None（原始 manifest 無 cap 欄）＝不量不殺：舊簽名 RunFn（無 **kwargs）照跑
+    base3 = tmp_path / "smoke3"
+    shutil.copytree(SMOKE, base3)
+    man3 = g2.G2Manifest.load(base3 / "manifest.json")
+    legacy_calls: list = []
+
+    def legacy_run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+                   log_dir: pathlib.Path) -> dict:  # 無 **kwargs＝舊簽名
+        legacy_calls.append(True)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    g2.run_g2_smoke(man3, base3, tmp_path / "out3", build, legacy_run,
+                    include_dirs=("data",))
+    assert legacy_calls, "無模型呼叫，無法驗證不帶新 kwarg 的路徑"
+
+
 # ── G2 正式效果比較預註冊（vq-5nz.15）────────────────────────────
 
 EFFECT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "effect_manifest.json"
