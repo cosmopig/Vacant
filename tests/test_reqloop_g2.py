@@ -292,6 +292,30 @@ def test_dry_run_json_is_machine_readable():
     assert j["budget"]["hard_token_cap"] is False
 
 
+def test_dry_run_text_shows_hard_caps_explicitly():
+    """r1095：dry-run 是發射前唯一的驗看，但人看文字 budget 行不顯示
+    max_tool_calls/max_tokens（6a360204 引入）——dry_run_json 有（整包 dump
+    budget）、文字行沒有，兩份出口不一致。dabstep-10 長尾（148 calls / 5.87M tok）
+    之後，控本靠發射前看得到上限；H-0 教訓：綠燈來自漏掉的 flag 正是要防的洞。
+    未設＝顯式 none（不量不殺、舊路徑），不是隱藏、也不是 UNKNOWN（值缺失）；
+    設了＝顯示數值，與 dry_run_json 同值。離線，零模型呼叫。
+    """
+    man = g2.G2Manifest.load(MANIFEST)
+    txt = g2.dry_run_text(man)
+    # 原始 manifest 無 cap 欄⇒顯式 none（不得缺席、不得填 0/UNKNOWN）
+    assert "max_tool_calls=none" in txt
+    assert "max_tokens=none" in txt
+    # manifest budget 設了⇒顯示數值，且與 dry_run_json 的 budget 同值
+    man.budget["max_tool_calls"] = 40
+    man.budget["max_tokens"] = 8_000_000
+    txt2 = g2.dry_run_text(man)
+    assert "max_tool_calls=40" in txt2
+    assert "max_tokens=8000000" in txt2
+    j2 = g2.dry_run_json(man)
+    assert j2["budget"]["max_tool_calls"] == 40
+    assert j2["budget"]["max_tokens"] == 8_000_000
+
+
 def test_run_g2_smoke_fake_six_cells(tmp_path):
     """6 格全出結果；localized 無缺口格＝0 呼叫；hidden-after 一律 UNKNOWN。"""
     man = g2.G2Manifest.load(MANIFEST)
