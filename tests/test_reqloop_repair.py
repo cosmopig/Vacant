@@ -946,12 +946,13 @@ def test_selftest_command_all_green(capsys):
     rc = repair.main(["--selftest"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "SELFTEST: 12/12 PASS" in out
-    assert "[8/12] ok" in out           # 累積修復（check 8）
-    assert "[9/12] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
-    assert "[10/12] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
-    assert "[11/12] ok" in out          # 成本誠實：model_calls＝實際 API 呼叫數、缺值⇒UNKNOWN（P001-20261105-03）
-    assert "[12/12] ok" in out          # 静默空结果→放棄偵测（contrast1753_20261105 dabstep-1753 localized r1）
+    assert "SELFTEST: 13/13 PASS" in out
+    assert "[8/13] ok" in out           # 累積修復（check 8）
+    assert "[9/13] ok" in out           # 改來源迎合交付不得翻 PASS（P000-20261105-02）
+    assert "[10/13] ok" in out          # 候選覆寫驗證器無效（P000-20261105-02）
+    assert "[11/13] ok" in out          # 成本誠實：model_calls＝實際 API 呼叫數、缺值⇒UNKNOWN（P001-20261105-03）
+    assert "[12/13] ok" in out          # 静默空结果→放棄偵测（contrast1753_20261105 dabstep-1753 localized r1）
+    assert "[13/13] ok" in out          # 版本後綴直譯器空结果形状（r1078；python3.12 盲區補齊）
 
 
 def test_main_cli_supports_min_rounds_and_defaults_generic_to_one(task_dir, tmp_path):
@@ -1925,6 +1926,41 @@ def test_detect_empty_result_giveup_ignores_stdout_redirection(tmp_path):
              "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
         )) + "\n", encoding="utf-8")
         assert repair.detect_empty_result_giveup(log, ans) is None, f"False positive on redirected: {cmd}"
+
+
+def test_detect_empty_result_giveup_handles_versioned_interpreter(tmp_path):
+    """版本後綴直譯器（python3.12／python3.11 -u／前綴路徑＋版本）＝同一空结果形状。
+
+    5a2384fa 的正則家族補齊了前綴路徑與命令行參數，但版本後綴（python3.12）
+    仍是盲區：本測試先紅後綠。重定向排除對版本形狀同樣成立（不誤判）。"""
+    log = tmp_path / "agent_stdout.log"
+    ans = tmp_path / "answer.txt"
+    ans.write_text("None\n", encoding="utf-8")
+    for cmd, script in (
+        ("python3.12 solution.py", "solution.py"),
+        ("python3.11 -u calc.py", "calc.py"),
+        ("python -u solve2.py", "solve2.py"),
+        ("/usr/local/bin/python3.12 run.py", "run.py"),
+        ("./.venv/bin/python3.12 -B stats.py", "stats.py"),
+    ):
+        log.write_text("\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": cmd}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+        hit = repair.detect_empty_result_giveup(log, ans)
+        assert hit is not None, f"versioned-interpreter shape missed: {cmd}"
+        assert any(script in s for s in hit["empty_run_scripts"])
+    # 重定向排除對版本形狀同樣成立（空輸出＝重定向自然現象，非空结果）
+    for cmd in ("python3.12 solution.py > out.txt", "python3.11 x.py | tee out.txt"):
+        log.write_text("\n".join(json.dumps(o) for o in (
+            {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+             "args": {"command": cmd}},
+            {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+             "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
+        )) + "\n", encoding="utf-8")
+        assert repair.detect_empty_result_giveup(log, ans) is None, f"false positive on redirected: {cmd}"
 
 
 def test_build_repair_prompt_avoids_conflicting_crash_and_empty_giveup_hints(task_dir):
