@@ -1087,8 +1087,22 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
                        {"missing_file": item.deliverable})
     content = deliv_file.read_text(encoding="utf-8")
     found: dict[str, list[str]] = {}
-    for m in _ANSWER_KV_RE.finditer(content):
-        found.setdefault(m.group(1).strip().lower(), []).append(m.group(2).strip())
+    if deliv_file.suffix.lower() == ".json":
+        # 工單 P20261106_0632-2：結構化 JSON 交付物（如 result.json）直接讀字典鍵值，
+        # 不再硬性限制 @key[value] 純文字正則；值轉字串後走同一 _kv_type_ok 約束檢查。
+        try:
+            data = json.loads(content)
+        except (json.JSONDecodeError, ValueError) as e:
+            return _result(item, "FAIL", "答案檔不是合法 JSON（invalid_json）",
+                           {"counterexamples": [{"key": "<file>", "problem": "invalid_json"}],
+                            "reason": str(e)})
+        if not isinstance(data, dict):
+            data = {}
+        for k, v in data.items():
+            found.setdefault(str(k).strip().lower(), []).append(str(v))
+    else:
+        for m in _ANSWER_KV_RE.finditer(content):
+            found.setdefault(m.group(1).strip().lower(), []).append(m.group(2).strip())
     counterexamples: list[dict[str, Any]] = []
     checked: list[str] = []
     for spec in specs:
@@ -1125,6 +1139,18 @@ def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
     if not deliv_file.is_file():
         return None, [f"missing_file:{item.deliverable}"]
     content = deliv_file.read_text(encoding="utf-8")
+    if deliv_file.suffix.lower() == ".json":
+        # 工單 P20261106_0632-2：JSON 交付物直接讀字典鍵值（大小寫不拘，與原正則路徑
+        # 同口徑）；非 dict 視為 key 缺失；解析失敗回傳 invalid_json（下游標 FAIL）。
+        try:
+            data = json.loads(content)
+        except (json.JSONDecodeError, ValueError):
+            return None, ["invalid_json"]
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if str(k).strip().lower() == key.lower():
+                    return str(v), []
+        return None, ["missing"]
     vals = [m.group(2).strip() for m in _ANSWER_KV_RE.finditer(content)
             if m.group(1).strip().lower() == key.lower()]
     if not vals:
