@@ -20,3 +20,8 @@
 - 沒驗證什麼：真實效果——本票是離線檢查器能力（JSON records.json 結構驗收），非效果數字；A/B 雙切片仍 NOT_fired（發射要授權＋新成本另報）；未見任務效力。
 - DECISION：未加 regex／靜態 prompt／重試；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer；工單已移 done/（結果 3 行在檔尾）。
 - 下一步：11-06#4 需求驅動內容閉環切片（A=realtask 6550d7a8／B=dab_378，離線三門已就緒，fire 要授權）；未授權維持雙凍結、0 新票。
+- r1140：完成工單 P20261106_2040-2——realtask_manifest.json 補入真實正確草稿 dabstep-11-pi-A（e014_dabstep_block pass=true/reward 1、本地 req_max_eur_amount PASS）→3 草稿（2 bad＋1 good）×2 臂＝6 格對照；manifest＋2 測試擴充（6 格、2 bad 1 good、三針無洩漏、baseline 1 PASS 2 FAIL）；commit 7ad97fbe；0 模型呼叫、0 發射、工單已移 done/。
+- 驗證了什麼：驗收 2 passed（1.64s）；dry-run 6 cells EXIT=0；baseline 1 PASS 2 FAIL EXIT=0（dabstep-11-pi-A all_required_pass=True、2 bad 皆 False）；test_reqloop_g2/repair/real_slice/checks 206 passed（4.04s）。
+- ⚠ 工單針「4990.0」非本切片任何題重算值：col_max(eur_amount)=4811.76＝good 草稿值（e014 lab pass=true 即此值）、掃 payments.csv 各數值欄無 max 近 4990.0——以錯誤值當針是空洞斷言，改以實際重算答案 4811.76 入針（票尾已註記、請規劃者知悉）。
+- 沒驗證什麼：真實效果（A/B 雙切片仍 NOT_fired、發射要授權＋新成本另報）；未見任務效力（開發選樣、單 rep）。
+- DECISION：針值修正屬工單事實錯誤修正（非繞過驗收：驗收意圖＝重算答案絕不進提示/baseline，4811.76 正是 dabstep-11 的重算答案）；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer、未加 regex／靜態 prompt／重跑。
