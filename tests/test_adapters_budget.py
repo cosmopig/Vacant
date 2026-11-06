@@ -62,3 +62,32 @@ def test_no_cap_unchanged(tmp_path):
     assert res["budget_exceeded"] is None
     assert res["observed_tool_calls"] is None   # 沒啟用輪詢＝沒量＝None，不填 0
     assert res["observed_tokens"] is None
+
+
+def test_wait_budget_drains_trailing_buffer_without_newline(tmp_path):
+    """行程退出時最後一行日誌無結尾換行（或結束瞬間未達換行）：
+    殘留緩衝區必須被清空解析，不得漏計工具呼叫數／token 數或漏判超標。"""
+    script = (
+        "import sys\n"
+        "sys.stdout.write('{\"type\": \"tool_execution_start\", \"toolName\": \"bash\"}\\n')\n"
+        "sys.stdout.write('{\"type\": \"tool_execution_start\", \"toolName\": \"bash\"}')\n"
+        "sys.stdout.flush()\n"
+    )
+    res = run_agent(_launch(script), workspace=tmp_path, log_dir=tmp_path,
+                    timeout_s=20, max_tool_calls=1)
+    assert res["observed_tool_calls"] == 2
+    assert res["budget_exceeded"] == "tool_calls"
+
+
+def test_wait_budget_supports_null_role_message_end(tmp_path):
+    """相容 message_end role 為 None 的 usage 事件（與 repair.parse_usage_from_log 一致）。"""
+    script = (
+        "import json\n"
+        "print(json.dumps({'type': 'message_end', 'message': "
+        "{'role': None, 'usage': {'input': 50, 'output': 70}}}), flush=True)\n"
+    )
+    res = run_agent(_launch(script), workspace=tmp_path, log_dir=tmp_path,
+                    timeout_s=20, max_tokens=100)
+    assert res["observed_tokens"] == 120
+    assert res["budget_exceeded"] == "tokens"
+

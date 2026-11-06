@@ -180,7 +180,7 @@ def _wait_budget(proc: subprocess.Popen, out_p: pathlib.Path, timeout_s: float,
     只處理以 `\n` 結尾的完整行；`json.loads` 失敗的行略過。
     口徑（與 reqloop/repair.py 的 usage 解析同形、但自寫不 import）：
     - `type=="tool_execution_start"` ＝ 1 次工具呼叫；
-    - `type=="message_end"` 且 `message.role=="assistant"` 且 `message.usage` 是 dict
+    - `type=="message_end"` 且 `message.role in ("assistant", None)` 且 `message.usage` 是 dict
       時，`input`＋`output`（只加 int，非 int 當缺值不加）累加成 token 用量。
     工具呼叫數**大於** `max_tool_calls`、或 token 數**大於等於** `max_tokens` ⇒ 殺。
     回傳 (rc, budget_exceeded, observed_tool_calls, observed_tokens, timed_out)。
@@ -190,6 +190,30 @@ def _wait_budget(proc: subprocess.Popen, out_p: pathlib.Path, timeout_s: float,
     budget: str | None = None
     timed_out = False
     deadline = time.monotonic() + timeout_s
+
+    def _parse_lines(raw_lines: list[bytes]) -> None:
+        nonlocal tool_calls, tokens
+        for raw in raw_lines:
+            if not raw:
+                continue
+            try:
+                ev = json.loads(raw)
+            except (json.JSONDecodeError, ValueError):
+                continue
+            if not isinstance(ev, dict):
+                continue
+            if ev.get("type") == "tool_execution_start":
+                tool_calls += 1
+            elif ev.get("type") == "message_end":
+                msg = ev.get("message")
+                if isinstance(msg, dict) and msg.get("role") in ("assistant", None):
+                    usage = msg.get("usage")
+                    if isinstance(usage, dict):
+                        for key in ("input", "output"):
+                            v = usage.get(key)
+                            if isinstance(v, int) and not isinstance(v, bool):
+                                tokens += v
+
     with out_p.open("rb") as rd:
         buf = b""
         while True:
@@ -205,26 +229,7 @@ def _wait_budget(proc: subprocess.Popen, out_p: pathlib.Path, timeout_s: float,
                     idx = buf.rfind(b"\n")
                     complete = buf[:idx + 1] if idx >= 0 else b""
                     buf = buf[idx + 1:]
-                for raw in complete.splitlines():
-                    if not raw:
-                        continue
-                    try:
-                        ev = json.loads(raw)
-                    except (json.JSONDecodeError, ValueError):
-                        continue
-                    if not isinstance(ev, dict):
-                        continue
-                    if ev.get("type") == "tool_execution_start":
-                        tool_calls += 1
-                    elif ev.get("type") == "message_end":
-                        msg = ev.get("message")
-                        if isinstance(msg, dict) and msg.get("role") == "assistant":
-                            usage = msg.get("usage")
-                            if isinstance(usage, dict):
-                                for key in ("input", "output"):
-                                    v = usage.get(key)
-                                    if isinstance(v, int) and not isinstance(v, bool):
-                                        tokens += v
+                _parse_lines(complete.splitlines())
             over_calls = max_tool_calls is not None and tool_calls > max_tool_calls
             over_tokens = max_tokens is not None and tokens >= max_tokens
             if over_calls or over_tokens:
@@ -233,6 +238,20 @@ def _wait_budget(proc: subprocess.Popen, out_p: pathlib.Path, timeout_s: float,
             if proc.poll() is not None:
                 break  # agent 自己正常結束：不殺、不記超限
             time.sleep(0.2)
+
+        # 結束後清空殘留輸出（包含最後一塊或最後一行無換行符之 JSON）
+        rest = rd.read()
+        if rest:
+            buf += rest
+        if buf:
+            _parse_lines(buf.splitlines())
+            buf = b""
+        if budget is None:
+            over_calls = max_tool_calls is not None and tool_calls > max_tool_calls
+            over_tokens = max_tokens is not None and tokens >= max_tokens
+            if over_calls or over_tokens:
+                budget = "tool_calls" if over_calls else "tokens"
+
     _kill_group(proc)
     rc = proc.wait()
     return rc, budget, tool_calls, tokens, timed_out
