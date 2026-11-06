@@ -139,6 +139,35 @@ def test_real_slice_dry_run_lists_two_cells_and_caps():
     assert "timeout_s_per_round=300" in txt
 
 
+def test_real_slice_needle_is_true_recomputed_value():
+    """資深審查 2026-11-06 #2 驗收判準：無洩漏針必須是對應題目的真實重算值——
+    由 checker 自己的 col_stats 代碼路徑對凍結 task/data/ 實算得出，不是手寫數字。
+    （錯誤針＝空洞斷言：切片 A 的 1628／0.020500 即此形狀、已收斂移除；r1140 4990.0→4811.76 同訓。）
+    零模型呼叫。"""
+    import csv
+    from vacant_network.reqloop.checks import _col_stats
+    man = _loaded()
+    base = REAL_SLICE_MANIFEST.parent
+    d = man.drafts[0]
+    needle = "-1.13"
+    assert needle in man.raw.get("leak_guard", ""), "manifest leak_guard 須點名針（防針漂移）"
+    req_set = RequirementSet.load(base / d["task"]["dir"] / "requirements.json")
+    hit = 0
+    for it in req_set.items:
+        if it.id not in ("pre_kurtosis", "post_kurtosis"):
+            continue
+        hit += 1
+        rc = it.params["recompute"]
+        assert rc["type"] == "col_stats"
+        data_path = base / d["task"]["dir"] / it.params["data_file"]
+        with open(data_path, newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        expected = round(_col_stats(rows, rc), int(rc.get("round", 0)))
+        assert str(expected) == needle, \
+            f"{it.id}: 針 {needle!r} 非 task/data 實算真值 {expected!r}（空洞斷言）"
+    assert hit == 2, "測試空洞：pre/post_kurtosis 未皆驗到"
+
+
 def test_real_slice_status_pending_naming():
     """發射需點名＋成本另報（11-06 #7）：規格凍結但狀態不得是 FIRED。"""
     man = _loaded()

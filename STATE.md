@@ -40,3 +40,11 @@
 - 沒驗證什麼：真實效果（A/B 雙切片仍 NOT_fired、發射要授權＋新成本另報）；未見任務效力（開發選樣、單 rep）；f4391686 CI（loop 自動推後核）。
 - DECISION：純規格補齊＋測試鎖定（非純文檔修補：新增機器斷言、紅→綠在案）；未加 regex／靜態 prompt／重試；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer。
 - 下一步：候授權 fire A（6 格）或 B（2 格），二擇一、不並跑；未授權維持雙凍結、0 新票、不製造工作。
+- r1144：執行資深審查 2026-11-06 兩條指示（0 模型呼叫、0 發射、0 新票——審查明令不再補欄位水工單，故未開票、記帳於本條＋NOW.md）：
+- ①auto/argon `23fd09eb`（reqloop checks 強化）合併入 auto/qwen27b：merge `c7755793`（--no-ff、無衝突）；該 commit 修復 read_table_deliverable 損毀行/重複鍵假 PASS、check_csv_structure 僅驗 rows[0] 假 PASS、check_rowset_filter/group_aggregate 大小寫對齊假 PASS/FAIL、check_kv_recomputed/plain_recomputed 早退分支漏標 expected_in_evidence=false；驗收 5 檔 218 passed（含其新增 1 測試）。
+- ②切片收斂（審查#2「停止雙軌維護兩份重疊切片」）：刪除 ops/reqloop/g2/realtask_manifest.json＋test_reqloop_g2.py 三枚專屬測試（frozen/leakfree、baseline、six_elements）＋REALTASK_MANIFEST/SIX_ELEMENTS 兩常數。刪除理由（實算在案）：針「1628」/「0.020500」非該兩題真重算值（以 argon 合併後 checker 實算＝2081990 / 0.120132，與審查報告同值），且兩草稿失敗型實為 not_an_integer/not_a_number（格式/取整）而非 mismatch_with_recomputation（內容算錯）——雙重誤標，修補即審查點名的水工，故收斂移除。
+- 收斂後單一真實內容錯誤切片＝real_slice/manifest.json（dab_378-pi-C、2 臂 2 格、FROZEN_PENDING_NAMING）：--baseline 9 PASS/2 FAIL，FAIL＝pre/post_kurtosis（草稿 -1.17 vs 真重算 -1.13、problem=mismatch_with_recomputation、expected_in_evidence=false）；針「-1.13」由 checker 自己的 _col_stats 路徑對凍結 task/data/2014_q4.csv 實算確認（raw -1.1295509754595254→round2 -1.13），並新增守衛測試 test_real_slice_needle_is_true_recomputed_value（針與 task/data 實算不符即紅、防針漂移成空洞斷言）。
+- 驗證了什麼：pytest tests/test_reqloop_g2.py tests/test_reqloop_real_slice.py＝44 passed；5 檔驗收集（checks/g2/repair/real_slice/g1_gate）＝218 passed（220−3 移除＋1 新增）；real_slice --baseline EXIT=0（9/11 required PASS）；smoke/smoke_e013/smoke_e014 管線凍結未動（test_reqloop_checks/repair 依賴）；test_all_repo_reqloop_manifests_resolve_frozen 維持綠（子集斷言）。
+- 沒驗證什麼：真實效果（切片 NOT_fired，發射要授權＋新成本另報）；未見任務效力；c7755793 CI（loop 自動推後核）。
+- DECISION：未 fire（無新授權）、未加 regex／靜態 prompt／重試、未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer；commit 含：merge c7755793＋本收斂 commit（刪 1 manifest＋改 2 測試檔＋STATE/NOW）。
+- 下一步：候需求端點名 vq-6rp（dabstep-1753 模型側硬缺口）或 vq-5nz.6（停滯草稿換方法）；或授權後對 real_slice 做最小 A/B——兩臂起始草稿 sha256 完全相同（manifest 已凍結同一 draft 71c5097b…）、報告原始結果（localized 是否修好 pre/post_kurtosis 且保住其餘 9 項、成本 ≤ generic）、模型流量＝新成本先另報。
