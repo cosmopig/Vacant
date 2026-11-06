@@ -40,28 +40,39 @@ def _loaded():
     return g2.G2Manifest.load(REAL_SLICE_MANIFEST)
 
 
-def test_real_slice_manifest_frozen_two_cells():
-    """真實 CSV 任務最小對照＝1 真草稿 × 2 臂＝2 格；凍結副本存在、hash 對得上。"""
+def test_real_slice_manifest_frozen_four_cells():
+    """真實 CSV 任務最小對照＝1 失敗＋1 正確真草稿 × 2 臂＝4 格；凍結副本存在、hash 對得上。
+    失敗草稿保持在 drafts[0]（其它測試與針守衛以 drafts[0] 為反例基準）。"""
     man = _loaded()
     man.verify_frozen(REAL_SLICE_MANIFEST.parent)
     assert set(man.arms) == {"generic", "localized"}
-    assert len(man.drafts) == 1
-    d = man.drafts[0]
-    assert d["task_id"] == "dab_378" and d["role"] == "bad"
-    assert d["source"]["score"] is not None, "真實草稿須有已記錄分數（不得 null）"
-    cells = g2.plan_cells(man)
-    assert len(cells) == 2 and {c[1] for c in cells} == {"generic", "localized"}
+    assert len(man.drafts) == 2, "4 格最小對照＝2 真草稿 × 2 臂（11-06 指示 2：正確成果須有真實基線）"
+    assert {d["role"] for d in man.drafts} == {"bad", "good"}
+    assert man.drafts[0]["role"] == "bad", "失敗草稿須為 drafts[0]（反例基準，針守衛依賴）"
     base = REAL_SLICE_MANIFEST.parent
-    for rel, h in d["draft"]["files"].items():
-        f = base / d["draft"]["dir"] / rel
-        assert f.is_file()
-        assert _sha(f) == h
-    assert d["task"]["requirements"]["sha256"]
-    # r1011 口徑：凍結資料檔（CSV）必須釘 hash 且可解析
-    assert d["task"].get("data_files", {}).get("data/2014_q4.csv"), \
-        "真實 CSV 任務必須釘資料檔 hash（漏驗即放過洞）"
-    df = base / d["task"]["dir"] / "data/2014_q4.csv"
-    assert df.is_file()
+    for d in man.drafts:
+        assert d["task_id"] == "dab_378"
+        assert d["source"]["score"] is not None, "真實草稿須有已記錄分數（不得 null）"
+        assert d["source"]["score"].get("task_id") == "dab_378"
+        for rel, h in d["draft"]["files"].items():
+            f = base / d["draft"]["dir"] / rel
+            assert f.is_file()
+            assert _sha(f) == h
+        assert d["task"]["requirements"]["sha256"]
+        # r1011 口徑：凍結資料檔（CSV）必須釘 hash 且可解析
+        assert d["task"].get("data_files", {}).get("data/2014_q4.csv"), \
+            "真實 CSV 任務必須釘資料檔 hash（漏驗即放過洞）"
+        df = base / d["task"]["dir"] / "data/2014_q4.csv"
+        assert df.is_file()
+    # 兩臂公平比較客觀基線：兩草稿共用同一 task 目錄（同一 request/requirements/CSV）
+    assert len({d["task"]["dir"] for d in man.drafts}) == 1, \
+        "兩草稿必須共用同一 task 目錄（同起點），實得不同"
+    cells = g2.plan_cells(man)
+    assert len(cells) == 4
+    assert {(n, a) for n, a in cells} == {
+        ("dab_378-pi-A", "generic"), ("dab_378-pi-A", "localized"),
+        ("dab_378-pi-C", "generic"), ("dab_378-pi-C", "localized"),
+    }
 
 
 def test_real_slice_six_elements_and_cost_cap():
@@ -103,6 +114,29 @@ def test_real_slice_real_failed_artifact_two_kurtosis_fail():
     assert p["note"]
 
 
+def test_real_slice_baseline_good_and_bad():
+    """4 格 baseline（0 模型呼叫）：真實正確草稿 11/11 PASS、真實失敗草稿 9 PASS/2 FAIL——
+    「正確成果是否退步（right_to_wrong=0）」的客觀真實基線（11-06 指示 2）。"""
+    man = _loaded()
+    base = REAL_SLICE_MANIFEST.parent
+    by_role = {d["role"]: d for d in man.drafts}
+    assert set(by_role) == {"bad", "good"}
+    for role in ("good", "bad"):
+        d = by_role[role]
+        task_dir = base / d["task"]["dir"]
+        draft_dir = base / d["draft"]["dir"]
+        req_set = RequirementSet.load(task_dir / "requirements.json")
+        results = run_requirement_checks(task_dir, req_set, draft_dir)
+        st = {r.claim_id: r.status for r in results}
+        n_pass = sum(1 for v in st.values() if v == "PASS")
+        if role == "good":
+            assert n_pass == 11 and all(v == "PASS" for v in st.values()), \
+                f"dab_378-pi-A 應 11/11 PASS，實得 {st}"
+        else:
+            assert n_pass == 9, f"dab_378-pi-C 應 9 PASS/2 FAIL，實得 {st}"
+            assert {k for k, v in st.items() if v == "FAIL"} == {"pre_kurtosis", "post_kurtosis"}, st
+
+
 def test_real_slice_localized_prompt_leak_free():
     """無洩漏門：localized 提示點名 2 條 FAIL（修復目標仍在），但重算峰度值
     -1.13 絕不進提示；FAIL 證據標記 expected_in_evidence=False。零模型呼叫。"""
@@ -125,12 +159,14 @@ def test_real_slice_localized_prompt_leak_free():
     assert "-1.13" not in prompt, "localized 提示洩重算峰度值 -1.13"
 
 
-def test_real_slice_dry_run_lists_two_cells_and_caps():
-    """--dry-run 文字行：2 格、成本上限顯式（漏掉的 flag 正是長尾要防的形狀）。"""
+def test_real_slice_dry_run_lists_four_cells_and_caps():
+    """--dry-run 文字行：2 drafts · 4 cells、成本上限顯式（漏掉的 flag 正是長尾要防的形狀）。"""
     man = _loaded()
     txt = g2.dry_run_text(man)
-    assert "2 drafts" not in txt
-    assert "1 drafts · 2 cells" in txt
+    assert "2 drafts · 4 cells" in txt
+    assert "1 drafts" not in txt
+    assert "dab_378-pi-A × generic" in txt
+    assert "dab_378-pi-A × localized" in txt
     assert "dab_378-pi-C × generic" in txt
     assert "dab_378-pi-C × localized" in txt
     assert "max_tool_calls=60" in txt
