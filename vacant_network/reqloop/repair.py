@@ -185,9 +185,13 @@ def _partition_deliverables(
     satisfied: set[str] = set()
     unsatisfied: set[str] = set()
     for d in {it.deliverable for it in req_set.items if it.deliverable}:
-        req_items = [i for i in req_set.items if i.deliverable == d and i.required]
-        results = [by_id[i.id] for i in req_items if i.id in by_id]
-        if req_items and results and all(c.status == "PASS" for c in results):
+        all_items = [i for i in req_set.items if i.deliverable == d]
+        req_items = [i for i in all_items if i.required]
+        if (
+            req_items
+            and all(i.id in by_id and by_id[i.id].status == "PASS" for i in req_items)
+            and all(by_id[i.id].status == "PASS" for i in all_items if i.id in by_id)
+        ):
             satisfied.add(d)
         else:
             unsatisfied.add(d)
@@ -613,8 +617,13 @@ _PROMPT_TEXT_CAP = 800
 _FORMAT_ONLY_PROBLEMS = frozenset({
     "not_a_number",
     "not_an_integer",
+    "not_nonneg_int",
+    "out_of_01",
+    "missing",
     "missing_key",
     "missing_file",
+    "invalid_json",
+    "ambiguous",
     "empty_value",
     "not_a_fee_id",
 })
@@ -625,13 +634,17 @@ def _is_format_only_claim(c: ClaimResult) -> bool:
     ev = c.evidence
     if not isinstance(ev, dict):
         return False
+    if "missing_file" in ev:
+        return True
     prob = ev.get("problem")
-    if isinstance(prob, str) and prob in _FORMAT_ONLY_PROBLEMS:
+    if isinstance(prob, str) and (prob in _FORMAT_ONLY_PROBLEMS or prob.startswith("missing_file:")):
         return True
     cex = ev.get("counterexamples")
     if isinstance(cex, list) and cex:
         return all(
-            isinstance(it, dict) and isinstance(it.get("problem"), str) and it["problem"] in _FORMAT_ONLY_PROBLEMS
+            isinstance(it, dict)
+            and isinstance(it.get("problem"), str)
+            and (it["problem"] in _FORMAT_ONLY_PROBLEMS or it["problem"].startswith("missing_file:"))
             for it in cex
         )
     return False
@@ -1968,6 +1981,11 @@ def pin_agent_python(launch: Any, *, python: str | os.PathLike | None = None) ->
 
 
 def _default_build(provider: str | None, model: str | None, hooks: bool = True):
+    if isinstance(provider, pathlib.Path) or isinstance(model, pathlib.Path):
+        raise TypeError(
+            "_default_build(provider, model) 是工廠函式，請先呼叫取得 BuildFn，"
+            "勿直接作為 build(prompt, ws) 傳入"
+        )
     from vacant_network.adapters.agents import pi_build
     extra: list[str] = []
     if provider:

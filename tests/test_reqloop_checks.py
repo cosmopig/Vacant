@@ -1740,3 +1740,133 @@ def test_mean_int_col_unrounded_float_reports_not_an_integer_instead_of_mismatch
     assert "重算不符" not in recomp.detail
 
 
+def test_json_deliverable_duplicate_and_case_ambiguous_keys_fail_in_both_verifiers(tmp_path: pathlib.Path):
+    """argon 20261106_0800 回歸（9409763f 缺陷）：
+    1. JSON 交付物含大小寫重複鍵（如 {"mean_cases": 200, "MEAN_CASES": 999}）時，
+       check_answer_kv 與 check_kv_recomputed 必須一致回傳 FAIL（ambiguous），
+       _kv_answer_value 不得只取第一個命中而放行 PASS。
+    2. JSON 交付物含完全同名重複鍵（如 '{"mean_cases": 999, "mean_cases": 200}'）時，
+       兩檢查器亦必須偵測到多個值並回傳 FAIL（ambiguous），不得被 json.loads 靜默覆寫後放行 PASS。
+    3. JSON 交付物數值字串含千分位逗號或空白（如 "1,000"）時，kv_recomputed 與 answer_kv 口徑一致。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "cases.csv",
+        "Country,No. of cases\nA,100\nB,200\nC,300\n",
+    )
+    items = [
+        RequirementItem(
+            id="req_fmt",
+            quote="輸出 result.json 含 mean_cases（整數）",
+            deliverable="result.json",
+            verifier="answer_kv",
+            params={"keys": [{"key": "mean_cases", "type": "integer"}]},
+        ),
+        RequirementItem(
+            id="req_val",
+            quote="mean_cases 為 No. of cases 均值（200）",
+            deliverable="result.json",
+            verifier="kv_recomputed",
+            params={
+                "key": "mean_cases",
+                "data_file": "cases.csv",
+                "recompute": {"type": "mean_int_col", "col": "No. of cases"},
+            },
+        ),
+    ]
+    rs = RequirementSet(task_id="t_json_dup", items=items)
+
+    # 1. 大小寫重複鍵：兩條皆須 FAIL (ambiguous)
+    case_dup = tmp_path / "case_dup"
+    _write(case_dup / "result.json", '{"mean_cases": 200, "MEAN_CASES": 999}\n')
+    res_case = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, case_dup)}
+    assert res_case["req_fmt"].status == "FAIL"
+    assert res_case["req_fmt"].evidence["counterexamples"][0]["problem"] == "ambiguous"
+    assert res_case["req_val"].status == "FAIL"
+    assert res_case["req_val"].evidence.get("problem") == "ambiguous"
+
+    # 2. 完全同名重複鍵：兩條皆須 FAIL (ambiguous)
+    exact_dup = tmp_path / "exact_dup"
+    _write(exact_dup / "result.json", '{"mean_cases": 999, "mean_cases": 200}\n')
+    res_exact = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, exact_dup)}
+    assert res_exact["req_fmt"].status == "FAIL"
+    assert res_exact["req_fmt"].evidence["counterexamples"][0]["problem"] == "ambiguous"
+    assert res_exact["req_val"].status == "FAIL"
+    assert res_exact["req_val"].evidence.get("problem") == "ambiguous"
+
+
+def test_nan_and_inf_never_false_pass_or_crash_across_verifiers(tmp_path: pathlib.Path):
+    """argon 20261106_0800 回歸：
+    IEEE 754 中 `abs(float('nan') - expected) > atol` 為 False，且 `round(float('inf'))`／
+    `round(float('nan'))` 會拋未捕捉的 OverflowError／ValueError。
+    任何交付物寫入 'nan'、'NaN'、'inf'、'-inf' 時：
+    - check_answer_kv（含 type=number 與 type=integer/nonneg_int/number_in_01）必須回傳 FAIL（not_a_number），不得崩潰或 PASS；
+    - check_kv_recomputed 與 check_plain_recomputed 必須回傳 FAIL（not_a_number），不得因 NaN 比較為 False 而假 PASS；
+    - check_rowset_filter 與 check_group_aggregate 必須回傳 FAIL，不得把 'nan' 儲存格放行 PASS。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "cases.csv",
+        "Country,No. of cases\nA,100\nB,200\nC,300\n",
+    )
+    items = [
+        RequirementItem(
+            id="kv_num",
+            quote="num",
+            deliverable="result.json",
+            verifier="answer_kv",
+            params={"keys": [{"key": "mean_cases", "type": "number"}]},
+        ),
+        RequirementItem(
+            id="kv_int",
+            quote="int",
+            deliverable="result.json",
+            verifier="answer_kv",
+            params={"keys": [{"key": "mean_cases", "type": "integer"}]},
+        ),
+        RequirementItem(
+            id="kv_recomp",
+            quote="recomp",
+            deliverable="result.json",
+            verifier="kv_recomputed",
+            params={
+                "key": "mean_cases",
+                "data_file": "cases.csv",
+                "recompute": {"type": "mean_int_col", "col": "No. of cases"},
+            },
+        ),
+        RequirementItem(
+            id="plain_recomp",
+            quote="plain",
+            deliverable="plain.txt",
+            verifier="plain_recomputed",
+            params={
+                "data_file": "cases.csv",
+                "recompute": {"type": "unique_count", "col": "Country"},
+            },
+        ),
+        RequirementItem(
+            id="grp_agg",
+            quote="grp",
+            deliverable="agg.csv",
+            verifier="group_aggregate",
+            params={
+                "input_csv": "cases.csv",
+                "group_by": ["country"],
+                "aggregates": [{"name": "total", "type": "sum", "col": "no. of cases"}],
+            },
+        ),
+    ]
+    rs = RequirementSet(task_id="t_nan_inf", items=items)
+
+    for bad_token in ("nan", "NaN", "inf", "-inf", "Infinity"):
+        d = tmp_path / f"deliv_{bad_token}"
+        _write(d / "result.json", json.dumps({"mean_cases": bad_token}))
+        _write(d / "plain.txt", f"{bad_token}\n")
+        _write(d / "agg.csv", f"country,total\nA,{bad_token}\nB,200\nC,300\n")
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, d)}
+        for cid, claim in res.items():
+            assert claim.status == "FAIL", f"token={bad_token!r} claim={cid} got {claim.status}: {claim.detail}"
+
+
+

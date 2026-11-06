@@ -3261,3 +3261,56 @@ def test_budget_exceeded_round_recorded(task_dir, tmp_path):
     assert r.agent["budget_exceeded"] == "tool_calls"
     d = r.to_dict()
     assert d["agent"]["budget_exceeded"] == "tool_calls"
+
+
+def test_partition_deliverables_missing_or_non_pass_claim_never_marked_satisfied(tmp_path):
+    """argon 20261106_0800 回歸（21d96152 缺陷）：
+    1. 當某交付物關聯 2 條必需項（如 req_fmt 與 req_recomp），若其中 1 條在 before 中為 PASS、
+       另 1 條在 before 中缺項（尚未出現在 before），_partition_deliverables 必須將該交付物歸為
+       unsatisfied，絕不能因 `results = [by_id[i.id] for i in req_items if i.id in by_id]` 過濾掉缺項
+       而誤判為 satisfied（「成果已驗證通過，請完整保留勿修改」）。
+    2. 當某交付物的關聯非必需項在 before 中為 FAIL 時，亦不得將該交付物標為「已驗證通過請勿修改」。
+    3. JSON 交付物常見的 invalid_json／missing／ambiguous 屬於格式/鍵值結構問題，_is_format_only_claim
+       必須識別為 True，避免在只有格式問題時插入「不能再算出與失敗草稿相同的錯誤結果」的重算數值誤導。
+    """
+    rs = RequirementSet(
+        task_id="t_part",
+        items=[
+            RequirementItem(id="req_1", quote="q1", deliverable="result.json", verifier="answer_kv", params={}, required=True),
+            RequirementItem(id="req_2", quote="q2", deliverable="result.json", verifier="kv_recomputed", params={}, required=True),
+            RequirementItem(id="req_clean", quote="q3", deliverable="clean.csv", verifier="csv_structure", params={}, required=True),
+        ],
+    )
+    # req_1 為 PASS，但 req_2 在 before 中缺項
+    before_missing = [
+        repair.ClaimResult(claim_id="req_1", status="PASS", detail="ok", evidence={},
+                           verifier="answer_kv", verifier_version="0.1.0", required=True, authority="user_request"),
+        repair.ClaimResult(claim_id="req_clean", status="PASS", detail="ok", evidence={},
+                           verifier="csv_structure", verifier_version="0.1.0", required=True, authority="user_request"),
+    ]
+    sat, unsat = repair._partition_deliverables(rs, before_missing)
+    assert "result.json" in unsat
+    assert "result.json" not in sat
+    assert "clean.csv" in sat
+
+    # JSON 格式問題屬於 format_only，不應觸發「數值重算不符」指示
+    for prob in ("invalid_json", "missing", "ambiguous", "not_nonneg_int", "out_of_01", "missing_file:result.json"):
+        c_top = repair.ClaimResult(
+            claim_id="req_2", status="FAIL", detail="bad",
+            evidence={"problem": prob},
+            verifier="kv_recomputed", verifier_version="0.1.0", required=True, authority="user_request",
+        )
+        assert repair._is_format_only_claim(c_top) is True, prob
+
+
+def test_default_build_rejects_direct_use_as_build_fn(tmp_path):
+    """argon 20261106_0800 回歸（effects2cap_20261106 實況）：
+    `_default_build(provider, model)` 是工廠函式，回傳 `build(prompt, ws)`。
+    若呼叫端誤把 `_default_build` 本身當成 `build` 傳進 `repair_slice`／`run_g2_smoke`，
+    `build(prompt, ws)` 的第二個參數 `ws` 會是 `pathlib.Path`；過去 `_default_build` 不檢查型別，
+    靜默回傳內部函式物件，導致 `run_agent` 拋 `AttributeError: 'function' object has no attribute 'env'`。
+    現在 `_default_build` 收到 `Path` 時必須立即拋清楚的 `TypeError`。
+    """
+    with pytest.raises(TypeError, match="工廠函式"):
+        repair._default_build("my warning prompt", tmp_path)
+
