@@ -231,9 +231,6 @@ def check_monthly_sales_metrics(
 
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
     atol = float(item.params.get("atol", 0.01))
-    # expected_in_evidence（預設 True＝G1／selftest 舊行為不變）：False＝防洩題模式，
-    # detail/evidence 只點名月份／欄位與草稿目前錯值，重算期望值不進證據
-    # （build_repair_prompt 的 localized 臂直載 detail/evidence，洩題即兩臂不公平）。
     include_expected = bool(item.params.get("expected_in_evidence", True))
 
     # 尋找交付物中的月份欄位
@@ -277,15 +274,15 @@ def check_monthly_sales_metrics(
                 })
             else:
                 mismatches.append(
-                    f"月份 {m} 訂單數不符: 交付物為 {actual_cnt}，與對原始資料的重算不一致"
-                    "（期望值不在證據中，請依原始需求與工作區資料自行重算）"
+                    f"月份 {m} 訂單數與原始資料重算不符: 交付物為 {actual_cnt}"
                 )
                 counterexamples.append({
                     "month": m,
                     "field": "orders_count",
                     "actual": actual_cnt,
-                    "reason": "可能包含取消訂單、重複訂單未去重，或跨月邊界歸屬錯誤",
+                    "problem": "mismatch_with_recomputation",
                     "expected_in_evidence": False,
+                    "reason": "可能包含取消訂單、重複訂單未去重，或跨月邊界歸屬錯誤",
                 })
 
         if actual_sales is None or abs(actual_sales - expected_sales) > atol:
@@ -303,50 +300,44 @@ def check_monthly_sales_metrics(
                 })
             else:
                 mismatches.append(
-                    f"月份 {m} 淨銷售額不符: 交付物為 {actual_sales}，與對原始資料的重算不一致"
-                    "（期望值不在證據中，請依原始需求與工作區資料自行重算）"
+                    f"月份 {m} 淨銷售額與原始資料重算不符: 交付物為 {actual_sales}"
                 )
                 counterexamples.append({
                     "month": m,
                     "field": "net_sales",
                     "actual": actual_sales,
-                    "reason": "可能未扣除取消單、重複計入重複訂單、或金額加總公式錯誤",
+                    "problem": "mismatch_with_recomputation",
                     "expected_in_evidence": False,
+                    "reason": "可能未扣除取消單、重複計入重複訂單、或金額加總公式錯誤",
                 })
 
     if mismatches:
-        evidence = {"counterexamples": counterexamples}
+        ev_fail: dict[str, Any] = {"counterexamples": counterexamples}
         if include_expected:
-            evidence["expected_metrics"] = expected_metrics
+            ev_fail["expected_metrics"] = expected_metrics
         else:
-            evidence["expected_in_evidence"] = False
+            ev_fail["expected_in_evidence"] = False
         return ClaimResult(
             claim_id=item.id,
             status="FAIL",
             detail="; ".join(mismatches),
-            evidence=evidence,
+            evidence=ev_fail,
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
             authority=item.authority,
         )
 
-    if include_expected:
-        return ClaimResult(
-            claim_id=item.id,
-            status="PASS",
-            detail="月度訂單數與淨銷售額重算核對完全一致",
-            evidence={"recomputed_metrics": expected_metrics},
-            verifier=item.verifier,
-            verifier_version=VERIFIER_VERSION,
-            required=item.required,
-            authority=item.authority,
-        )
+    ev_pass: dict[str, Any] = (
+        {"recomputed_metrics": expected_metrics}
+        if include_expected
+        else {"expected_in_evidence": False}
+    )
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail="月度訂單數與淨銷售額與對原始資料的重算一致（期望值不在證據中）",
-        evidence={"expected_in_evidence": False},
+        detail="月度訂單數與淨銷售額重算核對完全一致",
+        evidence=ev_pass,
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
@@ -376,8 +367,6 @@ def check_monthly_top_products(
 
     _, expected_top, _ = recompute_orders_monthly(task_dir, item.params)
     top_n = int(item.params.get("top_n", 3))
-    # expected_in_evidence（預設 True＝舊行為不變）：False＝防洩題，期望排行與
-    # 各商品重算金額不進 detail/evidence（只點名月份與草稿目前排行）。
     include_expected = bool(item.params.get("expected_in_evidence", True))
 
     deliv_by_month = {}
@@ -406,14 +395,21 @@ def check_monthly_top_products(
 
         if len(actual_list) < len(expected_list):
             mismatches.append(f"月份 {m} 前 {top_n} 名商品未完整提供: 預期 {len(expected_list)} 個，實有 {len(actual_list)} 個")
-            ce = {"month": m}
             if include_expected:
-                ce["expected"] = expected_list
-            ce["actual"] = actual_list
-            ce["reason"] = "缺少排名欄位或未填滿前三名"
-            if not include_expected:
-                ce["expected_in_evidence"] = False
-            counterexamples.append(ce)
+                counterexamples.append({
+                    "month": m,
+                    "expected": expected_list,
+                    "actual": actual_list,
+                    "reason": "缺少排名欄位或未填滿前三名",
+                })
+            else:
+                counterexamples.append({
+                    "month": m,
+                    "actual": actual_list,
+                    "problem": "incomplete_top_products",
+                    "expected_in_evidence": False,
+                    "reason": "缺少排名欄位或未填滿前三名",
+                })
             continue
 
         if actual_list != expected_list:
@@ -432,44 +428,41 @@ def check_monthly_top_products(
                 })
             else:
                 mismatches.append(
-                    f"月份 {m} 商品排行錯誤: 交付物為 {actual_list}，與依淨銷售額重算的排行不一致"
-                    "（期望排行不在證據中，請依原始需求與工作區資料自行重算）"
+                    f"月份 {m} 商品排行與原始資料重算不符: 交付物為 {actual_list}"
                 )
                 counterexamples.append({
                     "month": m,
                     "actual_top": actual_list,
-                    "reason": "排序依據錯誤（例如誤用訂單筆數/數量排序，而非使用者要求的淨銷售額排序）",
+                    "problem": "mismatch_with_recomputation",
                     "expected_in_evidence": False,
+                    "reason": "排序依據錯誤（例如誤用訂單筆數/數量排序，而非使用者要求的淨銷售額排序）",
                 })
 
     if mismatches:
+        ev_fail: dict[str, Any] = {"counterexamples": counterexamples}
+        if not include_expected:
+            ev_fail["expected_in_evidence"] = False
         return ClaimResult(
             claim_id=item.id,
             status="FAIL",
             detail="; ".join(mismatches),
-            evidence={"counterexamples": counterexamples},
+            evidence=ev_fail,
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
             authority=item.authority,
         )
 
-    if include_expected:
-        return ClaimResult(
-            claim_id=item.id,
-            status="PASS",
-            detail=f"各月份前 {top_n} 名商品排行（依淨銷售額）重算核對完全一致",
-            evidence={"expected_top": {m: [p[0] for p in prods[:top_n]] for m, prods in expected_top.items()}},
-            verifier=item.verifier,
-            verifier_version=VERIFIER_VERSION,
-            required=item.required,
-            authority=item.authority,
-        )
+    ev_pass: dict[str, Any] = (
+        {"expected_top": {m: [p[0] for p in prods[:top_n]] for m, prods in expected_top.items()}}
+        if include_expected
+        else {"expected_in_evidence": False}
+    )
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail=f"各月份前 {top_n} 名商品排行（依淨銷售額）與對原始資料的重算一致（期望排行不在證據中）",
-        evidence={"expected_in_evidence": False},
+        detail=f"各月份前 {top_n} 名商品排行（依淨銷售額）重算核對完全一致",
+        evidence=ev_pass,
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
@@ -540,38 +533,39 @@ def check_summary_metrics_consistency(
     total_expected_sales = sum(m["net_sales"] for m in expected_metrics.values())
 
     atol = float(item.params.get("atol", 0.05))
-    # expected_in_evidence（預設 True＝舊行為不變）：False＝防洩題，重算總額不進
-    # detail/evidence（UNKNOWN/FAIL/PASS 三態皆 scrub，避免 PASS 證據或 UNKNOWN
-    # 陳述把正確答案字串帶進 localized 提示詞）。
     include_expected = bool(item.params.get("expected_in_evidence", True))
     keywords = list(item.params.get("metric_keywords") or _SUMMARY_TOTAL_KEYWORDS)
     claims = _extract_summary_total_claims(content, keywords)
 
     if not claims:
         if include_expected:
-            detail = (
-                f"摘要中找不到綁定在合計條目上的總額陳述（重算值 {total_expected_sales:.2f}）；"
-                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
+            return ClaimResult(
+                claim_id=item.id,
+                status="UNKNOWN",
+                detail=(
+                    f"摘要中找不到綁定在合計條目上的總額陳述（重算值 {total_expected_sales:.2f}）；"
+                    "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
+                ),
+                evidence={
+                    "expected_total_sales": total_expected_sales,
+                    "reason": "no metric-bound total claim found",
+                },
+                verifier=item.verifier,
+                verifier_version=VERIFIER_VERSION,
+                required=item.required,
+                authority=item.authority,
             )
-            evidence = {
-                "expected_total_sales": total_expected_sales,
-                "reason": "no metric-bound total claim found",
-            }
-        else:
-            detail = (
-                "摘要中找不到綁定在合計條目上的總額陳述；"
-                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
-                "（期望值不在證據中，請依原始需求與工作區資料自行重算）"
-            )
-            evidence = {
-                "reason": "no metric-bound total claim found",
-                "expected_in_evidence": False,
-            }
         return ClaimResult(
             claim_id=item.id,
             status="UNKNOWN",
-            detail=detail,
-            evidence=evidence,
+            detail=(
+                "摘要中找不到綁定在合計條目上的總額陳述；"
+                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
+            ),
+            evidence={
+                "expected_in_evidence": False,
+                "reason": "no metric-bound total claim found",
+            },
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
@@ -583,27 +577,31 @@ def check_summary_metrics_consistency(
         values = [c["value"] for c in claims]
         if include_expected:
             detail = f"合計淨銷售總額條目與重算值 {total_expected_sales:.2f} 不符"
+            ev_fail: dict[str, Any] = {
+                "expected_total_sales": total_expected_sales,
+                "counterexamples": [
+                    {"phrase": c["phrase"], "value": c["value"],
+                     "expected": total_expected_sales}
+                    for c in wrong
+                ],
+            }
         else:
-            detail = ("合計淨銷售總額條目與對原始資料的重算不符"
-                      "（期望值不在證據中，請依原始需求與工作區資料自行重算）")
+            detail = "合計淨銷售總額條目與原始資料重算不符"
+            ev_fail = {
+                "expected_in_evidence": False,
+                "counterexamples": [
+                    {"phrase": c["phrase"], "value": c["value"],
+                     "problem": "mismatch_with_recomputation"}
+                    for c in wrong
+                ],
+            }
         if len({round(v, 6) for v in values}) > 1:
             detail += "；且多個合計陳述互相矛盾"
-        counterexamples = []
-        for c in wrong:
-            ce = {"phrase": c["phrase"], "value": c["value"]}
-            if include_expected:
-                ce["expected"] = total_expected_sales
-            counterexamples.append(ce)
-        evidence = {"counterexamples": counterexamples}
-        if include_expected:
-            evidence["expected_total_sales"] = total_expected_sales
-        else:
-            evidence["expected_in_evidence"] = False
         return ClaimResult(
             claim_id=item.id,
             status="FAIL",
             detail=detail,
-            evidence=evidence,
+            evidence=ev_fail,
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
@@ -624,12 +622,14 @@ def check_summary_metrics_consistency(
             required=item.required,
             authority=item.authority,
         )
-    # 防洩題：PASS 證據也不帶重算總額與匹配原文（匹配原文含正確答案字串）。
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail="文字摘要中的合計淨銷售總額與對原始資料的重算一致（期望值不在證據中）",
-        evidence={"expected_in_evidence": False},
+        detail="文字摘要中的合計淨銷售總額核對正確",
+        evidence={
+            "expected_in_evidence": False,
+            "matched_claims": [c["phrase"] for c in claims],
+        },
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
@@ -969,19 +969,28 @@ def check_rowset_filter(
 
     exp_keys = Counter(tuple(_fmt_key(r[c]) for c in identity) for r in expected)
     act_keys = Counter(tuple(_fmt_key(r.get(c, "")) for c in identity) for r in deliv_rows)
+    include_expected = bool(params.get("expected_in_evidence", True))
     if exp_keys != act_keys:
         only_exp = sorted(set(exp_keys) - set(act_keys))
         only_act = sorted(set(act_keys) - set(exp_keys))
-        detail = "行集不符"
-        if only_exp:
-            detail += f"；缺少列 {[_fmt_key(k) for k in only_exp]}"
-        if only_act:
-            detail += f"；多出列 {[_fmt_key(k) for k in only_act]}"
-        detail += f"（預期 {sum(exp_keys.values())} 列、交付物 {sum(act_keys.values())} 列）"
+        if include_expected:
+            detail = "行集不符"
+            if only_exp:
+                detail += f"；缺少列 {[_fmt_key(k) for k in only_exp]}"
+            if only_act:
+                detail += f"；多出列 {[_fmt_key(k) for k in only_act]}"
+            detail += f"（預期 {sum(exp_keys.values())} 列、交付物 {sum(act_keys.values())} 列）"
+            return _result(
+                item, "FAIL", detail,
+                {"counterexamples": [{"kind": "rowset_mismatch",
+                                      "expected_keys": [list(k) for k in only_exp],
+                                      "actual_keys": [list(k) for k in only_act]}]},
+            )
+        detail = f"行集與原始資料篩選去重結果不符（交付物 {sum(act_keys.values())} 列）"
         return _result(
             item, "FAIL", detail,
-            {"counterexamples": [{"kind": "rowset_mismatch",
-                                  "expected_keys": [list(k) for k in only_exp],
+            {"expected_in_evidence": False,
+             "counterexamples": [{"kind": "rowset_mismatch",
                                   "actual_keys": [list(k) for k in only_act]}]},
         )
 
@@ -1009,23 +1018,40 @@ def check_rowset_filter(
             act_raw = "" if act_raw is None else str(act_raw).strip()
             if isinstance(exp_v, str):
                 if exp_v.strip() != act_raw:
-                    mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {exp_v!r}，交付物為 {act_raw!r}")
-                    counterexamples.append({"row": list(key), "field": out_col, "expected": exp_v, "actual": act_raw})
+                    if include_expected:
+                        mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {exp_v!r}，交付物為 {act_raw!r}")
+                        counterexamples.append({"row": list(key), "field": out_col, "expected": exp_v, "actual": act_raw})
+                    else:
+                        mismatches.append(f"列 {list(key)} 欄 {out_col} 與重算不符: 交付物為 {act_raw!r}")
+                        counterexamples.append({"row": list(key), "field": out_col, "actual": act_raw, "problem": "mismatch_with_recomputation"})
                 continue
             try:
                 act_v = _to_num(act_raw)
             except UnsafeExpressionError:
                 mismatches.append(f"列 {list(key)} 欄 {out_col} 無法解析: 交付物為 {act_raw!r}")
-                counterexamples.append({"row": list(key), "field": out_col, "expected": _fmt_val(exp_v), "actual": act_raw})
+                if include_expected:
+                    counterexamples.append({"row": list(key), "field": out_col, "expected": _fmt_val(exp_v), "actual": act_raw})
+                else:
+                    counterexamples.append({"row": list(key), "field": out_col, "actual": act_raw, "problem": "not_a_number"})
                 continue
             if abs(act_v - float(exp_v)) > atol:
-                mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {_fmt_val(exp_v)}，交付物為 {act_raw}")
-                counterexamples.append({"row": list(key), "field": out_col,
-                                       "expected": _fmt_val(exp_v), "actual": act_raw,
-                                       "diff": act_v - float(exp_v)})
+                if include_expected:
+                    mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {_fmt_val(exp_v)}，交付物為 {act_raw}")
+                    counterexamples.append({"row": list(key), "field": out_col,
+                                           "expected": _fmt_val(exp_v), "actual": act_raw,
+                                           "diff": act_v - float(exp_v)})
+                else:
+                    mismatches.append(f"列 {list(key)} 欄 {out_col} 與重算不符: 交付物為 {act_raw}")
+                    counterexamples.append({"row": list(key), "field": out_col,
+                                           "actual": act_raw,
+                                           "problem": "mismatch_with_recomputation"})
     if mismatches:
-        return _result(item, "FAIL", "; ".join(mismatches), {"counterexamples": counterexamples})
-    return _result(item, "PASS", f"{len(expected)} 列重算核對完全一致", {"recomputed_rows": len(expected)})
+        ev_fail: dict[str, Any] = {"counterexamples": counterexamples}
+        if not include_expected:
+            ev_fail["expected_in_evidence"] = False
+        return _result(item, "FAIL", "; ".join(mismatches), ev_fail)
+    return _result(item, "PASS", f"{len(expected)} 列重算核對完全一致",
+                   {"recomputed_rows": len(expected)} if include_expected else {"expected_in_evidence": False})
 
 
 def check_group_aggregate(
@@ -1115,18 +1141,29 @@ def check_group_aggregate(
 
     exp_keys, act_keys = set(expected), set(deliv_groups)
     dup = [k for k in exp_keys & act_keys if len(deliv_groups[k]) != 1]
+    include_expected = bool(params.get("expected_in_evidence", True))
     if exp_keys != act_keys or dup:
-        detail = "分組集不符"
-        if exp_keys - act_keys:
-            detail += f"；缺少組 {sorted(exp_keys - act_keys)}"
-        if act_keys - exp_keys:
-            detail += f"；多出組 {sorted(act_keys - exp_keys)}"
+        if include_expected:
+            detail = "分組集不符"
+            if exp_keys - act_keys:
+                detail += f"；缺少組 {sorted(exp_keys - act_keys)}"
+            if act_keys - exp_keys:
+                detail += f"；多出組 {sorted(act_keys - exp_keys)}"
+            if dup:
+                detail += f"；重複組 {sorted(dup)}"
+            return _result(
+                item, "FAIL", detail,
+                {"counterexamples": [{"kind": "group_mismatch",
+                                      "expected_groups": [list(k) for k in sorted(exp_keys)],
+                                      "actual_groups": [list(k) for k in sorted(act_keys)]}]},
+            )
+        detail = "分組集與原始資料重算不符"
         if dup:
             detail += f"；重複組 {sorted(dup)}"
         return _result(
             item, "FAIL", detail,
-            {"counterexamples": [{"kind": "group_mismatch",
-                                  "expected_groups": [list(k) for k in sorted(exp_keys)],
+            {"expected_in_evidence": False,
+             "counterexamples": [{"kind": "group_mismatch",
                                   "actual_groups": [list(k) for k in sorted(act_keys)]}]},
         )
 
@@ -1138,7 +1175,10 @@ def check_group_aggregate(
         for name, exp_v in vals.items():
             if name not in dr:
                 mismatches.append(f"組 {list(key)} 缺欄 {name}")
-                counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": None})
+                if include_expected:
+                    counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": None})
+                else:
+                    counterexamples.append({"group": list(key), "field": name, "actual": None, "problem": "missing_column"})
                 continue
             act_raw = "" if dr[name] is None else str(dr[name]).strip()
             if exp_v is None:
@@ -1150,16 +1190,29 @@ def check_group_aggregate(
                 act_v = _to_num(act_raw)
             except UnsafeExpressionError:
                 mismatches.append(f"組 {list(key)} 欄 {name} 無法解析: 交付物為 {act_raw!r}")
-                counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": act_raw})
+                if include_expected:
+                    counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": act_raw})
+                else:
+                    counterexamples.append({"group": list(key), "field": name, "actual": act_raw, "problem": "not_a_number"})
                 continue
             if abs(act_v - float(exp_v)) > atol:
-                mismatches.append(f"組 {list(key)} 欄 {name} 不符: 預期 {_fmt_val(exp_v)}，交付物為 {act_raw}")
-                counterexamples.append({"group": list(key), "field": name,
-                                       "expected": _fmt_val(exp_v), "actual": act_raw,
-                                       "diff": act_v - float(exp_v)})
+                if include_expected:
+                    mismatches.append(f"組 {list(key)} 欄 {name} 不符: 預期 {_fmt_val(exp_v)}，交付物為 {act_raw}")
+                    counterexamples.append({"group": list(key), "field": name,
+                                           "expected": _fmt_val(exp_v), "actual": act_raw,
+                                           "diff": act_v - float(exp_v)})
+                else:
+                    mismatches.append(f"組 {list(key)} 欄 {name} 與原始資料重算不符: 交付物為 {act_raw}")
+                    counterexamples.append({"group": list(key), "field": name,
+                                           "actual": act_raw,
+                                           "problem": "mismatch_with_recomputation"})
     if mismatches:
-        return _result(item, "FAIL", "; ".join(mismatches), {"counterexamples": counterexamples})
-    return _result(item, "PASS", f"{len(expected)} 組聚合重算核對完全一致", {"recomputed_groups": len(expected)})
+        ev_fail: dict[str, Any] = {"counterexamples": counterexamples}
+        if not include_expected:
+            ev_fail["expected_in_evidence"] = False
+        return _result(item, "FAIL", "; ".join(mismatches), ev_fail)
+    return _result(item, "PASS", f"{len(expected)} 組聚合重算核對完全一致",
+                   {"recomputed_groups": len(expected)} if include_expected else {"expected_in_evidence": False})
 
 
 _ANSWER_KV_RE = re.compile(r"^\s*@([A-Za-z_][A-Za-z0-9_]*)\s*\[\s*([^\]]*?)\s*\]\s*$",
@@ -2071,18 +2124,28 @@ def check_summary_numbers(
 
     mismatches: list[str] = []
     counterexamples: list[dict[str, Any]] = []
+    include_expected = bool(params.get("expected_in_evidence", True))
     for label, exp_v in expected:
         if exp_v is None:
             mismatches.append(f"{label} 重算結果為空，無法核對")
             counterexamples.append({"label": label, "expected": None})
             continue
         if not any(abs(x - float(exp_v)) <= atol for x in found):
-            mismatches.append(f"摘要未包含正確的{label} {_fmt_val(exp_v)}")
-            counterexamples.append({"label": label, "expected": _fmt_val(exp_v),
-                                    "found_numbers_in_summary": found[:10]})
+            if include_expected:
+                mismatches.append(f"摘要未包含正確的{label} {_fmt_val(exp_v)}")
+                counterexamples.append({"label": label, "expected": _fmt_val(exp_v),
+                                        "found_numbers_in_summary": found[:10]})
+            else:
+                mismatches.append(f"摘要未包含與原始資料重算一致的{label}")
+                counterexamples.append({"label": label, "problem": "mismatch_with_recomputation",
+                                        "found_numbers_in_summary": found[:10]})
     if mismatches:
-        return _result(item, "FAIL", "; ".join(mismatches), {"counterexamples": counterexamples})
-    return _result(item, "PASS", "摘要各數字均與重算一致", {"recomputed": {l: _fmt_val(v) for l, v in expected}})
+        ev_fail: dict[str, Any] = {"counterexamples": counterexamples}
+        if not include_expected:
+            ev_fail["expected_in_evidence"] = False
+        return _result(item, "FAIL", "; ".join(mismatches), ev_fail)
+    return _result(item, "PASS", "摘要各數字均與重算一致",
+                   {"recomputed": {l: _fmt_val(v) for l, v in expected}} if include_expected else {"expected_in_evidence": False})
 
 
 def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> ClaimResult:

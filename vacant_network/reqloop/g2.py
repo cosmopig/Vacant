@@ -393,6 +393,7 @@ def main(argv: Sequence[str] | None = None, *,
     man_path = pathlib.Path(args.manifest)
     man = G2Manifest.load(man_path)
     base = man_path.parent
+    man.verify_frozen(base)
 
     if args.dry_run:
         if args.json:

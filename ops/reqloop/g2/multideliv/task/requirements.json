@@ -79,7 +79,7 @@
         "atol": 0.05,
         "expected_in_evidence": false
       },
-      "description": "摘要報告中兩月合計淨銷售總額必須與重算值完全一致 (88000.00)",
+      "description": "摘要報告中兩月合計淨銷售總額必須與重算值完全一致",
       "required": true
     }
   ]

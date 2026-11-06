@@ -163,8 +163,10 @@ def test_multideliv_localized_prompt_leak_free():
         if it.verifier in recomputing:
             assert it.params.get("expected_in_evidence") is False, \
                 f"{it.id}（{it.verifier}）須設 expected_in_evidence=false"
-    NEEDLES = ("UltraWide Monitor", "Ergonomic Mouse", "88000")
+    NEEDLES = ("UltraWide Monitor", "Ergonomic Mouse", "Mechanical Keyboard", "88000")
     for d in man.drafts:
+        assert "request" in d["task"] and _is64(d["task"]["request"].get("sha256", "")), \
+            f"{d['name']}: manifest 須補釘 task.request.sha256"
         task_dir = base / d["task"]["dir"]
         draft_dir = base / d["draft"]["dir"]
         before = run_requirement_checks(task_dir, req_set, draft_dir)
@@ -1373,6 +1375,26 @@ def test_g2_propagates_manifest_synthetic_flag_and_verifies_request_sha256(tmp_p
     req_md.unlink()
     with pytest.raises(FileNotFoundError, match="request"):
         man.verify_frozen(base)
+
+
+def test_g2_dry_run_verifies_frozen_files(tmp_path):
+    """argon 20261106_1447 回歸：
+    `g2.main(["--manifest", ..., "--dry-run"])` 在列印計畫並回傳 0 之前，
+    必須先執行 `man.verify_frozen(base)`；若凍結檔案缺失或 sha256 不符，
+    `--dry-run` 必須當場拋錯拒絕，不得在凍結毀損時仍回傳 rc=0。
+    """
+    multideliv_dir = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv"
+    base = tmp_path / "md"
+    shutil.copytree(multideliv_dir, base)
+    man_path = base / "manifest.json"
+
+    # 正常凍結狀態：--dry-run 回傳 0
+    assert g2.main(["--manifest", str(man_path), "--dry-run"]) == 0
+
+    # 竄改 requirements.json：--dry-run 必須拋 ValueError 拒絕
+    (base / "task" / "requirements.json").write_text('{"corrupted": true}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="requirements"):
+        g2.main(["--manifest", str(man_path), "--dry-run"])
 
 
 
