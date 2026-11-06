@@ -30,6 +30,7 @@ from vacant_network.reqloop.requirements import RequirementSet
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 SMOKE = REPO_ROOT / "ops" / "reqloop" / "g2" / "smoke"
 MANIFEST = SMOKE / "manifest.json"
+MULTIDELIV_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv" / "manifest.json"
 
 
 # ── 工具 ─────────────────────────────────────────────────────────────
@@ -101,6 +102,47 @@ def test_smoke_fixtures_frozen():
 
 def _is64(s: str) -> bool:
     return isinstance(s, str) and len(s) == 64 and all(c in "0123456789abcdef" for c in s)
+
+
+def test_multideliv_manifest_frozen():
+    """P20261106_0834-2：多交付物局部修復最小對照＝orders_monthly 2 份真失敗草稿
+    × 2 臂（generic/localized）＝4 格；凍結結構、凍結副本存在性、預算釘住
+    （max_rounds_per_cell=1、max_tool_calls=60、max_tokens=4000000）。
+    本批只驗管線與保留指標，不宣稱任何真模型效果；零模型呼叫。"""
+    assert MULTIDELIV_MANIFEST.is_file(), "多交付物最小對照 manifest 未凍結"
+    man = g2.G2Manifest.load(MULTIDELIV_MANIFEST)
+    assert set(man.arms) == {"generic", "localized"}
+    assert len(man.drafts) == 2
+    names = {d["name"] for d in man.drafts}
+    assert names == {"orders_monthly_bad_missing_top_products",
+                     "orders_monthly_bad_summary_number_mismatch"}
+    cells = g2.plan_cells(man)
+    assert len(cells) == 4 and {c[1] for c in cells} == {"generic", "localized"}
+    for d in man.drafts:
+        assert d["task_id"] == "orders_monthly" and d["role"] == "bad"
+        # 保留意圖：恰一份已滿足＋一份未滿足交付物（本切片的存在理由）
+        p = d["preservation"]
+        assert set(p["satisfied"]) | set(p["unsatisfied"]) == {"summary.md", "monthly_sales.csv"}
+        assert len(p["satisfied"]) == 1 and len(p["unsatisfied"]) == 1
+        if d["name"] == "orders_monthly_bad_missing_top_products":
+            assert p["satisfied"] == ["summary.md"]
+            assert p["unsatisfied"] == ["monthly_sales.csv"]
+        else:
+            assert p["satisfied"] == ["monthly_sales.csv"]
+            assert p["unsatisfied"] == ["summary.md"]
+        # 凍結副本真的在 repo 裡，且 hash 對得上（同 smoke 口徑）
+        base = MULTIDELIV_MANIFEST.parent
+        for rel, h in d["draft"]["files"].items():
+            f = base / d["draft"]["dir"] / rel
+            assert f.is_file(), f"凍結交付檔缺失：{f}"
+            assert _sha(f) == h, f"凍結交付檔 hash 不符：{f}"
+        assert _sha(base / d["task"]["dir"] / "requirements.json") == d["task"]["requirements"]["sha256"]
+        assert d["source"]["score"] is not None   # 來源分數如實記錄（synthetic 亦不得 null）
+    # 預算釘住（工單：單輪、硬上限齊備；未發射＝0 模型呼叫）
+    b = man.budget
+    assert b["max_rounds_per_cell"] == 1
+    assert b["max_tool_calls"] == 60
+    assert b["max_tokens"] == 4000000
 
 
 # ── answer_kv 驗證器 ────────────────────────────────────────────────

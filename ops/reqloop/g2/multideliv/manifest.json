@@ -1,0 +1,116 @@
+{
+ "schema": "vacant.reqloop.g2.manifest/1",
+ "status": "NOT_fired",
+ "status_note": "預註冊凍結計畫（P20261106_0834-2）：本工單零模型呼叫；發射另行點名、以 CI 綠＋凍結核對為門",
+ "frozen_at": "2026-11-06T09:12:48Z",
+ "ticket": "P20261106_0834-2",
+ "purpose": "G2 多交付物局部修復最小對照（2026-11-06 指示 4）：orders_monthly 2 份真實失敗草稿（已滿足產物＋未滿足結構化產物各一）× generic/localized 兩臂＝4 格；單輪、硬上限釘住；驗「修復只改未滿足產物並保留其餘成果」（satisfied_preserved／satisfied_mutated 位元組級指標）。先證明可修回一種內容錯誤才擴量；本 manifest 只凍結計畫，不發射、不宣稱效果",
+ "arms": [
+  "generic",
+  "localized"
+ ],
+ "model": {
+  "provider": "lms1004nothink",
+  "model": "gemma-4-12b-it-qat",
+  "note": "兩臂同一模型（1004 gemma、non-thinking 基線，同 effects2 批次口徑）；若一臂換模型，另一臂必須同模型對照（紅線）"
+ },
+ "budget": {
+  "max_rounds_per_cell": 1,
+  "timeout_s_per_round": 300,
+  "max_tool_calls": 60,
+  "max_tokens": 4000000,
+  "hard_token_cap": false,
+  "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0；max_tokens 為執行器硬上限（超過即殺、如實記錄）",
+  "min_rounds": {
+   "generic": 1,
+   "localized": 0
+  },
+  "note": "單輪對照（max_rounds_per_cell=1）；兩臂同草稿、同上下文、同工具、同模型、同總預算；min_rounds：generic 臂對的草稿也至少重驗 1 次，localized 缺口驅動（本批兩草稿皆有缺口⇒各 1 輪）"
+ },
+ "scoring": {
+  "readable": "可見需求檢查（requirements.json＋凍結資料重算）＋位元組級保留指標（satisfied_preserved/satisfied_mutated）",
+  "hidden_before": "無（G1 synthetic 任務、無 hidden scorer；known-bad 形狀即初始驗 FAIL 證據）",
+  "hidden_after": "UNKNOWN——本地無 hidden scorer 可重跑；缺失即 UNKNOWN，絕不填 0"
+ },
+ "leak_guard": "修復模型只看得到原始問題（request.md 原文）、凍結資料（orders.csv）與可見檢查反例形狀；重算值/hidden 參考值永不進提示（本批無 hidden；同 e013/e014 口徑）",
+ "drafts": [
+  {
+   "name": "orders_monthly_bad_missing_top_products",
+   "role": "bad",
+   "task_id": "orders_monthly",
+   "synthetic": true,
+   "source": {
+    "run": "G1 synthetic task（ops/reqloop/g1/tasks/orders_monthly）——自造案例、標 synthetic；非 lab 真跑",
+    "cell": null,
+    "score": {
+     "pass": false,
+     "lab_score": null,
+     "note": "known-bad G1 自造草稿（初始驗有 1 組必需項 FAIL）；無 lab 執行、無 hidden 分"
+    },
+    "fetched_from": "ops/reqloop/g1/tasks/orders_monthly/bad_missing_top_products（repo G1 任務；凍結副本於本目錄）"
+   },
+   "draft": {
+    "dir": "draft_bad_missing_top_products",
+    "files": {
+     "summary.md": "89071b955dfbb0e5392443560232f030f3e59860f617644a7d1625057f493e59",
+     "monthly_sales.csv": "6f6844ad69fe7d4f5d8064f91e723a84210248e7dc6a01f3f64a18ef8b33a47a"
+    }
+   },
+   "task": {
+    "dir": "task",
+    "requirements": {
+     "sha256": "fd0c3ff954d7916960b0d31393874aad3a7c3c009b4b66495fec2ad31b6894a1"
+    }
+   },
+   "preservation": {
+    "satisfied": [
+     "summary.md"
+    ],
+    "unsatisfied": [
+     "monthly_sales.csv"
+    ],
+    "evidence": "初始驗：req_summary_consistency=PASS（summary.md 已滿足）；req_csv_structure=FAIL、req_top_products_ranking=FAIL（monthly_sales.csv 未滿足：top_3 欄缺失）"
+   },
+   "lab_note": "本切片目的＝多交付物局部修復保留：已滿足交付物須位元組保留（satisfied_preserved），修復只改未滿足產物"
+  },
+  {
+   "name": "orders_monthly_bad_summary_number_mismatch",
+   "role": "bad",
+   "task_id": "orders_monthly",
+   "synthetic": true,
+   "source": {
+    "run": "G1 synthetic task（ops/reqloop/g1/tasks/orders_monthly）——自造案例、標 synthetic；非 lab 真跑",
+    "cell": null,
+    "score": {
+     "pass": false,
+     "lab_score": null,
+     "note": "known-bad G1 自造草稿（初始驗有 1 組必需項 FAIL）；無 lab 執行、無 hidden 分"
+    },
+    "fetched_from": "ops/reqloop/g1/tasks/orders_monthly/bad_summary_number_mismatch（repo G1 任務；凍結副本於本目錄）"
+   },
+   "draft": {
+    "dir": "draft_bad_summary_number_mismatch",
+    "files": {
+     "summary.md": "8dea23a622f1343e264049c7ee072f08887438eb9389e4f2bdcd9439596f3db3",
+     "monthly_sales.csv": "a6f5bd40ec0cbee64aecc8685f928047bc74b2896ea0195bc98b59415357ae17"
+    }
+   },
+   "task": {
+    "dir": "task",
+    "requirements": {
+     "sha256": "fd0c3ff954d7916960b0d31393874aad3a7c3c009b4b66495fec2ad31b6894a1"
+    }
+   },
+   "preservation": {
+    "satisfied": [
+     "monthly_sales.csv"
+    ],
+    "unsatisfied": [
+     "summary.md"
+    ],
+    "evidence": "初始驗：3 條 CSV 必需項=PASS（monthly_sales.csv 已滿足）；req_summary_consistency=FAIL（summary.md 未滿足：數值 78,500.00 抄錯）"
+   },
+   "lab_note": "本切片目的＝多交付物局部修復保留：已滿足交付物須位元組保留（satisfied_preserved），修復只改未滿足產物"
+  }
+ ]
+}

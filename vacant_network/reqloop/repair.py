@@ -1739,6 +1739,12 @@ class RepairOutcome:
     #: 即為 True；True 時本候選不可接受（退出碼 20），不得宣告缺口關閉。
     source_tampered: bool
     source_tampered_files: tuple[str, ...]
+    #: 已滿足交付物的位元組級保留（P20261106_0834-2）：初始驗即已滿足的交付物中，
+    #: 最終工作區檔案與原草稿 SHA256 逐檔核對相符＝preserved；
+    #: 不符或缺失（被覆寫／竄改／刪除）＝mutated。「修復只改未滿足產物」由本欄直接判定，
+    #: 不再只依賴條目級 regressed 間接推估。
+    satisfied_preserved: tuple[str, ...]
+    satisfied_mutated: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
         d = dataclasses.asdict(self)
@@ -1753,6 +1759,10 @@ def _dir_sha256(d: pathlib.Path) -> str:
             h.update(str(p.relative_to(d)).encode("utf-8"))
             h.update(p.read_bytes())
     return h.hexdigest()
+
+
+def _file_sha256(p: pathlib.Path) -> str:
+    return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
 def repair_slice(
@@ -1901,6 +1911,24 @@ def repair_slice(
             regressed_set.add(cid)
     regressed = tuple(sorted(regressed_set))
 
+    # 已滿足交付物位元組級保留（P20261106_0834-2）：initial_satisfied（初始驗即已滿足）
+    # 各交付物檔案，比對最終工作區與原草稿之 SHA256：相符⇒preserved；
+    # 不符或缺失⇒mutated（覆寫／竄改／刪除皆不算保留）。
+    # 零輪（無缺口）⇒無最終工作區，原草稿未動⇒以原草稿自比＝全部 preserved。
+    initial_satisfied, _unsatisfied = _partition_deliverables(req_set, before)
+    final_ws = pathlib.Path(rounds[-1].workspace) if rounds else d_dir
+    satisfied_preserved: list[str] = []
+    satisfied_mutated: list[str] = []
+    for d in sorted(initial_satisfied):
+        orig_f = d_dir / d
+        if not orig_f.is_file():
+            continue   # 交付物非檔案（無比對基準）⇒兩欄皆不計
+        final_f = final_ws / d
+        if final_f.is_file() and _file_sha256(final_f) == _file_sha256(orig_f):
+            satisfied_preserved.append(d)
+        else:
+            satisfied_mutated.append(d)
+
     calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
     wall_total = sum(w for w in wall if isinstance(w, (int, float)))
@@ -1952,6 +1980,8 @@ def repair_slice(
         draft_sha256=_dir_sha256(d_dir),
         source_tampered=source_tampered,
         source_tampered_files=source_tampered_files,
+        satisfied_preserved=tuple(satisfied_preserved),
+        satisfied_mutated=tuple(satisfied_mutated),
     )
 
 
