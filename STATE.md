@@ -48,3 +48,8 @@
 - 沒驗證什麼：真實效果（切片 NOT_fired，發射要授權＋新成本另報）；未見任務效力；c7755793 CI（loop 自動推後核）。
 - DECISION：未 fire（無新授權）、未加 regex／靜態 prompt／重試、未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer；commit 含：merge c7755793＋本收斂 commit（刪 1 manifest＋改 2 測試檔＋STATE/NOW）。
 - 下一步：候需求端點名 vq-6rp（dabstep-1753 模型側硬缺口）或 vq-5nz.6（停滯草稿換方法）；或授權後對 real_slice 做最小 A/B——兩臂起始草稿 sha256 完全相同（manifest 已凍結同一 draft 71c5097b…）、報告原始結果（localized 是否修好 pre/post_kurtosis 且保住其餘 9 項、成本 ≤ generic）、模型流量＝新成本先另報。
+- r1145：發射已授權最小 A/B（11-06 #4「最小對照先證明可修回一種內容錯誤」＋#7 已授權小型原型不等點名＋審查 #3 條件式指示；0 新票）：real_slice dab_378-pi-C × generic/localized＝2 格，碼態釘住 cd747e53（git archive ./code），model lms1004nothink/gemma-4-12b-it-qat，雙臂同預算 60 calls/4M tok/300s 每輪，22:46–22:53Z 完成。
+- 原始結果：兩臂 gap_closed、exit 0、9 PASS/2 FAIL→11/11 PASS、fixed=[pre,post_kurtosis]、regressed=0、source_tampered=false；兩臂起始草稿 sha256=16754dc3… 相同（同草稿公平比較成立）；獨立 lab scorer（black-box、未讀 hidden）兩臂皆 pass=true、rc=0、raw stdout sha 兩臂相同。
+- 成本：generic 1 session/24 calls/440,238 tok/89.2s vs localized 1 session/32 calls/417,236 tok/300.2s（觸 300s 每輪上限）→「成本 ≤ generic」＝否（calls +33%、tokens −5%、wall 3.4x）。
+- 關鍵原始觀察：對照臂 generic（單輪重驗、無缺口驅動提示）在同一草稿修回同樣 2 個 kurtosis 錯誤且更省——單 rep 未顯示 localized 優於 generic；「此類內容錯誤可修回」成立（1 rep）；是否擴量＝新決策、需另行授權。
+- 驗收命令：python3 -c "import json; ba=json.load(open('/home/user1/dev/ops/realab_dab378_20261106/before_after.json')); [print(c['arm'],c['verdict'],c['independent_after']['pass'],c['local']['source_tampered']) for c in ba['cells']]"（兩臂 wrong_to_right True False）＋sha256sum 初始草稿 16754dc3…＋diff 位元組層（generic 僅 2 行 kurtosis；localized 另重排 2 行 median 格式、數值相同）；raw 全量 ops/realab_dab378_20261106/＋audits/realab_dab378_20261106_summary.json；本輪 repo 零代碼改動（無 commit）；未動 main、未自 push、未讀 /srv/eval hidden／scorer、未加 regex／靜態 prompt／重試。
