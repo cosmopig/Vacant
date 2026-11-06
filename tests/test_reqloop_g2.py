@@ -530,6 +530,8 @@ def test_g2_totals_and_cli_include_exit_codes(tmp_path, capsys):
     assert out.count("exit=0") == 4
     assert out.count("exit=20") == 2
     assert "exit_0=4" in out and "exit_20=2" in out
+    # P20261106_1638-2：totals 行三態完整（基建失敗一眼可見）
+    assert "exit_22=0" in out
 
 
 def test_result_written_machine_readable(tmp_path):

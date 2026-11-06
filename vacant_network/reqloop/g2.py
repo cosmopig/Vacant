@@ -440,7 +440,8 @@ def main(argv: Sequence[str] | None = None, *,
         wall_s = str(t["wall_ms_total"]) if t["wall_ms_total"] is not None else "UNKNOWN"
         print(f"totals: cells={t['cells']}  model_calls={mc_s}  tokens={tokens_s}  wall_ms={wall_s}  "
               f"preserved={t['satisfied_preserved_total']} mutated={t['satisfied_mutated_total']}  "
-              f"exit_0={t['exit_0_total']} exit_20={t['exit_20_total']}")
+              f"exit_0={t['exit_0_total']} exit_20={t['exit_20_total']} "
+              f"exit_22={t['exit_22_total']}")
     print(f"result: {p}")
     # 冒煙口徑：只要管線跑通（每格都有 readable 判定）即 0；缺口修沒修好是**結果**，不是失敗
     return 0

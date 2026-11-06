@@ -1590,6 +1590,8 @@ def test_cli_exit_code_20_on_source_tamper(task_dir, tmp_path, capsys):
     assert rc == 20
     text = capsys.readouterr().out
     assert "SOURCE_TAMPERED" in text and "expenses.csv" in text
+    # P20261106_1638-2：文字輸出末尾必須顯現裁決出口碼（不再需要手動查 $?）
+    assert "exit    : 20" in text
 
 
 def test_exit_code_20_on_satisfied_mutated(task_dir, tmp_path, capsys):

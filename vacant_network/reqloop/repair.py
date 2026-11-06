@@ -2574,7 +2574,12 @@ def main(argv: list[str] | None = None, *,
         print(f"cost    : sessions={c['calls']}  model_calls={mc_s}  wall_ms={wall_s}  tokens={tokens_s} "
               f"(source: {c['token_source']})")
         print(f"stopped : {outcome.stopped}")
-    return _exit_code(outcome)
+    # P20261106_1638-2：文字輸出末尾顯現裁決出口碼（0 合格接收／20 拒收／22 基建故障），
+    # 不再需要手動查 $?；json 模式由 to_dict() 的 exit_code 欄位承載
+    code = _exit_code(outcome)
+    if not args.json:
+        print(f"exit    : {code}")
+    return code
 
 
 def _exit_code(outcome: RepairOutcome) -> int:
