@@ -1,7 +1,8 @@
 # NOW
 
-## 現在在哪（r1148）
-- P20261106_2241-2 驗收完成（d33a1ac8，工單已入 done/）：`audit_kv_preservation` 實裝於 reqloop/checks.py——
+## 現在在哪（r1149）
+- r1149 驗證輪：審查 #1/#2 核實收口（23fd09eb 經 c7755793 在 tree；5 檔 220 passed；單一切片＝real_slice；針護欄經 checker `_col_stats` 重算兩 kurtosis 皆 -1.13）；effects2 raw 交叉核對與 r1135 彙整一致（bad9 localized 9/9 vs generic 7/9、right_to_wrong 0、tamper 0、+2 題＝+112 calls/+4.11M tok）；11-06#3 停止條款未觸發（本批 localized 有較多修好）；0 產品改動、0 模型呼叫、0 發射。
+- r1148：P20261106_2241-2 驗收完成（d33a1ac8，工單已入 done/）：`audit_kv_preservation` 實裝於 reqloop/checks.py——
   鍵值交付物（@key[value] 文字檔或頂層 JSON dict）行級/鍵級保留審計：
   兩側恰好各出現一次且值相等（JSON 另需型別一致）→ preserved；值改動/鍵刪/鍵重複/檔案缺失/草稿無此鍵 → mutated。
   audit 側計算、免模型自評（11-06 指示 4「修復只改未滿足產物並保留其餘成果」的機器可驗判定能力）。

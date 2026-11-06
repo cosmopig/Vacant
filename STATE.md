@@ -64,3 +64,9 @@
 - 沒驗證：未接線進 real_slice/g2 管線（工單範圍外）；未 fire 模型、無效果數字；d33a1ac8 CI 待 loop 自動推 auto/qwen27b 後核。
 - DECISION：純離線產品能力（0 模型呼叫 0 元）；未加 regex/靜態 prompt/重試、未動 main、未自 push、未讀 /srv/eval hidden/scorer；工單已入 done/（結果 3 行在檔尾）。
 - 下一步：候需求端授權 fire 4 格（A＋C×兩臂、同預算 60/4M/300s）或點名 vq-6rp/vq-5nz.6；可選下票：把 audit_kv_preservation 接進 real_slice 報告（preserved/mutated 進 before_after 證據）。
+- r1149：驗證輪（資深審查 2026-11-07 #1/#2 收口核實＋effects2 raw 交叉核對；0 產品改動、0 模型呼叫、0 發射）：
+  ① 審查#1 ✅：auto/argon 23fd09eb 經 c7755793 已在 auto/qwen27b tree（git branch --contains 核實）；指定 5 測試檔（checks/g2/repair/real_slice/g1_gate）現樹重跑＝220 passed（219＋r1148 audit_kv_preservation 測試）。
+  ② 審查#2 ✅：雙軌已收斂——本 branch 只剩單一真實切片 ops/reqloop/g2/real_slice/manifest.json（dab_378-pi-C bad＋dab_378-pi-A good、4 格、FROZEN_PENDING_NAMING）；realtask_manifest.json 不在 tree、tests/ 無引用；「針非重算值」已封死：test_real_slice_needle_is_true_recomputed_value 經 checker 自身 _col_stats 路徑重算 pre/post_kurtosis 皆 -1.13 且斷言恰 2 項；test_reqloop_g2.py＋test_reqloop_real_slice.py 綠。
+  ③ effects2_20261106（28 格 @4d4b8102、14/14 雙臂同 draft sha、tamper 0）raw 交叉核對與 0fa90edd（r1135 彙整）一致：bad9 本日 independent pass localized 9/9 vs generic 7/9（generic 2 blocked：dab_055、dabstep-10 stalled）、wrong_to_right loc 3 vs gen 1、right_to_wrong 雙臂 0、good5 雙臂 5/5；bad9 成本 loc 347 calls/9.69M tok/1351s vs gen 235/5.58M/876s（+2 題＝+112 calls/+4.11M tok，dabstep-10 loc 獨占 148 calls/5.87M/339s）。
+  ④ 11-06#3 判定：本批 localized 有較多修好（9/9>7/9）⇒「沒有多修好＋沒有降低成本」停止條款未觸發；成本未降（+22% calls/+43% tokens）、單 rep 開發選樣、不宣稱 localized 較好；本輪零新 ticket、零新 regex/靜態 prompt/重跑。
+  DECISION：未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden/scorer、缺值 UNKNOWN 不填 0；real_slice 4 格 fire＝另行授權＋先報成本；本輪無產品 commit（記帳於 STATE/NOW）。
