@@ -59,7 +59,10 @@
    "task": {
     "dir": "task",
     "requirements": {
-     "sha256": "fd0c3ff954d7916960b0d31393874aad3a7c3c009b4b66495fec2ad31b6894a1"
+     "sha256": "e66b8e2fbe1d4571f7d4432df772064a87550c98d1291aa9857d9508994c8b56"
+    },
+    "request": {
+     "sha256": "1570d4ed024f5b1a9445c77df9de9e8d79c1309632ca2d55cbd511270529abbf"
     }
    },
    "preservation": {
@@ -98,7 +101,10 @@
    "task": {
     "dir": "task",
     "requirements": {
-     "sha256": "fd0c3ff954d7916960b0d31393874aad3a7c3c009b4b66495fec2ad31b6894a1"
+     "sha256": "e66b8e2fbe1d4571f7d4432df772064a87550c98d1291aa9857d9508994c8b56"
+    },
+    "request": {
+     "sha256": "1570d4ed024f5b1a9445c77df9de9e8d79c1309632ca2d55cbd511270529abbf"
     }
    },
    "preservation": {

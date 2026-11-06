@@ -231,6 +231,10 @@ def check_monthly_sales_metrics(
 
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
     atol = float(item.params.get("atol", 0.01))
+    # expected_in_evidence（預設 True＝G1／selftest 舊行為不變）：False＝防洩題模式，
+    # detail/evidence 只點名月份／欄位與草稿目前錯值，重算期望值不進證據
+    # （build_repair_prompt 的 localized 臂直載 detail/evidence，洩題即兩臂不公平）。
+    include_expected = bool(item.params.get("expected_in_evidence", True))
 
     # 尋找交付物中的月份欄位
     deliv_by_month = {}
@@ -260,47 +264,89 @@ def check_monthly_sales_metrics(
         actual_sales = _parse_float(actual_sales_str) if actual_sales_str else None
 
         if actual_cnt is None or actual_cnt != expected_cnt:
-            mismatches.append(
-                f"月份 {m} 訂單數不符: 預期 {expected_cnt}，交付物為 {actual_cnt}"
-            )
-            counterexamples.append({
-                "month": m,
-                "field": "orders_count",
-                "expected": expected_cnt,
-                "actual": actual_cnt,
-                "reason": "可能包含取消訂單、重複訂單未去重，或跨月邊界歸屬錯誤",
-            })
+            if include_expected:
+                mismatches.append(
+                    f"月份 {m} 訂單數不符: 預期 {expected_cnt}，交付物為 {actual_cnt}"
+                )
+                counterexamples.append({
+                    "month": m,
+                    "field": "orders_count",
+                    "expected": expected_cnt,
+                    "actual": actual_cnt,
+                    "reason": "可能包含取消訂單、重複訂單未去重，或跨月邊界歸屬錯誤",
+                })
+            else:
+                mismatches.append(
+                    f"月份 {m} 訂單數不符: 交付物為 {actual_cnt}，與對原始資料的重算不一致"
+                    "（期望值不在證據中，請依原始需求與工作區資料自行重算）"
+                )
+                counterexamples.append({
+                    "month": m,
+                    "field": "orders_count",
+                    "actual": actual_cnt,
+                    "reason": "可能包含取消訂單、重複訂單未去重，或跨月邊界歸屬錯誤",
+                    "expected_in_evidence": False,
+                })
 
         if actual_sales is None or abs(actual_sales - expected_sales) > atol:
-            mismatches.append(
-                f"月份 {m} 淨銷售額不符: 預期 {expected_sales:.2f}，交付物為 {actual_sales}"
-            )
-            counterexamples.append({
-                "month": m,
-                "field": "net_sales",
-                "expected": expected_sales,
-                "actual": actual_sales,
-                "diff": (actual_sales - expected_sales) if actual_sales is not None else None,
-                "reason": "可能未扣除取消單、重複計入重複訂單、或金額加總公式錯誤",
-            })
+            if include_expected:
+                mismatches.append(
+                    f"月份 {m} 淨銷售額不符: 預期 {expected_sales:.2f}，交付物為 {actual_sales}"
+                )
+                counterexamples.append({
+                    "month": m,
+                    "field": "net_sales",
+                    "expected": expected_sales,
+                    "actual": actual_sales,
+                    "diff": (actual_sales - expected_sales) if actual_sales is not None else None,
+                    "reason": "可能未扣除取消單、重複計入重複訂單、或金額加總公式錯誤",
+                })
+            else:
+                mismatches.append(
+                    f"月份 {m} 淨銷售額不符: 交付物為 {actual_sales}，與對原始資料的重算不一致"
+                    "（期望值不在證據中，請依原始需求與工作區資料自行重算）"
+                )
+                counterexamples.append({
+                    "month": m,
+                    "field": "net_sales",
+                    "actual": actual_sales,
+                    "reason": "可能未扣除取消單、重複計入重複訂單、或金額加總公式錯誤",
+                    "expected_in_evidence": False,
+                })
 
     if mismatches:
+        evidence = {"counterexamples": counterexamples}
+        if include_expected:
+            evidence["expected_metrics"] = expected_metrics
+        else:
+            evidence["expected_in_evidence"] = False
         return ClaimResult(
             claim_id=item.id,
             status="FAIL",
             detail="; ".join(mismatches),
-            evidence={"counterexamples": counterexamples, "expected_metrics": expected_metrics},
+            evidence=evidence,
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
             authority=item.authority,
         )
 
+    if include_expected:
+        return ClaimResult(
+            claim_id=item.id,
+            status="PASS",
+            detail="月度訂單數與淨銷售額重算核對完全一致",
+            evidence={"recomputed_metrics": expected_metrics},
+            verifier=item.verifier,
+            verifier_version=VERIFIER_VERSION,
+            required=item.required,
+            authority=item.authority,
+        )
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail="月度訂單數與淨銷售額重算核對完全一致",
-        evidence={"recomputed_metrics": expected_metrics},
+        detail="月度訂單數與淨銷售額與對原始資料的重算一致（期望值不在證據中）",
+        evidence={"expected_in_evidence": False},
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
@@ -330,6 +376,9 @@ def check_monthly_top_products(
 
     _, expected_top, _ = recompute_orders_monthly(task_dir, item.params)
     top_n = int(item.params.get("top_n", 3))
+    # expected_in_evidence（預設 True＝舊行為不變）：False＝防洩題，期望排行與
+    # 各商品重算金額不進 detail/evidence（只點名月份與草稿目前排行）。
+    include_expected = bool(item.params.get("expected_in_evidence", True))
 
     deliv_by_month = {}
     for r in deliv_rows:
@@ -357,27 +406,41 @@ def check_monthly_top_products(
 
         if len(actual_list) < len(expected_list):
             mismatches.append(f"月份 {m} 前 {top_n} 名商品未完整提供: 預期 {len(expected_list)} 個，實有 {len(actual_list)} 個")
-            counterexamples.append({
-                "month": m,
-                "expected": expected_list,
-                "actual": actual_list,
-                "reason": "缺少排名欄位或未填滿前三名",
-            })
+            ce = {"month": m}
+            if include_expected:
+                ce["expected"] = expected_list
+            ce["actual"] = actual_list
+            ce["reason"] = "缺少排名欄位或未填滿前三名"
+            if not include_expected:
+                ce["expected_in_evidence"] = False
+            counterexamples.append(ce)
             continue
 
         if actual_list != expected_list:
-            mismatches.append(
-                f"月份 {m} 商品排行錯誤: 預期 {expected_list}，交付物為 {actual_list}"
-            )
-            # 附上各商品的重算金額與筆數反例說明
-            prod_info = {p[0]: {"sales": p[1], "count": p[2]} for p in expected_top.get(m, [])}
-            counterexamples.append({
-                "month": m,
-                "expected_top": expected_list,
-                "actual_top": actual_list,
-                "prod_details": prod_info,
-                "reason": "排序依據錯誤（例如誤用訂單筆數/數量排序，而非使用者要求的淨銷售額排序）",
-            })
+            if include_expected:
+                mismatches.append(
+                    f"月份 {m} 商品排行錯誤: 預期 {expected_list}，交付物為 {actual_list}"
+                )
+                # 附上各商品的重算金額與筆數反例說明
+                prod_info = {p[0]: {"sales": p[1], "count": p[2]} for p in expected_top.get(m, [])}
+                counterexamples.append({
+                    "month": m,
+                    "expected_top": expected_list,
+                    "actual_top": actual_list,
+                    "prod_details": prod_info,
+                    "reason": "排序依據錯誤（例如誤用訂單筆數/數量排序，而非使用者要求的淨銷售額排序）",
+                })
+            else:
+                mismatches.append(
+                    f"月份 {m} 商品排行錯誤: 交付物為 {actual_list}，與依淨銷售額重算的排行不一致"
+                    "（期望排行不在證據中，請依原始需求與工作區資料自行重算）"
+                )
+                counterexamples.append({
+                    "month": m,
+                    "actual_top": actual_list,
+                    "reason": "排序依據錯誤（例如誤用訂單筆數/數量排序，而非使用者要求的淨銷售額排序）",
+                    "expected_in_evidence": False,
+                })
 
     if mismatches:
         return ClaimResult(
@@ -391,11 +454,22 @@ def check_monthly_top_products(
             authority=item.authority,
         )
 
+    if include_expected:
+        return ClaimResult(
+            claim_id=item.id,
+            status="PASS",
+            detail=f"各月份前 {top_n} 名商品排行（依淨銷售額）重算核對完全一致",
+            evidence={"expected_top": {m: [p[0] for p in prods[:top_n]] for m, prods in expected_top.items()}},
+            verifier=item.verifier,
+            verifier_version=VERIFIER_VERSION,
+            required=item.required,
+            authority=item.authority,
+        )
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail=f"各月份前 {top_n} 名商品排行（依淨銷售額）重算核對完全一致",
-        evidence={"expected_top": {m: [p[0] for p in prods[:top_n]] for m, prods in expected_top.items()}},
+        detail=f"各月份前 {top_n} 名商品排行（依淨銷售額）與對原始資料的重算一致（期望排行不在證據中）",
+        evidence={"expected_in_evidence": False},
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
@@ -466,21 +540,38 @@ def check_summary_metrics_consistency(
     total_expected_sales = sum(m["net_sales"] for m in expected_metrics.values())
 
     atol = float(item.params.get("atol", 0.05))
+    # expected_in_evidence（預設 True＝舊行為不變）：False＝防洩題，重算總額不進
+    # detail/evidence（UNKNOWN/FAIL/PASS 三態皆 scrub，避免 PASS 證據或 UNKNOWN
+    # 陳述把正確答案字串帶進 localized 提示詞）。
+    include_expected = bool(item.params.get("expected_in_evidence", True))
     keywords = list(item.params.get("metric_keywords") or _SUMMARY_TOTAL_KEYWORDS)
     claims = _extract_summary_total_claims(content, keywords)
 
     if not claims:
+        if include_expected:
+            detail = (
+                f"摘要中找不到綁定在合計條目上的總額陳述（重算值 {total_expected_sales:.2f}）；"
+                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
+            )
+            evidence = {
+                "expected_total_sales": total_expected_sales,
+                "reason": "no metric-bound total claim found",
+            }
+        else:
+            detail = (
+                "摘要中找不到綁定在合計條目上的總額陳述；"
+                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
+                "（期望值不在證據中，請依原始需求與工作區資料自行重算）"
+            )
+            evidence = {
+                "reason": "no metric-bound total claim found",
+                "expected_in_evidence": False,
+            }
         return ClaimResult(
             claim_id=item.id,
             status="UNKNOWN",
-            detail=(
-                f"摘要中找不到綁定在合計條目上的總額陳述（重算值 {total_expected_sales:.2f}）；"
-                "看不到可可靠對應的欄位，依規則標 UNKNOWN，不准以全文數字搜索代替"
-            ),
-            evidence={
-                "expected_total_sales": total_expected_sales,
-                "reason": "no metric-bound total claim found",
-            },
+            detail=detail,
+            evidence=evidence,
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
@@ -490,35 +581,55 @@ def check_summary_metrics_consistency(
     wrong = [c for c in claims if abs(c["value"] - total_expected_sales) > atol]
     if wrong:
         values = [c["value"] for c in claims]
-        detail = f"合計淨銷售總額條目與重算值 {total_expected_sales:.2f} 不符"
+        if include_expected:
+            detail = f"合計淨銷售總額條目與重算值 {total_expected_sales:.2f} 不符"
+        else:
+            detail = ("合計淨銷售總額條目與對原始資料的重算不符"
+                      "（期望值不在證據中，請依原始需求與工作區資料自行重算）")
         if len({round(v, 6) for v in values}) > 1:
             detail += "；且多個合計陳述互相矛盾"
+        counterexamples = []
+        for c in wrong:
+            ce = {"phrase": c["phrase"], "value": c["value"]}
+            if include_expected:
+                ce["expected"] = total_expected_sales
+            counterexamples.append(ce)
+        evidence = {"counterexamples": counterexamples}
+        if include_expected:
+            evidence["expected_total_sales"] = total_expected_sales
+        else:
+            evidence["expected_in_evidence"] = False
         return ClaimResult(
             claim_id=item.id,
             status="FAIL",
             detail=detail,
-            evidence={
-                "expected_total_sales": total_expected_sales,
-                "counterexamples": [
-                    {"phrase": c["phrase"], "value": c["value"],
-                     "expected": total_expected_sales}
-                    for c in wrong
-                ],
-            },
+            evidence=evidence,
             verifier=item.verifier,
             verifier_version=VERIFIER_VERSION,
             required=item.required,
             authority=item.authority,
         )
 
+    if include_expected:
+        return ClaimResult(
+            claim_id=item.id,
+            status="PASS",
+            detail=f"文字摘要中的合計淨銷售總額核對正確 ({total_expected_sales:.2f})",
+            evidence={
+                "expected_total_sales": total_expected_sales,
+                "matched_claims": [c["phrase"] for c in claims],
+            },
+            verifier=item.verifier,
+            verifier_version=VERIFIER_VERSION,
+            required=item.required,
+            authority=item.authority,
+        )
+    # 防洩題：PASS 證據也不帶重算總額與匹配原文（匹配原文含正確答案字串）。
     return ClaimResult(
         claim_id=item.id,
         status="PASS",
-        detail=f"文字摘要中的合計淨銷售總額核對正確 ({total_expected_sales:.2f})",
-        evidence={
-            "expected_total_sales": total_expected_sales,
-            "matched_claims": [c["phrase"] for c in claims],
-        },
+        detail="文字摘要中的合計淨銷售總額與對原始資料的重算一致（期望值不在證據中）",
+        evidence={"expected_in_evidence": False},
         verifier=item.verifier,
         verifier_version=VERIFIER_VERSION,
         required=item.required,
