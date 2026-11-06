@@ -12,6 +12,6 @@
 - 下一步候選：11-06#4 真實 CSV/JSON 任務切片（manifest sha 6550d7a8… 已凍結 NOT_fired；離線三門 verify_frozen＋--dry-run＋--baseline 已就緒，待授權才 fire）；bd vq-5nz.49 已關。
 - r1138：審查三點核對＋雙切片離線門現樹驗證：①auto/argon 無需合併（d5105097 綠）；②9329be88 待辦確認已不在 NOW.md（僅 STATE 有解除紀錄）；③樹上原有兩份凍結真實切片——A=realtask_manifest.json（6550d7a8、4 格）＋B=real_slice/manifest.json（P20261107_0237-1、dab_378、2 格、r1131 auto 51ac77ec 入樹、7 測試）；NOW.md 原只列 A，已補列 B（ticket 檔缺失、六要素在 manifest）。
 - 做了什麼：0 產品改動、0 模型呼叫、0 發射；test_reqloop_real_slice.py＋test_reqloop_g2.py 46 passed（2.06s）；A/B --dry-run 皆 EXIT=0；A --baseline EXIT=0（0/2、0/1 required PASS、無洩漏）；B --baseline EXIT=0（9 PASS/2 FAIL＝pre/post_kurtosis -1.17、expected_in_evidence=false、無洩漏）。
-- 驗證了什麼：B 自 r1131 入樹後首次於現樹（含 r1136 g2.py --baseline 改動）全門綠；A 維持綠；B manifest 的 before_visible「9 PASS/2 FAIL」與 --baseline 實跑一致。
-- 沒驗證什麼：真實效果（A/B 皆 NOT_fired，發射要授權＋新成本另報）；auto/qwen27b CI（45527e97 未跑完、不阻塞）；未見任務效力（開發選樣、單 rep）。
-- 下一步：若授權 fire A（或 B，二擇一／分批、不並跑）；未授權維持雙凍結、0 新票、不製造工作。
+- redo（審查補實讀）：effects_20261105_summary.json＝50 格（policy30 30＋feedback_once20 20）、snapshot d38d2eb2、local 45 vs current_code 50/50 與獨立評分一致、scope_note＝開發選樣／單 rep／UNKNOWN 不填 0——本輪 NOW/STATE 未引其數字、僅列「effects2 以 r1135 彙整為準」，一致無需更正；multideliv manifest＋draft_bad_missing_top_products/summary.md＝該 summary.md 即「已滿足」銷售報告（satisfied），未滿足產物是 monthly_sales.csv（top_3 欄缺失），satisfied_preserved／satisfied_mutated／source_tampered 定義核對 manifest＋repair.py，multideliv FIRED（r1104）輸出在 ~/dev/ops/multideliv_20261106（g2_result.json 在）；repair.py＝source_tampered→退出碼 20「表面全 PASS 也拒收」、_check_preserved_deliverables 位元組保留。
+- 驗證了什麼：B 自 r1131 入樹後首次於現樹全門綠（含 r1136 g2.py --baseline 改動）；A 維持綠；B before_visible「9 PASS/2 FAIL」與實跑一致；B「同口徑」（只修未滿足、保留已滿足、來源改動拒收）與 multideliv 定義＋repair.py 守衛一致。
+- 沒驗證／下一步：真實效果（A/B 皆 NOT_fired，發射要授權＋新成本另報）；auto/qwen27b CI（45527e97 未跑完、不阻塞）；未見任務效力（開發選樣、單 rep）。若授權 fire A（或 B，二擇一／分批、不並跑）；未授權維持雙凍結、0 新票、不製造工作。
