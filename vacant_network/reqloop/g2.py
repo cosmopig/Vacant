@@ -311,6 +311,9 @@ def run_g2_smoke(
                 "arm": arm,
                 "synthetic": outcome.synthetic,
                 "stopped": outcome.stopped,
+                # 審查指示 3（2026-11-06）：重跑審計須如實報告每格 _exit_code——
+                # 直接記錄 repair._exit_code(outcome)（單一真相源），審計方不從結果欄位重推
+                "exit_code": repair._exit_code(outcome),
                 "before_readable_status": before_map,
                 "after_readable_status": {c.claim_id: c.status for c in last_after},
                 "final_readable_status": dict(outcome.final_status),
