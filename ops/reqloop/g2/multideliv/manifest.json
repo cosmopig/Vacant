@@ -1,7 +1,7 @@
 {
  "schema": "vacant.reqloop.g2.manifest/1",
- "status": "NOT_fired",
- "status_note": "預註冊凍結計畫（P20261106_0834-2）：本工單零模型呼叫；發射另行點名、以 CI 綠＋凍結核對為門",
+ "status": "FIRED",
+ "status_note": "r1104（2026-11-06 10:42 UTC）依審查指示 3 發射：門＝CI 綠（auto/qwen27b 3b3f8f46、4877 passed）＋verify_frozen＋dry_run 全過；4 格 × 1 輪（60 calls/4M tok/300s）；輸出 ~/dev/ops/multideliv_20261106；dry_run 存證 dry_run_r1104.txt",
  "frozen_at": "2026-11-06T09:12:48Z",
  "ticket": "P20261106_0834-2",
  "purpose": "G2 多交付物局部修復最小對照（2026-11-06 指示 4）：orders_monthly 2 份真實失敗草稿（已滿足產物＋未滿足結構化產物各一）× generic/localized 兩臂＝4 格；單輪、硬上限釘住；驗「修復只改未滿足產物並保留其餘成果」（satisfied_preserved／satisfied_mutated 位元組級指標）。先證明可修回一種內容錯誤才擴量；本 manifest 只凍結計畫，不發射、不宣稱效果",

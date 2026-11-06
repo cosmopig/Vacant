@@ -2496,6 +2496,11 @@ def main(argv: list[str] | None = None, *,
         if outcome.source_tampered:
             print(f"SOURCE_TAMPERED: {', '.join(outcome.source_tampered_files)}"
                   f"  ← 來源資料被改寫，不可接受（P000-20261105-02）")
+        if outcome.satisfied_mutated:
+            print(f"SATISFIED_MUTATED: {', '.join(outcome.satisfied_mutated)}"
+                  f"  ← 原已滿足交付物被改寫，未遵守保留約束（拒收）")
+        if outcome.satisfied_preserved:
+            print(f"satisfied_preserved: {', '.join(outcome.satisfied_preserved)}")
         if outcome.unresolved:
             print(f"unresolved: {', '.join(outcome.unresolved)}")
         c = outcome.cost
@@ -2511,6 +2516,10 @@ def main(argv: list[str] | None = None, *,
 def _exit_code(outcome: RepairOutcome) -> int:
     # P000-20261105-02：來源改動＝不可接受，即使表面全 PASS 也拒收
     if outcome.source_tampered:
+        return 20
+    # P20261106_1035-2：已滿足交付物被改寫＝未遵守「修復只改未滿足產物並保留其餘成果」，
+    # 與 source_tampered 同等嚴格把關，即使表面全 PASS 也拒收
+    if outcome.satisfied_mutated:
         return 20
     if outcome.stopped in (STOP_NO_GAP, STOP_GAP_CLOSED) and not outcome.unresolved:
         return 0

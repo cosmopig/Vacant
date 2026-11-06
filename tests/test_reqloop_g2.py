@@ -1057,6 +1057,106 @@ def test_g2_result_totals_keeps_repair_sessions_and_model_calls_distinct():
     assert totals["repair_sessions"] != totals["model_calls"]
 
 
+def test_g2_totals_and_cli_include_satisfied_deliverable_preservation(tmp_path, capsys):
+    """P20261106_1035-2：已滿足交付物位元組保留狀態必須顯式可見：
+    1. `G2Result.to_dict()["totals"]` 含 `satisfied_preserved_total`／`satisfied_mutated_total`；
+    2. CLI 文字輸出：每格 `satisfied_mutated` 非空 ⇒ 印 `SATISFIED_MUTATED: <files>`；
+       `source_tampered` ⇒ 印 `SOURCE_TAMPERED: <files>`；totals 行顯示 `preserved=... mutated=...`。
+    回歸形狀：multideliv_20261106 的 generic 臂 top_products 格 `satisfied_mutated=["summary.md"]`，
+    但舊 CLI 文字行只印 REGRESSED、`totals` 完全沒有保留／竄改總計，人看輸出誤以為全數合格。
+    synthetic 離線接線（G1 自造案例＋fake agent），只驗管線，不宣稱任何效果。"""
+    # (1) to_dict totals
+    def _cell(draft: str, arm: str, preserved: list, mutated: list,
+              tampered_files: tuple = ()) -> dict:
+        return {
+            "draft": draft, "arm": arm, "stopped": "gap_closed",
+            "cost": {"calls": 1, "model_calls": 2, "tokens": 100, "wall_ms_total": 50},
+            "satisfied_preserved": preserved,
+            "satisfied_mutated": mutated,
+            "source_tampered": bool(tampered_files),
+            "source_tampered_files": list(tampered_files),
+        }
+
+    cells = [
+        _cell("d1", "localized", ["a.csv"], []),
+        _cell("d2", "generic", [], ["summary.md"]),
+        _cell("d3", "localized", [], ["b.md"], tampered_files=("data/in.csv",)),
+    ]
+    res = g2.G2Result(
+        manifest_sha256="0" * 64, generated_at="2026-11-06T00:00:00Z",
+        model={"provider": "p", "model": "m"},
+        budget={"max_rounds_per_cell": 1, "timeout_s_per_round": 30},
+        scoring={"independent": "UNKNOWN"}, cells=cells,
+    )
+    totals = res.to_dict()["totals"]
+    assert totals["satisfied_preserved_total"] == 1
+    assert totals["satisfied_mutated_total"] == 2
+
+    # (2) CLI 文字輸出（G1 自造案例、fake agent 兩臂不同行為）
+    g1 = REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks" / "expense_category"
+    base = tmp_path / "g2base"
+    shutil.copytree(g1, base / "task")   # 任務目錄（requirements/request/expenses.csv＋good/bad 草稿）
+    draft_src = g1 / "bad_grand_total_wrong"
+    shutil.copytree(draft_src, base / "draft")
+    good_md = (g1 / "good" / "summary.md").read_text(encoding="utf-8")
+    csv_text = (base / "draft" / "expense_summary.csv").read_text(encoding="utf-8")
+
+    def run(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        (ws / "summary.md").write_text(good_md, encoding="utf-8")
+        if "generic" in ws.parts:
+            # generic 臂：竄改已滿足交付物（CSV 尾加空行：位元組變、內容不變）
+            (ws / "expense_summary.csv").write_text(csv_text + "\n", encoding="utf-8")
+        else:
+            # localized 臂：改寫來源資料 ⇒ source_tampered
+            (ws / "expenses.csv").write_text("category,amount\nx,1\n", encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    man = {
+        "schema": "vacant.reqloop.g2.manifest/1",
+        "frozen_at": "2026-11-06T00:00:00Z",
+        "ticket": "P20261106_1035-2", "purpose": "synthetic 管線測試",
+        "arms": ["generic", "localized"],
+        "model": {"provider": "fake", "model": "fake"},
+        "budget": {"max_rounds_per_cell": 1, "timeout_s_per_round": 30},
+        "scoring": {"independent": "UNKNOWN"},
+        "leak_guard": "synthetic",
+        "drafts": [{
+            "name": "g1_expense_bad", "role": "bad", "task_id": "expense_category",
+            "source": {"cell": "synthetic", "score": {"pass": False,
+                                                      "n_correct": "2/3", "status": "ok"}},
+            "draft": {"dir": "draft", "files": {
+                "summary.md": _sha(base / "draft" / "summary.md"),
+                "expense_summary.csv": _sha(base / "draft" / "expense_summary.csv")}},
+            "task": {"dir": "task",
+                     "requirements": {"sha256": _sha(base / "task" / "requirements.json")},
+                     "request": {"sha256": _sha(base / "task" / "request.md")}},
+        }],
+    }
+    man_path = base / "manifest.json"
+    man_path.write_text(json.dumps(man, ensure_ascii=False), encoding="utf-8")
+
+    out_root = tmp_path / "out"
+    rc = g2.main(["--manifest", str(man_path), "--out", str(out_root)],
+                 build=_fake_build([]), run=run)
+    assert rc == 0   # 冒煙口徑：管線跑通即 0（拒收裁決在 repair._exit_code 層，由另票測試鎖）
+    text = capsys.readouterr().out
+    # 每格顯式暴露保留／突變／來源狀態（舊碼只印 REGRESSED，此三行必紅）
+    assert "SATISFIED_MUTATED" in text and "expense_summary.csv" in text
+    assert "SOURCE_TAMPERED" in text and "expenses.csv" in text
+    assert "preserved=1" in text and "mutated=1" in text
+    # g2_result.json 的 totals 同含兩欄（經真實管線派生，非手抄）
+    payload = json.loads((out_root / "g2_result.json").read_text(encoding="utf-8"))
+    t = payload["totals"]
+    assert t["satisfied_preserved_total"] == 1
+    assert t["satisfied_mutated_total"] == 1
+
+
 def test_run_g2_smoke_records_spawn_errors_and_auto_binds_default_build_factory(tmp_path):
     """argon 20261106_0800 回歸（effects2cap_20261106 實況）：
     1. `g2_result.json` 的每格必須記錄 `spawn_errors`（逐輪 `r.agent.get("spawn_error")`），
