@@ -110,6 +110,13 @@ class G2Manifest:
                 raise FileNotFoundError(f"凍結 requirements 缺失：{req_f}")
             if _sha256(req_f) != d["task"]["requirements"]["sha256"]:
                 raise ValueError(f"requirements hash 不符：{req_f}")
+            req_md_pin = d["task"].get("request", {}).get("sha256")
+            if req_md_pin:
+                req_md_f = base / d["task"]["dir"] / "request.md"
+                if not req_md_f.is_file():
+                    raise FileNotFoundError(f"凍結 request 缺失：{req_md_f}")
+                if _sha256(req_md_f) != req_md_pin:
+                    raise ValueError(f"request hash 不符：{req_md_f}")
             # r1011（審計票 R20261104_2123-1）：凍結清單裡的每條 pin 都必須可解析、
             # hash 相符——effect_manifest 曾有 5 份 e013 data_files key 缺 data/ 前綴，
             # 檔案在、hash 對，舊門卻從不驗（靠漏驗拿到的綠燈就是放過洞的條件）。
@@ -292,7 +299,7 @@ def run_g2_smoke(
                 feedback_mode=arm,
                 max_rounds=max_rounds, timeout_s=timeout_s,
                 max_tool_calls=max_tool_calls, max_tokens=max_tokens,
-                synthetic=False,
+                synthetic=bool(d.get("synthetic", False)),
                 min_rounds=min_rounds,
                 include_dirs=include_dirs,
             )
@@ -302,6 +309,7 @@ def run_g2_smoke(
                 "task_id": d["task_id"],
                 "role": d["role"],
                 "arm": arm,
+                "synthetic": outcome.synthetic,
                 "stopped": outcome.stopped,
                 "before_readable_status": before_map,
                 "after_readable_status": {c.claim_id: c.status for c in last_after},

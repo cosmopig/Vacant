@@ -3402,3 +3402,124 @@ def test_default_build_rejects_direct_use_as_build_fn(tmp_path):
     with pytest.raises(TypeError, match="工廠函式"):
         repair._default_build("my warning prompt", tmp_path)
 
+
+def test_satisfied_preservation_not_enforced_when_no_unsatisfied_or_single_deliverable(task_dir, tmp_path):
+    """argon 20261106_1121 回歸（3b3f8f46／98bed360 缺陷）：
+    「修復只改未滿足產物並保留其餘成果」只適用於「多交付物（len(declared)>=2）且同時存在已滿足與未滿足交付物」
+    的部分修復情境（與 build_repair_prompt 的分流條件一致）。
+    1. 當草稿本身無未滿足交付物（如 good 草稿，_unsatisfied 為空）時，generic 臂以 min_rounds=1 重驗，
+       提示詞印的是【目前交付物檔案（可以修改）】；若模型重新存檔（例如尾端多一個換行）但所有檢查仍 PASS，
+       絕不可將其打入 satisfied_mutated 並以 _exit_code=20 拒收！
+    2. 單一交付物（answer.txt）的 good 草稿在 min_rounds=0（no_gap）或 min_rounds=1 下，
+       satisfied_preserved 與 satisfied_mutated 皆應為空，避免把單一交付物 no_gap 格虛灌進
+       satisfied_preserved_total。
+    """
+    # (1) 多交付物 good 草稿 + min_rounds=1（generic 重驗重存 summary.md 加換行，仍全 PASS）
+    rs = load_req_set(task_dir)
+    good_draft = task_dir / "good"
+    good_md = (good_draft / "summary.md").read_text(encoding="utf-8")
+    out_good_recheck = repair.repair_slice(
+        task_dir, rs, good_draft,
+        out_root=tmp_path / "good_recheck", build=_fake_build([]),
+        run=_fake_agent({"summary.md": good_md + "\n"}),
+        feedback_mode="generic", max_rounds=1, min_rounds=1, synthetic=True,
+    )
+    assert out_good_recheck.unresolved == ()
+    assert out_good_recheck.regressed == ()
+    assert out_good_recheck.satisfied_preserved == ()
+    assert out_good_recheck.satisfied_mutated == ()
+    assert out_good_recheck.stopped == "gap_closed"
+    assert repair._exit_code(out_good_recheck) == 0
+
+    # (2) 單一交付物 good 草稿（dab_035 形狀）：no_gap (min_rounds=0) 與 generic (min_rounds=1)
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    t035 = repo_root / "ops" / "reqloop" / "g2" / "smoke" / "dab_035" / "task"
+    d035 = repo_root / "ops" / "reqloop" / "g2" / "smoke" / "dab_035" / "draft"
+    rs035 = RequirementSet.load(t035 / "requirements.json")
+    ans035 = (d035 / "answer.txt").read_text(encoding="utf-8")
+
+    out_single_nogap = repair.repair_slice(
+        t035, rs035, d035,
+        out_root=tmp_path / "single_nogap", build=_fake_build([]),
+        run=_fake_agent(None),
+        feedback_mode="localized", max_rounds=2, min_rounds=0, synthetic=True,
+    )
+    assert out_single_nogap.stopped == "no_gap"
+    assert out_single_nogap.satisfied_preserved == ()
+    assert out_single_nogap.satisfied_mutated == ()
+    assert repair._exit_code(out_single_nogap) == 0
+
+    out_single_gen = repair.repair_slice(
+        t035, rs035, d035,
+        out_root=tmp_path / "single_gen", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": ans035.rstrip("\n") + "\n\n"}),
+        feedback_mode="generic", max_rounds=2, min_rounds=1, synthetic=True,
+    )
+    assert out_single_gen.unresolved == ()
+    assert out_single_gen.regressed == ()
+    assert out_single_gen.satisfied_preserved == ()
+    assert out_single_gen.satisfied_mutated == ()
+    assert out_single_gen.stopped == "gap_closed"
+    assert repair._exit_code(out_single_gen) == 0
+
+
+def test_satisfied_mutated_prevents_early_gap_closed_and_round2_restores_clean_satisfied_deliverable(task_dir, tmp_path):
+    """argon 20261106_1121 回歸（3b3f8f46／98bed360 缺陷）：
+    在多交付物部分修復（expense_category/bad_grand_total_wrong：summary.md FAIL、expense_summary.csv PASS）中：
+    1. 當 max_rounds=1 且 agent 修好 summary.md 但同時改寫了已滿足的 expense_summary.csv 時，
+       satisfied_mutated=('expense_summary.csv',)，stopped 絕不能自相矛盾地標為 'gap_closed'
+       （否則 g2_result.json 記 stopped='gap_closed' 而 repair._exit_code 卻回 20 拒收）。
+    2. 當 max_rounds=2 且第 1 輪改寫了已滿足的 expense_summary.csv（無論第 1 輪是否修好 summary.md）：
+       - 迴圈不得在第 1 輪因表面全 PASS 就提前 break 標 gap_closed；
+       - 第 2 輪工作區開局必須從原草稿還原乾淨的已滿足交付物（expense_summary.csv），同時保留 round_1/
+         工作區快照不變；
+       - 當第 2 輪修好 summary.md 且不再改動已還原的 expense_summary.csv 時，最終候選滿足保留約束：
+         satisfied_preserved=('expense_summary.csv',)、satisfied_mutated=()、stopped='gap_closed'、_exit_code=0。
+    """
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    good_md = _good_summary(task_dir)
+    clean_csv = (draft / "expense_summary.csv").read_text(encoding="utf-8")
+    mutated_csv = clean_csv + "\n"
+
+    # (1) 單輪（max_rounds=1）修好未滿足但竄改已滿足 ⇒ stopped != "gap_closed"，_exit_code == 20
+    out_1r = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_1r", build=_fake_build([]),
+        run=_fake_agent({"summary.md": good_md, "expense_summary.csv": mutated_csv}),
+        feedback_mode="localized", max_rounds=1, synthetic=True,
+    )
+    assert out_1r.satisfied_mutated == ("expense_summary.csv",)
+    assert out_1r.stopped != "gap_closed"
+    assert repair._exit_code(out_1r) == 20
+
+    # (2) 雙輪（max_rounds=2）：第 1 輪改寫了 expense_summary.csv 且未修好 summary.md；
+    #     第 2 輪工作區必須收到已還原的乾淨 expense_summary.csv，且只修 summary.md 後通過保留檢查
+    rounds_seen: list[int] = []
+
+    def run_2r(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        rounds_seen.append(len(rounds_seen) + 1)
+        if len(rounds_seen) == 1:
+            (ws / "expense_summary.csv").write_text(mutated_csv, encoding="utf-8")
+        else:
+            # 第 2 輪開局：已滿足交付物必須已從原草稿還原為乾淨位元組
+            assert (ws / "expense_summary.csv").read_text(encoding="utf-8") == clean_csv
+            (ws / "summary.md").write_text(good_md, encoding="utf-8")
+        return _run_result(log_dir)
+
+    out_2r = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_2r", build=_fake_build([]),
+        run=run_2r,
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert len(out_2r.rounds) == 2
+    # round_1 快照仍保留第 1 輪真實產物（未竄改歷史）
+    assert (tmp_path / "out_2r" / "round_1" / "expense_summary.csv").read_text(encoding="utf-8") == mutated_csv
+    assert out_2r.stopped == "gap_closed"
+    assert out_2r.satisfied_preserved == ("expense_summary.csv",)
+    assert out_2r.satisfied_mutated == ()
+    assert repair._exit_code(out_2r) == 0
+
+

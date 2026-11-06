@@ -1589,6 +1589,7 @@ def run_repair_round(
     include_dirs: tuple[str, ...] = ("data",),
     authoritative: pathlib.Path | None = None,
     prev_round_agent: dict[str, Any] | None = None,
+    preserved_from_draft: tuple[pathlib.Path, tuple[str, ...]] | None = None,
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。來源目錄不被改動。
 
@@ -1622,6 +1623,14 @@ def run_repair_round(
         )
     ws = prepare_workspace(task_dir, draft_dir, out_root,
                            round_n=n, include_dirs=include_dirs)
+    if n >= 2 and preserved_from_draft is not None:
+        orig_d_dir, preserved_rels = preserved_from_draft
+        for rel in preserved_rels:
+            src_f = orig_d_dir / rel
+            if src_f.is_file():
+                dst_f = ws / rel
+                dst_f.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src_f, dst_f)
     prompt = build_repair_prompt(authoritative, req_set, draft_dir, before,
                                  feedback_mode=feedback_mode, include_dirs=include_dirs,
                                  prev_round_agent=prev_round_agent)
@@ -1765,6 +1774,47 @@ def _file_sha256(p: pathlib.Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def _preserved_deliverables(
+    req_set: RequirementSet,
+    before: list[ClaimResult],
+    d_dir: pathlib.Path,
+) -> tuple[str, ...]:
+    """回傳應受「修復只改未滿足產物並保留其餘成果」位元組級保留約束的初始已滿足交付物檔名。
+
+    條件與 build_repair_prompt 的分流完全對齊：
+    1. 任務宣告的交付物數 len(declared) >= 2（多交付物）；
+    2. 初始驗同時存在已滿足（initial_satisfied 非空）與未滿足（initial_unsatisfied 非空）交付物；
+    3. 該已滿足交付物在原草稿目錄 d_dir 下實際為檔案。
+    單一交付物（answer.txt）或無未滿足交付物（good 草稿）不適用部分修復保留約束，回傳 ()。
+    """
+    declared = {it.deliverable for it in req_set.items if it.deliverable}
+    if len(declared) < 2:
+        return ()
+    initial_satisfied, initial_unsatisfied = _partition_deliverables(req_set, before)
+    if not initial_satisfied or not initial_unsatisfied:
+        return ()
+    return tuple(sorted(d for d in initial_satisfied if (d_dir / d).is_file()))
+
+
+def _check_preserved_deliverables(
+    d_dir: pathlib.Path,
+    ws_dir: pathlib.Path,
+    tracked: tuple[str, ...],
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    preserved: list[str] = []
+    mutated: list[str] = []
+    for d in tracked:
+        orig_f = d_dir / d
+        if not orig_f.is_file():
+            continue
+        final_f = ws_dir / d
+        if final_f.is_file() and _file_sha256(final_f) == _file_sha256(orig_f):
+            preserved.append(d)
+        else:
+            mutated.append(d)
+    return tuple(preserved), tuple(mutated)
+
+
 def repair_slice(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
@@ -1820,6 +1870,7 @@ def repair_slice(
 
     # 初始驗（原草稿）：來源讀權威快照，交付物讀原草稿
     before = run_requirement_checks(auth, req_set, d_dir)
+    tracked_preserved = _preserved_deliverables(req_set, before, d_dir)
     req_fail = [c.claim_id for c in before if c.required and c.status == "FAIL"]
     rounds: list[RepairRound] = []
     stalled = 0
@@ -1845,14 +1896,18 @@ def repair_slice(
                 include_dirs=include_dirs,
                 authoritative=auth,
                 prev_round_agent=prev_round_agent,
+                preserved_from_draft=(d_dir, tracked_preserved) if tracked_preserved else None,
             )
             rounds.append(r)
             prev_round_agent = r.agent   # 第 N+1 輪提示可點名第 N 輪的工具死迴圈觀察
             if r.source_tampered:
                 tamper_seen = True
-            # 缺口關閉：全部必需項 PASS，且全程無來源改動（P000-20261105-02：
-            # 改來源迎合交付不得關閉缺口）
-            if not tamper_seen and _required_all_pass(req_set, r.after):
+            _, round_mutated = _check_preserved_deliverables(
+                d_dir, pathlib.Path(r.workspace), tracked_preserved
+            )
+            # 缺口關閉：全部必需項 PASS、全程無來源改動（P000-20261105-02）、且本輪未改寫
+            # 應保留之初始已滿足交付物（P20261106_1035-2：竄改已滿足交付物不得關閉缺口）
+            if not tamper_seen and not round_mutated and _required_all_pass(req_set, r.after):
                 stopped = STOP_GAP_CLOSED
                 break
             # 停滯決策（P000-20261105-01：按「相鄰輪可確認改善」計算）：
@@ -1861,12 +1916,12 @@ def repair_slice(
             # - 非必需項 FAIL→PASS：不是已確認缺口。若算進度，一次非必需修復會
             #   每輪都重置停滯預算，迴圈燒盡 max_rounds——預算紀律失效。
             # - FAIL→UNKNOWN：紅線明列不算修好（不得用狀態變化偽裝進度）。
-            # - 來源改動輪（P000-20261105-02）：不可接受，不算進度。
+            # - 來源改動輪（P000-20261105-02）或竄改已滿足交付物輪：不可接受，不算進度。
             prev_map = _status_map(prev_after)
             newly = {c.claim_id for c in r.after
                      if c.required and c.status == "PASS"
                      and prev_map.get(c.claim_id) != "PASS"}
-            if newly and not r.source_tampered:
+            if newly and not r.source_tampered and not round_mutated:
                 stalled = 0
             else:
                 stalled += 1
@@ -1911,23 +1966,12 @@ def repair_slice(
             regressed_set.add(cid)
     regressed = tuple(sorted(regressed_set))
 
-    # 已滿足交付物位元組級保留（P20261106_0834-2）：initial_satisfied（初始驗即已滿足）
-    # 各交付物檔案，比對最終工作區與原草稿之 SHA256：相符⇒preserved；
-    # 不符或缺失⇒mutated（覆寫／竄改／刪除皆不算保留）。
-    # 零輪（無缺口）⇒無最終工作區，原草稿未動⇒以原草稿自比＝全部 preserved。
-    initial_satisfied, _unsatisfied = _partition_deliverables(req_set, before)
+    # 已滿足交付物位元組級保留（P20261106_0834-2）：在多交付物部分修復（tracked_preserved 非空）時，
+    # 比對最終工作區與原草稿之 SHA256：相符⇒preserved；不符或缺失⇒mutated（覆寫／竄改／刪除皆不算保留）。
     final_ws = pathlib.Path(rounds[-1].workspace) if rounds else d_dir
-    satisfied_preserved: list[str] = []
-    satisfied_mutated: list[str] = []
-    for d in sorted(initial_satisfied):
-        orig_f = d_dir / d
-        if not orig_f.is_file():
-            continue   # 交付物非檔案（無比對基準）⇒兩欄皆不計
-        final_f = final_ws / d
-        if final_f.is_file() and _file_sha256(final_f) == _file_sha256(orig_f):
-            satisfied_preserved.append(d)
-        else:
-            satisfied_mutated.append(d)
+    satisfied_preserved, satisfied_mutated = _check_preserved_deliverables(
+        d_dir, final_ws, tracked_preserved
+    )
 
     calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
