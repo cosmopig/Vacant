@@ -76,6 +76,36 @@ def read_csv_rows(path: pathlib.Path) -> list[dict[str, str]]:
         return rows
 
 
+def read_table_deliverable(path: pathlib.Path) -> list[dict[str, Any]]:
+    """讀取表格交付物：.json 接受物件陣列或含 records/rows/data 物件陣列之物件；其餘副檔名走 read_csv_rows。
+
+    鍵小寫標準化（與 CSV 同口徑）；值保留 JSON 原生型別（下游統一經 str() 轉換比對）。
+    JSON 解析失敗回傳空列表（交付物判為空/不符，絕不冒稱 PASS）。
+    """
+    if path.suffix.lower() != ".json":
+        return read_csv_rows(path)
+    if not path.is_file():
+        return []
+    try:
+        data: Any = json.loads(path.read_text(encoding="utf-8-sig"))
+    except ValueError:
+        return []
+    if isinstance(data, dict):
+        for key in ("records", "rows", "data"):
+            if isinstance(data.get(key), list):
+                data = data[key]
+                break
+        else:
+            data = [data]
+    if not isinstance(data, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    for r in data:
+        if isinstance(r, dict):
+            rows.append({str(k).strip().lower(): v for k, v in r.items()})
+    return rows
+
+
 def check_csv_structure(
     deliverable_dir: pathlib.Path,
     item: RequirementItem,
@@ -965,7 +995,7 @@ def check_rowset_filter(
     deliv_file = deliverable_dir / item.deliverable
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
-    deliv_rows = read_csv_rows(deliv_file)
+    deliv_rows = read_table_deliverable(deliv_file)
 
     exp_keys = Counter(tuple(_fmt_key(r[c]) for c in identity) for r in expected)
     act_keys = Counter(tuple(_fmt_key(r.get(c, "")) for c in identity) for r in deliv_rows)
@@ -1127,7 +1157,7 @@ def check_group_aggregate(
     deliv_file = deliverable_dir / item.deliverable
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
-    deliv_rows = read_csv_rows(deliv_file)
+    deliv_rows = read_table_deliverable(deliv_file)
     if not deliv_rows:
         return _result(item, "FAIL", f"交付物為空: {item.deliverable}", {"empty_csv": item.deliverable})
     missing_cols = [g for g in group_by if g not in deliv_rows[0]]

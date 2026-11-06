@@ -413,6 +413,87 @@ def test_rowset_filter_unsafe_expr_is_unknown(tmp_path: pathlib.Path):
     assert res["req_main"].status == "UNKNOWN"
 
 
+def test_check_rowset_filter_supports_json_deliverable(tmp_path: pathlib.Path):
+    """JSON 交付物（物件陣列）須被 rowset_filter 直接解析並重算比對；改前以 CSV 讀取會誤判 FAIL。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "inventory.csv",
+        "item_id,item_name,current_stock,safety_stock,unit_cost,supplier_status\n"
+        "A1,電阻,8,40,0.05,ACTIVE\n"
+        "A2,MCU,5,20,10.0,ACTIVE\n"
+        "A2,MCU,5,20,10.0,ACTIVE\n"      # 重複列
+        "A4,晶片,3,30,2.0,DISCONTINUED\n",  # 停產，須排除
+    )
+    params = {
+        "input_csv": "inventory.csv",
+        "exclude": [{"col": "supplier_status", "op": "eq", "value": "DISCONTINUED"}],
+        "dedup_by": "item_id",
+        "include": [{"col": "current_stock", "op": "lt", "value": "safety_stock"}],
+        "identity": ["item_id"],
+        "values": {
+            "item_name": "item_name",
+            "current_stock": "current_stock",
+            "safety_stock": "safety_stock",
+            "restock_needed": {"expr": "safety_stock - current_stock"},
+            "estimated_cost": {"expr": "(safety_stock - current_stock) * unit_cost", "round": 2},
+        },
+        "atol": 0.01,
+    }
+
+    # good：JSON 物件陣列（數值為 JSON number）→ PASS
+    good = tmp_path / "good"
+    _write(
+        good / "restock.json",
+        json.dumps([
+            {"item_id": "A1", "item_name": "電阻", "current_stock": 8, "safety_stock": 40,
+             "restock_needed": 32, "estimated_cost": 1.6},
+            {"item_id": "A2", "item_name": "MCU", "current_stock": 5, "safety_stock": 20,
+             "restock_needed": 15, "estimated_cost": 150.0},
+        ], ensure_ascii=False),
+    )
+    req_set = _req_set("rowset_filter", params, "restock.json")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：行集不符（多帶停產 A4）→ FAIL
+    bad_extra = tmp_path / "bad_extra"
+    _write(
+        bad_extra / "restock.json",
+        json.dumps([
+            {"item_id": "A1", "item_name": "電阻", "current_stock": 8, "safety_stock": 40,
+             "restock_needed": 32, "estimated_cost": 1.6},
+            {"item_id": "A2", "item_name": "MCU", "current_stock": 5, "safety_stock": 20,
+             "restock_needed": 15, "estimated_cost": 150.0},
+            {"item_id": "A4", "item_name": "晶片", "current_stock": 3, "safety_stock": 30,
+             "restock_needed": 27, "estimated_cost": 54.0},
+        ], ensure_ascii=False),
+    )
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_extra)}
+    assert res["req_main"].status == "FAIL"
+    assert any(c.get("kind") == "rowset_mismatch" for c in res["req_main"].evidence["counterexamples"])
+
+    # bad：金額算錯（150.0 → 140.0），evidence 不帶預期值 ⇒ 無洩漏反例 actual + problem
+    bad_val = tmp_path / "bad_val"
+    _write(
+        bad_val / "restock.json",
+        json.dumps([
+            {"item_id": "A1", "item_name": "電阻", "current_stock": 8, "safety_stock": 40,
+             "restock_needed": 32, "estimated_cost": 1.6},
+            {"item_id": "A2", "item_name": "MCU", "current_stock": 5, "safety_stock": 20,
+             "restock_needed": 15, "estimated_cost": 140.0},
+        ], ensure_ascii=False),
+    )
+    params_ne = dict(params, expected_in_evidence=False)
+    req_set = _req_set("rowset_filter", params_ne, "restock.json")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_val)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    hit = [c for c in r.evidence["counterexamples"] if c.get("field") == "estimated_cost"]
+    assert hit and "actual" in hit[0]
+    assert hit[0]["problem"] == "mismatch_with_recomputation"
+    assert "expected" not in hit[0]
+
+
 def test_group_aggregate_counts_ratio_mean(tmp_path: pathlib.Path):
     task_dir = tmp_path / "task"
     _write(
@@ -474,6 +555,55 @@ def test_group_aggregate_counts_ratio_mean(tmp_path: pathlib.Path):
     )
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_case)}
     assert res["req_main"].status == "FAIL"
+
+
+def test_check_group_aggregate_supports_json_deliverable(tmp_path: pathlib.Path):
+    """JSON 交付物須被 group_aggregate 直接解析並重算比對；改前以 CSV 讀取會誤判 FAIL。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "grades.csv",
+        "student_id,class_name,midterm_score,final_score,status\n"
+        "S1,Class_A,78,82,ENROLLED\n"
+        "S2,Class_A,55,60,ENROLLED\n"
+        "S3,Class_B,90,70,ENROLLED\n",
+    )
+    params = {
+        "input_csv": "grades.csv",
+        "group_by": ["class_name"],
+        "compute": [{"name": "total_score", "expr": "midterm_score * 0.4 + final_score * 0.6"}],
+        "aggregates": [
+            {"name": "student_count", "type": "count"},
+            {"name": "passing_count", "type": "count_if", "expr": "total_score >= 60.0"},
+            {"name": "pass_rate", "type": "ratio", "num": "passing_count", "den": "student_count", "round": 2},
+            {"name": "average_score", "type": "mean", "expr": "total_score", "round": 2},
+        ],
+        "atol": 0.01,
+    }
+    rows = [
+        {"class_name": "Class_A", "student_count": 2, "passing_count": 1, "pass_rate": 0.5, "average_score": 69.2},
+        {"class_name": "Class_B", "student_count": 1, "passing_count": 1, "pass_rate": 1.0, "average_score": 78.0},
+    ]
+    req_set = _req_set("group_aggregate", params, "class_summary.json")
+
+    # good：JSON 物件陣列 → PASS
+    good = tmp_path / "good"
+    _write(good / "class_summary.json", json.dumps(rows))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    # good：JSON 物件包 records 陣列 → PASS
+    wrapped = tmp_path / "wrapped"
+    _write(wrapped / "class_summary.json", json.dumps({"records": rows}))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, wrapped)}
+    assert res["req_main"].status == "PASS"
+
+    # bad：平均算錯（69.2 → 60.2）→ FAIL 且帶反例
+    bad_mean = tmp_path / "bad_mean"
+    _write(bad_mean / "class_summary.json", json.dumps([dict(rows[0], average_score=60.2), rows[1]]))
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad_mean)}
+    assert res["req_main"].status == "FAIL"
+    ce = res["req_main"].evidence.get("counterexamples")
+    assert ce and any(c.get("field") == "average_score" for c in ce)
 
 
 def test_group_aggregate_normalize_and_default(tmp_path: pathlib.Path):
