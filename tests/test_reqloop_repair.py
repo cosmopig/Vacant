@@ -174,6 +174,45 @@ def test_localized_prompt_has_requirement_counterexample_and_scope(task_dir):
     assert "報銷總金額" in generic                     # 原始需求兩臂都有
 
 
+def test_localized_prompt_partitions_unsatisfied_and_preserved_deliverables(task_dir):
+    """P20261106_0632-1（2026-11-06 指示 4）：修復只改未滿足產物並保留其餘成果。
+
+    expense_category 有兩份宣告交付物：expense_summary.csv（req_csv_structure＋
+    req_group_recompute，bad_grand_total_wrong 草稿兩條皆 PASS）與 summary.md
+    （req_summary_numbers FAIL）。localized 提示必須把交付物分流——
+    「未滿足（請修正）」列 summary.md、「已滿足（請完整保留勿修改）」列
+    expense_summary.csv，且逐條需求標明所屬交付物檔名；generic 對照臂完全不變
+    （不帶分流區塊、維持原單一可修改列表）。
+    """
+    rs = load_req_set(task_dir)
+    before = run_requirement_checks(task_dir, rs, task_dir / BAD_DRAFT)
+    statuses = {c.claim_id: c.status for c in before}
+    assert statuses[FAIL_CLAIM] == "FAIL"
+    assert all(statuses[c] == "PASS" for c in PASS_CLAIMS)
+
+    loc = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="localized")
+    fix_hdr = "【未滿足交付物（請修正此檔案以滿足缺口）】"
+    keep_hdr = "【已滿足交付物（成果已驗證通過，請完整保留勿修改）】"
+    assert fix_hdr in loc
+    assert keep_hdr in loc
+    # 順序：未滿足在前、已滿足在後；summary.md 在未滿足節下，expense_summary.csv 在已滿足節下
+    i_fix, i_keep = loc.index(fix_hdr), loc.index(keep_hdr)
+    assert i_fix < i_keep
+    assert "- summary.md" in loc[i_fix:i_keep]
+    assert "expense_summary.csv" not in loc[i_fix:i_keep]      # 已通過的成果不得列在待修節
+    assert "- expense_summary.csv" in loc[i_keep:]
+    # 逐條需求驗證輸出標明所屬交付物
+    assert "（交付物：summary.md）" in loc
+    assert "（交付物：expense_summary.csv）" in loc
+    # generic 對照臂完全不變：無分流區塊、維持原單一可修改列表、無交付物標記
+    gen = repair.build_repair_prompt(task_dir, rs, task_dir / BAD_DRAFT, before,
+                                     feedback_mode="generic")
+    assert fix_hdr not in gen and keep_hdr not in gen
+    assert "【目前交付物檔案" in gen
+    assert "（交付物：" not in gen
+
+
 def test_prompt_tells_env_has_sciplib_and_verify_by_import(task_dir):
     """dab_039 真實停因：草稿 solution.py 舊註解聲稱 scipy 缺失，模型誤信後
     手刻 Royston 演算法＋搜尋工作區外部目錄，300s 預算耗盡（r976 複跑 549k tok 仍 stalled）。
@@ -1544,9 +1583,18 @@ def test_round2_prompt_does_not_list_source_files_as_modifiable_deliverables(tas
     )
     assert len(prompts) == 2
     for idx, p in enumerate(prompts, 1):
-        mod_section = p.split("【目前交付物檔案")[1].split("【工作區")[0]
-        assert "- summary.md" in mod_section, (idx, mod_section)
-        assert "- expense_summary.csv" in mod_section, (idx, mod_section)
+        # P20261106_0632-1：同時存在已滿足/未滿足交付物時為分流版式，
+        # 可修改節＝【未滿足交付物】；否則維持原單一列表。
+        if "【未滿足交付物" in p:
+            mod_section = p.split("【未滿足交付物")[1].split("【已滿足交付物")[0]
+            assert "- summary.md" in mod_section, (idx, mod_section)
+            assert "- expense_summary.csv" not in mod_section, (idx, mod_section)
+            keep_section = p.split("【已滿足交付物")[1].split("【工作區")[0]
+            assert "- expense_summary.csv" in keep_section, (idx, keep_section)
+        else:
+            mod_section = p.split("【目前交付物檔案")[1].split("【工作區")[0]
+            assert "- summary.md" in mod_section, (idx, mod_section)
+            assert "- expense_summary.csv" in mod_section, (idx, mod_section)
         for forbidden in ("- expenses.csv", "- request.md", "- requirements.json"):
             assert forbidden not in mod_section, f"round {idx} 把權威來源列為可修改交付物: {mod_section}"
         assert "- requirements.json" not in p, f"round {idx} 提示不應宣傳控制器內部 requirements.json"

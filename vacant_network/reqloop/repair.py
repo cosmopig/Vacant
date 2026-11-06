@@ -170,6 +170,30 @@ def diff_results(before: list[ClaimResult], after: list[ClaimResult]) -> RepairD
 
 # ── 修復請求（原生 pi 收到的提示）────────────────────────────────────
 
+def _partition_deliverables(
+    req_set: RequirementSet, before: list[ClaimResult]
+) -> tuple[set[str], set[str]]:
+    """按關聯必需項的驗證狀態分流宣告交付物（只 localized 臂用）。
+
+    回傳 (satisfied, unsatisfied)：
+    - 某交付物的所有關聯必需項皆 PASS ⇒ satisfied（成果已驗證，提示要求完整保留）；
+    - 任一關聯必需項非 PASS（FAIL/UNKNOWN/CONFLICT 或缺項）⇒ unsatisfied（缺口所在，請修正）；
+    - 沒有關聯必需項（無從判定已驗證）⇒ 保守歸 unsatisfied（可修改）。
+    未知狀態不得當已驗證：看不到＝UNKNOWN，不是 PASS。
+    """
+    by_id = {c.claim_id: c for c in before}
+    satisfied: set[str] = set()
+    unsatisfied: set[str] = set()
+    for d in {it.deliverable for it in req_set.items if it.deliverable}:
+        req_items = [i for i in req_set.items if i.deliverable == d and i.required]
+        results = [by_id[i.id] for i in req_items if i.id in by_id]
+        if req_items and results and all(c.status == "PASS" for c in results):
+            satisfied.add(d)
+        else:
+            unsatisfied.add(d)
+    return satisfied, unsatisfied
+
+
 def build_repair_prompt(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
@@ -252,12 +276,36 @@ def build_repair_prompt(
     ref_files = [f for f in ref_files if f not in draft_names] or ref_files
 
     by_id = {c.claim_id: c for c in before}
+    # P20261106_0632-1（2026-11-06 指示 4）：localized 臂在同時存在已滿足與未滿足的
+    # 宣告交付物時分流顯示——只修未滿足、完整保留已滿足，防止模型重寫已通過的成果；
+    # generic 對照臂定義不變（單一可修改列表）；全部未滿足或單一交付物也維持原列表。
+    satisfied, unsatisfied = _partition_deliverables(req_set, before)
+    declared = {it.deliverable for it in req_set.items if it.deliverable}
+    partition = (
+        feedback_mode == "localized"
+        and len(declared) >= 2
+        and bool(satisfied)
+        and bool(unsatisfied)
+    )
     lines: list[str] = []
     lines.append("【原始需求（使用者原文）】")
     lines.append(request if request else "（缺 request.md）")
     lines.append("")
-    lines.append("【目前交付物檔案（可以修改；若原始需求要求的交付物不存在，請依需求建立它）】")
-    lines.append("\n".join(f"- {f}" for f in draft_files) if draft_files else "- （無）")
+    if partition:
+        fix_files = [f for f in draft_files if f not in satisfied]
+        # 宣告了但尚不存在於工作區的交付物＝未滿足（請依需求建立它）
+        fix_files += sorted(declared - satisfied - set(draft_files))
+        keep_files = [f for f in draft_files if f in satisfied]
+        lines.append("【未滿足交付物（請修正此檔案以滿足缺口）】")
+        lines.append("\n".join(f"- {f}" for f in fix_files) if fix_files else "- （無）")
+        lines.append("")
+        lines.append("【已滿足交付物（成果已驗證通過，請完整保留勿修改）】")
+        lines.append("\n".join(f"- {f}" for f in keep_files) if keep_files else "- （無）")
+        if declared - satisfied - set(draft_files):
+            lines.append("若原始需求要求的交付物不存在，請依需求建立它。")
+    else:
+        lines.append("【目前交付物檔案（可以修改；若原始需求要求的交付物不存在，請依需求建立它）】")
+        lines.append("\n".join(f"- {f}" for f in draft_files) if draft_files else "- （無）")
     ref_all = list(ref_files)
     for dd in include_dirs:
         dpath = t / dd
@@ -280,7 +328,9 @@ def build_repair_prompt(
             c = by_id.get(item.id)
             if c is None:
                 continue
-            lines.append(f"- [{c.status}] {item.id}：{item.quote}")
+            # 標明所屬交付物（多交付物任務中缺口對應哪個檔案；空＝沿用舊格式）
+            tag = f"（交付物：{item.deliverable}）" if item.deliverable else ""
+            lines.append(f"- [{c.status}] {item.id}{tag}：{item.quote}")
             if c.status != "PASS":
                 lines.append(f"  驗證結果：{_cap_prompt_text(c.detail)}")
                 if c.evidence:
