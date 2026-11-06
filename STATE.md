@@ -15,3 +15,8 @@
 - redo（審查補實讀）：effects_20261105_summary.json＝50 格（policy30 30＋feedback_once20 20）、snapshot d38d2eb2、local 45 vs current_code 50/50 與獨立評分一致、scope_note＝開發選樣／單 rep／UNKNOWN 不填 0——本輪 NOW/STATE 未引其數字、僅列「effects2 以 r1135 彙整為準」，一致無需更正；multideliv manifest＋draft_bad_missing_top_products/summary.md＝該 summary.md 即「已滿足」銷售報告（satisfied），未滿足產物是 monthly_sales.csv（top_3 欄缺失），satisfied_preserved／satisfied_mutated／source_tampered 定義核對 manifest＋repair.py，multideliv FIRED（r1104）輸出在 ~/dev/ops/multideliv_20261106（g2_result.json 在）；repair.py＝source_tampered→退出碼 20「表面全 PASS 也拒收」、_check_preserved_deliverables 位元組保留。
 - 驗證了什麼：B 自 r1131 入樹後首次於現樹全門綠（含 r1136 g2.py --baseline 改動）；A 維持綠；B before_visible「9 PASS/2 FAIL」與實跑一致；B「同口徑」（只修未滿足、保留已滿足、來源改動拒收）與 multideliv 定義＋repair.py 守衛一致。
 - 沒驗證／下一步：真實效果（A/B 皆 NOT_fired，發射要授權＋新成本另報）；auto/qwen27b CI（45527e97 未跑完、不阻塞）；未見任務效力（開發選樣、單 rep）。若授權 fire A（或 B，二擇一／分批、不並跑）；未授權維持雙凍結、0 新票、不製造工作。
+- r1139：完成工單 P20261106_2040-1（check_csv_structure 支援 JSON 交付物＋table_structure 別名）——TDD 先紅（empty_csv FAIL）後綠；checks.py 3 行（read_table_deliverable 替換 read_csv_rows＋分派加別名＋docstring）＋1 新測試；commit 51e3e5df；0 模型呼叫、0 發射。
+- 驗證了什麼：驗收 `pytest tests/test_reqloop_checks.py -k test_check_csv_structure_supports_json_deliverable` → 1 passed；同檔 52 passed（原 51 維持綠）；test_reqloop_g2/repair/real_slice 154 passed；CSV 路徑不變（非 .json 仍走 read_csv_rows，既有 CSV 欄位測試全綠）。
+- 沒驗證什麼：真實效果——本票是離線檢查器能力（JSON records.json 結構驗收），非效果數字；A/B 雙切片仍 NOT_fired（發射要授權＋新成本另報）；未見任務效力。
+- DECISION：未加 regex／靜態 prompt／重試；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer；工單已移 done/（結果 3 行在檔尾）。
+- 下一步：11-06#4 需求驅動內容閉環切片（A=realtask 6550d7a8／B=dab_378，離線三門已就緒，fire 要授權）；未授權維持雙凍結、0 新票。
