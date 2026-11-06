@@ -59,3 +59,8 @@
 - DECISION：純離線規格＋測試鎖定（0 模型呼叫、0 元）；未加 regex／靜態 prompt／重試；未動 main、未自 push、未讀 /srv/eval hidden／scorer；未動 dab_378-pi-C/task/ 任何檔。
 - 下一步：候需求端點名／授權 fire 4 格（兩臂同草稿起點 hash 由 manifest pin 保證；A 臂 11/11 為 right_to_wrong=0 客觀基線）；vq-6rp／vq-5nz.6 仍候點名。
 - r1147c：審查指「28888」不於本任務讀過/算過的任何內容——grep 重算（repo 全庫＋~/dev/ops，除 STATE.md 外）確認：「28888」在任務材料零命中（repo 內僅無關資料的巧合子串：runs/ 的 latency_ms／p50、smoke_e014 payments.csv 的 ID 子串）；其在本任務範圍的唯一出現即 STATE.md 本行——系審查訊息自帶編號之回顯，已刪去該裸編號，只保留重算值。pytest 質疑結論不變：該 pytest 步為工單驗收明令之 TDD 紅步（改 manifest 前 3 failed/5 passed；驗收文字「改之前會因 len(man.drafts)==2 失敗」），其後兩步 8 passed、219 passed 皆 RC=0；重跑：real_slice 8 passed RC=0、5 檔 219 passed RC=0、--dry-run「2 drafts · 4 cells」、--baseline C 9/11＋A 11/11 RC=0。無實施錯誤、零程式改動（不為結案製造修補/commit）。
+- r1148（第 1148 輪，工單 P20261106_2241-2）：實裝 audit_kv_preservation（reqloop/checks.py，_kv_answer_value 之後）——鍵值交付物行級/鍵級保留審計：.txt 用 _ANSWER_KV_RE 逐行 raw 比對、.json 頂層 dict 值相等＋型別一致；值改動/鍵刪/鍵重複/檔案缺失/草稿無此鍵→mutated；TDD 紅（ImportError）→綠。
+- 驗證：票面驗收指令（含 -q）RC=0、1 點過；無 -q 口徑「1 passed, 54 deselected」；5 檔 checks/g2/repair/real_slice/g1_gate 220 passed（219 既有＋1 新增）無回歸；未動 read_table_deliverable／check_kv_recomputed 判準（只讀其正則口徑）。
+- 沒驗證：未接線進 real_slice/g2 管線（工單範圍外）；未 fire 模型、無效果數字；d33a1ac8 CI 待 loop 自動推 auto/qwen27b 後核。
+- DECISION：純離線產品能力（0 模型呼叫 0 元）；未加 regex/靜態 prompt/重試、未動 main、未自 push、未讀 /srv/eval hidden/scorer；工單已入 done/（結果 3 行在檔尾）。
+- 下一步：候需求端授權 fire 4 格（A＋C×兩臂、同預算 60/4M/300s）或點名 vq-6rp/vq-5nz.6；可選下票：把 audit_kv_preservation 接進 real_slice 報告（preserved/mutated 進 before_after 證據）。
