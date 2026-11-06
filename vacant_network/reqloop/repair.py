@@ -41,8 +41,10 @@ G2 局部修復切片（工單 P000-20261104-01-repair-slice，2026-11-04）。
 
 呼叫契約（注入用，測試／換執行器用）：
     build(prompt: str, workspace: Path) -> Launch
-    run(launch, *, workspace: Path, timeout_s: float, log_dir: Path) -> dict
-    （與 `adapters.agents.pi_build`／`adapters.run.run_agent` 同簽名）
+    run(launch, *, workspace: Path, timeout_s: float, log_dir: Path,
+        max_tool_calls: int | None = None, max_tokens: int | None = None) -> dict
+    （與 `adapters.agents.pi_build`／`adapters.run.run_agent` 同簽名；
+    兩支硬上限 opt-in：None＝不量不殺；未設定時本層不帶新 kwarg，舊簽名實現照跑）
 
 CLI（可重跑的原生 pi 命令；provider/model 用既有 pi 設定，不輸出憑證）：
     .venv/bin/python -m vacant_network.reqloop.repair \
@@ -1519,6 +1521,8 @@ def run_repair_round(
     run: RunFn,
     feedback_mode: str,
     timeout_s: float,
+    max_tool_calls: int | None = None,
+    max_tokens: int | None = None,
     include_dirs: tuple[str, ...] = ("data",),
     authoritative: pathlib.Path | None = None,
     prev_round_agent: dict[str, Any] | None = None,
@@ -1528,6 +1532,10 @@ def run_repair_round(
     `prev_round_agent`（第 2+ 輪）：上一輪 agent 欄位（第 1 輪＝None）。localized
     臂若其 tool_loop_suspected 非空，本輪提示點名上一輪重複的工具與次數（針對性
     反迴圈指令）；generic 臂不受影響。只進提示，不改重驗／停滯／退出碼。
+
+    硬預算上限（opt-in，2026-11-06）：`max_tool_calls`／`max_tokens` 轉發給執行器
+    run()；兩者皆 None＝原路徑逐位元組不變（不量不殺，舊簽名 RunFn 不受影響）。
+    執行器殺掉的輪次其回傳 dict 帶 `budget_exceeded`，如實記錄在本輪 agent 欄位。
 
     累積修復（P000-20261105-01）：
     - `draft_dir`＝本輪來源目錄：第 1 輪為原草稿；第 N 輪（N≥2）為上一輪工作區
@@ -1557,8 +1565,13 @@ def run_repair_round(
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
     launch = build(prompt, ws)
     log_dir = pathlib.Path(out_root) / f"agent_round_{n}"
+    # 硬預算上限（opt-in）：皆 None＝原路徑逐位元組不變（不帶新 kwarg，舊簽名 RunFn 照跑）
+    run_kwargs: dict[str, Any] = {}
+    if max_tool_calls is not None or max_tokens is not None:
+        run_kwargs = {"max_tool_calls": max_tool_calls, "max_tokens": max_tokens}
     try:
-        agent = run(launch, workspace=ws, timeout_s=timeout_s, log_dir=log_dir)
+        agent = run(launch, workspace=ws, timeout_s=timeout_s, log_dir=log_dir,
+                    **run_kwargs)
         error = agent.get("spawn_error")
     except Exception as e:  # noqa: BLE001 — agent 崩潰＝該輪無進展，如實記錄
         agent = {"rc": None, "timed_out": False, "wall_ms": None,
@@ -1690,6 +1703,8 @@ def repair_slice(
     *,
     max_rounds: int = 2,
     timeout_s: float = 300.0,
+    max_tool_calls: int | None = None,
+    max_tokens: int | None = None,
     synthetic: bool = False,
     min_rounds: int = 0,
     include_dirs: tuple[str, ...] = ("data",),
@@ -1709,6 +1724,10 @@ def repair_slice(
     （out_root/authoritative/＋authoritative_manifest.json），產物才讀候選工作區——
     agent 改寫工作區來源（CSV／requirements.json）不得翻 FAIL→PASS；任一輪來源改動
     記錄在 source_tampered（不可接受，退出碼 20），且不得宣告缺口關閉。
+
+    硬預算上限（opt-in，2026-11-06）：`max_tool_calls`／`max_tokens` 逐輪轉發給執行器
+    run()；皆 None＝不量不殺、呼叫形狀與以前逐位元組相同。設定的值如實記錄在
+    cost["budget"]（None＝未設；不填 0）。
     """
     if feedback_mode not in FEEDBACK_MODES:
         raise ValueError(f"feedback_mode must be one of {FEEDBACK_MODES}")
@@ -1749,6 +1768,7 @@ def repair_slice(
                 n, t_dir, req_set, source_dir, prev_after,
                 out_root=o_root, build=build, run=run,
                 feedback_mode=feedback_mode, timeout_s=timeout_s,
+                max_tool_calls=max_tool_calls, max_tokens=max_tokens,
                 include_dirs=include_dirs,
                 authoritative=auth,
                 prev_round_agent=prev_round_agent,
@@ -1846,7 +1866,11 @@ def repair_slice(
         "token_source": token_source,  # agent_stdout | partial（部分輪缺）| unavailable（無任何輪有 usage 資料）
         "budget": {"max_rounds": max_rounds, "timeout_s_per_round": timeout_s,
                    "stall_limit": _STALL_LIMIT,
-                   "note": "硬上限＝輪數×單輪 wall timeout＋輪數；無硬 token 限制能力，如實標記"},
+                   "max_tool_calls": max_tool_calls,  # opt-in；None＝未設（不量不殺）
+                   "max_tokens": max_tokens,          # opt-in；None＝未設（不量不殺）
+                   "note": ("硬上限＝輪數×單輪 wall timeout＋輪數；tool 呼叫數／token "
+                            "硬上限 opt-in：未設＝不量不殺；設了＝執行器超過即殺，"
+                            "該輪 budget_exceeded 如實記錄")},
     }
     return RepairOutcome(
         synthetic=synthetic,
@@ -2301,6 +2325,10 @@ def main(argv: list[str] | None = None, *,
     ap.add_argument("--min-rounds", type=int, default=None,
                     help="無已確認缺口時至少執行的輪數（預設：generic 臂為 1，localized 臂為 0）")
     ap.add_argument("--timeout", type=float, default=300.0, help="單輪 agent wall timeout（秒）")
+    ap.add_argument("--max-tool-calls", type=int, default=None,
+                    help="單輪 agent 工具呼叫數硬上限（超過即殺；不給＝不量不殺）")
+    ap.add_argument("--max-tokens", type=int, default=None,
+                    help="單輪 agent token 用量硬上限（累計超過即殺；不給＝不量不殺）")
     ap.add_argument("--provider", default=os.environ.get("VACANT_PI_PROVIDER"),
                     help="pi provider（預設讀 VACANT_PI_PROVIDER；不給＝pi 預設）")
     ap.add_argument("--model", default=os.environ.get("VACANT_PI_MODEL"),
@@ -2338,7 +2366,9 @@ def main(argv: list[str] | None = None, *,
         task_dir, req_set, draft_dir,
         out_root=out_root, build=build, run=run,
         feedback_mode=args.feedback_mode, max_rounds=args.rounds,
-        timeout_s=args.timeout, synthetic=args.synthetic,
+        timeout_s=args.timeout,
+        max_tool_calls=args.max_tool_calls, max_tokens=args.max_tokens,
+        synthetic=args.synthetic,
         min_rounds=min_rounds,
         include_dirs=include_dirs,
     )

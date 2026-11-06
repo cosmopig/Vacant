@@ -238,10 +238,16 @@ def run_g2_smoke(
     run: Callable[..., dict[str, Any]],
     *,
     include_dirs: tuple[str, ...] = ("data",),
+    max_tool_calls: int | None = None,
+    max_tokens: int | None = None,
 ) -> G2Result:
     """跑 6 格。每格＝repair_slice（有上限的修復入口）：
     generic 臂 min_rounds=1（對的草稿也重驗一次）；localized 臂 min_rounds=0（缺口驅動）。
     兩臂同 max_rounds、同 timeout、同模型、同資料、同草稿。
+
+    硬預算上限（opt-in，2026-11-06）：優先序＝顯式引數 > manifest budget
+    （`max_tool_calls`／`max_tokens`）> None。皆 None＝不量不殺，呼叫形狀與以前相同；
+    設了＝執行器超過即殺，該輪 `budget_exceeded` 記錄進每格 cell。
     """
     from vacant_network.reqloop.checks import run_requirement_checks
 
@@ -251,6 +257,10 @@ def run_g2_smoke(
     max_rounds = int(man.budget.get("max_rounds_per_cell", 2))
     timeout_s = float(man.budget.get("timeout_s_per_round", 300.0))
     min_by_arm = man.budget.get("min_rounds", {}) or {}
+    if max_tool_calls is None:
+        max_tool_calls = man.budget.get("max_tool_calls")
+    if max_tokens is None:
+        max_tokens = man.budget.get("max_tokens")
 
     cells: list[dict[str, Any]] = []
     for d in man.drafts:
@@ -268,6 +278,7 @@ def run_g2_smoke(
                 build=build, run=run,
                 feedback_mode=arm,
                 max_rounds=max_rounds, timeout_s=timeout_s,
+                max_tool_calls=max_tool_calls, max_tokens=max_tokens,
                 synthetic=False,
                 min_rounds=min_rounds,
                 include_dirs=include_dirs,
@@ -288,6 +299,8 @@ def run_g2_smoke(
                 # P000-20261105-02：來源改動＝不可接受（必須可見於實驗記錄）
                 "source_tampered": outcome.source_tampered,
                 "source_tampered_files": list(outcome.source_tampered_files),
+                # r1088：逐輪硬預算殺因（None＝該輪未被殺；未啟用上限時全 None）
+                "budget_exceeded": [r.agent.get("budget_exceeded") for r in outcome.rounds],
                 "before_hidden": d["source"].get("score"),       # 已記錄（引用，不重跑）
                 "after_hidden": AFTER_HIDDEN_UNKNOWN,            # 本地無權重跑；絕不填 0
                 "cost": dict(outcome.cost),
@@ -338,6 +351,10 @@ def main(argv: Sequence[str] | None = None, *,
     ap.add_argument("--provider", default=None, help="pi provider（預設讀 manifest）")
     ap.add_argument("--model", default=None, help="pi model（預設讀 manifest）")
     ap.add_argument("--no-hooks", action="store_true", help="pi 不載 Vacant 掛鉤")
+    ap.add_argument("--max-tool-calls", type=int, default=None,
+                    help="單輪 agent 工具呼叫數硬上限（覆蓋 manifest；不給＝讀 manifest，無＝不量不殺）")
+    ap.add_argument("--max-tokens", type=int, default=None,
+                    help="單輪 agent token 用量硬上限（覆蓋 manifest；不給＝讀 manifest，無＝不量不殺）")
     args = ap.parse_args(argv)
 
     man_path = pathlib.Path(args.manifest)
@@ -362,7 +379,8 @@ def main(argv: Sequence[str] | None = None, *,
     out_root = pathlib.Path(args.out) if args.out else pathlib.Path(
         tempfile.mkdtemp(prefix="vacant-g2-"))
 
-    res = run_g2_smoke(man, base, out_root, build, run, include_dirs=("data",))
+    res = run_g2_smoke(man, base, out_root, build, run, include_dirs=("data",),
+                       max_tool_calls=args.max_tool_calls, max_tokens=args.max_tokens)
     p = write_result(res, out_root)
 
     if args.json:
