@@ -1188,9 +1188,11 @@ _CRASH_EXC_RE = re.compile(
 _GIVEUP_ANSWERS = {"", "none", "n/a", "not applicable", "no answer"}
 # 静默空结果 → 放棄偵测：bash 命令中 python 解释器直接执行 .py 文件（不匹配
 # heredoc 重定向 `> solution.py`，也不匹配 `python3 -c "..."`）。
-# 支援各種前綴路徑（如 /usr/bin/python3, ./.venv/bin/python）與執行參數（如 -u, -B）。
+# 支援各種前綴路徑（如 /usr/bin/python3, ./.venv/bin/python）、版本後綴
+# （如 python3.12, python3.11, /usr/local/bin/python3.12）與執行參數（如 -u, -B）。
+# （r1078：5a2384fa 補了前綴路徑與參數，版本後綴是同一形狀家族的剩餘盲區。）
 _PY_SCRIPT_RUN_RE = re.compile(
-    r"(?:^|[\s;|&])(?:(?:\S+/)?python3?)(?:\s+-[a-zA-Z0-9]+)*\s+([^\s;|&<>]+\.py)"
+    r"(?:^|[\s;|&])(?:(?:\S+/)?python3?(?:\.\d+)*)(?:\s+-[a-zA-Z0-9]+)*\s+([^\s;|&<>]+\.py)"
 )
 # 偵測命令是否對 stdout 進行重導向或管道（> / >> / 1> / &> / |）
 _STDOUT_REDIRECT_RE = re.compile(r"(?:(?<![2-9a-zA-Z])(?:>|>>)|1>|&>|\|)")
@@ -2208,6 +2210,33 @@ def _selftest() -> int:
               and hint12 not in gen12
               and miss12 is None,
               f"hit={hit12} miss={miss12}")
+
+        # 13) 版本後綴直譯器（r1078）：python3.12 / 前綴路徑＋版本 / 版本＋參數
+        #     ＝同一静默空结果形状（5a2384fa 補前綴路徑與參數，版本後綴是剩餘盲區）；
+        #     重定向排除對版本形狀同樣成立。
+        ver_log = tmp / "versioned_py.log"
+        ans13 = tmp / "versioned_py_answer.txt"
+        ans13.write_text("None", encoding="utf-8")
+
+        def _ver_hit(cmd: str) -> dict[str, Any] | None:
+            ver_log.write_text("\n".join(json.dumps(o) for o in (
+                {"type": "tool_execution_start", "toolCallId": "c1", "toolName": "bash",
+                 "args": {"command": cmd}},
+                {"type": "tool_execution_end", "toolCallId": "c1", "toolName": "bash",
+                 "result": {"content": [{"type": "text", "text": "\n"}]}, "isError": False},
+            )) + "\n", encoding="utf-8")
+            return detect_empty_result_giveup(ver_log, ans13)
+
+        h13a = _ver_hit("python3.12 solution.py")
+        h13b = _ver_hit("/usr/local/bin/python3.12 -u calc.py")
+        h13c = _ver_hit("python3.12 solution.py > out.txt")
+        check("版本後綴直譯器空结果形状（python3.12／前綴路徑＋版本＋-u⇒偵测到；" "重定向⇒不偵测）",
+              h13a is not None
+              and "solution.py" in h13a["empty_run_scripts"]
+              and h13b is not None
+              and "calc.py" in h13b["empty_run_scripts"]
+              and h13c is None,
+              f"a={h13a} b={h13b} c={h13c}")
 
         passed = sum(1 for _, err in results if err is None)
         print("G2 repair-slice SELFTEST（synthetic G1、離線、0 模型呼叫；只驗管線，不宣稱效果）")
