@@ -32,6 +32,14 @@ SMOKE = REPO_ROOT / "ops" / "reqloop" / "g2" / "smoke"
 MANIFEST = SMOKE / "manifest.json"
 MULTIDELIV_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "multideliv" / "manifest.json"
 REALTASK_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g2" / "realtask_manifest.json"
+SIX_ELEMENTS = (
+    "original_user_requirement",
+    "existing_real_failed_artifact",
+    "current_behavior",
+    "expected_demonstrable_improvement",
+    "cost_cap",
+    "independent_acceptance",
+)
 
 
 # ── 工具 ─────────────────────────────────────────────────────────────
@@ -296,6 +304,28 @@ def test_realtask_baseline_offline_and_leakfree():
 
     rc = g2.main(["--manifest", str(REALTASK_MANIFEST), "--baseline"])
     assert rc == 0
+
+
+def test_realtask_six_elements_and_cost_cap():
+    """P20261106_2121-1（資深審查 2026-11-06 #3＋11-06#5）：真實任務切片最小對照規格
+    六要素齊備；成本上限＝審查指定 max_tool_calls=60 / max_tokens=4000000 /
+    timeout=300s，且 budget 欄位同值（與切片 B real_slice 同口徑、同 multideliv 單輪）。
+    切片 A 是 NOW.md 發射候選第一——缺六要素＝審查#3 的驗收條件無法被機械核對。"""
+    assert REALTASK_MANIFEST.is_file(), "真實任務切片 manifest 未凍結"
+    man = g2.G2Manifest.load(REALTASK_MANIFEST)
+    el = man.raw.get("six_elements", {})
+    missing = [k for k in SIX_ELEMENTS if k not in el]
+    assert not missing, f"六要素缺：{missing}"
+    cc = el["cost_cap"]
+    assert cc["max_tool_calls"] == 60
+    assert cc["max_tokens"] == 4000000
+    assert cc["timeout_s_per_round"] == 300
+    assert cc["max_rounds_per_cell"] == 1, "最小對照＝單輪（multideliv 同口徑）"
+    b = man.budget
+    assert b["max_tool_calls"] == 60
+    assert b["max_tokens"] == 4000000
+    assert b["timeout_s_per_round"] == 300
+    assert b["max_rounds_per_cell"] == 1
 
 
 # ── answer_kv 驗證器 ────────────────────────────────────────────────
