@@ -1,5 +1,24 @@
 # NOW
 
+## r1136（2026-11-06，未提交 @ auto/qwen27b）
+
+完成 11-06#4「獨立可見檢查給出可重現的內容反例」＋工單「目前行為」要素——**此前缺的離線 baseline 命令**。
+交付（1 檔＋1 測試，純新增 147 行，不改既有行為）：
+- `vacant_network/reqloop/g2.py`：新增 `--baseline`（離線、不呼叫模型、不發射、不改凍結檔）：對
+  **目前（未修復）**草稿跑獨立可見檢查（run_requirement_checks），逐條目輸出 status（PASS/FAIL/UNKNOWN）
+  ＋可重現內容反例（detail/evidence）。這是發射前的「before」基準——沒有它，真跑後無法證明「修復只改未滿足產物」。
+- `tests/test_reqloop_g2.py`：新增 `test_realtask_baseline_offline_and_leakfree`（兩草稿皆真壞＝各有 required FAIL；
+  重算答案 1628/0.020500 不出現於整段 JSON；草稿自身錯值 2081990.36/0.120132 可出現＝內容反例；main --baseline 回 0）。
+
+驗證（離線、零模型呼叫）：
+- `python3 -m vacant_network.reqloop.g2 --manifest ops/reqloop/g2/realtask_manifest.json --baseline` → EXIT=0；
+  兩草稿 required 0/2・0/1 PASS（dab_055 not_an_integer＋均值未取整；dabstep-1273 not_a_number prose）。
+- 整段 `--json` 輸出＝2656 bytes（重算自 live 命令 `… --baseline --json | wc -c`＝2656；in-code `len(json.dumps(...).encode())`＝2655＋print 換行 1）：1628/0.020500 缺席、2081990.36/0.120132（草稿自身錯值）在場＝內容反例。
+- pytest：test_reqloop_g2.py 40/40 過；reqloop/repair/checks 掃全部過。
+
+必附口徑：離線（不呼叫模型、不發射）；測量不是門（算出＝0；PASS/FAIL 是結果、不是失敗）；缺值＝UNKNOWN；
+不宣稱 localized 較好（開發選樣、單 rep）。真實 6550d7a8 切片仍 **NOT_fired**（發射要授權、要模型流量）。
+
 ## r1135（2026-11-06，已提交 0fa90edd @ auto/qwen27b）
 
 完成 11-06 最高優先 #2：effects2_20261106（28 格 @4d4b8102，排除 dabstep-1753）raw 彙整必答。
@@ -32,5 +51,5 @@ hidden_after 全 UNKNOWN（本地無權重跑）；tamper/UNKNOWN 不算成功�
 - 本輪未改產品碼（審計腳本＋JSON 為 11-06#2 指定交付物，非墊場）。
 
 ## 下輪
-- 若授權：跑 6550d7a8 切片（verify_frozen＋--dry-run＋無洩漏檢查先過，再 fire）。
+- 若授權：跑 6550d7a8 切片（離線三門先過：verify_frozen＋--dry-run＋**--baseline**（無洩漏＋目前行為基準），再 fire）。
 - 未授權：維持 effects2 不動（不補快照、不排除失敗、不加重試換好結果）。

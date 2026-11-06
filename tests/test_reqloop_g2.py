@@ -221,6 +221,55 @@ def test_realtask_manifest_frozen_and_leakfree():
             assert n not in prompt, f"{d['name']}: localized 提示洩重算答案 {n!r}"
 
 
+def test_realtask_baseline_offline_and_leakfree():
+    """r1136：離線 baseline（11-06#4「獨立可見檢查給出可重現的內容反例」＋工單「目前行為」
+    要素）此前缺一個**命令**。本輪補 g2 --baseline：對**目前（未修復）**草稿跑獨立可見
+    檢查，逐條目輸出 status＋可重現內容反例——這是發射前的「before」基準；沒有它，就無
+    法在真跑後證明「修復只改未滿足產物並保留其餘成果」。
+
+    斷言（離線、零模型呼叫）：
+    1. baseline_json 結構：schema/mode/2 草稿；每個 required 條目都有 status；
+    2. 兩份草稿都是真的壞（各有至少一個 required FAIL、all_required_pass=False）——測試非空洞；
+    3. 無洩漏：重算答案 1628／0.020500 絕不出現在整段 JSON 字串；草稿自己的錯誤值
+       （2081990.36／0.120132）可以出現（那就是內容反例）；
+    4. baseline_text 渲染草稿名＋FAIL；
+    5. main --baseline 回傳 0（測量不是門：算出＝0；PASS/FAIL 是結果、不是失敗）。
+    """
+    man = g2.G2Manifest.load(REALTASK_MANIFEST)
+    base = REALTASK_MANIFEST.parent
+    man.verify_frozen(base)   # 凍結副本 hash 全對（離線）
+    assert man.raw.get("status") == "NOT_fired", "本批只凍結計畫、不發射"
+
+    j = g2.baseline_json(man, base)
+    assert j["schema"] == g2.BASELINE_SCHEMA
+    assert j["mode"] == "baseline"
+    assert j["manifest_sha256"] == _sha(REALTASK_MANIFEST)
+    assert [d["name"] for d in j["drafts"]] == ["dab_055-pi-C", "dabstep-1273-pi-C"]
+
+    for d in j["drafts"]:
+        reqs = [i for i in d["items"] if i["required"]]
+        assert reqs, f"{d['name']}: 無 required 條目（空洞）"
+        for i in reqs:
+            assert i["status"] in {"PASS", "FAIL", "UNKNOWN"}, f"{d['name']} {i['id']}: 缺 status"
+        # 兩份草稿都是真的壞：至少一個 required FAIL（測試非空洞）
+        assert any(i["status"] == "FAIL" for i in reqs), f"{d['name']}: 無 FAIL 條目（測試空洞）"
+        assert d["all_required_pass"] is False, f"{d['name']}: 不應全過"
+
+    # 無洩漏：重算答案絕不出現在整段 JSON 字串
+    blob = json.dumps(j, ensure_ascii=False)
+    for n in ("1628", "0.020500"):
+        assert n not in blob, f"baseline 洩重算答案 {n!r}"
+    # 草稿自己的錯誤值可以出現（內容反例）
+    assert "2081990.36" in blob and "0.120132" in blob
+
+    txt = g2.baseline_text(man, base)
+    assert "dab_055-pi-C" in txt and "dabstep-1273-pi-C" in txt
+    assert "FAIL" in txt
+
+    rc = g2.main(["--manifest", str(REALTASK_MANIFEST), "--baseline"])
+    assert rc == 0
+
+
 # ── answer_kv 驗證器 ────────────────────────────────────────────────
 
 @pytest.fixture()
