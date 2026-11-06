@@ -498,6 +498,47 @@ def test_repair_fail_to_pass_and_original_preserved(task_dir, tmp_path):
     assert "10674.83" in log[0]["prompt"]
 
 
+def test_satisfied_deliverable_byte_preservation(task_dir, tmp_path):
+    """已滿足交付物的位元組級保留（P20261106_0834-2）：
+    bad_grand_total_wrong＝summary.md 未滿足（req_summary_numbers FAIL）＋
+    expense_summary.csv 已滿足（兩條 CSV 必需項皆 PASS）。
+    - fake agent 只改未滿足交付物（summary.md）⇒ satisfied_preserved 含
+      expense_summary.csv、satisfied_mutated 為空（只改未滿足產物、其餘保留）；
+    - fake agent 竄改已滿足交付物（CSV 位元組改變）⇒ 記入 satisfied_mutated，
+      不再只依賴條目級 regressed 間接推估。
+    synthetic 離線接線，只驗管線指標，不宣稱任何真模型效果。"""
+    rs = load_req_set(task_dir)
+    draft = task_dir / BAD_DRAFT
+    # 前置：初始驗的分流正如工單假設（summary.md 未滿足、CSV 已滿足）
+    before = run_requirement_checks(task_dir, rs, draft)
+    st = {c.claim_id: c.status for c in before}
+    assert st[FAIL_CLAIM] == "FAIL" and all(st[c] == "PASS" for c in PASS_CLAIMS)
+    assert repair._partition_deliverables(rs, before) == ({"expense_summary.csv"}, {"summary.md"})
+
+    csv_text = (draft / "expense_summary.csv").read_text(encoding="utf-8")
+
+    # Case A：只改未滿足交付物（summary.md）→ CSV 位元組保留
+    out_a = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_a", build=_fake_build([]),
+        run=_fake_agent({"summary.md": _good_summary(task_dir)}),
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert "expense_summary.csv" in out_a.satisfied_preserved
+    assert out_a.satisfied_mutated == ()
+
+    # Case B：同時竄改已滿足交付物（位元組改變）→ 記入 satisfied_mutated
+    out_b = repair.repair_slice(
+        task_dir, rs, draft,
+        out_root=tmp_path / "out_b", build=_fake_build([]),
+        run=_fake_agent({"summary.md": _good_summary(task_dir),
+                         "expense_summary.csv": csv_text + "\n# tampered-by-fake-agent\n"}),
+        feedback_mode="localized", max_rounds=2, synthetic=True,
+    )
+    assert "expense_summary.csv" not in out_b.satisfied_preserved
+    assert out_b.satisfied_mutated == ("expense_summary.csv",)
+
+
 def test_cumulative_second_round_inherits_first_round_candidate(task_dir, tmp_path):
     """P000-20261105-01 驗收核心：兩個獨立內容缺陷、fake agent 每輪只修一項 ⇒ 兩輪後兩項皆 PASS。
     第 2 輪必須承接第 1 輪候選（累積修復），不得每輪重抽原草稿：

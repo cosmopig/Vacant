@@ -1,0 +1,83 @@
+{
+  "task_id": "orders_monthly",
+  "items": [
+    {
+      "id": "req_csv_structure",
+      "quote": "產出月度指標表 monthly_sales.csv：欄位需包含：month、orders_count、net_sales、top_1_product、top_2_product、top_3_product",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "month",
+          "orders_count",
+          "net_sales",
+          "top_1_product",
+          "top_2_product",
+          "top_3_product"
+        ]
+      },
+      "description": "交付物 CSV 必須存在且具備全部要求欄位",
+      "required": true
+    },
+    {
+      "id": "req_monthly_metrics",
+      "quote": "排除狀態為 CANCELLED 的取消訂單。排除重複訂單。計算 orders_count（有效訂單數）、net_sales（淨銷售總額）",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "monthly_sales_metrics",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "exclude_status": [
+          "CANCELLED"
+        ],
+        "dedup_by": "order_id",
+        "date_col": "order_date",
+        "amount_col": "net_amount",
+        "status_col": "status",
+        "atol": 0.01
+      },
+      "description": "各月有效訂單數與淨銷售額必須與原始資料嚴格重算一致",
+      "required": true
+    },
+    {
+      "id": "req_top_products_ranking",
+      "quote": "列出各月份淨銷售額前三名商品：top_1_product、top_2_product、top_3_product（請務必嚴格依該月份內之淨銷售額高低由大到小排序，不可依訂單筆數排序）",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "monthly_top_products",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "exclude_status": [
+          "CANCELLED"
+        ],
+        "dedup_by": "order_id",
+        "date_col": "order_date",
+        "amount_col": "net_amount",
+        "product_col": "product_name",
+        "top_n": 3
+      },
+      "description": "各月商品前三名排行必須嚴格依淨銷售額重算一致",
+      "required": true
+    },
+    {
+      "id": "req_summary_consistency",
+      "quote": "內文中需明確載明「兩月合計淨銷售總額」（精確數值）",
+      "deliverable": "summary.md",
+      "verifier": "summary_metrics_consistency",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "exclude_status": [
+          "CANCELLED"
+        ],
+        "dedup_by": "order_id",
+        "date_col": "order_date",
+        "amount_col": "net_amount",
+        "atol": 0.05
+      },
+      "description": "摘要報告中兩月合計淨銷售總額必須與重算值完全一致 (88000.00)",
+      "required": true
+    }
+  ]
+}

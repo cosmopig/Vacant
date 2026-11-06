@@ -304,6 +304,9 @@ def run_g2_smoke(
                 # P000-20261105-02：來源改動＝不可接受（必須可見於實驗記錄）
                 "source_tampered": outcome.source_tampered,
                 "source_tampered_files": list(outcome.source_tampered_files),
+                # P20261106_0834-2：已滿足交付物位元組級保留（修復只改未滿足產物、其餘保留）
+                "satisfied_preserved": list(outcome.satisfied_preserved),
+                "satisfied_mutated": list(outcome.satisfied_mutated),
                 # r1088：逐輪硬預算殺因（None＝該輪未被殺；未啟用上限時全 None）
                 "budget_exceeded": [r.agent.get("budget_exceeded") for r in outcome.rounds],
                 "spawn_errors": [r.agent.get("spawn_error") for r in outcome.rounds],
