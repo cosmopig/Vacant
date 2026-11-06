@@ -457,6 +457,47 @@ def test_cell_records_repair_exit_code(tmp_path):
                if c["draft"].startswith("dab_035") and c["arm"] == "localized")
 
 
+def test_g2_totals_and_cli_include_exit_codes(tmp_path, capsys):
+    """P20261106_1237-1：審計要直接讀全批收錄率、終端使用者不需傾印 JSON。
+    1. `G2Result.to_dict()["totals"]` 含 exit_0_total/exit_20_total/exit_22_total；
+    2. `main()` 文字行：逐格印 exit=...（0/20/22 皆見），totals: 行印 exit_0=... exit_20=...。
+    fake 場景（與 test_cell_records_repair_exit_code 同構）：035 雙臂 no_gap=0、
+    039 雙臂 gap_closed=0、507 雙臂 unresolved=20 ⇒ 4×0、2×20、0×22。零模型呼叫。"""
+    man = g2.G2Manifest.load(MANIFEST)
+    base = MANIFEST.parent
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run_fix_039(launch, *, workspace, timeout_s, log_dir):
+        if "dab_039" in str(workspace):
+            (workspace / "answer.txt").write_text(
+                "@is_normal[0.31]\n@transformed_importance_score_mean[4.2]\n"
+                "@transformed_importance_score_std[1.1]\n", encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 700, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    res = g2.run_g2_smoke(man, base, tmp_path / "out", build, run_fix_039,
+                          include_dirs=("data",))
+    t = res.to_dict()["totals"]
+    assert t["exit_0_total"] == 4     # 035×2 臂 + 039×2 臂
+    assert t["exit_20_total"] == 2    # 507×2 臂（agent 跑過、缺口未消＝拒收）
+    assert t["exit_22_total"] == 0
+
+    # main() 文字行：逐格 exit=... 與 totals: 行 exit_0=.../exit_20=...（改前必紅）
+    rc = g2.main(["--manifest", str(MANIFEST), "--out", str(tmp_path / "mout")],
+                 build=build, run=run_fix_039)
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert out.count("exit=0") == 4
+    assert out.count("exit=20") == 2
+    assert "exit_0=4" in out and "exit_20=2" in out
+
+
 def test_result_written_machine_readable(tmp_path):
     man = g2.G2Manifest.load(MANIFEST)
     base = MANIFEST.parent
