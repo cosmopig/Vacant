@@ -110,7 +110,7 @@ def check_csv_structure(
     deliverable_dir: pathlib.Path,
     item: RequirementItem,
 ) -> ClaimResult:
-    """檢查交付物 CSV 是否存在且包含指定欄位。"""
+    """檢查交付物表格（CSV 或 JSON 陣列）是否存在且包含指定欄位。"""
     csv_file = deliverable_dir / item.deliverable
     if not csv_file.is_file():
         return ClaimResult(
@@ -124,7 +124,7 @@ def check_csv_structure(
             authority=item.authority,
         )
 
-    rows = read_csv_rows(csv_file)
+    rows = read_table_deliverable(csv_file)
     if not rows:
         return ClaimResult(
             claim_id=item.id,
@@ -2333,7 +2333,7 @@ def run_requirement_checks(
             continue
 
         vname = item.verifier
-        if vname == "csv_structure":
+        if vname in ("csv_structure", "table_structure"):
             res = check_csv_structure(d_dir, item)
         elif vname == "monthly_sales_metrics":
             res = check_monthly_sales_metrics(t_dir, d_dir, item)

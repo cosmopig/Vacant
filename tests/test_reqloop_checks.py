@@ -2072,5 +2072,57 @@ def test_multideliv_verifiers_expected_in_evidence_false_omits_recomputed_values
         assert secret not in blob_exp, f"secret {secret!r} leaked in {blob_exp}"
 
 
+def test_check_csv_structure_supports_json_deliverable(tmp_path: pathlib.Path):
+    """P20261106_2040-1：JSON 表格交付物（records.json）須被 check_csv_structure 直接解析。
+
+    改前 read_csv_rows 以 CSV 解析 JSON 陣列→空列→誤判 FAIL(empty_csv)；
+    改後含全部必要欄位回 PASS、缺必要欄位回精確 missing_columns 反例；
+    table_structure 別名分派到同一檢查器。
+    """
+    from vacant_network.reqloop.checks import check_csv_structure
+
+    d_dir = tmp_path / "deliverable"
+    _write(d_dir / "records.json", json.dumps(
+        [{"item_id": "A1", "price": 10}, {"item_id": "A2", "price": 20}]))
+
+    item = RequirementItem(
+        id="req_json_structure",
+        quote="輸出 records.json（每筆一列，含 item_id 與 price）",
+        deliverable="records.json",
+        verifier="csv_structure",
+        params={"required_columns": ["item_id", "price"]},
+    )
+    res = check_csv_structure(d_dir, item)
+    assert res.status == "PASS"
+    assert res.evidence["row_count"] == 2
+    assert set(res.evidence["columns"]) >= {"item_id", "price"}
+
+    # 缺必要欄位 → 精確 missing_columns 反例（非 empty_csv 假失敗）
+    item_missing = RequirementItem(
+        id="req_json_missing",
+        quote="輸出 records.json（含 item_id 與 sku）",
+        deliverable="records.json",
+        verifier="csv_structure",
+        params={"required_columns": ["item_id", "sku"]},
+    )
+    res_missing = check_csv_structure(d_dir, item_missing)
+    assert res_missing.status == "FAIL"
+    assert res_missing.evidence["missing_columns"] == ["sku"]
+
+    # table_structure 別名分派到同一檢查器（改前未知檢查器→UNKNOWN）
+    rs = RequirementSet(
+        task_id="task_json_structure",
+        items=[
+            RequirementItem(
+                id="req_alias",
+                quote="輸出 records.json（含 item_id 與 price）",
+                deliverable="records.json",
+                verifier="table_structure",
+                params={"required_columns": ["item_id", "price"]},
+            ),
+        ],
+    )
+    results = {r.claim_id: r for r in run_requirement_checks(tmp_path, rs, d_dir)}
+    assert results["req_alias"].status == "PASS"
 
 
