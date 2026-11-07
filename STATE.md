@@ -64,3 +64,8 @@
 - 驗證：153 passed（test_reqloop_checks＋extract＋run_eval）；reqloop 全 6 檔 210 passed（2.97s）；0 模型呼叫。審查點名四檔補開（redo）：(a) effects_20261105_summary.json——policy30 generic 7/10・localized 6/10、once20 generic 7/10・localized 4/10、right_to_wrong 0，與 11/06 引用一致；scope_note「單 rep 不宣稱 localized 優於 generic、缺值 None」即我框定來源。(b) phase3/progress.json——complete=True、9 rows，fixed＝dab_378/426/427/507/dabstep-10/23、unresolved＝dab_039/055/dabstep-1273，與 eval_phase3_glm53.json 及 1608 審查官方表逐格一致。(c) run_eval.py——門禁 MISSING→FAIL（extraction incomplete 不得 PASS）、缺成本→None/UNKNOWN、exit MISSING→2・all PASS→0・否則 20，與我記錄的 RC 口徑一致。(d) repair.py——418d3bc7/f74b779c 未觸（凍結維持）；STOP_NO_GAP（零呼叫）與 STOP_STALLED（連續兩次未消除缺口）即 11/04 規則。四項均支持既有結論，無需改數。核實：worker 紅的 6 個測試（real_slice/g2/dabstep10）在 dd4566e2（合併前）已存在且 CI 綠 0 fails——我樹內合併前就過，worker 41eef681 紅燈是它自己 WIP 所致，不屬我範圍、不代修。vq-el4.6 依 1608 審查指示#3 結案（bd close，reason 帶證據路徑）；vq-el4 下 6 項 task 全 closed。
 - 沒驗證：f74b779c/110ae3ff CI 綠燈（新 HEAD，還沒跑）。
 - 下一步：復核 f74b779c CI（pending→綠）；vq-el4 epic 剩餘待人類/審查派新工單，無自創工作。
+- 2026-11-07 r1200（工單 P20261107_1627-1）：固化 vq-el4.6 結案基準——run_models_comparison docstring 註記 3 模型正式口徑（glm53/glm53flash/deepseek41；gemma 為 1004 本地端點、不繞 glm 直呼 vibe、不入表）；新增 test_eval_g1_compare_3m_baseline_contract 鎖定 out/eval_g1_compare_3m.json（3 模型、glm53 39/39 100% FP0 gate PASS、另兩模型 FAIL）。
+- 驗證：pytest tests/test_reqloop_extract_run_eval.py -k baseline_contract → 1 passed, 29 deselected；該檔 30 passed；tests/test_reqloop_extract*.py 全 86 passed（0.24s）；0 模型呼叫。
+- vq-el4.6 狀態：CLOSED（r1199 已 bd close，close reason 帶證據路徑；本輪 bd show 複核＝CLOSED，無需重結）。裁決落點：gemma 不入表、phase3 官方＝out/eval_phase3_glm53.json 6/9、G1 樣本單 rep 不宣稱模型較好。
+- 沒驗證：f74b779c/110ae3ff CI 綠燈（新 HEAD、排隊中）；gemma 入表對接口（待規劃者）。
+- 下一步：複核 CI；等 G2.5 後續（G3 前置）新派工；無自創工作。

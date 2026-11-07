@@ -634,3 +634,24 @@ def test_run_eval_multi_model_extraction_failure_labeled(tmp_path, capsys):
           "--vibe-calls", str(vc), "--json", str(jout)])
     doc1 = json.loads(jout.read_text(encoding="utf-8"))
     assert doc1["models"]["m1"]["extract_failed"] == {}
+
+
+def test_eval_g1_compare_3m_baseline_contract():
+    """vq-el4.6 結案基準（2026-11-07 裁決）：3 模型對照表已鎖定。
+
+    官方證據 out/eval_g1_compare_3m.json：恰為 3 模型（gemma 為 1004 本地端點、
+    不繞 glm 直呼 vibe、不入表）；glm53 達標（39/39 100% FP0 門禁 PASS）；另兩模型
+    FAIL（G1 開發樣本單 rep，不宣稱模型較好）。缺值不填 0——缺成本即 None。
+    """
+    out = (pathlib.Path(__file__).resolve().parents[1] / "ops" / "reqloop" / "extract"
+           / "out" / "eval_g1_compare_3m.json")
+    assert out.is_file(), f"結案基準證據缺失: {out}"
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert set(doc["models"]) == {"glm53", "glm53flash", "deepseek41"}
+    m = doc["models"]["glm53"]
+    assert m["bad_caught"] == 39
+    assert m["caught_pct"] == 100.0
+    assert m["good_fp"] == 0
+    assert m["gate"] == "PASS"
+    assert doc["models"]["glm53flash"]["gate"] == "FAIL"
+    assert doc["models"]["deepseek41"]["gate"] == "FAIL"

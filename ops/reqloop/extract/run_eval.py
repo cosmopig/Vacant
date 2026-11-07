@@ -132,6 +132,11 @@ def run_models_comparison(models: list[str], g1: pathlib.Path, out_dir: pathlib.
                           vibe_calls: pathlib.Path) -> dict:
     """多模型對照（vq-el4.6）：每模型各跑 evaluate_task＋read_extract_costs（離線、不呼叫模型）。
 
+    結案口徑（2026-11-07 裁決）：正式對照表為 3 模型 glm53／glm53flash／deepseek41；
+    證據 ops/reqloop/extract/out/eval_g1_compare_3m.json（glm53 39/39 100% FP0 門禁 PASS、
+    glm53flash 16/39 41% FAIL、deepseek41 23/39 59% FP1 FAIL）；gemma 為 1004 本地端點、
+    非 Vibe CLI 模型——依指示不繞過 glm 直呼 vibe、不自建 gemma client、不入本表。
+
     每模型門禁：抓錯 ≥ 70% 且 0 冤枉且擷取完整；缺擷取結果→MISSING（fail-closed）；
     任一題擷取失敗（report.extract_error／parse_error）→FAIL（擷取不完整；該題計未抓出，
     但 extract_failed 點名原因，不得讀成模型沒抓出）；任一題成本缺值 → calls/tokens＝None。
