@@ -321,3 +321,95 @@ def test_real_slice_dab055_baseline_reproduces_content_counterexample():
     dj = g2.dry_run_json(man)
     assert [c["draft"] for c in dj["cells"]] == ["dab_055-pi-C", "dab_055-pi-C"]
     assert dj["hidden_after"] == "UNKNOWN"
+
+
+def test_real_slice_dab055_needle_is_true_recomputed_value():
+    """P20261107_0243-2 針守衛（資深審查 2026-11-07 #3）：req_mean_cases_recomputed 的
+    重算真值必須是對凍結資料 data/estimated_numbers.csv 實算的點估計均值
+    （dab_055 規則：純整數／點估計前導整數，Null/空/非數值忽略），round 後恰為 2081990、
+    與 manifest purpose 點名之針一致——手寫數字不算（空洞斷言，同 r1140 訓）。
+    mean_int_col 分支內聯於 check_kv_recomputed（checks.py:1612-1640，無模組級函式）；
+    本測試逐字複製其解析迴圈鎖真值，複製與產品之漂移另由本檔 smoke 測試
+    （2081990→gap_closed、2081990.36→FAIL）兩側共同釘住。零模型呼叫。"""
+    import csv
+    man = g2.G2Manifest.load(DAB055_MANIFEST)
+    base = DAB055_MANIFEST.parent
+    d = man.drafts[0]
+    needle = "2081990"
+    assert needle in man.raw.get("purpose", ""), "manifest purpose 須點名針（防針漂移）"
+    req_set = RequirementSet.load(base / d["task"]["dir"] / "requirements.json")
+    item = next(it for it in req_set.items if it.id == "req_mean_cases_recomputed")
+    rc = item.params["recompute"]
+    assert rc["type"] == "mean_int_col"
+    data_path = base / d["task"]["dir"] / item.params["data_file"]
+    with open(data_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    col = rc["col"]
+    ints: list[int] = []
+    for r in rows:  # checks.py:1612-1640 mean_int_col 解析迴圈（逐字複製）
+        raw_cell = r.get(col)
+        if raw_cell is None:
+            continue
+        cell = str(raw_cell).strip()
+        if not cell:
+            continue
+        m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
+        if m_int:
+            ints.append(int(m_int.group(1)))
+    assert ints, "測試空洞：無可解析整數（產品將 UnknownSource，無法鎖真值）"
+    raw_mean = sum(ints) / len(ints)
+    assert round(raw_mean) == 2081990, \
+        f"真值漂移：round(raw_mean)={round(raw_mean)} ≠ 針 {needle}"
+
+
+def test_real_slice_dab055_smoke_pipeline_and_exit_codes(tmp_path):
+    """P20261107_0243-2：dab_055 內容閉環端到端修復／拒收管線（假代理、零模型呼叫）。
+
+    同草稿（2081990.36 點估計 float）、同預算（manifest 凍結 2 輪×300s）、2 臂：
+    - localized：修復非整數格式錯誤並保留點估計數值 → @mean_cases[2081990]
+      → req_answer_kv＋req_mean_cases_recomputed 兩缺口全閉、gap_closed、exit 0；
+    - generic：落入 note 嚴整數解讀陷阱（2200，獨立 scorer 已記錄的 note-trap 形狀、
+      非隱藏分數反推）→ req_answer_kv PASS（值合法整數）但 req_mean_cases_recomputed
+      FAIL、不提前放行，max_rounds 用盡以 exit 20 拒收、unresolved 精確點名未滿足條目。
+    （11-06 指示 4：先證明可修回一種內容錯誤才擴量。）"""
+    from vacant_network.adapters.agents import Launch
+    man = g2.G2Manifest.load(DAB055_MANIFEST)
+    base = DAB055_MANIFEST.parent
+    # 測試空洞門：bad 草稿 baseline 必 FAIL/FAIL（可重現反例），否則「修好」無意義
+    j = g2.baseline_json(man, base)
+    st = {i["id"]: i["status"] for i in j["drafts"][0]["items"]}
+    assert st == {"req_answer_kv": "FAIL", "req_mean_cases_recomputed": "FAIL"}, st
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path, **kw) -> dict:
+        ws_s = str(workspace)
+        if "localized" in ws_s:
+            text = "@mean_cases[2081990]"    # 格式修復、保留點估計數值
+        else:
+            text = "@mean_cases[2200]"       # 模擬 note 嚴整數解讀陷阱
+        (pathlib.Path(workspace) / "answer.txt").write_text(text, encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 700, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    res = g2.run_g2_smoke(man, base, tmp_path / "out", build, run, include_dirs=("data",))
+    by = {(c["draft"], c["arm"]): c for c in res.cells}
+    assert len(res.cells) == 2, "2 格＝1 bad 真草稿 × 2 臂"
+    c_loc = by[("dab_055-pi-C", "localized")]
+    assert c_loc["stopped"] == "gap_closed"
+    assert c_loc["exit_code"] == 0
+    assert set(c_loc["fixed"]) == {"req_answer_kv", "req_mean_cases_recomputed"}
+    assert c_loc["unresolved"] == []
+    assert c_loc["regressed"] == [], "無初始已滿足項，退步必為空"
+    c_gen = by[("dab_055-pi-C", "generic")]
+    assert c_gen["exit_code"] == 20
+    assert c_gen["stopped"] == "max_rounds"
+    assert c_gen["unresolved"] == ["req_mean_cases_recomputed"]
+    assert c_gen["after_readable_status"]["req_answer_kv"] == "PASS", \
+        "2200 是合法整數格式：req_answer_kv 應 PASS（未滿足的是值、非格式）"
