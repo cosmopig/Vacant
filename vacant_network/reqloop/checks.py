@@ -1428,9 +1428,28 @@ def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
     return vals[0], []
 
 
+def _strict_json_equal(a: Any, b: Any) -> bool:
+    """JSON 鍵值保留審計用嚴格相等：型別必須完全一致（排除 Python `True == 1`、`2 == 2.0`），
+    且巢狀物件（`_JsonPairs`）不得含重複鍵。"""
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, _JsonPairs):
+        if len(a) != len(b):
+            return False
+        da = dict(a)
+        db = dict(b)
+        if len(da) != len(a) or len(db) != len(b) or da.keys() != db.keys():
+            return False
+        return all(_strict_json_equal(da[k], db[k]) for k in da)
+    if isinstance(a, list):
+        return len(a) == len(b) and all(_strict_json_equal(x, y) for x, y in zip(a, b))
+    return bool(a == b)
+
+
 def _kv_preservation_values(path: pathlib.Path) -> tuple[dict[str, list[Any]] | None, str | None]:
     """鍵級保留審計讀鍵→值清單：.txt → 各 @key[value] 行之 raw 字串（與 check_answer_kv 同一正則）；
-    .json → 頂層 dict 值（保留原始型別供型別一致比較）。回 (found, problem|None)。"""
+    .json → 頂層 dict 值（透過 _JsonPairs 保留同名或大小寫重複鍵並保留原始型別供嚴格型別一致比較）。
+    回 (found, problem|None)。"""
     if not path.is_file():
         return None, "missing_file"
     try:
@@ -1439,13 +1458,13 @@ def _kv_preservation_values(path: pathlib.Path) -> tuple[dict[str, list[Any]] | 
         return None, "unreadable"
     if path.suffix.lower() == ".json":
         try:
-            data = json.loads(content)
+            data = json.loads(content, object_pairs_hook=_JsonPairs)
         except (json.JSONDecodeError, ValueError):
             return None, "invalid_json"
-        if not isinstance(data, dict):
+        if not isinstance(data, _JsonPairs):
             return None, "not_a_dict"
         found: dict[str, list[Any]] = {}
-        for k, v in data.items():
+        for k, v in data:
             found.setdefault(str(k).strip().lower(), []).append(v)
         return found, None
     found = {}
@@ -1459,7 +1478,7 @@ def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Pa
     """鍵值交付物（@key[value] 文字檔或頂層 JSON 字典）的行級／鍵級保留審計。
 
     audit 側計算、免模型自評、免正則猜測：對每個 satisfied key 比對原草稿與修復後產物，
-    兩側均恰好出現一次且值相等（.json 另需型別一致）→ preserved；值被覆寫、鍵被刪除
+    兩側均恰好出現一次且值相等（.json 另需遞迴嚴格型別一致且無重複鍵）→ preserved；值被覆寫、鍵被刪除
     或重複、交付物檔案缺失/不可解析、或草稿中無此鍵（不可判定，保守歸類）→ mutated。
     回 (preserved, mutated)，鍵順序跟隨輸入 satisfied_keys。
     """
@@ -1474,7 +1493,7 @@ def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Pa
             mutated.append(str(key))
             continue
         dv, fv = d_vals[k][0], f_vals[k][0]
-        if dv == fv and type(dv) is type(fv):
+        if _strict_json_equal(dv, fv):
             preserved.append(str(key))
         else:
             mutated.append(str(key))

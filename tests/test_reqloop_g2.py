@@ -1399,5 +1399,74 @@ def test_g2_dry_run_verifies_frozen_files(tmp_path):
         g2.main(["--manifest", str(man_path), "--dry-run"])
 
 
+def test_run_g2_smoke_audits_kv_preservation_on_satisfied_kv_keys(tmp_path, capsys):
+    """argon 20261107_0035 回歸（d33a1ac8／124e86d4 缺陷）：
+    1. `audit_kv_preservation` 必須在 `g2.run_g2_smoke` 中實際接線執行，對每格初始已滿足（`before == "PASS"`）
+       的 `kv_recomputed` 鍵逐一比對原草稿與修復後工作區產物，將結果寫入 `cell["kv_preserved"]` 與
+       `cell["kv_mutated"]`，並於 `G2Result.to_dict()["totals"]` 匯總 `kv_preserved_total`／`kv_mutated_total`。
+    2. 結構格式條目（如 `verifier == "answer_kv"` 的 `req_answer_kv`）不是 `@key[value]` 鍵，絕不得被當成缺失鍵
+       誤判進 `kv_mutated`。
+    3. 當某格改動了原本已 PASS 的 `@key[value]` 行（如 `realab_dab378_20261106` 的 localized 臂把
+       `@pre_median[19711.00]` 改寫為 `@pre_median[19711.0]`），`cell["kv_mutated"]` 與 CLI 輸出
+       `KV_MUTATED:` 必須如實揭露。
+    """
+    real_slice_dir = REPO_ROOT / "ops" / "reqloop" / "g2" / "real_slice"
+    base = tmp_path / "real_slice"
+    shutil.copytree(real_slice_dir, base)
+    man_path = base / "manifest.json"
+    good_ans = (base / "dab_378-pi-A" / "draft" / "answer.txt").read_text(encoding="utf-8")
+
+    def run_sim(launch, *, workspace, timeout_s, log_dir, **kw):
+        ws = pathlib.Path(workspace)
+        if "dab_378-pi-C" in ws.parts:
+            if "generic" in ws.parts:
+                # generic：只修 2 條 kurtosis，保留全部 8 條已滿足 @key[value] 行逐字不變
+                (ws / "answer.txt").write_text(good_ans, encoding="utf-8")
+            else:
+                # localized：修好 kurtosis，但把已滿足的 @pre_median[19711.00] 改寫成 19711.0
+                mut_ans = good_ans.replace("@pre_median[19711.00]", "@pre_median[19711.0]")
+                (ws / "answer.txt").write_text(mut_ans, encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 50, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    out_root = tmp_path / "out"
+    rc = g2.main(["--manifest", str(man_path), "--out", str(out_root)],
+                 build=_fake_build([]), run=run_sim)
+    assert rc == 0
+    cli_text = capsys.readouterr().out
+    assert "KV_MUTATED: pre_median" in cli_text
+
+    payload = json.loads((out_root / "g2_result.json").read_text(encoding="utf-8"))
+    by = {(c["draft"], c["arm"]): c for c in payload["cells"]}
+
+    # req_answer_kv 是格式檢查條目 id，不得被誤判進 kv_mutated
+    for c in payload["cells"]:
+        assert "req_answer_kv" not in c.get("kv_mutated", [])
+        assert "req_answer_kv" not in c.get("kv_preserved", [])
+
+    # bad 草稿 generic：8 個初始 PASS 的 @key[value] 全數 preserved
+    assert len(by[("dab_378-pi-C", "generic")]["kv_preserved"]) == 8
+    assert by[("dab_378-pi-C", "generic")]["kv_mutated"] == []
+
+    # bad 草稿 localized：7 個 preserved、1 個 mutated (pre_median)
+    assert len(by[("dab_378-pi-C", "localized")]["kv_preserved"]) == 7
+    assert by[("dab_378-pi-C", "localized")]["kv_mutated"] == ["pre_median"]
+
+    # good 草稿（雙臂）：10 個初始 PASS 的 @key[value] 全數 preserved
+    assert len(by[("dab_378-pi-A", "generic")]["kv_preserved"]) == 10
+    assert by[("dab_378-pi-A", "generic")]["kv_mutated"] == []
+    assert len(by[("dab_378-pi-A", "localized")]["kv_preserved"]) == 10
+    assert by[("dab_378-pi-A", "localized")]["kv_mutated"] == []
+
+    totals = payload["totals"]
+    assert totals["kv_preserved_total"] == 8 + 7 + 10 + 10 == 35
+    assert totals["kv_mutated_total"] == 1
+
+
+
 
 

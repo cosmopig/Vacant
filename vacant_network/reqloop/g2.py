@@ -331,6 +331,10 @@ class G2Result:
                                                  for c in self.cells),
                 "satisfied_mutated_total": sum(len(c.get("satisfied_mutated") or [])
                                                for c in self.cells),
+                "kv_preserved_total": sum(len(c.get("kv_preserved") or [])
+                                          for c in self.cells),
+                "kv_mutated_total": sum(len(c.get("kv_mutated") or [])
+                                        for c in self.cells),
                 # P20261106_1237-1：每格退出碼匯整（0＝受收錄合格／20＝拒收／22＝基建故障），
                 # 下游審計直接讀全批收錄率，不從 cells 重推
                 "exit_0_total": sum(1 for c in self.cells if c.get("exit_code") == 0),
@@ -359,7 +363,7 @@ def run_g2_smoke(
     （`max_tool_calls`／`max_tokens`）> None。皆 None＝不量不殺，呼叫形狀與以前相同；
     設了＝執行器超過即殺，該輪 `budget_exceeded` 記錄進每格 cell。
     """
-    from vacant_network.reqloop.checks import run_requirement_checks
+    from vacant_network.reqloop.checks import audit_kv_preservation, run_requirement_checks
 
     base = pathlib.Path(base)
     man.verify_frozen(base)
@@ -382,6 +386,14 @@ def run_g2_smoke(
         # 修復前的 readable 判定（與 repair_slice 同一口径）
         before = run_requirement_checks(task_dir, req_set, draft_dir)
         before_map = {c.claim_id: c.status for c in before}
+        sat_kv_by_deliv: dict[str, list[str]] = {}
+        for it in req_set.items:
+            if it.verifier == "kv_recomputed" and before_map.get(it.id) == "PASS":
+                k = str((it.params or {}).get("key") or it.id).strip()
+                if k:
+                    lst = sat_kv_by_deliv.setdefault(it.deliverable, [])
+                    if k not in lst:
+                        lst.append(k)
         for arm in man.arms:
             min_rounds = int(min_by_arm.get(arm, 1 if arm == "generic" else 0))
             outcome = repair.repair_slice(
@@ -396,6 +408,13 @@ def run_g2_smoke(
                 include_dirs=include_dirs,
             )
             last_after = outcome.rounds[-1].after if outcome.rounds else before
+            final_ws = pathlib.Path(outcome.rounds[-1].workspace) if outcome.rounds else draft_dir
+            kv_preserved: list[str] = []
+            kv_mutated: list[str] = []
+            for deliv_rel, sat_keys in sat_kv_by_deliv.items():
+                kp, km = audit_kv_preservation(draft_dir / deliv_rel, final_ws / deliv_rel, sat_keys)
+                kv_preserved.extend(kp)
+                kv_mutated.extend(km)
             cells.append({
                 "draft": d["name"],
                 "task_id": d["task_id"],
@@ -418,6 +437,9 @@ def run_g2_smoke(
                 # P20261106_0834-2：已滿足交付物位元組級保留（修復只改未滿足產物、其餘保留）
                 "satisfied_preserved": list(outcome.satisfied_preserved),
                 "satisfied_mutated": list(outcome.satisfied_mutated),
+                # P20261106_2241-2：單交付物鍵值檔的行級／鍵級保留審計（kv_recomputed 初始 PASS 鍵）
+                "kv_preserved": kv_preserved,
+                "kv_mutated": kv_mutated,
                 # r1088：逐輪硬預算殺因（None＝該輪未被殺；未啟用上限時全 None）
                 "budget_exceeded": [r.agent.get("budget_exceeded") for r in outcome.rounds],
                 "spawn_errors": [r.agent.get("spawn_error") for r in outcome.rounds],
@@ -530,6 +552,8 @@ def main(argv: Sequence[str] | None = None, *,
                 print(f"      REGRESSED: {', '.join(c['regressed'])}")
             if c.get("satisfied_mutated"):
                 print(f"      SATISFIED_MUTATED: {', '.join(c['satisfied_mutated'])}")
+            if c.get("kv_mutated"):
+                print(f"      KV_MUTATED: {', '.join(c['kv_mutated'])}")
             if c.get("source_tampered"):
                 print(f"      SOURCE_TAMPERED: {', '.join(c.get('source_tampered_files') or [])}")
         t = res.to_dict()["totals"]

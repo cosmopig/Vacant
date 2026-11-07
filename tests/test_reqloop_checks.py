@@ -2406,4 +2406,77 @@ def test_audit_kv_preservation_text_and_json(tmp_path):
     assert mutated == tuple(satisfied)
 
 
+def test_audit_kv_preservation_json_duplicate_keys_and_nested_strict_types(tmp_path):
+    """argon 20261107_0035 回歸（d33a1ac8 缺陷）：
+    1. `.json` 交付物若含完全同名重複鍵（如 `{"mean_cases": 999.0, "mean_cases": 2.0}`）或大小寫重複鍵，
+       `_kv_preservation_values` 必須透過 `object_pairs_hook=_JsonPairs` 保留所有值，並由
+       `audit_kv_preservation` 歸類為 `mutated`（與 `check_answer_kv`／`check_kv_recomputed` 的 `ambiguous`
+       口徑一致），不得被 `json.loads` 的原生 `dict` 靜默後蓋前而誤判 `preserved`。
+    2. 巢狀 list/dict 內若發生 `bool` vs `int`（Python 中 `True == 1`）或 `int` vs `float`（`2 == 2.0`）
+       型別改變、或巢狀物件內有重複鍵，必須判為 `mutated`；巢狀 dict 無重複鍵且型別與值皆一致時為 `preserved`。
+    """
+    from vacant_network.reqloop.checks import audit_kv_preservation
+
+    jdraft = tmp_path / "draft.json"
+    jfinal = tmp_path / "final.json"
+    jdraft.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": True, "count": 2, "items": [1, False]}}),
+        encoding="utf-8",
+    )
+
+    # (1) 完全同名重複鍵：後鍵剛好等於 2.0，也不得被 dict 吞掉判為 preserved
+    jfinal.write_text(
+        '{"mean_cases": 999.0, "mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": true, "count": 2, "items": [1, false]}}',
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "median_cases", "meta"])
+    assert preserved == ("median_cases", "meta")
+    assert mutated == ("mean_cases",)
+
+    # (2) 巢狀 bool vs int（True vs 1、False vs 0）⇒ mutated
+    jfinal.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": 1, "count": 2, "items": [1, False]}}),
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+    jfinal.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": True, "count": 2, "items": [1, 0]}}),
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+    # (3) 巢狀 int vs float（2 vs 2.0）⇒ mutated
+    jfinal.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": True, "count": 2.0, "items": [1, False]}}),
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+    # (4) 巢狀 dict 鍵順序不同但無重複且型別與值一致 ⇒ preserved
+    jfinal.write_text(
+        '{"mean_cases": 2.0, "median_cases": 3.5, "meta": {"items": [1, false], "count": 2, "flag": true}}',
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases", "meta")
+    assert mutated == ()
+
+    # (5) 巢狀 dict 含重複鍵 ⇒ mutated
+    jfinal.write_text(
+        '{"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": false, "flag": true, "count": 2, "items": [1, false]}}',
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+
+
 
