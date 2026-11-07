@@ -202,3 +202,9 @@
 - 驗證：一條指令 RC=0、4/4；守衛測試 1 passed；repair --selftest 13/13；pytest test_reqloop_repair.py 111 passed；pytest -k effects_20261105 3 passed 0 skipped。
 - 沒驗證／沒做：無新功能變更、無發射（vq-6rp／vq-5nz.6／dab_055 2 格候需求端點名）；0 模型呼叫、0 元。
 - 下一步：點名後發射（成本另報）；點名前不發射、不同題重跑、不改文件湊進展。
+## r1171（2026-11-07；票 P20261107_0644-1：max_row_first 抽取頂層單一事實來源＋單元測試）
+- 做了：checks.py 內嵌 max_row_first 區塊（原 1614-1635）→ 單行 `expected = _max_row_first(rows, rc)`；頂層新增 `_max_row_first`（_mean_int_col 前）——sel_col 最大、平手取檔案序首列、out_col 輸出、缺欄位/無可解析/輸出不可解析拋 UnknownSource，行為逐位元組同；測試加 `test_max_row_first_standalone_helper`（平手取首列、非平手取最大、缺 sel/out 欄、無可解析列、輸出不可解析）。
+- 驗證：驗收指令 `pytest tests/test_reqloop_checks.py -k max_row_first -v` → **2 passed**（改前 1 passed）；全檔 58 passed；real_slice+dab055+dabstep10 15 passed；repair --selftest 13/13。
+- 沒驗證：未跑 effects2_20261106（在跑）；無效果性變更（純重構＋測試，單一事實來源防漂移）。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 模型呼叫、0 元。
+- 票尾 3 行結果（commit c0e64ff4／驗收末行／無缺）→ 移 done/。下一步：dab_426 切片可直用 `_max_row_first` 做審計預檢；vq-6rp／vq-5nz.6／dab_055 2 格仍候需求端點名。
