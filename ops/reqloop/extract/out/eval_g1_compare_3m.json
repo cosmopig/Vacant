@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-11-07T15:53:40+0000",
+  "g1": "/home/user1/dev/Vacant/ops/reqloop/g1/tasks",
+  "out_dir": "/home/user1/dev/Vacant/ops/reqloop/extract/out",
+  "models": {
+    "glm53": {
+      "bad_caught": 39,
+      "total_bad": 39,
+      "caught_pct": 100.0,
+      "good_fp": 0,
+      "total_good": 7,
+      "calls": 41,
+      "tokens": 328550,
+      "missing": [],
+      "files": 7,
+      "extract_failed": {},
+      "gate": "PASS"
+    },
+    "glm53flash": {
+      "bad_caught": 16,
+      "total_bad": 39,
+      "caught_pct": 41.0,
+      "good_fp": 0,
+      "total_good": 7,
+      "calls": null,
+      "tokens": null,
+      "missing": [],
+      "files": 7,
+      "extract_failed": {
+        "inventory_alerts": "ExtractError: glm rc=4: glm: 失敗（deadline）Stopped: deadline",
+        "orders_monthly": "ExtractError: glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+        "support_tickets": "ExtractError: glm rc=4: glm: 失敗（deadline）Stopped: deadline",
+        "web_traffic": "ExtractError: glm rc=4: glm: 失敗（deadline）Stopped: deadline"
+      },
+      "gate": "FAIL"
+    },
+    "deepseek41": {
+      "bad_caught": 23,
+      "total_bad": 39,
+      "caught_pct": 59.0,
+      "good_fp": 1,
+      "total_good": 7,
+      "calls": null,
+      "tokens": null,
+      "missing": [],
+      "files": 7,
+      "extract_failed": {
+        "inventory_alerts": "ExtractError: glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+        "web_traffic": "ExtractError: glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit"
+      },
+      "gate": "FAIL"
+    }
+  }
+}

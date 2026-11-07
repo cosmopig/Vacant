@@ -114,12 +114,27 @@ def read_extract_costs(vibe_calls: pathlib.Path, model: str, task_ids: list[str]
     return costs
 
 
+def _extraction_failure(ext_path: pathlib.Path) -> str | None:
+    """擷取結果檔的 report 有 extract_error／parse_error → 回傳原因；否則 None。
+
+    擷取失敗（glm rc=4：deadline／token_limit／turn_limit 等）是「該題沒有產出需求」，
+    與「產出了需求但沒抓出」是兩件事；對照表必須點名，不得讀成模型沒抓出（r1197）。
+    """
+    try:
+        raw = json.loads(ext_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "擷取結果檔無法讀取"
+    rep = raw.get("report") or {}
+    return rep.get("extract_error") or rep.get("parse_error")
+
+
 def run_models_comparison(models: list[str], g1: pathlib.Path, out_dir: pathlib.Path,
                           vibe_calls: pathlib.Path) -> dict:
     """多模型對照（vq-el4.6）：每模型各跑 evaluate_task＋read_extract_costs（離線、不呼叫模型）。
 
-    每模型門禁與單模型路徑同口徑：抓錯 ≥ 70% 且 0 冤枉；缺擷取結果→MISSING（fail-closed）；
-    任一題成本缺值 → calls/tokens＝None（UNKNOWN，絕不填 0）。
+    每模型門禁：抓錯 ≥ 70% 且 0 冤枉且擷取完整；缺擷取結果→MISSING（fail-closed）；
+    任一題擷取失敗（report.extract_error／parse_error）→FAIL（擷取不完整；該題計未抓出，
+    但 extract_failed 點名原因，不得讀成模型沒抓出）；任一題成本缺值 → calls/tokens＝None。
     """
     task_dirs = sorted(p for p in g1.iterdir() if p.is_dir() and (p / "requirements.json").is_file())
     ids = [p.name for p in task_dirs]
@@ -127,10 +142,15 @@ def run_models_comparison(models: list[str], g1: pathlib.Path, out_dir: pathlib.
     for model in models:
         caught = fp = total_bad = total_good = 0
         missing = [t for t in ids if not (out_dir / f"{t}.{model}.json").is_file()]
+        extract_failed: dict[str, str] = {}
         for t_dir in task_dirs:
             if t_dir.name in missing:
                 continue
-            res = evaluate_task(t_dir, RequirementSet.load(out_dir / f"{t_dir.name}.{model}.json"))
+            ext_path = out_dir / f"{t_dir.name}.{model}.json"
+            reason = _extraction_failure(ext_path)
+            if reason:
+                extract_failed[t_dir.name] = reason
+            res = evaluate_task(t_dir, RequirementSet.load(ext_path))
             total_bad += len(res["bad"])
             caught += sum(1 for b in res["bad"] if b["caught"])
             g = res["good"]
@@ -141,30 +161,41 @@ def run_models_comparison(models: list[str], g1: pathlib.Path, out_dir: pathlib.
         costs = read_extract_costs(vibe_calls, model, ids)
         all_found = bool(ids) and all(costs[t]["found"] for t in ids)
         catch_rate = caught / total_bad if total_bad else 0.0
-        gate = "MISSING" if missing else (
-            "PASS" if (total_good > 0 and fp == 0 and catch_rate >= GATE_CATCH_RATE) else "FAIL")
+        if missing:
+            gate = "MISSING"
+        elif extract_failed:
+            gate = "FAIL"     # 擷取不完整＝未達標（不得 PASS）
+        else:
+            gate = "PASS" if (total_good > 0 and fp == 0 and catch_rate >= GATE_CATCH_RATE) else "FAIL"
         out_models[model] = {
             "bad_caught": caught, "total_bad": total_bad, "caught_pct": round(catch_rate * 100, 1),
             "good_fp": fp, "total_good": total_good,
             "calls": sum(costs[t]["calls"] for t in ids) if all_found else None,
             "tokens": sum(costs[t]["total_tokens"] for t in ids) if all_found else None,
-            "missing": missing, "gate": gate}
+            "missing": missing, "files": len(ids) - len(missing),
+            "extract_failed": extract_failed, "gate": gate}
     return {"models": out_models}
 
 
 def print_models_table(result: dict) -> None:
     print("# G2.5 多模型對照（離線重算、不呼叫模型）")
-    print(f"{'Model':<14}{'Bad Caught':<14}{'Caught %':<11}{'Good FP':<10}{'Total Good':<13}{'Calls':<9}{'Tokens'}")
+    print(f"{'Model':<14}{'Bad Caught':<14}{'Caught %':<11}{'Extract OK':<12}"
+          f"{'Good FP':<10}{'Total Good':<13}{'Calls':<9}{'Tokens'}")
     for model, s in result["models"].items():
         calls = "UNKNOWN" if s["calls"] is None else str(s["calls"])
         tokens = "UNKNOWN" if s["tokens"] is None else str(s["tokens"])
+        files = s.get("files", 0)
+        extract_ok = f"{files - len(s.get('extract_failed', {}))}/{files}"
         print(f"{model:<14}{s['bad_caught']}/{s['total_bad']:<10}{s['caught_pct']:.1f}%{'':<5}"
-              f"{s['good_fp']:<10}{s['total_good']:<13}{calls:<9}{tokens}")
+              f"{extract_ok:<12}{s['good_fp']:<10}{s['total_good']:<13}{calls:<9}{tokens}")
     for model, s in result["models"].items():
         if s["missing"]:
             print(f"## {model}：缺擷取結果（fail-closed）：{', '.join(s['missing'])}")
+    for model, s in result["models"].items():
+        for t, reason in s.get("extract_failed", {}).items():
+            print(f"## {model} 擷取失敗（fail-closed、計未抓出）：{t}：{reason.splitlines()[0][:120]}")
     print("門禁：" + "; ".join(f"{m} {s['gate']}" for m, s in result["models"].items())
-          + f"（抓錯 ≥ {GATE_CATCH_RATE * 100:.0f}% 且 0 冤枉；成本缺值＝UNKNOWN，不填 0）")
+          + f"（抓錯 ≥ {GATE_CATCH_RATE * 100:.0f}% 且 0 冤枉且擷取完整；成本缺值＝UNKNOWN，不填 0）")
 
 
 def write_models_json(path: pathlib.Path, result: dict, g1: pathlib.Path, out_dir: pathlib.Path) -> None:
@@ -262,16 +293,20 @@ def main(argv: list[str] | None = None) -> int:
         ext = RequirementSet.load(ext_path)
         hand_res = evaluate_task(t_dir, hand)
         ext_res = evaluate_task(t_dir, ext)
+        ext_err = _extraction_failure(ext_path)
         rows.append({
             "task": t_dir.name, "missing": False,
             "hand": hand_res, "ext": ext_res,
             "ext_items": len(ext.items),
             "ext_unverified": sum(1 for i in ext.items if i.unverified),
+            "ext_error": ext_err,
         })
         print(
             f"## {t_dir.name}：條目 手寫 {len(hand.items)}／擷取 {len(ext.items)}"
             f"（unverified {sum(1 for i in ext.items if i.unverified)}）"
         )
+        if ext_err:
+            print(f"- ⚠️ 擷取失敗（fail-closed、計未抓出）：{ext_err.splitlines()[0][:120]}")
         print(f"- good：手寫 {hand_res['good']}、擷取 {ext_res['good']}")
         for hb, eb in zip(hand_res["bad"], ext_res["bad"]):
             mark = "✅" if eb["caught"] else "❌漏抓"

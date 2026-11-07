@@ -1,0 +1,111 @@
+{
+  "task_id": "nested_events",
+  "items": [
+    {
+      "id": "req_000",
+      "quote": "產出 `event_stats.csv`，欄位：`event_type, event_count, total_duration_ms`",
+      "deliverable": "event_stats.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "event_type",
+          "event_count",
+          "total_duration_ms"
+        ]
+      },
+      "description": "event_stats.csv 必須存在，且含 event_type、event_count、total_duration_ms 三個欄位",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_001",
+      "quote": "`total_duration_ms` = 該類型 `duration_ms` 加總（缺失以 0 計）",
+      "deliverable": "event_stats.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_json": "events.json",
+        "group_by": [
+          "event_type"
+        ],
+        "group_normalize": {
+          "event_type": {
+            "lower": true
+          }
+        },
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "duration_ms",
+            "impute": 0
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "event_count",
+            "type": "count"
+          },
+          {
+            "name": "total_duration_ms",
+            "type": "sum",
+            "col": "duration_ms"
+          }
+        ]
+      },
+      "description": "各 event_type（不分大小寫、輸出統一 lower；payload 或 duration_ms 缺失以 0 計且仍計入 event_count）分組，重算 event_count 與 total_duration_ms 並與交付一致",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_002",
+      "quote": "須明確載明「事件總數」（全部事件筆數，精確數值）與「總時長」（ms）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_json": "events.json",
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "duration_ms",
+            "impute": 0
+          }
+        ],
+        "numbers": [
+          {
+            "type": "count",
+            "label": "事件總數"
+          },
+          {
+            "type": "sum",
+            "col": "duration_ms",
+            "label": "總時長"
+          }
+        ]
+      },
+      "description": "summary.md 中「事件總數」與「總時長」（ms）數字必須與 events.json 重算一致",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53flash",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req_000",
+      "req_001",
+      "req_002"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T15:35:33+00:00"
+}

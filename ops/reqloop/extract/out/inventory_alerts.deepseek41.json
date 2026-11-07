@@ -1,0 +1,13 @@
+{
+  "task_id": "inventory_alerts",
+  "items": [],
+  "model": "deepseek41",
+  "report": {
+    "parse_error": null,
+    "extract_error": "ExtractError: glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+    "kept": [],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T15:44:49+00:00"
+}

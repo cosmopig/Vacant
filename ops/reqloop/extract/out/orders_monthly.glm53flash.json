@@ -1,0 +1,13 @@
+{
+  "task_id": "orders_monthly",
+  "items": [],
+  "model": "glm53flash",
+  "report": {
+    "parse_error": null,
+    "extract_error": "ExtractError: glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+    "kept": [],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T15:37:34+00:00"
+}

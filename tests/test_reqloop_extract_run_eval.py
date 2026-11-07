@@ -593,3 +593,44 @@ def test_run_eval_multi_model_comparison(tmp_path, capsys):
                  "--vibe-calls", str(vc)]) == 0                     # 單模型全 PASS → 0
     assert main(["--models", "m3", "--g1", str(g1), "--out-dir", str(out_dir),
                  "--vibe-calls", str(vc)]) == 2                     # 缺擷取 → fail-closed
+
+
+def test_run_eval_multi_model_extraction_failure_labeled(tmp_path, capsys):
+    """擷取失敗格（report.extract_error／parse_error，r1197：glm53flash 4 題 deadline／
+    token_limit、deepseek41 2 題 turn_limit）：
+    - 計為未抓出（fail-closed），但對照表與 JSON 必須點名該題與原因——不得讀成「模型沒抓出」；
+    - 任一題擷取失敗 → 門禁不得 PASS（擷取不完整），即使抓錯率仍達標。
+    """
+    from run_eval import main
+    g1, out_dir = _mk_g1_multi(tmp_path)
+    good = RequirementSet.load(out_dir / "ta.m1.json")
+    err = "ExtractError: glm rc=4: deadline"
+    failed_doc = {"task_id": "ta", "items": [],
+                  "report": {"parse_error": None, "extract_error": err,
+                             "kept": [], "discarded": [], "unverified": []}}
+    (out_dir / "ta.m4.json").write_text(json.dumps(failed_doc, ensure_ascii=False), encoding="utf-8")
+    (out_dir / "tb.m4.json").write_text(json.dumps(good.to_dict()), encoding="utf-8")
+    vc = tmp_path / "vc_m4.jsonl"
+    vc.write_text("", encoding="utf-8")
+    jout = tmp_path / "c4.json"
+
+    rc = main(["--models", "m4", "--g1", str(g1), "--out-dir", str(out_dir),
+               "--vibe-calls", str(vc), "--json", str(jout)])
+    out = capsys.readouterr().out
+    assert rc == 20                                    # 擷取失敗 → 門禁 FAIL（非 PASS）
+    assert "ta" in out and "deadline" in out            # 表格必須點名失敗題與原因
+    doc = json.loads(jout.read_text(encoding="utf-8"))
+    m4 = doc["models"]["m4"]
+    assert m4["gate"] == "FAIL"
+    assert m4["extract_failed"] == {"ta": err}
+    assert (m4["bad_caught"], m4["total_bad"]) == (1, 2)   # 失敗題計未抓出（fail-closed）
+    assert m4["good_fp"] == 0                            # 失敗題的 good＝UNKNOWN，不冤枉
+
+    # 全部擷取成功時 extract_failed 為空（不影響既有 PASS 口徑）
+    assert main(["--models", "m1", "--g1", str(g1), "--out-dir", str(out_dir),
+                 "--vibe-calls", str(vc)]) == 0
+    capsys.readouterr()
+    main(["--models", "m1", "--g1", str(g1), "--out-dir", str(out_dir),
+          "--vibe-calls", str(vc), "--json", str(jout)])
+    doc1 = json.loads(jout.read_text(encoding="utf-8"))
+    assert doc1["models"]["m1"]["extract_failed"] == {}

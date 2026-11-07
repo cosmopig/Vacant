@@ -1,0 +1,172 @@
+{
+  "task_id": "orders_monthly",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "排除狀態為 `CANCELLED` 的取消訂單。",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "monthly_sales_metrics",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "expected_in_evidence": true
+      },
+      "description": "月度指標表的訂單數與淨銷售額須以排除 CANCELLED 後的資料重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "排除重複訂單（同一 `order_id` 僅保留計算一筆有效記錄）。",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "monthly_sales_metrics",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "expected_in_evidence": true
+      },
+      "description": "同一 order_id 僅計一筆，月度指標須與去重後重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "欄位需包含：`month`（格式 YYYY-MM）、`orders_count`（有效訂單數）、`net_sales`（淨銷售總額）。",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "table_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "month",
+          "orders_count",
+          "net_sales"
+        ]
+      },
+      "description": "monthly_sales.csv 須存在且含 month、orders_count、net_sales 欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "同時需列出各月份淨銷售額前三名商品：`top_1_product`、`top_2_product`、`top_3_product`",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "table_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "top_1_product",
+          "top_2_product",
+          "top_3_product"
+        ]
+      },
+      "description": "monthly_sales.csv 須含前三名商品欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "請務必嚴格依該月份內之**淨銷售額**高低由大到小排序，不可依訂單筆數排序",
+      "deliverable": "monthly_sales.csv",
+      "verifier": "monthly_top_products",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "top_n": 3
+      },
+      "description": "各月淨銷售額前三名商品排行須與重算一致（排除 CANCELLED、同 order_id 去重）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R6",
+      "quote": "內文中需明確載明「兩月合計淨銷售總額」（精確數值）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "orders.csv",
+        "numbers": [
+          {
+            "type": "sum",
+            "col": "net_amount",
+            "label": "兩月合計淨銷售總額"
+          }
+        ]
+      },
+      "description": "summary.md 中的兩月合計淨銷售總額須與 orders.csv 重算一致（排除 CANCELLED、同 order_id 去重）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R7",
+      "quote": "使用簡潔的繁體中文 Markdown 撰寫。",
+      "deliverable": "summary.md",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "total",
+        "value_type": "number"
+      },
+      "description": "摘要須為繁體中文 Markdown；語言與文體無法以程式客觀驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R8",
+      "quote": "簡述各月銷售成長或商品表現觀察。",
+      "deliverable": "summary.md",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "total",
+        "value_type": "number"
+      },
+      "description": "文字觀察內容屬質性描述，無法以程式驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "deepseek41",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6",
+      "R7",
+      "R8"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "R7",
+        "reason": "unsupported_tag_value_type:number"
+      },
+      {
+        "id": "R8",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "generated_at": "2026-11-07T15:45:07+00:00"
+}

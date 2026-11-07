@@ -1,0 +1,13 @@
+{
+  "task_id": "web_traffic",
+  "items": [],
+  "model": "glm53flash",
+  "report": {
+    "parse_error": null,
+    "extract_error": "ExtractError: glm rc=4: glm: 失敗（deadline）Stopped: deadline",
+    "kept": [],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T15:44:11+00:00"
+}
