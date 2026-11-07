@@ -1,21 +1,27 @@
-# NOW — 第 1178 輪（2026-11-07，≤ 3 KB、覆寫不追加；細節放 bd）
+# 現在（第 1180 輪，2026-11-07）
 
-## 現在：r1178 收尾——票 P20261107_0001-1（extract.py 接 glm 後端＋真擷取 orders_monthly）已完成（done/），doing/ 空
-
-- **驗收全綠**：`python3 -m vacant_network.reqloop.extract --task ops/reqloop/g1/tasks/orders_monthly --model glm53`
-  →「條目 9、丟棄 0、unverified 2」RC=0（N=9≥3）；`tail -1 ~/dev/ops/state/vibe_calls.jsonl`＝
-  glm53／orders_monthly 擷取需求／rc=0／7416 tok。commit `fa96421f`（extract.py＋tests＋輸出 json）。
-- **功能**：`extract.py` 新增 `GlmClient`（subprocess 只走 `glm` 指令，非 0 一律 fail-closed 不重試）、
-  `build_task_prompt`（request 全文＋資料檔欄位與前 5 列＋12 個 verifier 清單與輸出格式；
-  kind 限定 explicit/assumption/preference）、`csv_preview`、`run_task`、`main` CLI
-  （預設寫 `ops/reqloop/extract/out/<task>.<model>.json`，含 report）。
-- **擷取結果**：9 條目全留（rowset_filter×2、csv_structure、monthly_sales_metrics、
-  monthly_top_products、summary_numbers、summary_metrics_consistency 等）；R6 缺 required_columns、
-  R8 缺 tag → unverified（fail-closed，檢查時 UNKNOWN）。首次跑 9/9 被丟棄是模型自造 kind，
-  已在 prompt 寫明合法值後復跑通過（2 次模型呼叫合計約 15k tok，遠低於每日 200 萬 token 上限）。
-- **下一步**：等規劃者下一票（vq-el4.3：run_eval.py 第一項 G1 用擷取需求重跑）。
-- effects2_20261106 讓它跑完、未重跑未改快照；dab_055 發射仍候點名；1753 維持排除。
+## 這一輪（vq-el4.3：run_eval.py 第一項——G1 擷取需求 vs 手寫需求）
+- **新工具**：`ops/reqloop/extract/run_eval.py`（離線、不呼叫模型）：兩套需求各跑
+  `checks.py` 重算；good 三態 VERIFIED/FP/UNKNOWN；bad 任一 FAIL 即抓出；
+  門禁＝抓錯 ≥70% 且 0 冤枉；退出碼 0/20/2（缺擷取 fail-closed）；
+  成本讀 `~/dev/ops/state/vibe_calls.jsonl`，缺值 UNKNOWN 不填 0。
+- **真實結果（G1，7 題、39 bad／7 good；glm53 重擷取 7 次呼叫、約 10.7 萬 token）**：
+  - 抓錯：**手寫 39/39 vs 擷取 27/39（69.2%）**
+  - 冤枉：**手寫 0 vs 擷取 4**
+  - good VERIFIED：擷取 0/7（必要條目含 unverified → UNKNOWN）
+  - **門禁 FAIL（RC=20）**——未達 70% 且 >0 冤枉。舊提示基線 12/39、冤枉 0（也在 STATE）。
+- **根因與修**：模型把 input 來源參數寫成 `data_file`（rowset_filter/group_aggregate/
+  summary_numbers 要 `input_csv|input_json`）→ 靜默 UNKNOWN。已修（TDD）：
+  `_REQUIRED_PARAMS` 補三 verifier、`_INPUT_SOURCE_VERIFIERS` 靜態驗證（錯名→unverified）、
+  `VERIFIER_HINTS` 標參數名；`checks.py` 兩個檢查器條目非物件 → UnknownSource 不 crash。
+- **下一步（依 RLOOP_PLAN「沒過就改擷取方法，不寫報告」）**：
+  1. 4 格冤枉的 claim 級對照（哪個 verifier 對 good 誤殺）→ 定 round2 改法；
+  2. round2 擷取（改 prompt 或 verifier 選擇策略）＋重跑 run_eval；
+  3. argon `7639e032`「12 checker 完整參數與子欄位驗證」待 CI 綠再合併（與本輪同向）。
+- 驗證：`pytest tests/test_reqloop_extract.py tests/test_reqloop_run_eval.py` **47 passed**；
+  run_eval RC=20（誠實 FAIL）。commit `bafa61bc`、`3d1b3969`。
+- 未過 CI 故未合併 argon；未發射；effects2_20261106 未動、未重跑；dab_055 候點名；1753 排除。
 
 ## 紅線（不變）
-main 不動；不手動 push；不讀 `/srv/eval` hidden/scorer；不洩露金鑰；不繞過 glm 直連 vibe；
-不發 frozen 實驗、不做大重跑。本輪 2 次 GLM 5.3 擷取呼叫（票內授權）。
+main 不動；不手動 push；不讀 `/srv/eval` hidden/scorer；不洩露金鑰；不繞過 `glm` 直連 vibe；
+不改 `repair.py`／G1 `requirements.json`／G1 資料／凍結快照；本輪 7 次 GLM 5.3 擷取（票內授權路徑）。

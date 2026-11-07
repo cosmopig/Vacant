@@ -257,3 +257,11 @@
 - 坑：首跑 9/9 丟棄＝模型自造 kind（data_cleaning/metric…）；prompt 寫明 kind∈{explicit,assumption,preference} 後復跑 9 留 2 unverified（R6 缺 required_columns、R8 缺 tag，fail-closed 保留）。
 - 沒驗證/沒做：extract.py +192 行略超票面 ≤150 註記（票尾已記）；未跑 vq-el4.3（run_eval）；effects2_20261106 未動、未重跑；dab_055 仍候點名。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未繞過 glm／未洩露金鑰／1753 維持排除；模型呼叫僅票內授權的 2 次 GLM 5.3。
+## r1180（2026-11-07；票 vq-el4.3：run_eval.py 第一項 G1 用擷取需求重跑——門禁 FAIL，誠實記錄）
+- 做了：`ops/reqloop/extract/run_eval.py`（新）——兩套需求（手寫 requirements.json vs 擷取 out/<t>.<model>.json）各跑 checks.py 重算；good 三態 VERIFIED/FP/UNKNOWN（口徑同 run_g1.py）、bad 任一 FAIL 即抓出；門禁＝抓錯 ≥70% 且 0 冤枉；退出碼 0/20/2（缺擷取 fail-closed）；成本讀 vibe_calls.jsonl，缺值 UNKNOWN 不填 0。`tests/test_reqloop_run_eval.py` 5/5。
+- 擷取：7 題全用 `glm`（glm53）重擷取（本輪 7 次呼叫、約 10.7 萬 token；orders_monthly 共 3 次累計 22,390 tok；遠低於每日 200 萬上限）。
+- 真實結果（G1、7 題、39 bad／7 good）：**抓錯 手寫 39/39 vs 擷取 27/39（69.2%）、冤枉 手寫 0 vs 擷取 4；門禁 FAIL（RC=20）**。改進前（舊提示）12/39、冤枉 0——提示補參數名後抓錯 +15 格、但出現 4 格冤枉；兩版皆未達 70%+0 冤枉。good 0/7 VERIFIED（必要條目含 unverified/UNKNOWN → 三態=UNKNOWN）。
+- 根因（逐格 claim 診斷）：round1 主要死因＝模型把 input 來源參數寫成 data_file（rowset_filter/group_aggregate/summary_numbers 要 input_csv|input_json）→ 靜默 UNKNOWN；已修：`_REQUIRED_PARAMS` 補三 verifier、`_INPUT_SOURCE_VERIFIERS` 靜態驗證（錯名→unverified）、VERIFIER_HINTS 標參數名；`checks.py` 兩個檢查器條目非物件→UnknownSource 不再 crash（summary_numbers.numbers、group_aggregate.aggregates）。
+- 未過門禁的下一步（依 RLOOP_PLAN：改擷取方法，不寫報告）：(a) 4 格冤枉的 claim 級對照（哪些 verifier 對 good 誤殺）；(b) round2 擷取 prompt 再迭代或換 verifier 選擇策略；(c) argon 7639e032「12 checker 完整參數與子欄位驗證」待 CI 綠後合併（與本輪同向、可能重疊，合併時取較嚴格）。
+- 驗證：`pytest tests/test_reqloop_extract.py tests/test_reqloop_run_eval.py` 47 passed；run_eval 兩跑 RC=20（門禁 FAIL）。commit bafa61bc、3d1b3969。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未繞過 glm／未洩露金鑰／未改 repair.py、requirements.json、G1 資料／1753 維持排除；本輪模型呼叫僅 7 次 GLM 5.3 擷取（票內授權路徑）。
