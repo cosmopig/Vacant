@@ -21,7 +21,7 @@
         "key": "mean_cases",
         "data_file": "data/estimated_numbers.csv",
         "recompute": {"type": "mean_int_col", "col": "No. of cases",
-                      "note": "Int64 轉換語意：Null/空/不可解析整數（如 '630308[495000-801000]'）一律忽略；對剩餘整數取均值"},
+                      "note": "Int64 轉換語意（同 checks._mean_int_col）：純整數與附區間的點估計字串（如 '630308[495000-801000]'）取前導整數為點估計；Null/空與非數值字串忽略；未顯式指定 round 時取整"},
         "atol": 1e-6
       },
       "description": "答案值必須等於對凍結資料 data/estimated_numbers.csv 的公開規則重算；重算值不進證據（防洩漏）",

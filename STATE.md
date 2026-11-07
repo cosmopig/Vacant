@@ -163,3 +163,9 @@
 - 重做（NOW.md×1、STATE.md×2 點名「451,938」）：由 raw（g2_result_dab_055-pi-C_generic.json、g2_result_dab_055-pi-C_localized.json）以千位分隔重算——generic model_calls=25、tokens=1,451,938、wall_ms_total=149,433；localized model_calls=21、tokens=372,043、wall_ms_total=67,646。
 - 對照：NOW.md L7、STATE.md L152 所寫「1,451,938」與重算值逐字相同；第三處（L158）為 r1163-review 條目引述 flag 字串。三處皆＝重算值，未寫任何其他值。
 - 結論：NOW.md／STATE.md 數值正確、內文不改；上一輪缺的是「含千位分隔之重算輸出」的記錄，本條補上。
+## r1164（2026-11-07；資深審查 04:35 三點執行：合併／取消／歸因修正）
+- 1. 合併 auto/argon@399f68b6（先查 CI：🟢 4913 passed/71 skipped/收集 4983 ≥ 本支 4944、failures=0；merge 234ec5fa 無衝突）：repair.py 跨輪修復保留被改動鍵＋checks.py `_mean_int_col` 抽取（語義不變、純重構）＋測試；4 檔接受套（repair/real_slice/dab055_slice/effects2_analysis）125 passed。
+- 2. vq-5nz.54 取消（bd close，含理由）＋票 P20261107_0210-1 移 done/（票尾附取消理由＋歸因修正指引）：effects2_20261106 已含三批完整 A/B（generic 0/3 FAIL vs localized 3/3 PASS）結論已足夠；依 11-06 #3 不再加同題重試；切片凍結規格保留、發射授權不保留。
+- 3. 歸因修正（先核對原始 agent_stdout.log 四份，再改）：precheck 舊文「generic 依 note 嚴整數解讀重算」「localized 草稿值取整」皆與日誌不符——實況：r1 兩臂皆 `pd.to_numeric(errors='coerce')` 544 列→NaN、312 列純整數均值 2199.551282051282→round→2200、兩臂 0 次 read requirements.json（日誌 6 處為 ls 清單）；generic r2 維持 2200（無 split('[')、無 2081990）；localized r2 對 2200 收到反例 `req_mean_cases_recomputed: FAIL (mismatch_with_recomputation)` 後改 `split('[')[0]` 解析全表 856 列重算 2081990.3598130841→2081990。
+- 3 處檔案改：`ops/audits/dab055_slice_precheck_20261107.{py,json}`（新增 `effects2_round_behavior` 欄＋counterexample 兩句改寫，重跑生成、採分不変）＋repo `ops/reqloop/g2/real_slice_dab055/manifest.json`（purpose 改寫）＋同切片 `task/requirements.json` note 改為與 `checks._mean_int_col` 同口徑（純整數與附區間字串取前導整數點估計、Null/空與非數值忽略、未指定 round 時取整），manifest requirements sha→bf467c7c…（凍結快照 effects2/smoke_e013 字節未動）；`--baseline` 門仍 FAIL/FAIL 可重現、evidence 無洩漏。
+- 紅線：未動 main／未自 push（merge commit 由 loop 自動推）／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 模型呼叫、0 元、0 發射。

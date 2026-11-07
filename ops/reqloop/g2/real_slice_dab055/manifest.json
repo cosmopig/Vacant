@@ -2,7 +2,7 @@
   "schema": "vacant.reqloop.g2.manifest/1",
   "frozen_at": "2026-11-07T02:39:00+0800",
   "ticket": "P20261107_0210-1（next slice dab_055 content closed loop；六要素齊備、準備即止；發射＝新成本決策、待 demand side 點名）",
-  "purpose": "content closed loop 對照 slice：1 份 bad 真草稿（dab_055-pi-C，@mean_cases[2081990.36] 點估計 float；獨立 scorer fail）× generic/localized 2 臂。預期可展示改善（工單）：localized 應修復成 @mean_cases[2081990]（格式修、值保留）並關缺口；generic 原生重查允許在 note-vs-verifier 語義矛盾（note 嚴格整數解讀 2200 vs 驗證器 point-estimate 重算 2081990）上 block（stopped=max_rounds、unresolved=req_mean_cases_recomputed）——這是可量測對照，不宣稱任何產品優劣。baseline＝可重現內容反例（FAIL/FAIL）；重算期望值（整數 2081990）永不進任何證據（kv_recomputed expected_in_evidence=false）。本 manifest 只凍結離線規格（verify_frozen/dry-run/baseline 三門）；發射是另一步授權（點名＋成本另報），不在本檔範圍。",
+  "purpose": "content closed loop 對照 slice：1 份 bad 真草稿（dab_055-pi-C，@mean_cases[2081990.36] 點估計 float；獨立 scorer fail）× generic/localized 2 臂。參考結果（effects2_20261106，依原始 agent_stdout.log）：第 1 輪兩臂皆 pd.to_numeric(..., errors='coerce') 將 544 列轉 NaN、僅 312 列純整數均值 2199.55→2200，兩臂皆 0 次讀 requirements.json；第 2 輪 localized 對 2200 收到反例 req_mean_cases_recomputed: FAIL (mismatch_with_recomputation) 後改 split('[')[0] 解析全表 856 列前導整數重算 2081990（非草稿 2081990.36 取整），generic 維持 2200 未解（stopped=max_rounds、unresolved=req_mean_cases_recomputed）。預期可展示改善（工單）：localized 應修復成 @mean_cases[2081990]（格式修、值保留）並關缺口；generic 原生重查允許未解（stopped=max_rounds、unresolved=req_mean_cases_recomputed）——這是可量測對照，不宣稱任何產品優劣。baseline＝可重現內容反例（FAIL/FAIL）；重算期望值（整數 2081990）永不進任何證據（kv_recomputed expected_in_evidence=false）。本 manifest 只凍結離線規格（verify_frozen/dry-run/baseline 三門）；發射是另一步授權（點名＋成本另報），不在本檔範圍。",
   "arms": ["generic", "localized"],
   "model": {
     "model": "gemma-4-12b-it-qat",
@@ -48,7 +48,7 @@
       },
       "task": {
         "dir": "dab_055-pi-C/task",
-        "requirements": {"sha256": "51502b32ff40eb5b770248a2cf0a76d6ae0f47b4256d2d1738727e8700a867b9"},
+        "requirements": {"sha256": "bf467c7c0100c013aa574e38934581cdd10dacb4651c07bbb1d03482a1ca3947"},
         "request": {"sha256": "89762c8d2e867eba309d53e7c651ee9bdfe5dc7242786dc69bf728a6b7661695"},
         "data_files": {
           "contract.md": "fc9b32bf919c8d219cfa1d4b735063e5f0bea1ab528c76bbea17b95c9caf0faa",
