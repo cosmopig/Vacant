@@ -1,17 +1,17 @@
-# 現在（第 1218 輪後，2026-11-07 22:50 UTC）
+# 現在（第 1219 輪後，2026-11-07 23:2x UTC）
 
-## r1218：CI 紅燈例外——auto/worker 6 failed → 0 failed
-- worker 失活（無进程、19:49 後無改動、其 NOW 自述等待）→ r1215「不動 worker」前提失效；「CI 紅燈例外」＋執行器「本輪須輸出變好」→ 修。DECISION 已記 STATE。
-- 修法＝還原凍結狀態，零產品判斷（qwen27b/argon 樹＋pin 三方一致為準）：
-  ① dabstep-10-pi-C/draft/answer.txt WIP 污染（c834c2ee 多行）→ 還 pin 624b60c5（"30"）；
-  ② real_slice_dab055/manifest.json 斷裂絕對 symlink → 還真實檔 3234d206；
-  ③ 刪 tracked 殘骸 `~HEAD`／`~auto_argon`＋空 manifest/ 目錄。
-- 驗收（worker 樹）：3 個原紅燈檔 57 passed；`-k 'reqloop or beads'` → 354 passed 1 skipped 0 failed（原 6 failed）；0 模型呼叫。
-- commit auto/worker **aca58a95**（可逆：reset --hard b7cb338d）、worktree 乾淨、未 push；vq-4xa 已 close。
-- 我的分支 05989682 🟢 5033/0 未動；argon 🟢；**三分支現只待 worker CI 轉綠**。
+## r1219：產品真 bug 例外——repo 唯一 tracked 絕對 symlink → 真實檔＋CI 守護
+- 授權依據：vq-el4 全閉、open 空 → 「CI 紅燈和產品真 bug 例外」＋執行器「本輪須一條指令輸出變好」。
+- 缺陷：audits/e016…envleak_recompute.py 是 tracked 絕對 symlink（→/home/user1/dev/ops/audits/...）＝worker 紅燈同型（另一 checkout 必斷、FileNotFoundError）。
+- TDD：新 tests/test_repo_no_absolute_symlinks.py（tracked symlink 目標不得以 / 開頭）→ 修前 1 failed 點名 → 修後 **1 passed**；`-k 'reqloop or beads'` 353 passed 0 failed；0 模型呼叫。
+- commit auto/qwen27b **b5355486**（mode 120000→100644、內容 sha256 4c9f2731… 不變、ops/audits 原件未動）；未 push；vq-0tr close。
+
+## CI（本地 vacant-ci）
+- auto/worker aca58a95 🟢 5034/0（23:03）→ 審查指示4 達標，三分支已全綠過。
+- auto/argon 05989682 🟢 5033/0；auto/qwen27b 05989682 🟢 5033/0；46e634b8＋b5355486 待 pickup（~14min/pass、自動）。
 
 ## 下一步
-1. 下輪巡 vacant-ci：auto/worker aca58a95 pickup 後應 🟢（本地 CI 掃本地 HEAD、約 10 分鐘一 pass）。若仍紅＝先查 CI 環境（ops/audits 3 個絕對 symlink 本機可解析、非紅燈因、未動）。
+1. 下輪巡 b5355486 CI → 應 🟢（新測試純 git index 斷言、無模型/網絡）；若紅＝先查 CI 環境。
 2. 等審查派工；G3 須派工，不自發射大成本。
 
 ## 紅線（不變）
