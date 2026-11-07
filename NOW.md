@@ -1,18 +1,14 @@
 # NOW — R-loop (auto/qwen27b)
 
+## 第 1168 輪 (2026-11-07)
+**資深審查三項（argon 合併／vq-5nz.54 取消／dab_055 歸因修正）逐項於磁碟核實皆已落地；無新產品變更（0 呼叫、0 元、0 發射）**
+
+- ① 399f68b6 為 HEAD 祖先（merge 234ec5fa）；② vq-5nz.54=CLOSED＋票 P20261107_0210-1 在 done/（doing/ 空）；③ precheck effects2_round_behavior（r1 兩臂 coerce→2200、0 次讀 requirements；localized r2 反例→split('[')→2081990）＋manifest purpose＋note=_mean_int_col 口徑＋sha bf467c7c=實檔。
+- 全綠：reqloop checks+repair+g2 207 passed；selftest 13/13；dab055 slice 14 passed；CI c71ae612 還沒跑完（看一次、不輪詢）。
+- 卡點（如實）：紅線內無剩餘符合六要素之工作——下一步全為候需求端點名的發射：vq-6rp（1753）、vq-5nz.6（停滯 8 格換方法）、dab_055 2 格發射。
+- 下一步：點名後發射（新成本另報）；點名前不發射、不同題重跑、不改文件湊進展。
+
 ## 第 1166 輪 (2026-11-07)
-**票 P20261107_0539-1：dab_055 審計預檢腳本改單一事實來源（值＝產品 _mean_int_col）＋守衛測試（commit 5c15626f，0 模型呼叫、0 元）**
+票 P20261107_0539-1：dab_055 預檢改單一事實來源（值=產品 _mean_int_col）＋守衛測試（commit 5c15626f）；71 passed、selftest 13/13、0 呼叫 0 元。
 
-- **一個檔**：`~/dev/ops/audits/dab055_slice_precheck_20261107.py`（非 repo）——值計算由「內嵌複製的解析迴圈」改為**直接呼叫產品** `checks._mean_int_col(rows, rc)`；`parsed/ignored` 降為報告列數統計；輸出新增 `single_source_of_truth` 欄（expected_from／expected／unrounded）。消除「產品改口徑→審計證據靜默漂移」的形狀（項目自身紀律禁止複製解析迴圈）。
-- **一個測試**：repo `tests/test_reqloop_real_slice.py::test_real_slice_dab055_precheck_single_source_of_truth`——斷言預檢輸出 expected/unrounded == 產品對同一凍結資料（real_slice_dab055，CSV sha bc485997…）實算值、expected_from 點名產品函數；預檢回復成內嵌迴圈舊版（無該欄）即紅；預檢輸出缺席（CI 他主機）→ skip。
-- **一條指令輸出變好**：`python ops/audits/dab055_slice_precheck_20261107.py` RC=0、值不變（expected=2081990、parsed=856、raw_mean=2081990.3598130841）、行尾多 `single_source_of_truth=checks._mean_int_col`、JSON 多同欄。
-- **驗收**：`pytest tests/test_reqloop_real_slice.py + checks + dab055_slice` → 71 passed；`repair --selftest` 13/13 PASS（產品未動）。
-- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改 effects2·smoke_e013 凍結位元組／1753 維持排除／未見＝UNKNOWN。
-
-## 第 1165 輪 (2026-11-07)
-**票 P20261107_0443-1 收口（r1164 55d79635 已完成，本輪重驗四步、無新 commit）**：note 語義＝`checks._mean_int_col`；manifest sha=bf467c7c…=實檔；歸因與 agent_stdout.log 一致、針 2081990 保留；驗收 `3 passed`；票尾 3 行→done/。0 呼叫 0 元。
-
-## 待辦
-- vq-6rp（dabstep-1753）／vq-5nz.6（停滯草稿換方法）：同候需求端點名（未動）。
-- 本輪 commit 5c15626f CI 待綠（看一眼、不輪詢）。
 （NOW 上限 3 KB、覆寫不追加）

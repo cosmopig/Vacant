@@ -184,3 +184,9 @@
 - 一條指令輸出變好：python ops/audits/dab055_slice_precheck_20261107.py RC=0、行尾多 single_source_of_truth=checks._mean_int_col、JSON 多同欄。
 - 驗收：pytest real_slice+checks+dab055_slice 71 passed；repair --selftest 13/13（產品未動）；commit 5c15626f、樹乾淨。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改 effects2·smoke_e013 凍結位元組／1753 維持排除／未見＝UNKNOWN；0 模型呼叫、0 元。
+## r1168（2026-11-07；資深審查三項：逐項於磁碟核實皆已落地；無新產品變更）
+- ① `git merge-base --is-ancestor 399f68b6 HEAD`=MERGED（merge 234ec5fa）；② vq-5nz.54=CLOSED（理由：effects2 三批 A/B 結論已足、依 11-06#3 不再同題重試）＋票 P20261107_0210-1 在 done/（doing/ 空）；③ precheck json effects2_round_behavior（r1 兩臂 coerce→2200、0 次讀 requirements；localized r2 反例→split('[')→2081990）＋manifest purpose＋requirements note=_mean_int_col 口徑，sha bf467c7c=實檔=manifest。
+- 驗證：reqloop checks+repair+g2 全綠（207 passed、0 fail）；repair --selftest 13/13；dab055 slice 14 passed；CI auto/qwen27b c71ae612 還沒跑完（看一次、不輪詢）。
+- 卡點（如實）：紅線內（不新增發射／regex／靜態處方／重試、1753 排除）無剩餘符合六要素之工作——下一步全是候需求端點名的發射：vq-6rp（1753）、vq-5nz.6（停滯 8 格換方法）、dab_055 2 格發射；11-06#7 新成本另報，不自我點名。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 模型呼叫、0 元、0 發射。
+- 下一步：點名後發射（成本另報）；點名前不發射、不同題重跑、不改文件湊進展。
