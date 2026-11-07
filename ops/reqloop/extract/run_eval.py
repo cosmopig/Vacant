@@ -373,6 +373,9 @@ def _print_all_dashboard(j1: pathlib.Path, j2: pathlib.Path, j3: pathlib.Path,
           f"rejected {d3.get('rejected')}、right_to_wrong {d3.get('right_to_wrong')}、"
           f"held {d3.get('held')}"
           + (f"、error {d3['errors']}" if d3.get("errors") else ""))
+    if d3.get("stale_cells"):
+        print(f"   ⚠ STALE（擷取規則變動後需求已變，舊裁決不計、需線上 --phase3 重驗）："
+              f"{', '.join(d3['stale_cells'])}")
     print(f"   成本：{_cost(d3.get('cost'))}")
     print(bar)
     all_ok = rc1 == 0 and rc2 == 0 and rc3 == 0
@@ -416,10 +419,12 @@ def run_all(model: str = "glm53",
     # 不靜默發起即時外部模型呼叫（消耗額度或覆蓋已驗收成果）。
     rc2 = run_phase2(model=model, base=base, vibe_calls=vibe_calls, json_out=j2,
                      offline=True)
+    # argon 20261107_1921：phase3 同樣 offline——舊版在 progress.json 缺格/ERROR 行時會靜默
+    # 啟動 pi 修復 session；且需求已隨擷取規則變動的舊裁決不得沿用（STALE→fail-closed）。
     rc3 = run_phase3(base=base, include_good=include_good, extract_model=model,
                      provider=provider, model=p3_model, max_rounds=max_rounds,
                      timeout_s=timeout_s, out_root=p3_out, req_dir=p3_req_dir,
-                     json_out=j3, limit=limit)
+                     json_out=j3, limit=limit, offline=True)
     all_ok = _print_all_dashboard(j1, j2, j3, rc1, rc2, rc3)
     return 0 if all_ok else 20
 
@@ -1002,6 +1007,31 @@ def _dir_sha256(d: pathlib.Path) -> str:
     return h.hexdigest()
 
 
+def _req_digest(req: RequirementSet) -> str:
+    """需求組內容 hash（canonical JSON）：判定 phase3 舊裁決所依需求是否仍是現行需求。"""
+    return hashlib.sha256(json.dumps(req.to_dict(), ensure_ascii=False, sort_keys=True)
+                          .encode("utf-8")).hexdigest()
+
+
+def effective_phase3_requirements(cell: Real14Cell, req_file: pathlib.Path,
+                                  real14_dir: pathlib.Path) -> RequirementSet:
+    """phase3 修復所用需求＝phase2 判抓錯所用的同一份。
+
+    argon 20261107_1921：phase2 的快取路徑以「現行」build_requirement_set 從 raw_output 重建；
+    phase3 原本直接 load 擷取當時存下的 items。擷取規則一改（例：418d3bc7 補 number 型別、
+    tag_not_in_request），同一 cell 兩相用的就是不同需求（real14 9 錯中 4 格不同，dab_039
+    由 4 UNKNOWN（no_gap、0 呼叫）變成有 FAIL），PHASE3 數字不再對應目前的擷取管線。
+    out 檔有 raw_output → 依現行規則重建；舊格式（無 raw_output）→ 照舊 load。
+    """
+    doc = json.loads(req_file.read_text(encoding="utf-8"))
+    raw = doc.get("raw_output")
+    if isinstance(raw, str):
+        user_text = load_cell_request_text(cell.task_dir, _task_id_from_cell(cell.cell), real14_dir)
+        req, _ = build_requirement_set(cell.cell, parse_model_output(raw), user_text)
+        return req
+    return RequirementSet.load(req_file)
+
+
 def run_phase3(base: pathlib.Path | None = None,
                include_good: bool = False,
                extract_model: str = "glm53",
@@ -1013,12 +1043,17 @@ def run_phase3(base: pathlib.Path | None = None,
                req_dir: pathlib.Path | None = None,
                out_root: pathlib.Path | None = None,
                json_out: pathlib.Path | None = None,
-               limit: int | None = None) -> int:
+               limit: int | None = None,
+               offline: bool = False) -> int:
     """vq-el4.5：9 份錯草稿（effects2 real14）×自動擷取需求×localized 修復×獨立 scorer。
 
     發射前凍結 freeze.json（cell 清單＋draft/需求 hash＋模型＋預算）；逐 cell 寫
     progress.json（長實驗可離線監控）。退出碼：0 全部 cell 有裁決；2 有 fail-closed。
     成本：repair_sessions（session 數）與 model_calls（API 請求數）嚴分；任一缺值⇒UNKNOWN。
+
+    argon 20261107_1921：每行記 req_effective_sha256（修復實際所用需求的 hash）；接續時
+    需求已變（擷取規則改了）→ 舊裁決 STALE、不沿用。offline=True（--all）：唯讀——不建立/
+    啟動修復 agent、不改寫 progress.json；無可沿用裁決的格 fail-closed 記 ERROR。
     """
     from vacant_network.reqloop.repair import _default_build  # noqa: PLC0415
 
@@ -1061,6 +1096,10 @@ def run_phase3(base: pathlib.Path | None = None,
     }
     freeze_path = out_root / "freeze.json"
     if not freeze_path.is_file():
+        if offline:
+            print("PHASE3 fail-closed：offline 模式找不到 freeze.json（沒有可沿用的正式跑）",
+                  file=sys.stderr)
+            return 2
         freeze_path.write_text(json.dumps(freeze_doc, ensure_ascii=False, indent=1),
                                encoding="utf-8")
     else:
@@ -1076,9 +1115,9 @@ def run_phase3(base: pathlib.Path | None = None,
                   file=sys.stderr)
             return 2
 
-    if build is None:
+    if build is None and not offline:
         build = _default_build(provider, model, hooks=True)
-    if run is None:
+    if run is None and not offline:
         from vacant_network.adapters.run import run_agent  # noqa: PLC0415
         run = run_agent
 
@@ -1098,17 +1137,51 @@ def run_phase3(base: pathlib.Path | None = None,
 
     rows: list[dict] = []
     errors = 0
+    stale_cells: list[str] = []
+    real14_dir = REPO_ROOT / "ops" / "reqloop" / "extract" / "real14"
     n_bad = sum(1 for c in cells if c.role == "bad")
     print(f"PHASE3（vq-el4.5）：{len(cells)} 份草稿（{n_bad} 錯／{len(cells) - n_bad} 好）"
-          f"＋自動擷取需求（{extract_model}）＋localized 修復（{provider}/{model}）＋獨立 scorer")
+          f"＋自動擷取需求（{extract_model}）＋localized 修復（{provider}/{model}）＋獨立 scorer"
+          + ("（offline 唯讀：不發起修復）" if offline else ""))
     for c in cells:
-        if c.cell in cached_rows:
-            rows.append(cached_rows[c.cell])
-            print(f"  {c.cell:22s} {c.role:4s} RESUMED（已接續 progress.json，不重複呼叫）",
-                  flush=True)
-            continue
         src = sources.get(c.cell)
         req_file = req_dir / f"{c.cell}.{extract_model}.json"
+        eff_req: RequirementSet | None = None
+        eff_sha: str | None = None
+        eff_err: str | None = None
+        if req_file.is_file():
+            try:
+                eff_req = effective_phase3_requirements(c, req_file, real14_dir)
+                eff_sha = _req_digest(eff_req)
+            except Exception as e:  # noqa: BLE001 — 重建失敗＝fail-closed，不退回舊 items
+                eff_err = f"{type(e).__name__}: {str(e)[:80]}"
+        cached = cached_rows.get(c.cell)
+        stale = False
+        if cached is not None:
+            used_sha = cached.get("req_effective_sha256")
+            if used_sha is None and req_file.is_file():
+                # 舊版 progress 行：當時 phase3 直接 load 擷取檔 items
+                try:
+                    used_sha = _req_digest(RequirementSet.load(req_file))
+                except Exception:  # noqa: BLE001
+                    used_sha = None
+            if eff_sha is not None and used_sha == eff_sha:
+                rows.append(cached)
+                print(f"  {c.cell:22s} {c.role:4s} RESUMED（已接續 progress.json，不重複呼叫）",
+                      flush=True)
+                continue
+            stale = True
+            stale_cells.append(c.cell)
+            print(f"  {c.cell:22s} {c.role:4s} STALE（舊裁決 {cached.get('verdict')} 所依需求"
+                  f"≠現行擷取需求，不沿用）", flush=True)
+        if offline:
+            errors += 1
+            why = ("STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）"
+                   if stale else "offline 無可沿用裁決（不發起修復呼叫）")
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR", "detail": why,
+                         **({"stale_verdict": cached.get("verdict")} if stale else {})})
+            print(f"  {c.cell:22s} {c.role:4s} ERROR（{why[:40]}）", flush=True)
+            continue
         if src is None:
             errors += 1
             rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
@@ -1119,12 +1192,21 @@ def run_phase3(base: pathlib.Path | None = None,
             rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
                          "detail": f"缺擷取結果 {req_file.name}（fail-closed，不拿缺的當通過）"})
             print(f"  {c.cell:22s} {c.role:4s} ERROR（缺擷取結果）")
+        elif eff_req is None:
+            errors += 1
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
+                         "detail": f"擷取需求重建失敗（fail-closed）：{eff_err}"})
+            print(f"  {c.cell:22s} {c.role:4s} ERROR（擷取需求重建失敗）")
         else:
-            req_set = RequirementSet.load(req_file)
+            req_set = eff_req
             try:
                 row = phase3_cell(c, req_set, src, out_root,
                                   build=build, run=run, scorer=scorer,
                                   max_rounds=max_rounds, timeout_s=timeout_s)
+                row["req_effective_sha256"] = eff_sha
+                if stale:
+                    row["supersedes"] = {"verdict": cached.get("verdict"),
+                                         "req_effective_sha256": cached.get("req_effective_sha256")}
             except Exception as e:  # noqa: BLE001 — 單 cell 故障不拖垮全批，但如實計錯
                 errors += 1
                 row = {"cell": c.cell, "role": c.role, "status": "ERROR",
@@ -1145,9 +1227,10 @@ def run_phase3(base: pathlib.Path | None = None,
                 print(f"  {row['cell']:22s} {row['role']:4s} ERROR：{row.get('detail', '')[:80]}",
                       flush=True)
 
-    (out_root / "progress.json").write_text(
-        json.dumps({"complete": True, "rows": rows}, ensure_ascii=False, indent=1),
-        encoding="utf-8")
+    if not offline:  # offline（--all）唯讀：不改寫官方 progress.json
+        (out_root / "progress.json").write_text(
+            json.dumps({"complete": True, "rows": rows}, ensure_ascii=False, indent=1),
+            encoding="utf-8")
 
     def _agg(key: str):
         vals = [r["cost"][key] for r in rows if "cost" in r and "verdict" in r]
@@ -1165,6 +1248,7 @@ def run_phase3(base: pathlib.Path | None = None,
     summary = {"phase": 3, "base": str(base), "extract_model": extract_model,
                "repair_model": {"provider": provider, "model": model},
                "cells": len(rows), "errors": errors,
+               "stale_cells": stale_cells,
                "fixed": fixed, "unresolved": unresolved, "rejected": rejected,
                "right_to_wrong": rtw, "held": held,
                "cost": cost,
@@ -1174,6 +1258,8 @@ def run_phase3(base: pathlib.Path | None = None,
                "rows": rows}
     print(f"\n裁決：fixed {fixed}、unresolved {unresolved}、rejected {rejected}、"
           f"right_to_wrong {rtw}、held {held}、error {errors}")
+    if stale_cells:
+        print(f"  STALE（需求已變、舊裁決不計）：{', '.join(stale_cells)}")
     for k, v in cost.items():
         print(f"  成本 {k}: {v if v is not None else 'UNKNOWN（缺值不填 0）'}")
     print("對照：手寫需求 localized 9/9（g2-truth；開發選樣單 rep）")

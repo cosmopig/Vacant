@@ -121,7 +121,7 @@
   "total_good": 5,
   "errors": 0,
   "cost": {
-    "calls": 71,
-    "tokens": 701696
+    "calls": 74,
+    "tokens": 732826
   }
 }

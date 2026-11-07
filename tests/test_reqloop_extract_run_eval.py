@@ -558,6 +558,108 @@ def test_run_phase3_offline_rerun_keeps_official_freeze_untouched(tmp_path):
     assert (out_root / "freeze.json").read_text(encoding="utf-8") == freeze1
 
 
+def _write_rebuildable_reqs(base: pathlib.Path, req_dir: pathlib.Path) -> None:
+    """real14 形擷取檔：items＝擷取當時規則的結果，raw_output＝模型原始輸出（可依現行規則重建）。"""
+    import run_eval
+    raw = json.dumps([{
+        "id": "R1", "quote": "How many unique merchants", "deliverable": "answer.txt",
+        "verifier": "plain_recomputed",
+        "params": {"data_file": "data/t.csv",
+                   "recompute": {"type": "unique_count", "col": "merchant_id"}}}])
+    req_dir.mkdir(exist_ok=True)
+    for c in derive_real14_cells(base):
+        user_text = load_cell_request_text(c.task_dir, run_eval._task_id_from_cell(c.cell), req_dir)
+        req, _ = run_eval.build_requirement_set(c.cell, run_eval.parse_model_output(raw), user_text)
+        doc = req.to_dict()
+        doc["raw_output"] = raw
+        (req_dir / f"{c.cell}.glm53.json").write_text(json.dumps(doc), encoding="utf-8")
+
+
+def test_run_phase3_stale_requirements_invalidate_resume_and_offline_never_runs(tmp_path, monkeypatch):
+    """argon 20261107_1921：phase2 依「現行擷取規則」從 raw_output 重建需求來判抓錯，
+    phase3 卻直接 load 擷取當時存下的 items——擷取規則改了（418d3bc7）之後，兩相對同一 cell
+    用的是不同需求，舊 phase3 裁決還被 progress.json 接續沿用（違反 11/04「需求/驗證器變動，
+    相關結果必須失效重驗」）。
+
+    - phase3 修復用的需求＝與 phase2 同一份（raw_output 依現行規則重建）；
+    - 每行記 req_effective_sha256；需求變了 → 舊裁決不接續；
+    - offline=True（--all）：不接續的格 fail-closed 記 ERROR（STALE），絕不建立/啟動修復 agent，
+      也不改寫官方 progress.json；
+    - offline=False：只重跑變動格。
+    """
+    import run_eval
+    base = _mk_base(tmp_path)
+    req_dir = tmp_path / "req"
+    _write_rebuildable_reqs(base, req_dir)
+    scorer = lambda s, w, d: {"pass": True, "status": "scored", "rc": 0}
+    out_root = tmp_path / "out"
+    agent = _fake_agent({"answer.txt": "@m[3]\n"})
+    assert run_phase3(base=base, include_good=True, build=_fake_build(), run=agent,
+                      scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
+    prog1 = json.loads((out_root / "progress.json").read_text(encoding="utf-8"))
+    assert all(r.get("req_effective_sha256") for r in prog1["rows"])
+
+    def boom(*a, **k):
+        raise AssertionError("offline／需求未變時不得建立或啟動修復 agent")
+
+    # 需求未變：offline 接續全部、0 次 build/run
+    assert run_phase3(base=base, include_good=True, build=boom, run=boom, scorer=scorer,
+                      req_dir=req_dir, out_root=out_root, offline=True) == 0
+
+    # 舊版 progress 行（無 req_effective_sha256）：用當時直接 load 的需求比對，未變 → 照接續
+    legacy = {"complete": True, "rows": [{k: v for k, v in r.items() if k != "req_effective_sha256"}
+                                         for r in prog1["rows"]]}
+    (out_root / "progress.json").write_text(json.dumps(legacy), encoding="utf-8")
+    assert run_phase3(base=base, include_good=True, build=boom, run=boom, scorer=scorer,
+                      req_dir=req_dir, out_root=out_root, offline=True) == 0
+
+    # 擷取規則改了（例：某型別從不支援變支援 → 條目 unverified 狀態改變）
+    orig = run_eval.build_requirement_set
+
+    def changed_rules(task_id, raw_items, user_text):
+        req, rep = orig(task_id, raw_items, user_text)
+        items = [RequirementItem(**{**it.to_dict(), "unverified": True}) for it in req.items]
+        return RequirementSet(req.task_id, items), rep
+    monkeypatch.setattr(run_eval, "build_requirement_set", changed_rules)
+
+    before = (out_root / "progress.json").read_text(encoding="utf-8")
+    jout = tmp_path / "p3_offline.json"
+    rc = run_phase3(base=base, include_good=True, build=boom, run=boom, scorer=scorer,
+                    req_dir=req_dir, out_root=out_root, offline=True, json_out=jout)
+    assert rc == 2                                            # fail-closed，不沿用舊裁決
+    doc = json.loads(jout.read_text(encoding="utf-8"))
+    assert doc["errors"] == 2 and doc["fixed"] == 0 and doc["held"] == 0
+    assert sorted(doc["stale_cells"]) == ["fake-001-pi-C", "fake-002-pi-C"]
+    assert all(r["status"] == "ERROR" and "STALE" in r["detail"] for r in doc["rows"])
+    assert (out_root / "progress.json").read_text(encoding="utf-8") == before   # 官方紀錄不被改寫
+
+    # 線上（非 offline）：變動格重跑，且修復拿到的是重建後（現行規則）的需求
+    calls = {"n": 0}
+
+    def counting_build(prompt, ws):
+        calls["n"] += 1
+        return _fake_build()(prompt, ws)
+    assert run_phase3(base=base, include_good=True, build=counting_build, run=agent,
+                      scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
+    prog2 = json.loads((out_root / "progress.json").read_text(encoding="utf-8"))
+    assert {r["cell"] for r in prog2["rows"] if "verdict" in r} == {"fake-001-pi-C", "fake-002-pi-C"}
+    used = json.loads((out_root / "tasks" / "fake-001-pi-C" / "requirements.json")
+                      .read_text(encoding="utf-8"))
+    assert all(it["unverified"] for it in used["items"])
+
+
+def test_run_all_passes_offline_to_phase3(tmp_path, monkeypatch):
+    """--all 宣稱全程離線：phase3 也必須 offline=True（不得因缺/舊裁決而發起修復 session）。"""
+    import run_eval
+    seen = {}
+    monkeypatch.setattr(run_eval, "run_phase1", lambda **kw: 0)
+    monkeypatch.setattr(run_eval, "run_phase2", lambda **kw: seen.setdefault("p2", kw) and 0)
+    monkeypatch.setattr(run_eval, "run_phase3", lambda **kw: seen.setdefault("p3", kw) and 0)
+    run_eval.run_all(out_dir=tmp_path)
+    assert seen["p2"].get("offline") is True
+    assert seen["p3"].get("offline") is True
+
+
 # ── 多模型對照（vq-el4.6）：--models 表格＋JSON ─────────────────────────────
 
 def _mk_g1_multi(tmp_path: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path]:
