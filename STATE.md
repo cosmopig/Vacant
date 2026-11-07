@@ -214,3 +214,9 @@
 - 沒驗證：無效果性變更（純規格＋守衛、0 模型呼叫、0 元）；未發射（FROZEN_PENDING_NAMING，候需求端點名）。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改 effects2·smoke_e013 凍結位元組／1753 維持排除。
 - 下一步：dab_426 切片規格就绪候點名發射（成本另報）；vq-6rp／vq-5nz.6 同候；點名前不發射、不同題重跑。
+## r1173（2026-11-07；資深審查第四節三項：逐項於磁碟核實已落地＋本輪獨立重推日誌證據；無新變更、0 發射）
+- ① merge：`git merge-base --is-ancestor 399f68b6 HEAD`=MERGED（merge 234ec5fa，r1164）；auto/argon 399f68b6 CI 綠（4913 passed）；產品變更在樹（checks.py:1819 _mean_int_col、repair.py kv_satisfied 跨輪保留）。
+- ② vq-5nz.54=CLOSED（理由：effects2 三批 A/B 已足＋依 11-06#3 不再同題重試）；票 P20261107_0210-1 在 done/（結案說明在檔尾）；doing/ 僅 P20261107_0653-1（dabstep-10，非 dab_055，候點名）。
+- ③ 本輪獨立重推 effects2_20261106 四份 agent_stdout.log：r1 兩臂 to_numeric/coerce 在、2200 在、無 split('[')；localized r1 的 6 處 2081990 皆為草稿 float 2081990.36（無 bare）；兩臂 requirements.json 6 處皆 ls 檔案清單（非讀取）；localized r2 split('[')×9→2081990×40；generic r2 0/0。precheck json／manifest purpose／requirements note 三者與之一致；note 與 _mean_int_col docstring 逐條同口徑；sha bf467c7c…=實檔=manifest。
+- 驗證：precheck RC=0（重生 json、值不變）；pytest dab055+real_slice+checks 75 passed；repair --selftest 13/13；樹乾淨（HEAD 792795c2 未動）。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 模型呼叫、0 元、0 發射。下一步：vq-6rp（1753）／vq-5nz.55（dabstep-10）／vq-5nz.6（停滯 8 格）／dab_426 4 格皆候需求端點名（成本另報）、不自我點名。
