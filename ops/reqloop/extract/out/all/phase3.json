@@ -7,22 +7,17 @@
   "model": "gemma-4-12b-it-qat"
  },
  "cells": 9,
- "errors": 4,
- "stale_cells": [
-  "dab_039-pi-C",
-  "dab_055-pi-C",
-  "dab_426-pi-C",
-  "dab_427-pi-A"
- ],
- "fixed": 4,
- "unresolved": 1,
+ "errors": 0,
+ "stale_cells": [],
+ "fixed": 7,
+ "unresolved": 2,
  "rejected": 0,
  "right_to_wrong": 0,
  "held": 0,
  "cost": {
-  "repair_sessions": 8,
-  "model_calls": 210,
-  "tokens": 11012667
+  "repair_sessions": 15,
+  "model_calls": 275,
+  "tokens": 15087278
  },
  "cost_note": "repair_sessions＝修復 session 數；model_calls＝API 請求數（raw usage）；任一缺值⇒UNKNOWN（不填 0）",
  "comparison_baseline": "手寫需求（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep，不宣稱較好",
@@ -30,16 +25,70 @@
   {
    "cell": "dab_039-pi-C",
    "role": "bad",
-   "status": "ERROR",
-   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
-   "stale_verdict": "unresolved"
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "max_rounds",
+   "final_status": {
+    "R1": "UNKNOWN",
+    "R2": "UNKNOWN",
+    "R3": "PASS",
+    "R4": "UNKNOWN"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "ops/reqloop/extract/out/phase3_batch1_20261107/repair/dab_039-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 29,
+    "tokens": 2505080,
+    "wall_ms_total": 434664
+   },
+   "req_effective_sha256": "b1cc38850956a20985bb7d3dcfd7682335ca87e68ad3ef85a50f2da5f3b36329"
   },
   {
    "cell": "dab_055-pi-C",
    "role": "bad",
-   "status": "ERROR",
-   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
-   "stale_verdict": "unresolved"
+   "before": false,
+   "after": {
+    "pass": false,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "unresolved",
+   "stopped": "stalled",
+   "final_status": {
+    "R1": "FAIL",
+    "R2": "FAIL",
+    "R3": "FAIL",
+    "R4": "FAIL",
+    "R5": "FAIL"
+   },
+   "regressed": [
+    "R3",
+    "R4"
+   ],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "ops/reqloop/extract/out/phase3_batch1_20261107/repair/dab_055-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 14,
+    "tokens": 668553,
+    "wall_ms_total": 118317
+   },
+   "req_effective_sha256": "dc06f20ed9fabd9dd2e55993424a0e3c020e19b2f4a8465c467990d6c9340d7f"
   },
   {
    "cell": "dab_378-pi-C",
@@ -82,16 +131,70 @@
   {
    "cell": "dab_426-pi-C",
    "role": "bad",
-   "status": "ERROR",
-   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
-   "stale_verdict": "fixed"
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "stalled",
+   "final_status": {
+    "R1": "FAIL",
+    "R2": "PASS"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_426-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 12,
+    "tokens": 468665,
+    "wall_ms_total": 80548
+   },
+   "req_effective_sha256": "deb667be3a834e97388ccbb34cb65e2c2fbf46a9a384c687e3f9806edfc5d362",
+   "supersedes": {
+    "verdict": "fixed",
+    "req_effective_sha256": null
+   }
   },
   {
    "cell": "dab_427-pi-A",
    "role": "bad",
-   "status": "ERROR",
-   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
-   "stale_verdict": "fixed"
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "gap_closed",
+   "final_status": {
+    "1": "PASS",
+    "2": "PASS"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_427-pi-A/round_1",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 1,
+    "model_calls": 10,
+    "tokens": 432313,
+    "wall_ms_total": 52194
+   },
+   "req_effective_sha256": "fcb5b9fa6706e70d9b8eb7d697c5cb555e1d1534266ca6aaa6e95d3548ccdebd",
+   "supersedes": {
+    "verdict": "fixed",
+    "req_effective_sha256": null
+   }
   },
   {
    "cell": "dab_507-pi-A",

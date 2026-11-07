@@ -1,10 +1,10 @@
 {
  "schema": "vacant.reqloop.authoritative/1",
- "task": "/home/user1/dev/ops/phase3_r1192/tasks/dab_427-pi-A",
+ "task": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/tasks/dab_427-pi-A",
  "files": {
   "contract.md": "12203b2b65c9e9ac197f69abe6b187727732e64c020407d312f399f2a1061fb4",
   "request.md": "e4ec2828a34b8e9f4bf1172525c7b162244bdb66f08725340780e6c413f1f0eb",
-  "requirements.json": "b4d1c8f464fcc51c4e421330abab2abe68c9b481f2ef8dc54bbb1d1a47ee7e36",
+  "requirements.json": "354c968edeed5be379104d97d43f6bd581d6c9a00160fb75b8aa13ee28fb7f0a",
   "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
  }
 }

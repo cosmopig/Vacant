@@ -120,20 +120,25 @@
    "stopped": "stalled",
    "final_status": {
     "R1": "FAIL",
-    "R2": "UNKNOWN"
+    "R2": "PASS"
    },
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_426-pi-C/round_2",
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_426-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 16,
-    "tokens": 398231,
-    "wall_ms_total": 61605
+    "model_calls": 12,
+    "tokens": 468665,
+    "wall_ms_total": 80548
+   },
+   "req_effective_sha256": "deb667be3a834e97388ccbb34cb65e2c2fbf46a9a384c687e3f9806edfc5d362",
+   "supersedes": {
+    "verdict": "fixed",
+    "req_effective_sha256": null
    }
   },
   {
@@ -146,23 +151,28 @@
     "rc": 0
    },
    "verdict": "fixed",
-   "stopped": "max_rounds",
+   "stopped": "gap_closed",
    "final_status": {
-    "1": "UNKNOWN",
+    "1": "PASS",
     "2": "PASS"
    },
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_427-pi-A/round_2",
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_427-pi-A/round_1",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
-    "repair_sessions": 2,
-    "model_calls": 15,
-    "tokens": 361588,
-    "wall_ms_total": 54086
+    "repair_sessions": 1,
+    "model_calls": 10,
+    "tokens": 432313,
+    "wall_ms_total": 52194
+   },
+   "req_effective_sha256": "fcb5b9fa6706e70d9b8eb7d697c5cb555e1d1534266ca6aaa6e95d3548ccdebd",
+   "supersedes": {
+    "verdict": "fixed",
+    "req_effective_sha256": null
    }
   },
   {

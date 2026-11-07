@@ -15,7 +15,7 @@
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
       "id": "2",
