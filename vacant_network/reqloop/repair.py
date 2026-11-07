@@ -1906,12 +1906,18 @@ def repair_slice(
     # 併入 satisfied_*（_exit_code 20 把關）；good 草稿（無初始缺口）維持
     # satisfied_* == () 規範（argon 20261106_1121：全 PASS 重存不得被保留檢查誤拒）。
     before_st = {c.claim_id: c.status for c in before}
+    # argon 20261107_0035 回歸（897c5552）：只收 `verifier == "kv_recomputed"` 的鍵值條目——
+    # 結構格式條目（如 req_answer_kv）不是 @key[value] 鍵，不得被誤判進 kv_mutated；去重。
     kv_satisfied: dict[str, list[str]] = {}
     for it in req_set.items:
+        if it.verifier != "kv_recomputed" or before_st.get(it.id) != "PASS":
+            continue
         p = it.params if isinstance(it.params, dict) else {}
         k = p.get("key")
-        if isinstance(k, str) and k.strip() and before_st.get(it.id) == "PASS":
-            kv_satisfied.setdefault(str(it.deliverable), []).append(k.strip())
+        if isinstance(k, str) and k.strip():
+            lst = kv_satisfied.setdefault(str(it.deliverable), [])
+            if k.strip() not in lst:
+                lst.append(k.strip())
     kv_enforced = bool(req_fail) and bool(kv_satisfied)
     rounds: list[RepairRound] = []
     stalled = 0
