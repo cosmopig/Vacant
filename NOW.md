@@ -1,4 +1,9 @@
-# 現在（第 1182 輪，2026-11-07）
+# 現在（第 1183 輪，2026-11-07）
+
+## r1183：工單 P20261107_1024-1（extract 加固）收
+- group_aggregate 範例補 ratio(num/den)＋group_normalize；_param_problem 對 exclude op:ne
+  回 invalid_param:exclude_op_ne 轉 unverified；prompt 補單一 rowset_filter 條目規則；
+  驗收 2 passed、extract 48＋checks/run_eval 70 passed；commit 23f35083；工單 mv done/。
 
 ## 這一輪（vq-el4.3：run_eval.py 第一項——G1 擷取需求 vs 手寫需求）→ **門禁 PASS**
 - **結果**：抓錯 **手寫 39/39 vs 擷取 28/39（71.8%≥70%）**；冤枉 **手寫 0 vs 擷取 0**；
