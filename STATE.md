@@ -168,3 +168,10 @@
 - ③ run_eval.py --all 離線重跑＝PASS rc=0：G1 抓錯 39/39＋冤枉 0（41c/328550t）、REAL14 抓錯 9/9＋冤枉 1/5（74c/732826t）、PHASE3 fixed 7／unresolved 2（15s/275c/15087278t）；vibe_calls 130→130（0 新 API 呼叫）、out/ 無 git 變動——「G2.5 三門全 PASS」補上新鮮執行依據。
 - ④ extract.py／repair.py 在位驗證：quote_is_verbatim L132、SUPPORTED_VERIFIERS L46、_RECOMPUTE_TYPES L160-163（r1212 條目 L511-521 引用不準，正確 L160-163）、model_declared_unverified L755、tag_not_in_request 守衛在；repair.py 2795 行＝RLOOP_PLAN 凍結行數、末次改動 399f68b6（argon 已審已併）、worktree 乾淨——「repair.py 未動」現由證據背書。
 - 下一步：不變——下輪巡 1c5e818a／2c3fe6cc CI；等審查派工（G3 須派工才動）。
+- DECISION: r1218 修 auto/worker 紅燈（推翻 r1215「不動 worker」）｜執行器明言前4輪無進展、本輪須產出一條指令輸出變好；「CI 紅燈例外」條款授權；worker 已失活（無进程、19:49 後無改動、其 NOW 自述等待）；修法是還原凍結狀態（與 qwen27b/argon 樹＋pin 逐位元組一致），非重凍、零產品判斷；單 commit 可逆（reset --hard b7cb338d 即回）、未 push。
+## r1218（2026-11-07 22:50 UTC）：CI 紅燈例外——auto/worker 6 failed → 0 failed
+- ① 工單：vq-4xa（CI 紅燈例外，bd create→close）。vq-el4 全閉、open/doing 空、/srv/vlab/queue 空、審查4指示 r1216 已達標→本輪唯一可做的例外工作＝worker 紅燈。
+- ② 根因核實（非 r1215 猜測，逐檔證據）：①smoke_e014/dabstep-10-pi-C/draft/answer.txt 被 WIP（c2042ade、bbd54fff）污染「30」→多行對話塊 c834c2ee，pin 624b60c5 破＋測試 int() 必炸（qwen27b/argon 樹皆為「30」）；②real_slice_dab055/manifest.json 被提交成斷裂絕對 symlink（目標 smoke_e013/dab_055-pi-C/manifest.json 不存在）＋tracked 殘骸 manifest.json~auto_argon／dab_055-pi-C~HEAD＋空 manifest/ 目錄（13:08 合併衝突解決產物）。
+- ③ 修復＝還原凍結狀態：answer.txt 還 624b60c5；manifest.json 還真實檔 3234d206（與 qwen27b 樹同 hash）；刪 2 殘骸＋空目錄。commit auto/worker **aca58a95**、worktree 乾淨、0 產品邏輯改動、0 模型呼叫、未 push。
+- ④ 驗證（worker 樹、~/dev/Vacant/.venv）：3 個原紅燈檔 **57 passed**（原 6 failed）；`pytest -k 'reqloop or beads'` → **354 passed, 1 skipped, 0 failed**（7.6s）。未驗證：aca58a95 的 vacant-ci 燈（待 pickup）；ops/audits 下 3 個絕對 symlink（本機可解析、未破測試、未動）。
+- 下一步：下輪巡 auto/worker aca58a95 CI 應轉綠（三分支全綠）；等審查派工（G3 須派工，不自發射大成本）。
