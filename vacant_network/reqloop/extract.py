@@ -506,102 +506,15 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
     return None
 
 
-def _convert_smc_keywords_to_numbers(
-    keywords: list[Any], sib_aggs: list[dict[str, Any]]
-) -> list[dict[str, Any]] | None:
-    """將非銷售任務被誤選為 summary_metrics_consistency 的 metric_keywords 對應至同資料檔 group_aggregate 的聚合定義。"""
-    if not keywords or not sib_aggs:
-        return None
-    agg_by_name = {
-        str(a.get("name", "")).strip(): a
-        for a in sib_aggs
-        if isinstance(a, dict) and _non_empty_str(a.get("name"))
-    }
-    mapped: list[dict[str, Any]] = []
-    for kw_raw in keywords:
-        if not _non_empty_str(kw_raw):
-            return None
-        kw = str(kw_raw).strip()
-        matched: dict[str, Any] | None = None
-        if any(tok in kw for tok in ("率", "比例", "百分", "rate", "pct")):
-            for a in sib_aggs:
-                if not isinstance(a, dict):
-                    continue
-                if a.get("type") == "ratio":
-                    num_agg = agg_by_name.get(str(a.get("num", "")).strip())
-                    if num_agg and num_agg.get("type") == "count_if" and _non_empty_str(num_agg.get("expr")):
-                        matched = {
-                            "type": "pct_if",
-                            "expr": str(num_agg["expr"]).strip(),
-                            "label": kw,
-                            "round": 2,
-                        }
-                        break
-                elif a.get("type") == "count_if" and _non_empty_str(a.get("expr")):
-                    matched = {
-                        "type": "pct_if",
-                        "expr": str(a["expr"]).strip(),
-                        "label": kw,
-                        "round": 2,
-                    }
-                    break
-        elif any(tok in kw for tok in ("平均", "均", "mean", "avg")):
-            for a in sib_aggs:
-                if isinstance(a, dict) and a.get("type") in ("mean", "mean_skip_empty"):
-                    entry: dict[str, Any] = {
-                        "type": "mean",
-                        "label": kw,
-                        "round": int(a.get("round", 2)),
-                    }
-                    if _non_empty_str(a.get("col")):
-                        entry["col"] = str(a["col"]).strip()
-                    if _non_empty_str(a.get("expr")):
-                        entry["expr"] = str(a["expr"]).strip()
-                    matched = entry
-                    break
-        elif any(tok in kw for tok in ("最長", "最大", "最高", "max", "worst")):
-            for a in sib_aggs:
-                if isinstance(a, dict) and a.get("type") == "max":
-                    entry = {"type": "max", "label": kw}
-                    if _non_empty_str(a.get("col")):
-                        entry["col"] = str(a["col"]).strip()
-                    if _non_empty_str(a.get("expr")):
-                        entry["expr"] = str(a["expr"]).strip()
-                    matched = entry
-                    break
-        elif any(tok in kw for tok in ("最短", "最小", "最低", "min")):
-            for a in sib_aggs:
-                if isinstance(a, dict) and a.get("type") == "min":
-                    entry = {"type": "min", "label": kw}
-                    if _non_empty_str(a.get("col")):
-                        entry["col"] = str(a["col"]).strip()
-                    if _non_empty_str(a.get("expr")):
-                        entry["expr"] = str(a["expr"]).strip()
-                    matched = entry
-                    break
-        elif any(tok in kw for tok in ("總數", "人數", "筆數", "張數", "count")):
-            for a in sib_aggs:
-                if isinstance(a, dict) and a.get("type") == "count":
-                    matched = {"type": "count", "label": kw}
-                    break
-        elif any(tok in kw for tok in ("總額", "合計", "sum")):
-            for a in sib_aggs:
-                if isinstance(a, dict) and a.get("type") == "sum":
-                    entry = {"type": "sum", "label": kw}
-                    if _non_empty_str(a.get("col")):
-                        entry["col"] = str(a["col"]).strip()
-                    if _non_empty_str(a.get("expr")):
-                        entry["expr"] = str(a["expr"]).strip()
-                    matched = entry
-                    break
-        if matched is None:
-            return None
-        mapped.append(matched)
-    return mapped
-
-
 def _normalize_raw_items(raw_items: list[Any], user_text: str) -> list[Any]:
-    """在不改動語義的前提下正規化模型常見同義別名與跨條目共用過濾管線。"""
+    """只做不改語義的純語法正規化（路徑前綴、型別別名、round(expr, n) 拆解、巢狀欄位攤平）。
+
+    argon 20261107_1242：不得替模型補條件。舊版第二趟會從兄弟條目複製
+    exclude/dedup_by/include/compute/flatten、對 orders.csv 硬塞 CANCELLED/order_id/
+    net_sales 公式、把非 orders.csv 的 summary_metrics_consistency 改成 summary_numbers
+    並自訂 round——這些不在模型輸出也不在該條 quote 內，等於把手寫需求藏進擷取器，
+    已移除（模型漏寫的條件照原樣檢查；檢查不了的由 _param_problem 標 unverified）。
+    """
     cloned = [copy.deepcopy(it) if isinstance(it, dict) else it for it in raw_items]
 
     # 第一趟：單條目路徑、別名、round(expr, n) 拆解與 input_json 巢狀欄位 flatten
@@ -719,78 +632,10 @@ def _normalize_raw_items(raw_items: list[Any], user_text: str) -> list[Any]:
                 }
                 for dc in dotted:
                     if dc not in existing:
-                        flat.append({"path": dc, "as": dc, "impute": 0})
+                        # 只做路徑攤平；缺值怎麼補（impute）是需求語義，由模型依原文寫，程式不代決定
+                        flat.append({"path": dc, "as": dc})
                         existing.add(dc)
                 params["flatten"] = flat
-
-    # 第二趟：跨條目轉化非 orders.csv 的 summary_metrics_consistency 並補齊 summary_numbers 漏寫的資料管線
-    for raw in cloned:
-        if not isinstance(raw, dict):
-            continue
-        verifier = str(raw.get("verifier") or "").strip()
-        params = raw.get("params")
-        if not isinstance(params, dict):
-            continue
-        src = str(params.get("input_csv") or params.get("input_json") or "").strip()
-
-        if verifier == "summary_metrics_consistency" and src:
-            csv_name = pathlib.Path(src).name.lower()
-            kws = params.get("metric_keywords")
-            if csv_name != "orders.csv" and isinstance(kws, list):
-                for sib in cloned:
-                    if (
-                        isinstance(sib, dict)
-                        and str(sib.get("verifier") or "").strip() == "group_aggregate"
-                        and isinstance(sib.get("params"), dict)
-                    ):
-                        sib_p = sib["params"]
-                        sib_src = str(sib_p.get("input_csv") or sib_p.get("input_json") or "").strip()
-                        if sib_src == src and isinstance(sib_p.get("aggregates"), list):
-                            mapped = _convert_smc_keywords_to_numbers(kws, sib_p["aggregates"])
-                            if mapped:
-                                raw["verifier"] = "summary_numbers"
-                                verifier = "summary_numbers"
-                                params.pop("metric_keywords", None)
-                                params["numbers"] = mapped
-                                break
-
-        if verifier == "summary_numbers" and src:
-            for sib in cloned:
-                if not isinstance(sib, dict) or sib is raw:
-                    continue
-                sib_v = str(sib.get("verifier") or "").strip()
-                sib_p = sib.get("params")
-                if not isinstance(sib_p, dict):
-                    continue
-                sib_src = str(sib_p.get("input_csv") or sib_p.get("input_json") or "").strip()
-                if sib_src != src:
-                    continue
-                if sib_v in ("group_aggregate", "rowset_filter"):
-                    for pipe_k in ("exclude", "dedup_by", "include", "compute", "flatten"):
-                        if pipe_k not in params and pipe_k in sib_p:
-                            params[pipe_k] = copy.deepcopy(sib_p[pipe_k])
-                elif sib_v in ("monthly_sales_metrics", "monthly_top_products") and pathlib.Path(src).name.lower() == "orders.csv":
-                    if "exclude" not in params and "CANCELLED" in user_text:
-                        params["exclude"] = [{"col": "status", "op": "eq", "value": "CANCELLED"}]
-                    if "dedup_by" not in params and "order_id" in user_text:
-                        params["dedup_by"] = "order_id"
-            if pathlib.Path(src).name.lower() == "orders.csv" and isinstance(params.get("numbers"), list):
-                needs_net_sales = any(
-                    isinstance(n, dict) and str(n.get("col", "")).strip() == "net_sales"
-                    for n in params["numbers"]
-                )
-                if needs_net_sales:
-                    comp_list = params.get("compute")
-                    if not isinstance(comp_list, list):
-                        comp_list = []
-                    if not any(
-                        isinstance(c, dict) and str(c.get("name", "")).strip() == "net_sales"
-                        for c in comp_list
-                    ):
-                        comp_list.append(
-                            {"name": "net_sales", "expr": "qty * unit_price - discount"}
-                        )
-                        params["compute"] = comp_list
 
     return cloned
 

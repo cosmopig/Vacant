@@ -992,28 +992,28 @@ def test_normalize_raw_items_fixes_g1_r1184_shapes():
         },
     ]
     req, report = build_requirement_set("t_norm", raw_items, user_text)
-    assert all(not i.unverified for i in req.items), report.unverified
     by_id = {i.id: i for i in req.items}
+    # argon 20261107_1242：只有純語法正規化（1、2）保留；3、4 原本由程式代模型補條件，
+    # 已移除——見 test_normalize_never_invents_conditions_the_model_did_not_write。
+    assert not by_id["r_json"].unverified and not by_id["r_inv"].unverified
 
-    # 1. distinct 與 flatten
+    # 1. distinct 與 flatten（flatten 只做路徑攤平，缺值補法不由程式決定：不帶 impute）
     assert by_id["r_json"].params["aggregates"][0]["type"] == "distinct"
     assert by_id["r_json"].params["flatten"] == [
-        {"path": "payload.duration_ms", "as": "payload.duration_ms", "impute": 0}
+        {"path": "payload.duration_ms", "as": "payload.duration_ms"}
     ]
     # 2. round 拆解與 values 算式轉物件
     assert by_id["r_inv"].params["compute"][1]["expr"] == "(safety_stock - current_stock) * unit_cost"
     assert by_id["r_inv"].params["values"]["restock_needed"] == {"expr": "safety_stock - current_stock"}
     assert by_id["r_inv"].params["values"]["estimated_cost"] == {"expr": "estimated_cost", "round": 2}
-    # 3. orders.csv summary_numbers 補齊 exclude/dedup_by 與 net_sales compute
-    assert by_id["r_ord_sum"].params["exclude"] == [{"col": "status", "op": "eq", "value": "CANCELLED"}]
-    assert by_id["r_ord_sum"].params["dedup_by"] == "order_id"
-    assert any(c.get("name") == "net_sales" for c in by_id["r_ord_sum"].params.get("compute", []))
-    # 4. grades.csv 的 summary_metrics_consistency 轉為 summary_numbers 並繼承 exclude/dedup_by/compute
-    assert by_id["r_smc_grades"].verifier == "summary_numbers"
-    assert by_id["r_smc_grades"].params["exclude"] == [{"col": "status", "op": "eq", "value": "WITHDRAWN"}]
-    assert by_id["r_smc_grades"].params["dedup_by"] == "student_id"
-    nums = by_id["r_smc_grades"].params["numbers"]
-    assert [n["type"] for n in nums] == ["pct_if", "mean"]
+    # 3. 模型漏寫的 exclude/dedup_by/compute 不再由程式補上（照模型原樣檢查）
+    assert "exclude" not in by_id["r_ord_sum"].params
+    assert "dedup_by" not in by_id["r_ord_sum"].params
+    assert "compute" not in by_id["r_ord_sum"].params
+    # 4. 非 orders.csv 的 summary_metrics_consistency 不轉型，標 unverified（UNKNOWN，不當通過也不冤枉）
+    assert by_id["r_smc_grades"].verifier == "summary_metrics_consistency"
+    assert by_id["r_smc_grades"].unverified
+    assert "numbers" not in by_id["r_smc_grades"].params
 
     # 未能拆解的非法函式呼叫 foo(x) 必須被 _param_problem 攔截為 invalid_param:expr
     bad_expr_params = {
@@ -1022,6 +1022,53 @@ def test_normalize_raw_items_fixes_g1_r1184_shapes():
         "values": {"x": {"expr": "foo(bar)"}},
     }
     assert _param_problem("rowset_filter", bad_expr_params) == "invalid_param:expr"
+
+
+def test_normalize_never_invents_conditions_the_model_did_not_write():
+    """argon 20261107_1242：G2.5 規則「防止模型（或程式）自己發明條件」。
+
+    9b91a0f5 的 _normalize_raw_items 會：(a) 從同資料檔兄弟條目複製 exclude/dedup_by/
+    include/compute/flatten 到 summary_numbers；(b) orders.csv＋原文含 CANCELLED/order_id
+    就硬塞 exclude/dedup_by 與 net_sales = qty * unit_price - discount；(c) 把非 orders.csv
+    的 summary_metrics_consistency 改成 summary_numbers 並自訂 round: 2；(d) flatten 一律
+    impute 0。這些條件不是模型寫的、也不在該條 quote 內，是看過 G1 的錯才寫進程式的。
+    擷取結果必須只反映模型輸出（純語法別名可以），否則 G1 數字量到的是手寫規則。
+    """
+    from vacant_network.reqloop.extract import build_requirement_set
+
+    user_text = (
+        "排除狀態為 CANCELLED 的訂單後輸出 clean.csv。summary.md 列出全部訂單（含取消）的總筆數。"
+        "重複的 order_id 只保留第一筆。"
+    )
+    raw_items = [
+        {"id": "f", "quote": "排除狀態為 CANCELLED 的訂單後輸出 clean.csv。", "deliverable": "clean.csv",
+         "verifier": "rowset_filter",
+         "params": {"input_csv": "orders.csv", "identity": ["order_id"],
+                    "exclude": [{"col": "status", "op": "eq", "value": "CANCELLED"}],
+                    "dedup_by": "order_id",
+                    "compute": [{"name": "x", "expr": "qty * 2"}]}},
+        {"id": "s", "quote": "summary.md 列出全部訂單（含取消）的總筆數。", "deliverable": "summary.md",
+         "verifier": "summary_numbers",
+         "params": {"input_csv": "orders.csv",
+                    "numbers": [{"type": "count", "label": "總筆數"},
+                                {"type": "sum", "col": "net_sales", "label": "淨額"}]}},
+        {"id": "m", "quote": "summary.md 列出全部訂單（含取消）的總筆數。", "deliverable": "summary.md",
+         "verifier": "summary_metrics_consistency",
+         "params": {"input_csv": "grades.csv", "metric_keywords": ["平均"]}},
+        {"id": "g", "quote": "summary.md 列出全部訂單（含取消）的總筆數。", "deliverable": "summary.md",
+         "verifier": "group_aggregate",
+         "params": {"input_csv": "grades.csv", "group_by": ["c"],
+                    "aggregates": [{"name": "avg", "type": "mean", "col": "score"}]}},
+    ]
+    req, _ = build_requirement_set("t_inv", raw_items, user_text)
+    by_id = {i.id: i for i in req.items}
+    s = by_id["s"].params
+    for k in ("exclude", "dedup_by", "include", "compute", "flatten"):
+        assert k not in s, f"程式替模型補了 {k}：{s.get(k)!r}"
+    assert by_id["m"].verifier == "summary_metrics_consistency"
+    assert by_id["m"].unverified
+    # 原始輸入不被就地改寫
+    assert "exclude" not in raw_items[1]["params"]
 
 
 def test_run_task_and_main_support_real_g2_subdir_data_and_contract_md(tmp_path):
@@ -1087,3 +1134,30 @@ def test_run_task_and_main_support_real_g2_subdir_data_and_contract_md(tmp_path)
     assert doc["items"][0]["deliverable"] == "answer.txt"
     assert doc["items"][0]["params"]["data_file"] == "data/payments.csv"
 
+
+
+def test_deliverable_not_named_in_request_is_unverified_not_fail(tmp_path):
+    """argon 20261107_1242：deliverable 是模型猜的（原文沒出現該檔名，如 "answer"、
+    "@total_hotels[count]"）時，檢查只會因「檔案不存在」判 FAIL——對錯草稿算假抓錯、
+    對對草稿算冤枉。這是擷取錯，不是交付錯：標 unverified（UNKNOWN）。
+    /app/ 前綴屬工作區根目錄寫法，剝除後比對。"""
+    from vacant_network.reqloop.extract import build_requirement_set
+    from vacant_network.reqloop.checks import run_requirement_checks
+
+    user_text = ("What is the mean? Write ONLY the final answer to `/app/answer.txt`.\n"
+                 "@mean_cases[mean_value] rounded.")
+    mk = lambda i, d: {"id": i, "quote": "What is the mean?", "deliverable": d,
+                       "verifier": "tag_format",
+                       "params": {"tag": "mean_cases", "value_type": "float"}}
+    req, rep = build_requirement_set(
+        "t", [mk("guess1", "answer"), mk("guess2", "@mean_cases[mean_value]"),
+              mk("ok_app", "/app/answer.txt"), mk("ok", "answer.txt")], user_text)
+    by_id = {i.id: i for i in req.items}
+    assert by_id["guess1"].unverified and by_id["guess2"].unverified
+    reasons = {u.id: u.reason for u in rep.unverified}
+    assert reasons["guess1"].startswith("deliverable_not_in_request")
+    assert not by_id["ok"].unverified
+    assert by_id["ok_app"].deliverable == "answer.txt" and not by_id["ok_app"].unverified
+    (tmp_path / "answer.txt").write_text("@mean_cases[1.5]\n")
+    res = {r.claim_id: r.status for r in run_requirement_checks(tmp_path, req, tmp_path)}
+    assert res["guess1"] == "UNKNOWN" and res["guess2"] == "UNKNOWN"

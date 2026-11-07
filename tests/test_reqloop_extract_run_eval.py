@@ -196,3 +196,25 @@ def test_phase2_extract_cell_reuses_existing_out(tmp_path):
     got = phase2_extract_cell(c, "user text", [], {}, "glm53",
                               _ExplodingClient(), out_path)
     assert got.items[0].id == "R1"
+
+
+def test_load_cell_request_text_appends_public_contract_md(tmp_path):
+    """argon 20261107_1242：real14 首跑 prompt 漏了 contract.md（公開交付規格：寫到
+    answer.txt、@name[value] 格式），擷取模型只好猜交付檔名（answer、@x[y]、
+    /app/answer.txt），草稿明明有 answer.txt 卻每條都判「答案檔不存在」FAIL——
+    9/9 抓錯與 4/5 冤枉都是這個假象。contract.md 是 agent 拿到的公開任務文字，必須進原文。"""
+    task = tmp_path / "task"; task.mkdir()
+    (task / "request.md").write_text("original request", encoding="utf-8")
+    (task / "contract.md").write_text("Write your final answer to `answer.txt`.", encoding="utf-8")
+    got = load_cell_request_text(task, "dab_001", tmp_path / "real14")
+    assert got.startswith("original request")
+    assert "Write your final answer to `answer.txt`." in got
+
+
+def test_load_cell_request_text_real14_fallback_also_gets_contract(tmp_path):
+    task = tmp_path / "task"; task.mkdir()
+    (task / "contract.md").write_text("Write ONLY the final answer to answer.txt", encoding="utf-8")
+    real14 = tmp_path / "real14"; real14.mkdir()
+    (real14 / "dabstep-10.request.md").write_text("reconstructed question", encoding="utf-8")
+    got = load_cell_request_text(task, "dabstep-10", real14)
+    assert got.startswith("reconstructed question") and "answer.txt" in got
