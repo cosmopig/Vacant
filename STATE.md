@@ -49,3 +49,8 @@
 - vq-el4.6 已 in_progress（bd note 記下一步）；repair.py 未動。
 - 沒驗證：其他模型（gemma/glm53flash/deepseek41）G1 擷取與實際對照（vq-el4.6 本體）；7de75257 CI 綠燈（auto/qwen27b 本輪仍在跑）。
 - 下一步：vq-el4.6——glm53flash/deepseek41 跑 G1 7 題擷取（走 glm 指令、日 ≤2M token、先查 ledger 預算）→ --models glm53,glm53flash,deepseek41 同表對照；gemma 端點走 1004 provider（非 vibe 別名）另議；復核 CI。
+- 2026-11-07 r1197: vq-el4.6 本體——glm53flash/deepseek41 發射 G1 7 題擷取（ledger 先查：1.04M/2M 內）。glm53flash 3/7 成功（deadline×3、token_limit×1）、deepseek41 5/7（turn_limit×2）；依 glm 規則「撞額度就停，不要重試」不重試，失敗入盤為 fail-closed 0 條目（report.extract_error 有據）。
+- 產品修（TDD、1 行為差異）：run_eval 對照表點名擷取失敗題——Extract OK 欄＋extract_failed 原因＋擷取不完整→FAIL（不得 PASS）；單模型路徑同標 ⚠️。tests/test_reqloop_extract*.py 83 passed（新 test_run_eval_multi_model_extraction_failure_labeled 先紅後綠）。
+- 驗收：--models glm53,glm53flash,deepseek41 → RC=20（非全過，預期）；glm53 39/39(100%) 7/7 FP0 41calls/328550tok PASS；glm53flash 16/39(41%) 3/7 FAIL；deepseek41 23/39(59%) 5/7 FP1 FAIL；只可讀作固定 harness 下 G1 開發樣本、單 rep、非未見效力；證據 out/eval_g1_compare_3m.json；commit 93b8d6d1。
+- 沒驗證：gemma 入同表（1004 provider 對接口待規劃者定）；dd4566e2 CI 綠燈（排隊中，LATEST 綠＝87ca83d3 5014 passed）；r1195 兩跑差異裁決（待規劃者）。
+- 下一步：報規劃者（1）gemma 入表對接口、（2）兩跑裁決；複核 dd4566e2 CI；規劃者定口徑後結 vq-el4.6。
