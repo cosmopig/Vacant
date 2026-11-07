@@ -1,0 +1,105 @@
+{
+  "schema": "vacant.reqloop.g2.manifest/1",
+  "frozen_at": "2026-11-07T07:01:00+0800",
+  "ticket": "P20261107_0644-2（dab_426 行條件篩選類 max_row_first 最小對照切片規格；11-06 指示 4「先證明可修回一種內容錯誤才擴量」＋指示 5 六要素；準備即止）",
+  "status": "FROZEN_PENDING_NAMING",
+  "purpose": "CSV/JSON 真實任務最小對照規格（11-06 指示 4）：dab_426（e008/e013 真實 CSV 任務，行條件篩選類 max_row_first——與 dab_378 峰度統計類、dab_055 整數文字解析類不同形狀）1 失敗＋1 正確真草稿 × 2 臂＝4 格。bad 草稿 dab_426-pi-C 輸出 @max_wind_speed[165.11]（取到全組最大風速而非「最高 category 的那一列 storm」的風速——獨立 scorer fail 0/1、e013 已記錄），可見反例＝req_max_wind_recomputed: FAIL (mismatch_with_recomputation)；good 草稿 dab_426-pi-A 輸出 @max_wind_speed[156.42]（e008 已記錄 pass=true）。此前 dab_426-pi-C 散落在 smoke_e013 大目錄、無獨立 4 格規格（缺正確草稿基線，無法度量 right_to_wrong）。本檔只凍結離線規格（verify_frozen／dry-run／baseline 三門＋針 156.42 單一事實來源守衛）；發射是另一步授權（點名＋成本另報，11-06 #7），本批零模型呼叫、零元。",
+  "six_elements": {
+    "original_user_requirement": {
+      "source": "ASSIGNMENT「2026-11-06 使用者質疑一週效果」指示 4＋5",
+      "quote": "下一設計須回到需求驅動內容閉環：在 CSV/JSON 真實任務的一個小切片，執行產生結構化計算結果；獨立可見檢查給出可重現的內容反例；修復只改未滿足產物並保留其餘成果。不要再只根據工具錯誤訊息發一般處方。與 generic 同草稿同預算做最小對照，先證明可修回一種內容錯誤才擴量。不得讀 hidden/scorer 或按隱藏分數反推規則。（指示 5：每個新產品工單須寫原始使用者要求、現有真實失敗產物、目前行為、預期可展示改善、成本上限、獨立驗收方法。）"
+    },
+    "existing_real_failed_artifact": {
+      "draft": "dab_426-pi-C/draft/answer.txt（sha256=594f973d96aa72ea9fc6a210b9d433c42fee6e5e9855edbb9855dc30f2f1ad2b；內容 @max_wind_speed[165.11]，與 /srv/vlab/runs/e013_dabench_pi_AC_full/dabench-dab_426-pi-C-r1/app_final.tgz 內 answer.txt 逐位元組同）",
+      "recorded_score": {"run": "e013_dabench_pi_AC_full", "pass": false, "n_correct": "0/1", "status": "ok"},
+      "before_visible": "1 PASS / 1 FAIL（req_answer_kv PASS 格式合法；req_max_wind_recomputed FAIL (mismatch_with_recomputation)——165.11 是全組最大風速，不是「最高 max_storm_cat 那一列」的 max_sust_wind；針 156.42 永不進證據）；此前散落在 smoke_e013 大目錄、無獨立 4 格最小對照規格（缺正確草稿基線，無法度量 right_to_wrong）"
+    },
+    "current_behavior": "real_slice 僅有 dab_378（峰度統計類 col_stats）、real_slice_dab055 僅有 dab_055（整數文字解析類 mean_int_col）；缺少「行條件篩選類（max_row_first）」的獨立切片規格。e013 的 dab_426-pi-C 已記錄 fail 0/1（165.11 形狀），但沒有獨立 4 格最小對照＋正確草稿基線，無法在發射後度量「正確成果是否退步」。",
+    "expected_demonstrable_improvement": "本切片只凍規格＋常設守衛（0 模型呼叫）：(1) verify_frozen 通過、2 drafts · 4 cells、role={bad,good}；(2) baseline（產品離線命令 g2 --baseline）顯示 bad 草稿 1 PASS / 1 FAIL（req_answer_kv PASS、req_max_wind_recomputed FAIL）、good 草稿 2/2 PASS——「right_to_wrong 度量」的真實基線；(3) 針 156.42＝checks._max_row_first 對凍結 CSV 實算 round 2（單一事實來源、防手寫數字漂移）且永不進證據或 localized 提示。發射後（另一步授權）：localized 應把 165.11 修回 156.42（只改未滿足產物、保留 req_answer_kv 格式）且 good 草稿 0 退步；generic＝同草稿同預算對照。本批不宣稱任何優劣。",
+    "cost_cap": {"max_rounds_per_cell": 2, "timeout_s_per_round": 300, "max_tool_calls": 60, "max_tokens": 4000000, "hard_token_cap": false, "note": "離線規格與單測：0 模型呼叫、0 元。發射（另一步授權）時成本上限同 budget 欄位；無硬 token 上限能力，成本從 raw usage 讀、缺值=UNKNOWN(None) 絕不填 0"},
+    "independent_acceptance": "pytest tests/test_reqloop_real_slice.py -k \"dab426\" -v（3 passed：凍結 4 格＋baseline/漏洩守衛＋單一事實來源針）；另 PYTHONPATH=. python -m vacant_network.reqloop.g2 --manifest ops/reqloop/g2/real_slice_dab426/manifest.json --dry-run 輸出含 2 drafts · 4 cells。零模型呼叫。"
+  },
+  "arms": ["generic", "localized"],
+  "model": {
+    "model": "gemma-4-12b-it-qat",
+    "provider": "lms1004nothink",
+    "note": "同 effects2_20261106 / real_slice_dab055 口徑（1004 nothink）；發射前已釘在 manifest、不事後暗換；本批（規格＋守衛）不呼叫模型"
+  },
+  "budget": {
+    "max_rounds_per_cell": 2,
+    "timeout_s_per_round": 300,
+    "max_tool_calls": 60,
+    "max_tokens": 4000000,
+    "hard_token_cap": false,
+    "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0；max_tool_calls/max_tokens 為執行器硬上限（超過即殺、如實記錄）",
+    "min_rounds": {"generic": 1, "localized": 0},
+    "note": "同草稿同預算、2 輪×300s/輪（工單指定）；兩臂同模型、同上下文、同工具、同總預算（11-06 指示 2 公平比較口徑）"
+  },
+  "scoring": {
+    "hidden_before": "已有記錄分數（lab 既有、只引用不在本地重跑）：bad dab_426-pi-C e013 pass=false n_correct=0/1；good dab_426-pi-A e008 pass=true abq=1 psaq=1.0",
+    "hidden_after": "UNKNOWN（本地無權重跑 hidden scorer；如點名發射，以 lab 既有 scorer 離線、生成後才跑，同 effects2 口徑；缺值＝UNKNOWN 不填 0；tamper/UNKNOWN 不計成功）"
+  },
+  "leak_guard": "修復模型只看得到 request.md 原文、凍結 CSV（data/cost_data_with_errors.csv）、可見檢查反例形狀（mismatch_with_recomputation，無值）；重算針 156.42（checks._max_row_first 對凍結 CSV 實算 round 2）永不進證據（expected_in_evidence=false）也永不進 localized 提示；bad 草稿自己的 165.11 是合法內容、允許出現；不讀 /srv/eval/hidden/、不讀 scorer.py、不按隱藏分數反推規則（紅線）；發射後須重審軌跡內 hidden 文本（同 effects2/realab 口徑）",
+  "drafts": [
+    {
+      "name": "dab_426-pi-C",
+      "role": "bad",
+      "task_id": "dab_426",
+      "source": {
+        "run": "e013_dabench_pi_AC_full",
+        "cell": "dabench-dab_426-pi-C-r1",
+        "score": {"pass": false, "n_correct": "0/1", "status": "ok"},
+        "fetched_from": "lab 既有已記錄結果（/srv/vlab/runs/e013_dabench_pi_AC_full/dabench-dab_426-pi-C-r1/score.json：pass=false、abq=0、psaq=0.0、note=status=ok; n_correct=0/1；draft answer.txt sha 594f973d… 與本凍結副本逐位元組同；只引用，不在本地重跑 hidden scorer）"
+      },
+      "synthetic": false,
+      "draft": {
+        "dir": "dab_426-pi-C/draft",
+        "files": {"answer.txt": "594f973d96aa72ea9fc6a210b9d433c42fee6e5e9855edbb9855dc30f2f1ad2b"}
+      },
+      "task": {
+        "dir": "dab_426-pi-C/task",
+        "requirements": {"sha256": "fd8a392af0da93558501d45b1012bf11657d70060cb0c3b0eb585ff251303d34"},
+        "request": {"sha256": "11aac002949b7b2288fa826631124c2abd47757b7145bdc8541bb8122672b930"},
+        "data_files": {
+          "contract.md": "37cbf972efd27fe85ebd870eea6ce6f2a6cbb40dab3d9a35ad26bd97ee5f53b0",
+          "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+        }
+      },
+      "preservation": {
+        "satisfied_items": ["req_answer_kv"],
+        "unsatisfied_items": ["req_max_wind_recomputed"],
+        "note": "單行產物（answer.txt 1 行 @max_wind_speed[165.11]）：165.11＝全組 max_sust_wind 最大值（行條件篩選錯），不是最高 max_storm_cat 那一列的風速；baseline 1 PASS / 1 FAIL＝可重現內容反例；修復只改未滿足產物並保留 req_answer_kv 格式（11-06 指示 4）"
+      }
+    },
+    {
+      "name": "dab_426-pi-A",
+      "role": "good",
+      "task_id": "dab_426",
+      "source": {
+        "run": "e008_dabench_pi_AC",
+        "cell": "dabench-dab_426-pi-A-r1",
+        "score": {"pass": true, "abq": 1, "psaq": 1.0, "status": "ok", "n_items": 1},
+        "fetched_from": "lab 既有已記錄結果（/srv/vlab/runs/e008_dabench_pi_AC/dabench-dab_426-pi-A-r1/score.json：pass=true、abq=1、psaq=1.0；app_final.tgz 內 answer.txt sha 42849c99… 與本凍結副本逐位元組同；只引用，不在本地重跑 hidden scorer）"
+      },
+      "synthetic": false,
+      "draft": {
+        "dir": "dab_426-pi-A/draft",
+        "files": {"answer.txt": "42849c9912cfd59a0c69fbbc837a215e190ba5c597fc343edf8a87ac3c30fe38"}
+      },
+      "task": {
+        "dir": "dab_426-pi-C/task",
+        "requirements": {"sha256": "fd8a392af0da93558501d45b1012bf11657d70060cb0c3b0eb585ff251303d34"},
+        "request": {"sha256": "11aac002949b7b2288fa826631124c2abd47757b7145bdc8541bb8122672b930"},
+        "data_files": {
+          "contract.md": "37cbf972efd27fe85ebd870eea6ce6f2a6cbb40dab3d9a35ad26bd97ee5f53b0",
+          "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+        }
+      },
+      "preservation": {
+        "satisfied_items": ["req_answer_kv", "req_max_wind_recomputed"],
+        "unsatisfied_items": [],
+        "note": "正確草稿基線（11-06 指示 2「正確成果是否退步」客觀基準）：baseline 2/2 PASS；兩臂起始草稿 hash 由 manifest pin 保證一致（同一檔、兩臂同起點）；與 dab_426-pi-C 共用 task 目錄（同一 request/requirements/CSV）"
+      }
+    }
+  ]
+}

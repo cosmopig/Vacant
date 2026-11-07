@@ -32,6 +32,11 @@ DAB055_MANIFEST = (
     pathlib.Path(__file__).resolve().parent.parent
     / "ops" / "reqloop" / "g2" / "real_slice_dab055" / "manifest.json"
 )
+# r1172（P20261107_0644-2）：dab_426 行條件篩選類（max_row_first）4 格最小對照規格
+DAB426_MANIFEST = (
+    pathlib.Path(__file__).resolve().parent.parent
+    / "ops" / "reqloop" / "g2" / "real_slice_dab426" / "manifest.json"
+)
 SIX_ELEMENTS = (
     "original_user_requirement",
     "existing_real_failed_artifact",
@@ -448,3 +453,134 @@ def test_real_slice_dab055_smoke_pipeline_and_exit_codes(tmp_path):
     assert c_gen["unresolved"] == ["req_mean_cases_recomputed"]
     assert c_gen["after_readable_status"]["req_answer_kv"] == "PASS", \
         "2200 是合法整數格式：req_answer_kv 應 PASS（未滿足的是值、非格式）"
+
+
+# ── r1172（P20261107_0644-2）：dab_426 行條件篩選類（max_row_first）4 格最小對照 ──
+
+def test_real_slice_dab426_manifest_frozen_four_cells():
+    """P20261107_0644-2：dab_426 真實 CSV 任務 4 格最小對照＝1 失敗＋1 正確真草稿 × 2 臂。
+
+    dab_426 是行條件篩選類（max_row_first）——與 dab_378 峰度統計類、dab_055
+    整數文字解析類不同形狀（11-06 指示 4「先證明可修回一種內容錯誤才擴量」的
+    下一種內容錯誤形狀）。凍結副本存在、每條 pin 都驗（verify_frozen，r1011 口徑）；
+    兩草稿共用同一 task 目錄（同起點、公平比較客觀基線）；狀態 FROZEN_PENDING_NAMING
+    （發射是另一步授權，11-06 #7）。零模型呼叫。"""
+    assert DAB426_MANIFEST.is_file(), "real_slice_dab426 manifest 未凍結"
+    man = g2.G2Manifest.load(DAB426_MANIFEST)
+    base = DAB426_MANIFEST.parent
+    man.verify_frozen(base)
+    assert man.raw.get("status") == "FROZEN_PENDING_NAMING", "發射未授權，狀態不得是 FIRED"
+    assert set(man.arms) == {"generic", "localized"}
+    assert [d["name"] for d in man.drafts] == ["dab_426-pi-C", "dab_426-pi-A"], \
+        "bad 草稿須為 drafts[0]（反例基準，針守衛依賴）"
+    assert {d["role"] for d in man.drafts} == {"bad", "good"}
+    for d in man.drafts:
+        assert d["task_id"] == "dab_426"
+        assert d["source"]["score"] is not None, "真實草稿須有已記錄分數（不得 null）"
+        assert d["synthetic"] is False, "真草稿，不是 synthetic"
+        # 凍結資料檔（CSV）必須釘 hash（verify_frozen 已逐條驗）
+        assert d["task"]["data_files"].get("data/cost_data_with_errors.csv")
+    # 兩臂公平比較客觀基線：兩草稿共用同一 task 目錄（同一 request/requirements/CSV）
+    assert len({d["task"]["dir"] for d in man.drafts}) == 1, \
+        "兩草稿必須共用同一 task 目錄（同起點），實得不同"
+    cells = g2.plan_cells(man)
+    assert len(cells) == 4, "4 格最小對照＝2 真草稿 × 2 臂"
+    assert {(n, a) for n, a in cells} == {
+        ("dab_426-pi-A", "generic"), ("dab_426-pi-A", "localized"),
+        ("dab_426-pi-C", "generic"), ("dab_426-pi-C", "localized"),
+    }
+    b = man.budget
+    assert b["max_rounds_per_cell"] == 2 and b["timeout_s_per_round"] == 300
+    assert b["max_tool_calls"] == 60 and b["max_tokens"] == 4000000
+    assert b["hard_token_cap"] is False
+    assert b["min_rounds"] == {"generic": 1, "localized": 0}
+    el = man.raw.get("six_elements", {})
+    missing = [k for k in SIX_ELEMENTS if k not in el]
+    assert not missing, f"六要素缺：{missing}（11-06 指示 5）"
+
+
+def test_real_slice_dab426_baseline_and_leak_guard():
+    """P20261107_0644-2：baseline（產品自己的離線命令 g2 --baseline，0 模型呼叫）＋無洩漏門。
+
+    - bad 草稿 dab_426-pi-C（@max_wind_speed[165.11]，全組最大風速、非最高 category 列）：
+      req_answer_kv PASS（格式合法）＋ req_max_wind_recomputed FAIL (mismatch_with_recomputation)
+      ＝可重現內容反例；
+    - good 草稿 dab_426-pi-A（@max_wind_speed[156.42]）：2/2 PASS＝「正確成果是否退步」
+      的真實基線（11-06 指示 2）；
+    - 重算期望值 156.42（針）永不進 baseline 任何 item 的 detail/evidence
+      （kv_recomputed expected_in_evidence=false）；bad 草稿自己的 165.11 是合法內容、
+      須允許出現；
+    - dry-run 同 manifest 可列 4 格（發射前最後一道離線門，本檔不真跑）。
+    """
+    man = g2.G2Manifest.load(DAB426_MANIFEST)
+    base = DAB426_MANIFEST.parent
+    man.verify_frozen(base)
+    j = g2.baseline_json(man, base)
+    by_name = {d["name"]: d for d in j["drafts"]}
+    assert set(by_name) == {"dab_426-pi-A", "dab_426-pi-C"}
+
+    bad = by_name["dab_426-pi-C"]
+    bad_st = {i["id"]: i["status"] for i in bad["items"]}
+    assert bad_st == {"req_answer_kv": "PASS", "req_max_wind_recomputed": "FAIL"}, \
+        f"bad 草稿 baseline 應 1 PASS/1 FAIL（格式對、值錯），實得 {bad_st}"
+    assert bad["required_total"] == 2 and bad["required_pass"] == 1
+    assert bad["all_required_pass"] is False
+    bad_by_id = {i["id"]: i for i in bad["items"]}
+    assert bad_by_id["req_max_wind_recomputed"]["evidence"].get("expected_in_evidence") is False, \
+        "FAIL 證據須標記 expected_in_evidence=False（重算值不進證據）"
+    assert bad_by_id["req_max_wind_recomputed"]["evidence"].get("deliverable_value") == "165.11", \
+        "反例須點名草稿自己的錯值 165.11（全組最大風速形狀）"
+
+    good = by_name["dab_426-pi-A"]
+    good_st = {i["id"]: i["status"] for i in good["items"]}
+    assert good_st == {"req_answer_kv": "PASS", "req_max_wind_recomputed": "PASS"}, \
+        f"good 草稿 baseline 應 2/2 PASS（正確成果真實基線），實得 {good_st}"
+    assert good["required_total"] == 2 and good["required_pass"] == 2
+    assert good["all_required_pass"] is True
+
+    # 無洩漏：針 156.42（重算期望值）不得進任何 item 的 detail/evidence
+    blob = json.dumps(
+        {d["name"]: {i["id"]: {k: i[k] for k in ("detail", "evidence")} for i in d["items"]}
+         for d in j["drafts"]},
+        ensure_ascii=False)
+    assert "156.42" not in blob, f"重算期望值進證據：{blob}"
+    assert "165.11" in blob, "草稿自己的錯值 165.11（合法內容）應可見於反例"
+
+    # dry-run 同 manifest 可列 4 格
+    dj = g2.dry_run_json(man)
+    assert len(dj["cells"]) == 4
+    assert {(c["draft"], c["arm"]) for c in dj["cells"]} == {
+        ("dab_426-pi-A", "generic"), ("dab_426-pi-A", "localized"),
+        ("dab_426-pi-C", "generic"), ("dab_426-pi-C", "localized"),
+    }
+    assert dj["hidden_after"] == "UNKNOWN"
+
+
+def test_real_slice_dab426_single_source_of_truth():
+    """P20261107_0644-2 針守衛（防手寫數字漂移，同 dab055/r1171 口徑）：
+    req_max_wind_recomputed 的重算真值必須是產品 checks._max_row_first 對凍結資料
+    data/cost_data_with_errors.csv 實算、round 2 後恰為 156.42——與 manifest 點名之針
+    一致；禁止在測試內複製解析迴圈（r1171 已把 _max_row_first 抽成頂層單一事實來源）。
+    零模型呼叫。"""
+    import csv
+    from vacant_network.reqloop.checks import _max_row_first
+    man = g2.G2Manifest.load(DAB426_MANIFEST)
+    base = DAB426_MANIFEST.parent
+    d = man.drafts[0]
+    needle = "156.42"
+    assert needle in man.raw.get("leak_guard", ""), "manifest leak_guard 須點名針（防針漂移）"
+    req_set = RequirementSet.load(base / d["task"]["dir"] / "requirements.json")
+    item = next(it for it in req_set.items if it.id == "req_max_wind_recomputed")
+    rc = item.params["recompute"]
+    assert rc["type"] == "max_row_first"
+    assert rc["sel_col"] == "max_storm_cat" and rc["out_col"] == "max_sust_wind" and rc["round"] == 2
+    data_path = base / d["task"]["dir"] / item.params["data_file"]
+    with open(data_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    unrounded = _max_row_first(rows, rc)
+    expected = round(unrounded, int(rc["round"]))
+    assert str(expected) == needle, (
+        f"真值漂移：_max_row_first={unrounded!r} → round 2={expected!r} ≠ 針 {needle}"
+    )
+    assert str(unrounded) != needle, \
+        "測試空洞：若未 round 即等於針，round 守衛無意義（156.41568 → 156.42 才是真守衛）"
