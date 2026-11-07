@@ -128,3 +128,9 @@
 - 沒驗證什麼：「改前見紅」無法重演（修復已入樹，本輪只重驗不重做）；22c218d0 CI 仍無記錄（LATEST 停在 7d08eae4，看一眼不等待不輪詢）；0 模型呼叫、0 元、0 發射。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態提示·重試／未改 effects2 快照·凍結 manifest／1753 維持排除。
 - DECISION：票 P20261107_0243-1 以重驗收口入 done/（非重做）；下一輪候 vq-5nz.54（dab_055 2 格）點名發射——manifest 已凍結、離線三門全過、單命令可發射。
+## r1160（第 1160 輪；2026-11-07）
+- 做：工單 P20261107_0243-2——tests/test_reqloop_real_slice.py +92 行兩測試：① 針守衛 test_real_slice_dab055_needle_is_true_recomputed_value（對凍結 data/estimated_numbers.csv 以 mean_int_col 語意實算：解析迴圈逐字複製 checks.py:1612-1640〔該分支無模組級函式、票指名的 _mean_int_col 不存在〕、round(raw_mean)==2081990 鎖真值防空洞斷言）；② test_real_slice_dab055_smoke_pipeline_and_exit_codes（run_g2_smoke 假代理兩臂：localized @mean_cases[2081990]→gap_closed/exit 0/兩缺口 fixed/unresolved 空/regressed 空；generic @mean_cases[2200] note 陷阱→req_answer_kv PASS 但 req_mean_cases_recomputed FAIL、不提前放行、max_rounds/exit 20 拒收、unresolved 精確點名）。
+- 驗證了什麼：驗收單測 → `2 passed, 10 deselected in 0.55s`（改前 0 selected/RC 5 見紅）；5 檔接受套 → `229 passed in 2.90s`（基線 227＋新 2；票內「228」按 r1158 前 226 基線、已過時）；diff 僅 1 檔＋92 行；票尾追加結果 1 行、mv done/（doing/ 空）。
+- 沒驗證什麼：0 模型呼叫/0 元/0 發射——本票為離線管線驗證非效果數字；vq-5nz.54 兩格發射仍候點名＋成本另報；針守衛複製與產品之漂移由 smoke 兩側（2081990→gap_closed、2081990.36→FAIL）共同釘住。
+- 紅線：未動 main、未自 push、未讀 hidden/scorer、未加錯誤字串 regex/靜態處方提示/重試（測試內 regex 係產品解析逐字複製、非新修復規則）、未改 effects2 快照/凍結 manifest；1753 維持排除。commit a321acd4（auto/qwen27b）。
+- DECISION：票 P20261107_0243-2 完成入 done/；dab_055 內容閉環離線側（baseline 反例＋兩臂分流＋針守衛）已全入產品測試套；下一輪候 vq-5nz.54 點名發射（manifest 凍結、單命令可發射）；P20261107_0210-1 仍在 tickets/doing/（非 qwen/ 票、本輪不越權動它）。
