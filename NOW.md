@@ -1,24 +1,23 @@
-# 現在（第 1198 輪，2026-11-07）
+# 現在（第 1199 輪，2026-11-07）
 
-## r1198：資深審查三條全數驗證完成
-- 合併：auto/argon 7899602d 已合入（b134ba3f）；四項修復全在樹內且有測試，
-  149 passed（test_reqloop_checks＋test_reqloop_extract＋test_reqloop_extract_run_eval）。
-- real14 門禁兩跑皆 PASS：r1 8/9＋冤枉 1/5（dab_039 4 UNKNOWN→MISSED）；
-  r2 9/9＋1/5（工單 R20261107_1255-2 引 r2）；兩份 JSON 已入庫。
-- vq-el4.4／vq-el4.5 已 closed；vq-el4.6 in_progress。
-- CI：dd4566e2（LATEST_qwen27b）轉綠 5016 passed——比上輪「排隊中」好；
-  39cb65ec（HEAD）仍無本機 CI 檔（面板：跑中）。
+## r1199：argon 418d3bc7 審查驗證＋vq-el4.6 結案
+- 1608 審查指示 4 條落地：
+  1. 合併 auto/argon 418d3bc7（tag_format number／tag_not_in_request／round
+     層級 fallback）——審完 diff 後 merge；與並行 worker T1 會聚於 f74b779c
+     （16:23:02 建立），我驗證：reqloop 6 檔 210 passed、0 模型呼叫。
+  2. phase3 官方鎖定 out/eval_phase3_glm53.json：6 fixed/3 unresolved、
+     263 calls/14 sessions、tokens None＝UNKNOWN；8/9＝單 rep 抽樣變異，不宣稱成效。
+  3. vq-el4.6 結案（bd close）：3 模型表達標（RC=20 預期門禁；glm53 39/39 PASS、
+     glm53flash 16/39 FAIL、deepseek41 23/39 FP1 FAIL；out/eval_g1_compare_3m.json）；
+     gemma 為 1004 本地端點，不繞 glm 直呼 vibe，不入 Vibe CLI 表。
+  4. CI：f74b779c/110ae3ff 尚未跑（見下）。
+- vq-el4 六個 task 全 closed；epic 待新派工。
+- worker 紅燈（41eef681 6 fails）核實為其 WIP 所致：同 6 測試在 dd4566e2（合併前）
+  已存在且 CI 綠 0 fails；不屬我範圍、不代修。
 
 ## 下一步
-1. 查 39cb65ec CI（pending→綠）。
-2. 待規劃者：gemma（1004 provider）入 --models 表的對接口——先報後做（r1197 已報）；
-   glm wrapper 無 gemma 別名，新建 client＋成本帳＝模型變更，須另報批准。
-3. 待規劃者：phase3 兩跑以哪跑為準——已對原始 progress.json 核實：官方 r1192＝6 fixed/3
-   unresolved（263 calls/14 sessions/13.0M tok，regressed 全 []）；service_run_1502＝8 fixed/1
-   unresolved（209 calls/14 sessions/8.37M tok，regressed 全 []）；差異格＝dab_055＋dabstep-1273；
-   dab_039 兩跑皆 unresolved/0 calls（證據 audits/phase3_two_runs_20261107/）。
-4. 規劃者定接口後：以 GlmClient（vacant_network/reqloop/extract.py:920）為範本建
-   gemma client，入四模型表；不宣稱模型較好。
+1. 復核 f74b779c CI（pending→綠）。
+2. 無自創工作：等審查/人類對 G2.5 後續（G3 前置）派新工單。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden／scorer；不繞 glm 直連 vibe；
