@@ -1035,7 +1035,7 @@ def run_phase3(base: pathlib.Path | None = None,
             "before_pass": src["before_pass"] if src else None,
         })
     out_root.mkdir(parents=True, exist_ok=True)
-    (out_root / "freeze.json").write_text(json.dumps({
+    freeze_doc = {
         "phase": 3, "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "base": str(base), "extract_model": extract_model,
         "repair": {"provider": provider, "model": model, "feedback_mode": "localized",
@@ -1045,7 +1045,23 @@ def run_phase3(base: pathlib.Path | None = None,
                    "note": "無硬 token 上限；成本從 raw usage 讀、缺值＝UNKNOWN 不填 0"},
         "comparison": "手寫需求基線（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep",
         "cells": freeze_cells,
-    }, ensure_ascii=False, indent=1), encoding="utf-8")
+    }
+    freeze_path = out_root / "freeze.json"
+    if not freeze_path.is_file():
+        freeze_path.write_text(json.dumps(freeze_doc, ensure_ascii=False, indent=1),
+                               encoding="utf-8")
+    else:
+        # 官方 freeze 不可變：驗證／接續 run 不得重寫 generated_at（凍結快照）；
+        # 參數不一致時 fail-closed，絕不靜默覆蓋官方 freeze。
+        try:
+            _old = json.loads(freeze_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            _old = None
+        if _old is None or any(_old.get(k) != freeze_doc[k] for k in
+                               ("base", "extract_model", "repair", "budget", "comparison", "cells")):
+            print("PHASE3 fail-closed：既有 freeze.json 與本次 run 參數不一致，拒絕覆蓋官方 freeze",
+                  file=sys.stderr)
+            return 2
 
     if build is None:
         build = _default_build(provider, model, hooks=True)

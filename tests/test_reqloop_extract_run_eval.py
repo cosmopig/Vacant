@@ -530,6 +530,34 @@ def test_run_phase3_resumes_from_existing_progress(tmp_path):
     assert doc["fixed"] == 1 and doc["held"] == 1 and doc["errors"] == 0
 
 
+def test_run_phase3_offline_rerun_keeps_official_freeze_untouched(tmp_path):
+    """驗證／接續 run 不得重寫官方 freeze.json（含 generated_at）；參數不一致 → fail-closed rc=2、不覆蓋。"""
+    base = _mk_base(tmp_path)
+    req_dir = tmp_path / "req"
+    req_dir.mkdir()
+    for cell in ("fake-001-pi-C", "fake-002-pi-C"):
+        (req_dir / f"{cell}.glm53.json").write_text(
+            json.dumps(_reqset(task_id=cell).to_dict()), encoding="utf-8")
+    scorer = lambda s, w, d: {"pass": True, "status": "scored", "rc": 0}
+    out_root = tmp_path / "out"
+    agent = _fake_agent({"answer.txt": "@m[3]\n"})
+    assert run_phase3(base=base, include_good=True, build=_fake_build(),
+                      run=agent, scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
+    freeze1 = (out_root / "freeze.json").read_text(encoding="utf-8")
+    assert "generated_at" in freeze1
+
+    # 同參數重跑（驗證 run）：freeze.json 逐 byte 不變
+    assert run_phase3(base=base, include_good=True, build=_fake_build(),
+                      run=agent, scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
+    assert (out_root / "freeze.json").read_text(encoding="utf-8") == freeze1
+
+    # 參數不一致：fail-closed rc=2、官方 freeze 不被覆蓋
+    assert run_phase3(base=base, include_good=True, max_rounds=999999,
+                      build=_fake_build(), run=agent, scorer=scorer,
+                      req_dir=req_dir, out_root=out_root) == 2
+    assert (out_root / "freeze.json").read_text(encoding="utf-8") == freeze1
+
+
 # ── 多模型對照（vq-el4.6）：--models 表格＋JSON ─────────────────────────────
 
 def _mk_g1_multi(tmp_path: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path]:

@@ -24,6 +24,7 @@ from vacant_network.reqloop.extract import (
     csv_preview,
     default_prompt,
     extract_requirements,
+    json_preview,
     main,
     parse_model_output,
     quote_is_verbatim,
@@ -401,6 +402,34 @@ def test_glm_client_nonzero_exit_is_fail_closed_no_retry(tmp_path):
 def test_csv_preview_header_plus_five_rows():
     csv = "\n".join(f"r{i}" for i in range(20)) + "\n"
     assert csv_preview(csv).splitlines() == [f"r{i}" for i in range(6)]
+
+
+def test_json_preview_caps_dict_list_values_to_first_rows():
+    # 物件 JSON：全部鍵（欄位名）可見；陣列值只准進前 5 列（輸入上限＝欄位＋前幾列）
+    data = json.dumps({"merchant_a": [{"fee": i} for i in range(100)], "note": "x"})
+    obj = json.loads(json_preview(data))
+    assert set(obj) == {"merchant_a", "note"}
+    assert len(obj["merchant_a"]) == 5
+    assert obj["merchant_a"][0] == {"fee": 0}
+    assert obj["note"] == "x"
+
+
+def test_json_preview_caps_nested_lists_any_depth():
+    obj = json.loads(json_preview(json.dumps({"a": {"b": list(range(50))}, "c": [[i] for i in range(20)]})))
+    assert len(obj["a"]["b"]) == 5 and obj["a"]["b"][0] == 0
+    assert len(obj["c"]) == 5
+
+
+def test_json_preview_top_level_list_unchanged():
+    assert json_preview(json.dumps(list(range(50)))) == json.dumps(list(range(5)), ensure_ascii=False, indent=1)
+
+
+def test_build_task_prompt_dict_json_preview_capped():
+    # 擷取 prompt 只准含資料檔欄位＋前幾列：100 列陣列值的尾部不准進 prompt
+    data = json.dumps({"m": [{"i": k} for k in range(100)]})
+    p = build_task_prompt("REQ", data_file="d.json", data_preview=json_preview(data))
+    assert '"i": 0' in p
+    assert '"i": 99' not in p
 
 
 def test_build_task_prompt_whitelist_data_and_user_text_only():
