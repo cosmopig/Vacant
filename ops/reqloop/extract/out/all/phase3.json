@@ -7,16 +7,22 @@
   "model": "gemma-4-12b-it-qat"
  },
  "cells": 9,
- "errors": 0,
- "fixed": 6,
- "unresolved": 3,
+ "errors": 4,
+ "stale_cells": [
+  "dab_039-pi-C",
+  "dab_055-pi-C",
+  "dab_426-pi-C",
+  "dab_427-pi-A"
+ ],
+ "fixed": 4,
+ "unresolved": 1,
  "rejected": 0,
  "right_to_wrong": 0,
  "held": 0,
  "cost": {
-  "repair_sessions": 14,
-  "model_calls": 263,
-  "tokens": null
+  "repair_sessions": 8,
+  "model_calls": 210,
+  "tokens": 11012667
  },
  "cost_note": "repair_sessions＝修復 session 數；model_calls＝API 請求數（raw usage）；任一缺值⇒UNKNOWN（不填 0）",
  "comparison_baseline": "手寫需求（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep，不宣稱較好",
@@ -24,65 +30,16 @@
   {
    "cell": "dab_039-pi-C",
    "role": "bad",
-   "before": false,
-   "after": {
-    "pass": false,
-    "status": "scored",
-    "rc": 0
-   },
-   "verdict": "unresolved",
-   "stopped": "no_gap",
-   "final_status": {
-    "R1": "UNKNOWN",
-    "R2": "UNKNOWN",
-    "R3": "UNKNOWN",
-    "R4": "UNKNOWN"
-   },
-   "regressed": [],
-   "source_tampered": false,
-   "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/draft",
-   "deliverables": [
-    "answer.txt"
-   ],
-   "cost": {
-    "repair_sessions": 0,
-    "model_calls": 0,
-    "tokens": null,
-    "wall_ms_total": null
-   }
+   "status": "ERROR",
+   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
+   "stale_verdict": "unresolved"
   },
   {
    "cell": "dab_055-pi-C",
    "role": "bad",
-   "before": false,
-   "after": {
-    "pass": false,
-    "status": "scored",
-    "rc": 0
-   },
-   "verdict": "unresolved",
-   "stopped": "stalled",
-   "final_status": {
-    "R1": "FAIL",
-    "R2": "FAIL",
-    "R3": "PASS",
-    "R4": "UNKNOWN",
-    "R5": "FAIL"
-   },
-   "regressed": [],
-   "source_tampered": false,
-   "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_055-pi-C/round_2",
-   "deliverables": [
-    "answer.txt"
-   ],
-   "cost": {
-    "repair_sessions": 2,
-    "model_calls": 22,
-    "tokens": 1227517,
-    "wall_ms_total": 134648
-   }
+   "status": "ERROR",
+   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
+   "stale_verdict": "unresolved"
   },
   {
    "cell": "dab_378-pi-C",
@@ -125,60 +82,16 @@
   {
    "cell": "dab_426-pi-C",
    "role": "bad",
-   "before": false,
-   "after": {
-    "pass": true,
-    "status": "scored",
-    "rc": 0
-   },
-   "verdict": "fixed",
-   "stopped": "stalled",
-   "final_status": {
-    "R1": "FAIL",
-    "R2": "UNKNOWN"
-   },
-   "regressed": [],
-   "source_tampered": false,
-   "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_426-pi-C/round_2",
-   "deliverables": [
-    "answer.txt"
-   ],
-   "cost": {
-    "repair_sessions": 2,
-    "model_calls": 16,
-    "tokens": 398231,
-    "wall_ms_total": 61605
-   }
+   "status": "ERROR",
+   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
+   "stale_verdict": "fixed"
   },
   {
    "cell": "dab_427-pi-A",
    "role": "bad",
-   "before": false,
-   "after": {
-    "pass": true,
-    "status": "scored",
-    "rc": 0
-   },
-   "verdict": "fixed",
-   "stopped": "max_rounds",
-   "final_status": {
-    "1": "UNKNOWN",
-    "2": "PASS"
-   },
-   "regressed": [],
-   "source_tampered": false,
-   "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_427-pi-A/round_2",
-   "deliverables": [
-    "answer.txt"
-   ],
-   "cost": {
-    "repair_sessions": 2,
-    "model_calls": 15,
-    "tokens": 361588,
-    "wall_ms_total": 54086
-   }
+   "status": "ERROR",
+   "detail": "STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）",
+   "stale_verdict": "fixed"
   },
   {
    "cell": "dab_507-pi-A",
