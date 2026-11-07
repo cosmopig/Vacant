@@ -166,6 +166,7 @@ def test_load_cell_request_text_prefers_request_md(tmp_path):
 def test_load_cell_request_text_falls_back_to_real14(tmp_path):
     task = tmp_path / "task"; task.mkdir()
     real14 = tmp_path / "real14"
+    real14.mkdir(parents=True, exist_ok=True)
     (real14 / "dabstep-10.request.md").write_text("reconstructed question", encoding="utf-8")
     assert load_cell_request_text(task, "dabstep-10", real14) == "reconstructed question"
 

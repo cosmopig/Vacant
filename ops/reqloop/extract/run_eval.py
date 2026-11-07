@@ -42,7 +42,7 @@ from vacant_network.reqloop.extract import (  # noqa: E402
     json_preview,
     ExtractError,
 )
-from vacant_network.reqloop.requirements import RequirementSet, RequirementError  # noqa: E402
+from vacant_network.reqloop.requirements import RequirementSet  # noqa: E402
 
 GATE_CATCH_RATE = 0.70  # RLOOP_PLAN G2.5 第 1 項：39 份錯誤抓到 ≥ 70%
 
@@ -128,7 +128,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if a.phase2:
         return run_phase2(model=a.model,
-                          base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None)
+                          base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None,
+                          json_out=pathlib.Path(a.json) if a.json else None)
 
     g1 = pathlib.Path(a.g1) if a.g1 else REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks"
     out_dir = pathlib.Path(a.out_dir) if a.out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
@@ -303,11 +304,15 @@ def derive_real14_cells(base: pathlib.Path) -> list[Real14Cell]:
     missing: list[str] = []
     for cell_name in sorted(roles):
         found = None
+        task_id = _task_id_from_cell(cell_name)
         for s in SNAPSHOT_SETS:
-            t_dir = g2 / s / cell_name / "task"
-            d_dir = g2 / s / cell_name / "draft"
-            if t_dir.is_dir() and d_dir.is_dir():
-                found = (t_dir, d_dir)
+            for cand in (cell_name, task_id):
+                t_dir = g2 / s / cand / "task"
+                d_dir = g2 / s / cand / "draft"
+                if t_dir.is_dir() and d_dir.is_dir():
+                    found = (t_dir, d_dir)
+                    break
+            if found is not None:
                 break
         if found is None:
             missing.append(cell_name)
@@ -429,7 +434,8 @@ def read_real14_costs(vibe_calls: pathlib.Path) -> tuple[int, int] | None:
 
 def run_phase2(model: str = "glm53",
                base: pathlib.Path | None = None,
-               vibe_calls: pathlib.Path | None = None) -> int:
+               vibe_calls: pathlib.Path | None = None,
+               json_out: pathlib.Path | None = None) -> int:
     """item 2：14 份原始草稿 × 自動擷取需求 → 抓錯 x/9、冤枉 y/5 → 門禁。"""
     base = pathlib.Path(base) if base else REAL14_BASE_DEFAULT
     vibe_calls = (pathlib.Path(vibe_calls).expanduser() if vibe_calls
@@ -444,6 +450,7 @@ def run_phase2(model: str = "glm53",
     caught = 0
     false_acc = 0
     errors = 0
+    rows: list[dict] = []
     print(f"REAL14（{base.name}，{total_bad} 壞／{total_good} 好）——自動擷取需求、14 份原始草稿")
     for c in cells:
         try:
@@ -456,9 +463,11 @@ def run_phase2(model: str = "glm53",
                 c, user_text, names, previews, model, client,
                 out_dir / f"{c.cell}.{model}.json")
             results = run_requirement_checks(c.task_dir, req, c.draft_dir)
-        except (ExtractError, RequirementError, FileNotFoundError, RuntimeError,
+        except (ExtractError, FileNotFoundError, RuntimeError,
                 ValueError) as e:
             errors += 1
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
+                         "detail": str(e)[:100]})
             print(f"  {c.cell:22s} {c.role:4s} ERROR（fail-closed）：{str(e)[:100]}")
             continue
         fails = [r for r in results if r.status == "FAIL"]
@@ -467,15 +476,23 @@ def run_phase2(model: str = "glm53",
             if fails:
                 caught += 1
                 note = "; ".join(f"{r.claim_id}: {r.detail[:50]}" for r in fails[:2])
+                rows.append({"cell": c.cell, "role": c.role, "status": "CAUGHT",
+                             "n_fail": len(fails), "n_unknown": unknowns, "detail": note})
                 print(f"  {c.cell:22s} {c.role:4s} 抓錯  {len(fails)} FAIL／{unknowns} UNKNOWN——{note}")
             else:
+                rows.append({"cell": c.cell, "role": c.role, "status": "MISSED",
+                             "n_fail": 0, "n_unknown": unknowns, "n_results": len(results)})
                 print(f"  {c.cell:22s} {c.role:4s} 漏掉  0 FAIL／{unknowns} UNKNOWN（{len(results)} 項）")
         else:
             if fails:
                 false_acc += 1
                 note = "; ".join(f"{r.claim_id}: {r.detail[:50]}" for r in fails[:2])
+                rows.append({"cell": c.cell, "role": c.role, "status": "FALSE",
+                             "n_fail": len(fails), "n_unknown": unknowns, "detail": note})
                 print(f"  {c.cell:22s} {c.role:4s} 冤枉  {len(fails)} FAIL／{unknowns} UNKNOWN——{note}")
             else:
+                rows.append({"cell": c.cell, "role": c.role, "status": "CLEAN",
+                             "n_fail": 0, "n_unknown": unknowns, "n_results": len(results)})
                 print(f"  {c.cell:22s} {c.role:4s} 乾淨  {unknowns} UNKNOWN（{len(results)} 項）")
 
     ok = gate_pass(caught, total_bad, false_acc, total_good)
@@ -488,6 +505,14 @@ def run_phase2(model: str = "glm53",
         print(f"成本：{costs[0]} 次擷取、{costs[1]} tokens（vibe_calls.jsonl；含重跑前既有呼叫）")
     else:
         print("成本：UNKNOWN（vibe_calls.jsonl 無 real14 紀錄）")
+    if json_out is not None:
+        _write_json(pathlib.Path(json_out), rows,
+                    {"gate": "PASS" if ok else "FAIL", "model": model,
+                     "caught": caught, "total_bad": total_bad,
+                     "false_acc": false_acc, "total_good": total_good,
+                     "errors": errors,
+                     "cost": {"calls": costs[0], "tokens": costs[1]} if costs else None})
+        print(f"JSON 結果：{json_out}")
     return 0 if ok else 20
 
 
