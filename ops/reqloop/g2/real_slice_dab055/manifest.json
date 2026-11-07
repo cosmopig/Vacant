@@ -1,1 +1,60 @@
-/home/user1/dev/wt/worker/ops/reqloop/g2/smoke_e013/dab_055-pi-C/manifest.json
+{
+  "schema": "vacant.reqloop.g2.manifest/1",
+  "frozen_at": "2026-11-07T02:39:00+0800",
+  "ticket": "P20261107_0210-1（next slice dab_055 content closed loop；六要素齊備、準備即止；發射＝新成本決策、待 demand side 點名）",
+  "purpose": "content closed loop 對照 slice：1 份 bad 真草稿（dab_055-pi-C，@mean_cases[2081990.36] 點估計 float；獨立 scorer fail）× generic/localized 2 臂。參考結果（effects2_20261106，依原始 agent_stdout.log）：第 1 輪兩臂皆 pd.to_numeric(..., errors='coerce') 將 544 列轉 NaN、僅 312 列純整數均值 2199.55→2200，兩臂皆 0 次讀 requirements.json；第 2 輪 localized 對 2200 收到反例 req_mean_cases_recomputed: FAIL (mismatch_with_recomputation) 後改 split('[')[0] 解析全表 856 列前導整數重算 2081990（非草稿 2081990.36 取整），generic 維持 2200 未解（stopped=max_rounds、unresolved=req_mean_cases_recomputed）。預期可展示改善（工單）：localized 應修復成 @mean_cases[2081990]（格式修、值保留）並關缺口；generic 原生重查允許未解（stopped=max_rounds、unresolved=req_mean_cases_recomputed）——這是可量測對照，不宣稱任何產品優劣。baseline＝可重現內容反例（FAIL/FAIL）；重算期望值（整數 2081990）永不進任何證據（kv_recomputed expected_in_evidence=false）。本 manifest 只凍結離線規格（verify_frozen/dry-run/baseline 三門）；發射是另一步授權（點名＋成本另報），不在本檔範圍。",
+  "arms": ["generic", "localized"],
+  "model": {
+    "model": "gemma-4-12b-it-qat",
+    "provider": "pi provider=lms1004nothink",
+    "note": "同 effects2_20261106 dab_055-pi-C 批次（1004 nothink）；發射前已釘在 manifest、不事後暗換。"
+  },
+  "budget": {
+    "max_rounds_per_cell": 2,
+    "timeout_s_per_round": 300,
+    "hard_token_cap": false,
+    "token_cap_note": "無硬 token 上限能力；成本從 raw usage 讀，缺值=UNKNOWN(None)，絕不填 0",
+    "min_rounds": {"generic": 1, "localized": 0},
+    "cell_cost_cap": {
+      "model_calls": 25,
+      "tokens_total": 1451938,
+      "note": "工單 P20261107_0210-1 成本上限（本批 generic 實測值）：超過即停、不追加重試。這是 cell 總預算，不是逐輪硬帽（不設 max_tool_calls/max_tokens＝不量不殺，同 effects2 口徑；該批 generic 實測 25 calls / 1,451,938 tokens 即在 2 輪內）"
+    },
+    "note": "同草稿、同預算、2 輪×300s/輪（工單元素 3、既有 G2 口徑）；兩臂同模型、同總預算"
+  },
+  "scoring": {
+    "hidden_after": "UNKNOWN",
+    "hidden_after_note": "本地無權重跑 lab 的 hidden scorer；缺值＝UNKNOWN(None)，絕不填 0",
+    "recorded_scores": "source.score 是引用既有受權量表（獨立 scorer）的已記錄結果（draft 2081990.36 → fail），不是本地重跑"
+  },
+  "leak_guard": "可見檢查重算值永不進模型 prompt 與證據（kv_recomputed expected_in_evidence=false；模型只看 task＋可見檢查形狀反例、無值）；draft 原文凍結 sha（draft files＋requirements＋request＋contract＋data）；發射後須重審軌跡內 hidden 文本（同 effects2/realab 口徑）",
+  "drafts": [
+    {
+      "name": "dab_055-pi-C",
+      "role": "content_counterexample",
+      "task_id": "dab_055",
+      "source": {
+        "run": "effects2_20261106",
+        "cell": "dab_055-pi-C",
+        "score": {
+          "pass": false,
+          "note": "獨立 scorer（lab 受權量表，r1156 precheck）：draft @mean_cases[2081990.36] → fail（2081990.36 非整數、且不符 point-estimate 重算 2081990）；同批 localized final @mean_cases[2081990] → pass、generic final 2200 → fail"
+        }
+      },
+      "synthetic": false,
+      "draft": {
+        "dir": "dab_055-pi-C/draft",
+        "files": {"answer.txt": "c778b235f6b6f7928c5c2839f41d173aa5a816b1a71637d8f17bad9ec7852e56"}
+      },
+      "task": {
+        "dir": "dab_055-pi-C/task",
+        "requirements": {"sha256": "bf467c7c0100c013aa574e38934581cdd10dacb4651c07bbb1d03482a1ca3947"},
+        "request": {"sha256": "89762c8d2e867eba309d53e7c651ee9bdfe5dc7242786dc69bf728a6b7661695"},
+        "data_files": {
+          "contract.md": "fc9b32bf919c8d219cfa1d4b735063e5f0bea1ab528c76bbea17b95c9caf0faa",
+          "data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+        }
+      }
+    }
+  ]
+}
