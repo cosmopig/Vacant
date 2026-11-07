@@ -196,3 +196,9 @@
 - 重核依賴部分②（r1168「全綠 207 passed」含 3 個讀此檔之測試）：`pytest tests/test_reqloop_g2.py -k effects_20261105`＝3 passed、0 skipped（含 matches_source_files 逐數交叉核對，源檔在本機）。
 - 核對無誤傷：r1168 STATE/NOW 所引 2200/2081990 屬 effects2_20261106（dab_055）批、非本檔；未見舊 6 格或 1/10 數字於 r1168 交付物；本檔 scope_note（開發選樣單 rep、缺值 None、hidden_after 全 UNKNOWN）口徑未被任何交付物誤引。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未改凍結快照；0 模型呼叫、0 元、0 發射。
+## r1169（2026-11-07；交付前審查重做：四個點名檔實際開啟＋固化成一條指令）
+- 重做：審查點名的四檔逐一開啟（NOW.md 1745B≤3KB；effects_20261105_summary.json 60,228B；test_reqloop_repair.py 3960 行；repair.py）並重驗 r1168 記錄：50 格、policy30 7/10・6/10、once20 7/10・4/10、5 格分歧皆舊 checker／current 50/50、dab_055-pi-C-localized false→true/true，全部成立。
+- 新增：~/dev/ops/audits/r1169_review_redo_check_20261107.py（一條指令、四檔實際開啟＋逐值核對，RC 0＝4/4 VERIFIED、RC 1 點名；fake repo 篡改→RC 1，負控制成立）＋守衛測試 tests/test_reqloop_review_r1169.py（缺席 skip；repair.py 被回復或數字被改即紅）。
+- 驗證：一條指令 RC=0、4/4；守衛測試 1 passed；repair --selftest 13/13；pytest test_reqloop_repair.py 111 passed；pytest -k effects_20261105 3 passed 0 skipped。
+- 沒驗證／沒做：無新功能變更、無發射（vq-6rp／vq-5nz.6／dab_055 2 格候需求端點名）；0 模型呼叫、0 元。
+- 下一步：點名後發射（成本另報）；點名前不發射、不同題重跑、不改文件湊進展。
