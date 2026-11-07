@@ -80,8 +80,8 @@ def get_arm_data(exp_dir, arm_name):
 
 def main():
     # Use the path from STATE.md / instructions
-    exp_dir = "/srv/vlab/runs/e016_failed_step_ablation"
-    arms = ["A", "C", "C-nf"]
+    exp_dir = "/home/user1/dev/wt/worker/ops/audits/fixtures/e016_cell_cost"
+    arms = ["A", "C"]
     results = {}
 
     for arm in arms:
