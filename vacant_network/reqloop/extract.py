@@ -60,6 +60,7 @@ __all__ = [
     "build_task_prompt",
     "csv_preview",
     "default_prompt",
+    "json_preview",
     "extract_requirements",
     "main",
     "parse_model_output",
@@ -421,6 +422,21 @@ def csv_preview(csv_text: str, max_rows: int = 5) -> str:
     return "\n".join(lines[: max_rows + 1])
 
 
+def json_preview(json_text: str, max_items: int = 5) -> str:
+    """JSON 資料檔預覽：陣列只取前 max_items 項、物件取整體結構——准進 prompt 的資料內容上限。
+
+    解析失敗時退回前 max_items+1 行原文（與 csv_preview 同形）。
+    """
+    try:
+        obj = json.loads(json_text)
+    except (json.JSONDecodeError, ValueError):
+        lines = [ln for ln in json_text.splitlines() if ln.strip()]
+        return "\n".join(lines[: max_items + 1])
+    if isinstance(obj, list):
+        obj = obj[:max_items]
+    return json.dumps(obj, ensure_ascii=False, indent=1)
+
+
 def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str = "") -> str:
     """正式 prompt（vq-el4.2）：request 全文＋資料檔欄位與前 5 列＋verifier 清單與輸出格式。
 
@@ -443,7 +459,7 @@ def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str 
         "5. 不准發明使用者沒說的需求。",
     ]
     if data_file:
-        parts += ["", f"附帶資料檔：{data_file}（欄位名稱與前 5 列）：", data_preview]
+        parts += ["", f"附帶資料檔：{data_file}（欄位與前幾列／項，僅供判斷欄位名稱）：", data_preview]
     parts += ["", "使用者原文：", user_text]
     return "\n".join(parts)
 
@@ -469,6 +485,13 @@ def run_task(
     if csvs:
         data_file = csvs[0].name
         data_preview = csv_preview(csvs[0].read_text(encoding="utf-8"))
+    else:
+        # 無 CSV 時看頂層 JSON 資料檔（如 nested_events/events.json）；
+        # 手寫 requirements.json 是參考需求，一律不准進 prompt。
+        jsons = sorted(p for p in t_dir.glob("*.json") if p.name != "requirements.json")
+        if jsons:
+            data_file = jsons[0].name
+            data_preview = json_preview(jsons[0].read_text(encoding="utf-8"))
     prompt = build_task_prompt(user_text, data_file=data_file, data_preview=data_preview)
     req, report = extract_requirements(
         user_text=user_text, client=client, task_id=t_dir.name,

@@ -455,6 +455,34 @@ def test_run_task_counts_discarded_unverified_and_hands_off(tmp_path):
     assert "order_id,status" in prompt and "B,CANCELLED" in prompt  # 欄位名＋前 5 列進 prompt
 
 
+def test_run_task_previews_json_data_file_when_no_csv(tmp_path):
+    """G1 nested_events 只有 events.json：run_task 須把 JSON 資料檔名與前幾項進 prompt，
+    超過前 5 項的不准進；手寫 requirements.json 仍不准進。"""
+    t_dir = tmp_path / "nested_events"
+    t_dir.mkdir()
+    (t_dir / "request.md").write_text(
+        "events.json 是 JSON 陣列，產出 event_stats.csv 與 summary.md。",
+        encoding="utf-8",
+    )
+    events = [
+        {"event_id": f"e{i:03d}", "event_type": "click", "ts": "2026-10-15T08:01:00Z",
+         "payload": {"duration_ms": i * 10}}
+        for i in range(1, 8)
+    ]
+    (t_dir / "events.json").write_text(
+        json.dumps(events, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    (t_dir / "requirements.json").write_text('{"task_id": "HANDWRITTEN-SECRET"}', encoding="utf-8")
+    client = FakeClient("[]")
+    out = tmp_path / "out.json"
+    run_task(t_dir / "request.md", model="glm53", client=client, out_path=out)
+    prompt = client.prompts[0]
+    assert "events.json" in prompt
+    assert "e001" in prompt and "e005" in prompt  # 前 5 項資料
+    assert "e006" not in prompt  # 第 6 項起不准進 prompt
+    assert "HANDWRITTEN-SECRET" not in prompt
+
+
 def test_main_success_prints_counts_and_writes(tmp_path, capsys):
     t_dir = tmp_path / "orders_monthly"
     t_dir.mkdir()
