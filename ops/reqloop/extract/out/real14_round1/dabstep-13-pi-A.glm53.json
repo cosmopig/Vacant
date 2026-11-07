@@ -1,0 +1,66 @@
+{
+  "task_id": "dabstep-13-pi-A",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "During which hour of the day do the most transactions occur?",
+      "deliverable": "/app/answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "mode_col",
+          "col": "hour_of_day"
+        }
+      },
+      "description": "答案檔應只含一個數字，代表交易次數最多的當日小時；以 hour_of_day 欄位重算眾數比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).",
+      "deliverable": "/app/answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "answer",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 內容必須僅為一個數字（無其他文字）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "provenance": {
+    "cell": "dabstep-13-pi-A",
+    "role": "good",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-13-pi-A/task",
+    "user_text_chars": 858,
+    "data_files": [
+      "data/payments.csv",
+      "data/payments-readme.md"
+    ],
+    "generated_at": "2026-11-07T12:42:33+08:00"
+  }
+}

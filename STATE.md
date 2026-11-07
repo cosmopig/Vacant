@@ -18,3 +18,8 @@
 - 按票 RC=20 分支：如實記錄、不寫報告、不碰 hidden/scorer；vq-el4.4 未收（門禁未達）；commit 552dda17；工單 mv done/。
 - 下一步（規劃者重拆 vq-el4.4）：修 deliverable 路徑綁定（好稿檔案在、需求指錯路徑→冤枉）→ 重跑（cache 已存、0 計費）→ 再過門禁 → vq-el4.5。
 - r1188 redo（審查）：state/vibe_calls.jsonl 補入 repo（與 ~/dev/ops 正規帳本 sha256 一致，15 次 real14/141762 tok 全 rc=0）；commit a412c2a1；其餘不動。
+- 2026-11-07 r1189: 審查指示「review auto/argon 後 merge → 續 vq-el4.2/4.3/4.4」（el4.2/4.3 已收）。merge auto/argon（54f2947d，含 378c0c02 NaN 守衛、7639e032 extract/checks 加固、ae6448a1 WIP：`_deliverable_problem`（deliverable 必須是原文點名的檔案，猜名→unverified→UNKNOWN）、`load_cell_request_text` 附 contract.md、phase2 cache 記 prompt_sha256＋raw_output（同 prompt 可 0 呼叫離線重建）、rebuild_from_logs.py）。
+- 根因：r1188 prompt 漏 contract.md → 擷取模型猜交付檔名（answer/@x[y]/app/answer.txt）→ 好稿有 answer.txt 也判 missing_file（4 冤枉、6/9 抓錯同型假象）。
+- 重擷取 14 cell（新 prompt＝request.md＋contract.md；14 次/~190k tok，日 ≤2M 預算內；舊 out 快照 real14_round1/ 14 檔）→ **real14 門禁 PASS：抓錯 9/9、冤枉 1/5（RC=0）**；dab_035/105/dabstep-13 轉 CLEAN、dab_039 改以 contract 點名 answer.txt 判缺（真抓錯）；殘留冤枉 dab_057（3 因：req-3/5 原始字串欄子集重算 r=0.52、req-6 deliverable 誤綁資料檔、req-4 round 參數層級錯配——checker 讀 rc['round'] 而模型放 p['round']，0.96966 vs 0.97 atol 1e-6）。
+- cache 驗證：重跑 0 新呼叫（ledger 85→85）、結果逐字相同。測試：test_reqloop_extract/run_eval/checks 148 passed。
+- vq-el4.4 close（reason 帶證據路徑）；round 參數層級錯配已 note 進 vq-el4.5。下一步：vq-el4.5（localized 修復跑 9 份錯＋獨立 scorer，對照手寫 9/9）。

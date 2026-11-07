@@ -2,9 +2,9 @@
   "task_id": "dab_378-pi-C",
   "items": [
     {
-      "id": "R1",
-      "quote": "Use the mean imputation method to fill in missing values for both the \"24-Hour Passes Purchased (midnight to 11:59 pm)\" and \"7-Day Passes Purchased (midnight to 11:59 pm)\" columns.",
-      "deliverable": "answer",
+      "id": "1",
+      "quote": "This task expects 10 item(s):\n`@pre_mean[...]`, `@pre_median[...]`, `@pre_sd[...]`, `@pre_skewness[...]`, `@pre_kurtosis[...]`, `@post_mean[...]`, `@post_median[...]`, `@post_sd[...]`, `@post_skewness[...]`, `@post_kurtosis[...]`.",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -51,16 +51,16 @@
           }
         ]
       },
-      "description": "答案檔必須以 @tag[value] 格式給出十個統計鍵，且均為數值型別。均值填補本身無法用現有 verifier 直接驗證填補後的資料集，僅驗證答案鍵值結構。",
+      "description": "answer.txt 必須含 10 個指定鍵且值為數字（各四捨五入至兩位小數）。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
+      "id": "2",
       "quote": "@pre_mean[mean_before]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -73,16 +73,16 @@
           "round": 2
         }
       },
-      "description": "填補前 Trips 欄位平均值，四捨五入至兩位小數。",
+      "description": "pre_mean 等於 Trips 欄位填補前（即原始檔）的均值，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R3",
+      "id": "3",
       "quote": "@pre_median[median_before]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -95,16 +95,16 @@
           "round": 2
         }
       },
-      "description": "填補前 Trips 欄位中位數，四捨五入至兩位小數。",
+      "description": "pre_median 等於 Trips 欄位原始資料的中位數，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R4",
+      "id": "4",
       "quote": "@pre_sd[sd_before]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -117,16 +117,16 @@
           "round": 2
         }
       },
-      "description": "填補前 Trips 欄位標準差，四捨五入至兩位小數。",
+      "description": "pre_sd 等於 Trips 欄位原始資料的標準差，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
-      "id": "R5",
+      "id": "5",
       "quote": "@pre_skewness[skew_before]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -139,16 +139,16 @@
           "round": 2
         }
       },
-      "description": "填補前 Trips 欄位偏度，四捨五入至兩位小數。",
+      "description": "pre_skewness 等於 Trips 欄位原始資料的偏度，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
-      "id": "R6",
+      "id": "6",
       "quote": "@pre_kurtosis[kurt_before]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -161,16 +161,16 @@
           "round": 2
         }
       },
-      "description": "填補前 Trips 欄位峰度（超額峰度、pandas 口徑），四捨五入至兩位小數。",
+      "description": "pre_kurtosis 等於 Trips 欄位原始資料的超額峰度（pandas 口徑），兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
-      "id": "R7",
+      "id": "7",
       "quote": "@post_mean[mean_after]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "assumption",
       "params": {
@@ -183,16 +183,16 @@
           "round": 2
         }
       },
-      "description": "填補後 Trips 欄位平均值。均值填補僅作用於兩個 Passes 欄位，不更動 Trips 欄位，故填補後統計應與填補前相同；以原始資料重算比對。",
+      "description": "假設：遺漏值僅出現在兩個 Passes 欄位且採均值填補、不刪列，故 Trips 欄位填補前後統計量不變；post_mean 可由原始檔 Trips 欄位均值重算。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R8",
+      "id": "8",
       "quote": "@post_median[median_after]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "assumption",
       "params": {
@@ -205,16 +205,16 @@
           "round": 2
         }
       },
-      "description": "填補後 Trips 欄位中位數；因填補不影響 Trips 欄位，應與填補前相同。",
+      "description": "假設：均值填補不影響 Trips 欄位本身，post_median 等於原始檔 Trips 欄位中位數，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R9",
+      "id": "9",
       "quote": "@post_sd[sd_after]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "assumption",
       "params": {
@@ -227,16 +227,16 @@
           "round": 2
         }
       },
-      "description": "填補後 Trips 欄位標準差；因填補不影響 Trips 欄位，應與填補前相同。",
+      "description": "假設：均值填補不影響 Trips 欄位本身，post_sd 等於原始檔 Trips 欄位標準差，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
-      "id": "R10",
+      "id": "10",
       "quote": "@post_skewness[skew_after]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "assumption",
       "params": {
@@ -249,16 +249,16 @@
           "round": 2
         }
       },
-      "description": "填補後 Trips 欄位偏度；因填補不影響 Trips 欄位，應與填補前相同。",
+      "description": "假設：均值填補不影響 Trips 欄位本身，post_skewness 等於原始檔 Trips 欄位偏度，兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
-      "id": "R11",
+      "id": "11",
       "quote": "@post_kurtosis[kurt_after]",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "assumption",
       "params": {
@@ -271,22 +271,37 @@
           "round": 2
         }
       },
-      "description": "填補後 Trips 欄位峰度（超額峰度、pandas 口徑）；因填補不影響 Trips 欄位，應與填補前相同。",
+      "description": "假設：均值填補不影響 Trips 欄位本身，post_kurtosis 等於原始檔 Trips 欄位超額峰度（pandas 口徑），兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "12",
+      "quote": "Use the mean imputation method to fill in missing values for both the \"24-Hour Passes Purchased (midnight to 11:59 pm)\" and \"7-Day Passes Purchased (midnight to 11:59 pm)\" columns.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": []
+      },
+      "description": "unverified=true：對兩個 Passes 欄位進行均值填補是中間處理步驟，最終交付物 answer.txt 僅含 Trips 欄位統計量，且可用 recompute 型別無法重算「填補後的 Passes 欄位均值」此一中間結果，無法程式驗證。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
     },
     {
-      "id": "R12",
+      "id": "13",
       "quote": "Evaluate if the imputation has significantly affected the distribution and what implications it has on the dataset analysis.",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
         "keys": []
       },
-      "description": "對分佈影響的評估與含義說明屬定性論述，無法用現有 verifier 程式化驗證；unverified=true。",
+      "description": "unverified=true：對分佈影響的評估與含義屬文字論述，且合約聲明「Only the `@name[value]` items in `answer.txt` are read. Any other text in the file is ignored.」，無法以程式驗證。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -298,59 +313,42 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3",
-      "R4",
-      "R5",
-      "R6",
-      "R7",
-      "R8",
-      "R9",
-      "R10",
-      "R11",
-      "R12"
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "R4",
-        "reason": "unsupported_recompute_stat:sd"
+        "id": "12",
+        "reason": "empty_param:keys"
       },
       {
-        "id": "R5",
-        "reason": "unsupported_recompute_stat:skewness"
-      },
-      {
-        "id": "R6",
-        "reason": "unsupported_recompute_stat:kurtosis"
-      },
-      {
-        "id": "R9",
-        "reason": "unsupported_recompute_stat:sd"
-      },
-      {
-        "id": "R10",
-        "reason": "unsupported_recompute_stat:skewness"
-      },
-      {
-        "id": "R11",
-        "reason": "unsupported_recompute_stat:kurtosis"
-      },
-      {
-        "id": "R12",
+        "id": "13",
         "reason": "empty_param:keys"
       }
     ]
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"This task expects 10 item(s):\\n`@pre_mean[...]`, `@pre_median[...]`, `@pre_sd[...]`, `@pre_skewness[...]`, `@pre_kurtosis[...]`, `@post_mean[...]`, `@post_median[...]`, `@post_sd[...]`, `@post_skewness[...]`, `@post_kurtosis[...]`.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"pre_mean\", \"type\": \"number\"}, {\"key\": \"pre_median\", \"type\": \"number\"}, {\"key\": \"pre_sd\", \"type\": \"number\"}, {\"key\": \"pre_skewness\", \"type\": \"number\"}, {\"key\": \"pre_kurtosis\", \"type\": \"number\"}, {\"key\": \"post_mean\", \"type\": \"number\"}, {\"key\": \"post_median\", \"type\": \"number\"}, {\"key\": \"post_sd\", \"type\": \"number\"}, {\"key\": \"post_skewness\", \"type\": \"number\"}, {\"key\": \"post_kurtosis\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須含 10 個指定鍵且值為數字（各四捨五入至兩位小數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"@pre_mean[mean_before]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"pre_mean\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"mean\", \"round\": 2}},\n    \"description\": \"pre_mean 等於 Trips 欄位填補前（即原始檔）的均值，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"3\",\n    \"quote\": \"@pre_median[median_before]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"pre_median\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"median\", \"round\": 2}},\n    \"description\": \"pre_median 等於 Trips 欄位原始資料的中位數，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"4\",\n    \"quote\": \"@pre_sd[sd_before]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"pre_sd\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"sd\", \"round\": 2}},\n    \"description\": \"pre_sd 等於 Trips 欄位原始資料的標準差，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"5\",\n    \"quote\": \"@pre_skewness[skew_before]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"pre_skewness\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"skewness\", \"round\": 2}},\n    \"description\": \"pre_skewness 等於 Trips 欄位原始資料的偏度，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"6\",\n    \"quote\": \"@pre_kurtosis[kurt_before]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"pre_kurtosis\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"kurtosis\", \"round\": 2}},\n    \"description\": \"pre_kurtosis 等於 Trips 欄位原始資料的超額峰度（pandas 口徑），兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"7\",\n    \"quote\": \"@post_mean[mean_after]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"post_mean\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"mean\", \"round\": 2}},\n    \"description\": \"假設：遺漏值僅出現在兩個 Passes 欄位且採均值填補、不刪列，故 Trips 欄位填補前後統計量不變；post_mean 可由原始檔 Trips 欄位均值重算。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  },\n  {\n    \"id\": \"8\",\n    \"quote\": \"@post_median[median_after]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"post_median\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"median\", \"round\": 2}},\n    \"description\": \"假設：均值填補不影響 Trips 欄位本身，post_median 等於原始檔 Trips 欄位中位數，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  },\n  {\n    \"id\": \"9\",\n    \"quote\": \"@post_sd[sd_after]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"post_sd\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"sd\", \"round\": 2}},\n    \"description\": \"假設：均值填補不影響 Trips 欄位本身，post_sd 等於原始檔 Trips 欄位標準差，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  },\n  {\n    \"id\": \"10\",\n    \"quote\": \"@post_skewness[skew_after]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"post_skewness\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"skewness\", \"round\": 2}},\n    \"description\": \"假設：均值填補不影響 Trips 欄位本身，post_skewness 等於原始檔 Trips 欄位偏度，兩位小數。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  },\n  {\n    \"id\": \"11\",\n    \"quote\": \"@post_kurtosis[kurt_after]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"post_kurtosis\", \"data_file\": \"data/2014_q4.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"Trips over the past 24-hours (midnight to 11:59pm)\", \"stat\": \"kurtosis\", \"round\": 2}},\n    \"description\": \"假設：均值填補不影響 Trips 欄位本身，post_kurtosis 等於原始檔 Trips 欄位超額峰度（pandas 口徑），兩位小數。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  },\n  {\n    \"id\": \"12\",\n    \"quote\": \"Use the mean imputation method to fill in missing values for both the \\\"24-Hour Passes Purchased (midnight to 11:59 pm)\\\" and \\\"7-Day Passes Purchased (midnight to 11:59 pm)\\\" columns.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": []},\n    \"description\": \"unverified=true：對兩個 Passes 欄位進行均值填補是中間處理步驟，最終交付物 answer.txt 僅含 Trips 欄位統計量，且可用 recompute 型別無法重算「填補後的 Passes 欄位均值」此一中間結果，無法程式驗證。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  },\n  {\n    \"id\": \"13\",\n    \"quote\": \"Evaluate if the imputation has significantly affected the distribution and what implications it has on the dataset analysis.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": []},\n    \"description\": \"unverified=true：對分佈影響的評估與含義屬文字論述，且合約聲明「Only the `@name[value]` items in `answer.txt` are read. Any other text in the file is ignored.」，無法以程式驗證。\",\n    \"required\": false,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_378-pi-C",
     "role": "bad",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_378/task",
-    "user_text_chars": 1393,
+    "user_text_chars": 2156,
     "data_files": [
       "data/2014_q4.csv"
     ],
-    "generated_at": "2026-11-07T12:41:49+08:00"
+    "prompt_sha256": "f9548fc5c2bcf340a217b4f81dcce186a0f31e08c05911269b0fb8bf889c5497",
+    "generated_at": "2026-11-07T13:10:06+08:00"
   }
 }

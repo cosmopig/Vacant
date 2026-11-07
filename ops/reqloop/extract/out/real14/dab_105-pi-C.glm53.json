@@ -2,9 +2,9 @@
   "task_id": "dab_105-pi-C",
   "items": [
     {
-      "id": "req-1",
-      "quote": "Calculate the correlation coefficient between ApplicantIncome and LoanAmount.",
-      "deliverable": "@correlation_coefficient[corr_coeff]",
+      "id": "req_correlation_coefficient",
+      "quote": "Calculate the Pearson correlation coefficient to assess the strength and direction of linear relationship between ApplicantIncome and LoanAmount.",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -17,23 +17,43 @@
           "round": 2
         }
       },
-      "description": "計算 ApplicantIncome 與 LoanAmount 的 Pearson 相關係數，忽略任一欄缺值的列，四捨五入到小數兩位，與答案檔 @correlation_coefficient 值比對。",
+      "description": "計算 ApplicantIncome 與 LoanAmount 的 Pearson 相關係數，忽略任一欄缺值的列，四捨五入到小數兩位，與 answer.txt 中 @correlation_coefficient 的值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req-2",
+      "id": "req_answer_key_type",
       "quote": "@correlation_coefficient[corr_coeff] where \"corr_coeff\" is a number between -1 and 1, rounded to two decimal places",
-      "deliverable": "@correlation_coefficient[corr_coeff]",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "correlation_coefficient",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 必須含 @correlation_coefficient[...] 鍵值，值為 -1 到 1 之間的數字（兩位小數）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_tag_format",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`",
+      "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
       "params": {
         "tag": "correlation_coefficient",
         "value_type": "number"
       },
-      "description": "答案必須以 @correlation_coefficient[數值] 格式交付，數值介於 -1 與 1 之間且四捨五入至兩位小數。",
+      "description": "answer.txt 中答案項須以 @correlation_coefficient[數值] 格式撰寫，各佔一行。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -45,25 +65,28 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req-1",
-      "req-2"
+      "req_correlation_coefficient",
+      "req_answer_key_type",
+      "req_tag_format"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "req-2",
+        "id": "req_tag_format",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_correlation_coefficient\",\n    \"quote\": \"Calculate the Pearson correlation coefficient to assess the strength and direction of linear relationship between ApplicantIncome and LoanAmount.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"correlation_coefficient\",\n      \"data_file\": \"data/test_Y3wMUE5_7gLdaTN.csv\",\n      \"recompute\": {\"type\": \"pearson2\", \"col_a\": \"ApplicantIncome\", \"col_b\": \"LoanAmount\", \"round\": 2}\n    },\n    \"description\": \"計算 ApplicantIncome 與 LoanAmount 的 Pearson 相關係數，忽略任一欄缺值的列，四捨五入到小數兩位，與 answer.txt 中 @correlation_coefficient 的值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_answer_key_type\",\n    \"quote\": \"@correlation_coefficient[corr_coeff] where \\\"corr_coeff\\\" is a number between -1 and 1, rounded to two decimal places\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"correlation_coefficient\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須含 @correlation_coefficient[...] 鍵值，值為 -1 到 1 之間的數字（兩位小數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_tag_format\",\n    \"quote\": \"Put each answer item on its own line, in the form `@name[value]`\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"correlation_coefficient\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 中答案項須以 @correlation_coefficient[數值] 格式撰寫，各佔一行。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_105-pi-C",
     "role": "good",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_105-pi-C/task",
-    "user_text_chars": 673,
+    "user_text_chars": 1267,
     "data_files": [
       "data/test_Y3wMUE5_7gLdaTN.csv"
     ],
-    "generated_at": "2026-11-07T12:41:37+08:00"
+    "prompt_sha256": "3ee0fa8be1c8bb72712227e9cddd537e9227b3aa15f42e077ba60ce7168b961d",
+    "generated_at": "2026-11-07T13:09:53+08:00"
   }
 }

@@ -4,7 +4,7 @@
     {
       "id": "req_mean_cases",
       "quote": "What is the mean number of cases recorded across all countries and years?",
-      "deliverable": "@mean_cases[mean_value]",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -15,7 +15,7 @@
           "col": "No. of cases"
         }
       },
-      "description": "計算 'No. of cases' 欄位（轉為 Int64、忽略 Null/空值）跨所有國家與年份的平均值，與答案檔 @mean_cases 的值比對。",
+      "description": "計算 'No. of cases' 欄所有國家與年份的均值；Null 或空白記錄不計入（mean_int_col 預設忽略 Null/空白並四捨五入為整數）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -24,18 +24,38 @@
     {
       "id": "req_answer_format",
       "quote": "@mean_cases[mean_value] where \"mean_value\" is a positive integer.",
-      "deliverable": "@mean_cases[mean_value]",
+      "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
       "params": {
         "tag": "mean_cases",
         "value_type": "number"
       },
-      "description": "答案須以 @mean_cases[正整數] 格式呈現。",
+      "description": "answer.txt 需含 @mean_cases[value] 格式項目，值為正整數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
+    },
+    {
+      "id": "req_ignore_null",
+      "quote": "Ignore those records where 'No. of cases' column value is Null or empty.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "mean_cases",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "mean_int_col",
+          "col": "No. of cases"
+        }
+      },
+      "description": "計算均值時排除 'No. of cases' 為 Null 或空白的記錄；mean_int_col 已內建此語義。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -44,7 +64,8 @@
     "extract_error": null,
     "kept": [
       "req_mean_cases",
-      "req_answer_format"
+      "req_answer_format",
+      "req_ignore_null"
     ],
     "discarded": [],
     "unverified": [
@@ -54,14 +75,16 @@
       }
     ]
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_mean_cases\",\n    \"quote\": \"What is the mean number of cases recorded across all countries and years?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"計算 'No. of cases' 欄所有國家與年份的均值；Null 或空白記錄不計入（mean_int_col 預設忽略 Null/空白並四捨五入為整數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_answer_format\",\n    \"quote\": \"@mean_cases[mean_value] where \\\"mean_value\\\" is a positive integer.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"mean_cases\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 需含 @mean_cases[value] 格式項目，值為正整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_ignore_null\",\n    \"quote\": \"Ignore those records where 'No. of cases' column value is Null or empty.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"計算均值時排除 'No. of cases' 為 Null 或空白的記錄；mean_int_col 已內建此語義。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_055-pi-C",
     "role": "bad",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_055-pi-C/task",
-    "user_text_chars": 486,
+    "user_text_chars": 1067,
     "data_files": [
       "data/estimated_numbers.csv"
     ],
-    "generated_at": "2026-11-07T12:41:19+08:00"
+    "prompt_sha256": "680af33b4c5cb456e28a40eb5839547e03cfd8e69bb7c7b4212e197b511fa590",
+    "generated_at": "2026-11-07T13:09:37+08:00"
   }
 }

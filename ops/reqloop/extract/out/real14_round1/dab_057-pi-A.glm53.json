@@ -1,0 +1,92 @@
+{
+  "task_id": "dab_057-pi-A",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.",
+      "deliverable": "@correlation_coefficient[r_value]",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "correlation_coefficient",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "pearson2",
+          "col_a": "No. of cases",
+          "col_b": "No. of deaths",
+          "round": 2
+        }
+      },
+      "description": "以完整資料（不分國家、年份）計算 No. of cases 與 No. of deaths 的 Pearson 相關係數，四捨五入至兩位小數，並與答案鍵 correlation_coefficient 比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "@correlation_coefficient[r_value] where \"r_value\" is a number between -1 and 1, rounded to two decimal places.",
+      "deliverable": "@correlation_coefficient[r_value]",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "number"
+      },
+      "description": "答案須以 @correlation_coefficient[數值] 格式交付，數值介於 -1 與 1 之間並四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R3",
+      "quote": "Convert the data types of 'No. of cases' and 'No. of deaths' column from Object (String) to Int64 before performing calculations.",
+      "deliverable": "@correlation_coefficient[r_value]",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "correlation_coefficient",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "pearson2",
+          "col_a": "No. of cases",
+          "col_b": "No. of deaths",
+          "round": 2
+        }
+      },
+      "description": "計算前須將 'No. of cases' 與 'No. of deaths' 由字串轉為整數；此轉換為相關係數計算的前置步驟，重算時以轉換後的數值欄進行 Pearson 計算。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "R2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "provenance": {
+    "cell": "dab_057-pi-A",
+    "role": "good",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_057-pi-A/task",
+    "user_text_chars": 666,
+    "data_files": [
+      "data/estimated_numbers.csv"
+    ],
+    "generated_at": "2026-11-07T12:41:27+08:00"
+  }
+}
