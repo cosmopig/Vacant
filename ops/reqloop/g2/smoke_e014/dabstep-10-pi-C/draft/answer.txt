@@ -1,1 +1,5 @@
+How many unique merchants are present in the dataset? (Answer must be just a number of unique merchants.)
+
+The dataset contains 5 unique merchants.
+
 5
