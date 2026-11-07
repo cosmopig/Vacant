@@ -84,7 +84,7 @@ import tempfile
 from typing import Any, Callable
 
 from vacant_network.intake.verifiers import ClaimResult
-from vacant_network.reqloop.checks import run_requirement_checks
+from vacant_network.reqloop.checks import audit_kv_preservation, run_requirement_checks
 from vacant_network.reqloop.requirements import RequirementSet
 
 FEEDBACK_MODES = ("generic", "localized")
@@ -1772,6 +1772,14 @@ class RepairOutcome:
     #: 不再只依賴條目級 regressed 間接推估。
     satisfied_preserved: tuple[str, ...]
     satisfied_mutated: tuple[str, ...]
+    #: KV 交付物鍵級保留審計（r1151；審計端計算、不靠模型自評；
+    #: real_slice manifest independent_acceptance(2)）：初始驗即已滿足（params.key 且
+    #: 初始驗 PASS）的 key 中，最終工作區值位元組相同（.txt raw 字串／.json 值＋型別）
+    #: ＝ preserved；值被改／key 缺失／重複／檔案缺失＝ mutated（audit_kv_preservation
+    #: 保守分類）。純資訊審計：不改變退出碼（已滿足 key 值被改但重算仍 PASS＝成果仍
+    #: 正確，不得誤拒）；兩欄皆空＝審計未執行（零輪 no_gap／無 key 級已滿足項）。
+    kv_preserved: tuple[str, ...]
+    kv_mutated: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
         d = dataclasses.asdict(self)
@@ -1991,6 +1999,32 @@ def repair_slice(
         d_dir, final_ws, tracked_preserved
     )
 
+    # KV 交付物鍵級保留審計（real_slice manifest independent_acceptance(2)、審計端計算）：
+    # 單一交付物（answer.txt @key[value]）KV 任務上檔案級 satisfied_* by design 不適用
+    # （argon 20261106_1121），鍵級是「保留其餘成果」的落點：初始驗即已滿足的 key 中，
+    # 最終工作區值位元組相同＝preserved；值被改／key 缺失／重複／檔案缺失＝mutated
+    # （audit_kv_preservation 保守分類）。純資訊審計：不改變退出碼。零輪（no_gap、
+    # 未重生產）⇒ 審計不執行、兩欄皆空（不虛灌證據）。
+    kv_preserved: list[str] = []
+    kv_mutated: list[str] = []
+    if rounds:
+        before_st = {c.claim_id: c.status for c in before}
+        keys_by_file: dict[str, list[str]] = {}
+        for it in req_set.items:
+            if it.verifier != "kv_recomputed" or before_st.get(it.id) != "PASS":
+                continue
+            p = it.params if isinstance(it.params, dict) else {}
+            k = p.get("key")
+            if isinstance(k, str) and k.strip():
+                lst = keys_by_file.setdefault(str(it.deliverable), [])
+                if k.strip() not in lst:
+                    lst.append(k.strip())
+        for fname, keys in keys_by_file.items():
+            p_keys, m_keys = audit_kv_preservation(
+                d_dir / fname, final_ws / fname, keys)
+            kv_preserved.extend(p_keys)
+            kv_mutated.extend(m_keys)
+
     calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
     wall_total = sum(w for w in wall if isinstance(w, (int, float)))
@@ -2044,6 +2078,8 @@ def repair_slice(
         source_tampered_files=source_tampered_files,
         satisfied_preserved=tuple(satisfied_preserved),
         satisfied_mutated=tuple(satisfied_mutated),
+        kv_preserved=tuple(kv_preserved),
+        kv_mutated=tuple(kv_mutated),
     )
 
 
@@ -2565,6 +2601,12 @@ def main(argv: list[str] | None = None, *,
                   f"  ← 原已滿足交付物被改寫，未遵守保留約束（拒收）")
         if outcome.satisfied_preserved:
             print(f"satisfied_preserved: {', '.join(outcome.satisfied_preserved)}")
+        if outcome.kv_mutated:
+            print(f"KV_MUTATED: {', '.join(outcome.kv_mutated)}"
+                  f"  ← 原已滿足 key 值被改（鍵級審計、資訊性；不影響退出碼）")
+        if outcome.kv_preserved:
+            print(f"kv_preserved: {', '.join(outcome.kv_preserved)}"
+                  f"  （鍵級保留審計：原已滿足 key 值位元組相同）")
         if outcome.unresolved:
             print(f"unresolved: {', '.join(outcome.unresolved)}")
         c = outcome.cost

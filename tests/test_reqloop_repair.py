@@ -3475,6 +3475,89 @@ def test_satisfied_preservation_not_enforced_when_no_unsatisfied_or_single_deliv
     assert repair._exit_code(out_single_gen) == 0
 
 
+def test_kv_preservation_audit_single_deliverable(tmp_path):
+    """KV 單一交付物的鍵級保留審計（real_slice manifest independent_acceptance(2)、
+    審計端計算、不靠模型自評；r1151 接線）：
+
+    檔案級 satisfied_preserved/mutated 對單一交付物 by design 不適用（argon 20261106_1121），
+    「保留其餘成果」在 KV 任務（answer.txt @key[value]）上只能逐鍵核對：
+    初始驗即已滿足（PASS）的 key 中，最終工作區值位元組相同＝preserved；
+    值被改／key 消失／重複／檔案缺失＝mutated（保守分類）。
+    純資訊審計：不改變退出碼（已滿足 key 值被改但重算仍 PASS＝成果仍正確，
+    argon 20261106_1121 教訓：不得把正確候選誤拒）。
+
+    用真 dab_378-pi-C 切片（11 條＝1 格式＋10 重算；8 個已滿足 key＋pre/post_kurtosis 原 FAIL）：
+    1) 修復只改兩個 kurtosis 行 ⇒ kv_preserved=8 個 key、kv_mutated=()、exit 0；
+    2) 修復同時篡改一個已滿足 key（pre_mean）⇒ 該 key 進 kv_mutated 且入 regressed；
+    3) 好草稿（dab_378-pi-A）generic 重驗重存（內容不變）⇒ kv_preserved=10、kv_mutated=()；
+    4) 好草稿 localized no_gap（零輪）⇒ 審計未執行、兩欄皆空（不虛灌證據）。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    c_base = repo_root / "ops" / "reqloop" / "g2" / "real_slice" / "dab_378-pi-C"
+    t, d = c_base / "task", c_base / "draft"
+    rs = RequirementSet.load(t / "requirements.json")
+    draft_c = (d / "answer.txt").read_text(encoding="utf-8")
+    satisfied_keys = ("pre_mean", "pre_median", "pre_sd", "pre_skewness",
+                      "post_mean", "post_median", "post_sd", "post_skewness")
+
+    # (1) 只改原 FAIL 的 kurtosis 兩行（-1.17 → 重算正確值 -1.13），已滿足行位元組不變
+    fixed_c = (draft_c.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                         .replace("@post_kurtosis[-1.17]", "@post_kurtosis[-1.13]"))
+    out = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "ok", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": fixed_c}),
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert set(out.fixed) == {"pre_kurtosis", "post_kurtosis"}
+    assert out.regressed == ()
+    assert tuple(out.kv_preserved) == satisfied_keys
+    assert out.kv_mutated == ()
+    assert out.stopped == "gap_closed"
+    assert repair._exit_code(out) == 0
+
+    # (2) 同時篡改一個已滿足 key（pre_mean）⇒ 鍵級審計必須記下，且該 key 入 regressed
+    tampered_c = fixed_c.replace("@pre_mean[21144.08]", "@pre_mean[99999.99]")
+    out2 = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "mut", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": tampered_c}),
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert "pre_mean" in out2.kv_mutated
+    assert "pre_mean" not in out2.kv_preserved
+    assert "pre_mean" in out2.regressed
+    assert repair._exit_code(out2) != 0
+
+    # (3) 好草稿（dab_378-pi-A，10 key 全滿足）generic 重驗重存、內容不變 ⇒ 10 鍵全保留
+    # （manifest：A 與 C 共用同一 task 目錄 dab_378-pi-C/task）
+    da = (repo_root / "ops" / "reqloop" / "g2" / "real_slice" / "dab_378-pi-A" / "draft")
+    draft_a = (da / "answer.txt").read_text(encoding="utf-8")
+    out3 = repair.repair_slice(
+        t, rs, da,
+        out_root=tmp_path / "a", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": draft_a}),
+        feedback_mode="generic", max_rounds=2, min_rounds=1, synthetic=False,
+    )
+    assert out3.fixed == ()
+    assert out3.kv_mutated == ()
+    assert len(out3.kv_preserved) == 10
+    assert out3.stopped == "gap_closed"
+    assert repair._exit_code(out3) == 0
+
+    # (4) 好草稿 localized no_gap（零輪、未重生產）⇒ 審計未執行、兩欄皆空（不虛灌）
+    out4 = repair.repair_slice(
+        t, rs, da,
+        out_root=tmp_path / "a_nogap", build=_fake_build([]),
+        run=_fake_agent(None),
+        feedback_mode="localized", max_rounds=2, min_rounds=0, synthetic=False,
+    )
+    assert out4.stopped == "no_gap"
+    assert out4.kv_preserved == ()
+    assert out4.kv_mutated == ()
+    assert repair._exit_code(out4) == 0
+
+
 def test_satisfied_mutated_prevents_early_gap_closed_and_round2_restores_clean_satisfied_deliverable(task_dir, tmp_path):
     """argon 20261106_1121 回歸（3b3f8f46／98bed360 缺陷）：
     在多交付物部分修復（expense_category/bad_grand_total_wrong：summary.md FAIL、expense_summary.csv PASS）中：

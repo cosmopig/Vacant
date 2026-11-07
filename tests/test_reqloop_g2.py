@@ -1456,14 +1456,14 @@ def test_run_g2_smoke_audits_kv_preservation_on_satisfied_kv_keys(tmp_path, caps
     assert len(by[("dab_378-pi-C", "localized")]["kv_preserved"]) == 7
     assert by[("dab_378-pi-C", "localized")]["kv_mutated"] == ["pre_median"]
 
-    # good 草稿（雙臂）：10 個初始 PASS 的 @key[value] 全數 preserved
+    # good 草稿：generic 重驗 10 個初始 PASS 的 @key[value] 全數 preserved；localized no_gap 不虛灌（空）
     assert len(by[("dab_378-pi-A", "generic")]["kv_preserved"]) == 10
     assert by[("dab_378-pi-A", "generic")]["kv_mutated"] == []
-    assert len(by[("dab_378-pi-A", "localized")]["kv_preserved"]) == 10
+    assert by[("dab_378-pi-A", "localized")]["kv_preserved"] == []
     assert by[("dab_378-pi-A", "localized")]["kv_mutated"] == []
 
     totals = payload["totals"]
-    assert totals["kv_preserved_total"] == 8 + 7 + 10 + 10 == 35
+    assert totals["kv_preserved_total"] == 8 + 7 + 10 == 25
     assert totals["kv_mutated_total"] == 1
 
 
