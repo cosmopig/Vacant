@@ -1612,27 +1612,7 @@ def check_kv_recomputed(
         elif rtype == "mean_int_col":
             expected, unrounded_int_expected = _mean_int_col(rows, rc)
         elif rtype == "max_row_first":
-            # G2 小批（e013 dab_426）：sel_col 最大值、平手取檔案序第一列、
-            # 輸出該列 out_col——「neglecting ties…choose the one that appears
-            # first」的文字直譯。
-            sel_col = str(rc.get("sel_col", "")).strip()
-            out_col = str(rc.get("out_col", "")).strip()
-            if not sel_col or not out_col:
-                raise UnknownSource("max_row_first 需要 sel_col 與 out_col")
-            best: tuple[float, dict[str, Any]] | None = None
-            for r in rows:
-                try:
-                    v = float(str(r.get(sel_col, "")).strip())
-                except (TypeError, ValueError):
-                    continue
-                if best is None or v > best[0]:
-                    best = (v, r)
-            if best is None:
-                raise UnknownSource("max_row_first: 無可解析選取欄")
-            try:
-                expected = float(str(best[1].get(out_col, "")).strip())
-            except (TypeError, ValueError):
-                raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+            expected = _max_row_first(rows, rc)
         elif rtype == "pearson2":
             # G2 小批（e013 dab_105）：兩欄成對可解析行（缺值行忽略）、Pearson r。
             col_a = str(rc.get("col_a", "")).strip()
@@ -1809,6 +1789,31 @@ def _col_max(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     if not col:
         raise UnknownSource("col_max.col 缺失")
     return max(_col_values(rows, col))
+
+
+def _max_row_first(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """max_row_first（G2 dab_426）：sel_col 最大值、平手取檔案序第一列、輸出該列 out_col。
+
+    「neglecting ties…choose the one that appears first」的文字直譯（e013 dab_426）。
+    """
+    sel_col = str(rc.get("sel_col", "")).strip()
+    out_col = str(rc.get("out_col", "")).strip()
+    if not sel_col or not out_col:
+        raise UnknownSource("max_row_first 需要 sel_col 與 out_col")
+    best: tuple[float, dict[str, Any]] | None = None
+    for r in rows:
+        try:
+            v = float(str(r.get(sel_col, "")).strip())
+        except (TypeError, ValueError):
+            continue
+        if best is None or v > best[0]:
+            best = (v, r)
+    if best is None:
+        raise UnknownSource("max_row_first: 無可解析選取欄")
+    try:
+        return float(str(best[1].get(out_col, "")).strip())
+    except (TypeError, ValueError):
+        raise UnknownSource(f"max_row_first: {out_col} 不可解析")
 
 
 def _mean_int_col(

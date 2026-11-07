@@ -10,6 +10,8 @@ import pytest
 
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 from vacant_network.reqloop.checks import (
+    _max_row_first,
+    UnknownSource,
     recompute_orders_monthly,
     run_requirement_checks,
 )
@@ -1025,6 +1027,32 @@ def test_kv_recomputed_max_row_first_first_tie_wins(tmp_path: pathlib.Path):
     _write(bad / "answer.txt", "@max_wind_speed[165.11]\n")   # 取了組內最大風速（錯）
     res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
     assert res["req_main"].status == "FAIL"
+
+
+def test_max_row_first_standalone_helper():
+    """_max_row_first 頂層獨立呼叫：平手取檔案序第一列；缺欄位／無可解析選取欄／
+    輸出欄不可解析皆拋 UnknownSource（單一事實來源，外部審計可直接呼叫產品代碼）。"""
+    rows = [
+        {"sel": "6", "out": "156.41568"},   # 與次列同為最大值
+        {"sel": "6", "out": "165.10544"},   # 平手取首列——不取此列
+        {"sel": "1", "out": "43.45"},
+        {"sel": "x", "out": "99.0"},        # 不可解析選取欄，忽略
+    ]
+    rc = {"sel_col": "sel", "out_col": "out"}
+    assert _max_row_first(rows, rc) == 156.41568
+    # 最大列非首列時仍取最大（非平手情況）
+    assert _max_row_first(rows + [{"sel": "9", "out": "200.0"}], rc) == 200.0
+    # 缺 sel_col / out_col → UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first(rows, {"out_col": "out"})
+    with pytest.raises(UnknownSource):
+        _max_row_first(rows, {"sel_col": "sel"})
+    # 無可解析選取欄 → UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "x"}, {"sel": ""}], rc)
+    # 輸出欄不可解析 → UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "6", "out": "n/a"}], rc)
 
 
 def test_kv_recomputed_pearson2_pass_and_fail(tmp_path: pathlib.Path):
