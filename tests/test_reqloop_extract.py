@@ -748,4 +748,4 @@ def test_task_prompt_round3_semantic_rules_r1182():
     assert '"op": "ne", "value": "CANCELLED"' not in p, "反例 op:ne 仍在 prompt"
     assert '"type": "ratio"' in p and '"num"' in p and '"den"' in p, "ratio(num/den) 未明寫"
     assert "全部分組欄位" in p, "group_normalize 範圍規則未明寫"
-    assert "都要寫進" in p, "條件合併規則未明寫"
+    assert "完整條件集" in p and "rowset_filter 就要 exclude 與 include 都寫" in p, "條件合併規則未明寫"
