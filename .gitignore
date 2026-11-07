@@ -113,3 +113,9 @@ ops/gain/_r481_fixture_scope_*.md
 ops/gain/_r481_dup_*/
 ops/gain/_r47x_*
 
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
