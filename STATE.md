@@ -148,3 +148,9 @@
 - 驗證了什麼：230 passed（2.72s）；負控／skip 控皆過；raw 重算與摘要逐項一致；工作樹淨（僅新測試檔）。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 產品改動、0 模型呼叫、0 發射。
 - DECISION：11-06 #1/#2 必答數字已有常設守衛且與 raw 一致；vq-5nz.54（dab_055 2 格）仍候 demand side 點名＋成本另報，點名到位即單命令發射。
+## r1163（第 1163 輪；2026-11-07）
+- 做：審查 P1/P2 已於 r1161 驗收閉口（897c5552 為 3af7dc13 祖先；realab_20261107_summary.json repo 檔＋ops-home symlink 皆在）；本輪依「一檔一測試一命令輸出變好」完成 P3 選題事實守衛——新檔 tests/test_reqloop_dab055_slice.py（1 檔、1 測試）：由 effects2_20261106 raw（dab_055-pi-C 兩格 g2_result＋before_after.json）釘住選題事實：同草稿 hash 356c5855…＋同 manifest＋baseline 0/1 雙臂 FAIL；generic 內容反例未解（req_mean_cases_recomputed FAIL、unresolved 精確點名、max_rounds、tamper 0）；localized gap_closed 兩 claim PASS（unresolved/regressed 空）；獨立裁決 scored false/true；成本常數 generic 25 calls/1,451,938 tok/149,433 ms vs localized 21/372,043/67,646。負控：raw 副本篡改（unresolved 清空、成本 25→24）即拒（NEGCTL_OK）；skip 控：raw 缺席 skip 不偽綠。
+- 驗證了什麼：新測試 `1 passed in 0.04s`；7 檔接受套（5 檔＋effects2_analysis＋本檔）230→`231 passed in 3.03s`（基線 230 先跑後加）；diff 僅 1 檔＋90 行；commit dfb02b61。
+- 沒驗證什麼：0 模型呼叫/0 元/0 發射——本票是選題事實守衛（P3「預期可展示改善」已於 raw 成立、非新效果數字）；vq-5nz.54 發射仍候 demand side 裁決（發射＝重複成本、NOW 已標）。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加錯誤字串 regex·靜態處方·重試／未改 effects2 快照·凍結 manifest／1753 維持排除。
+- DECISION：審查 P3 下一切片（dab_055-pi-C）選題事實今有常設守衛，與 r1162 bad9 聚合守衛互補（聚合 vs 逐題）；dab_378 維持停跑（stop-dab378 記憶在案）；vq-5nz.54（2 格）發射候 demand side 裁決是否仍需新證據＋成本另報。
