@@ -2,6 +2,6 @@
   "database": "dolt",
   "backend": "dolt",
   "dolt_mode": "embedded",
-  "dolt_database": "Vacant",
-  "project_id": "01de207e-59f6-47be-b693-69ec31b5cf7a"
+  "dolt_database": "vq",
+  "project_id": "7ee45eb8-eec3-4d1b-b15b-a7bfb2d46be6"
 }
