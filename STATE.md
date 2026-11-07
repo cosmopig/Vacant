@@ -38,3 +38,8 @@
 - 正式發射 vacant-phase3-20261107.service（14:35 active）：9 錯×r1190 擷取需求（freeze.json 凍 hash）×localized 修復（gemma-4-12b-it-qat、≤2 輪×300s）×獨立 scorer；out/phase3/progress.json；0 新增擷取呼叫；工單 P20261107_1431-1（六要素齊）入 done；發射後不等。
 - 沒驗證：正式批 9 格數字（約 2.5h、下輪看 progress）；7de75257 CI 綠燈；冒煙數字非正式結果。
 - 下一步：vq-el4.5 收結果（complete=true→verdict＋成本，對照手寫 9/9、不宣稱較好）；復核 CI。
+- 2026-11-07 r1195: 工單 P20261107_1426-1 收——run_phase3 補 progress.json 斷點接續（+19 行；新測試改前重複呼叫 build/run 而 FAIL、改後過，27 passed）；r1192 正式跑 6/3（phase3_r1192, 14:09–14:30）同步官方 out/phase3。
+- 重要：同 freeze 有兩跑——(a) phase3_r1192＝6 fixed/3 unresolved、263 calls/14 sessions（票定官方）；(b) 14:35 service 重跑＝8/1、209 calls（15:02 完成、寫進 repo out/）。兩跑 draft/req sha 全同＝gemma 單 rep 抽樣差異；(b) 證據已存 ~/dev/ops/audits/phase3_two_runs_20261107/（含 repair tar 53M），以哪跑為準留規劃者裁決；不宣稱較好。
+- 驗收：run_eval.py --phase3 → fixed 6、unresolved 3、rejected 0、rtw 0、held 0、error 0、RC=0、0 新模型呼叫；成本 263 model_calls/14 sessions/tokens UNKNOWN；eval_phase3_glm53.json 寫入。vq-el4.5 close（bd，reason 帶證據路徑）；工單 mv done/。
+- 沒驗證：7de75257 CI 綠燈（auto/qwen27b 本輪仍跑）；兩跑差異的裁決（待規劃者）。
+- 下一步：等規劃者對兩跑差異裁決；bd ready＝vq-el4.6（換模型比較 gemma/glm53/glm53flash/deepseek41）；復核 CI。
