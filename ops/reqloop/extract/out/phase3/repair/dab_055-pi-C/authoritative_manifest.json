@@ -1,0 +1,10 @@
+{
+ "schema": "vacant.reqloop.authoritative/1",
+ "task": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/tasks/dab_055-pi-C",
+ "files": {
+  "contract.md": "fc9b32bf919c8d219cfa1d4b735063e5f0bea1ab528c76bbea17b95c9caf0faa",
+  "request.md": "89762c8d2e867eba309d53e7c651ee9bdfe5dc7242786dc69bf728a6b7661695",
+  "requirements.json": "a4b01dba4d60a075877c5040925897cde0bc137f9339299c66bedc82c4228ef5",
+  "data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+ }
+}

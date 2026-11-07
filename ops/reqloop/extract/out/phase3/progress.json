@@ -1,0 +1,164 @@
+{
+ "complete": false,
+ "rows": [
+  {
+   "cell": "dab_039-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": false,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "unresolved",
+   "stopped": "no_gap",
+   "final_status": {
+    "R1": "UNKNOWN",
+    "R2": "UNKNOWN",
+    "R3": "UNKNOWN",
+    "R4": "UNKNOWN"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/draft",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 0,
+    "model_calls": 0,
+    "tokens": null,
+    "wall_ms_total": null
+   }
+  },
+  {
+   "cell": "dab_055-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "max_rounds",
+   "final_status": {
+    "R1": "PASS",
+    "R2": "PASS",
+    "R3": "PASS",
+    "R4": "UNKNOWN",
+    "R5": "PASS"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_055-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 16,
+    "tokens": 306939,
+    "wall_ms_total": 57726
+   }
+  },
+  {
+   "cell": "dab_378-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "stalled",
+   "final_status": {
+    "req_pre_mean": "PASS",
+    "req_pre_median": "PASS",
+    "req_pre_sd": "PASS",
+    "req_pre_skewness": "PASS",
+    "req_pre_kurtosis": "PASS",
+    "req_post_mean": "PASS",
+    "req_post_median": "PASS",
+    "req_post_sd": "PASS",
+    "req_post_skewness": "PASS",
+    "req_post_kurtosis": "PASS",
+    "req_mean_imputation": "UNKNOWN"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_378-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 13,
+    "tokens": 315057,
+    "wall_ms_total": 263429
+   }
+  },
+  {
+   "cell": "dab_426-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "stalled",
+   "final_status": {
+    "R1": "FAIL",
+    "R2": "UNKNOWN"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_426-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 12,
+    "tokens": 457403,
+    "wall_ms_total": 148229
+   }
+  },
+  {
+   "cell": "dab_427-pi-A",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "max_rounds",
+   "final_status": {
+    "1": "UNKNOWN",
+    "2": "PASS"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_427-pi-A/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 25,
+    "tokens": 856048,
+    "wall_ms_total": 280235
+   }
+  }
+ ]
+}

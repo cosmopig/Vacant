@@ -1,0 +1,10 @@
+{
+ "schema": "vacant.reqloop.authoritative/1",
+ "task": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/tasks/dab_507-pi-A",
+ "files": {
+  "contract.md": "9a197bd1b56fa93337389c520d17ba10e733e8b9dbc4a7f5013e7182eefe363e",
+  "request.md": "05092e7ce837a682f9e6624bc60ac4a588cec8a390f079b01a8223ea15b9eb96",
+  "requirements.json": "0c2ace971f2bd8694c7c125a6f713cf68a819096f0a0ef2ea9dc9af8b045f6cc",
+  "data/hotel_data.csv": "581144a1a813e187abc75c3db8f71c25cbec27afe7956e9be9de369acde1c0f7"
+ }
+}

@@ -1,0 +1,240 @@
+{
+  "task_id": "dab_378-pi-C",
+  "items": [
+    {
+      "id": "req_pre_mean",
+      "quote": "@pre_mean[mean_before]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_mean",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "mean",
+          "round": 2
+        }
+      },
+      "description": "插補前 Trips 欄位的平均值，四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_pre_median",
+      "quote": "@pre_median[median_before]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_median",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "median",
+          "round": 2
+        }
+      },
+      "description": "插補前 Trips 欄位的中位數，四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_pre_sd",
+      "quote": "@pre_sd[sd_before]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_sd",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "sd",
+          "round": 2
+        }
+      },
+      "description": "插補前 Trips 欄位的標準差，四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_pre_skewness",
+      "quote": "@pre_skewness[skew_before]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_skewness",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "skewness",
+          "round": 2
+        }
+      },
+      "description": "插補前 Trips 欄位的偏度，四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_pre_kurtosis",
+      "quote": "@pre_kurtosis[kurt_before]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "pre_kurtosis",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "kurtosis",
+          "round": 2
+        }
+      },
+      "description": "插補前 Trips 欄位的峰度（超額峰度，pandas 口徑），四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_post_mean",
+      "quote": "@post_mean[mean_after]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "assumption",
+      "params": {
+        "key": "post_mean",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "mean",
+          "round": 2
+        }
+      },
+      "description": "插補後 Trips 欄位的平均值。均值插補僅作用於兩個 Passes 購買欄位，不改變 Trips 欄位本身，故插補後統計值等同原始資料重算值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_post_median",
+      "quote": "@post_median[median_after]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "assumption",
+      "params": {
+        "key": "post_median",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "median",
+          "round": 2
+        }
+      },
+      "description": "插補後 Trips 欄位的中位數。均值插補僅作用於兩個 Passes 購買欄位，不改變 Trips 欄位本身，故插補後統計值等同原始資料重算值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_post_sd",
+      "quote": "@post_sd[sd_after]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "assumption",
+      "params": {
+        "key": "post_sd",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "sd",
+          "round": 2
+        }
+      },
+      "description": "插補後 Trips 欄位的標準差。均值插補僅作用於兩個 Passes 購買欄位，不改變 Trips 欄位本身，故插補後統計值等同原始資料重算值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_post_skewness",
+      "quote": "@post_skewness[skew_after]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "assumption",
+      "params": {
+        "key": "post_skewness",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "skewness",
+          "round": 2
+        }
+      },
+      "description": "插補後 Trips 欄位的偏度。均值插補僅作用於兩個 Passes 購買欄位，不改變 Trips 欄位本身，故插補後統計值等同原始資料重算值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_post_kurtosis",
+      "quote": "@post_kurtosis[kurt_after]",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "assumption",
+      "params": {
+        "key": "post_kurtosis",
+        "data_file": "data/2014_q4.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "Trips over the past 24-hours (midnight to 11:59pm)",
+          "stat": "kurtosis",
+          "round": 2
+        }
+      },
+      "description": "插補後 Trips 欄位的峰度（超額峰度，pandas 口徑）。均值插補僅作用於兩個 Passes 購買欄位，不改變 Trips 欄位本身，故插補後統計值等同原始資料重算值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_mean_imputation",
+      "quote": "Use the mean imputation method to fill in missing values for both the \"24-Hour Passes Purchased (midnight to 11:59 pm)\" and \"7-Day Passes Purchased (midnight to 11:59 pm)\" columns.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": []
+      },
+      "description": "對兩個 Passes 購買欄位以均值填補遺失值。此步驟本身無法用現有 verifier 的 recompute 型別直接驗證（無均值插補型別）；其效果僅透過插補前後 Trips 欄位統計量（本清單其他條目）間接檢核，故設 unverified。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ]
+}

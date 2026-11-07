@@ -1,0 +1,17 @@
+{
+  "task_id": "dab_427-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "2",
+      "quote": "How many storms have null values in the \"min_p\" column?",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

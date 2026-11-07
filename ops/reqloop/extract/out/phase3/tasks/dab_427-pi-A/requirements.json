@@ -1,0 +1,41 @@
+{
+  "task_id": "dab_427-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "null_entries_count",
+        "value_type": "number"
+      },
+      "description": "答案須寫入 answer.txt，並以 @null_entries_count[數字] 格式呈現。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "2",
+      "quote": "How many storms have null values in the \"min_p\" column?",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "null_entries_count",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {
+          "type": "null_count",
+          "col": "min_p"
+        }
+      },
+      "description": "統計 min_p 欄位中 null 值的個數（僅計 null，不計其他錯誤資料），與 answer.txt 中 @null_entries_count 的值比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

@@ -33,3 +33,8 @@
 - commit：3db4a7f3（訊息以工單檔名開頭）；工單已 mv done/，尾附結果 3 行。
 - 沒驗證：GitHub CI 綠燈（本輪不 push，待自動推送後下一輪查 auto/qwen27b CI）。
 - 下一步：查 3db4a7f3 CI（應轉綠）；然後回主線 vq-el4.5（9 錯 localized 修復＋獨立 scorer）。
+- 2026-11-07 r1192: vq-el4.5 發射——(1) CI 復核：7de75257（HEAD、含 r1191 CI 修 3db4a7f3）本機 CI 仍跑（~/dev/ops/ci/ 無該 SHA 檔），下輪再核；(2) phase3 預檢：26 離線測試綠、14 cell 可推導（9 bad）、req/src/labcell/draft 全在、gemma 端點健康、sudo -n OK；9 bad 初始驗 8 份有 FAIL 缺口（dab_055 3F、dab_507 2F、其餘各 1F）、dab_039 無缺口（0 呼叫）。
+- 冒煙（scratch /tmp/phase3_smoke_r1192，非正式）：dab_039 unresolved（after=False scored、0 呼叫）；dab_055 fixed（after=True scored、17 calls／286058 tok）→ 真模型全鏈路（pi→gemma→localized 重驗→sudo -n 獨立 scorer→verdict）通過。
+- 正式發射 vacant-phase3-20261107.service（14:35 active）：9 錯×r1190 擷取需求（freeze.json 凍 hash）×localized 修復（gemma-4-12b-it-qat、≤2 輪×300s）×獨立 scorer；out/phase3/progress.json；0 新增擷取呼叫；工單 P20261107_1431-1（六要素齊）入 done；發射後不等。
+- 沒驗證：正式批 9 格數字（約 2.5h、下輪看 progress）；7de75257 CI 綠燈；冒煙數字非正式結果。
+- 下一步：vq-el4.5 收結果（complete=true→verdict＋成本，對照手寫 9/9、不宣稱較好）；復核 CI。
