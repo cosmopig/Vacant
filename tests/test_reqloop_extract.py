@@ -730,3 +730,22 @@ def test_parse_model_output_handles_multiple_fences_and_braces_in_prose():
         + "\n附註：以上符合 {schema} 規範 [done]。"
     )
     assert parse_model_output(raw_prose_braces) == _valid_items()
+
+
+def test_task_prompt_round3_semantic_rules_r1182():
+    """vq-el4.3 round3（r1182）：4 格冤枉 FP 的根因是參數語義錯——
+    (1) rowset_filter 範例 exclude 用 op:"ne"（檢查器 exclude＝排除符合條件的列，模型照抄即反）；
+    (2) 比率定義（sla_rate＝X÷Y）模型用 count_if 而非 ratio(num/den)；
+    (3) 同行集的多條件（exclude/dedup/include）未合併進每個重算條目（缺 current_stock<safety_stock）；
+    (4) 「輸出用 lower」只套到句中欄位，group_normalize 範圍不足。
+    prompt 必須明寫這四條＋範例改 eq。
+    """
+    from vacant_network.reqloop.extract import build_task_prompt
+
+    p = build_task_prompt("t")
+    assert "要排除的列" in p, "exclude 語義未明寫"
+    assert '"op": "eq", "value": "CANCELLED"' in p, "範例應為 eq"
+    assert '"op": "ne", "value": "CANCELLED"' not in p, "反例 op:ne 仍在 prompt"
+    assert '"type": "ratio"' in p and '"num"' in p and '"den"' in p, "ratio(num/den) 未明寫"
+    assert "全部分組欄位" in p, "group_normalize 範圍規則未明寫"
+    assert "都要寫進" in p, "條件合併規則未明寫"
