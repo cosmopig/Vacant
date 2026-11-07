@@ -135,3 +135,9 @@
 - ⑤ 派工面：vq-el4 全 closed、bd ready 空、tickets open/doing/qwen 三欄空、/srv/vlab/queue 空——無新工單。
 - DECISION: 不自動發起 PHASE3 線上重驗（4 格 STALE 需模型呼叫；11/07 定案「不新增單題重算」、審查未點名）；不自動推 argon（2db8afa5 CI 正在跑、下輪巡）。
 - 下一步：等審查新派工／G2.5 後續；下輪巡 auto/argon 2db8afa5 CI。
+- 2026-11-07 r1213（工單 P20261107_2028-1：PHASE3 第一批 STALE 重驗；驗收 BATCH1_STALE_RESOLVED_OK）：
+- ① dab_039-pi-C **unresolved→fixed**（29 calls/2505080 tok）、dab_055-pi-C unresolved→unresolved（14c/668553t、stalled）；共 4 sessions/43 calls/3173633 tokens（1004 gemma-4-12b-it-qat、raw usage、無硬 token 上限）。
+- ② DECISION: 工單字面指令 --phase3 --limit 2 對官方 9 格 freeze.json fail-closed（_freeze_matches 9≠2、設計使然非 bug）→ 改 --p3-out phase3_batch1_20261107 新工作目錄跑同 2 格（官方 freeze 未動、未刪），2 行新裁決（含 req_effective_sha256）併入官方 progress.json，其餘 7 行原樣；舊 039/055 裁決（unresolved、req_sha None）留存在 3f400c5d 前 git 歷史。
+- ③ 驗證：驗收指令＝BATCH1_STALE_RESOLVED_OK；離線複驗（唯讀）039/055 由 STALE 變 RESUMED、剩 STALE＝dab_426/dab_427（第二批）；source_tampered/satisfied_mutated 皆 False。
+- ④ 沒驗證：3f400c5d 的 CI（本輪不跑全量 pytest）；039 fixed 為本批單 rep 裁決、開發選樣，不宣稱管線普遍較好；426/427 未重驗前 PHASE3 離線門仍 fail-closed rc=2（機制在位）。
+- 下一步：等第二批工單（dab_426/427）或審查派工；巡 auto/qwen27b 3f400c5d 與 auto/argon 2db8afa5 CI。

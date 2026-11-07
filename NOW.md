@@ -1,15 +1,17 @@
-# 現在（第 1212 輪後，2026-11-07）
+# 現在（第 1213 輪後，2026-11-07）
 
-## r1212：CI 巡燈＋離線門禁複驗（0 模型呼叫、0 產品改動）
-- ① c6f73f7f（本分支 HEAD，含 2db8afa5 合併＋beads 修正）本地 CI **🟢 5031 passed/74 skipped/0 failed**（5104 收集、839s）——r1211 預設的綠燈坐實；argan 合併帶進的 3 個新測試在內。
-- ② `run_eval.py --all` 離線複驗（0 新 API 呼叫，vibe_calls 130→130）：G1 PASS（39/39・0 冤枉）、REAL14 PASS（9/9・1/5）；**PHASE3 fail-closed FAIL（rc=2）**：fixed 4／unresolved 1／error 4，STALE＝dab_039・dab_055・dab_426・dab_427。
-- ③ PHASE3 紅燈**是 2db8afa5/3cf31e81 合併進的 STALE 機制在位、非回歸**：round 1199 規則變動後這 4 格舊裁決不得沿用；worker R20261107_1928-2 已驗證「PHASE3 FAIL rc=2 fail-closed＝expected behavior」；官方鎖檔 eval_phase3_glm53.json 未動（6/9＝round 1192 舊規則單 rep、round 1199 變動格未重跑、**不得宣稱現行管線即時成果**）。
-- ④ extract.py 防發明機制在位（quote_is_verbatim L132／recompute type 白名單→unverified L511-521／模型自帶 unverified 一律尊重 L734-755）。
+## r1213：PHASE3 第一批 STALE 重驗完成（工單 P20261107_2028-1 → done）
+- dab_039-pi-C **unresolved→fixed**（29 calls/2505080 tok）；dab_055-pi-C unresolved→unresolved（14c/668553t、stalled）。共 4 sessions/43 calls/3173633 tokens（1004 gemma-4-12b-it-qat；raw usage；無硬 token 上限）。
+- 驗收＝**BATCH1_STALE_RESOLVED_OK**（commit 3f400c5d）。兩格帶 req_effective_sha256 入官方 progress.json；離線複驗 039/055 由 STALE→RESUMED。
+- 路徑偏離（已記 DECISION）：字面 `--phase3 --limit 2` 對官方 9 格 freeze fail-closed（_freeze_matches 9≠2，設計使然）→ 改 `--p3-out phase3_batch1_20261107` 新工作目錄跑同 2 格；官方 freeze.json 未動；2 行裁決併入官方 progress.json（其餘 7 行原樣；舊裁決在 3f400c5d 前 git 歷史）。
+
+## PHASE3 現況（口徑）
+- 9 格：fixed 5（039 新、378、427*、507、dabstep-10、23 中 5）＋unresolved 2（055 新、1273）＋**STALE 2（dab_426、dab_427＝第二批，未重驗）**；離線門對剩 2 格 fail-closed rc=2＝機制在位。
+- 所有裁決＝開發選樣單 rep（gemma 12b 本機）；039 fixed 是單格結果，不宣稱管線普遍較好。
 
 ## 下一步
-1. vq-el4 全 closed、bd ready 空、tickets 無新派、/srv/vlab/queue 空——等審查新派工／G2.5 後續。
-2. PHASE3 現行管線重驗需線上 `--phase3`（4 格 STALE，模型呼叫）——未獲派工前不自動發起。
-3. auto/argon 2db8afa5 CI 正在跑（state.json running），結果下輪巡。
+1. 等第二批工單（dab_426/427 重驗）或審查新派工。
+2. 巡 CI：auto/qwen27b 3f400c5d、auto/argon 2db8afa5（輪首時皆未跑完）。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
