@@ -190,3 +190,9 @@
 - 卡點（如實）：紅線內（不新增發射／regex／靜態處方／重試、1753 排除）無剩餘符合六要素之工作——下一步全是候需求端點名的發射：vq-6rp（1753）、vq-5nz.6（停滯 8 格換方法）、dab_055 2 格發射；11-06#7 新成本另報，不自我點名。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 模型呼叫、0 元、0 發射。
 - 下一步：點名後發射（成本另報）；點名前不發射、不同題重跑、不改文件湊進展。
+## r1168-redo（交付前審查：effects_20261105_summary.json 點名但記錄未開啟——已開啟並重做依賴部分）
+- 已開啟（head＋code load，60,228 bytes）：repo `ops/audits/effects_20261105_summary.json`（schema `vacant.audit/effects_20261105_summary/1`、snapshot d38d2eb2、source_root ~/dev/ops/effects_20261105、total_cells=50）。
+- 重核依賴部分①（票 P20261107_0210-1「參考基線」引文＝r1168 ②之驗證依據）——逐項對文件重驗、全部一致：total_cells=50；policy30 每臂 cells−preserved_good＝15−5＝10、wrong_to_right 7/6→7/10・6/10；once20 10−0＝10、7/4→7/10・4/10；local_vs_independent 分歧 3＋2＝5 格全為 d38d2eb2 舊 checker 行；current_code_matches_total＝50、兩 phase 0 分歧；dab_055-pi-C-localized(policy30) local_all_pass_d38d2eb2=false→after_independent=true、current_code_all_pass=true（cells_detail 逐字核對）。
+- 重核依賴部分②（r1168「全綠 207 passed」含 3 個讀此檔之測試）：`pytest tests/test_reqloop_g2.py -k effects_20261105`＝3 passed、0 skipped（含 matches_source_files 逐數交叉核對，源檔在本機）。
+- 核對無誤傷：r1168 STATE/NOW 所引 2200/2081990 屬 effects2_20261106（dab_055）批、非本檔；未見舊 6 格或 1/10 數字於 r1168 交付物；本檔 scope_note（開發選樣單 rep、缺值 None、hidden_after 全 UNKNOWN）口徑未被任何交付物誤引。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未改凍結快照；0 模型呼叫、0 元、0 發射。
