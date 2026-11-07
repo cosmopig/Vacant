@@ -1050,9 +1050,126 @@ def test_max_row_first_standalone_helper():
     # 無可解析選取欄 → UnknownSource
     with pytest.raises(UnknownSource):
         _max_row_first([{"sel": "x"}, {"sel": ""}], rc)
-    # 輸出欄不可解析 → UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "NaN", "out": "1.0"}, {"sel": "inf", "out": "2.0"}], rc)
+    # 前導列 sel_col 為 NaN/inf 時必須忽略，不得鎖死在首列或搶走最大列
+    assert _max_row_first(
+        [{"sel": "NaN", "out": "999.0"}, {"sel": "inf", "out": "888.0"}] + rows,
+        rc,
+    ) == 156.41568
+    # 輸出欄不可解析（含 NaN/inf）→ UnknownSource
     with pytest.raises(UnknownSource):
         _max_row_first([{"sel": "6", "out": "n/a"}], rc)
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "6", "out": "NaN"}], rc)
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "6", "out": "inf"}], rc)
+
+
+def test_recompute_ignores_non_finite_csv_cells_and_never_false_passes_on_nan(
+    tmp_path: pathlib.Path,
+):
+    """argon 20261107_0724 回歸：CSV 資料欄含 'NaN'/'nan'/'inf'/'-inf' 缺值字串時，
+    _max_row_first、_col_values（col_stats / col_max）、pearson2、zcount3、count_if、
+    fee_ids_lookup 必須將非有限浮點視為缺值忽略（或輸出欄無效時回傳 UNKNOWN），
+    絕不得讓 expected 變成 NaN 後因 `abs(got - nan) > atol == False` 對任意錯誤答案給假 PASS，
+    或因 `round(nan, k)` 拋出未捕捉 ValueError 崩潰。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "data.csv",
+        "sel,out,a,b\n"
+        "NaN,999.0,NaN,100\n"
+        "inf,888.0,1,2\n"
+        "5,156.41568,2,4\n"
+        "6,165.10544,3,5\n"
+        "6,120.0,4,8\n",
+    )
+    bad_dir = tmp_path / "bad"
+    _write(bad_dir / "answer.txt", "@w[999.0]\n@r[123456.0]\n@m[999.0]\n@z[0]\n")
+    good_dir = tmp_path / "good"
+    _write(good_dir / "answer.txt", "@w[165.11]\n@r[0.98]\n@m[2.5]\n@z[0]\n")
+
+    # 1. max_row_first：忽略 NaN/inf 選取列，正確取 sel=6 首列 out=165.10544 → round 2 = 165.11
+    rs_w = _req_set(
+        "kv_recomputed",
+        {
+            "key": "w",
+            "data_file": "data.csv",
+            "recompute": {"type": "max_row_first", "sel_col": "sel", "out_col": "out", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_w, bad_dir)[0].status == "FAIL"
+    assert run_requirement_checks(task_dir, rs_w, good_dir)[0].status == "PASS"
+
+    # 2. pearson2（無 round 與有 round）：忽略 NaN/inf 列，任意錯值 123456.0 必須 FAIL（不得因 NaN 假 PASS）
+    rs_r_raw = _req_set(
+        "kv_recomputed",
+        {
+            "key": "r",
+            "data_file": "data.csv",
+            "recompute": {"type": "pearson2", "col_a": "a", "col_b": "b"},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_r_raw, bad_dir)[0].status == "FAIL"
+    rs_r_rnd = _req_set(
+        "kv_recomputed",
+        {
+            "key": "r",
+            "data_file": "data.csv",
+            "recompute": {"type": "pearson2", "col_a": "a", "col_b": "b", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_r_rnd, bad_dir)[0].status == "FAIL"
+    assert run_requirement_checks(task_dir, rs_r_rnd, good_dir)[0].status == "PASS"
+
+    # 3. col_stats（mean of a = (1+2+3+4)/4 = 2.5）與 plain_recomputed col_max（max of a = 4.0）：
+    #    忽略 NaN 列，不得算進 NaN 造成假 PASS 或 round(nan) ValueError
+    rs_m = _req_set(
+        "kv_recomputed",
+        {
+            "key": "m",
+            "data_file": "data.csv",
+            "recompute": {"type": "col_stats", "col": "a", "stat": "mean", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_m, bad_dir)[0].status == "FAIL"
+    assert run_requirement_checks(task_dir, rs_m, good_dir)[0].status == "PASS"
+
+    plain_good = tmp_path / "plain_good"
+    _write(plain_good / "answer.txt", "4\n")
+    plain_bad = tmp_path / "plain_bad"
+    _write(plain_bad / "answer.txt", "999\n")
+    rs_cmax = _req_set(
+        "plain_recomputed",
+        {
+            "data_file": "data.csv",
+            "recompute": {"type": "col_max", "col": "a", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_cmax, plain_good)[0].status == "PASS"
+    assert run_requirement_checks(task_dir, rs_cmax, plain_bad)[0].status == "FAIL"
+
+    # 4. zcount3：含 NaN 列時忽略 NaN，對真實極端值 [1,1,1,1,1,1,1,1,1,1,1,100] 應算出 1 個 |z|>3，
+    #    回答 @z[0] 必須 FAIL（不得因 NaN 污染 mean/sd 讓 expected 靜默變 0.0 而假 PASS）
+    _write(
+        task_dir / "z.csv",
+        "v\nNaN\n" + "1\n" * 11 + "100\n",
+    )
+    rs_z = _req_set(
+        "kv_recomputed",
+        {
+            "key": "z",
+            "data_file": "z.csv",
+            "recompute": {"type": "zcount3", "col": "v"},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_z, bad_dir)[0].status == "FAIL"
 
 
 def test_kv_recomputed_pearson2_pass_and_fail(tmp_path: pathlib.Path):

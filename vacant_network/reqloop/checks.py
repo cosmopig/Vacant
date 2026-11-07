@@ -1584,14 +1584,23 @@ def check_kv_recomputed(
             eq = rc.get("eq")
             if not col or eq is None:
                 raise UnknownSource("count_if 需要 col 與 eq")
+            try:
+                eq_num = float(eq)
+            except (TypeError, ValueError):
+                raise UnknownSource("count_if.eq 不可解析為數字")
+            if not math.isfinite(eq_num):
+                raise UnknownSource("count_if.eq 非有限數值")
             expected = 0.0
             for r in rows:
                 cell = r.get(col)
                 try:
-                    if float(str(cell).strip()) == float(eq):
-                        expected += 1.0
+                    v = float(str(cell).strip())
                 except (TypeError, ValueError):
                     continue
+                if not math.isfinite(v):
+                    continue
+                if v == eq_num:
+                    expected += 1.0
         elif rtype == "zcount3":
             col = str(rc.get("col", "")).strip()
             if not col:
@@ -1599,14 +1608,17 @@ def check_kv_recomputed(
             vals: list[float] = []
             for r in rows:
                 try:
-                    vals.append(float(str(r.get(col, "")).strip()))
+                    v = float(str(r.get(col, "")).strip())
                 except (TypeError, ValueError):
                     continue
+                if not math.isfinite(v):
+                    continue
+                vals.append(v)
             if len(vals) < 2:
                 raise UnknownSource("zcount3: 可解析數值不足 2 個")
             mean = sum(vals) / len(vals)
             sd = (sum((v - mean) ** 2 for v in vals) / len(vals)) ** 0.5  # 母體慣例；見 params.note
-            if sd == 0.0:
+            if sd == 0.0 or not math.isfinite(sd):
                 raise UnknownSource("zcount3: 標準差為 0")
             expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
         elif rtype == "mean_int_col":
@@ -1627,6 +1639,8 @@ def check_kv_recomputed(
                     y = float(str(r.get(col_b, "")).strip())
                 except (TypeError, ValueError):
                     continue
+                if not (math.isfinite(x) and math.isfinite(y)):
+                    continue
                 xs.append(x)
                 ys.append(y)
             if len(xs) < 2:
@@ -1645,6 +1659,8 @@ def check_kv_recomputed(
             expected = _null_count(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        if not isinstance(expected, (int, float)) or isinstance(expected, bool) or not math.isfinite(float(expected)):
+            raise UnknownSource("重算結果非有限數值")
         rnd = rc.get("round")
         if isinstance(rnd, int) and not isinstance(rnd, bool):
             expected = round(expected, rnd)
@@ -1653,7 +1669,7 @@ def check_kv_recomputed(
 
     atol = float(p.get("atol", 1e-6))
     rule_desc = f"{str(rc.get('type'))}: {data_rel} {json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}"
-    if abs(got - expected) > atol:
+    if not (abs(got - expected) <= atol):
         if (unrounded_int_expected is not None
                 and not re.match(r"^[+-]?\d+$", val_str)
                 and round(got) == int(expected)
@@ -1676,7 +1692,7 @@ def check_kv_recomputed(
 
 
 def _col_values(rows: list[dict[str, Any]], col: str) -> list[float]:
-    """取欄（可解析為 float 的值，保留檔案序）；欄不存在或全不可解析 → UnknownSource。"""
+    """取欄（可解析為有限 float 的值，保留檔案序）；欄不存在或全不可解析 → UnknownSource。"""
     if not rows or col not in rows[0]:
         raise UnknownSource(f"資料檔找不到欄 {col!r}")
     vals: list[float] = []
@@ -1685,9 +1701,12 @@ def _col_values(rows: list[dict[str, Any]], col: str) -> list[float]:
         if raw is None:
             continue
         try:
-            vals.append(float(str(raw).strip()))
+            v = float(str(raw).strip())
         except ValueError:
             continue
+        if not math.isfinite(v):
+            continue
+        vals.append(v)
     if not vals:
         raise UnknownSource(f"欄 {col!r} 沒有可解析為數值的值")
     return vals
@@ -1806,14 +1825,19 @@ def _max_row_first(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
             v = float(str(r.get(sel_col, "")).strip())
         except (TypeError, ValueError):
             continue
+        if not math.isfinite(v):
+            continue
         if best is None or v > best[0]:
             best = (v, r)
     if best is None:
         raise UnknownSource("max_row_first: 無可解析選取欄")
     try:
-        return float(str(best[1].get(out_col, "")).strip())
+        out_v = float(str(best[1].get(out_col, "")).strip())
     except (TypeError, ValueError):
         raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+    if not math.isfinite(out_v):
+        raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+    return out_v
 
 
 def _mean_int_col(
@@ -1866,6 +1890,8 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
         amount = float(rc.get("amount"))
     except (TypeError, ValueError):
         raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
+    if not math.isfinite(amount):
+        raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
     fees: list[float] = []
     for r in rows:
         if str(r.get("card_scheme", "")).strip() != scheme:
@@ -1878,6 +1904,8 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
             fixed = float(r.get("fixed_amount"))
             rate = float(r.get("rate"))
         except (TypeError, ValueError):
+            raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
+        if not (math.isfinite(fixed) and math.isfinite(rate)):
             raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
         fees.append(fixed + rate * amount / 10000)
     if not fees:
@@ -1904,9 +1932,12 @@ def _mode_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> str:
 
     def _key(v: str) -> tuple:
         try:
-            return (0, float(v), "")
+            fv = float(v)
         except ValueError:
             return (1, 0.0, v)
+        if not math.isfinite(fv):
+            return (1, 0.0, v)
+        return (0, fv, "")
 
     winners.sort(key=_key)
     return winners[0]
@@ -1966,6 +1997,8 @@ def _capture_delay_fits(merchant_cd: Any, fee_cd: Any) -> bool:
     try:
         d = float(m)
     except ValueError:
+        return fee_cd == m
+    if not math.isfinite(d):
         return fee_cd == m
     if fee_cd == "immediate":
         return d == 0
@@ -2052,6 +2085,8 @@ def _fee_ids_lookup(
         try:
             amount = float(str(r.get("eur_amount", "")).strip())
         except ValueError:
+            continue
+        if not math.isfinite(amount):
             continue
         have_amount = True
         total += amount
@@ -2197,6 +2232,9 @@ def check_plain_recomputed(
             expected = _scheme_fee_avg(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        if isinstance(expected, (int, float)) and not isinstance(expected, bool):
+            if not math.isfinite(float(expected)):
+                raise UnknownSource("重算結果非有限數值")
         rnd = rc.get("round")
         if (isinstance(rnd, int) and not isinstance(rnd, bool)
                 and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
@@ -2216,12 +2254,14 @@ def check_plain_recomputed(
                         "rule": rule_desc, "expected_in_evidence": False})
     exp_num: float | None = None
     if isinstance(expected, (int, float)) and not isinstance(expected, bool):
-        exp_num = float(expected)
+        exp_num = float(expected) if math.isfinite(float(expected)) else None
     elif isinstance(expected, str):
         try:
-            exp_num = float(expected)
+            parsed_exp = float(expected)
         except ValueError:
             exp_num = None
+        else:
+            exp_num = parsed_exp if math.isfinite(parsed_exp) else None
 
     if exp_num is not None:
         try:
