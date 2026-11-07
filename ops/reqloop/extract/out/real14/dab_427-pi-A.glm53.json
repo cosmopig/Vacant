@@ -1,0 +1,88 @@
+{
+  "task_id": "dab_427-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "How many storms have null values in the \"min_p\" column?",
+      "deliverable": "answer",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "null_entries_count",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {
+          "type": "null_count",
+          "col": "min_p"
+        }
+      },
+      "description": "統計 min_p 欄位中 null 值的個數，答案為整數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "2",
+      "quote": "@null_entries_count[number] where \"number\" is an integer indicating the count of null entries in the \"min_p\" column.",
+      "deliverable": "answer",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "null_entries_count",
+        "value_type": "number"
+      },
+      "description": "答案須以 @null_entries_count[整數] 格式呈現。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "3",
+      "quote": "Only the null values should be counted, and not any irrelevant or erroneous data that might be present.",
+      "deliverable": "answer",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "null_entries_count",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {
+          "type": "null_count",
+          "col": "min_p"
+        }
+      },
+      "description": "僅計算真正的 null 值（預設 null 集 ''/none/null/nan/na/n-a），不含其他錯誤或無關資料；null_count 的預設 null 集即符合此約束。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "1",
+      "2",
+      "3"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "provenance": {
+    "cell": "dab_427-pi-A",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_427-pi-A/task",
+    "user_text_chars": 476,
+    "data_files": [
+      "data/cost_data_with_errors.csv"
+    ],
+    "generated_at": "2026-11-07T12:42:00+08:00"
+  }
+}
