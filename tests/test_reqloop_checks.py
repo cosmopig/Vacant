@@ -2939,3 +2939,68 @@ def test_checks_resolve_deliverable_path_handles_app_and_relative_prefixes(tmp_p
     res = run_requirement_checks(task_dir, rs, draft_dir)
     assert res[0].status == "PASS"
 
+
+def test_check_tag_format_validates_number_type(tmp_path: pathlib.Path):
+    """argon 20261107_1608 回歸：
+    tag_format 範例使用 value_type="number"，檢查器必須將其視為數值驗證；
+    合格數字（如 3.14）為 PASS，非數字字串（如 not_a_number）必須判 FAIL，不得放行。
+    """
+    from vacant_network.reqloop.requirements import RequirementItem
+    from vacant_network.reqloop.checks import check_tag_format
+
+    (tmp_path / "answer.txt").write_text("@total[3.14]\n", encoding="utf-8")
+    item_ok = RequirementItem(
+        id="R1", quote="total", deliverable="answer.txt", verifier="tag_format",
+        params={"tag": "total", "value_type": "number"}
+    )
+    res_ok = check_tag_format(tmp_path, item_ok)
+    assert res_ok.status == "PASS"
+
+    (tmp_path / "answer_bad.txt").write_text("@total[not_a_number]\n", encoding="utf-8")
+    item_bad = RequirementItem(
+        id="R2", quote="total", deliverable="answer_bad.txt", verifier="tag_format",
+        params={"tag": "total", "value_type": "number", "file": "answer_bad.txt"}
+    )
+    res_bad = check_tag_format(tmp_path, item_bad)
+    assert res_bad.status == "FAIL"
+
+
+def test_recomputed_checks_support_round_at_params_level(tmp_path: pathlib.Path):
+    """argon 20261107_1608 回歸：
+    模型若將 round 放在 params 層級而非 recompute 內層，
+    check_kv_recomputed 與 check_plain_recomputed 必須相容支援，不得因未四捨五入誤判 FAIL。
+    """
+    from vacant_network.reqloop.requirements import RequirementItem
+    from vacant_network.reqloop.checks import check_kv_recomputed, check_plain_recomputed
+
+    # 1 + 2 + 4 = 7; 7 / 3 = 2.3333333333... 四捨五入至兩位為 2.33
+    (tmp_path / "data.csv").write_text("x\n1\n2\n4\n", encoding="utf-8")
+    (tmp_path / "answer_kv.txt").write_text("@mean[2.33]\n", encoding="utf-8")
+    (tmp_path / "answer_plain.txt").write_text("2.33\n", encoding="utf-8")
+
+    item_kv = RequirementItem(
+        id="R_kv", quote="mean", deliverable="answer_kv.txt", verifier="kv_recomputed",
+        params={"key": "mean", "data_file": "data.csv", "round": 2,
+                "recompute": {"type": "col_stats", "col": "x", "stat": "mean"}}
+    )
+    res_kv = check_kv_recomputed(tmp_path, tmp_path, item_kv)
+    assert res_kv.status == "PASS", f"Expected PASS but got {res_kv.status}: {res_kv.detail}"
+
+    item_plain = RequirementItem(
+        id="R_plain", quote="mean", deliverable="answer_plain.txt", verifier="plain_recomputed",
+        params={"data_file": "data.csv", "round": 2,
+                "recompute": {"type": "col_max", "col": "x"}}
+    )
+    # col_max is 4.0; let's test mode_col with floating values or a plain recompute that rounds
+    # col_max with float:
+    (tmp_path / "data_float.csv").write_text("v\n1.234\n2.567\n", encoding="utf-8")
+    (tmp_path / "answer_max.txt").write_text("2.57\n", encoding="utf-8")
+    item_plain2 = RequirementItem(
+        id="R_plain2", quote="max", deliverable="answer_max.txt", verifier="plain_recomputed",
+        params={"data_file": "data_float.csv", "round": 2,
+                "recompute": {"type": "col_max", "col": "v"}}
+    )
+    res_plain = check_plain_recomputed(tmp_path, tmp_path, item_plain2)
+    assert res_plain.status == "PASS", f"Expected PASS but got {res_plain.status}: {res_plain.detail}"
+
+

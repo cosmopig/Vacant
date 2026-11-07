@@ -1163,3 +1163,56 @@ def test_deliverable_not_named_in_request_is_unverified_not_fail(tmp_path):
     (tmp_path / "answer.txt").write_text("@mean_cases[1.5]\n")
     res = {r.claim_id: r.status for r in run_requirement_checks(tmp_path, req, tmp_path)}
     assert res["guess1"] == "UNKNOWN" and res["guess2"] == "UNKNOWN"
+
+
+def test_tag_format_accepts_number_value_type():
+    """argon 20261107_1608 回歸：
+    VERIFIER_PARAM_EXAMPLES['tag_format'] 範例給出 value_type="number"，
+    _param_problem 與 build_requirement_set 必須視為合法型別，不得誤殺為 unverified。
+    同時若原文未包含該 @tag 格式，必須標記 tag_not_in_request 防模型捏造。
+    """
+    from vacant_network.reqloop.extract import _param_problem, build_requirement_set, VERIFIER_PARAM_EXAMPLES
+
+    assert 'value_type": "number"' in VERIFIER_PARAM_EXAMPLES["tag_format"]
+    assert _param_problem("tag_format", {"tag": "total", "value_type": "number"}) is None
+    assert _param_problem("tag_format", {"tag": "total", "value_type": "float"}) is None
+
+    user_text = "Write your final answer to answer.txt. Format: @total[number]."
+    raw = [{
+        "id": "R1", "quote": "@total[number]", "deliverable": "answer.txt",
+        "verifier": "tag_format", "params": {"tag": "total", "value_type": "number"}
+    }]
+    req, rep = build_requirement_set("t", raw, user_text)
+    assert len(req.items) == 1
+    assert req.items[0].unverified is False
+    assert len(rep.unverified) == 0
+
+    # 負控制：原文無 @answer 卻被模型自造 tag_format
+    user_text_plain = "Write ONLY the final answer to /app/answer.txt"
+    raw_bad = [{
+        "id": "R2", "quote": "Write ONLY the final answer to /app/answer.txt",
+        "deliverable": "answer.txt", "verifier": "tag_format",
+        "params": {"tag": "answer", "value_type": "number"}
+    }]
+    req_bad, rep_bad = build_requirement_set("t", raw_bad, user_text_plain)
+    assert req_bad.items[0].unverified is True
+    assert rep_bad.unverified[0].reason == "tag_not_in_request:answer"
+
+
+def test_normalize_raw_items_copies_round_to_recompute():
+    """argon 20261107_1608 回歸：
+    模型若將 round 放在 params 頂層，_normalize_raw_items 應將其傳播至 recompute 字典中。
+    """
+    from vacant_network.reqloop.extract import _normalize_raw_items
+
+    raw = [{
+        "id": "R1", "deliverable": "answer.txt", "verifier": "kv_recomputed",
+        "params": {
+            "key": "mean", "data_file": "data.csv", "round": 2,
+            "recompute": {"type": "col_stats", "col": "x", "stat": "mean"}
+        }
+    }]
+    norm = _normalize_raw_items(raw, "user_text")
+    rc = norm[0]["params"]["recompute"]
+    assert rc.get("round") == 2
+
