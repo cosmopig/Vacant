@@ -163,7 +163,7 @@ _RECOMPUTE_TYPES: dict[str, frozenset[str]] = {
 }
 
 _VALID_KEY_TYPES = frozenset({"number", "integer", "nonneg_int", "number_in_01"})
-_VALID_TAG_VALUE_TYPES = frozenset({"integer", "int", "float", "str"})
+_VALID_TAG_VALUE_TYPES = frozenset({"integer", "int", "float", "number", "str"})
 _VALID_AGG_TYPES = frozenset(
     {"count", "distinct", "sum", "mean", "mean_skip_empty", "max", "min", "count_if", "ratio"}
 )
@@ -557,6 +557,8 @@ def _normalize_raw_items(raw_items: list[Any], user_text: str) -> list[Any]:
             if str(rc.get("type", "")).strip().lower() == "col_stats" and isinstance(rc.get("stat"), str):
                 st = rc["stat"].strip().lower()
                 rc["stat"] = _COL_STAT_ALIASES.get(st, st)
+            if "round" not in rc and isinstance(params.get("round"), int) and not isinstance(params.get("round"), bool):
+                rc["round"] = params["round"]
 
         computed_rounds: dict[str, int] = {}
         comp = params.get("compute")
@@ -743,6 +745,11 @@ def build_requirement_set(
             d_problem = _deliverable_problem(deliverable, user_text)
             if d_problem is not None:
                 reason = d_problem
+                unverified_flag = True
+        if reason is None and verifier == "tag_format":
+            tag_name = str(raw_params.get("tag", "")).strip()
+            if tag_name and not re.search(r"@\s*" + re.escape(tag_name) + r"\b", user_text):
+                reason = f"tag_not_in_request:{tag_name[:40]}"
                 unverified_flag = True
         if unverified_flag and reason is None:
             reason = "model_declared_unverified"
