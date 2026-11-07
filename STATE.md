@@ -156,3 +156,15 @@
   ② real_slice_dab055/manifest.json 被提交成絕對路徑 symlink（目標在 worker 自己 worktree 也不存在）＋ `~HEAD`/`~auto_argon` 殘骸檔 → CI worktree FileNotFoundError（3 測紅）。
 - 處置：不動 auto/worker（活躍 agent WIP＋修法含「重凍需授權」的產品判斷）；修復 recipe 已寫入 NOW.md 交 worker/審查。
 - 零產品改動、零模型呼叫、零 commit（worktree 乾淨）。
+- 2026-11-07 r1216（vq-el4.7：審查指示4 固化；1 檔 2 測試、0 模型呼叫）：
+- ① 1216 審查 4 條全核實達標：argon 2db8afa5 已為 HEAD 祖先（r1212 CI 🟢 含 3 新測試）；6/9 口徑已記（round 1192 舊規則單 rep、非現行管線）；repair.py／官方鎖檔 eval_phase3_glm53.json 未動；`env -u BEADS_DIR bd list --parent vq-el4 --all` → 7 issues rc=0（b5251fbb 修復在位）。
+- ② 新 tests/test_repo_beads_shared_db.py（2 測試）：鎖 .beads/metadata.json dolt_database=vq＋project_id 7ee45eb8…、embeddeddolt gitignore → 110ae3ff 同型回退（bd init 建獨立庫）由 CI 紅燈抓。mutate 驗證：改回 Vacant/01de207e → 1 failed；還原 → 2 passed。commit 2c3fe6cc、vq-el4.7 close（驗收 2 passed in 0.03s）。
+- ③ CI：qwen27b 2b6e6f92 🟢 5031/0；1c5e818a（r1215）尚未跑＝vacant-ci.service 在跑（21:40 idle、10 分鐘一 pass、自動 pickup、約 14 分鐘）——不手動跑；argon 🟢；worker b7cb338d 🔴（WIP、不動、recipe 在 r1215 NOW）。
+- ④ 沒驗證：2c3fe6cc 的 CI（待 vacant-ci pickup；新測試純檔案斷言、無模型/網絡）；worker 6 測紅燈非本分支造成（r1215 診斷不變）。
+- 下一步：下輪巡 1c5e818a／2c3fe6cc CI；等審查派工（G2.5 三門全 PASS、vq-el4 全閉、主線下一門 G3 須派工才動）。
+- 2026-11-07 r1216 審查複核（交付後審查：4 個被點名檔＋tests/test_repo_beads_shared_db.py 重跑；0 產品改動、0 模型呼叫）：
+- ① 測試重跑：.venv/bin/python -m pytest tests/test_repo_beads_shared_db.py →「2 passed in 0.03s」、pytest_rc=0（逐測試單跑同）；實作無缺陷、不改不修飾。
+- ② 開 ops/audits/effects_20261105_summary.json（repo 內）：50 格（policy30 30＋once20 20、snapshot d38d2eb2）；per-arm wrong_to_right＝policy30 generic 7／localized 6、once20 generic 7／localized 4（各 10 錯草稿中），與 11/06 參考口徑一致；scope_note＝開發選樣、無硬 token 上限、不宣稱 localized 優。本輪紀錄未引用該檔（6/9 口徑＝另一份 glm53 Phase3 鎖檔）→ 無依賴需修。
+- ③ run_eval.py --all 離線重跑＝PASS rc=0：G1 抓錯 39/39＋冤枉 0（41c/328550t）、REAL14 抓錯 9/9＋冤枉 1/5（74c/732826t）、PHASE3 fixed 7／unresolved 2（15s/275c/15087278t）；vibe_calls 130→130（0 新 API 呼叫）、out/ 無 git 變動——「G2.5 三門全 PASS」補上新鮮執行依據。
+- ④ extract.py／repair.py 在位驗證：quote_is_verbatim L132、SUPPORTED_VERIFIERS L46、_RECOMPUTE_TYPES L160-163（r1212 條目 L511-521 引用不準，正確 L160-163）、model_declared_unverified L755、tag_not_in_request 守衛在；repair.py 2795 行＝RLOOP_PLAN 凍結行數、末次改動 399f68b6（argon 已審已併）、worktree 乾淨——「repair.py 未動」現由證據背書。
+- 下一步：不變——下輪巡 1c5e818a／2c3fe6cc CI；等審查派工（G3 須派工才動）。
