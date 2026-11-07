@@ -1,1 +1,1 @@
-@total_hotels[48]
+@total_hotels[46]

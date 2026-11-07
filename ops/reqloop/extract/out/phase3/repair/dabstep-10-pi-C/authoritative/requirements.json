@@ -1,0 +1,24 @@
+{
+  "task_id": "dabstep-10-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "How many unique merchants are present in the dataset?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "unique_count",
+          "col": "merchant"
+        }
+      },
+      "description": "答案檔 answer.txt 內容必須是 data/payments.csv 中 merchant 欄位的去重計數（單一數字）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

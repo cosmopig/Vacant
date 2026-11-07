@@ -159,6 +159,93 @@
     "tokens": 856048,
     "wall_ms_total": 280235
    }
+  },
+  {
+   "cell": "dab_507-pi-A",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "gap_closed",
+   "final_status": {
+    "1": "PASS",
+    "2": "PASS",
+    "3": "PASS"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_507-pi-A/round_1",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 1,
+    "model_calls": 42,
+    "tokens": 1752906,
+    "wall_ms_total": 281320
+   }
+  },
+  {
+   "cell": "dabstep-10-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "gap_closed",
+   "final_status": {
+    "R1": "PASS"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dabstep-10-pi-C/round_1",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 1,
+    "model_calls": 7,
+    "tokens": 292684,
+    "wall_ms_total": 41321
+   }
+  },
+  {
+   "cell": "dabstep-1273-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "fixed",
+   "stopped": "max_rounds",
+   "final_status": {
+    "R1": "PASS",
+    "R2": "UNKNOWN"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dabstep-1273-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 22,
+    "tokens": 923831,
+    "wall_ms_total": 192082
+   }
   }
  ]
 }

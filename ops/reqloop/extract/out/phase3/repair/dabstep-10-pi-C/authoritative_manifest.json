@@ -1,0 +1,11 @@
+{
+ "schema": "vacant.reqloop.authoritative/1",
+ "task": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/tasks/dabstep-10-pi-C",
+ "files": {
+  "contract.md": "a3b5048b46851b3ced34f3af730c5baa7ab74659fd257ff53394e9014133ca1d",
+  "requirements.json": "56cdab160c0ee1436d8ba4e4611f71097d1cc03b35f1f32fbc67fda2ef924501",
+  "data/merchant_data.json": "f158e834de27ee8407e99d9c32da690357981d2770958fd302a9bb79ced83581",
+  "data/payments-readme.md": "8754b92d0b3127856ff72266ea482995d2a1f6a34d0a12732f7c26f527f2c4a5",
+  "data/payments.csv": "5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25"
+ }
+}
