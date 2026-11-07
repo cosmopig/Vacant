@@ -1610,34 +1610,7 @@ def check_kv_recomputed(
                 raise UnknownSource("zcount3: 標準差為 0")
             expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
         elif rtype == "mean_int_col":
-            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」——支援純整數（如 '100'）
-            # 與附信賴區間的點估計字串（如 '630308[495000-801000]'，取前導整數點估計，與
-            # No. of cases_median 同值，同 dab_057 口徑）；Null/空與非數值字串（如 'xx[1-2]'）忽略。
-            # 未顯式指定 round 時取整（round），避免與 answer_kv type=integer 構成無解矛盾。
-            # （r1029 合併 d96a8dba：採 argon 語意——effects_20261105 50/50 驗收要求與獨立
-            # scorer 一致；點估計解讀與 dab_057/No. of cases_median 同口徑，非猜測。）
-            col = str(rc.get("col", "")).strip()
-            if not col:
-                raise UnknownSource("mean_int_col 需要 col")
-            ints: list[int] = []
-            for r in rows:
-                raw_cell = r.get(col)
-                if raw_cell is None:
-                    continue
-                cell = str(raw_cell).strip()
-                if not cell:
-                    continue
-                m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
-                if m_int:
-                    ints.append(int(m_int.group(1)))
-            if not ints:
-                raise UnknownSource("mean_int_col: 無可解析整數")
-            raw_mean = sum(ints) / len(ints)
-            if rc.get("round") is None:
-                unrounded_int_expected = float(raw_mean)
-                expected = float(round(raw_mean))
-            else:
-                expected = float(raw_mean)
+            expected, unrounded_int_expected = _mean_int_col(rows, rc)
         elif rtype == "max_row_first":
             # G2 小批（e013 dab_426）：sel_col 最大值、平手取檔案序第一列、
             # 輸出該列 out_col——「neglecting ties…choose the one that appears
@@ -1836,6 +1809,37 @@ def _col_max(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     if not col:
         raise UnknownSource("col_max.col 缺失")
     return max(_col_values(rows, col))
+
+
+def _mean_int_col(
+    rows: list[dict[str, Any]], rc: dict[str, Any]
+) -> tuple[float, float | None]:
+    """mean_int_col（G2 小批 e013 dab_055）：「轉 Int64；Null/空忽略」——支援純整數（如 '100'）
+    與附信賴區間的點估計字串（如 '630308[495000-801000]'，取前導整數點估計，與
+    No. of cases_median 同值，同 dab_057 口徑）；Null/空與非數值字串（如 'xx[1-2]'）忽略。
+    未顯式指定 round 時取整（round），避免與 answer_kv type=integer 構成無解矛盾。
+    回傳 (expected, unrounded_int_expected)。
+    """
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("mean_int_col 需要 col")
+    ints: list[int] = []
+    for r in rows:
+        raw_cell = r.get(col)
+        if raw_cell is None:
+            continue
+        cell = str(raw_cell).strip()
+        if not cell:
+            continue
+        m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
+        if m_int:
+            ints.append(int(m_int.group(1)))
+    if not ints:
+        raise UnknownSource("mean_int_col: 無可解析整數")
+    raw_mean = sum(ints) / len(ints)
+    if rc.get("round") is None:
+        return float(round(raw_mean)), float(raw_mean)
+    return float(raw_mean), None
 
 
 def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:

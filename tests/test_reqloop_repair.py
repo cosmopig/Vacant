@@ -3809,4 +3809,152 @@ def test_single_deliverable_kv_preservation_enforced(tmp_path):
     assert repair._exit_code(out2) == 20
 
 
+def test_single_deliverable_kv_preservation_round2_restores_mutated_keys_and_avoids_blind_prompt(tmp_path):
+    """argon 20261107_0357 回歸（eafa6e7e 跨輪鍵級還原與盲提示缺陷）：
+    1. 當第 1 輪修好部分失敗鍵（pre_kurtosis: -1.17→-1.13）、留下另一失敗鍵（post_kurtosis: -1.17），
+       同時改壞一個初始已滿足鍵（pre_mean: 21144.08→999.0）時：
+       - 第 2 輪開局工作區必須從原草稿還原被改壞的 `@pre_mean[21144.08]`，同時保留第 1 輪修好的
+         `@pre_kurtosis[-1.13]`；
+       - 當第 2 輪只修 `@post_kurtosis[-1.13]` 時，最終候選滿足鍵級保留：
+         `stopped == "gap_closed"`、`satisfied_mutated == ()`、`_exit_code == 0`；
+       - 若第 2 輪為 no-op，控制器開局自動還原的 `req_pre_mean_recomputed` 不得被算進 `r2.diff.fixed`
+         或偽造進展，必須在 2 輪後以 `stopped == "stalled"`、`_exit_code == 20` 停止。
+    2. 當第 1 輪已修好所有失敗鍵（pre_kurtosis / post_kurtosis → -1.13），僅因改動已滿足鍵的原始字串表示
+       （如 realab_dab378_20261106 localized 將 `@pre_median[19711.00]` 改為 `@pre_median[19711.0]`）
+       而被 `round_mutated` 擋下進入第 2 輪時：
+       - 第 2 輪提示不得呈現「11 條全 PASS、0 條 FAIL」且工作區遺失原草稿 `"19711.00"` 的盲提示死胡同；
+       - 第 2 輪開局工作區必須保有原草稿 `"19711.00"` 且提示仍列出原始失敗項（`[FAIL]`）；
+       - 若第 2 輪 agent 空轉（no-op），不得免費拿到 `gap_closed`（必須 `stopped == "stalled"`、`_exit_code == 20`）；
+       - 若第 2 輪 agent 修好失敗鍵且保留 `"19711.00"`，則 `stopped == "gap_closed"`、`_exit_code == 0`。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    base = repo_root / "ops" / "reqloop" / "g2" / "real_slice" / "dab_378-pi-C"
+    t, d = base / "task", base / "draft"
+    rs = RequirementSet.load(t / "requirements.json")
+    draft_c = (d / "answer.txt").read_text(encoding="utf-8")
+    satisfied_keys = ("pre_mean", "pre_median", "pre_sd", "pre_skewness",
+                      "post_mean", "post_median", "post_sd", "post_skewness")
+
+    # (1a) 第 1 輪修 pre_kurtosis 但弄壞 pre_mean；第 2 輪開局已還原 pre_mean 並保留 pre_kurtosis，
+    #      第 2 輪只需修 post_kurtosis 即通過
+    seen_1a: list[int] = []
+
+    def run_partial_then_finish(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        seen_1a.append(len(seen_1a) + 1)
+        if len(seen_1a) == 1:
+            r1_txt = (draft_c.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                             .replace("@pre_mean[21144.08]", "@pre_mean[999.0]"))
+            (ws / "answer.txt").write_text(r1_txt, encoding="utf-8")
+        else:
+            ws_txt = (ws / "answer.txt").read_text(encoding="utf-8")
+            assert "@pre_mean[21144.08]" in ws_txt
+            assert "@pre_kurtosis[-1.13]" in ws_txt
+            (ws / "answer.txt").write_text(
+                ws_txt.replace("@post_kurtosis[-1.17]", "@post_kurtosis[-1.13]"),
+                encoding="utf-8",
+            )
+        return _run_result(log_dir)
+
+    out_1a = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "partial_ok", build=_fake_build([]),
+        run=run_partial_then_finish,
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert out_1a.stopped == "gap_closed"
+    assert tuple(out_1a.satisfied_preserved) == satisfied_keys
+    assert out_1a.satisfied_mutated == ()
+    assert repair._exit_code(out_1a) == 0
+
+    # (1b) 第 1 輪同上、第 2 輪 no-op ⇒ 控制器還原 pre_mean 不得算 agent 修好，2 輪 stalled + exit 20
+    seen_1b: list[int] = []
+
+    def run_partial_then_noop(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        seen_1b.append(len(seen_1b) + 1)
+        if len(seen_1b) == 1:
+            r1_txt = (draft_c.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                             .replace("@pre_mean[21144.08]", "@pre_mean[999.0]"))
+            (ws / "answer.txt").write_text(r1_txt, encoding="utf-8")
+        return _run_result(log_dir)
+
+    out_1b = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "partial_noop", build=_fake_build([]),
+        run=run_partial_then_noop,
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert out_1b.rounds[1].diff.fixed == ()
+    assert out_1b.stopped == "stalled"
+    assert repair._exit_code(out_1b) == 20
+
+    # (2a) 第 1 輪修好兩條 kurtosis 但把 19711.00 改寫為 19711.0（數值重算仍 PASS、位元組保留 FAIL）；
+    #      第 2 輪提示不得全 PASS 盲提示，且第 2 輪若空轉（no-op）必須 stalled + exit 20
+    prompts_2a: list[str] = []
+
+    def build_capture(prompt: str, ws: pathlib.Path) -> Launch:
+        prompts_2a.append(prompt)
+        return Launch(argv=["true"], note="fake")
+
+    seen_2a: list[int] = []
+
+    def run_reformat_then_noop(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        seen_2a.append(len(seen_2a) + 1)
+        if len(seen_2a) == 1:
+            r1_txt = (draft_c.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                             .replace("@post_kurtosis[-1.17]", "@post_kurtosis[-1.13]")
+                             .replace("@pre_median[19711.00]", "@pre_median[19711.0]"))
+            (ws / "answer.txt").write_text(r1_txt, encoding="utf-8")
+        else:
+            assert "@pre_median[19711.00]" in (ws / "answer.txt").read_text(encoding="utf-8")
+        return _run_result(log_dir)
+
+    out_2a = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "reformat_noop", build=build_capture,
+        run=run_reformat_then_noop,
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert len(prompts_2a) == 2
+    assert "[FAIL] pre_kurtosis" in prompts_2a[1]
+    assert "[FAIL] post_kurtosis" in prompts_2a[1]
+    assert out_2a.stopped == "stalled"
+    assert repair._exit_code(out_2a) == 20
+
+    # (2b) 第 1 輪同上（19711.00→19711.0），第 2 輪在已還原 19711.00 的工作區上修好兩條 kurtosis ⇒ gap_closed, exit 0
+    seen_2b: list[int] = []
+
+    def run_reformat_then_fix_cleanly(launch, *, workspace, timeout_s, log_dir):
+        ws = pathlib.Path(workspace)
+        seen_2b.append(len(seen_2b) + 1)
+        if len(seen_2b) == 1:
+            r1_txt = (draft_c.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                             .replace("@post_kurtosis[-1.17]", "@post_kurtosis[-1.13]")
+                             .replace("@pre_median[19711.00]", "@pre_median[19711.0]"))
+            (ws / "answer.txt").write_text(r1_txt, encoding="utf-8")
+        else:
+            ws_txt = (ws / "answer.txt").read_text(encoding="utf-8")
+            assert "@pre_median[19711.00]" in ws_txt
+            (ws / "answer.txt").write_text(
+                ws_txt.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                      .replace("@post_kurtosis[-1.17]", "@post_kurtosis[-1.13]"),
+                encoding="utf-8",
+            )
+        return _run_result(log_dir)
+
+    out_2b = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "reformat_fix", build=_fake_build([]),
+        run=run_reformat_then_fix_cleanly,
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert out_2b.stopped == "gap_closed"
+    assert tuple(out_2b.satisfied_preserved) == satisfied_keys
+    assert out_2b.satisfied_mutated == ()
+    assert repair._exit_code(out_2b) == 0
+
+
+
 
