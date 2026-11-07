@@ -208,3 +208,9 @@
 - 沒驗證：未跑 effects2_20261106（在跑）；無效果性變更（純重構＋測試，單一事實來源防漂移）。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 模型呼叫、0 元。
 - 票尾 3 行結果（commit c0e64ff4／驗收末行／無缺）→ 移 done/。下一步：dab_426 切片可直用 `_max_row_first` 做審計預檢；vq-6rp／vq-5nz.6／dab_055 2 格仍候需求端點名。
+## r1172（2026-11-07；票 P20261107_0644-2：dab_426 真實 CSV 4 格最小對照切片規格＋常設守衛）
+- 做了：ops/reqloop/g2/real_slice_dab426/（manifest FROZEN_PENDING_NAMING＋六要素＋arms/model/budget 同工單；bad dab_426-pi-C 165.11 e013 fail 0/1、good dab_426-pi-A 156.42 e008 pass，共用 task 目錄、全 sha256 釘住＝smoke_e013 與 lab tgz 逐位元組核對）；tests/test_reqloop_real_slice.py +3 守衛（凍結 4 格／baseline bad 1P·1F vs good 2P·0F＋針 156.42 永不進證據／checks._max_row_first 單一事實來源 round 2=156.42、unrounded 156.41568）。
+- 驗證：驗收指令 pytest -k dab426 → **3 passed**（改前缺測試與檔案）；--dry-run 含 `2 drafts · 4 cells`；real_slice+checks+dab055 75 passed、g2 39 passed、repair selftest 13/13。commit 132461da、樹乾淨。
+- 沒驗證：無效果性變更（純規格＋守衛、0 模型呼叫、0 元）；未發射（FROZEN_PENDING_NAMING，候需求端點名）。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改 effects2·smoke_e013 凍結位元組／1753 維持排除。
+- 下一步：dab_426 切片規格就绪候點名發射（成本另報）；vq-6rp／vq-5nz.6 同候；點名前不發射、不同題重跑。
