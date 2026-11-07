@@ -1,0 +1,284 @@
+{
+ "schema": "realab.summary/1",
+ "ticket": "R20261107_0035-1",
+ "task": "dab_378",
+ "generated_at": "2026-11-07T01:43:18+00:00",
+ "purpose": "11-06 指示 #4 後續＋審查 2026-11-07 Priority 2：6-cell 審計摘要——realab_dab378_20261106（2 格）＋realab_20261107（4 格）：獨立 scorer 結果、鍵級保留、成本欄位；並回答同草稿同預算下 localized 是否修回更多、正確成果是否退步、成本是否值得",
+ "cells": [
+  {
+   "batch": "realab_dab378_20261106",
+   "draft": "dab_378-pi-C",
+   "role": "bad",
+   "arm": "generic",
+   "before_pass_independent": false,
+   "before_note": "recorded lab score（e008_dabench_pi_AC/dabench-dab_378-pi-C-r1/score.json：pass=false, n_correct 6/8, psaq 0.75；引用，未本地重跑）",
+   "after_independent": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0,
+    "raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1"
+   },
+   "kv_preserved": [
+    "pre_mean",
+    "pre_median",
+    "pre_sd",
+    "pre_skewness",
+    "post_mean",
+    "post_median",
+    "post_sd",
+    "post_skewness"
+   ],
+   "kv_mutated": [],
+   "repair_sessions": 1,
+   "model_calls": 24,
+   "tokens": 440238,
+   "wall_ms_total": 89240,
+   "stopped": "gap_closed",
+   "exit_code": 0,
+   "fixed": [
+    "post_kurtosis",
+    "pre_kurtosis"
+   ],
+   "regressed": []
+  },
+  {
+   "batch": "realab_dab378_20261106",
+   "draft": "dab_378-pi-C",
+   "role": "bad",
+   "arm": "localized",
+   "before_pass_independent": false,
+   "before_note": "recorded lab score（e008_dabench_pi_AC/dabench-dab_378-pi-C-r1/score.json：pass=false, n_correct 6/8, psaq 0.75；引用，未本地重跑）",
+   "after_independent": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0,
+    "raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1"
+   },
+   "kv_preserved": [
+    "pre_mean",
+    "pre_sd",
+    "pre_skewness",
+    "post_mean",
+    "post_sd",
+    "post_skewness"
+   ],
+   "kv_mutated": [
+    "pre_median",
+    "post_median"
+   ],
+   "repair_sessions": 1,
+   "model_calls": 32,
+   "tokens": 417236,
+   "wall_ms_total": 300160,
+   "stopped": "gap_closed",
+   "exit_code": 0,
+   "fixed": [
+    "post_kurtosis",
+    "pre_kurtosis"
+   ],
+   "regressed": []
+  },
+  {
+   "batch": "realab_20261107",
+   "draft": "dab_378-pi-C",
+   "role": "bad",
+   "arm": "generic",
+   "before_pass_independent": false,
+   "before_note": "recorded lab score（e008_dabench_pi_AC/dabench-dab_378-pi-C-r1/score.json：pass=False, n_correct 6/8, psaq 0.75；引用，未本地重跑）",
+   "after_independent": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0,
+    "raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1",
+    "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final_answer_sha256": "eb139290f97b52723c1ac2ea00bb6d1c98b754ed203e116bf33f6e1f95f263c5",
+    "scored_via": "lab scorer on dab_378-pi-C/generic workspace (bytes identical to this cell, sha256 eb139290f97b…)"
+   },
+   "kv_preserved": [
+    "pre_mean",
+    "pre_median",
+    "pre_sd",
+    "pre_skewness",
+    "post_mean",
+    "post_median",
+    "post_sd",
+    "post_skewness"
+   ],
+   "kv_mutated": [],
+   "kv_audit_note": "audit_kv_preservation 審計端計算（產品函式，非模型自評）",
+   "repair_sessions": 1,
+   "model_calls": 29,
+   "tokens": 485581,
+   "wall_ms_total": 107053,
+   "stopped": "gap_closed",
+   "exit_code": 0,
+   "fixed": [
+    "post_kurtosis",
+    "pre_kurtosis"
+   ],
+   "regressed": []
+  },
+  {
+   "batch": "realab_20261107",
+   "draft": "dab_378-pi-C",
+   "role": "bad",
+   "arm": "localized",
+   "before_pass_independent": false,
+   "before_note": "recorded lab score（e008_dabench_pi_AC/dabench-dab_378-pi-C-r1/score.json：pass=False, n_correct 6/8, psaq 0.75；引用，未本地重跑）",
+   "after_independent": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0,
+    "raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1",
+    "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final_answer_sha256": "06ff239a89d12dd1790cb3b98a74ef3b9db4a1534f131a6dac618175532de33e",
+    "scored_via": "lab scorer on dab_378-pi-C/localized workspace (bytes identical to this cell, sha256 06ff239a89d1…)"
+   },
+   "kv_preserved": [
+    "pre_mean",
+    "pre_median",
+    "pre_sd",
+    "pre_skewness",
+    "post_mean",
+    "post_median",
+    "post_sd",
+    "post_skewness"
+   ],
+   "kv_mutated": [],
+   "kv_audit_note": "audit_kv_preservation 審計端計算（產品函式，非模型自評）",
+   "repair_sessions": 1,
+   "model_calls": 14,
+   "tokens": 77732,
+   "wall_ms_total": 48117,
+   "stopped": "gap_closed",
+   "exit_code": 0,
+   "fixed": [
+    "post_kurtosis",
+    "pre_kurtosis"
+   ],
+   "regressed": []
+  },
+  {
+   "batch": "realab_20261107",
+   "draft": "dab_378-pi-A",
+   "role": "good",
+   "arm": "generic",
+   "before_pass_independent": true,
+   "before_note": "recorded lab score（e008_dabench_pi_AC/dabench-dab_378-pi-A-r1/score.json：pass=True, abq 1, psaq 1.0, n_items 8；引用，未本地重跑）",
+   "after_independent": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0,
+    "raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1",
+    "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final_answer_sha256": "eb139290f97b52723c1ac2ea00bb6d1c98b754ed203e116bf33f6e1f95f263c5",
+    "scored_via": "lab scorer on dab_378-pi-C/generic workspace (bytes identical to this cell, sha256 eb139290f97b…)"
+   },
+   "kv_preserved": [
+    "pre_mean",
+    "pre_median",
+    "pre_sd",
+    "pre_skewness",
+    "pre_kurtosis",
+    "post_mean",
+    "post_median",
+    "post_sd",
+    "post_skewness",
+    "post_kurtosis"
+   ],
+   "kv_mutated": [],
+   "kv_audit_note": "audit_kv_preservation 審計端計算（產品函式，非模型自評）",
+   "repair_sessions": 1,
+   "model_calls": 22,
+   "tokens": 416275,
+   "wall_ms_total": 100663,
+   "stopped": "gap_closed",
+   "exit_code": 0,
+   "fixed": [],
+   "regressed": []
+  },
+  {
+   "batch": "realab_20261107",
+   "draft": "dab_378-pi-A",
+   "role": "good",
+   "arm": "localized",
+   "before_pass_independent": true,
+   "before_note": "recorded lab score（e008_dabench_pi_AC/dabench-dab_378-pi-A-r1/score.json：pass=True, abq 1, psaq 1.0, n_items 8；引用，未本地重跑）",
+   "after_independent": {
+    "pass": true,
+    "status": "scored",
+    "rc": 0,
+    "raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1",
+    "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "final_answer_sha256": "06ff239a89d12dd1790cb3b98a74ef3b9db4a1534f131a6dac618175532de33e",
+    "scored_via": "lab scorer on dab_378-pi-C/localized workspace (bytes identical to this cell, sha256 06ff239a89d1…)"
+   },
+   "kv_preserved": null,
+   "kv_mutated": null,
+   "kv_audit_note": "no_gap、零輪未重生產 ⇒ 審計未執行（by design，不虛灌證據）；kv_preserved/kv_mutated = null（UNKNOWN，未測量≠未變動）",
+   "repair_sessions": 0,
+   "model_calls": 0,
+   "tokens": null,
+   "wall_ms_total": null,
+   "stopped": "no_gap",
+   "exit_code": 0,
+   "fixed": [],
+   "regressed": [],
+   "cost_note": "no_gap：agent 未啟動 ⇒ repair_sessions=0、model_calls=0 是完整事實；tokens/wall_ms_total 無 usage 來源 ⇒ null（UNKNOWN，不填 0）"
+  }
+ ],
+ "answer": {
+  "localized_fixes_more_than_generic": "否（本切片）——4 個 C（壞草稿）格中兩臂各修回同樣 2 個 kurtosis 錯誤（pre/post_kurtosis，wrong_to_right），regressed 皆 0；A（好草稿）格兩臂皆維持 11/11（right_stays_right）。localized 沒有修回 generic 修不回的東西，反之亦然。",
+  "correct_results_regressed": "否——6 格最終產物獨立 scorer 皆 pass=true、檢查層 regressed=0。位元組層：11-06 localized 重排 2 行 median 格式（19711.00→19711.0，數值相同、scorer 接受，kv_mutated=2）；11-07 兩臂 kv 鍵值行全數逐位元組保留（C 8/8、A 10/10，kv_mutated=0）；A/localized no_gap 零輪未重生產。",
+  "cost_worth_it": "無一致結論——11-06 C：localized 32 calls/417,236 tok/300.2s vs generic 24/440,238/89.2s（localized 更貴、wall 觸 300s 每輪上限）；11-07 C：localized 14/77,732/48.1s vs generic 29/485,581/107.1s（localized 更省）。兩批修正集合相同 ⇒ 成本方向隨 run 變化，沒有為「多修的東西」付代價，也沒有省下的代價。開發選樣、單 rep（1 draft × 2 arms × 2 批），不宣稱 localized 較好或較差。"
+ },
+ "boundaries": [
+  "tamper/UNKNOWN 不計成功；缺值=null(UNKNOWN) 不填 0；A/localized no_gap 格 tokens/wall 為 null（無 usage 來源），其 repair_sessions/model_calls=0 是「agent 未啟動」的完整事實（g2 cost 同口徑）",
+  "kv_preserved/kv_mutated＝audit_kv_preservation 審計端計算（只收 verifier==kv_recomputed 的 @key[value] 鍵；req_answer_kv 是格式條目、非鍵值行，不進 kv 清單）",
+  "before_pass_independent 是 lab 既有已記錄分（引用，未本地重跑 hidden scorer）；after 全部為本輪/11-06 新採分（pass=true、rc=0、raw stdout sha 記錄）",
+  "11-07 四格最終產物只有兩種位元組內容（eb139290…：A/generic+C/generic；06ff239a…：A/localized+C/localized＝A 草稿）；按 sha 去重各採分一次、逐格記錄同一結果",
+  "本切片＝dabench 失敗草稿 dab_378-pi-C（effects2_20261106 generic 失敗）＋其同 task 好草稿 dab_378-pi-A 作「正確成果退步」基準；開發選樣單 rep，不宣稱 localized 較好",
+  "11-07 結果 manifest（run 時）sha256=cf516b8d…；本票交付 2 的措辭修訂後 sha256=32527583…（措辭修訂不改變任何已記錄結果）"
+ ],
+ "manifest_wording_fix": {
+  "file": "ops/reqloop/g2/real_slice/manifest.json",
+  "change": "「9 條已滿足行」→「9 個已滿足條目（1 條 req_answer_kv 格式＋8 條 @key[value] 鍵值行）」（4 處：current_behavior／expected_demonstrable_improvement／independent_acceptance／dab_378-pi-C preservation.note）",
+  "manifest_sha256_at_run": "cf516b8d7895d77a222af05b1b4fd5e3e2a1882a4afe29a2c8d0cc317ff228c1",
+  "manifest_sha256_after_fix": "3252758385058f45dc281b49b74fd3d4c2a76801bcd44162a89408a4f5180f7e"
+ },
+ "evidence": {
+  "realab_dab378_20261106": {
+   "summary": "/home/user1/dev/ops/audits/realab_dab378_20261106_summary.json",
+   "raw": "/home/user1/dev/ops/realab_dab378_20261106/{before_after.json,provenance.json,contrast/*}",
+   "scorer_raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1"
+  },
+  "realab_20261107": {
+   "g2_result": "/home/user1/dev/ops/realab_20261107/g2_result.json (sha256 85419fe769a76b09f6c7f3b461f6541b4c6fe3039d694f0af824a22f51baa472)",
+   "kv_audit": "/home/user1/dev/ops/audits/realab_kv_preservation_20261107.json",
+   "independent_after_this_round": "/home/user1/dev/ops/realab_20261107/independent_after_20261107.json",
+   "scorer_raw_stdout_sha256": "53949d813ba4337c7fb82f218f61aa5c28bdcb8e0c7b849af054863fd09388b1",
+   "final_answer_sha256_by_content": {
+    "eb139290…(A/generic+C/generic)": "eb139290f97b52723c1ac2ea00bb6d1c98b754ed203e116bf33f6e1f95f263c5",
+    "06ff239a…(A/localized+C/localized=draft A)": "06ff239a89d12dd1790cb3b98a74ef3b9db4a1534f131a6dac618175532de33e"
+   }
+  },
+  "drafts": {
+   "dab_378-pi-C": {
+    "answer.txt": "16754dc396ead4d014b6377ec6b79637cafbd238af3e395394a206a001319d34"
+   },
+   "dab_378-pi-A": {
+    "answer.txt": "06ff239a89d12dd1790cb3b98a74ef3b9db4a1534f131a6dac618175532de33e"
+   }
+  }
+ },
+ "provenance": {
+  "model": {
+   "provider": "lms1004nothink",
+   "model": "gemma-4-12b-it-qat",
+   "note": "與 effects2_20261106 同 provider/model（可比口徑）；不新裝、不改設定、不換模型（11-06 #2/#7：無新發射、無模型變動另報）"
+  },
+  "scorer": "lab 既有 black-box scorer（independent_score.py 介面，sudo -n、生成後才跑、hidden_read_by_agent=false、未讀 /srv/eval hidden 或 scorer.py 源碼）",
+  "no_model_calls_this_round": true,
+  "note": "本輪（r1154）只執行：採分（2 次，按最終內容 sha 去重）＋審計端計算；無 repair/agent 執行"
+ }
+}
