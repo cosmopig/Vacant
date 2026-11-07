@@ -10,7 +10,9 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import pathlib
+import re
 
 import vacant_network.reqloop.g2 as g2
 import vacant_network.reqloop.repair as repair
@@ -24,6 +26,11 @@ def _sha(p: pathlib.Path) -> str:
 REAL_SLICE_MANIFEST = (
     pathlib.Path(__file__).resolve().parent.parent
     / "ops" / "reqloop" / "g2" / "real_slice" / "manifest.json"
+)
+# r1157（P20261107_0210-1）：dab_055 content closed loop slice 的產品管線凍結規格
+DAB055_MANIFEST = (
+    pathlib.Path(__file__).resolve().parent.parent
+    / "ops" / "reqloop" / "g2" / "real_slice_dab055" / "manifest.json"
 )
 SIX_ELEMENTS = (
     "original_user_requirement",
@@ -259,3 +266,58 @@ def test_real_slice_smoke_preservation_and_exit_codes(tmp_path):
         a = by[("dab_378-pi-A", arm)]
         assert a["exit_code"] == 0
         assert a["regressed"] == []
+
+
+def test_real_slice_dab055_baseline_reproduces_content_counterexample():
+    """P20261107_0210-1（r1157）：dab_055 content closed loop slice 進產品管線。
+
+    此前該 slice 的內容反例只存在於 ad-hoc 審計腳本
+    （ops/audits/dab055_slice_precheck_20261107.py）；本測試把它變成產品自己的
+    離線命令輸出（g2 --manifest … --baseline），且：
+    - 凍結副本存在、hash 對得上（verify_frozen，同 r1011 口徑：每條 pin 都驗）
+    - baseline 對 bad 草稿（2081990.36 點估計 float）必為 FAIL/FAIL——可重現內容反例；
+      I-4 形狀：required 為空集不許冒稱全過
+    - 重算期望整數 2081990 永不進 detail/evidence；草稿自己的值 2081990.36 是
+      合法內容、允許出現（以「2081990 後不接小數點」區分兩者）
+    - 工單成本上限（25 calls / 1,451,938 tokens，cell 總預算）在 budget 欄位同值
+    - 本檔零模型呼叫；發射＝另一步授權（點名＋成本另報），不在本檔範圍
+    """
+    man = g2.G2Manifest.load(DAB055_MANIFEST)
+    base = DAB055_MANIFEST.parent
+    man.verify_frozen(base)
+
+    # 2 格＝1 bad 真草稿 × 2 臂；同草稿同預算（2 輪×300s、min_rounds 語義同 effects2 口徑）
+    assert set(man.arms) == {"generic", "localized"}
+    assert [d["name"] for d in man.drafts] == ["dab_055-pi-C"]
+    assert man.drafts[0]["role"] == "content_counterexample"
+    assert man.drafts[0]["synthetic"] is False, "真草稿，不是 synthetic"
+    assert len(g2.plan_cells(man)) == 2
+    b = man.budget
+    assert b["max_rounds_per_cell"] == 2 and b["timeout_s_per_round"] == 300
+    assert b["min_rounds"] == {"generic": 1, "localized": 0}
+    cc = b["cell_cost_cap"]
+    assert cc["model_calls"] == 25 and cc["tokens_total"] == 1451938, "工單成本上限同值"
+    assert man.drafts[0]["source"]["score"]["pass"] is False, "已記錄獨立 scorer：draft fail"
+
+    # baseline：FAIL/FAIL 內容反例（產品自己的離線命令，不是 ad-hoc 腳本）
+    j = g2.baseline_json(man, base)
+    d = j["drafts"][0]
+    assert d["name"] == "dab_055-pi-C"
+    assert d["required_total"] == 2
+    assert d["required_pass"] == 0, "bad 草稿 baseline 必為 FAIL/FAIL（反例）"
+    assert d["all_required_pass"] is False
+    by_id = {i["id"]: i for i in d["items"]}
+    assert by_id["req_answer_kv"]["status"] == "FAIL"
+    assert by_id["req_mean_cases_recomputed"]["status"] == "FAIL"
+
+    # 無洩漏：期望整數 2081990（重算值）不得進 detail/evidence；
+    # 2081990.36（草稿自己的 float 值）是合法內容、須允許出現
+    blob = json.dumps({k: by_id[k] for k in ("req_answer_kv", "req_mean_cases_recomputed")},
+                      ensure_ascii=False)
+    assert not re.search(r"2081990(?!\.)", blob), f"重算期望值進證據：{blob}"
+    assert "2081990.36" in blob, "草稿自己的值（合法內容）應可見"
+
+    # dry-run 同 manifest 可列格（發射前最後一道離線門，本檔不真跑）
+    dj = g2.dry_run_json(man)
+    assert [c["draft"] for c in dj["cells"]] == ["dab_055-pi-C", "dab_055-pi-C"]
+    assert dj["hidden_after"] == "UNKNOWN"
