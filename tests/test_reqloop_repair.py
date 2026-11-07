@@ -3760,4 +3760,53 @@ def test_round2_restored_preserved_deliverable_recomputes_before_and_preserves_s
     assert out_gen.stopped == "stalled"
 
 
+def test_single_deliverable_kv_preservation_enforced(tmp_path):
+    """工單 P20261107_0041-1：單一結構化答案檔的鍵級保留必須強制（不只資訊性）。
+
+    檔案級 satisfied_* 對單一交付物 by design 為空（_preserved_deliverables 在
+    len(declared) < 2 時退回 ()），若 agent 在修復失敗項時擅改原本 PASS 的已滿足 key，
+    satisfied_mutated 仍為空、退出碼 0 放行＝漏防。接線後（audit_kv_preservation →
+    satisfied_preserved/satisfied_mutated，部分修復情境）：
+    (a) fake agent 只修 FAIL key、已滿足 key 位元組不變
+        ⇒ satisfied_preserved 含 8 個已滿足 key、satisfied_mutated == ()、exit 0；
+    (b) fake agent 修好 FAIL key 但同時改寫已滿足 key pre_mean
+        ⇒ satisfied_mutated 含 pre_mean、_exit_code == 20（拒收）、不得標 gap_closed。
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[1]
+    base = repo_root / "ops" / "reqloop" / "g2" / "real_slice" / "dab_378-pi-C"
+    t, d = base / "task", base / "draft"
+    rs = RequirementSet.load(t / "requirements.json")
+    draft_c = (d / "answer.txt").read_text(encoding="utf-8")
+    satisfied_keys = ("pre_mean", "pre_median", "pre_sd", "pre_skewness",
+                      "post_mean", "post_median", "post_sd", "post_skewness")
+
+    # (a) 只修原 FAIL 的 kurtosis 兩行（-1.17 → -1.13），已滿足行位元組不變 ⇒ 保留成立、放行
+    fixed_c = (draft_c.replace("@pre_kurtosis[-1.17]", "@pre_kurtosis[-1.13]")
+                         .replace("@post_kurtosis[-1.17]", "@post_kurtosis[-1.13]"))
+    out = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "ok", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": fixed_c}),
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert tuple(out.satisfied_preserved) == satisfied_keys
+    assert out.satisfied_mutated == ()
+    assert out.kv_mutated == ()
+    assert out.stopped == "gap_closed"
+    assert repair._exit_code(out) == 0
+
+    # (b) 修好 FAIL key 的同時改寫已滿足 key pre_mean ⇒ 拒收（exit 20）、不得標 gap_closed
+    tampered_c = fixed_c.replace("@pre_mean[21144.08]", "@pre_mean[99999.99]")
+    out2 = repair.repair_slice(
+        t, rs, d,
+        out_root=tmp_path / "mut", build=_fake_build([]),
+        run=_fake_agent({"answer.txt": tampered_c}),
+        feedback_mode="localized", max_rounds=2, synthetic=False,
+    )
+    assert "pre_mean" in out2.satisfied_mutated
+    assert "pre_mean" not in out2.satisfied_preserved
+    assert out2.stopped != "gap_closed"
+    assert repair._exit_code(out2) == 20
+
+
 

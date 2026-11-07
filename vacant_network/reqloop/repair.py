@@ -1776,8 +1776,9 @@ class RepairOutcome:
     #: real_slice manifest independent_acceptance(2)）：初始驗即已滿足（params.key 且
     #: 初始驗 PASS）的 key 中，最終工作區值位元組相同（.txt raw 字串／.json 值＋型別）
     #: ＝ preserved；值被改／key 缺失／重複／檔案缺失＝ mutated（audit_kv_preservation
-    #: 保守分類）。純資訊審計：不改變退出碼（已滿足 key 值被改但重算仍 PASS＝成果仍
-    #: 正確，不得誤拒）；兩欄皆空＝審計未執行（零輪 no_gap／無 key 級已滿足項）。
+    #: 保守分類）。部分修復情境（初始驗存在未滿足必需項）下併入 satisfied_*（
+    #: _exit_code 20 拒收，P20261107_0041-1）；good 草稿不併入（argon 20261106_1121：
+    #: 全 PASS 重存不得被保留檢查誤拒）。兩欄皆空＝審計未執行（零輪 no_gap）。
     kv_preserved: tuple[str, ...]
     kv_mutated: tuple[str, ...]
 
@@ -1898,6 +1899,20 @@ def repair_slice(
     before = run_requirement_checks(auth, req_set, d_dir)
     tracked_preserved = _preserved_deliverables(req_set, before, d_dir)
     req_fail = [c.claim_id for c in before if c.required and c.status == "FAIL"]
+
+    # 鍵值交付物（answer.txt @key[val]／頂層 JSON）的「保留其餘成果」只能逐鍵核對：
+    # 初始驗即已滿足（PASS）且帶 params.key 的條目，其 key 為應保留鍵。
+    # 工單 P20261107_0041-1：部分修復情境（存在初始未滿足必需項）下，鍵級保留
+    # 併入 satisfied_*（_exit_code 20 把關）；good 草稿（無初始缺口）維持
+    # satisfied_* == () 規範（argon 20261106_1121：全 PASS 重存不得被保留檢查誤拒）。
+    before_st = {c.claim_id: c.status for c in before}
+    kv_satisfied: dict[str, list[str]] = {}
+    for it in req_set.items:
+        p = it.params if isinstance(it.params, dict) else {}
+        k = p.get("key")
+        if isinstance(k, str) and k.strip() and before_st.get(it.id) == "PASS":
+            kv_satisfied.setdefault(str(it.deliverable), []).append(k.strip())
+    kv_enforced = bool(req_fail) and bool(kv_satisfied)
     rounds: list[RepairRound] = []
     stalled = 0
     stopped = STOP_MAX_ROUNDS
@@ -1931,6 +1946,15 @@ def repair_slice(
             _, round_mutated = _check_preserved_deliverables(
                 d_dir, pathlib.Path(r.workspace), tracked_preserved
             )
+            # 鍵級（P20261107_0041-1）：本輪改寫初始已滿足 key 等同改寫已滿足交付物——
+            # 缺口不得提前關閉、也不算進度（與檔案級 round_mutated 同等把關）
+            if kv_enforced:
+                _kv_round_mut = [key for fname, keys in kv_satisfied.items()
+                                for key in audit_kv_preservation(
+                                    d_dir / fname,
+                                    pathlib.Path(r.workspace) / fname, keys)[1]]
+                if _kv_round_mut:
+                    round_mutated = round_mutated + tuple(_kv_round_mut)
             # 缺口關閉：全部必需項 PASS、全程無來源改動（P000-20261105-02）、且本輪未改寫
             # 應保留之初始已滿足交付物（P20261106_1035-2：竄改已滿足交付物不得關閉缺口）
             if not tamper_seen and not round_mutated and _required_all_pass(req_set, r.after):
@@ -1999,27 +2023,22 @@ def repair_slice(
         d_dir, final_ws, tracked_preserved
     )
 
-    # KV 交付物鍵級保留審計（real_slice manifest independent_acceptance(2)、審計端計算）：
-    # 單一交付物（answer.txt @key[value]）KV 任務上檔案級 satisfied_* by design 不適用
-    # （argon 20261106_1121），鍵級是「保留其餘成果」的落點：初始驗即已滿足的 key 中，
-    # 最終工作區值位元組相同＝preserved；值被改／key 缺失／重複／檔案缺失＝mutated
-    # （audit_kv_preservation 保守分類）。純資訊審計：不改變退出碼。零輪（no_gap、
-    # 未重生產）⇒ 審計不執行、兩欄皆空（不虛灌證據）。
+    # KV 交付物鍵級保留審計（審計端計算、audit_kv_preservation 保守分類）：
+    # 初始驗即已滿足的 key 中，最終工作區值位元組相同＝preserved；值被改／key 缺失／
+    # 重複／檔案缺失＝mutated。零輪（no_gap、未重生產）⇒ 審計不執行、兩欄皆空（不虛灌）。
+    # 工單 P20261107_0041-1：部分修復情境（kv_enforced）下併入 satisfied_*，被改寫鍵
+    # 與檔案級 satisfied_mutated 同等把關（_exit_code 20 拒收）；good 草稿不併入。
     kv_preserved: list[str] = []
     kv_mutated: list[str] = []
     if rounds:
-        before_st = {c.claim_id: c.status for c in before}
-        keys_by_file: dict[str, list[str]] = {}
-        for it in req_set.items:
-            p = it.params if isinstance(it.params, dict) else {}
-            k = p.get("key")
-            if isinstance(k, str) and k.strip() and before_st.get(it.id) == "PASS":
-                keys_by_file.setdefault(str(it.deliverable), []).append(k.strip())
-        for fname, keys in keys_by_file.items():
+        for fname, keys in kv_satisfied.items():
             p_keys, m_keys = audit_kv_preservation(
                 d_dir / fname, final_ws / fname, keys)
             kv_preserved.extend(p_keys)
             kv_mutated.extend(m_keys)
+        if kv_enforced:
+            satisfied_preserved = satisfied_preserved + tuple(kv_preserved)
+            satisfied_mutated = satisfied_mutated + tuple(kv_mutated)
 
     calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
@@ -2599,7 +2618,7 @@ def main(argv: list[str] | None = None, *,
             print(f"satisfied_preserved: {', '.join(outcome.satisfied_preserved)}")
         if outcome.kv_mutated:
             print(f"KV_MUTATED: {', '.join(outcome.kv_mutated)}"
-                  f"  ← 原已滿足 key 值被改（鍵級審計、資訊性；不影響退出碼）")
+                  f"  ← 原已滿足 key 值被改（鍵級審計；部分修復情境下已併入 satisfied_mutated 拒收）")
         if outcome.kv_preserved:
             print(f"kv_preserved: {', '.join(outcome.kv_preserved)}"
                   f"  （鍵級保留審計：原已滿足 key 值位元組相同）")
