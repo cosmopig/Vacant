@@ -251,3 +251,9 @@
 - 可重現內容反例：合成同形資料 dabstep-17 形草稿 7.683437（count ratio）→ FAIL mismatch_with_recomputation、8.907926（volume ratio）→ PASS、out="group" 分組名精確比對；expected_in_evidence=False、重算值不入 detail/evidence。
 - 沒驗證/沒做：未連真實 dabstep 資料實跑（票面值 8.907926/7.683437 為票面實敗產物，合成資料同形）；checks.py 插入 83 行含 docstring、略超票面「改 ≤50 行」註記（已在票尾註明）；未動 repair.py／未發射／1753 維持排除。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／0 模型呼叫、0 元；票已 mv done/，doing/ 空（等規劃者下一票）。
+## r1178（2026-11-07；票 P20261107_0001-1：extract.py 接 glm 後端＋orders_monthly 真擷取——驗收全綠）
+- 做了：extract.py 加 GlmClient（subprocess 只走 glm 指令；非 0 即 fail-closed、不重試）、build_task_prompt（原文＋欄位前 5 列＋12 verifier 清單＋kind 合法值）、csv_preview、run_task、main CLI（預設寫 ops/reqloop/extract/out/<task>.<model>.json）；tests +7。
+- 驗證：pytest extract+checks+repair+r1169 212 passed；驗收「條目 9、丟棄 0、unverified 2」RC=0（N≥3）；vibe_calls.jsonl 有 glm53/orders_monthly 擷取需求 rc=0 7416 tok。commit fa96421f；票 mv done/；bd vq-el4.2 關閉。
+- 坑：首跑 9/9 丟棄＝模型自造 kind（data_cleaning/metric…）；prompt 寫明 kind∈{explicit,assumption,preference} 後復跑 9 留 2 unverified（R6 缺 required_columns、R8 缺 tag，fail-closed 保留）。
+- 沒驗證/沒做：extract.py +192 行略超票面 ≤150 註記（票尾已記）；未跑 vq-el4.3（run_eval）；effects2_20261106 未動、未重跑；dab_055 仍候點名。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未繞過 glm／未洩露金鑰／1753 維持排除；模型呼叫僅票內授權的 2 次 GLM 5.3。
