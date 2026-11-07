@@ -84,3 +84,9 @@
 - 沒驗證什麼：新效果數字（未重 fire；A/B 仍單 rep 開發選樣、不宣稱 localized 較好）；hidden_after 仍 UNKNOWN（本地無權重跑 hidden scorer、缺值不填 0）。
 - DECISION：0 模型呼叫、0 元、0 發射；未加 regex／靜態 prompt／重試；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 /srv/eval hidden／scorer；工單六要素齊（open/→done/）；bd vq-5nz.50 建立＋關閉（commit SHA 入註記）。
 - 下一步：vq-6rp（dabstep-1753 模型側硬缺口）／vq-5nz.6（停滯草稿換方法）仍候需求端點名；是否擴量＝新決策、需另行授權。
+
+## r1152（第 1152 輪）
+- 做：工單 P20261107_0041-1（done/）——audit_kv_preservation 接線從「純資訊 kv_*」升級為「部分修復情境強制」：repair_slice 收集初始驗 PASS 且帶 params.key 的 kv_satisfied；kv_enforced（初始驗存在未滿足必需項）時各輪 round_mutated 併入被改寫 key（缺口不提前關閉、不算進度）＋結尾併入 satisfied_preserved/satisfied_mutated → _exit_code 20 拒收；good 草稿維持 satisfied_*==()（argon 20261106_1121）；零輪 no_gap 審計不執行不虛灌。
+- 驗證：TDD 紅（satisfied_preserved AssertionError）→綠 test_single_deliverable_kv_preservation_enforced（dab_378-pi-C：(a) 只修 FAIL key⇒8 鍵保留、exit 0；(b) 改寫 pre_mean⇒satisfied_mutated、exit 20、非 gap_closed）；5 檔 checks/g2/repair/real_slice/g1_gate＝**222 passed**（221 既有＋1 新增、無回歸）；commit eafa6e7e。
+- 沒驗證：真實模型行為（未 fire、無新效果數字）；KV key 的 OS 層 0o444 寫保護（工單範圍外）。
+- 下一步：vq-6rp（dabstep-1753）／vq-5nz.6 仍候需求端點名；擴量＝新決策需另授權。
