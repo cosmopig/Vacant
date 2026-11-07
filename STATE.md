@@ -92,3 +92,8 @@
 - 驗證：14/14 real14 prompt_sha 快取命中（改前後皆 0 mismatch）；reqloop 12 檔 347 passed；run_eval.py --all＝🏆 PASS、RC=0、G1 39/39・REAL14 9/9・PHASE3 6fixed/3unres 全 RESUMED；vibe_calls 130→130（0 新呼叫）；out 146 檔 hash 僅 phase2.json 結果檔變動（cost 71→74 為 r1205 時代 3 次真實呼叫入帳，18:19–18:35 帳本可查）。
 - 沒驗證：本輪未跑全量 pytest（由 CI 跑）；auto/qwen27b CI 結果待巡。
 - 下一步：等 CI/審查；工單已入 done/（ebe4344c）。
+- 2026-11-07 r1208（工單 P20261107_1827-2：run_phase2 offline 模式防護）：
+- 做了：phase2_extract_cell＋run_phase2 各加 offline: bool = False；offline=True 且快取未命中（缺檔/prompt_sha 不符）→ raise ExtractError（fail-closed，不發外部 API 呼叫）；run_all() 傳 offline=True；CLI --phase2 預設 False 行為不變；repair.py 未碰。
+- 驗證：pytest -k offline_mode＝1 passed（32 deselected）；extract 3 檔 97 passed；run_eval.py --all＝🏆 PASS、RC=0、REAL14 74 呼叫/732,826 tok 與帳本同（0 新呼叫）；out/all/phase2.json 還原 HEAD。
+- 沒驗證：未跑全量 pytest（CI 跑）；auto/qwen27b 新 HEAD 57ce9625 本地 CI 待巡。
+- 下一步：巡 57ce9625 本地 CI；工單已入 done/。
