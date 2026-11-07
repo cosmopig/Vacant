@@ -3,6 +3,7 @@
 G2.5 vq-el4.3：run_eval.py 第一項——G1 用自動擷取需求重跑，對照手寫版（離線、不呼叫模型）。
 
 用法：
+    python3 ops/reqloop/extract/run_eval.py --all                # 全三項整合驗收（G1 重跑＋REAL14＋PHASE3）
     python3 ops/reqloop/extract/run_eval.py --model glm53 [--json OUT]
 
 對 G1 每題（ops/reqloop/g1/tasks/<t>/）：
@@ -210,6 +211,216 @@ def write_models_json(path: pathlib.Path, result: dict, g1: pathlib.Path, out_di
     path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+# ── --all：G2.5 全三項整合驗收（vq-el4 結案指令）────────────────────────────
+# 依序 run_phase1（G1 重跑）→ run_phase2（REAL14）→ run_phase3（localized 修復報告）；
+# 三項全過 → 0，任一未過 → 20。全程離線重算（phase2 重用 out/real14 快取、
+# phase3 接續 out/phase3/progress.json）；成本缺值＝UNKNOWN，絕不填 0。
+
+
+def run_phase1(model: str = "glm53",
+               g1: pathlib.Path | None = None,
+               out_dir: pathlib.Path | None = None,
+               vibe_calls: pathlib.Path | None = None,
+               json_out: pathlib.Path | None = None) -> int:
+    """item 1：G1 重跑（擷取需求 vs 手寫需求；離線重算、不呼叫模型）。
+
+    退出碼：0 門禁 PASS；20 門禁 FAIL；2 缺任務或缺擷取結果（fail-closed）。
+    """
+    g1 = pathlib.Path(g1) if g1 else REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks"
+    out_dir = pathlib.Path(out_dir) if out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
+    vibe_calls = (pathlib.Path(vibe_calls).expanduser() if vibe_calls
+                  else pathlib.Path("~/dev/ops/state/vibe_calls.jsonl").expanduser())
+    json_out = pathlib.Path(json_out) if json_out else None
+
+    task_dirs = sorted(p for p in g1.iterdir() if p.is_dir() and (p / "requirements.json").is_file())
+    if not task_dirs:
+        print(f"錯誤：{g1} 內未找到任何 G1 任務", file=sys.stderr)
+        return 2
+
+    print(f"# G2.5 G1 重跑對照（model={model}；離線重算、不呼叫模型）")
+    print()
+    rows: list[dict] = []
+    missing: list[str] = []
+    for t_dir in task_dirs:
+        hand = RequirementSet.load(t_dir / "requirements.json")
+        ext_path = out_dir / f"{t_dir.name}.{model}.json"
+        if not ext_path.is_file():
+            missing.append(t_dir.name)
+            print(f"## {t_dir.name}：缺擷取結果（{ext_path}）——fail-closed，不計入")
+            rows.append({"task": t_dir.name, "missing": True})
+            continue
+        ext = RequirementSet.load(ext_path)
+        hand_res = evaluate_task(t_dir, hand)
+        ext_res = evaluate_task(t_dir, ext)
+        ext_err = _extraction_failure(ext_path)
+        rows.append({
+            "task": t_dir.name, "missing": False,
+            "hand": hand_res, "ext": ext_res,
+            "ext_items": len(ext.items),
+            "ext_unverified": sum(1 for i in ext.items if i.unverified),
+            "ext_error": ext_err,
+        })
+        print(
+            f"## {t_dir.name}：條目 手寫 {len(hand.items)}／擷取 {len(ext.items)}"
+            f"（unverified {sum(1 for i in ext.items if i.unverified)}）"
+        )
+        if ext_err:
+            print(f"- ⚠️ 擷取失敗（fail-closed、計未抓出）：{ext_err.splitlines()[0][:120]}")
+        print(f"- good：手寫 {hand_res['good']}、擷取 {ext_res['good']}")
+        for hb, eb in zip(hand_res["bad"], ext_res["bad"]):
+            mark = "✅" if eb["caught"] else "❌漏抓"
+            print(f"- {hb['case']}：手寫 {'抓出' if hb['caught'] else '漏抓'}、擷取 {mark}")
+        print()
+
+    costs = read_extract_costs(vibe_calls, model, [r["task"] for r in rows if not r.get("missing")])
+    print("## 擷取成本（vibe_calls.jsonl；缺值＝UNKNOWN，不填 0）")
+    for r in rows:
+        if r.get("missing"):
+            continue
+        c = costs.get(r["task"]) or {}
+        if c.get("found"):
+            print(f"- {r['task']}：{c['calls']} 次呼叫、{c['total_tokens']} tokens")
+        else:
+            print(f"- {r['task']}：UNKNOWN（無紀錄）")
+    print()
+
+    hand_caught = sum(b["caught"] for r in rows if not r.get("missing") for b in r["hand"]["bad"])
+    ext_caught = sum(b["caught"] for r in rows if not r.get("missing") for b in r["ext"]["bad"])
+    total_bad = sum(len(r["hand"]["bad"]) for r in rows if not r.get("missing"))
+    hand_fp = sum(1 for r in rows if not r.get("missing") and r["hand"]["good"] == "FP")
+    ext_fp = sum(1 for r in rows if not r.get("missing") and r["ext"]["good"] == "FP")
+    ext_verified = sum(1 for r in rows if not r.get("missing") and r["ext"]["good"] == "VERIFIED")
+    total_good = sum(1 for r in rows if not r.get("missing") and r["ext"]["good"] in ("VERIFIED", "FP", "UNKNOWN"))
+
+    print("## 門禁指標彙整")
+    print(f"- 錯誤交付物：{total_bad}；抓錯 手寫 {hand_caught}/{total_bad}、擷取 {ext_caught}/{total_bad}")
+    print(f"- 正確交付物：{total_good}；冤枉 手寫 {hand_fp}、擷取 {ext_fp}（擷取 VERIFIED {ext_verified}/{total_good}）")
+
+    found_cost = {t: c for t, c in costs.items() if c.get("found")}
+    cost_info = {
+        "calls": sum(c["calls"] for c in found_cost.values()) if found_cost else None,
+        "tokens": sum(c["total_tokens"] for c in found_cost.values()) if found_cost else None,
+        "unknown_tasks": sorted(t for t, c in costs.items() if not c.get("found")),
+    }
+
+    if missing:
+        print(f"❌ 門禁判定：FAIL（缺擷取結果：{', '.join(missing)}）")
+        if json_out is not None:
+            _write_json(json_out, rows, {"gate": "FAIL", "missing": missing, "cost": cost_info})
+        return 2
+
+    catch_rate = ext_caught / total_bad if total_bad else 0.0
+    gate = (total_good > 0 and ext_fp == 0 and catch_rate >= GATE_CATCH_RATE)
+    print(f"- 擷取版抓錯率 {catch_rate * 100:.1f}%（門檻 ≥ {GATE_CATCH_RATE * 100:.0f}%）、冤枉 {ext_fp}（門檻 0）")
+    if gate:
+        print("🏆 G2.5 第 1 項門禁：PASS（擷取需求在 G1 上達標）")
+    else:
+        print("❌ G2.5 第 1 項門禁：FAIL（未達抓錯門檻或存在冤枉——改擷取方法，不寫報告）")
+    if json_out is not None:
+        _write_json(json_out, rows,
+                    {"gate": "PASS" if gate else "FAIL", "catch_rate": catch_rate,
+                     "ext_caught": ext_caught, "total_bad": total_bad, "ext_fp": ext_fp,
+                     "cost": cost_info})
+    return 0 if gate else 20
+
+
+def _print_all_dashboard(j1: pathlib.Path, j2: pathlib.Path, j3: pathlib.Path,
+                         rc1: int, rc2: int, rc3: int) -> bool:
+    """印出三項整合總結看板（各項指標／門禁狀態／成本）；回傳三項是否全過。"""
+    def _doc(p: pathlib.Path) -> dict:
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    def _gate(rc: int) -> str:
+        if rc == 0:
+            return "PASS"
+        return "FAIL（rc=2，fail-closed／缺值）" if rc == 2 else "FAIL"
+
+    def _cost(c: object) -> str:
+        if not isinstance(c, dict) or not c:
+            return "UNKNOWN（缺值不填 0）"
+        labels = {"calls": "呼叫", "repair_sessions": "repair_sessions",
+                  "model_calls": "model_calls", "tokens": "tokens"}
+        parts = [f"{labels[k]} {c[k] if c[k] is not None else 'UNKNOWN'}"
+                 for k in ("calls", "repair_sessions", "model_calls", "tokens") if k in c]
+        if c.get("unknown_tasks"):
+            parts.append(f"{len(c['unknown_tasks'])} 題 UNKNOWN")
+        return "、".join(parts) if parts else "UNKNOWN"
+
+    d1, d2, d3 = _doc(j1), _doc(j2), _doc(j3)
+    bar = "=" * 64
+    print()
+    print(bar)
+    print("📋 G2.5 全三項整合總結看板（各項指標／門禁狀態／成本）")
+    print(bar)
+    print(f"① G1 重跑（擷取 vs 手寫）：門禁 {_gate(rc1)}")
+    if d1.get("missing"):
+        print(f"   指標：缺擷取 {len(d1['missing'])} 題（{', '.join(map(str, d1['missing']))}）")
+    else:
+        print(f"   指標：抓錯 {d1.get('ext_caught')}/{d1.get('total_bad')}"
+              f"（率 {(d1.get('catch_rate') or 0) * 100:.1f}%，門檻 ≥ {GATE_CATCH_RATE * 100:.0f}%）、"
+              f"冤枉 {d1.get('ext_fp')}（門檻 0）")
+    print(f"   成本：{_cost(d1.get('cost'))}")
+    print(f"② REAL14（14 份真實草稿、自動擷取）：門禁 {_gate(rc2)}")
+    print(f"   指標：抓錯 {d2.get('caught')}/{d2.get('total_bad')}（門檻 ≥ {MIN_CATCH_BAD}）、"
+          f"冤枉 {d2.get('false_acc')}/{d2.get('total_good')}（門檻 ≤ {MAX_FALSE_GOOD}）"
+          + (f"、{d2['errors']} cell 錯誤" if d2.get("errors") else ""))
+    print(f"   成本：{_cost(d2.get('cost'))}")
+    print(f"③ PHASE3（錯草稿＋localized 修復＋獨立 scorer）：門禁 {_gate(rc3)}")
+    print(f"   指標：fixed {d3.get('fixed')}、unresolved {d3.get('unresolved')}、"
+          f"rejected {d3.get('rejected')}、right_to_wrong {d3.get('right_to_wrong')}、"
+          f"held {d3.get('held')}"
+          + (f"、error {d3['errors']}" if d3.get("errors") else ""))
+    print(f"   成本：{_cost(d3.get('cost'))}")
+    print(bar)
+    all_ok = rc1 == 0 and rc2 == 0 and rc3 == 0
+    if all_ok:
+        print("🏆 G2.5 全三項門禁整合驗收：PASS")
+    else:
+        failed = [n for n, rc in (("G1 重跑", rc1), ("REAL14", rc2), ("PHASE3", rc3)) if rc != 0]
+        print(f"❌ G2.5 全三項門禁整合驗收：FAIL（未過：{'、'.join(failed)}）")
+    return all_ok
+
+
+def run_all(model: str = "glm53",
+            g1: pathlib.Path | None = None,
+            out_dir: pathlib.Path | None = None,
+            vibe_calls: pathlib.Path | None = None,
+            base: pathlib.Path | None = None,
+            include_good: bool = False,
+            provider: str | None = None,
+            p3_model: str | None = None,
+            max_rounds: int | None = None,
+            timeout_s: float | None = None,
+            p3_out: pathlib.Path | None = None,
+            p3_req_dir: pathlib.Path | None = None,
+            limit: int | None = None) -> int:
+    """--all：G2.5 全三項整合驗收，依序 G1 重跑 → REAL14 → PHASE3（離線重算）。
+
+    三項全過（rc 皆 0）→ 0；任一未過 → 20。逐項 JSON 落 <out-dir>/all/ 供複核；
+    成本由各項自讀（vibe_calls／raw usage），缺值＝UNKNOWN，絕不填 0。
+    """
+    provider = PHASE3_PROVIDER if provider is None else provider
+    p3_model = PHASE3_MODEL if p3_model is None else p3_model
+    max_rounds = PHASE3_MAX_ROUNDS if max_rounds is None else max_rounds
+    timeout_s = PHASE3_TIMEOUT_S if timeout_s is None else timeout_s
+    base_dir = pathlib.Path(out_dir) if out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
+    all_dir = base_dir / "all"
+    all_dir.mkdir(parents=True, exist_ok=True)
+    j1, j2, j3 = all_dir / "phase1.json", all_dir / "phase2.json", all_dir / "phase3.json"
+    rc1 = run_phase1(model=model, g1=g1, out_dir=out_dir,
+                     vibe_calls=vibe_calls, json_out=j1)
+    rc2 = run_phase2(model=model, base=base, vibe_calls=vibe_calls, json_out=j2)
+    rc3 = run_phase3(base=base, include_good=include_good, extract_model=model,
+                     provider=provider, model=p3_model, max_rounds=max_rounds,
+                     timeout_s=timeout_s, out_root=p3_out, req_dir=p3_req_dir,
+                     json_out=j3, limit=limit)
+    all_ok = _print_all_dashboard(j1, j2, j3, rc1, rc2, rc3)
+    return 0 if all_ok else 20
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="python3 ops/reqloop/extract/run_eval.py",
@@ -226,6 +437,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="item 2：14 份真實草稿（effects2_20261106，9 壞／5 好）＋自動擷取需求")
     ap.add_argument("--phase3", action="store_true",
                     help="item 3（vq-el4.5）：9 份錯草稿＋自動擷取需求＋localized 修復＋獨立 scorer")
+    ap.add_argument("--all", action="store_true",
+                    help="執行 G2.5 全三項整合驗收：G1 重跑、真實 14 份、localized 修復報告")
     ap.add_argument("--effects2", default=None,
                     help="effects2 目錄（預設 ~/dev/ops/effects2_20261106）")
     ap.add_argument("--include-good", action="store_true",
@@ -242,6 +455,19 @@ def main(argv: list[str] | None = None) -> int:
                     help="自動擷取需求目錄（預設 ops/reqloop/extract/out/real14）")
     ap.add_argument("--limit", type=int, default=None, help="phase3 只跑前 N 格（冒煙用；不宣稱效果）")
     a = ap.parse_args(argv)
+
+    if a.all:
+        return run_all(model=a.model,
+                       g1=pathlib.Path(a.g1) if a.g1 else None,
+                       out_dir=pathlib.Path(a.out_dir) if a.out_dir else None,
+                       vibe_calls=pathlib.Path(a.vibe_calls).expanduser(),
+                       base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None,
+                       include_good=a.include_good,
+                       provider=a.p3_provider, p3_model=a.p3_model,
+                       max_rounds=a.p3_rounds, timeout_s=a.p3_timeout,
+                       p3_out=pathlib.Path(a.p3_out).expanduser() if a.p3_out else None,
+                       p3_req_dir=pathlib.Path(a.p3_req_dir).expanduser() if a.p3_req_dir else None,
+                       limit=a.limit)
 
     if a.phase2:
         return run_phase2(model=a.model,
@@ -283,83 +509,8 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return 0 if all(g == "PASS" for g in gates) else 20
 
-    print(f"# G2.5 G1 重跑對照（model={a.model}；離線重算、不呼叫模型）")
-    print()
-    rows: list[dict] = []
-    missing: list[str] = []
-    for t_dir in task_dirs:
-        hand = RequirementSet.load(t_dir / "requirements.json")
-        ext_path = out_dir / f"{t_dir.name}.{a.model}.json"
-        if not ext_path.is_file():
-            missing.append(t_dir.name)
-            print(f"## {t_dir.name}：缺擷取結果（{ext_path}）——fail-closed，不計入")
-            rows.append({"task": t_dir.name, "missing": True})
-            continue
-        ext = RequirementSet.load(ext_path)
-        hand_res = evaluate_task(t_dir, hand)
-        ext_res = evaluate_task(t_dir, ext)
-        ext_err = _extraction_failure(ext_path)
-        rows.append({
-            "task": t_dir.name, "missing": False,
-            "hand": hand_res, "ext": ext_res,
-            "ext_items": len(ext.items),
-            "ext_unverified": sum(1 for i in ext.items if i.unverified),
-            "ext_error": ext_err,
-        })
-        print(
-            f"## {t_dir.name}：條目 手寫 {len(hand.items)}／擷取 {len(ext.items)}"
-            f"（unverified {sum(1 for i in ext.items if i.unverified)}）"
-        )
-        if ext_err:
-            print(f"- ⚠️ 擷取失敗（fail-closed、計未抓出）：{ext_err.splitlines()[0][:120]}")
-        print(f"- good：手寫 {hand_res['good']}、擷取 {ext_res['good']}")
-        for hb, eb in zip(hand_res["bad"], ext_res["bad"]):
-            mark = "✅" if eb["caught"] else "❌漏抓"
-            print(f"- {hb['case']}：手寫 {'抓出' if hb['caught'] else '漏抓'}、擷取 {mark}")
-        print()
-
-    costs = read_extract_costs(vibe_calls, a.model, [r["task"] for r in rows if not r.get("missing")])
-    print("## 擷取成本（vibe_calls.jsonl；缺值＝UNKNOWN，不填 0）")
-    for r in rows:
-        if r.get("missing"):
-            continue
-        c = costs.get(r["task"]) or {}
-        if c.get("found"):
-            print(f"- {r['task']}：{c['calls']} 次呼叫、{c['total_tokens']} tokens")
-        else:
-            print(f"- {r['task']}：UNKNOWN（無紀錄）")
-    print()
-
-    hand_caught = sum(b["caught"] for r in rows if not r.get("missing") for b in r["hand"]["bad"])
-    ext_caught = sum(b["caught"] for r in rows if not r.get("missing") for b in r["ext"]["bad"])
-    total_bad = sum(len(r["hand"]["bad"]) for r in rows if not r.get("missing"))
-    hand_fp = sum(1 for r in rows if not r.get("missing") and r["hand"]["good"] == "FP")
-    ext_fp = sum(1 for r in rows if not r.get("missing") and r["ext"]["good"] == "FP")
-    ext_verified = sum(1 for r in rows if not r.get("missing") and r["ext"]["good"] == "VERIFIED")
-    total_good = sum(1 for r in rows if not r.get("missing") and r["ext"]["good"] in ("VERIFIED", "FP", "UNKNOWN"))
-
-    print("## 門禁指標彙整")
-    print(f"- 錯誤交付物：{total_bad}；抓錯 手寫 {hand_caught}/{total_bad}、擷取 {ext_caught}/{total_bad}")
-    print(f"- 正確交付物：{total_good}；冤枉 手寫 {hand_fp}、擷取 {ext_fp}（擷取 VERIFIED {ext_verified}/{total_good}）")
-
-    if missing:
-        print(f"❌ 門禁判定：FAIL（缺擷取結果：{', '.join(missing)}）")
-        if a.json:
-            _write_json(pathlib.Path(a.json), rows, {"gate": "FAIL", "missing": missing})
-        return 2
-
-    catch_rate = ext_caught / total_bad if total_bad else 0.0
-    gate = (total_good > 0 and ext_fp == 0 and catch_rate >= GATE_CATCH_RATE)
-    print(f"- 擷取版抓錯率 {catch_rate * 100:.1f}%（門檻 ≥ {GATE_CATCH_RATE * 100:.0f}%）、冤枉 {ext_fp}（門檻 0）")
-    if gate:
-        print("🏆 G2.5 第 1 項門禁：PASS（擷取需求在 G1 上達標）")
-    else:
-        print("❌ G2.5 第 1 項門禁：FAIL（未達抓錯門檻或存在冤枉——改擷取方法，不寫報告）")
-    if a.json:
-        _write_json(pathlib.Path(a.json), rows,
-                    {"gate": "PASS" if gate else "FAIL", "catch_rate": catch_rate,
-                     "ext_caught": ext_caught, "total_bad": total_bad, "ext_fp": ext_fp})
-    return 0 if gate else 20
+    return run_phase1(model=a.model, g1=g1, out_dir=out_dir, vibe_calls=vibe_calls,
+                      json_out=pathlib.Path(a.json) if a.json else None)
 
 
 def _write_json(path: pathlib.Path, rows: list[dict], gate_info: dict) -> None:

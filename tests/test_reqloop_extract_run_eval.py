@@ -655,3 +655,85 @@ def test_eval_g1_compare_3m_baseline_contract():
     assert m["gate"] == "PASS"
     assert doc["models"]["glm53flash"]["gate"] == "FAIL"
     assert doc["models"]["deepseek41"]["gate"] == "FAIL"
+
+
+# ── --all 全三項整合驗收（vq-el4 結案指令）───────────────────────────────────────────────────
+
+def test_run_eval_all_option(tmp_path, capsys, monkeypatch):
+    """--all：依序 run_phase1→run_phase2→run_phase3，輸出整合總結看板（各項指標/門禁/成本）。
+
+    三項 rc 皆 0 → 0＋「🏆 G2.5 全三項門禁整合驗收：PASS」；
+    任一項 rc≠0（FAIL 20 或 MISSING/錯誤 2）→ 20＋「❌ …：FAIL（未過：…）」。
+    成本缺值（None）→ 看板印 UNKNOWN，絕不填 0。三項 fake 離線、不呼叫模型。
+    """
+    import run_eval
+    from run_eval import main
+
+    calls = []
+
+    def fake_phase1(**kw):
+        calls.append("phase1")
+        return 0
+
+    def fake_phase2(**kw):
+        calls.append("phase2")
+        return 0
+
+    def fake_phase3(**kw):
+        calls.append("phase3")
+        return 0
+
+    monkeypatch.setattr(run_eval, "run_phase1", fake_phase1)
+    monkeypatch.setattr(run_eval, "run_phase2", fake_phase2)
+    monkeypatch.setattr(run_eval, "run_phase3", fake_phase3)
+
+    def write_phase_jsons():
+        all_dir = tmp_path / "all"
+        all_dir.mkdir(parents=True, exist_ok=True)
+        (all_dir / "phase1.json").write_text(json.dumps({
+            "gate": "PASS", "catch_rate": 1.0, "ext_caught": 39, "total_bad": 39,
+            "ext_fp": 0, "cost": {"calls": 72, "tokens": 512000,
+                                  "unknown_tasks": []}}), encoding="utf-8")
+        (all_dir / "phase2.json").write_text(json.dumps({
+            "gate": "PASS", "caught": 9, "total_bad": 9, "false_acc": 1,
+            "total_good": 5, "errors": 0,
+            "cost": {"calls": 71, "tokens": 701696}}), encoding="utf-8")
+        (all_dir / "phase3.json").write_text(json.dumps({
+            "fixed": 6, "unresolved": 3, "rejected": 0, "right_to_wrong": 0,
+            "held": 0, "errors": 0,
+            "cost": {"repair_sessions": 14, "model_calls": 263,
+                     "tokens": None}}), encoding="utf-8")
+
+    # ① 三項全過 → rc 0、依序執行、總結看板＋🏆 PASS（末行）
+    write_phase_jsons()
+    rc = main(["--all", "--out-dir", str(tmp_path)])
+    out = capsys.readouterr().out
+    assert calls == ["phase1", "phase2", "phase3"], calls
+    assert rc == 0, out
+    for name in ("G1 重跑", "REAL14", "PHASE3"):
+        assert name in out, name
+    assert "39/39" in out and "9/9" in out and "fixed 6" in out
+    assert "263" in out                      # phase3 model_calls
+    assert "UNKNOWN" in out                  # phase3 tokens None → UNKNOWN，不填 0
+    assert out.strip().splitlines()[-1] == "🏆 G2.5 全三項門禁整合驗收：PASS", out
+
+    # ② 任一項 FAIL（rc 20）→ rc 20＋❌ FAIL 點名未過項
+    write_phase_jsons()
+    calls.clear()
+    monkeypatch.setattr(run_eval, "run_phase2", lambda **kw: (calls.append("phase2"), 20)[1])
+    rc = main(["--all", "--out-dir", str(tmp_path)])
+    out = capsys.readouterr().out
+    assert calls == ["phase1", "phase2", "phase3"]
+    assert rc == 20, out
+    assert out.strip().splitlines()[-1] == "❌ G2.5 全三項門禁整合驗收：FAIL（未過：REAL14）", out
+
+    # ③ 任一項 MISSING/錯誤（rc 2）→ rc 20＋門禁欄標 fail-closed
+    write_phase_jsons()
+    capsys.readouterr()
+    monkeypatch.setattr(run_eval, "run_phase2", fake_phase2)   # 還原②的 patch
+    monkeypatch.setattr(run_eval, "run_phase1", lambda **kw: 2)
+    rc = main(["--all", "--out-dir", str(tmp_path)])
+    out = capsys.readouterr().out
+    assert rc == 20, out
+    assert "fail-closed" in out
+    assert out.strip().splitlines()[-1] == "❌ G2.5 全三項門禁整合驗收：FAIL（未過：G1 重跑）", out
