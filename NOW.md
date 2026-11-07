@@ -1,22 +1,18 @@
-# NOW
+# NOW — R-loop (auto/qwen27b)
 
-## 現在在哪（r1149）
-- r1149 驗證輪：審查 #1/#2 核實收口（23fd09eb 經 c7755793 在 tree；5 檔 220 passed；單一切片＝real_slice；針護欄經 checker `_col_stats` 重算兩 kurtosis 皆 -1.13）；effects2 raw 交叉核對與 r1135 彙整一致（bad9 localized 9/9 vs generic 7/9、right_to_wrong 0、tamper 0、+2 題＝+112 calls/+4.11M tok）；11-06#3 停止條款未觸發（本批 localized 有較多修好）；0 產品改動、0 模型呼叫、0 發射。
-- r1148：P20261106_2241-2 驗收完成（d33a1ac8，工單已入 done/）：`audit_kv_preservation` 實裝於 reqloop/checks.py——
-  鍵值交付物（@key[value] 文字檔或頂層 JSON dict）行級/鍵級保留審計：
-  兩側恰好各出現一次且值相等（JSON 另需型別一致）→ preserved；值改動/鍵刪/鍵重複/檔案缺失/草稿無此鍵 → mutated。
-  audit 側計算、免模型自評（11-06 指示 4「修復只改未滿足產物並保留其餘成果」的機器可驗判定能力）。
-- 驗收：票面指令 RC=0、1 點過（無 -q 口徑「1 passed, 54 deselected」）；5 檔 checks/g2/repair/real_slice/g1_gate 220 passed 無回歸；0 模型呼叫 0 元。
+## 第 1150 輪 (2026-11-07 08:05 +0800)
+**redo 審查點名 6 檔（實讀＋現樹重跑）＋發射 4 格 A/B（已完成、raw 在案）**
 
-## 對 11-06 指示 2 的意義
-- 「正確成果是否退步（right_to_wrong=0）」客觀基線維持三重（A 11/11 PASS 基線、同草稿 pin hash、r1145 單 rep regressed=0），現再加第四重：
-  任何 fire 後都可對 answer.txt/result.json 跑 audit_kv_preservation 客觀列出 preserved/mutated，不靠模型自評。
+- 實讀 6 檔＋重跑：5 檔 checks/g2/repair/real_slice/g1_gate＝**220 passed**；g2＋real_slice＝46 passed；針守衛 -1.13 重算 1 passed；baseline C 9/11（pre/post_kurtosis FAIL、-1.17 vs 重算、expected_in_evidence=false）＋A 11/11。
+- **4 格 A/B 已完成**（unit `vacant-realab-20261107.service`、raw `~/dev/ops/realab_20261107/g2_result.json`、4 格 exit 0、00:06–00:10Z）：
+  - C(bad) 兩臂 9/11→**11/11**（fixed=[pre,post_kurtosis]、regressed=0、source_tampered=false）。
+  - A(good) 兩臂 11/11→**11/11**（fixed=0、regressed=0、**right_to_wrong=0**；localized no_gap 0 呼叫）。
+  - 總 65 calls/979,588 tok/255,833ms；C generic 29 calls vs localized 14、A generic 22 vs localized 0（本 rep localized 省，r1145 反之＝單 rep 噪音）。
+  - hidden_after=**UNKNOWN**（本地無權重跑、缺值不填 0）；單 rep 開發選樣、**不宣稱 localized 較好**。
+- 需求端三問（11-05）：①內容錯誤可修回＝**是**（2 rep）；②已正確產出被保留＝**是**；③成本＝總量小但臂間優勢單 rep 翻轉、不宣稱。
+- 紅線：未動 main、未自 push、未讀 hidden/scorer、未加 regex/靜態 prompt/重試、未改凍結 manifest；repo 零代碼改動。
 
-## 下一步（候需求端）
-- 授權 fire 4 格（A＋C × generic/localized、同預算 60/4M/300s）→ 一次回答 localized 是否多修好、正確成果是否退步、成本是否值得。
-- 或點名 vq-6rp（dabstep-1753 模型側硬缺口）/ vq-5nz.6（停滯草稿換方法）。
-- 可選下票（不阻塞）：把 audit_kv_preservation 接進 real_slice 的 before_after 報告。
-- d33a1ac8 CI 待 loop 自動推 auto/qwen27b 後核。
-
-## 紅線
-不碰 main、不自 push、不讀 /srv/eval hidden/scorer、缺值＝UNKNOWN 不填 0、不為每輪有 commit 加水工單/regex/靜態 prompt、tamper/UNKNOWN 不算成功、批內開發選樣不宣稱 localized 較好。
+## 待辦
+- [ ] （可選）以 raw 結果彙整 audits summary 檔（fixed/regressed/cost/UNKNOWN 如實、供下輪引用）。
+- [ ] vq-6rp（dabstep-1753）／vq-5nz.6 仍候點名（不阻本 A/B）。
+- [ ] 是否擴量＝新決策、需另行授權（11-06#4「證明可修回後再擴量」；本 4 格已證明可修回＋保留）。
