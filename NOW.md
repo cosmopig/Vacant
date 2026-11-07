@@ -1,21 +1,21 @@
-# NOW — 第 1176 輪（2026-11-07，≤ 3 KB、覆寫不追加；細節放 bd）
+# NOW — 第 1177 輪（2026-11-07，≤ 3 KB、覆寫不追加；細節放 bd）
 
-## 現在：r1176 收尾——工單 P20261107_0822-1 已退回（bounced/），doing/ 空
+## 現在：r1177 收尾——票 P20261107_0822-2 已完成（done/），doing/ 空，等規劃者下一票
 
-- **票錯在驗收指令**：`-k "nan_or_inf or nan_sel"` 在指定樹匹配 0/59 測試（pytest RC=5）、
-  「4 passed」不可達；實際回歸測試是 `test_recompute_ignores_non_finite_csv_cells_and_never_false_passes_on_nan`
-  ＋`test_nan_and_inf_never_false_pass_or_crash_across_verifiers`（`-k "nan"`→2 passed）。
-  票尾已寫明＋重發建議；**步驟 1–4 已全部完成**，重發票只需驗收。
-- **已完成（未回滾）**：
-  1. `auto/qwen27b` FF 至 `a05bb00b`——378c0c02 NaN/inf 防護入樹（checks.py 25 處
-     `math.isfinite`、`_max_row_first` 跳非有限、`abs(got-expected)<=atol` 封 NaN 假 PASS）。
-  2. `ops/audits/r1169_review_redo_check_20261107.py` 解譯器 fallback＋`PYTHONPATH=str(REPO)`，
-     ops repo commit `a8fc19e`；worktree 實跑 RC=0、4/4 PASS、0×FileNotFoundError。
-- **下一步**：等規劃者重發（改 `-k "nan"`）或下一票。bd ready 有 vq-el4.2（Vibe CLI 後端；
-  依 11/06 指示 5，未備齊六要素＋真實失敗產物前不自行開工）。
+- **驗收全綠**：`pytest tests/test_reqloop_checks.py -k group_ratio_stat` → 1 passed（改前 0 選中）；
+  `pytest tests/test_reqloop_extract.py -k recompute_type_sets_match_dispatch` → 1 passed；
+  reqloop 全線 205 passed。commit `61304ef1`（checks.py＋tests，2 檔 +209/-2）。
+- **功能**：`checks.py::_group_ratio_stat`（分組金額比率極值；group_col/sum_col/
+  num_sum_col/denom_sum_col、where/num_where、percent/stat min|max/out val|group、
+  平手取首見、NaN/inf 忽略、無有效分母→UNKNOWN）；PLAIN_RECOMPUTE_TYPES＋分派鏈同步
+  （extract.py 白名單同源）；`out="group"` 非數值答案跳過數值預檢（其餘型別行為不變）。
+- **可重現內容反例**（dabstep-16/17 形，合成同形資料）：草稿 7.683437（count ratio 2132/27748）
+  → FAIL `mismatch_with_recomputation`；8.907926（volume ratio）→ PASS；out="group" 分組名
+  精確比對；重算值不進 detail/evidence（`expected_in_evidence=False`）。
+- **下一步**：等規劃者下一票（`bd list --parent vq-el4 --all` 照順序）。bd ready 有
+  vq-el4.2（Vibe CLI 後端；依 11/06 指示 5，六要素備齊前不自行開工）。
 - effects2_20261106 讓它跑完、未重跑未改快照；dab_055 發射仍候點名；1753 維持排除。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 `/srv/eval` hidden/scorer；不洩露 `secrets/extract.env`；
 不發 frozen 實驗、不做大重跑；0 模型呼叫、0 元。
-（MEMORY 上限 6 KB、NOW 上限 3 KB；超過的部分沒有附上，請先把它縮短）

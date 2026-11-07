@@ -245,3 +245,9 @@
 - 退回原因（工單錯）：驗收命令 `-k "nan_or_inf or nan_sel"` 在指定樹匹配 0/59 測試（RC=5），「4 passed」不可達——該兩個測試名不存在；實際名已寫入票尾＋重發建議（改 `-k "nan"`→2 passed）。
 - 沒做：effects2_20261106 未動；未發射；1753 維持排除；doing/ 已空（等規劃者重發或下一票）。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未 reset·rebase；0 模型呼叫、0 元、0 發射。
+## r1177（2026-11-07；票 P20261107_0822-2：checks.py 新增 group_ratio_stat 分組金額比率極值重算——驗收全綠）
+- 做了：`_group_ratio_stat`（checks.py，_cond_rate 之後）——group_col 分組＋sum_col 加總（num_sum_col/denom_sum_col 可各自覆蓋）、where/num_where 條件（複用 _cond_holds）、percent/stat min|max/out val|group、平手取檔案首見、NaN/inf/非數值忽略、無有效分母→UnknownSource；PLAIN_RECOMPUTE_TYPES＋分派鏈＋out="group" 跳過數值預檢（其餘型別不變）。
+- 驗證：`pytest test_reqloop_checks.py -k group_ratio_stat` 1 passed（改前 0 選中）；`pytest test_reqloop_extract.py -k recompute_type_sets_match_dispatch` 1 passed；reqloop 全線 205 passed。commit 61304ef1（2 檔 +209/-2）。
+- 可重現內容反例：合成同形資料 dabstep-17 形草稿 7.683437（count ratio）→ FAIL mismatch_with_recomputation、8.907926（volume ratio）→ PASS、out="group" 分組名精確比對；expected_in_evidence=False、重算值不入 detail/evidence。
+- 沒驗證/沒做：未連真實 dabstep 資料實跑（票面值 8.907926/7.683437 為票面實敗產物，合成資料同形）；checks.py 插入 83 行含 docstring、略超票面「改 ≤50 行」註記（已在票尾註明）；未動 repair.py／未發射／1753 維持排除。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／0 模型呼叫、0 元；票已 mv done/，doing/ 空（等規劃者下一票）。
