@@ -134,3 +134,8 @@
 - 沒驗證什麼：0 模型呼叫/0 元/0 發射——本票為離線管線驗證非效果數字；vq-5nz.54 兩格發射仍候點名＋成本另報；針守衛複製與產品之漂移由 smoke 兩側（2081990→gap_closed、2081990.36→FAIL）共同釘住。
 - 紅線：未動 main、未自 push、未讀 hidden/scorer、未加錯誤字串 regex/靜態處方提示/重試（測試內 regex 係產品解析逐字複製、非新修復規則）、未改 effects2 快照/凍結 manifest；1753 維持排除。commit a321acd4（auto/qwen27b）。
 - DECISION：票 P20261107_0243-2 完成入 done/；dab_055 內容閉環離線側（baseline 反例＋兩臂分流＋針守衛）已全入產品測試套；下一輪候 vq-5nz.54 點名發射（manifest 凍結、單命令可發射）；P20261107_0210-1 仍在 tickets/doing/（非 qwen/ 票、本輪不越權動它）。
+## r1161（第 1161 輪；2026-11-07）
+- 做：senior review 三點核對＋P2 審計收口：① P1——auto/argon 897c5552（r1156 generic 對照臂 stale 草稿判定修復）已是 auto/qwen27b（3af7dc13）祖先、免重複合併；5 檔接受套 229 passed（2.57s；審查「223」為舊基線，現基線 227+新 2=229）。② P2——repo 摘要（r1154 689cd45f）程序化驗收全綠：6 格字段完整、無 TODO/TBD、11-06 localized kv_mutated=['pre_median','post_median']（6/8 preserved、數值相同 scorer 接受）、11-07 kv_mutated=[]（C 8/8、A 10/10）、no_gap 格 null 不填 0；batch A kv 值以產品函式 audit_kv_preservation 實算覆核（草稿 16754dc3 × 最終 06ff239a/cc1338ff：generic 8/8、localized 6/8＋median×2）與記錄一致；建 ~/dev/ops/audits/realab_20261107_summary.json→repo 檔 symlink（單一來源、可逆）；done/ 票 R20261107_0035-1 票尾補結果 5 行。③ P3——realab run 目錄僅 20261106/20261107 兩批、無 dab_378 新 A/B 重跑；下一切片候選＝dab_055（generic 0/2 真實失敗）內容閉環切片已入管線、候點名發射。
+- 驗證了什麼：5 檔接受套 229 passed；摘要結構＋kv 實算覆核全一致；0 產品改動、0 模型呼叫、0 發射、工作樹乾淨。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除。
+- DECISION：審查三點全收口（P1 已驗證、P2 已補完收口、P3 凍結維持）；下一輪候 vq-5nz.54（dab_055 2 格）點名發射。
