@@ -187,3 +187,9 @@
 - ③ CI：b5355486（r1219）🟢 **5034 passed, 74 skipped**（855.33s、23:28 完成）——「還沒跑完」轉 🟢；argon 05989682 🟢 5033/0、worker aca58a95 🟢 5034/0（指示4 達標）；1cd853b4＋6047a458 待下一 pass pickup（新測試進場後應 5035）。
 - ④ 沒驗證：1cd853b4 的 CI（待 pickup、純 git index 斷言、無模型/網絡）；本輪未跑全量 pytest（vacant-ci 職掌）。
 - 下一步：下輪巡 b5355486＋1cd853b4 CI→應🟢；等審查派工（G3 須派工、不自發射大成本）。
+## r1221（2026-11-07 23:5x UTC）：CI 巡燈收口＋G2.5 三門新鮮 PASS＋凍結邊界核實（vq-el4.8）
+- ① 巡燈（NOW.md 上輪第 1 步）：qwen27b **ad9b989c（含 1cd853b4＋6047a458）🟢 5035 passed, 0 failed, 74 skipped（826.40s、collected 5108＝5106+2）**——「還沒跑完」轉 🟢（指令輸出變好）；r1219/r1220 兩件 repo 衛生守護進 CI 套件；三分支最新 HEAD 全綠（argon 05989682 5033/0、worker aca58a95 5034/0）。
+- ② G2.5 門禁本輪新鮮重跑：`run_eval.py --all` **🏆 PASS rc=0**（G1 抓錯 39/39 冤枉 0；REAL14 抓錯 9/9 冤枉 1/5；PHASE3 fixed 7/unresolved 2/error 0；RESUMED、**0 新 API 呼叫**）；備案＝已 commit out/all/phase{1,2,3}.json（dd6e49c4）、`git status` 無漂移——審查指示1（達標＋備案）有本輪執行依據。
+- ③ 凍結邊界＋守護本輪核實：repair.py **2795 行**＝RLOOP_PLAN 凍結、extract.py 1217 行、reqloop tree 乾淨、最後改動 399f68b6/ebe4344c 皆已核准（指示2）；審查點名 4 件守護測試檔 **40 passed（0.48s）**（指示3）。
+- ④ 沒驗證：GitHub Actions（gh CLI 不在本機、無 admin、不准改 workflows；本地 vacant-ci 為在位 gate）；本輪未跑全量 pytest（vacant-ci 職掌、且其 ad9b989c 燈即本輪①）。
+- 下一步：等審查派工（G3 須派工、不自發射大成本）；若 auto/* 新 commit 落地→巡該分支 CI；無新授權工作時不補長文件、不改 repair.py。

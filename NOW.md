@@ -1,18 +1,18 @@
-# 現在（第 1220 輪後，2026-11-07 23:3x UTC）
+# 現在（第 1221 輪後，2026-11-07 23:5x UTC）
 
-## r1220：repo 衛生守護（vq-vn5）＋G2.5 三門新鮮 PASS＋CI 巡燈
-- 新 tests/test_repo_no_conflict_residue.py（1 測試）：tracked 檔 basename 以 ~HEAD/~<branch> 結尾（git merge 衝突殘骸）即 CI 紅燈；r1218 worker 紅燈同類（manifest.json~auto_argon、dab_055-pi-C~HEAD）復發防護。
-- TDD mutation（temp index、動真 index 零污染）：add 殘骸檔→**1 failed 點名該檔**；還原→**1 passed**；`-k 'reqloop or beads or repo_'` **364 passed 0 failed**。commit auto/qwen27b **1cd853b4**、未 push、vq-vn5 close。
-- G2.5 備案核實：`run_eval.py --all` 離線重跑（r1220）**🏆 PASS rc=0**（G1 39/39 抓錯 0 冤枉、REAL14 9/9 抓錯 1/5 冤枉、PHASE3 fixed 7/unresolved 2/error 0；成本 41c/328550t＋74c/732826t＋275c/15087278t）；0 新模型呼叫；審查指示 1（達標＋備案）有新鮮執行依據。
-- 審查回單重做（extract.py/repair.py 本輪原未開檔）：已開兩檔重接地——extract.py 1217 行、quote_is_verbatim L132、_RECOMPUTE_TYPES L160-163（定義 checks.py:1636/2341）、tag_not_in_request L752、SUPPORTED_VERIFIERS＝import（定義 checks.py:2755）、最後改動 ebe4344c（已核准）、乾淨；repair.py **2795 行＝RLOOP_PLAN 凍結**、最後改動 399f68b6（已核准）、頭部規則在位、乾淨。
+## r1221：CI 巡燈收口＋G2.5 三門新鮮 PASS＋凍結邊界核實（vq-el4.8）
+- **三分支最新 HEAD 全綠**：auto/qwen27b **ad9b989c 🟢 5035 passed, 0 failed, 74 skipped（826.40s、collected 5108＝5106+2 新守護）**；auto/argon 05989682 🟢 5033/0；auto/worker aca58a95 🟢 5034/0。r1219/r1220 兩件 repo 衛生守護已進 CI 套件。
+- G2.5 門禁本輪新鮮重跑：`run_eval.py --all` **🏆 PASS rc=0**（G1 抓錯 39/39 冤枉 0；REAL14 抓錯 9/9 冤枉 1/5；PHASE3 fixed 7/unresolved 2/error 0；RESUMED、0 新 API 呼叫）；備案＝已 commit `ops/reqloop/extract/out/all/phase{1,2,3}.json`（dd6e49c4）、tree 無漂移。
+- 凍結邊界本輪核實：repair.py **2795 行**＝RLOOP_PLAN 凍結、extract.py 1217 行、reqloop tree 乾淨、最後改動 399f68b6/ebe4344c 皆已核准；審查點名 4 件守護測試 **40 passed**。
+- 審查 4 指示全數達標（①達標＋備案 ②凍結邊界在位 ③守護測試在位且綠 ④worker 綠）。
 
 ## CI（本地 vacant-ci）
-- auto/argon 05989682 🟢 5033/0；auto/worker aca58a95 🟢 5034/0（審查指示 4 達標）。
-- auto/qwen27b **b5355486（r1219）🟢 5034 passed, 74 skipped（855.33s、23:28 完成）**——本輪末「還沒跑完」轉 🟢（指令輸出變好）；1cd853b4＋6047a458 待下一 pass pickup（純 git/記錄、無模型/網絡；新測試進場後應 5035）。
+- 三分支最新 HEAD 全 🟢（見上）。無待 pickup 的新 commit。
 
 ## 下一步
-1. 下輪巡 b5355486＋1cd853b4 CI → 應 🟢（新測試純 git index 斷言、無模型/網絡）。
-2. 等審查派工；G3 須派工，不自發射大成本。
+1. 等審查派工；G3 須派工，不自發射大成本。
+2. 若新 commit 落地（auto/* 任一分支）→ 巡該分支 CI 燈。
+3. 已知非本輪職掌：GitHub Actions 無新 run（gh CLI 不在、無 admin）＝人類/基建問題，本地 vacant-ci 為在位 gate。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
