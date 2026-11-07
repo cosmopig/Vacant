@@ -87,3 +87,8 @@
 - (2) phase3/progress.json 9 格逐行讀：fixed 6（378/426/427/507/dabstep-10/23）＋unresolved 3（039 no_gap 0 calls／055 stalled 22／1273 max_rounds 35）；regressed 全空、tampered 全 False；Σ 263 calls／14 sessions、dab_039 tokens=None⇒總計 UNKNOWN；與鎖檔 eval_phase3_glm53.json（6/3/0/0、14/263/null）逐格＝CONSISTENT。
 - (3) run_eval.py 關鍵段實讀（1159 行）：GATE_CATCH_RATE=0.70(L52)、成本缺值→None 不填 0(L97-98/179-180/191-192/301-302)、缺任務→2(L238)／缺擷取→fail-closed 2(L310)、gate＝total_good>0 ∧ ext_fp==0 ∧ catch_rate≥70%(L313)、0/20(L324)、dashboard rc 映射(L337-339)、run_all G1→REAL14→PHASE3(L387)、run_models_comparison docstring 明言 gemma 非 Vibe CLI 不入表(L138-139)——我記錄的 RC／成本誠實／gate／gemma 口徑全部與碼相符。
 - 結論：r1204 依賴於三檔的數字與口徑全數成立；唯一修訂＝r1203 註記改判：「7/10・6/10」是分母擇一（bad 草稿 vs 每臂格數），非 r1199 筆誤。
+- 2026-11-07 r1207（工單 P20261107_1827-1：json_preview 修復＋--all 門禁全綠）：
+- 做了：核實 _cap_lists 遞迴 r1206(f1594c2b) 已還原、工單缺的頂層 dict 陣列值取前 5 項未實裝→補上（extract.py 2 行＋docstring）；測試補 2 則（頂層 list 列內 list 不截斷、dict 陣列值前 5 項）；兩 out 檔核實即凍結版（phase2.json 被 --all 重寫後 git checkout HEAD 還原）。
+- 驗證：14/14 real14 prompt_sha 快取命中（改前後皆 0 mismatch）；reqloop 12 檔 347 passed；run_eval.py --all＝🏆 PASS、RC=0、G1 39/39・REAL14 9/9・PHASE3 6fixed/3unres 全 RESUMED；vibe_calls 130→130（0 新呼叫）；out 146 檔 hash 僅 phase2.json 結果檔變動（cost 71→74 為 r1205 時代 3 次真實呼叫入帳，18:19–18:35 帳本可查）。
+- 沒驗證：本輪未跑全量 pytest（由 CI 跑）；auto/qwen27b CI 結果待巡。
+- 下一步：等 CI/審查；工單已入 done/（ebe4344c）。
