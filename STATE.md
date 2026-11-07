@@ -90,3 +90,10 @@
 - 驗證：TDD 紅（satisfied_preserved AssertionError）→綠 test_single_deliverable_kv_preservation_enforced（dab_378-pi-C：(a) 只修 FAIL key⇒8 鍵保留、exit 0；(b) 改寫 pre_mean⇒satisfied_mutated、exit 20、非 gap_closed）；5 檔 checks/g2/repair/real_slice/g1_gate＝**222 passed**（221 既有＋1 新增、無回歸）；commit eafa6e7e。
 - 沒驗證：真實模型行為（未 fire、無新效果數字）；KV key 的 OS 層 0o444 寫保護（工單範圍外）。
 - 下一步：vq-6rp（dabstep-1753）／vq-5nz.6 仍候需求端點名；擴量＝新決策需另授權。
+
+## r1153（第 1153 輪）
+- 做：工單 P20261107_0041-2（done/）——test_reqloop_real_slice.py 補真實 CSV 切片端到端假代理管線測試（run_g2_smoke 實跑 dab_378 4 格、0 模型呼叫）：(1) C×generic 正確修復 kurtosis＋其餘 8 鍵逐行保留⇒gap_closed／exit 0／satisfied_preserved＝8 鍵／satisfied_mutated==[]；(2) C×localized 修復但竄改初始 PASS 的 pre_mean⇒satisfied_mutated 精確含 pre_mean、exit 20 拒收、非 gap_closed；(3) A 正確草稿兩臂 exit 0、right_to_wrong==0。另 g2.py CLI 人讀輸出補 SATISFIED_PRESERVED 行（與 SATISFIED_MUTATED 同格式，此前只有 mutated 側可見）。
+- 驗證：新測試紅（缺）→綠（1 passed）；5 檔 checks/g2/repair/real_slice/g1_gate＝**223 passed**（222 既有＋1 新增、2.54s、無回歸）；CLI 輸出離線假跑驗證（SATISFIED_PRESERVED/MUTATED、exit_0=3／exit_20=1、A localized no_gap 0 呼叫）。
+- 沒驗證：真實模型行為（離線管線測試、無新效果數字）；真實模型是否保留 9 鍵仍候點名發射（vq-5nz）。
+- 紅線：0 模型呼叫、0 發射、0 元；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 hidden/scorer、未加 regex/靜態 prompt/重試、未動凍結 manifest/快照；工單六要素齊（doing/→done/）。
+- 下一步：vq-6rp（dabstep-1753 模型側硬缺口）／vq-5nz.6（停滯草稿換方法）仍候需求端點名；擴量＝新決策需另授權。
