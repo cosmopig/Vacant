@@ -6,3 +6,5 @@
 - 驗證：驗收指令 2 passed RC=0；test_reqloop_extract 48 passed、checks+run_eval 70 passed；0 模型呼叫、成本 0。
 - commit：23f35083；工單已 mv done/。
 - 下一步：vq-el4.4——run_eval.py 第二項，真實 14 份（9 錯 5 對）用擷取需求檢查。
+- 2026-11-07 r1184: 工單 P20261107_1024-2（重擷取 G1＋過 run_eval 門禁）收——G1 7 題重擷取（glm53）：student_grades/support_tickets 的 exclude op:ne 改 op:eq；orders_monthly 直接重擷取會 FP=1，故 surgical 沿用 round3 正確形（op:eq）保 FP=0；run_eval 擷取 29/39（74.4%≥70%）、冤枉 0、EXIT=0；eval JSON 由 stale FAIL 重生成為 PASS；round3/ 快照（與 round1/round2/ 同模式）；vibe_calls.jsonl 已寫本輪 7 題；repair.py 已查（G2 凍結、本任務不依賴）；commit 51b72063；工單 mv done/。
+- 下一步：vq-el4.4——run_eval.py 第二項，真實 14 份（9 錯 5 對）用擷取需求檢查。
