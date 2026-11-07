@@ -154,3 +154,8 @@
 - 沒驗證什麼：0 模型呼叫/0 元/0 發射——本票是選題事實守衛（P3「預期可展示改善」已於 raw 成立、非新效果數字）；vq-5nz.54 發射仍候 demand side 裁決（發射＝重複成本、NOW 已標）。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加錯誤字串 regex·靜態處方·重試／未改 effects2 快照·凍結 manifest／1753 維持排除。
 - DECISION：審查 P3 下一切片（dab_055-pi-C）選題事實今有常設守衛，與 r1162 bad9 聚合守衛互補（聚合 vs 逐題）；dab_378 維持停跑（stop-dab378 記憶在案）；vq-5nz.54（2 格）發射候 demand side 裁決是否仍需新證據＋成本另報。
+## r1163-review（交付前審查重做；2026-11-07）
+- 重做①（NOW/STATE「451,938」）：由 raw 重算——generic tokens=1451938、localized tokens=372043、model_calls 25/21、wall_ms 149433/67646、兩臂 draft_sha 356c5855… 一致（g2_result_dab_055-pi-C_{generic,localized}.json 逐欄讀出）；NOW/STATE 所寫值與重算值逐字相符，無需改值。
+- 重做②（effects_20261105_summary.json 先前未開啟）：已開啟核對——policy30 generic 7/10、localized 6/10，feedback_once20 generic 7/10、localized 4/10，dab_055-pi-C-localized 在 local_vs_independent_mismatches（local false→independent true）；與 11-06 #6 口徑及票 P20261107_0210-1 參考基線一致，r1163 記錄未引該檔數字，無衝突。
+- 重做③（g2.py／repair.py 先前未開啟）：已核對產品碼語義——repair.py:98-100 STOP_GAP_CLOSED＝「重驗後無必需條目 FAIL」、STOP_MAX_ROUNDS＝「輪數用盡，缺口仍在」；g2.py:408-417 產出 stopped/final_readable_status/fixed/regressed/unresolved 欄位；本輪守衛釘住的欄位與停因語義有產品碼依據，非僅 raw。
+- 結論：三項重做皆為「重算／核對與已寫記錄一致」，NOW.md、STATE.md、測試內容無須改動；不以此充進展。
