@@ -10,6 +10,9 @@ import pytest
 
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 from vacant_network.reqloop.checks import (
+    _group_ratio_stat,
+    _max_row_first,
+    UnknownSource,
     recompute_orders_monthly,
     run_requirement_checks,
 )
@@ -1027,6 +1030,149 @@ def test_kv_recomputed_max_row_first_first_tie_wins(tmp_path: pathlib.Path):
     assert res["req_main"].status == "FAIL"
 
 
+def test_max_row_first_standalone_helper():
+    """_max_row_first 頂層獨立呼叫：平手取檔案序第一列；缺欄位／無可解析選取欄／
+    輸出欄不可解析皆拋 UnknownSource（單一事實來源，外部審計可直接呼叫產品代碼）。"""
+    rows = [
+        {"sel": "6", "out": "156.41568"},   # 與次列同為最大值
+        {"sel": "6", "out": "165.10544"},   # 平手取首列——不取此列
+        {"sel": "1", "out": "43.45"},
+        {"sel": "x", "out": "99.0"},        # 不可解析選取欄，忽略
+    ]
+    rc = {"sel_col": "sel", "out_col": "out"}
+    assert _max_row_first(rows, rc) == 156.41568
+    # 最大列非首列時仍取最大（非平手情況）
+    assert _max_row_first(rows + [{"sel": "9", "out": "200.0"}], rc) == 200.0
+    # 缺 sel_col / out_col → UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first(rows, {"out_col": "out"})
+    with pytest.raises(UnknownSource):
+        _max_row_first(rows, {"sel_col": "sel"})
+    # 無可解析選取欄 → UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "x"}, {"sel": ""}], rc)
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "NaN", "out": "1.0"}, {"sel": "inf", "out": "2.0"}], rc)
+    # 前導列 sel_col 為 NaN/inf 時必須忽略，不得鎖死在首列或搶走最大列
+    assert _max_row_first(
+        [{"sel": "NaN", "out": "999.0"}, {"sel": "inf", "out": "888.0"}] + rows,
+        rc,
+    ) == 156.41568
+    # 輸出欄不可解析（含 NaN/inf）→ UnknownSource
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "6", "out": "n/a"}], rc)
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "6", "out": "NaN"}], rc)
+    with pytest.raises(UnknownSource):
+        _max_row_first([{"sel": "6", "out": "inf"}], rc)
+
+
+def test_recompute_ignores_non_finite_csv_cells_and_never_false_passes_on_nan(
+    tmp_path: pathlib.Path,
+):
+    """argon 20261107_0724 回歸：CSV 資料欄含 'NaN'/'nan'/'inf'/'-inf' 缺值字串時，
+    _max_row_first、_col_values（col_stats / col_max）、pearson2、zcount3、count_if、
+    fee_ids_lookup 必須將非有限浮點視為缺值忽略（或輸出欄無效時回傳 UNKNOWN），
+    絕不得讓 expected 變成 NaN 後因 `abs(got - nan) > atol == False` 對任意錯誤答案給假 PASS，
+    或因 `round(nan, k)` 拋出未捕捉 ValueError 崩潰。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "data.csv",
+        "sel,out,a,b\n"
+        "NaN,999.0,NaN,100\n"
+        "inf,888.0,1,2\n"
+        "5,156.41568,2,4\n"
+        "6,165.10544,3,5\n"
+        "6,120.0,4,8\n",
+    )
+    bad_dir = tmp_path / "bad"
+    _write(bad_dir / "answer.txt", "@w[999.0]\n@r[123456.0]\n@m[999.0]\n@z[0]\n")
+    good_dir = tmp_path / "good"
+    _write(good_dir / "answer.txt", "@w[165.11]\n@r[0.98]\n@m[2.5]\n@z[0]\n")
+
+    # 1. max_row_first：忽略 NaN/inf 選取列，正確取 sel=6 首列 out=165.10544 → round 2 = 165.11
+    rs_w = _req_set(
+        "kv_recomputed",
+        {
+            "key": "w",
+            "data_file": "data.csv",
+            "recompute": {"type": "max_row_first", "sel_col": "sel", "out_col": "out", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_w, bad_dir)[0].status == "FAIL"
+    assert run_requirement_checks(task_dir, rs_w, good_dir)[0].status == "PASS"
+
+    # 2. pearson2（無 round 與有 round）：忽略 NaN/inf 列，任意錯值 123456.0 必須 FAIL（不得因 NaN 假 PASS）
+    rs_r_raw = _req_set(
+        "kv_recomputed",
+        {
+            "key": "r",
+            "data_file": "data.csv",
+            "recompute": {"type": "pearson2", "col_a": "a", "col_b": "b"},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_r_raw, bad_dir)[0].status == "FAIL"
+    rs_r_rnd = _req_set(
+        "kv_recomputed",
+        {
+            "key": "r",
+            "data_file": "data.csv",
+            "recompute": {"type": "pearson2", "col_a": "a", "col_b": "b", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_r_rnd, bad_dir)[0].status == "FAIL"
+    assert run_requirement_checks(task_dir, rs_r_rnd, good_dir)[0].status == "PASS"
+
+    # 3. col_stats（mean of a = (1+2+3+4)/4 = 2.5）與 plain_recomputed col_max（max of a = 4.0）：
+    #    忽略 NaN 列，不得算進 NaN 造成假 PASS 或 round(nan) ValueError
+    rs_m = _req_set(
+        "kv_recomputed",
+        {
+            "key": "m",
+            "data_file": "data.csv",
+            "recompute": {"type": "col_stats", "col": "a", "stat": "mean", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_m, bad_dir)[0].status == "FAIL"
+    assert run_requirement_checks(task_dir, rs_m, good_dir)[0].status == "PASS"
+
+    plain_good = tmp_path / "plain_good"
+    _write(plain_good / "answer.txt", "4\n")
+    plain_bad = tmp_path / "plain_bad"
+    _write(plain_bad / "answer.txt", "999\n")
+    rs_cmax = _req_set(
+        "plain_recomputed",
+        {
+            "data_file": "data.csv",
+            "recompute": {"type": "col_max", "col": "a", "round": 2},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_cmax, plain_good)[0].status == "PASS"
+    assert run_requirement_checks(task_dir, rs_cmax, plain_bad)[0].status == "FAIL"
+
+    # 4. zcount3：含 NaN 列時忽略 NaN，對真實極端值 [1,1,1,1,1,1,1,1,1,1,1,100] 應算出 1 個 |z|>3，
+    #    回答 @z[0] 必須 FAIL（不得因 NaN 污染 mean/sd 讓 expected 靜默變 0.0 而假 PASS）
+    _write(
+        task_dir / "z.csv",
+        "v\nNaN\n" + "1\n" * 11 + "100\n",
+    )
+    rs_z = _req_set(
+        "kv_recomputed",
+        {
+            "key": "z",
+            "data_file": "z.csv",
+            "recompute": {"type": "zcount3", "col": "v"},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_z, bad_dir)[0].status == "FAIL"
+
+
 def test_kv_recomputed_pearson2_pass_and_fail(tmp_path: pathlib.Path):
     """pearson2：成對可解析行、Pearson r、可依 round。"""
     task_dir = tmp_path / "task"
@@ -1813,6 +1959,133 @@ def test_plain_recomputed_scheme_fee_avg_null_is_credit_and_round(tmp_path: path
     assert res_d["req_main"].status == "PASS"
 
 
+# ── plain_recomputed＋group_ratio_stat（G2.5：dabstep-16/17 volume ratio，2026-11-07）──
+
+def _grp_rows():
+    """分組 A：denom 100+400=500、num 100→0.2；分組 B：denom 1000、num 500→0.5。"""
+    return [
+        {"g": "A", "amt": "100", "fraud": "True"},
+        {"g": "A", "amt": "400", "fraud": "False"},
+        {"g": "B", "amt": "500", "fraud": "True"},
+        {"g": "B", "amt": "500", "fraud": "False"},
+    ]
+
+
+def _grp_rc(**over) -> dict:
+    rc = {"group_col": "g", "sum_col": "amt",
+          "num_where": [{"col": "fraud", "op": "eq", "value": "True"}]}
+    rc.update(over)
+    return rc
+
+
+def test_group_ratio_stat_helper_and_dispatch(tmp_path: pathlib.Path):
+    """group_ratio_stat：分組金額比率極值（manual.md fraud volume ratio）。
+    helper 單測（min/max、val/group、percent、平手取首見、NaN/缺值過濾、無有效分母）
+    ＋ run_requirement_checks 整合分派（dabstep-17 實敗形：count-ratio 草稿 7.683437
+    被判 FAIL(mismatch_with_recomputation)、volume-ratio 8.907926 被判 PASS；
+    dabstep-16 形：out="group" 回分組名稱；重算值不洩漏）。"""
+    # ── helper 直測 ──
+    rows = _grp_rows()
+    assert _group_ratio_stat(rows, _grp_rc()) == 0.2                       # min + out=val
+    assert _group_ratio_stat(rows, _grp_rc(out="group")) == "A"            # min + out=group
+    assert _group_ratio_stat(rows, _grp_rc(stat="max")) == 0.5             # max + val
+    assert _group_ratio_stat(rows, _grp_rc(stat="max", out="group")) == "B"  # max + group
+    assert _group_ratio_stat(rows, _grp_rc(percent=True)) == 20.0          # percent
+    # 平手取首見分組（X、Y 皆 0.5）
+    tie_rows = [
+        {"g": "X", "amt": "10", "fraud": "True"},
+        {"g": "Y", "amt": "5", "fraud": "True"},
+        {"g": "X", "amt": "10", "fraud": "False"},
+        {"g": "Y", "amt": "5", "fraud": "False"},
+    ]
+    assert _group_ratio_stat(tie_rows, _grp_rc()) == 0.5
+    assert _group_ratio_stat(tie_rows, _grp_rc(out="group")) == "X"
+    assert _group_ratio_stat(tie_rows, _grp_rc(stat="max", out="group")) == "X"
+    # NaN/inf/缺值忽略（A：num 50、denom 100→0.5；B：num 0、denom 100→0.0）
+    dirty_rows = [
+        {"g": "A", "amt": "nan", "fraud": "True"},
+        {"g": "A", "amt": "50", "fraud": "True"},
+        {"g": "A", "amt": "", "fraud": "False"},
+        {"g": "A", "amt": "50", "fraud": "False"},
+        {"g": "B", "amt": "inf", "fraud": "True"},
+        {"g": "B", "amt": "100", "fraud": "False"},
+    ]
+    assert _group_ratio_stat(dirty_rows, _grp_rc()) == 0.0
+    assert _group_ratio_stat(dirty_rows, _grp_rc(out="group")) == "B"
+    assert _group_ratio_stat(dirty_rows, _grp_rc(stat="max")) == 0.5
+    # 無有效分母 / 參數缺陷 → UnknownSource（不自評）
+    for bad_rows in ([{"g": "A", "amt": "", "fraud": "True"}],
+                     [{"g": "A", "amt": "50", "fraud": "True"},
+                      {"g": "A", "amt": "-50", "fraud": "False"}]):  # 分母和=0
+        with pytest.raises(UnknownSource):
+            _group_ratio_stat(bad_rows, _grp_rc())
+    for bad_rc in ({"num_where": [{"col": "fraud", "op": "eq", "value": "True"}]},   # 缺 group_col/sum_col
+                   {"group_col": "g", "sum_col": "amt"},                               # 缺 num_where
+                   _grp_rc(stat="median"),                                            # 非法 stat
+                   _grp_rc(out="rank")):                                              # 非法 out
+        with pytest.raises(UnknownSource):
+            _group_ratio_stat(rows, bad_rc)
+
+    # ── 整合分派（run_requirement_checks）：dabstep-17 可重現內容反例 ──
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "payments.csv",
+        "merchant,eur_amount,has_fraudulent_dispute\n"
+        "M1,910920.74,False\n"
+        "M1,89079.26,True\n"      # M1：89079.26/1000000 = 8.907926%（volume ratio 真值）
+        "M2,1800000.00,False\n"
+        "M2,200000.00,True\n",    # M2：200000/2000000 = 10.0%；min 分組＝M1
+    )
+    params = {
+        "data_file": "payments.csv",
+        "recompute": {
+            "type": "group_ratio_stat",
+            "group_col": "merchant", "sum_col": "eur_amount",
+            "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}],
+            "stat": "min", "out": "val", "percent": True,
+        },
+    }
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "8.907926\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "7.683437\n")   # dabstep-17 實敗草稿：誤用 count ratio（2132/27748）
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("problem") == "mismatch_with_recomputation"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+    joined = str(r.evidence) + (r.detail or "")
+    assert "8.907926" not in joined
+
+    # ── dabstep-16 形：out="group" 回分組名稱（非數值答案）──
+    params_g = dict(params)
+    params_g["recompute"] = dict(params["recompute"], out="group")
+    req_set_g = _req_set("plain_recomputed", params_g, "answer.txt")
+    good_g = tmp_path / "good_g"
+    _write(good_g / "answer.txt", "M1\n")
+    res_g = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set_g, good_g)}
+    assert res_g["req_main"].status == "PASS"
+
+    bad_g = tmp_path / "bad_g"
+    _write(bad_g / "answer.txt", "M2\n")   # 錯分組（如 dabstep-16 誤選 Golfclub_Baron_Friso）
+    res_bg = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set_g, bad_g)}
+    assert res_bg["req_main"].status == "FAIL"
+    assert res_bg["req_main"].evidence.get("problem") == "mismatch_with_recomputation"
+
+    # ── 參數缺陷 → UNKNOWN（不自評，非 FAIL）──
+    params_bad = dict(params)
+    params_bad["recompute"] = dict(params["recompute"], stat="median")
+    req_set_bad = _req_set("plain_recomputed", params_bad, "answer.txt")
+    d_bad = tmp_path / "d_bad"
+    _write(d_bad / "answer.txt", "8.907926\n")
+    res_bad = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set_bad, d_bad)}
+    assert res_bad["req_main"].status == "UNKNOWN"
+
+
 def test_mean_int_col_point_estimate_and_integer_satisfiable(tmp_path: pathlib.Path):
     """argon 20261105_0346 回歸（dab_055 實況）：
     1. estimated_numbers.csv 的 'No. of cases' 含 '630308[495000-801000]'（前導整數即點估計，
@@ -2125,4 +2398,544 @@ def test_check_csv_structure_supports_json_deliverable(tmp_path: pathlib.Path):
     results = {r.claim_id: r for r in run_requirement_checks(tmp_path, rs, d_dir)}
     assert results["req_alias"].status == "PASS"
 
+
+def test_json_table_deliverable_strict_validation_and_column_normalization(tmp_path: pathlib.Path):
+    """argon 20261106_2115 回歸：
+    1. read_table_deliverable 不得靜默丟棄 JSON 陣列中的非物件元素（字串、null、數字、陣列）、
+       不得把空物件 `{}` 或 `{"records": null}` 包成 1 列假表格、
+       不得放行單列 JSON 物件內的同名或大小寫重複鍵（如 `unit_cost` 與 `UNIT_COST`）。
+    2. check_csv_structure 與 check_group_aggregate 必須檢查所有列皆具備必要／分組欄位，
+       不得只看 `rows[0]` 而放行第 2 列缺欄的 JSON 交付物。
+    3. check_rowset_filter 與 check_group_aggregate 的欄位名稱（values 的 out_col 與來源欄、
+       aggregates[].name）必須大小寫不敏感對齊，且交付物缺欄時必須判 FAIL（missing_column），
+       不得因 `dr.get(out_col)` 與 `r.get(spec)` 皆回空字串而 `"" == ""` 假 PASS；
+       複製數值欄在 CSV 字串（如 `'10.00'`）與 JSON 浮點（`10.0`）間在 atol 內應視為相等。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "inventory.csv",
+        "Item_ID,Item_Name,Current_Stock,Safety_Stock,Unit_Cost\n"
+        "A1,電阻,8,40,10.00\n"
+        "A2,MCU,5,20,20.00\n",
+    )
+
+    rs_struct = _req_set("table_structure", {"required_columns": ["item_id", "unit_cost"]}, "out.json")
+    rs_rowset = _req_set(
+        "rowset_filter",
+        {
+            "input_csv": "inventory.csv",
+            "identity": ["item_id"],
+            "values": {
+                "Unit_Cost": "Unit_Cost",
+                "restock": {"expr": "safety_stock - current_stock"},
+            },
+            "atol": 0.01,
+        },
+        "out.json",
+    )
+    rs_group = _req_set(
+        "group_aggregate",
+        {
+            "input_csv": "inventory.csv",
+            "group_by": ["item_id"],
+            "aggregates": [{"name": "Total_Cost", "type": "sum", "col": "unit_cost"}],
+            "atol": 0.01,
+        },
+        "out.json",
+    )
+
+    # (a) 合法 JSON 表格交付物（含大小寫欄位與 JSON 浮點 10.0 vs CSV '10.00'）→ 皆 PASS
+    good_dir = tmp_path / "good"
+    _write(
+        good_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 10.0, "restock": 32, "Total_Cost": 10.0},
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0},
+        ]),
+    )
+    for rs in (rs_struct, rs_rowset, rs_group):
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, good_dir)}
+        assert res["req_main"].status == "PASS", f"{rs.items[0].verifier}: {res['req_main'].detail}"
+
+    # (b) JSON 陣列混入非 dict 損毀元素 → 結構、rowset、group 皆須 FAIL（不得靜默過濾後假 PASS）
+    mixed_dir = tmp_path / "mixed_non_dict"
+    _write(
+        mixed_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 10.0, "restock": 32, "Total_Cost": 10.0},
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0},
+            "CORRUPTED_ROW",
+            None,
+        ]),
+    )
+    for rs in (rs_struct, rs_rowset, rs_group):
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, mixed_dir)}
+        assert res["req_main"].status == "FAIL", f"{rs.items[0].verifier} should FAIL on non-dict elements"
+
+    # (c) 空物件 `{}` 或包裝鍵非陣列 `{"records": null}` → 即使 required_columns=[] 亦須 FAIL(empty_csv)
+    rs_empty_cols = _req_set("table_structure", {"required_columns": []}, "out.json")
+    for idx, bad_json in enumerate(["{}", '{"records": null}', "[{}]"]):
+        bad_dir = tmp_path / f"empty_obj_{idx}"
+        _write(bad_dir / "out.json", bad_json)
+        res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_empty_cols, bad_dir)}
+        assert res["req_main"].status == "FAIL", f"payload={bad_json} should FAIL"
+
+    # (d) 單列 JSON 物件內含大小寫重複鍵或同名重複鍵（前錯後對）→ 皆須 FAIL
+    for idx, dup_json in enumerate([
+        '[{"Item_ID": "A1", " unit_cost": 999999, "UNIT_COST": 10.0, "restock": 32, "Total_Cost": 10.0}, '
+        '{"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0}]',
+        '[{"Item_ID": "A1", "Unit_Cost": 999999, "Unit_Cost": 10.0, "restock": 32, "Total_Cost": 10.0}, '
+        '{"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15, "Total_Cost": 20.0}]',
+    ]):
+        dup_dir = tmp_path / f"dup_key_{idx}"
+        _write(dup_dir / "out.json", dup_json)
+        for rs in (rs_struct, rs_rowset, rs_group):
+            res = {r.claim_id: r for r in run_requirement_checks(task_dir, rs, dup_dir)}
+            assert res["req_main"].status == "FAIL", f"dup_key_{idx} {rs.items[0].verifier} should FAIL"
+
+    # (e) 第 2 列缺少必要欄或分組欄 → table_structure 與 group_aggregate 皆須 FAIL(missing_columns)
+    row2_missing_col = tmp_path / "row2_missing_col"
+    _write(
+        row2_missing_col / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 10.0, "Total_Cost": 10.0},
+            {"Item_ID": "A2", "Total_Cost": 20.0},  # 缺 Unit_Cost
+        ]),
+    )
+    res_st = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_struct, row2_missing_col)}
+    assert res_st["req_main"].status == "FAIL"
+    assert res_st["req_main"].evidence["missing_columns"] == ["unit_cost"]
+
+    row2_missing_grp = tmp_path / "row2_missing_grp"
+    _write(
+        row2_missing_grp / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Total_Cost": 10.0},
+            {"Total_Cost": 20.0},  # 第 2 列缺分組欄 Item_ID
+        ]),
+    )
+    res_gr = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_group, row2_missing_grp)}
+    assert res_gr["req_main"].status == "FAIL"
+    assert res_gr["req_main"].evidence["missing_columns"] == ["item_id"]
+
+    # (f) rowset_filter：Unit_Cost 寫錯（999999）或完全缺欄 → 必須 FAIL（不得因大小寫鍵產生 ""=="" 假 PASS）
+    wrong_val_dir = tmp_path / "wrong_val"
+    _write(
+        wrong_val_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "Unit_Cost": 999999, "restock": 32},
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15},
+        ]),
+    )
+    res_wv = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_rowset, wrong_val_dir)}
+    assert res_wv["req_main"].status == "FAIL"
+
+    missing_val_col_dir = tmp_path / "missing_val_col"
+    _write(
+        missing_val_col_dir / "out.json",
+        json.dumps([
+            {"Item_ID": "A1", "restock": 32},  # 缺 Unit_Cost
+            {"Item_ID": "A2", "Unit_Cost": 20.0, "restock": 15},
+        ]),
+    )
+    res_mc = {r.claim_id: r for r in run_requirement_checks(task_dir, rs_rowset, missing_val_col_dir)}
+    assert res_mc["req_main"].status == "FAIL"
+
+
+def test_recomputed_verifiers_early_fail_include_expected_in_evidence_false(tmp_path: pathlib.Path):
+    """argon 20261106_2115 回歸：
+    check_kv_recomputed 與 check_plain_recomputed 在早退格式失敗分支
+    （missing_file、empty_value、not_a_number、missing、ambiguous）也必須標註
+    `expected_in_evidence: False`，與其餘分支一致。
+    """
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.csv", "Country,No. of cases\nA,100\nB,200\n")
+    rs = RequirementSet(
+        task_id="t_early_ev",
+        items=[
+            RequirementItem(
+                id="kv_recomp",
+                quote="kv",
+                deliverable="result.txt",
+                verifier="kv_recomputed",
+                params={
+                    "key": "mean_cases",
+                    "data_file": "cases.csv",
+                    "recompute": {"type": "mean_int_col", "col": "No. of cases"},
+                },
+            ),
+            RequirementItem(
+                id="plain_recomp",
+                quote="plain",
+                deliverable="plain.txt",
+                verifier="plain_recomputed",
+                params={
+                    "data_file": "cases.csv",
+                    "recompute": {"type": "unique_count", "col": "Country"},
+                },
+            ),
+        ],
+    )
+
+    # 1. missing_file
+    d_missing = tmp_path / "d_missing"
+    d_missing.mkdir()
+    for r in run_requirement_checks(task_dir, rs, d_missing):
+        assert r.status == "FAIL"
+        assert r.evidence.get("expected_in_evidence") is False
+
+    # 2. not_a_number / empty_value
+    d_nan = tmp_path / "d_nan"
+    _write(d_nan / "result.txt", "@mean_cases[prose_not_num]\n")
+    _write(d_nan / "plain.txt", "The answer is 2.\n")
+    for r in run_requirement_checks(task_dir, rs, d_nan):
+        assert r.status == "FAIL"
+        assert r.evidence.get("expected_in_evidence") is False
+
+    d_empty = tmp_path / "d_empty"
+    _write(d_empty / "result.txt", "no key here\n")
+    _write(d_empty / "plain.txt", "\n")
+    for r in run_requirement_checks(task_dir, rs, d_empty):
+        assert r.status == "FAIL"
+        assert r.evidence.get("expected_in_evidence") is False
+
+
+def test_audit_kv_preservation_text_and_json(tmp_path):
+    """P20261106_2241-2：鍵值交付物的行級／鍵級保留審計（audit 側，免自評）。"""
+    from vacant_network.reqloop.checks import audit_kv_preservation
+
+    # --- 文字檔 @key[value] ---
+    d = tmp_path / "txt_draft"
+    f = tmp_path / "txt_final"
+    d.mkdir(parents=True)
+    f.mkdir(parents=True)
+    draft = d / "answer.txt"
+    final = f / "answer.txt"
+    draft.write_text("@mean_cases[2.0]\n@median_cases[3.5]\n@top_product[Alfa]\n", encoding="utf-8")
+    satisfied = ["mean_cases", "median_cases"]
+
+    # (a) 僅修改未滿足鍵 → 已滿足鍵全數 preserved
+    final.write_text("@mean_cases[2.0]\n@median_cases[3.5]\n@top_product[Omega]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("mean_cases", "median_cases")
+    assert mutated == ()
+
+    # (b) 已滿足鍵被覆寫修改 → mutated
+    final.write_text("@mean_cases[2.1]\n@median_cases[3.5]\n@top_product[Alfa]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("median_cases",)
+    assert mutated == ("mean_cases",)
+
+    # (b) 已滿足鍵被刪除 → mutated
+    final.write_text("@mean_cases[2.0]\n@top_product[Alfa]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("mean_cases",)
+    assert mutated == ("median_cases",)
+
+    # (b) 已滿足鍵重複出現（ambiguous）→ mutated
+    final.write_text("@mean_cases[2.0]\n@mean_cases[2.0]\n@median_cases[3.5]\n", encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(draft, final, satisfied)
+    assert preserved == ("median_cases",)
+    assert mutated == ("mean_cases",)
+
+    # (c) final 檔案缺失 → 所有鍵 mutated
+    preserved, mutated = audit_kv_preservation(draft, f / "nope.txt", satisfied)
+    assert preserved == ()
+    assert mutated == tuple(satisfied)
+
+    # --- JSON 字典交付物 ---
+    jd = tmp_path / "json_draft"
+    jf = tmp_path / "json_final"
+    jd.mkdir(parents=True)
+    jf.mkdir(parents=True)
+    jdraft = jd / "result.json"
+    jfinal = jf / "result.json"
+    jdraft.write_text(json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "top_product": "Alfa"}),
+                      encoding="utf-8")
+
+    # (a) 僅修改未滿足鍵
+    jfinal.write_text(json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "top_product": "Omega"}),
+                      encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, satisfied)
+    assert preserved == ("mean_cases", "median_cases")
+    assert mutated == ()
+
+    # (b) 已滿足鍵值被修改
+    jfinal.write_text(json.dumps({"mean_cases": 2.1, "median_cases": 3.5, "top_product": "Alfa"}),
+                      encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, satisfied)
+    assert mutated == ("mean_cases",)
+
+    # (b) 值相等但型別不一致（float→int）→ mutated
+    jfinal.write_text(json.dumps({"mean_cases": 2, "median_cases": 3.5, "top_product": "Alfa"}),
+                      encoding="utf-8")
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, satisfied)
+    assert preserved == ("median_cases",)
+    assert mutated == ("mean_cases",)
+
+    # (c) final 檔案缺失
+    preserved, mutated = audit_kv_preservation(jdraft, jf / "nope.json", satisfied)
+    assert preserved == ()
+    assert mutated == tuple(satisfied)
+
+
+def test_audit_kv_preservation_json_duplicate_keys_and_nested_strict_types(tmp_path):
+    """argon 20261107_0035 回歸（d33a1ac8 缺陷）：
+    1. `.json` 交付物若含完全同名重複鍵（如 `{"mean_cases": 999.0, "mean_cases": 2.0}`）或大小寫重複鍵，
+       `_kv_preservation_values` 必須透過 `object_pairs_hook=_JsonPairs` 保留所有值，並由
+       `audit_kv_preservation` 歸類為 `mutated`（與 `check_answer_kv`／`check_kv_recomputed` 的 `ambiguous`
+       口徑一致），不得被 `json.loads` 的原生 `dict` 靜默後蓋前而誤判 `preserved`。
+    2. 巢狀 list/dict 內若發生 `bool` vs `int`（Python 中 `True == 1`）或 `int` vs `float`（`2 == 2.0`）
+       型別改變、或巢狀物件內有重複鍵，必須判為 `mutated`；巢狀 dict 無重複鍵且型別與值皆一致時為 `preserved`。
+    """
+    from vacant_network.reqloop.checks import audit_kv_preservation
+
+    jdraft = tmp_path / "draft.json"
+    jfinal = tmp_path / "final.json"
+    jdraft.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": True, "count": 2, "items": [1, False]}}),
+        encoding="utf-8",
+    )
+
+    # (1) 完全同名重複鍵：後鍵剛好等於 2.0，也不得被 dict 吞掉判為 preserved
+    jfinal.write_text(
+        '{"mean_cases": 999.0, "mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": true, "count": 2, "items": [1, false]}}',
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "median_cases", "meta"])
+    assert preserved == ("median_cases", "meta")
+    assert mutated == ("mean_cases",)
+
+    # (2) 巢狀 bool vs int（True vs 1、False vs 0）⇒ mutated
+    jfinal.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": 1, "count": 2, "items": [1, False]}}),
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+    jfinal.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": True, "count": 2, "items": [1, 0]}}),
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+    # (3) 巢狀 int vs float（2 vs 2.0）⇒ mutated
+    jfinal.write_text(
+        json.dumps({"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": True, "count": 2.0, "items": [1, False]}}),
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+    # (4) 巢狀 dict 鍵順序不同但無重複且型別與值一致 ⇒ preserved
+    jfinal.write_text(
+        '{"mean_cases": 2.0, "median_cases": 3.5, "meta": {"items": [1, false], "count": 2, "flag": true}}',
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases", "meta")
+    assert mutated == ()
+
+    # (5) 巢狀 dict 含重複鍵 ⇒ mutated
+    jfinal.write_text(
+        '{"mean_cases": 2.0, "median_cases": 3.5, "meta": {"flag": false, "flag": true, "count": 2, "items": [1, false]}}',
+        encoding="utf-8",
+    )
+    preserved, mutated = audit_kv_preservation(jdraft, jfinal, ["mean_cases", "meta"])
+    assert preserved == ("mean_cases",)
+    assert mutated == ("meta",)
+
+
+def test_strict_json_equal_dict_nested_types():
+    """工單 P20261107_0243-1：原生 Python `dict` 遞迴嚴格比對。
+
+    `_strict_json_equal` 的 docstring 承諾「型別必須完全一致（排除 Python `True == 1`、
+    `2 == 2.0`）」；但原生 `dict` 傳入時（自訂檢查器、單元測試、反序列化產物）缺少
+    `isinstance(a, dict)` 分支，會降級至 Python 裸 `==`，使巢狀 `bool vs int`、
+    `int vs float` 被誤判相等（假 preserved）。"""
+    from vacant_network.reqloop.checks import _strict_json_equal
+
+    # (a) 巢狀 bool vs int（True vs 1）⇒ 不等
+    assert _strict_json_equal({"flag": True}, {"flag": 1}) is False
+    # (b) 巢狀 int vs float（2 vs 2.0）⇒ 不等
+    assert _strict_json_equal({"count": 2}, {"count": 2.0}) is False
+    # (c) 巢狀 list 內 bool vs int ⇒ 不等
+    assert _strict_json_equal({"a": [1, True]}, {"a": [1, 1]}) is False
+    # (d) 型別與值完全一致 ⇒ 相等
+    assert _strict_json_equal({"meta": {"x": 1}}, {"meta": {"x": 1}}) is True
+    # (e) 鍵不同 ⇒ 不等
+    assert _strict_json_equal({"a": 1}, {"b": 1}) is False
+
+
+def test_monthly_verifiers_missing_input_is_unknown_not_vacuous_pass(
+    tmp_path: pathlib.Path,
+):
+    """argon 20261107_0822 回歸：
+    monthly_sales_metrics / monthly_top_products / summary_metrics_consistency
+    當 input_csv 不存在或無有效月份資料時，必須回傳 UNKNOWN（不得在 expected_months=[] 時
+    迴圈跑 0 次直接回傳空轉假 PASS，或以 0.0 冤枉正確摘要）。
+    """
+    task_dir = tmp_path / "task"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    deliv = tmp_path / "deliv"
+    _write(
+        deliv / "monthly_sales.csv",
+        "month,order_count,net_sales\n2023-01,999,999999.0\n",
+    )
+    _write(
+        deliv / "top_products.csv",
+        "month,rank,product,net_sales\n2023-01,1,FAKE,999999.0\n",
+    )
+    _write(
+        deliv / "summary.md",
+        "2023-01 訂單數 10，淨銷售額 1200.50\n",
+    )
+
+    for vname, dfile in (
+        ("monthly_sales_metrics", "monthly_sales.csv"),
+        ("monthly_top_products", "top_products.csv"),
+        ("summary_metrics_consistency", "summary.md"),
+    ):
+        rs = _req_set(vname, {"input_csv": "nonexistent.csv"}, dfile)
+        res = run_requirement_checks(task_dir, rs, deliv)[0]
+        assert res.status == "UNKNOWN", f"{vname} should be UNKNOWN when input_csv is missing, got {res.status}"
+
+
+def test_plain_recomputed_mode_col_string_values_pass_and_fail(tmp_path: pathlib.Path):
+    """argon 20261107_0822 回歸：
+    plain_recomputed 的 mode_col 支援字串型眾數（如類別名稱 'Electronics'），
+    不得被前置 float(val_str) 攔截而對正確字串答案誤判 FAIL (not_a_number)；
+    錯誤字串仍須判 FAIL 且 expected_in_evidence 為 False。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "items.csv",
+        "category\nElectronics\nBooks\nElectronics\nClothing\n",
+    )
+    rs = _req_set(
+        "plain_recomputed",
+        {"data_file": "items.csv", "recompute": {"type": "mode_col", "col": "category"}},
+        "answer.txt",
+    )
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "Electronics\n")
+    r_good = run_requirement_checks(task_dir, rs, good)[0]
+    assert r_good.status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "Books\n")
+    r_bad = run_requirement_checks(task_dir, rs, bad)[0]
+    assert r_bad.status == "FAIL"
+    assert r_bad.evidence.get("expected_in_evidence") is False
+
+
+def test_recomputed_verifiers_check_source_before_blaming_deliverable_and_malformed_params_are_unknown(
+    tmp_path: pathlib.Path,
+):
+    """argon 20261107_0822 回歸：
+    1. 當 kv_recomputed / plain_recomputed 的重算規則指向不存在的資料欄（如擷取模型寫錯 col / col_a / col_b）
+       或資料檔不存在時，必須回傳 UNKNOWN，不得因先檢查交付物或漏驗欄位存在性而對 good 交付物誤判 FAIL（冤枉）或假 PASS；
+    2. rowset_filter 無 values 且無篩選條件、或 answer_kv / group_aggregate / summary_numbers 傳入畸形參數時，
+       必須回傳 UNKNOWN，不得空轉假 PASS 或拋未捕捉 AttributeError。
+    """
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.csv", "Country,No. of cases\nA,100\nB,200\n")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@mean_cases[150]\n")
+    _write(good / "out.csv", "Country,No. of cases\nA,999999\nB,888888\n")
+
+    # (a) 擷取模型寫錯 col 與 key 時，因為資料欄 wrong_col 不存在（UnknownSource），必須回傳 UNKNOWN 而非 FAIL
+    rs_bad_col = _req_set(
+        "kv_recomputed",
+        {
+            "key": "wrong_key",
+            "data_file": "cases.csv",
+            "recompute": {"type": "mean_int_col", "col": "wrong_col"},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_bad_col, good)[0].status == "UNKNOWN"
+
+    # (b) count_if / zcount3 / pearson2 指向不存在的欄位時，也必須回傳 UNKNOWN（不得因算成 0 而假 PASS 或 FAIL）
+    for rspec in (
+        {"type": "count_if", "col": "no_such_col", "eq": 1},
+        {"type": "zcount3", "col": "no_such_col"},
+        {"type": "pearson2", "col_a": "no_such_a", "col_b": "no_such_b"},
+    ):
+        rs_rc = _req_set(
+            "kv_recomputed",
+            {"key": "mean_cases", "data_file": "cases.csv", "recompute": rspec},
+            "answer.txt",
+        )
+        assert run_requirement_checks(task_dir, rs_rc, good)[0].status == "UNKNOWN"
+
+    # (c) rowset_filter 缺 values 且無過濾條件時回 UNKNOWN，不得對錯值 out.csv 給假 PASS
+    rs_rf = _req_set(
+        "rowset_filter",
+        {"input_csv": "cases.csv", "identity": ["Country"]},
+        "out.csv",
+    )
+    assert run_requirement_checks(task_dir, rs_rf, good)[0].status == "UNKNOWN"
+
+    # (d) answer_kv 傳入非 dict 的 key spec 時回 UNKNOWN，不拋 AttributeError
+    rs_akv = _req_set("answer_kv", {"keys": ["mean_cases"]}, "answer.txt")
+    assert run_requirement_checks(task_dir, rs_akv, good)[0].status == "UNKNOWN"
+
+
+
+
+
+
+
+def test_dedup_by_field_coerces_single_element_list():
+    """vq-el4.3 第 3 輪：glm53 把 dedup_by 寫成 ["order_id"]——檢查器必須容錯取首項，
+    而不是 AttributeError crash（崩潰不是 FAIL，也不准靜默跳過去重）。"""
+    from vacant_network.reqloop.checks import _dedup_by_field
+    assert _dedup_by_field({"dedup_by": "order_id"}) == "order_id"
+    assert _dedup_by_field({"dedup_by": ["order_id"]}) == "order_id"
+    assert _dedup_by_field({}) == ""
+    assert _dedup_by_field({"dedup_by": " Order_ID "}) == "order_id"
+
+
+def test_dedup_by_field_rejects_ambiguous_shapes():
+    """空列表／多元素／非字串 → UnknownSource（fail-closed，不准猜）。"""
+    import pytest
+    from vacant_network.reqloop.checks import UnknownSource, _dedup_by_field
+    for bad in ([], ["a", "b"], 5, {"x": 1}):
+        with pytest.raises(UnknownSource):
+            _dedup_by_field({"dedup_by": bad})
+
+
+def test_checks_resolve_deliverable_path_handles_app_and_relative_prefixes(tmp_path: pathlib.Path):
+    """argon 20261107_1255 回歸：
+    交付物路徑若帶 /app/（Docker 容器內路徑，如 /app/answer.txt）或 ./，
+    檢查器必須安全剝除並錨定至 deliverable_dir，不得因絕對路徑穿透到主機根目錄導致 missing_file 冤枉。
+    """
+    from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
+    from vacant_network.reqloop.checks import run_requirement_checks, resolve_deliverable_path
+
+    task_dir = tmp_path / "task"
+    draft_dir = tmp_path / "draft"
+    task_dir.mkdir()
+    draft_dir.mkdir()
+    (task_dir / "payments.csv").write_text("hour\n10\n10\n11\n", encoding="utf-8")
+    (draft_dir / "answer.txt").write_text("10\n", encoding="utf-8")
+
+    assert resolve_deliverable_path(draft_dir, "/app/answer.txt") == draft_dir / "answer.txt"
+    assert resolve_deliverable_path(draft_dir, "./answer.txt") == draft_dir / "answer.txt"
+    assert resolve_deliverable_path(draft_dir, "answer.txt") == draft_dir / "answer.txt"
+
+    item = RequirementItem(
+        id="R1", quote="write to /app/answer.txt", deliverable="/app/answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv", "recompute": {"type": "mode_col", "col": "hour"}}
+    )
+    rs = RequirementSet("t", [item])
+    res = run_requirement_checks(task_dir, rs, draft_dir)
+    assert res[0].status == "PASS"
 

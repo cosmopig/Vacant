@@ -1,0 +1,115 @@
+{
+  "task_id": "expense_category",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "產出 `expense_summary.csv`，欄位：`category, subcategory, total_amount`",
+      "deliverable": "expense_summary.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "category",
+          "subcategory",
+          "total_amount"
+        ]
+      },
+      "description": "交付檔 expense_summary.csv 必須存在且含 category、subcategory、total_amount 三欄。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）。",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "aggregates": [
+          {
+            "column": "amount",
+            "op": "sum",
+            "round": 2,
+            "rounding_order": "round_after_summing",
+            "output_column": "total_amount"
+          }
+        ],
+        "input_csv": "expenses.csv"
+      },
+      "description": "total_amount 必須是先加總再四捨五入到小數點後 2 位的值，與重算一致（驗證捨入順序，避免逐列先捨入）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "numbers": [
+          {
+            "label": "報銷總金額",
+            "definition": "sum of amount over all rows in expenses.csv, rounded to 2 decimal places",
+            "match": "exact_numeric"
+          }
+        ],
+        "input_csv": "expenses.csv"
+      },
+      "description": "summary.md 中載明的報銷總金額（全部 amount 加總、小數點後 2 位）須與從 expenses.csv 重算的數值一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "產出 `summary.md`",
+      "deliverable": "summary.md",
+      "verifier": "table_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [],
+        "existence": true
+      },
+      "description": "交付物 summary.md 必須存在（表格結構欄位由其他條目驗證，此處僅驗證檔案存在）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R3",
+      "R4",
+      "R5"
+    ],
+    "discarded": [
+      {
+        "index": 1,
+        "id": "R2",
+        "reason": "quote_not_verbatim"
+      }
+    ],
+    "unverified": [
+      {
+        "id": "R5",
+        "reason": "empty_param:required_columns"
+      }
+    ]
+  },
+  "generated_at": "2026-11-07T09:38:06+00:00"
+}

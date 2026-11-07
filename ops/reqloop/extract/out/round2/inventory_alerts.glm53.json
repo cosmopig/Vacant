@@ -1,0 +1,239 @@
+{
+  "task_id": "inventory_alerts",
+  "items": [
+    {
+      "id": "req-1",
+      "quote": "排除 `supplier_status` 為 `DISCONTINUED` 的停產項目。",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "identity": [
+          "item_id"
+        ],
+        "exclude": [
+          {
+            "col": "supplier_status",
+            "op": "eq",
+            "value": "DISCONTINUED"
+          }
+        ]
+      },
+      "description": "交付行集不得包含 supplier_status 為 DISCONTINUED 的項目。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-2",
+      "quote": "同一 `item_id` 若出現多筆，只保留第一筆。",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "identity": [
+          "item_id"
+        ],
+        "exclude": [
+          {
+            "col": "supplier_status",
+            "op": "eq",
+            "value": "DISCONTINUED"
+          }
+        ]
+      },
+      "description": "以 item_id 為識別去重，重複僅保留第一筆；與排除 DISCONTINUED 一併套用於行集驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-3",
+      "quote": "選出庫存不足品項：`current_stock < safety_stock`（等於安全量者不需補貨）。",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "identity": [
+          "item_id"
+        ],
+        "exclude": [
+          {
+            "col": "supplier_status",
+            "op": "eq",
+            "value": "DISCONTINUED"
+          },
+          {
+            "col": "current_stock",
+            "op": "ge",
+            "value": "safety_stock"
+          }
+        ]
+      },
+      "description": "僅納入 current_stock 小於 safety_stock 的品項；等於安全量者排除。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-4",
+      "quote": "產出 `restock_alerts.csv`，欄位：`item_id, item_name, current_stock, safety_stock, restock_needed, estimated_cost`",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "item_id",
+          "item_name",
+          "current_stock",
+          "safety_stock",
+          "restock_needed",
+          "estimated_cost"
+        ]
+      },
+      "description": "交付檔 restock_alerts.csv 必須存在且含指定六個欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-5",
+      "quote": "`restock_needed = safety_stock - current_stock`",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "group_by": [
+          "item_id"
+        ],
+        "aggregates": [
+          {
+            "name": "restock_needed",
+            "type": "sum",
+            "expr": "safety_stock - current_stock"
+          }
+        ]
+      },
+      "description": "restock_needed 欄位須等於 safety_stock - current_stock，可由原始資料重算比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-6",
+      "quote": "`estimated_cost = restock_needed × unit_cost`（小數點後 2 位）",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "group_by": [
+          "item_id"
+        ],
+        "compute": [
+          {
+            "name": "restock_needed",
+            "expr": "safety_stock - current_stock"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "estimated_cost",
+            "type": "sum",
+            "expr": "restock_needed * unit_cost"
+          }
+        ]
+      },
+      "description": "estimated_cost 須等於 restock_needed × unit_cost，取到小數點後 2 位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-7",
+      "quote": "產出 `summary.md`，須明確載明「需補貨品項數」與「預估補貨總金額」（精確數值，小數點後 2 位）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "numbers": [
+          {
+            "type": "count_if",
+            "expr": "current_stock < safety_stock",
+            "label": "需補貨品項數"
+          },
+          {
+            "type": "sum",
+            "col": "estimated_cost",
+            "label": "預估補貨總金額"
+          }
+        ]
+      },
+      "description": "summary.md 須載明需補貨品項數與預估補貨總金額（小數點後 2 位），數字須與原始資料重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "req-8",
+      "quote": "排除 `supplier_status` 為 `DISCONTINUED` 的停產項目。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "inventory.csv",
+        "numbers": [
+          {
+            "type": "count_if",
+            "expr": "current_stock < safety_stock",
+            "label": "需補貨品項數"
+          }
+        ]
+      },
+      "description": "摘要中的需補貨品項數須以排除 DISCONTINUED、去重後且 current_stock < safety_stock 的列重算；本條目之 params 未含排除條件，故以 unverified 標記，原因：summary_numbers 的 numbers 形狀無法表達 exclude/dedup，無法程式化驗證過濾規則。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req-1",
+      "req-2",
+      "req-3",
+      "req-4",
+      "req-5",
+      "req-6",
+      "req-7",
+      "req-8"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "req-7",
+        "reason": "unsupported_summary_number_type:count_if"
+      },
+      {
+        "id": "req-8",
+        "reason": "unsupported_summary_number_type:count_if"
+      }
+    ]
+  },
+  "generated_at": "2026-11-07T10:09:40+00:00"
+}

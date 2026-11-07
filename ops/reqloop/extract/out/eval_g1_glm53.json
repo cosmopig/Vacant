@@ -1,0 +1,447 @@
+{
+  "rows": [
+    {
+      "task": "expense_category",
+      "missing": false,
+      "hand": {
+        "task_id": "expense_category",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_grand_total_wrong",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_subcategory_dropped",
+            "caught": true
+          },
+          {
+            "case": "bad_round_each_row",
+            "caught": true
+          },
+          {
+            "case": "bad_subcategory_case_split",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "expense_category",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_grand_total_wrong",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_subcategory_dropped",
+            "caught": true
+          },
+          {
+            "case": "bad_round_each_row",
+            "caught": true
+          },
+          {
+            "case": "bad_subcategory_case_split",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 3,
+      "ext_unverified": 0
+    },
+    {
+      "task": "inventory_alerts",
+      "missing": false,
+      "hand": {
+        "task_id": "inventory_alerts",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_duplicate_rows",
+            "caught": true
+          },
+          {
+            "case": "bad_include_discontinued",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_stock_threshold",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_number_mismatch",
+            "caught": true
+          },
+          {
+            "case": "bad_wrong_formula",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "inventory_alerts",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_duplicate_rows",
+            "caught": true
+          },
+          {
+            "case": "bad_include_discontinued",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_stock_threshold",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_number_mismatch",
+            "caught": true
+          },
+          {
+            "case": "bad_wrong_formula",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 5,
+      "ext_unverified": 0
+    },
+    {
+      "task": "nested_events",
+      "missing": false,
+      "hand": {
+        "task_id": "nested_events",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_duration_dropped",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_payload_dropped",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_total_wrong",
+            "caught": true
+          },
+          {
+            "case": "bad_type_case_split",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "nested_events",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_duration_dropped",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_payload_dropped",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_total_wrong",
+            "caught": true
+          },
+          {
+            "case": "bad_type_case_split",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 4,
+      "ext_unverified": 0
+    },
+    {
+      "task": "orders_monthly",
+      "missing": false,
+      "hand": {
+        "task_id": "orders_monthly",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_duplicate_orders",
+            "caught": true
+          },
+          {
+            "case": "bad_include_cancelled",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_top_products",
+            "caught": true
+          },
+          {
+            "case": "bad_month_boundary",
+            "caught": true
+          },
+          {
+            "case": "bad_ranking_by_count",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_number_mismatch",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "orders_monthly",
+        "good": "UNKNOWN",
+        "bad": [
+          {
+            "case": "bad_duplicate_orders",
+            "caught": true
+          },
+          {
+            "case": "bad_include_cancelled",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_top_products",
+            "caught": true
+          },
+          {
+            "case": "bad_month_boundary",
+            "caught": true
+          },
+          {
+            "case": "bad_ranking_by_count",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_number_mismatch",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 6,
+      "ext_unverified": 2
+    },
+    {
+      "task": "student_grades",
+      "missing": false,
+      "hand": {
+        "task_id": "student_grades",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_duplicate_students",
+            "caught": true
+          },
+          {
+            "case": "bad_include_withdrawn",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_passing_threshold",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_number_mismatch",
+            "caught": true
+          },
+          {
+            "case": "bad_weight_calculation",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "student_grades",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_duplicate_students",
+            "caught": true
+          },
+          {
+            "case": "bad_include_withdrawn",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_passing_threshold",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_number_mismatch",
+            "caught": true
+          },
+          {
+            "case": "bad_weight_calculation",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 6,
+      "ext_unverified": 0
+    },
+    {
+      "task": "support_tickets",
+      "missing": false,
+      "hand": {
+        "task_id": "support_tickets",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_include_open",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_worst",
+            "caught": true
+          },
+          {
+            "case": "bad_rate_as_pct",
+            "caught": true
+          },
+          {
+            "case": "bad_sla_strict_lt",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_max_wrong",
+            "caught": true
+          },
+          {
+            "case": "bad_worst_as_mean",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "support_tickets",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_include_open",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_worst",
+            "caught": true
+          },
+          {
+            "case": "bad_rate_as_pct",
+            "caught": true
+          },
+          {
+            "case": "bad_sla_strict_lt",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_max_wrong",
+            "caught": true
+          },
+          {
+            "case": "bad_worst_as_mean",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 3,
+      "ext_unverified": 0
+    },
+    {
+      "task": "web_traffic",
+      "missing": false,
+      "hand": {
+        "task_id": "web_traffic",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_dwell_zero_imputed",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_no_tz_shift",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_uv_summed",
+            "caught": true
+          },
+          {
+            "case": "bad_uv_not_dedup",
+            "caught": true
+          }
+        ]
+      },
+      "ext": {
+        "task_id": "web_traffic",
+        "good": "VERIFIED",
+        "bad": [
+          {
+            "case": "bad_dwell_zero_imputed",
+            "caught": true
+          },
+          {
+            "case": "bad_missing_columns",
+            "caught": true
+          },
+          {
+            "case": "bad_no_tz_shift",
+            "caught": true
+          },
+          {
+            "case": "bad_summary_uv_summed",
+            "caught": true
+          },
+          {
+            "case": "bad_uv_not_dedup",
+            "caught": true
+          }
+        ]
+      },
+      "ext_items": 4,
+      "ext_unverified": 0
+    }
+  ],
+  "gate": "PASS",
+  "catch_rate": 1.0,
+  "ext_caught": 39,
+  "total_bad": 39,
+  "ext_fp": 0
+}

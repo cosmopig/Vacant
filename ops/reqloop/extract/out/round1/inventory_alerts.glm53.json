@@ -1,0 +1,158 @@
+{
+  "task_id": "inventory_alerts",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "排除 `supplier_status` 為 `DISCONTINUED` 的停產項目。",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "identity": "item_id",
+        "input_csv": "inventory.csv",
+        "rules": "排除 supplier_status = DISCONTINUED"
+      },
+      "description": "交付列中不得包含 supplier_status 為 DISCONTINUED 的項目。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "同一 `item_id` 若出現多筆，只保留第一筆。",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "identity": "item_id",
+        "input_csv": "inventory.csv",
+        "rules": "依 item_id 去重，保留第一筆"
+      },
+      "description": "以 item_id 為識別去重，保留原始資料中第一筆。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "選出庫存不足品項：`current_stock < safety_stock`（等於安全量者不需補貨）。",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {
+        "identity": "item_id",
+        "input_csv": "inventory.csv",
+        "rules": "current_stock < safety_stock（嚴格小於）"
+      },
+      "description": "僅納入 current_stock 嚴格小於 safety_stock 的品項。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "產出 `restock_alerts.csv`，欄位：`item_id, item_name, current_stock, safety_stock, restock_needed, estimated_cost`",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "item_id",
+          "item_name",
+          "current_stock",
+          "safety_stock",
+          "restock_needed",
+          "estimated_cost"
+        ]
+      },
+      "description": "交付檔 restock_alerts.csv 必須存在且含指定欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "`restock_needed = safety_stock - current_stock`",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "restock_needed",
+        "data_file": "inventory.csv",
+        "recompute": "safety_stock - current_stock（排除 DISCONTINUED、item_id 去重、current_stock < safety_stock 後逐列計算）"
+      },
+      "description": "restock_needed 欄須等於 safety_stock - current_stock。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R6",
+      "quote": "`estimated_cost = restock_needed × unit_cost`（小數點後 2 位）",
+      "deliverable": "restock_alerts.csv",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "estimated_cost",
+        "data_file": "inventory.csv",
+        "recompute": "restock_needed × unit_cost，四捨五入至小數點後 2 位"
+      },
+      "description": "estimated_cost 欄須等於 restock_needed × unit_cost，並取小數點後 2 位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R7",
+      "quote": "產出 `summary.md`，須明確載明「需補貨品項數」與「預估補貨總金額」（精確數值，小數點後 2 位）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "numbers": [
+          "需補貨品項數",
+          "預估補貨總金額"
+        ],
+        "input_csv": "inventory.csv",
+        "recompute": "需補貨品項數 = 符合條件列數；預估補貨總金額 = Σ estimated_cost，小數點後 2 位"
+      },
+      "description": "summary.md 須存在並載明需補貨品項數與預估補貨總金額，數值須與原始資料重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6",
+      "R7"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "R5",
+        "reason": "recompute_not_dict"
+      },
+      {
+        "id": "R6",
+        "reason": "recompute_not_dict"
+      }
+    ]
+  },
+  "generated_at": "2026-11-07T09:38:12+00:00"
+}

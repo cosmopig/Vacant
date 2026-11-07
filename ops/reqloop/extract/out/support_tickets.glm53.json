@@ -1,0 +1,133 @@
+{
+  "task_id": "support_tickets",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "只統計 `status` 為 `CLOSED` 的工單（`OPEN` 進行中工單不計入任何統計）",
+      "deliverable": "sla_report.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "tickets.csv",
+        "group_by": [
+          "priority"
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "OPEN"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "ticket_count",
+            "type": "count"
+          },
+          {
+            "name": "avg_resolved_hours",
+            "type": "mean",
+            "col": "resolved_hours",
+            "round": 2
+          },
+          {
+            "name": "sla_met_count",
+            "type": "count_if",
+            "expr": "resolved_hours <= sla_target_hours"
+          },
+          {
+            "name": "sla_rate",
+            "type": "ratio",
+            "num": "sla_met_count",
+            "den": "ticket_count",
+            "round": 4
+          },
+          {
+            "name": "worst_hours",
+            "type": "max",
+            "col": "resolved_hours"
+          }
+        ]
+      },
+      "description": "依 priority 分組，僅統計 status 為 CLOSED 的工單，計算結案數、平均處理時數（2 位小數）、SLA 達標數（resolved_hours <= sla_target_hours）、達標率（4 位小數）與最長處理時數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "產出 `sla_report.csv`，欄位：`priority, ticket_count, avg_resolved_hours, sla_met_count, sla_rate, worst_hours`",
+      "deliverable": "sla_report.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "priority",
+          "ticket_count",
+          "avg_resolved_hours",
+          "sla_met_count",
+          "sla_rate",
+          "worst_hours"
+        ]
+      },
+      "description": "sla_report.csv 必須存在且含指定六個欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "產出 `summary.md`，須明確載明「結案工單總數」、「整體 SLA 達標率（百分數，小數點後 2 位）」與「最長處理時數」（精確數值）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "tickets.csv",
+        "numbers": [
+          {
+            "type": "count",
+            "label": "結案工單總數"
+          },
+          {
+            "type": "pct_if",
+            "expr": "resolved_hours <= sla_target_hours",
+            "label": "整體 SLA 達標率",
+            "round": 2
+          },
+          {
+            "type": "max",
+            "label": "最長處理時數",
+            "col": "resolved_hours"
+          }
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "OPEN"
+          }
+        ]
+      },
+      "description": "summary.md 須載明結案工單總數、整體 SLA 達標率（百分數、2 位小數）與最長處理時數，且數字與從 tickets.csv（排除 OPEN 工單）重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T11:10:46Z"
+}

@@ -1,19 +1,16 @@
-# NOW
+# 現在（第 1188 輪，2026-11-07）
 
-## 現在在哪（r1141）
-- r1141 驗證輪：審查三點核對＋雙切片現樹複驗全綠（A/B dry-run＋baseline 皆 EXIT=0、無洩漏；reqloop 206 passed）；未 fire（無新授權、新成本另報）。
-- r1141 redo：點名三檔補實讀（effects_20261105_summary.json 全結構、multideliv summary.md＋CSV＋manifest、repair.py L1817-1995）——STATE/NOW 依賴斷言全部核實一致、0 更正。
-- r1140：工單 P20261106_2040-2 完成：realtask_manifest.json 補入真實正確草稿 `dabstep-11-pi-A`（e014 lab pass=true、本地 req_max_eur_amount PASS）→ 3 草稿（2 bad＋1 good）×2 臂＝6 格對照基準；status 維持 NOT_fired。
-- commit 7ad97fbe（2 檔：manifest＋test_reqloop_g2.py 兩測試擴充）。驗收 2 passed；dry-run 6 cells EXIT=0；baseline 1 PASS 2 FAIL EXIT=0；reqloop 四測試檔 206 passed。0 模型呼叫、0 發射。
-- ⚠ 工單針「4990.0」非本切片任何題重算值（實際 col_max(eur_amount)=4811.76＝good 草稿值；無欄位 max 近 4990）——已改以 4811.76 入針並註記於票尾，避免空洞斷言。
+## r1188：real14 首跑完成（門禁 FAIL）
+- 修 run_eval.py 1 行 ExtractReport 序列化（改前 RC=1）；14/14 cell 判定：
+  **抓錯 9/9（達標）、冤枉 4/5（未達）→ FAIL（RC=20）**；15 次/141762 tok；重跑全 cache。
+- 冤枉同型：dab_035/057/105/dabstep-13＝需求綁定 checker 解析不到的
+  deliverable/值路徑（dabstep-13 好稿有 answer.txt，需求寫 /app/answer.txt）。
+- commit 552dda17；工單 done/；vq-el4.4 未收（bd note 已記）。
 
-## 雙切片（皆 NOT_fired）
-- A=realtask_manifest.json（6 格、2 bad＋1 good；離線三門 verify_frozen＋--dry-run＋--baseline 全綠）。
-- B=real_slice/manifest.json（dab_378、2 格、7 測試）。
+## 下一步（等規劃者重拆 vq-el4.4）
+- 修 deliverable 路徑綁定（prompt 或 checker 解析對齊草稿實際檔案位置）→
+  重跑（0 計費）→ 門禁過 → vq-el4.5（localized 修復＋獨立 scorer）。
 
-## 下一步
-- 若授權：fire A 或 B（二擇一／分批、不並跑）——模型流量＝新成本、先另報。
-- 未授權：維持雙凍結、0 新票、不加 regex／靜態 prompt／重跑；候需求端點名 vq-6rp、vq-5nz.6。
-
-## 紅線
-不碰 main、不自 push（loop 自動推 auto/qwen27b）、不讀 /srv/eval hidden／scorer 源、缺值＝UNKNOWN 不填 0、不為「每輪有 commit」加 regex／靜態 prompt／未授權重跑／純文檔修補、批內開發選樣不宣稱 localized 較好、兩臂起始 hash 不一致不稱同草稿公平比較、tamper/UNKNOWN 不算成功。
+## 紅線（不變）
+main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
+不改 repair.py／G1 requirements.json／凍結快照；成本缺值＝UNKNOWN 不填 0。

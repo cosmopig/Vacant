@@ -1,0 +1,67 @@
+{
+  "task_id": "dab_055-pi-C",
+  "items": [
+    {
+      "id": "req_mean_cases",
+      "quote": "What is the mean number of cases recorded across all countries and years?",
+      "deliverable": "@mean_cases[mean_value]",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "mean_cases",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "mean_int_col",
+          "col": "No. of cases"
+        }
+      },
+      "description": "計算 'No. of cases' 欄位（轉為 Int64、忽略 Null/空值）跨所有國家與年份的平均值，與答案檔 @mean_cases 的值比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_answer_format",
+      "quote": "@mean_cases[mean_value] where \"mean_value\" is a positive integer.",
+      "deliverable": "@mean_cases[mean_value]",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "mean_cases",
+        "value_type": "number"
+      },
+      "description": "答案須以 @mean_cases[正整數] 格式呈現。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req_mean_cases",
+      "req_answer_format"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "req_answer_format",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "provenance": {
+    "cell": "dab_055-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_055-pi-C/task",
+    "user_text_chars": 486,
+    "data_files": [
+      "data/estimated_numbers.csv"
+    ],
+    "generated_at": "2026-11-07T12:41:19+08:00"
+  }
+}

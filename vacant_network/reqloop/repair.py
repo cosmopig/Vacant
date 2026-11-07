@@ -84,7 +84,11 @@ import tempfile
 from typing import Any, Callable
 
 from vacant_network.intake.verifiers import ClaimResult
-from vacant_network.reqloop.checks import run_requirement_checks
+from vacant_network.reqloop.checks import (
+    _ANSWER_KV_RE,
+    audit_kv_preservation,
+    run_requirement_checks,
+)
 from vacant_network.reqloop.requirements import RequirementSet
 
 FEEDBACK_MODES = ("generic", "localized")
@@ -1572,6 +1576,97 @@ def _load_manifest(authoritative: pathlib.Path) -> dict[str, str]:
     return dict(man["files"])
 
 
+def _restore_kv_keys_from_draft(
+    orig_file: pathlib.Path,
+    ws_file: pathlib.Path,
+    keys: list[str] | tuple[str, ...],
+) -> bool:
+    """從原草稿 orig_file 將被上一輪改壞／刪除的應保留鍵（keys）還原進 ws_file，
+    同時保留上一輪對其他未滿足鍵的修復進度。若 ws_file 缺失／損毀無法解析或還原後
+    audit_kv_preservation 仍有鍵不合，則退回複製整個 orig_file。
+    """
+    if not orig_file.is_file() or not keys:
+        return False
+    _, m_keys = audit_kv_preservation(orig_file, ws_file, keys)
+    if not m_keys:
+        return False
+    ws_file.parent.mkdir(parents=True, exist_ok=True)
+    if not ws_file.is_file():
+        _copy_into_workspace(orig_file, ws_file)
+        return True
+    try:
+        orig_text = orig_file.read_text(encoding="utf-8")
+        ws_text = ws_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        _copy_into_workspace(orig_file, ws_file)
+        return True
+
+    target_lows = {k.strip().lower() for k in m_keys if k.strip()}
+    if orig_file.suffix.lower() == ".json":
+        try:
+            orig_data = json.loads(orig_text)
+            ws_data = json.loads(ws_text)
+        except (json.JSONDecodeError, ValueError):
+            _copy_into_workspace(orig_file, ws_file)
+            return True
+        if not isinstance(orig_data, dict) or not isinstance(ws_data, dict):
+            _copy_into_workspace(orig_file, ws_file)
+            return True
+        orig_by_low = {str(k).strip().lower(): (k, v) for k, v in orig_data.items()}
+        new_data: dict[str, Any] = {}
+        seen_lows: set[str] = set()
+        for k, v in ws_data.items():
+            kl = str(k).strip().lower()
+            if kl in target_lows:
+                if kl not in seen_lows and kl in orig_by_low:
+                    ok, ov = orig_by_low[kl]
+                    new_data[ok] = ov
+                    seen_lows.add(kl)
+            else:
+                new_data[k] = v
+        for k in m_keys:
+            kl = k.strip().lower()
+            if kl not in seen_lows and kl in orig_by_low:
+                ok, ov = orig_by_low[kl]
+                new_data[ok] = ov
+                seen_lows.add(kl)
+        ws_file.write_text(
+            json.dumps(new_data, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    else:
+        orig_lines_by_low: dict[str, str] = {}
+        for m in _ANSWER_KV_RE.finditer(orig_text):
+            kl = m.group(1).strip().lower()
+            if kl not in orig_lines_by_low:
+                orig_lines_by_low[kl] = f"@{m.group(1).strip()}[{m.group(2).strip()}]"
+        seen_lows = set()
+        out_lines: list[str] = []
+        for line in ws_text.splitlines():
+            m = _ANSWER_KV_RE.match(line)
+            if m:
+                kl = m.group(1).strip().lower()
+                if kl in target_lows:
+                    if kl not in seen_lows and kl in orig_lines_by_low:
+                        out_lines.append(orig_lines_by_low[kl])
+                        seen_lows.add(kl)
+                    continue
+            out_lines.append(line)
+        for k in m_keys:
+            kl = k.strip().lower()
+            if kl not in seen_lows and kl in orig_lines_by_low:
+                out_lines.append(orig_lines_by_low[kl])
+                seen_lows.add(kl)
+        ws_file.write_text(
+            ("\n".join(out_lines) + "\n") if out_lines else orig_text,
+            encoding="utf-8",
+        )
+
+    if audit_kv_preservation(orig_file, ws_file, keys)[1]:
+        _copy_into_workspace(orig_file, ws_file)
+    return True
+
+
 def run_repair_round(
     n: int,
     task_dir: pathlib.Path,
@@ -1590,6 +1685,7 @@ def run_repair_round(
     authoritative: pathlib.Path | None = None,
     prev_round_agent: dict[str, Any] | None = None,
     preserved_from_draft: tuple[pathlib.Path, tuple[str, ...]] | None = None,
+    kv_preserved_from_draft: tuple[pathlib.Path, dict[str, list[str]]] | None = None,
 ) -> RepairRound:
     """一輪修復：新工作區 → 原生 pi → 重驗 → 差異。來源目錄不被改動。
 
@@ -1637,6 +1733,28 @@ def run_repair_round(
         if restored_any:
             before = run_requirement_checks(authoritative, req_set, ws)
             prompt_draft_dir = ws
+    if n >= 2 and kv_preserved_from_draft is not None:
+        orig_d_dir, kv_map = kv_preserved_from_draft
+        kv_restored_files: list[str] = []
+        for fname, keys in kv_map.items():
+            if _restore_kv_keys_from_draft(orig_d_dir / fname, ws / fname, keys):
+                kv_restored_files.append(fname)
+        if kv_restored_files:
+            before = run_requirement_checks(authoritative, req_set, ws)
+            prompt_draft_dir = ws
+            if _required_all_pass(req_set, before):
+                # 若上一輪已修好所有失敗鍵、僅因改壞應保留鍵（如 19711.00→19711.0 或
+                # pre_mean→999）而被擋在缺口關閉門外：若只還原應保留鍵，本輪開局工作區將
+                # 直接呈現「100% PASS、零 FAIL」，導致本輪提示無任何缺口可修、且空轉
+                # （no-op）agent 會免費拿到 gap_closed。此時退回原草稿完整檔案重修，
+                # 讓本輪提示保有原始失敗反例與原草稿乾淨保留鍵。
+                for fname in kv_restored_files:
+                    src_f = orig_d_dir / fname
+                    if src_f.is_file():
+                        dst_f = ws / fname
+                        dst_f.parent.mkdir(parents=True, exist_ok=True)
+                        _copy_into_workspace(src_f, dst_f)
+                before = run_requirement_checks(authoritative, req_set, ws)
     if feedback_mode == "localized" and preserved_from_draft is not None:
         # P20261106_1237-2：已滿足交付物寫保護（OS 層守門）。
         # localized 臂「只修未滿足交付物、其餘交付物保留」從事後 hash 對賬＋
@@ -1772,6 +1890,15 @@ class RepairOutcome:
     #: 不再只依賴條目級 regressed 間接推估。
     satisfied_preserved: tuple[str, ...]
     satisfied_mutated: tuple[str, ...]
+    #: KV 交付物鍵級保留審計（r1151；審計端計算、不靠模型自評；
+    #: real_slice manifest independent_acceptance(2)）：初始驗即已滿足（params.key 且
+    #: 初始驗 PASS）的 key 中，最終工作區值位元組相同（.txt raw 字串／.json 值＋型別）
+    #: ＝ preserved；值被改／key 缺失／重複／檔案缺失＝ mutated（audit_kv_preservation
+    #: 保守分類）。部分修復情境（初始驗存在未滿足必需項）下併入 satisfied_*（
+    #: _exit_code 20 拒收，P20261107_0041-1）；good 草稿不併入（argon 20261106_1121：
+    #: 全 PASS 重存不得被保留檢查誤拒）。兩欄皆空＝審計未執行（零輪 no_gap）。
+    kv_preserved: tuple[str, ...]
+    kv_mutated: tuple[str, ...]
 
     def to_dict(self) -> dict[str, Any]:
         d = dataclasses.asdict(self)
@@ -1890,6 +2017,30 @@ def repair_slice(
     before = run_requirement_checks(auth, req_set, d_dir)
     tracked_preserved = _preserved_deliverables(req_set, before, d_dir)
     req_fail = [c.claim_id for c in before if c.required and c.status == "FAIL"]
+
+    # 鍵值交付物（answer.txt @key[val]／頂層 JSON）的「保留其餘成果」只能逐鍵核對：
+    # 初始驗即已滿足（PASS）且帶 params.key 的條目，其 key 為應保留鍵。
+    # 工單 P20261107_0041-1：部分修復情境（存在初始未滿足必需項）下，鍵級保留
+    # 併入 satisfied_*（_exit_code 20 把關）；good 草稿（無初始缺口）維持
+    # satisfied_* == () 規範（argon 20261106_1121：全 PASS 重存不得被保留檢查誤拒）。
+    before_st = {c.claim_id: c.status for c in before}
+    # argon 20261107_0035 回歸（897c5552）：只收 `verifier == "kv_recomputed"` 的鍵值條目——
+    # 結構格式條目（如 req_answer_kv）不是 @key[value] 鍵，不得被誤判進 kv_mutated；去重。
+    kv_satisfied: dict[str, list[str]] = {}
+    for it in req_set.items:
+        if it.verifier != "kv_recomputed" or before_st.get(it.id) != "PASS":
+            continue
+        p = it.params if isinstance(it.params, dict) else {}
+        k = p.get("key")
+        if isinstance(k, str) and k.strip():
+            lst = kv_satisfied.setdefault(str(it.deliverable), [])
+            if k.strip() not in lst:
+                lst.append(k.strip())
+    kv_enforced_keys: dict[str, list[str]] = {
+        fname: keys for fname, keys in kv_satisfied.items()
+        if fname not in tracked_preserved
+    }
+    kv_enforced = bool(req_fail) and bool(kv_enforced_keys)
     rounds: list[RepairRound] = []
     stalled = 0
     stopped = STOP_MAX_ROUNDS
@@ -1915,6 +2066,7 @@ def repair_slice(
                 authoritative=auth,
                 prev_round_agent=prev_round_agent,
                 preserved_from_draft=(d_dir, tracked_preserved) if tracked_preserved else None,
+                kv_preserved_from_draft=(d_dir, kv_enforced_keys) if kv_enforced else None,
             )
             rounds.append(r)
             prev_round_agent = r.agent   # 第 N+1 輪提示可點名第 N 輪的工具死迴圈觀察
@@ -1923,6 +2075,15 @@ def repair_slice(
             _, round_mutated = _check_preserved_deliverables(
                 d_dir, pathlib.Path(r.workspace), tracked_preserved
             )
+            # 鍵級（P20261107_0041-1）：本輪改寫初始已滿足 key 等同改寫已滿足交付物——
+            # 缺口不得提前關閉、也不算進度（與檔案級 round_mutated 同等把關）
+            if kv_enforced:
+                _kv_round_mut = [key for fname, keys in kv_enforced_keys.items()
+                                for key in audit_kv_preservation(
+                                    d_dir / fname,
+                                    pathlib.Path(r.workspace) / fname, keys)[1]]
+                if _kv_round_mut:
+                    round_mutated = round_mutated + tuple(_kv_round_mut)
             # 缺口關閉：全部必需項 PASS、全程無來源改動（P000-20261105-02）、且本輪未改寫
             # 應保留之初始已滿足交付物（P20261106_1035-2：竄改已滿足交付物不得關閉缺口）
             if not tamper_seen and not round_mutated and _required_all_pass(req_set, r.after):
@@ -1991,6 +2152,26 @@ def repair_slice(
         d_dir, final_ws, tracked_preserved
     )
 
+    # KV 交付物鍵級保留審計（審計端計算、audit_kv_preservation 保守分類）：
+    # 初始驗即已滿足的 key 中，最終工作區值位元組相同＝preserved；值被改／key 缺失／
+    # 重複／檔案缺失＝mutated。零輪（no_gap、未重生產）⇒ 審計不執行、兩欄皆空（不虛灌）。
+    # 工單 P20261107_0041-1：部分修復情境（kv_enforced）下併入 satisfied_*，被改寫鍵
+    # 與檔案級 satisfied_mutated 同等把關（_exit_code 20 拒收）；good 草稿不併入。
+    kv_preserved: list[str] = []
+    kv_mutated: list[str] = []
+    if rounds:
+        for fname, keys in kv_satisfied.items():
+            p_keys, m_keys = audit_kv_preservation(
+                d_dir / fname, final_ws / fname, keys)
+            kv_preserved.extend(p_keys)
+            kv_mutated.extend(m_keys)
+        if kv_enforced:
+            for fname, keys in kv_enforced_keys.items():
+                p_keys, m_keys = audit_kv_preservation(
+                    d_dir / fname, final_ws / fname, keys)
+                satisfied_preserved = satisfied_preserved + p_keys
+                satisfied_mutated = satisfied_mutated + m_keys
+
     calls = len(rounds)   # 修復 session 數（agent 啟動次數）——不是模型 API 請求數
     wall = [r.agent.get("wall_ms") for r in rounds]
     wall_total = sum(w for w in wall if isinstance(w, (int, float)))
@@ -2044,6 +2225,8 @@ def repair_slice(
         source_tampered_files=source_tampered_files,
         satisfied_preserved=tuple(satisfied_preserved),
         satisfied_mutated=tuple(satisfied_mutated),
+        kv_preserved=tuple(kv_preserved),
+        kv_mutated=tuple(kv_mutated),
     )
 
 
@@ -2565,6 +2748,12 @@ def main(argv: list[str] | None = None, *,
                   f"  ← 原已滿足交付物被改寫，未遵守保留約束（拒收）")
         if outcome.satisfied_preserved:
             print(f"satisfied_preserved: {', '.join(outcome.satisfied_preserved)}")
+        if outcome.kv_mutated:
+            print(f"KV_MUTATED: {', '.join(outcome.kv_mutated)}"
+                  f"  ← 原已滿足 key 值被改（鍵級審計；部分修復情境下已併入 satisfied_mutated 拒收）")
+        if outcome.kv_preserved:
+            print(f"kv_preserved: {', '.join(outcome.kv_preserved)}"
+                  f"  （鍵級保留審計：原已滿足 key 值位元組相同）")
         if outcome.unresolved:
             print(f"unresolved: {', '.join(outcome.unresolved)}")
         c = outcome.cost

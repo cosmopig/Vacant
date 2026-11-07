@@ -20,7 +20,7 @@ import math
 import pathlib
 import re
 from collections import Counter
-from typing import Any
+from typing import Any, Sequence
 
 from vacant_network.intake.verifiers import ClaimResult
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
@@ -76,34 +76,65 @@ def read_csv_rows(path: pathlib.Path) -> list[dict[str, str]]:
         return rows
 
 
+def _strict_table_pairs_hook(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """表格 JSON 物件解析 hook：鍵小寫標準化，且拒絕同名或大小寫重複鍵。"""
+    out: dict[str, Any] = {}
+    for k, v in pairs:
+        norm_k = str(k).strip().lower()
+        if norm_k in out:
+            raise ValueError(f"duplicate or case-colliding JSON key: {k!r}")
+        out[norm_k] = v
+    return out
+
+
 def read_table_deliverable(path: pathlib.Path) -> list[dict[str, Any]]:
     """讀取表格交付物：.json 接受物件陣列或含 records/rows/data 物件陣列之物件；其餘副檔名走 read_csv_rows。
 
     鍵小寫標準化（與 CSV 同口徑）；值保留 JSON 原生型別（下游統一經 str() 轉換比對）。
-    JSON 解析失敗回傳空列表（交付物判為空/不符，絕不冒稱 PASS）。
+    JSON 解析失敗、含重複鍵、空物件、或陣列混入非物件元素時皆回傳空列表（絕不冒稱 PASS）。
     """
     if path.suffix.lower() != ".json":
         return read_csv_rows(path)
     if not path.is_file():
         return []
     try:
-        data: Any = json.loads(path.read_text(encoding="utf-8-sig"))
+        data: Any = json.loads(
+            path.read_text(encoding="utf-8-sig"),
+            object_pairs_hook=_strict_table_pairs_hook,
+        )
     except ValueError:
         return []
     if isinstance(data, dict):
+        if not data:
+            return []
         for key in ("records", "rows", "data"):
-            if isinstance(data.get(key), list):
+            if key in data:
+                if not isinstance(data[key], list):
+                    return []
                 data = data[key]
                 break
         else:
             data = [data]
-    if not isinstance(data, list):
+    if not isinstance(data, list) or not data:
         return []
     rows: list[dict[str, Any]] = []
     for r in data:
-        if isinstance(r, dict):
-            rows.append({str(k).strip().lower(): v for k, v in r.items()})
+        if not isinstance(r, dict) or not r:
+            return []
+        rows.append(r)
     return rows
+
+
+def resolve_deliverable_path(deliverable_dir: pathlib.Path, deliverable: str) -> pathlib.Path:
+    """安全解析交付物路徑：剝除 /app/、./ 或前導斜線，確保路徑錨定於 deliverable_dir（防 docker 容器路徑穿透）。"""
+    d = str(deliverable).strip()
+    if d.startswith("/app/"):
+        d = d[len("/app/"):]
+    elif d.startswith("./"):
+        d = d[2:]
+    elif d.startswith("/"):
+        d = d.lstrip("/")
+    return deliverable_dir / d
 
 
 def check_csv_structure(
@@ -111,7 +142,7 @@ def check_csv_structure(
     item: RequirementItem,
 ) -> ClaimResult:
     """檢查交付物表格（CSV 或 JSON 陣列）是否存在且包含指定欄位。"""
-    csv_file = deliverable_dir / item.deliverable
+    csv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not csv_file.is_file():
         return ClaimResult(
             claim_id=item.id,
@@ -137,9 +168,9 @@ def check_csv_structure(
             authority=item.authority,
         )
 
-    required_cols = [c.lower() for c in item.params.get("required_columns", [])]
-    existing_cols = list(rows[0].keys())
-    missing_cols = [c for c in required_cols if c not in existing_cols]
+    required_cols = [str(c).strip().lower() for c in item.params.get("required_columns", [])]
+    existing_cols = [k for k in rows[0].keys() if all(k in r for r in rows)]
+    missing_cols = [c for c in required_cols if not all(c in r for r in rows)]
 
     if missing_cols:
         return ClaimResult(
@@ -180,7 +211,7 @@ def recompute_orders_monthly(
     rows = read_csv_rows(input_file)
 
     exclude_status = set(s.upper() for s in params.get("exclude_status", ["CANCELLED"]))
-    dedup_by = params.get("dedup_by", "order_id").lower()
+    dedup_by = _dedup_by_field(params) or "order_id"
     date_col = params.get("date_col", "order_date").lower()
     amount_col = params.get("amount_col", "net_amount").lower()
     product_col = params.get("product_col", "product_name").lower()
@@ -245,7 +276,7 @@ def check_monthly_sales_metrics(
     item: RequirementItem,
 ) -> ClaimResult:
     """檢查交付物 CSV 中的各月訂單數與淨銷售額是否與原始資料重算一致。"""
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     deliv_rows = read_csv_rows(deliv_file)
     if not deliv_rows:
         return ClaimResult(
@@ -259,7 +290,23 @@ def check_monthly_sales_metrics(
             authority=item.authority,
         )
 
+    input_csv = str(item.params.get("input_csv", "orders.csv")).strip()
+    if not input_csv or not (task_dir / input_csv).is_file():
+        return _result(
+            item,
+            "UNKNOWN",
+            f"原始輸入不存在: {input_csv or 'orders.csv'}；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": f"missing_input_csv:{input_csv or 'orders.csv'}"},
+        )
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
+    expected_months = item.params.get("expected_months", sorted(expected_metrics.keys()))
+    if not expected_metrics or not isinstance(expected_months, list) or not expected_months:
+        return _result(
+            item,
+            "UNKNOWN",
+            "原始資料重算無有效月份指標；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": "empty_expected_months"},
+        )
     atol = float(item.params.get("atol", 0.01))
     include_expected = bool(item.params.get("expected_in_evidence", True))
 
@@ -270,7 +317,6 @@ def check_monthly_sales_metrics(
         if m:
             deliv_by_month[m.strip()] = r
 
-    expected_months = item.params.get("expected_months", sorted(expected_metrics.keys()))
     mismatches = []
     counterexamples = []
 
@@ -381,7 +427,7 @@ def check_monthly_top_products(
     item: RequirementItem,
 ) -> ClaimResult:
     """檢查各月份前 N 名商品排行是否嚴格依淨銷售額重算一致。"""
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     deliv_rows = read_csv_rows(deliv_file)
     if not deliv_rows:
         return ClaimResult(
@@ -395,7 +441,23 @@ def check_monthly_top_products(
             authority=item.authority,
         )
 
+    input_csv = str(item.params.get("input_csv", "orders.csv")).strip()
+    if not input_csv or not (task_dir / input_csv).is_file():
+        return _result(
+            item,
+            "UNKNOWN",
+            f"原始輸入不存在: {input_csv or 'orders.csv'}；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": f"missing_input_csv:{input_csv or 'orders.csv'}"},
+        )
     _, expected_top, _ = recompute_orders_monthly(task_dir, item.params)
+    expected_months = item.params.get("expected_months", sorted(expected_top.keys()))
+    if not expected_top or not isinstance(expected_months, list) or not expected_months:
+        return _result(
+            item,
+            "UNKNOWN",
+            "原始資料重算無有效月份排行；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": "empty_expected_months"},
+        )
     top_n = int(item.params.get("top_n", 3))
     include_expected = bool(item.params.get("expected_in_evidence", True))
 
@@ -405,7 +467,6 @@ def check_monthly_top_products(
         if m:
             deliv_by_month[m.strip()] = r
 
-    expected_months = item.params.get("expected_months", sorted(expected_top.keys()))
     mismatches = []
     counterexamples = []
 
@@ -545,7 +606,7 @@ def check_summary_metrics_consistency(
     矛盾（任一與重算不符）＝FAIL；全文找不到可對應的合計陳述＝UNKNOWN
     （看不到可可靠對應的欄位，不准自評，也不准因其他地方出現正確數字而 PASS）。
     """
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return ClaimResult(
             claim_id=item.id,
@@ -558,8 +619,23 @@ def check_summary_metrics_consistency(
             authority=item.authority,
         )
 
+    input_csv = str(item.params.get("input_csv", "orders.csv")).strip()
+    if not input_csv or not (task_dir / input_csv).is_file():
+        return _result(
+            item,
+            "UNKNOWN",
+            f"原始輸入不存在: {input_csv or 'orders.csv'}；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": f"missing_input_csv:{input_csv or 'orders.csv'}"},
+        )
     content = deliv_file.read_text(encoding="utf-8")
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
+    if not expected_metrics:
+        return _result(
+            item,
+            "UNKNOWN",
+            "原始資料重算無有效月份指標；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": "empty_expected_metrics"},
+        )
     total_expected_sales = sum(m["net_sales"] for m in expected_metrics.values())
 
     atol = float(item.params.get("atol", 0.05))
@@ -815,7 +891,11 @@ def load_table(task_dir: pathlib.Path, params: dict[str, Any]) -> list[dict[str,
 
 def apply_flatten(rows: list[dict[str, Any]], specs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """把 JSON 巢狀欄位（path=a.b.c）攤平到 row[as]；缺失依 impute 填補。"""
+    if not isinstance(specs, list):
+        raise UnknownSource("flatten 須為列表")
     for spec in specs:
+        if not isinstance(spec, dict):
+            raise UnknownSource("flatten 元素須為物件")
         path = [p for p in str(spec.get("path", "")).split(".") if p]
         if not path:
             raise UnknownSource("flatten.path 缺失")
@@ -830,7 +910,11 @@ def apply_flatten(rows: list[dict[str, Any]], specs: list[dict[str, Any]]) -> li
 
 
 def _cond_holds(row: dict[str, Any], cond: dict[str, Any]) -> bool:
+    if not isinstance(cond, dict):
+        raise UnknownSource("篩選條件須為物件")
     col = str(cond.get("col", "")).strip().lower()
+    if not col:
+        raise UnknownSource("篩選條件缺少 col")
     op = str(cond.get("op", "eq")).strip().lower()
     value = cond.get("value")
     left_raw = row.get(col, "")
@@ -859,13 +943,36 @@ def _cond_holds(row: dict[str, Any], cond: dict[str, Any]) -> bool:
     raise UnknownSource(f"未知比較算子: {op}")
 
 
+def _dedup_by_field(params: dict[str, Any]) -> str:
+    """dedup_by 正規化：單一欄位名字串；模型常誤寫成一元素列表——容錯取首項。
+
+    空列表／多元素／非字串 → UnknownSource（fail-closed，不准猜）。
+    vq-el4.3 第 3 輪：glm53 把 dedup_by 寫成 ["order_id"]，原式 `.lower()` 直接
+    AttributeError crash（檢查器崩潰不是 FAIL，也不准靜默跳過）。
+    """
+    d = params.get("dedup_by")
+    if d is None:
+        return ""
+    if isinstance(d, (list, tuple)):
+        if len(d) == 1 and isinstance(d[0], str):
+            d = d[0]
+        else:
+            raise UnknownSource(f"dedup_by 須為單一欄位名字串：{d!r}")
+    if not isinstance(d, str):
+        raise UnknownSource(f"dedup_by 須為欄位名字串：{d!r}")
+    return d.strip().lower()
+
+
 def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
     """exclude → dedup_by（保留第一筆）→ include。"""
-    for cond in params.get("exclude", []) or []:
+    exclude_specs = params.get("exclude", []) or []
+    if not isinstance(exclude_specs, list):
+        raise UnknownSource("exclude 須為條件列表")
+    for cond in exclude_specs:
         rows = [r for r in rows if not _cond_holds(r, cond)]
-    dedup_by = params.get("dedup_by")
+    dedup_by = _dedup_by_field(params)
     if dedup_by:
-        key = str(dedup_by).strip().lower()
+        key = dedup_by
         seen: set[str] = set()
         out: list[dict[str, Any]] = []
         for r in rows:
@@ -876,14 +983,22 @@ def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[d
                 seen.add(k)
             out.append(r)
         rows = out
-    for cond in params.get("include", []) or []:
+    include_specs = params.get("include", []) or []
+    if not isinstance(include_specs, list):
+        raise UnknownSource("include 須為條件列表")
+    for cond in include_specs:
         rows = [r for r in rows if _cond_holds(r, cond)]
     return rows
 
 
 def apply_compute(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
     """逐列計算派生欄位（compute: name + 安全運算式）。"""
-    for spec in params.get("compute", []) or []:
+    compute_specs = params.get("compute", []) or []
+    if not isinstance(compute_specs, list):
+        raise UnknownSource("compute 須為列表")
+    for spec in compute_specs:
+        if not isinstance(spec, dict):
+            raise UnknownSource("compute 元素須為物件")
         name = str(spec.get("name", "")).strip()
         if not name:
             raise UnknownSource("compute.name 缺失")
@@ -962,6 +1077,19 @@ def _result(item: RequirementItem, status: str, detail: str, evidence: dict[str,
     )
 
 
+def _same_scalar_or_num(exp_str: str, act_str: str, atol: float) -> bool:
+    """字串相等，或雙邊皆為非前導零代碼之有效有限數值且差距不超過 atol。"""
+    if exp_str == act_str:
+        return True
+    for s in (exp_str, act_str):
+        if len(s) > 1 and s[0] == "0" and s[1].isdigit():
+            return False
+    try:
+        return abs(_to_num(act_str) - _to_num(exp_str)) <= atol
+    except UnsafeExpressionError:
+        return False
+
+
 def check_rowset_filter(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -971,16 +1099,27 @@ def check_rowset_filter(
     params = dict(item.params)
     try:
         rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
-        identity = [str(c).strip().lower() for c in params.get("identity", []) or []]
+        raw_identity = params.get("identity", []) or []
+        if not isinstance(raw_identity, list):
+            raise UnknownSource("rowset_filter.params.identity 須為列表")
+        identity = [str(c).strip().lower() for c in raw_identity if isinstance(c, str) and c.strip()]
         if not identity:
             raise UnknownSource("rowset_filter.params.identity 缺失")
-        values_spec: dict[str, Any] = params.get("values", {}) or {}
+        raw_values = params.get("values")
+        if raw_values is not None and not isinstance(raw_values, dict):
+            raise UnknownSource("rowset_filter.params.values 須為物件")
+        values_spec: dict[str, Any] = raw_values or {}
+        if not values_spec and not (params.get("exclude") or params.get("include") or params.get("dedup_by")):
+            raise UnknownSource("rowset_filter.params 缺少 values 與篩選條件；無法構成有效重算")
         expected: list[dict[str, Any]] = []
         for r in rows:
             er = {c: r.get(c, "") for c in identity}
             for out_col, spec in values_spec.items():
                 if isinstance(spec, str):
-                    er[out_col] = r.get(spec, "")
+                    col_key = spec.strip().lower()
+                    if col_key not in r:
+                        raise UnknownSource(f"values[{out_col}] 來源欄位不存在: {spec!r}")
+                    er[out_col] = r.get(col_key, "")
                 elif isinstance(spec, dict) and "expr" in spec:
                     v = safe_eval_expr(str(spec["expr"]), r)
                     if "round" in spec:
@@ -992,7 +1131,7 @@ def check_rowset_filter(
     except (UnknownSource, UnsafeExpressionError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
     deliv_rows = read_table_deliverable(deliv_file)
@@ -1044,10 +1183,28 @@ def check_rowset_filter(
         dr = deliv_rows[idx]
         for out_col, spec in values_spec.items():
             exp_v = er[out_col]
-            act_raw = dr.get(out_col)
+            out_key = str(out_col).strip().lower()
+            if out_key not in dr:
+                mismatches.append(f"列 {list(key)} 缺欄 {out_col}")
+                if include_expected:
+                    counterexamples.append({
+                        "row": list(key),
+                        "field": out_col,
+                        "expected": exp_v if isinstance(exp_v, str) else _fmt_val(exp_v),
+                        "actual": None,
+                    })
+                else:
+                    counterexamples.append({
+                        "row": list(key),
+                        "field": out_col,
+                        "actual": None,
+                        "problem": "missing_column",
+                    })
+                continue
+            act_raw = dr.get(out_key)
             act_raw = "" if act_raw is None else str(act_raw).strip()
             if isinstance(exp_v, str):
-                if exp_v.strip() != act_raw:
+                if not _same_scalar_or_num(exp_v.strip(), act_raw, atol):
                     if include_expected:
                         mismatches.append(f"列 {list(key)} 欄 {out_col} 不符: 預期 {exp_v!r}，交付物為 {act_raw!r}")
                         counterexamples.append({"row": list(key), "field": out_col, "expected": exp_v, "actual": act_raw})
@@ -1093,13 +1250,18 @@ def check_group_aggregate(
     params = dict(item.params)
     try:
         rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
-        group_by = [str(g).strip().lower() for g in params.get("group_by", []) or []]
+        raw_group_by = params.get("group_by", []) or []
+        if not isinstance(raw_group_by, list):
+            raise UnknownSource("group_aggregate.params.group_by 須為列表")
+        group_by = [str(g).strip().lower() for g in raw_group_by if isinstance(g, str) and g.strip()]
         if not group_by:
             raise UnknownSource("group_aggregate.params.group_by 缺失")
         agg_specs = params.get("aggregates", []) or []
-        if not agg_specs:
-            raise UnknownSource("group_aggregate.params.aggregates 缺失")
+        if not isinstance(agg_specs, list) or not agg_specs or not all(isinstance(s, dict) for s in agg_specs):
+            raise UnknownSource("group_aggregate.params.aggregates 缺失或非物件列表")
         norm = params.get("group_normalize", {}) or {}
+        if not isinstance(norm, dict):
+            raise UnknownSource("group_aggregate.params.group_normalize 須為物件")
 
         groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
         for r in rows:
@@ -1110,6 +1272,8 @@ def check_group_aggregate(
         for key, grows in groups.items():
             vals: dict[str, Any] = {}
             for spec in agg_specs:
+                if not isinstance(spec, dict):
+                    raise UnknownSource(f"group_aggregate.params.aggregates 條目非物件: {spec!r}")
                 t = str(spec.get("type", "")).strip().lower()
                 name = str(spec.get("name", "")).strip()
                 if not name:
@@ -1137,15 +1301,19 @@ def check_group_aggregate(
                 else:
                     raise UnknownSource(f"未知聚合類型: {t}")
                 vals[name] = v
+            vals_lower = {k.lower(): v for k, v in vals.items()}
             for spec in agg_specs:  # ratio 第二趟（依已算出的聚合名）
                 if str(spec.get("type", "")).strip().lower() != "ratio":
                     continue
                 name = str(spec.get("name", "")).strip()
-                num = vals.get(str(spec.get("num", "")))
-                den = vals.get(str(spec.get("den", "")))
+                num_k = str(spec.get("num", "")).strip()
+                den_k = str(spec.get("den", "")).strip()
+                num = vals.get(num_k, vals_lower.get(num_k.lower()))
+                den = vals.get(den_k, vals_lower.get(den_k.lower()))
                 if num is None or den is None or float(den) == 0:
                     raise UnknownSource(f"ratio {name}: 分母為 0 或缺失")
                 vals[name] = float(num) / float(den)
+                vals_lower[name.lower()] = vals[name]
             for spec in agg_specs:
                 name = str(spec.get("name", "")).strip()
                 if "round" in spec and vals.get(name) is not None:
@@ -1154,13 +1322,13 @@ def check_group_aggregate(
     except (UnknownSource, UnsafeExpressionError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
     deliv_rows = read_table_deliverable(deliv_file)
     if not deliv_rows:
         return _result(item, "FAIL", f"交付物為空: {item.deliverable}", {"empty_csv": item.deliverable})
-    missing_cols = [g for g in group_by if g not in deliv_rows[0]]
+    missing_cols = [g for g in group_by if not all(g in dr for dr in deliv_rows)]
     if missing_cols:
         return _result(item, "FAIL", f"交付物缺少分組欄位: {missing_cols}", {"missing_columns": missing_cols})
 
@@ -1203,14 +1371,15 @@ def check_group_aggregate(
     for key, vals in expected.items():
         dr = deliv_groups[key][0]
         for name, exp_v in vals.items():
-            if name not in dr:
+            name_key = name.lower()
+            if name_key not in dr:
                 mismatches.append(f"組 {list(key)} 缺欄 {name}")
                 if include_expected:
                     counterexamples.append({"group": list(key), "field": name, "expected": _fmt_val(exp_v), "actual": None})
                 else:
                     counterexamples.append({"group": list(key), "field": name, "actual": None, "problem": "missing_column"})
                 continue
-            act_raw = "" if dr[name] is None else str(dr[name]).strip()
+            act_raw = "" if dr[name_key] is None else str(dr[name_key]).strip()
             if exp_v is None:
                 if act_raw != "":
                     mismatches.append(f"組 {list(key)} 欄 {name} 預期空白，交付物為 {act_raw!r}")
@@ -1298,7 +1467,21 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
         return _result(item, "UNKNOWN",
                        "answer_kv.params.keys 缺失；無法可靠檢查答案檔格式",
                        {"reason": "no keys spec"})
-    deliv_file = deliverable_dir / item.deliverable
+    for spec in specs:
+        if not isinstance(spec, dict):
+            return _result(item, "UNKNOWN",
+                           "answer_kv.params.keys 元素須為物件；無法可靠檢查答案檔格式",
+                           {"reason": "key_spec_not_dict"})
+        key = str(spec.get("key", "")).strip().lower()
+        if not key:
+            return _result(item, "UNKNOWN",
+                           "answer_kv.params.keys[].key 缺失；無法可靠檢查答案檔格式",
+                           {"reason": "missing_key_name"})
+        cons = str(spec.get("type", "number")).strip().lower()
+        if cons not in ("number", "integer", "nonneg_int", "number_in_01"):
+            return _result(item, "UNKNOWN",
+                           f"未知約束型別：{cons}（不猜）", {"bad_constraint": cons})
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"答案檔不存在：{item.deliverable}",
                        {"missing_file": item.deliverable})
@@ -1348,7 +1531,7 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
 def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
                      key: str) -> tuple[str | None, list[str]]:
     """讀交付檔中 @key[value]；回傳 (value|None, 問題清單)——與 answer_kv 同一解析規則。"""
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return None, [f"missing_file:{item.deliverable}"]
     content = deliv_file.read_text(encoding="utf-8")
@@ -1368,6 +1551,91 @@ def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
     if len(vals) > 1:
         return None, ["ambiguous"]
     return vals[0], []
+
+
+def _strict_json_equal(a: Any, b: Any) -> bool:
+    """JSON 鍵值保留審計用嚴格相等：型別必須完全一致（排除 Python `True == 1`、`2 == 2.0`），
+    且巢狀物件（`_JsonPairs`）不得含重複鍵。"""
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, _JsonPairs):
+        if len(a) != len(b):
+            return False
+        da = dict(a)
+        db = dict(b)
+        if len(da) != len(a) or len(db) != len(b) or da.keys() != db.keys():
+            return False
+        return all(_strict_json_equal(da[k], db[k]) for k in da)
+    # 工單 P20261107_0243-1：原生 Python dict 遞迴嚴格比對——避免降級至裸 `==`
+    # 使巢狀 `bool vs int`（True==1）、`int vs float`（2==2.0）被誤判相等。
+    if isinstance(a, dict):
+        if a.keys() != b.keys():
+            return False
+        return all(_strict_json_equal(a[k], b[k]) for k in a)
+    if isinstance(a, list):
+        return len(a) == len(b) and all(_strict_json_equal(x, y) for x, y in zip(a, b))
+    return bool(a == b)
+
+
+def _kv_preservation_values(path: pathlib.Path) -> tuple[dict[str, list[Any]] | None, str | None]:
+    """鍵級保留審計讀鍵→值清單：.txt → 各 @key[value] 行之 raw 字串（與 check_answer_kv 同一正則）；
+    .json → 頂層 dict 值（透過 _JsonPairs 保留同名或大小寫重複鍵並保留原始型別供嚴格型別一致比較）。
+    回 (found, problem|None)。"""
+    if not path.is_file():
+        return None, "missing_file"
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None, "unreadable"
+    if path.suffix.lower() == ".json":
+        try:
+            data = json.loads(content, object_pairs_hook=_JsonPairs)
+        except (json.JSONDecodeError, ValueError):
+            return None, "invalid_json"
+        if not isinstance(data, _JsonPairs):
+            return None, "not_a_dict"
+        found: dict[str, list[Any]] = {}
+        for k, v in data:
+            found.setdefault(str(k).strip().lower(), []).append(v)
+        return found, None
+    found = {}
+    for m in _ANSWER_KV_RE.finditer(content):
+        found.setdefault(m.group(1).strip().lower(), []).append(m.group(2).strip())
+    return found, None
+
+
+def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Path | str,
+                          satisfied_keys: Sequence[str]) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """鍵值交付物（@key[value] 文字檔或頂層 JSON 字典）的行級／鍵級保留審計。
+
+    audit 側計算、免模型自評、免正則猜測：對每個 satisfied key 比對原草稿與修復後產物，
+    兩側均恰好出現一次且值相等（.json 另需遞迴嚴格型別一致且無重複鍵）→ preserved；值被覆寫、鍵被刪除
+    或重複、交付物檔案缺失/不可解析、或草稿中無此鍵（不可判定，保守歸類）→ mutated。
+    回 (preserved, mutated)，鍵順序跟隨輸入 satisfied_keys。
+    """
+    d_vals, _ = _kv_preservation_values(pathlib.Path(draft_path))
+    f_vals, _ = _kv_preservation_values(pathlib.Path(final_path))
+    preserved: list[str] = []
+    mutated: list[str] = []
+    for key in satisfied_keys:
+        k = str(key).strip().lower()
+        if (d_vals is None or f_vals is None
+                or len(d_vals.get(k, [])) != 1 or len(f_vals.get(k, [])) != 1):
+            mutated.append(str(key))
+            continue
+        dv, fv = d_vals[k][0], f_vals[k][0]
+        if _strict_json_equal(dv, fv):
+            preserved.append(str(key))
+        else:
+            mutated.append(str(key))
+    return tuple(preserved), tuple(mutated)
+
+
+# kv_recomputed 支援的重算型別（與下方 rtype 分派鏈保持同步；
+# 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
+KV_RECOMPUTE_TYPES: frozenset[str] = frozenset(
+    {"count_if", "zcount3", "mean_int_col", "max_row_first", "pearson2", "col_stats", "null_count"}
+)
 
 
 def check_kv_recomputed(
@@ -1422,19 +1690,6 @@ def check_kv_recomputed(
     except (UnknownSource, OSError, json.JSONDecodeError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    # vq-5nz.18：先驗交付物格式（交付物事實，可見且無歧義），再重算資料（語意歧義可 UNKNOWN）。
-    # 缺失/格式錯答案仍 FAIL——不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
-    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
-    if val_str is None:
-        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
-                       {"key": key, "problem": problems[0], "data_file": data_rel})
-    try:
-        got = float(val_str.replace(",", "").strip())
-    except ValueError:
-        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
-    if not math.isfinite(got):
-        return _result(item, "FAIL", "答案值不可解析為數字", {"key": key, "problem": "not_a_number", "value": val_str})
-
     unrounded_int_expected: float | None = None
     try:
         rtype = str(rc.get("type", "")).strip().lower()
@@ -1443,88 +1698,59 @@ def check_kv_recomputed(
             eq = rc.get("eq")
             if not col or eq is None:
                 raise UnknownSource("count_if 需要 col 與 eq")
+            if not rows or col not in rows[0]:
+                raise UnknownSource(f"資料檔找不到欄 {col!r}")
+            try:
+                eq_num = float(eq)
+            except (TypeError, ValueError):
+                raise UnknownSource("count_if.eq 不可解析為數字")
+            if not math.isfinite(eq_num):
+                raise UnknownSource("count_if.eq 非有限數值")
             expected = 0.0
             for r in rows:
                 cell = r.get(col)
                 try:
-                    if float(str(cell).strip()) == float(eq):
-                        expected += 1.0
+                    v = float(str(cell).strip())
                 except (TypeError, ValueError):
                     continue
+                if not math.isfinite(v):
+                    continue
+                if v == eq_num:
+                    expected += 1.0
         elif rtype == "zcount3":
             col = str(rc.get("col", "")).strip()
             if not col:
                 raise UnknownSource("zcount3 需要 col")
+            if not rows or col not in rows[0]:
+                raise UnknownSource(f"資料檔找不到欄 {col!r}")
             vals: list[float] = []
             for r in rows:
                 try:
-                    vals.append(float(str(r.get(col, "")).strip()))
+                    v = float(str(r.get(col, "")).strip())
                 except (TypeError, ValueError):
                     continue
+                if not math.isfinite(v):
+                    continue
+                vals.append(v)
             if len(vals) < 2:
                 raise UnknownSource("zcount3: 可解析數值不足 2 個")
             mean = sum(vals) / len(vals)
             sd = (sum((v - mean) ** 2 for v in vals) / len(vals)) ** 0.5  # 母體慣例；見 params.note
-            if sd == 0.0:
+            if sd == 0.0 or not math.isfinite(sd):
                 raise UnknownSource("zcount3: 標準差為 0")
             expected = float(sum(1 for v in vals if abs((v - mean) / sd) > 3.0))
         elif rtype == "mean_int_col":
-            # G2 小批（e013 dab_055）：「轉 Int64；Null/空忽略」——支援純整數（如 '100'）
-            # 與附信賴區間的點估計字串（如 '630308[495000-801000]'，取前導整數點估計，與
-            # No. of cases_median 同值，同 dab_057 口徑）；Null/空與非數值字串（如 'xx[1-2]'）忽略。
-            # 未顯式指定 round 時取整（round），避免與 answer_kv type=integer 構成無解矛盾。
-            # （r1029 合併 d96a8dba：採 argon 語意——effects_20261105 50/50 驗收要求與獨立
-            # scorer 一致；點估計解讀與 dab_057/No. of cases_median 同口徑，非猜測。）
-            col = str(rc.get("col", "")).strip()
-            if not col:
-                raise UnknownSource("mean_int_col 需要 col")
-            ints: list[int] = []
-            for r in rows:
-                raw_cell = r.get(col)
-                if raw_cell is None:
-                    continue
-                cell = str(raw_cell).strip()
-                if not cell:
-                    continue
-                m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
-                if m_int:
-                    ints.append(int(m_int.group(1)))
-            if not ints:
-                raise UnknownSource("mean_int_col: 無可解析整數")
-            raw_mean = sum(ints) / len(ints)
-            if rc.get("round") is None:
-                unrounded_int_expected = float(raw_mean)
-                expected = float(round(raw_mean))
-            else:
-                expected = float(raw_mean)
+            expected, unrounded_int_expected = _mean_int_col(rows, rc)
         elif rtype == "max_row_first":
-            # G2 小批（e013 dab_426）：sel_col 最大值、平手取檔案序第一列、
-            # 輸出該列 out_col——「neglecting ties…choose the one that appears
-            # first」的文字直譯。
-            sel_col = str(rc.get("sel_col", "")).strip()
-            out_col = str(rc.get("out_col", "")).strip()
-            if not sel_col or not out_col:
-                raise UnknownSource("max_row_first 需要 sel_col 與 out_col")
-            best: tuple[float, dict[str, Any]] | None = None
-            for r in rows:
-                try:
-                    v = float(str(r.get(sel_col, "")).strip())
-                except (TypeError, ValueError):
-                    continue
-                if best is None or v > best[0]:
-                    best = (v, r)
-            if best is None:
-                raise UnknownSource("max_row_first: 無可解析選取欄")
-            try:
-                expected = float(str(best[1].get(out_col, "")).strip())
-            except (TypeError, ValueError):
-                raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+            expected = _max_row_first(rows, rc)
         elif rtype == "pearson2":
             # G2 小批（e013 dab_105）：兩欄成對可解析行（缺值行忽略）、Pearson r。
             col_a = str(rc.get("col_a", "")).strip()
             col_b = str(rc.get("col_b", "")).strip()
             if not col_a or not col_b:
                 raise UnknownSource("pearson2 需要 col_a 與 col_b")
+            if not rows or col_a not in rows[0] or col_b not in rows[0]:
+                raise UnknownSource(f"資料檔找不到欄 {col_a!r} 或 {col_b!r}")
             xs: list[float] = []
             ys: list[float] = []
             for r in rows:
@@ -1532,6 +1758,8 @@ def check_kv_recomputed(
                     x = float(str(r.get(col_a, "")).strip())
                     y = float(str(r.get(col_b, "")).strip())
                 except (TypeError, ValueError):
+                    continue
+                if not (math.isfinite(x) and math.isfinite(y)):
                     continue
                 xs.append(x)
                 ys.append(y)
@@ -1551,15 +1779,33 @@ def check_kv_recomputed(
             expected = _null_count(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        if not isinstance(expected, (int, float)) or isinstance(expected, bool) or not math.isfinite(float(expected)):
+            raise UnknownSource("重算結果非有限數值")
         rnd = rc.get("round")
         if isinstance(rnd, int) and not isinstance(rnd, bool):
             expected = round(expected, rnd)
     except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
+    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
+    if val_str is None:
+        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
+                       {"key": key, "problem": problems[0], "data_file": data_rel,
+                        "expected_in_evidence": False})
+    try:
+        got = float(val_str.replace(",", "").strip())
+    except ValueError:
+        return _result(item, "FAIL", "答案值不可解析為數字",
+                       {"key": key, "problem": "not_a_number", "value": val_str,
+                        "expected_in_evidence": False})
+    if not math.isfinite(got):
+        return _result(item, "FAIL", "答案值不可解析為數字",
+                       {"key": key, "problem": "not_a_number", "value": val_str,
+                        "expected_in_evidence": False})
+
     atol = float(p.get("atol", 1e-6))
     rule_desc = f"{str(rc.get('type'))}: {data_rel} {json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}"
-    if abs(got - expected) > atol:
+    if not (abs(got - expected) <= atol):
         if (unrounded_int_expected is not None
                 and not re.match(r"^[+-]?\d+$", val_str)
                 and round(got) == int(expected)
@@ -1582,7 +1828,7 @@ def check_kv_recomputed(
 
 
 def _col_values(rows: list[dict[str, Any]], col: str) -> list[float]:
-    """取欄（可解析為 float 的值，保留檔案序）；欄不存在或全不可解析 → UnknownSource。"""
+    """取欄（可解析為有限 float 的值，保留檔案序）；欄不存在或全不可解析 → UnknownSource。"""
     if not rows or col not in rows[0]:
         raise UnknownSource(f"資料檔找不到欄 {col!r}")
     vals: list[float] = []
@@ -1591,9 +1837,12 @@ def _col_values(rows: list[dict[str, Any]], col: str) -> list[float]:
         if raw is None:
             continue
         try:
-            vals.append(float(str(raw).strip()))
+            v = float(str(raw).strip())
         except ValueError:
             continue
+        if not math.isfinite(v):
+            continue
+        vals.append(v)
     if not vals:
         raise UnknownSource(f"欄 {col!r} 沒有可解析為數值的值")
     return vals
@@ -1697,6 +1946,67 @@ def _col_max(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     return max(_col_values(rows, col))
 
 
+def _max_row_first(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """max_row_first（G2 dab_426）：sel_col 最大值、平手取檔案序第一列、輸出該列 out_col。
+
+    「neglecting ties…choose the one that appears first」的文字直譯（e013 dab_426）。
+    """
+    sel_col = str(rc.get("sel_col", "")).strip()
+    out_col = str(rc.get("out_col", "")).strip()
+    if not sel_col or not out_col:
+        raise UnknownSource("max_row_first 需要 sel_col 與 out_col")
+    best: tuple[float, dict[str, Any]] | None = None
+    for r in rows:
+        try:
+            v = float(str(r.get(sel_col, "")).strip())
+        except (TypeError, ValueError):
+            continue
+        if not math.isfinite(v):
+            continue
+        if best is None or v > best[0]:
+            best = (v, r)
+    if best is None:
+        raise UnknownSource("max_row_first: 無可解析選取欄")
+    try:
+        out_v = float(str(best[1].get(out_col, "")).strip())
+    except (TypeError, ValueError):
+        raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+    if not math.isfinite(out_v):
+        raise UnknownSource(f"max_row_first: {out_col} 不可解析")
+    return out_v
+
+
+def _mean_int_col(
+    rows: list[dict[str, Any]], rc: dict[str, Any]
+) -> tuple[float, float | None]:
+    """mean_int_col（G2 小批 e013 dab_055）：「轉 Int64；Null/空忽略」——支援純整數（如 '100'）
+    與附信賴區間的點估計字串（如 '630308[495000-801000]'，取前導整數點估計，與
+    No. of cases_median 同值，同 dab_057 口徑）；Null/空與非數值字串（如 'xx[1-2]'）忽略。
+    未顯式指定 round 時取整（round），避免與 answer_kv type=integer 構成無解矛盾。
+    回傳 (expected, unrounded_int_expected)。
+    """
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("mean_int_col 需要 col")
+    ints: list[int] = []
+    for r in rows:
+        raw_cell = r.get(col)
+        if raw_cell is None:
+            continue
+        cell = str(raw_cell).strip()
+        if not cell:
+            continue
+        m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
+        if m_int:
+            ints.append(int(m_int.group(1)))
+    if not ints:
+        raise UnknownSource("mean_int_col: 無可解析整數")
+    raw_mean = sum(ints) / len(ints)
+    if rc.get("round") is None:
+        return float(round(raw_mean)), float(raw_mean)
+    return float(raw_mean), None
+
+
 def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     """scheme_fee_avg（vq-5nz.16，dabstep-1273）：card_scheme×is_credit 匹配規則上的平均費率。
 
@@ -1716,6 +2026,8 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
         amount = float(rc.get("amount"))
     except (TypeError, ValueError):
         raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
+    if not math.isfinite(amount):
+        raise UnknownSource("scheme_fee_avg.amount 缺失或非數值")
     fees: list[float] = []
     for r in rows:
         if str(r.get("card_scheme", "")).strip() != scheme:
@@ -1728,6 +2040,8 @@ def _scheme_fee_avg(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
             fixed = float(r.get("fixed_amount"))
             rate = float(r.get("rate"))
         except (TypeError, ValueError):
+            raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
+        if not (math.isfinite(fixed) and math.isfinite(rate)):
             raise UnknownSource("匹配 fee 規則缺 fixed_amount/rate")
         fees.append(fixed + rate * amount / 10000)
     if not fees:
@@ -1754,9 +2068,12 @@ def _mode_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> str:
 
     def _key(v: str) -> tuple:
         try:
-            return (0, float(v), "")
+            fv = float(v)
         except ValueError:
             return (1, 0.0, v)
+        if not math.isfinite(fv):
+            return (1, 0.0, v)
+        return (0, fv, "")
 
     winners.sort(key=_key)
     return winners[0]
@@ -1782,6 +2099,80 @@ def _cond_rate(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
         raise UnknownSource("cond_rate: 分母為 0 行；無法算比率")
     numer = [r for r in pop if all(_cond_holds(r, c) for c in num_where)]
     return len(numer) / len(pop)
+
+
+def _group_ratio_stat(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float | str:
+    """group_ratio_stat（G2.5 dabstep-16/17，manual.md 公開 fraud volume ratio 定義）：
+    按 group_col 分組加總金額比率極值——rate_g = sum(分子金額) / sum(分母金額)，
+    跨組取 min/max（平手→檔案序首見分組），回傳極值數值（out="val"）或分組名稱（out="group"）。
+
+    語義 TDD 前凍結（對照 dabstep-17 草稿 7.683437＝誤用 count ratio 2132/27748 的實敗形）：
+    - sum_col＝加總金額欄；num_sum_col / denom_sum_col 可各自覆蓋分子/分母欄；
+    - where（可選）＝分母族群條件、num_where（必填）＝分子條件（皆 {col,op,value}，複用 _cond_holds）；
+    - 非數值/NaN/inf 儲存格忽略；分母和為 0 的分組不進候選；無任何有效分母→UnknownSource（不自評）；
+    - 重算值不進證據（check_plain_recomputed 防洩漏語義不變）。
+    """
+    group_col = str(rc.get("group_col", "")).strip()
+    if not group_col:
+        raise UnknownSource("group_ratio_stat 需要 group_col")
+    base_col = str(rc.get("sum_col", "")).strip()
+    denom_col = str(rc.get("denom_sum_col", "")).strip() or base_col
+    num_col = str(rc.get("num_sum_col", "")).strip() or base_col
+    if not denom_col:
+        raise UnknownSource("group_ratio_stat 需要 sum_col（或 denom_sum_col）")
+    if not num_col:
+        raise UnknownSource("group_ratio_stat 需要 sum_col（或 num_sum_col）")
+    where = rc.get("where", [])
+    if not isinstance(where, list):
+        raise UnknownSource("group_ratio_stat.where 須為條件清單")
+    num_where = rc.get("num_where")
+    if not isinstance(num_where, list) or not num_where:
+        raise UnknownSource("group_ratio_stat 需要 num_where（分子條件清單）")
+    for c in list(where) + list(num_where):
+        if not isinstance(c, dict) or not str(c.get("col", "")).strip():
+            raise UnknownSource("group_ratio_stat 條件缺少 col")
+    stat = str(rc.get("stat", "min")).strip().lower()
+    if stat not in ("min", "max"):
+        raise UnknownSource(f"group_ratio_stat.stat 須為 min 或 max，收到 {stat!r}")
+    out = str(rc.get("out", "val")).strip().lower()
+    if out not in ("val", "group"):
+        raise UnknownSource(f"group_ratio_stat.out 須為 val 或 group，收到 {out!r}")
+    percent = bool(rc.get("percent", False))
+
+    def _cell_num(v: Any) -> float | None:
+        try:
+            f = float(v)
+        except (TypeError, ValueError):
+            return None
+        return f if math.isfinite(f) else None
+
+    order: list[str] = []          # 各分組首次出現序（平手取首見）
+    denom: dict[str, float] = {}   # 分組分母和（僅有限數值）
+    numer: dict[str, float] = {}   # 分組分子和
+    for r in rows:
+        g = str(r.get(group_col, "")).strip()
+        if not g:
+            continue
+        if all(_cond_holds(r, c) for c in where):
+            v = _cell_num(r.get(denom_col))
+            if v is not None:
+                if g not in denom:
+                    order.append(g)
+                denom[g] = denom.get(g, 0.0) + v
+        if all(_cond_holds(r, c) for c in num_where):
+            v = _cell_num(r.get(num_col))
+            if v is not None:
+                if g not in numer:
+                    order.append(g)
+                numer[g] = numer.get(g, 0.0) + v
+    cands = [((numer.get(g, 0.0) / denom[g]) * (100.0 if percent else 1.0),
+              order.index(g), g)
+             for g in order if g in denom and denom[g] != 0.0]
+    if not cands:
+        raise UnknownSource("group_ratio_stat: 無分組有有效分母；無法算比率")
+    best = (min(cands, key=lambda t: (t[0], t[1])) if stat == "min"
+            else max(cands, key=lambda t: (t[0], -t[1])))
+    return best[2] if out == "group" else best[0]
 
 
 def _volume_band(total: float) -> str:
@@ -1816,6 +2207,8 @@ def _capture_delay_fits(merchant_cd: Any, fee_cd: Any) -> bool:
     try:
         d = float(m)
     except ValueError:
+        return fee_cd == m
+    if not math.isfinite(d):
         return fee_cd == m
     if fee_cd == "immediate":
         return d == 0
@@ -1903,6 +2296,8 @@ def _fee_ids_lookup(
             amount = float(str(r.get("eur_amount", "")).strip())
         except ValueError:
             continue
+        if not math.isfinite(amount):
+            continue
         have_amount = True
         total += amount
         if str(r.get("has_fraudulent_dispute", "")).strip().lower() == "true":
@@ -1939,6 +2334,14 @@ def _fee_ids_lookup(
         return True
 
     return tuple(sorted(int(f["ID"]) for f in fees if isinstance(f, dict) and "ID" in f and _fits(f)))
+
+
+# plain_recomputed 支援的重算型別（與下方 rtype 分派鏈保持同步；
+# 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
+PLAIN_RECOMPUTE_TYPES: frozenset[str] = frozenset(
+    {"fee_ids_lookup", "mode_col", "cond_rate", "unique_count", "col_max", "scheme_fee_avg",
+     "group_ratio_stat"}
+)
 
 
 def check_plain_recomputed(
@@ -1990,12 +2393,37 @@ def check_plain_recomputed(
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
     rtype = str(rc.get("type", "")).strip().lower()
-    # vq-5nz.18：先驗交付物格式（交付物事實，可見且無歧義），再重算資料
-    # （資料語意歧義可 UNKNOWN）。不可解析/空答案仍 FAIL——e014 prose 草稿被記錄
-    # pass=False；格式違規不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
-    deliv_file = deliverable_dir / item.deliverable
+    try:
+        if rtype == "mode_col":
+            expected: Any = _mode_col(rows, rc)
+        elif rtype == "cond_rate":
+            expected = _cond_rate(rows, rc)
+        elif rtype == "fee_ids_lookup":
+            expected = _fee_ids_lookup(rows, rc, task_dir)
+        elif rtype == "unique_count":
+            expected = _unique_count(rows, rc)
+        elif rtype == "col_max":
+            expected = _col_max(rows, rc)
+        elif rtype == "group_ratio_stat":
+            expected = _group_ratio_stat(rows, rc)
+        elif rtype == "scheme_fee_avg":
+            expected = _scheme_fee_avg(rows, rc)
+        else:
+            raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        if isinstance(expected, (int, float)) and not isinstance(expected, bool):
+            if not math.isfinite(float(expected)):
+                raise UnknownSource("重算結果非有限數值")
+        rnd = rc.get("round")
+        if (isinstance(rnd, int) and not isinstance(rnd, bool)
+                and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
+            expected = round(expected, rnd)
+    except (UnknownSource, OSError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
-        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）", {"problem": "missing_file"})
+        return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）",
+                       {"problem": "missing_file", "expected_in_evidence": False})
     val_str = deliv_file.read_text(encoding="utf-8").strip()
     rule_desc = (f"{str(rc.get('type'))}: {data_rel} "
                  f"{json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}")
@@ -2017,38 +2445,25 @@ def check_plain_recomputed(
                                    {"problem": "not_a_fee_id", "value": val_str,
                                     "rule": rule_desc, "expected_in_evidence": False})
     elif not val_str:
-        return _result(item, "FAIL", "答案值缺失（空檔）", {"problem": "empty_value"})
-    else:
+        return _result(item, "FAIL", "答案值缺失（空檔）",
+                       {"problem": "empty_value", "expected_in_evidence": False})
+    # mode_col：答案可能是字串眾數（非數值）；group_ratio_stat out="group"：
+    # 答案是分組名稱（dabstep-16 形）——兩者皆不做數值預檢；其餘型別行為不變。
+    elif not (
+        rtype == "mode_col"
+        or (rtype == "group_ratio_stat" and str(rc.get("out", "val")).strip().lower() == "group")
+    ):
         try:
             got_pre = float(val_str)
         except ValueError:
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
         if not math.isfinite(got_pre):
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
 
-    try:
-        if rtype == "mode_col":
-            expected: Any = _mode_col(rows, rc)
-        elif rtype == "cond_rate":
-            expected = _cond_rate(rows, rc)
-        elif rtype == "fee_ids_lookup":
-            expected = _fee_ids_lookup(rows, rc, task_dir)
-        elif rtype == "unique_count":
-            expected = _unique_count(rows, rc)
-        elif rtype == "col_max":
-            expected = _col_max(rows, rc)
-        elif rtype == "scheme_fee_avg":
-            expected = _scheme_fee_avg(rows, rc)
-        else:
-            raise UnknownSource(f"不支援的重算規則: {rtype!r}")
-        rnd = rc.get("round")
-        if (isinstance(rnd, int) and not isinstance(rnd, bool)
-                and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
-            expected = round(expected, rnd)
-    except (UnknownSource, OSError) as e:
-        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
     if got_ids is not None:
         if got_ids == set(expected):
@@ -2062,22 +2477,26 @@ def check_plain_recomputed(
                         "rule": rule_desc, "expected_in_evidence": False})
     exp_num: float | None = None
     if isinstance(expected, (int, float)) and not isinstance(expected, bool):
-        exp_num = float(expected)
+        exp_num = float(expected) if math.isfinite(float(expected)) else None
     elif isinstance(expected, str):
         try:
-            exp_num = float(expected)
+            parsed_exp = float(expected)
         except ValueError:
             exp_num = None
+        else:
+            exp_num = parsed_exp if math.isfinite(parsed_exp) else None
 
     if exp_num is not None:
         try:
             got = float(val_str)
         except ValueError:
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
         if not math.isfinite(got):
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
         atol = float(p.get("atol", 1e-6))
         ok = abs(got - exp_num) <= atol
     else:
@@ -2104,10 +2523,12 @@ def check_summary_numbers(
     try:
         rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
         numbers = params.get("numbers", []) or []
-        if not numbers:
-            raise UnknownSource("summary_numbers.params.numbers 缺失")
+        if not isinstance(numbers, list) or not numbers or not all(isinstance(n, dict) for n in numbers):
+            raise UnknownSource("summary_numbers.params.numbers 缺失或非物件列表")
         expected: list[tuple[str, Any]] = []
         for n in numbers:
+            if not isinstance(n, dict):
+                raise UnknownSource(f"summary_numbers.params.numbers 條目非物件: {n!r}")
             t = str(n.get("type", "")).strip().lower()
             label = str(n.get("label", t))
             if t == "count":
@@ -2140,7 +2561,7 @@ def check_summary_numbers(
     except (UnknownSource, UnsafeExpressionError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"摘要文字報告不存在: {item.deliverable}", {"missing_file": item.deliverable})
     content = deliv_file.read_text(encoding="utf-8")
@@ -2189,7 +2610,7 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
     - max_value: 最大值限制（數值類型適用，選填）
     """
     file_name = item.params.get("file", "answer.txt")
-    target_file = deliverable_dir / file_name
+    target_file = resolve_deliverable_path(deliverable_dir, file_name)
     if not target_file.is_file():
         return _result(
             item,
@@ -2306,6 +2727,34 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
 
 
 
+def _no_task_dir(fn):
+    """把 (deliverable_dir, item) 簽名包成統一 (task_dir, deliverable_dir, item)。"""
+    def _wrapped(task_dir: pathlib.Path, deliverable_dir: pathlib.Path, item: RequirementItem) -> ClaimResult:
+        return fn(deliverable_dir, item)
+    return _wrapped
+
+
+# verifier 白名單——單一事實來源（G2.5 vq-el4.1）。
+# run_requirement_checks 依本表分派；vacant_network.reqloop.extract 的白名單由此派生。
+# 不准在其他地方另造第二份清單。
+_VERIFIER_DISPATCH: dict[str, Any] = {
+    "csv_structure": _no_task_dir(check_csv_structure),
+    "table_structure": _no_task_dir(check_csv_structure),
+    "monthly_sales_metrics": check_monthly_sales_metrics,
+    "monthly_top_products": check_monthly_top_products,
+    "summary_metrics_consistency": check_summary_metrics_consistency,
+    "rowset_filter": check_rowset_filter,
+    "group_aggregate": check_group_aggregate,
+    "summary_numbers": check_summary_numbers,
+    "answer_kv": check_answer_kv,
+    "kv_recomputed": check_kv_recomputed,
+    "plain_recomputed": check_plain_recomputed,
+    "tag_format": _no_task_dir(check_tag_format),
+}
+
+SUPPORTED_VERIFIERS: frozenset[str] = frozenset(_VERIFIER_DISPATCH)
+
+
 def run_requirement_checks(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
@@ -2333,29 +2782,8 @@ def run_requirement_checks(
             continue
 
         vname = item.verifier
-        if vname in ("csv_structure", "table_structure"):
-            res = check_csv_structure(d_dir, item)
-        elif vname == "monthly_sales_metrics":
-            res = check_monthly_sales_metrics(t_dir, d_dir, item)
-        elif vname == "monthly_top_products":
-            res = check_monthly_top_products(t_dir, d_dir, item)
-        elif vname == "summary_metrics_consistency":
-            res = check_summary_metrics_consistency(t_dir, d_dir, item)
-        elif vname == "rowset_filter":
-            res = check_rowset_filter(t_dir, d_dir, item)
-        elif vname == "group_aggregate":
-            res = check_group_aggregate(t_dir, d_dir, item)
-        elif vname == "summary_numbers":
-            res = check_summary_numbers(t_dir, d_dir, item)
-        elif vname == "answer_kv":
-            res = check_answer_kv(t_dir, d_dir, item)
-        elif vname == "kv_recomputed":
-            res = check_kv_recomputed(t_dir, d_dir, item)
-        elif vname == "plain_recomputed":
-            res = check_plain_recomputed(t_dir, d_dir, item)
-        elif vname == "tag_format":
-            res = check_tag_format(d_dir, item)
-        else:
+        fn = _VERIFIER_DISPATCH.get(vname)
+        if fn is None:
             # 未知檢查器：依規則一律標記為 UNKNOWN，不得假裝 PASS
             results.append(
                 ClaimResult(
@@ -2371,6 +2799,6 @@ def run_requirement_checks(
             )
             continue
 
-        results.append(res)
+        results.append(fn(t_dir, d_dir, item))
 
     return results

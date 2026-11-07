@@ -1,0 +1,31 @@
+{
+  "task_id": "dab_426",
+  "items": [
+    {
+      "id": "req_answer_kv",
+      "quote": "Answer format: @max_wind_speed[number] where \"number\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {"keys": [{"key": "max_wind_speed", "type": "number"}]},
+      "description": "答案檔存在且 @max_wind_speed 為單一合法數值（格式；值正確性不在此宣告）",
+      "required": true, "authority": "user_request", "hidden": false, "unverified": false
+    },
+    {
+      "id": "req_max_wind_recomputed",
+      "quote": "Firstly, identify the storm with the highest maximum storm category, neglecting any ties. If there are multiple storms with the same highest maximum storm category, choose the one that appears first in the given dataset. Then find the maximum sustained wind speed corresponding to this particular storm.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "max_wind_speed",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {"type": "max_row_first", "sel_col": "max_storm_cat", "out_col": "max_sust_wind", "round": 2,
+                      "note": "max_storm_cat 最大值；平手取檔案序第一列；輸出該列 max_sust_wind（兩位小數）"},
+        "atol": 1e-6
+      },
+      "description": "答案值必須等於對凍結資料的公開規則重算（先選 storm、再取風速；非全組最大風速）；重算值不進證據",
+      "required": true, "authority": "user_request", "hidden": false, "unverified": false
+    }
+  ]
+}
