@@ -16,12 +16,18 @@ import pytest
 
 from vacant_network.reqloop import checks
 from vacant_network.reqloop.extract import (
+    ExtractError,
     ExtractParseError,
+    GlmClient,
     build_requirement_set,
+    build_task_prompt,
+    csv_preview,
     default_prompt,
     extract_requirements,
+    main,
     parse_model_output,
     quote_is_verbatim,
+    run_task,
 )
 from vacant_network.reqloop.requirements import RequirementSet
 
@@ -341,3 +347,144 @@ def test_default_prompt_lists_whitelist_and_no_secrets():
     low = p.lower()
     assert "scorer" not in low and "hidden" not in low
     assert "sk-" not in p and "key=" not in p.lower()
+
+
+# ------------------------------------------------ vq-el4.2：glm 後端＋任務 CLI（全假 glm，不呼叫模型）
+
+def _fake_glm(tmp_path, *, rc=0, stderr="", response=""):
+    """寫一個假 glm shell 指令：記錄參數、拷貝 prompt 檔、回傳固定回應。"""
+    script = tmp_path / "fake_glm"
+    log = tmp_path / "glm_invocation.txt"
+    copy = tmp_path / "prompt_copy.txt"
+    lines = [
+        "#!/bin/sh",
+        f'printf "%s\\n" "$@" > "{log}"',
+        f'cp "$6" "{copy}" 2>/dev/null || true',
+    ]
+    if stderr:
+        lines.append(f'printf "%s" "{stderr}" >&2')
+    if rc == 0:
+        lines.append(f"printf '%s\\n' {json.dumps(response)}")
+    else:
+        lines.append(f"exit {rc}")
+    script.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    script.chmod(0o755)
+    return script, log, copy
+
+
+def test_glm_client_passes_model_purpose_prompt_file(tmp_path):
+    script, log, copy = _fake_glm(tmp_path, response="[{'id': 'r1'}]")
+    client = GlmClient(model="glm53", purpose="orders_monthly 擷取需求", glm_bin=str(script))
+    out = client.complete("PROMPT-TEXT-123")
+    assert "r1" in out
+    args = log.read_text(encoding="utf-8").splitlines()
+    assert args[:3] == ["--model", "glm53", "--purpose"]
+    assert args[3] == "orders_monthly 擷取需求"
+    assert args[4] == "--prompt-file"
+    assert copy.read_text(encoding="utf-8") == "PROMPT-TEXT-123"  # prompt 真的經 --prompt-file 交給 glm
+
+
+def test_glm_client_nonzero_exit_is_fail_closed_no_retry(tmp_path):
+    script, _, _ = _fake_glm(tmp_path, rc=3, stderr="今日預算用完")
+    client = GlmClient(glm_bin=str(script))
+    attempts = 0
+    try:
+        for _ in range(3):
+            client.complete("x")  # 呼叫端不得重試；這裡只驗单次即失敗
+    except ExtractError as e:
+        attempts = 1
+        assert "rc=3" in str(e)
+    assert attempts == 1
+
+
+def test_csv_preview_header_plus_five_rows():
+    csv = "\n".join(f"r{i}" for i in range(20)) + "\n"
+    assert csv_preview(csv).splitlines() == [f"r{i}" for i in range(6)]
+
+
+def test_build_task_prompt_whitelist_data_and_user_text_only():
+    csv = "a,b\n1,2\n3,4\n5,6\n7,8\n9,10\n11,12\n13,14\n"
+    p = build_task_prompt("USER-REQ-TEXT", data_file="orders.csv", data_preview=csv_preview(csv))
+    for v in sorted(checks.SUPPORTED_VERIFIERS):
+        assert v in p
+    assert "orders.csv" in p and "USER-REQ-TEXT" in p
+    assert "a,b" in p and "9,10" in p  # 欄位名＋第 5 列資料
+    assert "11,12" not in p  # 超過前 5 列的資料不准進 prompt
+
+
+ORDER_TEXT = (
+    "排除狀態為 CANCELLED 的取消訂單。\n"
+    "欄位需包含：month、orders_count、net_sales。\n"
+    "內文中需明確載明「兩月合計淨銷售總額」（精確數值）。\n"
+    "簡述各月銷售成長觀察。\n"
+)
+
+
+def test_run_task_counts_discarded_unverified_and_hands_off(tmp_path):
+    t_dir = tmp_path / "orders_monthly"
+    t_dir.mkdir()
+    (t_dir / "request.md").write_text(ORDER_TEXT, encoding="utf-8")
+    (t_dir / "orders.csv").write_text(
+        "order_id,status\nA,COMPLETED\nB,CANCELLED\nC,COMPLETED\nD,COMPLETED\nE,COMPLETED\nF,COMPLETED\n",
+        encoding="utf-8",
+    )
+    (t_dir / "requirements.json").write_text('{"task_id": "HANDWRITTEN-SECRET"}', encoding="utf-8")
+    items = [
+        {"id": "r1", "quote": "排除狀態為 CANCELLED 的取消訂單。", "deliverable": "monthly_sales.csv",
+         "verifier": "rowset_filter", "params": {"values": ["COMPLETED"], "identity": "order_id"}},
+        {"id": "r2", "quote": "欄位需包含：month、orders_count、net_sales。", "deliverable": "monthly_sales.csv",
+         "verifier": "csv_structure", "params": {"required_columns": ["month", "orders_count", "net_sales"]}},
+        {"id": "r3", "quote": "內文中需明確載明「兩月合計淨銷售總額」（精確數值）。", "deliverable": "summary.md",
+         "verifier": "summary_metrics_consistency", "params": {"metric_keywords": ["合計淨銷售總額"]}},
+        {"id": "bad", "quote": "這句是改寫的、原文沒這句話。", "deliverable": "summary.md",
+         "verifier": "summary_numbers", "params": {"numbers": [1]}},
+        {"id": "unv", "quote": "簡述各月銷售成長觀察。", "deliverable": "summary.md",
+         "verifier": "vibes_check", "params": {}},
+    ]
+    client = FakeClient(json.dumps(items, ensure_ascii=False))
+    out = tmp_path / "out.json"
+    req, report = run_task(t_dir / "request.md", model="glm53", client=client, out_path=out)
+    assert [i.id for i in req.items] == ["r1", "r2", "r3", "unv"]  # 改寫 quote 被丟棄；未知 verifier 保留但 unverified
+    assert [d.reason for d in report.discarded] == ["quote_not_verbatim"]
+    assert [(u.id, u.reason) for u in report.unverified] == [("unv", "unknown_verifier:vibes_check")]
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["task_id"] == "orders_monthly" and doc["model"] == "glm53"
+    assert len(doc["items"]) == 4 and doc["report"]["discarded"][0]["reason"] == "quote_not_verbatim"
+    prompt = client.prompts[0]
+    assert "HANDWRITTEN-SECRET" not in prompt  # 手寫 requirements.json 不准進 prompt
+    assert "order_id,status" in prompt and "B,CANCELLED" in prompt  # 欄位名＋前 5 列進 prompt
+
+
+def test_main_success_prints_counts_and_writes(tmp_path, capsys):
+    t_dir = tmp_path / "orders_monthly"
+    t_dir.mkdir()
+    (t_dir / "request.md").write_text(ORDER_TEXT, encoding="utf-8")
+    (t_dir / "orders.csv").write_text("order_id,status\nA,COMPLETED\n", encoding="utf-8")
+    resp = json.dumps(
+        [{"id": "r1", "quote": "排除狀態為 CANCELLED 的取消訂單。", "deliverable": "monthly_sales.csv",
+          "verifier": "csv_structure", "params": {"required_columns": ["month"]}}],
+        ensure_ascii=False,
+    )
+    script, log, copy = _fake_glm(tmp_path, response=resp)
+    out = tmp_path / "o.json"
+    rc = main(["--task", str(t_dir), "--model", "glm53", "--glm", str(script), "--out", str(out)])
+    captured = capsys.readouterr().out
+    assert rc == 0
+    assert "條目 1、丟棄 0、unverified 0" in captured
+    assert json.loads(out.read_text(encoding="utf-8"))["items"][0]["id"] == "r1"
+    args = log.read_text(encoding="utf-8").splitlines()
+    assert args[1] == "glm53" and args[3] == "orders_monthly 擷取需求"
+    assert "USER" not in copy.read_text(encoding="utf-8") and "排除狀態" in copy.read_text(encoding="utf-8")
+
+
+def test_main_fail_closed_on_glm_failure(tmp_path, capsys):
+    t_dir = tmp_path / "orders_monthly"
+    t_dir.mkdir()
+    (t_dir / "request.md").write_text(ORDER_TEXT, encoding="utf-8")
+    script, _, _ = _fake_glm(tmp_path, rc=4, stderr="呼叫失敗")
+    rc = main(["--task", str(t_dir), "--model", "glm53", "--glm", str(script),
+               "--out", str(tmp_path / "o.json")])
+    captured = capsys.readouterr()
+    assert rc == 20
+    assert "條目 0、丟棄 0、unverified 0" in captured.out
+    assert "fail-closed" in captured.err

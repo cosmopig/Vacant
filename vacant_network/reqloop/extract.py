@@ -17,7 +17,8 @@ G2.5 自動擷取需求——驗證與組裝層（vq-el4.1）。
 4. 模型輸出無法解析、client 例外 → 空 RequirementSet＋報告記錄
    （fail-closed）；絕不假裝「沒有需求＝通過」。
 
-client 協定（vq-el4.2 注入 OpenAI 相容實作；測試用假 client，不呼叫模型）：
+client 協定（vq-el4.2 實作為 `GlmClient`：subprocess 呼叫 `glm` 指令——
+擷取模型的唯一入口；測試用假 client，不呼叫模型）：
 
     class ExtractClient(Protocol):
         def complete(self, prompt: str) -> str: ...
@@ -25,9 +26,16 @@ client 協定（vq-el4.2 注入 OpenAI 相容實作；測試用假 client，不�
 
 from __future__ import annotations
 
+import argparse
 import json
+import os
+import pathlib
 import re
+import subprocess
+import sys
+import tempfile
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Protocol
 
 from vacant_network.reqloop.checks import (
@@ -46,11 +54,17 @@ __all__ = [
     "ExtractError",
     "ExtractParseError",
     "ExtractReport",
+    "GlmClient",
+    "VERIFIER_HINTS",
     "build_requirement_set",
+    "build_task_prompt",
+    "csv_preview",
     "default_prompt",
     "extract_requirements",
+    "main",
     "parse_model_output",
     "quote_is_verbatim",
+    "run_task",
 ]
 
 
@@ -320,7 +334,7 @@ def default_prompt(user_text: str) -> str:
     return (
         "你是需求擷取助手。只依下方使用者原文，抽出可用程式驗證的需求條目。\n"
         "輸出 JSON 陣列，每項欄位：id, quote, deliverable, verifier, params, "
-        "description, required, kind。\n"
+        "description, required, kind（kind 只能取 explicit／assumption／preference，預設 explicit）。\n"
         "規則：\n"
         "1. quote 必須是使用者原文的逐字片段（不准改寫、不准自造）。\n"
         f"2. verifier 只能選：{verifiers}。\n"
@@ -331,6 +345,175 @@ def default_prompt(user_text: str) -> str:
         "使用者原文：\n"
         f"{user_text}"
     )
+
+
+# ------------------------------------------------- vq-el4.2：glm 後端＋任務 CLI
+
+# 每個 verifier 的一行用途提示（只寫在 prompt 裡，幫助模型選對；
+# 白名單與參數檢查仍以 checks.py 與本檔 _REQUIRED_PARAMS 為準）。
+VERIFIER_HINTS: dict[str, str] = {
+    "answer_kv": "答案檔 @key[value] 的鍵值與型別",
+    "csv_structure": "交付表格必須存在且含指定欄位",
+    "table_structure": "交付表格必須存在且含指定欄位",
+    "kv_recomputed": "從原始資料檔重算某鍵值並與交付比對（key/data_file/recompute）",
+    "plain_recomputed": "從原始資料檔重算單一數值並與交付比對（data_file/recompute）",
+    "tag_format": "文字交付物中 @tag[value] 格式",
+    "monthly_sales_metrics": "各月訂單數與淨銷售額與原始資料重算一致",
+    "monthly_top_products": "各月淨銷售額前 N 名商品排行與重算一致",
+    "summary_metrics_consistency": "摘要文字中合計指標數字與重算一致",
+    "summary_numbers": "摘要文字中指定數字與重算一致",
+    "rowset_filter": "排除→去重→納入後行集與逐欄值與重算一致",
+    "group_aggregate": "分組聚合值與重算一致",
+}
+
+
+class GlmClient:
+    """Vibe CLI 後端（vq-el4.2）：只准透過 `glm` 指令呼叫擷取模型。
+
+    `glm` 是唯一入口（11/07）：空暫存目錄、不給工具、單回合、每天 ≤200 萬
+    token 的限制都在指令內；每次呼叫寫 state/vibe_calls.jsonl，輸入輸出全文
+    存 logs/vibe/。呼叫端不得繞過 glm 直連 vibe，也不得持有金鑰。
+    退出碼：0 成功、3 今日預算用完、4 呼叫失敗——非 0 一律 fail-closed
+    （丟 ExtractError，不重試；撞額度就停）。
+    """
+
+    def __init__(
+        self,
+        model: str = "glm53",
+        purpose: str = "擷取需求",
+        glm_bin: str = "glm",
+        timeout: float = 900.0,
+    ) -> None:
+        self.model = model
+        self.purpose = purpose
+        self.glm_bin = glm_bin
+        self.timeout = timeout
+
+    def complete(self, prompt: str) -> str:
+        """寫 prompt 暫存檔 → subprocess 呼叫 glm → 回傳 stdout。"""
+        fd, prompt_path = tempfile.mkstemp(prefix="vacant_extract_", suffix=".md")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(prompt)
+            proc = subprocess.run(
+                [
+                    self.glm_bin, "--model", self.model,
+                    "--purpose", self.purpose, "--prompt-file", prompt_path,
+                ],
+                capture_output=True, text=True, timeout=self.timeout,
+            )
+        except subprocess.TimeoutExpired as e:
+            raise ExtractError(f"glm timed out after {self.timeout:.0f}s") from e
+        finally:
+            try:
+                os.unlink(prompt_path)
+            except OSError:
+                pass
+        if proc.returncode != 0:
+            lines = [ln for ln in (proc.stderr or proc.stdout or "").strip().splitlines() if ln.strip()]
+            raise ExtractError(f"glm rc={proc.returncode}: {lines[-1][:200] if lines else 'no output'}")
+        return proc.stdout
+
+
+def csv_preview(csv_text: str, max_rows: int = 5) -> str:
+    """CSV 欄位名稱（header）＋前 max_rows 列資料——准進 prompt 的資料內容上限。"""
+    lines = [ln for ln in csv_text.splitlines() if ln.strip()]
+    return "\n".join(lines[: max_rows + 1])
+
+
+def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str = "") -> str:
+    """正式 prompt（vq-el4.2）：request 全文＋資料檔欄位與前 5 列＋verifier 清單與輸出格式。
+
+    只含使用者原文與資料預覽；不含 hidden、scorer、手寫 requirements.json。
+    """
+    hints = "\n".join(
+        f"- {name}：{VERIFIER_HINTS.get(name, '見 checks.py')}" for name in sorted(SUPPORTED_VERIFIERS)
+    )
+    parts = [
+        "你是需求擷取助手。只依下方使用者原文，抽出可用程式驗證的需求條目。",
+        "輸出：一個 JSON 陣列（陣列外不要說明文字），每項欄位：",
+        "id, quote, deliverable, verifier, params, description, required, kind；"
+        "kind 只能取 explicit／assumption／preference（預設 explicit，不准自造其他值）。",
+        "規則：",
+        "1. quote 必須是使用者原文的逐字片段（不准改字、換序、改寫、自造）；拿不準寧可不收該條。",
+        "2. verifier 只能選：",
+        hints,
+        "3. params 須符合該 verifier 的要求（如 answer_kv 需 keys；kv_recomputed 需 key/data_file/recompute；csv_structure 需 required_columns）。",
+        "4. 無法用程式驗證的需求設 unverified=true，並在 description 說明原因。",
+        "5. 不准發明使用者沒說的需求。",
+    ]
+    if data_file:
+        parts += ["", f"附帶資料檔：{data_file}（欄位名稱與前 5 列）：", data_preview]
+    parts += ["", "使用者原文：", user_text]
+    return "\n".join(parts)
+
+
+def run_task(
+    request_md: str | pathlib.Path,
+    *,
+    model: str,
+    client: ExtractClient,
+    out_path: str | pathlib.Path,
+) -> tuple[RequirementSet, ExtractReport]:
+    """對真實任務目錄做一輪擷取：request.md 全文＋第一個 .csv 預覽 → client → 逐字/白名單檢查 → 寫結果。
+
+    只讀 request.md 與任務目錄頂層第一個 .csv；同目錄的 requirements.json、
+    bad_*／good 等手寫需求與參考產物一律不讀、不進 prompt。
+    """
+    req_md = pathlib.Path(request_md)
+    t_dir = req_md.parent
+    user_text = req_md.read_text(encoding="utf-8")
+    data_file = ""
+    data_preview = ""
+    csvs = sorted(t_dir.glob("*.csv"))
+    if csvs:
+        data_file = csvs[0].name
+        data_preview = csv_preview(csvs[0].read_text(encoding="utf-8"))
+    prompt = build_task_prompt(user_text, data_file=data_file, data_preview=data_preview)
+    req, report = extract_requirements(
+        user_text=user_text, client=client, task_id=t_dir.name,
+        build_prompt=lambda _text: prompt,
+    )
+    out = pathlib.Path(out_path)
+    doc = req.to_dict()
+    doc["model"] = model
+    doc["report"] = report.to_dict()
+    doc["generated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return req, report
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI：python3 -m vacant_network.reqloop.extract --task <dir> --model glm53"""
+    ap = argparse.ArgumentParser(
+        prog="python3 -m vacant_network.reqloop.extract",
+        description="G2.5 自動擷取需求（glm 後端；prompt 只含原文與資料欄位前 5 列，不含 hidden/scorer/手寫需求）",
+    )
+    ap.add_argument("--task", required=True, help="任務目錄（含 request.md 與資料 csv）")
+    ap.add_argument("--model", default="glm53", choices=("glm53", "glm53flash", "deepseek41"))
+    ap.add_argument("--out", default=None, help="輸出 json（預設 ops/reqloop/extract/out/<task>.<model>.json）")
+    ap.add_argument("--glm", default="glm", help="glm 指令路徑（測試可注入假指令）")
+    a = ap.parse_args(argv)
+
+    req_md = pathlib.Path(a.task) / "request.md"
+    if not req_md.is_file():
+        print(f"error: 找不到 {req_md}", file=sys.stderr)
+        return 2
+    task_id = pathlib.Path(a.task).name
+    client = GlmClient(model=a.model, purpose=f"{task_id} 擷取需求", glm_bin=a.glm)
+    out_path = (
+        pathlib.Path(a.out)
+        if a.out
+        else pathlib.Path("ops/reqloop/extract/out") / f"{task_id}.{a.model}.json"
+    )
+    req, report = run_task(req_md, model=a.model, client=client, out_path=out_path)
+    print(f"條目 {len(req.items)}、丟棄 {len(report.discarded)}、unverified {len(report.unverified)}")
+    print(f"寫入：{out_path}")
+    if report.extract_error or report.parse_error:
+        print(f"擷取失敗（fail-closed）：{report.extract_error or report.parse_error}", file=sys.stderr)
+        return 20
+    return 0
 
 
 def extract_requirements(
@@ -353,6 +536,7 @@ def extract_requirements(
             RequirementSet(task_id=task_id, items=[]),
             ExtractReport(extract_error=f"{type(e).__name__}: {e}"),
         )
+
     try:
         raw_items = parse_model_output(raw)
     except ExtractParseError as e:
@@ -361,3 +545,7 @@ def extract_requirements(
             ExtractReport(parse_error=str(e)),
         )
     return build_requirement_set(task_id, raw_items, user_text)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
