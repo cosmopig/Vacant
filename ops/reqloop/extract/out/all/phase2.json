@@ -1,0 +1,127 @@
+{
+  "rows": [
+    {
+      "cell": "dab_035-pi-C",
+      "role": "good",
+      "status": "CLEAN",
+      "n_fail": 0,
+      "n_unknown": 0,
+      "n_results": 2
+    },
+    {
+      "cell": "dab_039-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 3,
+      "detail": "R3: 交付物缺少指定檔案: answer.txt"
+    },
+    {
+      "cell": "dab_055-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 3,
+      "n_unknown": 0,
+      "detail": "R1: 答案值未取整數（與按公開規則重算的未取整均值一致，但依原始需求須四捨五入為整數；期望值不在證據中）; R2: 答案值未取整數（與按公開規則重算的未取整均值一致，但依原始需求須四捨五入為整數；期望值不在證據中）"
+    },
+    {
+      "cell": "dab_057-pi-A",
+      "role": "good",
+      "status": "FALSE",
+      "n_fail": 2,
+      "n_unknown": 0,
+      "detail": "1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）; 3: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    },
+    {
+      "cell": "dab_105-pi-C",
+      "role": "good",
+      "status": "CLEAN",
+      "n_fail": 0,
+      "n_unknown": 0,
+      "n_results": 2
+    },
+    {
+      "cell": "dab_378-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 2,
+      "n_unknown": 1,
+      "detail": "req_pre_kurtosis: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）; req_post_kurtosis: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    },
+    {
+      "cell": "dab_426-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 0,
+      "detail": "R1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    },
+    {
+      "cell": "dab_427-pi-A",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 2,
+      "n_unknown": 0,
+      "detail": "1: 標籤 @null_entries_count 格式不符：缺少方括號包裹值，找到 '@null_ent; 2: 答案值不可用（missing）；值正確性無法成立"
+    },
+    {
+      "cell": "dab_507-pi-A",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 0,
+      "detail": "1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    },
+    {
+      "cell": "dabstep-10-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 0,
+      "detail": "R1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    },
+    {
+      "cell": "dabstep-11-pi-A",
+      "role": "good",
+      "status": "CLEAN",
+      "n_fail": 0,
+      "n_unknown": 1,
+      "n_results": 2
+    },
+    {
+      "cell": "dabstep-1273-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 1,
+      "detail": "R1: 答案值不可解析為數字"
+    },
+    {
+      "cell": "dabstep-13-pi-A",
+      "role": "good",
+      "status": "CLEAN",
+      "n_fail": 0,
+      "n_unknown": 0,
+      "n_results": 2
+    },
+    {
+      "cell": "dabstep-23-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 1,
+      "detail": "R1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    }
+  ],
+  "gate": "PASS",
+  "model": "glm53",
+  "caught": 9,
+  "total_bad": 9,
+  "false_acc": 1,
+  "total_good": 5,
+  "errors": 0,
+  "cost": {
+    "calls": 71,
+    "tokens": 701696
+  }
+}
