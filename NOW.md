@@ -8,7 +8,7 @@
 
 ## CI（本地 vacant-ci）
 - auto/argon 05989682 🟢 5033/0；auto/worker aca58a95 🟢 5034/0（審查指示 4 達標）。
-- auto/qwen27b：b5355486（r1219）CI 23:13 起跑、本輪末應 🟢（上次巡＝「還沒跑完」）；1cd853b4 待下一 pass pickup（~14min）。
+- auto/qwen27b **b5355486（r1219）🟢 5034 passed, 74 skipped（855.33s、23:28 完成）**——本輪末「還沒跑完」轉 🟢（指令輸出變好）；1cd853b4＋6047a458 待下一 pass pickup（純 git/記錄、無模型/網絡；新測試進場後應 5035）。
 
 ## 下一步
 1. 下輪巡 b5355486＋1cd853b4 CI → 應 🟢（新測試純 git index 斷言、無模型/網絡）。
