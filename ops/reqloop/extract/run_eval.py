@@ -114,12 +114,74 @@ def read_extract_costs(vibe_calls: pathlib.Path, model: str, task_ids: list[str]
     return costs
 
 
+def run_models_comparison(models: list[str], g1: pathlib.Path, out_dir: pathlib.Path,
+                          vibe_calls: pathlib.Path) -> dict:
+    """多模型對照（vq-el4.6）：每模型各跑 evaluate_task＋read_extract_costs（離線、不呼叫模型）。
+
+    每模型門禁與單模型路徑同口徑：抓錯 ≥ 70% 且 0 冤枉；缺擷取結果→MISSING（fail-closed）；
+    任一題成本缺值 → calls/tokens＝None（UNKNOWN，絕不填 0）。
+    """
+    task_dirs = sorted(p for p in g1.iterdir() if p.is_dir() and (p / "requirements.json").is_file())
+    ids = [p.name for p in task_dirs]
+    out_models: dict[str, dict] = {}
+    for model in models:
+        caught = fp = total_bad = total_good = 0
+        missing = [t for t in ids if not (out_dir / f"{t}.{model}.json").is_file()]
+        for t_dir in task_dirs:
+            if t_dir.name in missing:
+                continue
+            res = evaluate_task(t_dir, RequirementSet.load(out_dir / f"{t_dir.name}.{model}.json"))
+            total_bad += len(res["bad"])
+            caught += sum(1 for b in res["bad"] if b["caught"])
+            g = res["good"]
+            if g in ("VERIFIED", "FP", "UNKNOWN"):
+                total_good += 1
+            if g == "FP":
+                fp += 1
+        costs = read_extract_costs(vibe_calls, model, ids)
+        all_found = bool(ids) and all(costs[t]["found"] for t in ids)
+        catch_rate = caught / total_bad if total_bad else 0.0
+        gate = "MISSING" if missing else (
+            "PASS" if (total_good > 0 and fp == 0 and catch_rate >= GATE_CATCH_RATE) else "FAIL")
+        out_models[model] = {
+            "bad_caught": caught, "total_bad": total_bad, "caught_pct": round(catch_rate * 100, 1),
+            "good_fp": fp, "total_good": total_good,
+            "calls": sum(costs[t]["calls"] for t in ids) if all_found else None,
+            "tokens": sum(costs[t]["total_tokens"] for t in ids) if all_found else None,
+            "missing": missing, "gate": gate}
+    return {"models": out_models}
+
+
+def print_models_table(result: dict) -> None:
+    print("# G2.5 多模型對照（離線重算、不呼叫模型）")
+    print(f"{'Model':<14}{'Bad Caught':<14}{'Caught %':<11}{'Good FP':<10}{'Total Good':<13}{'Calls':<9}{'Tokens'}")
+    for model, s in result["models"].items():
+        calls = "UNKNOWN" if s["calls"] is None else str(s["calls"])
+        tokens = "UNKNOWN" if s["tokens"] is None else str(s["tokens"])
+        print(f"{model:<14}{s['bad_caught']}/{s['total_bad']:<10}{s['caught_pct']:.1f}%{'':<5}"
+              f"{s['good_fp']:<10}{s['total_good']:<13}{calls:<9}{tokens}")
+    for model, s in result["models"].items():
+        if s["missing"]:
+            print(f"## {model}：缺擷取結果（fail-closed）：{', '.join(s['missing'])}")
+    print("門禁：" + "; ".join(f"{m} {s['gate']}" for m, s in result["models"].items())
+          + f"（抓錯 ≥ {GATE_CATCH_RATE * 100:.0f}% 且 0 冤枉；成本缺值＝UNKNOWN，不填 0）")
+
+
+def write_models_json(path: pathlib.Path, result: dict, g1: pathlib.Path, out_dir: pathlib.Path) -> None:
+    doc = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+           "g1": str(g1), "out_dir": str(out_dir), **result}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="python3 ops/reqloop/extract/run_eval.py",
         description="G2.5 G1 重跑：擷取需求 vs 手寫需求（離線重算，不呼叫模型）",
     )
     ap.add_argument("--model", default="glm53", help="擷取模型別名（對應 out/<task>.<model>.json；預設 glm53）")
+    ap.add_argument("--models", default=None,
+                    help="多模型對照（逗號分隔，如 --models glm53,glm53flash）；輸出一張整合對照表（vq-el4.6）")
     ap.add_argument("--g1", default=None, help="G1 任務目錄（預設 ops/reqloop/g1/tasks）")
     ap.add_argument("--out-dir", default=None, help="擷取結果目錄（預設 ops/reqloop/extract/out）")
     ap.add_argument("--vibe-calls", default="~/dev/ops/state/vibe_calls.jsonl", help="擷取成本紀錄")
@@ -170,6 +232,20 @@ def main(argv: list[str] | None = None) -> int:
     if not task_dirs:
         print(f"錯誤：{g1} 內未找到任何 G1 任務", file=sys.stderr)
         return 2
+
+    if a.models:
+        models = [m.strip() for m in a.models.split(",") if m.strip()]
+        if not models:
+            print("錯誤：--models 為空", file=sys.stderr)
+            return 2
+        result = run_models_comparison(models, g1, out_dir, vibe_calls)
+        print_models_table(result)
+        if a.json:
+            write_models_json(pathlib.Path(a.json), result, g1, out_dir)
+        gates = [s["gate"] for s in result["models"].values()]
+        if "MISSING" in gates:
+            return 2
+        return 0 if all(g == "PASS" for g in gates) else 20
 
     print(f"# G2.5 G1 重跑對照（model={a.model}；離線重算、不呼叫模型）")
     print()

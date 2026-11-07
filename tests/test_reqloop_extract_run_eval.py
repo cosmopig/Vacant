@@ -528,3 +528,68 @@ def test_run_phase3_resumes_from_existing_progress(tmp_path):
     assert second_verdicts == first_verdicts             # 結果保留
     assert {r["cell"]: r for r in doc["rows"]} == {r["cell"]: r for r in prog1["rows"]}
     assert doc["fixed"] == 1 and doc["held"] == 1 and doc["errors"] == 0
+
+
+# ── 多模型對照（vq-el4.6）：--models 表格＋JSON ─────────────────────────────
+
+def _mk_g1_multi(tmp_path: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path]:
+    """2 題 G1 形（各 1 good＋1 bad）；答案＝去重商戶數 3。
+
+    m1 擷取＝有效重算需求（bad 抓出、good VERIFIED）；
+    m2 擷取＝unverified 條目（全 UNKNOWN、抓不出、不冤枉）；m3 無擷取結果（fail-closed）。
+    """
+    good_req = _reqset("t")
+    weak_req = RequirementSet("t", [RequirementItem(
+        id="R2", quote="How many unique merchants", deliverable="answer.txt",
+        verifier="plain_recomputed", params={}, unverified=True)])
+    g1 = tmp_path / "g1"
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    for tname in ("ta", "tb"):
+        t = g1 / tname
+        (t / "data").mkdir(parents=True)
+        (t / "data" / "t.csv").write_text("merchant_id\nM1\nM1\nM2\nM3\n", encoding="utf-8")
+        (t / "requirements.json").write_text(json.dumps(good_req.to_dict()), encoding="utf-8")
+        (t / "good").mkdir()
+        (t / "good" / "answer.txt").write_text("3\n", encoding="utf-8")
+        (t / "bad_wrong").mkdir()
+        (t / "bad_wrong" / "answer.txt").write_text("5\n", encoding="utf-8")
+        (out_dir / f"{tname}.m1.json").write_text(json.dumps(good_req.to_dict()), encoding="utf-8")
+        (out_dir / f"{tname}.m2.json").write_text(json.dumps(weak_req.to_dict()), encoding="utf-8")
+    return g1, out_dir
+
+
+def test_run_eval_multi_model_comparison(tmp_path, capsys):
+    """--models m1,m2：對照表（Model/Bad Caught/Caught %/Good FP/Total Good/Calls/Tokens）
+    ＋JSON 的 models 字典；一 PASS 一 FAIL → rc 20；單模型全 PASS → rc 0；缺擷取 → rc 2。"""
+    from run_eval import main
+    g1, out_dir = _mk_g1_multi(tmp_path)
+    vc = tmp_path / "vibe_calls.jsonl"
+    vc.write_text("\n".join(
+        json.dumps({"model": "m1", "rc": 0, "purpose": f"g1 {t}", "total_tokens": tok})
+        for t, tok in (("ta", 100), ("tb", 200))) + "\n", encoding="utf-8")
+    jout = tmp_path / "compare.json"
+
+    rc = main(["--models", "m1,m2", "--g1", str(g1), "--out-dir", str(out_dir),
+               "--vibe-calls", str(vc), "--json", str(jout)])
+    out = capsys.readouterr().out
+    assert rc == 20                                   # m1 PASS、m2 FAIL → 非全過
+    row1 = next(l for l in out.splitlines() if l.startswith("m1"))
+    row2 = next(l for l in out.splitlines() if l.startswith("m2"))
+    for col in ("Model", "Bad Caught", "Caught %", "Good FP", "Total Good", "Calls", "Tokens"):
+        assert col in out, col
+    assert "2/2" in row1 and "100.0%" in row1 and "300" in row1    # m1：全抓、有成本
+    assert "0/2" in row2 and "UNKNOWN" in row2                      # m2：0 抓、成本缺值
+    doc = json.loads(jout.read_text(encoding="utf-8"))
+    assert set(doc["models"]) == {"m1", "m2"}
+    m1, m2 = doc["models"]["m1"], doc["models"]["m2"]
+    assert (m1["bad_caught"], m1["total_bad"], m1["good_fp"], m1["total_good"]) == (2, 2, 0, 2)
+    assert m1["calls"] == 2 and m1["tokens"] == 300 and m1["gate"] == "PASS"
+    assert m2["bad_caught"] == 0 and m2["good_fp"] == 0
+    assert m2["calls"] is None and m2["tokens"] is None             # 缺值＝UNKNOWN，不填 0
+    assert m2["gate"] == "FAIL"
+
+    assert main(["--models", "m1", "--g1", str(g1), "--out-dir", str(out_dir),
+                 "--vibe-calls", str(vc)]) == 0                     # 單模型全 PASS → 0
+    assert main(["--models", "m3", "--g1", str(g1), "--out-dir", str(out_dir),
+                 "--vibe-calls", str(vc)]) == 2                     # 缺擷取 → fail-closed
