@@ -2890,3 +2890,22 @@ def test_recomputed_verifiers_check_source_before_blaming_deliverable_and_malfor
 
 
 
+
+
+def test_dedup_by_field_coerces_single_element_list():
+    """vq-el4.3 第 3 輪：glm53 把 dedup_by 寫成 ["order_id"]——檢查器必須容錯取首項，
+    而不是 AttributeError crash（崩潰不是 FAIL，也不准靜默跳過去重）。"""
+    from vacant_network.reqloop.checks import _dedup_by_field
+    assert _dedup_by_field({"dedup_by": "order_id"}) == "order_id"
+    assert _dedup_by_field({"dedup_by": ["order_id"]}) == "order_id"
+    assert _dedup_by_field({}) == ""
+    assert _dedup_by_field({"dedup_by": " Order_ID "}) == "order_id"
+
+
+def test_dedup_by_field_rejects_ambiguous_shapes():
+    """空列表／多元素／非字串 → UnknownSource（fail-closed，不准猜）。"""
+    import pytest
+    from vacant_network.reqloop.checks import UnknownSource, _dedup_by_field
+    for bad in ([], ["a", "b"], 5, {"x": 1}):
+        with pytest.raises(UnknownSource):
+            _dedup_by_field({"dedup_by": bad})

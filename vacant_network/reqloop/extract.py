@@ -56,6 +56,7 @@ __all__ = [
     "ExtractReport",
     "GlmClient",
     "VERIFIER_HINTS",
+    "VERIFIER_PARAM_EXAMPLES",
     "build_requirement_set",
     "build_task_prompt",
     "csv_preview",
@@ -536,6 +537,9 @@ def default_prompt(user_text: str) -> str:
     verifier 白名單由 checks.SUPPORTED_VERIFIERS 派生（單一事實來源）。
     """
     verifiers = ", ".join(sorted(SUPPORTED_VERIFIERS))
+    examples = "\n".join(
+        f"- {name}: {VERIFIER_PARAM_EXAMPLES[name]}" for name in sorted(VERIFIER_PARAM_EXAMPLES)
+    )
     return (
         "你是需求擷取助手。只依下方使用者原文，抽出可用程式驗證的需求條目。\n"
         "輸出 JSON 陣列，每項欄位：id, quote, deliverable, verifier, params, "
@@ -543,8 +547,9 @@ def default_prompt(user_text: str) -> str:
         "規則：\n"
         "1. quote 必須是使用者原文的逐字片段（不准改寫、不准自造）。\n"
         f"2. verifier 只能選：{verifiers}。\n"
-        "3. params 須符合該 verifier 的要求（如 kv_recomputed 需 key/data_file/"
-        "recompute.type；answer_kv 需 keys；tag_format 需 tag）。\n"
+        "3. params 必須符合下方該 verifier 的範例形狀（欄位名、型別、巢狀結構逐字照範例，"
+        "不准自創欄位名）：\n"
+        f"{examples}\n"
         "4. 無法用程式檢查的需求設 unverified=true 並在 description 說明。\n"
         "5. 不准發明使用者沒說的需求。\n\n"
         "使用者原文：\n"
@@ -573,6 +578,32 @@ VERIFIER_HINTS: dict[str, str] = {
                        "input_csv 或 input_json 其一，指原始資料檔）",
     "summary_numbers": "摘要文字中指定數字與重算一致（params 必帶 numbers、"
                        "input_csv 或 input_json 其一，指原始資料檔）",
+}
+
+
+# 每個 verifier 的 params 範例（vq-el4.3 第 2 輪：r1180 門禁 FAIL 的主因是模型自創欄位名——
+# identity/group_by 寫成字串、aggregates 用 {column,func}、numbers 用 {value,label}、
+# recompute 寫成字串。範例的欄位名、型別、巢狀結構必須逐字照抄；
+# 資料檔名必須是任務目錄裡真實存在的檔名（prompt 附帶資料檔那一節會列出）。)
+VERIFIER_PARAM_EXAMPLES: dict[str, str] = {
+    "answer_kv": '{"keys": [{"key": "grand_total", "type": "number"}]}',
+    "csv_structure": '{"required_columns": ["category", "subcategory", "total_amount"]}',
+    "table_structure": '{"required_columns": ["month", "orders_count", "net_sales"]}',
+    "kv_recomputed": '{"key": "mean_cases", "data_file": "events.csv",'
+                     ' "recompute": {"type": "count_if", "col": "cases", "eq": 3}}',
+    "plain_recomputed": '{"data_file": "orders.csv",'
+                        ' "recompute": {"type": "mode_col", "col": "status"}}',
+    "tag_format": '{"tag": "total", "value_type": "number"}',
+    "monthly_sales_metrics": '{"input_csv": "orders.csv", "expected_in_evidence": true}',
+    "monthly_top_products": '{"input_csv": "orders.csv", "top_n": 3}',
+    "summary_metrics_consistency": '{"input_csv": "orders.csv",'
+                                   ' "metric_keywords": ["合計淨銷售總額"]}',
+    "summary_numbers": '{"input_csv": "orders.csv",'
+                       ' "numbers": [{"type": "sum", "col": "amount", "label": "合計淨銷售總額"}]}',
+    "rowset_filter": '{"input_csv": "orders.csv", "identity": ["order_id"],'
+                     ' "exclude": [{"col": "status", "op": "ne", "value": "CANCELLED"}]}',
+    "group_aggregate": '{"input_csv": "orders.csv", "group_by": ["category"],'
+                       ' "aggregates": [{"name": "total_amount", "type": "sum", "col": "amount"}]}',
 }
 
 
@@ -653,16 +684,34 @@ def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str 
     hints = "\n".join(
         f"- {name}：{VERIFIER_HINTS.get(name, '見 checks.py')}" for name in sorted(SUPPORTED_VERIFIERS)
     )
+    examples = "\n".join(
+        f"  {name}: {VERIFIER_PARAM_EXAMPLES[name]}" for name in sorted(VERIFIER_PARAM_EXAMPLES)
+    )
     parts = [
         "你是需求擷取助手。只依下方使用者原文，抽出可用程式驗證的需求條目。",
         "輸出：一個 JSON 陣列（陣列外不要說明文字），每項欄位：",
         "id, quote, deliverable, verifier, params, description, required, kind；"
         "kind 只能取 explicit／assumption／preference（預設 explicit，不准自造其他值）。",
         "規則：",
-        "1. quote 必須是使用者原文的逐字片段（不准改字、換序、改寫、自造）；拿不準寧可不收該條。",
+        "1. quote 必須是使用者原文的逐字片段（逐字複製，不准改字、換序、改寫、自造）；拿不準寧可不收該條。",
         "2. verifier 只能選：",
         hints,
-        "3. params 須符合該 verifier 的要求（如 answer_kv 需 keys；kv_recomputed 需 key/data_file/recompute；csv_structure 需 required_columns）。",
+        "3. params 必須符合下方該 verifier 的範例形狀（欄位名、型別、巢狀結構逐字照範例，不准自創欄位名）：",
+        examples,
+        "   常見錯誤（任一觸及該條目即被判 unverified 或錯誤 FAIL）：",
+        "   - identity、group_by、required_columns、numbers、aggregates、exclude、include 必須是 JSON 陣列，不准寫成單一字串；",
+        "   - aggregates 每項必須是 {name, type, col?/expr?}；numbers 每項必須是 {type, col?, label?}；",
+        "   - values 必須是 {欄位名: 值} 的物件，不是陣列；exclude/include 每項必須是 {col, op, value}，op 只能取 eq/ne/lt/le/gt/ge；",
+        "   - recompute 必須是含 type 的物件，不准寫成字串；",
+        "   - input_csv／input_json／data_file 必須是下方「附帶資料檔」列出的真實檔名，不准猜檔名；",
+        "   - deliverable 必須是原文出現的交付物檔案名（如 monthly_sales.csv），不准寫描述性短句（如「資料清洗後的行集」）；",
+        "   - 原文含過濾/去重規則（如「排除 CANCELLED」、「重複只留第一筆」）時，每個重算條目的 params 都要自帶 exclude/dedup_by——params 逐條獨立、不繼承；dedup_by 是單一字串欄位名（如 \"order_id\"，不是陣列）；",
+        "   - 重算需要派生欄位時（如 total_score = midterm_score * 0.4 + final_score * 0.6），先用 compute: [{\"name\": \"total_score\", \"expr\": \"midterm_score * 0.4 + final_score * 0.6\"}] 定義，再在 aggregates/numbers 裡引用；",
+        "   - 分組鍵要轉換時（不分大小寫、空白歸類）用 group_normalize: {\"col\": {\"lower\": true, \"default\": \"unspecified\"}}；",
+        "   - 原文說「空白剔除不計入平均」時用平均類型 mean_skip_empty（不是 mean）；",
+        "   - 條件計數（如及格人數）用 aggregates 的 {\"name\": ..., \"type\": \"count_if\", \"expr\": \"total_score >= 60\"}；",
+        "   - rowset_filter 只用於行級交付物（每行＝一筆原始紀錄）；交付物是彙總表時改用對應的聚合 verifier 把過濾規則寫進去，不准對彙總表用 rowset_filter；",
+        "   - 需要資料檔的 verifier（rowset_filter、group_aggregate、summary_numbers、monthly_*、summary_metrics_consistency、kv/plain_recomputed）若該任務沒有對應資料檔，該條目設 unverified=true。",
         "4. 無法用程式驗證的需求設 unverified=true，並在 description 說明原因。",
         "5. 不准發明使用者沒說的需求。",
     ]

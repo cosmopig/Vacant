@@ -2,63 +2,10 @@
   "task_id": "student_grades",
   "items": [
     {
-      "id": "R1",
-      "quote": "排除 `status` 為 `WITHDRAWN` 的休退學記錄。",
-      "deliverable": "class_summary.csv",
-      "verifier": "rowset_filter",
-      "kind": "explicit",
-      "params": {
-        "identity": "student_id",
-        "input_csv": "grades.csv",
-        "values": {}
-      },
-      "description": "先排除 status=WITHDRAWN 的記錄，再以 student_id 去重保留第一筆，行集與重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R2",
-      "quote": "同一 `student_id` 若出現多筆，只保留第一筆。",
-      "deliverable": "class_summary.csv",
-      "verifier": "rowset_filter",
-      "kind": "explicit",
-      "params": {
-        "identity": "student_id",
-        "input_csv": "grades.csv"
-      },
-      "description": "排除→去重→納入後行集與逐欄值與重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "總評成績 `total_score = midterm_score × 0.4 + final_score × 0.6`；`total_score ≥ 60.0` 為及格。",
-      "deliverable": "class_summary.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "group_by": "class_name",
-        "aggregates": {
-          "average_score": "mean(total_score)",
-          "passing_count": "count(total_score >= 60.0)"
-        },
-        "input_csv": "grades.csv"
-      },
-      "description": "total_score 以 midterm_score×0.4 + final_score×0.6 計算，及格門檻為 total_score ≥ 60.0，分組聚合值須與重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R4",
+      "id": "req_class_summary_structure",
       "quote": "產出 `class_summary.csv`，欄位：`class_name, student_count, passing_count, pass_rate, average_score`",
       "deliverable": "class_summary.csv",
-      "verifier": "csv_structure",
+      "verifier": "table_structure",
       "kind": "explicit",
       "params": {
         "required_columns": [
@@ -69,64 +16,81 @@
           "average_score"
         ]
       },
-      "description": "class_summary.csv 必須存在且含指定欄位。",
+      "description": "class_summary.csv 必須存在，且含 class_name、student_count、passing_count、pass_rate、average_score 欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R5",
-      "quote": "`pass_rate` = 該班及格人數 / 該班修課人數（小數點後 2 位）",
+      "id": "req_class_summary_aggregates",
+      "quote": "總評成績 `total_score = midterm_score × 0.4 + final_score × 0.6`；`total_score ≥ 60.0` 為及格。",
       "deliverable": "class_summary.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "group_by": "class_name",
-        "aggregates": {
-          "pass_rate": "round(passing_count / student_count, 2)"
-        },
-        "input_csv": "grades.csv"
+        "input_csv": "grades.csv",
+        "group_by": [
+          "class_name"
+        ],
+        "dedup_by": [
+          "student_id"
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "ne",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "student_count",
+            "type": "count"
+          },
+          {
+            "name": "passing_count",
+            "type": "count_if",
+            "expr": "total_score >= 60.0"
+          },
+          {
+            "name": "pass_rate",
+            "type": "mean",
+            "expr": "total_score >= 60.0"
+          },
+          {
+            "name": "average_score",
+            "type": "mean",
+            "col": "total_score"
+          }
+        ]
       },
-      "description": "各班 pass_rate 為及格人數除以修課人數，四捨五入至小數點後 2 位，與重算一致。",
+      "description": "依 class_name 分組，排除 status 為 WITHDRAWN、同一 student_id 去重只留第一筆後，計算各班修課人數、及格人數（total_score ≥ 60.0）、及格率與 total_score 平均，與 class_summary.csv 重算比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R6",
-      "quote": "`average_score` = 該班 total_score 平均（小數點後 2 位）",
-      "deliverable": "class_summary.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "group_by": "class_name",
-        "aggregates": {
-          "average_score": "round(mean(total_score), 2)"
-        },
-        "input_csv": "grades.csv"
-      },
-      "description": "各班 average_score 為 total_score 平均，四捨五入至小數點後 2 位，與重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R7",
+      "id": "req_summary_md_metrics",
       "quote": "產出 `summary.md`，須明確載明「全年級及格率」（百分比，小數點後 2 位）與「全年級平均總評」（小數點後 2 位）。",
       "deliverable": "summary.md",
-      "verifier": "summary_numbers",
+      "verifier": "summary_metrics_consistency",
       "kind": "explicit",
       "params": {
-        "numbers": [
+        "input_csv": "grades.csv",
+        "metric_keywords": [
           "全年級及格率",
           "全年級平均總評"
-        ],
-        "input_csv": "grades.csv"
+        ]
       },
-      "description": "summary.md 須載明全年級及格率（百分比，小數點後 2 位）與全年級平均總評（小數點後 2 位），數字與原始資料重算一致。",
+      "description": "summary.md 中「全年級及格率」與「全年級平均總評」的數字須與原始資料重算一致（排除 WITHDRAWN、student_id 去重、total_score = midterm_score × 0.4 + final_score × 0.6）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -138,16 +102,12 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3",
-      "R4",
-      "R5",
-      "R6",
-      "R7"
+      "req_class_summary_structure",
+      "req_class_summary_aggregates",
+      "req_summary_md_metrics"
     ],
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T09:38:34+00:00"
+  "generated_at": "2026-11-07T10:10:05+00:00"
 }

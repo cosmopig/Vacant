@@ -199,7 +199,7 @@ def recompute_orders_monthly(
     rows = read_csv_rows(input_file)
 
     exclude_status = set(s.upper() for s in params.get("exclude_status", ["CANCELLED"]))
-    dedup_by = params.get("dedup_by", "order_id").lower()
+    dedup_by = _dedup_by_field(params) or "order_id"
     date_col = params.get("date_col", "order_date").lower()
     amount_col = params.get("amount_col", "net_amount").lower()
     product_col = params.get("product_col", "product_name").lower()
@@ -931,6 +931,26 @@ def _cond_holds(row: dict[str, Any], cond: dict[str, Any]) -> bool:
     raise UnknownSource(f"未知比較算子: {op}")
 
 
+def _dedup_by_field(params: dict[str, Any]) -> str:
+    """dedup_by 正規化：單一欄位名字串；模型常誤寫成一元素列表——容錯取首項。
+
+    空列表／多元素／非字串 → UnknownSource（fail-closed，不准猜）。
+    vq-el4.3 第 3 輪：glm53 把 dedup_by 寫成 ["order_id"]，原式 `.lower()` 直接
+    AttributeError crash（檢查器崩潰不是 FAIL，也不准靜默跳過）。
+    """
+    d = params.get("dedup_by")
+    if d is None:
+        return ""
+    if isinstance(d, (list, tuple)):
+        if len(d) == 1 and isinstance(d[0], str):
+            d = d[0]
+        else:
+            raise UnknownSource(f"dedup_by 須為單一欄位名字串：{d!r}")
+    if not isinstance(d, str):
+        raise UnknownSource(f"dedup_by 須為欄位名字串：{d!r}")
+    return d.strip().lower()
+
+
 def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
     """exclude → dedup_by（保留第一筆）→ include。"""
     exclude_specs = params.get("exclude", []) or []
@@ -938,9 +958,9 @@ def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[d
         raise UnknownSource("exclude 須為條件列表")
     for cond in exclude_specs:
         rows = [r for r in rows if not _cond_holds(r, cond)]
-    dedup_by = params.get("dedup_by")
+    dedup_by = _dedup_by_field(params)
     if dedup_by:
-        key = str(dedup_by).strip().lower()
+        key = dedup_by
         seen: set[str] = set()
         out: list[dict[str, Any]] = []
         for r in rows:

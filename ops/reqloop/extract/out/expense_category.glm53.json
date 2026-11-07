@@ -2,7 +2,7 @@
   "task_id": "expense_category",
   "items": [
     {
-      "id": "R1",
+      "id": "req-1",
       "quote": "產出 `expense_summary.csv`，欄位：`category, subcategory, total_amount`",
       "deliverable": "expense_summary.csv",
       "verifier": "csv_structure",
@@ -14,77 +14,83 @@
           "total_amount"
         ]
       },
-      "description": "交付檔 expense_summary.csv 必須存在且含 category、subcategory、total_amount 三欄。",
+      "description": "交付檔 expense_summary.csv 必須存在，且含 category、subcategory、total_amount 三個欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R3",
-      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）。",
+      "id": "req-3",
+      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）",
       "deliverable": "expense_summary.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
+        "input_csv": "expenses.csv",
         "group_by": [
           "category",
           "subcategory"
         ],
+        "group_normalize": {
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
         "aggregates": [
           {
-            "column": "amount",
-            "op": "sum",
-            "round": 2,
-            "rounding_order": "round_after_summing",
-            "output_column": "total_amount"
+            "name": "total_amount",
+            "type": "sum",
+            "col": "amount"
           }
-        ],
-        "input_csv": "expenses.csv"
+        ]
       },
-      "description": "total_amount 必須是先加總再四捨五入到小數點後 2 位的值，與重算一致（驗證捨入順序，避免逐列先捨入）。",
+      "description": "total_amount 須為該組 amount 先加總、再四捨五入到小數點後 2 位的值；驗證時以重算之組加總值（先加總後取整）比對交付值。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R4",
-      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）。",
+      "id": "req-4",
+      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）",
       "deliverable": "summary.md",
       "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
+        "input_csv": "expenses.csv",
         "numbers": [
           {
-            "label": "報銷總金額",
-            "definition": "sum of amount over all rows in expenses.csv, rounded to 2 decimal places",
-            "match": "exact_numeric"
+            "type": "sum",
+            "col": "amount",
+            "label": "報銷總金額"
           }
-        ],
-        "input_csv": "expenses.csv"
+        ]
       },
-      "description": "summary.md 中載明的報銷總金額（全部 amount 加總、小數點後 2 位）須與從 expenses.csv 重算的數值一致。",
+      "description": "summary.md 中「報銷總金額」須為全部 amount 加總、四捨五入到小數點後 2 位的精確數值，並與從 expenses.csv 重算結果一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R5",
-      "quote": "產出 `summary.md`",
+      "id": "req-5",
+      "quote": "須明確載明「報銷總金額」",
       "deliverable": "summary.md",
-      "verifier": "table_structure",
+      "verifier": "summary_metrics_consistency",
       "kind": "explicit",
       "params": {
-        "required_columns": [],
-        "existence": true
+        "input_csv": "expenses.csv",
+        "metric_keywords": [
+          "報銷總金額"
+        ]
       },
-      "description": "交付物 summary.md 必須存在（表格結構欄位由其他條目驗證，此處僅驗證檔案存在）。",
+      "description": "summary.md 摘要文字中「報銷總金額」合計指標數字須與原始資料重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -92,24 +98,19 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R3",
-      "R4",
-      "R5"
+      "req-1",
+      "req-3",
+      "req-4",
+      "req-5"
     ],
     "discarded": [
       {
         "index": 1,
-        "id": "R2",
+        "id": "req-2",
         "reason": "quote_not_verbatim"
       }
     ],
-    "unverified": [
-      {
-        "id": "R5",
-        "reason": "empty_param:required_columns"
-      }
-    ]
+    "unverified": []
   },
-  "generated_at": "2026-11-07T09:38:06+00:00"
+  "generated_at": "2026-11-07T10:09:29+00:00"
 }

@@ -557,6 +557,27 @@ def test_verifier_hints_name_the_input_params():
         assert "input_csv" in h and "input_json" in h, (v, h)
 
 
+def test_task_prompt_shows_param_shape_examples_for_every_supported_verifier():
+    """vq-el4.3 第 2 輪：r1180 門禁 FAIL 主因是模型自創欄位名（identity/group_by 寫成
+    字串、aggregates 用 {column,func}、numbers 用 {value,label}）——prompt 必須對
+    每個白名單 verifier 附 params 範例（senior 11/07 指令第 2 項）＋明示常見錯誤。
+    """
+    from vacant_network.reqloop import checks
+    from vacant_network.reqloop.extract import (
+        VERIFIER_PARAM_EXAMPLES, build_task_prompt, default_prompt,
+    )
+    assert set(VERIFIER_PARAM_EXAMPLES) == set(checks.SUPPORTED_VERIFIERS)
+    p = build_task_prompt("t")
+    for name in sorted(checks.SUPPORTED_VERIFIERS):
+        assert f"{name}: {VERIFIER_PARAM_EXAMPLES[name]}" in p, name
+    for rule in ["必須是 JSON 陣列", "必須是含 type 的物件", "eq/ne/lt/le/gt/ge", "不准猜檔名"]:
+        assert rule in p, rule
+    # default_prompt 也要帶範例（介面不分裂）
+    dp = default_prompt("t")
+    for name in sorted(checks.SUPPORTED_VERIFIERS):
+        assert f"- {name}: {VERIFIER_PARAM_EXAMPLES[name]}" in dp, name
+
+
 # ---------------------------------------------------------------- argon 20261107_0822 回歸
 
 def test_extract_validates_all_verifiers_and_subparams(tmp_path):

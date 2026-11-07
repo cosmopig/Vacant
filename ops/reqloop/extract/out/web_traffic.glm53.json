@@ -2,7 +2,7 @@
   "task_id": "web_traffic",
   "items": [
     {
-      "id": "R2",
+      "id": "R1",
       "quote": "依 `local_day` 產出 `daily_traffic.csv`，欄位：`local_day, visits, uv, avg_dwell`",
       "deliverable": "daily_traffic.csv",
       "verifier": "csv_structure",
@@ -15,7 +15,37 @@
           "avg_dwell"
         ]
       },
-      "description": "交付檔 daily_traffic.csv 必須存在且含欄位 local_day, visits, uv, avg_dwell。",
+      "description": "daily_traffic.csv 必須存在且含 local_day、visits、uv、avg_dwell 欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "`visits` = 該當地日期之造訪筆數",
+      "deliverable": "daily_traffic.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "traffic.csv",
+        "compute": [
+          {
+            "name": "local_day",
+            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
+          }
+        ],
+        "group_by": [
+          "local_day"
+        ],
+        "aggregates": [
+          {
+            "name": "visits",
+            "type": "count"
+          }
+        ]
+      },
+      "description": "各 local_day 的造訪筆數需與從 traffic.csv 重算一致（local_day 由 day_index + ((hour + tz_offset_hours) // 24) 派生，整數除向負無窮取整）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -23,52 +53,83 @@
     },
     {
       "id": "R3",
-      "quote": "`avg_dwell` = 該當地日期 `dwell_seconds` 平均（小數點後 2 位）；`dwell_seconds` 空白＝無停留紀錄，**剔除不計入平均**",
+      "quote": "`uv` = 該當地日期之獨立 `user_id` 數",
       "deliverable": "daily_traffic.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "group_by": "local_day",
-        "aggregates": {
-          "avg_dwell": "mean of non-blank dwell_seconds, rounded to 2 decimal places"
-        },
-        "input_csv": "traffic.csv"
+        "input_csv": "traffic.csv",
+        "compute": [
+          {
+            "name": "local_day",
+            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
+          }
+        ],
+        "group_by": [
+          "local_day"
+        ],
+        "aggregates": [
+          {
+            "name": "uv",
+            "type": "count_distinct",
+            "col": "user_id"
+          }
+        ]
       },
-      "description": "avg_dwell 計算時須剔除空白 dwell_seconds，且結果取小數點後 2 位，與從原始資料重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R4",
-      "quote": "產出 `summary.md`，須明確載明「全期獨立訪客數 UV」（全部資料跨日去重之 `user_id` 數）",
-      "deliverable": "summary.md",
-      "verifier": "kv_recomputed",
-      "kind": "explicit",
-      "params": {
-        "key": "全期獨立訪客數 UV",
-        "data_file": "traffic.csv",
-        "recompute": "count of distinct user_id across all rows"
-      },
-      "description": "summary.md 須載明全期獨立訪客數 UV，其值等於 traffic.csv 全部資料跨日去重之 user_id 數，可由原始資料重算比對。",
+      "description": "各 local_day 的獨立 user_id 數需與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
     },
     {
-      "id": "R5",
-      "quote": "與「全期造訪總數」（精確數值）",
-      "deliverable": "summary.md",
-      "verifier": "kv_recomputed",
+      "id": "R4",
+      "quote": "`avg_dwell` = 該當地日期 `dwell_seconds` 平均（小數點後 2 位）；`dwell_seconds` 空白＝無停留紀錄，**剔除不計入平均**",
+      "deliverable": "daily_traffic.csv",
+      "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "key": "全期造訪總數",
-        "data_file": "traffic.csv",
-        "recompute": "total row count of traffic.csv"
+        "input_csv": "traffic.csv",
+        "compute": [
+          {
+            "name": "local_day",
+            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
+          }
+        ],
+        "group_by": [
+          "local_day"
+        ],
+        "aggregates": [
+          {
+            "name": "avg_dwell",
+            "type": "mean_skip_empty",
+            "col": "dwell_seconds"
+          }
+        ]
       },
-      "description": "summary.md 須載明全期造訪總數的精確數值，等於原始資料總筆數，可由原始資料重算比對。",
+      "description": "各 local_day 的 dwell_seconds 平均（空白剔除不計入平均，四捨五入至小數點後 2 位）需與重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "須明確載明「全期獨立訪客數 UV」（全部資料跨日去重之 `user_id` 數）",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "traffic.csv",
+        "numbers": [
+          {
+            "type": "count_distinct",
+            "col": "user_id",
+            "label": "全期獨立訪客數 UV"
+          }
+        ]
+      },
+      "description": "summary.md 中「全期獨立訪客數 UV」須為全部資料跨日去重之 user_id 數，與重算一致（非每日 UV 相加）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -76,20 +137,24 @@
     },
     {
       "id": "R6",
-      "quote": "注意：全期 UV **不是**每日 UV 相加。",
+      "quote": "與「全期造訪總數」（精確數值）",
       "deliverable": "summary.md",
-      "verifier": "kv_recomputed",
+      "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
-        "key": "全期獨立訪客數 UV",
-        "data_file": "traffic.csv",
-        "recompute": "count of distinct user_id across all rows (must not equal sum of daily uv)"
+        "input_csv": "traffic.csv",
+        "numbers": [
+          {
+            "type": "count",
+            "label": "全期造訪總數"
+          }
+        ]
       },
-      "description": "全期 UV 須為跨日去重 user_id 數，不得以每日 UV 相加得出；驗證時以原始資料去重重算比對。",
+      "description": "summary.md 中「全期造訪總數」須為精確數值，與從 traffic.csv 重算之總筆數一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -97,33 +162,24 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
+      "R1",
       "R2",
       "R3",
       "R4",
       "R5",
       "R6"
     ],
-    "discarded": [
-      {
-        "index": 0,
-        "id": "R1",
-        "reason": "quote_not_verbatim"
-      }
-    ],
+    "discarded": [],
     "unverified": [
       {
-        "id": "R4",
-        "reason": "recompute_not_dict"
+        "id": "R3",
+        "reason": "unsupported_aggregate_type:count_distinct"
       },
       {
         "id": "R5",
-        "reason": "recompute_not_dict"
-      },
-      {
-        "id": "R6",
-        "reason": "recompute_not_dict"
+        "reason": "unsupported_summary_number_type:count_distinct"
       }
     ]
   },
-  "generated_at": "2026-11-07T09:38:48+00:00"
+  "generated_at": "2026-11-07T10:10:22+00:00"
 }
