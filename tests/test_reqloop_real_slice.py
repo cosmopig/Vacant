@@ -349,6 +349,54 @@ def test_real_slice_dab055_needle_is_true_recomputed_value():
     )
 
 
+def test_real_slice_dab055_precheck_single_source_of_truth():
+    """P20261107_0539-1（r1166）：dab_055 審計預檢腳本的值計算＝產品 checks._mean_int_col
+    （單一事實來源）——防「審計腳本內嵌解析迴圈、產品改口徑後靜默漂移」。
+
+    本輪改善：ops/audits/dab055_slice_precheck_20261107.py 不再複製 _mean_int_col 的
+    解析迴圈，改直接呼叫產品 _mean_int_col 取值，並輸出 single_source_of_truth 欄位。
+    本測試斷言：審計預檢輸出的 single_source_of_truth.expected/unrounded == 產品對同一
+    凍結資料（repo 凍結 slice，sha bc485997…，與預檢讀的 effects2 快照逐位元組同）實算值。
+    預檢輸出在 ~/dev/ops（本機審計證據）；若缺席（CI 他主機）則 skip，不視為失敗。
+    若有人把預檢回復成內嵌迴圈的舊版（無 single_source_of_truth 欄位），本測試即紅。
+    零模型呼叫。
+    """
+    import csv
+    import pytest
+    from vacant_network.reqloop.checks import _mean_int_col
+    precheck_json = (
+        pathlib.Path.home() / "dev" / "ops" / "audits" / "dab055_slice_precheck_20261107.json"
+    )
+    if not precheck_json.is_file():
+        pytest.skip("dab055 預檢輸出不在本機（~/dev/ops/audits），無法交叉驗證")
+    man = g2.G2Manifest.load(DAB055_MANIFEST)
+    base = DAB055_MANIFEST.parent
+    d = man.drafts[0]
+    req_set = RequirementSet.load(base / d["task"]["dir"] / "requirements.json")
+    item = next(it for it in req_set.items if it.id == "req_mean_cases_recomputed")
+    rc = item.params["recompute"]
+    assert rc["type"] == "mean_int_col"
+    data_path = base / d["task"]["dir"] / item.params["data_file"]
+    with open(data_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    expected, unrounded = _mean_int_col(rows, rc)
+    audit = json.loads(precheck_json.read_text(encoding="utf-8"))
+    sst = audit.get("single_source_of_truth")
+    assert sst is not None, (
+        "審計預檢缺 single_source_of_truth 欄位——疑似回復「內嵌解析迴圈」複製，"
+        "會與產品 _mean_int_col 口徑漂移"
+    )
+    assert "checks._mean_int_col" in sst.get("expected_from", ""), (
+        f"single_source_of_truth.expected_from 須點名產品函數，實得 {sst.get('expected_from')!r}"
+    )
+    assert sst["expected"] == expected, (
+        f"審計腳本值 {sst['expected']!r} ≠ 產品 _mean_int_col {expected!r}（口徑漂移）"
+    )
+    assert sst["unrounded"] == unrounded, (
+        f"審計腳本 unrounded {sst['unrounded']!r} ≠ 產品 {unrounded!r}"
+    )
+
+
 def test_real_slice_dab055_smoke_pipeline_and_exit_codes(tmp_path):
     """P20261107_0243-2：dab_055 內容閉環端到端修復／拒收管線（假代理、零模型呼叫）。
 
