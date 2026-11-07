@@ -584,3 +584,70 @@ def test_real_slice_dab426_single_source_of_truth():
     )
     assert str(unrounded) != needle, \
         "測試空洞：若未 round 即等於針，round 守衛無意義（156.41568 → 156.42 才是真守衛）"
+
+
+def test_real_slice_dab426_precheck_single_source_of_truth():
+    """P20261107_0735-1（r1174）：dab_426 審計預檢輸出（~/dev/ops/audits/
+    dab426_slice_precheck_20261107.json）的值計算＝產品 checks._max_row_first
+    （單一事實來源）——防「審計腳本內嵌解析迴圈、產品改口徑後靜默漂移」
+    （同 dab055/r1166、dabstep-10 紀律）。
+
+    斷言：預檢 single_source_of_truth.expected/unrounded == 產品對同一凍結資料
+    （repo 凍結 slice，CSV sha 83efce07…）實算值；expected_from 點名產品函數；
+    預檢離線採分與產品一致（bad 1 PASS/1 FAIL＝可重現反例、good 2/2 PASS＝
+    正確成果基線）；針 156.42 不進預檢記錄的任何 evidence。
+    預檢輸出在 ~/dev/ops（本機審計證據）；若缺席（CI 他主機）則 skip，不視為失敗。
+    若有人把預檢回復成無 single_source_of_truth 欄的舊形狀，本測試即紅。
+    零模型呼叫。"""
+    import csv
+    import pytest
+    from vacant_network.reqloop.checks import _max_row_first
+    precheck_json = (
+        pathlib.Path.home() / "dev" / "ops" / "audits" / "dab426_slice_precheck_20261107.json"
+    )
+    if not precheck_json.is_file():
+        pytest.skip("dab_426 預檢輸出不在本機（~/dev/ops/audits），無法交叉驗證")
+    man = g2.G2Manifest.load(DAB426_MANIFEST)
+    base = DAB426_MANIFEST.parent
+    d = man.drafts[0]
+    req_set = RequirementSet.load(base / d["task"]["dir"] / "requirements.json")
+    item = next(it for it in req_set.items if it.id == "req_max_wind_recomputed")
+    rc = item.params["recompute"]
+    assert rc["type"] == "max_row_first"
+    data_path = base / d["task"]["dir"] / item.params["data_file"]
+    with open(data_path, newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    unrounded = _max_row_first(rows, rc)
+    expected = round(unrounded, int(rc["round"]))
+    audit = json.loads(precheck_json.read_text(encoding="utf-8"))
+    sst = audit.get("single_source_of_truth")
+    assert sst is not None, (
+        "審計預檢缺 single_source_of_truth 欄位——疑似「內嵌解析迴圈」複製，"
+        "會與產品 _max_row_first 口徑漂移"
+    )
+    assert "checks._max_row_first" in sst.get("expected_from", ""), (
+        f"single_source_of_truth.expected_from 須點名產品函數，實得 {sst.get('expected_from')!r}"
+    )
+    assert sst["expected"] == expected, (
+        f"審計腳本值 {sst['expected']!r} ≠ 產品 _max_row_first {expected!r}（口徑漂移）"
+    )
+    assert sst["unrounded"] == unrounded, (
+        f"審計腳本 unrounded {sst['unrounded']!r} ≠ 產品 {unrounded!r}"
+    )
+    assert audit.get("recompute", {}).get("expected") == expected, "recompute.expected 須同值"
+    # 預檢離線採分與產品一致：bad 1 PASS/1 FAIL（反例）、good 2/2 PASS（基線）
+    by = {v["draft"]: {c["claim"]: c for c in v["claims"]}
+          for v in audit.get("visible_check_offline", [])}
+    assert set(by) == {"dab_426-pi-C", "dab_426-pi-A"}, f"採分草稿集漂移：{sorted(by)}"
+    bad_st = {k: c["status"] for k, c in by["dab_426-pi-C"].items()}
+    assert bad_st == {"req_answer_kv": "PASS", "req_max_wind_recomputed": "FAIL"}, \
+        f"bad 草稿應 1 PASS/1 FAIL（可重現內容反例），實得 {bad_st}"
+    good_st = {k: c["status"] for k, c in by["dab_426-pi-A"].items()}
+    assert good_st == {"req_answer_kv": "PASS", "req_max_wind_recomputed": "PASS"}, \
+        f"good 草稿應 2/2 PASS（正確成果基線），實得 {good_st}"
+    # 針 156.42 永不進預檢記錄的任何 evidence（洩漏守衛與 manifest leak_guard 一致）
+    ev_blob = json.dumps(
+        [c["evidence"] for v in audit.get("visible_check_offline", []) for c in v["claims"]],
+        ensure_ascii=False)  # 用 list（不用 dict）：兩草稿同 claim 名，dict 會被後者覆蓋
+    assert "156.42" not in ev_blob, f"重算期望值進證據：{ev_blob}"
+    assert "165.11" in ev_blob, "bad 草稿自己的錯值 165.11（合法內容）應可見於反例"
