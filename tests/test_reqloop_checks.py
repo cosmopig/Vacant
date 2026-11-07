@@ -10,6 +10,7 @@ import pytest
 
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 from vacant_network.reqloop.checks import (
+    _group_ratio_stat,
     _max_row_first,
     UnknownSource,
     recompute_orders_monthly,
@@ -1956,6 +1957,133 @@ def test_plain_recomputed_scheme_fee_avg_null_is_credit_and_round(tmp_path: path
     _write(good_d / "answer.txt", "0.6545\n")
     res_d = {r.claim_id: r for r in run_requirement_checks(task_dir, req_debit, good_d)}
     assert res_d["req_main"].status == "PASS"
+
+
+# ── plain_recomputed＋group_ratio_stat（G2.5：dabstep-16/17 volume ratio，2026-11-07）──
+
+def _grp_rows():
+    """分組 A：denom 100+400=500、num 100→0.2；分組 B：denom 1000、num 500→0.5。"""
+    return [
+        {"g": "A", "amt": "100", "fraud": "True"},
+        {"g": "A", "amt": "400", "fraud": "False"},
+        {"g": "B", "amt": "500", "fraud": "True"},
+        {"g": "B", "amt": "500", "fraud": "False"},
+    ]
+
+
+def _grp_rc(**over) -> dict:
+    rc = {"group_col": "g", "sum_col": "amt",
+          "num_where": [{"col": "fraud", "op": "eq", "value": "True"}]}
+    rc.update(over)
+    return rc
+
+
+def test_group_ratio_stat_helper_and_dispatch(tmp_path: pathlib.Path):
+    """group_ratio_stat：分組金額比率極值（manual.md fraud volume ratio）。
+    helper 單測（min/max、val/group、percent、平手取首見、NaN/缺值過濾、無有效分母）
+    ＋ run_requirement_checks 整合分派（dabstep-17 實敗形：count-ratio 草稿 7.683437
+    被判 FAIL(mismatch_with_recomputation)、volume-ratio 8.907926 被判 PASS；
+    dabstep-16 形：out="group" 回分組名稱；重算值不洩漏）。"""
+    # ── helper 直測 ──
+    rows = _grp_rows()
+    assert _group_ratio_stat(rows, _grp_rc()) == 0.2                       # min + out=val
+    assert _group_ratio_stat(rows, _grp_rc(out="group")) == "A"            # min + out=group
+    assert _group_ratio_stat(rows, _grp_rc(stat="max")) == 0.5             # max + val
+    assert _group_ratio_stat(rows, _grp_rc(stat="max", out="group")) == "B"  # max + group
+    assert _group_ratio_stat(rows, _grp_rc(percent=True)) == 20.0          # percent
+    # 平手取首見分組（X、Y 皆 0.5）
+    tie_rows = [
+        {"g": "X", "amt": "10", "fraud": "True"},
+        {"g": "Y", "amt": "5", "fraud": "True"},
+        {"g": "X", "amt": "10", "fraud": "False"},
+        {"g": "Y", "amt": "5", "fraud": "False"},
+    ]
+    assert _group_ratio_stat(tie_rows, _grp_rc()) == 0.5
+    assert _group_ratio_stat(tie_rows, _grp_rc(out="group")) == "X"
+    assert _group_ratio_stat(tie_rows, _grp_rc(stat="max", out="group")) == "X"
+    # NaN/inf/缺值忽略（A：num 50、denom 100→0.5；B：num 0、denom 100→0.0）
+    dirty_rows = [
+        {"g": "A", "amt": "nan", "fraud": "True"},
+        {"g": "A", "amt": "50", "fraud": "True"},
+        {"g": "A", "amt": "", "fraud": "False"},
+        {"g": "A", "amt": "50", "fraud": "False"},
+        {"g": "B", "amt": "inf", "fraud": "True"},
+        {"g": "B", "amt": "100", "fraud": "False"},
+    ]
+    assert _group_ratio_stat(dirty_rows, _grp_rc()) == 0.0
+    assert _group_ratio_stat(dirty_rows, _grp_rc(out="group")) == "B"
+    assert _group_ratio_stat(dirty_rows, _grp_rc(stat="max")) == 0.5
+    # 無有效分母 / 參數缺陷 → UnknownSource（不自評）
+    for bad_rows in ([{"g": "A", "amt": "", "fraud": "True"}],
+                     [{"g": "A", "amt": "50", "fraud": "True"},
+                      {"g": "A", "amt": "-50", "fraud": "False"}]):  # 分母和=0
+        with pytest.raises(UnknownSource):
+            _group_ratio_stat(bad_rows, _grp_rc())
+    for bad_rc in ({"num_where": [{"col": "fraud", "op": "eq", "value": "True"}]},   # 缺 group_col/sum_col
+                   {"group_col": "g", "sum_col": "amt"},                               # 缺 num_where
+                   _grp_rc(stat="median"),                                            # 非法 stat
+                   _grp_rc(out="rank")):                                              # 非法 out
+        with pytest.raises(UnknownSource):
+            _group_ratio_stat(rows, bad_rc)
+
+    # ── 整合分派（run_requirement_checks）：dabstep-17 可重現內容反例 ──
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "payments.csv",
+        "merchant,eur_amount,has_fraudulent_dispute\n"
+        "M1,910920.74,False\n"
+        "M1,89079.26,True\n"      # M1：89079.26/1000000 = 8.907926%（volume ratio 真值）
+        "M2,1800000.00,False\n"
+        "M2,200000.00,True\n",    # M2：200000/2000000 = 10.0%；min 分組＝M1
+    )
+    params = {
+        "data_file": "payments.csv",
+        "recompute": {
+            "type": "group_ratio_stat",
+            "group_col": "merchant", "sum_col": "eur_amount",
+            "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}],
+            "stat": "min", "out": "val", "percent": True,
+        },
+    }
+    req_set = _req_set("plain_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "8.907926\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "7.683437\n")   # dabstep-17 實敗草稿：誤用 count ratio（2132/27748）
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, bad)}
+    r = res["req_main"]
+    assert r.status == "FAIL"
+    assert r.evidence.get("problem") == "mismatch_with_recomputation"
+    assert r.evidence.get("expected_in_evidence") is False   # 重算值不進證據
+    joined = str(r.evidence) + (r.detail or "")
+    assert "8.907926" not in joined
+
+    # ── dabstep-16 形：out="group" 回分組名稱（非數值答案）──
+    params_g = dict(params)
+    params_g["recompute"] = dict(params["recompute"], out="group")
+    req_set_g = _req_set("plain_recomputed", params_g, "answer.txt")
+    good_g = tmp_path / "good_g"
+    _write(good_g / "answer.txt", "M1\n")
+    res_g = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set_g, good_g)}
+    assert res_g["req_main"].status == "PASS"
+
+    bad_g = tmp_path / "bad_g"
+    _write(bad_g / "answer.txt", "M2\n")   # 錯分組（如 dabstep-16 誤選 Golfclub_Baron_Friso）
+    res_bg = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set_g, bad_g)}
+    assert res_bg["req_main"].status == "FAIL"
+    assert res_bg["req_main"].evidence.get("problem") == "mismatch_with_recomputation"
+
+    # ── 參數缺陷 → UNKNOWN（不自評，非 FAIL）──
+    params_bad = dict(params)
+    params_bad["recompute"] = dict(params["recompute"], stat="median")
+    req_set_bad = _req_set("plain_recomputed", params_bad, "answer.txt")
+    d_bad = tmp_path / "d_bad"
+    _write(d_bad / "answer.txt", "8.907926\n")
+    res_bad = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set_bad, d_bad)}
+    assert res_bad["req_main"].status == "UNKNOWN"
 
 
 def test_mean_int_col_point_estimate_and_integer_satisfiable(tmp_path: pathlib.Path):

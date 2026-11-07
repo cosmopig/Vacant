@@ -1972,6 +1972,80 @@ def _cond_rate(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     return len(numer) / len(pop)
 
 
+def _group_ratio_stat(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float | str:
+    """group_ratio_stat（G2.5 dabstep-16/17，manual.md 公開 fraud volume ratio 定義）：
+    按 group_col 分組加總金額比率極值——rate_g = sum(分子金額) / sum(分母金額)，
+    跨組取 min/max（平手→檔案序首見分組），回傳極值數值（out="val"）或分組名稱（out="group"）。
+
+    語義 TDD 前凍結（對照 dabstep-17 草稿 7.683437＝誤用 count ratio 2132/27748 的實敗形）：
+    - sum_col＝加總金額欄；num_sum_col / denom_sum_col 可各自覆蓋分子/分母欄；
+    - where（可選）＝分母族群條件、num_where（必填）＝分子條件（皆 {col,op,value}，複用 _cond_holds）；
+    - 非數值/NaN/inf 儲存格忽略；分母和為 0 的分組不進候選；無任何有效分母→UnknownSource（不自評）；
+    - 重算值不進證據（check_plain_recomputed 防洩漏語義不變）。
+    """
+    group_col = str(rc.get("group_col", "")).strip()
+    if not group_col:
+        raise UnknownSource("group_ratio_stat 需要 group_col")
+    base_col = str(rc.get("sum_col", "")).strip()
+    denom_col = str(rc.get("denom_sum_col", "")).strip() or base_col
+    num_col = str(rc.get("num_sum_col", "")).strip() or base_col
+    if not denom_col:
+        raise UnknownSource("group_ratio_stat 需要 sum_col（或 denom_sum_col）")
+    if not num_col:
+        raise UnknownSource("group_ratio_stat 需要 sum_col（或 num_sum_col）")
+    where = rc.get("where", [])
+    if not isinstance(where, list):
+        raise UnknownSource("group_ratio_stat.where 須為條件清單")
+    num_where = rc.get("num_where")
+    if not isinstance(num_where, list) or not num_where:
+        raise UnknownSource("group_ratio_stat 需要 num_where（分子條件清單）")
+    for c in list(where) + list(num_where):
+        if not isinstance(c, dict) or not str(c.get("col", "")).strip():
+            raise UnknownSource("group_ratio_stat 條件缺少 col")
+    stat = str(rc.get("stat", "min")).strip().lower()
+    if stat not in ("min", "max"):
+        raise UnknownSource(f"group_ratio_stat.stat 須為 min 或 max，收到 {stat!r}")
+    out = str(rc.get("out", "val")).strip().lower()
+    if out not in ("val", "group"):
+        raise UnknownSource(f"group_ratio_stat.out 須為 val 或 group，收到 {out!r}")
+    percent = bool(rc.get("percent", False))
+
+    def _cell_num(v: Any) -> float | None:
+        try:
+            f = float(v)
+        except (TypeError, ValueError):
+            return None
+        return f if math.isfinite(f) else None
+
+    order: list[str] = []          # 各分組首次出現序（平手取首見）
+    denom: dict[str, float] = {}   # 分組分母和（僅有限數值）
+    numer: dict[str, float] = {}   # 分組分子和
+    for r in rows:
+        g = str(r.get(group_col, "")).strip()
+        if not g:
+            continue
+        if all(_cond_holds(r, c) for c in where):
+            v = _cell_num(r.get(denom_col))
+            if v is not None:
+                if g not in denom:
+                    order.append(g)
+                denom[g] = denom.get(g, 0.0) + v
+        if all(_cond_holds(r, c) for c in num_where):
+            v = _cell_num(r.get(num_col))
+            if v is not None:
+                if g not in numer:
+                    order.append(g)
+                numer[g] = numer.get(g, 0.0) + v
+    cands = [((numer.get(g, 0.0) / denom[g]) * (100.0 if percent else 1.0),
+              order.index(g), g)
+             for g in order if g in denom and denom[g] != 0.0]
+    if not cands:
+        raise UnknownSource("group_ratio_stat: 無分組有有效分母；無法算比率")
+    best = (min(cands, key=lambda t: (t[0], t[1])) if stat == "min"
+            else max(cands, key=lambda t: (t[0], -t[1])))
+    return best[2] if out == "group" else best[0]
+
+
 def _volume_band(total: float) -> str:
     """monthly_volume 檔位（manual.md：'100k-1m' is between 100.000 and 1.000.000；邊界含兩端，TDD 前凍結）。"""
     if total < 100_000:
@@ -2136,7 +2210,8 @@ def _fee_ids_lookup(
 # plain_recomputed 支援的重算型別（與下方 rtype 分派鏈保持同步；
 # 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
 PLAIN_RECOMPUTE_TYPES: frozenset[str] = frozenset(
-    {"fee_ids_lookup", "mode_col", "cond_rate", "unique_count", "col_max", "scheme_fee_avg"}
+    {"fee_ids_lookup", "mode_col", "cond_rate", "unique_count", "col_max", "scheme_fee_avg",
+     "group_ratio_stat"}
 )
 
 
@@ -2219,7 +2294,9 @@ def check_plain_recomputed(
     elif not val_str:
         return _result(item, "FAIL", "答案值缺失（空檔）",
                        {"problem": "empty_value", "expected_in_evidence": False})
-    else:
+    # group_ratio_stat out="group"：答案是分組名稱（非數值，dabstep-16 形），
+    # 不做數值預檢；其餘型別行為不變（bad 草稿仍先 FAIL，不被資料側 UNKNOWN 掩掉）。
+    elif rtype != "group_ratio_stat" or str(rc.get("out", "val")).strip().lower() != "group":
         try:
             got_pre = float(val_str)
         except ValueError:
@@ -2236,6 +2313,8 @@ def check_plain_recomputed(
             expected: Any = _mode_col(rows, rc)
         elif rtype == "cond_rate":
             expected = _cond_rate(rows, rc)
+        elif rtype == "group_ratio_stat":
+            expected = _group_ratio_stat(rows, rc)
         elif rtype == "fee_ids_lookup":
             expected = _fee_ids_lookup(rows, rc, task_dir)
         elif rtype == "unique_count":
