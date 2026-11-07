@@ -786,12 +786,31 @@ def run_phase3(base: pathlib.Path | None = None,
         from vacant_network.adapters.run import run_agent  # noqa: PLC0415
         run = run_agent
 
+    cached_rows: dict[str, dict] = {}
+    prog_path = out_root / "progress.json"
+    if prog_path.is_file():
+        try:
+            _p = json.loads(prog_path.read_text(encoding="utf-8"))
+            for _r in _p.get("rows") or []:
+                if isinstance(_r, dict) and _r.get("cell") and "verdict" in _r \
+                        and _r.get("status") != "ERROR":
+                    cached_rows[_r["cell"]] = _r
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            cached_rows = {}  # 損壞的 progress 不接續、不猜
+    if cached_rows:
+        print(f"PHASE3 接續：progress.json 已有 {len(cached_rows)} 份裁決，該 cell 不重複執行")
+
     rows: list[dict] = []
     errors = 0
     n_bad = sum(1 for c in cells if c.role == "bad")
     print(f"PHASE3（vq-el4.5）：{len(cells)} 份草稿（{n_bad} 錯／{len(cells) - n_bad} 好）"
           f"＋自動擷取需求（{extract_model}）＋localized 修復（{provider}/{model}）＋獨立 scorer")
     for c in cells:
+        if c.cell in cached_rows:
+            rows.append(cached_rows[c.cell])
+            print(f"  {c.cell:22s} {c.role:4s} RESUMED（已接續 progress.json，不重複呼叫）",
+                  flush=True)
+            continue
         src = sources.get(c.cell)
         req_file = req_dir / f"{c.cell}.{extract_model}.json"
         if src is None:

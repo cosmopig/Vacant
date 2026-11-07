@@ -483,3 +483,48 @@ def test_run_phase3_missing_extraction_fails_closed(tmp_path):
     prog = json.loads((tmp_path / "out" / "progress.json").read_text(encoding="utf-8"))
     by_cell = {r["cell"]: r for r in prog["rows"]}
     assert by_cell["fake-002-pi-C"]["status"] == "ERROR"
+
+
+def test_run_phase3_resumes_from_existing_progress(tmp_path):
+    """progress.json 已有裁決 → 第二輪不重複呼叫 build/run，結果保留（斷點接續）。"""
+    base = _mk_base(tmp_path)
+    req_dir = tmp_path / "req"
+    req_dir.mkdir()
+    for cell in ("fake-001-pi-C", "fake-002-pi-C"):
+        (req_dir / f"{cell}.glm53.json").write_text(
+            json.dumps(_reqset(task_id=cell).to_dict()), encoding="utf-8")
+    scorer = lambda s, w, d: {"pass": True, "status": "scored", "rc": 0}
+    out_root = tmp_path / "out"
+    calls = {"build": 0, "run": 0}
+
+    def counting_build(prompt: str, ws: pathlib.Path):
+        calls["build"] += 1
+        return _fake_build()(prompt, ws)
+
+    def counting_run(launch, *, workspace: pathlib.Path, timeout_s: float,
+                     log_dir: pathlib.Path) -> dict:
+        calls["run"] += 1
+        return _fake_agent({"answer.txt": "@m[3]\n"})(
+            launch, workspace=workspace, timeout_s=timeout_s, log_dir=log_dir)
+
+    rc1 = run_phase3(base=base, include_good=True, build=counting_build,
+                     run=counting_run, scorer=scorer, req_dir=req_dir, out_root=out_root)
+    assert rc1 == 0 and calls["build"] >= 1 and calls["run"] >= 1
+    prog1 = json.loads((out_root / "progress.json").read_text(encoding="utf-8"))
+    first_verdicts = {r["cell"]: r["verdict"] for r in prog1["rows"]}
+    assert first_verdicts == {"fake-001-pi-C": "fixed", "fake-002-pi-C": "held"}
+
+    def boom(*a, **k):
+        raise AssertionError("接續時不準再呼叫 build/run")
+
+    calls["build"] = calls["run"] = 0
+    rc2 = run_phase3(base=base, include_good=True, build=boom, run=boom,
+                     scorer=scorer, req_dir=req_dir, out_root=out_root,
+                     json_out=tmp_path / "phase3.json")
+    assert rc2 == 0
+    assert calls["build"] == 0 and calls["run"] == 0     # 沒有重複執行
+    doc = json.loads((tmp_path / "phase3.json").read_text(encoding="utf-8"))
+    second_verdicts = {r["cell"]: r["verdict"] for r in doc["rows"]}
+    assert second_verdicts == first_verdicts             # 結果保留
+    assert {r["cell"]: r for r in doc["rows"]} == {r["cell"]: r for r in prog1["rows"]}
+    assert doc["fixed"] == 1 and doc["held"] == 1 and doc["errors"] == 0

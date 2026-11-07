@@ -1,0 +1,17 @@
+{
+  "task_id": "dabstep-23-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "What is the fraud rate for in-person transactions for the year 2023?",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R2",
+      "quote": "Answer must be just a number.",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

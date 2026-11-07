@@ -1,6 +1,6 @@
 {
  "schema": "vacant.reqloop.authoritative/1",
- "task": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/tasks/dab_378-pi-C",
+ "task": "/home/user1/dev/ops/phase3_r1192/tasks/dab_378-pi-C",
  "files": {
   "contract.md": "a5f2dac625affe2930772d159f6314c895a6bf46db6cdc9bc108548e9011f9d3",
   "request.md": "71103d0aa33ed824dc15e80cee1ae218c3f42734b9a8bb86e5055f34314c8fb5",

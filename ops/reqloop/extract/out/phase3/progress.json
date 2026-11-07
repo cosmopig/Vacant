@@ -1,5 +1,5 @@
 {
- "complete": false,
+ "complete": true,
  "rows": [
   {
    "cell": "dab_039-pi-C",
@@ -37,31 +37,31 @@
    "role": "bad",
    "before": false,
    "after": {
-    "pass": true,
+    "pass": false,
     "status": "scored",
     "rc": 0
    },
-   "verdict": "fixed",
-   "stopped": "max_rounds",
+   "verdict": "unresolved",
+   "stopped": "stalled",
    "final_status": {
-    "R1": "PASS",
-    "R2": "PASS",
+    "R1": "FAIL",
+    "R2": "FAIL",
     "R3": "PASS",
     "R4": "UNKNOWN",
-    "R5": "PASS"
+    "R5": "FAIL"
    },
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_055-pi-C/round_2",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_055-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 16,
-    "tokens": 306939,
-    "wall_ms_total": 57726
+    "model_calls": 22,
+    "tokens": 1227517,
+    "wall_ms_total": 134648
    }
   },
   {
@@ -74,7 +74,7 @@
     "rc": 0
    },
    "verdict": "fixed",
-   "stopped": "stalled",
+   "stopped": "max_rounds",
    "final_status": {
     "req_pre_mean": "PASS",
     "req_pre_median": "PASS",
@@ -91,15 +91,15 @@
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_378-pi-C/round_2",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_378-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 13,
-    "tokens": 315057,
-    "wall_ms_total": 263429
+    "model_calls": 19,
+    "tokens": 89987,
+    "wall_ms_total": 70385
    }
   },
   {
@@ -120,15 +120,15 @@
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_426-pi-C/round_2",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_426-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 12,
-    "tokens": 457403,
-    "wall_ms_total": 148229
+    "model_calls": 16,
+    "tokens": 398231,
+    "wall_ms_total": 61605
    }
   },
   {
@@ -149,15 +149,15 @@
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_427-pi-A/round_2",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_427-pi-A/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 25,
-    "tokens": 856048,
-    "wall_ms_total": 280235
+    "model_calls": 15,
+    "tokens": 361588,
+    "wall_ms_total": 54086
    }
   },
   {
@@ -179,15 +179,15 @@
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dab_507-pi-A/round_1",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_507-pi-A/round_1",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 1,
-    "model_calls": 42,
-    "tokens": 1752906,
-    "wall_ms_total": 281320
+    "model_calls": 8,
+    "tokens": 24219,
+    "wall_ms_total": 12328
    }
   },
   {
@@ -207,19 +207,48 @@
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dabstep-10-pi-C/round_1",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dabstep-10-pi-C/round_1",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 1,
-    "model_calls": 7,
-    "tokens": 292684,
-    "wall_ms_total": 41321
+    "model_calls": 55,
+    "tokens": 3058932,
+    "wall_ms_total": 300005
    }
   },
   {
    "cell": "dabstep-1273-pi-C",
+   "role": "bad",
+   "before": false,
+   "after": {
+    "pass": false,
+    "status": "scored",
+    "rc": 0
+   },
+   "verdict": "unresolved",
+   "stopped": "max_rounds",
+   "final_status": {
+    "R1": "FAIL",
+    "R2": "UNKNOWN"
+   },
+   "regressed": [],
+   "source_tampered": false,
+   "satisfied_mutated": [],
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dabstep-1273-pi-C/round_2",
+   "deliverables": [
+    "answer.txt"
+   ],
+   "cost": {
+    "repair_sessions": 2,
+    "model_calls": 35,
+    "tokens": 2710239,
+    "wall_ms_total": 274921
+   }
+  },
+  {
+   "cell": "dabstep-23-pi-C",
    "role": "bad",
    "before": false,
    "after": {
@@ -236,15 +265,15 @@
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/Vacant/ops/reqloop/extract/out/phase3/repair/dabstep-1273-pi-C/round_2",
+   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dabstep-23-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 22,
-    "tokens": 923831,
-    "wall_ms_total": 192082
+    "model_calls": 93,
+    "tokens": 5129290,
+    "wall_ms_total": 335470
    }
   }
  ]
