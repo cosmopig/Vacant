@@ -141,3 +141,9 @@
 - ③ 驗證：驗收指令＝BATCH1_STALE_RESOLVED_OK；離線複驗（唯讀）039/055 由 STALE 變 RESUMED、剩 STALE＝dab_426/dab_427（第二批）；source_tampered/satisfied_mutated 皆 False。
 - ④ 沒驗證：3f400c5d 的 CI（本輪不跑全量 pytest）；039 fixed 為本批單 rep 裁決、開發選樣，不宣稱管線普遍較好；426/427 未重驗前 PHASE3 離線門仍 fail-closed rc=2（機制在位）。
 - 下一步：等第二批工單（dab_426/427）或審查派工；巡 auto/qwen27b 3f400c5d 與 auto/argon 2db8afa5 CI。
+- 2026-11-07 r1214（工單 P20261107_2028-2：PHASE3 第二批 STALE 重驗＋--all 整合驗收；純執行 0 產品改動）：
+- ① `run_eval.py --phase3`（online）：7 格 RESUMED（039/055/378/507/dabstep-10/1273/23，0 呼叫）；STALE 2 格重驗——dab_426-pi-C **fixed**（12c/468665t、stalled）、dab_427-pi-A **fixed**（10c/432313t、gap_closed）；本批 2 sessions/22 calls/900978 tok（1004 gemma-4-12b-it-qat、raw usage、無硬 token 上限）。
+- ② progress.json：9 格全有裁決、complete=True、0 ERROR；426/427 帶新 req_effective_sha256＋supersedes（舊 fixed 裁決留痕）。現行管線口徑：fixed 7／unresolved 2（055 stalled、1273 max_rounds）／rejected 0／right_to_wrong 0；Σ 15 sessions/275 calls/15087278 tokens——開發選樣單 rep，不宣稱管線普遍較好。
+- ③ 驗收 `run_eval.py --all`（~/dev/Vacant）：**🏆 G2.5 全三項門禁整合驗收：PASS、rc=0**；G1 PASS（抓錯 39/39、冤枉 0、41c/328550t）；REAL14 PASS（抓錯 9/9、冤枉 1/5、74c/732826t）；PHASE3 PASS（fixed 7/unresolved 2/error 0、15s/275c/15087278t）；vibe_calls 130→130（0 新外部 API 呼叫）；官方鎖檔 eval_phase3_glm53.json 未動、repair.py 未動。
+- 沒驗證：本輪 commit 的 CI（GitHub Actions 仍停擺；本地只跑工單驗收指令）；426/427 fixed 為本批單 rep 裁決。
+- 下一步：等審查派工／G2.5 後續；下輪巡 CI。
