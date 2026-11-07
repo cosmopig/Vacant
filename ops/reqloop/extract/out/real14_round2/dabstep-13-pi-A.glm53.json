@@ -1,0 +1,69 @@
+{
+  "task_id": "dabstep-13-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "During which hour of the day do the most transactions occur?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "mode_col",
+          "col": "hour_of_day"
+        }
+      },
+      "description": "答案為交易次數最多的整點小時，可由 payments.csv 的 hour_of_day 欄位重算眾數並與 answer.txt 比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "2",
+      "quote": "Answer must be just a number representing the hour of the day.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "answer",
+        "value_type": "number"
+      },
+      "description": "answer.txt 內容必須是單一數字（代表小時），無其他文字。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "1",
+      "2"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "raw_output": "[{\"id\":\"1\",\"quote\":\"During which hour of the day do the most transactions occur?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"mode_col\",\"col\":\"hour_of_day\"}},\"description\":\"答案為交易次數最多的整點小時，可由 payments.csv 的 hour_of_day 欄位重算眾數並與 answer.txt 比對。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"2\",\"quote\":\"Answer must be just a number representing the hour of the day.\",\"deliverable\":\"answer.txt\",\"verifier\":\"tag_format\",\"params\":{\"tag\":\"answer\",\"value_type\":\"number\"},\"description\":\"answer.txt 內容必須是單一數字（代表小時），無其他文字。\",\"required\":true,\"kind\":\"explicit\"}]\n",
+  "provenance": {
+    "cell": "dabstep-13-pi-A",
+    "role": "good",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-13-pi-A/task",
+    "user_text_chars": 1217,
+    "data_files": [
+      "data/payments.csv",
+      "data/payments-readme.md"
+    ],
+    "prompt_sha256": "49ba28e6f44dbb6eb88d421d3c5dd984c91d25b1cd2e5da14276bdbd27fb23a6",
+    "generated_at": "2026-11-07T13:10:55+08:00"
+  }
+}

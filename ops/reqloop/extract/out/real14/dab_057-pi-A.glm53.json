@@ -2,23 +2,7 @@
   "task_id": "dab_057-pi-A",
   "items": [
     {
-      "id": "req-2",
-      "quote": "@correlation_coefficient[r_value] where \"r_value\" is a number between -1 and 1, rounded to two decimal places.",
-      "deliverable": "answer.txt",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "correlation_coefficient",
-        "value_type": "number"
-      },
-      "description": "answer.txt 中答案項須為 @correlation_coefficient[數字] 格式，數值介於 -1 與 1 之間，四捨五入至小數兩位。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "req-3",
+      "id": "1",
       "quote": "Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
@@ -29,18 +13,34 @@
         "recompute": {
           "type": "pearson2",
           "col_a": "No. of cases",
-          "col_b": "No. of deaths"
-        },
-        "round": 2
+          "col_b": "No. of deaths",
+          "round": 2
+        }
       },
-      "description": "從 data/estimated_numbers.csv 重算 'No. of cases' 與 'No. of deaths' 兩欄的 Pearson 相關係數，與 answer.txt 的 @correlation_coefficient 值比對（四捨五入至兩位小數）。",
+      "description": "以完整資料重算 'No. of cases' 與 'No. of deaths' 的 Pearson 相關係數，與 answer.txt 中 @correlation_coefficient 的值比對，四捨五入至兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req-4",
+      "id": "2",
+      "quote": "@correlation_coefficient[r_value] where \"r_value\" is a number between -1 and 1, rounded to two decimal places.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "number"
+      },
+      "description": "answer.txt 須含 @correlation_coefficient[數值] 格式項目，值為介於 -1 與 1 之間、四捨五入至兩位小數的數字。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "3",
       "quote": "Convert the data types of 'No. of cases' and 'No. of deaths' column from Object (String) to Int64 before performing calculations.",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
@@ -50,54 +50,12 @@
         "data_file": "data/estimated_numbers.csv",
         "recompute": {
           "type": "pearson2",
-          "col_a": "No. of cases_median",
-          "col_b": "No. of deaths_median"
-        },
-        "round": 2
-      },
-      "description": "原始 'No. of cases'／'No. of deaths' 欄為含區間標記的字串，須先轉為整數（對應 median 數值欄）再計算；以重算 Pearson 係數驗證轉換後結果一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "req-5",
-      "quote": "Do this for complete data rather than specific country or year.",
-      "deliverable": "answer.txt",
-      "verifier": "kv_recomputed",
-      "kind": "explicit",
-      "params": {
-        "key": "correlation_coefficient",
-        "data_file": "data/estimated_numbers.csv",
-        "recompute": {
-          "type": "pearson2",
           "col_a": "No. of cases",
-          "col_b": "No. of deaths"
-        },
-        "round": 2
+          "col_b": "No. of deaths",
+          "round": 2
+        }
       },
-      "description": "相關係數須以整份資料（全部國家、全部年度）計算，不做任何國家或年度篩選；以全檔重算值比對驗證。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "req-6",
-      "quote": "The data file is input. Do not change it.",
-      "deliverable": "data/estimated_numbers.csv",
-      "verifier": "answer_kv",
-      "kind": "explicit",
-      "params": {
-        "keys": [
-          {
-            "key": "correlation_coefficient",
-            "type": "number"
-          }
-        ]
-      },
-      "description": "資料檔 data/estimated_numbers.csv 僅為輸入，不得修改；此為檔案不變性要求，無法以現有 verifier 直接驗證檔案未被改動，設 unverified。",
+      "description": "重算時須將 'No. of cases' 與 'No. of deaths' 由字串轉為整數後計算；此型別轉換步驟本身無法獨立程式驗證，但已內含於 pearson2 重算條目（id=1）中。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -109,27 +67,19 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req-2",
-      "req-3",
-      "req-4",
-      "req-5",
-      "req-6"
+      "1",
+      "2",
+      "3"
     ],
-    "discarded": [
-      {
-        "index": 0,
-        "id": "req-1",
-        "reason": "quote_not_verbatim"
-      }
-    ],
+    "discarded": [],
     "unverified": [
       {
-        "id": "req-2",
+        "id": "2",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"req-1\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of your workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"correlation_coefficient\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須存在且包含 @correlation_coefficient[value] 項目，值為數字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-2\",\n    \"quote\": \"@correlation_coefficient[r_value] where \\\"r_value\\\" is a number between -1 and 1, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"correlation_coefficient\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 中答案項須為 @correlation_coefficient[數字] 格式，數值介於 -1 與 1 之間，四捨五入至小數兩位。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-3\",\n    \"quote\": \"Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"correlation_coefficient\", \"data_file\": \"data/estimated_numbers.csv\", \"recompute\": {\"type\": \"pearson2\", \"col_a\": \"No. of cases\", \"col_b\": \"No. of deaths\"}, \"round\": 2},\n    \"description\": \"從 data/estimated_numbers.csv 重算 'No. of cases' 與 'No. of deaths' 兩欄的 Pearson 相關係數，與 answer.txt 的 @correlation_coefficient 值比對（四捨五入至兩位小數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-4\",\n    \"quote\": \"Convert the data types of 'No. of cases' and 'No. of deaths' column from Object (String) to Int64 before performing calculations.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"correlation_coefficient\", \"data_file\": \"data/estimated_numbers.csv\", \"recompute\": {\"type\": \"pearson2\", \"col_a\": \"No. of cases_median\", \"col_b\": \"No. of deaths_median\"}, \"round\": 2},\n    \"description\": \"原始 'No. of cases'／'No. of deaths' 欄為含區間標記的字串，須先轉為整數（對應 median 數值欄）再計算；以重算 Pearson 係數驗證轉換後結果一致。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  },\n  {\n    \"id\": \"req-5\",\n    \"quote\": \"Do this for complete data rather than specific country or year.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"correlation_coefficient\", \"data_file\": \"data/estimated_numbers.csv\", \"recompute\": {\"type\": \"pearson2\", \"col_a\": \"No. of cases\", \"col_b\": \"No. of deaths\"}, \"round\": 2},\n    \"description\": \"相關係數須以整份資料（全部國家、全部年度）計算，不做任何國家或年度篩選；以全檔重算值比對驗證。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-6\",\n    \"quote\": \"The data file is input. Do not change it.\",\n    \"deliverable\": \"data/estimated_numbers.csv\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"correlation_coefficient\", \"type\": \"number\"}]},\n    \"description\": \"資料檔 data/estimated_numbers.csv 僅為輸入，不得修改；此為檔案不變性要求，無法以現有 verifier 直接驗證檔案未被改動，設 unverified。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"correlation_coefficient\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"pearson2\", \"col_a\": \"No. of cases\", \"col_b\": \"No. of deaths\", \"round\": 2}\n    },\n    \"description\": \"以完整資料重算 'No. of cases' 與 'No. of deaths' 的 Pearson 相關係數，與 answer.txt 中 @correlation_coefficient 的值比對，四捨五入至兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"@correlation_coefficient[r_value] where \\\"r_value\\\" is a number between -1 and 1, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"correlation_coefficient\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 須含 @correlation_coefficient[數值] 格式項目，值為介於 -1 與 1 之間、四捨五入至兩位小數的數字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"3\",\n    \"quote\": \"Convert the data types of 'No. of cases' and 'No. of deaths' column from Object (String) to Int64 before performing calculations.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"correlation_coefficient\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"pearson2\", \"col_a\": \"No. of cases\", \"col_b\": \"No. of deaths\", \"round\": 2}\n    },\n    \"description\": \"重算時須將 'No. of cases' 與 'No. of deaths' 由字串轉為整數後計算；此型別轉換步驟本身無法獨立程式驗證，但已內含於 pearson2 重算條目（id=1）中。\",\n    \"required\": true,\n    \"kind\": \"assumption\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_057-pi-A",
     "role": "good",
@@ -139,6 +89,6 @@
       "data/estimated_numbers.csv"
     ],
     "prompt_sha256": "5111a303024a543d6369ad752ac591d11217e2be8898534a28fef819f91565b4",
-    "generated_at": "2026-11-07T13:09:45+08:00"
+    "generated_at": "2026-11-07T13:30:34+08:00"
   }
 }

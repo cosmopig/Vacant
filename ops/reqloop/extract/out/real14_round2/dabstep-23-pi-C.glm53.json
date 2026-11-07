@@ -1,0 +1,87 @@
+{
+  "task_id": "dabstep-23-pi-C",
+  "items": [
+    {
+      "id": "1",
+      "quote": "What is the fraud rate for in-person transactions for the year 2023?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "cond_rate",
+          "where": [
+            {
+              "col": "shopper_interaction",
+              "op": "eq",
+              "value": "POS"
+            },
+            {
+              "col": "year",
+              "op": "eq",
+              "value": 2023
+            }
+          ],
+          "num_where": [
+            {
+              "col": "has_fraudulent_dispute",
+              "op": "eq",
+              "value": true
+            }
+          ]
+        }
+      },
+      "description": "以 payments.csv 重算 2023 年 POS（in-person）交易中 has_fraudulent_dispute 為 True 的比率，與 answer.txt 的數字比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "2",
+      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "answer",
+        "value_type": "number"
+      },
+      "description": "answer.txt 內容必須是單一數字（詐騙率），一行、無其他文字。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "1",
+      "2"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "raw_output": "[{\"id\": \"1\", \"quote\": \"What is the fraud rate for in-person transactions for the year 2023?\", \"deliverable\": \"answer.txt\", \"verifier\": \"plain_recomputed\", \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"cond_rate\", \"where\": [{\"col\": \"shopper_interaction\", \"op\": \"eq\", \"value\": \"POS\"}, {\"col\": \"year\", \"op\": \"eq\", \"value\": 2023}], \"num_where\": [{\"col\": \"has_fraudulent_dispute\", \"op\": \"eq\", \"value\": true}]}}, \"description\": \"以 payments.csv 重算 2023 年 POS（in-person）交易中 has_fraudulent_dispute 為 True 的比率，與 answer.txt 的數字比對。\", \"required\": true, \"kind\": \"explicit\"}, {\"id\": \"2\", \"quote\": \"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`\", \"deliverable\": \"answer.txt\", \"verifier\": \"tag_format\", \"params\": {\"tag\": \"answer\", \"value_type\": \"number\"}, \"description\": \"answer.txt 內容必須是單一數字（詐騙率），一行、無其他文字。\", \"required\": true, \"kind\": \"explicit\"}]\n",
+  "provenance": {
+    "cell": "dabstep-23-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-23-pi-C/task",
+    "user_text_chars": 1192,
+    "data_files": [
+      "data/payments.csv",
+      "data/payments-readme.md"
+    ],
+    "prompt_sha256": "7e6630fd1b9e7f6e25f262e90729459fab7fbe5487ad235eeafac955cf23c1cb",
+    "generated_at": "2026-11-07T13:11:02+08:00"
+  }
+}

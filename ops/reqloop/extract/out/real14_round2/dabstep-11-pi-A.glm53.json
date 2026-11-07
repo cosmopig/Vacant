@@ -1,0 +1,67 @@
+{
+  "task_id": "dabstep-11-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "What is the highest transaction amount (in EUR) recorded?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "col_max",
+          "col": "eur_amount"
+        }
+      },
+      "description": "答案檔 answer.txt 應為 payments.csv 中 eur_amount 欄位的最大值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "2",
+      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "col_max",
+          "col": "eur_amount"
+        }
+      },
+      "description": "最終答案必須單獨寫入 answer.txt，且僅含該數值。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "1",
+      "2"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "raw_output": "[{\"id\": \"1\", \"quote\": \"What is the highest transaction amount (in EUR) recorded?\", \"deliverable\": \"answer.txt\", \"verifier\": \"plain_recomputed\", \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"col_max\", \"col\": \"eur_amount\"}}, \"description\": \"答案檔 answer.txt 應為 payments.csv 中 eur_amount 欄位的最大值。\", \"required\": true, \"kind\": \"explicit\"}, {\"id\": \"2\", \"quote\": \"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`\", \"deliverable\": \"answer.txt\", \"verifier\": \"plain_recomputed\", \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"col_max\", \"col\": \"eur_amount\"}}, \"description\": \"最終答案必須單獨寫入 answer.txt，且僅含該數值。\", \"required\": true, \"kind\": \"explicit\"}]\n",
+  "provenance": {
+    "cell": "dabstep-11-pi-A",
+    "role": "good",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-11-pi-A/task",
+    "user_text_chars": 1391,
+    "data_files": [
+      "data/payments.csv",
+      "data/payments-readme.md"
+    ],
+    "prompt_sha256": "b3dad3c0fe707bff3dca8dd1e681df1a6d1a01674b2e1bd3d251b2744ca0dcf3",
+    "generated_at": "2026-11-07T13:10:41+08:00"
+  }
+}

@@ -23,3 +23,8 @@
 - 重擷取 14 cell（新 prompt＝request.md＋contract.md；14 次/~190k tok，日 ≤2M 預算內；舊 out 快照 real14_round1/ 14 檔）→ **real14 門禁 PASS：抓錯 9/9、冤枉 1/5（RC=0）**；dab_035/105/dabstep-13 轉 CLEAN、dab_039 改以 contract 點名 answer.txt 判缺（真抓錯）；殘留冤枉 dab_057（3 因：req-3/5 原始字串欄子集重算 r=0.52、req-6 deliverable 誤綁資料檔、req-4 round 參數層級錯配——checker 讀 rc['round'] 而模型放 p['round']，0.96966 vs 0.97 atol 1e-6）。
 - cache 驗證：重跑 0 新呼叫（ledger 85→85）、結果逐字相同。測試：test_reqloop_extract/run_eval/checks 148 passed。
 - vq-el4.4 close（reason 帶證據路徑）；round 參數層級錯配已 note 進 vq-el4.5。下一步：vq-el4.5（localized 修復跑 9 份錯＋獨立 scorer，對照手寫 9/9）。
+- 2026-11-07 r1190: 資深審查指示——審過＋merge auto/argon 7899602d（resolve_deliverable_path 防 /app/ 穿透，1 回歸測試）；本地 137 tests passed。DECISION：該 SHA CI pending（排 qwen27b 後）仍依資深明確指示＋審過＋本地綠而合，下輪查 CI 復核。
+- 清 real14 舊 cache（r1189 快照 real14_round2/ 16 檔）→ 14 cell 重擷取（glm53 14 次）→ **門禁 PASS：抓錯 8/9、冤枉 1/5、RC=0**；dab_039 本輪漏（0FAIL/4UNKNOWN，門限內）、dab_057 仍冤枉（門限內）；重跑 0 新呼叫、結果相同；累計 71 次/701696 tok。
+- 證據：out/eval_real14_glm53.json（PASS）＋out/real14_round2/（r1189 PASS 快照）；vq-el4.4 已 close（r1189），r1190 復核入 bd note；vq-el4.5 已 claim。
+- 沒驗證：7899602d CI 綠燈；vq-el4.5 本體（9 錯 localized 修復＋獨立 scorer）。
+- 下一步：vq-el4.5——run_eval.py 第三項：9 錯草稿＋擷取需求＋localized 修復（adapters/run.py）＋independent_score.py（只讀 pass/status）；印修好/退步/未解決/呼叫/token，對照手寫 9/9。

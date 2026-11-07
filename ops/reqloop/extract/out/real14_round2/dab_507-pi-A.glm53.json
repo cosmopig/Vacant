@@ -1,0 +1,91 @@
+{
+  "task_id": "dab_507-pi-A",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "@total_hotels[count] where \"count\" is a non-negative integer representing the total number of hotels with a star rating of 5.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "total_hotels",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 必須包含 @total_hotels[...] 項目，值為非負整數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "total_hotels",
+        "data_file": "data/hotel_data.csv",
+        "recompute": {
+          "type": "count_if",
+          "col": "star_rating",
+          "eq": 5
+        }
+      },
+      "description": "從 data/hotel_data.csv 重算 star_rating 恰等於 5 的飯店數，並與 answer.txt 的 @total_hotels 值比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "Count only hotels that have a star rating exactly equal to 5.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "total_hotels",
+        "data_file": "data/hotel_data.csv",
+        "recompute": {
+          "type": "count_if",
+          "col": "star_rating",
+          "eq": 5
+        }
+      },
+      "description": "約束：僅計 star_rating 正好等於 5 的飯店（排除其他星級），重算口徑為 count_if star_rating == 5。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"@total_hotels[count] where \\\"count\\\" is a non-negative integer representing the total number of hotels with a star rating of 5.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"total_hotels\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須包含 @total_hotels[...] 項目，值為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"total_hotels\", \"data_file\": \"data/hotel_data.csv\", \"recompute\": {\"type\": \"count_if\", \"col\": \"star_rating\", \"eq\": 5}},\n    \"description\": \"從 data/hotel_data.csv 重算 star_rating 恰等於 5 的飯店數，並與 answer.txt 的 @total_hotels 值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"Count only hotels that have a star rating exactly equal to 5.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"total_hotels\", \"data_file\": \"data/hotel_data.csv\", \"recompute\": {\"type\": \"count_if\", \"col\": \"star_rating\", \"eq\": 5}},\n    \"description\": \"約束：僅計 star_rating 正好等於 5 的飯店（排除其他星級），重算口徑為 count_if star_rating == 5。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "provenance": {
+    "cell": "dab_507-pi-A",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_507/task",
+    "user_text_chars": 1048,
+    "data_files": [
+      "data/hotel_data.csv"
+    ],
+    "prompt_sha256": "780f0f835604ff50e8198a971806b2b7663f8947aed1b040e6115eb8409cdd7c",
+    "generated_at": "2026-11-07T13:10:28+08:00"
+  }
+}
