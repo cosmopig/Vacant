@@ -239,3 +239,9 @@
 - 重驗（重做部分）：`repair --selftest` **13/13 PASS**（RC 0）；`pytest test_reqloop_review_r1169.py + test_reqloop_repair.py + test_reqloop_extract.py + test_reqloop_checks.py` **214 passed**（r1169 守衛實檔開啟核對＋repair 111＋extract 32＋checks 58）。
 - 沒驗證/沒做：未重跑任何 frozen 實驗（effects2_20261106、dab_055 發射仍候點名）；未改任何代碼（extract/checks/repair 本輪零變更）；json 為既有實驗記錄、非本輪重測；未見任務效力（開發選樣/單 rep）不宣稱。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／未改 repair／1753 維持排除；0 模型呼叫、0 元、0 發射。
+## r1176（2026-11-07；票 P20261107_0822-1：argon NaN/inf 合併＋審計腳本 worktree fallback——驗收指令壞，退回）
+- 做了：(1) `auto/qwen27b` fast-forward 至 `a05bb00b`（含 378c0c02 非有限浮點防護：checks.py 25 處 `math.isfinite`、`_max_row_first` 跳非有限、`if not (abs(got - expected) <= atol)`@1679）；(2) `ops/audits/r1169_review_redo_check_20261107.py` 解譯器 fallback（REPO .venv→主 repo .venv→sys.executable）＋`_run` 加 `PYTHONPATH=str(REPO)`，commit ops repo a8fc19e（腳本＋證據 json 首次入庫）。
+- 驗證：`VACANT_REPO=/home/user1/dev/wt/argon` 實跑 RC=0、OVERALL PASS 4/4、0×FileNotFoundError（改前同指令 FileNotFoundError 退 1）；預設 REPO 回歸 RC=0；`pytest test_reqloop_checks.py + test_reqloop_review_r1169.py` 61 passed；`-k "nan"` 2 passed（兩個 nan 回歸測試真過）。
+- 退回原因（工單錯）：驗收命令 `-k "nan_or_inf or nan_sel"` 在指定樹匹配 0/59 測試（RC=5），「4 passed」不可達——該兩個測試名不存在；實際名已寫入票尾＋重發建議（改 `-k "nan"`→2 passed）。
+- 沒做：effects2_20261106 未動；未發射；1753 維持排除；doing/ 已空（等規劃者重發或下一票）。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未 reset·rebase；0 模型呼叫、0 元、0 發射。
