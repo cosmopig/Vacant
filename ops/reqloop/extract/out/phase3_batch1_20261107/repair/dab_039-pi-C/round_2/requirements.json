@@ -1,0 +1,29 @@
+{
+  "task_id": "dab_039-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "Use the Shapiro-Wilk test to determine the normality of the data in the \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R2",
+      "quote": "Calculate the mean and standard deviation of the transformed \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R3",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R4",
+      "quote": "If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

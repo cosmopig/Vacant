@@ -1,0 +1,101 @@
+{
+  "task_id": "dab_055-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "What is the mean number of cases recorded across all countries and years?",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "mean_cases",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "mean_int_col",
+          "col": "No. of cases"
+        }
+      },
+      "description": "計算 'No. of cases' 欄所有國家與年份的均值，須與 answer.txt 中 @mean_cases 值一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Ignore those records where 'No. of cases' column value is Null or empty.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "mean_cases",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "mean_int_col",
+          "col": "No. of cases"
+        }
+      },
+      "description": "重算均值時須忽略 'No. of cases' 為 Null 或空白的紀錄（mean_int_col 內建忽略 Null/空白）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "@mean_cases[mean_value] where \"mean_value\" is a positive integer.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "mean_cases",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 須含 @mean_cases[...] 項目，值為正整數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the names given under \"Answer format\" in the task.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "mean_cases",
+        "value_type": "number"
+      },
+      "description": "answer.txt 中答案項須為 @mean_cases[value] 格式，各佔一行。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "Convert the data type of 'No. of cases' column from Object (string) to Int64 before performing calculations.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "mean_cases",
+        "data_file": "data/estimated_numbers.csv",
+        "recompute": {
+          "type": "mean_int_col",
+          "col": "No. of cases"
+        }
+      },
+      "description": "計算前須將 'No. of cases' 由字串轉為整數；mean_int_col 以整數儲存格口徑重算均值並四捨五入為整數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

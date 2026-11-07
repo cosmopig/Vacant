@@ -1,0 +1,49 @@
+{
+ "phase": 3,
+ "generated_at": "2026-11-07T20:47:11+0000",
+ "base": "/home/user1/dev/ops/effects2_20261106",
+ "extract_model": "glm53",
+ "repair": {
+  "provider": "lms1004nothink",
+  "model": "gemma-4-12b-it-qat",
+  "feedback_mode": "localized",
+  "min_rounds": 0
+ },
+ "budget": {
+  "max_rounds": 2,
+  "timeout_s_per_round": 300.0,
+  "hard_token_cap": false,
+  "note": "無硬 token 上限；成本從 raw usage 讀、缺值＝UNKNOWN 不填 0"
+ },
+ "comparison": "手寫需求基線（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep",
+ "cells": [
+  {
+   "cell": "dab_039-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/draft",
+   "draft_sha256": "293e94e754f0c502e332f86ff431e265555971b056022867cd954e6c046be6cd",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_039-pi-C.glm53.json",
+   "req_sha256": "90b3682d313659799428f9aaec6a34600b8af295f8b22f6963f232b0e3256dab",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_039-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dab_055-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_055-pi-C/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_055-pi-C/draft",
+   "draft_sha256": "356c5855d9ecbf387be4ed11c4977f920f5779287e12f6a53b42f76b7cf69c35",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_055-pi-C.glm53.json",
+   "req_sha256": "f73fb87a600b881a6e8ca325f66d9018c0d0874a75be9448282c1179241f2468",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_055-pi-C-r1"
+   },
+   "before_pass": false
+  }
+ ]
+}

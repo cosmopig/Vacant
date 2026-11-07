@@ -6,31 +6,32 @@
    "role": "bad",
    "before": false,
    "after": {
-    "pass": false,
+    "pass": true,
     "status": "scored",
     "rc": 0
    },
-   "verdict": "unresolved",
-   "stopped": "no_gap",
+   "verdict": "fixed",
+   "stopped": "max_rounds",
    "final_status": {
     "R1": "UNKNOWN",
     "R2": "UNKNOWN",
-    "R3": "UNKNOWN",
+    "R3": "PASS",
     "R4": "UNKNOWN"
    },
    "regressed": [],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/draft",
+   "workspace": "ops/reqloop/extract/out/phase3_batch1_20261107/repair/dab_039-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
-    "repair_sessions": 0,
-    "model_calls": 0,
-    "tokens": null,
-    "wall_ms_total": null
-   }
+    "repair_sessions": 2,
+    "model_calls": 29,
+    "tokens": 2505080,
+    "wall_ms_total": 434664
+   },
+   "req_effective_sha256": "b1cc38850956a20985bb7d3dcfd7682335ca87e68ad3ef85a50f2da5f3b36329"
   },
   {
    "cell": "dab_055-pi-C",
@@ -46,23 +47,27 @@
    "final_status": {
     "R1": "FAIL",
     "R2": "FAIL",
-    "R3": "PASS",
-    "R4": "UNKNOWN",
+    "R3": "FAIL",
+    "R4": "FAIL",
     "R5": "FAIL"
    },
-   "regressed": [],
+   "regressed": [
+    "R3",
+    "R4"
+   ],
    "source_tampered": false,
    "satisfied_mutated": [],
-   "workspace": "/home/user1/dev/ops/phase3_r1192/repair/dab_055-pi-C/round_2",
+   "workspace": "ops/reqloop/extract/out/phase3_batch1_20261107/repair/dab_055-pi-C/round_2",
    "deliverables": [
     "answer.txt"
    ],
    "cost": {
     "repair_sessions": 2,
-    "model_calls": 22,
-    "tokens": 1227517,
-    "wall_ms_total": 134648
-   }
+    "model_calls": 14,
+    "tokens": 668553,
+    "wall_ms_total": 118317
+   },
+   "req_effective_sha256": "dc06f20ed9fabd9dd2e55993424a0e3c020e19b2f4a8465c467990d6c9340d7f"
   },
   {
    "cell": "dab_378-pi-C",
