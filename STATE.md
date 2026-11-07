@@ -225,3 +225,4 @@
 - 開啟 tests/test_reqloop_repair.py（3960 行、111 測試）並讀 3 個 argon 回歸測試：3812 跨輪鍵級還原＋盲提示避免（eafa6e7e）、3561 satisfied_mutated 還原、3689 r2 還原後 before 重算——與 argon 399f68b6「跨輪鍵級保留還原與防盲提示退回」一一對應；本輪實跑整檔 111 passed（r1173 僅跑另外三檔 75 passed＋selftest，repair.py 直接測試覆蓋由此補上）。
 - 驗證：pytest test_reqloop_repair.py 111 passed；g2 -k effects_20261105 3 passed（json 與源檔交叉核對）；review_r1169 守衛 1 passed；無分歧、無需改字。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未改凍結快照／1753 維持排除；0 模型呼叫、0 元、0 發射。
+- r1174: dab_426 切片預檢證據對＋守衛測試（P20261107_0735-1，7293bf60）：0 模型呼叫、可重現反例落盤（bad 1P/1F、good 2/2 PASS、針不進證據）；待點名發射。
