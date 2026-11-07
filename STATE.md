@@ -13,3 +13,8 @@
 - commit：dab6abff；工單 mv done/。
 - 沒驗證：phase2 實際 14 格擷取結果（需模型，屬 vq-el4.4 主線下一步，不在本票）。
 - 下一步：vq-el4.4 本體——跑 14 份真實草稿擷取需求＋檢查（glm53，票內授權路徑，出抓錯/冤枉數字）。
+- 2026-11-07 r1188: 工單 P20261107_1224-2（run_eval phase2 real14 首跑）收——修 run_eval.py 1 行 ExtractReport 序列化（report.to_dict()，改前 json.dumps TypeError RC=1）；real14 首跑 14/14 cell：抓錯 9/9、冤枉 4/5→門禁 FAIL（RC=20）；成本 15 次/141762 tok（含改前廢呼叫 1 次）；重跑全 cache 0 新呼叫。
+- 冤枉 4 份同型（dab_035/057/105/dabstep-13）＝擷取需求綁定 checker 無法解析的 deliverable/值路徑：dabstep-13 好稿有 answer.txt 但需求寫 /app/answer.txt→missing_file；未抓項 0。
+- 按票 RC=20 分支：如實記錄、不寫報告、不碰 hidden/scorer；vq-el4.4 未收（門禁未達）；commit 552dda17；工單 mv done/。
+- 下一步（規劃者重拆 vq-el4.4）：修 deliverable 路徑綁定（好稿檔案在、需求指錯路徑→冤枉）→ 重跑（cache 已存、0 計費）→ 再過門禁 → vq-el4.5。
+- r1188 redo（審查）：state/vibe_calls.jsonl 補入 repo（與 ~/dev/ops 正規帳本 sha256 一致，15 次 real14/141762 tok 全 rc=0）；commit a412c2a1；其餘不動。
