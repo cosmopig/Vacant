@@ -97,3 +97,11 @@
 - 沒驗證：真實模型行為（離線管線測試、無新效果數字）；真實模型是否保留 9 鍵仍候點名發射（vq-5nz）。
 - 紅線：0 模型呼叫、0 發射、0 元；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 hidden/scorer、未加 regex/靜態 prompt/重試、未動凍結 manifest/快照；工單六要素齊（doing/→done/）。
 - 下一步：vq-6rp（dabstep-1753 模型側硬缺口）／vq-5nz.6（停滯草稿換方法）仍候需求端點名；擴量＝新決策需另授權。
+
+## r1155（第 1155 輪）
+- 做：資深審查 2026-11-07 P1+P2 收口（r1154 已做完工作但被 1800s 切斷、票未結、STATE 未寫）：P1 驗證 auto/argon（897c5552）已為 HEAD 祖先（merge d4f93f24）並審過 argon 兩筆 diff（_strict_json_equal 嚴格型別相等＋_JsonPairs 重複鍵偵測＋kv_recomputed/PASS 過濾去重，皆 KV 審計強化、無異常）；P2 驗證 r1154 的 ops/audits/realab_20261107_summary.json（6 格＝11-06 2＋11-07 4、獨立 scorer pass=true×4 按最終內容 sha 去重 2 次採分、11-06 localized kv_mutated=['pre_median','post_median'] 如實、no_gap 格 tokens/wall=null 不填 0）；票 R20261107_0035-1 doing/→done/；bd vq-5nz.53 建立＋關閉。
+- 驗證：5 檔 checks/g2/repair/real_slice/g1_gate＝**225 passed**（審查 223 快照＋argon 合入的 2 筆新測試、全綠無回歸）；票驗收 2 檔＝**48 passed**；summary grep TODO/TBD＝0 命中；manifest「9 個已滿足條目」×4、舊措辭「9 條已滿足行」×0。
+- 沒驗證：689cd45f 本機 CI 仍跑（依規不等待）；dab_378 效果結論仍為開發選樣單 rep，不宣稱 localized 較好或較差。
+- 紅線：0 模型呼叫、0 發射、0 元；未動 main、未自 push（loop 自動推 auto/qwen27b）、未讀 hidden/scorer、未加 regex／靜態 prompt／重試、未動凍結 manifest 結果（僅措辭修訂、run 時 sha 已記錄）。
+- DECISION：審查 P3 已入記憶（stop-dab378）——停止 dab_378 重跑 A/B；下一切片須選 effects2_20261106 中 generic 實際失敗＋可見結構化反例的草稿、六要素齊備、離線驗證。vq-6rp／vq-5nz.6 仍候需求端點名；擴量＝新決策需另行授權。
+- 審查複核（r1155 補）：開卷重驗三個點名檔案——(1) ops/audits/effects_20261105_summary.json：policy30 generic7/10、localized6/10、once20 generic7/10、localized4/10、right_to_wrong=0、scope_note「單 rep 不宣稱 localized 優」與 11-06 提示 #6 全一致；realab_20261107_summary.json 未引用其數字（0 命中、僅引 effects2_20261106），無矛盾。(2) g2.py：totals 塊 null-safe（or []）、exit_code 直取 repair._exit_code（單一真相源）、satisfied_*/kv_* 皆讀 outcome。(3) repair.py：kv_satisfied 收 kv_recomputed＋初始 PASS＋去重、kv_enforced 僅部分修復情境、零輪 if rounds 守衛、cost 缺值 None 不填 0——與 897c5552 合入後樹一致；sat_kv_by_deliv 已不存在於 g2.py（argon 分支重複計算是合併時移除，單一真相源＝repair_slice）。先前「argon diff 已審、無異常」結論成立、現以開卷證據補實；零代碼改動、225/48 passed 仍有效。
