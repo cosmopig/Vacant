@@ -178,3 +178,9 @@
 - 票尾附 3 行結果（commit 55d79635／驗收末行／沒做到什麼：無）→ 移 done/。工作樹乾淨、未製造 commit；0 模型呼叫、0 元。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未改凍結快照／1753 維持排除。
 - 下一步：vq-6rp（dabstep-1753）／vq-5nz.6（停滯草稿換方法）待需求端點名；本輪無新功能程式變更（票屬規格校準收口、非效果進展）。
+## r1166（2026-11-07；票 P20261107_0539-1：dab_055 審計預檢單一事實來源＋守衛測試）
+- 一個檔（~/dev/ops，非 repo）：dab055_slice_precheck_20261107.py 值計算由「內嵌複製解析迴圈」改「直接呼叫產品 checks._mean_int_col」＋輸出新增 single_source_of_truth 欄（消「產品改口徑→審計證據靜默漂移」形狀）；值不變 expected=2081990/parsed=856/raw_mean=2081990.3598130841。
+- 一個測試（repo）：tests/test_reqloop_real_slice.py::test_real_slice_dab055_precheck_single_source_of_truth——預檢輸出 expected/unrounded==產品對同一凍結資料實算值、expected_from 點名產品函數；回復內嵌迴圈舊版（無該欄）即紅；缺席→skip。
+- 一條指令輸出變好：python ops/audits/dab055_slice_precheck_20261107.py RC=0、行尾多 single_source_of_truth=checks._mean_int_col、JSON 多同欄。
+- 驗收：pytest real_slice+checks+dab055_slice 71 passed；repair --selftest 13/13（產品未動）；commit 5c15626f、樹乾淨。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改 effects2·smoke_e013 凍結位元組／1753 維持排除／未見＝UNKNOWN；0 模型呼叫、0 元。
