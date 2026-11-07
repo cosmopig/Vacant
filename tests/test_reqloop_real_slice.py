@@ -209,3 +209,53 @@ def test_real_slice_status_pending_naming():
     man = _loaded()
     status = man.raw.get("status", "")
     assert status == "FROZEN_PENDING_NAMING", f"status={status!r}（發射未授權）"
+
+
+def test_real_slice_smoke_preservation_and_exit_codes(tmp_path):
+    """P20261107_0041-2：真實 CSV 切片端到端修復保留／拒收管線（假代理、零模型呼叫）。
+    C×generic 正確修復 kurtosis、其餘 8 鍵保留 → gap_closed／exit 0／8 鍵 preserved；
+    C×localized 修復但竄改初始 PASS 的 pre_mean → satisfied_mutated、exit 20 拒收；
+    A（正確草稿）兩臂 exit 0、right_to_wrong（regressed）== 0。"""
+    from vacant_network.adapters.agents import Launch
+    man = g2.G2Manifest.load(REAL_SLICE_MANIFEST)
+    base = REAL_SLICE_MANIFEST.parent
+    before_txt = (base / "dab_378-pi-C" / "draft" / "answer.txt").read_text(encoding="utf-8")
+    assert "-1.17" in before_txt, "測試空洞：草稿 C 應有 kurtosis 錯值"
+    fixed = before_txt.replace("-1.17", "-1.13")                     # 只改 2 未滿足行
+    tampered = fixed.replace("@pre_mean[21144.08]", "@pre_mean[999.0]")  # 修復＋竄改已滿足鍵
+    PRESERVED_8 = {"pre_mean", "pre_median", "pre_sd", "pre_skewness",
+                   "post_mean", "post_median", "post_sd", "post_skewness"}
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(argv=["true"], note="fake")
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path, **kw) -> dict:
+        ws_s = str(workspace)
+        if "dab_378-pi-C" in ws_s:   # A（正確草稿）：no-op、不得被改
+            text = tampered if "localized" in ws_s else fixed
+            (pathlib.Path(workspace) / "answer.txt").write_text(text, encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 700, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+
+    res = g2.run_g2_smoke(man, base, tmp_path / "out", build, run, include_dirs=("data",))
+    by = {(c["draft"], c["arm"]): c for c in res.cells}
+    assert len(res.cells) == 4, "4 格＝2 真草稿 × 2 臂"
+    c_fix = by[("dab_378-pi-C", "generic")]   # (1) 正確修復：缺口關閉＋其餘保留＋exit 0
+    assert c_fix["stopped"] == "gap_closed"
+    assert c_fix["exit_code"] == 0
+    assert set(c_fix["satisfied_preserved"]) == PRESERVED_8
+    assert c_fix["satisfied_mutated"] == []
+    assert c_fix["fixed"] == ["post_kurtosis", "pre_kurtosis"]
+    c_tamp = by[("dab_378-pi-C", "localized")]  # (2) 修復但竄改已滿足項：精確偵測＋exit 20
+    assert "pre_mean" in c_tamp["satisfied_mutated"]
+    assert c_tamp["exit_code"] == 20
+    assert c_tamp["stopped"] != "gap_closed"
+    for arm in ("generic", "localized"):       # (3) 正確草稿：兩臂 exit 0、right_to_wrong == 0
+        a = by[("dab_378-pi-A", arm)]
+        assert a["exit_code"] == 0
+        assert a["regressed"] == []

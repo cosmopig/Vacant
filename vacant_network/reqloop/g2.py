@@ -536,6 +536,8 @@ def main(argv: Sequence[str] | None = None, *,
                 print(f"      REGRESSED: {', '.join(c['regressed'])}")
             if c.get("satisfied_mutated"):
                 print(f"      SATISFIED_MUTATED: {', '.join(c['satisfied_mutated'])}")
+            if c.get("satisfied_preserved"):
+                print(f"      SATISFIED_PRESERVED: {', '.join(c['satisfied_preserved'])}")
             if c.get("kv_mutated"):
                 print(f"      KV_MUTATED: {', '.join(c['kv_mutated'])}（鍵級審計、資訊性）")
             if c.get("kv_preserved"):
