@@ -16,12 +16,20 @@
 - vq-el4.4 r1189 已 close；r1190 復核記入 bd note。vq-el4.5 已 claim。
 
 ## 下一步（vq-el4.5，in_progress）
-- 9 份錯草稿＋自動擷取需求（real14 cache）＋localized 修復
-  （adapters/run.py，reuse 紅線）＋獨立 scorer（~/dev/ops/effects2_
-  20261106/independent_score.py：sudo -n 跑 lab scorer，只讀 pass/
-  status 欄位；嚴禁讀 hidden/scorer 源）。
-- 印出：修好幾份（錯→對）、對→錯、未解決、呼叫數、tokens；對照手寫
-  9/9（g2-truth）。repair.py 凍結；不加錯誤字串 regex/靜態處方。
+- 9 份錯草稿＋自動擷取需求（real14 cache）＋localized 修復：修復
+  控制器 `python -m vacant_network.reqloop.repair`（--task/--draft/
+  --out/--rounds/--timeout；內部 reuse adapters/run.py run_agent；
+  repair.py 凍結、不加單案例規則）。
+- 獨立 scorer：~/dev/ops/effects_20261105/independent_score.py
+  （依 ops/audits/effects_20261105_summary.json 的 source_root 重算；
+  sudo -n 跑 lab scorer，只 pass/status 等欄位出評分端、評分永不回
+  饋修復；嚴禁讀 hidden/scorer 源）。
+- 印出：修好（錯→對）、對→錯、未解決＋停因；成本依 repair.py 口徑：
+  calls＝修復 session 數、model_calls＝實際 API 呼叫數（兩量嚴分）、
+  token 缺＝UNKNOWN（絕不填 0）、任一輪 usage 缺⇒總成本 UNKNOWN；
+  對照手寫 9/9（g2-truth：localized 9/9、generic 7/9）與
+  effects_20261105 參考（policy30 generic 7/10、localized 6/10；
+  once20 generic 7/10、localized 4/10；開發選樣單 rep、不宣稱較好）。
 - 長實驗：先寫 phase3（run_eval.py 第三項）＋凍結清單/hash/預算，
   再發射；發射後不等，看 progress。
 
