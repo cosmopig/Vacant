@@ -218,3 +218,46 @@ def test_load_cell_request_text_real14_fallback_also_gets_contract(tmp_path):
     (real14 / "dabstep-10.request.md").write_text("reconstructed question", encoding="utf-8")
     got = load_cell_request_text(task, "dabstep-10", real14)
     assert got.startswith("reconstructed question") and "answer.txt" in got
+
+
+class _CountingClient:
+    def __init__(self, response: str) -> None:
+        self.response = response
+        self.calls = 0
+
+    def complete(self, prompt: str) -> str:
+        self.calls += 1
+        return self.response
+
+
+_RAW_ONE = json.dumps([{
+    "id": "R1", "quote": "How many unique merchants", "deliverable": "answer",
+    "verifier": "plain_recomputed",
+    "params": {"data_file": "data/t.csv",
+               "recompute": {"type": "unique_count", "col": "merchant_id"}}}])
+
+
+def test_phase2_extract_cell_pins_prompt_and_reextracts_when_prompt_changes(tmp_path):
+    """argon 20261107_1248：out 檔記 prompt_sha256；原文改了（補 contract.md）不得
+    靜默沿用舊 prompt 的擷取結果；同 prompt 重跑 0 呼叫，且從 raw_output 以目前規則重建。"""
+    from run_eval import Real14Cell
+    c = Real14Cell(cell="fake-002-pi-C", role="bad",
+                   task_dir=tmp_path / "t", draft_dir=tmp_path / "d")
+    out_path = tmp_path / "out" / "fake-002-pi-C.glm53.json"
+    cl = _CountingClient(_RAW_ONE)
+    t1 = "How many unique merchants are there?"
+    r1 = phase2_extract_cell(c, t1, [], {}, "glm53", cl, out_path)
+    doc = json.loads(out_path.read_text(encoding="utf-8"))
+    assert cl.calls == 1 and doc["raw_output"] == _RAW_ONE
+    assert len(doc["provenance"]["prompt_sha256"]) == 64
+    # 原文沒點名 "answer" 這個檔 → 猜名 → unverified（不是 FAIL 來源）
+    assert r1.items[0].unverified
+
+    # 同 prompt：0 呼叫
+    r1b = phase2_extract_cell(c, t1, [], {}, "glm53", _ExplodingClient(), out_path)
+    assert [i.id for i in r1b.items] == ["R1"]
+
+    # 原文補上公開交付規格 → prompt 變了 → 重新擷取
+    t2 = t1 + "\n\nWrite your final answer to `answer.txt`."
+    phase2_extract_cell(c, t2, [], {}, "glm53", cl, out_path)
+    assert cl.calls == 2

@@ -207,6 +207,26 @@ def _strip_workspace_prefix(p: Any) -> Any:
     return s
 
 
+_FILE_PATH_RE = re.compile(r"^[\w.\-/]+\.\w{1,8}$")
+
+
+def _deliverable_problem(deliverable: str, user_text: str) -> str | None:
+    """交付物檔名必須是原文（含公開 contract）點名的檔案；模型猜的名字 → 回傳原因。
+
+    猜名（如 "answer"、"@total_hotels[count]"、"removed_outliers_count"）檢查時只會因
+    「檔案不存在」判 FAIL：對錯草稿是假抓錯、對對草稿是冤枉——那是擷取錯，不是交付錯。
+    判準：形如檔案路徑（有副檔名），且路徑或檔名在原文中以完整 token 出現
+    （"answer" 不會因原文有 "answer.txt" 而算點名）。
+    """
+    d = deliverable.strip()
+    if not _FILE_PATH_RE.match(d):
+        return f"deliverable_not_in_request:{d[:60]}"
+    for name in dict.fromkeys((d, pathlib.PurePosixPath(d).name)):
+        if re.search(r"(?<![\w\-])" + re.escape(name) + r"(?![\w\-]|\.\w)", user_text):
+            return None
+    return f"deliverable_not_in_request:{d[:60]}"
+
+
 def _unwrap_round_call(expr: str) -> tuple[str, int | None]:
     """若運算式最外層為 round(inner[, n])，拆解為 (inner_src, n) 供 checks.py safe_eval_expr 求值。"""
     if not isinstance(expr, str) or not expr.strip():
@@ -718,6 +738,11 @@ def build_requirement_set(
             problem = _param_problem(verifier, raw_params)
             if problem is not None:
                 reason = problem
+                unverified_flag = True
+        if reason is None:
+            d_problem = _deliverable_problem(deliverable, user_text)
+            if d_problem is not None:
+                reason = d_problem
                 unverified_flag = True
         if unverified_flag and reason is None:
             reason = "model_declared_unverified"

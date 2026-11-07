@@ -35,7 +35,8 @@ USER_TEXT = (
     "Task: Calculate the mean of the column 'No. of cases' in data/estimated_numbers.csv.\n"
     "Convert the data type of 'No. of cases' from Object (string) to Int64 before calculating.\n"
     "Ignore records where the value is Null or empty.\n"
-    "Answer format: @mean_cases[mean_value] where mean_value is a positive integer."
+    "Answer format: @mean_cases[mean_value] where mean_value is a positive integer.\n"
+    "Write the answer to answer.txt."  # argon 20261107_1248：交付檔名須在原文點名
 )
 
 
@@ -417,6 +418,7 @@ ORDER_TEXT = (
     "欄位需包含：month、orders_count、net_sales。\n"
     "內文中需明確載明「兩月合計淨銷售總額」（精確數值）。\n"
     "簡述各月銷售成長觀察。\n"
+    "交付 monthly_sales.csv 與 summary.md。\n"  # argon 20261107_1248：交付檔名須在原文點名
 )
 
 
@@ -535,7 +537,7 @@ def test_required_params_flag_missing_input_pair():
         req, report = build_requirement_set("t", [
             {"id": "R1", "verifier": v, "description": "d", "quote": "q",
              "deliverable": "summary.md", "params": params},
-        ], "q")
+        ], "q summary.md")
         assert req.items[0].unverified, (v, params)
         reason = next((u.reason for u in report.unverified if u.id == "R1"), "")
         assert "input_csv" in reason, (v, reason)
@@ -546,7 +548,7 @@ def test_required_params_flag_missing_input_pair():
          "deliverable": "summary.md",
          "params": {"group_by": ["a"], "aggregates": [{"name": "n", "type": "sum"}],
                     "input_csv": "orders.csv"}},
-    ], "q")
+    ], "q summary.md")
     assert not req.items[0].unverified
 
 

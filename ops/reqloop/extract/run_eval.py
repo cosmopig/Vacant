@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import hashlib
 import json
 import pathlib
 import re
@@ -36,10 +37,12 @@ if str(REPO_ROOT) not in sys.path:
 from vacant_network.reqloop.checks import run_requirement_checks  # noqa: E402
 from vacant_network.reqloop.extract import (  # noqa: E402
     GlmClient,
+    build_requirement_set,
     extract_requirements,
     build_task_prompt,
     csv_preview,
     json_preview,
+    parse_model_output,
     ExtractError,
 )
 from vacant_network.reqloop.requirements import RequirementSet  # noqa: E402
@@ -336,15 +339,27 @@ def _task_id_from_cell(cell: str) -> str:
 def load_cell_request_text(task_dir: pathlib.Path, task_id: str,
                            real14_dir: pathlib.Path) -> str:
     """使用者原文：優先用任務 request.md；無則（3 個 dabstep factoid cell）用
-    real14/<task_id>.request.md（來源與 sha 見該檔頭部 provenance）。兩者皆無 → fail-closed。"""
+    real14/<task_id>.request.md（來源與 sha 見該檔頭部 provenance）。兩者皆無 → fail-closed。
+
+    argon 20261107_1248：任務目錄的 contract.md（agent 拿到的公開交付規格：寫到哪個檔、
+    什麼格式）一併附上。首跑漏了它，擷取模型只能猜交付檔名（answer、@x[y]、
+    /app/answer.txt），草稿明明有 answer.txt 也全判「答案檔不存在」——real14 首跑
+    9 份抓錯中 6 份、4 份冤枉全部是這個假象。contract.md 不含答案、不含 hidden。"""
     primary = task_dir / "request.md"
-    if primary.is_file():
-        return primary.read_text(encoding="utf-8")
     fallback = real14_dir / f"{task_id}.request.md"
-    if fallback.is_file():
-        return fallback.read_text(encoding="utf-8")
-    raise FileNotFoundError(
-        f"request.md 與 {fallback} 皆無（fail-closed；不猜使用者原文）")
+    if primary.is_file():
+        text = primary.read_text(encoding="utf-8")
+    elif fallback.is_file():
+        text = fallback.read_text(encoding="utf-8")
+    else:
+        raise FileNotFoundError(
+            f"request.md 與 {fallback} 皆無（fail-closed；不猜使用者原文）")
+    contract = task_dir / "contract.md"
+    if contract.is_file():
+        c_text = contract.read_text(encoding="utf-8").strip()
+        if c_text and c_text not in text:
+            text = text.rstrip() + "\n\n" + c_text + "\n"
+    return text
 
 
 def task_data_files(task_dir: pathlib.Path) -> list[pathlib.Path]:
@@ -387,27 +402,60 @@ def gate_pass(caught_bad: int, total_bad: int, false_good: int, total_good: int,
     return caught_bad >= min_catch and false_good <= max_false
 
 
+class _RecordingClient:
+    """包住 client，留下模型原始輸出（存進 out 檔，之後改擷取規則可離線重建、不再計費）。"""
+
+    def __init__(self, inner: GlmClient) -> None:
+        self.inner = inner
+        self.raw: str | None = None
+
+    def complete(self, prompt: str) -> str:
+        self.raw = self.inner.complete(prompt)
+        return self.raw
+
+
 def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
                         previews: dict[str, str], model: str, client: GlmClient,
                         out_path: pathlib.Path) -> RequirementSet:
-    """單一 cell 擷取需求；out 檔已存在 → 直接重用（不再呼叫模型、不重複計費）。"""
-    if out_path.is_file():
-        return RequirementSet.load(out_path)
+    """單一 cell 擷取需求；out 檔已存在 → 不再呼叫模型、不重複計費。
+
+    argon 20261107_1248：out 檔記 prompt_sha256 與 raw_output。
+    - prompt 改了（例如原文補上 contract.md）而 out 是舊 prompt 的結果 → 重新擷取，
+      不靜默沿用舊 prompt 的需求（首跑後補 contract 若直接重用快取，數字不會變）。
+    - prompt 相同且有 raw_output → 用目前的 build_requirement_set 從原始輸出重建
+      （擷取規則改了也反映在數字上，0 呼叫）。
+    - 舊格式（無 prompt_sha256）→ 照舊直接重用。
+    """
     prompt = build_phase2_prompt(user_text, data_names, previews)
+    prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+    if out_path.is_file():
+        doc = json.loads(out_path.read_text(encoding="utf-8"))
+        pinned = (doc.get("provenance") or {}).get("prompt_sha256")
+        if pinned is None:
+            return RequirementSet.load(out_path)
+        if pinned == prompt_sha:
+            raw = doc.get("raw_output")
+            if isinstance(raw, str):
+                req, _ = build_requirement_set(cell.cell, parse_model_output(raw), user_text)
+                return req
+            return RequirementSet.load(out_path)
+    rec = _RecordingClient(client)
     req, report = extract_requirements(
-        user_text=user_text, client=client, task_id=cell.cell,
+        user_text=user_text, client=rec, task_id=cell.cell,
         build_prompt=lambda _t: prompt)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc = req.to_dict()
     doc.update({
         "model": model,
         "report": report.to_dict(),
+        "raw_output": rec.raw,
         "provenance": {
             "cell": cell.cell,
             "role": cell.role,
             "task_dir": str(cell.task_dir),
             "user_text_chars": len(user_text),
             "data_files": data_names,
+            "prompt_sha256": prompt_sha,
             "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         },
     })
