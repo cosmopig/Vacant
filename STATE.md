@@ -28,3 +28,8 @@
 - 證據：out/eval_real14_glm53.json（PASS）＋out/real14_round2/（r1189 PASS 快照）；vq-el4.4 已 close（r1189），r1190 復核入 bd note；vq-el4.5 已 claim。
 - 沒驗證：7899602d CI 綠燈；vq-el4.5 本體（9 錯 localized 修復＋獨立 scorer）。
 - 下一步：vq-el4.5——run_eval.py 第三項：9 錯草稿＋擷取需求＋localized 修復（adapters/run.py）＋independent_score.py（只讀 pass/status）；印修好/退步/未解決/呼叫/token，對照手寫 9/9。
+- 2026-11-07 r1191: 工單 P20261107_0000-1（GitHub CI 紅燈）收——test_pin_survives_venv_symlink 的 subprocess import 與 in-process 版本對照由 scipy/numpy 改 pytest（.[dev] 必有、pyproject dev 含 pytest>=8、CI 裝 .[dev]）；assertion 結構不變、未 skip/未刪斷言；1 file 4 lines。
+- 驗證：驗收 `pytest tests/test_reqloop_repair.py -k venv_symlink` → 1 passed；tests/test_reqloop_*.py 325 passed；該測試內 grep scipy=0（其餘命中為他測試提示文字與 r975 歷史註釋，不在本票範圍）；0 模型呼叫。
+- commit：3db4a7f3（訊息以工單檔名開頭）；工單已 mv done/，尾附結果 3 行。
+- 沒驗證：GitHub CI 綠燈（本輪不 push，待自動推送後下一輪查 auto/qwen27b CI）。
+- 下一步：查 3db4a7f3 CI（應轉綠）；然後回主線 vq-el4.5（9 錯 localized 修復＋獨立 scorer）。
