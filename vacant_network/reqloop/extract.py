@@ -150,7 +150,14 @@ _REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "kv_recomputed": ("key", "data_file", "recompute"),
     "plain_recomputed": ("data_file", "recompute"),
     "tag_format": ("tag",),
+    "rowset_filter": ("identity",),  # values 選填（只比 identity 行集）
+    "group_aggregate": ("group_by", "aggregates"),
+    "summary_numbers": ("numbers",),
 }
+
+# 這些檢查器用 checks.py 的 _load_source 讀原始資料，必須有 input_csv 或
+# input_json（至少其一）；缺了檢查時只回 UNKNOWN——這裡提前 surfaced 成 unverified。
+_INPUT_SOURCE_VERIFIERS = frozenset({"rowset_filter", "group_aggregate", "summary_numbers"})
 
 _RECOMPUTE_TYPES: dict[str, frozenset[str]] = {
     "kv_recomputed": KV_RECOMPUTE_TYPES,
@@ -181,6 +188,11 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype not in allowed:
             return f"unsupported_recompute_type:{rtype or 'missing'}"
+    if verifier in _INPUT_SOURCE_VERIFIERS and not (
+        isinstance(params.get("input_csv"), str) and params["input_csv"].strip()
+        or isinstance(params.get("input_json"), str) and params["input_json"].strip()
+    ):
+        return "missing_param:input_csv_or_input_json"
     return None
 
 
@@ -363,8 +375,12 @@ VERIFIER_HINTS: dict[str, str] = {
     "monthly_top_products": "各月淨銷售額前 N 名商品排行與重算一致",
     "summary_metrics_consistency": "摘要文字中合計指標數字與重算一致",
     "summary_numbers": "摘要文字中指定數字與重算一致",
-    "rowset_filter": "排除→去重→納入後行集與逐欄值與重算一致",
-    "group_aggregate": "分組聚合值與重算一致",
+    "rowset_filter": "排除→去重→納入後行集與逐欄值與重算一致（params 必帶 identity、"
+                      "input_csv 或 input_json 其一指原始資料檔；values 選填逐欄值）",
+    "group_aggregate": "分組聚合值與重算一致（params 必帶 group_by、aggregates、"
+                       "input_csv 或 input_json 其一，指原始資料檔）",
+    "summary_numbers": "摘要文字中指定數字與重算一致（params 必帶 numbers、"
+                       "input_csv 或 input_json 其一，指原始資料檔）",
 }
 
 

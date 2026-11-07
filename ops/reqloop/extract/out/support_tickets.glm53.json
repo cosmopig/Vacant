@@ -8,11 +8,11 @@
       "verifier": "rowset_filter",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
-        "filter": "status == 'CLOSED'",
-        "recompute": "排除 status != CLOSED 的列後作為全部統計基準"
+        "identity": "ticket_id",
+        "input_csv": "tickets.csv",
+        "filter": "status == CLOSED"
       },
-      "description": "所有統計僅以 status 為 CLOSED 的工單為基礎，OPEN 工單不計入任何統計。",
+      "description": "所有統計僅納入 status 為 CLOSED 的工單，OPEN 工單不得計入任何統計。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -34,7 +34,7 @@
           "worst_hours"
         ]
       },
-      "description": "sla_report.csv 必須存在且含指定六個欄位，資料依 priority 分組。",
+      "description": "sla_report.csv 必須存在且含指定欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -47,12 +47,18 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
         "group_by": "priority",
-        "metric": "ticket_count",
-        "recompute": "filter status=='CLOSED' 後依 priority 計數"
+        "aggregates": [
+          {
+            "column": "ticket_id",
+            "op": "count",
+            "as": "ticket_count",
+            "filter": "status == CLOSED"
+          }
+        ],
+        "input_csv": "tickets.csv"
       },
-      "description": "各優先級的結案工單數須與原始資料重算一致。",
+      "description": "各優先級的 ticket_count 須等於該優先級 CLOSED 工單數。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -65,12 +71,19 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
         "group_by": "priority",
-        "metric": "avg_resolved_hours",
-        "recompute": "filter status=='CLOSED' 後依 priority 對 resolved_hours 取平均，四捨五入至小數點後 2 位"
+        "aggregates": [
+          {
+            "column": "resolved_hours",
+            "op": "mean",
+            "as": "avg_resolved_hours",
+            "round": 2,
+            "filter": "status == CLOSED"
+          }
+        ],
+        "input_csv": "tickets.csv"
       },
-      "description": "各優先級 resolved_hours 平均值，保留小數點後 2 位，須與重算一致。",
+      "description": "各優先級 avg_resolved_hours 為 resolved_hours 平均值，四捨五入至小數點後 2 位。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -83,12 +96,18 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
         "group_by": "priority",
-        "metric": "sla_met_count",
-        "recompute": "filter status=='CLOSED' 且 resolved_hours <= sla_target_hours 後依 priority 計數"
+        "aggregates": [
+          {
+            "op": "count_if",
+            "condition": "resolved_hours <= sla_target_hours",
+            "as": "sla_met_count",
+            "filter": "status == CLOSED"
+          }
+        ],
+        "input_csv": "tickets.csv"
       },
-      "description": "各優先級達標（resolved_hours <= sla_target_hours，含等於）工單數須與重算一致。",
+      "description": "各優先級 sla_met_count 為 resolved_hours <= sla_target_hours 的 CLOSED 工單數（含等於目標者）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -101,12 +120,20 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
         "group_by": "priority",
-        "metric": "sla_rate",
-        "recompute": "各組 sla_met_count / ticket_count，四捨五入至小數點後 4 位"
+        "aggregates": [
+          {
+            "op": "ratio",
+            "numerator": "sla_met_count",
+            "denominator": "ticket_count",
+            "as": "sla_rate",
+            "round": 4,
+            "filter": "status == CLOSED"
+          }
+        ],
+        "input_csv": "tickets.csv"
       },
-      "description": "各優先級 sla_rate 定義為 sla_met_count ÷ ticket_count，保留小數點後 4 位，須與重算一致。",
+      "description": "各優先級 sla_rate 等於 sla_met_count ÷ ticket_count，取小數點後 4 位。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -119,12 +146,18 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
         "group_by": "priority",
-        "metric": "worst_hours",
-        "recompute": "filter status=='CLOSED' 後依 priority 對 resolved_hours 取最大值"
+        "aggregates": [
+          {
+            "column": "resolved_hours",
+            "op": "max",
+            "as": "worst_hours",
+            "filter": "status == CLOSED"
+          }
+        ],
+        "input_csv": "tickets.csv"
       },
-      "description": "各優先級 resolved_hours 最大值須與重算一致。",
+      "description": "各優先級 worst_hours 為該組 resolved_hours 最大值。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -137,23 +170,23 @@
       "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
-        "data_file": "tickets.csv",
         "numbers": [
           {
-            "label": "結案工單總數",
-            "recompute": "filter status=='CLOSED' 後總列數"
+            "name": "結案工單總數",
+            "recompute": "count of status == CLOSED"
           },
           {
-            "label": "整體 SLA 達標率（百分數，小數點後 2 位）",
-            "recompute": "filter status=='CLOSED' 且 resolved_hours <= sla_target_hours 的列數 ÷ 結案總數 × 100，四捨五入至小數點後 2 位"
+            "name": "整體 SLA 達標率",
+            "recompute": "count(resolved_hours <= sla_target_hours and status == CLOSED) / count(status == CLOSED) * 100, rounded to 2 decimals, percent format"
           },
           {
-            "label": "最長處理時數（精確數值）",
-            "recompute": "filter status=='CLOSED' 後 resolved_hours 的最大值"
+            "name": "最長處理時數",
+            "recompute": "max(resolved_hours) among status == CLOSED"
           }
-        ]
+        ],
+        "input_csv": "tickets.csv"
       },
-      "description": "summary.md 須載明三項指標：結案工單總數、整體 SLA 達標率（百分數、小數點後 2 位）、最長處理時數（精確數值），數字須與原始資料重算一致。",
+      "description": "summary.md 須載明三項指標：結案工單總數、整體 SLA 達標率（百分數、小數點後 2 位）、最長處理時數（精確數值），且數字與從 tickets.csv 重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -177,5 +210,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T09:22:04+00:00"
+  "generated_at": "2026-11-07T09:38:41+00:00"
 }

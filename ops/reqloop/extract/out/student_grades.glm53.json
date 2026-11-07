@@ -8,17 +8,11 @@
       "verifier": "rowset_filter",
       "kind": "explicit",
       "params": {
-        "data_file": "grades.csv",
-        "exclude": [
-          {
-            "column": "status",
-            "value": "WITHDRAWN"
-          }
-        ],
-        "dedup": [],
-        "include": []
+        "identity": "student_id",
+        "input_csv": "grades.csv",
+        "values": {}
       },
-      "description": "計算前須排除 status 為 WITHDRAWN 的記錄，排除後行集須與重算一致。",
+      "description": "先排除 status=WITHDRAWN 的記錄，再以 student_id 去重保留第一筆，行集與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -31,17 +25,10 @@
       "verifier": "rowset_filter",
       "kind": "explicit",
       "params": {
-        "data_file": "grades.csv",
-        "exclude": [],
-        "dedup": [
-          {
-            "column": "student_id",
-            "keep": "first"
-          }
-        ],
-        "include": []
+        "identity": "student_id",
+        "input_csv": "grades.csv"
       },
-      "description": "排除 WITHDRAWN 後，依 student_id 去重並保留第一筆，行集須與重算一致。",
+      "description": "排除→去重→納入後行集與逐欄值與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -51,18 +38,21 @@
       "id": "R3",
       "quote": "總評成績 `total_score = midterm_score × 0.4 + final_score × 0.6`；`total_score ≥ 60.0` 為及格。",
       "deliverable": "class_summary.csv",
-      "verifier": "kv_recomputed",
+      "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "key": "total_score",
-        "data_file": "grades.csv",
-        "recompute": "total_score = midterm_score * 0.4 + final_score * 0.6；及格判定為 total_score >= 60.0"
+        "group_by": "class_name",
+        "aggregates": {
+          "average_score": "mean(total_score)",
+          "passing_count": "count(total_score >= 60.0)"
+        },
+        "input_csv": "grades.csv"
       },
-      "description": "total_score 須依指定公式重算，及格門檻為 60.0。",
+      "description": "total_score 以 midterm_score×0.4 + final_score×0.6 計算，及格門檻為 total_score ≥ 60.0，分組聚合值須與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
       "id": "R4",
@@ -92,12 +82,13 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "grades.csv",
         "group_by": "class_name",
-        "metric": "pass_rate",
-        "recompute": "pass_rate = 該班及格人數 / 該班修課人數，四捨五入至小數點後 2 位"
+        "aggregates": {
+          "pass_rate": "round(passing_count / student_count, 2)"
+        },
+        "input_csv": "grades.csv"
       },
-      "description": "各班 pass_rate 須與依分組重算值一致。",
+      "description": "各班 pass_rate 為及格人數除以修課人數，四捨五入至小數點後 2 位，與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -110,12 +101,13 @@
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "grades.csv",
         "group_by": "class_name",
-        "metric": "average_score",
-        "recompute": "average_score = 該班 total_score（= midterm_score*0.4 + final_score*0.6）平均，四捨五入至小數點後 2 位"
+        "aggregates": {
+          "average_score": "round(mean(total_score), 2)"
+        },
+        "input_csv": "grades.csv"
       },
-      "description": "各班 average_score 須與依分組重算值一致。",
+      "description": "各班 average_score 為 total_score 平均，四捨五入至小數點後 2 位，與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -128,19 +120,13 @@
       "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
-        "data_file": "grades.csv",
-        "metrics": [
-          {
-            "name": "全年級及格率",
-            "recompute": "全年級及格人數 / 全年級修課人數，以百分比表示，四捨五入至小數點後 2 位"
-          },
-          {
-            "name": "全年級平均總評",
-            "recompute": "全年級 total_score（= midterm_score*0.4 + final_score*0.6）平均，四捨五入至小數點後 2 位"
-          }
-        ]
+        "numbers": [
+          "全年級及格率",
+          "全年級平均總評"
+        ],
+        "input_csv": "grades.csv"
       },
-      "description": "summary.md 中「全年級及格率」與「全年級平均總評」數字須與重算一致。",
+      "description": "summary.md 須載明全年級及格率（百分比，小數點後 2 位）與全年級平均總評（小數點後 2 位），數字與原始資料重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -161,12 +147,7 @@
       "R7"
     ],
     "discarded": [],
-    "unverified": [
-      {
-        "id": "R3",
-        "reason": "recompute_not_dict"
-      }
-    ]
+    "unverified": []
   },
-  "generated_at": "2026-11-07T09:21:56+00:00"
+  "generated_at": "2026-11-07T09:38:34+00:00"
 }

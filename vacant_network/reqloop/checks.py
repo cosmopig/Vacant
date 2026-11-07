@@ -1163,6 +1163,8 @@ def check_group_aggregate(
         for key, grows in groups.items():
             vals: dict[str, Any] = {}
             for spec in agg_specs:
+                if not isinstance(spec, dict):
+                    raise UnknownSource(f"group_aggregate.params.aggregates 條目非物件: {spec!r}")
                 t = str(spec.get("type", "")).strip().lower()
                 name = str(spec.get("name", "")).strip()
                 if not name:
@@ -2395,6 +2397,8 @@ def check_summary_numbers(
             raise UnknownSource("summary_numbers.params.numbers 缺失")
         expected: list[tuple[str, Any]] = []
         for n in numbers:
+            if not isinstance(n, dict):
+                raise UnknownSource(f"summary_numbers.params.numbers 條目非物件: {n!r}")
             t = str(n.get("type", "")).strip().lower()
             label = str(n.get("label", t))
             if t == "count":

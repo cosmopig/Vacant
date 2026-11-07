@@ -3,46 +3,6 @@
   "items": [
     {
       "id": "R1",
-      "quote": "依 `category` 與 `subcategory` 分組；`subcategory` 空白者歸入 `unspecified`",
-      "deliverable": "expense_summary.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "data_file": "expenses.csv",
-        "group_by": [
-          "category",
-          "subcategory"
-        ],
-        "rules": "空白 subcategory 歸入 unspecified"
-      },
-      "description": "依 category 與 subcategory 分組加總，subcategory 空白者歸入 unspecified。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R2",
-      "quote": "`subcategory` 大小寫不分（例如 `software` 與 `Software` 為同一組），輸出用 lower",
-      "deliverable": "expense_summary.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "data_file": "expenses.csv",
-        "group_by": [
-          "category",
-          "lower(subcategory)"
-        ],
-        "output_case": "lower"
-      },
-      "description": "subcategory 分組時大小寫不分，輸出使用小寫。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
       "quote": "產出 `expense_summary.csv`，欄位：`category, subcategory, total_amount`",
       "deliverable": "expense_summary.csv",
       "verifier": "csv_structure",
@@ -54,7 +14,35 @@
           "total_amount"
         ]
       },
-      "description": "expense_summary.csv 必須存在且含 category、subcategory、total_amount 欄位。",
+      "description": "交付檔 expense_summary.csv 必須存在且含 category、subcategory、total_amount 三欄。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）。",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "aggregates": [
+          {
+            "column": "amount",
+            "op": "sum",
+            "round": 2,
+            "rounding_order": "round_after_summing",
+            "output_column": "total_amount"
+          }
+        ],
+        "input_csv": "expenses.csv"
+      },
+      "description": "total_amount 必須是先加總再四捨五入到小數點後 2 位的值，與重算一致（驗證捨入順序，避免逐列先捨入）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -62,17 +50,21 @@
     },
     {
       "id": "R4",
-      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）",
-      "deliverable": "expense_summary.csv",
-      "verifier": "group_aggregate",
+      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
-        "data_file": "expenses.csv",
-        "value_column": "amount",
-        "rounding": "round(sum, 2)",
-        "order": "先加總後四捨五入"
+        "numbers": [
+          {
+            "label": "報銷總金額",
+            "definition": "sum of amount over all rows in expenses.csv, rounded to 2 decimal places",
+            "match": "exact_numeric"
+          }
+        ],
+        "input_csv": "expenses.csv"
       },
-      "description": "total_amount 為該組 amount 先加總再四捨五入到小數點後 2 位。",
+      "description": "summary.md 中載明的報銷總金額（全部 amount 加總、小數點後 2 位）須與從 expenses.csv 重算的數值一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -80,20 +72,19 @@
     },
     {
       "id": "R5",
-      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）",
+      "quote": "產出 `summary.md`",
       "deliverable": "summary.md",
-      "verifier": "summary_numbers",
+      "verifier": "table_structure",
       "kind": "explicit",
       "params": {
-        "data_file": "expenses.csv",
-        "recompute": "round(sum(amount), 2)",
-        "label": "報銷總金額"
+        "required_columns": [],
+        "existence": true
       },
-      "description": "summary.md 須載明報銷總金額，為全部 amount 加總後取小數點後 2 位的精確數值，與重算一致。",
+      "description": "交付物 summary.md 必須存在（表格結構欄位由其他條目驗證，此處僅驗證檔案存在）。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -102,13 +93,23 @@
     "extract_error": null,
     "kept": [
       "R1",
-      "R2",
       "R3",
       "R4",
       "R5"
     ],
-    "discarded": [],
-    "unverified": []
+    "discarded": [
+      {
+        "index": 1,
+        "id": "R2",
+        "reason": "quote_not_verbatim"
+      }
+    ],
+    "unverified": [
+      {
+        "id": "R5",
+        "reason": "empty_param:required_columns"
+      }
+    ]
   },
-  "generated_at": "2026-11-07T09:21:28+00:00"
+  "generated_at": "2026-11-07T09:38:06+00:00"
 }

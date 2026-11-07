@@ -446,7 +446,11 @@ def test_run_task_counts_discarded_unverified_and_hands_off(tmp_path):
     req, report = run_task(t_dir / "request.md", model="glm53", client=client, out_path=out)
     assert [i.id for i in req.items] == ["r1", "r2", "r3", "unv"]  # 改寫 quote 被丟棄；未知 verifier 保留但 unverified
     assert [d.reason for d in report.discarded] == ["quote_not_verbatim"]
-    assert [(u.id, u.reason) for u in report.unverified] == [("unv", "unknown_verifier:vibes_check")]
+    # summary_numbers 缺 input_csv/input_json → fail-closed 標 unverified（不準靜默 UNKNOWN）
+    assert [(u.id, u.reason) for u in report.unverified] == [
+        ("r1", "missing_param:input_csv_or_input_json"),
+        ("unv", "unknown_verifier:vibes_check"),
+    ]
     doc = json.loads(out.read_text(encoding="utf-8"))
     assert doc["task_id"] == "orders_monthly" and doc["model"] == "glm53"
     assert len(doc["items"]) == 4 and doc["report"]["discarded"][0]["reason"] == "quote_not_verbatim"
@@ -516,3 +520,38 @@ def test_main_fail_closed_on_glm_failure(tmp_path, capsys):
     assert rc == 20
     assert "條目 0、丟棄 0、unverified 0" in captured.out
     assert "fail-closed" in captured.err
+
+
+def test_required_params_flag_missing_input_pair():
+    from vacant_network.reqloop.extract import build_requirement_set
+    # group_aggregate/rowset_filter/summary_numbers 要 input_csv 或 input_json；
+    # 模型常猜 data_file——參數錯名必須靜態 surfaced 成 unverified，不准靜默 UNKNOWN。
+    for v, params in [
+        ("group_aggregate", {"group_by": "a", "aggregates": [{"column": "b", "func": "sum"}],
+                             "data_file": "orders.csv"}),
+        ("rowset_filter", {"identity": ["a"], "values": {}, "data_file": "orders.csv"}),
+        ("summary_numbers", {"numbers": [{"value": "1", "label": "x"}], "data_file": "orders.csv"}),
+    ]:
+        req, report = build_requirement_set("t", [
+            {"id": "R1", "verifier": v, "description": "d", "quote": "q",
+             "deliverable": "summary.md", "params": params},
+        ], "q")
+        assert req.items[0].unverified, (v, params)
+        reason = next((u.reason for u in report.unverified if u.id == "R1"), "")
+        assert "input_csv" in reason, (v, reason)
+
+    # 有 input_csv 就過
+    req, _ = build_requirement_set("t", [
+        {"id": "R1", "verifier": "group_aggregate", "description": "d", "quote": "q",
+         "deliverable": "summary.md",
+         "params": {"group_by": "a", "aggregates": [{"column": "b", "func": "sum"}],
+                    "input_csv": "orders.csv"}},
+    ], "q")
+    assert not req.items[0].unverified, req.items[0].unverified_reason
+
+
+def test_verifier_hints_name_the_input_params():
+    from vacant_network.reqloop.extract import VERIFIER_HINTS
+    for v in ("group_aggregate", "rowset_filter", "summary_numbers"):
+        h = VERIFIER_HINTS[v]
+        assert "input_csv" in h and "input_json" in h, (v, h)

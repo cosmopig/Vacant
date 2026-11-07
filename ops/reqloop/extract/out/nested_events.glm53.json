@@ -5,16 +5,29 @@
       "id": "R1",
       "quote": "`event_type` 不分大小寫（`CLICK`、`click`、`Click` 為同一類），輸出用 lower。",
       "deliverable": "event_stats.csv",
-      "verifier": "csv_structure",
+      "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "required_columns": [
-          "event_type",
-          "event_count",
-          "total_duration_ms"
-        ]
+        "group_by": "event_type_lower",
+        "aggregates": [
+          {
+            "column": "event_type",
+            "op": "lowercase_group"
+          },
+          {
+            "column": "event_count",
+            "op": "count"
+          },
+          {
+            "column": "total_duration_ms",
+            "op": "sum",
+            "field": "payload.duration_ms",
+            "missing_as": 0
+          }
+        ],
+        "input_json": "events.json"
       },
-      "description": "event_type 欄位值須為小寫（不分大小寫歸類後輸出 lower）。",
+      "description": "event_type 需先轉小寫再分組，CLICK/click/Click 視為同一類，輸出為小寫。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -22,6 +35,35 @@
     },
     {
       "id": "R2",
+      "quote": "`payload.duration_ms` 缺失以 0 計（該事件**仍計入** event_count）；無 payload 的事件也仍計數。",
+      "deliverable": "event_stats.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "group_by": "event_type_lower",
+        "aggregates": [
+          {
+            "column": "event_count",
+            "op": "count",
+            "note": "含 payload 缺失與 duration_ms 缺失事件"
+          },
+          {
+            "column": "total_duration_ms",
+            "op": "sum",
+            "field": "payload.duration_ms",
+            "missing_as": 0
+          }
+        ],
+        "input_json": "events.json"
+      },
+      "description": "duration_ms 或整個 payload 缺失時，事件仍計入 event_count，duration 以 0 計入總和。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
       "quote": "產出 `event_stats.csv`，欄位：`event_type, event_count, total_duration_ms`",
       "deliverable": "event_stats.csv",
       "verifier": "csv_structure",
@@ -33,31 +75,7 @@
           "total_duration_ms"
         ]
       },
-      "description": "交付 event_stats.csv，必須存在且含指定三欄。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "`total_duration_ms` = 該類型 `duration_ms` 加總（缺失以 0 計）。",
-      "deliverable": "event_stats.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "data_file": "events.json",
-        "group_key": "event_type",
-        "aggregations": [
-          {
-            "column": "payload.duration_ms",
-            "op": "sum",
-            "missing_value": 0,
-            "case_insensitive_group": true
-          }
-        ]
-      },
-      "description": "各 event_type（不分大小寫）的 total_duration_ms 等於該類 duration_ms 加總，缺失以 0 計。",
+      "description": "交付檔 event_stats.csv 必須存在且含三個指定欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -65,23 +83,23 @@
     },
     {
       "id": "R4",
-      "quote": "`payload.duration_ms` 缺失以 0 計（該事件**仍計入** event_count）；無 payload 的事件也仍計數。",
+      "quote": "`total_duration_ms` = 該類型 `duration_ms` 加總（缺失以 0 計）。",
       "deliverable": "event_stats.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
       "params": {
-        "data_file": "events.json",
-        "group_key": "event_type",
-        "aggregations": [
+        "group_by": "event_type_lower",
+        "aggregates": [
           {
-            "column": "event_id",
-            "op": "count",
-            "case_insensitive_group": true,
-            "include_missing_payload": true
+            "column": "total_duration_ms",
+            "op": "sum",
+            "field": "payload.duration_ms",
+            "missing_as": 0
           }
-        ]
+        ],
+        "input_json": "events.json"
       },
-      "description": "各 event_type（不分大小寫）的 event_count 須包含 duration_ms 缺失與無 payload 的事件。",
+      "description": "各類型 total_duration_ms 為該類（不分大小寫）所有事件 duration_ms 加總，缺失以 0 計。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -94,7 +112,6 @@
       "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
-        "data_file": "events.json",
         "numbers": [
           {
             "label": "事件總數",
@@ -102,12 +119,13 @@
           },
           {
             "label": "總時長",
-            "recompute": "sum_payload_duration_ms_missing_as_zero",
+            "recompute": "sum(payload.duration_ms, missing_as=0)",
             "unit": "ms"
           }
-        ]
+        ],
+        "input_json": "events.json"
       },
-      "description": "summary.md 須載明事件總數（全部事件筆數）與總時長（ms），數值與原始資料重算一致。",
+      "description": "summary.md 須載明事件總數（全部事件筆數）與總時長（ms），數值須與原始資料重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -128,5 +146,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T09:21:47+00:00"
+  "generated_at": "2026-11-07T09:38:19+00:00"
 }
