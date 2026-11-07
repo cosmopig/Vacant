@@ -328,10 +328,9 @@ def test_real_slice_dab055_needle_is_true_recomputed_value():
     重算真值必須是對凍結資料 data/estimated_numbers.csv 實算的點估計均值
     （dab_055 規則：純整數／點估計前導整數，Null/空/非數值忽略），round 後恰為 2081990、
     與 manifest purpose 點名之針一致——手寫數字不算（空洞斷言，同 r1140 訓）。
-    mean_int_col 分支內聯於 check_kv_recomputed（checks.py:1612-1640，無模組級函式）；
-    本測試逐字複製其解析迴圈鎖真值，複製與產品之漂移另由本檔 smoke 測試
-    （2081990→gap_closed、2081990.36→FAIL）兩側共同釘住。零模型呼叫。"""
+    直接呼叫產品 checks._mean_int_col(rows, rc)，禁止在測試內複製解析迴圈。零模型呼叫。"""
     import csv
+    from vacant_network.reqloop.checks import _mean_int_col
     man = g2.G2Manifest.load(DAB055_MANIFEST)
     base = DAB055_MANIFEST.parent
     d = man.drafts[0]
@@ -344,22 +343,10 @@ def test_real_slice_dab055_needle_is_true_recomputed_value():
     data_path = base / d["task"]["dir"] / item.params["data_file"]
     with open(data_path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
-    col = rc["col"]
-    ints: list[int] = []
-    for r in rows:  # checks.py:1612-1640 mean_int_col 解析迴圈（逐字複製）
-        raw_cell = r.get(col)
-        if raw_cell is None:
-            continue
-        cell = str(raw_cell).strip()
-        if not cell:
-            continue
-        m_int = re.match(r"^([+-]?\d+)(?:\s*\[\s*\d+\s*-\s*\d+\s*\])?$", cell)
-        if m_int:
-            ints.append(int(m_int.group(1)))
-    assert ints, "測試空洞：無可解析整數（產品將 UnknownSource，無法鎖真值）"
-    raw_mean = sum(ints) / len(ints)
-    assert round(raw_mean) == 2081990, \
-        f"真值漂移：round(raw_mean)={round(raw_mean)} ≠ 針 {needle}"
+    expected, unrounded = _mean_int_col(rows, rc)
+    assert f"{int(expected)}" == needle, (
+        f"真值漂移：_mean_int_col={expected!r} (unrounded={unrounded!r}) ≠ 針 {needle}"
+    )
 
 
 def test_real_slice_dab055_smoke_pipeline_and_exit_codes(tmp_path):
