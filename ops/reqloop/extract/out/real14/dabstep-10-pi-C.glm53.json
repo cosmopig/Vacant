@@ -2,7 +2,7 @@
   "task_id": "dabstep-10-pi-C",
   "items": [
     {
-      "id": "1",
+      "id": "R1",
       "quote": "How many unique merchants are present in the dataset?",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
@@ -14,31 +14,27 @@
           "col": "merchant"
         }
       },
-      "description": "答案檔內容應為資料集中 merchant 欄位的去重計數，與從 data/payments.csv 重算結果一致。",
+      "description": "答案檔 answer.txt 內容應為 payments.csv 中 merchant 欄位的去重計數（唯一商戶數）。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "2",
-      "quote": "Answer must be just a number of unique merchants.",
+      "id": "R2",
+      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).",
       "deliverable": "answer.txt",
-      "verifier": "answer_kv",
+      "verifier": "tag_format",
       "kind": "explicit",
       "params": {
-        "keys": [
-          {
-            "key": "answer",
-            "type": "number"
-          }
-        ]
+        "tag": "total",
+        "value_type": "number"
       },
-      "description": "answer.txt 內容必須僅為一個數字（唯一商戶數），不含其他文字。",
+      "description": "answer.txt 必須只含單一純文字數值一行，不得有其他文字。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -46,22 +42,29 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "1",
-      "2"
+      "R1",
+      "R2"
     ],
     "discarded": [],
-    "unverified": []
+    "unverified": [
+      {
+        "id": "R2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
   },
+  "raw_output": "[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"How many unique merchants are present in the dataset?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"unique_count\", \"col\": \"merchant\"}},\n    \"description\": \"答案檔 answer.txt 內容應為 payments.csv 中 merchant 欄位的去重計數（唯一商戶數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"total\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 必須只含單一純文字數值一行，不得有其他文字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n",
   "provenance": {
     "cell": "dabstep-10-pi-C",
     "role": "bad",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-10-pi-C/task",
-    "user_text_chars": 1045,
+    "user_text_chars": 1404,
     "data_files": [
       "data/payments.csv",
       "data/merchant_data.json",
       "data/payments-readme.md"
     ],
-    "generated_at": "2026-11-07T12:42:12+08:00"
+    "prompt_sha256": "0fb7e8b90c5a4ead2e71423610db4abf84ff0a9bf5524975efde26a6ed33e336",
+    "generated_at": "2026-11-07T13:11:36+08:00"
   }
 }

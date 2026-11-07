@@ -2,9 +2,25 @@
   "task_id": "dab_426-pi-C",
   "items": [
     {
-      "id": "req_max_wind_speed",
-      "quote": "What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?",
-      "deliverable": "@max_wind_speed[number]",
+      "id": "R2",
+      "quote": "@max_wind_speed[number] where \"number\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "max_wind_speed",
+        "value_type": "number"
+      },
+      "description": "答案須以 @max_wind_speed[value] 格式撰寫，值為數字（float，兩位小數）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R3",
+      "quote": "Firstly, identify the storm with the highest maximum storm category, neglecting any ties. If there are multiple storms with the same highest maximum storm category, choose the one that appears first in the given dataset. Then find the maximum sustained wind speed corresponding to this particular storm.",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -14,9 +30,10 @@
           "type": "max_row_first",
           "sel_col": "max_storm_cat",
           "out_col": "max_sust_wind"
-        }
+        },
+        "round": 2
       },
-      "description": "找出 max_storm_cat 最高的風暴（平手取檔案中首筆），回傳該列 max_sust_wind；max_row_first 的平手取首列語義對應原文「If there are multiple storms with the same highest maximum storm category, choose the one that appears first in the given dataset」。",
+      "description": "從 data/cost_data_with_errors.csv 找出 max_storm_cat 最大（平手取檔案序首列）的風暴，其 max_sust_wind 即為答案，與 answer.txt 的 @max_wind_speed 比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -28,19 +45,33 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req_max_wind_speed"
+      "R2",
+      "R3"
     ],
-    "discarded": [],
-    "unverified": []
+    "discarded": [
+      {
+        "index": 0,
+        "id": "R1",
+        "reason": "quote_not_verbatim"
+      }
+    ],
+    "unverified": [
+      {
+        "id": "R2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of the workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"max_wind_speed\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須存在且含 @max_wind_speed[number] 鍵值，型別為數字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"@max_wind_speed[number] where \\\"number\\\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"max_wind_speed\", \"value_type\": \"number\"},\n    \"description\": \"答案須以 @max_wind_speed[value] 格式撰寫，值為數字（float，兩位小數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"Firstly, identify the storm with the highest maximum storm category, neglecting any ties. If there are multiple storms with the same highest maximum storm category, choose the one that appears first in the given dataset. Then find the maximum sustained wind speed corresponding to this particular storm.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"max_wind_speed\", \"data_file\": \"data/cost_data_with_errors.csv\", \"recompute\": {\"type\": \"max_row_first\", \"sel_col\": \"max_storm_cat\", \"out_col\": \"max_sust_wind\"}, \"round\": 2},\n    \"description\": \"從 data/cost_data_with_errors.csv 找出 max_storm_cat 最大（平手取檔案序首列）的風暴，其 max_sust_wind 即為答案，與 answer.txt 的 @max_wind_speed 比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_426-pi-C",
     "role": "bad",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_426-pi-C/task",
-    "user_text_chars": 706,
+    "user_text_chars": 1291,
     "data_files": [
       "data/cost_data_with_errors.csv"
     ],
-    "generated_at": "2026-11-07T12:41:54+08:00"
+    "prompt_sha256": "0d3a71af578bfc8a7fb02338c1a3f429f2d733b5d2fd0e61ea80cbac5167dd65",
+    "generated_at": "2026-11-07T13:11:15+08:00"
   }
 }

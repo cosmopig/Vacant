@@ -2,9 +2,9 @@
   "task_id": "dab_057-pi-A",
   "items": [
     {
-      "id": "R1",
+      "id": "req_correlation_coefficient",
       "quote": "Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.",
-      "deliverable": "@correlation_coefficient[r_value]",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -13,53 +13,31 @@
         "recompute": {
           "type": "pearson2",
           "col_a": "No. of cases",
-          "col_b": "No. of deaths",
-          "round": 2
-        }
+          "col_b": "No. of deaths"
+        },
+        "atol": 1e-06
       },
-      "description": "以完整資料（不分國家、年份）計算 No. of cases 與 No. of deaths 的 Pearson 相關係數，四捨五入至兩位小數，並與答案鍵 correlation_coefficient 比對。",
+      "description": "計算 'No. of cases' 與 'No. of deaths' 兩欄（轉為 Int64 後）的 Pearson 相關係數，與 answer.txt 中 @correlation_coefficient 的數值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
+      "id": "req_answer_format_tag",
       "quote": "@correlation_coefficient[r_value] where \"r_value\" is a number between -1 and 1, rounded to two decimal places.",
-      "deliverable": "@correlation_coefficient[r_value]",
+      "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
       "params": {
         "tag": "correlation_coefficient",
         "value_type": "number"
       },
-      "description": "答案須以 @correlation_coefficient[數值] 格式交付，數值介於 -1 與 1 之間並四捨五入至兩位小數。",
+      "description": "answer.txt 須含 @correlation_coefficient[數值] 格式項目，數值介於 -1 與 1 之間並四捨五入至兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
-    },
-    {
-      "id": "R3",
-      "quote": "Convert the data types of 'No. of cases' and 'No. of deaths' column from Object (String) to Int64 before performing calculations.",
-      "deliverable": "@correlation_coefficient[r_value]",
-      "verifier": "kv_recomputed",
-      "kind": "explicit",
-      "params": {
-        "key": "correlation_coefficient",
-        "data_file": "data/estimated_numbers.csv",
-        "recompute": {
-          "type": "pearson2",
-          "col_a": "No. of cases",
-          "col_b": "No. of deaths",
-          "round": 2
-        }
-      },
-      "description": "計算前須將 'No. of cases' 與 'No. of deaths' 由字串轉為整數；此轉換為相關係數計算的前置步驟，重算時以轉換後的數值欄進行 Pearson 計算。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
     }
   ],
   "model": "glm53",
@@ -67,26 +45,27 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3"
+      "req_correlation_coefficient",
+      "req_answer_format_tag"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "R2",
+        "id": "req_answer_format_tag",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_correlation_coefficient\",\n    \"quote\": \"Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"correlation_coefficient\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\n        \"type\": \"pearson2\",\n        \"col_a\": \"No. of cases\",\n        \"col_b\": \"No. of deaths\"\n      },\n      \"atol\": 0.000001\n    },\n    \"description\": \"計算 'No. of cases' 與 'No. of deaths' 兩欄（轉為 Int64 後）的 Pearson 相關係數，與 answer.txt 中 @correlation_coefficient 的數值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_answer_format_tag\",\n    \"quote\": \"@correlation_coefficient[r_value] where \\\"r_value\\\" is a number between -1 and 1, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"correlation_coefficient\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"answer.txt 須含 @correlation_coefficient[數值] 格式項目，數值介於 -1 與 1 之間並四捨五入至兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_057-pi-A",
     "role": "good",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_057-pi-A/task",
-    "user_text_chars": 666,
+    "user_text_chars": 1260,
     "data_files": [
       "data/estimated_numbers.csv"
     ],
-    "generated_at": "2026-11-07T12:41:27+08:00"
+    "prompt_sha256": "5111a303024a543d6369ad752ac591d11217e2be8898534a28fef819f91565b4",
+    "generated_at": "2026-11-07T13:10:50+08:00"
   }
 }

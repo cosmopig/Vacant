@@ -2,7 +2,7 @@
   "task_id": "dabstep-11-pi-A",
   "items": [
     {
-      "id": "R1",
+      "id": "1",
       "quote": "What is the highest transaction amount (in EUR) recorded?",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
@@ -14,15 +14,15 @@
           "col": "eur_amount"
         }
       },
-      "description": "答案檔應只含 payments.csv 中 eur_amount 欄位的最大值（單一數字）。",
+      "description": "答案應為 payments.csv 中 eur_amount 欄位的最大值，寫入 answer.txt。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
-      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).",
+      "id": "2",
+      "quote": "The answer is a single plain-text value on one line (a number, or a comma-separated\n  list of numbers, or an empty file when the answer set is empty). No other text.",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
       "kind": "explicit",
@@ -33,30 +33,11 @@
           "col": "eur_amount"
         }
       },
-      "description": "answer.txt 內容必須僅為最終答案本身（單一數字，無其他文字）。",
+      "description": "answer.txt 內容必須為單行純文字數值（本題為 eur_amount 最大值），不得含其他文字；行集格式本身無法用重算驗證，僅能驗證數值本身。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.",
-      "deliverable": "answer.txt",
-      "verifier": "plain_recomputed",
-      "kind": "explicit",
-      "params": {
-        "data_file": "data/payments.csv",
-        "recompute": {
-          "type": "col_max",
-          "col": "eur_amount"
-        }
-      },
-      "description": "本題在 payments.csv 中有適用答案（eur_amount 最大值），故答案不應為 'Not Applicable'，而應為重算出的最大值。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -64,22 +45,28 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3"
+      "1",
+      "2"
     ],
     "discarded": [],
-    "unverified": []
+    "unverified": [
+      {
+        "id": "2",
+        "reason": "model_declared_unverified"
+      }
+    ]
   },
+  "raw_output": "[\n  {\n    \"id\": \"1\",\n    \"quote\": \"What is the highest transaction amount (in EUR) recorded?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"col_max\", \"col\": \"eur_amount\"}},\n    \"description\": \"答案應為 payments.csv 中 eur_amount 欄位的最大值，寫入 answer.txt。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"The answer is a single plain-text value on one line (a number, or a comma-separated\\n  list of numbers, or an empty file when the answer set is empty). No other text.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"col_max\", \"col\": \"eur_amount\"}},\n    \"description\": \"answer.txt 內容必須為單行純文字數值（本題為 eur_amount 最大值），不得含其他文字；行集格式本身無法用重算驗證，僅能驗證數值本身。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  }\n]\n",
   "provenance": {
     "cell": "dabstep-11-pi-A",
     "role": "good",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-11-pi-A/task",
-    "user_text_chars": 1032,
+    "user_text_chars": 1391,
     "data_files": [
       "data/payments.csv",
       "data/payments-readme.md"
     ],
-    "generated_at": "2026-11-07T12:42:19+08:00"
+    "prompt_sha256": "b3dad3c0fe707bff3dca8dd1e681df1a6d1a01674b2e1bd3d251b2744ca0dcf3",
+    "generated_at": "2026-11-07T13:12:10+08:00"
   }
 }

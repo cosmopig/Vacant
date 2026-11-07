@@ -2,9 +2,9 @@
   "task_id": "dabstep-13-pi-A",
   "items": [
     {
-      "id": "R1",
+      "id": "1",
       "quote": "During which hour of the day do the most transactions occur?",
-      "deliverable": "/app/answer.txt",
+      "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
       "kind": "explicit",
       "params": {
@@ -14,31 +14,27 @@
           "col": "hour_of_day"
         }
       },
-      "description": "答案檔應只含一個數字，代表交易次數最多的當日小時；以 hour_of_day 欄位重算眾數比對。",
+      "description": "answer.txt 應只含一個數字，即交易次數最多的 hour_of_day（以 data/payments.csv 重算 mode_col 驗證）。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
-      "quote": "write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).",
-      "deliverable": "/app/answer.txt",
-      "verifier": "answer_kv",
+      "id": "2",
+      "quote": "Answer must be just a number representing the hour of the day.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
       "kind": "explicit",
       "params": {
-        "keys": [
-          {
-            "key": "answer",
-            "type": "number"
-          }
-        ]
+        "tag": "answer",
+        "value_type": "number"
       },
-      "description": "answer.txt 內容必須僅為一個數字（無其他文字）。",
+      "description": "answer.txt 內容必須是單一數字（代表小時），不含其他文字。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -46,21 +42,28 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2"
+      "1",
+      "2"
     ],
     "discarded": [],
-    "unverified": []
+    "unverified": [
+      {
+        "id": "2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
   },
+  "raw_output": "[{\"id\": \"1\", \"quote\": \"During which hour of the day do the most transactions occur?\", \"deliverable\": \"answer.txt\", \"verifier\": \"plain_recomputed\", \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"mode_col\", \"col\": \"hour_of_day\"}}, \"description\": \"answer.txt 應只含一個數字，即交易次數最多的 hour_of_day（以 data/payments.csv 重算 mode_col 驗證）。\", \"required\": true, \"kind\": \"explicit\"}, {\"id\": \"2\", \"quote\": \"Answer must be just a number representing the hour of the day.\", \"deliverable\": \"answer.txt\", \"verifier\": \"tag_format\", \"params\": {\"tag\": \"answer\", \"value_type\": \"number\"}, \"description\": \"answer.txt 內容必須是單一數字（代表小時），不含其他文字。\", \"required\": true, \"kind\": \"explicit\"}]\n",
   "provenance": {
     "cell": "dabstep-13-pi-A",
     "role": "good",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-13-pi-A/task",
-    "user_text_chars": 858,
+    "user_text_chars": 1217,
     "data_files": [
       "data/payments.csv",
       "data/payments-readme.md"
     ],
-    "generated_at": "2026-11-07T12:42:33+08:00"
+    "prompt_sha256": "49ba28e6f44dbb6eb88d421d3c5dd984c91d25b1cd2e5da14276bdbd27fb23a6",
+    "generated_at": "2026-11-07T13:12:22+08:00"
   }
 }

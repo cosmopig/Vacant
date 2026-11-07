@@ -4,7 +4,7 @@
     {
       "id": "1",
       "quote": "Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?",
-      "deliverable": "@total_hotels[count]",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -15,7 +15,7 @@
           }
         ]
       },
-      "description": "答案必須以 @total_hotels[count] 標籤格式提供，count 為星級等於 5 的飯店數量。",
+      "description": "答案檔 answer.txt 必須包含 @total_hotels[count] 鍵，值為 5 星飯店總數（非負整數）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -24,7 +24,7 @@
     {
       "id": "2",
       "quote": "Count only hotels that have a star rating exactly equal to 5.",
-      "deliverable": "@total_hotels[count]",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -36,7 +36,7 @@
           "eq": 5
         }
       },
-      "description": "從 data/hotel_data.csv 重算 star_rating 恰等於 5 的列數，並與答案檔 @total_hotels 的值比對。",
+      "description": "從 data/hotel_data.csv 重算 star_rating 等於 5 的列數，並與 answer.txt 的 @total_hotels 值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -45,7 +45,7 @@
     {
       "id": "3",
       "quote": "This count value should be a non-negative integer.",
-      "deliverable": "@total_hotels[count]",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -56,7 +56,7 @@
           }
         ]
       },
-      "description": "count 必須為非負整數。",
+      "description": "@total_hotels 的值必須是非負整數。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -75,14 +75,16 @@
     "discarded": [],
     "unverified": []
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"total_hotels\", \"type\": \"number\"}]},\n    \"description\": \"答案檔 answer.txt 必須包含 @total_hotels[count] 鍵，值為 5 星飯店總數（非負整數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"Count only hotels that have a star rating exactly equal to 5.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"total_hotels\", \"data_file\": \"data/hotel_data.csv\", \"recompute\": {\"type\": \"count_if\", \"col\": \"star_rating\", \"eq\": 5}},\n    \"description\": \"從 data/hotel_data.csv 重算 star_rating 等於 5 的列數，並與 answer.txt 的 @total_hotels 值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"3\",\n    \"quote\": \"This count value should be a non-negative integer.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"total_hotels\", \"type\": \"number\"}]},\n    \"description\": \"@total_hotels 的值必須是非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_507-pi-A",
     "role": "bad",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_507/task",
-    "user_text_chars": 465,
+    "user_text_chars": 1048,
     "data_files": [
       "data/hotel_data.csv"
     ],
-    "generated_at": "2026-11-07T12:42:06+08:00"
+    "prompt_sha256": "780f0f835604ff50e8198a971806b2b7663f8947aed1b040e6115eb8409cdd7c",
+    "generated_at": "2026-11-07T13:11:29+08:00"
   }
 }

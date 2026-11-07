@@ -2,9 +2,53 @@
   "task_id": "dab_039-pi-C",
   "items": [
     {
-      "id": "req_1",
-      "quote": "@is_normal[p_value]",
-      "deliverable": "answer",
+      "id": "req_answer_file",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "is_normal",
+            "type": "number"
+          },
+          {
+            "key": "transformed_importance_score_mean",
+            "type": "number"
+          },
+          {
+            "key": "transformed_importance_score_std",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 必須存在且含 @is_normal、@transformed_importance_score_mean、@transformed_importance_score_std 三個鍵，值為數字。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_tag_format",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the\nnames given under \"Answer format\" in the task.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "is_normal",
+        "value_type": "number"
+      },
+      "description": "answer.txt 中答案項須為 @name[value] 格式，各佔一行，使用指定名稱。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "req_p_value_rounding",
+      "quote": "where \"p_value\" is a number between 0 and 1, rounded to four decimal places.",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -15,16 +59,16 @@
           }
         ]
       },
-      "description": "答案檔須含 is_normal 鍵，值為 Shapiro-Wilk 檢定 p-value（0 到 1 之間的數字）。",
+      "description": "@is_normal 的值為 0 到 1 之間的數字，四捨五入至小數點後四位。Shapiro-Wilk p 值無法用列出的 recompute type 重算，故僅驗證鍵值型別。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req_2",
-      "quote": "@transformed_importance_score_mean[mean]",
-      "deliverable": "answer",
+      "id": "req_mean_rounding",
+      "quote": "where \"mean\" is the mean of the transformed \"importance.score\" column, rounded to two decimal places.",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -35,16 +79,16 @@
           }
         ]
       },
-      "description": "答案檔須含 transformed_importance_score_mean 鍵，值為轉換後 importance.score 的平均數。",
+      "description": "@transformed_importance_score_mean 為（log 轉換後）importance.score 的平均數，四捨五入至小數點後兩位。轉換後欄位的重算 type 不在允許清單中，故僅驗證鍵值型別。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req_3",
-      "quote": "@transformed_importance_score_std[std]",
-      "deliverable": "answer",
+      "id": "req_std_rounding",
+      "quote": "where \"std\" is the standard deviation of the transformed \"importance.score\" column, rounded to two decimal places.",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -55,64 +99,16 @@
           }
         ]
       },
-      "description": "答案檔須含 transformed_importance_score_std 鍵，值為轉換後 importance.score 的標準差。",
+      "description": "@transformed_importance_score_std 為（log 轉換後）importance.score 的標準差，四捨五入至小數點後兩位。轉換後欄位的重算 type 不在允許清單中，故僅驗證鍵值型別。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req_4",
-      "quote": "@is_normal[p_value]",
-      "deliverable": "answer",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "is_normal",
-        "value_type": "number"
-      },
-      "description": "答案須以 @is_normal[值] 格式呈現，值為數字型別。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "req_5",
-      "quote": "@transformed_importance_score_mean[mean]",
-      "deliverable": "answer",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "transformed_importance_score_mean",
-        "value_type": "number"
-      },
-      "description": "答案須以 @transformed_importance_score_mean[值] 格式呈現，值為數字型別。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "req_6",
-      "quote": "@transformed_importance_score_std[std]",
-      "deliverable": "answer",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "transformed_importance_score_std",
-        "value_type": "number"
-      },
-      "description": "答案須以 @transformed_importance_score_std[值] 格式呈現，值為數字型別。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "req_7",
+      "id": "req_shapiro_test",
       "quote": "Use the Shapiro-Wilk test to determine the normality of the data in the \"importance.score\" column.",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -123,16 +119,16 @@
           }
         ]
       },
-      "description": "須以 Shapiro-Wilk 檢定判斷 importance.score 常態性；檢定本身的執行無對應 recompute 類型可程式驗證，僅能驗證答案鍵值存在與型別，故設 unverified。",
+      "description": "須以 Shapiro-Wilk 檢定判斷 importance.score 的常態性；檢定 p 值本身無法用列出的 recompute type 重算，unverified。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
     },
     {
-      "id": "req_8",
+      "id": "req_log_transform",
       "quote": "If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \"importance.score\" column.",
-      "deliverable": "answer",
+      "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
@@ -140,10 +136,14 @@
           {
             "key": "transformed_importance_score_mean",
             "type": "number"
+          },
+          {
+            "key": "transformed_importance_score_std",
+            "type": "number"
           }
         ]
       },
-      "description": "p-value < 0.05 時須對 importance.score 施以自然對數轉換；條件式轉換流程無對應 recompute 類型可程式驗證，僅能驗證答案鍵值存在與型別，故設 unverified。",
+      "description": "p 值 < 0.05 時對 importance.score 施以自然對數轉換；轉換後的統計量無法用列出的 recompute type 重算，unverified。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -155,47 +155,40 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req_1",
-      "req_2",
-      "req_3",
-      "req_4",
-      "req_5",
-      "req_6",
-      "req_7",
-      "req_8"
+      "req_answer_file",
+      "req_tag_format",
+      "req_p_value_rounding",
+      "req_mean_rounding",
+      "req_std_rounding",
+      "req_shapiro_test",
+      "req_log_transform"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "req_4",
+        "id": "req_tag_format",
         "reason": "unsupported_tag_value_type:number"
       },
       {
-        "id": "req_5",
-        "reason": "unsupported_tag_value_type:number"
-      },
-      {
-        "id": "req_6",
-        "reason": "unsupported_tag_value_type:number"
-      },
-      {
-        "id": "req_7",
+        "id": "req_shapiro_test",
         "reason": "model_declared_unverified"
       },
       {
-        "id": "req_8",
+        "id": "req_log_transform",
         "reason": "model_declared_unverified"
       }
     ]
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_answer_file\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}, {\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}, {\"key\": \"transformed_importance_score_std\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須存在且含 @is_normal、@transformed_importance_score_mean、@transformed_importance_score_std 三個鍵，值為數字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_tag_format\",\n    \"quote\": \"Put each answer item on its own line, in the form `@name[value]`, using exactly the\\nnames given under \\\"Answer format\\\" in the task.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"is_normal\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 中答案項須為 @name[value] 格式，各佔一行，使用指定名稱。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_p_value_rounding\",\n    \"quote\": \"where \\\"p_value\\\" is a number between 0 and 1, rounded to four decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}]},\n    \"description\": \"@is_normal 的值為 0 到 1 之間的數字，四捨五入至小數點後四位。Shapiro-Wilk p 值無法用列出的 recompute type 重算，故僅驗證鍵值型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_mean_rounding\",\n    \"quote\": \"where \\\"mean\\\" is the mean of the transformed \\\"importance.score\\\" column, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}]},\n    \"description\": \"@transformed_importance_score_mean 為（log 轉換後）importance.score 的平均數，四捨五入至小數點後兩位。轉換後欄位的重算 type 不在允許清單中，故僅驗證鍵值型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_std_rounding\",\n    \"quote\": \"where \\\"std\\\" is the standard deviation of the transformed \\\"importance.score\\\" column, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_std\", \"type\": \"number\"}]},\n    \"description\": \"@transformed_importance_score_std 為（log 轉換後）importance.score 的標準差，四捨五入至小數點後兩位。轉換後欄位的重算 type 不在允許清單中，故僅驗證鍵值型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_shapiro_test\",\n    \"quote\": \"Use the Shapiro-Wilk test to determine the normality of the data in the \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}]},\n    \"description\": \"須以 Shapiro-Wilk 檢定判斷 importance.score 的常態性；檢定 p 值本身無法用列出的 recompute type 重算，unverified。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  },\n  {\n    \"id\": \"req_log_transform\",\n    \"quote\": \"If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}, {\"key\": \"transformed_importance_score_std\", \"type\": \"number\"}]},\n    \"description\": \"p 值 < 0.05 時對 importance.score 施以自然對數轉換；轉換後的統計量無法用列出的 recompute type 重算，unverified。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_039-pi-C",
     "role": "bad",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/task",
-    "user_text_chars": 1240,
+    "user_text_chars": 1905,
     "data_files": [
       "data/imp.score.ldlr.metabolome.csv"
     ],
-    "generated_at": "2026-11-07T12:41:13+08:00"
+    "prompt_sha256": "8a6e702b0b867fbf1315c324749adab1c7c8afebb4ae765b332657bb90078263",
+    "generated_at": "2026-11-07T13:10:36+08:00"
   }
 }

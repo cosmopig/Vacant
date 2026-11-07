@@ -2,9 +2,9 @@
   "task_id": "dab_035-pi-C",
   "items": [
     {
-      "id": "R1",
-      "quote": "Identify and remove any outliers in the \"row retention time\" column using the Z-score method with a Z-score threshold of 3.",
-      "deliverable": "removed_outliers_count",
+      "id": "req-1",
+      "quote": "Identify and remove any outliers in the \"row retention time\" column using the Z-score method with a Z-score threshold of 3. Provide the number of removed outliers.",
+      "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
       "params": {
@@ -15,43 +15,27 @@
           "col": "row retention time"
         }
       },
-      "description": "以 Z-score 方法（閾值 3，|z|>3）計算 row retention time 欄位的離群值數量，並與交付的 removed_outliers_count 比對。",
+      "description": "以 Z-score 方法（閾值 3，|z|>3 視為離群值）計算 \"row retention time\" 欄位的離群值個數，與 answer.txt 中 @removed_outliers_count 的數值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
+      "id": "req-2",
       "quote": "@removed_outliers_count[count] where \"count\" is a non-negative integer indicating the count of removed outliers.",
-      "deliverable": "removed_outliers_count",
-      "verifier": "tag_format",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
       "kind": "explicit",
       "params": {
-        "tag": "removed_outliers_count",
-        "value_type": "count"
+        "keys": [
+          {
+            "key": "removed_outliers_count",
+            "type": "number"
+          }
+        ]
       },
-      "description": "答案須以 @removed_outliers_count[count] 標籤格式呈現，count 為非負整數。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "R3",
-      "quote": "Any data point with a Z-score greater than 3 or less than -3 is considered an outlier and should be removed.",
-      "deliverable": "removed_outliers_count",
-      "verifier": "kv_recomputed",
-      "kind": "explicit",
-      "params": {
-        "key": "removed_outliers_count",
-        "data_file": "data/imp.score.ldlr.metabolome.csv",
-        "recompute": {
-          "type": "zcount3",
-          "col": "row retention time"
-        }
-      },
-      "description": "Z-score > 3 或 < -3 的資料點視為離群值並移除；重算 |z|>3 的個數與交付值一致。",
+      "description": "answer.txt 必須包含 @removed_outliers_count[...] 項目，其值為非負整數。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -63,26 +47,22 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3"
+      "req-1",
+      "req-2"
     ],
     "discarded": [],
-    "unverified": [
-      {
-        "id": "R2",
-        "reason": "unsupported_tag_value_type:count"
-      }
-    ]
+    "unverified": []
   },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req-1\",\n    \"quote\": \"Identify and remove any outliers in the \\\"row retention time\\\" column using the Z-score method with a Z-score threshold of 3. Provide the number of removed outliers.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"removed_outliers_count\",\n      \"data_file\": \"data/imp.score.ldlr.metabolome.csv\",\n      \"recompute\": {\"type\": \"zcount3\", \"col\": \"row retention time\"}\n    },\n    \"description\": \"以 Z-score 方法（閾值 3，|z|>3 視為離群值）計算 \\\"row retention time\\\" 欄位的離群值個數，與 answer.txt 中 @removed_outliers_count 的數值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-2\",\n    \"quote\": \"@removed_outliers_count[count] where \\\"count\\\" is a non-negative integer indicating the count of removed outliers.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [{\"key\": \"removed_outliers_count\", \"type\": \"number\"}]\n    },\n    \"description\": \"answer.txt 必須包含 @removed_outliers_count[...] 項目，其值為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_035-pi-C",
     "role": "good",
     "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_035/task",
-    "user_text_chars": 589,
+    "user_text_chars": 1182,
     "data_files": [
       "data/imp.score.ldlr.metabolome.csv"
     ],
-    "generated_at": "2026-11-07T12:41:03+08:00"
+    "prompt_sha256": "ac96e6ce6fc8b6fffd38a7c6c75bd75a782648d0a35901364a9a3f2b039341d8",
+    "generated_at": "2026-11-07T13:10:29+08:00"
   }
 }
