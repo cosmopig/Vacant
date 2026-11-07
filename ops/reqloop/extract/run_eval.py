@@ -998,6 +998,31 @@ def phase3_cell(cell: Real14Cell, req_set: RequirementSet, source: dict,
                      "tokens": c.get("tokens"), "wall_ms_total": c.get("wall_ms_total")}}
 
 
+def _freeze_cell_match(old_c: dict, new_c: dict) -> bool:
+    """單一 cell 凍結欄位比對：工作區路徑容許不同 worktree（跨 clone/worktree 相容）。"""
+    for k in ("cell", "role", "task_dir", "draft_dir", "draft_sha256", "req_sha256", "source", "before_pass"):
+        if old_c.get(k) != new_c.get(k):
+            return False
+    ro = old_c.get("req_file")
+    rn = new_c.get("req_file")
+    if ro != rn:
+        if not (ro and rn and pathlib.Path(ro).name == pathlib.Path(rn).name):
+            return False
+    return True
+
+
+def _freeze_matches(old: dict, new: dict) -> bool:
+    """freeze.json 不變量比對：參數、題集、草稿/需求 sha256 必須逐 byte 一致。"""
+    for k in ("base", "extract_model", "repair", "budget", "comparison"):
+        if old.get(k) != new.get(k):
+            return False
+    old_cells = old.get("cells") or []
+    new_cells = new.get("cells") or []
+    if len(old_cells) != len(new_cells):
+        return False
+    return all(_freeze_cell_match(o, n) for o, n in zip(old_cells, new_cells))
+
+
 def _dir_sha256(d: pathlib.Path) -> str:
     h = hashlib.sha256()
     for p in sorted(d.rglob("*")) if d.is_dir() else []:
@@ -1109,8 +1134,7 @@ def run_phase3(base: pathlib.Path | None = None,
             _old = json.loads(freeze_path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError):
             _old = None
-        if _old is None or any(_old.get(k) != freeze_doc[k] for k in
-                               ("base", "extract_model", "repair", "budget", "comparison", "cells")):
+        if _old is None or not _freeze_matches(_old, freeze_doc):
             print("PHASE3 fail-closed：既有 freeze.json 與本次 run 參數不一致，拒絕覆蓋官方 freeze",
                   file=sys.stderr)
             return 2

@@ -551,11 +551,41 @@ def test_run_phase3_offline_rerun_keeps_official_freeze_untouched(tmp_path):
                       run=agent, scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
     assert (out_root / "freeze.json").read_text(encoding="utf-8") == freeze1
 
+
     # 參數不一致：fail-closed rc=2、官方 freeze 不被覆蓋
     assert run_phase3(base=base, include_good=True, max_rounds=999999,
                       build=_fake_build(), run=agent, scorer=scorer,
                       req_dir=req_dir, out_root=out_root) == 2
     assert (out_root / "freeze.json").read_text(encoding="utf-8") == freeze1
+
+
+def test_run_phase3_freeze_comparison_normalizes_worktree_req_file_paths(tmp_path):
+    """跨 worktree／clone 凍結相容性：freeze.json 中 req_file 指向其他 worktree
+    （如 /home/user1/dev/Vacant/…），當前在另一個 worktree 跑時，只要 cell、sha256 與
+    檔名一致，不得誤判為參數不一致（fail-closed rc=2）。
+    """
+    base = _mk_base(tmp_path)
+    req_dir = tmp_path / "req"
+    req_dir.mkdir(exist_ok=True)
+    for cell in ("fake-001-pi-C", "fake-002-pi-C"):
+        (req_dir / f"{cell}.glm53.json").write_text(
+            json.dumps(_reqset(task_id=cell).to_dict()), encoding="utf-8")
+    scorer = lambda s, w, d: {"pass": True, "status": "scored", "rc": 0}
+    out_root = tmp_path / "out"
+    agent = _fake_agent({"answer.txt": "@m[3]\n"})
+    assert run_phase3(base=base, include_good=True, build=_fake_build(),
+                      run=agent, scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
+
+    # 模擬官方 freeze.json 寫死其他 worktree 絕對路徑
+    freeze_path = out_root / "freeze.json"
+    doc = json.loads(freeze_path.read_text(encoding="utf-8"))
+    for c in doc["cells"]:
+        c["req_file"] = f"/other/worktree/prefix/{pathlib.Path(c['req_file']).name}"
+    freeze_path.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    # 驗證跑：即使 req_file 前綴不同，仍判定吻合、不報 rc=2
+    assert run_phase3(base=base, include_good=True, build=_fake_build(),
+                      run=agent, scorer=scorer, req_dir=req_dir, out_root=out_root) == 0
 
 
 def _write_rebuildable_reqs(base: pathlib.Path, req_dir: pathlib.Path) -> None:
