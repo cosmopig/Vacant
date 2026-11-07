@@ -139,3 +139,12 @@
 - 驗證了什麼：5 檔接受套 229 passed；摘要結構＋kv 實算覆核全一致；0 產品改動、0 模型呼叫、0 發射、工作樹乾淨。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除。
 - DECISION：審查三點全收口（P1 已驗證、P2 已補完收口、P3 凍結維持）；下一輪候 vq-5nz.54（dab_055 2 格）點名發射。
+
+## r1162（第 1162 輪；2026-11-07）
+- 審查：前 3 輪無進展，縮到「一檔、一測試、一命令輸出變好」、不得以改文件充數。
+- 做：①新檔 tests/test_reqloop_effects2_analysis.py（1 檔、1 測試 test_effects2_analysis_summary_matches_raw_recompute）——把 11-06 #1/#2 必答數字（r1135 正規記錄 ops/audits/effects2_20261106_analysis.json，0fa90edd）首次釘成常設 pytest 守衛：由 raw（28 格 contrast/g2_result_*.json＋before_after.json）獨立重算對照摘要——同草稿兩臂 draft_sha256 一致（14 題、baseline bad9 全錯/good5 全對）、Q1 bad9 localized 9/9 vs generic 7/9（tamper 0、UNKNOWN 不計成功）、Q2 good5 雙臂 5/5 且 regressed_effective 空、Q3 bad9 成本 generic 235 calls/5,576,588 tok vs localized 347/9,691,033、對昨日 d38d2eb2（1753 排除、同 9 題）generic 7→7、localized 6→9。負控（摘要 9→8／6→7 篡改即拒）＋skip 控（raw 缺席 skip、不偽綠）皆驗。
+- 命令輸出變好：5 檔接受套 229→`230 passed in 2.72s`（新增守衛＋1）；本守衛此前無任何常設測試護住 11-06 必答數字。
+- 中程自我糾正（消除雙軌）：本輪先建了 effects2_20261106_summary.json＋builder，核對後發現與 r1135 正規記錄重疊（＝審查點名的 dab_378 雙軌形態）→ 刪自製兩檔＋ops symlink，只留 r1135 單一來源＋本守衛。
+- 驗證了什麼：230 passed（2.72s）；負控／skip 控皆過；raw 重算與摘要逐項一致；工作樹淨（僅新測試檔）。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；0 產品改動、0 模型呼叫、0 發射。
+- DECISION：11-06 #1/#2 必答數字已有常設守衛且與 raw 一致；vq-5nz.54（dab_055 2 格）仍候 demand side 點名＋成本另報，點名到位即單命令發射。
