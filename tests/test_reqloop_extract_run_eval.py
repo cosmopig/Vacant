@@ -664,6 +664,31 @@ def test_run_eval_multi_model_extraction_failure_labeled(tmp_path, capsys):
     assert doc1["models"]["m1"]["extract_failed"] == {}
 
 
+def test_run_phase2_offline_mode_prevents_api_calls_on_cache_miss(tmp_path):
+    """P20261107_1827-2：--all 整合驗收的 phase2 走離線模式；快取未命中（缺檔）
+    時必須 fail-closed 直接報錯、不靜默發起外部模型呼叫。
+
+    - offline=True ＋快取未命中 → ExtractError，client 不被呼叫、不產生 out 檔；
+    - 預設 offline=False 維持既有行為：同樣的快取未命中仍正常擷取（呼叫 client）。
+    """
+    from run_eval import ExtractError, Real14Cell
+    c = Real14Cell(cell="fake-off-pi-C", role="bad",
+                   task_dir=tmp_path / "t", draft_dir=tmp_path / "d")
+    out_path = tmp_path / "out" / "fake-off-pi-C.glm53.json"
+
+    # 快取未命中（缺檔）＋ offline=True → fail-closed，client 不得被呼叫
+    with pytest.raises(ExtractError, match="離線模式快取未命中"):
+        phase2_extract_cell(c, "How many unique merchants?", [], {}, "glm53",
+                            _ExplodingClient(), out_path, offline=True)
+    assert not out_path.exists()
+
+    # 同樣的快取未命中、預設 offline=False → 照常擷取（既有 --phase2 行為不變）
+    cl = _CountingClient(_RAW_ONE)
+    req = phase2_extract_cell(c, "How many unique merchants?", [], {},
+                              "glm53", cl, out_path)
+    assert cl.calls == 1 and req.items[0].id == "R1"
+
+
 def test_eval_g1_compare_3m_baseline_contract():
     """vq-el4.6 結案基準（2026-11-07 裁決）：3 模型對照表已鎖定。
 

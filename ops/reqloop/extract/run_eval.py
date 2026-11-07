@@ -412,7 +412,10 @@ def run_all(model: str = "glm53",
     j1, j2, j3 = all_dir / "phase1.json", all_dir / "phase2.json", all_dir / "phase3.json"
     rc1 = run_phase1(model=model, g1=g1, out_dir=out_dir,
                      vibe_calls=vibe_calls, json_out=j1)
-    rc2 = run_phase2(model=model, base=base, vibe_calls=vibe_calls, json_out=j2)
+    # P20261107_1827-2：整合驗收的 phase2 走離線模式——快取未命中即 fail-closed，
+    # 不靜默發起即時外部模型呼叫（消耗額度或覆蓋已驗收成果）。
+    rc2 = run_phase2(model=model, base=base, vibe_calls=vibe_calls, json_out=j2,
+                     offline=True)
     rc3 = run_phase3(base=base, include_good=include_good, extract_model=model,
                      provider=provider, model=p3_model, max_rounds=max_rounds,
                      timeout_s=timeout_s, out_root=p3_out, req_dir=p3_req_dir,
@@ -711,7 +714,7 @@ class _RecordingClient:
 
 def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
                         previews: dict[str, str], model: str, client: GlmClient,
-                        out_path: pathlib.Path) -> RequirementSet:
+                        out_path: pathlib.Path, offline: bool = False) -> RequirementSet:
     """單一 cell 擷取需求；out 檔已存在 → 不再呼叫模型、不重複計費。
 
     argon 20261107_1248：out 檔記 prompt_sha256 與 raw_output。
@@ -720,6 +723,9 @@ def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
     - prompt 相同且有 raw_output → 用目前的 build_requirement_set 從原始輸出重建
       （擷取規則改了也反映在數字上，0 呼叫）。
     - 舊格式（無 prompt_sha256）→ 照舊直接重用。
+
+    P20261107_1827-2：offline=True 且快取未命中（缺檔或 prompt_sha 不符）→
+    直接 raise ExtractError（fail-closed），不靜默發出外部 API 呼叫。
     """
     prompt = build_phase2_prompt(user_text, data_names, previews)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
@@ -734,6 +740,8 @@ def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
                 req, _ = build_requirement_set(cell.cell, parse_model_output(raw), user_text)
                 return req
             return RequirementSet.load(out_path)
+    if offline:
+        raise ExtractError("離線模式快取未命中：拒絕外部 API 呼叫")
     rec = _RecordingClient(client)
     req, report = extract_requirements(
         user_text=user_text, client=rec, task_id=cell.cell,
@@ -778,8 +786,13 @@ def read_real14_costs(vibe_calls: pathlib.Path) -> tuple[int, int] | None:
 def run_phase2(model: str = "glm53",
                base: pathlib.Path | None = None,
                vibe_calls: pathlib.Path | None = None,
-               json_out: pathlib.Path | None = None) -> int:
-    """item 2：14 份原始草稿 × 自動擷取需求 → 抓錯 x/9、冤枉 y/5 → 門禁。"""
+               json_out: pathlib.Path | None = None,
+               offline: bool = False) -> int:
+    """item 2：14 份原始草稿 × 自動擷取需求 → 抓錯 x/9、冤枉 y/5 → 門禁。
+
+    offline=True（--all 整合驗收用）：快取未命中的格 fail-closed 記 ERROR，
+    不發起外部 API 呼叫；預設 False 維持原行為。
+    """
     base = pathlib.Path(base) if base else REAL14_BASE_DEFAULT
     vibe_calls = (pathlib.Path(vibe_calls).expanduser() if vibe_calls
                   else pathlib.Path("~/dev/ops/state/vibe_calls.jsonl").expanduser())
@@ -804,7 +817,7 @@ def run_phase2(model: str = "glm53",
             previews = {n: _data_preview(p) for n, p in zip(names, data_paths)}
             req = phase2_extract_cell(
                 c, user_text, names, previews, model, client,
-                out_dir / f"{c.cell}.{model}.json")
+                out_dir / f"{c.cell}.{model}.json", offline=offline)
             results = run_requirement_checks(c.task_dir, req, c.draft_dir)
         except (ExtractError, FileNotFoundError, RuntimeError,
                 ValueError) as e:
