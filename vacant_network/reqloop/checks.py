@@ -1441,6 +1441,12 @@ def _strict_json_equal(a: Any, b: Any) -> bool:
         if len(da) != len(a) or len(db) != len(b) or da.keys() != db.keys():
             return False
         return all(_strict_json_equal(da[k], db[k]) for k in da)
+    # 工單 P20261107_0243-1：原生 Python dict 遞迴嚴格比對——避免降級至裸 `==`
+    # 使巢狀 `bool vs int`（True==1）、`int vs float`（2==2.0）被誤判相等。
+    if isinstance(a, dict):
+        if a.keys() != b.keys():
+            return False
+        return all(_strict_json_equal(a[k], b[k]) for k in a)
     if isinstance(a, list):
         return len(a) == len(b) and all(_strict_json_equal(x, y) for x, y in zip(a, b))
     return bool(a == b)

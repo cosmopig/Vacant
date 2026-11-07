@@ -2478,5 +2478,26 @@ def test_audit_kv_preservation_json_duplicate_keys_and_nested_strict_types(tmp_p
     assert mutated == ("meta",)
 
 
+def test_strict_json_equal_dict_nested_types():
+    """工單 P20261107_0243-1：原生 Python `dict` 遞迴嚴格比對。
+
+    `_strict_json_equal` 的 docstring 承諾「型別必須完全一致（排除 Python `True == 1`、
+    `2 == 2.0`）」；但原生 `dict` 傳入時（自訂檢查器、單元測試、反序列化產物）缺少
+    `isinstance(a, dict)` 分支，會降級至 Python 裸 `==`，使巢狀 `bool vs int`、
+    `int vs float` 被誤判相等（假 preserved）。"""
+    from vacant_network.reqloop.checks import _strict_json_equal
+
+    # (a) 巢狀 bool vs int（True vs 1）⇒ 不等
+    assert _strict_json_equal({"flag": True}, {"flag": 1}) is False
+    # (b) 巢狀 int vs float（2 vs 2.0）⇒ 不等
+    assert _strict_json_equal({"count": 2}, {"count": 2.0}) is False
+    # (c) 巢狀 list 內 bool vs int ⇒ 不等
+    assert _strict_json_equal({"a": [1, True]}, {"a": [1, 1]}) is False
+    # (d) 型別與值完全一致 ⇒ 相等
+    assert _strict_json_equal({"meta": {"x": 1}}, {"meta": {"x": 1}}) is True
+    # (e) 鍵不同 ⇒ 不等
+    assert _strict_json_equal({"a": 1}, {"b": 1}) is False
+
+
 
 
