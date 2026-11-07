@@ -110,3 +110,13 @@
 - run_eval.py：GATE_CATCH_RATE=0.70（L52）、run_real14 offline fail-closed ERROR 路徑（L790-834，r1208 機制在位）。extract.py：quote_is_verbatim 改寫必 False（L132）、_VALID_TAG_VALUE_TYPES 含 "number"（L166）、tag_not_in_request 拒收（L752）——el4.4/4.6 機制在位。
 - repair.py：2,795 行、RD_FOCUS 文首規則在位、本輪零改動（最近 commit 為 argon 合併前）——凍結維持。
 - 結論：r1209 原有結論（本分支綠燈、worker 紅燈根因、不動 worker、無新工單）全部不受影響；補開只把 r1204 承繼數字改為本輪直接證據。
+- 2026-11-07 r1210（1608 審查指示核實輪；0 產品改動、0 模型呼叫）：
+- ① 418d3bc7 已合（f74b779c 在 HEAD）；四項碼在 HEAD 核實：checks.py L2694 val_type∈(float,number)、L1784/2416 round 外+內層 fallback；extract.py L166 "number"、L752 tag_not_in_request。
+- ② el4.5 官方檔（worktree clean＝r1209 redo 版）：6/9 fixed、263 calls/14 sessions、tokens null⇒UNKNOWN、rtw 0。③ el4.6 3 模型表：glm53 39/39 PASS 41c/328550t、flash 16/39 FAIL（4 extract-fail）、deepseek 23/39 FP1 FAIL（2 extract-fail），兩者 cost null。
+- ④ CI：本分支碼級 57ce9625 🟢 5028/0/5101（HEAD 399da52b 僅 docs、碼同）；reqloop 6 檔 217 passed（含 worker 紅燈同 6 測試在我分支全綠）。
+- DECISION: 不合 argon 新 tip 3cf31e81/2db8afa5——1608 指示只點名 418d3bc7（已合）；2db8afa5 CI 未跑（LATEST_argon 仍 418d3bc7 5021/0/5094；ASSIGNMENT L156 該 sha 綠燈前不合/cherry-pick）；1928 工單（argon 合併＋freeze 跨 worktree）已由 worker 在其分支執行（5ab53d8b --ours）。下一步：等審查新派工/2db8afa5 CI 綠燈。
+- r1210 redo（審查點名 3 檔未開，補開＋重驗依賴結論，0 產品改動）：
+- effects_20261105_summary.json（repo ops/audits/）：policy30 generic 7/10・localized 6/10（rtw 0）、feedback_once20 generic 7/10・localized 4/10（rtw 0）；costs p30 generic 365c/16.3M tok vs localized 550c/17.4M、o20 165c/6.2M vs 292c/13.3M；scope_note 單 rep／不宣稱 localized 優／缺值 None——r1204 承繼數字全吻合。
+- progress.json（9 格原始）：fixed 6（378/426/427/507/dabstep-10/23）＋unresolved 3（039 no_gap 0c・055 stalled 22c・1273 max_rounds 35c）；Σ sessions 14／calls 263；8 格有 tokens、dab_039=null。
+- run_eval.py L1146-1175 實讀：_agg 任一 None⇒None（官方 tokens=null 是規則結果、非資料錯）；verdict 逐格計數；L1123-1131 缺 source／缺擷取⇒ERROR fail-closed——官方檔＝原始逐格忠實投影。
+- 結論：r1210 三項驗證（el4.5 數字、run_eval 機制、effects 承繼數字）由承繼改本輪直接證據；全部結論不變。
