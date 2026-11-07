@@ -81,14 +81,33 @@
       "id": "R3",
       "quote": "產出 `summary.md`，須明確載明「結案工單總數」、「整體 SLA 達標率（百分數，小數點後 2 位）」與「最長處理時數」（精確數值）",
       "deliverable": "summary.md",
-      "verifier": "summary_metrics_consistency",
+      "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
         "input_csv": "tickets.csv",
-        "metric_keywords": [
-          "結案工單總數",
-          "整體 SLA 達標率",
-          "最長處理時數"
+        "numbers": [
+          {
+            "type": "count",
+            "label": "結案工單總數"
+          },
+          {
+            "type": "pct_if",
+            "expr": "resolved_hours <= sla_target_hours",
+            "label": "整體 SLA 達標率",
+            "round": 2
+          },
+          {
+            "type": "max",
+            "label": "最長處理時數",
+            "col": "resolved_hours"
+          }
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "OPEN"
+          }
         ]
       },
       "description": "summary.md 須載明結案工單總數、整體 SLA 達標率（百分數、2 位小數）與最長處理時數，且數字與從 tickets.csv（排除 OPEN 工單）重算一致。",
@@ -110,5 +129,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T11:10:46+00:00"
+  "generated_at": "2026-11-07T11:10:46Z"
 }

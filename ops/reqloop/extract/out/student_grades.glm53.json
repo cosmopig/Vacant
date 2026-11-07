@@ -172,7 +172,7 @@
       "id": "R5",
       "quote": "產出 `summary.md`，須明確載明「全年級及格率」（百分比，小數點後 2 位）與「全年級平均總評」（小數點後 2 位）。",
       "deliverable": "summary.md",
-      "verifier": "summary_metrics_consistency",
+      "verifier": "summary_numbers",
       "kind": "explicit",
       "params": {
         "input_csv": "grades.csv",
@@ -184,9 +184,25 @@
           }
         ],
         "dedup_by": "student_id",
-        "metric_keywords": [
-          "全年級及格率",
-          "全年級平均總評"
+        "numbers": [
+          {
+            "type": "pct_if",
+            "expr": "total_score >= 60.0",
+            "label": "全年級及格率",
+            "round": 2
+          },
+          {
+            "type": "mean",
+            "label": "全年級平均總評",
+            "round": 2,
+            "col": "total_score"
+          }
+        ],
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
         ]
       },
       "description": "summary.md 中「全年級及格率」與「全年級平均總評」的數字須與排除 WITHDRAWN、student_id 去重後的重算結果一致。",
@@ -250,5 +266,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T11:10:38+00:00"
+  "generated_at": "2026-11-07T11:10:38Z"
 }

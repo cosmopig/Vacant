@@ -3,23 +3,21 @@
   "items": [
     {
       "id": "R1",
-      "quote": "排除狀態為 `CANCELLED` 的取消訂單。",
+      "quote": "產出月度指標表 `monthly_sales.csv`",
       "deliverable": "monthly_sales.csv",
-      "verifier": "monthly_sales_metrics",
+      "verifier": "table_structure",
       "kind": "explicit",
       "params": {
-        "input_csv": "orders.csv",
-        "expected_in_evidence": true,
-        "exclude": [
-          {
-            "col": "status",
-            "op": "eq",
-            "value": "CANCELLED"
-          }
-        ],
-        "dedup_by": "order_id"
+        "required_columns": [
+          "month",
+          "orders_count",
+          "net_sales",
+          "top_1_product",
+          "top_2_product",
+          "top_3_product"
+        ]
       },
-      "description": "月度指標表須在排除 CANCELLED 訂單並以 order_id 去重後，各月有效訂單數與淨銷售額與原始資料重算一致。",
+      "description": "monthly_sales.csv 必須存在且包含 month、orders_count、net_sales 及各月前三名商品欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -29,16 +27,13 @@
       "id": "R2",
       "quote": "欄位需包含：`month`（格式 YYYY-MM）、`orders_count`（有效訂單數）、`net_sales`（淨銷售總額）。",
       "deliverable": "monthly_sales.csv",
-      "verifier": "table_structure",
+      "verifier": "monthly_sales_metrics",
       "kind": "explicit",
       "params": {
-        "required_columns": [
-          "month",
-          "orders_count",
-          "net_sales"
-        ]
+        "input_csv": "orders.csv",
+        "expected_in_evidence": true
       },
-      "description": "monthly_sales.csv 必須存在且含 month、orders_count、net_sales 欄位。",
+      "description": "各月有效訂單數與淨銷售額需與原始資料（排除 CANCELLED、order_id 去重後）重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -52,17 +47,9 @@
       "kind": "explicit",
       "params": {
         "input_csv": "orders.csv",
-        "top_n": 3,
-        "exclude": [
-          {
-            "col": "status",
-            "op": "eq",
-            "value": "CANCELLED"
-          }
-        ],
-        "dedup_by": "order_id"
+        "top_n": 3
       },
-      "description": "各月淨銷售額前三名商品排行須與排除 CANCELLED、order_id 去重後重算結果一致，且依淨銷售額排序。",
+      "description": "各月 top_1 至 top_3 商品需與依淨銷售額排序重算的前三名一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -92,7 +79,7 @@
         ],
         "dedup_by": "order_id"
       },
-      "description": "summary.md 中「兩月合計淨銷售總額」數字須與排除 CANCELLED、order_id 去重後重算的 net_amount 總和一致。",
+      "description": "摘要中兩月合計淨銷售總額需與原始資料（排除 CANCELLED、order_id 去重後）重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -105,11 +92,9 @@
       "verifier": "table_structure",
       "kind": "explicit",
       "params": {
-        "required_columns": [
-          "month"
-        ]
+        "required_columns": []
       },
-      "description": "無法以程式驗證語言風格與 Markdown 簡潔度，unverified=true；此處 params 為形狀佔位，不具驗證效力。",
+      "description": "語言與文體風格（繁體中文、簡潔 Markdown）無法以程式客觀驗證，設 unverified。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -119,23 +104,12 @@
       "id": "R6",
       "quote": "簡述各月銷售成長或商品表現觀察。",
       "deliverable": "summary.md",
-      "verifier": "summary_metrics_consistency",
+      "verifier": "table_structure",
       "kind": "explicit",
       "params": {
-        "input_csv": "orders.csv",
-        "metric_keywords": [
-          "兩月合計淨銷售總額"
-        ],
-        "exclude": [
-          {
-            "col": "status",
-            "op": "eq",
-            "value": "CANCELLED"
-          }
-        ],
-        "dedup_by": "order_id"
+        "required_columns": []
       },
-      "description": "各月觀察為自由文字敘述，無法逐字程式驗證，unverified=true；若其中出現合計指標數字，仍應與重算一致。",
+      "description": "觀察性文字描述屬主觀敘述，無法以程式驗證其內容品質，設 unverified。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -158,13 +132,13 @@
     "unverified": [
       {
         "id": "R5",
-        "reason": "model_declared_unverified"
+        "reason": "empty_param:required_columns"
       },
       {
         "id": "R6",
-        "reason": "model_declared_unverified"
+        "reason": "empty_param:required_columns"
       }
     ]
   },
-  "generated_at": "2026-11-07T10:29:44+00:00"
+  "generated_at": "2026-11-07T11:10:26Z"
 }

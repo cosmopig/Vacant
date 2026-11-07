@@ -805,3 +805,285 @@ def test_param_problem_flags_exclude_op_ne():
         u.id == "req_rowset_ne" and u.reason == "invalid_param:exclude_op_ne"
         for u in report.unverified
     )
+
+
+# ------------------------------------------------ argon 20261107_1149 回歸測試
+
+def test_col_stats_valid_stats_and_group_ratio_stat_validation():
+    """argon 20261107_1149：
+    1. checks.py:_col_stats 只支援 mean/median/sd/skewness/kurtosis；
+       extract.py 舊 _VALID_COL_STATS 誤拒 sd/skewness/kurtosis、誤放 p25/p75/sum。
+       修正後支援 mean/median/sd/skewness/kurtosis（並將 std/stddev→sd、p50→median 正規化），
+       不支援的 p25/sum 標 unsupported_recompute_stat。
+    2. plain_recomputed 的 group_ratio_stat 必須檢查 group_col、sum_col（或 num_sum_col+denom_sum_col）與 num_where。
+    """
+    from vacant_network.reqloop.extract import _recompute_subparam_problem, build_requirement_set
+
+    for valid_stat in ("mean", "median", "sd", "skewness", "kurtosis"):
+        assert _recompute_subparam_problem("col_stats", {"col": "x", "stat": valid_stat}) is None
+    for bad_stat in ("p25", "p75", "sum", "min", "max"):
+        prob = _recompute_subparam_problem("col_stats", {"col": "x", "stat": bad_stat})
+        assert prob == f"unsupported_recompute_stat:{bad_stat}"
+
+    # group_ratio_stat 缺必要欄位
+    assert _recompute_subparam_problem("group_ratio_stat", {}) == "missing_recompute_param:group_col"
+    assert (
+        _recompute_subparam_problem("group_ratio_stat", {"group_col": "merchant"})
+        == "missing_recompute_param:sum_col"
+    )
+    assert (
+        _recompute_subparam_problem(
+            "group_ratio_stat", {"group_col": "merchant", "sum_col": "eur_amount"}
+        )
+        == "missing_recompute_param:num_where"
+    )
+    assert (
+        _recompute_subparam_problem(
+            "group_ratio_stat",
+            {
+                "group_col": "merchant",
+                "sum_col": "eur_amount",
+                "num_where": [{"col": "has_fraudulent_dispute", "op": "eq", "value": "True"}],
+            },
+        )
+        is None
+    )
+
+    # build_requirement_set 將 col_stats 的 std 正規化為 sd 且通過驗證
+    items = [
+        {
+            "id": "r_sd",
+            "quote": "Calculate the mean of the column 'No. of cases' in data/estimated_numbers.csv.",
+            "deliverable": "/app/answer.txt",
+            "verifier": "kv_recomputed",
+            "params": {
+                "key": "sd_cases",
+                "data_file": "/app/data/estimated_numbers.csv",
+                "recompute": {"type": "col_stats", "col": "No. of cases", "stat": "std"},
+            },
+        }
+    ]
+    req, report = build_requirement_set("t_col_stats", items, USER_TEXT)
+    assert not req.items[0].unverified, report.unverified
+    assert req.items[0].deliverable == "answer.txt"
+    assert req.items[0].params["data_file"] == "data/estimated_numbers.csv"
+    assert req.items[0].params["recompute"]["stat"] == "sd"
+
+
+def test_exclude_op_ne_flagged_on_group_aggregate_and_summary_numbers():
+    """argon 20261107_1149：exclude op:ne 逆向過濾在 group_aggregate 與 summary_numbers 同樣會排空行集，
+    _param_problem 必須一併攔截（不只 rowset_filter）。
+    """
+    from vacant_network.reqloop.extract import _param_problem
+
+    ga_bad = {
+        "input_csv": "tickets.csv",
+        "group_by": ["priority"],
+        "exclude": [{"col": "status", "op": "ne", "value": "OPEN"}],
+        "aggregates": [{"name": "ticket_count", "type": "count"}],
+    }
+    sn_bad = {
+        "input_csv": "tickets.csv",
+        "exclude": [{"col": "status", "op": "ne", "value": "OPEN"}],
+        "numbers": [{"type": "count", "label": "總數"}],
+    }
+    assert _param_problem("group_aggregate", ga_bad) == "invalid_param:exclude_op_ne"
+    assert _param_problem("summary_numbers", sn_bad) == "invalid_param:exclude_op_ne"
+
+
+def test_normalize_raw_items_fixes_g1_r1184_shapes():
+    """argon 20261107_1149：驗證 G1 r1184 實際模型輸出中導致 6/7 good UNKNOWN 與 orders_monthly FP=1 的五種參數形狀問題：
+    1. distinct_count / count_distinct / nunique → distinct；
+    2. values 字串算式轉 {"expr": ...}，且 compute/values 內層 round(expr, n) 拆解為 expr + round:n；不支援函式呼叫標 invalid_param:expr；
+    3. input_json 搭配帶點號巢狀欄位（如 payload.duration_ms）自動補齊 flatten；
+    4. 同資料檔兄弟條目自動補齊 summary_numbers 漏寫的 exclude/dedup_by/compute/flatten；
+    5. 非 orders.csv 的 summary_metrics_consistency 若同檔有 group_aggregate 則轉為 summary_numbers，否則標 invalid_param。
+    """
+    from vacant_network.reqloop.extract import _param_problem, build_requirement_set
+
+    user_text = (
+        "排除狀態為 CANCELLED 的取消訂單。重複的 order_id 只保留第一筆。"
+        "計算 restock_needed = safety_stock - current_stock 與 estimated_cost = round(restock_needed * unit_cost, 2)。"
+        "產出 restock_plan.csv、monthly_sales.csv、event_stats.csv、class_summary.csv 與 summary.md。"
+        "內文需明確列出「全年級及格率」與「全年級平均總評」及「合計淨銷售總額」。"
+    )
+    raw_items = [
+        # 1. distinct_count + input_json 巢狀欄位自動補 flatten
+        {
+            "id": "r_json",
+            "quote": "產出 restock_plan.csv、monthly_sales.csv、event_stats.csv、class_summary.csv 與 summary.md。",
+            "deliverable": "event_stats.csv",
+            "verifier": "group_aggregate",
+            "params": {
+                "input_json": "events.json",
+                "group_by": ["event_type"],
+                "aggregates": [
+                    {"name": "unique_users", "type": "distinct_count", "col": "user_id"},
+                    {"name": "avg_dur", "type": "mean", "col": "payload.duration_ms", "round": 2},
+                ],
+            },
+        },
+        # 2. values 算式字串 + compute 內 round(expr, 2)
+        {
+            "id": "r_inv",
+            "quote": "計算 restock_needed = safety_stock - current_stock 與 estimated_cost = round(restock_needed * unit_cost, 2)。",
+            "deliverable": "restock_plan.csv",
+            "verifier": "rowset_filter",
+            "params": {
+                "input_csv": "inventory.csv",
+                "identity": ["sku"],
+                "compute": [
+                    {"name": "restock_needed", "expr": "safety_stock - current_stock"},
+                    {"name": "estimated_cost", "expr": "round((safety_stock - current_stock) * unit_cost, 2)"},
+                ],
+                "values": {
+                    "restock_needed": "safety_stock - current_stock",
+                    "estimated_cost": "estimated_cost",
+                },
+            },
+        },
+        # 3. monthly_sales_metrics 與漏寫 exclude/dedup_by 的 summary_numbers
+        {
+            "id": "r_msm",
+            "quote": "排除狀態為 CANCELLED 的取消訂單。重複的 order_id 只保留第一筆。",
+            "deliverable": "monthly_sales.csv",
+            "verifier": "monthly_sales_metrics",
+            "params": {"input_csv": "orders.csv"},
+        },
+        {
+            "id": "r_ord_sum",
+            "quote": "內文需明確列出「全年級及格率」與「全年級平均總評」及「合計淨銷售總額」。",
+            "deliverable": "summary.md",
+            "verifier": "summary_numbers",
+            "params": {
+                "input_csv": "orders.csv",
+                "numbers": [{"type": "sum", "col": "net_sales", "label": "合計淨銷售總額"}],
+            },
+        },
+        # 4. student_grades 的 group_aggregate + 被誤選為 summary_metrics_consistency 的摘要條目
+        {
+            "id": "r_ga_grades",
+            "quote": "產出 restock_plan.csv、monthly_sales.csv、event_stats.csv、class_summary.csv 與 summary.md。",
+            "deliverable": "class_summary.csv",
+            "verifier": "group_aggregate",
+            "params": {
+                "input_csv": "grades.csv",
+                "exclude": [{"col": "status", "op": "eq", "value": "WITHDRAWN"}],
+                "dedup_by": "student_id",
+                "group_by": ["class_name"],
+                "compute": [{"name": "total_score", "expr": "midterm_score * 0.4 + final_score * 0.6"}],
+                "aggregates": [
+                    {"name": "student_count", "type": "count"},
+                    {"name": "pass_count", "type": "count_if", "expr": "total_score >= 60"},
+                    {"name": "pass_rate", "type": "ratio", "num": "pass_count", "den": "student_count", "round": 4},
+                    {"name": "avg_total", "type": "mean", "col": "total_score", "round": 2},
+                ],
+            },
+        },
+        {
+            "id": "r_smc_grades",
+            "quote": "內文需明確列出「全年級及格率」與「全年級平均總評」及「合計淨銷售總額」。",
+            "deliverable": "summary.md",
+            "verifier": "summary_metrics_consistency",
+            "params": {
+                "input_csv": "grades.csv",
+                "metric_keywords": ["全年級及格率", "全年級平均總評"],
+            },
+        },
+    ]
+    req, report = build_requirement_set("t_norm", raw_items, user_text)
+    assert all(not i.unverified for i in req.items), report.unverified
+    by_id = {i.id: i for i in req.items}
+
+    # 1. distinct 與 flatten
+    assert by_id["r_json"].params["aggregates"][0]["type"] == "distinct"
+    assert by_id["r_json"].params["flatten"] == [
+        {"path": "payload.duration_ms", "as": "payload.duration_ms", "impute": 0}
+    ]
+    # 2. round 拆解與 values 算式轉物件
+    assert by_id["r_inv"].params["compute"][1]["expr"] == "(safety_stock - current_stock) * unit_cost"
+    assert by_id["r_inv"].params["values"]["restock_needed"] == {"expr": "safety_stock - current_stock"}
+    assert by_id["r_inv"].params["values"]["estimated_cost"] == {"expr": "estimated_cost", "round": 2}
+    # 3. orders.csv summary_numbers 補齊 exclude/dedup_by 與 net_sales compute
+    assert by_id["r_ord_sum"].params["exclude"] == [{"col": "status", "op": "eq", "value": "CANCELLED"}]
+    assert by_id["r_ord_sum"].params["dedup_by"] == "order_id"
+    assert any(c.get("name") == "net_sales" for c in by_id["r_ord_sum"].params.get("compute", []))
+    # 4. grades.csv 的 summary_metrics_consistency 轉為 summary_numbers 並繼承 exclude/dedup_by/compute
+    assert by_id["r_smc_grades"].verifier == "summary_numbers"
+    assert by_id["r_smc_grades"].params["exclude"] == [{"col": "status", "op": "eq", "value": "WITHDRAWN"}]
+    assert by_id["r_smc_grades"].params["dedup_by"] == "student_id"
+    nums = by_id["r_smc_grades"].params["numbers"]
+    assert [n["type"] for n in nums] == ["pct_if", "mean"]
+
+    # 未能拆解的非法函式呼叫 foo(x) 必須被 _param_problem 攔截為 invalid_param:expr
+    bad_expr_params = {
+        "input_csv": "inventory.csv",
+        "identity": ["sku"],
+        "values": {"x": {"expr": "foo(bar)"}},
+    }
+    assert _param_problem("rowset_filter", bad_expr_params) == "invalid_param:expr"
+
+
+def test_run_task_and_main_support_real_g2_subdir_data_and_contract_md(tmp_path):
+    """argon 20261107_1149：G2 真實 14 題（vq-el4.4）的資料檔位於 data/ 子目錄，
+    且部分題目只有 contract.md + effect_manifest.json 的 question（無 request.md）。
+    run_task 與 main 必須能讀取 contract.md / manifest question 並預覽 data/* 資料檔。
+    """
+    g2_root = tmp_path / "g2"
+    cell_dir = g2_root / "cells" / "dabstep-10-pi-C"
+    t_dir = cell_dir / "task"
+    (t_dir / "data").mkdir(parents=True)
+    (t_dir / "contract.md").write_text(
+        "# Task Contract\n1. Required Deliverable: `/app/answer.txt`\n2. Format: `@name[value]`\n",
+        encoding="utf-8",
+    )
+    (t_dir / "data" / "payments.csv").write_text(
+        "merchant,aci,is_credit\nBelles_cookbook_store,D,True\nBelles_cookbook_store,G,False\n",
+        encoding="utf-8",
+    )
+    manifest = {
+        "drafts": [
+            {
+                "id": "dabstep-10-pi-C",
+                "task_dir": "ops/reqloop/g2/cells/dabstep-10-pi-C/task",
+                "question": "For merchant 'Belles_cookbook_store', which aci is most common?",
+            }
+        ]
+    }
+    (g2_root / "effect_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    resp = json.dumps(
+        [
+            {
+                "id": "r1",
+                "quote": "For merchant 'Belles_cookbook_store', which aci is most common?",
+                "deliverable": "/app/answer.txt",
+                "verifier": "plain_recomputed",
+                "params": {
+                    "data_file": "/app/data/payments.csv",
+                    "recompute": {
+                        "type": "mode_col",
+                        "col": "aci",
+                        "where": [{"col": "merchant", "op": "eq", "value": "Belles_cookbook_store"}],
+                    },
+                },
+            }
+        ],
+        ensure_ascii=False,
+    )
+    script, _, copy = _fake_glm(tmp_path, response=resp)
+    out = tmp_path / "dab10.json"
+    rc = main(["--task", str(t_dir), "--model", "glm53", "--glm", str(script), "--out", str(out)])
+    assert rc == 0
+    prompt_sent = copy.read_text(encoding="utf-8")
+    assert "data/payments.csv" in prompt_sent
+    assert "Belles_cookbook_store,D,True" in prompt_sent
+    assert "For merchant 'Belles_cookbook_store', which aci is most common?" in prompt_sent
+    assert "# Task Contract" in prompt_sent
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["task_id"] == "dabstep-10-pi-C"
+    assert len(doc["items"]) == 1
+    assert doc["items"][0]["unverified"] is False
+    assert doc["items"][0]["deliverable"] == "answer.txt"
+    assert doc["items"][0]["params"]["data_file"] == "data/payments.csv"
+

@@ -45,7 +45,7 @@
           },
           {
             "name": "uv",
-            "type": "distinct_count",
+            "type": "distinct",
             "col": "user_id"
           },
           {
@@ -60,7 +60,7 @@
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     },
     {
       "id": "req_avg_dwell_skip_empty",
@@ -104,7 +104,7 @@
         "input_csv": "traffic.csv",
         "numbers": [
           {
-            "type": "distinct_count",
+            "type": "distinct",
             "col": "user_id",
             "label": "全期獨立訪客數 UV"
           },
@@ -113,13 +113,19 @@
             "col": "visit_id",
             "label": "全期造訪總數"
           }
+        ],
+        "compute": [
+          {
+            "name": "local_day",
+            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
+          }
         ]
       },
       "description": "summary.md 須載明全期獨立訪客數 UV（全部資料跨日去重之 user_id 數，非每日 UV 相加）與全期造訪總數，數字須與原始資料重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -133,16 +139,7 @@
       "req_summary_uv_and_total"
     ],
     "discarded": [],
-    "unverified": [
-      {
-        "id": "req_daily_group_metrics",
-        "reason": "unsupported_aggregate_type:distinct_count"
-      },
-      {
-        "id": "req_summary_uv_and_total",
-        "reason": "unsupported_summary_number_type:distinct_count"
-      }
-    ]
+    "unverified": []
   },
-  "generated_at": "2026-11-07T11:10:57+00:00"
+  "generated_at": "2026-11-07T11:10:57Z"
 }

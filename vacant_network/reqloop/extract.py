@@ -27,6 +27,8 @@ client 協定（vq-el4.2 實作為 `GlmClient`：subprocess 呼叫 `glm` 指令�
 from __future__ import annotations
 
 import argparse
+import ast
+import copy
 import json
 import os
 import pathlib
@@ -168,13 +170,109 @@ _VALID_AGG_TYPES = frozenset(
 _VALID_SUMMARY_NUM_TYPES = frozenset(
     {"count", "distinct", "sum", "mean", "max", "min", "pct_if"}
 )
-_VALID_COL_STATS = frozenset(
-    {"mean", "std", "min", "max", "p25", "median", "p50", "p75", "sum"}
-)
+# 與 checks.py:_col_stats 對齊（僅支援 mean / median / sd / skewness / kurtosis）
+_VALID_COL_STATS = frozenset({"mean", "median", "sd", "skewness", "kurtosis"})
+_COL_STAT_ALIASES: dict[str, str] = {
+    "std": "sd",
+    "stddev": "sd",
+    "skew": "skewness",
+    "kurt": "kurtosis",
+    "p50": "median",
+}
+_AGG_TYPE_ALIASES: dict[str, str] = {
+    "distinct_count": "distinct",
+    "count_distinct": "distinct",
+    "nunique": "distinct",
+    "avg": "mean",
+    "average": "mean",
+}
+_ALLOWED_BINOPS = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod)
+_ALLOWED_CMPS = (ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE)
+_ALLOWED_UNARY = (ast.UAdd, ast.USub)
+_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
 
 
 def _non_empty_str(v: Any) -> bool:
     return isinstance(v, str) and bool(v.strip())
+
+
+def _strip_workspace_prefix(p: Any) -> Any:
+    if not isinstance(p, str):
+        return p
+    s = p.strip()
+    if s.startswith("/app/"):
+        s = s[len("/app/"):]
+    elif s.startswith("./"):
+        s = s[2:]
+    return s
+
+
+def _unwrap_round_call(expr: str) -> tuple[str, int | None]:
+    """若運算式最外層為 round(inner[, n])，拆解為 (inner_src, n) 供 checks.py safe_eval_expr 求值。"""
+    if not isinstance(expr, str) or not expr.strip():
+        return expr, None
+    try:
+        tree = ast.parse(expr.strip(), mode="eval")
+    except SyntaxError:
+        return expr, None
+    body = tree.body
+    if (
+        isinstance(body, ast.Call)
+        and isinstance(body.func, ast.Name)
+        and body.func.id == "round"
+        and not body.keywords
+        and 1 <= len(body.args) <= 2
+    ):
+        ndigits = 0
+        if len(body.args) == 2:
+            arg1 = body.args[1]
+            if (
+                isinstance(arg1, ast.Constant)
+                and isinstance(arg1.value, int)
+                and not isinstance(arg1.value, bool)
+            ):
+                ndigits = int(arg1.value)
+            else:
+                return expr, None
+        return ast.unparse(body.args[0]), ndigits
+    return expr, None
+
+
+def _expr_syntax_ok(expr: str) -> bool:
+    """靜態檢查 expr 是否符合 checks.py:safe_eval_expr 允許的 AST 節點。"""
+    if not isinstance(expr, str) or not expr.strip():
+        return False
+    try:
+        tree = ast.parse(expr.strip(), mode="eval")
+    except SyntaxError:
+        return False
+
+    def _ok(node: ast.AST) -> bool:
+        if isinstance(node, ast.Expression):
+            return _ok(node.body)
+        if isinstance(node, ast.Constant):
+            return (
+                isinstance(node.value, (int, float, str))
+                and not isinstance(node.value, bool)
+            )
+        if isinstance(node, ast.Name):
+            return True
+        if isinstance(node, ast.BinOp) and type(node.op) in _ALLOWED_BINOPS:
+            return _ok(node.left) and _ok(node.right)
+        if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_UNARY:
+            return _ok(node.operand)
+        if (
+            isinstance(node, ast.Compare)
+            and len(node.ops) == 1
+            and type(node.ops[0]) in _ALLOWED_CMPS
+            and len(node.comparators) == 1
+        ):
+            return _ok(node.left) and _ok(node.comparators[0])
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, (ast.And, ast.Or)):
+            return all(_ok(v) for v in node.values)
+        return False
+
+    return _ok(tree)
 
 
 def _recompute_subparam_problem(rtype: str, rc: dict[str, Any]) -> str | None:
@@ -227,6 +325,29 @@ def _recompute_subparam_problem(rtype: str, rc: dict[str, Any]) -> str | None:
             )
         ):
             return "missing_recompute_param:num_where"
+    elif rtype == "group_ratio_stat":
+        if not _non_empty_str(rc.get("group_col")):
+            return "missing_recompute_param:group_col"
+        has_sum = _non_empty_str(rc.get("sum_col")) or (
+            _non_empty_str(rc.get("num_sum_col")) and _non_empty_str(rc.get("denom_sum_col"))
+        )
+        if not has_sum:
+            return "missing_recompute_param:sum_col"
+        num_where = rc.get("num_where")
+        if (
+            not isinstance(num_where, list)
+            or not num_where
+            or any(
+                not isinstance(c, dict) or not _non_empty_str(c.get("col")) for c in num_where
+            )
+        ):
+            return "missing_recompute_param:num_where"
+        stat = str(rc.get("stat", "max")).strip().lower()
+        if stat not in ("min", "max"):
+            return f"unsupported_recompute_stat:{stat}"
+        out = str(rc.get("out", "val")).strip().lower()
+        if out not in ("val", "group"):
+            return f"unsupported_recompute_out:{out}"
     elif rtype == "scheme_fee_avg":
         if not _non_empty_str(rc.get("scheme")):
             return "missing_recompute_param:scheme"
@@ -287,12 +408,32 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
     ):
         if "input_csv" in params and not _non_empty_str(params.get("input_csv")):
             return "empty_param:input_csv"
+        if verifier == "summary_metrics_consistency" and _non_empty_str(params.get("input_csv")):
+            csv_name = pathlib.Path(str(params["input_csv"]).strip()).name.lower()
+            if csv_name != "orders.csv":
+                return "invalid_param:summary_metrics_consistency_requires_orders_csv"
     if verifier in ("rowset_filter", "group_aggregate", "summary_numbers"):
         if not (
             _non_empty_str(params.get("input_csv"))
             or _non_empty_str(params.get("input_json"))
         ):
             return "missing_param:input_csv_or_json"
+        # r1183 + argon 20261107_1149：exclude 條件 op:ne 是逆向過濾（「排除非 X」會排空行集），
+        # rowset_filter / group_aggregate / summary_numbers 共用 apply_pipeline，一律攔截。
+        excl = params.get("exclude")
+        if isinstance(excl, list):
+            for cond in excl:
+                if isinstance(cond, dict) and cond.get("op") == "ne":
+                    return "invalid_param:exclude_op_ne"
+        comp = params.get("compute")
+        if comp is not None:
+            if not isinstance(comp, list):
+                return "invalid_param:compute"
+            for cspec in comp:
+                if not isinstance(cspec, dict) or not _non_empty_str(cspec.get("name")):
+                    return "invalid_param:compute"
+                if not _expr_syntax_ok(str(cspec.get("expr", ""))):
+                    return "invalid_param:expr"
         if verifier == "rowset_filter":
             ident = params.get("identity")
             if not isinstance(ident, list) or any(not _non_empty_str(c) for c in ident):
@@ -311,20 +452,15 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
                     if not _non_empty_str(out_col):
                         return "invalid_param:values"
                     if isinstance(spec, str):
-                        if not spec.strip():
+                        if not spec.strip() or not _IDENT_RE.match(spec.strip()):
                             return "invalid_param:values"
                     elif isinstance(spec, dict):
                         if not _non_empty_str(spec.get("expr")):
                             return "invalid_param:values"
+                        if not _expr_syntax_ok(str(spec.get("expr", ""))):
+                            return "invalid_param:expr"
                     else:
                         return "invalid_param:values"
-            # r1183（P20261107_1024-1）：exclude 條件 op:ne 是逆向過濾（「排除非 CANCELLED」
-            # 會排空行集、重算金額落差誤殺合格產物）——直接判參數缺陷轉 unverified。
-            excl = params.get("exclude")
-            if isinstance(excl, list):
-                for cond in excl:
-                    if isinstance(cond, dict) and cond.get("op") == "ne":
-                        return "invalid_param:exclude_op_ne"
         elif verifier == "group_aggregate":
             gb = params.get("group_by")
             if not isinstance(gb, list) or any(not _non_empty_str(c) for c in gb):
@@ -338,6 +474,8 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
                 atype = str(a.get("type", "")).strip()
                 if atype not in _VALID_AGG_TYPES:
                     return f"unsupported_aggregate_type:{atype or 'missing'}"
+                if a.get("expr") is not None and not _expr_syntax_ok(str(a.get("expr", ""))):
+                    return "invalid_param:expr"
         elif verifier == "summary_numbers":
             nums = params.get("numbers")
             if not isinstance(nums, list):
@@ -348,6 +486,8 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
                 ntype = str(n.get("type", "")).strip()
                 if ntype not in _VALID_SUMMARY_NUM_TYPES:
                     return f"unsupported_summary_number_type:{ntype or 'missing'}"
+                if n.get("expr") is not None and not _expr_syntax_ok(str(n.get("expr", ""))):
+                    return "invalid_param:expr"
     allowed = _RECOMPUTE_TYPES.get(verifier)
     if allowed is not None:
         if verifier == "kv_recomputed" and not _non_empty_str(params.get("key")):
@@ -364,6 +504,295 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
         if sub_prob is not None:
             return sub_prob
     return None
+
+
+def _convert_smc_keywords_to_numbers(
+    keywords: list[Any], sib_aggs: list[dict[str, Any]]
+) -> list[dict[str, Any]] | None:
+    """將非銷售任務被誤選為 summary_metrics_consistency 的 metric_keywords 對應至同資料檔 group_aggregate 的聚合定義。"""
+    if not keywords or not sib_aggs:
+        return None
+    agg_by_name = {
+        str(a.get("name", "")).strip(): a
+        for a in sib_aggs
+        if isinstance(a, dict) and _non_empty_str(a.get("name"))
+    }
+    mapped: list[dict[str, Any]] = []
+    for kw_raw in keywords:
+        if not _non_empty_str(kw_raw):
+            return None
+        kw = str(kw_raw).strip()
+        matched: dict[str, Any] | None = None
+        if any(tok in kw for tok in ("率", "比例", "百分", "rate", "pct")):
+            for a in sib_aggs:
+                if not isinstance(a, dict):
+                    continue
+                if a.get("type") == "ratio":
+                    num_agg = agg_by_name.get(str(a.get("num", "")).strip())
+                    if num_agg and num_agg.get("type") == "count_if" and _non_empty_str(num_agg.get("expr")):
+                        matched = {
+                            "type": "pct_if",
+                            "expr": str(num_agg["expr"]).strip(),
+                            "label": kw,
+                            "round": 2,
+                        }
+                        break
+                elif a.get("type") == "count_if" and _non_empty_str(a.get("expr")):
+                    matched = {
+                        "type": "pct_if",
+                        "expr": str(a["expr"]).strip(),
+                        "label": kw,
+                        "round": 2,
+                    }
+                    break
+        elif any(tok in kw for tok in ("平均", "均", "mean", "avg")):
+            for a in sib_aggs:
+                if isinstance(a, dict) and a.get("type") in ("mean", "mean_skip_empty"):
+                    entry: dict[str, Any] = {
+                        "type": "mean",
+                        "label": kw,
+                        "round": int(a.get("round", 2)),
+                    }
+                    if _non_empty_str(a.get("col")):
+                        entry["col"] = str(a["col"]).strip()
+                    if _non_empty_str(a.get("expr")):
+                        entry["expr"] = str(a["expr"]).strip()
+                    matched = entry
+                    break
+        elif any(tok in kw for tok in ("最長", "最大", "最高", "max", "worst")):
+            for a in sib_aggs:
+                if isinstance(a, dict) and a.get("type") == "max":
+                    entry = {"type": "max", "label": kw}
+                    if _non_empty_str(a.get("col")):
+                        entry["col"] = str(a["col"]).strip()
+                    if _non_empty_str(a.get("expr")):
+                        entry["expr"] = str(a["expr"]).strip()
+                    matched = entry
+                    break
+        elif any(tok in kw for tok in ("最短", "最小", "最低", "min")):
+            for a in sib_aggs:
+                if isinstance(a, dict) and a.get("type") == "min":
+                    entry = {"type": "min", "label": kw}
+                    if _non_empty_str(a.get("col")):
+                        entry["col"] = str(a["col"]).strip()
+                    if _non_empty_str(a.get("expr")):
+                        entry["expr"] = str(a["expr"]).strip()
+                    matched = entry
+                    break
+        elif any(tok in kw for tok in ("總數", "人數", "筆數", "張數", "count")):
+            for a in sib_aggs:
+                if isinstance(a, dict) and a.get("type") == "count":
+                    matched = {"type": "count", "label": kw}
+                    break
+        elif any(tok in kw for tok in ("總額", "合計", "sum")):
+            for a in sib_aggs:
+                if isinstance(a, dict) and a.get("type") == "sum":
+                    entry = {"type": "sum", "label": kw}
+                    if _non_empty_str(a.get("col")):
+                        entry["col"] = str(a["col"]).strip()
+                    if _non_empty_str(a.get("expr")):
+                        entry["expr"] = str(a["expr"]).strip()
+                    matched = entry
+                    break
+        if matched is None:
+            return None
+        mapped.append(matched)
+    return mapped
+
+
+def _normalize_raw_items(raw_items: list[Any], user_text: str) -> list[Any]:
+    """在不改動語義的前提下正規化模型常見同義別名與跨條目共用過濾管線。"""
+    cloned = [copy.deepcopy(it) if isinstance(it, dict) else it for it in raw_items]
+
+    # 第一趟：單條目路徑、別名、round(expr, n) 拆解與 input_json 巢狀欄位 flatten
+    for raw in cloned:
+        if not isinstance(raw, dict):
+            continue
+        if isinstance(raw.get("deliverable"), str):
+            raw["deliverable"] = _strip_workspace_prefix(raw["deliverable"])
+        params = raw.get("params")
+        if not isinstance(params, dict):
+            continue
+        for pk in ("data_file", "input_csv", "input_json", "file"):
+            if isinstance(params.get(pk), str):
+                params[pk] = _strip_workspace_prefix(params[pk])
+        rc = params.get("recompute")
+        if isinstance(rc, dict):
+            for rk in ("fees_file", "merchants_file"):
+                if isinstance(rc.get(rk), str):
+                    rc[rk] = _strip_workspace_prefix(rc[rk])
+            if str(rc.get("type", "")).strip().lower() == "col_stats" and isinstance(rc.get("stat"), str):
+                st = rc["stat"].strip().lower()
+                rc["stat"] = _COL_STAT_ALIASES.get(st, st)
+
+        computed_rounds: dict[str, int] = {}
+        comp = params.get("compute")
+        if isinstance(comp, list):
+            for cspec in comp:
+                if isinstance(cspec, dict) and isinstance(cspec.get("expr"), str):
+                    inner, r_digits = _unwrap_round_call(cspec["expr"])
+                    cspec["expr"] = inner
+                    if r_digits is not None and _non_empty_str(cspec.get("name")):
+                        computed_rounds[str(cspec["name"]).strip()] = r_digits
+
+        vals = params.get("values")
+        if isinstance(vals, dict):
+            for out_col, spec in list(vals.items()):
+                if isinstance(spec, str):
+                    s = spec.strip()
+                    if not _IDENT_RE.match(s):
+                        inner, r_digits = _unwrap_round_call(s)
+                        if _expr_syntax_ok(inner):
+                            vdict: dict[str, Any] = {"expr": inner}
+                            if r_digits is not None:
+                                vdict["round"] = r_digits
+                            vals[out_col] = vdict
+                    elif s in computed_rounds:
+                        vals[out_col] = {"expr": s, "round": computed_rounds[s]}
+                elif isinstance(spec, dict) and isinstance(spec.get("expr"), str):
+                    inner, r_digits = _unwrap_round_call(spec["expr"])
+                    spec["expr"] = inner
+                    if r_digits is not None and "round" not in spec:
+                        spec["round"] = r_digits
+
+        aggs = params.get("aggregates")
+        if isinstance(aggs, list):
+            for a in aggs:
+                if not isinstance(a, dict):
+                    continue
+                if isinstance(a.get("type"), str):
+                    at = a["type"].strip().lower()
+                    a["type"] = _AGG_TYPE_ALIASES.get(at, at)
+                if isinstance(a.get("expr"), str):
+                    inner, r_digits = _unwrap_round_call(a["expr"])
+                    a["expr"] = inner
+                    if r_digits is not None and "round" not in a:
+                        a["round"] = r_digits
+                if isinstance(a.get("col"), str) and "round" not in a:
+                    col_name = a["col"].strip()
+                    if col_name in computed_rounds:
+                        a["round"] = computed_rounds[col_name]
+
+        nums = params.get("numbers")
+        if isinstance(nums, list):
+            for n in nums:
+                if not isinstance(n, dict):
+                    continue
+                if isinstance(n.get("type"), str):
+                    nt = n["type"].strip().lower()
+                    n["type"] = _AGG_TYPE_ALIASES.get(nt, nt)
+                if isinstance(n.get("expr"), str):
+                    inner, r_digits = _unwrap_round_call(n["expr"])
+                    n["expr"] = inner
+                    if r_digits is not None and "round" not in n:
+                        n["round"] = r_digits
+
+        if _non_empty_str(params.get("input_json")):
+            ref_cols: list[str] = []
+            for key_list in ("group_by", "identity"):
+                kl = params.get(key_list)
+                if isinstance(kl, list):
+                    ref_cols.extend(str(c).strip() for c in kl if _non_empty_str(c))
+            if _non_empty_str(params.get("dedup_by")):
+                ref_cols.append(str(params["dedup_by"]).strip())
+            for cond_key in ("exclude", "include"):
+                cl = params.get(cond_key)
+                if isinstance(cl, list):
+                    for c in cl:
+                        if isinstance(c, dict) and _non_empty_str(c.get("col")):
+                            ref_cols.append(str(c["col"]).strip())
+            for spec_key in ("aggregates", "numbers"):
+                sl = params.get(spec_key)
+                if isinstance(sl, list):
+                    for s in sl:
+                        if isinstance(s, dict) and _non_empty_str(s.get("col")):
+                            ref_cols.append(str(s["col"]).strip())
+            dotted = [c for c in dict.fromkeys(ref_cols) if "." in c]
+            if dotted:
+                flat = params.get("flatten")
+                if not isinstance(flat, list):
+                    flat = []
+                existing = {
+                    str(f.get("as") or f.get("path") or "").strip()
+                    for f in flat
+                    if isinstance(f, dict)
+                }
+                for dc in dotted:
+                    if dc not in existing:
+                        flat.append({"path": dc, "as": dc, "impute": 0})
+                        existing.add(dc)
+                params["flatten"] = flat
+
+    # 第二趟：跨條目轉化非 orders.csv 的 summary_metrics_consistency 並補齊 summary_numbers 漏寫的資料管線
+    for raw in cloned:
+        if not isinstance(raw, dict):
+            continue
+        verifier = str(raw.get("verifier") or "").strip()
+        params = raw.get("params")
+        if not isinstance(params, dict):
+            continue
+        src = str(params.get("input_csv") or params.get("input_json") or "").strip()
+
+        if verifier == "summary_metrics_consistency" and src:
+            csv_name = pathlib.Path(src).name.lower()
+            kws = params.get("metric_keywords")
+            if csv_name != "orders.csv" and isinstance(kws, list):
+                for sib in cloned:
+                    if (
+                        isinstance(sib, dict)
+                        and str(sib.get("verifier") or "").strip() == "group_aggregate"
+                        and isinstance(sib.get("params"), dict)
+                    ):
+                        sib_p = sib["params"]
+                        sib_src = str(sib_p.get("input_csv") or sib_p.get("input_json") or "").strip()
+                        if sib_src == src and isinstance(sib_p.get("aggregates"), list):
+                            mapped = _convert_smc_keywords_to_numbers(kws, sib_p["aggregates"])
+                            if mapped:
+                                raw["verifier"] = "summary_numbers"
+                                verifier = "summary_numbers"
+                                params.pop("metric_keywords", None)
+                                params["numbers"] = mapped
+                                break
+
+        if verifier == "summary_numbers" and src:
+            for sib in cloned:
+                if not isinstance(sib, dict) or sib is raw:
+                    continue
+                sib_v = str(sib.get("verifier") or "").strip()
+                sib_p = sib.get("params")
+                if not isinstance(sib_p, dict):
+                    continue
+                sib_src = str(sib_p.get("input_csv") or sib_p.get("input_json") or "").strip()
+                if sib_src != src:
+                    continue
+                if sib_v in ("group_aggregate", "rowset_filter"):
+                    for pipe_k in ("exclude", "dedup_by", "include", "compute", "flatten"):
+                        if pipe_k not in params and pipe_k in sib_p:
+                            params[pipe_k] = copy.deepcopy(sib_p[pipe_k])
+                elif sib_v in ("monthly_sales_metrics", "monthly_top_products") and pathlib.Path(src).name.lower() == "orders.csv":
+                    if "exclude" not in params and "CANCELLED" in user_text:
+                        params["exclude"] = [{"col": "status", "op": "eq", "value": "CANCELLED"}]
+                    if "dedup_by" not in params and "order_id" in user_text:
+                        params["dedup_by"] = "order_id"
+            if pathlib.Path(src).name.lower() == "orders.csv" and isinstance(params.get("numbers"), list):
+                needs_net_sales = any(
+                    isinstance(n, dict) and str(n.get("col", "")).strip() == "net_sales"
+                    for n in params["numbers"]
+                )
+                if needs_net_sales:
+                    comp_list = params.get("compute")
+                    if not isinstance(comp_list, list):
+                        comp_list = []
+                    if not any(
+                        isinstance(c, dict) and str(c.get("name", "")).strip() == "net_sales"
+                        for c in comp_list
+                    ):
+                        comp_list.append(
+                            {"name": "net_sales", "expr": "qty * unit_price - discount"}
+                        )
+                        params["compute"] = comp_list
+
+    return cloned
 
 
 def build_requirement_set(
@@ -385,12 +814,13 @@ def build_requirement_set(
             ExtractReport(parse_error="model output is not a JSON array of items"),
         )
 
+    normalized_items = _normalize_raw_items(raw_items, user_text)
     discarded: list[DiscardedItem] = []
     unverified: list[UnverifiedItem] = []
     items: list[RequirementItem] = []
     seen_ids: set[str] = set()
 
-    for index, raw in enumerate(raw_items):
+    for index, raw in enumerate(normalized_items):
         fallback_id = f"req_{index:03d}"
         if not isinstance(raw, dict):
             discarded.append(DiscardedItem(index, fallback_id, "not_an_object"))
@@ -577,8 +1007,7 @@ VERIFIER_HINTS: dict[str, str] = {
     "tag_format": "文字交付物中 @tag[value] 格式",
     "monthly_sales_metrics": "各月訂單數與淨銷售額與原始資料重算一致",
     "monthly_top_products": "各月淨銷售額前 N 名商品排行與重算一致",
-    "summary_metrics_consistency": "摘要文字中合計指標數字與重算一致",
-    "summary_numbers": "摘要文字中指定數字與重算一致",
+    "summary_metrics_consistency": "月度訂單銷售摘要文字中「合計淨銷售總額」與 orders.csv 重算一致（非 orders.csv 任務一律改用 summary_numbers）",
     "rowset_filter": "排除→去重→納入後行集與逐欄值與重算一致（params 必帶 identity、"
                       "input_csv 或 input_json 其一指原始資料檔；values 選填逐欄值）",
     "group_aggregate": "分組聚合值與重算一致（params 必帶 group_by、aggregates、"
@@ -711,11 +1140,12 @@ def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str 
         examples,
         "   常見錯誤（任一觸及該條目即被判 unverified 或錯誤 FAIL）：",
         "   - identity、group_by、required_columns、numbers、aggregates、exclude、include 必須是 JSON 陣列，不准寫成單一字串；",
-        "   - aggregates 每項必須是 {name, type, col?/expr?}；numbers 每項必須是 {type, col?, label?}；",
-        "   - values 必須是 {欄位名: 值} 的物件，不是陣列；exclude/include 每項必須是 {col, op, value}，op 只能取 eq/ne/lt/le/gt/ge；",
-        "   - recompute 必須是含 type 的物件，不准寫成字串；",
-        "   - input_csv／input_json／data_file 必須是下方「附帶資料檔」列出的真實檔名，不准猜檔名；",
-        "   - deliverable 必須是原文出現的交付物檔案名（如 monthly_sales.csv），不准寫描述性短句（如「資料清洗後的行集」）；",
+        "   - aggregates 每項必須是 {name, type, col?/expr?}，type 只能取 count / distinct / sum / mean / mean_skip_empty / max / min / count_if / ratio（去重計數一律寫 distinct，不寫 distinct_count）；numbers 每項必須是 {type, col?, label?}，type 只能取 count / distinct / sum / mean / max / min / pct_if；",
+        "   - values 必須是 {欄位名: 值} 的物件，不是陣列；若欄位值由算式計算，必須寫成 {\"欄位名\": {\"expr\": \"a - b\", \"round\": 2}}（expr 內只准寫四則/比較算式，不准在 expr 字串內呼叫 round(...) 等函式，四捨五入一律寫在同物件的 \"round\": 2 欄位）；exclude/include 每項必須是 {col, op, value}，op 只能取 eq/ne/lt/le/gt/ge；",
+        "   - input_json 若需讀取巢狀欄位（如 payload.duration_ms），必須在 params 附 flatten: [{\"path\": \"payload.duration_ms\", \"as\": \"duration_ms\", \"impute\": 0}] 並以 as 後的欄位名引用；",
+        "   - recompute 必須是含 type 的物件，不准寫成字串：kv_recomputed 的 recompute.type 只能選 count_if（必帶 col, eq）、zcount3（必帶 col）、mean_int_col（必帶 col）、max_row_first（必帶 sel_col, out_col）、pearson2（必帶 col_a, col_b）、col_stats（必帶 col, stat；stat 只能取 mean/median/sd/skewness/kurtosis）、null_count（必帶 col）；plain_recomputed 的 recompute.type 只能選 mode_col（必帶 col，選填 where）、cond_rate（必帶 where, num_where）、unique_count（必帶 col，選填 where）、col_max（必帶 col，選填 where）、scheme_fee_avg（必帶 scheme, is_credit, amount）、group_ratio_stat（必帶 group_col, sum_col, num_where，選填 where/stat/out）、fee_ids_lookup（必帶 fees_file, merchants_file, merchant, year, month）；",
+        "   - input_csv／input_json／data_file 必須是下方「附帶資料檔」列出的真實檔名（工作區相對路徑，不加 /app/ 前綴），不准猜檔名；",
+        "   - deliverable 必須是原文出現的交付物檔案名（如 monthly_sales.csv 或 answer.txt，不加 /app/ 前綴），不准寫描述性短句（如「資料清洗後的行集」）；",
         "   - 原文含過濾/去重規則（如「排除 CANCELLED」、「重複只留第一筆」）時，每個重算條目的 params 都要自帶 exclude/dedup_by——params 逐條獨立、不繼承；dedup_by 是單一字串欄位名（如 \"order_id\"，不是陣列）；",
         "   - 重算需要派生欄位時（如 total_score = midterm_score * 0.4 + final_score * 0.6），先用 compute: [{\"name\": \"total_score\", \"expr\": \"midterm_score * 0.4 + final_score * 0.6\"}] 定義，再在 aggregates/numbers 裡引用；",
         "   - 分組鍵要轉換時（不分大小寫、空白歸類）用 group_normalize: {\"col\": {\"lower\": true, \"default\": \"unspecified\"}}；",
@@ -736,6 +1166,79 @@ def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str 
     return "\n".join(parts)
 
 
+def _find_manifest_question(t_dir: pathlib.Path, task_id: str) -> str:
+    """當任務目錄無 request.md 時，向父層搜尋 *manifest*.json 內的公開題目 question。"""
+    curr = t_dir.resolve()
+    for _ in range(4):
+        curr = curr.parent
+        if not curr.is_dir():
+            break
+        for mf in sorted(curr.glob("*manifest*.json")):
+            try:
+                data = json.loads(mf.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(data, dict):
+                continue
+            for d in data.get("drafts", []):
+                if not isinstance(d, dict):
+                    continue
+                if d.get("id") == task_id or str(d.get("task_dir", "")).endswith(f"/{task_id}/task"):
+                    q = str(d.get("question") or "").strip()
+                    if q:
+                        return q
+    return ""
+
+
+def _resolve_task_context(request_md: str | pathlib.Path) -> tuple[pathlib.Path, str, str]:
+    """回傳 (t_dir, task_id, user_text)。支援 request.md、contract.md 與父層 manifest question。"""
+    p = pathlib.Path(request_md)
+    t_dir = p if p.is_dir() else p.parent
+    req_file = t_dir / "request.md" if p.is_dir() else p
+    task_id = t_dir.parent.name if t_dir.name == "task" and t_dir.parent.name else t_dir.name
+
+    text_parts: list[str] = []
+    if req_file.is_file():
+        text_parts.append(req_file.read_text(encoding="utf-8").strip())
+    else:
+        q = _find_manifest_question(t_dir, task_id)
+        if q:
+            text_parts.append(q)
+    contract_md = t_dir / "contract.md"
+    if contract_md.is_file() and contract_md.resolve() != req_file.resolve():
+        c_text = contract_md.read_text(encoding="utf-8").strip()
+        if c_text and c_text not in text_parts:
+            text_parts.append(c_text)
+    return t_dir, task_id, "\n\n".join(part for part in text_parts if part)
+
+
+def _discover_data_preview(t_dir: pathlib.Path) -> tuple[str, str]:
+    """探索任務目錄頂層或 data/ 子目錄的資料檔（排除 requirements.json），回傳 (data_file, data_preview)。"""
+    csvs = sorted(t_dir.glob("*.csv"))
+    if csvs:
+        return csvs[0].name, csv_preview(csvs[0].read_text(encoding="utf-8"))
+    jsons = sorted(p for p in t_dir.glob("*.json") if p.name != "requirements.json")
+    if jsons:
+        return jsons[0].name, json_preview(jsons[0].read_text(encoding="utf-8"))
+    data_sub = t_dir / "data"
+    if data_sub.is_dir():
+        sub_files = sorted(
+            p
+            for p in data_sub.iterdir()
+            if p.is_file() and p.suffix.lower() in (".csv", ".json") and p.name != "requirements.json"
+        )
+        if sub_files:
+            rel_names = [f"data/{p.name}" for p in sub_files]
+            previews: list[str] = []
+            for p in sub_files:
+                rel = f"data/{p.name}"
+                raw_txt = p.read_text(encoding="utf-8")
+                pv = csv_preview(raw_txt) if p.suffix.lower() == ".csv" else json_preview(raw_txt)
+                previews.append(f"[{rel}]\n{pv}" if len(sub_files) > 1 else pv)
+            return ", ".join(rel_names), "\n\n".join(previews)
+    return "", ""
+
+
 def run_task(
     request_md: str | pathlib.Path,
     *,
@@ -743,30 +1246,16 @@ def run_task(
     client: ExtractClient,
     out_path: str | pathlib.Path,
 ) -> tuple[RequirementSet, ExtractReport]:
-    """對真實任務目錄做一輪擷取：request.md 全文＋第一個 .csv 預覽 → client → 逐字/白名單檢查 → 寫結果。
+    """對真實任務目錄做一輪擷取：request.md（或 contract.md + manifest question）全文＋資料預覽 → client → 逐字/白名單檢查 → 寫結果。
 
-    只讀 request.md 與任務目錄頂層第一個 .csv；同目錄的 requirements.json、
+    只讀公開題目與資料檔預覽；同目錄的 requirements.json、
     bad_*／good 等手寫需求與參考產物一律不讀、不進 prompt。
     """
-    req_md = pathlib.Path(request_md)
-    t_dir = req_md.parent
-    user_text = req_md.read_text(encoding="utf-8")
-    data_file = ""
-    data_preview = ""
-    csvs = sorted(t_dir.glob("*.csv"))
-    if csvs:
-        data_file = csvs[0].name
-        data_preview = csv_preview(csvs[0].read_text(encoding="utf-8"))
-    else:
-        # 無 CSV 時看頂層 JSON 資料檔（如 nested_events/events.json）；
-        # 手寫 requirements.json 是參考需求，一律不准進 prompt。
-        jsons = sorted(p for p in t_dir.glob("*.json") if p.name != "requirements.json")
-        if jsons:
-            data_file = jsons[0].name
-            data_preview = json_preview(jsons[0].read_text(encoding="utf-8"))
+    t_dir, task_id, user_text = _resolve_task_context(request_md)
+    data_file, data_preview = _discover_data_preview(t_dir)
     prompt = build_task_prompt(user_text, data_file=data_file, data_preview=data_preview)
     req, report = extract_requirements(
-        user_text=user_text, client=client, task_id=t_dir.name,
+        user_text=user_text, client=client, task_id=task_id,
         build_prompt=lambda _text: prompt,
     )
     out = pathlib.Path(out_path)
@@ -785,17 +1274,19 @@ def main(argv: list[str] | None = None) -> int:
         prog="python3 -m vacant_network.reqloop.extract",
         description="G2.5 自動擷取需求（glm 後端；prompt 只含原文與資料欄位前 5 列，不含 hidden/scorer/手寫需求）",
     )
-    ap.add_argument("--task", required=True, help="任務目錄（含 request.md 與資料 csv）")
+    ap.add_argument("--task", required=True, help="任務目錄（含 request.md 或 contract.md 與資料檔）")
     ap.add_argument("--model", default="glm53", choices=("glm53", "glm53flash", "deepseek41"))
     ap.add_argument("--out", default=None, help="輸出 json（預設 ops/reqloop/extract/out/<task>.<model>.json）")
     ap.add_argument("--glm", default="glm", help="glm 指令路徑（測試可注入假指令）")
     a = ap.parse_args(argv)
 
-    req_md = pathlib.Path(a.task) / "request.md"
-    if not req_md.is_file():
+    t_path = pathlib.Path(a.task)
+    req_md = t_path / "request.md"
+    contract_md = t_path / "contract.md"
+    if not req_md.is_file() and not contract_md.is_file():
         print(f"error: 找不到 {req_md}", file=sys.stderr)
         return 2
-    task_id = pathlib.Path(a.task).name
+    task_id = t_path.parent.name if t_path.name == "task" and t_path.parent.name else t_path.name
     client = GlmClient(model=a.model, purpose=f"{task_id} 擷取需求", glm_bin=a.glm)
     out_path = (
         pathlib.Path(a.out)

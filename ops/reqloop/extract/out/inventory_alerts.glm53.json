@@ -89,7 +89,9 @@
           }
         ],
         "values": {
-          "restock_needed": "safety_stock - current_stock"
+          "restock_needed": {
+            "expr": "safety_stock - current_stock"
+          }
         }
       },
       "description": "restock_needed 欄位值須等於 safety_stock - current_stock，於套用排除、去重、納入條件後的行集上逐欄比對。",
@@ -131,11 +133,14 @@
           },
           {
             "name": "estimated_cost",
-            "expr": "round((safety_stock - current_stock) * unit_cost, 2)"
+            "expr": "(safety_stock - current_stock) * unit_cost"
           }
         ],
         "values": {
-          "estimated_cost": "round((safety_stock - current_stock) * unit_cost, 2)"
+          "estimated_cost": {
+            "expr": "(safety_stock - current_stock) * unit_cost",
+            "round": 2
+          }
         }
       },
       "description": "estimated_cost 欄位值須等於 (safety_stock - current_stock) × unit_cost，四捨五入至小數點後 2 位，於套用全部過濾條件後的行集上逐欄比對。",
@@ -174,7 +179,7 @@
           },
           {
             "name": "estimated_cost",
-            "expr": "round((safety_stock - current_stock) * unit_cost, 2)"
+            "expr": "(safety_stock - current_stock) * unit_cost"
           }
         ],
         "numbers": [
@@ -210,5 +215,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T11:10:07+00:00"
+  "generated_at": "2026-11-07T11:10:07Z"
 }

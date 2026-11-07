@@ -27,6 +27,13 @@
             "type": "sum",
             "col": "payload.duration_ms"
           }
+        ],
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "payload.duration_ms",
+            "impute": 0
+          }
         ]
       },
       "description": "event_type 分組不分大小寫，輸出分組鍵以 lower 呈現，並與重算的各類型計數與加總一致。",
@@ -60,6 +67,13 @@
             "name": "total_duration_ms",
             "type": "sum",
             "col": "payload.duration_ms"
+          }
+        ],
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "payload.duration_ms",
+            "impute": 0
           }
         ]
       },
@@ -106,6 +120,13 @@
             "col": "payload.duration_ms",
             "label": "總時長"
           }
+        ],
+        "flatten": [
+          {
+            "path": "payload.duration_ms",
+            "as": "payload.duration_ms",
+            "impute": 0
+          }
         ]
       },
       "description": "summary.md 中「事件總數」（全部事件筆數）與「總時長」（duration_ms 加總，缺失以 0 計）須與從 events.json 重算的數值一致。",
@@ -128,5 +149,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T11:10:17+00:00"
+  "generated_at": "2026-11-07T11:10:17Z"
 }

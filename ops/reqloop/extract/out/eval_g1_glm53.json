@@ -93,7 +93,7 @@
       },
       "ext": {
         "task_id": "inventory_alerts",
-        "good": "UNKNOWN",
+        "good": "VERIFIED",
         "bad": [
           {
             "case": "bad_duplicate_rows",
@@ -113,11 +113,11 @@
           },
           {
             "case": "bad_summary_number_mismatch",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_wrong_formula",
-            "caught": false
+            "caught": true
           }
         ]
       },
@@ -155,7 +155,7 @@
       },
       "ext": {
         "task_id": "nested_events",
-        "good": "UNKNOWN",
+        "good": "VERIFIED",
         "bad": [
           {
             "case": "bad_missing_columns",
@@ -163,19 +163,19 @@
           },
           {
             "case": "bad_missing_duration_dropped",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_missing_payload_dropped",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_summary_total_wrong",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_type_case_split",
-            "caught": false
+            "caught": true
           }
         ]
       },
@@ -283,7 +283,7 @@
       },
       "ext": {
         "task_id": "student_grades",
-        "good": "UNKNOWN",
+        "good": "VERIFIED",
         "bad": [
           {
             "case": "bad_duplicate_students",
@@ -303,7 +303,7 @@
           },
           {
             "case": "bad_summary_number_mismatch",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_weight_calculation",
@@ -349,7 +349,7 @@
       },
       "ext": {
         "task_id": "support_tickets",
-        "good": "UNKNOWN",
+        "good": "VERIFIED",
         "bad": [
           {
             "case": "bad_include_open",
@@ -369,7 +369,7 @@
           },
           {
             "case": "bad_summary_max_wrong",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_worst_as_mean",
@@ -411,7 +411,7 @@
       },
       "ext": {
         "task_id": "web_traffic",
-        "good": "UNKNOWN",
+        "good": "VERIFIED",
         "bad": [
           {
             "case": "bad_dwell_zero_imputed",
@@ -427,21 +427,21 @@
           },
           {
             "case": "bad_summary_uv_summed",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_uv_not_dedup",
-            "caught": false
+            "caught": true
           }
         ]
       },
       "ext_items": 4,
-      "ext_unverified": 2
+      "ext_unverified": 0
     }
   ],
   "gate": "PASS",
-  "catch_rate": 0.7435897435897436,
-  "ext_caught": 29,
+  "catch_rate": 1.0,
+  "ext_caught": 39,
   "total_bad": 39,
   "ext_fp": 0
 }
