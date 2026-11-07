@@ -159,3 +159,7 @@
 - 重做②（effects_20261105_summary.json 先前未開啟）：已開啟核對——policy30 generic 7/10、localized 6/10，feedback_once20 generic 7/10、localized 4/10，dab_055-pi-C-localized 在 local_vs_independent_mismatches（local false→independent true）；與 11-06 #6 口徑及票 P20261107_0210-1 參考基線一致，r1163 記錄未引該檔數字，無衝突。
 - 重做③（g2.py／repair.py 先前未開啟）：已核對產品碼語義——repair.py:98-100 STOP_GAP_CLOSED＝「重驗後無必需條目 FAIL」、STOP_MAX_ROUNDS＝「輪數用盡，缺口仍在」；g2.py:408-417 產出 stopped/final_readable_status/fixed/regressed/unresolved 欄位；本輪守衛釘住的欄位與停因語義有產品碼依據，非僅 raw。
 - 結論：三項重做皆為「重算／核對與已寫記錄一致」，NOW.md、STATE.md、測試內容無須改動；不以此充進展。
+## r1163-review-2（交付前審查重做 #2；2026-11-07）
+- 重做（NOW.md×1、STATE.md×2 點名「451,938」）：由 raw（g2_result_dab_055-pi-C_generic.json、g2_result_dab_055-pi-C_localized.json）以千位分隔重算——generic model_calls=25、tokens=1,451,938、wall_ms_total=149,433；localized model_calls=21、tokens=372,043、wall_ms_total=67,646。
+- 對照：NOW.md L7、STATE.md L152 所寫「1,451,938」與重算值逐字相同；第三處（L158）為 r1163-review 條目引述 flag 字串。三處皆＝重算值，未寫任何其他值。
+- 結論：NOW.md／STATE.md 數值正確、內文不改；上一輪缺的是「含千位分隔之重算輸出」的記錄，本條補上。
