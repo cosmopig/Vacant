@@ -45,11 +45,12 @@
           {
             "name": "total_amount",
             "type": "sum",
-            "col": "amount"
+            "col": "amount",
+            "round": 2
           }
         ]
       },
-      "description": "依 category 與 subcategory 分組加總 amount；subcategory 空白歸 unspecified、大小寫不分且輸出用 lower，分組結果須與重算一致。",
+      "description": "依 category 與 subcategory 分組，subcategory 空白歸 unspecified、大小寫不分且輸出用 lower，total_amount 為該組 amount 加總後四捨五入到小數點後 2 位（先加總、後取整）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -57,42 +58,6 @@
     },
     {
       "id": "req-3",
-      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）。",
-      "deliverable": "expense_summary.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "expenses.csv",
-        "group_by": [
-          "category",
-          "subcategory"
-        ],
-        "group_normalize": {
-          "category": {
-            "lower": true
-          },
-          "subcategory": {
-            "lower": true,
-            "default": "unspecified"
-          }
-        },
-        "aggregates": [
-          {
-            "name": "total_amount",
-            "type": "sum",
-            "col": "amount",
-            "round": 2
-          }
-        ]
-      },
-      "description": "total_amount 為各組 amount 先加總再四捨五入到小數點後 2 位，須與重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "req-4",
       "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）。",
       "deliverable": "summary.md",
       "verifier": "summary_numbers",
@@ -103,12 +68,11 @@
           {
             "type": "sum",
             "col": "amount",
-            "label": "報銷總金額",
-            "round": 2
+            "label": "報銷總金額"
           }
         ]
       },
-      "description": "summary.md 中「報銷總金額」須為全部 amount 加總、四捨五入到小數點後 2 位的精確數值，並與原始資料重算一致。",
+      "description": "summary.md 中「報銷總金額」須為 expenses.csv 全部 amount 加總、四捨五入到小數點後 2 位的精確數值，並與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -122,11 +86,10 @@
     "kept": [
       "req-1",
       "req-2",
-      "req-3",
-      "req-4"
+      "req-3"
     ],
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T10:28:45+00:00"
+  "generated_at": "2026-11-07T11:09:57+00:00"
 }

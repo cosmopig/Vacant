@@ -15,8 +15,8 @@
         "exclude": [
           {
             "col": "status",
-            "op": "ne",
-            "value": "CLOSED"
+            "op": "eq",
+            "value": "OPEN"
           }
         ],
         "aggregates": [
@@ -27,7 +27,8 @@
           {
             "name": "avg_resolved_hours",
             "type": "mean",
-            "col": "resolved_hours"
+            "col": "resolved_hours",
+            "round": 2
           },
           {
             "name": "sla_met_count",
@@ -38,7 +39,8 @@
             "name": "sla_rate",
             "type": "ratio",
             "num": "sla_met_count",
-            "den": "ticket_count"
+            "den": "ticket_count",
+            "round": 4
           },
           {
             "name": "worst_hours",
@@ -47,7 +49,7 @@
           }
         ]
       },
-      "description": "依 priority 分組、僅計 status=CLOSED 的工單，重算各欄位（含比率 sla_rate）並與 sla_report.csv 比對。",
+      "description": "依 priority 分組，僅統計 status 為 CLOSED 的工單，計算結案數、平均處理時數（2 位小數）、SLA 達標數（resolved_hours <= sla_target_hours）、達標率（4 位小數）與最長處理時數。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -57,7 +59,7 @@
       "id": "R2",
       "quote": "產出 `sla_report.csv`，欄位：`priority, ticket_count, avg_resolved_hours, sla_met_count, sla_rate, worst_hours`",
       "deliverable": "sla_report.csv",
-      "verifier": "table_structure",
+      "verifier": "csv_structure",
       "kind": "explicit",
       "params": {
         "required_columns": [
@@ -69,7 +71,7 @@
           "worst_hours"
         ]
       },
-      "description": "sla_report.csv 必須存在且含指定欄位。",
+      "description": "sla_report.csv 必須存在且含指定六個欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -89,7 +91,7 @@
           "最長處理時數"
         ]
       },
-      "description": "summary.md 中三項合計指標數字須與 tickets.csv（僅 CLOSED 工單）重算一致；「小數點後 2 位」「精確數值」等格式要求無法程式驗證，僅驗數值一致性。",
+      "description": "summary.md 須載明結案工單總數、整體 SLA 達標率（百分數、2 位小數）與最長處理時數，且數字與從 tickets.csv（排除 OPEN 工單）重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -108,5 +110,5 @@
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T10:29:53+00:00"
+  "generated_at": "2026-11-07T11:10:46+00:00"
 }

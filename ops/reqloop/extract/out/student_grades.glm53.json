@@ -2,29 +2,8 @@
   "task_id": "student_grades",
   "items": [
     {
-      "id": "req_class_summary_structure",
-      "quote": "產出 `class_summary.csv`，欄位：`class_name, student_count, passing_count, pass_rate, average_score`",
-      "deliverable": "class_summary.csv",
-      "verifier": "table_structure",
-      "kind": "explicit",
-      "params": {
-        "required_columns": [
-          "class_name",
-          "student_count",
-          "passing_count",
-          "pass_rate",
-          "average_score"
-        ]
-      },
-      "description": "class_summary.csv 必須存在，且含 class_name、student_count、passing_count、pass_rate、average_score 欄位。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "req_class_summary_aggregates",
-      "quote": "總評成績 `total_score = midterm_score × 0.4 + final_score × 0.6`；`total_score ≥ 60.0` 為及格。",
+      "id": "R1",
+      "quote": "排除 `status` 為 `WITHDRAWN` 的休退學記錄。",
       "deliverable": "class_summary.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
@@ -33,16 +12,14 @@
         "group_by": [
           "class_name"
         ],
-        "dedup_by": [
-          "student_id"
-        ],
         "exclude": [
           {
             "col": "status",
-            "op": "ne",
+            "op": "eq",
             "value": "WITHDRAWN"
           }
         ],
+        "dedup_by": "student_id",
         "compute": [
           {
             "name": "total_score",
@@ -61,36 +38,197 @@
           },
           {
             "name": "pass_rate",
-            "type": "mean",
-            "expr": "total_score >= 60.0"
+            "type": "ratio",
+            "num": "passing_count",
+            "den": "student_count",
+            "round": 2
           },
           {
             "name": "average_score",
             "type": "mean",
-            "col": "total_score"
+            "col": "total_score",
+            "round": 2
           }
         ]
       },
-      "description": "依 class_name 分組，排除 status 為 WITHDRAWN、同一 student_id 去重只留第一筆後，計算各班修課人數、及格人數（total_score ≥ 60.0）、及格率與 total_score 平均，與 class_summary.csv 重算比對。",
+      "description": "class_summary.csv 為彙總表，排除 WITHDRAWN、student_id 去重（保留第一筆）後依 class_name 分組，重算各班人數、及格人數、及格率與平均總評。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req_summary_md_metrics",
+      "id": "R2",
+      "quote": "產出 `class_summary.csv`，欄位：`class_name, student_count, passing_count, pass_rate, average_score`",
+      "deliverable": "class_summary.csv",
+      "verifier": "table_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "class_name",
+          "student_count",
+          "passing_count",
+          "pass_rate",
+          "average_score"
+        ]
+      },
+      "description": "class_summary.csv 必須存在且含指定欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "`pass_rate` = 該班及格人數 / 該班修課人數（小數點後 2 位）",
+      "deliverable": "class_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "grades.csv",
+        "group_by": [
+          "class_name"
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "dedup_by": "student_id",
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "student_count",
+            "type": "count"
+          },
+          {
+            "name": "passing_count",
+            "type": "count_if",
+            "expr": "total_score >= 60.0"
+          },
+          {
+            "name": "pass_rate",
+            "type": "ratio",
+            "num": "passing_count",
+            "den": "student_count",
+            "round": 2
+          }
+        ]
+      },
+      "description": "pass_rate 定義為及格人數除以修課人數的比率，四捨五入至小數點後 2 位，與重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "`average_score` = 該班 total_score 平均（小數點後 2 位）",
+      "deliverable": "class_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "grades.csv",
+        "group_by": [
+          "class_name"
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "dedup_by": "student_id",
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "average_score",
+            "type": "mean",
+            "col": "total_score",
+            "round": 2
+          }
+        ]
+      },
+      "description": "average_score 為該班 total_score 平均，四捨五入至小數點後 2 位，與重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
       "quote": "產出 `summary.md`，須明確載明「全年級及格率」（百分比，小數點後 2 位）與「全年級平均總評」（小數點後 2 位）。",
       "deliverable": "summary.md",
       "verifier": "summary_metrics_consistency",
       "kind": "explicit",
       "params": {
         "input_csv": "grades.csv",
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "dedup_by": "student_id",
         "metric_keywords": [
           "全年級及格率",
           "全年級平均總評"
         ]
       },
-      "description": "summary.md 中「全年級及格率」與「全年級平均總評」的數字須與原始資料重算一致（排除 WITHDRAWN、student_id 去重、total_score = midterm_score × 0.4 + final_score × 0.6）。",
+      "description": "summary.md 中「全年級及格率」與「全年級平均總評」的數字須與排除 WITHDRAWN、student_id 去重後的重算結果一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R6",
+      "quote": "總評成績 `total_score = midterm_score × 0.4 + final_score × 0.6`；`total_score ≥ 60.0` 為及格。",
+      "deliverable": "class_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "grades.csv",
+        "group_by": [
+          "class_name"
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "WITHDRAWN"
+          }
+        ],
+        "dedup_by": "student_id",
+        "compute": [
+          {
+            "name": "total_score",
+            "expr": "midterm_score * 0.4 + final_score * 0.6"
+          }
+        ],
+        "aggregates": [
+          {
+            "name": "passing_count",
+            "type": "count_if",
+            "expr": "total_score >= 60.0"
+          }
+        ]
+      },
+      "description": "及格判定基於 total_score = midterm_score × 0.4 + final_score × 0.6 且 total_score ≥ 60.0，重算及格人數並與交付比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -102,12 +240,15 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req_class_summary_structure",
-      "req_class_summary_aggregates",
-      "req_summary_md_metrics"
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6"
     ],
     "discarded": [],
     "unverified": []
   },
-  "generated_at": "2026-11-07T10:10:05+00:00"
+  "generated_at": "2026-11-07T11:10:38+00:00"
 }

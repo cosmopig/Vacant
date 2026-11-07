@@ -31,7 +31,7 @@
       },
       "ext": {
         "task_id": "expense_category",
-        "good": "FP",
+        "good": "VERIFIED",
         "bad": [
           {
             "case": "bad_grand_total_wrong",
@@ -55,7 +55,7 @@
           }
         ]
       },
-      "ext_items": 4,
+      "ext_items": 3,
       "ext_unverified": 0
     },
     {
@@ -93,7 +93,7 @@
       },
       "ext": {
         "task_id": "inventory_alerts",
-        "good": "FP",
+        "good": "UNKNOWN",
         "bad": [
           {
             "case": "bad_duplicate_rows",
@@ -113,16 +113,16 @@
           },
           {
             "case": "bad_summary_number_mismatch",
-            "caught": true
+            "caught": false
           },
           {
             "case": "bad_wrong_formula",
-            "caught": true
+            "caught": false
           }
         ]
       },
-      "ext_items": 8,
-      "ext_unverified": 2
+      "ext_items": 5,
+      "ext_unverified": 0
     },
     {
       "task": "nested_events",
@@ -163,15 +163,15 @@
           },
           {
             "case": "bad_missing_duration_dropped",
-            "caught": true
+            "caught": false
           },
           {
             "case": "bad_missing_payload_dropped",
-            "caught": true
+            "caught": false
           },
           {
             "case": "bad_summary_total_wrong",
-            "caught": true
+            "caught": false
           },
           {
             "case": "bad_type_case_split",
@@ -179,7 +179,7 @@
           }
         ]
       },
-      "ext_items": 5,
+      "ext_items": 4,
       "ext_unverified": 0
     },
     {
@@ -217,7 +217,7 @@
       },
       "ext": {
         "task_id": "orders_monthly",
-        "good": "FP",
+        "good": "UNKNOWN",
         "bad": [
           {
             "case": "bad_duplicate_orders",
@@ -245,7 +245,7 @@
           }
         ]
       },
-      "ext_items": 7,
+      "ext_items": 6,
       "ext_unverified": 2
     },
     {
@@ -287,11 +287,11 @@
         "bad": [
           {
             "case": "bad_duplicate_students",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_include_withdrawn",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_missing_columns",
@@ -299,7 +299,7 @@
           },
           {
             "case": "bad_passing_threshold",
-            "caught": false
+            "caught": true
           },
           {
             "case": "bad_summary_number_mismatch",
@@ -307,11 +307,11 @@
           },
           {
             "case": "bad_weight_calculation",
-            "caught": false
+            "caught": true
           }
         ]
       },
-      "ext_items": 3,
+      "ext_items": 6,
       "ext_unverified": 0
     },
     {
@@ -349,7 +349,7 @@
       },
       "ext": {
         "task_id": "support_tickets",
-        "good": "FP",
+        "good": "UNKNOWN",
         "bad": [
           {
             "case": "bad_include_open",
@@ -369,7 +369,7 @@
           },
           {
             "case": "bad_summary_max_wrong",
-            "caught": true
+            "caught": false
           },
           {
             "case": "bad_worst_as_mean",
@@ -377,8 +377,8 @@
           }
         ]
       },
-      "ext_items": 9,
-      "ext_unverified": 2
+      "ext_items": 3,
+      "ext_unverified": 0
     },
     {
       "task": "web_traffic",
@@ -435,13 +435,13 @@
           }
         ]
       },
-      "ext_items": 6,
+      "ext_items": 4,
       "ext_unverified": 2
     }
   ],
-  "gate": "FAIL",
-  "catch_rate": 0.7948717948717948,
-  "ext_caught": 31,
+  "gate": "PASS",
+  "catch_rate": 0.7435897435897436,
+  "ext_caught": 29,
   "total_bad": 39,
-  "ext_fp": 4
+  "ext_fp": 0
 }

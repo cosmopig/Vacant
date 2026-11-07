@@ -1,0 +1,132 @@
+{
+  "task_id": "expense_category",
+  "items": [
+    {
+      "id": "req-1",
+      "quote": "產出 `expense_summary.csv`，欄位：`category, subcategory, total_amount`",
+      "deliverable": "expense_summary.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "category",
+          "subcategory",
+          "total_amount"
+        ]
+      },
+      "description": "expense_summary.csv 必須存在且包含 category、subcategory、total_amount 欄位。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-2",
+      "quote": "依 `category` 與 `subcategory` 分組；`subcategory` 空白者歸入 `unspecified`；\n   `subcategory` 大小寫不分（例如 `software` 與 `Software` 為同一組），輸出用 lower。",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "group_normalize": {
+          "category": {
+            "lower": true
+          },
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
+        "aggregates": [
+          {
+            "name": "total_amount",
+            "type": "sum",
+            "col": "amount"
+          }
+        ]
+      },
+      "description": "依 category 與 subcategory 分組加總 amount；subcategory 空白歸 unspecified、大小寫不分且輸出用 lower，分組結果須與重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-3",
+      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）。",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "group_normalize": {
+          "category": {
+            "lower": true
+          },
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
+        "aggregates": [
+          {
+            "name": "total_amount",
+            "type": "sum",
+            "col": "amount",
+            "round": 2
+          }
+        ]
+      },
+      "description": "total_amount 為各組 amount 先加總再四捨五入到小數點後 2 位，須與重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-4",
+      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "numbers": [
+          {
+            "type": "sum",
+            "col": "amount",
+            "label": "報銷總金額",
+            "round": 2
+          }
+        ]
+      },
+      "description": "summary.md 中「報銷總金額」須為全部 amount 加總、四捨五入到小數點後 2 位的精確數值，並與原始資料重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req-1",
+      "req-2",
+      "req-3",
+      "req-4"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T10:28:45+00:00"
+}

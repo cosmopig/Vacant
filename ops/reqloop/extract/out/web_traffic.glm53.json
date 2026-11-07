@@ -2,7 +2,7 @@
   "task_id": "web_traffic",
   "items": [
     {
-      "id": "R1",
+      "id": "req_daily_csv_structure",
       "quote": "依 `local_day` 產出 `daily_traffic.csv`，欄位：`local_day, visits, uv, avg_dwell`",
       "deliverable": "daily_traffic.csv",
       "verifier": "csv_structure",
@@ -15,15 +15,15 @@
           "avg_dwell"
         ]
       },
-      "description": "daily_traffic.csv 必須存在且含 local_day、visits、uv、avg_dwell 欄位。",
+      "description": "交付表格 daily_traffic.csv 必須存在，且含 local_day、visits、uv、avg_dwell 欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
-      "quote": "`visits` = 該當地日期之造訪筆數",
+      "id": "req_daily_group_metrics",
+      "quote": "當地日期 `local_day = day_index + ((hour + tz_offset_hours) // 24)`（整數除、向負無窮取整；",
       "deliverable": "daily_traffic.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
@@ -42,48 +42,28 @@
           {
             "name": "visits",
             "type": "count"
-          }
-        ]
-      },
-      "description": "各 local_day 的造訪筆數需與從 traffic.csv 重算一致（local_day 由 day_index + ((hour + tz_offset_hours) // 24) 派生，整數除向負無窮取整）。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "`uv` = 該當地日期之獨立 `user_id` 數",
-      "deliverable": "daily_traffic.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "traffic.csv",
-        "compute": [
-          {
-            "name": "local_day",
-            "expr": "day_index + ((hour + tz_offset_hours) // 24)"
-          }
-        ],
-        "group_by": [
-          "local_day"
-        ],
-        "aggregates": [
+          },
           {
             "name": "uv",
-            "type": "count_distinct",
+            "type": "distinct_count",
             "col": "user_id"
+          },
+          {
+            "name": "avg_dwell",
+            "type": "mean_skip_empty",
+            "col": "dwell_seconds",
+            "round": 2
           }
         ]
       },
-      "description": "各 local_day 的獨立 user_id 數需與重算一致。",
+      "description": "以 local_day = day_index + ((hour + tz_offset_hours) // 24)（整數除、向負無窮取整）分組，重算各當地日期的造訪筆數 visits、獨立 user_id 數 uv、以及 dwell_seconds 空白剔除後的平均 avg_dwell（小數點後 2 位），並與 daily_traffic.csv 比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
     },
     {
-      "id": "R4",
+      "id": "req_avg_dwell_skip_empty",
       "quote": "`avg_dwell` = 該當地日期 `dwell_seconds` 平均（小數點後 2 位）；`dwell_seconds` 空白＝無停留紀錄，**剔除不計入平均**",
       "deliverable": "daily_traffic.csv",
       "verifier": "group_aggregate",
@@ -103,19 +83,20 @@
           {
             "name": "avg_dwell",
             "type": "mean_skip_empty",
-            "col": "dwell_seconds"
+            "col": "dwell_seconds",
+            "round": 2
           }
         ]
       },
-      "description": "各 local_day 的 dwell_seconds 平均（空白剔除不計入平均，四捨五入至小數點後 2 位）需與重算一致。",
+      "description": "avg_dwell 為 dwell_seconds 的平均，空白（無停留紀錄）剔除不計入平均，四捨五入至小數點後 2 位，與 daily_traffic.csv 重算比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R5",
-      "quote": "須明確載明「全期獨立訪客數 UV」（全部資料跨日去重之 `user_id` 數）",
+      "id": "req_summary_uv_and_total",
+      "quote": "產出 `summary.md`，須明確載明「全期獨立訪客數 UV」（全部資料跨日去重之 `user_id` 數）與「全期造訪總數」（精確數值）。",
       "deliverable": "summary.md",
       "verifier": "summary_numbers",
       "kind": "explicit",
@@ -123,38 +104,22 @@
         "input_csv": "traffic.csv",
         "numbers": [
           {
-            "type": "count_distinct",
+            "type": "distinct_count",
             "col": "user_id",
             "label": "全期獨立訪客數 UV"
-          }
-        ]
-      },
-      "description": "summary.md 中「全期獨立訪客數 UV」須為全部資料跨日去重之 user_id 數，與重算一致（非每日 UV 相加）。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "R6",
-      "quote": "與「全期造訪總數」（精確數值）",
-      "deliverable": "summary.md",
-      "verifier": "summary_numbers",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "traffic.csv",
-        "numbers": [
+          },
           {
             "type": "count",
+            "col": "visit_id",
             "label": "全期造訪總數"
           }
         ]
       },
-      "description": "summary.md 中「全期造訪總數」須為精確數值，與從 traffic.csv 重算之總筆數一致。",
+      "description": "summary.md 須載明全期獨立訪客數 UV（全部資料跨日去重之 user_id 數，非每日 UV 相加）與全期造訪總數，數字須與原始資料重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -162,24 +127,22 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3",
-      "R4",
-      "R5",
-      "R6"
+      "req_daily_csv_structure",
+      "req_daily_group_metrics",
+      "req_avg_dwell_skip_empty",
+      "req_summary_uv_and_total"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "R3",
-        "reason": "unsupported_aggregate_type:count_distinct"
+        "id": "req_daily_group_metrics",
+        "reason": "unsupported_aggregate_type:distinct_count"
       },
       {
-        "id": "R5",
-        "reason": "unsupported_summary_number_type:count_distinct"
+        "id": "req_summary_uv_and_total",
+        "reason": "unsupported_summary_number_type:distinct_count"
       }
     ]
   },
-  "generated_at": "2026-11-07T10:10:22+00:00"
+  "generated_at": "2026-11-07T11:10:57+00:00"
 }
