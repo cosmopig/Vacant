@@ -147,3 +147,12 @@
 - ③ 驗收 `run_eval.py --all`（~/dev/Vacant）：**🏆 G2.5 全三項門禁整合驗收：PASS、rc=0**；G1 PASS（抓錯 39/39、冤枉 0、41c/328550t）；REAL14 PASS（抓錯 9/9、冤枉 1/5、74c/732826t）；PHASE3 PASS（fixed 7/unresolved 2/error 0、15s/275c/15087278t）；vibe_calls 130→130（0 新外部 API 呼叫）；官方鎖檔 eval_phase3_glm53.json 未動、repair.py 未動。
 - 沒驗證：本輪 commit 的 CI（GitHub Actions 仍停擺；本地只跑工單驗收指令）；426/427 fixed 為本批單 rep 裁決。
 - 下一步：等審查派工／G2.5 後續；下輪巡 CI。
+
+## r1215（2026-11-07 21:42 UTC）：CI 巡燈；worker 紅燈根因診斷（非本分支造成）
+- 本輪無新工單（vq-el4 全閉、open/doing 皆空）→ 只巡燈＋診斷。
+- auto/qwen27b **2b6e6f92（HEAD）🟢 5031 passed / 0 failed / 74 skipped（840s）**；ea66f391 🟢 同數。r1213/r1214 commit 的 CI 補齊。argon 2db8afa5 🟢 不變。
+- auto/worker b7cb338d 🔴 6 failed，根因＝worker 自身 WIP：
+  ① bbd54fff 改凍結草稿 smoke_e014/dabstep-10-pi-C/draft/answer.txt（624b60c5→c834c2ee）→ effect_manifest pin 破（3 測紅；qwen27b/argon 樹未動、綠）；
+  ② real_slice_dab055/manifest.json 被提交成絕對路徑 symlink（目標在 worker 自己 worktree 也不存在）＋ `~HEAD`/`~auto_argon` 殘骸檔 → CI worktree FileNotFoundError（3 測紅）。
+- 處置：不動 auto/worker（活躍 agent WIP＋修法含「重凍需授權」的產品判斷）；修復 recipe 已寫入 NOW.md 交 worker/審查。
+- 零產品改動、零模型呼叫、零 commit（worktree 乾淨）。

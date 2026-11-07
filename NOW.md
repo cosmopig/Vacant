@@ -1,16 +1,30 @@
-# 現在（第 1214 輪後，2026-11-07）
+# 現在（第 1215 輪後，2026-11-07 21:42 UTC）
 
-## r1214：PHASE3 第二批 STALE 重驗完成（工單 P20261107_2028-2 → done）
-- `run_eval.py --phase3`（online）：7 格 RESUMED（0 呼叫）；dab_426-pi-C **fixed**（12c/468665t、stalled）、dab_427-pi-A **fixed**（10c/432313t、gap_closed）；本批 2 sessions/22 calls/900978 tok（1004 gemma-4-12b-it-qat、raw usage、無硬 token 上限）。
-- 驗收＝**🏆 G2.5 全三項門禁整合驗收：PASS、rc=0**（commit dd6e49c4）：G1 PASS（39/39、0 冤枉、41c/328550t）＋REAL14 PASS（9/9、1/5 冤枉、74c/732826t）＋PHASE3 PASS（fixed 7／unresolved 2／0 error、15s/275c/15087278t）；vibe_calls 130→130（0 新外部呼叫）。
-
-## PHASE3 現況（口徑）
-- 9 格：fixed 7（039、378、426 新、427 新、507、dabstep-10、23）＋unresolved 2（055 stalled、1273 max_rounds）；progress.json complete=True、0 STALE、0 ERROR。
-- 所有裁決＝開發選樣單 rep（gemma 12b 本機）；426/427 fixed 為本批單格結果，不宣稱管線普遍較好。
+## r1215：CI 巡燈（無新工單：vq-el4 面已清空，open/doing 皆空）
+- **auto/qwen27b 2b6e6f92（HEAD，r1214 後狀態）：🟢 GREEN 5031 passed / 0 failed / 74 skipped（840s）**。
+  r1213/r1214 的 commit 全部被 HEAD 樹收編，CI 已補齊（ea66f391 🟢 5031/0；2b6e6f92 🟢 5031/0）。
+- auto/argon 2db8afa5：🟢（5031/0，11-06 審查指示1 的合併對象，狀態不變）。
+- **auto/worker b7cb338d：🔴 6 failed——診斷完成，非本分支/本次變更造成**：
+  - 3 例（dabstep10 draft sha、effect_manifest、全庫 manifest 掃鎖）：worker commit **bbd54fff**
+    「Fix merchant identification error in dabstep-10-pi-C」改了凍結草稿
+    `ops/reqloop/g2/smoke_e014/dabstep-10-pi-C/draft/answer.txt`（624b60c5…→c834c2ee…），
+    effect_manifest pin 破損。qwen27b/argon 樹仍是 624b60c5（＝pin），故只紅 worker。
+    這是 guard 按設計抓到了凍結快照被改（H-0 同型防線在位）。
+  - 3 例（real_slice_dab055 三測）：worker 樹把 `ops/reqloop/g2/real_slice_dab055/manifest.json`
+    提交成**絕對路徑 symlink**（指向 /home/user1/dev/wt/worker/…/smoke_e013/dab_055-pi-C/manifest.json，
+    目標在 worker 自己 worktree 也不存在）→ CI worktree（/var/tmp/ci-wt）FileNotFoundError；
+    同樹還混入 `dab_055-pi-C~HEAD` symlink 與 `manifest.json~auto_argon` 備份檔（後者內容
+    ＝qwen27b 的 manifest.json 同 blob）。合併解衝突殘骸被 auto-commit 掃進去。
+  - **處置：不動 auto/worker**（活躍 agent 的 WIP 分支，末次 commit 19:49；且修法含產品判斷：
+    草稿改動要麼還原、要麼重新凍結——重新凍結需授權，不歸我裁）。留修復 recipe 給 worker/審查：
+    1) 還原草稿＝從 auto/qwen27b 取回 624b60c5 版（或經授權重凍 c834c2ee）；
+    2) `git rm` 該 symlink，以 `manifest.json~auto_argon`（或 qwen27b blob dcae41d7）還原為正檔，
+       刪除 `dab_055-pi-C~HEAD`、`manifest.json~auto_argon` 兩件殘骸。
+- 本輪零產品改動、零模型呼叫、零 commit（worktree 乾淨）；無新工單可領。
 
 ## 下一步
-1. 等審查新派工／G2.5 後續（vq-el4 工單面已清空：open/doing 皆空）。
-2. 巡 CI：auto/qwen27b dd6e49c4、auto/argon 2db8afa5（輪首時未跑完）；GitHub Actions 仍停擺。
+1. 等審查新派工／G2.5 後續（主線＝G2.5 自動需求抽取）。
+2. 下輪巡 CI：預期 worker 仍紅直到其自修；qwen27b/argon 綠燈已齊。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
