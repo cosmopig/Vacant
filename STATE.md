@@ -43,3 +43,9 @@
 - 驗收：run_eval.py --phase3 → fixed 6、unresolved 3、rejected 0、rtw 0、held 0、error 0、RC=0、0 新模型呼叫；成本 263 model_calls/14 sessions/tokens UNKNOWN；eval_phase3_glm53.json 寫入。vq-el4.5 close（bd，reason 帶證據路徑）；工單 mv done/。
 - 沒驗證：7de75257 CI 綠燈（auto/qwen27b 本輪仍跑）；兩跑差異的裁決（待規劃者）。
 - 下一步：等規劃者對兩跑差異裁決；bd ready＝vq-el4.6（換模型比較 gemma/glm53/glm53flash/deepseek41）；復核 CI。
+- 2026-11-07 r1196: 工單 P20261107_1426-2 收——run_eval.py 新增 --models 多模型對照（純新增 76 行、2 檔；run_models_comparison/print_models_table/write_models_json；每模型 evaluate_task＋read_extract_costs，成本任一題缺值→None；門禁同口徑、缺擷取→MISSING/rc2；任一 FAIL→rc20）。
+- 驗收：--models glm53 --json eval_g1_compare.json → RC=0、glm53 39/39(100.0%) FP0、41 calls/328550 tok、JSON models 字典；票面 29/39 與現盤不符（top out/=39/39、round1 11/39、round2 31/39、round3 28/39）——表顯真實盤上數字，工單尾已註明。
+- 驗證：tests/test_reqloop_extract*.py 82 passed（含新 test_run_eval_multi_model_comparison：表格欄位、m1 PASS/m2 FAIL rc20、單模型 rc0、缺擷取 rc2、成本 None≠0）；0 模型呼叫（ledger 113→113）；單模型 --model 路徑 RC=0 不回歸。commit dff8f918；工單 mv done/。
+- vq-el4.6 已 in_progress（bd note 記下一步）；repair.py 未動。
+- 沒驗證：其他模型（gemma/glm53flash/deepseek41）G1 擷取與實際對照（vq-el4.6 本體）；7de75257 CI 綠燈（auto/qwen27b 本輪仍在跑）。
+- 下一步：vq-el4.6——glm53flash/deepseek41 跑 G1 7 題擷取（走 glm 指令、日 ≤2M token、先查 ledger 預算）→ --models glm53,glm53flash,deepseek41 同表對照；gemma 端點走 1004 provider（非 vibe 別名）另議；復核 CI。
