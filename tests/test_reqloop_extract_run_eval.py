@@ -85,14 +85,14 @@ def _mk_task(tmp_path: pathlib.Path) -> pathlib.Path:
     return task
 
 
-def _reqset() -> RequirementSet:
+def _reqset(task_id: str = "t") -> RequirementSet:
     item = RequirementItem(
         id="R1", quote="How many unique merchants", deliverable="answer.txt",
         verifier="plain_recomputed",
         params={"data_file": "data/t.csv",
                 "recompute": {"type": "unique_count", "col": "merchant_id"}},
     )
-    return RequirementSet("t", [item])
+    return RequirementSet(task_id, [item])
 
 
 def test_phase2_verdict_bad_caught_good_clean(tmp_path):
@@ -261,3 +261,225 @@ def test_phase2_extract_cell_pins_prompt_and_reextracts_when_prompt_changes(tmp_
     t2 = t1 + "\n\nWrite your final answer to `answer.txt`."
     phase2_extract_cell(c, t2, [], {}, "glm53", cl, out_path)
     assert cl.calls == 2
+
+
+# ── phase3（vq-el4.5）：9 錯＋自動擷取需求＋localized 修復＋獨立 scorer ──────────
+
+from run_eval import (  # noqa: E402
+    Real14Cell,
+    load_phase3_sources,
+    phase3_cell,
+    prepare_phase3_task,
+    run_phase3,
+)
+
+
+def _mk_base(tmp_path: pathlib.Path) -> pathlib.Path:
+    """最小 effects2 形 base：fake-001（bad、答案錯）＋ fake-002（good、答案對），
+    快照 task/draft＋effect_manifest source。唯一商戶數＝3。"""
+    base = tmp_path / "base"
+    (base / "snapshot" / "ops" / "reqloop" / "g2").mkdir(parents=True)
+    (base / "before_after.json").write_text(json.dumps({
+        "cells": [
+            {"draft": "fake-001-pi-C", "arm": "generic",
+             "before_d38d2eb2": {"policy30_2r": {"fixed": ["x"], "unresolved": []}}},
+            {"draft": "fake-002-pi-C", "arm": "generic",
+             "before_d38d2eb2": {"policy30_2r": {"fixed": [], "unresolved": []}}},
+        ]}))
+    g2 = base / "snapshot" / "ops" / "reqloop" / "g2" / "smoke"
+    for name, ans in (("fake-001", "@m[1]\n"), ("fake-002", "@m[3]\n")):
+        cell = f"{name}-pi-C"
+        task = g2 / cell / "task"
+        (task / "data").mkdir(parents=True)
+        (g2 / cell / "draft").mkdir(parents=True)
+        (task / "request.md").write_text("How many unique merchants?", encoding="utf-8")
+        (task / "contract.md").write_text("Write your final answer to `answer.txt`.", encoding="utf-8")
+        (task / "data" / "t.csv").write_text("merchant_id\nM1\nM1\nM2\nM3\n", encoding="utf-8")
+        (task / "requirements.json").write_text(
+            json.dumps(_reqset().to_dict()), encoding="utf-8")  # 手寫版：phase3 不得帶入
+        (g2 / cell / "draft" / "answer.txt").write_text(ans, encoding="utf-8")
+    (g2.parent / "effect_manifest.json").write_text(json.dumps({
+        "model": {"provider": "p", "model": "m"},
+        "drafts": [
+            {"name": "fake-001-pi-C", "source": {"run": "r1", "cell": "c1", "score": {"pass": False}}},
+            {"name": "fake-002-pi-C", "source": {"run": "r1", "cell": "c2", "score": {"pass": True}}},
+        ]}))
+    return base
+
+
+def _fake_build():
+    from vacant_network.adapters.run import Launch
+    def build(prompt: str, ws: pathlib.Path):
+        return Launch(argv=["true"], note="phase3-test-fake")
+    return build
+
+
+def _fake_agent(ws_files: dict[str, str] | None):
+    from vacant_network.adapters.run import Launch
+
+    def run(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
+            log_dir: pathlib.Path) -> dict:
+        for name, text in (ws_files or {}).items():
+            p = pathlib.Path(workspace) / name
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(text, encoding="utf-8")
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "agent_stdout.log").write_text("{}", encoding="utf-8")
+        (log_dir / "agent_stderr.log").write_text("", encoding="utf-8")
+        return {"rc": 0, "timed_out": False, "wall_ms": 100, "spawn_error": None,
+                "stdout_log": str(log_dir / "agent_stdout.log"),
+                "stderr_log": str(log_dir / "agent_stderr.log")}
+    return run
+
+
+def test_load_phase3_sources_from_manifest(tmp_path):
+    base = _mk_base(tmp_path)
+    src = load_phase3_sources(base)
+    assert src["fake-001-pi-C"] == {"run": "r1", "cell": "c1", "before_pass": False}
+    assert src["fake-002-pi-C"]["before_pass"] is True
+
+
+def test_load_phase3_sources_missing_manifest_fails_closed(tmp_path):
+    import pytest
+    with pytest.raises(FileNotFoundError):
+        load_phase3_sources(tmp_path)
+
+
+def test_prepare_phase3_task_uses_extracted_not_handwritten(tmp_path):
+    """phase3 任務目錄的 requirements.json＝自動擷取版；快照（task_dir）不被修改。"""
+    cell = Real14Cell(cell="fake-001-pi-C", role="bad",
+                      task_dir=tmp_path / "task", draft_dir=tmp_path / "draft")
+    (cell.task_dir / "data").mkdir(parents=True)
+    (cell.task_dir / "request.md").write_text("req", encoding="utf-8")
+    (cell.task_dir / "contract.md").write_text("contract", encoding="utf-8")
+    (cell.task_dir / "data" / "t.csv").write_text("merchant_id\nM1\n", encoding="utf-8")
+    (cell.task_dir / "requirements.json").write_text("HANDWRITTEN-MARKER", encoding="utf-8")
+    extracted = RequirementSet("fake-001-pi-C", [
+        RequirementItem(id="X1", quote="unique", deliverable="answer.txt",
+                        verifier="plain_recomputed",
+                        params={"data_file": "data/t.csv",
+                               "recompute": {"type": "unique_count", "col": "merchant_id"}}),
+    ])
+    dest = prepare_phase3_task(cell, extracted, tmp_path / "phase3" / "tasks" / "fake-001-pi-C")
+    got = json.loads((dest / "requirements.json").read_text(encoding="utf-8"))
+    assert got["items"][0]["id"] == "X1"
+    assert "HANDWRITTEN-MARKER" not in (dest / "requirements.json").read_text(encoding="utf-8")
+    assert (dest / "request.md").is_file() and (dest / "contract.md").is_file()
+    assert (dest / "data" / "t.csv").is_file()
+    # 快照未被修改
+    assert (cell.task_dir / "requirements.json").read_text(encoding="utf-8") == "HANDWRITTEN-MARKER"
+
+
+def test_phase3_cell_fixed_bad_draft(tmp_path):
+    """bad 草稿＋fake 修復（寫對答案）＋scorer pass=True → fixed；成本透傳。"""
+    base = _mk_base(tmp_path)
+    cells = {c.cell: c for c in derive_real14_cells(base)}
+    cell = cells["fake-001-pi-C"]
+    reqs = _reqset("fake-001-pi-C")
+    src = load_phase3_sources(base)["fake-001-pi-C"]
+    scorer = lambda source, ws, deliv: {"pass": True, "status": "scored", "rc": 0}
+    row = phase3_cell(cell, reqs, src, tmp_path / "out",
+                      build=_fake_build(), run=_fake_agent({"answer.txt": "@m[3]\n"}),
+                      scorer=scorer)
+    assert row["verdict"] == "fixed"
+    assert row["before"] is False and row["after"]["pass"] is True
+    assert row["cost"]["repair_sessions"] is not None
+    assert row["deliverables"] == ["answer.txt"]
+
+
+def test_phase3_cell_tampered_rejected_even_if_scorer_passes(tmp_path):
+    """修復若改來源（workspace 的 data/t.csv）→ source_tampered ⇒ rejected，不得翻 fixed。"""
+    base = _mk_base(tmp_path)
+    cells = {c.cell: c for c in derive_real14_cells(base)}
+    cell = cells["fake-001-pi-C"]
+    reqs = _reqset("fake-001-pi-C")
+    src = load_phase3_sources(base)["fake-001-pi-C"]
+    scorer = lambda source, ws, deliv: {"pass": True, "status": "scored", "rc": 0}
+    row = phase3_cell(cell, reqs, src, tmp_path / "out",
+                      build=_fake_build(),
+                      run=_fake_agent({"answer.txt": "@m[3]\n",
+                                       "data/t.csv": "merchant_id\nM1\nM1\nM2\n"}),
+                      scorer=scorer)
+    assert row["source_tampered"] is True
+    assert row["verdict"] == "rejected"
+
+
+def test_phase3_cell_unresolved_when_scorer_unknown(tmp_path):
+    """scorer UNKNOWN（pass=None）→ unresolved；FAIL→UNKNOWN 不算修好。"""
+    base = _mk_base(tmp_path)
+    cells = {c.cell: c for c in derive_real14_cells(base)}
+    cell = cells["fake-001-pi-C"]
+    reqs = _reqset("fake-001-pi-C")
+    src = load_phase3_sources(base)["fake-001-pi-C"]
+    scorer = lambda source, ws, deliv: {"pass": None, "status": "UNKNOWN", "rc": 1}
+    row = phase3_cell(cell, reqs, src, tmp_path / "out",
+                      build=_fake_build(), run=_fake_agent({"answer.txt": "@m[3]\n"}),
+                      scorer=scorer)
+    assert row["verdict"] == "unresolved"
+    assert row["after"]["pass"] is None
+
+
+def test_phase3_cell_scorer_exception_is_unknown(tmp_path):
+    """scorer 例外 → UNKNOWN（fail-closed），不得冒稱 pass、不拖垮全批。"""
+    base = _mk_base(tmp_path)
+    cells = {c.cell: c for c in derive_real14_cells(base)}
+    cell = cells["fake-001-pi-C"]
+    reqs = _reqset("fake-001-pi-C")
+    src = load_phase3_sources(base)["fake-001-pi-C"]
+
+    def boom(source, ws, deliv):
+        raise RuntimeError("lab scorer down")
+    row = phase3_cell(cell, reqs, src, tmp_path / "out",
+                      build=_fake_build(), run=_fake_agent(None), scorer=boom)
+    assert row["verdict"] == "unresolved"
+    assert "SCORER_ERROR" in row["after"]["status"]
+
+
+def test_run_phase3_bad_and_good_verdicts_freeze_and_progress(tmp_path):
+    """run_phase3：9 錯（這裡 1 錯＋1 好）→ fixed／held 兩行；freeze.json＋progress.json 完整。"""
+    base = _mk_base(tmp_path)
+    req_dir = tmp_path / "req"
+    req_dir.mkdir()
+    for cell in ("fake-001-pi-C", "fake-002-pi-C"):
+        (req_dir / f"{cell}.glm53.json").write_text(
+            json.dumps(_reqset(task_id=cell).to_dict()), encoding="utf-8")
+
+    def scorer(source, ws, deliv):
+        # fake-001（bad、答案被修對）→ pass；fake-002（good）→ pass
+        return {"pass": True, "status": "scored", "rc": 0}
+
+    rc = run_phase3(base=base, include_good=True,
+                    build=_fake_build(), run=_fake_agent({"answer.txt": "@m[3]\n"}),
+                    scorer=scorer, req_dir=req_dir, out_root=tmp_path / "out",
+                    json_out=tmp_path / "phase3.json")
+    doc = json.loads((tmp_path / "phase3.json").read_text(encoding="utf-8"))
+    assert rc == 0
+    by_cell = {r["cell"]: r for r in doc["rows"]}
+    assert by_cell["fake-001-pi-C"]["verdict"] == "fixed"
+    assert by_cell["fake-002-pi-C"]["verdict"] == "held"
+    freeze = json.loads((tmp_path / "out" / "freeze.json").read_text(encoding="utf-8"))
+    assert len(freeze["cells"]) == 2
+    assert all(c["req_sha256"] for c in freeze["cells"])
+    assert all(c["source"]["run"] == "r1" for c in freeze["cells"])
+    prog = json.loads((tmp_path / "out" / "progress.json").read_text(encoding="utf-8"))
+    assert prog["complete"] is True and len(prog["rows"]) == 2
+    # 成本缺值＝UNKNOWN（None）：允許 None，絕不填 0（None 與 0 必須可區分）
+    for v in doc["cost"].values():
+        assert v is None or (isinstance(v, (int, float)) and v >= 0)
+
+
+def test_run_phase3_missing_extraction_fails_closed(tmp_path):
+    """缺擷取結果 → ERROR 行、rc=2（不拿缺的當通過）。"""
+    base = _mk_base(tmp_path)
+    req_dir = tmp_path / "req"
+    req_dir.mkdir()
+    (req_dir / "fake-001-pi-C.glm53.json").write_text(
+        json.dumps(_reqset(task_id="fake-001-pi-C").to_dict()), encoding="utf-8")
+    rc = run_phase3(base=base, include_good=True,
+                    build=_fake_build(), run=_fake_agent(None),
+                    scorer=lambda s, w, d: {"pass": True, "status": "scored", "rc": 0},
+                    req_dir=req_dir, out_root=tmp_path / "out")
+    assert rc == 2
+    prog = json.loads((tmp_path / "out" / "progress.json").read_text(encoding="utf-8"))
+    by_cell = {r["cell"]: r for r in prog["rows"]}
+    assert by_cell["fake-002-pi-C"]["status"] == "ERROR"
