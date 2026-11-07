@@ -180,3 +180,10 @@
 - ② TDD 新檔 tests/test_repo_no_absolute_symlinks.py（tracked symlink 目標不得以 / 開頭）：修前 **1 failed** 點名該檔 → 修後 **1 passed in 0.06s**；`-k 'reqloop or beads'` 353 passed 1 skipped 0 failed；0 模型呼叫、0 成本。commit auto/qwen27b **b5355486**（120000→100644＋新測試）、未 push、vq-0tr close。
 - ③ CI：worker aca58a95 🟢 **5034/0**（23:03，審查指示4 達標）；argon 05989682 🟢；qwen27b 05989682 🟢 5033/0，46e634b8＋b5355486 待 vacant-ci pickup（~14min/pass 自動）。未驗證：b5355486 燈（新測試純 git index 斷言、無模型/網絡）。
 - 下一步：下輪巡 b5355486 CI 應 🟢；等審查派工（G3 須派工，不自發射大成本）。
+## r1220（2026-11-07 23:35 UTC）：repo 衛生守護 vq-vn5＋G2.5 備案核實＋CI 巡燈
+- ① 新 tests/test_repo_no_conflict_residue.py（1 測試、1 檔）：tracked 檔 basename 以 ~HEAD/~<branch> 結尾＝git merge 衝突殘骸→CI 紅燈；r1218 worker 紅燈同類（曾 tracked manifest.json~auto_argon、dab_055-pi-C~HEAD）復發防護。TDD mutation（temp index）：add 殘骸→**1 failed 點名**；還原→**1 passed**；`-k 'reqloop or beads or repo_'` **364 passed 1 skipped 0 failed**；0 模型呼叫。commit auto/qwen27b **1cd853b4**、未 push、vq-vn5 close。
+- ② 審查指示1 備案核實：`run_eval.py --all` 離線重跑＝**🏆 PASS rc=0**（G1 抓錯 39/39＋冤枉 0；REAL14 抓錯 9/9＋冤枉 1/5；PHASE3 fixed 7/unresolved 2/error 0；成本 41c/328550t＋74c/732826t＋275c/15087278t、0 新 API 呼叫）——「G2.5 全三門達標」有本輪新鮮執行依據。
+- ②-a（審查回單重做）：上輪②引 r1216「在位核實」、本輪原未開檔即引用——現補開兩檔並重接地：`vacant_network/reqloop/extract.py` 1217 行、git status 乾淨、最後改動 **ebe4344c**（P20261107_1827-1 已核准）；在位標記＝quote_is_verbatim **L132**、_RECOMPUTE_TYPES **L160-163**（KV/PLAIN 定義於 checks.py:1636/2341）、tag_not_in_request 守衛 **L752**、model_declared_unverified **L755**、SUPPORTED_VERIFIERS 為 **import**（extract.py L46；定義＝checks.py:2755 `frozenset(_VERIFIER_DISPATCH)`——r1216 條「L46」即此 import 行）。`vacant_network/reqloop/repair.py` **2795 行＝RLOOP_PLAN 凍結行數**、git status 乾淨、最後改動 **399f68b6**（argon、r1218/r1219 已核准）；頭部規則在位（原稿永不動／權威快照讀取／FAIL→UNKNOWN 不算修好／regressed 必錄／連續兩輪無確認改善即停）。「repair.py 凍結在位」自 r1220 起以本輪直讀證據為準，不再僅承 r1216。
+- ③ CI：b5355486（r1219）23:13 起跑、末巡應轉🟢（上輪＝還沒跑完）；1cd853b4 待下一 pass pickup；argon 05989682 🟢、worker aca58a95 🟢（指示4 達標）。
+- ④ 沒驗證：1cd853b4 的 CI（待 pickup、純 git index 斷言、無模型/網絡）；本輪未跑全量 pytest（vacant-ci 職掌）。
+- 下一步：下輪巡 b5355486＋1cd853b4 CI→應🟢；等審查派工（G3 須派工、不自發射大成本）。
