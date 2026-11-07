@@ -127,3 +127,11 @@
 - ④ 口徑：phase3 6/9＝round 1192 舊規則單 rep；round 1199 優化後 dab_039 等變動格未重跑，不得宣稱現行管線成果（已入 NOW.md）。
 - 沒驗證：17ea3897/b5251fbb 本地 CI（輪首 LATEST_argon 仍 3cf31e81 🟢 5030/0；2db8afa5 當時未跑，依審查明令合併）；GitHub Actions 仍停擺。
 - 下一步：下輪巡 17ea3897 本地 CI；vq-el4 全 closed、bd ready 空，等審查新派工。
+- 2026-11-07 r1212（CI 巡燈＋離線門禁複驗輪；0 產品改動、0 模型呼叫）：
+- ① c6f73f7f（本分支 HEAD）本地 CI 🟢 5031 passed/74 skipped/0 failed（5104 收集、839s、compile_rc=0、pytest_rc=0）——r1211 預設綠燈坐實；2db8afa5 帶進的 3 個新測試在內（5104 vs r1210 的 5101）。LATEST_qwen27b.json 已更新。
+- ② `run_eval.py --all` 離線複驗：vibe_calls 130→130（0 新 API 呼叫）；G1 PASS（抓錯 39/39、冤枉 0、41c/328550t）；REAL14 PASS（抓錯 9/9、冤枉 1/5、74c/732826t）；PHASE3 **fail-closed FAIL（rc=2）**：fixed 4、unresolved 1、error 4，STALE＝dab_039・dab_055・dab_426・dab_427（round 1199 規則變動後舊裁決不計）。
+- ③ PHASE3 紅燈定性＝**合併進的 STALE 機制在位、非回歸**：3cf31e81 引入 stale 判定（run_eval.py L1164-1206）＋2db8afa5 offline 唯讀；worker R20261107_1928-2（done）已驗證「PHASE3 FAIL rc=2 fail-closed＝expected behavior」；與審查指示②口徑一致（6/9＝round 1192 舊規則單 rep、不得宣稱現行管線成果）。官方鎖檔 eval_phase3_glm53.json 未動（mtime 11-07 15:07、最後改動 267058ee）；out/all/{phase2,phase3}.json 本輪 --all 覆寫後已 git checkout 還原。
+- ④ extract.py 防發明機制在位：quote_is_verbatim（L132、quote_not_verbatim 拒收 L710-711）、recompute type 白名單 _RECOMPUTE_TYPES（L511-521、不支援→unverified）、模型自帶 unverified 一律尊重（L734-755 model_declared_unverified）——檢查時 UNKNOWN 不通過。
+- ⑤ 派工面：vq-el4 全 closed、bd ready 空、tickets open/doing/qwen 三欄空、/srv/vlab/queue 空——無新工單。
+- DECISION: 不自動發起 PHASE3 線上重驗（4 格 STALE 需模型呼叫；11/07 定案「不新增單題重算」、審查未點名）；不自動推 argon（2db8afa5 CI 正在跑、下輪巡）。
+- 下一步：等審查新派工／G2.5 後續；下輪巡 auto/argon 2db8afa5 CI。
