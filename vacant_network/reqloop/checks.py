@@ -125,12 +125,24 @@ def read_table_deliverable(path: pathlib.Path) -> list[dict[str, Any]]:
     return rows
 
 
+def resolve_deliverable_path(deliverable_dir: pathlib.Path, deliverable: str) -> pathlib.Path:
+    """安全解析交付物路徑：剝除 /app/、./ 或前導斜線，確保路徑錨定於 deliverable_dir（防 docker 容器路徑穿透）。"""
+    d = str(deliverable).strip()
+    if d.startswith("/app/"):
+        d = d[len("/app/"):]
+    elif d.startswith("./"):
+        d = d[2:]
+    elif d.startswith("/"):
+        d = d.lstrip("/")
+    return deliverable_dir / d
+
+
 def check_csv_structure(
     deliverable_dir: pathlib.Path,
     item: RequirementItem,
 ) -> ClaimResult:
     """檢查交付物表格（CSV 或 JSON 陣列）是否存在且包含指定欄位。"""
-    csv_file = deliverable_dir / item.deliverable
+    csv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not csv_file.is_file():
         return ClaimResult(
             claim_id=item.id,
@@ -264,7 +276,7 @@ def check_monthly_sales_metrics(
     item: RequirementItem,
 ) -> ClaimResult:
     """檢查交付物 CSV 中的各月訂單數與淨銷售額是否與原始資料重算一致。"""
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     deliv_rows = read_csv_rows(deliv_file)
     if not deliv_rows:
         return ClaimResult(
@@ -415,7 +427,7 @@ def check_monthly_top_products(
     item: RequirementItem,
 ) -> ClaimResult:
     """檢查各月份前 N 名商品排行是否嚴格依淨銷售額重算一致。"""
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     deliv_rows = read_csv_rows(deliv_file)
     if not deliv_rows:
         return ClaimResult(
@@ -594,7 +606,7 @@ def check_summary_metrics_consistency(
     矛盾（任一與重算不符）＝FAIL；全文找不到可對應的合計陳述＝UNKNOWN
     （看不到可可靠對應的欄位，不准自評，也不准因其他地方出現正確數字而 PASS）。
     """
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return ClaimResult(
             claim_id=item.id,
@@ -1119,7 +1131,7 @@ def check_rowset_filter(
     except (UnknownSource, UnsafeExpressionError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
     deliv_rows = read_table_deliverable(deliv_file)
@@ -1310,7 +1322,7 @@ def check_group_aggregate(
     except (UnknownSource, UnsafeExpressionError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"交付物不存在: {item.deliverable}", {"missing_file": item.deliverable})
     deliv_rows = read_table_deliverable(deliv_file)
@@ -1469,7 +1481,7 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
         if cons not in ("number", "integer", "nonneg_int", "number_in_01"):
             return _result(item, "UNKNOWN",
                            f"未知約束型別：{cons}（不猜）", {"bad_constraint": cons})
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"答案檔不存在：{item.deliverable}",
                        {"missing_file": item.deliverable})
@@ -1519,7 +1531,7 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
 def _kv_answer_value(deliverable_dir: pathlib.Path, item: RequirementItem,
                      key: str) -> tuple[str | None, list[str]]:
     """讀交付檔中 @key[value]；回傳 (value|None, 問題清單)——與 answer_kv 同一解析規則。"""
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return None, [f"missing_file:{item.deliverable}"]
     content = deliv_file.read_text(encoding="utf-8")
@@ -2408,7 +2420,7 @@ def check_plain_recomputed(
     except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）",
                        {"problem": "missing_file", "expected_in_evidence": False})
@@ -2549,7 +2561,7 @@ def check_summary_numbers(
     except (UnknownSource, UnsafeExpressionError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    deliv_file = deliverable_dir / item.deliverable
+    deliv_file = resolve_deliverable_path(deliverable_dir, item.deliverable)
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"摘要文字報告不存在: {item.deliverable}", {"missing_file": item.deliverable})
     content = deliv_file.read_text(encoding="utf-8")
@@ -2598,7 +2610,7 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
     - max_value: 最大值限制（數值類型適用，選填）
     """
     file_name = item.params.get("file", "answer.txt")
-    target_file = deliverable_dir / file_name
+    target_file = resolve_deliverable_path(deliverable_dir, file_name)
     if not target_file.is_file():
         return _result(
             item,

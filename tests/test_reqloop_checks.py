@@ -2909,3 +2909,33 @@ def test_dedup_by_field_rejects_ambiguous_shapes():
     for bad in ([], ["a", "b"], 5, {"x": 1}):
         with pytest.raises(UnknownSource):
             _dedup_by_field({"dedup_by": bad})
+
+
+def test_checks_resolve_deliverable_path_handles_app_and_relative_prefixes(tmp_path: pathlib.Path):
+    """argon 20261107_1255 回歸：
+    交付物路徑若帶 /app/（Docker 容器內路徑，如 /app/answer.txt）或 ./，
+    檢查器必須安全剝除並錨定至 deliverable_dir，不得因絕對路徑穿透到主機根目錄導致 missing_file 冤枉。
+    """
+    from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
+    from vacant_network.reqloop.checks import run_requirement_checks, resolve_deliverable_path
+
+    task_dir = tmp_path / "task"
+    draft_dir = tmp_path / "draft"
+    task_dir.mkdir()
+    draft_dir.mkdir()
+    (task_dir / "payments.csv").write_text("hour\n10\n10\n11\n", encoding="utf-8")
+    (draft_dir / "answer.txt").write_text("10\n", encoding="utf-8")
+
+    assert resolve_deliverable_path(draft_dir, "/app/answer.txt") == draft_dir / "answer.txt"
+    assert resolve_deliverable_path(draft_dir, "./answer.txt") == draft_dir / "answer.txt"
+    assert resolve_deliverable_path(draft_dir, "answer.txt") == draft_dir / "answer.txt"
+
+    item = RequirementItem(
+        id="R1", quote="write to /app/answer.txt", deliverable="/app/answer.txt",
+        verifier="plain_recomputed",
+        params={"data_file": "payments.csv", "recompute": {"type": "mode_col", "col": "hour"}}
+    )
+    rs = RequirementSet("t", [item])
+    res = run_requirement_checks(task_dir, rs, draft_dir)
+    assert res[0].status == "PASS"
+
