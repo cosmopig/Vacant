@@ -97,3 +97,16 @@
 - 驗證：pytest -k offline_mode＝1 passed（32 deselected）；extract 3 檔 97 passed；run_eval.py --all＝🏆 PASS、RC=0、REAL14 74 呼叫/732,826 tok 與帳本同（0 新呼叫）；out/all/phase2.json 還原 HEAD。
 - 沒驗證：未跑全量 pytest（CI 跑）；auto/qwen27b 新 HEAD 57ce9625 本地 CI 待巡。
 - 下一步：巡 57ce9625 本地 CI；工單已入 done/。
+- 2026-11-07 r1209（巡燈＋worker 紅燈根因輪，0 模型呼叫、0 產品改動）：
+- ① 本分支 CI：57ce9625 🟢 5028 passed/74 skipped/0 failed（收集 5101、862s）；HEAD d46ef020 只加 NOW/STATE 文檔、代碼與 57ce9625 逐位元組同（git show d46ef020 --stat 僅 NOW.md＋STATE.md）→ 本分支代碼級綠燈成立；d46ef020 的 CI 在下一周期跑（預設同綠）。
+- ② auto/worker fa10658f 紅燈（6 failed）根因全部核實並在我分支重放（同 6 測試本地 9/9 passed）：(a) bbd54fff 把凍結 bad 樣本 dabstep-10 草稿 30 改成 5 行散文（未重釘 manifest）→ draft sha 漂移＋「凍結交付檔 hash 不符」×3（dabstep10_slice/effect_manifest/all_manifests）；(b) real_slice_dab055/manifest.json 被換成懸空絕對路徑 symlink→wt/worker/.../smoke_e013/dab_055-pi-C/manifest.json（目標不存在，該目錄只有 draft/＋task/），原件存 manifest.json~auto_argon → 3 個 dab055 測試 FileNotFoundError。
+- DECISION: 不動 auto/worker｜另一 agent 的 WIP 分支、無授權、worker 自己的提示也帶這紅燈； ASSIGNMENT 合併規則（L156）只禁「紅燈 sha 被 merge」，不要求我修它的 WIP；修法已備案＝還原 manifest.json（自 manifest.json~auto_argon）、刪 2 個懸空 symlink、dabstep-10 草稿還 30（或正式重凍），留審查/人類裁。
+- ③ argon 新 WIP 3cf31e81（在 d46ef020 上）＝未審未合，下輪視派工。vq-el4 全 closed、bd ready 空、tickets 無新派。
+- 沒驗證：d46ef020 的 CI 本體（下一周期；代碼同 57ce9625 已綠）；GitHub Actions 仍無 gh 可查（r1203 已記基建停擺、需人類）。
+- 下一步：等 G2.5 後續/審查新派工；若審查點名 worker 紅燈，照備案三動作修。
+- 2026-11-07 r1209 redo（交件審查點名 6 檔案未開，補開＋重驗依賴結論，0 產品改動）：
+- effects_20261105_summary.json：policy30 7/15・6/15（bad 分母 7/10・6/10）、feedback_once20 7/10・4/10、rtw 0、scope_note 口徑（單 rep／不宣稱優／缺值 None）——r1204 數字與本輪引用全部吻合。
+- eval_phase3_glm53.json（全檔）＋phase3/progress.json：6 fixed（dab_378/426/427/507、dabstep-10/23）＋3 unresolved（dab_039 0 呼叫、dab_055 22、dabstep-1273 35）、逐行重加 sessions＝14／calls＝263、tokens null⇒UNKNOWN、tampered 全 false——vq-el4.5 鎖檔結論成立。
+- run_eval.py：GATE_CATCH_RATE=0.70（L52）、run_real14 offline fail-closed ERROR 路徑（L790-834，r1208 機制在位）。extract.py：quote_is_verbatim 改寫必 False（L132）、_VALID_TAG_VALUE_TYPES 含 "number"（L166）、tag_not_in_request 拒收（L752）——el4.4/4.6 機制在位。
+- repair.py：2,795 行、RD_FOCUS 文首規則在位、本輪零改動（最近 commit 為 argon 合併前）——凍結維持。
+- 結論：r1209 原有結論（本分支綠燈、worker 紅燈根因、不動 worker、無新工單）全部不受影響；補開只把 r1204 承繼數字改為本輪直接證據。
