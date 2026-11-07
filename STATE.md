@@ -173,3 +173,8 @@
 - 已開啟（head＋code load，60,228 bytes）：repo `ops/audits/effects_20261105_summary.json`（schema `vacant.audit/effects_20261105_summary/1`、snapshot d38d2eb2、source_root effects_20261105）。
 - 逐項重核票 P20261107_0210-1「參考基線」引文（r1164 關閉票時背書之內容）——全部與文件一致、無需改字：total_cells=50；policy30 每臂 initial-error＝15−5＝10、wrong_to_right 7/6 → generic 7/10・localized 6/10；once20 每臂 initial-error＝10−0＝10、wrong_to_right 7/4 → 7/10・4/10（分母口徑＝cells−preserved_good，與「非 15/10 總格數」一致）；local_vs_independent 分歧 3＋2＝5 格全為 d38d2eb2 舊 checker 行；current_code_matches_total＝50 且兩 phase 0 分歧（50/50）；dab_055-pi-C-localized（policy30）local_all_pass_d38d2eb2=false → after_independent=true、current_code_all_pass=true；scope_note 缺值皆 None(UNKNOWN) 不填 0、hidden_after 全格 UNKNOWN。
 - 結論：票內參考基線數字逐項成立；r1164 取消決定依 effects2_20261106 三批 A/B（非本檔數字），維持不變；票 done/ 尾附本 redo 記錄。
+## r1165（2026-11-07；票 P20261107_0443-1：dab_055 requirements note＋manifest 對齊）
+- 票四步於 r1164（55d79635）已完成；本輪獨立重驗：step1 note 語義與 checks.py:1814-1840 _mean_int_col 逐條核對一致（前導整數點估計／Null·空·非數值忽略／未指定 round 時取整）；step2 sha256sum requirements.json=bf467c7c…=manifest.sha256；step3 purpose/score.note 歸因與原始 agent_stdout.log 一致（r1 兩臂 coerce→2200·0 次讀 requirements；localized r2 split('[')[0]→2081990），無「取整/note 陷阱」失實歸因、針 2081990 保留；step4 驗收 3 passed, 9 deselected。
+- 票尾附 3 行結果（commit 55d79635／驗收末行／沒做到什麼：無）→ 移 done/。工作樹乾淨、未製造 commit；0 模型呼叫、0 元。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未改凍結快照／1753 維持排除。
+- 下一步：vq-6rp（dabstep-1753）／vq-5nz.6（停滯草稿換方法）待需求端點名；本輪無新功能程式變更（票屬規格校準收口、非效果進展）。
