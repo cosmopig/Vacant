@@ -3,7 +3,7 @@
   "items": [
     {
       "id": "R1",
-      "quote": "只統計 `status` 為 `CLOSED` 的工單（`OPEN` 進行中工單不計入任何統計）。",
+      "quote": "只統計 `status` 為 `CLOSED` 的工單（`OPEN` 進行中工單不計入任何統計）",
       "deliverable": "sla_report.csv",
       "verifier": "group_aggregate",
       "kind": "explicit",
@@ -23,130 +23,23 @@
           {
             "name": "ticket_count",
             "type": "count"
-          }
-        ]
-      },
-      "description": "依 priority 分組，僅統計 status 為 CLOSED 的工單數（ticket_count）。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R2",
-      "quote": "`avg_resolved_hours`＝`resolved_hours` 平均值（小數點後 2 位）",
-      "deliverable": "sla_report.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "tickets.csv",
-        "group_by": [
-          "priority"
-        ],
-        "exclude": [
-          {
-            "col": "status",
-            "op": "ne",
-            "value": "CLOSED"
-          }
-        ],
-        "aggregates": [
+          },
           {
             "name": "avg_resolved_hours",
             "type": "mean",
             "col": "resolved_hours"
-          }
-        ]
-      },
-      "description": "各優先級結案工單 resolved_hours 平均值，小數點後 2 位。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "`sla_met_count`＝`resolved_hours <= sla_target_hours` 的工單數（等於目標者視為達標）",
-      "deliverable": "sla_report.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "tickets.csv",
-        "group_by": [
-          "priority"
-        ],
-        "exclude": [
-          {
-            "col": "status",
-            "op": "ne",
-            "value": "CLOSED"
-          }
-        ],
-        "aggregates": [
+          },
           {
             "name": "sla_met_count",
             "type": "count_if",
             "expr": "resolved_hours <= sla_target_hours"
-          }
-        ]
-      },
-      "description": "各優先級中 resolved_hours <= sla_target_hours 的結案工單數（等於目標視為達標）。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R4",
-      "quote": "`sla_rate`＝sla_met_count ÷ ticket_count（小數點後 4 位）",
-      "deliverable": "sla_report.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "tickets.csv",
-        "group_by": [
-          "priority"
-        ],
-        "exclude": [
-          {
-            "col": "status",
-            "op": "ne",
-            "value": "CLOSED"
-          }
-        ],
-        "aggregates": [
+          },
           {
             "name": "sla_rate",
-            "type": "count_if",
-            "expr": "resolved_hours <= sla_target_hours"
-          }
-        ]
-      },
-      "description": "各優先級 sla_rate＝sla_met_count ÷ ticket_count，小數點後 4 位；以達標數與總數重算比對。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R5",
-      "quote": "`worst_hours`＝該優先級 `resolved_hours` 的最大值",
-      "deliverable": "sla_report.csv",
-      "verifier": "group_aggregate",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "tickets.csv",
-        "group_by": [
-          "priority"
-        ],
-        "exclude": [
-          {
-            "col": "status",
-            "op": "ne",
-            "value": "CLOSED"
-          }
-        ],
-        "aggregates": [
+            "type": "ratio",
+            "num": "sla_met_count",
+            "den": "ticket_count"
+          },
           {
             "name": "worst_hours",
             "type": "max",
@@ -154,17 +47,17 @@
           }
         ]
       },
-      "description": "各優先級結案工單 resolved_hours 的最大值。",
+      "description": "依 priority 分組、僅計 status=CLOSED 的工單，重算各欄位（含比率 sla_rate）並與 sla_report.csv 比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R6",
+      "id": "R2",
       "quote": "產出 `sla_report.csv`，欄位：`priority, ticket_count, avg_resolved_hours, sla_met_count, sla_rate, worst_hours`",
       "deliverable": "sla_report.csv",
-      "verifier": "csv_structure",
+      "verifier": "table_structure",
       "kind": "explicit",
       "params": {
         "required_columns": [
@@ -183,66 +76,20 @@
       "unverified": false
     },
     {
-      "id": "R7",
-      "quote": "產出 `summary.md`，須明確載明「結案工單總數」",
+      "id": "R3",
+      "quote": "產出 `summary.md`，須明確載明「結案工單總數」、「整體 SLA 達標率（百分數，小數點後 2 位）」與「最長處理時數」（精確數值）",
       "deliverable": "summary.md",
-      "verifier": "summary_numbers",
+      "verifier": "summary_metrics_consistency",
       "kind": "explicit",
       "params": {
         "input_csv": "tickets.csv",
-        "numbers": [
-          {
-            "type": "count_if",
-            "expr": "status == CLOSED",
-            "label": "結案工單總數"
-          }
+        "metric_keywords": [
+          "結案工單總數",
+          "整體 SLA 達標率",
+          "最長處理時數"
         ]
       },
-      "description": "summary.md 中「結案工單總數」須與 tickets.csv 中 status 為 CLOSED 的筆數重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "R8",
-      "quote": "「整體 SLA 達標率（百分數，小數點後 2 位）」",
-      "deliverable": "summary.md",
-      "verifier": "summary_numbers",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "tickets.csv",
-        "numbers": [
-          {
-            "type": "count_if",
-            "expr": "resolved_hours <= sla_target_hours",
-            "label": "整體 SLA 達標率"
-          }
-        ]
-      },
-      "description": "summary.md 中整體 SLA 達標率（百分數、小數點後 2 位）須與 CLOSED 工單中 resolved_hours <= sla_target_hours 的比例重算一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "R9",
-      "quote": "與「最長處理時數」（精確數值）",
-      "deliverable": "summary.md",
-      "verifier": "summary_numbers",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "tickets.csv",
-        "numbers": [
-          {
-            "type": "max",
-            "col": "resolved_hours",
-            "label": "最長處理時數"
-          }
-        ]
-      },
-      "description": "summary.md 中「最長處理時數」須與 CLOSED 工單 resolved_hours 最大值重算一致。",
+      "description": "summary.md 中三項合計指標數字須與 tickets.csv（僅 CLOSED 工單）重算一致；「小數點後 2 位」「精確數值」等格式要求無法程式驗證，僅驗數值一致性。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -256,25 +103,10 @@
     "kept": [
       "R1",
       "R2",
-      "R3",
-      "R4",
-      "R5",
-      "R6",
-      "R7",
-      "R8",
-      "R9"
+      "R3"
     ],
     "discarded": [],
-    "unverified": [
-      {
-        "id": "R7",
-        "reason": "unsupported_summary_number_type:count_if"
-      },
-      {
-        "id": "R8",
-        "reason": "unsupported_summary_number_type:count_if"
-      }
-    ]
+    "unverified": []
   },
-  "generated_at": "2026-11-07T10:10:14+00:00"
+  "generated_at": "2026-11-07T10:29:53+00:00"
 }

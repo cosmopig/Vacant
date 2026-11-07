@@ -13,15 +13,13 @@
         "exclude": [
           {
             "col": "status",
-            "op": "ne",
+            "op": "eq",
             "value": "CANCELLED"
           }
         ],
-        "dedup_by": [
-          "order_id"
-        ]
+        "dedup_by": "order_id"
       },
-      "description": "計算各月有效訂單數與淨銷售額時，須先排除 CANCELLED 訂單並依 order_id 去重，結果須與 monthly_sales.csv 一致。",
+      "description": "月度指標表須在排除 CANCELLED 訂單並以 order_id 去重後，各月有效訂單數與淨銷售額與原始資料重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -29,32 +27,6 @@
     },
     {
       "id": "R2",
-      "quote": "排除重複訂單（同一 `order_id` 僅保留計算一筆有效記錄）。",
-      "deliverable": "monthly_sales.csv",
-      "verifier": "monthly_sales_metrics",
-      "kind": "explicit",
-      "params": {
-        "input_csv": "orders.csv",
-        "expected_in_evidence": true,
-        "exclude": [
-          {
-            "col": "status",
-            "op": "ne",
-            "value": "CANCELLED"
-          }
-        ],
-        "dedup_by": [
-          "order_id"
-        ]
-      },
-      "description": "同一 order_id 僅保留一筆有效記錄，重算之各月訂單數與淨銷售額須與交付一致。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
       "quote": "欄位需包含：`month`（格式 YYYY-MM）、`orders_count`（有效訂單數）、`net_sales`（淨銷售總額）。",
       "deliverable": "monthly_sales.csv",
       "verifier": "table_structure",
@@ -66,14 +38,14 @@
           "net_sales"
         ]
       },
-      "description": "monthly_sales.csv 必須存在且包含 month、orders_count、net_sales 欄位。",
+      "description": "monthly_sales.csv 必須存在且含 month、orders_count、net_sales 欄位。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R4",
+      "id": "R3",
       "quote": "同時需列出各月份淨銷售額前三名商品：`top_1_product`、`top_2_product`、`top_3_product`（請務必嚴格依該月份內之**淨銷售額**高低由大到小排序，不可依訂單筆數排序）。",
       "deliverable": "monthly_sales.csv",
       "verifier": "monthly_top_products",
@@ -84,22 +56,20 @@
         "exclude": [
           {
             "col": "status",
-            "op": "ne",
+            "op": "eq",
             "value": "CANCELLED"
           }
         ],
-        "dedup_by": [
-          "order_id"
-        ]
+        "dedup_by": "order_id"
       },
-      "description": "各月淨銷售額前三名商品須與從原始資料（排除 CANCELLED、order_id 去重後）重算結果一致，且依淨銷售額由大到小排序。",
+      "description": "各月淨銷售額前三名商品排行須與排除 CANCELLED、order_id 去重後重算結果一致，且依淨銷售額排序。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R5",
+      "id": "R4",
       "quote": "內文中需明確載明「兩月合計淨銷售總額」（精確數值）。",
       "deliverable": "summary.md",
       "verifier": "summary_numbers",
@@ -116,45 +86,56 @@
         "exclude": [
           {
             "col": "status",
-            "op": "ne",
+            "op": "eq",
             "value": "CANCELLED"
           }
         ],
-        "dedup_by": [
-          "order_id"
-        ]
+        "dedup_by": "order_id"
       },
-      "description": "summary.md 中「兩月合計淨銷售總額」數字須與從原始資料（排除 CANCELLED、order_id 去重後）重算之 net_amount 總和一致。",
+      "description": "summary.md 中「兩月合計淨銷售總額」數字須與排除 CANCELLED、order_id 去重後重算的 net_amount 總和一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R6",
+      "id": "R5",
       "quote": "使用簡潔的繁體中文 Markdown 撰寫。",
       "deliverable": "summary.md",
       "verifier": "table_structure",
       "kind": "explicit",
       "params": {
-        "required_columns": []
+        "required_columns": [
+          "month"
+        ]
       },
-      "description": "要求以繁體中文 Markdown 撰寫摘要，語言風格與格式無法以程式嚴格驗證，設為 unverified。",
+      "description": "無法以程式驗證語言風格與 Markdown 簡潔度，unverified=true；此處 params 為形狀佔位，不具驗證效力。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
     },
     {
-      "id": "R7",
+      "id": "R6",
       "quote": "簡述各月銷售成長或商品表現觀察。",
       "deliverable": "summary.md",
-      "verifier": "table_structure",
+      "verifier": "summary_metrics_consistency",
       "kind": "explicit",
       "params": {
-        "required_columns": []
+        "input_csv": "orders.csv",
+        "metric_keywords": [
+          "兩月合計淨銷售總額"
+        ],
+        "exclude": [
+          {
+            "col": "status",
+            "op": "eq",
+            "value": "CANCELLED"
+          }
+        ],
+        "dedup_by": "order_id"
       },
-      "description": "觀察性文字描述屬主觀敘述，無法以程式驗證其內容是否涵蓋，設為 unverified。",
+      "description": "各月觀察為自由文字敘述，無法逐字程式驗證，unverified=true；若其中出現合計指標數字，仍應與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -171,20 +152,19 @@
       "R3",
       "R4",
       "R5",
-      "R6",
-      "R7"
+      "R6"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "R6",
-        "reason": "empty_param:required_columns"
+        "id": "R5",
+        "reason": "model_declared_unverified"
       },
       {
-        "id": "R7",
-        "reason": "empty_param:required_columns"
+        "id": "R6",
+        "reason": "model_declared_unverified"
       }
     ]
   },
-  "generated_at": "2026-11-07T10:09:55+00:00"
+  "generated_at": "2026-11-07T10:29:44+00:00"
 }
