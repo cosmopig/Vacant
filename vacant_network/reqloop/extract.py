@@ -979,7 +979,8 @@ def csv_preview(csv_text: str, max_rows: int = 5) -> str:
 
 
 def json_preview(json_text: str, max_items: int = 5) -> str:
-    """JSON 資料檔預覽：陣列只取前 max_items 項、物件取整體結構——准進 prompt 的資料內容上限。
+    """JSON 資料檔預覽：頂層陣列只取前 max_items 項（每列內容完整）；
+    頂層物件保留全部鍵（欄位名）、陣列值只取前 max_items 項（每列完整）——不深層遞迴。
 
     解析失敗時退回前 max_items+1 行原文（與 csv_preview 同形）。
     """
@@ -990,6 +991,8 @@ def json_preview(json_text: str, max_items: int = 5) -> str:
         return "\n".join(lines[: max_items + 1])
     if isinstance(obj, list):
         obj = obj[:max_items]
+    elif isinstance(obj, dict):
+        obj = {k: (v[:max_items] if isinstance(v, list) else v) for k, v in obj.items()}
     return json.dumps(obj, ensure_ascii=False, indent=1)
 
 

@@ -408,6 +408,25 @@ def test_json_preview_top_level_list_unchanged():
     assert json_preview(json.dumps(list(range(50)))) == json.dumps(list(range(5)), ensure_ascii=False, indent=1)
 
 
+def test_json_preview_top_level_list_inner_lists_not_capped():
+    # 頂層 5 列完整：列內 list 欄位不被深層遞迴截斷（fees.json 形）
+    rows = [{"ID": i, "tags": list(range(40))} for i in range(100)]
+    obj = json.loads(json_preview(json.dumps(rows)))
+    assert len(obj) == 5
+    assert obj[0]["tags"] == list(range(40))
+    assert obj[4]["ID"] == 4
+
+
+def test_json_preview_caps_dict_list_values_to_first_rows():
+    # 物件 JSON：全部鍵（欄位名）可見；陣列值只准進前 5 列（輸入上限＝欄位＋前幾列）
+    data = json.dumps({"merchant_a": [{"fee": i} for i in range(100)], "note": "x"})
+    obj = json.loads(json_preview(data))
+    assert set(obj) == {"merchant_a", "note"}
+    assert len(obj["merchant_a"]) == 5
+    assert obj["merchant_a"][0] == {"fee": 0}
+    assert obj["note"] == "x"
+
+
 def test_build_task_prompt_whitelist_data_and_user_text_only():
     csv = "a,b\n1,2\n3,4\n5,6\n7,8\n9,10\n11,12\n13,14\n"
     p = build_task_prompt("USER-REQ-TEXT", data_file="orders.csv", data_preview=csv_preview(csv))
