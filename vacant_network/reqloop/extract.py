@@ -978,21 +978,8 @@ def csv_preview(csv_text: str, max_rows: int = 5) -> str:
     return "\n".join(lines[: max_rows + 1])
 
 
-def _cap_lists(obj: Any, max_items: int) -> Any:
-    """任一層級的陣列只保留前 max_items 項；物件的鍵（欄位名）全部保留，陣列值同樣截斷。
-
-    與 csv_preview 的輸入上限同形（欄位名＋前幾列）——資料內容只准進「欄位＋前幾列」。
-    """
-    if isinstance(obj, list):
-        return [_cap_lists(x, max_items) for x in obj[:max_items]]
-    if isinstance(obj, dict):
-        return {k: _cap_lists(v, max_items) for k, v in obj.items()}
-    return obj
-
-
 def json_preview(json_text: str, max_items: int = 5) -> str:
-    """JSON 資料檔預覽：陣列只取前 max_items 項（任一層級）；物件保留全部鍵（欄位名）、
-    陣列值同樣只取前 max_items 項——准進 prompt 的資料內容上限，與 csv_preview 一致（欄位＋前幾列）。
+    """JSON 資料檔預覽：陣列只取前 max_items 項、物件取整體結構——准進 prompt 的資料內容上限。
 
     解析失敗時退回前 max_items+1 行原文（與 csv_preview 同形）。
     """
@@ -1001,7 +988,9 @@ def json_preview(json_text: str, max_items: int = 5) -> str:
     except (json.JSONDecodeError, ValueError):
         lines = [ln for ln in json_text.splitlines() if ln.strip()]
         return "\n".join(lines[: max_items + 1])
-    return json.dumps(_cap_lists(obj, max_items), ensure_ascii=False, indent=1)
+    if isinstance(obj, list):
+        obj = obj[:max_items]
+    return json.dumps(obj, ensure_ascii=False, indent=1)
 
 
 def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str = "") -> str:
