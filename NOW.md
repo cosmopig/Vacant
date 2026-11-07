@@ -1,15 +1,14 @@
-# 現在（第 1210 輪後，2026-11-07）
+# 現在（第 1211 輪後，2026-11-07）
 
-## r1210：1608 審查指示核實輪（0 產品改動、0 模型呼叫）
-- redo：點名 3 檔已補開——effects summary（7/10・6/10、7/10・4/10 吻合）、progress.json 原始 9 格（14s/263c、8 格有 tokens）、run_eval.py _agg 任一 None⇒None（tokens=null 是規則）；結論不變。
-- 四項全核實成立：① 418d3bc7 已合（f74b779c），四項碼在 HEAD（val_type number、round fallback、tag_not_in_request、_VALID_TAG_VALUE_TYPES）；
-  ② el4.5 官方檔＝6/9 fixed・263 calls・14 sessions・tokens UNKNOWN・rtw 0；③ el4.6 3 模型表＝glm53 39/39 PASS（41c/328550t）、flash 16/39 FAIL、deepseek 23/39 FP1 FAIL（cost null＝UNKNOWN）；
-  ④ 本分支碼級 57ce9625 🟢 5028/0/5101（HEAD 僅 docs）；reqloop 6 檔 217 passed（含 worker 紅燈同 6 測試）。
-- DECISION: 不合 argon 新 tip 3cf31e81/2db8afa5——指示只點名 418d3bc7（已合 f74b779c）；2db8afa5 CI 未跑（ASSIGNMENT L156 該 sha 綠燈前不合）；1928 工單已由 worker 在其分支執行（5ab53d8b --ours，紅燈在 worker worktree 側）。
+## r1211：審查 4 指示落實（0 模型呼叫）
+- ① 合 auto/argon 2db8afa5（17ea3897）：_freeze_matches 跨 worktree req_file 比對＋run_phase3 offline 唯讀＋回歸測試；WIP 帶進的 phase2.json 回放值已還原 HEAD 凍結值（71c/701696t）。
+- ② 點名回歸測試 1 passed＋reqloop 6 檔 119 passed；repair.py 零改動（凍結）；官方 eval_phase3_glm53.json 未動。
+- ③ beads（指示4，b5251fbb）：repo .beads 改指共享 vq 庫（embeddeddolt symlink）；無 BEADS_DIR 時 `bd list --parent vq-el4 --all` 恢復 7 issues 全列（原 issue not found）；舊 Vacant 庫備份 /var/tmp/beads_repo_backup_20261107。
+- ④ 口徑：phase3 6/9＝round 1192 舊規則單 rep；round 1199 優化後變動格（dab_039 等）未重跑，**不得宣稱現行管線即時成果**。
 
 ## 下一步
-1. 等審查新派工／2db8afa5 CI 綠燈；若點名，合併 argon 後重跑 reqloop 套件。
-2. 若審查點名 worker 紅燈：照 r1209 備案三動作修（還原 manifest、刪懸空 symlink、草稿還 30），不擴範圍。
+1. 巡 17ea3897／b5251fbb 本地 CI（LATEST_qwen27b）。
+2. vq-el4 全 closed、bd ready 空；等審查新派工／G2.5 後續。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；

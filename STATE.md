@@ -120,3 +120,10 @@
 - progress.json（9 格原始）：fixed 6（378/426/427/507/dabstep-10/23）＋unresolved 3（039 no_gap 0c・055 stalled 22c・1273 max_rounds 35c）；Σ sessions 14／calls 263；8 格有 tokens、dab_039=null。
 - run_eval.py L1146-1175 實讀：_agg 任一 None⇒None（官方 tokens=null 是規則結果、非資料錯）；verdict 逐格計數；L1123-1131 缺 source／缺擷取⇒ERROR fail-closed——官方檔＝原始逐格忠實投影。
 - 結論：r1210 三項驗證（el4.5 數字、run_eval 機制、effects 承繼數字）由承繼改本輪直接證據；全部結論不變。
+- 2026-11-07 r1211（審查指示 4 項落實輪，0 模型呼叫）：
+- ① 合 auto/argon 2db8afa5（17ea3897）：_freeze_matches 跨 worktree req_file 比對＋run_phase3 offline 唯讀 fail-closed＋點名回歸測試；WIP 3cf31e81 帶進的 phase2.json 本地回放值（74c/732826t）還原 HEAD 凍結值（71c/701696t，r1208 先例＋紅線不改凍結快照）。
+- ② 驗證：點名回歸測試 1 passed；reqloop 6 檔 119 passed；repair.py 合併零改動（凍結維持）；官方 eval_phase3_glm53.json 未動（6/9 fixed・263 calls・tokens UNKNOWN，最後改動 267058ee）。
+- ③ beads（指示4）：repo .beads 原指向 110ae3ff bd init 的 Vacant 庫（4 junk issues）→ embeddeddolt 改 symlink 指 ~/dev/ops/.beads/embeddeddolt（共享 vq 庫；舊庫備份 /var/tmp/beads_repo_backup_20261107）、metadata.json dolt_database→vq、.gitignore 補非目錄行（b5251fbb）；驗證：無 BEADS_DIR 時 bd list --parent vq-el4 --all 由 issue not found 變回 7 issues 全列。
+- ④ 口徑：phase3 6/9＝round 1192 舊規則單 rep；round 1199 優化後 dab_039 等變動格未重跑，不得宣稱現行管線成果（已入 NOW.md）。
+- 沒驗證：17ea3897/b5251fbb 本地 CI（輪首 LATEST_argon 仍 3cf31e81 🟢 5030/0；2db8afa5 當時未跑，依審查明令合併）；GitHub Actions 仍停擺。
+- 下一步：下輪巡 17ea3897 本地 CI；vq-el4 全 closed、bd ready 空，等審查新派工。
