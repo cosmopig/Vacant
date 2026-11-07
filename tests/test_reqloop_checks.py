@@ -2772,5 +2772,121 @@ def test_strict_json_equal_dict_nested_types():
     assert _strict_json_equal({"a": 1}, {"b": 1}) is False
 
 
+def test_monthly_verifiers_missing_input_is_unknown_not_vacuous_pass(
+    tmp_path: pathlib.Path,
+):
+    """argon 20261107_0822 回歸：
+    monthly_sales_metrics / monthly_top_products / summary_metrics_consistency
+    當 input_csv 不存在或無有效月份資料時，必須回傳 UNKNOWN（不得在 expected_months=[] 時
+    迴圈跑 0 次直接回傳空轉假 PASS，或以 0.0 冤枉正確摘要）。
+    """
+    task_dir = tmp_path / "task"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    deliv = tmp_path / "deliv"
+    _write(
+        deliv / "monthly_sales.csv",
+        "month,order_count,net_sales\n2023-01,999,999999.0\n",
+    )
+    _write(
+        deliv / "top_products.csv",
+        "month,rank,product,net_sales\n2023-01,1,FAKE,999999.0\n",
+    )
+    _write(
+        deliv / "summary.md",
+        "2023-01 訂單數 10，淨銷售額 1200.50\n",
+    )
+
+    for vname, dfile in (
+        ("monthly_sales_metrics", "monthly_sales.csv"),
+        ("monthly_top_products", "top_products.csv"),
+        ("summary_metrics_consistency", "summary.md"),
+    ):
+        rs = _req_set(vname, {"input_csv": "nonexistent.csv"}, dfile)
+        res = run_requirement_checks(task_dir, rs, deliv)[0]
+        assert res.status == "UNKNOWN", f"{vname} should be UNKNOWN when input_csv is missing, got {res.status}"
+
+
+def test_plain_recomputed_mode_col_string_values_pass_and_fail(tmp_path: pathlib.Path):
+    """argon 20261107_0822 回歸：
+    plain_recomputed 的 mode_col 支援字串型眾數（如類別名稱 'Electronics'），
+    不得被前置 float(val_str) 攔截而對正確字串答案誤判 FAIL (not_a_number)；
+    錯誤字串仍須判 FAIL 且 expected_in_evidence 為 False。
+    """
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "items.csv",
+        "category\nElectronics\nBooks\nElectronics\nClothing\n",
+    )
+    rs = _req_set(
+        "plain_recomputed",
+        {"data_file": "items.csv", "recompute": {"type": "mode_col", "col": "category"}},
+        "answer.txt",
+    )
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "Electronics\n")
+    r_good = run_requirement_checks(task_dir, rs, good)[0]
+    assert r_good.status == "PASS"
+
+    bad = tmp_path / "bad"
+    _write(bad / "answer.txt", "Books\n")
+    r_bad = run_requirement_checks(task_dir, rs, bad)[0]
+    assert r_bad.status == "FAIL"
+    assert r_bad.evidence.get("expected_in_evidence") is False
+
+
+def test_recomputed_verifiers_check_source_before_blaming_deliverable_and_malformed_params_are_unknown(
+    tmp_path: pathlib.Path,
+):
+    """argon 20261107_0822 回歸：
+    1. 當 kv_recomputed / plain_recomputed 的重算規則指向不存在的資料欄（如擷取模型寫錯 col / col_a / col_b）
+       或資料檔不存在時，必須回傳 UNKNOWN，不得因先檢查交付物或漏驗欄位存在性而對 good 交付物誤判 FAIL（冤枉）或假 PASS；
+    2. rowset_filter 無 values 且無篩選條件、或 answer_kv / group_aggregate / summary_numbers 傳入畸形參數時，
+       必須回傳 UNKNOWN，不得空轉假 PASS 或拋未捕捉 AttributeError。
+    """
+    task_dir = tmp_path / "task"
+    _write(task_dir / "cases.csv", "Country,No. of cases\nA,100\nB,200\n")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@mean_cases[150]\n")
+    _write(good / "out.csv", "Country,No. of cases\nA,999999\nB,888888\n")
+
+    # (a) 擷取模型寫錯 col 與 key 時，因為資料欄 wrong_col 不存在（UnknownSource），必須回傳 UNKNOWN 而非 FAIL
+    rs_bad_col = _req_set(
+        "kv_recomputed",
+        {
+            "key": "wrong_key",
+            "data_file": "cases.csv",
+            "recompute": {"type": "mean_int_col", "col": "wrong_col"},
+        },
+        "answer.txt",
+    )
+    assert run_requirement_checks(task_dir, rs_bad_col, good)[0].status == "UNKNOWN"
+
+    # (b) count_if / zcount3 / pearson2 指向不存在的欄位時，也必須回傳 UNKNOWN（不得因算成 0 而假 PASS 或 FAIL）
+    for rspec in (
+        {"type": "count_if", "col": "no_such_col", "eq": 1},
+        {"type": "zcount3", "col": "no_such_col"},
+        {"type": "pearson2", "col_a": "no_such_a", "col_b": "no_such_b"},
+    ):
+        rs_rc = _req_set(
+            "kv_recomputed",
+            {"key": "mean_cases", "data_file": "cases.csv", "recompute": rspec},
+            "answer.txt",
+        )
+        assert run_requirement_checks(task_dir, rs_rc, good)[0].status == "UNKNOWN"
+
+    # (c) rowset_filter 缺 values 且無過濾條件時回 UNKNOWN，不得對錯值 out.csv 給假 PASS
+    rs_rf = _req_set(
+        "rowset_filter",
+        {"input_csv": "cases.csv", "identity": ["Country"]},
+        "out.csv",
+    )
+    assert run_requirement_checks(task_dir, rs_rf, good)[0].status == "UNKNOWN"
+
+    # (d) answer_kv 傳入非 dict 的 key spec 時回 UNKNOWN，不拋 AttributeError
+    rs_akv = _req_set("answer_kv", {"keys": ["mean_cases"]}, "answer.txt")
+    assert run_requirement_checks(task_dir, rs_akv, good)[0].status == "UNKNOWN"
+
+
+
 
 

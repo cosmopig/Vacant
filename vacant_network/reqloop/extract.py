@@ -142,7 +142,6 @@ def quote_is_verbatim(quote: str, user_text: str) -> bool:
 
 # 每個 verifier 必要頂層參數（缺失即檢查器無法可靠裁決——checks.py 自己也回
 # UNKNOWN；這裡提前 surfaced 成 unverified，口徑一致）。
-# 未列出的 verifier 無靜態必要參數（檢查器自帶預設或自 UNKNOWN 守衛）。
 _REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "csv_structure": ("required_columns",),
     "table_structure": ("required_columns",),
@@ -155,14 +154,97 @@ _REQUIRED_PARAMS: dict[str, tuple[str, ...]] = {
     "summary_numbers": ("numbers",),
 }
 
-# 這些檢查器用 checks.py 的 _load_source 讀原始資料，必須有 input_csv 或
-# input_json（至少其一）；缺了檢查時只回 UNKNOWN——這裡提前 surfaced 成 unverified。
-_INPUT_SOURCE_VERIFIERS = frozenset({"rowset_filter", "group_aggregate", "summary_numbers"})
-
 _RECOMPUTE_TYPES: dict[str, frozenset[str]] = {
     "kv_recomputed": KV_RECOMPUTE_TYPES,
     "plain_recomputed": PLAIN_RECOMPUTE_TYPES,
 }
+
+_VALID_KEY_TYPES = frozenset({"number", "integer", "nonneg_int", "number_in_01"})
+_VALID_TAG_VALUE_TYPES = frozenset({"integer", "int", "float", "str"})
+_VALID_AGG_TYPES = frozenset(
+    {"count", "distinct", "sum", "mean", "mean_skip_empty", "max", "min", "count_if", "ratio"}
+)
+_VALID_SUMMARY_NUM_TYPES = frozenset(
+    {"count", "distinct", "sum", "mean", "max", "min", "pct_if"}
+)
+_VALID_COL_STATS = frozenset(
+    {"mean", "std", "min", "max", "p25", "median", "p50", "p75", "sum"}
+)
+
+
+def _non_empty_str(v: Any) -> bool:
+    return isinstance(v, str) and bool(v.strip())
+
+
+def _recompute_subparam_problem(rtype: str, rc: dict[str, Any]) -> str | None:
+    """檢查 kv_recomputed / plain_recomputed 各 rtype 的必要子參數。"""
+    if rtype in (
+        "mean_int_col",
+        "zcount3",
+        "null_count",
+        "unique_count",
+        "col_max",
+        "mode_col",
+    ):
+        if not _non_empty_str(rc.get("col")):
+            return "missing_recompute_param:col"
+    elif rtype == "count_if":
+        if not _non_empty_str(rc.get("col")):
+            return "missing_recompute_param:col"
+        if rc.get("eq") is None:
+            return "missing_recompute_param:eq"
+    elif rtype == "max_row_first":
+        if not _non_empty_str(rc.get("sel_col")):
+            return "missing_recompute_param:sel_col"
+        if not _non_empty_str(rc.get("out_col")):
+            return "missing_recompute_param:out_col"
+    elif rtype == "pearson2":
+        if not _non_empty_str(rc.get("col_a")):
+            return "missing_recompute_param:col_a"
+        if not _non_empty_str(rc.get("col_b")):
+            return "missing_recompute_param:col_b"
+    elif rtype == "col_stats":
+        if not _non_empty_str(rc.get("col")):
+            return "missing_recompute_param:col"
+        stat = str(rc.get("stat", "")).strip().lower()
+        if stat not in _VALID_COL_STATS:
+            return f"unsupported_recompute_stat:{stat or 'missing'}"
+    elif rtype == "cond_rate":
+        where = rc.get("where")
+        num_where = rc.get("num_where")
+        if (
+            not isinstance(where, list)
+            or not where
+            or any(not isinstance(c, dict) or not _non_empty_str(c.get("col")) for c in where)
+        ):
+            return "missing_recompute_param:where"
+        if (
+            not isinstance(num_where, list)
+            or not num_where
+            or any(
+                not isinstance(c, dict) or not _non_empty_str(c.get("col")) for c in num_where
+            )
+        ):
+            return "missing_recompute_param:num_where"
+    elif rtype == "scheme_fee_avg":
+        if not _non_empty_str(rc.get("scheme")):
+            return "missing_recompute_param:scheme"
+        if not isinstance(rc.get("is_credit"), bool):
+            return "missing_recompute_param:is_credit"
+        amt = rc.get("amount")
+        if amt is None or isinstance(amt, bool) or not isinstance(amt, (int, float, str)):
+            return "missing_recompute_param:amount"
+    elif rtype == "fee_ids_lookup":
+        for subk in ("fees_file", "merchants_file", "merchant"):
+            if not _non_empty_str(rc.get(subk)):
+                return f"missing_recompute_param:{subk}"
+        yr = rc.get("year")
+        mo = rc.get("month")
+        if isinstance(yr, bool) or not isinstance(yr, int):
+            return "missing_recompute_param:year"
+        if isinstance(mo, bool) or not isinstance(mo, int) or not (1 <= mo <= 12):
+            return "missing_recompute_param:month"
+    return None
 
 
 def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
@@ -176,23 +258,103 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
         if isinstance(val, (str, list, dict)) and not val:
             return f"empty_param:{key}"
     if verifier in ("csv_structure", "table_structure"):
-        if not isinstance(params.get("required_columns"), list):
+        cols = params.get("required_columns")
+        if not isinstance(cols, list):
             return "required_columns_not_list"
-    if verifier == "answer_kv" and not isinstance(params.get("keys"), list):
-        return "keys_not_list"
+        if any(not _non_empty_str(c) for c in cols):
+            return "invalid_required_column"
+    if verifier == "answer_kv":
+        keys = params.get("keys")
+        if not isinstance(keys, list):
+            return "keys_not_list"
+        for s in keys:
+            if not isinstance(s, dict) or not _non_empty_str(s.get("key")):
+                return "invalid_key_spec"
+            vtype = str(s.get("type", "number")).strip().lower()
+            if vtype not in _VALID_KEY_TYPES:
+                return f"unsupported_key_type:{vtype or 'missing'}"
+    if verifier == "tag_format":
+        if not _non_empty_str(params.get("tag")):
+            return "invalid_param:tag"
+        vt = params.get("value_type")
+        if vt is not None and str(vt).strip().lower() not in _VALID_TAG_VALUE_TYPES:
+            return f"unsupported_tag_value_type:{vt}"
+    if verifier in (
+        "monthly_sales_metrics",
+        "monthly_top_products",
+        "summary_metrics_consistency",
+    ):
+        if "input_csv" in params and not _non_empty_str(params.get("input_csv")):
+            return "empty_param:input_csv"
+    if verifier in ("rowset_filter", "group_aggregate", "summary_numbers"):
+        if not (
+            _non_empty_str(params.get("input_csv"))
+            or _non_empty_str(params.get("input_json"))
+        ):
+            return "missing_param:input_csv_or_json"
+        if verifier == "rowset_filter":
+            ident = params.get("identity")
+            if not isinstance(ident, list) or any(not _non_empty_str(c) for c in ident):
+                return "invalid_param:identity"
+            vals = params.get("values")
+            if vals is not None and not isinstance(vals, dict):
+                return "invalid_param:values"
+            has_vals = isinstance(vals, dict) and bool(vals)
+            has_filter = bool(
+                params.get("exclude") or params.get("include") or params.get("dedup_by")
+            )
+            if not has_vals and not has_filter:
+                return "missing_param:values"
+            if isinstance(vals, dict):
+                for out_col, spec in vals.items():
+                    if not _non_empty_str(out_col):
+                        return "invalid_param:values"
+                    if isinstance(spec, str):
+                        if not spec.strip():
+                            return "invalid_param:values"
+                    elif isinstance(spec, dict):
+                        if not _non_empty_str(spec.get("expr")):
+                            return "invalid_param:values"
+                    else:
+                        return "invalid_param:values"
+        elif verifier == "group_aggregate":
+            gb = params.get("group_by")
+            if not isinstance(gb, list) or any(not _non_empty_str(c) for c in gb):
+                return "invalid_param:group_by"
+            aggs = params.get("aggregates")
+            if not isinstance(aggs, list):
+                return "invalid_param:aggregates"
+            for a in aggs:
+                if not isinstance(a, dict) or not _non_empty_str(a.get("name")):
+                    return "invalid_param:aggregates"
+                atype = str(a.get("type", "")).strip()
+                if atype not in _VALID_AGG_TYPES:
+                    return f"unsupported_aggregate_type:{atype or 'missing'}"
+        elif verifier == "summary_numbers":
+            nums = params.get("numbers")
+            if not isinstance(nums, list):
+                return "invalid_param:numbers"
+            for n in nums:
+                if not isinstance(n, dict):
+                    return "invalid_param:numbers"
+                ntype = str(n.get("type", "")).strip()
+                if ntype not in _VALID_SUMMARY_NUM_TYPES:
+                    return f"unsupported_summary_number_type:{ntype or 'missing'}"
     allowed = _RECOMPUTE_TYPES.get(verifier)
     if allowed is not None:
+        if verifier == "kv_recomputed" and not _non_empty_str(params.get("key")):
+            return "invalid_param:key"
+        if not _non_empty_str(params.get("data_file")):
+            return "invalid_param:data_file"
         rc = params.get("recompute")
         if not isinstance(rc, dict):
             return "recompute_not_dict"
         rtype = str(rc.get("type", "")).strip().lower()
         if rtype not in allowed:
             return f"unsupported_recompute_type:{rtype or 'missing'}"
-    if verifier in _INPUT_SOURCE_VERIFIERS and not (
-        isinstance(params.get("input_csv"), str) and params["input_csv"].strip()
-        or isinstance(params.get("input_json"), str) and params["input_json"].strip()
-    ):
-        return "missing_param:input_csv_or_input_json"
+        sub_prob = _recompute_subparam_problem(rtype, rc)
+        if sub_prob is not None:
+            return sub_prob
     return None
 
 
@@ -218,6 +380,7 @@ def build_requirement_set(
     discarded: list[DiscardedItem] = []
     unverified: list[UnverifiedItem] = []
     items: list[RequirementItem] = []
+    seen_ids: set[str] = set()
 
     for index, raw in enumerate(raw_items):
         fallback_id = f"req_{index:03d}"
@@ -226,7 +389,14 @@ def build_requirement_set(
             continue
 
         rid = raw.get("id")
-        fid = rid.strip() if isinstance(rid, str) and rid.strip() else fallback_id
+        base_id = rid.strip() if isinstance(rid, str) and rid.strip() else fallback_id
+        fid = base_id
+        if fid in seen_ids:
+            fid = f"{base_id}_{index}"
+            suffix = 2
+            while fid in seen_ids:
+                fid = f"{base_id}_{index}_{suffix}"
+                suffix += 1
 
         quote = raw.get("quote")
         if not isinstance(quote, str) or not quote.strip():
@@ -247,9 +417,8 @@ def build_requirement_set(
             discarded.append(DiscardedItem(index, fid, f"invalid_kind:{kind!r}"))
             continue
 
-        params = raw.get("params", {})
-        if not isinstance(params, dict):
-            params = {}
+        raw_params = raw.get("params", {})
+        params = raw_params if isinstance(raw_params, dict) else {}
 
         verifier = raw.get("verifier")
         if not isinstance(verifier, str) or not verifier.strip():
@@ -263,13 +432,14 @@ def build_requirement_set(
             reason = f"unknown_verifier:{verifier or 'missing'}"
             unverified_flag = True
         else:
-            problem = _param_problem(verifier, params)
+            problem = _param_problem(verifier, raw_params)
             if problem is not None:
                 reason = problem
                 unverified_flag = True
         if unverified_flag and reason is None:
             reason = "model_declared_unverified"
 
+        seen_ids.add(fid)
         items.append(
             RequirementItem(
                 id=fid,
@@ -279,7 +449,7 @@ def build_requirement_set(
                 kind=kind,  # type: ignore[arg-type]
                 params=params,
                 description=str(raw.get("description", "") or ""),
-                required=bool(raw.get("required", True)),
+                required=True,  # 擷取條目一律 required=True，防模型設 false 繞過門禁
                 authority=str(raw.get("authority", "client") or "client"),
                 hidden=False,  # 擷取輸入只有使用者原文；hidden 條目不許由擷取產生
                 unverified=unverified_flag,
@@ -296,10 +466,22 @@ def build_requirement_set(
     return RequirementSet(task_id=task_id, items=items), report
 
 
+def _coerce_parsed_items(data: Any) -> list[Any] | None:
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for key in ("items", "requirements", "requirements_items"):
+            if isinstance(data.get(key), list):
+                return data[key]
+        if any(k in data for k in ("quote", "verifier", "deliverable")):
+            return [data]
+    return None
+
+
 def parse_model_output(raw: str) -> list[Any]:
     """從模型輸出抽出需求條目 JSON 陣列；抽不出丟 ExtractParseError。
 
-    依次嘗試：整段 → ``` fence 內 JSON → 首個 {...} / [...] 片段。
+    依次嘗試：整段 → 所有 ``` fence 內 JSON → 首個 {...} / [...] 片段 → raw_decode 掃描。
     物件形式接受 {"items": [...]} / {"requirements": [...]} / 單條物件。
     """
     if not isinstance(raw, str):
@@ -309,9 +491,10 @@ def parse_model_output(raw: str) -> list[Any]:
         raise ExtractParseError("model output is empty")
 
     candidates: list[str] = [text]
-    m = _FENCE_RE.search(text)
-    if m:
-        candidates.append(m.group(1).strip())
+    for m in _FENCE_RE.finditer(text):
+        fenced = m.group(1).strip()
+        if fenced:
+            candidates.append(fenced)
     for pat in (r"\{.*\}", r"\[.*\]"):
         m = re.search(pat, text, re.DOTALL)
         if m:
@@ -324,14 +507,23 @@ def parse_model_output(raw: str) -> list[Any]:
         except json.JSONDecodeError as e:
             last_err = str(e)
             continue
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            for key in ("items", "requirements", "requirements_items"):
-                if isinstance(data.get(key), list):
-                    return data[key]
-            if any(k in data for k in ("quote", "verifier", "deliverable")):
-                return [data]
+        coerced = _coerce_parsed_items(data)
+        if coerced is not None:
+            return coerced
+
+    decoder = json.JSONDecoder()
+    for pos, ch in enumerate(text):
+        if ch not in "[{":
+            continue
+        try:
+            data, _ = decoder.raw_decode(text, pos)
+        except json.JSONDecodeError as e:
+            last_err = str(e)
+            continue
+        coerced = _coerce_parsed_items(data)
+        if coerced is not None:
+            return coerced
+
     raise ExtractParseError(
         f"cannot parse a JSON array of requirement items: {last_err or 'no JSON fragment found'}"
     )
