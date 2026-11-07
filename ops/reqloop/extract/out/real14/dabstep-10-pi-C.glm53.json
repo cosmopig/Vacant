@@ -14,7 +14,7 @@
           "col": "merchant"
         }
       },
-      "description": "答案檔 answer.txt 內容應為 payments.csv 中 merchant 欄位的去重計數（唯一商戶數）。",
+      "description": "答案為 payments.csv 中 merchant 欄位的去重計數，寫入 answer.txt 的單一數字須與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -27,10 +27,10 @@
       "verifier": "tag_format",
       "kind": "explicit",
       "params": {
-        "tag": "total",
+        "tag": "answer",
         "value_type": "number"
       },
-      "description": "answer.txt 必須只含單一純文字數值一行，不得有其他文字。",
+      "description": "answer.txt 內容必須只有單一數字一行，不得有其他文字。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -53,7 +53,7 @@
       }
     ]
   },
-  "raw_output": "[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"How many unique merchants are present in the dataset?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"unique_count\", \"col\": \"merchant\"}},\n    \"description\": \"答案檔 answer.txt 內容應為 payments.csv 中 merchant 欄位的去重計數（唯一商戶數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"total\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 必須只含單一純文字數值一行，不得有其他文字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n",
+  "raw_output": "[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"How many unique merchants are present in the dataset?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\n      \"data_file\": \"data/payments.csv\",\n      \"recompute\": {\"type\": \"unique_count\", \"col\": \"merchant\"}\n    },\n    \"description\": \"答案為 payments.csv 中 merchant 欄位的去重計數，寫入 answer.txt 的單一數字須與重算一致。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"answer\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 內容必須只有單一數字一行，不得有其他文字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n",
   "provenance": {
     "cell": "dabstep-10-pi-C",
     "role": "bad",
@@ -65,6 +65,6 @@
       "data/payments-readme.md"
     ],
     "prompt_sha256": "0fb7e8b90c5a4ead2e71423610db4abf84ff0a9bf5524975efde26a6ed33e336",
-    "generated_at": "2026-11-07T13:11:36+08:00"
+    "generated_at": "2026-11-07T13:18:31+08:00"
   }
 }

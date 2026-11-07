@@ -14,7 +14,7 @@
           "col": "hour_of_day"
         }
       },
-      "description": "answer.txt 應只含一個數字，即交易次數最多的 hour_of_day（以 data/payments.csv 重算 mode_col 驗證）。",
+      "description": "答案應為交易次數最多的當日小時（hour_of_day 的眾數），以單一數字寫入 answer.txt。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -30,7 +30,7 @@
         "tag": "answer",
         "value_type": "number"
       },
-      "description": "answer.txt 內容必須是單一數字（代表小時），不含其他文字。",
+      "description": "answer.txt 內容必須只有一個代表小時的數字，不含其他文字。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -53,7 +53,7 @@
       }
     ]
   },
-  "raw_output": "[{\"id\": \"1\", \"quote\": \"During which hour of the day do the most transactions occur?\", \"deliverable\": \"answer.txt\", \"verifier\": \"plain_recomputed\", \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"mode_col\", \"col\": \"hour_of_day\"}}, \"description\": \"answer.txt 應只含一個數字，即交易次數最多的 hour_of_day（以 data/payments.csv 重算 mode_col 驗證）。\", \"required\": true, \"kind\": \"explicit\"}, {\"id\": \"2\", \"quote\": \"Answer must be just a number representing the hour of the day.\", \"deliverable\": \"answer.txt\", \"verifier\": \"tag_format\", \"params\": {\"tag\": \"answer\", \"value_type\": \"number\"}, \"description\": \"answer.txt 內容必須是單一數字（代表小時），不含其他文字。\", \"required\": true, \"kind\": \"explicit\"}]\n",
+  "raw_output": "[{\"id\":\"1\",\"quote\":\"During which hour of the day do the most transactions occur?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"mode_col\",\"col\":\"hour_of_day\"}},\"description\":\"答案應為交易次數最多的當日小時（hour_of_day 的眾數），以單一數字寫入 answer.txt。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"2\",\"quote\":\"Answer must be just a number representing the hour of the day.\",\"deliverable\":\"answer.txt\",\"verifier\":\"tag_format\",\"params\":{\"tag\":\"answer\",\"value_type\":\"number\"},\"description\":\"answer.txt 內容必須只有一個代表小時的數字，不含其他文字。\",\"required\":true,\"kind\":\"explicit\"}]\n",
   "provenance": {
     "cell": "dabstep-13-pi-A",
     "role": "good",
@@ -64,6 +64,6 @@
       "data/payments-readme.md"
     ],
     "prompt_sha256": "49ba28e6f44dbb6eb88d421d3c5dd984c91d25b1cd2e5da14276bdbd27fb23a6",
-    "generated_at": "2026-11-07T13:12:22+08:00"
+    "generated_at": "2026-11-07T13:18:51+08:00"
   }
 }

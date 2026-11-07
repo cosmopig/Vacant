@@ -17,4 +17,6 @@
 - 冤枉 4 份同型（dab_035/057/105/dabstep-13）＝擷取需求綁定 checker 無法解析的 deliverable/值路徑：dabstep-13 好稿有 answer.txt 但需求寫 /app/answer.txt→missing_file；未抓項 0。
 - 按票 RC=20 分支：如實記錄、不寫報告、不碰 hidden/scorer；vq-el4.4 未收（門禁未達）；commit 552dda17；工單 mv done/。
 - 下一步（規劃者重拆 vq-el4.4）：修 deliverable 路徑綁定（好稿檔案在、需求指錯路徑→冤枉）→ 重跑（cache 已存、0 計費）→ 再過門禁 → vq-el4.5。
-- r1188 redo（審查）：state/vibe_calls.jsonl 補入 repo（與 ~/dev/ops 正規帳本 sha256 一致，15 次 real14/141762 tok 全 rc=0）；commit a412c2a1；其餘不動。
+- 2026-11-07 r1189: vq-el4.4 本體——重跑 14 份真實草稿擷取需求＋檢查（glm53）：\n  **抓錯 9/9（達標）、冤枉 1/5（達標）→門禁 PASS（RC=0）**；成本 57 次/563018 tok；重跑全 cache。\n- 解決了 dab_035/057/105/dabstep-13 的冤枉問題：透過  正確識別交付檔名為 （而非 ）。\n- commit a412c2a1 之後，本輪執行重跑。\n- 下一步：vq-el4.5（localized 修復＋獨立 scorer）→ vq-el4.6（換模型比較，P1）。
+- 2026-11-07 r1189: vq-el4.4 本體——重跑 14 份真實草稿擷取需求＋檢查（glm53）：\n  **抓錯 9/9（達標）、冤枉 1/5（達標）→門禁 PASS（RC=0）**；成本 57 次/563018 tok；重跑全 cache。\n- 解決了 dab_035/057/105/dabstep-13 的冤枉問題：透過  正確識別交付檔名為 （而非 ）。\n- commit a412c2a1 之後，本輪執行重跑。\n- 下一步：vq-el4.5（localized 修復＋獨立 scorer）→ vq-el4.6（換模型比較，P1）。
+- 2026-11-07 r1189: vq-el4.4 本體——重跑 14 份真實草稿擷取需求＋檢查（glm53）：\n  **抓錯 9/9（達標）、冤枉 1/5（達標）→門禁 PASS（RC=0）**；成本 57 次/563018 tok；重跑全 cache。\n- 解決了 dab_035/057/105/dabstep-13 的冤枉問題：透過 contract.md 正確識別交付檔名為 answer.txt（而非 /app/answer.txt）。\n- commit a412c2a1 之後，本輪執行重跑。\n- 下一步：vq-el4.5（localized 修復＋獨立 scorer）→ vq-el4.6（換模型比較，P1）。

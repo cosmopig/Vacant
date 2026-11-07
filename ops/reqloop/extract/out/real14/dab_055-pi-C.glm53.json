@@ -2,7 +2,7 @@
   "task_id": "dab_055-pi-C",
   "items": [
     {
-      "id": "R1",
+      "id": "req_mean_cases",
       "quote": "What is the mean number of cases recorded across all countries and years?",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
@@ -15,35 +15,15 @@
           "col": "No. of cases"
         }
       },
-      "description": "計算 'No. of cases' 欄（轉為 Int64、忽略 Null/空白）所有國家與年份的平均值，與 answer.txt 的 @mean_cases 值比對。",
+      "description": "計算 'No. of cases' 欄位（轉為 Int64、忽略 Null 或空值）所有國家與年份的平均值，與 answer.txt 中 @mean_cases 值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
+      "id": "req_answer_format_tag",
       "quote": "@mean_cases[mean_value] where \"mean_value\" is a positive integer.",
-      "deliverable": "answer.txt",
-      "verifier": "answer_kv",
-      "kind": "explicit",
-      "params": {
-        "keys": [
-          {
-            "key": "mean_cases",
-            "type": "number"
-          }
-        ]
-      },
-      "description": "answer.txt 必須含 @mean_cases 項目，值為正整數。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
@@ -51,34 +31,14 @@
         "tag": "mean_cases",
         "value_type": "number"
       },
-      "description": "answer.txt 需存在，且以 @mean_cases[value] 格式撰寫答案。",
+      "description": "answer.txt 須含 @mean_cases[value] 格式項目，值為正整數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
     },
     {
-      "id": "R4",
-      "quote": "Convert the data type of 'No. of cases' column from Object (string) to Int64 before performing calculations.",
-      "deliverable": "answer.txt",
-      "verifier": "kv_recomputed",
-      "kind": "explicit",
-      "params": {
-        "key": "mean_cases",
-        "data_file": "data/estimated_numbers.csv",
-        "recompute": {
-          "type": "mean_int_col",
-          "col": "No. of cases"
-        }
-      },
-      "description": "計算前須將 'No. of cases' 由字串轉為 Int64；以 mean_int_col 重算即隱含此轉換，與交付值比對。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R5",
+      "id": "req_ignore_null_empty",
       "quote": "Ignore those records where 'No. of cases' column value is Null or empty.",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
@@ -91,7 +51,7 @@
           "col": "No. of cases"
         }
       },
-      "description": "Null 或空白的 'No. of cases' 紀錄不計入平均；mean_int_col 重算即忽略 Null/空白，與交付值比對。",
+      "description": "計算平均值時排除 'No. of cases' 為 Null 或空值的紀錄；mean_int_col 本身即忽略 Null/空白儲存格。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -103,21 +63,19 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2",
-      "R3",
-      "R4",
-      "R5"
+      "req_mean_cases",
+      "req_answer_format_tag",
+      "req_ignore_null_empty"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "R3",
+        "id": "req_answer_format_tag",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"What is the mean number of cases recorded across all countries and years?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"計算 'No. of cases' 欄（轉為 Int64、忽略 Null/空白）所有國家與年份的平均值，與 answer.txt 的 @mean_cases 值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"@mean_cases[mean_value] where \\\"mean_value\\\" is a positive integer.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [{\"key\": \"mean_cases\", \"type\": \"number\"}]\n    },\n    \"description\": \"answer.txt 必須含 @mean_cases 項目，值為正整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"mean_cases\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"answer.txt 需存在，且以 @mean_cases[value] 格式撰寫答案。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R4\",\n    \"quote\": \"Convert the data type of 'No. of cases' column from Object (string) to Int64 before performing calculations.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"計算前須將 'No. of cases' 由字串轉為 Int64；以 mean_int_col 重算即隱含此轉換，與交付值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R5\",\n    \"quote\": \"Ignore those records where 'No. of cases' column value is Null or empty.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"Null 或空白的 'No. of cases' 紀錄不計入平均；mean_int_col 重算即忽略 Null/空白，與交付值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_mean_cases\",\n    \"quote\": \"What is the mean number of cases recorded across all countries and years?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"計算 'No. of cases' 欄位（轉為 Int64、忽略 Null 或空值）所有國家與年份的平均值，與 answer.txt 中 @mean_cases 值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_answer_format_tag\",\n    \"quote\": \"@mean_cases[mean_value] where \\\"mean_value\\\" is a positive integer.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"mean_cases\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 須含 @mean_cases[value] 格式項目，值為正整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_ignore_null_empty\",\n    \"quote\": \"Ignore those records where 'No. of cases' column value is Null or empty.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"mean_cases\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\"type\": \"mean_int_col\", \"col\": \"No. of cases\"}\n    },\n    \"description\": \"計算平均值時排除 'No. of cases' 為 Null 或空值的紀錄；mean_int_col 本身即忽略 Null/空白儲存格。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_055-pi-C",
     "role": "bad",
@@ -127,6 +85,6 @@
       "data/estimated_numbers.csv"
     ],
     "prompt_sha256": "680af33b4c5cb456e28a40eb5839547e03cfd8e69bb7c7b4212e197b511fa590",
-    "generated_at": "2026-11-07T13:10:44+08:00"
+    "generated_at": "2026-11-07T13:17:42+08:00"
   }
 }

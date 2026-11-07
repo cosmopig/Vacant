@@ -2,7 +2,7 @@
   "task_id": "dab_057-pi-A",
   "items": [
     {
-      "id": "req_correlation_coefficient",
+      "id": "req_1",
       "quote": "Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
@@ -13,18 +13,18 @@
         "recompute": {
           "type": "pearson2",
           "col_a": "No. of cases",
-          "col_b": "No. of deaths"
-        },
-        "atol": 1e-06
+          "col_b": "No. of deaths",
+          "round": 2
+        }
       },
-      "description": "計算 'No. of cases' 與 'No. of deaths' 兩欄（轉為 Int64 後）的 Pearson 相關係數，與 answer.txt 中 @correlation_coefficient 的數值比對。",
+      "description": "以完整資料（不分國家或年份）重算 'No. of cases' 與 'No. of deaths' 兩欄的 Pearson 相關係數，與 answer.txt 的 @correlation_coefficient 值比對；兩欄需先從字串轉為 Int64 後計算，結果四捨五入到兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req_answer_format_tag",
+      "id": "req_2",
       "quote": "@correlation_coefficient[r_value] where \"r_value\" is a number between -1 and 1, rounded to two decimal places.",
       "deliverable": "answer.txt",
       "verifier": "tag_format",
@@ -33,11 +33,31 @@
         "tag": "correlation_coefficient",
         "value_type": "number"
       },
-      "description": "answer.txt 須含 @correlation_coefficient[數值] 格式項目，數值介於 -1 與 1 之間並四捨五入至兩位小數。",
+      "description": "answer.txt 中答案項須為 @correlation_coefficient[數值] 格式，值為 -1 到 1 之間的數字，四捨五入至兩位小數。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": true
+    },
+    {
+      "id": "req_3",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "correlation_coefficient",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "最終答案須寫入工作區根目錄的 answer.txt，且含 @correlation_coefficient 鍵值（數字型別）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -45,18 +65,19 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req_correlation_coefficient",
-      "req_answer_format_tag"
+      "req_1",
+      "req_2",
+      "req_3"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "req_answer_format_tag",
+        "id": "req_2",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"req_correlation_coefficient\",\n    \"quote\": \"Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"correlation_coefficient\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\n        \"type\": \"pearson2\",\n        \"col_a\": \"No. of cases\",\n        \"col_b\": \"No. of deaths\"\n      },\n      \"atol\": 0.000001\n    },\n    \"description\": \"計算 'No. of cases' 與 'No. of deaths' 兩欄（轉為 Int64 後）的 Pearson 相關係數，與 answer.txt 中 @correlation_coefficient 的數值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_answer_format_tag\",\n    \"quote\": \"@correlation_coefficient[r_value] where \\\"r_value\\\" is a number between -1 and 1, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"correlation_coefficient\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"answer.txt 須含 @correlation_coefficient[數值] 格式項目，數值介於 -1 與 1 之間並四捨五入至兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_1\",\n    \"quote\": \"Calculate the Pearson correlation coefficient (r) to assess the strength and direction of the linear relationship between number of cases and number of deaths.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"correlation_coefficient\",\n      \"data_file\": \"data/estimated_numbers.csv\",\n      \"recompute\": {\n        \"type\": \"pearson2\",\n        \"col_a\": \"No. of cases\",\n        \"col_b\": \"No. of deaths\",\n        \"round\": 2\n      }\n    },\n    \"description\": \"以完整資料（不分國家或年份）重算 'No. of cases' 與 'No. of deaths' 兩欄的 Pearson 相關係數，與 answer.txt 的 @correlation_coefficient 值比對；兩欄需先從字串轉為 Int64 後計算，結果四捨五入到兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_2\",\n    \"quote\": \"@correlation_coefficient[r_value] where \\\"r_value\\\" is a number between -1 and 1, rounded to two decimal places.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"correlation_coefficient\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"answer.txt 中答案項須為 @correlation_coefficient[數值] 格式，值為 -1 到 1 之間的數字，四捨五入至兩位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_3\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [\n        {\n          \"key\": \"correlation_coefficient\",\n          \"type\": \"number\"\n        }\n      ]\n    },\n    \"description\": \"最終答案須寫入工作區根目錄的 answer.txt，且含 @correlation_coefficient 鍵值（數字型別）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_057-pi-A",
     "role": "good",
@@ -66,6 +87,6 @@
       "data/estimated_numbers.csv"
     ],
     "prompt_sha256": "5111a303024a543d6369ad752ac591d11217e2be8898534a28fef819f91565b4",
-    "generated_at": "2026-11-07T13:10:50+08:00"
+    "generated_at": "2026-11-07T13:17:49+08:00"
   }
 }

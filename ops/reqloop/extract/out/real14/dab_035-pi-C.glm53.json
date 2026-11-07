@@ -15,7 +15,7 @@
           "col": "row retention time"
         }
       },
-      "description": "以 Z-score 方法（閾值 3，|z|>3 視為離群值）計算 \"row retention time\" 欄位的離群值個數，與 answer.txt 中 @removed_outliers_count 的數值比對。",
+      "description": "以 Z-score 方法（閾值 3，|z|>3 視為離群值）計算 row retention time 欄位被移除的離群值數量，並與 answer.txt 中 @removed_outliers_count 的值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -23,7 +23,7 @@
     },
     {
       "id": "req-2",
-      "quote": "@removed_outliers_count[count] where \"count\" is a non-negative integer indicating the count of removed outliers.",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
@@ -31,11 +31,11 @@
         "keys": [
           {
             "key": "removed_outliers_count",
-            "type": "number"
+            "type": "integer"
           }
         ]
       },
-      "description": "answer.txt 必須包含 @removed_outliers_count[...] 項目，其值為非負整數。",
+      "description": "answer.txt 必須存在，且包含 @removed_outliers_count[count] 格式的答案項，count 為非負整數。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -53,7 +53,7 @@
     "discarded": [],
     "unverified": []
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"req-1\",\n    \"quote\": \"Identify and remove any outliers in the \\\"row retention time\\\" column using the Z-score method with a Z-score threshold of 3. Provide the number of removed outliers.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"removed_outliers_count\",\n      \"data_file\": \"data/imp.score.ldlr.metabolome.csv\",\n      \"recompute\": {\"type\": \"zcount3\", \"col\": \"row retention time\"}\n    },\n    \"description\": \"以 Z-score 方法（閾值 3，|z|>3 視為離群值）計算 \\\"row retention time\\\" 欄位的離群值個數，與 answer.txt 中 @removed_outliers_count 的數值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-2\",\n    \"quote\": \"@removed_outliers_count[count] where \\\"count\\\" is a non-negative integer indicating the count of removed outliers.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [{\"key\": \"removed_outliers_count\", \"type\": \"number\"}]\n    },\n    \"description\": \"answer.txt 必須包含 @removed_outliers_count[...] 項目，其值為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "[\n  {\n    \"id\": \"req-1\",\n    \"quote\": \"Identify and remove any outliers in the \\\"row retention time\\\" column using the Z-score method with a Z-score threshold of 3. Provide the number of removed outliers.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"removed_outliers_count\",\n      \"data_file\": \"data/imp.score.ldlr.metabolome.csv\",\n      \"recompute\": {\"type\": \"zcount3\", \"col\": \"row retention time\"}\n    },\n    \"description\": \"以 Z-score 方法（閾值 3，|z|>3 視為離群值）計算 row retention time 欄位被移除的離群值數量，並與 answer.txt 中 @removed_outliers_count 的值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-2\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"removed_outliers_count\", \"type\": \"integer\"}]},\n    \"description\": \"answer.txt 必須存在，且包含 @removed_outliers_count[count] 格式的答案項，count 為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n",
   "provenance": {
     "cell": "dab_035-pi-C",
     "role": "good",
@@ -63,6 +63,6 @@
       "data/imp.score.ldlr.metabolome.csv"
     ],
     "prompt_sha256": "ac96e6ce6fc8b6fffd38a7c6c75bd75a782648d0a35901364a9a3f2b039341d8",
-    "generated_at": "2026-11-07T13:10:29+08:00"
+    "generated_at": "2026-11-07T13:17:24+08:00"
   }
 }

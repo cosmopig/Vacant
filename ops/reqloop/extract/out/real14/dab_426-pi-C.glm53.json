@@ -2,24 +2,8 @@
   "task_id": "dab_426-pi-C",
   "items": [
     {
-      "id": "R2",
-      "quote": "@max_wind_speed[number] where \"number\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.",
-      "deliverable": "answer.txt",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "max_wind_speed",
-        "value_type": "number"
-      },
-      "description": "答案須以 @max_wind_speed[value] 格式撰寫，值為數字（float，兩位小數）。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "R3",
-      "quote": "Firstly, identify the storm with the highest maximum storm category, neglecting any ties. If there are multiple storms with the same highest maximum storm category, choose the one that appears first in the given dataset. Then find the maximum sustained wind speed corresponding to this particular storm.",
+      "id": "R1",
+      "quote": "What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
       "kind": "explicit",
@@ -30,14 +14,29 @@
           "type": "max_row_first",
           "sel_col": "max_storm_cat",
           "out_col": "max_sust_wind"
-        },
-        "round": 2
+        }
       },
-      "description": "從 data/cost_data_with_errors.csv 找出 max_storm_cat 最大（平手取檔案序首列）的風暴，其 max_sust_wind 即為答案，與 answer.txt 的 @max_wind_speed 比對。",
+      "description": "找出 max_storm_cat 最高的風暴（平手取檔案序首列），回傳該列 max_sust_wind，與 answer.txt 的 @max_wind_speed 比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the\nnames given under \"Answer format\" in the task. This task expects 1 item(s):\n`@max_wind_speed[...]`.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "max_wind_speed",
+        "value_type": "number"
+      },
+      "description": "answer.txt 須含 @max_wind_speed[數字] 格式項目，數值為兩位小數的 float。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -45,16 +44,10 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R2",
-      "R3"
+      "R1",
+      "R2"
     ],
-    "discarded": [
-      {
-        "index": 0,
-        "id": "R1",
-        "reason": "quote_not_verbatim"
-      }
-    ],
+    "discarded": [],
     "unverified": [
       {
         "id": "R2",
@@ -62,7 +55,7 @@
       }
     ]
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of the workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"max_wind_speed\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須存在且含 @max_wind_speed[number] 鍵值，型別為數字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"@max_wind_speed[number] where \\\"number\\\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"max_wind_speed\", \"value_type\": \"number\"},\n    \"description\": \"答案須以 @max_wind_speed[value] 格式撰寫，值為數字（float，兩位小數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"Firstly, identify the storm with the highest maximum storm category, neglecting any ties. If there are multiple storms with the same highest maximum storm category, choose the one that appears first in the given dataset. Then find the maximum sustained wind speed corresponding to this particular storm.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"max_wind_speed\", \"data_file\": \"data/cost_data_with_errors.csv\", \"recompute\": {\"type\": \"max_row_first\", \"sel_col\": \"max_storm_cat\", \"out_col\": \"max_sust_wind\"}, \"round\": 2},\n    \"description\": \"從 data/cost_data_with_errors.csv 找出 max_storm_cat 最大（平手取檔案序首列）的風暴，其 max_sust_wind 即為答案，與 answer.txt 的 @max_wind_speed 比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"max_wind_speed\",\n      \"data_file\": \"data/cost_data_with_errors.csv\",\n      \"recompute\": {\"type\": \"max_row_first\", \"sel_col\": \"max_storm_cat\", \"out_col\": \"max_sust_wind\"}\n    },\n    \"description\": \"找出 max_storm_cat 最高的風暴（平手取檔案序首列），回傳該列 max_sust_wind，與 answer.txt 的 @max_wind_speed 比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"Put each answer item on its own line, in the form `@name[value]`, using exactly the\\nnames given under \\\"Answer format\\\" in the task. This task expects 1 item(s):\\n`@max_wind_speed[...]`.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"max_wind_speed\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 須含 @max_wind_speed[數字] 格式項目，數值為兩位小數的 float。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n",
   "provenance": {
     "cell": "dab_426-pi-C",
     "role": "bad",
@@ -72,6 +65,6 @@
       "data/cost_data_with_errors.csv"
     ],
     "prompt_sha256": "0d3a71af578bfc8a7fb02338c1a3f429f2d733b5d2fd0e61ea80cbac5167dd65",
-    "generated_at": "2026-11-07T13:11:15+08:00"
+    "generated_at": "2026-11-07T13:18:13+08:00"
   }
 }
