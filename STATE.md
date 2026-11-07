@@ -226,3 +226,10 @@
 - 驗證：pytest test_reqloop_repair.py 111 passed；g2 -k effects_20261105 3 passed（json 與源檔交叉核對）；review_r1169 守衛 1 passed；無分歧、無需改字。
 - 紅線：未動 main／未自 push／未讀 hidden·scorer／未改凍結快照／1753 維持排除；0 模型呼叫、0 元、0 發射。
 - r1174: dab_426 切片預檢證據對＋守衛測試（P20261107_0735-1，7293bf60）：0 模型呼叫、可重現反例落盤（bad 1P/1F、good 2/2 PASS、針不進證據）；待點名發射。
+## r1175（2026-11-07；vq-el4.1：G2.5 自動擷取需求 extract.py——quote 逐字＋白名單＋unverified，fail-closed）
+- 做了：`vacant_network/reqloop/extract.py`（新）——`extract_requirements(user_text, client)` → `RequirementSet＋ExtractReport`：quote 非原文逐字片段→丟棄（嚴格子字串優先，空白正規化兜底；改寫必掛）；verifier 不在白名單→`unverified=True`（檢查時一律 UNKNOWN、絕不假裝 PASS）；必要參數缺失/空或 kv/plain recompute.type 不支援→同樣 unverified；模型輸出不可解析或 client 例外→空集合＋報告（fail-closed）。client 協定 `complete(prompt)->str`（假 client 測；el4.2 注入 OpenAI 相容實作）；`hidden` 一律強制 False（擷取輸入只有使用者原文）。
+- checks.py：加單一事實來源 `_VERIFIER_DISPATCH`＋`SUPPORTED_VERIFIERS`（12）＋`KV_RECOMPUTE_TYPES`（7）/`PLAIN_RECOMPUTE_TYPES`（6）；`run_requirement_checks` 改走該表——分派與 UNKNOWN 語意逐行不變。
+- 驗證：`tests/test_reqloop_extract.py` 32/32（含兩條驗收：改寫 quote 被丟棄、未知 verifier 變 unverified；＋unverified 檢查時=UNKNOWN、bad recompute type、缺參/空參、非物件、壞 kind、hidden 強制 false、fence JSON 解析、垃圾輸出 fail-closed、client 例外、白名單釘住、KV/PLAIN 型別集與 checks.py 源碼分派鏈核對）；reqloop 全線＋intake 全綠（含 r1169 重做檢查）。
+- 紅燈修好：r1169 守衛紅是 `~/dev/ops/loop/NOW.md` 改寫時漏「第 1xxx 輪」頭；本輪補回（≤3KB）→轉綠。
+- 紅線：未動 main／未自 push／未讀 hidden·scorer／未加 regex·靜態處方·重試／未改凍結快照／1753 維持排除；el4.1 零模型呼叫、0 元、0 發射。
+- 票：vq-el4.1 關閉；下一票 vq-el4.2（OpenAI 相容 client，`secrets/extract.env` 已建未用；注入式不硬編碼）。

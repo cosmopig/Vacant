@@ -1506,6 +1506,13 @@ def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Pa
     return tuple(preserved), tuple(mutated)
 
 
+# kv_recomputed 支援的重算型別（與下方 rtype 分派鏈保持同步；
+# 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
+KV_RECOMPUTE_TYPES: frozenset[str] = frozenset(
+    {"count_if", "zcount3", "mean_int_col", "max_row_first", "pearson2", "col_stats", "null_count"}
+)
+
+
 def check_kv_recomputed(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -2091,6 +2098,13 @@ def _fee_ids_lookup(
     return tuple(sorted(int(f["ID"]) for f in fees if isinstance(f, dict) and "ID" in f and _fits(f)))
 
 
+# plain_recomputed 支援的重算型別（與下方 rtype 分派鏈保持同步；
+# 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
+PLAIN_RECOMPUTE_TYPES: frozenset[str] = frozenset(
+    {"fee_ids_lookup", "mode_col", "cond_rate", "unique_count", "col_max", "scheme_fee_avg"}
+)
+
+
 def check_plain_recomputed(
     task_dir: pathlib.Path,
     deliverable_dir: pathlib.Path,
@@ -2460,6 +2474,34 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
 
 
 
+def _no_task_dir(fn):
+    """把 (deliverable_dir, item) 簽名包成統一 (task_dir, deliverable_dir, item)。"""
+    def _wrapped(task_dir: pathlib.Path, deliverable_dir: pathlib.Path, item: RequirementItem) -> ClaimResult:
+        return fn(deliverable_dir, item)
+    return _wrapped
+
+
+# verifier 白名單——單一事實來源（G2.5 vq-el4.1）。
+# run_requirement_checks 依本表分派；vacant_network.reqloop.extract 的白名單由此派生。
+# 不准在其他地方另造第二份清單。
+_VERIFIER_DISPATCH: dict[str, Any] = {
+    "csv_structure": _no_task_dir(check_csv_structure),
+    "table_structure": _no_task_dir(check_csv_structure),
+    "monthly_sales_metrics": check_monthly_sales_metrics,
+    "monthly_top_products": check_monthly_top_products,
+    "summary_metrics_consistency": check_summary_metrics_consistency,
+    "rowset_filter": check_rowset_filter,
+    "group_aggregate": check_group_aggregate,
+    "summary_numbers": check_summary_numbers,
+    "answer_kv": check_answer_kv,
+    "kv_recomputed": check_kv_recomputed,
+    "plain_recomputed": check_plain_recomputed,
+    "tag_format": _no_task_dir(check_tag_format),
+}
+
+SUPPORTED_VERIFIERS: frozenset[str] = frozenset(_VERIFIER_DISPATCH)
+
+
 def run_requirement_checks(
     task_dir: str | pathlib.Path,
     req_set: RequirementSet,
@@ -2487,29 +2529,8 @@ def run_requirement_checks(
             continue
 
         vname = item.verifier
-        if vname in ("csv_structure", "table_structure"):
-            res = check_csv_structure(d_dir, item)
-        elif vname == "monthly_sales_metrics":
-            res = check_monthly_sales_metrics(t_dir, d_dir, item)
-        elif vname == "monthly_top_products":
-            res = check_monthly_top_products(t_dir, d_dir, item)
-        elif vname == "summary_metrics_consistency":
-            res = check_summary_metrics_consistency(t_dir, d_dir, item)
-        elif vname == "rowset_filter":
-            res = check_rowset_filter(t_dir, d_dir, item)
-        elif vname == "group_aggregate":
-            res = check_group_aggregate(t_dir, d_dir, item)
-        elif vname == "summary_numbers":
-            res = check_summary_numbers(t_dir, d_dir, item)
-        elif vname == "answer_kv":
-            res = check_answer_kv(t_dir, d_dir, item)
-        elif vname == "kv_recomputed":
-            res = check_kv_recomputed(t_dir, d_dir, item)
-        elif vname == "plain_recomputed":
-            res = check_plain_recomputed(t_dir, d_dir, item)
-        elif vname == "tag_format":
-            res = check_tag_format(d_dir, item)
-        else:
+        fn = _VERIFIER_DISPATCH.get(vname)
+        if fn is None:
             # 未知檢查器：依規則一律標記為 UNKNOWN，不得假裝 PASS
             results.append(
                 ClaimResult(
@@ -2525,6 +2546,6 @@ def run_requirement_checks(
             )
             continue
 
-        results.append(res)
+        results.append(fn(t_dir, d_dir, item))
 
     return results
