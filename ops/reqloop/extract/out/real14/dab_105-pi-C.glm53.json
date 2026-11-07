@@ -1,0 +1,69 @@
+{
+  "task_id": "dab_105-pi-C",
+  "items": [
+    {
+      "id": "req-1",
+      "quote": "Calculate the correlation coefficient between ApplicantIncome and LoanAmount.",
+      "deliverable": "@correlation_coefficient[corr_coeff]",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "correlation_coefficient",
+        "data_file": "data/test_Y3wMUE5_7gLdaTN.csv",
+        "recompute": {
+          "type": "pearson2",
+          "col_a": "ApplicantIncome",
+          "col_b": "LoanAmount",
+          "round": 2
+        }
+      },
+      "description": "計算 ApplicantIncome 與 LoanAmount 的 Pearson 相關係數，忽略任一欄缺值的列，四捨五入到小數兩位，與答案檔 @correlation_coefficient 值比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-2",
+      "quote": "@correlation_coefficient[corr_coeff] where \"corr_coeff\" is a number between -1 and 1, rounded to two decimal places",
+      "deliverable": "@correlation_coefficient[corr_coeff]",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "number"
+      },
+      "description": "答案必須以 @correlation_coefficient[數值] 格式交付，數值介於 -1 與 1 之間且四捨五入至兩位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req-1",
+      "req-2"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "req-2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "provenance": {
+    "cell": "dab_105-pi-C",
+    "role": "good",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_105-pi-C/task",
+    "user_text_chars": 673,
+    "data_files": [
+      "data/test_Y3wMUE5_7gLdaTN.csv"
+    ],
+    "generated_at": "2026-11-07T12:41:37+08:00"
+  }
+}

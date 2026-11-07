@@ -401,7 +401,7 @@ def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
     doc = req.to_dict()
     doc.update({
         "model": model,
-        "report": report,
+        "report": report.to_dict(),
         "provenance": {
             "cell": cell.cell,
             "role": cell.role,

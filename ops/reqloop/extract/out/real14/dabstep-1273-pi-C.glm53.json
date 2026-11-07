@@ -1,0 +1,71 @@
+{
+  "task_id": "dabstep-1273-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/fees.json",
+        "recompute": {
+          "type": "scheme_fee_avg",
+          "scheme": "GlobalCard",
+          "is_credit": true,
+          "amount": 10,
+          "round": 6
+        }
+      },
+      "description": "答案檔 answer.txt 應為 GlobalCard、credit 交易、金額 10 EUR 的平均費用（fixed_amount + rate*amount/10000 的均值，null 欄位視為 wildcard），以 EUR 表示並四捨五入至 6 位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/fees.json",
+        "recompute": {
+          "type": "scheme_fee_avg",
+          "scheme": "GlobalCard",
+          "is_credit": true,
+          "amount": 10,
+          "round": 6
+        }
+      },
+      "description": "answer.txt 必須存在且只包含最終答案數字（不得含其他文字），數值需與自 data/fees.json 重算之平均費用一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "provenance": {
+    "cell": "dabstep-1273-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-1273-pi-C/task",
+    "user_text_chars": 1146,
+    "data_files": [
+      "data/fees.json",
+      "data/manual.md"
+    ],
+    "generated_at": "2026-11-07T12:42:28+08:00"
+  }
+}
