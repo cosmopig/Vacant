@@ -278,7 +278,23 @@ def check_monthly_sales_metrics(
             authority=item.authority,
         )
 
+    input_csv = str(item.params.get("input_csv", "orders.csv")).strip()
+    if not input_csv or not (task_dir / input_csv).is_file():
+        return _result(
+            item,
+            "UNKNOWN",
+            f"原始輸入不存在: {input_csv or 'orders.csv'}；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": f"missing_input_csv:{input_csv or 'orders.csv'}"},
+        )
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
+    expected_months = item.params.get("expected_months", sorted(expected_metrics.keys()))
+    if not expected_metrics or not isinstance(expected_months, list) or not expected_months:
+        return _result(
+            item,
+            "UNKNOWN",
+            "原始資料重算無有效月份指標；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": "empty_expected_months"},
+        )
     atol = float(item.params.get("atol", 0.01))
     include_expected = bool(item.params.get("expected_in_evidence", True))
 
@@ -289,7 +305,6 @@ def check_monthly_sales_metrics(
         if m:
             deliv_by_month[m.strip()] = r
 
-    expected_months = item.params.get("expected_months", sorted(expected_metrics.keys()))
     mismatches = []
     counterexamples = []
 
@@ -414,7 +429,23 @@ def check_monthly_top_products(
             authority=item.authority,
         )
 
+    input_csv = str(item.params.get("input_csv", "orders.csv")).strip()
+    if not input_csv or not (task_dir / input_csv).is_file():
+        return _result(
+            item,
+            "UNKNOWN",
+            f"原始輸入不存在: {input_csv or 'orders.csv'}；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": f"missing_input_csv:{input_csv or 'orders.csv'}"},
+        )
     _, expected_top, _ = recompute_orders_monthly(task_dir, item.params)
+    expected_months = item.params.get("expected_months", sorted(expected_top.keys()))
+    if not expected_top or not isinstance(expected_months, list) or not expected_months:
+        return _result(
+            item,
+            "UNKNOWN",
+            "原始資料重算無有效月份排行；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": "empty_expected_months"},
+        )
     top_n = int(item.params.get("top_n", 3))
     include_expected = bool(item.params.get("expected_in_evidence", True))
 
@@ -424,7 +455,6 @@ def check_monthly_top_products(
         if m:
             deliv_by_month[m.strip()] = r
 
-    expected_months = item.params.get("expected_months", sorted(expected_top.keys()))
     mismatches = []
     counterexamples = []
 
@@ -577,8 +607,23 @@ def check_summary_metrics_consistency(
             authority=item.authority,
         )
 
+    input_csv = str(item.params.get("input_csv", "orders.csv")).strip()
+    if not input_csv or not (task_dir / input_csv).is_file():
+        return _result(
+            item,
+            "UNKNOWN",
+            f"原始輸入不存在: {input_csv or 'orders.csv'}；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": f"missing_input_csv:{input_csv or 'orders.csv'}"},
+        )
     content = deliv_file.read_text(encoding="utf-8")
     expected_metrics, _, _ = recompute_orders_monthly(task_dir, item.params)
+    if not expected_metrics:
+        return _result(
+            item,
+            "UNKNOWN",
+            "原始資料重算無有效月份指標；無法可靠重算，依規則標 UNKNOWN",
+            {"reason": "empty_expected_metrics"},
+        )
     total_expected_sales = sum(m["net_sales"] for m in expected_metrics.values())
 
     atol = float(item.params.get("atol", 0.05))
@@ -834,7 +879,11 @@ def load_table(task_dir: pathlib.Path, params: dict[str, Any]) -> list[dict[str,
 
 def apply_flatten(rows: list[dict[str, Any]], specs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """把 JSON 巢狀欄位（path=a.b.c）攤平到 row[as]；缺失依 impute 填補。"""
+    if not isinstance(specs, list):
+        raise UnknownSource("flatten 須為列表")
     for spec in specs:
+        if not isinstance(spec, dict):
+            raise UnknownSource("flatten 元素須為物件")
         path = [p for p in str(spec.get("path", "")).split(".") if p]
         if not path:
             raise UnknownSource("flatten.path 缺失")
@@ -849,7 +898,11 @@ def apply_flatten(rows: list[dict[str, Any]], specs: list[dict[str, Any]]) -> li
 
 
 def _cond_holds(row: dict[str, Any], cond: dict[str, Any]) -> bool:
+    if not isinstance(cond, dict):
+        raise UnknownSource("篩選條件須為物件")
     col = str(cond.get("col", "")).strip().lower()
+    if not col:
+        raise UnknownSource("篩選條件缺少 col")
     op = str(cond.get("op", "eq")).strip().lower()
     value = cond.get("value")
     left_raw = row.get(col, "")
@@ -880,7 +933,10 @@ def _cond_holds(row: dict[str, Any], cond: dict[str, Any]) -> bool:
 
 def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
     """exclude → dedup_by（保留第一筆）→ include。"""
-    for cond in params.get("exclude", []) or []:
+    exclude_specs = params.get("exclude", []) or []
+    if not isinstance(exclude_specs, list):
+        raise UnknownSource("exclude 須為條件列表")
+    for cond in exclude_specs:
         rows = [r for r in rows if not _cond_holds(r, cond)]
     dedup_by = params.get("dedup_by")
     if dedup_by:
@@ -895,14 +951,22 @@ def apply_pipeline(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[d
                 seen.add(k)
             out.append(r)
         rows = out
-    for cond in params.get("include", []) or []:
+    include_specs = params.get("include", []) or []
+    if not isinstance(include_specs, list):
+        raise UnknownSource("include 須為條件列表")
+    for cond in include_specs:
         rows = [r for r in rows if _cond_holds(r, cond)]
     return rows
 
 
 def apply_compute(rows: list[dict[str, Any]], params: dict[str, Any]) -> list[dict[str, Any]]:
     """逐列計算派生欄位（compute: name + 安全運算式）。"""
-    for spec in params.get("compute", []) or []:
+    compute_specs = params.get("compute", []) or []
+    if not isinstance(compute_specs, list):
+        raise UnknownSource("compute 須為列表")
+    for spec in compute_specs:
+        if not isinstance(spec, dict):
+            raise UnknownSource("compute 元素須為物件")
         name = str(spec.get("name", "")).strip()
         if not name:
             raise UnknownSource("compute.name 缺失")
@@ -1003,10 +1067,18 @@ def check_rowset_filter(
     params = dict(item.params)
     try:
         rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
-        identity = [str(c).strip().lower() for c in params.get("identity", []) or []]
+        raw_identity = params.get("identity", []) or []
+        if not isinstance(raw_identity, list):
+            raise UnknownSource("rowset_filter.params.identity 須為列表")
+        identity = [str(c).strip().lower() for c in raw_identity if isinstance(c, str) and c.strip()]
         if not identity:
             raise UnknownSource("rowset_filter.params.identity 缺失")
-        values_spec: dict[str, Any] = params.get("values", {}) or {}
+        raw_values = params.get("values")
+        if raw_values is not None and not isinstance(raw_values, dict):
+            raise UnknownSource("rowset_filter.params.values 須為物件")
+        values_spec: dict[str, Any] = raw_values or {}
+        if not values_spec and not (params.get("exclude") or params.get("include") or params.get("dedup_by")):
+            raise UnknownSource("rowset_filter.params 缺少 values 與篩選條件；無法構成有效重算")
         expected: list[dict[str, Any]] = []
         for r in rows:
             er = {c: r.get(c, "") for c in identity}
@@ -1146,13 +1218,18 @@ def check_group_aggregate(
     params = dict(item.params)
     try:
         rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
-        group_by = [str(g).strip().lower() for g in params.get("group_by", []) or []]
+        raw_group_by = params.get("group_by", []) or []
+        if not isinstance(raw_group_by, list):
+            raise UnknownSource("group_aggregate.params.group_by 須為列表")
+        group_by = [str(g).strip().lower() for g in raw_group_by if isinstance(g, str) and g.strip()]
         if not group_by:
             raise UnknownSource("group_aggregate.params.group_by 缺失")
         agg_specs = params.get("aggregates", []) or []
-        if not agg_specs:
-            raise UnknownSource("group_aggregate.params.aggregates 缺失")
+        if not isinstance(agg_specs, list) or not agg_specs or not all(isinstance(s, dict) for s in agg_specs):
+            raise UnknownSource("group_aggregate.params.aggregates 缺失或非物件列表")
         norm = params.get("group_normalize", {}) or {}
+        if not isinstance(norm, dict):
+            raise UnknownSource("group_aggregate.params.group_normalize 須為物件")
 
         groups: dict[tuple[str, ...], list[dict[str, Any]]] = {}
         for r in rows:
@@ -1356,6 +1433,20 @@ def check_answer_kv(task_dir: pathlib.Path, deliverable_dir: pathlib.Path,
         return _result(item, "UNKNOWN",
                        "answer_kv.params.keys 缺失；無法可靠檢查答案檔格式",
                        {"reason": "no keys spec"})
+    for spec in specs:
+        if not isinstance(spec, dict):
+            return _result(item, "UNKNOWN",
+                           "answer_kv.params.keys 元素須為物件；無法可靠檢查答案檔格式",
+                           {"reason": "key_spec_not_dict"})
+        key = str(spec.get("key", "")).strip().lower()
+        if not key:
+            return _result(item, "UNKNOWN",
+                           "answer_kv.params.keys[].key 缺失；無法可靠檢查答案檔格式",
+                           {"reason": "missing_key_name"})
+        cons = str(spec.get("type", "number")).strip().lower()
+        if cons not in ("number", "integer", "nonneg_int", "number_in_01"):
+            return _result(item, "UNKNOWN",
+                           f"未知約束型別：{cons}（不猜）", {"bad_constraint": cons})
     deliv_file = deliverable_dir / item.deliverable
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"答案檔不存在：{item.deliverable}",
@@ -1565,24 +1656,6 @@ def check_kv_recomputed(
     except (UnknownSource, OSError, json.JSONDecodeError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
-    # vq-5nz.18：先驗交付物格式（交付物事實，可見且無歧義），再重算資料（語意歧義可 UNKNOWN）。
-    # 缺失/格式錯答案仍 FAIL——不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
-    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
-    if val_str is None:
-        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
-                       {"key": key, "problem": problems[0], "data_file": data_rel,
-                        "expected_in_evidence": False})
-    try:
-        got = float(val_str.replace(",", "").strip())
-    except ValueError:
-        return _result(item, "FAIL", "答案值不可解析為數字",
-                       {"key": key, "problem": "not_a_number", "value": val_str,
-                        "expected_in_evidence": False})
-    if not math.isfinite(got):
-        return _result(item, "FAIL", "答案值不可解析為數字",
-                       {"key": key, "problem": "not_a_number", "value": val_str,
-                        "expected_in_evidence": False})
-
     unrounded_int_expected: float | None = None
     try:
         rtype = str(rc.get("type", "")).strip().lower()
@@ -1591,6 +1664,8 @@ def check_kv_recomputed(
             eq = rc.get("eq")
             if not col or eq is None:
                 raise UnknownSource("count_if 需要 col 與 eq")
+            if not rows or col not in rows[0]:
+                raise UnknownSource(f"資料檔找不到欄 {col!r}")
             try:
                 eq_num = float(eq)
             except (TypeError, ValueError):
@@ -1612,6 +1687,8 @@ def check_kv_recomputed(
             col = str(rc.get("col", "")).strip()
             if not col:
                 raise UnknownSource("zcount3 需要 col")
+            if not rows or col not in rows[0]:
+                raise UnknownSource(f"資料檔找不到欄 {col!r}")
             vals: list[float] = []
             for r in rows:
                 try:
@@ -1638,6 +1715,8 @@ def check_kv_recomputed(
             col_b = str(rc.get("col_b", "")).strip()
             if not col_a or not col_b:
                 raise UnknownSource("pearson2 需要 col_a 與 col_b")
+            if not rows or col_a not in rows[0] or col_b not in rows[0]:
+                raise UnknownSource(f"資料檔找不到欄 {col_a!r} 或 {col_b!r}")
             xs: list[float] = []
             ys: list[float] = []
             for r in rows:
@@ -1673,6 +1752,22 @@ def check_kv_recomputed(
             expected = round(expected, rnd)
     except (UnknownSource, OSError) as e:
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
+    val_str, problems = _kv_answer_value(deliverable_dir, item, key)
+    if val_str is None:
+        return _result(item, "FAIL", f"答案值不可用（{problems[0]}）；值正確性無法成立",
+                       {"key": key, "problem": problems[0], "data_file": data_rel,
+                        "expected_in_evidence": False})
+    try:
+        got = float(val_str.replace(",", "").strip())
+    except ValueError:
+        return _result(item, "FAIL", "答案值不可解析為數字",
+                       {"key": key, "problem": "not_a_number", "value": val_str,
+                        "expected_in_evidence": False})
+    if not math.isfinite(got):
+        return _result(item, "FAIL", "答案值不可解析為數字",
+                       {"key": key, "problem": "not_a_number", "value": val_str,
+                        "expected_in_evidence": False})
 
     atol = float(p.get("atol", 1e-6))
     rule_desc = f"{str(rc.get('type'))}: {data_rel} {json.dumps({k: v for k, v in rc.items() if k not in ('type', 'note')}, ensure_ascii=False)}"
@@ -2189,9 +2284,31 @@ def check_plain_recomputed(
         return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
     rtype = str(rc.get("type", "")).strip().lower()
-    # vq-5nz.18：先驗交付物格式（交付物事實，可見且無歧義），再重算資料
-    # （資料語意歧義可 UNKNOWN）。不可解析/空答案仍 FAIL——e014 prose 草稿被記錄
-    # pass=False；格式違規不得被資料側 UNKNOWN 掩掉（紅線：bad 草稿必有一條必需 FAIL）。
+    try:
+        if rtype == "mode_col":
+            expected: Any = _mode_col(rows, rc)
+        elif rtype == "cond_rate":
+            expected = _cond_rate(rows, rc)
+        elif rtype == "fee_ids_lookup":
+            expected = _fee_ids_lookup(rows, rc, task_dir)
+        elif rtype == "unique_count":
+            expected = _unique_count(rows, rc)
+        elif rtype == "col_max":
+            expected = _col_max(rows, rc)
+        elif rtype == "scheme_fee_avg":
+            expected = _scheme_fee_avg(rows, rc)
+        else:
+            raise UnknownSource(f"不支援的重算規則: {rtype!r}")
+        if isinstance(expected, (int, float)) and not isinstance(expected, bool):
+            if not math.isfinite(float(expected)):
+                raise UnknownSource("重算結果非有限數值")
+        rnd = rc.get("round")
+        if (isinstance(rnd, int) and not isinstance(rnd, bool)
+                and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
+            expected = round(expected, rnd)
+    except (UnknownSource, OSError) as e:
+        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
+
     deliv_file = deliverable_dir / item.deliverable
     if not deliv_file.is_file():
         return _result(item, "FAIL", f"答案檔缺失（{item.deliverable}）",
@@ -2219,7 +2336,7 @@ def check_plain_recomputed(
     elif not val_str:
         return _result(item, "FAIL", "答案值缺失（空檔）",
                        {"problem": "empty_value", "expected_in_evidence": False})
-    else:
+    elif rtype != "mode_col":
         try:
             got_pre = float(val_str)
         except ValueError:
@@ -2230,31 +2347,6 @@ def check_plain_recomputed(
             return _result(item, "FAIL", "答案值不可解析為數字",
                            {"problem": "not_a_number", "value": val_str,
                             "expected_in_evidence": False})
-
-    try:
-        if rtype == "mode_col":
-            expected: Any = _mode_col(rows, rc)
-        elif rtype == "cond_rate":
-            expected = _cond_rate(rows, rc)
-        elif rtype == "fee_ids_lookup":
-            expected = _fee_ids_lookup(rows, rc, task_dir)
-        elif rtype == "unique_count":
-            expected = _unique_count(rows, rc)
-        elif rtype == "col_max":
-            expected = _col_max(rows, rc)
-        elif rtype == "scheme_fee_avg":
-            expected = _scheme_fee_avg(rows, rc)
-        else:
-            raise UnknownSource(f"不支援的重算規則: {rtype!r}")
-        if isinstance(expected, (int, float)) and not isinstance(expected, bool):
-            if not math.isfinite(float(expected)):
-                raise UnknownSource("重算結果非有限數值")
-        rnd = rc.get("round")
-        if (isinstance(rnd, int) and not isinstance(rnd, bool)
-                and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
-            expected = round(expected, rnd)
-    except (UnknownSource, OSError) as e:
-        return _result(item, "UNKNOWN", f"無法可靠重算（{e}）；依規則不自評", {"reason": str(e)})
 
     if got_ids is not None:
         if got_ids == set(expected):
@@ -2282,10 +2374,12 @@ def check_plain_recomputed(
             got = float(val_str)
         except ValueError:
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
         if not math.isfinite(got):
             return _result(item, "FAIL", "答案值不可解析為數字",
-                           {"problem": "not_a_number", "value": val_str})
+                           {"problem": "not_a_number", "value": val_str,
+                            "expected_in_evidence": False})
         atol = float(p.get("atol", 1e-6))
         ok = abs(got - exp_num) <= atol
     else:
@@ -2312,8 +2406,8 @@ def check_summary_numbers(
     try:
         rows = apply_compute(apply_pipeline(load_table(task_dir, params), params), params)
         numbers = params.get("numbers", []) or []
-        if not numbers:
-            raise UnknownSource("summary_numbers.params.numbers 缺失")
+        if not isinstance(numbers, list) or not numbers or not all(isinstance(n, dict) for n in numbers):
+            raise UnknownSource("summary_numbers.params.numbers 缺失或非物件列表")
         expected: list[tuple[str, Any]] = []
         for n in numbers:
             t = str(n.get("type", "")).strip().lower()

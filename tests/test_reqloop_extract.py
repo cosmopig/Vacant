@@ -341,3 +341,158 @@ def test_default_prompt_lists_whitelist_and_no_secrets():
     low = p.lower()
     assert "scorer" not in low and "hidden" not in low
     assert "sk-" not in p and "key=" not in p.lower()
+
+
+# ---------------------------------------------------------------- argon 20261107_0822 回歸
+
+def test_extract_validates_all_verifiers_and_subparams(tmp_path):
+    """argon 20261107_0822 回歸：
+    1. rowset_filter / group_aggregate / summary_numbers / monthly_* 缺必要參數或子欄位時必須標 unverified=True；
+    2. answer_kv 的 keys 元素非 dict 或缺 key / type 非法時標 unverified=True；
+    3. kv_recomputed / plain_recomputed 各 rtype 缺子參數（如 col / sel_col / out_col / col_a / col_b / stat / where / num_where / fees_file 等）標 unverified=True；
+    4. 模型設 required=False 時強制 required=True（防繞過門禁）；重複 id 自動消歧。
+    """
+    items = [
+        # 0: rowset_filter 缺 values 與篩選條件，且試圖設 required=False 繞過門禁
+        {
+            "id": "dup_id",
+            "quote": "Calculate the mean of the column 'No. of cases' in data/estimated_numbers.csv.",
+            "deliverable": "out.csv",
+            "verifier": "rowset_filter",
+            "params": {"input_csv": "orders.csv", "identity": ["id"]},
+            "required": False,
+        },
+        # 1: answer_kv keys 內為字串而非 dict（且 id 與前一條重複）
+        {
+            "id": "dup_id",
+            "quote": "Answer format: @mean_cases[mean_value] where mean_value is a positive integer.",
+            "deliverable": "answer.txt",
+            "verifier": "answer_kv",
+            "params": {"keys": ["mean_cases"]},
+        },
+        # 2: group_aggregate 缺 input_csv/input_json
+        {
+            "id": "req_ga_no_input",
+            "quote": "Ignore records where the value is Null or empty.",
+            "deliverable": "out.csv",
+            "verifier": "group_aggregate",
+            "params": {"group_by": ["a"], "aggregates": [{"name": "n", "type": "count"}]},
+        },
+        # 3: group_aggregate 聚合類型不支援
+        {
+            "id": "req_ga_bad_agg",
+            "quote": "Ignore records where the value is Null or empty.",
+            "deliverable": "out.csv",
+            "verifier": "group_aggregate",
+            "params": {
+                "input_csv": "t.csv",
+                "group_by": ["a"],
+                "aggregates": [{"name": "m", "type": "median"}],
+            },
+        },
+        # 4: summary_numbers numbers 元素 type 不支援
+        {
+            "id": "req_sn_bad_num",
+            "quote": "Ignore records where the value is Null or empty.",
+            "deliverable": "summary.md",
+            "verifier": "summary_numbers",
+            "params": {
+                "input_csv": "t.csv",
+                "numbers": [{"type": "harmonic_mean", "label": "x"}],
+            },
+        },
+        # 5: kv_recomputed mean_int_col 缺 col
+        {
+            "id": "req_kv_no_col",
+            "quote": "Calculate the mean of the column 'No. of cases' in data/estimated_numbers.csv.",
+            "deliverable": "answer.txt",
+            "verifier": "kv_recomputed",
+            "params": {
+                "key": "mean_cases",
+                "data_file": "data/estimated_numbers.csv",
+                "recompute": {"type": "mean_int_col"},
+            },
+        },
+        # 6: kv_recomputed pearson2 缺 col_b
+        {
+            "id": "req_kv_no_colb",
+            "quote": "Calculate the mean of the column 'No. of cases' in data/estimated_numbers.csv.",
+            "deliverable": "answer.txt",
+            "verifier": "kv_recomputed",
+            "params": {
+                "key": "r",
+                "data_file": "data/estimated_numbers.csv",
+                "recompute": {"type": "pearson2", "col_a": "a"},
+            },
+        },
+        # 7: plain_recomputed cond_rate 缺 num_where
+        {
+            "id": "req_plain_no_num_where",
+            "quote": "Ignore records where the value is Null or empty.",
+            "deliverable": "answer.txt",
+            "verifier": "plain_recomputed",
+            "params": {
+                "data_file": "data/estimated_numbers.csv",
+                "recompute": {
+                    "type": "cond_rate",
+                    "where": [{"col": "a", "op": "eq", "value": "1"}],
+                },
+            },
+        },
+        # 8: params 非 dict
+        {
+            "id": "req_params_not_dict",
+            "quote": "Ignore records where the value is Null or empty.",
+            "deliverable": "out.csv",
+            "verifier": "monthly_sales_metrics",
+            "params": ["not", "a", "dict"],
+        },
+    ]
+    req, report = build_requirement_set("t_guard", items, USER_TEXT)
+    assert len(req.items) == len(items)
+    # 重複 id 已消歧，不覆寫
+    ids = [i.id for i in req.items]
+    assert len(set(ids)) == len(ids)
+    assert ids[0] == "dup_id" and ids[1] == "dup_id_1"
+    # 所有條目強制 required=True，且因參數殘缺一律 unverified=True
+    assert all(i.required is True for i in req.items)
+    assert all(i.unverified is True for i in req.items)
+    reasons = {u.id: u.reason for u in report.unverified}
+    assert reasons["dup_id"] == "missing_param:values"
+    assert reasons["dup_id_1"] == "invalid_key_spec"
+    assert reasons["req_ga_no_input"] == "missing_param:input_csv_or_json"
+    assert reasons["req_ga_bad_agg"] == "unsupported_aggregate_type:median"
+    assert reasons["req_sn_bad_num"] == "unsupported_summary_number_type:harmonic_mean"
+    assert reasons["req_kv_no_col"] == "missing_recompute_param:col"
+    assert reasons["req_kv_no_colb"] == "missing_recompute_param:col_b"
+    assert reasons["req_plain_no_num_where"] == "missing_recompute_param:num_where"
+    assert reasons["req_params_not_dict"] == "params_not_object"
+
+    # 送入 checks.run_requirement_checks 時一律回傳 UNKNOWN，絕不假 PASS 或拋例外
+    (tmp_path / "orders.csv").write_text("id,amt\n1,10\n", encoding="utf-8")
+    (tmp_path / "out.csv").write_text("id,amt\n1,999999\n", encoding="utf-8")
+    (tmp_path / "answer.txt").write_text("@mean_cases[10]\n", encoding="utf-8")
+    results = checks.run_requirement_checks(tmp_path, req, tmp_path)
+    assert all(r.status == "UNKNOWN" for r in results)
+
+
+def test_parse_model_output_handles_multiple_fences_and_braces_in_prose():
+    """argon 20261107_0822 回歸：
+    模型先輸出說明文字（含 {key: val} 或 [備註]）或多段 code fence 時，
+    parse_model_output 必須正確抽出 JSON 陣列，不因貪婪正則跨段而失敗。
+    """
+    raw_multi_fence = (
+        "先看欄位說明：\n```text\n欄位 {No. of cases} 為字串\n```\n"
+        "擷取結果如下：\n```json\n"
+        + json.dumps(_valid_items())
+        + "\n```\n說明 [完]"
+    )
+    assert parse_model_output(raw_multi_fence) == _valid_items()
+
+    raw_prose_braces = (
+        "注意格式 {key: value} 與陣列 [a, b]：\n"
+        + json.dumps(_valid_items())
+        + "\n附註：以上符合 {schema} 規範 [done]。"
+    )
+    assert parse_model_output(raw_prose_braces) == _valid_items()
+
