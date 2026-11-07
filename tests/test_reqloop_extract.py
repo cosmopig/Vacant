@@ -572,6 +572,11 @@ def test_task_prompt_shows_param_shape_examples_for_every_supported_verifier():
         assert f"{name}: {VERIFIER_PARAM_EXAMPLES[name]}" in p, name
     for rule in ["必須是 JSON 陣列", "必須是含 type 的物件", "eq/ne/lt/le/gt/ge", "不准猜檔名"]:
         assert rule in p, rule
+    # r1183（P20261107_1024-1）：範例本身不得教錯——exclude 用 eq、group_aggregate 示範 ratio
+    assert '"op": "eq"' in VERIFIER_PARAM_EXAMPLES["rowset_filter"]
+    assert '"op": "ne"' not in VERIFIER_PARAM_EXAMPLES["rowset_filter"]
+    assert '"type": "ratio"' in VERIFIER_PARAM_EXAMPLES["group_aggregate"]
+    assert "同一個 rowset_filter 條目" in p
     # default_prompt 也要帶範例（介面不分裂）
     dp = default_prompt("t")
     for name in sorted(checks.SUPPORTED_VERIFIERS):
@@ -749,3 +754,54 @@ def test_task_prompt_round3_semantic_rules_r1182():
     assert '"type": "ratio"' in p and '"num"' in p and '"den"' in p, "ratio(num/den) 未明寫"
     assert "全部分組欄位" in p, "group_normalize 範圍規則未明寫"
     assert "完整條件集" in p and "rowset_filter 就要 exclude 與 include 都寫" in p, "條件合併規則未明寫"
+
+
+def test_param_examples_rowset_eq_and_group_ratio():
+    """r1183（P20261107_1024-1）：範例逐字檢查——rowset_filter 範例 exclude 是 op:eq
+    （不可 ne，照抄即排空行集）；group_aggregate 範例示範 ratio(num/den)；
+    prompt 裡看得見同一段文字（模型照抄的是 prompt）。
+    """
+    from vacant_network.reqloop.extract import VERIFIER_PARAM_EXAMPLES, build_task_prompt
+
+    rowset_ex = VERIFIER_PARAM_EXAMPLES["rowset_filter"]
+    assert '"op": "eq"' in rowset_ex
+    assert '"op": "ne"' not in rowset_ex
+    group_ex = VERIFIER_PARAM_EXAMPLES["group_aggregate"]
+    assert '"type": "ratio"' in group_ex
+    assert '"num"' in group_ex and '"den"' in group_ex
+    p = build_task_prompt("t")
+    assert '"op": "eq", "value": "CANCELLED"' in p
+    assert '"type": "ratio", "num": "high_count", "den": "total_count"' in p
+
+
+def test_param_problem_flags_exclude_op_ne():
+    """r1183（P20261107_1024-1）：exclude 條件 op:ne 是逆向過濾（「排除非 CANCELLED」
+    會排空行集、重算金額落差誤殺）——_param_problem 回
+    invalid_param:exclude_op_ne、該條目轉 unverified；正常 eq 條件不受影響。
+    """
+    from vacant_network.reqloop.extract import _param_problem
+
+    bad = {
+        "input_csv": "orders.csv",
+        "identity": ["order_id"],
+        "exclude": [{"col": "status", "op": "ne", "value": "CANCELLED"}],
+    }
+    assert _param_problem("rowset_filter", bad) == "invalid_param:exclude_op_ne"
+    ok = dict(bad)
+    ok["exclude"] = [{"col": "status", "op": "eq", "value": "CANCELLED"}]
+    assert _param_problem("rowset_filter", ok) is None
+
+    items = _valid_items()
+    items[0].update(
+        id="req_rowset_ne",
+        quote="Ignore records where the value is Null or empty.",
+        deliverable="out.csv",
+        verifier="rowset_filter",
+        params=bad,
+    )
+    req, report = build_requirement_set("t1", items, USER_TEXT)
+    assert req.items[0].unverified is True
+    assert any(
+        u.id == "req_rowset_ne" and u.reason == "invalid_param:exclude_op_ne"
+        for u in report.unverified
+    )

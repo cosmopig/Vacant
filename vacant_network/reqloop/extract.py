@@ -318,6 +318,13 @@ def _param_problem(verifier: str, params: dict[str, Any]) -> str | None:
                             return "invalid_param:values"
                     else:
                         return "invalid_param:values"
+            # r1183（P20261107_1024-1）：exclude 條件 op:ne 是逆向過濾（「排除非 CANCELLED」
+            # 會排空行集、重算金額落差誤殺合格產物）——直接判參數缺陷轉 unverified。
+            excl = params.get("exclude")
+            if isinstance(excl, list):
+                for cond in excl:
+                    if isinstance(cond, dict) and cond.get("op") == "ne":
+                        return "invalid_param:exclude_op_ne"
         elif verifier == "group_aggregate":
             gb = params.get("group_by")
             if not isinstance(gb, list) or any(not _non_empty_str(c) for c in gb):
@@ -603,7 +610,11 @@ VERIFIER_PARAM_EXAMPLES: dict[str, str] = {
     "rowset_filter": '{"input_csv": "orders.csv", "identity": ["order_id"],'
                      ' "exclude": [{"col": "status", "op": "eq", "value": "CANCELLED"}]}',
     "group_aggregate": '{"input_csv": "orders.csv", "group_by": ["category"],'
-                       ' "aggregates": [{"name": "total_amount", "type": "sum", "col": "amount"}]}',
+                       ' "group_normalize": {"category": {"lower": true}},'
+                       ' "aggregates": [{"name": "total_count", "type": "count"},'
+                       ' {"name": "high_count", "type": "count_if", "expr": "amount >= 100"},'
+                       ' {"name": "high_rate", "type": "ratio", "num": "high_count",'
+                       ' "den": "total_count", "round": 4}]}',
 }
 
 
@@ -711,7 +722,7 @@ def build_task_prompt(user_text: str, *, data_file: str = "", data_preview: str 
         "   - 原文說「空白剔除不計入平均」時用平均類型 mean_skip_empty（不是 mean）；",
         "   - 條件計數（如及格人數）用 aggregates 的 {\"name\": ..., \"type\": \"count_if\", \"expr\": \"total_score >= 60\"}；",
         "   - exclude/include 語義：exclude 的每個條件＝要排除的列，排除 X 就寫 {\"col\": ..., \"op\": \"eq\", \"value\": X}，不准把算子反寫成 ne；include 的每個條件＝要保留的列，value 可以是欄位名（欄位對欄位比較，如 {\"col\": \"current_stock\", \"op\": \"lt\", \"value\": \"safety_stock\"}）；",
-        "   - 條件合併：rowset_filter／group_aggregate／summary_numbers 的 params 要描述該交付物套用「全部」條件（排除、去重、納入）後的最終行集——即使該條 quote 只提到其中一個條件，也要附上完整條件集（例如原文既有「排除 X」又有「選出 current_stock < safety_stock」，rowset_filter 就要 exclude 與 include 都寫）；「只保留第一筆」類去重用 dedup_by: 欄位名字串；只附部分條件是錯的；",
+        "   - 條件合併：rowset_filter／group_aggregate／summary_numbers 的 params 要描述該交付物套用「全部」條件（排除、去重、納入）後的最終行集——即使該條 quote 只提到其中一個條件，也要附上完整條件集（例如原文既有「排除 X」又有「選出 current_stock < safety_stock」，rowset_filter 就要 exclude 與 include 都寫）；同一交付物的多步過濾/去重/篩選要整合在同一個 rowset_filter 條目裡，不准每步拆成多個獨立條目造成行集缺漏；「只保留第一筆」類去重用 dedup_by: 欄位名字串；只附部分條件是錯的；",
         "   - 原文把某欄位定義為 X ÷ Y 的比率（如 sla_rate＝sla_met_count ÷ ticket_count）時，該欄位聚合必須是 {\"name\": \"sla_rate\", \"type\": \"ratio\", \"num\": \"sla_met_count\", \"den\": \"ticket_count\"}（num/den 引用同列其他聚合的名字）；用 count_if 表達比率是錯的；",
         "   - 原文說「輸出用 lower」或大小寫不分時，group_normalize 要對該交付物的全部分組欄位套 {\"lower\": true}（不只句中點名的那一個欄位）；",
         "   - rowset_filter 只用於行級交付物（每行＝一筆原始紀錄）；交付物是彙總表時改用對應的聚合 verifier 把過濾規則寫進去，不准對彙總表用 rowset_filter；",
