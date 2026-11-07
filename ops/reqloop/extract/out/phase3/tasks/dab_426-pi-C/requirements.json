@@ -1,0 +1,42 @@
+{
+  "task_id": "dab_426-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "max_wind_speed",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {
+          "type": "max_row_first",
+          "sel_col": "max_storm_cat",
+          "out_col": "max_sust_wind"
+        }
+      },
+      "description": "找出 max_storm_cat 最高的風暴（平手取檔案序首列），回傳該列 max_sust_wind，即為最高類別風暴的最大持續風速。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the\nnames given under \"Answer format\" in the task. This task expects 1 item(s):\n`@max_wind_speed[...]`.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "max_wind_speed",
+        "value_type": "number"
+      },
+      "description": "answer.txt 需含 @max_wind_speed[number] 格式項目，數值為 float。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ]
+}

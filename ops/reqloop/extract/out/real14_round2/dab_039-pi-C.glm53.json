@@ -1,0 +1,155 @@
+{
+  "task_id": "dab_039-pi-C",
+  "items": [
+    {
+      "id": "req_answer_keys",
+      "quote": "@is_normal[p_value]\n@transformed_importance_score_mean[mean]\n@transformed_importance_score_std[std]",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "is_normal",
+            "type": "number"
+          },
+          {
+            "key": "transformed_importance_score_mean",
+            "type": "number"
+          },
+          {
+            "key": "transformed_importance_score_std",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 必須含三個答案鍵：is_normal、transformed_importance_score_mean、transformed_importance_score_std，值皆為數字。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req_is_normal_pvalue",
+      "quote": "Use the Shapiro-Wilk test to determine the normality of the data in the \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "is_normal",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "importance.score",
+          "stat": "mean"
+        }
+      },
+      "description": "is_normal 需為 Shapiro-Wilk 檢定的 p 值（介於 0 與 1，四捨五入至小數點後四位）。可用的 recompute 型別不支援 Shapiro-Wilk 檢定，無法程式重算此值，故此條目無法驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "req_transformed_mean",
+      "quote": "Calculate the mean and standard deviation of the transformed \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "transformed_importance_score_mean",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "importance.score",
+          "stat": "mean"
+        }
+      },
+      "description": "transformed_importance_score_mean 需為（條件式 log 轉換後）importance.score 的平均數，四捨五入至兩位小數。可用的 recompute 型別不支援條件式自然對數轉換後的均值，無法程式重算，故此條目無法驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "req_transformed_std",
+      "quote": "Calculate the mean and standard deviation of the transformed \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "transformed_importance_score_std",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {
+          "type": "col_stats",
+          "col": "importance.score",
+          "stat": "sd"
+        }
+      },
+      "description": "transformed_importance_score_std 需為（條件式 log 轉換後）importance.score 的標準差，四捨五入至兩位小數。可用的 recompute 型別不支援條件式自然對數轉換後的標準差，無法程式重算，故此條目無法驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "req_answer_file_format",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "is_normal",
+        "value_type": "number"
+      },
+      "description": "answer.txt 必須存在，且答案項以 @name[value] 格式逐行撰寫。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req_answer_keys",
+      "req_is_normal_pvalue",
+      "req_transformed_mean",
+      "req_transformed_std",
+      "req_answer_file_format"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "req_is_normal_pvalue",
+        "reason": "model_declared_unverified"
+      },
+      {
+        "id": "req_transformed_mean",
+        "reason": "model_declared_unverified"
+      },
+      {
+        "id": "req_transformed_std",
+        "reason": "model_declared_unverified"
+      },
+      {
+        "id": "req_answer_file_format",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req_answer_keys\",\n    \"quote\": \"@is_normal[p_value]\\n@transformed_importance_score_mean[mean]\\n@transformed_importance_score_std[std]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}, {\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}, {\"key\": \"transformed_importance_score_std\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須含三個答案鍵：is_normal、transformed_importance_score_mean、transformed_importance_score_std，值皆為數字。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_is_normal_pvalue\",\n    \"quote\": \"Use the Shapiro-Wilk test to determine the normality of the data in the \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"is_normal\", \"data_file\": \"data/imp.score.ldlr.metabolome.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"importance.score\", \"stat\": \"mean\"}},\n    \"description\": \"is_normal 需為 Shapiro-Wilk 檢定的 p 值（介於 0 與 1，四捨五入至小數點後四位）。可用的 recompute 型別不支援 Shapiro-Wilk 檢定，無法程式重算此值，故此條目無法驗證。\",\n    \"required\": true,\n    \"unverified\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_transformed_mean\",\n    \"quote\": \"Calculate the mean and standard deviation of the transformed \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"transformed_importance_score_mean\", \"data_file\": \"data/imp.score.ldlr.metabolome.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"importance.score\", \"stat\": \"mean\"}},\n    \"description\": \"transformed_importance_score_mean 需為（條件式 log 轉換後）importance.score 的平均數，四捨五入至兩位小數。可用的 recompute 型別不支援條件式自然對數轉換後的均值，無法程式重算，故此條目無法驗證。\",\n    \"required\": true,\n    \"unverified\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_transformed_std\",\n    \"quote\": \"Calculate the mean and standard deviation of the transformed \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"transformed_importance_score_std\", \"data_file\": \"data/imp.score.ldlr.metabolome.csv\", \"recompute\": {\"type\": \"col_stats\", \"col\": \"importance.score\", \"stat\": \"sd\"}},\n    \"description\": \"transformed_importance_score_std 需為（條件式 log 轉換後）importance.score 的標準差，四捨五入至兩位小數。可用的 recompute 型別不支援條件式自然對數轉換後的標準差，無法程式重算，故此條目無法驗證。\",\n    \"required\": true,\n    \"unverified\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_answer_file_format\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"is_normal\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 必須存在，且答案項以 @name[value] 格式逐行撰寫。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "provenance": {
+    "cell": "dab_039-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/task",
+    "user_text_chars": 1905,
+    "data_files": [
+      "data/imp.score.ldlr.metabolome.csv"
+    ],
+    "prompt_sha256": "8a6e702b0b867fbf1315c324749adab1c7c8afebb4ae765b332657bb90078263",
+    "generated_at": "2026-11-07T13:09:30+08:00"
+  }
+}

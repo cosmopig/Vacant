@@ -1,0 +1,35 @@
+{
+  "task_id": "dab_055-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "What is the mean number of cases recorded across all countries and years?",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R2",
+      "quote": "Ignore those records where 'No. of cases' column value is Null or empty.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R3",
+      "quote": "@mean_cases[mean_value] where \"mean_value\" is a positive integer.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R4",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the names given under \"Answer format\" in the task.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R5",
+      "quote": "Convert the data type of 'No. of cases' column from Object (string) to Int64 before performing calculations.",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

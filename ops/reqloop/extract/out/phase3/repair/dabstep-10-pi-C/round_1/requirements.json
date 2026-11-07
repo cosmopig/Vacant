@@ -1,0 +1,11 @@
+{
+  "task_id": "dabstep-10-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "How many unique merchants are present in the dataset?",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

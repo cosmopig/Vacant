@@ -1,0 +1,17 @@
+{
+  "task_id": "dab_426-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R2",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the\nnames given under \"Answer format\" in the task. This task expects 1 item(s):\n`@max_wind_speed[...]`.",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

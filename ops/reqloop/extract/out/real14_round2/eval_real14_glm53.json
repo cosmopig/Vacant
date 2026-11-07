@@ -1,0 +1,127 @@
+{
+  "rows": [
+    {
+      "cell": "dab_035-pi-C",
+      "role": "good",
+      "status": "FALSE",
+      "n_fail": 2,
+      "n_unknown": 1,
+      "detail": "R1: 答案值不可用（missing_file:removed_outliers_count）；值正確性無法; R3: 答案值不可用（missing_file:removed_outliers_count）；值正確性無法"
+    },
+    {
+      "cell": "dab_039-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 3,
+      "n_unknown": 5,
+      "detail": "req_1: 答案檔不存在：answer; req_2: 答案檔不存在：answer"
+    },
+    {
+      "cell": "dab_055-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 1,
+      "detail": "req_mean_cases: 答案值不可用（missing_file:@mean_cases[mean_value]）；值正確性無"
+    },
+    {
+      "cell": "dab_057-pi-A",
+      "role": "good",
+      "status": "FALSE",
+      "n_fail": 2,
+      "n_unknown": 1,
+      "detail": "R1: 答案值不可用（missing_file:@correlation_coefficient[r_val; R3: 答案值不可用（missing_file:@correlation_coefficient[r_val"
+    },
+    {
+      "cell": "dab_105-pi-C",
+      "role": "good",
+      "status": "FALSE",
+      "n_fail": 1,
+      "n_unknown": 1,
+      "detail": "req-1: 答案值不可用（missing_file:@correlation_coefficient[corr_"
+    },
+    {
+      "cell": "dab_378-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 5,
+      "n_unknown": 7,
+      "detail": "R1: 答案檔不存在：answer; R2: 答案值不可用（missing_file:answer）；值正確性無法成立"
+    },
+    {
+      "cell": "dab_426-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 1,
+      "n_unknown": 0,
+      "detail": "req_max_wind_speed: 答案值不可用（missing_file:@max_wind_speed[number]）；值正確性無"
+    },
+    {
+      "cell": "dab_427-pi-A",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 2,
+      "n_unknown": 1,
+      "detail": "1: 答案值不可用（missing_file:answer）；值正確性無法成立; 3: 答案值不可用（missing_file:answer）；值正確性無法成立"
+    },
+    {
+      "cell": "dab_507-pi-A",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 3,
+      "n_unknown": 0,
+      "detail": "1: 答案檔不存在：@total_hotels[count]; 2: 答案值不可用（missing_file:@total_hotels[count]）；值正確性無法成立"
+    },
+    {
+      "cell": "dabstep-10-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 2,
+      "n_unknown": 0,
+      "detail": "1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）; 2: 答案檔格式未達要求（見 counterexamples）"
+    },
+    {
+      "cell": "dabstep-11-pi-A",
+      "role": "good",
+      "status": "CLEAN",
+      "n_fail": 0,
+      "n_unknown": 0,
+      "n_results": 3
+    },
+    {
+      "cell": "dabstep-1273-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 2,
+      "n_unknown": 0,
+      "detail": "R1: 答案值不可解析為數字; R2: 答案值不可解析為數字"
+    },
+    {
+      "cell": "dabstep-13-pi-A",
+      "role": "good",
+      "status": "FALSE",
+      "n_fail": 2,
+      "n_unknown": 0,
+      "detail": "R1: 答案檔缺失（/app/answer.txt）; R2: 答案檔不存在：/app/answer.txt"
+    },
+    {
+      "cell": "dabstep-23-pi-C",
+      "role": "bad",
+      "status": "CAUGHT",
+      "n_fail": 2,
+      "n_unknown": 2,
+      "detail": "R1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）; R3: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+    }
+  ],
+  "gate": "FAIL",
+  "model": "glm53",
+  "caught": 9,
+  "total_bad": 9,
+  "false_acc": 4,
+  "total_good": 5,
+  "errors": 0,
+  "cost": {
+    "calls": 15,
+    "tokens": 141762
+  }
+}

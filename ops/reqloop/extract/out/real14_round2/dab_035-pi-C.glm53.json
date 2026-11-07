@@ -1,0 +1,127 @@
+{
+  "task_id": "dab_035-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "Provide the number of removed outliers.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "removed_outliers_count",
+            "type": "integer"
+          }
+        ]
+      },
+      "description": "答案檔必須包含 @removed_outliers_count 項，值為非負整數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Identify and remove any outliers in the \"row retention time\" column using the Z-score method with a Z-score threshold of 3.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "removed_outliers_count",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {
+          "type": "zcount3",
+          "col": "row retention time"
+        }
+      },
+      "description": "以母體標準差計算 row retention time 欄位的 Z-score，|z|>3 的資料點即為離群值，其個數應與答案檔 @removed_outliers_count 一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "Any data point with a Z-score greater than 3 or less than -3 is considered an outlier and should be removed.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "removed_outliers_count",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {
+          "type": "zcount3",
+          "col": "row retention time"
+        }
+      },
+      "description": "Z-score > 3 或 < -3 的資料點計為離群值並移除；移除數量與答案檔值重算比對（zcount3 即 |z|>3 計數）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "The data file for this task is `data/imp.score.ldlr.metabolome.csv`.",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "removed_outliers_count",
+        "data_file": "data/imp.score.ldlr.metabolome.csv",
+        "recompute": {
+          "type": "zcount3",
+          "col": "row retention time"
+        }
+      },
+      "description": "重算以 data/imp.score.ldlr.metabolome.csv 為輸入資料檔，且該檔案不得被更改。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "removed_outliers_count",
+        "value_type": "integer"
+      },
+      "description": "最終答案須寫入工作區根目錄的 answer.txt，格式為 @removed_outliers_count[非負整數]。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"Provide the number of removed outliers.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"removed_outliers_count\", \"type\": \"integer\"}]},\n    \"description\": \"答案檔必須包含 @removed_outliers_count 項，值為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"Identify and remove any outliers in the \\\"row retention time\\\" column using the Z-score method with a Z-score threshold of 3.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"removed_outliers_count\", \"data_file\": \"data/imp.score.ldlr.metabolome.csv\", \"recompute\": {\"type\": \"zcount3\", \"col\": \"row retention time\"}},\n    \"description\": \"以母體標準差計算 row retention time 欄位的 Z-score，|z|>3 的資料點即為離群值，其個數應與答案檔 @removed_outliers_count 一致。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"Any data point with a Z-score greater than 3 or less than -3 is considered an outlier and should be removed.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"removed_outliers_count\", \"data_file\": \"data/imp.score.ldlr.metabolome.csv\", \"recompute\": {\"type\": \"zcount3\", \"col\": \"row retention time\"}},\n    \"description\": \"Z-score > 3 或 < -3 的資料點計為離群值並移除；移除數量與答案檔值重算比對（zcount3 即 |z|>3 計數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R4\",\n    \"quote\": \"The data file for this task is `data/imp.score.ldlr.metabolome.csv`.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"removed_outliers_count\", \"data_file\": \"data/imp.score.ldlr.metabolome.csv\", \"recompute\": {\"type\": \"zcount3\", \"col\": \"row retention time\"}},\n    \"description\": \"重算以 data/imp.score.ldlr.metabolome.csv 為輸入資料檔，且該檔案不得被更改。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R5\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"removed_outliers_count\", \"value_type\": \"integer\"},\n    \"description\": \"最終答案須寫入工作區根目錄的 answer.txt，格式為 @removed_outliers_count[非負整數]。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "provenance": {
+    "cell": "dab_035-pi-C",
+    "role": "good",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_035/task",
+    "user_text_chars": 1182,
+    "data_files": [
+      "data/imp.score.ldlr.metabolome.csv"
+    ],
+    "prompt_sha256": "ac96e6ce6fc8b6fffd38a7c6c75bd75a782648d0a35901364a9a3f2b039341d8",
+    "generated_at": "2026-11-07T13:09:22+08:00"
+  }
+}

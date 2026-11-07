@@ -1,0 +1,23 @@
+{
+  "task_id": "dab_507-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "2",
+      "quote": "Count only hotels that have a star rating exactly equal to 5. This count value should be a non-negative integer.",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "3",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the names given under \"Answer format\" in the task. This task expects 1 item(s):",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

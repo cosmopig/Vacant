@@ -1,0 +1,17 @@
+{
+  "task_id": "dabstep-1273-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "R2",
+      "quote": "Answer must be just a number expressed in EUR rounded to 6 decimals.",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

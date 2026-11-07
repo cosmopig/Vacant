@@ -1,0 +1,72 @@
+{
+  "task_id": "dabstep-1273-pi-C",
+  "items": [
+    {
+      "id": "1",
+      "quote": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/fees.json",
+        "recompute": {
+          "type": "scheme_fee_avg",
+          "scheme": "GlobalCard",
+          "is_credit": true,
+          "amount": 10,
+          "round": 6
+        }
+      },
+      "description": "從 data/fees.json 重算 GlobalCard、credit 交易、金額 10 EUR 的平均費用（mean(fixed_amount + rate * amount / 10000)，null 欄位視為 wildcard），與 answer.txt 的數值比對，四捨五入至 6 位小數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "2",
+      "quote": "Answer must be just a number expressed in EUR rounded to 6 decimals.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "total",
+        "value_type": "number"
+      },
+      "description": "answer.txt 內容必須是單一數字（EUR，四捨五入至 6 位小數），不含其他文字。此條以格式檢查呈現；tag 名稱為交付檔案本身之數值內容。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "1",
+      "2"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
+  },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\n      \"data_file\": \"data/fees.json\",\n      \"recompute\": {\n        \"type\": \"scheme_fee_avg\",\n        \"scheme\": \"GlobalCard\",\n        \"is_credit\": true,\n        \"amount\": 10,\n        \"round\": 6\n      }\n    },\n    \"description\": \"從 data/fees.json 重算 GlobalCard、credit 交易、金額 10 EUR 的平均費用（mean(fixed_amount + rate * amount / 10000)，null 欄位視為 wildcard），與 answer.txt 的數值比對，四捨五入至 6 位小數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"Answer must be just a number expressed in EUR rounded to 6 decimals.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"total\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"answer.txt 內容必須是單一數字（EUR，四捨五入至 6 位小數），不含其他文字。此條以格式檢查呈現；tag 名稱為交付檔案本身之數值內容。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "provenance": {
+    "cell": "dabstep-1273-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-1273-pi-C/task",
+    "user_text_chars": 1505,
+    "data_files": [
+      "data/fees.json",
+      "data/manual.md"
+    ],
+    "prompt_sha256": "28f63ad835975b85cb784d68b7b556127b91fa0a418f3bc5b6702dff1692a930",
+    "generated_at": "2026-11-07T13:10:48+08:00"
+  }
+}

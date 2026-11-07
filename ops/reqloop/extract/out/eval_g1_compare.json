@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-11-07T15:23:35+0000",
+  "g1": "/home/user1/dev/Vacant/ops/reqloop/g1/tasks",
+  "out_dir": "/home/user1/dev/Vacant/ops/reqloop/extract/out",
+  "models": {
+    "glm53": {
+      "bad_caught": 39,
+      "total_bad": 39,
+      "caught_pct": 100.0,
+      "good_fp": 0,
+      "total_good": 7,
+      "calls": 41,
+      "tokens": 328550,
+      "missing": [],
+      "gate": "PASS"
+    }
+  }
+}

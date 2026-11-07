@@ -1,0 +1,71 @@
+{
+  "task_id": "dab_378-pi-C",
+  "items": [
+    {
+      "id": "req_pre_mean",
+      "quote": "@pre_mean[mean_before]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_pre_median",
+      "quote": "@pre_median[median_before]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_pre_sd",
+      "quote": "@pre_sd[sd_before]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_pre_skewness",
+      "quote": "@pre_skewness[skew_before]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_pre_kurtosis",
+      "quote": "@pre_kurtosis[kurt_before]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_post_mean",
+      "quote": "@post_mean[mean_after]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_post_median",
+      "quote": "@post_median[median_after]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_post_sd",
+      "quote": "@post_sd[sd_after]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_post_skewness",
+      "quote": "@post_skewness[skew_after]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_post_kurtosis",
+      "quote": "@post_kurtosis[kurt_after]",
+      "deliverable": "answer.txt",
+      "required": true
+    },
+    {
+      "id": "req_mean_imputation",
+      "quote": "Use the mean imputation method to fill in missing values for both the \"24-Hour Passes Purchased (midnight to 11:59 pm)\" and \"7-Day Passes Purchased (midnight to 11:59 pm)\" columns.",
+      "deliverable": "answer.txt",
+      "required": true
+    }
+  ]
+}

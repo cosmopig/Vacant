@@ -3,6 +3,7 @@
 G2.5 vq-el4.3：run_eval.py 第一項——G1 用自動擷取需求重跑，對照手寫版（離線、不呼叫模型）。
 
 用法：
+    python3 ops/reqloop/extract/run_eval.py --all                # 全三項整合驗收（G1 重跑＋REAL14＋PHASE3）
     python3 ops/reqloop/extract/run_eval.py --model glm53 [--json OUT]
 
 對 G1 每題（ops/reqloop/g1/tasks/<t>/）：
@@ -27,6 +28,7 @@ import hashlib
 import json
 import pathlib
 import re
+import shutil
 import sys
 import time
 
@@ -113,43 +115,135 @@ def read_extract_costs(vibe_calls: pathlib.Path, model: str, task_ids: list[str]
     return costs
 
 
-def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(
-        prog="python3 ops/reqloop/extract/run_eval.py",
-        description="G2.5 G1 重跑：擷取需求 vs 手寫需求（離線重算，不呼叫模型）",
-    )
-    ap.add_argument("--model", required=True, help="擷取模型別名（對應 out/<task>.<model>.json）")
-    ap.add_argument("--g1", default=None, help="G1 任務目錄（預設 ops/reqloop/g1/tasks）")
-    ap.add_argument("--out-dir", default=None, help="擷取結果目錄（預設 ops/reqloop/extract/out）")
-    ap.add_argument("--vibe-calls", default="~/dev/ops/state/vibe_calls.jsonl", help="擷取成本紀錄")
-    ap.add_argument("--json", default=None, help="同時寫機器可讀結果 json")
-    ap.add_argument("--phase2", action="store_true",
-                    help="item 2：14 份真實草稿（effects2_20261106，9 壞／5 好）＋自動擷取需求")
-    ap.add_argument("--effects2", default=None,
-                    help="effects2 目錄（預設 ~/dev/ops/effects2_20261106）")
-    a = ap.parse_args(argv)
+def _extraction_failure(ext_path: pathlib.Path) -> str | None:
+    """擷取結果檔的 report 有 extract_error／parse_error → 回傳原因；否則 None。
 
-    if a.phase2:
-        return run_phase2(model=a.model,
-                          base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None,
-                          json_out=pathlib.Path(a.json) if a.json else None)
+    擷取失敗（glm rc=4：deadline／token_limit／turn_limit 等）是「該題沒有產出需求」，
+    與「產出了需求但沒抓出」是兩件事；對照表必須點名，不得讀成模型沒抓出（r1197）。
+    """
+    try:
+        raw = json.loads(ext_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "擷取結果檔無法讀取"
+    rep = raw.get("report") or {}
+    return rep.get("extract_error") or rep.get("parse_error")
 
-    g1 = pathlib.Path(a.g1) if a.g1 else REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks"
-    out_dir = pathlib.Path(a.out_dir) if a.out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
-    vibe_calls = pathlib.Path(a.vibe_calls).expanduser()
+
+def run_models_comparison(models: list[str], g1: pathlib.Path, out_dir: pathlib.Path,
+                          vibe_calls: pathlib.Path) -> dict:
+    """多模型對照（vq-el4.6）：每模型各跑 evaluate_task＋read_extract_costs（離線、不呼叫模型）。
+
+    結案口徑（2026-11-07 裁決）：正式對照表為 3 模型 glm53／glm53flash／deepseek41；
+    證據 ops/reqloop/extract/out/eval_g1_compare_3m.json（glm53 39/39 100% FP0 門禁 PASS、
+    glm53flash 16/39 41% FAIL、deepseek41 23/39 59% FP1 FAIL）；gemma 為 1004 本地端點、
+    非 Vibe CLI 模型——依指示不繞過 glm 直呼 vibe、不自建 gemma client、不入本表。
+
+    每模型門禁：抓錯 ≥ 70% 且 0 冤枉且擷取完整；缺擷取結果→MISSING（fail-closed）；
+    任一題擷取失敗（report.extract_error／parse_error）→FAIL（擷取不完整；該題計未抓出，
+    但 extract_failed 點名原因，不得讀成模型沒抓出）；任一題成本缺值 → calls/tokens＝None。
+    """
+    task_dirs = sorted(p for p in g1.iterdir() if p.is_dir() and (p / "requirements.json").is_file())
+    ids = [p.name for p in task_dirs]
+    out_models: dict[str, dict] = {}
+    for model in models:
+        caught = fp = total_bad = total_good = 0
+        missing = [t for t in ids if not (out_dir / f"{t}.{model}.json").is_file()]
+        extract_failed: dict[str, str] = {}
+        for t_dir in task_dirs:
+            if t_dir.name in missing:
+                continue
+            ext_path = out_dir / f"{t_dir.name}.{model}.json"
+            reason = _extraction_failure(ext_path)
+            if reason:
+                extract_failed[t_dir.name] = reason
+            res = evaluate_task(t_dir, RequirementSet.load(ext_path))
+            total_bad += len(res["bad"])
+            caught += sum(1 for b in res["bad"] if b["caught"])
+            g = res["good"]
+            if g in ("VERIFIED", "FP", "UNKNOWN"):
+                total_good += 1
+            if g == "FP":
+                fp += 1
+        costs = read_extract_costs(vibe_calls, model, ids)
+        all_found = bool(ids) and all(costs[t]["found"] for t in ids)
+        catch_rate = caught / total_bad if total_bad else 0.0
+        if missing:
+            gate = "MISSING"
+        elif extract_failed:
+            gate = "FAIL"     # 擷取不完整＝未達標（不得 PASS）
+        else:
+            gate = "PASS" if (total_good > 0 and fp == 0 and catch_rate >= GATE_CATCH_RATE) else "FAIL"
+        out_models[model] = {
+            "bad_caught": caught, "total_bad": total_bad, "caught_pct": round(catch_rate * 100, 1),
+            "good_fp": fp, "total_good": total_good,
+            "calls": sum(costs[t]["calls"] for t in ids) if all_found else None,
+            "tokens": sum(costs[t]["total_tokens"] for t in ids) if all_found else None,
+            "missing": missing, "files": len(ids) - len(missing),
+            "extract_failed": extract_failed, "gate": gate}
+    return {"models": out_models}
+
+
+def print_models_table(result: dict) -> None:
+    print("# G2.5 多模型對照（離線重算、不呼叫模型）")
+    print(f"{'Model':<14}{'Bad Caught':<14}{'Caught %':<11}{'Extract OK':<12}"
+          f"{'Good FP':<10}{'Total Good':<13}{'Calls':<9}{'Tokens'}")
+    for model, s in result["models"].items():
+        calls = "UNKNOWN" if s["calls"] is None else str(s["calls"])
+        tokens = "UNKNOWN" if s["tokens"] is None else str(s["tokens"])
+        files = s.get("files", 0)
+        extract_ok = f"{files - len(s.get('extract_failed', {}))}/{files}"
+        print(f"{model:<14}{s['bad_caught']}/{s['total_bad']:<10}{s['caught_pct']:.1f}%{'':<5}"
+              f"{extract_ok:<12}{s['good_fp']:<10}{s['total_good']:<13}{calls:<9}{tokens}")
+    for model, s in result["models"].items():
+        if s["missing"]:
+            print(f"## {model}：缺擷取結果（fail-closed）：{', '.join(s['missing'])}")
+    for model, s in result["models"].items():
+        for t, reason in s.get("extract_failed", {}).items():
+            print(f"## {model} 擷取失敗（fail-closed、計未抓出）：{t}：{reason.splitlines()[0][:120]}")
+    print("門禁：" + "; ".join(f"{m} {s['gate']}" for m, s in result["models"].items())
+          + f"（抓錯 ≥ {GATE_CATCH_RATE * 100:.0f}% 且 0 冤枉且擷取完整；成本缺值＝UNKNOWN，不填 0）")
+
+
+def write_models_json(path: pathlib.Path, result: dict, g1: pathlib.Path, out_dir: pathlib.Path) -> None:
+    doc = {"generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+           "g1": str(g1), "out_dir": str(out_dir), **result}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+# ── --all：G2.5 全三項整合驗收（vq-el4 結案指令）────────────────────────────
+# 依序 run_phase1（G1 重跑）→ run_phase2（REAL14）→ run_phase3（localized 修復報告）；
+# 三項全過 → 0，任一未過 → 20。全程離線重算（phase2 重用 out/real14 快取、
+# phase3 接續 out/phase3/progress.json）；成本缺值＝UNKNOWN，絕不填 0。
+
+
+def run_phase1(model: str = "glm53",
+               g1: pathlib.Path | None = None,
+               out_dir: pathlib.Path | None = None,
+               vibe_calls: pathlib.Path | None = None,
+               json_out: pathlib.Path | None = None) -> int:
+    """item 1：G1 重跑（擷取需求 vs 手寫需求；離線重算、不呼叫模型）。
+
+    退出碼：0 門禁 PASS；20 門禁 FAIL；2 缺任務或缺擷取結果（fail-closed）。
+    """
+    g1 = pathlib.Path(g1) if g1 else REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks"
+    out_dir = pathlib.Path(out_dir) if out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
+    vibe_calls = (pathlib.Path(vibe_calls).expanduser() if vibe_calls
+                  else pathlib.Path("~/dev/ops/state/vibe_calls.jsonl").expanduser())
+    json_out = pathlib.Path(json_out) if json_out else None
 
     task_dirs = sorted(p for p in g1.iterdir() if p.is_dir() and (p / "requirements.json").is_file())
     if not task_dirs:
         print(f"錯誤：{g1} 內未找到任何 G1 任務", file=sys.stderr)
         return 2
 
-    print(f"# G2.5 G1 重跑對照（model={a.model}；離線重算、不呼叫模型）")
+    print(f"# G2.5 G1 重跑對照（model={model}；離線重算、不呼叫模型）")
     print()
     rows: list[dict] = []
     missing: list[str] = []
     for t_dir in task_dirs:
         hand = RequirementSet.load(t_dir / "requirements.json")
-        ext_path = out_dir / f"{t_dir.name}.{a.model}.json"
+        ext_path = out_dir / f"{t_dir.name}.{model}.json"
         if not ext_path.is_file():
             missing.append(t_dir.name)
             print(f"## {t_dir.name}：缺擷取結果（{ext_path}）——fail-closed，不計入")
@@ -158,23 +252,27 @@ def main(argv: list[str] | None = None) -> int:
         ext = RequirementSet.load(ext_path)
         hand_res = evaluate_task(t_dir, hand)
         ext_res = evaluate_task(t_dir, ext)
+        ext_err = _extraction_failure(ext_path)
         rows.append({
             "task": t_dir.name, "missing": False,
             "hand": hand_res, "ext": ext_res,
             "ext_items": len(ext.items),
             "ext_unverified": sum(1 for i in ext.items if i.unverified),
+            "ext_error": ext_err,
         })
         print(
             f"## {t_dir.name}：條目 手寫 {len(hand.items)}／擷取 {len(ext.items)}"
             f"（unverified {sum(1 for i in ext.items if i.unverified)}）"
         )
+        if ext_err:
+            print(f"- ⚠️ 擷取失敗（fail-closed、計未抓出）：{ext_err.splitlines()[0][:120]}")
         print(f"- good：手寫 {hand_res['good']}、擷取 {ext_res['good']}")
         for hb, eb in zip(hand_res["bad"], ext_res["bad"]):
             mark = "✅" if eb["caught"] else "❌漏抓"
             print(f"- {hb['case']}：手寫 {'抓出' if hb['caught'] else '漏抓'}、擷取 {mark}")
         print()
 
-    costs = read_extract_costs(vibe_calls, a.model, [r["task"] for r in rows if not r.get("missing")])
+    costs = read_extract_costs(vibe_calls, model, [r["task"] for r in rows if not r.get("missing")])
     print("## 擷取成本（vibe_calls.jsonl；缺值＝UNKNOWN，不填 0）")
     for r in rows:
         if r.get("missing"):
@@ -198,10 +296,17 @@ def main(argv: list[str] | None = None) -> int:
     print(f"- 錯誤交付物：{total_bad}；抓錯 手寫 {hand_caught}/{total_bad}、擷取 {ext_caught}/{total_bad}")
     print(f"- 正確交付物：{total_good}；冤枉 手寫 {hand_fp}、擷取 {ext_fp}（擷取 VERIFIED {ext_verified}/{total_good}）")
 
+    found_cost = {t: c for t, c in costs.items() if c.get("found")}
+    cost_info = {
+        "calls": sum(c["calls"] for c in found_cost.values()) if found_cost else None,
+        "tokens": sum(c["total_tokens"] for c in found_cost.values()) if found_cost else None,
+        "unknown_tasks": sorted(t for t, c in costs.items() if not c.get("found")),
+    }
+
     if missing:
         print(f"❌ 門禁判定：FAIL（缺擷取結果：{', '.join(missing)}）")
-        if a.json:
-            _write_json(pathlib.Path(a.json), rows, {"gate": "FAIL", "missing": missing})
+        if json_out is not None:
+            _write_json(json_out, rows, {"gate": "FAIL", "missing": missing, "cost": cost_info})
         return 2
 
     catch_rate = ext_caught / total_bad if total_bad else 0.0
@@ -211,11 +316,209 @@ def main(argv: list[str] | None = None) -> int:
         print("🏆 G2.5 第 1 項門禁：PASS（擷取需求在 G1 上達標）")
     else:
         print("❌ G2.5 第 1 項門禁：FAIL（未達抓錯門檻或存在冤枉——改擷取方法，不寫報告）")
-    if a.json:
-        _write_json(pathlib.Path(a.json), rows,
+    if json_out is not None:
+        _write_json(json_out, rows,
                     {"gate": "PASS" if gate else "FAIL", "catch_rate": catch_rate,
-                     "ext_caught": ext_caught, "total_bad": total_bad, "ext_fp": ext_fp})
+                     "ext_caught": ext_caught, "total_bad": total_bad, "ext_fp": ext_fp,
+                     "cost": cost_info})
     return 0 if gate else 20
+
+
+def _print_all_dashboard(j1: pathlib.Path, j2: pathlib.Path, j3: pathlib.Path,
+                         rc1: int, rc2: int, rc3: int) -> bool:
+    """印出三項整合總結看板（各項指標／門禁狀態／成本）；回傳三項是否全過。"""
+    def _doc(p: pathlib.Path) -> dict:
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    def _gate(rc: int) -> str:
+        if rc == 0:
+            return "PASS"
+        return "FAIL（rc=2，fail-closed／缺值）" if rc == 2 else "FAIL"
+
+    def _cost(c: object) -> str:
+        if not isinstance(c, dict) or not c:
+            return "UNKNOWN（缺值不填 0）"
+        labels = {"calls": "呼叫", "repair_sessions": "repair_sessions",
+                  "model_calls": "model_calls", "tokens": "tokens"}
+        parts = [f"{labels[k]} {c[k] if c[k] is not None else 'UNKNOWN'}"
+                 for k in ("calls", "repair_sessions", "model_calls", "tokens") if k in c]
+        if c.get("unknown_tasks"):
+            parts.append(f"{len(c['unknown_tasks'])} 題 UNKNOWN")
+        return "、".join(parts) if parts else "UNKNOWN"
+
+    d1, d2, d3 = _doc(j1), _doc(j2), _doc(j3)
+    bar = "=" * 64
+    print()
+    print(bar)
+    print("📋 G2.5 全三項整合總結看板（各項指標／門禁狀態／成本）")
+    print(bar)
+    print(f"① G1 重跑（擷取 vs 手寫）：門禁 {_gate(rc1)}")
+    if d1.get("missing"):
+        print(f"   指標：缺擷取 {len(d1['missing'])} 題（{', '.join(map(str, d1['missing']))}）")
+    else:
+        print(f"   指標：抓錯 {d1.get('ext_caught')}/{d1.get('total_bad')}"
+              f"（率 {(d1.get('catch_rate') or 0) * 100:.1f}%，門檻 ≥ {GATE_CATCH_RATE * 100:.0f}%）、"
+              f"冤枉 {d1.get('ext_fp')}（門檻 0）")
+    print(f"   成本：{_cost(d1.get('cost'))}")
+    print(f"② REAL14（14 份真實草稿、自動擷取）：門禁 {_gate(rc2)}")
+    print(f"   指標：抓錯 {d2.get('caught')}/{d2.get('total_bad')}（門檻 ≥ {MIN_CATCH_BAD}）、"
+          f"冤枉 {d2.get('false_acc')}/{d2.get('total_good')}（門檻 ≤ {MAX_FALSE_GOOD}）"
+          + (f"、{d2['errors']} cell 錯誤" if d2.get("errors") else ""))
+    print(f"   成本：{_cost(d2.get('cost'))}")
+    print(f"③ PHASE3（錯草稿＋localized 修復＋獨立 scorer）：門禁 {_gate(rc3)}")
+    print(f"   指標：fixed {d3.get('fixed')}、unresolved {d3.get('unresolved')}、"
+          f"rejected {d3.get('rejected')}、right_to_wrong {d3.get('right_to_wrong')}、"
+          f"held {d3.get('held')}"
+          + (f"、error {d3['errors']}" if d3.get("errors") else ""))
+    if d3.get("stale_cells"):
+        print(f"   ⚠ STALE（擷取規則變動後需求已變，舊裁決不計、需線上 --phase3 重驗）："
+              f"{', '.join(d3['stale_cells'])}")
+    print(f"   成本：{_cost(d3.get('cost'))}")
+    print(bar)
+    all_ok = rc1 == 0 and rc2 == 0 and rc3 == 0
+    if all_ok:
+        print("🏆 G2.5 全三項門禁整合驗收：PASS")
+    else:
+        failed = [n for n, rc in (("G1 重跑", rc1), ("REAL14", rc2), ("PHASE3", rc3)) if rc != 0]
+        print(f"❌ G2.5 全三項門禁整合驗收：FAIL（未過：{'、'.join(failed)}）")
+    return all_ok
+
+
+def run_all(model: str = "glm53",
+            g1: pathlib.Path | None = None,
+            out_dir: pathlib.Path | None = None,
+            vibe_calls: pathlib.Path | None = None,
+            base: pathlib.Path | None = None,
+            include_good: bool = False,
+            provider: str | None = None,
+            p3_model: str | None = None,
+            max_rounds: int | None = None,
+            timeout_s: float | None = None,
+            p3_out: pathlib.Path | None = None,
+            p3_req_dir: pathlib.Path | None = None,
+            limit: int | None = None) -> int:
+    """--all：G2.5 全三項整合驗收，依序 G1 重跑 → REAL14 → PHASE3（離線重算）。
+
+    三項全過（rc 皆 0）→ 0；任一未過 → 20。逐項 JSON 落 <out-dir>/all/ 供複核；
+    成本由各項自讀（vibe_calls／raw usage），缺值＝UNKNOWN，絕不填 0。
+    """
+    provider = PHASE3_PROVIDER if provider is None else provider
+    p3_model = PHASE3_MODEL if p3_model is None else p3_model
+    max_rounds = PHASE3_MAX_ROUNDS if max_rounds is None else max_rounds
+    timeout_s = PHASE3_TIMEOUT_S if timeout_s is None else timeout_s
+    base_dir = pathlib.Path(out_dir) if out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
+    all_dir = base_dir / "all"
+    all_dir.mkdir(parents=True, exist_ok=True)
+    j1, j2, j3 = all_dir / "phase1.json", all_dir / "phase2.json", all_dir / "phase3.json"
+    rc1 = run_phase1(model=model, g1=g1, out_dir=out_dir,
+                     vibe_calls=vibe_calls, json_out=j1)
+    # P20261107_1827-2：整合驗收的 phase2 走離線模式——快取未命中即 fail-closed，
+    # 不靜默發起即時外部模型呼叫（消耗額度或覆蓋已驗收成果）。
+    rc2 = run_phase2(model=model, base=base, vibe_calls=vibe_calls, json_out=j2,
+                     offline=True)
+    # argon 20261107_1921：phase3 同樣 offline——舊版在 progress.json 缺格/ERROR 行時會靜默
+    # 啟動 pi 修復 session；且需求已隨擷取規則變動的舊裁決不得沿用（STALE→fail-closed）。
+    rc3 = run_phase3(base=base, include_good=include_good, extract_model=model,
+                     provider=provider, model=p3_model, max_rounds=max_rounds,
+                     timeout_s=timeout_s, out_root=p3_out, req_dir=p3_req_dir,
+                     json_out=j3, limit=limit, offline=True)
+    all_ok = _print_all_dashboard(j1, j2, j3, rc1, rc2, rc3)
+    return 0 if all_ok else 20
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(
+        prog="python3 ops/reqloop/extract/run_eval.py",
+        description="G2.5 G1 重跑：擷取需求 vs 手寫需求（離線重算，不呼叫模型）",
+    )
+    ap.add_argument("--model", default="glm53", help="擷取模型別名（對應 out/<task>.<model>.json；預設 glm53）")
+    ap.add_argument("--models", default=None,
+                    help="多模型對照（逗號分隔，如 --models glm53,glm53flash）；輸出一張整合對照表（vq-el4.6）")
+    ap.add_argument("--g1", default=None, help="G1 任務目錄（預設 ops/reqloop/g1/tasks）")
+    ap.add_argument("--out-dir", default=None, help="擷取結果目錄（預設 ops/reqloop/extract/out）")
+    ap.add_argument("--vibe-calls", default="~/dev/ops/state/vibe_calls.jsonl", help="擷取成本紀錄")
+    ap.add_argument("--json", default=None, help="同時寫機器可讀結果 json")
+    ap.add_argument("--phase2", action="store_true",
+                    help="item 2：14 份真實草稿（effects2_20261106，9 壞／5 好）＋自動擷取需求")
+    ap.add_argument("--phase3", action="store_true",
+                    help="item 3（vq-el4.5）：9 份錯草稿＋自動擷取需求＋localized 修復＋獨立 scorer")
+    ap.add_argument("--all", action="store_true",
+                    help="執行 G2.5 全三項整合驗收：G1 重跑、真實 14 份、localized 修復報告")
+    ap.add_argument("--effects2", default=None,
+                    help="effects2 目錄（預設 ~/dev/ops/effects2_20261106）")
+    ap.add_argument("--include-good", action="store_true",
+                    help="phase3 連 5 份好草稿也跑（monitor right_to_wrong；預設只跑 9 錯）")
+    ap.add_argument("--p3-provider", default=PHASE3_PROVIDER,
+                    help="phase3 修復 pi provider（預設 lms1004nothink，effect_manifest 釘住）")
+    ap.add_argument("--p3-model", default=PHASE3_MODEL,
+                    help="phase3 修復 pi model（預設 gemma-4-12b-it-qat，與手寫 9/9 同模型）")
+    ap.add_argument("--p3-rounds", type=int, default=PHASE3_MAX_ROUNDS, help="phase3 每 cell 修復輪數上限")
+    ap.add_argument("--p3-timeout", type=float, default=PHASE3_TIMEOUT_S, help="phase3 單輪 wall timeout（秒）")
+    ap.add_argument("--p3-out", default=None,
+                    help="phase3 工作目錄（freeze/progress/tasks/repair；預設 ops/reqloop/extract/out/phase3）")
+    ap.add_argument("--p3-req-dir", default=None,
+                    help="自動擷取需求目錄（預設 ops/reqloop/extract/out/real14）")
+    ap.add_argument("--limit", type=int, default=None, help="phase3 只跑前 N 格（冒煙用；不宣稱效果）")
+    a = ap.parse_args(argv)
+
+    if a.all:
+        return run_all(model=a.model,
+                       g1=pathlib.Path(a.g1) if a.g1 else None,
+                       out_dir=pathlib.Path(a.out_dir) if a.out_dir else None,
+                       vibe_calls=pathlib.Path(a.vibe_calls).expanduser(),
+                       base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None,
+                       include_good=a.include_good,
+                       provider=a.p3_provider, p3_model=a.p3_model,
+                       max_rounds=a.p3_rounds, timeout_s=a.p3_timeout,
+                       p3_out=pathlib.Path(a.p3_out).expanduser() if a.p3_out else None,
+                       p3_req_dir=pathlib.Path(a.p3_req_dir).expanduser() if a.p3_req_dir else None,
+                       limit=a.limit)
+
+    if a.phase2:
+        return run_phase2(model=a.model,
+                          base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None,
+                          json_out=pathlib.Path(a.json) if a.json else None)
+
+    if a.phase3:
+        return run_phase3(
+            base=pathlib.Path(a.effects2).expanduser() if a.effects2 else None,
+            include_good=a.include_good,
+            extract_model=a.model,
+            provider=a.p3_provider, model=a.p3_model,
+            max_rounds=a.p3_rounds, timeout_s=a.p3_timeout,
+            out_root=pathlib.Path(a.p3_out).expanduser() if a.p3_out else None,
+            req_dir=pathlib.Path(a.p3_req_dir).expanduser() if a.p3_req_dir else None,
+            json_out=pathlib.Path(a.json) if a.json else None,
+            limit=a.limit)
+
+    g1 = pathlib.Path(a.g1) if a.g1 else REPO_ROOT / "ops" / "reqloop" / "g1" / "tasks"
+    out_dir = pathlib.Path(a.out_dir) if a.out_dir else REPO_ROOT / "ops" / "reqloop" / "extract" / "out"
+    vibe_calls = pathlib.Path(a.vibe_calls).expanduser()
+
+    task_dirs = sorted(p for p in g1.iterdir() if p.is_dir() and (p / "requirements.json").is_file())
+    if not task_dirs:
+        print(f"錯誤：{g1} 內未找到任何 G1 任務", file=sys.stderr)
+        return 2
+
+    if a.models:
+        models = [m.strip() for m in a.models.split(",") if m.strip()]
+        if not models:
+            print("錯誤：--models 為空", file=sys.stderr)
+            return 2
+        result = run_models_comparison(models, g1, out_dir, vibe_calls)
+        print_models_table(result)
+        if a.json:
+            write_models_json(pathlib.Path(a.json), result, g1, out_dir)
+        gates = [s["gate"] for s in result["models"].values()]
+        if "MISSING" in gates:
+            return 2
+        return 0 if all(g == "PASS" for g in gates) else 20
+
+    return run_phase1(model=a.model, g1=g1, out_dir=out_dir, vibe_calls=vibe_calls,
+                      json_out=pathlib.Path(a.json) if a.json else None)
 
 
 def _write_json(path: pathlib.Path, rows: list[dict], gate_info: dict) -> None:
@@ -416,7 +719,7 @@ class _RecordingClient:
 
 def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
                         previews: dict[str, str], model: str, client: GlmClient,
-                        out_path: pathlib.Path) -> RequirementSet:
+                        out_path: pathlib.Path, offline: bool = False) -> RequirementSet:
     """單一 cell 擷取需求；out 檔已存在 → 不再呼叫模型、不重複計費。
 
     argon 20261107_1248：out 檔記 prompt_sha256 與 raw_output。
@@ -425,6 +728,9 @@ def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
     - prompt 相同且有 raw_output → 用目前的 build_requirement_set 從原始輸出重建
       （擷取規則改了也反映在數字上，0 呼叫）。
     - 舊格式（無 prompt_sha256）→ 照舊直接重用。
+
+    P20261107_1827-2：offline=True 且快取未命中（缺檔或 prompt_sha 不符）→
+    直接 raise ExtractError（fail-closed），不靜默發出外部 API 呼叫。
     """
     prompt = build_phase2_prompt(user_text, data_names, previews)
     prompt_sha = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
@@ -439,6 +745,8 @@ def phase2_extract_cell(cell: Real14Cell, user_text: str, data_names: list[str],
                 req, _ = build_requirement_set(cell.cell, parse_model_output(raw), user_text)
                 return req
             return RequirementSet.load(out_path)
+    if offline:
+        raise ExtractError("離線模式快取未命中：拒絕外部 API 呼叫")
     rec = _RecordingClient(client)
     req, report = extract_requirements(
         user_text=user_text, client=rec, task_id=cell.cell,
@@ -483,8 +791,13 @@ def read_real14_costs(vibe_calls: pathlib.Path) -> tuple[int, int] | None:
 def run_phase2(model: str = "glm53",
                base: pathlib.Path | None = None,
                vibe_calls: pathlib.Path | None = None,
-               json_out: pathlib.Path | None = None) -> int:
-    """item 2：14 份原始草稿 × 自動擷取需求 → 抓錯 x/9、冤枉 y/5 → 門禁。"""
+               json_out: pathlib.Path | None = None,
+               offline: bool = False) -> int:
+    """item 2：14 份原始草稿 × 自動擷取需求 → 抓錯 x/9、冤枉 y/5 → 門禁。
+
+    offline=True（--all 整合驗收用）：快取未命中的格 fail-closed 記 ERROR，
+    不發起外部 API 呼叫；預設 False 維持原行為。
+    """
     base = pathlib.Path(base) if base else REAL14_BASE_DEFAULT
     vibe_calls = (pathlib.Path(vibe_calls).expanduser() if vibe_calls
                   else pathlib.Path("~/dev/ops/state/vibe_calls.jsonl").expanduser())
@@ -509,7 +822,7 @@ def run_phase2(model: str = "glm53",
             previews = {n: _data_preview(p) for n, p in zip(names, data_paths)}
             req = phase2_extract_cell(
                 c, user_text, names, previews, model, client,
-                out_dir / f"{c.cell}.{model}.json")
+                out_dir / f"{c.cell}.{model}.json", offline=offline)
             results = run_requirement_checks(c.task_dir, req, c.draft_dir)
         except (ExtractError, FileNotFoundError, RuntimeError,
                 ValueError) as e:
@@ -562,6 +875,423 @@ def run_phase2(model: str = "glm53",
                      "cost": {"calls": costs[0], "tokens": costs[1]} if costs else None})
         print(f"JSON 結果：{json_out}")
     return 0 if ok else 20
+
+
+# ── phase3（vq-el4.5）：9 份錯草稿＋自動擷取需求＋localized 修復＋獨立 scorer ──
+#
+# 對照基線（g2-truth：G2 開發樣本逐格重算）：手寫需求下 localized 修好 9/9、
+# generic 7/9；5 份對都保住。本相用**自動擷取**需求（out/real14/<cell>.<model>.json）
+# 接同一條修復控制器（repair.py 凍結、reuse adapters/run.py）與同一個獨立 scorer，
+# 量「自動需求」與「手寫需求」的修復力差距。
+#
+# 紅線：不讀 /srv/eval hidden／scorer 源；scorer 只出 pass/status；評分永不回饋修復；
+# 成本缺值＝UNKNOWN（絕不填 0）；source_tampered ⇒ rejected（不得翻 fixed）。
+
+PHASE3_PROVIDER = "lms1004nothink"          # effect_manifest.json 釘住的「1004 gemma」
+PHASE3_MODEL = "gemma-4-12b-it-qat"         # 與手寫 9/9 同模型（non-thinking 口徑）
+PHASE3_MAX_ROUNDS = 2                       # 同 G2 基準：2 輪×300s
+PHASE3_TIMEOUT_S = 300.0
+
+
+def load_phase3_sources(base: pathlib.Path) -> dict[str, dict]:
+    """draft 名 → {'run','cell','before_pass'}；來源＝snapshot 的 effect_manifest.json。
+
+    before_pass＝lab 既有記錄分數（只引用、不在本地重跑）。缺 manifest／缺 source
+    → fail-closed（不准拿不存在的 source 去跑 scorer）。
+    """
+    man_path = base / "snapshot" / "ops" / "reqloop" / "g2" / "effect_manifest.json"
+    if not man_path.is_file():
+        raise FileNotFoundError(f"effect_manifest.json 缺失：{man_path}")
+    man = json.loads(man_path.read_text(encoding="utf-8"))
+    out: dict[str, dict] = {}
+    for d in man.get("drafts", []):
+        s = d.get("source") or {}
+        if s.get("run") and s.get("cell"):
+            out[str(d["name"])] = {"run": s["run"], "cell": s["cell"],
+                                   "before_pass": (s.get("score") or {}).get("pass")}
+    return out
+
+
+def prepare_phase3_task(cell: Real14Cell, req_set: RequirementSet,
+                        dest: pathlib.Path) -> pathlib.Path:
+    """組 phase3 任務目錄：原 request.md／contract.md／data/ ＋ requirements.json＝**自動擷取**版。
+
+    快照（effects2 snapshot）只讀不改；手寫版 requirements.json 不帶入（那是對照組的輸入）。
+    """
+    dest.mkdir(parents=True, exist_ok=True)
+    for name in ("request.md", "contract.md"):
+        src = cell.task_dir / name
+        if src.is_file():
+            shutil.copy2(src, dest / name)
+    data = cell.task_dir / "data"
+    if data.is_dir():
+        shutil.copytree(data, dest / "data", dirs_exist_ok=True)
+    (dest / "requirements.json").write_text(
+        json.dumps(req_set.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    return dest
+
+
+def _default_phase3_scorer():
+    """實驗室既有獨立 scorer（sudo -n、只 pass/status 出評分端）；import 失敗 → 呼叫時 fail-closed。"""
+    base = pathlib.Path("~/dev/ops/effects_20261105").expanduser()
+    if str(base) not in sys.path:
+        sys.path.insert(0, str(base))
+    from independent_score import score_workspace  # noqa: PLC0415
+    return score_workspace
+
+
+def phase3_cell(cell: Real14Cell, req_set: RequirementSet, source: dict,
+                out_root: pathlib.Path, *, build, run,
+                max_rounds: int = PHASE3_MAX_ROUNDS,
+                timeout_s: float = PHASE3_TIMEOUT_S,
+                scorer=None) -> dict:
+    """一 cell：自動需求組 task → localized 修復（repair 凍結控制器）→ 獨立 scorer → 一行結果。
+
+    build/run/scorer 皆可注入（測試用 fake；生產用 pi gemma＋lab scorer）。
+    裁決口徑：bad 且 scorer pass=True 且無 source_tampered/satisfied_mutated → fixed；
+    tampered/mutated → rejected（改來源迎合交付不得翻 fixed）；其餘 → unresolved。
+    """
+    from vacant_network.reqloop.repair import repair_slice  # 延遲 import：phase1/2 不依賴
+
+    task_dir = prepare_phase3_task(cell, req_set, out_root / "tasks" / cell.cell)
+    outcome = repair_slice(
+        str(task_dir), req_set, cell.draft_dir,
+        out_root=out_root / "repair" / cell.cell,
+        build=build, run=run,
+        feedback_mode="localized", max_rounds=max_rounds, timeout_s=timeout_s,
+        min_rounds=0,  # localized 缺口驅動：無缺口 0 呼叫（同 G2 基準）
+        include_dirs=("data",))
+    d = outcome.to_dict()
+    rounds = d.get("rounds") or []
+    ws = pathlib.Path(rounds[-1]["workspace"]) if rounds else pathlib.Path(d["original_draft_dir"])
+    deliverables = sorted({it.deliverable for it in req_set.items if it.deliverable})
+    sc = scorer if scorer is not None else _default_phase3_scorer()
+    try:
+        g = sc(source, ws, deliverables)
+        after = {"pass": g.get("pass"), "status": g.get("status", "UNKNOWN"),
+                 "rc": g.get("rc")}
+    except Exception as e:  # noqa: BLE001 — scorer 故障＝UNKNOWN，不冒稱 pass
+        after = {"pass": None, "status": f"SCORER_ERROR:{type(e).__name__}", "rc": None}
+    tampered = bool(d.get("source_tampered")) or bool(d.get("satisfied_mutated"))
+    if cell.role == "bad":
+        if tampered:
+            verdict = "rejected"
+        elif after["pass"] is True:
+            verdict = "fixed"
+        else:
+            verdict = "unresolved"
+    else:  # good
+        if after["pass"] is True:
+            verdict = "held" if not tampered else "rejected"
+        elif after["pass"] is False:
+            verdict = "right_to_wrong"
+        else:
+            verdict = "unknown"
+    c = d.get("cost") or {}
+    return {"cell": cell.cell, "role": cell.role, "before": source.get("before_pass"),
+            "after": after, "verdict": verdict, "stopped": d.get("stopped"),
+            "final_status": d.get("final_status"), "regressed": d.get("regressed"),
+            "source_tampered": d.get("source_tampered"),
+            "satisfied_mutated": list(d.get("satisfied_mutated") or ()),
+            "workspace": str(ws), "deliverables": deliverables,
+            "cost": {"repair_sessions": c.get("calls"), "model_calls": c.get("model_calls"),
+                     "tokens": c.get("tokens"), "wall_ms_total": c.get("wall_ms_total")}}
+
+
+def _freeze_cell_match(old_c: dict, new_c: dict) -> bool:
+    """單一 cell 凍結欄位比對：工作區路徑容許不同 worktree（跨 clone/worktree 相容）。"""
+    for k in ("cell", "role", "task_dir", "draft_dir", "draft_sha256", "req_sha256", "source", "before_pass"):
+        if old_c.get(k) != new_c.get(k):
+            return False
+    ro = old_c.get("req_file")
+    rn = new_c.get("req_file")
+    if ro != rn:
+        if not (ro and rn and pathlib.Path(ro).name == pathlib.Path(rn).name):
+            return False
+    return True
+
+
+def _freeze_matches(old: dict, new: dict) -> bool:
+    """freeze.json 不變量比對：參數、題集、草稿/需求 sha256 必須逐 byte 一致。"""
+    for k in ("base", "extract_model", "repair", "budget", "comparison"):
+        if old.get(k) != new.get(k):
+            return False
+    old_cells = old.get("cells") or []
+    new_cells = new.get("cells") or []
+    if len(old_cells) != len(new_cells):
+        return False
+    return all(_freeze_cell_match(o, n) for o, n in zip(old_cells, new_cells))
+
+
+def _dir_sha256(d: pathlib.Path) -> str:
+    h = hashlib.sha256()
+    for p in sorted(d.rglob("*")) if d.is_dir() else []:
+        if p.is_file():
+            h.update(str(p.relative_to(d)).encode("utf-8"))
+            h.update(p.read_bytes())
+    return h.hexdigest()
+
+
+def _req_digest(req: RequirementSet) -> str:
+    """需求組內容 hash（canonical JSON）：判定 phase3 舊裁決所依需求是否仍是現行需求。"""
+    return hashlib.sha256(json.dumps(req.to_dict(), ensure_ascii=False, sort_keys=True)
+                          .encode("utf-8")).hexdigest()
+
+
+def effective_phase3_requirements(cell: Real14Cell, req_file: pathlib.Path,
+                                  real14_dir: pathlib.Path) -> RequirementSet:
+    """phase3 修復所用需求＝phase2 判抓錯所用的同一份。
+
+    argon 20261107_1921：phase2 的快取路徑以「現行」build_requirement_set 從 raw_output 重建；
+    phase3 原本直接 load 擷取當時存下的 items。擷取規則一改（例：418d3bc7 補 number 型別、
+    tag_not_in_request），同一 cell 兩相用的就是不同需求（real14 9 錯中 4 格不同，dab_039
+    由 4 UNKNOWN（no_gap、0 呼叫）變成有 FAIL），PHASE3 數字不再對應目前的擷取管線。
+    out 檔有 raw_output → 依現行規則重建；舊格式（無 raw_output）→ 照舊 load。
+    """
+    doc = json.loads(req_file.read_text(encoding="utf-8"))
+    raw = doc.get("raw_output")
+    if isinstance(raw, str):
+        user_text = load_cell_request_text(cell.task_dir, _task_id_from_cell(cell.cell), real14_dir)
+        req, _ = build_requirement_set(cell.cell, parse_model_output(raw), user_text)
+        return req
+    return RequirementSet.load(req_file)
+
+
+def run_phase3(base: pathlib.Path | None = None,
+               include_good: bool = False,
+               extract_model: str = "glm53",
+               provider: str = PHASE3_PROVIDER,
+               model: str = PHASE3_MODEL,
+               max_rounds: int = PHASE3_MAX_ROUNDS,
+               timeout_s: float = PHASE3_TIMEOUT_S,
+               build=None, run=None, scorer=None,
+               req_dir: pathlib.Path | None = None,
+               out_root: pathlib.Path | None = None,
+               json_out: pathlib.Path | None = None,
+               limit: int | None = None,
+               offline: bool = False) -> int:
+    """vq-el4.5：9 份錯草稿（effects2 real14）×自動擷取需求×localized 修復×獨立 scorer。
+
+    發射前凍結 freeze.json（cell 清單＋draft/需求 hash＋模型＋預算）；逐 cell 寫
+    progress.json（長實驗可離線監控）。退出碼：0 全部 cell 有裁決；2 有 fail-closed。
+    成本：repair_sessions（session 數）與 model_calls（API 請求數）嚴分；任一缺值⇒UNKNOWN。
+
+    argon 20261107_1921：每行記 req_effective_sha256（修復實際所用需求的 hash）；接續時
+    需求已變（擷取規則改了）→ 舊裁決 STALE、不沿用。offline=True（--all）：唯讀——不建立/
+    啟動修復 agent、不改寫 progress.json；無可沿用裁決的格 fail-closed 記 ERROR。
+    """
+    from vacant_network.reqloop.repair import _default_build  # noqa: PLC0415
+
+    base = pathlib.Path(base) if base else REAL14_BASE_DEFAULT
+    cells = derive_real14_cells(base)
+    if not include_good:
+        cells = [c for c in cells if c.role == "bad"]
+    if limit is not None:
+        cells = cells[:limit]
+    sources = load_phase3_sources(base)
+    req_dir = pathlib.Path(req_dir) if req_dir else (
+        REPO_ROOT / "ops" / "reqloop" / "extract" / "out" / "real14")
+    out_root = pathlib.Path(out_root) if out_root else (
+        REPO_ROOT / "ops" / "reqloop" / "extract" / "out" / "phase3")
+
+    freeze_cells = []
+    for c in cells:
+        src = sources.get(c.cell)
+        req_file = req_dir / f"{c.cell}.{extract_model}.json"
+        freeze_cells.append({
+            "cell": c.cell, "role": c.role,
+            "task_dir": str(c.task_dir), "draft_dir": str(c.draft_dir),
+            "draft_sha256": _dir_sha256(c.draft_dir) if c.draft_dir.is_dir() else None,
+            "req_file": str(req_file),
+            "req_sha256": hashlib.sha256(req_file.read_bytes()).hexdigest() if req_file.is_file() else None,
+            "source": {"run": src["run"], "cell": src["cell"]} if src else None,
+            "before_pass": src["before_pass"] if src else None,
+        })
+    out_root.mkdir(parents=True, exist_ok=True)
+    freeze_doc = {
+        "phase": 3, "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "base": str(base), "extract_model": extract_model,
+        "repair": {"provider": provider, "model": model, "feedback_mode": "localized",
+                   "min_rounds": 0},
+        "budget": {"max_rounds": max_rounds, "timeout_s_per_round": timeout_s,
+                   "hard_token_cap": False,
+                   "note": "無硬 token 上限；成本從 raw usage 讀、缺值＝UNKNOWN 不填 0"},
+        "comparison": "手寫需求基線（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep",
+        "cells": freeze_cells,
+    }
+    freeze_path = out_root / "freeze.json"
+    if not freeze_path.is_file():
+        if offline:
+            print("PHASE3 fail-closed：offline 模式找不到 freeze.json（沒有可沿用的正式跑）",
+                  file=sys.stderr)
+            return 2
+        freeze_path.write_text(json.dumps(freeze_doc, ensure_ascii=False, indent=1),
+                               encoding="utf-8")
+    else:
+        # 官方 freeze 不可變：驗證／接續 run 不得重寫 generated_at（凍結快照）；
+        # 參數不一致時 fail-closed，絕不靜默覆蓋官方 freeze。
+        try:
+            _old = json.loads(freeze_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            _old = None
+        if _old is None or not _freeze_matches(_old, freeze_doc):
+            print("PHASE3 fail-closed：既有 freeze.json 與本次 run 參數不一致，拒絕覆蓋官方 freeze",
+                  file=sys.stderr)
+            return 2
+
+    if build is None and not offline:
+        build = _default_build(provider, model, hooks=True)
+    if run is None and not offline:
+        from vacant_network.adapters.run import run_agent  # noqa: PLC0415
+        run = run_agent
+
+    cached_rows: dict[str, dict] = {}
+    prog_path = out_root / "progress.json"
+    if prog_path.is_file():
+        try:
+            _p = json.loads(prog_path.read_text(encoding="utf-8"))
+            for _r in _p.get("rows") or []:
+                if isinstance(_r, dict) and _r.get("cell") and "verdict" in _r \
+                        and _r.get("status") != "ERROR":
+                    cached_rows[_r["cell"]] = _r
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            cached_rows = {}  # 損壞的 progress 不接續、不猜
+    if cached_rows:
+        print(f"PHASE3 接續：progress.json 已有 {len(cached_rows)} 份裁決，該 cell 不重複執行")
+
+    rows: list[dict] = []
+    errors = 0
+    stale_cells: list[str] = []
+    real14_dir = REPO_ROOT / "ops" / "reqloop" / "extract" / "real14"
+    n_bad = sum(1 for c in cells if c.role == "bad")
+    print(f"PHASE3（vq-el4.5）：{len(cells)} 份草稿（{n_bad} 錯／{len(cells) - n_bad} 好）"
+          f"＋自動擷取需求（{extract_model}）＋localized 修復（{provider}/{model}）＋獨立 scorer"
+          + ("（offline 唯讀：不發起修復）" if offline else ""))
+    for c in cells:
+        src = sources.get(c.cell)
+        req_file = req_dir / f"{c.cell}.{extract_model}.json"
+        eff_req: RequirementSet | None = None
+        eff_sha: str | None = None
+        eff_err: str | None = None
+        if req_file.is_file():
+            try:
+                eff_req = effective_phase3_requirements(c, req_file, real14_dir)
+                eff_sha = _req_digest(eff_req)
+            except Exception as e:  # noqa: BLE001 — 重建失敗＝fail-closed，不退回舊 items
+                eff_err = f"{type(e).__name__}: {str(e)[:80]}"
+        cached = cached_rows.get(c.cell)
+        stale = False
+        if cached is not None:
+            used_sha = cached.get("req_effective_sha256")
+            if used_sha is None and req_file.is_file():
+                # 舊版 progress 行：當時 phase3 直接 load 擷取檔 items
+                try:
+                    used_sha = _req_digest(RequirementSet.load(req_file))
+                except Exception:  # noqa: BLE001
+                    used_sha = None
+            if eff_sha is not None and used_sha == eff_sha:
+                rows.append(cached)
+                print(f"  {c.cell:22s} {c.role:4s} RESUMED（已接續 progress.json，不重複呼叫）",
+                      flush=True)
+                continue
+            stale = True
+            stale_cells.append(c.cell)
+            print(f"  {c.cell:22s} {c.role:4s} STALE（舊裁決 {cached.get('verdict')} 所依需求"
+                  f"≠現行擷取需求，不沿用）", flush=True)
+        if offline:
+            errors += 1
+            why = ("STALE：需求已隨擷取規則變動，舊裁決失效；offline 不重跑（需線上 --phase3 重驗）"
+                   if stale else "offline 無可沿用裁決（不發起修復呼叫）")
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR", "detail": why,
+                         **({"stale_verdict": cached.get("verdict")} if stale else {})})
+            print(f"  {c.cell:22s} {c.role:4s} ERROR（{why[:40]}）", flush=True)
+            continue
+        if src is None:
+            errors += 1
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
+                         "detail": "manifest 缺 source（fail-closed）"})
+            print(f"  {c.cell:22s} {c.role:4s} ERROR（manifest 缺 source）")
+        elif not req_file.is_file():
+            errors += 1
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
+                         "detail": f"缺擷取結果 {req_file.name}（fail-closed，不拿缺的當通過）"})
+            print(f"  {c.cell:22s} {c.role:4s} ERROR（缺擷取結果）")
+        elif eff_req is None:
+            errors += 1
+            rows.append({"cell": c.cell, "role": c.role, "status": "ERROR",
+                         "detail": f"擷取需求重建失敗（fail-closed）：{eff_err}"})
+            print(f"  {c.cell:22s} {c.role:4s} ERROR（擷取需求重建失敗）")
+        else:
+            req_set = eff_req
+            try:
+                row = phase3_cell(c, req_set, src, out_root,
+                                  build=build, run=run, scorer=scorer,
+                                  max_rounds=max_rounds, timeout_s=timeout_s)
+                row["req_effective_sha256"] = eff_sha
+                if stale:
+                    row["supersedes"] = {"verdict": cached.get("verdict"),
+                                         "req_effective_sha256": cached.get("req_effective_sha256")}
+            except Exception as e:  # noqa: BLE001 — 單 cell 故障不拖垮全批，但如實計錯
+                errors += 1
+                row = {"cell": c.cell, "role": c.role, "status": "ERROR",
+                       "detail": f"{type(e).__name__}: {str(e)[:100]}"}
+            rows.append(row)
+            (out_root / "progress.json").write_text(
+                json.dumps({"complete": False, "rows": rows}, ensure_ascii=False, indent=1),
+                encoding="utf-8")
+            if "verdict" in row:
+                a = row["after"]
+                cost = row["cost"]
+                tok = "UNKNOWN" if cost["tokens"] is None else str(cost["tokens"])
+                mc = "UNKNOWN" if cost["model_calls"] is None else str(cost["model_calls"])
+                print(f"  {row['cell']:22s} {row['role']:4s} {row['verdict']:14s}"
+                      f"  after={a['pass']}（{a['status']}）stopped={row['stopped']}"
+                      f"  model_calls={mc} tokens={tok}", flush=True)
+            else:
+                print(f"  {row['cell']:22s} {row['role']:4s} ERROR：{row.get('detail', '')[:80]}",
+                      flush=True)
+
+    if not offline:  # offline（--all）唯讀：不改寫官方 progress.json
+        (out_root / "progress.json").write_text(
+            json.dumps({"complete": True, "rows": rows}, ensure_ascii=False, indent=1),
+            encoding="utf-8")
+
+    def _agg(key: str):
+        vals = [r["cost"][key] for r in rows if "cost" in r and "verdict" in r]
+        if not vals or any(v is None for v in vals):
+            return None
+        return sum(vals)
+
+    fixed = sum(1 for r in rows if r.get("verdict") == "fixed")
+    unresolved = sum(1 for r in rows if r.get("verdict") == "unresolved")
+    rejected = sum(1 for r in rows if r.get("verdict") == "rejected")
+    rtw = sum(1 for r in rows if r.get("verdict") == "right_to_wrong")
+    held = sum(1 for r in rows if r.get("verdict") == "held")
+    cost = {"repair_sessions": _agg("repair_sessions"), "model_calls": _agg("model_calls"),
+            "tokens": _agg("tokens")}
+    summary = {"phase": 3, "base": str(base), "extract_model": extract_model,
+               "repair_model": {"provider": provider, "model": model},
+               "cells": len(rows), "errors": errors,
+               "stale_cells": stale_cells,
+               "fixed": fixed, "unresolved": unresolved, "rejected": rejected,
+               "right_to_wrong": rtw, "held": held,
+               "cost": cost,
+               "cost_note": "repair_sessions＝修復 session 數；model_calls＝API 請求數（raw usage）；"
+                           "任一缺值⇒UNKNOWN（不填 0）",
+               "comparison_baseline": "手寫需求（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep，不宣稱較好",
+               "rows": rows}
+    print(f"\n裁決：fixed {fixed}、unresolved {unresolved}、rejected {rejected}、"
+          f"right_to_wrong {rtw}、held {held}、error {errors}")
+    if stale_cells:
+        print(f"  STALE（需求已變、舊裁決不計）：{', '.join(stale_cells)}")
+    for k, v in cost.items():
+        print(f"  成本 {k}: {v if v is not None else 'UNKNOWN（缺值不填 0）'}")
+    print("對照：手寫需求 localized 9/9（g2-truth；開發選樣單 rep）")
+    if json_out is not None:
+        pathlib.Path(json_out).write_text(
+            json.dumps(summary, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"JSON 結果：{json_out}")
+    return 0 if errors == 0 else 2
 
 
 if __name__ == "__main__":

@@ -1189,14 +1189,14 @@ def test_pin_survives_venv_symlink():
     build = repair._default_build(None, None, hooks=False)
     l = build("prompt", pathlib.Path("/tmp"))
     r = subprocess.run(
-        ["bash", "-c", "command -v python3; python3 -c 'import scipy, numpy; print(scipy.__version__)'"],
+        ["bash", "-c", "command -v python3; python3 -c 'import pytest; print(pytest.__version__)'"],
         env=dict(l.env), capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     first = r.stdout.splitlines()[0]
     assert pathlib.Path(first).parent == pathlib.Path(sys.executable).parent, first
-    # 若 venv 與基礎直譯器的 scipy 版本不同，這裡就抓得到 pin 失效
-    import scipy as venv_scipy
-    assert venv_scipy.__version__ in r.stdout, r.stdout
+    # 若 venv 與基礎直譯器的 pytest 版本不同，這裡就抓得到 pin 失效
+    import pytest as venv_pytest
+    assert venv_pytest.__version__ in r.stdout, r.stdout
 
 
 def test_g2_default_build_pins_python_too():

@@ -1,0 +1,42 @@
+{
+  "task_id": "dabstep-1273-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/fees.json",
+        "recompute": {
+          "type": "scheme_fee_avg",
+          "scheme": "GlobalCard",
+          "is_credit": true,
+          "amount": 10
+        }
+      },
+      "description": "以 fees.json 重算 GlobalCard、credit 交易、金額 10 EUR 的平均費用（mean(fixed_amount + rate*amount/10000)，null 欄位視為 wildcard），與 answer.txt 的數字比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Answer must be just a number expressed in EUR rounded to 6 decimals.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "total",
+        "value_type": "number"
+      },
+      "description": "answer.txt 內容必須是單一數字（EUR，四捨五入至 6 位小數），無其他文字；tag_format 僅能驗證數字型別，6 位小數的精確位數無法單獨程式驗證。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ]
+}

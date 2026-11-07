@@ -1,0 +1,69 @@
+{
+  "task_id": "dab_426-pi-C",
+  "items": [
+    {
+      "id": "req-1",
+      "quote": "What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "max_wind_speed",
+        "data_file": "data/cost_data_with_errors.csv",
+        "recompute": {
+          "type": "max_row_first",
+          "sel_col": "max_storm_cat",
+          "out_col": "max_sust_wind"
+        }
+      },
+      "description": "找出 max_storm_cat 最高的風暴（平手取檔案序首列），回傳該列 max_sust_wind，與 answer.txt 的 @max_wind_speed 比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "req-2",
+      "quote": "@max_wind_speed[number] where \"number\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "max_wind_speed",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 必須包含 @max_wind_speed[number] 項目，數值為浮點數（兩位小數）。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "req-1",
+      "req-2"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"req-1\",\n    \"quote\": \"What is the maximum sustained wind speed recorded during the storm with the highest maximum storm category?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"max_wind_speed\",\n      \"data_file\": \"data/cost_data_with_errors.csv\",\n      \"recompute\": {\n        \"type\": \"max_row_first\",\n        \"sel_col\": \"max_storm_cat\",\n        \"out_col\": \"max_sust_wind\"\n      }\n    },\n    \"description\": \"找出 max_storm_cat 最高的風暴（平手取檔案序首列），回傳該列 max_sust_wind，與 answer.txt 的 @max_wind_speed 比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-2\",\n    \"quote\": \"@max_wind_speed[number] where \\\"number\\\" is a float with two decimal places indicating the highest wind speed recorded for the storm with the highest maximum storm category.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [\n        {\n          \"key\": \"max_wind_speed\",\n          \"type\": \"number\"\n        }\n      ]\n    },\n    \"description\": \"answer.txt 必須包含 @max_wind_speed[number] 項目，數值為浮點數（兩位小數）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "provenance": {
+    "cell": "dab_426-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_426-pi-C/task",
+    "user_text_chars": 1291,
+    "data_files": [
+      "data/cost_data_with_errors.csv"
+    ],
+    "prompt_sha256": "0d3a71af578bfc8a7fb02338c1a3f429f2d733b5d2fd0e61ea80cbac5167dd65",
+    "generated_at": "2026-11-07T13:10:12+08:00"
+  }
+}

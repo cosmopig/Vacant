@@ -1,0 +1,69 @@
+{
+  "task_id": "dabstep-10-pi-C",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "How many unique merchants are present in the dataset?",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "unique_count",
+          "col": "merchant"
+        }
+      },
+      "description": "答案檔 answer.txt 的數字應等於 data/payments.csv 中 merchant 欄位的去重計數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "Answer must be just a number of unique merchants.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": []
+      },
+      "description": "answer.txt 內容必須僅為單一數字（唯一商戶數），不含其他文字；此格式要求無法用列出的 verifier 程式驗證，設 unverified。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    }
+  ],
+  "model": "glm53",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2"
+    ],
+    "discarded": [],
+    "unverified": [
+      {
+        "id": "R2",
+        "reason": "empty_param:keys"
+      }
+    ]
+  },
+  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"How many unique merchants are present in the dataset?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\n      \"data_file\": \"data/payments.csv\",\n      \"recompute\": {\"type\": \"unique_count\", \"col\": \"merchant\"}\n    },\n    \"description\": \"答案檔 answer.txt 的數字應等於 data/payments.csv 中 merchant 欄位的去重計數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"Answer must be just a number of unique merchants.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": []},\n    \"description\": \"answer.txt 內容必須僅為單一數字（唯一商戶數），不含其他文字；此格式要求無法用列出的 verifier 程式驗證，設 unverified。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  }\n]\n```\n",
+  "provenance": {
+    "cell": "dabstep-10-pi-C",
+    "role": "bad",
+    "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-10-pi-C/task",
+    "user_text_chars": 1404,
+    "data_files": [
+      "data/payments.csv",
+      "data/merchant_data.json",
+      "data/payments-readme.md"
+    ],
+    "prompt_sha256": "0fb7e8b90c5a4ead2e71423610db4abf84ff0a9bf5524975efde26a6ed33e336",
+    "generated_at": "2026-11-07T13:10:35+08:00"
+  }
+}

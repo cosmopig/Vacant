@@ -1,0 +1,169 @@
+{
+  "task_id": "expense_category",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "依 `category` 與 `subcategory` 分組；`subcategory` 空白者歸入 `unspecified`；",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "group_normalize": {
+          "category": {
+            "lower": true
+          },
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
+        "aggregates": [
+          {
+            "name": "total_amount",
+            "type": "sum",
+            "col": "amount",
+            "round": 2
+          }
+        ]
+      },
+      "description": "expense_summary.csv 須依 category 與 subcategory 分組，subcategory 空白歸入 unspecified，並對 amount 加總；以 group_aggregate 從 expenses.csv 重算比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R2",
+      "quote": "`subcategory` 大小寫不分（例如 `software` 與 `Software` 為同一組），輸出用 lower。",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "group_normalize": {
+          "category": {
+            "lower": true
+          },
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
+        "aggregates": [
+          {
+            "name": "total_amount",
+            "type": "sum",
+            "col": "amount",
+            "round": 2
+          }
+        ]
+      },
+      "description": "分組輸出大小寫不分並以 lower 輸出；group_normalize 對該交付物全部分組欄位套 lower，subcategory 另含空白歸類 default。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R3",
+      "quote": "產出 `expense_summary.csv`，欄位：`category, subcategory, total_amount`",
+      "deliverable": "expense_summary.csv",
+      "verifier": "csv_structure",
+      "kind": "explicit",
+      "params": {
+        "required_columns": [
+          "category",
+          "subcategory",
+          "total_amount"
+        ]
+      },
+      "description": "交付檔 expense_summary.csv 必須存在且含 category、subcategory、total_amount 三欄。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R4",
+      "quote": "`total_amount` = 該組 `amount` 加總後四捨五入到小數點後 2 位（**先加總、後取整**）。",
+      "deliverable": "expense_summary.csv",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "group_by": [
+          "category",
+          "subcategory"
+        ],
+        "group_normalize": {
+          "category": {
+            "lower": true
+          },
+          "subcategory": {
+            "lower": true,
+            "default": "unspecified"
+          }
+        },
+        "aggregates": [
+          {
+            "name": "total_amount",
+            "type": "sum",
+            "col": "amount",
+            "round": 2
+          }
+        ]
+      },
+      "description": "total_amount 為各組 amount 加總後四捨五入至小數 2 位（先加總、後取整），以 group_aggregate 重算比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "R5",
+      "quote": "產出 `summary.md`，須明確載明「報銷總金額」（全部加總、小數點後 2 位，精確數值）。",
+      "deliverable": "summary.md",
+      "verifier": "summary_numbers",
+      "kind": "explicit",
+      "params": {
+        "input_csv": "expenses.csv",
+        "numbers": [
+          {
+            "type": "sum",
+            "col": "amount",
+            "label": "報銷總金額"
+          }
+        ]
+      },
+      "description": "summary.md 須明確載明「報銷總金額」，其數值與 expenses.csv 全部 amount 加總（小數 2 位）重算一致。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ],
+  "model": "glm53flash",
+  "report": {
+    "parse_error": null,
+    "extract_error": null,
+    "kept": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5"
+    ],
+    "discarded": [],
+    "unverified": []
+  },
+  "generated_at": "2026-11-07T15:32:11+00:00"
+}

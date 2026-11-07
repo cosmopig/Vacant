@@ -1,0 +1,62 @@
+{
+  "task_id": "dab_507-pi-A",
+  "items": [
+    {
+      "id": "1",
+      "quote": "Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?",
+      "deliverable": "answer.txt",
+      "verifier": "kv_recomputed",
+      "kind": "explicit",
+      "params": {
+        "key": "total_hotels",
+        "data_file": "data/hotel_data.csv",
+        "recompute": {
+          "type": "count_if",
+          "col": "star_rating",
+          "eq": 5
+        }
+      },
+      "description": "統計 star_rating 恰為 5 的飯店數量，與 answer.txt 中 @total_hotels 的值比對。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "2",
+      "quote": "Count only hotels that have a star rating exactly equal to 5. This count value should be a non-negative integer.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "total_hotels",
+            "type": "integer"
+          }
+        ]
+      },
+      "description": "answer.txt 必須含 @total_hotels 鍵，值為非負整數。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    },
+    {
+      "id": "3",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the names given under \"Answer format\" in the task. This task expects 1 item(s):",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "total_hotels",
+        "value_type": "integer"
+      },
+      "description": "answer.txt 須以 @total_hotels[value] 格式撰寫，每項一行。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": false
+    }
+  ]
+}

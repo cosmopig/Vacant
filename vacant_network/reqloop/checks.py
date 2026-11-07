@@ -1781,7 +1781,7 @@ def check_kv_recomputed(
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
         if not isinstance(expected, (int, float)) or isinstance(expected, bool) or not math.isfinite(float(expected)):
             raise UnknownSource("重算結果非有限數值")
-        rnd = rc.get("round")
+        rnd = rc.get("round") if rc.get("round") is not None else p.get("round")
         if isinstance(rnd, int) and not isinstance(rnd, bool):
             expected = round(expected, rnd)
     except (UnknownSource, OSError) as e:
@@ -2413,7 +2413,7 @@ def check_plain_recomputed(
         if isinstance(expected, (int, float)) and not isinstance(expected, bool):
             if not math.isfinite(float(expected)):
                 raise UnknownSource("重算結果非有限數值")
-        rnd = rc.get("round")
+        rnd = rc.get("round") if rc.get("round") is not None else item.params.get("round")
         if (isinstance(rnd, int) and not isinstance(rnd, bool)
                 and isinstance(expected, (int, float)) and not isinstance(expected, bool)):
             expected = round(expected, rnd)
@@ -2691,7 +2691,7 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
                 f"標籤 @{tag} 的值 {int_val} 大於上限 {item.params['max_value']}",
                 {"actual": int_val, "max_value": item.params["max_value"]},
             )
-    elif val_type == "float":
+    elif val_type in ("float", "number"):
         try:
             flt_val = float(raw_val)
             if not math.isfinite(flt_val):
@@ -2701,7 +2701,7 @@ def check_tag_format(deliverable_dir: pathlib.Path, item: RequirementItem) -> Cl
                 item,
                 "FAIL",
                 f"標籤 @{tag} 的值 '{raw_val}' 無法解析為浮點數",
-                {"actual": raw_val, "expected_type": "float"},
+                {"actual": raw_val, "expected_type": val_type},
             )
         if "min_value" in item.params and flt_val < item.params["min_value"]:
             return _result(

@@ -1,0 +1,7 @@
+#!/bin/bash
+# 自主迴圈的護欄：只准推 auto/qwen27b，其他分支（尤其 main）一律拒絕。
+while read lref lsha rref rsha; do
+  if [ "$rref" != "refs/heads/auto/qwen27b" ] && [ "$rref" != "refs/heads/auto/worker" ] && [ "$rref" != "refs/heads/auto/argon" ]; then
+    echo "pre-push: 拒絕推到 $rref（只准 refs/heads/auto/qwen27b）" >&2; exit 1
+  fi
+done

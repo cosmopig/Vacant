@@ -1,0 +1,11 @@
+{
+ "schema": "vacant.reqloop.authoritative/1",
+ "task": "/home/user1/dev/ops/phase3_r1192/tasks/dabstep-23-pi-C",
+ "files": {
+  "contract.md": "a3b5048b46851b3ced34f3af730c5baa7ab74659fd257ff53394e9014133ca1d",
+  "request.md": "3fcd7c0f0e0610507c7b56e4e8f04855b808c0f30984f2ae2d05369e08fef67b",
+  "requirements.json": "8b5b16cb44589fe23e466b3a5dc98a815f8a0a11ceabef107f84afb09b5469ee",
+  "data/payments-readme.md": "8754b92d0b3127856ff72266ea482995d2a1f6a34d0a12732f7c26f527f2c4a5",
+  "data/payments.csv": "5fbb26210a45427d7a6560cfab3a362a08e4067f27cd03695f211a51c47ffc25"
+ }
+}

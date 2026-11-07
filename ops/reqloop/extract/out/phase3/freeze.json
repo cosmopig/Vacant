@@ -1,0 +1,147 @@
+{
+ "phase": 3,
+ "generated_at": "2026-11-07T15:07:45+0000",
+ "base": "/home/user1/dev/ops/effects2_20261106",
+ "extract_model": "glm53",
+ "repair": {
+  "provider": "lms1004nothink",
+  "model": "gemma-4-12b-it-qat",
+  "feedback_mode": "localized",
+  "min_rounds": 0
+ },
+ "budget": {
+  "max_rounds": 2,
+  "timeout_s_per_round": 300.0,
+  "hard_token_cap": false,
+  "note": "無硬 token 上限；成本從 raw usage 讀、缺值＝UNKNOWN 不填 0"
+ },
+ "comparison": "手寫需求基線（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep",
+ "cells": [
+  {
+   "cell": "dab_039-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_039/draft",
+   "draft_sha256": "293e94e754f0c502e332f86ff431e265555971b056022867cd954e6c046be6cd",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_039-pi-C.glm53.json",
+   "req_sha256": "90b3682d313659799428f9aaec6a34600b8af295f8b22f6963f232b0e3256dab",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_039-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dab_055-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_055-pi-C/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_055-pi-C/draft",
+   "draft_sha256": "356c5855d9ecbf387be4ed11c4977f920f5779287e12f6a53b42f76b7cf69c35",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_055-pi-C.glm53.json",
+   "req_sha256": "f73fb87a600b881a6e8ca325f66d9018c0d0874a75be9448282c1179241f2468",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_055-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dab_378-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_378/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_378/draft",
+   "draft_sha256": "a6d22e90c1fd5233483dff4792764d7a045079119a27b6a9200abdb3d41b4c57",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_378-pi-C.glm53.json",
+   "req_sha256": "eec559b24ef589939f15c11e337064801ddb5f78d56e9e8e4cd05922d7ec73f0",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_378-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dab_426-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_426-pi-C/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_426-pi-C/draft",
+   "draft_sha256": "a4b1525123ca7425c91c9d13ce6ff6b8a7a7ccd1cc07026d3defecfb9ef6cc26",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_426-pi-C.glm53.json",
+   "req_sha256": "f98b232c4f7afab453a5642d4d8f52b494506e9ac5ee66ee2e8275d56ac00b93",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_426-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dab_427-pi-A",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_427-pi-A/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e013/dab_427-pi-A/draft",
+   "draft_sha256": "1dcf62c6d75e8ac162280e09359c4600202b113bc404af3135cd9d81ee497caa",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_427-pi-A.glm53.json",
+   "req_sha256": "99d043d59bb0318c994b9d7d076fea3f1afa8f6cda70e106ebb7d161fe0c4e14",
+   "source": {
+    "run": "e013_dabench_pi_AC_full",
+    "cell": "dabench-dab_427-pi-A-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dab_507-pi-A",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_507/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke/dab_507/draft",
+   "draft_sha256": "04cb158a2ba203c8d743fe1246832496d676eed38b4f8be2df77470a97972b71",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dab_507-pi-A.glm53.json",
+   "req_sha256": "b2992074a82bfeee36f75e2d2ddf47b1dfcb66f4e8509186a4c1b8dcb7a3f2ad",
+   "source": {
+    "run": "e008_dabench_pi_AC",
+    "cell": "dabench-dab_507-pi-A-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dabstep-10-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-10-pi-C/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-10-pi-C/draft",
+   "draft_sha256": "1be01bbcd69ec3aa119e81788d917c734599e55b83f6b0a62ea80d016febb640",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dabstep-10-pi-C.glm53.json",
+   "req_sha256": "3617e11f409bd93bf1a639ba82b8df0467954d9083339388a2207e8525740140",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-10-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dabstep-1273-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-1273-pi-C/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-1273-pi-C/draft",
+   "draft_sha256": "96d587248b7c137ae1b16589270bbca0331f74e4c4eacaeba68f78ad13390f69",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dabstep-1273-pi-C.glm53.json",
+   "req_sha256": "2037e297768b7e4ce7c0c17e7b356b6f3ff22528018666eca6f0411dae99a239",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-1273-pi-C-r1"
+   },
+   "before_pass": false
+  },
+  {
+   "cell": "dabstep-23-pi-C",
+   "role": "bad",
+   "task_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-23-pi-C/task",
+   "draft_dir": "/home/user1/dev/ops/effects2_20261106/snapshot/ops/reqloop/g2/smoke_e014/dabstep-23-pi-C/draft",
+   "draft_sha256": "8118d6b66242468e2bb65fe0f2a28039d86bbe41bf17cacf7dc8d5cee75898f2",
+   "req_file": "/home/user1/dev/Vacant/ops/reqloop/extract/out/real14/dabstep-23-pi-C.glm53.json",
+   "req_sha256": "93ccd95eef9c0a8016b77df00d46cc2b207c6cafb88f87b95d04c6c3844673bb",
+   "source": {
+    "run": "e014_dabstep_block",
+    "cell": "dabstep-23-pi-C-r1"
+   },
+   "before_pass": false
+  }
+ ]
+}

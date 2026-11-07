@@ -1,0 +1,10 @@
+{
+ "schema": "vacant.reqloop.authoritative/1",
+ "task": "/home/user1/dev/ops/phase3_r1192/tasks/dab_426-pi-C",
+ "files": {
+  "contract.md": "37cbf972efd27fe85ebd870eea6ce6f2a6cbb40dab3d9a35ad26bd97ee5f53b0",
+  "request.md": "11aac002949b7b2288fa826631124c2abd47757b7145bdc8541bb8122672b930",
+  "requirements.json": "0fb13d8903ec21fbacd07555f4ca21dc411924e6e3ef6981959de834e17a1fbc",
+  "data/cost_data_with_errors.csv": "83efce074700d226453f08c9b8faddc4703c70ae0e1888e8e8422994416d1ce0"
+ }
+}

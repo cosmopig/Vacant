@@ -1,16 +1,19 @@
-# 現在（第 1188 輪，2026-11-07）
+# 現在（第 1208 輪後，2026-11-07）
 
-## r1188：real14 首跑完成（門禁 FAIL）
-- 修 run_eval.py 1 行 ExtractReport 序列化（改前 RC=1）；14/14 cell 判定：
-  **抓錯 9/9（達標）、冤枉 4/5（未達）→ FAIL（RC=20）**；15 次/141762 tok；重跑全 cache。
-- 冤枉同型：dab_035/057/105/dabstep-13＝需求綁定 checker 解析不到的
-  deliverable/值路徑（dabstep-13 好稿有 answer.txt，需求寫 /app/answer.txt）。
-- commit 552dda17；工單 done/；vq-el4.4 未收（bd note 已記）。
+## r1208：工單 P20261107_1827-2 完成（57ce9625，工單已入 done/）
+- run_phase2/phase2_extract_cell 加 offline 參數：offline=True 且快取未命中
+  （缺檔或 prompt_sha 不符）→ raise ExtractError（fail-closed、不發外部 API 呼叫）；
+  run_all()（--all 整合驗收）傳 offline=True；CLI --phase2 預設 False 行為不變。
+- 驗收：pytest -k offline_mode＝1 passed；extract 3 檔 97 passed；
+  run_eval.py --all＝🏆 PASS、RC=0、0 新 API 呼叫（REAL14 74/732,826 與帳本同）；
+  out/all/phase2.json 已還原 HEAD 凍結版。
 
-## 下一步（等規劃者重拆 vq-el4.4）
-- 修 deliverable 路徑綁定（prompt 或 checker 解析對齊草稿實際檔案位置）→
-  重跑（0 計費）→ 門禁過 → vq-el4.5（localized 修復＋獨立 scorer）。
+## 下一步
+1. 巡 auto/qwen27b 新 HEAD 57ce9625 本地 CI 綠燈。
+2. GitHub Actions 13:22 UTC 後仍無新 run＝人類/基建問題，等指示。
+3. 等 G2.5 後續或審查新派工。
 
 ## 紅線（不變）
-main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
+main 不動；不手動 push；不讀 /srv/eval hidden／scorer；不繞 glm 直連 vibe；
 不改 repair.py／G1 requirements.json／凍結快照；成本缺值＝UNKNOWN 不填 0。
+（MEMORY 上限 6 KB、NOW 上限 3 KB；超過的部分沒有附上，請先把它縮短）
