@@ -318,3 +318,10 @@
 3. 審查#3 單一事實源：3 code sha256 MATCH（51abfec3/c7589c61/332cd324）；run_eval --all 新鮮 **PASS** RC 0（G1 39/39·FP0／REAL14 9/9·0/5／PHASE3 fixed7·unresolved2·r2w0·err0；RESUMED progress.json、0 新增呼叫）；out/phase1-3.json 與 filing sources 逐字節一致（3c6fb35a/6b7cb831/ada235bb）。
 4. 審查#4/#5：vibe_calls 130 行末條 11-07T18:35Z＝0 呼叫；g3gate --plan RC 0（12 格冻结、NOT FIRED）＋--fire **RC 2** fail-closed 0 呼叫（首讀 RC=0 係 `| tail` 取 tail 退出碼之 pipe 假象，重核修正）；queue 空；無 G3 工單；vq-el4 20/20 closed。
 5. CI：輪首 qwen27b e85eceaf 仍 running（argon/worker 🟢）；本機無 gh CLI、CI 每輪至多點名一次→記錄不乾等；紅燈＝下輪例外。紅線：main c097899e 未動未 push／未讀 hidden·scorer／未 reset·rebase·branch -f。
+
+## 2026-11-08 r1256 redo（~12:1x UTC）：審查點名兩檔直接開啟＋核數（repair.py・effects_20261105_summary.json）
+1. repair.py 直接開啟：**2,795 行**、git blob **5147f8c3ea1b5e9ee50531aca0382971e912c243**＝anchor 钉值；docstring 規則塊＝保留原候選／權威輸入（source_tampered→退出碼 20）／累積修復承接前輪候選／FAIL→UNKNOWN 不算修好／regressed 必記錄／連續兩次停滯即停／成本缺值 UNKNOWN 絕不填 0／synthetic 僅離線／opt-in——無新增本地規則→r1256#1「repair 5147f8c3/2795 行冻结」声明落地實檔、零更正。
+2. effects_20261105_summary.json 直接開啟：**60,228 B**、blob **856c2c71**（r1237 以來未變）、schema/1、snapshot d38d2eb2、50 cells（policy30 30＋once20 20）、local_matches_total **45**、current_code_matches_total **50**。
+3. 逐欄 code 重算（load in code）、與 r1255 redo 引用**逐項一致、零出入**：policy30 w2r **g7/l6**・pres **g5/l5**・still **g3/l4**・r2w 0/0・api **365/550**（總 915）・tok **16,284,659/17,385,851**（總 33,670,510）；once20 w2r **g7/l4**・still **g3/l6**・pres 0/0・api **165/292**（總 457）・tok **6,210,682/13,293,271**（總 19,503,953）；local_vs_independent **3+2**（dab_055-pi-C-localized・dabstep-1273 雙臂）・current_code mismatch **0**；且 11-06 人類點名「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」與本檔逐項吻合。
+4. 依賴核對：r1256 記錄依賴兩檔者＝僅 #1 錨點声明（repair.py 本條①落地）；#3 三門 PASS 出自新鮮 run_eval（不依賴本檔）→**零更正**、r1256 結論不受影響。
+5. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記）・G3 未發射・queue 空・main c097899e 未動未 push。
