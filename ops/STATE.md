@@ -365,3 +365,9 @@
 3. 驗證：anchors **3 passed×3 分支**（qwen27b/worker/argon worktree 各實跑）；run_eval --all **RC 0 三門 PASS**（G1 39/39・FP0／REAL14 9/9・0/5／PHASE3 fixed7・u2・r2w0・err0；RESUMED progress.json、0 新呼叫）；filing 6 sha 重算後全 **MATCH**（sources 3c6fb35a/6b7cb831/ada235bb＋code 51abfec3/c7589c61/332cd324）；vibe_calls.jsonl 130 行末條 11-07T18:35Z＝今日 0 呼叫；/srv/vlab/queue 空。
 4. 未驗證：本 commit 與 worker 同步 commit 的 CI 燈（下輪各巡一次；輪首 qwen27b 59f060d1 仍 running、無紅）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准）。
 5. 下一步：巡 qwen27b＋worker 新 SHA CI 燈（一次；紅燈＝例外才動）；G3 續候人類明確核准；worker diff 若再長（journal 逐輪推進）即再同步清零。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
+
+## 2026-11-08 r1260 redo（12:5x UTC）：審查點名兩檔直接開啟＋核數（repair.py・effects_20261105_summary.json）
+1. repair.py 直接開啟：**2,795 行**、git blob **5147f8c3ea1b5e9ee50531aca0382971e912c243**＝anchor 钉值（審查#1）；docstring 規則塊＝保留原候選／權威輸入（source_tampered→退出碼 20）／累積修復承接前輪候選／FAIL→UNKNOWN 不算修好／regressed 必記錄／連續兩次無相鄰輪可確認改善即停／成本缺值 UNKNOWN 絕不填 0／calls（session）≠model_calls（API 請求）／synthetic 僅離線／opt-in——無新增本地規則→r1260「repair.py 冻结未動」紅線声明自此有直接實檔依據（此前僅 anchors 3 passed 間接）。
+2. effects_20261105_summary.json 直接開啟：**60,228 B**、blob **856c2c711c4649**（r1237 以來未變）、snapshot d38d2eb2、scope_note 明示開發選樣／單 rep／不宣稱 localized 優於 generic／缺值 None 不填 0／hidden_after 全 UNKNOWN；load in code 重算：policy30 w2r **g7/l6**（13）・pres g5/l5（10）・still g3/l4（7）・r2w 0/0・api 365/550（915）・tok 16,284,659/17,385,851（33,670,510）；once20 w2r **g7/l4**（11）・pres 0/0・still g3/l6（9）・api 165/292（457）・tok 6,210,682/13,293,271（19,503,953）——兩臂加總與 top-level 逐項一致。
+3. 對質：11-06 人類點名「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」＝本檔 w2r 逐項吻合；r1260 主條未引用本檔任何數字（三門出自行 run_eval 新鮮重算；9/9・7/9 對照基線是 g2-truth 手寫需求、非出自本檔）→**零更正**、r1260 結論不受影響。
+4. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記＋鏡像）・G3 未發射・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
