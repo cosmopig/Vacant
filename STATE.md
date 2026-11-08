@@ -204,3 +204,9 @@
 ## r1247 redo2（2026-11-08 ~09:3x UTC）：审查点名 r1247 redo ② 行的 "phase 总" 两数未见重算记录→命令重算并写回
 - ① 命令重算（load in code、三法一致）：feedback_once20 tokens_true_total＝19503953（phase 字段＝per_arm 6210682+13293271＝cells_detail 逐格加总）；policy30 同法＝33670510（16284659+17385851＝cells_detail 加总）。
 - ② 仅改 r1247 redo ② 行该处为重算值 33670510/19503953；其余不动；NOW.md 无此两数（grep rc=1）。
+
+## r1248（2026-11-08 ~09:08 UTC）：CI 巡燈一次（不轮询）＋锚点守护新鲜
+- ① 一条指令输出变好：qwen27b 0a460642 CI＝🟢 5056/5129（LATEST_qwen27b.json green=True；上轮「還沒跑完」）；5653d321↔0a460642 diff 仅 NOW/STATE 簿記→HEAD 产品树即绿灯树。
+- ② worker b150a94c 在跑（71%，查一次、未轮询；LATEST_worker 仍旧灯 b45a6fb1 5059/5132）；其产品树与绿灯树 0 文件 diff→预期 5056/5129；灯红→重开 vq-ssk。
+- ③ tests/test_reqloop_frozen_anchors.py 3 passed（0.14s）；g2.py 0e7a679d 三分支同；worker↔qwen27b vacant_network/tests diff 0 文件。
+- ④ 未验证：worker CI 灯（在跑、下轮查一次）。红线：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
