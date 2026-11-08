@@ -1,30 +1,15 @@
-# 現在做哪一個循環（≤3 KB、只放「現在在哪、下一步」；每輪紀錄寫 STATE.md）
+# 当前状态（2026-11-08 ~10:36 UTC，r1252）
 
-## 狀態（round 959、11/04 02:5x）
-- **e016 attempt-2 在跑**：54/102 格在位（02:2x 為 51）；events 活躍（pg_pig_latin C-nf 02:54、C 02:49）＝健康；
-  infra 快照 3/50＝6%＜20% 閾；pace ~12–16 分/格⇒ETA 11/04 下午–11/05 中午。
-- **senior #1 驗收（r959 再核）**：`audits/e016_verdict_pipeline.py --selftest` ALL OK RC=0；
-  對當前 run 輸出 `INCOMPLETE: 只到 54/102 格在位`（計數非 0、RC=10）⇒兩判準滿足。
-- **助手票 R20261104_0124-1（r955 草稿引用審計）**：停擺⇒r959 R&D 裁處自行執行：6 條 PASS＋第 7 條公式 PASS／**引用 FAIL**
-  （redo 實開 FINDINGS.md：「CB 2.26×」不存在先例、e014 實測紅線內 cost_ok；真鏈＝e007＋e014 §2＋e006 H/M 越線）：
-  草稿已修正、runbook 加註記、packet 鎖檔不改（結案用修正先例）；票在 done/（Done 段含 7b 修正）。
-  ⇒ **分支 3（MECHANISM_CONFIRMED）packet 提升門意已滿足**（草稿現行引用逐條核準；runbook §2 態 3）。
-- argon c9a811fe 已為 qwen27b 祖先（merge-base 核）⇒無待合；worker 69c50dba 綠。
-- CI：d082539d（r958 鏡像）pending；前 HEAD 5576107c 綠 4670（LATEST_qwen27b）。
-- 收口 runbook 在案：`staging/e016_closeout_runbook_r957.md`（§0 前置→§1 裁決→§2 五態逐字表→§3 結案三處→§4 紅線）。
+## 本轮交付（r1252，~10:09–10:37 UTC，零模型调用）
+1. **9732075e 灯 → 🟢 5056/5129**（本轮点名步骤，842.6s，green:true；auto/qwen27b HEAD 由「running」变绿）。
+2. **新离线验证全过（30.2s/0 调用）**：anchors 3 passed；run_eval --all EXIT=0（G1 39/39·FP0 / REAL14 9/9·0/5 / PHASE3 fixed 7·unresolved 2·right-to-wrong 0）；filing code sha256 3/3 MATCH；/srv/vlab/queue 空；vibe_calls 130 行（末条 11-07T18:35Z，零新增）；main c097899e；5fb3d00a 仍为三分支祖先。
+3. **🐛 实测发现（非推测）：auto/worker 树与 qwen27b 未对齐**——46 檔差異（14 D + 32 M），**9 個檔案含已 commit 的未解決衝突標記**（`git grep -l '<<<<<<<' auto/worker -- vacant_network tests ops | wc -l` = 9；含 `ops/audits/e016_verdict_pipeline.py` 已非合法 Python、`ops/STATE.md`）；worker 歷史含 WIP commit `41eef681`。r1250/r1251「三分支對齊」僅以祖先關係驗證，不足以證明樹一致；worker CI 綠不覆蓋此（無測試 import 破檔）。
+4. **開工單 R20261108_1034-1**（~/dev/ops/tickets/open/，予 worker assistant）：46 檔差異清零（以 qwen27b 為準；14 檔 qwen27b 不存在者 git rm），自證衝突標記=0、diff=0、compileall rc0；下輪 R&D 點名新 SHA CI 燈並複驗。
 
-## 🔴 下一步（e016 完賽那一輪，照 runbook 依序；完賽前只監控）
-1. `ls /srv/vlab/done/16_e016_failed_step_ablation.json`（缺＝還在跑）
-2. `python3 /srv/vlab/bin/report.py e016_failed_step_ablation --rescore`（不一致 0；非 0⇒停不裁決）
-3. `python3 audits/e016_verdict_pipeline.py`→五態之一（exit 0 非 UNKNOWN／20 UNKNOWN／10 INCOMPLETE）
-4. 照 runbook §2 對應行**逐字**：
-   1 UNKNOWN＝非負、infra 修復後重裁決、不寫機制結論；
-   2 COST_BREACH＝機制判定不成立、不改產品、併讀 L007 §2.5 成本病態；
-   3 MECHANISM_CONFIRMED＝強化＝新 cycle＋新 packet（r955 草稿＋審計門✓；TDD 先、六門＋senior 審查後才提升）；
-   4 NO_MECHANISM＝C 勝＝採樣⇒不改產品、誠實記錄（不寫「kickback 無用」因果）；
-   5 UNRESOLVED＝未建立、不改產品；候選 (b) 外端 referee／(a) H-harness-budget（低優先）
-   ＋結案寫三處（L006 §6／L007 §4 標記不改原文／FINDINGS e016 條目，正典＝Vacant repo）＋兩 repo 鏡像＋commit
+## 下一步（次轮，按序）
+1. 點名 worker 新 SHA（工單完成後）→ 期望 🟢 5056/5129；複驗 3 條自證＋filing 三 sha 仍 MATCH。
+2. 若工單未完成 → 按驗收條件補推（產品 bug 例外，非 vq-el4 序）。
+3. G3（vq-1zf）續候人類明確批准；其餘紅線不變。
 
-## 監控紀律
-- attempt-1 15 格（`…attempt1_envleak/`）不進裁決；`recompute_results.json`（全 0）與 `e016_…_recompute.py` 不能當證據。
-- 盤餘 62G、queue 空、无双分派；助手票全在 done/（doing/ 空）；CI d082539d 待結果（紅燈先修紀律）。
+## 红線（不變）
+無 G3 fire／無模型調用／無 queue／無 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 凍結（anchors 5147f8c3·e757aec5）／CI 每輪至多點名一次。

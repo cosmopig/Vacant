@@ -1,28 +1,15 @@
-# 当前状态（2026-11-08 ~10:05 UTC，r1251）
+# 当前状态（2026-11-08 ~10:36 UTC，r1252）
 
-## r1251 交付（审查指示 5 项收口验证：全既有命令、0 新文件、0 模型呼叫）
-- ① 审查#2 worker 同步收口验证：5fb3d00a 为 worker b150a94c 与 qwen27b 6aae8850 的祖先
-  （merge-base --is-ancestor 两者皆 0）；工单 R20261108_0810-1 已入 done/（验收：锚点 3 passed＋53 passed）；worker 灯 🟢 5056/5129。
-- ② 审查#1/#3：锚点守护新鲜 3 passed（0.04s）；repair 5147f8c3/2795 行、extract e757aec5/1217 行
-  ＝锚点直接一致；g25_all_gates_filing.json（4681 B、三门 PASS）3 个 code sha256
-  （extract/checks/run_eval）重算全 MATCH。
-- ③ 审查#4/#5：vibe_calls 130 行未变（末条 11-07T18:35Z）→今日 0 模型呼叫；/srv/vlab/queue 空；
-  RLOOP_PLAN.md（112 行）读到末尾——无人类 G3 核准→不发射。
-- ④ 环境一次核：本轮 0 个 D 态进程（上轮"大量 D"未再现）、时钟一致（09:43→09:59 无回跳）；
-  GitHub Actions 11-07 13:22 后仍无新 run（末 f03d1177 failure）→待人类/基建。
-- ⑤ qwen27b 6aae8850 CI：09:59 巡灯＝running（09:45:00 起跑、历次 14–14.5 分）；
-  上 HEAD e54b4850 已 🟢 5056/5129→本轮灯记 running，未轮询。
-- redo（审查点名 2 项）：4681 B＝`wc -c` 重算值（filing 4b24cd5b 未变）；
-  effects_20261105_summary.json 已开（60,228 B、blob 856c2c71 未变、snapshot d38d2eb2）：
-  w2r g7/l6・g7/l4、r2w 0/0、pres 5/5・0/0、api 365/550・165/292、tokens 16,284,659/17,385,851/6,210,682/13,293,271、
-  cells 30+20=50、mismatch 3+2=5→与历史引文全一致、零修正。
+## 本轮交付（r1252，~10:09–10:37 UTC，零模型调用）
+1. **9732075e 灯 → 🟢 5056/5129**（本轮点名步骤，842.6s，green:true；auto/qwen27b HEAD 由「running」变绿）。
+2. **新离线验证全过（30.2s/0 调用）**：anchors 3 passed；run_eval --all EXIT=0（G1 39/39·FP0 / REAL14 9/9·0/5 / PHASE3 fixed 7·unresolved 2·right-to-wrong 0）；filing code sha256 3/3 MATCH；/srv/vlab/queue 空；vibe_calls 130 行（末条 11-07T18:35Z，零新增）；main c097899e；5fb3d00a 仍为三分支祖先。
+3. **🐛 实测发现（非推测）：auto/worker 树与 qwen27b 未对齐**——46 檔差異（14 D + 32 M），**9 個檔案含已 commit 的未解決衝突標記**（`git grep -l '<<<<<<<' auto/worker -- vacant_network tests ops | wc -l` = 9；含 `ops/audits/e016_verdict_pipeline.py` 已非合法 Python、`ops/STATE.md`）；worker 歷史含 WIP commit `41eef681`。r1250/r1251「三分支對齊」僅以祖先關係驗證，不足以證明樹一致；worker CI 綠不覆蓋此（無測試 import 破檔）。
+4. **開工單 R20261108_1034-1**（~/dev/ops/tickets/open/，予 worker assistant）：46 檔差異清零（以 qwen27b 為準；14 檔 qwen27b 不存在者 git rm），自證衝突標記=0、diff=0、compileall rc0；下輪 R&D 點名新 SHA CI 燈並複驗。
 
-## 下一步（r1252，单一步骤、一轮可完）
-1. 巡 6aae8850 灯一次（≤1 次）：期望 🟢 5056/5129→新 HEAD 三分支全绿；
-   若红＝修红灯（授权例外）；若仍 running＝记一行、转待人类项。
+## 下一步（次轮，按序）
+1. 點名 worker 新 SHA（工單完成後）→ 期望 🟢 5056/5129；複驗 3 條自證＋filing 三 sha 仍 MATCH。
+2. 若工單未完成 → 按驗收條件補推（產品 bug 例外，非 vq-el4 序）。
+3. G3（vq-1zf）續候人類明確批准；其餘紅線不變。
 
-## 待人类（不自行修复）
-- G3（vq-1zf）等明确核准；GitHub Actions 基建停摆；上轮时钟/D 异常若再现请检查主机。
-
-## 红线（未动）
-G3 未发射｜0 模型呼叫｜queue 空｜main c097899e 未动未 push｜repair/extract 冻结｜未读 hidden/scorer｜CI 未轮询
+## 红線（不變）
+無 G3 fire／無模型調用／無 queue／無 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 凍結（anchors 5147f8c3·e757aec5）／CI 每輪至多點名一次。

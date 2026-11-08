@@ -261,3 +261,8 @@
 - ③ 数字对质：policy30 w2r g7/l6、still g3/l4、r2w 0/0、pres 5/5、api 365/550、tokens 16,284,659/17,385,851（5 格 tokens_true=None 缺值未填 0）；once20 w2r g7/l4、still g3/l6、r2w 0/0、pres 0/0、api 165/292、tokens 6,210,682/13,293,271；cells 30+20＝50；local_vs_independent mismatch 3+2＝5、current_code_vs_independent 两 phase 皆空→与 r1248/r1249/r1250 引文全一致、零修正。
 - ④ 依赖对质：r1251 六条（worker 同步／锚点守护／filing sha256／vibe_calls／环境／CI 灯）无一引用此文件；"4681 B" 出自 filing（wc -c）、不出自此文件→零依赖、零修正。
 - ⑤ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
+
+## 2026-11-08 r1252（10:09–10:37 UTC）
+1. **9732075e 灯 → 🟢 5056/5129**（本轮点名步骤，由 running 转绿）；新离线验证全过：anchors 3/3；G1 39/39·FP0；REAL14 9/9·0/5；PHASE3 fixed 7·unresolved 2·right-to-wrong 0；filing code sha 3/3 MATCH；0 模型调用；queue 空；main c097899e。
+2. **🐛 发现 auto/worker(b150a94c) 树与 qwen27b 有 46 檔差異（14 D+32 M）、9 檔含已 commit 衝突標記**（e016_verdict_pipeline.py 非合法 Python；worker 历史含 WIP 41eef681）——r1250/r1251「三分支对齐」仅以祖先验证、不足；worker CI 绿不覆盖。
+3. 開 **R20261108_1034-1**（worker：以 qwen27b 為準清零 46 檔＋3 條自證），下輪點名新 SHA 燈複驗；G3（vq-1zf）續候明確批准；紅線不變。
