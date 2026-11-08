@@ -1,4 +1,4 @@
-# NOW（r1270・2026-11-08）
+# NOW（r1270 redo・2026-11-08）
 
 ## 現在在哪
 - G2.5 主線完結、全綠（數字以 filing `out/all/phase3.json` 7/2 為準；standalone 6/3 舊檔不得引用）。
@@ -9,6 +9,10 @@
 - 工作隊列空：vq-el4 28/28 閉；唯一 ready＝vq-1zf（G3）待人類核准；/srv/vlab/queue 空。
 - 衛生修復（指示#3）：ops/STATE.md＋ops/loop/NOW.md 簿記鏡像自 r1265 後未同步（r1266–1269 跳過）——
   本輪同步至 r1270 狀態並對齊三分支，in-scope diff 0×2。
+- r1270 redo：審查點名 4 檔逐檔開啟核實——repair.py 2795 行／blob 5147f8c3 之 docstring 規則逐條核實；
+  filing 直讀（三門 PASS、phase3 7/2・r2w 0・errors 0、sessions 15／API 275）＋6 sha 本輪獨立重算 6/6 MATCH；
+  ci-contract 測試直讀（合約 import 守門＋scipy/numpy 負向控制）；effects summary 程式載入（50 cells、
+  50/50 一致、policy30 w2r13／once20 w2r11、scope_note 不宣稱 localized 優）；anchors＋ci-contract 直接重跑 7 passed。
 
 ## 下一步
 1. 每輪先跑 `python3 ops/reqloop/freeze_check.py`；任一項 BROKEN 即調查該項。
