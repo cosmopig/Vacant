@@ -1,23 +1,29 @@
-# NOW.md — r1265（2026-11-08，第 1265 輪）
+# NOW.md — r1266（2026-11-08，第 1266 輪）
 
-## 本輪結論（一句）
-主線 G2.5 已完結且全綠（`run_eval --all` EXIT 0、三門 PASS、242 測綠、anchors 5、in-scope diff 0）；唯一剩餘工作 G3 已備妥但阻塞於人類核准——本輪無實質代碼改動、未造假進展。
+## 現在在哪（一句）
+主線 G2.5 已完結全綠、G3 備妥等人類核准；本輪（redo）已逐檔開啟審查點名的 4 檔並重驗，
+修掉 repo `loop/NOW.md` 停滯在 r1252 的簿記缺口。無代碼改動。
 
-## 事實（本輪全部實跑／直接開啟）
-- `run_eval.py --all` EXIT 0：G1 抓錯 39/39・冤枉 0；REAL14 9/9・冤枉 0/5；PHASE3 fixed7／unresolved2／rejected0／right_to_wrong0／error0（0 新模型呼叫、離線重算）。
-- reqloop 相關測試 242 passed；anchors（frozen）5 passed×3 分支；in-scope diff 三分支 0。
-- `g3gate --plan` EXIT 0：12 格（4 題×3 臂）、verify_frozen OK、budget OK、NOT FIRED（0 model calls）。
-- **〔redo〕三檔本輪直接開啟核實**（此前只引 r1264 文字，現已落地）：
-  - `extract.py` 1217 行/blob `e757aec50c16…`＝G2.5 擷取驗證層，fail-closed（逐字 quote、`SUPPORTED_VERIFIERS` 閉集、解析失敗→空集、`GlmClient` 唯一模型入口）。
-  - `repair.py` 2795 行/blob `5147f8c3ea1b…`＝G2 修復切片（權威快照輸入、來源改寫→exit 20、FAIL→UNKNOWN≠修好、PASS 退步記 `regressed`、session≠API calls 分開、缺值＝None、opt-in）。
-  - `effects_20261105_summary.json` sha256 `a710f7e4…`，程式載入重算：50 cells、**current_code 50/50 與獨立一致（0 分歧）**、local 45/50（5 分歧＝舊 checker）、policy30 w2r13(g7/l6)/r2w0/pg10/sw7、once20 w2r11(g7/l4)/r2w0/sw9、api_calls 915+457 vs sessions 35+20。
-- bd：vq-el4 全 27 項 closed；唯一 open＝vq-1zf（G3，等人類核准）。
-- 0 model calls（queue 空、vibe_calls 今日 0）；未讀 /srv/eval hidden 與 scorer.py。
+## 本輪實測（全部直接開啟／重跑）
+- `auto-ci.yml`：name「auto CI」、job「auto core (reqloop + frozen hash + stepchain)」，
+  觸發僅 auto/**/PR/dispatch、`contents: read`；worktree clean，本輪只讀。
+- `repair.py`：2795 行／blob `5147f8c3ea1b`（與 anchor 一致）；docstring 含權威快照、
+  來源改寫→exit 20、FAIL→UNKNOWN≠修好、regressed、session≠model_calls、缺值=None；
+  `test_reqloop_frozen_anchors.py`+`test_reqloop_ci_contract.py` 7 passed。
+- `effects_20261105_summary.json`：60228 B／sha `a710f7e4…`；程式重算 8/8 條聲明 PASS：
+  50 cells、current_code 50/50（0 分歧）、local 45/50（5 分歧）、policy30 w2r13（g7/l6）
+  r2w0 pg10 sw7、once20 w2r11（g7/l4）r2w0 sw9、api_calls 915+457、sessions 35+20。
+- repo `loop/NOW.md`：原停滯 r1252（1910 B、11-08 10:38）vs 根 NOW.md r1265——13 輪未同步；
+  本輪覆寫（即本檔），與根 NOW.md／STATE.md 一致。
+- bd：vq-el4 27/27 closed；唯一 open＝vq-1zf（G3，等人類核准）。HEAD 684e2ba2。
 
-## 下一輪先做
-1. **需人類**：核准 G3 發射（`--fire`）或指派其他 in-scope 工作——主線已完結、無其他可單方推進的代碼工作（未核准前禁 `--fire`／入 queue／未授權模型呼叫）。
-2. 確認三分支 CI 轉綠（一次、不 poll）；若紅燈且屬本次變更相關才修。
+## 下一步（次輪，按序）
+1. **需人類**：G3（`--fire`）核准或指派其他 in-scope 工作；未核准前禁 fire／入 queue／
+   未授權模型呼叫（紅線#5）。
+2. 三分支 CI 綠燈確認（一次、不 poll）；紅燈僅在與本輪變更相關時才修。
 3. 每輪守：anchors 5 passed＋in-scope diff 0（簿記鏡像同步 worker/argon）。
 
 ## 紅線（本輪全守）
-0 model calls・無 git push（迴圈自推 qwen27b）・.github/workflows/ 只讀・無 reset/rebase/branch -f・repair.py/extract.py/checks.py/run_eval.py/filing 未改・未讀 /srv/eval hidden 與 scorer.py・無 sleep 輪詢。
+0 model calls・無 push（迴圈自推）・`.github/workflows/` 只讀・無 reset/rebase/branch -f・
+repair.py／extract.py／checks.py／run_eval.py／filing 未改・未讀 /srv/eval hidden 與
+scorer.py・無 sleep 輪詢。

@@ -6,3 +6,4 @@
 G3（唯一剩餘項）：vq-1zf open；`g3gate --plan` 全綠（12 格＝4 題×3 臂、verify_frozen OK、budget OK、入口＝glm）；紅線#5 嚴禁未核准 `--fire`／入 queue／未授權模型呼叫——發射需人類於 RLOOP_PLAN.md 或明確指示給核准信號。
 CI＋紅線：三分支 HEAD 皆純簿記 commit；本地 vacant-ci pending（未 poll）；auto-ci.yml disabled_manually（r1264 升級人類）。本輪 0 model calls（queue 空、vibe_calls 今日 0）、無 git push（迴圈自推）、.github/workflows/ 只讀、無 reset/rebase/branch -f、repair.py/extract.py/checks.py/run_eval.py/filing 未改、未讀 /srv/eval hidden 與 scorer.py。
 下一步（需人類決策）：① 核准 G3 發射（`--fire`）或指派其他 in-scope 工作——主線已完結、無其他可單方推進的代碼工作；② 確認三分支 CI 轉綠（一次、不 poll）；③ 每輪守 anchors 5 passed＋in-scope diff 0（簿記鏡像同步 worker/argon）。
+（2026-11-08 r1266：審查 redo 落地——4 點名檔逐檔開啟重驗：auto-ci.yml（name「auto CI」、觸發 auto/**/PR/dispatch、clean、只讀）；repair.py（2795 行・blob 5147f8c3ea1b，anchors＋ci-contract 7 passed）；effects_20261105_summary.json（60228 B・a710f7e4…，程式重算 8/8 聲明 PASS，per_arm g7/l6・g7/l4 核實）；repo loop/NOW.md（發現停滯 r1252 共 13 輪 → 本輪覆寫同步至 r1266）。無代碼改動；G3 仍阻塞等人類核准；0 model calls、無 push、未讀 hidden/scorer。）
