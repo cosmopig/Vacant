@@ -69,3 +69,10 @@
 - ④ 沒驗證：ad87a1e0 CI 檔（loop 職掌、下 cycle）；G3 核准信號（queue 空→0 呼叫）。
 - ⑤ 下一步：巡 ad87a1e0 CI＋等 G3 核准（vq-1zf）；無其他可動工單（vq-el4 18/18、open 工單 0）。
 - ⑥ redo（審查點名：effects_20261105_summary.json 本輪原未開→現補開）：code json 載入（60,228 B、Nov 5 11:25）——total_cells 50（local45→cur50）；policy30 30 cells：generic w2r 7/15（still3、pres5、16284659 tok）／localized 6/15（still4、pres5、17385851）、r2w0、cur mismatches 0；once20 20 cells：generic 7/10（still3、6210682）／localized 4/10（still6、13293271）、r2w0、mismatches 0；scope＝開發選樣已見題、無硬 token 上限、單 rep、hidden_after 全 UNKNOWN；本輪記錄無數字依賴此檔、與 11-06 #6 口徑核對一致。
+
+## r1236（2026-11-08 04:5x UTC）：G3 發射前置門交付（vq-1zf.1；離線 0 模型呼叫）＋G2.5 維持
+- ① 交付＝一條指令可跑的發射前置門：`python3 -m vacant_network.reqloop.g3gate --plan` **RC 0**（12 格、NOT FIRED、0 model calls）；`--fire` 無核准 **RC 2**（fail-closed、0 呼叫）；15 測試全綠＋reqloop 回歸 607 passed 1 skipped。
+- ② 選題＝未見任務：bank 30−已見 9 dab_ 前 4＝**dab_129/144/176/216**（`unseen_selection` 代碼重算核預註冊、改 seen 集合即改結果＝非寫死）；輸入凍結副本 ops/reqloop/g3_gate/tasks/（16 檔 sha256，verify_frozen 抓篡改/缺檔）；e008 先驗數據披露在 manifest。
+- ③ 門內寫死：≤12 格/300s 每輪/日 ≤2M tok 撞額停不重試/glm 唯一入口/無硬 token 上限、缺值 UNKNOWN；核准門＝人類核准文件（approved/epic/by）fail-closed；**G3 未發射**（核准待人類定案、queue 空）；不讀 /srv/eval hidden 與 scorer.py。
+- ④ commit **88697cd6**（g3gate.py＋15 測試＋manifest＋凍結副本）；vq-1zf.1 close（證據＝commit＋`--plan` 末行 G3GATE PLAN OK）；G2.5 三門 PASS 與備案維持；repair.py/extract.py/checks.py 未動。
+- ⑤ 下一步：等 G3 人類核准（核准後發射＝另一步授權：三臂逐格＋/srv/vlab scorer）；巡 88697cd6 CI；無其他可動工單。
