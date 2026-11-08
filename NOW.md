@@ -4,7 +4,8 @@
 - qwen27b e54b4850 灯：🟢 5056/5129（857.17s，ts 09:35:00Z；LATEST_qwen27b 已更新）
   → 三分支全绿收口（argon 5fb3d00a／worker b150a94c 皆🟢 5056/5129）；
   vq-ssk「灯红则重开」条件未触发，无新工单。
-- redo（审查点名 3 文件全已开）：NOW.md（1831 B）步骤①查灯已执行；
+- redo（审查点名 3 文件全已开）：NOW.md（轮首所开版本＝ca514810:NOW.md、重算 1831 B）步骤①查灯已执行；
+- redo2（审查点名 "1831 B"）：`git show ca514810:NOW.md | wc -c`＝1831→该值即重算值（指轮首所开版本）；现行本版 NOW.md＝1329 B（≤3KB 上限）。
   repair.py 2795 行 5147f8c3ea1b5e…／extract.py 1217 行 e757aec50c16…＝锚点直接一致
   （守护 3 passed 0.13s）；effects_20261105_summary.json 代码打开（blob 856c2c71 未变、
   snapshot d38d2eb2），三法重算 tokens 33,670,510／19,503,953、api 915＝365+550／457＝165+292、

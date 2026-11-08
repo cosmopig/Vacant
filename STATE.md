@@ -238,7 +238,11 @@
 
 ## r1250（2026-11-08 ~09:36 UTC）：qwen27b 灯收口🟢 5056/5129→三分支全绿＋redo 复核审查点名 3 文件
 - ① 一条指令输出变好：qwen27b e54b4850 灯＝🟢 5056/5129（857.17s、ts 09:35:00Z、LATEST_qwen27b 已更新；上轮「還沒跑完」）→三分支全绿收口（argon 5fb3d00a／worker b150a94c 皆🟢 5056/5129）；vq-ssk「灯红则重开」未触发、无新工单。
-- ② redo-NOW.md 已开（1831 B）：下一步①查灯已执行（见①）；②G3 待人类未发射；③环境异常待人类、未自修。
+- ② redo-NOW.md 已开（轮首所开版本＝ca514810:NOW.md、重算 1831 B，见 r1250 redo）：下一步①查灯已执行（见①）；②G3 待人类未发射；③环境异常待人类、未自修。
 - ③ redo-repair.py 已开：2795 行、blob 5147f8c3ea1b5e…＝锚点（tests/test_reqloop_frozen_anchors.py:27 直接一致）＋守护 3 passed（0.13s）；extract.py 1217 行 e757aec50c16…＝锚点。
 - ④ redo-effects_20261105_summary.json 代码打开（60,228 B、blob 856c2c71 未变、snapshot d38d2eb2）：三法重算 tokens policy30 33,670,510＝16,284,659+17,385,851（5/30 格成本缺值 None 未填 0）／feedback_once20 19,503,953＝6,210,682+13,293,271；api 915＝365+550／457＝165+292；w2r g7/l6・g7/l4、r2w 0/0、cells 30+20＝50、mism 3+2＝5→全一致、零修正。
 - ⑤ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
+
+## r1250 redo（2026-11-08 ~09:4x UTC）：审查点名 "1831 B"→命令重算并写回
+- ① 重算接地：`git show ca514810:NOW.md | wc -c`＝**1831**（轮首所开 NOW.md＝提交 ca514810 版本、blob 73569667…；现行 r1250 版＝1329 B、≤3KB 上限）→NOW/STATE 中 "1831 B" 即该命令重算值、指轮首所开版本；数值原本正确，补重算记录，零修正。
+- ② 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer。
