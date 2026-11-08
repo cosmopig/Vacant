@@ -264,3 +264,20 @@ def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     mod.results.clear()
     mod.check_ci_contract(cwd=repo)  # type: ignore[attr-defined]
     assert mod.results[-1][:2] == ("ci_contract", True), mod.results
+
+    # (e) r1285：5 passed + 1 skipped（守衛測試被 @pytest.mark.skip 禁用、藏 assert False，
+    #     另補一個足量測試保持 passed 計數＝5）→ pytest 匯總「5 passed, 1 skipped」→
+    #     舊計數守衛只抽 "5 passed" 仍判 OK＝假綠燈（r1271–r1282 同型、I-4 未測量不是通過）；
+    #     必須 BROKEN 且 detail 點出 skipped。
+    (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
+        "\n".join(f"def test_t{i}():\n    assert True\n" for i in range(5))
+        + "\nimport pytest\n\n"
+        + "@pytest.mark.skip(reason=\"guard disabled\")\n"
+        + "def test_disabled_guard():\n    assert False\n",
+        encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_anchors(cwd=repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "anchors" and ok is False, mod.results
+    assert "skipped" in detail, mod.results

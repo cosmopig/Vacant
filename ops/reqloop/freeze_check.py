@@ -39,7 +39,8 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
   bk_now          repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像；任一侧 0B
                   為空集測量→BROKEN，r1272 非空守衛）
 
-r1273 起 anchors/ci_contract 的 detail 帶「expected N passed, got M」，計數不符即 BROKEN。
+r1273 起 anchors/ci_contract 的 detail 帶「expected N passed, got M」，計數不符即 BROKEN；
+r1285 起另要求匯總行無其它結果類（skipped/xfailed 等＝未測量，I-4）。
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -89,6 +90,11 @@ def _pytest(test_file: str, cwd: Path = REPO) -> tuple[int, str]:
     return p.returncode, tail
 
 
+SUMMARY_RESULT_RE = re.compile(
+    r"(\d+)\s+(passed|failed|skipped|error|errors|xfailed|xpassed|deselected)"
+)
+
+
 def _check_guard_suite(
     name: str, test_file: str, expected_passed: int, cwd: Path = REPO
 ) -> None:
@@ -98,14 +104,24 @@ def _check_guard_suite(
     嚴禁弱化」：守衛檔被削掉測試、剩餘全綠時 rc 仍為 0——只比 rc 即假綠燈（與
     r1271/r1272 空對/空檔假綠同型）。故足額必須機械化：少於或多於期望計數皆 BROKEN
     （套件縮小＝弱化；增大＝守衛口徑變動，須同步更新本守衛的期望值，不得靜默放行）。
+
+    r1285：同型殘餘假綠——守衛檔以 @pytest.mark.skip 禁用一個守衛測試（藏失敗斷言）、
+    另補足量測試使 passed 計數不變時，pytest 匯總為「5 passed, 1 skipped」；只抽
+    passed 計數仍判 OK。skipped/xfailed 等即「未測量」（I-4：未測量不是通過）：
+    匯總行出現任何非 passed 結果類（skipped/failed/error(s)/xfailed/xpassed/
+    deselected）即 BROKEN。
     """
     rc, tail = _pytest(test_file, cwd)
-    m = re.search(r"(\d+) passed", tail)
-    count = int(m.group(1)) if m else None
-    ok = rc == 0 and count == expected_passed
+    counts: dict[str, int] = {}
+    for n, cat in SUMMARY_RESULT_RE.findall(tail):
+        counts[cat] = counts.get(cat, 0) + int(n)
+    passed = counts.get("passed")
+    other = {k: v for k, v in counts.items() if k != "passed"}
+    ok = rc == 0 and passed == expected_passed and not other
     record(
         name, ok,
-        f"pytest rc={rc} {tail}（expected {expected_passed} passed, got {count}）",
+        f"pytest rc={rc} {tail}（expected {expected_passed} passed, got {passed}"
+        + (f"；其它結果類 {other}）" if other else "；無其它結果類）"),
     )
 
 
