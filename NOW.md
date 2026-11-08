@@ -5,6 +5,7 @@
 - 新鮮 `run_eval.py --all`（離線、0 新呼叫）＝**exit 0**：G1 39/39・0 冤枉／REAL14 9/9・0/5／PHASE3 fixed7 unres2 rtw0 err0。
 - 備案：`ops/audits/build_g25_all_gates_filing.py`（讀 raw、fail-closed 斷言三門、附 sha256）→ `g25_all_gates_filing.json`（三門 PASS、git f6d29d1d）。
 - fail-closed 證明：篡改 raw → exit 2 不寫；守護 2 檔 38 passed。
+- redo（審查點名）：補開 extract.py（1217 行）＋核對驗證語義→備案加 `code` 段（extract.py/checks.py/run_eval.py sha256 錨點）。
 - vq-el4.14 close（vq-el4.15 重複併入）；vq-el4 14 子任務全 closed。
 
 ## 下一步

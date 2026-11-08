@@ -28,6 +28,23 @@ GATE_CATCH_RATE = 0.70   # run_eval.py:52
 MIN_CATCH_BAD = 5        # run_eval.py:539
 MAX_FALSE_GOOD = 1       # run_eval.py:540
 
+# 門禁結果所依賴的程式碼（r1228 redo：extract.py 在任務中被點名、原記錄未開啟→現補開＋接地）。
+# 角色描述已逐節核對（extract.py 頭部/quote_is_verbatim:132/build_requirement_set:665/
+# GlmClient:927/extract_requirements:1185；run_eval.py:40 即從 extract 匯入這些函式）。
+CODE_FILES: dict[str, str] = {
+    "vacant_network/reqloop/extract.py": (
+        "驗證/組裝層：quote 非原文逐字→丟棄該條；verifier 不在白名單／必要參數不合→"
+        "unverified（檢查時 UNKNOWN、不當通過）；client/解析例外→空 RequirementSet"
+        "（fail-closed、絕不當「沒有需求＝通過」）；GlmClient 只走 `glm` 指令＝擷取模型唯一"
+        "入口（rc≠0 丟 ExtractError、不重試）；run_eval.py:40 自本檔匯入"
+        " build_requirement_set/extract_requirements/parse_model_output 等"),
+    "vacant_network/reqloop/checks.py": (
+        "SUPPORTED_VERIFIERS 單一事實來源（extract.py:47 自本檔匯入）＋run_requirement_checks"
+        "（PASS/FAIL/FAIL/UNKNOWN 判定）"),
+    "ops/reqloop/extract/run_eval.py": (
+        "三門門檻：G1 抓錯≥70% 且 0 冤枉；REAL14 抓錯≥5/9 且冤枉≤1/5；PHASE3 errors==0"),
+}
+
 TICKET = "vq-el4.14"
 ROUND = 1228
 REVIEWER = "資深審查 2026-11-08 指示 #1：確認 G2.5 全三項門禁整合達標並備案"
@@ -145,10 +162,17 @@ def main(argv: list[str] | None = None) -> int:
             "phase2": {"path": str(RAW / "phase2.json"), "sha256": sha256(RAW / "phase2.json")},
             "phase3": {"path": str(RAW / "phase3.json"), "sha256": sha256(RAW / "phase3.json")},
         },
+        "code": {
+            rel: {"sha256": sha256(REPO / rel), "role": role} for rel, role in CODE_FILES.items()
+        },
         "boundaries": [
             "開發選樣、單一碼態、單 rep——不宣稱產品成效，不宣稱 localized/generic 孰優",
             "PHASE3 成本為 repair session 的 raw usage（歷史累計），非本備案輪新增呼叫",
-            "本備案輪 run_eval.py --all 為全程離線重算（0 新模型呼叫、0 新 token）",
+            "本備案輪 run_eval.py --all 為全程離線重算（0 新模型呼叫、0 新 token；"
+            "phase1/2 重用既有擷取 out/*.json、phase3 接續 progress.json）",
+            "G1/REAL14 門禁結果＝run_requirement_checks（checks.py）對 build_requirement_set"
+            "（extract.py）組裝的需求集做判定：quote 非逐字→丟棄、unverified→UNKNOWN"
+            "不當通過、client/解析例外→空集 fail-closed（本備案已逐節核對 extract.py）",
             "成本缺值＝UNKNOWN（null），不填 0；cost_usd=0 不代表免費",
             "1753 本批排除；hidden/scorer 未讀、未回流",
         ],
@@ -172,6 +196,7 @@ def main(argv: list[str] | None = None) -> int:
           f"rtw {p3.get('right_to_wrong')}、errors {p3_errors}）成本 sessions "
           f"{p3['cost'].get('repair_sessions')}/calls {p3['cost'].get('model_calls')}/"
           f"tokens {p3['cost'].get('tokens')}")
+    print("碼態錨點：" + "、".join(f"{rel}={f['sha256'][:8]}" for rel, f in filing["code"].items()))
     print(f"📁 備案已寫：{out}")
     return 0
 

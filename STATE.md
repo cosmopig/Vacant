@@ -16,3 +16,4 @@
 - ④ fail-closed 驗證：篡改 raw（G1 FAIL／REAL14 冤枉 2／P3 err1）→**exit 2、不寫備案**；守護 test_reqloop_extract_run_eval＋test_repo_beads_shared_db **38 passed**。
 - 沒驗證：f6d29d1d／fecd8657 CI 燈（下輪巡→應🟢）；GitHub Actions（無 admin＝基建）；未跑全量 pytest（vacant-ci 職掌）。
 - 工單 vq-el4.14 close（vq-el4.15 重複、併入）；下一步＝巡 CI＋等 G3 派工（不自發射大成本）、不改 repair.py。
+- ⑥ redo（審查點名 extract.py 原未開啟）：補開 `vacant_network/reqloop/extract.py`（1217 行、blob e757aec5）——核對 quote_is_verbatim:132（逐字、paraphrase 必 False→丟棄）、build_requirement_set:665（unverified→UNKNOWN 不當通過、client/解析例外→空集 fail-closed）、GlmClient:927（`glm` 唯一入口、rc≠0 不重試）、extract_requirements:1185；run_eval.py:40 自本檔匯入 build_requirement_set/extract_requirements/parse_model_output→G1/REAL14 門禁依賴它。**redo**：備案新增 `code` 段（extract.py sha256=51abfec3、checks.py=c7589c61[=blob f3525b01 與 r1227 一致]、run_eval.py=332cd324）＋boundaries 錄入驗證語義；fail-closed 重驗仍 exit 2 攔篡改；38 passed 不變。
