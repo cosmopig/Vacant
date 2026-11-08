@@ -76,3 +76,10 @@
 - ③ 門內寫死：≤12 格/300s 每輪/日 ≤2M tok 撞額停不重試/glm 唯一入口/無硬 token 上限、缺值 UNKNOWN；核准門＝人類核准文件（approved/epic/by）fail-closed；**G3 未發射**（核准待人類定案、queue 空）；不讀 /srv/eval hidden 與 scorer.py。
 - ④ commit **88697cd6**（g3gate.py＋15 測試＋manifest＋凍結副本）；vq-1zf.1 close（證據＝commit＋`--plan` 末行 G3GATE PLAN OK）；G2.5 三門 PASS 與備案維持；repair.py/extract.py/checks.py 未動。
 - ⑤ 下一步：等 G3 人類核准（核准後發射＝另一步授權：三臂逐格＋/srv/vlab scorer）；巡 88697cd6 CI；無其他可動工單。
+
+## r1236 redo（2026-11-08 05:0x UTC）：repair.py 補開＋依賴它之陳述接地（審查：本輪點名未開）
+- ① 補開 `vacant_network/reqloop/repair.py`：wc -l＝**2795**；git ls-tree HEAD＝blob **5147f8c3ea1b5e9ee50531aca0382971e912c243**（＝r1227 錨點 5147f8c3）；git hash-object 一致、git status 乾淨＝未動。
+- ② 已讀頭部 80 行＋結構 grep：G2 **局部（localized）修復**切片——FEEDBACK_MODES=("generic","localized") L94；build_repair_prompt(feedback_mode="localized") L205/211；repair_slice L1963；run_repair_round L1670；create_authoritative_snapshot L1502；_source_tampered_files L1547（權威快照、改來源＝source_tampered 退出碼 20）；parse_usage_from_log L549（成本缺值＝UNKNOWN 絕不填 0）；min_rounds：localized 臂＝0（缺口驅動、無缺口＝0 模型呼叫）；重用 reqloop.checks.run_requirement_checks 重驗。
+- ③ 本輪依賴它的陳述逐項核對：manifest arm_defs.full_rloop「localized 修復（repair.py 凍結 2795 行）＋重驗所有必要條目（checks.py）」✓；manifest six_elements「repair.py 凍結 2795 行」✓；STATE④／NOW「未動／凍結」✓（blob＝錨點、乾淨）→**全數如實、無需改數或改文案**；交付物（88697cd6）不變。
+- ④ 本 redo 0 模型呼叫、0 成本；g3gate 15 測試與 `--plan` RC 0 維持（重跑核過）。
+- ⑤ 附：`ops/audits/g25_all_gates_filing.json` 被外部程序（非本輪、無 repo 內測試寫它）刷新——diff 僅 generated_at＋git.head（d826f5b5），門禁數字/sha 全同；已還原為已提交版本，本輪足跡只留 NOW/STATE。
