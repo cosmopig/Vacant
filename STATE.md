@@ -105,3 +105,9 @@
 - ③ 未驗證／受阻：`ci/e847c56e.json` 尚不存在——CI 迴圈順序 qwen27b→argon→worker，qwen27b 1d560930 05:21:51 起跑，argon 排後（燈期 ~05:51）>本輪 05:46 硬限→依 ASSIGNMENT「該 sha CI 🟢 才准 merge」，**合併順延 r1239**（不輪詢、不為趕工繞門）。
 - ④ 紅線核對：/srv/vlab/queue 空（G3 未發射、0 模型呼叫）；worker 工單 R20261108_0455-1 已 done；open 工單無；main 未動；本輪 0 成本。
 - ⑤ 下一步（r1239）：`python3 ~/dev/ops/ci_status.py`→**ci/e847c56e.json 🟢**（收集數 ≥1d560930）→`git merge --no-edit auto/argon`＋驗收 53 passed＋/tmp g3gate_* 檢查＋錨點重驗＋`bd close vq-1zf.2`；紅/缺則 DECISION 入 STATE 續等；G3 續等人類核准。
+
+## r1238 redo（2026-11-08 05:3x UTC）：effects_20261105_summary.json 補開（審查點名本輪未開）＋數字接地
+- ① 已打開（head＋json.load）`ops/audits/effects_20261105_summary.json`：工作副本＝已提交 blob **856c2c71**1c464927427da8c2c6022d9a2729b87a（git 乾淨無漂移）；schema vacant.audit/effects_20261105_summary/1；snapshot **d38d2eb2**；source_root=/home/user1/dev/ops/effects_20261105；code_under_audit=d38d2eb2 vs current auto/qwen27b。
+- ② 逐欄 code 重算核對（與 r1237 redo 記錄一致）：total_cells **50**＝policy30 30（generic 15：w2r **7**/still3/pres5/sess19/api365/tok16,284,659；localized 15：w2r **6**/still4/pres5/sess16/api550/tok17,385,851）＋once20 20（generic 10：w2r **7**/still3/api165/tok6,210,682；localized 10：w2r **4**/still6/api292/tok13,293,271）；r2w 全 0；local 45/50→current 50/50；local-vs-獨立分歧 **3+2**（全 d38d2eb2 舊 checker，5 格 current 重驗皆＝after_independent）；current-vs-獨立 mismatches **0**；scope_note 口徑（開發選樣、單 rep、不宣稱孰優、缺值 UNKNOWN 不填 0）與 11-06 #6 一致。
+- ③ r1238 各陳述依賴檢查：本輪六項（合併預演 53 passed／4 檔範圍／守護測試審查／三分支錨點／G3 紅線 0 呼叫／CI 順延 DECISION）均未引用此檔任何數字；r1238 NOW/STATE/commit 文字無一提及 effects 數字→**無依賴陳述，無需改數或改文案**；交付物（fc504c8c、vq-1zf.2 note）不變。
+- ④ 本 redo 0 模型呼叫、0 成本。
