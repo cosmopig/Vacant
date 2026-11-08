@@ -299,3 +299,10 @@
 3. **單一事實源複核**：filing g25_all_gates_filing.json 三 code sha256 重算全 MATCH（51abfec3/c7589c61/332cd324，file-SHA256 口徑；本輪先誤以 git-blob-SHA1 比對出「假警報」、換對口徑後全 MATCH→存檔零出入）；anchors 3 passed（extract.py e757aec5/1217 行、repair.py 5147f8c3/2795 行冻结）；G2.5 三門 r1254 已新鮮離線重算 PASS、本輪 0 代码改動→引用仍成立、不重複重算。
 4. 未驗證：f7e05d06（纯簿记 commit、在灯後）自己的 CI 灯——下轮 loop CI 覆盖；代码树已被 3f90671d 绿灯完整覆盖。
 5. 红线未动：0 模型调用（vibe_calls 130 行、末条 11-07T18:35Z）·queue 空·tickets open/doing 空·main c097899e 未动未 push·未读 hidden/scorer·CI 本轮仅 1 次点名（同一在途 run 监控至绿、3 次有界检查）。
+
+## r1255 redo（2026-11-08 ~11:5x UTC）：審查點名兩檔直接開啟＋核數（repair.py・effects_20261105_summary.json）
+1. repair.py 直接開啟：2,795 行、git blob 5147f8c3ea1b5e9ee50531aca0382971e912c243＝anchor 钉值、與 r1255 記錄一致；docstring＝G2 局部修復切片（P000-20261104-01）；規則塊＝保留原候選／權威輸入（source_tampered→退出碼 20）／FAIL→UNKNOWN 不算修好／regressed 必記錄／連續兩次停滯即停——無新增本地規則→r1255「anchors 3 passed、repair 冻结 5147f8c3/2795 行」声明落地实档、零更正。
+2. effects_20261105_summary.json：head（schema vacant.audit/effects_20261105_summary/1、snapshot d38d2eb2、scope_note 开发选样单 rep·无硬 token 上限）＋python json 全载；**60,228 B**、blob **856c2c71**（r1237–r1254 以来未变）；50 cells（policy30 30＋once20 20）、local_matches_total **45**、current_code_matches_total **50**。
+3. 逐栏 code 重算、与存档引用（r1227⑤a／r1228⑥／r1231⑥／r1237／r1251–r1254 redo）**逐项一致、零出入**：policy30＝w2r **g7/l6**、pres **g5/l5**、still **g3/l4**、r2w **0/0**、api **365/550**、tok **16,284,659/17,385,851**；once20＝w2r **g7/l4**、still **g3/l6**、pres **0/0**、api **165/292**、tok **6,210,682/13,293,271**；tokens_true=None **5 格**（全 policy30·role=good）；per-arm 和＝phase 总（api 915/457、tok 33,670,510/19,503,953）全 OK；local_vs_independent **3+2**（dab_055-pi-C-localized·dabstep-1273 双臂×2 相）；current_code_vs_independent **0**（两相皆 []）。
+4. 依赖核对：r1255 交付物（STATE/NOW/commit 5a2d84b1）引用本档数字＝**0**→零更正；唯一依赖项（repair.py 冻结锚点）已按本条①直接落地；r1255 结论（三分支全绿＋G3 双负控＋filing 3 sha256 MATCH）不受影响。
+5. 红线未动：0 模型呼叫（纯文件读＋本地重算）·0 写入副作用（仅本条簿记）·G3 未发射·queue 空·main c097899e 未动未 push。
