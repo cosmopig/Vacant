@@ -29,7 +29,8 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
   bk_state        repo STATE.md（canonical）Current State section 與 ops/STATE.md 鏡像同步
                   （約定＝r1265 實證的 byte-level：鏡像＝canonical 標題＋Current State section，
                   即鏡像是 canonical 的 byte 前綴；canonical 尾部的輪次 log 不屬鏡像）
-  bk_now          repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像）
+  bk_now          repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像；任一侧 0B
+                  為空集測量→BROKEN，r1272 非空守衛）
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -180,15 +181,28 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
 
 
 def check_bookkeeping_now(repo: Path = REPO) -> None:
-    """bk_now：repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像）。"""
+    """bk_now：repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像）。
+
+    非空守衛（r1272）：byte-identical 對兩份 0B 檔也成立，那是空集測量——
+    I-4「未測量不是通過」；NOW.md 的約定是承載「現在在哪、下一步」，任一侧 0B
+    是簿記壞掉，必須 BROKEN，不得以「兩側一致」放行。
+    """
     a = repo / "NOW.md"
     b = repo / "ops" / "loop" / "NOW.md"
     try:
-        same = a.read_bytes() == b.read_bytes()
+        ba = a.read_bytes()
+        bb = b.read_bytes()
     except OSError as e:
         record("bk_now", False, f"unreadable: {e}")
         return
-    if same:
+    if not ba or not bb:
+        record(
+            "bk_now", False,
+            f"vacuous: repo NOW.md {len(ba)}B / ops/loop/NOW.md {len(bb)}B——空檔 byte-identity "
+            "不是同步（I-4：未測量不是通過）",
+        )
+        return
+    if ba == bb:
         record("bk_now", True, "repo NOW.md == ops/loop/NOW.md（byte-identical）")
     else:
         record("bk_now", False, "DRIFT: repo NOW.md != ops/loop/NOW.md")

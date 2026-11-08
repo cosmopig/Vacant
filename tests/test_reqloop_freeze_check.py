@@ -119,3 +119,13 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
     mod.results.clear()
     mod.check_bookkeeping_now(repo)  # type: ignore[attr-defined]
     assert mod.results[-1][1] is False, mod.results
+
+    # (e) 兩份 NOW.md 皆 0 字元 → 必須 BROKEN，不得假綠（r1272）：
+    # byte-identical 對空檔成立是空集測量——I-4「未測量不是通過」，
+    # NOW.md 的約定是承載「現在在哪、下一步」，0B 是簿記壞掉，不是「同步」。
+    (repo / "NOW.md").write_bytes(b"")
+    (repo / "ops" / "loop" / "NOW.md").write_bytes(b"")
+    mod.results.clear()
+    mod.check_bookkeeping_now(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "bk_now" and ok is False and "vacuous" in detail.lower(), mod.results
