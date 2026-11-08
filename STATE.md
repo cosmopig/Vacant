@@ -148,3 +148,10 @@
 - ① 補開（code json.load，60,228 B）：blob **856c2c71** 無漂移（r1238/r1240/r1241 三次核對同 blob；r1242 合併 4 檔範圍未觸及）；snapshot d38d2eb2、total_cells 50、local_matches 45／current 50。
 - ② 逐欄重算＝全 MATCH：policy30 generic w2r **7/10 錯**（wrong_to_right 7、wrong 10、still 3、r2w 0）、localized **6/10**（still 4、r2w 0）；once20 generic **7/10**（still 3）、localized **4/10**（still 6）——與 prompt #6「policy30 g7/l6、once20 g7/l4」口徑一致；tokens 四組 per_arm 欄（16,284,659／17,385,851／6,210,682／13,293,271）與 **cells_detail 逐格非 null 加總全 MATCH**（policy30/localized 5 格 null＝UNKNOWN、不計入加總、不填 0）；api 915=365+550、457=165+292 一致。
 - ③ 結論：r1242 交付物（merge ab3b6a67、53 passed、錨點、vq-1zf.2 close）均不依賴此檔→**無需改任何數字或文案**；記錄中引用此檔的數字（r1238/r1240/r1241 各條＋prompt #6）本輪全數接地重驗。`code_under_audit` 字串含「post auto/argon merge」＝blob 856c2c71 原有描述（合併前即存在、非本輪合併引入）。0 模型呼叫。
+
+## r1243（2026-11-08 ~07:0x-07:2x UTC）：三分支 CI 全綠（qwen27b 60987574 🟢）＋全線新鮮複驗
+- ① CI 巡燈（r1242 下一步①全數落地）：worker 13dd10fb 🟢 5056 passed/5129 collected（前紅燈 594f7e2a＝1 failed test_no_leftover_temp_directories_in_tmp 已隨 hermetic 修正消除）；qwen27b 新 HEAD 60987574（merge＋簿記；git diff ab3b6a67..60987574＝僅 NOW/STATE→產品碼樹＝r1242 已驗收樹）🟢 5053 passed/5126 collected 0 failed（07:21:30 出燈）；argon 1d78a8f4 🟢 5053/5126——**三分支全綠**；合併範圍複核＝恰 4 檔。
+- ② 驗收指令重跑：53 passed in 0.44s（RC0）；/tmp/g3gate_* 無（rc=2）。G2.5 三門新鮮離線複驗（run_eval.py --all，RESUMED 接續 progress.json、0 新呼叫）：G1 39/39·冤枉0 PASS、REAL14 9/9·0/5 PASS、PHASE3 fixed7·unresolved2·rejected0·r2w0 PASS→整合 **PASS**（RC0；成本為既有帳本值 41/74 呼叫、328,550/732,826 tokens；phase3 sessions15·calls275·tok15,087,278）。
+- ③ 錨點三分支同 blob：repair 2795 行/5147f8c3、extract 1217 行/e757aec5、checks f3525b01；g3gate 6f93f4e5、extract_eval 94897bf5、builder 23dac11c、filing 4b24cd5b——審查 #2 三分支同步＋#3 repair 凍結/extract 白名單邊界守住。
+- ④ 紅線：/srv/vlab/queue 0 項；vibe_calls.jsonl 最後條＝2026-11-07T18:35:51Z→本輪 0 模型呼叫；main 未動；不自 push；bd ready 僅 vq-1zf（G3 待人類核准、未發射）；tickets/open 空。
+- ⑤ 未驗證：無——r1242「下一步」全數完成（bf8a9a59 為中間簿記 commit，ci.sh 只測分支 HEAD 60987574，產品樹相同＝已覆蓋）；DECISION：無可領產品工單（vq-el4 18/18 closed、審查範圍限 R-loop 與產品行為），下輪起若無審查者/人類新指示，每輪只做一次巡燈＋錨點核對，不改文件湊進度。
