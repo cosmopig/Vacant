@@ -1,21 +1,25 @@
-# 当前状态（2026-11-08 r1261）
+# NOW.md — r1262（2026-11-08，第 1262 輪）
 
-## 本轮交付（r1261，0 模型呼叫）
-审查#3 机械化：tests/test_reqloop_frozen_anchors.py 新增 filing code sha 守卫
-（filing_code_violations＋绿灯＋漂移负控制）→pytest 3→5 passed；「code hash 与备案
-100% 吻合」由每轮人工重算改为机器直接变红。同轮新鲜复验：reqloop 353 passed；
-run_eval --all RC 0 三门 PASS（G1 39/39·FP0／REAL14 9/9·0/5／PHASE3 fixed7·u2·
-r2w0·err0）；filing 6 sha 全 MATCH；worker diff＝0；anchors 5 passed×3 分支；
-argon ff 对齐。工单 vq-el4.21。redo：审查点名 effects_20261105_summary.json
-已直接开启＋逐格重算（blob 856c2c71 未变；w2r policy30 g7/l6、once20 g7/l4
-与 11-06 点名数逐项吻合、两臂加總与 top-level 一致）→零更正。
+## 本輪結論（一句）
+GitHub auto CI 26 跑全紅（round-head 的本地 CI 報表遮蔽了它）；根因＝一測試在啟動的直譯器斷言 scipy/numpy（不在安裝合約），HEAD 已修；新增安裝合約守門測試，讓這類缺陷以後在本地就紅。
 
-## 下一步（次轮，按序）
-1. 三分支新 SHA CI 灯各巡一次（红灯＝例外才动手；本机无 gh，以轮首报告为准，不乾等）。
-2. G3（vq-1zf）续候人类明确核准——不发射、不入 queue、0 未授权模型呼叫。
-3. repair.py／extract.py／checks.py／run_eval.py 或 filing 任何变动 → 锚点／filing
-   守衛直接红灯＝例外，先停下报，不自行解冻。
+## 事實（證據）
+- GitHub API：26 個 auto 跑（11-07 07:27→13:22）全 failure，全敗「pytest — ReqLoop (test_reqloop*)」步（抽查最舊 run 42351331975 與最末 f03d1177/check-run 128415593693）。
+- 乾淨 venv（`pip install -e ".[dev]"` @ f03d1177）複現：1 failed＝`test_reqloop_repair.py::test_pin_survives_venv_symlink`（`import scipy, numpy` → ModuleNotFoundError）。
+- 3db4a7f3（11-07 13:49）改用 pytest：在 HEAD、不在 f03d1177 → GitHub 紅是 **STALE**（紅在舊 commit）。
+- HEAD（69b62a9b）乾淨 venv 三步全綠：ReqLoop 379 passed/3 skipped（host 資料）＋新守門 2；frozen 1 passed；stepchain 37 passed/1 skipped。
+- 新增 `tests/test_reqloop_ci_contract.py`：實際經 subprocess 啟動的 `-c` 片段 import ⊆ vacant-network（deps＋[dev]）∪ stdlib；scipy/numpy 負向控制；回歸模擬（改回 scipy）→ 守門紅並點名包與片段。
+- Actions 自 11-07 13:22 無新跑（stalled）；下一觸發＝迴圈自動 push。
 
-## 红线（不变）
-无 G3 fire／无模型调用／无 queue／无 hidden·scorer／不 push／不 reset·rebase／
-branch -f／repair.py＋extract.py 冻结／CI 每轮至多点名一次。
+## 下一輪先做
+1. 自動 push 後查 Actions 有沒有新跑（API `workflow_runs`，`curl -m`，別 sleep 輪詢）：綠→CI 紅解除；仍無跑→Actions infra 問題，需人工（本地無解）。
+2. 若新跑仍紅：用本輪方法乾淨 venv 複現（worktree＋fresh venv＋HOME 隔離），修準則＝只准斷言安裝合約內的包（見 test_reqloop_ci_contract.py）。
+3. 主線仍是 G2.5（vq-el4）：queue 空、0 model calls、等工單。G3（vq-1zf）仍未發——等 RLOOP_PLAN.md 人批。
+
+## 紅線（本輪全守）
+0 model calls（vibe_calls 無 11-07 後新條）·G3 未發未入隊·本輪無 git push·無 reset/rebase/branch -f·未讀 /srv/eval hidden 與 scorer.py·repair.py(2795)・extract.py(901)・checks.py・run_eval.py・filing（code 51abfec3/checks c7589c61/run_eval 332cd324）未改·.github/workflows/ 未改·無 sleep 輪詢。
+
+## 檔案清單（本輪）
+＋ `tests/test_reqloop_ci_contract.py`（新，2 tests）
+～ `STATE.md`／`NOW.md`（簿記）
+＝ 工單 `vq-el4.22`（建→帶證據關）；memory `github-actions-stalled-2026-11-07-13-22`（已更正）
