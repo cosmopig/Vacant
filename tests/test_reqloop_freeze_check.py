@@ -87,7 +87,8 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
 
     repo = tmp_path / "repo"
     (repo / "ops" / "loop").mkdir(parents=True)
-    canonical = "# t\n\n## Current State\nCANONICAL\n（log line）\n"
+    # 條目邊界約定（r1279 起守衛要求）：條目行＝「（YYYY-MM-DD…」（live 24/24 實證）。
+    canonical = "# t\n\n## Current State\nCANONICAL\n（2026-11-08 r999: log）\n"
     (repo / "STATE.md").write_text(canonical, encoding="utf-8")
     (repo / "ops" / "STATE.md").write_text("# t\n\n## Current State\nCANONICAL\n", encoding="utf-8")
     (repo / "NOW.md").write_text("NOW\n", encoding="utf-8")
@@ -149,6 +150,34 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
     )
     (repo / "ops" / "STATE.md").write_text(
         "# t\n\n## Current State\nE1 part1\n", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "bk_state" and ok is False and "TRUNCATED" in detail, mod.results
+
+
+def test_bookkeeping_multiline_paren_continuation_negative_control(
+    tmp_path: Path,
+) -> None:
+    """多行條目截斷假綠燈負控制（r1279）：r1278 守衛只要求餘部以「（」起始——
+    多行條目的續行本身以「（」開頭時（如「（續行…）」），條目中途被砍的鏡像仍被
+    判「同步」＝假綠燈（r1279 實測：('bk_state', True, 'mirror 31B…同步')，與
+    r1271/r1272/r1278 同型、H-0 同構）。條目邊界約定須按 live 檔實證的
+    「（YYYY-MM-DD…」起始（24/24 條目行逐條核實），不得只守「（」前綴：
+    非條目邊界的行邊界截斷一律 BROKEN。"""
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    (repo / "ops").mkdir(parents=True)
+    # canonical：條目 E1 跨兩行，續行以「（」開頭（形如新條目，實為條目本體）。
+    (repo / "STATE.md").write_text(
+        "# t\n\n## Current State\n（2026-11-08 r999: part1\n（續行以（開頭）\n",
+        encoding="utf-8",
+    )
+    # 鏡像在行邊界截斷：E1 只留第一行——舊守衛判「同步」（假綠），必須 BROKEN。
+    (repo / "ops" / "STATE.md").write_text(
+        "# t\n\n## Current State\n（2026-11-08 r999: part1\n", encoding="utf-8"
     )
     mod.results.clear()
     mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]

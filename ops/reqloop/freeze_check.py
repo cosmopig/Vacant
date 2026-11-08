@@ -57,6 +57,10 @@ REPO = Path(__file__).resolve().parents[2]
 FILING = REPO / "ops" / "audits" / "g25_all_gates_filing.json"
 IN_SCOPE = ("vacant_network", "tests", "ops")
 BASE_BRANCH = "auto/qwen27b"
+# 條目邊界約定（r1279）：條目行以「（YYYY-MM-DD…」起始——live canonical 24/24 條目行
+# 逐條實證。只守「（」前綴不夠：多行條目的續行本身可以「（」開頭（r1279 負控制實測
+# 假綠燈），須按日期錨定才算條目邊界。
+ENTRY_START_RE = re.compile(r"（\d{4}-\d{2}-\d{2}")
 
 results: list[tuple[str, bool, str]] = []
 
@@ -193,7 +197,14 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     60B/1B 仍輸出「同步」；與 r1271/r1272 空對/空檔假綠同型，H-0：漏掉一項得到的
     綠燈就是漏洞成因）。條目邊界約定：每輪條目各占一行、以「（」（U+FF08）起始——
     canonical 現有條目逐條實證、負控制 fixture 同形。故鏡像必須以行邊界（'\n'）結尾，
-    且 canonical 餘部為空（無輪次 log）或自新條目「（」開始。
+    且 canonical 餘部為空（無輪次 log）或自新條目起始。
+
+    r1279 邊界錨定（vq-el4.32）：「（」前綴必要但不充分——多行條目的續行本身可以
+    「（」開頭（如「（續行…）」），條目中途被砍的鏡像仍被判「同步」＝假綠燈
+    （r1279 實測：('bk_state', True, 'mirror 46B…同步')，與 r1278 截斷假綠同型）。
+    條目邊界約定收緊為 live 檔實證的「（YYYY-MM-DD…」起始（24/24 條目行逐條核實）：
+    餘部非日期條目起始即視為條目內截斷→BROKEN。代價：非日期條目行會被判不同步——
+    那是簿記違反約定，應修簿記而非放寬守衛。
     """
     canon = repo / "STATE.md"
     mirror = repo / "ops" / "STATE.md"
@@ -219,11 +230,11 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
             "（最新條目尾部被砍）——截斷鏡像不是同步（I-4：未測量不是通過）",
         )
         return
-    if len(m) < len(c) and not c[len(m):].startswith("（"):
+    if len(m) < len(c) and ENTRY_START_RE.match(c, len(m)) is None:
         record(
             "bk_state", False,
-            f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但餘部非新條目起始"
-            "「（」（多行條目內行邊界截斷）——截斷鏡像不是同步（I-4：未測量不是通過）",
+            f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但餘部非日期條目起始"
+            "「（YYYY-MM-DD…」（多行條目內行邊界截斷，續行形如新條目）——截斷鏡像不是同步（I-4：未測量不是通過）",
         )
         return
     record("bk_state", True, f"mirror {len(m)}B == canonical title+Current State（同步）")
