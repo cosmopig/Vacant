@@ -273,3 +273,8 @@
 3. CI 点名一次：2782d637（纯簿记）running ~7%；d450d43a 排队（ci.sh 读本地分支、序 qwen27b→argon→worker、无需 push）→工单留 doing/ 待灯。
 4. 未验证：d450d43a 与 2782d637 的 CI 结果（下轮巡灯一次）。
 5. 红线未动：0 模型调用（vibe_calls 130 行、末条 11-07T18:35Z）·queue 空·main c097899e·未 push·repair/extract 冻结·G3 未发射·未读 hidden/scorer。
+
+## r1253 redo（審查：任務點名 3 檔未在記錄步驟開啟）
+1. 直接開啟 repair.py（2795 行、blob 5147f8c3ea1b5e…）＋extract.py（1217 行、blob e757aec50c16bc64…）＝凍結錨點常數直接吻合（docstring＝G2 局部修復切片／G2.5 擷取層）→紅線「凍結」此輪由直接開啟落地（不再只靠 anchors 3 passed）。
+2. `effects_20261105_summary.json`（blob 856c2c71 未變、60,228B）載入代碼核數：policy30 w2r g7/l6·still g3/l4·pres 5/5·api 365/550·tokens 16,284,659/17,385,851；once20 w2r g7/l4·still g3/l6·pres 0/0·api 165/292·tokens 6,210,682/13,293,271；total_cells 50·local_matches 45/50（分歧 3+2=5）·current_code 50/50——與 r1244–r1251 各輪引用零出入。
+3. 結論：r1253 主記錄未引用 effects 數字（無依賴、零更正）；唯一依賴項「repair/extract 凍結」由直接開啟落地，零更正。
