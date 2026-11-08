@@ -130,6 +130,31 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
     name, ok, detail = mod.results[-1]
     assert name == "bk_now" and ok is False and "vacuous" in detail.lower(), mod.results
 
+    # (f) 鏡像截斷：最新條目尾部被砍 → 必須 BROKEN，不得假綠（r1278）：
+    # 截斷後的鏡像仍是 canonical 的 byte 前綴（startswith 成立），舊檢查判 OK，
+    # 但鏡像實際少了當前狀態條目的 9 個字元——與 r1271/r1272 同型假綠燈
+    # （H-0：漏掉一項得到的綠燈就是漏洞成因；I-4：未測量≠通過）。
+    (repo / "ops" / "STATE.md").write_text(
+        "# t\n\n## Current State\nCANONICA", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "bk_state" and ok is False and "TRUNCATED" in detail, mod.results
+
+    # (g) 多行條目在行邊界截斷（鏡像以完整行結尾、但 canonical 餘部不是新條目）
+    # → 必須 BROKEN：只守「以換行結尾」不夠，條目邊界（'（'）守衛才能抓住。
+    (repo / "STATE.md").write_text(
+        "# t\n\n## Current State\nE1 part1\nE1 part2\n（log line）\n", encoding="utf-8"
+    )
+    (repo / "ops" / "STATE.md").write_text(
+        "# t\n\n## Current State\nE1 part1\n", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "bk_state" and ok is False and "TRUNCATED" in detail, mod.results
+
 
 def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     """守衛測試「計數弱化」負控制（r1273）：審查指示 #1 點名「5 passed 守衛」與
