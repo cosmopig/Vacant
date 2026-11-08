@@ -358,3 +358,10 @@
 2. effects_20261105_summary.json 直接開啟：**60,228 B**、blob **856c2c71**（r1237 以來未變）、snapshot d38d2eb2、scope_note 明示「開發選樣・單 rep・不宣稱 localized 優於 generic・缺值 None 不填 0」；load in code 重算：policy30 w2r **g7/l6**（13）・r2w 0/0・pres g5/l5（10）・still g3/l4（7）・api 365/550（915）・tok 16,284,659/17,385,851（33,670,510）；once20 w2r **g7/l4**（11）・pres 0/0・still g3/l6（9）・api 165/292（457）・tok 6,210,682/13,293,271（19,503,953）——兩臂加總與 top-level 逐項一致。
 3. 對質：11-06 人類點名參考數「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」＝本檔 w2r 逐項吻合；r1258 redo 條② 各數逐項一致；r1259 主條與 NOW.md 未引用本檔任何數字、未做 localized 較好之声明→**零更正**、r1259 結論不受影響。
 4. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記）・G3 未發射・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
+
+## 2026-11-08 r1260（12:4x–12:5x UTC）：審查#2 worker diff 清零＋#1/#3 新鮮複驗（0 模型呼叫）
+1. DECISION: vq-el4 20/20 已閉、G3 候核准；NOW 下一步＝「巡 CI＋候核准」（無實質交付）→依本輪指示縮到一輪做完的最小實質項＝worker↔qwen27b 的 3 檔差異（tests/test_reqloop_g3gate.py＋2 簿記鏡像）清零（審查#2：對齊以該檔 diff＝0 判定）＋同輪新鮮複驗 #1 三分支 anchors 與 #3 filing/三門（0 模型呼叫）。工單 vq-el4.20。
+2. 交付：auto/worker 同步 qwen27b 的 3 檔（g3gate 測試 22 則＋ops/STATE.md＋ops/loop/NOW.md）→`git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops` 輸出 3→**0**。
+3. 驗證：anchors **3 passed×3 分支**（qwen27b/worker/argon worktree 各實跑）；run_eval --all **RC 0 三門 PASS**（G1 39/39・FP0／REAL14 9/9・0/5／PHASE3 fixed7・u2・r2w0・err0；RESUMED progress.json、0 新呼叫）；filing 6 sha 重算後全 **MATCH**（sources 3c6fb35a/6b7cb831/ada235bb＋code 51abfec3/c7589c61/332cd324）；vibe_calls.jsonl 130 行末條 11-07T18:35Z＝今日 0 呼叫；/srv/vlab/queue 空。
+4. 未驗證：本 commit 與 worker 同步 commit 的 CI 燈（下輪各巡一次；輪首 qwen27b 59f060d1 仍 running、無紅）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准）。
+5. 下一步：巡 qwen27b＋worker 新 SHA CI 燈（一次；紅燈＝例外才動）；G3 續候人類明確核准；worker diff 若再長（journal 逐輪推進）即再同步清零。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
