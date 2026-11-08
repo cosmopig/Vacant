@@ -2,6 +2,7 @@
 
 ## 現在在哪
 - 驗證＋簿記輪（非實質）：vq-el4 35/35 全閉、0 open；唯一 open＝vq-1zf（G3）待人類 `--fire` 核准（12 格已凍結、g3gate 離線釘住、不點火、不入 queue）。
+- r1284 redo：審查點名五檔已開啟複核（auto-ci.yml 63 行 sha 3f1e05e9… 未變、無檔內開關、四步真測；effects summary 60228 B sha a710f7e4… 未變、本輪未引其數字；g25 filing 4681 B sha 6e5afb46… 未變、三門全 PASS、phase3 7/2、6 sha 獨立重算 6/6 MATCH；extract.py 1217 行 blob e757aec5 sha 51abfec3 未變；repair.py 2795 行 blob 5147f8c3 未變）；r1284 條目依賴聲明全數成立、0 數字需更正。
 - 本輪新跑皆綠：freeze_check 9 項 OK（FROZEN_STATE_OK rc=0、簿記後末次複跑同綠）；35 passed（freeze 6／anchors 5／ci_contract 2／g3gate 22）；凍結四檔＋filing 由 anchors 5 passed＋filing 3/3 MATCH 機械化釘住（本輪新鮮）。
 - CI 一次讀取（不 poll）：現 HEAD qwen27b@898f8f12／argon@84273567／worker@3e7f9518 無 ci/<sha>.json；LATEST qwen27b@f6e435ce5 green（5071/0/74）、argon@4f0b89c5 green（5072/0/74）、worker@0ce81258 green（5071/0/74）；state.json running worker@05203065（舊 commit＝worker HEAD 之父、在跑）。
 - 無新人類指示（ops/ 最新仍 11-07）、reviews/ 最新 20261108_1735＝本輪 0 工單；tickets/open 空、/srv/vlab/queue 空、done 不變（最新 16_e016・11-04）。
