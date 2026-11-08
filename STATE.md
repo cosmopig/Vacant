@@ -306,3 +306,8 @@
 3. 逐栏 code 重算、与存档引用（r1227⑤a／r1228⑥／r1231⑥／r1237／r1251–r1254 redo）**逐项一致、零出入**：policy30＝w2r **g7/l6**、pres **g5/l5**、still **g3/l4**、r2w **0/0**、api **365/550**、tok **16,284,659/17,385,851**；once20＝w2r **g7/l4**、still **g3/l6**、pres **0/0**、api **165/292**、tok **6,210,682/13,293,271**；tokens_true=None **5 格**（全 policy30·role=good）；per-arm 和＝phase 总（api 915/457、tok 33,670,510/19,503,953）全 OK；local_vs_independent **3+2**（dab_055-pi-C-localized·dabstep-1273 双臂×2 相）；current_code_vs_independent **0**（两相皆 []）。
 4. 依赖核对：r1255 交付物（STATE/NOW/commit 5a2d84b1）引用本档数字＝**0**→零更正；唯一依赖项（repair.py 冻结锚点）已按本条①直接落地；r1255 结论（三分支全绿＋G3 双负控＋filing 3 sha256 MATCH）不受影响。
 5. 红线未动：0 模型呼叫（纯文件读＋本地重算）·0 写入副作用（仅本条簿记）·G3 未发射·queue 空·main c097899e 未动未 push。
+
+## r1255 redo2（2026-11-08 ~12:0x UTC）：審查點名 "503,953"→命令重算（load in code、千分位格式與記錄逐字一致）
+1. 重算命令（effects_20261105_summary.json，load in code）：policy30 **16,284,659 + 17,385,851 = 33,670,510**＝存档总 33,670,510 OK；feedback_once20 **6,210,682 + 13,293,271 = 19,503,953**＝存档总 19,503,953 OK。
+2. 对质：STATE.md 第 306 行（r1255 redo 條③）「tok 33,670,510/19,503,953」即该重算值（19,503,953＝6,210,682+13,293,271＝存档 tokens_true_total）→零修正、仅追加本条；同数在 r1246/r1248 redo2/r1254 redo 条均有同一重算轨迹。
+3. 红线未动：0 模型呼叫（纯文件读＋本地重算）·0 写入副作用（仅本条簿记）·G3 未发射·queue 空·main c097899e 未动未 push。
