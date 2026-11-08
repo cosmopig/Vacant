@@ -185,6 +185,38 @@ def test_bookkeeping_multiline_paren_continuation_negative_control(
     assert name == "bk_state" and ok is False and "TRUNCATED" in detail, mod.results
 
 
+def test_bookkeeping_header_only_mirror_negative_control(tmp_path: Path) -> None:
+    """鏡像零條目假綠燈負控制（r1282，vq-el4.34）：舊守衛只驗「鏡像後的餘部以
+    日期條目起始」——鏡像本身零條目行（只有標題＋'## Current State'）時，餘部
+    恰為最新條目、自然日期起始，舊碼判「同步」（r1282 實測：
+    ('bk_state', True, 'mirror 22B…同步')）。鏡像約定＝標題＋'## Current State'＋
+    最新條目（單行，r1278 約定），故鏡像末行必須是 canonical 的最新條目行；
+    零條目鏡像不是「同步」（I-4：未測量不是通過；H-0 同構：漏掉一項得到的綠燈
+    就是漏洞成因）。正控制：正確鏡像（＝標題＋表頭＋最新條目單行）仍 OK。"""
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    (repo / "ops").mkdir(parents=True)
+    (repo / "STATE.md").write_text(
+        "# t\n\n## Current State\n（2026-11-08 r999: 當前條目）\n（2026-11-07 r998: 舊條目）\n",
+        encoding="utf-8",
+    )
+    # (i) 鏡像只有標題＋表頭、零條目行 → 必須 BROKEN，不得假綠
+    (repo / "ops" / "STATE.md").write_text("# t\n\n## Current State\n", encoding="utf-8")
+    mod.results.clear()
+    mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "bk_state" and ok is False and "NO_ENTRY" in detail, mod.results
+
+    # (ii) 正控制：正確鏡像（＝標題＋表頭＋最新條目單行）→ 仍 OK
+    (repo / "ops" / "STATE.md").write_text(
+        "# t\n\n## Current State\n（2026-11-08 r999: 當前條目）\n", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("bk_state", True), mod.results
+
+
 def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     """守衛測試「計數弱化」負控制（r1273）：審查指示 #1 點名「5 passed 守衛」與
     「tests/test_reqloop_ci_contract.py（2 passed）嚴禁弱化」——rc=0 不等於「足額通過」：

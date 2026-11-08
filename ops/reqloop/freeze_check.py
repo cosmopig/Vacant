@@ -205,6 +205,16 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     條目邊界約定收緊為 live 檔實證的「（YYYY-MM-DD…」起始（24/24 條目行逐條核實）：
     餘部非日期條目起始即視為條目內截斷→BROKEN。代價：非日期條目行會被判不同步——
     那是簿記違反約定，應修簿記而非放寬守衛。
+
+    r1282 零條目鏡像守衛（vq-el4.34）：餘部守衛必要但不充分——鏡像本身零條目行
+    （只有標題＋'## Current State'）時，餘部恰為最新條目、自然日期起始，舊碼判
+    「同步」（r1282 實測：('bk_state', True, 'mirror 22B…同步')，與 r1271–r1279
+    同型假綠燈）。鏡像約定＝標題＋'## Current State'＋最新條目（單行，r1278 約定），
+    故鏡像末行必須恰為 canonical 的最新條目行（'## Current State' 後首個非空行）；
+    canonical 無條目行（空狀態段）亦 BROKEN（I-4：未測量不是通過）。
+    已知殘留邊界（如實）：多行條目在行邊界截斷且續行恰好形如「（YYYY-MM-DD…」時，
+    與「正確狀態＋兩個單行條目」逐位元組不可區分——任何 byte 級守衛都無法判別；
+    緩解＝「每輪條目各占一行」的簿記約定（違约定即修簿記），不在 byte 檢查裡假裝能分辨。
     """
     canon = repo / "STATE.md"
     mirror = repo / "ops" / "STATE.md"
@@ -235,6 +245,30 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
             "bk_state", False,
             f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但餘部非日期條目起始"
             "「（YYYY-MM-DD…」（多行條目內行邊界截斷，續行形如新條目）——截斷鏡像不是同步（I-4：未測量不是通過）",
+        )
+        return
+    # r1282（vq-el4.34）：鏡像末行＝canonical 最新條目行（'## Current State' 後首個
+    # 非空行）。零條目鏡像（只有標題＋表頭）的餘部恰為最新條目、日期起始，上面的
+    # 餘部守衛放行＝假綠燈（r1282 實測）；此守衛要求鏡像本身承載當前狀態條目。
+    c_lines = c.split("\n")
+    h = c_lines.index("## Current State")  # 前綴檢查已保證 canonical 含表頭
+    entry = next((ln for ln in c_lines[h + 1:] if ln.strip()), None)
+    if entry is None:
+        record(
+            "bk_state", False,
+            "canonical STATE.md '## Current State' 下無條目行——空狀態段不是同步"
+            "（I-4：未測量不是通過）",
+        )
+        return
+    m_lines = m.split("\n")
+    if m_lines and m_lines[-1] == "":
+        m_lines = m_lines[:-1]  # 上面已保證 m 以 '\n' 結尾
+    if not m_lines or m_lines[-1] != entry:
+        record(
+            "bk_state", False,
+            f"NO_ENTRY: mirror {len(m)}B 末行不是 canonical 最新條目行"
+            "（鏡像零條目/末行停滯——餘部雖以新條目起始，鏡像本身未承載當前狀態，"
+            "不是同步；I-4：未測量不是通過）",
         )
         return
     record("bk_state", True, f"mirror {len(m)}B == canonical title+Current State（同步）")
