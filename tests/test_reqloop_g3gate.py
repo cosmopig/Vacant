@@ -362,3 +362,28 @@ def test_cli_fire_valid_approval_rc3_approved_not_wired(tmp_path: pathlib.Path):
     assert r.returncode == 3, r.stdout + r.stderr
     assert "APPROVED" in r.stdout
     assert "未接線" in r.stdout                 # 如實：發射是核准後另一步
+
+
+# ── CLI 負控：篡改 manifest → --plan 必須 RC 1（r1258 前 operator 可見路徑零負控）──
+
+def test_cli_plan_tampered_manifest_rc1_not_ok(tmp_path: pathlib.Path):
+    """operator 可見 fail-closed 負控：凍結輸入檔 sha 被篡改→--plan 必須 RC 1。
+
+    r1257 釘住的是 API 層 verify_frozen 負控（test_verify_frozen_detects_tampered_sha）；
+    operator 實際執行的 CLI 入口 main() 的 try/except→RC 1 路徑零負控：若未來例外被
+    吞（fail-open 化），test_cli_plan_rc0_and_not_fired 仍綠、operator 見假綠。H-0 教訓：
+    忘帶旗標得到的綠燈，正是放行洞口的狀態。
+    """
+    import shutil
+    base = tmp_path / "frozen"
+    shutil.copytree(BASE, base)
+    m = base / "manifest.json"
+    raw = json.loads(m.read_text(encoding="utf-8"))
+    f0 = list(raw["tasks"][0]["files"])[0]
+    raw["tasks"][0]["files"][f0] = "f" * 64    # 只改 hash、檔還在＝純篡改（非缺檔）
+    m.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    r = _run("--plan", "--manifest", str(m))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "G3GATE PLAN FAIL" in r.stdout
+    assert "hash 不符" in r.stdout              # 拒因如實：hash 不符（非缺檔/非選題）
+    assert "G3GATE PLAN OK" not in r.stdout     # 不得假綠
