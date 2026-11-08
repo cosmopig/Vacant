@@ -24,3 +24,4 @@
 - 驗證（worker worktree、commit 後）：兩護欄 2 passed（此前 1 failed）／pearson2 3 passed／`pytest -k 'reqloop or beads'` 357 passed 1 skipped 0 failed。
 - 沒驗證：qwen27b d95bb8aa／worker 80947934 CI 燈（下輪巡→應🟢）；全量 pytest（vacant-ci 職掌）。
 - 工單 R20261108_0150-1 補救完成（5 驗收項全達）；下一步＝巡 CI＋等 G3 派工（不自發射大成本）；不改 repair.py。
+- ⑥ redo（審查點名 extract.py／repair.py 本輪原未開）：兩檔補開（qwen27b＋worker worktree，wc -l＋head）——extract.py **1217 行**（頭部＝G2.5 擷取驗證/組裝層：quote 非逐字→丟棄、verifier 不在 SUPPORTED_VERIFIERS→unverified＝UNKNOWN 不當通過、參數不合→unverified、解析/client 例外→空集 fail-closed、GlmClient 唯一入口＝`glm`）；repair.py **2795 行**（頭部＝保留原候選、權威快照 source_tampered 退出碼 20、FAIL→UNKNOWN 不算修好、verifier 閉集分派未知→UNKNOWN）；兩 worktree 行數一致、git 皆乾淨；最後改動 ebe4344c（extract，已核准）／399f68b6（repair，已核准）；blob 三分支全同（extract e757aec5＝r1228 錨點、repair 5147f8c3）；`git show --stat 80947934` 僅 3 個 symlink、未觸及該二檔→本輪「repair.py 凍結／extract.py 邊界不改」陳述現以此接地。
