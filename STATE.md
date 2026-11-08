@@ -155,3 +155,10 @@
 - ③ 錨點三分支同 blob：repair 2795 行/5147f8c3、extract 1217 行/e757aec5、checks f3525b01；g3gate 6f93f4e5、extract_eval 94897bf5、builder 23dac11c、filing 4b24cd5b——審查 #2 三分支同步＋#3 repair 凍結/extract 白名單邊界守住。
 - ④ 紅線：/srv/vlab/queue 0 項；vibe_calls.jsonl 最後條＝2026-11-07T18:35:51Z→本輪 0 模型呼叫；main 未動；不自 push；bd ready 僅 vq-1zf（G3 待人類核准、未發射）；tickets/open 空。
 - ⑤ 未驗證：無——r1242「下一步」全數完成（bf8a9a59 為中間簿記 commit，ci.sh 只測分支 HEAD 60987574，產品樹相同＝已覆蓋）；DECISION：無可領產品工單（vq-el4 18/18 closed、審查範圍限 R-loop 與產品行為），下輪起若無審查者/人類新指示，每輪只做一次巡燈＋錨點核對，不改文件湊進度。
+
+## r1244（2026-11-08 ~07:3x UTC）：輪首無新指示→依 NOW 步 3 一次巡燈（不改文件湊進展）
+- ① 無新指示核對：tickets/open 空、/srv/vlab done 仍 16_e016（無新件）、無 G3 核准文件（grep vq-1zf/approved 僅審查文件本身與舊 log）；輪首審查 5 條全數已落地（ab3b6a67 已合併、三分支同 blob、repair 凍結、0 模型呼叫、未發射）。
+- ② 驗收重跑：53 passed in 0.55s（RC0）；/tmp 無 g3gate_*（rc=2）；錨點三分支同 blob：repair 5147f8c3/2795 行、extract e757aec5/1217 行、checks f3525b01。
+- ③ CI：qwen27b HEAD 280eda92＝純簿記（git diff 60987574..280eda92 僅 NOW/STATE）→產品樹＝已綠 60987574（5053/5126）；280eda92 燈在 ci.sh 隊列（駐留 loop 每 10 分鐘自跑；不自跑全量 pytest、不輪詢）。
+- ④ 紅線：/srv/vlab/queue 0 項；vibe_calls.jsonl 最後條 2026-11-07T18:35:51Z→本輪 0 模型呼叫；main 未動；不自 push；bd ready 僅 vq-1zf（G3 待人類核准、未發射）；tickets/open 空。
+- ⑤ 未驗證：280eda92 CI 燈（ci.sh 自跑、下輪查一次）；DECISION：無可領產品工單（vq-el4 18/18、tickets/open 空、審查範圍限 R-loop 與產品行為）→唯一前向路徑是 G3 人類核准；本輪止於巡燈＋簿記，0 模型呼叫。
