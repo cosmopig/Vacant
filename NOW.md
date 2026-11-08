@@ -1,8 +1,8 @@
-# NOW（r1281・2026-11-08）
+# NOW（r1282・2026-11-08）
 
 ## 現在在哪
-- 全部工作項被人類決策阻塞：vq-el4 34/34 全閉、0 open；唯一 ready＝vq-1zf（G3）待 `--fire` 核准（12 格已凍結、g3gate 離線釘住、不點火、不入 queue）。
-- 本輪＝驗證＋簿記輪：freeze_check 9 項全 OK（FROZEN_STATE_OK rc=0）；CI 一次讀取：qwen27b LATEST 推進至 c2a96a16 green（5071/0/74，r1280 觀察時在跑之 commit 已收口）、argon/worker LATEST 不變（皆 5070/0/74 green）；現 HEAD（e960a009/581e69f8/0ce81258）無 ci/<sha>.json、state.json running argon@401c0e18（舊 commit）；0 代碼改動、0 model calls。
+- 實質修復輪（vq-el4.34 開→關，非簿記輪）：freeze_check bk_state「零條目鏡像」假綠燈（鏡像只有標題＋表頭、無條目行，舊守衛仍判「同步」，r1282 實測）——TDD RED→GREEN：鏡像末行須＝canonical 最新條目行＋負控制。13 passed（freeze 6／anchors 5／ci_contract 2）；freeze_check 9 項 OK、FROZEN_STATE_OK rc=0；三分支同步後 in-scope diff 0×2。
+- 其餘工作項仍被人類決策阻塞：vq-el4 35/35 全閉；唯一 ready＝vq-1zf（G3）待 `--fire` 核准（12 格已凍結、g3gate 離線釘住、不點火、不入 queue）。
 - 待人類決策（2 項）：① G3 `--fire` 核准 ② CI 通道裁決（auto-ci.yml disabled_manually；不翻開關、不重複診斷）。
 - G2.5 數字仍以 filing `out/all/phase3.json` 7/2 為準；不引舊 6/3 單測檔。
 - 無新人類指示（ops/ 最新仍 11-07）、tickets/open 空、/srv/vlab/queue 空、/srv/vlab/done 不變（最新 16_e016・11-04）。
