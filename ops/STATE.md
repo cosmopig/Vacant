@@ -7471,3 +7471,10 @@ DECISION:959=助手票停擺且 BACKLOG 規則已預授權裁處點（下輪仍�
 - 紅線：零發射、零產品行為改動（本輪改動＝staging 草稿/runbook＋票/BACKLOG/NOW/STATE 記錄；vacant_network/ 未動）；未動 main/~/.vacant；未讀 hidden/scorer；未手動 push。
 
 DECISION:959-redo=審查指「FINDINGS.md 未開」⇒本輪實開（542 行）重核依賴項，發現 r959 票面「7 條全 PASS」不準：第 7 條所引「CB 2.26×」先例不存在（e014 實測紅線內 cost_ok、2.26× 全庫無出處）⇒照票工作流修草稿（staging、R&D 權限）、runbook 加修正註記、packet 因「出結果前不得修改」鎖檔不改（結案記錄用修正先例）、票 Done 段改 7a/7b 雙行（誠實記錄 FAIL＋修正）｜紅線公式與管線同式不變、e016 裁決不受影響｜零發射、零產品行為改動、未 push、未動 main/~/.vacant、未讀 hidden/scorer
+
+## r1239（2026-11-08 05:36–06:0x UTC）：e847c56e CI 紅燈根因＋hermetic 守衛修正（argon 1d78a8f4／worker 13dd10fb）；合併順延 r1240
+- ① 根因（三證據）：ci.sh 共享 worktree 依 qwen27b→argon→worker 跑各分支 HEAD、且對已有結果的 sha 不重跑（`if [ -e $CI/$sha.json ]`）；同輪 qwen27b（1d560930 舊 mkdtemp 版 _tmp_manifest、green 5051）先跑，05:30 留 3 個 /tmp/g3gate_* 殘留（各 manifest.json+tasks）→ argon e847c56e 守衛斷言 /tmp 絕對乾淨被「別分支舊碼殘留」誤傷＝**1 failed, 5052 passed**。清 /tmp 重跑舊 sha 不可行、下一輪 qwen27b 舊碼必然再污染→hermetic 是唯一穩解。
+- ② **一條指令比上輪好**：reviewer 驗收指令 `pytest tests/test_reqloop_extract_run_eval.py tests/test_reqloop_g3gate.py` 在「/tmp 仍有污染」同環境：上輪（e847c56e CI）＝1 failed；本輪修正後＝**53 passed in 0.52s**。
+- ③ 修正＝1 檔 1 測試（守衛改前後集合差 hermetic；測試碼、不觸產品碼）：負控（還原 mkdtemp 版 _tmp_manifest）→守衛命中 1 failed→偵測力不變；還原→53 passed、/tmp 無 g3gate_*。
+- ④ 落地：argon **1d78a8f4**（14+/3-、不 push）；cherry-pick worker **13dd10fb**（乾淨應用、g3gate 16 passed）——防 worker 同競態誤傷。紅線：/srv/vlab/queue 空（0 模型呼叫）；錨點重驗 repair 2795/5147f8c3、extract 1217/e757aec5、reqloop checks f3525b01；合併範圍不觸 vacant_network/。
+- ⑤ 未驗證：新 sha CI（qwen27b b391818f→argon 1d78a8f4→worker 13dd10fb 下一輪跑）；合併未落地。下一步（r1240）：ci_status.py 見 argon 1d78a8f4 🟢→`git merge --no-edit auto/argon`＋53 passed 驗收＋/tmp 檢查＋錨點重驗＋`bd close vq-1zf.2`；紅則根因。G3 續等人類核准。
