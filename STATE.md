@@ -201,3 +201,9 @@
 - ④ 沒驗證：dec9bd9c（r1222 程式碼）CI 燈（輪首顯示「還沒跑完」→下輪巡）；本輪未跑全量 pytest（vacant-ci 職掌）。
 - 下一步：下輪巡 dec9bd9c CI；等審查派工（G3 須派工、不自發射大成本）。
 - ⑥ 審查 redo（P20261108_0029-1）：本輪原未開工單點名的官方鎖檔 `ops/reqloop/extract/out/eval_phase3_glm53.json`——現補開＋接地：9 cells **fixed 6／unresolved 3**（unresolved＝dab_039/dab_055/dabstep-1273；fixed＝dab_378/426/427/507/dabstep-10/23）、errors 0／rtw 0／rejected 0、cost＝14 sessions／263 calls／**tokens None＝UNKNOWN**（cost_note：缺值不填 0）、baseline g2-truth 9/9・7/9 單 rep 不宣稱優；在位未改動：git status 乾淨、mtime Nov 7 15:07、最後改動 **267058ee**（vq-el4.5 結案、已核准）、run_eval.py 對該檔 **0 引用**（grep）→ 本輪兩次 `--all` 執行未觸及。口徑區分：②「PHASE3 fixed 7／unresolved 2」＝run_eval --all 新鮮輸出（out/all/phase3.json、RESUMED 累計 15 sessions／275 calls／15087278 tok）；鎖檔＝vq-el4.5 官方快照（6/9 fixed）——**不同時點快照、非同一組數字**；工單驗收以 run_eval 輸出（fixed 7）為準、鎖檔僅為「不得修改」邊界。
+## r1224（2026-11-08 00:5x UTC）：dec9bd9c CI 燈轉綠＋審查指示 1-4 全部新鮮複核（0 模型呼叫、0 成本）
+- ① CI 巡燈（NOW.md 上輪第 1 步）：qwen27b **dec9bd9c（r1222 pearson2 修復＝checks.py＋test_reqloop_checks.py）🟢 5036 passed, 0 failed, 74 skipped（851.58s、collected 5109＝5108+1 新測試）**——「還沒跑完」轉 🟢（指令輸出變好）；vq-el4.10 修復自此有分支級 CI 綠燈。4ca2033a（純 NOW/STATE +2 行、0 產品代碼）待下一 pass pickup（~14min/pass）。
+- ② 審查指示 1-4 本輪新鮮複核：指示1 `bd list --parent vq-el4 --all` **11/11 closed、0 open**；指示2 repair.py **2795 行**／extract.py **1217 行**／tree 0 改動／最後改動 399f68b6・ebe4344c 皆已核准；指示3 守護測試（test_repo_beads_shared_db＋test_reqloop_extract_run_eval＋test_reqloop_checks＋test_repo_no_conflict_residue＋test_repo_no_absolute_symlinks）**109 passed（0.59s）**；指示4 worker aca58a95 🟢 5034/0、argon 05989682 🟢 5033/0。
+- ③ 無新工作：tickets open／doing／qwen 全空、`bd ready` 0、/srv/vlab queue 空（最新 done＝e016、r988 已結案）；本輪 0 API 呼叫。
+- ④ 沒驗證：4ca2033a CI 燈（待 pickup、純簿記 commit）；GitHub Actions（無 admin＝基建問題、本地 vacant-ci 為在位 gate）；本輪未跑全量 pytest（vacant-ci 職掌、其 dec9bd9c 燈即本輪①）。
+- 下一步：下輪巡 4ca2033a CI→應🟢；等審查派工（G3 須派工、不自發射大成本）；無新授權不補長文件、不改 repair.py。
