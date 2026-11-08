@@ -128,10 +128,10 @@ def test_check_budget_accepts_frozen_plan():
     g3.check_budget(_loaded())
 
 
-def test_check_budget_rejects_over_cell_cap():
+def test_check_budget_rejects_over_cell_cap(tmp_path: pathlib.Path):
     plan = _loaded()
     bad = {**plan.raw, "budget": {**plan.budget, "max_cells": 5}}
-    p = _tmp_manifest(bad)
+    p = _tmp_manifest(tmp_path, bad)
     try:
         g3.check_budget(g3.G3Plan.load(p))
     except ValueError:
@@ -139,11 +139,11 @@ def test_check_budget_rejects_over_cell_cap():
     raise AssertionError("12 格超上限必須拒")
 
 
-def test_check_budget_rejects_missing_daily_cap():
+def test_check_budget_rejects_missing_daily_cap(tmp_path: pathlib.Path):
     plan = _loaded()
     bad = {**plan.raw, "budget": {k: v for k, v in plan.budget.items()
                                   if k != "daily_token_cap"}}
-    p = _tmp_manifest(bad)
+    p = _tmp_manifest(tmp_path, bad)
     try:
         g3.check_budget(g3.G3Plan.load(p))
     except ValueError:
@@ -151,10 +151,10 @@ def test_check_budget_rejects_missing_daily_cap():
     raise AssertionError("缺日 token 上限必須拒（fail-closed）")
 
 
-def test_check_budget_rejects_wrong_entry():
+def test_check_budget_rejects_wrong_entry(tmp_path: pathlib.Path):
     plan = _loaded()
     bad = {**plan.raw, "budget": {**plan.budget, "model_entry": "vibe"}}
-    p = _tmp_manifest(bad)
+    p = _tmp_manifest(tmp_path, bad)
     try:
         g3.check_budget(g3.G3Plan.load(p))
     except ValueError:
@@ -162,13 +162,19 @@ def test_check_budget_rejects_wrong_entry():
     raise AssertionError("模型入口不是 glm 必須拒")
 
 
-def _tmp_manifest(raw: dict) -> pathlib.Path:
-    import tempfile
-    d = pathlib.Path(tempfile.mkdtemp(prefix="g3gate_"))
-    (d / "tasks").mkdir()
+def _tmp_manifest(tmp_path: pathlib.Path, raw: dict) -> pathlib.Path:
+    d = tmp_path / f"manifest_{abs(hash(json.dumps(raw)))}"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "tasks").mkdir(exist_ok=True)
     p = d / "manifest.json"
     p.write_text(json.dumps(raw), encoding="utf-8")
     return p
+
+
+def test_no_leftover_temp_directories_in_tmp():
+    import glob
+    leaked = glob.glob("/tmp/g3gate_*")
+    assert not leaked, f"g3gate 測試洩漏暫存目錄到 /tmp：{leaked}"
 
 
 # ── 核准門（fail-closed）─────────────────────────────────────────────
