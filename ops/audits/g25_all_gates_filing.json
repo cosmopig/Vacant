@@ -1,0 +1,116 @@
+{
+  "schema": "vacant.filing/g25_all_gates/1",
+  "ticket": "vq-el4.14",
+  "round": 1228,
+  "generated_at": "2026-11-08T05:01:59+00:00",
+  "purpose": "資深審查 2026-11-08 指示 #1：確認 G2.5 全三項門禁整合達標並備案",
+  "git": {
+    "head": "d826f5b52f00fcec6757f0a6a5f80d6eb7b8e103",
+    "branch": "auto/argon"
+  },
+  "gates": {
+    "g1_rerun": {
+      "gate": "PASS",
+      "metrics": {
+        "caught": 39,
+        "total_bad": 39,
+        "catch_rate": 1.0,
+        "false_acc": 0
+      },
+      "threshold": {
+        "catch_rate": ">=0.7",
+        "false_acc": "== 0"
+      },
+      "cost": {
+        "calls": 41,
+        "tokens": 328550,
+        "unknown_tasks": []
+      }
+    },
+    "real14": {
+      "gate": "PASS",
+      "metrics": {
+        "caught": 9,
+        "total_bad": 9,
+        "false_acc": 0,
+        "total_good": 5,
+        "errors": 0
+      },
+      "threshold": {
+        "caught": ">=5",
+        "false_acc": "<=1"
+      },
+      "cost": {
+        "calls": 74,
+        "tokens": 732826
+      }
+    },
+    "phase3": {
+      "gate": "PASS",
+      "metrics": {
+        "cells": 9,
+        "fixed": 7,
+        "unresolved": 2,
+        "rejected": 0,
+        "right_to_wrong": 0,
+        "held": 0,
+        "errors": 0,
+        "stale_cells": []
+      },
+      "threshold": "errors==0（fixed/unresolved 為觀測數、非門檻）",
+      "extract_model": "glm53",
+      "repair_model": {
+        "provider": "lms1004nothink",
+        "model": "gemma-4-12b-it-qat"
+      },
+      "cost": {
+        "repair_sessions": 15,
+        "model_calls": 275,
+        "tokens": 15087278
+      },
+      "cost_note": "repair_sessions＝修復 session 數；model_calls＝API 請求數（raw usage）；任一缺值⇒UNKNOWN（不填 0）",
+      "comparison_baseline": "手寫需求（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep，不宣稱較好"
+    }
+  },
+  "sources": {
+    "phase1": {
+      "path": "/home/user1/dev/wt/argon/ops/reqloop/extract/out/all/phase1.json",
+      "sha256": "3c6fb35a0cb4723cd88a523d88636de2f2c1f0340e3625a0f1dacfcd859fae0d"
+    },
+    "phase2": {
+      "path": "/home/user1/dev/wt/argon/ops/reqloop/extract/out/all/phase2.json",
+      "sha256": "6b7cb83139beb03cdaa64afa6d908fe4af9b87f4c7ffddc479d60297b4a2dd40"
+    },
+    "phase3": {
+      "path": "/home/user1/dev/wt/argon/ops/reqloop/extract/out/all/phase3.json",
+      "sha256": "ada235bbf50c25491b650018d67be8cec67ad460546fa42ee137882516d07049"
+    }
+  },
+  "code": {
+    "vacant_network/reqloop/extract.py": {
+      "sha256": "51abfec319d21813d7223bc5aa48417417680ba09aa0bd4d097b2c49ea223da7",
+      "role": "驗證/組裝層：quote 非原文逐字→丟棄該條；verifier 不在白名單／必要參數不合→unverified（檢查時 UNKNOWN、不當通過）；client/解析例外→空 RequirementSet（fail-closed、絕不當「沒有需求＝通過」）；GlmClient 只走 `glm` 指令＝擷取模型唯一入口（rc≠0 丟 ExtractError、不重試）；run_eval.py:40 自本檔匯入 build_requirement_set/extract_requirements/parse_model_output 等"
+    },
+    "vacant_network/reqloop/checks.py": {
+      "sha256": "c7589c610c629380f8919a08e1e707bb7ad65143cd4e0131a301158ab82fd4f4",
+      "role": "SUPPORTED_VERIFIERS 單一事實來源（extract.py:47 自本檔匯入）＋run_requirement_checks（PASS/FAIL/FAIL/UNKNOWN 判定）"
+    },
+    "ops/reqloop/extract/run_eval.py": {
+      "sha256": "332cd324ff22650a791222da0fd50f8eb511202e5632f6a6179c78a09713dd71",
+      "role": "三門門檻：G1 抓錯≥70% 且 0 冤枉；REAL14 抓錯≥5/9 且冤枉≤1/5；PHASE3 errors==0"
+    }
+  },
+  "boundaries": [
+    "開發選樣、單一碼態、單 rep——不宣稱產品成效，不宣稱 localized/generic 孰優",
+    "PHASE3 成本為 repair session 的 raw usage（歷史累計），非本備案輪新增呼叫",
+    "本備案輪 run_eval.py --all 為全程離線重算（0 新模型呼叫、0 新 token；phase1/2 重用既有擷取 out/*.json、phase3 接續 progress.json）",
+    "G1/REAL14 門禁結果＝run_requirement_checks（checks.py）對 build_requirement_set（extract.py）組裝的需求集做判定：quote 非逐字→丟棄、unverified→UNKNOWN不當通過、client/解析例外→空集 fail-closed（本備案已逐節核對 extract.py）",
+    "成本缺值＝UNKNOWN（null），不填 0；cost_usd=0 不代表免費",
+    "1753 本批排除；hidden/scorer 未讀、未回流"
+  ],
+  "verify": {
+    "gate_command": "python3 ops/reqloop/extract/run_eval.py --all",
+    "expected": "exit 0（三門全 PASS）",
+    "this_filing_builder": "python3 ops/audits/build_g25_all_gates_filing.py"
+  }
+}

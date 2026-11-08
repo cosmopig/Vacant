@@ -1,0 +1,143 @@
+{
+  "schema": "vacant.reqloop.g3gate.plan/1",
+  "frozen_at": "2026-11-08T04:50:13+00:00",
+  "ticket": "vq-1zf（G3 未見任務完整對照；審查指示 #5「G3 準備工作」2026-11-08；r1236 交付發射前置門）",
+  "purpose": "G3 發射前置門（離線、零模型呼叫、不發射）：選題＝bank 順序前 4 未見題（代碼重算、與預註冊 dab_129/144/176/216 一致）；任務輸入凍結副本在 repo 內（tasks/，sha256 逐檔核）；預算門＝12 格/300s 每輪/日 ≤2M tok 撞額停不重試/glm 唯一入口/無硬 token 上限缺值 UNKNOWN；核准門 fail-closed（人類明確核准前 0 模型呼叫）。發射（三臂真跑＋/srv/vlab scorer）是核准後另一步授權，不在本門範圍。核准前禁止任何發射。",
+  "arms": [
+    "native_pi",
+    "reqlist_only",
+    "full_rloop"
+  ],
+  "arm_defs": {
+    "native_pi": "原生 pi：「再檢查修正一次」（一輪可見回饋），無需求清單、無 R-loop 修復循環",
+    "reqlist_only": "只給需求清單：作答模型另得 extract.py 擷取的需求清單；無 localized 修復循環、無全條目重驗",
+    "full_rloop": "完整 R-loop：自動擷取需求（extract.py）＋ localized 修復（repair.py 凍結 2795 行）＋重驗所有必要條目（checks.py）"
+  },
+  "tasks": [
+    {
+      "task_id": "dab_129",
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "1420bea4982ae047af6957f137e9db39109d633d4f87acc8cc13cf5100dd58be",
+        "workspace/data/titanic.csv": "7d118fef8b6ccf7f81111877bc388536f7b1e498a655e3d649d19aaa010e9f6f",
+        "workspace/goal.md": "85e5b14de0ab98cde93fa92e6906c9b584a90ca0bcb89eb3e4317e5521601032"
+      }
+    },
+    {
+      "task_id": "dab_144",
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "79bbbff007b2f420f2d3f8137dade2434d81457d9c289ebf2fadb95a896cdea2",
+        "workspace/data/election2016.csv": "b2d37e2153fa661b710170db1c9b2d62cef2baf2910535bd5600c32892f48a45",
+        "workspace/goal.md": "55a89fb9f42ed871254af906731fde8c889fd4829bcf2fcd65c5159ca2feff70"
+      }
+    },
+    {
+      "task_id": "dab_176",
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "eb40caa7c7e08502bbe5b65036568490a4293e48f3e835a02349069068cac92b",
+        "workspace/data/titanic.csv": "7d118fef8b6ccf7f81111877bc388536f7b1e498a655e3d649d19aaa010e9f6f",
+        "workspace/goal.md": "8f27b7dc7ef8ddbb2bb7685fec33e26bad09c9064245ac79673c2ab4190eb7d4"
+      }
+    },
+    {
+      "task_id": "dab_216",
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "bdd413757b92f7b1d9504a13771694096d2d04ede3e8b1c174678f269e97a319",
+        "workspace/data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv": "c9e411ff75df8d966f6e5de9270a4a7276289c478a6b7aa216ce667eac66f540",
+        "workspace/goal.md": "884ec49927a5a04031204da720ee256179c88af02d86b744829ce2787ae0c970"
+      }
+    }
+  ],
+  "seen_set": [
+    "dab_035",
+    "dab_039",
+    "dab_055",
+    "dab_057",
+    "dab_105",
+    "dab_378",
+    "dab_426",
+    "dab_427",
+    "dab_507",
+    "dabstep"
+  ],
+  "seen_set_source": "effects_20261105_summary.json 50 格 task 聯集（r1233 redo；bank 內部分＝9 dab_）＋G1/REAL14/PHASE3 開發樣本（無 dabench 題）；dabstep 為另一 bank、不在本 bank 選題",
+  "bank": {
+    "name": "dabench",
+    "dir": "/home/user1/dev/ops/ref/bm_tasks/dabench",
+    "n_total": 30,
+    "ordering": [
+      "dab_035",
+      "dab_039",
+      "dab_055",
+      "dab_057",
+      "dab_105",
+      "dab_129",
+      "dab_144",
+      "dab_176",
+      "dab_216",
+      "dab_218",
+      "dab_249",
+      "dab_250",
+      "dab_378",
+      "dab_426",
+      "dab_427",
+      "dab_507",
+      "dab_514",
+      "dab_517",
+      "dab_587",
+      "dab_588",
+      "dab_657",
+      "dab_665",
+      "dab_666",
+      "dab_669",
+      "dab_688",
+      "dab_721",
+      "dab_723",
+      "dab_724",
+      "dab_725",
+      "dab_732"
+    ],
+    "disclosure": "此 4 題在舊機制 e008 A/C 臂有先驗數據（/srv/vlab/runs/e008_dabench_pi_AC/）——非 G3 三臂之一、R-loop 從未觸及，不構成調優（記錄在案防 cherry-pick 質疑）"
+  },
+  "budget": {
+    "max_cells": 12,
+    "timeout_s_per_round": 300,
+    "daily_token_cap": 2000000,
+    "quota_fail_closed": true,
+    "model_entry": "glm",
+    "hard_token_cap": false,
+    "cost_missing": "UNKNOWN",
+    "note": "無硬 token 上限能力；成本從 raw usage 讀、缺值 UNKNOWN 絕不填 0；撞 2M/日 額度即停、不得重試；空暫存目錄＋--enabled-tools none；不准反向代理、不准轉額度"
+  },
+  "scoring": {
+    "scorer": "/srv/vlab 既有 scorer（bin/report.py <exp> --rescore）；不准用 R-loop 自己列的清單當裁判",
+    "four_class_report": [
+      "報錯→對",
+      "對→錯",
+      "未解決",
+      "成本缺值"
+    ],
+    "before_after": "逐格 before_after.json（independent_status=independent_pass/regressed/source_tampered）",
+    "hidden_after": "UNKNOWN",
+    "same_draft_same_budget": "三臂同起始草稿、同資料、同總預算；額外呼叫全算成本"
+  },
+  "leak_guard": "不讀 /srv/eval/hidden/ 與 scorer.py 內容、不按隱藏分數反推規則；修復模型只看原始請求原文、凍結資料與可見反例；缺值＝UNKNOWN 不填 0；cost_usd=0 不報 0 成本；hidden_after 一律 UNKNOWN",
+  "approval": {
+    "required": true,
+    "epic": "vq-1zf",
+    "schema": "vacant.reqloop.g3gate.approval/1",
+    "mechanism": "人類明確核准文件（approved=true、epic=vq-1zf、by=核准者）；無核准信號→fail-closed RC 2、0 模型呼叫；核准後發射是另一步授權（三臂逐格＋/srv/vlab scorer）",
+    "status": "PENDING（r1236 核：/srv/vlab/queue 空、無核准信號）"
+  },
+  "six_elements": {
+    "original_user_requirement": "RLOOP_PLAN.md G3 門：事先留出的未見新題、三組（原生 pi／只給需求清單／完整 R-loop）、總預算上限相同、評分從原始需求和實際交付物出發（實驗室既有 scorer）",
+    "existing_real_failed_artifact": "G2.5 三門 PASS（run_eval.py --all exit 0；備案 ops/audits/g25_all_gates_filing.json）；G2 開發樣本（手寫需求、不可稱產品成效）：9 錯 localized 9／generic 7、5 對兩臂皆保住",
+    "current_behavior": "自動擷取需求可用（extract.py）；repair.py 凍結 2795 行；未見任務上從未做過三臂對照（本門＝前置準備、0 呼叫）",
+    "expected_demonstrable_improvement": "未見任務上完整 R-loop 臂 錯→對 ≥ 兩對照臂、對→錯不劣、每題成本（呼叫/token/wall）逐題可重算；四類分報＋成本缺值 UNKNOWN",
+    "cost_cap": "≤12 格（3 臂×4 題）；300s/輪；glm 唯一入口；日 ≤2M tok 撞額停不重試；無硬 token 上限、缺值 UNKNOWN",
+    "independent_acceptance": "/srv/vlab 既有 scorer（bin/report.py <exp> --rescore）；同起始草稿/同資料/同總預算；逐格 before_after.json＋四類分報；hidden_after 全 UNKNOWN"
+  }
+}

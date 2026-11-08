@@ -1,20 +1,21 @@
-# 現在（第 1226 輪後，2026-11-08 01:2x UTC）
+# NOW.md（r1236 redo，2026-11-08 05:0x UTC）
 
-## r1226：審查派工落地——auto/argon ff 合併 pearson2 修復（vq-el4.10）＋跨 worktree 驗證
-- 審查指示（輪首頭行）：「你修好的 commit（auto/argon），你審過再 merge」。
-- 審查 16 個缺失 commit（05989682..98ea2961）：唯一產品 diff＝dec9bd9c checks.py pearson2 點估計修復（vq-el4.10、已審已綠）＋29 測試行；其餘簿記/守護測試 → 可合併。
-- argon 純祖先 → `merge --ff-only`，argon 05989682→**98ea2961**（＝qwen27b），零衝突。
-- argon worktree 驗證：pearson2 **3 passed**；守護 5 檔 **109 passed**。
-- 跨 worktree checks.py：qwen27b＝argon＝**f3525b01**、worker＝**410e1118**——**本輪 redo-2 重算**：對 `~/dev/wt/worker/vacant_network/reqloop/checks.py`（aca58a95、樹乾淨）git hash-object 與 python 由檔案位元組（125,651 B）重算 git blob sha1，兩法皆＝410e1118cb55…（一致）；head 核為 checks 模組；岔開助手分支、範圍外、🟢。
-- redo 接地：repair.py **2795 行**（本輪原未開、現補開；399f68b6 已核准）／extract.py 1217 行；effects_20261105_summary.json 補開（50 cells、policy30 7/6、once20 7/4、cur_vs_ind 0、成本 None＝UNKNOWN）——r1226 記錄未引該檔數字、無矛盾。
-- **變好**：r1225「唯一產品 diff＝checks.py vs argon/worker」→ 現 argon↔qwen27b 產品 diff＝0。0 模型呼叫。
-- 工單 tickets/done/R20261108_0127-1；vq-el4.12 close（13/13 closed 0 open、含 epic）。
+## 主線
+G2.5（vq-el4）18/18 完結；主線推進到 **G3（vq-1zf）**。r1236 交付 **G3 發射前置門**（離線、0 模型呼叫）：
+選題＋凍結＋預算＋核准四門可一條指令驗，發射仍待人類核准（核准前禁止、0 呼叫）。
+
+## 本輪成果（r1236＋redo）
+- **一條指令**：`python3 -m vacant_network.reqloop.g3gate --plan` → **RC 0**（12 格、NOT FIRED、0 model calls）；`--fire` 無核准 → **RC 2**（fail-closed、0 呼叫）。
+- 選題＝未見任務：DABench 30 − 已見 9 dab_ 前 4 ＝ **dab_129/144/176/216**（`unseen_selection` 代碼重算核預註冊；非寫死）；輸入凍結副本 `ops/reqloop/g3_gate/tasks/`（16 檔 sha256，verify_frozen 抓篡改/缺檔）；e008 先驗數據披露在案。
+- 門內寫死：≤12 格／300s 每輪／日 ≤2M tok 撞額停不重試／glm 唯一入口／無硬 token 上限、缺值 UNKNOWN；核准門＝人類核准文件（approved/epic/by）fail-closed。
+- 驗證：g3gate 15 測試全綠；reqloop 回歸 **607 passed 1 skipped**；commit **88697cd6**；vq-1zf.1 close（證據＝commit＋`--plan` 末行 G3GATE PLAN OK）。
+- **redo（審查點名 repair.py 原未開）**：補開＋接地——2795 行、blob 5147f8c3（＝r1227 錨點）、git 乾淨＝未動；已讀頭部＋結構＝G2 **localized 修復**切片（FEEDBACK_MODES、build_repair_prompt localized、repair_slice、權威快照/source_tampered 退出碼 20、成本缺值 UNKNOWN、min_rounds localized=0）；本輪 4 處依賴陳述逐項如實、**無需改數**，交付物不變。
+
+## 邊界與紅線
+- **G3 未發射**：核准待人類定案（/srv/vlab/queue 空）；核准後發射＝另一步授權（三臂逐格＋/srv/vlab scorer）。
+- 不讀 /srv/eval hidden 與 scorer.py；hidden_after 全 UNKNOWN；cost_usd=0 不報 0 成本。
+- repair.py 凍結 2795 行（blob 5147f8c3，本輪已開核）；extract.py 邊界 e757aec5；checks.py f3525b01；本輪 0 模型呼叫。
+- G2.5 維持：三門 PASS（G1 39/39、REAL14 9/9、PHASE3 fixed7/rtw0）＋備案 g25_all_gates_filing.json。
 
 ## 下一步
-1. 巡 98ea2961 CI（qwen27b＋argon 同 HEAD、輪內「還沒跑完」）→ 應 🟢（`python3 ~/dev/ops/ci_status.py`）。
-2. 等審查派工（G3 須派工、不自發射大成本）；worker 同步 pearson2 未派工、不自動做。
-
-## 紅線（不變）
-main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
-不改 repair.py／G1 requirements.json／凍結快照／官方鎖檔 eval_phase3_glm53.json；成本缺值＝UNKNOWN 不填 0。
-（MEMORY 上限 6 KB、NOW 上限 3 KB）
+等 G3 人類核准→發射（另步授權）；巡 88697cd6 CI；無其他可動工單（vq-el4 18/18、open 0）。
