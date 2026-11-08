@@ -1,18 +1,31 @@
-# NOW.md（r1237 redo，2026-11-08 05:2x UTC）
+# 当前状态（2026-11-08 ~08:11 UTC，r1245 redo）
 
-## 主線
-G2.5（vq-el4）18/18 完結；G3（vq-1zf）發射前置門已交付（88697cd6），仍待人類核准（queue 空→0 呼叫）。
-本輪新項：**argon dd978829 審查完，合併等 CI 綠燈**（規則：跨分支合併等對應 SHA 綠燈；不輪詢）。
+## r1245 交付
+- 新增 `tests/test_reqloop_frozen_anchors.py`（commit `5fb3d00a`，未 push）：把审查指示#3
+  （repair 2,795 行/blob 5147f8c3；extract 1,217 行/blob e757aec5）固化成守卫＋篡改负控制。
+  `pytest tests/test_reqloop_frozen_anchors.py` → 3 passed；验收对（extract_run_eval+g3gate）53 passed 无回归；
+  frozen_anchors+repair+r1169 合计 116 passed。repair.py/extract.py 未改动。
+- vq-4xt 已关闭（reason 含 SHA＋验收输出）；唯一开放项 vq-1zf（G3，P1，待人类核准——不發射、不入队、0 模型呼叫）。
 
-## 本輪成果（r1237）
-- **一條指令（比上輪好）**：argon worktree `pytest tests/test_reqloop_g3gate.py tests/test_reqloop_extract_run_eval.py` → **53 passed in 0.67s**（含新洩漏守護＋worktree 隔離守護測試；上輪該兩測試不存在且 /tmp 有洩漏）。
-- dd978829 審查（4 檔）：filing builder 硬路徑改 `__file__` 動態、g3gate 測試 mkdtemp→tmp_path、＋2 守護測試；filing 再生成僅 generated_at/git.head/sources.path、**門禁數字與 sha 全未變**。
-- 清除 **3 個 /tmp/g3gate_* 洩漏目錄**（各僅 1 個測試 manifest.json）——新洩漏守護測試會因此紅燈，現 `ls /tmp/g3gate_*` 無殘留。
-- 凍結錨點在 a364b2cc 重驗：repair 2795 行/5147f8c3、extract e757aec5、checks f3525b01（qwen27b/argon 一致）；d826f5b5/a364b2cc 純簿記、產品 diff 0。
-- **redo（審查點名 effects_20261105_summary.json 本輪原未開）**：已 code 載入（blob 856c2c71＝已提交、無漂移；50 cells；policy30 g7/l6、once20 g7/l4、r2w0、current vs 獨立 50/50）——與 11-06 #6 口徑一致；r1237 各陳述無引用此檔→**無需改數**，交付物不變。
-## 邊界與紅線
-- **G3 未發射**：待人類定案（/srv/vlab/queue 空）；不新開工單、不碰 main、不發射大成本實驗。
-- 不讀 /srv/eval hidden 與 scorer.py；本輪 0 模型呼叫；成本缺值 UNKNOWN、cost_usd=0 不報 0 成本。
+## redo 接地（审查点名 3 檔未開啟 → 本轮全部实读＋核对）
+- `g25_all_gates_filing.json`（blob `4b24cd5b`，116 行，全读）：vq-el4.14 / round 1228，
+  generated 2026-11-08T05:01:59+00:00，head d826f5b5（auto/argon）；**三门全 PASS**
+  （G1 39/39・0 冤枉；REAL14 9/9・0 冤枉・errors 0；PHASE3 errors 0、fixed 7、unresolved 2）；
+  sources（phase1/2/3.json）与 code（extract/checks/run_eval sha256）均入档。
+- `effects_20261105_summary.json`（blob `856c2c71`，60,228 B，python 载读）：
+  policy30 g7·l6（localized tokens_true 17,385,851）、once20 g7·l4（localized 13,293,271）
+  ——与 r1244 redo2 重算值一致；scope_note＝开发选样/单 rep/缺值 None（hidden_after 全 UNKNOWN）。
+- `build_g25_all_gates_filing.py`（blob `23dac11c`，205 行）：fail-closed builder
+  （三门任一未过或 raw 缺值 → exit 2，不写「达标」备案）。
+- 锚点（本轮实测，三分支 qwen27b/argon/worker 同 blob）：repair `5147f8c3`/2,795 行、
+  extract `e757aec5`/1,217 行、g3gate `0d90f166`。**收回**上下文沿用的「g3gate 6f93f4e5」
+  锚点（与当前文件不符，本轮未验证前不重复该声明）。
 
-## 下一步
-巡 CI（argon dd978829／qwen27b a364b2cc，頭報還沒跑完）→🟢 後：`git merge --no-edit auto/argon`（ff 至 e847c56e）＋兩測試檔驗收（預期 53 passed）＋`git ls-tree HEAD -- vacant_network/reqloop/repair.py` 錨點重驗＋簿記 commit；之後續等 G3 人類核准。
+## 环境异常（待人类检查，勿自行修复）
+- 时钟在本轮中途回跳约 6h47m（14:41→07:5x UTC）。
+- `ops/loop/STATE.md` 历史丢失（现仅本轮一条；未入 git，无本地备份可恢复）。
+- ops 工作区 git status 大量 ` D`（ci/*.json、effects2_20261106 等）——非本轮所为。
+
+## 红线（未动）
+G3 未發射｜0 模型呼叫｜未入队｜main 未动、未 push｜未读隐藏分卷｜repair/extract 冻结未破｜
+CI 未轮询（280eda92 运行中，下轮头看一次）。
