@@ -183,3 +183,7 @@
 - ③ Effects 856c2c71（代码打开）：snapshot d38d2eb2、cells 50、local 45/current 50（mismatch 3+2=5 自洽）；policy30 g7・l6、once20 g7・l4、tokens 16,284,659/17,385,851/6,210,682/13,293,271、api 915=365+550、457=165+292、r2w=0 全 MATCH。
 - ④ 口径修正：summary 文件**无** `hidden_after_independent` 字段；「跑後隱藏評分全 UNKNOWN」＝原始 g2_result.json 的 `after_hidden`（50/50 UNKNOWN、phase 级同，非"45 cells"）；独立（可见）scorer 实评全 50（status=scored、34 pass/16 fail＝summary `after_independent` 布尔）。r1245 redo 行按此读。
 - ⑤ 历史行（r1242 "still 4/10・5/10"）在独立口径下仅 policy30-localized still=4 可复现、once20 无单一口径=5→历史不动、不再前带；今后引 g7/l6・g7/l4＋tokens/api。
+
+## r1246 redo2（2026-11-08 ~09:0x UTC）：审查点名 293,271（＝ once20 localized tokens_true 13,293,271 之尾部）重算
+- ① 从 effects_20261105_summary.json 一条命令重算：per_arm.localized.tokens_true＝13293271；cells_detail(arm=localized) 逐格加总＝13293271；双法一致 → r1246 redo ③ 与 NOW.md 的 "13,293,271" 即该重算值（13293271），无漂移。
+- ② 改动仅限：NOW.md redo 行内注记（13,293,271 后加双法重算注）＋本条重算记录；历史行（r1238/r1240/r1242 redo，L130/134/149）不动。
