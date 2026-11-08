@@ -2,11 +2,11 @@
   "schema": "vacant.filing/g25_all_gates/1",
   "ticket": "vq-el4.14",
   "round": 1228,
-  "generated_at": "2026-11-08T02:08:00+00:00",
+  "generated_at": "2026-11-08T05:01:59+00:00",
   "purpose": "資深審查 2026-11-08 指示 #1：確認 G2.5 全三項門禁整合達標並備案",
   "git": {
-    "head": "9a26445fe37d98cab5e6cb772608bd857c90b1d4",
-    "branch": "auto/qwen27b"
+    "head": "d826f5b52f00fcec6757f0a6a5f80d6eb7b8e103",
+    "branch": "auto/argon"
   },
   "gates": {
     "g1_rerun": {
@@ -74,15 +74,15 @@
   },
   "sources": {
     "phase1": {
-      "path": "/home/user1/dev/Vacant/ops/reqloop/extract/out/all/phase1.json",
+      "path": "/home/user1/dev/wt/argon/ops/reqloop/extract/out/all/phase1.json",
       "sha256": "3c6fb35a0cb4723cd88a523d88636de2f2c1f0340e3625a0f1dacfcd859fae0d"
     },
     "phase2": {
-      "path": "/home/user1/dev/Vacant/ops/reqloop/extract/out/all/phase2.json",
+      "path": "/home/user1/dev/wt/argon/ops/reqloop/extract/out/all/phase2.json",
       "sha256": "6b7cb83139beb03cdaa64afa6d908fe4af9b87f4c7ffddc479d60297b4a2dd40"
     },
     "phase3": {
-      "path": "/home/user1/dev/Vacant/ops/reqloop/extract/out/all/phase3.json",
+      "path": "/home/user1/dev/wt/argon/ops/reqloop/extract/out/all/phase3.json",
       "sha256": "ada235bbf50c25491b650018d67be8cec67ad460546fa42ee137882516d07049"
     }
   },

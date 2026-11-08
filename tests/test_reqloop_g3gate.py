@@ -128,10 +128,10 @@ def test_check_budget_accepts_frozen_plan():
     g3.check_budget(_loaded())
 
 
-def test_check_budget_rejects_over_cell_cap():
+def test_check_budget_rejects_over_cell_cap(tmp_path: pathlib.Path):
     plan = _loaded()
     bad = {**plan.raw, "budget": {**plan.budget, "max_cells": 5}}
-    p = _tmp_manifest(bad)
+    p = _tmp_manifest(tmp_path, bad)
     try:
         g3.check_budget(g3.G3Plan.load(p))
     except ValueError:
@@ -139,11 +139,11 @@ def test_check_budget_rejects_over_cell_cap():
     raise AssertionError("12 格超上限必須拒")
 
 
-def test_check_budget_rejects_missing_daily_cap():
+def test_check_budget_rejects_missing_daily_cap(tmp_path: pathlib.Path):
     plan = _loaded()
     bad = {**plan.raw, "budget": {k: v for k, v in plan.budget.items()
                                   if k != "daily_token_cap"}}
-    p = _tmp_manifest(bad)
+    p = _tmp_manifest(tmp_path, bad)
     try:
         g3.check_budget(g3.G3Plan.load(p))
     except ValueError:
@@ -151,10 +151,10 @@ def test_check_budget_rejects_missing_daily_cap():
     raise AssertionError("缺日 token 上限必須拒（fail-closed）")
 
 
-def test_check_budget_rejects_wrong_entry():
+def test_check_budget_rejects_wrong_entry(tmp_path: pathlib.Path):
     plan = _loaded()
     bad = {**plan.raw, "budget": {**plan.budget, "model_entry": "vibe"}}
-    p = _tmp_manifest(bad)
+    p = _tmp_manifest(tmp_path, bad)
     try:
         g3.check_budget(g3.G3Plan.load(p))
     except ValueError:
@@ -162,13 +162,30 @@ def test_check_budget_rejects_wrong_entry():
     raise AssertionError("模型入口不是 glm 必須拒")
 
 
-def _tmp_manifest(raw: dict) -> pathlib.Path:
-    import tempfile
-    d = pathlib.Path(tempfile.mkdtemp(prefix="g3gate_"))
-    (d / "tasks").mkdir()
+def _tmp_manifest(tmp_path: pathlib.Path, raw: dict) -> pathlib.Path:
+    d = tmp_path / f"manifest_{abs(hash(json.dumps(raw)))}"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "tasks").mkdir(exist_ok=True)
     p = d / "manifest.json"
     p.write_text(json.dumps(raw), encoding="utf-8")
     return p
+
+
+def test_no_leftover_temp_directories_in_tmp(tmp_path: pathlib.Path):
+    """_tmp_manifest 不得在 /tmp 根建立 g3gate_* 洩漏目錄。
+
+    r1240 hermetic 修正：舊版斷言 /tmp「絕對乾淨」，但 ci.sh 以共享 worktree 依
+    qwen27b→argon→worker 順序跑各分支 HEAD——同一輪 qwen27b 的舊 mkdtemp 版測試先跑，
+    殘留 /tmp/g3gate_* 會誤傷 argon 的守衛（e847c56e 實測：1 failed, 5052 passed）。
+    改為前後集合差：只在「本 helper 新建洩漏」時失敗，不受既有殘留影響；
+    對 mkdtemp 回歸的偵測力不變（負控：還原 mkdtemp 版 _tmp_manifest 時本測試必紅）。
+    """
+    import glob
+    baseline = set(glob.glob("/tmp/g3gate_*"))
+    p = _tmp_manifest(tmp_path, {"hermetic_guard": True})
+    assert p.is_file()
+    new = set(glob.glob("/tmp/g3gate_*")) - baseline
+    assert not new, f"_tmp_manifest 在 /tmp 根新建洩漏目錄：{sorted(new)}"
 
 
 # ── 核准門（fail-closed）─────────────────────────────────────────────

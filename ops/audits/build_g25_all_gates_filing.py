@@ -19,7 +19,7 @@ import pathlib
 import subprocess
 import sys
 
-REPO = pathlib.Path("/home/user1/dev/Vacant")
+REPO = pathlib.Path(__file__).resolve().parents[2]
 RAW = REPO / "ops/reqloop/extract/out/all"
 OUT = REPO / "ops/audits/g25_all_gates_filing.json"
 

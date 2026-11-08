@@ -7,6 +7,7 @@ cell 集合推導只讀 effects2_20261106 的 before_after.json（非本批的 h
 import json
 import pathlib
 import re
+import subprocess
 import sys
 
 import pytest
@@ -922,3 +923,27 @@ def test_run_eval_all_option(tmp_path, capsys, monkeypatch):
     assert rc == 20, out
     assert "fail-closed" in out
     assert out.strip().splitlines()[-1] == "❌ G2.5 全三項門禁整合驗收：FAIL（未過：G1 重跑）", out
+
+
+def test_build_g25_all_gates_filing_worktree_isolation(tmp_path: pathlib.Path):
+    """備案構建腳本必須動態依循當前 worktree，禁止硬寫 /home/user1/dev/Vacant。"""
+    repo = pathlib.Path(__file__).resolve().parents[1]
+    builder_py = repo / "ops" / "audits" / "build_g25_all_gates_filing.py"
+    assert builder_py.is_file(), "build_g25_all_gates_filing.py 檔案必須存在"
+    raw_text = builder_py.read_text(encoding="utf-8")
+    assert 'REPO = pathlib.Path("/home/user1/dev/Vacant")' not in raw_text, (
+        "build_g25_all_gates_filing.py 不得寫死 /home/user1/dev/Vacant"
+    )
+
+    # 執行構建，輸出到 tmp_path
+    out_file = tmp_path / "filing.json"
+    res = subprocess.run(
+        [sys.executable, str(builder_py), "--out", str(out_file)],
+        cwd=str(repo), capture_output=True, text=True,
+    )
+    assert res.returncode == 0, res.stderr
+    assert out_file.is_file()
+    doc = json.loads(out_file.read_text(encoding="utf-8"))
+    assert doc.get("schema") == "vacant.filing/g25_all_gates/1"
+    for phase_key, src in doc.get("sources", {}).items():
+        assert str(repo) in src["path"], f"{phase_key} 來源路徑必須基於當前 repo"
