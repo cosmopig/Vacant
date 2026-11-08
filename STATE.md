@@ -169,3 +169,10 @@
 - ③ g25_all_gates_filing.json（code 開啟，blob 4b24cd5b，round 1228、ticket vq-el4.14）：g1 39/39·false0 PASS（41 呼叫/328,550 tok）、real14 9/9·0/5 PASS（74/732,826）、phase3 fixed7·unres2·r2w0 PASS（sessions15·calls275·tok15,087,278）；三 code sha256（extract 51abfec3、checks c7589c61、run_eval 332cd324）對現樹重算全 MATCH。
 - ④ 結論：r1244 巡燈依賴陳述（三門 PASS、vq-el4 18/18、effects 數字）全部接地於此三檔→數字與文案零改動；「未開」缺口已補。
 - ⑤ 紅線不變：queue 空・0 模型呼叫・main 未動・不自 push・G3 未發射。
+
+## r1246（2026-11-08 ~08:3x UTC）：审查清单 #1–#5 收口＋抓到 worker 3 个空测试（派工单）
+- ① 审查#1：e847c56e/dd978829 已在 qwen27b（r1242 ab3b6a67）；验收重跑 53 passed（0.56s）；/tmp 无 g3gate_*（rc=2）。#3：frozen_anchors 3 passed；repair 2795/5147f8c3、extract 1217/e757aec5。#4/#5：0 模型呼叫（vibe 末条 11-07T18:35Z）、queue 空、G3 未發射、main 未动（c097899e）。
+- ② 真缺陷：tests/test_reqloop_g2_negative.py 仅 worker 有（3 测试体全 pass 零断言、WIP d3a8d1da 引入）→ worker CI 5056/5129＝5053/5126＋3 恒真；g2.py worker=4168a580 旧 docstring vs canonical 0e7a679d（qwen27b/argon＝247309e4；b45a6fb1 合并留旧版）。
+- ③ 工单 R20261108_0826-1-sync-worker-drop-vacuous-tests（bd vq-ssk；0 模型呼叫；验收：worker↔qwen27b 产品/测试 diff 0 文件、worker CI 5053/5126、g2.py blob 0e7a679d）。
+- ④ 未验证：qwen27b d56d6ecc／argon 5fb3d00a CI 燈（未轮询，下轮查一次）；环境异常（时钟回跳 6h47m、ops 大量 D）待人类。
+- 下一步：r1247 审助手 worker commit＋一次 CI 查燈；G3 仍待人类核准。
