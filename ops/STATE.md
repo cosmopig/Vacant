@@ -311,3 +311,10 @@
 1. 重算命令（effects_20261105_summary.json，load in code）：policy30 **16,284,659 + 17,385,851 = 33,670,510**＝存档总 33,670,510 OK；feedback_once20 **6,210,682 + 13,293,271 = 19,503,953**＝存档总 19,503,953 OK。
 2. 对质：STATE.md 第 306 行（r1255 redo 條③）「tok 33,670,510/19,503,953」即该重算值（19,503,953＝6,210,682+13,293,271＝存档 tokens_true_total）→零修正、仅追加本条；同数在 r1246/r1248 redo2/r1254 redo 条均有同一重算轨迹。
 3. 红线未动：0 模型呼叫（纯文件读＋本地重算）·0 写入副作用（仅本条簿记）·G3 未发射·queue 空·main c097899e 未动未 push。
+
+## 2026-11-08 r1256（11:51–12:0x UTC）：守线轮——審查五指示全數新鮮複驗＋新發現（in-scope diff 0→2＝僅簿記）（0 模型呼叫）
+1. 審查#1 錨點：tests/test_reqloop_frozen_anchors.py **3 passed**（0.34s；repair.py 5147f8c3/2795 行＋extract.py e757aec5/1217 行冻结）。
+2. 審查#2 對齊：`git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops`＝**2**（r1254 验收時＝0）——2 檔＝ops/STATE.md＋ops/loop/NOW.md，117 差異行全為逐輪簿記（worker 側 r1253 舊鏡像、main 側 r1255）；產品碼（vacant_network/tests/ops 碼）diff＝**0**→無碼漂移（验收後 main 4 個純簿記 commit 推進 journal 所致；journal 每輪必再分叉）；不同步 worker/argon 分支（11-05 禁進度同步代替功能進展＋審查「無 argon 合併」）。
+3. 審查#3 單一事實源：3 code sha256 MATCH（51abfec3/c7589c61/332cd324）；run_eval --all 新鮮 **PASS** RC 0（G1 39/39·FP0／REAL14 9/9·0/5／PHASE3 fixed7·unresolved2·r2w0·err0；RESUMED progress.json、0 新增呼叫）；out/phase1-3.json 與 filing sources 逐字節一致（3c6fb35a/6b7cb831/ada235bb）。
+4. 審查#4/#5：vibe_calls 130 行末條 11-07T18:35Z＝0 呼叫；g3gate --plan RC 0（12 格冻结、NOT FIRED）＋--fire **RC 2** fail-closed 0 呼叫（首讀 RC=0 係 `| tail` 取 tail 退出碼之 pipe 假象，重核修正）；queue 空；無 G3 工單；vq-el4 20/20 closed。
+5. CI：輪首 qwen27b e85eceaf 仍 running（argon/worker 🟢）；本機無 gh CLI、CI 每輪至多點名一次→記錄不乾等；紅燈＝下輪例外。紅線：main c097899e 未動未 push／未讀 hidden·scorer／未 reset·rebase·branch -f。
