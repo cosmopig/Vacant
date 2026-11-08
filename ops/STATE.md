@@ -371,3 +371,10 @@
 2. effects_20261105_summary.json 直接開啟：**60,228 B**、blob **856c2c711c4649**（r1237 以來未變）、snapshot d38d2eb2、scope_note 明示開發選樣／單 rep／不宣稱 localized 優於 generic／缺值 None 不填 0／hidden_after 全 UNKNOWN；load in code 重算：policy30 w2r **g7/l6**（13）・pres g5/l5（10）・still g3/l4（7）・r2w 0/0・api 365/550（915）・tok 16,284,659/17,385,851（33,670,510）；once20 w2r **g7/l4**（11）・pres 0/0・still g3/l6（9）・api 165/292（457）・tok 6,210,682/13,293,271（19,503,953）——兩臂加總與 top-level 逐項一致。
 3. 對質：11-06 人類點名「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」＝本檔 w2r 逐項吻合；r1260 主條未引用本檔任何數字（三門出自行 run_eval 新鮮重算；9/9・7/9 對照基線是 g2-truth 手寫需求、非出自本檔）→**零更正**、r1260 結論不受影響。
 4. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記＋鏡像）・G3 未發射・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
+
+## 2026-11-08 r1261（13:xx UTC）：審查#3 filing code sha 守衛機械化＋四項新鮮複驗（0 模型呼叫）
+1. 交付（工單 vq-el4.21）：tests/test_reqloop_frozen_anchors.py 新增 filing_code_violations()＋2 測（filing code 3 sha vs repo 100% 吻合綠燈＋漂移負控制）→pytest 3→5 passed；「code hash 100% 吻合」由每輪人工重算改為機器直接變紅（同 r1245 blob 錨點紀律；sources 段在 argon worktree、仍人工核）。
+2. 新鮮複驗：reqloop 相關 353 passed（無產品真 bug）；run_eval --all RC 0 三門 PASS（G1 39/39·FP0／REAL14 9/9·0/5／PHASE3 fixed7·u2·r2w0·err0；RESUMED 0 新呼叫）；filing 6 sha 重算全 MATCH（sources 3c6fb35a/6b7cb831/ada235bb＋code 51abfec3/c7589c61/332cd324）。
+3. 審查#1/#2：anchors 5 passed×3 分支（qwen27b/worker/argon worktree 各實跑）；argon ff 對齊 qwen27b 新 HEAD；worker 4 檔同步（守衛測試＋ops/STATE.md＋ops/loop/NOW.md）後 git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops＝0。
+4. 未驗證：本 commit 與 worker/argon 新 SHA 的 CI 燈（輪首巡一次：qwen27b 70926581、worker bc5361aa 均 running、無紅；本機無 gh、不乾等）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准、queue 0）。
+5. 下一步：三分支新 SHA CI 燈各巡一次（紅燈＝例外才動）；G3（vq-1zf）續候人類明確核准；frozen 4 檔或 filing 任何變動→新守衛直接紅燈即例外處理。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
