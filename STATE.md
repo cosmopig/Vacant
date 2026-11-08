@@ -33,3 +33,10 @@
 - ④ 沒驗證：GitHub Actions（無 admin＝基建）；全量 pytest（vacant-ci 職掌）；G3 未派工不發射。
 - 工單 vq-el4.16 close；下一步＝等審查派工 G3（不自發射大成本）、不改 repair.py／G1 requirements.json／凍結快照。
 - ⑥ redo（審查點名 effects_20261105_summary.json 本輪原未開→現補開＋接地）：python json 加載——**60,228 B**、mtime 2026-11-05 11:25:56+0000、git 乾淨（blob 856c2c71、最後改動 **26f23af5** argon 已核准）；schema vacant.audit/effects_20261105_summary/1、snapshot d38d2eb21d7f…、**50 cells**；policy30(30)：generic w2r **7**（still 3、preserved 5、365 calls／16,284,659 tok）／localized **6**（still 4、preserved 5、550／17,385,851）、r2w 0；feedback_once20(20)：generic **7**（still 3、preserved 0、165／6,210,682）／localized **4**（still 6、preserved 0、292／13,293,271）、r2w 0；**current_code_vs_independent_mismatches 兩相皆 []**（local 45→current 50，5 格分歧全出於 d38d2eb2 舊 checker）；scope_note＝開發選樣單 rep、不宣稱任一臂優、無硬 token 上限、缺值＝UNKNOWN 不填 0、hidden_after 全 UNKNOWN、repair_sessions 與 API 請求數嚴格分開——與提示 11-06 #6 及 r1227 ⑤a 接地**逐項一致、無矛盾**，本輪無依賴該檔的數字需改。
+
+## r1231（2026-11-08 03:3x UTC）：CI 巡燈——620b4336 🟢 5036/0 核過；69700c66＝純簿記待 loop CI；G3 epic 備案（零成本、待核准）
+- ① CI：qwen27b HEAD 69700c66 未測（loop CI 03:20 剛收工、state idle、下個 10 分 cycle ~03:30 起跑、~03:44 完）；loop 已收工的 **620b4336 🟢 5036 passed/0 failed/5109 collected**（ci/620b4336….json＋log pytest_rc=0 雙核）；69700c66 vs 620b4336 diff＝NOW.md+1／STATE.md+1（git diff --stat、產品 diff 0）→620b4336 綠即分支產品碼態之證；argon fecd8657 🟢、worker 80947934 🟢 不變。
+- ② GitHub Actions：gh CLI 不存在（command not found）、無 admin→狀態不可查＝基建（與 11-07 stalled 記憶一致）；.github/workflows 未動。
+- ③ 產品真 bug 掃（reqloop 9 檔、工單例外範圍）：無 TODO/FIXME；UNKNOWN/fail-closed 語義健全（checks.py 原始輸入缺失→UNKNOWN、extract.py client 例外→空集＋rc≠0 ExtractError 不重試、g2.py 空集 vacuous-pass 防護）；repair.py 凍結未動、extract.py 邊界未動、0 模型呼叫。
+- ④ G3 準備（審查指示#5、零成本零執行）：epic **vq-1zf** 建成——三臂（原生 pi／僅需求清單／完整 R-loop）×≤4 未見任務、≤12 格、每輪 300s、glm 唯一入口≤2M tok/day fail-closed、評分＝/srv/vlab 既有 scorer、四類分報＋成本缺值 UNKNOWN、hidden_after UNKNOWN、核准前禁發射。
+- ⑤ 沒驗證：69700c66 CI 燈（下輪巡→應🟢、紅燈優先修）；全量 pytest（vacant-ci 職掌）。vq-el4.17 留 open（下輪綠→close）；下一步＝巡 69700c66＋等 G3 核准（vq-1zf）。
