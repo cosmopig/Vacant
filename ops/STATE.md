@@ -292,3 +292,10 @@
 3. 內部一致性（本輪新增驗證，存檔未直接核過）：cells_detail 逐格按臂加總＝per_arm 節（api/tok 4/4 全 match）；per_arm 和＝phase 總（365+550=**915**、165+292=**457**、tok 33,670,510／19,503,953）；local_vs_independent_mismatches **3+2**。
 4. 依賴核對：r1254 交付物 grep 引用本檔數字＝**0**（STATE r1254 條／commit 3f90671d 訊息／NOW.md／工单 1034-1 驗收皆 0 hit）→本輪依賴該檔的產出＝0→**零更正**；r1254 結論（工单 4/4 收口＋三門 PASS＋filing 重算復現）不依賴本檔。
 5. 紅線未動：0 模型呼叫（純檔案讀取＋本地重算）·0 寫入副作用（git 乾淨）·G3 未發射·queue 空。
+
+## 2026-11-08 r1255（11:29–11:4x UTC）：三分支全绿收口＋G3 前置門雙負控＋單一事實源複核（0 模型呼叫）
+1. **CI 收口（本輪點名步驟）**：qwen27b@3f90671d 🟢 5056 passed/5129 collected（854.97s、pytest_rc 0、failures []）＋argon 同树 3f90671d 🟢＋worker@05537a84 🟢→**三分支全绿**（輪首 1/3 绿＋2 running→11:36 全绿）。qwen27b HEAD f7e05d06 系 3f90671d 之上纯簿记（4 文件 NOW/STATE 镜像、0 代码/0 测试改动）→绿灯完整覆盖代码态。
+2. **G3 前置門雙控（本輪新增驗證）**：`g3gate --plan` RC 0（12 格 dab_129/144/176/216×3 臂、verify_frozen OK、budget OK、NOT FIRED）；`g3gate --fire` 負控 RC 2 fail-closed、0 呼叫；RLOOP_PLAN 無核准標記→G3 續候人類明確核准，未發射、未入 queue。
+3. **單一事實源複核**：filing g25_all_gates_filing.json 三 code sha256 重算全 MATCH（51abfec3/c7589c61/332cd324，file-SHA256 口徑；本輪先誤以 git-blob-SHA1 比對出「假警報」、換對口徑後全 MATCH→存檔零出入）；anchors 3 passed（extract.py e757aec5/1217 行、repair.py 5147f8c3/2795 行冻结）；G2.5 三門 r1254 已新鮮離線重算 PASS、本輪 0 代码改動→引用仍成立、不重複重算。
+4. 未驗證：f7e05d06（纯簿记 commit、在灯後）自己的 CI 灯——下轮 loop CI 覆盖；代码树已被 3f90671d 绿灯完整覆盖。
+5. 红线未动：0 模型调用（vibe_calls 130 行、末条 11-07T18:35Z）·queue 空·tickets open/doing 空·main c097899e 未动未 push·未读 hidden/scorer·CI 本轮仅 1 次点名（同一在途 run 监控至绿、3 次有界检查）。
