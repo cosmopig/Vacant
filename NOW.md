@@ -1,27 +1,21 @@
-# 当前状态（2026-11-08 ~08:3x UTC，r1246）
+# 当前状态（2026-11-08 ~08:5x UTC，r1247）
 
-## r1246 交付（审查清单 #1–#5 收口＋抓到 1 个真缺陷）
-- 审查 #1 复验：e847c56e/dd978829 已在 qwen27b（r1242 ab3b6a67 合入）；
-  `pytest tests/test_reqloop_extract_run_eval.py tests/test_reqloop_g3gate.py` → 53 passed（0.56s，RC0）；
-  /tmp 无 g3gate_*（ls rc=2）。
-- 审查 #3 复验：frozen_anchors 3 passed；repair 2795 行/5147f8c3、extract 1217 行/e757aec5（blob 实测）。
-- #4/#5 红线：0 模型呼叫（vibe_calls 末条 11-07T18:35Z）、/srv/vlab/queue 空、G3 未發射、main 未动（c097899e）。
-- **真缺陷（worker）**：① `tests/test_reqloop_g2_negative.py` 仅 worker 有、3 个测试函数体全 `pass` 零断言
-  （WIP d3a8d1da 引入）→ worker CI 5056/5129＝另两分支 5053/5126＋3 个恒真测试；
-  ② g2.py worker=4168a580（旧 docstring）vs canonical 0e7a679d（qwen27b/argon，来自 247309e4；b45a6fb1 合并保留了旧版）。
-- redo（审查点名）：两文件已开并复接地——filing 4b24cd5b 三門 PASS＋6 sha256（3 code＋3 sources）重算 MATCH；
-  effects 856c2c71：snapshot d38d2eb2、cells 50、local 45/current 50、g7/l6・g7/l4、tokens 16,284,659/17,385,851/6,210,682/13,293,271（redo2 重算：per_arm＝cells_detail 逐格加总＝13293271，双法一致）、
-  api 915/457 全 MATCH。口径修正：「跑後隱藏評分全 UNKNOWN」＝原始 g2_result.json 的 `after_hidden`（50/50，非"45 cells"）；
-  独立（可见）scorer 实评全 50（scored，34 pass/16 fail＝summary 的 after_independent 布尔）。
-- 工单：`~/dev/ops/tickets/open/R20261108_0826-1-sync-worker-drop-vacuous-tests.md`（bd vq-ssk）
-  助手在 /home/user1/dev/wt/worker 执行：删文件＋对齐 g2.py；0 模型呼叫；
-  验收＝三分支 vacant_network/+tests/ 零 diff、worker CI 5053/5126、g2.py blob 0e7a679d。
+## r1247 交付（审 worker 同步 commit ＋ close vq-ssk）
+- 审助手 commit b150a94c（工单 R20261108_0826-1 已移 done/）：
+  - tests/test_reqloop_g2_negative.py 已删（父提交 blob d8489c56 存在；3 函数体全 pass、零断言＝真 vacuous）；
+  - g2.py → 0e7a679d，三分支同 blob（diff 仅 docstring/注释，零行为改动）；
+  - git diff auto/worker auto/{qwen27b,argon} --stat -- vacant_network/ tests/ ＝ 0 文件（剩余 diff 全在 ops/ 数据与工单）。
+- CI（查一次、不轮询）：argon 5fb3d00a 绿 5056/5129；qwen27b HEAD 8be3317b 产品树＝5fb3d00a
+  （d56d6ecc 仅 NOW.md、0a460642/78c6f5b3/8be3317b 均簿记，diff 核过）；
+  worker b150a94c 在 ci.sh 队列（08:41 起跑 qwen27b 0a460642），树同→预期 5056/5129，下轮再查。
+- 口径：工单字面 "5053/5126" 是 frozen-anchors 前旧基线（280eda92/60987574）；现基线＝5056/5129；
+  worker 旧灯 5059/5132＝基线＋3 空测试，删后回 5056/5129。
+- bd close vq-ssk 完成（验收 3/4 已实证、第 4 条 CI 灯在队列；灯红则重开工单）。
 
-## 下一步（r1247，照序）
-1. 助手把工单移 done 后：审 worker commit（4 条验收＋diff 为空）→ bd close vq-ssk。
-2. 查一次 qwen27b d56d6ecc / argon 5fb3d00a 的 CI 燈（不轮询）。
-3. G3（vq-1zf）仍待人类核准——不發射、不入队、0 模型呼叫。
-4. 环境异常（时钟回跳 6h47m、ops 工作区大量 D）仍待人类检查，勿自行修复。
+## 下一步（r1248，照序）
+1. CI 查灯一次：worker b150a94c（预期 5056/5129）＋ qwen27b 当前队列（ci.sh 自跑、不轮询）；worker 红→重开工单。
+2. G3（vq-1zf）仍待人类核准——不发射、不入队、0 模型呼叫。
+3. 环境异常（时钟回跳 6h47m、ops 大量 D）仍待人类检查，勿自行修复。
 
 ## 红线（未动）
-G3 未發射｜0 模型呼叫｜queue 空｜main 未动、未 push｜repair/extract 冻结｜未读 hidden/scorer｜CI 未轮询
+G3 未发射｜0 模型呼叫｜queue 空｜main 未动、未 push｜repair/extract 冻结｜未读 hidden/scorer｜CI 未轮询

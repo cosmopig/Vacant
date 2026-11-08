@@ -187,3 +187,10 @@
 ## r1246 redo2（2026-11-08 ~09:0x UTC）：审查点名 293,271（＝ once20 localized tokens_true 13,293,271 之尾部）重算
 - ① 从 effects_20261105_summary.json 一条命令重算：per_arm.localized.tokens_true＝13293271；cells_detail(arm=localized) 逐格加总＝13293271；双法一致 → r1246 redo ③ 与 NOW.md 的 "13,293,271" 即该重算值（13293271），无漂移。
 - ② 改动仅限：NOW.md redo 行内注记（13,293,271 后加双法重算注）＋本条重算记录；历史行（r1238/r1240/r1242 redo，L130/134/149）不动。
+
+## r1247（2026-11-08 ~08:5x UTC）：审 worker 同步 commit b150a94c＋close vq-ssk；三分支产品树归一
+- ① 验收4条：① test_reqloop_g2_negative.py 已删（父提交 b45a6fb1 有 blob d8489c56；3 函数体全 pass、零断言＝真 vacuous，删得对）；② g2.py＝0e7a679d 三分支同 blob（diff 仅 docstring/注释、零行为改动）；③ git diff auto/worker auto/{qwen27b,argon} --stat -- vacant_network/ tests/ ＝0 文件（全树残留 diff 全在 ops/ 数据与工单，不進 pytest tests/ 收集）；④ worker b150a94c CI 在 ci.sh 队列（08:41 起跑 qwen27b 0a460642），预期 5056/5129。
+- ② CI 查灯（一次、不轮询）：argon 5fb3d00a 绿 5056/5129（LATEST）；qwen27b HEAD 8be3317b 产品树＝5fb3d00a（d56d6ecc 仅 NOW.md、0a460642/78c6f5b3/8be3317b 均簿记，diff 核过）；worker 旧灯 5059/5132＝基线＋3 空测试。
+- ③ 口径：工单字面 "5053/5126" 为 frozen-anchors 前旧基线（280eda92/60987574 两灯 5053/5126 实证）；现基线 5056/5129；删 3 空测试后 worker 应回 5056/5129。
+- ④ bd close vq-ssk 完成（reason 含 4 条验收＋"灯红则重开"）；bd ready 仅剩 vq-1zf（G3 待人类核准）。
+- ⑤ 未验证：worker b150a94c 与 qwen27b 队列 CI 灯（ci.sh 自跑、下轮查一次）；红线：G3 未发射・0 模型呼叫（vibe 末条 11-07T18:35Z）・queue 空・main 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
