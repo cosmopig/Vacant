@@ -10,6 +10,9 @@
   → 整合 PASS。vibe_calls 仍 130 行（末条 11-07T18:35Z）。
 - 锚点守护新鲜：test_reqloop_frozen_anchors 3 passed（repair.py 5147f8c3／extract.py e757aec5）。
 - vq-el4 全 18 项 closed；bd ready 仅 vq-1zf（G3，待人类核准）。
+- redo（审查点名 3 文件已开）：repair.py 2795 行 blob 5147f8c3／extract.py 1217 行 blob e75aec5＝锚点直接一致；
+  effects_20261105_summary.json 代码打开（blob 856c2c71 未变、snapshot d38d2eb2、w2r g7/l6・g7/l4、
+  tokens 4 项、api 365/550・165/292 与历史引文全一致）；r1249 数字零依赖该文件→零修正。
 
 ## 下一步（r1250，照序）
 1. 查 qwen27b e54b4850 灯一次（预期 🟢 5056/5129）；绿→三分支全绿收口，红→重开工单。

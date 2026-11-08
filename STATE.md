@@ -228,3 +228,10 @@
 - ③ G2.5 三門新鮮離線複驗 run_eval.py --all EXIT=0：G1 39/39・冤枉 0；REAL14 9/9・冤枉 0/5；PHASE3 fixed 7/unresolved 2/退步 0/error 0→整合 PASS；0 新增模型呼叫（vibe_calls 130 行未变、git 工作树 0 改动）。
 - ④ 锚点守护新鲜 3 passed；vq-el4 全 18 项 closed、bd ready 仅 vq-1zf（G3 待人类核准）。
 - ⑤ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
+
+## r1249 redo（2026-11-08 ~09:3x UTC）：审查点名 3 文件已开＋依赖数字复核
+- ① repair.py 已开：2795 行、blob 5147f8c3ea1b5e...＝冻结锚点（test_reqloop_frozen_anchors 同 path＋blob 固化）；extract.py 已开：1217 行、blob e757aec50c16...＝锚点→r1249 ④／NOW 的 blob 引文直接接地。
+- ② effects_20261105_summary.json 代码打开：60,228 B、blob 856c2c711c...（r1244 redo 锚点未变）、snapshot_sha d38d2eb2、cells 50/45/50、per-arm w2r g7/l6・g7/l4、tokens 16,284,659/17,385,851/6,210,682/13,293,271、api 365/550・165/292、mismatch 3+2=5→与历史引文全一致。
+- ③ 依赖审查：r1249 各条数字（worker 灯／qwen27b diff／G2.5 三门／锚点 blob／vq-el4／红线）无一出自该文件——run_eval.py 不引用它（全 repo grep：引用方为 effects2_20261106_analyze.py、effects_20261105_summary.py、g3_gate/manifest.json、test_reqloop_review_r1169.py，无 run_eval.py）→零依赖、零修正。
+- ④ 新接地：test_reqloop_review_r1169.py 固化该文件 schema（vacant.audit/effects_20261105_summary/1）→该文件完整性在 CI 5056/5129 套内被覆盖。
+- ⑤ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
