@@ -80,3 +80,6 @@ bd.db
 # They would override fork protection in .git/info/exclude.
 # Config files (metadata.json, config.yaml) are tracked by git by default
 # since no pattern above ignores them.
+
+# 20261107 r1211: embeddeddolt 可能是指向 ~/dev/ops/.beads/embeddeddolt 的 symlink（共享 vq 庫）；忽略非目錄形式
+embeddeddolt

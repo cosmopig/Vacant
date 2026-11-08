@@ -1199,6 +1199,35 @@ def test_kv_recomputed_pearson2_pass_and_fail(tmp_path: pathlib.Path):
     assert res["req_main"].status == "FAIL"
 
 
+def test_kv_recomputed_pearson2_annotated_point_estimate_dab057(tmp_path: pathlib.Path):
+    """vq-el4.10（dab_057 冤枉缺陷，r1222）：點估計＋信賴區間字串（'630308[495000-801000]'）
+    必須取前導點估計參與 pearson2，口徑與同檔 _mean_int_col 一致（其 docstring 明寫
+    「同 dab_057 口徑」）。舊碼靜默丟棄這類行，只在純數字子集合上算 r
+    （dab_057 實測：子集合 297/856 對 r=0.52 → 把正確答案 0.97 自信地 FAIL）。
+    此處為 dab_057 數據的迷你版：全量 5 對 r=0.993509→0.99 必須 PASS；
+    修前只剩 (0,0)×2 → 常數欄 → UNKNOWN（即本測試修前必紅）。"""
+    task_dir = tmp_path / "task"
+    _write(
+        task_dir / "est.csv",
+        "No. of cases,No. of deaths\n"
+        "630308[495000-801000],298[110-510]\n"
+        "4615605[3106000-6661000],13316[9970-16600]\n"
+        "32924[30000-36000],76[3-130]\n"
+        "0,0\n0,0\n",
+    )
+    params = {
+        "key": "corr",
+        "data_file": "est.csv",
+        "recompute": {"type": "pearson2", "col_a": "No. of cases",
+                      "col_b": "No. of deaths", "round": 2},
+    }
+    req_set = _req_set("kv_recomputed", params, "answer.txt")
+    good = tmp_path / "good"
+    _write(good / "answer.txt", "@corr[0.99]\n")
+    res = {r.claim_id: r for r in run_requirement_checks(task_dir, req_set, good)}
+    assert res["req_main"].status == "PASS"
+
+
 def test_kv_recomputed_pearson2_constant_column_is_unknown(tmp_path: pathlib.Path):
     task_dir = tmp_path / "task"
     _write(task_dir / "x.csv", "a,b\n1,5\n2,5\n3,5\n")

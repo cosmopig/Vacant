@@ -1745,6 +1745,10 @@ def check_kv_recomputed(
             expected = _max_row_first(rows, rc)
         elif rtype == "pearson2":
             # G2 小批（e013 dab_105）：兩欄成對可解析行（缺值行忽略）、Pearson r。
+            # vq-el4.10（r1222，dab_057 冤枉缺陷）：點估計＋信賴區間字串
+            # （'630308[495000-801000]' → 630308）取前導點估計參與計算，口徑同 _mean_int_col；
+            # 修前這類行被靜默丟棄，只在純數字子集合上算 r（dab_057 實測 297/856 對
+            # r=0.52 → 把全量 r=0.97 的正確答案自信地 FAIL）。
             col_a = str(rc.get("col_a", "")).strip()
             col_b = str(rc.get("col_b", "")).strip()
             if not col_a or not col_b:
@@ -1754,12 +1758,9 @@ def check_kv_recomputed(
             xs: list[float] = []
             ys: list[float] = []
             for r in rows:
-                try:
-                    x = float(str(r.get(col_a, "")).strip())
-                    y = float(str(r.get(col_b, "")).strip())
-                except (TypeError, ValueError):
-                    continue
-                if not (math.isfinite(x) and math.isfinite(y)):
+                x = _point_estimate(r.get(col_a, ""))
+                y = _point_estimate(r.get(col_b, ""))
+                if x is None or y is None:
                     continue
                 xs.append(x)
                 ys.append(y)
@@ -1974,6 +1975,24 @@ def _max_row_first(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     if not math.isfinite(out_v):
         raise UnknownSource(f"max_row_first: {out_col} 不可解析")
     return out_v
+
+
+def _point_estimate(cell: Any) -> float | None:
+    """數值欄位解析口徑（vq-el4.10，r1222；與 _mean_int_col 的 '200[10-30]' 處理同口徑）：
+    純數值原樣解析；附信賴區間的點估計字串取前導點估計
+    （'630308[495000-801000]' → 630308）；NaN/inf、空、不可解析 → None（呼叫方忽略該行；
+    成對不足仍由下游「可解析數值不足」門關住，不會靜默空集合）。"""
+    s = str(cell).strip()
+    if not s:
+        return None
+    try:
+        f = float(s)
+    except ValueError:
+        m = re.match(r"^([+-]?\d+(?:\.\d+)?)(?:\s*\[\s*\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?\s*\])?$", s)
+        if not m:
+            return None
+        f = float(m.group(1))
+    return f if math.isfinite(f) else None
 
 
 def _mean_int_col(
