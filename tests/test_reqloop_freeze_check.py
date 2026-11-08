@@ -129,3 +129,52 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
     mod.check_bookkeeping_now(repo)  # type: ignore[attr-defined]
     name, ok, detail = mod.results[-1]
     assert name == "bk_now" and ok is False and "vacuous" in detail.lower(), mod.results
+
+
+def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
+    """守衛測試「計數弱化」負控制（r1273）：審查指示 #1 點名「5 passed 守衛」與
+    「tests/test_reqloop_ci_contract.py（2 passed）嚴禁弱化」——rc=0 不等於「足額通過」：
+    守衛檔被削掉測試、剩下全綠時，freeze_check 若仍判 OK 即假綠燈（與 r1271/r1272
+    空對/空檔假綠同型，H-0：漏掉一項得到的綠燈就是漏洞成因）。必須證明抓得到。"""
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    tests_dir = repo / "tests"
+    tests_dir.mkdir(parents=True)
+
+    # (a) anchors 守衛檔 5 測被削成 1 測（剩餘全綠、rc=0）→ 必須 BROKEN
+    (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
+        "def test_weakened():\n    assert True\n", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_anchors(cwd=repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "anchors" and ok is False, mod.results
+
+    # (b) 足額 5 測全綠 → OK
+    (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
+        "\n".join(f"def test_t{i}():\n    assert True\n" for i in range(5)),
+        encoding="utf-8",
+    )
+    mod.results.clear()
+    mod.check_anchors(cwd=repo)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("anchors", True), mod.results
+
+    # (c) ci_contract 守衛檔 2 測被削成 1 測（剩餘全綠、rc=0）→ 必須 BROKEN
+    (tests_dir / "test_reqloop_ci_contract.py").write_text(
+        "def test_weakened():\n    assert True\n", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_ci_contract(cwd=repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "ci_contract" and ok is False, mod.results
+
+    # (d) 足額 2 測全綠 → OK
+    (tests_dir / "test_reqloop_ci_contract.py").write_text(
+        "def test_t0():\n    assert True\n\n"
+        "def test_t1():\n    assert True\n",
+        encoding="utf-8",
+    )
+    mod.results.clear()
+    mod.check_ci_contract(cwd=repo)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("ci_contract", True), mod.results

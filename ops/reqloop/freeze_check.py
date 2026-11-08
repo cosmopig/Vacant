@@ -18,9 +18,16 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
     # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 九項全 OK
     # rc 1  且  VERDICT: FROZEN_STATE_BROKEN —— 任一項 BROKEN，detail 點名
 
+背景（2026-11-08 r1273，vq-el4.30）：審查指示 #1 點名「5 passed 守衛」與「ci_contract
+（2 passed）嚴禁弱化」，但 anchors/ci_contract 兩項原只比 pytest rc——守衛檔被削掉
+測試、剩餘全綠時 rc 仍 0，freeze_check 照樣輸出 FROZEN_STATE_OK＝假綠燈（r1271/r1272
+空對/空檔假綠同型）。負控制實測：1 測全綠的「anchors 檔」原判 OK。現改要求 rc 0 且
+恰好期望計數 passed（少於＝弱化、多於＝守衛口徑變動須同步更新），並配負控制測試
+（tests/test_reqloop_freeze_check.py test_guard_suite_count_negative_controls）。
+
 檢查項（全唯讀、0 model calls、不寫檔、不改分支、不 push）：
-  anchors         tests/test_reqloop_frozen_anchors.py（5 測，改凍結檔即紅）
-  ci_contract     tests/test_reqloop_ci_contract.py（2 測，安裝合約）
+  anchors         tests/test_reqloop_frozen_anchors.py——rc 0 且恰好 5 passed（5 passed 守衛）
+  ci_contract     tests/test_reqloop_ci_contract.py——rc 0 且恰好 2 passed（嚴禁弱化）
   diff_worker     git diff --name-only auto/worker  auto/qwen27b（in-scope）== 0
   diff_argon      git diff --name-only auto/argon   auto/qwen27b（in-scope）== 0
   filing_code     ops/audits/g25_all_gates_filing.json 的 code 三檔 sha256 重算 MATCH
@@ -32,6 +39,8 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
   bk_now          repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像；任一侧 0B
                   為空集測量→BROKEN，r1272 非空守衛）
 
+r1273 起 anchors/ci_contract 的 detail 帶「expected N passed, got M」，計數不符即 BROKEN。
+
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
 
@@ -39,6 +48,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -62,10 +72,10 @@ def _sha256(path: Path) -> str | None:
         return None
 
 
-def _pytest(test_file: str) -> tuple[int, str]:
+def _pytest(test_file: str, cwd: Path = REPO) -> tuple[int, str]:
     p = subprocess.run(
         [sys.executable, "-m", "pytest", test_file],
-        cwd=REPO,
+        cwd=cwd,
         capture_output=True,
         text=True,
         timeout=300,
@@ -75,14 +85,32 @@ def _pytest(test_file: str) -> tuple[int, str]:
     return p.returncode, tail
 
 
-def check_anchors() -> None:
-    rc, tail = _pytest("tests/test_reqloop_frozen_anchors.py")
-    record("anchors", rc == 0, f"pytest rc={rc} {tail}")
+def _check_guard_suite(
+    name: str, test_file: str, expected_passed: int, cwd: Path = REPO
+) -> None:
+    """守衛測試套件＝rc 0 且「恰好 expected_passed passed」（r1273 計數守衛）。
+
+    審查指示 #1 點名「5 passed 守衛」與「tests/test_reqloop_ci_contract.py（2 passed）
+    嚴禁弱化」：守衛檔被削掉測試、剩餘全綠時 rc 仍為 0——只比 rc 即假綠燈（與
+    r1271/r1272 空對/空檔假綠同型）。故足額必須機械化：少於或多於期望計數皆 BROKEN
+    （套件縮小＝弱化；增大＝守衛口徑變動，須同步更新本守衛的期望值，不得靜默放行）。
+    """
+    rc, tail = _pytest(test_file, cwd)
+    m = re.search(r"(\d+) passed", tail)
+    count = int(m.group(1)) if m else None
+    ok = rc == 0 and count == expected_passed
+    record(
+        name, ok,
+        f"pytest rc={rc} {tail}（expected {expected_passed} passed, got {count}）",
+    )
 
 
-def check_ci_contract() -> None:
-    rc, tail = _pytest("tests/test_reqloop_ci_contract.py")
-    record("ci_contract", rc == 0, f"pytest rc={rc} {tail}")
+def check_anchors(cwd: Path = REPO) -> None:
+    _check_guard_suite("anchors", "tests/test_reqloop_frozen_anchors.py", 5, cwd)
+
+
+def check_ci_contract(cwd: Path = REPO) -> None:
+    _check_guard_suite("ci_contract", "tests/test_reqloop_ci_contract.py", 2, cwd)
 
 
 def check_diff(branch: str, name: str) -> None:
