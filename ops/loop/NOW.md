@@ -1,11 +1,11 @@
-# NOW（r1274・2026-11-08）
+# NOW（r1275・2026-11-08）
 
 ## 現在在哪
-- 全部工作項被人類決策阻塞：vq-el4 30/30 全閉、0 open；唯一 ready＝vq-1zf（G3）待 `--fire` 核准（12 格已凍結、g3gate 離線釘住、不點火）。
-- 本輪＝驗證＋簿記輪（r1274）：0 代碼改動、0 model calls；freeze_check 9 項全 OK、11 passed。
+- 全部工作項被人類決策阻塞：vq-el4 31/31 全閉、0 open；唯一 ready＝vq-1zf（G3）待 `--fire` 核准（12 格已凍結、g3gate 離線釘住、不點火）。
+- 本輪＝驗證＋簿記輪（r1275）：0 代碼改動、0 model calls；freeze_check 9 項全 OK（FROZEN_STATE_OK rc=0）、33 passed（freeze 4／anchors 5／ci-contract 2／g3gate 22）。
 - 待人類決策（2 項）：① G3 `--fire` 核准 ② CI 通道裁決（auto-ci.yml disabled_manually；不翻開關、不重複診斷）。
 - G2.5 數字仍以 filing `out/all/phase3.json` 7/2 為準；不引舊 6/3 單測檔。
-- CI：現 HEAD 994acc87 尚無 ci/<sha>.json；LATEST 三分支皆 green@祖先 commit（0 failed・74 skipped）；在跑、不 poll。
+- CI：現 HEAD（e28db1fcb／cff3968de／bb056438c）無 ci/<sha>.json；LATEST qwen27b@8269746d・argon@c7638e3f 皆 green（5069/5142・74 skipped・0 failed）；worker running@cafbe8ed；在跑、不 poll。
 
 ## 下一步
 1. 每輪先跑 `python3 ops/reqloop/freeze_check.py`（9 項）；任何一項 BROKEN 先處理，不得自稱「已複核」。
