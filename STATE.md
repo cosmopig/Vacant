@@ -278,3 +278,10 @@
 1. 直接開啟 repair.py（2795 行、blob 5147f8c3ea1b5e…）＋extract.py（1217 行、blob e757aec50c16bc64…）＝凍結錨點常數直接吻合（docstring＝G2 局部修復切片／G2.5 擷取層）→紅線「凍結」此輪由直接開啟落地（不再只靠 anchors 3 passed）。
 2. `effects_20261105_summary.json`（blob 856c2c71 未變、60,228B）載入代碼核數：policy30 w2r g7/l6·still g3/l4·pres 5/5·api 365/550·tokens 16,284,659/17,385,851；once20 w2r g7/l4·still g3/l6·pres 0/0·api 165/292·tokens 6,210,682/13,293,271；total_cells 50·local_matches 45/50（分歧 3+2=5）·current_code 50/50——與 r1244–r1251 各輪引用零出入。
 3. 結論：r1253 主記錄未引用 effects 數字（無依賴、零更正）；唯一依賴項「repair/extract 凍結」由直接開啟落地，零更正。
+
+## 2026-11-08 r1254（11:00–11:2x UTC）：工单 1034-1 收口＋G2.5 三門新鮮複驗（0 模型呼叫）
+1. **工单 1034-1 验收 4/4→done/**：worker CI 灯 🟢（LATEST_worker.json b150a94c→05537a84、5056/5129、829s）→三分支全绿（qwen27b 2782d637／argon 5fb3d00a／worker 05537a84）；open/＋doing/ 皆空。
+2. G2.5 三門新鮮離線複驗 PASS（run_eval.py --all；PHASE3 全 RESUMED 不重複呼叫）：G1 39/39·FP0；REAL14 9/9·0/5；PHASE3 fixed 7·unresolved 2·r2w 0·errors 0。
+3. 單一事實源由重算复现：out/all/phase1-3.json 与 filing sources 三 sha 逐字节一致（3c6fb35a／6b7cb831／ada235bb）＋code 三 sha MATCH（51abfec3／c7589c61／332cd324）；anchors 3 passed（0.03s）；冻结 blob 直接核（5147f8c3ea1b／e757aec50c16）。
+4. 未验证：无（本轮零代码改动、纯验收与离线重算）。
+5. 红线未动：0 模型调用（vibe_calls 130 行、末条 11-07T18:35Z）·queue 空·main c097899e 未动未 push·repair/extract 冻结·G3 未发射·CI 本轮仅 1 次正式点名（11:13 读 LATEST_worker）。

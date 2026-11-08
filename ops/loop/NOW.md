@@ -1,17 +1,17 @@
-# 当前状态（2026-11-08 ~11:0x UTC，r1253＋redo）
+# 当前状态（2026-11-08 ~11:2x UTC，r1254）
 
-## 本轮交付（r1253，零模型调用）
-1. **一条指令变好**：`git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops | wc -l`＝**0**（r1252＝46）→工单 R20261108_1034-1 树对齐达成（d450d43a）。
-2. **验收 3.5/4**：in-scope diff=0 ✓；e016 compileall rc=0 ✓（b150a94c 版实证 8 标记＋SyntaxError＝真缺陷，已修）；filing 三 sha MATCH ✓；anchors 3 passed ✓。
-3. **① "标记=0" 系工单前提误**：qwen27b 基线本身 9 文件含 `<<<<<<<` 字串（trace/evidence.py:440＝CONFLICT_MARKER_RE 正则定义；余 8 为 exhibit/STATE/NOW 内容）；两分支同集合、in-scope 逐字节一致＝对齐已证。
-4. **CI 点名一次**：2782d637（纯簿记 5 文件）running ~7%；d450d43a 排队（ci.sh 读本地分支、序 qwen27b→argon→worker、无需 push）。
-5. **redo（审查点名 3 档直接開啟）**：repair.py（2795 行·5147f8c3ea1b…）＋extract.py（1217 行·e757aec50c16…）＝錨點直接吻合；effects_20261105_summary.json（856c2c71）載入核數＝r1244–r1251 引用零出入；r1253 主記錄無 effects 依賴→零更正。
-6. 红线全绿：vibe_calls 130 行（末条 11-07T18:35Z）→0 调用；queue 空；main c097899e；未 push。
+## 本轮交付（r1254，零模型调用）
+1. **工单 R20261108_1034-1 验收收口→done/**：worker CI 灯 🟢（LATEST_worker.json b150a94c→**05537a84**、5056 passed/74 skipped/0 failed）→**三分支全绿**（qwen27b 2782d637／argon 5fb3d00a／worker 05537a84，皆 5056/5129）。
+2. **G2.5 三門新鮮離線複驗 PASS**（`run_eval.py --all`、0 模型呼叫、PHASE3 全 RESUMED）：G1 抓錯 39/39·冤枉 0；REAL14 抓錯 9/9·冤枉 0/5；PHASE3 fixed 7·unresolved 2·right_to_wrong 0·errors 0。
+3. **單一事實源由重算复现**：本轮 out/all/phase1-3.json 与 filing（g25_all_gates_filing.json）sources 三 sha **逐字节一致**（3c6fb35a／6b7cb831／ada235bb）；code 三 sha 重算全 MATCH（51abfec3／c7589c61／332cd324）。
+4. 锚点：`test_reqloop_frozen_anchors` 3 passed（0.03s）；repair.py 5147f8c3ea1b…、extract.py e757aec50c16… 直接核＝冻结常量。
+5. 红线：vibe_calls 130 行（末条 11-07T18:35Z）＝0 调用；queue 空；main c097899e 未动未 push。
 
 ## 下一步（次轮，按序）
-1. 巡灯一次（不轮询）：期望 2782d637＋8221c29c 与 d450d43a 皆 🟢 5056/5129（LATEST_worker.json sha 由 b150a94c 变 d450d43a）。
-2. 灯绿→验收工单 1034-1：移 tickets/done/；若红→列 failures、开修复工单。
-3. G3（vq-1zf）续候人类明确批准；红线不变。
+1. 工单队列已清空（open/ 空、doing/ 空）；bd vq-el4 18/18 closed、无 in_progress。
+2. G3（vq-1zf）续候人类明确批准（RLOOP_PLAN 未见 approval）——不发射、不入队、不造工单。
+3. 无在途工作＝守线轮：审查指示 5 条本轮全数落地（锚点守护／worker 同步收口／filing 重算复现／0 模型调用／G3 等待）；新指示来了照指示做。
 
 ## 红线（不变）
-无 G3 fire／无模型调用／无 queue／无 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 冻结（5147f8c3·e757aec5，r1253 已直接開啟落地）／CI 每轮至多点名一次。
+无 G3 fire／无模型调用／无 queue／无 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 冻结／CI 每轮至多点名一次。
+（MEMORY 上限 6 KB、NOW 上限 3 KB；超過的部分沒有附上，請先把它縮短）
