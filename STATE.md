@@ -111,3 +111,8 @@
 - ② 逐欄 code 重算核對（與 r1237 redo 記錄一致）：total_cells **50**＝policy30 30（generic 15：w2r **7**/still3/pres5/sess19/api365/tok16,284,659；localized 15：w2r **6**/still4/pres5/sess16/api550/tok17,385,851）＋once20 20（generic 10：w2r **7**/still3/api165/tok6,210,682；localized 10：w2r **4**/still6/api292/tok13,293,271）；r2w 全 0；local 45/50→current 50/50；local-vs-獨立分歧 **3+2**（全 d38d2eb2 舊 checker，5 格 current 重驗皆＝after_independent）；current-vs-獨立 mismatches **0**；scope_note 口徑（開發選樣、單 rep、不宣稱孰優、缺值 UNKNOWN 不填 0）與 11-06 #6 一致。
 - ③ r1238 各陳述依賴檢查：本輪六項（合併預演 53 passed／4 檔範圍／守護測試審查／三分支錨點／G3 紅線 0 呼叫／CI 順延 DECISION）均未引用此檔任何數字；r1238 NOW/STATE/commit 文字無一提及 effects 數字→**無依賴陳述，無需改數或改文案**；交付物（fc504c8c、vq-1zf.2 note）不變。
 - ④ 本 redo 0 模型呼叫、0 成本。
+
+## r1238 redo 2（2026-11-08 05:4x UTC）：STATE.md 四個 tokens_true 數字指令重算（審查點名）
+- ① 重算方式＝從 `effects_20261105_summary.json` 的 `cells_detail` **逐格** `tokens_true` 加總（非抄 phase 層欄位）：policy30 generic **16,284,659**（15 格、api 365）、policy30 localized **17,385,851**（15 格、api 550）、feedback_once20 generic **6,210,682**（10 格、api 165）、feedback_once20 localized **13,293,271**（10 格、api 292）。
+- ② 交叉驗證：四組逐格加總與 phase 層 `per_arm` 欄位 tokens＋api 全 **MATCH**（ALL_MATCH）→r1238 redo ② 的四個數字即重算值，文字不變（r1237 redo 同值一併被本重算接地）。
+- ③ 本 redo 0 模型呼叫、0 成本；其餘未動。
