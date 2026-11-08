@@ -17,3 +17,10 @@
 - 沒驗證：f6d29d1d／fecd8657 CI 燈（下輪巡→應🟢）；GitHub Actions（無 admin＝基建）；未跑全量 pytest（vacant-ci 職掌）。
 - 工單 vq-el4.14 close（vq-el4.15 重複、併入）；下一步＝巡 CI＋等 G3 派工（不自發射大成本）、不改 repair.py。
 - ⑥ redo（審查點名 extract.py 原未開啟）：補開 `vacant_network/reqloop/extract.py`（1217 行、blob e757aec5）——核對 quote_is_verbatim:132（逐字、paraphrase 必 False→丟棄）、build_requirement_set:665（unverified→UNKNOWN 不當通過、client/解析例外→空集 fail-closed）、GlmClient:927（`glm` 唯一入口、rc≠0 不重試）、extract_requirements:1185；run_eval.py:40 自本檔匯入 build_requirement_set/extract_requirements/parse_model_output→G1/REAL14 門禁依賴它。**redo**：備案新增 `code` 段（extract.py sha256=51abfec3、checks.py=c7589c61[=blob f3525b01 與 r1227 一致]、run_eval.py=332cd324）＋boundaries 錄入驗證語義；fail-closed 重驗仍 exit 2 攔篡改；38 passed 不變。
+
+## r1229（2026-11-08 02:2x UTC）：R20261108_0150-1 驗收補救（worker 護欄紅→綠、0 模型呼叫）
+- 審查指示#2 複核：工單已 done 但驗收項3未達——worker 3 個 tracked absolute symlinks（`_data/payments.csv` 絕對鏈、`ops/audits/audits`、`ops/audits/e016_failed_step_ablation.md` repo 外指針）→`test_no_tracked_absolute_symlinks` failed；merge 944fbb08 已在、checks.py blob 三分支＝f3525b01、pearson2 3 passed（驗收項1/2/4 達）。
+- 修復 80947934@auto/worker（依 test 頭部修復規則）：`_data/payments.csv`→相對鏈（目標 repo 內已 tracked）；2 個 repo 外指針移除（正本 ~/dev/ops/audits 未動）；不 push。
+- 驗證（worker worktree、commit 後）：兩護欄 2 passed（此前 1 failed）／pearson2 3 passed／`pytest -k 'reqloop or beads'` 357 passed 1 skipped 0 failed。
+- 沒驗證：qwen27b d95bb8aa／worker 80947934 CI 燈（下輪巡→應🟢）；全量 pytest（vacant-ci 職掌）。
+- 工單 R20261108_0150-1 補救完成（5 驗收項全達）；下一步＝巡 CI＋等 G3 派工（不自發射大成本）；不改 repair.py。
