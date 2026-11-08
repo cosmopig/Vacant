@@ -56,3 +56,8 @@
 - ③ 審查 #3/#4 新鮮重驗：checks.py f3525b01×3 分支、extract.py e757aec5、repair.py 2795 行/5147f8c3 未動；G2.5 三門 PASS 備案在位（g1 39/39 冤枉0、real14 9/9 冤枉0、phase3 fixed7 rtw0 err0）。
 - ④ 沒驗證：literal afcc38fd CI 檔（下輪巡→應🟢）；GitHub Actions（無 gh CLI＝基建）；全量 pytest 由 loop CI 職掌（441f88c3 全量 5109 已綠）。
 - 下一步：下輪巡 afcc38fd 🟢＋等 G3 核准（vq-1zf；未核准 0 呼叫）；不新開工單、不碰 main、不發射大成本實驗。
+
+## r1233 redo（2026-11-08 04:2x UTC）：effects_20261105_summary.json 補開＋G3 選題重驗（審查：該檔上輪記錄未打開）
+- ① 已打開 ops/audits/effects_20261105_summary.json（60,228 B；schema vacant.audit/effects_20261105_summary/1；scope_note＝「開發選樣（e008/e013/e014 已見題）」；snapshot d38d2eb2；50 格）：policy30 30 格→10 唯一題、feedback_once20 20 格→7 唯一題（draft 欄位解 task）。
+- ② 已見聯集＝**9 dab_**（dab_035/039/055/057/105/378/426/427/507）＋dabstep；G3 選題依此重驗：bank ref/bm_tasks/dabench **30 題**−9＝**21 未見**；bank 順序前 4＝**dab_129/144/176/216**＝vq-1zf 預註冊選題，不變（code 驗 first4==expected True）。
+- ③ 本 redo 0 模型呼叫、0 成本；vq-el4.17 close 與 G3 未核准 0 呼叫之結論不變。
