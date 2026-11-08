@@ -332,3 +332,10 @@
 3. 驗證：pytest tests/test_reqloop_g3gate.py＝**20 passed**（0.27s）；anchors＋g2 合跑＝62 passed（repair 5147f8c3/extract e757aec5 冻结未動）；build_manifest 對真 bank（30 題）重算＝frozen manifest 的 tasks/files/seen_set/arms/bank.ordering **逐項一致**（0 模型呼叫、0 寫入）。
 4. 未驗證：本 commit 自身 CI 燈（下輪巡一次）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准、queue 空、--fire 雙負控 RC2/RC3 現已釘住）。
 5. 下一步：下輪巡本 commit CI 燈（一次；紅燈＝例外才動手）；G3 續候人類明確核准；新審查指示照指示做。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
+
+## 2026-11-08 r1258（12:1x–12:3x UTC）：G3 gate CLI 負控——篡改 manifest 時 --plan 必須 RC 1（20→21 passed；0 模型呼叫）
+1. DECISION: NOW 下一步＝「巡 CI＋候 G3 核准」（無實質交付）→依本輪指示縮到一輪做完的最小實質項＝g3gate CLI 入口 try/except→RC 1 路徑零負控之缺口（operator 可見 fail-closed；H-0 教訓：忘帶旗標得到的綠燈正是放行洞口的狀態）。工單 vq-1zf.4。
+2. 交付：tests/test_reqloop_g3gate.py +1 測試（25 行，commit 5c5cbefa）：複製 manifest+tasks、篡改一個 sha（檔仍在＝純篡改非缺檔）→ --plan 必須 **RC 1**＋G3GATE PLAN FAIL＋「hash 不符」、且不得出現 G3GATE PLAN OK（假綠偵測）。
+3. 驗證：pytest tests/test_reqloop_g3gate.py＝**21 passed**（0.33s）；anchors＋g2＋g3gate 合跑＝**63 passed**（1.77s；r1257＝62）；**負控**＝暫時吞例外（fail-open 化）→新測試紅→還原（g3gate.py sha256 前後一致 a0dd46f2、0 產品碼改動）；g3gate --plan **RC 0**／--fire **RC 2** 新鮮（0 呼叫）；filing 6 sha256 全 MATCH（code 51abfec3/c7589c61/332cd324＋sources 3c6fb35a/6b7cb831/ada235bb）；對齊 diff＝3（2 journal＋本輪新測試；vacant_network/ 產品碼 diff＝0）；vibe_calls 130 行末條 11-07T18:35Z＝0 呼叫。
+4. 未驗證：本 commit 自身 CI 燈（輪首 6d649c6b 仍 running；本機無 gh、每輪至多點名一次不乾等）；run_eval --all 本輪未重跑（以 r1256 新鮮 PASS＋本輪 code hash MATCH 為替代證據——三冻结碼本輪零改動，hash 即證明）。
+5. 下一步：巡本 commit CI 燈（一次；紅燈＝例外才動手）；G3 續候人類明確核准（queue 空、0 呼叫）；新審查指示照指示做。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
