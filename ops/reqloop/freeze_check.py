@@ -158,7 +158,10 @@ def check_filing_code() -> None:
         rel = key[len("/code/"):] if key.startswith("/code/") else key
         path = REPO / rel
         mine = _sha256(path)
-        match = mine == meta["sha256"]
+        # r1288（vq-el4.36）：備案 sha256 為 null（未 pin）＝未測量；檔不存在時
+        # _sha256→None，舊碼 None == None → True＝「3/3 MATCH」假綠燈（實測）。
+        # pin 與實算 sha 皆須非 null 才可 MATCH（I-4：未測量不是通過；H-0 同構）。
+        match = mine is not None and meta["sha256"] is not None and mine == meta["sha256"]
         ok += int(match)
         names.append(f"{Path(rel).name}{'MATCH' if match else 'MISMATCH'}")
     total = len(names)
@@ -175,7 +178,9 @@ def check_filing_sources() -> None:
         tail = raw.split(marker, 1)[1] if marker in raw else Path(raw).name
         path = REPO / "ops" / "reqloop" / tail
         mine = _sha256(path)
-        match = mine == meta["sha256"]
+        # r1288（vq-el4.36）：同 check_filing_code——null pin（未測量）不得 MATCH
+        # （實測：六 sha 全 null 備案 filing_sources 舊碼判 OK＝假綠燈）。
+        match = mine is not None and meta["sha256"] is not None and mine == meta["sha256"]
         ok += int(match)
         names.append(f"{name}{'MATCH' if match else 'MISMATCH'}")
     total = len(names)

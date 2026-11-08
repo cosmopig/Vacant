@@ -281,3 +281,81 @@ def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     name, ok, detail = mod.results[-1]
     assert name == "anchors" and ok is False, mod.results
     assert "skipped" in detail, mod.results
+
+
+def test_filing_null_sha_negative_control(tmp_path: Path) -> None:
+    """filing null-sha 假綠燈負控制（r1288，vq-el4.36）：備案 code/sources 的
+    sha256 若為 null（未 pin）且對應檔不存在，舊碼 `match = mine == meta["sha256"]`
+    變成 None == None → True——什麼都没 pin、什麼都没量到的削弱備案仍被判
+    「3/3 MATCH」＝假綠燈（r1288 實測：六 sha 全 null 備案 filing_sources 判
+    OK，與 r1273 削弱但照綠同型；I-4：未測量不是通過；H-0：漏掉一項得到的綠燈
+    就是漏洞成因）。null pin＝「sha 未 pin」＝未測量，必須 BROKEN。
+    正控制：真 sha＋真檔仍 3/3 MATCH OK（修復不得破壞正常路徑）。"""
+    import hashlib
+    import json
+
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    fdir = repo / "ops" / "audits"
+    fdir.mkdir(parents=True)
+    filing = fdir / "g25_all_gates_filing.json"
+    # 削弱備案：code 三檔只有 a/x.py 存在、sources 三檔全不存在，且六個 sha256
+    # 全為 null（未 pin）——舊碼對「檔不存在（_sha256→None）＋pin 為 null」判 MATCH。
+    (repo / "a").mkdir(parents=True)
+    (repo / "a" / "x.py").write_text("hello\n", encoding="utf-8")
+    filing.write_text(json.dumps({
+        "code": {
+            "/code/a/x.py": {"sha256": None},
+            "/code/b/y.py": {"sha256": None},
+            "/code/c/z.py": {"sha256": None},
+        },
+        "sources": {
+            f"phase{i}": {"path": f"/x/ops/reqloop/extract/out/all/phase{i}.json",
+                          "sha256": None}
+            for i in (1, 2, 3)
+        },
+    }), encoding="utf-8")
+    mod.REPO = repo   # type: ignore[attr-defined]
+    mod.FILING = filing  # type: ignore[attr-defined]
+    mod.results.clear()
+    mod.check_filing_code()  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_code" and ok is False, mod.results
+    assert "MISMATCH" in detail, mod.results
+    mod.results.clear()
+    mod.check_filing_sources()  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_sources" and ok is False, mod.results
+    assert "MISMATCH" in detail, mod.results
+
+    # 正控制：同一 repo，真 sha＋真檔 → 3/3 MATCH OK（修復不得破壞正常路徑）
+    (repo / "b").mkdir(parents=True); (repo / "c").mkdir(parents=True)
+    (repo / "b" / "y.py").write_text("hello\n", encoding="utf-8")
+    (repo / "c" / "z.py").write_text("hello\n", encoding="utf-8")
+    sdir = repo / "ops" / "reqloop" / "extract" / "out" / "all"
+    sdir.mkdir(parents=True)
+    for i in (1, 2, 3):
+        (sdir / f"phase{i}.json").write_text("{}\n", encoding="utf-8")
+    realsha = hashlib.sha256(b"hello\n").hexdigest()
+    realjson = hashlib.sha256(b"{}\n").hexdigest()
+    filing2 = fdir / "g25_all_gates_filing.json"
+    filing2.write_text(json.dumps({
+        "code": {
+            "/code/a/x.py": {"sha256": realsha},
+            "/code/b/y.py": {"sha256": realsha},
+            "/code/c/z.py": {"sha256": realsha},
+        },
+        "sources": {
+            f"phase{i}": {"path": f"/x/ops/reqloop/extract/out/all/phase{i}.json",
+                          "sha256": realjson}
+            for i in (1, 2, 3)
+        },
+    }), encoding="utf-8")
+    mod.FILING = filing2  # type: ignore[attr-defined]
+    mod.results.clear()
+    mod.check_filing_code()  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("filing_code", True), mod.results
+    mod.results.clear()
+    mod.check_filing_sources()  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("filing_sources", True), mod.results
