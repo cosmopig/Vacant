@@ -194,3 +194,9 @@
 - ③ 口径：工单字面 "5053/5126" 为 frozen-anchors 前旧基线（280eda92/60987574 两灯 5053/5126 实证）；现基线 5056/5129；删 3 空测试后 worker 应回 5056/5129。
 - ④ bd close vq-ssk 完成（reason 含 4 条验收＋"灯红则重开"）；bd ready 仅剩 vq-1zf（G3 待人类核准）。
 - ⑤ 未验证：worker b150a94c 与 qwen27b 队列 CI 灯（ci.sh 自跑、下轮查一次）；红线：G3 未发射・0 模型呼叫（vibe 末条 11-07T18:35Z）・queue 空・main 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
+
+## r1247 redo（2026-11-08 ~09:1x UTC）：审查点名 effects_20261105_summary.json 未开→代码打开＋依赖数字全数重接地
+- ① 文件已开（60,228 B，raw sha256 a710f7e4，git blob 856c2c71＝r1244 redo 锚点、未变）；python 逐字段提取 phases×per_arm×tokens/api/mismatches。
+- ② 对轮内记录（r1244 redo／r1246 redo／redo2 行及 11-06 引文）所有依赖该文件的数字代码复核：w2r g7/l6・g7/l4、still 3/4・3/6、r2w 0/0、pres 5/5・0/0、api 915=365+550・457=165+292、tokens 16,284,659/17,385,851/6,210,682/13,293,271（phase 总 33,670,510/19,503,953）、cells 50=30+20、local 45=27+18、current 50=30+20、mismatches 3+2=5・current_code 0、snapshot d38d2eb2 → 14/14 pass、零漂移。
+- ③ 结论：r1247 自身交付（worker 同步 4 验收、CI 基线 5056/5129、close vq-ssk）依赖 git 树／ci/ JSON／被删测试文件，与该文件无关→零数字改动；历史行引其数字者全数接地、无需修正。
+- ④ 红线不变：G3 未发射・0 模型呼叫・queue 空・main 未动・repair/extract 冻结・未读 hidden/scorer。

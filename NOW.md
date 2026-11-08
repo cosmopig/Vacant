@@ -11,6 +11,8 @@
 - 口径：工单字面 "5053/5126" 是 frozen-anchors 前旧基线（280eda92/60987574）；现基线＝5056/5129；
   worker 旧灯 5059/5132＝基线＋3 空测试，删后回 5056/5129。
 - bd close vq-ssk 完成（验收 3/4 已实证、第 4 条 CI 灯在队列；灯红则重开工单）。
+- redo（审查点名）：effects_20261105_summary.json 已用代码打开（blob 856c2c71 未变）；
+  所有依赖其数字 14/14 重接地 pass（w2r/api/tokens/cells/mismatches/snapshot）；r1247 自身交付不依赖该文件，零数字改动。
 
 ## 下一步（r1248，照序）
 1. CI 查灯一次：worker b150a94c（预期 5056/5129）＋ qwen27b 当前队列（ci.sh 自跑、不轮询）；worker 红→重开工单。
