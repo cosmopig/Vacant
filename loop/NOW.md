@@ -1,15 +1,19 @@
-# 当前状态（2026-11-08 ~10:36 UTC，r1252）
+# NOW（r1267 redo#3・2026-11-08）
 
-## 本轮交付（r1252，~10:09–10:37 UTC，零模型调用）
-1. **9732075e 灯 → 🟢 5056/5129**（本轮点名步骤，842.6s，green:true；auto/qwen27b HEAD 由「running」变绿）。
-2. **新离线验证全过（30.2s/0 调用）**：anchors 3 passed；run_eval --all EXIT=0（G1 39/39·FP0 / REAL14 9/9·0/5 / PHASE3 fixed 7·unresolved 2·right-to-wrong 0）；filing code sha256 3/3 MATCH；/srv/vlab/queue 空；vibe_calls 130 行（末条 11-07T18:35Z，零新增）；main c097899e；5fb3d00a 仍为三分支祖先。
-3. **🐛 实测发现（非推测）：auto/worker 树与 qwen27b 未对齐**——46 檔差異（14 D + 32 M），**9 個檔案含已 commit 的未解決衝突標記**（`git grep -l '<<<<<<<' auto/worker -- vacant_network tests ops | wc -l` = 9；含 `ops/audits/e016_verdict_pipeline.py` 已非合法 Python、`ops/STATE.md`）；worker 歷史含 WIP commit `41eef681`。r1250/r1251「三分支對齊」僅以祖先關係驗證，不足以證明樹一致；worker CI 綠不覆蓋此（無測試 import 破檔）。
-4. **開工單 R20261108_1034-1**（~/dev/ops/tickets/open/，予 worker assistant）：46 檔差異清零（以 qwen27b 為準；14 檔 qwen27b 不存在者 git rm），自證衝突標記=0、diff=0、compileall rc0；下輪 R&D 點名新 SHA CI 燈並複驗。
+## 現在在哪（本輪複核值）
+- G2.5 主線完成、全綠：filing 4681 B、code sha 3/3、sources sha 3/3（phase1 3c6fb35a／phase2 6b7cb831／phase3 ada235bb）本輪重算 MATCH；anchors＋ci-contract 7 passed；in-scope diff 0×2；0 model calls。
+- G2.5 數字引 **7/2**（filing 的 `out/all/phase3.json`）；standalone `eval_phase3_glm53.json`（11-07 15:07 舊版碼、6/3）**不得引用**。dab_039＝fixed（獨立 scorer 過；visible R3 PASS、R1/R2/R4 UNKNOWN 已記入 row）。
+- unresolved 2 格＝模型能力非 gate 失敗：dab_055（stalled、5/5 FAIL、R3/R4 需求級退步已記入 row）、dabstep-1273（max_rounds、R1 FAIL＋R2 UNKNOWN）。假設（待授權驗證）：dab_055 在 hand-written 需求下 fixed（g2-truth 9/9）但在 glm53 擷取需求下未修成→擷取需求可操作性可能較低。
+- 唯一未閉＝G3（vq-1zf）：12 格已備（g3gate --plan EXIT 0）、等人類核准 `--fire`；未核准不點火。
+- CI：三支最後完成皆 green（5066 passed／74 skipped）；worker@d5d6f2af（純簿記 HEAD）running、不 poll；通道裁決（auto-ci.yml vs local vacant-ci）等人類。
+- 本輪修正：NOW 兩檔 2994 B 貼 3 KB cap（harness 請縮短）→ 覆寫精簡版；r1267 條目「1996 B」係同輪舊測值（HEAD 實值 2994 B），已註明。
 
-## 下一步（次轮，按序）
-1. 點名 worker 新 SHA（工單完成後）→ 期望 🟢 5056/5129；複驗 3 條自證＋filing 三 sha 仍 MATCH。
-2. 若工單未完成 → 按驗收條件補推（產品 bug 例外，非 vq-el4 序）。
-3. G3（vq-1zf）續候人類明確批准；其餘紅線不變。
+## 下一步
+1. 人類核准 G3 `--fire` → 點火後回讀 receipt＋scoring，按 gate 紀律記錄（UNKNOWN 不升級）。
+2. 人類裁決 CI 通道 → 照裁決執行。
+3. 兩者之前：維持紅線、0 代碼改動、每輪只複核＋記錄，不為 commit 改檔。
 
-## 红線（不變）
-無 G3 fire／無模型調用／無 queue／無 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 凍結（anchors 5147f8c3·e757aec5）／CI 每輪至多點名一次。
+## 紅線（本輪全守）
+0 model calls・無 push（迴圈自推）・`.github/workflows/` 只讀・無 reset/rebase/branch -f・
+repair.py／extract.py／checks.py／run_eval.py／filing 未改・未讀 /srv/eval hidden 與 scorer.py・
+無 sleep 輪詢・G3 未核准不點火・standalone 6/3 舊檔不引用。
