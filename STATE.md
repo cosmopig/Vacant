@@ -116,3 +116,10 @@
 - ① 重算方式＝從 `effects_20261105_summary.json` 的 `cells_detail` **逐格** `tokens_true` 加總（非抄 phase 層欄位）：policy30 generic **16,284,659**（15 格、api 365）、policy30 localized **17,385,851**（15 格、api 550）、feedback_once20 generic **6,210,682**（10 格、api 165）、feedback_once20 localized **13,293,271**（10 格、api 292）。
 - ② 交叉驗證：四組逐格加總與 phase 層 `per_arm` 欄位 tokens＋api 全 **MATCH**（ALL_MATCH）→r1238 redo ② 的四個數字即重算值，文字不變（r1237 redo 同值一併被本重算接地）。
 - ③ 本 redo 0 模型呼叫、0 成本；其餘未動。
+
+## r1240（2026-11-08 06:1x UTC）：argon 新 hermetic 修正 1d78a8f4 審查＋合併預演（污染環境）全綠；合併仍等 1d78a8f4 CI 綠燈
+- ① 局勢變更：e847c56e CI 🔴（1 failed=test_no_leftover_temp_directories_in_tmp、5052 passed）——根因＝qwen27b 舊 mkdtemp 版在共享 worktree 先跑、殘留 /tmp/g3gate_* 被 argon 絕對乾淨守衛誤傷；argon 以 **1d78a8f4** 改 hermetic（前後集合差）、worker 同步 **13dd10fb**；qwen27b **491c1828**＝round 1239 簿記自動提交（僅 STATE/NOW，無產品碼）。
+- ② 審查 1d78a8f4（1 檔 1 測試、14+/3-）：baseline 集合差只在「本 helper 新建洩漏」時失敗、不受既有殘留影響；對 mkdtemp 回歸偵測力保留（負控必紅）——邏輯正確，不觸 repair.py/extract.py/產品碼。
+- ③ 一條指令（比上輪好）：合併預演樹（qwen27b 491c1828＋argon 1d78a8f4、RC0 無衝突、範圍＝r1238 同 4 檔）跑 reviewer 驗收指令 **53 passed in 0.56s**；且在 /tmp 有 g3gate_* 污染（＝e847c56e 紅燈條件）下 hermetic 守衛 **1 passed**（舊版同條件＝紅燈）、負控（還原 mkdtemp 版）守衛 **1 failed**（偵測力不變）；收尾清掉本輪自建 3 目錄、`ls /tmp/g3gate_*` 無殘留。
+- ④ 錨點重驗（合併樹）：repair.py 2795 行/blob 5147f8c3、extract.py 1217 行/blob e757aec5、reqloop/checks.py blob f3525b01——全一致。
+- ⑤ DECISION：合併順延 r1241——`ci/1d78a8f4.json` 不存在（ci.sh 10 分鐘週期、3 個新 sha 491c1828/1d78a8f4/13dd10fb 皆未跑、每支 ~14 分鐘、依 qwen27b→argon→worker 順序預計 ~06:4x 起逐支出燈）；依 ASSIGNMENT「該 sha CI 🟢 才准 merge」不輪詢、不繞門。紅線：/srv/vlab/queue 空（G3 未發射、0 模型呼叫）、main 未動。
