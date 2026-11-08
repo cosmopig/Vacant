@@ -248,3 +248,174 @@ def test_cli_fire_with_invalid_approval_rc2(tmp_path: pathlib.Path):
     assert r.returncode == 2, r.stdout + r.stderr
     assert "NOT FIRED" in r.stdout
     assert "0 model calls" in r.stdout
+
+
+# ── build_manifest：凍結 manifest 的唯一建造路徑（r1257 前零測試釘住）────
+
+def _synthetic_bank(root: pathlib.Path) -> dict[str, dict[str, str]]:
+    """6 題（t01..t06）；t03/t04 含巢狀目錄；回傳逐檔期望 sha256。"""
+    files: dict[str, dict[str, str]] = {}
+    for i in range(1, 7):
+        tid = f"t{i:02d}"
+        tdir = root / tid
+        tdir.mkdir(parents=True)
+        files[tid] = {}
+        (tdir / "instruction.txt").write_text(f"task {tid}\n", encoding="utf-8")
+        files[tid]["instruction.txt"] = _sha(tdir / "instruction.txt")
+        if i in (3, 4):
+            sub = tdir / "workspace" / "data"
+            sub.mkdir(parents=True)
+            (sub / "x.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+            files[tid]["workspace/data/x.csv"] = _sha(sub / "x.csv")
+    return files
+
+
+def test_build_manifest_selection_hashes_and_roundtrip(tmp_path: pathlib.Path):
+    bank = tmp_path / "bank"
+    bank.mkdir()
+    expected = _synthetic_bank(bank)
+    seen = {"t01", "t02"}
+    plan = g3.build_manifest(
+        bank, seen, n_tasks=2, ticket="T-BUILD", purpose="builder pin",
+        arm_defs={a: f"def {a}" for a in g3.ARM_ORDER},
+        budget=dict(g3.DEFAULT_BUDGET), scoring={"mode": "independent"},
+        leak_guard="no hidden/scorer", approval={"required": True},
+        seen_set_source="synthetic", frozen_at="2026-11-08T12:00:00Z")
+    # 1) 選題＝bank 順序未見前 2 題（t03/t04），不是 t05/t06
+    assert [t["task_id"] for t in plan["tasks"]] == ["t03", "t04"]
+    # 2) 逐檔 sha256（含巢狀目錄）算對
+    for t in plan["tasks"]:
+        assert t["files"] == expected[t["task_id"]]  # 逐檔比對，非只比 key
+    # 3) bank.ordering＝實際目錄全順序（選題可重算）
+    assert plan["bank"]["ordering"] == [f"t{i:02d}" for i in range(1, 7)]
+    assert plan["bank"]["n_total"] == 6
+    # 4) 回圈：load＋verify_frozen＋check_budget 全過（建造→凍結→驗證閉環）
+    base = tmp_path / "frozen"
+    base.mkdir()
+    (base / "manifest.json").write_text(json.dumps(plan, ensure_ascii=False),
+                                        encoding="utf-8")
+    for t in plan["tasks"]:
+        for rel in t["files"]:
+            dst = base / "tasks" / t["task_id"] / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((bank / t["task_id"] / rel).read_bytes())
+    loaded = g3.G3Plan.load(base / "manifest.json")
+    loaded.verify_frozen(base)
+    g3.check_budget(loaded)
+    assert g3.plan_cells(loaded) == [(tid, arm)
+                                     for tid in ("t03", "t04")
+                                     for arm in g3.ARM_ORDER]
+
+
+def test_build_manifest_fail_closed(tmp_path: pathlib.Path):
+    bank = tmp_path / "bank"
+    (bank / "t01").mkdir(parents=True)
+    (bank / "t01" / "instruction.txt").write_text("x", encoding="utf-8")
+    (bank / "t02").mkdir()
+    (bank / "t02" / "instruction.txt").write_text("y", encoding="utf-8")
+    kw = dict(ticket="T", purpose="P",
+              budget=dict(g3.DEFAULT_BUDGET), scoring={},
+              leak_guard="L", approval={}, seen_set_source="s", frozen_at="f")
+    # bank 目錄不存在→fail
+    try:
+        g3.build_manifest(tmp_path / "no_such_bank", set(), n_tasks=1,
+                          arm_defs={a: "d" for a in g3.ARM_ORDER}, **kw)
+        raise AssertionError("bank 目錄不存在應 raise")
+    except FileNotFoundError:
+        pass
+    # arm_defs 缺臂→fail（不靜默少臂）
+    try:
+        g3.build_manifest(bank, set(), n_tasks=1, arm_defs={"native_pi": "d"},
+                          **kw)
+        raise AssertionError("arm_defs 缺臂應 raise")
+    except KeyError:
+        pass
+    # 未見題不足→fail（不補位、不猜題）
+    try:
+        g3.build_manifest(bank, {"t01"}, n_tasks=2,
+                          arm_defs={a: "d" for a in g3.ARM_ORDER}, **kw)
+        raise AssertionError("未見題不足應 raise")
+    except ValueError:
+        pass
+
+
+def test_plan_report_machine_readable():
+    plan = _loaded()
+    r = g3.plan_report(plan)
+    assert r["schema"] == g3.PLAN_SCHEMA
+    assert r["cells"] == [[t, a] for t in EXPECTED_SELECTION for a in plan.arms]
+    assert len(r["cells"]) == 12
+    assert "NOT FIRED" in r["state"]          # 報告如實：未發射
+    assert r["budget"] == dict(plan.budget)   # 預算原樣帶出（不缺項）
+    assert r["tasks"] == EXPECTED_SELECTION
+
+
+# ── CLI：--fire 持有效核准→RC 3（核准但未接線；不發射、不靜默通過）────
+
+def test_cli_fire_valid_approval_rc3_approved_not_wired(tmp_path: pathlib.Path):
+    appr = tmp_path / "approval.json"
+    appr.write_text(json.dumps({"schema": g3.APPROVAL_SCHEMA, "approved": True,
+                               "epic": "vq-1zf", "by": "human-approver"}),
+                    encoding="utf-8")
+    r = _run("--fire", "--approval", str(appr))
+    # 3＝核准但未接線；不是 0（＝已發射）、不是 2（＝核准被拒）
+    assert r.returncode == 3, r.stdout + r.stderr
+    assert "APPROVED" in r.stdout
+    assert "未接線" in r.stdout                 # 如實：發射是核准後另一步
+
+
+# ── CLI 負控：篡改 manifest → --plan 必須 RC 1（r1258 前 operator 可見路徑零負控）──
+
+def test_cli_plan_tampered_manifest_rc1_not_ok(tmp_path: pathlib.Path):
+    """operator 可見 fail-closed 負控：凍結輸入檔 sha 被篡改→--plan 必須 RC 1。
+
+    r1257 釘住的是 API 層 verify_frozen 負控（test_verify_frozen_detects_tampered_sha）；
+    operator 實際執行的 CLI 入口 main() 的 try/except→RC 1 路徑零負控：若未來例外被
+    吞（fail-open 化），test_cli_plan_rc0_and_not_fired 仍綠、operator 見假綠。H-0 教訓：
+    忘帶旗標得到的綠燈，正是放行洞口的狀態。
+    """
+    import shutil
+    base = tmp_path / "frozen"
+    shutil.copytree(BASE, base)
+    m = base / "manifest.json"
+    raw = json.loads(m.read_text(encoding="utf-8"))
+    f0 = list(raw["tasks"][0]["files"])[0]
+    raw["tasks"][0]["files"][f0] = "f" * 64    # 只改 hash、檔還在＝純篡改（非缺檔）
+    m.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    r = _run("--plan", "--manifest", str(m))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "G3GATE PLAN FAIL" in r.stdout
+    assert "hash 不符" in r.stdout              # 拒因如實：hash 不符（非缺檔/非選題）
+    assert "G3GATE PLAN OK" not in r.stdout     # 不得假綠
+
+
+# ── CLI 負控：--fire＋有效核准＋篡改 manifest → 必須 RC 1（完整性先於核准判定）──
+
+def test_cli_fire_tampered_manifest_rejected_before_approval(tmp_path: pathlib.Path):
+    """安全排序負控：有效核准文件不得繞過凍結完整性檢查。
+
+    r1258 釘住的是 --plan 路徑（operator 可見 fail-closed）；--fire 路徑零負控：
+    若 main() 將核准判定移到 verify_frozen/check_budget 之前、或例外被吞（fail-open），
+    `--fire --approval <有效> --manifest <篡改>` 就會對 operator 印 APPROVED／RC 3——
+    「核准」在外觀上等同全門通過，但凍結輸入其實已被篡改（H-0 教訓：綠燈＝放行洞口的狀態）。
+    正確行為：完整性檢查先於核准判定 → RC 1、印 G3GATE PLAN FAIL＋拒因如實，
+    且不得出現 APPROVED、不得出現 G3GATE PLAN OK。
+    """
+    import shutil
+    base = tmp_path / "frozen"
+    shutil.copytree(BASE, base)
+    m = base / "manifest.json"
+    raw = json.loads(m.read_text(encoding="utf-8"))
+    f0 = list(raw["tasks"][0]["files"])[0]
+    raw["tasks"][0]["files"][f0] = "f" * 64    # 只改 hash、檔還在＝純篡改（非缺檔）
+    m.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    appr = tmp_path / "approval.json"
+    appr.write_text(json.dumps({"schema": g3.APPROVAL_SCHEMA, "approved": True,
+                               "epic": "vq-1zf", "by": "human-approver"}),
+                    encoding="utf-8")
+    r = _run("--fire", "--approval", str(appr), "--manifest", str(m))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "G3GATE PLAN FAIL" in r.stdout
+    assert "hash 不符" in r.stdout              # 拒因如實：hash 不符（非核准門拒）
+    assert "APPROVED" not in r.stdout           # 有效核准不得繞過完整性
+    assert "G3GATE PLAN OK" not in r.stdout     # 不得假綠

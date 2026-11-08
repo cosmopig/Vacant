@@ -1,16 +1,18 @@
-# 当前状态（2026-11-08 ~10:5x UTC，r1253）
+# 当前状态（2026-11-08 r1260）
 
-## 本轮交付（r1253，零模型调用）
-1. **一条指令变好**：`git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops | wc -l`＝**0**（r1252＝46）→工单 R20261108_1034-1 树对齐达成（d450d43a）。
-2. **验收 3.5/4**：in-scope diff=0 ✓；e016 compileall rc=0 ✓（b150a94c 版实证 8 标记＋SyntaxError＝真缺陷，已修）；filing 三 sha MATCH ✓；anchors 3 passed ✓。
-3. **① "标记=0" 系工单前提误**：qwen27b 基线本身 9 文件含 `<<<<<<<` 字串（trace/evidence.py:440＝CONFLICT_MARKER_RE 正则定义；余 8 为 exhibit/STATE/NOW 内容）；两分支同集合、in-scope 逐字节一致＝对齐已证。
-4. **CI 点名一次**：2782d637（纯簿记 5 文件）running ~7%；d450d43a 排队（ci.sh 读本地分支、序 qwen27b→argon→worker、无需 push）。
-5. 红线全绿：vibe_calls 130 行（末条 11-07T18:35Z）→0 调用；queue 空；main c097899e；未 push。
+## 本轮交付（r1260，0 模型呼叫）
+审查#2 worker diff 清零：worker↔qwen27b 的 3 檔差異（tests/test_reqloop_g3gate.py＋
+ops/STATE.md＋ops/loop/NOW.md）同步為 0（r1259＝3）。同輪新鮮複驗審查#1/#3：
+anchors 3 passed×3 分支（三分支 worktree 各實跑）；run_eval --all RC 0 三門 PASS
+（G1 39/39·FP0／REAL14 9/9·0/5／PHASE3 fixed7·u2·r2w0·err0）；filing 6 sha 全
+MATCH（sources 3c6fb35a/6b7cb831/ada235bb＋code 51abfec3/c7589c61/332cd324）。
+工單 vq-el4.20。
 
 ## 下一步（次轮，按序）
-1. 巡灯一次（不轮询）：期望 2782d637 🟢 5056/5129＋d450d43a 🟢 5056/5129（LATEST_worker.json sha 由 b150a94c 变 d450d43a）。
-2. 两灯绿→验收工单 1034-1：移 tickets/done/；若 d450d43a 红→列 failures、开修复工单。
-3. G3（vq-1zf）续候人类明确批准；红线不变。
+1. 巡 qwen27b＋worker 新 SHA 的 CI 灯（各一次；红灯＝例外才动手；本机无 gh，以轮首报告为准）。
+2. G3（vq-1zf）续候人类明确核准——不发射、不入 queue、0 未授权模型呼叫。
+3. worker↔qwen27b diff 若再长（journal 逐轮推进），再同步清零（审查#2 判准）。
 
 ## 红线（不变）
-无 G3 fire／无模型调用／无 queue／无 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 冻结（5147f8c3·e757aec5）／CI 每轮至多点名一次。
+无 G3 fire／无模型调用／无 queue／无 hidden·scorer／不 push／不 reset·rebase／
+branch -f／repair.py＋extract.py 冻结／CI 每轮至多点名一次。
