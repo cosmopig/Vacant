@@ -5,6 +5,7 @@
 - `run_eval.py --all` 離線新鮮複驗：**exit 0**；G1 39/39（0 冤枉）／REAL14 9/9（冤枉 0/5）／PHASE3 fixed7 unres2 rtw0 err0——與審查點名數字一致。
 - 守護：test_reqloop_extract＋run_eval **95 passed**。
 - extract.py 邊界核完（quote 逐字／deliverable 猜名攔／verifier 白名單＋參數閉集／expr AST 白名單／parse fail-closed）：無 fail-open 缺口。
+- redo：effects_20261105_summary.json 補開（60,228 B、git 乾淨、26f23af5 argon）——policy30 7/6、once20 7/4、mismatches 兩相 []、50 cells，與提示數字逐項一致、無矛盾。
 
 ## 下一步
 1. 等審查派工 G3（須派工、不自發射大成本）；repair.py／G1 requirements.json／凍結快照不改。
