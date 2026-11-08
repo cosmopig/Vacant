@@ -1,13 +1,13 @@
-# NOW（r1287・2026-11-08）
+# NOW（r1289・2026-11-08）
 
 ## 現在在哪
-- r1287 redo（審查點名接地）：6 檔全開——auto-ci.yml 63 行 blob 674b2c8f・1 job 4 步・檔內無 enabled 欄位；effects 60228 B sha a710f7e4・p30 w2r13(g7/l6)・o20 w2r11(g7/l4)・單 rep 不宣稱孰優；g25 filing 4681 B・三門 PASS(phase3 7/2、baseline 9/9・7/9)・6/6 sha MATCH；ci_contract 5857 B・2 測＋scipy 負控制；extract.py 1217 行 blob e757aec5 sha 51abfec3・4 不變量；repair.py 2795 行 blob 5147f8c3・8 不變量——依賴全成立、0 歷史條目更正（本輪初判「argon green 245/0/1」從未入條目；接地後實際 red 5070/2/74）。
-- CI（一次讀、不 poll）：af255ece8（qwen27b HEAD）running（log 進行中、無 failed、5145 collected）；LATEST：qwen27b@88e7a3f86 green 5072/0/74、worker@e9e8f53d green 5072/0/74（係 worker HEAD 之祖先）、argon@103960577 **RED 5070/2/74**（2 failed＝freeze_check cover+verdict 兩測；記錄事實、不重診斷）。
-- freeze_check 9 OK・FROZEN_STATE_OK（輪首 10:57:13Z＋收輪複跑）；vq-el4 36/36 全閉；G3 待人類 --fire。
+- r1289（收尾 r1288 force-kill）：r1288 已將 vq-el4.36 修復落 qwen27b 1d3c149cc（freeze_check filing 雙守衛 null-sha 假綠燈＋負控制）但 force-kill 於同步 worker/argon 與 bd 收尾前——in-scope diff 非 0、freeze_check 判 diff_worker/diff_argon BROKEN、vq-el4.36 仍 open（r1288「37/37 全閉」未成立）。
+- 本輪：① 接地核實修復在位（null-sha 負控制 GREEN、filing 6/6 MATCH、凍結四檔未動）② 同步 4 in-scope 檔至 worker＋argon→diff 0×2 ③ freeze_check 9 項全 OK・FROZEN_STATE_OK rc=0 ④ pytest test_reqloop_freeze_check 7 passed ⑤ bd 收尾 vq-el4.36→vq-el4 37/37 全閉、0 open。
+- CI（一次讀、不 poll）：本輪新 HEAD 無 ci/<sha>.json；argon red（freeze_check 2 測）已記錄、待人類裁決。
 
 ## 下一步
 1. 每輪先跑 python3 ops/reqloop/freeze_check.py（9 項）；審查點名檔須開啟後才可寫其依賴聲明。
-2. ci/af255ece8*.json 收口即一次讀取（不 poll）：green 即記錄；red 且涉本輪改動才處理。
+2. 本輪新 commit 之 ci/<sha>.json 收口即一次讀取（不 poll）：green 即記錄；red 且涉本輪改動才處理。
 3. 人類裁決 CI 通道前不重診斷（argon red 已記錄）；人類核准 G3 --fire 後才點火、按 gate 紀律記錄。
 
 ## 紅線（本輪全守住）
