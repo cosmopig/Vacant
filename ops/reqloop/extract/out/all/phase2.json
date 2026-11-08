@@ -27,10 +27,10 @@
     {
       "cell": "dab_057-pi-A",
       "role": "good",
-      "status": "FALSE",
-      "n_fail": 2,
+      "status": "CLEAN",
+      "n_fail": 0,
       "n_unknown": 0,
-      "detail": "1: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）; 3: 答案值與按公開規則對公開資料的重算不符；請依原始需求與工作區資料自行重算（期望值不在證據中）"
+      "n_results": 3
     },
     {
       "cell": "dab_105-pi-C",
@@ -117,7 +117,7 @@
   "model": "glm53",
   "caught": 9,
   "total_bad": 9,
-  "false_acc": 1,
+  "false_acc": 0,
   "total_good": 5,
   "errors": 0,
   "cost": {
