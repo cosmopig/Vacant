@@ -1,4 +1,4 @@
-# NOW（r1269・2026-11-08）
+# NOW（r1269 redo・2026-11-08）
 
 ## 現在在哪
 - G2.5 主線完結、全綠（數字以 filing `out/all/phase3.json` 7/2 為準；standalone 6/3 舊檔不得引用）。
@@ -6,6 +6,9 @@
   （anchors 5／ci-contract 2／diff 0×2／filing 6 sha MATCH／g3gate NOT FIRED）；
   CI 一次讀取：三分支最後完成皆 green（5066/5139・0 failed）；新 SHA（c7a08ebe/3327e413/320419c3）在跑、不 poll。
 - 工作隊列為空：vq-el4 28 項全閉；唯一 ready＝vq-1zf（G3），待人類核准。
+- r1269 redo：審查點名 5 檔（filing／effects summary／ci-contract 測試／extract.py／repair.py）本輪逐檔直接開啟重驗——
+  filing 6 sha 以 sha256sum 獨立重算 6/6 MATCH、phase3 7/2 直讀核實、ci-contract 2 測＋anchors 新跑 7 passed、
+  extract 1217 行／blob e757aec5、repair 2795 行／blob 5147f8c3 之 docstring 規則逐條核實；r1269 依賴聲明全成立。
 - 唯一未閉＝兩項人類決策：① G3 `--fire` 核准（12 格已備、g3gate --plan EXIT 0、0 model calls）；
   ② CI 通道裁決（auto-ci.yml 重啟 vs local vacant-ci 為權威）——按指示不重複診斷、不翻開關。
 
