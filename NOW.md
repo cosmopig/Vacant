@@ -12,6 +12,10 @@
   GitHub Actions 11-07 13:22 后仍无新 run（末 f03d1177 failure）→待人类/基建。
 - ⑤ qwen27b 6aae8850 CI：09:59 巡灯＝running（09:45:00 起跑、历次 14–14.5 分）；
   上 HEAD e54b4850 已 🟢 5056/5129→本轮灯记 running，未轮询。
+- redo（审查点名 2 项）：4681 B＝`wc -c` 重算值（filing 4b24cd5b 未变）；
+  effects_20261105_summary.json 已开（60,228 B、blob 856c2c71 未变、snapshot d38d2eb2）：
+  w2r g7/l6・g7/l4、r2w 0/0、pres 5/5・0/0、api 365/550・165/292、tokens 16,284,659/17,385,851/6,210,682/13,293,271、
+  cells 30+20=50、mismatch 3+2=5→与历史引文全一致、零修正。
 
 ## 下一步（r1252，单一步骤、一轮可完）
 1. 巡 6aae8850 灯一次（≤1 次）：期望 🟢 5056/5129→新 HEAD 三分支全绿；

@@ -254,3 +254,10 @@
 - ④ 环境一次核（不修复）：本轮 0 个 D 态进程（上轮"ops 大量 D"未再现）、时钟一致（09:43→09:59 无回跳）、磁盘 54G 空闲；GitHub Actions 11-07 13:22 后仍无新 run（末 f03d1177 failure）→仍待人类/基建。
 - ⑤ 本轮灯（一次、未轮询）：qwen27b 6aae8850 CI running（09:45:00 起跑、历次 14–14.5 分）；上 HEAD e54b4850 已 🟢 5056/5129→下一步＝r1252 巡灯一次（期望 🟢 收口）。
 - ⑥ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
+
+## r1251 redo（2026-11-08 ~10:1x UTC）：审查点名 2 项——"4681 B" 重算接地＋effects_20261105_summary.json 已开
+- ① "4681 B" 命令重算：`wc -c ops/audits/g25_all_gates_filing.json`＝**4681**（blob 4b24cd5b 未变）→NOW/STATE 的 "4681 B" 即该重算值（数值原本正确，此为补重算接地）。
+- ② effects_20261105_summary.json 已开（head＋代码）：60,228 B、blob 856c2c711c…未变（r1244 redo 锚点）、snapshot d38d2eb2、schema vacant.audit/effects_20261105_summary/1。
+- ③ 数字对质：policy30 w2r g7/l6、still g3/l4、r2w 0/0、pres 5/5、api 365/550、tokens 16,284,659/17,385,851（5 格 tokens_true=None 缺值未填 0）；once20 w2r g7/l4、still g3/l6、r2w 0/0、pres 0/0、api 165/292、tokens 6,210,682/13,293,271；cells 30+20＝50；local_vs_independent mismatch 3+2＝5、current_code_vs_independent 两 phase 皆空→与 r1248/r1249/r1250 引文全一致、零修正。
+- ④ 依赖对质：r1251 六条（worker 同步／锚点守护／filing sha256／vibe_calls／环境／CI 灯）无一引用此文件；"4681 B" 出自 filing（wc -c）、不出自此文件→零依赖、零修正。
+- ⑤ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
