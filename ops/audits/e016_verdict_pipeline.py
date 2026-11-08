@@ -7,11 +7,7 @@
 NO_MECHANISM / UNRESOLVED；優先序見 packet §4）。
 
 用法：
-<<<<<<< HEAD
-  python3 e016_verdict_pipeline.py --selftest      # 合成資料自測（6 態＋邊界）
-=======
   python3 e016_verdict_pipeline.py --selftest      # 合成資料自測（10 組：五態＋成本 UNKNOWN＋完賽缺分＋數值）
->>>>>>> auto/argon
   python3 e016_verdict_pipeline.py                 # 讀正式 run 目錄
 exit：0＝已判定（含五態）、10＝run 未完成（格子未齊）、20＝UNKNOWN（infra>20%）
 """
@@ -67,14 +63,6 @@ def _pairs(rows: list[dict], x: str, y: str) -> list[tuple[bool, bool]]:
 
 def cost(rows: list[dict], arm: str) -> dict:
     rs = [r for r in rows if r["arm"] == arm]
-<<<<<<< HEAD
-    passed = sum(1 for r in rs if r["pass"])
-    calls = sum(int(r.get("calls") or 0) for r in rs)
-    tok = sum(int(r.get("tok") or 0) for r in rs)
-    return {"arm": arm, "n": len(rs), "pass": passed, "calls": calls, "tok": tok,
-            "calls_per_success": (calls / passed) if passed else None,
-            "tokens_per_success": (tok / passed) if passed else None}
-=======
     # 成本 UNKNOWN 的格（calls/tok=None）不靜默當 0：單獨計數、只對已知格聚合。
     known = [r for r in rs if r.get("calls") is not None and r.get("tok") is not None]
     passed_known = sum(1 for r in known if r["pass"])
@@ -85,7 +73,6 @@ def cost(rows: list[dict], arm: str) -> dict:
             "calls": calls, "tok": tok,
             "calls_per_success": (calls / passed_known) if passed_known else None,
             "tokens_per_success": (tok / passed_known) if passed_known else None}
->>>>>>> auto/argon
 
 
 def decide(rows: list[dict], total_cells: int, missing: int) -> dict:
@@ -96,8 +83,6 @@ def decide(rows: list[dict], total_cells: int, missing: int) -> dict:
     for p, s in zip(pairs, sig):
         p["holm_significant"] = s
     costs = {a: cost(rows, a) for a in ARMS}
-<<<<<<< HEAD
-=======
     cost_unknown = sum(costs[a]["cost_unknown_n"] for a in ARMS)
     if cost_unknown > 0:
         # 任何一格成本 UNKNOWN ⇒ 成本判定 UNKNOWN（不是 0、不是通過；未測≠負結果）。
@@ -107,7 +92,6 @@ def decide(rows: list[dict], total_cells: int, missing: int) -> dict:
                         "（cell.json.metrics 缺 model_calls/input_tokens/output_tokens 或 cell.json 缺失；"
                         "成本紅線不可評——未測≠0、≠通過）"),
                 "pairs": pairs, "costs": costs}
->>>>>>> auto/argon
     ac, acnf, ccnf = pairs
     a_ok = costs["A"]["calls_per_success"]
     cost_breach = []
@@ -156,23 +140,13 @@ def load(runs_root: pathlib.Path, exp: str) -> tuple[list[dict], int, int]:
             if s.get("pass") is None:
                 missing += 1
                 continue
-<<<<<<< HEAD
-            rows.append({"task": task, "arm": arm, "pass": bool(s["pass"]),
-                         "calls": s.get("model_calls"), "tok": s.get("tokens")})
-=======
             calls, tok = _cell_cost(d)
             rows.append({"task": task, "arm": arm, "pass": bool(s["pass"]),
                          "calls": calls, "tok": tok})
->>>>>>> auto/argon
     total = sum(1 for d in root.iterdir() if d.is_dir() and not d.name.startswith(".") and d.name.endswith("-r1"))
     return rows, total, missing
 
 
-<<<<<<< HEAD
-def run(runs_root: pathlib.Path, exp: str) -> dict:
-    rows, total, missing = load(runs_root, exp)
-    
-=======
 def _cell_cost(cell_dir: pathlib.Path) -> tuple[int | None, int | None]:
     """成本在 cell.json.metrics（model_calls / input_tokens / output_tokens）；
     score.json 只有 pass / tests_*，沒有成本欄位（舊版從 score.json 讀⇒恆 None⇒
@@ -203,30 +177,20 @@ def missing_total(total: int, missing_scored: int) -> int:
 def run(runs_root: pathlib.Path, exp: str) -> dict:
     rows, total, missing = load(runs_root, exp)
 
->>>>>>> auto/argon
     # Job completion check logic
     done_file = "/srv/vlab/done/16_e016_failed_step_ablation.json"
     is_done = pathlib.Path(done_file).exists() or (total >= N_CELLS)
 
     if total < N_CELLS and not is_done:
-<<<<<<< HEAD
-        print(f"INCOMPLETE: {total}/{N_CELLS} 格未完成（等 job 結束再判決）")
-        sys.exit(10)
-=======
         print(f"INCOMPLETE: 只到 {total}/{N_CELLS} 格在位（等 job 結束再判決）")
         sys.exit(10)
     missing = missing_total(total, missing)   # 無目錄的格也計缺分（senior 11/04 #1.2）
->>>>>>> auto/argon
     v = decide(rows, total, missing)
     out = pathlib.Path(__file__).parent / f"{exp}_verdict.json"
     out.write_text(json.dumps(v, ensure_ascii=False, indent=2))
     print(f"{v['state']}  ({v['why']})  -> {out}")
     for p in v.get("pairs", []):
-<<<<<<< HEAD
-        print(f"  {p['x']} vs {p['y']}: pairs={p['pairs']} {p['x']}_only={p['x_only']} {p['y']}_only={p['y']}_only={p['y_only']} p_raw={p['p_raw']:.4f} holm={'SIG' if p['holm_significant'] else 'ns'}")
-=======
         print(f"  {p['x']} vs {p['y']}: pairs={p['pairs']} {p['x']}_only={p['x_only']} {p['y']}_only={p['y_only']} p_raw={p['p_raw']:.4f} holm={'SIG' if p['holm_significant'] else 'ns'}")
->>>>>>> auto/argon
     for a in ARMS:
         c = v.get("costs", {}).get(a, {})
         print(f"  cost {a}: n={c.get('n')} pass={c.get('pass')} calls/success={c.get('calls_per_success')} tok/success={c.get('tokens_per_success')}")
@@ -278,9 +242,6 @@ def selftest() -> None:
     assert mcnemar_p(3, 3) == 1.0
     assert holm([0.015625, 0.015625, 1.0]) == [True, True, False]
     assert holm([0.03, 0.03, 0.03]) == [False, False, False]
-<<<<<<< HEAD
-    print("ALL OK（7 組自測：五態＋零通過邊界＋McNemar/Holm 數值）")
-=======
     # 8) 成本 UNKNOWN：任一格成本欄位缺失 ⇒ 成本判定 UNKNOWN（不是 0、不是通過）
     r8 = rows_from({"A": base, "C": c2, "C-nf": c2})
     r8[1]["calls"] = None; r8[1]["tok"] = None   # C 首格成本未知
@@ -301,7 +262,6 @@ def selftest() -> None:
     v = decide(rows_from({"A": base, "C": c2, "C-nf": c2}), 102, missing_total(80, 2))
     assert v["state"] == "UNKNOWN" and "缺分" in v["why"], v
     print("ALL OK（10 組自測：五態＋零通過邊界＋成本 UNKNOWN 兩態＋完賽缺分計數＋McNemar/Holm 數值）")
->>>>>>> auto/argon
 
 
 if __name__ == "__main__":

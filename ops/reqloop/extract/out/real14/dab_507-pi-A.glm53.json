@@ -16,7 +16,7 @@
           "eq": 5
         }
       },
-      "description": "統計 star_rating 恰為 5 的飯店數，與 answer.txt 的 @total_hotels 值比對。",
+      "description": "統計 star_rating 恰為 5 的飯店數量，與 answer.txt 中 @total_hotels 的值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -32,11 +32,11 @@
         "keys": [
           {
             "key": "total_hotels",
-            "type": "number"
+            "type": "integer"
           }
         ]
       },
-      "description": "@total_hotels 必須存在且為非負整數。",
+      "description": "answer.txt 必須含 @total_hotels 鍵，值為非負整數。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -44,19 +44,19 @@
     },
     {
       "id": "3",
-      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the\nnames given under \"Answer format\" in the task.",
+      "quote": "Put each answer item on its own line, in the form `@name[value]`, using exactly the names given under \"Answer format\" in the task. This task expects 1 item(s):",
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
       "params": {
         "tag": "total_hotels",
-        "value_type": "number"
+        "value_type": "integer"
       },
-      "description": "answer.txt 需含 @total_hotels[value] 格式條目。",
+      "description": "answer.txt 須以 @total_hotels[value] 格式撰寫，每項一行。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -69,14 +69,9 @@
       "3"
     ],
     "discarded": [],
-    "unverified": [
-      {
-        "id": "3",
-        "reason": "unsupported_tag_value_type:number"
-      }
-    ]
+    "unverified": []
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"total_hotels\",\n      \"data_file\": \"data/hotel_data.csv\",\n      \"recompute\": {\"type\": \"count_if\", \"col\": \"star_rating\", \"eq\": 5}\n    },\n    \"description\": \"統計 star_rating 恰為 5 的飯店數，與 answer.txt 的 @total_hotels 值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"Count only hotels that have a star rating exactly equal to 5. This count value should be a non-negative integer.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [{\"key\": \"total_hotels\", \"type\": \"number\"}]\n    },\n    \"description\": \"@total_hotels 必須存在且為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"3\",\n    \"quote\": \"Put each answer item on its own line, in the form `@name[value]`, using exactly the\\nnames given under \\\"Answer format\\\" in the task.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"total_hotels\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"answer.txt 需含 @total_hotels[value] 格式條目。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"Are there any hotels in the dataset that have a star rating of 5? If yes, how many hotels have a star rating of 5?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"total_hotels\",\n      \"data_file\": \"data/hotel_data.csv\",\n      \"recompute\": {\"type\": \"count_if\", \"col\": \"star_rating\", \"eq\": 5}\n    },\n    \"description\": \"統計 star_rating 恰為 5 的飯店數量，與 answer.txt 中 @total_hotels 的值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"Count only hotels that have a star rating exactly equal to 5. This count value should be a non-negative integer.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [{\"key\": \"total_hotels\", \"type\": \"integer\"}]\n    },\n    \"description\": \"answer.txt 必須含 @total_hotels 鍵，值為非負整數。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"3\",\n    \"quote\": \"Put each answer item on its own line, in the form `@name[value]`, using exactly the names given under \\\"Answer format\\\" in the task. This task expects 1 item(s):\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"total_hotels\",\n      \"value_type\": \"integer\"\n    },\n    \"description\": \"answer.txt 須以 @total_hotels[value] 格式撰寫，每項一行。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_507-pi-A",
     "role": "bad",
@@ -86,6 +81,6 @@
       "data/hotel_data.csv"
     ],
     "prompt_sha256": "780f0f835604ff50e8198a971806b2b7663f8947aed1b040e6115eb8409cdd7c",
-    "generated_at": "2026-11-07T13:18:26+08:00"
+    "generated_at": "2026-11-07T13:31:12+08:00"
   }
 }

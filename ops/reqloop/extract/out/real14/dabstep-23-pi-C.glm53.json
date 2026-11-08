@@ -2,7 +2,7 @@
   "task_id": "dabstep-23-pi-C",
   "items": [
     {
-      "id": "req-1",
+      "id": "R1",
       "quote": "What is the fraud rate for in-person transactions for the year 2023?",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
@@ -32,14 +32,14 @@
           ]
         }
       },
-      "description": "以 payments.csv 重算 2023 年面對面（POS）交易的詐欺比率（has_fraudulent_dispute 為 true 的比例），與 answer.txt 的數字比對。",
+      "description": "以 payments.csv 重算 2023 年 POS（in-person）交易中 has_fraudulent_dispute 為 true 的比率，與 answer.txt 的數字比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "req-2",
+      "id": "R2",
       "quote": "Answer must be just a number.",
       "deliverable": "answer.txt",
       "verifier": "tag_format",
@@ -48,7 +48,7 @@
         "tag": "answer",
         "value_type": "number"
       },
-      "description": "answer.txt 內容必須是單一數字、一行、無其他文字。",
+      "description": "answer.txt 內容必須是單一數字（一行純文字值）。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -60,18 +60,18 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req-1",
-      "req-2"
+      "R1",
+      "R2"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "req-2",
+        "id": "R2",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
-  "raw_output": "[{\"id\":\"req-1\",\"quote\":\"What is the fraud rate for in-person transactions for the year 2023?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"cond_rate\",\"where\":[{\"col\":\"shopper_interaction\",\"op\":\"eq\",\"value\":\"POS\"},{\"col\":\"year\",\"op\":\"eq\",\"value\":2023}],\"num_where\":[{\"col\":\"has_fraudulent_dispute\",\"op\":\"eq\",\"value\":true}]}},\"description\":\"以 payments.csv 重算 2023 年面對面（POS）交易的詐欺比率（has_fraudulent_dispute 為 true 的比例），與 answer.txt 的數字比對。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"req-2\",\"quote\":\"Answer must be just a number.\",\"deliverable\":\"answer.txt\",\"verifier\":\"tag_format\",\"params\":{\"tag\":\"answer\",\"value_type\":\"number\"},\"description\":\"answer.txt 內容必須是單一數字、一行、無其他文字。\",\"required\":true,\"kind\":\"explicit\"}]\n",
+  "raw_output": "[{\"id\":\"R1\",\"quote\":\"What is the fraud rate for in-person transactions for the year 2023?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"cond_rate\",\"where\":[{\"col\":\"shopper_interaction\",\"op\":\"eq\",\"value\":\"POS\"},{\"col\":\"year\",\"op\":\"eq\",\"value\":2023}],\"num_where\":[{\"col\":\"has_fraudulent_dispute\",\"op\":\"eq\",\"value\":true}]}},\"description\":\"以 payments.csv 重算 2023 年 POS（in-person）交易中 has_fraudulent_dispute 為 true 的比率，與 answer.txt 的數字比對。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"R2\",\"quote\":\"Answer must be just a number.\",\"deliverable\":\"answer.txt\",\"verifier\":\"tag_format\",\"params\":{\"tag\":\"answer\",\"value_type\":\"number\"},\"description\":\"answer.txt 內容必須是單一數字（一行純文字值）。\",\"required\":true,\"kind\":\"explicit\"}]\n",
   "provenance": {
     "cell": "dabstep-23-pi-C",
     "role": "bad",
@@ -82,6 +82,6 @@
       "data/payments-readme.md"
     ],
     "prompt_sha256": "7e6630fd1b9e7f6e25f262e90729459fab7fbe5487ad235eeafac955cf23c1cb",
-    "generated_at": "2026-11-07T13:18:58+08:00"
+    "generated_at": "2026-11-07T13:31:47+08:00"
   }
 }

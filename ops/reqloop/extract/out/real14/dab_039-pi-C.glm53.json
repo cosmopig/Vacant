@@ -3,7 +3,7 @@
   "items": [
     {
       "id": "R1",
-      "quote": "@is_normal[p_value]",
+      "quote": "Use the Shapiro-Wilk test to determine the normality of the data in the \"importance.score\" column.",
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
@@ -15,15 +15,55 @@
           }
         ]
       },
-      "description": "答案檔必須含 @is_normal[...] 鍵，值為 0 到 1 之間的數字（Shapiro-Wilk p-value，四捨五入到小數點後四位）。p-value 本身需以 Shapiro-Wilk 檢定重算，但允許的 recompute 類型不支援 Shapiro-Wilk 檢定，故數值無法程式驗證，僅能驗證鍵存在與型別。",
+      "description": "answer.txt 必須含 @is_normal[...] 鍵值（0 到 1 之間的數字，四捤五入到小數點後四位）。Shapiro-Wilk 檢定本身無對應 recompute type，無法程式重算 p 值，僅能驗證鍵值存在與型別。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     },
     {
       "id": "R2",
-      "quote": "@transformed_importance_score_mean[mean]",
+      "quote": "Calculate the mean and standard deviation of the transformed \"importance.score\" column.",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {
+        "keys": [
+          {
+            "key": "transformed_importance_score_mean",
+            "type": "number"
+          },
+          {
+            "key": "transformed_importance_score_std",
+            "type": "number"
+          }
+        ]
+      },
+      "description": "answer.txt 必須含 @transformed_importance_score_mean[...] 與 @transformed_importance_score_std[...]（各四捤五入到小數點後兩位）。因需先做自然對數轉換，現有 recompute type 清單無法對轉換後欄位重算 mean/sd，故無法程式驗證數值，僅能驗證鍵值存在與型別。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R3",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "is_normal",
+        "value_type": "number"
+      },
+      "description": "answer.txt 須以 @name[value] 格式逐行撰寫答案項目。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "R4",
+      "quote": "If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \"importance.score\" column.",
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
@@ -35,63 +75,7 @@
           }
         ]
       },
-      "description": "答案檔必須含 @transformed_importance_score_mean[...] 鍵，值為 log 轉換後 importance.score 的均值（四捨五入到小數點後兩位）。轉換（自然對數）不屬於任何允許的 recompute 類型，故數值無法程式重算驗證，僅能驗證鍵存在與型別。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R3",
-      "quote": "@transformed_importance_score_std[std]",
-      "deliverable": "answer.txt",
-      "verifier": "answer_kv",
-      "kind": "explicit",
-      "params": {
-        "keys": [
-          {
-            "key": "transformed_importance_score_std",
-            "type": "number"
-          }
-        ]
-      },
-      "description": "答案檔必須含 @transformed_importance_score_std[...] 鍵，值為 log 轉換後 importance.score 的標準差（四捨五入到小數點後兩位）。轉換（自然對數）不屬於任何允許的 recompute 類型，故數值無法程式重算驗證，僅能驗證鍵存在與型別。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "R4",
-      "quote": "Put each answer item on its own line, in the form `@name[value]`",
-      "deliverable": "answer.txt",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "is_normal",
-        "value_type": "number"
-      },
-      "description": "answer.txt 中答案項目須以 @name[value] 格式、每項一行的形式呈現；此條驗證 @is_normal 標籤格式。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
-    },
-    {
-      "id": "R5",
-      "quote": "If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \"importance.score\" column.",
-      "deliverable": "answer.txt",
-      "verifier": "answer_kv",
-      "kind": "explicit",
-      "params": {
-        "keys": [
-          {
-            "key": "is_normal",
-            "type": "number"
-          }
-        ]
-      },
-      "description": "若 Shapiro-Wilk p-value < 0.05，須對 importance.score 欄做自然對數轉換後再計算後續統計量。此決策依賴 Shapiro-Wilk 檢定結果，允許的 verifier 均不支援，無法程式驗證轉換是否正確套用，僅能確認答案鍵存在。",
+      "description": "條件式需求：若 Shapiro-Wilk p 值 < 0.05，須對 importance.score 欄做自然對數轉換後再計算統計量。此條件分支與對數轉換無法用現有 recompute type 驗證，設為 unverified。",
       "required": true,
       "authority": "client",
       "hidden": false,
@@ -106,22 +90,29 @@
       "R1",
       "R2",
       "R3",
-      "R4",
-      "R5"
+      "R4"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "R4",
+        "id": "R1",
+        "reason": "model_declared_unverified"
+      },
+      {
+        "id": "R2",
+        "reason": "model_declared_unverified"
+      },
+      {
+        "id": "R3",
         "reason": "unsupported_tag_value_type:number"
       },
       {
-        "id": "R5",
+        "id": "R4",
         "reason": "model_declared_unverified"
       }
     ]
   },
-  "raw_output": "[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"@is_normal[p_value]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}]},\n    \"description\": \"答案檔必須含 @is_normal[...] 鍵，值為 0 到 1 之間的數字（Shapiro-Wilk p-value，四捨五入到小數點後四位）。p-value 本身需以 Shapiro-Wilk 檢定重算，但允許的 recompute 類型不支援 Shapiro-Wilk 檢定，故數值無法程式驗證，僅能驗證鍵存在與型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"@transformed_importance_score_mean[mean]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}]},\n    \"description\": \"答案檔必須含 @transformed_importance_score_mean[...] 鍵，值為 log 轉換後 importance.score 的均值（四捨五入到小數點後兩位）。轉換（自然對數）不屬於任何允許的 recompute 類型，故數值無法程式重算驗證，僅能驗證鍵存在與型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"@transformed_importance_score_std[std]\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_std\", \"type\": \"number\"}]},\n    \"description\": \"答案檔必須含 @transformed_importance_score_std[...] 鍵，值為 log 轉換後 importance.score 的標準差（四捨五入到小數點後兩位）。轉換（自然對數）不屬於任何允許的 recompute 類型，故數值無法程式重算驗證，僅能驗證鍵存在與型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R4\",\n    \"quote\": \"Put each answer item on its own line, in the form `@name[value]`\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"is_normal\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 中答案項目須以 @name[value] 格式、每項一行的形式呈現；此條驗證 @is_normal 標籤格式。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R5\",\n    \"quote\": \"If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}]},\n    \"description\": \"若 Shapiro-Wilk p-value < 0.05，須對 importance.score 欄做自然對數轉換後再計算後續統計量。此決策依賴 Shapiro-Wilk 檢定結果，允許的 verifier 均不支援，無法程式驗證轉換是否正確套用，僅能確認答案鍵存在。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  }\n]\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"Use the Shapiro-Wilk test to determine the normality of the data in the \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"is_normal\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須含 @is_normal[...] 鍵值（0 到 1 之間的數字，四捤五入到小數點後四位）。Shapiro-Wilk 檢定本身無對應 recompute type，無法程式重算 p 值，僅能驗證鍵值存在與型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"Calculate the mean and standard deviation of the transformed \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}, {\"key\": \"transformed_importance_score_std\", \"type\": \"number\"}]},\n    \"description\": \"answer.txt 必須含 @transformed_importance_score_mean[...] 與 @transformed_importance_score_std[...]（各四捤五入到小數點後兩位）。因需先做自然對數轉換，現有 recompute type 清單無法對轉換後欄位重算 mean/sd，故無法程式驗證數值，僅能驗證鍵值存在與型別。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  },\n  {\n    \"id\": \"R3\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"is_normal\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 須以 @name[value] 格式逐行撰寫答案項目。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R4\",\n    \"quote\": \"If the p-value from the Shapiro-Wilk test is less than 0.05, apply a natural log transformation to the \\\"importance.score\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\"keys\": [{\"key\": \"transformed_importance_score_mean\", \"type\": \"number\"}]},\n    \"description\": \"條件式需求：若 Shapiro-Wilk p 值 < 0.05，須對 importance.score 欄做自然對數轉換後再計算統計量。此條件分支與對數轉換無法用現有 recompute type 驗證，設為 unverified。\",\n    \"required\": true,\n    \"kind\": \"explicit\",\n    \"unverified\": true\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_039-pi-C",
     "role": "bad",
@@ -131,6 +122,6 @@
       "data/imp.score.ldlr.metabolome.csv"
     ],
     "prompt_sha256": "8a6e702b0b867fbf1315c324749adab1c7c8afebb4ae765b332657bb90078263",
-    "generated_at": "2026-11-07T13:17:35+08:00"
+    "generated_at": "2026-11-07T13:30:17+08:00"
   }
 }

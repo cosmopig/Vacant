@@ -2,7 +2,23 @@
   "task_id": "dab_427-pi-A",
   "items": [
     {
-      "id": "req_1",
+      "id": "1",
+      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {
+        "tag": "null_entries_count",
+        "value_type": "number"
+      },
+      "description": "答案須寫入 answer.txt，並以 @null_entries_count[數字] 格式呈現。",
+      "required": true,
+      "authority": "client",
+      "hidden": false,
+      "unverified": true
+    },
+    {
+      "id": "2",
       "quote": "How many storms have null values in the \"min_p\" column?",
       "deliverable": "answer.txt",
       "verifier": "kv_recomputed",
@@ -15,67 +31,11 @@
           "col": "min_p"
         }
       },
-      "description": "計算 min_p 欄位中 null 值的個數，並與 answer.txt 中 @null_entries_count 的值比對。",
+      "description": "統計 min_p 欄位中 null 值的個數（僅計 null，不計其他錯誤資料），與 answer.txt 中 @null_entries_count 的值比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
-    },
-    {
-      "id": "req_2",
-      "quote": "Only the null values should be counted, and not any irrelevant or erroneous data that might be present.",
-      "deliverable": "answer.txt",
-      "verifier": "kv_recomputed",
-      "kind": "explicit",
-      "params": {
-        "key": "null_entries_count",
-        "data_file": "data/cost_data_with_errors.csv",
-        "recompute": {
-          "type": "null_count",
-          "col": "min_p"
-        }
-      },
-      "description": "僅計數真正的 null 值（預設 null 集 ''/none/null/nan/na/n-a），不相關或錯誤資料（如 'None' 以外的異常值）不計入；null_count 的預設 null 集即對應此要求。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "req_3",
-      "quote": "@null_entries_count[number] where \"number\" is an integer indicating the count of null entries in the \"min_p\" column.",
-      "deliverable": "answer.txt",
-      "verifier": "answer_kv",
-      "kind": "explicit",
-      "params": {
-        "keys": [
-          {
-            "key": "null_entries_count",
-            "type": "number"
-          }
-        ]
-      },
-      "description": "answer.txt 必須包含 @null_entries_count[整數] 格式的答案項目。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": false
-    },
-    {
-      "id": "req_4",
-      "quote": "Write your final answer to `answer.txt` in the root of this workspace.",
-      "deliverable": "answer.txt",
-      "verifier": "tag_format",
-      "kind": "explicit",
-      "params": {
-        "tag": "null_entries_count",
-        "value_type": "number"
-      },
-      "description": "最終答案須寫入工作區根目錄的 answer.txt，並以 @null_entries_count[value] 標籤格式呈現。",
-      "required": true,
-      "authority": "client",
-      "hidden": false,
-      "unverified": true
     }
   ],
   "model": "glm53",
@@ -83,20 +43,18 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "req_1",
-      "req_2",
-      "req_3",
-      "req_4"
+      "1",
+      "2"
     ],
     "discarded": [],
     "unverified": [
       {
-        "id": "req_4",
+        "id": "1",
         "reason": "unsupported_tag_value_type:number"
       }
     ]
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"req_1\",\n    \"quote\": \"How many storms have null values in the \\\"min_p\\\" column?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"null_entries_count\",\n      \"data_file\": \"data/cost_data_with_errors.csv\",\n      \"recompute\": {\"type\": \"null_count\", \"col\": \"min_p\"}\n    },\n    \"description\": \"計算 min_p 欄位中 null 值的個數，並與 answer.txt 中 @null_entries_count 的值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_2\",\n    \"quote\": \"Only the null values should be counted, and not any irrelevant or erroneous data that might be present.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\n      \"key\": \"null_entries_count\",\n      \"data_file\": \"data/cost_data_with_errors.csv\",\n      \"recompute\": {\"type\": \"null_count\", \"col\": \"min_p\"}\n    },\n    \"description\": \"僅計數真正的 null 值（預設 null 集 ''/none/null/nan/na/n-a），不相關或錯誤資料（如 'None' 以外的異常值）不計入；null_count 的預設 null 集即對應此要求。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_3\",\n    \"quote\": \"@null_entries_count[number] where \\\"number\\\" is an integer indicating the count of null entries in the \\\"min_p\\\" column.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"answer_kv\",\n    \"params\": {\n      \"keys\": [{\"key\": \"null_entries_count\", \"type\": \"number\"}]\n    },\n    \"description\": \"answer.txt 必須包含 @null_entries_count[整數] 格式的答案項目。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req_4\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\n      \"tag\": \"null_entries_count\",\n      \"value_type\": \"number\"\n    },\n    \"description\": \"最終答案須寫入工作區根目錄的 answer.txt，並以 @null_entries_count[value] 標籤格式呈現。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"Write your final answer to `answer.txt` in the root of this workspace.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"null_entries_count\", \"value_type\": \"number\"},\n    \"description\": \"答案須寫入 answer.txt，並以 @null_entries_count[數字] 格式呈現。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"How many storms have null values in the \\\"min_p\\\" column?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"kv_recomputed\",\n    \"params\": {\"key\": \"null_entries_count\", \"data_file\": \"data/cost_data_with_errors.csv\", \"recompute\": {\"type\": \"null_count\", \"col\": \"min_p\"}},\n    \"description\": \"統計 min_p 欄位中 null 值的個數（僅計 null，不計其他錯誤資料），與 answer.txt 中 @null_entries_count 的值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dab_427-pi-A",
     "role": "bad",
@@ -106,6 +64,6 @@
       "data/cost_data_with_errors.csv"
     ],
     "prompt_sha256": "aba2911d1634803aad57db36e8e0449638f4b244c825db99dcb837421aa8f584",
-    "generated_at": "2026-11-07T13:18:20+08:00"
+    "generated_at": "2026-11-07T13:31:06+08:00"
   }
 }

@@ -2,7 +2,7 @@
   "task_id": "dabstep-11-pi-A",
   "items": [
     {
-      "id": "R1",
+      "id": "req-1",
       "quote": "What is the highest transaction amount (in EUR) recorded?",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
@@ -14,30 +14,27 @@
           "col": "eur_amount"
         }
       },
-      "description": "答案須為 payments.csv 中 eur_amount 欄位的最大值，寫入 answer.txt 的單一數值須與重算一致。",
+      "description": "答案為 payments.csv 中 eur_amount 欄位的最大值，寫入 answer.txt 的單一數值須與重算一致。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "R2",
-      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).",
+      "id": "req-2",
+      "quote": "When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`",
       "deliverable": "answer.txt",
-      "verifier": "plain_recomputed",
+      "verifier": "tag_format",
       "kind": "explicit",
       "params": {
-        "data_file": "data/payments.csv",
-        "recompute": {
-          "type": "col_max",
-          "col": "eur_amount"
-        }
+        "tag": "answer",
+        "value_type": "number"
       },
-      "description": "answer.txt 內只能有最終答案本身（單一數值），不得有其他文字。",
+      "description": "answer.txt 必須存在且僅含最終答案（單一純文字數值一行，無其他文字）。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -45,13 +42,18 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "R1",
-      "R2"
+      "req-1",
+      "req-2"
     ],
     "discarded": [],
-    "unverified": []
+    "unverified": [
+      {
+        "id": "req-2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
   },
-  "raw_output": "[{\"id\":\"R1\",\"quote\":\"What is the highest transaction amount (in EUR) recorded?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"col_max\",\"col\":\"eur_amount\"}},\"description\":\"答案須為 payments.csv 中 eur_amount 欄位的最大值，寫入 answer.txt 的單一數值須與重算一致。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"R2\",\"quote\":\"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"col_max\",\"col\":\"eur_amount\"}},\"description\":\"answer.txt 內只能有最終答案本身（單一數值），不得有其他文字。\",\"required\":true,\"kind\":\"explicit\"}]\n",
+  "raw_output": "[\n  {\n    \"id\": \"req-1\",\n    \"quote\": \"What is the highest transaction amount (in EUR) recorded?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"col_max\", \"col\": \"eur_amount\"}},\n    \"description\": \"答案為 payments.csv 中 eur_amount 欄位的最大值，寫入 answer.txt 的單一數值須與重算一致。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"req-2\",\n    \"quote\": \"When you have computed the final answer, write ONLY the final answer to `/app/answer.txt`\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"tag_format\",\n    \"params\": {\"tag\": \"answer\", \"value_type\": \"number\"},\n    \"description\": \"answer.txt 必須存在且僅含最終答案（單一純文字數值一行，無其他文字）。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n",
   "provenance": {
     "cell": "dabstep-11-pi-A",
     "role": "good",
@@ -62,6 +64,6 @@
       "data/payments-readme.md"
     ],
     "prompt_sha256": "b3dad3c0fe707bff3dca8dd1e681df1a6d1a01674b2e1bd3d251b2744ca0dcf3",
-    "generated_at": "2026-11-07T13:18:39+08:00"
+    "generated_at": "2026-11-07T13:31:27+08:00"
   }
 }

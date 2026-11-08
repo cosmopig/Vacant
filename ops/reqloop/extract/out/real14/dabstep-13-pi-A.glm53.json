@@ -2,7 +2,7 @@
   "task_id": "dabstep-13-pi-A",
   "items": [
     {
-      "id": "1",
+      "id": "R1",
       "quote": "During which hour of the day do the most transactions occur?",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
@@ -14,27 +14,30 @@
           "col": "hour_of_day"
         }
       },
-      "description": "答案應為交易次數最多的當日小時（hour_of_day 的眾數），以單一數字寫入 answer.txt。",
+      "description": "答案為交易次數最多的 hour_of_day 眾數，從 data/payments.csv 重算比對 answer.txt 內容。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "2",
+      "id": "R2",
       "quote": "Answer must be just a number representing the hour of the day.",
       "deliverable": "answer.txt",
-      "verifier": "tag_format",
+      "verifier": "plain_recomputed",
       "kind": "explicit",
       "params": {
-        "tag": "answer",
-        "value_type": "number"
+        "data_file": "data/payments.csv",
+        "recompute": {
+          "type": "mode_col",
+          "col": "hour_of_day"
+        }
       },
-      "description": "answer.txt 內容必須只有一個代表小時的數字，不含其他文字。",
+      "description": "answer.txt 必須只含一個代表小時的數字，無其他文字；以重算值比對檔案內容。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": true
+      "unverified": false
     }
   ],
   "model": "glm53",
@@ -42,18 +45,13 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "1",
-      "2"
+      "R1",
+      "R2"
     ],
     "discarded": [],
-    "unverified": [
-      {
-        "id": "2",
-        "reason": "unsupported_tag_value_type:number"
-      }
-    ]
+    "unverified": []
   },
-  "raw_output": "[{\"id\":\"1\",\"quote\":\"During which hour of the day do the most transactions occur?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/payments.csv\",\"recompute\":{\"type\":\"mode_col\",\"col\":\"hour_of_day\"}},\"description\":\"答案應為交易次數最多的當日小時（hour_of_day 的眾數），以單一數字寫入 answer.txt。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"2\",\"quote\":\"Answer must be just a number representing the hour of the day.\",\"deliverable\":\"answer.txt\",\"verifier\":\"tag_format\",\"params\":{\"tag\":\"answer\",\"value_type\":\"number\"},\"description\":\"answer.txt 內容必須只有一個代表小時的數字，不含其他文字。\",\"required\":true,\"kind\":\"explicit\"}]\n",
+  "raw_output": "```json\n[\n  {\n    \"id\": \"R1\",\n    \"quote\": \"During which hour of the day do the most transactions occur?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"mode_col\", \"col\": \"hour_of_day\"}},\n    \"description\": \"答案為交易次數最多的 hour_of_day 眾數，從 data/payments.csv 重算比對 answer.txt 內容。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"R2\",\n    \"quote\": \"Answer must be just a number representing the hour of the day.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/payments.csv\", \"recompute\": {\"type\": \"mode_col\", \"col\": \"hour_of_day\"}},\n    \"description\": \"answer.txt 必須只含一個代表小時的數字，無其他文字；以重算值比對檔案內容。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
   "provenance": {
     "cell": "dabstep-13-pi-A",
     "role": "good",
@@ -64,6 +62,6 @@
       "data/payments-readme.md"
     ],
     "prompt_sha256": "49ba28e6f44dbb6eb88d421d3c5dd984c91d25b1cd2e5da14276bdbd27fb23a6",
-    "generated_at": "2026-11-07T13:18:51+08:00"
+    "generated_at": "2026-11-07T13:31:41+08:00"
   }
 }

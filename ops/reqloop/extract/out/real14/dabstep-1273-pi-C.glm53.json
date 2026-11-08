@@ -2,7 +2,7 @@
   "task_id": "dabstep-1273-pi-C",
   "items": [
     {
-      "id": "1",
+      "id": "R1",
       "quote": "For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?",
       "deliverable": "answer.txt",
       "verifier": "plain_recomputed",
@@ -13,37 +13,30 @@
           "type": "scheme_fee_avg",
           "scheme": "GlobalCard",
           "is_credit": true,
-          "amount": 10,
-          "round": 6
+          "amount": 10
         }
       },
-      "description": "從 data/fees.json 重算 GlobalCard、credit、交易金額 10 EUR 的平均費用（mean(fixed_amount + rate * amount / 10000)，null 欄位為 wildcard），與 answer.txt 的數值比對。",
+      "description": "以 fees.json 重算 GlobalCard、credit 交易、金額 10 EUR 的平均費用（mean(fixed_amount + rate*amount/10000)，null 欄位視為 wildcard），與 answer.txt 的數字比對。",
       "required": true,
       "authority": "client",
       "hidden": false,
       "unverified": false
     },
     {
-      "id": "2",
+      "id": "R2",
       "quote": "Answer must be just a number expressed in EUR rounded to 6 decimals.",
       "deliverable": "answer.txt",
-      "verifier": "plain_recomputed",
+      "verifier": "tag_format",
       "kind": "explicit",
       "params": {
-        "data_file": "data/fees.json",
-        "recompute": {
-          "type": "scheme_fee_avg",
-          "scheme": "GlobalCard",
-          "is_credit": true,
-          "amount": 10,
-          "round": 6
-        }
+        "tag": "total",
+        "value_type": "number"
       },
-      "description": "答案須為四捨五入至 6 位小數的單一數字（EUR），重算時以 round: 6 對齊。",
+      "description": "answer.txt 內容必須是單一數字（EUR，四捨五入至 6 位小數），無其他文字；tag_format 僅能驗證數字型別，6 位小數的精確位數無法單獨程式驗證。",
       "required": true,
       "authority": "client",
       "hidden": false,
-      "unverified": false
+      "unverified": true
     }
   ],
   "model": "glm53",
@@ -51,13 +44,18 @@
     "parse_error": null,
     "extract_error": null,
     "kept": [
-      "1",
-      "2"
+      "R1",
+      "R2"
     ],
     "discarded": [],
-    "unverified": []
+    "unverified": [
+      {
+        "id": "R2",
+        "reason": "unsupported_tag_value_type:number"
+      }
+    ]
   },
-  "raw_output": "```json\n[\n  {\n    \"id\": \"1\",\n    \"quote\": \"For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/fees.json\", \"recompute\": {\"type\": \"scheme_fee_avg\", \"scheme\": \"GlobalCard\", \"is_credit\": true, \"amount\": 10, \"round\": 6}},\n    \"description\": \"從 data/fees.json 重算 GlobalCard、credit、交易金額 10 EUR 的平均費用（mean(fixed_amount + rate * amount / 10000)，null 欄位為 wildcard），與 answer.txt 的數值比對。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  },\n  {\n    \"id\": \"2\",\n    \"quote\": \"Answer must be just a number expressed in EUR rounded to 6 decimals.\",\n    \"deliverable\": \"answer.txt\",\n    \"verifier\": \"plain_recomputed\",\n    \"params\": {\"data_file\": \"data/fees.json\", \"recompute\": {\"type\": \"scheme_fee_avg\", \"scheme\": \"GlobalCard\", \"is_credit\": true, \"amount\": 10, \"round\": 6}},\n    \"description\": \"答案須為四捨五入至 6 位小數的單一數字（EUR），重算時以 round: 6 對齊。\",\n    \"required\": true,\n    \"kind\": \"explicit\"\n  }\n]\n```\n",
+  "raw_output": "[{\"id\":\"R1\",\"quote\":\"For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?\",\"deliverable\":\"answer.txt\",\"verifier\":\"plain_recomputed\",\"params\":{\"data_file\":\"data/fees.json\",\"recompute\":{\"type\":\"scheme_fee_avg\",\"scheme\":\"GlobalCard\",\"is_credit\":true,\"amount\":10}},\"description\":\"以 fees.json 重算 GlobalCard、credit 交易、金額 10 EUR 的平均費用（mean(fixed_amount + rate*amount/10000)，null 欄位視為 wildcard），與 answer.txt 的數字比對。\",\"required\":true,\"kind\":\"explicit\"},{\"id\":\"R2\",\"quote\":\"Answer must be just a number expressed in EUR rounded to 6 decimals.\",\"deliverable\":\"answer.txt\",\"verifier\":\"tag_format\",\"params\":{\"tag\":\"total\",\"value_type\":\"number\"},\"description\":\"answer.txt 內容必須是單一數字（EUR，四捨五入至 6 位小數），無其他文字；tag_format 僅能驗證數字型別，6 位小數的精確位數無法單獨程式驗證。\",\"required\":true,\"kind\":\"explicit\"}]\n",
   "provenance": {
     "cell": "dabstep-1273-pi-C",
     "role": "bad",
@@ -68,6 +66,6 @@
       "data/manual.md"
     ],
     "prompt_sha256": "28f63ad835975b85cb784d68b7b556127b91fa0a418f3bc5b6702dff1692a930",
-    "generated_at": "2026-11-07T13:18:46+08:00"
+    "generated_at": "2026-11-07T13:31:35+08:00"
   }
 }
