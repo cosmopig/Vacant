@@ -6,6 +6,7 @@
 3. **單一事實源由重算复现**：本轮 out/all/phase1-3.json 与 filing（g25_all_gates_filing.json）sources 三 sha **逐字节一致**（3c6fb35a／6b7cb831／ada235bb）；code 三 sha 重算全 MATCH（51abfec3／c7589c61／332cd324）。
 4. 锚点：`test_reqloop_frozen_anchors` 3 passed（0.03s）；repair.py 5147f8c3ea1b…、extract.py e757aec50c16… 直接核＝冻结常量。
 5. 红线：vibe_calls 130 行（末条 11-07T18:35Z）＝0 调用；queue 空；main c097899e 未动未 push。
+6. **redo（审查点名）**：effects_20261105_summary.json（blob 856c2c71、60,228B）head＋code 补开，逐栏重算与存档引用（r1227–r1253）逐项一致零出入（pres g5/l5·w2r g7/l6·still g3/l4·r2w 0；api 365/550·165/292；tok 16,284,659/17,385,851·6,210,682/13,293,271）；r1254 交付物引用其数字＝0→零更正。
 
 ## 下一步（次轮，按序）
 1. 工单队列已清空（open/ 空、doing/ 空）；bd vq-el4 18/18 closed、无 in_progress。

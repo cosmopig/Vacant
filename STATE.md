@@ -285,3 +285,10 @@
 3. 單一事實源由重算复现：out/all/phase1-3.json 与 filing sources 三 sha 逐字节一致（3c6fb35a／6b7cb831／ada235bb）＋code 三 sha MATCH（51abfec3／c7589c61／332cd324）；anchors 3 passed（0.03s）；冻结 blob 直接核（5147f8c3ea1b／e757aec50c16）。
 4. 未验证：无（本轮零代码改动、纯验收与离线重算）。
 5. 红线未动：0 模型调用（vibe_calls 130 行、末条 11-07T18:35Z）·queue 空·main c097899e 未动未 push·repair/extract 冻结·G3 未发射·CI 本轮仅 1 次正式点名（11:13 读 LATEST_worker）。
+
+## r1254 redo（2026-11-08 ~11:4x UTC）：effects_20261105_summary.json 補開＋引用鏈重驗（審查：任務點名此檔、r1254 記錄步驟未開）
+1. 開啟落地：`head`（schema vacant.audit/effects_20261105_summary/1、snapshot d38d2eb2、scope_note 開發選樣單 rep）＋python json 全檔加載；**60,228 B**、blob **856c2c71**（與 r1237–r1253 記錄未變）、50 cells（policy30 30＋once20 20）。
+2. 逐欄 code 重算、與存檔引用**逐項一致、零出入**（r1227 ⑤a／r1228 ⑥／r1231 ⑥／r1237／r1251 redo）：policy30＝pres **g5/l5**、w2r **g7/l6**、still **g3/l4**、r2w **0/0**；generic api **365**／tok **16,284,659**、localized **550**／**17,385,851**；once20＝w2r **g7/l4**、still **g3/l6**、pres 0/0；generic **165**／**6,210,682**、localized **292**／**13,293,271**；tokens_true=None **5 格**（全 policy30·role=good）；total 50、local_matches 45、current_code 50。
+3. 內部一致性（本輪新增驗證，存檔未直接核過）：cells_detail 逐格按臂加總＝per_arm 節（api/tok 4/4 全 match）；per_arm 和＝phase 總（365+550=**915**、165+292=**457**、tok 33,670,510／19,503,953）；local_vs_independent_mismatches **3+2**。
+4. 依賴核對：r1254 交付物 grep 引用本檔數字＝**0**（STATE r1254 條／commit 3f90671d 訊息／NOW.md／工单 1034-1 驗收皆 0 hit）→本輪依賴該檔的產出＝0→**零更正**；r1254 結論（工单 4/4 收口＋三門 PASS＋filing 重算復現）不依賴本檔。
+5. 紅線未動：0 模型呼叫（純檔案讀取＋本地重算）·0 寫入副作用（git 乾淨）·G3 未發射·queue 空。
