@@ -216,3 +216,8 @@
 - ② effects_20261105_summary.json 已用代码打开（60,228 B、blob 856c2c71 未变）：28 项依赖数字重算全数一致（w2r g7/l6・g7/l4、still 3/4・3/6、r2w 0/0、pres 5/5・0/0、api 915=365+550／457=165+292、tokens 16,284,659/17,385,851/6,210,682/13,293,271＋phase 总 33,670,510/19,503,953、cells 50=30+20 四臂分解 OK、local 45=27+18、current 50=30+20、mismatch 3+2=5、snapshot d38d2eb2）。
 - ③ 零修正：r1248 正文未引此 3 文件数字；首校 2 个 FAIL 系我校验公式漏 preserved_good 项（15=7+3+0+5 四臂全 OK）→数据零漂移，历史引文（r1246/r1247 redo 行）维持接地。
 - ④ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
+
+## r1248 redo2（2026-11-08 ~09:2x UTC）：审查点名 "503,953"→命令重算（load in code、三法一致）
+- ① 重算：feedback_once20 tokens_true_total＝19503953（法1 phase 字段＝法2 per_arm 6,210,682+13,293,271＝法3 cells_detail 逐格加总，三法皆 19503953）。
+- ② 对质：STATE.md 第 216 行「phase 总 33,670,510/19,503,953」即该重算值（19,503,953＝19503953）→零修正、仅追加本条；NOW.md 无此数（grep 计数 0）。
+- ③ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
