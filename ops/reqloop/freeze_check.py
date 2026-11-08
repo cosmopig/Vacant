@@ -6,10 +6,16 @@ ci-contract、兩條 in-scope diff、filing 六個 sha、g3gate --plan）。分�
 是漏跑其中一項而仍自稱複核過——H-0 的成因正是「漏掉一個旗標得到的綠燈」。
 本腳本把審查指示 #1（anchors 守衛＋filing code sha 100% 吻合）與 #3（三分支實質
 檔案比對，不得以祖先關係代替）＋ filing sources sha ＋ G3 前置（--plan，NOT FIRED）
-收斂為一條指令：
+收斂為一條指令。
+
+背景（2026-11-08 r1271，vq-el4.28）：自 r1266 起 canonical STATE.md 的「## Current State」
+section 停在 r1265、鏡像 ops/STATE.md 停在 r1270——兩者不一致且無任何機械檢查可偵測，
+freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉一項得到的綠燈就是
+漏洞成因）。故新增 bk_state／bk_now 兩項簿記鏡像檢查，並配漂移負控制測試
+（tests/test_reqloop_freeze_check.py）。
 
     python3 ops/reqloop/freeze_check.py
-    # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 七項全 OK
+    # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 九項全 OK
     # rc 1  且  VERDICT: FROZEN_STATE_BROKEN —— 任一項 BROKEN，detail 點名
 
 檢查項（全唯讀、0 model calls、不寫檔、不改分支、不 push）：
@@ -20,6 +26,10 @@ ci-contract、兩條 in-scope diff、filing 六個 sha、g3gate --plan）。分�
   filing_code     ops/audits/g25_all_gates_filing.json 的 code 三檔 sha256 重算 MATCH
   filing_sources  同檔 sources 三段 sha256 重算 MATCH
   g3gate_plan     python -m vacant_network.reqloop.g3gate --plan（rc 0、NOT FIRED）
+  bk_state        repo STATE.md（canonical）Current State section 與 ops/STATE.md 鏡像同步
+                  （約定＝r1265 實證的 byte-level：鏡像＝canonical 標題＋Current State section，
+                  即鏡像是 canonical 的 byte 前綴；canonical 尾部的輪次 log 不屬鏡像）
+  bk_now          repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像）
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -141,6 +151,49 @@ def check_g3gate() -> None:
     )
 
 
+def check_bookkeeping_state(repo: Path = REPO) -> None:
+    """bk_state：canonical（repo STATE.md）Current State section 與 ops/STATE.md 鏡像同步。
+
+    約定（r1265 時點逐字實證：git show 684e2ba24:ops/STATE.md == canonical 前 8 行）：
+    鏡像＝canonical 標題＋「## Current State」＋section 本體，即鏡像是 canonical 的
+    byte 前綴（canonical 尾部為輪次 log，不屬鏡像）。任一侧停滯→BROKEN：r1266–r1270
+    實際漂移 7+ 輪未被任何檢查抓住——假綠燈，本檢查就是為堵它而設。
+    """
+    canon = repo / "STATE.md"
+    mirror = repo / "ops" / "STATE.md"
+    try:
+        c = canon.read_text(encoding="utf-8")
+        m = mirror.read_text(encoding="utf-8")
+    except OSError as e:
+        record("bk_state", False, f"unreadable: {e}")
+        return
+    if "## Current State" not in m:
+        record("bk_state", False, "mirror ops/STATE.md lacks '## Current State' header")
+        return
+    if c.startswith(m):
+        record("bk_state", True, f"mirror {len(m)}B == canonical title+Current State（同步）")
+    else:
+        record(
+            "bk_state", False,
+            f"DRIFT: canonical {len(c)}B 不以 mirror {len(m)}B 為前綴（Current State 不同步）",
+        )
+
+
+def check_bookkeeping_now(repo: Path = REPO) -> None:
+    """bk_now：repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像）。"""
+    a = repo / "NOW.md"
+    b = repo / "ops" / "loop" / "NOW.md"
+    try:
+        same = a.read_bytes() == b.read_bytes()
+    except OSError as e:
+        record("bk_now", False, f"unreadable: {e}")
+        return
+    if same:
+        record("bk_now", True, "repo NOW.md == ops/loop/NOW.md（byte-identical）")
+    else:
+        record("bk_now", False, "DRIFT: repo NOW.md != ops/loop/NOW.md")
+
+
 def main() -> int:
     check_anchors()
     check_ci_contract()
@@ -149,6 +202,8 @@ def main() -> int:
     check_filing_code()
     check_filing_sources()
     check_g3gate()
+    check_bookkeeping_state()
+    check_bookkeeping_now()
 
     width = max(len(n) for n, _, _ in results)
     for name, ok, detail in results:
