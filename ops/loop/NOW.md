@@ -1,22 +1,20 @@
-# NOW.md — r1263＋redo（2026-11-08，第 1263 輪）
+# NOW.md — r1264（2026-11-08，第 1264 輪）
 
 ## 本輪結論（一句）
-[redo] 審查點名 extract.py／g3gate.py／repair.py 在記錄中未開啟 → 三檔全部開啟（head＋ast 載入）並逐項重驗依賴項：舊簿記「extract.py(901)」更正為實核 1217 行／blob e757aec5（與 anchor 釘值、審查點名一致）；g3gate --plan RC 0「NOT FIRED」（G3 未發機械化重驗）；filing 3 sha256 MATCH。
-[原 r1263] Actions 停擺實證（remote 6b19961d 已達、26 跑無新跑 → Actions 基建需人工）；三分支對齊清零（worker 補守門測試檔 → in-scope diff 1→0、argon ff 同 HEAD、7 passed×3 分支）。
+CI 紅燈根因定案：`auto-ci.yml` state=**disabled_manually**（人工禁用）——26/26 紅跑（11-07 07:27–13:22）全早於 scipy 修復 3db4a7f3（11-07 13:49、在 HEAD 2bb2d306 樹內）；**紅燈修復已在樹、但從未在 GitHub 跑過**。升級人類：re-enable 見綠燈，或明示本地 CI 為正統通道。
 
 ## 事實（證據）
-- 三檔開啟＋載入（ast.parse OK）：extract.py 1217 行／28 defs／blob e757aec5；g3gate.py 340 行／11 defs／blob 0d90f166；repair.py 2795 行／56 defs／blob 5147f8c3。
-- anchor 測試對照（tests/test_reqloop_frozen_anchors.py）：repair 5147f8c3・2795 與 extract e757aec5・1217＝審查指示#1 點名值，全吻合；**舊簿記「extract.py(901)」誤載（r1260–1262 相傳），本 redo 更正 1217**。
-- g3gate.py 無 subprocess／模型呼叫（僅預算欄位 model_entry="glm" 校驗）→ --plan 純離線：`python -m vacant_network.reqloop.g3gate --plan` → RC 0、「NOT FIRED（無核准信號；0 model calls）」、verify_frozen OK（4 題×4 輸入檔 sha256 全核）、budget gate OK。
-- filing code 3 sha256 重核：extract 51abfec3／checks c7589c61／run_eval 332cd324 全 MATCH。
-- [原] GitHub API：auto-ci.yml 26 跑、最後 f03d1177 11-07 13:22 failure；remote auto/qwen27b＝6b19961d＝local HEAD → push 到達未觸發＝Actions 端問題。PAT 讀通道 401（改公開免-auth API）；迴圈 push 通道正常。
-- [原] worker 補 tests/test_reqloop_ci_contract.py（sha256 一致）→ in-scope diff 0；argon ff-only 同 HEAD；7 passed×3 分支。
-- 工單 vq-el4.23（建→關）、vq-el4.24 redo（建→關）。
+- `GET /repos/cosmopig/Vacant/actions/workflows`（公開 API、單調用、無輪詢）：auto-ci.yml（id 410149973）state=disabled_manually；ci.yml／publish.yml 等皆 active → r1260–1263「Actions 不觸發」＝人工禁用、非基建故障。
+- runs：26 全 failure；首 fd167eaf 11-07T07:27:05Z、末 f03d1177 11-07T13:22:41Z；scipy 修復 3db4a7f3 commit 11-07T13:49:22Z；`git merge-base --is-ancestor 3db4a7f3 2bb2d306`→YES（在 HEAD）。
+- 修復驗收（票 P20261107_0000-1）：`test_pin_survives_venv_symlink`（tests/test_reqloop_repair.py:1185）函式體 0 處 scipy；`pytest -k venv_symlink`→1 passed。
+- 本地 CI（vacant-ci active、跑中）：qwen27b 70926581 🟢 5056/5129・argon 69b62a9b 🟢 5064/5137・worker ce4c16c2 🟢 5064/5137；2bb2d306 跑中（與最後綠 SHA 之 diff 僅簿記）。
+- in-scope diff：qwen27b↔worker 0、qwen27b↔argon 0；anchors 5 passed（本輪重跑）；g3gate --plan RC 0 NOT FIRED（0 model calls）。
+- bd：vq-el4.25 建→關（本輪）；vq-el4 全 25 項 closed；vq-1zf（G3）open、等人類核准。
 
 ## 下一輪先做
-1. Actions 一次檢查（API 單調用，別 sleep 輪詢）：新跑綠→紅解除；新跑紅→乾淨 venv 複現修；仍無新跑→升級人工（已二次實證非本地可修）。
-2. 主線 G2.5（vq-el4）子項全關；queue 空、0 model calls、等工單。G3（vq-1zf）未發——等 RLOOP_PLAN.md 人批；核准前禁 --fire。
-3. 每輪守：in-scope diff 0（含簿記鏡像，新檔進 qwen27b 須同輪同步 worker）＋三分支 7 passed。
+1. Actions 一次檢查（API 單調用）：有新跑（綠/紅）→記燈；仍無新跑→維持「等人類」、不重複診斷。
+2. G2.5 等工單（vq-el4 全關）；G3 等 RLOOP_PLAN.md 明確人批（核准前禁 --fire、queue 不放新任務）。
+3. 每輪守：in-scope diff 0（簿記鏡像同輪同步 worker/argon）＋三分支 anchors 5 passed＋本地 CI 綠燈。
 
 ## 紅線（本輪全守）
-0 model calls（queue 空；g3gate --plan 為離線前置門、非發射）・本輪無 git push（迴圈自動推 qwen27b）・無 reset/rebase/branch -f（argon 僅 ff-only）・未讀 /srv/eval hidden 與 scorer.py・repair.py／extract.py／g3gate.py／checks.py／run_eval.py／filing 未改（本輪只讀驗證）・.github/workflows/ 未改・無 sleep 輪詢。
+0 model calls（queue 空）・本輪無 git push（迴圈自動推 qwen27b）・.github/workflows/ 只讀・無 reset/rebase/branch -f・repair.py／extract.py／checks.py／run_eval.py／filing 未改・未讀 /srv/eval hidden 與 scorer.py・無 sleep 輪詢。
