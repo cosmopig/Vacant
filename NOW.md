@@ -1,21 +1,24 @@
-# 当前状态（2026-11-08 ~09:36 UTC，r1250）
+# 当前状态（2026-11-08 ~10:05 UTC，r1251）
 
-## r1250 交付
-- qwen27b e54b4850 灯：🟢 5056/5129（857.17s，ts 09:35:00Z；LATEST_qwen27b 已更新）
-  → 三分支全绿收口（argon 5fb3d00a／worker b150a94c 皆🟢 5056/5129）；
-  vq-ssk「灯红则重开」条件未触发，无新工单。
-- redo（审查点名 3 文件全已开）：NOW.md（轮首所开版本＝ca514810:NOW.md、重算 1831 B）步骤①查灯已执行；
-- redo2（审查点名 "1831 B"）：`git show ca514810:NOW.md | wc -c`＝1831→该值即重算值（指轮首所开版本）；现行本版 NOW.md＝1329 B（≤3KB 上限）。
-  repair.py 2795 行 5147f8c3ea1b5e…／extract.py 1217 行 e757aec50c16…＝锚点直接一致
-  （守护 3 passed 0.13s）；effects_20261105_summary.json 代码打开（blob 856c2c71 未变、
-  snapshot d38d2eb2），三法重算 tokens 33,670,510／19,503,953、api 915＝365+550／457＝165+292、
-  w2r g7/l6・g7/l4、cells 50、mism 5 全一致→零修正。
+## r1251 交付（审查指示 5 项收口验证：全既有命令、0 新文件、0 模型呼叫）
+- ① 审查#2 worker 同步收口验证：5fb3d00a 为 worker b150a94c 与 qwen27b 6aae8850 的祖先
+  （merge-base --is-ancestor 两者皆 0）；工单 R20261108_0810-1 已入 done/（验收：锚点 3 passed＋53 passed）；worker 灯 🟢 5056/5129。
+- ② 审查#1/#3：锚点守护新鲜 3 passed（0.04s）；repair 5147f8c3/2795 行、extract e757aec5/1217 行
+  ＝锚点直接一致；g25_all_gates_filing.json（4681 B、三门 PASS）3 个 code sha256
+  （extract/checks/run_eval）重算全 MATCH。
+- ③ 审查#4/#5：vibe_calls 130 行未变（末条 11-07T18:35Z）→今日 0 模型呼叫；/srv/vlab/queue 空；
+  RLOOP_PLAN.md（112 行）读到末尾——无人类 G3 核准→不发射。
+- ④ 环境一次核：本轮 0 个 D 态进程（上轮"大量 D"未再现）、时钟一致（09:43→09:59 无回跳）；
+  GitHub Actions 11-07 13:22 后仍无新 run（末 f03d1177 failure）→待人类/基建。
+- ⑤ qwen27b 6aae8850 CI：09:59 巡灯＝running（09:45:00 起跑、历次 14–14.5 分）；
+  上 HEAD e54b4850 已 🟢 5056/5129→本轮灯记 running，未轮询。
 
-## 下一步（r1251，照序）
-1. G3（vq-1zf）仍待人类明确核准——不发射、不入队、0 模型呼叫。
-2. vq-el4 全 18 项 closed、bd ready 仅 vq-1zf：无核准则不开新产品工作；
-   CI 每轮巡一次（不轮询），锚点守护／G2.5 三门按需新鲜复验。
-3. 环境异常（时钟回跳 6h47m、ops 大量 D）仍待人类检查，勿自行修复。
+## 下一步（r1252，单一步骤、一轮可完）
+1. 巡 6aae8850 灯一次（≤1 次）：期望 🟢 5056/5129→新 HEAD 三分支全绿；
+   若红＝修红灯（授权例外）；若仍 running＝记一行、转待人类项。
+
+## 待人类（不自行修复）
+- G3（vq-1zf）等明确核准；GitHub Actions 基建停摆；上轮时钟/D 异常若再现请检查主机。
 
 ## 红线（未动）
-G3 未发射｜0 模型呼叫｜queue 空｜main c097899e 未动、未 push｜repair/extract 冻结｜未读 hidden/scorer｜CI 未轮询
+G3 未发射｜0 模型呼叫｜queue 空｜main c097899e 未动未 push｜repair/extract 冻结｜未读 hidden/scorer｜CI 未轮询

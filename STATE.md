@@ -246,3 +246,11 @@
 ## r1250 redo（2026-11-08 ~09:4x UTC）：审查点名 "1831 B"→命令重算并写回
 - ① 重算接地：`git show ca514810:NOW.md | wc -c`＝**1831**（轮首所开 NOW.md＝提交 ca514810 版本、blob 73569667…；现行 r1250 版＝1329 B、≤3KB 上限）→NOW/STATE 中 "1831 B" 即该命令重算值、指轮首所开版本；数值原本正确，补重算记录，零修正。
 - ② 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer。
+
+## r1251（2026-11-08 ~10:05 UTC）：审查指示 5 项收口验证（全既有命令、0 新文件、0 模型呼叫）
+- ① 审查#2：worker 同步收口查实——5fb3d00a 为 auto/worker b150a94c 与 auto/qwen27b 6aae8850 的祖先（merge-base --is-ancestor 两者皆 0）；工单 R20261108_0810-1 已入 done/（验收：锚点 3 passed＋extract/g3gate 53 passed）；worker 灯 🟢 5056/5129→三分支代码对齐。
+- ② 审查#1/#3：锚点守护新鲜 3 passed（0.04s）；repair.py 5147f8c3/2795 行、extract.py e757aec5/1217 行＝锚点直接一致；g25_all_gates_filing.json（4681 B、vacant.filing/g25_all_gates/1、三门 PASS）的 3 个 code sha256（extract/checks/run_eval）重算全 MATCH→单一事实来源维持。
+- ③ 审查#4/#5＋红线：vibe_calls.jsonl 130 行未变（末条 11-07T18:35:51Z）→今日 0 模型呼叫；/srv/vlab/queue 空；RLOOP_PLAN.md（112 行）读到末尾＝无人类 G3 核准→不发射、不入队。
+- ④ 环境一次核（不修复）：本轮 0 个 D 态进程（上轮"ops 大量 D"未再现）、时钟一致（09:43→09:59 无回跳）、磁盘 54G 空闲；GitHub Actions 11-07 13:22 后仍无新 run（末 f03d1177 failure）→仍待人类/基建。
+- ⑤ 本轮灯（一次、未轮询）：qwen27b 6aae8850 CI running（09:45:00 起跑、历次 14–14.5 分）；上 HEAD e54b4850 已 🟢 5056/5129→下一步＝r1252 巡灯一次（期望 🟢 收口）。
+- ⑥ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
