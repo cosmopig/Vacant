@@ -1,25 +1,19 @@
-# NOW.md — r1262（2026-11-08，第 1262 輪）
+# NOW.md — r1263（2026-11-08，第 1263 輪）
 
 ## 本輪結論（一句）
-GitHub auto CI 26 跑全紅（round-head 的本地 CI 報表遮蔽了它）；根因＝一測試在啟動的直譯器斷言 scipy/numpy（不在安裝合約），HEAD 已修；新增安裝合約守門測試，讓這類缺陷以後在本地就紅。
+GitHub Actions 停擺實證：最新 commit（6b19961d）已在 remote auto/qwen27b 但無任何新跑（26 跑最後仍是 11-07 13:22 f03d1177 failure）＝push 到達後仍不觸發 → Actions 端基建問題、需人工（本地無解、.github/workflows/ 不準動）；同輪把三分支對齊清零（worker 補守門測試檔 → in-scope diff 1→0、argon ff 至同 HEAD、7 passed×3 分支）。
 
 ## 事實（證據）
-- GitHub API：26 個 auto 跑（11-07 07:27→13:22）全 failure，全敗「pytest — ReqLoop (test_reqloop*)」步（抽查最舊 run 42351331975 與最末 f03d1177/check-run 128415593693）。
-- 乾淨 venv（`pip install -e ".[dev]"` @ f03d1177）複現：1 failed＝`test_reqloop_repair.py::test_pin_survives_venv_symlink`（`import scipy, numpy` → ModuleNotFoundError）。
-- 3db4a7f3（11-07 13:49）改用 pytest：在 HEAD、不在 f03d1177 → GitHub 紅是 **STALE**（紅在舊 commit）。
-- HEAD（69b62a9b）乾淨 venv 三步全綠：ReqLoop 379 passed/3 skipped（host 資料）＋新守門 2；frozen 1 passed；stepchain 37 passed/1 skipped。
-- 新增 `tests/test_reqloop_ci_contract.py`：實際經 subprocess 啟動的 `-c` 片段 import ⊆ vacant-network（deps＋[dev]）∪ stdlib；scipy/numpy 負向控制；回歸模擬（改回 scipy）→ 守門紅並點名包與片段。
-- Actions 自 11-07 13:22 無新跑（stalled）；下一觸發＝迴圈自動 push。
+- GitHub API（公開讀）：auto-ci.yml `workflow_runs` total=26，最後 f03d1177 2026-11-07T13:22:41Z failure；remote auto/qwen27b＝6b19961d＝local HEAD（r1262 push 已達）→ 停擺定性＝「push 到達但未觸發」，非推送遺失。
+- ~/.git-credentials 的 PAT 對 API 讀回 401（讀通道壞）；迴圈 push 通道正常（remote＝local HEAD）。兩者分開。
+- 三分支對齊（審查#2 判準）：`git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops` 原 1（tests/test_reqloop_ci_contract.py，r1262 新檔）→ 0；argon 原為 qwen27b 祖先 → `git merge --ff-only` 至 6b19961d（同 HEAD、無分叉）。
+- 驗證：test_reqloop_ci_contract（2）＋test_reqloop_frozen_anchors（5）＝7 passed ×3 分支（worker 用主 venv、檔 sha256 eafe8290… 與 qwen27b 逐位元組一致）。
+- 工單 vq-el4.23（建→帶證據關）。
 
 ## 下一輪先做
-1. 自動 push 後查 Actions 有沒有新跑（API `workflow_runs`，`curl -m`，別 sleep 輪詢）：綠→CI 紅解除；仍無跑→Actions infra 問題，需人工（本地無解）。
-2. 若新跑仍紅：用本輪方法乾淨 venv 複現（worktree＋fresh venv＋HOME 隔離），修準則＝只准斷言安裝合約內的包（見 test_reqloop_ci_contract.py）。
-3. 主線仍是 G2.5（vq-el4）：queue 空、0 model calls、等工單。G3（vq-1zf）仍未發——等 RLOOP_PLAN.md 人批。
+1. Actions 一次檢查（API `workflow_runs`，curl -m，別 sleep 輪詢）：有新跑且綠→CI 紅解除；有新跑且紅→r1262 乾淨 venv 法複現修；**仍無新跑→Actions 基建、升級人工**（已二次實證非本地可修）。
+2. 主線 G2.5（vq-el4）23 子項全關；queue 空、0 model calls、等工單。G3（vq-1zf）未發——等 RLOOP_PLAN.md 人批。
+3. 每輪守：in-scope diff 0（含簿記鏡像，新檔進 qwen27b 須同輪同步 worker）＋三分支 7 passed。
 
 ## 紅線（本輪全守）
-0 model calls（vibe_calls 無 11-07 後新條）·G3 未發未入隊·本輪無 git push·無 reset/rebase/branch -f·未讀 /srv/eval hidden 與 scorer.py·repair.py(2795)・extract.py(901)・checks.py・run_eval.py・filing（code 51abfec3/checks c7589c61/run_eval 332cd324）未改·.github/workflows/ 未改·無 sleep 輪詢。
-
-## 檔案清單（本輪）
-＋ `tests/test_reqloop_ci_contract.py`（新，2 tests）
-～ `STATE.md`／`NOW.md`（簿記）
-＝ 工單 `vq-el4.22`（建→帶證據關）；memory `github-actions-stalled-2026-11-07-13-22`（已更正）
+0 model calls（queue 空、vibe_calls 無新條）・本輪無 git push（迴圈自動推 qwen27b）・無 reset/rebase/branch -f（argon 僅 ff-only）・未讀 /srv/eval hidden 與 scorer.py・repair.py(2795)／extract.py(901)／checks.py／run_eval.py／filing 未改・.github/workflows/ 未改・無 sleep 輪詢。

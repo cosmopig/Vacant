@@ -1,8 +1,8 @@
 # STATE.md — Vacant 現況（人類可讀；保持 ≤ 5 行）
 
 ## Current State
-（2026-11-08 r1262：GitHub auto CI 紅燈診斷——26 跑全紅（11-07 07:27→13:22，全敗 ReqLoop 步）；乾淨 venv 複現根因＝test_pin_survives_venv_symlink 斷言 scipy/numpy（不在安裝合約）；3db4a7f3 已改 pytest（在 HEAD、不在 f03d1177）→ HEAD 乾淨 venv 三步全綠（379/3・1・37/1）；新增 tests/test_reqloop_ci_contract.py（合約守門＋scipy 負向控制＋回歸模擬紅燈驗證）；round-head 的「CI」報表實為本地 CI，曾遮蔽 GitHub 紅。）
-G2.5 現況：G1 39/39・FP0・REAL14 9/9・PHASE3 fixed7・u2・r2w0・err0、G2 dev 9/9 vs 7/9（人手需求）全綠；r1258–1261 護欄（g3gate 負向控制、bd remember 紅線、filing hash 紅線）在案。
+（2026-11-08 r1263：Actions 停擺實證——remote auto/qwen27b＝6b19961d（r1262 push 已達）但 auto-ci.yml 仍 26 跑全數、最後一跑 f03d1177 停在 11-07 13:22 failure → push 到達仍未觸發新跑＝Actions 端問題，需人工（本地無解、.github/workflows/ 不準動）；同輪三分支對齊清零——worker 補 tests/test_reqloop_ci_contract.py（sha256 與 qwen27b 一致）→ in-scope diff 1→0，argon ff-only 至同 HEAD，7 passed（守門2＋anchor5）×3 分支。）
+G2.5 現況：G1 39/39・FP0・REAL14 9/9・PHASE3 fixed7・u2・r2w0・err0、G2 dev 9/9 vs 7/9（人手需求）全綠；filing hash 已 anchor 測試機械化釘住（5 測）。
 G3 未發（vq-1zf 等 RLOOP_PLAN.md 明確人批；發射路徑已備：ops/reqloop/g3_gate/＋manifest 凍結）。
-紅線：0 model calls（queue 空、vibe_calls 無新條）、本輪無 git push、main c097899e 未動、repair.py(2795)/extract.py(901)/checks.py/run_eval.py/filing 未改。
-Actions 自 11-07 13:22 無新跑（stalled）；下一觸發＝迴圈自動 push；仍無跑或仍紅→需人工。
+紅線：0 model calls（queue 空）、本輪無 git push（迴圈自動推）、main c097899e 未動、repair.py(2795)/extract.py(901)/checks.py/run_eval.py/filing 未改、無 reset/rebase/branch -f。
+下一步：下輪再查 Actions 一次（API 單調用）：新跑綠→紅解除；新跑紅→乾淨 venv 複現修；仍無跑→升級人工。主線 G2.5 等工單。
