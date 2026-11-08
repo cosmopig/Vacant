@@ -387,3 +387,35 @@ def test_cli_plan_tampered_manifest_rc1_not_ok(tmp_path: pathlib.Path):
     assert "G3GATE PLAN FAIL" in r.stdout
     assert "hash 不符" in r.stdout              # 拒因如實：hash 不符（非缺檔/非選題）
     assert "G3GATE PLAN OK" not in r.stdout     # 不得假綠
+
+
+# ── CLI 負控：--fire＋有效核准＋篡改 manifest → 必須 RC 1（完整性先於核准判定）──
+
+def test_cli_fire_tampered_manifest_rejected_before_approval(tmp_path: pathlib.Path):
+    """安全排序負控：有效核准文件不得繞過凍結完整性檢查。
+
+    r1258 釘住的是 --plan 路徑（operator 可見 fail-closed）；--fire 路徑零負控：
+    若 main() 將核准判定移到 verify_frozen/check_budget 之前、或例外被吞（fail-open），
+    `--fire --approval <有效> --manifest <篡改>` 就會對 operator 印 APPROVED／RC 3——
+    「核准」在外觀上等同全門通過，但凍結輸入其實已被篡改（H-0 教訓：綠燈＝放行洞口的狀態）。
+    正確行為：完整性檢查先於核准判定 → RC 1、印 G3GATE PLAN FAIL＋拒因如實，
+    且不得出現 APPROVED、不得出現 G3GATE PLAN OK。
+    """
+    import shutil
+    base = tmp_path / "frozen"
+    shutil.copytree(BASE, base)
+    m = base / "manifest.json"
+    raw = json.loads(m.read_text(encoding="utf-8"))
+    f0 = list(raw["tasks"][0]["files"])[0]
+    raw["tasks"][0]["files"][f0] = "f" * 64    # 只改 hash、檔還在＝純篡改（非缺檔）
+    m.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    appr = tmp_path / "approval.json"
+    appr.write_text(json.dumps({"schema": g3.APPROVAL_SCHEMA, "approved": True,
+                               "epic": "vq-1zf", "by": "human-approver"}),
+                    encoding="utf-8")
+    r = _run("--fire", "--approval", str(appr), "--manifest", str(m))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "G3GATE PLAN FAIL" in r.stdout
+    assert "hash 不符" in r.stdout              # 拒因如實：hash 不符（非核准門拒）
+    assert "APPROVED" not in r.stdout           # 有效核准不得繞過完整性
+    assert "G3GATE PLAN OK" not in r.stdout     # 不得假綠
