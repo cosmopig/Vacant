@@ -210,3 +210,9 @@
 - ② worker b150a94c 在跑（71%，查一次、未轮询；LATEST_worker 仍旧灯 b45a6fb1 5059/5132）；其产品树与绿灯树 0 文件 diff→预期 5056/5129；灯红→重开 vq-ssk。
 - ③ tests/test_reqloop_frozen_anchors.py 3 passed（0.14s）；g2.py 0e7a679d 三分支同；worker↔qwen27b vacant_network/tests diff 0 文件。
 - ④ 未验证：worker CI 灯（在跑、下轮查一次）。红线：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
+
+## r1248 redo（2026-11-08 ~09:1x UTC）：审查点名 3 文件已开＋依赖数字全数复核
+- ① repair.py（2795 行）／extract.py（1217 行）已打开：blob 5147f8c3／e757aec5 与冻结锚点直接一致→r1248「repair/extract 冻结」双接地（测试 3 passed＋直接 hash 核）。
+- ② effects_20261105_summary.json 已用代码打开（60,228 B、blob 856c2c71 未变）：28 项依赖数字重算全数一致（w2r g7/l6・g7/l4、still 3/4・3/6、r2w 0/0、pres 5/5・0/0、api 915=365+550／457=165+292、tokens 16,284,659/17,385,851/6,210,682/13,293,271＋phase 总 33,670,510/19,503,953、cells 50=30+20 四臂分解 OK、local 45=27+18、current 50=30+20、mismatch 3+2=5、snapshot d38d2eb2）。
+- ③ 零修正：r1248 正文未引此 3 文件数字；首校 2 个 FAIL 系我校验公式漏 preserved_good 项（15=7+3+0+5 四臂全 OK）→数据零漂移，历史引文（r1246/r1247 redo 行）维持接地。
+- ④ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动・未 push・repair/extract 冻结・未读 hidden/scorer。

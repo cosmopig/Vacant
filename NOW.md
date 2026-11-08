@@ -7,6 +7,8 @@
   产品树与绿灯树 0 文件 diff→预期 5056/5129；灯红→重开 vq-ssk 工单。
 - 锚点守护：test_reqloop_frozen_anchors 3 passed；g2.py 0e7a679d 三分支同；
   worker↔qwen27b vacant_network/tests diff 0 文件。
+- redo（审查点名 3 文件已开）：repair.py 2795 行 blob 5147f8c3、extract.py 1217 行 blob e757aec5＝锚点直接一致；
+  effects_20261105_summary.json 代码打开（blob 856c2c71 未变）、28 项依赖数字重算全一致→零修正。
 
 ## 下一步（r1249，照序）
 1. 查 worker b150a94c 灯一次（预期 5056/5129）；红→重开 vq-ssk，绿→三分支全绿收口。
