@@ -197,6 +197,10 @@
 
 ## r1247 redo（2026-11-08 ~09:1x UTC）：审查点名 effects_20261105_summary.json 未开→代码打开＋依赖数字全数重接地
 - ① 文件已开（60,228 B，raw sha256 a710f7e4，git blob 856c2c71＝r1244 redo 锚点、未变）；python 逐字段提取 phases×per_arm×tokens/api/mismatches。
-- ② 对轮内记录（r1244 redo／r1246 redo／redo2 行及 11-06 引文）所有依赖该文件的数字代码复核：w2r g7/l6・g7/l4、still 3/4・3/6、r2w 0/0、pres 5/5・0/0、api 915=365+550・457=165+292、tokens 16,284,659/17,385,851/6,210,682/13,293,271（phase 总 33,670,510/19,503,953）、cells 50=30+20、local 45=27+18、current 50=30+20、mismatches 3+2=5・current_code 0、snapshot d38d2eb2 → 14/14 pass、零漂移。
+- ② 对轮内记录（r1244 redo／r1246 redo／redo2 行及 11-06 引文）所有依赖该文件的数字代码复核：w2r g7/l6・g7/l4、still 3/4・3/6、r2w 0/0、pres 5/5・0/0、api 915=365+550・457=165+292、tokens 16,284,659/17,385,851/6,210,682/13,293,271（phase 总 33670510/19503953，重算值：per_arm 加总＝cells_detail 逐格加总＝phase 字段、三法一致）、cells 50=30+20、local 45=27+18、current 50=30+20、mismatches 3+2=5・current_code 0、snapshot d38d2eb2 → 14/14 pass、零漂移。
 - ③ 结论：r1247 自身交付（worker 同步 4 验收、CI 基线 5056/5129、close vq-ssk）依赖 git 树／ci/ JSON／被删测试文件，与该文件无关→零数字改动；历史行引其数字者全数接地、无需修正。
 - ④ 红线不变：G3 未发射・0 模型呼叫・queue 空・main 未动・repair/extract 冻结・未读 hidden/scorer。
+
+## r1247 redo2（2026-11-08 ~09:3x UTC）：审查点名 r1247 redo ② 行的 "phase 总" 两数未见重算记录→命令重算并写回
+- ① 命令重算（load in code、三法一致）：feedback_once20 tokens_true_total＝19503953（phase 字段＝per_arm 6210682+13293271＝cells_detail 逐格加总）；policy30 同法＝33670510（16284659+17385851＝cells_detail 加总）。
+- ② 仅改 r1247 redo ② 行该处为重算值 33670510/19503953；其余不动；NOW.md 无此两数（grep rc=1）。
