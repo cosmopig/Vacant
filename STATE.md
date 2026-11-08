@@ -221,3 +221,10 @@
 - ① 重算：feedback_once20 tokens_true_total＝19503953（法1 phase 字段＝法2 per_arm 6,210,682+13,293,271＝法3 cells_detail 逐格加总，三法皆 19503953）。
 - ② 对质：STATE.md 第 216 行「phase 总 33,670,510/19,503,953」即该重算值（19,503,953＝19503953）→零修正、仅追加本条；NOW.md 无此数（grep 计数 0）。
 - ③ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动・未 push・repair/extract 冻结・未读 hidden/scorer。
+
+## r1249（2026-11-08 ~09:21 UTC）：worker 灯收口🟢＋G2.5 三門新鮮 PASS＋qwen27b 灯自动起跑
+- ① worker b150a94c 灯查实（一次）：LATEST_worker 🟢 5056/5129（ts 09:10:32Z）＝预期命中→vq-ssk「灯红则重开」未触发，worker 同步收口。
+- ② qwen27b e54b4850：产品树与绿灯树 0a460642 0 文件 diff（仅 NOW/STATE）→CI 自动起跑 09:20:32Z（state.json running、e54b4850 log 已建）、预期 5056/5129；下轮查一次灯（未轮询）。
+- ③ G2.5 三門新鮮離線複驗 run_eval.py --all EXIT=0：G1 39/39・冤枉 0；REAL14 9/9・冤枉 0/5；PHASE3 fixed 7/unresolved 2/退步 0/error 0→整合 PASS；0 新增模型呼叫（vibe_calls 130 行未变、git 工作树 0 改动）。
+- ④ 锚点守护新鲜 3 passed；vq-el4 全 18 项 closed、bd ready 仅 vq-1zf（G3 待人类核准）。
+- ⑤ 红线未动：G3 未发射・0 模型呼叫・queue 空・main c097899e 未动未 push・repair/extract 冻结・未读 hidden/scorer・CI 未轮询。
