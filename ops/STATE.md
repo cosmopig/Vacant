@@ -1,15 +1,16 @@
-# 当前状态（2026-11-08 ~10:36 UTC，r1252）
+# 当前状态（2026-11-08 ~10:5x UTC，r1253）
 
-## 本轮交付（r1252，~10:09–10:37 UTC，零模型调用）
-1. **9732075e 灯 → 🟢 5056/5129**（本轮点名步骤，842.6s，green:true；auto/qwen27b HEAD 由「running」变绿）。
-2. **新离线验证全过（30.2s/0 调用）**：anchors 3 passed；run_eval --all EXIT=0（G1 39/39·FP0 / REAL14 9/9·0/5 / PHASE3 fixed 7·unresolved 2·right-to-wrong 0）；filing code sha256 3/3 MATCH；/srv/vlab/queue 空；vibe_calls 130 行（末条 11-07T18:35Z，零新增）；main c097899e；5fb3d00a 仍为三分支祖先。
-3. **🐛 实测发现（非推测）：auto/worker 树与 qwen27b 未对齐**——46 檔差異（14 D + 32 M），**9 個檔案含已 commit 的未解決衝突標記**（`git grep -l '<<<<<<<' auto/worker -- vacant_network tests ops | wc -l` = 9；含 `ops/audits/e016_verdict_pipeline.py` 已非合法 Python、`ops/STATE.md`）；worker 歷史含 WIP commit `41eef681`。r1250/r1251「三分支對齊」僅以祖先關係驗證，不足以證明樹一致；worker CI 綠不覆蓋此（無測試 import 破檔）。
-4. **開工單 R20261108_1034-1**（~/dev/ops/tickets/open/，予 worker assistant）：46 檔差異清零（以 qwen27b 為準；14 檔 qwen27b 不存在者 git rm），自證衝突標記=0、diff=0、compileall rc0；下輪 R&D 點名新 SHA CI 燈並複驗。
+## 本轮交付（r1253，零模型调用）
+1. **一条指令变好**：`git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops | wc -l`＝**0**（r1252＝46）→工单 R20261108_1034-1 树对齐达成（d450d43a）。
+2. **验收 3.5/4**：in-scope diff=0 ✓；e016 compileall rc=0 ✓（b150a94c 版实证 8 标记＋SyntaxError＝真缺陷，已修）；filing 三 sha MATCH ✓；anchors 3 passed ✓。
+3. **① "标记=0" 系工单前提误**：qwen27b 基线本身 9 文件含 `<<<<<<<` 字串（trace/evidence.py:440＝CONFLICT_MARKER_RE 正则定义；余 8 为 exhibit/STATE/NOW 内容）；两分支同集合、in-scope 逐字节一致＝对齐已证。
+4. **CI 点名一次**：2782d637（纯簿记 5 文件）running ~7%；d450d43a 排队（ci.sh 读本地分支、序 qwen27b→argon→worker、无需 push）。
+5. 红线全绿：vibe_calls 130 行（末条 11-07T18:35Z）→0 调用；queue 空；main c097899e；未 push。
 
 ## 下一步（次轮，按序）
-1. 點名 worker 新 SHA（工單完成後）→ 期望 🟢 5056/5129；複驗 3 條自證＋filing 三 sha 仍 MATCH。
-2. 若工單未完成 → 按驗收條件補推（產品 bug 例外，非 vq-el4 序）。
-3. G3（vq-1zf）續候人類明確批准；其餘紅線不變。
+1. 巡灯一次（不轮询）：期望 2782d637 🟢 5056/5129＋d450d43a 🟢 5056/5129（LATEST_worker.json sha 由 b150a94c 变 d450d43a）。
+2. 两灯绿→验收工单 1034-1：移 tickets/done/；若 d450d43a 红→列 failures、开修复工单。
+3. G3（vq-1zf）续候人类明确批准；红线不变。
 
-## 红線（不變）
-無 G3 fire／無模型調用／無 queue／無 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 凍結（anchors 5147f8c3·e757aec5）／CI 每輪至多點名一次。
+## 红线（不变）
+无 G3 fire／无模型调用／无 queue／无 hidden·scorer／不 push／不 reset·rebase·branch -f／repair.py＋extract.py 冻结（5147f8c3·e757aec5）／CI 每轮至多点名一次。
