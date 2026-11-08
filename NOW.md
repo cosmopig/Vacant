@@ -1,15 +1,13 @@
-# NOW（r1233，2026-11-08 04:1x UTC）
+# NOW（r1235，2026-11-08 04:4x UTC）
 
 ## 現況（本輪驗證）
-- **vq-el4.17 close**＝vq-el4 最後 in-progress 項；`bd list --parent vq-el4 --all` → **18 closed、0 open、0 in-progress**。
-- CI：097dd964 🟢 5036/0/5109 與 441f88c3 🟢 5036/0/5109（皆直接、json＋log）；69700c66/c3a55c97/441f88c3/afcc38fd 全純簿記（git diff --stat、產品碼 diff＝0 行）；HEAD afcc38fd CI 已排程（close 時 runner idle、下一 cycle）。
-- 審查 #3/#4 本輪新鮮重驗：checks.py **f3525b01×3 分支**、extract.py **e757aec5**、repair.py **2795 行/5147f8c3** 未動；G2.5 三門 PASS 備案 ops/audits/g25_all_gates_filing.json 在位（g1 39/39、real14 9/9、phase3 fixed7 rtw0）。
-- reqloop 守護 **170 passed**（2.3s，test_reqloop_extract＋test_reqloop_repair）。
-- G3（vq-1zf）：人類核准信號無（queue/done 無新件、審查 #5 明確等核准）→ **0 模型呼叫**。
-- 【redo 本輪】effects_20261105_summary.json 已打開（60,228 B、schema vacant.audit/effects_20261105_summary/1、scope_note＝開發選樣 e008/e013/e014 已見題）：policy30 30 格→10 唯一題、feedback_once20 20 格→7 唯一題，聯集＝**9 dab_**（dab_035/039/055/057/105/378/426/427/507）＋dabstep；G3 選題重驗：DABench bank **30**（ref/bm_tasks/dabench）−9 已見＝**21 未見**，bank 順序前 4＝**dab_129/144/176/216，與預註冊一致**。
-- 本輪 0 模型呼叫、0 成本。
+- **G2.5 三門本輪新鮮重跑**（HEAD ad87a1e0、`run_eval.py --all`、RC=0、離線 0 模型呼叫）：G1 抓錯 39/39、冤枉 0（41 呼叫/328,550 tok）；REAL14 9/9、冤枉 0/5（74 呼叫/732,826）；PHASE3 fixed 7、unresolved 2、rtw 0（15 sess/275 calls/15,087,278 tok）——與備案 ops/audits/g25_all_gates_filing.json（r1228）**逐數一致、無漂移**。審查 #1 由本輪自跑確認。
+- **審查 #2 已滿足（審查資訊過時）**：其寫 worker HEAD=aca58a95／blob 410e1118；實際 worker HEAD=**80947934**（r1229 補救）、工單 **R20261108_0150-1 已在 tickets/done/**（驗收證據齊：pearson2 3 passed、hygiene 2 passed、reqloop+beads 357 passed）；**checks.py blob 三分支全＝f3525b01**（qwen27b/argon/worker 逐一 ls-tree 核）。
+- 審查 #3 新鮮重驗：repair.py **2795 行/5147f8c3**、extract.py **e757aec5**、checks.py **f3525b01**（本輪 HEAD）——凍結與邊界未動。
+- CI：LATEST_qwen27b＝441f88c3 🟢 5036/0/5109；**HEAD ad87a1e0（r1233 redo）CI 尚無檔**（loop 職掌、下 cycle）；argon fecd8657 🟢、worker 80947934 🟢 5039/0。
+- G3（vq-1zf）：/srv/vlab/queue 空、done 無新件、審查 #5 明確等核准 → **0 模型呼叫**（本輪 0 呼叫、0 成本）。
 
-## 下一步（下輪 r1234）
-1. 驗 literal HEAD **afcc38fd** CI 檔轉 🟢（已排程、runner idle）；若紅（產品 diff 0 下不應）→三行歸因、不自修。
-2. G3：人類已核准→照 vq-1zf 發射（3 臂×4 未見題 dab_129/144/176/216 ≤12 格、glm 唯一入口 ≤2M tok/日 fail-closed、scorer=/srv/vlab、四類分報）；未核准→0 呼叫。
-3. 無其他工作：repair.py 凍結、不新開工單、不碰 main、不自發射大成本實驗。
+## 下一步（下輪 r1236）
+1. 驗 HEAD **ad87a1e0** CI 轉 🟢（純簿記、產品 diff 0→應綠）；紅燈才歸因。
+2. G3：見核准信號→照 vq-1zf 發射（3 臂×dab_129/144/176/216、≤12 格、glm 唯一入口 ≤2M tok/日 fail-closed、scorer=/srv/vlab、四類分報）；未核准→0 呼叫。
+3. 無其他工作：vq-el4 18/18 完結、工單 done、repair.py 凍結、不碰 main、不自發射大成本實驗。

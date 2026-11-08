@@ -61,3 +61,10 @@
 - ① 已打開 ops/audits/effects_20261105_summary.json（60,228 B；schema vacant.audit/effects_20261105_summary/1；scope_note＝「開發選樣（e008/e013/e014 已見題）」；snapshot d38d2eb2；50 格）：policy30 30 格→10 唯一題、feedback_once20 20 格→7 唯一題（draft 欄位解 task）。
 - ② 已見聯集＝**9 dab_**（dab_035/039/055/057/105/378/426/427/507）＋dabstep；G3 選題依此重驗：bank ref/bm_tasks/dabench **30 題**−9＝**21 未見**；bank 順序前 4＝**dab_129/144/176/216**＝vq-1zf 預註冊選題，不變（code 驗 first4==expected True）。
 - ③ 本 redo 0 模型呼叫、0 成本；vq-el4.17 close 與 G3 未核准 0 呼叫之結論不變。
+
+## r1235（2026-11-08 04:4x UTC）：G2.5 三門本輪自跑確認＋審查 #1/#2 收口（0 模型呼叫）
+- ① G2.5：HEAD ad87a1e0 新鮮跑 `run_eval.py --all` RC=0——G1 39/39 冤枉0（41/328,550）、REAL14 9/9 冤枉0/5（74/732,826）、PHASE3 fixed7 unresolved2 rtw0（15/275/15,087,278）；與備案 g25_all_gates_filing.json 逐數一致、無漂移→審查 #1 自跑確認。
+- ② 審查 #2（worker 同步）：資訊過時——實際 worker HEAD 80947934（r1229）、工單 R20261108_0150-1 已在 done/（驗收證據齊）；checks.py blob 三分支全＝f3525b01（qwen27b/argon/worker ls-tree 逐一核）→已滿足、無需再動。
+- ③ 審查 #3 新鮮重驗：repair.py 2795 行/5147f8c3、extract.py e757aec5、checks.py f3525b01——凍結與邊界未動。
+- ④ 沒驗證：ad87a1e0 CI 檔（loop 職掌、下 cycle）；G3 核准信號（queue 空→0 呼叫）。
+- ⑤ 下一步：巡 ad87a1e0 CI＋等 G3 核准（vq-1zf）；無其他可動工單（vq-el4 18/18、open 工單 0）。
