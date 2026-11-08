@@ -87,10 +87,11 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
 
     repo = tmp_path / "repo"
     (repo / "ops" / "loop").mkdir(parents=True)
-    # 條目邊界約定（r1279 起守衛要求）：條目行＝「（YYYY-MM-DD…」（live 24/24 實證）。
-    canonical = "# t\n\n## Current State\nCANONICAL\n（2026-11-08 r999: log）\n"
+    # 條目邊界約定（r1279 起守衛要求）：條目行＝「（YYYY-MM-DD…」（live 24/24 實證）；
+    # r1292 起錨點行（section 首個非空行）同為日期條目行——非條目行＝簿記違反約定。
+    canonical = "# t\n\n## Current State\n（2026-11-08 r999: state）\n（2026-11-07 r998: log）\n"
     (repo / "STATE.md").write_text(canonical, encoding="utf-8")
-    (repo / "ops" / "STATE.md").write_text("# t\n\n## Current State\nCANONICAL\n", encoding="utf-8")
+    (repo / "ops" / "STATE.md").write_text("# t\n\n## Current State\n（2026-11-08 r999: state）\n", encoding="utf-8")
     (repo / "NOW.md").write_text("NOW\n", encoding="utf-8")
     (repo / "ops" / "loop" / "NOW.md").write_text("NOW\n", encoding="utf-8")
 
@@ -133,10 +134,10 @@ def test_bookkeeping_negative_controls(tmp_path: Path) -> None:
 
     # (f) 鏡像截斷：最新條目尾部被砍 → 必須 BROKEN，不得假綠（r1278）：
     # 截斷後的鏡像仍是 canonical 的 byte 前綴（startswith 成立），舊檢查判 OK，
-    # 但鏡像實際少了當前狀態條目的 9 個字元——與 r1271/r1272 同型假綠燈
+    # 但鏡像實際少了當前狀態條目的尾部字元——與 r1271/r1272 同型假綠燈
     # （H-0：漏掉一項得到的綠燈就是漏洞成因；I-4：未測量≠通過）。
     (repo / "ops" / "STATE.md").write_text(
-        "# t\n\n## Current State\nCANONICA", encoding="utf-8"
+        "# t\n\n## Current State\n（2026-11-08 r999: sta", encoding="utf-8"
     )
     mod.results.clear()
     mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
@@ -215,6 +216,33 @@ def test_bookkeeping_header_only_mirror_negative_control(tmp_path: Path) -> None
     mod.results.clear()
     mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
     assert mod.results[-1][:2] == ("bk_state", True), mod.results
+
+
+def test_bookkeeping_nonentry_anchor_zero_entry_mirror_negative_control(
+    tmp_path: Path,
+) -> None:
+    """非條目錨點零條目鏡像假綠燈負控制（r1292, vq-el4.37）：r1282 守衛的錨點
+    ＝「## Current State」後首個非空行，但從未被要求是日期條目行——若 section 首個
+    非空行是非日期行（如 NOTE），鏡像＝標題＋表頭＋該非日期行（零條目行）時，既有
+    全部守衛仍判「同步」（r1292 實測：('bk_state', True, 'mirror 27B…同步')，與
+    r1271–r1282 同型假綠燈、H-0 同構：漏掉一項得到的綠燈就是漏洞成因；I-4：未測量
+    不是通過）。錨點行須匹配 ENTRY_START_RE「（YYYY-MM-DD…」，否則 BROKEN。"""
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    (repo / "ops").mkdir(parents=True)
+    (repo / "STATE.md").write_text(
+        "# t\n\n## Current State\nNOTE\n（2026-11-08 r999: entry）\n",
+        encoding="utf-8",
+    )
+    # 鏡像＝標題＋表頭＋非日期行（零條目行）→ 必須 BROKEN，不得假綠
+    (repo / "ops" / "STATE.md").write_text(
+        "# t\n\n## Current State\nNOTE\n", encoding="utf-8"
+    )
+    mod.results.clear()
+    mod.check_bookkeeping_state(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "bk_state" and ok is False and "NO_ENTRY" in detail, mod.results
 
 
 def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
