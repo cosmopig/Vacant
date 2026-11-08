@@ -281,6 +281,18 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
             "（I-4：未測量不是通過）",
         )
         return
+    # r1292（vq-el4.37）：錨點行本身必須是日期條目行——r1282 守衛取「首個非空行」
+    # 為錨點但從未驗其為條目行；section 首個非空行是非日期行（如 NOTE）時，鏡像＝
+    # 標題＋表頭＋該行（零條目行）仍判「同步」（r1292 實測：mirror 27B 判 OK＝
+    # r1271–r1282 同型假綠燈、H-0 同構）。非條目行＝簿記違反約定，應修簿記。
+    if ENTRY_START_RE.match(entry) is None:
+        record(
+            "bk_state", False,
+            f"NO_ENTRY: canonical '## Current State' 首個非空行非日期條目行「（YYYY-MM-DD…」"
+            f"（實際 {entry[:40]!r}）——錨點非條目時零條目鏡像仍判同步＝假綠燈；"
+            "非條目行是簿記違反約定，應修簿記（I-4：未測量不是通過）",
+        )
+        return
     m_lines = m.split("\n")
     if m_lines and m_lines[-1] == "":
         m_lines = m_lines[:-1]  # 上面已保證 m 以 '\n' 結尾
