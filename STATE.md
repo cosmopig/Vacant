@@ -176,3 +176,10 @@
 - ③ 工单 R20261108_0826-1-sync-worker-drop-vacuous-tests（bd vq-ssk；0 模型呼叫；验收：worker↔qwen27b 产品/测试 diff 0 文件、worker CI 5053/5126、g2.py blob 0e7a679d）。
 - ④ 未验证：qwen27b d56d6ecc／argon 5fb3d00a CI 燈（未轮询，下轮查一次）；环境异常（时钟回跳 6h47m、ops 大量 D）待人类。
 - 下一步：r1247 审助手 worker commit＋一次 CI 查燈；G3 仍待人类核准。
+
+## r1246 redo（2026-11-08 ~08:5x UTC）：审查点名两文件（effects/filing）已开、复接地；r1246 自身声明零修正
+- ① r1246 声明（验收 53 passed／锚点 3 passed／worker 缺陷／工单）未引两文件数字→无需返工；但按审查要求已全数打开。
+- ② Filing 4b24cd5b（116 行全读）：三門 PASS（G1 39/39・0 冤枉、REAL14 9/9・0/5、PHASE3 fixed7・unresolved2・rejected0・r2w0・errors0・stale[]）；6 个 sha256（extract 51abfec3／checks c7589c61／run_eval 332cd324＋phase1 3c6fb35a／phase2 6b7cb831／phase3 ada235bb）对现树重算全 MATCH。
+- ③ Effects 856c2c71（代码打开）：snapshot d38d2eb2、cells 50、local 45/current 50（mismatch 3+2=5 自洽）；policy30 g7・l6、once20 g7・l4、tokens 16,284,659/17,385,851/6,210,682/13,293,271、api 915=365+550、457=165+292、r2w=0 全 MATCH。
+- ④ 口径修正：summary 文件**无** `hidden_after_independent` 字段；「跑後隱藏評分全 UNKNOWN」＝原始 g2_result.json 的 `after_hidden`（50/50 UNKNOWN、phase 级同，非"45 cells"）；独立（可见）scorer 实评全 50（status=scored、34 pass/16 fail＝summary `after_independent` 布尔）。r1245 redo 行按此读。
+- ⑤ 历史行（r1242 "still 4/10・5/10"）在独立口径下仅 policy30-localized still=4 可复现、once20 无单一口径=5→历史不动、不再前带；今后引 g7/l6・g7/l4＋tokens/api。

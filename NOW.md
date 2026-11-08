@@ -9,6 +9,10 @@
 - **真缺陷（worker）**：① `tests/test_reqloop_g2_negative.py` 仅 worker 有、3 个测试函数体全 `pass` 零断言
   （WIP d3a8d1da 引入）→ worker CI 5056/5129＝另两分支 5053/5126＋3 个恒真测试；
   ② g2.py worker=4168a580（旧 docstring）vs canonical 0e7a679d（qwen27b/argon，来自 247309e4；b45a6fb1 合并保留了旧版）。
+- redo（审查点名）：两文件已开并复接地——filing 4b24cd5b 三門 PASS＋6 sha256（3 code＋3 sources）重算 MATCH；
+  effects 856c2c71：snapshot d38d2eb2、cells 50、local 45/current 50、g7/l6・g7/l4、tokens 16,284,659/17,385,851/6,210,682/13,293,271、
+  api 915/457 全 MATCH。口径修正：「跑後隱藏評分全 UNKNOWN」＝原始 g2_result.json 的 `after_hidden`（50/50，非"45 cells"）；
+  独立（可见）scorer 实评全 50（scored，34 pass/16 fail＝summary 的 after_independent 布尔）。
 - 工单：`~/dev/ops/tickets/open/R20261108_0826-1-sync-worker-drop-vacuous-tests.md`（bd vq-ssk）
   助手在 /home/user1/dev/wt/worker 执行：删文件＋对齐 g2.py；0 模型呼叫；
   验收＝三分支 vacant_network/+tests/ 零 diff、worker CI 5053/5126、g2.py blob 0e7a679d。
