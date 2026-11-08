@@ -165,7 +165,7 @@
 
 ## r1244 redo（2026-11-08 ~07:4x UTC）：審查點名 3 檔未開→全數開啟＋依賴數字重接地
 - ① build_g25_all_gates_filing.py（205 行，已開）：REPO=parents[2]（L22）argon 修正在樹；門檻 0.70/5/1 對 run_eval.py 單一來源；blob 23dac11c 三分支同。
-- ② effects_20261105_summary.json（60,228 B，code 開啟，blob 856c2c71）：policy30 g w2r7/still3/r2w0/pres5、l w2r6/still4/pres5（15 格＝10 錯＋5 對）；once20 g 7/still3、l 4/still6；tokens 16,284,659/17,385,851/6,210,682/13,293,271、api 915=365+550、457=165+292、snapshot d38d2eb2、cells 50、local 45／current 50（local 舊碼 mismatches 3+2、current 0）——與 prompt #6 及 r1242 全一致。
+- ② effects_20261105_summary.json（60,228 B，code 開啟，blob 856c2c71）：policy30 g w2r7/still3/r2w0/pres5、l w2r6/still4/pres5（15 格＝10 錯＋5 對）；once20 g 7/still3、l 4/still6；tokens 16,284,659/17385851/6,210,682/13293271、api 915=365+550、457=165+292、snapshot d38d2eb2、cells 50、local 45／current 50（local 舊碼 mismatches 3+2、current 0）——與 prompt #6 及 r1242 全一致。
 - ③ g25_all_gates_filing.json（code 開啟，blob 4b24cd5b，round 1228、ticket vq-el4.14）：g1 39/39·false0 PASS（41 呼叫/328,550 tok）、real14 9/9·0/5 PASS（74/732,826）、phase3 fixed7·unres2·r2w0 PASS（sessions15·calls275·tok15,087,278）；三 code sha256（extract 51abfec3、checks c7589c61、run_eval 332cd324）對現樹重算全 MATCH。
 - ④ 結論：r1244 巡燈依賴陳述（三門 PASS、vq-el4 18/18、effects 數字）全部接地於此三檔→數字與文案零改動；「未開」缺口已補。
 - ⑤ 紅線不變：queue 空・0 模型呼叫・main 未動・不自 push・G3 未發射。
