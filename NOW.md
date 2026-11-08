@@ -1,18 +1,16 @@
-# 現在（第 1229 輪後，2026-11-08 02:2x UTC）
+# 現在（第 1230 輪後，2026-11-08 03:0x UTC）
 
-## r1229：R20261108_0150-1 驗收補救落地（worker 護欄 1 failed → 2 passed）
-- 審查指示#2 複核：worker 已 merge auto/argon（944fbb08）＋WIP（8e9d4af0，僅 4 份 stderr 證據 log）；checks.py blob 三分支＝f3525b01；pearson2 3 passed。
-- 發現：工單標 done 但驗收項3未達——`test_no_tracked_absolute_symlinks` 1 failed（worker 3 個絕對 symlink）。
-- 修復（80947934@auto/worker）：`_data/payments.csv`→相對鏈；`ops/audits/audits`、`ops/audits/e016_failed_step_ablation.md`（repo 外指針）移除；正本 ~/dev/ops/audits 未動。
-- 驗證：兩護欄 2 passed／pearson2 3 passed／`-k 'reqloop or beads'` 357 passed 1 skipped 0 failed。
-- CI：argon fecd8657 🟢 5036/0；qwen27b d95bb8aa、worker 80947934 待跑（下輪巡）。
+## r1230：CI 三分支全綠（上輪 2 pending→綠）＋G2.5 三門新鮮 PASS（0 模型呼叫）
+- CI 巡：qwen27b 4e5b26a7 🟢 5036/0、argon fecd8657 🟢 5036/0、worker 80947934 🟢 5039/0（上輪 d95bb8aa/80947934 兩 pending 現全綠）。
+- `run_eval.py --all` 離線新鮮複驗：**exit 0**；G1 39/39（0 冤枉）／REAL14 9/9（冤枉 0/5）／PHASE3 fixed7 unres2 rtw0 err0——與審查點名數字一致。
+- 守護：test_reqloop_extract＋run_eval **95 passed**。
+- extract.py 邊界核完（quote 逐字／deliverable 猜名攔／verifier 白名單＋參數閉集／expr AST 白名單／parse fail-closed）：無 fail-open 缺口。
 
 ## 下一步
-1. 巡 CI：qwen27b d95bb8aa、worker 80947934 → 應🟢（`python3 ~/dev/ops/ci_status.py`）。
-2. 等審查派工 G3（須派工、不自發射大成本）；repair.py／G1 requirements.json／凍結快照不改。
-3. 大模型一律 `glm` 指令、≤200 萬 token/日；額度限制 fail-closed 不重試。
+1. 等審查派工 G3（須派工、不自發射大成本）；repair.py／G1 requirements.json／凍結快照不改。
+2. 大模型一律 `glm` 指令、≤200 萬 token/日；額度限制 fail-closed 不重試。
+3. 新 vq-el4 未完成項／CI 紅燈／產品真 bug 才開新工單（審查者只審 extract.py 與 G2.5 數字）。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
 官方鎖檔 eval_phase3_glm53.json 不改；成本缺值＝UNKNOWN 不填 0。
-（NOW 上限 3 KB）

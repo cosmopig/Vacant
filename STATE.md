@@ -25,3 +25,10 @@
 - 沒驗證：qwen27b d95bb8aa／worker 80947934 CI 燈（下輪巡→應🟢）；全量 pytest（vacant-ci 職掌）。
 - 工單 R20261108_0150-1 補救完成（5 驗收項全達）；下一步＝巡 CI＋等 G3 派工（不自發射大成本）；不改 repair.py。
 - ⑥ redo（審查點名 extract.py／repair.py 本輪原未開）：兩檔補開（qwen27b＋worker worktree，wc -l＋head）——extract.py **1217 行**（頭部＝G2.5 擷取驗證/組裝層：quote 非逐字→丟棄、verifier 不在 SUPPORTED_VERIFIERS→unverified＝UNKNOWN 不當通過、參數不合→unverified、解析/client 例外→空集 fail-closed、GlmClient 唯一入口＝`glm`）；repair.py **2795 行**（頭部＝保留原候選、權威快照 source_tampered 退出碼 20、FAIL→UNKNOWN 不算修好、verifier 閉集分派未知→UNKNOWN）；兩 worktree 行數一致、git 皆乾淨；最後改動 ebe4344c（extract，已核准）／399f68b6（repair，已核准）；blob 三分支全同（extract e757aec5＝r1228 錨點、repair 5147f8c3）；`git show --stat 80947934` 僅 3 個 symlink、未觸及該二檔→本輪「repair.py 凍結／extract.py 邊界不改」陳述現以此接地。
+
+## r1230（2026-11-08 03:0x UTC）：CI 三分支全綠（上輪 2 pending→綠）＋G2.5 三門新鮮離線複驗 PASS（0 新模型呼叫）
+- ① CI 巡（ci_status.py）：qwen27b **4e5b26a7** 🟢 5036/0、argon **fecd8657** 🟢 5036/0、worker **80947934** 🟢 5039/0——上輪 pending 的 d95bb8aa/80947934 現全綠，三分支 0 紅燈。
+- ② 新鮮 `run_eval.py --all`（離線、RESUMED/快取、0 新呼叫）：**exit 0**；G1 39/39（100%、0 冤枉）／REAL14 9/9（冤枉 0/5）／PHASE3 fixed7 unres2 rtw0 err0——與審查親自執行數字一致。
+- ③ extract.py 邊界核（審查指示#3 範圍）：quote 逐字（paraphrase/空→丟棄）、deliverable 猜名→unverified、SUPPORTED_VERIFIERS 白名單＋參數閉集＋expr AST 白名單、parse fail-closed——無 fail-open 缺口；守護 test_reqloop_extract＋run_eval **95 passed**；repair.py 仍凍結未動。
+- ④ 沒驗證：GitHub Actions（無 admin＝基建）；全量 pytest（vacant-ci 職掌）；G3 未派工不發射。
+- 工單 vq-el4.16 close；下一步＝等審查派工 G3（不自發射大成本）、不改 repair.py／G1 requirements.json／凍結快照。
