@@ -266,3 +266,10 @@
 1. **9732075e 灯 → 🟢 5056/5129**（本轮点名步骤，由 running 转绿）；新离线验证全过：anchors 3/3；G1 39/39·FP0；REAL14 9/9·0/5；PHASE3 fixed 7·unresolved 2·right-to-wrong 0；filing code sha 3/3 MATCH；0 模型调用；queue 空；main c097899e。
 2. **🐛 发现 auto/worker(b150a94c) 树与 qwen27b 有 46 檔差異（14 D+32 M）、9 檔含已 commit 衝突標記**（e016_verdict_pipeline.py 非合法 Python；worker 历史含 WIP 41eef681）——r1250/r1251「三分支对齐」仅以祖先验证、不足；worker CI 绿不覆盖。
 3. 開 **R20261108_1034-1**（worker：以 qwen27b 為準清零 46 檔＋3 條自證），下輪點名新 SHA 燈複驗；G3（vq-1zf）續候明確批准；紅線不變。
+
+## 2026-11-08 r1253（10:40–10:5x UTC）
+1. 一条指令变好：worker in-scope diff 46→**0**（d450d43a 完成工单 1034-1 树对齐）；e016 真缺陷实证已修（b150a94c：8 标记＋SyntaxError→现＝qwen27b 版、ast.parse OK、compileall rc0）。
+2. 验收 3.5/4：diff=0＋e016 rc0＋filing 三 sha MATCH（51abfec3/c7589c61/332cd324）＋anchors 3 passed；"标记=0"系工单前提误——qwen27b 基线即 9 文件含该字串（正则定义/exhibit 数据/簿记）、两分支同集合；范围外余差 10 根级文件不在工单范围。
+3. CI 点名一次：2782d637（纯簿记）running ~7%；d450d43a 排队（ci.sh 读本地分支、序 qwen27b→argon→worker、无需 push）→工单留 doing/ 待灯。
+4. 未验证：d450d43a 与 2782d637 的 CI 结果（下轮巡灯一次）。
+5. 红线未动：0 模型调用（vibe_calls 130 行、末条 11-07T18:35Z）·queue 空·main c097899e·未 push·repair/extract 冻结·G3 未发射·未读 hidden/scorer。
