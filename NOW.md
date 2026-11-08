@@ -1,39 +1,19 @@
-# NOW.md — r1267（2026-11-08，第 1267 輪）
+# NOW（r1267 redo#3・2026-11-08）
 
-## 現在在哪（一句）
-Redo#2 落地：「1910 B」以本輪命令重算（`git show 684e2ba2:loop/NOW.md | wc -c`＝1910）並只寫重算值；
-補開審查點名、此前未開的 2 個給定檔（g25_all_gates_filing.json、extract.py），filing 三 sha256 重算 3/3 MATCH。
-無代碼改動；主線 G2.5 完結全綠，G3 仍阻塞等人類核准。
+## 現在在哪（本輪複核值）
+- G2.5 主線完成、全綠：filing 4681 B、code sha 3/3、sources sha 3/3（phase1 3c6fb35a／phase2 6b7cb831／phase3 ada235bb）本輪重算 MATCH；anchors＋ci-contract 7 passed；in-scope diff 0×2；0 model calls。
+- G2.5 數字引 **7/2**（filing 的 `out/all/phase3.json`）；standalone `eval_phase3_glm53.json`（11-07 15:07 舊版碼、6/3）**不得引用**。dab_039＝fixed（獨立 scorer 過；visible R3 PASS、R1/R2/R4 UNKNOWN 已記入 row）。
+- unresolved 2 格＝模型能力非 gate 失敗：dab_055（stalled、5/5 FAIL、R3/R4 需求級退步已記入 row）、dabstep-1273（max_rounds、R1 FAIL＋R2 UNKNOWN）。假設（待授權驗證）：dab_055 在 hand-written 需求下 fixed（g2-truth 9/9）但在 glm53 擷取需求下未修成→擷取需求可操作性可能較低。
+- 唯一未閉＝G3（vq-1zf）：12 格已備（g3gate --plan EXIT 0）、等人類核准 `--fire`；未核准不點火。
+- CI：三支最後完成皆 green（5066 passed／74 skipped）；worker@d5d6f2af（純簿記 HEAD）running、不 poll；通道裁決（auto-ci.yml vs local vacant-ci）等人類。
+- 本輪修正：NOW 兩檔 2994 B 貼 3 KB cap（harness 請縮短）→ 覆寫精簡版；r1267 條目「1996 B」係同輪舊測值（HEAD 實值 2994 B），已註明。
 
-## 實測記錄（全部直接開啟／重跑）
-【r1267】
-- `g25_all_gates_filing.json`：4681 B；開啟讀全文；code 段三 sha256（extract.py `51abfec3`／checks.py `c7589c61`／
-  run_eval.py `332cd324`）本輪逐一 sha256 重算 → **3/3 MATCH**（備案與 repo 100% 吻合）。
-- `extract.py`：1217 行／57363 B；git blob `e757aec50c16`（anchor 一致）、sha256 `51abfec3…`（filing 一致）；
-  docstring fail-closed：quote 非逐字→丟棄、SUPPORTED_VERIFIERS 閉集、unverified→UNKNOWN 不當通過、
-  解析失敗→空集、GlmClient（subprocess `glm`）＝擷取模型唯一入口。
-- 「1910 B」重算：`git show 684e2ba2:loop/NOW.md | wc -c`＝**1910**（r1266 覆寫前的 r1252 舊版）；
-  現行 NOW.md／loop/NOW.md＝1996 B（本輪 wc -c）。
-【r1266】
-- `auto-ci.yml`：name「auto CI」、job「auto core (reqloop + frozen hash + stepchain)」，
-  觸發僅 auto/**/PR/dispatch、`contents: read`；worktree clean，本輪只讀。
-- `repair.py`：2795 行／blob `5147f8c3ea1b`（與 anchor 一致）；docstring 含權威快照、
-  來源改寫→exit 20、FAIL→UNKNOWN≠修好、regressed、session≠model_calls、缺值=None；
-  `test_reqloop_frozen_anchors.py`+`test_reqloop_ci_contract.py` 7 passed。
-- `effects_20261105_summary.json`：60228 B／sha `a710f7e4…`；程式重算 8/8 條聲明 PASS：
-  50 cells、current_code 50/50（0 分歧）、local 45/50（5 分歧）、policy30 w2r13（g7/l6）
-  r2w0 pg10 sw7、once20 w2r11（g7/l4）r2w0 sw9、api_calls 915+457、sessions 35+20。
-- repo `loop/NOW.md`：原停滯 r1252（**1910 B**——本輪自 git 重算 `git show 684e2ba2:loop/NOW.md | wc -c`＝1910；
-  11-08 10:38）vs 根 NOW.md r1265——13 輪未同步；r1266 已覆寫（即本檔），與根 NOW.md／STATE.md 一致。
-- bd：vq-el4 27/27 closed；唯一 open＝vq-1zf（G3，等人類核准）。HEAD 13151d72（r1266 commit）。
-
-## 下一步（次輪，按序）
-1. **需人類**：G3（`--fire`）核准或指派其他 in-scope 工作；未核准前禁 fire／入 queue／
-   未授權模型呼叫（紅線#5）。
-2. 三分支 CI 綠燈確認（一次、不 poll）；紅燈僅在與本輪變更相關時才修。
-3. 每輪守：anchors 5 passed＋in-scope diff 0（簿記鏡像同步 worker/argon）。
+## 下一步
+1. 人類核准 G3 `--fire` → 點火後回讀 receipt＋scoring，按 gate 紀律記錄（UNKNOWN 不升級）。
+2. 人類裁決 CI 通道 → 照裁決執行。
+3. 兩者之前：維持紅線、0 代碼改動、每輪只複核＋記錄，不為 commit 改檔。
 
 ## 紅線（本輪全守）
 0 model calls・無 push（迴圈自推）・`.github/workflows/` 只讀・無 reset/rebase/branch -f・
-repair.py／extract.py／checks.py／run_eval.py／filing 未改・未讀 /srv/eval hidden 與
-scorer.py・無 sleep 輪詢。
+repair.py／extract.py／checks.py／run_eval.py／filing 未改・未讀 /srv/eval hidden 與 scorer.py・
+無 sleep 輪詢・G3 未核准不點火・standalone 6/3 舊檔不引用。
