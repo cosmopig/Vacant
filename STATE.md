@@ -123,3 +123,9 @@
 - ③ 一條指令（比上輪好）：合併預演樹（qwen27b 491c1828＋argon 1d78a8f4、RC0 無衝突、範圍＝r1238 同 4 檔）跑 reviewer 驗收指令 **53 passed in 0.56s**；且在 /tmp 有 g3gate_* 污染（＝e847c56e 紅燈條件）下 hermetic 守衛 **1 passed**（舊版同條件＝紅燈）、負控（還原 mkdtemp 版）守衛 **1 failed**（偵測力不變）；收尾清掉本輪自建 3 目錄、`ls /tmp/g3gate_*` 無殘留。
 - ④ 錨點重驗（合併樹）：repair.py 2795 行/blob 5147f8c3、extract.py 1217 行/blob e757aec5、reqloop/checks.py blob f3525b01——全一致。
 - ⑤ DECISION：合併順延 r1241——`ci/1d78a8f4.json` 不存在（ci.sh 10 分鐘週期、3 個新 sha 491c1828/1d78a8f4/13dd10fb 皆未跑、每支 ~14 分鐘、依 qwen27b→argon→worker 順序預計 ~06:4x 起逐支出燈）；依 ASSIGNMENT「該 sha CI 🟢 才准 merge」不輪詢、不繞門。紅線：/srv/vlab/queue 空（G3 未發射、0 模型呼叫）、main 未動。
+
+## r1240 redo（2026-11-08 06:2x UTC）：審查點名 3 檔補開＋接地（builder／filing json／effects summary）
+- ① build_g25_all_gates_filing.py（qwen27b 工作樹＋argon 版都開）：合併範圍 diff＝**僅 1 行**（REPO 硬寫 /home/user1/dev/Vacant→`pathlib.Path(__file__).resolve().parents[2]`；檔在 <repo>/ops/audits/→parents[2]＝repo 根，正確）；`cwd=REPO`、`sha256(REPO/rel)` 隨之；`--out` 參數 a364b2cc 已存在（grep 核實，非本次合併新增）——r1240 ①③「4 檔範圍」陳述接地。
+- ② g25_all_gates_filing.json（qwen27b＋argon 兩版都載入）：三門全 PASS（g1_rerun 39/39/false_acc0；real14 9/9/false_acc0/good5/errors0；phase3 errors0/fixed7/unresolved2/r2w0）；code sha256（extract/checks/run_eval）與合併樹實檔**全 MATCH**；兩版僅差 generated_at/git.head/sources.path（sources 三 sha256 3c6fb35a/6b7cb831/ada235bb 不變）；git.head=d826f5b5＝argon r1236 簿記（regen 時 HEAD）、filing 變更集由 dd978829 入樹；vq-el4 18 項目全 closed（bd 核實）——NOW「G2.5 18/18＋三門 PASS」接地。
+- ③ effects_20261105_summary.json（code 載入、60,228 B）：blob **856c2c71** 無漂移；total_cells 50/local 45/current 50；policy30 g7/l6（still 3/4）、once20 g7/l4（still 3/6）；逐格 tokens_true 加總 16,284,659/17,385,851/6,210,682/13,293,271 與 per_arm 欄位全一致（＝r1238 redo 2）——與 11-06 #6 口徑一致；r1240 STATE/NOW 未直接引用這些數字→**無需改數或改文案**。
+- ④ 結論：r1240 依賴此三檔的陳述（4 檔合併範圍、builder 修正、錨點／三門）全數接地，交付物（cbff221f）與下一步（等 ci/1d78a8f4.json 🟢）不變；本 redo 0 模型呼叫、0 成本。
