@@ -325,3 +325,10 @@
 3. 逐欄 code 重算（load in code）、與 r1255 redo 引用**逐項一致、零出入**：policy30 w2r **g7/l6**・pres **g5/l5**・still **g3/l4**・r2w 0/0・api **365/550**（總 915）・tok **16,284,659/17,385,851**（總 33,670,510）；once20 w2r **g7/l4**・still **g3/l6**・pres 0/0・api **165/292**（總 457）・tok **6,210,682/13,293,271**（總 19,503,953）；local_vs_independent **3+2**（dab_055-pi-C-localized・dabstep-1273 雙臂）・current_code mismatch **0**；且 11-06 人類點名「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」與本檔逐項吻合。
 4. 依賴核對：r1256 記錄依賴兩檔者＝僅 #1 錨點声明（repair.py 本條①落地）；#3 三門 PASS 出自新鮮 run_eval（不依賴本檔）→**零更正**、r1256 結論不受影響。
 5. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記）・G3 未發射・queue 空・main c097899e 未動未 push。
+
+## 2026-11-08 r1257（12:1x–12:2x UTC）：G3 gate 唯一 builder 路徑釘住——g3gate 四新測試（16→20 passed；0 模型呼叫）
+1. DECISION: vq-el4 20/20 已閉、G3 待人類核准→本輪取「R-loop 內、一輪做完、非文件」的最小實質項＝g3gate 唯一 manifest 建造路徑（build_manifest）＋plan_report＋--fire 有效核准 RC3 路徑零測試釘住之缺口（grep 全庫零引用證實；非 repair/extract/checks/run_eval 冻结碼，0 產品碼改動）。
+2. 交付：tests/test_reqloop_g3gate.py +4 測試（114 行）：build_manifest 選題（bank 順序−seen 前 n）＋巢狀目錄逐檔 sha256＋build→load→verify_frozen→check_budget 閉環；fail-closed 三態（bank 缺→FileNotFoundError／缺臂→KeyError／未見不足→ValueError）；plan_report 12 格 NOT FIRED；--fire 有效核准→**RC 3**（核准但未接線、不發射、不靜默 0/2）。
+3. 驗證：pytest tests/test_reqloop_g3gate.py＝**20 passed**（0.27s）；anchors＋g2 合跑＝62 passed（repair 5147f8c3/extract e757aec5 冻结未動）；build_manifest 對真 bank（30 題）重算＝frozen manifest 的 tasks/files/seen_set/arms/bank.ordering **逐項一致**（0 模型呼叫、0 寫入）。
+4. 未驗證：本 commit 自身 CI 燈（下輪巡一次）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准、queue 空、--fire 雙負控 RC2/RC3 現已釘住）。
+5. 下一步：下輪巡本 commit CI 燈（一次；紅燈＝例外才動手）；G3 續候人類明確核准；新審查指示照指示做。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
