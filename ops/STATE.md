@@ -378,3 +378,9 @@
 3. 審查#1/#2：anchors 5 passed×3 分支（qwen27b/worker/argon worktree 各實跑）；argon ff 對齊 qwen27b 新 HEAD；worker 4 檔同步（守衛測試＋ops/STATE.md＋ops/loop/NOW.md）後 git diff --name-only auto/worker auto/qwen27b -- vacant_network tests ops＝0。
 4. 未驗證：本 commit 與 worker/argon 新 SHA 的 CI 燈（輪首巡一次：qwen27b 70926581、worker bc5361aa 均 running、無紅；本機無 gh、不乾等）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准、queue 0）。
 5. 下一步：三分支新 SHA CI 燈各巡一次（紅燈＝例外才動）；G3（vq-1zf）續候人類明確核准；frozen 4 檔或 filing 任何變動→新守衛直接紅燈即例外處理。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
+
+## 2026-11-08 r1261 redo（13:xx UTC）：審查點名 effects_20261105_summary.json 直接開啟＋核數
+1. 直接開啟：**60,228 B**、blob **856c2c71**（r1237 以來未變）、snapshot d38d2eb2；scope_note 明示開發選樣／單 rep／不宣稱 localized 優於 generic／缺值 None 不填 0。
+2. load in code 逐格重算：policy30 w2r **g7/10・l6/10**（13）・r2w 0/0・pres g5/l5（10）・still g3/l4（7）・api 365/550（915）・tok 16,284,659/17,385,851（33,670,510）；once20 w2r **g7/10・l4/10**（11）・r2w 0/0・pres 0/0・still g3/l6（9）・api 165/292（457）・tok 6,210,682/13,293,271（19,503,953）——兩臂加總與 top-level 逐項一致（w2r/api/tok 全 MATCH）。
+3. 對質：11-06 人類點名「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」＝本檔 w2r 逐項吻合；hidden_after 全 None（UNKNOWN）；r1261 主條未引用本檔任何數字（三門出自行 run_eval 新鮮重算；9/9・7/9 基線是 g2-truth 手寫需求、非本檔）→**零更正**、r1261 結論不受影響。
+4. 紅線未動：0 模型呼叫（vibe_calls 仍 130 行末條 11-07）・0 寫入副作用（僅本條簿記＋鏡像）・G3 未發射・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。

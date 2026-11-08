@@ -6,7 +6,9 @@
 100% 吻合」由每轮人工重算改为机器直接变红。同轮新鲜复验：reqloop 353 passed；
 run_eval --all RC 0 三门 PASS（G1 39/39·FP0／REAL14 9/9·0/5／PHASE3 fixed7·u2·
 r2w0·err0）；filing 6 sha 全 MATCH；worker diff＝0；anchors 5 passed×3 分支；
-argon ff 对齐。工单 vq-el4.21。
+argon ff 对齐。工单 vq-el4.21。redo：审查点名 effects_20261105_summary.json
+已直接开启＋逐格重算（blob 856c2c71 未变；w2r policy30 g7/l6、once20 g7/l4
+与 11-06 点名数逐项吻合、两臂加總与 top-level 一致）→零更正。
 
 ## 下一步（次轮，按序）
 1. 三分支新 SHA CI 灯各巡一次（红灯＝例外才动手；本机无 gh，以轮首报告为准，不乾等）。
