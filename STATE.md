@@ -194,3 +194,9 @@
 - ④ 沒驗證：GitHub Actions（gh CLI 不在本機、無 admin、不准改 workflows；本地 vacant-ci 為在位 gate）；本輪未跑全量 pytest（vacant-ci 職掌、且其 ad9b989c 燈即本輪①）。
 - ⑤ 審查回單 redo（任務點名本輪原未開的參考檔）：已開啟並核對 `ops/audits/effects_20261105_summary.json`（schema effects_20261105_summary/1、snapshot d38d2eb2、50 格）——policy30：generic wrong_to_right 7（still_wrong 3、preserved 5）／localized 6（still_wrong 4、preserved 5）、rtw 0；once20：generic 7／localized 4、rtw 0；current_code_vs_independent_mismatches 兩相皆 0（50/50）；scope_note＝開發選樣單 rep、不宣稱 localized 優、無硬 token 上限、hidden_after 全 UNKNOWN、缺值 None。交叉核對：本輪 r1221 STATE/NOW/commit 皆未引用該檔任何數字（所引「7」全部出處＝本輪②新鮮 run_eval.py --all PHASE3 輸出），無矛盾、無需改數；獨立評分檔在位（~/dev/ops/effects_20261105/{policy30,feedback_once20}/independent.json，逐 phase）。
 - 下一步：等審查派工（G3 須派工、不自發射大成本）；若 auto/* 新 commit 落地→巡該分支 CI；無新授權工作時不補長文件、不改 repair.py。
+## r1223（2026-11-08 00:4x UTC）：驗收 dab_057 點估計修復並結案 vq-el4.10（P20261108_0029-1）
+- ① 單測 `pytest tests/test_reqloop_checks.py -k pearson2` **3 passed**（0.06s）；Vacant tree 乾淨、repair.py **2795 行**＝RLOOP_PLAN 凍結在位、extract.py 1217 行。
+- ② 全三門新鮮重跑 `run_eval.py --all` **🏆 PASS rc=0**：G1 抓錯 39/39 冤枉 0；REAL14 抓錯 9/9 **冤枉 0/5（原 1/5——dab_057 不再被 pearson2 純數字子集合誤判）**；PHASE3 fixed 7／unresolved 2／rtw 0；RESUMED、**0 新 API 呼叫**。
+- ③ `bd close vq-el4.10` → **CLOSED**（reason：checks.py pearson2 支援點估計字串前導值（同 _mean_int_col 口徑），REAL14 false_acc 降至 0/5，run_eval --all PASS）；r1222（dec9bd9c）未收尾改動已收口。
+- ④ 沒驗證：dec9bd9c（r1222 程式碼）CI 燈（輪首顯示「還沒跑完」→下輪巡）；本輪未跑全量 pytest（vacant-ci 職掌）。
+- 下一步：下輪巡 dec9bd9c CI；等審查派工（G3 須派工、不自發射大成本）。

@@ -1,21 +1,19 @@
-# 現在（第 1221 輪後，2026-11-07 23:5x UTC）
+# 現在（第 1223 輪後，2026-11-08 00:4x UTC）
 
-## r1221：CI 巡燈收口＋G2.5 三門新鮮 PASS＋凍結邊界核實（vq-el4.8）
-- **三分支最新 HEAD 全綠**：auto/qwen27b **ad9b989c 🟢 5035 passed, 0 failed, 74 skipped（826.40s、collected 5108＝5106+2 新守護）**；auto/argon 05989682 🟢 5033/0；auto/worker aca58a95 🟢 5034/0。r1219/r1220 兩件 repo 衛生守護已進 CI 套件。
-- G2.5 門禁本輪新鮮重跑：`run_eval.py --all` **🏆 PASS rc=0**（G1 抓錯 39/39 冤枉 0；REAL14 抓錯 9/9 冤枉 1/5；PHASE3 fixed 7/unresolved 2/error 0；RESUMED、0 新 API 呼叫）；備案＝已 commit `ops/reqloop/extract/out/all/phase{1,2,3}.json`（dd6e49c4）、tree 無漂移。
-- 凍結邊界本輪核實：repair.py **2795 行**＝RLOOP_PLAN 凍結、extract.py 1217 行、reqloop tree 乾淨、最後改動 399f68b6/ebe4344c 皆已核准；審查點名 4 件守護測試 **40 passed**。
-- 審查回單 redo：已開啟核對參考檔 `ops/audits/effects_20261105_summary.json`（50 格、policy30 7/6・once20 7/4、rtw 0、current_code 50/50 合獨立評分、單 rep 不宣稱優）——本輪記錄未引用其數字、無矛盾（所引「7」＝run_eval PHASE3 新鮮輸出）。
-- 審查 4 指示全數達標（①達標＋備案 ②凍結邊界在位 ③守護測試在位且綠 ④worker 綠）。
+## r1223：驗收 dab_057 點估計修復＋結案 vq-el4.10（P20261108_0029-1 完成）
+- 單測 `-k pearson2` **3 passed**；`run_eval.py --all` **🏆 PASS rc=0**：G1 抓錯 39/39 冤枉 0；REAL14 抓錯 9/9 **冤枉 0/5（原 1/5，dab_057 由 FALSE 轉 CLEAN）**；PHASE3 fixed 7／unresolved 2／rtw 0；RESUMED、**0 新 API 呼叫**。
+- `bd close vq-el4.10` → **CLOSED**（checks.py pearson2 點估計前導值，同 _mean_int_col 口徑）；r1222（dec9bd9c）未收尾改動已收口。
+- 凍結在位：repair.py **2795 行**、extract.py 1217 行、tree 乾淨、官方鎖檔 eval_phase3_glm53.json 未動。
+- dec9bd9c（r1222 程式碼）CI 燈輪首顯示「還沒跑完」→下輪巡。
 
 ## CI（本地 vacant-ci）
-- 三分支最新 HEAD 全 🟢（見上）。無待 pickup 的新 commit。
+- auto/qwen27b dec9bd9c：待巡（其餘兩分支上輪全綠：argon 05989682 5033/0、worker aca58a95 5034/0）。
 
 ## 下一步
-1. 等審查派工；G3 須派工，不自發射大成本。
-2. 若新 commit 落地（auto/* 任一分支）→ 巡該分支 CI 燈。
-3. 已知非本輪職掌：GitHub Actions 無新 run（gh CLI 不在、無 admin）＝人類/基建問題，本地 vacant-ci 為在位 gate。
+1. 巡 dec9bd9c CI 燈（應 🟢；pearson2 修復已本地全綠）。
+2. 等審查派工；G3 須派工、不自發射大成本。
+3. 已知非本輪職掌：GitHub Actions 無新 run（無 admin）＝人類/基建問題，本地 vacant-ci 為在位 gate。
 
 ## 紅線（不變）
 main 不動；不手動 push；不讀 /srv/eval hidden/scorer；不繞 glm 直連 vibe；
 不改 repair.py／G1 requirements.json／凍結快照／官方鎖檔 eval_phase3_glm53.json；成本缺值＝UNKNOWN 不填 0。
-（MEMORY 上限 6 KB、NOW 上限 3 KB）
