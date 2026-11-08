@@ -83,3 +83,11 @@
 - ③ 本輪依賴它的陳述逐項核對：manifest arm_defs.full_rloop「localized 修復（repair.py 凍結 2795 行）＋重驗所有必要條目（checks.py）」✓；manifest six_elements「repair.py 凍結 2795 行」✓；STATE④／NOW「未動／凍結」✓（blob＝錨點、乾淨）→**全數如實、無需改數或改文案**；交付物（88697cd6）不變。
 - ④ 本 redo 0 模型呼叫、0 成本；g3gate 15 測試與 `--plan` RC 0 維持（重跑核過）。
 - ⑤ 附：`ops/audits/g25_all_gates_filing.json` 被外部程序（非本輪、無 repo 內測試寫它）刷新——diff 僅 generated_at＋git.head（d826f5b5），門禁數字/sha 全同；已還原為已提交版本，本輪足跡只留 NOW/STATE。
+
+## r1237（2026-11-08 05:1x UTC）：argon dd978829 審查＋/tmp 洩漏清除；合併等 CI 綠燈（0 模型呼叫）
+- ① G3：/srv/vlab/queue 空→未發射、0 呼叫；open 工單 0（worker 同步工單已在 done/）。上輪後新 commit 僅 d826f5b5/a364b2cc 純簿記（diff＝NOW/STATE、產品 diff 0）；凍結錨點在 a364b2cc 重驗：repair 2795 行/5147f8c3、extract e757aec5、checks f3525b01（qwen27b 與 argon 一致）。
+- ② argon 新出 **dd978829**＋e847c56e（merge qwen27b→argon）；審查 4 檔 diff：filing builder 硬路徑 /home/user1/dev/Vacant→`__file__` 動態、g3gate 測試 mkdtemp→pytest tmp_path、＋2 守護測試（worktree 隔離／無 /tmp 殘留）；filing 再生成僅 generated_at/git.head/sources.path（→wt/argon）、**門禁數字與全部 sha 未變**（可接受：路徑＝產出地溯源、sha 才是錨點）。
+- ③ 驗證（比上輪好的一條指令）：argon worktree `pytest tests/test_reqloop_g3gate.py tests/test_reqloop_extract_run_eval.py` → **53 passed in 0.67s**（含 2 新守護測試；上輪該兩測試不存在且 /tmp 有洩漏）。
+- ④ 發現並清除 **3 個 /tmp/g3gate_\* 洩漏目錄**（各含僅 1 個測試 manifest.json，20K；新洩漏守護測試會因它們紅燈→已 rm，`ls /tmp/g3gate_*` 無殘留）。
+- ⑤ 未驗證／受阻：dd978829 CI 頭報「還沒跑完」→依「跨分支合併仍等對應 SHA 綠燈」，**合併順延下輪**（ff 至 e847c56e）；不輪詢 CI。
+- ⑥ 下一步：巡 CI（argon dd978829／qwen27b a364b2cc）→🟢 後 `git merge --no-edit auto/argon`＋兩測試檔驗收（預期 53 passed）＋ls-tree 錨點重驗＋簿記 commit；G3 仍待人類核准；0 模型呼叫維持。
