@@ -1,23 +1,22 @@
-# NOW.md — r1265（2026-11-08，第 1265 輪）
+# NOW（r1270・2026-11-08）
 
-## 本輪結論（一句）
-主線 G2.5 已完結且全綠（`run_eval --all` EXIT 0、三門 PASS、242 測綠、anchors 5、in-scope diff 0）；唯一剩餘工作 G3 已備妥但阻塞於人類核准——本輪無實質代碼改動、未造假進展。
+## 現在在哪
+- G2.5 主線完結、全綠（數字以 filing `out/all/phase3.json` 7/2 為準；standalone 6/3 舊檔不得引用）。
+- 本輪 r1270（新跑）：freeze_check → VERDICT: FROZEN_STATE_OK rc=0
+  （anchors 5／ci-contract 2／diff 0×2／filing 6 sha MATCH／g3gate NOT FIRED＋PLAN OK）。
+- CI 一次讀取：LATEST 三分支皆 green（5066/5139・0 failed・74 skipped，@8c82ff24/876f4927/d5d6f2af）；
+  現 HEAD f7627783/1760ae14/cf1b939f 在跑（state.json：worker running），不 poll。
+- 工作隊列空：vq-el4 28/28 閉；唯一 ready＝vq-1zf（G3）待人類核准；/srv/vlab/queue 空。
+- 衛生修復（指示#3）：ops/STATE.md＋ops/loop/NOW.md 簿記鏡像自 r1265 後未同步（r1266–1269 跳過）——
+  本輪同步至 r1270 狀態並對齊三分支，in-scope diff 0×2。
 
-## 事實（本輪全部實跑／直接開啟）
-- `run_eval.py --all` EXIT 0：G1 抓錯 39/39・冤枉 0；REAL14 9/9・冤枉 0/5；PHASE3 fixed7／unresolved2／rejected0／right_to_wrong0／error0（0 新模型呼叫、離線重算）。
-- reqloop 相關測試 242 passed；anchors（frozen）5 passed×3 分支；in-scope diff 三分支 0。
-- `g3gate --plan` EXIT 0：12 格（4 題×3 臂）、verify_frozen OK、budget OK、NOT FIRED（0 model calls）。
-- **〔redo〕三檔本輪直接開啟核實**（此前只引 r1264 文字，現已落地）：
-  - `extract.py` 1217 行/blob `e757aec50c16…`＝G2.5 擷取驗證層，fail-closed（逐字 quote、`SUPPORTED_VERIFIERS` 閉集、解析失敗→空集、`GlmClient` 唯一模型入口）。
-  - `repair.py` 2795 行/blob `5147f8c3ea1b…`＝G2 修復切片（權威快照輸入、來源改寫→exit 20、FAIL→UNKNOWN≠修好、PASS 退步記 `regressed`、session≠API calls 分開、缺值＝None、opt-in）。
-  - `effects_20261105_summary.json` sha256 `a710f7e4…`，程式載入重算：50 cells、**current_code 50/50 與獨立一致（0 分歧）**、local 45/50（5 分歧＝舊 checker）、policy30 w2r13(g7/l6)/r2w0/pg10/sw7、once20 w2r11(g7/l4)/r2w0/sw9、api_calls 915+457 vs sessions 35+20。
-- bd：vq-el4 全 27 項 closed；唯一 open＝vq-1zf（G3，等人類核准）。
-- 0 model calls（queue 空、vibe_calls 今日 0）；未讀 /srv/eval hidden 與 scorer.py。
-
-## 下一輪先做
-1. **需人類**：核准 G3 發射（`--fire`）或指派其他 in-scope 工作——主線已完結、無其他可單方推進的代碼工作（未核准前禁 `--fire`／入 queue／未授權模型呼叫）。
-2. 確認三分支 CI 轉綠（一次、不 poll）；若紅燈且屬本次變更相關才修。
-3. 每輪守：anchors 5 passed＋in-scope diff 0（簿記鏡像同步 worker/argon）。
+## 下一步
+1. 每輪先跑 `python3 ops/reqloop/freeze_check.py`；任一項 BROKEN 即調查該項。
+2. 現 HEAD（f7627783/1760ae14/cf1b939f）ci/<sha>.json 到檔後一次讀取（不 poll）：綠則記錄；紅且屬本次變更相關才修。
+3. 人類核准 G3 `--fire` → 點火後回讀 receipt＋scoring，按 gate 紀律記錄（UNKNOWN 不升級）。
+4. 人類裁決 CI 通道 → 照裁決執行（不重複診斷、不翻 auto-ci.yml 開關）。
 
 ## 紅線（本輪全守）
-0 model calls・無 git push（迴圈自推 qwen27b）・.github/workflows/ 只讀・無 reset/rebase/branch -f・repair.py/extract.py/checks.py/run_eval.py/filing 未改・未讀 /srv/eval hidden 與 scorer.py・無 sleep 輪詢。
+0 model calls・無 push（迴圈自推 qwen27b）・.github/workflows/ 只讀・無 reset/rebase/branch -f・
+repair.py/extract.py/checks.py/run_eval.py/filing 未改（freeze_check FROZEN_STATE_OK）・
+未讀 /srv/eval hidden 與 scorer.py・無 sleep 輪詢・G3 未核准不點火・standalone 6/3 舊檔不引用。
