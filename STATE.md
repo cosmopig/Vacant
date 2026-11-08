@@ -200,3 +200,4 @@
 - ③ `bd close vq-el4.10` → **CLOSED**（reason：checks.py pearson2 支援點估計字串前導值（同 _mean_int_col 口徑），REAL14 false_acc 降至 0/5，run_eval --all PASS）；r1222（dec9bd9c）未收尾改動已收口。
 - ④ 沒驗證：dec9bd9c（r1222 程式碼）CI 燈（輪首顯示「還沒跑完」→下輪巡）；本輪未跑全量 pytest（vacant-ci 職掌）。
 - 下一步：下輪巡 dec9bd9c CI；等審查派工（G3 須派工、不自發射大成本）。
+- ⑥ 審查 redo（P20261108_0029-1）：本輪原未開工單點名的官方鎖檔 `ops/reqloop/extract/out/eval_phase3_glm53.json`——現補開＋接地：9 cells **fixed 6／unresolved 3**（unresolved＝dab_039/dab_055/dabstep-1273；fixed＝dab_378/426/427/507/dabstep-10/23）、errors 0／rtw 0／rejected 0、cost＝14 sessions／263 calls／**tokens None＝UNKNOWN**（cost_note：缺值不填 0）、baseline g2-truth 9/9・7/9 單 rep 不宣稱優；在位未改動：git status 乾淨、mtime Nov 7 15:07、最後改動 **267058ee**（vq-el4.5 結案、已核准）、run_eval.py 對該檔 **0 引用**（grep）→ 本輪兩次 `--all` 執行未觸及。口徑區分：②「PHASE3 fixed 7／unresolved 2」＝run_eval --all 新鮮輸出（out/all/phase3.json、RESUMED 累計 15 sessions／275 calls／15087278 tok）；鎖檔＝vq-el4.5 官方快照（6/9 fixed）——**不同時點快照、非同一組數字**；工單驗收以 run_eval 輸出（fixed 7）為準、鎖檔僅為「不得修改」邊界。
