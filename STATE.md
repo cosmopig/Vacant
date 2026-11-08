@@ -98,3 +98,10 @@
 - ③ 與 11-06 #6 口徑核對：「policy30 g7/10、l6/10」＝wrong-draft 分母（15 cells−pres5＝10 份錯草稿）與檔案 7/15、6/15 同義一致；「once20 g7/10、l4/10」（pres=0）直接一致；「單 rep、不宣稱孰優、缺值 UNKNOWN 不填 0」＝scope_note 原文一致→**口徑無出入**。
 - ④ r1237 各陳述依賴檢查：本輪六項（queue 空／凍結錨點／argon dd978829 審查／/tmp 清除／53 passed／合併順延）均未引用此檔任何數字；dd978829 的 4 檔 diff 亦不含此檔→**本輪無依賴它的陳述，無需改數或改文案**；交付物（91eb426d、vq-1zf.2）不變。
 - ⑤ 本 redo 0 模型呼叫、0 成本。
+
+## r1238（2026-11-08 05:2x UTC）：argon 合併預演全綠（合併樹 53 passed）＋三分支錨點核對；合併仍等 ci/e847c56e 綠燈
+- ① **一條指令（比上輪好）**：真實合併預演——detached worktree@auto/qwen27b＋`git merge --no-commit --no-ff auto/argon`（RC 0、無衝突，預演後已 abort＋清 worktree）→ 在**合併結果樹**上跑 reviewer 點名驗收指令 → **53 passed in 0.55s**、`ls /tmp/g3gate_*` 無殘留（上輪 53 passed 僅 argon 側樹）。
+- ② 審查接地：合併範圍＝4 檔（a364b2cc..e847c56e，48+/17-，與 r1237 審查同一集合）；2 個新守護測試逐個審查（洩漏守護＋worktree 隔離 `--out`）邏輯正確；凍結錨點**三分支**核對（比上輪多 worker）：repair 2795 行/5147f8c3、extract 1217 行/e757aec5、reqloop/checks f3525b01 全一致；提示點名 5 檔全數開啟。
+- ③ 未驗證／受阻：`ci/e847c56e.json` 尚不存在——CI 迴圈順序 qwen27b→argon→worker，qwen27b 1d560930 05:21:51 起跑，argon 排後（燈期 ~05:51）>本輪 05:46 硬限→依 ASSIGNMENT「該 sha CI 🟢 才准 merge」，**合併順延 r1239**（不輪詢、不為趕工繞門）。
+- ④ 紅線核對：/srv/vlab/queue 空（G3 未發射、0 模型呼叫）；worker 工單 R20261108_0455-1 已 done；open 工單無；main 未動；本輪 0 成本。
+- ⑤ 下一步（r1239）：`python3 ~/dev/ops/ci_status.py`→**ci/e847c56e.json 🟢**（收集數 ≥1d560930）→`git merge --no-edit auto/argon`＋驗收 53 passed＋/tmp g3gate_* 檢查＋錨點重驗＋`bd close vq-1zf.2`；紅/缺則 DECISION 入 STATE 續等；G3 續等人類核准。
