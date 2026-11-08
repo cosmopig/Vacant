@@ -143,3 +143,8 @@
 - ③ 錨點複核：repair.py 2795 行/5147f8c3、extract.py 1217 行/e757aec5、reqloop/checks.py f3525b01 全一致；三分支測試檔 blob 全對齊（g3gate 6f93f4e5、extract_eval 94897bf5）——worker 13dd10fb 已含同步（r1241），審查 #2「三分支同步」已滿足，tickets/open 空、無新工單。
 - ④ bd close vq-1zf.2（reason 含 ab3b6a67＋「53 passed in 0.71s」）；bd ready 僅剩 epic vq-1zf（G3）＝待人類核准，不發射；/srv/vlab/queue 空（0 項）。
 - ⑤ 未驗證：ab3b6a67 與 bf8a9a59 的 ci/<sha>.json 尚在隊列（ci.sh 06:43 起跑 worker 13dd10fb）——下輪輪首出燈核對；DECISION：無其他產品工單可領（審查範圍限 R-loop 與產品行為），本輪止於合併＋驗收＋簿記，0 模型呼叫。
+
+## r1242 redo（2026-11-08 ~07:0x UTC）：補開 effects_20261105_summary.json＋重算所有依賴數字
+- ① 補開（code json.load，60,228 B）：blob **856c2c71** 無漂移（r1238/r1240/r1241 三次核對同 blob；r1242 合併 4 檔範圍未觸及）；snapshot d38d2eb2、total_cells 50、local_matches 45／current 50。
+- ② 逐欄重算＝全 MATCH：policy30 generic w2r **7/10 錯**（wrong_to_right 7、wrong 10、still 3、r2w 0）、localized **6/10**（still 4、r2w 0）；once20 generic **7/10**（still 3）、localized **4/10**（still 6）——與 prompt #6「policy30 g7/l6、once20 g7/l4」口徑一致；tokens 四組 per_arm 欄（16,284,659／17,385,851／6,210,682／13,293,271）與 **cells_detail 逐格非 null 加總全 MATCH**（policy30/localized 5 格 null＝UNKNOWN、不計入加總、不填 0）；api 915=365+550、457=165+292 一致。
+- ③ 結論：r1242 交付物（merge ab3b6a67、53 passed、錨點、vq-1zf.2 close）均不依賴此檔→**無需改任何數字或文案**；記錄中引用此檔的數字（r1238/r1240/r1241 各條＋prompt #6）本輪全數接地重驗。`code_under_audit` 字串含「post auto/argon merge」＝blob 856c2c71 原有描述（合併前即存在、非本輪合併引入）。0 模型呼叫。
