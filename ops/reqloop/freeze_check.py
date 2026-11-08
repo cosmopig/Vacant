@@ -187,6 +187,13 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     鏡像＝canonical 標題＋「## Current State」＋section 本體，即鏡像是 canonical 的
     byte 前綴（canonical 尾部為輪次 log，不屬鏡像）。任一侧停滯→BROKEN：r1266–r1270
     實際漂移 7+ 輪未被任何檢查抓住——假綠燈，本檢查就是為堵它而設。
+
+    r1278 截斷守衛（vq-el4.31）：「byte 前綴」必要但不充分——截斷鏡像（最新條目尾部
+    被砍）仍是 canonical 的 byte 前綴，舊檢查照樣判 OK＝假綠燈（實測：live 鏡像砍
+    60B/1B 仍輸出「同步」；與 r1271/r1272 空對/空檔假綠同型，H-0：漏掉一項得到的
+    綠燈就是漏洞成因）。條目邊界約定：每輪條目各占一行、以「（」（U+FF08）起始——
+    canonical 現有條目逐條實證、負控制 fixture 同形。故鏡像必須以行邊界（'\n'）結尾，
+    且 canonical 餘部為空（無輪次 log）或自新條目「（」開始。
     """
     canon = repo / "STATE.md"
     mirror = repo / "ops" / "STATE.md"
@@ -199,13 +206,27 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     if "## Current State" not in m:
         record("bk_state", False, "mirror ops/STATE.md lacks '## Current State' header")
         return
-    if c.startswith(m):
-        record("bk_state", True, f"mirror {len(m)}B == canonical title+Current State（同步）")
-    else:
+    if not c.startswith(m):
         record(
             "bk_state", False,
             f"DRIFT: canonical {len(c)}B 不以 mirror {len(m)}B 為前綴（Current State 不同步）",
         )
+        return
+    if not m.endswith("\n"):
+        record(
+            "bk_state", False,
+            f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但非行邊界結尾"
+            "（最新條目尾部被砍）——截斷鏡像不是同步（I-4：未測量不是通過）",
+        )
+        return
+    if len(m) < len(c) and not c[len(m):].startswith("（"):
+        record(
+            "bk_state", False,
+            f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但餘部非新條目起始"
+            "「（」（多行條目內行邊界截斷）——截斷鏡像不是同步（I-4：未測量不是通過）",
+        )
+        return
+    record("bk_state", True, f"mirror {len(m)}B == canonical title+Current State（同步）")
 
 
 def check_bookkeeping_now(repo: Path = REPO) -> None:
