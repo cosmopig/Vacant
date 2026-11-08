@@ -4,6 +4,7 @@
 - CI 巡燈（上輪第 1 步）：qwen27b **dec9bd9c（r1222 pearson2 修復）🟢 5036 passed, 0 failed, 74 skipped**（851.58s、collected 5109＝5108+1）——「還沒跑完」轉 🟢。
 - 審查指示 1-4 皆有本輪新鮮證據：vq-el4 **11/11 closed、0 open**；worker 🟢 5034/0・argon 🟢 5033/0；repair.py **2795 行**／extract.py **1217 行**／tree 乾淨／最後改動已核准；守護測試 **109 passed（0.59s）**。
 - 無新工作：tickets／bd ready 全 0、/srv/vlab queue 空。
+- **審查 redo**：prompt §6 點名的官方參考檔 `ops/audits/effects_20261105_summary.json` 本輪原未開——現補開＋接地（50 cells、snapshot d38d2eb2；policy30 generic 7/10・localized 6/10，once20 7/10・4/10，rtw 0、cur_vs_ind 兩相 0、本批 localized 修回較少＋成本較高；單 rep 不宣稱優）；本輪記錄未引用該檔數字→無矛盾、無需改數；檔在位未改動（最後改動 26f23af5、pipeline 0 引用）。
 
 ## CI（本地 vacant-ci）
 - auto/qwen27b **4ca2033a**：待 pickup（純 NOW/STATE +2 行、0 產品代碼；~14min/pass）→下輪巡、應 🟢。
