@@ -352,3 +352,9 @@
 3. 驗證：pytest tests/test_reqloop_g3gate.py＝**22 passed**（0.39s；r1258＝21）；**負控**＝暫時吞例外（fail-open 化）→新測試紅（assert 3 == 1，即 APPROVED/RC 3）→還原（g3gate.py sha256 前後一致 a0dd46f2、0 產品碼改動）；anchors＋g2＋g3gate 合跑＝**64 passed**（r1258＝63）；filing 6 sha256 全 MATCH（code 51abfec3/c7589c61/332cd324＋sources 3c6fb35a/6b7cb831/ada235bb）；對齊 diff＝3（2 journal＋本輪測試檔）、vacant_network/ 產品碼 diff＝0；vq-1zf.5 closed。
 4. 未驗證：本 commit 自身 CI 燈（下輪巡一次；輪首 4d0b2290 仍 running）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准、queue 空、--fire 雙負控＋RC3 現已釘住）。
 5. 下一步：下輪巡本 commit CI 燈（一次；紅燈＝例外才動手）；G3 續候人類明確核准；新審查指示照指示做。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
+
+## 2026-11-08 r1259 redo（12:5x UTC）：審查點名兩檔直接開啟＋核數（repair.py・effects_20261105_summary.json）
+1. repair.py 直接開啟：**2,795 行**、git blob **5147f8c3ea1b5e9ee50531aca0382971e912c243**＝anchor 钉值（審查 #1）；docstring 規則塊＝保留原候選／權威輸入（source_tampered→退出碼 20）／累積修復承接前輪候選／FAIL→UNKNOWN 不算修好／regressed 必記錄／連續兩次停滯即停／成本缺值 UNKNOWN 絕不填 0／synthetic 僅離線／opt-in——無新增本地規則→r1259 條⑤「repair.py＋extract.py 冻结未動」声明自此有直接實檔依據（此前僅 anchor 3 passed 間接）。
+2. effects_20261105_summary.json 直接開啟：**60,228 B**、blob **856c2c71**（r1237 以來未變）、snapshot d38d2eb2、scope_note 明示「開發選樣・單 rep・不宣稱 localized 優於 generic・缺值 None 不填 0」；load in code 重算：policy30 w2r **g7/l6**（13）・r2w 0/0・pres g5/l5（10）・still g3/l4（7）・api 365/550（915）・tok 16,284,659/17,385,851（33,670,510）；once20 w2r **g7/l4**（11）・pres 0/0・still g3/l6（9）・api 165/292（457）・tok 6,210,682/13,293,271（19,503,953）——兩臂加總與 top-level 逐項一致。
+3. 對質：11-06 人類點名參考數「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」＝本檔 w2r 逐項吻合；r1258 redo 條② 各數逐項一致；r1259 主條與 NOW.md 未引用本檔任何數字、未做 localized 較好之声明→**零更正**、r1259 結論不受影響。
+4. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記）・G3 未發射・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
