@@ -91,3 +91,10 @@
 - ④ 發現並清除 **3 個 /tmp/g3gate_\* 洩漏目錄**（各含僅 1 個測試 manifest.json，20K；新洩漏守護測試會因它們紅燈→已 rm，`ls /tmp/g3gate_*` 無殘留）。
 - ⑤ 未驗證／受阻：dd978829 CI 頭報「還沒跑完」→依「跨分支合併仍等對應 SHA 綠燈」，**合併順延下輪**（ff 至 e847c56e）；不輪詢 CI。
 - ⑥ 下一步：巡 CI（argon dd978829／qwen27b a364b2cc）→🟢 後 `git merge --no-edit auto/argon`＋兩測試檔驗收（預期 53 passed）＋ls-tree 錨點重驗＋簿記 commit；G3 仍待人類核准；0 模型呼叫維持。
+
+## r1237 redo（2026-11-08 05:2x UTC）：effects_20261105_summary.json 補開（審查點名本輪未開）＋依賴陳述核對
+- ① 已打開並 code 載入 `ops/audits/effects_20261105_summary.json`（60,228 B；工作副本＝已提交 blob **856c2c71**1c464927427da8c2c6022d9a2729b87a、git 乾淨無漂移；schema vacant.audit/effects_20261105_summary/1；snapshot **d38d2eb2**；total_cells **50**；source_root=/home/user1/dev/ops/effects_20261105）。
+- ② 檔案內容（逐欄 code 重算）：policy30 30 cells＝generic w2r **7**/15（still3、pres5、api 365、tok 16,284,659、sess 19）＋localized **6**/15（still4、pres5、550、17,385,851、16），r2w0；once20 20 cells＝generic **7**/10（still3、165、6,210,682）＋localized **4**/10（still6、292、13,293,271），r2w0；local-vs-獨立分歧 3＋2（全出於 d38d2eb2 舊 checker）、**current 碼重驗 vs 獨立 50/50（mismatches 0）**；local 45/50→current 50/50。
+- ③ 與 11-06 #6 口徑核對：「policy30 g7/10、l6/10」＝wrong-draft 分母（15 cells−pres5＝10 份錯草稿）與檔案 7/15、6/15 同義一致；「once20 g7/10、l4/10」（pres=0）直接一致；「單 rep、不宣稱孰優、缺值 UNKNOWN 不填 0」＝scope_note 原文一致→**口徑無出入**。
+- ④ r1237 各陳述依賴檢查：本輪六項（queue 空／凍結錨點／argon dd978829 審查／/tmp 清除／53 passed／合併順延）均未引用此檔任何數字；dd978829 的 4 檔 diff 亦不含此檔→**本輪無依賴它的陳述，無需改數或改文案**；交付物（91eb426d、vq-1zf.2）不變。
+- ⑤ 本 redo 0 模型呼叫、0 成本。

@@ -1,4 +1,4 @@
-# NOW.md（r1237，2026-11-08 05:1x UTC）
+# NOW.md（r1237 redo，2026-11-08 05:2x UTC）
 
 ## 主線
 G2.5（vq-el4）18/18 完結；G3（vq-1zf）發射前置門已交付（88697cd6），仍待人類核准（queue 空→0 呼叫）。
@@ -9,7 +9,7 @@ G2.5（vq-el4）18/18 完結；G3（vq-1zf）發射前置門已交付（88697cd6
 - dd978829 審查（4 檔）：filing builder 硬路徑改 `__file__` 動態、g3gate 測試 mkdtemp→tmp_path、＋2 守護測試；filing 再生成僅 generated_at/git.head/sources.path、**門禁數字與 sha 全未變**。
 - 清除 **3 個 /tmp/g3gate_* 洩漏目錄**（各僅 1 個測試 manifest.json）——新洩漏守護測試會因此紅燈，現 `ls /tmp/g3gate_*` 無殘留。
 - 凍結錨點在 a364b2cc 重驗：repair 2795 行/5147f8c3、extract e757aec5、checks f3525b01（qwen27b/argon 一致）；d826f5b5/a364b2cc 純簿記、產品 diff 0。
-
+- **redo（審查點名 effects_20261105_summary.json 本輪原未開）**：已 code 載入（blob 856c2c71＝已提交、無漂移；50 cells；policy30 g7/l6、once20 g7/l4、r2w0、current vs 獨立 50/50）——與 11-06 #6 口徑一致；r1237 各陳述無引用此檔→**無需改數**，交付物不變。
 ## 邊界與紅線
 - **G3 未發射**：待人類定案（/srv/vlab/queue 空）；不新開工單、不碰 main、不發射大成本實驗。
 - 不讀 /srv/eval hidden 與 scorer.py；本輪 0 模型呼叫；成本缺值 UNKNOWN、cost_usd=0 不報 0 成本。
