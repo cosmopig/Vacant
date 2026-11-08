@@ -136,3 +136,10 @@
 - ③ 一條指令（比上輪好）：預演改在**當前 HEAD** bd63231d＋1d78a8f4（r1240 是 491c1828）：RC0 無衝突、範圍 4 檔、驗收 **53 passed in 0.59s**；簿記 commit 後對**精確終樹** 178a2800＋1d78a8f4 複做同綠（RC0、範圍 4 檔、**53 passed in 0.65s**、/tmp 零殘留）；51 vs 53 解明＝51 為合併前 qwen27b（36+15）、53 為合併後（37+16，argon ＋2 測試），不矛盾；污染環境（/tmp 6 殘留目錄＝e847c56e 紅燈條件）下 hermetic 守衛 **1 passed**；錨點 5147f8c3/2795、e757aec5/1217、f3525b01 全一致；三分支 repair/extract 同 blob。
 - ④ CI 實況：491c1828 **🟢**（5051 passed）；1d78a8f4 跑中（06:28:30 起、ETA ~06:42）；13dd10fb 其後（~06:56）；qwen27b HEAD（簿記後 178a2800）下一 pass（~07:0x-07:1x）；ci.sh 序列跑於 /var/tmp/ci-wt，未觸。
 - ⑤ DECISION：合併順延 r1242——本輪 1800s 硬限（~06:50）內 qwen27b 當前 HEAD（178a2800）不可能出燈；依 ASSIGNMENT「該 sha CI 🟢 才准 merge」不輪詢不繞門。收尾：/tmp g3gate 殘留 0（含本輪自建 3＋CI qwen27b 跑產 3）、預演 worktree 已刪、0 模型呼叫、queue 空（G3 未發射）、main 未動。
+
+## r1242（2026-11-08 ~06:5x UTC）：argon 合併完成（vq-1zf.2 close）＋驗收
+- ① CI 門核對：1d78a8f4（argon）🟢 5053 passed/5126 collected ≥ qwen27b 491c1828 5124 collected（ASSIGNMENT 規則滿足）；qwen27b HEAD bf8a9a59＝純簿記（git show --stat＝僅 NOW/STATE；git diff 178a2800..bf8a9a59＝僅 NOW/STATE 7±→產品碼樹＝r1241 已驗收預演樹）→准合併。
+- ② git merge --no-edit auto/argon RC0（merge commit **ab3b6a67**），範圍恰為預期 4 檔（builder REPO=parents[2] 在樹、g25 filing json、g3gate hermetic、extract_run_eval +25 worktree_isolation）；驗收指令 **53 passed in 0.71s**（與預演 53 passed 一致）；ls /tmp/g3gate_* 空（rc=2）。
+- ③ 錨點複核：repair.py 2795 行/5147f8c3、extract.py 1217 行/e757aec5、reqloop/checks.py f3525b01 全一致；三分支測試檔 blob 全對齊（g3gate 6f93f4e5、extract_eval 94897bf5）——worker 13dd10fb 已含同步（r1241），審查 #2「三分支同步」已滿足，tickets/open 空、無新工單。
+- ④ bd close vq-1zf.2（reason 含 ab3b6a67＋「53 passed in 0.71s」）；bd ready 僅剩 epic vq-1zf（G3）＝待人類核准，不發射；/srv/vlab/queue 空（0 項）。
+- ⑤ 未驗證：ab3b6a67 與 bf8a9a59 的 ci/<sha>.json 尚在隊列（ci.sh 06:43 起跑 worker 13dd10fb）——下輪輪首出燈核對；DECISION：無其他產品工單可領（審查範圍限 R-loop 與產品行為），本輪止於合併＋驗收＋簿記，0 模型呼叫。
