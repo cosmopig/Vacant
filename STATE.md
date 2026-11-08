@@ -64,7 +64,7 @@
 
 ## r1235（2026-11-08 04:4x UTC）：G2.5 三門本輪自跑確認＋審查 #1/#2 收口（0 模型呼叫）
 - ① G2.5：HEAD ad87a1e0 新鮮跑 `run_eval.py --all` RC=0——G1 39/39 冤枉0（41/328,550）、REAL14 9/9 冤枉0/5（74/732,826）、PHASE3 fixed7 unresolved2 rtw0（15/275/**15087278**，本輪 code 載入 out/all/phase3.json cost 欄重算）；與備案 g25_all_gates_filing.json 逐數一致、無漂移→審查 #1 自跑確認。
-- ② 審查 #2（worker 同步）：資訊過時——其寫 aca58a95／410e1118，本輪重算接地 `git ls-tree aca58a95 -- vacant_network/reqloop/checks.py`→**410e1118cb55eff6…**一致；實際 worker HEAD 80947934（r1229）、工單 R20261108_0150-1 已在 done/（驗收證據齊）；checks.py blob 三分支全＝f3525b01（qwen27b/argon/worker ls-tree 逐一核）→已滿足、無需再動。
+- ② 審查 #2（worker 同步）：資訊過時——其寫 aca58a95／blob 410e1118cb55eff6de7ee12f1f7e1de8a31b2ce7（審查僅截前 8 位），本輪重算接地 `git ls-tree aca58a95 -- vacant_network/reqloop/checks.py`→**410e1118cb55eff6de7ee12f1f7e1de8a31b2ce7** 一致；實際 worker HEAD 80947934（r1229）、工單 R20261108_0150-1 已在 done/（驗收證據齊）；checks.py blob 三分支全＝f3525b01（qwen27b/argon/worker ls-tree 逐一核）→已滿足、無需再動。
 - ③ 審查 #3 新鮮重驗：repair.py 2795 行/5147f8c3、extract.py e757aec5、checks.py f3525b01——凍結與邊界未動。
 - ④ 沒驗證：ad87a1e0 CI 檔（loop 職掌、下 cycle）；G3 核准信號（queue 空→0 呼叫）。
 - ⑤ 下一步：巡 ad87a1e0 CI＋等 G3 核准（vq-1zf）；無其他可動工單（vq-el4 18/18、open 工單 0）。
