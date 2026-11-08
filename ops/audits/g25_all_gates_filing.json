@@ -1,0 +1,101 @@
+{
+  "schema": "vacant.filing/g25_all_gates/1",
+  "ticket": "vq-el4.14",
+  "round": 1228,
+  "generated_at": "2026-11-08T02:04:04+00:00",
+  "purpose": "資深審查 2026-11-08 指示 #1：確認 G2.5 全三項門禁整合達標並備案",
+  "git": {
+    "head": "f6d29d1d4d9b18295ddd4f0bc5bdd1054495d40b",
+    "branch": "auto/qwen27b"
+  },
+  "gates": {
+    "g1_rerun": {
+      "gate": "PASS",
+      "metrics": {
+        "caught": 39,
+        "total_bad": 39,
+        "catch_rate": 1.0,
+        "false_acc": 0
+      },
+      "threshold": {
+        "catch_rate": ">=0.7",
+        "false_acc": "== 0"
+      },
+      "cost": {
+        "calls": 41,
+        "tokens": 328550,
+        "unknown_tasks": []
+      }
+    },
+    "real14": {
+      "gate": "PASS",
+      "metrics": {
+        "caught": 9,
+        "total_bad": 9,
+        "false_acc": 0,
+        "total_good": 5,
+        "errors": 0
+      },
+      "threshold": {
+        "caught": ">=5",
+        "false_acc": "<=1"
+      },
+      "cost": {
+        "calls": 74,
+        "tokens": 732826
+      }
+    },
+    "phase3": {
+      "gate": "PASS",
+      "metrics": {
+        "cells": 9,
+        "fixed": 7,
+        "unresolved": 2,
+        "rejected": 0,
+        "right_to_wrong": 0,
+        "held": 0,
+        "errors": 0,
+        "stale_cells": []
+      },
+      "threshold": "errors==0（fixed/unresolved 為觀測數、非門檻）",
+      "extract_model": "glm53",
+      "repair_model": {
+        "provider": "lms1004nothink",
+        "model": "gemma-4-12b-it-qat"
+      },
+      "cost": {
+        "repair_sessions": 15,
+        "model_calls": 275,
+        "tokens": 15087278
+      },
+      "cost_note": "repair_sessions＝修復 session 數；model_calls＝API 請求數（raw usage）；任一缺值⇒UNKNOWN（不填 0）",
+      "comparison_baseline": "手寫需求（g2-truth）：localized 9/9、generic 7/9；開發選樣單 rep，不宣稱較好"
+    }
+  },
+  "sources": {
+    "phase1": {
+      "path": "/home/user1/dev/Vacant/ops/reqloop/extract/out/all/phase1.json",
+      "sha256": "3c6fb35a0cb4723cd88a523d88636de2f2c1f0340e3625a0f1dacfcd859fae0d"
+    },
+    "phase2": {
+      "path": "/home/user1/dev/Vacant/ops/reqloop/extract/out/all/phase2.json",
+      "sha256": "6b7cb83139beb03cdaa64afa6d908fe4af9b87f4c7ffddc479d60297b4a2dd40"
+    },
+    "phase3": {
+      "path": "/home/user1/dev/Vacant/ops/reqloop/extract/out/all/phase3.json",
+      "sha256": "ada235bbf50c25491b650018d67be8cec67ad460546fa42ee137882516d07049"
+    }
+  },
+  "boundaries": [
+    "開發選樣、單一碼態、單 rep——不宣稱產品成效，不宣稱 localized/generic 孰優",
+    "PHASE3 成本為 repair session 的 raw usage（歷史累計），非本備案輪新增呼叫",
+    "本備案輪 run_eval.py --all 為全程離線重算（0 新模型呼叫、0 新 token）",
+    "成本缺值＝UNKNOWN（null），不填 0；cost_usd=0 不代表免費",
+    "1753 本批排除；hidden/scorer 未讀、未回流"
+  ],
+  "verify": {
+    "gate_command": "python3 ops/reqloop/extract/run_eval.py --all",
+    "expected": "exit 0（三門全 PASS）",
+    "this_filing_builder": "python3 ops/audits/build_g25_all_gates_filing.py"
+  }
+}

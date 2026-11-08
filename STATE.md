@@ -8,3 +8,11 @@
 - 下一步：下輪巡 fecd8657 CI→應🟢（ci_status.py）；等審查派工（G3 須派工、不自發射大成本）；worker pearson2 未派工不自動做、不改 repair.py。
 - ⑤ 審查 redo（本輪點名 3 檔原未開→現補開＋接地）：(a) `ops/audits/effects_20261105_summary.json` python json 加載：60,228 B、mtime 2026-11-05 11:25、git 乾淨、最後改動 26f23af5（argon、已核准）；schema vacant.audit/effects_20261105_summary/1、snapshot d38d2eb2、50 cells；policy30(30)：generic w2r **7**（still 3、preserved 5、365 calls／16,284,659 tok）／localized **6**（still 4、preserved 5、550／17,385,851）、rtw 0；once20(20)：generic **7**（still 3、preserved 0、165／6,210,682）／localized **4**（still 6、preserved 0、292／13,293,271）、rtw 0；**current_code_vs_independent_mismatches 兩相皆 []**（30/30、20/20）；local（d38d2eb2 舊 checker）vs independent 5 格分歧現碼全解（matches 45→50）；scope_note＝開發選樣單 rep、不宣稱任何一方優、無硬 token 上限。(b) `extract.py` 補開：**1217 行**、頭部＝G2.5 擷取驗證/組裝層（quote 非逐字→丟棄；verifier 不在 SUPPORTED_VERIFIERS 或參數不合→unverified＝UNKNOWN 不當通過；client 例外→空集 fail-closed；GlmClient subprocess 走 `glm` 指令＝唯一入口）、git 乾淨、最後改動 ebe4344c（已核准）。(c) `repair.py` 補開：**2795 行**、頭部＝G2 切片規則（保留原候選、重驗讀權威快照 source_tampered 退出碼 20、FAIL→UNKNOWN 不算修好、unresolved 列明）、git 乾淨、最後改動 399f68b6（已核准）。交叉核對：r1227 STATE/NOW/工單未引用該三檔任何數字（僅「不改 repair.py」邊界）→無矛盾、無需改數；邊界陳述現以本輪新鮮開啟接地。
 - 工單 tickets/done/R20261108_0147-1；vq-el4.13 close。
+
+## r1228（2026-11-08 01:5x UTC）：G2.5 新鮮複驗全三門＋審查指示#1「備案」落地（0 新模型呼叫、0 token）
+- ① CI 巡：f6d29d1d（qwen27b）CI 執行中（01:49 起跑）；argon fecd8657 同；worker aca58a95 🟢 5034/0。f6d29d1d＝純簿記（NOW/STATE、產品 diff 0）→核准。
+- ② 新鮮重跑 `run_eval.py --all`（全程離線、0 新呼叫：vibe_calls 末筆仍 11-07T18:35）：**exit 0**；G1 39/39（100%、0 冤枉）／REAL14 9/9（冤枉 0/5）／PHASE3 fixed7 unres2 rtw0 err0——與審查點名數字一致。
+- ③ 備案（指示#1）：新增 `ops/audits/build_g25_all_gates_filing.py`（讀 out/all/phase{1,2,3}.json、fail-closed 斷言三門、附 raw sha256＋成本＋邊界）→ `g25_all_gates_filing.json`（schema vacant.filing/g25_all_gates/1、三門 PASS、git f6d29d1d、ticket vq-el4.14）。
+- ④ fail-closed 驗證：篡改 raw（G1 FAIL／REAL14 冤枉 2／P3 err1）→**exit 2、不寫備案**；守護 test_reqloop_extract_run_eval＋test_repo_beads_shared_db **38 passed**。
+- 沒驗證：f6d29d1d／fecd8657 CI 燈（下輪巡→應🟢）；GitHub Actions（無 admin＝基建）；未跑全量 pytest（vacant-ci 職掌）。
+- 工單 vq-el4.14 close（vq-el4.15 重複、併入）；下一步＝巡 CI＋等 G3 派工（不自發射大成本）、不改 repair.py。
