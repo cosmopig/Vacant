@@ -5,7 +5,7 @@
 - 審查 #3：repair.py 凍結（5147f8c3×3）、extract.py 邊界不變（e757aec5×3）；本輪 0 改動。
 - 審查 #4：glm 唯一入口＋fail-closed（rc3/4 不重試）＋成本缺值 UNKNOWN——在位（extract.py GlmClient 只 subprocess 呼叫 glm）。
 - G2.5 門：三項全 PASS＋備案（ops/audits/g25_all_gates_filing.json）——審查自跑＋r1230 雙重確認。
-- G3（vq-1zf）：**已全備、待人類核准**。本輪補預註冊（零成本）：選題規則＋4 未見題 dab_129/144/176/216（DABench 30−已見 9、bank 順序前 4、comm 指令可驗）＋方向護欄判準＋e008 先驗揭露（bd note）。
+- G3（vq-1zf）：**已全備、待人類核准**。本輪補預註冊（零成本）：選題規則＋4 未見題 dab_129/144/176/216（DABench 30−已見 9、bank 順序前 4、comm 指令可驗）＋方向護欄判準＋e008 先驗揭露（bd note）。已見集已對照官方 ops/audits/effects_20261105_summary.json（cells_detail 50 格）重驗：選題不變（redo 完成）。
 - CI：097dd964 🟢 5036/0/5109（LATEST 前進）；隊列 69700c66→c3a55c97（各 ~14 分）→ **c3a55c97 燈預期下輪**。
 
 ## 下一步（下輪 r1233）

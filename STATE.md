@@ -3,7 +3,7 @@
 ## r1232（2026-11-08 03:5x UTC）：審查指示 #2/#3/#4 新鮮驗證＋G3 預註冊（選題規則＋方向護欄）＋CI 097dd964 🟢（0 模型呼叫、0 成本）
 - ① 審查 #2 worker 同步（本輪新鮮重驗）：工單 R20261108_0150-1 在 done/（r1229 執行）；argon(fecd8657) 是 worker(80947934) 祖先（merge-base==argon HEAD）；checks.py **f3525b01**／extract.py **e757aec5**／repair.py **5147f8c3** ×3 分支 blob 全同（rev-parse <br>:<file>）；兩條衛生守護測試 ×3 分支在位；worker CI 🟢 5039/0 → 三分支產品碼一致。
 - ② 審查 #4：glm 唯一入口在位（~/.local/bin/glm；rc3 預算完／rc4 失敗、不重試）；extract.py GlmClient 只 subprocess 呼叫 `glm` binary（timeout／rc≠0→ExtractError fail-closed）；成本讀 state/vibe_calls.jsonl、缺值 UNKNOWN 不填 0。
-- ③ G3 預註冊（審查 #5 準備、零成本）：bd note vq-1zf 鎖定選題規則＋4 未見題 **dab_129/144/176/216**（DABench 30 − R-loop 已見 9＝dab_035/039/055/057/105/378/426/427/507，bank 順序前 4）＋一條指令驗證（comm -23 …|head -4）＋方向護欄判準（SUPPORTED／反向如實報不推「有害」／平手＝not established）＋e008 先驗數據揭露。DECISION：不發射（審查 #5 明確待人類核准＋本輪 30 分鐘跑不完＋最保守）。
+- ③ G3 預註冊（審查 #5 準備、零成本）：bd note vq-1zf 鎖定選題規則＋4 未見題 **dab_129/144/176/216**（DABench 30 − R-loop 已見 9，bank 順序前 4）＋一條指令驗證＋方向護欄判準（SUPPORTED／反向如實報不推「有害」／平手＝not established）＋e008 先驗揭露。**重做（審查要求）**：打開 ops/audits/effects_20261105_summary.json（60,228 B、schema vacant.audit/effects_20261105_summary/1、cells_detail 50 格）重推已見集：官方 9 已見 dab_＝dab_035/039/055/057/105/378/426/427/507，與 REAL14 9 題兩兩相同；G2 smoke_e014 全為 dabstep（更正上輪歸屬，不影響聯集）；選題重驗＝dab_129/144/176/216 **不變**。DECISION：不發射（審查 #5 待人類核准＋本輪跑不完＋最保守）。
 - ④ CI：**097dd964 🟢 5036/0/5109**（runner 03:30→03:44；LATEST_qwen27b 620b4336→097dd964）；隊列剩 69700c66→c3a55c97（各 ~14 分）→ c3a55c97 燈預期下輪。
 - ⑤ 沒驗證：c3a55c97 CI 燈（下輪應🟢→關 vq-el4.17）；GitHub Actions（無 gh CLI＝基建、本輪確認 rc=1）；全量 pytest（vacant-ci 職掌）。
 - 下一步：下輪巡 c3a55c97 CI→🟢 關 vq-el4.17；G3 等人類核准（vq-1zf 已全備）；無授權工作。
