@@ -345,3 +345,10 @@
 2. effects_20261105_summary.json 直接開啟：**60,228 B**、blob **856c2c71**（r1237 以來未變）、snapshot d38d2eb2、scope_note 明示「開發選樣・單 rep・不宣稱 localized 優於 generic・缺值 None 不填 0・hidden_after 全 UNKNOWN」；load in code 重算：policy30 w2r **g7/l6**（13）・pres g5/l5（10）・still g3/l4（7）・api 365/550（915）・tok 16,284,659/17,385,851（33,670,510）；once20 w2r **g7/l4**（11）・pres 0/0・still g3/l6（9）・api 165/292（457）・tok 6,210,682/13,293,271（19,503,953）——兩臂加總與 top-level 逐項一致、r2w 全 0。
 3. 對質：11-06 人類點名參考數「policy30 generic7/10・localized6/10；once20 generic7/10・localized4/10」＝本檔 w2r 逐項吻合；r1256 redo 條③ 各數逐項一致；r1258 主條與 NOW.md 皆未引用本檔任何數字、未做 localized 較好之声明→**零更正**、r1258 結論不受影響。
 4. 紅線未動：0 模型呼叫（純文件讀＋本地重算）・0 寫入副作用（僅本條簿記）・G3 未發射・queue 空・main c097899e 未動未 push・未讀 hidden/scorer。
+
+## 2026-11-08 r1259（12:3x UTC）：G3 gate --fire 路徑負控——有效核准＋篡改 manifest 必須 RC 1（21→22 passed；0 模型呼叫）
+1. DECISION: NOW 下一步＝「巡 CI＋候 G3 核准」（無實質交付）→依本輪指示縮到一輪做完的最小實質項＝--fire 路徑零負控缺口（r1257 釘 builder、r1258 釘 --plan 篡改→RC 1；--fire＋有效核准＋篡改 manifest 若核准判定先於完整性檢查或例外被吞，operator 見 APPROVED/RC 3＝假綠，H-0 教訓）。工單 vq-1zf.5。
+2. 交付：tests/test_reqloop_g3gate.py +1 測試（32 行，commit 4761ef63）：篡改 manifest（檔仍在、只改 sha）＋有效核准文件→--fire 必須 **RC 1**＋G3GATE PLAN FAIL＋「hash 不符」，且不得出現 APPROVED、不得出現 G3GATE PLAN OK（完整性先於核准判定）。
+3. 驗證：pytest tests/test_reqloop_g3gate.py＝**22 passed**（0.39s；r1258＝21）；**負控**＝暫時吞例外（fail-open 化）→新測試紅（assert 3 == 1，即 APPROVED/RC 3）→還原（g3gate.py sha256 前後一致 a0dd46f2、0 產品碼改動）；anchors＋g2＋g3gate 合跑＝**64 passed**（r1258＝63）；filing 6 sha256 全 MATCH（code 51abfec3/c7589c61/332cd324＋sources 3c6fb35a/6b7cb831/ada235bb）；對齊 diff＝3（2 journal＋本輪測試檔）、vacant_network/ 產品碼 diff＝0；vq-1zf.5 closed。
+4. 未驗證：本 commit 自身 CI 燈（下輪巡一次；輪首 4d0b2290 仍 running）；G3 仍 NOT FIRED（RLOOP_PLAN 無核准、queue 空、--fire 雙負控＋RC3 現已釘住）。
+5. 下一步：下輪巡本 commit CI 燈（一次；紅燈＝例外才動手）；G3 續候人類明確核准；新審查指示照指示做。紅線：0 模型呼叫・queue 空・main c097899e 未動未 push・未讀 hidden/scorer・repair.py＋extract.py 冻结未動。
