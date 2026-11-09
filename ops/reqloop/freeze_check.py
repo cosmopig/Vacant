@@ -66,6 +66,22 @@ builder ops/audits/build_g25_all_gates_filing.py 的 phase1/2/3（同 tail）。
 EXPECTED_CI_CONTRACT_TEST_NAMES 2；來源：兩份守衛檔現行測試函數名，審查指示 #1 點名），
 detail 點名 missing；負控制 test_guard_suite_identity_negative_controls。
 
+背景（2026-11-09 r1327，vq-el4.51）：r1324 只擋 plain print 偽「PASSED
+<nodeid>」行（偽行在真 summary 標頭前、不進段），但 _parse_passed_names 取輸出中
+「第一處」short test summary info 為段首——守衛檔的 dummy 測試可 print 偽標頭＋偽
+PASSED 行（-rA 下 PASSES 段顯示通過測試的 captured stdout；capfd.disabled() 更直接），
+偽頭必在真頭之前，舊碼以偽頭為段首→偽名進身份集＝假綠燈（r1327 RED 實證：3 真名＋
+2 偽名 dummy 檔被舊碼判 ('anchors', True, 'pytest rc=0（身份齊；expected 5 passed,
+got 5；…）')；r1296/r1314/r1324 同族：計數守住、身份未守；H-0：漏掉一項得到的
+綠燈就是漏洞成因）。修：① 段首＝「最後一處」標頭行——真 summary 由 pytest 於 session
+結束時輸出，測試執行期的 print 必在其之前；② 計數錨：真 -rA 段恰每通過測試一行
+PASSED，段內行數須 == passed，段內多出一行偽行即破→BROKEN（fail-closed，I-4：未測量
+不是通過）。真守衛檔（全綠）仍 OK（測試檔正控制 (c)）；負控制：
+tests/test_reqloop_freeze_check.py::test_guard_suite_fake_summary_header_negative_control。
+殘留（誠實記錄）：真 summary 之後才 print（conftest.py pytest_terminal_summary hook／
+晚到 thread）超出本守衛的單檔威脅模型（既有負控制皆只改守衛檔），與 bk_state 已知
+殘留邊界同類。
+
 背景（2026-11-11 r1324，vq-el4.50）：r1314 身份守衛從全量輸出收集「PASSED
 <nodeid>」行核對測試名——但測試體本身可 print 以「PASSED 」開頭的行進 stdout，
 舊碼會把那些行加進 passed_names：削弱守衛檔（3 真名 dummy＋2 假名 dummy、
@@ -169,28 +185,38 @@ SUMMARY_RESULT_RE = re.compile(
 
 
 
-def _parse_passed_names(out: str, test_file: str) -> set[str]:
-    """從 pytest -rA short test summary 段收集通過測試名（r1324，vq-el4.50）。
+def _passed_lines(out: str, test_file: str) -> list[str]:
+    """從 pytest -rA short test summary 段收集匹配 test_file 的 PASSED 行（r1327，vq-el4.51）。
 
-    r1314 身份守衛從全量輸出收集「PASSED <nodeid>」行——測試體可 print 以「PASSED
-    」開頭的行進 stdout，舊碼把偽造行加進身份集＝假綠燈（r1324 RED 實證；
-    r1296/r1314 同族：計數守住身份未守）。現只認「short test summary info」標頭行
-    以來的段（真 -rA summary；pytest 穩定契約、不受 repo addopts 影響——r1314 實測
-    同形），且 nodeid 須含測試檔名（defense in depth）；段不存在（pytest 未跑／
-    -rA 缺席＝未測量）→空集→caller 的 missing 非空→BROKEN（I-4：未測量不是通過）。
+    r1324 只認「short test summary info」標頭行以來的段、但取「第一處」標頭為段首——
+    守衛檔的 dummy 測試可 print 偽標頭＋偽「PASSED <nodeid>」行（-rA 下 PASSES 段顯示
+    通過測試的 captured stdout；capfd.disabled() 更直接），偽頭必在真頭之前，舊碼以偽頭
+    為段首→偽名進身份集＝假綠燈（r1327 RED 實證；r1296/r1314/r1324 同族：計數守住
+    身份未守）。真 summary 由 pytest 於 session 結束時輸出：測試執行期的 print 必在其
+    之前，故段首＝「最後一處」標頭行；nodeid 須含測試檔名（defense in depth）；段不存在
+    （pytest 未跑／-rA 缺席＝未測量）→空列表→caller 的 missing 非空→BROKEN
+    （I-4：未測量不是通過）。段內行數另由 caller 與 passed 計數對帳（見 _check_guard_suite）。
     """
     lines = out.splitlines()
     try:
-        start = next(
+        start = max(
             i for i, ln in enumerate(lines) if "short test summary info" in ln
         )
-    except StopIteration:
-        return set()
-    names: set[str] = set()
+    except ValueError:
+        return []
+    out_lines: list[str] = []
     for ln in lines[start + 1:]:
         ln = ln.strip()
         if ln.startswith("PASSED ") and test_file in ln and "::" in ln:
-            names.add(ln.split("::", 1)[1].strip())
+            out_lines.append(ln)
+    return out_lines
+
+
+def _parse_passed_names(out: str, test_file: str) -> set[str]:
+    """同段 PASSED 行→通過測試名集合（r1324 起只認 short test summary 段，見 _passed_lines）。"""
+    names: set[str] = set()
+    for ln in _passed_lines(out, test_file):
+        names.add(ln.split("::", 1)[1].strip())
     return names
 
 
@@ -218,6 +244,12 @@ def _check_guard_suite(
     r1314 實測：pyproject addopts="-q …" 令 -v 被抵消、無逐測行；-rA 穩定）、
     要求 ⊇ 期望集（EXPECTED_ANCHOR_TEST_NAMES／EXPECTED_CI_CONTRACT_TEST_NAMES）；
     缺失即 BROKEN 且 detail 點名。
+
+    r1327（vq-el4.51）：r1324 只擋 plain print（偽行在標頭前、不進段），但測試體
+    可 print 偽「short test summary info」標頭＋偽 PASSED 行，舊碼取第一處標頭為段首
+    →偽名進身份集＝假綠燈（r1327 RED 實證）。收緊：段首＝最後一處標頭行（真 summary
+    於 session 結束時輸出、測試執行期的 print 必在其之前）＋計數錨（段內 PASSED 行數
+    == passed；段內多出一行偽行即破→BROKEN，fail-closed，I-4）。
     """
     rc, tail, out = _pytest(test_file, cwd, extra=("-rA",))
     counts: dict[str, int] = {}
@@ -226,15 +258,31 @@ def _check_guard_suite(
     passed = counts.get("passed")
     other = {k: v for k, v in counts.items() if k != "passed"}
     # 身份守衛（r1314，r1296 同型；r1324 收緊：只認 -rA short test summary 段、
-    # nodeid 須含測試檔名——print 偽造 summary 行不再進身份集，見 _parse_passed_names）。
-    passed_names = _parse_passed_names(out, test_file)
+    # nodeid 須含測試檔名；r1327 再收緊：段首＝最後一處「short test summary info」
+    # ——真 summary 於 session 結束時輸出、測試執行期的 print 偽頭必在其之前，見
+    # _passed_lines——＋計數錨：真 -rA 段恰每通過測試一行 PASSED，段內行數須 ==
+    # passed，段內多出一行偽行即破→BROKEN）。
+    passed_lines = _passed_lines(out, test_file)
+    passed_names = {ln.split("::", 1)[1].strip() for ln in passed_lines}
     missing = [n for n in expected_names if n not in passed_names]
-    ok = rc == 0 and passed == expected_passed and not other and not missing
+    count_bad = passed is not None and len(passed_lines) != passed
+    ok = (
+        rc == 0
+        and passed == expected_passed
+        and not count_bad
+        and not other
+        and not missing
+    )
     # detail 截斷 160 字（record）：缺名置首（r1314），長測試名不被截斷。
     record(
         name, ok,
         f"pytest rc={rc}（"
         + (f"缺守衛測試: {', '.join(missing)}" if missing else "身份齊")
+        + (
+            f"；summary 段 PASSED 行 {len(passed_lines)}≠passed {passed}（偽 summary 段？）"
+            if count_bad
+            else ""
+        )
         + f"；expected {expected_passed} passed, got {passed}；summary: {tail}"
         + (f"；其它結果類 {other}）" if other else "；無其它結果類）"),
     )
