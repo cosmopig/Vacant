@@ -611,3 +611,86 @@ def test_check_crash_named_broken_verdict_negative_control(tmp_path: Path) -> No
     mod.results.clear()
     mod.run_check("filing_sources", mod.check_filing_sources)  # type: ignore[attr-defined]
     assert mod.results[-1][:2] == ("filing_sources", True), mod.results
+
+
+def test_diff_anchor_negative_control(tmp_path: Path) -> None:
+    """r1300：check_diff 的 base 必须錨定被測 commit（CI 是 detached checkout）。
+
+    CI（ci.sh）detached checkout 被測 commit，repo 內分支 ref 指向執行時點的 live
+    分支 HEAD：worktree 已同步到新 tip 時，舊 commit 自己的 in-scope 檔與 worktree
+    不同，舊碼 ref 基 diff 判 0 file differ、OK＝假綠燈（r1300 實證：被測 commit
+    ops/STATE.md=v1、兩 ref 皆指 v2 tip → ref 基 0 files OK／HEAD 基 1 file
+    BROKEN；H-0 同構：量錯對象得到的綠燈就是漏洞成因；I-4：未測量不是通過）。
+    期望行為：HEAD detached 時 base 錨定 HEAD（被測 commit）→ 示例舊 commit 判
+    BROKEN、detail 點名差異檔；HEAD attached 分支（本地 dev/worktree）時口徑不變
+    （base=auto/qwen27b，判旧同）。
+    """
+    import os
+    import subprocess
+
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@t",
+    }
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    def git(*args: str) -> None:
+        subprocess.run(
+            ["git", *args],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+
+    git("init", "-q", "-b", "main")
+    (repo / "ops").mkdir()
+    (repo / "ops" / "STATE.md").write_text("v1\n", encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-qm", "c1")
+    sha1 = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo, check=True,
+        capture_output=True, text=True,
+    ).stdout.strip()
+    (repo / "ops" / "STATE.md").write_text("v2\n", encoding="utf-8")
+    git("commit", "-qam", "c2")
+    sha2 = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo, check=True,
+        capture_output=True, text=True,
+    ).stdout.strip()
+    git("branch", "auto/qwen27b", sha2)
+    git("branch", "auto/worker", sha2)
+    git("checkout", "-q", "--detach", sha1)  # CI 沙盒：被測 commit＝舊 commit
+
+    mod = _load_freeze_check()
+    mod.REPO = repo
+
+    # 負控制：被測 commit 的 in-scope 檔與 worktree 不同 → 必 BROKEN。
+    # 舊碼（ref 基，量 tip 狀態）在此判 OK＝假綠燈（已實證）。
+    mod.results.clear()
+    mod.check_diff(branch="auto/worker", name="diff_worker")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert not ok, (
+        f"被測 commit 的 in-scope 檔與 worktree 不同卻判 OK＝假綠燈"
+        f"（ref 基量 tip 狀態而非被測 commit）: {detail}"
+    )
+    assert "ops/STATE.md" in detail, f"detail 應點名差異檔: {detail}"
+
+    # 正控制：被測 commit 與 worktree 同步 → OK（守衛未過緊）。
+    mod.results.clear()
+    git("checkout", "-q", "--detach", sha2)
+    mod.check_diff(branch="auto/worker", name="diff_worker")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert ok, f"被測 commit 與 worktree 同步卻判 BROKEN（過緊）: {detail}"
+
+    # attached-HEAD 控制（本地 dev/worktree 口徑不變）：base=auto/qwen27b、判旧同。
+    mod.results.clear()
+    git("checkout", "-q", "auto/qwen27b")
+    mod.check_diff(branch="auto/worker", name="diff_worker")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert ok, f"attached-HEAD 口徑改變（期望 base=auto/qwen27b）: {detail}"
