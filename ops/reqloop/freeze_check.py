@@ -31,7 +31,9 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
   diff_worker     git diff --name-only auto/worker  auto/qwen27b（in-scope）== 0
   diff_argon      git diff --name-only auto/argon   auto/qwen27b（in-scope）== 0
   filing_code     ops/audits/g25_all_gates_filing.json 的 code 三檔 sha256 重算 MATCH
+                  （r1296/vq-el4.38：key 集＝恰 3 份凍結檔——身份替換的削弱但照綠守衛）
   filing_sources  同檔 sources 三段 sha256 重算 MATCH
+                  （r1296/vq-el4.38：key 集＝phase1/2/3、派生 tail 集＝3 份互異 phase 檔）
   g3gate_plan     python -m vacant_network.reqloop.g3gate --plan（rc 0、NOT FIRED）
   bk_state        repo STATE.md（canonical）Current State section 與 ops/STATE.md 鏡像同步
                   （約定＝r1265 實證的 byte-level：鏡像＝canonical 標題＋Current State section，
@@ -41,6 +43,14 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
 
 r1273 起 anchors/ci_contract 的 detail 帶「expected N passed, got M」，計數不符即 BROKEN；
 r1285 起另要求匯總行無其它結果類（skipped/xfailed 等＝未測量，I-4）。
+
+背景（2026-11-09 r1296，vq-el4.38）：filing code/sources 段原只查 count==3＋逐條
+MATCH——key 被替換成另一條（檔存在、sha 真）後，3 份凍結檔/3 份 phase 檔失去覆蓋，
+舊碼仍判「3/3 MATCH」OK＝假綠燈（r1296 實證：run_eval.py key→decoy.py 舊碼判 OK；
+phase3 key→phaseX 舊碼判 OK；r1273 同型：計數守住但身份未守；H-0：漏掉一項得到的
+綠燈就是漏洞成因；I-4：未測量不是通過）。期望集來源：審查指示 #1 點名的 3 份凍結檔
+（tests/test_reqloop_frozen_anchors.py::test_filing_guard_detects_drift 同 3 路徑）＋
+builder ops/audits/build_g25_all_gates_filing.py 的 phase1/2/3（同 tail）。
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -150,8 +160,32 @@ def check_diff(branch: str, name: str) -> None:
     record(name, p.returncode == 0 and not files, detail)
 
 
+# r1296（vq-el4.38）：filing 覆蓋集身份期望集（來源與理由見模組 docstring）。
+EXPECTED_CODE_KEYS = frozenset({
+    "vacant_network/reqloop/extract.py",
+    "vacant_network/reqloop/checks.py",
+    "ops/reqloop/extract/run_eval.py",
+})
+EXPECTED_SOURCE_KEYS = frozenset({"phase1", "phase2", "phase3"})
+EXPECTED_SOURCE_TAILS = frozenset({
+    "extract/out/all/phase1.json",
+    "extract/out/all/phase2.json",
+    "extract/out/all/phase3.json",
+})
+
+
 def check_filing_code() -> None:
     d = json.loads(FILING.read_text(encoding="utf-8"))
+    keys = set(d["code"])
+    missing = sorted(EXPECTED_CODE_KEYS - keys)
+    extra = sorted(keys - EXPECTED_CODE_KEYS)
+    if missing or extra:
+        record(
+            "filing_code", False,
+            f"COVERAGE: code key 集缺 {missing}、多 {extra}"
+            "（期望恰為 3 份凍結檔；count==3 但身份被替換＝假綠燈；r1273 同型；I-4）",
+        )
+        return
     names: list[str] = []
     ok = 0
     for key, meta in d["code"].items():
@@ -170,6 +204,30 @@ def check_filing_code() -> None:
 
 def check_filing_sources() -> None:
     d = json.loads(FILING.read_text(encoding="utf-8"))
+    keys = set(d["sources"])
+    missing = sorted(EXPECTED_SOURCE_KEYS - keys)
+    extra = sorted(keys - EXPECTED_SOURCE_KEYS)
+    if missing or extra:
+        record(
+            "filing_sources", False,
+            f"COVERAGE: sources key 集缺 {missing}、多 {extra}"
+            "（期望恰為 phase1/2/3；削弱但照綠；r1273 同型）",
+        )
+        return
+    marker = "ops/reqloop/"
+    tails: list[str] = []
+    for k in sorted(d["sources"]):
+        raw = str(d["sources"][k]["path"])
+        tails.append(raw.split(marker, 1)[1] if marker in raw else Path(raw).name)
+    tmissing = sorted(EXPECTED_SOURCE_TAILS - set(tails))
+    dup = len(tails) != len(set(tails))
+    if tmissing or dup:
+        record(
+            "filing_sources", False,
+            f"COVERAGE: sources 派生路徑集與 3 份 phase 檔不符——缺 {tmissing}"
+            f"{'、重複' if dup else ''}（三條須各量一份互異 phase 檔；削弱但照綠；r1273 同型）",
+        )
+        return
     names: list[str] = []
     ok = 0
     for name, meta in d["sources"].items():
