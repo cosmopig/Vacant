@@ -1,7 +1,8 @@
-# NOW — r1295・2026-11-09
+# NOW — r1295 redo・2026-11-09
 
 ## 現在在哪
-- r1295（驗證輪，0 代碼改動、0 model calls）：上輪未驗證項收口——argon@e392be8a CI green 5074 passed／0 failed／74 skipped（5147 collected、824.8s；ci/e392be8a…json）＝NOW step 1 指定之一讀閉環。e392be8a 係 argon HEAD 417bdbb9 之祖先（其間 3 commit 僅 4 簿記檔）。
+- r1295（驗證輪）：上輪未驗證項收口——argon@e392be8a CI green 5074 passed／0 failed／74 skipped（5147 collected、824.8s）＝NOW step 1 指定之一讀閉環；e392be8a 係 argon HEAD 417bdbb9 之祖先（其間 3 commit 僅 4 簿記檔）。
+- r1295 redo（本輪）：審查點名 5 檔全數開啟、依賴聲明全數接地、0 需更正——auto-ci.yml 63 行 sha 3f1e05e9、無檔內開關；effects 60228 B sha a710f7e4、未引其數字；g25 filing 4681 B sha 6e5afb46、6/6 sha 獨立重算 MATCH；extract 1217 行 sha 51abfec3；repair 2795 行。
 - 現 HEAD 之 CI：worker@32a6a010 進行中（state.json running）、qwen27b@3716a100 排隊（無 ci/<sha>.json）——不 poll、不 sleep。
 - LATEST 三分支皆綠：qwen27b@4c207cc2 5074/0/74、worker@72652457 5073/0/74、argon@e392be8a 5074/0/74。
 - freeze_check（輪首新跑）：9 項全 OK、VERDICT: FROZEN_STATE_OK rc=0。
