@@ -788,6 +788,118 @@ def test_guard_suite_printed_summary_spoof_negative_control(tmp_path: Path) -> N
     )
 
 
+def test_guard_suite_fake_summary_header_negative_control(tmp_path: Path) -> None:
+    """r1327 (vq-el4.51)：測試體可 print 偽「short test summary info」標頭＋偽 PASSED 行偽造身份集。
+
+    r1324 只擋 plain print("PASSED <nodeid>")（偽行在標頭前、不進段），但
+    _parse_passed_names 取輸出中「第一處」short test summary info 為段首——守衛檔的 dummy
+    測試可 print 偽標頭＋偽 PASSED 行（-rA 下 PASSES 段顯示通過測試的 captured stdout；
+    capfd.disabled() 更直接），偽頭必在真頭之前，舊碼以偽頭為段首→偽名進身份集＝假綠燈
+    （r1327 RED 實證：3 真名＋2 偽名 dummy 檔被舊碼判
+    ('anchors', True, 'pytest rc=0（身份齊；expected 5 passed, got 5；…）')）。
+    期望行為：check_anchors/check_ci_contract 判 BROKEN、detail 點名缺的真實守衛測試名；
+    正控制（全真名 dummy 檔、無偽 print）仍 OK（守衛不過緊）；單元級：段首＝最後一處
+    標頭行；段內行數與 passed 對帳（_passed_lines）。
+    殘留（誠實記錄）：真 summary 之後才 print（conftest.py pytest_terminal_summary hook／
+    晚到 thread）超出本守衛的單檔威脅模型（既有負控制皆只改守衛檔），與 bk_state 已知
+    殘留邊界同類；段內行數對帳（段內 PASSED 行數 == passed）是偽行落在最後段內的二道防線。
+    """
+    mod = _load_freeze_check()
+    anchor_names = list(mod.EXPECTED_ANCHOR_TEST_NAMES)  # type: ignore[attr-defined]
+    ci_names = list(mod.EXPECTED_CI_CONTRACT_TEST_NAMES)  # type: ignore[attr-defined]
+    assert len(anchor_names) >= 4 and len(ci_names) >= 2
+
+    # (a) anchors：3 真名＋2 偽名；一 dummy print 偽標頭＋2 偽 PASSED 行（＝期望真名）
+    af = tmp_path / "tests" / "test_reqloop_frozen_anchors.py"
+    af.parent.mkdir(parents=True, exist_ok=True)
+    af.write_text(
+        "\n\n".join(
+            [f"def {n}():\n    assert True" for n in anchor_names[:3]]
+            + [
+                "def test_s0():\n"
+                '    print("short test summary info")\n'
+                + "\n".join(
+                    f'    print("PASSED tests/test_reqloop_frozen_anchors.py::{n}")'
+                    for n in anchor_names[3:]
+                )
+                + "\n\ndef test_s1():\n    assert True"
+            ]
+        ),
+        encoding="utf-8",
+    )
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_anchors(cwd=tmp_path)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[0]  # type: ignore[attr-defined]
+    assert name == "anchors"
+    assert not ok, (
+        f"偽 summary 標頭＋偽 PASSED 行偽造身份集、判 OK＝假綠燈（r1327 RED）: {detail}"
+    )
+    assert any(n in detail for n in anchor_names[3:]), (
+        f"detail 須點名缺的真實守衛測試名: {detail}"
+    )
+
+    # (b) ci_contract 同型：1 真名＋1 偽名；偽 print 覆蓋兩個期望名
+    (tmp_path / "tests" / "test_reqloop_ci_contract.py").write_text(
+        f"def {ci_names[0]}():\n    assert True\n\n"
+        "def test_s0():\n"
+        '    print("short test summary info")\n'
+        + "\n".join(
+            f'    print("PASSED tests/test_reqloop_ci_contract.py::{n}")'
+            for n in ci_names
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_ci_contract(cwd=tmp_path)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[0]  # type: ignore[attr-defined]
+    assert name == "ci_contract"
+    assert not ok, f"偽 summary 標頭偽造 ci_contract 身份集、判 OK＝假綠燈: {detail}"
+
+    # (c) 正控制：全真名 dummy 檔、無偽 print→仍 OK（守衛不過緊）
+    (tmp_path / "tests" / "test_reqloop_frozen_anchors.py").write_text(
+        "\n\n".join(f"def {n}():\n    assert True" for n in anchor_names),
+        encoding="utf-8",
+    )
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_anchors(cwd=tmp_path)  # type: ignore[attr-defined]
+    assert mod.results[0][1] is True, (  # type: ignore[attr-defined]
+        f"全真名守衛檔應仍 OK（守衛不過緊）: {mod.results}"
+    )
+
+    # (d) 單元：偽標頭在前、真標頭在後→段首＝最後一處標頭行（只收真段）
+    out = (
+        "short test summary info\n"
+        "PASSED tests/test_reqloop_frozen_anchors.py::test_foo_spoof\n"
+        "=========================== short test summary info ============================\n"
+        "PASSED tests/test_reqloop_frozen_anchors.py::test_repair_py_is_frozen\n"
+    )
+    assert (
+        mod._parse_passed_names(  # type: ignore[attr-defined]
+            out, "tests/test_reqloop_frozen_anchors.py"
+        )
+        == {"test_repair_py_is_frozen"}
+    )
+
+    # (e) 單元：段內行數與 passed 對帳——段內 6 行 vs passed 5→對帳破→caller 判 BROKEN
+    out = (
+        "=========================== short test summary info ============================\n"
+        + "".join(
+            f"PASSED tests/test_reqloop_frozen_anchors.py::{n}\n"
+            for n in [*anchor_names, "test_spoofed_extra"]
+        )
+        + "======================= 5 passed in 0.01s ========================\n"
+    )
+    assert (
+        len(
+            mod._passed_lines(  # type: ignore[attr-defined]
+                out, "tests/test_reqloop_frozen_anchors.py"
+            )
+        )
+        == 6
+    )
+
+
 def test_diff_anchor_negative_control(tmp_path: Path) -> None:
     """r1300：check_diff 的 base 必须錨定被測 commit（CI 是 detached checkout）。
 
@@ -1151,8 +1263,14 @@ GUARD_CONTENT_PIN = {
     # 檔，舊碼判 ('anchors', True, '身份齊；expected 5 passed, got 5')；r1296/r1314
     # 同族：計數守住身份未守）。真守衛檔（全綠）仍 OK（測試檔正控制 (c)）；計數/
     # 其它結果類守衛不變，只收緊身份集來源——顯式更新錨並留記錄。
+    # r1327 解冻記錄：freeze_check.py 身份集段首改為「最後一處」short test summary
+    # info 標頭行（_passed_lines）＋計數錨（段內 PASSED 行數 == passed，_check_guard_suite）
+    # ——堵 r1327 RED 實證的「dummy print 偽標頭＋偽 PASSED 行」假綠燈（3 真名＋2 偽名
+    # dummy 檔，舊碼判 ('anchors', True, '身份齊；expected 5 passed, got 5；…')；
+    # r1296/r1314/r1324 同族）。真守衛檔（全綠）仍 OK（測試檔正控制 (c)）；計數/其它
+    # 結果類守衛不變，只收緊段首＋加計數錨——顯式更新錨並留記錄。
     "ops/reqloop/freeze_check.py":
-        "0112cdf61de5e306373cbb88aa10ea188add6c9257d6ec39fcc2ec54a84ae7b3",
+        "1d7841ad8749ec30b59ff637a2fbb8b11d8bbfc087fe95660183c9ee7558a1e9",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
