@@ -28,8 +28,10 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
 檢查項（全唯讀、0 model calls、不寫檔、不改分支、不 push）：
   anchors         tests/test_reqloop_frozen_anchors.py——rc 0 且恰好 5 passed（5 passed 守衛）
   ci_contract     tests/test_reqloop_ci_contract.py——rc 0 且恰好 2 passed（嚴禁弱化）
-  diff_worker     git diff --name-only auto/worker  auto/qwen27b（in-scope）== 0
-  diff_argon      git diff --name-only auto/argon   auto/qwen27b（in-scope）== 0
+  diff_worker     git diff --name-only auto/worker  <base>（in-scope）== 0
+  diff_argon      git diff --name-only auto/argon   <base>（in-scope）== 0
+                  （r1300/vq-el4.45：base＝被測 commit——HEAD detached（CI 沙盒）時 base=HEAD，
+                  否則 base=auto/qwen27b；量 tip 狀態而非被測 commit 的綠燈＝假綠燈）
   filing_code     ops/audits/g25_all_gates_filing.json 的 code 三檔 sha256 重算 MATCH
                   （r1296/vq-el4.38：key 集＝恰 3 份凍結檔——身份替換的削弱但照綠守衛）
   filing_sources  同檔 sources 三段 sha256 重算 MATCH
@@ -60,6 +62,16 @@ bk_now）根本未跑——本檔自載契約「單一裁決行」「任一項 B
 I-4：未測量不是通過，且操作者須看得到「哪項未跑」。故 main() 每項檢查經
 run_check 包層：異常被點名記 BROKEN（CRASH: <ExcType>: <msg>），其餘各項照跑、
 裁決行必現（SystemExit/KeyboardInterrupt 不吞）。
+
+背景（2026-11-09 r1300，vq-el4.45）：diff_worker/diff_argon 原為
+`git diff <worktree> auto/qwen27b`（live refs）。CI（ci.sh）以 detached checkout
+量被測 commit，repo 內的分支 ref 指向執行時點的 live 分支 HEAD——worktree 已同步
+到新 tip 時，舊 commit 自己的 in-scope 檔（簿記等）與 worktree 不同，舊碼仍判 0
+file differ、OK＝假綠燈（r1300 沙盒實證：被測 commit ops/STATE.md=v1、兩 ref 皆
+指 v2 tip → ref 基 0 files OK／HEAD 基 1 file BROKEN；H-0 同構：量錯對象得到的
+綠燈就是漏洞成因；I-4：未測量不是通過）。改：HEAD detached 時 base 錨定 HEAD
+（被測 commit）；attached 分支（本地 dev/worktree）保持分支 ref——不變量的口徑
+（worktree 鏡像 qwen27b tip）不變。負控制：test_diff_anchor_negative_control。
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -153,16 +165,45 @@ def check_ci_contract(cwd: Path = REPO) -> None:
     _check_guard_suite("ci_contract", "tests/test_reqloop_ci_contract.py", 2, cwd)
 
 
-def check_diff(branch: str, name: str) -> None:
+def _diff_base() -> str:
+    """diff 的 base 錨定被測 commit（r1300，vq-el4.45）。
+
+    CI（ci.sh）detached checkout 被測 commit，repo 內分支 ref 指向執行時點的 live
+    分支 HEAD：舊碼 ref 基 diff 量的是 tip 狀態而非被測 commit——worktree 已同步
+    新 tip 時，舊 commit 自己的 in-scope 檔與 worktree 不同仍判 0 file differ、OK
+    ＝假綠燈（r1300 沙盒實證；H-0 同構：量錯對象得到的綠燈就是漏洞成因）。
+    HEAD detached（CI 沙盒）→ base=HEAD（被測 commit）；attached 分支（本地 dev/
+    worktree）→ base=auto/qwen27b（舊口徑：worktree 鏡像 qwen27b tip）。
+    """
     p = subprocess.run(
-        ["git", "diff", "--name-only", branch, BASE_BRANCH, "--", *IN_SCOPE],
+        ["git", "symbolic-ref", "-q", "HEAD"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    if p.returncode != 0:
+        h = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO,
+            capture_output=True,
+            text=True,
+        )
+        if h.returncode == 0 and h.stdout.strip():
+            return h.stdout.strip()
+    return BASE_BRANCH
+
+
+def check_diff(branch: str, name: str) -> None:
+    base = _diff_base()
+    p = subprocess.run(
+        ["git", "diff", "--name-only", branch, base, "--", *IN_SCOPE],
         cwd=REPO,
         capture_output=True,
         text=True,
     )
     files = [l for l in p.stdout.splitlines() if l.strip()]
     detail = (
-        f"{len(files)} in-scope file(s) differ ({branch} vs {BASE_BRANCH})"
+        f"{len(files)} in-scope file(s) differ ({branch} vs {base})"
         + (f": {files[:3]}" if files else "")
     )
     if p.returncode != 0:
