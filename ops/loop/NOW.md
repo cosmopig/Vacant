@@ -1,9 +1,10 @@
 # NOW.md — 現況唯一真源
 
 ## 位置
-2026-11-09 r1311：維護／驗證輪（0 代碼改動、0 模型呼叫、0 新工單）。審查指示#1/#2/#3 本輪複核、全部維持、0 更正：凍結錨守衛＋安裝合約測試 7 passed；freeze_check 10/10 OK VERDICT: FROZEN_STATE_OK rc=0；LATEST 三分支 CI 皆 green；跨分支簿記已同步。0 模型呼叫。
+2026-11-09 r1311 redo：redo 審查點出 effects_20261105_summary.json 在任務點名、r1311 記錄步驟未實開；本輪實開＋獨立重算依賴數字全一致、0 更正；freeze_check 10/10 OK＋7 passed；跨分支已同步。0 模型呼叫。
 
 ## 數字（本輪實測著地）
+- effects summary 實開（60228 B／sha a710f7e4 重算未變）：policy30 w2r g7/l6 r2w0、sessions 19+16=35／API 365+550=915／tokens 33670510；once20 w2r g7/l4 r2w0、sessions 10+10=20／API 165+292=457／tokens 19503953；scope_note＝開發選樣（e008/e013/e014 已見題）、單 rep 不宣稱 localized 優、不宣稱等 token、hidden_after 全 UNKNOWN、缺值 None 不填 0（與 11-06 指示逐項一致）
 - freeze_check 10/10 OK VERDICT: FROZEN_STATE_OK rc=0（anchors 5／ci_contract 2／diff 0×2／filing code 3/3＋sources 3/3 MATCH／g3gate NOT_FIRED＋PLAN_OK／bk_state 同步／bk_now byte-identical／wt_clean 3/3 clean）
 - 守衛測試 7 passed（test_reqloop_frozen_anchors.py 5＋test_reqloop_ci_contract.py 2）
 - 凍結 4 檔：repair.py 2795 行／blob 5147f8c3、extract.py 1217 行／blob e757aec5、checks c7589c61、run_eval 332cd324（anchor pin 未變）
