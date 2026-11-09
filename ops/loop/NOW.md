@@ -1,7 +1,8 @@
 # NOW.md — Vacant Loop 目前位置（agent-facing；只放「目前位置、下一步」；≤ 3 KB、覆蓋不追加）
 
-## 目前狀態（r1304）
+## 目前狀態（r1304 redo）
 - r1303（vq-el4.46：diff_worker/diff_argon 結構性假紅燈閉環——跨分支 diff 錨定同步對應 commit、非 live tip）被 rc=124 中斷，r1304 收尾完成：19 passed＋freeze_check 9/9 FROZEN_STATE_OK（三分支）、in-scope diff 0×2、worktree 已同步（worker 65e98e0f3／argon 6cdf6b029）、vq-el4.46 已閉（vq-el4 46/46 全閉）。
+- r1304 redo（vq-el4.47）：審查點名 5 檔（auto-ci.yml／effects summary／g25 filing／extract／repair）逐檔實開＋重算依賴引用——0 更正（filing 6/6 MATCH、extract 1217 行／repair 2795 行、auto-ci.yml grep disab/enab＝0、effects 數值 vs r1301 redo 一致、4 門＋auto/** 觸發＋contents: read）。
 - CI（r1304 一次讀取、非 poll）：qwen27b@7492f2c65 GREEN 5077/0/74；argon@8ee9fe968 GREEN 5077/0/74；worker@368768d77 RED 2 failed＝r1301 同型結構性假紅（被測輪已同步、tip 已前進、舊守衛量 live tip）——根因即 vq-el4.46 已修；runner 現跑 argon@e9f8b9aee（in progress、舊守衛代碼）。新 HEAD CI：loop 自推、下輪首一次讀取、不 poll。
 - 隊列：唯一 ready＝vq-1zf（G3）待人類 --fire（不點火、不入 queue）；/srv/vlab/queue 空；tickets/open 空；無新人類指示（ops/ 最新仍 11-07）。
 
