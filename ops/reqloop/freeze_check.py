@@ -28,10 +28,11 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
 檢查項（全唯讀、0 model calls、不寫檔、不改分支、不 push）：
   anchors         tests/test_reqloop_frozen_anchors.py——rc 0 且恰好 5 passed（5 passed 守衛）
   ci_contract     tests/test_reqloop_ci_contract.py——rc 0 且恰好 2 passed（嚴禁弱化）
-  diff_worker     git diff --name-only auto/worker  <base>（in-scope）== 0
-  diff_argon      git diff --name-only auto/argon   <base>（in-scope）== 0
-                  （r1300/vq-el4.45：base＝被測 commit——HEAD detached（CI 沙盒）時 base=HEAD，
-                  否則 base=auto/qwen27b；量 tip 狀態而非被測 commit 的綠燈＝假綠燈）
+  diff_worker     另一分支錨定被測 commit 的「同步對應 commit」（同簿記身份，r1303）後
+  diff_argon      git diff --name-only <counterpart> <base>（in-scope）== 0
+                  （r1300/vq-el4.45：base＝被測 commit；r1303/vq-el4.46：另一分支不再對
+                  live tip diff——tip 每輪前進，已同步的舊 commit 量 tip 必假紅燈
+                  （r1301 CI 實證）；無同步對應＝該輪從未同步→fail-closed BROKEN）
   filing_code     ops/audits/g25_all_gates_filing.json 的 code 三檔 sha256 重算 MATCH
                   （r1296/vq-el4.38：key 集＝恰 3 份凍結檔——身份替換的削弱但照綠守衛）
   filing_sources  同檔 sources 三段 sha256 重算 MATCH
@@ -72,6 +73,20 @@ file differ、OK＝假綠燈（r1300 沙盒實證：被測 commit ops/STATE.md=v
 綠燈就是漏洞成因；I-4：未測量不是通過）。改：HEAD detached 時 base 錨定 HEAD
 （被測 commit）；attached 分支（本地 dev/worktree）保持分支 ref——不變量的口徑
 （worktree 鏡像 qwen27b tip）不變。負控制：test_diff_anchor_negative_control。
+
+背景（2026-11-09 r1303，vq-el4.46）：r1300 把 base 錨定被測 commit，但 check_diff 仍對
+另一分支的 live tip（branch ref）diff——分支 tip 每輪前進，已正確同步的舊 commit 一旦
+分支前進必 diff≠0→假紅燈。r1301 CI 實證：被測 r1301@bd93d42e2，CI 執行時 worker tip
+已進 r1301 redo（569d7f625）→ diff_worker/diff_argon 皆 BROKEN（2 in-scope file differ:
+ops/STATE.md、ops/loop/NOW.md）、pytest 2 failed；但該輪實際同步乾淨——三分支的
+r1301 trio（bd93d42e2／812391cbf／38477561d）4 簿記檔 blob 全同、in-scope diff=0。
+H-0 同構：量錯對象得到的紅燈同样是壞裁決。改：check_diff 錨定「同步對應 commit」——
+同輪次（同簿記身份＝STATE.md/NOW.md/ops/STATE.md/ops/loop/NOW.md 的 path→blob 對）在該
+分支上的 commit——量其 in-scope 內容；無對應（該輪從未同步到該分支；r1296「sync 漏掉
+canonical 簿記」/r1297「worker/argon 未同步」缺陷類）→BROKEN（fail-closed，I-4 未測量
+不是通過）；base 無簿記檔→輪次身份未測量→BROKEN。守衛未弱化：未同步輪仍紅燈、
+同步輪的 in-scope 內容漂移仍紅燈；消除的只是「分支前進」這個結構性假紅燈。
+負控制：tests/test_reqloop_freeze_check.py::test_diff_sync_counterpart_anchor。
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -193,21 +208,92 @@ def _diff_base() -> str:
     return BASE_BRANCH
 
 
+# 輪次身份＝四簿記檔（canonical＋鏡像）的 path→blob 對（r1303，vq-el4.46）。
+# 任一侧漂移（r1296「sync 漏掉 2 canonical 簿記檔」類）即身份不符→無對應→BROKEN。
+BOOKKEEPING_PATHS = ("STATE.md", "NOW.md", "ops/STATE.md", "ops/loop/NOW.md")
+# 在另一分支歷史中向前找同步對應 commit 的窗口（每輪三分支鎖步前進，對應 commit
+# 通常在最近 ~10 commit 內；窗口外＝該輪從未同步→fail-closed）。
+COUNTERPART_WINDOW = 100
+
+
+def _bookkeeping_identity(ref: str) -> dict[str, str] | None:
+    """ref 的簿記身份：BOOKKEEPING_PATHS 中「存在於該 commit」的 path→blob sha 對。
+
+    單次 git ls-tree（不存在的路徑被靜默跳過、rc 0）；ref 不可解析→None（未測量，I-4）。
+    """
+    p = subprocess.run(
+        ["git", "ls-tree", ref, "--", *BOOKKEEPING_PATHS],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    if p.returncode != 0:
+        return None
+    ident: dict[str, str] = {}
+    for line in p.stdout.splitlines():
+        meta, _, path = line.partition("\t")
+        parts = meta.split()
+        if len(parts) == 3 and parts[1] == "blob":
+            ident[path] = parts[2]
+    return ident
+
+
+def _sync_counterpart(branch: str, base: str) -> str | None:
+    """在 branch 歷史中找與被測 commit base 同簿記身份（輪次身份）的同步對應 commit（r1303，vq-el4.46）。
+
+    r1300 把 base 錨定被測 commit，但仍對另一分支的 live tip diff；分支 tip 每輪前進——
+    已正確同步的舊 commit 一旦分支前進必 diff≠0→假紅燈（r1301 CI 實證：被測
+    r1301@bd93d42e2、worker tip 已進 r1301 redo→2 in-scope file differ BROKEN、
+    2 failed；該輪實際同步乾淨：三分支 4 簿記檔 blob 全同、in-scope diff=0；
+    H-0 同構：量錯對象得到的紅燈同样是壞裁決）。
+    改：錨定「同步對應 commit」——同輪次在該分支上的 commit——量其 in-scope 內容。
+    無對應（base 的輪次從未同步到該分支；r1296/r1297 缺陷類）→None→BROKEN（fail-closed）。
+    """
+    target = _bookkeeping_identity(base)
+    if not target:  # None＝ref 不可解析；{}＝無簿記檔＝輪次身份未測量（I-4）
+        return None
+    p = subprocess.run(
+        ["git", "log", "--format=%H", "-n", str(COUNTERPART_WINDOW), branch],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    if p.returncode != 0:
+        return None  # 分支不存在→未測量→fail-closed
+    for sha in (l.strip() for l in p.stdout.splitlines()):
+        if sha and _bookkeeping_identity(sha) == target:
+            return sha
+    return None
+
+
 def check_diff(branch: str, name: str) -> None:
     base = _diff_base()
+    counterpart = _sync_counterpart(branch, base)
+    if counterpart is None:
+        record(
+            name, False,
+            f"no sync counterpart on {branch}: 被測 {base[:9]} 的簿記身份（STATE.md/NOW.md"
+            f"/ops 鏡像）在 {branch} 最近 {COUNTERPART_WINDOW} commit 內無對應"
+            f" commit——該輪從未同步到 {branch}？（fail-closed，I-4 未測量不是通過）",
+        )
+        return
     p = subprocess.run(
-        ["git", "diff", "--name-only", branch, base, "--", *IN_SCOPE],
+        ["git", "diff", "--name-only", counterpart, base, "--", *IN_SCOPE],
         cwd=REPO,
         capture_output=True,
         text=True,
     )
     files = [l for l in p.stdout.splitlines() if l.strip()]
     detail = (
-        f"{len(files)} in-scope file(s) differ ({branch} vs {base})"
+        f"{len(files)} in-scope file(s) differ "
+        f"({branch}@{counterpart[:9]} vs {base[:9]})"
         + (f": {files[:3]}" if files else "")
     )
     if p.returncode != 0:
-        detail = f"git rc={p.returncode}（分支不存在或不可比？）{p.stderr.strip()[:80]}"
+        detail = (
+            f"git rc={p.returncode}（{branch}@{counterpart[:9]} vs {base[:9]} 不可比？）"
+            f"{p.stderr.strip()[:80]}"
+        )
     record(name, p.returncode == 0 and not files, detail)
 
 
