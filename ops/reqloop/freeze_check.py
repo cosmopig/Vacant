@@ -105,6 +105,8 @@ REPO = Path(__file__).resolve().parents[2]
 FILING = REPO / "ops" / "audits" / "g25_all_gates_filing.json"
 IN_SCOPE = ("vacant_network", "tests", "ops")
 BASE_BRANCH = "auto/qwen27b"
+# r1309：規範三分支 worktree（wt_clean 守衛對象；審查指示 #3 點名 qwen27b/worker/argon）
+CANONICAL_WORKTREE_BRANCHES = ("auto/qwen27b", "auto/worker", "auto/argon")
 # 條目邊界約定（r1279）：條目行以「（YYYY-MM-DD…」起始——live canonical 24/24 條目行
 # 逐條實證。只守「（」前綴不夠：多行條目的續行本身可以「（」開頭（r1279 負控制實測
 # 假綠燈），須按日期錨定才算條目邊界。
@@ -530,6 +532,87 @@ def check_bookkeeping_now(repo: Path = REPO) -> None:
         record("bk_now", False, "DRIFT: repo NOW.md != ops/loop/NOW.md")
 
 
+def check_worktree_clean(repo: Path = REPO) -> None:
+    """wt_clean：規範三分支 worktree in-scope（vacant_network/tests/ops）無 staged/未
+    commit/未追蹤殘留（r1309、審查指示 #3 機械化）。
+
+    審查指示 #3：「跨三分支（qwen27b, worker, argon）必須及時同步，嚴禁 staged 未
+    commit 殘留引發 in-scope diff 導致 CI live 測試紅燈」。本輪實證洞（舊碼、主
+    repo live）：in-scope 殘留 `?? ops/reqloop/zz_scratch_r1309.txt` 存在時，舊
+    freeze_check（9 項）仍輸出 VERDICT: FROZEN_STATE_OK rc=0＝假綠燈（H-0 同構：
+    漏檢查項得到的綠燈就是洞的成因；I-4：未測量不是通過）。
+    口徑（與 r1300「CI 量被測 commit」一致）：
+      attached（本地 dev/worktree）→量三分規範 worktree（任一缺失＝該分支 worktree
+      未測量→fail-closed BROKEN）；detached（CI 沙盒）→只量 checkout 本身（被測
+      commit），local worktrees 不可達、detail 點名 scope、不冒充已量。
+    """
+    attached = subprocess.run(
+        ["git", "symbolic-ref", "-q", "HEAD"],
+        cwd=repo, capture_output=True, text=True,
+    ).returncode == 0
+    if attached:
+        p = subprocess.run(
+            ["git", "worktree", "list", "--porcelain"],
+            cwd=repo, capture_output=True, text=True,
+        )
+        if p.returncode != 0:
+            record("wt_clean", False, f"git worktree list rc={p.returncode}（未測量、I-4）")
+            return
+        branch_to_path: dict[str, str] = {}
+        block: list[str] = []
+
+        def flush() -> None:
+            d: dict[str, str] = {}
+            for line in block:
+                k, _, v = line.partition(" ")
+                if v:
+                    d[k] = v
+            block.clear()
+            b = d.get("branch", "")
+            if b.startswith("refs/heads/") and "worktree" in d:
+                branch_to_path[b[len("refs/heads/"):]] = d["worktree"]
+
+        for line in p.stdout.splitlines():
+            if line == "":
+                flush()
+            else:
+                block.append(line)
+        flush()
+        missing = [b for b in CANONICAL_WORKTREE_BRANCHES if b not in branch_to_path]
+        if missing:
+            record("wt_clean", False,
+                   f"no worktree for {missing}（未測量、I-4：未測量不是通過）")
+            return
+        targets = [(b, branch_to_path[b]) for b in CANONICAL_WORKTREE_BRANCHES]
+        scope = "local attached"
+    else:
+        targets = [("<checkout>", str(repo))]
+        scope = "detached checkout（CI：只量被測 commit、local worktrees 未測量）"
+
+    parts: list[str] = []
+    dirty = False
+    for label, path in targets:
+        sp = subprocess.run(
+            ["git", "status", "--porcelain", "--", *IN_SCOPE],
+            cwd=path, capture_output=True, text=True,
+        )
+        if sp.returncode != 0:
+            record("wt_clean", False,
+                   f"git status rc={sp.returncode} at {path}（未測量、I-4）")
+            return
+        entries = [l for l in sp.stdout.splitlines() if l.strip()]
+        if entries:
+            dirty = True
+            parts.append(f"{label}: RESIDUE {entries[:3]}")
+        else:
+            parts.append(f"{label}: clean")
+    if dirty:
+        record("wt_clean", False, f"DIRTY（{scope}）: " + "；".join(parts))
+    else:
+        record("wt_clean", True,
+               f"in-scope clean {len(targets)}/{len(targets)}（{scope}）: " + "；".join(parts))
+
+
 def run_check(name: str, fn: Callable[[], None]) -> None:
     """單項檢查異常包層（r1297，vq-el4.39）：檢查執行中拋異常（FILING JSON 損毀、
     FILING 缺失、filing 條目非 dict、git 缺席、子程超時…）時，點名記 BROKEN
@@ -546,7 +629,7 @@ def run_check(name: str, fn: Callable[[], None]) -> None:
 
 def main() -> int:
     # r1297（vq-el4.39）：每項檢查經 run_check——任一項崩潰被點名記 BROKEN，
-    # 其餘各項照跑，9 項全在輸出＋單一裁決行（I-4：未測量不是通過）。
+    # 其餘各項照跑，10 項全在輸出＋單一裁決行（I-4：未測量不是通過；r1309 起 10 項）。
     run_check("anchors", check_anchors)
     run_check("ci_contract", check_ci_contract)
     run_check("diff_worker", lambda: check_diff("auto/worker", "diff_worker"))
@@ -556,6 +639,7 @@ def main() -> int:
     run_check("g3gate_plan", check_g3gate)
     run_check("bk_state", check_bookkeeping_state)
     run_check("bk_now", check_bookkeeping_now)
+    run_check("wt_clean", check_worktree_clean)  # r1309：三分支 worktree in-scope 殘留
 
     width = max(len(n) for n, _, _ in results)
     for name, ok, detail in results:

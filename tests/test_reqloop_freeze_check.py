@@ -31,6 +31,7 @@ MANDATED = (
     "g3gate_plan",    # G3 前置（NOT FIRED、0 model calls）
     "bk_state",       # 審查指示 #3 工作樹衛生：STATE.md 簿記鏡像同步（r1271 起）
     "bk_now",         # 審查指示 #3 工作樹衛生：NOW.md 簿記鏡像同步（r1271 起）
+    "wt_clean",       # 審查指示 #3 工作樹衛生：規範三分支 worktree in-scope 無殘留（r1309）
 )
 
 
@@ -826,3 +827,126 @@ def test_diff_sync_counterpart_anchor(tmp_path: Path) -> None:
         ["git", "checkout", "-q", "auto/qwen27b"],
         cwd=repo2, check=True, capture_output=True, text=True,
     )
+
+
+def _mk_3wt_repo(tmp_path: Path, name: str) -> tuple:
+    """三分支 worktree 沙盒 repo（r1309、審查指示 #3）：主 worktree（auto/qwen27b）＋
+    auto/worker、auto/argon 兩 linked worktree，全 clean。
+    回傳 (repo, git, wt_worker, wt_argon)。"""
+    import os
+    import subprocess
+
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@t",
+    }
+    repo = tmp_path / name
+    (repo / "ops" / "reqloop").mkdir(parents=True)
+    (repo / "ops" / "reqloop" / "x.py").write_text("x = 1\n", encoding="utf-8")
+
+    def git(*args: str) -> None:
+        subprocess.run(
+            ["git", *args], cwd=repo, check=True,
+            capture_output=True, text=True, env=env,
+        )
+
+    git("init", "-q", "-b", "auto/qwen27b")
+    git("add", "ops")
+    git("commit", "-qm", "c1")
+    wt_w = tmp_path / f"{name}-worker"
+    wt_a = tmp_path / f"{name}-argon"
+    git("worktree", "add", "-q", "-b", "auto/worker", str(wt_w))
+    git("worktree", "add", "-q", "-b", "auto/argon", str(wt_a))
+    return repo, git, wt_w, wt_a
+
+
+def test_worktree_clean_negative_controls(tmp_path: Path) -> None:
+    """r1309（審查指示 #3 機械化）：規範三分支 worktree in-scope 無殘留。
+
+    本輪實證洞（舊碼、主 repo live）：in-scope 殘留
+    `?? ops/reqloop/zz_scratch_r1309.txt` 存在時，舊 freeze_check（9 項）仍輸出
+    VERDICT: FROZEN_STATE_OK rc=0＝假綠燈（審查指示 #3：「嚴禁 staged 未 commit
+    殘留引發 in-scope diff 導致 CI live 測試紅燈」；H-0 同構：漏檢查項得到的綠燈
+    就是洞的成因；I-4：未測量不是通過）。期望行為：
+      (a) 三 worktree 全 clean→OK、detail 點名三分支；
+      (b) 主 worktree in-scope staged 未 commit→BROKEN 且點名該檔；
+      (c) worker worktree 未追蹤 in-scope 檔→BROKEN 且點名該檔；
+      (d) 規範 worktree 缺（argon）→BROKEN 未測量（fail-closed，I-4）；
+      (e) detached（CI 沙盒口徑）clean checkout→OK、scope 收斂到 checkout 本身
+          （r1300：CI 量被測 commit；local worktrees 不可達、不冒充已量）；
+      (f) detached＋in-scope 殘留→BROKEN（CI 沙盒自身殘留也抓）。
+    """
+    mod = _load_freeze_check()
+    repo, git, wt_w, wt_a = _mk_3wt_repo(tmp_path, "wtc")
+
+    # (a) 三 worktree 全 clean→OK、點名三分支
+    mod.results.clear()
+    mod.check_worktree_clean(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert (name, ok) == ("wt_clean", True), mod.results
+    assert "auto/qwen27b" in detail and "auto/worker" in detail and "auto/argon" in detail, detail
+
+    # (b) staged 未 commit（modified＋staged）→BROKEN、點名該檔
+    (repo / "ops" / "reqloop" / "x.py").write_text("x = 2\n", encoding="utf-8")
+    git("add", "ops")
+    mod.results.clear()
+    mod.check_worktree_clean(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert (name, ok) == ("wt_clean", False), mod.results
+    assert "x.py" in detail, detail
+    git("reset", "-q", "--hard")  # 恢復 clean、讓 (c) 獨立
+
+    # (c) worker worktree 未追蹤 in-scope 檔→BROKEN、點名該檔
+    (wt_w / "ops" / "scratch.txt").write_text("scratch\n", encoding="utf-8")
+    mod.results.clear()
+    mod.check_worktree_clean(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert (name, ok) == ("wt_clean", False), mod.results
+    assert "scratch.txt" in detail, detail
+    (wt_w / "ops" / "scratch.txt").unlink()
+
+    # (d) 規範 worktree 缺（argon）→BROKEN 未測量（I-4）
+    git("worktree", "remove", "--force", str(wt_a))
+    mod.results.clear()
+    mod.check_worktree_clean(repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert (name, ok) == ("wt_clean", False), mod.results
+    assert "auto/argon" in detail, detail
+
+    # (e)(f) detached（CI 沙盒口徑）
+    import os
+    import subprocess
+
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t",
+    }
+    repo2 = tmp_path / "wtc-detached"
+    (repo2 / "ops").mkdir(parents=True)
+    (repo2 / "ops" / "y.py").write_text("y = 1\n", encoding="utf-8")
+
+    def git2(*args: str) -> None:
+        subprocess.run(
+            ["git", *args], cwd=repo2, check=True,
+            capture_output=True, text=True, env=env,
+        )
+
+    git2("init", "-q", "-b", "master")
+    git2("add", "ops")
+    git2("commit", "-qm", "c1")
+    git2("checkout", "-q", "--detach")
+    mod.results.clear()
+    mod.check_worktree_clean(repo2)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert (name, ok) == ("wt_clean", True), mod.results
+    assert "checkout" in detail, f"detached detail 必須點名 scope: {detail}"
+    (repo2 / "ops" / "z.txt").write_text("z\n", encoding="utf-8")
+    mod.results.clear()
+    mod.check_worktree_clean(repo2)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert (name, ok) == ("wt_clean", False), mod.results
+    assert "z.txt" in detail, detail
