@@ -27,7 +27,9 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
 
 檢查項（全唯讀、0 model calls、不寫檔、不改分支、不 push）：
   anchors         tests/test_reqloop_frozen_anchors.py——rc 0 且恰好 5 passed（5 passed 守衛）
+                  且通過測試名 ⊇ EXPECTED_ANCHOR_TEST_NAMES（r1314 身份守衛，-rA 收集）
   ci_contract     tests/test_reqloop_ci_contract.py——rc 0 且恰好 2 passed（嚴禁弱化）
+                  且通過測試名 ⊇ EXPECTED_CI_CONTRACT_TEST_NAMES（r1314 身份守衛，-rA 收集）
   diff_worker     另一分支錨定被測 commit 的「同步對應 commit」（同簿記身份，r1303）後
   diff_argon      git diff --name-only <counterpart> <base>（in-scope）== 0
                   （r1300/vq-el4.45：base＝被測 commit；r1303/vq-el4.46：另一分支不再對
@@ -54,6 +56,15 @@ phase3 key→phaseX 舊碼判 OK；r1273 同型：計數守住但身份未守；
 綠燈就是漏洞成因；I-4：未測量不是通過）。期望集來源：審查指示 #1 點名的 3 份凍結檔
 （tests/test_reqloop_frozen_anchors.py::test_filing_guard_detects_drift 同 3 路徑）＋
 builder ops/audits/build_g25_all_gates_filing.py 的 phase1/2/3（同 tail）。
+
+背景（2026-11-09 r1314，vq-el4.49）：anchors/ci_contract 守衛原只守「計數＋無其他結果
+類別」——守衛測試被換成同數 assert True dummy（全綠、rc=0、計數足、無 skipped）時舊碼
+仍判 OK＝假綠燈（r1314 RED 實證：5 個 dummy 的 anchors 檔舊碼判 ('anchors', True, …)，
+既有 test_guard_suite_count_negative_controls fixture (b) 曾字面編碼此期望；r1296 同型：
+計數守住但身份未守；H-0：漏掉一項得到的綠燈就是漏洞成因；I-4：未測量不是通過）。
+現以 pytest -rA 收集 PASSED 測試名、要求 ⊇ 期望集（EXPECTED_ANCHOR_TEST_NAMES 5／
+EXPECTED_CI_CONTRACT_TEST_NAMES 2；來源：兩份守衛檔現行測試函數名，審查指示 #1 點名），
+detail 點名 missing；負控制 test_guard_suite_identity_negative_controls。
 
 背景（2026-11-09 r1297，vq-el4.39）：任一檢查執行中拋異常（FILING JSON 損毀、
 FILING 缺失、filing 條目非 dict、git 缺席、子程超時…）時，舊 main() 直接 traceback
@@ -126,9 +137,10 @@ def _sha256(path: Path) -> str | None:
         return None
 
 
-def _pytest(test_file: str, cwd: Path = REPO) -> tuple[int, str]:
+def _pytest(test_file: str, cwd: Path = REPO, extra: tuple[str, ...] = ()) -> tuple[int, str, str]:
+    """跑 pytest，回 (rc, tail, 全量輸出)（r1314 加全量輸出：收集逐測 PASSED 測試名）。"""
     p = subprocess.run(
-        [sys.executable, "-m", "pytest", test_file],
+        [sys.executable, "-m", "pytest", test_file, *extra],
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -136,7 +148,7 @@ def _pytest(test_file: str, cwd: Path = REPO) -> tuple[int, str]:
     )
     out = (p.stdout or "") + (p.stderr or "")
     tail = out.strip().splitlines()[-1] if out.strip() else ""
-    return p.returncode, tail
+    return p.returncode, tail, out
 
 
 SUMMARY_RESULT_RE = re.compile(
@@ -144,8 +156,10 @@ SUMMARY_RESULT_RE = re.compile(
 )
 
 
+
 def _check_guard_suite(
-    name: str, test_file: str, expected_passed: int, cwd: Path = REPO
+    name: str, test_file: str, expected_passed: int,
+    expected_names: tuple[str, ...], cwd: Path = REPO,
 ) -> None:
     """守衛測試套件＝rc 0 且「恰好 expected_passed passed」（r1273 計數守衛）。
 
@@ -159,27 +173,51 @@ def _check_guard_suite(
     passed 計數仍判 OK。skipped/xfailed 等即「未測量」（I-4：未測量不是通過）：
     匯總行出現任何非 passed 結果類（skipped/failed/error(s)/xfailed/xpassed/
     deselected）即 BROKEN。
+
+    r1314（vq-el4.49）：計數足必要但不充分（r1296 同型：計數守住身份未守）——
+    守衛測試被換成同數 assert True dummy（全綠、rc=0、計數足、無 skipped）時舊計數
+    守衛仍判 OK＝假綠燈（r1314 RED 實證）。故以 pytest -rA 的 short test summary
+    逐行 `PASSED <nodeid>` 收集通過測試名（-rA 不受 repo addopts -q 影響——
+    r1314 實測：pyproject addopts="-q …" 令 -v 被抵消、無逐測行；-rA 穩定）、
+    要求 ⊇ 期望集（EXPECTED_ANCHOR_TEST_NAMES／EXPECTED_CI_CONTRACT_TEST_NAMES）；
+    缺失即 BROKEN 且 detail 點名。
     """
-    rc, tail = _pytest(test_file, cwd)
+    rc, tail, out = _pytest(test_file, cwd, extra=("-rA",))
     counts: dict[str, int] = {}
     for n, cat in SUMMARY_RESULT_RE.findall(tail):
         counts[cat] = counts.get(cat, 0) + int(n)
     passed = counts.get("passed")
     other = {k: v for k, v in counts.items() if k != "passed"}
-    ok = rc == 0 and passed == expected_passed and not other
+    # 身份守衛（r1314，r1296 同型）：pytest -rA 的 short test summary 逐行
+    # `PASSED <nodeid>`（nodeid 可含 Class:: 前綴），收集通過測試名。
+    passed_names: set[str] = set()
+    for line in out.splitlines():
+        if line.startswith("PASSED ") and "::" in line:
+            passed_names.add(line.split("::", 1)[1].strip())
+    missing = [n for n in expected_names if n not in passed_names]
+    ok = rc == 0 and passed == expected_passed and not other and not missing
+    # detail 截斷 160 字（record）：缺名置首（r1314），長測試名不被截斷。
     record(
         name, ok,
-        f"pytest rc={rc} {tail}（expected {expected_passed} passed, got {passed}"
+        f"pytest rc={rc}（"
+        + (f"缺守衛測試: {', '.join(missing)}" if missing else "身份齊")
+        + f"；expected {expected_passed} passed, got {passed}；summary: {tail}"
         + (f"；其它結果類 {other}）" if other else "；無其它結果類）"),
     )
 
 
 def check_anchors(cwd: Path = REPO) -> None:
-    _check_guard_suite("anchors", "tests/test_reqloop_frozen_anchors.py", 5, cwd)
+    _check_guard_suite(
+        "anchors", "tests/test_reqloop_frozen_anchors.py", 5,
+        EXPECTED_ANCHOR_TEST_NAMES, cwd,
+    )
 
 
 def check_ci_contract(cwd: Path = REPO) -> None:
-    _check_guard_suite("ci_contract", "tests/test_reqloop_ci_contract.py", 2, cwd)
+    _check_guard_suite(
+        "ci_contract", "tests/test_reqloop_ci_contract.py", 2,
+        EXPECTED_CI_CONTRACT_TEST_NAMES, cwd,
+    )
 
 
 def _diff_base() -> str:
@@ -311,6 +349,21 @@ EXPECTED_SOURCE_TAILS = frozenset({
     "extract/out/all/phase2.json",
     "extract/out/all/phase3.json",
 })
+
+# 守衛測試身份（r1314，vq-el4.49；r1296 同型：計數守住身份未守）：
+# 來源＝tests/test_reqloop_frozen_anchors.py 與 tests/test_reqloop_ci_contract.py
+# 現行測試函數名（審查指示 #1 點名的兩份守衛檔）。
+EXPECTED_ANCHOR_TEST_NAMES = (
+    "test_repair_py_is_frozen",
+    "test_extract_py_boundary_is_frozen",
+    "test_guard_detects_tampered_copy",
+    "test_g25_filing_code_hashes_match_repo",
+    "test_filing_guard_detects_drift",
+)
+EXPECTED_CI_CONTRACT_TEST_NAMES = (
+    "test_reqloop_tests_never_execute_non_contract_imports",
+    "test_guard_negative_control_scipy_numpy_flagged",
+)
 
 
 def check_filing_code() -> None:
