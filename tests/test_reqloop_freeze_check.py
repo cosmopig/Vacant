@@ -29,6 +29,7 @@ MANDATED = (
     "filing_code",    # 審查指示 #1：filing code 三 sha 100% 吻合
     "filing_sources", # filing sources 三 sha
     "g3gate_plan",    # G3 前置（NOT FIRED、0 model calls）
+    "queue_empty",    # 審查指示 #5：人類核准前 /srv/vlab/queue/ 必須為空（r1339）
     "bk_state",       # 審查指示 #3 工作樹衛生：STATE.md 簿記鏡像同步（r1271 起）
     "bk_now",         # 審查指示 #3 工作樹衛生：NOW.md 簿記鏡像同步（r1271 起）
     "wt_clean",       # 審查指示 #3 工作樹衛生：規範三分支 worktree in-scope 無殘留（r1309）
@@ -1269,8 +1270,13 @@ GUARD_CONTENT_PIN = {
     # dummy 檔，舊碼判 ('anchors', True, '身份齊；expected 5 passed, got 5；…')；
     # r1296/r1314/r1324 同族）。真守衛檔（全綠）仍 OK（測試檔正控制 (c)）；計數/其它
     # 結果類守衛不變，只收緊段首＋加計數錨——顯式更新錨並留記錄。
+    # r1339 解冻記錄：freeze_check.py 新增 check_queue_empty（/srv/vlab/queue/ 人類
+    # 核准前必須為空，審查指示 #5 機械化；r1309/r1321 同型：把人工紅線機械化）——
+    # g3gate_plan 只驗「未發射」、不驗「queue 是否有任務」，本輪補上該缺口；queue
+    # 路徑可注入（CI/沙盒用 tmp_path）。新增一項 mandated 檢查（10→11 項），其餘
+    # 十項守衛逐位不變——顯式更新錨並留記錄。
     "ops/reqloop/freeze_check.py":
-        "1d7841ad8749ec30b59ff637a2fbb8b11d8bbfc087fe95660183c9ee7558a1e9",
+        "b829eb5820bcecb878b905dc7f114559480cae2b1b606d35a1d3d67c4dc11c24",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
@@ -1415,3 +1421,41 @@ def test_g3gate_red_path_negative_controls(tmp_path: Path) -> None:
             f"{name}: 期望 ok={expect_ok}，實際 ok={got[1]} —— {mod.results}"
         assert "rc=" in got[2] and expect_flags in got[2], \
             f"{name}: detail 未點名三條件各自真偽 —— {mod.results}"
+
+
+# ---------------------------------------------------------------------------
+# queue_empty（r1339）：人類核准前 /srv/vlab/queue/ 必須為空（審查指示 #5：
+# 核准前嚴禁向 queue 放入新任務）。g3gate_plan 只驗「未發射」，不驗「queue
+# 是否有任務」——本檢查把該人工紅線機械化（r1309/r1321 同型；I-4：未測量
+# 不是通過）。queue 路徑可注入（CI/沙盒用 tmp_path，不碰真 /srv/vlab/queue/）。
+# ---------------------------------------------------------------------------
+def test_check_queue_empty_green_and_negative_controls(tmp_path: Path) -> None:
+    mod = _load_freeze_check()
+
+    # (a) 正控制：queue 為空目錄 → ok=True。
+    empty_q = tmp_path / "qempty"
+    empty_q.mkdir()
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_queue_empty(queue=empty_q)  # type: ignore[attr-defined]
+    got = mod.results[-1]  # type: ignore[attr-defined]
+    assert got[0] == "queue_empty", mod.results
+    assert got[1] is True, f"空 queue 應 ok=True，實際 {got}"
+
+    # (b) 負控制：queue 有一個任務檔 → ok=False（detail 點名該檔）。
+    nonempty_q = tmp_path / "qnonempty"
+    nonempty_q.mkdir()
+    (nonempty_q / "00_smoke.json").write_text("{}", encoding="utf-8")
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_queue_empty(queue=nonempty_q)  # type: ignore[attr-defined]
+    got = mod.results[-1]  # type: ignore[attr-defined]
+    assert got[0] == "queue_empty", mod.results
+    assert got[1] is False, f"非空 queue 應 ok=False，實際 {got}"
+    assert "00_smoke.json" in got[2], f"detail 未點名任務檔 —— {got}"
+
+    # (c) 負控制：queue 不存在 → ok=True（無 queue 即無任務；detail 點名 absent）。
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_queue_empty(queue=tmp_path / "no_such_queue_dir")  # type: ignore[attr-defined]
+    got = mod.results[-1]  # type: ignore[attr-defined]
+    assert got[0] == "queue_empty", mod.results
+    assert got[1] is True, f"queue 不存在應 ok=True（無任務），實際 {got}"
+    assert "absent" in got[2], f"detail 未點名 queue absent scope —— {got}"
