@@ -15,7 +15,7 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
 （tests/test_reqloop_freeze_check.py）。
 
     python3 ops/reqloop/freeze_check.py
-    # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 九項全 OK
+    # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 十一項全 OK
     # rc 1  且  VERDICT: FROZEN_STATE_BROKEN —— 任一項 BROKEN，detail 點名
 
 背景（2026-11-08 r1273，vq-el4.30）：審查指示 #1 點名「5 passed 守衛」與「ci_contract
@@ -40,6 +40,7 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
   filing_sources  同檔 sources 三段 sha256 重算 MATCH
                   （r1296/vq-el4.38：key 集＝phase1/2/3、派生 tail 集＝3 份互異 phase 檔）
   g3gate_plan     python -m vacant_network.reqloop.g3gate --plan（rc 0、NOT FIRED）
+  queue_empty     /srv/vlab/queue/ 人類核准前必須為空（r1339 起；審查指示 #5）
   bk_state        repo STATE.md（canonical）Current State section 與 ops/STATE.md 鏡像同步
                   （約定＝r1265 實證的 byte-level：鏡像＝canonical 標題＋Current State section，
                   即鏡像是 canonical 的 byte 前綴；canonical 尾部的輪次 log 不屬鏡像）
@@ -141,6 +142,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
+DEFAULT_QUEUE = Path("/srv/vlab/queue")  # 審查指示 #5：人類核准前此處必須無任務
 FILING = REPO / "ops" / "audits" / "g25_all_gates_filing.json"
 IN_SCOPE = ("vacant_network", "tests", "ops")
 BASE_BRANCH = "auto/qwen27b"
@@ -546,6 +548,41 @@ def check_g3gate(cmd: list[str] | None = None) -> None:
     )
 
 
+def check_queue_empty(queue: Path | None = None) -> None:
+    """queue_empty：/srv/vlab/queue/ 在人類核准前必須為空（審查指示 #5：核准前
+    嚴禁向 /srv/vlab/queue/ 放入新任務）。
+
+    口徑：g3gate_plan 只驗「未發射」（NOT FIRED），不驗「queue 是否有任務」——
+    本檢查補上該缺口（r1309/r1321 同型：把人工紅線機械化；I-4：未測量不是通過）。
+    語義：
+      - queue 為目錄且空 → OK（無任務、符合紅線）；
+      - queue 為目錄但非空 → BROKEN（detail 點名任務檔；紅線 #5 違反）；
+      - queue 不存在/非目錄 → OK（無 queue 即無任務；detail 點名 scope=absent）。
+    queue 路徑可注入（CI/沙盒用 tmp_path，不碰真 /srv/vlab/queue/）。
+    唯讀：只列目錄，不寫、不刪、不發射（0 model calls）。
+    """
+    if queue is None:
+        queue = DEFAULT_QUEUE
+    if not queue.is_dir():
+        record("queue_empty", True,
+               f"queue {queue} 不存在/非目錄 → 無任務可入隊（scope=absent；"
+               "審查指示 #5 未違反）")
+        return
+    try:
+        entries = sorted(p.name for p in queue.iterdir() if not p.name.startswith("."))
+    except OSError as e:
+        record("queue_empty", False,
+               f"queue {queue} 不可列讀: {e}（未測量、I-4）")
+        return
+    if entries:
+        record("queue_empty", False,
+               f"queue {queue} 非空（{len(entries)} 任務檔: {entries[:3]}…）"
+               "——人類核准前嚴禁入隊（審查指示 #5）")
+    else:
+        record("queue_empty", True,
+               f"queue {queue} 空（0 任務檔；審查指示 #5 未違反）")
+
+
 def check_bookkeeping_state(repo: Path = REPO) -> None:
     """bk_state：canonical（repo STATE.md）Current State section 與 ops/STATE.md 鏡像同步。
 
@@ -781,6 +818,7 @@ def main() -> int:
     run_check("filing_code", check_filing_code)
     run_check("filing_sources", check_filing_sources)
     run_check("g3gate_plan", check_g3gate)
+    run_check("queue_empty", check_queue_empty)
     run_check("bk_state", check_bookkeeping_state)
     run_check("bk_now", check_bookkeeping_now)
     run_check("wt_clean", check_worktree_clean)  # r1309：三分支 worktree in-scope 殘留
