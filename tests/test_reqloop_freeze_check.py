@@ -1248,9 +1248,14 @@ def test_worktree_clean_negative_controls(tmp_path: Path) -> None:
 # 防不了「同名換內容」。且四份守衛檔（freeze_check.py／anchors／ci-contract／本檔）的
 # 內容此前無任何 hash 錨點（filing 只釘 extract/checks/run_eval 三份、anchor 只釘
 # repair/extract 兩份）——H-0 同型（綠燈來自沒量該量的）、I-4（未測量不是通過）。
-# 本節把三份守衛檔（ ruler freeze_check.py ＋ 它 invoke 的兩份守衛）的內容 sha256 固化成
-# 錨點；解冻（含合法修改）必須顯式更新 GUARD_CONTENT_PIN 並留記錄——與
+# 本節把守衛檔（ ruler freeze_check.py ＋ 它 invoke 的兩份守衛；r1347 起再加第二收口
+# 標準 verify_effects_summary.py＋其測試檔）的內容 sha256 固化成錨點；解冻（含合法修改）
+# 必須顯式更新 GUARD_CONTENT_PIN 並留記錄——與
 # test_reqloop_frozen_anchors.py 的紀律一致（「解冻須顯式改本測試並留記錄」）。
+# r1347（vq-el4.56）擴覆蓋記錄：審查指示 #3 點名的第二收口指令 verify_effects_summary.py
+# （r1333 vq-el4.53）與其測試檔（r1344）建於 r1319 之後、從未釘住——同名 dummy＋stub
+# 場景＝r1319 同型假綠燈（本輪 RED 實證：v==[]）。兩檔不含 pin 本身（無自釘循環），
+# 故補釘。此後任何對兩檔的合法修改均須顯式更新錨並留記錄。
 # 殘留（誠實記錄）：本檔自身不釘（自釘是循環：驗自己的檔可連期望值一起改）；該層的
 # 獨立信號＝CI 套件 passed 計數（落 ~/dev/ops/ci/*.json，本檔被刪/被削即計數可見地掉）
 # ＋ 三分支 in-scope diff（跨分支不同步的篡改被凍結狀態複核抓住）。
@@ -1286,11 +1291,18 @@ GUARD_CONTENT_PIN = {
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
         "eafe829013f15de0e0933aad879ea40381f6239873ce885926951ea699b69d58",
+    # r1347（vq-el4.56）擴覆蓋：第二收口標準（審查指示 #3 點名）兩檔——r1319 之後建立、
+    # 此前從未釘住；補釘後「腳本 stub＋測試檔同名 dummy」假綠燈場景被本 pin 抓住
+    # （RED 證據見 test_guard_content_pin_effects_summary_pair_negative_controls）。
+    "ops/reqloop/verify_effects_summary.py":
+        "e6cd3933db60be3e653ec62bbce607e4bf2925e39bf8a4086cfb99b2b2e88c55",
+    "tests/test_reqloop_verify_effects_summary.py":
+        "f72e692710c6669f01892bcd4dab4a78c6f9753ef45a2ca45b81100f8e068fb0",
 }
 
 
 def guard_content_violations(root: Path) -> list[str]:
-    """三份守衛檔內容 vs GUARD_CONTENT_PIN 的違規清單；空列表＝逐位吻合。
+    """五份守衛檔內容（r1347 起）vs GUARD_CONTENT_PIN 的違規清單；空列表＝逐位吻合。
 
     只讀受測檔，不寫任何共享狀態；root 為 repo 根（真 repo 或臨時 repo）。
     """
@@ -1312,8 +1324,8 @@ def guard_content_violations(root: Path) -> list[str]:
 
 
 def test_guard_content_pin_green_and_negative_controls(tmp_path: Path) -> None:
-    """守衛內容錨（r1319）：
-    (a) 綠燈：真 repo 三份守衛檔與 GUARD_CONTENT_PIN 逐位吻合；
+    """守衛內容錨（r1319；r1347 擴至五份）：
+    (a) 綠燈：真 repo 五份守衛檔與 GUARD_CONTENT_PIN 逐位吻合；
     (b) anchors 守衛檔被換成同名 dummy（5×assert True，恰為 freeze_check 期望真名）
         → 必須判內容漂移（r1314 之前的假綠燈，本輪起必須紅），且未改檔不得誤判；
     (c) ruler freeze_check.py 被換成直接印 FROZEN_STATE_OK 的 stub → 必須判漂移；
@@ -1497,3 +1509,74 @@ def test_queue_empty_hidden_entry_negative_control(tmp_path: Path) -> None:
     got2 = mod.results[-1]  # type: ignore[attr-defined]
     assert got2[0] == "queue_empty", mod.results
     assert got2[1] is True, f"空 queue 應仍 ok=True，實際 {got2}"
+
+
+# ── r1347（vq-el4.56）：GUARD_CONTENT_PIN 擴覆蓋——第二收口標準（verify_effects_summary 對）──
+# 缺口（本輪 RED 實證）：審查指示 #3 點名 verify_effects_summary.py 與 freeze_check.py 為收口
+# 兩指令，但 GUARD_CONTENT_PIN（r1319）只釘三份（freeze_check.py＋anchors＋ci_contract）；
+# ops/reqloop/verify_effects_summary.py（r1333 vq-el4.53）與
+# tests/test_reqloop_verify_effects_summary.py（r1344）建於 r1319 之後、從未釘住。
+# 攻擊場景（r1319 同名 dummy 同型）：測試檔換同名 dummy（assert True 全綠）＋腳本換直接印
+# VERDICT: EFFECTS_SUMMARY_OK 的 stub → 舊 guard_content_violations 回空清單、收口指令照綠
+# ＝假綠燈（H-0 同構：綠燈來自沒量該量的）。此兩檔不含 pin 本身（無自釘循環，與本檔殘留
+# 不同），故可釘、且必須釘。
+
+EFFECTS_PAIR = (
+    "ops/reqloop/verify_effects_summary.py",
+    "tests/test_reqloop_verify_effects_summary.py",
+)
+
+
+def test_guard_content_pin_effects_summary_pair_negative_controls(tmp_path: Path) -> None:
+    """r1347（vq-el4.56）：第二收口標準對（腳本＋其測試檔）必須在 GUARD_CONTENT_PIN 內。
+    (a) 負控制：腳本換「直接印 VERDICT: EFFECTS_SUMMARY_OK」stub＋測試檔換同名 dummy
+        （真名 assert True）→ guard_content_violations 必對兩檔各判內容漂移；
+    (b) 正控制：五份守衛檔皆真內容 → 零違規（擴錨後不得誤判未改檔）。
+    全部對臨時 repo 操作，不碰真檔；無 subprocess 片段（不觸及安裝合約掃描範圍）。
+    RED 證據（本輪、舊錨）：(a) 的 v == []（兩檔不在 pin → 零違規＝假綠燈）。"""
+
+    def fake_repo() -> Path:
+        root = tmp_path / "repo"
+        for rel in tuple(GUARD_CONTENT_PIN):
+            dst = root / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((REPO / rel).read_bytes())
+        return root
+
+    def place(root: Path, content: str) -> None:
+        for rel in EFFECTS_PAIR:
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / "ops/reqloop/verify_effects_summary.py").write_text(
+            "def main():\n    print('VERDICT: EFFECTS_SUMMARY_OK')\n\nmain()\n",
+            encoding="utf-8",
+        )
+        (root / "tests/test_reqloop_verify_effects_summary.py").write_text(content, encoding="utf-8")
+
+    # (a) 腳本 stub＋測試檔同名 dummy（真名、assert True）→ 兩檔都必須被判漂移
+    real_names = (
+        "test_script_exists",
+        "test_live_verdict_ok",
+        "test_live_covers_all_mandated",
+        "test_live_file_sha_pinned",
+    )
+    root_a = fake_repo()
+    place(root_a, "\n".join(f"def {n}():\n    assert True\n" for n in real_names))
+    v = guard_content_violations(root_a)
+    assert any("ops/reqloop/verify_effects_summary.py" in s and "內容漂移" in s for s in v), (
+        f"verify_effects_summary.py stub 未被抓到（r1319 同型缺口：r1319 後建檔、從未釘住）: {v}"
+    )
+    assert any("tests/test_reqloop_verify_effects_summary.py" in s and "內容漂移" in s for s in v), (
+        f"同名 dummy 測試檔未被抓到: {v}"
+    )
+    # 未改的既有三份守衛檔不得誤判
+    for rel in tuple(GUARD_CONTENT_PIN):
+        if rel not in EFFECTS_PAIR:
+            assert not any(rel in s for s in v), f"未改檔被誤判: {rel}: {v}"
+
+    # (b) 正控制：五份守衛檔皆真內容 → 零違規
+    root_b = fake_repo()
+    for rel in EFFECTS_PAIR:
+        (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root_b / rel).write_bytes((REPO / rel).read_bytes())
+    v_ok = guard_content_violations(root_b)
+    assert v_ok == [], f"真內容守衛檔被誤判漂移: {v_ok}"
