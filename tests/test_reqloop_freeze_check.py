@@ -328,15 +328,15 @@ def test_filing_null_sha_negative_control(tmp_path: Path) -> None:
     fdir = repo / "ops" / "audits"
     fdir.mkdir(parents=True)
     filing = fdir / "g25_all_gates_filing.json"
-    # 削弱備案：code 三檔只有 a/x.py 存在、sources 三檔全不存在，且六個 sha256
-    # 全為 null（未 pin）——舊碼對「檔不存在（_sha256→None）＋pin 為 null」判 MATCH。
-    (repo / "a").mkdir(parents=True)
-    (repo / "a" / "x.py").write_text("hello\n", encoding="utf-8")
+    # 削弱備案：code 三檔＋sources 三檔全不存在，且六個 sha256 全為 null（未 pin）
+    # ——舊碼對「檔不存在（_sha256→None）＋pin 為 null」判 MATCH。
+    # r1296（vq-el4.38）：key 須為 canonical 3 份凍結檔（新 key-identity 守衛
+    # 先過），才進得到 null-sha 路徑。
     filing.write_text(json.dumps({
         "code": {
-            "/code/a/x.py": {"sha256": None},
-            "/code/b/y.py": {"sha256": None},
-            "/code/c/z.py": {"sha256": None},
+            "vacant_network/reqloop/extract.py": {"sha256": None},
+            "vacant_network/reqloop/checks.py": {"sha256": None},
+            "ops/reqloop/extract/run_eval.py": {"sha256": None},
         },
         "sources": {
             f"phase{i}": {"path": f"/x/ops/reqloop/extract/out/all/phase{i}.json",
@@ -357,10 +357,14 @@ def test_filing_null_sha_negative_control(tmp_path: Path) -> None:
     assert name == "filing_sources" and ok is False, mod.results
     assert "MISMATCH" in detail, mod.results
 
-    # 正控制：同一 repo，真 sha＋真檔 → 3/3 MATCH OK（修復不得破壞正常路徑）
-    (repo / "b").mkdir(parents=True); (repo / "c").mkdir(parents=True)
-    (repo / "b" / "y.py").write_text("hello\n", encoding="utf-8")
-    (repo / "c" / "z.py").write_text("hello\n", encoding="utf-8")
+    # 正控制：同一 repo，真 sha＋真檔（canonical 3 份凍結檔＋3 份 phase 檔）
+    # → 3/3 MATCH OK（修復不得破壞正常路徑；r1296 key＝canonical 身份）
+    for rel in ("vacant_network/reqloop/extract.py",
+                "vacant_network/reqloop/checks.py",
+                "ops/reqloop/extract/run_eval.py"):
+        p = repo / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("hello\n", encoding="utf-8")
     sdir = repo / "ops" / "reqloop" / "extract" / "out" / "all"
     sdir.mkdir(parents=True)
     for i in (1, 2, 3):
@@ -370,9 +374,9 @@ def test_filing_null_sha_negative_control(tmp_path: Path) -> None:
     filing2 = fdir / "g25_all_gates_filing.json"
     filing2.write_text(json.dumps({
         "code": {
-            "/code/a/x.py": {"sha256": realsha},
-            "/code/b/y.py": {"sha256": realsha},
-            "/code/c/z.py": {"sha256": realsha},
+            "vacant_network/reqloop/extract.py": {"sha256": realsha},
+            "vacant_network/reqloop/checks.py": {"sha256": realsha},
+            "ops/reqloop/extract/run_eval.py": {"sha256": realsha},
         },
         "sources": {
             f"phase{i}": {"path": f"/x/ops/reqloop/extract/out/all/phase{i}.json",
@@ -381,6 +385,107 @@ def test_filing_null_sha_negative_control(tmp_path: Path) -> None:
         },
     }), encoding="utf-8")
     mod.FILING = filing2  # type: ignore[attr-defined]
+    mod.results.clear()
+    mod.check_filing_code()  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("filing_code", True), mod.results
+    mod.results.clear()
+    mod.check_filing_sources()  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("filing_sources", True), mod.results
+
+
+def test_filing_key_substitution_negative_control(tmp_path: Path) -> None:
+    """filing 覆蓋集身份假綠燈負控制（r1296，vq-el4.38）：count==3 必要但不
+    充分（r1273 同型：計數守住但身份未守）——code 段 key 被換成另一檔（檔存在、
+    sha 真）後 3 份凍結檔之一失去覆蓋，舊碼仍判「3/3 MATCH」OK（r1296 實證：
+    run_eval.py key→decoy.py，舊碼判 OK＝假綠燈；H-0：漏掉一項得到的綠燈就是
+    漏洞成因；I-4：未測量不是通過）。sources 段同（phase3 key→phaseX、
+    phase3 路徑重指 phase1 檔）。新守衛：code key 集＝恰 3 份凍結檔；
+    sources key 集＝phase1/2/3、派生 tail 集＝3 份 phase 檔且互異；
+    正控制：canonical key 集＋真 sha 仍 OK。"""
+    import hashlib
+    import json
+
+    mod = _load_freeze_check()
+    repo = tmp_path / "repo"
+    fdir = repo / "ops" / "audits"
+    fdir.mkdir(parents=True)
+
+    def sha(b: bytes) -> str:
+        return hashlib.sha256(b).hexdigest()
+
+    hs, hj = sha(b"hello\n"), sha(b"{}\n")
+    CODE3 = (
+        "vacant_network/reqloop/extract.py",
+        "vacant_network/reqloop/checks.py",
+        "ops/reqloop/extract/run_eval.py",
+    )
+    for rel in (*CODE3, "ops/reqloop/decoy.py"):
+        p = repo / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_bytes(b"hello\n")
+    sdir = repo / "ops" / "reqloop" / "extract" / "out" / "all"
+    sdir.mkdir(parents=True)
+    for i in (1, 2, 3):
+        (sdir / f"phase{i}.json").write_bytes(b"{}\n")
+
+    def sp(i: int) -> str:
+        return f"/x/ops/reqloop/extract/out/all/phase{i}.json"
+
+    filing = fdir / "g25_all_gates_filing.json"
+    mod.REPO = repo  # type: ignore[attr-defined]
+    mod.FILING = filing  # type: ignore[attr-defined]
+
+    # (a) code 段 key 替換：run_eval.py → decoy.py（檔存在、sha 真）＝削弱但照綠
+    filing.write_text(json.dumps({
+        "code": {
+            "vacant_network/reqloop/extract.py": {"sha256": hs},
+            "vacant_network/reqloop/checks.py": {"sha256": hs},
+            "ops/reqloop/decoy.py": {"sha256": hs},
+        },
+        "sources": {f"phase{i}": {"path": sp(i), "sha256": hj} for i in (1, 2, 3)},
+    }), encoding="utf-8")
+    mod.results.clear()
+    mod.check_filing_code()  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_code" and ok is False, mod.results
+    assert "run_eval.py" in detail and "decoy.py" in detail, mod.results
+
+    # (b) sources 段 key 改名：phase3 → phaseX（路徑/sha 真）＝削弱但照綠
+    filing.write_text(json.dumps({
+        "code": {k: {"sha256": hs} for k in CODE3},
+        "sources": {
+            "phase1": {"path": sp(1), "sha256": hj},
+            "phase2": {"path": sp(2), "sha256": hj},
+            "phaseX": {"path": sp(3), "sha256": hj},
+        },
+    }), encoding="utf-8")
+    mod.results.clear()
+    mod.check_filing_sources()  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_sources" and ok is False, mod.results
+    assert "phase3" in detail and "phaseX" in detail, mod.results
+
+    # (c) sources 段路徑重指：key 集 canonical 但 phase3 指 phase1 檔（兩條量同一
+    # 檔、phase3.json 失覆蓋）——tail 集守衛（互異性）
+    filing.write_text(json.dumps({
+        "code": {k: {"sha256": hs} for k in CODE3},
+        "sources": {
+            "phase1": {"path": sp(1), "sha256": hj},
+            "phase2": {"path": sp(2), "sha256": hj},
+            "phase3": {"path": sp(1), "sha256": hj},
+        },
+    }), encoding="utf-8")
+    mod.results.clear()
+    mod.check_filing_sources()  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_sources" and ok is False, mod.results
+    assert "phase3" in detail, mod.results
+
+    # 正控制：canonical key 集＋真 sha → 全 MATCH OK（修復不得破壞正常路徑）
+    filing.write_text(json.dumps({
+        "code": {k: {"sha256": hs} for k in CODE3},
+        "sources": {f"phase{i}": {"path": sp(i), "sha256": hj} for i in (1, 2, 3)},
+    }), encoding="utf-8")
     mod.results.clear()
     mod.check_filing_code()  # type: ignore[attr-defined]
     assert mod.results[-1][:2] == ("filing_code", True), mod.results
