@@ -1,7 +1,7 @@
 # NOW.md — 現況唯一真源
 
 ## 位置
-2026-11-09 r1316：vq-el4.49 開→關（守衛測試身份守衛驗證＋worker 同步＋結案）。r1314 實作已由 r1315 auto-commit 3ea3c69fa 入樹；本輪驗證（首次 2 failed＝diff_worker 未同步＝真實陳述）→同步 2 檔入 worker worktree（0e61c7575、blob 吻合）→21 passed＋freeze_check 10/10 OK VERDICT: FROZEN_STATE_OK rc=0。0 代碼改動（本輪＝sync＋簿記＋結案）、0 模型呼叫；vq-el4 50/50 全閉（含 epic）、唯一剩餘＝vq-1zf（G3）待人類 --fire。
+2026-11-09 r1316 redo：redo 點出任務點名未實開的 5 檔（auto-ci.yml／effects_20261105_summary／g25_all_gates_filing／extract.py／repair.py）——本輪逐檔實開＋獨立重算（50 格 13 g7/l6＋11 g7/l4、0 假回歸、filing 6 sha MATCH、extract 1217 行 e757aec5 51abfec3、repair 2795 行 5147f8c3、auto-ci 63 行 0 disab/enab），0 更正；r1316 狀態不變（vq-el4.49 已閉、21 passed、FROZEN_STATE_OK、0 模型呼叫）。前情 r1316：vq-el4.49 開→關（首次 2 failed＝diff_worker 未同步＝真實陳述→worker 0e61c7575 同步後全綠）；vq-el4 50/50 全閉、唯一剩餘＝vq-1zf（G3）待人類 --fire。
 
 ## 數字（本輪實測著地）
 - 守衛套件（本輪新跑）：21 passed（freeze_check 14 含 test_guard_suite_identity_negative_controls：(a) 5 dummy 非期望名→BROKEN 且點名缺失／(b) 期望名齊→OK／(c) 2 dummy→BROKEN 點名／(d) 齊→OK＋計數負控制(e) skipped 同型；anchors 5；ci_contract 2）
