@@ -1,3 +1,0 @@
-ID: req_csv_structure, Status: PASS, Detail: 交付物 CSV 結構驗證通過，包含所有必要欄位: ['item_id', 'item_name', 'current_stock', 'safety_stock', 'restock_needed', 'estimated_cost']
-ID: req_rowset_recompute, Status: PASS, Detail: 16 列重算核對完全一致
-ID: req_summary_numbers, Status: PASS, Detail: 摘要各數字均與重算一致
