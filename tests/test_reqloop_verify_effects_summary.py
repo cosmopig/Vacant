@@ -12,8 +12,14 @@
 - 正控：live 檔 rc=0、VERDICT: EFFECTS_SUMMARY_OK、七項全 OK（狀態欄位判定，
   非子串——"OK" ⊂ "BROKEN"，r1271 測試自身假綠燈教訓）、sha 身份釘住、
   數字與人類任務參考值一致；
-- 負控：總和漂移／分臂漂移／成本漂移／零格空集／成本字串／缺檔／scope_note
-  弱化——全部必須 BROKEN 且 rc=1（任何一種削弱不得照綠）。
+- 負控：identity 漂移／總和漂移／分臂漂移／成本漂移／零格空集／once20 總和漂移／
+  成本字串／totals 漂移／reference 漂移／缺檔／scope_note 弱化——全部必須 BROKEN 且
+  rc=1（任何一種削弱不得照綠）。
+  r1344 補 identity／once20_internal／totals／reference 四項紅路：本輪之前 7 項中
+  僅 3 項有負控制、其餘 4 項紅路從未實證——r1344 RED 實證：停用 totals 三項比對
+  （仍印 OK）後本套件仍 13 passed、live 仍 VERDICT: EFFECTS_SUMMARY_OK rc=0＝
+  死守衛無人能翻紅（H-0 同構：漏掉一項得到的綠燈就是漏洞成因；r1271/r1282/r1288
+  同族）。
 
 對 live 檔全唯讀（負控制只操作 tmp 副本，絕不碰原檔）；0 model calls；
 subprocess 只用 [sys.executable, script]（無 python -c 片段，不觸及
@@ -189,6 +195,22 @@ def _mutate_arm_drift(d: dict) -> None:
     gen_sw["arm"] = "localized"
 
 
+def _mutate_reference_drift(d: dict) -> None:
+    """r1344：檔內部完全自洽（逐格重算＝總和＝分臂）但偏離人類參考值——
+    once20 一格 generic w2r 改 still_wrong，總和／分臂同步更新：
+    internal 全綠、只有 reference（人類任務參考 11w/g7/l4）能照紅。
+    守「重算自洽但參考值被改寫」＝reference 項的獨立紅路。"""
+    p = d["phases"]["feedback_once20"]
+    cell = next(c for c in p["cells_detail"]
+                if c["arm"] == "generic"
+                and not c["before_pass_independent"] and c["after_independent"])
+    cell["after_independent"] = False
+    p["wrong_to_right"] = 10
+    p["still_wrong"] = 10
+    p["per_arm"]["generic"]["wrong_to_right"] = 6
+    p["per_arm"]["generic"]["still_wrong"] += 1
+
+
 @pytest.mark.parametrize(
     ("label", "mutate", "expected_broken"),
     [
@@ -214,6 +236,22 @@ def _mutate_arm_drift(d: dict) -> None:
         ("scope_weakened",
          lambda d: d.__setitem__("scope_note", d["scope_note"].replace("無硬 token 上限", "有 token 上限")),
          "scope_note"),
+        # r1344：identity 紅路（schema 改寫）——本輪之前 7 項中 4 項（identity／
+        # once20_internal／totals／reference）無負控制＝紅路從未實證（RED 證據：停用
+        # totals 三比對後本套件仍 13 passed＋live VERDICT OK；H-0 同構）
+        ("identity_drift",
+         lambda d: d.__setitem__("schema", "vacant.audit/wrong/2"),
+         "identity"),
+        # r1344：once20_internal 紅路（既有負控全打 policy30；once20 總和漂移 11→10）
+        ("once20_drift",
+         lambda d: d["phases"]["feedback_once20"].__setitem__("wrong_to_right", 10),
+         "once20_internal"),
+        # r1344：totals 紅路（頂層 total_cells 50→51；相位級不變）
+        ("totals_drift",
+         lambda d: d.__setitem__("total_cells", 51),
+         "totals"),
+        # r1344：reference 紅路（內部自洽但偏離人類參考 11w/g7/l4；只有 reference 照紅）
+        ("reference_drift", _mutate_reference_drift, "reference"),
     ],
 )
 def test_negative_controls(tmp_path: Path, label: str, mutate, expected_broken: str) -> None:
