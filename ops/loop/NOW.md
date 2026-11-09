@@ -10,7 +10,8 @@
   3 分支對齊（qwen27b 更新→worktree checkout 同步＋commit）。0 產品改動、0 新代碼、0 模型呼叫。
 - **驗證（本輪新跑）**：17 passed×3＋freeze_check 9/9 OK VERDICT: FROZEN_STATE_OK rc=0×3
   ＋in-scope diff 0×2（freeze_check live＋git diff 雙證）。
-- **CI 一次讀取（不 poll）**：worker@39ccc65ea running；qwen27b@3bf1b5f4e／argon@d9b871228 排隊。
+- **CI 一次讀取（不 poll）**：worker@39ccc65ea（pre-sync）RED——2 failed＝恰兩 live 測（實證漂移根因）；
+  同步後新 HEAD（b1f2de295／da593442b／dacbf5563）待 runner、不 poll。
 
 ## Next（依序）
 1. CI：三分支現 HEAD 在跑/排隊；輪末一次讀取、不 poll。綠→收尾；紅→依證據診斷（不猜）。
