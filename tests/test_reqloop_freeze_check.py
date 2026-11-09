@@ -492,3 +492,122 @@ def test_filing_key_substitution_negative_control(tmp_path: Path) -> None:
     mod.results.clear()
     mod.check_filing_sources()  # type: ignore[attr-defined]
     assert mod.results[-1][:2] == ("filing_sources", True), mod.results
+
+
+def test_check_crash_named_broken_verdict_negative_control(tmp_path: Path) -> None:
+    """單項檢查崩潰失裁負控制（r1297，vq-el4.39）：任一檢查執行中拋異常時
+    （FILING JSON 損毀＝本守衛要 pin 的備案本身壞掉；FILING 缺失；filing 條目
+    非 dict；git 缺席；子程超時），舊 main() 直接 traceback——r1297 實證：
+    stdout 全空（前 5 項檢查的結果也丟）、無裁決行、detail 未點名、且其後 4 項
+    （filing_sources/g3gate_plan/bk_state/bk_now）根本未跑——freeze_check.py
+    docstring 自載契約「單一指令、單一裁決行」「任一項 BROKEN，detail 點名」
+    失守；I-4：未測量不是通過（4 項未跑＝4 項未測量，且操作者連「未跑」都
+    看不到；H-0 同構：該有裁決處的空白本身就是漏洞成因）。
+    修復：main() 每項檢查以 run_check 包層——異常被點名記 BROKEN
+    （CRASH: <ExcType>: <msg>），9 項全在輸出、裁決行必現、rc=1。
+    (a) FILING JSON 損毀 → filing_code BROKEN CRASH（舊碼：JSONDecodeError 逃逸、
+        results 空）
+    (b) FILING 整檔缺失 → BROKEN CRASH（舊碼：FileNotFoundError 逃逸）
+    (c) filing code 條目非 dict（key 集 canonical）→ BROKEN CRASH
+        （舊碼：TypeError 逃逸）
+    (d) 沙盒 main() 全跑：rc=1、VERDICT: FROZEN_STATE_BROKEN、9 項全在、
+        filing 兩項 CRASH 點名（舊碼：無裁決行、stdout 全空、後 4 項未跑）
+    正控制：真 sha＋真檔（canonical key）filing 兩項仍 OK（包層不得打紅正常路徑）。"""
+    import hashlib
+    import json
+
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    fdir = repo / "ops" / "audits"
+    fdir.mkdir(parents=True)
+    filing = fdir / "g25_all_gates_filing.json"
+    mod.REPO = repo  # type: ignore[attr-defined]
+    mod.FILING = filing  # type: ignore[attr-defined]
+
+    # (a) JSON 損毀 → 舊碼：JSONDecodeError 逃逸（r1297 實證：results=[]、無記錄）
+    filing.write_text("{not json", encoding="utf-8")
+    mod.results.clear()
+    mod.run_check("filing_code", mod.check_filing_code)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_code" and ok is False, mod.results
+    assert "CRASH" in detail, mod.results
+
+    # (b) FILING 整檔缺失 → 舊碼：FileNotFoundError 逃逸
+    filing.unlink()
+    mod.results.clear()
+    mod.run_check("filing_code", mod.check_filing_code)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_code" and ok is False, mod.results
+    assert "CRASH" in detail, mod.results
+
+    # (c) filing code 條目非 dict（key 集 canonical、覆集守衛先過）→ 舊碼：
+    # TypeError: string indices must be integers 逃逸。
+    # 須先建檔使 mine 非 None——mine=None 時 `mine is not None and meta["sha256"]`
+    # 短路求值、根本到不了 meta["sha256"]（此為另一條 BROKEN 路徑，不是本負控制目標）。
+    CODE3 = (
+        "vacant_network/reqloop/extract.py",
+        "vacant_network/reqloop/checks.py",
+        "ops/reqloop/extract/run_eval.py",
+    )
+    for rel in CODE3:
+        p3 = repo / rel
+        p3.parent.mkdir(parents=True, exist_ok=True)
+        p3.write_bytes(b"hello\n")
+    filing.write_text(json.dumps({
+        "code": {k: "garbage" for k in CODE3},
+        "sources": {f"phase{i}": {"path": f"/x/phase{i}.json", "sha256": "0" * 64}
+                    for i in (1, 2, 3)},
+    }), encoding="utf-8")
+    mod.results.clear()
+    mod.run_check("filing_code", mod.check_filing_code)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "filing_code" and ok is False, mod.results
+    assert "CRASH" in detail, mod.results
+
+    # (d) 沙盒 main() 全跑：單一裁決行契約（舊碼：traceback、無裁決行、
+    # stdout 全空、filing_sources/g3gate_plan/bk_state/bk_now 未跑）
+    sandbox = tmp_path / "sandbox"
+    (sandbox / "ops" / "reqloop").mkdir(parents=True)
+    (sandbox / "ops" / "audits").mkdir(parents=True)
+    (sandbox / "ops" / "reqloop" / "freeze_check.py").write_text(
+        SCRIPT.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    (sandbox / "ops" / "audits" / "g25_all_gates_filing.json").write_text(
+        "{broken", encoding="utf-8"
+    )
+    p = subprocess.run(
+        [sys.executable, str(sandbox / "ops" / "reqloop" / "freeze_check.py")],
+        cwd=sandbox, capture_output=True, text=True, timeout=300,
+    )
+    assert p.returncode == 1, p.stdout + p.stderr
+    assert "VERDICT: FROZEN_STATE_BROKEN" in p.stdout, p.stdout + p.stderr
+    heads = {l.split()[0] for l in p.stdout.splitlines() if l.strip()}
+    missing = [k for k in MANDATED if k not in heads]
+    assert not missing, f"沙盒裁決輸出缺項 {missing}\n{p.stdout}"
+    for k in ("filing_code", "filing_sources"):
+        line = next(l for l in p.stdout.splitlines() if l.split() and l.split()[0] == k)
+        assert "CRASH" in line, p.stdout
+
+    # 正控制：真 sha＋真檔（canonical key）→ filing 兩項仍 OK
+    for rel in CODE3:
+        p2 = repo / rel
+        p2.parent.mkdir(parents=True, exist_ok=True)
+        p2.write_bytes(b"hello\n")
+    sdir = repo / "ops" / "reqloop" / "extract" / "out" / "all"
+    sdir.mkdir(parents=True)
+    for i in (1, 2, 3):
+        (sdir / f"phase{i}.json").write_bytes(b"{}\n")
+    hs = hashlib.sha256(b"hello\n").hexdigest()
+    hj = hashlib.sha256(b"{}\n").hexdigest()
+    filing.write_text(json.dumps({
+        "code": {k: {"sha256": hs} for k in CODE3},
+        "sources": {f"phase{i}": {"path": f"/x/ops/reqloop/extract/out/all/phase{i}.json",
+                                  "sha256": hj} for i in (1, 2, 3)},
+    }), encoding="utf-8")
+    mod.results.clear()
+    mod.run_check("filing_code", mod.check_filing_code)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("filing_code", True), mod.results
+    mod.results.clear()
+    mod.run_check("filing_sources", mod.check_filing_sources)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("filing_sources", True), mod.results
