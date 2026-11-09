@@ -1032,3 +1032,119 @@ def test_worktree_clean_negative_controls(tmp_path: Path) -> None:
     name, ok, detail = mod.results[-1]
     assert (name, ok) == ("wt_clean", False), mod.results
     assert "z.txt" in detail, detail
+
+
+# ── r1319（2026-11-09）：守衛內容 hash 錨（同名 dummy 守衛假綠燈，r1314 之後一步）──
+# 缺陷實測（本輪 RED）：tests/test_reqloop_frozen_anchors.py 被換成 5 個「期望真名」的
+# assert True dummy（全綠、rc=0、計數=5、身份齊）時，freeze_check 仍判
+# ('anchors', True, …)=假綠燈；ci_contract 2 測同型。本檔案既有 fixture
+# （test_guard_suite_count_negative_controls (b)、test_guard_suite_identity_negative_controls
+# (b)/(d)）曾字面編碼「同名 dummy → OK」的期望——那正是缺口：r1314 身份守衛防「改名」，
+# 防不了「同名換內容」。且四份守衛檔（freeze_check.py／anchors／ci-contract／本檔）的
+# 內容此前無任何 hash 錨點（filing 只釘 extract/checks/run_eval 三份、anchor 只釘
+# repair/extract 兩份）——H-0 同型（綠燈來自沒量該量的）、I-4（未測量不是通過）。
+# 本節把三份守衛檔（ ruler freeze_check.py ＋ 它 invoke 的兩份守衛）的內容 sha256 固化成
+# 錨點；解冻（含合法修改）必須顯式更新 GUARD_CONTENT_PIN 並留記錄——與
+# test_reqloop_frozen_anchors.py 的紀律一致（「解冻須顯式改本測試並留記錄」）。
+# 殘留（誠實記錄）：本檔自身不釘（自釘是循環：驗自己的檔可連期望值一起改）；該層的
+# 獨立信號＝CI 套件 passed 計數（落 ~/dev/ops/ci/*.json，本檔被刪/被削即計數可見地掉）
+# ＋ 三分支 in-scope diff（跨分支不同步的篡改被凍結狀態複核抓住）。
+
+GUARD_CONTENT_PIN = {
+    "ops/reqloop/freeze_check.py":
+        "b559be112a46dfce4fab9c29cdb3d2f9a0c75415f1bc88ceb218fb13bd527e83",
+    "tests/test_reqloop_frozen_anchors.py":
+        "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
+    "tests/test_reqloop_ci_contract.py":
+        "eafe829013f15de0e0933aad879ea40381f6239873ce885926951ea699b69d58",
+}
+
+
+def guard_content_violations(root: Path) -> list[str]:
+    """三份守衛檔內容 vs GUARD_CONTENT_PIN 的違規清單；空列表＝逐位吻合。
+
+    只讀受測檔，不寫任何共享狀態；root 為 repo 根（真 repo 或臨時 repo）。
+    """
+    import hashlib
+
+    out: list[str] = []
+    for rel, want in GUARD_CONTENT_PIN.items():
+        p = root / rel
+        if not p.is_file():
+            out.append(f"守衛檔不存在: {rel}")
+            continue
+        got = hashlib.sha256(p.read_bytes()).hexdigest()
+        if got != want:
+            out.append(
+                f"守衛內容漂移 {rel}: 期望 {want[:8]}, 實際 {got[:8]}"
+                "（同名 dummy／stub 換檔？合法修改須顯式更新 GUARD_CONTENT_PIN 並留記錄）"
+            )
+    return out
+
+
+def test_guard_content_pin_green_and_negative_controls(tmp_path: Path) -> None:
+    """守衛內容錨（r1319）：
+    (a) 綠燈：真 repo 三份守衛檔與 GUARD_CONTENT_PIN 逐位吻合；
+    (b) anchors 守衛檔被換成同名 dummy（5×assert True，恰為 freeze_check 期望真名）
+        → 必須判內容漂移（r1314 之前的假綠燈，本輪起必須紅），且未改檔不得誤判；
+    (c) ruler freeze_check.py 被換成直接印 FROZEN_STATE_OK 的 stub → 必須判漂移；
+    (d) ci_contract 同名 dummy（2×assert True）→ 必須判漂移。
+    全部對臨時 repo 操作，不碰真檔；無 subprocess 片段（不觸及安裝合約掃描範圍）。"""
+    import hashlib
+
+    # (a) 真 repo 綠燈
+    v = guard_content_violations(REPO)
+    assert v == [], f"三份守衛檔內容須與 GUARD_CONTENT_PIN 吻合（解冻須顯式更新錨並留記錄）: {v}"
+
+    def fake_repo() -> Path:
+        root = tmp_path / "repo"
+        for rel in tuple(GUARD_CONTENT_PIN):
+            dst = root / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((REPO / rel).read_bytes())
+        return root
+
+    expected_anchors_names = (
+        "test_repair_py_is_frozen",
+        "test_extract_py_boundary_is_frozen",
+        "test_guard_detects_tampered_copy",
+        "test_g25_filing_code_hashes_match_repo",
+        "test_filing_guard_detects_drift",
+    )
+    expected_ci_names = (
+        "test_reqloop_tests_never_execute_non_contract_imports",
+        "test_guard_negative_control_scipy_numpy_flagged",
+    )
+
+    # (b) anchors 同名 dummy → 必須判漂移；ruler／ci_contract 未改不得誤判
+    root_b = fake_repo()
+    (root_b / "tests" / "test_reqloop_frozen_anchors.py").write_text(
+        "\n".join(f"def {n}():\n    assert True\n" for n in expected_anchors_names),
+        encoding="utf-8",
+    )
+    v = guard_content_violations(root_b)
+    assert any("test_reqloop_frozen_anchors.py" in s and "內容漂移" in s for s in v), \
+        f"同名 dummy 守衛檔未被抓到（r1314 假綠燈缺口）: {v}"
+    assert not any("freeze_check.py" in s for s in v), f"未改檔被誤判: {v}"
+    assert not any("test_reqloop_ci_contract.py" in s for s in v), f"未改檔被誤判: {v}"
+
+    # (c) ruler 被換成 stub（直接印 FROZEN_STATE_OK、10 項全 OK 的假裁決）→ 必須判漂移
+    root_c = fake_repo()
+    (root_c / "ops" / "reqloop" / "freeze_check.py").write_text(
+        "def main():\n    print('VERDICT: FROZEN_STATE_OK')\n\nmain()\n", encoding="utf-8"
+    )
+    v = guard_content_violations(root_c)
+    assert any("freeze_check.py" in s and "內容漂移" in s for s in v), \
+        f"stub ruler 未被抓到: {v}"
+    assert not any("test_reqloop_frozen_anchors.py" in s for s in v), f"未改檔被誤判: {v}"
+
+    # (d) ci_contract 同名 dummy → 必須判漂移
+    root_d = fake_repo()
+    (root_d / "tests" / "test_reqloop_ci_contract.py").write_text(
+        "\n\n".join(f"def {n}():\n    assert True\n" for n in expected_ci_names),
+        encoding="utf-8",
+    )
+    v = guard_content_violations(root_d)
+    assert any("test_reqloop_ci_contract.py" in s and "內容漂移" in s for s in v), \
+        f"同名 dummy ci_contract 守衛未被抓到: {v}"
+    assert not any("freeze_check.py" in s for s in v), f"未改檔被誤判: {v}"
