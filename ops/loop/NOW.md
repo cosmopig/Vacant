@@ -1,19 +1,19 @@
 # NOW.md — 現況唯一真源
 
 ## 位置
-2026-11-09 r1313 redo：redo 審查點出 r1313 記錄步驟未實開任務點名 3 檔——本輪逐檔實開＋依賴數字獨立重算、0 更正（effects summary 數字與 11-06 參考一致；g2.5 filing code 3/3＋sources 3/3 本輪 sha256sum 重算一致；extract.py 1217 行／blob e757aec5／docstring 規則 1–4 逐條）。0 代碼改動、0 模型呼叫；vq-el4 49/49 全閉、唯一 vq-1zf（G3）待人類 --fire。
+2026-11-09 r1316：vq-el4.49 開→關（守衛測試身份守衛驗證＋worker 同步＋結案）。r1314 實作已由 r1315 auto-commit 3ea3c69fa 入樹；本輪驗證（首次 2 failed＝diff_worker 未同步＝真實陳述）→同步 2 檔入 worker worktree（0e61c7575、blob 吻合）→21 passed＋freeze_check 10/10 OK VERDICT: FROZEN_STATE_OK rc=0。0 代碼改動（本輪＝sync＋簿記＋結案）、0 模型呼叫；vq-el4 50/50 全閉（含 epic）、唯一剩餘＝vq-1zf（G3）待人類 --fire。
 
 ## 數字（本輪實測著地）
-- CI 一次讀取（輪首、不 poll）：state.json qwen27b@82975bf8c running（始 07:41:20Z、參考全程 844s）；argon@ca78c53b7／worker@7a931ab3a 無 ci/<sha>.json；LATEST 三分支皆 green 且在分支（31dbb6c11／b30f71b4a／2e76bb3d58，各 5079 passed／0 failed／74 skipped）——較 r1311 記錄之 LATEST（5078/0/74）推進為較新綠跑
-- 守衛套件（本輪新跑）：frozen_anchors 5＋ci_contract 2＋freeze_check 13＝20 passed
-- repair --selftest（CI 門 4、離線 0 模型呼叫）：13/13 PASS rc=0
-- 凍結 4 檔：repair 2795 行／blob 5147f8c3、extract 1217 行／blob e757aec5、checks c7589c61、run_eval 332cd324（anchor pin 未變）；g2.5 filing code 3/3＋sources 3/3 MATCH（freeze_check）
-- vq-el4 49/49 全閉（0 open）；唯一 ready＝vq-1zf（G3）待人類 --fire；/srv/vlab/queue 空；tickets/open 空；無新人類指示（ops/ 最新仍 11-07＋附帶審查）
+- 守衛套件（本輪新跑）：21 passed（freeze_check 14 含 test_guard_suite_identity_negative_controls：(a) 5 dummy 非期望名→BROKEN 且點名缺失／(b) 期望名齊→OK／(c) 2 dummy→BROKEN 點名／(d) 齊→OK＋計數負控制(e) skipped 同型；anchors 5；ci_contract 2）
+- freeze_check（本輪新跑）：10/10 OK、VERDICT: FROZEN_STATE_OK rc=0（anchors 身份齊 5 passed／ci_contract 身份齊 2 passed／diff_worker 0 files @0e61c7575／diff_argon 0 files @31182c54e／filing code 3/3＋sources 3/3 MATCH／g3gate NOT_FIRED＋PLAN_OK／bk_state＋bk_now 同步／wt_clean 3/3）
+- 期望名 vs 兩守衛檔實際測試名：7/7 精確吻合（grep ^def test_ 核對）
+- CI 一次讀取（不 poll）：qwen27b@3ea3c69fa 無 ci/<sha>.json（state.json idle）；LATEST worker@a550efa7 green 5079/0/74；LATEST argon@c235031f green 5079/0/74
+- vq-el4 50/50 全閉（0 open）；唯一剩餘＝vq-1zf（G3）待人類 --fire；/srv/vlab/queue 空；tickets/open 空；無新人類指示（ops/ 最新仍 11-07＋附帶審查）
 
 ## 待辦（依序）
 1. 待人類：G3 --fire（vq-1zf）——不點火、不入 queue
 2. 待人類：CI 通道裁決（auto-ci.yml disabled_manually＝服務端狀態；不重診斷、不翻開關）
-3. 下輪：CI 再一次讀取（本輪 qwen27b@82975bf8c running；若本輪簿記 commit 成為新 HEAD 則讀新 HEAD）；維持審查指示（凍結錨守衛＋CI 合約、fail-closed、輪末 VERDICT: FROZEN_STATE_OK）
+3. 下輪：CI 再一次讀取（qwen27b@3ea3c69fa 本輪無工件、runner idle；若本輪簿記 commit 成為新 HEAD 則讀新 HEAD）；維持審查指示（凍結錨守衛＋CI 合約、fail-closed、輪末 VERDICT: FROZEN_STATE_OK）
 
 ## 紅線
 - 不碰 main；不自 push（loop 自推）；.github/workflows/ 只讀；不讀 /srv/eval hidden＋scorer
