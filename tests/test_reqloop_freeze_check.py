@@ -266,9 +266,18 @@ def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     name, ok, detail = mod.results[-1]
     assert name == "anchors" and ok is False, mod.results
 
-    # (b) 足額 5 測全綠 → OK
+    # (b) 足額 5 測（期望測試名、身份齊）全綠 → OK
     (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
-        "\n".join(f"def test_t{i}():\n    assert True\n" for i in range(5)),
+        "\n".join(
+            f"def {n}():\n    assert True\n"
+            for n in (
+                "test_repair_py_is_frozen",
+                "test_extract_py_boundary_is_frozen",
+                "test_guard_detects_tampered_copy",
+                "test_g25_filing_code_hashes_match_repo",
+                "test_filing_guard_detects_drift",
+            )
+        ),
         encoding="utf-8",
     )
     mod.results.clear()
@@ -284,22 +293,31 @@ def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     name, ok, detail = mod.results[-1]
     assert name == "ci_contract" and ok is False, mod.results
 
-    # (d) 足額 2 測全綠 → OK
+    # (d) 足額 2 測（期望測試名、身份齊）全綠 → OK
     (tests_dir / "test_reqloop_ci_contract.py").write_text(
-        "def test_t0():\n    assert True\n\n"
-        "def test_t1():\n    assert True\n",
+        "def test_reqloop_tests_never_execute_non_contract_imports():\n    assert True\n\n"
+        "def test_guard_negative_control_scipy_numpy_flagged():\n    assert True\n",
         encoding="utf-8",
     )
     mod.results.clear()
     mod.check_ci_contract(cwd=repo)  # type: ignore[attr-defined]
     assert mod.results[-1][:2] == ("ci_contract", True), mod.results
 
-    # (e) r1285：5 passed + 1 skipped（守衛測試被 @pytest.mark.skip 禁用、藏 assert False，
-    #     另補一個足量測試保持 passed 計數＝5）→ pytest 匯總「5 passed, 1 skipped」→
-    #     舊計數守衛只抽 "5 passed" 仍判 OK＝假綠燈（r1271–r1282 同型、I-4 未測量不是通過）；
-    #     必須 BROKEN 且 detail 點出 skipped。
+    # (e) r1285：5 passed + 1 skipped（守衛測試被 @pytest.mark.skip 禁用、藏 assert False）
+    #     → pytest 匯總「5 passed, 1 skipped」→ 舊計數守衛只抽 "5 passed" 仍判 OK＝假綠燈
+    #     （r1271–r1282 同型、I-4 未測量不是通過）；必須 BROKEN 且 detail 點出 skipped。
+    #     r1314 起 5 個守衛用期望真名（身份層滿足、結果類別層單獨抓 skipped）。
     (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
-        "\n".join(f"def test_t{i}():\n    assert True\n" for i in range(5))
+        "\n".join(
+            f"def {n}():\n    assert True\n"
+            for n in (
+                "test_repair_py_is_frozen",
+                "test_extract_py_boundary_is_frozen",
+                "test_guard_detects_tampered_copy",
+                "test_g25_filing_code_hashes_match_repo",
+                "test_filing_guard_detects_drift",
+            )
+        )
         + "\nimport pytest\n\n"
         + "@pytest.mark.skip(reason=\"guard disabled\")\n"
         + "def test_disabled_guard():\n    assert False\n",
@@ -310,6 +328,70 @@ def test_guard_suite_count_negative_controls(tmp_path: Path) -> None:
     name, ok, detail = mod.results[-1]
     assert name == "anchors" and ok is False, mod.results
     assert "skipped" in detail, mod.results
+
+
+def test_guard_suite_identity_negative_controls(tmp_path: Path) -> None:
+    """守衛測試「身份」假綠燈負控制（r1314，vq-el4.49）：計數守衛必要但不充分（r1296 同型）。
+    anchors 5 測（repair/extract 錨、篡改副本偵測、filing 哈希比對、漂移偵測）被換成 5 個
+    assert True dummy（全綠、rc=0、計數=5、無 skipped）時，舊計數守衛仍判 OK＝假綠燈——
+    本檔案既有 (b) fixture 曾字面編碼此期望；ci_contract 2 測同型。H-0：漏掉一項得到的
+    綠燈就是漏洞成因；I-4：未測量不是通過。必須證明抓得到：身份缺失→BROKEN 且點名，
+    身份齊→OK。全部對臨時 repo 操作，不碰真檔。"""
+    mod = _load_freeze_check()
+
+    repo = tmp_path / "repo"
+    tests_dir = repo / "tests"
+    tests_dir.mkdir(parents=True)
+
+    # (a) anchors：5 dummy（非期望名）全綠 → 必須 BROKEN，且 detail 點名缺失守衛測試
+    (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
+        "\n".join(f"def test_t{i}():\n    assert True\n" for i in range(5)),
+        encoding="utf-8",
+    )
+    mod.results.clear()
+    mod.check_anchors(cwd=repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "anchors" and ok is False, mod.results
+    assert "test_repair_py_is_frozen" in detail, mod.results
+
+    # (b) anchors：期望 5 測試名齊（身份足）→ OK
+    (tests_dir / "test_reqloop_frozen_anchors.py").write_text(
+        "\n".join(
+            f"def {n}():\n    assert True\n"
+            for n in (
+                "test_repair_py_is_frozen",
+                "test_extract_py_boundary_is_frozen",
+                "test_guard_detects_tampered_copy",
+                "test_g25_filing_code_hashes_match_repo",
+                "test_filing_guard_detects_drift",
+            )
+        ),
+        encoding="utf-8",
+    )
+    mod.results.clear()
+    mod.check_anchors(cwd=repo)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("anchors", True), mod.results
+
+    # (c) ci_contract：2 dummy（非期望名）全綠 → 必須 BROKEN，且 detail 點名缺失
+    (tests_dir / "test_reqloop_ci_contract.py").write_text(
+        "def test_t0():\n    assert True\n\ndef test_t1():\n    assert True\n",
+        encoding="utf-8",
+    )
+    mod.results.clear()
+    mod.check_ci_contract(cwd=repo)  # type: ignore[attr-defined]
+    name, ok, detail = mod.results[-1]
+    assert name == "ci_contract" and ok is False, mod.results
+    assert "test_reqloop_tests_never_execute_non_contract_imports" in detail, mod.results
+
+    # (d) ci_contract：期望 2 測試名齊 → OK
+    (tests_dir / "test_reqloop_ci_contract.py").write_text(
+        "def test_reqloop_tests_never_execute_non_contract_imports():\n    assert True\n\n"
+        "def test_guard_negative_control_scipy_numpy_flagged():\n    assert True\n",
+        encoding="utf-8",
+    )
+    mod.results.clear()
+    mod.check_ci_contract(cwd=repo)  # type: ignore[attr-defined]
+    assert mod.results[-1][:2] == ("ci_contract", True), mod.results
 
 
 def test_filing_null_sha_negative_control(tmp_path: Path) -> None:
