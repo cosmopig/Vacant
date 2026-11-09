@@ -1275,8 +1275,13 @@ GUARD_CONTENT_PIN = {
     # g3gate_plan 只驗「未發射」、不驗「queue 是否有任務」，本輪補上該缺口；queue
     # 路徑可注入（CI/沙盒用 tmp_path）。新增一項 mandated 檢查（10→11 項），其餘
     # 十項守衛逐位不變——顯式更新錨並留記錄。
+    # r1343 解凍記錄（vq-el4.56）：freeze_check.py check_queue_empty 收緊——r1339 首版以
+    # `startswith(".")` 跳過隱藏條目，非空 queue（僅隱藏檔）被計成「0 任務檔」判 OK＝
+    # 假綠燈（r1272 空檔 vacuous、r1288 null-sha 同族；I-4：未測量不是通過；RED 證據
+    # 見 test_queue_empty_hidden_entry_negative_control）；本輪改為計數所有條目（含隱藏）
+    # 並點名。其餘十項守衛逐位不變——顯式更新錨並留記錄。
     "ops/reqloop/freeze_check.py":
-        "b829eb5820bcecb878b905dc7f114559480cae2b1b606d35a1d3d67c4dc11c24",
+        "4f8f669b2fdb5405172880cf2f8813fe58f000ef9f7c27a96ee07d136172e1fd",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
@@ -1459,3 +1464,36 @@ def test_check_queue_empty_green_and_negative_controls(tmp_path: Path) -> None:
     assert got[0] == "queue_empty", mod.results
     assert got[1] is True, f"queue 不存在應 ok=True（無任務），實際 {got}"
     assert "absent" in got[2], f"detail 未點名 queue absent scope —— {got}"
+
+
+def test_queue_empty_hidden_entry_negative_control(tmp_path: Path) -> None:
+    """r1343（vq-el4.56）：r1339 的 queue_empty 守衛跳過隱藏項
+    （`if not p.name.startswith(".")`）——非空 queue（僅隱藏檔）被計成「0 任務檔」
+    判 OK＝假綠燈（r1272 空檔 vacuous、r1288 null-sha 同族；I-4：未測量不是通過）。
+    審查指示 #5 紅線是「嚴禁向 /srv/vlab/queue/ 放入新任務」——隱藏任務檔也是任務檔；
+    fail-closed：queue 內任何條目（含隱藏）都必須點名 BROKEN。RED 證據（本輪、舊碼）：
+    dotfile-only queue → ('queue_empty', True, '…(0 任務檔…')。
+    正控制：空目錄仍 OK（守衛未過度收緊）。"""
+    mod = _load_freeze_check()
+
+    # 負控制：queue 僅有隱藏條目 → ok=False（detail 點名該隱藏檔）。
+    hidden_q = tmp_path / "qhidden"
+    hidden_q.mkdir()
+    (hidden_q / ".00_smoke_hidden.json").write_text("{}", encoding="utf-8")
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_queue_empty(queue=hidden_q)  # type: ignore[attr-defined]
+    got = mod.results[-1]  # type: ignore[attr-defined]
+    assert got[0] == "queue_empty", mod.results
+    assert got[1] is False, (
+        f"僅隱藏條目的非空 queue 應 ok=False（r1339 跳過隱藏檔＝假綠燈缺口），實際 {got}"
+    )
+    assert ".00_smoke_hidden.json" in got[2], f"detail 未點名隱藏任務檔 —— {got}"
+
+    # 正控制：空目錄仍 OK（收緊後不得誤判空 queue）。
+    empty_q = tmp_path / "qempty2"
+    empty_q.mkdir()
+    mod.results.clear()  # type: ignore[attr-defined]
+    mod.check_queue_empty(queue=empty_q)  # type: ignore[attr-defined]
+    got2 = mod.results[-1]  # type: ignore[attr-defined]
+    assert got2[0] == "queue_empty", mod.results
+    assert got2[1] is True, f"空 queue 應仍 ok=True，實際 {got2}"

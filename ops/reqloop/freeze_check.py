@@ -554,9 +554,13 @@ def check_queue_empty(queue: Path | None = None) -> None:
 
     口徑：g3gate_plan 只驗「未發射」（NOT FIRED），不驗「queue 是否有任務」——
     本檢查補上該缺口（r1309/r1321 同型：把人工紅線機械化；I-4：未測量不是通過）。
+    r1343（vq-el4.56）收緊：隱藏條目（dotfile）也計數——r1339 首版以
+    `startswith(".")` 跳過隱藏項，非空 queue（僅隱藏檔）被計成「0 任務檔」判 OK＝
+    假綠燈（r1272 空檔 vacuous、r1288 null-sha 同族；I-4：未測量不是通過）；
+    隱藏任務檔也是任務檔（紅線 #5 是「嚴禁放入新任務」，不區分可見/隱藏）。
     語義：
       - queue 為目錄且空 → OK（無任務、符合紅線）；
-      - queue 為目錄但非空 → BROKEN（detail 點名任務檔；紅線 #5 違反）；
+      - queue 為目錄但非空（含僅隱藏條目）→ BROKEN（detail 點名任務檔；紅線 #5 違反）；
       - queue 不存在/非目錄 → OK（無 queue 即無任務；detail 點名 scope=absent）。
     queue 路徑可注入（CI/沙盒用 tmp_path，不碰真 /srv/vlab/queue/）。
     唯讀：只列目錄，不寫、不刪、不發射（0 model calls）。
@@ -569,18 +573,19 @@ def check_queue_empty(queue: Path | None = None) -> None:
                "審查指示 #5 未違反）")
         return
     try:
-        entries = sorted(p.name for p in queue.iterdir() if not p.name.startswith("."))
+        # r1343：計數所有條目（含隱藏）——跳過隱藏項＝非空 queue 可被讀成空（假綠燈）。
+        entries = sorted(p.name for p in queue.iterdir())
     except OSError as e:
         record("queue_empty", False,
                f"queue {queue} 不可列讀: {e}（未測量、I-4）")
         return
     if entries:
         record("queue_empty", False,
-               f"queue {queue} 非空（{len(entries)} 任務檔: {entries[:3]}…）"
-               "——人類核准前嚴禁入隊（審查指示 #5）")
+               f"queue {queue} 非空（{len(entries)} 任務檔（含隱藏）: {entries[:3]}…）"
+               "——人類核准前嚴禁入隊（審查指示 #5；r1343 起隱藏檔也計數）")
     else:
         record("queue_empty", True,
-               f"queue {queue} 空（0 任務檔；審查指示 #5 未違反）")
+               f"queue {queue} 空（0 任務檔（含隱藏）；審查指示 #5 未違反）")
 
 
 def check_bookkeeping_state(repo: Path = REPO) -> None:
