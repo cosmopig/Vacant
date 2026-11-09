@@ -1,5 +1,8 @@
 # NOW.md — 当前状态与下一步
 
+## 当前状态（r1302 redo，2026-11-09）
+- 审查点名 5 檔實開＋依賴引用重算——**0 更正**：auto-ci.yml（63 行、sha 3f1e05e9、4 門、檔內無 enable/disable 聲明→「disabled_manually」為服務端狀態）；effects_20261105_summary.json（50 cells、50/45、policy30 13/0、feedback 11/0，與 r1301 redo 記錄一致）；g25_all_gates_filing.json（6 sha 獨立重算 6/6 MATCH）；extract.py（1217 行＝紅線值✓、blob e757aec5、sha 51abfec3）；repair.py（2795 行＝紅線值✓、blob 5147f8c3）。
+
 ## 当前状态（r1302，2026-11-09）
 - CI 红灯根因收口：qwen27b@bd93d42e2（r1301）RED（2 failed＝两 live 测 verdict/covers，822s）——根因按证据非猜测：CI detached 下 _diff_base() 锚定被测 commit（r1300/vq-el4.45 防假绿设计），r1301 redo 簿记已推进三分支（worker@569d7f625／argon@8ee9fe968）→ 被测 commit 的簿记必然落后＝真实陈述非误报；其余 7 项全 OK（anchors 5／ci_contract 2／filing 6/6 MATCH／g3gate NOT_FIRED+PLAN_OK／bk 同步）。不弱化守卫（弱化＝复活假绿洞）。
 - 现三分支状态绿（本轮新跑）：freeze_check 9/9 OK FROZEN_STATE_OK rc=0；18 passed；in-scope diff 0×2；两 worktree 干净、0 staged。
