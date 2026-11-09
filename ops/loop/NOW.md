@@ -1,7 +1,7 @@
 # NOW.md — 現況唯一真源
 
 ## 位置
-2026-11-09 r1313：維護／驗證輪——CI 現 HEAD（qwen27b@82975bf8c）一次讀取＝running（始 07:41:20Z、不 poll）；守衛套件 20 passed＋repair selftest 13/13；三分支簿記同步。0 代碼改動、0 模型呼叫、0 新工單（vq-el4 49/49 全閉，無未完成項可開單）。
+2026-11-09 r1313 redo：redo 審查點出 r1313 記錄步驟未實開任務點名 3 檔——本輪逐檔實開＋依賴數字獨立重算、0 更正（effects summary 數字與 11-06 參考一致；g2.5 filing code 3/3＋sources 3/3 本輪 sha256sum 重算一致；extract.py 1217 行／blob e757aec5／docstring 規則 1–4 逐條）。0 代碼改動、0 模型呼叫；vq-el4 49/49 全閉、唯一 vq-1zf（G3）待人類 --fire。
 
 ## 數字（本輪實測著地）
 - CI 一次讀取（輪首、不 poll）：state.json qwen27b@82975bf8c running（始 07:41:20Z、參考全程 844s）；argon@ca78c53b7／worker@7a931ab3a 無 ci/<sha>.json；LATEST 三分支皆 green 且在分支（31dbb6c11／b30f71b4a／2e76bb3d58，各 5079 passed／0 failed／74 skipped）——較 r1311 記錄之 LATEST（5078/0/74）推進為較新綠跑
