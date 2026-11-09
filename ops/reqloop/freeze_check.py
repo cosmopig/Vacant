@@ -437,9 +437,18 @@ def check_filing_sources() -> None:
     record("filing_sources", ok == total and total == 3, f"{ok}/{total} sha256 {' '.join(names)}")
 
 
-def check_g3gate() -> None:
+def check_g3gate(cmd: list[str] | None = None) -> None:
+    """G3 發射前置：`g3gate --plan` 收斂＝rc 0 且 NOT FIRED 且 G3GATE PLAN OK，
+    三者缺一即 BROKEN（I-4：未測量不是通過）。
+
+    r1321：cmd 參數可注入（預設＝真命令，main() 行為逐位不變），供紅路負控制
+    ——本項曾是 10 項 mandated 中唯一沒有負控制的一項（repo 紀律：先證明守衛會紅）。
+    假命令＝純 print 腳本：0 模型呼叫、不觸真 g3gate 模組（紅線：G3 未 --fire）。
+    """
+    if cmd is None:
+        cmd = [sys.executable, "-m", "vacant_network.reqloop.g3gate", "--plan"]
     p = subprocess.run(
-        [sys.executable, "-m", "vacant_network.reqloop.g3gate", "--plan"],
+        cmd,
         cwd=REPO,
         capture_output=True,
         text=True,
