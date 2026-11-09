@@ -1,19 +1,20 @@
 # NOW.md — 現況唯一真源
 
 ## 位置
-2026-11-09 r1309：實質進展（vq-el4.48 開→關）——審查指示 #3 機械化：freeze_check 新增 wt_clean（三分支 worktree in-scope 殘留守衛）。洞（本輪實證、TDD RED 先）：in-scope 殘留存在時舊 9 項仍 FROZEN_STATE_OK rc=0＝假綠；新檢查抓到（BROKEN 點名檔）；MANDATED 9→10。本輪新跑：20 passed（freeze_check 13／anchors 5／ci_contract 2、was 19）＋freeze_check 10/10 OK VERDICT: FROZEN_STATE_OK rc=0＋三分支同步（diff 0×2）＋三 worktree in-scope 狀態全 clean。0 模型呼叫。
+2026-11-09 r1310 redo：vq-vyg 開→關——審查點名 3 檔（auto-ci.yml／effects summary／repair.py）本輪全部實開＋重算、核對簿記依賴聲明 0 更正；freeze_check 10/10 OK＋20 passed；三分支已同步、worktree clean。0 模型呼叫。
 
 ## 數字（本輪實測著地）
-- wt_clean（r1309 新）：attached→量 qwen27b/worker/argon 三 worktree in-scope（vacant_network/tests/ops）殘留（staged/未 commit/未追蹤、點名檔）；任一 worktree 缺＝未測量→BROKEN（fail-closed I-4）；detached（CI 沙盒）→只量 checkout 本身（r1300 被測 commit 口徑、detail 點名 scope、不冒充已量）
-- 驗收：20 passed（was 19）＋freeze_check 10/10 OK rc=0（was 9/9）＋in-scope diff 0×2（auto/worker@2b7e98bef／auto/argon@ecb494a79 vs auto/qwen@c65c98173）
-- CI 一次讀取（不 poll）：三分支現 HEAD（553aa1da/d7d64fc4/03b4e38f）皆無 ci/<sha>.json（r1306 redo sync 輪；runner 正跑 argon@0959f856、state.json running）；LATEST（舊 SHA）全綠 5078/0/74
-- 凍結：repair.py 2795 行／extract.py 1217 行／checks c7589c61／run_eval 332cd324；filing code 3/3＋sources 3/3 MATCH（freeze_check 本輪重驗）
+- auto-ci.yml：63 行／2695 B／sha 3f1e05e9（重算、未變）；1 job 4 門（reqloop／FROZEN_SOURCE_SHA／stepchain／repair --selftest）；grep enable/disable＝0→disabled_manually 係服務端狀態、待人類裁決、不翻開關
+- effects summary：60228 B／sha a710f7e4（重算、未變）；policy30 w2r g7/l6 r2w0、sessions 19+16=35／API 365+550=915／tokens 33670510；once20 w2r g7/l4 r2w0、sessions 20／API 457／tokens 19503953；與 11-06 指示逐項一致
+- repair.py：2795 行／blob 5147f8c3（重算＝anchor pin）；extract 1217／e757aec5；checks c7589c61／run_eval 332cd324（filing 3/3 MATCH）；docstring 不變量逐條核實
+- freeze_check 10/10 OK VERDICT: FROZEN_STATE_OK rc=0；20 passed；in-scope diff 0×2；wt_clean 3/3 clean
+- CI 一次讀取（不 poll）：qwen27b@31dbb6c11 running（log 約 19%）；argon@89c378c83／worker@7443c8695 無產出；LATEST 三分支皆 green 5078/0/74
 
 ## 待辦（依序）
 1. 待人類：G3 --fire（vq-1zf）——不點火、不入 queue
-2. 待人類：CI 通道裁決（auto-ci.yml disabled_manually＝服務端狀態、檔內無 enable/disable 聲明；不重診斷、不翻開關）
-3. vq-el4 47/47 全閉（vq-el4.48 本輪開→關）；/srv/vlab/queue 空；無新人類指示（ops/ 最新仍 11-07＋本輪附帶審查）
-4. 下輪：本輪新 HEAD 之 CI 首一次讀取（qwen27b 簿記 HEAD／worker／argon sync HEAD、不 poll）；維持資深審查指示（凍結錨守衛＋CI 合約、fail-closed、輪末 VERDICT: FROZEN_STATE_OK）
+2. 待人類：CI 通道裁決（auto-ci.yml disabled_manually＝服務端狀態；不重診斷、不翻開關）
+3. 下輪：三分支 HEAD 之 CI 首一次讀取（qwen27b 31dbb6c11 本輪在跑／argon／worker）；維持審查指示（凍結錨守衛＋CI 合約、fail-closed、輪末 VERDICT: FROZEN_STATE_OK）
+4. vq-el4 49/49 全閉；/srv/vlab/queue 空；無新人類指示（ops/ 最新仍 11-07＋附帶審查）
 
 ## 紅線
 - 不碰 main；不自 push（loop 自推）；.github/workflows/ 只讀；不讀 /srv/eval hidden＋scorer
