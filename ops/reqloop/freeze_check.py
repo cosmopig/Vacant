@@ -66,6 +66,18 @@ builder ops/audits/build_g25_all_gates_filing.py 的 phase1/2/3（同 tail）。
 EXPECTED_CI_CONTRACT_TEST_NAMES 2；來源：兩份守衛檔現行測試函數名，審查指示 #1 點名），
 detail 點名 missing；負控制 test_guard_suite_identity_negative_controls。
 
+背景（2026-11-11 r1324，vq-el4.50）：r1314 身份守衛從全量輸出收集「PASSED
+<nodeid>」行核對測試名——但測試體本身可 print 以「PASSED 」開頭的行進 stdout，
+舊碼會把那些行加進 passed_names：削弱守衛檔（3 真名 dummy＋2 假名 dummy、
+print 偽造剩下 2 期望名 summary 行）計數足、無其它結果類、「身份齊」→ OK
+＝假綠燈（r1324 RED 實證：('anchors', True, 'pytest rc=0（身份齊；expected 5
+passed, got 5；…）')；r1296/r1314 同族：計數守住身份未守；H-0：漏掉一項得到的
+綠燈就是漏洞成因）。修：_parse_passed_names 只認「short test summary info」標頭
+行以來的段（真 -rA summary，pytest 穩定契約、不受 repo addopts 影響——r1314
+實測同形）、nodeid 須含測試檔名（defense in depth）；段不存在＝未測量→空集
+→missing→BROKEN（I-4：未測量不是通過）。負控制：tests/test_reqloop_freeze_check.py
+::test_guard_suite_printed_summary_spoof_negative_control。
+
 背景（2026-11-09 r1297，vq-el4.39）：任一檢查執行中拋異常（FILING JSON 損毀、
 FILING 缺失、filing 條目非 dict、git 缺席、子程超時…）時，舊 main() 直接 traceback
 ——r1297 實證：FILING JSON 損毀 → JSONDecodeError 逃逸 → stdout 全空（前 5 項結果
@@ -157,6 +169,31 @@ SUMMARY_RESULT_RE = re.compile(
 
 
 
+def _parse_passed_names(out: str, test_file: str) -> set[str]:
+    """從 pytest -rA short test summary 段收集通過測試名（r1324，vq-el4.50）。
+
+    r1314 身份守衛從全量輸出收集「PASSED <nodeid>」行——測試體可 print 以「PASSED
+    」開頭的行進 stdout，舊碼把偽造行加進身份集＝假綠燈（r1324 RED 實證；
+    r1296/r1314 同族：計數守住身份未守）。現只認「short test summary info」標頭行
+    以來的段（真 -rA summary；pytest 穩定契約、不受 repo addopts 影響——r1314 實測
+    同形），且 nodeid 須含測試檔名（defense in depth）；段不存在（pytest 未跑／
+    -rA 缺席＝未測量）→空集→caller 的 missing 非空→BROKEN（I-4：未測量不是通過）。
+    """
+    lines = out.splitlines()
+    try:
+        start = next(
+            i for i, ln in enumerate(lines) if "short test summary info" in ln
+        )
+    except StopIteration:
+        return set()
+    names: set[str] = set()
+    for ln in lines[start + 1:]:
+        ln = ln.strip()
+        if ln.startswith("PASSED ") and test_file in ln and "::" in ln:
+            names.add(ln.split("::", 1)[1].strip())
+    return names
+
+
 def _check_guard_suite(
     name: str, test_file: str, expected_passed: int,
     expected_names: tuple[str, ...], cwd: Path = REPO,
@@ -188,12 +225,9 @@ def _check_guard_suite(
         counts[cat] = counts.get(cat, 0) + int(n)
     passed = counts.get("passed")
     other = {k: v for k, v in counts.items() if k != "passed"}
-    # 身份守衛（r1314，r1296 同型）：pytest -rA 的 short test summary 逐行
-    # `PASSED <nodeid>`（nodeid 可含 Class:: 前綴），收集通過測試名。
-    passed_names: set[str] = set()
-    for line in out.splitlines():
-        if line.startswith("PASSED ") and "::" in line:
-            passed_names.add(line.split("::", 1)[1].strip())
+    # 身份守衛（r1314，r1296 同型；r1324 收緊：只認 -rA short test summary 段、
+    # nodeid 須含測試檔名——print 偽造 summary 行不再進身份集，見 _parse_passed_names）。
+    passed_names = _parse_passed_names(out, test_file)
     missing = [n for n in expected_names if n not in passed_names]
     ok = rc == 0 and passed == expected_passed and not other and not missing
     # detail 截斷 160 字（record）：缺名置首（r1314），長測試名不被截斷。
