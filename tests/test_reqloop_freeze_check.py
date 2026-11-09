@@ -1051,8 +1051,10 @@ def test_worktree_clean_negative_controls(tmp_path: Path) -> None:
 # ＋ 三分支 in-scope diff（跨分支不同步的篡改被凍結狀態複核抓住）。
 
 GUARD_CONTENT_PIN = {
+    # r1321 解冻記錄：freeze_check.py check_g3gate 加 cmd 注入參數（預設＝真命令，
+    # 行為逐位不變）以補上 10 項中唯一缺失的紅路負控制——顯式更新錨並留記錄。
     "ops/reqloop/freeze_check.py":
-        "b559be112a46dfce4fab9c29cdb3d2f9a0c75415f1bc88ceb218fb13bd527e83",
+        "2d7f30c292d3df3a04ea650d4cfd899a32379db16983be5be02e9f237ac88038",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
@@ -1148,3 +1150,52 @@ def test_guard_content_pin_green_and_negative_controls(tmp_path: Path) -> None:
     assert any("test_reqloop_ci_contract.py" in s and "內容漂移" in s for s in v), \
         f"同名 dummy ci_contract 守衛未被抓到: {v}"
     assert not any("freeze_check.py" in s for s in v), f"未改檔被誤判: {v}"
+
+
+# r1321（2026-11-09）：g3gate_plan 是 10 項 mandated 檢查中唯一沒有負控制的一項。
+# repo 自身紀律（r1261 起各守衛輪、verify_run_receipts.py「先跑負控制」）：必須先
+# 證明守衛會紅，綠燈才算數。check_g3gate 的綠燈＝rc==0 且 "NOT FIRED" 且
+# "G3GATE PLAN OK"——三者缺一必須 BROKEN（I-4：未測量不是通過；r1288 null-sha
+# 同型：綠燈須來自全部條件，不是子集）。舊簽名無注入點（命令硬編碼），本測試
+# 先紅（TypeError: unexpected keyword argument 'cmd'）→ 最小修改＝check_g3gate
+# 加 cmd 參數（預設＝真命令，main() 行為逐位不變）。fake g3gate＝純 print 腳本：
+# 0 模型呼叫、無網路、不觸真 g3gate 模組（紅線：G3 未 --fire）。
+
+def test_g3gate_red_path_negative_controls(tmp_path: Path) -> None:
+    """g3gate_plan 紅路負控制（r1321）：
+    (a) rc=0 但只印 NOT FIRED（缺 G3GATE PLAN OK）→ 必須 BROKEN；
+    (b) rc=0 但只印 G3GATE PLAN OK（缺 NOT FIRED）→ 必須 BROKEN；
+    (c) 兩個 marker 都在但 rc=1 → 必須 BROKEN；
+    (d) 正控制：rc=0＋兩 marker 齊 → OK（修復不得破壞正常路徑）。
+    全對臨時 repo 操作，不碰真檔；detail 須點名三條件各自真偽。"""
+    mod = _load_freeze_check()
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    mod.REPO = repo  # type: ignore[attr-defined]
+
+    def fake(name: str, body: str) -> Path:
+        p = tmp_path / name
+        p.write_text(body, encoding="utf-8")
+        return p
+
+    cases = (
+        ("only_not_fired.py", "print('NOT FIRED')\n",
+         False, "NOT_FIRED=True PLAN_OK=False"),
+        ("only_plan_ok.py", "print('G3GATE PLAN OK')\n",
+         False, "NOT_FIRED=False PLAN_OK=True"),
+        ("both_rc1.py",
+         "import sys\nprint('NOT FIRED')\nprint('G3GATE PLAN OK')\nsys.exit(1)\n",
+         False, "NOT_FIRED=True PLAN_OK=True"),
+        ("both_rc0.py", "print('NOT FIRED')\nprint('G3GATE PLAN OK')\n",
+         True, "NOT_FIRED=True PLAN_OK=True"),
+    )
+    for name, body, expect_ok, expect_flags in cases:
+        script = fake(name, body)
+        mod.results.clear()  # type: ignore[attr-defined]
+        mod.check_g3gate(cmd=[sys.executable, str(script)])  # type: ignore[attr-defined]
+        got = mod.results[-1]  # type: ignore[attr-defined]
+        assert got[0] == "g3gate_plan", (name, mod.results)
+        assert got[1] is expect_ok, \
+            f"{name}: 期望 ok={expect_ok}，實際 ok={got[1]} —— {mod.results}"
+        assert "rc=" in got[2] and expect_flags in got[2], \
+            f"{name}: detail 未點名三條件各自真偽 —— {mod.results}"
