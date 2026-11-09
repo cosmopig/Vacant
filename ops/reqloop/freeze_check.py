@@ -52,6 +52,15 @@ phase3 key→phaseX 舊碼判 OK；r1273 同型：計數守住但身份未守；
 （tests/test_reqloop_frozen_anchors.py::test_filing_guard_detects_drift 同 3 路徑）＋
 builder ops/audits/build_g25_all_gates_filing.py 的 phase1/2/3（同 tail）。
 
+背景（2026-11-09 r1297，vq-el4.39）：任一檢查執行中拋異常（FILING JSON 損毀、
+FILING 缺失、filing 條目非 dict、git 缺席、子程超時…）時，舊 main() 直接 traceback
+——r1297 實證：FILING JSON 損毀 → JSONDecodeError 逃逸 → stdout 全空（前 5 項結果
+也丟）、無裁決行、detail 未點名、後 4 項（filing_sources/g3gate_plan/bk_state/
+bk_now）根本未跑——本檔自載契約「單一裁決行」「任一項 BROKEN，detail 點名」失守；
+I-4：未測量不是通過，且操作者須看得到「哪項未跑」。故 main() 每項檢查經
+run_check 包層：異常被點名記 BROKEN（CRASH: <ExcType>: <msg>），其餘各項照跑、
+裁決行必現（SystemExit/KeyboardInterrupt 不吞）。
+
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
 
@@ -62,6 +71,7 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -393,16 +403,32 @@ def check_bookkeeping_now(repo: Path = REPO) -> None:
         record("bk_now", False, "DRIFT: repo NOW.md != ops/loop/NOW.md")
 
 
+def run_check(name: str, fn: Callable[[], None]) -> None:
+    """單項檢查異常包層（r1297，vq-el4.39）：檢查執行中拋異常（FILING JSON 損毀、
+    FILING 缺失、filing 條目非 dict、git 缺席、子程超時…）時，點名記 BROKEN
+    （CRASH: <ExcType>: <msg>）而非讓異常逃逸到 main() 頂層——r1297 實證舊碼：
+    JSONDecodeError 逃逸 → stdout 全空（前 5 項結果也丟）、無裁決行、detail 未
+    點名、後 4 項（filing_sources/g3gate_plan/bk_state/bk_now）根本未跑，本檔
+    自載契約「單一裁決行／detail 點名」失守；I-4：未測量不是通過，且操作者須
+    看得到「哪項未跑」。SystemExit/KeyboardInterrupt 不吞（except Exception）。"""
+    try:
+        fn()
+    except Exception as exc:
+        record(name, False, f"CRASH: {type(exc).__name__}: {exc}")
+
+
 def main() -> int:
-    check_anchors()
-    check_ci_contract()
-    check_diff("auto/worker", "diff_worker")
-    check_diff("auto/argon", "diff_argon")
-    check_filing_code()
-    check_filing_sources()
-    check_g3gate()
-    check_bookkeeping_state()
-    check_bookkeeping_now()
+    # r1297（vq-el4.39）：每項檢查經 run_check——任一項崩潰被點名記 BROKEN，
+    # 其餘各項照跑，9 項全在輸出＋單一裁決行（I-4：未測量不是通過）。
+    run_check("anchors", check_anchors)
+    run_check("ci_contract", check_ci_contract)
+    run_check("diff_worker", lambda: check_diff("auto/worker", "diff_worker"))
+    run_check("diff_argon", lambda: check_diff("auto/argon", "diff_argon"))
+    run_check("filing_code", check_filing_code)
+    run_check("filing_sources", check_filing_sources)
+    run_check("g3gate_plan", check_g3gate)
+    run_check("bk_state", check_bookkeeping_state)
+    run_check("bk_now", check_bookkeeping_now)
 
     width = max(len(n) for n, _, _ in results)
     for name, ok, detail in results:
