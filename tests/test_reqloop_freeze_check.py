@@ -621,9 +621,12 @@ def test_diff_anchor_negative_control(tmp_path: Path) -> None:
     不同，舊碼 ref 基 diff 判 0 file differ、OK＝假綠燈（r1300 實證：被測 commit
     ops/STATE.md=v1、兩 ref 皆指 v2 tip → ref 基 0 files OK／HEAD 基 1 file
     BROKEN；H-0 同構：量錯對象得到的綠燈就是漏洞成因；I-4：未測量不是通過）。
-    期望行為：HEAD detached 時 base 錨定 HEAD（被測 commit）→ 示例舊 commit 判
-    BROKEN、detail 點名差異檔；HEAD attached 分支（本地 dev/worktree）時口徑不變
-    （base=auto/qwen27b，判旧同）。
+    期望行為（r1303 語義更新）：HEAD detached 時 base 錨定 HEAD（被測 commit）；
+    另一分支錨定被測 commit 的「同步對應 commit」（同簿記身份）——示例舊 commit
+    sha1 在 auto/worker 歷史中存在且內容相同（同步過）→ OK（r1303：量 live tip 判
+    BROKEN＝假紅燈，已修；「未同步輪必 BROKEN」的負控制見
+    test_diff_sync_counterpart_anchor）；HEAD attached 分支（本地 dev/worktree）
+    口徑不變（base=auto/qwen27b）。
     """
     import os
     import subprocess
@@ -670,16 +673,17 @@ def test_diff_anchor_negative_control(tmp_path: Path) -> None:
     mod = _load_freeze_check()
     mod.REPO = repo
 
-    # 負控制：被測 commit 的 in-scope 檔與 worktree 不同 → 必 BROKEN。
-    # 舊碼（ref 基，量 tip 狀態）在此判 OK＝假綠燈（已實證）。
+    # r1303 語義：被測 commit sha1 的輪次在 auto/worker 歷史中存在且內容相同
+    # （sha1 ∈ auto/worker 祖先，簿記身份相同）＝已同步→OK。r1300 口徑（量 live
+    # tip）在此判 BROKEN＝假紅燈（r1301 CI 實證）；「該輪從未同步」的負控制另見
+    # test_diff_sync_counterpart_anchor（b）。
     mod.results.clear()
     mod.check_diff(branch="auto/worker", name="diff_worker")
     ok, detail = mod.results[-1][1], mod.results[-1][2]
-    assert not ok, (
-        f"被測 commit 的 in-scope 檔與 worktree 不同卻判 OK＝假綠燈"
-        f"（ref 基量 tip 狀態而非被測 commit）: {detail}"
+    assert ok, (
+        f"被測 commit 的輪次已同步、分支已前進，仍判 BROKEN＝假紅燈"
+        f"（量 live tip 而非同步對應 commit）: {detail}"
     )
-    assert "ops/STATE.md" in detail, f"detail 應點名差異檔: {detail}"
 
     # 正控制：被測 commit 與 worktree 同步 → OK（守衛未過緊）。
     mod.results.clear()
@@ -694,3 +698,131 @@ def test_diff_anchor_negative_control(tmp_path: Path) -> None:
     mod.check_diff(branch="auto/worker", name="diff_worker")
     ok, detail = mod.results[-1][1], mod.results[-1][2]
     assert ok, f"attached-HEAD 口徑改變（期望 base=auto/qwen27b）: {detail}"
+
+
+def _mk_repo(tmp_path: Path, name: str) -> tuple:
+    """凍結沙盒 git repo，回傳 (repo, git, sha)（同 test_diff_anchor_negative_control 口徑）。"""
+    import os
+    import subprocess
+
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "t",
+        "GIT_AUTHOR_EMAIL": "t@t",
+        "GIT_COMMITTER_NAME": "t",
+        "GIT_COMMITTER_EMAIL": "t@t",
+    }
+    repo = tmp_path / name
+    repo.mkdir()
+
+    def git(*args: str) -> None:
+        subprocess.run(
+            ["git", *args],
+            cwd=repo,
+            check=True,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+
+    def sha() -> str:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=repo, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+
+    git("init", "-q", "-b", "main")
+    (repo / "ops").mkdir()
+    return repo, git, sha
+
+
+def test_diff_sync_counterpart_anchor(tmp_path: Path) -> None:
+    """r1303（vq-el4.46）：check_diff 必須把另一分支錨定「被測 commit 的同步對應 commit」。
+
+    r1300 把 base 錨定被測 commit，但仍對另一分支的 live tip diff；分支 tip 每輪前進——
+    已正確同步的舊 commit 一旦分支前進必 diff≠0→假紅燈（r1301 CI 實證：被測
+    r1301@bd93d42e2、worker tip 已進 r1301 redo→2 in-scope file differ BROKEN、2 failed；
+    該輪實際同步乾淨：三分支 4 簿記檔 blob 全同、in-scope diff=0；H-0 同構：量錯對象
+    得到的紅燈同样是壞裁決）。期望行為：
+      (a) 被測 commit 的輪次已同步到另一分支（存在對應 commit）＋ tip 已前進→OK（不假紅燈）；
+      (b) 被測 commit 的輪次從未同步到該分支（無對應 commit）→BROKEN、detail 點名該分支
+          （fail-closed；r1296/r1297「同步殘留」缺陷類仍紅燈＝守衛未弱化）；
+      (c) 同一被測 commit 對已同步的分支→OK。
+    """
+    import subprocess
+
+    repo, git, sha = _mk_repo(tmp_path, "synced")
+    (repo / "STATE.md").write_text("round1\n", encoding="utf-8")
+    (repo / "ops" / "code.py").write_text("v1\n", encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-qm", "c1")
+    (repo / "STATE.md").write_text("round1\nround2\n", encoding="utf-8")
+    (repo / "ops" / "code.py").write_text("v2\n", encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-qm", "c2")  # 被測輪次（round2）
+    c2 = sha()
+    git("branch", "auto/qwen27b", c2)
+    git("branch", "auto/argon", c2)   # round2 已同步
+    # round2 同步後，worker 前進到新輪次（tip 不再＝被測 commit）：
+    git("checkout", "-qb", "auto/worker", c2)
+    (repo / "STATE.md").write_text("round1\nround2\nround3\n", encoding="utf-8")
+    (repo / "ops" / "code.py").write_text("v3\n", encoding="utf-8")
+    git("add", "-A")
+    git("commit", "-qm", "c3-worker")
+    # CI 沙盒：被測 commit＝round2（detached）；auto/worker tip＝round3。
+    git("checkout", "-q", "--detach", c2)
+
+    mod = _load_freeze_check()
+    mod.REPO = repo
+
+    # (a) 假紅燈重現：舊碼（對 live tip diff）在此判 BROKEN（1 file differ: ops/code.py）；
+    #     新碼錨定同步對應 commit（c2）→0 differ→OK。
+    mod.results.clear()
+    mod.check_diff(branch="auto/worker", name="diff_worker")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert ok, (
+        f"被測 commit 的輪次已正確同步、另一分支已前進，仍判 BROKEN＝假紅燈"
+        f"（量 live tip 而非同步對應 commit）: {detail}"
+    )
+
+    mod.results.clear()
+    mod.check_diff(branch="auto/argon", name="diff_argon")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert ok, f"已同步分支卻判 BROKEN（過緊）: {detail}"
+
+    # (b) 負控制：該輪從未同步到該分支（無同步對應 commit）→必 BROKEN、點名分支。
+    repo2, git2, sha2 = _mk_repo(tmp_path, "unsynced")
+    (repo2 / "STATE.md").write_text("round1\n", encoding="utf-8")
+    (repo2 / "ops" / "code.py").write_text("v1\n", encoding="utf-8")
+    git2("add", "-A")
+    git2("commit", "-qm", "d1")
+    (repo2 / "STATE.md").write_text("round1\nround2\n", encoding="utf-8")
+    (repo2 / "ops" / "code.py").write_text("v2\n", encoding="utf-8")
+    git2("add", "-A")
+    git2("commit", "-qm", "d2")  # 被測輪次（round2）只在 qwen27b
+    d2 = sha2()
+    git2("branch", "auto/qwen27b", d2)
+    git2("branch", "auto/argon", d2)   # 已同步
+    git2("branch", "auto/worker", "HEAD~1")  # 停在 round1＝從未同步 round2（r1296/r1297 缺陷類）
+    git2("checkout", "-q", "--detach", d2)
+
+    mod.REPO = repo2
+    mod.results.clear()
+    mod.check_diff(branch="auto/worker", name="diff_worker")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert not ok, (
+        "被測輪次從未同步到 auto/worker 卻判 OK＝假綠燈（守衛弱化）"
+    )
+    assert "auto/worker" in detail, f"detail 應點名分支: {detail}"
+
+    # (c) 同一被測 commit、已同步分支→OK。
+    mod.results.clear()
+    mod.check_diff(branch="auto/argon", name="diff_argon")
+    ok, detail = mod.results[-1][1], mod.results[-1][2]
+    assert ok, f"已同步分支卻判 BROKEN（過緊）: {detail}"
+
+    # 恢復 git helper 的 cwd（module REPO 已被測試覆寫，無需還原；僅清理 detached HEAD）。
+    subprocess.run(
+        ["git", "checkout", "-q", "auto/qwen27b"],
+        cwd=repo2, check=True, capture_output=True, text=True,
+    )
