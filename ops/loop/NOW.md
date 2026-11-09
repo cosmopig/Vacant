@@ -1,20 +1,32 @@
-# NOW（現況，每輪更新，≤3KB）
+# NOW — 現況（loop 指針，≤3KB）
 
-## 輪次 r1340（2026-11-09）
-- 輪次：驗證/待命輪，本輪無新開發（計劃 20261109_1852：開 0 張工單；11/07 指示：工單只准對應 vq-el4 下一個未完成項目或 CI 紅燈/產品真 bug——vq-el4 全閉且兩者皆無）。
-- 審查 20261109_1844 五項：①worktree clean 3/3＋in-scope diff 0×2 ✓ ②錨點凍結 ✓ ③雙單指令守衛 rc=0 ✓ ④GitHub Actions 未再診斷、候人類 ✓ ⑤queue 未入任務、G3 未點火 ✓
-- 守衛：freeze_check 11/11 OK，VERDICT: FROZEN_STATE_OK，rc=0；verify_effects_summary VERDICT: EFFECTS_SUMMARY_OK，rc=0；守衛四檔 39 passed。effects 源檔已實開：60228B sha256 a710f7e4…，snapshot d38d2eb2，50 格 local 45／current 50，6 條 scope_note 在位。
-- 錨點（已實開頭部）：repair.py 2795 行 blob 5147f8c3／extract.py 1217 行 blob e757aec5（sha256 51abfec3＝filing）；filing 6/6 sha 實開 MATCH（g1 39/39、real14 9/9、phase3 errors==0）。
-- CI（一次讀取，未輪詢）：auto-ci.yml 已實開（auto/** 觸發、contents:read、四步＝pytest test_reqloop_*＋test_gain_harness_arms::test_t12＋test_stepchain_*＋repair --selftest；main ci.yml 不動）；LATEST 三分支全綠 5097/0/74（5ca414d1/63a738df/5cb09386）；目前 3 HEAD per-sha json 缺 → UNKNOWN per sha；state.json running auto/qwen27b@6bfec75d1（18:46Z）。
-- G3：vq-1zf open；g3gate --plan NOT_FIRED rc=0（12 格凍結）；queue/ 0 檔；0 未授權模型呼叫。
-- 待人類決策：G3 明確 --fire；CI 管道（GitHub Actions）去留。
+輪次：1341（2026-11-09 19:09Z）——驗證/待命輪：0 代碼改動／0 模型呼叫／0 新工單；審查五項（20261109_1844）全數驗證達成（worktree clean、anchor、雙單指令守衛、CI 只讀、G3 不點火）。
 
 ## 目前 HEAD
-- qwen27b@7a954b7f6（r1339 queue_empty 守衛）＋本輪簿記
-- worker@1c7a0be62／argon@b052189fd（r1339 sync）＋本輪簿記 sync
-- bd：vq-el4 56/56 全閉；vq-1zf（G3 epic）open 候人類 --fire。
+- qwen27b@b5ef7233（r1340 簿記⑦）＋本輪簿記
+- worker@d794e830（r1340 簿記同步）＋本輪同步
+- argon@7ec72867（r1340 簿記同步）＋本輪同步
+- in-scope diff 0×2（freeze_check diff_worker/diff_argon OK）
 
-## 紅線（不變）
-- 不自 push、不改 main、不讀 hidden/scorer.py、不改 .github/workflows/。
-- 不 queue 注入、不 G3 點火、不未授權模型呼叫、不偽造進度。
-- UNKNOWN＝UNKNOWN，不寫成綠燈；不引用 stale LATEST 充數目前 HEAD。
+## CI（一次讀取，不輪詢）
+- qwen27b@6bfec75d1（r1338 redo、r1339 之前）本輪收 GREEN 5097 passed/0 failed/74 skipped（ts 19:00:14Z；r1340 時 running）＝UNKNOWN 收口
+- LATEST：qwen27b@6bfec75d1 GREEN／worker@63a738df GREEN／argon@5cb09386 GREEN（各 5097/0/74）
+- 綠 sha 與現 3 HEAD 之 in-scope diff＝僅 r1339 守衛 2 檔（freeze_check.py＋test_reqloop_freeze_check.py、本地 39 passed 本輪再驗）＋簿記 4 檔
+- 現 3 HEAD per-sha 無 json→UNKNOWN（runner 自取、下輪首讀）
+- state.json：running auto/argon@b052189fd（r1339 argon 同步）、不輪詢
+
+## 隊列
+- vq-el4 56/56 全閉（0 open）；全庫唯一 open＝vq-1zf（G3）待人類 --fire
+- tickets/open 空；/srv/vlab/queue 空（freeze_check queue_empty OK）
+
+## 待人類
+1. G3 --fire（vq-1zf、不點火、不入 queue）
+2. CI 通道裁決（auto-ci.yml disabled_manually＝server-side state、不翻開關、不重診斷）
+
+## 紅線
+- 無 push（loop 自推）、.github/workflows/ 只讀、hidden/scorer 未讀
+- 凍結 4 檔＋g2.5 filing 未改（freeze_check 11/11 OK、39 passed、in-scope diff 0×2）
+- G3 未發射、queue 未入任務、0 模型呼叫、未以改文件湊進展
+
+## 主線
+- R-loop／G2.5／產品行為：無授權開發工作（vq-el4 全閉），續候人類 G3 與 CI 管道決策
