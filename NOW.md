@@ -1,13 +1,14 @@
 # NOW.md — 現況單一事實來源
 
 ## 位置
-2026-11-09 r1318：維護／驗證輪（0 代碼改動、0 模型呼叫）。vq-el4 50/50 全閉、唯一剩 vq-1zf（G3）待人類 --fire（不點火、不入隊）。本輪：上輪簿記 commit 後新 HEAD 之 CI 一次讀取（不 poll）＋守衛套件複驗＋freeze_check 10/10 OK。
+2026-11-09 r1318 redo：redo 審查指出 r1318 未實際開啟任務點名五檔——本輪五檔全數實開＋依賴值獨立重算，0 更正。vq-el4 50/50 全閉、唯一剩 vq-1zf（G3）待人類 --fire（不點火、不入隊）。
 
 ## 數字（本輪實測落地）
-- CI 一次讀取（無輪詢）：現 HEAD qwen27b@b4f170e1d／worker@aa40b5623／argon@19fa81b22 無 ci/<sha>.json → UNKNOWN；state.json idle=true；LATEST 三分支皆綠：qwen27b@3ea3c69fa 5080/0/74（840s、rc0）／worker@c2242076c 5080/0/74（829s、rc0）／argon@706e26972 5080/0/74（842s、rc0）
-- 最近綠燈祖先＋diff（本輪新驗證）：worker c2242076c 為 aa40b5623 直接父、argon 706e26972 為 19fa81b22 直接父（merge-base --is-ancestor 驗證）；qwen27b 3ea3c69fa 為 b4f170e1d 之祖先（驗證）；三現 HEAD 對其綠燈祖先之 diff 各僅 4 簿記檔（NOW/STATE/ops 鏡像，git diff --stat 驗證）、0 產品檔
-- 守衛套件（本輪新跑）：21 passed in 2.78s（freeze_check 14／anchors 5／ci_contract 2）
-- freeze_check（本輪新跑、簿記前）：10/10 OK、VERDICT: FROZEN_STATE_OK rc=0（diff 0×2／filing 6/6 MATCH／g3gate NOT_FIRED／bk 同步／wt clean 3/3）
+- 五檔實開（本 redo 輪）：auto-ci.yml 63 行/2695B、最後 commit d9f27dd27、grep enab|disab 0 命中（rc=1、檔案內無啟禁聲明）；effects 60228B/sha a710f7e4、50 格(50/45)、policy30 w2r g7/l6 r2w 0、once20 w2r g7/l4 r2w 0、scope_note 逐字（開發選樣/無硬 token 上限/單 rep 不宣稱優/hidden_after UNKNOWN/缺值 None）；g2.5 filing 4681B/sha 6e5afb46、三 gate 全 PASS（g1 39/39 false_acc 0／real14 9/9 errors 0／phase3 fixed 7 unresolved 2 errors 0）、code 3-sha＋sources 3-sha 本輪獨立重算 6/6 MATCH；extract.py 1217 行/blob e757aec5/sha 51abfec3、規則 1-4 逐字；repair.py 2795 行/blob 5147f8c3/sha c860fc23、規則逐字（FAIL→UNKNOWN 不算修好／退步記 regressed／連續兩次無缺口⇒停止）
+- CI 一次讀取（r1318、無輪詢）：現 HEAD qwen27b@b4f170e1d／worker@aa40b5623／argon@19fa81b22 無 ci/<sha>.json → UNKNOWN；state.json idle=true；LATEST 三分支皆綠（qwen27b@3ea3c69fa 5080/0/74／worker@c2242076c 5080/0/74／argon@706e26972 5080/0/74）
+- 最近綠燈祖先＋diff（r1318 驗證）：worker c2242076c、argon 706e26972 為現 HEAD 直接父；qwen27b 3ea3c69fa 為現 HEAD 之祖先；三現 HEAD 對綠燈祖先 diff 各僅 4 簿記檔、0 產品檔
+- 守衛套件（本輪新跑）：21 passed（freeze_check 14／anchors 5／ci_contract 2）
+- freeze_check（本輪新跑、簿記前）：10/10 OK、VERDICT: FROZEN_STATE_OK rc=0
 - 隊列：/srv/vlab/queue 空；tickets/open 空；ops/ 最新人類指示仍 11-07＋附帶審查；G3（vq-1zf）待人類 --fire
 
 ## TODO（依序）
