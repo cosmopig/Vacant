@@ -1,0 +1,97 @@
+{
+ "schema": "vacant.audit/g25_redo/1",
+ "round": 1368,
+ "date": "2026-11-10",
+ "ticket": "vq-el4.64",
+ "purpose": "r1366 交付審查點名 4 檔 redo：直接檢視＋依賴部分獨立重算（本輪全部實跑，證據在本檔；非引用前輪紀錄）",
+ "files_viewed_directly": [
+  {
+   "path": "ops/audits/effects_20261105_summary.json",
+   "size": 60228,
+   "sha256": "a710f7e44cb7dcc79afbf90a445a9776e091850aa7aa10228e1c2844cdd3fda5",
+   "sha_note": "a710f7e44cb7dcc7… 與 r1268/r1272 redo 紀錄一致",
+   "viewed": "json 載入直讀：schema/snapshot_sha d38d2eb2/source_root/code_under_audit/phases 結構＋scope_note 全文＋totals",
+   "facts": [
+    "total_cells=50、current_code_matches_total=50（與獨立評分 50/50 一致）、local_matches_total=45（5 分歧＝d38d2eb2 舊 checker）",
+    "policy30 w2r=13/r2w=0（generic7/localized6）、once20 w2r=11/r2w=0（generic7/localized4）、r2w 全 0",
+    "sessions 35/20、API 915/457、tokens 33670510/19503953（repair_sessions 與 API 請求數嚴格分開）",
+    "scope_note 6 條關鍵聲明在位：開發選樣／無硬 token 上限／單 rep 不宣稱 localized 優／sessions≠API／hidden_after 全 UNKNOWN／缺值 None 不填 0"
+   ]
+  },
+  {
+   "path": "ops/audits/g25_all_gates_filing.json",
+   "size": 4681,
+   "sha256": "6e5afb46570de1191fff702c9db66a3f89824de2f7313eb47e5cbc25c8ff87e5",
+   "viewed": "全文直讀（4681 B，cat）",
+   "facts": [
+    "三門 PASS：G1 caught 39/39（≥70%、false_acc 0）、REAL14 caught 9/9（≥5、冤枉 0）、PHASE3 cells 9 fixed 7 unresolved 2 r2w 0 errors 0",
+    "PHASE3 cost：repair_sessions 15 / model_calls 275 / tokens 15087278（cost_note：sessions≠API、缺值→UNKNOWN 不填 0）",
+    "extract_model glm53、repair gemma-4-12b-it-qat；comparison_baseline＝手寫需求（g2-truth）localized 9/9・generic 7/9（開發選樣單 rep、不宣稱較好）",
+    "code 三 sha（extract 51abfec3…／checks c7589c61…／run_eval 332cd324…）＋sources 三 sha（argon worktree out/all/）本輪獨立重算 6/6 MATCH"
+   ]
+  },
+  {
+   "path": "vacant_network/reqloop/extract.py",
+   "size": 57363,
+   "sha256": "51abfec319d21813d7223bc5aa48417417680ba09aa0bd4d097b2c49ea223da7",
+   "git_blob_sha1": "e757aec50c16bc6481cd88545672d50884c83f40",
+   "lines": 1217,
+   "viewed": "本輪 read 直讀 665–779（build_requirement_set 全函數）＋927–1006（GlmClient 全類＋preview 函數）＋grep 符號圖（46 SUPPORTED_VERIFIERS import／736 白名單判定／796 parse_model_output／1185 extract_requirements）",
+   "facts": [
+    "quote 缺失／非原文逐字片段→discarded（quote_not_verbatim）；deliverable 缺失→discarded；kind 非法→discarded",
+    "verifier 不在 checks.SUPPORTED_VERIFIERS 白名單→unverified=True（檢查時 UNKNOWN、不當通過）；必要參數不合→unverified；模型自帶 unverified 一律尊重",
+    "required=True 強制（防模型設 false 繞過門禁）、hidden=False 強制（擷取輸入只有使用者原文）",
+    "raw_items 非 list→空 RequirementSet＋parse_error（fail-closed，絕不當「沒有需求＝通過」）",
+    "GlmClient 唯一入口＝subprocess 呼叫 `glm` 指令（--model/--purpose/--prompt-file）；rc≠0 一律 ExtractError、不重試（fail-closed）"
+   ]
+  },
+  {
+   "path": "vacant_network/reqloop/repair.py",
+   "size": 148101,
+   "sha256": "c860fc235a6102a67f566fb319ed6f54205bc47c40449d4fae2419343deacfc3",
+   "git_blob_sha1": "5147f8c3ea1b5e9ee50531aca0382971e912c243",
+   "lines": 2795,
+   "viewed": "本輪 read 直讀 1–32（規則 docstring 全文）＋2040–2119（repair_slice 主迴圈：STOP_NO_GAP／gap_closed／stalled 判定）＋grep STOP_* 常數（101–104）",
+   "facts": [
+    "保留原候選：原草稿目錄永不被改動，每輪複製 round_N/ 工作區（即該輪候選快照）",
+    "權威輸入＝控制器保存的 authoritative/＋manifest（來源改寫→source_tampered、退出碼 20，缺口不得關閉）",
+    "FAIL→UNKNOWN 不算修好；非必需項 FAIL→PASS 不重置停滯計數；來源改動輪／竄改已滿足交付物輪不算進度",
+    "連續兩次修復無相鄰輪可確認改善→STOP_STALLED（_STALL_LIMIT）；無缺口零呼叫（STOP_NO_GAP）；輪數用盡→STOP_MAX_ROUNDS",
+    "budget＝輪數上限由控制器管（不靠提示詞）；budget_exceeded 如實記錄"
+   ]
+  }
+ ],
+ "independent_recompute": {
+  "method": "本輪自寫 python（hashlib 直算 sha256/git blob sha1，不經 freeze_check／anchor 測試）",
+  "filing_sha256": {
+   "phase1": "MATCH",
+   "phase2": "MATCH",
+   "phase3": "MATCH",
+   "code/vacant_network/reqloop/extract.py": "MATCH",
+   "code/vacant_network/reqloop/checks.py": "MATCH",
+   "code/ops/reqloop/extract/run_eval.py": "MATCH"
+  },
+  "anchor_blobs": {
+   "repair.py": "MATCH",
+   "extract.py": "MATCH"
+  },
+  "lines": {
+   "repair.py": 2795,
+   "extract.py": 1217,
+   "check": "wc -l 與 splitlines 皆同值"
+  },
+  "ves": "python3 ops/reqloop/verify_effects_summary.py → 7 項全 OK（identity a710f7e4…／discipline／policy30 13w0r g7l6／once20 11w0r g7l4／totals 50 格／reference／scope_note）→ VERDICT: EFFECTS_SUMMARY_OK rc=0"
+ },
+ "acceptance_fresh_this_round": {
+  "freeze_check": "11/11 OK（anchors 5 passed／ci_contract 2 passed／diff_worker 0 @fe52a16cd／diff_argon 0 @c0aa85ddb／filing_code 3/3／filing_sources 3/3／g3gate NOT_FIRED＋PLAN_OK／queue 空含隱藏／bk_state 同步／bk_now 同步／wt_clean 3/3）→ VERDICT: FROZEN_STATE_OK rc=0",
+  "tests": "pytest tests/test_reqloop_frozen_anchors.py test_reqloop_freeze_check.py test_reqloop_ci_contract.py test_reqloop_verify_effects_summary.py → 48 passed",
+  "in_scope_diff": "git diff --name-only auto/worker|auto/argon auto/qwen27b -- vacant_network tests ops → 0 files ×2",
+  "queue": "/srv/vlab/queue 空（ls -la 0 項含隱藏）",
+  "ci_one_read_no_poll": "3 tips（qwen27b@c74359a7／argon@c0aa85dd／worker@fe52a16c）皆無 ~/dev/ops/ci/<sha>.json → per-sha UNKNOWN（下輪首讀）"
+ },
+ "redlines": [
+  "無 push（loop 自推）；.github/workflows/ 零改動；hidden/scorer 未讀未回流",
+  "凍結 4 檔未改（repair 2795 行・blob 5147f8c3…／extract 1217 行・blob e757aec5…／checks c7589c61…／run_eval 332cd324…）＋filing 未改（6/6 本輪）",
+  "無 reset/rebase；G3 未發射（vq-1zf 待人類 --fire）；0 模型呼叫（glm 未用）；無 sleep poll"
+ ]
+}
