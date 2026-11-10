@@ -1,0 +1,4 @@
+{"task_id":"T3_cleanup_utils","family":"refactor",
+ "prompt":"utils.py is messy. Clean it up.",
+ "ambiguity":"Scope (style only vs restructure vs delete dead code), whether public names may change, whether to add tests first since none exist.",
+ "process_dimensions":["search for call sites before renaming","add characterization tests first","small diff vs rewrite","report what changed"]}

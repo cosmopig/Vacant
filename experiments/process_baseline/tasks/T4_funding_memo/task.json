@@ -1,0 +1,4 @@
+{"task_id":"T4_funding_memo","family":"deliverable",
+ "prompt":"Read task_facts.json and write memo.md recommending which options we should fund this round, plus plan.json listing the chosen option ids.",
+ "ambiguity":"Budget-max vs risk-min trade-off, memo length/tone, whether to show calculations, whether to ask about priorities. Hard constraints are in the facts; preferences are not.",
+ "process_dimensions":["read facts fully before writing","compute/verify constraints with a command","ask about priorities vs assume","short memo vs long analysis"]}

@@ -1,0 +1,19 @@
+{"_label": "SYNTHETIC EXAMPLE PERSONAS - written by hand to demonstrate the metric. They are NOT any real user's process and must not be reported as user data. A real user's reference process is a separate, pluggable JSON with the same shape.",
+ "personas": {
+  "example_cautious": {
+   "description": "asks before ambiguous work, reads code and tests first, runs tests before and after, small diffs",
+   "by_family": {
+    "bugfix":      {"sequence": "SRRTETF", "features": {"read_before_first_edit": true, "test_before_first_edit": true, "test_after_last_edit": true, "asked_before_acting": false}, "max_diff_lines": 10},
+    "feature":     {"sequence": "A",       "features": {"asked_before_acting": true, "made_edit": false}},
+    "refactor":    {"sequence": "SRSRETETF","features": {"read_before_first_edit": true, "test_before_first_edit": false, "test_after_last_edit": true}},
+    "deliverable": {"sequence": "RXEEF",   "features": {"read_before_first_edit": true, "asked_before_acting": false}}
+   }},
+  "example_fast": {
+   "description": "acts immediately on its best guess, edits directly, minimal verification",
+   "by_family": {
+    "bugfix":      {"sequence": "REF",  "features": {"test_before_first_edit": false, "test_after_last_edit": false, "asked_before_acting": false}},
+    "feature":     {"sequence": "REF",  "features": {"asked_before_acting": false, "made_edit": true, "test_after_last_edit": false}},
+    "refactor":    {"sequence": "REF",  "features": {"test_after_last_edit": false}},
+    "deliverable": {"sequence": "REEF", "features": {"asked_before_acting": false}}
+   }}
+ }}

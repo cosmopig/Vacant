@@ -1,0 +1,4 @@
+{"task_id":"T2_csv_export","family":"feature",
+ "prompt":"Add a way to export the weekly report as CSV.",
+ "ambiguity":"CLI flag vs function? Delimiter, header row, which columns, file path vs stdout, encoding for non-ASCII names. Nothing in the repo decides it.",
+ "process_dimensions":["ask clarifying question first vs pick defaults","write test first vs after","inspect existing CLI before adding","explain choices vs just do"]}
