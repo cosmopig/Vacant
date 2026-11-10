@@ -350,6 +350,16 @@ def cmd_twin_run(args) -> int:
     return 0
 
 
+def cmd_twin_report(args) -> int:
+    from .twin_report import main as report_main
+    argv = ["--out", args.out]
+    for path in args.run:
+        argv.extend(["--run", path])
+    for model in args.model or []:
+        argv.extend(["--model", model])
+    return report_main(argv)
+
+
 def cmd_compat(args) -> int:
     from .endpoint_smoke import main as smoke_main
     argv = ["--config", args.config]
@@ -439,6 +449,12 @@ def build_parser() -> argparse.ArgumentParser:
     twin_run.add_argument("--out", required=True)
     twin_run.add_argument("--backend", choices=("fixture", "openai"))
     twin_run.set_defaults(func=cmd_twin_run)
+
+    twin_report = sub.add_parser("twin2k-report", help="write result.md from one or more twin2k-run directories; does not call a model")
+    twin_report.add_argument("--run", action="append", required=True)
+    twin_report.add_argument("--model", action="append")
+    twin_report.add_argument("--out", required=True)
+    twin_report.set_defaults(func=cmd_twin_report)
 
     compat = sub.add_parser("compat-check", help="§14 Step 2 compatibility pre-check; one request unless --dry-run")
     compat.add_argument("--config", required=True)
