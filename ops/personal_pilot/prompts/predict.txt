@@ -1,0 +1,5 @@
+任務：預測此人在本題較可能選A、B、tie、neither或unsure。
+只能使用給定個人資料；輸出case_id、prediction、
+evidence_case_ids、applicable_rule_ids、uncertainty。
+個人資料：{profile_or_retrieved_cases}
+本題：{heldout_case_without_owner_label}

@@ -1,0 +1,7 @@
+只使用下列完整校準案例及本人回答建立profile，最多6條規則。
+每條規則包含：scope、condition、preference、exceptions、
+evidence_case_ids、counterevidence_case_ids、status、evidence_strength。
+規則要能被新案例反駁；未被本人確認的狀態為inferred。
+不把單一案例推廣為所有場景的固定人格。
+矛盾或無來源的內容放unresolved_questions。
+原始資料：{calibration_cases_joined_with_answers}

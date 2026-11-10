@@ -1,0 +1,343 @@
+Commands below were executed in this workspace. Exit codes are the process status.
+
+$ python3 -m vacant_network.personal --help
+usage: python -m vacant_network.personal [-h]
+                                         {validate-data,fixture-run,build-profiles,freeze,predict,score-predictions,generate,export-blind,report,compat-check}
+                                         ...
+
+positional arguments:
+  {validate-data,fixture-run,build-profiles,freeze,predict,score-predictions,generate,export-blind,report,compat-check}
+    validate-data       check the synthetic banks; does not call a model
+    fixture-run         run F01–F12 offline and write fixture_report.md
+    build-profiles      build RAW, SUMMARY, and STRUCTURED representations
+    freeze              write a freeze manifest; does not call a model
+    predict             stage-1 predictions; openai backend calls the model
+    score-predictions   score sealed labels; does not call a model
+    generate            stage-2 screen batch; extension batch is refused
+    export-blind        write a blind bundle; does not call a model
+    report              write result.md; does not call a model
+    compat-check        §14 Step 2 compatibility pre-check; one request unless
+                        --dry-run
+
+options:
+  -h, --help            show this help message and exit
+exit:0
+
+$ python3 -m vacant_network.personal validate-data --config ops/personal_pilot/config.example.json --out ops/personal_pilot/reporting/data_validation.json
+{
+  "ok": true,
+  "base_commit": "c097899e768fe049f0b96f6724b219e8530acc10",
+  "runner_commit": "c097899e768fe049f0b96f6724b219e8530acc10",
+  "calibration_cases": 16,
+  "holdout_cases": 24,
+  "tasks": 12,
+  "legal_subset_counts": {
+    "T01": 14,
+    "T02": 10,
+    "T03": 23,
+    "T04": 12,
+    "T05": 13,
+    "T06": 15,
+    "T07": 15,
+    "T08": 13,
+    "T09": 16,
+    "T10": 15,
+    "T11": 13,
+    "T12": 17
+  },
+  "documented_legal_subset_counts": {
+    "T01": 14,
+    "T02": 10,
+    "T03": 23,
+    "T04": 12,
+    "T05": 13,
+    "T06": 15,
+    "T07": 15,
+    "T08": 13,
+    "T09": 16,
+    "T10": 15,
+    "T11": 13,
+    "T12": 17
+  },
+  "problems": [],
+  "human_answers_in_repo": false,
+  "labels_path_read": false
+}
+exit:0
+
+$ python3 ops/personal_pilot/endpoint_smoke.py --config ops/personal_pilot/config.example.json --dry-run
+{
+  "schema_version": "vacant.personal.endpoint_smoke.v1",
+  "step": "§14 Step 2 compatibility pre-check",
+  "sent": false,
+  "url": "http://127.0.0.1:11434/v1/chat/completions",
+  "request_has_max_tokens": true,
+  "request_has_tools": false,
+  "model_id_configured": "qwen3-coder:30b",
+  "pricing": "local",
+  "dry_run": true
+}
+exit:0
+
+$ python3 -m vacant_network.personal compat-check --config ops/personal_pilot/config.example.json --dry-run
+exit:0
+dry_run http://127.0.0.1:11434/v1/chat/completions tools False
+
+$ python3 -m vacant_network.personal build-profiles (fixture backend, plumbing answers in /tmp)
+{"model_calls": 0, "builder": "deterministic_transcript", "out": "/tmp/personal-cli/profiles"}
+exit:0
+
+$ python3 -m vacant_network.personal freeze
+{"froze": "/tmp/personal-cli/freeze.json", "p5_executed": false}
+exit:0
+
+$ python3 -m vacant_network.personal predict (fixture; does not invent labels)
+{"planned_cells": 72, "sent": 0}
+exit:0
+
+$ python3 -m vacant_network.personal generate --batch extension
+exit:2
+
+$ python3 -m vacant_network.personal export-blind --run-dir ops/personal_pilot/reporting/examples/screen --out /tmp/personal-cli/blind
+{"display_items": 6, "row_identities": 48}
+exit:0
+
+$ python3 -m vacant_network.personal report --run-dir ops/personal_pilot/reporting/examples/screen --out ops/personal_pilot/reporting/result_skeleton.md
+{"decision": "inconclusive", "out": "ops/personal_pilot/reporting/result_skeleton.md"}
+exit:0
+
+$ python3 -m vacant_network.personal score-predictions (labels live only in /tmp)
+{
+  "scored": {
+    "missing_labels": [
+      "H02",
+      "H03",
+      "H04",
+      "H05",
+      "H06",
+      "H07",
+      "H08",
+      "H09",
+      "H10",
+      "H11",
+      "H12",
+      "H13",
+      "H14",
+      "H15",
+      "H16",
+      "H17",
+      "H18",
+      "H19",
+      "H20",
+      "H21",
+      "H22",
+      "H23",
+      "H24"
+    ],
+    "representations": {
+      "RAW": {
+        "all": {
+          "cells": 24,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 1,
+            "by_human": {
+              "unsure": 1
+            },
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 1,
+          "confusion": {
+            "unsure->missing": 1
+          },
+          "hit_ids": []
+        },
+        "F1F2": {
+          "cells": 16,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 1,
+            "by_human": {
+              "unsure": 1
+            },
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 1,
+          "confusion": {
+            "unsure->missing": 1
+          },
+          "hit_ids": []
+        },
+        "F3": {
+          "cells": 8,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 0,
+            "by_human": {},
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 0,
+          "confusion": {},
+          "hit_ids": []
+        }
+      },
+      "SUMMARY": {
+        "all": {
+          "cells": 24,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 1,
+            "by_human": {
+              "unsure": 1
+            },
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 1,
+          "confusion": {
+            "unsure->missing": 1
+          },
+          "hit_ids": []
+        },
+        "F1F2": {
+          "cells": 16,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 1,
+            "by_human": {
+              "unsure": 1
+            },
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 1,
+          "confusion": {
+            "unsure->missing": 1
+          },
+          "hit_ids": []
+        },
+        "F3": {
+          "cells": 8,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 0,
+            "by_human": {},
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 0,
+          "confusion": {},
+          "hit_ids": []
+        }
+      },
+      "STRUCTURED": {
+        "all": {
+          "cells": 24,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 1,
+            "by_human": {
+              "unsure": 1
+            },
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 1,
+          "confusion": {
+            "unsure->missing": 1
+          },
+          "hit_ids": []
+        },
+        "F1F2": {
+          "cells": 16,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 1,
+            "by_human": {
+              "unsure": 1
+            },
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 1,
+          "confusion": {
+            "unsure->missing": 1
+          },
+          "hit_ids": []
+        },
+        "F3": {
+          "cells": 8,
+          "legal_cells": 0,
+          "prediction_coverage": 0.0,
+          "human_definite_n": 0,
+          "definite_hits": 0,
+          "definite_accuracy": null,
+          "wilson95": null,
+          "non_ab": {
+            "n": 0,
+            "by_human": {},
+            "model_match": {}
+          },
+          "exact_match_filled": 0,
+          "filled_n": 0,
+          "confusion": {},
+          "hit_ids": []
+        }
+      }
+    },
+    "baseline_for_net_gain": "SUMMARY",
+    "net_gain_structured_vs_baseline_f1f2": 0,
+    "human_definite_n_f1f2": 0,
+    "note": "one user; 24 items are not 24 people. F3 is not pooled into the main screen."
+  },
+  "screen": {
+    "decision": "inconclusive",
+    "reason": "labels, main cells, or usage are incomplete; an incomplete baseline cannot trigger a go"
+  },
+  "note": "screen is exploratory; F3 is separate"
+}
+exit:0
+{'decision': 'inconclusive', 'reason': 'labels, main cells, or usage are incomplete; an incomplete baseline cannot trigger a go'}

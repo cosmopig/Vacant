@@ -1,0 +1,38 @@
+{
+  "schema_version": "vacant.personal.config.v1",
+  "private_pilot_root": null,
+  "bank_dir": "task_bank",
+  "prompt_dir": "prompts",
+  "checker": "trusted_checks/check_plan.py",
+  "run_id": "example-not-a-trial",
+  "seed": 20261109,
+  "user_id": "pilot-owner",
+  "backend": "fixture",
+  "extension_budget_authorized": false,
+  "model": {
+    "base_url": "http://127.0.0.1:11434/v1",
+    "model_id": "qwen3-coder:30b",
+    "api_key_env": "VACANT_PERSONAL_API_KEY",
+    "pricing": "local",
+    "temperature": 0.0,
+    "request_timeout_seconds": 90
+  },
+  "budget": {
+    "model_id": null,
+    "pricing_verified_at": null,
+    "input_usd_per_million": null,
+    "cached_input_usd_per_million": null,
+    "output_usd_per_million": null,
+    "cash_limit_usd": 15,
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 150000,
+    "max_requests": 112,
+    "request_timeout_seconds": 90,
+    "max_model_wall_seconds": 3600,
+    "profile_build_request_cap": 4,
+    "stage1_output_tokens": 200,
+    "stage2_output_tokens": 1800,
+    "profile_output_tokens": 2200
+  },
+  "notes": "Null prices are unset, not zero. pricing=local means do not infer API USD; still record tokens when a real endpoint returns usage. Do not commit private_pilot_root. This example does not contain a human answer."
+}
