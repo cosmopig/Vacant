@@ -1,14 +1,14 @@
-# NOW（round 1386 收口）
+# NOW（round 1387 收口）
 
 ## 狀態
-- 分支 auto/qwen27b；r1386 redo：審查 3 項 redo 全完成——bd close --note 失敗步後獨立重跑守衛 5 檔 66 passed rc=0；effects_20261105_summary.json 直開＋cells_detail 獨立重算全 MATCH（60,228B、sha a710f7e44cb7…3fda5）；repair.py 直開 2795 行／blob 5147f8c3ea1b5e…c243＝anchor 期望；簿記數字無需更正。
-- r1386：freeze_check bk_state 訊息單位修復（vq-l6u）——原 {len(m)}B 實為 str 字元數被標成位元組（CJK 多字元：鏡像實 1868B 卻報 1372B，wc -c 複核不上＝H-0 同構假綠燈風險）；改報 UTF-8 位元組數（len(s.encode('utf-8'))），檢查邏輯不變；4 負控制（OK/DRIFT/TRUNC/NOENTRY）復驗、守衛 6 檔 66 passed、freeze_check 11/11 OK。
-- CI 一次讀取（不 poll）：worker tip f438981b38653e6edfa554ea406999c45db6cc47 🟢 5125 passed/74 skipped/832s（ci/<sha>.json green=true）；qwen27b tip 31ae4636dfec39ea32aee862af0d907df09a8894 與 argon tip 85cafe6909da0b1a9c01c1a508260a832f4f3bc1 per-sha json 無→UNKNOWN（daemon 待 tick，非紅燈）。
+- 分支 auto/qwen27b；r1387：GUARD_CONTENT_PIN 修復——r1386 合法修改 ops/reqloop/freeze_check.py（bk_state 訊息 {len(m)}B 字元數→len(s.encode('utf-8')) 位元組數、檢查邏輯不變、4 負控在位）但漏更新 pin→全量守衛 6 檔 88 測 3 FAILED（pin 4f8f669b… vs 實際 cfbfba31…）＝守衛正常運作（r1365/r1366 同族）；修＝更新 pin（4f8f669b→cfbfba31、r1387 記錄在案）、不改 ruler（freeze_check.py 本輪 0 改動）。
+- 驗收：守衛 6 檔 88 passed（freeze 22/anchors 5/ci 2/ves 19/g3gate 22/g3 18）；freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0（diff 0×2、wt_clean 3/3、filing 6/6、queue 空含隱藏、g3gate NOT_FIRED+PLAN_OK、bk 同步）；in-scope diff 0×2。
+- CI 一次讀取（不 poll）：3 tips（qwen27b 870885fe/argon cc5de0c1/worker b056caea）per-sha json 無→UNKNOWN（H-0、非紅燈）。
 - 凍結不變：repair.py 2795 行 blob 5147f8c3、extract.py 1217 行 blob e757aec5、filing 6/6 MATCH、queue 空（含隱藏）、G3 NOT_FIRED。
-- vq-l6u 本輪 closed（acceptance 輸出在 bd close 證據）；vq-1zf（G3）仍等人類 --fire。
+- vq-1zf（G3）仍等人類 --fire；無其他 open 待辦。
 
 ## 下一步（loop 側）
-- 下輪開頭一次讀取 CI（不 poll）：qwen27b/argon 兩 tip 的 per-sha json（python3 ~/dev/ops/ci_status.py）——綠＝三分支收口；紅＝查因。
+- 下輪開頭一次讀取 CI（不 poll）：3 tips 的 per-sha json（python3 ~/dev/ops/ci_status.py）——綠＝三分支收口；紅＝查因。
 - vq-1zf 仍等人類 --fire；無其他待辦。
 
 ## 紅線（不變）
