@@ -1,18 +1,21 @@
-# NOW（round 1390 redo 收口）
+# NOW.md — 現行輪唯一指針（本檔 ≤ 3 KB；只留現況＋下一步＋紅線）
 
-## 狀態
-- 分支 auto/qwen27b；r1390 redo＝審查點名 4 檔實開＋依賴值重算（vq-el4.76 開→關），0 更正期望值。
-- **四檔已實開**：
-  - effects_20261105_summary.json：50 格 current_code 50/50（local 舊 checker 45/50）；policy30 13w/0r（g7/l6）、once20 11w/0r（g7/l4）；成本 35/915/33,670,510 與 20/457/19,503,953；scope_note 邊界在案。
-  - g25_all_gates_filing.json：三門全 PASS（39/39＋0；9/9＋0/5；fixed 7/unresolved 2/errors 0）；6 sha256 獨立重算 6/6 MATCH（extract.py 51abfec3…、run_eval.py 332cd324…）。
-  - extract.py：1,217 行、blob e757aec5、fail-closed 組裝層。
-  - repair.py：2,795 行、blob 5147f8c3、修復紀律（FAIL→UNKNOWN 不算修好、成本缺值 UNKNOWN 不填 0）。
-- CI（r1390 一次讀、不 poll）：qwen27b LATEST 🟢 93707c2fa；argon LATEST 🟢 1b93dcd04（5125/0）；worker LATEST 紅＝b056caea7 舊 sha pin 族（r1388 定案）；worker@86bea3a77 running→per-sha UNKNOWN（H-0）。
-- 守衛 88 passed＋freeze_check 11/11 OK FROZEN_STATE_OK＋ves 7/7 OK（r1390 新跑）；vq-1zf 仍等人類 --fire；queue 空。
+主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結、凍結）、G2 已完（凍結、凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 下一步（loop 側）
-- 下輪開頭一次讀取 CI：3 tips per-sha json——worker@86bea3a77 預期綠（in-scope 碼＝qwen27b tip diff 0、本地 88 passed 蓋三紅測）；綠＝三分支收口、紅＝查因（先核 pin 族同型）。
-- vq-1zf 仍等人類 --fire；無其他待辦。
+## 現況（r1391、2026-11-10）
 
-## 紅線（不變）
-- 不 push（loop 自推）／不動 main／不 reset-rebase／不讀 hidden+scorer／不 fire G3／不寫 queue／不 full pytest／不跑 gate_command（0 模型呼叫）／CI 只讀一次不 poll。
+三分支收口定案（r1390 下一步①）：CI 一次讀取（不 poll）3/3 綠——qwen27b@93707c2fa 5125 passed／74 skipped／0 failed（859s）；argon@1b93dcd04 5125／74／0（861s）；worker@86bea3a77 5125／74／0（859s）；state.json idle。3 綠 sha 皆現 3 tips（qwen27b 2752fb24c／argon 875427385／worker a9633eb4b）之祖先，diff 僅 4 簿記檔（NOW.md／STATE.md／ops/STATE.md／ops/loop/NOW.md）→代碼 byte-identical、綠 CI 覆蓋現 tip 代碼；in-scope diff 0×2。現 tip 本地重驗（全數新跑）：守衛 6 檔 88 passed（4.89s）；freeze_check 11/11 OK FROZEN_STATE_OK rc=0；ves 7/7 OK EFFECTS_SUMMARY_OK rc=0。未驗證：現 3 tips per-sha CI json→UNKNOWN（H-0、非紅燈）。
+
+## 下一步
+
+1. 下輪開頭一次讀取現 3 tips（2752fb24c／875427385／a9633eb4b）per-sha CI json（state.json 現 idle、待 CI tick；綠＝三分支收口終證、紅＝查因；不 poll）。
+2. 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決（CI 現為唯一 5125 全量綠燈通道）。
+3. bd：vq-el4 家族 0 open／0 in_progress（vq-el4.78 本輪開→關）；無其它工作項；/srv/vlab/queue 空（含隱藏）。
+
+## 紅線
+
+- 不讀 /srv/eval/hidden/ 與 scorer.py；G3 不入 /srv/vlab/queue；G3 只待人類 --fire 後發射。
+- main 不碰；無 push（loop 自推）；.github/workflows/ 零改動；無 reset/rebase。
+- 凍結 4 檔不改（repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…）＋g25 filing（6 sha256）不改。
+- 0 模型呼叫（glm 未用）；不跑 full pytest（只 CI 一次讀取）；不 sleep poll；不以改文湊進展；數字一律實跑／重算驗證。
+- 簿記：STATE.md（canonical、Current State 首行最新單行條目、先 append 條目）＋鏡像 ops/STATE.md（5 行鏡像）＋NOW.md（repo root）＋鏡像 ops/loop/NOW.md（byte-identical）；每輪簿記後同步 worker／argon worktree。
