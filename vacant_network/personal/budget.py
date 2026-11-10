@@ -101,7 +101,8 @@ class BudgetLedger:
         self.stop_reason: str | None = None
 
     def sent_calls(self) -> list[dict[str, Any]]:
-        return [row for row in self.calls if row.get("sent")]
+        """計入額度的請求。被一次重試取代、且沒有 usage 的那一筆不計，避免把同一格算兩次。"""
+        return [row for row in self.calls if row.get("sent") and row.get("budget_request", True)]
 
     def _totals(self) -> dict[str, float]:
         input_tokens = 0
@@ -109,13 +110,17 @@ class BudgetLedger:
         cash = 0.0
         wall_ms = 0
         unknown_cost = False
-        for row in self.sent_calls():
+        for row in self.calls:
+            if not row.get("sent"):
+                continue
+            if isinstance(row.get("wall_ms"), int):
+                wall_ms += row["wall_ms"]
+            if not row.get("budget_request", True):
+                continue
             mapped = row.get("usage_mapped")
             if isinstance(mapped, dict):
                 input_tokens += int(mapped["input_total"])
                 output_tokens += int(mapped["output_total"])
-            if isinstance(row.get("wall_ms"), int):
-                wall_ms += row["wall_ms"]
             if row.get("cost_usd") is None and self.pricing == "rated" and row.get("status") == "completed":
                 unknown_cost = True
             elif isinstance(row.get("cost_usd"), (int, float)) and not isinstance(row.get("cost_usd"), bool):
@@ -158,11 +163,12 @@ class BudgetLedger:
                 return False, "cash_limit_usd"
         return True, "ok"
 
-    def begin(self, *, purpose: str, request_hash: str, call_id: str | None = None) -> dict[str, Any]:
+    def begin(self, *, purpose: str, request_hash: str, call_id: str | None = None, extra: dict[str, Any] | None = None) -> dict[str, Any]:
         row = {
             "call_id": call_id or uuid.uuid4().hex,
             "purpose": purpose,
             "sent": True,
+            "budget_request": True,
             "status": "in_flight",
             "request_hash": request_hash,
             "response_hash": None,
@@ -172,12 +178,13 @@ class BudgetLedger:
             "cost_note": None,
             "wall_ms": None,
             "error": None,
+            "request_extra": dict(extra) if extra else None,
             "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
         self.calls.append(row)
         return row
 
-    def finish(self, call_id: str, *, status: str, usage: dict[str, Any] | None, wall_ms: int, response_hash: str | None, error: str | None) -> dict[str, Any]:
+    def finish(self, call_id: str, *, status: str, usage: dict[str, Any] | None, wall_ms: int, response_hash: str | None, error: str | None, stop_run: bool = True) -> dict[str, Any]:
         row = next(item for item in self.calls if item["call_id"] == call_id)
         mapped = map_usage(usage)
         row["status"] = status
@@ -204,12 +211,11 @@ class BudgetLedger:
         else:
             row["cost_usd"] = None
             row["cost_note"] = "no measured usage"
-            if status in ("usage_unknown", "timeout", "model_failed"):
+            if stop_run and status in ("usage_unknown", "timeout", "model_failed"):
                 self.stopped = True
-                self.stop_reason = "usage_unknown" if status != "model_failed" else "usage_unknown"
+                self.stop_reason = "usage_unknown"
                 if status == "model_failed":
                     row["status"] = "model_failed"
-                    self.stop_reason = "usage_unknown"
         return row
 
     def public_rows(self) -> list[dict[str, Any]]:

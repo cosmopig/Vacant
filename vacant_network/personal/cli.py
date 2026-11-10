@@ -317,7 +317,7 @@ def cmd_twin_prepare(args) -> int:
 
 
 def cmd_twin_run(args) -> int:
-    from .backend import SingleCallBackend, brain_from_config
+    from .backend import SingleCallBackend, brain_from_config, resolve_model
     from .twin_runner import execute_twin, fixture_backend, load_prepared
     config = _config(args.config)
     people = load_prepared(Path(args.prepared))
@@ -325,7 +325,7 @@ def cmd_twin_run(args) -> int:
     if kind == "fixture":
         backend = fixture_backend(config)
     elif kind == "openai":
-        model = config.get("model") or {}
+        model = resolve_model(config)
         if model.get("pricing") not in ("local", "rated"):
             print("pricing must be local or rated before a model call", file=sys.stderr)
             return 2
@@ -339,6 +339,8 @@ def cmd_twin_run(args) -> int:
     summary = execute_twin(
         people, backend, Path(args.out),
         max_output_tokens=int((config.get("budget") or {}).get("stage1_output_tokens") or 200),
+        resume=bool(args.resume),
+        retry_transient=bool((config.get("twin") or {}).get("retry_transient_once", True)),
     )
     brief = {
         "rows": summary["rows"],
@@ -438,6 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
     twin_run.add_argument("--prepared", required=True)
     twin_run.add_argument("--out", required=True)
     twin_run.add_argument("--backend", choices=("fixture", "openai"))
+    twin_run.add_argument("--resume", action="store_true", help="skip completed (pid, arm, case_id) rows already in the output")
     twin_run.set_defaults(func=cmd_twin_run)
 
     compat = sub.add_parser("compat-check", help="§14 Step 2 compatibility pre-check; one request unless --dry-run")
