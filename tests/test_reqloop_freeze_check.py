@@ -1285,8 +1285,18 @@ GUARD_CONTENT_PIN = {
     # 假綠燈（r1272 空檔 vacuous、r1288 null-sha 同族；I-4：未測量不是通過；RED 證據
     # 見 test_queue_empty_hidden_entry_negative_control）；本輪改為計數所有條目（含隱藏）
     # 並點名。其餘十項守衛逐位不變——顯式更新錨並留記錄。
+    # r1387 解凍記錄（補 r1386 遺漏）：r1386（50b7023c1）合法修改 freeze_check.py——
+    # bk_state 訊息單位由 str 字元數改為 UTF-8 位元組數（len(s.encode('utf-8'))），使綠燈
+    # 訊息可被 wc -c 複核（CJK 多字位元組下字元數≠位元組數，舊訊息鏡像實 1868B 卻報
+    # 1372B＝H-0 同構假綠燈）；檢查邏輯（startswith／行邊界／條目錨點）逐位不變。r1386
+    # 改 ruler 後遺漏更新本錨（pin 仍 r1343 之 4f8f669b），致本檔三 GUARD_CONTENT_PIN 測試
+    # 轉紅（守衛照設計抓到未記錄的 ruler 改動）；r1386 只跑「5 檔 66 passed」（不含本檔）
+    # 故未見紅。本輪按「合法修改須顯式更新錨並留記錄」紀律補錨（不改 ruler、不削守衛）：
+    # (1) ops/reqloop/freeze_check.py
+    #     4f8f669b2fdb5405172880cf2f8813fe58f000ef9f7c27a96ee07d136172e1fd
+    #     → cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e
     "ops/reqloop/freeze_check.py":
-        "4f8f669b2fdb5405172880cf2f8813fe58f000ef9f7c27a96ee07d136172e1fd",
+        "cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
