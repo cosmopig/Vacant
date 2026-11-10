@@ -1391,14 +1391,28 @@ GUARD_CONTENT_PIN = {
     # 不在 pin → 零違規＝假綠燈；H-0 同構：綠燈來自沒量該量的）。兩檔不含 pin 本身
     # （無自釘循環；r1347 先例明文「可釘、且必須釘」）。sha256 皆本輪 sha256sum 自
     # 磁碟實算、非轉抄。
+    # r1405 解凍記錄（vq-el4.90）：ci_tip_check.py is_green 收緊——r1399 初版只驗
+    # green is True＋failed==0＋errors==0、不驗 passed、計數不驗型：記錄
+    # {green:true, passed:0, failed:0, errors:0}（零通過＝未測量任何測試）被判
+    # TIP_GREEN→CI_TIP_OK＝假綠燈（本輪 RED 實證：舊碼證據行
+    # 「per-sha … green（passed=0 failed=0 skipped=0）」→ CI_TIP_OK rc=0）；
+    # {failed:false, errors:false}（json bool，False==0）亦被讀成零失敗＝型混淆同族
+    # （I-4「a suite that reported zero tests fails」、r1272 空檔 vacuous、
+    # r1296 null-sha 同族；該 ruler 自身 docstring 即引 I-4 跳損毀 json，零計數
+    # 記錄同為不可用證據）。修法：is_green 收緊為嚴格 int（排除 bool）——
+    # green is True 且 passed int>0 且 failed int==0 且 errors int==0；缺欄位／
+    # 錯型／零通過＝非綠（fail-closed）。live 記錄 passed≈5145（int）不受影響
+    # （live 判定仍 CI_TIP_OK）。兩檔合法改動後顯式更新錨：
     # (1) ops/reqloop/ci_tip_check.py
-    #     新增 pin 9c1aee8e0fa8300c55c7d65316e84fb5f5b4aa2dac7803c49e408713aa61a202
+    #     9c1aee8e0fa8300c55c7d65316e84fb5f5b4aa2dac7803c49e408713aa61a202
+    #     → 18700ff7f4632a56c16619fb8e4eda3b650bdca233b659e6c1e430edfa290089
+    # (2) tests/test_reqloop_ci_tip_check.py（新增負控 (h) 雙場景）
+    #     3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761
+    #     → fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4
     "ops/reqloop/ci_tip_check.py":
-        "9c1aee8e0fa8300c55c7d65316e84fb5f5b4aa2dac7803c49e408713aa61a202",
-    # (2) tests/test_reqloop_ci_tip_check.py
-    #     新增 pin 3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761
+        "18700ff7f4632a56c16619fb8e4eda3b650bdca233b659e6c1e430edfa290089",
     "tests/test_reqloop_ci_tip_check.py":
-        "3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761",
+        "fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4",
 }
 
 
