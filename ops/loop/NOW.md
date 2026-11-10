@@ -19,5 +19,6 @@ r1405＝ci_tip_check is_green 假綠燈洞修復（vq-el4.90 開→關；全庫�
 
 - 不讀 /srv/eval/hidden/ 與 scorer.py；G3 不入 /srv/vlab/queue；G3 只待人類 --fire 後發射。
 - main 不碰；無 push（loop 自推）；.github/workflows/ 零改動；無 reset/rebase。
-- 凍結 4 檔＋filing sha256 未改（repair.py 2795 行 blob 5147f8c3…、extract.py 1217 行 blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；ops/audits/g25_all_gates_filing.json 6 sha256 相符）。
-- GUARD_CONTENT_PIN 12 檔須與磁碟真值一致；任何守衛檔改動必須同步更新錨並記錄解凍理由。
+- 凍結 4 檔不改（repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…）＋g25 filing（6 sha256）不改。
+- 0 模型呼叫（glm 未用）；不跑 full pytest；不 sleep poll；不以改文湊進展；數字一律實跑／重算驗證。
+- 簿記：STATE.md（canonical、Current State 首行最新單行條目）＋鏡像 ops/STATE.md（byte 前綴）＋NOW.md＋鏡像 ops/loop/NOW.md（byte-identical）；每輪簿記後同步 worker／argon worktree（in-scope diff 0×2）。
