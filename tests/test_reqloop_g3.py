@@ -73,6 +73,28 @@ class FakeChannel(g3.Channel):
         return answer, usage
 
 
+# ── 通道契約：Channel 是已宣告的抽象契約，非未完成占位 ───────────
+
+
+def test_channel_is_abstract_contract():
+    """Channel＝ABC 抽象契約（同 substrate.Substrate 慣例）：
+    裸 Channel 不可實例化（TypeError）；未實作 call 的子類不可實例化；
+    實作 call 的子類（FakeChannel/GlmChannel）可實例化且 isinstance 成立。
+    """
+    with pytest.raises(TypeError):
+        g3.Channel()
+
+    class _NoCall(g3.Channel):
+        pass
+
+    with pytest.raises(TypeError):
+        _NoCall()
+
+    fake = FakeChannel()
+    assert isinstance(fake, g3.Channel)
+    assert isinstance(g3.GlmChannel(), g3.Channel)
+
+
 # ── 三臂內容契約（對齊 manifest.arm_defs，2026-11-08 凍結）──────────
 
 

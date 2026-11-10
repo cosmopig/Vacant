@@ -25,6 +25,7 @@ g3gate（`vacant_network/reqloop/g3gate.py`）只核「發射前置」：選題/
 from __future__ import annotations
 
 import argparse
+from abc import ABC, abstractmethod
 import hashlib
 import json
 import os
@@ -126,10 +127,17 @@ class RoundUsage:
         return {"calls": self.calls, "tokens": self.tokens, "wall_ms": self.wall_ms}
 
 
-class Channel:
-    """模型通道協議：call() → (text, RoundUsage)。可注入（測試假通道、真 GlmChannel）。"""
+class Channel(ABC):
+    """模型通道協議：call() → (text, RoundUsage)。可注入（測試假通道、真 GlmChannel）。
 
+    抽象契約（同 vacant_network/substrate.py 的 Substrate(ABC) 慣例）：裸 Channel
+    不可實例化（TypeError）；具體通道必實作 call——GlmChannel（真發射、glm CLI）
+    或測試假通道。未實作 call 的子類同樣不可實例化。
+    """
+
+    @abstractmethod
     def call(self, *, prompt: str, model: str, purpose: str, timeout_s: float) -> tuple[str, RoundUsage]:
+        """具體通道必實作；裸 Channel 不可實例化（ABC TypeError），此體不執行。"""
         raise NotImplementedError
 
 
