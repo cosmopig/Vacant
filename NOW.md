@@ -1,14 +1,14 @@
-# NOW（round 1387 收口）
+# NOW（round 1388 收口）
 
 ## 狀態
-- 分支 auto/qwen27b；r1387：GUARD_CONTENT_PIN 修復——r1386 合法修改 ops/reqloop/freeze_check.py（bk_state 訊息 {len(m)}B 字元數→len(s.encode('utf-8')) 位元組數、檢查邏輯不變、4 負控在位）但漏更新 pin→全量守衛 6 檔 88 測 3 FAILED（pin 4f8f669b… vs 實際 cfbfba31…）＝守衛正常運作（r1365/r1366 同族）；修＝更新 pin（4f8f669b→cfbfba31、r1387 記錄在案）、不改 ruler（freeze_check.py 本輪 0 改動）。
-- 驗收：守衛 6 檔 88 passed（freeze 22/anchors 5/ci 2/ves 19/g3gate 22/g3 18）；freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0（diff 0×2、wt_clean 3/3、filing 6/6、queue 空含隱藏、g3gate NOT_FIRED+PLAN_OK、bk 同步）；in-scope diff 0×2。
-- CI 一次讀取（不 poll）：3 tips（qwen27b 870885fe/argon cc5de0c1/worker b056caea）per-sha json 無→UNKNOWN（H-0、非紅燈）。
+- 分支 auto/qwen27b（tip b4997a07）；r1388：CI 紅燈根因定案（0 產品改動）——qwen27b@50b7023c（r1386）／argon@cc5de0c1（r1386 redo 同步）三紅測＝三 GUARD_CONTENT_PIN 測＝守衛照設計抓到 r1386 未記錄的 ruler 改動（該 commit ruler 已 cfbfba31＝tip 值、pin 仍 r1343 之 4f8f669b）；同 r1384「舊 CI 2 紅閉合」模式、非新缺口、非產品 bug；現 3 tips 皆含 r1387 修復。
+- 驗收（本輪 tip 新跑）：守衛 6 檔 88 passed in 4.82s（含三舊紅測）；freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0。
+- CI 一次讀取（不 poll）：現 3 tips（b4997a07/f7115fa6/5f7db930）per-sha json 無→UNKNOWN（H-0、非紅燈）；worker@b056caea（舊 commit、r1386 redo 同步）running（state.json），預期同 pin 族。
 - 凍結不變：repair.py 2795 行 blob 5147f8c3、extract.py 1217 行 blob e757aec5、filing 6/6 MATCH、queue 空（含隱藏）、G3 NOT_FIRED。
-- vq-1zf（G3）仍等人類 --fire；無其他 open 待辦。
+- vq-el4.71 本輪開→關；vq-1zf（G3）仍等人類 --fire；無其他 open 待辦。
 
 ## 下一步（loop 側）
-- 下輪開頭一次讀取 CI（不 poll）：3 tips 的 per-sha json（python3 ~/dev/ops/ci_status.py）——綠＝三分支收口；紅＝查因。
+- 下輪開頭一次讀取 CI（不 poll）：3 tips 的 per-sha json（python3 ~/dev/ops/ci_status.py）——綠＝三分支收口；紅＝查因（先核是否本輪 pin 族同型）。
 - vq-1zf 仍等人類 --fire；無其他待辦。
 
 ## 紅線（不變）
