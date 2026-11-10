@@ -162,6 +162,67 @@ def test_check_budget_rejects_wrong_entry(tmp_path: pathlib.Path):
     raise AssertionError("模型入口不是 glm 必須拒")
 
 
+# ── 預算門：放寬預註冊上限必須拒（r1408 vq-1zf.7）──────────────────
+# RED 實證（本輪、舊碼）：manifest 寫 max_cells=999／timeout_s_per_round=3000／
+# daily_token_cap=2e9，check_budget 全數接受→--plan 印 G3GATE PLAN OK（假綠燈）；
+# 而 quota_fail_closed=False 等硬欄位已 fail-closed——三個數值上限是該函式唯一的
+# fail-open 項，與函式自身 docstring「任何一項缺失/放寬即拒」及 DEFAULT_BUDGET
+# 註解「manifest 可加嚴、不可放寬」矛盾（同族：r1376 UNKNOWN fail-open、r1405
+# bool 當 int；ruler 不得信被驗方的自我聲明）。
+
+def test_check_budget_rejects_loosened_cell_ceiling(tmp_path: pathlib.Path):
+    """manifest 放寬預註冊 12 格上限（max_cells=999、12 格≤999）必須拒。"""
+    plan = _loaded()
+    bad = {**plan.raw, "budget": {**plan.budget, "max_cells": 999}}
+    p = _tmp_manifest(tmp_path, bad)
+    try:
+        g3.check_budget(g3.G3Plan.load(p))
+    except ValueError as e:
+        assert "max_cells" in str(e)
+        return
+    raise AssertionError("max_cells=999 放寬 12 格預註冊上限必須拒（可加嚴、不可放寬）")
+
+
+def test_check_budget_rejects_loosened_timeout_ceiling(tmp_path: pathlib.Path):
+    """manifest 放寬預註冊 300s/輪上限（timeout_s_per_round=3000）必須拒。"""
+    plan = _loaded()
+    bad = {**plan.raw, "budget": {**plan.budget, "timeout_s_per_round": 3000}}
+    p = _tmp_manifest(tmp_path, bad)
+    try:
+        g3.check_budget(g3.G3Plan.load(p))
+    except ValueError as e:
+        assert "timeout_s_per_round" in str(e)
+        return
+    raise AssertionError("timeout_s_per_round=3000 放寬 300s/輪預註冊上限必須拒")
+
+
+def test_check_budget_rejects_loosened_daily_cap_ceiling(tmp_path: pathlib.Path):
+    """manifest 放寬預註冊 2M/日上限（daily_token_cap=2e9）必須拒。"""
+    plan = _loaded()
+    bad = {**plan.raw, "budget": {**plan.budget, "daily_token_cap": 2_000_000_000}}
+    p = _tmp_manifest(tmp_path, bad)
+    try:
+        g3.check_budget(g3.G3Plan.load(p))
+    except ValueError as e:
+        assert "daily_token_cap" in str(e)
+        return
+    raise AssertionError("daily_token_cap=2e9 放寬 2M/日預註冊上限必須拒")
+
+
+def test_check_budget_accepts_exactly_preregistered_ceiling(tmp_path: pathlib.Path):
+    """正控制：恰好等於上限（12/300/2M）不是放寬——必須接受。
+
+    live manifest 恰好即此形（test_check_budget_accepts_frozen_plan 亦覆蓋）；
+    加嚴方向（max_cells=5、12 格>5 被拒）由 test_check_budget_rejects_over_cell_cap 覆蓋。
+    """
+    plan = _loaded()
+    at = {**plan.raw, "budget": {**plan.budget, "max_cells": 12,
+                                 "timeout_s_per_round": 300,
+                                 "daily_token_cap": 2_000_000}}
+    p = _tmp_manifest(tmp_path, at)
+    g3.check_budget(g3.G3Plan.load(p))   # 必須不 raise
+
+
 def _tmp_manifest(tmp_path: pathlib.Path, raw: dict) -> pathlib.Path:
     d = tmp_path / f"manifest_{abs(hash(json.dumps(raw)))}"
     d.mkdir(parents=True, exist_ok=True)
@@ -387,6 +448,29 @@ def test_cli_plan_tampered_manifest_rc1_not_ok(tmp_path: pathlib.Path):
     assert "G3GATE PLAN FAIL" in r.stdout
     assert "hash 不符" in r.stdout              # 拒因如實：hash 不符（非缺檔/非選題）
     assert "G3GATE PLAN OK" not in r.stdout     # 不得假綠
+
+
+# ── CLI 負控：放寬預算上限的 manifest → --plan 必須 RC 1（r1408 vq-1zf.7）────
+
+def test_cli_plan_loosened_budget_rc1_not_ok(tmp_path: pathlib.Path):
+    """operator 可見 fail-closed 負控：manifest 放寬預註冊上限→--plan 必須 RC 1。
+
+    r1258 釘住的是篡改 sha 的 --plan 路徑；放寬預算上限是 operator 可見的同一族假綠燈
+    （舊碼對 max_cells=999 印 G3GATE PLAN OK，本輪 RED 實證）。修正後拒因必須點名
+    放寬的欄位（max_cells），不得出現 G3GATE PLAN OK。
+    """
+    import shutil
+    base = tmp_path / "frozen"
+    shutil.copytree(BASE, base)
+    m = base / "manifest.json"
+    raw = json.loads(m.read_text(encoding="utf-8"))
+    raw["budget"] = {**raw["budget"], "max_cells": 999}   # 放寬 12 格預註冊上限
+    m.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    r = _run("--plan", "--manifest", str(m))
+    assert r.returncode == 1, r.stdout + r.stderr
+    assert "G3GATE PLAN FAIL" in r.stdout
+    assert "max_cells" in r.stdout           # 拒因點名放寬的欄位
+    assert "G3GATE PLAN OK" not in r.stdout  # 不得假綠
 
 
 # ── CLI 負控：--fire＋有效核准＋篡改 manifest → 必須 RC 1（完整性先於核准判定）──

@@ -32,15 +32,18 @@ from typing import Any, Sequence
 
 PLAN_SCHEMA = "vacant.reqloop.g3gate.plan/1"
 APPROVAL_SCHEMA = "vacant.reqloop.g3gate.approval/1"
+# 預註冊預算上限（vq-1zf：≤12 格、300s/輪、日 ≤2,000,000 tok；fail-closed 底線）
 MAX_CELLS = 12
+MAX_TIMEOUT_S_PER_ROUND = 300
+MAX_DAILY_TOKEN_CAP = 2_000_000
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 
 # 發射前置的最低預算形（fail-closed 底線；manifest 可加嚴、不可放寬）
 DEFAULT_BUDGET: dict[str, Any] = {
     "max_cells": MAX_CELLS,
-    "timeout_s_per_round": 300,
-    "daily_token_cap": 2_000_000,
+    "timeout_s_per_round": MAX_TIMEOUT_S_PER_ROUND,
+    "daily_token_cap": MAX_DAILY_TOKEN_CAP,
     "quota_fail_closed": True,
     "model_entry": "glm",
     "hard_token_cap": False,
@@ -167,7 +170,16 @@ def plan_cells(plan: G3Plan) -> list[tuple[str, str]]:
 
 
 def check_budget(plan: G3Plan) -> None:
-    """預算門（fail-closed）：任何一項缺失/放寬即拒。"""
+    """預算門（fail-closed）：任何一項缺失/放寬即拒。
+
+    r1408（vq-1zf.7）：三個數值上限（格數/輪時/日 token）是預註冊底線（≤12 格、
+    300s/輪、日 ≤2,000,000 tok）：manifest 可加嚴、不可放寬——放寬即拒（與
+    quota_fail_closed 等硬欄位同一口徑）。舊碼只要求 max_cells≥1／timeout>0／
+    cap>0：manifest 寫 max_cells=999、timeout_s_per_round=3000、daily_token_cap=2e9
+    皆被接受（本輪 RED 實證）——邊界實際由 manifest 自我聲明決定（fail-open）；
+    而 boolean/enum 硬欄位早已 fail-closed，數值上限是唯一漏洞（同族：r1376
+    UNKNOWN fail-open、r1405 bool 當 int：門不得信被驗方的自我聲明）。
+    """
     b = plan.budget
     cells = len(plan_cells(plan))
     try:
@@ -176,20 +188,33 @@ def check_budget(plan: G3Plan) -> None:
         raise ValueError("budget.max_cells 非法")
     if max_cells < 1 or cells > max_cells:
         raise ValueError(f"格數 {cells} 超預算上限 {max_cells}")
+    if max_cells > MAX_CELLS:
+        raise ValueError(
+            f"budget.max_cells={max_cells} 放寬預註冊上限 {MAX_CELLS}"
+            "（manifest 可加嚴、不可放寬；任何一項放寬即拒）")
     try:
         tpr = int(b.get("timeout_s_per_round"))
     except (TypeError, ValueError):
         raise ValueError("budget.timeout_s_per_round 缺失/非法（每輪必須有牆時上限）")
     if tpr <= 0:
         raise ValueError("budget.timeout_s_per_round 必須 > 0")
+    if tpr > MAX_TIMEOUT_S_PER_ROUND:
+        raise ValueError(
+            f"budget.timeout_s_per_round={tpr} 放寬預註冊上限 {MAX_TIMEOUT_S_PER_ROUND}s/輪"
+            "（manifest 可加嚴、不可放寬；任何一項放寬即拒）")
     cap = b.get("daily_token_cap")
     if cap is None:
         raise ValueError("budget.daily_token_cap 缺失（日額度上限必須寫在案）")
     try:
-        if int(cap) <= 0:
-            raise ValueError("budget.daily_token_cap 必須 > 0")
+        cap_i = int(cap)
     except TypeError:
         raise ValueError("budget.daily_token_cap 非法")
+    if cap_i <= 0:
+        raise ValueError("budget.daily_token_cap 必須 > 0")
+    if cap_i > MAX_DAILY_TOKEN_CAP:
+        raise ValueError(
+            f"budget.daily_token_cap={cap_i} 放寬預註冊上限 {MAX_DAILY_TOKEN_CAP} tok/日"
+            "（manifest 可加嚴、不可放寬；任何一項放寬即拒）")
     if b.get("quota_fail_closed") is not True:
         raise ValueError("撞額度必須停、不得重試（quota_fail_closed 必須為 true）")
     if b.get("model_entry") != "glm":

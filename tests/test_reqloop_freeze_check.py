@@ -1346,10 +1346,25 @@ GUARD_CONTENT_PIN = {
     # （無自釘循環），故可釘、且必須釘——顯式更新錨並留記錄：
     # (1) vacant_network/reqloop/g3gate.py sha256=a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b
     # (2) tests/test_reqloop_g3gate.py sha256=87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d
+    # r1408 解凍記錄（vq-1zf.7）：check_budget 收緊——manifest 三個數值上限（max_cells/
+    # timeout_s_per_round/daily_token_cap）原只要求 >0：manifest 寫 max_cells=999／
+    # timeout=3000／cap=2e9 皆被接受（本輪 RED 實證；--plan 對之印 G3GATE PLAN OK
+    # 假綠燈），而 boolean/enum 硬欄位（quota_fail_closed 等）早已 fail-closed——
+    # 與函式自身 docstring「任何一項缺失/放寬即拒」及 DEFAULT_BUDGET 註解「manifest
+    # 可加嚴、不可放寬」矛盾（同族 r1376 UNKNOWN fail-open、r1405 bool 當 int：門
+    # 不得信被驗方的自我聲明）。本輪補 MAX_TIMEOUT_S_PER_ROUND=300／
+    # MAX_DAILY_TOKEN_CAP=2_000_000 兩常數（MAX_CELLS=12 已有）、check_budget 對
+    # 三上限一律「放寬即拒」（與硬欄位同口徑；等於上限不是放寬：live manifest
+    # 12/300/2M 仍 PLAN OK rc=0 實測）。＋ test 檔新增 5 測（3 放寬欄位負控＋
+    # 1 恰好上限正控＋1 CLI 負控 test_cli_plan_loosened_budget_rc1_not_ok：放寬
+    # manifest→RC 1＋G3GATE PLAN FAIL 點名 max_cells；套件 22→27 測）。兩檔合法
+    # 改動後顯式更新錨並留記錄：
+    # (1) vacant_network/reqloop/g3gate.py sha256=a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b → f1bd86be6698702ecf3f22fa7c263015f0b2d2c7905146e13e6a9e1a2318ebf2
+    # (2) tests/test_reqloop_g3gate.py sha256=87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d → 86bac89dc0c4595140831b5e8b5e1c0744c20e3a9377bf66670ca18fbf3b8134
     "vacant_network/reqloop/g3gate.py":
-        "a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b",
+        "f1bd86be6698702ecf3f22fa7c263015f0b2d2c7905146e13e6a9e1a2318ebf2",
     "tests/test_reqloop_g3gate.py":
-        "87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d",
+        "86bac89dc0c4595140831b5e8b5e1c0744c20e3a9377bf66670ca18fbf3b8134",
     # r1397 擴覆蓋記錄（vq-el4.85）：GUARD_CONTENT_PIN 擴覆蓋——NOW.md 紅線轉抄守衛檔
     # （freeze_check 第 12 項 mandated 檢查 now_redline invoke 其 redline_violations()
     # 為唯一實現）。缺口（本輪 RED 雙實證）：該檔 r1392（vq-el4.80）建立、晚於
