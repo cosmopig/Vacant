@@ -15,7 +15,7 @@ from .backend import FixtureBackend
 from .budget import BudgetLedger, map_usage
 from .metrics import leave_one_out_majority, score_twin
 from .runner import RunnerError
-from .twin2k import TWIN_LLM_ARMS, load_participant, twin_user_prompt
+from .twin2k import TWIN_ARMS, TWIN_LLM_ARMS, load_participant, twin_user_prompt
 
 
 class _Jsonl:
@@ -95,11 +95,25 @@ def _skip_on_resume(row: dict[str, Any]) -> bool:
     return row.get("status") in ("completed", "usage_unknown")
 
 
-def execute_twin(participants: list[dict[str, Any]], backend, out_dir: Path, *, max_output_tokens: int = 200, resume: bool = False, retry_transient: bool = True) -> dict[str, Any]:
+def parse_arms(raw: str | None) -> list[str] | None:
+    """None means every arm. Otherwise a canonical-order subset of TWIN_ARMS."""
+    if raw is None or str(raw).strip() == "":
+        return None
+    requested = [part.strip().upper() for part in str(raw).split(",") if part.strip()]
+    if not requested:
+        raise RunnerError("--arms is empty")
+    unknown = [name for name in requested if name not in TWIN_ARMS]
+    if unknown:
+        raise RunnerError("unknown arm(s): " + ", ".join(unknown) + "; choose from " + ", ".join(TWIN_ARMS))
+    return [name for name in TWIN_ARMS if name in requested]
+
+
+def execute_twin(participants: list[dict[str, Any]], backend, out_dir: Path, *, max_output_tokens: int = 200, resume: bool = False, retry_transient: bool = True, arms: list[str] | None = None) -> dict[str, Any]:
     """participants 的 labels 只在這裡拿來算 MAJORITY，不放進 prompt。
 
     每一筆預測與呼叫寫完就 flush。`--resume` 跳過已完成的 (pid, arm, case_id)。
     逾時與連線錯誤在 twin 跑裡最多再試一次，而且不因此停掉後面的格子。
+    `--arms` 只跑列出的臂；未列出的臂既不呼叫模型，也不寫新列。
     """
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -111,6 +125,17 @@ def execute_twin(participants: list[dict[str, Any]], backend, out_dir: Path, *, 
     labels = [label for person in participants for label in person["labels"]]
     majority = leave_one_out_majority(labels)
     prior = {_key(row): row for row in _read_jsonl(pred_path)} if resume else {}
+    if arms is None:
+        selected = list(TWIN_ARMS)
+    else:
+        unknown = [name for name in arms if name not in TWIN_ARMS]
+        if unknown:
+            raise RunnerError("unknown arm(s): " + ", ".join(unknown))
+        selected = [name for name in TWIN_ARMS if name in arms]
+        if not selected:
+            raise RunnerError("no arms selected")
+    llm_arms = [name for name in selected if name in TWIN_LLM_ARMS]
+    include_majority = "MAJORITY" in selected
     ledger = getattr(backend, "ledger", None)
     flushed_calls = _load_calls(ledger, call_path) if resume and ledger is not None else 0
     predictions = _Jsonl(pred_path)
@@ -148,11 +173,11 @@ def execute_twin(participants: list[dict[str, Any]], backend, out_dir: Path, *, 
                     "human_acceptance": None,
                 }
                 mkey = _key(majority_row)
-                if not (resume and mkey in prior and _skip_on_resume(prior[mkey])):
+                if include_majority and not (resume and mkey in prior and _skip_on_resume(prior[mkey])):
                     predictions.write(majority_row)
                     written += 1
                     kept[mkey] = majority_row
-                for arm in TWIN_LLM_ARMS:
+                for arm in llm_arms:
                     key = (person["pid"], arm, case["case_id"])
                     if resume and key in prior and _skip_on_resume(prior[key]):
                         continue

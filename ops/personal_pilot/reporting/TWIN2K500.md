@@ -2,12 +2,15 @@
 
 The self-filled C01–C16 / H01–H24 answers are not used in this test phase. Ground truth is the public dataset Twin-2K-500 (Toubia, Gui, Peng, Merlau, Li, and Chen, 2025; [arXiv:2505.17479](https://arxiv.org/abs/2505.17479); Hugging Face `LLM-Digital-Twin/Twin-2K-500`, config `wave_split`, CC BY 4.0, ungated).
 
-- Calibration for RAW, SUMMARY, and STRUCTURED is that person's wave 1–3 answers, after dropping any item whose id or text also appears in wave 4.
+- Calibration starts from that person's wave 1–3 answers, after dropping any item whose id or text also appears in wave 4.
+- RAW retrieves the top 8 items from that full calibration pool. The full wave 1–3 text is about 95k characters, which does not fit a 32k-token context.
+- SUMMARY is a deterministic transcript of up to 10 non-demographic calibration answers (the demographics block is excluded). It is not the official `persona_summary`, and it is not a model-built SUMMARY_BUILD request; that prompt belongs to the separate C01–C16 human-pilot path.
+- STRUCTURED is built from the same non-demographic pool and length-matched to SUMMARY: whole rules are dropped from the end until the text is not longer than the summary.
+- DEMOGRAPHICS is a separate arm: up to 10 lines from the demographics block only.
 - Holdout items are wave 4 questions with exactly two options. Labels stay in `labels.jsonl` and are not put in the profile.
 - `persona_summary` is ignored. The published summary was built with wave 4 answers.
-- RAW retrieves the top 8 calibration items. The full wave 1–3 text is about 95k characters, which does not fit a 32k-token context.
-- STRUCTURED is length-matched to SUMMARY: whole rules are dropped from the end until the text is not longer than the summary.
-- Other arms: leave-one-out population majority (no model call), demographics-only, and no profile.
+- Other arms: leave-one-out population majority (no model call) and no profile.
+- `twin2k-run --arms SUMMARY,STRUCTURED` runs only those arms. `load_participant` rebuilds profiles from the stored calibration, so an older prepared directory picks up the SUMMARY fix without being rewritten.
 - Test-retest is the per-person agreement between the earlier answer and the wave 4 answer on repeated binary items. Accuracy divided by that rate is reported separately. A rate of 0 does not become a number.
 
 Preliminary reference, not a result of this checkout: a rough pilot on 294 people was about 83% test-retest and about 56% majority. The converter recomputes both on the participants actually sampled.
