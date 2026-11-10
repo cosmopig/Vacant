@@ -2,7 +2,7 @@
 
 ## 狀態
 - 分支 auto/qwen27b（tip 68c6d2ab3）；r1389＝CI 燈一次讀取輪（NOW 下一步、vq-el4.73 開→關）。
-- CI 輪首一次讀取（不 poll）：3 LATEST 紅燈全在 pre-r1387 修舊 sha（qwen27b@50b7023c r1386／argon@cc5de0c1／worker@b056caea，各 3 FAILED＝GUARD_CONTENT_PIN 族＝r1388 定案同族、非新缺口）；state.json running＝qwen27b@93707c2fa（r1388、tip 祖先、含 r1387 pin 修復）。
+- CI（輪首一次讀＋工作後一次讀，不 poll）：3 LATEST 紅燈全在 pre-r1387 修舊 sha（＝r1388 定案同族、非新缺口）；**qwen27b@93707c2fa（tip 祖先）已完成 🟢 5125 passed／0 failed**——LATEST 紅→綠成立（ci/93707c2fa….json）；argon@1b93dcd04（tip 祖先）in progress（預期綠）；worker tip per-sha→UNKNOWN（H-0）。
 - tip 重驗：守衛 6 檔 88 passed（含三舊紅測按名全綠）＋freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0。
 - 無新人類指示（reviews 最新 20261110_1021＝本輪提示指示、5 條在樹／維持中）；vq-el4 74 項 0 open；queue 空（含隱藏）；G3 NOT_FIRED。
 
