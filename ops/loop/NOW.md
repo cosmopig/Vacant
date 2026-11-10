@@ -6,7 +6,7 @@
 
 r1394＝收尾 r1393（auto rc=124）未竟之 vq-el4.81（開→關）：r1393 把紅線轉抄守衛接進一鍵 ruler（11→12 項 now_redline、唯一實現 redline_violations）但漏更 GUARD_CONTENT_PIN（守衛照設計抓到、3 測試紅＝r1386 同型遺漏）＋2 檔未同步 worker/argon（diff BROKEN）。本輪：pin 依紀律補（cfbfba31…→42ab72d2…、解凍記錄留案）＋freeze_check docstring 虛記更正＋三分支同步（worker@67107afc6／argon@d43a9aab1）。
 - 驗收（本輪全數新跑）：freeze_check 12/12 OK VERDICT: FROZEN_STATE_OK rc=0（now_redline OK、diff 0×2、anchors 5／ci 2、filing 3/3＋3/3、queue 空含隱藏、g3gate NOT_FIRED）；守衛 6 檔 77 passed；in-scope diff 0×2。
-- CI 一次讀取（輪首、不 poll）：argon tip 🟢 5130/74；qwen27b r1392 🟢 5130/74、本輪新 sha 無 per-sha json→UNKNOWN；worker 05766d8b running→UNKNOWN。
+- CI（一次讀取、不 poll）：argon tip 3c442302 🟢 5130/74；qwen27b r1392 d7b1939c 🟢 5130/74；worker 05766d8b 🟢 5130/74/0（輪尾完成）；本輪新 3 sha 無 per-sha json→UNKNOWN。
 - bd：vq-el4.81 開→關（本輪）；vq-1zf（G3）仍等人類 --fire、不代發、不入 queue；/srv/vlab/queue 空（含隱藏）。
 
 ## 下一步
