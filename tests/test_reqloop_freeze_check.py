@@ -1365,6 +1365,24 @@ GUARD_CONTENT_PIN = {
     #     新增 pin 6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f
     "tests/test_reqloop_now_redline.py":
         "6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f",
+    # r1398 擴覆蓋記錄（vq-el4.86）：GUARD_CONTENT_PIN 擴覆蓋——G3 發射管線對
+    # （模組＋其實體紅線守衛檔，審查指示 #1 點名 7 檔之一）。缺口（本輪 RED 雙
+    # 實證）：該對 r1373（vq-1zf.6）建檔、晚於 r1319/r1347/r1365 建錨各輪、從未
+    # 釘住——vq-el4.63／vq-el4.85 同型。攻擊場景：模組換「直接印 fire 成功」
+    # stub＋測試檔換同名 dummy（18 真名 assert True、守衛套件 96 計數不變）→
+    # 舊 guard_content_violations 回空清單＝完整假綠燈（H-0 同構）；下游紅線
+    # （無核准 RC 2 fail-closed／prompt 無 hidden·scorer／成本缺值 UNKNOWN／
+    # 撞額度停）全被掏空。既有行為級信號（18 測）住在被 swap 的檔內、被削即
+    # swap 完成；位元組錨不依賴任何行為輸出。該對不含 pin 本身（無自釘循環），
+    # 故可釘、且必須釘（r1347/r1365 先例明文）：
+    # (1) vacant_network/reqloop/g3.py
+    #     新增 pin 220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7
+    # (2) tests/test_reqloop_g3.py
+    #     新增 pin fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd
+    "vacant_network/reqloop/g3.py":
+        "220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7",
+    "tests/test_reqloop_g3.py":
+        "fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd",
 }
 
 
@@ -1740,6 +1758,100 @@ def test_guard_content_pin_g3gate_pair_negative_controls(tmp_path: Path) -> None
     # (b) 正控制：七份守衛檔皆真內容 → 零違規
     root_b = fake_repo()
     for rel in G3GATE_PAIR:
+        (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root_b / rel).write_bytes((REPO / rel).read_bytes())
+    v_ok = guard_content_violations(root_b)
+    assert v_ok == [], f"真內容守衛檔被誤判漂移: {v_ok}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# r1398（vq-el4.86）：GUARD_CONTENT_PIN 擴覆蓋——G3 發射管線對（g3.py＋其測試檔）
+# 缺口（本輪 RED 實證）：G3 發射管線模組 vacant_network/reqloop/g3.py（r1373
+# vq-1zf.6）與其實體紅線守衛檔 tests/test_reqloop_g3.py（18 測；無核准→RC 2、
+# 0 模型呼叫 fail-closed；prompt 無 hidden/scorer；成本缺值→UNKNOWN 絕不填 0；
+# 撞日額度→停、不得重試）皆建於 r1319/r1347/r1365 建錨各輪之後、從未釘住。
+# 攻擊場景（r1365 同型）：模組換「直接印 fire 成功」stub＋測試檔換同名 dummy
+# （18 真名、assert True）→ 守衛套件 96 計數不變、全綠；真發射時的紅線
+# （fail-closed／無 hidden／額度停）被整層掏空＝完整假綠燈（H-0 同構：綠燈
+# 來自沒量該量的）。兩檔不含 pin 本身（無自釘循環；r1347/r1365 先例明文：
+# 「可釘、且必須釘」）。
+# 獨立信號缺失同 r1365：同名 dummy 保持 CI passed 計數；loop 每輪三分支
+# 同步→跨分支 diff 信號被規避——pin 是唯一能抓此 swap 的守衛。
+G3_PAIR = (
+    "vacant_network/reqloop/g3.py",
+    "tests/test_reqloop_g3.py",
+)
+
+
+def test_guard_content_pin_g3_pair_negative_controls(tmp_path: Path) -> None:
+    """r1398（vq-el4.86）：G3 發射管線對（模組＋其 18 測紅線守衛檔）必須在 GUARD_CONTENT_PIN 內。
+    (a) 負控制：模組換「直接印 fire 成功」stub＋測試檔換同名 dummy
+        （18 真名、assert True、守衛套件 96 計數不變）→ guard_content_violations
+        必對兩檔各判內容漂移；
+    (b) 正控制：守衛檔皆真內容 → 零違規（擴錨後不得誤判未改檔）。
+    全部對臨時 repo 操作，不碰真檔；無 subprocess 片段（不觸及安裝合約掃描範圍）。
+    RED 證據（本輪、舊錨）：(a) 的 v == []（兩檔不在 pin → 零違規＝假綠燈）。"""
+
+    def fake_repo() -> Path:
+        root = tmp_path / "repo"
+        for rel in tuple(GUARD_CONTENT_PIN):
+            dst = root / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((REPO / rel).read_bytes())
+        return root
+
+    def place(root: Path, dummy_names: tuple[str, ...]) -> None:
+        for rel in G3_PAIR:
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / "vacant_network/reqloop/g3.py").write_text(
+            "def fire(*args, **kwargs):\n"
+            "    print('G3 FIRED OK（12/12 cells、0 model calls、hidden_after UNKNOWN）')\n",
+            encoding="utf-8",
+        )
+        (root / "tests/test_reqloop_g3.py").write_text(
+            "\n".join(f"def {n}():\n    assert True\n" for n in dummy_names),
+            encoding="utf-8",
+        )
+
+    # (a) g3 模組 stub＋測試檔同名 dummy → 兩檔都必須被判漂移
+    real_names = (
+        "test_channel_is_abstract_contract",
+        "test_arm_specs_match_preregistration",
+        "test_arm_order_matches_gate",
+        "test_dry_run_rc0_zero_calls",
+        "test_fire_no_approval_rc2_zero_calls",
+        "test_fire_invalid_approval_rc2_zero_calls",
+        "test_fire_tampered_manifest_rc1_before_approval",
+        "test_fire_valid_approval_fake_channel_rc0_12cells",
+        "test_three_arms_same_task_input_and_list_only_for_two_arms",
+        "test_prompts_contain_no_hidden_or_scorer",
+        "test_missing_usage_totals_unknown_not_zero",
+        "test_quota_exceeded_stops_no_retry",
+        "test_quota_guard_blocks_before_call",
+        "test_quota_guard_unknown_usage_bounded_by_call_cap",
+        "test_quota_guard_no_backstop_preserves_legacy_behavior",
+        "test_full_rloop_second_round_only_when_missing",
+        "test_glm_channel_uses_cli_only",
+        "test_rc_codes_match_gate",
+    )
+    root_a = fake_repo()
+    place(root_a, real_names)
+    v = guard_content_violations(root_a)
+    assert any("vacant_network/reqloop/g3.py" in s and "內容漂移" in s for s in v), (
+        f"g3 發射管線 stub 未被抓到（r1365 同型缺口：發射管線模組建於建錨輪後、"
+        f"從未釘住；換 fire 成功 stub 後紅線整層掏空仍綠）: {v}"
+    )
+    assert any("tests/test_reqloop_g3.py" in s and "內容漂移" in s for s in v), (
+        f"同名 dummy 測試檔未被抓到（18 真名 assert True、套件 96 計數不變）: {v}"
+    )
+    # 未改的既有守衛檔不得誤判
+    for rel in tuple(GUARD_CONTENT_PIN):
+        if rel not in G3_PAIR:
+            assert not any(rel in s for s in v), f"未改檔被誤判: {rel}: {v}"
+
+    # (b) 正控制：守衛檔皆真內容 → 零違規
+    root_b = fake_repo()
+    for rel in G3_PAIR:
         (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
         (root_b / rel).write_bytes((REPO / rel).read_bytes())
     v_ok = guard_content_violations(root_b)
