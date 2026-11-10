@@ -29,3 +29,12 @@ python3 -m vacant_network.personal twin2k-run \
 ```
 
 `twin2k-run --backend fixture` does not call the endpoint. The example config points at `http://127.0.0.1:11434/v1`, model `qwen3-coder:30b`, `pricing: local`.
+
+Cross-model report from saved run directories. This does not call a model:
+
+```bash
+python3 -m vacant_network.personal twin2k-report \
+  --run "$HOME/vacant-twin2k-qwen" --model qwen3.8:27b \
+  --run "$HOME/vacant-twin2k-gemma" --model gemma4:12b \
+  --out "$HOME/vacant-twin2k-report.md"
+```
