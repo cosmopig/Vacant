@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "base_commit": "c097899e768fe049f0b96f6724b219e8530acc10",
+  "runner_commit": "c097899e768fe049f0b96f6724b219e8530acc10",
+  "calibration_cases": 16,
+  "holdout_cases": 24,
+  "tasks": 12,
+  "legal_subset_counts": {
+    "T01": 14,
+    "T02": 10,
+    "T03": 23,
+    "T04": 12,
+    "T05": 13,
+    "T06": 15,
+    "T07": 15,
+    "T08": 13,
+    "T09": 16,
+    "T10": 15,
+    "T11": 13,
+    "T12": 17
+  },
+  "documented_legal_subset_counts": {
+    "T01": 14,
+    "T02": 10,
+    "T03": 23,
+    "T04": 12,
+    "T05": 13,
+    "T06": 15,
+    "T07": 15,
+    "T08": 13,
+    "T09": 16,
+    "T10": 15,
+    "T11": 13,
+    "T12": 17
+  },
+  "problems": [],
+  "human_answers_in_repo": false,
+  "labels_path_read": false
+}

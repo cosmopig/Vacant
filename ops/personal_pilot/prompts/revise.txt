@@ -1,0 +1,7 @@
+檢視原稿，確認它符合本次明確要求，且核心理由有根據。
+你可以保留或修改；這是最後一輪。
+只輸出完整JSON envelope。
+原始任務：{task}
+個人資料：{profile}
+原稿：{draft}
+客觀回饋：{gate_on_results_or_fixed_no_checker_feedback}

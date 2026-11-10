@@ -1153,6 +1153,12 @@ sha256、驗 Ed25519、比對 `chain_head`，`os.O_EXCL` 讓一張收據只能�
 
 ---
 
+## Twin-2K-500 試驗資料（不是本人自填的 C/H）
+
+測試階段的地面真相用公開資料集 [Twin-2K-500](https://huggingface.co/datasets/LLM-Digital-Twin/Twin-2K-500)（Toubia、Gui、Peng、Merlau、Li、Chen，2025；config `wave_split`；CC BY 4.0）。waves 1–3 用來建 profile，wave 4 的二選項題是保留題。官方 `persona_summary` 用了 wave 4 的答案，所以不用。資料快取在倉庫外（預設 `~/.cache/vacant/twin2k500`）。
+
+引用時的天花板／地板是**初步**數字，要由程式在當次樣本上重算：294 人的粗試算大約是重測一致率 83%、多數決底線 56%。說明與命令：[`ops/personal_pilot/reporting/TWIN2K500.md`](ops/personal_pilot/reporting/TWIN2K500.md)。
+
 ## 文件索引
 
 | 檔案 | 內容 |
