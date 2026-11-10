@@ -131,14 +131,16 @@ canonical 簿記」/r1297「worker/argon 未同步」缺陷類）→BROKEN（fai
 同步輪的 in-scope 內容漂移仍紅燈；消除的只是「分支前進」這個結構性假紅燈。
 負控制：tests/test_reqloop_freeze_check.py::test_diff_sync_counterpart_anchor。
 
-背景（2026-11-11 r1393，vq-el4.81）：新增第 12 項 mandated 檢查 now_redline（11→12 項）——
+背景（2026-11-10 r1393，vq-el4.81）：新增第 12 項 mandated 檢查 now_redline（11→12 項）——
 r1392 的 NOW.md 紅線轉抄守衛（tests/test_reqloop_now_redline.py，5 案）只在 pytest
 套件內跑；旁路 pytest、只看本 ruler 的 FROZEN_STATE_OK 時，紅線轉抄漂移（一個
 hash 前綴／行數、或整行被刪）仍不被一鍵 ruler 測量（H-0 同型：漏掉一項得到的綠燈
 就是漏洞成因）。本項調用同一把尺（redline_violations），不重寫解析邏輯（vrun 同原則）；
 守衛檔／NOW.md 缺 → BROKEN（I-4：未測量不是通過）。紀律（r1387/r1388 同型）：改
-ruler 已同步顯式更新 GUARD_CONTENT_PIN 之 ops/reqloop/freeze_check.py pin（cfbfba31…
-→新值，r1393 記錄在案，見 tests/test_reqloop_freeze_check.py）。負控制：
+ruler 須同步顯式更新 GUARD_CONTENT_PIN 之 ops/reqloop/freeze_check.py pin 並留記錄。
+r1393 改 ruler 但 pin 未更新（守衛照設計抓到、本檔 3 GUARD_CONTENT_PIN 測試紅＝
+r1386 同型遺漏）；r1394 依紀律補 pin（cfbfba31…→新值，解凍記錄見
+tests/test_reqloop_freeze_check.py）。負控制：
 tests/test_reqloop_freeze_check.py::test_now_redline_negative_controls（hash 漂移／
 NOW 缺／守衛檔缺，3 路徑全 BROKEN）。
 

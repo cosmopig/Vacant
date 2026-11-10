@@ -1296,8 +1296,19 @@ GUARD_CONTENT_PIN = {
     # (1) ops/reqloop/freeze_check.py
     #     4f8f669b2fdb5405172880cf2f8813fe58f000ef9f7c27a96ee07d136172e1fd
     #     → cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e
+    # r1394 解凍記錄（補 r1393 遺漏，vq-el4.81）：r1393（790368a5e）合法修改
+    # freeze_check.py——新增第 12 項 mandated 檢查 now_redline（r1392 紅線轉抄守衛接進
+    # 一鍵 ruler、重用 tests/test_reqloop_now_redline.py 之 redline_violations() 為唯一
+    # 實現）＋本檔 test_now_redline_green_light／test_now_redline_negative_controls
+    # （綠燈 1＋負控 3 路徑）；但 commit 時未更新本 pin（其 docstring「pin 已更新」未
+    # 兌現——r1386 同型遺漏，守衛照設計抓到：本檔 3 GUARD_CONTENT_PIN 測試紅）。r1394
+    # 依「合法修改須顯式更新錨並留記錄」紀律補 pin（不改 ruler 邏輯、不削守衛；
+    # r1393 docstring 虛記同步更正為如實記載）：
+    # (1) ops/reqloop/freeze_check.py
+    #     cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e
+    #     → 42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5
     "ops/reqloop/freeze_check.py":
-        "cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e",
+        "42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
@@ -1730,7 +1741,8 @@ def test_guard_content_pin_g3gate_pair_negative_controls(tmp_path: Path) -> None
 # redline_violations() 為唯一實現（同一把尺、無第二份 ruler、vrun 同原則）；
 # 守衛檔缺／NOW.md 缺 → BROKEN（I-4：未測量不是通過）。
 # 紀律（r1387/r1388 同型）：改 ruler 須同步顯式更新 GUARD_CONTENT_PIN 中
-# ops/reqloop/freeze_check.py 之 pin 並留解凍記錄（見該 pin 條目 r1393 記錄）。
+# ops/reqloop/freeze_check.py 之 pin 並留解凍記錄（見該 pin 條目 r1394 記錄）；
+# r1393 改 ruler 但 pin 未更新（守衛抓到、三測試紅），r1394 依紀律補齊。
 # ─────────────────────────────────────────────────────────────────────────────
 
 
