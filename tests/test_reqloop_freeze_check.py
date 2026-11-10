@@ -33,6 +33,7 @@ MANDATED = (
     "bk_state",       # 審查指示 #3 工作樹衛生：STATE.md 簿記鏡像同步（r1271 起）
     "bk_now",         # 審查指示 #3 工作樹衛生：NOW.md 簿記鏡像同步（r1271 起）
     "wt_clean",       # 審查指示 #3 工作樹衛生：規範三分支 worktree in-scope 無殘留（r1309）
+    "now_redline",    # r1393（vq-el4.81）：NOW.md 紅線契約行 vs 磁碟，進一鍵 ruler（11→12 項）
 )
 
 
@@ -1295,8 +1296,19 @@ GUARD_CONTENT_PIN = {
     # (1) ops/reqloop/freeze_check.py
     #     4f8f669b2fdb5405172880cf2f8813fe58f000ef9f7c27a96ee07d136172e1fd
     #     → cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e
+    # r1394 解凍記錄（補 r1393 遺漏，vq-el4.81）：r1393（790368a5e）合法修改
+    # freeze_check.py——新增第 12 項 mandated 檢查 now_redline（r1392 紅線轉抄守衛接進
+    # 一鍵 ruler、重用 tests/test_reqloop_now_redline.py 之 redline_violations() 為唯一
+    # 實現）＋本檔 test_now_redline_green_light／test_now_redline_negative_controls
+    # （綠燈 1＋負控 3 路徑）；但 commit 時未更新本 pin（其 docstring「pin 已更新」未
+    # 兌現——r1386 同型遺漏，守衛照設計抓到：本檔 3 GUARD_CONTENT_PIN 測試紅）。r1394
+    # 依「合法修改須顯式更新錨並留記錄」紀律補 pin（不改 ruler 邏輯、不削守衛；
+    # r1393 docstring 虛記同步更正為如實記載）：
+    # (1) ops/reqloop/freeze_check.py
+    #     cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e
+    #     → 42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5
     "ops/reqloop/freeze_check.py":
-        "cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e",
+        "42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5",
     "tests/test_reqloop_frozen_anchors.py":
         "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
     "tests/test_reqloop_ci_contract.py":
@@ -1717,3 +1729,90 @@ def test_guard_content_pin_g3gate_pair_negative_controls(tmp_path: Path) -> None
         (root_b / rel).write_bytes((REPO / rel).read_bytes())
     v_ok = guard_content_violations(root_b)
     assert v_ok == [], f"真內容守衛檔被誤判漂移: {v_ok}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# r1393（vq-el4.81）：NOW.md 紅線守衛接進 freeze_check 一鍵 ruler（11→12 項）
+#
+# 背景：r1392 落地的紅線轉抄守衛（tests/test_reqloop_now_redline.py）只在 pytest
+# 套件內跑——旁路 pytest、只看 freeze_check 的 FROZEN_STATE_OK 時，紅線轉抄漂移
+# 仍不被一鍵 ruler 測量（H-0 同型：忘了把該測的測進 ruler 得到的綠燈）。
+# 本輪以第 12 項 mandated 檢查 now_redline 補上：重用紅線守衛檔的
+# redline_violations() 為唯一實現（同一把尺、無第二份 ruler、vrun 同原則）；
+# 守衛檔缺／NOW.md 缺 → BROKEN（I-4：未測量不是通過）。
+# 紀律（r1387/r1388 同型）：改 ruler 須同步顯式更新 GUARD_CONTENT_PIN 中
+# ops/reqloop/freeze_check.py 之 pin 並留解凍記錄（見該 pin 條目 r1394 記錄）；
+# r1393 改 ruler 但 pin 未更新（守衛抓到、三測試紅），r1394 依紀律補齊。
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _now_redline_guard():
+    """載入紅線守衛唯一實現（tests/test_reqloop_now_redline.py）。"""
+    import importlib.util as _ilu
+
+    guard = REPO / "tests" / "test_reqloop_now_redline.py"
+    spec = _ilu.spec_from_file_location("reqloop_now_redline_guard", guard)
+    assert spec is not None and spec.loader is not None, f"守衛檔不可載入: {guard}"
+    mod = _ilu.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_now_redline_green_light() -> None:
+    """（綠）真 repo：NOW.md 紅線契約行與磁碟逐條相符 → now_redline OK。
+    本輪目標輸出：freeze_check 12/12 OK（上一輪 11/11）。"""
+    mod = _load_freeze_check()
+    g = _now_redline_guard()
+    v = g.redline_violations(REPO / "NOW.md")
+    assert v == [], f"前置：紅線守衛本身紅（NOW.md 與磁碟漂移）: {v}"
+    mod.results.clear()
+    mod.run_check("now_redline", mod.check_now_redline)
+    assert len(mod.results) == 1, f"run_check 應記 1 筆: {mod.results}"
+    name, ok, detail = mod.results[0]
+    assert name == "now_redline", f"檢查名錯: {mod.results[0]}"
+    assert ok is True, f"真 repo 應 OK: {mod.results[0]}"
+    assert "now_redline" not in detail, "OK 訊息不應混入 BROKEN 字樣: " + detail
+
+
+def test_now_redline_negative_controls(tmp_path: Path) -> None:
+    """（負控制×3）RED 路徑證明，防空轉假綠燈（I-4）。
+    (a) NOW.md 紅線轉抄漂移（blob hash 前綴差一位，r1392 守衛同型負控）→ BROKEN；
+    (b) NOW.md 不存在 → BROKEN（fail-closed，不是 OK）；
+    (c) 守衛模組不存在 → BROKEN（fail-closed；沙盒裡 ruler 被拷走時即此路徑）。
+    """
+    mod = _load_freeze_check()
+    g = _now_redline_guard()
+
+    # (a) 轉抄漂移：只在紅線契約行內改一個 blob 前綴（重用守衛自己的 _mutate_redline，
+    #     同一把尺；注意：NOW.md 另有狀態行也含 blob e757aec5…，全檔 sub 會打錯行）
+    mutated = g._mutate_redline(REPO / "NOW.md", tmp_path, "e757aec5", "0757aec5")
+    v = g.redline_violations(mutated)
+    assert any("extract.py" in s and "blob 前綴漂移" in s for s in v), (
+        f"前置：守衛應抓到該漂移: {v}"
+    )
+    mod.results.clear()
+    mod.run_check("now_redline", lambda: mod.check_now_redline(now=mutated))
+    name, ok, detail = mod.results[0]
+    assert name == "now_redline"
+    assert ok is False, f"篡改 NOW.md 應 BROKEN: {mod.results[0]}"
+    assert "漂移" in detail, f"BROKEN 訊息應點名漂移: {mod.results[0]}"
+
+    # (b) NOW.md 不存在 → BROKEN（fail-closed）
+    missing_now = tmp_path / "no_such_NOW.md"
+    assert not missing_now.exists()
+    mod.results.clear()
+    mod.run_check("now_redline", lambda: mod.check_now_redline(now=missing_now))
+    name, ok, detail = mod.results[0]
+    assert name == "now_redline"
+    assert ok is False, f"NOW.md 缺應 BROKEN（fail-closed）: {mod.results[0]}"
+    assert "未測量" in detail or "不存在" in detail, f"detail 應點名未測量: {mod.results[0]}"
+
+    # (c) 守衛模組不存在 → BROKEN（fail-closed；沙盒裡 freeze_check 被拷走時即此路徑）
+    missing_guard = tmp_path / "no_such_guard.py"
+    assert not missing_guard.exists()
+    mod.results.clear()
+    mod.run_check("now_redline", lambda: mod.check_now_redline(guard=missing_guard))
+    name, ok, detail = mod.results[0]
+    assert name == "now_redline"
+    assert ok is False, f"守衛模組缺應 BROKEN（fail-closed）: {mod.results[0]}"
+    assert "守衛" in detail, f"detail 應點名守衛缺: {mod.results[0]}"
