@@ -1,16 +1,15 @@
-# NOW — r1375 (2026-11-10)
+# NOW — r1376 (2026-11-10)
 
 ## Current State
-- r1375 redo（審查點名 4 檔直接開啟＋依賴值獨立重算）：effects summary 60,228 B（a710f7e4…）聚合自 cells_detail 重算全 MATCH（50 cells、w2r 13+11、g7/l6 與 g7/l4、r2w 0、local 27/18、current 30/20、sess 35/20、api 915/457、tok 33.67M/19.50M、mismatch 3/2 格）；g25 filing 4,681 B 6 sha256 獨立重算全 MATCH＋三門 PASS（g1 39/39、real14 9/9、phase3 9 cells fixed 7 unresolved 2）；extract.py 1217 行 e757aec5、repair.py 2795 行 5147f8c3 實開＋docstring 規則確認——r1375 依賴值全成立、條目不改。
-- r1375 維護驗證（NOW r1374 下一步全數執行＋審查 #5 核驗，0 產品改動）：CI 一次讀取 3 HEAD（qwen27b@dde6ea83b／worker@9feed7670／argon@39eb6a5f3）無 per-sha json→全 UNKNOWN（pending、不 poll）。
-- 驗收全綠（本輪全數新跑）：freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0（diff 0×2、wt 3/3、filing 6/6 MATCH、queue 空含隱藏、g3gate NOT_FIRED+PLAN_OK、bk 同步）；守衛 6 檔 86 passed（freeze 22／anchors 5／ci 2／ves 19／g3gate 22／g3 16）；ves 7/7 OK。
-- 審查 #5：2dd0d4891（auto/argon）為 argon HEAD 祖先、662987424 亦祖先、in-scope diff 0×2→合併已完成、審查通過、無需動作。
-- 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決。
+- r1376 實質修復（vq-el4.66 開→關、非簿記輪）：真產品 bug（planner 例外條款；vq-el4 66/66 全閉後唯一授權之非等待工作）——G3 `QuotaGuard` 對 unknown-usage 通道 **fail-open**：只在 `usage.tokens` 非 None 時累計 `known_tokens`，通道若每通回報 unknown（None）→`known_tokens` 恆 0、`daily_token_cap` 永不觸發→舊碼放行無限呼叫，違反紅線「撞日額度即停、不得重試」（實證 cap=250 仍放行 50 次）。
+- 修復（TDD）：`tests/test_reqloop_g3.py` 先增 2 測試→RED；`g3.py` `QuotaGuard` 增 `max_calls` fail-closed 後備（呼叫數恆可測、不依賴「用量恰好被測到」）＋`run_g3` 以 plan 上界（擷取每 task 一次＋每格 max_rounds）傳 `max_calls`→GREEN。缺值仍報 UNKNOWN（不假裝 0）、但放行有界。
+- 驗收（本輪全數新跑）：`test_reqloop_g3.py` 18/18 PASS；守衛 7 檔 pinned 測試 48/48 PASS（anchors 5／ci 2／ves 19／g3gate 22）；freeze_check 10/11 OK（唯一 BROKEN＝`wt_clean`、僅因本輪 2 檔未 commit＝期中預期、commit 後 11/11）；ves 7/7 OK。
+- **未 commit**（AGENTS.md 保守檔：未獲明確授權不 commit）；建議 `git commit -am 'r1376: QuotaGuard fail-open fix (unknown-usage bounded by max_calls)'`。
 
-## Next Step (r1376)
-1. CI 一次讀取：三分支 HEAD per-sha（含本輪新 commit）→記 GREEN/RED/UNKNOWN（不 poll、不等待）。
-2. 維持驗收：freeze_check 11/11 OK；守衛 86 passed；in-scope diff 0×2；queue 空（含隱藏）；g3gate NOT_FIRED。
-3. 待人類：G3 --fire（vq-1zf）。
+## Next Step (r1377)
+1. 若獲授權：commit 本輪 2 檔（g3.py＋test_reqloop_g3.py）→freeze_check 應 11/11 OK。
+2. CI 一次讀取：三分支 HEAD per-sha→記 GREEN/RED/UNKNOWN（不 poll）。
+3. 待人類：G3 `--fire`（vq-1zf、不代發、不入 queue）；CI 通道裁決。
 
 ## Red lines
 - 無 push；.github/workflows/ 只讀；不讀 /srv/eval/hidden/ 或 scorer.py；G3 未經人類核准不得發射（不代發 --fire、不入 queue）；/srv/vlab/queue/ 不放任務；無 reset/rebase；凍結檔（repair.py 2795 行、extract.py 1217 行、checks.py、run_eval.py）與 filing 不改；只跑相關測試、不自啟 full pytest；無 sleep poll CI；0 模型呼叫。
