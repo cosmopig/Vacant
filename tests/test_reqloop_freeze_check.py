@@ -1350,6 +1350,21 @@ GUARD_CONTENT_PIN = {
         "a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b",
     "tests/test_reqloop_g3gate.py":
         "87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d",
+    # r1397 擴覆蓋記錄（vq-el4.85）：GUARD_CONTENT_PIN 擴覆蓋——NOW.md 紅線轉抄守衛檔
+    # （freeze_check 第 12 項 mandated 檢查 now_redline invoke 其 redline_violations()
+    # 為唯一實現）。缺口（本輪 RED 雙實證）：該檔 r1392（vq-el4.80）建立、晚於
+    # r1319/r1347/r1365 建錨各輪、從未釘住——vq-el4.63 同型。攻擊場景：同名 stub 換檔
+    # （5 真名 assert True＋redline_violations→[]）→ 套件 5 例仍全綠、95 計數不變；
+    # 下游實證：真 freeze_check.check_now_redline 對該 stub 判 OK（真 NOW.md 與「紅線
+    # 契約行被整行掏空」的 NOW.md 皆判 ('now_redline', True, …)＝完整假綠燈、H-0 同構）。
+    # 既有行為級信號（test_now_redline_negative_controls）住在自排除（自釘循環）的
+    # test_reqloop_freeze_check.py 內，被 shortcut 同削即 swap 完成；位元組錨不依賴
+    # 任何行為輸出、抓一切位元組改動。該檔不含 pin 本身（無自釘循環），故可釘、且
+    # 必須釘（r1347 先例明文）：
+    # (1) tests/test_reqloop_now_redline.py
+    #     新增 pin 6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f
+    "tests/test_reqloop_now_redline.py":
+        "6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f",
 }
 
 
@@ -1816,3 +1831,71 @@ def test_now_redline_negative_controls(tmp_path: Path) -> None:
     assert name == "now_redline"
     assert ok is False, f"守衛模組缺應 BROKEN（fail-closed）: {mod.results[0]}"
     assert "守衛" in detail, f"detail 應點名守衛缺: {mod.results[0]}"
+
+
+# ── r1397（vq-el4.85）：GUARD_CONTENT_PIN 擴覆蓋——NOW.md 紅線轉抄守衛檔 ──
+# 缺口（本輪 RED 實證）：freeze_check 第 12 項 mandated 檢查 now_redline 所 invoke 之
+# redline_violations() 唯一實現在 tests/test_reqloop_now_redline.py（r1392 vq-el4.80 建立，
+# 晚於 r1319/r1347/r1365 建錨各輪、從未釘住——vq-el4.63 同型：ruler 所 invoke 的守衛檔
+# 建於建錨之後）。攻擊場景（r1365 同型）：該檔換同名 stub（5 真名 assert True＋
+# redline_violations→[]）→ 套件 5 例仍全綠、95 計數不變；check_now_redline 調 stub 得 []
+# → ruler 照判 OK；NOW.md 紅線契約行可整行掏空而 FROZEN_STATE_OK 仍成立（H-0 同構：
+# 綠燈來自沒量該量的；r1319/r1347/r1365 同族：計數守住、檔案未守）。既有行為級信號
+# （test_now_redline_negative_controls）住在自排除（自釘循環）的 test_reqloop_freeze_check.py
+# 內——被 shortcut 同削即 swap 完成；位元組錨不依賴任何行為輸出、抓一切位元組改動。
+# 該檔不含 pin 本身（無自釘循環），故可釘、且必須釘（r1347 先例明文）。
+NOW_REDLINE_GUARD = "tests/test_reqloop_now_redline.py"
+
+
+def test_guard_content_pin_now_redline_guard_negative_controls(tmp_path: Path) -> None:
+    """r1397（vq-el4.85）：ruler（freeze_check 第 12 項 now_redline）所 invoke 之紅線
+    守衛檔必須在 GUARD_CONTENT_PIN 內。
+    (a) 負控制：檔換同名 stub（5 真名 assert True＋redline_violations→[]）→
+        guard_content_violations 必判內容漂移；
+    (b) 正控制：八份守衛檔皆真內容 → 零違規（擴錨後不得誤判未改檔）。
+    全部對臨時 repo 操作，不碰真檔；無 subprocess 片段（不觸及安裝合約掃描範圍）。
+    RED 證據（本輪、舊錨）：(a) 的 v == []（檔不在 pin → 零違規＝假綠燈；r1365 同形：
+    guard_content_violations 只掃 pin 內檔，未釘檔的 stub swap 對它是隱形的）。"""
+
+    def fake_repo() -> Path:
+        root = tmp_path / "repo"
+        for rel in tuple(GUARD_CONTENT_PIN):
+            dst = root / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((REPO / rel).read_bytes())
+        return root
+
+    # (a) 同名 stub（5 真名 assert True＋redline_violations→[]）→ 必須被判漂移
+    real_names = (
+        "test_now_redline_claims_match_disk",
+        "test_guard_detects_transcribed_hash_drift",
+        "test_guard_detects_transcribed_line_count_drift",
+        "test_guard_detects_filing_count_drift",
+        "test_guard_detects_missing_redline_line",
+    )
+    stub = (
+        "def redline_violations(now_path=None):\n    return []\n\n"
+        + "\n".join(f"def {n}():\n    assert True\n" for n in real_names)
+    )
+    root_a = fake_repo()
+    dst = root_a / NOW_REDLINE_GUARD
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(stub, encoding="utf-8")
+    v = guard_content_violations(root_a)
+    assert any(NOW_REDLINE_GUARD in s and "內容漂移" in s for s in v), (
+        f"紅線守衛 stub swap 未被抓到（vq-el4.63 同型缺口：ruler 所 invoke 的守衛檔"
+        f"從未釘住；check_now_redline 調 stub 之 redline_violations 得 [] → ruler 照判 OK，"
+        f"NOW.md 紅線契約行可整行掏空而 FROZEN_STATE_OK 仍成立）: {v}"
+    )
+    # 未改的既有守衛檔不得誤判
+    for rel in tuple(GUARD_CONTENT_PIN):
+        if rel != NOW_REDLINE_GUARD:
+            assert not any(rel in s for s in v), f"未改檔被誤判: {rel}: {v}"
+
+    # (b) 正控制：八份守衛檔皆真內容 → 零違規
+    root_b = fake_repo()
+    dst = root_b / NOW_REDLINE_GUARD
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_bytes((REPO / NOW_REDLINE_GUARD).read_bytes())
+    v_ok = guard_content_violations(root_b)
+    assert v_ok == [], f"真內容守衛檔被誤判漂移: {v_ok}"
