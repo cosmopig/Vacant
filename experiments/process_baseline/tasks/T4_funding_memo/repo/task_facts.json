@@ -1,0 +1,10 @@
+{"task_id":"T4_funding_memo",
+ "goal":"Pick options to fund this round for a small research team (synthetic example).",
+ "budget_units":10, "person_hours_cap":60,
+ "options":[
+  {"id":"A","title":"Re-run baseline with logging","cost_units":2,"person_hours":10,"depends_on":[]},
+  {"id":"B","title":"New retrieval module","cost_units":5,"person_hours":30,"depends_on":["A"]},
+  {"id":"C","title":"User interview round","cost_units":3,"person_hours":20,"depends_on":[]},
+  {"id":"D","title":"Dashboard polish","cost_units":4,"person_hours":15,"depends_on":[]},
+  {"id":"E","title":"Failure taxonomy","cost_units":1,"person_hours":8,"depends_on":["A"]}
+ ]}

@@ -1,0 +1,4 @@
+{"task_id":"T1_bulk_discount","family":"bugfix",
+ "prompt":"Customers say the bulk discount is wrong for big orders. Please fix it.",
+ "ambiguity":"Which threshold is 'big'? Is the bug in the >= vs > boundary or in stacking with the coupon? Existing tests encode one interpretation.",
+ "process_dimensions":["read tests before editing","run tests before/after","ask vs assume the business rule","minimal diff vs rewrite"]}
