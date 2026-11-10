@@ -143,6 +143,13 @@ def _phase_internal_check(name: str, p: dict | None) -> tuple[str, bool, str]:
         have = p.get(fkey)
         if have != want:
             problems.append(f"{fkey}={have}（逐格重算={want}）")
+    # r1354（vq-el4.60）：movement_total（人審 headline）覆核——
+    # 必須＝逐格重算 w2r+r2w；缺值或不符即 BROKEN。此前 13→12 仍 7/7 OK rc=0
+    # 假綠燈（實測 RED）；H-0：漏一項得到的綠燈就是洞的成因；I-4：未覆核不是通過。
+    want_movement = agg["wrong_to_right"] + agg["right_to_wrong"]
+    have_movement = p.get("movement_total")
+    if have_movement != want_movement:
+        problems.append(f"movement_total={have_movement}（逐格重算 w2r+r2w={want_movement}）")
     have_arms = p.get("per_arm") or {}
     if set(have_arms) != set(agg["per_arm"]):
         problems.append(f"per_arm 臂集合={sorted(have_arms)}（重算={sorted(agg['per_arm'])}）")
@@ -168,6 +175,7 @@ def _phase_internal_check(name: str, p: dict | None) -> tuple[str, bool, str]:
     if problems:
         return name, False, f"{name}: " + "；".join(problems[:6])
     return name, True, f"{name}: {agg['cells']} 格；w2r={agg['wrong_to_right']}/r2w={agg['right_to_wrong']}；" \
+                       f"movement={want_movement}；" \
                        f"arm w2r=" + "/".join(f"{a}{v['wrong_to_right']}" for a, v in sorted(agg['per_arm'].items()))
 
 
