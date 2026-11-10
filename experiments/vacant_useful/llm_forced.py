@@ -71,6 +71,7 @@ def main():
     ap.add_argument("--model", default=os.environ.get("VACANT_MODEL", "qwen3.8:27b"))
     ap.add_argument("--seed", type=int, default=20261109)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--rpm", type=float, default=18.0, help="max requests per minute")
     a = ap.parse_args()
     D = pickle.load(open(CACHE / "compact.pkl", "rb"))
     pids = json.load(open(Path(a.sample) / "manifest.json"))["pids"]
@@ -94,6 +95,10 @@ def main():
                 prompt = PROMPT.format(precedents=precedent_block(w4, qid, k, a.seed), question=f"{stem}\nA. {A}\nB. {B}")
                 if a.dry_run:
                     print(prompt); return
+                gap = 60.0 / a.rpm
+                if getattr(main, "_last", None) and time.time() - main._last < gap:
+                    time.sleep(gap - (time.time() - main._last))
+                main._last = time.time()
                 t0 = time.time(); text = err = None
                 for _ in range(2):
                     try:
