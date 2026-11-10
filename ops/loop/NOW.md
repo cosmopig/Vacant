@@ -2,19 +2,18 @@
 
 主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結）、G2 已完（凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 現況（r1406、2026-11-10）
+## 現況（r1407、2026-11-10）
 
-r1406＝r1405 rc=124 超時殘留收口＋vq-el4.90 結案（全庫唯一 open 仍 vq-1zf）。
-- 紅燈根因（輪首 freeze_check 實跑、2/12 BROKEN）：r1405 最終簿記（ba5fe0a68 auto-commit）僅落 qwen27b，worker/argon 停在 5a74f7534／a03ec7927（4 簿記檔身份缺失）→diff_worker／diff_argon「no sync counterpart」（非產品 bug；in-scope 碼 0 檔）。
-- 修（r1406 sync commits）：兩 worktree `git checkout auto/qwen27b -- STATE.md NOW.md ops/STATE.md ops/loop/NOW.md`＋commit（worker@6f4b5dfa4／argon@98528f91c）→diff OK→FROZEN_STATE_OK rc=0。
-- vq-el4.90（is_green 假綠燈洞、r1405 實質完成）：本地驗收齊、唯一未驗證＝per-sha CI 測量（環境、每輪 ci_tip_check 追到 COVERED；r1402／r1404 先例亦帶 CI 未跑結案）→本輪 bd close（r1405 被超時切斷未執行）。
-- 驗收（本輪全數新跑）：守衛 8 檔 109 passed in 5.03s；freeze_check 12/12 FROZEN_STATE_OK rc=0（含 now_redline）；ves 7/7 EFFECTS_SUMMARY_OK rc=0（policy30 13w0r g7/l6、once20 11w0r g7/l4、reference MATCH）；g3gate 22 passed NOT_FIRED；in-scope diff 0×2；queue 空（含隱藏）；live ci_tip_check→NO_COVERAGE ×3→CI_TIP_BROKEN rc=1（r1405 碼未被綠 CI 測量、fail-closed、在跑≠已綠、state.json 一次讀取不 poll）。
-- 簿記：canonical＝STATE.md＋NOW.md；鏡像＝ops/STATE.md＋ops/loop/NOW.md（byte-identical）；三分支同步（qwen27b@ba5fe0a68／worker@6f4b5dfa4／argon@98528f91c）、in-scope diff 0×2。
+r1407＝驗證＋簿記輪：本輪改善之命令輸出＝`python3 ops/reqloop/ci_tip_check.py`：r1406 NO_COVERAGE×3／CI_TIP_BROKEN rc=1 → 本輪 **VERDICT: CI_TIP_OK rc=0**（全數新跑）。
+- 三分支收口：qwen27b@9e47d350f PEER_COVERED（綠祖先 9131e49aa、peer=worker@146037568 COVERED、root tree 恆等 65b226f68a70…＝位元組恆等）；worker@146037568 COVERED（綠祖先 5a74f7534、diff 純 4 簿記檔）；argon@0fb7f5fa5 PEER_COVERED——＝r1405 is_green 碼 CI 收口機械終證（state.json 一次讀取：CI 在跑、在跑≠已綠、不 poll）。
+- 驗收（本輪全數新跑）：守衛 8 檔 109 passed in 5.00s（審查基線 108 之超集、0 排除、0 弱化）；freeze_check 12/12 FROZEN_STATE_OK rc=0（anchors 5、ci_contract 2、diff 0×2、filing 3/3＋3/3、queue 空含隱藏、g3gate NOT_FIRED、wt_clean 3/3、now_redline OK）；ves 7/7 EFFECTS_SUMMARY_OK rc=0（13w0r g7/l6、11w0r g7/l4、reference MATCH）；GUARD_CONTENT_PIN 12/12 sha256 MATCH（本輪獨立重算）；凍結錨實算＝repair 2795 行／blob 5147f8c3、extract 1217 行／blob e757aec5。
+- 環境：無新人類指示（ops/ 最新 11-07）、tickets/open 空、/srv/vlab/queue 空、vq-el4 92/92 全閉、全庫唯一 open＝vq-1zf（G3）待人類 --fire、不代發、不入 queue。
+- 簿記：canonical＝STATE.md＋NOW.md；鏡像＝ops/STATE.md＋ops/loop/NOW.md（byte-identical）；三分支同步後 in-scope diff 0×2。
 
 ## 下一步
 
-1. 下輪開頭重跑 `python3 ops/reqloop/ci_tip_check.py`（一次讀取、不 poll）：現 3 tips（ba5fe0a68／6f4b5dfa4／98528f91c）若被綠祖先覆蓋→COVERED＝r1405 碼 CI 收口（rc=0）；未覆蓋→NO_COVERAGE 非退步（待 CI）、當時再驗。
-2. 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決（GitHub auto-ci.yml disabled_manually、本地 vacant-ci 為實效通道）。
+1. 下輪開頭重跑 `python3 ops/reqloop/ci_tip_check.py`（一次讀取、不 poll）：仍 CI_TIP_OK 且 tips 未動＝收口穩定；轉紅＝查因（不預設退步）。
+2. 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決（auto-ci.yml disabled_manually、本地 vacant-ci 實效通道；不翻開關、不重複診斷）。
 
 ## 紅線
 
