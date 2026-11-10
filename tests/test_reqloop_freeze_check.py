@@ -1315,11 +1315,24 @@ GUARD_CONTENT_PIN = {
         "7a49b66c0b69784ec20401280f474450ca9b6866364e355ec933a18e92d8f9a7",
     "tests/test_reqloop_verify_effects_summary.py":
         "578f73bc5b4f262d2fb935315a460cf4b57b1412eb3f6cef107a79329f729fc2",
+    # r1365 解凍記錄（vq-el4.63）：G3 發射前置門對（freeze_check g3gate_plan 所 invoke 的
+    # 門模組＋其 22 測測試檔）——r1257（vq-1zf.3）建立、r1319/r1347 建錨時點在後、
+    # 從未釘住。攻擊場景（r1319/r1347 同型）：模組換「直接印 NOT FIRED＋G3GATE
+    # PLAN OK、exit 0」stub＋測試檔換同名 dummy（22 真名、assert True、CI 計數不變）
+    # → 舊 guard_content_violations 回空清單＋freeze_check g3gate_plan 照判 OK（本輪
+    # RED 雙實證）＝完整假綠燈（H-0 同構：綠燈來自沒量該量的）。兩檔不含 pin 本身
+    # （無自釘循環），故可釘、且必須釘——顯式更新錨並留記錄：
+    # (1) vacant_network/reqloop/g3gate.py sha256=a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b
+    # (2) tests/test_reqloop_g3gate.py sha256=87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d
+    "vacant_network/reqloop/g3gate.py":
+        "a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b",
+    "tests/test_reqloop_g3gate.py":
+        "87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d",
 }
 
 
 def guard_content_violations(root: Path) -> list[str]:
-    """五份守衛檔內容（r1347 起）vs GUARD_CONTENT_PIN 的違規清單；空列表＝逐位吻合。
+    """七份守衛檔內容（r1347 起五份；r1365 擴至七份）vs GUARD_CONTENT_PIN 的違規清單；空列表＝逐位吻合。
 
     只讀受測檔，不寫任何共享狀態；root 為 repo 根（真 repo 或臨時 repo）。
     """
@@ -1341,8 +1354,8 @@ def guard_content_violations(root: Path) -> list[str]:
 
 
 def test_guard_content_pin_green_and_negative_controls(tmp_path: Path) -> None:
-    """守衛內容錨（r1319；r1347 擴至五份）：
-    (a) 綠燈：真 repo 五份守衛檔與 GUARD_CONTENT_PIN 逐位吻合；
+    """守衛內容錨（r1319；r1347 擴至五份；r1365 擴至七份）：
+    (a) 綠燈：真 repo 七份守衛檔與 GUARD_CONTENT_PIN 逐位吻合；
     (b) anchors 守衛檔被換成同名 dummy（5×assert True，恰為 freeze_check 期望真名）
         → 必須判內容漂移（r1314 之前的假綠燈，本輪起必須紅），且未改檔不得誤判；
     (c) ruler freeze_check.py 被換成直接印 FROZEN_STATE_OK 的 stub → 必須判漂移；
@@ -1352,7 +1365,7 @@ def test_guard_content_pin_green_and_negative_controls(tmp_path: Path) -> None:
 
     # (a) 真 repo 綠燈
     v = guard_content_violations(REPO)
-    assert v == [], f"三份守衛檔內容須與 GUARD_CONTENT_PIN 吻合（解冻須顯式更新錨並留記錄）: {v}"
+    assert v == [], f"七份守衛檔內容須與 GUARD_CONTENT_PIN 吻合（解冻須顯式更新錨並留記錄）: {v}"
 
     def fake_repo() -> Path:
         root = tmp_path / "repo"
@@ -1593,6 +1606,103 @@ def test_guard_content_pin_effects_summary_pair_negative_controls(tmp_path: Path
     # (b) 正控制：五份守衛檔皆真內容 → 零違規
     root_b = fake_repo()
     for rel in EFFECTS_PAIR:
+        (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root_b / rel).write_bytes((REPO / rel).read_bytes())
+    v_ok = guard_content_violations(root_b)
+    assert v_ok == [], f"真內容守衛檔被誤判漂移: {v_ok}"
+
+
+# ── r1365（vq-el4.63）：GUARD_CONTENT_PIN 擴覆蓋——G3 發射前置門對（g3gate 模組＋其測試檔）──
+# 缺口（本輪 RED 實證）：freeze_check 的 g3gate_plan 只驗子程 rc 0＋stdout 含「NOT FIRED」
+# ＋「G3GATE PLAN OK」——ruler 所 invoke 的 G3 發射前置門模組 vacant_network/reqloop/g3gate.py
+# （r1257 vq-1zf.3）可被換成「直接印該兩行、exit 0」的 stub 而 freeze_check 照判 OK；其測試檔
+# tests/test_reqloop_g3gate.py（22 測）可被換同名 dummy（22 真名、assert True）而 CI 套件
+# passed 計數不變（5106）——完整假綠燈（H-0 同構：綠燈來自沒量該量的；r1319/r1347 同族：
+# 計數守住、身份未守／檔案未守）。GUARD_CONTENT_PIN（r1319；r1347 擴至五份）未覆蓋此兩檔；
+# r1347 先例明文：「兩檔不含 pin 本身（無自釘循環），故可釘、且必須釘」——本對同形。
+# 獨立信號缺失實證：同名 dummy 保持 CI 計數；loop 每輪自動同步三分支 worktree→跨分支
+# diff 信號亦被規避——pin 是唯一能抓此 swap 的守衛。
+G3GATE_PAIR = (
+    "vacant_network/reqloop/g3gate.py",
+    "tests/test_reqloop_g3gate.py",
+)
+
+
+def test_guard_content_pin_g3gate_pair_negative_controls(tmp_path: Path) -> None:
+    """r1365（vq-el4.63）：G3 發射前置門對（模組＋其測試檔）必須在 GUARD_CONTENT_PIN 內。
+    (a) 負控制：模組換「直接印 NOT FIRED＋G3GATE PLAN OK、exit 0」stub＋測試檔換同名
+        dummy（22 真名、assert True、CI 計數不變）→ guard_content_violations 必對兩檔
+        各判內容漂移；
+    (b) 正控制：七份守衛檔皆真內容 → 零違規（擴錨後不得誤判未改檔）。
+    全部對臨時 repo 操作，不碰真檔；無 subprocess 片段（不觸及安裝合約掃描範圍）。
+    RED 證據（本輪、舊錨）：(a) 的 v == []（兩檔不在 pin → 零違規＝假綠燈）；
+    下游實證：真 freeze_check.check_g3gate 對該 stub 判 OK（rc=0 NOT_FIRED=True
+    PLAN_OK=True）——守衛套 v==[]＋ruler 照綠＝完整假綠燈。"""
+
+    def fake_repo() -> Path:
+        root = tmp_path / "repo"
+        for rel in tuple(GUARD_CONTENT_PIN):
+            dst = root / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((REPO / rel).read_bytes())
+        return root
+
+    def place(root: Path, dummy_names: tuple[str, ...]) -> None:
+        for rel in G3GATE_PAIR:
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / "vacant_network/reqloop/g3gate.py").write_text(
+            "print('NOT FIRED（無核准信號；0 model calls）')\n"
+            "print('G3GATE PLAN OK')\n",
+            encoding="utf-8",
+        )
+        (root / "tests/test_reqloop_g3gate.py").write_text(
+            "\n".join(f"def {n}():\n    assert True\n" for n in dummy_names),
+            encoding="utf-8",
+        )
+
+    # (a) g3gate 模組 stub＋測試檔同名 dummy → 兩檔都必須被判漂移
+    real_names = (
+        "test_unseen_selection_matches_preregistration",
+        "test_unseen_selection_is_computation_not_hardcode",
+        "test_unseen_selection_insufficient_raises",
+        "test_plan_load_and_verify_frozen",
+        "test_verify_frozen_detects_tampered_sha",
+        "test_verify_frozen_detects_missing_file",
+        "test_check_budget_accepts_frozen_plan",
+        "test_check_budget_rejects_over_cell_cap",
+        "test_check_budget_rejects_missing_daily_cap",
+        "test_check_budget_rejects_wrong_entry",
+        "test_no_leftover_temp_directories_in_tmp",
+        "test_approval_gate_rejects_absent_or_invalid",
+        "test_approval_gate_accepts_valid",
+        "test_cli_plan_rc0_and_not_fired",
+        "test_cli_fire_without_approval_rc2_zero_calls",
+        "test_cli_fire_with_invalid_approval_rc2",
+        "test_build_manifest_selection_hashes_and_roundtrip",
+        "test_build_manifest_fail_closed",
+        "test_plan_report_machine_readable",
+        "test_cli_fire_valid_approval_rc3_approved_not_wired",
+        "test_cli_plan_tampered_manifest_rc1_not_ok",
+        "test_cli_fire_tampered_manifest_rejected_before_approval",
+    )
+    root_a = fake_repo()
+    place(root_a, real_names)
+    v = guard_content_violations(root_a)
+    assert any("vacant_network/reqloop/g3gate.py" in s and "內容漂移" in s for s in v), (
+        f"g3gate 前置門 stub 未被抓到（r1319/r1347 同型缺口：ruler 所 invoke 的門模組"
+        f"從未釘住；freeze_check g3gate_plan 對 stub 照判 OK）: {v}"
+    )
+    assert any("tests/test_reqloop_g3gate.py" in s and "內容漂移" in s for s in v), (
+        f"同名 dummy 測試檔未被抓到: {v}"
+    )
+    # 未改的既有五份守衛檔不得誤判
+    for rel in tuple(GUARD_CONTENT_PIN):
+        if rel not in G3GATE_PAIR:
+            assert not any(rel in s for s in v), f"未改檔被誤判: {rel}: {v}"
+
+    # (b) 正控制：七份守衛檔皆真內容 → 零違規
+    root_b = fake_repo()
+    for rel in G3GATE_PAIR:
         (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
         (root_b / rel).write_bytes((REPO / rel).read_bytes())
     v_ok = guard_content_violations(root_b)
