@@ -2,16 +2,15 @@
 
 主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結、凍結）、G2 已完（凍結、凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 現況（r1395、2026-11-10）
+## 現況（r1396、2026-11-10）
 
-r1395＝審查指示 #1 守衛套件口徑對帳（vq-el4.82 開→關）：r1394「守衛 6 檔 77 passed」把 tests/test_reqloop_g3.py（18 案、G3 發射管線紅線守衛）排除計數、無留案理由（審查基線 88＝r1390/r1391 口徑含 g3 18；r1392 446 passed 亦含）＝未記錄之口徑收窄。本輪恢復 7 檔全口徑（0 ruler 改、0 產品碼改、pin 未動）。
-- 驗收（本輪全數新跑）：守衛 7 檔 95 passed rc=0（freeze_check 24／anchors 5／ci 2／ves 19／g3gate 22／g3 18／now_redline 5；88 基線之超集、0 弱化）；freeze_check 12/12 OK FROZEN_STATE_OK rc=0（diff 0×2、filing 3/3＋3/3、queue 空含隱藏、g3gate NOT_FIRED）；ves 7/7 OK EFFECTS_SUMMARY_OK rc=0（policy30 13w0r g7/l6、once20 11w0r g7/l4、reference MATCH）。
-- CI（一次讀取、不 poll）：state.json running＝qwen27b@3ae52673（現 tip）；LATEST 三檔 🟢 5130/0/74（d7b1939c／05766d8b／3c442302、皆現 tips 之祖先）；現 3 tips（3ae52673／840a7fd4／8afae247）per-sha json 無→UNKNOWN（H-0、非紅燈；tip 本地驗收全綠）。
-- bd：vq-el4.82 開→關（本輪）；vq-1zf（G3）仍等人類 --fire、不代發、不入 queue；/srv/vlab/queue 空（含隱藏）。
+r1396＝CI 巡燈一次讀取（vq-el4.83 開→關）：現 3 tips（qwen27b e4bea31b9／worker e9ea6c243／argon 4a95082e2）per-sha CI json 無→UNKNOWN（H-0、非紅燈；worker tip 在跑 per state.json）；LATEST 三檔全 🟢（qwen27b 3ae526734 5132/74/0／worker 05766d8bf 5130/74/0／argon 8afae2473 5132/74/0）、綠→tip diff 僅簿記（worker 經碼恆等傳遞）→現 tip 碼被綠 CI 覆蓋；上輪 qwen27b@3ae52673「在跑預期綠」定案。
+- 驗收（本輪全數新跑）：守衛 7 檔 95 passed rc=0（freeze_check 24／anchors 5／ci 2／ves 19／g3gate 22／g3 18／now_redline 5；88 基線之超集、0 弱化）；freeze_check 12/12 OK FROZEN_STATE_OK rc=0（diff 0×2、filing 3/3＋3/3、queue 空含隱藏、g3gate NOT_FIRED、bk 同步）；ves 7/7 OK EFFECTS_SUMMARY_OK rc=0（policy30 13w0r g7/l6、once20 11w0r g7/l4、reference MATCH）。
+- bd：vq-el4.83 開→關（本輪）；vq-1zf（G3）仍等人類 --fire、不代發、不入 queue；/srv/vlab/queue 空（含隱藏）。
 
 ## 下一步
 
-1. 下輪開頭一次讀取三分支現 tip per-sha CI json（現 tips：qwen27b 3ae52673…（在跑）／worker 840a7fd4…／argon 8afae247…；綠＝三分支收口終證、紅＝查因；不 poll）。
+1. 下輪開頭一次讀取三分支現 tip per-sha CI json（現 tips：qwen27b e4bea31b9…／worker e9ea6c243…（在跑）／argon 4a95082e2…；綠＝三分支收口終證、紅＝查因；不 poll）。
 2. 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決（CI 現為唯一全量綠燈通道）。
 
 ## 紅線
