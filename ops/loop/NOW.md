@@ -1,16 +1,21 @@
-# NOW — r1375 (2026-11-10)
+# NOW（round 1378 redo 收尾）
 
-## Current State
-- r1375 redo（審查點名 4 檔直接開啟＋依賴值獨立重算）：effects summary 60,228 B（a710f7e4…）聚合自 cells_detail 重算全 MATCH（50 cells、w2r 13+11、g7/l6 與 g7/l4、r2w 0、local 27/18、current 30/20、sess 35/20、api 915/457、tok 33.67M/19.50M、mismatch 3/2 格）；g25 filing 4,681 B 6 sha256 獨立重算全 MATCH＋三門 PASS（g1 39/39、real14 9/9、phase3 9 cells fixed 7 unresolved 2）；extract.py 1217 行 e757aec5、repair.py 2795 行 5147f8c3 實開＋docstring 規則確認——r1375 依賴值全成立、條目不改。
-- r1375 維護驗證（NOW r1374 下一步全數執行＋審查 #5 核驗，0 產品改動）：CI 一次讀取 3 HEAD（qwen27b@dde6ea83b／worker@9feed7670／argon@39eb6a5f3）無 per-sha json→全 UNKNOWN（pending、不 poll）。
-- 驗收全綠（本輪全數新跑）：freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0（diff 0×2、wt 3/3、filing 6/6 MATCH、queue 空含隱藏、g3gate NOT_FIRED+PLAN_OK、bk 同步）；守衛 6 檔 86 passed（freeze 22／anchors 5／ci 2／ves 19／g3gate 22／g3 16）；ves 7/7 OK。
-- 審查 #5：2dd0d4891（auto/argon）為 argon HEAD 祖先、662987424 亦祖先、in-scope diff 0×2→合併已完成、審查通過、無需動作。
-- 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決。
+## 狀態
+- 分支 auto/qwen27b（redo commit 見 git log）；三分支 in-scope diff（vacant_network/tests/ops）= 0；worker/argon worktree clean。
+- **r1376 QuotaGuard fail-open fix（vq-el4.66）**已 committed（c9ce6a3f5 起，auto r1377）：`g3.py` QuotaGuard `max_calls` 兜底＋`run_g3` 傳 plan 上限（g3.py:459）；本輪已同步 worker/argon。
+- **redo（評審指定五檔重開重驗）**：effects summary（50 cells；policy30 13w g7/l6 local 27/30；once20 11w g7/l4 local 18/20；0 r2w；sess 35+20；api 915+457；tok 33,670,510+19,503,953；mismatch local 3+2 / current 0）＋ g25 filing（3 門 PASS、6/6 sha 獨立重驗 MATCH）＋ ci_contract（131 行、2 tests）＋ extract.py（1,217 行 blob e757aec5）＋ repair.py（2,795 行 blob 5147f8c3）——**全對上記錄，0 更正**。
 
-## Next Step (r1376)
-1. CI 一次讀取：三分支 HEAD per-sha（含本輪新 commit）→記 GREEN/RED/UNKNOWN（不 poll、不等待）。
-2. 維持驗收：freeze_check 11/11 OK；守衛 86 passed；in-scope diff 0×2；queue 空（含隱藏）；g3gate NOT_FIRED。
-3. 待人類：G3 --fire（vq-1zf）。
+## Acceptance（本輪實跑）
+- pytest 相關檔：anchors 5 + ci 2 = **7 passed**；ves 19 + g3 18 + g3gate 22 = **59 passed**（0.95s）。
+- `verify_effects_summary.py`：VERDICT: EFFECTS_SUMMARY_OK（7/7）。
+- `freeze_check.py`：**11/11 OK，VERDICT: FROZEN_STATE_OK，rc=0**（redo commit 後）。
+- CI 一次讀取（未 polling）：worker 61e2dbac GREEN 5123p/74s、argon fea8ec74 GREEN 5123p/74s（皆 sync 前 sha）；qwen27b c9ce6a3f **UNKNOWN**（json 未生成，僅 .log）。
+- bd：vq-el4 67 closed / 0 open；vq-1zf（G3）等人 `--fire`，未觸。
+- /srv/vlab/queue 空。
 
-## Red lines
-- 無 push；.github/workflows/ 只讀；不讀 /srv/eval/hidden/ 或 scorer.py；G3 未經人類核准不得發射（不代發 --fire、不入 queue）；/srv/vlab/queue/ 不放任務；無 reset/rebase；凍結檔（repair.py 2795 行、extract.py 1217 行、checks.py、run_eval.py）與 filing 不改；只跑相關測試、不自啟 full pytest；無 sleep poll CI；0 模型呼叫。
+## 紅線（不變）
+- 不 push（loop 自動推）／不動 main／不 reset-rebase／不讀 hidden+scorer／不 fire G3／不寫 queue／不 full pytest／CI 只讀一次不 poll／不做模型呼叫。
+
+## 下一步（loop 側）
+- auto-push 後三分支 CI 以新 sha 重跑；qwen27b c9ce6a3f 的 CI json 待生成（下輪一次讀取即可）。
+- vq-1zf 仍等人類 `--fire`。

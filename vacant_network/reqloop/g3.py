@@ -224,17 +224,28 @@ class QuotaGuard:
     """日額度 fail-closed 護欄（11/07「撞 2M/日額度即停、不得重試」）：
     呼叫前已知 tokens ≥ cap → 直接 G3QuotaError（0 呼叫）；呼叫後累計。
     缺值 tokens 不累計（UNKNOWN 不假裝 0）。
+
+    呼叫數後備（r1376，vq-el4 真產品 bug）：token 用量全為 UNKNOWN（None）時
+    known_tokens 恆 0、token cap 永不觸發→舊碼放行無限呼叫＝fail-open（實證：
+    cap=250 仍放行 50 次）。呼叫數恆可測，故以 max_calls 兜底——工作量的界不該
+    依賴「用量恰好被測到」。max_calls=None＝不啟用後備（既有呼叫形狀不變）。
     """
 
-    def __init__(self, channel: Channel, daily_token_cap: int) -> None:
+    def __init__(self, channel: Channel, daily_token_cap: int,
+                 max_calls: int | None = None) -> None:
         self.channel = channel
         self.cap = int(daily_token_cap)
+        self.max_calls = int(max_calls) if max_calls is not None else None
         self.known_tokens = 0
         self.total_calls = 0
 
     def call(self, *, prompt: str, model: str, purpose: str, timeout_s: float) -> tuple[str, RoundUsage]:
         if self.known_tokens >= self.cap:
             raise G3QuotaError(f"已知 tokens {self.known_tokens} ≥ 日額度 {self.cap}——停、不重試")
+        if self.max_calls is not None and self.total_calls >= self.max_calls:
+            raise G3QuotaError(
+                f"呼叫數 {self.total_calls} ≥ 後備上限 {self.max_calls}"
+                "（用量 UNKNOWN 時 token cap 不可測，以呼叫數兜底）——停、不重試")
         text, usage = self.channel.call(prompt=prompt, model=model, purpose=purpose, timeout_s=timeout_s)
         if usage.tokens is not None:
             self.known_tokens += usage.tokens
@@ -439,9 +450,14 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
 
     cap = int(plan.budget["daily_token_cap"])
     tpr = int(plan.budget["timeout_s_per_round"])
-    guard = QuotaGuard(channel, cap)
     arm_order = tuple(plan.arms)
     tasks = [t["task_id"] for t in plan.tasks]
+    # 呼叫數後備上限（r1376）：token 用量未知時 token cap 不可測→以呼叫數兜底。
+    # 上界＝擷取（每 task 一次）＋每格最多 max_rounds 輪；實際呼叫少於此上界。
+    n_tasks = len(plan.tasks)
+    max_rounds = max(ARM_SPECS[a]["max_rounds"] for a in arm_order) if arm_order else 0
+    max_calls = n_tasks + (len(arm_order) * n_tasks) * max_rounds
+    guard = QuotaGuard(channel, cap, max_calls=max_calls)
 
     result: dict = {
         "schema": SCHEMA_RESULT,
