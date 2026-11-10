@@ -41,7 +41,7 @@ def git(ws: Path, *a: str) -> str:
     return subprocess.run(["git", *a], cwd=ws, capture_output=True, text=True).stdout
 
 
-def score(rdir: Path, task: dict, run_id: str, condition: str, t0: float, t1: float, args) -> dict:
+def score(rdir: Path, task: dict, run_id: str, condition: str, t0: float, t1: float, args, rc=None) -> dict:
     """Post-process a finished run (also used by --rescore on existing runs)."""
     ws = rdir / "ws"
     git(ws, "add", "-A")
@@ -117,7 +117,7 @@ def run_one(task_dir: Path, out: Path, run_id: str, args) -> dict:
         except subprocess.TimeoutExpired:
             rc = "timeout"
     t1 = time.time()
-    m = score(rdir, task, run_id, args.condition, t0, t1, args)
+    m = score(rdir, task, run_id, args.condition, t0, t1, args, rc)
     pi_ver = subprocess.run(["pi", "--version"], capture_output=True, text=True).stdout.strip()
     meta = {"run_id": run_id, "task": task, "condition": args.condition, "model": args.model,
             "upstream": args.upstream_label, "cli": "pi", "cli_version": pi_ver, "tools": TOOLS,
@@ -144,6 +144,7 @@ def main() -> None:
     ap.add_argument("--personas", default=str(HERE / "personas" / "examples.json"))
     ap.add_argument("--timeout", type=int, default=600)
     ap.add_argument("--tag", default="")
+    ap.add_argument("--start-rep", type=int, default=0)
     ap.add_argument("--rescore", action="store_true", help="recompute trajectory/metrics for existing runs in --out")
     args = ap.parse_args()
     args.agent_dir = Path(args.agent_dir)
@@ -153,13 +154,15 @@ def main() -> None:
     if args.rescore:
         for md in sorted(out.glob("*/meta.json")):
             meta = json.loads(md.read_text())
-            score(md.parent, meta["task"], meta["run_id"], meta["condition"], meta["t_start"], meta["t_end"], args)
+            old = md.parent / "metrics.json"
+            rc = json.loads(old.read_text()).get("rc") if old.exists() else None
+            score(md.parent, meta["task"], meta["run_id"], meta["condition"], meta["t_start"], meta["t_end"], args, rc)
             print("rescored", meta["run_id"])
         return
     task_dirs = sorted(p for p in (HERE / "tasks").iterdir() if (p / "task.json").exists())
     if args.tasks:
         task_dirs = [p for p in task_dirs if p.name in args.tasks]
-    for rep in range(args.repeats):
+    for rep in range(args.start_rep, args.start_rep + args.repeats):
         for td in task_dirs:
             run_id = f"{args.condition}{args.tag}_{td.name}_r{rep}"
             m = run_one(td, out, run_id, args)
