@@ -619,6 +619,11 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     已知殘留邊界（如實）：多行條目在行邊界截斷且續行恰好形如「（YYYY-MM-DD…」時，
     與「正確狀態＋兩個單行條目」逐位元組不可區分——任何 byte 級守衛都無法判別；
     緩解＝「每輪條目各占一行」的簿記約定（違约定即修簿記），不在 byte 檢查裡假裝能分辨。
+
+    r1386 單位修正（vq-l6u）：訊息裡的 {len(m)}B 實為 str 字元數被標成位元組（CJK
+    多字位元組 → wc -c 對不上：鏡像實 1868B 卻報 1372B＝綠燈無法用 wc 複核，H-0 同構）。
+    改為 len(s.encode('utf-8'))；檢查邏輯（startswith／行邊界／條目錨點）全部不變——
+    UTF-8 無歧義性保證字元前綴 ⟺ 位元組前綴。
     """
     canon = repo / "STATE.md"
     mirror = repo / "ops" / "STATE.md"
@@ -628,26 +633,28 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     except OSError as e:
         record("bk_state", False, f"unreadable: {e}")
         return
+    # r1386：訊息報 UTF-8 位元組數（可被 wc -c 複核）；len(str) 是字元數，CJK 下兩者不同。
+    cb, mb = len(c.encode("utf-8")), len(m.encode("utf-8"))
     if "## Current State" not in m:
         record("bk_state", False, "mirror ops/STATE.md lacks '## Current State' header")
         return
     if not c.startswith(m):
         record(
             "bk_state", False,
-            f"DRIFT: canonical {len(c)}B 不以 mirror {len(m)}B 為前綴（Current State 不同步）",
+            f"DRIFT: canonical {cb}B 不以 mirror {mb}B 為前綴（Current State 不同步）",
         )
         return
     if not m.endswith("\n"):
         record(
             "bk_state", False,
-            f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但非行邊界結尾"
+            f"TRUNCATED: mirror {mb}B 為 canonical 之 byte 前綴但非行邊界結尾"
             "（最新條目尾部被砍）——截斷鏡像不是同步（I-4：未測量不是通過）",
         )
         return
     if len(m) < len(c) and ENTRY_START_RE.match(c, len(m)) is None:
         record(
             "bk_state", False,
-            f"TRUNCATED: mirror {len(m)}B 為 canonical 之 byte 前綴但餘部非日期條目起始"
+            f"TRUNCATED: mirror {mb}B 為 canonical 之 byte 前綴但餘部非日期條目起始"
             "「（YYYY-MM-DD…」（多行條目內行邊界截斷，續行形如新條目）——截斷鏡像不是同步（I-4：未測量不是通過）",
         )
         return
@@ -682,12 +689,12 @@ def check_bookkeeping_state(repo: Path = REPO) -> None:
     if not m_lines or m_lines[-1] != entry:
         record(
             "bk_state", False,
-            f"NO_ENTRY: mirror {len(m)}B 末行不是 canonical 最新條目行"
+            f"NO_ENTRY: mirror {mb}B 末行不是 canonical 最新條目行"
             "（鏡像零條目/末行停滯——餘部雖以新條目起始，鏡像本身未承載當前狀態，"
             "不是同步；I-4：未測量不是通過）",
         )
         return
-    record("bk_state", True, f"mirror {len(m)}B == canonical title+Current State（同步）")
+    record("bk_state", True, f"mirror {mb}B == canonical title+Current State（同步）")
 
 
 def check_bookkeeping_now(repo: Path = REPO) -> None:
