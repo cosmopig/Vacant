@@ -34,5 +34,22 @@
     "stage2_output_tokens": 1800,
     "profile_output_tokens": 2200
   },
-  "notes": "Null prices are unset, not zero. pricing=local means do not infer API USD; still record tokens when a real endpoint returns usage. Do not commit private_pilot_root. This example does not contain a human answer."
+  "dataset": {
+    "name": "LLM-Digital-Twin/Twin-2K-500",
+    "config": "wave_split",
+    "license": "CC BY 4.0",
+    "citation": "Toubia, Gui, Peng, Merlau, Li, and Chen (2025). Twin-2K-500. arXiv:2505.17479",
+    "cache_dir": "~/.cache/vacant/twin2k500",
+    "participants": 20,
+    "seed": 20261109,
+    "raw_top_k": 8,
+    "use_persona_summary": false,
+    "preliminary_reference": {
+      "n_people": 294,
+      "test_retest_ceiling": 0.83,
+      "majority_floor": 0.56,
+      "status": "preliminary figures from a 294-person pilot; the converter recomputes both on the sampled participants"
+    }
+  },
+  "notes": "Null prices are unset, not zero. pricing=local means do not infer API USD; still record tokens when a real endpoint returns usage. Do not commit private_pilot_root or the Twin-2K-500 cache. This example does not contain a human answer. persona_summary is not used."
 }

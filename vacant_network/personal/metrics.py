@@ -308,3 +308,179 @@ def pairwise(rows: list[dict[str, Any]], reviews: list[dict[str, Any]]) -> list[
                 winner = right
             out.append({"task_id": task_id, "left": left, "right": right, "winner": winner})
     return out
+
+
+# --- Twin-2K-500 比較 -------------------------------------------------------
+# 分母是每個人的二選項保留題。沒答、解析失敗、預算停掉都算未命中，不從分母拿掉。
+
+TWIN_PRELIMINARY = {
+    "n_people": 294,
+    "test_retest_ceiling": 0.83,
+    "majority_floor": 0.56,
+    "status": "preliminary reference from a 294-person pilot; recompute with score_twin on the sample actually drawn",
+}
+
+
+def _twin_hit(prediction: str | None, human: str | None) -> bool:
+    return prediction in ("A", "B") and human in ("A", "B") and prediction == human
+
+
+def leave_one_out_majority(labels: list[dict[str, Any]]) -> dict[tuple[str, str], str | None]:
+    """每個 (pid, case) 的多數選項，不算本人。平手回 None，不當成猜對。"""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in labels:
+        grouped.setdefault(row["case_id"], []).append(row)
+    found: dict[tuple[str, str], str | None] = {}
+    for case_id, rows in grouped.items():
+        for row in rows:
+            counts: Counter[str] = Counter(
+                other["choice_option_id"] for other in rows
+                if other["pid"] != row["pid"] and other.get("choice_option_id")
+            )
+            if not counts:
+                found[(str(row["pid"]), case_id)] = None
+                continue
+            ranking = sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+            if len(ranking) > 1 and ranking[0][1] == ranking[1][1]:
+                found[(str(row["pid"]), case_id)] = None
+            else:
+                found[(str(row["pid"]), case_id)] = ranking[0][0]
+    return found
+
+
+def _letter(option_id: str | None, presented_order: list[str]) -> str | None:
+    if option_id == presented_order[0]:
+        return "A"
+    if option_id == presented_order[1]:
+        return "B"
+    return None
+
+
+def score_twin(predictions: list[dict[str, Any]], labels: list[dict[str, Any]], retests: dict[str, dict[str, Any]], *, n_boot: int = 2000, seed: int = 0) -> dict[str, Any]:
+    """每人準確率、Wilson、重測正規化、偏離多數的題、配對 McNemar 與 bootstrap、選項順序分拆。"""
+    from vacant_network.research import boot_ci, mcnemar_exact
+
+    label_by = {(str(row["pid"]), row["case_id"]): row for row in labels}
+    majority = leave_one_out_majority(labels)
+    arms = sorted({row["arm"] for row in predictions})
+    graded = []
+    for row in predictions:
+        key = (str(row["pid"]), row["case_id"])
+        label = label_by.get(key)
+        human = None if label is None else label.get("choice")
+        order = (label or row).get("presented_order") or ["option_1", "option_2"]
+        pred = row.get("prediction") if row.get("status") == "completed" else None
+        if row["arm"] == "MAJORITY" and row.get("status") == "completed":
+            pred = _letter(majority.get(key), order)
+        hit = _twin_hit(pred, human)
+        maj = majority.get(key)
+        human_option = None if label is None else label.get("choice_option_id")
+        differs = maj is not None and human_option is not None and human_option != maj
+        graded.append({
+            "pid": str(row["pid"]),
+            "case_id": row["case_id"],
+            "arm": row["arm"],
+            "human": human,
+            "prediction": pred,
+            "hit": hit,
+            "answered": pred in ("A", "B", "tie", "neither", "unsure"),
+            "presented_order": order,
+            "swapped": order == ["option_2", "option_1"],
+            "differs_from_majority": differs,
+            "in_denominator": human in ("A", "B"),
+        })
+    per_person = []
+    pids = sorted({row["pid"] for row in graded})
+    by_arm: dict[str, dict[str, Any]] = {}
+    for arm in arms:
+        arm_rows = [row for row in graded if row["arm"] == arm and row["in_denominator"]]
+        people = []
+        for pid in pids:
+            mine = [row for row in arm_rows if row["pid"] == pid]
+            hits = sum(1 for row in mine if row["hit"])
+            total = len(mine)
+            rate = retests.get(pid, {}).get("rate")
+            accuracy = (hits / total) if total else None
+            people.append({
+                "pid": pid,
+                "hits": hits,
+                "n": total,
+                "accuracy": accuracy,
+                "wilson95": wilson_interval(hits, total) if total else None,
+                "test_retest_rate": rate,
+                "accuracy_over_retest": (accuracy / rate) if accuracy is not None and rate else None,
+            })
+        differs = [row for row in arm_rows if row["differs_from_majority"]]
+        same_order = [row for row in arm_rows if not row["swapped"]]
+        swapped = [row for row in arm_rows if row["swapped"]]
+
+        def _acc(rows: list[dict[str, Any]]) -> float | None:
+            if not rows:
+                return None
+            return sum(1 for row in rows if row["hit"]) / len(rows)
+
+        by_arm[arm] = {
+            "per_person": people,
+            "micro_accuracy": _acc(arm_rows),
+            "micro_wilson95": wilson_interval(sum(1 for row in arm_rows if row["hit"]), len(arm_rows)) if arm_rows else None,
+            "macro_accuracy": _mean_defined([person["accuracy"] for person in people]),
+            "macro_accuracy_over_retest": _mean_defined([person["accuracy_over_retest"] for person in people]),
+            "differs_from_majority": {"n": len(differs), "accuracy": _acc(differs)},
+            "option_order": {
+                "identity": {"n": len(same_order), "accuracy": _acc(same_order)},
+                "swapped": {"n": len(swapped), "accuracy": _acc(swapped)},
+            },
+            "denominator_note": "unanswered, parse_failed, and budget_stopped count as misses",
+        }
+        per_person.extend(people)
+    pairs = []
+    arm_list = [arm for arm in ("MAJORITY", "DEMOGRAPHICS", "NONE", "RAW", "SUMMARY", "STRUCTURED") if arm in by_arm]
+    for i, left in enumerate(arm_list):
+        for right in arm_list[i + 1:]:
+            left_rows = {(row["pid"], row["case_id"]): row for row in graded if row["arm"] == left and row["in_denominator"]}
+            right_rows = {(row["pid"], row["case_id"]): row for row in graded if row["arm"] == right and row["in_denominator"]}
+            keys = sorted(set(left_rows) & set(right_rows))
+            paired = []
+            b = c = 0
+            for key in keys:
+                hit_l = bool(left_rows[key]["hit"])
+                hit_r = bool(right_rows[key]["hit"])
+                paired.append({"hit_left": hit_l, "hit_right": hit_r})
+                if (not hit_l) and hit_r:
+                    b += 1
+                elif hit_l and (not hit_r):
+                    c += 1
+
+            def _diff(sample: list[dict[str, Any]], _b=b) -> float:
+                if not sample:
+                    return 0.0
+                return (
+                    sum(1.0 if row["hit_right"] else 0.0 for row in sample)
+                    - sum(1.0 if row["hit_left"] else 0.0 for row in sample)
+                ) / len(sample)
+
+            low, high = boot_ci(paired, _diff, n_boot=n_boot, seed=seed) if paired else (None, None)
+            pairs.append({
+                "left": left,
+                "right": right,
+                "n": len(paired),
+                "mcnemar_b_right_only": b,
+                "mcnemar_c_left_only": c,
+                "mcnemar_p": mcnemar_exact(b, c),
+                "accuracy_diff_right_minus_left": _diff(paired) if paired else None,
+                "bootstrap95": None if low is None else [low, high],
+            })
+    return {
+        "arms": by_arm,
+        "pairs": pairs,
+        "preliminary_reference": TWIN_PRELIMINARY,
+        "retests": retests,
+        "note": "N people are not independent items. Majority is leave-one-out. The 0.83/0.56 figures are a preliminary reference, not this sample.",
+    }
+
+
+def _mean_defined(values: list[float | None]) -> float | None:
+    usable = [value for value in values if isinstance(value, (int, float)) and not isinstance(value, bool)]
+    if not usable:
+        return None
+    return sum(usable) / len(usable)

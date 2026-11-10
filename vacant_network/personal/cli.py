@@ -293,6 +293,63 @@ def cmd_report(args) -> int:
     return 0
 
 
+def _twin_module():
+    import importlib.util
+    path = Path(__file__).resolve().parents[2] / "ops" / "personal_pilot" / "datasets" / "twin2k500.py"
+    spec = importlib.util.spec_from_file_location("vacant_twin2k500_ops", path)
+    if spec is None or spec.loader is None:
+        raise RunnerError(f"missing {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def cmd_twin_prepare(args) -> int:
+    module = _twin_module()
+    argv = ["--out", args.out, "--seed", str(args.seed)]
+    if args.participants is not None:
+        argv.extend(["--participants", str(args.participants)])
+    if args.cache:
+        argv.extend(["--cache", args.cache])
+    if args.fixture:
+        argv.extend(["--fixture", args.fixture])
+    return module.main(argv)
+
+
+def cmd_twin_run(args) -> int:
+    from .backend import SingleCallBackend, brain_from_config
+    from .twin_runner import execute_twin, fixture_backend, load_prepared
+    config = _config(args.config)
+    people = load_prepared(Path(args.prepared))
+    kind = args.backend or config.get("backend") or "fixture"
+    if kind == "fixture":
+        backend = fixture_backend(config)
+    elif kind == "openai":
+        model = config.get("model") or {}
+        if model.get("pricing") not in ("local", "rated"):
+            print("pricing must be local or rated before a model call", file=sys.stderr)
+            return 2
+        backend = SingleCallBackend(
+            brain_from_config(model),
+            BudgetLedger(config.get("budget"), pricing=model["pricing"], rates=model),
+        )
+    else:
+        print("backend must be fixture or openai", file=sys.stderr)
+        return 2
+    summary = execute_twin(
+        people, backend, Path(args.out),
+        max_output_tokens=int((config.get("budget") or {}).get("stage1_output_tokens") or 200),
+    )
+    brief = {
+        "rows": summary["rows"],
+        "stopped": summary["stopped"],
+        "micro_accuracy": {arm: (summary["scores"]["arms"].get(arm) or {}).get("micro_accuracy") for arm in summary["scores"]["arms"]},
+        "preliminary_reference": summary["scores"]["preliminary_reference"],
+    }
+    print(json.dumps(brief, ensure_ascii=False, indent=2))
+    return 0
+
+
 def cmd_compat(args) -> int:
     from .endpoint_smoke import main as smoke_main
     argv = ["--config", args.config]
@@ -367,6 +424,21 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--reviews")
     report.add_argument("--out")
     report.set_defaults(func=cmd_report)
+
+    prepare = sub.add_parser("twin2k-prepare", help="download Twin-2K-500 wave_split into a cache outside the repo and write a participant sample")
+    prepare.add_argument("--out", required=True)
+    prepare.add_argument("--participants", type=int)
+    prepare.add_argument("--seed", type=int, default=20261109)
+    prepare.add_argument("--cache", default=None)
+    prepare.add_argument("--fixture", help="synthetic JSON instead of the Hugging Face download")
+    prepare.set_defaults(func=cmd_twin_prepare)
+
+    twin_run = sub.add_parser("twin2k-run", help="score sampled participants; openai backend calls the configured endpoint")
+    twin_run.add_argument("--config", required=True)
+    twin_run.add_argument("--prepared", required=True)
+    twin_run.add_argument("--out", required=True)
+    twin_run.add_argument("--backend", choices=("fixture", "openai"))
+    twin_run.set_defaults(func=cmd_twin_run)
 
     compat = sub.add_parser("compat-check", help="§14 Step 2 compatibility pre-check; one request unless --dry-run")
     compat.add_argument("--config", required=True)

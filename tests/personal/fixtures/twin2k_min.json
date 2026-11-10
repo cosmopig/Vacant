@@ -1,0 +1,205 @@
+{
+  "note": "Synthetic lookalike for tests. Not a row from Twin-2K-500.",
+  "rows": [
+    {
+      "pid": "p1",
+      "persona_summary": "PERSONA_SUMMARY_USES_WAVE4_SECRET",
+      "wave1_3_persona_json": {
+        "Elements": [
+          {
+            "ElementType": "Block",
+            "BlockName": "Demographics",
+            "Questions": [
+              {
+                "QuestionID": "Q_REGION",
+                "QuestionText": "Which synthetic region do you live in?",
+                "QuestionType": "MC",
+                "Options": ["East", "West"],
+                "Answers": {"SelectedByPosition": 1, "SelectedText": "East"}
+              }
+            ]
+          },
+          {
+            "ElementType": "Block",
+            "BlockName": "Habits",
+            "Questions": [
+              {
+                "QuestionID": "Q_FOOD",
+                "QuestionText": "Which synthetic drink do you pick?",
+                "QuestionType": "MC",
+                "Options": ["Tea", "Coffee"],
+                "Answers": {"SelectedText": "Tea"}
+              },
+              {
+                "QuestionID": "Q_REPEAT",
+                "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+                "QuestionType": "MC",
+                "Options": ["Yes", "No"],
+                "Answers": {"SelectedText": "Yes"}
+              }
+            ]
+          }
+        ]
+      },
+      "wave4_Q_wave1_3_A": [
+        {
+          "ElementType": "Block",
+          "BlockName": "Repeated",
+          "Questions": [
+            {
+              "QuestionID": "Q_REPEAT",
+              "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+              "QuestionType": "MC",
+              "Options": ["Yes", "No"],
+              "Answers": {"SelectedText": "Yes"}
+            }
+          ]
+        }
+      ],
+      "wave4_Q_wave4_A": [
+        {
+          "ElementType": "Block",
+          "BlockName": "Repeated",
+          "Questions": [
+            {
+              "QuestionID": "Q_REPEAT",
+              "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+              "QuestionType": "MC",
+              "Options": ["Yes", "No"],
+              "Answers": {"SelectedText": "No"}
+            },
+            {
+              "QuestionID": "Q_ONLY4",
+              "QuestionText": "WAVE4_ONLY_STEM_SENTINEL question about a private choice",
+              "QuestionType": "MC",
+              "Options": ["Alpha", "Beta"],
+              "Answers": {"SelectedByPosition": 1, "SelectedText": "Alpha"}
+            },
+            {
+              "QuestionID": "Q_THREE",
+              "QuestionText": "Three options are not a binary holdout item",
+              "QuestionType": "MC",
+              "Options": ["One", "Two", "Three"],
+              "Answers": {"SelectedText": "Two"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pid": "p2",
+      "persona_summary": "PERSONA_SUMMARY_USES_WAVE4_SECRET",
+      "wave1_3_persona_json": {
+        "Elements": [
+          {
+            "ElementType": "Block",
+            "BlockName": "Demographics",
+            "Questions": [
+              {
+                "QuestionID": "Q_REGION",
+                "QuestionText": "Which synthetic region do you live in?",
+                "QuestionType": "MC",
+                "Options": ["East", "West"],
+                "Answers": {"SelectedText": "West"}
+              }
+            ]
+          },
+          {
+            "ElementType": "Block",
+            "BlockName": "Habits",
+            "Questions": [
+              {
+                "QuestionID": "Q_FOOD",
+                "QuestionText": "Which synthetic drink do you pick?",
+                "QuestionType": "MC",
+                "Options": ["Tea", "Coffee"],
+                "Answers": {"SelectedText": "Coffee"}
+              }
+            ]
+          }
+        ]
+      },
+      "wave4_Q_wave1_3_A": [
+        {
+          "Questions": [
+            {
+              "QuestionID": "Q_REPEAT",
+              "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+              "Options": ["Yes", "No"],
+              "Answers": {"SelectedText": "Yes"}
+            }
+          ]
+        }
+      ],
+      "wave4_Q_wave4_A": [
+        {
+          "Questions": [
+            {
+              "QuestionID": "Q_REPEAT",
+              "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+              "Options": ["Yes", "No"],
+              "Answers": {"SelectedText": "Yes"}
+            },
+            {
+              "QuestionID": "Q_ONLY4",
+              "QuestionText": "WAVE4_ONLY_STEM_SENTINEL question about a private choice",
+              "Options": ["Alpha", "Beta"],
+              "Answers": {"SelectedText": "Beta"}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pid": "p3",
+      "persona_summary": "PERSONA_SUMMARY_USES_WAVE4_SECRET",
+      "wave1_3_persona_json": {
+        "Elements": [
+          {
+            "ElementType": "Block",
+            "BlockName": "Demographics",
+            "Questions": [
+              {
+                "QuestionID": "Q_REGION",
+                "QuestionText": "Which synthetic region do you live in?",
+                "QuestionType": "MC",
+                "Options": ["East", "West"],
+                "Answers": {"SelectedText": "East"}
+              }
+            ]
+          }
+        ]
+      },
+      "wave4_Q_wave1_3_A": [
+        {
+          "Questions": [
+            {
+              "QuestionID": "Q_REPEAT",
+              "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+              "Options": ["Yes", "No"],
+              "Answers": {"SelectedText": "No"}
+            }
+          ]
+        }
+      ],
+      "wave4_Q_wave4_A": [
+        {
+          "Questions": [
+            {
+              "QuestionID": "Q_REPEAT",
+              "QuestionText": "WAVE4_REPEAT_STEM_SENTINEL should not stay in calibration",
+              "Options": ["Yes", "No"],
+              "Answers": {"SelectedText": "No"}
+            },
+            {
+              "QuestionID": "Q_ONLY4",
+              "QuestionText": "WAVE4_ONLY_STEM_SENTINEL question about a private choice",
+              "Options": ["Alpha", "Beta"],
+              "Answers": {"SelectedText": "Alpha"}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
