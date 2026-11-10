@@ -159,17 +159,30 @@ def _phase_internal_check(name: str, p: dict | None) -> tuple[str, bool, str]:
             for key in ARM_KEYS:
                 if have_arm.get(key) != want_arm.get(key):
                     problems.append(f"per_arm.{arm}.{key}={have_arm.get(key)}（重算={want_arm.get(key)}）")
-    # mismatch 清單與逐格一致（local 與 current 兩張表）
-    for flag, list_key, count_key in (
+    # mismatch 清單與逐格一致（local 與 current 兩張表）——
+    # r1361（vq-el4.61）：不只長度要對，內容（cell 名集合）也要對。
+    # 舊碼只比長度（n_list==n_false）：右長度（3）錯內容（3 個 flag=True 格）
+    # 仍 7/7 OK rc=0 假綠燈（本輪 RED 實證：mismatch_content_drift）。
+    # 同族：r1296/r1314/r1324/r1327/r1350（計數守住、身份未守）。
+    # 新覆核：mismatch 列表的 cell 名集合 ＝ cells_detail 中 flag=False 的格之
+    # cell 名集合（cell = draft-"-"-arm）；長度檢查保留（重複／懸空名場景的清晰診斷）。
+    for flag, list_key, _count_key in (
         ("local_matches_independent", "local_vs_independent_mismatches", "local_matches"),
         ("current_code_matches_independent", "current_code_vs_independent_mismatches", "current_code_matches"),
     ):
-        n_false = sum(1 for c in (p.get("cells_detail") or []) if not c.get(flag))
-        n_list = len(p.get(list_key) or [])
+        cds = p.get("cells_detail") or []
+        n_false = sum(1 for c in cds if not c.get(flag))
+        lst = p.get(list_key) or []
+        n_list = len(lst)
         if n_list != n_false:
             problems.append(f"{list_key} 長度={n_list}（逐格 {flag}=False 格數={n_false}）")
-        if count_key in p and p.get(count_key) is not None:
-            pass  # 已於上方總和比對涵蓋
+        want_cells = {f"{c.get('draft')}-{c.get('arm')}" for c in cds if not c.get(flag)}
+        have_cells = {m.get("cell") for m in lst if isinstance(m, dict)}
+        if have_cells != want_cells:
+            problems.append(
+                f"{list_key} 內容={sorted(have_cells)} "
+                f"（逐格 {flag}=False 集合={sorted(want_cells)}）"
+            )
     if agg["cells"] == 0:
         problems.append("cells_detail 為空（I-4：未測量不是通過）")
     if problems:

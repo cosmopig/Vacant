@@ -1300,10 +1300,21 @@ GUARD_CONTENT_PIN = {
     # （套件 17→18 測）。兩檔合法改動後顯式更新錨：
     # (1) ops/reqloop/verify_effects_summary.py sha256=e6cd3933db60be3e653ec62bbce607e4bf2925e39bf8a4086cfb99b2b2e88c55 → 5b44c3bba4c04767d372ca733967cf29932925370079af1a130e18db63f90583
     # (2) tests/test_reqloop_verify_effects_summary.py sha256=f72e692710c6669f01892bcd4dab4a78c6f9753ef45a2ca45b81100f8e068fb0 → 1dc3713eb9d8da8f20a81eeb56ba6bb8d82825867482fe9e5cf71ebeeb740ebf
+    # r1361 解凍記錄（vq-el4.61）：_phase_internal_check 的 mismatch 列表覆核由
+    # 「只比長度（n_list==n_false）」收緊為「長度＋內容（cell 名集合）」——
+    # 舊碼對「右長度（3）錯內容（3 個 flag=True 格）」仍判 7/7 OK rc=0 假綠燈
+    # （本輪 RED 實證：mismatch_content_drift）；同族 r1296/r1314/r1324/r1327/r1350
+    # （計數守住、身份未守）。新覆核：mismatch 列表的 cell 名集合 ＝
+    # cells_detail 中 flag=False 的格之 cell 名集合（cell=draft-"-"-arm）；
+    # 長度檢查保留（重複／懸空名場景的清晰診斷）。＋ test 新增
+    # mismatch_content_drift 負控制（套件 18→19 測）。live 檔仍 7/7 OK rc=0。
+    # 兩檔合法改動後顯式更新錨：
+    # (1) ops/reqloop/verify_effects_summary.py sha256=5b44c3bba4c04767d372ca733967cf29932925370079af1a130e18db63f90583 → 7a49b66c0b69784ec20401280f474450ca9b6866364e355ec933a18e92d8f9a7
+    # (2) tests/test_reqloop_verify_effects_summary.py sha256=1dc3713eb9d8da8f20a81eeb56ba6bb8d82825867482fe9e5cf71ebeeb740ebf → 578f73bc5b4f262d2fb935315a460cf4b57b1412eb3f6cef107a79329f729fc2
     "ops/reqloop/verify_effects_summary.py":
-        "5b44c3bba4c04767d372ca733967cf29932925370079af1a130e18db63f90583",
+        "7a49b66c0b69784ec20401280f474450ca9b6866364e355ec933a18e92d8f9a7",
     "tests/test_reqloop_verify_effects_summary.py":
-        "1dc3713eb9d8da8f20a81eeb56ba6bb8d82825867482fe9e5cf71ebeeb740ebf",
+        "578f73bc5b4f262d2fb935315a460cf4b57b1412eb3f6cef107a79329f729fc2",
 }
 
 
