@@ -12,7 +12,9 @@ I-4：未測量不是通過）：worker/argon 的 per-sha CI 跑在舊祖先
 簿記延展／peer tree 恆等／未測量）此前無任何機械檢查，全靠散文推斷。
 
 判定（逐分支）：
-  TIP_GREEN     tip 有 per-sha json 且綠（green 真＋failed==0＋errors==0）
+  TIP_GREEN     tip 有 per-sha json 且綠（green 真＋passed int>0＋failed int==0＋
+                errors int==0；r1405 起計數須嚴格 int 且 passed>0——零通過空記錄／
+                json bool 計數皆非綠，I-4：未測量不是通過）
   RED           tip 有 per-sha json 但紅——peer 恆等救不了自體紅
   COVERED       tip 無 per-sha，但存在綠 CI 祖先 G（按 commit 時間取最新），
                 且 diff G..tip 全部落在簿記集（見下）
@@ -86,12 +88,25 @@ def load_ci_jsons(ci_dir: Path) -> dict[str, dict]:
     return out
 
 
+def _is_int(v: Any) -> bool:
+    """嚴格 int（排除 bool——json true/false 非計數；False==0 型混淆不得讀成零）。"""
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
 def is_green(rec: dict[str, Any]) -> bool:
-    """綠＝green 真 且 failed==0 且 errors==0；缺欄位＝非綠（fail-closed，I-4）。"""
+    """綠＝green 真 且 passed 為 int>0 且 failed 為 int==0 且 errors 為 int==0。
+
+    r1405（vq-el4.90）收緊：r1399 初版只驗 green／failed／errors、不驗 passed、計數不驗型——
+    記錄 {green:true, passed:0, failed:0, errors:0}（零通過＝未測量任何測試）被讀成綠、
+    {failed:false}（json bool，False==0）亦被讀成零失敗＝假綠燈（I-4「a suite that
+    reported zero tests fails」、r1272 空檔 vacuous／r1296 null-sha 同族；負控 (h) RED
+    實證）。收緊後：passed 缺欄位／錯型／≤0＝非綠；failed／errors 缺欄位／錯型＝非綠
+    （fail-closed，I-4：未測量不是通過）。live 記錄 passed≈5145（int）不受影響。"""
     return (
         rec.get("green") is True
-        and rec.get("failed", 1) == 0
-        and rec.get("errors", 1) == 0
+        and _is_int(rec.get("passed")) and rec["passed"] > 0
+        and _is_int(rec.get("failed")) and rec["failed"] == 0
+        and _is_int(rec.get("errors")) and rec["errors"] == 0
     )
 
 

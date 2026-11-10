@@ -20,6 +20,10 @@ ops/reqloop/ci_tip_check.py 的收口判定做負控制：
   負控 (b)：ci 目錄全空 → 三分支皆 UNKNOWN → CI_TIP_UNKNOWN（空目錄≠OK，I-4）。
   負控 (c)：tip per-sha 紅（failed>0）→ RED → BROKEN。
   負控 (d)：json green=true 但 failed>0 → 不得判 TIP_GREEN（is_green fail-closed）。
+  負控 (h)：json green=true 但 passed=0（零通過＝未測量任何測試）→ 不得判 TIP_GREEN；
+            json bool 計數（failed:false／errors:false，False==0 型混淆）亦不得讀成 0
+            （r1405 補；I-4「a suite that reported zero tests fails」，r1272 空檔 vacuous
+            同族——舊碼判 TIP_GREEN→CI_TIP_OK＝假綠燈）。
   負控 (e)：兩綠祖先（commit 時間 100/200），新者 diff 純簿記、舊者含碼
             → 必選新者判 COVERED（按 commit 時間選最新，非 json mtime／任意序）。
   負控 (f)：損毀 json 不得崩潰、不得計入證據（I-4）。
@@ -215,6 +219,41 @@ def test_green_true_but_failed_nonzero_is_not_green(tmp_path: Path, monkeypatch)
     res = _eval(mod, tmp_path, fg, monkeypatch)
     assert res["branches"][C]["verdict"] != "TIP_GREEN", res
     assert res["verdict"] != "CI_TIP_OK", res
+
+
+def test_vacuous_or_bool_counter_record_is_red_not_green(tmp_path: Path, monkeypatch) -> None:
+    """負控 (h)（r1405）：C tip per-sha 記錄存在但不可用 → 必須判 RED（有記錄、非綠
+    → 查因），整體 CI_TIP_BROKEN rc=1。舊碼（r1399 初版 is_green 只驗
+    green is True＋failed==0＋errors==0、不驗 passed、計數不驗型）對兩場景皆判
+    TIP_GREEN→CI_TIP_OK＝假綠燈（H-0 同構：綠燈來自沒量該量的）：
+    (h1) green=true、passed=0、failed=0、errors=0——零通過＝未測量任何測試，
+        I-4「a suite that reported zero tests fails」（本 ruler 自身 docstring 即引 I-4
+        跳損毀 json；零計數記錄同為不可用證據，r1272 空檔 vacuous 同族）；
+    (h2) green=true、passed=5134、failed=false、errors=false——json bool 非整數計數，
+        舊碼因 False==0 被讀成「零失敗」（r1296 null-sha 同族：型未守）。
+    修後 is_green 收緊為嚴格 int（非 bool）：passed>0、failed==0、errors==0。"""
+    mod = _load()
+    # (h1) 零通過空記錄
+    fg, recs = _scenario_base()
+    recs[-1] = _ci_record(C, TIP_C, green=True, passed=0, failed=0, errors=0, skipped=0)
+    for r in recs:
+        _write_ci(tmp_path, r)
+    res = _eval(mod, tmp_path, fg, monkeypatch)
+    assert res["branches"][C]["verdict"] == "RED", res
+    assert res["verdict"] == "CI_TIP_BROKEN" and res["rc"] == 1, res
+    # (h2) bool 計數型混淆（新 tmp 子目錄，避免與 (h1) 之 ci 檔混用）
+    fg2, recs2 = _scenario_base()
+    rec2 = _ci_record(C, TIP_C, green=True, passed=5134, failed=0, errors=0)
+    rec2["failed"] = False  # json 序列化為 false——非整數
+    rec2["errors"] = False
+    recs2[-1] = rec2
+    d2 = tmp_path / "h2"
+    d2.mkdir()
+    for r in recs2:
+        _write_ci(d2, r)
+    res2 = _eval(mod, d2, fg2, monkeypatch)
+    assert res2["branches"][C]["verdict"] == "RED", res2
+    assert res2["verdict"] == "CI_TIP_BROKEN" and res2["rc"] == 1, res2
 
 
 def test_latest_green_ancestor_by_commit_time(tmp_path: Path, monkeypatch) -> None:
