@@ -15,7 +15,7 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
 （tests/test_reqloop_freeze_check.py）。
 
     python3 ops/reqloop/freeze_check.py
-    # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 十一項全 OK
+    # rc 0  且  VERDICT: FROZEN_STATE_OK   —— 十二項全 OK
     # rc 1  且  VERDICT: FROZEN_STATE_BROKEN —— 任一項 BROKEN，detail 點名
 
 背景（2026-11-08 r1273，vq-el4.30）：審查指示 #1 點名「5 passed 守衛」與「ci_contract
@@ -46,6 +46,9 @@ freeze_check 當時仍輸出 FROZEN_STATE_OK＝假綠燈（H-0 同構：漏掉�
                   即鏡像是 canonical 的 byte 前綴；canonical 尾部的輪次 log 不屬鏡像）
   bk_now          repo NOW.md 與 ops/loop/NOW.md byte-identical（約定＝cp 鏡像；任一侧 0B
                   為空集測量→BROKEN，r1272 非空守衛）
+  now_redline     NOW.md 紅線「凍結 4 檔＋filing N sha256」契約行 vs 磁碟逐條核實（r1393，
+                  vq-el4.81；重用 tests/test_reqloop_now_redline.py 之 redline_violations()
+                  為唯一實現，無第二份 ruler；守衛檔缺／NOW.md 缺 → BROKEN，I-4）
 
 r1273 起 anchors/ci_contract 的 detail 帶「expected N passed, got M」，計數不符即 BROKEN；
 r1285 起另要求匯總行無其它結果類（skipped/xfailed 等＝未測量，I-4）。
@@ -127,6 +130,17 @@ canonical 簿記」/r1297「worker/argon 未同步」缺陷類）→BROKEN（fai
 不是通過）；base 無簿記檔→輪次身份未測量→BROKEN。守衛未弱化：未同步輪仍紅燈、
 同步輪的 in-scope 內容漂移仍紅燈；消除的只是「分支前進」這個結構性假紅燈。
 負控制：tests/test_reqloop_freeze_check.py::test_diff_sync_counterpart_anchor。
+
+背景（2026-11-11 r1393，vq-el4.81）：新增第 12 項 mandated 檢查 now_redline（11→12 項）——
+r1392 的 NOW.md 紅線轉抄守衛（tests/test_reqloop_now_redline.py，5 案）只在 pytest
+套件內跑；旁路 pytest、只看本 ruler 的 FROZEN_STATE_OK 時，紅線轉抄漂移（一個
+hash 前綴／行數、或整行被刪）仍不被一鍵 ruler 測量（H-0 同型：漏掉一項得到的綠燈
+就是漏洞成因）。本項調用同一把尺（redline_violations），不重寫解析邏輯（vrun 同原則）；
+守衛檔／NOW.md 缺 → BROKEN（I-4：未測量不是通過）。紀律（r1387/r1388 同型）：改
+ruler 已同步顯式更新 GUARD_CONTENT_PIN 之 ops/reqloop/freeze_check.py pin（cfbfba31…
+→新值，r1393 記錄在案，見 tests/test_reqloop_freeze_check.py）。負控制：
+tests/test_reqloop_freeze_check.py::test_now_redline_negative_controls（hash 漂移／
+NOW 缺／守衛檔缺，3 路徑全 BROKEN）。
 
 口徑：本腳本只報「凍結狀態是否完好」，不裁 G2.5 成效、不裁 G3 可否發射。
 """
@@ -806,6 +820,43 @@ def check_worktree_clean(repo: Path = REPO) -> None:
                f"in-scope clean {len(targets)}/{len(targets)}（{scope}）: " + "；".join(parts))
 
 
+def check_now_redline(
+    now: Path | None = None,
+    guard: Path | None = None,
+) -> None:
+    """now_redline：NOW.md 紅線「凍結 4 檔＋filing N sha256」契約行 vs 磁碟逐條核實（r1393）。
+
+    背景：r1392 的轉抄守衛只在 pytest 套件內跑——旁路 pytest、只看本 ruler 的
+    FROZEN_STATE_OK 時，紅線轉抄漂移（一個 hash 前綴／行數，或整行被刪）仍不被
+    一鍵 ruler 測量（H-0 同型）。本項把它接進 ruler，使審查指示 #4 的「轉抄精度」
+    在 12 項一鍵裁決內可驗證。
+
+    唯一實現：載入 tests/test_reqloop_now_redline.py 並調用其 redline_violations()
+    （同一把尺、無第二份解析邏輯、vrun 同原則）。該檔缺／NOW.md 缺 → BROKEN
+    （I-4：未測量不是通過；沙盒裡本 ruler 被拷走時即走此 fail-closed 路徑）。
+    """
+    import importlib.util
+
+    if guard is None:
+        guard = REPO / "tests" / "test_reqloop_now_redline.py"
+    if now is None:
+        now = REPO / "NOW.md"
+    if not guard.is_file():
+        record("now_redline", False, f"BROKEN：紅線守衛模組缺（未測量，I-4）：{guard}")
+        return
+    spec = importlib.util.spec_from_file_location("reqloop_now_redline_guard", guard)
+    if spec is None or spec.loader is None:
+        record("now_redline", False, f"BROKEN：紅線守衛模組不可載入（未測量，I-4）：{guard}")
+        return
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    violations = mod.redline_violations(now)
+    if violations:
+        record("now_redline", False, "NOW.md 紅線漂移: " + "; ".join(violations))
+    else:
+        record("now_redline", True, "NOW.md 紅線（凍結 4 檔＋filing sha256）與磁碟逐條相符（唯一實現：redline_violations）")
+
+
 def run_check(name: str, fn: Callable[[], None]) -> None:
     """單項檢查異常包層（r1297，vq-el4.39）：檢查執行中拋異常（FILING JSON 損毀、
     FILING 缺失、filing 條目非 dict、git 缺席、子程超時…）時，點名記 BROKEN
@@ -822,7 +873,7 @@ def run_check(name: str, fn: Callable[[], None]) -> None:
 
 def main() -> int:
     # r1297（vq-el4.39）：每項檢查經 run_check——任一項崩潰被點名記 BROKEN，
-    # 其餘各項照跑，10 項全在輸出＋單一裁決行（I-4：未測量不是通過；r1309 起 10 項）。
+    # 其餘各項照跑，12 項全在輸出＋單一裁決行（I-4：未測量不是通過；r1393 起 12 項）。
     run_check("anchors", check_anchors)
     run_check("ci_contract", check_ci_contract)
     run_check("diff_worker", lambda: check_diff("auto/worker", "diff_worker"))
@@ -834,6 +885,7 @@ def main() -> int:
     run_check("bk_state", check_bookkeeping_state)
     run_check("bk_now", check_bookkeeping_now)
     run_check("wt_clean", check_worktree_clean)  # r1309：三分支 worktree in-scope 殘留
+    run_check("now_redline", check_now_redline)  # r1393：NOW.md 紅線契約行 vs 磁碟（指示 #4 機械化進一鍵 ruler）
 
     width = max(len(n) for n, _, _ in results)
     for name, ok, detail in results:
