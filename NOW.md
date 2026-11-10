@@ -2,9 +2,14 @@
 
 主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結、凍結）、G2 已完（凍結、凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 現況（r1391、2026-11-10）
+## 現況（r1391 redo、2026-11-10）
 
-三分支收口定案（r1390 下一步①）：CI 一次讀取（不 poll）3/3 綠——qwen27b@93707c2fa 5125 passed／74 skipped／0 failed（859s）；argon@1b93dcd04 5125／74／0（861s）；worker@86bea3a77 5125／74／0（859s）；state.json idle。3 綠 sha 皆現 3 tips（qwen27b 2752fb24c／argon 875427385／worker a9633eb4b）之祖先，diff 僅 4 簿記檔（NOW.md／STATE.md／ops/STATE.md／ops/loop/NOW.md）→代碼 byte-identical、綠 CI 覆蓋現 tip 代碼；in-scope diff 0×2。現 tip 本地重驗（全數新跑）：守衛 6 檔 88 passed（4.89s）；freeze_check 11/11 OK FROZEN_STATE_OK rc=0；ves 7/7 OK EFFECTS_SUMMARY_OK rc=0。未驗證：現 3 tips per-sha CI json→UNKNOWN（H-0、非紅燈）。
+r1391 redo＝審查點名 4 檔實開＋依賴值獨立重算（vq-el4.79 開→關），0 更正：
+- effects_20261105_summary.json（json.load 實開）：60,228 B／sha a710f7e4…／50 格（local 45／current 50）；cells_detail 獨立重算：policy30 13w／0r（g7／l6）、保住 10／仍錯 7、35 sess／915 api／33,670,510 tok（None 5 格）；once20 11w／0r（g7／l4）、保住 0／仍錯 9、20 sess／457 api／19,503,953 tok——與檔級欄位全 MATCH。
+- g25_all_gates_filing.json（json.load 實開）：4,681 B／sha 6e5afb46…／三門全 PASS；6 sha256 獨立重算 6/6 MATCH（extract.py 51abfec3…／checks.py c7589c61…／run_eval.py 332cd324…／phase1-3 3c6fb35a…／6b7cb831…／ada235bb…）。
+- extract.py（head 實開）：1,217 行、blob e757aec5＝錨點 pin、fail-closed 組裝層。
+- repair.py（head 實開）：2,795 行、blob 5147f8c3＝錨點 pin、G2 局部修復切片。
+r1391 三分支收口定案（不變）：CI 一次讀取 3/3 綠（93707c2fa／1b93dcd04／86bea3a77 各 5125／74／0）；3 綠 sha 皆現 tips 之祖先、diff 僅 4 簿記檔→代碼 byte-identical；in-scope diff 0×2；現 tip 本地 88 passed／freeze 11/11／ves 7/7。未驗證：現 3 tips per-sha CI json→UNKNOWN（H-0、非紅燈）。
 
 ## 下一步
 
