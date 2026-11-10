@@ -15,7 +15,7 @@ from typing import Any
 
 from vacant_network.brains import OpenAIBrain, _post
 
-from .backend import brain_from_config
+from .backend import brain_from_config, resolve_model
 from .budget import BudgetLedger
 from .runner import load_config
 
@@ -42,12 +42,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-tokens", type=int, default=16)
     args = parser.parse_args(argv)
     config = load_config(Path(args.config))
-    model = config.get("model") or {}
+    model = resolve_model(config)
     brain = brain_from_config(model)
     if not isinstance(brain, OpenAIBrain):
         print("compat-check expected an OpenAI-compatible brain", file=sys.stderr)
         return 2
-    payload = build_payload(brain.model, max_tokens=args.max_tokens)
+    brain.max_tokens = args.max_tokens
+    payload = brain.build_payload("ping") if hasattr(brain, "build_payload") else build_payload(brain.model, max_tokens=args.max_tokens)
     url = brain.base_url + "/chat/completions"
     report: dict[str, Any] = {
         "schema_version": "vacant.personal.endpoint_smoke.v1",
@@ -56,6 +57,8 @@ def main(argv: list[str] | None = None) -> int:
         "url": url,
         "request_has_max_tokens": "max_tokens" in payload,
         "request_has_tools": "tools" in payload,
+        "reasoning_effort": payload.get("reasoning_effort"),
+        "request_has_think": "think" in payload,
         "model_id_configured": brain.model,
         "pricing": model.get("pricing"),
     }

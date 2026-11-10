@@ -356,10 +356,19 @@ def _letter(option_id: str | None, presented_order: list[str]) -> str | None:
     return None
 
 
+def latest_prediction_rows(predictions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """同一 (pid, arm, case_id) 以最後一筆為準，resume 補寫不會把舊失敗算進分母兩次。"""
+    latest: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for row in predictions:
+        latest[(str(row.get("pid")), str(row.get("arm")), str(row.get("case_id")))] = row
+    return list(latest.values())
+
+
 def score_twin(predictions: list[dict[str, Any]], labels: list[dict[str, Any]], retests: dict[str, dict[str, Any]], *, n_boot: int = 2000, seed: int = 0) -> dict[str, Any]:
     """每人準確率、Wilson、重測正規化、偏離多數的題、配對 McNemar 與 bootstrap、選項順序分拆。"""
     from vacant_network.research import boot_ci, mcnemar_exact
 
+    predictions = latest_prediction_rows(predictions)
     label_by = {(str(row["pid"]), row["case_id"]): row for row in labels}
     majority = leave_one_out_majority(labels)
     arms = sorted({row["arm"] for row in predictions})
@@ -419,18 +428,24 @@ def score_twin(predictions: list[dict[str, Any]], labels: list[dict[str, Any]], 
                 return None
             return sum(1 for row in rows if row["hit"]) / len(rows)
 
+        unsure_rows = [row for row in arm_rows if row["prediction"] == "unsure"]
+        strict = _acc(arm_rows)
         by_arm[arm] = {
             "per_person": people,
-            "micro_accuracy": _acc(arm_rows),
+            "micro_accuracy": strict,
+            "strict_accuracy": strict,
             "micro_wilson95": wilson_interval(sum(1 for row in arm_rows if row["hit"]), len(arm_rows)) if arm_rows else None,
             "macro_accuracy": _mean_defined([person["accuracy"] for person in people]),
             "macro_accuracy_over_retest": _mean_defined([person["accuracy_over_retest"] for person in people]),
+            "unsure_n": len(unsure_rows),
+            "unsure_rate": (len(unsure_rows) / len(arm_rows)) if arm_rows else None,
+            "unsure_note": "unsure is reported as abstention and counts as incorrect in strict_accuracy; it is not dropped from the denominator",
             "differs_from_majority": {"n": len(differs), "accuracy": _acc(differs)},
             "option_order": {
                 "identity": {"n": len(same_order), "accuracy": _acc(same_order)},
                 "swapped": {"n": len(swapped), "accuracy": _acc(swapped)},
             },
-            "denominator_note": "unanswered, parse_failed, and budget_stopped count as misses",
+            "denominator_note": "unanswered, unsure, parse_failed, and budget_stopped count as misses in strict_accuracy",
         }
         per_person.extend(people)
     pairs = []

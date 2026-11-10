@@ -29,3 +29,16 @@ python3 -m vacant_network.personal twin2k-run \
 ```
 
 `twin2k-run --backend fixture` does not call the endpoint. The example config points at `http://127.0.0.1:11434/v1`, model `qwen3-coder:30b`, `pricing: local`.
+
+Resume after a dropped tunnel. Completed cells stay. A `usage_unknown` row is not sent again.
+
+```bash
+python3 -m vacant_network.personal twin2k-run \
+  --config ops/personal_pilot/config.kaggle.example.json \
+  --prepared "$HOME/vacant-twin2k-20" \
+  --backend openai \
+  --out "$HOME/vacant-twin2k-20/run" \
+  --resume
+```
+
+Kaggle notes (`zstd` before the Ollama installer, servers started with `start_new_session=True`, no `terminate` in the keep-alive cell): [docs/KAGGLE_OLLAMA.md](../../../docs/KAGGLE_OLLAMA.md).

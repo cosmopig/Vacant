@@ -1,0 +1,61 @@
+{
+  "schema_version": "vacant.personal.config.v1",
+  "private_pilot_root": null,
+  "bank_dir": "task_bank",
+  "prompt_dir": "prompts",
+  "checker": "trusted_checks/check_plan.py",
+  "run_id": "kaggle-twin2k",
+  "seed": 20261109,
+  "user_id": "twin2k-sample",
+  "backend": "openai",
+  "extension_budget_authorized": false,
+  "model": {
+    "base_url": "https://PLACEHOLDER.trycloudflare.com/v1",
+    "model_id": "qwen3.8:27b",
+    "api_key_env": "VACANT_PERSONAL_API_KEY",
+    "pricing": "local",
+    "temperature": 0.0,
+    "request_timeout_seconds": 300,
+    "reasoning_effort": "none"
+  },
+  "models": [
+    {
+      "model_id": "qwen3.8:27b",
+      "reasoning_effort": "none"
+    },
+    {
+      "model_id": "gemma4:12b",
+      "reasoning_effort": "none"
+    }
+  ],
+  "twin": {
+    "retry_transient_once": true
+  },
+  "budget": {
+    "model_id": null,
+    "pricing_verified_at": null,
+    "input_usd_per_million": null,
+    "cached_input_usd_per_million": null,
+    "output_usd_per_million": null,
+    "cash_limit_usd": 15,
+    "max_input_tokens": 1000000,
+    "max_output_tokens": 150000,
+    "max_requests": 6000,
+    "request_timeout_seconds": 300,
+    "max_model_wall_seconds": 10800,
+    "profile_build_request_cap": 60,
+    "stage1_output_tokens": 200,
+    "stage2_output_tokens": 1800,
+    "profile_output_tokens": 2200
+  },
+  "dataset": {
+    "name": "LLM-Digital-Twin/Twin-2K-500",
+    "config": "wave_split",
+    "license": "CC BY 4.0",
+    "cache_dir": "~/.cache/vacant/twin2k500",
+    "participants": 20,
+    "seed": 20261109,
+    "use_persona_summary": false
+  },
+  "notes": "Placeholder tunnel URL. Set VACANT_MODEL to qwen3.8:27b or gemma4:12b. pricing local does not invent API USD. reasoning_effort none is required for these reasoning models on /v1/chat/completions; think:false is not sent."
+}
