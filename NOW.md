@@ -15,8 +15,9 @@
   test_freeze_check_covers_all_mandated_checks＋test_freeze_check_verdict_ok
   （5104 passed）＝r1361 rc=124 auto-commit 簿記身份未同步兩 worktree（其
   STATE.md blob a8bf476e25 不在 worker/argon 100 筆 STATE.md commit，git ls-tree
-  實測）；r1362 已修 live 樹：現三 tip 同身份 05650d3fe0→同族紅不會在 tip
-  重現（tip CI 仍 UNKNOWN、待跑完）；LATEST_worker＝67859de04 GREEN 5105/0/74。
+  實測）；r1362 已修 live 樹：讀取時點三 tip 同身份 05650d3fe0、本輪收口後
+  新 tip 同身份 30c43eeb（三分支皆在、實測）→同族紅不在 tip 重現（tip CI 仍
+  UNKNOWN、待跑完）；LATEST_worker＝67859de04 GREEN 5105/0/74。
 
 ## 下一步（下一輪開頭、單項、可收口）
 
