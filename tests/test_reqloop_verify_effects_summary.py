@@ -13,8 +13,8 @@
   非子串——"OK" ⊂ "BROKEN"，r1271 測試自身假綠燈教訓）、sha 身份釘住、
   數字與人類任務參考值一致；
 - 負控：identity 漂移／總和漂移／分臂漂移／成本漂移／零格空集／once20 總和漂移／
-  成本字串／totals 漂移／reference 漂移／缺檔／scope_note 弱化——全部必須 BROKEN 且
-  rc=1（任何一種削弱不得照綠）。
+  成本字串／totals 漂移／reference 漂移／movement_total 漂移／缺檔／scope_note 弱化
+  ——全部必須 BROKEN 且 rc=1（任何一種削弱不得照綠）。
   r1344 補 identity／once20_internal／totals／reference 四項紅路：本輪之前 7 項中
   僅 3 項有負控制、其餘 4 項紅路從未實證——r1344 RED 實證：停用 totals 三項比對
   （仍印 OK）後本套件仍 13 passed、live 仍 VERDICT: EFFECTS_SUMMARY_OK rc=0＝
@@ -64,6 +64,7 @@ REFERENCE = {
         "right_to_wrong": 0,
         "preserved_good": 10,
         "still_wrong": 7,
+        "movement_total": 13,
         "arm_w2r": {"generic": 7, "localized": 6},
         "repair_sessions_total": 35,
         "api_model_calls_true_total": 915,
@@ -77,6 +78,7 @@ REFERENCE = {
         "right_to_wrong": 0,
         "preserved_good": 0,
         "still_wrong": 9,
+        "movement_total": 11,
         "arm_w2r": {"generic": 7, "localized": 4},
         "repair_sessions_total": 20,
         "api_model_calls_true_total": 457,
@@ -149,7 +151,7 @@ def test_live_reference_numbers() -> None:
     for ph, ref in REFERENCE.items():
         p = d["phases"][ph]
         for key in ("cells", "wrong_to_right", "right_to_wrong", "preserved_good",
-                    "still_wrong", "repair_sessions_total",
+                    "still_wrong", "movement_total", "repair_sessions_total",
                     "api_model_calls_true_total", "tokens_true_total",
                     "local_matches", "current_code_matches"):
             assert p[key] == ref[key], f"{ph}.{key}: {p[key]} != {ref[key]}"
@@ -252,6 +254,12 @@ def _mutate_reference_drift(d: dict) -> None:
          "totals"),
         # r1344：reference 紅路（內部自洽但偏離人類參考 11w/g7/l4；只有 reference 照紅）
         ("reference_drift", _mutate_reference_drift, "reference"),
+        # r1354（vq-el4.60）：movement_total 紅路——人審 headline（13/11）原不在覆核
+        # 範圍：實測 RED，13→12 仍 7/7 OK rc=0 假綠燈（H-0：漏一項得到的綠燈就是洞的
+        # 成因；I-4：未覆核不是通過）；修後 policy30_internal 必須點名 movement_total
+        ("movement_drift",
+         lambda d: d["phases"]["policy30"].__setitem__("movement_total", 12),
+         "policy30_internal"),
     ],
 )
 def test_negative_controls(tmp_path: Path, label: str, mutate, expected_broken: str) -> None:

@@ -1294,10 +1294,16 @@ GUARD_CONTENT_PIN = {
     # r1347（vq-el4.56）擴覆蓋：第二收口標準（審查指示 #3 點名）兩檔——r1319 之後建立、
     # 此前從未釘住；補釘後「腳本 stub＋測試檔同名 dummy」假綠燈場景被本 pin 抓住
     # （RED 證據見 test_guard_content_pin_effects_summary_pair_negative_controls）。
+    # r1354 解凍記錄（vq-el4.60）：_phase_internal_check 新增 movement_total 覆核
+    # （＝逐格重算 w2r+r2w；OK detail 點名 movement；此前 13→12 仍 7/7 OK rc=0
+    # 假綠燈，實測 RED）＋ test 新增 movement_drift 負控制＋REFERENCE 人審錨 13/11
+    # （套件 17→18 測）。兩檔合法改動後顯式更新錨：
+    # (1) ops/reqloop/verify_effects_summary.py sha256=e6cd3933db60be3e653ec62bbce607e4bf2925e39bf8a4086cfb99b2b2e88c55 → 5b44c3bba4c04767d372ca733967cf29932925370079af1a130e18db63f90583
+    # (2) tests/test_reqloop_verify_effects_summary.py sha256=f72e692710c6669f01892bcd4dab4a78c6f9753ef45a2ca45b81100f8e068fb0 → 1dc3713eb9d8da8f20a81eeb56ba6bb8d82825867482fe9e5cf71ebeeb740ebf
     "ops/reqloop/verify_effects_summary.py":
-        "e6cd3933db60be3e653ec62bbce607e4bf2925e39bf8a4086cfb99b2b2e88c55",
+        "5b44c3bba4c04767d372ca733967cf29932925370079af1a130e18db63f90583",
     "tests/test_reqloop_verify_effects_summary.py":
-        "f72e692710c6669f01892bcd4dab4a78c6f9753ef45a2ca45b81100f8e068fb0",
+        "1dc3713eb9d8da8f20a81eeb56ba6bb8d82825867482fe9e5cf71ebeeb740ebf",
 }
 
 
