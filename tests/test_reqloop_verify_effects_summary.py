@@ -213,6 +213,25 @@ def _mutate_reference_drift(d: dict) -> None:
     p["per_arm"]["generic"]["still_wrong"] += 1
 
 
+def _mutate_mismatch_content(d: dict) -> None:
+    """r1361（vq-el4.61）：policy30 local mismatch 列表「長度＝3」維持不變，
+    但把 3 個 cell 名換成 3 個 local_matches_independent＝True（實際相符）的格——
+    長度仍自洽（len==n_false==3）、local_matches 總和與 reference 全不變，
+    只有「列表內容（cell 名集合）≠ 逐格 flag=False 集合」被改。
+    舊碼只比長度（n_list==n_false）→ 7/7 OK rc=0 假綠燈（本輪 RED 實證）；
+    新碼 _phase_internal_check 必須覆核 cell 名集合並點名內容。
+    同族：r1296/r1314/r1324/r1327/r1350（計數守住、身份未守）。"""
+    p = d["phases"]["policy30"]
+    cds = p["cells_detail"]
+    true_cells = [c for c in cds if c["local_matches_independent"]][:3]
+    p["local_vs_independent_mismatches"] = [
+        {"cell": f"{c['draft']}-{c['arm']}",
+         "local_all_pass_d38d2eb2": c["local_all_pass_d38d2eb2"],
+         "after_independent": c["after_independent"]}
+        for c in true_cells
+    ]
+
+
 @pytest.mark.parametrize(
     ("label", "mutate", "expected_broken"),
     [
@@ -260,6 +279,10 @@ def _mutate_reference_drift(d: dict) -> None:
         ("movement_drift",
          lambda d: d["phases"]["policy30"].__setitem__("movement_total", 12),
          "policy30_internal"),
+        # r1361（vq-el4.61）：mismatch 列表內容紅路——只核長度不核內容（cell 名集合），
+        # 右長度（3）錯內容（3 個 flag=True 格）仍 7/7 OK rc=0 假綠燈（RED 實證）；
+        # 同族 r1296/r1314/r1324/r1327/r1350（計數守住身份未守）。新碼須點名內容。
+        ("mismatch_content_drift", _mutate_mismatch_content, "policy30_internal"),
     ],
 )
 def test_negative_controls(tmp_path: Path, label: str, mutate, expected_broken: str) -> None:
