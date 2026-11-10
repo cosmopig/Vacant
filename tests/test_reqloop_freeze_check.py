@@ -1383,6 +1383,22 @@ GUARD_CONTENT_PIN = {
         "220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7",
     "tests/test_reqloop_g3.py":
         "fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd",
+    # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
+    # 其 10 測測試檔）r1399 輪（rc=124 殘留）建於 r1319/r1347/r1365/r1397 建錨各輪
+    # 之後、從未釘住（r1347 同型：verify_effects_summary 對建於 r1333/r1344、r1347
+    # 補釘）。RED 實證（本輪新跑）：工具換「直接印 CI_TIP_OK」stub＋測試檔換同名
+    # dummy（10 真名、assert True、CI passed 計數不變）→ 舊 10 檔 pin 回 []（兩檔
+    # 不在 pin → 零違規＝假綠燈；H-0 同構：綠燈來自沒量該量的）。兩檔不含 pin 本身
+    # （無自釘循環；r1347 先例明文「可釘、且必須釘」）。sha256 皆本輪 sha256sum 自
+    # 磁碟實算、非轉抄。
+    # (1) ops/reqloop/ci_tip_check.py
+    #     新增 pin 9c1aee8e0fa8300c55c7d65316e84fb5f5b4aa2dac7803c49e408713aa61a202
+    "ops/reqloop/ci_tip_check.py":
+        "9c1aee8e0fa8300c55c7d65316e84fb5f5b4aa2dac7803c49e408713aa61a202",
+    # (2) tests/test_reqloop_ci_tip_check.py
+    #     新增 pin 3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761
+    "tests/test_reqloop_ci_tip_check.py":
+        "3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761",
 }
 
 
@@ -1852,6 +1868,92 @@ def test_guard_content_pin_g3_pair_negative_controls(tmp_path: Path) -> None:
     # (b) 正控制：守衛檔皆真內容 → 零違規
     root_b = fake_repo()
     for rel in G3_PAIR:
+        (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root_b / rel).write_bytes((REPO / rel).read_bytes())
+    v_ok = guard_content_violations(root_b)
+    assert v_ok == [], f"真內容守衛檔被誤判漂移: {v_ok}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# r1401（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（ci_tip_check.py＋
+# 其 10 測測試檔）
+#
+# 缺口（本輪 RED 實證、全數新跑）：r1399 輪（rc=124 殘留）建 CI tip 收口機械
+# 檢查 ops/reqloop/ci_tip_check.py（NOW.md 下一步 #1 機械化：綠＝收口最終證據、
+# 紅＝查因、未測量≠通過、state.json 一次讀取不 poll）＋tests/test_reqloop_ci_
+# tip_check.py（10 測、含 7 負控制）——與 verify_effects_summary 對（r1333/r1344，
+# r1347 補釘）同型——建於各建錨輪之後、從未釘住。攻擊場景（r1347 同型）：工具
+# 換「直接印 CI_TIP_OK」stub＋測試檔換同名 dummy（10 真名、assert True、CI
+# passed 計數不變）→ 收口判定整層掏空仍綠＝假綠燈（H-0 同構：綠燈來自沒量該
+# 量的）。pin 是唯一能抓此 swap 的守衛。兩檔不含 pin 本身（無自釘循環；r1347
+# 先例明文「可釘、且必須釘」）。
+CI_TIP_PAIR = (
+    "ops/reqloop/ci_tip_check.py",
+    "tests/test_reqloop_ci_tip_check.py",
+)
+
+
+def test_guard_content_pin_ci_tip_pair_negative_controls(tmp_path: Path) -> None:
+    """r1401（vq-el4.87）：CI tip 收口對（工具＋其 10 測測試檔）必須在 GUARD_CONTENT_PIN 內。
+    (a) 負控制：工具換「直接印 CI_TIP_OK」stub＋測試檔換同名 dummy
+        （10 真名、assert True、CI passed 計數不變）→ guard_content_violations
+        必對兩檔各判內容漂移；
+    (b) 正控制：守衛檔皆真內容 → 零違規（擴錨後不得誤判未改檔）。
+    全部對臨時 repo 操作，不碰真檔；無 subprocess 片段（不觸及安裝合約掃描範圍）。
+    RED 證據（本輪、舊錨）：(a) 的 v == []（兩檔不在 pin → 零違規＝假綠燈）。"""
+
+    def fake_repo() -> Path:
+        root = tmp_path / "repo"
+        for rel in tuple(GUARD_CONTENT_PIN):
+            dst = root / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes((REPO / rel).read_bytes())
+        return root
+
+    def place(root: Path, dummy_names: tuple[str, ...]) -> None:
+        for rel in CI_TIP_PAIR:
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / "ops/reqloop/ci_tip_check.py").write_text(
+            "def main(*args, **kwargs):\n"
+            "    print('VERDICT: CI_TIP_OK')\n    return 0\n",
+            encoding="utf-8",
+        )
+        (root / "tests/test_reqloop_ci_tip_check.py").write_text(
+            "\n".join(f"def {n}():\n    assert True\n" for n in dummy_names),
+            encoding="utf-8",
+        )
+
+    # (a) ci_tip_check 工具 stub＋測試檔同名 dummy → 兩檔都必須被判漂移
+    real_names = (
+        "test_live_shape_covered_peercovered_tipgreen",
+        "test_peer_not_identical_code_diff_is_no_coverage",
+        "test_empty_ci_dir_is_unknown_not_ok",
+        "test_red_tip_json_is_red",
+        "test_green_true_but_failed_nonzero_is_not_green",
+        "test_latest_green_ancestor_by_commit_time",
+        "test_corrupt_ci_json_skipped_not_crash",
+        "test_state_json_running_is_note_only",
+        "test_bookkeeping_only_diff_vs_one_code_file",
+        "test_verdict_aggregation_priority",
+    )
+    root_a = fake_repo()
+    place(root_a, real_names)
+    v = guard_content_violations(root_a)
+    assert any("ops/reqloop/ci_tip_check.py" in s and "內容漂移" in s for s in v), (
+        f"ci_tip_check 收口 stub 未被抓到（r1347 同型缺口：收口工具建於建錨輪後、"
+        f"從未釘住；換直接印 OK 的 stub 後收口證據整層掏空仍綠）: {v}"
+    )
+    assert any("tests/test_reqloop_ci_tip_check.py" in s and "內容漂移" in s for s in v), (
+        f"同名 dummy 測試檔未被抓到（10 真名 assert True、CI passed 計數不變）: {v}"
+    )
+    # 未改的既有守衛檔不得誤判
+    for rel in tuple(GUARD_CONTENT_PIN):
+        if rel not in CI_TIP_PAIR:
+            assert not any(rel in s for s in v), f"未改檔被誤判: {rel}: {v}"
+
+    # (b) 正控制：守衛檔皆真內容 → 零違規
+    root_b = fake_repo()
+    for rel in CI_TIP_PAIR:
         (root_b / rel).parent.mkdir(parents=True, exist_ok=True)
         (root_b / rel).write_bytes((REPO / rel).read_bytes())
     v_ok = guard_content_violations(root_b)
