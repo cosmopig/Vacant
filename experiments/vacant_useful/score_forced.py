@@ -41,6 +41,7 @@ def main():
     ap.add_argument("--sample-key", default="S10")
     ap.add_argument("--hier", default=str(Path.home() / ".cache/vacant/twin2k500/hier_results.pkl"))
     ap.add_argument("--out")
+    ap.add_argument("--scored-only", action="store_true", help="partial run: keep only cells every LLM arm has answered (no extrapolation)")
     a = ap.parse_args()
     H = pickle.load(open(a.hier, "rb"))[a.sample_key]
     truth, base = {}, {"ITEM_MAJ": {}, "PRICE_PRIOR": {}, "PRICE_K5": {}}
@@ -62,9 +63,11 @@ def main():
         pa = r["p_A"] if isinstance(r["p_A"], (int, float)) else 0.5
         arms[r["arm"]][k] = (ok, abs(pa - 0.5), r["prediction"] is None)
     keys = sorted(truth)
+    if a.scored_only:
+        keys = [k for k in keys if all(k in d for d in arms.values())]
     out = []
     w = out.append
-    w(f"# llm_forced scoring ({a.sample_key}, {len(keys)} cells)\n")
+    w(f"# llm_forced scoring ({a.sample_key}, {len(keys)} cells, {len({k[0] for k in keys})} people{', partial: scored cells only' if a.scored_only else ''})\n")
     w("| Arm | Answered | Strict acc. | Wilson 95% | vs ITEM_MAJ | vs PRICE_PRIOR | vs PRICE_K5 |")
     w("|---|---:|---:|---|---|---|---|")
     rows = {n: {k: base[n][k] for k in keys} for n in base}

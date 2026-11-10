@@ -82,11 +82,12 @@ def main():
         for line in pred_path.read_text().splitlines():
             r = json.loads(line); done.add((r["pid"], r["arm"], r["qid"]))
     fh = pred_path.open("a")
-    for arm in a.arms:
-        k = 5 if arm == "FORCED_PRECEDENT5" else 0
-        for pid in pids:
-            w4 = D[pid]["w4"]
-            for qid, (lab, stem, opts, fam) in w4.items():
+    # interleave arms per cell so a partial run still yields paired cells
+    for pid in pids:
+        w4 = D[pid]["w4"]
+        for qid, (lab, stem, opts, fam) in w4.items():
+            for arm in a.arms:
+                k = 5 if arm == "FORCED_PRECEDENT5" else 0
                 if (pid, arm, qid) in done:
                     continue
                 order = random.Random(f"{a.seed}:{pid}:{qid}").randrange(2)  # same A/B order rule as twin2k._presentation
