@@ -2,11 +2,12 @@
 
 主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結）、G2 已完（凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 現況（r1410、2026-11-10）
+## 現況（r1412、2026-11-10）
 
-r1410＝維護收口輪（0 代碼改動、0 model calls；全數本輪新跑）驗收集全綠：
-- **ci_tip_check**（NOW r1409 下一步 #1）→ **CI_TIP_OK rc=0** 維持：qwen27b@cf9cbc8a7 COVERED（綠祖先 ec538c2b7＝r1408 commit、..tip 純簿記 4 檔）、worker@9fd53486 PEER_COVERED（root tree 恆等 090c610d…）、argon@66fc22a0 COVERED＝r1408 碼 per-sha CI 收口維持
-- **守衛 8 檔 114 passed**（審查基線 108 之超集、0 排除 0 弱化）；**freeze_check 12/12 FROZEN_STATE_OK rc=0**；**ves 7/7 EFFECTS_SUMMARY_OK rc=0**；**GUARD_CONTENT_PIN 12/12 MATCH**（獨立重算）；queue 空（含隱藏）；無新人類指示（ops/ 最新仍 11-07）
+r1412＝收 r1411（rc=124 超時）簿記殘留（vq-el4.91 結案、非簿記輪——修真實紅燈）：
+- **輪首紅燈→收口**：freeze_check 10/12 FROZEN_STATE_BROKEN rc=1（diff_worker/diff_argon＝r1411 被殺後簿記未 sync，純簿記 4 檔 0 產品碼）→ sync 後 **12/12 FROZEN_STATE_OK rc=0**；守衛 8 檔 2 failed/112 passed → **114 passed**
+- **ci_tip_check（輪首、一次讀取）**：**CI_TIP_OK rc=0** 三分支全 COVERED——worker/argon 由 r1411 的 PEER_COVERED 轉直接 COVERED（綠祖先 json 已量到）
+- **ves 7/7 EFFECTS_SUMMARY_OK**；**g3gate NOT_FIRED PLAN_OK rc=0**（manifest 12/300/2M 恰於上限、非放寬）；GUARD_CONTENT_PIN 12/12 MATCH（獨立重算）；queue 空（含隱藏）
 
 ## 下一步
 
