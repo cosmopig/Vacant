@@ -1,22 +1,14 @@
-# NOW — r1370 (2026-11-10)
+# NOW — r1371 (2026-11-10)
 
 ## Current State
-- vq-el4 全數任務已關（65/65）；全庫唯一 open＝vq-1zf（G3、待人類 --fire）。
-- 本輪 redo（審查點名 4 檔實際開檔核實、非引 tool 輸出代讀）：effects 50 格
-  13w0r g7l6／11w0r g7l4（sha a710f7e4…）；filing 3 門 PASS＋6 sha 全在檔；
-  extract.py 1217 行/blob e757aec5…（discard/白名單/fail-closed/required=True/
-  hidden=False/GlmClient 只走 glm）；repair.py 2795 行/blob 5147f8c3…（原草稿保留/
-  source_tampered→20/FAIL→UNKNOWN 不算修好/STOP_STALLED/缺口關閉＝全部必需項 PASS）
-  ——record 所引全數有碼。
-- 驗收全綠（本輪全數新跑）：freeze_check 11/11 OK rc0；ves 7/7 OK rc0；守衛 4 檔
-  48 passed＋g3gate 22＝70 passed；GUARD_CONTENT_PIN 7 檔；in-scope diff 0×2；
-  queue 空（含隱藏）；g3gate NOT_FIRED。
-- CI：三分支最後完成（r1368）皆 GREEN 5107/0/74（qwen27b@c02588db6／worker@62010b70b／
-  argon@1cd8805d5）；r1369 HEAD per-sha 未出→UNKNOWN、worker@ef5674e5 running（不 poll）。
+- vq-el4 全數已關（66 issues 0 open 0 in progress，含 epic）；全庫唯一 open＝vq-1zf（G3、待人類 --fire）。
+- 本輪（r1371）CI 一次讀取（不 poll）：worker@ef5674e5（r1369 worker tip）UNKNOWN→GREEN 5107/0/74（per-sha json 落盤）；qwen27b@89d6650a・argon@8651ea64（r1369 tips）仍無 per-sha json→UNKNOWN；現 r1370 HEAD（17de139fd/6f1a1acb/5bca01512）：qwen27b running（log ~62%、無 json）、worker/argon 未跑（下輪首讀）。
+- 驗收全綠（本輪全數新跑、主倉）：freeze_check 11/11 OK rc=0（diff 0×2、wt_clean 3/3、filing 3/3＋3/3 MATCH、queue 空含隱藏、g3gate NOT_FIRED+PLAN_OK、bk 同步）；ves 7/7 OK rc=0（50 格、13w0r g7l6／11w0r g7l4）；守衛 5 檔 70 passed（freeze 22／anchors 5／ci 2／ves 19／g3gate 22）；in-scope diff 0×2。
+- 審查指示（1371）#1–#5 本輪全數驗證在位（三分支零漂移／守衛檔＋負控制／凍結錨點＋filing 6/6／CI 一次讀取＋簿記雙 worktree 同步 commit／G3 待人類＋queue 空）；核准 argon commit 5845434b5 已驗在歷史、0 diff、無需動作。
 - 待人類：G3 --fire（vq-1zf、不代發、不入 queue）；CI 通道裁決。
 
-## Next Step (r1371)
-1. CI 一次讀取：r1369 HEAD（89d6650a/ef5674e5/8651ea64）per-sha → 記 GREEN/RED（不 poll、不等待）。
+## Next Step (r1372)
+1. CI 一次讀取：現 r1370 HEAD（17de139fd/6f1a1acb/5bca01512）＋r1369 殘留（89d6650a/8651ea64）per-sha → 記 GREEN/RED（不 poll、不等待）。
 2. 維持驗收：freeze_check 11/11 OK；ves 7/7 OK；守衛 70 passed；in-scope diff 0×2；queue 空（含隱藏）；g3gate NOT_FIRED。
 3. 待人類：G3 --fire（vq-1zf）。
 
