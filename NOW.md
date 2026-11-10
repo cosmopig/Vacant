@@ -1,12 +1,13 @@
-# NOW（round 1384 收尾）
+# NOW（round 1384 redo 收尾）
 
 ## 狀態
-- 分支 auto/qwen27b；**r1384（驗證收口輪）**：審查指示 5 條全數新驗＋tip 全量 CI 契約套件重跑，0 更正（0 產品改動、0 模型呼叫、只跑 CI 契約 4 步、未跑 5125 全量 pytest）。
-- 驗收（本輪全數新跑）：守衛 88 passed（freeze 22／anchors 5／ci 2／ves 19／g3gate 22／g3 18）；ves 7/7 OK rc=0；freeze_check 11/11 OK VERDICT: FROZEN_STATE_OK rc=0；CI@862968eca86de80db89a95706e34b0875f09a8dd（pre-fix）2 FAILED（bk_state 同族：test_freeze_check_verdict_ok＋test_freeze_check_covers_all_mandated_checks）在 tip 57bef1853e75f2d5f7b5680a9c8f15a5cbcbb21f 已轉綠：test_reqloop_*.py（18 檔）441 passed 10.27s＋t12 1 passed＋stepchain 38 passed 156s＋repair --selftest 13/13 PASS。
-- CI 一次讀取（不 poll）：vacant-ci.service active（自 2026-11-07）；上一輪次 qwen27b@862968eca86de80db89a95706e34b0875f09a8dd 2 failed（run 10:48 開始、早於 b58d9f56e 10:56 修復）→argon@1098d858e1add2db93ce1c72ab1c11fb1b8cce4d 5125/0→worker@96b4df5966be3cfecd6327e097d339d763fad4a4 5125/0（11:30 UTC）；qwen27b tip 57bef1853e75f2d5f7b5680a9c8f15a5cbcbb21f（11:26）尚未被 CI 覆蓋、per-sha json UNKNOWN。跨分支：4 簿記檔輪首 3 分支 sha256 恆等，本輪簿記再同步三分支。vq-1zf 仍 open（等人類 `--fire`）；vq-el4 家族 71（0 open／0 in_progress）；/srv/vlab/queue/ 空。
+- 分支 auto/qwen27b；**r1384 redo**：審查點名 3 檔全數直接開啟＋依賴部分獨立重算，0 更正（數值全對上、補 phase 歸屬；0 產品改動、0 模型呼叫）。
+- 直接開啟＋重算：① effects_20261105_summary.json（load in code）：50 cells（local 45/current 50）；policy30 30 cells 13w0r、35 sess/915 api/33,670,510 tok；once20 20 cells 11w0r、20 sess/457 api/19,503,953 tok；兩相合計 55 sess/1,372 api/53,174,463 tok——r1384 條目數字＝policy30 phase 值，重算一致。② g25_all_gates_filing.json（load in code）：三門 g1_rerun/real14/phase3 全 PASS；6 sha256 獨立重算 6/6 MATCH。③ extract.py（head＋wc＋git hash-object）：1217 行、blob e757aec50c16bc6481cd88545672d50884c83f40。
+- CI（承 r1384 一次讀取、本輪不重讀）：vacant-ci.service active；上一輪次 qwen27b@862968eca86de80db89a95706e34b0875f09a8dd 2 failed（run 10:48 開始、早於 b58d9f56e 10:56 修復）→argon@1098d858e1add2db93ce1c72ab1c11fb1b8cce4d 5125/0→worker@96b4df5966be3cfecd6327e097d339d763fad4a4 5125/0（11:30 UTC）；qwen27b tip 尚未被 CI 覆蓋、per-sha json UNKNOWN。
+- 跨分支：4 簿記檔 3 分支 sha256 恆等（redo commit 後復核）；vq-1zf 仍 open（等人類 `--fire`）；vq-el4 家族 71（0 open／0 in_progress）；/srv/vlab/queue/ 空。
 
 ## 下一步（loop 側）
-- 下輪開頭一次讀取 qwen27b tip 57bef1853e75f2d5f7b5680a9c8f15a5cbcbb21f 的 per-sha CI json（vacant-ci 下一輪次應已覆蓋）：綠＝2 紅正式閉合（LATEST_qwen27b 不再指 pre-fix 862968eca86de80db89a95706e34b0875f09a8dd）；紅＝查因（但 tip 全量 CI 契約套件本輪已本地全綠）。
+- 下輪開頭一次讀取簿記新 commit（三分支）的 per-sha CI json：綠＝2 紅正式閉合（LATEST_qwen27b 不再指 pre-fix 862968eca86de80db89a95706e34b0875f09a8dd）；紅＝查因（r1384 已全量 CI 契約套件本地全綠於 tip）。
 - vq-1zf（G3）仍等人類 `--fire`；無其他 open 工單。
 
 ## 紅線（不變）
