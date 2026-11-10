@@ -222,9 +222,10 @@ def test_missing_usage_totals_unknown_not_zero(tmp_path):
 
 
 def test_quota_exceeded_stops_no_retry(tmp_path):
+    import dataclasses
     fake = FakeChannel(tokens=6000)
     plan = _plan()
-    plan.budget = dict(plan.budget, daily_token_cap=12000)  # 小額度以便測試
+    plan = dataclasses.replace(plan, budget=dict(plan.budget, daily_token_cap=12000))  # 小額度以便測試
     result = g3.run_g3(plan, BASE, tmp_path / "o", channel=fake, approval=_approval())
     # t1 擷取(6000)＋t1/native(6000)＝12000 撞額→之後全停
     assert result["stop_reason"] == "quota"

@@ -41,9 +41,10 @@ from vacant_network.reqloop.requirements import RequirementSet
 
 SCHEMA_RESULT = "vacant.reqloop.g3.result/1"
 
-# 與 g3gate 同義（發射側不自訂第二套碼）：
+# 與 g3gate 同義（發射側不自訂第二套碼）；g3gate 本身沒有 plan 失敗碼
+#（其 --fire 未接線用 RC_APPROVED_NOT_WIRED=3），發射側 plan/完整性失敗用 1：
 RC_OK = g3gate.RC_OK
-RC_PLAN = g3gate.RC_PLAN
+RC_PLAN = 1
 RC_NOT_APPROVED = g3gate.RC_NOT_APPROVED
 
 HIDDEN_AFTER_UNKNOWN = "UNKNOWN"
@@ -132,6 +133,13 @@ class Channel:
         raise NotImplementedError
 
 
+def _count_lines(path: pathlib.Path) -> int:
+    """行數（Python 3.12 無 Path.count_lines；vibe_calls.jsonl 每天只有少量行）。"""
+    if not path.is_file():
+        return 0
+    return len(path.read_text(encoding="utf-8", errors="replace").splitlines())
+
+
 def _tail_usage(path: pathlib.Path, n_lines: int) -> list[dict]:
     """讀 vibe_calls.jsonl 末 n_lines 行（該檔由 glm CLI 每次呼叫追加一行）。"""
     if n_lines <= 0 or not path.is_file():
@@ -163,7 +171,7 @@ class GlmChannel(Channel):
         self._calls_log = self.state_dir / "vibe_calls.jsonl"
 
     def call(self, *, prompt: str, model: str, purpose: str, timeout_s: float) -> tuple[str, RoundUsage]:
-        before_lines = self._calls_log.count_lines() if self._calls_log.is_file() else 0
+        before_lines = _count_lines(self._calls_log)
         fd, prompt_path = tempfile.mkstemp(prefix="vacant_g3_", suffix=".md")
         t0 = time.monotonic()
         try:
@@ -187,8 +195,7 @@ class GlmChannel(Channel):
         if proc.returncode != 0:
             lines = [ln for ln in (proc.stderr or proc.stdout or "").strip().splitlines() if ln.strip()]
             raise G3CallError(f"glm rc={proc.returncode}: {lines[-1][:200] if lines else 'no output'}")
-        new = _tail_usage(self._calls_log, self._calls_log.count_lines() - before_lines
-                          if self._calls_log.is_file() else 0)
+        new = _tail_usage(self._calls_log, _count_lines(self._calls_log) - before_lines)
         if new:
             tokens = None
             for rec in new:
@@ -250,7 +257,7 @@ class _ChannelExtractClient:
             raise
         except G3CallError as e:
             raise _extract.ExtractError(f"glm 擷取呼叫失敗：{e}") from e
-        self.ledger.append(usage)
+        self.ledger.append(usage.to_dict())
         return text
 
 
@@ -339,9 +346,10 @@ def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
         "【資料】",
         data_block.strip(),
     ]
-    if spec["requirement_list"]:
-        parts += ["【需求清單（extract.py 擷取）】", req_list_text or render_requirement_list(None)]
     parts += ["【本輪要求】", spec["instruction"]]
+    if spec["requirement_list"]:
+        # 需求清單屬於「臂段」（【本輪要求】之後）：任務＋資料段三臂逐字相同
+        parts += ["【需求清單（extract.py 擷取）】", req_list_text or render_requirement_list(None)]
     if round_no >= 2 and missing:
         parts += [
             "【上一稿與缺口】以下必要答案項在上一稿缺失：",
@@ -355,23 +363,24 @@ def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
 # ── 結果與總量（缺值 UNKNOWN 絕不填 0）────────────────────────────────
 
 
-def _sum_tokens(usages: list[RoundUsage]) -> int | None:
-    """任一筆缺 tokens → None；零筆 → None（不報 0 成本）。"""
+def _sum_tokens(usages: list[dict]) -> int | None:
+    """任一筆缺 tokens → None；零筆 → None（不報 0 成本）。usages 為 RoundUsage.to_dict() 記錄。"""
     if not usages:
         return None
     total = 0
     for u in usages:
-        if u.tokens is None:
+        v = u["tokens"]
+        if v is None:
             return None
-        total += u.tokens
+        total += int(v)
     return total
 
 
-def _sum_calls(usages: list[RoundUsage]) -> int:
-    return sum(u.calls for u in usages)
+def _sum_calls(usages: list[dict]) -> int:
+    return sum(int(u["calls"]) for u in usages)
 
 
-def _cell_usage(cell: dict) -> list[RoundUsage]:
+def _cell_usage(cell: dict) -> list[dict]:
     return [u for r in cell["rounds"] for u in r["usages"]]
 
 
@@ -466,17 +475,24 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
             try:
                 req_set, report = _extract.extract_requirements(
                     user_text=inputs["goal"], client=client, task_id=tid)
-            except G3QuotaError:
+            except G3QuotaError as e:
+                # 撞額度＝停發、不重試（不得降級成「擷取失敗＝沒有需求」）
                 stopped = True
                 result["stop_reason"] = "quota"
+                trec["extract_error"] = f"G3QuotaError: {e}"
                 trec["extract_usages"] = ledger
                 result["tasks"].append(trec)
-                _finalize_and_write(result, guard, out_root)
-                return result
-            trec["extract_error"] = report.extract_error or report.parse_error
-            trec["n_requirements"] = len(req_set.items)
-            trec["extract_usages"] = ledger
-        result["tasks"].append(trec)
+                req_set = None
+            else:
+                trec["extract_error"] = report.extract_error or report.parse_error
+                # 凍結的 extract_requirements 會把 client 例外吞進 extract_error，
+                # 撞額度標記必須在此層取回（否則「撞額度即停」被降級成空清單繼續發）
+                if (trec["extract_error"] or "").startswith("G3QuotaError"):
+                    stopped = True
+                    result["stop_reason"] = "quota"
+                trec["n_requirements"] = len(req_set.items)
+                trec["extract_usages"] = ledger
+                result["tasks"].append(trec)
 
         for arm in arm_order:
             spec = ARM_SPECS[arm]
@@ -510,25 +526,22 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                     cell["status"] = "partial_quota" if cell["answer"] is not None else "not_run"
                     stopped = True
                     result["stop_reason"] = "quota"
-                    result["cells"].append(cell)
-                    _finalize_and_write(result, guard, out_root)
-                    return result
+                    break
                 except G3CallError as e:
                     rec["error"] = str(e)
                     cell["rounds"].append(rec)
                     cell["status"] = "error"
                     cell["error"] = str(e)
-                    result["cells"].append(cell)
                     break
                 cell["rounds"].append(rec)
-                rec["usages"].append(usage)
+                rec["usages"].append(usage.to_dict())
                 cell["answer"] = text
                 cell["answer_sha256"] = hashlib.sha256(text.encode()).hexdigest()
                 # full_rloop：第 2 輪僅在必要答案項缺失時才花（localized 修復）
                 missing = tuple(n for n in needed
                                 if not re.search(rf"@{re.escape(n)}\[[^\]]*\]", text))
-            if cell["status"] == "not_run":
-                cell["status"] = "ok"  # 至少一輪成功且無錯誤＝完成（初始值即 not_run）
+            if cell["status"] == "not_run" and cell["answer"] is not None:
+                cell["status"] = "ok"  # 至少一輪成功且無錯誤＝完成（撞額度無答案的 cell 保持 not_run）
             result["cells"].append(cell)
 
     _finalize_and_write(result, guard, out_root)
