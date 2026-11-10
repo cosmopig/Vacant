@@ -277,6 +277,49 @@ def test_quota_guard_blocks_before_call():
     assert ch.n == 3, "撞額後的呼叫必須被擋下（0 實際呼叫）"
 
 
+def test_quota_guard_unknown_usage_bounded_by_call_cap():
+    """r1376（真產品 bug）：token 用量全 UNKNOWN 時 token cap 不可測→舊碼放行
+    無限呼叫＝fail-open（實證：cap=250 仍放行 50 次）。呼叫數恆可測，故以 max_calls
+    兜底——工作量的界不得依賴「用量恰好被測到」。缺值仍報 UNKNOWN（不假裝 0），
+    但放行必須有界。"""
+    class Unknown(g3.Channel):
+        def __init__(self):
+            self.n = 0
+        def call(self, **kw):
+            self.n += 1
+            return "x", g3.RoundUsage(1, None, 1)  # tokens=None（UNKNOWN）
+
+    ch = Unknown()
+    guard = g3.QuotaGuard(ch, daily_token_cap=250, max_calls=5)
+    kw = dict(prompt="p", model="m", purpose="t", timeout_s=1)
+    allowed = 0
+    for _ in range(50):
+        try:
+            guard.call(**kw)
+            allowed += 1
+        except g3.G3QuotaError:
+            break
+    assert allowed == 5, f"unknown-usage 時呼叫必須被 max_calls 兜底，實際放行 {allowed} 次"
+    assert ch.n == 5
+
+
+def test_quota_guard_no_backstop_preserves_legacy_behavior():
+    """max_calls=None（預設）＝不啟用後備——既有呼叫形狀不變（token cap 仍為唯一界）。"""
+    class Unknown(g3.Channel):
+        def __init__(self):
+            self.n = 0
+        def call(self, **kw):
+            self.n += 1
+            return "x", g3.RoundUsage(1, None, 1)
+
+    ch = Unknown()
+    guard = g3.QuotaGuard(ch, daily_token_cap=10**9)  # 大 cap，token 界不觸發
+    kw = dict(prompt="p", model="m", purpose="t", timeout_s=1)
+    for _ in range(10):
+        guard.call(**kw)  # 不該被呼叫數擋下（未啟用後備）
+    assert ch.n == 10, "max_calls=None 時不得以呼叫數擋下（保留既有行為）"
+
+
 # ── full_rloop：第 2 輪僅在必要答案項缺失時才花 ──────────────────
 
 
