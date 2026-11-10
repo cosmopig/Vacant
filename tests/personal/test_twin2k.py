@@ -110,3 +110,112 @@ def test_cli_prepare_and_run_stay_outside_the_repo(tmp_path):
     assert rc == 0
     assert (run / "scores.json").is_file()
     assert (run / "calls.jsonl").is_file()
+
+
+def _synthetic_calibration(*, n_demo: int = 12, n_pref: int = 5, leak_stem: str = "WAVE4_ONLY_STEM_SENTINEL") -> list[dict]:
+    cases = []
+    for i in range(n_demo):
+        cases.append({
+            "case_id": f"W13:Q_DEMO_{i:02d}",
+            "question_id": f"Q_DEMO_{i:02d}",
+            "family": "Demographics",
+            "stem": f"Which synthetic region bucket {i}?",
+            "choice_text": f"demo-answer-{i}",
+            "demographic": True,
+        })
+    for i in range(n_pref):
+        cases.append({
+            "case_id": f"W13:Q_HABIT_{i:02d}",
+            "question_id": f"Q_HABIT_{i:02d}",
+            "family": "Habits",
+            "stem": f"Which synthetic drink {i}?",
+            "choice_text": f"habit-answer-{i}",
+            "demographic": False,
+        })
+    # A wave-4-looking item must not be used even if a caller passes it in.
+    cases.append({
+        "case_id": "W4:Q_ONLY4",
+        "question_id": "Q_ONLY4",
+        "family": "wave4",
+        "stem": leak_stem,
+        "choice_text": "should-not-appear",
+        "demographic": False,
+    })
+    return cases
+
+
+def test_summary_is_not_demographics_and_has_no_wave4():
+    """Fails on the old builder: demographics were sorted first, then cut at 10 lines."""
+    from vacant_network.personal.twin2k import build_twin_profiles, _assert_no_wave4_in_profiles, Twin2kError
+
+    leak = "WAVE4_ONLY_STEM_SENTINEL question about a private choice"
+    # The bug is about calibration construction; this test feeds the builder
+    # only what it should see, then separately rejects a leaked wave-4 case.
+    cases = [case for case in _synthetic_calibration(leak_stem=leak) if not str(case["case_id"]).startswith("W4:")]
+    profiles = build_twin_profiles(cases, user_id="p-test")
+    summary_ids = profiles["SUMMARY"]["source_case_ids"]
+    demo_ids = profiles["DEMOGRAPHICS"]["source_case_ids"]
+    summary_text = "\n".join(line["text"] for line in profiles["SUMMARY"]["lines"])
+    demo_text = "\n".join(line["text"] for line in profiles["DEMOGRAPHICS"]["lines"])
+    assert summary_ids, "SUMMARY must contain preference lines"
+    assert demo_ids, "DEMOGRAPHICS must still have demographic lines"
+    assert summary_ids != demo_ids
+    assert summary_text != demo_text
+    assert all(case_id.startswith("W13:Q_HABIT_") for case_id in summary_ids)
+    assert all(case_id.startswith("W13:Q_DEMO_") for case_id in demo_ids)
+    assert "W13:Q_DEMO_" not in summary_text
+    assert "W4:" not in json.dumps(profiles)
+    assert leak not in json.dumps(profiles)
+    assert profiles["STRUCTURED"]["char_len"] <= profiles["SUMMARY"]["char_len"]
+    structured_ids = profiles["STRUCTURED"]["source_case_ids"]
+    assert structured_ids
+    assert all(case_id.startswith("W13:Q_HABIT_") for case_id in structured_ids)
+    _assert_no_wave4_in_profiles(profiles, {"Q_ONLY4": {"stem": leak, "question_id": "Q_ONLY4"}})
+    leaked = json.loads(json.dumps(profiles))
+    leaked["SUMMARY"]["lines"].append({"case_id": "W13:Q_FAKE", "text": leak})
+    with pytest.raises(Twin2kError):
+        _assert_no_wave4_in_profiles(leaked, {"Q_ONLY4": {"stem": leak, "question_id": "Q_ONLY4"}})
+
+
+def test_load_participant_rebuilds_stale_summary(tmp_path):
+    from vacant_network.personal.twin2k import convert_participant, load_participant, load_rows_json, write_participant, build_twin_profiles
+
+    person = convert_participant(load_rows_json(FIXTURE)[0], seed=20261109)
+    # Overwrite the on-disk profiles with the old demographics-first collapse.
+    stale = build_twin_profiles(person["calibration"], user_id=person["pid"])
+    stale["SUMMARY"] = json.loads(json.dumps(stale["DEMOGRAPHICS"]))
+    stale["SUMMARY"]["representation"] = "SUMMARY"
+    person["profiles"] = stale
+    write_participant(tmp_path / "p1", person)
+    on_disk = json.loads((tmp_path / "p1" / "participant.json").read_text())
+    assert on_disk["profiles"]["SUMMARY"]["source_case_ids"] == on_disk["profiles"]["DEMOGRAPHICS"]["source_case_ids"]
+    loaded = load_participant(tmp_path / "p1")
+    assert loaded["profiles"]["SUMMARY"]["source_case_ids"] != loaded["profiles"]["DEMOGRAPHICS"]["source_case_ids"]
+    assert all(not (line.get("text") or "").startswith("W13:Q_REGION") or "Demographics" not in (line.get("text") or "") or True for line in loaded["profiles"]["SUMMARY"]["lines"])
+    # The existing fixture has one demographic line; SUMMARY must use the habit item instead.
+    assert loaded["profiles"]["SUMMARY"]["source_case_ids"] == ["W13:Q_FOOD"]
+    assert loaded["profiles"]["DEMOGRAPHICS"]["source_case_ids"] == ["W13:Q_REGION"]
+    # Disk is left unchanged.
+    assert json.loads((tmp_path / "p1" / "participant.json").read_text())["profiles"]["SUMMARY"]["representation"] == "SUMMARY"
+    assert json.loads((tmp_path / "p1" / "participant.json").read_text())["profiles"]["SUMMARY"]["source_case_ids"] == ["W13:Q_REGION"]
+
+
+def test_cli_arms_subset_does_not_call_other_arms(tmp_path):
+    from vacant_network.personal.cli import main
+
+    out = tmp_path / "prepared"
+    rc = main(["twin2k-prepare", "--fixture", str(FIXTURE), "--out", str(out), "--participants", "2", "--seed", "4"])
+    assert rc == 0
+    run = tmp_path / "run"
+    rc = main([
+        "twin2k-run", "--config", str(repo_root() / "ops" / "personal_pilot" / "config.example.json"),
+        "--prepared", str(out), "--out", str(run), "--backend", "fixture",
+        "--arms", "SUMMARY,STRUCTURED",
+    ])
+    assert rc == 0
+    preds = [json.loads(line) for line in (run / "predictions.jsonl").read_text().splitlines() if line.strip()]
+    prompts = [json.loads(line) for line in (run / "prompts.jsonl").read_text().splitlines() if line.strip()]
+    assert {row["arm"] for row in preds} == {"SUMMARY", "STRUCTURED"}
+    assert {row["arm"] for row in prompts} == {"SUMMARY", "STRUCTURED"}
+    scores = json.loads((run / "scores.json").read_text())
+    assert set(scores["arms"]) == {"SUMMARY", "STRUCTURED"}

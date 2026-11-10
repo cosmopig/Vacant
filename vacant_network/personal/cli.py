@@ -318,7 +318,7 @@ def cmd_twin_prepare(args) -> int:
 
 def cmd_twin_run(args) -> int:
     from .backend import SingleCallBackend, brain_from_config, resolve_model
-    from .twin_runner import execute_twin, fixture_backend, load_prepared
+    from .twin_runner import execute_twin, fixture_backend, load_prepared, parse_arms
     config = _config(args.config)
     people = load_prepared(Path(args.prepared))
     kind = args.backend or config.get("backend") or "fixture"
@@ -341,6 +341,7 @@ def cmd_twin_run(args) -> int:
         max_output_tokens=int((config.get("budget") or {}).get("stage1_output_tokens") or 200),
         resume=bool(args.resume),
         retry_transient=bool((config.get("twin") or {}).get("retry_transient_once", True)),
+        arms=parse_arms(getattr(args, "arms", None)),
     )
     brief = {
         "rows": summary["rows"],
@@ -441,6 +442,7 @@ def build_parser() -> argparse.ArgumentParser:
     twin_run.add_argument("--out", required=True)
     twin_run.add_argument("--backend", choices=("fixture", "openai"))
     twin_run.add_argument("--resume", action="store_true", help="skip completed (pid, arm, case_id) rows already in the output")
+    twin_run.add_argument("--arms", help="comma-separated subset of arms (default: all six). Example: SUMMARY,STRUCTURED")
     twin_run.set_defaults(func=cmd_twin_run)
 
     compat = sub.add_parser("compat-check", help="§14 Step 2 compatibility pre-check; one request unless --dry-run")

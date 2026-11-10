@@ -307,20 +307,43 @@ def _presentation(pid: str, question_id: str, seed: int) -> list[str]:
     return order
 
 
+def _format_summary_line(case: dict[str, Any]) -> dict[str, str]:
+    return {
+        "case_id": case["case_id"],
+        "text": f"{case['case_id']} ({case['family']}) selected {case['choice_text']}.",
+    }
+
+
+def _preference_cases(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Wave 1–3 calibration minus the demographics block, sorted stably by case id."""
+    return sorted(
+        (case for case in cases if not case.get("demographic")),
+        key=lambda case: case["case_id"],
+    )
+
+
+def _demographic_cases(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return sorted(
+        (case for case in cases if case.get("demographic")),
+        key=lambda case: case["case_id"],
+    )
+
+
 def _summary_lines(cases: list[dict[str, Any]]) -> list[dict[str, str]]:
-    demographic = [case for case in cases if case.get("demographic")]
-    rest = [case for case in cases if not case.get("demographic")]
-    ordered = sorted(demographic, key=lambda case: case["case_id"]) + sorted(rest, key=lambda case: case["case_id"])
-    kept = ordered[:SUMMARY_LINE_CAP]
-    lines = []
-    for case in kept:
-        lines.append({
-            "case_id": case["case_id"],
-            "text": (
-                f"{case['case_id']} ({case['family']}) selected {case['choice_text']}."
-            ),
-        })
-    return lines
+    """Up to SUMMARY_LINE_CAP lines from non-demographic calibration answers.
+
+    Demographics are a separate arm. Putting them first and then cutting at
+    SUMMARY_LINE_CAP made SUMMARY identical to DEMOGRAPHICS whenever the
+    demographics block had at least 10 items, which Twin-2K-500 does.
+    """
+    kept = _preference_cases(cases)[:SUMMARY_LINE_CAP]
+    return [_format_summary_line(case) for case in kept]
+
+
+def _demographic_lines(cases: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Demographics-only lines, still capped at SUMMARY_LINE_CAP."""
+    kept = _demographic_cases(cases)[:SUMMARY_LINE_CAP]
+    return [_format_summary_line(case) for case in kept]
 
 
 def _rules_from_cases(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -378,7 +401,8 @@ def build_twin_profiles(calibration: list[dict[str, Any]], *, user_id: str) -> d
         "char_len": len(summary_text),
     }
     budget = min(SUMMARY_CHAR_BUDGET, len(summary_text)) if summary_text else 0
-    rules, dropped_rules = _fit_rules(_rules_from_cases(calibration), char_budget=budget)
+    # Same source pool as SUMMARY, then length-matched to the real summary text.
+    rules, dropped_rules = _fit_rules(_rules_from_cases(_preference_cases(calibration)), char_budget=budget)
     structured_text = "\n\n".join(_render_rule(rule) for rule in rules)
     if len(structured_text) > len(summary_text) and summary_text:
         raise ProfileError("length-matched structured profile is longer than the summary")
@@ -396,8 +420,7 @@ def build_twin_profiles(calibration: list[dict[str, Any]], *, user_id: str) -> d
         "char_len": len(structured_text),
         "summary_char_len": len(summary_text),
     }
-    demographic_cases = [case for case in calibration if case.get("demographic")]
-    demographic_lines = _summary_lines(demographic_cases) if demographic_cases else []
+    demographic_lines = _demographic_lines(calibration)
     demographics = {
         "schema_version": "vacant.personal.summary.v1",
         "representation": "DEMOGRAPHICS",
@@ -542,6 +565,15 @@ def load_participant(directory: Path) -> dict[str, Any]:
         if line.strip():
             labels.append(json.loads(line))
     public["labels"] = labels
+    # Rebuild from stored calibration so an older prepared dir picks up
+    # builder fixes. The file on disk is left as a historical record.
+    public["profiles"] = build_twin_profiles(public.get("calibration") or [], user_id=str(public.get("pid")))
+    wave4 = {
+        case["question_id"]: {"stem": case.get("stem") or "", "question_id": case["question_id"]}
+        for case in public.get("holdout_cases") or []
+        if case.get("question_id")
+    }
+    _assert_no_wave4_in_profiles(public["profiles"], wave4)
     return public
 
 
