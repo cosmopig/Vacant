@@ -24,6 +24,11 @@ r1428（vq-el4.97，TDD RED→GREEN）：
   ::test_negative_vacuous_tokens）。
 - 缺檔／非 JSON 不再崩成 traceback：點名 BROKEN＋單一裁決行（vq-el4.39）。
 - 負控制：tests/test_reqloop_g3_fire_summary.py（正 2＋repo 摘要 1＋負 5）。
+
+r1432（P20261111_0710-1，重發 20261111b 收案）：摘要敘事改由 result 資料驅動——
+cells_run 容許 not_run 格（重發 12 格＝4ok＋6err＋2not_run、cells_run=10）；
+failures／scope_note／token note 不再硬編碼某次發射的數字（首發 49744 那套敘事
+對重發就是假摘要，同型名實不符）。同一腳本對首發 live raw 仍 VERDICT OK（正控制）。
 """
 from __future__ import annotations
 
@@ -83,8 +88,11 @@ def main(argv: list[str] | None = None) -> int:
     chk(all(c.get("hidden_after") == "UNKNOWN" for c in cells), "hidden_after 非全 UNKNOWN")
     chk(all(c.get("answer") is None for c in cells if c.get("status") != "ok"), "error 格有 answer")
     tot = d.get("totals") or {}
-    expected_cells_run = sum(1 for c in cells if c.get("status") != "not_run")
-    chk(tot.get("cells") == 12 and tot.get("cells_run") == expected_cells_run, "totals.cells/cells_run")
+    not_run_cells = [c for c in cells if c.get("status") == "not_run"]
+    ok_n = sum(1 for c in cells if c.get("status") == "ok")
+    chk(tot.get("cells") == 12 and _num(tot.get("cells_run"))
+        and tot["cells_run"] == 12 - len(not_run_cells),
+        f"totals.cells_run={tot.get('cells_run')!r} 應＝12-not_run({len(not_run_cells)})")
 
     for c in cells:
         if c.get("answer") is not None:
@@ -120,60 +128,16 @@ def main(argv: list[str] | None = None) -> int:
     if APPROVAL.exists():
         ap = json.loads(APPROVAL.read_text(encoding="utf-8"))
 
-    is_first_fire = (result_path.resolve() == RESULT.resolve() or result_path.parent.name == "g3_fire_20261111")
-    if is_first_fire:
-        fire_info = {
-            "fired_at": d.get("fired_at"),
-            "launcher": "systemd user unit vacant-g3-fire-20261111（r1426 發射；一次性、無 [Install]、不自動再發射）",
-            "out_dir": str(FIRE),
-            "journal": "journalctl --user -u vacant-g3-fire-20261111",
-            "done_marker": "journal 尾行『G3 FIRE DONE』（2026-11-11T06:02:37Z）；unit inactive (dead)",
-            "stop_reason": d.get("stop_reason"),
-        }
-        token_note = "8 個 error 格無 usage → 該格 tokens=None（UNKNOWN），不填 0；49744＝20887（dab_129 native_pi）＋28857（4 次擷取）；known_usages=5（r1428 非空守衛：0 已知 usage 不得判 OK）"
-        failures = [
-            {"cells": 8, "arms": ["reqlist_only", "full_rloop"], "rounds": "round 1",
-             "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
-             "harness_behavior": "停、不重試（quota_fail_closed，spec 內行為）",
-             "note": "provider 側 token_limit；非本地 2M/日 額度（known_tokens 49744 ≪ 2000000）"},
-            {"cells": 3, "arms": ["native_pi"], "rounds": "round 1",
-             "error": "pi timed out after 300s",
-             "note": "dab_129 native_pi 278s 完成；dab_144/176/216 超 300s/輪 預算"},
-        ]
-        scope_note = [
-            "G3 首次真發射（未見任務對照），單 1 rep、本地模型（H-12），不遷移到其他模型/harness",
-            "11/12 格 error：本批不能支持任何臂 superiority 結論",
-            "full_rloop content_reverify enabled 4/4，但皆 round 1 error、0 重算輪、final_verdict 全 null",
-            "dab_129/native_pi 為唯一 ok 格（answer 在位、hidden_after=UNKNOWN、待 vlab/人類側打分）",
-            "stop_reason=null＝12 格全跑完（非撞額度中斷）；quota.known_tokens 49744",
-        ]
-    else:
-        fire_info = {
-            "fired_at": d.get("fired_at"),
-            "launcher": f"launcher ({result_path.parent.name})",
-            "out_dir": str(result_path.parent),
-            "journal": f"journalctl --user -u vacant-{result_path.parent.name}",
-            "done_marker": None,
-            "stop_reason": d.get("stop_reason"),
-        }
-        err_or_not_run = sum(1 for c in cells if c.get("status") != "ok")
-        token_note = f"{err_or_not_run} 個非 ok 格（無 usage 記 None/UNKNOWN）；known_total={cell_known + ext_known}（cell={cell_known} + extract={ext_known}）；known_usages={n_known}"
-        err_groups: dict[str, list[dict]] = {}
-        for c in cells:
-            if c.get("status") != "ok":
-                err = str(c.get("error") or c.get("status"))
-                err_groups.setdefault(err, []).append(c)
-        failures = [
-            {"cells": len(g), "arms": sorted(list({c.get("arm") for c in g})),
-             "error": err, "tasks": sorted(list({c.get("task") for c in g}))}
-            for err, g in err_groups.items()
-        ]
-        n_ok = sum(1 for c in cells if c.get("status") == "ok")
-        scope_note = [
-            f"G3 發射結果（未見任務對照），單 1 rep、本地模型（H-12），{n_ok}/{len(cells)} ok",
-            f"stop_reason={d.get('stop_reason')!r}",
-            f"tokens={tot.get('tokens')}",
-        ]
+    # r1432：failures 由 cells 實際狀態分組——硬編碼某次發射的敘事對別次發射就是假摘要。
+    failures: list[dict] = []
+    for msg in sorted({c.get("error") for c in cells if c.get("status") == "error"}, key=str):
+        grp = [c for c in cells if c.get("status") == "error" and c.get("error") == msg]
+        failures.append({"cells": len(grp), "arms": sorted({c.get("arm") for c in grp}),
+                         "error": msg, "harness_behavior": "停、不重試（quota_fail_closed，spec 內行為）"})
+    if not_run_cells:
+        failures.append({"cells": len(not_run_cells), "arms": sorted({c.get("arm") for c in not_run_cells}),
+                         "status": "not_run",
+                         "note": f"stop_reason={d.get('stop_reason')!r}；無 usage／answer（UNKNOWN 不填 0）"})
 
     out = {
         "schema": "vacant.audit/g3_fire_20261111_summary/1",
@@ -187,8 +151,14 @@ def main(argv: list[str] | None = None) -> int:
             "approval_sha256": hashlib.sha256(APPROVAL.read_bytes()).hexdigest() if APPROVAL.exists() else None,
             "approval_approved": (ap or {}).get("approved"),
             "approval_epic": (ap or {}).get("epic"),
+            "approval_inline_in_result": d.get("approval"),
         },
-        "fire": fire_info,
+        "fire": {
+            "fired_at": d.get("fired_at"),
+            "ticket": d.get("ticket"),
+            "out_dir": str(result_path.parent),
+            "stop_reason": d.get("stop_reason"),
+        },
         "scope": "4 未見題（dab_129/144/176/216）× 3 臂（native_pi/reqlist_only/full_rloop）＝12 格；同批重跑須簿記如實標記、不得當獨立樣本",
         "models": {
             "extract": d.get("extract_model"),
@@ -212,11 +182,17 @@ def main(argv: list[str] | None = None) -> int:
             "extract_tokens_known": ext_known,
             "known_total": cell_known + ext_known,
             "known_usages": n_known,
-            "note": token_note,
+            "note": (f"已知 usage：cells {len(cell_vals)}/12 格、extract {len(ext_vals)} 次（known_usages={n_known}）；"
+                     "缺 usage 格 tokens=None（UNKNOWN），不填 0；非空守衛：0 已知 usage 不得判 OK"),
         },
         "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
         "failures": failures,
-        "scope_note": scope_note,
+        "scope_note": [
+            f"ok {ok_n}/12 格 answer 在位、hidden_after 全 UNKNOWN——不自己打分（打分照 /srv/vlab 慣例、人類/vlab 側）",
+            f"非 ok {12 - ok_n}/12 格（error/not_run）：本批不宣稱任何臂 superiority",
+            "單 1 rep、本地模型（H-12）、不遷移到其他模型/harness；同批重跑須簿記如實標記、不得當獨立樣本",
+            f"stop_reason={d.get('stop_reason')!r}；quota.known_tokens={(d.get('quota') or {}).get('known_tokens')!r}",
+        ],
     }
     if problems:
         for p in problems:
@@ -227,8 +203,8 @@ def main(argv: list[str] | None = None) -> int:
     dest.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     ok = sum(p["ok"] for p in per_arm.values())
     er = sum(p["error"] for p in per_arm.values())
-    print(f"cells=12 ok/err={ok}/{er} hidden_after=12xUNKNOWN tokens_known={cell_known + ext_known} "
-          f"stop_reason={d.get('stop_reason')}")
+    print(f"cells=12 ok/err/not_run={ok}/{er}/{len(not_run_cells)} hidden_after=12xUNKNOWN "
+          f"tokens_known={cell_known + ext_known} stop_reason={d.get('stop_reason')}")
     print("VERDICT: G3_FIRE_SUMMARY_OK")
     return 0
 

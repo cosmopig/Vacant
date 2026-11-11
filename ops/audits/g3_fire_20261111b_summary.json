@@ -9,14 +9,17 @@
     "approval_file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
     "approval_sha256": "610c7640347296c43d986b4adc59096ad3fe4967bbf560b727d8f97755ea0709",
     "approval_approved": true,
-    "approval_epic": "vq-1zf"
+    "approval_epic": "vq-1zf",
+    "approval_inline_in_result": {
+      "approved": true,
+      "epic": "vq-1zf",
+      "by": "人類擁有者（2026-11-11 口頭常設授權：「讓他可以真發射他想做就做」；由外部 agent 代為落檔）"
+    }
   },
   "fire": {
     "fired_at": "2026-11-11T07:30:14Z",
-    "launcher": "launcher (g3_fire_20261111b)",
+    "ticket": "vq-1zf（G3 未見任務完整對照；審查指示 #5「G3 準備工作」2026-11-08；r1236 交付發射前置門）",
     "out_dir": "/home/user1/dev/ops/g3_fire_20261111b",
-    "journal": "journalctl --user -u vacant-g3_fire_20261111b",
-    "done_marker": null,
     "stop_reason": "quota"
   },
   "scope": "4 未見題（dab_129/144/176/216）× 3 臂（native_pi/reqlist_only/full_rloop）＝12 格；同批重跑須簿記如實標記、不得當獨立樣本",
@@ -362,7 +365,7 @@
     "extract_tokens_known": 28392,
     "known_total": 132917,
     "known_usages": 8,
-    "note": "8 個非 ok 格（無 usage 記 None/UNKNOWN）；known_total=132917（cell=104525 + extract=28392）；known_usages=8"
+    "note": "已知 usage：cells 4/12 格、extract 4 次（known_usages=8）；缺 usage 格 tokens=None（UNKNOWN），不填 0；非空守衛：0 已知 usage 不得判 OK"
   },
   "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
   "failures": [
@@ -373,11 +376,7 @@
         "reqlist_only"
       ],
       "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
-      "tasks": [
-        "dab_129",
-        "dab_144",
-        "dab_176"
-      ]
+      "harness_behavior": "停、不重試（quota_fail_closed，spec 內行為）"
     },
     {
       "cells": 2,
@@ -385,15 +384,14 @@
         "full_rloop",
         "reqlist_only"
       ],
-      "error": "not_run",
-      "tasks": [
-        "dab_216"
-      ]
+      "status": "not_run",
+      "note": "stop_reason='quota'；無 usage／answer（UNKNOWN 不填 0）"
     }
   ],
   "scope_note": [
-    "G3 發射結果（未見任務對照），單 1 rep、本地模型（H-12），4/12 ok",
-    "stop_reason='quota'",
-    "tokens=132917"
+    "ok 4/12 格 answer 在位、hidden_after 全 UNKNOWN——不自己打分（打分照 /srv/vlab 慣例、人類/vlab 側）",
+    "非 ok 8/12 格（error/not_run）：本批不宣稱任何臂 superiority",
+    "單 1 rep、本地模型（H-12）、不遷移到其他模型/harness；同批重跑須簿記如實標記、不得當獨立樣本",
+    "stop_reason='quota'；quota.known_tokens=132917"
   ]
 }
