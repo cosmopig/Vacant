@@ -2,7 +2,8 @@
 
 - 對應：2026-11-11 人類常設定案第 2.a 條與資深審查第四節第 3 條——full_rloop 的
   content_reverify 逐條差異是否支持「需求驅動 R-loop 在未見題上抓到並修好內容錯誤」；
-  4 題只出方向性結論、每個數字帶分母、不做普遍宣稱。對應工單 P20261111_0914-2。
+  4 題只出方向性結論、每個數字帶分母、不做普遍宣稱。對應工單 P20261111_0914-2
+  （r1438 產出）與其重發 P20261111_1115-1（r1440 獨立重驗，見 §8）。
 - 數據來源（本輪實際開啟核驗）：
   - `ops/audits/g3_fire_20261111c_summary.json`（21573 B；identity.result_sha256
     `bd727b930f8e1be5…`；raw `~/dev/ops/g3_fire_20261111c/g3_result.json` 20660 B、
@@ -148,3 +149,30 @@
 2. hidden 打分：10 ok 格 answer（native_pi 2＋reqlist_only 4＋full_rloop 4）——
    人類/vlab 側。
 3. 本輪 0 行產品碼，無新 CI 相關改動；CI 裁決照舊不 poll。
+
+## 8. r1440 重發票獨立重驗（P20261111_1115-1）
+
+本票與 0914-2 同範圍重發（票身「目前行為」描述落後於 HEAD：c 解讀與 G3.1 凍結
+r1438 已產出、commit 2b0a3c8ad／54d47eaae，0914-2 票尾已收案）。r1440 不信任既有
+報告，按本票步驟 1–2 從 raw 逐條重驗：
+
+- raw `~/dev/ops/g3_fire_20261111c/g3_result.json` 20660 B、sha256
+  `bd727b930f8e1be5…`＝identity pin（本輪重算一致）；summary 21573 B（重算一致）。
+- full_rloop 4/4 格 `content_reverify.enabled=true`、各恰 1 輪：round 1 verdict
+  UNKNOWN 4/4、gap_reason null 4/4、`diff` null 4/4（fixed／regressed／unresolved
+  皆 null，非「0 個錯誤被抓到」）、round 2 發生 0/4、final_verdict UNKNOWN 4/4
+  ——與 §1 表逐一吻合。
+- claims 26/26（7/9/5/5）皆 `status=UNKNOWN`、`required=true`、
+  `evidence.unverified=true`，detail 全為「此條目無可靠程式重算檢查器，依規則標為
+  UNKNOWN，不准以自評代替」；逐格 verifier 分佈重算與 §1 一致（dab_129
+  answer_kv×5＋tag_format×2；dab_144 answer_kv×9；dab_176 answer_kv×2＋
+  rowset_filter×2＋tag_format×1；dab_216 kv_recomputed×3＋answer_kv×1＋
+  tag_format×1）。
+- 三臂狀態與 12 格答案值（§0／§2 表）逐格重算一致：native_pi 2ok/2err（dab_129、
+  dab_216「pi timed out after 600s」）、reqlist_only 4/4 ok、full_rloop 4/4 ok；
+  totals 27 calls／383921 tokens；hidden_after UNKNOWN 12/12。
+- 票身「claims 為 None」＝summary 層投影（summary JSON 各 full_rloop 格
+  `content_reverify.claims: null`）；raw 層 claims 清單在位（26 條、status
+  UNKNOWN）——兩層不矛盾，本報告以 raw 為準。
+- 無更正：§1–§5 結論不變（4/4 題未測得（UNKNOWN）、無支持證據；H1 成立 4/4；
+  H2 not_applicable；G3.1＝H2.0＋H2.1 凍結不變、核准前不發射、不佔配額）。
