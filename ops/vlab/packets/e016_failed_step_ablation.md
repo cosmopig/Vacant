@@ -129,3 +129,19 @@ C 格 `vacant_sha==b8b715af`、A 格 null（e014 gate-5 先例）。
 - 隊列檔：`staging/16a_e016_smoke.json`（stage 1）、`staging/16_e016_failed_step_ablation.json`（stage 2）
 - 參考：L006 §1–§4；e015 packet（狀態表/優先序）；e014 §5（成本紅線）；R532 AMEND1（方向護欄）；
   NOW.md round 901–902
+
+## 9. 完賽回填（round 1441、2026-11-11；§1–§8 預註冊內容未動）
+
+- **通過率**：A 18/34 [0.5294]、C 17/34 [0.5000]、C-nf 16/34 [0.4706]（34 題對、1 rep）。
+- **McNemar（精確雙邊、與 report.py 同式）**：A vs C p=1.0（A_only 5 / C_only 4）、
+  A vs C-nf p=0.7539（A_only 6 / C-nf_only 4）、C vs C-nf p=1.0（C_only 4 / C-nf_only 3）；
+  Holm–Bonferroni（family=3）三對皆未顯著。
+- **目標格 pg_list_ops**：三臂皆未過（A/C/C-nf 全 false）——未出現「C 贏、C-nf 掛」的機制指紋。
+- **成本（每成功呼叫）**：A 60.2 vs C 80.5 vs C-nf 87.4 calls/success（C/A 1.34×、C-nf/A 1.45×，
+  未破 2× 紅線）；tokens/success A 1.43M / C 2.00M / C-nf 2.09M。
+- **裁決＝NO_MECHANISM**（§4 狀態表第 4 態）：C vs C-nf 未顯著 ⇒ 開關無可測效應 ⇒ **不改產品**；
+  依 §4 預註冊措辭不寫「kickback 無用」因果結論（1 rep、H-12；未顯著 ≠ 等價）。
+- **裁決落盤**：`ops/audits/e016_failed_step_ablation_verdict.json`（`e016_verdict_pipeline.py`
+  2026-11-11 對 `/srv/vlab/runs` 機械重生成、exit 0、與 round 1018 已入樹版逐位元組一致）。
+- **界**：本地量化模型 gemma-4-12b-it-qat、pi、1 rep、34 題之方向性測量（H-12）；
+  不推及其他模型/harness/題組/規模。
