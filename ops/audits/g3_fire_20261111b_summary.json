@@ -1,0 +1,399 @@
+{
+  "schema": "vacant.audit/g3_fire_20261111_summary/1",
+  "generated_by": "ops/audits/g3_fire_20261111_summary.py",
+  "identity": {
+    "result_file": "/home/user1/dev/ops/g3_fire_20261111b/g3_result.json",
+    "result_bytes": 11477,
+    "result_sha256": "613919ede3334c0b32bd6eb1639f8c11d9cc62fa7678316cd5ee9b4958d7f9cd",
+    "result_file_mtime_utc": "2026-11-11T07:48:04+00:00",
+    "approval_file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
+    "approval_sha256": "610c7640347296c43d986b4adc59096ad3fe4967bbf560b727d8f97755ea0709",
+    "approval_approved": true,
+    "approval_epic": "vq-1zf"
+  },
+  "fire": {
+    "fired_at": "2026-11-11T07:30:14Z",
+    "launcher": "launcher (g3_fire_20261111b)",
+    "out_dir": "/home/user1/dev/ops/g3_fire_20261111b",
+    "journal": "journalctl --user -u vacant-g3_fire_20261111b",
+    "done_marker": null,
+    "stop_reason": "quota"
+  },
+  "scope": "4 未見題（dab_129/144/176/216）× 3 臂（native_pi/reqlist_only/full_rloop）＝12 格；同批重跑須簿記如實標記、不得當獨立樣本",
+  "models": {
+    "extract": "glm53",
+    "answer_glm_arms": "deepseek41",
+    "native_pi_provider": "lms1003qwen",
+    "native_pi_model": "qwen/qwen3.8-27b"
+  },
+  "tasks": [
+    {
+      "task_id": "dab_129",
+      "input_sha256": "63c8b794a8ec08ee6774c0daa484e75e3d44d0d6ad810c0d1e4a0a49567c9276",
+      "required_answer_names": [
+        "mean_fare",
+        "std_dev_fare"
+      ],
+      "n_requirements": 4,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6611,
+          "wall_ms": 15151
+        }
+      ]
+    },
+    {
+      "task_id": "dab_144",
+      "input_sha256": "7913a2cd3004b0156ec1564718ea2b8c7c322a69f6bbe33b05cec997387f4856",
+      "required_answer_names": [
+        "dist_dem",
+        "dist_gop",
+        "mean_dem",
+        "mean_gop",
+        "std_dev_dem",
+        "std_dev_gop"
+      ],
+      "n_requirements": 14,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7855,
+          "wall_ms": 10491
+        }
+      ]
+    },
+    {
+      "task_id": "dab_176",
+      "input_sha256": "e8e54cf0a8ff58a21601bee1272071bb0eeb5001008dbb4bbeb3400e3244131a",
+      "required_answer_names": [
+        "median_age"
+      ],
+      "n_requirements": 5,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6563,
+          "wall_ms": 10926
+        }
+      ]
+    },
+    {
+      "task_id": "dab_216",
+      "input_sha256": "d69ebc8525ad491948af507963b55d5ca53c61eaa2464088f80ed011411055b6",
+      "required_answer_names": [
+        "mean",
+        "std_dev"
+      ],
+      "n_requirements": 10,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7363,
+          "wall_ms": 14452
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "task": "dab_129",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_fare[32.20]\n@std_dev_fare[49.67]\n",
+      "answer_sha256": "a494b65514ed018446e10cbe177d994cbab837a6ce07f0f8dc9411c1eff0dc5c",
+      "tokens": 21971,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_129",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_129",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_dem[0.32]\n@mean_gop[0.64]\n@std_dev_dem[0.153]\n@std_dev_gop[0.156]\n@dist_dem[Not Normal]\n@dist_gop[Not Normal]\n",
+      "answer_sha256": "e8169290986b646482ff83e001353f4c6f2fe531f60c8ee7c67802dafe441916",
+      "tokens": 44174,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@median_age[31.50]\n",
+      "answer_sha256": "a0bb3a63cb70a1c50892c4ad82ccb083acdc73e1fc6c33805b4212c52b57a2ad",
+      "tokens": 23922,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean[4.61]\n@std_dev[1.50]\n",
+      "answer_sha256": "7dc357b6b6214371f80c8057b76041ee78e2cb27ac2abf0422c25e2d9e304d33",
+      "tokens": 14458,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "reqlist_only",
+      "status": "not_run",
+      "rounds": 1,
+      "error": null,
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "full_rloop",
+      "status": "not_run",
+      "rounds": 0,
+      "error": null,
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    }
+  ],
+  "per_arm": {
+    "native_pi": {
+      "cells": 4,
+      "ok": 4,
+      "error": 0,
+      "errors": [],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    },
+    "reqlist_only": {
+      "cells": 4,
+      "ok": 0,
+      "error": 3,
+      "errors": [
+        "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit"
+      ],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    },
+    "full_rloop": {
+      "cells": 4,
+      "ok": 0,
+      "error": 3,
+      "errors": [
+        "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit"
+      ],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    }
+  },
+  "totals": {
+    "cells": 12,
+    "cells_run": 10,
+    "model_calls": 31,
+    "tokens": 132917,
+    "tokens_missing": false
+  },
+  "token_accounting": {
+    "cell_tokens_known": 104525,
+    "extract_tokens_known": 28392,
+    "known_total": 132917,
+    "known_usages": 8,
+    "note": "8 個非 ok 格（無 usage 記 None/UNKNOWN）；known_total=132917（cell=104525 + extract=28392）；known_usages=8"
+  },
+  "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
+  "failures": [
+    {
+      "cells": 6,
+      "arms": [
+        "full_rloop",
+        "reqlist_only"
+      ],
+      "error": "glm rc=4: glm: 失敗（turn_limit）Stopped: turn_limit",
+      "tasks": [
+        "dab_129",
+        "dab_144",
+        "dab_176"
+      ]
+    },
+    {
+      "cells": 2,
+      "arms": [
+        "full_rloop",
+        "reqlist_only"
+      ],
+      "error": "not_run",
+      "tasks": [
+        "dab_216"
+      ]
+    }
+  ],
+  "scope_note": [
+    "G3 發射結果（未見任務對照），單 1 rep、本地模型（H-12），4/12 ok",
+    "stop_reason='quota'",
+    "tokens=132917"
+  ]
+}
