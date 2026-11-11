@@ -540,3 +540,53 @@ def test_glm_channel_uses_cli_only():
 def test_rc_codes_match_gate():
     assert (g3.RC_OK, g3.RC_PLAN, g3.RC_NOT_APPROVED) == (0, 1, 2)
     assert g3.RC_NOT_APPROVED == g3gate.RC_NOT_APPROVED
+
+
+# ── 無工具覆寫指令（P20261111_0840-1 項 1／AMEND-3 核准）─────────────
+
+
+def _agent_style_task() -> dict:
+    """agent 式任務文本（原為工具使用者所寫：讀檔＋寫檔指令）。"""
+    return {
+        "instruction": ("讀取 data/airfare.csv，計算 fare 的均值與標準差，"
+                        "把結果寫進 answer.txt。"),
+        "goal": "計算 fare 的均值與標準差。",
+        "contract": "@mean_fare[...]\n@std_dev_fare[...]\n",
+        "data": {"airfare.csv": "fare\n1.0\n2.0\n3.0\n"},
+    }
+
+
+def test_cell_prompt_no_tool_override_negative_control():
+    """P20261111_0840-1 負控制（先紅後綠）：現版 prompt 對 agent 式任務文本
+    缺無工具覆寫——模型照文本做 agent 動作（讀檔/寫檔）撞 --max-turns 1
+    --enabled-tools none → turn_limit（fire a/b：glm 臂 8/8 turn_limit、
+    9-15s、輸出 67-164 tok）。修法後：build_cell_prompt（含 round>=2 修復輪）
+    頂部必須有顯式無工具覆寫。本測試對現版碼必紅、對修法碼必綠。"""
+    task = _agent_style_task()
+    spec = dict(g3.ARM_SPECS["reqlist_only"])
+    p1 = g3.build_cell_prompt(task, spec, round_no=1)
+    p2 = g3.build_cell_prompt(task, spec, round_no=2,
+                             prev_draft="@mean_fare[1.00]\n", feedback="缺口：@std_dev_fare")
+    for label, p in (("round1", p1), ("round2", p2)):
+        assert "你沒有任何工具" in p, (
+            f"{label} prompt 無無工具覆寫（agent 式任務文本＋無工具通道→turn_limit，見 fire a/b）")
+        assert "不要讀檔、不要寫檔" in p, f"{label} prompt 未明令禁止讀檔/寫檔"
+
+
+def test_cell_prompt_no_tool_override_before_task_text():
+    """P20261111_0840-1 正控制：覆寫指令存在且位於任務文本之前（票面驗收）；
+    round 1 與 round>=2 修復輪都在頂部；覆寫不改變臂段（三臂同源指令不變）。"""
+    task = _agent_style_task()
+    for arm in ("reqlist_only", "full_rloop"):
+        spec = dict(g3.ARM_SPECS[arm])
+        p1 = g3.build_cell_prompt(task, spec, round_no=1)
+        p2 = g3.build_cell_prompt(task, spec, round_no=2,
+                                 prev_draft="d", feedback="f")
+        for label, p in (("round1", p1), ("round2", p2)):
+            assert g3.NO_TOOL_OVERRIDE in p, f"{arm}/{label} 無覆寫常數"
+            assert p.index(g3.NO_TOOL_OVERRIDE) < p.index(task["instruction"].strip()), (
+                f"{arm}/{label}：覆寫必須在任務文本之前")
+            # 覆寫在最頂（第一行）——「頂部加顯式覆寫」的如實形
+            assert p.startswith(g3.NO_TOOL_OVERRIDE), f"{arm}/{label}：覆寫必須在 prompt 頂部"
+        # 臂段指令不被覆寫吞掉
+        assert g3.ARM_SPECS[arm]["instruction"] in p1
