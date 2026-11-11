@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import List, Dict, Any
+import os
 
 def audit_run_dir(run_path: Path) -> Dict[str, Any]:
     """
@@ -14,24 +15,77 @@ def audit_run_dir(run_path: Path) -> Dict[str, Any]:
     clean_cells = []
     missing_cell_json = []
 
-    # We want to find all cell.json files in this directory and its subdirectories
-    for p in run_path.rglob("cell.json"):
-        if any(".infra-" in part for part in p.parts):
-            continue
-        try:
-            with open(p, 'r') as f:
-                data = json.load(f)
-                content = str(data)
-                total_cells += 1
-                # C-nf arm's VACANT_FAILED_STEP_REVIEW is a pre-registered parameter, not a leak
-                if "VACANT_PI_PARENT" in content or "VACANT_PI_SELF" in content:
-                    violations.append(str(p))
-                    violated_cells.append(str(p))
-                else:
-                    clean_cells.append(str(p))
-        except Exception as e:
-            # Log error but continue scanning other files
-            pass
+    for root, dirs, files in os.walk(run_path):
+        # Skip .infra- directories
+        dirs[:] = [d for d in dirs if not d.startswith(".infra-")]
+        
+        if "cell.json" in files:
+            p = Path(root) / "cell.json"
+            try:
+                with open(p, 'r') as f:
+                    data = json.load(f)
+                    content = str(data)
+                    total_cells += 1
+                    # C-nf arm's VACANT_FAILED_STEP_REVIEW is a pre-registered parameter, not a leak
+                    if "VACANT_PI_PARENT" in content or "VACANT_PI_SELF" in content:
+                        violations.append(str(p))
+                        violated_cells.append(str(p))
+                    else:
+                        clean_cells.append(str(p))
+            except Exception as e:
+                # Log error but continue scanning other files
+                pass
+            
+    return {
+        "total_cells": total_cells,
+        "violations": violations,
+        "violated_cells": violated_cells,
+        "clean_cells": clean_cells,
+        "missing_cell_json": missing_cell_json
+    }
+
+def audit_run_dir_v2(run_path: Path) -> Dict[str, Any]:
+    # Ensure run_path is a Path object
+    if not isinstance(run_path, Path):
+        run_path = Path(run_path)
+    
+    # If the path doesn't exist, return empty results instead of crashing
+    if not run_path.exists():
+        return {
+            "total_cells": 0,
+            "violations": [],
+            "violated_cells": [],
+            "clean_cells": [],
+            "missing_cell_json": []
+        }
+
+    # Use os.walk for more robust recursive scanning than rglob in some environments
+    total_cells = 0
+    violations = []
+    violated_cells = []
+    clean_cells = []
+    missing_cell_json = []
+
+    for root, dirs, files in os.walk(run_path):
+        # Skip .infra- directories
+        dirs[:] = [d for d in dirs if not d.startswith(".infra-")]
+        
+        if "cell.json" in files:
+            p = Path(root) / "cell.json"
+            try:
+                with open(p, 'r') as f:
+                    data = json.load(f)
+                    content = str(data)
+                    total_cells += 1
+                    # C-nf arm's VACANT_FAILED_STEP_REVIEW is a pre-registered parameter, not a leak
+                    if "VACANT_PI_PARENT" in content or "VACANT_PI_SELF" in content:
+                        violations.append(str(p))
+                        violated_cells.append(str(p))
+                    else:
+                        clean_cells.append(str(p))
+            except Exception as e:
+                # Log error but continue scanning other files
+                pass
             
     return {
         "total_cells": total_cells,
@@ -53,8 +107,8 @@ def main():
         # Positive control: e016 attempt-2
         pos_path = Path("/srv/vlab/runs/e016_failed_step_ablation")
 
-        neg_results = audit_run_dir(neg_path)
-        pos_results = audit_run_dir(pos_path)
+        neg_results = audit_run_dir_v2(neg_path)
+        pos_results = audit_run_dir_v2(pos_path)
 
         # Verify negative control: 14 cells, 11 violations, 3 clean
         if (neg_results["total_cells"] == 14 and 

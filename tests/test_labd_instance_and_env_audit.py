@@ -4,8 +4,9 @@ import shutil
 import os
 
 def test_audit_run_dir():
-    from ops.audits.labd_instance_and_env_audit import audit_run_dir
-    
+    from ops.audits.labd_instance_and_env_audit import audit_run_dir_v2
+    import shutil
+
     # Use a unique name to avoid collisions and ensure it's in the current directory
     test_dir = Path("./test_audit_dir_v2")
     if test_dir.exists():
@@ -29,7 +30,7 @@ def test_audit_run_dir():
         with open(cell_path_infra, 'w') as f:
             json.dump({"agent_env": {"VACANT_PI_SELF": "should_be_ignored"}}, f)
 
-        results = audit_run_dir(test_dir)
+        results = audit_run_dir_v2(test_dir)
         # total_cells should be 2 because .infra-data is ignored
         assert results["total_cells"] == 2, f"Expected 2 cells, found {results['total_cells']}"
         assert len(results["violations"]) == 1
