@@ -4,7 +4,11 @@
     {"id": "AMEND-1", "date": "2026-11-11",
      "by": "人類擁有者（口頭指示：native_pi 接真 pi、模型用本地的 lms1003qwen）",
      "reason": "原凍結預算 model_entry='glm' 與 arm_defs 的 native_pi（原生 pi）互相矛盾：glm CLI 單回合無工具，接不了 pi 的工具迴圈。寧可顯式修預註冊，不可名實不符發射。",
-     "change": "budget.model_entry 如實改為 'glm+local_pi'，新增 pi_provider='lms1003qwen'、pi_model='qwen/qwen3.8-27b'；arm_defs／任務清單與逐檔 sha256 全部不變。舊核准文件作廢；發射前須重新核准（approval_gate 仍 fail-closed）。"}
+     "change": "budget.model_entry 如實改為 'glm+local_pi'，新增 pi_provider='lms1003qwen'、pi_model='qwen/qwen3.8-27b'；arm_defs／任務清單與逐檔 sha256 全部不變。舊核准文件作廢；發射前須重新核准（approval_gate 仍 fail-closed）。"},
+    {"id": "AMEND-2", "date": "2026-11-11",
+     "by": "人類擁有者（常設授權延伸；票 P20261111_0645-1「AMEND-2（人類常設授權延伸…）」）",
+     "reason": "首發後檢（票 P20261111_0645-1）：3× native_pi 格「pi timed out after 300s」，唯一成功的 pi 格用 278s（貼著 300s 線）——本地 pi 工具迴圈單回合 >300s 是 infra 失敗，不是任務失敗。glm 臂的 8 個失敗是另一類（token_limit，見票尾歸因），不改 glm 的 300s/輪。",
+     "change": "新增 budget.timeout_s_per_round_pi=600（pi 臂每格牆時 cap；g3gate.MAX_TIMEOUT_S_PER_ROUND_PI=600 為新預註冊上限，可加嚴不可放寬，check_budget fail-closed 驗收）；budget.timeout_s_per_round=300（glm 臂）維持不變；max_cells/daily_token_cap 等其餘預算字段不動。任務輸入與 arm_defs 全部不變。"}
   ],
   "frozen_at": "2026-11-08T04:50:13+00:00",
   "ticket": "vq-1zf（G3 未見任務完整對照；審查指示 #5「G3 準備工作」2026-11-08；r1236 交付發射前置門）",
@@ -111,6 +115,7 @@
   "budget": {
     "max_cells": 12,
     "timeout_s_per_round": 300,
+    "timeout_s_per_round_pi": 600,
     "daily_token_cap": 2000000,
     "quota_fail_closed": true,
     "model_entry": "glm+local_pi",
@@ -118,7 +123,7 @@
     "pi_model": "qwen/qwen3.8-27b",
     "hard_token_cap": false,
     "cost_missing": "UNKNOWN",
-    "note": "無硬 token 上限能力；成本從 raw usage 讀、缺值 UNKNOWN 絕不填 0；撞 2M/日 額度即停、不得重試；空暫存目錄＋--enabled-tools none；不准反向代理、不准轉額度"
+    "note": "無硬 token 上限能力；成本從 raw usage 讀、缺值 UNKNOWN 絕不填 0；撞 2M/日 額度即停、不得重試；空暫存目錄＋--enabled-tools none；不准反向代理、不准轉額度。AMEND-2（2026-11-11）：timeout_s_per_round_pi=600＝pi 臂每格牆時 cap（首發 3× 300s 超時、成功格 278s 貼線）；glm 臂與擷取仍 300s/輪"
   },
   "scoring": {
     "scorer": "/srv/vlab 既有 scorer（bin/report.py <exp> --rescore）；不准用 R-loop 自己列的清單當裁判",

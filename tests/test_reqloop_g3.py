@@ -191,7 +191,8 @@ class FakePiChannel(g3.Channel):
 
     def call(self, *, prompt: str, model: str, purpose: str,
              timeout_s: float) -> tuple[str, g3.RoundUsage]:
-        self.calls.append({"prompt": prompt, "purpose": purpose, "model": model})
+        self.calls.append({"prompt": prompt, "purpose": purpose, "model": model,
+                           "timeout_s": timeout_s})
         tid = purpose.split()[1].split("/")[0]
         names = g3.required_answer_names(
             (BASE / "tasks" / tid / "workspace" / "contract.md").read_text(encoding="utf-8"))
@@ -244,6 +245,42 @@ def test_fire_valid_approval_fake_channels_rc0_12cells(tmp_path):
             assert c["content_reverify"]["enabled"] is True
         else:
             assert c["content_reverify"]["enabled"] is False
+
+
+def test_amend2_pi_arm_600s_glm_arms_and_extract_300s(tmp_path):
+    """AMEND-2（2026-11-11，票 P20261111_0645-1）：pi 臂每格牆時＝
+    budget.timeout_s_per_round_pi（600s）；glm 臂與擷取維持
+    budget.timeout_s_per_round（300s）——per-channel cap 分流。
+
+    首發實證：唯一成功的 pi 格用 278s（貼著 300s 線），3× pi 格 300s 超時；
+    glm 臂的 8 個失敗是 token_limit（非牆時）——兩類 infra 失敗分開歸因、分開修。"""
+    fake = FakeChannel(tokens=1000)
+    fake_pi = FakePiChannel(tokens=1000)
+    plan = _plan()
+    g3.run_g3(plan, BASE, tmp_path / "o", channel=fake,
+              pi_channel=fake_pi, approval=_approval())
+    assert fake_pi.calls, "native_pi 格必須由 pi 通道服務"
+    assert {c["timeout_s"] for c in fake_pi.calls} == {600}, \
+        "pi 臂每格牆時必須是 AMEND-2 的 600s（實測："
+    assert fake.calls, "glm 通道（擷取＋兩臂）必須有呼叫"
+    assert {c["timeout_s"] for c in fake.calls} == {300}, \
+        "glm 臂＋擷取每輪牆時必須維持 300s（AMEND-2 不改 glm）"
+
+
+def test_glm_channel_passes_explicit_max_tokens_total():
+    """glm 臂 token_limit 修復（票 P20261111_0645-1，選項 a：提升 glm 上限）：
+    GlmChannel 必須顯式傳 --max-tokens——vibe help 原文「Maximum total prompt +
+    completion tokens」：該參數是 prompt+completion 總預算，不是 completion 上限。
+    首發 8×「Stopped: token_limit」實證：answer prompt input 32609–39266 tok
+    （vibe_calls.jsonl）全部 > glm CLI 預設 30000→completion 被擠成 55–181 tok；
+    擷取 call（input 5.7K tok）在 30000 內→全成。新 cap 必須 > 首發最大 prompt。"""
+    import inspect
+    src = inspect.getsource(g3.GlmChannel)
+    assert "--max-tokens" in src, "GlmChannel 必須顯式傳 --max-tokens（不能靠 CLI 預設 30000）"
+    assert "GLM_MAX_TOKENS_TOTAL" in src
+    assert g3.GLM_MAX_TOKENS_TOTAL > 39266, \
+        "cap 必須 > 首發最大 answer prompt input（39266 tok）＋completion 空間"
+    assert g3.GLM_MAX_TOKENS_TOTAL > 30000, "cap 不得低於舊預設（放寬方向）"
 
 
 def test_arms_same_task_input_and_arm_specific_prompt(tmp_path):
