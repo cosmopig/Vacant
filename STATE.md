@@ -279,3 +279,9 @@
 - 誠實記帳：bank.ordering 為「screen top4＋其餘 canonical 順序」之凍結構造（ticket 明確要求 ordering 使 unseen_selection 恰合 [dab_725, dab_587, dab_657, dab_517]）；seen_set 含 dabstep（g3_1 承傳、非本 bank 題、不影響選題）；未宣稱 G3.2 假說成立（本輪只凍結、未發射、無數據）。
 - 票務：commit a3cc92616（repo /home/user1/dev/Vacant，branch auto/qwen27b，訊息首行＝票檔名）；票尾 3 行（commit SHA／驗收末行／未做）＋mv done/（doing/ 現 0 票）。
 - 下一步：G3.2 發射＝人類核准後另票（H0 門＝4 題各 1 次 extract 預跑：≥1/4 題 ≥1 條 required claim 確定性裁決→發完整批 4 格；0/4→否決＋停止同路徑＋上報）；G3.1 發射（1315-2）仍待人類核准；1215-1 收斂後 freeze_check 12/12 復測。
+
+## 2026-11-11 r1469（票 P20261111_2119-2：G3.2 H0 extract 預跑門；結案）
+- 做了什麼：新 `ops/audits/g3_2_extract_prerun.py`（150 行，鏡 g3_1 架構：load_manifest 釘凍結 4 題、classify 確定性 vs unverified、h0_verdict、--selftest 正/負/解析失敗 3 控制 fail-closed、--run 4×glm、ledger 成本缺值 UNKNOWN）＋`tests/test_reqloop_g3_2_prerun.py`（80 行 4 案）＋真實報告 `ops/audits/g3_2_h0_prerun_report.json`（4 calls／29914 tok）；假說檔狀態段更新為 H0_MET。
+- 驗證了什麼：驗收兩連 `--selftest`→VERDICT: G3_2_PRERUN_SELFTEST_OK＋pytest 4 passed RC=0（改前兩檔不存在 exit 2）；回歸 test_reqloop_g3_2_manifest/prereg＋frozen_anchors 12 passed；凍結 4 檔未動（git diff vacant_network/ 空）；dab_725 2 條確定性 claim＝R1/R6 `answer_kv` numeric keys（凍結 extract/checks 判定 unverified=False、可 PASS/FAIL 重算）。
+- 沒驗證／沒做：完整批未發射（票紅線：預跑不擅自點火）；H0 結果＝**H0_MET（1/4）**：dab_725 2/7 確定性；dab_587/657/517 全 0 確定性（unverified 理由：deliverable_not_in_request、unsupported_recompute_type:mean_col/median_col/std_col/pearson、model_declared_unverified、unknown_verifier:missing）→ 上報人類待核准發射 full_rloop×4。
+- 下一步：人類裁決（發完整批／停同路徑）；若發射→approval 門 fail-closed＋`g3 --manifest ops/reqloop/g3_2/manifest.json`；G3.1（1315-2）仍待人類核准；1215-1 候 worker 收斂。
