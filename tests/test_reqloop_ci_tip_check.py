@@ -28,6 +28,8 @@ ops/reqloop/ci_tip_check.py 的收口判定做負控制：
             → 必選新者判 COVERED（按 commit 時間選最新，非 json mtime／任意序）。
   負控 (f)：損毀 json 不得崩潰、不得計入證據（I-4）。
   負控 (g)：state.json running 只加註記、不改判定（一次讀取、不 poll 的紀律）。
+  負控 (i)：零分支輸入（檢查量零分支）→ 不得判 OK（r1413；I-4 未測量不是通過；
+            舊碼 all([]) 恆真 → CI_TIP_OK＝空集綠燈，r1272 空檔 vacuous／r1334 零格同族）。
 """
 from __future__ import annotations
 
@@ -338,6 +340,20 @@ def test_verdict_aggregation_priority(tmp_path: Path, monkeypatch) -> None:
     res = _eval(mod, tmp_path, fg, monkeypatch)
     assert res["branches"][C]["verdict"] == "UNKNOWN", res
     assert res["verdict"] == "CI_TIP_BROKEN" and res["rc"] == 1, res
+
+
+def test_zero_branch_input_is_vacuous_not_ok(tmp_path: Path) -> None:
+    """負控 (i)（r1413）：零分支輸入 → 檢查量零分支 → 不得判 OK。
+    舊碼：all(v in _CLOSED for v in []) 恆真 → CI_TIP_OK rc=0（空集綠燈；I-4
+    「未測量不是通過」，r1272 空檔 vacuous／r1334 零格同族；移除全部測量對象
+    反而把判定從 UNKNOWN 升成 OK＝H-0「綠燈來自沒量該量的」）。修後：
+    BROKEN（vacuous）rc=1 fail-closed；證據須點名 'vacuous'（可複核，非裸判定）。
+    （空輸入在觸及 git 前即須被拒，故無需偽 git。）"""
+    mod = _load()
+    res = mod.evaluate(tmp_path, {})
+    assert res["verdict"] == "CI_TIP_BROKEN", res
+    assert res["rc"] == 1, res
+    assert any("vacuous" in e for e in res["evidence"]), res
 
 
 if __name__ == "__main__":
