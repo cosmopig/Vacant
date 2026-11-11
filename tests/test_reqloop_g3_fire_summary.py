@@ -181,6 +181,34 @@ def test_negative_tokens_none(tmp_path: Path) -> None:
     assert "缺值" in r.stderr, r.stderr
 
 
+def test_positive_partial_cells_run_quota_stop(tmp_path: Path) -> None:
+    """正控制：部分格子因配額未跑（status='not_run'，cells=12, cells_run=10）→ 必須 OK rc=0。
+    舊碼死守 cells_run==12 判 BROKEN（配額提早停止合法場景被誤殺）。"""
+    d = _base()
+    d["cells"][10]["status"] = "not_run"
+    d["cells"][10]["rounds"] = []
+    d["cells"][11]["status"] = "not_run"
+    d["cells"][11]["rounds"] = []
+    d["totals"]["cells_run"] = 10
+    r = _run(_write(tmp_path, d, "partial.json"), tmp_path / "partial_out.json")
+    assert r.returncode == 0, f"rc={r.returncode}\n{r.stdout}\n{r.stderr}"
+    assert OK_VERDICT in r.stdout, r.stdout
+
+
+def test_negative_cells_run_mismatch(tmp_path: Path) -> None:
+    """負控制：totals.cells_run 與實際非 not_run 格數不符（10 != 11）→ 必須 BROKEN rc=1。"""
+    d = _base()
+    d["cells"][10]["status"] = "not_run"
+    d["cells"][10]["rounds"] = []
+    d["cells"][11]["status"] = "not_run"
+    d["cells"][11]["rounds"] = []
+    d["totals"]["cells_run"] = 11
+    r = _run(_write(tmp_path, d, "mismatch.json"), tmp_path / "mismatch_out.json")
+    assert r.returncode == 1, f"rc=0 假綠燈\n{r.stdout}\n{r.stderr}"
+    assert BROKEN_VERDICT in r.stdout, r.stdout
+    assert "cells_run" in r.stderr, r.stderr
+
+
 def test_negative_schema_drift(tmp_path: Path) -> None:
     d = _base()
     d["schema"] = "vacant.reqloop.g3.result/2"

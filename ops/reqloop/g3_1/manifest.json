@@ -1,0 +1,55 @@
+{
+  "v": 1,
+  "dialect": "mbpp",
+  "entry_point": "solve",
+  "tasks": [
+    {
+      "task_id": "dab_055",
+      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+      "workspace_sha256": "unknown",
+      "required_answer_names": ["mean_cases"],
+      "data_files": [
+        {
+          "path": "data/estimated_numbers.csv",
+          "sha256": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_035",
+      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+      "workspace_sha256": "unknown",
+      "required_answer_names": ["removed_outliers_count"],
+      "data_files": [
+        {
+          "path": "data/imp.score.ldlr.metabolome.csv",
+          "sha256": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_105",
+      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+      "workspace_sha256": "unknown",
+      "required_answer_names": ["correlation_coefficient"],
+      "data_files": [
+        {
+          "path": "data/test_Y3wMUE5_7gLdaTN.csv",
+          "sha256": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8"
+        }
+      ]
+    },
+    {
+      "task_id": "dab_218",
+      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+      "workspace_sha256": "unknown",
+      "required_answer_names": ["correlation_coefficient"],
+      "data_files": [
+        {
+          "path": "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+          "sha256": "c9e411ff75df8d966f6e5de9270a4a7276289c478a6b7aa216ce667eac66f540"
+        }
+      ]
+    }
+  ]
+}
