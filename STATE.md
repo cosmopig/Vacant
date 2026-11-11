@@ -236,3 +236,10 @@
 - 沒驗證什麼：H2.0 預跑未重發（r1447a 已判 H2_0_REFUTED；重發與完整批點火＝人類裁決）、CI（不 poll）、hidden 打分（人側）。
 - 票尾 3 行結果已寫、票已 mv done/；NOW.md 更新＋ops/loop/NOW.md 鏡像。
 - 下一步：1215-1 收案狀態、CI 三分支 ci_status.py 核、等規劃者下一票（doing/ 現空）。
+
+## 2026-11-11 r1450 redo（審查指示：本票點名的 ops/reqloop/g3_1_candidate_hypothesis.md 未開——補開＋重測依賴項）
+- 做了什麼：補開假說檔（§2 H2.0 門／§3 預檢查／§4 停止規則／§5 發射前置）；決定性重測 H2.0 報告 14 條 deliverable_not_in_request 的實際 deliverable 值於修復後 user_text（goal+contract）下的標記狀態；證據落檔 ops/audits/g3_1_contract_fix_report_recheck_20261111.json；票尾補 redo 補正段；NOW.md 修正。0 model calls、0 產品碼改動。
+- 驗證了什麼：14/14 實際 deliverable 皆描述性短句或資料來源檔名（非 answer.txt；prompt extract.py L1028 明令禁止描述性短句）→ 修復後 **0/14 解旗、14/14 仍標記**（凍結 ruler _deliverable_problem 重跑）。code 修復本身仍成立＝必要正確性修復（G2.5 real14 首跑 6/9 同型猜名即此缺陷；answer.txt 範例案解旗有測試＋實測）。
+- 誠實記帳：**H2_0_REFUTED（r1447a，3e45e212）不被本票推翻**——報告主失敗模式＝模型 deliverable 欄位不合規，非 contract 漏附；§4 停止規則（不發完整批、不疊同路徑票、上報人類）維持。c-run 26/26「同型」歸因因該 run 逐條原因未持久化（假說 §1.3）維持 UNKNOWN。
+- 票尾 redo 段已補（done/P20261111_1516-1…md）；NOW.md＋鏡像更新。
+- 下一步：不變（1215-1 收案、CI 核、等下一票；H2.0 重發＝人類裁決）。

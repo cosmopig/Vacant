@@ -1,0 +1,38 @@
+{
+  "schema": "vacant.audit/g3_1_contract_fix_recheck/1",
+  "generated_at": "2026-11-11",
+  "round": "r1450 redo（審查指示：g3_1_candidate_hypothesis.md 未開）",
+  "purpose": "決定性重測：H2.0 預跑報告（g3_1_h20_prerun_report.json）14 條 deliverable_not_in_request 的實際 deliverable 值，在修復後 user_text（goal+contract.md，compose_extract_user_text）下是否仍被 _deliverable_problem 標記。0 model calls。",
+  "inputs": {
+    "report": "ops/audits/g3_1_h20_prerun_report.json（h20_verdict=H2_0_REFUTED，0/4 題確定性 claim）",
+    "hypothesis": "ops/reqloop/g3_1_candidate_hypothesis.md（§2 H2.0 門、§3 預檢查、§4 停止規則）",
+    "fixed_user_text": "vacant_network/reqloop/g3.compose_extract_user_text(goal, contract)（P20261111_1516-1，commit c79af8cf6）",
+    "ruler": "vacant_network/reqloop/extract._deliverable_problem（凍結檔，未改）"
+  },
+  "method": "逐條取報告 reason 內的 deliverable 值（reason 即 _deliverable_problem 回傳、截斷 60 字元；本批 14 條皆 <60 字元無截斷），對 inputs.goal（old）與 compose_extract_user_text(goal, contract)（new）各跑一次 _deliverable_problem。",
+  "claims": [
+    {"task_id": "dab_035", "claim_id": "R1", "deliverable": "removed_outliers_count", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_035", "claim_id": "R2", "deliverable": "filtered_rowset", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_055", "claim_id": "R4", "deliverable": "答案以 @mean_cases[正整數] 標籤格式呈現", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_105", "claim_id": "R1", "deliverable": "ApplicantIncome 與 LoanAmount 的 Pearson 相關係數", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_105", "claim_id": "R2", "deliverable": "Pearson 相關係數（線性關係強度與方向）", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_105", "claim_id": "R3", "deliverable": "計算前排除 ApplicantIncome 或 LoanAmount 任一欄為缺失值的列", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_105", "claim_id": "R4", "deliverable": "相關係數四捨五入至小數點後兩位", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_105", "claim_id": "R5", "deliverable": "答案以 @correlation_coefficient[corr_coeff] 標籤格式輸出", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_105", "claim_id": "R6", "deliverable": "資料來源檔案 data/test_Y3wMUE5_7gLdaTN.csv", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_218", "claim_id": "req-1", "deliverable": "positive_diffsel 與 negative_diffsel 兩欄的 Pearson 相關係數 (r)", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_218", "claim_id": "req-2", "deliverable": "以 @correlation_coefficient[r_value] 標籤格式輸出的相關係數", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_218", "claim_id": "req-3", "deliverable": "計算前不得移除離群值或修改資料", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_218", "claim_id": "req-4", "deliverable": "計算須使用全部資料點", "old_flagged": true, "new_flagged": true},
+    {"task_id": "dab_218", "claim_id": "req-5", "deliverable": "資料來源檔案 data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv", "old_flagged": true, "new_flagged": true}
+  ],
+  "summary": {
+    "n_deliverable_not_in_request_claims": 14,
+    "fixed_by_contract_append": 0,
+    "still_flagged_after_fix": 14,
+    "conclusion": "14 條實際 deliverable 值皆為描述性短句或資料來源檔名（非交付檔名；擷取 prompt extract.py L1028 明令禁止描述性短句），append contract.md（點名 answer.txt）對本報告 0/14 條解旗。報告主失敗模式＝模型 deliverable 欄位不合規，非 contract 漏附。",
+    "h20_impact": "H2_0_REFUTED（r1447a，3e45e212）不被 P20261111_1516-1 的修復推翻；§4 停止規則（不發完整批、上報人類）維持。該票＝必要正確性修復（contract 漏附缺陷真實存在，見 run_eval.py load_cell_request_text 註記：G2.5 real14 首跑 9 錯中 6 錯為同型猜名），但不清 H2.0 門。",
+    "c_run_attribution": "g3_fire_20261111c（dab_129/144/176/216，非 4 凍結題）26/26 unverified 之「同型漏傳 contract.md」歸因：該 run 逐條原因未持久化（假說 §1.3），歸因維持未驗證（UNKNOWN），非既定事實。"
+  },
+  "reproduce": "python3 -c 載入本檔 method 所述流程：對 ops/reqloop/g3_1/tasks/<tid> 的 goal/contract 跑 g3.compose_extract_user_text，再對每條 deliverable 跑 extract._deliverable_problem（old=new 時 new 用拼接後 user_text）；或重跑 tests/test_reqloop_g3.py -k test_extract_requirements_includes_contract_deliverable（answer.txt 範例案：old flagged→new None，與本檔 0/14 不矛盾——兩者 deliverable 值不同）。"
+}

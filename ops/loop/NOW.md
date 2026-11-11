@@ -1,7 +1,7 @@
 # NOW.md — 現況（每輪更新，≤3KB）
 
 ## 狀態（2026-11-11 r1450 G3 輸入 contract 接線）
-- **r1450（票 P20261111_1516-1，收案 c79af8cf6）：g3.py 擷取使用者原文漏附公開 contract.md → `deliverable_not_in_request` 假陽性已修**。g3.py 新增 `compose_extract_user_text`（對齊 G2.5 `load_cell_request_text`：contract 非空且未含於 goal 時 `goal.rstrip()+"\n\n"+contract.strip()+"\n"`）接上發射路徑；g3_1_extract_prerun run_prerun 改讀 workspace/contract.md 同口徑；新測試 `test_extract_requirements_includes_contract_deliverable`（正負控制）。4 凍結題（dab_035/055/105/218）實測 old→new：`deliverable_not_in_request:answer.txt`→None（0 model calls）。票尾 3 行結果→done/。
+- **r1450（票 P20261111_1516-1，c79af8cf6）：g3.py 擷取 user_text 漏附 contract.md 已修**（helper＋call site＋prerun 同口徑＋新測試，answer.txt 範例案 old→new 解旗，0 model calls）。**redo 補正**（假說檔已補開）：H2.0 報告 14 條實際 deliverable 皆描述性短句（prompt L1028 禁止）→ 修復後 user_text 重測 **0/14 解旗**（證據 ops/audits/g3_1_contract_fix_report_recheck_20261111.json）→ **H2_0_REFUTED（r1447a）不被推翻、§4 停止規則維持**；票尾 redo 段已補。
 - r1449：argon 同步 24 in-scope 檔→diff_argon 0 differ；diff_worker 殘留＝1215-1 3 檔（在進未升上，誠實紅）。vq-kax 3 項已落地；收案被 1215-1 阻塞。
 - r1447/a：G3.1 H2.0=H2_0_REFUTED（3e45e212）；r1442 凍結（809dae937）；r1444 stray-labd（3127a77ad）。
 - CI：三分支新 tip 待跑完，下輪 ci_status.py 核（不 poll）。
