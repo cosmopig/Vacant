@@ -260,3 +260,8 @@
 - 沒驗證什麼：live 0 實例路徑（須停真 labd 1734，不動它；mock＋selftest 覆蓋判定分支）；CI（不 poll）。
 - 誠實記帳：改前 pgrep -f 路徑此刻恰好只命中 1734 而驗收為綠，但結構上仍假陽性易（r1461 實量 count 2 假陽性）；本輪為結構修復非數字修復。
 - 下一步：1843-2（audit_run_dir/--audit-e016）串行審查（worker 在進、同檔，本輪 commit 為其新基線）；1215-1 收案；CI 三分支 ci_status.py 核；G3.1 H2.0 重發待人類裁決。
+## 2026-11-11 r1465（審查指示 #1：bk_now 鏡像修復＋argon 簿記同步；freeze_check 4 紅→2 紅）
+- 做了什麼：DECISION: 選 argon 側同步而非字面 `git merge auto/argon`｜argon 之 diff 僅 4 簿記檔（r1461 舊內容、252 行 delta），合併會以舊覆新；既定慣例 mainline 為 canonical、argon 鏡像（r1270 實證、r1461 同法修 diff_argon）。動作：NOW.md 覆寫 r1465 內容→cp 鏡像 ops/loop/NOW.md（原為 2786B r1461 舊內容）；argon worktree `git checkout auto/qwen27b -- STATE.md NOW.md ops/STATE.md ops/loop/NOW.md`＋commit。0 model calls、0 產品碼改動。
+- 驗證了什麼：修前 freeze_check 4 紅實測（diff_worker/diff_argon/bk_now/wt_clean）；修後 bk_now OK（byte-identical）＋diff_argon OK（counterpart＝argon HEAD、in-scope diff 0）；anchors 5 passed 基線不變。
+- 沒驗證什麼：diff_worker＋wt_clean 仍紅＝worker round 20:15 在進（票 1843-2、worktree 2 檔 M，其輪末自動 commit）；CI（不 poll）；test_freeze_check_verdict_ok 須待 2 紅收斂才綠。
+- 下一步：worker 1843-2 收斂後串行審查（同檔 ops/audits/labd_instance_and_env_audit.py；基線＝本輪 mainline commit）；升上後三分支 freeze_check 復測（期望 12/12）＋CI 核；G3.1 H2.0 重發待人類裁決（H2_0_REFUTED 仍有效）。
