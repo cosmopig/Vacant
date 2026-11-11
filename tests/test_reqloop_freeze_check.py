@@ -1576,10 +1576,23 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_g3.py（新增 1 測）
     #     3ed315e37f4fe05f705352f34a6911b6b9e20db95586670fe9744145bfbc8259
     #     → 2168556a5775e68138e636cade988a08f2bd1e1d4740b4b098a48713c82742ca
+    # r1459 解凍記錄（票 P20261111_1516-1-g3-input-contract-wiring，審查指示 #2；
+    # 分支 auto/qwen27b）：r1450（c79af8cf6）修「擷取使用者原文漏附公開
+    # contract.md→deliverable_not_in_request 假陽性」——compose_extract_user_text 改組
+    # f"{goal}\n\n{contract}"（合法修改、已核准），但該輪未依紀律更新本 pin（r1393
+    # 同型：改 ruler／被釘檔而 pin 未更新；本輪 6 支 guard_content_pin 測試紅＝
+    # 守衛照設計抓到，r1394 先例依紀律補齊）。4 凍結題實測 old→new 全轉 None；
+    # 凍結四檔未動、0 model calls。sha256 本輪 sha256sum 自磁碟實算、非轉抄：
+    # (1) vacant_network/reqloop/g3.py
+    #     f5fc822e1ec43d34e1ed3864f366501dc15c5d1b6ca5a80a34210baaf7c7e731
+    #     → 24beb4b32a7e3beb7d4f400fc6334629216239a18caa3eeca5773c63183786ba
+    # (2) tests/test_reqloop_g3.py
+    #     2168556a5775e68138e636cade988a08f2bd1e1d4740b4b098a48713c82742ca
+    #     → 7efb8398e73f84f57723d625ca079c014a9d860b58f295ea0ef4ddc488b321bc
     "vacant_network/reqloop/g3.py":
-        "f5fc822e1ec43d34e1ed3864f366501dc15c5d1b6ca5a80a34210baaf7c7e731",
+        "24beb4b32a7e3beb7d4f400fc6334629216239a18caa3eeca5773c63183786ba",
     "tests/test_reqloop_g3.py":
-        "2168556a5775e68138e636cade988a08f2bd1e1d4740b4b098a48713c82742ca",
+        "7efb8398e73f84f57723d625ca079c014a9d860b58f295ea0ef4ddc488b321bc",
     "tests/test_reqloop_g3_conformance.py":
         "e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
