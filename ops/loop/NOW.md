@@ -1,9 +1,9 @@
 # NOW.md — 現況（≤3KB）
 
 ## 輪次／階段／狀態
-r1425（2026-11-11）：例行機械複驗輪——審查 5 條指示全綠、0 產品改動。vq-el4 全數關；vq-1zf（G3）全庫唯一 open，待人類 `--fire`。
+r1425 redo（2026-11-11）：例行機械複驗輪＋redo——審查點名 effects_20261105_summary.json 本輪直接開啟＋獨立重算（60228B／a710f7e44c…、50 格、policy30 13w g7/l6、once20 11w g7/l4、sess 35/20、API 915/457、tok 33670510/19503953）——0 更正。vq-el4 全數關；vq-1zf（G3）全庫唯一 open，待人類 `--fire`。
 - 輪首 ci_tip_check 一次讀取 → CI_TIP_OK rc=0（qwen27b@b1fa10ef5 COVERED／worker@03f9d086 COVERED／argon@c044ea28 PEER_COVERED）。
-- 守衛 8 檔 122 passed（freeze 27／anchors 5／ci_contract 2／ves 19／g3gate 27／g3 25／now_redline 5／ci_tip 12；涵蓋審查 115，g3 已增 18→25＝覆蓋擴大）。
+- 守衛 8 檔 122 passed（freeze 27／anchors 5／ci_contract 2／ves 19／g3gate 27／g3 25／now_redline 5／ci_tip 12；涵蓋審查 115，g3 已增 18→25＝覆蓋擴大）；redo 後複跑仍 122 passed。
 - GUARD_CONTENT_PIN 13 檔（含審查 12 檔）sha256 與磁碟 100% 吻合（獨立 hashlib 重算 0 差異）；repair 2795 行/148101B/5147f8c3…、extract 1217 行/57363B/e757aec5…；g25 filing 6/6 sha256 MATCH。
 - verify_effects_summary → EFFECTS_SUMMARY_OK（policy30 13w/0r g7/l6、once20 11w/0r g7/l4、50 格）；freeze_check 12/12 FROZEN_STATE_OK。
 
@@ -19,5 +19,6 @@ r1425（2026-11-11）：例行機械複驗輪——審查 5 條指示全綠、0 
 
 ## 證據與下輪驗證點
 - `python3 ops/reqloop/ci_tip_check.py` → VERDICT: CI_TIP_OK rc=0（本輪一次讀取；三分支 COVERED/PEER_COVERED）。
-- `python3 ops/reqloop/freeze_check.py` → VERDICT: FROZEN_STATE_OK 12/12。
+- `python3 ops/reqloop/freeze_check.py` → VERDICT: FROZEN_STATE_OK 12/12（redo 後複跑）。
 - 守衛 8 檔 122 passed（freeze 27／anchors 5／ci_contract 2／ves 19／g3gate 27／g3 25／now_redline 5／ci_tip_check 12）。
+- redo：effects_20261105_summary.json 直接開啟＋逐格重算（13w g7/l6、11w g7/l4、50 格）與 11-06 人類參考吻合，0 更正。
