@@ -1394,10 +1394,27 @@ GUARD_CONTENT_PIN = {
     #     新增 pin 220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7
     # (2) tests/test_reqloop_g3.py
     #     新增 pin fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd
+    # r1419 解凍記錄（vq-el4.94）：g3.py GlmChannel.call raw usage 計數收緊——舊碼
+    # `int(rec.get("total_tokens"))` 把 JSON bool 當 int（false→0＝實際耗 token 的
+    # 呼叫記成本 0、true→1）、負數（-100 → QuotaGuard known_tokens 被扣減、日額度
+    # 更遲才觸發）、float（截斷）／string（自我聲明文字）全靜默接受＝quota
+    # fail-open（本輪 RED 實證：false→0／-100→-100／123.5→123／"123"→123；
+    # r1376 同族「工作量的界不得依賴用量恰好被測到」、r1405 strict-int／r1408 預算
+    # 同族；門不得信被驗方的自我聲明）。修法：只認嚴格 int≥0，否則 UNKNOWN
+    # （None，不填 0）；vibe_calls.jsonl 由外部 glm CLI 寫（實測真形狀即嚴格 int，
+    # 如 "total_tokens": 10164），正控制不受影響。test 檔新增 6 測（負控 4：
+    # bool／負數／float+string／混合行；正控 2：int 計數／多行加總），g3 檔 18→24。
+    # 兩檔合法改動後顯式更新錨：
+    # (1) vacant_network/reqloop/g3.py
+    #     220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7
+    #     → ecac78790351d2ca249f06106eef95da1b8fb6cffa517f013be03743b439dba2
+    # (2) tests/test_reqloop_g3.py（新增 r1419 6 測）
+    #     fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd
+    #     → c036e3cd767e929d691c39674890dfcdba69ebcc05b366ba05a2d3cff72f6f72
     "vacant_network/reqloop/g3.py":
-        "220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7",
+        "ecac78790351d2ca249f06106eef95da1b8fb6cffa517f013be03743b439dba2",
     "tests/test_reqloop_g3.py":
-        "fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd",
+        "c036e3cd767e929d691c39674890dfcdba69ebcc05b366ba05a2d3cff72f6f72",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
     # 其 10 測測試檔）r1399 輪（rc=124 殘留）建於 r1319/r1347/r1365/r1397 建錨各輪
     # 之後、從未釘住（r1347 同型：verify_effects_summary 對建於 r1333/r1344、r1347

@@ -344,6 +344,88 @@ def test_full_rloop_second_round_only_when_missing(tmp_path):
     assert sum(1 for c in r2["cells"] if c["arm"] == "full_rloop" and len(c["rounds"]) == 2) == 1
 
 
+# ── r1419：GlmChannel raw usage 型別混淆（vq-el4.94）─────────────
+# vibe_calls.jsonl 由外部 glm CLI 寫（被驗方自我聲明）；舊碼 `int(rec.get(
+# "total_tokens"))` 把 JSON bool 當 int（false→0：實際耗 token 的呼叫記成本 0；
+# true→1）、負數（-100→QuotaGuard known_tokens 被扣減、日額度更遲才觸發）、
+# float（截斷）／string（自我聲明文字）全靜默接受＝quota fail-open（r1376 同族：
+# 工作量的界不得依賴「用量恰好被測到」；r1405 strict-int／r1408 預算同族）。修＝
+# 嚴 int≥0，否則 UNKNOWN（None，不填 0）。
+
+
+def _fake_glm(tmp_path: pathlib.Path, usage_lines: list[str]) -> tuple[pathlib.Path, pathlib.Path]:
+    """造假 glm 可執行檔：每次呼叫把 usage_lines 逐行追加進 state/vibe_calls.jsonl、rc 0。"""
+    state = tmp_path / "state"
+    state.mkdir(parents=True, exist_ok=True)
+    log = state / "vibe_calls.jsonl"
+    binpath = tmp_path / "fakeglm.py"
+    body = "\n    ".join(f"f.write({line!r} + '\\n')" for line in usage_lines)
+    binpath.write_text(
+        "#!/usr/bin/env python3\nimport pathlib\n"
+        f"p = pathlib.Path(r'{log}')\n"
+        "with p.open('a', encoding='utf-8') as f:\n"
+        f"    {body}\n"
+        "print('answer text')\n",
+        encoding="utf-8")
+    binpath.chmod(0o755)
+    return binpath, state
+
+
+def _glm_call_once(tmp_path: pathlib.Path, usage_lines: list[str]) -> g3.RoundUsage:
+    binpath, state = _fake_glm(tmp_path, usage_lines)
+    ch = g3.GlmChannel(glm_bin=str(binpath), state_dir=state)
+    _, usage = ch.call(prompt="p", model="m", purpose="t", timeout_s=10)
+    return usage
+
+
+def test_glm_channel_bool_total_tokens_unknown_not_zero(tmp_path):
+    """r1419 負控：JSON bool 不是可數 token——false 被舊碼讀成 0（成本記 0，
+    fail-open）、true 被讀成 1（被驗方自我聲明）。嚴 int 否則 UNKNOWN。"""
+    for val in ("false", "true"):
+        usage = _glm_call_once(tmp_path / val, ['{"total_tokens": ' + val + '}'])
+        assert usage.tokens is None, f"total_tokens={val} 應 UNKNOWN，實得 {usage.tokens!r}"
+
+
+def test_glm_channel_negative_total_tokens_unknown_not_negative(tmp_path):
+    """r1419 負控：負數被舊碼回 -100→QuotaGuard known_tokens 被扣減＝日額度更遲
+    觸發、更多呼叫獲准（fail-open 方向）。嚴 int≥0。"""
+    usage = _glm_call_once(tmp_path / "neg", ['{"total_tokens": -100}'])
+    assert usage.tokens is None, f"total_tokens=-100 應 UNKNOWN，實得 {usage.tokens!r}"
+
+
+def test_glm_channel_float_string_total_tokens_unknown(tmp_path):
+    """r1419 負控：float（123.5→截斷 123）／string（'123' 自我聲明文字）不是
+    可信計數→UNKNOWN（同 r1405 strict-int 族；門不得信被驗方的自我聲明）。"""
+    for val in ('123.5', '"123"'):
+        usage = _glm_call_once(tmp_path / val.replace("\"", "").replace(".", "_"),
+                               ['{"total_tokens": ' + val + '}'])
+        assert usage.tokens is None, f"total_tokens={val} 應 UNKNOWN，實得 {usage.tokens!r}"
+
+
+def test_glm_channel_int_total_tokens_still_counts(tmp_path):
+    """r1419 正控：真 glm CLI 形狀（嚴格 int，實測 vibe_calls.jsonl 如 10164）仍
+    正常計數；每次呼叫只讀自己新增的 usage 行（非跨呼叫累計）。"""
+    binpath, state = _fake_glm(tmp_path / "ok", ['{"total_tokens": 123}'])
+    ch = g3.GlmChannel(glm_bin=str(binpath), state_dir=state)
+    _, u1 = ch.call(prompt="p", model="m", purpose="t", timeout_s=10)
+    assert u1.tokens == 123
+    _, u2 = ch.call(prompt="p", model="m", purpose="t", timeout_s=10)
+    assert u2.tokens == 123, "第二呼只讀自己的新行（123），不是累計 246"
+
+
+def test_glm_channel_multi_line_usage_sums(tmp_path):
+    """r1419 正控：一次呼叫產生多行 usage（如 glm 內部多階段）→ 加總（舊行為保留）。"""
+    usage = _glm_call_once(tmp_path / "multi", ['{"total_tokens": 100}', '{"total_tokens": 50}'])
+    assert usage.tokens == 150
+
+
+def test_glm_channel_mixed_good_and_bad_line_unknown(tmp_path):
+    """r1419 負控：一次呼叫的多行中任一行不可信（100＋false）→ 整呼 UNKNOWN
+    （不得 100+0=100 把壞行洗成 0 混入總計）。"""
+    usage = _glm_call_once(tmp_path / "mixed", ['{"total_tokens": 100}', '{"total_tokens": false}'])
+    assert usage.tokens is None, f"混入 bool 行應整呼 UNKNOWN，實得 {usage.tokens!r}"
+
+
 # ── 管線級：GlmChannel 不持金鑰、只走 glm CLI（靜態檢查）─────────
 
 
