@@ -291,3 +291,8 @@
 - 未做（如實）：diff_worker 仍 BROKEN——worker 在跑（pid 563325、票 1843-2 doing/、w-0083）；紅線＝不碰在進產物，12/12 待 worker 收斂後複測（審查#3 條件句）。
 - 審查#4 阻塞：BACKLOG 10 行＝worker 在進票 1843-2 的步驟 4/5，本輪不碰（票 2158-1 留下輪）；審查#2 已於 r1469 結案（H0_MET 1/4、報告在 ops/audits/g3_2_h0_prerun_report.json）；G3.2 完整批＋G3.1 發射仍待人類核准（未發）。
 - 驗收：now_redline 5 passed；freeze_check 11/12（唯紅＝diff_worker，worker 在進）；0 model calls、0 push、凍結 4 檔＋filing 未動。
+## 2026-11-11 r1472（票 P20261111_2319-1：G3.2 full_rloop×4 背景發射啟動＋狀態登載；結案）
+- 做了什麼：H0 門已過（r1469 H0_MET 1/4：dab_725 2/7 確定性 claim）＋常設核准 g3_vq-1zf_fire_20261111.json（approved=true、epic=vq-1zf）→ 建立 /home/user1/dev/ops/g3_fire/20261111_g3_2，nohup 背景發射 `python3 -m vacant_network.reqloop.g3 --manifest ops/reqloop/g3_2/manifest.json --fire --approval /home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json --out /home/user1/dev/ops/g3_fire/20261111_g3_2`（PID=637896、fired_at 2026-11-11T23:28:45Z）；4 格＝dab_725/dab_587/dab_657/dab_517×full_rloop；log＝fire.log。
+- 驗證了什麼：票面驗收一行 exit 0 → G3_2_FIRE_LAUNCH_RECORDED_OK（改前目錄不存在＋STATE.md 無登載＝exit 1）；發射進程本輪內跑完（比預期快）：4/4 cells status=ok、各 1 輪、requirement_list=true、error=null、hidden_after 全 UNKNOWN（打分流給 /srv/vlab scorer；本端未讀 hidden/scorer）、model_calls=8（answer=deepseek41、extract=glm53，經 glm CLI）、tokens=128923（遠低於 2M 上限、無撞額）；產物 g3_result.json＋cells/*/round_1/answer.txt。
+- 沒驗證／沒做：hidden 側分數＝UNKNOWN（待外部 scorer；同批不重發＝非獨立樣本）；claim 級 PASS/FAIL/UNKNOWN 分報與 H1 裁決＝另票（本票僅啟動＋登載；0 行產品碼、凍結 4 檔未動、未改 g3_1/g3_fire_20261111* 產物）。
+- 下一步：新票讀 g3_result.json＋各輪 claim 裁決，逐 claim 分報（PASS/FAIL/UNKNOWN）＋成本（缺值 UNKNOWN）；G3.1 發射（1315-2）仍待人類核准；1215-1 候 worker 收斂。

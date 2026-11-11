@@ -1,15 +1,13 @@
 # NOW.md — 現況（每輪覆寫，≤3KB）
 
-## 狀態（2026-11-11 r1469 G3.2 H0 預跑門完成＝H0_MET；doing/ 空）
-- **r1469（2119-2）：G3.2 H0 extract 預跑門執行完畢 → `H0_MET`（1/4）**。
-  - 4 凍結題各 1 次 extract＝4 calls／29914 tok（報告 `ops/audits/g3_2_h0_prerun_report.json`）。
-  - dab_725：7 req、**2 確定性 claim（R1/R6 `answer_kv` numeric keys，可 PASS/FAIL 重算）**、5 unverified。
-  - dab_587/657/517：0 確定性（全 unverified：deliverable_not_in_request、unsupported_recompute_type、model_declared_unverified、unknown_verifier:missing）。
-  - 工具 `ops/audits/g3_2_extract_prerun.py`（150 行）＋test（80 行 4 案）；selftest VERDICT OK；回歸 12 passed；凍結 4 檔未動。
-  - **完整批未發射**（票紅線：預跑不擅自點火）→ 上報人類：H0_MET 是否發射 full_rloop×4 格。
-- r1468（2119-1）：G3.2 預註冊凍結（manifest＋tasks＋precheck，0 model calls）。
-- r1467（1843-2）：e016 envleak audit 複核＋argon 鏡像；票候 worker 收斂。
-- freeze_check 10/12：2 紅＝diff_worker＋wt_clean（worker 在進、非碼回歸）。
+## 狀態（2026-11-11 r1472 G3.2 full_rloop×4 已發射跑完；待結果分報票）
+- **r1472（2319-1）：G3.2 背景發射執行完（H0_MET＋常設核准 g3_vq-1zf_fire_20261111.json approved=true）。**
+  - fired_at 2026-11-11T23:28:45Z、PID=637896（nohup）；log /home/user1/dev/ops/g3_fire/20261111_g3_2/fire.log。
+  - 4/4 cells status=ok（dab_725/587/657/517×full_rloop、各 1 輪、requirement_list=true）；model_calls=8、tokens=128923（＜2M 上限）。
+  - hidden_after 全 UNKNOWN（打分流 /srv/vlab scorer；本端未讀 hidden/scorer）；產物 g3_result.json＋cells/*/round_1/answer.txt。
+  - 驗收 exit 0 → G3_2_FIRE_LAUNCH_RECORDED_OK；票 mv done/。
+- r1469（2119-2）：H0 extract 預跑門＝H0_MET 1/4（dab_725 2 確定性 claim；ops/audits/g3_2_h0_prerun_report.json）。
+- r1468（2119-1）：預註冊凍結（manifest＋tasks＋precheck，0 model calls）。
 
 ## 紅線（契約，不改）
 - 無 push（迴圈自動 push auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
@@ -18,11 +16,10 @@
 - 不寫 /srv/vlab/queue；不 poll CI；不跑 full pytest。
 
 ## 未完成（≤3，交接下輪）
-1. **G3.2 發射＝待人類核准**：H0 已過（MET）；核准後 approval 門 fail-closed＋`python3 -m vacant_network.reqloop.g3 --manifest ops/reqloop/g3_2/manifest.json`（full_rloop×4 格、300s/輪、2M tok 撞額停）。
+1. **G3.2 結果分報＝待新票**：讀 g3_result.json＋各輪 claim 裁決→逐 claim 分報（PASS/FAIL/UNKNOWN）＋成本；同批不重發（非獨立樣本）。
 2. G3.1 發射（1315-2）：仍待人類核准（H2_0_REFUTED 有效；重發＝人類裁決）。
 3. 1215-1（hidden_file_in_workspace 收緊）：worker 在進；收斂後下輪審查＋升上→freeze_check 12/12。
 
 ## 下輪入口（≤3）
-- 人類裁決 G3.2（發／停）→照裁決走；doing/ 現空，無待辦票。
-- 守衛：g3 四檔＋anchors＋freeze_check（除 1215-1 項外）全綠；新工具 selftest 保持 OK。
-（MEMORY 上限 6 KB、NOW 上限 3 KB）
+- G3.2 結果分報（未完成 #1）；不碰 g3_1/g3_fire_20261111* 既有產物。
+- 守衛：g3 四檔＋anchors＋freeze_check（除 1215-1 項）全綠；新工具 selftest 保持 OK。
