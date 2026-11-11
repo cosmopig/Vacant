@@ -1,15 +1,19 @@
 # NOW.md — 現況（每輪更新，≤3KB）
 
-## 狀態（2026-11-11 r1436）
-- 唯一工單 P20261111_0840-1-g3-refire-c-prompt-override-and-maxcalls（vq-kax，AMEND-3 已批）：
-  ①prompt 無工具覆寫（r1435 完成：NO_TOOL_OVERRIDE 頂部、round1+修復輪、2 測）②max_calls
-  重測（本輪完成：PI_SESSION_CALL_CAP＝8（實測 pi 單 session max，fire b dab_144 raw）＋
-  max_calls_bound 逐臂上界，c 計畫 48≥31＝fire b 實際；3 測負控先紅後綠；pin 解凍記錄）
-  ③c 重發已發射（systemd vacant-g3-fire-20261111c、out＝~/dev/ops/g3_fire_20261111c、
-  approval＝AMEND3、單發不重試）→結果下輪確認。
-- CI 兩分支紅燈（freeze_check 4 案）根因：r1435 in-scope 改動未同步 worker/argon 工作樹＋
-  NOW.md 紅線契約行缺（r1434 覆寫）＋STATE 鏡像尾行過時——本輪三項皆修（worktree 同步＋
-  紅線行自磁碟實算恢復＋鏡像更新）。
+## 狀態（2026-11-11 r1437）
+- G3 重發 c 審計摘要收案（P20261111_0914-1→done，commit ba665989f）：12/12 格跑完
+  （stop_reason=None、max_calls 修正生效、無 not_run）；native_pi 2ok/2err（600s timeout
+  infra）、reqlist_only 4/4 ok、full_rloop 4/4 ok（content_reverify 4/4×1 輪、
+  final_verdict 全 UNKNOWN、claims 全 None）；tokens 383921＝355734+28187
+  （known_usages=14、缺值 UNKNOWN 不填 0）；hidden_after 12/12 UNKNOWN。
+- G3.1：H1 機制可達性達門檻（4/4 格完成≥1 輪 content_reverify；a+b 合計 0/8 輪）；
+  H2 未測得（final_verdict/claims 全 UNKNOWN/None）→裁決歸人類（依預註冊）；
+  10 格 ok 有 answer 待 hidden 打分（人類/vlab 側）。
+- 簿記：修 r1436 中斷殘留——bk_state 鏡像（443608B 非 canonical 前綴）依約定重建
+  （標題＋Current State＋最新條目）、bk_now 鏡像 cp；三分支同步：argon 全同步
+  （簿記 4＋in-scope 9、純落後無自有改動）、worker 僅簿記 4 檔（labd WIP 2 檔＝
+  worker loop 自有、不碰）→freeze_check 11/12、唯一紅＝diff_worker（2 in-scope
+  file(s) differ＝worker loop WIP，非本輪遺漏）。
 
 ## 紅線（契約，不改）
 - 無 push（loop 自推 auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
@@ -17,21 +21,15 @@
 - /srv/eval/hidden/、scorer.py 不讀；缺值 UNKNOWN 不填 0；hidden_after＝UNKNOWN；同批重發非獨立樣本、不宣稱臂 superiority。
 - /srv/vlab/queue 不寫；無 poll CI；無 full pytest。
 
-## 本輪工作（r1436）
-- g3.py：舊 max_calls 式把「一次 pi session」當 1 call（PiChannel.call 內部 N 通 API
-  呼叫、QuotaGuard 累計 RoundUsage.calls）→4 題×3 臂 28＜fire b 實際 31→假停
-  （2 格 not_run/quota）。新 max_calls_bound＝n＋Σ臂 n×rounds×（pi 8｜1）；仍嚴上界、
-  撞額＝停不重試；無 pi 臂每輪＝1 call（既有形狀）；預算欄位不動。
-- 測試 29 passed（含 3 新測）；GUARD_CONTENT_PIN r1436 解凍記錄（g3.py
-  5a94c167…／test_g3 3ed315e3…，磁碟實算）。
-- c fire 10:10 UTC 發射；本輪 0 模型呼叫（模型呼叫全經 fire）。
-
 ## 未完成（≤3，下輪接手）
-1. 確認 c fire 結果（g3_fire_20261111c/g3_result.json；12 格皆 ok/error/not_run 之一；
-   若再撞 quota/turn_limit＝infra 歸因、不重試）→ticket 收案兩行＋三分支同步。
-2. （若 c 仍 0/4 content_reverify）H1 已證偽→停、升級人類（G3.1 預註冊）。
-3. worker/argon 同步 commit 已建、push 由 loop/人類（無 push 紅線）。
+1. G3.1 H1/H2 裁決：c 4/4 格完成≥1 輪 content_reverify 但 final_verdict 全 UNKNOWN、
+   claims verdict 全 None——H2（缺口格 fixed≥1 且 regressed=0）未測得；裁決歸人類
+   （依預註冊升級）。
+2. hidden 打分：10 格 ok 有 answer（native_pi 2＋reqlist_only 4＋full_rloop 4），
+   人類/vlab 側。
+3. worker/argon 同步 commit 本輪已建；push 由 loop/人類（無 push 紅線）；CI 重跑
+   驗證不 poll。
 
 ## 下輪入口（≤3）
-- 讀 doing/ 工單→`systemctl --user status vacant-g3-fire-20261111c`→結果 JSON→收案簿記。
+- bd ready（vq-kax 狀態＋人類裁決）→下一張工單；doing/ 現空。
 - 守衛：g3 3 檔＋anchors＋freeze_check（12 項）須全綠（含 now_redline、diff_worker/argon）。
