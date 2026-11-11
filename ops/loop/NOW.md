@@ -10,8 +10,10 @@
   H2 未測得（final_verdict/claims 全 UNKNOWN/None）→裁決歸人類（依預註冊）；
   10 格 ok 有 answer 待 hidden 打分（人類/vlab 側）。
 - 簿記：修 r1436 中斷殘留——bk_state 鏡像（443608B 非 canonical 前綴）依約定重建
-  （標題＋Current State＋最新條目）、bk_now 鏡像 cp、worker/argon worktree 同步
-  （in-scope diff 0×2）、freeze_check 12/12 FROZEN_STATE_OK。
+  （標題＋Current State＋最新條目）、bk_now 鏡像 cp；三分支同步：argon 全同步
+  （簿記 4＋in-scope 9、純落後無自有改動）、worker 僅簿記 4 檔（labd WIP 2 檔＝
+  worker loop 自有、不碰）→freeze_check 11/12、唯一紅＝diff_worker（2 in-scope
+  file(s) differ＝worker loop WIP，非本輪遺漏）。
 
 ## 紅線（契約，不改）
 - 無 push（loop 自推 auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
