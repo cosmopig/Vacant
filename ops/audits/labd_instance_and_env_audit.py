@@ -59,46 +59,61 @@ def audit_run_dir(run_path: Path) -> Dict[str, Any]:
         "missing_cell_json": missing_cell_json
     }
 
+def audit_e016(run_path: Path) -> Dict[str, Any]:
+    """
+    Specific audit for experiment e016 to verify environment leak fixes.
+    Checks both negative and positive controls as defined in R20261111_1843-2.
+    """
+    # Verify negative control: e016 attempt-1 (should have leaks)
+    neg_path = Path("/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak")
+    # Positive control: e016 attempt-2 (should be clean)
+    pos_path = Path("/srv/vlab/runs/e016_failed_step_ablation")
+
+    neg_results = audit_run_dir(neg_path)
+    pos_results = audit_run_dir(pos_path)
+
+    # Verify negative control: 14 cells, 11 violations, 3 clean
+    if (neg_results["total_cells"] == 14 and 
+        len(neg_results["violations"]) == 11 and 
+        len(neg_results["clean_cells"]) == 3):# Note: This matches the ticket's specific counts for attempt-1
+        print("Negative control passed.")
+    else:
+        print(f"Negative control failed: {neg_results}")
+        return {"status": "FAIL", "negative_control": neg_results, "positive_control": pos_results}
+
+    # Verify positive control: 102 cells, 0 violations
+    if (pos_results["total_cells"] == 102 and 
+        len(pos_results["violations"]) == 0):
+        print("Positive control passed.")
+    else:
+        print(f"Positive control failed: {pos_results}")
+        return {"status": "FAIL", "negative_control": neg_results, "positive_control": pos_results}
+
+    output_path = Path("ops/audits/e016_envleak_resolution_audit.json")
+    with open(output_path, "w") as f:
+        json.dump({
+            "negative_control": neg_results,
+            "positive_control": pos_results
+        }, f, indent=2)
+    
+    print(f"Audit results written to {output_path}")
+    return {"status": "PASS", "negative_control": neg_results, "positive_control": pos_results}
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--audit-e016", action="store_true")
     args = parser.parse_args()
 
-        # Verify negative control: e016 attempt-1
-        neg_path = Path("/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak")
-        # Positive control: e016 attempt-2
-        pos_path = Path("/srv/vlab/runs/e016_failed_step_ablation")
-
-        neg_results = audit_run_dir(neg_path)
-        pos_results = audit_run_dir(pos_path)
-
-        # Verify negative control: 14 cells, 11 violations, 3 clean
-        if (neg_results["total_cells"] == 14 and 
-            len(neg_results["violations"]) == 11 and 
-            len(neg_results["clean_cells"]) == 3):
-            print("Negative control passed.")
+    if args.audit_e016:
+        result = audit_e016(Path(""))
+        if result["status"] == "PASS":
+            print("VERDICT: E016_ENVLEAK_AUDIT_OK")
+            exit(0)
         else:
-            print(f"Negative control failed: {neg_results}")
             exit(1)
-
-        # Verify positive control: 102 cells, 0 violations
-        if (pos_results["total_cells"] == 102 and 
-            len(pos_results["violations"]) == 0):
-            print("Positive control passed.")
-        else:
-            print(f"Positive control failed: {pos_results}")
-            exit(1)
-
-        output_path = Path("ops/audits/e016_envleak_resolution_audit.json")
-        with open(output_path, "w") as f:
-            json.dump({
-                "negative_control": neg_results,
-                "positive_control": pos_results
-            }, f, indent=2)
-        
-        print(f"Audit results written to {output_path}")
-        print("VERDICT: E016_ENVLEAK_AUDIT_OK")
+    else:
+        parser.print_help()
 
 if __name__ == "__main__":
     main()
