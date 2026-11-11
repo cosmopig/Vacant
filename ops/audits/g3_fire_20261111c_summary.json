@@ -1,0 +1,677 @@
+{
+  "schema": "vacant.audit/g3_fire_20261111_summary/1",
+  "generated_by": "ops/audits/g3_fire_20261111_summary.py",
+  "identity": {
+    "result_file": "/home/user1/dev/ops/g3_fire_20261111c/g3_result.json",
+    "result_bytes": 20660,
+    "result_sha256": "bd727b930f8e1be55d03f17cfcf39f8fe83bb7368cfa2f162bbfb324314d1cd9",
+    "result_file_mtime_utc": "2026-11-11T10:49:28+00:00",
+    "approval_file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
+    "approval_sha256": "610c7640347296c43d986b4adc59096ad3fe4967bbf560b727d8f97755ea0709",
+    "approval_approved": true,
+    "approval_epic": "vq-1zf",
+    "approval_inline_in_result": {
+      "approved": true,
+      "epic": "vq-1zf",
+      "by": "人類擁有者（2026-11-11 常設裁決「讓他可以真發射他想做就做」；由外部 agent 代為落檔，延續 g3_vq-1zf_fire_20261111.json）"
+    }
+  },
+  "fire": {
+    "fired_at": "2026-11-11T10:10:31Z",
+    "ticket": "vq-1zf（G3 未見任務完整對照；審查指示 #5「G3 準備工作」2026-11-08；r1236 交付發射前置門）",
+    "out_dir": "/home/user1/dev/ops/g3_fire_20261111c",
+    "stop_reason": null
+  },
+  "scope": "4 未見題（dab_129/144/176/216）× 3 臂（native_pi/reqlist_only/full_rloop）＝12 格；同批重跑須簿記如實標記、不得當獨立樣本",
+  "models": {
+    "extract": "glm53",
+    "answer_glm_arms": "deepseek41",
+    "native_pi_provider": "lms1003qwen",
+    "native_pi_model": "qwen/qwen3.8-27b"
+  },
+  "tasks": [
+    {
+      "task_id": "dab_129",
+      "input_sha256": "63c8b794a8ec08ee6774c0daa484e75e3d44d0d6ad810c0d1e4a0a49567c9276",
+      "required_answer_names": [
+        "mean_fare",
+        "std_dev_fare"
+      ],
+      "n_requirements": 7,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6908,
+          "wall_ms": 10306
+        }
+      ]
+    },
+    {
+      "task_id": "dab_144",
+      "input_sha256": "7913a2cd3004b0156ec1564718ea2b8c7c322a69f6bbe33b05cec997387f4856",
+      "required_answer_names": [
+        "dist_dem",
+        "dist_gop",
+        "mean_dem",
+        "mean_gop",
+        "std_dev_dem",
+        "std_dev_gop"
+      ],
+      "n_requirements": 9,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7620,
+          "wall_ms": 50954
+        }
+      ]
+    },
+    {
+      "task_id": "dab_176",
+      "input_sha256": "e8e54cf0a8ff58a21601bee1272071bb0eeb5001008dbb4bbeb3400e3244131a",
+      "required_answer_names": [
+        "median_age"
+      ],
+      "n_requirements": 5,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6944,
+          "wall_ms": 33038
+        }
+      ]
+    },
+    {
+      "task_id": "dab_216",
+      "input_sha256": "d69ebc8525ad491948af507963b55d5ca53c61eaa2464088f80ed011411055b6",
+      "required_answer_names": [
+        "mean",
+        "std_dev"
+      ],
+      "n_requirements": 5,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6715,
+          "wall_ms": 16690
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "task": "dab_129",
+      "arm": "native_pi",
+      "status": "error",
+      "rounds": 1,
+      "error": "pi timed out after 600s",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_129",
+      "arm": "reqlist_only",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_fare[32.20]\n@std_dev_fare[41.42]\n",
+      "answer_sha256": "80347135d1c3773d4ffcf8c63eb2c906230b7a4b2a2ec6ec5363b214fbca21d2",
+      "tokens": 36932,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_129",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_fare[32.20] @std_dev_fare[41.42]\n",
+      "answer_sha256": "ef9a4f03662e9bf1f669adb2d568c33902a8c5c5035297b05e1d3fead6b1aa66",
+      "tokens": 36933,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [
+          {
+            "round": 1,
+            "verdict": "UNKNOWN",
+            "gap_reason": null,
+            "claims": [
+              {
+                "id": "req-1",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-2",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-3",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-4",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-5",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "tag_format",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-6",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "tag_format",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-7",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              }
+            ]
+          }
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_dem[0.32]\n@mean_gop[0.64]\n@std_dev_dem[0.153]\n@std_dev_gop[0.156]\n@dist_dem[Not Normal]\n@dist_gop[Not Normal]\n",
+      "answer_sha256": "e8169290986b646482ff83e001353f4c6f2fe531f60c8ee7c67802dafe441916",
+      "tokens": 45057,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "reqlist_only",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_dem[0.34]\n@mean_gop[0.61]\n@std_dev_dem[0.164]\n@std_dev_gop[0.146]\n@dist_dem[Not Normal]\n@dist_gop[Not Normal]\n",
+      "answer_sha256": "14dbd1d6180287459863d90b2bb4e0d5054195ff6f2eb4bb4852ea3b4cd580b3",
+      "tokens": 39123,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_dem[45.94]\n@mean_gop[52.02]\n@std_dev_dem[18.756]\n@std_dev_gop[16.836]\n@dist_dem[Not Normal]\n@dist_gop[Not Normal]\n",
+      "answer_sha256": "57a4e462397c8ae2f7937ebe1778c01566777946a26e31ae917ee0481ccafaf4",
+      "tokens": 39126,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [
+          {
+            "round": 1,
+            "verdict": "UNKNOWN",
+            "gap_reason": null,
+            "claims": [
+              {
+                "id": "req_mean_dem",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_mean_gop",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_std_dev_dem",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_std_dev_gop",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_dist_dem",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_dist_gop",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_rounding_mean",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_rounding_stddev",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req_anderson_darling_alpha",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              }
+            ]
+          }
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@median_age[31.5]\n",
+      "answer_sha256": "0dc8a6eade8e249f477e594efbb15ee94a2313c2c1fb15dd9fe09ed50272d0a2",
+      "tokens": 20207,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "reqlist_only",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@median_age[35.00]\n",
+      "answer_sha256": "8085cdfe44496143d7fce206ede0893fee9bf1ff5b363300d549fb99e291a937",
+      "tokens": 36717,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@median_age[35.5]\n",
+      "answer_sha256": "81c7a0d3c5ebbbe50db2124e5a9b7cf00db91ead94466041263f3d72554e8bad",
+      "tokens": 36717,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [
+          {
+            "round": 1,
+            "verdict": "UNKNOWN",
+            "gap_reason": null,
+            "claims": [
+              {
+                "id": "req-1",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-2",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "rowset_filter",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-3",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "rowset_filter",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-4",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "tag_format",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-5",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              }
+            ]
+          }
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "native_pi",
+      "status": "error",
+      "rounds": 1,
+      "error": "pi timed out after 600s",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "reqlist_only",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean[5.36]\n@std_dev[1.90]\n",
+      "answer_sha256": "148f1c59d6c8426ac04bf86b155532c77ed9da81d32d36dcf6b673e4d182c4a6",
+      "tokens": 32460,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean[5.60]\n@std_dev[1.96]\n",
+      "answer_sha256": "0afd2ee1a32fe2506e9629823b52303fc7d16f10298629f74fb5f10c8fdb7899",
+      "tokens": 32462,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [
+          {
+            "round": 1,
+            "verdict": "UNKNOWN",
+            "gap_reason": null,
+            "claims": [
+              {
+                "id": "req-mean",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "kv_recomputed",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-std-dev",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "kv_recomputed",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-answer-format",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "answer_kv",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-rounding",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "tag_format",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              },
+              {
+                "id": "req-no-outliers",
+                "status": "UNKNOWN",
+                "required": true,
+                "verifier": "kv_recomputed",
+                "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+                "evidence": {
+                  "unverified": true
+                }
+              }
+            ]
+          }
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null,
+        "error": null
+      }
+    }
+  ],
+  "per_arm": {
+    "native_pi": {
+      "cells": 4,
+      "ok": 2,
+      "error": 2,
+      "errors": [
+        "pi timed out after 600s"
+      ],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    },
+    "reqlist_only": {
+      "cells": 4,
+      "ok": 4,
+      "error": 0,
+      "errors": [],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    },
+    "full_rloop": {
+      "cells": 4,
+      "ok": 4,
+      "error": 0,
+      "errors": [],
+      "content_reverify_final_verdicts": [
+        "UNKNOWN"
+      ]
+    }
+  },
+  "totals": {
+    "cells": 12,
+    "cells_run": 12,
+    "model_calls": 27,
+    "tokens": 383921,
+    "tokens_missing": false
+  },
+  "token_accounting": {
+    "cell_tokens_known": 355734,
+    "extract_tokens_known": 28187,
+    "known_total": 383921,
+    "known_usages": 14,
+    "note": "已知 usage：cells 10/12 格、extract 4 次（known_usages=14）；缺 usage 格 tokens=None（UNKNOWN），不填 0；非空守衛：0 已知 usage 不得判 OK"
+  },
+  "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
+  "failures": [
+    {
+      "cells": 2,
+      "arms": [
+        "native_pi"
+      ],
+      "error": "pi timed out after 600s",
+      "harness_behavior": "停、不重試（quota_fail_closed，spec 內行為）"
+    }
+  ],
+  "scope_note": [
+    "ok 10/12 格 answer 在位、hidden_after 全 UNKNOWN——不自己打分（打分照 /srv/vlab 慣例、人類/vlab 側）",
+    "非 ok 2/12 格（error/not_run）：本批不宣稱任何臂 superiority",
+    "單 1 rep、本地模型（H-12）、不遷移到其他模型/harness；同批重跑須簿記如實標記、不得當獨立樣本",
+    "stop_reason=None；quota.known_tokens=383921"
+  ]
+}
