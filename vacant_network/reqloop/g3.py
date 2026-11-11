@@ -21,9 +21,10 @@ g3gate（`vacant_network/reqloop/g3gate.py`）只核「發射前置」：選題/
   無核准→RC 2、0 模型呼叫（與 g3gate 同 fail-closed）。
 - 臂名實相符（conformance）：ARM_WIRED（實作接線）對照 ARM_REQUIRED（預註冊
   arm_defs 要求）逐臂核對；任何一臂不符→RC 3（同義 RC_APPROVED_NOT_WIRED）、
-  0 模型呼叫——核准過了也不發。native_pi 預註冊要求原生 pi，而 glm 通道
-  （單回合、無工具）接不了 pi_agent，因此三臂計畫目前**不能發射**：要嘛接
-  線、要嘛人類修預註冊改名（見 arm_conformance 訊息），agent 不得自改。
+  0 模型呼叫——核准過了也不發。AMEND-1（2026-11-11 人類裁決）：native_pi
+  接真 pi 工具迴圈＋本地模型（PiChannel；manifest budget 如實宣告
+  'glm+local_pi'＋pi_provider/pi_model），不再是 glm 通道＋提示詞自檢的
+  名實不符版本；run_g3 對 pi 臂要求注入 pi_channel，缺注入＝拒發。
 - full_rloop 的 localized 修復與重驗＝真的接了 checks.run_requirement_checks
   （程式重算每輪重驗）＋build_repair_feedback（FAIL-only 反饋，不含重算期望
   值）＋repair.diff_results（FAIL→PASS／退步入帳）；不再是只有答案項名稱的
@@ -47,6 +48,7 @@ import time
 
 from vacant_network.reqloop import extract as _extract
 from vacant_network.reqloop import g3gate
+from vacant_network.reqloop import repair as _repair
 from vacant_network.reqloop.requirements import RequirementSet
 from vacant_network.reqloop.checks import run_requirement_checks
 from vacant_network.reqloop.repair import diff_results as _diff_results
@@ -70,10 +72,10 @@ DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 DEFAULT_STATE_DIR = pathlib.Path(os.environ.get("VACANT_OPS_STATE", str(pathlib.Path.home() / "dev" / "ops" / "state")))
 
 # 三臂（vq-1zf 預註冊 ops/reqloop/g3_gate/manifest.json arm_defs，2026-11-08 凍結）：
-#   native_pi    預註冊＝「原生 pi：再檢查修正一次」（一輪可見回饋，無需求清單、無
-#                 修復循環）。本管線的模型通道凍結為 glm CLI（單回合、無工具），
-#                 接不了 pi_agent（pi_build/run_agent 工具迴圈）→ ARM_WIRED=False，
-#                 arm_conformance 拒發（RC 3、0 模型呼叫）直到接線或人類修預註冊。
+#   native_pi    「原生 pi：再檢查修正一次」（一輪可見回饋，無需求清單、無修復
+#                 循環）。AMEND-1（2026-11-11 人類裁決）：接真 pi 工具迴圈＋
+#                 本地模型（PiChannel；provider/model 由 manifest budget 宣告），
+#                 不再是「glm 通道＋提示詞自檢」的名實不符版本。
 #   reqlist_only 作答模型另得 extract.py 擷取的需求清單；無 localized 修復、無重驗。
 #   full_rloop   需求清單＋每輪 checks.run_requirement_checks 程式重算（非模型自評）：
 #                 必需條目有已確認缺口（FAIL／必要答案項缺失）才花下一輪；修復反饋
@@ -82,6 +84,7 @@ DEFAULT_STATE_DIR = pathlib.Path(os.environ.get("VACANT_OPS_STATE", str(pathlib.
 #                 記錄（FAIL→PASS／任何退步一律入帳）。UNKNOWN 不是缺口、也不是通過。
 ARM_SPECS: dict[str, dict] = {
     "native_pi": {
+        "pi_agent": True,
         "requirement_list": False,
         "max_rounds": 1,
         "localized_repair": False,
@@ -122,11 +125,14 @@ ARM_SPECS: dict[str, dict] = {
 # 要求。兩者不符 → 拒發（RC 3、0 模型呼叫）：發射跑完的數據會掛著名實不符的
 # 臂名被引用，比不發射更糟。
 ARM_WIRED: dict[str, dict[str, bool]] = {
-    # glm CLI 凍結為唯一模型入口（單回合、無工具；g3gate.check_budget 釘死
-    # model_entry='glm'）→ 原生 pi 執行在此管線沒有接線。要接線就得放寬凍結
-    # 預算的 model_entry；要保留 glm 入口就得由人類修預註冊（改名，重核准）。
+    # AMEND-1（2026-11-11 人類裁決）：native_pi 接真 pi 工具迴圈＋本地模型
+    # （PiChannel：pi_build/run_agent－prepare_workspace/parse_usage_from_log
+    # 全部復用 G2 的既有機制；provider/model 由 manifest budget 宣告）。
+    # 行為由 tests/test_reqloop_g3_conformance.py 的 PiChannel 測試背書
+    # （fake build/run 注入：answer.txt 讀回、usage 解析、rc!=0/timeout/
+    # 缺交付物→G3CallError）。
     "native_pi": {
-        "pi_agent": False,          # 預註冊要求原生 pi；未接線
+        "pi_agent": True,           # PiChannel（pi 工具迴圈、本地模型）
         "requirement_list": False,
         "localized_repair": False,
         "content_reverify": False,
@@ -435,6 +441,124 @@ class GlmChannel(Channel):
         return proc.stdout, RoundUsage(calls=1, tokens=tokens, wall_ms=wall_ms)
 
 
+class PiChannel(Channel):
+    """native_pi 的真通道（AMEND-1，2026-11-11）：pi 工具迴圈＋本地模型。
+
+    一個 call＝一次 pi session：在任務輸入複本（prepare_workspace：G2 既有機制）
+    裡跑 agent、讀回 answer.txt 作為本輪草稿。作答的「self-check 一輪可見回饋」
+    由 pi 原生 agent 迴圈完成——臂定義就是 pi 的原生行為，不是提示詞自檢。
+
+    通道隔離：glm 臂走 GlmChannel（遠端／額度），pi 臂走本通道（本地模型，同
+    QuotaGuard 日額度界）。provider/model 由 manifest budget（pi_provider/
+    pi_model，AMEND-1 如實宣告）或 CLI 參數指定；本類不持金鑰。
+
+    Usage：repair.parse_usage_from_log 讀 agent stdout raw usage（input+output+
+    total、API 呼叫數）；缺值＝UNKNOWN（None），絕不填 0。build/run 可注入
+    （測試用假通道；簽名與 adapters.agents.pi_build／adapters.run.run_agent 同）。
+
+    錯誤語義（與 GlmChannel 同口徑）：pi 非零退出／逾時／spawn 失敗／agent
+    沒寫 answer.txt → G3CallError（該格 error、不重試、管線繼續）。
+    """
+
+    def __init__(self, base: str | pathlib.Path, *,
+                 out_root: str | pathlib.Path,
+                 provider: str = "lms1003qwen", model: str = "qwen/qwen3.8-27b",
+                 include_dirs: tuple[str, ...] = ("data",),
+                 build=None, run=None,
+                 deliverable: str = DEFAULT_DELIVERABLE) -> None:
+        self.base = pathlib.Path(base)
+        self.out_root = pathlib.Path(out_root)
+        self.provider = provider
+        self.model = model
+        self.include_dirs = tuple(include_dirs)
+        self.deliverable = deliverable
+        self._build_fn = build
+        self._run_fn = run
+
+    def _build(self, prompt: str, ws: pathlib.Path):
+        if self._build_fn is not None:
+            return self._build_fn(prompt, ws)
+        # 預設：真 pi（同 repair._default_build——pi_build＋pin_agent_python，
+        # pin 讓 agent 的裸 python 與驗證重算同一個直譯器）
+        from vacant_network.adapters.agents import pi_build
+        extra = ["--provider", self.provider, "--model", self.model]
+        return _repair.pin_agent_python(pi_build(prompt, ws, extra=extra))
+
+    def _run(self, launch, *, workspace: pathlib.Path, timeout_s: float,
+             log_dir: pathlib.Path) -> dict:
+        if self._run_fn is not None:
+            return self._run_fn(launch, workspace=workspace, timeout_s=timeout_s,
+                                log_dir=log_dir)
+        from vacant_network.adapters.run import run_agent
+        return run_agent(launch, workspace=workspace, timeout_s=timeout_s,
+                        log_dir=log_dir)
+
+    def call(self, *, prompt: str, model: str, purpose: str,
+             timeout_s: float) -> tuple[str, RoundUsage]:
+        m = re.match(r"G3 (\S+?)/(\S+) r(\d+)$", purpose)
+        if not m:
+            raise G3CallError(f"native pi purpose 格式未預期：{purpose!r}")
+        tid, arm, round_no = m.group(1), m.group(2), int(m.group(3))
+        task_ws = self.base / "tasks" / tid / "workspace"
+        if not task_ws.is_dir():
+            raise G3CallError(f"任務工作目錄缺失：{task_ws}")
+        cell_root = self.out_root / "cells" / f"{tid}__{arm}"
+        cell_root.mkdir(parents=True, exist_ok=True)
+        # 工作區＝G2 既有機制 prepare_workspace：task 輸入複本（goal/contract/
+        # data/）＋逐輪快照（保留供審計；原任務檔不被改動）。pi 臂第 1 輪就
+        # 自己作答、沒有草稿來源 → draft_dir 用不存在的哨兵路徑。
+        ws = _repair.prepare_workspace(
+            task_ws, cell_root / "_no_draft_",
+            out_root=cell_root, round_n=round_no,
+            include_dirs=self.include_dirs)
+        log_dir = cell_root / f"round_{round_no}_agent"
+        launch = self._build(prompt, ws)
+        ret = self._run(launch, workspace=ws, timeout_s=timeout_s,
+                        log_dir=log_dir)
+        if ret.get("spawn_error"):
+            raise G3CallError(f"pi spawn 失敗：{ret.get('spawn_error')}")
+        if ret.get("budget_exceeded"):
+            raise G3CallError(
+                f"pi 預算超限被殺（budget_exceeded={ret.get('budget_exceeded')}"
+                f"；observed tool_calls={ret.get('observed_tool_calls')}, "
+                f"tokens={ret.get('observed_tokens')}）")
+        if ret.get("timed_out"):
+            raise G3CallError(f"pi timed out after {timeout_s:.0f}s")
+        rc = ret.get("rc")
+        if rc != 0:
+            raise G3CallError(f"pi rc={rc}")
+        answer = ws / self.deliverable
+        if not answer.is_file():
+            raise G3CallError(
+                f"native pi 未產出交付物 {self.deliverable}（工作區：{ws}）")
+        text = answer.read_text(encoding="utf-8", errors="replace")
+        usage = _repair.parse_usage_from_log(ret.get("stdout_log", ""))
+        tokens = usage["total"] if usage else None      # 缺值＝UNKNOWN，不填 0
+        calls = usage["calls"] if usage else 1          # 沒量到 usage＝session 計 1
+        wall = ret.get("wall_ms")
+        return text, RoundUsage(calls=calls, tokens=tokens,
+                                wall_ms=wall if isinstance(wall, int) else None)
+
+
+class _ArmChannelRouter(Channel):
+    """依 purpose 的臂名分流：pi 臂→PiChannel（本地模型），其他（glm 作答
+    臂／擷取）→GlmChannel。兩個入口共用同一個 QuotaGuard（同一日額度界，
+    AMEND-1 的 model_entry='glm+local_pi' 如實對應這個拓撲）。"""
+
+    def __init__(self, channel: Channel, pi_channel: Channel) -> None:
+        self.channel = channel
+        self.pi_channel = pi_channel
+
+    def call(self, *, prompt: str, model: str, purpose: str,
+             timeout_s: float) -> tuple[str, RoundUsage]:
+        m = re.match(r"G3 \S+?/(\S+) r\d+$", purpose)
+        if m and ARM_SPECS.get(m.group(1), {}).get("pi_agent"):
+            return self.pi_channel.call(prompt=prompt, model=model,
+                                        purpose=purpose, timeout_s=timeout_s)
+        return self.channel.call(prompt=prompt, model=model,
+                                 purpose=purpose, timeout_s=timeout_s)
+
+
 class QuotaGuard:
     """日額度 fail-closed 護欄（11/07「撞 2M/日額度即停、不得重試」）：
     呼叫前已知 tokens ≥ cap → 直接 G3QuotaError（0 呼叫）；呼叫後累計。
@@ -611,6 +735,23 @@ def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
     return "\n\n".join(parts) + "\n"
 
 
+def build_pi_cell_prompt(task: dict, spec: dict) -> str:
+    """native_pi 臂的 prompt：工作區裡有真檔案（prepare_workspace 複本），
+    pi 用工具自讀——不內嵌 64KB 資料預覽（截斷反而妨礙工具迴圈）。
+
+    臂段指令與其他臂同源（ARM_SPECS['instruction']）＝臂間唯一差異段；
+    任務「輸入」逐字＝凍結 instruction.txt（不是管線自撰）。
+    """
+    parts = [
+        task["instruction"].strip(),
+        "【本臂要求】",
+        spec["instruction"],
+        "【輸出】",
+        "只把最終答案項寫進 answer.txt（contract 格式），每項一行，不寫其他說明。",
+    ]
+    return "\n\n".join(parts) + "\n"
+
+
 # ── 結果與總量（缺值 UNKNOWN 絕不填 0）────────────────────────────────
 
 
@@ -661,7 +802,7 @@ def write_result(out_root: pathlib.Path, result: dict) -> pathlib.Path:
 
 
 def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
-           channel: Channel, approval: dict,
+           channel: Channel, pi_channel: Channel | None = None, approval: dict,
            answer_model: str = DEFAULT_ANSWER_MODEL,
            extract_model: str = DEFAULT_EXTRACT_MODEL) -> dict:
     """三臂×N 格發射主體。返回結果 dict（write_result 落 g3_result.json）。
@@ -669,8 +810,10 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
     門（順序即優先級）：
       1) verify_frozen＋check_budget（完整性先於核准判定，篡改→G3Plan 層 ValueError）
       2) approval_gate（不過→G3NotApproved，0 模型呼叫）
-      3) 每 task：需求清單擷取一次（供 reqlist_only/full_rloop 兩臂共用＝同資料）
-      4) 每格逐輪：QuotaGuard 撞額→停、不重試；G3CallError→該格 error、管線繼續
+      3) arm_conformance＋pi_channel 注入檢查（不符/缺注入→G3ArmsNotConformant，
+         0 模型呼叫——核准過了也不發）
+      4) 每 task：需求清單擷取一次（供 reqlist_only/full_rloop 兩臂共用＝同資料）
+      5) 每格逐輪：QuotaGuard 撞額→停、不重試；G3CallError→該格 error、管線繼續
     """
     base = pathlib.Path(base)
     out_root = pathlib.Path(out_root)
@@ -689,13 +832,18 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
     ok_arms, arm_problems = arm_conformance(plan)
     if not ok_arms:
         raise G3ArmsNotConformant("；".join(arm_problems))
+    # pi 臂的執行通道必須真的注入（PiChannel 或測試假通道）；缺注入＝拒發
+    needs_pi = any(ARM_WIRED.get(a, {}).get("pi_agent") for a in arm_order)
+    if needs_pi and pi_channel is None:
+        raise G3ArmsNotConformant(
+            "native_pi: pi_agent 已接線（AMEND-1）但 pi_channel 未注入——"
+            "拒發（0 模型呼叫）")
     tasks = [t["task_id"] for t in plan.tasks]
     # 呼叫數後備上限（r1376）：token 用量未知時 token cap 不可測→以呼叫數兜底。
     # 上界＝擷取（每 task 一次）＋每格最多 max_rounds 輪；實際呼叫少於此上界。
     n_tasks = len(plan.tasks)
     max_rounds = max(ARM_SPECS[a]["max_rounds"] for a in arm_order) if arm_order else 0
     max_calls = n_tasks + (len(arm_order) * n_tasks) * max_rounds
-    guard = QuotaGuard(channel, cap, max_calls=max_calls)
 
     result: dict = {
         "schema": SCHEMA_RESULT,
@@ -715,6 +863,10 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
 
     needs_list = any(ARM_SPECS[a]["requirement_list"] for a in arm_order)
     stopped = False
+    # 通道分流（AMEND-1）：pi 臂→PiChannel（本地模型）；其他→glm 通道；
+    # 擷取一律 glm。兩入口同 QuotaGuard（同一日額度界）。
+    guard = QuotaGuard(_ArmChannelRouter(channel,
+                                         pi_channel), cap, max_calls=max_calls)
 
     for t in plan.tasks:
         tid = t["task_id"]
@@ -788,9 +940,13 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
             for round_no in range(1, spec["max_rounds"] + 1):
                 if round_no > 1 and not gap:
                     break  # 上一稿無已確認缺口→不花下一輪（無額外呼叫）
-                prompt = build_cell_prompt(inputs, spec, req_list_text=req_list_text,
-                                           round_no=round_no, missing=missing,
-                                           prev_draft=prev_draft, feedback=feedback)
+                if spec.get("pi_agent"):
+                    # native_pi：pi 在工作區用工具自讀任務檔（不內嵌資料預覽）
+                    prompt = build_pi_cell_prompt(inputs, spec)
+                else:
+                    prompt = build_cell_prompt(inputs, spec, req_list_text=req_list_text,
+                                               round_no=round_no, missing=missing,
+                                               prev_draft=prev_draft, feedback=feedback)
                 rec: dict = {"round": round_no, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
                              "usages": [], "error": None}
                 try:
@@ -874,7 +1030,8 @@ def _print_cell_lines(result: dict) -> None:
         print(f"STOP_REASON {result['stop_reason']}（停、不重試）")
 
 
-def main(argv: list[str] | None = None, *, channel: Channel | None = None) -> int:
+def main(argv: list[str] | None = None, *, channel: Channel | None = None,
+         pi_channel: Channel | None = None) -> int:
     ap = argparse.ArgumentParser(prog="vacant_network.reqloop.g3",
                                  description="G3 發射管線（vq-1zf；核准前禁止發射）")
     ap.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
@@ -954,8 +1111,18 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None) -> in
 
     out_root = pathlib.Path(args.out) if args.out else base / f"fire_{time.strftime('%Y%m%d_%H%M%S')}"
     chan = channel if channel is not None else GlmChannel()
+    # pi 臂的通道（AMEND-1）：預設真 PiChannel——provider/model 讀 manifest
+    # budget（check_budget 已保證 model_entry='glm+local_pi' 時 pi_provider/
+    # pi_model 為非空字串）；測試注入假 pi_channel，真 pi 只在真發射時被 import。
+    pi_chan = pi_channel
+    if pi_chan is None and any(ARM_SPECS.get(a, {}).get("pi_agent") for a in plan.arms):
+        pi_chan = PiChannel(
+            base, out_root=out_root,
+            provider=str(plan.budget.get("pi_provider") or "lms1003qwen"),
+            model=str(plan.budget.get("pi_model") or "qwen/qwen3.8-27b"))
     try:
-        result = run_g3(plan, base, out_root, channel=chan, approval=approval,
+        result = run_g3(plan, base, out_root, channel=chan, pi_channel=pi_chan,
+                        approval=approval,
                         answer_model=args.answer_model, extract_model=args.extract_model)
     except G3NotApproved as e:
         print(f"G3 FIRE NOT APPROVED: {e}——0 模型呼叫（fail-closed）")

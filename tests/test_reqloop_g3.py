@@ -1,10 +1,12 @@
-"""G3 發射管線（vq-1zf.6）：接線＋假通道驗證，全程 0 真模型呼叫。
+"""G3 發射管線（vq-1zf.6＋AMEND-1）：接線＋假通道驗證，全程 0 真模型呼叫。
 
 紅線（本測試即驗收）：
 - 無核准/不合格核准 → RC 2、0 模型呼叫（fail-closed）
-- 臂與預註冊定義不符（native_pi 未接 pi_agent）→ RC 3、0 模型呼叫
+- 臂與預註冊定義不符（pi 臂缺 pi_channel 注入）→ RC 3、0 模型呼叫
   （核准過了也不發——conformance 門；詳見 test_reqloop_g3_conformance.py）
-- 有效核准＋假通道＋兩臂皆接線 → 8 格跑通、hidden_after 全 UNKNOWN
+- AMEND-1（2026-11-11 人類裁決）：native_pi 接真 pi（PiChannel、本地模型
+  lms1003qwen）；有效核准＋假 glm 通道＋假 pi 通道 → 12 格跑通、
+  hidden_after 全 UNKNOWN
 - 成本缺值 → UNKNOWN（None），絕不填 0
 - 撞日額度 → 停、不得重試
 - full_rloop 第 2 輪僅在已確認缺口時才花（無額外呼叫）
@@ -177,73 +179,102 @@ def test_fire_tampered_manifest_rc1_before_approval(tmp_path):
     assert fake.calls == []
 
 
-# ── 發射主體：有效核准＋假通道 ────────────────────────────────────
+# ── 發射主體：有效核准＋假通道（12 格，pi 臂走注入的假 pi 通道）───────
 
 
-def test_frozen_three_arm_plan_refuses_to_fire(tmp_path):
-    """conformance 門（P0）：凍結三臂計畫含 native_pi（未接 pi_agent）→
-    拒發（G3ArmsNotConformant）、0 模型呼叫——核准過了也不發。"""
+class FakePiChannel(g3.Channel):
+    """native_pi 的假 pi 通道：router 依 purpose 臂名分流到此；回齊全答案。"""
+
+    def __init__(self, *, tokens: int | None = 1000) -> None:
+        self.calls: list[dict] = []
+        self.tokens = tokens
+
+    def call(self, *, prompt: str, model: str, purpose: str,
+             timeout_s: float) -> tuple[str, g3.RoundUsage]:
+        self.calls.append({"prompt": prompt, "purpose": purpose, "model": model})
+        tid = purpose.split()[1].split("/")[0]
+        names = g3.required_answer_names(
+            (BASE / "tasks" / tid / "workspace" / "contract.md").read_text(encoding="utf-8"))
+        answer = "\n".join(f"@{n}[1.00]" for n in names) + "\n"
+        return answer, g3.RoundUsage(1, self.tokens, 5)
+
+
+def test_three_arm_plan_refuses_without_pi_channel(tmp_path):
+    """conformance：native_pi 已接線（AMEND-1）但 pi_channel 未注入→
+    拒發（G3ArmsNotConformant）、0 模型呼叫。"""
     fake = FakeChannel(tokens=1000)
+    fake_pi = FakePiChannel()
     with pytest.raises(g3.G3ArmsNotConformant) as ei:
-        g3.run_g3(_plan(), BASE, tmp_path / "o", channel=fake, approval=_approval())
-    assert "native_pi" in str(ei.value) and "pi_agent" in str(ei.value)
-    assert fake.calls == [], "拒發＝0 模型呼叫"
-    # 不落任何結果檔（沒有發射就沒有「跑了一批」的紀錄可誤讀）
-    assert not (tmp_path / "o" / "g3_result.json").is_file()
-    ok, problems = g3.arm_conformance(_plan())
-    assert not ok and any("native_pi" in p for p in problems)
+        g3.run_g3(_plan(), BASE, tmp_path / "o", channel=fake,
+                  approval=_approval())
+    assert "pi_channel" in str(ei.value)
+    assert fake.calls == [] and fake_pi.calls == []
 
 
-def test_fire_two_arm_plan_fake_channel_rc0_8cells(tmp_path):
+def test_fire_valid_approval_fake_channels_rc0_12cells(tmp_path):
     fake = FakeChannel(tokens=1000)
-    plan = _plan_2arms()
+    fake_pi = FakePiChannel(tokens=1000)
+    plan = _plan()
     out = tmp_path / "out"
-    result = g3.run_g3(plan, BASE, out, channel=fake, approval=_approval())
-    # 兩臂 4 題＝8 格全跑（full_rloop 答案齊全且無已確認缺口→1 輪）
-    assert len(result["cells"]) == 8
+    result = g3.run_g3(plan, BASE, out, channel=fake, pi_channel=fake_pi,
+                       approval=_approval())
+    # 三臂 4 題＝12 格全跑（AMEND-1：native_pi 走 pi 通道；其餘臂答案齊全→1 輪）
+    assert len(result["cells"]) == 12
     assert all(c["status"] == "ok" for c in result["cells"])
     assert all(c["hidden_after"] == "UNKNOWN" for c in result["cells"])
-    # 成本：4 擷取 + 8 作答 = 12 calls × 1000 tok
+    # native_pi 4 格都由 pi 通道服務（router 依臂名分流）
+    assert len(fake_pi.calls) == 4
+    assert sorted(c["purpose"].split()[1] for c in fake_pi.calls) == [
+        f"{t['task_id']}/native_pi" for t in plan.tasks]
+    # 成本：4 擷取 + 12 作答 = 16 calls × 1000 tok（glm 與 pi 同額度界）
     t = result["totals"]
-    assert t["model_calls"] == 12
-    assert t["tokens"] == 12000
+    assert t["model_calls"] == 16
+    assert t["tokens"] == 16000
     # 結果落盤
     p = out / "g3_result.json"
     assert p.is_file()
     disk = json.loads(p.read_text(encoding="utf-8"))
     assert disk["schema"] == g3.SCHEMA_RESULT
     assert disk["stop_reason"] is None
-    # content_reverify 全臂在帳上（reqlist_only 未啟用；full_rloop 啟用但
-    # 擷取清單 unverified→verdict UNKNOWN，絕不假 PASS）
+    # content_reverify 全臂在帳上（native_pi/reqlist_only 未啟用；full_rloop
+    # 啟用，擷取清單 unverified→verdict UNKNOWN，絕不假 PASS）
     for c in disk["cells"]:
         assert "content_reverify" in c
-        if c["arm"] == "reqlist_only":
-            assert c["content_reverify"]["enabled"] is False
-        else:
+        if c["arm"] == "full_rloop":
             assert c["content_reverify"]["enabled"] is True
+        else:
+            assert c["content_reverify"]["enabled"] is False
 
 
-def test_arms_same_task_input_and_list_only_for_list_arms(tmp_path):
-    """兩臂同任務＝同輸入；需求清單只進帶清單的臂；任務＋資料段逐字相同。"""
+def test_arms_same_task_input_and_arm_specific_prompt(tmp_path):
+    """三臂同任務＝同輸入 sha；需求清單只進帶清單的臂；pi 臂 prompt 用
+    凍結 instruction（工作區有真檔案，不內嵌資料預覽）。"""
     fake = FakeChannel(tokens=1000)
-    plan = _plan_2arms()
-    result = g3.run_g3(plan, BASE, tmp_path / "o", channel=fake, approval=_approval())
+    fake_pi = FakePiChannel(tokens=1000)
+    plan = _plan()
+    result = g3.run_g3(plan, BASE, tmp_path / "o", channel=fake,
+                        pi_channel=fake_pi, approval=_approval())
     by_task = {}
     for c in result["cells"]:
         by_task.setdefault(c["task"], []).append(c)
     for tid, cells in by_task.items():
-        assert len(cells) == 2
+        assert len(cells) == 3
         shas = {c["input_sha256"] for c in cells}
-        assert len(shas) == 1, "各臂同任務＝同輸入（same_draft_same_budget）"
-    for tid in list(by_task):
+        assert len(shas) == 1, "三臂同任務＝同輸入（same_draft_same_budget）"
         reqlist = [c["prompt"] for c in fake.calls if c["purpose"] == f"G3 {tid}/reqlist_only r1"][0]
         full = [c["prompt"] for c in fake.calls if c["purpose"] == f"G3 {tid}/full_rloop r1"][0]
+        native = [c["prompt"] for c in fake_pi.calls if c["purpose"].startswith(f"G3 {tid}/native_pi")][0]
         assert "【需求清單" in reqlist
         assert "【需求清單" in full
-        # 任務＋資料段兩臂逐字相同（只改臂段）
+        assert "【需求清單" not in native
+        # glm 兩臂的任務＋資料段逐字相同（只改臂段）
         def task_block(p: str) -> str:
             return p.split("【本輪要求】")[0]
         assert task_block(reqlist) == task_block(full)
+        # pi 臂的 prompt 逐字以凍結 instruction.txt 為本（不自撰任務）
+        frozen_instr = (BASE / "tasks" / tid / "instruction.txt").read_text(encoding="utf-8").strip()
+        assert frozen_instr in native
+        assert "data_preview" not in native and "--- goal.md ---" not in native
 
 
 def test_prompts_contain_no_hidden_or_scorer(tmp_path):

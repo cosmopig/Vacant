@@ -8,7 +8,8 @@ G3「未見任務完整對照」（epic vq-1zf）的**發射前置門**——離
 2. 任務輸入凍結副本在 repo 內（ops/reqloop/g3_gate/tasks/），verify_frozen 逐檔核 sha256
    ＋選題一致性——篡改/缺檔即 fail（同 G2Manifest.verify_frozen 的門）。
 3. 預算門：≤12 格（3 臂×4 題）、300s/輪、日 ≤2,000,000 tok 撞額停不重試（fail-closed）、
-   模型呼叫唯一入口＝glm CLI、無硬 token 上限→成本從 raw usage 讀、缺值＝UNKNOWN 絕不填 0。
+   模型入口如實宣告＝'glm' 或 'glm+local_pi'（AMEND-1 2026-11-11：native_pi 接真
+   pi 本地模型）、無硬 token 上限→成本從 raw usage 讀、缺值＝UNKNOWN 絕不填 0。
 4. 核准門 fail-closed：人類明確核准文件（approved=true、epic=vq-1zf、by=核准者）；
    無核准信號→RC 2、0 模型呼叫。核准前禁止任何發射。
 
@@ -39,13 +40,18 @@ MAX_DAILY_TOKEN_CAP = 2_000_000
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 
-# 發射前置的最低預算形（fail-closed 底線；manifest 可加嚴、不可放寬）
+# 發射前置的最低預算形（fail-closed 底線；manifest 可加嚴、不可放寬）。
+# AMEND-1（2026-11-11 人類裁決）：ARM_ORDER 含 native_pi（真 pi 工具迴圈），
+# 預設形如實宣告兩個模型入口（glm＋本地 pi）與 pi_provider/pi_model；
+# 不含 pi 的計畫可自行寫 model_entry='glm'（check_budget 白名單收）。
 DEFAULT_BUDGET: dict[str, Any] = {
     "max_cells": MAX_CELLS,
     "timeout_s_per_round": MAX_TIMEOUT_S_PER_ROUND,
     "daily_token_cap": MAX_DAILY_TOKEN_CAP,
     "quota_fail_closed": True,
-    "model_entry": "glm",
+    "model_entry": "glm+local_pi",
+    "pi_provider": "lms1003qwen",
+    "pi_model": "qwen/qwen3.8-27b",
     "hard_token_cap": False,
     "cost_missing": "UNKNOWN",
 }
@@ -217,8 +223,24 @@ def check_budget(plan: G3Plan) -> None:
             "（manifest 可加嚴、不可放寬；任何一項放寬即拒）")
     if b.get("quota_fail_closed") is not True:
         raise ValueError("撞額度必須停、不得重試（quota_fail_closed 必須為 true）")
-    if b.get("model_entry") != "glm":
-        raise ValueError("模型呼叫唯一入口＝glm CLI（model_entry 必須為 'glm'）")
+    # 模型入口如實宣告（fail-closed 白名單；2026-11-11 人類裁決 AMEND-1：
+    # native_pi 接真 pi、本地模型——manifest 如實宣告兩個入口）：
+    #   glm            只有 glm CLI（單回合、無工具）
+    #   glm+local_pi   glm CLI ＋ pi 工具迴圈（本地 provider/model，
+    #                  pi_provider／pi_model 必須非空字串）
+    entry = b.get("model_entry")
+    if entry not in ("glm", "glm+local_pi"):
+        raise ValueError(
+            "model_entry 必須如實宣告為 'glm' 或 'glm+local_pi'"
+            f"（got {entry!r}）")
+    if entry == "glm+local_pi":
+        for key in ("pi_provider", "pi_model"):
+            v = b.get(key)
+            if not (isinstance(v, str) and v.strip()):
+                raise ValueError(f"model_entry=glm+local_pi 必須宣告 {key}（非空字串）")
+    if "native_pi" in plan.arms and entry != "glm+local_pi":
+        raise ValueError(
+            "arms 含 native_pi（預註冊要求原生 pi）但 model_entry 未宣告 local_pi" "——名實不符即拒（AMEND-1）")
     if b.get("hard_token_cap") is not False:
         raise ValueError("無硬 token 上限能力：hard_token_cap 必須如實為 false")
     if b.get("cost_missing") != "UNKNOWN":
