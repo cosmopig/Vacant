@@ -65,8 +65,7 @@ def main():
     parser.add_argument("--audit-e016", action="store_true")
     args = parser.parse_args()
 
-    if args.audit_e016:
-        # Negative control: e016 attempt-1
+        # Verify negative control: e016 attempt-1
         neg_path = Path("/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak")
         # Positive control: e016 attempt-2
         pos_path = Path("/srv/vlab/runs/e016_failed_step_ablation")
