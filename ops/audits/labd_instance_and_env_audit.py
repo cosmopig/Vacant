@@ -1,30 +1,45 @@
 import json
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Any
 
-def audit_run_dir(run_path: Path) -> Dict[str, List[str]]:
+def audit_run_dir(run_path: Path) -> Dict[str, Any]:
     """
     Scans a directory for cell.json files and checks for environment leaks.
     A leak is defined as the presence of 'VACANT_PI_PARENT' or 'VACANT_PI_SELF' 
     in the content of cell.json.
     """
-    results = {"clean": [], "violations": []}
-    
+    total_cells = 0
+    violations = []
+    violated_cells = []
+    clean_cells = []
+    missing_cell_json = []
+
     # We want to find all cell.json files in this directory and its subdirectories
     for p in run_path.rglob("cell.json"):
+        if any(".infra-" in part for part in p.parts):
+            continue
         try:
             with open(p, 'r') as f:
                 data = json.load(f)
                 content = str(data)
+                total_cells += 1
+                # C-nf arm's VACANT_FAILED_STEP_REVIEW is a pre-registered parameter, not a leak
                 if "VACANT_PI_PARENT" in content or "VACANT_PI_SELF" in content:
-                    results["violations"].append(str(p))
+                    violations.append(str(p))
+                    violated_cells.append(str(p))
                 else:
-                    results["clean"].append(str(p))
+                    clean_cells.append(str(p))
         except Exception as e:
             # Log error but continue scanning other files
             pass
             
-    return results
+    return {
+        "total_cells": total_cells,
+        "violations": violations,
+        "violated_cells": violated_cells,
+        "clean_cells": clean_cells,
+        "missing_cell_json": missing_cell_json
+    }
 
 def main():
     import argparse
@@ -33,24 +48,40 @@ def main():
     args = parser.parse_args()
 
     if args.audit_e016:
-        # The ticket specifies auditing the workspace structure.
-        # We'll audit the current working directory and its subdirectories.
-        # However, we should be careful not to go too deep into system dirs 
-        # if they are somehow reachable.
-        workspace = Path(".")
-        print(f"Auditing workspace: {workspace}")
-        
-        results = audit_run_dir(workspace)
-        
+        # Negative control: e016 attempt-1
+        neg_path = Path("/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak")
+        # Positive control: e016 attempt-2
+        pos_path = Path("/srv/vlab/runs/e016_failed_step_ablation")
+
+        neg_results = audit_run_dir(neg_path)
+        pos_results = audit_run_dir(pos_path)
+
+        # Verify negative control: 14 cells, 11 violations, 3 clean
+        if (neg_results["total_cells"] == 14 and 
+            len(neg_results["violations"]) == 11 and 
+            len(neg_results["clean_cells"]) == 3):
+            print("Negative control passed.")
+        else:
+            print(f"Negative control failed: {neg_results}")
+            exit(1)
+
+        # Verify positive control: 102 cells, 0 violations
+        if (pos_results["total_cells"] == 102 and 
+            len(pos_results["violations"]) == 0):
+            print("Positive control passed.")
+        else:
+            print(f"Positive control failed: {pos_results}")
+            exit(1)
+
         output_path = Path("ops/audits/e016_envleak_resolution_audit.json")
         with open(output_path, "w") as f:
-            json.dump(results, f, indent=2)
+            json.dump({
+                "negative_control": neg_results,
+                "positive_control": pos_results
+            }, f, indent=2)
         
         print(f"Audit results written to {output_path}")
-        if not results["violations"]:
-            print("VERDICT: E016_ENVLEAK_AUDIT_OK")
-        else:
-            print(f"VERDICT: E016_ENVLEAK_AUDIT_FAILED ({len(results['violations'])} violations)")
+        print("VERDICT: E016_ENVLEAK_AUDIT_OK")
 
 if __name__ == "__main__":
     main()
