@@ -830,6 +830,37 @@ def write_result(out_root: pathlib.Path, result: dict) -> pathlib.Path:
     return p
 
 
+#: pi session call 數上界（P20261111_0840-1 項 2；AMEND-3
+#: ops/approvals/g3_vq-1zf_fire_20261111_AMEND3.json 人類核准）：PiChannel.call
+#: 「一次通道呼叫＝一次 pi session」，session 內部 N 通 API 呼叫（工具迴圈：
+#: 讀任務檔、寫 answer.txt），RoundUsage.calls＝實 call 數，QuotaGuard 累計的
+#: 就是它——舊公式把 pi 格當 1 call 是名實不符。實測（raw，非轉抄）：fire a
+#: dab_129＝7；fire b 4 格＝7/8/7/5（max 8，dab_144）。上界取實測 max 8；
+#: fail-closed 語義不變（撞上界＝停、不重試）。理由＋算式已寫回票面與
+#: commit 訊息（AMEND-3：不得靜默放寬）。
+PI_SESSION_CALL_CAP = 8
+
+
+def max_calls_bound(arm_order: tuple[str, ...], n_tasks: int) -> int:
+    """QuotaGuard max_calls 後備上限（r1436 重測，P20261111_0840-1 項 2）。
+
+    算式（嚴上界，逐臂）：
+      擷取  n_tasks（每 task 1 guard.call；GlmChannel RoundUsage.calls＝1）
+      臂 a  n_tasks × max_rounds_a ×（PI_SESSION_CALL_CAP 若 pi 臂，否則 1）
+    舊公式 n_tasks + arms×n_tasks×max_rounds 把一次 pi session 當 1 call：
+    4 題×3 臂＝4+3×4×2＝28 < fire b 實際 31（raw totals.model_calls：pi 27
+    ＋extract 4）→QuotaGuard 中途假停（2 格 not_run/quota、非 token 額度）。
+    新式每輪仍≤1 guard.call、pi session ≤cap 通內部呼叫——仍為嚴上界，只是
+    依實測值定 pi 每-session 上界；無 pi 臂的計畫每輪＝1 call（既有形狀）。
+    """
+    cells = 0
+    for a in arm_order:
+        spec = ARM_SPECS[a]
+        per_call = PI_SESSION_CALL_CAP if spec.get("pi_agent") else 1
+        cells += int(n_tasks) * int(spec["max_rounds"]) * per_call
+    return int(n_tasks) + cells
+
+
 # ── 發射主體（零模型呼叫：通道注入）──────────────────────────────────
 
 
@@ -877,9 +908,11 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
     tasks = [t["task_id"] for t in plan.tasks]
     # 呼叫數後備上限（r1376）：token 用量未知時 token cap 不可測→以呼叫數兜底。
     # 上界＝擷取（每 task 一次）＋每格最多 max_rounds 輪；實際呼叫少於此上界。
+    # r1436（P20261111_0840-1 項 2／AMEND-3）：pi 臂每 session 內部 N 通呼叫
+    # （實測 max 8），舊式把 pi 格當 1 call→28 < fire b 實際 31→假停；改用
+    # max_calls_bound（逐臂嚴上界，算式見其 docstring；理由＋算式寫回票面）。
     n_tasks = len(plan.tasks)
-    max_rounds = max(ARM_SPECS[a]["max_rounds"] for a in arm_order) if arm_order else 0
-    max_calls = n_tasks + (len(arm_order) * n_tasks) * max_rounds
+    max_calls = max_calls_bound(arm_order, n_tasks)
 
     result: dict = {
         "schema": SCHEMA_RESULT,

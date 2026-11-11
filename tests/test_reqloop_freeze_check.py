@@ -1535,10 +1535,33 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_g3.py（新增 2 測）
     #     17c69ec886fc77deabd561e0a131f080a248e268b3b4080553ea43c861b49410
     #     → f462ac61704637ff33c0e6f9142080b630ec0c8ba9fb1afe3a187b886b3d8c74
+    # r1436 解凍記錄（工單 P20261111_0840-1 項 2；AMEND-3
+    # ops/approvals/g3_vq-1zf_fire_20261111_AMEND3.json 人類核准；分支
+    # auto/qwen27b）：QuotaGuard max_calls 後備上限重測——舊公式
+    # n_tasks + arms×n_tasks×max_rounds 把「一次 pi session」當 1 call，但
+    # PiChannel.call 的 RoundUsage.calls＝session 內部實際 API 呼叫數
+    # （工具迴圈：讀任務檔、寫 answer.txt），QuotaGuard 累計的就是它；
+    # 4 題×3 臂舊式＝28 < fire b 實際 31（raw totals.model_calls：pi 4 格
+    # 7+8+7+5＝27＋extract 4；ops/g3_fire_20261111b/g3_result.json）→
+    # guard 中途假停（2 格 not_run/quota、非 token 額度）。修法：新常數
+    # PI_SESSION_CALL_CAP＝8（實測 pi 單 session max，fire b dab_144；fire a
+    # dab_129＝7）＋max_calls_bound()＝n_tasks＋Σ臂 n_tasks×max_rounds×
+    # （pi 8｜非 pi 1）——c 計畫 4 題×3 臂＝4+32+4+8＝48≥31；仍為嚴上界、
+    # fail-closed 語義不變（撞上界＝停、不重試）；無 pi 臂計畫每輪＝1 call
+    # （既有形狀）。理由＋算式寫回票面與 commit 訊息（AMEND-3：不得靜默
+    # 放寬）。test_reqloop_g3.py 加 3 測（負控制 1：pi 臂在場上界須≥8——對
+    # 舊式必紅；正控制 2：≥fire b 實際 31／算式精確值 48 與無 pi 16），
+    # g3 檔 26→29。sha256 本輪 sha256sum 自磁碟實算、非轉抄：
+    # (1) vacant_network/reqloop/g3.py
+    #     c875ca69d221d92ad4a1753f2ccf3a926a59e662d4c86a5eb70b0cbe1186a581
+    #     → 5a94c1676958e7203bc41ec75a9f2c42cfd1b38812ba70d4e4274fc864dc358e
+    # (2) tests/test_reqloop_g3.py（新增 3 測）
+    #     f462ac61704637ff33c0e6f9142080b630ec0c8ba9fb1afe3a187b886b3d8c74
+    #     → 3ed315e37f4fe05f705352f34a6911b6b9e20db95586670fe9744145bfbc8259
     "vacant_network/reqloop/g3.py":
-        "c875ca69d221d92ad4a1753f2ccf3a926a59e662d4c86a5eb70b0cbe1186a581",
+        "5a94c1676958e7203bc41ec75a9f2c42cfd1b38812ba70d4e4274fc864dc358e",
     "tests/test_reqloop_g3.py":
-        "f462ac61704637ff33c0e6f9142080b630ec0c8ba9fb1afe3a187b886b3d8c74",
+        "3ed315e37f4fe05f705352f34a6911b6b9e20db95586670fe9744145bfbc8259",
     "tests/test_reqloop_g3_conformance.py":
         "e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
