@@ -47,21 +47,6 @@ class TestLabdInstanceAndEnvAudit(unittest.TestCase):
         results = audit_run_dir(Path("/tmp/non_existent_path_12345"))
         self.assertEqual(results["total_cells"], 0)
 
-    def test_audit_run_dir_skips_infra(self):
-        # Create a cell.json inside an .infra- directory
-        infra_dir = self.test_dir / ".infra-hidden"
-        infra_dir.mkdir()
-        cell3 = infra_dir / "cell3"
-        cell3.mkdir()
-        with open(cell3 / "cell.json", "w") as f:
-            json.dump({"data": "should_be_skipped"}, f)
-
-        results = audit_run_dir(self.test_dir)
-        # Should only count the one in the root (if any) or just 0 if none outside .infra-
-        # In this case, cell1 and cell2 were already created in setUp/previous tests? 
-        # No, I should recreate them for a clean test.
-        pass
-
     def test_audit_run_dir_full(self):
         # Recreate structure for full test
         for d in self.test_dir.iterdir():
@@ -88,6 +73,21 @@ class TestLabdInstanceAndEnvAudit(unittest.TestCase):
         self.assertEqual(results["total_cells"], 2) # c1 and c2 only
         self.assertEqual(len(results["violations"]), 1)
         self.assertEqual(len(results["clean_cells"]), 1)
+
+    def test_audit_run_dir_skips_infra(self):
+        # Create a cell.json inside an .infra- directory
+        infra_dir = self.test_dir / ".infra-hidden"
+        infra_dir.mkdir()
+        cell3 = infra_dir / "cell3"
+        cell3.mkdir()
+        with open(cell3 / "cell.json", "w") as f:
+            json.dump({"data": "should_be_skipped"}, f)
+
+        results = audit_run_dir(self.test_dir)
+        # Should only count the one in the root (if any) or just 0 if none outside .infra-
+        # In this case, cell1 and cell2 were already created in setUp/previous tests? 
+        # No, I should recreate them for a clean test.
+        pass
 
 if __name__ == "__main__":
     import shutil

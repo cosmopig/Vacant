@@ -31,11 +31,13 @@ def audit_run_dir(run_path: Path) -> Dict[str, Any]:
     missing_cell_json = []
 
     for root, dirs, files in os.walk(run_path):
-        # Skip .infra- directories
-        dirs[:] = [d for d in dirs if not d.startswith(".infra-")]
+        # Skip directories and files containing .infra-
+        dirs[:] = [d for d in dirs if ".infra-" not in d]
         
         if "cell.json" in files:
             p = Path(root) / "cell.json"
+            if ".infra-" in str(p):
+                continue
             try:
                 with open(p, 'r') as f:
                     data = json.load(f)
