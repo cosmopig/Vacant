@@ -207,12 +207,19 @@ class GlmChannel(Channel):
         if new:
             tokens = None
             for rec in new:
-                try:
-                    v = int(rec.get("total_tokens"))
-                except (TypeError, ValueError):
+                v = rec.get("total_tokens")
+                # r1419（vq-el4.94，真產品 bug）：舊碼 `int(rec.get("total_tokens"))`
+                # 把 JSON bool 當 int（false→0＝實際耗 token 的呼叫記成本 0、true→1）、
+                # 負數（-100 → QuotaGuard known_tokens 被扣減、日額度更遲才觸發）、
+                # float（截斷）／string（自我聲明文字）全靜默接受——quota fail-open
+                # （r1376 同族：工作量的界不得依賴「用量恰好被測到」；r1405 strict-int／
+                # r1408 預算同族；門不得信被驗方的自我聲明）。本檔由外部 glm CLI 寫，
+                # 只認嚴格 int≥0；否則 UNKNOWN（None，不填 0）。真 CLI 形狀即嚴格 int
+                # （實測 vibe_calls.jsonl 如 "total_tokens": 10164），正控制不受影響。
+                if isinstance(v, bool) or not isinstance(v, int) or v < 0:
                     v = None
                 if v is None:
-                    tokens = None  # 任一筆缺值 → UNKNOWN（不填 0）
+                    tokens = None  # 任一筆缺值/不可信 → UNKNOWN（不填 0）
                     break
                 tokens = (tokens or 0) + v
         else:
