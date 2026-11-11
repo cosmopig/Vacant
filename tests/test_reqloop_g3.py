@@ -590,3 +590,38 @@ def test_cell_prompt_no_tool_override_before_task_text():
             assert p.startswith(g3.NO_TOOL_OVERRIDE), f"{arm}/{label}：覆寫必須在 prompt 頂部"
         # 臂段指令不被覆寫吞掉
         assert g3.ARM_SPECS[arm]["instruction"] in p1
+
+
+# ── max_calls 後備上限重測（P20261111_0840-1 項 2／AMEND-3 核准）─────
+# 根因：PiChannel.call 一次通道呼叫＝一次 pi session＝內部 N 通 API 呼叫
+# （RoundUsage.calls＝實 call 數；QuotaGuard.total_calls 累計的就是它）。
+# 舊公式 n_tasks + arms×n_tasks×max_rounds 把 pi 格當 1 call：4 題×3 臂
+# ＝4+3×4×2=28；fire b 實際 31（raw：pi 4 格 7+8+7+5=27＋extract 4；
+# ops/g3_fire_20261111b/g3_result.json totals.model_calls）→QuotaGuard
+# 中途假停（dab_216 兩格 not_run/quota，非 token 額度）。上界必須容納
+# pi 單 session 實測最大 call 數（fire b dab_144＝8）。
+
+
+def test_max_calls_bound_negative_control_pi_sessions():
+    """P20261111_0840-1 負控制（先紅後綠）：pi 臂在場時，後備上界必須 ≥
+    實測 pi 單 session 最大 call 數（8，fire b raw dab_144）——舊公式
+    1 題×pi 臂＝1+1×1×1=2，pi session 第 3 通呼叫即撞額假停（fire a/b
+    同族 infra 失敗）。本測試對舊公式必紅、對重測公式必綠。"""
+    assert g3.max_calls_bound(("native_pi",), 1) >= 8, (
+        "pi 臂上界低於實測 pi 單 session 最大 call 數（fire b dab_144＝8）——"
+        "QuotaGuard 會中途假停（fire b 2 格 not_run/quota 同因）")
+
+
+def test_max_calls_bound_covers_fire_b_actual_total():
+    """正控制（票面算式）：c 重發計畫 4 題×3 臂上界 ≥ fire b 實際總 call 31
+    （raw 實測，非轉抄）——否則 guard 必然中途假停。"""
+    arms = ("native_pi", "reqlist_only", "full_rloop")
+    assert g3.max_calls_bound(arms, 4) >= 31
+
+
+def test_max_calls_bound_exact_formula_and_no_pi_unchanged():
+    """正控制（算式精確值）：extract 每 task 1 call＋Σ臂 n×max_rounds×
+    (pi 8｜非 pi 1)：4+4×1×8+4×1×1+4×2×1＝48。無 pi 臂的計畫每輪仍＝1
+    call（既有呼叫形狀不變）：4+4×1+4×2＝16。"""
+    assert g3.max_calls_bound(("native_pi", "reqlist_only", "full_rloop"), 4) == 48
+    assert g3.max_calls_bound(("reqlist_only", "full_rloop"), 4) == 16
