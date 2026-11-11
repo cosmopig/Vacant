@@ -14,7 +14,7 @@ r1432（2026-11-11）：**P20261111_0710-1 G3 重發（20261111b）審計摘要�
 
 ## 關鍵約束（紅線）
 - 無 push（loop 自推 auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
-- 凍結四檔（repair/extract/checks/run_eval）＋g25 filing 不改；g3.py 改動僅依 vq-kax 工單（AMEND-3 為其授權，執行順序照工單）。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py 2823 行／blob f3525b01…、run_eval.py 1298 行／blob b6d2f37f…；g25 filing（6 sha256）不改；g3.py 改動僅依 vq-kax 工單（AMEND-3 為其授權，執行順序照工單）。
 - /srv/eval/hidden/、scorer.py 不讀；缺值 UNKNOWN 不填 0；hidden_after＝UNKNOWN；同批重發非獨立樣本、不宣稱臂 superiority。
 - /srv/vlab/queue 不寫；無 poll CI；無 full pytest。
 
