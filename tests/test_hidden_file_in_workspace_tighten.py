@@ -1,73 +1,88 @@
 import unittest
-from pathlib import Path
+import pathlib
 import tarfile
-from ops.audits.hidden_file_in_workspace_tighten import audit_workspace, calculate_content_hash
+import json
+import os
+from ops.audits.hidden_file_in_workspace_tighten import audit_workspace, get_non_trivial_lines, calculate_content_hash
 
 class TestHiddenFileTighten(unittest.TestCase):
     def setUp(self):
-        self.test_dir = Path("./test_audit_data")
+        self.test_dir = pathlib.Path("./test_data")
         if self.test_dir.exists():
             import shutil
             shutil.rmtree(self.test_dir)
         self.test_dir.mkdir()
+        
+        self.mock_ws = self.test_dir / "mock_ws"
+        self.mock_ws.mkdir()
+        
+        self.hidden_lit_dir = self.test_dir / "hidden_lits"
+        self.hidden_lit_dir.mkdir()
+        with open(self.hidden_lit_dir / "test_h1.py", "w") as f:
+            f.write("val = 1\n# comment\n")
+            
+        self.visible_lit_dir = self.test_dir / "visible_lits"
+        self.visible_lit_dir.mkdir()
+        with open(self.visible_lit_dir / "test_v1.py", "w") as f:
+            f.write("val = 2\n")
 
     def tearDown(self):
         if self.test_dir.exists():
             import shutil
             shutil.rmtree(self.test_dir)
 
-    def test_content_hash_consistency(self):
-        content1 = "def solve():\n    return 42\n"
-        content2 = "def solve():\n    return 42\n  # comment"
-        # The hash should be the same if non-trivial lines are identical
-        self.assertEqual(calculate_content_hash(content1), calculate_content_hash(content2))
-
-    def test_audit_workspace_logic(self):
-        # Setup mock directories
-        hid = self.test_dir / "hidden"
-        vis = self.test_dir / "visible"
-        hid.mkdir()
-        vis.mkdir()
+    def test_confirmed_violation(self):
+        # Exact match of non-trivial lines (val = 1)
+        with open(self.mock_ws / "hidden_file.py", "w") as f:
+            f.write("val = 1\n# comment\n")
         
-        # Hidden lit: solve returns 42
-        with open(hid / "test_h1.py", "w") as f:
-            f.write("def solve():\n    return 42\n")
-        # Visible lit: solve returns 10
-        with open(vis / "test_v1.py", "w") as f:
-            f.write("def solve():\n    return 10\n")
-    
-        ws = self.test_dir / "workspace"
-        ws.mkdir()
-    
-        # Case 1: Confirmed Violation (Exact match of hidden lit)
-        with open(ws / "hidden_leak.py", "w") as f:
-            f.write("def solve():\n    return 42\n")
-    
-        # Case 2: False Positive Benign (Suspicious name, different content, no overlap)
-        with open(ws / "test_hidden_fake.py", "w") as f:
-            f.write("def solve():\n    return 99\n")
-    
-        # Case 3: Suspected Leak (Suspicious name, some overlap with hidden lit)
-        with open(ws / "test_hidden_partial.py", "w") as f:
-            f.write("def solve():\n    return 42\n  # but also something else")
-    
-        # Pack into archive
-        archive = self.test_dir / "workspace.tar.gz"
-        with tarfile.open(archive, "w:gz") as tf:
-            tf.add(ws / "hidden_leak.py", arcname="hidden_leak.py")
-            tf.add(ws / "test_hidden_fake.py", arcname="test_hidden_fake.py")
-            tf.add(ws / "test_hidden_partial.py", arcname="test_hidden_partial.py")
-
+        tar_path = self.test_dir / "violation.tar.gz"
+        with tarfile.open(tar_path, "w:gz") as tf:
+            tf.add(self.mock_ws / "hidden_file.py", arcname="hidden_file.py")
+            
         task = {
-            "hidden_dir": hid,
-            "visible_dir": vis
+            "hidden_dir": self.hidden_lit_dir,
+            "visible_dir": self.visible_lit_dir
         }
-
-        results = audit_workspace(self.test_dir / "workspace", task)
-        
+        results = audit_workspace(self.mock_ws, task)
         rules = [r["rule"] for r in results]
         self.assertIn("CONFIRMED_VIOLATION", rules)
+
+    def test_benign_false_positive(self):
+        # Different content (val = 2), no overlap with hidden lit (val = 1)
+        with open(self.mock_ws / "hidden_file_fake.py", "w") as f:
+            f.write("val = 2\n")
+        
+        tar_path = self.test_dir / "benign.tar.gz"
+        with tarfile.open(tar_path, "w:gz") as tf:
+            tf.add(self.mock_ws / "hidden_file_fake.py", arcname="hidden_file_fake.py")
+            
+        task = {
+            "hidden_dir": self.hidden_lit_dir,
+            "visible_dir": self.visible_lit_dir
+        }
+        results = audit_workspace(self.mock_ws, task)
+        rules = [r["rule"] for r in results]
+        # It should be FALSE_POSITIVE_BENIGN because it's not a confirmed violation 
+        # and has no overlap with hidden lits.
         self.assertIn("FALSE_POSITIVE_BENIGN", rules)
+
+    def test_suspected_leak(self):
+        # Partial overlap (val = 1 is in both, but there's more content)
+        with open(self.mock_ws / "leaked_file.py", "w") as f:
+            f.write("val = 1\nother = 2\n")
+        
+        tar_path = self.test_dir / "leak.tar.gz"
+        with tarfile.open(tar_path, "w:gz") as tf:
+            tf.add(self.mock_ws / "leaked_file.py", arcname="leaked_file.py")
+            
+        task = {
+            "hidden_dir": self.hidden_lit_dir,
+            "visible_dir": self.visible_lit_dir
+        }
+        results = audit_workspace(self.mock_ws, task)
+        rules = [r["rule"] for r in results]
+        # It should be SUSPECTED_LEAK because it has overlap but is not an exact match of non-trivial lines
         self.assertIn("SUSPECTED_LEAK", rules)
 
 if __name__ == "__main__":

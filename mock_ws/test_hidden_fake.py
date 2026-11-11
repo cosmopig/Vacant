@@ -1,1 +1,1 @@
-solve_val = 99
+val = 2

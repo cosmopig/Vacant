@@ -1,2 +1,2 @@
-solve_val = 42
-# Some comment
+val = 1
+other = 2
