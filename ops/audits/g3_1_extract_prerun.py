@@ -18,7 +18,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 
 from vacant_network.reqloop.extract import ExtractReport, GlmClient, RequirementSet, extract_requirements  # noqa: E402
-from vacant_network.reqloop.g3 import input_sha256  # noqa: E402
+from vacant_network.reqloop.g3 import compose_extract_user_text, input_sha256  # noqa: E402
 
 MANIFEST = REPO / "ops/reqloop/g3_1/manifest.json"
 REPORT = REPO / "ops/audits/g3_1_h20_prerun_report.json"
@@ -59,11 +59,14 @@ def h20_verdict(rows: list[dict]) -> str:
     return H2_MET if any(r["has_deterministic_claim"] for r in rows) else H2_REFUTED
 
 def run_prerun(client, manifest_path: Path = MANIFEST, tasks_root: Path = REPO / "ops/reqloop/g3_1/tasks") -> list[dict]:
-    rows = []  # user_text＝workspace/goal.md，與 g3.py:971 發射路徑同口徑
+    rows = []  # user_text＝workspace/goal.md＋contract.md（公開交付規格），與 g3.py 發射路徑同口徑（P20261111_1516-1）
     for t in load_manifest(manifest_path):
         tdir = tasks_root / t["task_id"]
         gt = (tdir / "workspace/goal.md").read_text(encoding="utf-8")
-        req, report = extract_requirements(user_text=gt, client=client, task_id=t["task_id"])
+        cp = tdir / "workspace" / "contract.md"
+        contract = cp.read_text(encoding="utf-8") if cp.is_file() else None
+        user_text = compose_extract_user_text(gt, contract)
+        req, report = extract_requirements(user_text=user_text, client=client, task_id=t["task_id"])
         row = {"task_id": t["task_id"], "input_sha256": input_sha256(tdir, t["files"]),
                "goal_sha256": hashlib.sha256(gt.encode("utf-8")).hexdigest()}
         row.update(classify(req, report))

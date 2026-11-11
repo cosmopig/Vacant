@@ -709,6 +709,20 @@ def required_answer_names(contract: str) -> list[str]:
     return sorted(set(_ANSWER_ITEM_RE.findall(contract)) - {"name"})
 
 
+def compose_extract_user_text(goal: str, contract: str | None) -> str:
+    """擷取用的使用者原文＝goal＋公開 contract.md（對齊 G2.5 load_cell_request_text）。
+
+    contract.md 是公開交付規格（寫到哪個檔、什麼格式），不含答案、不含 hidden。
+    漏附它時交付檔名只存在於 contract，擷取模型猜出的檔名全數被判
+    deliverable_not_in_request（假陽性，見 P20261111_1516-1）。
+    contract 為空或已含於 goal 時原樣回傳 goal。
+    """
+    c = (contract or "").strip()
+    if c and c not in goal:
+        return goal.rstrip() + "\n\n" + c + "\n"
+    return goal
+
+
 def render_requirement_list(req_set: RequirementSet | None) -> str:
     """需求清單 → 決定性文字塊（進 prompt；只含 quote/deliverable/狀態）。"""
     if req_set is None or not req_set.items:
@@ -969,7 +983,9 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                                            timeout_s=tpr, ledger=ledger)
             try:
                 req_set, report = _extract.extract_requirements(
-                    user_text=inputs["goal"], client=client, task_id=tid)
+                    user_text=compose_extract_user_text(
+                        inputs["goal"], inputs.get("contract")),
+                    client=client, task_id=tid)
             except G3QuotaError as e:
                 # 撞額度＝停發、不重試（不得降級成「擷取失敗＝沒有需求」）
                 stopped = True

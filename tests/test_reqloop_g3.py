@@ -678,3 +678,43 @@ def test_unverified_reasons_persisted(tmp_path):
                     n += 1
                     assert cl["evidence"]["reason"] == "unknown_verifier:missing", cl
     assert n > 0, "full_rloop claims 必含 unverified 條目（FakeChannel 擷取清單）"
+
+
+# P20261111_1516-1：使用者原文漏附公開 contract.md → 合規交付物被誤判
+# deliverable_not_in_request（假陽性）。compose_extract_user_text 對齊 G2.5
+# load_cell_request_text：contract 非空且未含於 goal 時以換行附加。
+def test_extract_requirements_includes_contract_deliverable():
+    from types import SimpleNamespace
+    from vacant_network.reqloop import extract as extract_mod
+
+    goal = ("Compute the mean of the Amount column from sales.csv "
+            "and write the result to a file.")
+    contract = ("Write the final answer to answer.txt in the format "
+                "@mean[<value>].")
+    payload = ('[{"id":"R1","quote":"write the result to a file",'
+               '"deliverable":"answer.txt","verifier":"answer_kv",'
+               '"params":{"keys":[{"key":"mean","type":"number"}]},'
+               '"description":"d","kind":"explicit"}]')
+    fake = SimpleNamespace(complete=lambda prompt: payload)
+
+    # helper 行為（對齊 G2.5 load_cell_request_text）
+    assert g3.compose_extract_user_text(goal, contract) == \
+        goal.rstrip() + "\n\n" + contract.strip() + "\n"
+    assert g3.compose_extract_user_text(goal, None) == goal
+    assert g3.compose_extract_user_text(goal, "") == goal
+    assert g3.compose_extract_user_text(goal + contract, contract) == goal + contract
+
+    # 負控制：僅 goal.md（未點名 answer.txt）→ deliverable 判為猜名
+    req_neg, rep_neg = extract_mod.extract_requirements(
+        user_text=goal, client=fake, task_id="t_neg")
+    reasons_neg = [u.reason for u in rep_neg.unverified]
+    assert "deliverable_not_in_request:answer.txt" in reasons_neg, reasons_neg
+    assert all(it.unverified for it in req_neg.items)
+
+    # 正控制：附加 contract.md（點名 answer.txt）→ 通過驗證、無該假陽性
+    user_text = g3.compose_extract_user_text(goal, contract)
+    req_pos, rep_pos = extract_mod.extract_requirements(
+        user_text=user_text, client=fake, task_id="t_pos")
+    reasons_pos = [u.reason for u in rep_pos.unverified]
+    assert not any(r.startswith("deliverable_not_in_request") for r in reasons_pos), reasons_pos
+    assert req_pos.items and not req_pos.items[0].unverified, reasons_pos
