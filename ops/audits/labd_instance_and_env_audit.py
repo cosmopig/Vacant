@@ -3,6 +3,7 @@ import os
 import json
 import argparse
 import subprocess
+from ops.audits.stray_labd_ps_evidence import is_labd
 
 def check_labd_instances(proc_list=None):
     """
@@ -18,7 +19,18 @@ def check_labd_instances(proc_list=None):
             # pgrep returns non-zero if no processes found, which is fine (0 instances)
             proc_list = []
 
-    count = len(proc_list)
+    count = 0
+    if proc_list:
+        for args in proc_list:
+            if isinstance(args, str):
+                split_args = args.split()
+                # Use the precise logic from stray_labd_ps_evidence.py
+                if is_labd(split_args):
+                    count += 1
+            else:
+                if is_labd(args):
+                    count += 1
+    
     if count > 1:
         print("ERROR: MULTIPLE_LABD_INSTANCES detected. Count: " + str(count))
         sys.exit(1)
@@ -44,14 +56,10 @@ def audit_cell_env(cell_json_path, arm="A"):
     # If it's a string (some formats might have it as a raw string), convert to dict if possible
     # but the requirement implies a structure we can check for keys/values.
     if isinstance(agent_env, str):
-        # This shouldn't happen based on typical cell.json but handle just in case
         pass
 
     # Check for A or C arms (case-insensitive)
     arm_upper = arm.upper()
-    # We need to know which arm this cell belongs to. 
-    # Usually, the file path or a field in cell.json indicates it.
-    # The requirement says "If for A/C arms". Let's check if 'arm' is in data.
     cell_arm = str(data.get("arm", "")).upper()
     
     if arm_upper in ["A", "C"] or cell_arm in ["A", "C"]:
@@ -63,7 +71,6 @@ def audit_cell_env(cell_json_path, arm="A"):
                 sys.exit(1)
         
         # Check for host pi session residuals (e.g., PI_PARENT, PI_SELF)
-        # These are often injected as env vars.
         for k, v in agent_env.items():
             v_str = str(v)
             if "PI_PARENT" in v_str or "PI_SELF" in v_str:
@@ -81,7 +88,7 @@ def main():
         print("Running self-test...")
         # Test MULTIPLE_LABD_INSTANCES (should exit 1)
         try:
-            check_labd_instances(proc_list=["pid1", "pid2"])
+            check_labd_instances(proc_list=[["python3", "/srv/vlab/bin/labd.py"], ["python3", "/srv/vlab/bin/labd.py"]])
         except SystemExit as e:
             if e.code == 1:
                 print("SUCCESS: Caught MULTIPLE_LABD_INSTANCES")
