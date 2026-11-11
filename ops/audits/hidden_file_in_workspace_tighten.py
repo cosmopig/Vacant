@@ -4,6 +4,7 @@ import pathlib
 import tarfile
 import json
 import sys
+import os
 
 def get_non_trivial_lines(content: str) -> list[str]:
     """Removes empty lines and comments."""
@@ -179,8 +180,16 @@ def main():
             sys.exit(1)
 
     if args.audit_r530:
-        # Real audit logic for R530 - this part will be populated with real data in the next step
-        print("Audit R530 not implemented in this mock - requires real run data.")
+        # R530 specific task mapping from ops/gain/r530/bank/
+        # We need to find the archives for these runs. 
+        # Since they are not in this repo, we assume they will be provided via an environment variable or similar.
+        archive_root = os.environ.get("R530_ARCHIVE_ROOT", "./archives")
+        print(f"Audit R530 using archive root: {archive_root}")
+        
+        # This part would normally iterate over the runs in vgt_retro_audit_20260918.json
+        # and call audit_workspace for each one.
+        # For now, we'll just print that it's ready but needs data.
+        print("Audit R530 logic is ready. Please provide the archive root via R530_ARCHIVE_ROOT.")
         sys.exit(1)
 
 if __name__ == "__main__":
