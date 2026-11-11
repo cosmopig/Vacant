@@ -67,7 +67,6 @@ def audit_running_labd():
                 continue
 
         # Check for multiple instances - ignore if we are in a known multi-labd env (like this one)
-        # but keep the logic available for other environments.
         if len(results["active_processes"]) > 1 and os.environ.get("STRAY_LABD_AUDIT_IGNORE_MULTI") != "1":
             results["violations"].append(f"Multiple labd.py instances detected: {len(results['active_processes'])}")
 
