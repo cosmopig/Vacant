@@ -1,55 +1,138 @@
 {
-  "v": 1,
-  "dialect": "mbpp",
-  "entry_point": "solve",
+  "schema": "vacant.reqloop.g3gate.plan/1",
+  "frozen_at": "2026-11-11T13:50:00+00:00",
+  "ticket": "P20261111_1315-1（G3.1 預註冊凍結；2026-11-11 人類常設定案第 2.a 條「G 系列就此自續：假設→manifest 凍結→發射清單」＋第 5 條常設授權；候選假說 ops/reqloop/g3_1_candidate_hypothesis.md §3、§5）",
+  "purpose": "G3.1 核心機制批（H2.0 前置＋H2.1 抓修，見候選假說檔 §2）：full_rloop（待驗機制臂）× 候選題單 4 題＝4 格；選題＝dabench bank 順序 − 已見集合，前 4 題（代碼重算，G3Plan.verify_frozen 核選題一致性）；任務輸入凍結副本在本目錄 tasks/（逐檔 sha256 核）；預算門＝≤4 格、300s/輪、日 ≤2,000,000 tok 撞額停不重試、glm CLI 唯一入口、無硬 token 上限→成本從 raw usage 讀、缺值 UNKNOWN 絕不填 0；核准門 fail-closed（無核准信號→RC 2、0 模型呼叫）。發射前預檢查（假說 §3）第 1 條＝逐條 unverified 原因持久化已由 g3.py 呼叫端落地（trec.unverified_reasons，r1442 入樹）；本 manifest 只凍結，不發射。",
+  "arms": [
+    "full_rloop"
+  ],
+  "arm_defs": {
+    "full_rloop": "完整 R-loop：自動擷取需求（extract.py）＋ localized 修復（repair.py 凍結 2795 行）＋重驗所有必要條目（checks.py）"
+  },
   "tasks": [
     {
-      "task_id": "dab_055",
-      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
-      "workspace_sha256": "unknown",
-      "required_answer_names": ["mean_cases"],
-      "data_files": [
-        {
-          "path": "data/estimated_numbers.csv",
-          "sha256": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c"
-        }
-      ]
+      "task_id": "dab_035",
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "3cd61ac5be274b7d4b31ca69847ff9a50bbe83279ed67e3e6bed853671256ae6",
+        "workspace/data/imp.score.ldlr.metabolome.csv": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553",
+        "workspace/goal.md": "d7f36d41901ec35d2f38f7cc7870418b1df761ae6491d662650554711193c1fe"
+      }
     },
     {
-      "task_id": "dab_035",
-      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
-      "workspace_sha256": "unknown",
-      "required_answer_names": ["removed_outliers_count"],
-      "data_files": [
-        {
-          "path": "data/imp.score.ldlr.metabolome.csv",
-          "sha256": "8aa6112a864d4491ec14b7821f0ce889a6f751793ec30c7b9d86c5443e25c553"
-        }
-      ]
+      "task_id": "dab_055",
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "fc9b32bf919c8d219cfa1d4b735063e5f0bea1ab528c76bbea17b95c9caf0faa",
+        "workspace/data/estimated_numbers.csv": "bc485997a837c738907ac5b03aef0f4d0a938edb415861ab37af22bdd243329c",
+        "workspace/goal.md": "89762c8d2e867eba309d53e7c651ee9bdfe5dc7242786dc69bf728a6b7661695"
+      }
     },
     {
       "task_id": "dab_105",
-      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
-      "workspace_sha256": "unknown",
-      "required_answer_names": ["correlation_coefficient"],
-      "data_files": [
-        {
-          "path": "data/test_Y3wMUE5_7gLdaTN.csv",
-          "sha256": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8"
-        }
-      ]
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "workspace/data/test_Y3wMUE5_7gLdaTN.csv": "2248e254edd4260a5cbae11856115d3d0336396239188e970c18c6e12dda4cd8",
+        "workspace/goal.md": "4969ccbadbf17dcc8625ebcb1f0ae21fb598e9d752f74493c13555e3cfbc251c"
+      }
     },
     {
       "task_id": "dab_218",
-      "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
-      "workspace_sha256": "unknown",
-      "required_answer_names": ["correlation_coefficient"],
-      "data_files": [
-        {
-          "path": "data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
-          "sha256": "c9e411ff75df8d966f6e5de9270a4a7276289c478a6b7aa216ce667eac66f540"
-        }
-      ]
+      "files": {
+        "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "workspace/contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+        "workspace/data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv": "c9e411ff75df8d966f6e5de9270a4a7276289c478a6b7aa216ce667eac66f540",
+        "workspace/goal.md": "71f059a69e9a50dd256b5a332473eb02121a3b5896d867a12b7296d6f66ba3db"
+      }
     }
-  ]
+  ],
+  "seen_set": [
+    "dab_039",
+    "dab_057",
+    "dab_129",
+    "dab_144",
+    "dab_176",
+    "dab_216",
+    "dab_378",
+    "dab_426",
+    "dab_427",
+    "dab_507",
+    "dabstep"
+  ],
+  "seen_set_source": "G3.1 候選假說 §3 題單（dab_055/035/105＝G2 開發樣本真實交付物來源題、dab_218＝本批 G3 系列未見；備選 dab_039）＋G3 三臂 c 發已見的 dab_129/144/176/216（fire 20261111c，ops/audits/g3_fire_20261111c_summary.json）＋g3_gate seen_set 其餘（effects_20261105 50 格聯集＋G1 開發樣本；dabstep 為另一 bank、不在本 bank 選題）。口徑：同批重發不得當獨立樣本（假說 §3）；選題不讀 hidden/scorer、不靠隱藏分反推。",
+  "bank": {
+    "name": "dabench",
+    "dir": "/home/user1/dev/ops/ref/bm_tasks/dabench",
+    "n_total": 30,
+    "ordering": [
+      "dab_035",
+      "dab_039",
+      "dab_055",
+      "dab_057",
+      "dab_105",
+      "dab_129",
+      "dab_144",
+      "dab_176",
+      "dab_216",
+      "dab_218",
+      "dab_249",
+      "dab_250",
+      "dab_378",
+      "dab_426",
+      "dab_427",
+      "dab_507",
+      "dab_514",
+      "dab_517",
+      "dab_587",
+      "dab_588",
+      "dab_657",
+      "dab_665",
+      "dab_666",
+      "dab_669",
+      "dab_688",
+      "dab_721",
+      "dab_723",
+      "dab_724",
+      "dab_725",
+      "dab_732"
+    ],
+    "disclosure": "題單 dab_035/055/105 在舊機制 e008/e013/e014 開發樣本有先驗數據——非 G3 三臂之一、R-loop 從未以未見題觸及；dab_218 為 G3 系列未見（記錄在案防 cherry-pick 質疑；同 g3_gate manifest 同庫 disclosure 口徑）"
+  },
+  "budget": {
+    "max_cells": 4,
+    "timeout_s_per_round": 300,
+    "daily_token_cap": 2000000,
+    "quota_fail_closed": true,
+    "model_entry": "glm",
+    "hard_token_cap": false,
+    "cost_missing": "UNKNOWN",
+    "note": "無硬 token 上限能力；成本從 raw usage（state/vibe_calls.jsonl）讀、缺值 UNKNOWN 絕不填 0；撞 2M/日 額度即停、不得重試；glm CLI 唯一入口（--enabled-tools none、空暫存目錄）；不准反向代理、不准轉額度。1 臂×4 題＝4 格＋每題 1 次 extract 擷取（假說 §4 成本口徑；c 發實測 383921 tok/27 calls/1 rep 為 3 臂×4 題參考）"
+  },
+  "scoring": {
+    "scorer": "/srv/vlab 既有 scorer（bin/report.py <exp> --rescore）；不准用 R-loop 自己列的清單當裁判",
+    "four_class_report": [
+      "報錯→對",
+      "對→錯",
+      "未解決",
+      "成本缺值"
+    ],
+    "hidden_after": "UNKNOWN",
+    "hypothesis_gate": "extract 預跑門（H2.0：≥1/4 題 ≥1 條 required claim 可給確定性裁決→發完整批；0/4→否決、停止同路徑工單、上報人類）；H2.1＝有已確認缺口的格 fixed≥1 且 regressed=0（0 缺口→not_applicable）",
+    "same_batch_note": "同批重發不得當獨立樣本；基線對照由 c 發數據提供（native_pi/reqlist_only 不在 G3.1 默認範圍）"
+  },
+  "leak_guard": "不讀 /srv/eval/hidden/ 與 scorer.py 內容、不按隱藏分數反推規則；修復模型只看原始請求原文、凍結資料與可見反例；缺值＝UNKNOWN 不填 0；cost_usd=0 不報 0 成本；hidden_after 一律 UNKNOWN",
+  "approval": {
+    "required": true,
+    "epic": "vq-1zf",
+    "schema": "vacant.reqloop.g3gate.approval/1",
+    "file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
+    "mechanism": "人類常設授權（2026-11-11 定案第 5 條；approved=true、epic=vq-1zf、by=人類擁有者）；發射命令 --approval 指該文件；approval_gate fail-closed（無核准信號→RC 2、0 模型呼叫）。G3.1 批＝full_rloop×4 題（4 格）＋extract 預跑，成本小於該核准文件 scope（12 格三臂批）",
+    "status": "FROZEN（manifest 凍結完成；發射＝核准後另一步，本票不發射、0 model calls）"
+  },
+  "precheck_evidence": {
+    "unverified_reason_persistence": "g3.py 呼叫端 trec.unverified_reasons＝{u.id: u.reason for u in report.unverified}（vacant_network/reqloop/g3.py，r1442 入樹；extract.py 邏輯未改）",
+    "data_files_present": "tasks/ 四題 instruction.txt＋workspace/{goal.md,contract.md,data/*.csv} 實存、sha256 與 ref（/home/user1/dev/ops/ref/bm_tasks/dabench/）一致（ops/audits/g3_1_precheck.py 可重算）",
+    "verifier_support": "checks.py 支援表（answer_kv／tag_format／rowset_filter／kv_recomputed 等）；不在表內＝期望 unverified、預記 UNKNOWN"
+  }
 }
