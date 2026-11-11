@@ -1,0 +1,54 @@
+{
+  "schema": "vacant.audit/e016_envleak_resolution/1",
+  "ticket": "R20261111_1843-2",
+  "criterion": "洩漏＝cell.json 的 agent_env 含 VACANT_PI_PARENT/VACANT_PI_SELF 殘留；C-nf 臂 VACANT_FAILED_STEP_REVIEW 為預註冊臂定義參數、不計洩漏；infra 快照目錄（<cell>.infra-<YYYYMMDDTHHMMSS> 後綴）整目錄排除",
+  "negative_control": {
+    "dir": "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak",
+    "expect": {
+      "total_cells": 14,
+      "violations": 11,
+      "clean_cells": 3
+    },
+    "observed": {
+      "total_cells": 14,
+      "violations": 11,
+      "clean_cells": 3,
+      "missing_cell_json": 2
+    },
+    "ok": true,
+    "violated_cells": [
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_beer_song-pi-A-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_book_store-pi-C-nf-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_affine_cipher-pi-A-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_bottle_song-pi-C-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_affine_cipher-pi-C-nf-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_affine_cipher-pi-C-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_beer_song-pi-C-nf-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_beer_song-pi-C-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_bottle_song-pi-A-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_book_store-pi-A-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_bottle_song-pi-C-nf-r1/cell.json"
+    ],
+    "missing_cell_json": [
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_book_store-pi-C-r1/cell.json",
+      "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak/polyglot_py-pg_bowling-pi-A-r1/cell.json"
+    ]
+  },
+  "positive_control": {
+    "dir": "/srv/vlab/runs/e016_failed_step_ablation",
+    "expect": {
+      "total_cells": 102,
+      "violations": 0
+    },
+    "observed": {
+      "total_cells": 102,
+      "violations": 0,
+      "clean_cells": 102,
+      "missing_cell_json": 0
+    },
+    "ok": true,
+    "violated_cells": [],
+    "missing_cell_json": []
+  },
+  "verdict": "E016_ENVLEAK_AUDIT_OK"
+}

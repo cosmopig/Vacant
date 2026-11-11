@@ -93,10 +93,162 @@ def audit_cell_env(cell_json_path, arm="A"):
 
     return True
 
+# ---- 1843-2：目錄級批量稽核（E016 環境洩漏收案）----
+# 盤面事實：infra 快照目錄是 <cell>.infra-<YYYYMMDDTHHMMSS> 後綴形態
+# （attempt2 實測 5 個、各帶 cell.json），非 .infra- 前綴；排除規則按後綴匹配。
+# 洩漏判據（票面）：agent_env 含 host VACANT_PI_PARENT / VACANT_PI_SELF 殘留；
+# C-nf 臂的 VACANT_FAILED_STEP_REVIEW 是預註冊臂定義參數，不計為洩漏。
+import re
+INFRA_DIR_RE = re.compile(r"\.infra-\d{8}T\d{6}$")
+LEAK_MARKERS = ("VACANT_PI_PARENT", "VACANT_PI_SELF")
+
+def is_infra_dir(name: str) -> bool:
+    return bool(INFRA_DIR_RE.search(name))
+
+def agent_env_leaks(agent_env) -> bool:
+    """agent_env 有無 host VACANT_PI_PARENT / VACANT_PI_SELF 殘留（key 或 value）。
+
+    C-nf 臂的 VACANT_FAILED_STEP_REVIEW 是預註冊臂定義參數，不含上述標記、不計為洩漏。
+    """
+    if agent_env is None:
+        return False
+    if isinstance(agent_env, str):
+        blob = agent_env
+    else:
+        try:
+            blob = json.dumps(agent_env)
+        except (TypeError, ValueError):
+            blob = str(agent_env)
+    return any(m in blob for m in LEAK_MARKERS)
+
+def audit_run_dir(run_path) -> dict:
+    """掃描 run_path 下所有 cell.json（排除 infra 快照目錄）做批量洩漏稽核。
+
+    返回 {total_cells, violations, violated_cells, clean_cells, missing_cell_json}：
+    - total_cells：計入稽核的 cell.json 數（infra 快照目錄整目錄排除）
+    - violations：洩漏 cell 數（int）；violated_cells：其 cell.json 路徑列表
+    - clean_cells：無洩漏的 cell.json 路徑列表
+    - missing_cell_json：run 直屬 cell 槽目錄存在但缺 cell.json 的預期路徑
+      （attempt1 實例：book_store-C、bowling-A）
+    """
+    from pathlib import Path
+    run_path = Path(run_path)
+    result = {
+        "total_cells": 0,
+        "violations": 0,
+        "violated_cells": [],
+        "clean_cells": [],
+        "missing_cell_json": [],
+    }
+    if not run_path.is_dir():
+        return result
+
+    for root, dirs, files in os.walk(run_path):
+        # infra 快照目錄（<cell>.infra-<ts>）整目錄排除
+        dirs[:] = [d for d in dirs if not is_infra_dir(d)]
+        if "cell.json" in files:
+            p = Path(root) / "cell.json"
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except (OSError, json.JSONDecodeError):
+                continue  # 讀不了＝不計入（不假裝通過、也不虛報洩漏）
+            result["total_cells"] += 1
+            if agent_env_leaks(data.get("agent_env")):
+                result["violations"] += 1
+                result["violated_cells"].append(str(p))
+            else:
+                result["clean_cells"].append(str(p))
+        else:
+            # run 直屬的 cell 槽目錄（非 infra）缺 cell.json
+            rel = Path(root).relative_to(run_path)
+            if len(rel.parts) == 1 and not is_infra_dir(rel.parts[0]):
+                result["missing_cell_json"].append(str(Path(root) / "cell.json"))
+    return result
+
+E016_NEG_DIR = "/srv/vlab/runs/e016_failed_step_ablation_r905_attempt1_envleak"
+E016_POS_DIR = "/srv/vlab/runs/e016_failed_step_ablation"
+E016_NEG_EXPECT = {"total_cells": 14, "violations": 11, "clean_cells": 3}
+E016_POS_EXPECT = {"total_cells": 102, "violations": 0}
+
+def audit_e016() -> int:
+    """E016 環境洩漏收案：負控制 attempt1＋正控制 attempt2 雙控制。
+
+    兩控制皆吻合 → 寫 ops/audits/e016_envleak_resolution_audit.json＋
+    VERDICT: E016_ENVLEAK_AUDIT_OK＋exit 0；任一不符 → exit 1。
+    """
+    from pathlib import Path
+    neg = audit_run_dir(E016_NEG_DIR)
+    pos = audit_run_dir(E016_POS_DIR)
+
+    neg_ok = (
+        neg["total_cells"] == E016_NEG_EXPECT["total_cells"]
+        and neg["violations"] == E016_NEG_EXPECT["violations"]
+        and len(neg["clean_cells"]) == E016_NEG_EXPECT["clean_cells"]
+    )
+    pos_ok = (
+        pos["total_cells"] == E016_POS_EXPECT["total_cells"]
+        and pos["violations"] == E016_POS_EXPECT["violations"]
+    )
+    ok = neg_ok and pos_ok
+    verdict = "E016_ENVLEAK_AUDIT_OK" if ok else "E016_ENVLEAK_AUDIT_FAIL"
+
+    def _obs(r):
+        return {
+            "total_cells": r["total_cells"],
+            "violations": r["violations"],
+            "clean_cells": len(r["clean_cells"]),
+            "missing_cell_json": len(r["missing_cell_json"]),
+        }
+
+    evidence = {
+        "schema": "vacant.audit/e016_envleak_resolution/1",
+        "ticket": "R20261111_1843-2",
+        "criterion": (
+            "洩漏＝cell.json 的 agent_env 含 VACANT_PI_PARENT/VACANT_PI_SELF 殘留；"
+            "C-nf 臂 VACANT_FAILED_STEP_REVIEW 為預註冊臂定義參數、不計洩漏；"
+            "infra 快照目錄（<cell>.infra-<YYYYMMDDTHHMMSS> 後綴）整目錄排除"
+        ),
+        "negative_control": {
+            "dir": E016_NEG_DIR,
+            "expect": dict(E016_NEG_EXPECT),
+            "observed": _obs(neg),
+            "ok": neg_ok,
+            "violated_cells": neg["violated_cells"],
+            "missing_cell_json": neg["missing_cell_json"],
+        },
+        "positive_control": {
+            "dir": E016_POS_DIR,
+            "expect": dict(E016_POS_EXPECT),
+            "observed": _obs(pos),
+            "ok": pos_ok,
+            "violated_cells": pos["violated_cells"],
+            "missing_cell_json": pos["missing_cell_json"],
+        },
+        "verdict": verdict,
+    }
+    out = Path(__file__).resolve().parent / "e016_envleak_resolution_audit.json"
+    out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    print(f"Negative control (attempt1): {'OK' if neg_ok else 'FAIL'} "
+          f"(total={neg['total_cells']} violations={neg['violations']} "
+          f"clean={len(neg['clean_cells'])} missing={len(neg['missing_cell_json'])})")
+    print(f"Positive control (attempt2): {'OK' if pos_ok else 'FAIL'} "
+          f"(total={pos['total_cells']} violations={pos['violations']} "
+          f"missing={len(pos['missing_cell_json'])})")
+    print(f"evidence: {out}")
+    print(f"VERDICT: {verdict}")
+    return 0 if ok else 1
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--selftest", action="store_true", help="Run self-test mode")
+    parser.add_argument("--audit-e016", action="store_true",
+                        help="E016 環境洩漏收案雙控制（attempt1 負控制＋attempt2 正控制）")
     args = parser.parse_args()
+
+    if args.audit_e016:
+        sys.exit(audit_e016())
 
     if args.selftest:
         print("Running self-test...")
@@ -143,7 +295,7 @@ def main():
             sys.exit(1)
 
     if len(sys.argv) < 2:
-        print("Usage: labd_instance_and_env_audit.py [--selftest] <cell_json_path>")
+        print("Usage: labd_instance_and_env_audit.py [--selftest] [--audit-e016] <cell_json_path>")
         sys.exit(1)
 
     cell_json_path = sys.argv[1]
