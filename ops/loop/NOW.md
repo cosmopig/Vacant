@@ -1,27 +1,26 @@
 # NOW.md — 現況（≤3KB）
 
 ## 輪次／階段／狀態
-r1420（2026-11-11）：收斂態＋收口 r1419 殘留（vq-el4.94 驗證、同步、結案）。
-- 主線：G2.5（凍結、閉）；G3（vq-1zf）待人類 `--fire`；vq-el4.94 r1420 閉；僅餘 vq-el4.95（CI 覆蓋跟進、次輪一次讀收口）。
-- r1419（9311ef8a，rc=124 殘留）代碼＋6 測＋pin 已在樹；r1420 驗證全綠：pin 2/2、RED 負控 4 FAIL＋正控 2 PASS（舊碼）→6/6（新碼）、護衛 121 passed、freeze 12/12、diff 0×2。
+r1423（2026-11-11）：工單 P20261111_0315-1 收案——G3 分支（d13bac4be P0＋9327dffb5 AMEND-1、base r1418）已併入 auto/qwen27b（r1421 auto-commit 1af7aecf1；本輪 redo 收案）。
+- 主線：G2.5（凍結、已收案）；G3（vq-1zf）接線完成、待人類 `--fire`（AMEND-1＝接線核准、非發射核准；/srv/vlab/queue 空）；僅餘 vq-el4.95（CI 覆蓋跟進、次輪一次讀收口）。
+- 本輪驗收（全數新跑）：G3 trio 70 passed（g3 25／conformance 18／g3gate 27）；freeze_check 27 passed（含 3 GUARD_CONTENT_PIN）；g3gate --plan NOT FIRED＋PLAN OK（入口=glm+local_pi）；g3 --dry-run 12 cells＋arm conformance OK、0 模型呼叫。
 
-## 下一步（次輪）
-- 常規：頭部 ci_tip_check 一次讀（不 poll）——qwen27b 代碼改動 CI 在跑（9311ef8a 在跑≠已綠）；綠後三分支應 covered。
-- freeze_check 12 項全核；實質新任務以人類批核或新產品 bug 為準（11-06 指示仍有效：不加同線重試、不加大規模重跑）。
+## 下一步（下一輪）
+- 常規：輪首 ci_tip_check 一次讀取（不 poll）——現三分支 HEAD（qwen27b 簿記 commit／worker 33759b498／argon b718a96ee）CI pending、次輪一次讀。
+- freeze_check 12 項複驗；實質新任務待人類核准或新產品 bug。
 
 ## 近期關鍵事件
-- r1420-redo：審查點名 3 檔未開啟——effects summary（50 cells：policy30 w→r 13 g7/15·l6/15、feedback 11 g7/10·l4/10、r→w 0）／filing（三門 PASS、6 sha256 本輪重算全 MATCH）／extract.py（1217 行、blob e757aec5…、g3.py:39 import 依賴）——全開啟＋獨立重算、r1420 依賴主張全成立、0 重做。
-- r1420：vq-el4.94 閉——GlmChannel total_tokens 收緊 strict int≥0、否則 UNKNOWN（不填 0）；r1419 代碼＋6 測＋GUARD_CONTENT_PIN 解凍記錄本輪驗收：pin sha 2/2 MATCH、RED 證據（舊碼 4 負控 FAIL／2 正控 PASS、還原 sha 復合）、護衛 8 檔 121 passed、freeze_check 12/12、worktree 同步 diff 0×2。
-- r1419：（rc=124）auto-commit 9311ef8a 代碼＋測試＋pin 入樹、未同步 peer／未結案→r1420 紅燈源頭（diff_worker/diff_argon）。
+- r1423：工單 P20261111_0315-1 收案——merge 已在樹內驗證（1af7aecf1、parents 9504e6270+9327dffb5）；tests 檔開啟（r1419 local／r1419 branch／r1420／r1421 解凍記錄全數保留）；5 pins 磁碟複驗 2ba95fe5…／b07ce47e…／a7507f6a…／a1b10e2e…／86bac89d…；紅線行更新 r1420 值＋AMEND-1 註記；in-scope diff 0×2（docs 檔非 in-scope、qwen27b 獨有）。
+- r1421（rc=124 未收尾）：merge 入樹（1af7aecf1）＋pins 更新磁碟實值（r1421 合併記錄）＋worker／argon 6 檔同步（33759b498／b718a96ee）——簿記與結案當時未做、本輪補完。
+- r1420-redo：審查點名 3 檔開啟＋重算、主張全成立、0 重做。
+- r1420：vq-el4.94 閉——GlmChannel total_tokens strict int≥0、否則 UNKNOWN（fail-closed）；121 passed＋freeze 12/12。
 
 ## 關鍵約束（紅線）
-- 不 push（loop 自動推 auto/qwen27b）、不 main、不 reset/rebase；.github/workflows/ 唯讀。
-- 凍結 4 檔不改（repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…）＋g25 filing（6 sha256）不改；r1419 解凍 2 檔（g3.py ecac7879…／test_reqloop_g3.py c036e3cd…，vq-el4.94 記錄在案）已釘。
-- /srv/eval/hidden/、scorer.py 不讀；anchors 5＋filing 3/3＋3/3 每輪複核。
-- G3 未 fire（/srv/vlab/queue 空、NOT_FIRED）；不 sleep poll CI；不全量 pytest；本輪 0 model calls。
+- 無 push（loop 自推 auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
+- 凍結 4 檔不改（repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…）＋g25 filing（6 sha256）不改；r1419/r1420/r1421 解凍已釘（g3.py 2ba95fe5…／test_reqloop_g3.py b07ce47e…／g3_conformance a7507f6a…／g3gate.py a1b10e2e…／test_reqloop_g3gate.py 86bac89d…；r1420＝AMEND-1 人類裁決之合法解凍、記錄在 GUARD_CONTENT_PIN r1420 條目）。
+- /srv/eval/hidden/、scorer.py 不讀；anchors 5＋filing 3/3+3/3 每輪複驗。
+- G3 未發射（queue 空、NOT_FIRED）；無 sleep poll CI；無 full pytest；本輪 0 model calls。
 
-## 證據與次輪驗證點
-- `python3 ops/reqloop/freeze_check.py` → VERDICT: FROZEN_STATE_OK 12/12（r1420 修後實測）。
-- `python3 ops/reqloop/ci_tip_check.py` → 開輪一次讀；現 qwen27b 代碼 CI 在跑（在跑≠已綠、不 poll）。
-- 護衛套件：8 檔 121 passed（27/5/2/19/27/24/5/12；g3 18→24＝r1419 6 新測）。
-- RED 證據：舊碼 4 負控 FAILED＋2 正控 PASS；新碼 6/6 綠（r1420 實測、還原 sha256 復合 pin）。
+## 證據與下輪驗證點
+- `python3 ops/reqloop/freeze_check.py` → VERDICT: FROZEN_STATE_OK 12/12（本輪簿記後重跑、綠）。
+- 守衛套件：freeze 27／anchors 5／ci 2／ves 19／g3 25／conformance 18／g3gate 27／now_redline 5／ci_tip 12（本輪新跑）。
