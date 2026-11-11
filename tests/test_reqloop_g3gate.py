@@ -196,6 +196,60 @@ def test_check_budget_rejects_loosened_timeout_ceiling(tmp_path: pathlib.Path):
     raise AssertionError("timeout_s_per_round=3000 放寬 300s/輪預註冊上限必須拒")
 
 
+def test_check_budget_accepts_amend2_pi_timeout_exactly_600(tmp_path: pathlib.Path):
+    """正控制：AMEND-2（2026-11-11 人類常設授權）pi 臂每格牆時 cap＝600s＝預註冊
+    上限——恰好等於上限不是放寬，必須接受（glm 的 timeout_s_per_round 仍 ≤300s）。"""
+    plan = _loaded()
+    at = {**plan.raw, "budget": {**plan.budget, "timeout_s_per_round_pi": 600}}
+    p = _tmp_manifest(tmp_path, at)
+    g3.check_budget(g3.G3Plan.load(p))   # 必須不 raise
+
+
+def test_check_budget_rejects_loosened_pi_timeout_ceiling(tmp_path: pathlib.Path):
+    """manifest 放寬 AMEND-2 預註冊 600s/格上限（timeout_s_per_round_pi=601）必須拒。
+
+    首發後檢（票 P20261111_0645-1）：3× native_pi 格 300s 超時；AMEND-2 把 pi 臂
+    每格牆時放到 600s、glm 維持 300s/輪——600 是新的預註冊上限，放寬仍拒（r1408
+    同口徑：manifest 可加嚴、不可放寬）。"""
+    plan = _loaded()
+    bad = {**plan.raw, "budget": {**plan.budget, "timeout_s_per_round_pi": 601}}
+    p = _tmp_manifest(tmp_path, bad)
+    try:
+        g3.check_budget(g3.G3Plan.load(p))
+    except ValueError as e:
+        assert "timeout_s_per_round_pi" in str(e)
+        return
+    raise AssertionError("timeout_s_per_round_pi=601 放寬 600s/格預註冊上限必須拒")
+
+
+def test_check_budget_rejects_missing_pi_timeout_with_pi_arm(tmp_path: pathlib.Path):
+    """model_entry=glm+local_pi（pi 臂在場）而 budget.timeout_s_per_round_pi 缺失
+    必須拒——per-channel cap 必須在案（fail-closed；與 pi_provider/pi_model 同口徑）。"""
+    plan = _loaded()
+    raw = {**plan.raw, "budget": {
+        k: v for k, v in plan.budget.items() if k != "timeout_s_per_round_pi"}}
+    p = _tmp_manifest(tmp_path, raw)
+    try:
+        g3.check_budget(g3.G3Plan.load(p))
+    except ValueError as e:
+        assert "timeout_s_per_round_pi" in str(e)
+        return
+    raise AssertionError("pi 臂在場而 timeout_s_per_round_pi 缺失必須拒")
+
+
+def test_check_budget_rejects_nonint_pi_timeout(tmp_path: pathlib.Path):
+    """timeout_s_per_round_pi 非 int（字串）必須拒——門不得信被驗方的自我聲明（r1405 同族）。"""
+    plan = _loaded()
+    bad = {**plan.raw, "budget": {**plan.budget, "timeout_s_per_round_pi": "600"}}
+    p = _tmp_manifest(tmp_path, bad)
+    try:
+        g3.check_budget(g3.G3Plan.load(p))
+    except ValueError as e:
+        assert "timeout_s_per_round_pi" in str(e)
+        return
+    raise AssertionError("timeout_s_per_round_pi='600'（非 int）必須拒")
+
+
 def test_check_budget_rejects_loosened_daily_cap_ceiling(tmp_path: pathlib.Path):
     """manifest 放寬預註冊 2M/日上限（daily_token_cap=2e9）必須拒。"""
     plan = _loaded()

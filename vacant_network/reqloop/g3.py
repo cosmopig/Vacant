@@ -67,6 +67,16 @@ DEFAULT_ANSWER_MODEL = "deepseek41"     # 作答模型（glm CLI 別名）
 DEFAULT_EXTRACT_MODEL = "glm53"         # 擷取模型（必須不同於作答模型）
 DATA_PREVIEW_BYTES = 64 * 1024          # 進 prompt 的單資料檔上限（超出截斷並如實標註）
 
+#: glm 臂 token_limit 修復（票 P20261111_0645-1，選項 a：提升 glm 上限）：
+#: vibe --max-tokens＝「Maximum total prompt + completion tokens」（vibe help
+#: 原文）——是 prompt+completion 總預算，不是 completion 上限。首發實證（8×
+#: 「Stopped: token_limit」）：answer prompt input 32609–39266 tok
+#: （state/vibe_calls.jsonl）全部 > glm CLI 預設 --max-tokens 30000→completion
+#: 被擠成 55–181 tok；擷取 call（input ~5.7K tok）在 30000 內→全成。上限是
+#: CLI 級參數（非每帳號設定），由本呼叫端顯式傳：60000 > 首發最大 prompt
+#: 39266＋completion 空間。
+GLM_MAX_TOKENS_TOTAL = 60_000
+
 REPO = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 DEFAULT_STATE_DIR = pathlib.Path(os.environ.get("VACANT_OPS_STATE", str(pathlib.Path.home() / "dev" / "ops" / "state")))
@@ -408,7 +418,8 @@ class GlmChannel(Channel):
                 f.write(prompt)
             proc = subprocess.run(
                 [self.glm_bin, "--model", model, "--purpose", purpose,
-                 "--prompt-file", prompt_path, "--time-limit", str(int(timeout_s))],
+                 "--prompt-file", prompt_path, "--time-limit", str(int(timeout_s)),
+                 "--max-tokens", str(GLM_MAX_TOKENS_TOTAL)],
                 capture_output=True, text=True, timeout=timeout_s + 30,
             )
         except subprocess.TimeoutExpired as e:
@@ -833,6 +844,11 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
     cap = int(plan.budget["daily_token_cap"])
     tpr = int(plan.budget["timeout_s_per_round"])
     arm_order = tuple(plan.arms)
+    # AMEND-2（2026-11-11，票 P20261111_0645-1）：per-channel 牆時——pi 臂每格＝
+    # budget.timeout_s_per_round_pi（600s）；glm 臂與擷取維持 timeout_s_per_round
+    # （300s）。check_budget 已驗（pi 臂在場而字段缺失/放寬/非 int→拒發）。
+    needs_pi = any(ARM_WIRED.get(a, {}).get("pi_agent") for a in arm_order)
+    tpr_pi = int(plan.budget["timeout_s_per_round_pi"]) if needs_pi else tpr
     # 臂 conformance（核准過了也不代表臂名實相符）：任何一臂與預註冊定義
     # 不符即拒發——0 模型呼叫（名實不符的發射比不發射更糟：數據會掛著
     # 錯的臂名被引用）。
@@ -840,7 +856,6 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
     if not ok_arms:
         raise G3ArmsNotConformant("；".join(arm_problems))
     # pi 臂的執行通道必須真的注入（PiChannel 或測試假通道）；缺注入＝拒發
-    needs_pi = any(ARM_WIRED.get(a, {}).get("pi_agent") for a in arm_order)
     if needs_pi and pi_channel is None:
         raise G3ArmsNotConformant(
             "native_pi: pi_agent 已接線（AMEND-1）但 pi_channel 未注入——"
@@ -957,9 +972,10 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                 rec: dict = {"round": round_no, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
                              "usages": [], "error": None}
                 try:
+                    # AMEND-2：pi 臂每格 600s（tpr_pi）；glm 臂每輪 300s（tpr）。
                     text, usage = guard.call(prompt=prompt, model=answer_model,
                                              purpose=f"G3 {tid}/{arm} r{round_no}",
-                                             timeout_s=tpr)
+                                             timeout_s=tpr_pi if spec.get("pi_agent") else tpr)
                 except G3QuotaError as e:
                     rec["error"] = f"quota: {e}"
                     cell["rounds"].append(rec)

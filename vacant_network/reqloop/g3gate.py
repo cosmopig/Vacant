@@ -36,6 +36,12 @@ APPROVAL_SCHEMA = "vacant.reqloop.g3gate.approval/1"
 # 預註冊預算上限（vq-1zf：≤12 格、300s/輪、日 ≤2,000,000 tok；fail-closed 底線）
 MAX_CELLS = 12
 MAX_TIMEOUT_S_PER_ROUND = 300
+#: AMEND-2（2026-11-11，人類常設授權；票 P20261111_0645-1）：native_pi 臂每格牆時
+#: cap。首發後檢實證：3× pi 格 300s 超時，唯一成功的 pi 格用 278s（貼線）；
+#: 本地 pi 工具迴圈（qwen3.8-27b）單回合 >300s。AMEND-2 把 pi 臂每格放到 600s、
+#: glm 臂維持 300s/輪（glm 的 8 個失敗是 token_limit、非牆時，兩類分開修）。
+#: 600 即新的預註冊上限：manifest 可加嚴、不可放寬（同 timeout_s_per_round 口徑）。
+MAX_TIMEOUT_S_PER_ROUND_PI = 600
 MAX_DAILY_TOKEN_CAP = 2_000_000
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g3_gate" / "manifest.json"
@@ -47,6 +53,7 @@ DEFAULT_MANIFEST = REPO_ROOT / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 DEFAULT_BUDGET: dict[str, Any] = {
     "max_cells": MAX_CELLS,
     "timeout_s_per_round": MAX_TIMEOUT_S_PER_ROUND,
+    "timeout_s_per_round_pi": MAX_TIMEOUT_S_PER_ROUND_PI,  # AMEND-2：pi 臂每格牆時 cap（glm 仍 300s/輪）
     "daily_token_cap": MAX_DAILY_TOKEN_CAP,
     "quota_fail_closed": True,
     "model_entry": "glm+local_pi",
@@ -238,6 +245,28 @@ def check_budget(plan: G3Plan) -> None:
             v = b.get(key)
             if not (isinstance(v, str) and v.strip()):
                 raise ValueError(f"model_entry=glm+local_pi 必須宣告 {key}（非空字串）")
+    # AMEND-2（2026-11-11，票 P20261111_0645-1）：pi 臂每格牆時 cap 獨立於 glm 的
+    # timeout_s_per_round（≤300s 不變）。per-channel cap 必須在案（fail-closed，
+    # 與 pi_provider/pi_model 同口徑）；存在即驗 int>0 且 ≤600（放寬即拒，r1408 同口徑）。
+    tpr_pi = b.get("timeout_s_per_round_pi")
+    if tpr_pi is None:
+        if entry == "glm+local_pi":
+            raise ValueError(
+                "budget.timeout_s_per_round_pi 缺失（pi 臂在場，AMEND-2 的每格牆時"
+                " cap 必須在案）")
+    else:
+        if isinstance(tpr_pi, bool):
+            raise ValueError("budget.timeout_s_per_round_pi 非法（bool 不算 int，r1405 同族）")
+        try:
+            tpr_pi_i = int(tpr_pi)
+        except (TypeError, ValueError):
+            raise ValueError("budget.timeout_s_per_round_pi 非法（必須是 int）")
+        if tpr_pi_i != tpr_pi or tpr_pi_i <= 0:
+            raise ValueError("budget.timeout_s_per_round_pi 必須是 > 0 的 int")
+        if tpr_pi_i > MAX_TIMEOUT_S_PER_ROUND_PI:
+            raise ValueError(
+                f"budget.timeout_s_per_round_pi={tpr_pi_i} 放寬預註冊上限 "
+                f"{MAX_TIMEOUT_S_PER_ROUND_PI}s/格（AMEND-2；manifest 可加嚴、不可放寬）")
     if "native_pi" in plan.arms and entry != "glm+local_pi":
         raise ValueError(
             "arms 含 native_pi（預註冊要求原生 pi）但 model_entry 未宣告 local_pi" "——名實不符即拒（AMEND-1）")
