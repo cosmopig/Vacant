@@ -31,7 +31,7 @@ def get_non_trivial_lines(content: str) -> List[str]:
 
 def get_content_hash(lines: List[str]) -> str:
     """Computes SHA256 of sorted non-trivial lines."""
-    content = "\n".join(lines)
+    content = "\n".join(sorted(list(set(lines))))
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 def analyze_archive(tar_path: str, ground_truth_dir: str) -> Dict[str, Any]:
