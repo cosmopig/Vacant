@@ -253,3 +253,10 @@
 - 驗證了什麼：驗收命令改前狀態＝argparse exit 2（與票一致）；attempt2 PI 掃描 0/107 命中（含 infra）；list_ops smoke mtime 14:15 vs affine-A 14:38。
 - 沒驗證什麼：audit_run_dir/--audit-e016 未實作（驗收期望值本身錯，實作即被迫擇一：硬編 15 恆紅、或改數硬綠）。
 - 下一步：等規劃者依票尾重拆建議改期望值重發（或裁定口徑）；doing/ 現空；1215-1 收案＋CI 三分支核不變。
+
+## 2026-11-11 r1462（票 P20261111_1918-1-labd-instance-audit-live-fix，1716-1 重拆，doing→done）
+- 做了什麼：check_labd_instances 重寫——live 路徑改 stray_labd_ps_evidence.collect_processes（/proc 掃描）＋is_labd 判定（python 解釋器前置的 labd.py 參數），移除 pgrep -f 子字串路徑；mock proc_list 逐項判定（list/dict["cmdline"]／"args"／bare string）；三向 0→0／1→1／>1→ERROR: MULTIPLE_LABD_INSTANCES Count N＋exit 1；selftest 補 0／1／substring 控制並把 AGENT_ENV_LEAK 控制移入可達位置（原為死碼）；3 個 pgrep-mock 測試換成 7 個新控制（含 collect_processes mock 分支測試）。main repo 本無重複 def（重複在 worker 未升上 de75f2d87），重寫後恰 1 個 def（步驟 2 滿足）。
+- 驗證了什麼：驗收指令 RC=0（LIVE_COUNT_1_OK＋pytest 10 passed）；live 三向實測——真 1 實例→1/rc0、加假第 2 實例→Count 2/rc1（假殘留 330333 事後 kill、清理後復測→1/rc0）；selftest×2（module／script 模式）全 SUCCESS；stray_labd selftest 6/6；anchors 5 passed（凍結 4 檔未動）。0 model calls。
+- 沒驗證什麼：live 0 實例路徑（須停真 labd 1734，不動它；mock＋selftest 覆蓋判定分支）；CI（不 poll）。
+- 誠實記帳：改前 pgrep -f 路徑此刻恰好只命中 1734 而驗收為綠，但結構上仍假陽性易（r1461 實量 count 2 假陽性）；本輪為結構修復非數字修復。
+- 下一步：1843-2（audit_run_dir/--audit-e016）串行審查（worker 在進、同檔，本輪 commit 為其新基線）；1215-1 收案；CI 三分支 ci_status.py 核；G3.1 H2.0 重發待人類裁決。

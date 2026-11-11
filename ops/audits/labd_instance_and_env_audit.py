@@ -2,23 +2,44 @@ import sys
 import os
 import json
 import argparse
-import subprocess
+
+try:
+    from ops.audits.stray_labd_ps_evidence import collect_processes, is_labd
+except ImportError:  # direct script run from ops/audits/ (sys.path[0] = script dir)
+    from stray_labd_ps_evidence import collect_processes, is_labd
+
+def _cmdline_of(entry):
+    """Normalize one proc_list entry to a cmdline argument list.
+
+    Accepts a raw argument list, a dict with "cmdline"/"args"
+    (collect_processes() shape), or a bare string (judged as one token).
+    """
+    if isinstance(entry, dict):
+        for key in ("cmdline", "args"):
+            value = entry.get(key)
+            if isinstance(value, (list, tuple)):
+                return [str(a) for a in value]
+        return []
+    if isinstance(entry, (list, tuple)):
+        return [str(a) for a in entry]
+    if isinstance(entry, str):
+        return [entry]
+    return []
 
 def check_labd_instances(proc_list=None):
     """
-    Verify that the number of running labd.py instances is <= 1.
+    Count running labd.py instances.
     0 = idle, 1 = normal; >1 reports MULTIPLE_LABD_INSTANCES and exits 1.
+
+    proc_list=None: live /proc scan via stray_labd_ps_evidence.collect_processes,
+    judged by is_labd (an argument ending in labd.py preceded by a python
+    interpreter) -- no pgrep -f substring match, so a process whose args merely
+    mention "labd.py" never counts (and a bare pid string can never match).
+    proc_list given: each entry judged item by item with the same is_labd rule.
     """
     if proc_list is None:
-        # Real check: look for 'labd.py' in the process list
-        try:
-            output = subprocess.check_output(["pgrep", "-f", "labd.py"], text=True)
-            proc_list = output.splitlines()
-        except subprocess.CalledProcessError:
-            # pgrep returns non-zero if no processes found, which is fine (0 instances)
-            proc_list = []
-
-    count = len(proc_list)
+        proc_list = collect_processes()
+    count = sum(1 for entry in proc_list if is_labd(_cmdline_of(entry)))
     if count > 1:
         print("ERROR: MULTIPLE_LABD_INSTANCES detected. Count: " + str(count))
         sys.exit(1)
@@ -79,9 +100,37 @@ def main():
 
     if args.selftest:
         print("Running self-test...")
-        # Test MULTIPLE_LABD_INSTANCES (should exit 1)
+        # Three-way control: 0 instances
+        if check_labd_instances(proc_list=[]) != 0:
+            print("FAILURE: expected 0 for empty proc_list")
+            sys.exit(1)
+        print("SUCCESS: zero instances")
+        # Three-way control: 1 instance
+        if check_labd_instances(proc_list=[["python3", "/srv/vlab/bin/labd.py"]]) != 1:
+            print("FAILURE: expected 1 for a single labd cmdline")
+            sys.exit(1)
+        print("SUCCESS: single instance")
+        # Substring-only args must not count (pgrep -f false positive)
+        if check_labd_instances(proc_list=[["pi", "-p", "text mentions labd.py"]]) != 0:
+            print("FAILURE: substring-only match must not count")
+            sys.exit(1)
+        print("SUCCESS: substring non-labd not counted")
+        # Test AGENT_ENV_LEAK (should exit 1)
         try:
-            check_labd_instances(proc_list=["pid1", "pid2"])
+            audit_cell_env("dummy_path", arm="A")
+        except SystemExit as e:
+            if e.code == 1:
+                print("SUCCESS: Caught AGENT_ENV_LEAK")
+            else:
+                print(f"FAILURE: Unexpected exit code {e.code}")
+                sys.exit(1)
+        else:
+            print("FAILURE: expected SystemExit for AGENT_ENV_LEAK")
+            sys.exit(1)
+
+        # Test MULTIPLE_LABD_INSTANCES (should exit 1) -- last: exits 0 on success
+        try:
+            check_labd_instances(proc_list=[["python3", "/a/labd.py"], ["python3", "/b/labd.py"]])
         except SystemExit as e:
             if e.code == 1:
                 print("SUCCESS: Caught MULTIPLE_LABD_INSTANCES")
@@ -89,17 +138,9 @@ def main():
             else:
                 print(f"FAILURE: Unexpected exit code {e.code}")
                 sys.exit(1)
-
-        # Test AGENT_ENV_LEAK (should exit 1)
-        try:
-            audit_cell_env("dummy_path", arm="A")
-        except SystemExit as e:
-            if e.code == 1:
-                print("SUCCESS: Caught AGENT_ENV_LEAK")
-                sys.exit(0)
-            else:
-                print(f"FAILURE: Unexpected exit code {e.code}")
-                sys.exit(1)
+        else:
+            print("FAILURE: expected SystemExit for multiple instances")
+            sys.exit(1)
 
     if len(sys.argv) < 2:
         print("Usage: labd_instance_and_env_audit.py [--selftest] <cell_json_path>")
