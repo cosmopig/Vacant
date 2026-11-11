@@ -2,10 +2,10 @@
 
 主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結）、G2 已完（凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 現況（r1415、2026-11-11）
+## 現況（r1416、2026-11-11）
 
-驗證＋簿記輪（0 代碼改動、0 model calls）：
-- ci_tip_check：輪首（一次讀取）三分支 NO_COVERAGE、CI_TIP_BROKEN rc=1（3 非簿記檔＝r1413 碼改動未被綠 CI 測量、CI 在跑）→ 本輪期間 a08a6f7d7（含該 3 檔）收綠（01:03:06、5152 passed／0 failed／74 skipped）→ **輪末 VERDICT: CI_TIP_OK rc=0、收斂完成**（qwen27b@7e104c613 COVERED、worker@fb3a57d91＋argon@db9461230 PEER_COVERED root tree 恆等；CI 仍在跑 argon@6a9ad4233 舊 tip、在跑≠已綠、不 poll）
+驗證＋簿記輪（0 代碼改動、0 model calls），全綠：
+- ci_tip_check（輪首一次讀取、不 poll）：**VERDICT: CI_TIP_OK rc=0**——qwen27b@da653a9f COVERED（綠祖先 a08a6f7d7..tip 純簿記 4 檔）；worker@c2c4d135 PEER_COVERED（root tree 與 qwen27b tip 位元組恆等 7d37c25f…）；argon@448c154e COVERED（綠祖先 6a9ad4233..tip 純簿記 4 檔）；state.json 一次讀取 CI 在跑（在跑≠已綠、不 poll）
 - freeze_check：12/12 FROZEN_STATE_OK rc=0（anchors 5／ci_contract 2／diff 0×2／filing 3/3＋3/3／g3gate NOT_FIRED PLAN_OK／queue 空（含隱藏）／bk 同步／wt clean 3/3／now_redline 相符）
 - 守衛套件 8 檔 115 passed（27/5/2/19/27/18/5/12；審查基線 114＋r1413 負控 (i) 1、0 弱化）
 - bd：vq-el4 94/94 全閉、0 open；唯一 ready＝vq-1zf（G3）待人類 --fire；/srv/vlab/queue 空；無新人類指示（ops/ 最新仍 11-07；審查 20261110_2256 五條指示全數複驗維持）
