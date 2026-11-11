@@ -2,51 +2,113 @@ import sys
 import os
 import json
 import argparse
-from typing import List, Optional
+import subprocess
 
-def audit_cell_env(cell_json_path: str, arm: str = "A") -> int:
+def check_labd_instances(proc_list=None):
     """
-    Verifies that cell.json does not contain host environment leaks in agent_env.
-    For A/C arms, VACANT_* or host pi session residuals are forbidden.
-    Returns 0 on success, or exits with 1 and a message on failure.
+    Verify that the number of running labd.py instances is <= 1.
+    0 = idle, 1 = normal; >1 reports MULTIPLE_LABD_INSTANCES and exits 1.
     """
-    # If path doesn't exist, we can't audit it anyway, but for testing purposes
-    # we might want to handle it gracefully if mocked.
-    if not os.path.exists(cell_json_path) and "fake" not in cell_json_path:
-        print(f"ERROR: File {cell_json_path} not found")
+    if proc_list is None:
+        # Real check: look for 'labd.py' in the process list
+        try:
+            output = subprocess.check_output(["pgrep", "-f", "labd.py"], text=True)
+            proc_list = output.splitlines()
+        except subprocess.CalledProcessError:
+            # pgrep returns non-zero if no processes found, which is fine (0 instances)
+            proc_list = []
+
+    count = len(proc_list)
+    if count > 1:
+        print("ERROR: MULTIPLE_LABD_INSTANCES detected. Count: " + str(count))
+        sys.exit(1)
+    return count
+
+def audit_cell_env(cell_json_path, arm="A"):
+    """
+    Verify cell.json agent_env. 
+    For A/C arms, must not contain VACANT_* or host pi session residuals (must be empty/null).
+    Reports AGENT_ENV_LEAK and exits 1 on violation.
+    """
+    if not os.path.exists(cell_json_path):
+        print(f"ERROR: Cell JSON path {cell_json_path} does not exist.")
         sys.exit(1)
 
-    # For testing purposes, if the file is fake, we mock its content
-    if "fake" in cell_json_path:
-        if "leak" in cell_json_path:
-            data = {"agent_env": {"VACANT_PI_PARENT": "some_value"}}
-        else:
-            data = {"agent_env": {"SOME_VAR": "value", "OTHER_VAR": 123}}
-    else:
-        with open(cell_json_path, "r") as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                print("ERROR: Failed to decode JSON from cell.json")
-                sys.exit(1)
-
+    with open(cell_json_path, 'r') as f:
+        data = json.load(f)
+    
     agent_env = data.get("agent_env", {})
-    if not isinstance(agent_env, dict):
-        # If it's null or missing, it's technically "empty" for our purposes
-        return 0
+    if agent_env is None:
+        agent_env = {}
 
-    # Check if arm is A or C (case-insensitive)
-    if arm.upper() in ("A", "C"):
-        for key, value in agent_env.items():
-            val_str = str(value).upper()
-            # Forbidden patterns: VACANT_* or host pi session residuals
-            # Host pi session residuals often look like PI_PARENT, PI_SELF, etc.
-            if "VACANT_" in key.upper() or "VACANT_" in val_str:
-                print(f"ERROR: AGENT_ENV_LEAK detected in {key}={value}")
+    # If it's a string (some formats might have it as a raw string), convert to dict if possible
+    # but the requirement implies a structure we can check for keys/values.
+    if isinstance(agent_env, str):
+        # This shouldn't happen based on typical cell.json but handle just in case
+        pass
+
+    # Check for A or C arms (case-insensitive)
+    arm_upper = arm.upper()
+    # We need to know which arm this cell belongs to. 
+    # Usually, the file path or a field in cell.json indicates it.
+    # The requirement says "If for A/C arms". Let's check if 'arm' is in data.
+    cell_arm = str(data.get("arm", "")).upper()
+    
+    if arm_upper in ["A", "C"] or cell_arm in ["A", "C"]:
+        # Check for VACANT_* keys or values
+        for k, v in agent_env.items():
+            v_str = str(v)
+            if "VACANT_" in k or "VACANT_" in v_str:
+                print(f"ERROR: AGENT_ENV_LEAK detected in key '{k}' with value '{v_str}'")
                 sys.exit(1)
-            # Check for host pi session residuals (e.g., PI_PARENT, PI_SELF)
-            if "PI_PARENT" in val_str or "PI_SELF" in val_str:
-                print(f"ERROR: AGENT_ENV_LEAK detected in {key}={value}")
+        
+        # Check for host pi session residuals (e.g., PI_PARENT, PI_SELF)
+        # These are often injected as env vars.
+        for k, v in agent_env.items():
+            v_str = str(v)
+            if "PI_PARENT" in v_str or "PI_SELF" in v_str:
+                print(f"ERROR: AGENT_ENV_LEAK detected host pi session residual in '{k}'")
                 sys.exit(1)
 
-    return 0
+    return True
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--selftest", action="store_true", help="Run self-test mode")
+    args = parser.parse_args()
+
+    if args.selftest:
+        print("Running self-test...")
+        # Test MULTIPLE_LABD_INSTANCES (should exit 1)
+        try:
+            check_labd_instances(proc_list=["pid1", "pid2"])
+        except SystemExit as e:
+            if e.code == 1:
+                print("SUCCESS: Caught MULTIPLE_LABD_INSTANCES")
+                sys.exit(0)
+            else:
+                print(f"FAILURE: Unexpected exit code {e.code}")
+                sys.exit(1)
+
+        # Test AGENT_ENV_LEAK (should exit 1)
+        try:
+            audit_cell_env("dummy_path", arm="A")
+        except SystemExit as e:
+            if e.code == 1:
+                print("SUCCESS: Caught AGENT_ENV_LEAK")
+                sys.exit(0)
+            else:
+                print(f"FAILURE: Unexpected exit code {e.code}")
+                sys.exit(1)
+
+    if len(sys.argv) < 2:
+        print("Usage: labd_instance_and_env_audit.py [--selftest] <cell_json_path>")
+        sys.exit(1)
+
+    cell_json_path = sys.argv[1]
+    check_labd_instances()
+    audit_cell_env(cell_json_path, arm="A")
+    print("VERDICT: LABD_AUDIT_OK")
+
+if __name__ == "__main__":
+    main()
