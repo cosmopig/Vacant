@@ -1,7 +1,7 @@
 # NOW.md — 現在狀態（每輪更新，≤3KB）
 
 ## 狀態（2026-11-11 r1443）
-- r1443（1152-1）：G3 unverified 原因持久化——report.unverified 逐條存進 trec.unverified_reasons＋evidence["reason"]（g3.py 僅此、0 model calls）；test_unverified_reasons_persisted 負/正控制＋end-to-end；GUARD_CONTENT_PIN 解凍記錄；三分支同步後 freeze_check 12/12。
+- r1443（1152-1）：G3 unverified 原因持久化——report.unverified 逐條存進 trec.unverified_reasons＋evidence["reason"]（g3.py 僅此、0 model calls）；test_unverified_reasons_persisted 負/正控制＋end-to-end；GUARD_CONTENT_PIN 解凍記錄；worktree 已同步，freeze_check 11/12（唯一紅＝diff_worker：worker loop 並行 WIP 3 檔、非本輪遺漏、不碰）。
 - r1442：30f387a04（argon）審完採 2 測試、未完整 merge（舊線、會回退較新產物）；worker 產物（G3.1 manifest freeze 等 6 檔）升上 mainline；NOW.md 紅線契約行修復＋鏡像 byte 一致。
 - G3.1：H2.0＋H2.1 已凍結；待人類核准，核准前不發射、不佔配額（vq-kax）。
 
@@ -18,4 +18,5 @@
 
 ## 下輪入口（≤3）
 - bd ready（vq-kax 狀態＋人類裁決）→下一票；doing/ 現空。
-- 守衛：g3 四檔＋anchors＋freeze_check（12 項，含 now_redline、diff_worker/argon）全綠。
+- diff_worker 紅（worker loop WIP stray_labd_ps 3 檔）：審查後升上 mainline 或 worker 側收束→freeze_check 12/12。
+- 守衛：g3 四檔＋anchors＋freeze_check（除上項外）全綠。
