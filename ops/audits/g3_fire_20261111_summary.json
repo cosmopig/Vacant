@@ -1,0 +1,398 @@
+{
+  "schema": "vacant.audit/g3_fire_20261111_summary/1",
+  "generated_by": "ops/audits/g3_fire_20261111_summary.py",
+  "identity": {
+    "result_file": "/home/user1/dev/ops/g3_fire_20261111/g3_result.json",
+    "result_bytes": 11071,
+    "result_sha256": "3961e38d879265cee574686c90ce814a6dc57211bb8da60f60f3c9171533779f",
+    "result_file_mtime_utc": "2026-11-11T06:02:37+00:00",
+    "approval_file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
+    "approval_sha256": "610c7640347296c43d986b4adc59096ad3fe4967bbf560b727d8f97755ea0709",
+    "approval_approved": true,
+    "approval_epic": "vq-1zf"
+  },
+  "fire": {
+    "fired_at": "2026-11-11T05:41:18Z",
+    "launcher": "systemd user unit vacant-g3-fire-20261111（r1426 發射；一次性、無 [Install]、不自動再發射）",
+    "out_dir": "/home/user1/dev/ops/g3_fire_20261111",
+    "journal": "journalctl --user -u vacant-g3-fire-20261111",
+    "done_marker": "journal 尾行『G3 FIRE DONE』（2026-11-11T06:02:37Z）；unit inactive (dead)",
+    "stop_reason": null
+  },
+  "scope": "4 未見題（dab_129/144/176/216）× 3 臂（native_pi/reqlist_only/full_rloop）＝12 格；同批重跑須簿記如實標記、不得當獨立樣本",
+  "models": {
+    "extract": "glm53",
+    "answer_glm_arms": "deepseek41",
+    "native_pi_provider": "lms1003qwen",
+    "native_pi_model": "qwen/qwen3.8-27b"
+  },
+  "tasks": [
+    {
+      "task_id": "dab_129",
+      "input_sha256": "63c8b794a8ec08ee6774c0daa484e75e3d44d0d6ad810c0d1e4a0a49567c9276",
+      "required_answer_names": [
+        "mean_fare",
+        "std_dev_fare"
+      ],
+      "n_requirements": 7,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6824,
+          "wall_ms": 9087
+        }
+      ]
+    },
+    {
+      "task_id": "dab_144",
+      "input_sha256": "7913a2cd3004b0156ec1564718ea2b8c7c322a69f6bbe33b05cec997387f4856",
+      "required_answer_names": [
+        "dist_dem",
+        "dist_gop",
+        "mean_dem",
+        "mean_gop",
+        "std_dev_dem",
+        "std_dev_gop"
+      ],
+      "n_requirements": 12,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7631,
+          "wall_ms": 11254
+        }
+      ]
+    },
+    {
+      "task_id": "dab_176",
+      "input_sha256": "e8e54cf0a8ff58a21601bee1272071bb0eeb5001008dbb4bbeb3400e3244131a",
+      "required_answer_names": [
+        "median_age"
+      ],
+      "n_requirements": 7,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7050,
+          "wall_ms": 9120
+        }
+      ]
+    },
+    {
+      "task_id": "dab_216",
+      "input_sha256": "d69ebc8525ad491948af507963b55d5ca53c61eaa2464088f80ed011411055b6",
+      "required_answer_names": [
+        "mean",
+        "std_dev"
+      ],
+      "n_requirements": 10,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7352,
+          "wall_ms": 10203
+        }
+      ]
+    }
+  ],
+  "cells": [
+    {
+      "task": "dab_129",
+      "arm": "native_pi",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_fare[32.20]\n@std_dev_fare[49.67]\n",
+      "answer_sha256": "a494b65514ed018446e10cbe177d994cbab837a6ce07f0f8dc9411c1eff0dc5c",
+      "tokens": 20887,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_129",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_129",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "native_pi",
+      "status": "error",
+      "rounds": 1,
+      "error": "pi timed out after 300s",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_144",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "native_pi",
+      "status": "error",
+      "rounds": 1,
+      "error": "pi timed out after 300s",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_176",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "native_pi",
+      "status": "error",
+      "rounds": 1,
+      "error": "pi timed out after 300s",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "reqlist_only",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": false,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    },
+    {
+      "task": "dab_216",
+      "arm": "full_rloop",
+      "status": "error",
+      "rounds": 1,
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "answer": null,
+      "answer_sha256": null,
+      "tokens": null,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "rounds": [],
+        "final_verdict": null,
+        "diff": null,
+        "error": null
+      }
+    }
+  ],
+  "per_arm": {
+    "native_pi": {
+      "cells": 4,
+      "ok": 1,
+      "error": 3,
+      "errors": [
+        "pi timed out after 300s"
+      ],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    },
+    "reqlist_only": {
+      "cells": 4,
+      "ok": 0,
+      "error": 4,
+      "errors": [
+        "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit"
+      ],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    },
+    "full_rloop": {
+      "cells": 4,
+      "ok": 0,
+      "error": 4,
+      "errors": [
+        "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit"
+      ],
+      "content_reverify_final_verdicts": [
+        "None"
+      ]
+    }
+  },
+  "totals": {
+    "cells": 12,
+    "cells_run": 12,
+    "model_calls": 11,
+    "tokens": 49744,
+    "tokens_missing": false
+  },
+  "token_accounting": {
+    "cell_tokens_known": 20887,
+    "extract_tokens_known": 28857,
+    "known_total": 49744,
+    "note": "8 個 error 格無 usage → 該格 tokens=None（UNKNOWN），不填 0；49744＝20887（dab_129 native_pi）＋28857（4 次擷取）"
+  },
+  "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
+  "failures": [
+    {
+      "cells": 8,
+      "arms": [
+        "reqlist_only",
+        "full_rloop"
+      ],
+      "rounds": "round 1",
+      "error": "glm rc=4: glm: 失敗（token_limit）Stopped: token_limit",
+      "harness_behavior": "停、不重試（quota_fail_closed，spec 內行為）",
+      "note": "provider 側 token_limit；非本地 2M/日 額度（known_tokens 49744 ≪ 2000000）"
+    },
+    {
+      "cells": 3,
+      "arms": [
+        "native_pi"
+      ],
+      "rounds": "round 1",
+      "error": "pi timed out after 300s",
+      "note": "dab_129 native_pi 278s 完成；dab_144/176/216 超 300s/輪 預算"
+    }
+  ],
+  "scope_note": [
+    "G3 首次真發射（未見任務對照），單 1 rep、本地模型（H-12），不遷移到其他模型/harness",
+    "11/12 格 error：本批不能支持任何臂 superiority 結論",
+    "full_rloop content_reverify enabled 4/4，但皆 round 1 error、0 重算輪、final_verdict 全 null",
+    "dab_129/native_pi 為唯一 ok 格（answer 在位、hidden_after=UNKNOWN、待 vlab/人類側打分）",
+    "stop_reason=null＝12 格全跑完（非撞額度中斷）；quota.known_tokens 49744"
+  ]
+}
