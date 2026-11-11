@@ -1,0 +1,40 @@
+{
+  "timestamp": 1794403286.475866,
+  "status": "OK",
+  "instances": 1,
+  "violations": [],
+  "launch_script_findings": [],
+  "evidence": [
+    {
+      "pid": 1734,
+      "ppid": 1656,
+      "cmdline": [
+        "/usr/bin/python3",
+        "/srv/vlab/bin/labd.py"
+      ],
+      "env": {
+        "HOME": "/home/user1",
+        "LANG": "en_US.UTF-8",
+        "LOGNAME": "user1",
+        "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin",
+        "SHELL": "/bin/bash",
+        "USER": "user1",
+        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "QT_ACCESSIBILITY": "1",
+        "XDG_DATA_DIRS": "/usr/local/share/:/usr/share/:/var/lib/snapd/desktop",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        "GSM_SKIP_SSH_AGENT_WORKAROUND": "true",
+        "SSH_AUTH_SOCK": "/run/user/1000/gnupg/S.gpg-agent.ssh",
+        "MANAGERPID": "1656",
+        "INVOCATION_ID": "27305319f39a4b80b8ed99eb0bc9d001",
+        "JOURNAL_STREAM": "8:25655",
+        "SYSTEMD_EXEC_PID": "1734",
+        "MEMORY_PRESSURE_WATCH": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/vacant-labd.service/memory.pressure",
+        "MEMORY_PRESSURE_WRITE": "c29tZSAyMDAwMDAgMjAwMDAwMAA=",
+        "VLAB_PAR": "1"
+      },
+      "parent_cmdline": [],
+      "parent_env": null
+    }
+  ]
+}
