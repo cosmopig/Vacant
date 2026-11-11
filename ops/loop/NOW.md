@@ -15,7 +15,7 @@ r1420（2026-11-11）：收斂態＋收口 r1419 殘留（vq-el4.94 驗證、同
 
 ## 關鍵約束（紅線）
 - 不 push（loop 自動推 auto/qwen27b）、不 main、不 reset/rebase；.github/workflows/ 唯讀。
-- 凍結 4 檔不改（repair.py blob 5147f8c3…／extract.py blob e757aec5…／checks.py c7589c61…／run_eval.py 332cd324…）＋g25 filing（6 sha256）不改；r1419 解凍 2 檔（g3.py ecac7879…／test_reqloop_g3.py c036e3cd…，vq-el4.94 記錄在案）已釘。
+- 凍結 4 檔不改（repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…）＋g25 filing（6 sha256）不改；r1419 解凍 2 檔（g3.py ecac7879…／test_reqloop_g3.py c036e3cd…，vq-el4.94 記錄在案）已釘。
 - /srv/eval/hidden/、scorer.py 不讀；anchors 5＋filing 3/3＋3/3 每輪複核。
 - G3 未 fire（/srv/vlab/queue 空、NOT_FIRED）；不 sleep poll CI；不全量 pytest；本輪 0 model calls。
 
