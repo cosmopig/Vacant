@@ -1558,10 +1558,28 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_g3.py（新增 3 測）
     #     f462ac61704637ff33c0e6f9142080b630ec0c8ba9fb1afe3a187b886b3d8c74
     #     → 3ed315e37f4fe05f705352f34a6911b6b9e20db95586670fe9744145bfbc8259
+    # r1443 解凍記錄（票 P20261111_1152-1；分支 auto/qwen27b）：g3.py
+    # unverified 原因持久化——G3 fire c 26/26 required claims 全 UNKNOWN、
+    # evidence 只有 {"unverified": true}，extract.py 的逐條原因（如
+    # unknown_verifier:missing）被 g3.py 丟棄、收案無法歸因。修法：run_g3
+    # 擷取段把 report.unverified 存進 trec["unverified_reasons"]（base dict
+    # 初始化 {}，quota 停止路徑亦在）；_claim_records 加可選參數
+    # unverified_reasons，evidence.unverified=true 且 claim_id 在映射內時
+    # 注入 evidence["reason"]（另建 dict、原 ClaimResult 不改動；無映射
+    # 時行為逐位不變＝負控制）。凍結四檔未動、0 model calls。test_reqloop_g3.py
+    # 加 1 測（test_unverified_reasons_persisted：負控制舊呼叫形狀無 reason
+    # ＋正控制 reason 逐條一致＋end-to-end 假通道 trec/claims 皆有原因），
+    # g3 檔 29→30。sha256 本輪 sha256sum 自磁碟實算、非轉抄：
+    # (1) vacant_network/reqloop/g3.py
+    #     5a94c1676958e7203bc41ec75a9f2c42cfd1b38812ba70d4e4274fc864dc358e
+    #     → f5fc822e1ec43d34e1ed3864f366501dc15c5d1b6ca5a80a34210baaf7c7e731
+    # (2) tests/test_reqloop_g3.py（新增 1 測）
+    #     3ed315e37f4fe05f705352f34a6911b6b9e20db95586670fe9744145bfbc8259
+    #     → 2168556a5775e68138e636cade988a08f2bd1e1d4740b4b098a48713c82742ca
     "vacant_network/reqloop/g3.py":
-        "5a94c1676958e7203bc41ec75a9f2c42cfd1b38812ba70d4e4274fc864dc358e",
+        "f5fc822e1ec43d34e1ed3864f366501dc15c5d1b6ca5a80a34210baaf7c7e731",
     "tests/test_reqloop_g3.py":
-        "3ed315e37f4fe05f705352f34a6911b6b9e20db95586670fe9744145bfbc8259",
+        "2168556a5775e68138e636cade988a08f2bd1e1d4740b4b098a48713c82742ca",
     "tests/test_reqloop_g3_conformance.py":
         "e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋

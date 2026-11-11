@@ -260,20 +260,31 @@ def content_recheck(task_ws: pathlib.Path, req_set: RequirementSet,
     return run_requirement_checks(task_ws, req_set, deliverable_dir)
 
 
-def _claim_records(results: list) -> list[dict]:
+def _claim_records(results: list, unverified_reasons: dict | None = None) -> list[dict]:
     """ClaimResult → 可落盤的逐條記錄（controller 自己的證據；不進 prompt 的部分
-    如 evidence 原樣保留，leak_guard 管的是 prompt，不是結果檔）。"""
-    return [
-        {
+    如 evidence 原樣保留，leak_guard 管的是 prompt，不是結果檔）。
+
+    unverified_reasons＝extract 報告 report.unverified 的 {claim_id: 原因} 映射；
+    claim 的 evidence.unverified=true 且有對應原因時注入 evidence["reason"]——
+    UNKNOWN 條目落盤可歸因（I-4：未測得≠通過，且寫下測不了的原因）。原
+    ClaimResult 的 evidence 不改動（另建 dict，後端 diff/feedback 共用同一清單）。
+    """
+    out = []
+    for c in results:
+        ev = c.evidence
+        if (isinstance(ev, dict) and ev.get("unverified")
+                and unverified_reasons
+                and c.claim_id in unverified_reasons):
+            ev = {**ev, "reason": unverified_reasons[c.claim_id]}
+        out.append({
             "id": c.claim_id,
             "status": c.status,
             "required": bool(c.required),
             "verifier": c.verifier,
             "detail": c.detail,
-            "evidence": c.evidence,
-        }
-        for c in results
-    ]
+            "evidence": ev,
+        })
+    return out
 
 
 def content_verdict(results: list) -> str:
@@ -947,6 +958,7 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
             "required_answer_names": required_answer_names(inputs["contract"]),
             "extract_error": None,
             "n_requirements": 0,
+            "unverified_reasons": {},
             "extract_usages": [],
         }
         req_set = None
@@ -974,6 +986,10 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                     stopped = True
                     result["stop_reason"] = "quota"
                 trec["n_requirements"] = len(req_set.items)
+                # 逐條 unverified 原因（unknown_verifier／參數不合／deliverable 問題等）
+                # 隨 task 記錄落盤，並透傳給 _claim_records 注入 evidence["reason"]——
+                # 此前 report.unverified 在此被丟棄，26/26 UNKNOWN 收案無法歸因。
+                trec["unverified_reasons"] = {u.id: u.reason for u in report.unverified}
                 trec["extract_usages"] = ledger
                 result["tasks"].append(trec)
 
@@ -1056,7 +1072,7 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                         "round": round_no,
                         "verdict": content_verdict(results) if results else "UNKNOWN",
                         "gap_reason": confirmed_gap(results, missing)[1] or None,
-                        "claims": _claim_records(results),
+                        "claims": _claim_records(results, trec.get("unverified_reasons")),
                     })
                     if round_no >= 2 and prev_results and results:
                         # 檢查器例外（results 為空）不得被記成「全部退步」——
