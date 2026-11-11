@@ -19,6 +19,15 @@ g3gate（`vacant_network/reqloop/g3gate.py`）只核「發射前置」：選題/
 - 不寫任何任務檔到 /srv/vlab/queue/
 - 發射授權：人類核准文件（approved=true、epic=vq-1zf、by=核准者）；
   無核准→RC 2、0 模型呼叫（與 g3gate 同 fail-closed）。
+- 臂名實相符（conformance）：ARM_WIRED（實作接線）對照 ARM_REQUIRED（預註冊
+  arm_defs 要求）逐臂核對；任何一臂不符→RC 3（同義 RC_APPROVED_NOT_WIRED）、
+  0 模型呼叫——核准過了也不發。native_pi 預註冊要求原生 pi，而 glm 通道
+  （單回合、無工具）接不了 pi_agent，因此三臂計畫目前**不能發射**：要嘛接
+  線、要嘛人類修預註冊改名（見 arm_conformance 訊息），agent 不得自改。
+- full_rloop 的 localized 修復與重驗＝真的接了 checks.run_requirement_checks
+  （程式重算每輪重驗）＋build_repair_feedback（FAIL-only 反饋，不含重算期望
+  值）＋repair.diff_results（FAIL→PASS／退步入帳）；不再是只有答案項名稱的
+  正規表示式存在性檢查。
 
 本模組 0 模型呼叫：通道可注入（測試用假通道）；GlmChannel 只在真發射時使用。
 """
@@ -39,6 +48,8 @@ import time
 from vacant_network.reqloop import extract as _extract
 from vacant_network.reqloop import g3gate
 from vacant_network.reqloop.requirements import RequirementSet
+from vacant_network.reqloop.checks import run_requirement_checks
+from vacant_network.reqloop.repair import diff_results as _diff_results
 
 SCHEMA_RESULT = "vacant.reqloop.g3.result/1"
 
@@ -58,16 +69,24 @@ REPO = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 DEFAULT_STATE_DIR = pathlib.Path(os.environ.get("VACANT_OPS_STATE", str(pathlib.Path.home() / "dev" / "ops" / "state")))
 
-# 三臂內容契約（逐字對齊 manifest.arm_defs，2026-11-08 凍結）：
-#   native_pi    「再檢查修正一次」（一輪可見回饋），無需求清單、無 R-loop 修復循環
-#   reqlist_only 作答模型另得 extract.py 擷取的需求清單；無 localized 修復循環、無全條目重驗
-#   full_rloop   自動擷取需求＋localized 修復＋重驗所有必要條目
+# 三臂（vq-1zf 預註冊 ops/reqloop/g3_gate/manifest.json arm_defs，2026-11-08 凍結）：
+#   native_pi    預註冊＝「原生 pi：再檢查修正一次」（一輪可見回饋，無需求清單、無
+#                 修復循環）。本管線的模型通道凍結為 glm CLI（單回合、無工具），
+#                 接不了 pi_agent（pi_build/run_agent 工具迴圈）→ ARM_WIRED=False，
+#                 arm_conformance 拒發（RC 3、0 模型呼叫）直到接線或人類修預註冊。
+#   reqlist_only 作答模型另得 extract.py 擷取的需求清單；無 localized 修復、無重驗。
+#   full_rloop   需求清單＋每輪 checks.run_requirement_checks 程式重算（非模型自評）：
+#                 必需條目有已確認缺口（FAIL／必要答案項缺失）才花下一輪；修復反饋
+#                 逐條帶 FAIL 狀態與可見反例（不含重算期望值）、只修未滿足條目；
+#                 修復後重驗所有必需條目（reverify_all），差異用 repair.diff_results
+#                 記錄（FAIL→PASS／任何退步一律入帳）。UNKNOWN 不是缺口、也不是通過。
 ARM_SPECS: dict[str, dict] = {
     "native_pi": {
         "requirement_list": False,
         "max_rounds": 1,
         "localized_repair": False,
         "reverify_all": False,
+        "content_reverify": False,
         "instruction": (
             "再檢查修正一次：先作答，然後對自己的草稿做一輪可見回饋檢查並修正；"
             "沒有需求清單、沒有修復循環。只依任務與資料作答。"
@@ -78,6 +97,7 @@ ARM_SPECS: dict[str, dict] = {
         "max_rounds": 1,
         "localized_repair": False,
         "reverify_all": False,
+        "content_reverify": False,
         "instruction": (
             "你另得一份由 extract.py 擷取的需求清單（見下）。依需求清單與任務作答；"
             "沒有 localized 修復循環、沒有全條目重驗。"
@@ -88,6 +108,7 @@ ARM_SPECS: dict[str, dict] = {
         "max_rounds": 2,
         "localized_repair": True,
         "reverify_all": True,
+        "content_reverify": True,
         "instruction": (
             "完整 R-loop：依需求清單作答。若草稿未滿足清單，只修未滿足的條目、"
             "已滿足部分保持不變；輸出前重驗所有必要條目。"
@@ -95,7 +116,45 @@ ARM_SPECS: dict[str, dict] = {
     },
 }
 
+# 臂名實相符（conformance 門；抓「臂名比實作先走」的 H-0 型假綠燈）。
+# ARM_WIRED＝當前實作真正具備的機制（惟測試可證偽的宣告，見
+# tests/test_reqloop_g3_conformance.py）；ARM_REQUIRED＝預註冊 arm_defs 對每臂的
+# 要求。兩者不符 → 拒發（RC 3、0 模型呼叫）：發射跑完的數據會掛著名實不符的
+# 臂名被引用，比不發射更糟。
+ARM_WIRED: dict[str, dict[str, bool]] = {
+    # glm CLI 凍結為唯一模型入口（單回合、無工具；g3gate.check_budget 釘死
+    # model_entry='glm'）→ 原生 pi 執行在此管線沒有接線。要接線就得放寬凍結
+    # 預算的 model_entry；要保留 glm 入口就得由人類修預註冊（改名，重核准）。
+    "native_pi": {
+        "pi_agent": False,          # 預註冊要求原生 pi；未接線
+        "requirement_list": False,
+        "localized_repair": False,
+        "content_reverify": False,
+    },
+    "reqlist_only": {
+        "requirement_list": True,  # extract.py 擷取，作答 prompt 帶清單
+        "localized_repair": False,
+        "content_reverify": False,
+    },
+    "full_rloop": {
+        "requirement_list": True,   # 同 reqlist_only 的擷取清單
+        "localized_repair": True,   # FAIL-only 反饋＋只修缺口（build_repair_feedback）
+        "content_reverify": True,   # checks.run_requirement_checks 程式重算每輪重驗
+    },
+}
+# ARM_REQUIRED 是預註冊（manifest.arm_defs）的逐臂要求；改這裡＝改預註冊，
+# 須人類重新核准，agent 不得自行放寬。
+ARM_REQUIRED: dict[str, dict[str, bool]] = {
+    "native_pi": {"pi_agent": True},   # arm_def:「原生 pi」
+    "reqlist_only": {"requirement_list": True},
+    "full_rloop": {"requirement_list": True, "localized_repair": True,
+                   "content_reverify": True},
+}
+
 _ANSWER_ITEM_RE = re.compile(r"@([A-Za-z0-9_]+)\[[^\]]*\]")
+# 契約範本列舉答案項的句子（dab 系任務固定用這個格式，例：
+# "This task expects 2 item(s): `@mean_fare[...]`, `@std_dev_fare[...]`."）
+_ANSWER_EXPECTS_RE = re.compile(r"expects\s+\d+\s+item\(s\)\s*:\s*([^\n]+)")
 
 
 class G3QuotaError(RuntimeError):
@@ -108,6 +167,162 @@ class G3CallError(RuntimeError):
 
 class G3NotApproved(RuntimeError):
     """核准門不過（RC 2 語義；0 模型呼叫）。"""
+
+
+class G3ArmsNotConformant(RuntimeError):
+    """臂與預註冊定義不符（RC 3 語義；0 模型呼叫——核准過了也不發）。"""
+
+
+# ── 臂 conformance（名實相符門）──────────────────────────────────────
+
+
+def arm_conformance(plan: g3gate.G3Plan) -> tuple[bool, list[str]]:
+    """逐臂核對「預註冊要求（ARM_REQUIRED）」與「實作接線（ARM_WIRED）」。
+
+    不符即回傳問題清單（發射側拒發）。兩個來源都不得自我宣告放行：
+    - ARM_REQUIRED 缺項的臂＝預註冊沒寫清楚 → 也拒（不默默放行）；
+    - ARM_SPECS 宣告 localized_repair／reverify_all 的臂，wired 必須真的有
+      修復反饋與內容重算機制（規格旗標不得無實作支撐——舊 full_rloop 就是
+      宣告了 localized_repair=True 卻只有答案項名稱正規表示式檢查）。
+    """
+    problems: list[str] = []
+    for arm in plan.arms:
+        if arm not in ARM_SPECS or arm not in ARM_WIRED:
+            problems.append(f"{arm}: ARM_SPECS/ARM_WIRED 無此臂（manifest 與管線不同步）")
+            continue
+        spec = ARM_SPECS[arm]
+        wired = ARM_WIRED[arm]
+        for mech, need in ARM_REQUIRED.get(arm, {}).items():
+            if need and not wired.get(mech, False):
+                problems.append(
+                    f"{arm}: 預註冊要求 {mech}=True，實作未接線"
+                    f"（ARM_WIRED['{arm}']['{mech}']=False）")
+        if arm not in ARM_REQUIRED or not ARM_REQUIRED[arm]:
+            problems.append(f"{arm}: ARM_REQUIRED 未記載預註冊要求（不得默默放行）")
+        if (spec.get("localized_repair") or spec.get("reverify_all")) and (
+                not wired.get("localized_repair", False)
+                or not wired.get("content_reverify", False)):
+            problems.append(
+                f"{arm}: ARM_SPECS 宣告 localized 修復/重驗，但 ARM_WIRED 未接線")
+    return (not problems), problems
+
+
+# ── 內容重驗（checks.py 程式重算，非模型自評）────────────────────────
+
+
+#: 修復反饋中單段驗證詳情／反例的長度上限（與 repair._PROMPT_TEXT_CAP 同口徑：
+#: 過長 JSON 對小模型是過載；截斷必須可見）
+_FEEDBACK_TEXT_CAP = 800
+
+DEFAULT_DELIVERABLE = "answer.txt"
+
+
+def _cap_feedback_text(s: str) -> str:
+    s = (s or "").strip()
+    if len(s) <= _FEEDBACK_TEXT_CAP:
+        return s
+    return s[:_FEEDBACK_TEXT_CAP].rstrip() + f"…（已截斷，共 {len(s)} 字）"
+
+
+def cell_round_dir(out_root: pathlib.Path, tid: str, arm: str,
+                   round_no: int) -> pathlib.Path:
+    """每格每輪的工作目錄（草稿在此落盤為交付物，供 checks 重算；保留供審計）。"""
+    d = pathlib.Path(out_root) / "cells" / f"{tid}__{arm}" / f"round_{round_no}"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def content_recheck(task_ws: pathlib.Path, req_set: RequirementSet,
+                    deliverable_dir: pathlib.Path, text: str) -> list:
+    """草稿落盤為 answer.txt → checks.run_requirement_checks 程式重算。
+
+    同 G1/G2 口徑：檢查器從任務目錄自己的資料重算，模型自評不算數。
+    未知檢查器／參數不合 → ClaimResult UNKNOWN（不是 PASS、不是 FAIL）。
+    """
+    deliverable_dir.mkdir(parents=True, exist_ok=True)
+    (deliverable_dir / DEFAULT_DELIVERABLE).write_text(text, encoding="utf-8")
+    return run_requirement_checks(task_ws, req_set, deliverable_dir)
+
+
+def _claim_records(results: list) -> list[dict]:
+    """ClaimResult → 可落盤的逐條記錄（controller 自己的證據；不進 prompt 的部分
+    如 evidence 原樣保留，leak_guard 管的是 prompt，不是結果檔）。"""
+    return [
+        {
+            "id": c.claim_id,
+            "status": c.status,
+            "required": bool(c.required),
+            "verifier": c.verifier,
+            "detail": c.detail,
+            "evidence": c.evidence,
+        }
+        for c in results
+    ]
+
+
+def content_verdict(results: list) -> str:
+    """必需條目裁決（I-4 口徑：未測得≠通過）。
+
+    全必需 PASS → PASS；任一必需 FAIL → FAIL；查無必需條目、或含
+    UNKNOWN/CONFLICT/缺項 → UNKNOWN（絕不因「沒量到」而 PASS）。
+    """
+    required = [c for c in results if getattr(c, "required", False)]
+    if not required:
+        return "UNKNOWN"
+    if any(c.status == "FAIL" for c in required):
+        return "FAIL"
+    if all(c.status == "PASS" for c in required):
+        return "PASS"
+    return "UNKNOWN"
+
+
+def confirmed_gap(results: list, missing: tuple[str, ...]) -> tuple[bool, str]:
+    """已確認缺口：必需條目 FAIL，或必要答案項缺失。
+
+    UNKNOWN 不是缺口（無從據以修復），但也不是通過——verdict 另記。
+    回傳 (有缺口, 缺口所在)。
+    """
+    if missing:
+        return True, "missing_answer_names"
+    fails = [c.claim_id for c in results
+             if getattr(c, "required", False) and c.status == "FAIL"]
+    if fails:
+        return True, "required_fail"
+    return False, ""
+
+
+def build_repair_feedback(req_set: RequirementSet, results: list,
+                          missing: tuple[str, ...]) -> str:
+    """localized 修復反饋（只有 full_rloop 的第 2 輪 prompt 帶）。
+
+    內容與 G2 repair.build_repair_prompt 同口徑：逐條狀態（含 FAIL 的可見
+    反例）、已 PASS 條目必須保持、只修缺口。檢查器（kv_recomputed 等）的
+    反例依設計不含重算期望值——本函數原樣轉載，不添加任何答案。
+    """
+    by_id = {c.claim_id: c for c in results}
+    lines = ["【逐條需求驗證結果（程式重算，非模型自評）】"]
+    for it in req_set.items:
+        c = by_id.get(it.id)
+        if c is None:
+            continue
+        lines.append(f"- [{c.status}] {it.id}（交付物：{it.deliverable}）：{it.quote}")
+        if c.status != "PASS":
+            lines.append(f"  驗證結果：{_cap_feedback_text(str(c.detail))}")
+            if c.evidence:
+                ev = json.dumps(c.evidence, ensure_ascii=False, default=str)
+                lines.append(f"  可見反例：{_cap_feedback_text(ev)}")
+    lines.append("")
+    keep = [c.claim_id for c in results if c.status == "PASS"]
+    lines.append("【必須保持成立的條件】")
+    lines.append(
+        ("以下條目已 PASS，修正後必須仍然 PASS：" + "、".join(keep))
+        if keep else "（沒有已 PASS 的條目）")
+    if missing:
+        lines.append(
+            "另外，以下必要答案項在上一稿缺失："
+            + "、".join(f"@{n}[...]" for n in missing))
+    lines.append("只修上面的缺口，不要重寫不相關的部分；所有必需條目都要能通過重驗。")
+    return "\n".join(lines)
 
 
 # ── 用量與通道 ─────────────────────────────────────────────────────────
@@ -327,8 +542,18 @@ def input_sha256(task_dir: pathlib.Path, files: dict[str, str]) -> str:
 
 
 def required_answer_names(contract: str) -> list[str]:
-    """從可見 contract.md 解析必要答案項名（@name[...]）。"""
-    return sorted(set(_ANSWER_ITEM_RE.findall(contract)))
+    """從可見 contract.md 解析必要答案項名（@name[...]）。
+
+    優先取「expects N item(s):」列舉的項名。契約範本用 `@name[value]` 描述
+    輸出格式，那個 placeholder 不是答案項名——舊解析把 "name" 也算進必要項，
+    對不含 `@name[...]` 的真實答案造成恆真假缺口。列舉句不存在時退回全文
+    掃描並剔除範本 placeholder "name"（兩個來源都以可見 contract 為準，
+    無隱藏資料）。
+    """
+    m = _ANSWER_EXPECTS_RE.search(contract)
+    if m:
+        return sorted(set(_ANSWER_ITEM_RE.findall(m.group(1))))
+    return sorted(set(_ANSWER_ITEM_RE.findall(contract)) - {"name"})
 
 
 def render_requirement_list(req_set: RequirementSet | None) -> str:
@@ -345,11 +570,14 @@ def render_requirement_list(req_set: RequirementSet | None) -> str:
 
 
 def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
-                      round_no: int = 1, missing: tuple[str, ...] = ()) -> str:
+                      round_no: int = 1, missing: tuple[str, ...] = (),
+                      prev_draft: str = "", feedback: str = "") -> str:
     """決定性 prompt：任務＋資料＋（臂）需求清單＋（臂）指令＋（第 2 輪）缺口證據。
 
     紅線：不含 /srv/eval/hidden/、scorer.py 或任何隱藏內容；缺口證據只含
-    可見 contract 的答案項名與上一稿原文（無測試資料）。
+    可見 contract 的答案項名與上一稿原文＋檢查器反例（依設計不含重算期望值）。
+    第 2 輪（localized 修復）必帶上一稿原文——模型必須看得到自己上一稿
+    才能只修缺口；空白反例（無缺口卻進第 2 輪）在 run_g3 的輪迴圈已被擋下。
     """
     data_block = ""
     for name in sorted(task["data"]):
@@ -369,12 +597,16 @@ def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
     if spec["requirement_list"]:
         # 需求清單屬於「臂段」（【本輪要求】之後）：任務＋資料段三臂逐字相同
         parts += ["【需求清單（extract.py 擷取）】", req_list_text or render_requirement_list(None)]
-    if round_no >= 2 and missing:
-        parts += [
-            "【上一稿與缺口】以下必要答案項在上一稿缺失：",
-            "、".join(f"@{n}[...]" for n in missing),
-            "只修未滿足的條目、已滿足部分保持不變；輸出前重驗所有必要條目。",
-        ]
+    if round_no >= 2:
+        parts += ["【上一稿與缺口】"]
+        if prev_draft.strip():
+            parts += ["--- 上一稿原文（可見回饋的對象）---", prev_draft.strip()]
+        if missing:
+            parts += ["以下必要答案項在上一稿缺失："
+                      + "、".join(f"@{n}[...]" for n in missing)]
+        if feedback:
+            parts += [feedback]
+        parts += ["只修未滿足的條目、已滿足部分保持不變；輸出前重驗所有必要條目。"]
     parts += ["【輸出】", "只輸出最終答案項（contract 格式），每項一行，不要多餘說明。"]
     return "\n\n".join(parts) + "\n"
 
@@ -451,6 +683,12 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
     cap = int(plan.budget["daily_token_cap"])
     tpr = int(plan.budget["timeout_s_per_round"])
     arm_order = tuple(plan.arms)
+    # 臂 conformance（核准過了也不代表臂名實相符）：任何一臂與預註冊定義
+    # 不符即拒發——0 模型呼叫（名實不符的發射比不發射更糟：數據會掛著
+    # 錯的臂名被引用）。
+    ok_arms, arm_problems = arm_conformance(plan)
+    if not ok_arms:
+        raise G3ArmsNotConformant("；".join(arm_problems))
     tasks = [t["task_id"] for t in plan.tasks]
     # 呼叫數後備上限（r1376）：token 用量未知時 token cap 不可測→以呼叫數兜底。
     # 上界＝擷取（每 task 一次）＋每格最多 max_rounds 輪；實際呼叫少於此上界。
@@ -520,24 +758,39 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
 
         for arm in arm_order:
             spec = ARM_SPECS[arm]
+            reverify_on = bool(spec["content_reverify"]) and req_set is not None \
+                and bool(req_set.items)
             cell: dict = {
                 "task": tid, "arm": arm, "status": "not_run",
                 "requirement_list": bool(spec["requirement_list"]),
                 "input_sha256": trec["input_sha256"],
                 "rounds": [], "answer": None, "answer_sha256": None,
                 "hidden_after": HIDDEN_AFTER_UNKNOWN, "error": None,
+                "content_reverify": {
+                    "enabled": reverify_on,
+                    "rounds": [],          # 每輪逐條狀態（有檢查器的輪才有）
+                    "final_verdict": None,  # PASS/FAIL/UNKNOWN
+                    "diff": None,           # 修復前後差異（repair.diff_results）
+                    "error": None,
+                },
             }
             if stopped:
                 result["cells"].append(cell)
                 continue
             req_list_text = render_requirement_list(req_set) if spec["requirement_list"] else ""
+            task_ws = tdir / "workspace"
             needed = trec["required_answer_names"]
             missing: tuple[str, ...] = ()
+            gap = False                # 進第 2 輪的條件（缺口＝FAIL 或必要答案項缺失）
+            feedback = ""
+            prev_draft = ""
+            prev_results: list = []
             for round_no in range(1, spec["max_rounds"] + 1):
-                if round_no > 1 and not missing:
-                    break  # full_rloop：上一稿已覆蓋必要答案項→不花第 2 輪（無額外呼叫）
+                if round_no > 1 and not gap:
+                    break  # 上一稿無已確認缺口→不花下一輪（無額外呼叫）
                 prompt = build_cell_prompt(inputs, spec, req_list_text=req_list_text,
-                                           round_no=round_no, missing=missing)
+                                           round_no=round_no, missing=missing,
+                                           prev_draft=prev_draft, feedback=feedback)
                 rec: dict = {"round": round_no, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
                              "usages": [], "error": None}
                 try:
@@ -561,9 +814,35 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                 rec["usages"].append(usage.to_dict())
                 cell["answer"] = text
                 cell["answer_sha256"] = hashlib.sha256(text.encode()).hexdigest()
-                # full_rloop：第 2 輪僅在必要答案項缺失時才花（localized 修復）
+                prev_draft = text
+                # 必要答案項＝可見 contract 的答案項名（結構性缺口，全臂通用）
                 missing = tuple(n for n in needed
                                 if not re.search(rf"@{re.escape(n)}\[[^\]]*\]", text))
+                # 內容重驗（full_rloop）：checks 程式重算，非模型自評。
+                if reverify_on:
+                    rd = cell_round_dir(out_root, tid, arm, round_no)
+                    try:
+                        results = content_recheck(task_ws, req_set, rd, text)
+                    except Exception as e:  # 檢查器例外不得炸掉整格：如實記錄、標 UNKNOWN
+                        cell["content_reverify"]["error"] = f"{type(e).__name__}: {e}"
+                        results = []
+                    cell["content_reverify"]["rounds"].append({
+                        "round": round_no,
+                        "verdict": content_verdict(results) if results else "UNKNOWN",
+                        "gap_reason": confirmed_gap(results, missing)[1] or None,
+                        "claims": _claim_records(results),
+                    })
+                    if round_no >= 2 and prev_results and results:
+                        # 檢查器例外（results 為空）不得被記成「全部退步」——
+                        # diff 只在兩輪都有真實重算結果時記。
+                        cell["content_reverify"]["diff"] = \
+                            _diff_results(prev_results, results).to_dict()
+                    cell["content_reverify"]["final_verdict"] = \
+                        cell["content_reverify"]["rounds"][-1]["verdict"]
+                    gap, gap_reason = confirmed_gap(results, missing)
+                    if gap and round_no < spec["max_rounds"]:
+                        feedback = build_repair_feedback(req_set, results, missing)
+                    prev_results = results
             if cell["status"] == "not_run" and cell["answer"] is not None:
                 cell["status"] = "ok"  # 至少一輪成功且無錯誤＝完成（撞額度無答案的 cell 保持 not_run）
             result["cells"].append(cell)
@@ -628,11 +907,24 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None) -> in
         for t, a in cells:
             spec = ARM_SPECS[a]
             print(f"  CELL {t}/{a}: list={spec['requirement_list']} rounds<={spec['max_rounds']} "
-                  f"localized={spec['localized_repair']} reverify={spec['reverify_all']}")
+                  f"localized={spec['localized_repair']} reverify={spec['reverify_all']} "
+                  f"content_reverify={spec['content_reverify']}")
+        ok_arms, arm_problems = arm_conformance(plan)
+        print(f"  arm conformance: {'OK' if ok_arms else 'NOT CONFORMANT（--fire 會拒發 RC 3）'}")
+        for p in arm_problems:
+            print(f"    - {p}")
         print("DRY-RUN OK（0 模型呼叫；未發射）")
         return RC_OK
 
-    # --fire：核准門 fail-closed（無核准→RC 2、0 模型呼叫）
+    # --fire：門序＝完整性（凍結/預算）→ 核准 → 臂 conformance（fail-closed）
+    base = pathlib.Path(args.manifest).parent
+    try:
+        plan.verify_frozen(base)
+        g3gate.check_budget(plan)
+    except Exception as e:
+        print(f"G3 FIRE PLAN BAD: {e}")
+        return RC_PLAN
+
     if args.approval is None:
         print("G3 FIRE NOT APPROVED: 無核准文件——0 模型呼叫（fail-closed）")
         return RC_NOT_APPROVED
@@ -646,7 +938,20 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None) -> in
         print(f"G3 FIRE NOT APPROVED: {why}——0 模型呼叫（fail-closed）")
         return RC_NOT_APPROVED
 
-    base = pathlib.Path(args.manifest).parent
+    # 臂 conformance（核准之後、第一個模型呼叫之前）：臂名實不符→拒發。
+    # 名實不符的發射比不發射更糟——跑出的數據會掛著錯的臂名被引用。
+    ok_arms, arm_problems = arm_conformance(plan)
+    if not ok_arms:
+        print("G3 FIRE ARMS NOT CONFORMANT: 與預註冊定義不符——0 模型呼叫（fail-closed）")
+        for p in arm_problems:
+            print(f"  - {p}")
+        print("處置二選一（兩者都是預註冊層級變更，須人類重新核准；agent 不得自改）：")
+        print("  1) 接線缺失的機制後更新 ARM_WIRED（native_pi 需 pi_build/run_agent")
+        print("     工具迴圈，且需放寬凍結 budget.model_entry='glm'）；")
+        print("  2) 人類修預註冊（manifest arm_defs 改名，ARM_ORDER/ARM_SPECS/"
+              "ARM_WIRED/ARM_REQUIRED 同步），舊核准作廢、重新核准。")
+        return g3gate.RC_APPROVED_NOT_WIRED
+
     out_root = pathlib.Path(args.out) if args.out else base / f"fire_{time.strftime('%Y%m%d_%H%M%S')}"
     chan = channel if channel is not None else GlmChannel()
     try:
@@ -655,6 +960,9 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None) -> in
     except G3NotApproved as e:
         print(f"G3 FIRE NOT APPROVED: {e}——0 模型呼叫（fail-closed）")
         return RC_NOT_APPROVED
+    except G3ArmsNotConformant as e:
+        print(f"G3 FIRE ARMS NOT CONFORMANT: {e}——0 模型呼叫（fail-closed）")
+        return g3gate.RC_APPROVED_NOT_WIRED
     except Exception as e:
         print(f"G3 FIRE FAIL: {type(e).__name__}: {e}")
         return RC_PLAN

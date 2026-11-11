@@ -1394,10 +1394,41 @@ GUARD_CONTENT_PIN = {
     #     新增 pin 220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7
     # (2) tests/test_reqloop_g3.py
     #     新增 pin fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd
+    # r1419 解凍記錄（分支 fix/g3-arms-actually-do-what-they-say；G3 三臂名實相符
+    # P0 修復，2026-11-11 日報揭示）：舊 G3 管線與預註冊有重大落差——
+    # native_pi 只是 ARM_SPECS 名稱＋提示文字（三臂全走 GlmChannel 單回合無工具，
+    # 沒有 pi）；full_rloop 的 localized_repair=True 只由「必要答案項 @name[...]
+    # 是否出現」的正規表示式實現（格式完整但數字錯誤的草稿完全抓不到）。
+    # 本輪合法修改（不改凍結 manifest、不加寬任何預算）：
+    # (1) g3.py：加 ARM_WIRED/ARM_REQUIRED＋arm_conformance 門（臂與預註冊定義
+    #     不符→RC 3、0 模型呼叫；核准過了也不發）；full_rloop 真正接上
+    #     checks.run_requirement_checks 程式重算（每輪重驗、reverify_all）、
+    #     build_repair_feedback（FAIL-only localized 反饋，不含重算期望值）、
+    #     repair.diff_results 差異；required_answer_names 修掉契約範本
+    #     placeholder `@name[value]` 被誤算必要項的恆真假缺口；--fire 門序＝
+    #     完整性→核准→臂 conformance。
+    # (2) test_reqloop_g3.py：既有 6 測改至新語義（凍結三臂計畫拒發；兩臂
+    #     皆接線的計畫 8 格跑通；成本/額度數字隨之更新）。
+    # (3) tests/test_reqloop_g3_conformance.py（新增 pin）：抓假守衛檔——
+    #     「格式完整但數字錯誤」的草稿必須被抓到（舊管線會放行的缺口，本檔
+    #     使其 RED），reqlist_only 不得免費獲得重驗能力；conformance 負控制
+    #     （native_pi 拒發、ARM_REQUIRED 不可清空）。新檔與 G3_PAIR 同型
+    #     （r1347/r1365/r1398 先例：可釘、且必須釘）。
+    # 顯式更新錨並留記錄：
+    # (1) vacant_network/reqloop/g3.py
+    #     220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7
+    #     → 8c91f709fdf840a341bf6d5bcdeac322aa6c4a61e5fe91e6104b0c92794b9214
+    # (2) tests/test_reqloop_g3.py
+    #     fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd
+    #     → 7cd9987e1b2495ae8e038da5fa47bc785a1c0067eccab3dc21c6ba56c587dd5e
+    # (3) tests/test_reqloop_g3_conformance.py 新增 pin
+    #     390443348660119eae2e2cf932e904ae25a4f9e857f141f7671945e1b19be6ea
     "vacant_network/reqloop/g3.py":
-        "220189d274bc4fa236b4638ecfadb5f946d40779d9dbce2acef8c0a411ac22f7",
+        "8c91f709fdf840a341bf6d5bcdeac322aa6c4a61e5fe91e6104b0c92794b9214",
     "tests/test_reqloop_g3.py":
-        "fbf58421608ef7762ab1a3077bc5f8a854f19821040520ef7a02af59c50dbdcd",
+        "7cd9987e1b2495ae8e038da5fa47bc785a1c0067eccab3dc21c6ba56c587dd5e",
+    "tests/test_reqloop_g3_conformance.py":
+        "390443348660119eae2e2cf932e904ae25a4f9e857f141f7671945e1b19be6ea",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
     # 其 10 測測試檔）r1399 輪（rc=124 殘留）建於 r1319/r1347/r1365/r1397 建錨各輪
     # 之後、從未釘住（r1347 同型：verify_effects_summary 對建於 r1333/r1344、r1347
