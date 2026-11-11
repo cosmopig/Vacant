@@ -19,5 +19,18 @@ class TestG3_1Manifest(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertIn("VERDICT: G3_1_PRECHECK_OK", result.stdout)
 
+    def test_g3_1_dry_run_success(self):
+        """G3 管線官方乾跑（plan schema＋凍結＋預算）：exit 0、DRY-RUN OK、0 model calls。"""
+        result = subprocess.run(
+            ["python3", "-m", "vacant_network.reqloop.g3",
+             "--manifest", "ops/reqloop/g3_1/manifest.json", "--dry-run"],
+            capture_output=True,
+            text=True,
+            cwd=Path(__file__).parent.parent,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("DRY-RUN OK", result.stdout)
+        self.assertIn("0 模型呼叫", result.stdout)
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,21 +1,23 @@
-# NOW.md — 現在狀態（每輪更新，≤3KB）
+# NOW.md — 現況（每輪更新，≤3KB）
 
-## 狀態（2026-11-11 r1444）
-- r1444（1152-2）：stray-labd audit evidence chain 審查＋重做＋升上。審查發現 4 缺陷（未修前）：--selftest 空轉綠燈（兩分支皆 OK＋exit 0、mock 設自己環境零作用）、「2 passed」含 1 個 pass 空轉、已提交報告非本工具所產（schema 不符）且其第 2 個「進程」是 pi session（pgrep -f 誤配 prompt 文字）、1 死代碼函數。修：audit 純函數化＋selftest 6 組真實控制（假 process table、任一失敗→BROKEN rc=1；變異元驗證轉紅）＋matcher 收緊（python 解釋器＋labd.py 尾配）＋報告由工具實跑產出（1 實例 pid 1734、findings []）；8 真測試 passed；auto/worker 187568ca6→mainline 升上＋雙 worktree 同步。
-- freeze_check 11/12：唯一紅＝diff_worker＝worker 並行 WIP 票 1215-1（3 檔、doing/ 在進、13:13–13:17 UTC）——如實呈紅（同 r1440/r1443 型）、不碰在進產物、未審查不升上 mainline（紅線）；原 stray 3 檔已兩側同 blob、不再計差異。
+## 狀態（2026-11-11 r1460 收案輪：1215-1＋L007 結案、三分支同步、守衛全綠）
+- **1215-1（hidden_file_in_workspace 收緊）：已結案**——e3f6fe884 在 auto/qwen27b 祖先（r1459 升上）；驗收重核（本輪新跑）：tests/test_hidden_file_in_workspace_tighten.py 6 passed＋tighten --selftest VERDICT: HIDDEN_FILE_TIGHTEN_OK；票 done/。
+- **L007（資料損失循環）：已結案**——loop/L007.md §8 結案段終態 CLOSED: NO_MECHANISM＋e016 數據（A 18/34、C 17/34、C-nf 16/34、McNemar p=1.0）；BACKLOG [x]＋「round 1459 結案」；l007_closure_check --selftest VERDICT: L007_CLOSURE_OK rc=0（本輪新跑）；票 R20261111_1516-1 done/。
+- 簿記：bk_state 鏡像重建（head -5 慣例）、bk_now cp 同 blob；三分支 in-scope diff 0×2（worker：32 檔升上集同步＋ops/loop/L007.md 移除＋root mock 雜訊清；argon：簿記 4 檔同步）；freeze_check 12/12 FROZEN_STATE_OK（本輪新跑）。
+- 前情：r1458（1716-2）bounced（期望值與數據矛盾）；r1450（1516-1 g3 contract wiring）done；H2.0=REFUTED（r1447a）維持。
 
 ## 紅線（契約，不改）
-- 無 push（迴圈自動 push auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
-- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py 2823 行／blob f3525b01…、run_eval.py 1298 行／blob b6d2f37f…；g25 filing（6 sha256）不改；g3.py 改動僅依核准工單（vq-kax AMEND-3 為其核准；1152-1 unverified 原因持久化依該票），執行順序以工單為準。
-- 不讀 /srv/eval/hidden/ 或 scorer.py；缺值 UNKNOWN 不填 0；hidden_after=UNKNOWN；同批重發非獨立樣本，不宣稱臂優。
+- 不 push（loop 自動 push auto/qwen27b）、不 main、不 reset/rebase；.github/workflows/ 只讀。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py 2823 行／blob f3525b01…、run_eval.py 1298 行／blob b6d2f37f…；g25 filing（6 sha256）不變；g3.py 僅依核准工單改動。
+- 不讀 /srv/eval/hidden/ 或 scorer.py；缺值＝UNKNOWN 不 0；hidden_after=UNKNOWN。
 - 不寫 /srv/vlab/queue；不 poll CI；不跑 full pytest。
 
-## 未完成（≤3，交接下輪）
-1. 1215-1（hidden_file_in_workspace 收緊）：worker doing/ 在進（WIP 61e884e6f 13:17）；收案後下輪審查＋升上→freeze_check 12/12。
-2. G3.1 H1/H2 裁決：c 發 4/4 格完成 ≥1 輪 content_reverify 但 final_verdict 全 UNKNOWN、claims 全未測得——裁決歸人類（預註冊升級、vq-kax 待核准）。
-3. hidden 打分：10 格 ok 有 answer（native_pi 2＋reqlist_only 4＋full_rloop 4），人類/vlab 側。
+## 未完成（≤3，交下輪）
+1. 1516-2（G3 extract contract input gap audit，open/）：下輪入口票。
+2. G3.1 H2.0 重發：預註冊停止規則＝不發完整批、裁決歸人類（待人類）。
+3. hidden 計分：10 cells ok 有答案，人側/vlab 側；CI 三分支核＝python3 /home/user1/dev/ops/ci_status.py（新 tip 跑完後，不 poll）。
 
 ## 下輪入口（≤3）
-- 1215-1 審查（若已收案）→升上→freeze_check 12/12；若仍在進→如實呈紅、續不碰。
-- bd ready（vq-kax 狀態＋人類裁決）→下一票；doing/＝1215-1。
-- 守衛：g3 四檔＋anchors＋freeze_check（除上項外）全綠。
+- bd ready＋open/ 票（1516-2）；doing/ 現空。
+- 守衛基線（r1460 量）：freeze_check 12/12、anchors 5 passed、tighten 6 passed。
+- worker loop 注意：WIP auto-commit 會再收 root 層 mock_* 雜訊（非 in-scope）——需 worker prompt 加 selftest 後清理（系統性，已記錄）。

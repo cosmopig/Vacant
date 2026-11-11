@@ -1,0 +1,176 @@
+{
+  "schema": "vacant.audit/g3_1_h20_prerun/1",
+  "ticket": "P20261111_1315-2",
+  "generated_at": "2026-11-11T14:05:57+00:00",
+  "purpose": "G3.1 H2.0 extract 預跑門：4 凍結題擷取需求的 verifier 支援性與確定性可驗證性",
+  "model": "glm53",
+  "manifest": {
+    "path": "/home/user1/dev/Vacant/ops/reqloop/g3_1/manifest.json",
+    "sha256": "60ed69c81325d39f05bb0452023f9a018a02b97060bb1ded2e00a36fcbda6ed9"
+  },
+  "h20_rule": "≥1/4 題 ≥1 條確定性 claim → H2_0_MET；0/4 題 → H2_0_REFUTED（fail-closed：擷取/解析失敗＝空集合，不計 MET）",
+  "n_tasks": 4,
+  "n_tasks_with_deterministic_claim": 0,
+  "h20_verdict": "H2_0_REFUTED",
+  "cost": {
+    "model_calls": 4,
+    "total_tokens": 27240
+  },
+  "tasks": [
+    {
+      "task_id": "dab_035",
+      "input_sha256": "cdf2a37e27696e59015b050db40cfc250113da26ea60d0c76cd82eb823e4d797",
+      "goal_sha256": "d7f36d41901ec35d2f38f7cc7870418b1df761ae6491d662650554711193c1fe",
+      "n_requirements": 2,
+      "n_deterministic_claims": 0,
+      "deterministic_claim_ids": [],
+      "n_unverified_claims": 2,
+      "unverified_claims": [
+        {
+          "id": "R1",
+          "reason": "deliverable_not_in_request:removed_outliers_count"
+        },
+        {
+          "id": "R2",
+          "reason": "deliverable_not_in_request:filtered_rowset"
+        }
+      ],
+      "reason_distribution": {
+        "deliverable_not_in_request:filtered_rowset": 1,
+        "deliverable_not_in_request:removed_outliers_count": 1
+      },
+      "n_discarded": 0,
+      "has_deterministic_claim": false,
+      "extract_error": null,
+      "parse_error": null
+    },
+    {
+      "task_id": "dab_055",
+      "input_sha256": "02b12248e1fd496ec585743b415232a3ddc4d26838cd46eef0c65b40b68a02b2",
+      "goal_sha256": "89762c8d2e867eba309d53e7c651ee9bdfe5dc7242786dc69bf728a6b7661695",
+      "n_requirements": 5,
+      "n_deterministic_claims": 0,
+      "deterministic_claim_ids": [],
+      "n_unverified_claims": 5,
+      "unverified_claims": [
+        {
+          "id": "R1",
+          "reason": "unsupported_recompute_type:mean_col"
+        },
+        {
+          "id": "R2",
+          "reason": "unsupported_recompute_type:mean_col"
+        },
+        {
+          "id": "R3",
+          "reason": "unsupported_recompute_type:mean_col"
+        },
+        {
+          "id": "R4",
+          "reason": "deliverable_not_in_request:答案以 @mean_cases[正整數] 標籤格式呈現"
+        },
+        {
+          "id": "R5",
+          "reason": "unsupported_recompute_type:mean_col"
+        }
+      ],
+      "reason_distribution": {
+        "deliverable_not_in_request:答案以 @mean_cases[正整數] 標籤格式呈現": 1,
+        "unsupported_recompute_type:mean_col": 4
+      },
+      "n_discarded": 0,
+      "has_deterministic_claim": false,
+      "extract_error": null,
+      "parse_error": null
+    },
+    {
+      "task_id": "dab_105",
+      "input_sha256": "90225a6693f50a7b282107e2685ab7d2a2ac3a7417ce49cbd4d4e0622f33a917",
+      "goal_sha256": "4969ccbadbf17dcc8625ebcb1f0ae21fb598e9d752f74493c13555e3cfbc251c",
+      "n_requirements": 6,
+      "n_deterministic_claims": 0,
+      "deterministic_claim_ids": [],
+      "n_unverified_claims": 6,
+      "unverified_claims": [
+        {
+          "id": "R1",
+          "reason": "deliverable_not_in_request:ApplicantIncome 與 LoanAmount 的 Pearson 相關係數"
+        },
+        {
+          "id": "R2",
+          "reason": "deliverable_not_in_request:Pearson 相關係數（線性關係強度與方向）"
+        },
+        {
+          "id": "R3",
+          "reason": "deliverable_not_in_request:計算前排除 ApplicantIncome 或 LoanAmount 任一欄為缺失值的列"
+        },
+        {
+          "id": "R4",
+          "reason": "deliverable_not_in_request:相關係數四捨五入至小數點後兩位"
+        },
+        {
+          "id": "R5",
+          "reason": "deliverable_not_in_request:答案以 @correlation_coefficient[corr_coeff] 標籤格式輸出"
+        },
+        {
+          "id": "R6",
+          "reason": "deliverable_not_in_request:資料來源檔案 data/test_Y3wMUE5_7gLdaTN.csv"
+        }
+      ],
+      "reason_distribution": {
+        "deliverable_not_in_request:ApplicantIncome 與 LoanAmount 的 Pearson 相關係數": 1,
+        "deliverable_not_in_request:Pearson 相關係數（線性關係強度與方向）": 1,
+        "deliverable_not_in_request:相關係數四捨五入至小數點後兩位": 1,
+        "deliverable_not_in_request:答案以 @correlation_coefficient[corr_coeff] 標籤格式輸出": 1,
+        "deliverable_not_in_request:計算前排除 ApplicantIncome 或 LoanAmount 任一欄為缺失值的列": 1,
+        "deliverable_not_in_request:資料來源檔案 data/test_Y3wMUE5_7gLdaTN.csv": 1
+      },
+      "n_discarded": 0,
+      "has_deterministic_claim": false,
+      "extract_error": null,
+      "parse_error": null
+    },
+    {
+      "task_id": "dab_218",
+      "input_sha256": "97cc7d6d60e1c515466cbb35a7908e8bb7106029f0128b5826e024e66458092d",
+      "goal_sha256": "71f059a69e9a50dd256b5a332473eb02121a3b5896d867a12b7296d6f66ba3db",
+      "n_requirements": 5,
+      "n_deterministic_claims": 0,
+      "deterministic_claim_ids": [],
+      "n_unverified_claims": 5,
+      "unverified_claims": [
+        {
+          "id": "req-1",
+          "reason": "deliverable_not_in_request:positive_diffsel 與 negative_diffsel 兩欄的 Pearson 相關係數 (r)"
+        },
+        {
+          "id": "req-2",
+          "reason": "deliverable_not_in_request:以 @correlation_coefficient[r_value] 標籤格式輸出的相關係數"
+        },
+        {
+          "id": "req-3",
+          "reason": "deliverable_not_in_request:計算前不得移除離群值或修改資料"
+        },
+        {
+          "id": "req-4",
+          "reason": "deliverable_not_in_request:計算須使用全部資料點"
+        },
+        {
+          "id": "req-5",
+          "reason": "deliverable_not_in_request:資料來源檔案 data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
+        }
+      ],
+      "reason_distribution": {
+        "deliverable_not_in_request:positive_diffsel 與 negative_diffsel 兩欄的 Pearson 相關係數 (r)": 1,
+        "deliverable_not_in_request:以 @correlation_coefficient[r_value] 標籤格式輸出的相關係數": 1,
+        "deliverable_not_in_request:計算前不得移除離群值或修改資料": 1,
+        "deliverable_not_in_request:計算須使用全部資料點": 1,
+        "deliverable_not_in_request:資料來源檔案 data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv": 1
+      },
+      "n_discarded": 0,
+      "has_deterministic_claim": false,
+      "extract_error": null,
+      "parse_error": null
+    }
+  ]
+}
