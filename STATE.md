@@ -285,3 +285,9 @@
 - 驗證了什麼：驗收兩連 `--selftest`→VERDICT: G3_2_PRERUN_SELFTEST_OK＋pytest 4 passed RC=0（改前兩檔不存在 exit 2）；回歸 test_reqloop_g3_2_manifest/prereg＋frozen_anchors 12 passed；凍結 4 檔未動（git diff vacant_network/ 空）；dab_725 2 條確定性 claim＝R1/R6 `answer_kv` numeric keys（凍結 extract/checks 判定 unverified=False、可 PASS/FAIL 重算）。
 - 沒驗證／沒做：完整批未發射（票紅線：預跑不擅自點火）；H0 結果＝**H0_MET（1/4）**：dab_725 2/7 確定性；dab_587/657/517 全 0 確定性（unverified 理由：deliverable_not_in_request、unsupported_recompute_type:mean_col/median_col/std_col/pearson、model_declared_unverified、unknown_verifier:missing）→ 上報人類待核准發射 full_rloop×4。
 - 下一步：人類裁決（發完整批／停同路徑）；若發射→approval 門 fail-closed＋`g3 --manifest ops/reqloop/g3_2/manifest.json`；G3.1（1315-2）仍待人類核准；1215-1 候 worker 收斂。
+## 2026-11-11 r1470（審查 2026-11-11 22:25 五條指示落地輪：argon 同步＋2 紅燈修復）
+- 審查#1（done）：argon 樹位元組恆等 a3cc92616（已含 mainline 歷史、零 in-scope 內容差）實證後，argon worktree `git merge auto/qwen27b`→argon 收 r1469 4 檔；mainline `git merge --no-edit auto/argon`（FF，零內容）→freeze_check diff_argon OK。
+- 自修 2 紅燈（r1469 簿記遺漏）：bk_now（NOW.md≠ops/loop/NOW.md 鏡像）→cp 對齊 byte-identical；now_redline（r1469 重寫紅線行脫離契約格式）→恢復 r1467 契約行（4 檔行數/blob 5147f8c3/e757aec5/f3525b01/b6d2f37f＋g25 filing 6 sha256 本輪自磁碟重算全吻合）。
+- 未做（如實）：diff_worker 仍 BROKEN——worker 在跑（pid 563325、票 1843-2 doing/、w-0083）；紅線＝不碰在進產物，12/12 待 worker 收斂後複測（審查#3 條件句）。
+- 審查#4 阻塞：BACKLOG 10 行＝worker 在進票 1843-2 的步驟 4/5，本輪不碰（票 2158-1 留下輪）；審查#2 已於 r1469 結案（H0_MET 1/4、報告在 ops/audits/g3_2_h0_prerun_report.json）；G3.2 完整批＋G3.1 發射仍待人類核准（未發）。
+- 驗收：now_redline 5 passed；freeze_check 11/12（唯紅＝diff_worker，worker 在進）；0 model calls、0 push、凍結 4 檔＋filing 未動。

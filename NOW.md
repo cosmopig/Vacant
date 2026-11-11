@@ -13,7 +13,7 @@
 
 ## 紅線（契約，不改）
 - 無 push（迴圈自動 push auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
-- 凍結 4 檔不改（repair 2795／extract 1217／checks 2823／run_eval 1298 行）；g3.py 改動僅依核准工單。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py 2823 行／blob f3525b01…、run_eval.py 1298 行／blob b6d2f37f…；g25 filing（6 sha256）不變；g3.py 僅依核准工單改動。
 - 不讀 /srv/eval/hidden/ 或 scorer.py；缺值 UNKNOWN 不填 0；hidden_after=UNKNOWN；同批重發非獨立樣本。
 - 不寫 /srv/vlab/queue；不 poll CI；不跑 full pytest。
 
