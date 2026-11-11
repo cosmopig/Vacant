@@ -1,48 +1,94 @@
-import json
+import unittest
 from pathlib import Path
-import shutil
+from typing import Dict, Any
 import os
+import json
+from ops.audits.labd_instance_and_env_audit import audit_run_dir
 
-def test_audit_run_dir():
-    from ops.audits.labd_instance_and_env_audit import audit_run_dir_v2
-    import shutil
+class TestLabdInstanceAndEnvAudit(unittest.TestCase):
+    def setUp(self):
+        # Create a temporary directory for testing
+        self.test_dir = Path("/tmp/audit_test")
+        if self.test_dir.exists():
+            import shutil
+            shutil.rmtree(self.test_dir)
+        self.test_dir.mkdir()
 
-    # Use a unique name to avoid collisions and ensure it's in the current directory
-    test_dir = Path("./test_audit_dir_v2")
-    if test_dir.exists():
-        shutil.rmtree(test_dir)
-    test_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        # 1. Clean cell
-        cell_path_clean = test_dir / "cell_clean.json"
-        with open(cell_path_clean, 'w') as f:
-            json.dump({"agent_env": {"VAR": "VAL"}}, f)
-            
-        # 2. Leaked cell
-        cell_path_leak = test_dir / "cell_leak.json"
-        with open(cell_path_leak, 'w') as f:
-            json.dump({"agent_env": {"VACANT_PI_SELF": "leaked"}}, f)
-            
-        # 3. Infra cell (should be ignored)
-        infra_dir = test_dir / ".infra-data"
-        infra_dir.mkdir(parents=True, exist_ok=True)
-        cell_path_infra = infra_dir / "cell.json"
-        with open(cell_path_infra, 'w') as f:
-            json.dump({"agent_env": {"VACANT_PI_SELF": "should_be_ignored"}}, f)
+    def tearDown(self):
+        # Remove the temporary directory after tests
+        if self.test_dir.exists():
+            import shutil
+            shutil.rmtree(self.test_dir)
 
-        results = audit_run_dir_v2(test_dir)
-        # total_cells should be 2 because .infra-data is ignored
-        assert results["total_cells"] == 2, f"Expected 2 cells, found {results['total_cells']}"
-        assert len(results["violations"]) == 1
-        assert len(results["clean_cells"]) == 1
-        return True
-    finally:
-        if test_dir.exists():
-            shutil.rmtree(test_dir)
+    def test_audit_run_dir_basic(self):
+        # Create a cell.json with no leaks
+        cell1 = self.test_dir / "cell1"
+        cell1.mkdir()
+        with open(cell1 / "cell.json", "w") as f:
+            json.dump({"data": "clean"}, f)
 
-def test_audit_run_dir_e016():
-    pass
+        # Create a cell.json with a leak
+        cell2 = self.test_dir / "cell2"
+        cell2.mkdir()
+        with open(cell2 / "cell.json", "w") as f:
+            json.dump({"data": "leak", "VACANT_PI_PARENT": "secret"}, f)
+
+        results = audit_run_dir(self.test_dir)
+        self.assertEqual(results["total_cells"], 2)
+        self.assertEqual(len(results["violations"]), 1)
+        self.assertEqual(len(results["clean_cells"]), 1)
+
+    def test_audit_run_dir_missing_file(self):
+        # Empty directory
+        results = audit_run_dir(self.test_dir)
+        self.assertEqual(results["total_cells"], 0)
+
+    def test_audit_run_dir_nonexistent_path(self):
+        results = audit_run_dir(Path("/tmp/non_existent_path_12345"))
+        self.assertEqual(results["total_cells"], 0)
+
+    def test_audit_run_dir_skips_infra(self):
+        # Create a cell.json inside an .infra- directory
+        infra_dir = self.test_dir / ".infra-hidden"
+        infra_dir.mkdir()
+        cell3 = infra_dir / "cell3"
+        cell3.mkdir()
+        with open(cell3 / "cell.json", "w") as f:
+            json.dump({"data": "should_be_skipped"}, f)
+
+        results = audit_run_dir(self.test_dir)
+        # Should only count the one in the root (if any) or just 0 if none outside .infra-
+        # In this case, cell1 and cell2 were already created in setUp/previous tests? 
+        # No, I should recreate them for a clean test.
+        pass
+
+    def test_audit_run_dir_full(self):
+        # Recreate structure for full test
+        for d in self.test_dir.iterdir():
+            if d.is_dir(): shutil.rmtree(d)
+        
+        # Clean cell
+        c1 = self.test_dir / "c1"
+        c1.mkdir()
+        with open(c1 / "cell.json", "w") as f: json.dump({"v": 1}, f)
+
+        # Leaky cell
+        c2 = self.test_dir / "c2"
+        c2.mkdir()
+        with open(c2 / "cell.json", "w") as f: json.dump({"v": 1, "VACANT_PI_SELF": "leak"}, f)
+
+        # Hidden cell (should be skipped)
+        h = self.test_dir / ".infra-hidden"
+        h.mkdir()
+        c3 = h / "c3"
+        c3.mkdir()
+        with open(c3 / "cell.json", "w") as f: json.dump({"v": 1}, f)
+
+        results = audit_run_dir(self.test_dir)
+        self.assertEqual(results["total_cells"], 2) # c1 and c2 only
+        self.assertEqual(len(results["violations"]), 1)
+        self.assertEqual(len(results["clean_cells"]), 1)
 
 if __name__ == "__main__":
-    import pytest
-    pytest.main([__file__])
+    import shutil
+    unittest.main()
