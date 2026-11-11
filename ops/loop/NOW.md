@@ -2,11 +2,11 @@
 
 主線：R-loop 主線（~/dev/ops/RLOOP_PLAN.md）。G2.5 已完（凍結）、G2 已完（凍結）；G3 發射＝人類核准＋真通道，不代發、不入 queue。
 
-## 現況（r1416＋redo、2026-11-11）
+## 現況（r1417、2026-11-11）
 
-驗證＋簿記輪（0 代碼改動、0 model calls），全綠；redo（審查點名 4 檔、逐檔直接開啟＋獨立重算、0 更正）：
-- redo：repair.py 2795 行／blob 5147f8c3…＋extract.py 1217 行／blob e757aec5…／sha256 51abfec3…（filing）＋filing 4681B 三門 PASS・6/6 sha MATCH＋effects summary 60228B w2r 13w g7/l6・11w g7/l4 r2w 0 全重算 MATCH（4 檔皆已直讀、細節見 STATE.md r1416 redo 條目）
-- ci_tip_check（輪首一次讀取、不 poll）：**VERDICT: CI_TIP_OK rc=0**——qwen27b@da653a9f COVERED（綠祖先 a08a6f7d7..tip 純簿記 4 檔）；worker@c2c4d135 PEER_COVERED（root tree 位元組恆等）；argon@448c154e COVERED；CI 在跑（在跑≠已綠、不 poll）
+驗證＋簿記輪（0 代碼改動、0 model calls），全綠＋審查 redo（effects summary 直開、逐格獨立重算、0 更正）：
+- 審查 redo：effects_20261105_summary.json 60228B sha256 a710f7e4…（ves pin）直開＋cells_detail 逐格重算——policy30 30 格 w2r 13（g7/l6）r2w 0、sess 35＝19+16、API 915＝365+550、tok 33670510；once20 20 格 w2r 11（g7/l4）r2w 0、sess 20＝10+10、API 457＝165+292、tok 19503953；total 50／local 45／current 50 全 MATCH 0 更正
+- ci_tip_check（輪首一次讀取、不 poll）：**VERDICT: CI_TIP_OK rc=0**——qwen27b@b1372e492 COVERED（綠祖先 a08a6f7d7..tip 純簿記 4 檔）；worker@24f2939f PEER_COVERED（root tree 位元組恆等）；argon@52fa0034 COVERED；綠底 5152 passed/0 failed/74 skipped（三分支同一）
 - freeze_check：12/12 FROZEN_STATE_OK rc=0（anchors 5／ci_contract 2／diff 0×2／filing 3/3＋3/3／g3gate NOT_FIRED PLAN_OK／queue 空（含隱藏）／bk 同步／wt clean 3/3／now_redline 相符）
 - 守衛套件 8 檔 115 passed（27/5/2/19/27/18/5/12；審查基線 114＋r1413 負控 (i) 1、0 弱化）
 - bd：vq-el4 94/94 全閉、0 open；唯一 ready＝vq-1zf（G3）待人類 --fire；/srv/vlab/queue 空；無新人類指示（ops/ 最新仍 11-07）
