@@ -1424,7 +1424,8 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_ci_tip_check.py（新增負控 (h) 雙場景）
     #     3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761
     #     → fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4
-    # r1413 解凍記錄（vq-el4.9x）：ci_tip_check.py evaluate 收緊——零分支輸入（檢查
+    # r1413 解凍記錄（vq-el4.92；佔位 .9x 於 r1414 解析為實際 issue id）：
+    # ci_tip_check.py evaluate 收緊——零分支輸入（檢查
     # 量零分支）被舊碼判 CI_TIP_OK rc=0（all([]) 恆真）＝空集綠燈（本輪 RED 實證：
     # `--branches '{}'` → VERDICT: CI_TIP_OK rc=0；I-4 未測量不是通過，r1272 空檔
     # vacuous／r1334 零格同族；移除全部測量對象把判定從 UNKNOWN 升成 OK＝H-0「綠燈
@@ -1438,8 +1439,15 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_ci_tip_check.py（新增負控 (i)）
     #     fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4
     #     → b1b1a9555e38fb0424899db45ca3f61ba794ed2616913eb32d36a594086f6944
+    # r1414 解凍記錄（vq-el4.92）：r1413 遺留的佔位「vq-el4.9x」解析為實際 issue id
+    # vq-el4.92（ci_tip_check.py 3 處：2 docstring＋1 evidence 字串；純文字、零邏輯改動；
+    # evidence 子串 'vacuous' 不變，負控 (i) 仍成立；test_reqloop_ci_tip_check.py 未動，
+    # 其錨不變）。顯式更新錨：
+    # (1) ops/reqloop/ci_tip_check.py
+    #     c0d41a915a255d128238b36374b5121a09fd2e69606bd245038425f3cf4b027a
+    #     → 90f3a0ab6506d9399f47c92260318e231e2db29f00a2eda78610e2428bb2267f
     "ops/reqloop/ci_tip_check.py":
-        "c0d41a915a255d128238b36374b5121a09fd2e69606bd245038425f3cf4b027a",
+        "90f3a0ab6506d9399f47c92260318e231e2db29f00a2eda78610e2428bb2267f",
     "tests/test_reqloop_ci_tip_check.py":
         "b1b1a9555e38fb0424899db45ca3f61ba794ed2616913eb32d36a594086f6944",
 }
