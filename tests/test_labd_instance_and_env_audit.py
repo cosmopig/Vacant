@@ -19,6 +19,12 @@ class TestLabdAudit(unittest.TestCase):
         count = check_labd_instances(proc_list=proc_list)
         self.assertEqual(count, 1)
 
+    def test_check_labd_instances_with_args_single(self):
+        # Test single instance (should return 1)
+        proc_list = [["python3", "/srv/vlab/bin/labd.py"]]
+        count = check_labd_instances(proc_list=proc_list)
+        self.assertEqual(count, 1)
+
     def test_check_labd_instances_with_args_false_positive(self):
         # Test command containing "labd.py" but not as the script argument for python (should return 0)
         proc_list = [["python3", "/srv/vlab/bin/other_script.py"]]
@@ -31,7 +37,20 @@ class TestLabdAudit(unittest.TestCase):
         count = check_labd_instances(proc_list=proc_list)
         self.assertEqual(count, 0)
 
+    def test_check_labd_instances_ignores_substring_in_args(self):
+        # Negative control: contains "labd.py" text but not as a real labd script (should return 0)
+        proc_list = [["python3", "/srv/vlab/bin/view_doc.py", "about labd.py"]]
+        count = check_labd_instances(proc_list=proc_list)
+        self.assertEqual(count, 0)
+
+    def test_check_labd_instances_detects_real_labd(self):
+        # Positive control: real labd script (should return 1)
+        proc_list = [["python3", "/srv/vlab/bin/labd.py"]]
+        count = check_labd_instances(proc_list=proc_list)
+        self.assertEqual(count, 1)
+
     def test_audit_cell_env_success_a_arm_empty(self):
+
         # Mock cell.json with empty agent_env for A arm
         mock_data = {
             "arm": "A",
