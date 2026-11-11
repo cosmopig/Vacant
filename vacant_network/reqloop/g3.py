@@ -711,10 +711,23 @@ def render_requirement_list(req_set: RequirementSet | None) -> str:
     return "\n".join(lines)
 
 
+#: 顯式無工具覆寫（2026-11-11，工單 P20261111_0840-1 項 1；AMEND-3
+#: ops/approvals/g3_vq-1zf_fire_20261111_AMEND3.json 人類核准）：任務文本原為
+#: 工具使用者所寫（agent 式指令），而無工具臂走 glm CLI
+#: --max-turns 1 --enabled-tools none——模型照文本做讀檔/寫檔的 agent 動作，
+#: 撞單回合無工具限制即 turn_limit（fire a/b：glm 臂 8/8 turn_limit、9-15s、
+#: 輸出 67-164 tok）。修法：build_cell_prompt（round 1 與 round>=2 修復輪共用）
+#: 頂部加顯式覆寫；不改變三臂同源的臂段指令；不改 ~/.local/bin/glm。
+NO_TOOL_OVERRIDE = (
+    "此任務文本原為工具使用者所寫；你沒有任何工具。不要讀檔、不要寫檔，"
+    "僅依下文給出的任務與資料，在第一則訊息直接輸出全部 @name[值] 答案行。"
+)
+
+
 def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
                       round_no: int = 1, missing: tuple[str, ...] = (),
                       prev_draft: str = "", feedback: str = "") -> str:
-    """決定性 prompt：任務＋資料＋（臂）需求清單＋（臂）指令＋（第 2 輪）缺口證據。
+    """決定性 prompt：無工具覆寫＋任務＋資料＋（臂）需求清單＋（臂）指令＋（第 2 輪）缺口證據。
 
     紅線：不含 /srv/eval/hidden/、scorer.py 或任何隱藏內容；缺口證據只含
     可見 contract 的答案項名與上一稿原文＋檢查器反例（依設計不含重算期望值）。
@@ -725,6 +738,7 @@ def build_cell_prompt(task: dict, spec: dict, *, req_list_text: str = "",
     for name in sorted(task["data"]):
         data_block += f"--- data/{name} ---\n{task['data'][name]}\n"
     parts = [
+        NO_TOOL_OVERRIDE,
         "你是作答模型。只依下方任務、資料與（如有）需求清單完成任務，輸出最終答案。",
         "【任務】",
         task["instruction"].strip(),

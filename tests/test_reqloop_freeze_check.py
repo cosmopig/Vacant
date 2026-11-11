@@ -1518,10 +1518,27 @@ GUARD_CONTENT_PIN = {
     # (3) tests/test_reqloop_g3_conformance.py／g3gate.py／test_reqloop_g3gate.py
     #     未受本地改動影響，磁碟實算與分支記錄值吻合（a7507f6a…/a1b10e2e…/
     #     86bac89d…）。
+    # r1435 解凍記錄（工單 P20261111_0840-1 項 1；AMEND-3
+    # ops/approvals/g3_vq-1zf_fire_20261111_AMEND3.json 人類核准；分支
+    # auto/qwen27b）：g3.py build_cell_prompt（round 1 與 round>=2 修復輪共用）
+    # 頂部加顯式無工具覆寫 NO_TOOL_OVERRIDE（工單指定文句：「此任務文本原為
+    # 工具使用者所寫；你沒有任何工具。不要讀檔、不要寫檔，僅依下文給出的任務與
+    # 資料，在第一則訊息直接輸出全部 @name[值] 答案行」）——修 fire a/b 之 glm 臂
+    # 8/8 turn_limit（agent 式任務文本撞 --max-turns 1 --enabled-tools none）；
+    # 臂段指令／manifest／預算逐位不變；不改 ~/.local/bin/glm。
+    # test_reqloop_g3.py 加 2 測（負控制 1：現版 prompt 無覆寫＝紅、修法後綠；
+    # 正控制 1：覆寫存在且在任務文本之前、round 1 與 2 都在頂部），g3 檔 24→26。
+    # sha256 本輪 sha256sum 自磁碟實算、非轉抄：
+    # (1) vacant_network/reqloop/g3.py
+    #     189f4e732cf03b0fddbe8fe82dd7b66f60a041d64cf63e29daf97732eb3351f3
+    #     → c875ca69d221d92ad4a1753f2ccf3a926a59e662d4c86a5eb70b0cbe1186a581
+    # (2) tests/test_reqloop_g3.py（新增 2 測）
+    #     17c69ec886fc77deabd561e0a131f080a248e268b3b4080553ea43c861b49410
+    #     → f462ac61704637ff33c0e6f9142080b630ec0c8ba9fb1afe3a187b886b3d8c74
     "vacant_network/reqloop/g3.py":
-        "189f4e732cf03b0fddbe8fe82dd7b66f60a041d64cf63e29daf97732eb3351f3",
+        "c875ca69d221d92ad4a1753f2ccf3a926a59e662d4c86a5eb70b0cbe1186a581",
     "tests/test_reqloop_g3.py":
-        "17c69ec886fc77deabd561e0a131f080a248e268b3b4080553ea43c861b49410",
+        "f462ac61704637ff33c0e6f9142080b630ec0c8ba9fb1afe3a187b886b3d8c74",
     "tests/test_reqloop_g3_conformance.py":
         "e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
