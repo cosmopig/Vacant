@@ -1,7 +1,7 @@
 # NOW.md — 現況（每輪覆寫，≤3KB）
 
 ## 狀態（2026-11-11 r1465：審查指示 #1——bk_now 鏡像修復＋argon 同步；freeze_check 4 紅→2 紅）
-- 修前 4 紅（實測）：diff_worker/diff_argon/bk_now/wt_clean。修後：bk_now OK（cp NOW.md→ops/loop/NOW.md；鏡像原為 r1461 舊內容，本輪重算 git show 4a995163a:ops/loop/NOW.md | wc -c = 2786B）＋diff_argon OK（argon worktree 全樹鏡像 mainline 737ba92ca＋commit，8 檔＝簿記 3＋in-scope 5，in-scope diff 0）。
+- 修前 4 紅（實測）：diff_worker/diff_argon/bk_now/wt_clean。修後：bk_now OK（cp NOW.md→ops/loop/NOW.md；鏡像原為 r1461 舊內容，本輪重算 git show 4a995163a:ops/loop/NOW.md | wc -c = 2786B）＋diff_argon OK（argon worktree 全樹鏡像 mainline 本輪 commit＋commit，8 檔＝簿記 3＋in-scope 5，in-scope diff 0）。
 - 審查 redo（交付前）：2786B 承傳數改有實測證據；5 點名檔實開核對皆與記錄相符（effects summary 60228B、l007 147 行＋selftest 重跑 OK、extract 1217 行/blob e757aec5…、repair 2795 行/blob 5147f8c3…、票 1152-1 文檔通讀＋g3_1 precheck 重跑 OK）。
 - DECISION: 不字面 merge auto/argon｜argon diff 僅 4 簿記檔（r1461 內容、252 行 delta），合併會以舊覆新；慣例＝mainline canonical＋argon 鏡像（r1270/r1461 實證）。
 - 剩 2 紅皆 worker 在進（如實）：diff_worker（無 sync counterpart；worker 領先 1843-2 WIP）＋wt_clean（worker worktree 2 檔 M）。worker round 20:15 發射、其輪末自動 commit。
