@@ -243,3 +243,11 @@
 - 誠實記帳：**H2_0_REFUTED（r1447a，3e45e212）不被本票推翻**——報告主失敗模式＝模型 deliverable 欄位不合規，非 contract 漏附；§4 停止規則（不發完整批、不疊同路徑票、上報人類）維持。c-run 26/26「同型」歸因因該 run 逐條原因未持久化（假說 §1.3）維持 UNKNOWN。
 - 票尾 redo 段已補（done/P20261111_1516-1…md）；NOW.md＋鏡像更新。
 - 下一步：不變（1215-1 收案、CI 核、等下一票；H2.0 重發＝人類裁決）。
+
+## 2026-11-11 r1458（票 P20261111_1716-2-e016-run-envleak-audit，bounce）
+- DECISION: 票 bounce 不實作｜票負控制期望 violations==15（「15 格 A 臂全洩漏」）與磁碟數據矛盾：attempt1 實量 14 cell.json、11 PI 洩漏、3 合規 smoke（list_ops，14:15 早於 14:34:40 發射）、2 格無 cell.json（book-C rc=-15／bowling-A）；官方記錄 DECISION_20261103_E016_ENVLEAK_FIX.md §4.2 自書「15 格含 3 合規 smoke 格」；任何誠實口徑皆非 15（11/12/14/16）。
+- 票內部不一致：正控制 0 違規＋102 格須採「PI 殘留才算洩漏＋排除 5 個 .infra-* 目錄（各帶 cell.json）＋VACANT_FAILED_STEP_REVIEW 視為臂參數」口徑（attempt2 實量 107 cell.json、0 PI 命中、34 FSR 全 C-nf）；此口徑下負控制＝11 非 15。改期望值硬過＝製造綠燈，拒絕。
+- 做了什麼：逐格實量兩目錄＋對讀官方決策檔＋基線測試（6 passed）；票尾寫明矛盾全證據＋重拆建議；票 mv bounced/（1716-1 同批已在 bounced/）。0 model calls、0 產品碼改動、repo 無功能變更。
+- 驗證了什麼：驗收命令改前狀態＝argparse exit 2（與票一致）；attempt2 PI 掃描 0/107 命中（含 infra）；list_ops smoke mtime 14:15 vs affine-A 14:38。
+- 沒驗證什麼：audit_run_dir/--audit-e016 未實作（驗收期望值本身錯，實作即被迫擇一：硬編 15 恆紅、或改數硬綠）。
+- 下一步：等規劃者依票尾重拆建議改期望值重發（或裁定口徑）；doing/ 現空；1215-1 收案＋CI 三分支核不變。

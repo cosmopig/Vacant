@@ -1,9 +1,9 @@
 # NOW.md — 現況（每輪更新，≤3KB）
 
-## 狀態（2026-11-11 r1450 G3 輸入 contract 接線）
-- **r1450（票 P20261111_1516-1，c79af8cf6）：g3.py 擷取 user_text 漏附 contract.md 已修**（helper＋call site＋prerun 同口徑＋新測試，answer.txt 範例案 old→new 解旗，0 model calls）。**redo 補正**（假說檔已補開）：H2.0 報告 14 條實際 deliverable 皆描述性短句（prompt L1028 禁止）→ 修復後 user_text 重測 **0/14 解旗**（證據 ops/audits/g3_1_contract_fix_report_recheck_20261111.json）→ **H2_0_REFUTED（r1447a）不被推翻、§4 停止規則維持**；票尾 redo 段已補。
-- r1449：argon 同步 24 in-scope 檔→diff_argon 0 differ；diff_worker 殘留＝1215-1 3 檔（在進未升上，誠實紅）。vq-kax 3 項已落地；收案被 1215-1 阻塞。
-- r1447/a：G3.1 H2.0=H2_0_REFUTED（3e45e212）；r1442 凍結（809dae937）；r1444 stray-labd（3127a77ad）。
+## 狀態（2026-11-11 r1458 e016 envleak 審計票 bounce）
+- **r1458（票 P20261111_1716-2，bounced/）：驗收期望值與數據矛盾，未實作**。負控制要 violations==15「A 臂 15 格全洩漏」；attempt1 實量＝14 cell.json／11 PI 洩漏／3 合規 smoke（list_ops，14:15 早於 14:34:40 發射）／2 格無 cell.json（book-C rc=-15、bowling-A）；官方 DECISION_20261103_E016_ENVLEAK_FIX.md §4.2 自書「15 格含 3 合規 smoke 格」。正控制口徑（PI 殘留＋排 .infra 5 目錄＋FSR＝臂參數）下負控制＝11 非 15；「任何 VACANT_」口徑則正控制＝34 破。改數硬過＝製造綠燈，拒絕；票尾已寫全證據＋重拆建議。
+- r1450（票 1516-1，c79af8cf6）：g3.py 擷取 user_text 漏附 contract.md 已修＋redo 補正（0/14 解旗、H2_0_REFUTED 不被推翻）。
+- r1449：argon 24 檔同步→diff_argon 0；diff_worker 殘留＝1215-1 3 檔（誠實紅）。r1447/a：H2.0=REFUTED；r1442 凍結；r1444 stray-labd。
 - CI：三分支新 tip 待跑完，下輪 ci_status.py 核（不 poll）。
 
 ## 紅線（契約，不改）
@@ -18,6 +18,7 @@
 3. hidden 計分：10 cells ok 有答案，人側/vlab 側。
 
 ## 下輪入口（≤3）
-- bd ready＋1215-1 收案狀態；qwen doing/ 現空，等規劃者下一票。
+- bd ready＋1215-1 收案狀態；qwen doing/ 現空（1716-1、1716-2 皆 bounced/，等規劃者重拆或新票）。
 - CI 三分支核：python3 /home/user1/dev/ops/ci_status.py（新 tip 跑完後）。
 - 守衛：anchors 5 passed、freeze_check（除 1215-1 項）全綠；test_reqloop_g3 34 passed（r1450 量）。
+（MEMORY 上限 6 KB、NOW 上限 3 KB；超過的部分沒有附上，請先把它縮短）
