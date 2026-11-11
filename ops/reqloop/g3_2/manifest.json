@@ -1,0 +1,175 @@
+{
+ "schema": "vacant.reqloop.g3gate.plan/1",
+ "frozen_at": "2026-11-11T21:55:02+00:00",
+ "ticket": "P20261111_2119-1（G3.2 預註冊凍結；2026-11-11 人類常設定案第 2.a 條「G 系列就此自續：假設→manifest 凍結→發射清單」＋第 5 條常設授權；候選假說 ops/reqloop/g3_2_candidate_hypothesis.md §3、§5）",
+ "purpose": "G3.2 確定性裁決門＋抓修批（假說 §2 H0/H1）：full_rloop（待驗機制臂）× 候選題單 4 題＝4 格；選題＝bank 30 −（g3_1 tasks ∪ g3_1 seen_set）＝16 候選，相容性篩選 top4（全 COMPATIBLE：dab_725/587/657/517；排序＝分級→凍結家族數→題號，決定性可重算，ops/audits/g3_2_bank_screen.py，輸出 hash 入本 manifest 防 cherry-pick）；基線臂不進默認範圍（同 G3.1 §3）；任務輸入凍結副本在本目錄 tasks/（逐檔 sha256 核，與 ref 源一致）；預算門＝≤4 格、300s/輪、日 ≤2,000,000 tok 撞額停不重試、glm CLI 唯一入口、無硬 token 上限→成本從 raw usage 讀、缺值 UNKNOWN 絕不填 0；核准門 fail-closed（無核准信號→RC 2、0 模型呼叫）。發射前預檢查（假說 §3）：資料檔在位、詞彙→能力映射落凍結集（screen --selftest C1）、screen 輸出 hash 入 manifest——皆已落地；本 manifest 只凍結、不發射（0 model calls）。",
+ "arms": [
+  "full_rloop"
+ ],
+ "arm_defs": {
+  "full_rloop": "完整 R-loop：自動擷取需求（extract.py）＋ localized 修復（repair.py 凍結 2795 行）＋重驗所有必要條目（checks.py）"
+ },
+ "tasks": [
+  {
+   "task_id": "dab_725",
+   "files": {
+    "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "workspace/contract.md": "d45d8d39ef41e9873977c05716f3a52fd6c926ad8e595348486c488b18d65732",
+    "workspace/data/auto-mpg.csv": "555a2b668da52d7431215df842fb073d1ad220c56d4ac6ec359c0ae9b1beea6b",
+    "workspace/goal.md": "fdaeab445f23e4919ad1a58757af30744abfc4ac50e8e918d6bd4b0379233c68"
+   }
+  },
+  {
+   "task_id": "dab_587",
+   "files": {
+    "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "workspace/contract.md": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
+    "workspace/data/20170413_000000_group_statistics.csv": "17da5edda18a5a5c2168f5f06a0a90604efef810cac0d17492723ddad2685753",
+    "workspace/goal.md": "7a03ec2359e8ba5ddb32f1324fba43ea2d6231cc5e7a08a8722e35a1994f337b"
+   }
+  },
+  {
+   "task_id": "dab_657",
+   "files": {
+    "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "workspace/contract.md": "f549700ab0be633b75740eb2ed19f6d09350e23cff6a20ba37f693f31a9e0a6e",
+    "workspace/data/YAHOO-BTC_USD_D.csv": "ddbd797b7db4999bbb7e836ad928aba56bea7a5dbeb516afb7d63fd42662a328",
+    "workspace/goal.md": "f419633a43fa9202192b87dac1f48a575d8a62c429a4a72a1c4d910a369b1e83"
+   }
+  },
+  {
+   "task_id": "dab_517",
+   "files": {
+    "instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "workspace/contract.md": "7c5b87c071d5235dfb0419be336c886e8dd48b1fe10f9c2da03a53d7748921c9",
+    "workspace/data/titanic.csv": "7d118fef8b6ccf7f81111877bc388536f7b1e498a655e3d649d19aaa010e9f6f",
+    "workspace/goal.md": "f70034514f56ba0f365801472d1d48429ac3051f3cd2c2246ca32d0e2a346c69"
+   }
+  }
+ ],
+ "seen_set": [
+  "dab_035",
+  "dab_055",
+  "dab_105",
+  "dab_218",
+  "dab_039",
+  "dab_057",
+  "dab_129",
+  "dab_144",
+  "dab_176",
+  "dab_216",
+  "dab_378",
+  "dab_426",
+  "dab_427",
+  "dab_507",
+  "dabstep",
+  "dab_666",
+  "dab_721",
+  "dab_250",
+  "dab_665",
+  "dab_723",
+  "dab_732",
+  "dab_249",
+  "dab_514",
+  "dab_588",
+  "dab_669",
+  "dab_724",
+  "dab_688"
+ ],
+ "seen_set_source": "g3_1 manifest tasks（dab_035/055/105/218；同批重發不得當獨立樣本，G3.1 §3 口徑）∪ g3_1 manifest seen_set（effects_20261105 50 格聯集＋G1 開發樣本＋G3 c 發已見 dab_129/144/176/216；dabstep 為另一 bank、不在本 bank 選題）∪ G3.2 相容性篩選未入 top4 之 12 候選（screen 排序：COMPATIBLE dab_666/721、PARTIAL dab_250/665/723/732/249/514/588/669/724、INCOMPATIBLE dab_688）。口徑：選題不讀 hidden/scorer、不靠隱藏分反推；同批重發不得當獨立樣本。",
+ "bank": {
+  "name": "dabench",
+  "dir": "/home/user1/dev/ops/ref/bm_tasks/dabench",
+  "n_total": 30,
+  "ordering": [
+   "dab_725",
+   "dab_587",
+   "dab_657",
+   "dab_517",
+   "dab_035",
+   "dab_039",
+   "dab_055",
+   "dab_057",
+   "dab_105",
+   "dab_129",
+   "dab_144",
+   "dab_176",
+   "dab_216",
+   "dab_218",
+   "dab_249",
+   "dab_250",
+   "dab_378",
+   "dab_426",
+   "dab_427",
+   "dab_507",
+   "dab_514",
+   "dab_588",
+   "dab_665",
+   "dab_666",
+   "dab_669",
+   "dab_688",
+   "dab_721",
+   "dab_723",
+   "dab_724",
+   "dab_732"
+  ],
+  "ordering_note": "ordering＝凍結選題清單（screen top4，排序＝分級→凍結家族數→題號）＋其餘 26 題 canonical 順序；seen_set 涵蓋其餘 26 題全部，故 unseen_selection 前 4 題＝凍結選題清單（G3Plan.verify_frozen 以 g3gate.unseen_selection 重算核選題一致性）",
+  "disclosure": "4 選題（dab_725/587/657/517）皆不在 g3_1 manifest tasks ∪ seen_set、不在 effects_20261105 50 格——對 G 系列與舊機制 e008/e013/e014 均無先驗數據（記錄在案防 cherry-pick 質疑；同 g3_gate/g3_1 manifest 同庫 disclosure 口徑）；候選集 16 題＝bank 30 − 排除 14（in-bank），分級 6 COMPATIBLE／9 PARTIAL／1 INCOMPATIBLE（screen 輸出）"
+ },
+ "budget": {
+  "max_cells": 4,
+  "timeout_s_per_round": 300,
+  "daily_token_cap": 2000000,
+  "quota_fail_closed": true,
+  "model_entry": "glm",
+  "hard_token_cap": false,
+  "cost_missing": "UNKNOWN",
+  "note": "無硬 token 上限能力；成本從 raw usage（state/vibe_calls.jsonl）讀、缺值 UNKNOWN 絕不填 0；撞 2M/日 額度即停、不得重試；glm CLI 唯一入口（--enabled-tools none、空暫存目錄）；不准反向代理、不准轉額度。1 臂×4 題＝4 格＋每題 1 次 extract 擷取（假說 §4 成本口徑；G3.1 預跑實測 27240 tok/4 calls 為同形參考）"
+ },
+ "scoring": {
+  "scorer": "/srv/vlab 既有 scorer（bin/report.py <exp> --rescore）；不准用 R-loop 自己列的清單當裁判",
+  "four_class_report": [
+   "報錯→對",
+   "對→錯",
+   "未解決",
+   "成本缺值"
+  ],
+  "hidden_after": "UNKNOWN",
+  "hypothesis_gate": "H0（門，fail-closed，假說 §2）：§3 選題（4 題、各 1 次 extract 預跑）≥1/4 題存在 ≥1 條 required claim 可給確定性裁決（PASS 或 FAIL、程式重算）→發完整批；0/4→否決、不發完整批、G3.2 停止、上報人類、不再新增同路徑工單；H1（條件於 H0）：(a) ≥1/4 格 ≥1 輪 content_reverify 達確定性裁決；(b) round 1 有已確認缺口的格、所有該等格 round 2 diff fixed≥1 且 regressed=0（0 缺口格→H1(b) 記 not_applicable，不記通過亦不記否決）",
+  "same_batch_note": "同批重發不得當獨立樣本；基線對照由 c 發數據提供（native_pi/reqlist_only 不在 G3.2 默認範圍）"
+ },
+ "leak_guard": "不讀 /srv/eval/hidden/ 與 scorer.py 內容、不按隱藏分數反推規則；修復模型只看原始請求原文、凍結資料與可見反例；缺值＝UNKNOWN 不填 0；cost_usd=0 不報 0 成本；hidden_after 一律 UNKNOWN",
+ "approval": {
+  "required": true,
+  "epic": "vq-1zf",
+  "schema": "vacant.reqloop.g3gate.approval/1",
+  "file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
+  "mechanism": "人類常設授權（2026-11-11 定案第 5 條；approved=true、epic=vq-1zf、by=人類擁有者）；發射命令 --approval 指該文件；approval_gate fail-closed（無核准信號→RC 2、0 模型呼叫）。G3.2 批＝full_rloop×4 題（4 格）＋extract 預跑，成本小於該核准文件 scope（12 格三臂批）",
+  "status": "FROZEN（manifest 凍結完成；發射＝核准後另一步，本票不發射、0 model calls）"
+ },
+ "screening": {
+  "tool": "ops/audits/g3_2_bank_screen.py",
+  "output_schema": "vacant.g3_2_bank_screen/1",
+  "audit_file": "ops/audits/g3_2_bank_screen_output_20261111.json",
+  "output_sha256": "98bc5d9680a66a2c337da558bce499fdb5d85742019e70695a5b545fd5c34220",
+  "n_candidates": 16,
+  "n_excluded_in_bank": 14,
+  "top4": [
+   "dab_725",
+   "dab_587",
+   "dab_657",
+   "dab_517"
+  ],
+  "classes": {
+   "COMPATIBLE": 6,
+   "PARTIAL": 9,
+   "INCOMPATIBLE": 1
+  },
+  "note": "假說 §3 預檢查 3：screen 輸出（top4＋ranking＋排除集）落 audit、hash 入 manifest（防 cherry-pick）；--selftest 9 controls（含 C1 映射落凍結集、C8 決定性）"
+ },
+ "precheck_evidence": {
+  "data_files_present": "tasks/ 四題 instruction.txt＋workspace/{goal.md,contract.md,data/*.csv} 實存、逐檔 sha256 與 ref（/home/user1/dev/ops/ref/bm_tasks/dabench/）一致（diff -r 0 差異；ops/audits/g3_2_precheck.py 可重算）",
+  "verifier_support": "checks.py 支援表（answer_kv／tag_format／rowset_filter／kv_recomputed 等）；screen --selftest C1 核對詞彙→(verifier,recompute type) 全落凍結集；不在表內＝期望 unverified、預記 UNKNOWN",
+  "unverified_reason_persistence": "g3.py 呼叫端 trec.unverified_reasons＝{u.id: u.reason for u in report.unverified}（vacant_network/reqloop/g3.py，r1442 入樹；extract.py 邏輯未改）"
+ }
+}

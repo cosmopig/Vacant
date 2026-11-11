@@ -1,0 +1,252 @@
+{
+ "schema": "vacant.g3_2_bank_screen/1",
+ "bank": "/home/user1/dev/ops/ref/bm_tasks/dabench",
+ "n_bank": 30,
+ "n_excluded_total": 15,
+ "n_excluded_in_bank": 14,
+ "excluded_in_bank": [
+  "dab_035",
+  "dab_039",
+  "dab_055",
+  "dab_057",
+  "dab_105",
+  "dab_129",
+  "dab_144",
+  "dab_176",
+  "dab_216",
+  "dab_218",
+  "dab_378",
+  "dab_426",
+  "dab_427",
+  "dab_507"
+ ],
+ "n_candidates": 16,
+ "top4": [
+  "dab_725",
+  "dab_587",
+  "dab_657",
+  "dab_517"
+ ],
+ "ranking": [
+  {
+   "task": "dab_725",
+   "class": "COMPATIBLE",
+   "n_tags": 6,
+   "data_files": [
+    "auto-mpg.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "kv_recomputed:max_row_first",
+    "plain_recomputed:unique_count"
+   ],
+   "unsupported": []
+  },
+  {
+   "task": "dab_587",
+   "class": "COMPATIBLE",
+   "n_tags": 1,
+   "data_files": [
+    "20170413_000000_group_statistics.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "kv_recomputed:pearson2"
+   ],
+   "unsupported": []
+  },
+  {
+   "task": "dab_657",
+   "class": "COMPATIBLE",
+   "n_tags": 3,
+   "data_files": [
+    "YAHOO-BTC_USD_D.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "kv_recomputed:null_count"
+   ],
+   "unsupported": []
+  },
+  {
+   "task": "dab_517",
+   "class": "COMPATIBLE",
+   "n_tags": 1,
+   "data_files": [
+    "titanic.csv"
+   ],
+   "supported": [
+    "kv_recomputed:pearson2"
+   ],
+   "unsupported": []
+  },
+  {
+   "task": "dab_666",
+   "class": "COMPATIBLE",
+   "n_tags": 2,
+   "data_files": [
+    "my_test_01.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats"
+   ],
+   "unsupported": []
+  },
+  {
+   "task": "dab_721",
+   "class": "COMPATIBLE",
+   "n_tags": 1,
+   "data_files": [
+    "auto-mpg.csv"
+   ],
+   "supported": [
+    "kv_recomputed:pearson2"
+   ],
+   "unsupported": []
+  },
+  {
+   "task": "dab_250",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "baseball_data.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "kv_recomputed:null_count",
+    "plain_recomputed:group_ratio_stat"
+   ],
+   "unsupported": [
+    "derived_feature"
+   ]
+  },
+  {
+   "task": "dab_665",
+   "class": "PARTIAL",
+   "n_tags": 6,
+   "data_files": [
+    "YAHOO-BTC_USD_D.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "kv_recomputed:null_count",
+    "plain_recomputed:group_ratio_stat"
+   ],
+   "unsupported": [
+    "imputation"
+   ]
+  },
+  {
+   "task": "dab_723",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "auto-mpg.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "plain_recomputed:group_ratio_stat"
+   ],
+   "unsupported": [
+    "derived_feature"
+   ]
+  },
+  {
+   "task": "dab_732",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "gapminder_cleaned.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats",
+    "kv_recomputed:null_count"
+   ],
+   "unsupported": [
+    "imputation"
+   ]
+  },
+  {
+   "task": "dab_249",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "baseball_data.csv"
+   ],
+   "supported": [
+    "kv_recomputed:pearson2"
+   ],
+   "unsupported": [
+    "hypothesis_test"
+   ]
+  },
+  {
+   "task": "dab_514",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "hotel_data.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats"
+   ],
+   "unsupported": [
+    "hypothesis_test"
+   ]
+  },
+  {
+   "task": "dab_588",
+   "class": "PARTIAL",
+   "n_tags": 1,
+   "data_files": [
+    "20170413_000000_group_statistics.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats"
+   ],
+   "unsupported": [
+    "outlier_detection"
+   ]
+  },
+  {
+   "task": "dab_669",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "my_test_01.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats"
+   ],
+   "unsupported": [
+    "outlier_detection"
+   ]
+  },
+  {
+   "task": "dab_724",
+   "class": "PARTIAL",
+   "n_tags": 2,
+   "data_files": [
+    "auto-mpg.csv"
+   ],
+   "supported": [
+    "kv_recomputed:col_stats"
+   ],
+   "unsupported": [
+    "outlier_detection"
+   ]
+  },
+  {
+   "task": "dab_688",
+   "class": "INCOMPATIBLE",
+   "n_tags": 4,
+   "data_files": [
+    "ravenna_250715.csv"
+   ],
+   "supported": [],
+   "unsupported": [
+    "derived_feature"
+   ]
+  }
+ ]
+}
