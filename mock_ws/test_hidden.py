@@ -1,1 +1,1 @@
-val = 1
+solve_val = 42

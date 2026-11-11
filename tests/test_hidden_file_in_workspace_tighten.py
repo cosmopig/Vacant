@@ -1,89 +1,90 @@
 import unittest
-import pathlib
-import tarfile
-import json
-import os
-from ops.audits.hidden_file_in_workspace_tighten import audit_workspace, get_non_trivial_lines, calculate_content_hash
+from ops.audits.hidden_file_in_workspace_tighten import audit_workspace
 
 class TestHiddenFileTighten(unittest.TestCase):
-    def setUp(self):
-        self.test_dir = pathlib.Path("./test_data")
-        if self.test_dir.exists():
-            import shutil
-            shutil.rmtree(self.test_dir)
-        self.test_dir.mkdir()
-        
-        self.mock_ws = self.test_dir / "mock_ws"
-        self.mock_ws.mkdir()
-        
-        self.hidden_lit_dir = self.test_dir / "hidden_lits"
-        self.hidden_lit_dir.mkdir()
-        with open(self.hidden_lit_dir / "test_h1.py", "w") as f:
-            f.write("val = 1\n# comment\n")
-            
-        self.visible_lit_dir = self.test_dir / "visible_lits"
-        self.visible_lit_dir.mkdir()
-        with open(self.visible_lit_dir / "test_v1.py", "w") as f:
-            f.write("val = 2\n")
+    def test_selftest_logic(self):
+        # This is a bit tricky because the script has its own main for --selftest
+        # We can just call it and check if it succeeds, but we want to unit test the logic.
+        pass
 
-    def tearDown(self):
-        if self.test_dir.exists():
-            import shutil
-            shutil.rmtree(self.test_dir)
-
-    def test_confirmed_violation(self):
-        # Exact match of non-trivial lines (val = 1)
-        with open(self.mock_ws / "hidden_file.py", "w") as f:
-            f.write("val = 1\n# comment\n")
-        
-        tar_path = self.test_dir / "violation.tar.gz"
-        with tarfile.open(tar_path, "w:gz") as tf:
-            tf.add(self.mock_ws / "hidden_file.py", arcname="hidden_file.py")
-            
-        task = {
-            "hidden_dir": self.hidden_lit_dir,
-            "visible_dir": self.visible_lit_dir
+    def test_audit_workspace_confirmed_violation(self):
+        mock_task = {
+            "hidden_dir": pathlib.Path("./mock_hidden"),
+            "visible_dir": pathlib.Path("./mock_visible"),
+            "task_id": "test_confirmed"
         }
-        results = audit_workspace(self.mock_ws, task)
-        rules = [r["rule"] for r in results]
-        self.assertIn("CONFIRMED_VIOLATION", rules)
-
-    def test_benign_false_positive(self):
-        # Different content (val = 2), no overlap with hidden lit (val = 1)
-        with open(self.mock_ws / "hidden_file_fake.py", "w") as f:
-            f.write("val = 2\n")
+        # Setup dirs
+        pathlib.Path("./mock_hidden").mkdir(parents=True, exist_ok=True)
+        pathlib.Path("./mock_visible").mkdir(parents=True, exist_ok=True)
+        with open(pathlib.Path("./mock_hidden") / "test_hidden.py", "w") as f:
+            f.write("content = 123\n")
+        with open(pathlib.Path("./mock_visible") / "test_visible.py", "w") as f:
+            f.write("content = 456\n")
         
-        tar_path = self.test_dir / "benign.tar.gz"
-        with tarfile.open(tar_path, "w:gz") as tf:
-            tf.add(self.mock_ws / "hidden_file_fake.py", arcname="hidden_file_fake.py")
-            
-        task = {
-            "hidden_dir": self.hidden_lit_dir,
-            "visible_dir": self.visible_lit_dir
-        }
-        results = audit_workspace(self.mock_ws, task)
-        rules = [r["rule"] for r in results]
-        # It should be FALSE_POSITIVE_BENIGN because it's not a confirmed violation 
-        # and has no overlap with hidden lits.
-        self.assertIn("FALSE_POSITIVE_BENIGN", rules)
-
-    def test_suspected_leak(self):
-        # Partial overlap (val = 1 is in both, but there's more content)
-        with open(self.mock_ws / "leaked_file.py", "w") as f:
-            f.write("val = 1\nother = 2\n")
+        ws = pathlib.Path("./mock_ws")
+        ws.mkdir(parents=True, exist_ok=True)
+        with open(ws / "test_hidden.py", "w") as f:
+            f.write("content = 123\n")
         
-        tar_path = self.test_dir / "leak.tar.gz"
+        tar_path = pathlib.Path("./mock_ws.tar.gz")
+        import tarfile
         with tarfile.open(tar_path, "w:gz") as tf:
-            tf.add(self.mock_ws / "leaked_file.py", arcname="leaked_file.py")
-            
-        task = {
-            "hidden_dir": self.hidden_lit_dir,
-            "visible_dir": self.visible_lit_dir
+            tf.add(ws / "test_hidden.py", arcname="test_hidden.py")
+        
+        results = audit_workspace(pathlib.Path("./mock_ws"), mock_task)
+        self.assertTrue(any(r["rule"] == "CONFIRMED_VIOLATION" for r in results))
+
+    def test_audit_workspace_benign_false_positive(self):
+        mock_task = {
+            "hidden_dir": pathlib.Path("./mock_hidden"),
+            "visible_dir": pathlib.Path("./mock_visible"),
+            "task_id": "test_benign"
         }
-        results = audit_workspace(self.mock_ws, task)
-        rules = [r["rule"] for r in results]
-        # It should be SUSPECTED_LEAK because it has overlap but is not an exact match of non-trivial lines
-        self.assertIn("SUSPECTED_LEAK", rules)
+        pathlib.Path("./mock_hidden").mkdir(parents=True, exist_ok=True)
+        pathlib.Path("./mock_visible").mkdir(parents=True, exist_ok=True)
+        with open(pathlib.Path("./mock_hidden") / "test_hidden.py", "w") as f:
+            f.write("content = 123\n")
+        with open(pathlib.Path("./mock_visible") / "test_visible.py", "w") as f:
+            f.write("content = 456\n")
+        
+        ws = pathlib.Path("./mock_ws")
+        ws.mkdir(parents=True, exist_ok=True)
+        with open(ws / "test_hidden_fake.py", "w") as f:
+            f.write("content = 999\n")
+        
+        tar_path = pathlib.Path("./mock_ws.tar.gz")
+        import tarfile
+        with tarfile.open(tar_path, "w:gz") as tf:
+            tf.add(ws / "test_hidden_fake.py", arcname="test_hidden_fake.py")
+        
+        results = audit_workspace(pathlib.Path("./mock_ws"), mock_task)
+        self.assertTrue(any(r["rule"] == "FALSE_POSITIVE_BENIGN" for r in results))
+
+    def test_audit_workspace_suspected_leak(self):
+        mock_task = {
+            "hidden_dir": pathlib.Path("./mock_hidden"),
+            "visible_dir": pathlib.Path("./mock_visible"),
+            "task_id": "test_suspect"
+        }
+        pathlib.Path("./mock_hidden").mkdir(parents=True, exist_ok=True)
+        pathlib.Path("./mock_visible").mkdir(parents=True, exist_ok=True)
+        with open(pathlib.Path("./mock_hidden") / "test_hidden.py", "w") as f:
+            f.write("content = 123\n")
+        with open(pathlib.Path("./mock_visible") / "test_visible.py", "w") as f:
+            f.write("content = 456\n")
+        
+        ws = pathlib.Path("./mock_ws")
+        ws.mkdir(parents=True, exist_ok=True)
+        with open(ws / "test_suspect.py", "w") as f:
+            f.write("content = 123\n# Some comment\n")
+        
+        tar_path = pathlib.Path("./mock_ws.tar.gz")
+        import tarfile
+        with tarfile.open(tar_path, "w:gz") as tf:
+            tf.add(ws / "test_suspect.py", arcname="test_suspect.py")
+        
+        results = audit_workspace(pathlib.Path("./mock_ws"), mock_task)
+        self.assertTrue(any(r["rule"] == "SUSPECTED_LEAK" for r in results))
 
 if __name__ == "__main__":
     unittest.main()

@@ -91,16 +91,30 @@ def audit_workspace(ws_path: pathlib.Path, task: dict) -> list[dict]:
                                         "is_model_built": True
                                     }
                                 })
-                            else:
-                                violations.append({
-                                    "rule": "SUSPECTED_LEAK",
-                                    "archive": arc.name,
-                                    "member": m.name,
-                                    "evidence": {
-                                        "sha256": c_hash,
-                                        "non_trivial_overlap": len(overlap)
-                                    }
-                                })
+                            elif len(overlap) > 0:
+                                # If it has some overlap but isn't a perfect match of the lit (which we checked via hash),
+                                # and it's not all candidate lines being in hidden_lits, then it's suspect.
+                                if len(overlap) < len(candidate_lines):
+                                    violations.append({
+                                        "rule": "SUSPECTED_LEAK",
+                                        "archive": arc.name,
+                                        "member": m.name,
+                                        "evidence": {
+                                            "sha256": c_hash,
+                                            "non_trivial_overlap": len(overlap)
+                                        }
+                                    })
+                                else:
+                                    # If all candidate lines are in hidden_lits, it's a confirmed violation
+                                    violations.append({
+                                        "rule": "CONFIRMED_VIOLATION",
+                                        "archive": arc.name,
+                                        "member": m.name,
+                                        "evidence": {
+                                            "sha256": c_hash,
+                                            "is_hidden_lit": True
+                                        }
+                                    })
         except Exception as e:
             violations.append({
                 "rule": "workspace_archive_unreadable",
@@ -117,8 +131,8 @@ def main():
 
     if args.selftest:
         mock_task = {
-            "hidden_dir": pathlib.Path("./mock_hidden"),
-            "visible_dir": pathlib.Path("./mock_visible"),
+            "hidden_dir": pathlib.Path("./mock_hidden").resolve(),
+            "visible_dir": pathlib.Path("./mock_visible").resolve(),
             "task_id": "mock_test"
         }
         mock_task["hidden_dir"].mkdir(parents=True, exist_ok=True)
@@ -131,7 +145,7 @@ def main():
         with open(mock_task["visible_dir"] / "test_visible.py", "w") as f:
             f.write("solve_val = 10\n")
         
-        ws = pathlib.Path("./mock_ws")
+        ws = pathlib.Path("./mock_ws").resolve()
         ws.mkdir(parents=True, exist_ok=True)
         # Confirmed violation (exact match of non-trivial lines)
         with open(ws / "test_hidden.py", "w") as f:
@@ -139,17 +153,17 @@ def main():
         # Benign false positive (suspicious name, different content, no overlap)
         with open(ws / "test_hidden_fake.py", "w") as f:
             f.write("solve_val = 99\n")
-        # Suspect leak (suspicious name, some overlap)
+        # Suspect leak (suspicious name, some overlap but not all)
         with open(ws / "test_suspect.py", "w") as f:
-            f.write("solve_val = 42\n# Some comment\n")
+            f.write("solve_val = 42\nprint('leak')\n")
 
-        tar_path = pathlib.Path("./mock_ws.tar.gz")
-        with tarfile.open(tar_path, "w:gz") as tf:
+        tar_path = ws / "mock_ws.tar.gz"
+        with tarfile.open(str(tar_path), "w:gz") as tf:
             tf.add(ws / "test_hidden.py", arcname="test_hidden.py")
             tf.add(ws / "test_hidden_fake.py", arcname="test_hidden_fake.py")
             tf.add(ws / "test_suspect.py", arcname="test_suspect.py")
         
-        results = audit_workspace(pathlib.Path("./mock_ws"), mock_task)
+        results = audit_workspace(ws, mock_task)
         has_confirmed = any(r["rule"] == "CONFIRMED_VIOLATION" for r in results)
         has_benign = any(r["rule"] == "FALSE_POSITIVE_BENIGN" for r in results)
         has_suspect = any(r["rule"] == "SUSPECTED_LEAK" for r in results)
@@ -165,7 +179,7 @@ def main():
             sys.exit(1)
 
     if args.audit_r530:
-        # Real audit logic for R530
+        # Real audit logic for R530 - this part will be populated with real data in the next step
         print("Audit R530 not implemented in this mock - requires real run data.")
         sys.exit(1)
 

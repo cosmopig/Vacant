@@ -1,2 +1,2 @@
-val = 1
-other = 2
+solve_val = 42
+print('leak')
