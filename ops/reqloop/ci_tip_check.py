@@ -31,7 +31,7 @@ I-4：未測量不是通過）：worker/argon 的 per-sha CI 跑在舊祖先
 任一 RED／NO_COVERAGE → CI_TIP_BROKEN rc=1；否則（任一 UNKNOWN）→
 CI_TIP_UNKNOWN rc=2。BROKEN 優先於 UNKNOWN（有具體缺口比「無數據」更該亮紅）。
 零分支輸入（量零分支）→ CI_TIP_BROKEN（vacuous）rc=1——all([]) 恆真；「移除全部測量
-對象反而得 OK」是空集綠燈（r1413，vq-el4.9x；I-4 未測量不是通過，r1272 空檔 vacuous／
+對象反而得 OK」是空集綠燈（r1413，vq-el4.92；I-4 未測量不是通過，r1272 空檔 vacuous／
 r1334 零格同族；負控制見 tests/test_reqloop_ci_tip_check.py 負控 (i)）。
 
 紀律：只讀（ci/<sha>.json、ci/state.json、git 只讀子命令）；state.json 一次
@@ -174,7 +174,8 @@ def _running_note(ci_dir: Path, branch: str) -> str | None:
 def evaluate(ci_dir: Path, branch_wts: dict[str, Path]) -> dict[str, Any]:
     """三分支收口判定（唯一入口）。返回 {branches:{...}, verdict, rc}。
 
-    r1413（vq-el4.9x）收緊：零分支輸入＝量零分支 → BROKEN（vacuous）rc=1，fail-closed。
+    r1413（vq-el4.92，r1414 將佔位 .9x 解析為實際 issue id）收緊：零分支輸入＝量零分支
+    → BROKEN（vacuous）rc=1，fail-closed。
     舊碼 all([]) 恆真 → CI_TIP_OK rc=0＝空集綠燈（I-4 未測量不是通過，r1272 空檔
     vacuous／r1334 零格同族；移除全部測量對象把判定從 UNKNOWN 升成 OK＝H-0「綠燈
     來自沒量該量的」；RED 證據＝tests/test_reqloop_ci_tip_check.py 負控 (i)）。
@@ -185,7 +186,7 @@ def evaluate(ci_dir: Path, branch_wts: dict[str, Path]) -> dict[str, Any]:
             "verdict": VERDICT_BROKEN,
             "rc": 1,
             "evidence": [
-                "vacuous: zero branches —— 檢查量零分支；I-4 未測量不是通過（r1413，vq-el4.9x）"
+                "vacuous: zero branches —— 檢查量零分支；I-4 未測量不是通過（r1413，vq-el4.92）"
             ],
         }
     ci = load_ci_jsons(ci_dir)
