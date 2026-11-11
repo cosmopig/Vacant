@@ -625,3 +625,56 @@ def test_max_calls_bound_exact_formula_and_no_pi_unchanged():
     call（既有呼叫形狀不變）：4+4×1+4×2＝16。"""
     assert g3.max_calls_bound(("native_pi", "reqlist_only", "full_rloop"), 4) == 48
     assert g3.max_calls_bound(("reqlist_only", "full_rloop"), 4) == 16
+
+
+# ── r1443：unverified 原因持久化（票 P20261111_1152-1）─────────────
+# G3 fire c：full_rloop 26/26 required claims 全 UNKNOWN、evidence 只有
+# {"unverified": true}——extract.py 的逐條原因（unknown_verifier／參數不合／
+# deliverable 問題）被 g3.py 丟棄，收案無法歸因。修＝report.unverified 持久
+# 化進 trec.unverified_reasons＋_claim_records 注入 evidence["reason"]。
+# 0 model calls（單元＋假通道）。
+
+
+def test_unverified_reasons_persisted(tmp_path):
+    from vacant_network.intake.verifiers import ClaimResult
+    from vacant_network.reqloop import extract as extract_mod
+
+    report = extract_mod.ExtractReport(
+        unverified=(
+            extract_mod.UnverifiedItem("r1", "unknown_verifier:missing"),
+            extract_mod.UnverifiedItem("r2", "param_problem:empty"),
+        ))
+    reasons = {u.id: u.reason for u in report.unverified}
+    unv = ClaimResult(claim_id="r1", status="UNKNOWN", detail="d",
+                      evidence={"unverified": True}, verifier="missing",
+                      verifier_version="v1", required=True, authority="client")
+    verified = ClaimResult(claim_id="ok1", status="PASS", detail="d",
+                           evidence={"recomputed": 1}, verifier="plain_recomputed",
+                           verifier_version="v1", required=True, authority="client")
+    # 負控制：舊碼呼叫形狀（不傳原因映射）→ evidence 無 reason（不填、不造）
+    old = g3._claim_records([unv, verified])
+    assert old[0]["evidence"].get("reason") is None
+    assert old[0]["evidence"] == {"unverified": True}
+    # 正控制：由 report.unverified 派生的映射→evidence 含 reason 且逐條一致
+    new = g3._claim_records([unv, verified], reasons)
+    assert new[0]["evidence"]["reason"] == "unknown_verifier:missing"
+    assert new[0]["evidence"]["unverified"] is True
+    assert "reason" not in new[1]["evidence"], "verified 條目不得注入 reason"
+    # 原 ClaimResult 的 evidence 不得被改動（diff／feedback 共用同一清單）
+    assert unv.evidence == {"unverified": True}
+    # 端到端：假通道擷取清單為 unverified→trec 與落盤 claims 皆有原因
+    plan = _plan_2arms()
+    fake = FakeChannel(tokens=1000)
+    r = g3.run_g3(plan, BASE, tmp_path / "out", channel=fake, approval=_approval())
+    assert all(t["unverified_reasons"] == {"r1": "unknown_verifier:missing"}
+               for t in r["tasks"])
+    n = 0
+    for c in r["cells"]:
+        if c["arm"] != "full_rloop":
+            continue
+        for rd in c["content_reverify"]["rounds"]:
+            for cl in rd["claims"]:
+                if cl["evidence"].get("unverified"):
+                    n += 1
+                    assert cl["evidence"]["reason"] == "unknown_verifier:missing", cl
+    assert n > 0, "full_rloop claims 必含 unverified 條目（FakeChannel 擷取清單）"
