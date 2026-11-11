@@ -1424,10 +1424,24 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_ci_tip_check.py（新增負控 (h) 雙場景）
     #     3ca4dd545ed9e077e156d5c20e1e83a8a60fdfe148bdd0be049c9665d3f42761
     #     → fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4
+    # r1413 解凍記錄（vq-el4.9x）：ci_tip_check.py evaluate 收緊——零分支輸入（檢查
+    # 量零分支）被舊碼判 CI_TIP_OK rc=0（all([]) 恆真）＝空集綠燈（本輪 RED 實證：
+    # `--branches '{}'` → VERDICT: CI_TIP_OK rc=0；I-4 未測量不是通過，r1272 空檔
+    # vacuous／r1334 零格同族；移除全部測量對象把判定從 UNKNOWN 升成 OK＝H-0「綠燈
+    # 來自沒量該量的」）。修法：evaluate 首守空 branch_wts → BROKEN（vacuous）rc=1
+    # fail-closed＋證據點名 vacuous；main 補頂層證據輸出。其餘判定（TIP_GREEN/
+    # COVERED/PEER_COVERED/RED/UNKNOWN 與聚合口徑）逐位不變；live 三分支判定仍
+    # CI_TIP_OK（正控制實測）。兩檔合法改動後顯式更新錨：
+    # (1) ops/reqloop/ci_tip_check.py
+    #     18700ff7f4632a56c16619fb8e4eda3b650bdca233b659e6c1e430edfa290089
+    #     → c0d41a915a255d128238b36374b5121a09fd2e69606bd245038425f3cf4b027a
+    # (2) tests/test_reqloop_ci_tip_check.py（新增負控 (i)）
+    #     fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4
+    #     → b1b1a9555e38fb0424899db45ca3f61ba794ed2616913eb32d36a594086f6944
     "ops/reqloop/ci_tip_check.py":
-        "18700ff7f4632a56c16619fb8e4eda3b650bdca233b659e6c1e430edfa290089",
+        "c0d41a915a255d128238b36374b5121a09fd2e69606bd245038425f3cf4b027a",
     "tests/test_reqloop_ci_tip_check.py":
-        "fb5939bd3da044b7de5af94e0c2fbd5b7b4ca6f47e96deb2952ae705af5a4ab4",
+        "b1b1a9555e38fb0424899db45ca3f61ba794ed2616913eb32d36a594086f6944",
 }
 
 
