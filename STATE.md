@@ -296,3 +296,9 @@
 - 驗證了什麼：票面驗收一行 exit 0 → G3_2_FIRE_LAUNCH_RECORDED_OK（改前目錄不存在＋STATE.md 無登載＝exit 1）；發射進程本輪內跑完（比預期快）：4/4 cells status=ok、各 1 輪、requirement_list=true、error=null、hidden_after 全 UNKNOWN（打分流給 /srv/vlab scorer；本端未讀 hidden/scorer）、model_calls=8（answer=deepseek41、extract=glm53，經 glm CLI）、tokens=128923（遠低於 2M 上限、無撞額）；產物 g3_result.json＋cells/*/round_1/answer.txt。
 - 沒驗證／沒做：hidden 側分數＝UNKNOWN（待外部 scorer；同批不重發＝非獨立樣本）；claim 級 PASS/FAIL/UNKNOWN 分報與 H1 裁決＝另票（本票僅啟動＋登載；0 行產品碼、凍結 4 檔未動、未改 g3_1/g3_fire_20261111* 產物）。
 - 下一步：新票讀 g3_result.json＋各輪 claim 裁決，逐 claim 分報（PASS/FAIL/UNKNOWN）＋成本（缺值 UNKNOWN）；G3.1 發射（1315-2）仍待人類核准；1215-1 候 worker 收斂。
+## 2026-11-11 r1473（票 P20261111_2319-2：G3.2 fire 結果分報＋H1 判定；結案）
+- 做了什麼：新 `ops/audits/g3_2_fire_summary.py`（解析＋H1 判定＋H0 復現交叉核；--selftest 6 controls fail-closed）→`g3_2_fire_summary.json`（4/4 ok、26/26 UNKNOWN、tokens 重算 100324+28599=128923 吻合、answer_sha 4/4 重算吻合、hidden_after 4/4 UNKNOWN）＋`ops/audits/g3_2_interpretation.md`（逐題分報＋H1 判定＋H0 門不穩定發現）；假說檔狀態→**H1_REFUTED**＋§6 新增 G3.3 預註冊（H0 門跨獨立呼叫穩定性、1 extract 呼叫、待人類核准）；NOW.md 覆寫＋鏡像同步。
+- 驗證了什麼：票面驗收 exit 0「G3_2_INTERPRETATION_AND_PREREG_OK」（改前 summary/interp 不存在＝exit 1）；selftest 6 PASS（H1 四態＋tokens 空集＋answer_sha 失配）；now_redline 5 passed（紅線行自磁碟重算吻合）；0 model calls、0 產品碼改動、凍結 4 檔未動。
+- 判定：H1_REFUTED——(a) 0/4 格確定性裁決觸發否決；(b) not_applicable（0/4 已確認缺口格；不記通過不記否決）；第 2 輪 0/4 未執行＝UNKNOWN 非缺口（g3.py 機制如設計）。reason 家族：deliverable_not_in_request 20/26、unsupported_recompute_type 5/26、missing_param 1/26＝extract→checks 編譯層問題，非 harness 故障（4/4 ok），非 4 題內容正確性結論（hidden 4/4 UNKNOWN）。
+- 誠實記帳：H0 預跑 H0_MET（dab_725 2/7）fire 未復現（0/6、claim 分解 7→6）→H0 門量「該次呼叫」非「該題」（呼叫隨機）；其餘 3/4 題兩輪一致（0→0）。停止規則「H1 否決→停止、上報人類」與「連續 2 發無已確認缺口被消解（G3 c＋G3.2）」皆觸發；本輪分報即上報。
+- 下一步：G 系列候人類裁決（G3.3 1 呼叫／G3.4 多呼叫共識門／解凍 extract+checks／終止）；G3.1（1315-2）仍待人類核准；1215-1 候 worker 收斂→freeze_check 12/12 複測。
