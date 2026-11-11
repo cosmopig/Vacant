@@ -1361,10 +1361,34 @@ GUARD_CONTENT_PIN = {
     # 改動後顯式更新錨並留記錄：
     # (1) vacant_network/reqloop/g3gate.py sha256=a0dd46f20138ff578153b8f5ab42f0d0d1f60e98f016bfd01253ff0a8c669b9b → f1bd86be6698702ecf3f22fa7c263015f0b2d2c7905146e13e6a9e1a2318ebf2
     # (2) tests/test_reqloop_g3gate.py sha256=87e76f3dec89ff987dc06385c0e1e334c0190edf1e169866df707879c2bad60d → 86bac89dc0c4595140831b5e8b5e1c0744c20e3a9377bf66670ca18fbf3b8134
+    # r1429 解凍記錄（票 P20261111_0645-1，G3 首發後檢＋重發＋AMEND-2）：
+    # 首發 12 格 1 ok/11 error：8× glm 臂「Stopped: token_limit」（answer prompt
+    # input 32609–39266 tok 全部 > glm CLI 預設 --max-tokens 30000＝prompt+
+    # completion 總預算——vibe help 原文；擷取 call ~5.7K tok 在內故全成）＋
+    # 3× native_pi「pi timed out after 300s」（唯一成功 pi 格用 278s 貼線）。本輪：
+    # (1) g3gate.py：新增 MAX_TIMEOUT_S_PER_ROUND_PI=600（AMEND-2：pi 臂每格牆時
+    #     cap；600 為新預註冊上限，可加嚴不可放寬）＋DEFAULT_BUDGET 加
+    #     timeout_s_per_round_pi＋check_budget fail-closed 驗收（pi 臂在場必須在案、
+    #     bool 拒、非 int 拒、放寬拒——r1405/r1408 同口徑）；
+    # (2) g3.py：新增 GLM_MAX_TOKENS_TOTAL=60000，GlmChannel 顯式傳 --max-tokens
+    #     （選項 a：提升 glm 上限；上限是 CLI 級參數非每帳號設定）＋fire()
+    #     per-channel 牆時（pi 臂 600s／glm 臂與擷取 300s）；
+    # (3) test_reqloop_g3gate.py：4 新測（600 正控／601 放寬拒／缺失拒／非 int 拒）；
+    # (4) test_reqloop_g3.py：2 新測（pi 600s＋glm 300s per-channel 分流；
+    #     --max-tokens 顯式傳＋>首發最大 prompt）；
+    # (5) test_reqloop_g3_conformance.py：BUDGET_GLM_PI 加 timeout_s_per_round_pi
+    #     （與 manifest 同 budget 形）。manifest.json（AMEND-2 條目＋budget 字段）
+    #     不在 pin 清單；四凍結檔（freeze_check／anchors／ci_contract／
+    #     effects_summary）與 g25 呈報未動：
+    # (1) vacant_network/reqloop/g3gate.py sha256=a1b10e2e6e1aee46413d7da914f4e7197f4c3ef18c4d97b37989f9d977573229 → 367d88fef75aed9d8cd968e9b0f99e4443bee5765731ac12f7873e02ed7ba5ab
+    # (2) tests/test_reqloop_g3gate.py sha256=86bac89dc0c4595140831b5e8b5e1c0744c20e3a9377bf66670ca18fbf3b8134 → b3ea217739530292642ab7eb6980e6e87aadb9540a259d17f65f4918d0238ab9
+    # (3) vacant_network/reqloop/g3.py sha256=2ba95fe5fc49334f2fbe1a6088aa34bc77faf097b0b3d39bb1d0e5b71b762b75 → 189f4e732cf03b0fddbe8fe82dd7b66f60a041d64cf63e29daf97732eb3351f3
+    # (4) tests/test_reqloop_g3.py sha256=b07ce47e21f44659066e3c3774c1ca2f9d7082aea57728ce8893749dcd5b6441 → 17c69ec886fc77deabd561e0a131f080a248e268b3b4080553ea43c861b49410
+    # (5) tests/test_reqloop_g3_conformance.py sha256=a7507f6a17ea40f1823008589a42e4bf8c38a382b333c99fc90d4494acab346b → e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b
     "vacant_network/reqloop/g3gate.py":
-        "a1b10e2e6e1aee46413d7da914f4e7197f4c3ef18c4d97b37989f9d977573229",
+        "367d88fef75aed9d8cd968e9b0f99e4443bee5765731ac12f7873e02ed7ba5ab",
     "tests/test_reqloop_g3gate.py":
-        "86bac89dc0c4595140831b5e8b5e1c0744c20e3a9377bf66670ca18fbf3b8134",
+        "b3ea217739530292642ab7eb6980e6e87aadb9540a259d17f65f4918d0238ab9",
     # r1397 擴覆蓋記錄（vq-el4.85）：GUARD_CONTENT_PIN 擴覆蓋——NOW.md 紅線轉抄守衛檔
     # （freeze_check 第 12 項 mandated 檢查 now_redline invoke 其 redline_violations()
     # 為唯一實現）。缺口（本輪 RED 雙實證）：該檔 r1392（vq-el4.80）建立、晚於
@@ -1495,11 +1519,11 @@ GUARD_CONTENT_PIN = {
     #     未受本地改動影響，磁碟實算與分支記錄值吻合（a7507f6a…/a1b10e2e…/
     #     86bac89d…）。
     "vacant_network/reqloop/g3.py":
-        "2ba95fe5fc49334f2fbe1a6088aa34bc77faf097b0b3d39bb1d0e5b71b762b75",
+        "189f4e732cf03b0fddbe8fe82dd7b66f60a041d64cf63e29daf97732eb3351f3",
     "tests/test_reqloop_g3.py":
-        "b07ce47e21f44659066e3c3774c1ca2f9d7082aea57728ce8893749dcd5b6441",
+        "17c69ec886fc77deabd561e0a131f080a248e268b3b4080553ea43c861b49410",
     "tests/test_reqloop_g3_conformance.py":
-        "a7507f6a17ea40f1823008589a42e4bf8c38a382b333c99fc90d4494acab346b",
+        "e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
     # 其 10 測測試檔）r1399 輪（rc=124 殘留）建於 r1319/r1347/r1365/r1397 建錨各輪
     # 之後、從未釘住（r1347 同型：verify_effects_summary 對建於 r1333/r1344、r1347

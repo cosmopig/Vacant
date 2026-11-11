@@ -46,11 +46,14 @@ BUDGET_GLM = {
     "cost_missing": "UNKNOWN",
 }
 # AMEND-1：native_pi 接真 pi＋本地模型——manifest 如實宣告 glm+local_pi
+# AMEND-2（2026-11-11）：pi 臂在場→每格牆時 cap 必須在案（timeout_s_per_round_pi；
+# glm 的 timeout_s_per_round 仍 300s）
 BUDGET_GLM_PI = {
     **BUDGET_GLM,
     "model_entry": "glm+local_pi",
     "pi_provider": "lms1003qwen",
     "pi_model": "qwen/qwen3.8-27b",
+    "timeout_s_per_round_pi": g3gate.MAX_TIMEOUT_S_PER_ROUND_PI,
 }
 
 GOAL = """# Task
