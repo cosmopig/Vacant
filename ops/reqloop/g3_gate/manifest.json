@@ -1,5 +1,11 @@
 {
   "schema": "vacant.reqloop.g3gate.plan/1",
+  "amendments": [
+    {"id": "AMEND-1", "date": "2026-11-11",
+     "by": "人類擁有者（口頭指示：native_pi 接真 pi、模型用本地的 lms1003qwen）",
+     "reason": "原凍結預算 model_entry='glm' 與 arm_defs 的 native_pi（原生 pi）互相矛盾：glm CLI 單回合無工具，接不了 pi 的工具迴圈。寧可顯式修預註冊，不可名實不符發射。",
+     "change": "budget.model_entry 如實改為 'glm+local_pi'，新增 pi_provider='lms1003qwen'、pi_model='qwen/qwen3.8-27b'；arm_defs／任務清單與逐檔 sha256 全部不變。舊核准文件作廢；發射前須重新核准（approval_gate 仍 fail-closed）。"}
+  ],
   "frozen_at": "2026-11-08T04:50:13+00:00",
   "ticket": "vq-1zf（G3 未見任務完整對照；審查指示 #5「G3 準備工作」2026-11-08；r1236 交付發射前置門）",
   "purpose": "G3 發射前置門（離線、零模型呼叫、不發射）：選題＝bank 順序前 4 未見題（代碼重算、與預註冊 dab_129/144/176/216 一致）；任務輸入凍結副本在 repo 內（tasks/，sha256 逐檔核）；預算門＝12 格/300s 每輪/日 ≤2M tok 撞額停不重試/glm 唯一入口/無硬 token 上限缺值 UNKNOWN；核准門 fail-closed（人類明確核准前 0 模型呼叫）。發射（三臂真跑＋/srv/vlab scorer）是核准後另一步授權，不在本門範圍。核准前禁止任何發射。",
@@ -107,7 +113,9 @@
     "timeout_s_per_round": 300,
     "daily_token_cap": 2000000,
     "quota_fail_closed": true,
-    "model_entry": "glm",
+    "model_entry": "glm+local_pi",
+    "pi_provider": "lms1003qwen",
+    "pi_model": "qwen/qwen3.8-27b",
     "hard_token_cap": false,
     "cost_missing": "UNKNOWN",
     "note": "無硬 token 上限能力；成本從 raw usage 讀、缺值 UNKNOWN 絕不填 0；撞 2M/日 額度即停、不得重試；空暫存目錄＋--enabled-tools none；不准反向代理、不准轉額度"

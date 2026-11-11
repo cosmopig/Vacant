@@ -1,16 +1,21 @@
-"""G3 發射管線（vq-1zf.6）：接線＋假通道驗證，全程 0 真模型呼叫。
+"""G3 發射管線（vq-1zf.6＋AMEND-1）：接線＋假通道驗證，全程 0 真模型呼叫。
 
 紅線（本測試即驗收）：
 - 無核准/不合格核准 → RC 2、0 模型呼叫（fail-closed）
-- 有效核准＋假通道 → 12 格跑通、hidden_after 全 UNKNOWN
+- 臂與預註冊定義不符（pi 臂缺 pi_channel 注入）→ RC 3、0 模型呼叫
+  （核准過了也不發——conformance 門；詳見 test_reqloop_g3_conformance.py）
+- AMEND-1（2026-11-11 人類裁決）：native_pi 接真 pi（PiChannel、本地模型
+  lms1003qwen）；有效核准＋假 glm 通道＋假 pi 通道 → 12 格跑通、
+  hidden_after 全 UNKNOWN
 - 成本缺值 → UNKNOWN（None），絕不填 0
 - 撞日額度 → 停、不得重試
-- full_rloop 第 2 輪僅在必要答案項缺失時才花（無額外呼叫）
+- full_rloop 第 2 輪僅在已確認缺口時才花（無額外呼叫）
 - prompt 無 /srv/eval/hidden/、無 scorer.py（leak_guard）
 """
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 import pathlib
 import re
@@ -23,6 +28,8 @@ import vacant_network.reqloop.g3gate as g3gate
 REPO = pathlib.Path(__file__).resolve().parent.parent
 MANIFEST = REPO / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 BASE = REPO / "ops" / "reqloop" / "g3_gate"
+#: 凍結的三臂計畫含 native_pi（未接 pi_agent）→ 拒發；跑得通的臂組合
+CONFORMING_ARMS = ("reqlist_only", "full_rloop")
 
 
 def _approval() -> dict:
@@ -37,6 +44,12 @@ def _approval() -> dict:
 def _plan():
     assert MANIFEST.is_file(), "g3_gate manifest 未凍結"
     return g3gate.G3Plan.load(MANIFEST)
+
+
+def _plan_2arms():
+    """兩臂（皆接線）版本的凍結計畫：native_pi 未接 pi_agent→conformance 拒發，
+    其餘管線行為用這個版本驗。"""
+    return dataclasses.replace(_plan(), arms=CONFORMING_ARMS)
 
 
 def _full_answer(task_id: str) -> str:
@@ -166,19 +179,54 @@ def test_fire_tampered_manifest_rc1_before_approval(tmp_path):
     assert fake.calls == []
 
 
-# ── 發射主體：有效核准＋假通道（12 格）─────────────────────────────
+# ── 發射主體：有效核准＋假通道（12 格，pi 臂走注入的假 pi 通道）───────
 
 
-def test_fire_valid_approval_fake_channel_rc0_12cells(tmp_path):
+class FakePiChannel(g3.Channel):
+    """native_pi 的假 pi 通道：router 依 purpose 臂名分流到此；回齊全答案。"""
+
+    def __init__(self, *, tokens: int | None = 1000) -> None:
+        self.calls: list[dict] = []
+        self.tokens = tokens
+
+    def call(self, *, prompt: str, model: str, purpose: str,
+             timeout_s: float) -> tuple[str, g3.RoundUsage]:
+        self.calls.append({"prompt": prompt, "purpose": purpose, "model": model})
+        tid = purpose.split()[1].split("/")[0]
+        names = g3.required_answer_names(
+            (BASE / "tasks" / tid / "workspace" / "contract.md").read_text(encoding="utf-8"))
+        answer = "\n".join(f"@{n}[1.00]" for n in names) + "\n"
+        return answer, g3.RoundUsage(1, self.tokens, 5)
+
+
+def test_three_arm_plan_refuses_without_pi_channel(tmp_path):
+    """conformance：native_pi 已接線（AMEND-1）但 pi_channel 未注入→
+    拒發（G3ArmsNotConformant）、0 模型呼叫。"""
     fake = FakeChannel(tokens=1000)
+    fake_pi = FakePiChannel()
+    with pytest.raises(g3.G3ArmsNotConformant) as ei:
+        g3.run_g3(_plan(), BASE, tmp_path / "o", channel=fake,
+                  approval=_approval())
+    assert "pi_channel" in str(ei.value)
+    assert fake.calls == [] and fake_pi.calls == []
+
+
+def test_fire_valid_approval_fake_channels_rc0_12cells(tmp_path):
+    fake = FakeChannel(tokens=1000)
+    fake_pi = FakePiChannel(tokens=1000)
     plan = _plan()
     out = tmp_path / "out"
-    result = g3.run_g3(plan, BASE, out, channel=fake, approval=_approval())
-    # 12 格全跑（full_rloop 答案齊全→1 輪）
+    result = g3.run_g3(plan, BASE, out, channel=fake, pi_channel=fake_pi,
+                       approval=_approval())
+    # 三臂 4 題＝12 格全跑（AMEND-1：native_pi 走 pi 通道；其餘臂答案齊全→1 輪）
     assert len(result["cells"]) == 12
     assert all(c["status"] == "ok" for c in result["cells"])
     assert all(c["hidden_after"] == "UNKNOWN" for c in result["cells"])
-    # 成本：4 擷取 + 12 作答 = 16 calls × 1000 tok
+    # native_pi 4 格都由 pi 通道服務（router 依臂名分流）
+    assert len(fake_pi.calls) == 4
+    assert sorted(c["purpose"].split()[1] for c in fake_pi.calls) == [
+        f"{t['task_id']}/native_pi" for t in plan.tasks]
+    # 成本：4 擷取 + 12 作答 = 16 calls × 1000 tok（glm 與 pi 同額度界）
     t = result["totals"]
     assert t["model_calls"] == 16
     assert t["tokens"] == 16000
@@ -188,12 +236,24 @@ def test_fire_valid_approval_fake_channel_rc0_12cells(tmp_path):
     disk = json.loads(p.read_text(encoding="utf-8"))
     assert disk["schema"] == g3.SCHEMA_RESULT
     assert disk["stop_reason"] is None
+    # content_reverify 全臂在帳上（native_pi/reqlist_only 未啟用；full_rloop
+    # 啟用，擷取清單 unverified→verdict UNKNOWN，絕不假 PASS）
+    for c in disk["cells"]:
+        assert "content_reverify" in c
+        if c["arm"] == "full_rloop":
+            assert c["content_reverify"]["enabled"] is True
+        else:
+            assert c["content_reverify"]["enabled"] is False
 
 
-def test_three_arms_same_task_input_and_list_only_for_two_arms(tmp_path):
+def test_arms_same_task_input_and_arm_specific_prompt(tmp_path):
+    """三臂同任務＝同輸入 sha；需求清單只進帶清單的臂；pi 臂 prompt 用
+    凍結 instruction（工作區有真檔案，不內嵌資料預覽）。"""
     fake = FakeChannel(tokens=1000)
+    fake_pi = FakePiChannel(tokens=1000)
     plan = _plan()
-    result = g3.run_g3(plan, BASE, tmp_path / "o", channel=fake, approval=_approval())
+    result = g3.run_g3(plan, BASE, tmp_path / "o", channel=fake,
+                        pi_channel=fake_pi, approval=_approval())
     by_task = {}
     for c in result["cells"]:
         by_task.setdefault(c["task"], []).append(c)
@@ -201,25 +261,25 @@ def test_three_arms_same_task_input_and_list_only_for_two_arms(tmp_path):
         assert len(cells) == 3
         shas = {c["input_sha256"] for c in cells}
         assert len(shas) == 1, "三臂同任務＝同輸入（same_draft_same_budget）"
-    # 需求清單只進 reqlist_only/full_rloop 的 prompt
-    def prompts_of(arm: str) -> list[str]:
-        return [r["prompt"] for c in fake.calls if re.search(rf"/{arm} r1$", c["purpose"])]
-    for tid in list(by_task):
-        native = [c["prompt"] for c in fake.calls if c["purpose"] == f"G3 {tid}/native_pi r1"][0]
         reqlist = [c["prompt"] for c in fake.calls if c["purpose"] == f"G3 {tid}/reqlist_only r1"][0]
         full = [c["prompt"] for c in fake.calls if c["purpose"] == f"G3 {tid}/full_rloop r1"][0]
-        assert "【需求清單" not in native
+        native = [c["prompt"] for c in fake_pi.calls if c["purpose"].startswith(f"G3 {tid}/native_pi")][0]
         assert "【需求清單" in reqlist
         assert "【需求清單" in full
-        # 任務＋資料段三臂逐字相同（只改臂段）
+        assert "【需求清單" not in native
+        # glm 兩臂的任務＋資料段逐字相同（只改臂段）
         def task_block(p: str) -> str:
             return p.split("【本輪要求】")[0]
-        assert task_block(native) == task_block(reqlist) == task_block(full)
+        assert task_block(reqlist) == task_block(full)
+        # pi 臂的 prompt 逐字以凍結 instruction.txt 為本（不自撰任務）
+        frozen_instr = (BASE / "tasks" / tid / "instruction.txt").read_text(encoding="utf-8").strip()
+        assert frozen_instr in native
+        assert "data_preview" not in native and "--- goal.md ---" not in native
 
 
 def test_prompts_contain_no_hidden_or_scorer(tmp_path):
     fake = FakeChannel(tokens=100)
-    g3.run_g3(_plan(), BASE, tmp_path / "o", channel=fake, approval=_approval())
+    g3.run_g3(_plan_2arms(), BASE, tmp_path / "o", channel=fake, approval=_approval())
     for c in fake.calls:
         assert "/srv/eval" not in c["prompt"]
         assert "scorer.py" not in c["prompt"]
@@ -231,9 +291,9 @@ def test_prompts_contain_no_hidden_or_scorer(tmp_path):
 
 def test_missing_usage_totals_unknown_not_zero(tmp_path):
     fake = FakeChannel(tokens=None)  # raw usage 缺 tokens
-    result = g3.run_g3(_plan(), BASE, tmp_path / "o", channel=fake, approval=_approval())
+    result = g3.run_g3(_plan_2arms(), BASE, tmp_path / "o", channel=fake, approval=_approval())
     t = result["totals"]
-    assert t["model_calls"] == 16  # 呼叫數是事實，仍可數
+    assert t["model_calls"] == 12  # 呼叫數是事實，仍可數
     assert t["tokens"] is None, "缺值必須 UNKNOWN（None），不得填 0"
     assert t["tokens_missing"] is True
     for c in result["cells"]:
@@ -246,13 +306,13 @@ def test_missing_usage_totals_unknown_not_zero(tmp_path):
 def test_quota_exceeded_stops_no_retry(tmp_path):
     import dataclasses
     fake = FakeChannel(tokens=6000)
-    plan = _plan()
+    plan = _plan_2arms()
     plan = dataclasses.replace(plan, budget=dict(plan.budget, daily_token_cap=12000))  # 小額度以便測試
     result = g3.run_g3(plan, BASE, tmp_path / "o", channel=fake, approval=_approval())
-    # t1 擷取(6000)＋t1/native(6000)＝12000 撞額→之後全停
+    # t1 擷取(6000)＋t1/reqlist(6000)＝12000 撞額→之後全停
     assert result["stop_reason"] == "quota"
     assert len(fake.calls) == 2, "撞額後不得再呼叫（不重試）"
-    assert sum(1 for c in result["cells"] if c["status"] == "not_run") == 11
+    assert sum(1 for c in result["cells"] if c["status"] == "not_run") == 7
     assert result["totals"]["cells_run"] == 1
     q = result["quota"]
     assert q["known_tokens"] == 12000 and q["daily_token_cap"] == 12000
@@ -324,12 +384,12 @@ def test_quota_guard_no_backstop_preserves_legacy_behavior():
 
 
 def test_full_rloop_second_round_only_when_missing(tmp_path):
-    plan = _plan()
-    # 全部齊全→每格 1 輪（16 calls）
+    plan = _plan_2arms()
+    # 全部齊全→每格 1 輪（12 calls）
     fake = FakeChannel(tokens=10)
     r1 = g3.run_g3(plan, BASE, tmp_path / "o1", channel=fake, approval=_approval())
     assert all(len(c["rounds"]) == 1 for c in r1["cells"])
-    assert len(fake.calls) == 16
+    assert len(fake.calls) == 12
     # 某 task 的 full_rloop 缺一個必要項→該格 2 輪（多 1 次呼叫）
     tid = plan.tasks[0]["task_id"]
     full = _full_answer(tid).splitlines()
