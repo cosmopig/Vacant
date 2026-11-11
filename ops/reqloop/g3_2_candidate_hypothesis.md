@@ -1,7 +1,13 @@
 # G3.2 預註冊假說（H0 確定性裁決門＋H1 抓修；篩選後相容題選題清單）
 
-- 狀態（2026-11-11 r1464）：**預註冊凍結、待人類核准；核准前不發射、不佔配額。
-  本輪 0 model calls、0 行產品碼、未改凍結四檔（repair/extract/checks/run_eval）。**
+- 狀態（2026-11-11 r1469）：**H0 預跑門已執行（P20261111_2119-2）：`H0_MET`**——
+  4 凍結題各 1 次 extract（4 calls / 29914 tok，報告 `ops/audits/g3_2_h0_prerun_report.json`）：
+  dab_725 有 2/7 條確定性 claim（R1/R6，`answer_kv`＋numeric keys，凍結 extract/checks 判定
+  unverified=False、可 PASS/FAIL 重算）；dab_587/657/517 均 0 條確定性（全 unverified：
+  deliverable_not_in_request／unsupported_recompute_type／model_declared_unverified／unknown_verifier）。
+  依票紅線「預跑不擅自點火完整批」：完整批（full_rloop×4 格）待人類核准，不進默認。
+  前態（r1468）：預註冊凍結完成（manifest＋tasks 凍結副本＋precheck，0 model calls）；
+  r1464：預註冊草擬、未改凍結四檔（repair/extract/checks/run_eval）。
 - 依據（全部 in-repo 證據）：
   - G3 c 發：`ops/audits/g3_fire_20261111c_summary.json`＋解讀檔（12/12 格跑完、
     機制可達性 H1 4/4 成立、26/26 claims unverified→UNKNOWN）

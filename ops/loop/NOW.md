@@ -1,21 +1,28 @@
 # NOW.md — 現況（每輪覆寫，≤3KB）
 
-## 狀態（2026-11-11 r1467：1843-2 驗收核實（mainline＋argon 雙位綠）；票結案候 worker 收斂）
-- 1843-2 實作＝r1466（rc=124 超時）遺留、本輪首驗：`python3 ops/audits/labd_instance_and_env_audit.py --audit-e016` → **VERDICT: E016_ENVLEAK_AUDIT_OK rc=0**（負控制 attempt1 14 格/11 洩/3 合規＋missing 2＝book_store-C、bowling-A；正控制 attempt2 102 格/0 洩；與 r1458 逐格實量吻合）；`pytest tests/test_labd_instance_and_env_audit.py` → 12 passed（mainline＋argon 皆 RC=0）；evidence JSON 重跑逐位元組一致（決定性）。
-- argon（idle）全樹鏡像 mainline HEAD（3 檔：audit py／test py／evidence JSON）＋commit；先驗 0 独占檔；in-scope diff 0 → diff_argon OK。
-- freeze_check 10 OK／2 紅（快照）：diff_worker（no sync counterpart）＋wt_clean——皆＝worker 於同票迭代（round 79 21:35 WIP commit、round 80 在進），非碼回歸。worker r79 在 worktree 根留空檔 test_audit.py（收編時須一併處置）。
-- CI 直讀一次（不 poll）：f31bfb35 5232/2、c8124888d 5223/2（2 敗皆 test_reqloop_freeze_check 兩 verdict 案＝執行時 worker 在進狀態）；**4bfa4dab（mainline）無結果＝UNKNOWN**、下輪直讀。
-- 票 1843-2 仍在 doing/（worker 在進）：本輪不碰在進產物——結案三件（票尾 3 行＋mv done/＋BACKLOG 項 10 註審計依據）延至 r1468。BACKLOG 項 10 現 [x]（21:14 worker round 77 期間所改、審計依據未註）。
-- 誠實記帳：mainline（r1466）與 worker（rounds 74–79 WIP）對同票並行實作；canonical＝mainline（已驗）；worker WIP 收斂後同步收編、不宣稱雙線完成。
+## 狀態（2026-11-11 r1469 G3.2 H0 預跑門完成＝H0_MET；doing/ 空）
+- **r1469（2119-2）：G3.2 H0 extract 預跑門執行完畢 → `H0_MET`（1/4）**。
+  - 4 凍結題各 1 次 extract＝4 calls／29914 tok（報告 `ops/audits/g3_2_h0_prerun_report.json`）。
+  - dab_725：7 req、**2 確定性 claim（R1/R6 `answer_kv` numeric keys，可 PASS/FAIL 重算）**、5 unverified。
+  - dab_587/657/517：0 確定性（全 unverified：deliverable_not_in_request、unsupported_recompute_type、model_declared_unverified、unknown_verifier:missing）。
+  - 工具 `ops/audits/g3_2_extract_prerun.py`（150 行）＋test（80 行 4 案）；selftest VERDICT OK；回歸 12 passed；凍結 4 檔未動。
+  - **完整批未發射**（票紅線：預跑不擅自點火）→ 上報人類：H0_MET 是否發射 full_rloop×4 格。
+- r1468（2119-1）：G3.2 預註冊凍結（manifest＋tasks＋precheck，0 model calls）。
+- r1467（1843-2）：e016 envleak audit 複核＋argon 鏡像；票候 worker 收斂。
+- freeze_check 10/12：2 紅＝diff_worker＋wt_clean（worker 在進、非碼回歸）。
 
 ## 紅線（契約，不改）
-- 不 push（loop 自動 push auto/qwen27b）、不 main、不 reset/rebase；.github/workflows/ 只讀。
+- 無 push（迴圈自動 push auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
 - 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py 2823 行／blob f3525b01…、run_eval.py 1298 行／blob b6d2f37f…；g25 filing（6 sha256）不變；g3.py 僅依核准工單改動。
-- 不讀 /srv/eval/hidden/ 或 scorer.py；缺值＝UNKNOWN 不 0；hidden_after=UNKNOWN。
+- 不讀 /srv/eval/hidden/ 或 scorer.py；缺值 UNKNOWN 不填 0；hidden_after=UNKNOWN；同批重發非獨立樣本。
+- 不寫 /srv/vlab/queue；不 poll CI；不跑 full pytest。
 
-## 下一步（r1468）
-1. worker 收斂（現 rounds ≥80 於同票迭代）→串行審查：保留 mainline 實作（canonical、已驗），worker 並行實作留痕。
-2. worker 同步至 mainline（git checkout auto/qwen27b -- .＋git rm 多餘 tracked 檔如 test_audit.py＋commit）→diff_worker/wt_clean 收斂。
-3. 票 1843-2 結案：票尾 3 行＋mv done/＋BACKLOG 項 10 註審計依據（`--audit-e016` VERDICT OK＋evidence JSON＋commit）。
-4. 三分支 freeze_check 復測（期望 12/12）＋test_reqloop_freeze_check verdict 綠＋4bfa4dab CI 直讀（一次、不 poll）。
-5. G3.1 H2.0 重發＝人類裁決（H2_0_REFUTED r1447a 仍有效、不碰）。
+## 未完成（≤3，交接下輪）
+1. **G3.2 發射＝待人類核准**：H0 已過（MET）；核准後 approval 門 fail-closed＋`python3 -m vacant_network.reqloop.g3 --manifest ops/reqloop/g3_2/manifest.json`（full_rloop×4 格、300s/輪、2M tok 撞額停）。
+2. G3.1 發射（1315-2）：仍待人類核准（H2_0_REFUTED 有效；重發＝人類裁決）。
+3. 1215-1（hidden_file_in_workspace 收緊）：worker 在進；收斂後下輪審查＋升上→freeze_check 12/12。
+
+## 下輪入口（≤3）
+- 人類裁決 G3.2（發／停）→照裁決走；doing/ 現空，無待辦票。
+- 守衛：g3 四檔＋anchors＋freeze_check（除 1215-1 項外）全綠；新工具 selftest 保持 OK。
+（MEMORY 上限 6 KB、NOW 上限 3 KB）
