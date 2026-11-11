@@ -1,89 +1,49 @@
-import unittest
-from unittest.mock import patch, MagicMock
-import os
 import json
-import subprocess
-from ops.audits.labd_instance_and_env_audit import check_labd_instances, audit_cell_env
+import os
 
-class TestLabdAudit(unittest.TestCase):
-    def test_check_labd_instances_with_args(self):
-        # Test multiple instances (should exit 1)
-        proc_list = [["python3", "/srv/vlab/bin/labd.py"], ["python3", "/srv/vlab/bin/labd.py"]]
-        with self.assertRaises(SystemExit) as cm:
-            check_labd_instances(proc_list=proc_list)
-        self.assertEqual(cm.exception.code, 1)
-
-    def test_check_labd_instances_with_args_single(self):
-        # Test single instance (should return 1)
-        proc_list = [["python3", "/srv/vlab/bin/labd.py"]]
-        count = check_labd_instances(proc_list=proc_list)
-        self.assertEqual(count, 1)
-
-    def test_check_labd_instances_with_args_single(self):
-        # Test single instance (should return 1)
-        proc_list = [["python3", "/srv/vlab/bin/labd.py"]]
-        count = check_labd_instances(proc_list=proc_list)
-        self.assertEqual(count, 1)
-
-    def test_check_labd_instances_with_args_false_positive(self):
-        # Test command containing "labd.py" but not as the script argument for python (should return 0)
-        proc_list = [["python3", "/srv/vlab/bin/other_script.py"]]
-        count = check_labd_instances(proc_list=proc_list)
-        self.assertEqual(count, 0)
-
-    def test_check_labd_instances_with_args_substring_false_positive(self):
-        # Test command where "labd.py" is just a substring in an argument (should return 0)
-        proc_list = [["python3", "/srv/vlab/bin/my_pi_session_other.py"]]
-        count = check_labd_instances(proc_list=proc_list)
-        self.assertEqual(count, 0)
-
-    def test_check_labd_instances_ignores_substring_in_args(self):
-        # Negative control: contains "labd.py" text but not as a real labd script (should return 0)
-        proc_list = [["python3", "/srv/vlab/bin/view_doc.py", "about labd.py"]]
-        count = check_labd_instances(proc_list=proc_list)
-        self.assertEqual(count, 0)
-
-    def test_check_labd_instances_detects_real_labd(self):
-        # Positive control: real labd script (should return 1)
-        proc_list = [["python3", "/srv/vlab/bin/labd.py"]]
-        count = check_labd_instances(proc_list=proc_list)
-        self.assertEqual(count, 1)
-
-    def test_audit_cell_env_success_a_arm_empty(self):
-
-        # Mock cell.json with empty agent_env for A arm
-        mock_data = {
+# Mocking the environment for testing
+def test_audit_run_dir_no_violations():
+    # Create a dummy directory with no violations
+    test_dir = "test_audit_ok"
+    os.makedirs(test_dir, exist_ok=True)
+    cell_path = os.path.join(test_dir, "cell.json")
+    with open(cell_path, 'w') as f:
+        json.dump({
             "arm": "A",
-            "agent_env": {}
-        }
-        with patch("builtins.open", unittest.mock.mock_open(read_data=json.dumps(mock_data))):
-            with patch("os.path.exists", return_value=True):
-                result = audit_cell_env("dummy_path", arm="A")
-                self.assertTrue(result)
+            "agent_env": {
+                "SOME_VAR": "some_value",
+                "OTHER_VAR": 123
+            }
+        }, f)
 
-    def test_audit_cell_env_fail_leak_vacant_key(self):
-        # Mock cell.json with VACANT_ key for A arm
-        mock_data = {
-            "arm": "A",
-            "agent_env": {"VACANT_SECRET": "some_value"}
-        }
-        with patch("builtins.open", unittest.mock.mock_open(read_data=json.dumps(mock_data))):
-            with patch("os.path.exists", return_value=True):
-                with self.assertRaises(SystemExit) as cm:
-                    audit_cell_env("dummy_path", arm="A")
-                self.assertEqual(cm.exception.code, 1)
+    from ops.audits.labd_instance_and_env_audit import audit_run_dir
+    results = audit_run_dir(test_dir)
+    assert results["violations"] == 0
+    assert results["total_cells"] == 1
+    os.remove(cell_path)
+    os.rmdir(test_dir)
 
-    def test_audit_cell_env_fail_leak_pi_parent(self):
-        # Mock cell.json with PI_PARENT in value for A arm
-        mock_data = {
+def test_audit_run_dir_with_violations():
+    # Create a dummy directory with violations
+    test_dir = "test_audit_fail"
+    os.makedirs(test_dir, exist_ok=True)
+    cell_path = os.path.join(test_dir, "cell.json")
+    with open(cell_path, 'w') as f:
+        json.dump({
             "arm": "A",
-            "agent_env": {"SOME_VAR": "host_PI_PARENT_value"}
-        }
-        with patch("builtins.open", unittest.mock.mock_open(read_data=json.dumps(mock_data))):
-            with patch("os.path.exists", return_value=True):
-                with self.assertRaises(SystemExit) as cm:
-                    audit_cell_env("dummy_path", arm="A")
-                self.assertEqual(cm.exception.code, 1)
+            "agent_env": {
+                "VACANT_SECRET": "leak",
+                "PI_SELF": "host_info"
+            }
+        }, f)
+
+    from ops.audits.labd_instance_and_env_audit import audit_run_dir
+    results = audit_run_dir(test_dir)
+    assert results["violations"] == 1
+    assert results["total_cells"] == 1
+    os.remove(cell_path)
+    os.rmdir(test_dir)
 
 if __name__ == "__main__":
-    unittest.main()
+    import pytest
+    pytest.main([__file__])

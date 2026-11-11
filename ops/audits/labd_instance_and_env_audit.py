@@ -5,7 +5,6 @@ import argparse
 import subprocess
 from ops.audits.stray_labd_ps_evidence import is_labd
 
-
 def check_labd_instances(proc_list=None, cmdlines=None):
     """
     Verify that the number of running labd.py instances is <= 1.
@@ -85,9 +84,48 @@ def audit_cell_env(cell_json_path, arm="A"):
 
     return True
 
+def audit_run_dir(run_path):
+    """
+    Audit all cell.json files in a directory for environment leaks.
+    Returns a summary of the findings.
+    """
+    results = {
+        "total_cells": 0,
+        "violations": 0,
+        "details": []
+    }
+
+    for root, dirs, files in os.walk(run_path):
+        if "cell.json" in files:
+            cell_path = os.path.join(root, "cell.json")
+            results["total_cells"] += 1
+            try:
+                # We use arm="A" as default for the audit unless specified otherwise
+                # but since we are auditing a batch, we check if it's A or C
+                with open(cell_path, 'r') as f:
+                    data = json.load(f)
+                
+                arm = str(data.get("arm", "A")).upper()
+                if arm in ["A", "C"]:
+                    audit_cell_env(cell_path, arm=arm)
+            except SystemExit as e:
+                if e.code == 1:
+                    results["violations"] += 1
+                    results["details"].append({
+                        "path": cell_path,
+                        "error": "AGENT_ENV_LEAK",
+                        "arm": arm
+                    })
+            except Exception as e:
+                print(f"ERROR: Failed to audit {cell_path}: {e}")
+
+    return results
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--selftest", action="store_true", help="Run self-test mode")
+    parser.add_argument("--audit-e016", action="store_true", help="Perform e016 specific audit")
+    parser.add_argument("target", nargs="?", help="cell_json_path or run_dir")
     args = parser.parse_args()
 
     if args.selftest:
@@ -114,14 +152,22 @@ def main():
                 print(f"FAILURE: Unexpected exit code {e.code}")
                 sys.exit(1)
 
-    if len(sys.argv) < 2:
-        print("Usage: labd_instance_and_env_audit.py [--selftest] <cell_json_path>")
-        sys.exit(1)
+    if not args.target:
+        parser.error("the following arguments are required: target")
 
-    cell_json_path = sys.argv[1]
-    check_labd_instances()
-    audit_cell_env(cell_json_path, arm="A")
-    print("VERDICT: LABD_AUDIT_OK")
+    target = args.target
+    if args.audit_e016 and os.path.isdir(target):
+        print(f"Auditing directory: {target}")
+        results = audit_run_dir(target)
+        # The ticket says 14 cells, 11 violations for negative control.
+        # My current run shows 14 cells, 7 violations.
+        # I need to check if there are more files or if my logic is missing some.
+        print(json.dumps(results, indent=2))
+        sys.exit(0 if results["violations"] == 0 else 1)
+    else:
+        check_labd_instances()
+        audit_cell_env(target, arm="A")
+        print("VERDICT: LABD_AUDIT_OK")
 
 if __name__ == "__main__":
     main()
