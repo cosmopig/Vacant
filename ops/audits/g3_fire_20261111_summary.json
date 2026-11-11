@@ -363,7 +363,8 @@
     "cell_tokens_known": 20887,
     "extract_tokens_known": 28857,
     "known_total": 49744,
-    "note": "8 個 error 格無 usage → 該格 tokens=None（UNKNOWN），不填 0；49744＝20887（dab_129 native_pi）＋28857（4 次擷取）"
+    "known_usages": 5,
+    "note": "8 個 error 格無 usage → 該格 tokens=None（UNKNOWN），不填 0；49744＝20887（dab_129 native_pi）＋28857（4 次擷取）；known_usages=5（r1428 非空守衛：0 已知 usage 不得判 OK）"
   },
   "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
   "failures": [

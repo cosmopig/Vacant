@@ -12,6 +12,18 @@
 - 同批重跑須簿記如實標記、不得當獨立樣本（本摘要不宣稱任何臂優）。
 - 11/12 格 error＋單 1 rep（H-12 本地模型）：本批不能支持任何臂 superiority 結論。
 - token 獨立重算：cells usage 之和 ＋ tasks extract_usages 之和 必須等於 totals.tokens。
+
+用法：python3 ops/audits/g3_fire_20261111_summary.py [result.json [out.json]]
+  （預設＝上述 live raw／repo 的 ops/audits/g3_fire_20261111_summary.json；
+  argv 注入供 CI/沙盒用 tmp 檔——r1339 queue 路徑注入同型）
+
+r1428（vq-el4.97，TDD RED→GREEN）：
+- tokens 重算補非空守衛：舊碼對「全部 usage 缺失＋totals.tokens=0」的零測量檔
+  判 0+0==0 → VERDICT OK rc=0＝無成本假綠燈（I-4 未測量不是通過；r1272 空檔
+  vacuous、r1344 死守衛同族；RED 實證於 tests/test_reqloop_g3_fire_summary.py
+  ::test_negative_vacuous_tokens）。
+- 缺檔／非 JSON 不再崩成 traceback：點名 BROKEN＋單一裁決行（vq-el4.39）。
+- 負控制：tests/test_reqloop_g3_fire_summary.py（正 2＋repo 摘要 1＋負 5）。
 """
 from __future__ import annotations
 
@@ -42,9 +54,22 @@ def _cell_tokens(cell: dict):
     return sum(vals)
 
 
-def main() -> int:
-    raw = RESULT.read_bytes()
-    d = json.loads(raw.decode("utf-8"))
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    result_path = pathlib.Path(argv[0]) if len(argv) >= 1 else RESULT
+    dest = pathlib.Path(argv[1]) if len(argv) >= 2 else DEST
+    try:
+        raw = result_path.read_bytes()
+    except OSError as e:
+        print(f"BROKEN: result 檔無法讀取：{e}", file=sys.stderr)
+        print("VERDICT: G3_FIRE_SUMMARY_BROKEN")
+        return 1
+    try:
+        d = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        print("BROKEN: result 非合法 JSON", file=sys.stderr)
+        print("VERDICT: G3_FIRE_SUMMARY_BROKEN")
+        return 1
     problems: list[str] = []
 
     def chk(cond: bool, msg: str) -> None:
@@ -65,10 +90,18 @@ def main() -> int:
             chk(hashlib.sha256(c["answer"].encode("utf-8")).hexdigest() == c.get("answer_sha256"),
                 f"{c.get('task')}/{c.get('arm')} answer_sha256 重算不符")
 
-    cell_known = sum(v for v in (_cell_tokens(c) for c in cells) if v is not None)
-    ext_known = sum(v for t in d.get("tasks", []) for u in (t.get("extract_usages") or [])
-                    for v in [u.get("tokens")] if _num(v))
-    chk(_num(tot.get("tokens")) and cell_known + ext_known == tot["tokens"],
+    cell_vals = [v for v in (_cell_tokens(c) for c in cells) if v is not None]
+    ext_vals = [v for t in d.get("tasks", []) for u in (t.get("extract_usages") or [])
+                for v in [u.get("tokens")] if _num(v)]
+    cell_known = sum(cell_vals)
+    ext_known = sum(ext_vals)
+    n_known = len(cell_vals) + len(ext_vals)
+    # r1428（vq-el4.97）：非空守衛——舊碼對「零測量」檔（0 已知 usage＋
+    # totals.tokens=0）判 0+0==0 → OK＝無成本假綠燈（I-4：未測量不是通過）。
+    chk(n_known > 0,
+        "tokens 重算空集：0 個已知 usage（未測量不是通過；I-4）——零 measurement 不得判 OK")
+    chk(_num(tot.get("tokens")), f"totals.tokens 缺值：{tot.get('tokens')!r}（UNKNOWN 不是 0）")
+    chk(n_known > 0 and _num(tot.get("tokens")) and cell_known + ext_known == tot["tokens"],
         f"tokens 重算 {cell_known}+{ext_known} != {tot.get('tokens')!r}")
 
     per_arm: dict = {}
@@ -90,10 +123,10 @@ def main() -> int:
         "schema": "vacant.audit/g3_fire_20261111_summary/1",
         "generated_by": "ops/audits/g3_fire_20261111_summary.py",
         "identity": {
-            "result_file": str(RESULT),
+            "result_file": str(result_path),
             "result_bytes": len(raw),
             "result_sha256": hashlib.sha256(raw).hexdigest(),
-            "result_file_mtime_utc": datetime.fromtimestamp(RESULT.stat().st_mtime, tz=timezone.utc).isoformat(timespec="seconds"),
+            "result_file_mtime_utc": datetime.fromtimestamp(result_path.stat().st_mtime, tz=timezone.utc).isoformat(timespec="seconds"),
             "approval_file": str(APPROVAL),
             "approval_sha256": hashlib.sha256(APPROVAL.read_bytes()).hexdigest() if APPROVAL.exists() else None,
             "approval_approved": (ap or {}).get("approved"),
@@ -129,7 +162,8 @@ def main() -> int:
             "cell_tokens_known": cell_known,
             "extract_tokens_known": ext_known,
             "known_total": cell_known + ext_known,
-            "note": "8 個 error 格無 usage → 該格 tokens=None（UNKNOWN），不填 0；49744＝20887（dab_129 native_pi）＋28857（4 次擷取）",
+            "known_usages": n_known,
+            "note": "8 個 error 格無 usage → 該格 tokens=None（UNKNOWN），不填 0；49744＝20887（dab_129 native_pi）＋28857（4 次擷取）；known_usages=5（r1428 非空守衛：0 已知 usage 不得判 OK）",
         },
         "hidden_after": "12/12 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
         "failures": [
@@ -154,8 +188,8 @@ def main() -> int:
             print(f"BROKEN: {p}", file=sys.stderr)
         print("VERDICT: G3_FIRE_SUMMARY_BROKEN")
         return 1
-    DEST.parent.mkdir(parents=True, exist_ok=True)
-    DEST.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     ok = sum(p["ok"] for p in per_arm.values())
     er = sum(p["error"] for p in per_arm.values())
     print(f"cells=12 ok/err={ok}/{er} hidden_after=12xUNKNOWN tokens_known={cell_known + ext_known} "
