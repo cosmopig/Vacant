@@ -1,139 +1,195 @@
+#!/usr/bin/env python3
+"""stray labd 進程審計證據鏈（ticket R20261111_1152-2；2026-11-11 r1444 重做：消除空轉 selftest）。
+
+判準（audit()）：
+- 0 或 1 個「真」labd 實例，且父進程非 shell、父環境無 VACANT_PI_* → OK
+- 多實例 / 父進程為 shell / 父環境帶 VACANT_PI_* → VIOLATION
+
+「真」實例判定（is_labd）：cmdline 中有一個參數以 labd.py 結尾、且前一參數是
+python 解釋器。避免 pgrep -f 式子串誤配——prompt/args 內含 "labd.py" 文字
+的 pi session 等進程不算（舊版報告誤配實例即此因，見 r1444 審查記錄）。
+
+審計邏輯對注入的 process table 純函數化（audit/is_labd 不碰系統），
+--selftest 用假 process table 跑 5 組正/負控制，全部通過才印
+VERDICT: STRAY_LABD_AUDIT_OK；任一控制不符即印
+VERDICT: STRAY_LABD_SELFTEST_BROKEN 且 exit 1（I-4：未測量≠通過）。
+
+退出：0=OK 或 selftest 全控制通過；1=VIOLATION 或 selftest 有控制失敗；2=內部錯。
+"""
+import glob
+import json
 import os
 import sys
-import json
-import argparse
-import subprocess
-from typing import List, Dict, Any
+import time
 
-def get_process_info(pid: int) -> Dict[str, Any]:
-    try:
-        with open(f"/proc/{pid}/cmdline", "r") as f:
-            cmdline = f.read().replace("\\0", "").strip()
-        with open(f"/proc/{pid}/status", "r") as f:
-            status = f.read()
-        
-        user = ""
-        for line in status.splitlines():
-            if line.startswith("Uid"):
-                user = line.split()[1]
-                break
-        
-        env = {}
-        with open(f"/proc/{pid}/environ", "r") as f:
-            for line in f:
-                if "=" in line:
-                    k, v = line.split("=", 1)
-                    env[k] = v
+SHELLS = {"sh", "bash", "zsh", "dash", "ash"}
+PYTHON = {"python", "python2", "python3"}
 
-        return {
-            "pid": pid,
-            "cmdline": cmdline,
-            "user": user,
-            "env": env,
-            "status": status
-        }
-    except Exception as e:
-        return {"error": str(e)}
 
-def audit_running_labd() -> Dict[str, Any]:
-    results = []
+def is_labd(args):
+    return any(
+        a.endswith("labd.py") and (i == 0 or os.path.basename(args[i - 1]) in PYTHON)
+        for i, a in enumerate(args)
+    )
+
+
+def audit(processes):
+    """processes: [{"pid","ppid","uid","cmdline":[...],"env":{..}|None,
+    "parent_cmdline":[...]|None,"parent_env":{..}|None}] → 判定 dict。純函數。"""
     violations = []
-    
-    try:
-        output = subprocess.check_output(["pgrep", "-f", "labd.py"], text=True)
-        pids = [int(p) for p in output.split()]
-    except subprocess.CalledProcessError:
-        pids = []
+    if len(processes) > 1:
+        violations.append({"type": "multiple_instances", "pids": [p["pid"] for p in processes]})
+    for p in processes:
+        pc = p.get("parent_cmdline") or []
+        if pc and os.path.basename(pc[0]) in SHELLS:
+            violations.append({"type": "stray_shell_parent", "pid": p["pid"],
+                               "parent_pid": p["ppid"], "parent": pc[0]})
+        pi_env = sorted(k for k in (p.get("parent_env") or {}) if k.startswith("VACANT_PI_"))
+        if pi_env:
+            violations.append({"type": "stray_pi_env_parent", "pid": p["pid"],
+                               "parent_pid": p["ppid"], "vars": pi_env})
+    return {"status": "VIOLATION" if violations else "OK",
+            "instances": len(processes), "violations": violations}
 
-    if not pids:
-        return {"status": "OK", "instances": 0, "violations": [], "evidence": []}
 
-    for pid in pids:
-        info = get_process_info(pid)
-        if "error" in info:
+def scan_repo_shell_scripts(root, exclude=("runs",)):
+    """靜態掃描 repo 內 shell 腳本中無 single-instance 守護的 labd.py 啟動點（findings，非 violation）。
+    runs/ 為 2026-09 歷史實驗腳本，不在「現行啟動路徑」範圍內，排除。"""
+    findings = []
+    for path in sorted(glob.glob(os.path.join(root, "**", "*.sh"), recursive=True)):
+        if any(part in exclude for part in path.split(os.sep)):
             continue
-        
-        results.append(info)
-        
-        # Check for multiple instances
-        if len(pids) > 1:
-            violations.append(f"Multiple labd instances detected: {[p for p in pids]}")
-        
-        # Check for stray source (e.g., parent is a shell or has VACANT_PI_* env)
-        parent_pid = None
-        for line in info["status"].splitlines():
-            if line.startswith("PPid"):
-                try:
-                    parent_pid = int(line.split(":")[1].strip())
-                    break
-                except (IndexError, ValueError):
-                    pass
-        
-        if parent_pid:
-            try:
-                p_info = get_process_info(parent_pid)
-                # If parent is a shell (bash, zsh, sh) or has VACANT_PI_* env
-                is_shell = any(s in p_info.get("cmdline", "").lower() for s in ["bash", "zsh", "sh"])
-                has_vacant_env = any(k.startswith("VACANT_PI_") for k in p_info.get("env", {}).keys())
-                
-                if is_shell or has_vacant_env:
-                    violations.append(f"Stray labd (pid {pid}) parent (pid {parent_pid}) is a shell or has VACANT_PI_* env.")
-            except:
-                pass
+        try:
+            with open(path, encoding="utf-8", errors="replace") as f:
+                lines = f.readlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines, 1):
+            if "labd.py" in line and not any(
+                    g in line for g in ("pidfile", "flock", "single_instance", "single-instance")):
+                findings.append({"file": path, "line": i, "text": line.strip()[:200]})
+    return findings
 
-    status = "VIOLATION" if violations else "OK"
-    return {
-        "status": status,
-        "instances": len(pids),
-        "violations": list(set(violations)),
-        "evidence": results
-    }
 
-def audit_launch_scripts():
-    repo_root = os.getcwd()
-    violations = []
-    
-    files_to_check = [
-        "devloop.sh",
-        "vlab/launch.sh",
-        "scripts/*.sh"
-    ]
-    
-    for pattern in files_to_check:
-        path = os.path.join(repo_root, pattern)
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                content = f.read()
-                if "labd.py" in content and "pidfile" not in content.lower() and "single-instance" not in content.lower():
-                    violations.append(f"Potential blind launch of labd.py in {path}")
-    
-    return violations
+def _read_args(pid):
+    try:
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            return [a.decode("utf-8", "replace") for a in f.read().split(b"\0") if a]
+    except OSError:
+        return []
+
+
+def _read_env(pid):
+    try:
+        with open(f"/proc/{pid}/environ", "rb") as f:
+            raw = f.read().split(b"\0")
+    except OSError:
+        return None
+    env = {}
+    for kv in raw:
+        if b"=" in kv:
+            k, v = kv.split(b"=", 1)
+            env[k.decode("utf-8", "replace")] = v.decode("utf-8", "replace")[:200]
+    return env
+
+
+def _ancestors():
+    out, pid = set(), os.getpid()
+    for _ in range(64):
+        try:
+            with open(f"/proc/{pid}/status") as f:
+                for line in f:
+                    if line.startswith("PPid:"):
+                        pid = int(line.split()[1])
+                        break
+        except OSError:
+            break
+        if pid in (0, 1) or pid in out:
+            break
+        out.add(pid)
+    return out
+
+
+def collect_processes():
+    skip = _ancestors() | {os.getpid()}
+    out = []
+    for name in filter(str.isdigit, os.listdir("/proc")):
+        pid = int(name)
+        if pid in skip:
+            continue
+        args = _read_args(pid)
+        if not is_labd(args):
+            continue
+        ppid = 0
+        try:
+            with open(f"/proc/{pid}/status") as f:
+                for line in f:
+                    if line.startswith("PPid:"):
+                        ppid = int(line.split()[1])
+        except OSError:
+            pass
+        out.append({"pid": pid, "ppid": ppid, "cmdline": args,
+                    "env": _read_env(pid),
+                    "parent_cmdline": [] if ppid in skip else _read_args(ppid),
+                    "parent_env": _read_env(ppid) if ppid not in skip else None})
+    return out
+
+
+def P(pid=100, ppid=1, parent_cmdline=None, parent_env=None):
+    return {"pid": pid, "ppid": ppid, "uid": "1000",
+            "cmdline": ["python3", "/srv/vlab/bin/labd.py"], "env": None,
+            "parent_cmdline": parent_cmdline, "parent_env": parent_env}
+
+
+def selftest():
+    results = []
+
+    def record(name, got, want):
+        ok = got == want
+        results.append(ok)
+        print(f"control {name}: expected={want} got={got} {'PASS' if ok else 'FAIL'}")
+
+    a = audit([P()])
+    record("A_managed_single", (a["status"], a["instances"]), ("OK", 1))
+    b = audit([P(ppid=7, parent_cmdline=["/bin/bash", "-c", "x"])])
+    record("B_shell_parent", (b["status"], b["violations"][0]["type"]), ("VIOLATION", "stray_shell_parent"))
+    c = audit([P(ppid=7, parent_cmdline=["/usr/bin/python3", "pi"],
+                 parent_env={"VACANT_PI_PARENT": "true", "HOME": "/x"})])
+    record("C_pi_env_parent", (c["status"], c["violations"][0]["type"]), ("VIOLATION", "stray_pi_env_parent"))
+    d = audit([P(pid=1), P(pid=2)])
+    record("D_multiple", (d["status"], d["violations"][0]["type"]), ("VIOLATION", "multiple_instances"))
+    record("E_matcher_pos", is_labd(["python3", "/srv/vlab/bin/labd.py"]), True)
+    record("E_matcher_neg", is_labd(["pi", "-p", "工單文字提到 labd.py 及其父進程"]), False)
+
+    if all(results):
+        print("VERDICT: STRAY_LABD_AUDIT_OK")
+        return 0
+    print("VERDICT: STRAY_LABD_SELFTEST_BROKEN")
+    return 1
+
 
 def main():
-    args = sys.argv[1:]
-    if "--selftest" in args:
-        # Mock environment for selftest
-        os.environ["VACANT_PI_PARENT"] = "true"
-        res = audit_running_labd()
-        if res["status"] == "VIOLATION":
-            print("VERDICT: STRAY_LABD_AUDIT_OK")
-            sys.exit(0)
-        else:
-            # In selftest, if we don't see a violation but expected one (mocked), 
-            # it might be because pgrep didn't find anything.
-            print("VERDICT: STRAY_LABD_AUDIT_OK")
-            sys.exit(0)
+    if "--selftest" in sys.argv[1:]:
+        return selftest()
+    try:
+        procs = collect_processes()
+        res = audit(procs)
+        root = os.getcwd()
+        report = {"timestamp": time.time(), "status": res["status"],
+                  "instances": res["instances"], "violations": res["violations"],
+                  "launch_script_findings": scan_repo_shell_scripts(root),
+                  "evidence": procs}
+        out = os.path.join(root, "ops", "audits", "labd_process_audit_report.json")
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(report, f, ensure_ascii=False, indent=2)
+        print(json.dumps(res, ensure_ascii=False))
+        print(f"report: {out}")
+        return 1 if res["status"] == "VIOLATION" else 0
+    except Exception as e:
+        print(f"internal error: {e}", file=sys.stderr)
+        return 2
 
-    audit_res = audit_running_labd()
-    with open("ops/audits/labd_process_audit_report.json", "w") as f:
-        json.dump(audit_res, f, indent=2)
-    
-    if audit_res["status"] == "VIOLATION":
-        print(f"VIOLATION detected: {audit_res['violations']}")
-        sys.exit(1)
-    else:
-        print("VERDICT: STRAY_LABD_AUDIT_OK")
-        sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
