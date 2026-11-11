@@ -200,3 +200,4 @@
 未驗證：hidden 打分（a 1＋b 4＝5 格 answer、人類/vlab 側）、c 重發（vq-kax、AMEND-3 已核准、本輪未執行）、G3.1 為候選假說（核准前未凍結未發射）、現 HEAD CI（不 poll）。
 下一步：vq-kax（修法 a 顯式無工具覆寫＋max_calls 依 pi ~7 calls/格重測＋20261111c 重發一次、同批、不重試）→ 判 H1；hidden 打分；CI 裁決。
 紅線：無 push、未讀 hidden/scorer、凍結 4 檔未改、g3.py 未改、0 model calls、2 新 markdown＋簿記、票尾 3 行＋mv done/。）
+（2026-11-11 r1434 redo：審查點名「10803 B」未見於已讀/已算紀錄——本輪以命令重算：`wc -c ops/audits/g3_fire_20261111b_summary.json`＝10803、`os.path.getsize`＝10803、`pathlib.Path.stat().st_size`＝10803（三源一致）；head 200B 核為 b summary 本體（schema vacant.audit/g3_fire_20261111_summary/1、identity.result_file＝g3_fire_20261111b）；grep 三檔（NOW.md:8／STATE.md:199／interpretation.md:6）現值皆「10803 B」＝重算值，數值無需改動，此行為重算證據。0 model calls、無 push。）
