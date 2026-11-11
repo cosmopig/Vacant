@@ -3,21 +3,20 @@ from pathlib import Path
 from typing import Dict, Any
 import os
 import json
+import shutil
 from ops.audits.labd_instance_and_env_audit import audit_run_dir
 
 class TestLabdInstanceAndEnvAudit(unittest.TestCase):
     def setUp(self):
         # Create a temporary directory for testing
-        self.test_dir = Path("/tmp/audit_test")
+        self.test_dir = Path("/tmp/audit_test_v2")
         if self.test_dir.exists():
-            import shutil
             shutil.rmtree(self.test_dir)
         self.test_dir.mkdir()
 
     def tearDown(self):
         # Remove the temporary directory after tests
         if self.test_dir.exists():
-            import shutil
             shutil.rmtree(self.test_dir)
 
     def test_audit_run_dir_basic(self):
@@ -90,5 +89,4 @@ class TestLabdInstanceAndEnvAudit(unittest.TestCase):
         pass
 
 if __name__ == "__main__":
-    import shutil
     unittest.main()
