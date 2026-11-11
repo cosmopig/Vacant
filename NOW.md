@@ -1,9 +1,9 @@
 # NOW.md — 現況（每輪更新，≤3KB）
 
-## 狀態（2026-11-11 r1449 三分支簿記同步）
-- **r1449（審查指示 #1）：argon 同步 24 in-scope 檔（g3_1 凍結/預跑門＋2 測試）＋簿記 4 檔（同 blob）→ diff_argon 0 file differ（OK）**。worker 同集合已同步（1215-1 dirty 檔未碰）；diff_worker 殘留＝1215-1 3 檔（在進未升上，誠實紅，待收案＋下輪審查升上）。全量 merge 被否決：會帶入 1215-1 WIP（違反不碰在進產物）；指令所列 labd 檔兩分支皆已有（r1444 升上）。
-- vq-kax 3 項已落地（NO_TOOL_OVERRIDE＋負控制測試、max_calls_bound、c 再發射 12/12 格跑完歸因）；殘留＝「守衛全綠」中 diff_worker/wt_clean 被 1215-1 阻塞。
-- r1448：bk_now 復 OK；其紅線行半形斜線本輪實測 3/5 紅（與「5 passed」記錄不符），已自磁碟重算改全形→5/5 綠；r1447/a：G3.1 H2.0=H2_0_REFUTED（3e45e212）；r1442：G3.1 凍結（809dae937）；r1444：stray-labd 升上（3127a77ad）。
+## 狀態（2026-11-11 r1450 G3 輸入 contract 接線）
+- **r1450（票 P20261111_1516-1，收案 c79af8cf6）：g3.py 擷取使用者原文漏附公開 contract.md → `deliverable_not_in_request` 假陽性已修**。g3.py 新增 `compose_extract_user_text`（對齊 G2.5 `load_cell_request_text`：contract 非空且未含於 goal 時 `goal.rstrip()+"\n\n"+contract.strip()+"\n"`）接上發射路徑；g3_1_extract_prerun run_prerun 改讀 workspace/contract.md 同口徑；新測試 `test_extract_requirements_includes_contract_deliverable`（正負控制）。4 凍結題（dab_035/055/105/218）實測 old→new：`deliverable_not_in_request:answer.txt`→None（0 model calls）。票尾 3 行結果→done/。
+- r1449：argon 同步 24 in-scope 檔→diff_argon 0 differ；diff_worker 殘留＝1215-1 3 檔（在進未升上，誠實紅）。vq-kax 3 項已落地；收案被 1215-1 阻塞。
+- r1447/a：G3.1 H2.0=H2_0_REFUTED（3e45e212）；r1442 凍結（809dae937）；r1444 stray-labd（3127a77ad）。
 - CI：三分支新 tip 待跑完，下輪 ci_status.py 核（不 poll）。
 
 ## 紅線（契約，不改）
@@ -18,6 +18,6 @@
 3. hidden 計分：10 cells ok 有答案，人側/vlab 側。
 
 ## 下輪入口（≤3）
-- bd ready（vq-kax 剩 1 項）＋1215-1 收案狀態；qwen doing/ 現空。
+- bd ready＋1215-1 收案狀態；qwen doing/ 現空，等規劃者下一票。
 - CI 三分支核：python3 /home/user1/dev/ops/ci_status.py（新 tip 跑完後）。
-- 守衛：g3 4 檔＋anchors＋freeze_check（除 1215-1 項）全綠。
+- 守衛：anchors 5 passed、freeze_check（除 1215-1 項）全綠；test_reqloop_g3 34 passed（r1450 量）。

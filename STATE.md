@@ -229,3 +229,10 @@
 - vq-kax 收斂狀態：3 項（option-a NO_TOOL_OVERRIDE＋負控制測試、max_calls_bound、c 再發射 12/12 格跑完歸因）皆已落地有測試；殘留＝「守衛全綠」中 diff_worker/wt_clean 被 1215-1 阻塞（誠實紅）。
 - **r1448 紅線行實測修正（本輪真跑守衛發現）**：ab40a77ef 的 NOW.md 紅線行用半形「行/blob」，守衛正規式要全形「行／blob」→ test_reqloop_now_redline 3 failed/2 passed（r1448「5 passed」記錄與磁碟不符；H-0 同型：綠燈來自沒量該量的）。值重自磁碟計算（repair 2795/5147f8c3、extract 1217/e757aec5、checks 2823/f3525b01、run_eval 1298/b6d2f37f、filing 6 個 64-hex 皆合），僅改斜線為全形→本輪實測 5 passed。
 - 驗收（本輪）：freeze_check diff_argon OK（本輪量）；test_reqloop_now_redline 5 passed；test_reqloop_g3 30 passed；anchors 5 passed。CI 三分支綠＝新 tip CI 跑完後下輪以 ci_status.py 核（本輪不 poll）。
+
+## 2026-11-11 r1450（票 P20261111_1516-1-g3-input-contract-wiring，doing→done）
+- 做了什麼：g3.py 新增 `compose_extract_user_text(goal, contract)`（對齊 G2.5 load_cell_request_text：contract 非空且未含於 goal 時 `goal.rstrip()+"\n\n"+contract.strip()+"\n"`，否則原樣回傳）並接上 extract_requirements 發射路徑（原只傳 inputs["goal"]）；g3_1_extract_prerun run_prerun 改讀 workspace/contract.md 同口徑；tests/test_reqloop_g3.py 新增 test_extract_requirements_includes_contract_deliverable（helper 4 斷言＋負控制 deliverable_not_in_request:answer.txt＋正控制無該假陽性且 claim verified）。0 model calls、0 行凍結 4 檔改動。
+- 驗證了什麼：驗收指令 RC=0（1 passed, 33 deselected；prerun selftest 5 PASS、VERDICT: G3_1_PRERUN_SELFTEST_OK）；4 凍結題 dab_035/055/105/218 實測 old→new＝deliverable_not_in_request:answer.txt→None；test_reqloop_g3 34 passed＋test_reqloop_extract/g3_1_manifest/g3gate 全綠；freeze_check anchors/filing_code/now_redline/bk_now OK（diff_worker/diff_argon/bk_state/wt_clean 紅＝1215-1 在進＋本輪簿記，誠實）。
+- 沒驗證什麼：H2.0 預跑未重發（r1447a 已判 H2_0_REFUTED；重發與完整批點火＝人類裁決）、CI（不 poll）、hidden 打分（人側）。
+- 票尾 3 行結果已寫、票已 mv done/；NOW.md 更新＋ops/loop/NOW.md 鏡像。
+- 下一步：1215-1 收案狀態、CI 三分支 ci_status.py 核、等規劃者下一票（doing/ 現空）。
