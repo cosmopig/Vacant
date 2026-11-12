@@ -1,11 +1,12 @@
 # NOW.md — 現況（每輪覆寫，≤3KB）
 
-## 狀態（2026-11-11 r1475 審查 2225 複核＋argon 再同步；#3/#4 候 worker 收斂）
+## 狀態（2026-11-11 r1475＋redo；審查 2225 複核＋argon 再同步；#3/#4 候 worker 收斂）
 - **r1475（審查 20261111_2225 五指示驗證，0 model calls）：**
   - #1 完成：argon 再同步（修前 diff_argon BROKEN＝無 counterpart；r1465 全樹鏡像程序、0 argon 独占先驗）→修後 diff_argon OK（樹恆等＋counterpart commit）。
   - #2 複核（本輪新跑）：`g3_2_extract_prerun.py --selftest`→G3_2_PRERUN_SELFTEST_OK rc=0＋`pytest tests/test_reqloop_g3_2_prerun.py` 4 passed。
   - #3/#4 受阻（如實）：worker round 88 在進（票 2158-1 stray-labd 根因審計 doing/、WIP 2 檔 M）——紅線不碰在進產物；收斂後審查升上＋worker 同步→12/12。
   - freeze_check：修前 9/12→修後 10/12；2 紅＝diff_worker＋wt_clean（同根因＝worker 在進），worker 收斂即 12/12。argon CI 2 紅同源（BROKEN 檢查下游）。
+- **r1475 redo（5 點名檔全開啟＋重算，0 更正）**：extract/repair 身份重算＝紅線值；prerun report＝H0_MET 1/4（dab_725 R1,R6）、4 題 input_sha256 重算 MATCH（定義＝manifest 指紋 g3.py:688）；dab_517 instruction 全讀；effects summary 重算（50 格、w2r 13/11）——r1475 未引其數字。
 - r1473（2319-2）：G3.2 fire 結果分報＋H1_REFUTED；G 系列停候人類（不變）。
 - r1472（2319-1）：G3.2 背景發射執行完（4/4 ok、128923 tok）。
 
