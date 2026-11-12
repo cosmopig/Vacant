@@ -32,6 +32,7 @@ PACKET_DEFAULT = REPO / "ops/packets/e010_bigwork.md"
 BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
 PACKET_SHA256 = "1e84ad57de64de6f788b05bfe1a30de505ccc156a0925d2ae2e02e65f5cf10d4"
 BACKLOG_SHA256 = "6599f4d3ad3f64d2946f02328f8f2dbe7ec1ab5aa2fdc41c976d0fca4f045b44"
+BACKLOG_LINE_SHA256 = "92ac9264f062bcd2faf0408cd0ed61282aa2cc44a48d2b505f08d6b116608e83"
 ENVELOPE_TOOL = pathlib.Path(__file__).resolve().parents[2] / "ops/vlab/tools/envelope_compliance.py"
 CLOSURE_NOTE = ("**結案（round 1482、2026-11-12、票 P20261112_0320-1）**：C-r1 完賽產物機械複核"
                 "（cell：vacant_home_bytes=1,077,331 B ≤256MiB 且 <149.5M；vacant_objects_bytes=1,062,407 B；"
@@ -69,12 +70,17 @@ def check(cell_text: str, packet_text: str, backlog_text: str) -> list[str]:
 
 
 def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
-    """凍結快照須存在且 sha256 與釘住值一致（任何改動＝違規；負控可暫態篡改必紅）。"""
+    """凍結快照須存在且 sha256 與釘住值一致（BACKLOG 為多項目共用檔，亦接受目標條目行 sha256 相符）。"""
     if not p.is_file():
         return [f"snapshot missing: {p}"]
-    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    raw = p.read_bytes()
+    got = hashlib.sha256(raw).hexdigest()
     if got == want:
         return []
+    if want == BACKLOG_SHA256:
+        ln = next((s for s in raw.decode("utf-8", errors="replace").splitlines() if "e010_bigwork_pi_AC" in s), "")
+        if hashlib.sha256(ln.encode("utf-8")).hexdigest() == BACKLOG_LINE_SHA256:
+            return []
     return [f"snapshot sha256 drift {p.name}: {got[:12]}… != 釘住 {want[:12]}…（快照為凍結紀錄，改動即紅）"]
 
 
