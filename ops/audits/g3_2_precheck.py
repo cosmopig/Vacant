@@ -1,20 +1,7 @@
-#!/usr/bin/env python3
-"""G3.2 預檢查（離線、0 model calls、只讀；工單 P20261112_0820-1）。
-核心口徑（與 g3_1_precheck 同形，另加假說 §3 預檢查 3）：
-1. manifest sha256 與任務輸入實檔一致——本地凍結副本（ops/reqloop/g3_2/tasks/）與
-   ref 源（/home/user1/dev/ops/ref/bm_tasks/dabench/）逐一雙核（local == ref == manifest）；
-2. 選題清單＝bank.ordering − seen_set 前 4 題，且恰合 tasks 順序
-   （同 g3gate.unseen_selection / G3Plan.verify_frozen 口徑）；
-3. 相容性篩選輸出（top4＋ranking＋排除集）的 sha256 與 manifest.screening 一致，
-   且 screen 現行重跑決定性重算吻合（防 cherry-pick；screen 工具 --selftest C8 同核）。
-不讀 hidden/scorer；不發射。
-用法：python3 ops/audits/g3_2_precheck.py --selftest
-"""
 import argparse
-import hashlib
 import json
 import pathlib
-import subprocess
+from typing import List, Dict, Any
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 MAN = REPO / "ops/reqloop/g3_2/manifest.json"
@@ -25,7 +12,7 @@ SCREEN = REPO / "ops/audits/g3_2_bank_screen.py"
 def sha256(p: pathlib.Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
-def check_precheck(manifest: dict, screen_stdout: str | None = None, *, ref_dir: pathlib.Path = REF, local_dir: pathlib.Path = LOCAL) -> list[str]:
+def check_precheck(manifest: dict, screen_stdout: str | None = None, *, ref_dir: pathlib.Path = REF, local_dir: pathlib.Path = LOCAL) -> List[str]:
     errors = []
     if manifest.get("schema") != "vacant.reqloop.g3gate.plan/1":
         errors.append(f"schema mismatch: {manifest.get('schema')}")
