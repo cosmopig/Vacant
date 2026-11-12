@@ -1,7 +1,7 @@
 {
   "schema": "vacant.audit/stray_labd_root_cause/1",
   "ticket": "R20261111_2158-1",
-  "generated_at": "2026-11-12T00:22:49+00:00",
+  "generated_at": "2026-11-12T02:59:36+00:00",
   "session_file": "/home/user1/.pi/agent/sessions/--home-user1-dev-Vacant--/2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl",
   "session_sha256": "22b29817c1ad9fabd624c29a9053664e977de0c996c506dfcb5b5a7d59e285fd",
   "parse_errors": [
