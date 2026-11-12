@@ -4,6 +4,7 @@
 - **票 R20261112_0820-1 驗收過（驗收態 2b915a54f）：** 項1 `g3_2_precheck.py --selftest`→VERDICT: G3_2_PRECHECK_OK（正控制＋5 負控制 n1-n5）✓；項2 `g3_2_fire_summary.py --selftest`→VERDICT: G3_2_FIRE_SUMMARY_SELFTEST_OK RC=0 ✓；項3 pytest 3 測試檔 19 passed ✓。升上 qwen 84665f8a1（含 r1428 docstring 測試、函數體未動）→argon 1781caccf；in-scope diff_worker/diff_argon＝0 檔。票 open/→done/＋票尾註記。
 - **worker WIP 回退（實質裁決、非文書）：** round-110 自動 commit 5f1be6ed9 接 check_fire_summary 進 selftest＋加 task-status 檢查，但真實 JSON tasks 無 status 欄位→selftest BROKEN＋test_selftest_success FAILED（本輪兩路實測）→回退 2b915a54f 版本（worker f23e50c32、worktree 同還原）；WIP 留痕 5f1be6ed9（git show 可重做）。另清 16 檔 f1-f4 佔位（aeb82b0b2，無引用、qwen/argon 從未存在）。
 - **較上輪好的命令：** worker HEAD 5f1be6ed9 時 `g3_2_fire_summary.py --selftest`＝BROKEN、`test_reqloop_g3_2_fire_summary.py::test_selftest_success`＝FAILED→回退後三分支皆 VERDICT OK＋19 passed。
+- **redo（審查點名 5 檔未開）：** effects summary／g25 filing／g3-1 票／extract.py／repair.py 逐檔全開＋交叉核對＋相依項重跑全綠（VERDICT×2＋19 passed）、簿記引值與磁碟實態全相符、無更正。
 - **紅線：** 無 push（loop 自推）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、凍結 4 檔＋filing 未改（anchors 5 passed 本輪新跑）、0 model calls、未跑 full pytest、不以文書改動充實進度。
 
 ## 紅線（契約、不變）
