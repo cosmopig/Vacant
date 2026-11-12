@@ -1,7 +1,7 @@
 # NOW.md — 現況（每輪覆寫、≤3KB）
 
-## 狀態（2026-11-12 r1511；CI 紅燈例外輪：argon 🔴 2 failed 根因定案＋e006/e008 四檔＋簿記兩分支同步；freeze_check 9/12→11/12，唯餘 wt_clean＝worker e015 WIP 在途）
-- **較上輪好的命令：** `python3 ops/reqloop/freeze_check.py` 9/12（3 BROKEN）→11/12（1 BROKEN）；`git diff --name-only auto/argon auto/qwen27b -- vacant_network tests ops` 6 檔→0；e006/e008 selftest VERDICT OK＋6 passed 三樹全綠（argon 872155a16／worker 708b16c06）。
+## 狀態（2026-11-12 r1511；CI 紅燈例外輪：argon 🔴 2 failed 根因定案＋e006/e008 四檔＋簿記兩分支同步；freeze_check 9/12→10/12，唯餘 diff_worker＋wt_clean 皆＝worker e015 WIP 在途）
+- **較上輪好的命令：** `python3 ops/reqloop/freeze_check.py` 9/12（3 BROKEN）→10/12（2 BROKEN：diff_worker＋wt_clean，皆＝worker e015 WIP 在途、票在 doing/）；`git diff --name-only auto/argon auto/qwen27b -- vacant_network tests ops` 6 檔→0（diff_argon BROKEN→OK）；e006/e008 selftest VERDICT OK＋6 passed 三樹全綠（argon 872155a16＋c51155bfd／worker 708b16c06＋09ec4a2b4）。
 - **argon 紅燈根因（log 定案、非猜）：** 2 failed＝test_reqloop_freeze_check verdict 兩測←freeze_check diff_worker/diff_argon（r1510 簿記未同步兩分支）＋wt_clean（worker e015 WIP M＋??，票在 doing/、selftest RC=1 在途）；e015 官方版 qwen selftest RC=0 未動——不碰 WIP、不代修（r1496 先例）。
 - **本輪同步（只收斂檔）：** e006/e008（2 量具＋2 測試）＋簿記 4 檔→argon/worker；worker WIP 兩檔（e015_closure_check.py M、e015_verdict_pipeline.py ??）未 commit 未觸、commit 後復核仍在。
 - **紅線：** 無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest；
