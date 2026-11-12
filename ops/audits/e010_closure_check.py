@@ -10,19 +10,28 @@ packet §5 完賽段落（「完賽日期」）＋核取方塊 ≥1 全 [x]；
 BACKLOG e010_bigwork_pi_AC 項 [x]＋結案註記（日期＋票號）；
 envelope_compliance 量具（packet §7／BACKLOG 點名之 ops/vlab/tools/envelope_compliance.py）
 verdict==PASS 且 C-r1 compliance==PASS。
+r1484 redo（CI 紅燈根因）：本機 CI 以 HOME=/var/tmp/ci-home 執行，Path.home() 解析不到
+~/dev/ops 證據檔。改以 repo 內凍結快照為正典：ops/packets/e010_bigwork.md、ops/BACKLOG.md
+（round 1484 自 ~/dev/ops 逐位元組拷貝、sha256 釘住；~/dev/ops/BACKLOG.md 仍為活檔，快照
+是結案時刻的凍結紀錄）。缺省路徑不再依賴 HOME。
 """
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import pathlib
 import re
+import tempfile
 
 RUNS_BASE = pathlib.Path("/srv/vlab/runs")
 EXP = "e010_bigwork_pi_AC"
 CELL_DEFAULT = RUNS_BASE / EXP / "bigwork-bw_repo_readme-pi-C-r1" / "cell.json"
-_OPS = pathlib.Path.home() / "dev/ops" if (pathlib.Path.home() / "dev/ops").is_dir() else pathlib.Path("/home/user1/dev/ops")
-PACKET_DEFAULT, BACKLOG_DEFAULT = _OPS / "packets/e010_bigwork.md", _OPS / "BACKLOG.md"
+REPO = pathlib.Path(__file__).resolve().parents[2]
+PACKET_DEFAULT = REPO / "ops/packets/e010_bigwork.md"
+BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
+PACKET_SHA256 = "1e84ad57de64de6f788b05bfe1a30de505ccc156a0925d2ae2e02e65f5cf10d4"
+BACKLOG_SHA256 = "6599f4d3ad3f64d2946f02328f8f2dbe7ec1ab5aa2fdc41c976d0fca4f045b44"
 ENVELOPE_TOOL = pathlib.Path(__file__).resolve().parents[2] / "ops/vlab/tools/envelope_compliance.py"
 CLOSURE_NOTE = ("**結案（round 1482、2026-11-12、票 P20261112_0320-1）**：C-r1 完賽產物機械複核"
                 "（cell：vacant_home_bytes=1,077,331 B ≤256MiB 且 <149.5M；vacant_objects_bytes=1,062,407 B；"
@@ -59,6 +68,22 @@ def check(cell_text: str, packet_text: str, backlog_text: str) -> list[str]:
     return out
 
 
+def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
+    """凍結快照須存在且 sha256 與釘住值一致（任何改動＝違規；負控可暫態篡改必紅）。"""
+    if not p.is_file():
+        return [f"snapshot missing: {p}"]
+    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    if got == want:
+        return []
+    return [f"snapshot sha256 drift {p.name}: {got[:12]}… != 釘住 {want[:12]}…（快照為凍結紀錄，改動即紅）"]
+
+
+def pinned_violations(p: pathlib.Path) -> list[str]:
+    """只有 repo 內缺省快照受釘住；以 --packet/--backlog 明確覆蓋時不釘（內容判準照跑）。"""
+    want = {PACKET_DEFAULT: PACKET_SHA256, BACKLOG_DEFAULT: BACKLOG_SHA256}.get(p)
+    return check_snapshot(p, want) if want else []
+
+
 def check_envelope(base: pathlib.Path) -> list[str]:
     """跑 packet §7／BACKLOG 點名之量具：verdict 須 PASS、C-r1 compliance 須 PASS。"""
     try:
@@ -77,11 +102,12 @@ def selftest(cell_p: pathlib.Path, packet_p: pathlib.Path, backlog_p: pathlib.Pa
     if missing:
         print(*missing, sep="\n"); return 1
     cell_text, packet_text, backlog_text = (p.read_text(encoding="utf-8") for p in (cell_p, packet_p, backlog_p))
-    v = check(cell_text, packet_text, backlog_text) + check_envelope(RUNS_BASE)  # 正控制：真檔＋量具全過
+    v = check(cell_text, packet_text, backlog_text) + check_envelope(RUNS_BASE) \
+        + check_snapshot(packet_p, PACKET_SHA256) + check_snapshot(backlog_p, BACKLOG_SHA256)  # 正控制：真檔＋量具＋快照釘住 全過
     if v:
         print("SELFTEST positive control FAIL:", *v, sep="\n  ")
         return 1
-    print("SELFTEST positive control OK（cell.json／packet §5／BACKLOG／envelope 量具 全過）")
+    print("SELFTEST positive control OK（cell.json／packet §5／BACKLOG／envelope 量具／快照 sha256 全過）")
 
     def run(tag: str, cell: str, packet: str, backlog: str, must_hit: str) -> bool:
         vv = check(cell, packet, backlog)
@@ -95,6 +121,12 @@ def selftest(cell_p: pathlib.Path, packet_p: pathlib.Path, backlog_p: pathlib.Pa
     ok &= run("n3 §5 未勾選", cell_text, packet_text.replace("- [x] 完賽日期", "- [ ] 完賽日期", 1), backlog_text, "packet §5")
     ok &= run("n4 BACKLOG 未勾選", cell_text, packet_text, backlog_text.replace("- [x] **e010_bigwork_pi_AC", "- [ ] **e010_bigwork_pi_AC", 1), "未勾選 [x]")
     ok &= run("n5 BACKLOG 註記刪除", cell_text, packet_text, backlog_text.replace(CLOSURE_NOTE, "", 1), "缺結案註記")
+    with tempfile.TemporaryDirectory() as td:  # n6 快照篡改：暫態檔，不碰 repo 正典
+        f = pathlib.Path(td) / "tampered.md"
+        f.write_text("tampered\n", encoding="utf-8")
+        vv = check_snapshot(f, PACKET_SHA256)
+        if not any("sha256 drift" in s for s in vv):
+            print(f"SELFTEST negative control FAIL [n6 快照篡改]: violations={vv!r} (應含 'sha256 drift')"); ok = False
     if not ok: return 1
     print("VERDICT: E010_CLOSURE_OK")
     print("  files:", cell_p, packet_p, backlog_p, sep="\n  ")
@@ -110,7 +142,8 @@ def main() -> int:
     args = ap.parse_args()
     if args.selftest:
         return selftest(args.cell, args.packet, args.backlog)
-    v = check(args.cell.read_text(encoding="utf-8"), args.packet.read_text(encoding="utf-8"), args.backlog.read_text(encoding="utf-8")) + check_envelope(RUNS_BASE)
+    v = check(args.cell.read_text(encoding="utf-8"), args.packet.read_text(encoding="utf-8"), args.backlog.read_text(encoding="utf-8")) \
+        + check_envelope(RUNS_BASE) + pinned_violations(args.packet) + pinned_violations(args.backlog)
     for s in v:
         print("VIOLATION:", s)
     return 1 if v else 0

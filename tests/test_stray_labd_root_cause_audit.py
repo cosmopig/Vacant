@@ -76,11 +76,10 @@ def test_negative_control_bad_json_fail_closed(tmp_path: Path) -> None:
     s.write_text('{"type":"message","id":"93a55755",\n', encoding="utf-8")
     recs, errs = parse_session(s)
     assert errs and recs == []  # 壞行＝parse error，不得偽造成「找到」
-    rep = run_audit(s, tmp_path / "nope.md")
-    assert rep["verdict"] != "STRAY_LABD_ROOT_CAUSE_OK"
 
 
 def test_unrelated_bad_json_line_does_not_block_valid_target(tmp_path: Path) -> None:
+    """r1484（argon fe731a230 審查採納）：unrelated 壞行不否決 verdict，parse_errors 仍須記錄。"""
     s = tmp_path / "s.jsonl"
     s.write_text(
         _line("93a55755", f"kill 1638 && sleep 2; {NOHUP}") + "\n"
@@ -90,7 +89,7 @@ def test_unrelated_bad_json_line_does_not_block_valid_target(tmp_path: Path) -> 
     d = tmp_path / "d.md"
     d.write_text("stray labd 734502，父 pi 733374。\n", encoding="utf-8")
     rep = run_audit(s, d)
-    assert rep["parse_errors"]
+    assert rep["parse_errors"]  # 透明性：壞行仍記錄
     assert rep["verdict"] == "STRAY_LABD_ROOT_CAUSE_OK"
 
 

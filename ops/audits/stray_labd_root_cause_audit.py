@@ -10,6 +10,9 @@
 provider/toolCall/command，逐項對照 ticket 預期值（任一不符＝check 失敗 → verdict 非 OK，
 fail-closed）；由 DECISION 檔關聯 stray/parent PID（缺值＝UNKNOWN，絕不是 0 或 PASS）。
 --selftest：5 組正/負控制（0 模型呼叫）。退出：0=OK；1=verdict 非 OK 或 selftest broken。
+r1484（審查 argon fe731a230，已驗證）：verdict 語義修正——unrelated 壞行（真 session 第 190 行
+截斷 JSON）不再一票否決；verdict 只取決於「目標 message 找到 ＋ checks 非空 ＋ 全數 ok」，
+parse_errors 仍完整記錄於證據（透明性不降）。`bool(checks)` 同時塞住 `all([])` 空集偽真洞。
 """
 import argparse
 import datetime as _dt
@@ -20,8 +23,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-_HOME = Path.home() if (Path.home() / ".pi/agent/sessions").is_dir() else Path("/home/user1")
-SESSION = (_HOME / ".pi/agent/sessions/--home-user1-dev-Vacant--/"
+SESSION = (Path.home() / ".pi/agent/sessions/--home-user1-dev-Vacant--/"
            "2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl")
 DECISION = REPO / "decisions/DECISION_20261103_E016_ENVLEAK_FIX.md"
 OUT = REPO / "ops/audits/stray_labd_root_cause_evidence.json"
@@ -84,6 +86,7 @@ def run_audit(session: Path, decision: Path) -> dict:
     recs, errs = parse_session(session)
     ev = find_message(recs, EXPECTED["msg_id"])
     checks = evaluate(ev) if ev else []
+    # r1484：unrelated 壞行不否決（仍記錄於 parse_errors）；目標缺失／checks 空／任一 check 不符仍 fail-closed
     ok = ev is not None and bool(checks) and all(c["ok"] for c in checks)
     return {"schema": "vacant.audit/stray_labd_root_cause/1", "ticket": "R20261111_2158-1",
             "generated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
