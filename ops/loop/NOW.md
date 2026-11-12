@@ -1,12 +1,10 @@
 # NOW.md — 現況（每輪覆寫、≤3KB）
 
-## 狀態（2026-11-12 r1491；審查兩步指示複核：驗收全數重跑皆綠；CI 三分支跑件中）
-- **審查 Step 1（本輪複核、全綠）：** a78871977 為 auto/qwen27b 祖先（merge f570989b9 在樹、`git merge-base --is-ancestor`＝YES）；兩舊票（R20261111_2158-2／R20261112_0111-1）在 done/、open/doing 空（ls 實證）；freeze_check 12/12 FROZEN_STATE_OK（diff_worker@c6e472a0c／diff_argon@b69f3f974 in-scope 0 檔、wt_clean 3/3、filing 6 sha MATCH）。
-- **審查 Step 2（本輪全數重跑、皆綠）：** `python3 ops/audits/g3_series_unverified_taxonomy.py --selftest`→G3_SERIES_TAXONOMY_OK＋3 passed；`python3 ops/audits/g3_3_precheck.py --selftest`→G3_3_PRECHECK_OK（4 負控制）＋`HOME=/var/tmp/ci-home pytest tests/test_reqloop_g3_3_manifest.py`→9 passed。票面探針欄位與實際 schema 的偏差不隱藏（0455-1 票尾＋script 16–17 行已記錄；實作 n3＝`tasks[*].n_deterministic_claims`、覆蓋等同）。
-- **較上輪好的命令：** `HOME=/var/tmp/ci-home pytest tests/test_reqloop_g3_3_manifest.py` → 9 passed RC=0（本輪首次以 CI 的 HOME 釘住跑；票面記錄原先未釘此 HOME）。
-- **CI 一次讀取（不 poll）：** 三分支皆「還沒跑完」（qwen27b 1e5fecc8／argon b69f3f97／worker c6e472a0）→下輪輪首一次讀取。
-- **審查 redo（本輪完成）：** 5 點名檔逐檔實開＋交叉核對（effects_20261105_summary.json 全開、l007_closure_check.py 全開＋selftest 重跑 L007_CLOSURE_OK、g3-1 票全讀、extract.py／repair.py 行數＋blob 實測與紅線契約行完全一致）——未發現不符、無數字更正。
-- **無新產品工作：** 票 open/doing 空、bd ready 空；0 新碼、0 model calls；G 系列候人類裁決（vq-kax）、新 G 票不接。
+## 狀態（2026-11-12 r1495；票 P20261112_0748-1 e013 成本重算量具；產物在樹全綠；驗收 grep 壞 → bounced/）
+- **工作完成且全綠（commit 760ed5774）：** ops/audits/e013_recompute.py（120 行；--selftest 正控制＋負1（舊 events 無 metrics→標記異常隔離、非 0.0 合格）＋負2（pass=None infra→嚴排除分母）全綠，VERDICT: E013_RECOMPUTE_OK RC=0；活體 A 30 格 calls 26.93/tokens 583095、C 30 格 14.41/244937、excluded=0）＋tests/test_e013_recompute.py（3 passed）＋BACKLOG.md line 101 [ ]→[x]＋結案註記（repo 與 ~/dev/ops 兩份）。
+- **驗收指令本身壞（票面描述錯→bounced/）：** `grep -F "- [x]"` 被 GNU grep 前導 dash 當選項→「invalid option -- ' '」rc=2、與檔案內容無關（實證 `echo '- [x] x' | grep -F "- [x]"` 亦 rc=2）；機械等價修正式 `grep -E "e013_recompute" ops/BACKLOG.md | grep -F -- "- [x]"` rc=0（line 101 含 `- [x]`）。依輪規「驗收指令本身壞掉」條款票移 bounced/、候規劃者修驗收 grep 重驗；產物已入庫、無需重做。
+- **較上輪好的命令：** `python3 ops/audits/e013_recompute.py --selftest`→RC=0（上輪檔案不存在 exit 1；本輪正＋2 負控制＋活體全綠）。
+- **紅線：** 無 push（loop 自推）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、凍結 4 檔＋filing 6 sha 未改（anchors 5 passed）、0 model calls、未跑 full pytest、不以文書改動充實進度（本輪實質＝e013 量具新碼＋測試＋BACKLOG 收口，皆可機械複核）。
 
 ## 紅線（契約、不變）
 - 不 push（loop 自推 auto/qwen27b）、不 main、不 reset/rebase；.github/workflows/ 只讀。
@@ -15,11 +13,11 @@
 - 不寫 /srv/vlab/queue；CI 不 poll；不跑 full pytest。
 
 ## 未完（≤3、交下輪）
-1. CI 一次讀取（ci_status.py、不 poll）：三新 HEAD 跑件中；若紅→讀 log 根因不猜。
-2. G 系列候人類裁決（H2_REFUTED 停止規則）：解凍 extract/checks 或終止；vq-kax 候決；新 G 票不接。
-3. （無）——若人類裁決後開新票，依票接。
+1. e013 票（bounced/）：候規劃者把驗收 grep 改為 `grep -F -- "- [x]"`（或 `-e`）重驗；產物已在樹（760ed5774）、無需重做。
+2. CI 一次讀取（ci_status.py、不 poll）：三新 HEAD 跑件中（r1491 記錄）；若紅→讀 log 根因不猜。
+3. G 系列候人類裁決（vq-kax）：解凍 extract/checks 或終止；新 G 票不接。
 
 ## 下輪入口（≤3）
-- ci_status.py 一次讀取（不 poll）：若紅→讀 log 根因不猜；若綠→三分支收斂、記錄數字。
-- G 系列若人類裁決（解凍／終止）→依裁決開新票、不代決。
+- e013 驗收指令修好後重驗（產物在樹、只須跑驗收指令；票在 bounced/）。
+- ci_status.py 一次讀取（不 poll）：若紅→讀 log 根因不猜；若綠→記錄數字。
 - 守衛：anchors 綠、freeze_check 12/12、鏡像 byte-identical、NOW.md ≤3KB。
