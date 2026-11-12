@@ -1,0 +1,643 @@
+{
+  "schema": "vacant.audit/g3_2_fire_summary/1",
+  "generated_by": "ops/audits/g3_2_fire_summary.py",
+  "ticket": "P20261111_2319-2",
+  "identity": {
+    "result_file": "/home/user1/dev/ops/g3_fire/20261111_g3_2/g3_result.json",
+    "result_bytes": 19136,
+    "result_sha256": "2a46b5a365983e1fe190c2bbf94ed4b73cb32932e80b5b5caefdd272bccbea7e",
+    "result_file_mtime_utc": "2026-11-11T23:30:01+00:00",
+    "approval_file": "/home/user1/dev/ops/approvals/g3_vq-1zf_fire_20261111.json",
+    "approval_sha256": "610c7640347296c43d986b4adc59096ad3fe4967bbf560b727d8f97755ea0709",
+    "approval_approved": true,
+    "approval_epic": "vq-1zf",
+    "approval_inline_in_result": {
+      "approved": true,
+      "epic": "vq-1zf",
+      "by": "人類擁有者（2026-11-11 口頭常設授權：「讓他可以真發射他想做就做」；由外部 agent 代為落檔）"
+    }
+  },
+  "fire": {
+    "fired_at": "2026-11-11T23:28:45Z",
+    "out_dir": "/home/user1/dev/ops/g3_fire/20261111_g3_2",
+    "arm": "full_rloop",
+    "stop_reason": null
+  },
+  "scope": "4 凍結未見題（dab_725/dab_587/dab_657/dab_517）× full_rloop＝4 格；1 rep；同批重發非獨立樣本",
+  "models": {
+    "extract": "glm53",
+    "answer": "deepseek41"
+  },
+  "tasks": [
+    {
+      "task_id": "dab_725",
+      "input_sha256": "9ba533c056f1c4b307e474ae9455a1f759c31c297a0538612ab1d8d81b9cf9fd",
+      "required_answer_names": [
+        "mean1",
+        "mean2",
+        "mean3",
+        "median1",
+        "median2",
+        "median3"
+      ],
+      "n_requirements": 6,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7313,
+          "wall_ms": 11593
+        }
+      ],
+      "unverified_reasons": {
+        "R1": "deliverable_not_in_request:answer.txt 中六個 @name[value] 項目（mean1, median1, mean2, median",
+        "R2": "deliverable_not_in_request:依 displacement 出現次數選出前三大值",
+        "R3": "deliverable_not_in_request:各 displacement 值對應列之 mpg 平均數與中位數",
+        "R4": "deliverable_not_in_request:六個數值皆四捨五入至小數點後兩位",
+        "R5": "deliverable_not_in_request:工作區根目錄的 answer.txt 檔案",
+        "R6": "deliverable_not_in_request:data/auto-mpg.csv 保持未修改"
+      }
+    },
+    {
+      "task_id": "dab_587",
+      "input_sha256": "234a9d95535d82be7a4ebab5495e4662c6d8bcbd6c258dc87145337b7adb77fc",
+      "required_answer_names": [
+        "correlation_coefficient"
+      ],
+      "n_requirements": 5,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 6886,
+          "wall_ms": 10303
+        }
+      ],
+      "unverified_reasons": {
+        "R1": "deliverable_not_in_request:answer.txt 中包含 @correlation_coefficient[...] 項目",
+        "R2": "deliverable_not_in_request:平均等待時間由 HH:MM:SS 字串轉換為秒（整數）",
+        "R3": "deliverable_not_in_request:以 Pearson 方法計算相關係數並四捨五入至小數三位",
+        "R4": "deliverable_not_in_request:使用指定資料檔 data/20170413_000000_group_statistics.csv",
+        "R5": "deliverable_not_in_request:不得修改輸入資料檔"
+      }
+    },
+    {
+      "task_id": "dab_657",
+      "input_sha256": "fc27da88ae833512b7e1578b55eb46e328583329d37df412d194a14f87956df6",
+      "required_answer_names": [
+        "mean_close",
+        "median_close",
+        "std_close"
+      ],
+      "n_requirements": 8,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7218,
+          "wall_ms": 18330
+        }
+      ],
+      "unverified_reasons": {
+        "req-1": "unsupported_recompute_type:mean_col",
+        "req-2": "unsupported_recompute_type:median_col",
+        "req-3": "unsupported_recompute_type:std_col",
+        "req-4": "deliverable_not_in_request:answer.txt 中 @mean_close 項的格式",
+        "req-5": "deliverable_not_in_request:answer.txt 中 @median_close 項的格式",
+        "req-6": "deliverable_not_in_request:answer.txt 中 @std_close 項的格式",
+        "req-7": "unsupported_recompute_type:mean_col",
+        "req-8": "unsupported_recompute_type:mean_col"
+      }
+    },
+    {
+      "task_id": "dab_517",
+      "input_sha256": "fe69b721c704c3663c9acccff02fe514bf137694f5a02866508d390492ec571a",
+      "required_answer_names": [
+        "correlation_pclass_fare"
+      ],
+      "n_requirements": 7,
+      "extract_error": null,
+      "extract_usages": [
+        {
+          "calls": 1,
+          "tokens": 7182,
+          "wall_ms": 12176
+        }
+      ],
+      "unverified_reasons": {
+        "req_correlation_value": "deliverable_not_in_request:correlation_pclass_fare 的相關係數值",
+        "req_pearson_method": "deliverable_not_in_request:以 Pearson 方法計算相關係數",
+        "req_exclude_nulls": "deliverable_not_in_request:計算前排除 Pclass 或 Fare 為 null 的列",
+        "req_round_2dp": "deliverable_not_in_request:最終輸出四捨五入至小數點後 2 位",
+        "req_answer_format": "deliverable_not_in_request:答案以 @correlation_pclass_fare[浮點數] 格式呈現",
+        "req_answer_file": "deliverable_not_in_request:answer.txt 檔案（工作區根目錄）",
+        "req_data_unchanged": "missing_param:values"
+      }
+    }
+  ],
+  "cells": [
+    {
+      "task": "dab_725",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean1[23.45], @median1[23.00]\n@mean2[21.25], @median2[20.20]\n@mean3[20.16], @median3[19.40]\n",
+      "answer_sha256": "e55019f82488b886b28f5d0273fef7af96369210322f13694ba67b604a66de88",
+      "tokens": 16007,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "n_rounds": 1,
+        "n_claims": 6,
+        "claims": [
+          {
+            "id": "R1",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "answer_kv",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:answer.txt 中六個 @name[value] 項目（mean1, median1, mean2, median"
+            }
+          },
+          {
+            "id": "R2",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "group_aggregate",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:依 displacement 出現次數選出前三大值"
+            }
+          },
+          {
+            "id": "R3",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "rowset_filter",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:各 displacement 值對應列之 mpg 平均數與中位數"
+            }
+          },
+          {
+            "id": "R4",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:六個數值皆四捨五入至小數點後兩位"
+            }
+          },
+          {
+            "id": "R5",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "answer_kv",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:工作區根目錄的 answer.txt 檔案"
+            }
+          },
+          {
+            "id": "R6",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "answer_kv",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:data/auto-mpg.csv 保持未修改"
+            }
+          }
+        ],
+        "round_verdicts": [
+          "UNKNOWN"
+        ],
+        "gap_reasons": [
+          null
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null
+      }
+    },
+    {
+      "task": "dab_587",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@correlation_coefficient[0.446]\n",
+      "answer_sha256": "a9426b8fc4d88cfeb9bf3f9d742e81c51e818980c2beaaa6d9d18cd33283627c",
+      "tokens": 9969,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "n_rounds": 1,
+        "n_claims": 5,
+        "claims": [
+          {
+            "id": "R1",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:answer.txt 中包含 @correlation_coefficient[...] 項目"
+            }
+          },
+          {
+            "id": "R2",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:平均等待時間由 HH:MM:SS 字串轉換為秒（整數）"
+            }
+          },
+          {
+            "id": "R3",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數並四捨五入至小數三位"
+            }
+          },
+          {
+            "id": "R4",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:使用指定資料檔 data/20170413_000000_group_statistics.csv"
+            }
+          },
+          {
+            "id": "R5",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:不得修改輸入資料檔"
+            }
+          }
+        ],
+        "round_verdicts": [
+          "UNKNOWN"
+        ],
+        "gap_reasons": [
+          null
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null
+      }
+    },
+    {
+      "task": "dab_657",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@mean_close[2211.42]\n@median_close[436.57]\n@std_close[3528.44]\n",
+      "answer_sha256": "62ab5c03da00902b7c4921b33855c4b643e5419e8f3dad69246015faff34890f",
+      "tokens": 37555,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "n_rounds": 1,
+        "n_claims": 8,
+        "claims": [
+          {
+            "id": "req-1",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "plain_recomputed",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "unsupported_recompute_type:mean_col"
+            }
+          },
+          {
+            "id": "req-2",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "plain_recomputed",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "unsupported_recompute_type:median_col"
+            }
+          },
+          {
+            "id": "req-3",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "plain_recomputed",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "unsupported_recompute_type:std_col"
+            }
+          },
+          {
+            "id": "req-4",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:answer.txt 中 @mean_close 項的格式"
+            }
+          },
+          {
+            "id": "req-5",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:answer.txt 中 @median_close 項的格式"
+            }
+          },
+          {
+            "id": "req-6",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:answer.txt 中 @std_close 項的格式"
+            }
+          },
+          {
+            "id": "req-7",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "plain_recomputed",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "unsupported_recompute_type:mean_col"
+            }
+          },
+          {
+            "id": "req-8",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "plain_recomputed",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "unsupported_recompute_type:mean_col"
+            }
+          }
+        ],
+        "round_verdicts": [
+          "UNKNOWN"
+        ],
+        "gap_reasons": [
+          null
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null
+      }
+    },
+    {
+      "task": "dab_517",
+      "arm": "full_rloop",
+      "status": "ok",
+      "rounds": 1,
+      "error": null,
+      "answer": "@correlation_pclass_fare[-0.55]\n",
+      "answer_sha256": "ae95ab581182c88cf68005f9633150f3525b128642b6764a86ee87020073faab",
+      "tokens": 36793,
+      "hidden_after": "UNKNOWN",
+      "content_reverify": {
+        "enabled": true,
+        "n_rounds": 1,
+        "n_claims": 7,
+        "claims": [
+          {
+            "id": "req_correlation_value",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "answer_kv",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:correlation_pclass_fare 的相關係數值"
+            }
+          },
+          {
+            "id": "req_pearson_method",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "answer_kv",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數"
+            }
+          },
+          {
+            "id": "req_exclude_nulls",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "rowset_filter",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:計算前排除 Pclass 或 Fare 為 null 的列"
+            }
+          },
+          {
+            "id": "req_round_2dp",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:最終輸出四捨五入至小數點後 2 位"
+            }
+          },
+          {
+            "id": "req_answer_format",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "tag_format",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:答案以 @correlation_pclass_fare[浮點數] 格式呈現"
+            }
+          },
+          {
+            "id": "req_answer_file",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "answer_kv",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "deliverable_not_in_request:answer.txt 檔案（工作區根目錄）"
+            }
+          },
+          {
+            "id": "req_data_unchanged",
+            "status": "UNKNOWN",
+            "required": true,
+            "verifier": "rowset_filter",
+            "detail": "此條目無可靠程式重算檢查器，依規則標為 UNKNOWN，不准以自評代替",
+            "evidence": {
+              "unverified": true,
+              "reason": "missing_param:values"
+            }
+          }
+        ],
+        "round_verdicts": [
+          "UNKNOWN"
+        ],
+        "gap_reasons": [
+          null
+        ],
+        "final_verdict": "UNKNOWN",
+        "diff": null
+      }
+    }
+  ],
+  "claims": {
+    "total": 26,
+    "pass": 0,
+    "fail": 0,
+    "unknown": 26,
+    "denominator": "26（6+5+8+7，4 格）",
+    "deterministic_cells": "0/4",
+    "reason_distribution": {
+      "deliverable_not_in_request:answer.txt 中六個 @name[value] 項目（mean1, median1, mean2, median": 1,
+      "deliverable_not_in_request:依 displacement 出現次數選出前三大值": 1,
+      "deliverable_not_in_request:各 displacement 值對應列之 mpg 平均數與中位數": 1,
+      "deliverable_not_in_request:六個數值皆四捨五入至小數點後兩位": 1,
+      "deliverable_not_in_request:工作區根目錄的 answer.txt 檔案": 1,
+      "deliverable_not_in_request:data/auto-mpg.csv 保持未修改": 1,
+      "deliverable_not_in_request:answer.txt 中包含 @correlation_coefficient[...] 項目": 1,
+      "deliverable_not_in_request:平均等待時間由 HH:MM:SS 字串轉換為秒（整數）": 1,
+      "deliverable_not_in_request:以 Pearson 方法計算相關係數並四捨五入至小數三位": 1,
+      "deliverable_not_in_request:使用指定資料檔 data/20170413_000000_group_statistics.csv": 1,
+      "deliverable_not_in_request:不得修改輸入資料檔": 1,
+      "unsupported_recompute_type:mean_col": 3,
+      "unsupported_recompute_type:median_col": 1,
+      "unsupported_recompute_type:std_col": 1,
+      "deliverable_not_in_request:answer.txt 中 @mean_close 項的格式": 1,
+      "deliverable_not_in_request:answer.txt 中 @median_close 項的格式": 1,
+      "deliverable_not_in_request:answer.txt 中 @std_close 項的格式": 1,
+      "deliverable_not_in_request:correlation_pclass_fare 的相關係數值": 1,
+      "deliverable_not_in_request:以 Pearson 方法計算相關係數": 1,
+      "deliverable_not_in_request:計算前排除 Pclass 或 Fare 為 null 的列": 1,
+      "deliverable_not_in_request:最終輸出四捨五入至小數點後 2 位": 1,
+      "deliverable_not_in_request:答案以 @correlation_pclass_fare[浮點數] 格式呈現": 1,
+      "deliverable_not_in_request:answer.txt 檔案（工作區根目錄）": 1,
+      "missing_param:values": 1
+    }
+  },
+  "h1": {
+    "rule": "§2 H1：(a) ≥1/4 格完成 ≥1 輪 content_reverify 且該輪 ≥1 條 claim 由 checks 程式重算給確定性裁決（PASS/FAIL）；且 (b) round 1 有已確認缺口（≥1 必需 FAIL 或缺必要答案項）的格中，所有該等格 round 2 diff fixed≥1 且 regressed=0。0/4 格有已確認缺口→(b) not_applicable（不得記通過、不得記否決）。否決條件：(a) 0/4；或 (b) ≥1 缺口格 fixed=0 或 regressed≥1。",
+    "a": "0/4 格有確定性裁決（無）",
+    "a_met": false,
+    "b": "not_applicable（已確認缺口格 0/4：無）",
+    "verdict": "H1_REFUTED",
+    "note": "單 rep、方向性；不宣稱臂 superiority；不外推其他模型/題（H-12）；H1 判定只讀機制記錄（claims 狀態＋gap_reason＋diff），不讀 hidden/scorer"
+  },
+  "h0_reproducibility": {
+    "prerun_report": "/home/user1/dev/Vacant/ops/audits/g3_2_h0_prerun_report.json",
+    "per_task": [
+      {
+        "task_id": "dab_725",
+        "input_sha256_match": true,
+        "prerun_n_requirements": 7,
+        "fire_n_requirements": 6,
+        "prerun_deterministic_ids": [
+          "R1",
+          "R6"
+        ],
+        "fire_deterministic_ids": [],
+        "reproduced": false
+      },
+      {
+        "task_id": "dab_587",
+        "input_sha256_match": true,
+        "prerun_n_requirements": 5,
+        "fire_n_requirements": 5,
+        "prerun_deterministic_ids": [],
+        "fire_deterministic_ids": [],
+        "reproduced": null
+      },
+      {
+        "task_id": "dab_657",
+        "input_sha256_match": true,
+        "prerun_n_requirements": 8,
+        "fire_n_requirements": 8,
+        "prerun_deterministic_ids": [],
+        "fire_deterministic_ids": [],
+        "reproduced": null
+      },
+      {
+        "task_id": "dab_517",
+        "input_sha256_match": true,
+        "prerun_n_requirements": 7,
+        "fire_n_requirements": 7,
+        "prerun_deterministic_ids": [],
+        "fire_deterministic_ids": [],
+        "reproduced": null
+      }
+    ],
+    "note": "同題同 input_sha256、同 extract 模型（glm53），pre-run 與 fire 各自獨立 1 次 extract 呼叫；確定性 claim 數若不一致＝extract 層跨呼叫非確定（LLM 輸出漂移），非 checks/repair 層問題"
+  },
+  "cost": {
+    "model_calls": 8,
+    "answer_tokens_known": 100324,
+    "extract_tokens_known": 28599,
+    "tokens_total": 128923,
+    "tokens_missing": false,
+    "daily_quota": {
+      "known_tokens": 128923,
+      "daily_token_cap": 2000000,
+      "share_pct": 6.45
+    },
+    "cost_usd": "UNKNOWN（產物無計價欄；glm CLI 計價缺值不填 0、cost_usd=0 不等於免費）"
+  },
+  "hidden_after": "4/4 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
+  "failures": [
+    {
+      "cells": 0,
+      "note": "status=error 格數；0＝機制達標，26/26 claims UNKNOWN 是 extract 層問題非 harness 故障"
+    }
+  ],
+  "scope_note": [
+    "4/4 格 status=ok、各 1 輪（UNKNOWN 非缺口→不觸發第 2 輪，g3.py 守衛如設計）",
+    "26/26 claims UNKNOWN、0 PASS、0 FAIL——本批不給任何內容正確性結論（UNKNOWN 不是通過也不是沒有）",
+    "單 rep、本地模型（H-12）、不遷移其他模型/harness；同批重發非獨立樣本",
+    "H0 預跑（22:21Z）與 fire（23:28Z）為兩次獨立 extract 呼叫——見 h0_reproducibility"
+  ]
+}
