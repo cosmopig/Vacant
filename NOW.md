@@ -6,7 +6,7 @@
 - DECISION：argon 合併本輪不執行——新 argon sha 的 CI 未跑（規則：該 sha 須🟢且收集測試數不少於目前 HEAD；同步後 5407≥5407、只候 CI 綠）→下輪 merge＋驗收（freeze_check 12/12＋pytest 27 passed）。
 
 ## 紅線
-- 凍結 4 檔未動：repair.py 2795 行/blob 5147f8c3…、extract.py 1217 行/blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
 - 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest。
 - NOW.md ≤3KB；ops/loop/NOW.md cp 鏡像 byte-identical；ops/STATE.md＝根 STATE.md 位元組前綴（bk_state）。
 - 不以文書改動充實進度：本輪實質＝2 worktree 12 檔同步＋簿記、全可機械複核（freeze_check 12/12、pytest 全綠、in-scope diff 0 檔）。
