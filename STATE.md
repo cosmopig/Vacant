@@ -442,3 +442,9 @@
 - 已驗證（本輪新跑）：驗收指令 `python3 ops/audits/e013_closure_check.py --selftest`→VERDICT: E013_CLOSURE_OK RC=0＋`pytest tests/test_e013_closure_check.py`→3 passed（空 HOME selftest＋正控制＋4 負控制＋缺檔乾淨退出）；CI 模擬（git archive 異位＋空 HOME）同綠（e001/e009 同型坑預先排除）；CI 三分支一次讀（ci_status.py、不 poll）：qwen cc2be2eb/argon d7a902a0/worker 06c68633 全 pending（非紅）。
 - 未驗證：CI 完成裁決（下輪頭複讀一次）；e015 VERDICT.json 第 1780 行磁盤損傷（另立工單）；envelope 數值未對 cell.json 逐格獨立重算（採信 envelope_compliance.py 重算輸出、同 e009 口徑）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未動、0 行產品碼（2 新增檔）；下一步＝下輪頭 CI 三分支一次讀（vq-fd0；argon d7a902a0 若🟢且測試數≥qwen HEAD 即執行 §1 merge）→bd vq-el4 依序下一票。
+
+## 2026-11-12 r1523（HEAD 紅燈閉環：r1522 超時殘留改動（569df0b74）破 e013 測試，還原 996d40561 已驗收 blob；0 model calls）
+- 做了什麼：① 票 vq-el4.102（產品真 bug 例外）：HEAD `pytest tests/test_e013_closure_check.py` 1 failed——r1522 輪超時（rc=124）殘留改動被 569df0b74 自動提交：n4 訊息『缺裁決註記』→『缺票面要求內容』＋BACKLOG 行加 vacant_sha 要求（票面未要求、e002/e006/e008/e009 同族皆『缺裁決註記』）→tests/test_e013_closure_check.py:45 斷言舊訊息必紅。② `git checkout 996d40561 -- ops/audits/e013_closure_check.py` byte 還原已驗收狀態（commit ffa970cae，3 insertions/3 deletions）。③ §1（merge auto/argon bcc805143）延後：輪首 CI 三分支一次讀全「還沒跑完」（qwen 569df0b7/argon 944b553b/worker 9ed92055，不 poll）；ASSIGNMENT 合併規則要求該 sha CI🟢。
+- 已驗證（本輪新跑）：`python3 ops/audits/e013_closure_check.py --selftest`→VERDICT: E013_CLOSURE_OK RC=0；`pytest tests/test_e013_closure_check.py`→3 passed（1 failed→3 passed）；freeze_check→12/12 FROZEN_STATE_OK RC=0（diff_worker/diff_argon in-scope 0 檔、wt_clean 3/3、anchors 5 passed、filing 6 sha MATCH）。
+- 未驗證：CI 完成裁決（下輪頭三分支一次讀、不 poll）；hidden 計分（人類/vlab 側）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未動（freeze_check anchors/filing 本輪新跑 OK）、0 model calls；下一步＝下輪頭 CI 三分支一次讀（vq-fd0；argon 944b553b 若🟢且測試數≥qwen HEAD 即執行 §1 merge）→bd vq-el4 依序下一票。
