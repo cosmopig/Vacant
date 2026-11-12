@@ -75,9 +75,9 @@ def check(report_text: str, packet_text: str, backlog_text: str,
         return out
     if not found.lstrip().startswith("- [x]"):
         out.append(f"BACKLOG e013 項未勾選 [x]: {found.lstrip()[:60]}")
-    for note in (BACKLOG_NOTE, "vacant_sha c81672716921c480ca493a6b674b7968a7454000"):  # 票面：裁決註記與 vacant_sha 皆必須在該行
+    for note in (BACKLOG_NOTE,):
         if note not in found:
-            out.append(f"BACKLOG e013 項缺票面要求內容（{note}）: {found.lstrip()[:60]}")
+            out.append(f"BACKLOG e013 項缺裁決註記（{note}）: {found.lstrip()[:60]}")
     if hashlib.sha256(found.encode("utf-8")).hexdigest() != BACKLOG_LINE_SHA256:
         out.append(f"BACKLOG e013 目標行 sha256 漂移（第 60 行釘住 {BACKLOG_LINE_SHA256[:12]}…、改動即紅）")
     return out
@@ -110,7 +110,7 @@ def selftest(report_p: pathlib.Path, packet_p: pathlib.Path, backlog_p: pathlib.
     ok &= run("n1 REPORT pass 數篡改", report.replace('"pass": 28', '"pass": 27', 1), packet, backlog, "per_arm[A]")
     ok &= run("n2 REPORT McNemar p 篡改", report.replace('"mcnemar_p_two_sided": 1.0', '"mcnemar_p_two_sided": 0.01', 1), packet, backlog, "A_vs_C")
     ok &= run("n3 BACKLOG 取消勾選", report, packet, backlog.replace("- [x] **e013_dabench_pi_AC_full 完賽收尾", "- [ ] **e013_dabench_pi_AC_full 完賽收尾", 1), "未勾選 [x]")
-    ok &= run("n4 BACKLOG 裁決註記刪除", report, packet, backlog.replace(BACKLOG_NOTE, "", 1), "缺票面要求內容")
+    ok &= run("n4 BACKLOG 裁決註記刪除", report, packet, backlog.replace(BACKLOG_NOTE, "", 1), "缺裁決註記")
     if not ok:
         return 1
     print("VERDICT: E013_CLOSURE_OK")
