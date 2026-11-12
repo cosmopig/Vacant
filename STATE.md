@@ -308,3 +308,13 @@
 - 驗證了什麼：freeze_check 修前 9/12（3 紅＝diff_worker／diff_argon／wt_clean，皆 worker 關聯）→argon 同步後 10/12（2 紅＝diff_worker＋wt_clean、同根因、候 worker 收斂即 12/12）；argon CI 2 紅燈（test_freeze_check_verdict_ok／test_freeze_check_covers_all_mandated_checks）與 mainline 同源＝BROKEN 檢查之下游，候 worker 收斂轉綠；freeze_check 內 anchors 5 passed＋filing_code 3/3＋filing_sources 3/3 sha256＋queue_empty＋g3gate NOT_FIRED PLAN_OK（本輪新跑）。
 - 誠實記帳：本輪實質＝#1 argon 再同步（diff_argon BROKEN→OK）＋#2 驗收複核（selftest＋4 測試新跑）；#3（freeze_check 12/12）與 #4（BACKLOG 項 10 根因更新）皆依賴 worker round 88 收斂——本輪不代做、不同檔重複勞動（平行分岔＝衝突風險，r1461/r1465 同型）；無以文書改動充實進度。
 - 下一步：worker 收斂後→審查票 2158-1 產物（stray-labd 根因＋session 證據鏈）＋升上＋worker 簿記同步→freeze_check 12/12 複測（審查 #3）；G 系列（G3.3/G3.1）仍候人類裁決。
+
+## 2026-11-11 r1475 redo（審查指示：任務點名但記錄步驟未開啟的 5 檔，逐檔開啟＋重算；0 更正）
+- 逐檔（本 redo 全部開啟）：
+  - `vacant_network/reqloop/extract.py`：head＋wc＋git hash-object＋sha256sum——1217 行、blob e757aec5…、sha256 51abfec3…；r1475 紅線/filing 引值相符（0 改動）。
+  - `vacant_network/reqloop/repair.py`：同上——2795 行、blob 5147f8c3…、sha256 c860fc23…（與 r1465 記錄同）；r1475 引值相符（0 改動）。
+  - `ops/audits/g3_2_h0_prerun_report.json`：code 載入全讀——schema vacant.audit/g3_2_h0_prerun/1；ticket P20261111_2119-2；h0_rule（≥1/4 題 ≥1 確定性 claim→H0_MET，0/4→H0_REFUTED，fail-closed 空集合）；verdict＝H0_MET、4 題、1 題有確定性 claim；cost 4 calls/29914 tok；逐題：dab_725 7 需求/2 確定性（R1,R6）/5 不可驗，dab_587 5/0，dab_657 8/0，dab_517 7/0（correlation_pclass_fare ×3＋model_declared ×2＋pearson ×2）；4 題 input_sha256 依定義（g3.py:688-694：manifest 凍結檔清單指紋、順序不敏感）自 manifest.json＋磁盤重算＝全 MATCH（dab_517 goal_sha256＝goal.md sha，磁盤 MATCH）。
+  - `ops/reqloop/g3_2/tasks/dab_517/instruction.txt`：103B 全讀——“Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.”（agent-style，指向 workspace 內 goal/contract；產物定義在 contract.md）；其自身 sha bd1a2673… 在 manifest files 清單內，report 輸入绑定覆蓋（重算 MATCH）。
+  - `ops/audits/effects_20261105_summary.json`：code 載入重算——50 格（policy30 30＋once20 20）；policy30 w2r 13（generic 7/localized 6）r2w0、sessions 35、API 915、tokens 33670510；once20 w2r 11（7/4）r2w0、sessions 20、API 457、tokens 19503953；local 45/current 50；snapshot d38d2eb2；scope_note（開發選樣 e008/e013/e014、無硬 token 上限、單 rep、hidden_after 全 UNKNOWN、缺值 None 不填 0）。
+- 依賴檢查（r1475 各 claim 對 5 檔）：#2（驗收複核）依賴 selftest/pytest（本輪實跑）＋report verdict——redo 確認 H0_MET/1/4/dab_725 2 確定性全相符；r1475 未引 effects summary 任何數字（0 引用）；凍結 4 檔引值（紅線）與重算相符。**0 更正**；唯一定義澄清：report `input_sha256`＝manifest 檔清單指紋（g3.py:688），非檔自身 sha——dab_517 instruction.txt 自身 sha bd1a2673… 在 manifest 內，report 值 fe69b721…＝重算 MATCH。
+- redo 後：STATE/NOW 更新＋commit＋argon 全樹鏡像再同步（r1465 程序）＋freeze_check 複測。
