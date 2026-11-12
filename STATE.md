@@ -418,3 +418,9 @@
 - 坑：審計報告不在 repo（只在 ~/dev/ops/audits/）→e009 口徑候選路徑；`**Total Cells Scored**` markdown 粗體→剝 * 後匹配票面字串；首版 151 行超票 ≤140→精簡至 140 行整。
 - 沒驗證什麼：CI（下輪三分支一次讀取、不 poll）；envelope 數值未對 cell.json 逐格獨立重算（採信 envelope_compliance.py 重算輸出）；量具只鎖 e001 結案文字與數值、不構成機制效力證明。
 - 紅線＋下一步：0 model calls；無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未改、0 行產品碼（新增檔 only）；下輪：CI 一次讀取→bd list --parent vq-el4 --all 照順序下一票。
+
+## 2026-11-12 r1518（票 P20261112_1728-1 done：CI 紅燈修復——e001 審計報告候選路徑補本機實體簿記目錄）
+- 做了什麼（0 model calls）：ops/audits/e001_closure_check.py::audit_default() 候選擴為 3 路徑（repo→REPO.parent/ops→/home/user1/dev/ops/audits/，取首個存在、fallback repo 路徑）；1 檔 3 行、140 行不增、0 新外部依賴；tests/test_e001_closure_check.py 未改、負控制未放寬。commit b7cc57148；票已 mv done/。
+- 驗證了什麼（本輪新跑）：改前用票面 CI 模擬指令（copytree ops/tests 至 /var/tmp＋pytest）重現 2 failed, 1 passed「missing file 審計報告: /var/tmp/ops/audits/e001_pi_AC_baseline.md」RC=1；改後同指令→3 passed in 0.14s＋assert 成功＋`--selftest` VERDICT: E001_CLOSURE_OK RC=0；本機 repo pytest 該檔 3 passed。
+- 沒驗證什麼：三分支 CI（下輪一次讀取、不 poll）；e009 與 reqloop_freeze_check 兩組紅燈不屬本票範圍（票面只限 e001 結案量具），待對應工單。
+- 紅線＋下一步：0 model calls；無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未改；下輪：CI 一次讀取→bd list --parent vq-el4 --all 照順序下一票。
