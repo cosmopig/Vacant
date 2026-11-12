@@ -24,9 +24,9 @@ BACKLOG_LINE_SHA256 = "b71e9f07bc5a3c6d26a1953e6a8cccfc5d5ff89fe61b9089990cd56bd
 
 
 def audit_default() -> pathlib.Path:
-    """審計報告在簿記目錄（REPO.parent/ops）；repo 路徑在位優先、否則候選（e009 口徑）。"""
-    in_repo = REPO / "ops/audits/e001_pi_AC_baseline.md"
-    return in_repo if in_repo.is_file() else REPO.parent / "ops/audits/e001_pi_AC_baseline.md"
+    """審計報告在簿記目錄；repo 路徑在位優先，否則候選（e009 口徑＋本機實體簿記目錄）。"""
+    cands = (REPO / "ops/audits/e001_pi_AC_baseline.md", REPO.parent / "ops/audits/e001_pi_AC_baseline.md", pathlib.Path("/home/user1/dev/ops/audits/e001_pi_AC_baseline.md"))
+    return next((p for p in cands if p.is_file()), cands[0])
 
 
 def run_envelope(base: pathlib.Path) -> dict:

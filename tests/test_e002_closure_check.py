@@ -1,66 +1,53 @@
-import unittest
-from pathlib import Path
+"""e002_closure_check 單元測試（票 R20261112_1510-1；對齊 test_e008_closure_check 架構）。
+
+驗收：--selftest 在空 HOME（模擬本機 CI /var/tmp/ci-home）下返回 0、
+輸出含 VERDICT: E002_CLOSURE_OK；另直接驗證 check() 正控制與 4 類篡改必紅、
+缺檔時乾淨退出不拋未捕獲異常。
+"""
+import importlib.util
+import os
+import pathlib
 import subprocess
-import json
+import sys
 
-class TestE002ClosureCheck(unittest.TestCase):
-    def setUp(self):
-        self.script = Path("ops/audits/e002_closure_check.py")
-        self.assert_is_file(self.script)
+REPO = pathlib.Path(__file__).resolve().parents[1]
+SCRIPT = REPO / "ops/audits/e002_closure_check.py"
 
-    def assert_is_file(self, path: Path):
-        self.assertTrue(path.exists(), f"Expected file {path} to exist.")
-        self.assertTrue(path.is_file(), f"Expected {path} to be a file.")
 
-    def test_script_execution_logic(self):
-        """Test that the script correctly identifies violations in a dummy report."""
-        # Valid-looking but incorrect data
-        dummy_report = {
-            "cells_scored": 100,  # Should be 170
-            "infra": [1, 2],       # Should be 9
-            "per_arm": {
-                "A": {"n": 34, "pass": 18, "rate": 0.5294},
-                "C": {"n": 34, "pass": 22, "rate": 0.6471},
-                "H": {"n": 34, "pass": 15, "rate": 0.4412},
-                "M": {"n": 34, "pass": 15, "rate": 0.4412},
-                "S": {"n": 34, "pass": 20, "rate": 0.5882}
-            },
-            "paired": {
-                "A_vs_C": {"mcnemar_p_two_sided": 0.99}, # Should be 0.3438
-                "A_vs_H": {"mcnemar_p_two_sided": 0.4531},
-                "A_vs_M": {"mcnemar_p_two_sided": 0.5078},
-                "A_vs_S": {"mcnemar_p_two_sided": 0.7266}
-            }
-        }
-        dummy_report_path = Path("dummy_report.json")
-        dummy_report_path.write_text(json.dumps(dummy_report))
+def _load():
+    spec = importlib.util.spec_from_file_location("e002_closure_check", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
-        try:
-            # We use --report to point to our dummy file
-            result = subprocess.run(
-                [str(self.script), "--report", str(dummy_report_path)],
-                capture_output=True,
-                text=True
-            )
-            # Should have violations (return code 1)
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("REPORT cells_scored=100 != 170", result.stdout)
-            self.assertIn("REPORT infra 數=2 != 9", result.stdout)
-            self.assertIn("REPORT A_vs_C mcnemar_p_two_sided=0.99 != 0.3438", result.stdout)
-        finally:
-            if dummy_report_path.exists():
-                dummy_report_path.unlink()
 
-    def test_script_handles_missing_files(self):
-        """Verify script doesn't crash when files are missing (it should just report them)."""
-        result = subprocess.run(
-            [str(self.script)],
-            capture_output=True,
-            text=True
-        )
-        # It should exit with 1 because it can't find the default files
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("missing file", result.stdout)
+def test_selftest_ok_under_empty_home(tmp_path):
+    env = {**os.environ, "HOME": str(tmp_path / "empty-home")}
+    p = subprocess.run([sys.executable, str(SCRIPT), "--selftest"],
+                       capture_output=True, text=True, timeout=120, env=env)
+    assert p.returncode == 0, p.stdout + p.stderr
+    assert "VERDICT: E002_CLOSURE_OK" in p.stdout
 
-if __name__ == "__main__":
-    unittest.main()
+
+def test_check_positive_and_four_negatives():
+    mod = _load()
+    report = mod.REPORT_DEFAULT.read_text(encoding="utf-8")
+    packet = mod.PACKET_DEFAULT.read_text(encoding="utf-8")
+    backlog = mod.BACKLOG_DEFAULT.read_text(encoding="utf-8")
+    assert mod.check(report, packet, backlog) == []
+    v = mod.check(report.replace('"pass": 18', '"pass": 17', 1), packet, backlog)
+    assert any("per_arm[A]" in s for s in v)
+    v = mod.check(report.replace('"mcnemar_p_two_sided": 0.3438', '"mcnemar_p_two_sided": 0.01', 1), packet, backlog)
+    assert any("A_vs_C" in s for s in v)
+    v = mod.check(report, packet, backlog.replace("- [x] **e002 全臂最終回寫", "- [ ] **e002 全臂最終回寫", 1))
+    assert any("未勾選" in s for s in v)
+    v = mod.check(report, packet, backlog.replace("Holm 4 組校正 p_holm 皆＝1.0", "", 1))
+    assert any("缺裁決註記" in s for s in v)
+
+
+def test_missing_file_clean_exit(tmp_path):
+    p = subprocess.run([sys.executable, str(SCRIPT), "--report", str(tmp_path / "nope.json")],
+                       capture_output=True, text=True, timeout=60)
+    assert p.returncode == 1
+    assert "missing file REPORT.json" in p.stdout
+    assert "Traceback" not in p.stderr

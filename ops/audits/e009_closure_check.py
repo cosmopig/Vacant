@@ -15,8 +15,8 @@ REPORT_DEFAULT = RUNS_BASE / EXP / "REPORT.json"
 def _first(*c):
     return next((p for p in c if p.is_file()), c[0])
 
-PACKET_DEFAULT = _first(REPO / "ops/packets/e009_replicate_e002_AC.md", REPO.parent / "ops/packets/e009_replicate_e002_AC.md")
-L2C1_DEFAULT = _first(REPO / "ops/audits/e009_outputs/l2c1.json", REPO.parent / "ops/audits/e009_outputs/l2c1.json")
+PACKET_DEFAULT = _first(REPO / "ops/packets/e009_replicate_e002_AC.md", REPO.parent / "ops/packets/e009_replicate_e002_AC.md", pathlib.Path("/home/user1/dev/ops/packets/e009_replicate_e002_AC.md"))
+L2C1_DEFAULT = _first(REPO / "ops/audits/e009_outputs/l2c1.json", REPO.parent / "ops/audits/e009_outputs/l2c1.json", pathlib.Path("/home/user1/dev/ops/audits/e009_outputs/l2c1.json"))
 BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
 ENV_TOOL = REPO / "ops/vlab/tools/envelope_compliance.py"
 PER_ARM = {"A": (34, 17, 0.5), "C": (33, 18, 0.5455)}  # n/pass/rate
