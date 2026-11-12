@@ -20,9 +20,13 @@ def _load():
     return mod
 
 
-def test_selftest_ok():
+def test_selftest_ok(tmp_path):
+    # r1484（CI 紅燈根因回歸護欄）：HOME 指向空目錄（模擬本機 CI 的 /var/tmp/ci-home）
+    # 也須綠——缺省證據路徑不得依賴 PATH/HOME 解析到 ~/dev/ops。
+    import os
+    env = {**os.environ, "HOME": str(tmp_path / "empty-home")}
     p = subprocess.run([sys.executable, str(SCRIPT), "--selftest"],
-                       capture_output=True, text=True, timeout=120)
+                       capture_output=True, text=True, timeout=120, env=env)
     assert p.returncode == 0, p.stdout + p.stderr
     assert "VERDICT: E010_CLOSURE_OK" in p.stdout
 
@@ -40,3 +44,17 @@ def test_check_detects_byte_tamper():
 
 def test_check_envelope_pass():
     assert _load().check_envelope(_load().RUNS_BASE) == []
+
+
+def test_snapshots_match_pins():
+    mod = _load()
+    assert mod.check_snapshot(mod.PACKET_DEFAULT, mod.PACKET_SHA256) == []
+    assert mod.check_snapshot(mod.BACKLOG_DEFAULT, mod.BACKLOG_SHA256) == []
+
+
+def test_snapshot_pin_catches_drift(tmp_path):
+    mod = _load()
+    f = tmp_path / "tampered.md"
+    f.write_text("tampered\n", encoding="utf-8")
+    assert any("sha256 drift" in s for s in mod.check_snapshot(f, mod.PACKET_SHA256))
+    assert mod.check_snapshot(tmp_path / "nope.md", mod.PACKET_SHA256)  # 缺檔也紅

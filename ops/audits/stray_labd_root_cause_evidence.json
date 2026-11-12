@@ -1,7 +1,7 @@
 {
   "schema": "vacant.audit/stray_labd_root_cause/1",
   "ticket": "R20261111_2158-1",
-  "generated_at": "2026-11-12T02:59:36+00:00",
+  "generated_at": "2026-11-12T04:47:39+00:00",
   "session_file": "/home/user1/.pi/agent/sessions/--home-user1-dev-Vacant--/2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl",
   "session_sha256": "22b29817c1ad9fabd624c29a9053664e977de0c996c506dfcb5b5a7d59e285fd",
   "parse_errors": [
@@ -60,10 +60,10 @@
     }
   ],
   "decision_correlation": {
-    "file": "/home/user1/dev/Vacant/decisions/DECISION_20261103_E016_ENVLEAK_FIX.md",
+    "file": "decisions/DECISION_20261103_E016_ENVLEAK_FIX.md",
     "stray_pid": 734502,
     "parent_pid": 733374
   },
-  "root_cause": "未建立（fail-closed：message 缺失／parse 失敗／check 不符）",
-  "verdict": "STRAY_LABD_ROOT_CAUSE_NOT_ESTABLISHED"
+  "root_cause": "pi session 01a1a112 message 93a55755 以 bash 工具 kill 1638 後以 nohup 手動拉起 labd（非 labd loop 管理實例），啟動環境洩入 E010 父環境（stray 734502／父 pi 733374）",
+  "verdict": "STRAY_LABD_ROOT_CAUSE_OK"
 }
