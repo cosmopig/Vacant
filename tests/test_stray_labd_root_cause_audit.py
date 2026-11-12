@@ -102,6 +102,35 @@ def test_correlation_unknown_when_missing(tmp_path: Path) -> None:
     assert out2["stray_pid"] == 734502 and out2["parent_pid"] == 733374
 
 
+def test_missing_session_file_fails_closed_without_crash(tmp_path: Path) -> None:
+    missing = tmp_path / "missing_session.jsonl"
+    recs, errs = parse_session(missing)
+    assert recs == [] and errs
+    rep = run_audit(missing, tmp_path / "nope.md")
+    assert rep["verdict"] == "STRAY_LABD_ROOT_CAUSE_NOT_ESTABLISHED"
+    assert rep["session_sha256"] is None
+    assert rep["parse_errors"]
+
+
+def test_run_idempotent_and_ci_home_safe(tmp_path: Path) -> None:
+    import os
+    evidence = ROOT / "ops" / "audits" / "stray_labd_root_cause_evidence.json"
+    before_bytes = evidence.read_bytes()
+    env = {**os.environ, "HOME": str(tmp_path / "empty-home")}
+    out = subprocess.run([sys.executable, str(SCRIPT), "--run"],
+                         capture_output=True, text=True, timeout=60, env=env)
+    try:
+        assert out.returncode == 0, out.stdout + out.stderr
+        assert "VERDICT: STRAY_LABD_ROOT_CAUSE_OK" in out.stdout
+        assert evidence.read_bytes() == before_bytes, (
+            "--run 對既有相同證據重跑時應保持 generated_at 冪等，不得弄髒 git worktree"
+        )
+    finally:
+        if evidence.read_bytes() != before_bytes:
+            evidence.write_bytes(before_bytes)
+
+
+
 def test_selftest_subprocess_all_controls_pass() -> None:
     out = subprocess.run([sys.executable, str(SCRIPT), "--selftest"],
                          capture_output=True, text=True, timeout=60)

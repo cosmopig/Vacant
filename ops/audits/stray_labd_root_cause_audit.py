@@ -23,8 +23,12 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-SESSION = (Path.home() / ".pi/agent/sessions/--home-user1-dev-Vacant--/"
-           "2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl")
+_SESSION_REL = (".pi/agent/sessions/--home-user1-dev-Vacant--/"
+                "2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl")
+_HOME_SESSION = Path.home() / _SESSION_REL
+_FALLBACK_SESSION = Path("/home/user1") / _SESSION_REL
+SESSION = (_HOME_SESSION if _HOME_SESSION.is_file() or not _FALLBACK_SESSION.is_file()
+           else _FALLBACK_SESSION)
 DECISION = REPO / "decisions/DECISION_20261103_E016_ENVLEAK_FIX.md"
 OUT = REPO / "ops/audits/stray_labd_root_cause_evidence.json"
 EXPECTED = {"msg_id": "93a55755", "timestamp": "2026-11-03T11:15:40.431Z",
@@ -36,7 +40,9 @@ OK_V, BAD_V = "STRAY_LABD_ROOT_CAUSE_OK", "STRAY_LABD_ROOT_CAUSE_NOT_ESTABLISHED
 
 
 def parse_session(path: Path) -> tuple[list[dict], list[str]]:
-    """解析 JSONL → (records, parse_errors)；壞行記錯、不偽造成記錄（fail-closed）。"""
+    """解析 JSONL → (records, parse_errors)；缺檔或壞行記錯、不偽造成記錄（fail-closed）。"""
+    if not path.is_file():
+        return [], [f"missing session file: {path}"]
     recs, errs = [], []
     for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if line.strip():
@@ -145,7 +151,19 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory() as d:
             return selftest(Path(d))
     rep = run_audit(SESSION, DECISION)
-    OUT.write_text(json.dumps(rep, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if OUT.is_file():
+        try:
+            old = json.loads(OUT.read_text(encoding="utf-8"))
+            if isinstance(old, dict) and "generated_at" in old:
+                old_body = {k: v for k, v in old.items() if k != "generated_at"}
+                new_body = {k: v for k, v in rep.items() if k != "generated_at"}
+                if old_body == new_body:
+                    rep["generated_at"] = old["generated_at"]
+        except (OSError, json.JSONDecodeError):
+            pass
+    new_text = json.dumps(rep, indent=2, ensure_ascii=False) + "\n"
+    if not OUT.is_file() or OUT.read_text(encoding="utf-8") != new_text:
+        OUT.write_text(new_text, encoding="utf-8")
     for c in rep["checks"]:
         print(f"{'PASS' if c['ok'] else 'FAIL'} {c['name']}: {c['expected']} == {c['actual']}")
     print(f"correlation: {rep['decision_correlation']}")
