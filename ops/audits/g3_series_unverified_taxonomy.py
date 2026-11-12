@@ -51,7 +51,7 @@ def load_batches() -> dict:
         "g3_1_prerun": {"n_requirements": nr(g1), "n_deterministic": det(g1), "claims": tc(g1), "ids": None},
         "g3_2_prerun": {"n_requirements": nr(g2), "n_deterministic": det(g2), "claims": tc(g2), "ids": None},
         "g3_2_fire": {"n_requirements": nr(fs),
-                      "n_deterministic": int(fs["claims"]["deterministic_cells"].split("/")[0]),
+                      "n_deterministic": int(fs["claims"]["pass"]) + int(fs["claims"]["fail"]),
                       "claims": [r for t in fs["tasks"] for r in t.get("unverified_reasons", {}).values()],
                       "ids": None},
         "g3_3_call3": {"n_requirements": c3["n_requirements"],
@@ -117,6 +117,7 @@ def verify(res: dict) -> list:
         e = pb.get(b) or {}
         eq(f"per[{b}].n_requirements", e.get("n_requirements"), req)
         eq(f"per[{b}].n_unverified", e.get("n_unverified"), unv)
+        eq(f"per[{b}].n_deterministic", e.get("n_deterministic"), req - unv)
     g = pb.get("g3_3_call3", {})
     eq("g3_3_call3.dnr_taxonomy", g.get("dnr_taxonomy"), EXPECTED["g3_3_call3_dnr"])
     eq("g3_3_call3.claims_by_id", g.get("claims_by_id"), EXPECTED["g3_3_call3_claims"])
@@ -163,7 +164,19 @@ def run() -> int:
             print("VIOLATION:", x)
         print("VERDICT: G3_SERIES_TAXONOMY_BROKEN")
         return 1
-    OUT.write_text(json.dumps(res, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    if OUT.is_file():
+        try:
+            old = json.loads(OUT.read_text(encoding="utf-8"))
+            if isinstance(old, dict) and "generated_at" in old:
+                if {k: val for k, val in old.items() if k != "generated_at"} == {
+                    k: val for k, val in res.items() if k != "generated_at"
+                }:
+                    res["generated_at"] = old["generated_at"]
+        except (OSError, json.JSONDecodeError):
+            pass
+    new_text = json.dumps(res, ensure_ascii=False, indent=1) + "\n"
+    if not OUT.is_file() or OUT.read_text(encoding="utf-8") != new_text:
+        OUT.write_text(new_text, encoding="utf-8")
     t = res["totals"]
     print(f"written: {OUT.relative_to(REPO)}（{t['requirements']} req／{t['deterministic_claims']} det／"
           f"{t['unverified']} unv；dnr {t['dnr_total']}＝{t['dnr_taxonomy']}）")

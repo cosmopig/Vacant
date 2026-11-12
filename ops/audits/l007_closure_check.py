@@ -34,6 +34,7 @@ L007_DEFAULT = REPO / "ops/loop/L007.md"
 BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
 L007_SHA256 = "d52d668fabc028fe048af6c6c3b489243d15f926dde6eb1a2ad529c98d22226f"
 BACKLOG_SHA256 = "6599f4d3ad3f64d2946f02328f8f2dbe7ec1ab5aa2fdc41c976d0fca4f045b44"
+BACKLOG_LINE_SHA256 = "2d9b477e6bc0a34b5d2c644f2e21b22189279b85b7bec60c843970bf0155267f"
 
 L007_REQUIRED: tuple[tuple[str, str], ...] = (
     ("結案終態", "CLOSED: NO_MECHANISM"),
@@ -80,12 +81,17 @@ def check(l007_path: pathlib.Path, backlog_path: pathlib.Path) -> list[str]:
 
 
 def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
-    """凍結快照須存在且 sha256 與釘住值一致（任何改動＝違規；負控可暫態篡改必紅）。"""
+    """凍結快照須存在且 sha256 與釘住值一致（BACKLOG 為多項目共用檔，亦接受目標條目行 sha256 相符）。"""
     if not p.is_file():
         return [f"snapshot missing: {p}"]
-    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    raw = p.read_bytes()
+    got = hashlib.sha256(raw).hexdigest()
     if got == want:
         return []
+    if want == BACKLOG_SHA256:
+        ln = next((s for s in raw.decode("utf-8", errors="replace").splitlines() if "L007 資料損失" in s), "")
+        if hashlib.sha256(ln.encode("utf-8")).hexdigest() == BACKLOG_LINE_SHA256:
+            return []
     return [f"snapshot sha256 drift {p.name}: {got[:12]}… != 釘住 {want[:12]}…（快照為凍結紀錄，改動即紅）"]
 
 

@@ -58,3 +58,15 @@ def test_snapshot_pin_catches_drift(tmp_path):
     f.write_text("tampered\n", encoding="utf-8")
     assert any("sha256 drift" in s for s in mod.check_snapshot(f, mod.PACKET_SHA256))
     assert mod.check_snapshot(tmp_path / "nope.md", mod.PACKET_SHA256)  # 缺檔也紅
+
+
+def test_backlog_snapshot_allows_closing_unrelated_items_but_catches_e010_line_tamper(tmp_path):
+    mod = _load()
+    text = mod.BACKLOG_DEFAULT.read_text(encoding="utf-8")
+    other_closed = text.replace("- [ ] **e004 OpenCode", "- [x] **e004 OpenCode", 1)
+    p_other = tmp_path / "BACKLOG.md"
+    p_other.write_text(other_closed, encoding="utf-8")
+    assert mod.check_snapshot(p_other, mod.BACKLOG_SHA256) == []
+    p_bad = tmp_path / "BACKLOG_bad.md"
+    p_bad.write_text(text.replace("1,077,331 B", "9,999,999 B", 1), encoding="utf-8")
+    assert any("sha256 drift" in s for s in mod.check_snapshot(p_bad, mod.BACKLOG_SHA256))
