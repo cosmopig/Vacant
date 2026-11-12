@@ -36,3 +36,7 @@ def test_check_detects_byte_tamper():
     v = mod.check(cell.replace('"vacant_home_bytes": 1077331',
                                '"vacant_home_bytes": 999999999', 1), packet, backlog)
     assert any("vacant_home_bytes" in s for s in v)
+
+
+def test_check_envelope_pass():
+    assert _load().check_envelope(_load().RUNS_BASE) == []
