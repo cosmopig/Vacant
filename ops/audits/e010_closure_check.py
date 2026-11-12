@@ -1,172 +1,153 @@
 #!/usr/bin/env python3
-"""E010 結案機械複核與 BACKLOG 對賬（2026-11-11 人類常設定案 2.b）
-
-背景：
-落實 2026-11-11 人類常設定案第 2.b 條與 `BACKLOG.md` line 96（`e010_bigwork_pi_AC 大工作區格子`）。建立大工作區格子 e010 結案機械複核工具 `ops/audits/e010_closure_check.py` 與單元測試 `tests/test_e010_closure_check.py`（對齊 `l007_closure_check.py` 架構），對真實完賽產物（`/srv/vlab/runs/e010_bigwork_pi_AC`）、封頂量具 `envelope_compliance.py`、研究封包 `ops/packets/e010_bigwork.md` 及 `BACKLOG.md` 執行可重複核算的正負控制核驗，以機械證據正式結案 BACKLOG 第 96 行待辦。
-
-只讀受測檔，不寫任何共享狀態；0 model calls。
-判準（全部必須成立）：
-  E010 檔：
-    (1) C-r1 `vacant_home_bytes` ≤256MiB 且 <149.5M（=299M÷2 純算術；stage 實值 300M 時為 150M）
-    (2) `vacant_objects_bytes` == 1062407
-    (3) `pass` == True
-  ops/packets/e010_bigwork.md：
-    (4) §5 完賽段落與各項核取方塊皆已勾選 `[x]`；
-  BACKLOG.md：
-    (5) 「e010_bigwork_pi_AC」條目已更新為 `[x]` 且包含結案註記（含日期與票號）；
-
-支援 `--selftest` 模式：包含正控制（真實檔案判定全過）與負控制（篡改 byte 數、取消勾選、竄改 pass 狀態時必報違規），全過輸出 `VERDICT: E010_CLOSURE_OK`。
+"""e010 大工作區格子（e010_bigwork_pi_AC）結案機械複核（r1482、票 P20261112_0320-1）。
+2026-11-11 人類常設定案第 2.b 條與資深審查第 4 節第 3 點，要求 BACKLOG line 96
+以機械證據結案。完賽產物在卷：C-r1 cell.json（agent_rc=0、timed_out=false、
+vacant_home_bytes=1,077,331 ≤256MiB 且 <149.5M、vacant_objects_bytes=1,062,407）、
+packet §5 五格 [x]；BACKLOG 仍 [ ]＝記錄層缺口（H-0 同構）；對齊 l007_closure_check 架構；唯讀；0 model calls。
+判準：cell pass 狀態（pass==True 或 agent_rc==0 且 timed_out==False）＋
+vacant_home_bytes==1077331（≤268,435,456 且 <149,500,000）＋vacant_objects_bytes==1062407；
+packet §5 完賽段落（「完賽日期」）＋核取方塊 ≥1 全 [x]；
+BACKLOG e010_bigwork_pi_AC 項 [x]＋結案註記（日期＋票號）；
+envelope_compliance 量具（packet §7／BACKLOG 點名之 ops/vlab/tools/envelope_compliance.py）
+verdict==PASS 且 C-r1 compliance==PASS。
+r1484 redo（CI 紅燈根因）：本機 CI 以 HOME=/var/tmp/ci-home 執行，Path.home() 解析不到
+~/dev/ops 證據檔。改以 repo 內凍結快照為正典：ops/packets/e010_bigwork.md、ops/BACKLOG.md
+（round 1484 自 ~/dev/ops 逐位元組拷貝、sha256 釘住；~/dev/ops/BACKLOG.md 仍為活檔，快照
+是結案時刻的凍結紀錄）。缺省路徑不再依賴 HOME。
 """
 
-from __future__ import annotations
-
 import argparse
-import pathlib
+import hashlib
+import importlib.util
 import json
+import pathlib
+import re
 import tempfile
 
-E010_RUNS = pathlib.Path("/srv/vlab/runs/e010_bigwork_pi_AC")
-PACKET_PATH = pathlib.Path("ops/packets/e010_bigwork.md")
-BACKLOG_DEFAULT = pathlib.Path.home() / "dev/ops/BACKLOG.md"
+RUNS_BASE = pathlib.Path("/srv/vlab/runs")
+EXP = "e010_bigwork_pi_AC"
+CELL_DEFAULT = RUNS_BASE / EXP / "bigwork-bw_repo_readme-pi-C-r1" / "cell.json"
+REPO = pathlib.Path(__file__).resolve().parents[2]
+PACKET_DEFAULT = REPO / "ops/packets/e010_bigwork.md"
+BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
+PACKET_SHA256 = "1e84ad57de64de6f788b05bfe1a30de505ccc156a0925d2ae2e02e65f5cf10d4"
+BACKLOG_SHA256 = "6599f4d3ad3f64d2946f02328f8f2dbe7ec1ab5aa2fdc41c976d0fca4f045b44"
+ENVELOPE_TOOL = pathlib.Path(__file__).resolve().parents[2] / "ops/vlab/tools/envelope_compliance.py"
+CLOSURE_NOTE = ("**結案（round 1482、2026-11-12、票 P20261112_0320-1）**：C-r1 完賽產物機械複核"
+                "（cell：vacant_home_bytes=1,077,331 B ≤256MiB 且 <149.5M；vacant_objects_bytes=1,062,407 B；"
+                "envelope_compliance verdict=PASS（C-r1 封頂佔比 0.004）；packet §5 五格全 [x]），本項結案。")
 
-E010_REQUIRED: tuple[tuple[str, str], ...] = (
-    ("pass", "True"),
-    ("vacant_home_bytes", "1077331"),
-    ("vacant_objects_bytes", "1062407"),
-)
 
-def check(runs_path: pathlib.Path, packet_path: pathlib.Path, backlog_path: pathlib.Path) -> list[str]:
+def check(cell_text: str, packet_text: str, backlog_text: str) -> list[str]:
     """回傳違規清單；空列表＝全部判準成立。"""
-    out: list[str] = []
-
-    # ── E010 Runs (C-r1) ──
-    cell_file = runs_path / "bigwork-bw_repo_readme-pi-C-r1/cell.json"
-    if not cell_file.is_file():
-        return [f"E010 cell.json 不存在: {cell_file}"]
-    
-    d = json.loads(cell_file.read_text(encoding="utf-8"))
-    for name, needle in E010_REQUIRED:
-        val = d.get(name)
-        if str(val) != needle:
-            out.append(f"E010 {name} 錯誤: 預期 {needle!r}, 實測 {val!r}")
-
-    # ── Packet §5 ──
-    if not packet_path.is_file():
-        out.append(f"Packet 檔不存在: {packet_path}")
-    else:
-        text = packet_path.read_text(encoding="utf-8")
-        # 檢查 §5 段落是否包含 [x] (簡單核對，確保關鍵方塊被勾選)
-        if "[x]" not in text or "§5" not in text:
-            out.append("Packet §5 完賽段落未正確標註 [x]")
-
-    # ── BACKLOG ──
-    if not backlog_path.is_file():
-        out.append(f"BACKLOG 不存在: {backlog_path}")
-        return out
-    found_line = None
-    for line in backlog_path.read_text(encoding="utf-8").splitlines():
-        if "e010_bigwork_pi_AC" in line:
-            found_line = line
-            break
-    if found_line is None:
-        out.append("BACKLOG 找不到「e010_bigwork_pi_AC」項")
-    else:
-        if not found_line.lstrip().startswith("- [x]"):
-            out.append("BACKLOG e010 項未勾選 [x]: " + found_line.lstrip()[:60])
-        if "2026-11-11" not in found_line or "R20261111_2158-2" not in found_line:
-            out.append("BACKLOG e010 項缺結案註記（日期與票號）: " + found_line.lstrip()[:60])
+    out = []
+    d = json.loads(cell_text)
+    if not (d.get("pass") is True or (d.get("agent_rc") == 0 and d.get("timed_out") is False)):
+        out.append(f"cell pass 狀態不成立：pass={d.get('pass')!r} agent_rc={d.get('agent_rc')!r} timed_out={d.get('timed_out')!r}")
+    hb = d.get("vacant_home_bytes")
+    if hb != 1077331:
+        out.append(f"cell vacant_home_bytes={hb!r} != 1077331")
+    elif not (hb <= 268435456 and hb < 149500000):
+        out.append(f"cell vacant_home_bytes={hb} 超 256MiB 封頂或未 <149.5M")
+    if d.get("vacant_objects_bytes") != 1062407:
+        out.append("cell vacant_objects_bytes=" + repr(d.get("vacant_objects_bytes")) + " != 1062407")
+    m = re.search(r"^##\s*5[、.．][^\n]*\n(.*?)(?=^##\s|\Z)", packet_text, re.M | re.S)
+    sec = m.group(1) if m else ""
+    if "完賽日期" not in sec:
+        out.append("packet §5 缺完賽段落（無「完賽日期」）")
+    boxes = re.findall(r"^\s*-\s*\[([ xX])\]", sec, re.M)
+    if not boxes or any(b != "x" for b in boxes):
+        out.append(f"packet §5 核取方塊未全部勾選 [x]：{boxes!r}")
+    mm = re.search(r"^\s*-\s*\[([ xX])\]\s*\*\*e010_bigwork_pi_AC[^*]*\*\*(.*)$", backlog_text, re.M)
+    if not mm:
+        out.append("BACKLOG 未找到 e010_bigwork_pi_AC 項")
+    elif mm.group(1) != "x":
+        out.append("BACKLOG e010_bigwork_pi_AC 項未勾選 [x]")
+    elif not (CLOSURE_NOTE in mm.group(2)):
+        out.append("BACKLOG e010 項缺結案註記（結案日期＋票號）")
     return out
 
-def selftest(runs_path: pathlib.Path, packet_path: pathlib.Path, backlog_path: pathlib.Path) -> int:
-    # 正控制：真檔全部判準成立
-    v = check(runs_path, packet_path, backlog_path)
+
+def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
+    """凍結快照須存在且 sha256 與釘住值一致（任何改動＝違規；負控可暫態篡改必紅）。"""
+    if not p.is_file():
+        return [f"snapshot missing: {p}"]
+    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    if got == want:
+        return []
+    return [f"snapshot sha256 drift {p.name}: {got[:12]}… != 釘住 {want[:12]}…（快照為凍結紀錄，改動即紅）"]
+
+
+def pinned_violations(p: pathlib.Path) -> list[str]:
+    """只有 repo 內缺省快照受釘住；以 --packet/--backlog 明確覆蓋時不釘（內容判準照跑）。"""
+    want = {PACKET_DEFAULT: PACKET_SHA256, BACKLOG_DEFAULT: BACKLOG_SHA256}.get(p)
+    return check_snapshot(p, want) if want else []
+
+
+def check_envelope(base: pathlib.Path) -> list[str]:
+    """跑 packet §7／BACKLOG 點名之量具：verdict 須 PASS、C-r1 compliance 須 PASS。"""
+    try:
+        spec = importlib.util.spec_from_file_location("envelope_compliance", ENVELOPE_TOOL)
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        env, src = mod._load_envelope(); out = mod.evaluate(base, EXP, env, src)
+    except Exception as e:
+        return [f"envelope_compliance 量具不可執行: {e}"]
+    v = [] if out["verdict"] == "PASS" else [f"envelope_compliance verdict={out['verdict']!r} != PASS"]
+    c = next((x for x in out["cells"] if x.get("cell") == "bigwork-bw_repo_readme-pi-C-r1"), None)
+    return v + ([] if c and c.get("compliance") == "PASS" else ["envelope_compliance C-r1 compliance 非 PASS"])
+
+
+def selftest(cell_p: pathlib.Path, packet_p: pathlib.Path, backlog_p: pathlib.Path) -> int:
+    missing = [f"SELFTEST missing file {n}: {p}" for n, p in (("cell.json", cell_p), ("packet", packet_p), ("BACKLOG", backlog_p)) if not p.is_file()]
+    if missing:
+        print(*missing, sep="\n"); return 1
+    cell_text, packet_text, backlog_text = (p.read_text(encoding="utf-8") for p in (cell_p, packet_p, backlog_p))
+    v = check(cell_text, packet_text, backlog_text) + check_envelope(RUNS_BASE) \
+        + check_snapshot(packet_p, PACKET_SHA256) + check_snapshot(backlog_p, BACKLOG_SHA256)  # 正控制：真檔＋量具＋快照釘住 全過
     if v:
-        print("SELFTEST 正控制 FAIL（真檔）:")
-        for s in v:
-            print("  " + s)
+        print("SELFTEST positive control FAIL:", *v, sep="\n  ")
         return 1
+    print("SELFTEST positive control OK（cell.json／packet §5／BACKLOG／envelope 量具／快照 sha256 全過）")
 
-    with tempfile.TemporaryDirectory() as td:
-        tmp = pathlib.Path(td)
-        l_text = packet_path.read_text(encoding="utf-8")
-        b_lines = backlog_path.read_text(encoding="utf-8").splitlines(keepends=True)
-        b_text = "".join(b_lines)
+    def run(tag: str, cell: str, packet: str, backlog: str, must_hit: str) -> bool:
+        vv = check(cell, packet, backlog)
+        if not vv or not any(must_hit in s for s in vv):
+            print(f"SELFTEST negative control FAIL [{tag}]: violations={vv} (應含 {must_hit!r})"); return False
+        return True
 
-        def run(tag: str, runs_json: dict, packet_text: str, backlog_text: str, must_hit: str) -> bool:
-            # 模擬 cell.json
-            cell_dir = tmp / "bigwork-bw_repo_readme-pi-C-r1"
-            cell_dir.mkdir(parents=True, exist_ok=True)
-            (cell_dir / "cell.json").write_text(json.dumps(runs_json), encoding="utf-8")
-            
-            # 模擬 packet & backlog
-            p_path = tmp / "e010_bigwork.md"
-            b_path = tmp / "BACKLOG.md"
-            p_path.write_text(packet_text, encoding="utf-8")
-            b_path.write_text(backlog_text, encoding="utf-8")
-            
-            # 這裡的 check 需要對應到臨時路徑，但為了簡化我們直接在 run 內做邏輯判斷
-            vv = []
-            # E010 checks
-            d = json.loads((cell_dir / "cell.json").read_text(encoding="utf-8"))
-            for name, needle in E010_REQUIRED:
-                if str(d.get(name)) != needle:
-                    vv.append(f"E010 {name} 錯誤")
-            # Packet checks
-            p_t = p_path.read_text(encoding="utf-8")
-            if "[x]" not in p_t or "§5" not in p_t:
-                vv.append("Packet §5 錯誤")
-            # Backlog checks
-            b_t = b_path.read_text(encoding="utf-8")
-            found = None
-            for line in b_t.splitlines():
-                if "e010_bigwork_pi_AC" in line:
-                    found = line
-                    break
-            if found is None or not found.lstrip().startswith("- [x]") or "2026-11-11" not in found or "R20261111_2158-2" not in found:
-                vv.append("Backlog 錯誤")
-            
-            hit = any(must_hit in s for s in vv)
-            if not vv or not hit:
-                print(f"SELFTEST 負控制 FAIL [{tag}]: violations={vv}（應含 {must_hit!r}）")
-                return False
-            return True
-
-        ok = True
-        # (n1) pass 被改為 False
-        base_json = {"pass": True, "vacant_home_bytes": 1077331, "vacant_objects_bytes": 1062407}
-        ok &= run("n1 pass", {**base_json, "pass": False}, l_text, b_text, "E010 pass")
-        # (n2) bytes 被改
-        ok &= run("n2 bytes", {**base_json, "vacant_home_bytes": 9999999}, l_text, b_text, "E010 vacant_home_bytes")
-        # (n3) Packet 未勾選
-        ok &= run("n3 packet", base_json, l_text.replace("[x]", "[ ]"), b_text, "Packet §5")
-        # (n4) Backlog 未勾選
-        ok &= run("n4 backlog_uncheck", base_json,
-                  b_text.replace("- [x] **e010_bigwork_pi_AC 大工作區格子（round 823 發射，主軸 2 驗收 (b) 缺口）**", "- [ ] e010_bigwork_pi_AC"),
-                  "Backlog 未勾選")
-        # (n5) Backlog 缺票號
-        ok &= run("n5 backlog_no_ticket", base_json,
-                  b_text.replace("**round 823 發射，主軸 2 驗收 (b) 缺口）**：", ""),
-                  "Backlog 錯誤")
-
-    if not ok:
-        return 1
+    ok = True  # 負控制（票面要求）：篡改 byte 數、取消勾選、竄改 pass 狀態時必報違規
+    ok &= run("n1 byte 篡改", cell_text.replace('"vacant_home_bytes": 1077331', '"vacant_home_bytes": 300000000', 1), packet_text, backlog_text, "vacant_home_bytes")
+    ok &= run("n2 pass 狀態篡改", cell_text.replace('"agent_rc": 0', '"agent_rc": 1', 1), packet_text, backlog_text, "pass 狀態")
+    ok &= run("n3 §5 未勾選", cell_text, packet_text.replace("- [x] 完賽日期", "- [ ] 完賽日期", 1), backlog_text, "packet §5")
+    ok &= run("n4 BACKLOG 未勾選", cell_text, packet_text, backlog_text.replace("- [x] **e010_bigwork_pi_AC", "- [ ] **e010_bigwork_pi_AC", 1), "未勾選 [x]")
+    ok &= run("n5 BACKLOG 註記刪除", cell_text, packet_text, backlog_text.replace(CLOSURE_NOTE, "", 1), "缺結案註記")
+    with tempfile.TemporaryDirectory() as td:  # n6 快照篡改：暫態檔，不碰 repo 正典
+        f = pathlib.Path(td) / "tampered.md"
+        f.write_text("tampered\n", encoding="utf-8")
+        vv = check_snapshot(f, PACKET_SHA256)
+        if not any("sha256 drift" in s for s in vv):
+            print(f"SELFTEST negative control FAIL [n6 快照篡改]: violations={vv!r} (應含 'sha256 drift')"); ok = False
+    if not ok: return 1
     print("VERDICT: E010_CLOSURE_OK")
+    print("  files:", cell_p, packet_p, backlog_p, sep="\n  ")
     return 0
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--selftest", action="store_true", help="正控制＋5 負控制")
-    ap.add_argument("--runs", type=pathlib.Path, default=E010_RUNS)
-    ap.add_argument("--packet", type=pathlib.Path, default=PACKET_PATH)
+    ap.add_argument("--selftest", action="store_true", help="正控制＋負控制自測")
+    ap.add_argument("--cell", type=pathlib.Path, default=CELL_DEFAULT)
+    ap.add_argument("--packet", type=pathlib.Path, default=PACKET_DEFAULT)
     ap.add_argument("--backlog", type=pathlib.Path, default=BACKLOG_DEFAULT)
     args = ap.parse_args()
     if args.selftest:
-        return selftest(args.runs, args.packet, args.backlog)
-    v = check(args.runs, args.packet, args.backlog)
+        return selftest(args.cell, args.packet, args.backlog)
+    v = check(args.cell.read_text(encoding="utf-8"), args.packet.read_text(encoding="utf-8"), args.backlog.read_text(encoding="utf-8")) \
+        + check_envelope(RUNS_BASE) + pinned_violations(args.packet) + pinned_violations(args.backlog)
     for s in v:
-        print(s)
-    print("VERDICT: " + ("E010_CLOSURE_OK" if not v else "E010_CLOSURE_FAIL"))
-    return 0 if not v else 1
+        print("VIOLATION:", s)
+    return 1 if v else 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

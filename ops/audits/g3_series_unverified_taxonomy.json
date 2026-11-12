@@ -1,0 +1,94 @@
+{
+ "schema": "vacant.audit/g3_series_taxonomy/1",
+ "ticket": "R20261112_0422-1",
+ "generated_at": "2026-11-12T05:17:59+00:00",
+ "sources": {
+  "g3_1_prerun": {
+   "file": "ops/audits/g3_1_h20_prerun_report.json",
+   "sha256": "4190d8234a54eb8cc35666e6130044063f60ab69f6ba0202cffcffbec965201a"
+  },
+  "g3_2_prerun": {
+   "file": "ops/audits/g3_2_h0_prerun_report.json",
+   "sha256": "16caef0cd363db75013706bab82bf7cb67dbd2681c6b317f2392e299e7077244"
+  },
+  "g3_2_fire": {
+   "file": "ops/audits/g3_2_fire_summary.json",
+   "sha256": "534cb932ae792f643451b414c1657f506bc43b8093ca1784e6d1defb9e3f3bbe"
+  },
+  "g3_3_call3": {
+   "file": "ops/audits/g3_3_h0_stability_report.json",
+   "sha256": "91abadd36632890cb8c68ee8db88826096a7a091039fcd896c0c937e494f9620"
+  }
+ },
+ "totals": {
+  "requirements": 76,
+  "deterministic_claims": 2,
+  "unverified": 74,
+  "prefix_distribution": {
+   "deliverable_not_in_request": 52,
+   "unsupported_recompute_type": 14,
+   "model_declared_unverified": 4,
+   "unknown_verifier": 3,
+   "missing_param": 1
+  },
+  "dnr_total": 52,
+  "dnr_taxonomy": {
+   "no_filename_token": 32,
+   "contains_input_path_only": 6,
+   "contains_answer_txt": 14
+  }
+ },
+ "per_batch": {
+  "g3_1_prerun": {
+   "n_requirements": 18,
+   "n_deterministic": 0,
+   "n_unverified": 18,
+   "dnr_total": 14,
+   "dnr_taxonomy": {
+    "no_filename_token": 12,
+    "contains_input_path_only": 2
+   }
+  },
+  "g3_2_prerun": {
+   "n_requirements": 27,
+   "n_deterministic": 2,
+   "n_unverified": 25,
+   "dnr_total": 13,
+   "dnr_taxonomy": {
+    "no_filename_token": 6,
+    "contains_answer_txt": 6,
+    "contains_input_path_only": 1
+   }
+  },
+  "g3_2_fire": {
+   "n_requirements": 26,
+   "n_deterministic": 0,
+   "n_unverified": 26,
+   "dnr_total": 20,
+   "dnr_taxonomy": {
+    "contains_answer_txt": 7,
+    "no_filename_token": 11,
+    "contains_input_path_only": 2
+   }
+  },
+  "g3_3_call3": {
+   "n_requirements": 5,
+   "n_deterministic": 0,
+   "n_unverified": 5,
+   "dnr_total": 5,
+   "dnr_taxonomy": {
+    "no_filename_token": 3,
+    "contains_answer_txt": 1,
+    "contains_input_path_only": 1
+   },
+   "claims_by_id": {
+    "R1": "no_filename_token",
+    "R2": "no_filename_token",
+    "R3": "no_filename_token",
+    "R4": "contains_answer_txt",
+    "R5": "contains_input_path_only"
+   }
+  }
+ },
+ "note": "0 model calls；hidden/scorer 未讀；g3_3 僅計第 3 次獨立呼叫（既有 2 點不重複計）"
+}

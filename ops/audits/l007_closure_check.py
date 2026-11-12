@@ -25,11 +25,15 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import pathlib
 import tempfile
 
-L007_DEFAULT = pathlib.Path.home() / "dev/ops/loop/L007.md"
-BACKLOG_DEFAULT = pathlib.Path.home() / "dev/ops/BACKLOG.md"
+REPO = pathlib.Path(__file__).resolve().parents[2]
+L007_DEFAULT = REPO / "ops/loop/L007.md"
+BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
+L007_SHA256 = "d52d668fabc028fe048af6c6c3b489243d15f926dde6eb1a2ad529c98d22226f"
+BACKLOG_SHA256 = "6599f4d3ad3f64d2946f02328f8f2dbe7ec1ab5aa2fdc41c976d0fca4f045b44"
 
 L007_REQUIRED: tuple[tuple[str, str], ...] = (
     ("結案終態", "CLOSED: NO_MECHANISM"),
@@ -75,9 +79,25 @@ def check(l007_path: pathlib.Path, backlog_path: pathlib.Path) -> list[str]:
     return out
 
 
+def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
+    """凍結快照須存在且 sha256 與釘住值一致（任何改動＝違規；負控可暫態篡改必紅）。"""
+    if not p.is_file():
+        return [f"snapshot missing: {p}"]
+    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    if got == want:
+        return []
+    return [f"snapshot sha256 drift {p.name}: {got[:12]}… != 釘住 {want[:12]}…（快照為凍結紀錄，改動即紅）"]
+
+
+def pinned_violations(p: pathlib.Path) -> list[str]:
+    """只有 repo 內缺省快照受釘住；以 --l007/--backlog 明確覆蓋時不釘（內容判準照跑）。"""
+    want = {L007_DEFAULT: L007_SHA256, BACKLOG_DEFAULT: BACKLOG_SHA256}.get(p)
+    return check_snapshot(p, want) if want else []
+
+
 def selftest(l007: pathlib.Path, backlog: pathlib.Path) -> int:
-    # 正控制：真檔全部判準成立
-    v = check(l007, backlog)
+    # 正控制：真檔全部判準成立＋快照 sha256 釘住
+    v = check(l007, backlog) + pinned_violations(l007) + pinned_violations(backlog)
     if v:
         print("SELFTEST 正控制 FAIL（真檔）:")
         for s in v:
@@ -121,6 +141,13 @@ def selftest(l007: pathlib.Path, backlog: pathlib.Path) -> int:
         ok &= run("n5 BACKLOG 註記", l_text,
                   b_text.replace("**round 1459 結案（票 R20261111_1516-1）**：", "", 1),
                   "缺結案註記")
+        # (n6) 快照篡改 → sha256 drift 必紅
+        f = tmp / "tampered.md"
+        f.write_text("tampered\n", encoding="utf-8")
+        vv = check_snapshot(f, L007_SHA256)
+        if not any("sha256 drift" in s for s in vv):
+            print(f"SELFTEST 負控制 FAIL [n6 快照篡改]: violations={vv!r}")
+            ok = False
 
     if not ok:
         return 1
@@ -130,13 +157,13 @@ def selftest(l007: pathlib.Path, backlog: pathlib.Path) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--selftest", action="store_true", help="正控制＋5 負控制")
+    ap.add_argument("--selftest", action="store_true", help="正控制＋6 負控制")
     ap.add_argument("--l007", type=pathlib.Path, default=L007_DEFAULT)
     ap.add_argument("--backlog", type=pathlib.Path, default=BACKLOG_DEFAULT)
     args = ap.parse_args()
     if args.selftest:
         return selftest(args.l007, args.backlog)
-    v = check(args.l007, args.backlog)
+    v = check(args.l007, args.backlog) + pinned_violations(args.l007) + pinned_violations(args.backlog)
     for s in v:
         print(s)
     print("VERDICT: " + ("L007_CLOSURE_OK" if not v else "L007_CLOSURE_FAIL"))
