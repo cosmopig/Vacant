@@ -152,6 +152,7 @@ def run_selftest():
         return 1
 
     print("All selftests passed.")
+    print("VERDICT: G3_2_PRECHECK_OK")
     return 0
 
 def main() -> int:
