@@ -2,7 +2,7 @@
 
 ## 狀態（2026-11-12 r1522；senior review §3 完成：e013 結案量具入 qwen27b、驗收全綠；§1 merge 延後（CI pending）；0 model calls）
 - **產物：** e013 完賽結案機械複核量具（票 R20261112_1821-1、資深審查§3）：ops/audits/e013_closure_check.py（138 行；複核 auto/worker 990581ebc 腳本 byte 採用、對齊 e009 架構）＋tests/test_e013_closure_check.py（53 行；worker 版負控制測試為空 pass＝假綠燈→改實測 4 負控制）。數值本輪全新核對：REPORT 60 格 A 28/30 [0.9333]、C 27/30 [0.9]、p=1.0、A_only 2/C_only 1、vacant_sha c8167271…；envelope C 30 PASS/0 FAIL、home_bytes [26151,54408,165414]；packet 標題；BACKLOG 第 60 行 [x]＋裁決註記＋sha256 3e5969ac…。
-- **驗收（本輪新跑）：** `python3 ops/audits/e013_closure_check.py --selftest`→VERDICT: E013_CLOSURE_OK RC=0＋`pytest tests/test_e013_closure_check.py`→3 passed；CI 模擬（git archive 異位＋空 HOME）同綠。commit 996d40561、bd vq-el4.101 closed。
+- **驗收（本輪新跑）：** `python3 ops/audits/e013_closure_check.py --selftest`→VERDICT: E013_CLOSURE_OK RC=0＋`pytest tests/test_e013_closure_check.py`→3 passed；CI 模擬（git archive 異位＋空 HOME）同綠。commit 996d40561、bd vq-el4.101 closed；三分支簿記已同步、freeze_check 12/12 OK（含清除 worker WIP 殘留絕對路徑符號連結 2 個）。
 - **延後（DECISION）：** §1 merge auto/argon（bcc805143）——ASSIGNMENT 合併規則要求該 sha CI🟢；三分支 CI 全 pending（本輪一次讀、不 poll）。qwen 側已有同效 bk_now 修復 269a930de，CI 綠後直接 merge 收斂。
 - **紅線：** 無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、0 行產品碼（2 新增檔）；
 - 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
