@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""e005 OpenCode 五臂冒煙（A/C/H/M/S 各 1 格、預註冊）完賽結案機械複核（2026-11-12、票 P20261112_2131-2）。對齊 e013/e003 架構；唯讀；0 model calls。
+"""e005 OpenCode 五臂冒煙（A/C/H/M/S 各 1 格、預註冊）完賽結案機械複核（2026-11-12、票 P20261112_2131-2）。對齊 e013/e003 架構（含 envelope importlib 接法）；唯讀；0 model calls。
 複核對象：REPORT.json（cells_scored=5、infra=0、A/C/H/S 各 1/1 rate=1.0、M 0/1 rate=0.0 timeouts=1、
 C 臂 vacant_sha bf1a9f1a…、A_vs_C pairs=1 p=1.0、A_vs_M pairs=1 A_only=1 p=1.0）＋envelope_compliance 封頂合規（C 臂 1 PASS/0 FAIL、home_bytes [79333,79333,79333]）
 ＋packet 標題＋BACKLOG 第 84 行結案記錄（-[x]＋e006 全盤發射前置＋e005 M 格 900s 逾時註記＋行 sha256 釘住）。
@@ -31,7 +31,6 @@ BACKLOG_LINE_NO = 84  # 票面釘住的人類記錄行號（1-based）
 BACKLOG_LINE_SHA256 = "0db7714370bd26347a3b496cdd42b52ba510d06a64cfd019e128e21fe5902806"
 
 def run_envelope(base: pathlib.Path) -> dict:
-    """跑 envelope_compliance 量具（同 e003/e013 的 importlib 接法）；回 evaluate() 結果 dict。"""
     spec = importlib.util.spec_from_file_location("envelope_compliance", ENV_TOOL)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -89,7 +88,6 @@ def check(report_text: str, packet_text: str, backlog_text: str,
     return out
 
 def _read_or_die(p: pathlib.Path, name: str):
-    """缺檔印一欄乾淨訊息並回 None（不拋未捕獲異常）。"""
     if not p.is_file():
         print(f"missing file {name}: {p}")
         return None
