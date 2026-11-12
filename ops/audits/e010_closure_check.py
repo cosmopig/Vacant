@@ -21,8 +21,8 @@ import re
 RUNS_BASE = pathlib.Path("/srv/vlab/runs")
 EXP = "e010_bigwork_pi_AC"
 CELL_DEFAULT = RUNS_BASE / EXP / "bigwork-bw_repo_readme-pi-C-r1" / "cell.json"
-PACKET_DEFAULT = pathlib.Path.home() / "dev/ops/packets/e010_bigwork.md"
-BACKLOG_DEFAULT = pathlib.Path.home() / "dev/ops/BACKLOG.md"
+_OPS = pathlib.Path.home() / "dev/ops" if (pathlib.Path.home() / "dev/ops").is_dir() else pathlib.Path("/home/user1/dev/ops")
+PACKET_DEFAULT, BACKLOG_DEFAULT = _OPS / "packets/e010_bigwork.md", _OPS / "BACKLOG.md"
 ENVELOPE_TOOL = pathlib.Path(__file__).resolve().parents[2] / "ops/vlab/tools/envelope_compliance.py"
 CLOSURE_NOTE = ("**結案（round 1482、2026-11-12、票 P20261112_0320-1）**：C-r1 完賽產物機械複核"
                 "（cell：vacant_home_bytes=1,077,331 B ≤256MiB 且 <149.5M；vacant_objects_bytes=1,062,407 B；"

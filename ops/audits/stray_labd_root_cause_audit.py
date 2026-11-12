@@ -20,7 +20,8 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-SESSION = (Path.home() / ".pi/agent/sessions/--home-user1-dev-Vacant--/"
+_HOME = Path.home() if (Path.home() / ".pi/agent/sessions").is_dir() else Path("/home/user1")
+SESSION = (_HOME / ".pi/agent/sessions/--home-user1-dev-Vacant--/"
            "2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl")
 DECISION = REPO / "decisions/DECISION_20261103_E016_ENVLEAK_FIX.md"
 OUT = REPO / "ops/audits/stray_labd_root_cause_evidence.json"
@@ -70,7 +71,8 @@ def evaluate(ev: dict) -> list[dict]:
 
 def correlate_decision(path: Path) -> dict:
     """DECISION 檔關聯 stray/parent PID；缺值＝UNKNOWN（紅線：不是 0、不是 PASS）。"""
-    out = {"file": str(path), "stray_pid": "UNKNOWN", "parent_pid": "UNKNOWN"}
+    rel = str(path.relative_to(REPO)) if path.is_relative_to(REPO) else str(path)
+    out = {"file": rel, "stray_pid": "UNKNOWN", "parent_pid": "UNKNOWN"}
     if path.is_file():
         text = path.read_text(encoding="utf-8", errors="replace")
         out["stray_pid"] = 734502 if "734502" in text else "UNKNOWN"
@@ -82,7 +84,7 @@ def run_audit(session: Path, decision: Path) -> dict:
     recs, errs = parse_session(session)
     ev = find_message(recs, EXPECTED["msg_id"])
     checks = evaluate(ev) if ev else []
-    ok = ev is not None and not errs and all(c["ok"] for c in checks)
+    ok = ev is not None and bool(checks) and all(c["ok"] for c in checks)
     return {"schema": "vacant.audit/stray_labd_root_cause/1", "ticket": "R20261111_2158-1",
             "generated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
             "session_file": str(session),

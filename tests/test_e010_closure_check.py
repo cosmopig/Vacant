@@ -5,6 +5,7 @@
 """
 
 import importlib.util
+import os
 import pathlib
 import subprocess
 import sys
@@ -21,8 +22,9 @@ def _load():
 
 
 def test_selftest_ok():
+    env = {**os.environ, "HOME": "/var/tmp/ci-home"}
     p = subprocess.run([sys.executable, str(SCRIPT), "--selftest"],
-                       capture_output=True, text=True, timeout=120)
+                       capture_output=True, text=True, timeout=120, env=env)
     assert p.returncode == 0, p.stdout + p.stderr
     assert "VERDICT: E010_CLOSURE_OK" in p.stdout
 
