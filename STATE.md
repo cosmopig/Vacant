@@ -338,3 +338,10 @@
 - 沒驗證什麼：完整批未發射（H2 否決＝停止規則、0 answer 呼叫）；G3.4 共識門未推動（H2 未成立）；anchors／freeze_check 本輪未跑（本輪僅改 md＋新增報告 JSON，凍結 4 檔 0 改動）。
 - 誠實記帳：1 模型呼叫（票面成本上限內：1 extract、參考 7313 tok、實測 7249）；停止規則上報人類＝STATE/NOW＋bd note vq-kax（G 系列停止、候裁：解凍 extract/checks 或終止 G 系列）；未加重試/靜態 prompt/regex 工單；無 push（迴圈自推）、main 未動、未讀 hidden/scorer。
 - 下一步：G 系列停止候人類裁決（vq-kax 維持 IN_PROGRESS；新 G 系列工單不接）；worker round 88 收斂→審查升上→freeze_check 12/12（r1476 #3 不變）；CI 下輪輪首一次讀取（不 poll）。
+
+## 2026-11-12 r1482（票 P20261112_0320-1：e010 大工作區格子結案機械複核）
+- 做了什麼（0 model calls）：1) `ops/audits/e010_closure_check.py`（120 行，對齊 l007 架構）——cell.json 判準（pass 狀態／vacant_home_bytes==1077331 ≤256MiB 且 <149.5M／vacant_objects_bytes==1062407）＋packet §5 完賽段落與 5 格全 [x]＋BACKLOG e010 項 [x] 與結案註記（日期＋票號）；--selftest 正控制（真檔全過）＋5 負控制（byte 篡改 300,000,000／agent_rc 0→1／§5 退回 [ ]／BACKLOG 退回 [ ]／結案註記刪除，必紅）；2) `tests/test_e010_closure_check.py`（38 行、2 測）；3) BACKLOG.md line 96（~/dev/ops）[ ]→[x]＋結案註記（round 1482、2026-11-12、票號）。
+- 驗證了什麼：驗收 `python3 ops/audits/e010_closure_check.py --selftest && python3 -m pytest tests/test_e010_closure_check.py -q`→RC=0、VERDICT: E010_CLOSURE_OK、2 passed；非 selftest 路徑 RC=0；規模 120/38 行（票面 ≤120/≤50）；git status 僅 2 新增檔（凍結 4 檔 0 改動、/srv/vlab/runs 0 改動）。
+- 沒驗證什麼：全規模 e010 候選格（候 1004 磁碟餘量、不屬本票）；anchors 本輪未跑（本輪僅新增檔、風險零，下輪補）；argon/worker 鏡像未同步（本輪無 mainline 內容差）。
+- 誠實記帳：0 model calls、無 push（迴圈自推）、main 未動、未讀 hidden/scorer；驗收指令改前 exit 1（兩檔不存在）→今 RC 0；票尾 3 行＋mv done/。
+- 下一步：worker 收斂檢查（workerloop 狀態＋票 2158-1 產物）→審查升上→freeze_check 12/12（r1476 #3）；anchors 補跑；G 系列維持停止候人類裁決（vq-kax）；CI 輪首一次讀取（不 poll）。
