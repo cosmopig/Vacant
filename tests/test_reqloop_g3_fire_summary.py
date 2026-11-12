@@ -144,9 +144,26 @@ def test_repo_summary_consistent() -> None:
 
 
 def test_negative_vacuous_tokens(tmp_path: Path) -> None:
-    """核心洞（本輪 RED 實證）：零 measurement 檔（全部 usage 缺失＋totals.tokens=0）
-    舊碼判 OK rc=0＝無成本假綠燈（I-4：未測量不是通過；r1272/r1344 同族）。
-    新碼必須 BROKEN rc=1 且點名空集。"""
+    """核心洞（本輪 RED 實證）：把全部 usage 剝除＋totals.tokens=0 的自洽「零測量」檔（12 格、
+    schema／status／hidden_after／answer sha 全合法）→ 舊碼
+    ``VERDICT: G3_FIRE_SUMMARY_OK`` rc=0、``tokens_known=0``＝無成本綠燈
+    （I-4：未測量不是通過；r1272 空檔 vacuous、r1344 死守衛同族；口徑 4：
+    成效數字必須同時寫成本——零已測量成本不得判 OK）。
+
+修（本輪）：
+- tokens 重算加非空守衛：已知 usage 數 n_known > 0 為必要條件——
+  0 已知 usage＋totals.tokens=0 → BROKEN（舊碼 0+0==0 判 OK＝vacuous 假綠燈）。
+- argv 注入：argv[1]=result 檔、argv[2]=輸出目的（預設＝live raw／repo 的
+  ops/audits/g3_fire_20261111_summary.json，預設行為維持）——供 CI/沙盒
+  用 tmp 檔（r1339 queue 路徑注入同型）。
+- 單一裁決行契約（vq-el4.39）：缺檔／非 JSON 不得崩成 traceback 讓裁決消失——
+  點名 BROKEN＋VERDICT 行。
+
+對 live raw（~/dev/ops/g3_fire_20261111/g3_result.json）全唯讀；負控制只操作
+自造合成檔（tmp_path，CI-safe：不依賴 repo 外檔案）；repo 內不寫任何檔
+（輸出目的全部 tmp）。0 model calls；subprocess 只用 [sys.executable, script, ...]
+（無 python -c 片段，不觸及 test_reqloop_ci_contract.py 的安裝合約掃描範圍）。
+"""
     d = _base()
     for c in d["cells"]:
         for rd in c["rounds"]:
