@@ -34,7 +34,7 @@ DEST = REPO / "ops" / "audits" / "g3_2_fire_summary.json"
 FROZEN_ORDER = ["dab_725", "dab_587", "dab_657", "dab_517"]
 
 H1_RULE = ("§2 H1：(a) ≥1/4 格完成 ≥1 輪 content_reverify 且該輪 ≥1 條 claim 由 checks 程式重算給"
-           "確定性裁決（PASS/FAIL）；且 (b) round 1 有已確認缺口（≥1 必需 FAIL 或缺必要答案項）的格中，"
+           "確定性裁決（PASS/FAIL）；且 (b) round 1 有已確認缺口（≥1 輪 gap_reason 非 null）的格中，"
            "所有該等格 round 2 diff fixed≥1 且 regressed=0。0/4 格有已確認缺口→(b) not_applicable"
            "（不得記通過、不得記否決）。否決條件：(a) 0/4；或 (b) ≥1 缺口格 fixed=0 或 regressed≥1。")
 
@@ -230,7 +230,7 @@ def build(raw: bytes, result_path: pathlib.Path) -> tuple[dict, list[str]]:
         "scope_note": [
             "4/4 格 status=ok、各 1 輪（UNKNOWN 非缺口→不觸發第 2 輪，g3.py 守衛如設計）",
             "26/26 claims UNKNOWN、0 PASS、0 FAIL——本批不給任何內容正確性結論（UNKNOWN 不是通過也不是沒有）",
-            "單 rep、本地模型（H-12）、不遷移其他模型/harness；同批重發非獨立樣本",
+            "單 rep、方向性；不外推其他模型/題（H-12）；同批重發非獨立樣本",
             "H0 預跑（22:21Z）與 fire（23:28Z）為兩次獨立 extract 呼叫——見 h0_reproducibility",
         ],
     }
@@ -244,7 +244,7 @@ def selftest() -> int:
         "answer_sha256": hashlib.sha256(b"@x[1]").hexdigest(),
         "rounds": [{"round": 1, "usages": [{"calls": 1, "tokens": 10}]}],
         "hidden_after": "UNKNOWN",
-        "content_reverify": {"enabled": True, "rounds": [], "final_verdict": "UNKNOWN", "diff": None, "error": None},
+        "content_reverify": {"enabled": True, "rounds": [], "final_verdict": None, "diff": None, "error": None},
     }
     def mk(claims, gap1=None, diff=None, rounds=1):
         c = copy.deepcopy(base_cell)
@@ -278,7 +278,7 @@ def selftest() -> int:
     _, probs = build(raw, RESULT)
     ck("tokens_empty_guard", any("空集" in p for p in probs), str(probs))
     raw = json.dumps({"schema": "vacant.reqloop.g3.result/1",
-                      "cells": [dict(base_cell, answer_sha256="0" * 64)],
+                      "cells": [dict(base_cell, answer=None, answer_sha256="0" * 64)],
                       "tasks": [], "totals": {"tokens": 10}, "quota": {}}).encode()
     _, probs = build(raw, RESULT)
     ck("answer_sha_mismatch", any("answer_sha256 重算不符" in p for p in probs), str(probs))
