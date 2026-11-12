@@ -55,7 +55,16 @@ def test_check_detects_tamper():
     assert any("缺結案註記" in s for s in v)
 
 
-def test_plain_mode_ok():
+def test_plain_mode_ok(tmp_path):
     p = subprocess.run([sys.executable, str(SCRIPT)], capture_output=True, text=True, timeout=180)
     assert p.returncode == 0, p.stdout + p.stderr
     assert "VIOLATION" not in p.stdout
+    mod = importlib.util.module_from_spec(importlib.util.spec_from_file_location("e015", SCRIPT))
+    importlib.util.spec_from_file_location("e015", SCRIPT).loader.exec_module(mod)
+    assert mod.BACKLOG_DEFAULT == REPO / "ops/BACKLOG.md"
+    assert mod.VERDICT_DEFAULT == REPO / "ops/audits/e015_h_multi_review_verdict.json"
+    assert mod.check("{bad json", "packet", "backlog") == ["VERDICT.json 無法解析為 JSON"]
+    m = subprocess.run([sys.executable, str(SCRIPT), "--verdict", str(tmp_path / "nope.json")],
+                       capture_output=True, text=True, timeout=60)
+    assert m.returncode == 1 and "missing file" in m.stdout and "Traceback" not in m.stderr
+

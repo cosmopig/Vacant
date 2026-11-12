@@ -28,10 +28,12 @@ import re
 import subprocess
 import sys
 
-VERDICT_DEFAULT = pathlib.Path("/srv/vlab/runs/e015_h_multi_review/VERDICT.json")
 REPO = pathlib.Path(__file__).resolve().parents[2]
+VERDICT_DEFAULT = REPO / "ops/audits/e015_h_multi_review_verdict.json"
+VERDICT_SHA256 = "d0e2988411ad3aeaf55c044e4e7272ce1bcdf055ed5b2d7c358769cb4d7c2fb9"
 PACKET_DEFAULT = REPO / "ops/vlab/packets/e015_h_multi_review.md"
-BACKLOG_DEFAULT = pathlib.Path("/home/user1/dev/ops/BACKLOG.md")
+BACKLOG_DEFAULT = REPO / "ops/BACKLOG.md"
+BACKLOG_LINE_SHA256 = "a2829e9ca73c5a3e52de96154c0b6a19903a6bfc2c46257e056ef378633fc80f"
 PIPELINE_DEFAULT = pathlib.Path("/home/user1/dev/ops/audits/e015_verdict_pipeline.py")
 PIPELINE_SHA256 = "fe94c68923eda6435c0f4a675627a3ccb0f0cd5425405d569a28cd756e1cee32"
 QUEUE_DEFAULT = pathlib.Path("/home/user1/dev/ops/staging/15_e015_h_multi_review.json")
@@ -70,10 +72,12 @@ def recompute_from_receipts() -> dict:
 
 def check(verdict_text: str, packet_text: str, backlog_text: str,
           report_p: pathlib.Path = VERDICT_DEFAULT) -> list[str]:
-    """回傳違規清單；空列表＝全部判準成立。
-    （report_p 為對齊舊簽名之兼容參數、現不直接使用。）"""
+    """回傳違規清單；空列表＝全部判準成立。"""
     out = []
-    d = json.loads(verdict_text)
+    try:
+        d = json.loads(verdict_text)
+    except json.JSONDecodeError:
+        return ["VERDICT.json 無法解析為 JSON"]
     if d.get("state") != "NOT_BETTER_THAN_RANDOM":
         out.append(f"VERDICT state={d.get('state')} != NOT_BETTER_THAN_RANDOM")
     for key, want in (("X", 15), ("n_bad", 16), ("Y", 7), ("n_good", 15), ("missing", 1)):
@@ -105,6 +109,8 @@ def check(verdict_text: str, packet_text: str, backlog_text: str,
         out.append("BACKLOG e015 項未勾選 [x]")
     elif CLOSURE_NOTE not in m.group(2):
         out.append("BACKLOG e015 項缺結案註記（日期＋輪次＋票號＋判定結果）")
+    elif hashlib.sha256(m.group(0).encode("utf-8")).hexdigest() != BACKLOG_LINE_SHA256:
+        out.append("BACKLOG e015 目標行 sha256 漂移")
     return out
 
 
@@ -121,6 +127,8 @@ def selftest(verdict_p: pathlib.Path = VERDICT_DEFAULT,
     p_text = packet_p.read_text(encoding="utf-8")
     b_text = backlog_p.read_text(encoding="utf-8")
     v = check(v_text, p_text, b_text, verdict_p)
+    if verdict_p == VERDICT_DEFAULT and hashlib.sha256(verdict_p.read_bytes()).hexdigest() != VERDICT_SHA256:
+        v.append("VERDICT 快照 sha256 drift")
     if v:
         print("SELFTEST positive control FAIL:", *v, sep="\n  ")
         return 1
@@ -169,10 +177,17 @@ def main() -> int:
     args = ap.parse_args()
     if args.selftest:
         return selftest(args.verdict, args.packet, args.backlog)
+    missing = [f"missing file {n}: {p}" for n, p in
+               (("VERDICT.json", args.verdict), ("packet", args.packet), ("BACKLOG", args.backlog)) if not p.is_file()]
+    if missing:
+        print(*missing, sep="\n")
+        return 1
     v = check(args.verdict.read_text(encoding="utf-8"),
               args.packet.read_text(encoding="utf-8"),
               args.backlog.read_text(encoding="utf-8"),
               args.verdict)
+    if args.verdict == VERDICT_DEFAULT and hashlib.sha256(args.verdict.read_bytes()).hexdigest() != VERDICT_SHA256:
+        v.append("VERDICT 快照 sha256 drift")
     if v:
         print(*("VIOLATION: " + s for s in v), sep="\n")
         return 1

@@ -1,0 +1,1782 @@
+{
+  "state": "NOT_BETTER_THAN_RANDOM",
+  "X": 15,
+  "Y": 7,
+  "n_bad": 16,
+  "n_good": 15,
+  "missing": 1,
+  "missing_cells": [
+    {
+      "valid": false,
+      "verdict": null,
+      "why": "unparsed:UNPARSED",
+      "usage": {
+        "input_tokens": 114287,
+        "output_tokens": 17770,
+        "model_calls": 43
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_057",
+        "cell_src": "e015_h_multi_review/dabench-dab_057-pi-A-r1",
+        "artifact_sha256": "18ce7368f1472a64e64ff9a5b6360c88ee19567dd51b84967d1eeaa5b48f55d7",
+        "artifact_bytes": 1734,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:17:00+0000",
+        "end_ts": "2026-11-03T11:21:07+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_057-pi-A-r1/stdout.json",
+        "stdout_sha256": "2af7321da4e620e0073ec3c267361e3622cec1e34cc5deca127ce293f4d082a4",
+        "usage": {
+          "input_tokens": 114287,
+          "output_tokens": 17770,
+          "model_calls": 43
+        },
+        "parsed_verdict": "UNPARSED"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_057-pi-A-r1",
+      "truth": "GOOD"
+    }
+  ],
+  "p_expected": {
+    "bad_side": [
+      17,
+      65536
+    ],
+    "good_side": [
+      22819,
+      32768
+    ]
+  },
+  "p_reversed": {
+    "bad_side": [
+      65535,
+      65536
+    ],
+    "good_side": [
+      16384,
+      32768
+    ]
+  },
+  "holm": {
+    "first_alpha": 0.025,
+    "second_alpha": 0.05,
+    "first_pass": true,
+    "second_pass": false
+  },
+  "generated_at": "2026-11-03T11:27:02+0000",
+  "rows": [
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 17047,
+        "output_tokens": 283,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_055",
+        "cell_src": "e015_h_multi_review/dabench-dab_055-pi-A-r1",
+        "artifact_sha256": "e5c7f927ff588106483c20ae6714fa494fea93b22fb8b777e8363041fdea63c2",
+        "artifact_bytes": 1379,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:15:57+0000",
+        "end_ts": "2026-11-03T11:16:04+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_055-pi-A-r1/stdout.json",
+        "stdout_sha256": "2e1956bc66a6c5245b4d75b72863ddbc03777ffa4e74ef9c2bccf1b4f7ea1926",
+        "usage": {
+          "input_tokens": 17047,
+          "output_tokens": 283,
+          "model_calls": 9
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_055-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16373,
+        "output_tokens": 278,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_426",
+        "cell_src": "e015_h_multi_review/dabench-dab_426-pi-A-r1",
+        "artifact_sha256": "1d465d2693df4ad4c54532eacdda6b897f6cdab8f6d8f65d4c181db8cf76a993",
+        "artifact_bytes": 954,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:04+0000",
+        "end_ts": "2026-11-03T11:16:10+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_426-pi-A-r1/stdout.json",
+        "stdout_sha256": "c34d19392507575974fc6f1afa6ccbb37897bdcb6e87e74b1adcae5d2bf48ab1",
+        "usage": {
+          "input_tokens": 16373,
+          "output_tokens": 278,
+          "model_calls": 9
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_426-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16257,
+        "output_tokens": 318,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_427",
+        "cell_src": "e015_h_multi_review/dabench-dab_427-pi-C-r1",
+        "artifact_sha256": "e69544e7e9a3aa1164c2a63cc13b86f46df37f5230237cc315853550952f8a04",
+        "artifact_bytes": 892,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:10+0000",
+        "end_ts": "2026-11-03T11:16:17+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_427-pi-C-r1/stdout.json",
+        "stdout_sha256": "f7aee74fad9dd5e3a68b448485f8bbdac764552d60c7511b70f242ddf3077ba8",
+        "usage": {
+          "input_tokens": 16257,
+          "output_tokens": 318,
+          "model_calls": 9
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_427-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 6838,
+        "output_tokens": 113,
+        "model_calls": 4
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "12",
+        "cell_src": "e015_h_multi_review/dabstep-12-pi-C-r1",
+        "artifact_sha256": "9fdcb140b04c5d28aff62221aed47873c54f29c61c6a9d4c066ca5dfbec7fc79",
+        "artifact_bytes": 243,
+        "instruction_sha256": "efe93000e1f2a2ea349db76b615114ac082a3c5182b69cdda46731b756b89286",
+        "prompt_sha256": "998c47e6cc5281e3371099356602c09e13a0a1551cf8201901feb272a8f60762",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: Which card scheme is the most commonly used?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just the name of the card scheme. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:17+0000",
+        "end_ts": "2026-11-03T11:16:20+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-12-pi-C-r1/stdout.json",
+        "stdout_sha256": "41b8c04374629f0b89d6a9d03e7808f3c9f7a96959962a5fda23b724781b55aa",
+        "usage": {
+          "input_tokens": 6838,
+          "output_tokens": 113,
+          "model_calls": 4
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-12-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 8669,
+        "output_tokens": 128,
+        "model_calls": 5
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "16",
+        "cell_src": "e015_h_multi_review/dabstep-16-pi-C-r1",
+        "artifact_sha256": "3fae7865ee3754debf0a9e1c2c4bb52563ac256d73fb75e6a63d701085fa3d14",
+        "artifact_bytes": 243,
+        "instruction_sha256": "0d606e5f06915582076b640e21388159b890fc748d7fc8223fad8235f144f2ac",
+        "prompt_sha256": "23e29ef8f0f4f6674c4bf88a6d233b8030b942f80a6aedc9ddddf91a54a504dc",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: Which merchant has the lowest average fraud rate for the year 2023?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just the name of the merchant. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:20+0000",
+        "end_ts": "2026-11-03T11:16:23+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-16-pi-C-r1/stdout.json",
+        "stdout_sha256": "6d518a1dcdd2c28a1cf4130c6c071ca477b1136b67aa523145f9d718a5669da1",
+        "usage": {
+          "input_tokens": 8669,
+          "output_tokens": 128,
+          "model_calls": 5
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-16-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 19933,
+        "output_tokens": 338,
+        "model_calls": 10
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "17",
+        "cell_src": "e015_h_multi_review/dabstep-17-pi-A-r1",
+        "artifact_sha256": "3a4e78f35b97d4585e1b2e983c03c5dd9fb0797959d27bcc0a6bf19c709bd145",
+        "artifact_bytes": 1222,
+        "instruction_sha256": "64480b19785096b89657ed2620162bebce169e4211ae53abc3b26e344094798b",
+        "prompt_sha256": "86ca89a5b5386cb9d88a7fd6379b6a0a490f44ca3dc2c13c6cdea788c857c280",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: What is the lowest avg fraud rate per merchant for the year 2023?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed as a percentage rounded to 6 decimal places. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:23+0000",
+        "end_ts": "2026-11-03T11:16:30+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-17-pi-A-r1/stdout.json",
+        "stdout_sha256": "756f79ae53e76148d6e5b93ce585659e7b54c4aad495268bb2ec999ac7561c1a",
+        "usage": {
+          "input_tokens": 19933,
+          "output_tokens": 338,
+          "model_calls": 10
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-17-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16888,
+        "output_tokens": 434,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_035",
+        "cell_src": "e015_h_multi_review/dabench-dab_035-pi-A-r1",
+        "artifact_sha256": "eab9c6e1424a0d50d1f2637cbd3f6d7509ef99d49e73981fc9699844530e82e9",
+        "artifact_bytes": 1231,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:30+0000",
+        "end_ts": "2026-11-03T11:16:39+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_035-pi-A-r1/stdout.json",
+        "stdout_sha256": "94d2a89ac09f8f350bb15f77ab5bf89d0885dfb430d2a19b8e8dfb626d4684b2",
+        "usage": {
+          "input_tokens": 16888,
+          "output_tokens": 434,
+          "model_calls": 9
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_035-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 21429,
+        "output_tokens": 391,
+        "model_calls": 11
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_035",
+        "cell_src": "e015_h_multi_review/dabench-dab_035-pi-C-r1",
+        "artifact_sha256": "5d1d50628059b761a7eb40c8a2ba5e82699273be3974acfbe483dcc361385e17",
+        "artifact_bytes": 1234,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:39+0000",
+        "end_ts": "2026-11-03T11:16:47+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_035-pi-C-r1/stdout.json",
+        "stdout_sha256": "1c9a891b3c5d16e4296e0223655daf7e2560f8ef557c8ded6a907a1855702d8f",
+        "usage": {
+          "input_tokens": 21429,
+          "output_tokens": 391,
+          "model_calls": 11
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_035-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 15689,
+        "output_tokens": 386,
+        "model_calls": 8
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_039",
+        "cell_src": "e015_h_multi_review/dabench-dab_039-pi-A-r1",
+        "artifact_sha256": "18c19d7911249a61a395ab63e978be4991d9929a8bf125a02e81d9bd52f6929b",
+        "artifact_bytes": 1606,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:47+0000",
+        "end_ts": "2026-11-03T11:16:55+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_039-pi-A-r1/stdout.json",
+        "stdout_sha256": "62969974e6db10304aa5f3768d2070bccdee02a4c3dc643f0cc4c3e94b551e77",
+        "usage": {
+          "input_tokens": 15689,
+          "output_tokens": 386,
+          "model_calls": 8
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_039-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16101,
+        "output_tokens": 241,
+        "model_calls": 8
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_039",
+        "cell_src": "e015_h_multi_review/dabench-dab_039-pi-C-r1",
+        "artifact_sha256": "b811171aa2eb6599bf2f5caff615523b296de8ba9e37b06fc45bc34272458b4d",
+        "artifact_bytes": 1883,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:16:55+0000",
+        "end_ts": "2026-11-03T11:17:00+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_039-pi-C-r1/stdout.json",
+        "stdout_sha256": "7d540fd72d7315a199998ed3a2c04f81540aaec7774fae4a9bf96bc52283cc4a",
+        "usage": {
+          "input_tokens": 16101,
+          "output_tokens": 241,
+          "model_calls": 8
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_039-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": false,
+      "verdict": null,
+      "why": "unparsed:UNPARSED",
+      "usage": {
+        "input_tokens": 114287,
+        "output_tokens": 17770,
+        "model_calls": 43
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_057",
+        "cell_src": "e015_h_multi_review/dabench-dab_057-pi-A-r1",
+        "artifact_sha256": "18ce7368f1472a64e64ff9a5b6360c88ee19567dd51b84967d1eeaa5b48f55d7",
+        "artifact_bytes": 1734,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:17:00+0000",
+        "end_ts": "2026-11-03T11:21:07+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_057-pi-A-r1/stdout.json",
+        "stdout_sha256": "2af7321da4e620e0073ec3c267361e3622cec1e34cc5deca127ce293f4d082a4",
+        "usage": {
+          "input_tokens": 114287,
+          "output_tokens": 17770,
+          "model_calls": 43
+        },
+        "parsed_verdict": "UNPARSED"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_057-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 15000,
+        "output_tokens": 248,
+        "model_calls": 8
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_057",
+        "cell_src": "e015_h_multi_review/dabench-dab_057-pi-C-r1",
+        "artifact_sha256": "38e9dcb8becef0504b44fc34a4955270ef23dc0af82013da8d193b4710c28bcb",
+        "artifact_bytes": 1585,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:07+0000",
+        "end_ts": "2026-11-03T11:21:15+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_057-pi-C-r1/stdout.json",
+        "stdout_sha256": "a46c51cae891087a56da5934f0713d52c39bc59eb21ee0317e076a31459fbe15",
+        "usage": {
+          "input_tokens": 15000,
+          "output_tokens": 248,
+          "model_calls": 8
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_057-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 14515,
+        "output_tokens": 234,
+        "model_calls": 8
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_105",
+        "cell_src": "e015_h_multi_review/dabench-dab_105-pi-A-r1",
+        "artifact_sha256": "41ca2f1d6a802a116a22c9edfaeeb08a375f5ec12fcf5c1f402d3edf5358ef0c",
+        "artifact_bytes": 1208,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:15+0000",
+        "end_ts": "2026-11-03T11:21:21+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_105-pi-A-r1/stdout.json",
+        "stdout_sha256": "67334186a25272c7a69243f523027e28313a6213712b22e76e90ebdb362fa88f",
+        "usage": {
+          "input_tokens": 14515,
+          "output_tokens": 234,
+          "model_calls": 8
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_105-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 14515,
+        "output_tokens": 246,
+        "model_calls": 8
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_105",
+        "cell_src": "e015_h_multi_review/dabench-dab_105-pi-C-r1",
+        "artifact_sha256": "d557c6978ea5b96a81cc3c949a77f75ca34cc764a2f0729b7eb9a39c03787262",
+        "artifact_bytes": 1209,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:21+0000",
+        "end_ts": "2026-11-03T11:21:26+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_105-pi-C-r1/stdout.json",
+        "stdout_sha256": "992ed6e770f56f744f96a3cec686d3adea328cf38e27492c96d2dd08a0beb64f",
+        "usage": {
+          "input_tokens": 14515,
+          "output_tokens": 246,
+          "model_calls": 8
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_105-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16535,
+        "output_tokens": 203,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_129",
+        "cell_src": "e015_h_multi_review/dabench-dab_129-pi-A-r1",
+        "artifact_sha256": "592f2e5bde005f0e11e60aeb46acd5fbf07daf36f648f946596271c66c505045",
+        "artifact_bytes": 981,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:26+0000",
+        "end_ts": "2026-11-03T11:21:31+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_129-pi-A-r1/stdout.json",
+        "stdout_sha256": "83d37c8319fecf7d866918870776861efa9fdd4f21b9f7fdf56a8771a2fd75b8",
+        "usage": {
+          "input_tokens": 16535,
+          "output_tokens": 203,
+          "model_calls": 9
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_129-pi-A-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 19303,
+        "output_tokens": 446,
+        "model_calls": 10
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_129",
+        "cell_src": "e015_h_multi_review/dabench-dab_129-pi-C-r1",
+        "artifact_sha256": "de5f231287bbe73d7ace06ea3ea1f6ea85613917281d479e00197060831c704b",
+        "artifact_bytes": 1270,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:31+0000",
+        "end_ts": "2026-11-03T11:21:40+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_129-pi-C-r1/stdout.json",
+        "stdout_sha256": "8fc29237d8e2bc546764a4f67227716f0f1a0f97ec4f36e2562cb64986c3164c",
+        "usage": {
+          "input_tokens": 19303,
+          "output_tokens": 446,
+          "model_calls": 10
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_129-pi-C-r1",
+      "truth": "GOOD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16242,
+        "output_tokens": 318,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_055",
+        "cell_src": "e015_h_multi_review/dabench-dab_055-pi-C-r1",
+        "artifact_sha256": "1c61bd673c47310829423e15b1dc8acc9a80cb390d17cf5b6c2f37d273b4944a",
+        "artifact_bytes": 914,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:40+0000",
+        "end_ts": "2026-11-03T11:21:47+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_055-pi-C-r1/stdout.json",
+        "stdout_sha256": "12950793efca538ad825c9336b7ed2b8635aaf567f5640efb4958beee4a9f280",
+        "usage": {
+          "input_tokens": 16242,
+          "output_tokens": 318,
+          "model_calls": 9
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_055-pi-C-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 20944,
+        "output_tokens": 801,
+        "model_calls": 11
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_426",
+        "cell_src": "e015_h_multi_review/dabench-dab_426-pi-C-r1",
+        "artifact_sha256": "630f49f6ab9323bada1abd057172a9c6edc8ef4c27cb1c58699fe69a97c18099",
+        "artifact_bytes": 960,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:21:47+0000",
+        "end_ts": "2026-11-03T11:22:00+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_426-pi-C-r1/stdout.json",
+        "stdout_sha256": "b9db3bc188cd1f122591d6fd1cf81d138a56177748c89062b91eee16b8edaa89",
+        "usage": {
+          "input_tokens": 20944,
+          "output_tokens": 801,
+          "model_calls": 11
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_426-pi-C-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16251,
+        "output_tokens": 300,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_427",
+        "cell_src": "e015_h_multi_review/dabench-dab_427-pi-A-r1",
+        "artifact_sha256": "c371af2b498b149eb0e3245eb1d499f6cbc822f7d4896e2804b4308cbfaed187",
+        "artifact_bytes": 889,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:00+0000",
+        "end_ts": "2026-11-03T11:22:06+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_427-pi-A-r1/stdout.json",
+        "stdout_sha256": "dc8a3e6cfbfa698a58301bd9f8e4996fed11bd11efbada789c965e3e656e0561",
+        "usage": {
+          "input_tokens": 16251,
+          "output_tokens": 300,
+          "model_calls": 9
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_427-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 6849,
+        "output_tokens": 110,
+        "model_calls": 4
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "12",
+        "cell_src": "e015_h_multi_review/dabstep-12-pi-A-r1",
+        "artifact_sha256": "d26f145537640ae6e2e4acb41ccf19f54c0f20de21151cf7355761306495008f",
+        "artifact_bytes": 190,
+        "instruction_sha256": "efe93000e1f2a2ea349db76b615114ac082a3c5182b69cdda46731b756b89286",
+        "prompt_sha256": "998c47e6cc5281e3371099356602c09e13a0a1551cf8201901feb272a8f60762",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: Which card scheme is the most commonly used?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just the name of the card scheme. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:07+0000",
+        "end_ts": "2026-11-03T11:22:10+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-12-pi-A-r1/stdout.json",
+        "stdout_sha256": "1a85d75476fdc9e8758cb551c400f12b3c98bb62b2ea4c3bf5c90602d27bbda4",
+        "usage": {
+          "input_tokens": 6849,
+          "output_tokens": 110,
+          "model_calls": 4
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-12-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 12446,
+        "output_tokens": 181,
+        "model_calls": 7
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "16",
+        "cell_src": "e015_h_multi_review/dabstep-16-pi-A-r1",
+        "artifact_sha256": "12816944283a837ed6ec0223eb1d07bfc0e61525d197b1ba5f59f57d51b3bb96",
+        "artifact_bytes": 250,
+        "instruction_sha256": "0d606e5f06915582076b640e21388159b890fc748d7fc8223fad8235f144f2ac",
+        "prompt_sha256": "23e29ef8f0f4f6674c4bf88a6d233b8030b942f80a6aedc9ddddf91a54a504dc",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: Which merchant has the lowest average fraud rate for the year 2023?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just the name of the merchant. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:10+0000",
+        "end_ts": "2026-11-03T11:22:14+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-16-pi-A-r1/stdout.json",
+        "stdout_sha256": "8aa7eadf5945e7bfb0b8ab8efb4873bc1b96077d4ade508bc27410c137562ab3",
+        "usage": {
+          "input_tokens": 12446,
+          "output_tokens": 181,
+          "model_calls": 7
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-16-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 14633,
+        "output_tokens": 234,
+        "model_calls": 8
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "17",
+        "cell_src": "e015_h_multi_review/dabstep-17-pi-C-r1",
+        "artifact_sha256": "a906476905838171d66cb631c5d06c7b1e1d82ab08583a38f123ac89d1637c28",
+        "artifact_bytes": 435,
+        "instruction_sha256": "64480b19785096b89657ed2620162bebce169e4211ae53abc3b26e344094798b",
+        "prompt_sha256": "86ca89a5b5386cb9d88a7fd6379b6a0a490f44ca3dc2c13c6cdea788c857c280",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: What is the lowest avg fraud rate per merchant for the year 2023?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed as a percentage rounded to 6 decimal places. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:14+0000",
+        "end_ts": "2026-11-03T11:22:19+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-17-pi-C-r1/stdout.json",
+        "stdout_sha256": "a053dcd1981cb3ad179c538d77d7174a0206cb3fc4866fed80e17ebafe1c800c",
+        "usage": {
+          "input_tokens": 14633,
+          "output_tokens": 234,
+          "model_calls": 8
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-17-pi-C-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16221,
+        "output_tokens": 345,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_507",
+        "cell_src": "e015_h_multi_review/dabench-dab_507-pi-A-r1",
+        "artifact_sha256": "fc1433416055aea9dad25a25700b39d29f69a4bc6af3fb3bc73e73727d7a1f91",
+        "artifact_bytes": 875,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:19+0000",
+        "end_ts": "2026-11-03T11:22:26+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_507-pi-A-r1/stdout.json",
+        "stdout_sha256": "cd7a8aa289863b245e82d897dc73b1e1108a0d3a5ed7c8b8ecfa7951d2c0f33c",
+        "usage": {
+          "input_tokens": 16221,
+          "output_tokens": 345,
+          "model_calls": 9
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_507-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "ACCEPT",
+      "why": null,
+      "usage": {
+        "input_tokens": 16221,
+        "output_tokens": 937,
+        "model_calls": 9
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "dab_507",
+        "cell_src": "e015_h_multi_review/dabench-dab_507-pi-C-r1",
+        "artifact_sha256": "479151922e4faa7c08c99ea0107cd6833ee3f1c3481cefc838ee63408f1b924d",
+        "artifact_bytes": 867,
+        "instruction_sha256": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+        "prompt_sha256": "7f8d2f795307b258c9b43cfd8279abbd119568cd50c41e37aa0a55ea002a2274",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nRead goal.md and contract.md in this directory and do what they say. Use your tools to write the file.\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:27+0000",
+        "end_ts": "2026-11-03T11:22:41+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabench-dab_507-pi-C-r1/stdout.json",
+        "stdout_sha256": "c8f04f2d6e57535f7d9139620db1352ad0991aa5a8c59bc24210ff7f8ba8f0f1",
+        "usage": {
+          "input_tokens": 16221,
+          "output_tokens": 937,
+          "model_calls": 9
+        },
+        "parsed_verdict": "ACCEPT"
+      },
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_507-pi-C-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 8673,
+        "output_tokens": 133,
+        "model_calls": 5
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "10",
+        "cell_src": "e015_h_multi_review/dabstep-10-pi-A-r1",
+        "artifact_sha256": "24431996f076006dc6b0b4e0d81e680f423f0dadf35ccfe6adb74ac7f97af730",
+        "artifact_bytes": 191,
+        "instruction_sha256": "a20814cfd92369a0cfd07ccace59723a92a717889942ff0bd17562931d0c200d",
+        "prompt_sha256": "866d3b040369aae638b9f50e49ad2b0b036c07cc2e57fa6ff4893715619d5dd1",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: How many unique merchants are present in the dataset?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number of unique merchants. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:41+0000",
+        "end_ts": "2026-11-03T11:22:45+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-10-pi-A-r1/stdout.json",
+        "stdout_sha256": "dc4f4f5d8952687096505279b8c5e98a1a15349faebabc074bf1580b001cb79f",
+        "usage": {
+          "input_tokens": 8673,
+          "output_tokens": 133,
+          "model_calls": 5
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-10-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 10498,
+        "output_tokens": 152,
+        "model_calls": 6
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "10",
+        "cell_src": "e015_h_multi_review/dabstep-10-pi-C-r1",
+        "artifact_sha256": "962d28e97e853d5b4d838b556a8d73649a1599629463d713b63362dc81f3d074",
+        "artifact_bytes": 232,
+        "instruction_sha256": "a20814cfd92369a0cfd07ccace59723a92a717889942ff0bd17562931d0c200d",
+        "prompt_sha256": "866d3b040369aae638b9f50e49ad2b0b036c07cc2e57fa6ff4893715619d5dd1",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: How many unique merchants are present in the dataset?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number of unique merchants. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:45+0000",
+        "end_ts": "2026-11-03T11:22:49+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-10-pi-C-r1/stdout.json",
+        "stdout_sha256": "16a8b78c553044141df41826ab6666c81bbba2d00a4435ce00ae742b5bec9bfb",
+        "usage": {
+          "input_tokens": 10498,
+          "output_tokens": 152,
+          "model_calls": 6
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-10-pi-C-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 8619,
+        "output_tokens": 127,
+        "model_calls": 5
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "10",
+        "cell_src": "e015_h_multi_review/dabstep-10-pi-CB-r1",
+        "artifact_sha256": "21a1f08ee4e7eb62b4f62f0047f8763fc83880f911f67df9170c6712bf8675d8",
+        "artifact_bytes": 229,
+        "instruction_sha256": "a20814cfd92369a0cfd07ccace59723a92a717889942ff0bd17562931d0c200d",
+        "prompt_sha256": "866d3b040369aae638b9f50e49ad2b0b036c07cc2e57fa6ff4893715619d5dd1",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: How many unique merchants are present in the dataset?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number of unique merchants. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'.\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:49+0000",
+        "end_ts": "2026-11-03T11:22:52+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-10-pi-CB-r1/stdout.json",
+        "stdout_sha256": "d4222dbc08e89c10bcc93d78cc40064cbee22e31bfd510aee2508294e112652a",
+        "usage": {
+          "input_tokens": 8619,
+          "output_tokens": 127,
+          "model_calls": 5
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-10-pi-CB-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 8766,
+        "output_tokens": 136,
+        "model_calls": 5
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "1273",
+        "cell_src": "e015_h_multi_review/dabstep-1273-pi-A-r1",
+        "artifact_sha256": "86c83cd1a7d5b5a938bce535f5b0de39ae72edb35ac62dcae14c3b476bf18017",
+        "artifact_bytes": 191,
+        "instruction_sha256": "c7e0fd1147d195b061a2a929b3da80eac3c54b9e547ff9ab3cb056ce1ee4c134",
+        "prompt_sha256": "9c4f6303958eba03f006e1d6b7e3193f58bf10b2960be774226637867b4d68a4",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed in EUR rounded to 6 decimals. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:52+0000",
+        "end_ts": "2026-11-03T11:22:56+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-1273-pi-A-r1/stdout.json",
+        "stdout_sha256": "5948aaf764886b2e8aeca82d4e44d9770bf64d1cf79004cb964cad6417d91754",
+        "usage": {
+          "input_tokens": 8766,
+          "output_tokens": 136,
+          "model_calls": 5
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-1273-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 21226,
+        "output_tokens": 318,
+        "model_calls": 11
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "1273",
+        "cell_src": "e015_h_multi_review/dabstep-1273-pi-C-r1",
+        "artifact_sha256": "f3b36a455230c6ec060b33507ae0c678aa8a5f68531605753d7fbc772a9a5586",
+        "artifact_bytes": 981,
+        "instruction_sha256": "c7e0fd1147d195b061a2a929b3da80eac3c54b9e547ff9ab3cb056ce1ee4c134",
+        "prompt_sha256": "9c4f6303958eba03f006e1d6b7e3193f58bf10b2960be774226637867b4d68a4",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed in EUR rounded to 6 decimals. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:22:56+0000",
+        "end_ts": "2026-11-03T11:23:02+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-1273-pi-C-r1/stdout.json",
+        "stdout_sha256": "bd653dbf9958bbb9ebf7386f9997a7b10c8db258c49278512d1cdcf36bbf1d87",
+        "usage": {
+          "input_tokens": 21226,
+          "output_tokens": 318,
+          "model_calls": 11
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-1273-pi-C-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 5192,
+        "output_tokens": 110,
+        "model_calls": 3
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "1273",
+        "cell_src": "e015_h_multi_review/dabstep-1273-pi-CB-r1",
+        "artifact_sha256": "db04801b495cca2974db013692e6fd28f2a5d59d3d696e3d76c708154954cd80",
+        "artifact_bytes": 3110,
+        "instruction_sha256": "c7e0fd1147d195b061a2a929b3da80eac3c54b9e547ff9ab3cb056ce1ee4c134",
+        "prompt_sha256": "9c4f6303958eba03f006e1d6b7e3193f58bf10b2960be774226637867b4d68a4",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: For credit transactions, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR?\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed in EUR rounded to 6 decimals. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:23:02+0000",
+        "end_ts": "2026-11-03T11:23:05+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-1273-pi-CB-r1/stdout.json",
+        "stdout_sha256": "35a75d9852319d131e40f6212750036e2620cfb162f4388a3f1aadbb84d72256",
+        "usage": {
+          "input_tokens": 5192,
+          "output_tokens": 110,
+          "model_calls": 3
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-1273-pi-CB-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 86840,
+        "output_tokens": 324,
+        "model_calls": 7
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "1305",
+        "cell_src": "e015_h_multi_review/dabstep-1305-pi-A-r1",
+        "artifact_sha256": "1f56ef717613c712e2873b8db106beb2d8a4f5236c17a1c1b52548553011b3ac",
+        "artifact_bytes": 4472,
+        "instruction_sha256": "7b7b65fec3391d88416a33470bf493f50e3b80d6557d347f14528883bf250d98",
+        "prompt_sha256": "bb952bfc6c37c7e0289c470d37ed96cfed984b75993e180c16516a640098668f",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: For account type H and the MCC description: Eating Places and Restaurants, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR? Provide the answer in EUR and 6 decimals\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed in EUR rounded to 6 decimals. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:23:05+0000",
+        "end_ts": "2026-11-03T11:23:19+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-1305-pi-A-r1/stdout.json",
+        "stdout_sha256": "bfc6ff11f66a58bef77470caf51fd9dd6ddd7df44cd82154f957d8abbde58269",
+        "usage": {
+          "input_tokens": 86840,
+          "output_tokens": 324,
+          "model_calls": 7
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-1305-pi-A-r1",
+      "truth": "BAD"
+    },
+    {
+      "valid": true,
+      "verdict": "REJECT",
+      "why": null,
+      "usage": {
+        "input_tokens": 10792,
+        "output_tokens": 173,
+        "model_calls": 6
+      },
+      "exit_code": 0,
+      "receipt": {
+        "task_id": "1305",
+        "cell_src": "e015_h_multi_review/dabstep-1305-pi-C-r1",
+        "artifact_sha256": "ed28b1e519eff5339de601687f72d06972dcef020d3f10dc26ae9fab14b568c6",
+        "artifact_bytes": 234,
+        "instruction_sha256": "7b7b65fec3391d88416a33470bf493f50e3b80d6557d347f14528883bf250d98",
+        "prompt_sha256": "bb952bfc6c37c7e0289c470d37ed96cfed984b75993e180c16516a640098668f",
+        "command": "pi -p --mode json <prompt>",
+        "argv": [
+          "pi",
+          "-p",
+          "--mode",
+          "json",
+          "你是獨立審查者。以下給出一個任務的公開描述，與一份已交付的交件（檔案在 ./app/ 目錄）。\n你的任務：判斷交件是否滿足任務要求。規則：\n1. 只讀、只評，不代寫；不修改任何檔案；不得再啟動任何 agent（一層）。\n2. 你可以列目錄、讀檔；不需要執行程式。\n3. 先給一句理由，最後一行必須恰好是：\nVERDICT: ACCEPT\n或\nVERDICT: REJECT\n\n【任務描述】\nYou are an expert data analyst and you will answer factoid questions by referencing files in the data directory: `/app/data/`\nDon't forget to reference any documentation in the data dir before answering a question.\n\nHere is the question you need to answer: For account type H and the MCC description: Eating Places and Restaurants, what would be the average fee that the card scheme GlobalCard would charge for a transaction value of 10 EUR? Provide the answer in EUR and 6 decimals\n\nHere are the guidelines you MUST follow when answering the question above: Answer must be just a number expressed in EUR rounded to 6 decimals. If a question does not have a relevant or applicable answer for the task, please respond with 'Not Applicable'\n\nBefore answering the question, reference any documentation in the data dir and leverage its information in your reasoning / planning.\n\nWhen you have computed the final answer, write ONLY the final answer to `/app/answer.txt` (e.g. if the answer is 42, the file should contain just `42`).\n\n【交件】\n目錄 ./app/（用 ls 查看檔案清單後自行讀取）\n"
+        ],
+        "model": {
+          "base": "http://100.86.226.21:1234/v1",
+          "id": "gemma-4-12b-it-qat"
+        },
+        "start_ts": "2026-11-03T11:23:19+0000",
+        "end_ts": "2026-11-03T11:23:24+0000",
+        "exit_code": 0,
+        "stdout_path": "/srv/vlab/runs/e015_h_multi_review/reviewer/dabstep-1305-pi-C-r1/stdout.json",
+        "stdout_sha256": "f437bf35b5b6d132da496277536d237ec629db2f10f38b51a055c16829a4453f",
+        "usage": {
+          "input_tokens": 10792,
+          "output_tokens": 173,
+          "model_calls": 6
+        },
+        "parsed_verdict": "REJECT"
+      },
+      "cell": "e014_dabstep_block/dabstep-1305-pi-C-r1",
+      "truth": "BAD"
+    }
+  ],
+  "usage": [
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_055-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 17047,
+      "output_tokens": 283
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_426-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16373,
+      "output_tokens": 278
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_427-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16257,
+      "output_tokens": 318
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-12-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 4,
+      "input_tokens": 6838,
+      "output_tokens": 113
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-16-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 5,
+      "input_tokens": 8669,
+      "output_tokens": 128
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-17-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 10,
+      "input_tokens": 19933,
+      "output_tokens": 338
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_035-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16888,
+      "output_tokens": 434
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_035-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 11,
+      "input_tokens": 21429,
+      "output_tokens": 391
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_039-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 8,
+      "input_tokens": 15689,
+      "output_tokens": 386
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_039-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 8,
+      "input_tokens": 16101,
+      "output_tokens": 241
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_057-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": null,
+      "infra_why": "unparsed:UNPARSED",
+      "model_calls": 43,
+      "input_tokens": 114287,
+      "output_tokens": 17770
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_057-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 8,
+      "input_tokens": 15000,
+      "output_tokens": 248
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_105-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 8,
+      "input_tokens": 14515,
+      "output_tokens": 234
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_105-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 8,
+      "input_tokens": 14515,
+      "output_tokens": 246
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_129-pi-A-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16535,
+      "output_tokens": 203
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_129-pi-C-r1",
+      "truth": "GOOD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 10,
+      "input_tokens": 19303,
+      "output_tokens": 446
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_055-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16242,
+      "output_tokens": 318
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_426-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 11,
+      "input_tokens": 20944,
+      "output_tokens": 801
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_427-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16251,
+      "output_tokens": 300
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-12-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 4,
+      "input_tokens": 6849,
+      "output_tokens": 110
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-16-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 7,
+      "input_tokens": 12446,
+      "output_tokens": 181
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-17-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 8,
+      "input_tokens": 14633,
+      "output_tokens": 234
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_507-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16221,
+      "output_tokens": 345
+    },
+    {
+      "cell": "e013_dabench_pi_AC_full/dabench-dab_507-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "ACCEPT",
+      "infra_why": null,
+      "model_calls": 9,
+      "input_tokens": 16221,
+      "output_tokens": 937
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-10-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 5,
+      "input_tokens": 8673,
+      "output_tokens": 133
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-10-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 6,
+      "input_tokens": 10498,
+      "output_tokens": 152
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-10-pi-CB-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 5,
+      "input_tokens": 8619,
+      "output_tokens": 127
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-1273-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 5,
+      "input_tokens": 8766,
+      "output_tokens": 136
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-1273-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 11,
+      "input_tokens": 21226,
+      "output_tokens": 318
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-1273-pi-CB-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 3,
+      "input_tokens": 5192,
+      "output_tokens": 110
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-1305-pi-A-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 7,
+      "input_tokens": 86840,
+      "output_tokens": 324
+    },
+    {
+      "cell": "e014_dabstep_block/dabstep-1305-pi-C-r1",
+      "truth": "BAD",
+      "verdict": "REJECT",
+      "infra_why": null,
+      "model_calls": 6,
+      "input_tokens": 10792,
+      "output_tokens": 173
+    }
+  ],
+  "reading": "H-multi-review 被否（機制層；預註冊門檻內未證實優於隨機）；Phase 2 不發射"
+}
