@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """e014 DABStep 阻擋級機制實驗結案機械複核（票 P20261112_1125-1；0 model calls、只讀）。證據：REPORT.json（78/78、infra=[]、A 13/26、C 14/26、CB 14/26、A_vs_C/A_vs_CB
-McNemar p=1.0、CB.pass==C.pass、CB/A calls 0.522×、tokens 0.501× 皆 <2× 紅線）；
-packet 非空；BACKLOG 第 14 行 `- [x] **e014 完賽`＋裁決註記「H1（blocking>evidence）
-在 DABStep 被否」（~/dev/ops 鏡像 byte 一致）。對齊 e016/e004：REPO 自 __file__ 推導、
-CI-home 相容；REPORT 在 repo 外、以 --report 注入快照；BACKLOG 接受目標行 sha fallback。"""
+McNemar p=1.0、CB.pass==C.pass、CB/A calls 0.522×/tokens 0.501× 皆 <2× 紅線）；packet 非空；BACKLOG 第 14 行 `- [x] **e014 完賽`＋
+「H1（blocking>evidence）在 DABStep 被否」（~/dev/ops 鏡像 byte 一致）。對齊 e016/e004（含 e004 selftest missing-file 預檢）：
+REPO 自 __file__ 推導、CI-home 相容；REPORT 在 repo 外、以 --report 注入快照；BACKLOG 接受目標行 sha fallback。"""
 import argparse
 import hashlib
 import json
@@ -34,11 +33,10 @@ def check(report_text: str, packet_text: str, backlog_text: str) -> list[str]:
     if d.get("infra") != []:
         out.append(f"infra={d.get('infra')!r} != []")
     arms = d.get("per_arm", {})
-    for arm, (nw, pw, rw) in (("A", (26, 13, 0.5)), ("C", (26, 14, 0.5385)), ("CB", (26, 14, 0.5385))):
+    for arm, want in (("A", (26, 13, 0.5)), ("C", (26, 14, 0.5385)), ("CB", (26, 14, 0.5385))):
         a = arms.get(arm) or {}
-        for k, w in (("n", nw), ("pass", pw), ("rate", rw)):
-            if a.get(k) != w:
-                out.append(f"per_arm[{arm}].{k}={a.get(k)!r} != {w}")
+        if (a.get("n"), a.get("pass"), a.get("rate")) != want:
+            out.append(f"per_arm[{arm}] n/pass/rate={a.get('n')!r}/{a.get('pass')!r}/{a.get('rate')!r} != {want[0]}/{want[1]}/{want[2]}")
     for key in ("A_vs_C", "A_vs_CB"):
         p = (d.get("paired", {}) or {}).get(key) or {}
         if p.get("mcnemar_p_two_sided") != 1.0:
@@ -81,18 +79,20 @@ def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
     return [f"snapshot sha256 drift {p.name}: {hashlib.sha256(raw).hexdigest()[:12]}… != 釘住 {want[:12]}…（凍結紀錄，改動即紅）"]
 
 def _pinned(p: pathlib.Path) -> list[str]:
-    """只有 repo 內缺省快照受釘住；以 --report/--packet/--backlog 明確覆蓋時不釘（內容判準照跑）。"""
-    want = PINS.get(p)
-    return check_snapshot(p, want) if want else []
+    """只有缺省快照受釘住；以 --report/--packet/--backlog 明確覆蓋時不釘（內容判準照跑）。"""
+    return check_snapshot(p, PINS[p]) if p in PINS else []
 
 def selftest(report_p: pathlib.Path, packet_p: pathlib.Path, backlog_p: pathlib.Path) -> int:
+    missing = [f"SELFTEST missing file {n}: {p}" for n, p in (("REPORT.json", report_p), ("packet", packet_p), ("BACKLOG", backlog_p)) if not p.is_file()]
+    if missing:
+        print(*missing, sep="\n")
+        return 1
     r = report_p.read_text(encoding="utf-8")
     p = packet_p.read_text(encoding="utf-8")
     b = backlog_p.read_text(encoding="utf-8")
     v = check(r, p, b) + _pinned(report_p) + _pinned(packet_p) + _pinned(backlog_p)
     if v:
-        print("SELFTEST 正控制 FAIL（真檔）:\n" + "\n".join("  " + s for s in v))
-        return 1
+        print("SELFTEST 正控制 FAIL（真檔）:\n" + "\n".join("  " + s for s in v)); return 1
     def run(tag: str, rr: str, pp: str, bb: str, must_hit: str) -> bool:
         vv = check(rr, pp, bb)
         if not (vv and any(must_hit in s for s in vv)):

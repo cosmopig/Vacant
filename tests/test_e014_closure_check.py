@@ -46,3 +46,8 @@ def test_ci_home_empty_dir_green(tmp_path):
                         "--selftest"], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
     assert "VERDICT: E014_CLOSURE_OK" in r.stdout
+
+def test_missing_file_clean_red():
+    r = subprocess.run([sys.executable, str(SCRIPT), "--report", "/nonexistent/report.json", "--selftest"],
+                       capture_output=True, text=True)
+    assert r.returncode == 1 and "missing file" in r.stdout and "Traceback" not in r.stderr
