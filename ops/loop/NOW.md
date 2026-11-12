@@ -9,7 +9,7 @@
 ## 未完成（≤3、交下輪）
 1. CI 三分支驗收（vq-fd0）：現一次讀＝qwen 4104c851/argon 85e18f163/worker 2aa9f48cf 全 pending 非紅；下輪頭複讀一次（不 poll），紅則讀 log 定根因。
 2. e015 殘留：/srv/vlab/runs/e015_h_multi_review/VERDICT.json 第 1780 行磁盤損傷（量具已釘 repo 內快照 d0e29884…；磁盤修復另立工單，未做）。
-3. 候人類裁決（不進 vq-el4 順序）：L008 樣本量／預算（未發射、0 調用）；G 系列重發（vq-kax）；e013 票（bounced/）候 planner 修驗收 grep；0820-1（open/）候 worker 重驗 item 1。
+3. 候人類裁決（不進 vq-el4 順序）：L008 樣本量／預算（未發射、0 調用）；G 系列重發（vq-kax）；e013（票 P20261112_1821-1 在 bounced/，候 planner 修驗收 grep；worker loop 在自身 worktree 做 closure-check WIP）。註：0820-1 已於 r1502 結案（done/、三項驗收全過），舊 NOW 之「open/」為 stale。
 
 ## 下輪入口（≤3）
 - CI 三分支一次讀（ci_status.py、不 poll）→紅則 log 定根因（vq-fd0 驗收）。
