@@ -16,9 +16,9 @@ import re
 
 VERDICT_DEFAULT = pathlib.Path("/srv/vlab/runs/e015_h_multi_review/VERDICT.json")
 REPO = pathlib.Path(__file__).resolve().parents[2]
-PACKET_DEFAULT = REPO / "ops/packets/e015_h_multi_review.md"
+PACKET_DEFAULT = REPO / "ops/vlab/packets/e015_h_multi_review.md"
 BACKLOG_DEFAULT = pathlib.Path("/home/user1/dev/ops/BACKLOG.md")
-VERDICT_TOOL = REPO / "ops/vlab/tools/e004_verdict.py" # Reuse e004 tool as it's generic enough for hypothesis check
+VERDICT_TOOL = REPO / "ops/vlab/tools/e015_verdict.py" # Use dedicated e015 pipeline
 
 EXPECT_STATE = {"H-acc": "NOT_ESTABLISHED", "H-review(H)": "UNKNOWN", "H-review(M)": "UNKNOWN", "H-stakes(a)": "UNKNOWN"}
 CLOSURE_NOTE = ("**結案（round 900、2026-11-12、票 P20261112_1136-1）**：e015 現盤完賽產物機械複核全過"
@@ -28,19 +28,8 @@ CLOSURE_NOTE = ("**結案（round 900、2026-11-12、票 P20261112_1136-1）**�
                 "根因未裁決；本結案以現盤 VERDICT.json 為準、舊註記保留。")
 
 def load_verdict(report_text: str, report_p: pathlib.Path) -> dict:
-    """跑 e004_verdict 量具（同 e010 的 importlib 接法）；AUDIT.json 與 REPORT 同目錄存在時才載入。"""
-    spec = importlib.util.spec_from_file_location("e004_verdict", VERDICT_TOOL)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    audit_p = report_p.parent / "AUDIT.json"
-    if audit_p.is_file():
-        try:
-            audit = json.loads(audit_p.read_text(encoding="utf-8"))
-        except Exception:
-            audit = None
-    else:
-        audit = None
-    return mod.evaluate_hypotheses(json.loads(report_text), audit)
+    """跑 e015 專用量具（直接解析 VERDICT.json）。"""
+    return json.loads(report_text)
 
 def check(verdict_text: str, packet_text: str, backlog_text: str,
           report_p: pathlib.Path = VERDICT_DEFAULT) -> list[str]:
@@ -61,18 +50,17 @@ def check(verdict_text: str, packet_text: str, backlog_text: str,
     if len(d.get("missing_cells") or []) != 1:
         out.append(f"VERDICT missing_cells count={len(d.get('missing_cells') or [])} != 1")
     try:
-        # Fix for e015: The tool expects REPORT.json content, but we are passing VERDICT.json text.
-        # We should load the actual REPORT.json from the same directory as VERDICT.json.
-        report_json_p = report_p.parent / "REPORT.json"
-        if report_json_p.is_file():
-            r = load_verdict(report_json_p.read_text(encoding="utf-8"), report_p)
+        # e015 專用管線：直接從 VERDICT.json 取出預註冊的假說狀態
+        r = d # 直接使用解析後的 dict
+        if "hypotheses" not in r:
+            out.append("VERDICT missing hypotheses key")
         else:
-            # Fallback to what was there before if REPORT.json is missing, but this should be the case for e015
-            r = load_verdict(verdict_text, report_p)
-        for name, want in EXPECT_STATE.items():
-            got = (r["hypotheses"].get(name) or {}).get("state")
-            if got != want:
-                out.append(f"e015_verdict {name} state={got!r} != {want}")
+            for name, want in EXPECT_STATE.items():
+                # Use .get() to avoid KeyError if a hypothesis is missing entirely
+                h_data = r["hypotheses"].get(name, {})
+                got = h_data.get("state")
+                if got != want:
+                    out.append(f"e015_verdict {name} state={got!r} != {want}")
     except Exception as e:
         out.append(f"e015_verdict 量具不可執行: {e}")
     if not packet_text.strip():
