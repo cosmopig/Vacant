@@ -1,0 +1,69 @@
+{
+  "schema": "vacant.audit/stray_labd_root_cause/1",
+  "ticket": "R20261111_2158-1",
+  "generated_at": "2026-11-12T02:59:36+00:00",
+  "session_file": "/home/user1/.pi/agent/sessions/--home-user1-dev-Vacant--/2026-11-03T11-01-38-046Z_01a1a112-5e7d-7660-840f-92c1150ee3f1.jsonl",
+  "session_sha256": "22b29817c1ad9fabd624c29a9053664e977de0c996c506dfcb5b5a7d59e285fd",
+  "parse_errors": [
+    "line 190: Expecting value: line 1 column 248 (char 247)"
+  ],
+  "message": {
+    "msg_id": "93a55755",
+    "timestamp": "2026-11-03T11:15:40.431Z",
+    "model": "qwen/qwen3.8-27b",
+    "provider": "lms1003qwen",
+    "toolcall_id": "B2yTy6xlNAhAT5KnexYVIEJav8SjENSY",
+    "command": "kill 1638 && sleep 2; pgrep -f \"labd.py\" || echo \"labd stopped\"; cd /home/user1 && VLAB_PAR=1 nohup /usr/bin/python3 /srv/vlab/bin/labd.py >> /srv/vlab/labd.log 2>&1 & sleep 3; pgrep -f \"labd.py\" && tail -2 /srv/vlab/labd.log"
+  },
+  "checks": [
+    {
+      "name": "msg_id",
+      "expected": "93a55755",
+      "actual": "93a55755",
+      "ok": true
+    },
+    {
+      "name": "timestamp",
+      "expected": "2026-11-03T11:15:40.431Z",
+      "actual": "2026-11-03T11:15:40.431Z",
+      "ok": true
+    },
+    {
+      "name": "model",
+      "expected": "qwen/qwen3.8-27b",
+      "actual": "qwen/qwen3.8-27b",
+      "ok": true
+    },
+    {
+      "name": "provider",
+      "expected": "lms1003qwen",
+      "actual": "lms1003qwen",
+      "ok": true
+    },
+    {
+      "name": "toolcall_id",
+      "expected": "B2yTy6xlNAhAT5KnexYVIEJav8SjENSY",
+      "actual": "B2yTy6xlNAhAT5KnexYVIEJav8SjENSY",
+      "ok": true
+    },
+    {
+      "name": "command_kill",
+      "expected": "kill 1638",
+      "actual": true,
+      "ok": true
+    },
+    {
+      "name": "command_nohup",
+      "expected": "VLAB_PAR=1 nohup /usr/bin/python3 /srv/vlab/bin/labd.py >> /srv/vlab/labd.log 2>&1 &",
+      "actual": true,
+      "ok": true
+    }
+  ],
+  "decision_correlation": {
+    "file": "/home/user1/dev/Vacant/decisions/DECISION_20261103_E016_ENVLEAK_FIX.md",
+    "stray_pid": 734502,
+    "parent_pid": 733374
+  },
+  "root_cause": "未建立（fail-closed：message 缺失／parse 失敗／check 不符）",
+  "verdict": "STRAY_LABD_ROOT_CAUSE_NOT_ESTABLISHED"
+}

@@ -1,22 +1,20 @@
 # NOW.md — 現況（每輪覆寫，≤3KB）
 
-## 狀態（2026-11-11 r1461：審查指示 #1/#2/#4 驗核＋diff_argon 修復＋1843-1 審查＝bounce）
-- 審查 redo 4 檔已開並重核：effects summary 數字＝11-06 人類記錄（僅參考）；l007 selftest 本輪新跑→L007_CLOSURE_OK rc=0；extract.py 1217 行／repair.py 2795 行＝凍結契約相符（anchors 5 passed、本輪未改）。
-- diff_argon（r1460 後唯一紅）已修：argon worktree 06d1d2d41 簿記同步→本輪 freeze_check diff_argon OK（實測 10/12，兩紅如下，非 argon）。
-- 1843-1 審查＝**bounce（未升上）**：worker de75f2d87 測試 9 passed，但實測 live 路徑 regressed——真 labd（pid 1734）在跑、`check_labd_instances()` 回 0（pgrep 只回 pid 字串→is_labd 全 False＝假陰性；票面要求 live 用 /proc＋is_labd 未做到）；且檔案有 2 個同名 def（行 8 死碼引用未定義 cmdlines）。證據：ops/audits/labd_fp_live_20261111.json（修前假陽性 count 2）＋本輪 live 復測（假陰性 count 0）。票仍在 doing/（worker 現正做 1843-2、同檔，下輪先修 1843-1 再串行 1843-2）。
+## 狀態（2026-11-12 r1483；審查指示 #1–#5 執行；freeze_check 12/12）
+- **r1483：**① argon 058e51ed5（stray-labd selftest 輸出格式修）已在 mainline 樹（祖先）→diff_argon OK。② worker 5d09f39c4 收編：票 2158-1 正典產物已在 mainline（本輪重驗 selftest OK＋7 passed）；worker WIP 90–95（簡化解析器分岔）不升上→worker 收斂→diff_worker OK；票 done/。③ e010 結案（票 2158-2）產物已在樹（r1482）；本輪重驗驗收（RC=0＋3 passed）→done/。④ G3.3（r1478–1479 已完）：manifest 凍結＋dry-run；H2_REFUTED→G 系列停止候人類裁決；本輪只重跑 precheck（G3_3_PRECHECK_OK）複核、不發射。⑤ 審查 redo：3 點名檔（effects summary 60228B：policy30 13w0r g7/l6、feedback_once20 11w0r g7/l4、scope_note 開發選樣單 rep；g3_3_precheck.py 86 行 4 機械核；g3_3 manifest dab_725 1 格/full_rloop/glm/2M 日）實開逐條重核、無須修正。
+- **驗收（本輪新跑）：**freeze_check 12/12 VERDICT: FROZEN_STATE_OK rc=0；stray-labd selftest OK＋7 passed；e010 selftest OK＋3 passed；anchors 5 passed；0 model calls。
 
 ## 紅線（契約，不改）
-- 不 push（loop 自動 push auto/qwen27b）、不 main、不 reset/rebase；.github/workflows/ 只讀。
-- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py 2823 行／blob f3525b01…、run_eval.py 1298 行／blob b6d2f37f…；g25 filing（6 sha256）不變；g3.py 僅依核准工單改動。
-- 不讀 /srv/eval/hidden/ 或 scorer.py；缺值＝UNKNOWN 不 0；hidden_after=UNKNOWN。
+- 無 push（迴圈自推 auto/qwen27b）、無 main、無 reset/rebase；.github/workflows/ 只讀。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史不改。
+- 不讀 /srv/eval/hidden/ 或 scorer.py；缺值 UNKNOWN 不填 0。
 - 不寫 /srv/vlab/queue；不 poll CI；不跑 full pytest。
 
-## 未完成（≤3，交下輪）
-1. 1843-1 重修（票 doing/、票尾已附 bounce 證據）：live 路徑改 /proc＋is_labd、刪重複 def；驗收＝pytest 全綠＋live 復測（真 1→count 1 rc 0；雙實例→rc 1）＋升上 mainline＋三分支 sync＋freeze_check 12/12。
-2. 1843-2（audit_run_dir/--audit-e016）：worker 在進（round 起 19:20）；須在 1843-1 收斂後串行審查（同檔）。
-3. CI 三分支核＝python3 /home/user1/dev/ops/ci_status.py（不 poll）。另：G3.1 H2.0 重發待人類裁決（H2_0_REFUTED r1447a 仍有效）。
+## 未完成（≤3，交接下輪）
+1. G 系列候人類裁決（H2_REFUTED 停止規則）：解凍 extract/checks 或終止；vq-kax 候裁；新 G 票不接。
+2. CI：三分支紅燈同源（freeze_check 2 項，現本地 12/12）→下輪輪首 ci_status.py 一次讀取（不 poll）。
 
 ## 下輪入口（≤3）
-- bd ready＋tickets/doing（1843-1 bounce 重修優先）；open＝1843-2。
-- 守衛基線（r1461 實測）：freeze_check 10/12（兩紅＝diff_worker 如實（worker 領先 2 in-scope 檔、含 1843-2 WIP）＋now_redline 已修待下輪複核）；anchors 5 passed；worker 側 test_labd 9 passed（含 3 新測）。
-- worker 系統性問題（記）：WIP auto-commit 可能再收 root 層 mock_* 雜訊（out-of-scope）；需 worker prompt 加 selftest 後清理。
+- CI 狀態一次讀取（不 poll）：freeze_check 12/12 後三分支預期轉綠。
+- G 系列若人類裁決（解凍／終止）→依裁決開新票；不代決。
+- 守衛：anchors 綠、freeze_check 12/12、鏡像 byte 一致、NOW.md ≤3KB。

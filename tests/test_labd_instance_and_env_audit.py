@@ -1,92 +1,122 @@
 import unittest
-from pathlib import Path
-from typing import Dict, Any
-import os
+from unittest.mock import patch
+import contextlib
+import io
 import json
-import shutil
-from ops.audits.labd_instance_and_env_audit import audit_run_dir
+from ops.audits.labd_instance_and_env_audit import (
+    check_labd_instances, audit_cell_env, audit_run_dir, agent_env_leaks,
+)
 
-class TestLabdInstanceAndEnvAudit(unittest.TestCase):
-    def setUp(self):
-        # Create a temporary directory for testing
-        self.test_dir = Path("/tmp/audit_test_v2")
-        if self.test_dir.exists():
-            shutil.rmtree(self.test_dir)
-        self.test_dir.mkdir()
+LABD_CMDLINE = ["/usr/bin/python3", "/srv/vlab/bin/labd.py"]
 
-    def tearDown(self):
-        # Remove the temporary directory after tests
-        if self.test_dir.exists():
-            shutil.rmtree(self.test_dir)
+class TestLabdAudit(unittest.TestCase):
+    def test_check_labd_instances_zero(self):
+        # 0 instances -> 0
+        self.assertEqual(check_labd_instances(proc_list=[]), 0)
 
-    def test_audit_run_dir_basic(self):
-        # Create a cell.json with no leaks
-        cell1 = self.test_dir / "cell1"
-        cell1.mkdir()
-        with open(cell1 / "cell.json", "w") as f:
-            json.dump({"data": "clean"}, f)
+    def test_check_labd_instances_one(self):
+        # 1 instance (real live shape: python interpreter + labd.py) -> 1
+        self.assertEqual(check_labd_instances(proc_list=[list(LABD_CMDLINE)]), 1)
 
-        # Create a cell.json with a leak
-        cell2 = self.test_dir / "cell2"
-        cell2.mkdir()
-        with open(cell2 / "cell.json", "w") as f:
-            json.dump({"data": "leak", "VACANT_PI_PARENT": "secret"}, f)
+    def test_check_labd_instances_one_dict_entry(self):
+        # collect_processes() entry shape: dict with "cmdline"
+        entry = {"pid": 1734, "ppid": 1656, "cmdline": list(LABD_CMDLINE), "env": None}
+        self.assertEqual(check_labd_instances(proc_list=[entry]), 1)
 
-        results = audit_run_dir(self.test_dir)
-        self.assertEqual(results["total_cells"], 2)
-        self.assertEqual(len(results["violations"]), 1)
-        self.assertEqual(len(results["clean_cells"]), 1)
+    def test_check_labd_instances_substring_not_labd(self):
+        # args merely mention "labd.py" (pgrep -f substring false positive) -> 0
+        self.assertEqual(
+            check_labd_instances(proc_list=[["pi", "-p", "工單文字提到 labd.py"]]), 0)
 
-    def test_audit_run_dir_missing_file(self):
-        # Empty directory
-        results = audit_run_dir(self.test_dir)
-        self.assertEqual(results["total_cells"], 0)
+    def test_check_labd_instances_bare_pid_strings_not_labd(self):
+        # bare pid tokens are judged by the same is_labd rule -> never a match
+        self.assertEqual(check_labd_instances(proc_list=["12345", "67890"]), 0)
 
-    def test_audit_run_dir_nonexistent_path(self):
-        results = audit_run_dir(Path("/tmp/non_existent_path_12345"))
-        self.assertEqual(results["total_cells"], 0)
+    def test_check_labd_instances_multiple_exits_1(self):
+        # >1 instances -> SystemExit(1) with the MULTIPLE_LABD_INSTANCES message
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            with self.assertRaises(SystemExit) as cm:
+                check_labd_instances(proc_list=[["python3", "/a/labd.py"],
+                                                ["python3", "/b/labd.py"],
+                                                ["python3", "/c/labd.py"]])
+        self.assertEqual(cm.exception.code, 1)
+        self.assertIn("ERROR: MULTIPLE_LABD_INSTANCES detected. Count: 3", buf.getvalue())
 
-    def test_audit_run_dir_full(self):
-        # Recreate structure for full test
-        for d in self.test_dir.iterdir():
-            if d.is_dir(): shutil.rmtree(d)
-        
-        # Clean cell
-        c1 = self.test_dir / "c1"
-        c1.mkdir()
-        with open(c1 / "cell.json", "w") as f: json.dump({"v": 1}, f)
+    def test_check_labd_instances_live_path_uses_collect_processes(self):
+        # proc_list=None must go through the /proc collector (is_labd matcher), not pgrep
+        with patch("ops.audits.labd_instance_and_env_audit.collect_processes",
+                   return_value=[{"cmdline": list(LABD_CMDLINE)}]):
+            self.assertEqual(check_labd_instances(), 1)
 
-        # Leaky cell
-        c2 = self.test_dir / "c2"
-        c2.mkdir()
-        with open(c2 / "cell.json", "w") as f: json.dump({"v": 1, "VACANT_PI_SELF": "leak"}, f)
+    def test_audit_cell_env_success_a_arm_empty(self):
+        # Mock cell.json with empty agent_env for A arm
+        mock_data = {
+            "arm": "A",
+            "agent_env": {}
+        }
+        with patch("builtins.open", unittest.mock.mock_open(read_data=json.dumps(mock_data))):
+            with patch("os.path.exists", return_value=True):
+                result = audit_cell_env("dummy_path", arm="A")
+                self.assertTrue(result)
 
-        # Hidden cell (should be skipped)
-        h = self.test_dir / ".infra-hidden"
-        h.mkdir()
-        c3 = h / "c3"
-        c3.mkdir()
-        with open(c3 / "cell.json", "w") as f: json.dump({"v": 1}, f)
+    def test_audit_cell_env_fail_leak_vacant_key(self):
+        # Mock cell.json with VACANT_ key for A arm
+        mock_data = {
+            "arm": "A",
+            "agent_env": {"VACANT_SECRET": "some_value"}
+        }
+        with patch("builtins.open", unittest.mock.mock_open(read_data=json.dumps(mock_data))):
+            with patch("os.path.exists", return_value=True):
+                with self.assertRaises(SystemExit) as cm:
+                    audit_cell_env("dummy_path", arm="A")
+                self.assertEqual(cm.exception.code, 1)
 
-        results = audit_run_dir(self.test_dir)
-        self.assertEqual(results["total_cells"], 2) # c1 and c2 only
-        self.assertEqual(len(results["violations"]), 1)
-        self.assertEqual(len(results["clean_cells"]), 1)
+    def test_audit_cell_env_fail_leak_pi_parent(self):
+        # Mock cell.json with PI_PARENT in value for A arm
+        mock_data = {
+            "arm": "A",
+            "agent_env": {"SOME_VAR": "host_PI_PARENT_value"}
+        }
+        with patch("builtins.open", unittest.mock.mock_open(read_data=json.dumps(mock_data))):
+            with patch("os.path.exists", return_value=True):
+                with self.assertRaises(SystemExit) as cm:
+                    audit_cell_env("dummy_path", arm="A")
+                self.assertEqual(cm.exception.code, 1)
 
-    def test_audit_run_dir_skips_infra(self):
-        # Create a cell.json inside an .infra- directory
-        infra_dir = self.test_dir / ".infra-hidden"
-        infra_dir.mkdir()
-        cell3 = infra_dir / "cell3"
-        cell3.mkdir()
-        with open(cell3 / "cell.json", "w") as f:
-            json.dump({"data": "should_be_skipped"}, f)
+def test_audit_run_dir(tmp_path):
+    # 1843-2：audit_run_dir 批量稽核——正/負控制、infra 快照目錄排除、缺 cell.json 點名
+    run = tmp_path / "run"
+    (run / "cell_ok").mkdir(parents=True)
+    (run / "cell_ok" / "cell.json").write_text(json.dumps(
+        {"agent_env": {"VACANT_FAILED_STEP_REVIEW": "true"}}))  # C-nf 臂參數、非洩漏
+    (run / "cell_leak").mkdir()
+    (run / "cell_leak" / "cell.json").write_text(json.dumps(
+        {"agent_env": {"VACANT_PI_SELF": "5678", "OTHER": "x"}}))
+    infra = run / "cell_leak.infra-20261103T180005"
+    infra.mkdir()
+    (infra / "cell.json").write_text(json.dumps(
+        {"agent_env": {"VACANT_PI_PARENT": "9999"}}))  # 即使洩漏也須整目錄排除
+    (run / "cell_missing").mkdir()  # cell 槽目錄存在但缺 cell.json
 
-        results = audit_run_dir(self.test_dir)
-        # Should only count the one in the root (if any) or just 0 if none outside .infra-
-        # In this case, cell1 and cell2 were already created in setUp/previous tests? 
-        # No, I should recreate them for a clean test.
-        pass
+    r = audit_run_dir(run)
+    assert r["total_cells"] == 2, r
+    assert r["violations"] == 1, r
+    assert r["violated_cells"] == [str(run / "cell_leak" / "cell.json")], r
+    assert r["clean_cells"] == [str(run / "cell_ok" / "cell.json")], r
+    assert r["missing_cell_json"] == [str(run / "cell_missing" / "cell.json")], r
+    blob = json.dumps([r["violated_cells"], r["clean_cells"]])
+    assert "infra" not in blob, "infra 快照目錄不得計入任何一列"
+
+
+def test_agent_env_leaks_fsr_not_leak():
+    # C-nf 臂的 VACANT_FAILED_STEP_REVIEW 是預註冊臂定義參數，不計為洩漏
+    assert agent_env_leaks({"VACANT_FAILED_STEP_REVIEW": "true"}) is False
+    assert agent_env_leaks({"VACANT_PI_SELF": "1"}) is True
+    assert agent_env_leaks({"VACANT_PI_PARENT": "2"}) is True
+    assert agent_env_leaks(None) is False
+    assert agent_env_leaks({}) is False
+
 
 if __name__ == "__main__":
     unittest.main()
