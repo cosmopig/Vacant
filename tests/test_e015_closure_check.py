@@ -68,3 +68,30 @@ def test_plain_mode_ok(tmp_path):
                        capture_output=True, text=True, timeout=60)
     assert m.returncode == 1 and "missing file" in m.stdout and "Traceback" not in m.stderr
 
+
+def test_plain_includes_live_by_default(tmp_path):
+    """r1530（票 vq-el4.105）：閉環檢查預設含 live 現盤——一條指令覆蓋快照＋live（r1528 快照綠但 live 損傷的盲區收口）。
+    live 相符→rc=0 且輸出含 live 行；live 損傷→rc=1 VIOLATION；live 缺位→rc=2 UNKNOWN（看不到≠PASS）。"""
+    spec = importlib.util.spec_from_file_location("e015_closure_check", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    snap = mod.VERDICT_DEFAULT.read_bytes()
+    cut = snap.rfind(b"  ],")
+    assert cut > 0
+    good = tmp_path / "live_good.json"
+    good.write_bytes(snap)
+    p = subprocess.run([sys.executable, str(SCRIPT), "--live", str(good)],
+                       capture_output=True, text=True, timeout=180)
+    assert p.returncode == 0, p.stdout + p.stderr
+    assert "live" in p.stdout
+    bad = tmp_path / "live_bad.json"
+    bad.write_bytes(snap[:cut] + b'\n  "tail": {\n')
+    p = subprocess.run([sys.executable, str(SCRIPT), "--live", str(bad)],
+                       capture_output=True, text=True, timeout=180)
+    assert p.returncode == 1, p.stdout + p.stderr
+    assert "VIOLATION" in p.stdout and "live" in p.stdout
+    p = subprocess.run([sys.executable, str(SCRIPT), "--live", str(tmp_path / "live_absent.json")],
+                       capture_output=True, text=True, timeout=180)
+    assert p.returncode == 2, p.stdout + p.stderr
+    assert "UNKNOWN" in p.stdout and "缺位" in p.stdout
+

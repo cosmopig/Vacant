@@ -18,6 +18,11 @@ r1508 修正（planner 代修；裁決與驗收記錄見票內 r1508 註記）�
   2) 舊註記裁決：活檔 line 25–26 舊註記與現盤 VERDICT.json 逐項相符（X=15/16、Y=7/15、
      缺 1/32＝dab_057 UNPARSED 43 calls/114k tok、Holm first 達/second 不達、state、
      Phase 2 不發射）；票內「不符」主張不成立（r1508 機械比對）；結案註記以本裁決為準。
+
+r1530（票 vq-el4.105）：閉環檢查預設含 live 現盤（r1528 盲區：快照綠但 live 損傷須另跑
+  e015_live_verdict_check.py 才看得到）——plain 模式預設併入 live 哨兵：live 相符→OK 行；
+  live 損傷/漂移→VIOLATION rc=1；live 缺位→UNKNOWN rc=2（看不到≠PASS、也≠「沒有」）。
+  --live 可覆寫；selftest 增 live 整合正/負控制（暫態檔、不碰現盤）。
 """
 import argparse
 import hashlib
@@ -39,12 +44,34 @@ PIPELINE_SHA256 = "fe94c68923eda6435c0f4a675627a3ccb0f0cd5425405d569a28cd756e1ce
 QUEUE_DEFAULT = pathlib.Path("/home/user1/dev/ops/staging/15_e015_h_multi_review.json")
 RUNS_ROOT = pathlib.Path("/srv/vlab/runs")
 EXP = "e015_h_multi_review"
+LIVE_MOD_DEFAULT = REPO / "ops/audits/e015_live_verdict_check.py"
+LIVE_DEFAULT = pathlib.Path("/srv/vlab/runs/e015_h_multi_review/VERDICT.json")
 
 CLOSURE_NOTE = ("**結案（round 900、2026-11-12、票 P20261112_1136-1）**：e015 現盤完賽產物機械複核全過"
                 "（VERDICT.json：state=NOT_BETTER_THAN_RANDOM、X=15、n_bad=16、Y=7、n_good=15、missing=1、32 格；"
                 "e015 裁決管線（sha256 fe94c689…）獨立重算與現盤 VERDICT.json 逐項相符、selftest 12 項綠；packet 非空）；"
                 "判定結果：H1 未成立（NOT_BETTER_THAN_RANDOM、H-multi-review 被否於機制層）、Phase 2 不發射；"
                 "裁決（r1508）：本行舊註記與現盤 VERDICT.json 相符（機械逐項比對）、票內「不符」主張不成立。")
+
+
+def _live_mod():
+    """載入同目錄 live 哨兵（同 e013 載 envelope_compliance 之 importlib 接法；不 pin sha——
+    量具在 repo 內、有自己的 selftest 與測試、三分支同步紀律同本檔）。"""
+    spec = importlib.util.spec_from_file_location("e015_live_verdict_check", LIVE_MOD_DEFAULT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def live_section(live_p: pathlib.Path, snap_p: pathlib.Path) -> tuple[int, list[str]]:
+    """預設含 live 現盤（r1530）：回 (rc, 行)。0＝live 與正典相符；1＝live 違規（損傷/漂移）；
+    2＝UNKNOWN（live 缺位、看不到≠PASS、也≠「沒有」）。"""
+    rc, v = _live_mod().check(live_p, snap_p)
+    if rc == 0:
+        return 0, ["live: 現盤與正典快照逐位元組相同"]
+    if rc == 2:
+        return 2, [f"UNKNOWN: live 現盤缺位 {live_p}（看不到≠PASS、也≠『沒有』）"]
+    return 1, ["VIOLATION(live): " + s for s in v]
 
 
 def recompute_from_receipts() -> dict:
@@ -163,36 +190,73 @@ def selftest(verdict_p: pathlib.Path = VERDICT_DEFAULT,
             globals()["PIPELINE_DEFAULT"] = saved
     if not ok:
         return 1
+    # live 整合控制（r1530：閉環檢查預設含 live；暫態檔、不碰現盤）
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        td = pathlib.Path(td)
+        snap_b = verdict_p.read_bytes()
+        cut = snap_b.rfind(b"  ],")
+        good = td / "live_good.json"
+        good.write_bytes(snap_b)
+        rc, lines = live_section(good, verdict_p)
+        if rc != 0 or not any("live" in s for s in lines):
+            print("SELFTEST live 整合 FAIL [正控制]:", rc, lines)
+            return 1
+        bad = td / "live_bad.json"
+        bad.write_bytes(snap_b[:cut] + b'\n  "tail": {\n')
+        rc, lines = live_section(bad, verdict_p)
+        if rc != 1 or not any("VIOLATION" in s for s in lines):
+            print("SELFTEST live 整合 FAIL [n6 live 損傷]:", rc, lines)
+            return 1
+        rc, lines = live_section(td / "live_absent.json", verdict_p)
+        if rc != 2 or not any("UNKNOWN" in s for s in lines):
+            print("SELFTEST live 整合 FAIL [n7 live 缺位 UNKNOWN]:", rc, lines)
+            return 1
     print("VERDICT: E015_CLOSURE_OK")
     print("  files:", verdict_p, packet_p, backlog_p, PIPELINE_DEFAULT, sep="\n  ")
+    print("  live 整合：正控制＋n6 live 損傷＋n7 live 缺位 UNKNOWN 全生效")
     return 0
+
+
+def plain(verdict_p: pathlib.Path, packet_p: pathlib.Path, backlog_p: pathlib.Path,
+          live_p: pathlib.Path) -> tuple[int, list[str]]:
+    """plain 閉環檢查（r1530：預設含 live）：回 (rc, 行)。
+    rc=0 全過（含 live 相符）；1＝違規（快照違規或 live 損傷/漂移）；2＝UNKNOWN（live 缺位）。"""
+    missing = [f"missing file {n}: {p}" for n, p in
+               (("VERDICT.json", verdict_p), ("packet", packet_p), ("BACKLOG", backlog_p)) if not p.is_file()]
+    if missing:
+        return 1, missing
+    v = check(verdict_p.read_text(encoding="utf-8"),
+              packet_p.read_text(encoding="utf-8"),
+              backlog_p.read_text(encoding="utf-8"),
+              verdict_p)
+    if verdict_p == VERDICT_DEFAULT and hashlib.sha256(verdict_p.read_bytes()).hexdigest() != VERDICT_SHA256:
+        v.append("VERDICT 快照 sha256 drift")
+    if v:
+        return 1, ["VIOLATION: " + s for s in v]
+    rc_live, lv = live_section(live_p, verdict_p)
+    if rc_live == 1:
+        return 1, lv
+    if rc_live == 2:
+        return 2, lv
+    return 0, ["E015_CLOSURE: 0 違規（VERDICT.json 數字＋管線獨立重算＋管線 selftest＋packet＋BACKLOG 結案註記"
+               "＋live 現盤與正典逐位元組相同 全過）"]
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--selftest", action="store_true", help="正控制＋負控制自測")
+    ap.add_argument("--selftest", action="store_true", help="正控制＋負控制自測（含 live 整合控制）")
     ap.add_argument("--verdict", type=pathlib.Path, default=VERDICT_DEFAULT)
     ap.add_argument("--packet", type=pathlib.Path, default=PACKET_DEFAULT)
     ap.add_argument("--backlog", type=pathlib.Path, default=BACKLOG_DEFAULT)
+    ap.add_argument("--live", type=pathlib.Path, default=LIVE_DEFAULT,
+                    help="live 現盤 VERDICT.json（r1530 閉環檢查預設含 live；缺位＝UNKNOWN rc=2）")
     args = ap.parse_args()
     if args.selftest:
         return selftest(args.verdict, args.packet, args.backlog)
-    missing = [f"missing file {n}: {p}" for n, p in
-               (("VERDICT.json", args.verdict), ("packet", args.packet), ("BACKLOG", args.backlog)) if not p.is_file()]
-    if missing:
-        print(*missing, sep="\n")
-        return 1
-    v = check(args.verdict.read_text(encoding="utf-8"),
-              args.packet.read_text(encoding="utf-8"),
-              args.backlog.read_text(encoding="utf-8"),
-              args.verdict)
-    if args.verdict == VERDICT_DEFAULT and hashlib.sha256(args.verdict.read_bytes()).hexdigest() != VERDICT_SHA256:
-        v.append("VERDICT 快照 sha256 drift")
-    if v:
-        print(*("VIOLATION: " + s for s in v), sep="\n")
-        return 1
-    print("E015_CLOSURE: 0 違規（VERDICT.json 數字＋管線獨立重算＋管線 selftest＋packet＋BACKLOG 結案註記 全過）")
-    return 0
+    rc, lines = plain(args.verdict, args.packet, args.backlog, args.live)
+    print(*lines, sep="\n")
+    return rc
 
 
 if __name__ == "__main__":
