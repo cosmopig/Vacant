@@ -369,3 +369,10 @@
 - 沒驗證什麼：CI 結果（跑件中、下輪一次讀取）；R20261112_0820-1 驗收三項（worker 未收斂且 live 在途——worker 樹 g3_2_precheck selftest 紅於 line 31 hashlib 是該票工作本身、mainline 樹 g3_2_precheck.py 仍為 58 行舊版未受合併影響）；hidden 計分（人類/vlab 側）；G 系列發射（0 呼叫）。
 - 誠實記帳：0 model calls；無 push（loop 自推）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀；凍結 4 檔＋filing 6 sha 未改（anchors 5 passed 本輪新跑）；不以文書改動充實進度（本輪實質＝argon 合併＋BACKLOG 收口＋四項驗收重跑、全可機械複核）；worker 的 hashlib bug 不代修（票 0820-1 本身的工作、代修＝污染收斂判准）。
 - 下一步：worker 收斂後重驗 0820-1 驗收（g3_2_precheck --selftest＋g3_2_fire_summary --selftest＋pytest 2 檔）→升上三分支→freeze_check；e013 票（tickets/qwen/bounced/）候規劃者修驗收 grep 重驗；ci_status.py 一次讀取（不 poll）。
+
+## 2026-11-12 r1497（票 P20261112_0923-1 argon 合併驗證＋BACKLOG 雙向同步收口——重驗結案）
+- 做了什麼（0 model calls）：票的實質工作在 r1496 已完成並提交（merge 3a50221ca 在 HEAD 祖先鏈、5f7d0b774 is-ancestor OK；BACKLOG 同步 73837eae6、repo 與 ~/dev/ops/BACKLOG.md byte 一致、工作樹 clean）；本輪全鏈重驗＋票移 done/，無重複 commit、無空提交。
+- 驗證了什麼（本輪新跑）：驗收四項全 RC=0——g3_series_unverified_taxonomy --selftest→VERDICT: G3_SERIES_TAXONOMY_OK；l007_closure_check --selftest→VERDICT: L007_CLOSURE_OK；e010_closure_check --selftest→VERDICT: E010_CLOSURE_OK；venv pytest 3 檔 14 passed [100%]（末行 `.............. [100%]`）；`git diff --exit-code ops/BACKLOG.md` RC=0；line 50 e004 [x]＋line 101 e013 [x] 逐行核過。
+- 沒驗證什麼：CI（三分支跑件中、下輪 ci_status.py 一次讀取不 poll）；R20261112_0820-1（worker 未收斂、不升上、在途檔不碰）。
+- 誠實記帳：0 model calls；無 push/main/reset/rebase；本輪無新功能程式改動（實質改動 73837eae6 屬 r1496 已計，不重複計數）；凍結 4 檔／filing 未碰；hidden/scorer 未讀。
+- 下一步：ci_status.py 一次讀取（紅→讀 log 根因）；worker 收斂後重驗 0820-1 三項→升上三分支；e013 票（bounced/）候規劃者修驗收 grep 重驗。
