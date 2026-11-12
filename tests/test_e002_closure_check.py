@@ -1,27 +1,43 @@
 import unittest
 from pathlib import Path
-from ops.audits.e002_closure_check import main
+from ops.audits.e002_closure_check import check
 
 class TestE002ClosureCheck(unittest.TestCase):
-    def setUp(self):
-        # We don't want to actually touch the real files during unit tests if possible,
-        # but since e002_closure_check.py uses absolute paths for defaults and 
-        # we need to verify it works with them, we can just run it as is or mock.
-        pass
+    def test_report_cells_scored(self):
+        report = '{"cells_scored": 169, "infra": [1]*9, "per_arm": {}, "paired": {}}'
+        packet = "# Packet"
+        backlog = "- [x] **e002 完賽收尾"
+        violations = check(report, packet, backlog)
+        self.assertIn("REPORT cells_scored=169 != 170", violations)
 
-    def test_selftest_success(self):
-        """Verify that the script passes its own selftest on real data."""
-        # This will use the default paths defined in e002_closure_check.py
-        result = main()
-        self.assertEqual(result, 0, "Selftest should pass with correct files.")
+    def test_report_infra_count(self):
+        report = '{"cells_scored": 170, "infra": [1], "per_arm": {}, "paired": {}}'
+        packet = "# Packet"
+        backlog = "- [x] **e002 完賽收尾"
+        violations = check(report, packet, backlog)
+        self.assertIn("REPORT infra 數=1 != 9", violations)
 
-    def test_report_missing(self):
-        """Verify behavior when REPORT.json is missing."""
-        # We can't easily mock the default paths in the script without editing it,
-        # but we can check if it handles errors gracefully (returns 1).
-        # Since /srv/vlab/runs/... might exist, this test is slightly fragile 
-        # unless we ensure a dummy file doesn't exist.
-        pass
+    def test_report_per_arm(self):
+        # Missing C arm
+        report = '{"cells_scored": 170, "infra": [1]*9, "per_arm": {"A": {"n":34,"pass":18,"rate":0.5294}}, "paired": {}}'
+        packet = "# Packet"
+        backlog = "- [x] **e002 完賽收尾"
+        violations = check(report, packet, backlog)
+        self.assertTrue(any("per_arm[C]" in v for v in violations))
+
+    def test_packet_heading(self):
+        report = '{"cells_scored": 170, "infra": [1]*9, "per_arm": {"A":{"n":34,"pass":18,"rate":0.5294},"C":{"n":34,"pass":22,"rate":0.6471},"H":{"n":34,"pass":15,"rate":0.4412},"M":{"n":34,"pass":15,"rate":0.4412},"S":{"n":34,"pass":20,"rate":0.5882}}, "paired": {}}'
+        packet = "# Wrong Heading"
+        backlog = "- [x] **e002 完賽收尾"
+        violations = check(report, packet, backlog)
+        self.assertIn("packet 缺標題: '## 4. 預註冊判準（發射前寫死）'", violations)
+
+    def test_backlog_missing(self):
+        report = '{"cells_scored": 170, "infra": [1]*9, "per_arm": {"A":{"n":34,"pass":18,"rate":0.5294},"C":{"n":34,"pass":22,"rate":0.6471},"H":{"n":34,"pass":15,"rate":0.4412},"M":{"n":34,"pass":15,"rate":0.4412},"S":{"n":34,"pass":20,"rate":0.5882}}, "paired": {}}'
+        packet = "# Packet"
+        backlog = ""
+        violations = check(report, packet, backlog)
+        self.assertIn("BACKLOG 找不到項: '**e002 完賽收尾'", violations)
 
 if __name__ == "__main__":
     unittest.main()
