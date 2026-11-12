@@ -411,3 +411,10 @@
 - 坑：首版 BACKLOG 行 sha 釘含尾行換行（awk|sha256sum）與 splitlines() 口徑不符→正控制必紅；改以無換行行 sha 0bc4ff14… 釘住（e006 語義）後全綠。
 - 沒驗證什麼：CI（下輪三分支一次讀取、不 poll）；envelope 數值未對 cell.json 逐格獨立重算（直接採信 envelope_compliance.py 重算輸出）；量具只鎖 e008 結案文字與數值，不構成機制效力證明。
 - 紅線＋下一步：0 model calls；無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、凍結 4 檔＋filing 未改、0 行產品碼（新增檔 only）；票已 mv done/；下輪：CI 一次讀取→`bd list --parent vq-el4 --all` 照順序下一票。
+
+## 2026-11-12 r1515（票 P20261112_1528-2 done：e001 120 格基準結案機械複核量具＋單元測試）
+- 做了什麼（0 model calls）：新增 ops/audits/e001_closure_check.py（140 行、對齊 e008 架構、純 stdlib、CI-home 兼容）：REPORT.json（cells_scored=120/infra=14/A 28-60 rate 0.4667/C 34-60 rate 0.5667/C 臂 vacant_sha dd2c6746…/A_vs_C pairs=60 A_only=2 C_only=8 p=0.1094）＋envelope_compliance（C 臂 60 PASS/0 FAIL、home_bytes [27611,333481,1146648]）＋packet e001 標題＋審計報告（Total Cells Scored 120、McNemar p=0.1094；實位在 ~/dev/ops/audits/、量具 repo 路徑優先＋簿記目錄候選）＋BACKLOG 第 16 行 e001 執行樹（行 sha256 b71e9f07… 釘住、改動即紅）；--selftest 正控制＋4 負控制（pass 數/McNemar p/封包標題/審計報告關聯字 必紅）；--report 快照注入；缺檔乾淨退出。＋tests/test_e001_closure_check.py（54 行、3 測試：空 HOME selftest／正＋4 負／缺檔）。commit 26c2b14af；票已 mv done/。
+- 驗證了什麼（本輪新跑）：驗收 `python3 ops/audits/e001_closure_check.py --selftest && pytest tests/test_e001_closure_check.py`→VERDICT: E001_CLOSURE_OK＋3 passed、RC=0；非 selftest 路徑 rc=0；4 負控制逐一命中指定違規字串；envelope evaluate 單跑 0.04s；改前兩檔不存在（票面 exit 1/2）。
+- 坑：審計報告不在 repo（只在 ~/dev/ops/audits/）→e009 口徑候選路徑；`**Total Cells Scored**` markdown 粗體→剝 * 後匹配票面字串；首版 151 行超票 ≤140→精簡至 140 行整。
+- 沒驗證什麼：CI（下輪三分支一次讀取、不 poll）；envelope 數值未對 cell.json 逐格獨立重算（採信 envelope_compliance.py 重算輸出）；量具只鎖 e001 結案文字與數值、不構成機制效力證明。
+- 紅線＋下一步：0 model calls；無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未改、0 行產品碼（新增檔 only）；下輪：CI 一次讀取→bd list --parent vq-el4 --all 照順序下一票。
