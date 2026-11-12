@@ -1,0 +1,77 @@
+{
+  "schema": "vacant.audit/g3_3_h0_stability/1",
+  "ticket": "P20261112_0119-2",
+  "generated_at": "2026-11-12T02:22:10+00:00",
+  "model": "glm53",
+  "h2_rule": "3 次獨立 extract 呼叫 ≥2/3 次 ≥1 條確定性 claim（PASS/FAIL、程式重算）→H2_MET；既有 2 點 1 達 1 未達，故等價於 call3 產出 ≥1 條確定性 claim；call3=0（1/3 達）→H2_REFUTED（fail-closed：extract/parse 失敗＝空集合不計達；UNKNOWN 非裁決非通過 I-4；規則源：ops/reqloop/g3_2_candidate_hypothesis.md §6）",
+  "n_calls": 3,
+  "n_calls_reached": 1,
+  "h2_verdict": "H2_REFUTED",
+  "h2_consequence": "單呼叫 H0 門為呼叫隨機；停止規則：G 系列停止、上報人類；不加同題重試／靜態 prompt／錯誤字串 regex 工單",
+  "cost": {
+    "model_calls": 1,
+    "total_tokens": 7249
+  },
+  "calls": [
+    {
+      "call": 1,
+      "source": "prerun r1469",
+      "n_requirements": 7,
+      "n_deterministic_claims": 2,
+      "deterministic_claim_ids": [
+        "R1",
+        "R6"
+      ],
+      "input_sha256": "9ba533c056f1c4b307e474ae9455a1f759c31c297a0538612ab1d8d81b9cf9fd",
+      "reached": true
+    },
+    {
+      "call": 2,
+      "source": "fire r1472",
+      "n_requirements": 6,
+      "n_deterministic_claims": 0,
+      "deterministic_claim_ids": [],
+      "input_sha256": "9ba533c056f1c4b307e474ae9455a1f759c31c297a0538612ab1d8d81b9cf9fd",
+      "reached": false
+    },
+    {
+      "call": 3,
+      "source": "G3.3 第 3 次獨立 extract 呼叫（本票 --run）",
+      "input_sha256": "9ba533c056f1c4b307e474ae9455a1f759c31c297a0538612ab1d8d81b9cf9fd",
+      "n_requirements": 5,
+      "n_deterministic_claims": 0,
+      "deterministic_claim_ids": [],
+      "n_unverified_claims": 5,
+      "unverified_claims": [
+        {
+          "id": "R1",
+          "reason": "deliverable_not_in_request:分析時僅使用出現次數最多的三個 displacement 值"
+        },
+        {
+          "id": "R2",
+          "reason": "deliverable_not_in_request:每個 displacement 值分別計算 mpg 的平均與中位數，僅使用該 displacement 值的列"
+        },
+        {
+          "id": "R3",
+          "reason": "deliverable_not_in_request:所有結果四捨五入至小數點後兩位"
+        },
+        {
+          "id": "R4",
+          "reason": "deliverable_not_in_request:最終答案寫入工作區根目錄的 answer.txt"
+        },
+        {
+          "id": "R5",
+          "reason": "deliverable_not_in_request:不得修改輸入資料檔 data/auto-mpg.csv"
+        }
+      ],
+      "has_deterministic_claim": false,
+      "extract_error": null,
+      "parse_error": null,
+      "reached": false
+    }
+  ],
+  "manifest": {
+    "path": "ops/reqloop/g3_3/manifest.json",
+    "sha256": "b93209afb8a04027bb3d2adbe18545f37af56e31c8d52f06085f10499464ed31"
+  }
+}
