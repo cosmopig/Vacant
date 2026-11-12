@@ -48,8 +48,10 @@ def check_precheck(manifest: dict, screen_stdout: str | None = None, *, ref_dir:
             elif sha256(rp) != want:
                 errors.append(f"ref sha mismatch: {rel} (tid={tid})")
 
-    seen = set(manifest["bank"]["seen_set"])
-    unseen = [x for x in manifest["bank"]["ordering"] if x not in seen]
+    bank = manifest.get("bank", {})
+    seen_set = bank.get("seen_set", [])
+    ordering = bank.get("ordering", [])
+    unseen = [x for x in ordering if x not in seen_set]
     if len(unseen) != 4 or unseen != expected_tids:
         errors.append(f"unseen 前 4 ≠ tasks：{unseen}")
 

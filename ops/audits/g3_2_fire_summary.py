@@ -222,7 +222,7 @@ def build(raw: bytes, result_path: pathlib.Path) -> tuple[dict, list[str]]:
                             "daily_token_cap": (d.get("quota") or {}).get("daily_token_cap"),
                             "share_pct": (round((d.get("quota") or {}).get("known_tokens", 0) / (d.get("quota") or {}).get("daily_token_cap", 1) * 100, 2)
                                          if (d.get("quota") or {}).get("daily_token_cap") else None)},
-            "cost_usd": "UNKNOWN（產物無計價欄；glm CLI 計價缺值不填 0、cost_usd=0 不等於免費）",
+            "cost_usd": "UNKNOWN（產物無計價欄；glm CLI 計價缺值不填 0、cost_usd=0 不報 0 成本）",
         },
         "hidden_after": "4/4 UNKNOWN——不自己打分；打分照 /srv/vlab 作業慣例（人類/vlab 側）",
         "failures": [{"cells": sum(1 for c in cells if c.get("status") == "error"),

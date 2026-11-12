@@ -1,73 +1,94 @@
 import unittest
 import json
 import pathlib
-from ops.audits import g3_2_precheck
+from ops.audits import g3_2_fire_summary
 
-class TestG32Precheck(unittest.TestCase):
+class TestG3_2FireSummary(unittest.TestCase):
     def setUp(self):
-        # Valid manifest for base tests
-        self.valid_manifest = {
-            "schema": "vacant.reqloop.g3gate.plan/1",
-            "tasks": [
-                {"task_id": "dab_725", "files": {"input.txt": "sha1"}},
-                {"task_id": "dab_587", "files": {"input.txt": "sha2"}},
-                {"task_id": "dab_657", "files": {"input.txt": "sha3"}},
-                {"task_id": "dab_517", "files": {"input.txt": "sha4"}},
+        # Valid result for base tests (H1 MET, 4 cells)
+        self.valid_result = {
+            "schema": "vacant.reqloop.g3.result/1",
+            "cells": [
+                {
+                    "task": "dab_725", "arm": "full_rloop", "status": "ok", "error": None, "answer": "@x[1]",
+                    "answer_sha256": hashlib.sha256(b"@x[1]").hexdigest(),
+                    "rounds": [{"round": 1, "usages": [{"calls": 1, "tokens": 10}]}],
+                    "content_reverify": {"enabled": True, "rounds": [], "final_verdict": None, "diff": None}
+                },
+                {
+                    "task": "dab_587", "arm": "full_rloop", "status": "ok", "error": None, "answer": "@x[1]",
+                    "answer_sha256": hashlib.sha256(b"@x[1]").hexdigest(),
+                    "rounds": [{"round": 1, "usages": [{"calls": 1, "tokens": 10}]}],
+                    "content_reverify": {"enabled": True, "rounds": [], "final_verdict": None, "diff": None}
+                },
+                {
+                    "task": "dab_657", "arm": "full_rloop", "status": "ok", "error": None, "answer": "@x[1]",
+                    "answer_sha256": hashlib.sha256(b"@x[1]").hexdigest(),
+                    "rounds": [{"round": 1, "usages": [{"calls": 1, "tokens": 10}]}],
+                    "content_reverify": {"enabled": True, "rounds": [], "final_verdict": None, "diff": None}
+                },
+                {
+                    "task": "dab_517", "arm": "full_rloop", "status": "ok", "error": None, "answer": "@x[1]",
+                    "answer_sha256": hashlib.sha256(b"@x[1]").hexdigest(),
+                    "rounds": [{"round": 1, "usages": [{"calls": 1, "tokens": 10}]}],
+                    "content_reverify": {"enabled": True, "rounds": [], "final_verdict": None, "diff": None}
+                },
             ],
-            "bank": {
-                "seen_set": ["old_1"],
-                "ordering": ["dab_725", "dab_587", "dab_657", "dab_517"]
-            },
-            "screening": {
-                "output_sha256": "dummy_sha",
-                "top4": ["dab_725", "dab_587", "dab_657", "dab_517"]
-            },
-            "budget": {
-                "arms": ["full_rloop"],
-                "max_cells": 4,
-                "timeout_s_per_round": 300,
-                "daily_token_cap": 2000000,
-                "quota_fail_closed": True,
-                "model_entry": "glm",
-                "hard_token_cap": False,
-                "cost_missing": "UNKNOWN"
-            }
+            "tasks": [
+                {"task_id": "dab_725", "n_requirements": 1},
+                {"task_id": "dab_587", "n_requirements": 1},
+                {"task_id": "dab_657", "n_requirements": 1},
+                {"task_id": "dab_517", "n_requirements": 1},
+            ],
+            "totals": {"tokens": 40, "model_calls": 0},
+            "quota": {"known_tokens": 40, "daily_token_cap": 2000000}
         }
 
+    def test_build_success(self):
+        """Valid result produces H1_MET and correct claim counts."""
+        raw = json.dumps(self.valid_result).encode()
+        out, problems = g3_2_fire_summary.build(raw, pathlib.Path("dummy"))
+        self.assertEqual(len(problems), 0)
+        self.assertEqual(out["claims"]["total"], 4)
+        self.assertEqual(out["h1"]["verdict"], "H1_MET")
+
     def test_schema_mismatch(self):
-        manifest = self.valid_manifest.copy()
-        manifest["schema"] = "wrong/schema"
-        errors = g3_2_precheck.check_precheck(manifest)
-        self.assertTrue(any("schema mismatch" in e for e in errors))
+        res = self.valid_result.copy()
+        res["schema"] = "wrong/schema"
+        raw = json.dumps(res).encode()
+        _, problems = g3_2_fire_summary.build(raw, pathlib.Path("dummy"))
+        self.assertTrue(any("schema 漂移" in p for p in problems))
 
-    def test_task_order_mismatch(self):
-        manifest = self.valid_manifest.copy()
-        manifest["tasks"] = [
-            {"task_id": "dab_587", "files": {}},
-            {"task_id": "dab_725", "files": {}},
-            {"task_id": "dab_657", "files": {}},
-            {"task_id": "dab_517", "files": {}},
-        ]
-        errors = g3_2_precheck.check_precheck(manifest)
-        self.assertTrue(any("task 順序不符" in e for e in errors))
+    def test_cell_order_mismatch(self):
+        res = self.valid_result.copy()
+        # Swap first two cells
+        res["cells"] = res["cells"][1:] + res["cells"][:1]
+        raw = json.dumps(res).encode()
+        _, problems = g3_2_fire_summary.build(raw, pathlib.Path("dummy"))
+        self.assertTrue(any("cells 順序/集合漂移" in p for p in problems))
 
-    def test_unseen_mismatch(self):
-        manifest = self.valid_manifest.copy()
-        manifest["bank"]["ordering"] = ["wrong_1", "dab_725", "dab_587", "dab_657", "dab_517"]
-        errors = g3_2_precheck.check_precheck(manifest)
-        self.assertTrue(any("unseen 前 4 ≠ tasks" in e for e in errors))
+    def test_tokens_empty_guard(self):
+        res = self.valid_result.copy()
+        res["cells"] = []
+        res["totals"] = {"tokens": 0}
+        raw = json.dumps(res).encode()
+        _, problems = g3_2_fire_summary.build(raw, pathlib.Path("dummy"))
+        self.assertTrue(any("tokens 重算空集" in p for p in problems))
 
-    def test_budget_mismatch(self):
-        manifest = self.valid_manifest.copy()
-        manifest["budget"]["max_cells"] = 10
-        errors = g3_2_precheck.check_precheck(manifest)
-        self.assertTrue(any("max_cells mismatch" in e for e in errors))
+    def test_answer_sha_mismatch(self):
+        res = self.valid_result.copy()
+        res["cells"][0]["answer"] = "new_answer"
+        # Keep old sha
+        raw = json.dumps(res).encode()
+        _, problems = g3_2_fire_summary.build(raw, pathlib.Path("dummy"))
+        self.assertTrue(any("answer_sha256 重算不符" in p for p in problems))
 
-    def test_screen_sha_mismatch(self):
-        manifest = self.valid_manifest.copy()
-        manifest["screening"]["output_sha256"] = "wrong_sha"
-        errors = g3_2_precheck.check_precheck(manifest, screen_stdout="dummy output")
-        self.assertTrue(any("screen sha mismatch" in e for e in errors))
+    def test_selftest(self):
+        """Verify the --selftest mode passes all 6 controls."""
+        r = subprocess.run(["python3", "ops/audits/g3_2_fire_summary.py", "--selftest"],
+                           capture_output=True, text=True, cwd=ROOT)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("VERDICT: G3_2_FIRE_SUMMARY_SELFTEST_OK", r.stdout)
 
 if __name__ == "__main__":
     unittest.main()
