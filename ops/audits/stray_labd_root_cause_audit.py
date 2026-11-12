@@ -110,7 +110,7 @@ def selftest(tmp: Path) -> int:
 
     def ck(name: str, cond: bool) -> None:
         nonlocal ok
-        print(("PASS " if cond else "FAIL ") + f"control {name}")
+        print(f"control {name}: " + ("PASS" if cond else "FAIL"))
         ok = ok and bool(cond)
 
     s.write_text(_line("93a55755", f"kill 1638 && sleep 2; {NOHUP_FRAG}") + "\n", encoding="utf-8")
