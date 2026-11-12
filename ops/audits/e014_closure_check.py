@@ -37,13 +37,18 @@ def check(report_text: str, packet_text: str, backlog_text: str) -> list[str]:
         a = arms.get(arm) or {}
         if (a.get("n"), a.get("pass"), a.get("rate")) != want:
             out.append(f"per_arm[{arm}] n/pass/rate={a.get('n')!r}/{a.get('pass')!r}/{a.get('rate')!r} != {want[0]}/{want[1]}/{want[2]}")
-    for key in ("A_vs_C", "A_vs_CB"):
+    for key, c_key in (("A_vs_C", "C_only"), ("A_vs_CB", "CB_only")):
         p = (d.get("paired", {}) or {}).get(key) or {}
-        if p.get("mcnemar_p_two_sided") != 1.0:
-            out.append(f"paired[{key}].mcnemar_p_two_sided={p.get('mcnemar_p_two_sided')!r} != 1.0")
+        if (p.get("pairs"), p.get("A_only"), p.get(c_key), p.get("mcnemar_p_two_sided")) != (26, 1, 2, 1.0):
+            out.append(f"paired[{key}] pairs/A_only/{c_key}/mcnemar_p={(p.get('pairs'), p.get('A_only'), p.get(c_key), p.get('mcnemar_p_two_sided'))!r} != (26, 1, 2, 1.0)")
     cb, cc, ca = arms.get("CB") or {}, arms.get("C") or {}, arms.get("A") or {}
     if cb.get("pass") != cc.get("pass"):
         out.append(f"CB vs C 零分歧對必要條件違反：pass CB={cb.get('pass')!r} != C={cc.get('pass')!r}")
+    if REPORT_DEFAULT.parent.is_dir():
+        c_map = {p.parent.name.split("-")[1]: json.loads(p.read_text()).get("pass") for p in REPORT_DEFAULT.parent.glob("*-pi-C-r1/score.json")}
+        cb_map = {p.parent.name.split("-")[1]: json.loads(p.read_text()).get("pass") for p in REPORT_DEFAULT.parent.glob("*-pi-CB-r1/score.json")}
+        if len(c_map) != 26 or c_map != cb_map:
+            out.append(f"CB vs C 逐題分歧對 != 0（26 題比對不符）")
     for k in ("calls_per_success", "tokens_per_success"):
         if not (cb.get(k) and ca.get(k)):
             out.append(f"成本 {k} 缺值（CB/A）")
@@ -51,17 +56,14 @@ def check(report_text: str, packet_text: str, backlog_text: str) -> list[str]:
             out.append(f"成本紅線 CB/A {k}={cb[k] / ca[k]:.3f} 未 < 2.0")
     if not packet_text.strip():
         out.append("packet 為空")
-    lines = backlog_text.splitlines()
-    if len(lines) < BACKLOG_LINE_NO:
-        out.append(f"BACKLOG 少於 {BACKLOG_LINE_NO} 行")
-        return out
-    ln = lines[BACKLOG_LINE_NO - 1]
-    if not ln.lstrip().startswith("- [x]"):
-        out.append(f"BACKLOG 第 {BACKLOG_LINE_NO} 行未勾選 [x]: {ln.lstrip()[:48]}")
-    if BACKLOG_KEY not in ln:
-        out.append(f"BACKLOG 第 {BACKLOG_LINE_NO} 行缺 e014 完賽項")
-    if BACKLOG_VERDICT not in ln:
-        out.append(f"BACKLOG 第 {BACKLOG_LINE_NO} 行缺裁決註記（H1 在 DABStep 被否）")
+    ln = next((l for l in backlog_text.splitlines() if BACKLOG_KEY in l), None)
+    if ln is None:
+        out.append("BACKLOG 缺 e014 完賽項")
+    else:
+        if not ln.lstrip().startswith("- [x]"):
+            out.append(f"BACKLOG e014 項未勾選 [x]: {ln.lstrip()[:48]}")
+        if BACKLOG_VERDICT not in ln:
+            out.append("BACKLOG e014 項缺裁決註記（H1 在 DABStep 被否）")
     return out
 
 def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
@@ -72,9 +74,8 @@ def check_snapshot(p: pathlib.Path, want: str) -> list[str]:
     if hashlib.sha256(raw).hexdigest() == want:
         return []
     if want == BACKLOG_SHA256:
-        lines = raw.decode("utf-8", errors="replace").splitlines()
-        if len(lines) >= BACKLOG_LINE_NO and hashlib.sha256(
-                lines[BACKLOG_LINE_NO - 1].encode("utf-8")).hexdigest() == BACKLOG_LINE_SHA256:
+        ln = next((s for s in raw.decode("utf-8", errors="replace").splitlines() if BACKLOG_KEY in s), "")
+        if hashlib.sha256(ln.encode("utf-8")).hexdigest() == BACKLOG_LINE_SHA256:
             return []
     return [f"snapshot sha256 drift {p.name}: {hashlib.sha256(raw).hexdigest()[:12]}… != 釘住 {want[:12]}…（凍結紀錄，改動即紅）"]
 
@@ -117,12 +118,12 @@ def main() -> int:
     args = ap.parse_args()
     if args.selftest:
         return selftest(args.report, args.packet, args.backlog)
-    v = check(args.report.read_text(encoding="utf-8"),
-              args.packet.read_text(encoding="utf-8"),
-              args.backlog.read_text(encoding="utf-8"))
+    missing = [f"missing file {n}: {p}" for n, p in (("REPORT.json", args.report), ("packet", args.packet), ("BACKLOG", args.backlog)) if not p.is_file()]
+    if missing:
+        print(*missing, sep="\n"); return 1
+    v = check(args.report.read_text(encoding="utf-8"), args.packet.read_text(encoding="utf-8"), args.backlog.read_text(encoding="utf-8"))
     v += _pinned(args.report) + _pinned(args.packet) + _pinned(args.backlog)
-    if v:
-        print("\n".join(v))
+    if v: print("\n".join(v))
     print("VERDICT: " + ("E014_CLOSURE_OK" if not v else "E014_CLOSURE_FAIL"))
     return 0 if not v else 1
 
