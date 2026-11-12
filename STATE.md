@@ -424,3 +424,9 @@
 - 驗證了什麼（本輪新跑）：改前用票面 CI 模擬指令（copytree ops/tests 至 /var/tmp＋pytest）重現 2 failed, 1 passed「missing file 審計報告: /var/tmp/ops/audits/e001_pi_AC_baseline.md」RC=1；改後同指令→3 passed in 0.14s＋assert 成功＋`--selftest` VERDICT: E001_CLOSURE_OK RC=0；本機 repo pytest 該檔 3 passed。
 - 沒驗證什麼：三分支 CI（下輪一次讀取、不 poll）；e009 與 reqloop_freeze_check 兩組紅燈不屬本票範圍（票面只限 e001 結案量具），待對應工單。
 - 紅線＋下一步：0 model calls；無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未改；下輪：CI 一次讀取→bd list --parent vq-el4 --all 照順序下一票。
+
+## 2026-11-12 r1519（票 P20261112_1728-2 done：CI 紅燈修復——e009 封包與 L2C1 路徑候選補本機實體簿記目錄）
+- 做了什麼（0 model calls）：ops/audits/e009_closure_check.py::PACKET_DEFAULT/L2C1_DEFAULT 各補第三候選（/home/user1/dev/ops/packets/e009_replicate_e002_AC.md 與 audits/e009_outputs/l2c1.json 實體路徑，取首個存在）；1 檔 2 行、140 行不增、0 新外部依賴；tests/test_e009_closure_check.py 未改、負控制未放寬。commit 4ea62cd0b；票已 mv done/。
+- 驗證了什麼（本輪新跑）：票面 CI 模擬指令（copytree ops/tests 至 /var/tmp＋pytest）→3 passed in 0.14s＋assert 成功＋`--selftest` VERDICT: E009_CLOSURE_OK RC=0；本機 repo pytest 該檔 3 passed。
+- 沒驗證什麼：三分支 CI（下輪一次讀取、不 poll）；reqloop_freeze_check 紅燈（argon/worker 分支）不屬本票範圍、待對應工單。
+- 紅線＋下一步：0 model calls；無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 檔＋g25 filing 未改；下輪：CI 一次讀取→bd list --parent vq-el4 --all 照順序下一票。
