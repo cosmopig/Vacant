@@ -1,6 +1,7 @@
 import unittest
 import json
 import pathlib
+import subprocess
 from ops.audits.g3_2_precheck import check_precheck
 
 REF = pathlib.Path("/home/user1/dev/ops/ref/bm_tasks/dabench")
@@ -54,7 +55,10 @@ class TestG3_2Precheck(unittest.TestCase):
             rel = f"f{idx+1}"
             self.valid_manifest["tasks"][idx]["files"][rel] = hashlib.sha256(b"content").hexdigest()
 
-        errors = check_precheck(self.valid_manifest, screen_stdout="dummy\n{\"top4\": [\"dab_725\", \"dab_587\", \"dab_657\", \"dab_517\"]}", 
+        dummy_stdout = 'dummy\n{"top4": ["dab_725", "dab_587", "dab_657", "dab_517"]}'
+        self.valid_manifest["screening"]["output_sha256"] = hashlib.sha256(dummy_stdout.encode("utf-8")).hexdigest()
+
+        errors = check_precheck(self.valid_manifest, screen_stdout=dummy_stdout, 
                                  ref_dir=REF, local_dir=LOCAL)
         self.assertEqual(errors, [])
 
@@ -105,11 +109,9 @@ class TestG3_2Precheck(unittest.TestCase):
 
     def test_missing_ref_fail_closed(self):
         # Ensure ref_dir is a non-existent path or similar to trigger fail-closed if needed
-        # But the requirement says "含 ref_dir 指向不存在目錄時 fail-closed"
         # In check_precheck, it checks lp.is_file() and rp.is_file(). 
         # If rp is not a file, it adds an error.
         self.valid_manifest["tasks"][0]["files"]["f1"] = "sha1"
         errors = check_precheck(self.valid_manifest, screen_stdout="dummy\n{\"top4\": [\"dab_725\", \"dab_587\", \"dab_657\", \"dab_517\"]}", 
                                  ref_dir=pathlib.Path("/non/existent"), local_dir=LOCAL)
         self.assertTrue(any("missing ref" in e for e in errors))
-

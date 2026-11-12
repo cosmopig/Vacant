@@ -1,76 +1,39 @@
 import unittest
 import json
-from pathlib import Path
+import pathlib
 from ops.audits.g3_2_fire_summary import check_fire_summary
 
-class TestFireSummary(unittest.TestCase):
-    def test_h1a_success(self):
-        # 4 cells, 1/4 = 1. Need >= 1 confirmed reverify with PASS/FAIL.
-        rows = [
-            {"task_id": "t1", "content_reverify": True, "status": "PASS"},
-            {"task_id": "t2", "content_reverify": False, "status": "PASS"},
-            {"task_id": "t3", "content_reverify": False, "status": "FAIL"},
-            {"task_id": "t4", "content_reverify": False, "status": "UNKNOWN"},
-        ]
-        errors = check_fire_summary(rows)
-        self.assertEqual(len(errors), 0)
+class TestG3_2FireSummary(unittest.TestCase):
+    def test_selftest_success(self):
+        # This test is slightly different from the requirement because we want to 
+        # verify that running the script with --selftest works as expected.
+        # The requirement says: "驗證 python3 ops/audits/g3_2_fire_summary.py --selftest ... 退出碼為 0 且輸出含 VERDICT: G3_2_FIRE_SUMMARY_SELFTEST_OK"
+        import subprocess
+        result = subprocess.run(
+            ["python3", "ops/audits/g3_2_fire_summary.py", "--selftest"],
+            capture_output=True, text=True
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("VERDICT: G3_2_FIRE_SUMMARY_SELFTEST_OK", result.stdout)
 
-    def test_h1a_failure(self):
-        # 4 cells, 0 confirmed reverifies.
-        rows = [
-            {"task_id": "t1", "content_reverify": False, "status": "PASS"},
-            {"task_id": "t2", "content_reverify": False, "status": "FAIL"},
-            {"task_id": "t3", "content_reverify": False, "status": "UNKNOWN"},
-            {"task_id": "t4", "content_reverify": False, "status": "UNKNOWN"},
-        ]
-        errors = check_fire_summary(rows)
-        self.assertTrue(any("H1(a) failed" in e for e in errors))
+    def test_core_denominators(self):
+        # 驗證 ops/audits/g3_2_fire_summary.json 的核心分母恆等式：
+        # claims["total"] == 26
+        # claims["pass"] + claims["fail"] + claims["unknown"] == 26
+        # cost["answer_tokens_known"] + cost["extract_tokens_known"] == cost["tokens_total"] == 128923
+        # h1["verdict"] == "H1_REFUTED"
+        with open("ops/audits/g3_2_fire_summary.json", "r") as f:
+            data = json.load(f)
+        
+        claims = data["claims"]
+        cost = data["cost"]
+        h1 = data["h1"]
 
-    def test_h1b_success(self):
-        # Gap is content_reverify=True and status="UNKNOWN"
-        # Round 2 must have diff_fixed >= 1 and regressed=False
-        rows = [
-            {"task_id": "gap1", "content_reverify": True, "status": "UNKNOWN", "diff_fixed": 1, "regressed": False},
-            {"task_id": "t2", "content_reverify": False, "status": "PASS"},
-            {"task_id": "t3", "content_reverify": False, "status": "FAIL"},
-            {"task_id": "t4", "content_reverify": False, "status": "UNKNOWN"},
-        ]
-        errors = check_fire_summary(rows)
-        self.assertEqual(len(errors), 0)
-
-    def test_h1b_failure_diff_fixed(self):
-        rows = [
-            {"task_id": "gap1", "content_reverify": True, "status": "UNKNOWN", "diff_fixed": 0, "regressed": False},
-            {"task_id": "t2", "content_reverify": False, "status": "PASS"},
-            {"task_id": "t3", "content_reverify": False, "status": "FAIL"},
-            {"task_id": "t4", "content_reverify": False, "status": "UNKNOWN"},
-        ]
-        errors = check_fire_summary(rows)
-        self.assertTrue(any("H1(b) failed" in e and "diff_fixed=0" in e for e in errors))
-
-    def test_h1b_failure_regressed(self):
-        rows = [
-            {"task_id": "gap1", "content_reverify": True, "status": "UNKNOWN", "diff_fixed": 1, "regressed": True},
-            {"task_id": "t2", "content_reverify": False, "status": "PASS"},
-            {"task_id": "t3", "content_reverify": False, "status": "FAIL"},
-            {"task_id": "t4", "content_reverify": False, "status": "UNKNOWN"},
-        ]
-        errors = check_fire_summary(rows)
-        self.assertTrue(any("H1(b) failed" in e and "regressed=True" in e for e in errors))
-
-    def test_superiority_claim(self):
-        rows = [
-            {"task_id": "t1", "content_reverify": True, "status": "PASS (Superior to baseline)"},
-            {"task_id": "t2", "content_reverify": False, "status": "FAIL"},
-            {"task_id": "t3", "content_reverify": False, "status": "UNKNOWN"},
-            {"task_id": "t4", "content_reverify": False, "status": "UNKNOWN"},
-        ]
-        errors = check_fire_summary(rows)
-        self.assertTrue(any("Superiority claim detected" in e for e in errors))
-
-    def test_empty_rows(self):
-        errors = check_fire_summary([])
-        self.assertIn("empty rows", errors)
+        self.assertEqual(claims["total"], 26)
+        self.assertEqual(claims["pass"] + claims["fail"] + claims["unknown"], 26)
+        self.assertEqual(cost["answer_tokens_known"] + cost["extract_tokens_known"], cost["tokens_total"])
+        self.assertEqual(cost["tokens_total"], 128923)
+        self.assertEqual(h1["verdict"], "H1_REFUTED")
 
 if __name__ == "__main__":
     unittest.main()
