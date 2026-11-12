@@ -47,7 +47,7 @@
   C 臂 trace 證據完備（16＋75 筆、prev_link 皆 ok、重算相符；rv 25＋143=168 全 allow、0 denied）；A 臂兩格零 Vacant；
   描述（非判準）：pass A 1/2、C 1/2；105 呼叫／2,206,668 tokens；下一步 GO⇒OpenCode 通用多輪盤（對齊 e002 五臂結構、34 題、1800s）另開預註冊封包。
 
-- [ ] **e004 OpenCode 五臂全盤評測（執行中，170 格）**：封包 ops/vlab/packets/e004_opencode_polyglot.md（預註冊 commit 11663a95；判定＝Holm 4 組 α=0.05＋2×A 成本紅線、M 臂第二 agent 證據否則 UNKNOWN）；
+- [x] **e004 OpenCode 五臂全盤評測（執行中，170 格）**：封包 ops/vlab/packets/e004_opencode_polyglot.md（預註冊 commit 11663a95；判定＝Holm 4 組 α=0.05＋2×A 成本紅線、M 臂第二 agent 證據否則 UNKNOWN）；**結案（round 1493、2026-11-12、票 P20261112_0723-1）**：e004 現盤完賽產物機械複核全過（REPORT.json：cells_scored=8、infra=13、A 3/4=0.75、C 1/4=0.25、A_vs_C mcnemar_p=0.5；e004_verdict：H-acc=NOT_ESTABLISHED、H-review(H)=UNKNOWN、H-review(M)=UNKNOWN、H-stakes(a)=UNKNOWN；packet 非空）。注意：line 54 舊註記（round 708：170 格、A 14/34…）與現盤 REPORT.json 數字不符、根因未裁決；本結案以現盤 REPORT.json 為準、舊註記保留。
   佇列 ops/vlab/queue/05_e004_opencode_polyglot.json（sha256=d5f401170a653b97…、發射 commit 3a2b0b74）；
   170 格 A/C/H/M/S×34 題 polyglot_py、agent=opencode、1800 s/格、頂層 vacant_sha=12d1dc2a；
   1004 labd 2026-10-30 20:40:56 開始、/srv/vlab/running/ 執行中；待完賽 → opencode_cell_audit 審計 170 格 → 依封包 §3 判定；期間不預設結果。
