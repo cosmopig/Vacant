@@ -4,9 +4,9 @@
 - **r1479b 文書核對（票內 redo、0 model calls，報告數字判定經核準確、無更正）**：
   - 規則源逐行核對 g3_2 §6（本假說＋腳本＋報告 `h2_rule` 皆逐字吻合：≥2/3、既有 1 達 1 未達、否決條件、停止規則、後續任務單）。
   - call3 五條 quote 逐字核對數據資料夾文書（`instruction.txt`→`goal.md`＋`contract.md`）：頂三 displacement、分值計算、兩位小數、`answer.txt` 根目錄、資料檔不改——全為真實業務規則、無幻覺需求；6 個答案項（@mean1…@median3）俱在 verifier params 內。
-  - 全 5 條 unverified 的唯一致敗因子＝glm53 把**描述性短句**寫入 `deliverable` 欄（prompt 明禁「不准寫描述性短句」；凍結 `extract._deliverable_problem` 依設計拒收）；模型其實知道正確檔名（`answer.txt`／`data/auto-mpg.csv` 俱見於其短句內）→ 非請求覆蓋缺口，係 extract 側欄位合規的呼叫隨機性。
+  - 全 5 條 unverified 的唯一致敗因子＝glm53 把**描述性短句**寫入 `deliverable` 欄（prompt 明禁「不准寫描述性短句」；凍結 `extract._deliverable_problem` 依設計拒收）；惟原文「模型其實知道正確檔名（俱見於其短句內）」為過度宣稱——r1486 更正（票 R20261112_0422-1 機械分類 `ops/audits/g3_series_unverified_taxonomy.py`／`.json`）：5 條中僅 1/5 含 `answer.txt`（R4）、1/5 含輸入檔名 `data/auto-mpg.csv`（R5）、3/5（R1/R2/R3）完全不含檔名 → 致敗因子仍為 extract 側欄位合規的呼叫隨機性，但「自短句恢復檔名」的適用面僅 2/5。
   - 三次呼叫對照：call1（R1/R6 達）用裸檔名 `answer.txt` 即過、其餘 3 條 unverified 為猜名「analysis」；call2（fire）6 條、call3 5 條全同型（短句入 deliverable）——同 input、同模型、同 prompt，僅 `deliverable` 欄合規隨呼叫漂移。
-  - → 人類裁決方向中「**交付物命名強化**」（extract 側欄位正規化／自短句恢復檔名）證據力最強；本系列仍不單方面解凍 4 檔。
+  - → r1486 更正（票 R20261112_0422-1）：單靠「自 deliverable 短句恢復檔名」不足以單獨解決——跨 4 批 52 條 `deliverable_not_in_request` 中 14/52 含 `answer.txt`、6/52 僅含輸入路徑、32/52 無檔名；人類裁決方向「**交付物命名強化**」（extract 側欄位正規化／自短句恢復檔名）須搭配「從請求上下文預設唯一輸出檔」或「調整擷取結構」才成立；本系列仍不單方面解凍 4 檔。
 - 狀態（2026-11-12 r1477、歷史）：**凍結完成（P20261112_0119-1）；未發射（0 model calls）**——
   manifest `ops/reqloop/g3_3/manifest.json`（schema `vacant.reqloop.g3gate.plan/1`）＋
   任務輸入凍結副本 `ops/reqloop/g3_3/tasks/dab_725/`（與 g3_2 byte-identical、逐檔 sha256 核）
