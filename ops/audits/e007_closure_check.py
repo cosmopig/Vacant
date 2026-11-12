@@ -81,9 +81,9 @@ def check(report_text: str, packet_text: str, backlog_text: str,
         out.append(f"BACKLOG e007 目標行 sha256 漂移（第 {BACKLOG_LINE_NO} 行釘住 {BACKLOG_LINE_SHA256[:12]}…、改動即紅）")
     return out
 
-def _read_or_die(p, name):
+def _read_or_die(p: pathlib.Path, name: str):
     """缺檔印一欄乾淨訊息並回 None（不拋未捕獲異常）。"""
-    if p is None or not isinstance(p, pathlib.Path) or not p.is_file():
+    if not p.is_file():
         print(f"missing file {name}: {p}")
         return None
     return p.read_text(encoding="utf-8")
