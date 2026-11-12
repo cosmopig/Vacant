@@ -1,39 +1,53 @@
-import unittest
-from pathlib import Path
+"""e013_closure_check 單元測試（票 R20261112_1821-1；對齊 test_e009_closure_check 架構）。
+
+驗收：--selftest 在空 HOME（模擬本機 CI /var/tmp/ci-home）下返回 0、
+輸出含 VERDICT: E013_CLOSURE_OK；另直接驗證 check() 正控制與 4 類篡改必紅、
+缺檔時乾淨退出不拋未捕獲異常（BACKLOG 目標行 sha256 釘住、改動即紅）。
+"""
+import importlib.util
+import os
+import pathlib
+import subprocess
 import sys
 
-# Add current dir to path for imports if needed, but we use absolute paths or relative to script
-sys.path.append(str(Path(__file__).resolve().parents[2]))
+REPO = pathlib.Path(__file__).resolve().parents[1]
+SCRIPT = REPO / "ops/audits/e013_closure_check.py"
 
-from ops.audits.e013_closure_check import selftest
 
-class TestE013ClosureCheck(unittest.TestCase):
-    def test_selftest_success(self):
-        # 驗證 --selftest 在空 HOME 下退出碼為 0 且輸出含 VERDICT: E013_CLOSURE_OK
-        # 注意：這裡需要模擬檔案內容，但 selftest 會讀取真實路徑。
-        # 因為我們在本地執行，且目標檔案確實存在於 /srv/vlab/...
-        # 我們直接呼叫並檢查輸出即可。
-        import io
-        from contextlib import redirect_stdout
-        f = io.StringIO()
-        with redirect_stdout(f):
-            exit_code = selftest(
-                Path("/srv/vlab/runs/e013_dabench_pi_AC_full/REPORT.json"),
-                Path("/home/user1/dev/ops/packets/e013_dabench_full.md"),
-                Path("/home/user1/dev/ops/BACKLOG.md"),
-                None,
-                Path("/srv/vlab/runs")
-            )
-        output = f.getvalue()
-        self.assertEqual(exit_code, 0)
-        self.assertIn("VERDICT: E013_CLOSURE_OK", output)
+def _load():
+    spec = importlib.util.spec_from_file_location("e013_closure_check", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
-    def test_negative_controls(self):
-        # 驗證 4 個負控制全部生效
-        # 我們需要模擬被篡改的內容。由於 selftest 內部會讀取檔案，我們可以用臨時檔案或 mock。
-        # 但為了簡單且符合「不依賴 Path.home()」與「純 stdlib」，我們直接檢查腳本邏輯是否正確。
-        # 這裡我們選擇用一個簡單的測試：確保 selftest 能辨識出錯誤。
-        pass
 
-if __name__ == "__main__":
-    unittest.main()
+def test_selftest_ok_under_empty_home(tmp_path):
+    env = {**os.environ, "HOME": str(tmp_path / "empty-home")}
+    p = subprocess.run([sys.executable, str(SCRIPT), "--selftest"],
+                       capture_output=True, text=True, timeout=120, env=env)
+    assert p.returncode == 0, p.stdout + p.stderr
+    assert "VERDICT: E013_CLOSURE_OK" in p.stdout
+
+
+def test_check_positive_and_four_negatives():
+    mod = _load()
+    report = mod.REPORT_DEFAULT.read_text(encoding="utf-8")
+    packet = mod.PACKET_DEFAULT.read_text(encoding="utf-8")
+    backlog = mod.BACKLOG_DEFAULT.read_text(encoding="utf-8")
+    assert mod.check(report, packet, backlog, None, mod.RUNS_BASE) == []
+    v = mod.check(report.replace('"pass": 28', '"pass": 27', 1), packet, backlog, None, mod.RUNS_BASE)
+    assert any("per_arm[A]" in s for s in v)
+    v = mod.check(report.replace('"mcnemar_p_two_sided": 1.0', '"mcnemar_p_two_sided": 0.01', 1), packet, backlog, None, mod.RUNS_BASE)
+    assert any("A_vs_C" in s for s in v)
+    v = mod.check(report, packet, backlog.replace("- [x] **e013_dabench_pi_AC_full 完賽收尾", "- [ ] **e013_dabench_pi_AC_full 完賽收尾", 1), None, mod.RUNS_BASE)
+    assert any("未勾選" in s for s in v)
+    v = mod.check(report, packet, backlog.replace("round 875 完賽裁決（分支 4）＋結案", "", 1), None, mod.RUNS_BASE)
+    assert any("缺裁決註記" in s for s in v)
+
+
+def test_missing_file_clean_exit(tmp_path):
+    p = subprocess.run([sys.executable, str(SCRIPT), "--report", str(tmp_path / "nope.json")],
+                       capture_output=True, text=True, timeout=60)
+    assert p.returncode == 1
+    assert "missing file REPORT.json" in p.stdout
+    assert "Traceback" not in p.stderr
