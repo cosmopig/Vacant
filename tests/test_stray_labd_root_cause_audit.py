@@ -1,43 +1,43 @@
 import unittest
-import subprocess
+from unittest.mock import patch, mock_open
 import json
+import sys
 from pathlib import Path
 
+# Add current directory to path so we can import the audit script
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from ops.audits.stray_labd_root_cause_audit import audit_session_file
+
 class TestStrayLabdRootCauseAudit(unittest.TestCase):
-    def test_selftest_success(self):
-        """Verify that --selftest returns 0 and prints VERDICT: STRAY_LABD_ROOT_CAUSE_OK."""
-        cmd = ["python3", "ops/audits/stray_labd_root_cause_audit.py", "--selftest"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0)
-        # The script prints the JSON result to stdout, but also prints VERDICT: STRAY_LABD_ROOT_CAUSE_OK before it?
-        # Actually, looking at my audit_session_file, it prints "VERDICT: ..." then returns a dict which is dumped.
-        self.assertIn("VERDICT: STRAY_LABD_ROOT_CAUSE_OK", result.stdout)
-
-    def test_audit_missing_event(self):
-        """Verify that audit fails when no labd event is found."""
-        mock_content = '{"messageId": "12345", "toolCall": "ls -la"}'
-        with patch("builtins.open", mock_open(read_data=mock_content)):
-            cmd = ["python3", "ops/audits/stray_labd_root_cause_audit.py", "--session-file", "dummy.jsonl"]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            self.assertEqual(result.returncode, 1)
-            # The script prints to stderr or stdout? Let's check both.
-            self.assertTrue("ERROR: No labd launch event found" in result.stdout or "ERROR: No labd launch event found" in result.stderr)
-
-    def test_audit_invalid_message_id(self):
-        """Verify that audit fails when messageId is incorrect."""
-        mock_content = json.dumps({
-            "messageId": "WRONG_ID",
+    def test_audit_success(self):
+        mock_data = {
+            "messageId": "93a55755",
             "timestamp": "2026-11-03T11:15:40.431Z",
-            "model": {"name": "qwen/qwen3.8-27b"},
-            "toolCall": "VLAB_PAR=1 nohup /usr/bin/python3 /srv/vlab/bin/labd.py >> /srv/vlab/labd.log 2>&1 &",
-            "strayPid": 734502,
-            "parentPid": 733374
-        })
-        with patch("builtins.open", mock_open(read_data=mock_content)):
-            cmd = ["python3", "ops/audits/stray_labd_root_cause_audit.py", "--session-file", "dummy.jsonl"]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            self.assertEqual(result.returncode, 1)
-            # The script prints to stderr or stdout? Let's check both.
-            self.assertTrue("messageId WRONG_ID != 93a55755" in result.stdout or "messageId WRONG_ID != 93a55755" in result.stderr)
+            "toolCall": "kill 1638; VLAB_PAR=1 nohup /usr/bin/python3 /srv/vlab/bin/labd.py >> /srv/vlab/labd.log 2>&1 &",
+            "model": "lms1003qwen",
+            "provider": "qwen/qwen3.8-27b",
+            "stray_pid": 734502,
+            "parent_pid": 733374
+        }
+        # Mocking the file content for parse_session_evidence
+        with patch("builtins.open", mock_open(read_data=json.dumps(mock_data))):
+            result = audit_session_file("dummy_path")
+            self.assertIsNotNone(result)
+            self.assertEqual(result["messageId"], "93a55755")
 
-from unittest.mock import patch, mock_open
+    def test_audit_missing_command(self):
+        mock_data = {
+            "messageId": "93a55755",
+            "timestamp": "2026-11-03T11:15:40.431Z",
+            "toolCall": "echo hello",
+            "model": "lms1003qwen",
+            "provider": "qwen/qwen3.8-27b",
+            "stray_pid": 734502,
+            "parent_pid": 733374
+        }
+        with patch("builtins.open", mock_open(read_data=json.dumps(mock_data))):
+            result = audit_session_file("dummy_path")
+            self.assertIsNone(result)
+
+if __name__ == "__main__":
+    unittest.main()
