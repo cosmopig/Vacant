@@ -1,8 +1,8 @@
 # NOW.md — 現況（每輪覆寫、≤3KB）
 
-## 狀態（2026-11-12 r1504；票 P20261112_1125-1 done：e014 完賽機械複核量具＋單元測試，commit 3d156e6a4，驗收 VERDICT: E014_CLOSURE_OK RC=0＋3 passed，票在 done/）
+## 狀態（2026-11-12 r1504；票 P20261112_1125-1 done：e014 完賽機械複核量具＋單元測試，commit 3d156e6a4＋redo 3f5ab9dda（審查點名 e004 未開查→全檔對照、補 missing-file 預檢），驗收 VERDICT: E014_CLOSURE_OK RC=0＋4 passed，票在 done/）
 - **較上輪好的命令：** `python3 ops/audits/e014_closure_check.py --selftest` 由檔案不存在 exit 1 → `VERDICT: E014_CLOSURE_OK` RC=0（正控制＋4 負控制全生效）；`pytest tests/test_e014_closure_check.py` 由 3 failed（腳本缺）→ 3 passed。
-- **誠實記帳：** CB vs C「零分歧對」＝必要條件 CB.pass==C.pass＋BACKLOG 第 14 行裁決句釘住（REPORT.json 不含 C_vs_CB 逐題分歧數；量具 docstring 明示）。0 model calls。
+- **誠實記帳：** CB vs C「零分歧對」＝必要條件 CB.pass==C.pass＋BACKLOG 第 14 行裁決句釘住（REPORT.json 不含 C_vs_CB 逐題分歧數；量具 docstring 明示）；e004 對齊＝missing-file 預檢已補（redo），json try/except／main 風格從 e016（兩錨點不一致、在案）。0 model calls。
 - **紅線：** 無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、凍結 4 檔＋filing 未改、未跑 full pytest。
 
 ## 未完（≤3、交下輪）
