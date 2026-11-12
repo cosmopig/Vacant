@@ -64,9 +64,22 @@ def check(packet_path: pathlib.Path, report_path: pathlib.Path, cell_c_path: pat
             out.append(f"report.py --rescore 存在不一致: {mismatches}")
 
     # (4) envelope_compliance.py verdict=PASS
-    # 此處假設我們需要檢查相關文件或透過指令確認，但依據要求主要是核對結果。
-    # 若有特定檔案可讀取則加入。目前僅作為標記。
-    
+    try:
+        import subprocess
+        # 使用獨立量具核對 C-r1 的合規性。
+        cmd = ["python3", "ops/vlab/tools/envelope_compliance.py", "e010_bigwork_pi_AC", "--base", "/srv/vlab/runs"]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            out.append(f"envelope_compliance.py 執行失敗 (RC={res.returncode}): {res.stderr}")
+        else:
+            comp_data = json.loads(res.stdout)
+            # verdict 為 "PASS", "FAIL", "NO_EVIDENCE", 或 "NA"
+            verdict = comp_data.get("verdict")
+            if verdict != "PASS":
+                out.append(f"envelope_compliance.py verdict={verdict} (預期 PASS)")
+    except Exception as e:
+        out.append(f"執行 envelope_compliance.py 時發生異常: {str(e)}")
+
     return out
 
 def selftest(packet: pathlib.Path, report: pathlib.Path, cell_c: pathlib.Path) -> int:
