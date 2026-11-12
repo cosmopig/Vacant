@@ -331,3 +331,10 @@
 - 沒驗證什麼：未發射（本票只凍結；approval gate fail-closed 路徑未觸及）；anchors 本輪未跑（未改任何凍結 4 檔、風險零，下輪補）；argon/worker 鏡像未同步（本輪僅新增檔、無 mainline 內容差，候 worker 收斂一併）。
 - 誠實記帳：純本地檔案＋測試，0 model calls、無 push、main 未動、未讀 hidden/scorer、g3_1/g3_2 歷史 0 改動；無文書充實——驗收指令改前 exit 1（manifest 不存在）→今 RC 0。
 - 下一步：G3.3 fire＝候人類裁決（H2 第 3 次獨立 extract、1 呼叫、參考 7313 tok；否決→G 系列停止）；worker round 88 收斂→審查升上→freeze_check 12/12（r1476 #3 不變）；CI 輪首一次讀取（不 poll）。
+
+## 2026-11-12 r1479（票 P20261112_0119-2：G3.3 H0 跨呼叫穩定性 → H2_REFUTED、停止規則啟動）
+- 做了什麼：dab_725 第 3 次獨立 extract（glm53、同 input 9ba533c0…、1 通 7249 tok、0 answer 呼叫；腳本＋單測前輪 r1478 已入樹 4509bd9e7、本輪補完）→5 需求 0 確定性（全 unverified：deliverable_not_in_request）；3 呼叫軌跡 2→0→0 確定性、達 1/3（<2/3）→**H2_REFUTED**（單呼叫 H0 門＝呼叫隨機、非孤立漂移）；假說檔標記 H2_REFUTED＋停止規則啟動；完整批（full_rloop）未發射。
+- 驗證了什麼：驗收鏈 `g3_3_h0_stability.py --selftest && pytest tests/test_reqloop_g3_3_stability.py`→VERDICT: G3_3_STABILITY_SELFTEST_OK＋3 測 RC=0；--run 真實報告 ops/audits/g3_3_h0_stability_report.json（成本自 raw 帳本 vibe_calls.jsonl：1 call 7249 tok、rc=0）；commit `2d01c6463`；票尾 3 行結果＋mv done/。
+- 沒驗證什麼：完整批未發射（H2 否決＝停止規則、0 answer 呼叫）；G3.4 共識門未推動（H2 未成立）；anchors／freeze_check 本輪未跑（本輪僅改 md＋新增報告 JSON，凍結 4 檔 0 改動）。
+- 誠實記帳：1 模型呼叫（票面成本上限內：1 extract、參考 7313 tok、實測 7249）；停止規則上報人類＝STATE/NOW＋bd note vq-kax（G 系列停止、候裁：解凍 extract/checks 或終止 G 系列）；未加重試/靜態 prompt/regex 工單；無 push（迴圈自推）、main 未動、未讀 hidden/scorer。
+- 下一步：G 系列停止候人類裁決（vq-kax 維持 IN_PROGRESS；新 G 系列工單不接）；worker round 88 收斂→審查升上→freeze_check 12/12（r1476 #3 不變）；CI 下輪輪首一次讀取（不 poll）。
