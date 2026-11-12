@@ -1,19 +1,18 @@
 # NOW.md — 現況（每輪覆寫、≤3KB）
 
-## 狀態（2026-11-12 r1507；senior review 指示：Step 1 argon g3_2 修復合併 832732a0a＋worker 同步 46e4dc25f＋f1-f4 假檔 32 檔清出（wt_clean 3/3 clean）；Step 2 e015 票驗收未達門→BOUNCE（done/→open/、票內證據＋修法）；freeze_check 11/12、唯 diff_worker＝e015 WIP 3 檔）
-- **較上輪好的命令：** `python3 ops/audits/g3_2_precheck.py --selftest`→VERDICT: G3_2_PRECHECK_OK（top-level seen_set＋fail-closed 恢復）＋`g3_2_fire_summary.py --selftest`→VERDICT: G3_2_FIRE_SUMMARY_SELFTEST_OK（6 負控制）＋pytest g3_2 12 passed（qwen＋worker 雙樹皆綠）；`freeze_check.py` wt_clean 由 DIRTY（worker f1-f4 殘留）→3/3 clean。
-- **e015 驗收（門未達、BOUNCE）：** selftest rc=1 正控制 FAIL；根因 e015_closure_check.py:64 把 VERDICT.json 當 REPORT.json 輸入傳 e004 量具（e004_verdict.py:104 必拋「缺 paired 區塊」；r1507 實證兩路）＋pytest 3 failed＋BACKLOG 缺 CLOSURE_NOTE（舊註記裁決候 planner）；票內「All tests passed」與實測不符；票 bounced（worker 46e4dc25f；~/dev/ops/tickets/open/ 存影）、不代修。
-- **收斂同步：** qwen 832732a0a（merge argon）→worker 46e4dc25f（g3_2 4＋l008 3 檔入、f1-f4 16 git rm、票 bounce）→argon 54d55fb10（l008 3）＋d736928e6（e014 2）；ref 目錄側 16 f1-f4 亦 rm（共 32 清出）。
-- **誠實記帳：** 0 model calls；freeze_check 11/12（唯 diff_worker＝e015 WIP 3 檔，worker 在途重做＝12/12 唯一阻擋）；CI 未 poll（9a61b624d 2 failed＝freeze_check 狀態測試、綁 worker 在途態非 g3_2 修復本身；新 HEAD CI 候下輪一次讀取）；已知缺陷：l008 selftest 重寫 report generated_at（位元差、內容不變）、本輪已還原。
-- **紅線：** 無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest。
-- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史不改。
+## 狀態（2026-11-12 r1511；CI 紅燈例外輪：argon 🔴 2 failed 根因定案＋e006/e008 四檔＋簿記兩分支同步；freeze_check 9/12→11/12，唯餘 wt_clean＝worker e015 WIP 在途）
+- **較上輪好的命令：** `python3 ops/reqloop/freeze_check.py` 9/12（3 BROKEN）→11/12（1 BROKEN）；`git diff --name-only auto/argon auto/qwen27b -- vacant_network tests ops` 6 檔→0；e006/e008 selftest VERDICT OK＋6 passed 三樹全綠（argon 872155a16／worker 708b16c06）。
+- **argon 紅燈根因（log 定案、非猜）：** 2 failed＝test_reqloop_freeze_check verdict 兩測←freeze_check diff_worker/diff_argon（r1510 簿記未同步兩分支）＋wt_clean（worker e015 WIP M＋??，票在 doing/、selftest RC=1 在途）；e015 官方版 qwen selftest RC=0 未動——不碰 WIP、不代修（r1496 先例）。
+- **本輪同步（只收斂檔）：** e006/e008（2 量具＋2 測試）＋簿記 4 檔→argon/worker；worker WIP 兩檔（e015_closure_check.py M、e015_verdict_pipeline.py ??）未 commit 未觸、commit 後復核仍在。
+- **紅線：** 無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest；
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
 
 ## 未完（≤3、交下輪）
-1. 三分支新 HEAD CI 一次讀取（qwen 832732a0a＋簿記／worker 46e4dc25f＋簿記／argon d736928e6＋簿記；紅→log 根因不猜）。
-2. e015 重做（worker）：load_verdict 改載 REPORT.json（或改 e015 專用 verdict 管線）＋BACKLOG CLOSURE_NOTE（舊註記裁決後）→selftest E015_CLOSURE_OK＋pytest 全綠→升三分支→freeze_check 12/12。
+1. e015（worker doing/）：收斂（selftest E015_CLOSURE_OK＋pytest 全綠）→審查門驗收→升三分支→freeze_check 12/12→argon CI 紅轉綠。
+2. 0820-1（open/）：worker 重驗項1（VERDICT 裁決行）→升三分支。
 3. 候人類裁決：L008 樣本量/預算（未發射、0 呼叫）；e013 票（bounced/）候規劃者修驗收 grep；G 系列（vq-kax）。
 
 ## 下輪入口（≤3）
-- CI 一次讀取；紅→log 根因。
-- `bd list --parent vq-el4 --all` 照順序；呼叫 GLM／DeepSeek 一律用 `glm` 指令。
-- 守衛：NOW.md ≤3KB、ops/loop/NOW.md 與 root byte-identical、ops/STATE.md＝canonical Current State 最新條目（bk_state 契約）。
+- 三新 HEAD CI 一次讀取（紅→log 根因不猜、不 poll）。
+- e015 收斂檢查：worker 樹 `python3 ops/audits/e015_closure_check.py --selftest` RC=0 否？收斂即按審查門驗收→升三分支。
+- 守衛：NOW.md ≤3KB、ops/loop/NOW.md 與 root byte-identical（cp 鏡像）、ops/STATE.md＝canonical Current State 前綴鏡像（bk_state 契約）、紅線契約行逐字保留（now_redline 機器解析）。
