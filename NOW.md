@@ -4,7 +4,7 @@
 - 本輪實質＝CI 紅燈例外通道收斂：三分支 CI 紅燈根因＝diff_worker（gemma worker r128 WIP f550ad900、e007 兩檔）；讀 log 定位、不猜。
 - 判定：該 WIP 是已結案票（R20261112_2133-1 已 done/、qwen 正典綠；doing/、open/ 皆空、worker worktree clean、非在途票工作）上的自相矛盾草稿（同調 selftest(None×4) 一測期 0 一測期 1、必紅）→依 r1530 先例（結案時同款取代 r125 WIP 舊稿）同步正典 2 檔至 auto/worker（4eb72a025、與 qwen 同 blob）。
 - 驗收（本輪新測）：worker 樹 pytest tests/test_e007_closure_check.py 紅→綠（1 failed→3 passed）；--selftest VERDICT: E007_CLOSURE_OK RC=0；freeze_check 11/12→12/12（VERDICT: FROZEN_STATE_OK、diff_worker 0 in-scope differ）；tests/test_reqloop_freeze_check.py＋test_reqloop_now_redline.py 32 passed（CI 紅燈兩檔轉綠）。
-- CI（輪首一次讀、不 poll）：三分支 HEAD（qwen 4784859e／argon 5a97a7ec／worker 850aa073）皆「還沒跑完」；qwen 在途 CI（22:59 起）輪末仍在跑；auto/argon merge 條件（該 sha 🟢 且 test count≥qwen HEAD）未滿足、未執行。
+- CI（輪首＋輪末各一次、不 poll）：舊在途 qwen run（4784859e）23:14 落地 RED 2 failed＝freeze_check 2 測試（該 run 讀到 sync 前之 worker HEAD 850aa073、與預測一致）；新三分支 HEAD（qwen 75fc36e3／argon 4e9efc5f／worker 412cec59）CI 在途/未跑（不再讀）；auto/argon merge 條件（該 sha 🟢 且 test count≥qwen HEAD）未滿足、未執行。
 - 披露：gemma worker 若在後續輪次重寫該 2 檔（票已結案），依 r1496 先例 bounce 回該分支處理。
 - vq-el4 全閉；下一票候點名或真產品 bug（CI 紅燈為例外通道）；G 系列維持停止態、0 呼叫。
 
