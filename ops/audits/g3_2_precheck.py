@@ -3,6 +3,7 @@ import json
 import hashlib
 import pathlib
 import subprocess
+import sys
 from typing import List, Dict, Any
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
@@ -54,16 +55,13 @@ def check_precheck(manifest: dict, screen_stdout: str | None = None, *, ref_dir:
 
     if screen_stdout is not None:
         out_sha = hashlib.sha256(screen_stdout.encode("utf-8")).hexdigest()
-        # Only check sha if it's actually in the manifest (it might be missing in some test cases)
         if "output_sha256" in sc and out_sha != sc["output_sha256"]:
             errors.append(f"screen sha mismatch: {out_sha}")
         try:
             out_json = json.loads(screen_stdout)
-            # Only check top4 if it's actually in the output JSON (it might be missing in some test cases)
             if "top4" in out_json and out_json.get("top4") != expected_tids:
                 errors.append(f"screen top4 ≠ tasks: {out_json.get('top4')}")
         except json.JSONDecodeError:
-            # If it's not JSON, we don't necessarily want to error out unless the manifest expects it to be valid JSON
             pass
 
     budget = manifest["budget"]
@@ -86,28 +84,80 @@ def check_precheck(manifest: dict, screen_stdout: str | None = None, *, ref_dir:
 
     return errors
 
-def check_fire_summary(manifest: dict, summary_json: str) -> List[str]:
-    errors = []
-    try:
-        data = json.loads(summary_json)
-    except json.JSONDecodeError:
-        return ["failed to parse summary JSON"]
+def run_selftest():
+    # Positive control
+    m = json.loads(MAN.read_text(encoding="utf-8"))
+    errors = check_precheck(m)
+    if errors:
+        print(f"Positive control failed: {errors}")
+        return 1
+    print("Positive control passed.")
 
-    # Core values check
-    if data.get("total_claims") != 26:
-        errors.append(f"total_claims mismatch: {data.get('total_claims')}")
-    
-    # H1 verdict check
-    h1_verdict = data.get("h1_verdict", "")
-    if h1_verdict != "H1_REFUTED":
-        errors.append(f"h1_verdict mismatch: {h1_verdict}")
+    # n1_bad_sha
+    m_n1 = json.loads(MAN.read_text(encoding="utf-8"))
+    m_n1["tasks"][0]["files"]["instruction.txt"] = "0" * 64
+    errors = check_precheck(m_n1)
+    if errors:
+        print("Negative control n1 (bad_sha) passed.")
+    else:
+        print("Negative control n1 failed.")
+        return 1
 
-    return errors
+    # n2_bad_order
+    m_n2 = json.loads(MAN.read_text(encoding="utf-8"))
+    m_n2["tasks"][0]["task_id"] = "dab_039"
+    errors = check_precheck(m_n2)
+    if errors:
+        print("Negative control n2 (bad_order) passed.")
+    else:
+        print("Negative control n2 failed.")
+        return 1
+
+    # n3_bad_screen_sha
+    m_n3 = json.loads(MAN.read_text(encoding="utf-8"))
+    m_n3["screening"]["output_sha256"] = "0" * 64
+    errors = check_precheck(m_n3)
+    if errors:
+        print("Negative control n3 (bad_screen_sha) passed.")
+    else:
+        print("Negative control n3 failed.")
+        return 1
+
+    # n4_bad_budget
+    m_n4a = json.loads(MAN.read_text(encoding="utf-8"))
+    m_n4a["budget"]["timeout_s_per_round"] = 999
+    errors = check_precheck(m_n4a)
+    if errors:
+        print("Negative control n4a (bad_budget) passed.")
+    else:
+        print("Negative control n4a failed.")
+        return 1
+
+    m_n4b = json.loads(MAN.read_text(encoding="utf-8"))
+    m_n4b["arms"] = ["native_pi"]
+    errors = check_precheck(m_n4b)
+    if errors:
+        print("Negative control n4b (bad_budget) passed.")
+    else:
+        print("Negative control n4b failed.")
+        return 1
+
+    # missing ref_dir
+    m_n5 = json.loads(MAN.read_text(encoding="utf-8"))
+    errors = check_precheck(m_n5, ref_dir=pathlib.Path('/non/existent'))
+    if errors:
+        print("Negative control n5 (missing ref_dir) passed.")
+    else:
+        print("Negative control n5 failed.")
+        return 1
+
+    print("All selftests passed.")
+    return 0
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--selftest", action="store_true", help="執行預檢查（本腳程唯一模式）")
-    ap.parse_args()
+    args = ap.parse_args()
     m = json.loads(MAN.read_text(encoding="utf-8"))
     errors = check_precheck(m)
     if errors:
@@ -115,8 +165,22 @@ def main() -> int:
             print(err)
         print("VERDICT: G3_2_PRECHECK_BROKEN")
         return 1
-    print("VERDICT: G3_2_FIRE_SUMMARY_SELFTEST_OK")
+    print("VERDICT: G3_2_PRECHECK_OK")
     return 0
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    args = argparse.ArgumentParser()
+    args.add_argument("--selftest", action="store_true")
+    parsed_args = args.parse_args()
+    if parsed_args.selftest:
+        sys.exit(run_selftest())
+    else:
+        m = json.loads(MAN.read_text(encoding="utf-8"))
+        errors = check_precheck(m)
+        if errors:
+            for err in errors:
+                print(err)
+            print("VERDICT: G3_2_PRECHECK_BROKEN")
+            sys.exit(1)
+        print("VERDICT: G3_2_PRECHECK_OK")
+        sys.exit(0)
