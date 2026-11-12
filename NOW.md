@@ -2,7 +2,7 @@
 
 ## 狀態（2026-11-12 r1477；票 P20261112_0119-1 完成→done/）
 - **r1477（0 model calls）：G3.3 預註冊凍結落地、驗收鏈 RC=0：**
-  - `ops/reqloop/g3_3/manifest.json`（plan/1；arms=[full_rloop]；tasks=[dab_725] 4 檔 sha256；seen_set＝g3_2 27∪{587,657,517}→unseen=[dab_725]；budget 1 格/300s/2M 日/glm/quota_fail_closed；approval→g3_vq-1zf_fire_20261111.json）
+  - `ops/reqloop/g3_3/manifest.json`（plan/1；arms=[full_rloop]；tasks=[dab_725] 4 檔 sha256；seen_set＝g3_2 seen_set(27)∪(g3_2 tasks−{dab_725}＝[dab_587,dab_657,dab_517])＝30（自 ops/reqloop/g3_2/manifest.json 機械重算核）→unseen=[dab_725]；budget 1 格/300s/2M 日/glm/quota_fail_closed；approval→g3_vq-1zf_fire_20261111.json）
   - `ops/reqloop/g3_3/tasks/dab_725/`（diff -r 0 vs g3_2 副本）
   - `ops/reqloop/g3_3_candidate_hypothesis.md`（H2 獨立確立：3 次獨立 extract ≥2/3 確定性→成立／1/3 達→否決→G 系列停）
   - `ops/audits/g3_3_precheck.py --selftest`→VERDICT: G3_3_PRECHECK_OK（local==ref==manifest 4 檔＋選題規則機械核＝H0 預跑恰 1 題達＝dab_725）
