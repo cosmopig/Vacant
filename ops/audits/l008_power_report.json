@@ -1,0 +1,144 @@
+{
+  "schema": "l008.power/1",
+  "alpha": 0.05,
+  "phase1_n": 60,
+  "target_power": 0.8,
+  "grid": [
+    {
+      "p_disc": 0.2,
+      "psi": 0.65,
+      "n": 60,
+      "power": 0.110497
+    },
+    {
+      "p_disc": 0.2,
+      "psi": 0.7,
+      "n": 60,
+      "power": 0.191785
+    },
+    {
+      "p_disc": 0.2,
+      "psi": 0.75,
+      "n": 60,
+      "power": 0.307534
+    },
+    {
+      "p_disc": 0.2,
+      "psi": 0.8,
+      "n": 60,
+      "power": 0.455104
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.65,
+      "n": 60,
+      "power": 0.146438
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.7,
+      "n": 60,
+      "power": 0.256748
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.75,
+      "n": 60,
+      "power": 0.406265
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.8,
+      "n": 60,
+      "power": 0.580855
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.65,
+      "n": 60,
+      "power": 0.180294
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.7,
+      "n": 60,
+      "power": 0.317939
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.75,
+      "n": 60,
+      "power": 0.495396
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.8,
+      "n": 60,
+      "power": 0.684526
+    }
+  ],
+  "mde_summary": [
+    {
+      "p_disc": 0.2,
+      "psi": 0.65,
+      "n_required": 460
+    },
+    {
+      "p_disc": 0.2,
+      "psi": 0.7,
+      "n_required": 258
+    },
+    {
+      "p_disc": 0.2,
+      "psi": 0.75,
+      "n_required": 168
+    },
+    {
+      "p_disc": 0.2,
+      "psi": 0.8,
+      "n_required": 115
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.65,
+      "n_required": 368
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.7,
+      "n_required": 207
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.75,
+      "n_required": 135
+    },
+    {
+      "p_disc": 0.25,
+      "psi": 0.8,
+      "n_required": 92
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.65,
+      "n_required": 306
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.7,
+      "n_required": 172
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.75,
+      "n_required": 112
+    },
+    {
+      "p_disc": 0.3,
+      "psi": 0.8,
+      "n_required": 77
+    }
+  ],
+  "generated_at": "2026-11-12T12:32:52.722029+00:00",
+  "source": "vacant_network.research.mcnemar_power / mcnemar_n_required（精確雙尾 McNemar）"
+}
