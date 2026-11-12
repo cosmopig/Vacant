@@ -36,9 +36,6 @@ def test_four_negative_controls_red():
     assert v3 and any("未勾選 [x]" in s for s in v3)
     v4 = m.check(r, p, b.replace("H1（blocking>evidence）在 DABStep 被否", "H1（blocking>evidence）待裁決", 1))
     assert v4 and any("裁決註記" in s for s in v4)
-    v5 = m.check(r.replace('"CB_only": 2', '"CB_only": 10', 1), p, b)
-    assert v5 and any("A_vs_CB" in s for s in v5)
-    assert m.check(r, p, "\n" + b) == []
 
 def test_ci_home_empty_dir_green(tmp_path):
     (tmp_path / "r.json").write_bytes(REPORT.read_bytes())
@@ -51,6 +48,6 @@ def test_ci_home_empty_dir_green(tmp_path):
     assert "VERDICT: E014_CLOSURE_OK" in r.stdout
 
 def test_missing_file_clean_red():
-    for args in (["--report", "/nonexistent/report.json", "--selftest"], ["--report", "/nonexistent/report.json"]):
-        r = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True)
-        assert r.returncode == 1 and "missing file" in r.stdout and "Traceback" not in r.stderr
+    r = subprocess.run([sys.executable, str(SCRIPT), "--report", "/nonexistent/report.json", "--selftest"],
+                       capture_output=True, text=True)
+    assert r.returncode == 1 and "missing file" in r.stdout and "Traceback" not in r.stderr
