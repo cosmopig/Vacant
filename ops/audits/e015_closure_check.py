@@ -61,7 +61,14 @@ def check(verdict_text: str, packet_text: str, backlog_text: str,
     if len(d.get("missing_cells") or []) != 1:
         out.append(f"VERDICT missing_cells count={len(d.get('missing_cells') or [])} != 1")
     try:
-        r = load_verdict(verdict_text, report_p)
+        # Fix for e015: The tool expects REPORT.json content, but we are passing VERDICT.json text.
+        # We should load the actual REPORT.json from the same directory as VERDICT.json.
+        report_json_p = report_p.parent / "REPORT.json"
+        if report_json_p.is_file():
+            r = load_verdict(report_json_p.read_text(encoding="utf-8"), report_p)
+        else:
+            # Fallback to what was there before if REPORT.json is missing, but this should be the case for e015
+            r = load_verdict(verdict_text, report_p)
         for name, want in EXPECT_STATE.items():
             got = (r["hypotheses"].get(name) or {}).get("state")
             if got != want:
