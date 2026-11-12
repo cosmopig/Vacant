@@ -54,9 +54,12 @@ def test_snapshot_pins(tmp_path):
     f = tmp_path / "tampered.json"
     f.write_text("tampered\n", encoding="utf-8")
     assert any("sha256 drift" in s for s in mod.check_snapshot(f, mod.VERDICT_SHA256))
-    # BACKLOG 共用檔：他項被勾選不影響 e016 目標行（行 sha 仍相符）；目標行被改必紅
+    # BACKLOG 共用檔：他項被勾選不影響 e016 目標行（行 sha 仍相符）；目標行被改必紅。
+    # 他項須選目前確為 [ ] 的行（e004 line 50 已於 round 1493 結案勾選，
+    # 以不存在的 "[ ]" 串做 replace 會使 other==text、假負控制永紅）。
     text = mod.BACKLOG_DEFAULT.read_text(encoding="utf-8")
-    other = text.replace("- [ ] **e004 OpenCode", "- [x] **e004 OpenCode", 1)
+    other = text.replace("- [ ] **/tmp 2.9G 候 supervisor 處置（round 870 實測）**",
+                         "- [x] **/tmp 2.9G 候 supervisor 處置（round 870 實測）**", 1)
     assert other != text
     f = tmp_path / "BACKLOG.md"
     f.write_text(other, encoding="utf-8")
