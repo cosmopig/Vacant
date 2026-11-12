@@ -376,3 +376,5 @@
 - 沒驗證什麼：CI（三分支跑件中、下輪 ci_status.py 一次讀取不 poll）；R20261112_0820-1（worker 未收斂、不升上、在途檔不碰）。
 - 誠實記帳：0 model calls；無 push/main/reset/rebase；本輪無新功能程式改動（實質改動 73837eae6 屬 r1496 已計，不重複計數）；凍結 4 檔／filing 未碰；hidden/scorer 未讀。
 - 下一步：ci_status.py 一次讀取（紅→讀 log 根因）；worker 收斂後重驗 0820-1 三項→升上三分支；e013 票（bounced/）候規劃者修驗收 grep 重驗。
+- redo（審查點名 freeze_check.py 未開）：已開 ops/reqloop/freeze_check.py（901 行：wt_clean＝三分支 worktree in-scope 殘留、diff_*＝簿記身份對應＋in-scope diff）並兩跑全量。票點名殘留 ` M ops/BACKLOG.md` 已消失（auto/qwen27b: clean）；本輪簿記 166bacab4 曾致 diff_worker/argon no-counterpart→已同步 4 簿記檔 argon e5fe94349／worker bd868a06e（pathspec 限定、worker 3 檔在途 WIP 未碰）。
+- redo 後 ruler 10/12：diff_argon OK 0 differ；唯二 BROKEN＝worker 票 R20261112_0820-1 在途（diff_worker 20 in-scope WIP 檔＋wt_clean auto/worker live 殘留、r1496 同分類、非 mainline 缺陷、不碰）；其餘 10 項 OK；VERDICT: FROZEN_STATE_BROKEN rc=1（預期、候 worker 收斂轉 12/12）。
