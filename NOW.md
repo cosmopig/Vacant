@@ -1,6 +1,6 @@
 # NOW.md — 現況（每輪覆寫、≤3KB）
 
-## 狀態（2026-11-12 r1514；票 P20261112_1528-1 收尾結案：r1513 已實作（commit acd51b0e4）但該輪 rc=124 被切斷未收尾；r1514 票面驗收複跑全綠（VERDICT: E009_CLOSURE_OK＋3 passed RC=0）→票尾 3 行＋mv done/、doing/ 現空；0 model calls、0 行產品碼）
+## 狀態（2026-11-12 review 複核輪、接 r1514；票 P20261112_1528-1（done/）交件前 redo：票面點名 4 材料（BACKLOG 第 56 行／e006／e008／envelope_compliance）本輪全數打開、依賴部分獨立複核全對、無需重做程式；驗收複跑 VERDICT: E009_CLOSURE_OK＋3 passed RC=0；0 model calls、0 行產品碼）
 - **產物：** ops/audits/e009_closure_check.py（140 行、純 stdlib、CI-home 兼容：簿記目錄＝REPO.parent/ops、不依賴 Path.home()）＋tests/test_e009_closure_check.py（54 行、3 測試）。
 - **驗收（本輪新跑）：** `python3 ops/audits/e009_closure_check.py --selftest && pytest tests/test_e009_closure_check.py -q`→VERDICT: E009_CLOSURE_OK、RC=0；無 -q 複跑「3 passed in 0.13s」；非 selftest 路徑 rc=0；--l2c1 注入篡改（L2-C1→MET）必紅 rc=1；4 負控（pass 數／McNemar p／取消勾選／刪裁決註記）全紅。
 - **判準（實測核對全過）：** REPORT.json cells_scored=67／infra=41／A 17/34 rate=0.5／C 18/33 rate=0.5455／A_vs_C(33,3,4,p=1.0)／C 臂 vacant_sha cf62d258…；envelope C 臂 33 PASS/0 FAIL、home_bytes [14856,74081,393813]；packet 標題；l2c1 L2-C1 NOT_MET（若在位則核對）；BACKLOG 第 56 行（sha 5f27f759… 釘住、改動即紅）。
