@@ -45,6 +45,28 @@ class TestG3SeriesTaxonomy(unittest.TestCase):
             self.assertTrue(p.is_file(), name)
             self.assertEqual(hashlib.sha256(p.read_bytes()).hexdigest(), s["sha256"], name)
 
+    def test_run_is_idempotent(self):
+        """--run 對既有相同證據重跑時應保持 generated_at 冪等，不得弄髒 git worktree。"""
+        before = REPORT.read_bytes()
+        try:
+            r = subprocess.run(["python3", str(AUDIT), "--run"], capture_output=True, text=True, cwd=ROOT)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual(REPORT.read_bytes(), before)
+        finally:
+            if REPORT.read_bytes() != before:
+                REPORT.write_bytes(before)
+
+    def test_verify_catches_per_batch_deterministic_conservation_and_fire_claim_count(self):
+        """verify() 必須檢查每批 n_requirements == n_deterministic + n_unverified，且 load_batches 對 g3_2_fire 讀 claims.pass+fail（不因 deterministic_cells='see h0_reproducibility' 崩潰）。"""
+        import copy
+        import ops.audits.g3_series_unverified_taxonomy as mod
+        b = mod.load_batches()
+        b_bad = copy.deepcopy(b)
+        b_bad["g3_1_prerun"]["n_deterministic"] = 999
+        b_bad["g3_2_prerun"]["n_deterministic"] = -997
+        errs = mod.verify(mod.build(b_bad))
+        self.assertTrue(errs, "per_batch n_deterministic 篡改但總和抵銷時 verify() 仍須攔截")
+
 
 if __name__ == "__main__":
     unittest.main()
