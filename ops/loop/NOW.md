@@ -5,6 +5,7 @@
 - **Step 2（審查#2，本輪複核）：** g3_3_precheck --selftest VERDICT: G3_3_PRECHECK_OK RC=0（正控制＋4 負控制）；manifest 9＋taxonomy 3＝12 passed；anchors 5 passed；e010 selftest RC=0；兩票在 done/、票尾記錄在案。
 - **較上輪好的命令：** worker 末次完成 CI 紅燈 3 failed（c8430163）→該 2 測試檔於現 HEAD 本輪實測 32 passed（含該 3 紅）＝紅根因（worktree 分岔）已修、在跑 CI 預期轉綠。
 - **CI 一次讀取（不 poll）：** 三分支皆「還沒跑完」（9f3fdf62／3e0530ee／252b88b3）；vacant-ci 跑 worker@252b88b3 中（06:33:45 起）；鄰近綠 8a4ef5a9／30e8ee25 各 5275 passed。
+- **交付前 redo 補（點名檔全數開查）：** L007 結案守衛 `l007_closure_check.py --selftest` VERDICT: L007_CLOSURE_OK RC=0＋2 passed（L007 r1459 已結案 CLOSED: NO_MECHANISM）；紅線釘盤實證（repair 2795 行／5147f8c3、extract 1217 行／e757aec5、checks c7589c61…、run_eval 332cd324…、filing 6 sha MATCH；凍結 repair/extract/checks 在 vacant_network/reqloop/）；假說檔 1/5・3/5 與 14/52・6/52・32/52 與在樹一致；G3.1 票脈絡一致；effects 摘要無依賴（未引數）。
 - 簿記：STATE 頂條目＋NOW 覆寫（紅線行逐字保留、≤3KB）＋鏡像（head -5→ops/STATE.md、cp→ops/loop/NOW.md byte-identical）＋worktree 4 檔簿記同步（argon／worker，r1270 程序）。
 
 ## 紅線（契約，不改）
