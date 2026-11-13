@@ -51,8 +51,6 @@ def _contract_path(args) -> pathlib.Path:
         return pathlib.Path(args.contract)
     found = C.find(pathlib.Path.cwd())
     if found is None:
-        # This was raising SystemExit("...") which results in RC 1.
-        # We want to raise ContractError so it gets caught by main() and returns 2.
         raise C.ContractError("no contract found (looked for .vacant/contract.json up to the "
                                 "git root). Create one with `vacant contract init --task <id>`.")
     return found
