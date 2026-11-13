@@ -501,7 +501,8 @@ class PiChannel(Channel):
                  provider: str = "lms1003qwen", model: str = "qwen/qwen3.8-27b",
                  include_dirs: tuple[str, ...] = ("data",),
                  build=None, run=None,
-                 deliverable: str = DEFAULT_DELIVERABLE) -> None:
+                 deliverable: str = DEFAULT_DELIVERABLE,
+                 tasks_dir: pathlib.Path | str | None = None) -> None:
         self.base = pathlib.Path(base)
         self.out_root = pathlib.Path(out_root)
         self.provider = provider
@@ -510,6 +511,9 @@ class PiChannel(Channel):
         self.deliverable = deliverable
         self._build_fn = build
         self._run_fn = run
+        # 票 P20261113_1307-1：G4 任務工作區在 ops/reqloop/g3_2/tasks（自訂根）；
+        # None（預設）＝舊行為 base/tasks/<tid>/workspace。
+        self.tasks_dir = pathlib.Path(tasks_dir) if tasks_dir is not None else None
 
     def _build(self, prompt: str, ws: pathlib.Path):
         if self._build_fn is not None:
@@ -531,11 +535,15 @@ class PiChannel(Channel):
 
     def call(self, *, prompt: str, model: str, purpose: str,
              timeout_s: float) -> tuple[str, RoundUsage]:
-        m = re.match(r"G3 (\S+?)/(\S+) r(\d+)$", purpose)
+        # 票 P20261113_1307-1：相容 G4 purpose（G4 <task>/<arm> r<n>）；G3 舊格式
+        # 與舊行為不變。
+        m = re.match(r"(?:G3|G4) (\S+?)/(\S+) r(\d+)$", purpose)
         if not m:
             raise G3CallError(f"native pi purpose 格式未預期：{purpose!r}")
         tid, arm, round_no = m.group(1), m.group(2), int(m.group(3))
-        task_ws = self.base / "tasks" / tid / "workspace"
+        task_root = self.tasks_dir if self.tasks_dir is not None \
+            else self.base / "tasks"
+        task_ws = task_root / tid / "workspace"
         if not task_ws.is_dir():
             raise G3CallError(f"任務工作目錄缺失：{task_ws}")
         cell_root = self.out_root / "cells" / f"{tid}__{arm}"
@@ -587,7 +595,8 @@ class _ArmChannelRouter(Channel):
 
     def call(self, *, prompt: str, model: str, purpose: str,
              timeout_s: float) -> tuple[str, RoundUsage]:
-        m = re.match(r"G3 \S+?/(\S+) r\d+$", purpose)
+        # 票 P20261113_1307-1：相容 G4 purpose（G3 舊格式分流行為不變）。
+        m = re.match(r"(?:G3|G4) \S+?/(\S+) r\d+$", purpose)
         if m and ARM_SPECS.get(m.group(1), {}).get("pi_agent"):
             return self.pi_channel.call(prompt=prompt, model=model,
                                         purpose=purpose, timeout_s=timeout_s)

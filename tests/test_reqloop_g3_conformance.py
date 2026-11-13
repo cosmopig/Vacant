@@ -384,6 +384,65 @@ def test_pi_channel_bad_purpose_rejected(tmp_path):
         chan.call(prompt="p", model="m", purpose="不是格 purpose", timeout_s=10)
 
 
+def test_pi_channel_supports_g4_purpose_and_tasks_dir(tmp_path):
+    """G4 通道呼叫（票 P20261113_1307-1）：PiChannel 支援 G4 purpose 格式＋自訂 tasks_dir。
+
+    改動前此 purpose 會拋 G3CallError（regex 硬編碼 ``G3``；且 G4 任務工作區在
+    ops/reqloop/g3_2/tasks、不在 base/tasks）——本測改動前必紅。
+    """
+    # 自訂 tasks_dir（G4 任務工作區）；base 下刻意沒有 tasks/ 子樹
+    tasks = tmp_path / "g3_2" / "tasks"
+    ws = tasks / "dab_725" / "workspace"
+    ws.mkdir(parents=True)
+    (ws / "goal.md").write_text("# Task\n", encoding="utf-8")
+    (ws / "contract.md").write_text("# Contract\n", encoding="utf-8")
+    base = tmp_path / "base"
+    base.mkdir()
+    out = tmp_path / "out"
+    chan = g3.PiChannel(base, out_root=out, build=_noop_build,
+                        run=_fake_pi_run(usage_lines=[_USAGE_LINE]),
+                        tasks_dir=tasks)
+    # G4 purpose＋自訂 tasks_dir 正常執行（讀回 answer.txt、usage 如實）
+    text, usage = chan.call(prompt="p", model="qwen/qwen3.8-27b",
+                            purpose="G4 dab_725/native_pi r1", timeout_s=300)
+    assert text == "@n_rows[7]\n"
+    assert usage.tokens == 150 and usage.calls == 1
+    # 工作區取自自訂 tasks_dir（不是 base/tasks）
+    cell_ws = out / "cells" / "dab_725__native_pi" / "round_1"
+    assert (cell_ws / "answer.txt").read_text(encoding="utf-8") == "@n_rows[7]\n"
+    # 舊 G3 purpose＋tasks_dir=None 預設＝舊行為（base/tasks/<tid>/workspace）
+    ws3 = base / "tasks" / "dab_t1" / "workspace"
+    ws3.mkdir(parents=True)
+    (ws3 / "goal.md").write_text("# Task\n", encoding="utf-8")
+    chan_default = g3.PiChannel(base, out_root=out, build=_noop_build,
+                                run=_fake_pi_run())
+    text3, _ = chan_default.call(prompt="p", model="m",
+                                 purpose="G3 dab_t1/native_pi r1", timeout_s=300)
+    assert text3 == "@n_rows[7]\n"
+    # 負控制：非 G3/G4 的 purpose 仍拒絕（fail-closed 未破）
+    with pytest.raises(g3.G3CallError, match="purpose"):
+        chan.call(prompt="p", model="m", purpose="G5 dab_725/native_pi r1",
+                  timeout_s=10)
+    # _ArmChannelRouter：G4 的 native_pi 也分流到 pi 通道；其他臂走原通道
+    class _Rec(g3.Channel):
+        def __init__(self) -> None:
+            self.hit: list[str] = []
+
+        def call(self, *, prompt: str, model: str, purpose: str,
+                 timeout_s: float) -> tuple[str, g3.RoundUsage]:
+            self.hit.append(purpose)
+            return "glm", g3.RoundUsage(calls=1, tokens=None, wall_ms=None)
+
+    other = _Rec()
+    router = g3._ArmChannelRouter(channel=other, pi_channel=chan)
+    text_r, _ = router.call(prompt="p", model="m",
+                            purpose="G4 dab_725/native_pi r1", timeout_s=300)
+    assert text_r == "@n_rows[7]\n" and other.hit == []
+    text_o, _ = router.call(prompt="p", model="m",
+                            purpose="G4 dab_725/reqlist_only r1", timeout_s=300)
+    assert text_o == "glm" and other.hit == ["G4 dab_725/reqlist_only r1"]
+
+
 # ── 抓假：「格式完整但數字錯誤」的草稿必須被抓到並修復 ──────────────
 
 
