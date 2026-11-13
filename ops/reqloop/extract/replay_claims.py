@@ -5,8 +5,8 @@
 需求重判 deterministic/unverified。不造假：四來源只存 claim id＋原 reason（g3_2_fire 另存
 verifier）；params/quote/deliverable 未存 → 需未存欄位者（missing_param 的 params、2 條
 deterministic）標 missing_raw，不計數不推測。基線：當前代碼下原本 unverified 者無一翻成
-deterministic=12（D3 已落、P20261113_0300-3：mean_col/median_col/std_col；pearson 2 條屬
-D3b、P20261113_0344-1，參數未存於來源）；taxonomy 的 2 條 deterministic（g3_2_prerun
+deterministic=14（D3 已落、P20261113_0300-3：mean_col/median_col/std_col 12 條；D3b 已落、
+P20261113_0344-1：pearson 2 條）；taxonomy 的 2 條 deterministic（g3_2_prerun
 dab_725 R1/R6）落在 missing_raw，差額即這些。D2 量效：K1＝走 trusted_deliverable
 （trusted_deliverable_from_contract 自原文抽唯一非輸入檔；零個或多個＝None＝維持舊判定）；
 checks.py recompute 型別集合擴充後自動反映。末行 REPLAY K0 deterministic=K0 → K1 deterministic=K1（兩數並列報告）
@@ -130,9 +130,9 @@ def summarize(rows):
     det_in_mraw = sum(1 for r in mraw if r["original_verdict"] == "deterministic")
     det_tax, tax_req = int(tax["deterministic_claims"]), int(tax["requirements"])
     # D3 已落（P20261113_0300-3、11-13 定案第 3 條）：baseline 由「K0 deterministic=0」
-    # 更新為「K0 deterministic=12（mean_col/median_col/std_col）」；pearson 2 條屬 D3b
-    # （P20261113_0344-1，參數未存於來源、不可誠實實作）。
-    baseline_match = (total == tax_req) and (det == 12) and (det_in_mraw == det_tax)
+    # 更新為「K0 deterministic=12（mean_col/median_col/std_col）」；D3b 已落
+    # （P20261113_0344-1）：pearson 2 條再翻 deterministic → K0 deterministic=14。
+    baseline_match = (total == tax_req) and (det == 14) and (det_in_mraw == det_tax)
     dist: dict[str, int] = {}
     urt: dict[str, int] = {}
     for r in rows:
@@ -153,8 +153,8 @@ def summarize(rows):
                          "explanation": (f"replayable={total - len(mraw)} 集合內 deterministic={det}：K0 基線（不走 trusted）下，"
                                          "unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決："
                                          "extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成"
-                                         " deterministic；pearson 2 條屬 D3b（P20261113_0344-1，參數未存於來源、不可誠實實作）；"
-                                         "D2 量效見 d2_K1。taxonomy 的 "
+                                         " deterministic；2 條 pearson 已因 D3b（P20261113_0344-1：checks.py 支援集合加入 pearson）翻成"
+                                         " deterministic；D2 量效見 d2_K1。taxonomy 的 "
                                          f"{det_tax} 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、"
                                          "未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。")}}
 
@@ -178,17 +178,17 @@ def selftest() -> int:
     check("pos  有效交付物 answer.txt → deterministic", ok and r is None)
     check("replay D3: mean_col 已 deterministic（11-13 定案、P20261113_0300-3 落盤）",
           replay_reason("unsupported_recompute_type:mean_col", ut, inputs, "plain_recomputed")[0] is True)
-    check("replay D3b: pearson 仍非 deterministic（參數未存於來源、待 P20261113_0344-1 核實）",
-          replay_reason("unsupported_recompute_type:pearson", ut, inputs, "plain_recomputed")[0] is False)
+    check("replay D3b: pearson 已 deterministic（P20261113_0344-1 落盤：checks.py 支援集合加入 pearson）",
+          replay_reason("unsupported_recompute_type:pearson", ut, inputs, "plain_recomputed")[0] is True)
     check("replay missing_param → missing_raw（不造假）", replay_reason("missing_param:values", ut, inputs) == (None, None))
     s = summarize(collect())
     check("76 條全收齊且基線對帳通過", s["total"] == 76 and s["baseline"]["baseline_match"] is True)
     s1 = summarize(collect(use_trusted=True))
-    check("D2+D3 K1：64 條 → deterministic（52 可信任交付物＋12 重算型別，9 任務）", s1["deterministic"] == 64)
+    check("D2+D3+D3b K1：66 條 → deterministic（52 可信任交付物＋12 重算型別＋2 pearson，9 任務）", s1["deterministic"] == 66)
     check("D2 K1：deliverable_not_in_request 零殘留（全部解除，非強行翻綠）",
           not any(k.startswith("deliverable_not_in_request") for k in s1["reason_distribution"]))
-    check("D3 K1 未誤動其它類：unverified 9 條＝4 自陳＋3 unknown_verifier＋2 pearson（D3b 領地）",
-          s1["unverified"] == 9)
+    check("D3b K1 未誤動其它類：unverified 7 條＝4 自陳＋3 unknown_verifier（pearson 2 條已翻 deterministic）",
+          s1["unverified"] == 7)
     if fails:
         print(f"SELFTEST FAIL ({len(fails)}): {fails}")
         return 1
@@ -205,7 +205,7 @@ def main(argv=None) -> int:
     s0 = summarize(rows0)
     rows1 = collect(use_trusted=True)
     s1 = summarize(rows1)
-    doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
+    doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable / P20261113_0344-1-d3b-pearson-recompute（本輪）",
            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
            "code_sha": code_sha(),
            "raw_fields_saved": {"verifier": "g3_2_fire 26/26；其餘三來源 0/50", "deliverable": "僅 reason 內截斷 60 字元",

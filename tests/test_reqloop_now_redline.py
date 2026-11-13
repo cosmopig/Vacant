@@ -1,8 +1,8 @@
 """r1392（2026-11-10）：NOW.md 紅線「凍結 4 檔＋filing 6 sha256」轉抄守衛（審查指示 #4 機械化）。
 
-背景（vq-el4.80）：NOW.md 紅線段是每輪輪首提示唯一重注入的凍結契約行，逐字引用
-  repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、
-  checks.py c7589c61…、run_eval.py 332cd324…、g25 filing（6 sha256）
+背景（vq-el4.80）：NOW.md 紅線段是每輪輪首提示唯一重注入的凍結／受控解凍契約行，逐字引用
+  各檔行數／blob（或 sha256）前綴＋g25 filing（6 sha256）；r1550 起反映 11-13 裁決 §3
+  受控解凍（extract.py/checks.py 現行基線自磁碟重算，非轉抄）
 磁碟上的真實檔已有機械錨（test_reqloop_frozen_anchors.py 釘 repair/extract 之
 blob＋行數、filing code 三 sha256；freeze_check 釘 filing 3/3＋3/3），但「NOW.md
 引文 vs 磁碟」本身此前無任何機械檢查——簿記覆寫時轉抄錯一個 hash 前綴／行數，
@@ -36,8 +36,11 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 NOW = REPO_ROOT / "NOW.md"
 FILING = REPO_ROOT / "ops" / "audits" / "g25_all_gates_filing.json"
 
-# 紅線契約行起始（NOW.md 紅線段「凍結 4 檔不改」行；前綴精確匹配，不誤傷狀態段）。
-REDLINE_PREFIX = "- 凍結 4 檔不改"
+# 紅線契約行起始（NOW.md 紅線段「凍結／受控解凍」行；前綴精確匹配，不誤傷狀態段）。
+# r1550（2026-11-13，票 P20261113_0344-1）：11-13 裁決 §3 受控解凍後，4 檔中 2 檔
+# （extract.py/checks.py）為「受控解凍＋現行基線錨」，2 檔（repair.py/run_eval.py）仍凍結；
+# 前綴由「凍結 4 檔不改」改為「凍結／受控解凍」以誠實反映制度（內容仍逐條自磁碟核實）。
+REDLINE_PREFIX = "- 凍結／受控解凍"
 
 # 紅線引文檔名 → repo 內真實路徑（紅線只引檔名；映射即契約的一部分）。
 PATHS = {
