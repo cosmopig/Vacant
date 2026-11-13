@@ -97,6 +97,27 @@ def test_replay_claims_gate_flag(capsys):
     assert rc.run_gate_check is rc.gate_check  # 票面函式名為同一實作
 
 
+def test_replay_claims_verify_specs_flag(capsys):
+    """P20261113_1206-3：--verify-specs 交叉驗證 4 題 G4 凍結規格（正控制必 PASS、負控制必非 PASS、0 假 PASS）。"""
+    assert rc.main(["--verify-specs"]) == 0
+    out = capsys.readouterr().out
+    assert "FROZEN_SPECS:" in out and "VERDICT: PASS" in out
+
+
+def test_replay_claims_verify_specs_flag_neg_control(tmp_path, capsys):
+    """P20261113_1206-3 負控制：規格自 hash 被篡改 → verify_frozen_specs 必 FAIL（RC 1）。"""
+    import copy
+    src = REPO / "ops/reqloop/g4/specs/dab_725.json"
+    raw = json.loads(src.read_text(encoding="utf-8"))
+    raw = copy.deepcopy(raw)
+    raw["items"][0]["quote"] = "TAMPERED"
+    (tmp_path / "dab_725.json").write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    for tid in ("dab_587", "dab_657", "dab_517"):
+        (tmp_path / f"{tid}.json").write_bytes((REPO / "ops/reqloop/g4/specs" / f"{tid}.json").read_bytes())
+    assert rc.verify_frozen_specs(tmp_path) == 1
+    assert "FROZEN_SPECS FAIL" in capsys.readouterr().out
+
+
 def test_replay_claims_json_flag(capsys):
     """P20261113_0948-3：--json 輸出機器可讀統計（K1 trusted）。
 

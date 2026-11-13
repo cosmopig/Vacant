@@ -586,3 +586,9 @@
 - 已驗證（本輪新跑）：票面驗收 pytest tests/test_reqloop_g3_frozen_spec.py -k test_run_g4→2 passed（RC 0）；回歸 19 passed（frozen_spec/anchors/g4_prereg）＋80 passed（g3/g3gate/replay_claims/freeze_g4_specs）；g4gate --dry-run「12 cells ready (0 model calls)」RC=0、--fire RC=2（fail-closed 未破）；manifest human_signoff 仍 null；frozen anchors 綠（repair/run_eval/extract/checks 未改）。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（本輪 0 發射）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls。下一步：open/ 剩 1 張（P20261113_1206-3 d1 replay 驗證凍結規格）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補票。
+
+## 2026-11-13 r1572（票 P20261113_1206-3 done：d1 replay verify_frozen_specs 凍結規格交叉驗證；0 model calls）
+- 做了什麼：replay_claims.py 加 verify_frozen_specs（4 題 G4 凍結規格 spec_sha256 自校驗＋每條 checkable 條目正控制必 PASS／負控制錯值必非 PASS；統計 total_items/checkable_items/false_pass，0 假 PASS→RC 0）＋main --verify-specs；TDD 先紅後綠（正路徑＋篡改 spec 負控制兩測）；票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 `--verify-specs`→`FROZEN_SPECS: 4 tasks, 22 checkable, 0 false_pass VERDICT: PASS` RC=0；pytest tests/test_replay_claims.py→12 passed（含 2 新）；回歸 24 passed（frozen anchors/g4 specs/g3 frozen/g4 prereg）；git diff 純加法 2 檔＋131/−0；4 份凍結規格 sha256 未動、frozen anchors 綠（repair/run_eval/extract/checks 未改）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（本輪 0 發射）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls。注意：ops/audits/g26_claim_replay.json 本輪被背景迴圈簿記重生成一次（generated_at＋by_task；唯一寫入源＝replay_claims 預設 main，無測試觸發），已還原、未納入本票 commit。下一步：open/ 空→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器）。

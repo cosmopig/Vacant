@@ -14,12 +14,14 @@ checks.py recompute 型別集合擴充後自動反映。末行 REPLAY K0 determi
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime
 import json
 import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
@@ -286,16 +288,124 @@ def gate_check() -> int:
 
 run_gate_check = gate_check  # P20261113_0846-3 票面函式名（同一實作）
 
+SPEC_DIR = REPO / "ops/reqloop/g4/specs"
+FROZEN_TASKS = ("dab_725", "dab_587", "dab_657", "dab_517")
+_KV_CTRL = {"mean_col": checks._mean_col, "median_col": checks._median_col, "std_col": checks._std_col,
+            "pearson": checks._pearson_pair, "pearson2": checks._pearson_pair}
+
+def _ctrl_rows(data_file: pathlib.Path) -> list:
+    """控制用資料行載入（口徑同 checks.check_kv_recomputed：.csv DictReader／.json row 物件列表）。"""
+    if data_file.suffix.lower() == ".json":
+        d = json.loads(data_file.read_text(encoding="utf-8"))
+        if not isinstance(d, list) or not all(isinstance(r, dict) for r in d):
+            raise ValueError("data_file JSON 非 row 物件列表")
+        return d
+    with data_file.open(newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+def _checkable(item) -> bool:
+    """條目可確定性檢查（口徑同 g3._item_uncheckable_reason／1100-2：unverified 標記、
+    檢查器不在白名單、必要參數缺陷——任一命中即永久 UNKNOWN）。"""
+    return (not item.unverified and item.verifier in checks.SUPPORTED_VERIFIERS
+            and extract._param_problem(item.verifier, item.params) is None)
+
+def _ctrl_answers(item, task_dir):
+    """單條目 (正控制, 負控制) answer.txt 內容：正必 PASS、負必非 PASS（P20261113_1206-3）。
+    值口徑同 checks 各驗證器（answer_kv 約束型別、tag_format value_type、kv_recomputed 重算＋round）；
+    無法構造→(None, None)。"""
+    if item.verifier == "answer_kv":
+        pos = []
+        for s in item.params.get("keys") or []:
+            k, cons = str(s.get("key", "")).strip(), str(s.get("type", "number")).lower()
+            if not k or cons not in ("number", "integer", "nonneg_int", "number_in_01"):
+                return None, None
+            pos.append(f"@{k}[{'1.5' if cons in ('number', 'number_in_01') else '3'}]")
+        return "\n".join(pos) + "\n", f"@{pos[0].split('[')[0]}[not_a_number]\n"
+    if item.verifier == "tag_format":
+        tag, vt = str(item.params.get("tag", "")).strip(), str(item.params.get("value_type", "str")).lower()
+        if not tag or vt not in ("str", "int", "integer", "float", "number"):
+            return None, None
+        if vt == "str":
+            return f"@{tag}[hello]\n", f"@{tag} hello\n"  # 負：缺方括號 → missing_brackets FAIL
+        base = 5.0 if vt in ("int", "integer") else 1.5
+        if "min_value" in item.params:
+            base = max(base, float(item.params["min_value"]))
+        if "max_value" in item.params:
+            base = min(base, float(item.params["max_value"]))
+        if vt in ("int", "integer"):
+            base = int(base)
+        return f"@{tag}[{base}]\n", f"@{tag}[not_a_number]\n"
+    if item.verifier == "kv_recomputed":
+        key, rc = str(item.params.get("key", "")).strip(), item.params.get("recompute") or {}
+        helper = _KV_CTRL.get(str(rc.get("type", "")).strip().lower())
+        df = task_dir / str(item.params.get("data_file", "")).strip()
+        if not key or helper is None or not df.is_file():
+            return None, None
+        try:
+            exp = helper(_ctrl_rows(df), rc)
+        except Exception:  # UnknownSource 等＝當前資料下無法確定性檢查
+            return None, None
+        rnd = rc.get("round") if rc.get("round") is not None else item.params.get("round")
+        if isinstance(rnd, int) and not isinstance(rnd, bool):
+            exp = round(exp, rnd)
+        return f"@{key}[{exp}]\n", f"@{key}[{float(exp) + 12345.6789}]\n"  # 負：錯值必 mismatch FAIL
+    return None, None
+
+def verify_frozen_specs(specs_dir=SPEC_DIR) -> int:
+    """G4 凍結規格交叉驗證（P20261113_1206-3、11-13 定案 §4）：4 題規格 spec_sha256 自校驗＋
+    每條 checkable 條目正控制（必 PASS）／負控制（錯值，必非 PASS）；0 假 PASS 且全部可構造才 PASS。
+    零模型、唯讀。"""
+    total_items = checkable_items = false_pass = 0
+    for tid in FROZEN_TASKS:
+        p = pathlib.Path(specs_dir) / f"{tid}.json"
+        try:
+            req_set = RequirementSet.from_dict(json.loads(p.read_text(encoding="utf-8")))
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            print(f"FROZEN_SPECS FAIL: {tid} 規格讀取失敗：{e}")
+            return 1
+        ok, reason = req_set.verify_self_hash()
+        if not ok:
+            print(f"FROZEN_SPECS FAIL: {tid} spec_sha256 自校驗失敗（{reason}）")
+            return 1
+        task_dir = REPO / "ops/reqloop/g3_2/tasks" / tid / "workspace"
+        total_items += len(req_set.items)
+        for item in req_set.items:
+            if not _checkable(item):
+                continue  # 永久 UNKNOWN 條目（參數缺陷）＝非 checkable，不計入分母
+            checkable_items += 1
+            pos, neg = _ctrl_answers(item, task_dir)
+            for label, content in (("pos", pos), ("neg", neg)):
+                if content is None:
+                    false_pass += 1
+                    print(f"FROZEN_SPECS FAIL: {tid} {item.id} {label} 控制無法構造")
+                    continue
+                with tempfile.TemporaryDirectory() as td:
+                    pathlib.Path(td, "answer.txt").write_text(content, encoding="utf-8")
+                    res = {r.claim_id: r.status for r in checks.run_requirement_checks(task_dir, req_set, td)}
+                if (res.get(item.id) == "PASS") != (label == "pos"):
+                    false_pass += 1
+                    print(f"FROZEN_SPECS FAIL: {tid} {item.id} {label} 控制判 {res.get(item.id)}"
+                          f"（預期 {'PASS' if label == 'pos' else '非 PASS'}）")
+    if false_pass:
+        print(f"FROZEN_SPECS FAIL: 4 tasks, {total_items} items, {checkable_items} checkable, false_pass={false_pass}")
+        return 1
+    print(f"FROZEN_SPECS: 4 tasks, {checkable_items} checkable, 0 false_pass VERDICT: PASS")
+    return 0
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="replay_claims")
     ap.add_argument("--selftest", action="store_true", help="跑負/正控制與基線對帳後即回")
     ap.add_argument("--gate", action="store_true", help="成效門機械檢驗（確定性 >= 30 且負控制 0 假 PASS）")
+    ap.add_argument("--verify-specs", action="store_true",
+                    help="P20261113_1206-3：G4 凍結規格正/負控制交叉驗證（0 假 PASS）")
     ap.add_argument("--json", action="store_true", help="P20261113_0948-3：K1（trusted）統計輸出 JSON 到 stdout（RC 0、不寫檔）")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
     if a.gate:
         return gate_check()
+    if a.verify_specs:  # P20261113_1206-3：凍結規格交叉驗證（不呼叫模型、不寫檔）
+        return verify_frozen_specs()
     if a.json:  # P20261113_0948-3：--json 機器可讀輸出（不呼叫模型、不寫 OUT）
         s1 = summarize(collect(use_trusted=True))
         print(json.dumps({"totals": s1, "by_task": s1["by_task"], "deterministic": s1["deterministic"]},
