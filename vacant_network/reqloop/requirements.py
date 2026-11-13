@@ -13,6 +13,7 @@ vacant_network.reqloop.requirements
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import json
 import pathlib
 from typing import Any, Literal
@@ -116,17 +117,48 @@ class RequirementSet:
     """任務需求條目集合。"""
     task_id: str
     items: list[RequirementItem] = dataclasses.field(default_factory=list)
+    goal_sha256: str = ""
+    contract_sha256: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "task_id": self.task_id,
             "items": [item.to_dict() for item in self.items],
         }
+        if self.goal_sha256:
+            d["goal_sha256"] = self.goal_sha256
+        if self.contract_sha256:
+            d["contract_sha256"] = self.contract_sha256
+        return d
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> RequirementSet:
         items = [RequirementItem.from_dict(d) for d in data.get("items", [])]
-        return cls(task_id=data.get("task_id", "unnamed_task"), items=items)
+        return cls(
+            task_id=data.get("task_id", "unnamed_task"),
+            items=items,
+            goal_sha256=str(data.get("goal_sha256", "") or ""),
+            contract_sha256=str(data.get("contract_sha256", "") or ""),
+        )
+
+    def verify_task_hash(self, task_dir: pathlib.Path) -> tuple[bool, str]:
+        """比對 task_dir 下 goal.md／contract.md 的 sha256 與規格記載值。
+
+        未綁定（任一為空字串）→ (False, "unbound")；檔案缺失或 hash 不符 →
+        (False, "mismatch: ...")；兩者皆吻合 → (True, "OK")。
+        """
+        if not self.goal_sha256 or not self.contract_sha256:
+            return (False, "unbound")
+        base = pathlib.Path(task_dir)
+        for name, recorded in (("goal.md", self.goal_sha256),
+                               ("contract.md", self.contract_sha256)):
+            p = base / name
+            if not p.is_file():
+                return (False, f"mismatch: {name} missing")
+            actual = hashlib.sha256(p.read_bytes()).hexdigest()
+            if actual != recorded:
+                return (False, f"mismatch: {name} sha256={actual} != recorded={recorded}")
+        return (True, "OK")
 
     @classmethod
     def load(cls, path: str | pathlib.Path) -> RequirementSet:
