@@ -259,3 +259,70 @@ def test_replay_claims_verify_specs_tampered_manifest_fails_closed(tmp_path, cap
     mp.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
     assert rc.verify_frozen_specs(manifest_path=mp) == 1
     assert "FROZEN_SPECS FAIL: manifest integrity" in capsys.readouterr().out
+
+
+# ── P20261113_1900-1：--unverified-report 點名全部非確定性 claim ─────────────
+
+EXPECTED_UNVERIFIED = sorted([
+    "CLAIM_UNVERIFIED: dab_725/R4: model_declared_unverified",
+    "CLAIM_UNVERIFIED: dab_725/R7: model_declared_unverified",
+    "CLAIM_UNVERIFIED: dab_587/req-3: unknown_verifier:missing",
+    "CLAIM_UNVERIFIED: dab_587/req-4: unknown_verifier:missing",
+    "CLAIM_UNVERIFIED: dab_587/req-5: unknown_verifier:missing",
+    "CLAIM_UNVERIFIED: dab_517/req_write_answer_txt: model_declared_unverified",
+    "CLAIM_UNVERIFIED: dab_517/req_do_not_modify_data: model_declared_unverified",
+])
+
+
+def test_unverified_report_flag_names_all_seven_claims(capsys):
+    """P20261113_1900-1 (a)：--unverified-report RC0、恰 7 條點名（只印原因碼、不印欄位值）；
+    0 條把錯判 PASS（無任何一行含 PASS／deterministic 語意翻轉）。"""
+    assert rc.main(["--unverified-report"]) == 0
+    out = capsys.readouterr().out
+    lines = [l for l in out.splitlines() if l.startswith("CLAIM_UNVERIFIED: ")]
+    assert lines == EXPECTED_UNVERIFIED  # 恰 7 條、逐條點名（多一條/少一條/換序皆紅）
+    for l in lines:
+        assert "PASS" not in l, f"unverified 條不得含 PASS 語意：{l!r}"
+        assert "deterministic" not in l, f"unverified 條不得翻成 deterministic：{l!r}"
+        assert l.split(": ", 2)[2] in ("model_declared_unverified", "unknown_verifier:missing")
+
+
+def test_unverified_report_missing_report_output_unchanged(capsys):
+    """P20261113_1900-1 (b) 負控制：--missing-report 既有 3 條輸出逐字不變（舊行為未被改到）。"""
+    assert rc.main(["--missing-report"]) == 0
+    lines = [l for l in capsys.readouterr().out.splitlines() if l.strip()]
+    assert lines == [
+        "REPLAY K1 (trusted): total=76 deterministic=66 unverified=7 missing_raw=3",
+        "CLAIM_MISSING: dab_517/req_data_unchanged: values missing_param",
+        "CLAIM_MISSING: dab_725/R1: verifier raw_fields_not_saved",
+        "CLAIM_MISSING: dab_725/R6: verifier raw_fields_not_saved",
+    ]
+
+
+def test_unverified_report_gate_still_passes(capsys):
+    """P20261113_1900-1 (c)：--gate 仍 deterministic=66/76 >= 30 false_pass=0 VERDICT: PASS。"""
+    assert rc.main(["--gate"]) == 0
+    assert ("GATE_CHECK: deterministic=66/76 >= 30 false_pass=0 VERDICT: PASS"
+            in capsys.readouterr().out)
+
+
+def test_unverified_report_json_named_non_deterministic(capsys):
+    """P20261113_1900-1 步驟2：--json 既有欄位不變，totals 旁純加法新增
+    named_non_deterministic（7 條 task/claim/reason 逐條清單）。"""
+    assert rc.main(["--json"]) == 0
+    doc = json.loads(capsys.readouterr().out)
+    nn = doc["named_non_deterministic"]
+    assert isinstance(nn, list) and len(nn) == 7
+    for e in nn:
+        assert set(e) == {"task_id", "claim_id", "reason"}
+    assert {"task_id": "dab_587", "claim_id": "req-3", "reason": "unknown_verifier:missing"} in nn
+    assert {"task_id": "dab_725", "claim_id": "R4", "reason": "model_declared_unverified"} in nn
+    assert {"task_id": "dab_517", "claim_id": "req_do_not_modify_data",
+            "reason": "model_declared_unverified"} in nn
+    # 既有欄位不變（負控制：下游不破）
+    assert doc["totals"]["deterministic"] == 66
+    assert doc["totals"]["unverified"] == 7
+    assert doc["totals"]["missing_raw"] == 3
+    assert doc["totals"]["reason_distribution"]["model_declared_unverified"] == 4
+    assert doc["totals"]["reason_distribution"]["unknown_verifier:missing"] == 3
+    assert doc["deterministic"] == 66

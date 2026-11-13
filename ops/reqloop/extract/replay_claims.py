@@ -162,6 +162,10 @@ def summarize(rows):
     for r in sorted(mraw, key=lambda x: (x["task_id"], x["claim_id"])):
         f, rs = missing_field_reason(r)
         missing_detail.append({"task_id": r["task_id"], "claim_id": r["claim_id"], "field": f, "reason": rs})
+    # P20261113_1900-1：unverified 逐條點名（task/claim/原因碼，不印欄位值；排序穩定；純加法）
+    unverified_detail = [{"task_id": r["task_id"], "claim_id": r["claim_id"], "reason": r["replay_reason"]}
+                         for r in sorted((r for r in rows if r["replay_status"] == "unverified"),
+                                         key=lambda x: (x["task_id"], x["claim_id"]))]
     tax = json.loads(TAX.read_text(encoding="utf-8"))["totals"]
     det_in_mraw = sum(1 for r in mraw if r["original_verdict"] == "deterministic")
     det_tax, tax_req = int(tax["deterministic_claims"]), int(tax["requirements"])
@@ -187,6 +191,7 @@ def summarize(rows):
     return {"total": total, "by_task": by_task, "replayable": total - len(mraw), "deterministic": det,
             "unverified": sum(1 for r in rows if r["replay_status"] == "unverified"), "missing_raw": len(mraw),
             "missing_detail": missing_detail,
+            "unverified_detail": unverified_detail,  # P20261113_1900-1（純加法，不改既有欄位）
             "missing_raw_claims": [{**r, "why": r["original_reason"] or "deterministic claim; raw fields not saved"} for r in mraw],
             "reason_distribution": dict(sorted(dist.items())),
             "unsupported_recompute_types": dict(sorted(urt.items())),
@@ -445,6 +450,8 @@ def main(argv=None) -> int:
     ap.add_argument("--json", action="store_true", help="P20261113_0948-3：K1（trusted）統計輸出 JSON 到 stdout（RC 0、不寫檔）")
     ap.add_argument("--missing-report", action="store_true",
                     help="P20261113_1358-2：點名列出缺失 claim（欄位名＋原因碼、不印欄位值；唯讀、不寫檔）")
+    ap.add_argument("--unverified-report", action="store_true",
+                    help="P20261113_1900-1：點名列出全部 unverified claim（只印原因碼、不印欄位值；唯讀、不寫檔、0 model calls）")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
@@ -454,7 +461,8 @@ def main(argv=None) -> int:
         return verify_frozen_specs()
     if a.json:  # P20261113_0948-3：--json 機器可讀輸出（不呼叫模型、不寫 OUT）
         s1 = summarize(collect(use_trusted=True))
-        print(json.dumps({"totals": s1, "by_task": s1["by_task"], "deterministic": s1["deterministic"]},
+        print(json.dumps({"totals": s1, "named_non_deterministic": s1["unverified_detail"],
+                          "by_task": s1["by_task"], "deterministic": s1["deterministic"]},
                          indent=2, ensure_ascii=False))
         return 0
     if a.missing_report:  # P20261113_1358-2：缺失點名報告（不呼叫模型、不寫 OUT）
@@ -463,6 +471,13 @@ def main(argv=None) -> int:
               f"unverified={s1['unverified']} missing_raw={s1['missing_raw']}")
         for e in s1["missing_detail"]:
             print(f"CLAIM_MISSING: {e['task_id']}/{e['claim_id']}: {e['field']} {e['reason']}")
+        return 0
+    if a.unverified_report:  # P20261113_1900-1：unverified 點名報告（不呼叫模型、不寫 OUT）
+        s1 = summarize(collect(use_trusted=True))
+        print(f"REPLAY K1 (trusted): total={s1['total']} deterministic={s1['deterministic']} "
+              f"unverified={s1['unverified']} missing_raw={s1['missing_raw']}")
+        for e in s1["unverified_detail"]:
+            print(f"CLAIM_UNVERIFIED: {e['task_id']}/{e['claim_id']}: {e['reason']}")
         return 0
     rows0 = collect()
     s0 = summarize(rows0)
