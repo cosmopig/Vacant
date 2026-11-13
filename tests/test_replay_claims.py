@@ -95,3 +95,21 @@ def test_replay_claims_gate_flag(capsys):
     out = capsys.readouterr().out
     assert "GATE_CHECK:" in out and "VERDICT: PASS" in out
     assert rc.run_gate_check is rc.gate_check  # 票面函式名為同一實作
+
+
+def test_replay_claims_json_flag(capsys):
+    """P20261113_0948-3：--json 輸出機器可讀統計（K1 trusted）。
+
+    驗證：RC 0、stdout 可被 json.loads 解析、"deterministic" 為整數（現值 66＝成效門口徑）、
+    內含 "by_task"（每題 total/deterministic/unverified/missing_raw，分組合計＝76）。
+    """
+    assert rc.main(["--json"]) == 0
+    doc = json.loads(capsys.readouterr().out)
+    assert isinstance(doc["deterministic"], int)
+    assert doc["deterministic"] == 66
+    assert doc["totals"]["deterministic"] == 66
+    by = doc["by_task"]
+    assert isinstance(by, dict) and by
+    assert sum(t["total"] for t in by.values()) == 76
+    for t in by.values():
+        assert t["total"] == t["deterministic"] + t["unverified"] + t["missing_raw"]

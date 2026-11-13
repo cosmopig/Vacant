@@ -144,7 +144,12 @@ def summarize(rows):
         if (r["original_reason"] or "").startswith("unsupported_recompute_type:"):
             t = r["original_reason"].split(":", 1)[1]
             urt[t] = urt.get(t, 0) + 1
-    return {"total": total, "replayable": total - len(mraw), "deterministic": det,
+    by_task: dict[str, dict[str, int]] = {}
+    for r in rows:  # P20261113_0948-3：按任務分組摘要（機器可讀）
+        t = by_task.setdefault(r["task_id"], {"total": 0, "deterministic": 0, "unverified": 0, "missing_raw": 0})
+        t["total"] += 1
+        t[r["replay_status"]] += 1
+    return {"total": total, "by_task": by_task, "replayable": total - len(mraw), "deterministic": det,
             "unverified": sum(1 for r in rows if r["replay_status"] == "unverified"), "missing_raw": len(mraw),
             "missing_raw_claims": [{**r, "why": r["original_reason"] or "deterministic claim; raw fields not saved"} for r in mraw],
             "reason_distribution": dict(sorted(dist.items())),
@@ -285,11 +290,17 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="replay_claims")
     ap.add_argument("--selftest", action="store_true", help="跑負/正控制與基線對帳後即回")
     ap.add_argument("--gate", action="store_true", help="成效門機械檢驗（確定性 >= 30 且負控制 0 假 PASS）")
+    ap.add_argument("--json", action="store_true", help="P20261113_0948-3：K1（trusted）統計輸出 JSON 到 stdout（RC 0、不寫檔）")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
     if a.gate:
         return gate_check()
+    if a.json:  # P20261113_0948-3：--json 機器可讀輸出（不呼叫模型、不寫 OUT）
+        s1 = summarize(collect(use_trusted=True))
+        print(json.dumps({"totals": s1, "by_task": s1["by_task"], "deterministic": s1["deterministic"]},
+                         indent=2, ensure_ascii=False))
+        return 0
     rows0 = collect()
     s0 = summarize(rows0)
     rows1 = collect(use_trusted=True)
