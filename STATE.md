@@ -604,3 +604,9 @@
 - 已驗證（本輪新跑）：票面驗收兩條全綠（--dry-run RC=0「G4 DRY-RUN: 12 cells ready (0 model calls)」／--fire RC=2「G4 FIRE REFUSED: human_signoff is null」）；pytest frozen_spec＋g4_prereg＋frozen_anchors＋replay_claims＋g3gate→63 passed；G3 預設 manifest 舊路徑 --dry-run 輸出逐字不變 RC 0（無 experiment 欄位不分流）；git diff 2 檔 61+/1−（產品碼 g3.py 41 行≤45）；manifest human_signoff 仍 null、ops/reqloop/g4 無新產物（0 發射）。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（本輪 0 發射）；已簽核 manifest 的 --fire 正路徑未實跑（需人類簽核，Mock 正控制已在 test_run_g4_mock_pipeline 覆蓋 run_g4 層）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。commit 55a1e1cba。下一步：open/ 剩 1 張（P20261113_1307-3 g4gate 任務工作區 hash 守衛）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器）。
+
+## 2026-11-13 r1575（票 P20261113_1307-3 done：g4gate 任務工作區檔案雜湊守衛；0 model calls）
+- 做了什麼：build_g4_execution_plan 逐題 RequirementSet.load＋verify_task_hash(ws)，goal.md/contract.md sha256 與凍結規格綁定值不符→ValueError「雜湊不符（…；fail-closed）」（輸入檔漂移離線組裝即攔截，不必等真發射 load_frozen_spec）；TDD 先紅後綠；test_build_g4_execution_plan 加篡改負控制（真實工作檔基底、goal.md 改一個字元→雜湊不符），缺檔負控制改真實檔複製基底 isolating 缺檔路徑；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 1 passed（含篡改負控制）＋g4gate --plan 12 格 RC 0；32 passed（g4_prereg/g3_frozen_spec/frozen_anchors/replay_claims）；4 題真實工作區 hash 全吻合（正路徑）；git diff 2 檔 36+/10−（產品碼 7 行）；repair/run_eval/extract/checks 未改（anchors 綠）；manifest human_signoff 仍 null、ops/reqloop/g4 無新產物（0 發射）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（本輪 0 發射）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls。下一步：open/ 空→規劃者依 11-13 §5 補票（每張動產品碼 vacant_network/reqloop/ 或 D1 重播器；open<3 張須補）；G4 發射等人類簽核。
