@@ -527,3 +527,10 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、r1556 已上報規劃者不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
 - DECISION：compute_spec_sha256 對 from_dict 載入者以來源 dict 快照為依據（非 to_dict 重組）——因 G4 檔案 spec_sha256 是整份檔案 dict（含 spec_version/ticket/frozen_from、7 鍵 items）的 canonical hash，to_dict 重組必不符；to_dict 維持舊格式（run_eval _req_digest 相續不受影響），raw 快照只在自校驗路徑用。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、凍結 4 檔＋g25 filing 6 sha 未改、0 model calls、未發射。下一步：open/ 剩 P20261113_0846-3（D1 replay gate CLI）→doing/ 取票照做；輪頭一次讀 CI 三分支。
+
+## 2026-11-13 r1559（票 P20261113_0846-3 done：D1 replay --gate 補齊票面剩餘缺口——reason 碼斷言 a/b＋unknown_verifier c＋run_gate_check 同義名＋CLI 測試；0 model calls）
+- 做了什麼：`--gate`/gate_check 主體由 argon 57bb13d7d 實作（輪首核實已綠：驗收 RC=0、66/76、false_pass=0）；本輪補票面剩餘缺口——負控制 (a) 錯交付物檔名必判 `deliverable_not_in_request`、(b) 輸入檔當交付物必判 `deliverable_is_input_file`（reason 碼斷言）、(c) 未知 verifier 必判 `unknown_verifier`（gate 內新增、dab_725/587/657/517 各跑一次）＋`run_gate_check = gate_check`（票面同義名）＋tests/test_replay_claims.py::test_replay_claims_gate_flag（`main(["--gate"])` RC=0、輸出含 GATE_CHECK:／VERDICT: PASS）。票尾 3 行結果→mv done/（open/ 現空）。
+- 已驗證（本輪新跑）：票面驗收 `python3 ops/reqloop/extract/replay_claims.py --gate` → `GATE_CHECK: deterministic=66/76 >= 30 false_pass=0 VERDICT: PASS`（RC=0）；tests/test_replay_claims.py 9 passed（含既有假-PASS→exit1 負控制）；git diff 僅 2 檔 +24/-6（票面 ≤60 行／2 檔）；repair.py／run_eval.py／歷史數據／凍結 4 檔／g25 filing 未改。commit 1b3e3f334。
+- 未驗證：CI 裁決（輪首 auto/qwen27b「還沒跑完」；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、r1556 已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
+- DECISION：票面「改前此命令會報 unrecognized arguments」不成立——argon 已先行實作（57bb13d7d 為 HEAD 祖先）；不退回，改補票面剩餘缺口（票面測試名／reason 碼／(c) 未知 verifier 負控制），實際狀態如實註記於票尾 3 行與 commit 訊息。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 空→規劃者依 11-13 §5 補票；輪頭一次讀 CI 三分支。
