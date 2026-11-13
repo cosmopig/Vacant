@@ -657,3 +657,9 @@
 - 已驗證（本輪新跑）：票面驗收 2 passed（RC=0）；g4_prereg＋frozen_specs＋frozen_anchors＋g3_frozen 29 passed；g3gate＋g3_frozen 42 passed；freeze_g4_specs 5 passed；CLI dry-run RC0／plan RC0／fire RC2（human_signoff 仍 null、0 發射）／篡改 manifest dry-run RC1 點名 dab_587；git diff 2 檔 26+/19−。
 - 未驗證：CI 裁決（輪首 qwen 還沒跑完；argon 8 紅／worker 11 紅＝他枝新 WIP、既有已上報、不代修）；g3.py 未動（票限 ≤2 檔）——g3.py:1456 傳 plain dict 由統一核驗口 dict 分支接管、generic except 捕 SpecIntegrityError RC1（42 passed 覆蓋）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 2 張（1810-3／1810-4）<3→規劃者依 11-13 §5 補票；下一輪 doing/ 取票照做。
+
+## 2026-11-13 r1591（票 P20261113_1810-3 done：D4 g3 CLI G4 dry-run 篡改 spec_sha256 fail-closed pin 測試；0 model calls）
+- 做了什麼：票步驟1（捕獲＋`G4 DRY-RUN FAIL`＋RC1）現樹已存在（1307-2 加入之 except Exception＝票點名三型 SpecIntegrityError/ValueError/KeyError 之超集，且即「對齊 --fire 通用失敗出口」本身；收窄會弱化 fail-closed、違票目的）→ 本票落地為 pin 測試 test_g3_cli_g4_dry_run_tampered_spec_fails_closed_exit_1（篡改 spec_sha256→RC1、點名題號 dab_725、stderr 無 Traceback）；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 1 passed（含票面原文 -q 指令 RC=0）；g3_frozen_spec 12＋frozen_anchors 5＋g4_preregistration 6＋freeze_g4_specs 5＋g3gate＋frozen_specs 37＝66 passed；git diff 僅測試 1 檔＋17（產品碼零改動）；4 凍結檔未動（anchors 綠）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝 WIP、既有、已上報、不代修）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）。open/ 1 張（1810-4）<3→規劃者依 11-13 §5 補票；下一輪 doing/ 取票照做。
