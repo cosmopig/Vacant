@@ -12,6 +12,7 @@ vacant_network.reqloop.requirements
 
 from __future__ import annotations
 
+import copy
 import dataclasses
 import hashlib
 import json
@@ -119,6 +120,12 @@ class RequirementSet:
     items: list[RequirementItem] = dataclasses.field(default_factory=list)
     goal_sha256: str = ""
     contract_sha256: str = ""
+    # 規格自 hash（整份規格除本欄的 canonical JSON 之 sha256，同 freeze_specs._canon 口徑）。
+    # 空字串＝未綁定（舊規格/舊行為）；非空時才進 to_dict，舊序列化逐位元組不變。
+    spec_sha256: str = ""
+    # from_dict 來源 dict 的深拷貝快照：規格檔案（如 G4 4 題）的 spec_sha256 即對該
+    # 快照（除 spec_sha256 欄）而算，載入物件才能直接自校驗；程式內構建＝None（對 to_dict 算）。
+    raw: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -129,6 +136,8 @@ class RequirementSet:
             d["goal_sha256"] = self.goal_sha256
         if self.contract_sha256:
             d["contract_sha256"] = self.contract_sha256
+        if self.spec_sha256:
+            d["spec_sha256"] = self.spec_sha256
         return d
 
     @classmethod
@@ -139,7 +148,29 @@ class RequirementSet:
             items=items,
             goal_sha256=str(data.get("goal_sha256", "") or ""),
             contract_sha256=str(data.get("contract_sha256", "") or ""),
+            spec_sha256=str(data.get("spec_sha256", "") or ""),
+            raw=copy.deepcopy(data),
         )
+
+    def compute_spec_sha256(self) -> str:
+        """規格自 hash：整份規格序列化（除 spec_sha256 欄）canonical JSON 之 sha256。
+
+        canonical＝sort_keys＋compact separators＋ensure_ascii=False（同 freeze_specs._canon）。
+        依據：from_dict 載入者＝來源 dict 快照 raw；程式內構建者＝to_dict()。
+        """
+        base = self.raw if self.raw is not None else self.to_dict()
+        body = {k: v for k, v in base.items() if k != "spec_sha256"}
+        canon = json.dumps(body, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+    def verify_self_hash(self) -> tuple[bool, str]:
+        """自 hash 自校驗：未綁定→(False,"unbound")；吻合→(True,"OK")；否則 (False,"mismatch: …")。"""
+        if not self.spec_sha256:
+            return (False, "unbound")
+        actual = self.compute_spec_sha256()
+        if actual == self.spec_sha256:
+            return (True, "OK")
+        return (False, f"mismatch: spec_sha256={actual} != recorded={self.spec_sha256}")
 
     def verify_task_hash(self, task_dir: pathlib.Path) -> tuple[bool, str]:
         """比對 task_dir 下 goal.md／contract.md 的 sha256 與規格記載值。
