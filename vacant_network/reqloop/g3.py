@@ -889,11 +889,57 @@ def max_calls_bound(arm_order: tuple[str, ...], n_tasks: int) -> int:
 # ── 發射主體（零模型呼叫：通道注入）──────────────────────────────────
 
 
+def load_frozen_spec(spec_dir: pathlib.Path, tid: str, inputs: dict) -> RequirementSet:
+    """D4（11-13 定案第 2 條）：載入預跑通過的需求規格 <spec_dir>/<tid>.json。
+
+    規格檔須記載 task_id、goal_sha256、contract_sha256 與 reqset（RequirementSet
+    序列化）。任一不符／損壞→ValueError 拒發（fail-closed）；絕不默默降級為
+    重新擷取——G3.3 證明重新擷取不穩定，發射必須 100% 重用凍結規格。
+    """
+    p = pathlib.Path(spec_dir) / f"{tid}.json"
+    if not p.is_file():
+        raise ValueError(
+            f"D4 凍結規格缺檔：{p}——指定 spec_dir 卻無此 task 規格，拒發（不重新擷取）")
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+        raise ValueError(f"D4 凍結規格損壞：{p}: {e}") from e
+    if not isinstance(raw, dict):
+        raise ValueError(f"D4 凍結規格損壞（非 JSON 物件）：{p}")
+    if raw.get("task_id") != tid:
+        raise ValueError(
+            f"D4 凍結規格 task_id 不符：{p} 記載 {raw.get('task_id')!r}、當前 {tid!r}——拒發")
+    goal_sha = hashlib.sha256(inputs["goal"].encode("utf-8")).hexdigest()
+    contract_sha = hashlib.sha256(inputs["contract"].encode("utf-8")).hexdigest()
+    if raw.get("goal_sha256") != goal_sha:
+        raise ValueError(
+            f"D4 凍結規格 goal_sha256 不符：{p} 記載 {raw.get('goal_sha256')!r}、"
+            f"當前 {goal_sha!r}——goal 已變動，拒發（不重新擷取）")
+    if raw.get("contract_sha256") != contract_sha:
+        raise ValueError(
+            f"D4 凍結規格 contract_sha256 不符：{p} 記載 {raw.get('contract_sha256')!r}、"
+            f"當前 {contract_sha!r}——contract 已變動，拒發（不重新擷取）")
+    if not isinstance(raw.get("reqset"), dict):
+        raise ValueError(f"D4 凍結規格損壞（reqset 缺失或非物件）：{p}")
+    try:
+        req_set = RequirementSet.from_dict(raw["reqset"])
+    except (KeyError, TypeError, AttributeError) as e:
+        raise ValueError(f"D4 凍結規格損壞（reqset 不可反序列化）：{p}: {e}") from e
+    if req_set.task_id != tid:
+        raise ValueError(
+            f"D4 凍結規格 reqset.task_id 不符：{req_set.task_id!r} != {tid!r}——拒發")
+    return req_set
+
+
 def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
            channel: Channel, pi_channel: Channel | None = None, approval: dict,
            answer_model: str = DEFAULT_ANSWER_MODEL,
-           extract_model: str = DEFAULT_EXTRACT_MODEL) -> dict:
+           extract_model: str = DEFAULT_EXTRACT_MODEL,
+           spec_dir: pathlib.Path | None = None) -> dict:
     """三臂×N 格發射主體。返回結果 dict（write_result 落 g3_result.json）。
+
+    D4（11-13 定案第 2 條）：spec_dir 指定時，需求清單直接重用凍結規格
+    （<spec_dir>/<task_id>.json；0 模型擷取呼叫）；缺檔/雜湊不符/損壞→ValueError。
 
     門（順序即優先級）：
       1) verify_frozen＋check_budget（完整性先於核准判定，篡改→G3Plan 層 ValueError）
@@ -978,29 +1024,38 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
         req_set = None
         if needs_list and not stopped:
             ledger: list[RoundUsage] = []
-            client = _ChannelExtractClient(guard, extract_model,
-                                           purpose=f"G3 {tid} 擷取需求",
-                                           timeout_s=tpr, ledger=ledger)
-            try:
-                # D2（11-13 裁決第 2 條）：交付物是任務的事實——從原文（goal＋公開
-                # contract）抽唯一點名的非輸入輸出檔作為 trusted deliverable；抽不出
-                # （None）時 extract_requirements 保持舊行為（逐條照模型自報＋逐字點名檢查）。
-                _ut = compose_extract_user_text(
-                    inputs["goal"], inputs.get("contract"))
-                req_set, report = _extract.extract_requirements(
-                    user_text=_ut,
-                    client=client, task_id=tid,
-                    trusted_deliverable=_extract.trusted_deliverable_from_contract(
-                        _ut, list(inputs["data"].keys())))
-            except G3QuotaError as e:
-                # 撞額度＝停發、不重試（不得降級成「擷取失敗＝沒有需求」）
-                stopped = True
-                result["stop_reason"] = "quota"
-                trec["extract_error"] = f"G3QuotaError: {e}"
-                trec["extract_usages"] = ledger
-                result["tasks"].append(trec)
-                req_set = None
+            report = None
+            if spec_dir is not None:
+                # D4（11-13 定案第 2 條）：預跑通過的需求規格凍結落盤、正式發射
+                # 直接重用——0 模型擷取呼叫、條件 100% 重現（G3.3 證明重新擷取
+                # 不穩定）；缺檔/雜湊不符/損壞→load_frozen_spec 拋 ValueError 拒發，
+                # 絕不默默降級為重新擷取。
+                req_set = load_frozen_spec(spec_dir, tid, inputs)
+                report = _extract.ExtractReport()
             else:
+                client = _ChannelExtractClient(guard, extract_model,
+                                               purpose=f"G3 {tid} 擷取需求",
+                                               timeout_s=tpr, ledger=ledger)
+                try:
+                    # D2（11-13 裁決第 2 條）：交付物是任務的事實——從原文（goal＋公開
+                    # contract）抽唯一點名的非輸入輸出檔作為 trusted deliverable；抽不出
+                    # （None）時 extract_requirements 保持舊行為（逐條照模型自報＋逐字點名檢查）。
+                    _ut = compose_extract_user_text(
+                        inputs["goal"], inputs.get("contract"))
+                    req_set, report = _extract.extract_requirements(
+                        user_text=_ut,
+                        client=client, task_id=tid,
+                        trusted_deliverable=_extract.trusted_deliverable_from_contract(
+                            _ut, list(inputs["data"].keys())))
+                except G3QuotaError as e:
+                    # 撞額度＝停發、不重試（不得降級成「擷取失敗＝沒有需求」）
+                    stopped = True
+                    result["stop_reason"] = "quota"
+                    trec["extract_error"] = f"G3QuotaError: {e}"
+                    trec["extract_usages"] = ledger
+                    result["tasks"].append(trec)
+                    req_set = None
+            if report is not None:
                 trec["extract_error"] = report.extract_error or report.parse_error
                 # 凍結的 extract_requirements 會把 client 例外吞進 extract_error，
                 # 撞額度標記必須在此層取回（否則「撞額度即停」被降級成空清單繼續發）
@@ -1152,6 +1207,10 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None,
     ap.add_argument("--out", default=None, help="結果輸出目錄（預設 ops/reqloop/g3_gate/fire_<ts>）")
     ap.add_argument("--answer-model", default=DEFAULT_ANSWER_MODEL)
     ap.add_argument("--extract-model", default=DEFAULT_EXTRACT_MODEL)
+    ap.add_argument("--spec-dir", default=None,
+                    help="D4 凍結需求規格目錄（<dir>/<task_id>.json）：發射時直接重用、"
+                         "0 次擷取呼叫；task_id/goal/contract 雜湊不符或規格損壞→拒發。"
+                         "省略＝舊行為（動態擷取）")
     args = ap.parse_args(argv)
 
     try:
@@ -1231,7 +1290,8 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None,
     try:
         result = run_g3(plan, base, out_root, channel=chan, pi_channel=pi_chan,
                         approval=approval,
-                        answer_model=args.answer_model, extract_model=args.extract_model)
+                        answer_model=args.answer_model, extract_model=args.extract_model,
+                        spec_dir=pathlib.Path(args.spec_dir) if args.spec_dir else None)
     except G3NotApproved as e:
         print(f"G3 FIRE NOT APPROVED: {e}——0 模型呼叫（fail-closed）")
         return RC_NOT_APPROVED
