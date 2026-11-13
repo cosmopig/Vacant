@@ -663,3 +663,9 @@
 - 已驗證（本輪新跑）：票面驗收 1 passed（含票面原文 -q 指令 RC=0）；g3_frozen_spec 12＋frozen_anchors 5＋g4_preregistration 6＋freeze_g4_specs 5＋g3gate＋frozen_specs 37＝66 passed；git diff 僅測試 1 檔＋17（產品碼零改動）；4 凍結檔未動（anchors 綠）。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝 WIP、既有、已上報、不代修）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）。open/ 1 張（1810-4）<3→規劃者依 11-13 §5 補票；下一輪 doing/ 取票照做。
+
+## 2026-11-13 r1592（票 P20261113_1810-4 done：D1 replay verify_frozen_specs 接入 manifest spec_sha256 密碼學綁定核驗＋負控制；0 model calls）
+- 做了什麼：TDD 先紅（TypeError: manifest_path 未接受）後綠——verify_frozen_specs(specs_dir=SPEC_DIR, manifest_path=None)：預設 manifest=ops/reqloop/g4/manifest.json，迴圈前經 vacant_network.reqloop.specs.load_frozen_specs 逐題核驗 spec_sha256，SpecIntegrityError→印「FROZEN_SPECS FAIL: manifest integrity」回 1（fail-closed、0 假 PASS）；新增負控制測試 test_replay_claims_verify_specs_tampered_manifest_fails_closed（篡改 spec_sha256→RC1＋點名輸出）；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 1 passed（票面原文 -q 指令 RC=0）；test_replay_claims.py 19 passed；frozen_specs＋g4_prereg＋frozen_anchors＋g3_frozen_spec 30 passed（4 凍結檔未動）；--verify-specs 仍 VERDICT: PASS（4 tasks, 22 checkable, 0 false_pass）；--gate 仍 deterministic=66/76 false_pass=0 VERDICT: PASS；git diff 2 檔 25+/2−（產品碼淨 +10）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝 WIP、既有、已上報、不代修）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 0 張＋doing/ 空＜3→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器）；下一輪 doing/ 取票照做。
