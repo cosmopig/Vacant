@@ -651,3 +651,9 @@
 - 已驗證（本輪新跑）：票面驗收 1 passed（RC0）；test_reqloop_frozen_specs.py 6 passed；test_g4_preregistration.py 6 passed；frozen_anchors 5 passed（4 凍結檔未動）；g4gate --dry-run RC0；git diff 2 檔 35+/9−（產品碼 net +8 行）。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝新 WIP、既有已上報、不代修）；g4gate.py／g3.py 未切 dict 入參（票限 ≤2 檔；呼叫端仍路徑入參＝舊行為）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 3 張（1810-2／1810-3／1810-4）≥3 達標；下一輪 doing/ 取票照做。
+
+## 2026-11-13 r1590（票 P20261113_1810-2 done：D4 g4gate 接入 specs.load_frozen_specs 統一核驗口；0 model calls）
+- 做了什麼：g4_dry_run 開頭經 load_frozen_specs(manifest) 全量 4 題凍結規格 spec_sha256 密碼學校驗（篡改/缺檔→SpecIntegrityError fail-closed），移除重複手動 verify_self_hash()/spec_sha256 比對，每題自 loaded_specs[task]（RequirementSet.from_dict）做可檢查性分析、n_checkable==0 仍 ValueError 拒發；build_g4_execution_plan 改直接 load_frozen_specs(manifest)、移除 _manifest_path workaround；CLI dry-run 例外列加 SpecIntegrityError（篡改 manifest 乾淨 RC1）；TDD 先紅（新測試 ValueError 非 SpecIntegrityError；簡化後 (b) 走 DEFAULT_MANIFEST 亦紅）後綠；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 2 passed（RC=0）；g4_prereg＋frozen_specs＋frozen_anchors＋g3_frozen 29 passed；g3gate＋g3_frozen 42 passed；freeze_g4_specs 5 passed；CLI dry-run RC0／plan RC0／fire RC2（human_signoff 仍 null、0 發射）／篡改 manifest dry-run RC1 點名 dab_587；git diff 2 檔 26+/19−。
+- 未驗證：CI 裁決（輪首 qwen 還沒跑完；argon 8 紅／worker 11 紅＝他枝新 WIP、既有已上報、不代修）；g3.py 未動（票限 ≤2 檔）——g3.py:1456 傳 plain dict 由統一核驗口 dict 分支接管、generic except 捕 SpecIntegrityError RC1（42 passed 覆蓋）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 2 張（1810-3／1810-4）<3→規劃者依 11-13 §5 補票；下一輪 doing/ 取票照做。
