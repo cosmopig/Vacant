@@ -541,3 +541,10 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b「還沒跑完」；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
 - DECISION：自校驗置於 goal/contract 檢查之後——goal 篡改測試的 raw 快照含 goal_sha256，若先跑自校驗會誤報 spec_sha256 原因碼（既有測試紅）；票面「from_dict 之後」仍滿足。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、凍結 4 檔＋g25 filing 未改、0 model calls、未發射。下一步：open/ 剩 2 張（0948-2 g4gate dry-run＋發射控制、0948-3 D1 replay --json）→doing/ 取票照做；open/ 少於 3 張由規劃者補。
+
+## 2026-11-13 r1561（票 P20261113_0948-2 done：G4 預註冊離線檢驗＋發射門控制產品模組 g4gate；0 model calls）
+- 做了什麼：新產品模組 vacant_network/reqloop/g4gate.py（LaunchRefused／DEFAULT_MANIFEST／load_g4_manifest 驗 schema＋4 題×3 臂×12 格＋規格檔路徑／g4_dry_run 複用 RequirementSet.verify_self_hash 核 4 份凍結規格自 hash＋manifest↔規格 hash 一致／decide_g4_launch 未簽核 fail-closed／CLI --dry-run RC0＋--fire 未簽核 RC2）；tests/test_g4_preregistration.py 改由產品模組引入（移除內嵌參考實現，3 測試）。票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 --dry-run→"G4 DRY-RUN: 12 cells ready (0 model calls)" RC=0；--fire→"G4 FIRE REFUSED: human_signoff is null" RC=2；pytest tests/test_g4_preregistration.py 3 passed；回歸 requirements＋freeze_g4_specs＋g4_preregistration＋g3＋g3gate＋replay_claims 86 passed（同 r1560 基線）；負控制：cells 改 11／規格 hash 不符→ValueError、未簽核→LaunchRefused、簽核→authorized（純決策不發射）；git status 僅 2 檔（新模組 110 行／code 76 行≤90、測試 +17/-41）；repair.py／run_eval.py／extract.py／checks.py／g25 filing／凍結 4 檔未改。commit 530ca359e。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射；g4gate 核准後發射管線未接線、另一步授權）。
+- DECISION：g4_dry_run 複用 RequirementSet.verify_self_hash（r1558 產品原生自校驗）而非自造 hash——同一把尺；--fire 未簽核輸出固定字串「G4 FIRE REFUSED: human_signoff is null」對票面驗收原文（例外訊息完整句留在 LaunchRefused）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 1 張（0948-3 D1 replay --json）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補。
