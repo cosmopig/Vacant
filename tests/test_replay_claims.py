@@ -201,3 +201,27 @@ def test_json_totals_missing_detail_shape(capsys):
     assert s0["deterministic"] == 14
     assert s0["missing_raw"] == 3
     assert s0["missing_detail"] == doc["totals"]["missing_detail"]
+
+
+# ── P20261113_1507-1：dab_587 unknown_verifier:missing 根因點名＋負控制 ──────
+
+def test_missing_verifier_stays_unverified_negative_control():
+    """P20261113_1507-1：verifier 缺失（空字串/None）必判 unknown_verifier:missing，
+    絕不翻 deterministic（I-4：未測量不是通過；0 假 PASS 負控制）。
+
+    dab_587 三條根因＝模型擷取階段省略 verifier 欄位且預跑未存 raw fields：
+    (a) judge_claim 空/None → (False, "unknown_verifier:missing")（對齊 extract.py:806）；
+    (b) replay_reason("unknown_verifier:missing") 維持 (False, reason)；
+    (c) dab_587 的 3 條重播 row 維持 unverified 且 replay_reason 點名此根因。
+    """
+    # (a) judge_claim：空字串與 None 皆點名為 missing（對齊 extract.py:806 的 or 'missing'）
+    assert rc.judge_claim("", "answer.txt", {}, UT, INPUTS) == (False, "unknown_verifier:missing")
+    assert rc.judge_claim(None, "answer.txt", {}, UT, INPUTS) == (False, "unknown_verifier:missing")
+    # (b) replay_reason：unknown_verifier:missing 維持 unverified（0 假 PASS 負控制）
+    assert rc.replay_reason("unknown_verifier:missing", UT, INPUTS) == (False, "unknown_verifier:missing")
+    # (c) dab_587 三條（模型省略 verifier、預跑未存 raw fields）維持 unverified 且點名根因
+    rows = [r for r in rc.collect(use_trusted=True)
+            if r["task_id"] == "dab_587" and r["replay_status"] == "unverified"]
+    assert len(rows) == 3
+    assert all(r["replay_reason"] == "unknown_verifier:missing" for r in rows)
+    assert all(r["claim_id"] in ("req-3", "req-4", "req-5") for r in rows)

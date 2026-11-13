@@ -60,7 +60,8 @@ def judge_claim(verifier, deliverable, params, user_text, input_files, *, truste
     """用當前代碼重判一條「原始需求」（順序同 extract.build_requirement_set）。回 (deterministic, reason)。"""
     v = str(verifier or "").strip()
     if not v or v not in checks.SUPPORTED_VERIFIERS:
-        return False, f"unknown_verifier:{verifier}"
+        # P20261113_1507-1：verifier 空/None（模型擷取階段省略該欄位）點名為 missing（對齊 extract.py:806）
+        return False, f"unknown_verifier:{v or 'missing'}"
     if (p := extract._param_problem(v, params or {})):
         return False, p
     d = str(trusted_deliverable or deliverable or "").strip()
@@ -76,8 +77,14 @@ def replay_reason(reason, user_text, input_files, saved_verifier=None, trusted=N
     """對「原失敗階段」重跑當前代碼。回 (True/False, reason)；(None, None)＝missing_raw（原始欄位未存，不重判）。"""
     if reason == "model_declared_unverified":
         return False, reason  # fail-closed：模型自陳不可驗，當前代碼下穩定
+    if reason == "unknown_verifier:missing":
+        # P20261113_1507-1：模型擷取階段省略 verifier 欄位且預跑未存 raw fields（dab_587 三條根因）
+        # → 永久 unverified，絕不翻 deterministic（I-4：未測量不是通過）
+        return False, reason
     if reason.startswith("unknown_verifier:"):
         v = reason.split(":", 1)[1].strip()
+        if not v:  # 空 verifier 欄位 → 點名為 missing（同 judge_claim 口徑）
+            return False, "unknown_verifier:missing"
         ok = v in checks.SUPPORTED_VERIFIERS
         return ok, (None if ok else reason)
     if reason.startswith("unsupported_recompute_type:"):
