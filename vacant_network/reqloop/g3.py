@@ -49,8 +49,8 @@ import time
 from vacant_network.reqloop import extract as _extract
 from vacant_network.reqloop import g3gate
 from vacant_network.reqloop import repair as _repair
-from vacant_network.reqloop.requirements import RequirementSet
-from vacant_network.reqloop.checks import run_requirement_checks
+from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
+from vacant_network.reqloop.checks import SUPPORTED_VERIFIERS, run_requirement_checks
 from vacant_network.reqloop.repair import diff_results as _diff_results
 
 SCHEMA_RESULT = "vacant.reqloop.g3.result/1"
@@ -889,6 +889,20 @@ def max_calls_bound(arm_order: tuple[str, ...], n_tasks: int) -> int:
 # ── 發射主體（零模型呼叫：通道注入）──────────────────────────────────
 
 
+def _item_uncheckable_reason(item: RequirementItem) -> str | None:
+    """單條需求「不能確定性檢查」的機器可讀原因；None＝可檢查。
+
+    口徑同 g4gate（P20261113_1100-2）：unverified 標記／檢查器不在
+    checks.SUPPORTED_VERIFIERS／必要參數缺失或非法——任一命中即
+    checks.run_requirement_checks 永久 UNKNOWN，修復輪無從據以收斂。
+    """
+    if item.unverified:
+        return "unverified_flag"
+    if item.verifier not in SUPPORTED_VERIFIERS:
+        return f"unknown_verifier:{item.verifier or 'missing'}"
+    return _extract._param_problem(item.verifier, item.params)
+
+
 def load_frozen_spec(spec_dir: pathlib.Path, tid: str, inputs: dict) -> RequirementSet:
     """D4（11-13 定案第 2 條）：載入預跑通過的需求規格 <spec_dir>/<tid>.json。
 
@@ -945,6 +959,15 @@ def load_frozen_spec(spec_dir: pathlib.Path, tid: str, inputs: dict) -> Requirem
         if not ok and reason != "unbound":
             raise ValueError(
                 f"D4 凍結規格 spec_sha256 自校驗失敗：{p}: {reason}——規格內容被篡改，拒發")
+    # 條目可檢查性守衛（P20261113_1100-3）：空規格或全空殼＝無任何條目能
+    # 確定性檢查，發射只是無意義修復輪→fail-closed 拒發（寧拒不空轉）。
+    if not req_set.items:
+        raise ValueError(f"D4 凍結規格無任何需求條目：{p}——拒發")
+    reasons = {it.id: _item_uncheckable_reason(it) for it in req_set.items}
+    if all(r is not None for r in reasons.values()):
+        detail = "; ".join(f"{i}:{r}" for i, r in sorted(reasons.items()))
+        raise ValueError(
+            f"D4 凍結規格全空殼（0/{len(reasons)} 條可確定性檢查）：{detail}——拒發")
     return req_set
 
 

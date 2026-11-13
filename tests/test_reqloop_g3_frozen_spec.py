@@ -57,14 +57,21 @@ def _task_io(tid: str) -> tuple[str, str]:
            (ws / "contract.md").read_text(encoding="utf-8")
 
 
-def _frozen_reqset(tid: str) -> RequirementSet:
-    """凍結規格的需求清單：2 條（1 必需／1 任意；皆無程式重算檢查器→UNKNOWN 口徑）。"""
+def _frozen_reqset(tid: str, tag: str = "mean_fare") -> RequirementSet:
+    """凍結規格的需求清單：2 條（1 可確定性檢查／1 任意 UNKNOWN）。
+
+    P20261113_1100-3：load_frozen_spec 加可檢查性守衛後，全條目不可檢查的
+    規格＝空殼→拒發；正控制因此須含 ≥1 條可確定性檢查條目（tag_format，
+    tag＝任務首個必要答案項，假通道答案 `@<tag>[1.00]` 必 PASS、不觸發
+    修復輪）。unverified 條目保留 UNKNOWN 口徑（未測得≠通過）。
+    """
     return RequirementSet.from_dict({
         "task_id": tid,
         "items": [
-            {"id": "f1", "quote": "凍結規格條目一（必需）", "deliverable": "answer.txt",
-             "verifier": "unverified", "kind": "explicit", "required": True,
-             "unverified": True},
+            {"id": "f1", "quote": "凍結規格條目一（必需，可檢查）",
+             "deliverable": "answer.txt", "verifier": "tag_format",
+             "params": {"tag": tag, "value_type": "float"},
+             "kind": "explicit", "required": True, "unverified": False},
             {"id": "f2", "quote": "凍結規格條目二（任意）", "deliverable": "answer.txt",
              "verifier": "unverified", "kind": "explicit", "required": False,
              "unverified": True},
@@ -111,7 +118,7 @@ def test_frozen_spec_reused_zero_extract_calls(tmp_path):
     plan = _plan_1task()
     tid = plan.tasks[0]["task_id"]
     goal, contract = _task_io(tid)
-    expected = _frozen_reqset(tid)
+    expected = _frozen_reqset(tid, tag=g3.required_answer_names(contract)[0])
     spec_dir = tmp_path / "specs"
     _write_spec(spec_dir, tid, goal, contract, expected)
 
@@ -173,6 +180,46 @@ def test_corrupted_spec_refuses(tmp_path):
         g3.run_g3(plan, BASE, tmp_path / "o", channel=fake,
                   approval=_approval(), spec_dir=spec_dir)
     assert fake.calls == [], "拒發必須 0 模型呼叫（不得降級為重新擷取）"
+
+
+def test_uncheckable_specs_refuse(tmp_path):
+    """負控制（空殼規格、P20261113_1100-3）：items=[] 與全條目不可檢查
+    （皆標 unverified）→ 皆 fail-closed ValueError 拒發、0 模型呼叫——
+    全 UNKNOWN 的規格發射只是無意義修復輪，寧拒不空轉。
+    """
+    plan = _plan_1task()
+    tid = plan.tasks[0]["task_id"]
+    goal, contract = _task_io(tid)
+
+    # 情形 1：空條目
+    spec_dir1 = tmp_path / "s1"
+    _write_spec(spec_dir1, tid, goal, contract,
+                RequirementSet.from_dict({"task_id": tid, "items": []}))
+    fake1 = CountingChannel()
+    with pytest.raises(ValueError, match="無任何需求條目"):
+        g3.run_g3(plan, BASE, tmp_path / "o1", channel=fake1,
+                  approval=_approval(), spec_dir=spec_dir1)
+    assert fake1.calls == [], "拒發必須 0 模型呼叫"
+
+    # 情形 2：條目存在但全標 unverified（verifier 合法也仍永久 UNKNOWN）
+    shell = RequirementSet.from_dict({
+        "task_id": tid,
+        "items": [
+            {"id": "f1", "quote": "空殼條目一", "deliverable": "answer.txt",
+             "verifier": "tag_format",
+             "params": {"tag": "mean_fare", "value_type": "float"},
+             "required": True, "unverified": True},
+            {"id": "f2", "quote": "空殼條目二", "deliverable": "answer.txt",
+             "verifier": "unverified", "required": False, "unverified": True},
+        ],
+    })
+    spec_dir2 = tmp_path / "s2"
+    _write_spec(spec_dir2, tid, goal, contract, shell)
+    fake2 = CountingChannel()
+    with pytest.raises(ValueError, match="全空殼"):
+        g3.run_g3(plan, BASE, tmp_path / "o2", channel=fake2,
+                  approval=_approval(), spec_dir=spec_dir2)
+    assert fake2.calls == [], "拒發必須 0 模型呼叫"
 
 
 def _g4_inputs(tid: str) -> dict:
