@@ -567,3 +567,10 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射、發射管線未接線另一步）。
 - DECISION：守衛以「每題 0 條可檢查（全空殼）」為拒發條件而非「任一條目缺參即拒」——凍結 dab_725 4/6、dab_517 5/6 含永久 UNKNOWN 條目仍可满足（r1565/r1566 正負控制已證），若逐條硬拒則票面驗收（真 manifest RC=0）與票面負控制無法同時成立；個別缺陷仍全數計數並寫入 n_checkable 與 fail 訊息。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 1 張（1100-3 g3 load_frozen_spec 可檢查性過濾）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補。
+
+## 2026-11-13 r1569（票 P20261113_1100-3 done：g3 load_frozen_spec 條目可檢查性守衛；0 model calls）
+- 做了什麼：g3.py 加 _item_uncheckable_reason（unverified 標記／verifier 不在 checks.SUPPORTED_VERIFIERS／extract._param_problem 缺陷，口徑同 g4gate 1100-2）＋load_frozen_spec 雜湊校驗後：空規格→ValueError「D4 凍結規格無任何需求條目：{p}——拒發」、全空殼（0/N 可檢查）→ValueError 逐條缺陷，fail-closed 寧拒不空轉；TDD 先紅（新負控制 DID NOT RAISE）後綠。票尾結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 pytest tests/test_reqloop_g3_frozen_spec.py→7 passed（RC 0）；回歸 8 檔 90 passed（含 frozen anchors、g4gate --dry-run 12 cells ready RC=0）；git diff 僅 2 檔（78+/8-）；repair.py／run_eval.py／extract.py／checks.py／g25 filing／g3 歷史產物未改（anchors 綠）。commit d39d9019a。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
+- DECISION：原正控制 _frozen_reqset 為全 unverified 規格、新守衛下依法即空殼須拒——票面「保留正控制（合法規格正常載入）」與「全不可檢查→拒發」表面衝突；解法＝正控制補 1 條可確定性檢查條目（tag_format、tag＝任務首個必要答案項、假通道答案 @<tag>[1.00] 必 PASS 不觸發修復輪），負控制兩情形（空條目／全 unverified）合併 1 測滿足票面 7 passed。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 3 張新票（P20261113_1206-1 g4gate 執行計畫矩陣／1206-2 g3 run_g4 管線分派／1206-3 d1 replay 驗證凍結規格）→doing/ 取票照做（11-13 §5：每張動產品碼或 D1 重播器）。
