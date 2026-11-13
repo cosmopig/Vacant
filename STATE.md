@@ -520,3 +520,10 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon/worker 紅＝既有 freeze_check/now_redline 系、r1556 已上報規劃者不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
 - DECISION：本票只動 g3.py＋測試（11-13 §3 受控解凍只涵蓋 extract.py/checks.py、本票不涉）；open/ 剩 2 張（0846-2 RequirementSet spec_sha 完整性、0846-3 D1 replay gate CLI）→下輪照做或依 §5 規劃者補至 ≥3。
 - 紅線＋下一步：無 push、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：doing/ 空→開 open/ 下一票（P20261113_0846-2 或 -3）；輪頭一次讀 CI 三分支（紅→讀 log 根因不猜）。
+
+## 2026-11-13 r1558（票 P20261113_0846-2 done：RequirementSet 原生 spec_sha256 欄位＋compute_spec_sha256／verify_self_hash；0 model calls）
+- 做了什麼：requirements.py RequirementSet＋spec_sha256 欄（空＝未綁定、非空才進 to_dict→舊序列化逐位元組不變）＋raw 快照（from_dict 深拷貝；G4 檔案規格自 hash 即對該快照，同 freeze_specs._canon 口徑）＋compute_spec_sha256／verify_self_hash（unbound/OK/mismatch 三態）；tests/test_reqloop_requirements.py＋1（正 1／負 2／G4 dab_517 實例 1）。票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 5 passed（改前 AttributeError）；回歸 g3_frozen_spec＋freeze_g4_specs＋g4_preregistration＋trusted_deliverable 22 passed、extract_run_eval＋extract＋g3 130 passed、repair＋g2＋real_slice＋checks 254 passed；freeze_specs --check 4/4 OK；舊序列化相容 sanity（spec_sha256 空不進 to_dict、roundtrip 保留）；4 份 G4 規格原生 verify_self_hash 全 (True,"OK")。commit c1b9f4dc9。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、r1556 已上報規劃者不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
+- DECISION：compute_spec_sha256 對 from_dict 載入者以來源 dict 快照為依據（非 to_dict 重組）——因 G4 檔案 spec_sha256 是整份檔案 dict（含 spec_version/ticket/frozen_from、7 鍵 items）的 canonical hash，to_dict 重組必不符；to_dict 維持舊格式（run_eval _req_digest 相續不受影響），raw 快照只在自校驗路徑用。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、凍結 4 檔＋g25 filing 6 sha 未改、0 model calls、未發射。下一步：open/ 剩 P20261113_0846-3（D1 replay gate CLI）→doing/ 取票照做；輪頭一次讀 CI 三分支。
