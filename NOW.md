@@ -7,7 +7,7 @@
 - 待驗：open/＋doing/ 皆空→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器，<3 張要補）。
 
 ## 紅線
-- 凍結：repair.py 2795 行/blob 5147f8c3…、extract.py 1295 行/blob b502741b…、checks.py 2907 行/blob d401a8ae…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2/g3_3 歷史未動；g26 歷史報告（g26_claim_replay.json）未改。
+- 凍結／受控解凍：repair.py 2795 行／blob 5147f8c3…、extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob d401a8ae…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2/g3_3 歷史未動；g26 歷史報告（g26_claim_replay.json）未改。
 - 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest；0 model calls。
 - G4 真發射仍須人類簽核（human_signoff=null）；g4gate 核准後發射管線未接線、另一步授權。
 - 不以文書改動充實進度：本輪實質＝D1 重播器 --json＋by_task（2 檔＋30/-1、1 新測試），全可機械複核。

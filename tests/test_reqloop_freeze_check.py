@@ -1407,8 +1407,17 @@ GUARD_CONTENT_PIN = {
     # 必須釘（r1347 先例明文）：
     # (1) tests/test_reqloop_now_redline.py
     #     新增 pin 6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f
+    # r1563 補錨記錄（票 P20261113_0344-1、2026-11-13 裁決 §3 受控解凍；落盤
+    # 1904000f2 round 1551；r1386/r1394 同型：合法修改已落盤而 pin 未更新、守衛
+    # 照設計抓到、本輪依紀律補齊）：該檔 REDLINE_PREFIX 由「- 凍結 4 檔不改」
+    # 改為「- 凍結／受控解凍」（§3：extract.py/checks.py 受控解凍、repair.py/
+    # run_eval.py 仍凍結）＋docstring 對應更新；5 測未增刪、值仍逐字對盤核對。
+    # sha256 本輪自磁碟實算、非轉抄：
+    # (1) tests/test_reqloop_now_redline.py
+    #     6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f
+    #     → fa8e2f4ef9f48304a98d0bde65072c127a88f029e9e60d8ceff73d7039c0a284
     "tests/test_reqloop_now_redline.py":
-        "6ce235db5165ac82debda8656e870381dd3b5dae52eb17cd59f4f928b3c07f2f",
+        "fa8e2f4ef9f48304a98d0bde65072c127a88f029e9e60d8ceff73d7039c0a284",
     # r1398 擴覆蓋記錄（vq-el4.86）：GUARD_CONTENT_PIN 擴覆蓋——G3 發射管線對
     # （模組＋其實體紅線守衛檔，審查指示 #1 點名 7 檔之一）。缺口（本輪 RED 雙
     # 實證）：該對 r1373（vq-1zf.6）建檔、晚於 r1319/r1347/r1365 建錨各輪、從未
@@ -1599,8 +1608,21 @@ GUARD_CONTENT_PIN = {
     #   vacant_network/reqloop/g3.py
     #     24beb4b32a7e3beb7d4f400fc6334629216239a18caa3eeca5773c63183786ba
     #     → 532a1f89dbb29fd125ac2ea10f3b20e27512364bd5dc64a1fdd23c965b7ae553
+    # r1563 補錨記錄（11-13 §2 D4 主線三票、皆人類核准；r1386/r1394 同型：合法
+    # 修改已落盤而 pin 未更新、守衛照設計抓到、本輪依紀律補齊）：三票依序合法
+    # 修改 g3.py——
+    # (a) P20261113_0545-1（a262f6f36）：D4 預跑通過需求規格凍結落盤、正式發射
+    #     直接重用（g3.py 84+/24-）；
+    # (b) P20261113_0846-1（86af7ce4a）：load_frozen_spec 相容 G4 原生扁平
+    #     RequirementSet 格式＋自校驗（25+/15-）；
+    # (c) P20261113_0948-1（20b5b675e）：load_frozen_spec 補 spec_sha256 自校驗
+    #     （記載自 hash 時內容被篡改→fail-closed ValueError；7+）。
+    # 凍結四檔未動、0 model calls。sha256 本輪自磁碟實算、非轉抄：
+    # (1) vacant_network/reqloop/g3.py
+    #     532a1f89dbb29fd125ac2ea10f3b20e27512364bd5dc64a1fdd23c965b7ae553
+    #     → 7a2e73a1e47d672624568779cc34055e81353d3b30a4a523614c149478d7c4c5
     "vacant_network/reqloop/g3.py":
-        "532a1f89dbb29fd125ac2ea10f3b20e27512364bd5dc64a1fdd23c965b7ae553",
+        "7a2e73a1e47d672624568779cc34055e81353d3b30a4a523614c149478d7c4c5",
     "tests/test_reqloop_g3.py":
         "7efb8398e73f84f57723d625ca079c014a9d860b58f295ea0ef4ddc488b321bc",
     "tests/test_reqloop_g3_conformance.py":
