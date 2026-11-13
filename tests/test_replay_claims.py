@@ -134,3 +134,70 @@ def test_replay_claims_json_flag(capsys):
     assert sum(t["total"] for t in by.values()) == 76
     for t in by.values():
         assert t["total"] == t["deterministic"] + t["unverified"] + t["missing_raw"]
+
+
+# ── P20261113_1358-2：--missing-report 點名缺失欄位 ──────────────────────────
+
+def test_missing_field_reason_point_names_only():
+    """缺失欄位點名：只回欄位名＋原因碼，永不回欄位值。
+
+    - original_reason=missing_param:<field> → field=<field>、reason=missing_param
+      （欄位名取自 reason 碼本身；reason 是機器碼，不是值）。
+    - 原始 deterministic（來源只存 claim id、raw 欄位未存）→ field=verifier
+      （judge 契約首個未存欄位）、reason=raw_fields_not_saved。
+    """
+    assert rc.missing_field_reason({"original_reason": "missing_param:values"}) == ("values", "missing_param")
+    assert rc.missing_field_reason({"original_reason": "missing_param:col_name"}) == ("col_name", "missing_param")
+    assert rc.missing_field_reason({"original_reason": None}) == ("verifier", "raw_fields_not_saved")
+    assert rc.missing_field_reason({}) == ("verifier", "raw_fields_not_saved")
+
+
+def test_missing_report_flag_lists_each_missing_claim_at_tail(capsys):
+    """--missing-report：RC 0、點名列出全部 3 條缺失、CLAIM_MISSING 行在 stdout 末尾。"""
+    assert rc.main(["--missing-report"]) == 0
+    out = capsys.readouterr().out
+    lines = [l for l in out.splitlines() if l.strip()]
+    tail = [l for l in lines if l.startswith("CLAIM_MISSING: ")]
+    assert len(tail) == 3
+    # 末尾 3 行即 3 條點名（排序穩定、無值外洩的格式）
+    assert lines[-3:] == sorted([
+        "CLAIM_MISSING: dab_517/req_data_unchanged: values missing_param",
+        "CLAIM_MISSING: dab_725/R1: verifier raw_fields_not_saved",
+        "CLAIM_MISSING: dab_725/R6: verifier raw_fields_not_saved",
+    ])
+
+
+def test_missing_report_lines_are_point_named_no_values(capsys):
+    """負控制（票：點名欄位名、不印欄位值）：每行必須恰為
+    CLAIM_MISSING: <task>/<claim>: <field> <reason>——多一個 token（即值）即紅。"""
+    import re
+    assert rc.main(["--missing-report"]) == 0
+    out = capsys.readouterr().out
+    lines = [l for l in out.splitlines() if l.startswith("CLAIM_MISSING: ")]
+    assert len(lines) == 3
+    for l in lines:
+        assert re.fullmatch(r"CLAIM_MISSING: \S+/\S+: \S+ \S+", l), (
+            f"行非點名格式（疑印了欄位值）: {l!r}")
+
+
+def test_json_totals_missing_detail_shape(capsys):
+    """--json totals 內含 missing_detail：3 條、每條恰 {task_id, claim_id, field, reason}；
+    K1 deterministic 計數不受影響（仍 66）；K0 亦不受影響（summarize K0 同結構）。"""
+    assert rc.main(["--json"]) == 0
+    doc = json.loads(capsys.readouterr().out)
+    md = doc["totals"]["missing_detail"]
+    assert isinstance(md, list) and len(md) == 3
+    for e in md:
+        assert set(e) == {"task_id", "claim_id", "field", "reason"}
+    assert {"task_id": "dab_517", "claim_id": "req_data_unchanged", "field": "values",
+            "reason": "missing_param"} in md
+    assert {"task_id": "dab_725", "claim_id": "R1", "field": "verifier",
+            "reason": "raw_fields_not_saved"} in md
+    assert {"task_id": "dab_725", "claim_id": "R6", "field": "verifier",
+            "reason": "raw_fields_not_saved"} in md
+    # K0/K1 計數不變（票紅線：不改變 K0/K1 確定性計數）
+    assert doc["totals"]["deterministic"] == 66
+    s0 = rc.summarize(rc.collect())
+    assert s0["deterministic"] == 14
+    assert s0["missing_raw"] == 3
+    assert s0["missing_detail"] == doc["totals"]["missing_detail"]
