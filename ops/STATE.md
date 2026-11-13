@@ -501,3 +501,9 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅＝既有 freeze_check 8 紅之 2、worker 11 紅含既有 freeze_check/now_redline→上報規劃者、不代修）；G4 真發射須人類點頭（本輪 0 發射、human_signoff=null）；成效門最終裁決屬人類（現況 K1=66/76 已達）。
 - DECISION：本輪不同步新 3 檔至 worker/argon worktree（11-13 定案§1 禁同步類工單＋本輪只做本票；r1553 同款先例，in-scope diff 留規劃者裁決）。
 - 紅線＋下一步：無 push、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 規格＋g25 filing 6 sha＋g3 歷史未改、0 model calls、未發射。下一步：open/ 只剩 1 張（requirementset-hash-integrity）→依 11-13 定案§5 由規劃者補至 ≥3 張；freeze_check 既有紅上報規劃者、不代修。
+## 2026-11-13 r1555（票 P20261113_0746-1 done：RequirementSet 原生 goal_sha256/contract_sha256 欄位＋verify_task_hash 完整性校驗；0 model calls）
+- 做了什麼：① 票：vacant_network/reqloop/requirements.py RequirementSet 加可選欄位 goal_sha256/contract_sha256（預設 ""；to_dict 非空才輸出→舊規格序列化欄位集合不變；from_dict 解析、向下相容）＋verify_task_hash(task_dir)→未綁定 (False,"unbound")／缺檔或 hash 不符 (False,"mismatch: ...")／皆吻合 (True,"OK")（純 stdlib hashlib、無新依賴）＋tests/test_reqloop_requirements.py 4 測試（正控 OK／goal 篡改 1 字元 mismatch／contract 缺檔 mismatch／舊規格 unbound）。② 票務：票尾追加 3 行結果→mv done/（doing/ 空、open/ 空）。③ 簿記：NOW.md 覆寫＋ops 鏡像 byte-identical＋本條目。
+- 已驗證（本輪新跑）：票面驗收 `python3 -m pytest tests/test_reqloop_requirements.py`→"4 passed in 0.06s"（TDD 先紅 4 failed→綠）；回歸 tests/test_freeze_g4_specs＋test_replay_claims＋test_reqloop_g3＋test_reqloop_g3gate→75 passed（g4 規格 load 正常、舊行為未改）；舊規格 to_dict 欄位集合 {task_id,items} 不變＋round-trip SANITY_OK；commit da3f59ee2（2 檔、93 行純新增）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 未跑完；argon 2 紅／worker 11 紅＝既有 freeze_check／now_redline 系→上報規劃者、不代修）；成效門最終裁決屬人類（現況 K1=66/76 已達）；G4 發射須人類簽核（human_signoff=null、本輪 0 發射）。
+- DECISION：本輪不同步新 2 檔至 worker/argon worktree（11-13 定案§1 禁同步類工單＋本輪只做本票；r1553/r1554 同款先例、in-scope diff 留規劃者裁決）。
+- 紅線＋下一步：無 push、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑 full pytest、凍結 4 規格＋g25 filing 6 sha＋g3 歷史未改、0 model calls。下一步：open/ 已空→依 11-13 定案§5 規劃者補票（每張動 reqloop 產品碼或 D1 重播器）；freeze_check 既有紅上報、不代修。
