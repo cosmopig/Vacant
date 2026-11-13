@@ -11,6 +11,7 @@ G4 預註冊離線檢驗與發射門控制（票 P20261113_0948-2；11-13 人類
 入口（單一）：
   python3 -m vacant_network.reqloop.g4gate --dry-run   # G4 DRY-RUN: 12 cells ready (0 model calls)
   python3 -m vacant_network.reqloop.g4gate --fire      # 未簽核 → G4 FIRE REFUSED，RC 2
+  python3 -m vacant_network.reqloop.g4gate --plan      # 12 格執行排程矩陣 JSON（0 model calls）
 """
 from __future__ import annotations
 
@@ -116,6 +117,32 @@ def g4_dry_run(manifest: dict[str, Any]) -> dict[str, Any]:
     return {"status": "ready", "n_cells": len(cells), "cells": cells, "model_calls": 0}
 
 
+def build_g4_execution_plan(manifest: dict[str, Any] | None = None,
+                            tasks_dir: pathlib.Path | None = None) -> dict[str, Any]:
+    """G4 執行排程矩陣（4 題 × 3 臂＝12 格）：離線機械組裝與前置資源驗證（0 model calls）。
+
+    在 `g4_dry_run` 通過（4 規格存在＋hash 自校驗＋可檢查性守衛）的基礎上，逐題驗證任務工作區
+    （`tasks_dir/<task>/workspace/goal.md`＋`contract.md`，預設 `ops/reqloop/g3_2/tasks`）齊備，
+    組裝每格 task_id/arm/workspace/spec_file/n_checkable；任一題缺工作區檔案→ValueError fail-closed。"""
+    if manifest is None:
+        manifest = load_g4_manifest(DEFAULT_MANIFEST)
+    if tasks_dir is None:
+        tasks_dir = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
+    dry = g4_dry_run(manifest)
+    n_checkable = {c["task_id"]: c["n_checkable"] for c in dry["cells"]}
+    cells = []
+    for task in manifest["tasks"]:
+        ws = pathlib.Path(tasks_dir) / task / "workspace"
+        missing = [n for n in ("goal.md", "contract.md") if not (ws / n).is_file()]
+        if missing:
+            raise ValueError(f"{task}: 任務工作區缺 {', '.join(missing)}（{ws}；fail-closed）")
+        spec_file = manifest["specs"][task]["file"]
+        for arm in manifest["arms"]:
+            cells.append({"task_id": task, "arm": arm, "workspace": str(ws),
+                          "spec_file": spec_file, "n_checkable": n_checkable[task]})
+    return {"status": "ready", "cells": cells, "n_cells": len(cells), "model_calls": 0}
+
+
 def decide_g4_launch(manifest: dict[str, Any]) -> str:
     """發射門：純決策、0 model calls。`approval_required` 且 `human_signoff is None`→拒絕。"""
     if manifest.get("approval_required") is True and manifest.get("human_signoff") is None:
@@ -131,6 +158,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                       help="驗 12 格＋4 規格自 hash（預設）；RC 0")
     mode.add_argument("--fire", action="store_true",
                       help="真發射門；未簽核→RC 2（fail-closed、0 model calls）")
+    mode.add_argument("--plan", action="store_true",
+                      help="組裝 12 格執行排程矩陣並 JSON 印出（0 model calls）；RC 0")
     ap.add_argument("--manifest", default=str(DEFAULT_MANIFEST))
     a = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -140,6 +169,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as e:
         print(f"G4 DRY-RUN FAIL: {e}")
         return 1
+
+    if a.plan:
+        try:
+            plan = build_g4_execution_plan(manifest)
+        except (OSError, ValueError, KeyError, json.JSONDecodeError) as e:
+            print(f"G4 PLAN FAIL: {e}")
+            return 1
+        print(json.dumps(plan, ensure_ascii=False, indent=2))
+        return 0
 
     if a.fire:
         try:
