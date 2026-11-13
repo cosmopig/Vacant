@@ -1,0 +1,29 @@
+{
+  "v": 1,
+  "experiment": "G4",
+  "ticket": "P20261113_0708-2-g4-preregistration",
+  "title": "4 題 × 3 臂：重用凍結需求規格（不得動態重新擷取）",
+  "status": "preregistered",
+  "approval_required": true,
+  "human_signoff": null,
+  "human_signoff_policy": "未經人類點頭禁止真發射（fail-closed；參考門與測試見 tests/test_g4_preregistration.py）。簽核＝人類把 human_signoff 填為 {by, ts, sha256}，其中 sha256 為本 manifest 此刻（human_signoff 仍為 null 時）整檔 UTF-8 字節的 sha256；簽核後先重跑測試確認 0 model calls 再排程發射。",
+  "prereg_reason": "2026-11-13 人類定案第 4 條：成效門達標（現況 66/76 可確定性檢查、0 假 PASS）後由規劃者開 G4 預註冊工單（4 題 dab_725/587/657/517 重用凍結規格）；發射前要人類點頭。",
+  "model": null,
+  "model_calls_budget": null,
+  "tasks": ["dab_725", "dab_587", "dab_657", "dab_517"],
+  "arms": ["native_pi", "reqlist_only", "full_rloop"],
+  "cells": 12,
+  "spec_dir": "ops/reqloop/g4/specs",
+  "specs": {
+    "dab_725": {"file": "ops/reqloop/g4/specs/dab_725.json", "spec_sha256": "5b63ebbde4210b35aa17ee476c0f1f8975b6013c9527c9ec64ed243e892def10", "n_items": 6},
+    "dab_587": {"file": "ops/reqloop/g4/specs/dab_587.json", "spec_sha256": "ec5f83fa63eb5442e5aeb877f1552c3a1f5c8d90ca7fae907017374636cf8857", "n_items": 5},
+    "dab_657": {"file": "ops/reqloop/g4/specs/dab_657.json", "spec_sha256": "0284bfe8cb713a081355b5427bb2e08b4d13dfec4281a700acb6aaee7875adbb", "n_items": 8},
+    "dab_517": {"file": "ops/reqloop/g4/specs/dab_517.json", "spec_sha256": "046111f8a2cff72cca35323b99a6774ab55f94b1f9349258f7dbca294c05fb77", "n_items": 6}
+  },
+  "frozen_spec_source": "P20261113_0708-1-freeze-g4-specs：ops/reqloop/extract/freeze_specs.py（源自 ops/audits/g26_claim_replay.json）",
+  "invariants": [
+    "未經人類簽核，任何發射啟動器必須 fail-closed 拒絕（tests/test_g4_preregistration.py::test_launch_fails_closed_without_human_signoff）",
+    "12 格全部重用 spec_dir 下凍結規格（D4：正式發射直接重用、不重新擷取）",
+    "交付物為非輸入檔 answer.txt；輸入檔不得當交付物；tamper/UNKNOWN 不算成功"
+  ]
+}
