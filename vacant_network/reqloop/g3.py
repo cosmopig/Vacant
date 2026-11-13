@@ -938,6 +938,13 @@ def load_frozen_spec(spec_dir: pathlib.Path, tid: str, inputs: dict) -> Requirem
         raise ValueError(
             f"D4 凍結規格 contract_sha256 不符：{p} 記載 {recorded_contract!r}、"
             f"當前 {contract_sha!r}——contract 已變動，拒發（不重新擷取）")
+    # spec_sha256 自校驗（P20261113_0948-1）：規格記載自 hash 時，內容（含 items）
+    # 被篡改即 fail-closed 拒發；未綁定（空）＝舊規格，照舊行為不檢查。
+    if req_set.spec_sha256:
+        ok, reason = req_set.verify_self_hash()
+        if not ok and reason != "unbound":
+            raise ValueError(
+                f"D4 凍結規格 spec_sha256 自校驗失敗：{p}: {reason}——規格內容被篡改，拒發")
     return req_set
 
 

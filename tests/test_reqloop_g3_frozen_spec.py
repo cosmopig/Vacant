@@ -195,6 +195,24 @@ def test_load_frozen_spec_real_g4_specs():
         assert len(rs.items) >= 1
 
 
+def test_flat_spec_items_tampered_fails_self_hash(tmp_path):
+    """負控制（自 hash）：items[0].quote 改動 1 字但保留原 spec_sha256→fail-closed。
+    P20261113_0948-1：goal／contract hash 皆吻合（未動）、僅條目內容被篡改，
+    改前 load_frozen_spec 不會發現（無自校驗）；改後必拋 spec_sha256 自校驗失敗。
+    """
+    tid = "dab_725"
+    src = json.loads((G4_SPEC_DIR / f"{tid}.json").read_text(encoding="utf-8"))
+    q = src["items"][0]["quote"]
+    src["items"][0]["quote"] = q[:-1] + ("X" if q[-1] != "X" else "Y")
+    spec_dir = tmp_path / "specs"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    (spec_dir / f"{tid}.json").write_text(
+        json.dumps(src, ensure_ascii=False), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="spec_sha256 自校驗失敗"):
+        g3.load_frozen_spec(spec_dir, tid, _g4_inputs(tid))
+
+
 def test_flat_spec_goal_hash_tampered_refuses(tmp_path):
     """負控制（扁平格式）：goal_sha256 改動 1 碼→fail-closed ValueError 拒發。"""
     tid = "dab_725"
