@@ -610,3 +610,9 @@
 - 已驗證（本輪新跑）：票面驗收 1 passed（含篡改負控制）＋g4gate --plan 12 格 RC 0；32 passed（g4_prereg/g3_frozen_spec/frozen_anchors/replay_claims）；4 題真實工作區 hash 全吻合（正路徑）；git diff 2 檔 36+/10−（產品碼 7 行）；repair/run_eval/extract/checks 未改（anchors 綠）；manifest human_signoff 仍 null、ops/reqloop/g4 無新產物（0 發射）。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（本輪 0 發射）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls。下一步：open/ 空→規劃者依 11-13 §5 補票（每張動產品碼 vacant_network/reqloop/ 或 D1 重播器；open<3 張須補）；G4 發射等人類簽核。
+
+## 2026-11-13 r1581（票 P20261113_1358-2 done：D1 重播 --missing-report 點名缺失欄位；0 model calls）
+- 做了什麼：票面功能（--missing-report＋missing_detail＋4 測試）已於 r1579 超時輪 WIP 入樹（auto-commit f2c7beb95）；本輪＝全數驗收＋簿記修復（票驗收必需）：ops/STATE.md 鏡像重生成（canonical 前綴至 Current State 最新條目行＝r1538 單行；輪首 633185B 鏡像截斷於第 509 行行中、末行非最新條目）＋NOW.md 紅線契約行恢復（值自磁碟重算：repair 2795/5147f8c3、run_eval 1298/b6d2f37f、extract 1295/b502741b、checks 2907/d401a8ae、filing 6 sha256）＋ops/loop/NOW.md byte-identical；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：--missing-report RC0＋3 條 CLAIM_MISSING 逐條點名（dab_517/req_data_unchanged values missing_param；dab_725/R1、R6 verifier raw_fields_not_saved）；--json deterministic=66（不變）＋missing_detail 3 條（只欄位名、不印值）；pytest tests/test_replay_claims.py 16 passed；freeze_check VERDICT: FROZEN_STATE_OK（輪首 FROZEN_STATE_BROKEN：bk_state 截斷／bk_now 漂移／now_redline 缺契約行，3 項全修）；anchors 5 passed。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 15 紅＝freeze_check/now_redline 系；本輪簿記修復後本分支應轉綠、待 CI 證實；argon 2 紅／worker 11 紅＝既有、已上報、不代修）；missing claim 的 raw 是否可回補＝規劃者裁決（票：報 missing 不猜測）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、4 凍結檔 blob 前綴未變（anchors 綠）。open/ 3 張（1358-3 D4 loader、1507-1、1507-2）→doing/ 取票照做。
