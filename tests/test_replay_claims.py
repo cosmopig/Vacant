@@ -246,3 +246,16 @@ def test_missing_param_values_stays_missing_raw_negative_control():
     assert rows[0]["replay_status"] == "missing_raw"
     assert rows[0]["replay_reason"] == "missing_param:values"
     assert rows[0]["replay_status"] != "deterministic"
+
+
+# ── P20261113_1810-4：manifest 雜湊綁定核驗＋負控制 ────────────────────────
+
+def test_replay_claims_verify_specs_tampered_manifest_fails_closed(tmp_path, capsys):
+    """P20261113_1810-4：manifest spec_sha256 被篡改 → verify_frozen_specs 必 fail-closed
+    （RC 1、輸出點名「FROZEN_SPECS FAIL: manifest integrity」）；0 假 PASS。"""
+    m = json.loads((REPO / "ops/reqloop/g4/manifest.json").read_text(encoding="utf-8"))
+    m["specs"]["dab_725"]["spec_sha256"] = "0" * 64
+    mp = tmp_path / "manifest_tampered.json"
+    mp.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    assert rc.verify_frozen_specs(manifest_path=mp) == 1
+    assert "FROZEN_SPECS FAIL: manifest integrity" in capsys.readouterr().out

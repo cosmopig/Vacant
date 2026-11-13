@@ -28,6 +28,7 @@ sys.path.insert(0, str(REPO))
 from vacant_network.reqloop import checks, extract  # noqa: E402
 from vacant_network.reqloop.g3 import compose_extract_user_text  # noqa: E402
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet  # noqa: E402
+from vacant_network.reqloop.specs import SpecIntegrityError, load_frozen_specs  # noqa: E402
 
 OUT, TAX = REPO / "ops/audits/g26_claim_replay.json", REPO / "ops/audits/g3_series_unverified_taxonomy.json"
 SOURCES = (("g3_1_prerun", "g3_1", "ops/audits/g3_1_h20_prerun_report.json"),
@@ -385,10 +386,19 @@ def _ctrl_answers(item, task_dir):
         return f"@{key}[{exp}]\n", f"@{key}[{float(exp) + 12345.6789}]\n"  # 負：錯值必 mismatch FAIL
     return None, None
 
-def verify_frozen_specs(specs_dir=SPEC_DIR) -> int:
-    """G4 凍結規格交叉驗證（P20261113_1206-3、11-13 定案 §4）：4 題規格 spec_sha256 自校驗＋
+def verify_frozen_specs(specs_dir=SPEC_DIR, manifest_path=None) -> int:
+    """G4 凍結規格交叉驗證（P20261113_1206-3、P20261113_1810-4、11-13 定案 §4）：
+    先對 manifest 綁定之 spec_sha256 做密碼學核驗（不符／損毀即 fail-closed），
+    再做 4 題規格 spec_sha256 自校驗＋
     每條 checkable 條目正控制（必 PASS）／負控制（錯值，必非 PASS）；0 假 PASS 且全部可構造才 PASS。
     零模型、唯讀。"""
+    if manifest_path is None:
+        manifest_path = REPO / "ops/reqloop/g4/manifest.json"
+    try:
+        load_frozen_specs(manifest_path)
+    except SpecIntegrityError as e:
+        print(f"FROZEN_SPECS FAIL: manifest integrity: {e}")
+        return 1
     total_items = checkable_items = false_pass = 0
     for tid in FROZEN_TASKS:
         p = pathlib.Path(specs_dir) / f"{tid}.json"
