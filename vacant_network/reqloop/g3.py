@@ -48,6 +48,10 @@ import time
 
 from vacant_network.reqloop import extract as _extract
 from vacant_network.reqloop import g3gate
+# G4 簽核門與 manifest 校驗（票 P20261113_1206-2）：DEFAULT_MANIFEST 另取別名
+# G4_DEFAULT_MANIFEST，避免遮蔽本模組 g3 CLI 的既有 DEFAULT_MANIFEST（g3_gate）。
+from .g4gate import DEFAULT_MANIFEST as G4_DEFAULT_MANIFEST
+from .g4gate import LaunchRefused, decide_g4_launch, load_g4_manifest
 from vacant_network.reqloop import repair as _repair
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 from vacant_network.reqloop.checks import SUPPORTED_VERIFIERS, run_requirement_checks
@@ -79,6 +83,9 @@ GLM_MAX_TOKENS_TOTAL = 60_000
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g3_gate" / "manifest.json"
+#: G4 每輪牆時（G4 manifest 無 budget 欄位——model_calls_budget=null 不偽造預算；
+#: 取 600s＝AMEND-2 pi 臂每格上限，glm 臂舊為 300s，取兩臂中較寬者）。
+G4_ROUND_TIMEOUT_S = 600
 DEFAULT_STATE_DIR = pathlib.Path(os.environ.get("VACANT_OPS_STATE", str(pathlib.Path.home() / "dev" / "ops" / "state")))
 
 # 三臂（vq-1zf 預註冊 ops/reqloop/g3_gate/manifest.json arm_defs，2026-11-08 凍結）：
@@ -1207,6 +1214,172 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
             result["cells"].append(cell)
 
     _finalize_and_write(result, guard, out_root)
+    return result
+
+
+def run_g4(manifest_path: pathlib.Path | str = G4_DEFAULT_MANIFEST,
+           out_root: pathlib.Path | str | None = None, *,
+           channel: Channel, pi_channel: Channel | None = None,
+           tasks_dir: pathlib.Path | None = None) -> dict:
+    """G4 發射入口（票 P20261113_1206-2；11-13 人類定案第 4 條：發射前須人類簽核）。
+
+    門（順序即優先級，全部 0 模型呼叫）：
+      1) load_g4_manifest（schema／4 題／3 臂／12 格／規格檔存在）
+      2) decide_g4_launch（approval_required 且 human_signoff is None→LaunchRefused，fail-closed）
+      3) 臂存在於 ARM_SPECS＋pi 臂的 pi_channel 注入檢查（缺→G3ArmsNotConformant 拒發）
+    發射（D4：12 格一律重用凍結規格，0 模型擷取呼叫）：
+      - 每題 load_frozen_spec（缺檔／hash 不符／空殼→ValueError 拒發，絕不重新擷取）
+      - native_pi→pi_channel；其他臂→channel；G3QuotaError→停、不重試；
+        G3CallError→該格 error、管線繼續（同 run_g3 口徑）
+      - full_rloop→content_recheck 程式重算＋build_repair_feedback（與 run_g3 同源）
+    產物：out_root/g4_result.json（預設 ops/reqloop/g4/fire_<ts>）；回傳同一份 dict。
+    """
+    manifest = load_g4_manifest(manifest_path)
+    decide_g4_launch(manifest)  # 未簽核→LaunchRefused（fail-closed、0 模型呼叫）
+    arm_order = tuple(manifest["arms"])
+    for arm in arm_order:
+        if arm not in ARM_SPECS:
+            raise G3ArmsNotConformant(
+                f"{arm}: G4 manifest 臂不在 ARM_SPECS（manifest 與管線不同步）——拒發")
+    if any(ARM_SPECS[a].get("pi_agent") for a in arm_order) and pi_channel is None:
+        raise G3ArmsNotConformant(
+            "G4 含 native_pi 臂但 pi_channel 未注入——拒發（0 模型呼叫）")
+    if out_root is None:
+        out_root = REPO / "ops" / "reqloop" / "g4" / f"fire_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
+    out_root = pathlib.Path(out_root)
+    spec_dir = REPO / manifest["spec_dir"]
+    if tasks_dir is None:
+        tasks_dir = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
+    tasks_dir = pathlib.Path(tasks_dir)
+
+    result: dict = {
+        "schema": "vacant.reqloop.g4.result/1",
+        "fired_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "ticket": manifest.get("ticket"),
+        "human_signoff": manifest.get("human_signoff"),
+        "model": manifest.get("model"),          # null＝UNKNOWN（G4 manifest 未宣告模型/預算，不偽造）
+        "answer_model": DEFAULT_ANSWER_MODEL,
+        "arms": list(arm_order),
+        "tasks": [],
+        "cells": [],
+        "stop_reason": None,
+        "totals": None,
+    }
+    stopped = False
+    for tid in manifest["tasks"]:
+        tdir = tasks_dir / tid
+        if stopped:
+            result["tasks"].append({"task_id": tid, "input_sha256": None,
+                                    "required_answer_names": [], "n_requirements": 0,
+                                    "extract_error": "stopped: quota", "extract_usages": []})
+            result["cells"].extend(
+                {"task": tid, "arm": arm, "status": "not_run", "rounds": []}
+                for arm in arm_order)
+            continue
+        inputs = load_task_inputs(tdir)
+        # D4（11-13 定案第 2 條）：直接重用凍結規格（0 模型擷取呼叫）；缺檔／雜湊不符／
+        # 空殼→load_frozen_spec 拋 ValueError 拒發，絕不默默降級為重新擷取。
+        req_set = load_frozen_spec(spec_dir, tid, inputs)
+        h = hashlib.sha256()
+        h.update(inputs["goal"].encode("utf-8")); h.update(b"\x00")
+        h.update(inputs["contract"].encode("utf-8")); h.update(b"\x00")
+        for name in sorted(inputs["data"]):
+            h.update(name.encode("utf-8")); h.update(inputs["data"][name].encode("utf-8"))
+        needed = tuple(required_answer_names(inputs["contract"]))
+        trec: dict = {"task_id": tid, "input_sha256": h.hexdigest(),
+                      "required_answer_names": list(needed),
+                      "n_requirements": len(req_set.items),
+                      "extract_error": None, "extract_usages": []}   # G4：0 擷取呼叫
+        for arm in arm_order:
+            spec = ARM_SPECS[arm]
+            reverify_on = bool(spec["content_reverify"])
+            cell: dict = {
+                "task": tid, "arm": arm, "status": "not_run",
+                "requirement_list": bool(spec["requirement_list"]),
+                "input_sha256": trec["input_sha256"],
+                "rounds": [], "answer": None, "answer_sha256": None,
+                "hidden_after": HIDDEN_AFTER_UNKNOWN, "error": None,
+                "content_reverify": {"enabled": reverify_on, "rounds": [],
+                                     "final_verdict": None, "diff": None, "error": None},
+            }
+            if stopped:
+                result["cells"].append(cell)
+                continue
+            req_list_text = render_requirement_list(req_set) if spec["requirement_list"] else ""
+            task_ws = tdir / "workspace"
+            missing: tuple[str, ...] = ()
+            gap = False
+            feedback = ""
+            prev_draft = ""
+            prev_results: list = []
+            for round_no in range(1, spec["max_rounds"] + 1):
+                if round_no > 1 and not gap:
+                    break  # 上一稿無已確認缺口→不花下一輪（無額外呼叫）
+                if spec.get("pi_agent"):
+                    prompt = build_pi_cell_prompt(inputs, spec)
+                else:
+                    prompt = build_cell_prompt(inputs, spec, req_list_text=req_list_text,
+                                               round_no=round_no, missing=missing,
+                                               prev_draft=prev_draft, feedback=feedback)
+                rec: dict = {"round": round_no,
+                             "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+                             "usages": [], "error": None}
+                ch = pi_channel if spec.get("pi_agent") else channel
+                try:
+                    text, usage = ch.call(prompt=prompt, model=DEFAULT_ANSWER_MODEL,
+                                          purpose=f"G4 {tid}/{arm} r{round_no}",
+                                          timeout_s=G4_ROUND_TIMEOUT_S)
+                except G3QuotaError as e:
+                    rec["error"] = f"quota: {e}"
+                    cell["rounds"].append(rec)
+                    cell["status"] = "partial_quota" if cell["answer"] is not None else "not_run"
+                    stopped = True
+                    result["stop_reason"] = "quota"
+                    break
+                except G3CallError as e:
+                    rec["error"] = str(e)
+                    cell["rounds"].append(rec)
+                    cell["status"] = "error"
+                    cell["error"] = str(e)
+                    break
+                cell["rounds"].append(rec)
+                rec["usages"].append(usage.to_dict())
+                cell["answer"] = text
+                cell["answer_sha256"] = hashlib.sha256(text.encode()).hexdigest()
+                prev_draft = text
+                missing = tuple(n for n in needed
+                                if not re.search(rf"@{re.escape(n)}\[[^\]]*\]", text))
+                if reverify_on:
+                    rd = cell_round_dir(out_root, tid, arm, round_no)
+                    try:
+                        results = content_recheck(task_ws, req_set, rd, text)
+                    except Exception as e:  # 檢查器例外不得炸掉整格：如實記錄、標 UNKNOWN
+                        cell["content_reverify"]["error"] = f"{type(e).__name__}: {e}"
+                        results = []
+                    cell["content_reverify"]["rounds"].append({
+                        "round": round_no,
+                        "verdict": content_verdict(results) if results else "UNKNOWN",
+                        "gap_reason": confirmed_gap(results, missing)[1] or None,
+                        "claims": _claim_records(results),
+                    })
+                    if round_no >= 2 and prev_results and results:
+                        cell["content_reverify"]["diff"] = \
+                            _diff_results(prev_results, results).to_dict()
+                    cell["content_reverify"]["final_verdict"] = \
+                        cell["content_reverify"]["rounds"][-1]["verdict"]
+                    gap, _ = confirmed_gap(results, missing)
+                    if gap and round_no < spec["max_rounds"]:
+                        feedback = build_repair_feedback(req_set, results, missing)
+                    prev_results = results
+            if cell["status"] == "not_run" and cell["answer"] is not None:
+                cell["status"] = "ok"
+            result["cells"].append(cell)
+        result["tasks"].append(trec)
+
+    result["totals"] = result_totals(result)
+    out_root.mkdir(parents=True, exist_ok=True)
+    (out_root / "g4_result.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return result
 
 

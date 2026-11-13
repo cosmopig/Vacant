@@ -272,3 +272,72 @@ def test_flat_spec_goal_hash_tampered_refuses(tmp_path):
 
     with pytest.raises(ValueError, match="goal_sha256"):
         g3.load_frozen_spec(spec_dir, tid, _g4_inputs(tid))
+
+
+# ── run_g4 發射入口（票 P20261113_1206-2）──────────────────────────────
+
+
+class MockChannel(g3.Channel):
+    """G4 假通道（票 P20261113_1206-2）：記錄呼叫、作答回必要答案項齊全的答案。
+
+    斷言式守衛：purpose 必為作答形狀（`G4 <task>/<arm> r<n>`）；若出現
+    擷取呼叫（「擷取需求」）＝D4 失效（G4 必須 0 模型擷取呼叫），直接炸。
+    """
+
+    def __init__(self) -> None:
+        self.calls: list[dict] = []
+
+    def call(self, *, prompt: str, model: str, purpose: str,
+             timeout_s: float) -> tuple[str, g3.RoundUsage]:
+        assert "擷取需求" not in purpose, f"D4 失效：G4 出現擷取呼叫：{purpose!r}"
+        m = re.match(r"G4 (\S+)/(\S+) r(\d+)$", purpose)
+        assert m, f"出現非作答呼叫：{purpose!r}"
+        self.calls.append({"purpose": purpose, "model": model, "timeout_s": timeout_s})
+        names = g3.required_answer_names(
+            (G4_TASKS / m.group(1) / "workspace" / "contract.md").read_text(encoding="utf-8"))
+        return "\n".join(f"@{n}[1.00]" for n in names) + "\n", g3.RoundUsage(1, 1000, 5)
+
+
+def test_run_g4_fails_closed_when_unsigned(tmp_path):
+    """負控制（簽核門）：預設 manifest human_signoff=null → LaunchRefused、0 模型呼叫、
+    不落盤任何結果（fail-closed：未經人類簽核不得發射，11-13 定案第 4 條）。"""
+    fake = MockChannel()
+    with pytest.raises(g3.LaunchRefused):
+        g3.run_g4(G4_MANIFEST, tmp_path / "o", channel=fake, pi_channel=fake)
+    assert fake.calls == [], "拒發必須 0 模型呼叫"
+    assert not (tmp_path / "o" / "g4_result.json").exists()
+
+
+def test_run_g4_mock_pipeline(tmp_path):
+    """正控制（已簽核 mock manifest＋MockChannel）：12 格跑完、落盤 g4_result.json、
+    model_calls 僅來自解題（0 模型擷取呼叫＝D4 重用凍結規格）。"""
+    m = json.loads(G4_MANIFEST.read_text(encoding="utf-8"))
+    assert m["human_signoff"] is None, "前提：真實 manifest 未簽核"
+    m["human_signoff"] = {"by": "mock signer（測試用，非真發射）",
+                          "ts": "2026-11-13T00:00:00Z",
+                          "sha256": _sha(json.dumps(m, ensure_ascii=False, sort_keys=True))}
+    mp = tmp_path / "manifest.json"
+    mp.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+
+    fake = MockChannel()
+    out = tmp_path / "out"
+    result = g3.run_g4(mp, out, channel=fake, pi_channel=fake)
+
+    # 落盤 g4_result.json、回傳與落盤同一份結果
+    p = out / "g4_result.json"
+    assert p.is_file()
+    data = json.loads(p.read_text(encoding="utf-8"))
+    # 落盤＝回傳結果的 JSON 序列化（tuple→list 等序列化差異不算漂移）
+    assert data == json.loads(json.dumps(result, ensure_ascii=False))
+    assert data["human_signoff"] == m["human_signoff"]
+    # 12 格（4 題 × 3 臂）全部跑完、無錯誤
+    assert data["totals"]["cells"] == 12
+    assert data["totals"]["cells_run"] == 12
+    assert all(c["status"] == "ok" for c in data["cells"])
+    # 0 模型擷取呼叫：每一格 task 記錄的擷取帳務皆空
+    assert all(t["extract_usages"] == [] for t in data["tasks"])
+    # model_calls 僅來自解題：總量＝假通道實際作答呼叫數（每次 calls=1）
+    assert fake.calls
+    assert len({f'{c["purpose"].split(" r")[0]}' for c in fake.calls}) == 12
+    assert data["totals"]["model_calls"] == len(fake.calls)
+    assert data["totals"]["model_calls"] >= 12
