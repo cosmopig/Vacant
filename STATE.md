@@ -574,3 +574,9 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
 - DECISION：原正控制 _frozen_reqset 為全 unverified 規格、新守衛下依法即空殼須拒——票面「保留正控制（合法規格正常載入）」與「全不可檢查→拒發」表面衝突；解法＝正控制補 1 條可確定性檢查條目（tag_format、tag＝任務首個必要答案項、假通道答案 @<tag>[1.00] 必 PASS 不觸發修復輪），負控制兩情形（空條目／全 unverified）合併 1 測滿足票面 7 passed。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 3 張新票（P20261113_1206-1 g4gate 執行計畫矩陣／1206-2 g3 run_g4 管線分派／1206-3 d1 replay 驗證凍結規格）→doing/ 取票照做（11-13 §5：每張動產品碼或 D1 重播器）。
+
+## 2026-11-13 r1570（票 P20261113_1206-1 done：g4gate 12 格執行排程矩陣＋--plan；0 model calls）
+- 做了什麼：g4gate.py 加 build_g4_execution_plan（g4_dry_run 通過後逐題驗 ops/reqloop/g3_2/tasks/<task>/workspace/{goal.md,contract.md} 齊備，組裝每格 task_id/arm/workspace/spec_file/n_checkable；缺檔→ValueError fail-closed）＋main --plan JSON 印出 RC 0；TDD 先紅後綠；票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 2 項全綠（pytest tests/test_g4_preregistration.py→5 passed RC=0（改前 4）／--dry-run「12 cells ready (0 model calls)」RC=0）；--plan JSON 12 格 RC=0；--fire 未簽核 RC=2（fail-closed 未破）；回歸 9 檔 115 passed（含 frozen anchors）；git diff 純加法 2 檔 +65/-0；manifest human_signoff 仍 null。commit cb38cc438。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（0 發射）；1206-2／1206-3 未動。
+- 紅線＋下一步：無 push、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 2 張（1206-2 g3 run_g4 管線分派、1206-3 d1 replay 驗證凍結規格）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補票。
