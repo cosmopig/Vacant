@@ -52,6 +52,7 @@ from vacant_network.reqloop import g3gate
 # G4_DEFAULT_MANIFEST，避免遮蔽本模組 g3 CLI 的既有 DEFAULT_MANIFEST（g3_gate）。
 from .g4gate import DEFAULT_MANIFEST as G4_DEFAULT_MANIFEST
 from .g4gate import LaunchRefused, build_g4_execution_plan, decide_g4_launch, load_g4_manifest
+from .specs import SpecIntegrityError, load_frozen_specs  # D4 統一核驗口（票 P20261113_1708-1）
 from vacant_network.reqloop import repair as _repair
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 from vacant_network.reqloop.checks import SUPPORTED_VERIFIERS, run_requirement_checks
@@ -1235,7 +1236,9 @@ def run_g4(manifest_path: pathlib.Path | str = G4_DEFAULT_MANIFEST,
     門（順序即優先級，全部 0 模型呼叫）：
       1) load_g4_manifest（schema／4 題／3 臂／12 格／規格檔存在）
       2) decide_g4_launch（approval_required 且 human_signoff is None→LaunchRefused，fail-closed）
-      3) 臂存在於 ARM_SPECS＋pi 臂的 pi_channel 注入檢查（缺→G3ArmsNotConformant 拒發）
+      3) load_frozen_specs（manifest 所列 4 題規格檔 spec_sha256 密碼學核驗；
+         任一不符／缺檔／缺鍵→SpecIntegrityError 拒發，0 模型呼叫）
+      4) 臂存在於 ARM_SPECS＋pi 臂的 pi_channel 注入檢查（缺→G3ArmsNotConformant 拒發）
     發射（D4：12 格一律重用凍結規格，0 模型擷取呼叫）：
       - 每題 load_frozen_spec（缺檔／hash 不符／空殼→ValueError 拒發，絕不重新擷取）
       - native_pi→pi_channel；其他臂→channel；G3QuotaError→停、不重試；
@@ -1245,6 +1248,10 @@ def run_g4(manifest_path: pathlib.Path | str = G4_DEFAULT_MANIFEST,
     """
     manifest = load_g4_manifest(manifest_path)
     decide_g4_launch(manifest)  # 未簽核→LaunchRefused（fail-closed、0 模型呼叫）
+    # D4 統一核驗口（票 P20261113_1708-1）：在執行任何 cell 前，逐檔對 manifest 所列
+    # 4 題規格檔核驗 spec_sha256（specs.load_frozen_specs）；任一不符→SpecIntegrityError
+    # fail-closed（0 模型呼叫、無部分結果）。
+    load_frozen_specs(manifest_path)
     arm_order = tuple(manifest["arms"])
     for arm in arm_order:
         if arm not in ARM_SPECS:

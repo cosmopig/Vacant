@@ -345,6 +345,34 @@ def test_run_g4_mock_pipeline(tmp_path):
     assert data["totals"]["model_calls"] >= 12
 
 
+def test_run_g4_tampered_spec_fails_closed(tmp_path):
+    """負控制（票 P20261113_1708-1）：篡改 specs.dab_587.spec_sha256 → run_g4 拋
+    SpecIntegrityError、0 模型呼叫（改前 run_g4 未接 load_frozen_specs，此測試必失敗）。
+
+    mock 簽核僅為放行簽核門、使流程到達 spec 核驗守衛（測試用、非真發射）；
+    規格檔複製到 tmp，4 份凍結檔不動。
+    """
+    m = json.loads(G4_MANIFEST.read_text(encoding="utf-8"))
+    m["human_signoff"] = {"by": "mock signer（測試用，非真發射）",
+                          "ts": "2026-11-13T00:00:00Z",
+                          "sha256": _sha(json.dumps(m, ensure_ascii=False, sort_keys=True))}
+    for tid, entry in m["specs"].items():
+        dst = tmp_path / "specs" / pathlib.Path(entry["file"]).name
+        dst.parent.mkdir(exist_ok=True)
+        dst.write_bytes((REPO / entry["file"]).read_bytes())
+        m["specs"][tid]["file"] = str(dst)
+    old = m["specs"]["dab_587"]["spec_sha256"]
+    m["specs"]["dab_587"]["spec_sha256"] = ("0" if old[0] != "0" else "1") + old[1:]
+    mp = tmp_path / "manifest_tampered.json"
+    mp.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+
+    fake = MockChannel()
+    with pytest.raises(g3.SpecIntegrityError):
+        g3.run_g4(mp, tmp_path / "o", channel=fake, pi_channel=fake)
+    assert fake.calls == [], "拒發必須 0 模型呼叫"
+    assert not (tmp_path / "o" / "g4_result.json").exists()
+
+
 def test_g3_cli_g4_dry_run_and_fire_fail_closed():
     """票 P20261113_1307-2：g3 CLI 自動分派 G4 manifest（改前「plan schema 不符」RC 1）。
 
