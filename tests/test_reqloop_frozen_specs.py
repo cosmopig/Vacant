@@ -108,6 +108,25 @@ def test_negative_manifest_without_specs_key_or_missing(tmp_path):
         load_frozen_specs(tmp_path / "no_such_manifest.json")
 
 
+def test_load_frozen_specs_accepts_dict_input():
+    """D4 dict 入參（P20261113_1810-1）：(a) json.loads 的 manifest dict→4 題；
+    (b) dict 內篡改 spec_sha256→點名題號（密碼學檢驗不移除）；(c) 無 specs 鍵→必拋。"""
+    from vacant_network.reqloop.specs import SpecIntegrityError, load_frozen_specs
+    # (a) 正控制：同一份 repo manifest，記憶體內 dict 輸入→4 題全回
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert set(load_frozen_specs(m)) == REAL_TASKS
+    # (b) 負：dict 內 spec_sha256 改一位→必拋、點名題號
+    bad = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    bad["specs"]["dab_725"]["spec_sha256"] = _flip_hex(bad["specs"]["dab_725"]["spec_sha256"])
+    with pytest.raises(SpecIntegrityError) as ei:
+        load_frozen_specs(bad)
+    assert ei.value.task_id == "dab_725" and "dab_725" in str(ei.value)
+    # (c) 負：無 specs 鍵→必拋，且點名 _manifest_path 來源
+    with pytest.raises(SpecIntegrityError) as ei2:
+        load_frozen_specs({"v": 1, "tasks": ["dab_725"], "_manifest_path": "in-mem.json"})
+    assert "in-mem.json" in str(ei2.value)
+
+
 def test_specs_module_imports_without_model_channel():
     """綠燈：specs.py 直接 import 面只有標準庫＋同包（requirements 鏈），不牽動模型通道。"""
     import vacant_network.reqloop.specs as S  # import 本身即測：不發任何網路

@@ -52,24 +52,31 @@ def _resolve(file: str) -> pathlib.Path:
     return p if p.is_absolute() else REPO_ROOT / p
 
 
-def load_frozen_specs(manifest_path: str | pathlib.Path) -> dict[str, dict[str, Any]]:
+def load_frozen_specs(manifest_input: str | pathlib.Path | dict[str, Any]) -> dict[str, dict[str, Any]]:
     """載入 manifest 的凍結規格並逐檔核驗 spec_sha256。
 
     回傳 {task_id: 規格檔 JSON dict}。任何一題失敗即拋 SpecIntegrityError，
     不返回部分結果、不靜默 fallback（fail-closed）。
+    `manifest_input` 可為檔案路徑，或已解析的 manifest dict（其
+    `_manifest_path` 欄位用於點名來源檔，僅供報錯文案）。
     `file` 相對路徑對 repo root 解析（與 g4gate 同口徑），絕對路徑照用。
     """
-    mp = pathlib.Path(manifest_path)
-    if not mp.is_file():
-        raise SpecIntegrityError(f"manifest 不存在: {mp}（不靜默 fallback）")
-    try:
-        manifest = json.loads(mp.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
-        raise SpecIntegrityError(f"manifest 不可讀/不可解析: {mp}: {e}") from e
+    if isinstance(manifest_input, dict):
+        manifest = manifest_input
+        mp_label = manifest.get("_manifest_path", "<in-memory manifest>")
+    else:
+        mp = pathlib.Path(manifest_input)
+        mp_label = str(mp)
+        if not mp.is_file():
+            raise SpecIntegrityError(f"manifest 不存在: {mp}（不靜默 fallback）")
+        try:
+            manifest = json.loads(mp.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
+            raise SpecIntegrityError(f"manifest 不可讀/不可解析: {mp_label}: {e}") from e
     specs = manifest.get("specs") if isinstance(manifest, dict) else None
     if not isinstance(specs, dict) or not specs:
         raise SpecIntegrityError(
-            f"manifest 無 specs 對應（fail-closed，不猜）: {mp}")
+            f"manifest 無 specs 對應（fail-closed，不猜）: {mp_label}")
 
     out: dict[str, dict[str, Any]] = {}
     for task_id, entry in specs.items():
