@@ -1,0 +1,65 @@
+{
+  "task_id": "dab_725",
+  "spec_version": 1,
+  "ticket": "P20261113_0708-1-freeze-g4-specs",
+  "frozen_from": "ops/audits/g26_claim_replay.json",
+  "goal_sha256": "fdaeab445f23e4919ad1a58757af30744abfc4ac50e8e918d6bd4b0379233c68",
+  "contract_sha256": "d45d8d39ef41e9873977c05716f3a52fd6c926ad8e595348486c488b18d65732",
+  "items": [
+    {
+      "id": "R1",
+      "quote": "# Task\n\n1. Investigate the relationship between 'displacement' and 'mpg' by analyzing the distribution of 'mpg' for each unique value of 'displacement'. Calculate the mean and median 'mpg' for each of the three most common unique values of 'displacement'.\n\n## Constraints\n\n{\n- Only consider the three unique 'displacement' values that occur most frequently in the dataset.\n- The 'mpg' means and medians must be calculated for each of these three values separately, with 'mpg' values only from rows with the corresponding 'displacement' value.\n- Results must be rounded to two decimal places.\n}\n\n## Answer format\n\n{\n@mean1[mean1], @median1[median1]\n@mean2[mean2], @median2[median2]\n@mean3[mean3], @median3[median3]\nwhere \"mean1\", \"median1\", \"mean2\", \"median2\", \"mean3\", \"median3\" are corresponding mean and median 'mpg' values for each of the top three 'displacement' values, respectively. Each value should be a float, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/auto-mpg.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/R1 deterministic"
+    },
+    {
+      "id": "R2",
+      "quote": "# Task\n\n1. Investigate the relationship between 'displacement' and 'mpg' by analyzing the distribution of 'mpg' for each unique value of 'displacement'. Calculate the mean and median 'mpg' for each of the three most common unique values of 'displacement'.\n\n## Constraints\n\n{\n- Only consider the three unique 'displacement' values that occur most frequently in the dataset.\n- The 'mpg' means and medians must be calculated for each of these three values separately, with 'mpg' values only from rows with the corresponding 'displacement' value.\n- Results must be rounded to two decimal places.\n}\n\n## Answer format\n\n{\n@mean1[mean1], @median1[median1]\n@mean2[mean2], @median2[median2]\n@mean3[mean3], @median3[median3]\nwhere \"mean1\", \"median1\", \"mean2\", \"median2\", \"mean3\", \"median3\" are corresponding mean and median 'mpg' values for each of the top three 'displacement' values, respectively. Each value should be a float, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/auto-mpg.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "group_aggregate",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/R2 deterministic"
+    },
+    {
+      "id": "R3",
+      "quote": "# Task\n\n1. Investigate the relationship between 'displacement' and 'mpg' by analyzing the distribution of 'mpg' for each unique value of 'displacement'. Calculate the mean and median 'mpg' for each of the three most common unique values of 'displacement'.\n\n## Constraints\n\n{\n- Only consider the three unique 'displacement' values that occur most frequently in the dataset.\n- The 'mpg' means and medians must be calculated for each of these three values separately, with 'mpg' values only from rows with the corresponding 'displacement' value.\n- Results must be rounded to two decimal places.\n}\n\n## Answer format\n\n{\n@mean1[mean1], @median1[median1]\n@mean2[mean2], @median2[median2]\n@mean3[mean3], @median3[median3]\nwhere \"mean1\", \"median1\", \"mean2\", \"median2\", \"mean3\", \"median3\" are corresponding mean and median 'mpg' values for each of the top three 'displacement' values, respectively. Each value should be a float, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/auto-mpg.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "rowset_filter",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/R3 deterministic"
+    },
+    {
+      "id": "R4",
+      "quote": "# Task\n\n1. Investigate the relationship between 'displacement' and 'mpg' by analyzing the distribution of 'mpg' for each unique value of 'displacement'. Calculate the mean and median 'mpg' for each of the three most common unique values of 'displacement'.\n\n## Constraints\n\n{\n- Only consider the three unique 'displacement' values that occur most frequently in the dataset.\n- The 'mpg' means and medians must be calculated for each of these three values separately, with 'mpg' values only from rows with the corresponding 'displacement' value.\n- Results must be rounded to two decimal places.\n}\n\n## Answer format\n\n{\n@mean1[mean1], @median1[median1]\n@mean2[mean2], @median2[median2]\n@mean3[mean3], @median3[median3]\nwhere \"mean1\", \"median1\", \"mean2\", \"median2\", \"mean3\", \"median3\" are corresponding mean and median 'mpg' values for each of the top three 'displacement' values, respectively. Each value should be a float, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/auto-mpg.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/R4 deterministic"
+    },
+    {
+      "id": "R5",
+      "quote": "# Task\n\n1. Investigate the relationship between 'displacement' and 'mpg' by analyzing the distribution of 'mpg' for each unique value of 'displacement'. Calculate the mean and median 'mpg' for each of the three most common unique values of 'displacement'.\n\n## Constraints\n\n{\n- Only consider the three unique 'displacement' values that occur most frequently in the dataset.\n- The 'mpg' means and medians must be calculated for each of these three values separately, with 'mpg' values only from rows with the corresponding 'displacement' value.\n- Results must be rounded to two decimal places.\n}\n\n## Answer format\n\n{\n@mean1[mean1], @median1[median1]\n@mean2[mean2], @median2[median2]\n@mean3[mean3], @median3[median3]\nwhere \"mean1\", \"median1\", \"mean2\", \"median2\", \"mean3\", \"median3\" are corresponding mean and median 'mpg' values for each of the top three 'displacement' values, respectively. Each value should be a float, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/auto-mpg.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/R5 deterministic"
+    },
+    {
+      "id": "R6",
+      "quote": "# Task\n\n1. Investigate the relationship between 'displacement' and 'mpg' by analyzing the distribution of 'mpg' for each unique value of 'displacement'. Calculate the mean and median 'mpg' for each of the three most common unique values of 'displacement'.\n\n## Constraints\n\n{\n- Only consider the three unique 'displacement' values that occur most frequently in the dataset.\n- The 'mpg' means and medians must be calculated for each of these three values separately, with 'mpg' values only from rows with the corresponding 'displacement' value.\n- Results must be rounded to two decimal places.\n}\n\n## Answer format\n\n{\n@mean1[mean1], @median1[median1]\n@mean2[mean2], @median2[median2]\n@mean3[mean3], @median3[median3]\nwhere \"mean1\", \"median1\", \"mean2\", \"median2\", \"mean3\", \"median3\" are corresponding mean and median 'mpg' values for each of the top three 'displacement' values, respectively. Each value should be a float, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/auto-mpg.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "answer_kv",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/R6 deterministic"
+    }
+  ],
+  "spec_sha256": "5b63ebbde4210b35aa17ee476c0f1f8975b6013c9527c9ec64ed243e892def10"
+}

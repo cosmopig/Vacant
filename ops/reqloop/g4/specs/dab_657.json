@@ -1,0 +1,83 @@
+{
+  "task_id": "dab_657",
+  "spec_version": 1,
+  "ticket": "P20261113_0708-1-freeze-g4-specs",
+  "frozen_from": "ops/audits/g26_claim_replay.json",
+  "goal_sha256": "f419633a43fa9202192b87dac1f48a575d8a62c429a4a72a1c4d910a369b1e83",
+  "contract_sha256": "f549700ab0be633b75740eb2ed19f6d09350e23cff6a20ba37f693f31a9e0a6e",
+  "items": [
+    {
+      "id": "req-1",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-1 deterministic"
+    },
+    {
+      "id": "req-2",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-2 deterministic"
+    },
+    {
+      "id": "req-3",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-3 deterministic"
+    },
+    {
+      "id": "req-4",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-4 deterministic"
+    },
+    {
+      "id": "req-5",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-5 deterministic"
+    },
+    {
+      "id": "req-6",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "tag_format",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-6 deterministic"
+    },
+    {
+      "id": "req-7",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-7 deterministic"
+    },
+    {
+      "id": "req-8",
+      "quote": "# Task\n\nCalculate the mean, median, and standard deviation of the 'Close' column.\n\n## Constraints\n\nUsing pandas library in Python, ignore the missing values, and round the results to 2 decimal places.\n\n## Answer format\n\n@mean_close[mean], @median_close[median], @std_close[std_deviation] where \"mean\", \"median\", and \"std_deviation\" are decimal numbers representing the mean, median, and standard deviation of the 'Close' column, respectively, rounded to two decimal places.\n\n## Data\n\nThe data file for this task is `data/YAHOO-BTC_USD_D.csv`.\n",
+      "deliverable": "answer.txt",
+      "verifier": "plain_recomputed",
+      "kind": "explicit",
+      "params": {},
+      "description": "G4 frozen spec: g26 replay g3_2_fire/req-8 deterministic"
+    }
+  ],
+  "spec_sha256": "0284bfe8cb713a081355b5427bb2e08b4d13dfec4281a700acb6aaee7875adbb"
+}
