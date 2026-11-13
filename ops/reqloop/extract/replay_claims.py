@@ -204,6 +204,9 @@ def gate_check() -> int:
         (c) 故意篡改答案值（如 999999.99）→ 必判 FAIL。
     (3) 斷言在上述所有負控制情境下 false_pass == 0。
     通過時輸出：GATE_CHECK: deterministic=<K>/76 >= 30 false_pass=0 VERDICT: PASS
+    P20261113_0846-3：補齊票面全量負控制——(a) 錯交付物檔名必判 deliverable_not_in_request、
+    (b) 輸入檔當交付物必判 deliverable_is_input_file、(c) 未知 verifier 必判 unknown_verifier；
+    run_gate_check 為票面同義名（同一實作）。
     """
     rows1 = collect(use_trusted=True)
     s1 = summarize(rows1)
@@ -225,9 +228,9 @@ def gate_check() -> int:
         tpath = REPO / "ops/reqloop/g3_2/tasks" / tid
         keys = [{"key": key_name, "type": "number"}]
 
-        # 負控制 1: 故意錯的交付物檔名／缺檔
-        ok1, _ = judge_claim("answer_kv", "non_existent_output_9x8y.txt", {"keys": keys}, ut, inputs)
-        if ok1:
+        # 負控制 1（票 (a)）: 故意錯的交付物檔名／缺檔 → 必判 deliverable_not_in_request
+        ok1, r1 = judge_claim("answer_kv", "non_existent_output_9x8y.txt", {"keys": keys}, ut, inputs)
+        if ok1 or not str(r1).startswith("deliverable_not_in_request"):
             false_pass += 1
         import tempfile
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -239,10 +242,10 @@ def gate_check() -> int:
             if res and res[0].status == "PASS":
                 false_pass += 1
 
-        # 負控制 2: 輸入檔當交付物
+        # 負控制 2（票 (b)）: 輸入檔當交付物 → 必判 deliverable_is_input_file
         for inp in inputs:
-            ok2, _ = judge_claim("answer_kv", inp, {"keys": keys}, ut, inputs)
-            if ok2:
+            ok2, r2 = judge_claim("answer_kv", inp, {"keys": keys}, ut, inputs)
+            if ok2 or r2 != "deliverable_is_input_file":
                 false_pass += 1
             if not is_input_file(inp, inputs):
                 false_pass += 1
@@ -264,12 +267,19 @@ def gate_check() -> int:
                 if res and res[0].status == "PASS":
                     false_pass += 1
 
+        # 負控制 4（票 (c)）: 未知 verifier → 必判 unknown_verifier
+        ok4, r4 = judge_claim("unsupported_dummy_check", "answer.txt", {}, ut, inputs)
+        if ok4 or not str(r4).startswith("unknown_verifier:"):
+            false_pass += 1
+
     if false_pass != 0:
         print(f"GATE_CHECK FAIL: false_pass={false_pass} != 0")
         return 1
 
     print(f"GATE_CHECK: deterministic={det}/76 >= 30 false_pass=0 VERDICT: PASS")
     return 0
+
+run_gate_check = gate_check  # P20261113_0846-3 票面函式名（同一實作）
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="replay_claims")

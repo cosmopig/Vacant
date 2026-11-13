@@ -87,3 +87,11 @@ def test_gate_check_negative_control_fails_on_false_pass():
     """負控制：若有假 PASS，gate_check 必須失敗退出（exit 1）。"""
     with patch.object(rc, "judge_claim", return_value=(True, None)):
         assert rc.gate_check() == 1
+
+
+def test_replay_claims_gate_flag(capsys):
+    """P20261113_0846-3：--gate 命令列路徑執行成功，輸出含 GATE_CHECK: 與 VERDICT: PASS。"""
+    assert rc.main(["--gate"]) == 0
+    out = capsys.readouterr().out
+    assert "GATE_CHECK:" in out and "VERDICT: PASS" in out
+    assert rc.run_gate_check is rc.gate_check  # 票面函式名為同一實作
