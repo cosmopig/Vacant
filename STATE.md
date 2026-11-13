@@ -640,3 +640,9 @@
 - 已驗證（本輪新跑）：票面驗收 1 passed（票面 -q 指令 RC=0）；g3_frozen_spec 全檔 11 passed；frozen_specs＋frozen_anchors＋g4_prereg 16 passed；g3gate＋g3 65 passed；g3 CLI G4 --dry-run RC0／--fire RC2（human_signoff 仍 null、0 發射）；git diff 2 檔 36+/1−。
 - 未驗證：CI 裁決（輪首 qwen 還沒跑完；argon 2 紅／worker 11 紅＝既有、已上報、不代修）；g3 CLI --fire 分支未另列 SpecIntegrityError 專屬 except（走既有通用 except fail-closed RC1）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 1 張（1708-2）<3→規劃者依 11-13 §5 補票；下一輪 doing/ 取票照做。
+
+## 2026-11-13 r1588（票 P20261113_1708-2 done：D1 重播 dab_517 missing_param:values 根因點名＋負控制；0 model calls）
+- 做了什麼：replay_claims.replay_reason 對 missing_param:* 明確回 (None, reason)（保留缺失根因碼如 missing_param:values、非 (None,None) 抹除；I-4 未測量不是通過、絕不翻 deterministic）；selftest 同點名對齊；TDD 先紅（改前 (None,None) 斷言失敗）後綠；新增 test_missing_param_values_stays_missing_raw_negative_control（(a) replay_reason 點名、(b) dab_517 req_data_unchanged collect(use_trusted=True) 維持 missing_raw＋點名、0 假 PASS）；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 1 passed（RC0）；test_replay_claims.py 18 passed；--missing-report 仍含 CLAIM_MISSING: dab_517/req_data_unchanged: values missing_param；--selftest PASS；--gate deterministic=66/76 false_pass=0 VERDICT: PASS；--json det=66 不變、K1 分佈 missing_raw 點名為 missing_param:values；anchors＋frozen_specs 10 passed（4 凍結檔未動）；git diff 2 檔 30+/4−（產品碼 9 行）。
+- 未驗證：CI 裁決（輪首 qwen 還沒跑完；argon 8 紅／worker 11 紅＝他枝新 WIP（argon 85167539b dict 輸入、worker 85956c78f e007 修正）、既有已上報、不代修）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 0 張＋doing/ 空＜3→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器）；下一輪 doing/ 取票照做。
