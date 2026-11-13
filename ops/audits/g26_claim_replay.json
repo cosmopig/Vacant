@@ -1,9 +1,9 @@
 {
   "ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
-  "generated_at": "2026-11-13T05:34:57+00:00",
+  "generated_at": "2026-11-13T07:16:10+00:00",
   "code_sha": {
     "vacant_network/reqloop/extract.py": "b502741bcd290d1bfefc257986be838d6356d4f3",
-    "vacant_network/reqloop/checks.py": "f3525b0126788bc8432799a31ab7b50a64c775dc"
+    "vacant_network/reqloop/checks.py": "764119e29305a20e8b40118ab284888018b23d9e"
   },
   "raw_fields_saved": {
     "verifier": "g3_2_fire 26/26；其餘三來源 0/50",
@@ -14,8 +14,8 @@
   "baseline_K0": {
     "total": 76,
     "replayable": 73,
-    "deterministic": 0,
-    "unverified": 73,
+    "deterministic": 14,
+    "unverified": 59,
     "missing_raw": 3,
     "missing_raw_claims": [
       {
@@ -69,14 +69,11 @@
     ],
     "reason_distribution": {
       "deliverable_not_in_request:*": 52,
+      "deterministic": 14,
       "missing_raw": 1,
       "model_declared_unverified": 4,
       "raw_fields_not_saved": 2,
-      "unknown_verifier:missing": 3,
-      "unsupported_recompute_type:mean_col": 8,
-      "unsupported_recompute_type:median_col": 2,
-      "unsupported_recompute_type:pearson": 2,
-      "unsupported_recompute_type:std_col": 2
+      "unknown_verifier:missing": 3
     },
     "unsupported_recompute_types": {
       "mean_col": 8,
@@ -86,17 +83,17 @@
     },
     "baseline": {
       "taxonomy_deterministic": 2,
-      "replay_deterministic_within_replayable": 0,
+      "replay_deterministic_within_replayable": 14,
       "deterministic_in_missing_raw": 2,
-      "baseline_match": true,
-      "explanation": "replayable=73 集合內 deterministic=0：K0 基線（不走 trusted）下，原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "baseline_match": false,
+      "explanation": "replayable=73 集合內 deterministic=14：K0 基線（不走 trusted）下，unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；pearson 2 條屬 D3b（P20261113_0344-1，參數未存於來源、不可誠實實作）；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "d2_K1": {
     "total": 76,
     "replayable": 73,
-    "deterministic": 52,
-    "unverified": 21,
+    "deterministic": 66,
+    "unverified": 7,
     "missing_raw": 3,
     "missing_raw_claims": [
       {
@@ -149,15 +146,11 @@
       }
     ],
     "reason_distribution": {
-      "deterministic": 52,
+      "deterministic": 66,
       "missing_raw": 1,
       "model_declared_unverified": 4,
       "raw_fields_not_saved": 2,
-      "unknown_verifier:missing": 3,
-      "unsupported_recompute_type:mean_col": 8,
-      "unsupported_recompute_type:median_col": 2,
-      "unsupported_recompute_type:pearson": 2,
-      "unsupported_recompute_type:std_col": 2
+      "unknown_verifier:missing": 3
     },
     "unsupported_recompute_types": {
       "mean_col": 8,
@@ -167,23 +160,23 @@
     },
     "baseline": {
       "taxonomy_deterministic": 2,
-      "replay_deterministic_within_replayable": 52,
+      "replay_deterministic_within_replayable": 66,
       "deterministic_in_missing_raw": 2,
       "baseline_match": false,
-      "explanation": "replayable=73 集合內 deterministic=52：K0 基線（不走 trusted）下，原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "replayable=73 集合內 deterministic=66：K0 基線（不走 trusted）下，unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；pearson 2 條屬 D3b（P20261113_0344-1，參數未存於來源、不可誠實實作）；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "k0_to_k1": {
-    "K0_deterministic": 0,
-    "K1_deterministic": 52,
+    "K0_deterministic": 14,
+    "K1_deterministic": 66,
     "flipped_to_deterministic": 52,
-    "K0_baseline_match": true
+    "K0_baseline_match": false
   },
   "totals": {
     "total": 76,
     "replayable": 73,
-    "deterministic": 52,
-    "unverified": 21,
+    "deterministic": 66,
+    "unverified": 7,
     "missing_raw": 3,
     "missing_raw_claims": [
       {
@@ -236,15 +229,11 @@
       }
     ],
     "reason_distribution": {
-      "deterministic": 52,
+      "deterministic": 66,
       "missing_raw": 1,
       "model_declared_unverified": 4,
       "raw_fields_not_saved": 2,
-      "unknown_verifier:missing": 3,
-      "unsupported_recompute_type:mean_col": 8,
-      "unsupported_recompute_type:median_col": 2,
-      "unsupported_recompute_type:pearson": 2,
-      "unsupported_recompute_type:std_col": 2
+      "unknown_verifier:missing": 3
     },
     "unsupported_recompute_types": {
       "mean_col": 8,
@@ -254,10 +243,10 @@
     },
     "baseline": {
       "taxonomy_deterministic": 2,
-      "replay_deterministic_within_replayable": 52,
+      "replay_deterministic_within_replayable": 66,
       "deterministic_in_missing_raw": 2,
       "baseline_match": false,
-      "explanation": "replayable=73 集合內 deterministic=52：K0 基線（不走 trusted）下，原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "replayable=73 集合內 deterministic=66：K0 基線（不走 trusted）下，unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；pearson 2 條屬 D3b（P20261113_0344-1，參數未存於來源、不可誠實實作）；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "claims": [
@@ -299,8 +288,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -314,8 +303,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -329,8 +318,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -359,8 +348,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -734,8 +723,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -764,8 +753,8 @@
       "original_reason": "unsupported_recompute_type:median_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:median_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -794,8 +783,8 @@
       "original_reason": "unsupported_recompute_type:std_col",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:std_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -839,8 +828,8 @@
       "original_reason": "unsupported_recompute_type:pearson",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:pearson",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -854,8 +843,8 @@
       "original_reason": "unsupported_recompute_type:pearson",
       "saved_verifier": null,
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:pearson",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1109,8 +1098,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": "plain_recomputed",
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -1124,8 +1113,8 @@
       "original_reason": "unsupported_recompute_type:median_col",
       "saved_verifier": "plain_recomputed",
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:median_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -1139,8 +1128,8 @@
       "original_reason": "unsupported_recompute_type:std_col",
       "saved_verifier": "plain_recomputed",
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:std_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -1199,8 +1188,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": "plain_recomputed",
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -1214,8 +1203,8 @@
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": "plain_recomputed",
       "trusted_deliverable": "answer.txt",
-      "replay_status": "unverified",
-      "replay_reason": "unsupported_recompute_type:mean_col",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
