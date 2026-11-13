@@ -622,3 +622,9 @@
 - 已驗證（本輪新跑）：pytest tests/test_reqloop_frozen_specs.py 5 passed（真 manifest 正控制＋hash flip 點名＋缺 spec 檔零部分結果＋缺 specs 鍵/缺 manifest＋import 隔離）；pytest tests/test_reqloop_frozen_anchors.py＋tests/test_reqloop_now_redline.py 10 passed；freeze_check VERDICT: FROZEN_STATE_OK 12/12 RC=0（輪首 10/12→12/12：diff_worker/diff_argon 轉 OK、in-scope diff 0 檔、簿記 4 檔身份同）；anchors 5 passed（freeze_check 內含）；manifest human_signoff 仍 null、ops/reqloop/g4 無新產物（0 發射）。
 - 未驗證：CI 裁決（輪首 qwen 15 紅＝freeze_check/now_redline 系，本輪簿記＋收斂後本分支應轉綠、待 CI 證實；argon 2 紅／worker 11 紅＝既有，兩分支新 HEAD 收斂後應轉綠、待 CI 證實）。
 - 紅線＋下一步：不 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、G4 未接線（argon 840cbee5e/85167539b 未合併，1507-2/1708-1 接線票另步授權）、G4 未真發射（人類簽核 null）、4 凍結檔 blob 前綴未變（anchors 綠）。open/ 4 張（1507-1、1507-2、1708-1、1708-2）→doing/ 取票照做。
+
+## 2026-11-13 r1585（票 P20261113_1507-1 done：D1 重播 dab_587 unknown_verifier:missing 根因點名＋負控制；0 model calls）
+- 做了什麼：replay_claims.judge_claim verifier 空/None 點名 unknown_verifier:missing（對齊 extract.py:806 or 'missing'）＋replay_reason 明確分支維持 (False, reason)（I-4 未測量不是通過）＋空 verifier 尾巴同點名；TDD 先紅後綠；新增 test_missing_verifier_stays_unverified_negative_control（judge_claim 空/None、replay_reason 點名、dab_587 req-3/4/5 三條 row 維持 unverified）；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 1 passed；test_replay_claims.py 17 passed；--json deterministic=66 不變（≥30 門）、dab_587 unverified=3、reason_distribution 點名 unknown_verifier:missing=3；--gate false_pass=0 VERDICT: PASS；--selftest PASS（K0 baseline_match True）；anchors 5 passed（repair/run_eval/extract/checks 4 凍結檔未動）；git diff 2 檔 32+/1−（產品碼 9 行）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有、已上報、不代修）；dab_587 raw fields 回補＝規劃者裁決（維持 UNKNOWN、不補造）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）。open/ 3 張（1507-2、1708-1、1708-2）≥3 達標；下一輪 doing/ 取票照做。
