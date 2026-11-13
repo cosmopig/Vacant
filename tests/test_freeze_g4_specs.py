@@ -101,3 +101,19 @@ def test_d_tamper_negative_controls(tmp_path):
     t5["spec_sha256"] = hashlib.sha256(fs._canon(body).encode("utf-8")).hexdigest()
     ok, why = fs.validate_spec(dump(t5, "t5.json"))
     assert not ok and why == "deliverable", (ok, why)
+
+
+def test_e_checkability_wrong_answer_fails(tmp_path):
+    """P20261113_1100-1：錯誤交付物下，每份 spec 至少 1 條 FAIL、0 條假 PASS。
+
+    修前 25 條 params 全為 {} → 錯誤交付物判 0 FAIL / 0 PASS / 25 UNKNOWN，
+    G4 full_rloop 修補機制無從觸發；修後至少部分條目可判 FAIL，且不假 PASS。"""
+    _ensure_specs()
+    from vacant_network.reqloop.checks import run_requirement_checks
+    for t in TASKS:
+        (tmp_path / "answer.txt").write_text("wrong_answer\n", encoding="utf-8")
+        rs = RequirementSet.load(SPEC_DIR / f"{t}.json")
+        res = run_requirement_checks(WS / t / "workspace", rs, tmp_path)
+        statuses = [r.status for r in res]
+        assert "FAIL" in statuses, f"{t}: 錯誤交付物無任何 FAIL（statuses={statuses}）"
+        assert "PASS" not in statuses, f"{t}: 錯誤交付物出現假 PASS：{statuses}"

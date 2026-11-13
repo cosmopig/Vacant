@@ -2,6 +2,7 @@
   "task_id": "dab_517",
   "spec_version": 1,
   "ticket": "P20261113_0708-1-freeze-g4-specs",
+  "params_fix_ticket": "P20261113_1100-1-g4-freeze-specs-params-checkability",
   "frozen_from": "ops/audits/g26_claim_replay.json",
   "goal_sha256": "f70034514f56ba0f365801472d1d48429ac3051f3cd2c2246ca32d0e2a346c69",
   "contract_sha256": "7c5b87c071d5235dfb0419be336c886e8dd48b1fe10f9c2da03a53d7748921c9",
@@ -10,18 +11,36 @@
       "id": "req_correlation_value",
       "quote": "# Task\n\nFind the correlation coefficient between the passenger class and the fare.\n\n## Constraints\n\nCalculate the correlation using the Pearson method. Do not include the rows with null values in either Pclass or Fare in the calculation. Round the final output to 2 decimal places.\n\n## Answer format\n\n@correlation_pclass_fare[correlation_value], where \"correlation_value\" is a float rounded to 2 decimal places, representing the correlation coefficient between passenger class and fare.\n\n## Data\n\nThe data file for this task is `data/titanic.csv`.\n",
       "deliverable": "answer.txt",
-      "verifier": "answer_kv",
+      "verifier": "kv_recomputed",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "key": "correlation_pclass_fare",
+        "data_file": "data/titanic.csv",
+        "recompute": {
+          "type": "pearson",
+          "col_a": "Pclass",
+          "col_b": "Fare",
+          "round": 2
+        }
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/req_correlation_value deterministic"
     },
     {
       "id": "req_pearson_method",
       "quote": "# Task\n\nFind the correlation coefficient between the passenger class and the fare.\n\n## Constraints\n\nCalculate the correlation using the Pearson method. Do not include the rows with null values in either Pclass or Fare in the calculation. Round the final output to 2 decimal places.\n\n## Answer format\n\n@correlation_pclass_fare[correlation_value], where \"correlation_value\" is a float rounded to 2 decimal places, representing the correlation coefficient between passenger class and fare.\n\n## Data\n\nThe data file for this task is `data/titanic.csv`.\n",
       "deliverable": "answer.txt",
-      "verifier": "answer_kv",
+      "verifier": "kv_recomputed",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "key": "correlation_pclass_fare",
+        "data_file": "data/titanic.csv",
+        "recompute": {
+          "type": "pearson",
+          "col_a": "Pclass",
+          "col_b": "Fare",
+          "round": 2
+        }
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/req_pearson_method deterministic"
     },
     {
@@ -39,7 +58,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_pclass_fare",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/req_round_2dp deterministic"
     },
     {
@@ -48,7 +70,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_pclass_fare",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/req_answer_format deterministic"
     },
     {
@@ -57,9 +82,16 @@
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "keys": [
+          {
+            "key": "correlation_pclass_fare",
+            "type": "number"
+          }
+        ]
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/req_answer_file deterministic"
     }
   ],
-  "spec_sha256": "046111f8a2cff72cca35323b99a6774ab55f94b1f9349258f7dbca294c05fb77"
+  "spec_sha256": "3b1a178b9cdcca52bcfc96f12150cfe7e209bee37cd3a7182db996c41837881d"
 }

@@ -2,6 +2,7 @@
   "task_id": "dab_725",
   "spec_version": 1,
   "ticket": "P20261113_0708-1-freeze-g4-specs",
+  "params_fix_ticket": "P20261113_1100-1-g4-freeze-specs-params-checkability",
   "frozen_from": "ops/audits/g26_claim_replay.json",
   "goal_sha256": "fdaeab445f23e4919ad1a58757af30744abfc4ac50e8e918d6bd4b0379233c68",
   "contract_sha256": "d45d8d39ef41e9873977c05716f3a52fd6c926ad8e595348486c488b18d65732",
@@ -12,7 +13,34 @@
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "keys": [
+          {
+            "key": "mean1",
+            "type": "number"
+          },
+          {
+            "key": "median1",
+            "type": "number"
+          },
+          {
+            "key": "mean2",
+            "type": "number"
+          },
+          {
+            "key": "median2",
+            "type": "number"
+          },
+          {
+            "key": "mean3",
+            "type": "number"
+          },
+          {
+            "key": "median3",
+            "type": "number"
+          }
+        ]
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R1 deterministic"
     },
     {
@@ -39,7 +67,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "mean1",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R4 deterministic"
     },
     {
@@ -48,7 +79,34 @@
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "keys": [
+          {
+            "key": "mean1",
+            "type": "number"
+          },
+          {
+            "key": "median1",
+            "type": "number"
+          },
+          {
+            "key": "mean2",
+            "type": "number"
+          },
+          {
+            "key": "median2",
+            "type": "number"
+          },
+          {
+            "key": "mean3",
+            "type": "number"
+          },
+          {
+            "key": "median3",
+            "type": "number"
+          }
+        ]
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R5 deterministic"
     },
     {
@@ -57,9 +115,36 @@
       "deliverable": "answer.txt",
       "verifier": "answer_kv",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "keys": [
+          {
+            "key": "mean1",
+            "type": "number"
+          },
+          {
+            "key": "median1",
+            "type": "number"
+          },
+          {
+            "key": "mean2",
+            "type": "number"
+          },
+          {
+            "key": "median2",
+            "type": "number"
+          },
+          {
+            "key": "mean3",
+            "type": "number"
+          },
+          {
+            "key": "median3",
+            "type": "number"
+          }
+        ]
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R6 deterministic"
     }
   ],
-  "spec_sha256": "5b63ebbde4210b35aa17ee476c0f1f8975b6013c9527c9ec64ed243e892def10"
+  "spec_sha256": "920da0f25c0bb10c852b0ec5ca5b2d8712d8765bc1c627bd694c1e1843a059fb"
 }

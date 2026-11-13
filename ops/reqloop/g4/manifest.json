@@ -15,10 +15,10 @@
   "cells": 12,
   "spec_dir": "ops/reqloop/g4/specs",
   "specs": {
-    "dab_725": {"file": "ops/reqloop/g4/specs/dab_725.json", "spec_sha256": "5b63ebbde4210b35aa17ee476c0f1f8975b6013c9527c9ec64ed243e892def10", "n_items": 6},
-    "dab_587": {"file": "ops/reqloop/g4/specs/dab_587.json", "spec_sha256": "ec5f83fa63eb5442e5aeb877f1552c3a1f5c8d90ca7fae907017374636cf8857", "n_items": 5},
-    "dab_657": {"file": "ops/reqloop/g4/specs/dab_657.json", "spec_sha256": "0284bfe8cb713a081355b5427bb2e08b4d13dfec4281a700acb6aaee7875adbb", "n_items": 8},
-    "dab_517": {"file": "ops/reqloop/g4/specs/dab_517.json", "spec_sha256": "046111f8a2cff72cca35323b99a6774ab55f94b1f9349258f7dbca294c05fb77", "n_items": 6}
+    "dab_725": {"file": "ops/reqloop/g4/specs/dab_725.json", "spec_sha256": "920da0f25c0bb10c852b0ec5ca5b2d8712d8765bc1c627bd694c1e1843a059fb", "n_items": 6},
+    "dab_587": {"file": "ops/reqloop/g4/specs/dab_587.json", "spec_sha256": "defe4b2ed68964cd03e9d970221ed665cc862f79c33d337f90ddf8da242c2875", "n_items": 5},
+    "dab_657": {"file": "ops/reqloop/g4/specs/dab_657.json", "spec_sha256": "5f35c8fac48a06da00c2eb22eeac80a89753666ae0a6695e976c05266e3c1619", "n_items": 8},
+    "dab_517": {"file": "ops/reqloop/g4/specs/dab_517.json", "spec_sha256": "3b1a178b9cdcca52bcfc96f12150cfe7e209bee37cd3a7182db996c41837881d", "n_items": 6}
   },
   "frozen_spec_source": "P20261113_0708-1-freeze-g4-specs：ops/reqloop/extract/freeze_specs.py（源自 ops/audits/g26_claim_replay.json）",
   "invariants": [

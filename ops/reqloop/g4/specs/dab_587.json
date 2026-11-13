@@ -2,6 +2,7 @@
   "task_id": "dab_587",
   "spec_version": 1,
   "ticket": "P20261113_0708-1-freeze-g4-specs",
+  "params_fix_ticket": "P20261113_1100-1-g4-freeze-specs-params-checkability",
   "frozen_from": "ops/audits/g26_claim_replay.json",
   "goal_sha256": "7a03ec2359e8ba5ddb32f1324fba43ea2d6231cc5e7a08a8722e35a1994f337b",
   "contract_sha256": "1cc22ee9073cd0fe67c2998e541f7e2e34fd71dbac11c5c9220f2cea8d223b2d",
@@ -12,7 +13,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R1 deterministic"
     },
     {
@@ -21,7 +25,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R2 deterministic"
     },
     {
@@ -30,7 +37,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R3 deterministic"
     },
     {
@@ -39,7 +49,10 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R4 deterministic"
     },
     {
@@ -48,9 +61,12 @@
       "deliverable": "answer.txt",
       "verifier": "tag_format",
       "kind": "explicit",
-      "params": {},
+      "params": {
+        "tag": "correlation_coefficient",
+        "value_type": "float"
+      },
       "description": "G4 frozen spec: g26 replay g3_2_fire/R5 deterministic"
     }
   ],
-  "spec_sha256": "ec5f83fa63eb5442e5aeb877f1552c3a1f5c8d90ca7fae907017374636cf8857"
+  "spec_sha256": "defe4b2ed68964cd03e9d970221ed665cc862f79c33d337f90ddf8da242c2875"
 }
