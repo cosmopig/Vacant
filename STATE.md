@@ -560,3 +560,10 @@
 - 已驗證（本輪新跑）：票面驗收 3 項全綠（--check 4 題 OK RC=0／5 passed／3 passed）；獨立負控制 wrong_answer→4 題皆 FAIL≥1 且 PASS 0；獨立正控制（stdlib 重算 657 mean/median/std Close、517 pearson Pclass-Fare=-0.55）→值條目全 PASS，規格可满足非全 FAIL；回歸 8 檔 75 passed（含 frozen anchors 5）；repair.py blob 5147f8c3 未改、extract/checks/run_eval 未改（anchors 綠）；g3 歷史產物未動。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 2 張（1100-2 g4gate dry-run 可檢查性守衛、1100-3 g3 load_frozen_spec 可檢查性過濾）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補。
+
+## 2026-11-13 r1568（票 P20261113_1100-2 done：g4gate dry-run 規格可確定性檢查守衛；0 model calls）
+- 做了什麼：g4gate.g4_dry_run 加可檢查性守衛（_item_checkable＝verifier 在 checks.SUPPORTED_VERIFIERS＋extract._param_problem 無缺陷＋交付物非輸入檔；_task_input_files＝g26 replay∪spec params 資料來源、D2 同源）；每題規格 0 條可檢查＝全空殼→ValueError 逐條缺陷、拒絕宣稱 ready；cells 加 n_checkable（725=4/6、587=5/5、657=8/8、517=5/6）；tests/test_g4_preregistration.py 加負控制（全條目清空 params／置未支援 verifier／交付物＝輸入檔三類皆 fail-closed ValueError、各自重算 spec_sha256 確保守衛在可檢查性非 hash 觸發）＋n_checkable≥1 斷言。票尾結果 1 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 4 passed＋--dry-run「12 cells ready (0 model calls)」RC=0；--fire 未簽核 RC=2；回歸 12 檔 228 passed（requirements/freeze_g4_specs/g4_preregistration/g3_frozen_spec/g3gate/replay_claims/trusted_deliverable/frozen_anchors/extract/checks×3）；git diff 僅 2 檔（+88/-4）；repair.py／run_eval.py／extract.py／checks.py／g25 filing／凍結 4 檔未改（anchors 綠）。commit 7914910ff。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射、發射管線未接線另一步）。
+- DECISION：守衛以「每題 0 條可檢查（全空殼）」為拒發條件而非「任一條目缺參即拒」——凍結 dab_725 4/6、dab_517 5/6 含永久 UNKNOWN 條目仍可满足（r1565/r1566 正負控制已證），若逐條硬拒則票面驗收（真 manifest RC=0）與票面負控制無法同時成立；個別缺陷仍全數計數並寫入 n_checkable 與 fail 訊息。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 1 張（1100-3 g3 load_frozen_spec 可檢查性過濾）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補。
