@@ -122,3 +122,26 @@ def test_specs_module_imports_without_model_channel():
     assert mods <= allowed, f"specs.py 引入了模型通道/外部依賴: {mods}"
     assert callable(S.load_frozen_specs)
     assert issubclass(S.SpecIntegrityError, Exception)
+
+
+def test_load_frozen_specs_accepts_dict_input():
+    """load_frozen_specs 支援傳入已載入的 manifest dict（例如已解析的 JSON 物件），
+    具備相同的密碼學校驗與 fail-closed 守衛，遇篡改拋 SpecIntegrityError。"""
+    from vacant_network.reqloop.specs import SpecIntegrityError, load_frozen_specs
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    out = load_frozen_specs(m)
+    assert set(out) == REAL_TASKS
+
+    # 篡改負控制：在 dict 內改一位 spec_sha256 必須拋 SpecIntegrityError
+    m_tampered = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    orig_sha = m_tampered["specs"]["dab_725"]["spec_sha256"]
+    m_tampered["specs"]["dab_725"]["spec_sha256"] = _flip_hex(orig_sha)
+    with pytest.raises(SpecIntegrityError) as ei:
+        load_frozen_specs(m_tampered)
+    assert ei.value.task_id == "dab_725"
+
+    # 無 specs 鍵負控制
+    with pytest.raises(SpecIntegrityError) as ei2:
+        load_frozen_specs({"v": 1, "tasks": ["dab_725"]})
+    assert "specs" in str(ei2.value)
+
