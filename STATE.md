@@ -534,3 +534,10 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b「還沒跑完」；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、r1556 已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
 - DECISION：票面「改前此命令會報 unrecognized arguments」不成立——argon 已先行實作（57bb13d7d 為 HEAD 祖先）；不退回，改補票面剩餘缺口（票面測試名／reason 碼／(c) 未知 verifier 負控制），實際狀態如實註記於票尾 3 行與 commit 訊息。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 空→規劃者依 11-13 §5 補票；輪頭一次讀 CI 三分支。
+
+## 2026-11-13 r1560（票 P20261113_0948-1 done：load_frozen_spec 補 spec_sha256 自校驗 fail-closed＋扁平 items 篡改負控制；0 model calls）
+- 做了什麼：g3.py::load_frozen_spec 在 goal/contract hash 檢查後，req_set.spec_sha256 非空→verify_self_hash()，not ok 且非 unbound→ValueError「spec_sha256 自校驗失敗…拒發」；未綁定（空）＝舊規格照舊行為不檢查；tests/test_reqloop_g3_frozen_spec.py＋1（dab_725 items[0].quote 改 1 字、保留原 spec_sha256→必拋該 ValueError）。票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 6 passed（改前 5 passed＋新負控制；舊 g3.py 下新測試 FAILED＝漏洞實證、非自證）；回歸 requirements＋freeze_g4_specs＋g4_preregistration＋g3＋g3gate＋replay_claims 86 passed；git diff 僅 2 檔＋25（票面 ≤25 行／2 檔）；commit 20b5b675e。
+- 未驗證：CI 裁決（輪首 auto/qwen27b「還沒跑完」；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
+- DECISION：自校驗置於 goal/contract 檢查之後——goal 篡改測試的 raw 快照含 goal_sha256，若先跑自校驗會誤報 spec_sha256 原因碼（既有測試紅）；票面「from_dict 之後」仍滿足。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、凍結 4 檔＋g25 filing 未改、0 model calls、未發射。下一步：open/ 剩 2 張（0948-2 g4gate dry-run＋發射控制、0948-3 D1 replay --json）→doing/ 取票照做；open/ 少於 3 張由規劃者補。
