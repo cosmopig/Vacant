@@ -580,3 +580,9 @@
 - 已驗證（本輪新跑）：票面驗收 2 項全綠（pytest tests/test_g4_preregistration.py→5 passed RC=0（改前 4）／--dry-run「12 cells ready (0 model calls)」RC=0）；--plan JSON 12 格 RC=0；--fire 未簽核 RC=2（fail-closed 未破）；回歸 9 檔 115 passed（含 frozen anchors）；git diff 純加法 2 檔 +65/-0；manifest human_signoff 仍 null。commit cb38cc438。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（0 發射）；1206-2／1206-3 未動。
 - 紅線＋下一步：無 push、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 2 張（1206-2 g3 run_g4 管線分派、1206-3 d1 replay 驗證凍結規格）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補票。
+
+## 2026-11-13 r1571（票 P20261113_1206-2 收口：g3 run_g4 發射入口＋Mock 驗證；0 model calls）
+- 做了什麼：本票實作（g3.py::run_g4＝load_g4_manifest→decide_g4_launch fail-closed→臂合規＋pi_channel 檢查→12 格 load_frozen_spec 0 擷取→g4_result.json；兩測含 MockChannel 斷言「擷取呼叫即炸」）已於 r1570 auto-commit 2dfe7b74d 在樹；本輪全面驗收後票尾 3 行結果→mv done/（doing/ 清空）。
+- 已驗證（本輪新跑）：票面驗收 pytest tests/test_reqloop_g3_frozen_spec.py -k test_run_g4→2 passed（RC 0）；回歸 19 passed（frozen_spec/anchors/g4_prereg）＋80 passed（g3/g3gate/replay_claims/freeze_g4_specs）；g4gate --dry-run「12 cells ready (0 model calls)」RC=0、--fire RC=2（fail-closed 未破）；manifest human_signoff 仍 null；frozen anchors 綠（repair/run_eval/extract/checks 未改）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報、不代修）；G4 真發射仍須人類簽核（本輪 0 發射）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls。下一步：open/ 剩 1 張（P20261113_1206-3 d1 replay 驗證凍結規格）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補票。
