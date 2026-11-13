@@ -22,6 +22,7 @@ from vacant_network.reqloop.g4gate import (
     load_g4_manifest,
 )
 from vacant_network.reqloop.requirements import RequirementSet
+from vacant_network.reqloop.specs import SpecIntegrityError
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
 MANIFEST = REPO / "ops" / "reqloop" / "g4" / "manifest.json"
@@ -147,3 +148,19 @@ def test_build_g4_execution_plan(tmp_path):
     goal.write_text(("x" if orig[0] != "x" else "y") + orig[1:], encoding="utf-8")
     with pytest.raises(ValueError, match="dab_657.*雜湊不符"):
         build_g4_execution_plan(m, tasks_dir=tasks_dir2)
+
+
+def test_build_g4_execution_plan_spec_sha_tamper_fails_closed(tmp_path):
+    """負控制（票 P20261113_1507-2、11-13 定案 §2 D4）：manifest 的 spec_sha256 被篡改
+    → `build_g4_execution_plan` 經 specs.load_frozen_specs 統一核驗口 fail-closed，
+    拋 SpecIntegrityError（點名 dab_587）；不得靜默放行或降級為 dry-run 通過。"""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert m["specs"]["dab_587"]["spec_sha256"] != "0" * 64  # 前置：未篡改
+    tampered = copy.deepcopy(m)
+    tampered["specs"]["dab_587"]["spec_sha256"] = "0" * 64  # 篡改 manifest 綁定值
+    mpath = tmp_path / "manifest_tampered.json"
+    mpath.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
+    tampered["_manifest_path"] = str(mpath)  # 讓統一核驗口讀到這份被篡改的 manifest
+    with pytest.raises(SpecIntegrityError) as exc:
+        build_g4_execution_plan(tampered)
+    assert exc.value.task_id == "dab_587"

@@ -23,6 +23,7 @@ from typing import Any, Sequence
 from .checks import SUPPORTED_VERIFIERS
 from .extract import _param_problem
 from .requirements import RequirementItem, RequirementSet
+from .specs import SpecIntegrityError, load_frozen_specs
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g4" / "manifest.json"
@@ -128,6 +129,10 @@ def build_g4_execution_plan(manifest: dict[str, Any] | None = None,
     組裝每格 task_id/arm/workspace/spec_file/n_checkable；任一題缺工作區檔案或雜湊不符→ValueError fail-closed。"""
     if manifest is None:
         manifest = load_g4_manifest(DEFAULT_MANIFEST)
+    # D4（11-13 定案 §2）：統一 spec_sha256 核驗口——逐檔對 manifest 綁定值密碼學校驗；
+    # 任何不符／缺檔即 SpecIntegrityError fail-closed（不返回部分結果），先於 g4_dry_run。
+    # 傳入 dict 可用 `_manifest_path` 點名其來源檔（負控制用）；無則以 DEFAULT_MANIFEST 為準。
+    load_frozen_specs(manifest.get("_manifest_path") or DEFAULT_MANIFEST)
     if tasks_dir is None:
         tasks_dir = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
     dry = g4_dry_run(manifest)
@@ -179,7 +184,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if a.plan:
         try:
             plan = build_g4_execution_plan(manifest)
-        except (OSError, ValueError, KeyError, json.JSONDecodeError) as e:
+        except (SpecIntegrityError, OSError, ValueError, KeyError, json.JSONDecodeError) as e:
             print(f"G4 PLAN FAIL: {e}")
             return 1
         print(json.dumps(plan, ensure_ascii=False, indent=2))
