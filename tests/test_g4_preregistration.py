@@ -7,6 +7,8 @@ vacant_network.reqloop.g4gate；本測試改由產品模組引入（不再內嵌
 """
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
 import pathlib
 
@@ -63,3 +65,38 @@ def test_dry_run_zero_model_calls():
     assert out["status"] == "ready" and out["n_cells"] == 12
     assert {(c["task_id"], c["arm"]) for c in out["cells"]} == {(t, a) for t in m["tasks"] for a in m["arms"]}
     assert out["model_calls"] == 0
+    # 票 P20261113_1100-2：cells 帶 n_checkable（每題 ≥1 條可確定性檢查）
+    assert all(isinstance(c["n_checkable"], int) and c["n_checkable"] >= 1 for c in out["cells"])
+
+
+def test_dry_run_fails_closed_on_shell_specs(tmp_path):
+    """負控制（票 P20261113_1100-2）：凍結規格全空殼時 g4_dry_run 必須 fail-closed 拋 ValueError。
+
+    三類缺陷各一個：全部條目清空 params／全部條目置未支援 verifier／全部條目交付物＝輸入檔。
+    每類都重算 spec_sha256（同 RequirementSet 口徑），確保守衛在「可檢查性」而非「hash」上觸發。
+    標準乾跑 RC0＋0 model calls 由 test_dry_run_zero_model_calls 與 CLI 驗收覆蓋。"""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    spec_path = REPO / m["specs"]["dab_587"]["file"]
+    base = json.loads(spec_path.read_text(encoding="utf-8"))
+
+    def corrupt(mutate) -> dict:
+        raw = copy.deepcopy(base)
+        mutate(raw)
+        body = {k: v for k, v in raw.items() if k != "spec_sha256"}
+        raw["spec_sha256"] = hashlib.sha256(
+            json.dumps(body, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        p = tmp_path / "dab_587_shell.json"
+        p.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+        m2 = copy.deepcopy(m)
+        m2["specs"]["dab_587"] = {"file": str(p), "spec_sha256": raw["spec_sha256"],
+                                 "n_items": len(raw["items"])}
+        return m2
+
+    with pytest.raises(ValueError, match="全空殼"):
+        g4_dry_run(corrupt(lambda raw: [it.update({"params": {}}) for it in raw["items"]]))
+    with pytest.raises(ValueError, match="unknown_verifier"):
+        g4_dry_run(corrupt(lambda raw: [it.update({"verifier": "not_a_verifier"}) for it in raw["items"]]))
+    with pytest.raises(ValueError, match="deliverable_is_input_file"):
+        g4_dry_run(corrupt(lambda raw: [
+            it.update({"deliverable": "20170413_000000_group_statistics.csv"}) for it in raw["items"]]))

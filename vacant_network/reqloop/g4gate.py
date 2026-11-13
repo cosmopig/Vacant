@@ -3,7 +3,8 @@ vacant_network.reqloop.g4gate
 G4 預註冊離線檢驗與發射門控制（票 P20261113_0948-2；11-13 人類定案第 4 條：發射前須人類點頭）。
 只做離線機械複核與簽核門控，**不發起任何真模型呼叫（0 model calls）、不發射**：
 - `load_g4_manifest(path)`：讀取並驗證 manifest（schema、4 題、3 臂、12 格、規格檔路徑）；
-- `g4_dry_run(manifest)`：4 份凍結規格存在、`spec_sha256` 自校驗吻合（複用 `RequirementSet.verify_self_hash`）；
+- `g4_dry_run(manifest)`：4 份凍結規格存在、`spec_sha256` 自校驗吻合（複用 `RequirementSet.verify_self_hash`）、
+  可檢查性守衛（票 P20261113_1100-2：每題規格 ≥1 條可確定性檢查條目，0 條＝空殼→ValueError fail-closed）；
 - `decide_g4_launch(manifest)`：`approval_required == True` 且 `human_signoff is None` → 拋 `LaunchRefused`（fail-closed）；
 - CLI：`--dry-run`（RC 0）／`--fire`（未簽核 RC 2；0 model calls）。
 
@@ -18,10 +19,13 @@ import json
 import pathlib
 from typing import Any, Sequence
 
-from .requirements import RequirementSet
+from .checks import SUPPORTED_VERIFIERS
+from .extract import _param_problem
+from .requirements import RequirementItem, RequirementSet
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g4" / "manifest.json"
+G26_REPLAY = REPO / "ops" / "audits" / "g26_claim_replay.json"
 EXPECTED_TASKS = ("dab_725", "dab_587", "dab_657", "dab_517")
 EXPECTED_ARMS = ("native_pi", "reqlist_only", "full_rloop")
 _EXPECTED_KEYS = ("v", "experiment", "status", "approval_required", "human_signoff",
@@ -53,8 +57,44 @@ def load_g4_manifest(path: str | pathlib.Path) -> dict[str, Any]:
     return m
 
 
+def _task_input_files(task_id: str, items: Sequence[RequirementItem]) -> set[str]:
+    """該任務的輸入檔（檔名正規化）：g26 replay（D2 可信交付物同源）∪ 規格 params 引用的資料來源。"""
+    names: set[str] = set()
+    try:
+        claims = json.loads(G26_REPLAY.read_text(encoding="utf-8"))["claims"]
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        raise ValueError(f"{task_id}: g26 replay 不可讀、無法判定輸入檔（fail-closed）") from e
+    for c in claims:
+        if c.get("task_id") == task_id:
+            names.update(pathlib.Path(str(f)).name for f in c.get("input_files", ()))
+    for it in items:
+        p = it.params if isinstance(it.params, dict) else {}
+        names.update(
+            pathlib.Path(str(p[k])).name for k in ("data_file", "input_csv", "input_json")
+            if isinstance(p.get(k), str) and p.get(k))
+    return names
+
+
+def _item_checkable(item: RequirementItem, input_files: set[str]) -> str | None:
+    """單條需求非「確定性可檢查」的機器可讀原因；None＝可檢查（checks.run_requirement_checks 非永久 UNKNOWN）。"""
+    if item.unverified:
+        return "unverified_flag"
+    if item.verifier not in SUPPORTED_VERIFIERS:
+        return f"unknown_verifier:{item.verifier or 'missing'}"
+    problem = _param_problem(item.verifier, item.params)
+    if problem is not None:
+        return problem
+    if pathlib.Path(item.deliverable).name in input_files:
+        return f"deliverable_is_input_file:{item.deliverable}"
+    return None
+
+
 def g4_dry_run(manifest: dict[str, Any]) -> dict[str, Any]:
-    """發射前 dry-run：4 份凍結規格存在＋`spec_sha256` 自校驗吻合（fail-closed）；0 model calls。"""
+    """發射前 dry-run：4 份凍結規格存在＋`spec_sha256` 自校驗吻合＋可檢查性守衛（fail-closed）；0 model calls。
+
+    守衛（P20261113_1100-2）：每題規格須 ≥1 條可確定性檢查條目（verifier 在白名單＋無參數缺陷＋
+    交付物非輸入檔）；0 條＝空殼規格→ValueError，拒絕宣稱 ready。個別條目缺參照 UNKNOWN 計數、
+    不單獨拒發（凍結規格含永久 UNKNOWN 條目仍可满足——r1565/r1566 正負控制已證）。"""
     cells = []
     for task in manifest["tasks"]:
         entry = manifest["specs"][task]
@@ -64,8 +104,15 @@ def g4_dry_run(manifest: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"{task}: frozen spec 自校驗失敗（{why}；fail-closed）")
         if spec_set.spec_sha256 != entry["spec_sha256"]:
             raise ValueError(f"{task}: manifest 與規格 spec_sha256 不符（fail-closed）")
+        input_files = _task_input_files(task, spec_set.items)
+        reasons = {it.id: _item_checkable(it, input_files) for it in spec_set.items}
+        n_checkable = sum(1 for r in reasons.values() if r is None)
+        if n_checkable == 0:
+            detail = "; ".join(f"{i}:{r}" for i, r in sorted(reasons.items()))
+            raise ValueError(f"{task}: 凍結規格全空殼（0/{len(spec_set.items)} 可檢查；fail-closed）：{detail}")
         for arm in manifest["arms"]:
-            cells.append({"task_id": task, "arm": arm, "n_items": len(spec_set.items)})
+            cells.append({"task_id": task, "arm": arm, "n_items": len(spec_set.items),
+                          "n_checkable": n_checkable})
     return {"status": "ready", "n_cells": len(cells), "cells": cells, "model_calls": 0}
 
 
