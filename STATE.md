@@ -628,3 +628,9 @@
 - 已驗證（本輪新跑）：票面驗收 1 passed；test_replay_claims.py 17 passed；--json deterministic=66 不變（≥30 門）、dab_587 unverified=3、reason_distribution 點名 unknown_verifier:missing=3；--gate false_pass=0 VERDICT: PASS；--selftest PASS（K0 baseline_match True）；anchors 5 passed（repair/run_eval/extract/checks 4 凍結檔未動）；git diff 2 檔 32+/1−（產品碼 9 行）。
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有、已上報、不代修）；dab_587 raw fields 回補＝規劃者裁決（維持 UNKNOWN、不補造）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）。open/ 3 張（1507-2、1708-1、1708-2）≥3 達標；下一輪 doing/ 取票照做。
+
+## 2026-11-13 r1586（票 P20261113_1507-2 done：D4 g4gate 接入 specs.load_frozen_specs 統一 spec_sha256 核驗；0 model calls）
+- 做了什麼：build_g4_execution_plan 在 g4_dry_run 之前先經 load_frozen_specs 逐檔對 manifest 綁定 spec_sha256 密碼學校驗（D4 統一核驗口、fail-closed）；dict 入參可用 _manifest_path 點名來源檔、無則 DEFAULT_MANIFEST；main --plan 例外列加 SpecIntegrityError；TDD 先紅（改前 ValueError 路徑、非 SpecIntegrityError）後綠；票尾 3 行→mv done/。
+- 已驗證（本輪新跑）：票面驗收 1 passed（RC0）；g4_preregistration＋frozen_specs＋g3_frozen_spec＋frozen_anchors 26 passed；g4gate --dry-run RC0／--fire RC2（human_signoff 仍 null）／--plan RC0；g3 CLI G4 dry-run RC0；git diff 2 檔 23+/1−（≤2 檔≤25 行）。
+- 未驗證：CI 裁決（輪首 qwen 還沒跑完；argon 2 紅／worker 11 紅＝既有、已上報、不代修）；g3.py 未動（票限 ≤2 檔）→其 dict 無 _manifest_path 時統一核驗口以 DEFAULT_MANIFEST 為準（g4_dry_run ValueError 路徑仍 fail-closed）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 2 張（1708-1、1708-2）<3→規劃者依 11-13 §5 補票；下一輪 doing/ 取票照做。
