@@ -1,6 +1,7 @@
 {
   "ticket": "P20261113_0300-1-d1-offline-claim-replay",
-  "generated_at": "2026-11-13T03:24:16+00:00",
+  "mode": "claimed",
+  "generated_at": "2026-11-13T03:59:16+00:00",
   "code_sha": {
     "vacant_network/reqloop/extract.py": "e757aec50c16bc6481cd88545672d50884c83f40",
     "vacant_network/reqloop/checks.py": "f3525b0126788bc8432799a31ab7b50a64c775dc"
@@ -15,6 +16,10 @@
     "total": 76,
     "replayable": 73,
     "deterministic": 0,
+    "deterministic_proven": 0,
+    "deterministic_content": 0,
+    "deterministic_content_proven": 0,
+    "deterministic_format": 0,
     "unverified": 73,
     "missing_raw": 3,
     "missing_raw_claims": [
@@ -27,6 +32,10 @@
         "saved_verifier": null,
         "replay_status": "missing_raw",
         "replay_reason": "raw_fields_not_saved",
+        "confidence": null,
+        "check_class": "unknown",
+        "trusted_deliverable": null,
+        "trusted_source": null,
         "user_text_chars": 1669,
         "input_files": [
           "auto-mpg.csv"
@@ -42,6 +51,10 @@
         "saved_verifier": null,
         "replay_status": "missing_raw",
         "replay_reason": "raw_fields_not_saved",
+        "confidence": null,
+        "check_class": "unknown",
+        "trusted_deliverable": null,
+        "trusted_source": null,
         "user_text_chars": 1669,
         "input_files": [
           "auto-mpg.csv"
@@ -57,6 +70,10 @@
         "saved_verifier": "rowset_filter",
         "replay_status": "missing_raw",
         "replay_reason": null,
+        "confidence": null,
+        "check_class": "content",
+        "trusted_deliverable": null,
+        "trusted_source": null,
         "user_text_chars": 1142,
         "input_files": [
           "titanic.csv"
@@ -81,12 +98,12 @@
       "pearson": 2,
       "std_col": 2
     },
+    "execution_controls": "not_possible: params/quote 0/76 saved → 無法編譯成 RequirementItem 跑 checks；錯值→FAIL 控制須在 D2/D3 單元測試用真實資料做",
     "baseline": {
       "taxonomy_deterministic": 2,
-      "replay_deterministic_within_replayable": 0,
       "deterministic_in_missing_raw": 2,
       "baseline_match": true,
-      "explanation": "replayable=73 集合內 deterministic=0：當前代碼（extract.py/checks.py 凍結 blob）下，原本 unverified 者無一翻成 deterministic（與原判時同代碼）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。凍結代碼下 replayable 集合內 deterministic=0。"
     }
   },
   "claims": [
@@ -99,6 +116,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:removed_outliers_count",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1182,
       "input_files": [
         "imp.score.ldlr.metabolome.csv"
@@ -113,6 +134,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:filtered_rowset",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1182,
       "input_files": [
         "imp.score.ldlr.metabolome.csv"
@@ -127,6 +152,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -141,6 +170,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -155,6 +188,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -169,6 +206,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:答案以 @mean_cases[正整數] 標籤格式呈現",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -183,6 +224,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -197,6 +242,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:ApplicantIncome 與 LoanAmount 的 Pearson 相關係數",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -211,6 +260,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:Pearson 相關係數（線性關係強度與方向）",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -225,6 +278,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:計算前排除 ApplicantIncome 或 LoanAmount 任一欄為缺失值的列",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -239,6 +296,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:相關係數四捨五入至小數點後兩位",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -253,6 +314,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:答案以 @correlation_coefficient[corr_coeff] 標籤格式輸出",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -267,6 +332,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:資料來源檔案 data/test_Y3wMUE5_7gLdaTN.csv",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -281,6 +350,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:positive_diffsel 與 negative_diffsel 兩欄的 Pearson 相關係數 (r)",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -295,6 +368,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:以 @correlation_coefficient[r_value] 標籤格式輸出的相關係數",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -309,6 +386,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:計算前不得移除離群值或修改資料",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -323,6 +404,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:計算須使用全部資料點",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -337,6 +422,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:資料來源檔案 data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -351,6 +440,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:analysis",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -365,6 +458,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:analysis",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -379,6 +476,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -393,6 +494,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:analysis",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -407,6 +512,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -421,6 +530,10 @@
       "saved_verifier": null,
       "replay_status": "missing_raw",
       "replay_reason": "raw_fields_not_saved",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -435,6 +548,10 @@
       "saved_verifier": null,
       "replay_status": "missing_raw",
       "replay_reason": "raw_fields_not_saved",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -449,6 +566,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中的答案項目 @correlation_coefficient[...]",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -463,6 +584,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中答案項目的標籤格式",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -477,6 +602,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unknown_verifier:missing",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -491,6 +620,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unknown_verifier:missing",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -505,6 +638,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unknown_verifier:missing",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -519,6 +656,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @mean_close[...] 標籤項目",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -533,6 +674,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -547,6 +692,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @median_close[...] 標籤項目",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -561,6 +710,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:median_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -575,6 +728,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @std_close[...] 標籤項目",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -589,6 +746,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:std_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -603,6 +764,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:工作區根目錄存在 answer.txt，且包含 3 個 @name[value] 項目",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -617,6 +782,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:資料檔 data/YAHOO-BTC_USD_D.csv 保持未修改",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -631,6 +800,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:pearson",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -645,6 +818,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:pearson",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -659,6 +836,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:correlation_pclass_fare",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -673,6 +854,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:correlation_pclass_fare",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -687,6 +872,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:correlation_pclass_fare",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -701,6 +890,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -715,6 +908,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -729,6 +926,10 @@
       "saved_verifier": "answer_kv",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中六個 @name[value] 項目（mean1, median1, mean2, median",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -743,6 +944,10 @@
       "saved_verifier": "group_aggregate",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:依 displacement 出現次數選出前三大值",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -757,6 +962,10 @@
       "saved_verifier": "rowset_filter",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:各 displacement 值對應列之 mpg 平均數與中位數",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -771,6 +980,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:六個數值皆四捨五入至小數點後兩位",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -785,6 +998,10 @@
       "saved_verifier": "answer_kv",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:工作區根目錄的 answer.txt 檔案",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -799,6 +1016,10 @@
       "saved_verifier": "answer_kv",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:data/auto-mpg.csv 保持未修改",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -813,6 +1034,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @correlation_coefficient[...] 項目",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -827,6 +1052,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:平均等待時間由 HH:MM:SS 字串轉換為秒（整數）",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -841,6 +1070,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數並四捨五入至小數三位",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -855,6 +1088,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:使用指定資料檔 data/20170413_000000_group_statistics.csv",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -869,6 +1106,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:不得修改輸入資料檔",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -883,6 +1124,10 @@
       "saved_verifier": "plain_recomputed",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -897,6 +1142,10 @@
       "saved_verifier": "plain_recomputed",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:median_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -911,6 +1160,10 @@
       "saved_verifier": "plain_recomputed",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:std_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -925,6 +1178,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中 @mean_close 項的格式",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -939,6 +1196,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中 @median_close 項的格式",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -953,6 +1214,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 中 @std_close 項的格式",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -967,6 +1232,10 @@
       "saved_verifier": "plain_recomputed",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -981,6 +1250,10 @@
       "saved_verifier": "plain_recomputed",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -995,6 +1268,10 @@
       "saved_verifier": "answer_kv",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:correlation_pclass_fare 的相關係數值",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1009,6 +1286,10 @@
       "saved_verifier": "answer_kv",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1023,6 +1304,10 @@
       "saved_verifier": "rowset_filter",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:計算前排除 Pclass 或 Fare 為 null 的列",
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1037,6 +1322,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:最終輸出四捨五入至小數點後 2 位",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1051,6 +1340,10 @@
       "saved_verifier": "tag_format",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:答案以 @correlation_pclass_fare[浮點數] 格式呈現",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1065,6 +1358,10 @@
       "saved_verifier": "answer_kv",
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:answer.txt 檔案（工作區根目錄）",
+      "confidence": null,
+      "check_class": "format",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1079,6 +1376,10 @@
       "saved_verifier": "rowset_filter",
       "replay_status": "missing_raw",
       "replay_reason": null,
+      "confidence": null,
+      "check_class": "content",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1093,6 +1394,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:分析時僅使用出現次數最多的三個 displacement 值",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1107,6 +1412,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:每個 displacement 值分別計算 mpg 的平均與中位數，僅使用該 displacement 值的列",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1121,6 +1430,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:所有結果四捨五入至小數點後兩位",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1135,6 +1448,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:最終答案寫入工作區根目錄的 answer.txt",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1149,6 +1466,10 @@
       "saved_verifier": null,
       "replay_status": "unverified",
       "replay_reason": "deliverable_not_in_request:不得修改輸入資料檔 data/auto-mpg.csv",
+      "confidence": null,
+      "check_class": "unknown",
+      "trusted_deliverable": null,
+      "trusted_source": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
