@@ -51,8 +51,8 @@ def _contract_path(args) -> pathlib.Path:
         return pathlib.Path(args.contract)
     found = C.find(pathlib.Path.cwd())
     if found is None:
-        raise SystemExit("vacant: no contract found (looked for .vacant/contract.json up to the "
-                         "git root). Create one with `vacant contract init --task <id>`.")
+        raise C.ContractError(["no contract found (looked for .vacant/contract.json up to the "
+                               "git root). Create one with `vacant contract init --task <id>`."])
     return found
 
 
