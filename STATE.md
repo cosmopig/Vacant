@@ -548,3 +548,9 @@
 - 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射；g4gate 核准後發射管線未接線、另一步授權）。
 - DECISION：g4_dry_run 複用 RequirementSet.verify_self_hash（r1558 產品原生自校驗）而非自造 hash——同一把尺；--fire 未簽核輸出固定字串「G4 FIRE REFUSED: human_signoff is null」對票面驗收原文（例外訊息完整句留在 LaunchRefused）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/ 剩 1 張（0948-3 D1 replay --json）→doing/ 取票照做；open/<3 張→規劃者依 11-13 §5 補。
+
+## 2026-11-13 r1562（票 P20261113_0948-3 done：D1 重播器 --json 機器可讀輸出＋by_task 按任務摘要；0 model calls）
+- 做了什麼：ops/reqloop/extract/replay_claims.py 加 `--json`（K1 trusted 統計 {"totals","by_task","deterministic"} 以 json.dumps indent=2 ensure_ascii=False 印 stdout、RC 0、不寫 OUT）＋ summarize() 內建 by_task（每題 total/deterministic/unverified/missing_raw）；tests/test_replay_claims.py 加 test_replay_claims_json_flag（RC0＋json.loads＋deterministic=66 int＋by_task 分組合計 76＋每題分部和恒等）。票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 `python3 ops/reqloop/extract/replay_claims.py --json`→RC=0、json.loads 成功、"deterministic": 66（int）、by_task 8 題（dab_035/055/105/218/517/587/657/725）合計 76（dab_725 total=18/det=14/mraw=2）；tests/test_replay_claims.py 10 passed；回歸 requirements+freeze_g4_specs+g4_preregistration+g3_frozen_spec+g3gate+trusted_deliverable 69 passed；git diff 僅 2 檔＋30/-1（票面 ≤40 行／≤2 檔）；repair.py／run_eval.py／extract.py／checks.py／g25 filing／g26 歷史報告未改（git status 僅 2 檔）。commit 19c97a5db。
+- 未驗證：CI 裁決（輪首 auto/qwen27b「還沒跑完」；argon 2 紅／worker 11 紅＝既有 freeze_check/now_redline 系、已上報規劃者、不代修）；下游管線未接線（--json 輸出已可直接 json 消費、接線另一步）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：open/＋doing/ 皆空→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器）；G4 發射仍須人類簽核。
