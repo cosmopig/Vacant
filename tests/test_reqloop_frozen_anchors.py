@@ -2,7 +2,8 @@
 
 背景：审查指示#3（2026-11-08）要求
   - repair.py  冻结在 2,795 行、git blob 5147f8c3（不得为特定题新增修复规则/局部 regex）；
-  - extract.py 白名单防线不变：1,217 行、git blob e757aec5。
+  - extract.py 基线：e757aec5 / 1,217 行（G2.5 历史基线）→ 2026-11-13 裁決 §3 受控解冻，
+    D2 加法落地后重立为 b502741b / 1,295 行（见 EXTRACT 锚；再改须重立并留记录）。
 此前该约束只靠每轮人工 blob 核对（STATE.md 的「錨點」行）落地，没有任何一条指令能在
 文件被改动时直接变红。本文件把锚点固化成测试：
 
@@ -28,10 +29,15 @@ REPAIR = {
     "blob": "5147f8c3ea1b5e9ee50531aca0382971e912c243",
     "lines": 2795,  # wc -l 口径（换行字节数）
 }
+# 2026-11-13 人類裁決 §3「受控解凍」：extract.py 只准加法、走新參數、預設值＝舊行為；
+# gate＝run_eval.py --all 三門數字與 g25 filing 一模一樣＋結果寫 ops/audits/g26_*.json。
+# r1546（本輪，票 P20261113_0300-2 D2）：D2 加法（trusted_deliverable 新參數）落地後
+# 重立此錨——e757aec5…/1217 行（G2.5 歷史基線）→ b502741b…/1295 行。
+# 再改 extract.py 仍須重立本錨並留記錄（受控≠自由改動）。
 EXTRACT = {
     "path": REPO_ROOT / "vacant_network" / "reqloop" / "extract.py",
-    "blob": "e757aec50c16bc6481cd88545672d50884c83f40",
-    "lines": 1217,
+    "blob": "b502741bcd290d1bfefc257986be838d6356d4f3",
+    "lines": 1295,
 }
 
 
@@ -74,25 +80,49 @@ def test_guard_detects_tampered_copy(tmp_path: pathlib.Path):
     assert any("行数漂移" in s for s in v), "守卫未检出行数漂移"
 
 
-# r1261（2026-11-08）：审查指示#3 —— G2.5 备案的 code sha256 必须与 repo 实际文件
-# 100% 吻合（extract.py 51abfec3 / checks.py c7589c61 / run_eval.py 332cd324）。
-# 此前同样只靠每轮人工重算（r1260 手算 6 sha 全 MATCH）；本节把「code」段固化成测试，
-# 任何一份文件被改动而备案未同步更新即直接变红。
-# 只覆盖 `code` 段（路径全部 repo 相对）；`sources` 段指向 argon worktree 的库外产物，
-# 仍每轮人工重算（repo 测试不依赖另一个 worktree 的路径）。
+# r1261（2026-11-08）：审查指示#3 —— G2.5 备案的 code sha256 与 repo 实际文件吻合。
+# r1546（2026-11-13，人類裁決 §3＋票 P20261113_0300-2「不要做」）：g25 filing 不改——
+# 它是 G2.5 历史备案（extract.py 条目记解冻前基线 51abfec3…）。本节语义改为：
+# (1) filing 档本身逐位冻结（FILING_SHA256）；(2) 仍冻结的 checks.py/run_eval.py 现行
+# sha 与备案吻合；(3) filing 的 extract.py 条目仍记解冻前历史基线。extract.py 的
+# 「现行」基线由上方 EXTRACT 锚把守——分工不重叠（同 now_redline 原则）。
 FILING = REPO_ROOT / "ops" / "audits" / "g25_all_gates_filing.json"
+FILING_SHA256 = "6e5afb46570de1191fff702c9db66a3f89824de2f7313eb47e5cbc25c8ff87e5"
+LIVE_CODE_FILES = (
+    "vacant_network/reqloop/checks.py",
+    "ops/reqloop/extract/run_eval.py",
+)
+HISTORICAL_EXTRACT_SHA256 = (
+    "51abfec319d21813d7223bc5aa48417417680ba09aa0bd4d097b2c49ea223da7"
+)
 
 
 def filing_code_violations(filing_path: pathlib.Path, root: pathlib.Path) -> list[str]:
-    """返回「备案 code sha256 vs repo 实际文件」的违规清单；空列表＝100% 吻合。"""
+    """g25 filing 守卫违规清单（2026-11-13 裁決後语义）；空列表＝无违规。
+
+    (1) filing 档本身与 FILING_SHA256 逐位吻合（g25 filing 不改，它是历史备案）；
+    (2) 仍冻结的 checks.py/run_eval.py 现行 sha 与备案记录吻合；
+    (3) filing 的 extract.py 条目仍记解冻前历史基线（历史备案未被改写）。
+    extract.py 现行基线由 EXTRACT 锚把守，不在此尺。只读，不写任何共享状态。"""
     if not filing_path.is_file():
         return [f"备案不存在: {filing_path}"]
-    filing = json.loads(filing_path.read_text(encoding="utf-8"))
+    raw = filing_path.read_bytes()
+    got_filing = hashlib.sha256(raw).hexdigest()
+    out: list[str] = []
+    if got_filing != FILING_SHA256:
+        out.append(
+            f"filing 档本身漂移: 期望 {FILING_SHA256[:8]}, 实际 {got_filing[:8]}"
+            "（11-13 裁決 §3：g25 filing 不改——它是历史备案，不是可更新的现行记录）"
+        )
+    filing = json.loads(raw)
     code = filing.get("code", {})
     if not code:
-        return ["备案没有 code 段（schema 变更？）"]
-    out: list[str] = []
-    for rel, spec in code.items():
+        return out + ["备案没有 code 段（schema 变更？）"]
+    for rel in LIVE_CODE_FILES:
+        spec = code.get(rel)
+        if not isinstance(spec, dict):
+            out.append(f"备案 code 段缺 {rel}")
+            continue
         p = root / rel
         if not p.is_file():
             out.append(f"文件不存在: {rel}")
@@ -101,28 +131,48 @@ def filing_code_violations(filing_path: pathlib.Path, root: pathlib.Path) -> lis
         got = hashlib.sha256(p.read_bytes()).hexdigest()
         if got != want:
             out.append(f"{rel} sha 漂移: 期望 {want[:8]}, 实际 {got[:8]}")
+    ex = code.get("vacant_network/reqloop/extract.py")
+    if not isinstance(ex, dict) or str(ex.get("sha256", "")) != HISTORICAL_EXTRACT_SHA256:
+        out.append(
+            "filing 的 extract.py 条目须仍记 G2.5 解冻前历史基线 "
+            f"{HISTORICAL_EXTRACT_SHA256[:8]}（历史备案不可改写；现行基线见 EXTRACT 锚）"
+        )
     return out
 
 
 def test_g25_filing_code_hashes_match_repo():
-    """绿灯：备案 code 三份文件当前与 repo 100% 吻合（改动即红；解冻须显式核准并更新备案）。"""
+    """绿灯（2026-11-13 裁決後语义）：g25 filing 档逐位不改（历史备案）；仍冻结的
+    checks.py/run_eval.py 现行与备案 100% 吻合；filing 的 extract.py 条目仍记解冻前
+    基线。extract.py 现行基线由 test_extract_py_boundary_is_frozen 把守。"""
     v = filing_code_violations(FILING, REPO_ROOT)
     assert v == [], (
-        "G2.5 备案 code hash 须与 repo 100% 吻合（审查指示#3；"
-        "改 extract.py/checks.py/run_eval.py 须显式核准并同步备案）: "
+        "g25 filing 须逐位不改（11-13 裁決 §3）且仍冻结档（checks.py/run_eval.py）"
+        "现行与备案 100% 吻合: "
     ) + "; ".join(v)
 
 
 def test_filing_guard_detects_drift(tmp_path: pathlib.Path):
-    """负控制：code 任一文件被改必须被守卫判漂移；未改的不得误判。"""
+    """负控制（2026-11-13 裁決後语义）：
+    (a) 仍冻结的 checks.py 被改 → 必须判漂移；未改的 run_eval.py 不得误判；
+    (b) filing 档本身被改（历史备案改写）→ 必须判「filing 档本身漂移」。
+    对临时 repo 操作，不碰真档。"""
     fake_root = tmp_path / "repo"
-    for rel in ("vacant_network/reqloop/extract.py", "vacant_network/reqloop/checks.py",
-                "ops/reqloop/extract/run_eval.py"):
+    for rel in LIVE_CODE_FILES:
         dst = fake_root / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes((REPO_ROOT / rel).read_bytes())
-    extract = fake_root / "vacant_network" / "reqloop" / "extract.py"
-    extract.write_bytes(extract.read_bytes() + "# 未核准的修改\n".encode("utf-8"))
+
+    # (a) 改 checks.py → 必须红；run_eval.py 未改不得误判
+    checks = fake_root / "vacant_network" / "reqloop" / "checks.py"
+    checks.write_bytes(checks.read_bytes() + "# 未核准的修改\n".encode("utf-8"))
     v = filing_code_violations(FILING, fake_root)
-    assert any("extract.py" in s and "sha 漂移" in s for s in v), f"守卫未检出 extract.py 漂移: {v}"
-    assert not any("checks.py" in s for s in v), f"checks.py 未改却被误判: {v}"
+    assert any("checks.py" in s and "sha 漂移" in s for s in v), f"守卫未检出 checks.py 漂移: {v}"
+    assert not any("run_eval.py" in s for s in v), f"run_eval.py 未改却被误判: {v}"
+
+    # (b) filing 档本身被改 → 必须红（历史备案改写）
+    f2 = tmp_path / "filing.json"
+    d = json.loads(FILING.read_text(encoding="utf-8"))
+    d["code"]["vacant_network/reqloop/checks.py"]["sha256"] = "0" * 64
+    f2.write_text(json.dumps(d), encoding="utf-8")
+    v2 = filing_code_violations(f2, REPO_ROOT)
+    assert any("filing 档本身漂移" in s for s in v2), f"filing 档被改须被点名: {v2}"

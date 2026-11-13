@@ -1,6 +1,6 @@
 {
   "ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
-  "generated_at": "2026-11-13T04:35:41+00:00",
+  "generated_at": "2026-11-13T04:53:00+00:00",
   "code_sha": {
     "vacant_network/reqloop/extract.py": "b502741bcd290d1bfefc257986be838d6356d4f3",
     "vacant_network/reqloop/checks.py": "f3525b0126788bc8432799a31ab7b50a64c775dc"
