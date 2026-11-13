@@ -104,6 +104,19 @@ def test_dry_run_fails_closed_on_shell_specs(tmp_path):
             it.update({"deliverable": "20170413_000000_group_statistics.csv"}) for it in raw["items"]]))
 
 
+def test_g4_dry_run_tampered_spec_fails_closed_with_spec_integrity_error():
+    """負控制（票 P20261113_1810-2、11-13 定案 §2 D4）：篡改 manifest 的 spec_sha256
+    → `g4_dry_run` 經 specs.load_frozen_specs 統一核驗口 fail-closed 拋 SpecIntegrityError
+    （點名 dab_587），非舊 ValueError 路徑；不得靜默放行或降級為 dry-run 通過。"""
+    m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert m["specs"]["dab_587"]["spec_sha256"] != "0" * 64  # 前置：未篡改
+    tampered = copy.deepcopy(m)
+    tampered["specs"]["dab_587"]["spec_sha256"] = "0" * 64  # 篡改 manifest 綁定值
+    with pytest.raises(SpecIntegrityError) as exc:
+        g4_dry_run(tampered)
+    assert exc.value.task_id == "dab_587"
+
+
 def _copy_real_workspaces(tasks_dir: pathlib.Path) -> None:
     """把真實任務工作檔（規格已綁 goal／contract sha256）複製到 tasks_dir，作負控制基底。"""
     real = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
@@ -150,17 +163,14 @@ def test_build_g4_execution_plan(tmp_path):
         build_g4_execution_plan(m, tasks_dir=tasks_dir2)
 
 
-def test_build_g4_execution_plan_spec_sha_tamper_fails_closed(tmp_path):
-    """負控制（票 P20261113_1507-2、11-13 定案 §2 D4）：manifest 的 spec_sha256 被篡改
-    → `build_g4_execution_plan` 經 specs.load_frozen_specs 統一核驗口 fail-closed，
+def test_build_g4_execution_plan_spec_sha_tamper_fails_closed():
+    """負控制（票 P20261113_1507-2/1810-2、11-13 定案 §2 D4）：manifest 的 spec_sha256 被篡改
+    → `build_g4_execution_plan` 直接傳入 dict 經 specs.load_frozen_specs 統一核驗口 fail-closed，
     拋 SpecIntegrityError（點名 dab_587）；不得靜默放行或降級為 dry-run 通過。"""
     m = json.loads(MANIFEST.read_text(encoding="utf-8"))
     assert m["specs"]["dab_587"]["spec_sha256"] != "0" * 64  # 前置：未篡改
     tampered = copy.deepcopy(m)
     tampered["specs"]["dab_587"]["spec_sha256"] = "0" * 64  # 篡改 manifest 綁定值
-    mpath = tmp_path / "manifest_tampered.json"
-    mpath.write_text(json.dumps(tampered, ensure_ascii=False, indent=2), encoding="utf-8")
-    tampered["_manifest_path"] = str(mpath)  # 讓統一核驗口讀到這份被篡改的 manifest
     with pytest.raises(SpecIntegrityError) as exc:
         build_g4_execution_plan(tampered)
     assert exc.value.task_id == "dab_587"

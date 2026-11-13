@@ -3,8 +3,8 @@ vacant_network.reqloop.g4gate
 G4 預註冊離線檢驗與發射門控制（票 P20261113_0948-2；11-13 人類定案第 4 條：發射前須人類點頭）。
 只做離線機械複核與簽核門控，**不發起任何真模型呼叫（0 model calls）、不發射**：
 - `load_g4_manifest(path)`：讀取並驗證 manifest（schema、4 題、3 臂、12 格、規格檔路徑）；
-- `g4_dry_run(manifest)`：4 份凍結規格存在、`spec_sha256` 自校驗吻合（複用 `RequirementSet.verify_self_hash`）、
-  可檢查性守衛（票 P20261113_1100-2：每題規格 ≥1 條可確定性檢查條目，0 條＝空殼→ValueError fail-closed）；
+- `g4_dry_run(manifest)`：統一核驗口 `specs.load_frozen_specs` 對 4 份凍結規格做 spec_sha256 密碼學校驗
+  （篡改/缺檔→SpecIntegrityError fail-closed）＋可檢查性守衛（票 P20261113_1100-2：每題規格 ≥1 條可確定性檢查條目，0 條＝空殼→ValueError fail-closed）；
 - `decide_g4_launch(manifest)`：`approval_required == True` 且 `human_signoff is None` → 拋 `LaunchRefused`（fail-closed）；
 - CLI：`--dry-run`（RC 0）／`--fire`（未簽核 RC 2；0 model calls）。
 
@@ -92,20 +92,18 @@ def _item_checkable(item: RequirementItem, input_files: set[str]) -> str | None:
 
 
 def g4_dry_run(manifest: dict[str, Any]) -> dict[str, Any]:
-    """發射前 dry-run：4 份凍結規格存在＋`spec_sha256` 自校驗吻合＋可檢查性守衛（fail-closed）；0 model calls。
+    """發射前 dry-run：統一核驗口 `specs.load_frozen_specs` 核驗 4 份凍結規格
+    （篡改/缺檔→SpecIntegrityError fail-closed）＋可檢查性守衛（fail-closed）；0 model calls。
 
     守衛（P20261113_1100-2）：每題規格須 ≥1 條可確定性檢查條目（verifier 在白名單＋無參數缺陷＋
     交付物非輸入檔）；0 條＝空殼規格→ValueError，拒絕宣稱 ready。個別條目缺參照 UNKNOWN 計數、
     不單獨拒發（凍結規格含永久 UNKNOWN 條目仍可满足——r1565/r1566 正負控制已證）。"""
+    # D4（11-13 定案 §2）統一核驗口：全量 4 題凍結規格逐檔 spec_sha256 密碼學校驗；
+    # 任何篡改/缺檔→SpecIntegrityError fail-closed（不返回部分結果），先於可檢查性分析。
+    loaded_specs = load_frozen_specs(manifest)
     cells = []
     for task in manifest["tasks"]:
-        entry = manifest["specs"][task]
-        spec_set = RequirementSet.load(REPO / entry["file"])
-        ok, why = spec_set.verify_self_hash()
-        if not ok:
-            raise ValueError(f"{task}: frozen spec 自校驗失敗（{why}；fail-closed）")
-        if spec_set.spec_sha256 != entry["spec_sha256"]:
-            raise ValueError(f"{task}: manifest 與規格 spec_sha256 不符（fail-closed）")
+        spec_set = RequirementSet.from_dict(loaded_specs[task])
         input_files = _task_input_files(task, spec_set.items)
         reasons = {it.id: _item_checkable(it, input_files) for it in spec_set.items}
         n_checkable = sum(1 for r in reasons.values() if r is None)
@@ -131,8 +129,7 @@ def build_g4_execution_plan(manifest: dict[str, Any] | None = None,
         manifest = load_g4_manifest(DEFAULT_MANIFEST)
     # D4（11-13 定案 §2）：統一 spec_sha256 核驗口——逐檔對 manifest 綁定值密碼學校驗；
     # 任何不符／缺檔即 SpecIntegrityError fail-closed（不返回部分結果），先於 g4_dry_run。
-    # 傳入 dict 可用 `_manifest_path` 點名其來源檔（負控制用）；無則以 DEFAULT_MANIFEST 為準。
-    load_frozen_specs(manifest.get("_manifest_path") or DEFAULT_MANIFEST)
+    load_frozen_specs(manifest)
     if tasks_dir is None:
         tasks_dir = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
     dry = g4_dry_run(manifest)
@@ -177,7 +174,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         manifest = load_g4_manifest(a.manifest)
         out = g4_dry_run(manifest)
-    except (OSError, ValueError, KeyError, json.JSONDecodeError) as e:
+    except (SpecIntegrityError, OSError, ValueError, KeyError, json.JSONDecodeError) as e:
         print(f"G4 DRY-RUN FAIL: {e}")
         return 1
 
