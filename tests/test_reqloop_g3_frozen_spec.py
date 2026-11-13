@@ -10,8 +10,10 @@
 """
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import hashlib
+import io
 import json
 import pathlib
 import re
@@ -341,3 +343,23 @@ def test_run_g4_mock_pipeline(tmp_path):
     assert len({f'{c["purpose"].split(" r")[0]}' for c in fake.calls}) == 12
     assert data["totals"]["model_calls"] == len(fake.calls)
     assert data["totals"]["model_calls"] >= 12
+
+
+def test_g3_cli_g4_dry_run_and_fire_fail_closed():
+    """票 P20261113_1307-2：g3 CLI 自動分派 G4 manifest（改前「plan schema 不符」RC 1）。
+
+    - --dry-run → build_g4_execution_plan 12 格排程、RC 0、0 model calls；
+    - --fire（human_signoff=null）→ LaunchRefused、RC 2、fail-closed、0 model calls。
+    """
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = g3.main(["--manifest", str(G4_MANIFEST), "--dry-run"])
+    assert rc == 0
+    assert "12 cells ready" in buf.getvalue()
+    assert "0 model calls" in buf.getvalue()
+
+    buf2 = io.StringIO()
+    with contextlib.redirect_stdout(buf2):
+        rc = g3.main(["--manifest", str(G4_MANIFEST), "--fire"])
+    assert rc == 2
+    assert "G4 FIRE REFUSED" in buf2.getvalue()

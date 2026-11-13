@@ -51,7 +51,7 @@ from vacant_network.reqloop import g3gate
 # G4 簽核門與 manifest 校驗（票 P20261113_1206-2）：DEFAULT_MANIFEST 另取別名
 # G4_DEFAULT_MANIFEST，避免遮蔽本模組 g3 CLI 的既有 DEFAULT_MANIFEST（g3_gate）。
 from .g4gate import DEFAULT_MANIFEST as G4_DEFAULT_MANIFEST
-from .g4gate import LaunchRefused, decide_g4_launch, load_g4_manifest
+from .g4gate import LaunchRefused, build_g4_execution_plan, decide_g4_launch, load_g4_manifest
 from vacant_network.reqloop import repair as _repair
 from vacant_network.reqloop.requirements import RequirementItem, RequirementSet
 from vacant_network.reqloop.checks import SUPPORTED_VERIFIERS, run_requirement_checks
@@ -1434,6 +1434,44 @@ def main(argv: list[str] | None = None, *, channel: Channel | None = None,
                          "0 次擷取呼叫；task_id/goal/contract 雜湊不符或規格損壞→拒發。"
                          "省略＝舊行為（動態擷取）")
     args = ap.parse_args(argv)
+
+    # 票 P20261113_1307-2：G4 manifest（experiment=="G4"）自動分派——舊 G3Plan schema
+    # 無法載入它（改前「plan schema 不符」RC 1）。G4 dry-run 走 g4gate 離線驗證
+    # （12 格排程、0 model calls）；--fire 走 run_g4 發射門（未簽核→LaunchRefused，
+    # fail-closed、0 model calls）。G3 manifest 無 experiment 欄位，不受影響。
+    try:
+        probe = json.loads(pathlib.Path(args.manifest).read_text(encoding="utf-8"))
+    except Exception:
+        probe = None
+    if isinstance(probe, dict) and probe.get("experiment") == "G4":
+        if args.dry_run:
+            try:
+                plan = build_g4_execution_plan(probe)
+            except Exception as e:
+                print(f"G4 DRY-RUN FAIL: {e}")
+                return 1
+            print(f"G4 DRY-RUN: {plan['n_cells']} cells ready (0 model calls)")
+            return RC_OK
+        # --fire：run_g4 門序＝manifest 校驗→簽核門→臂 conformance；未簽核在
+        # 任何通道建構/呼叫之前即 LaunchRefused（0 model calls）。
+        base = pathlib.Path(args.manifest)
+        out_root = (pathlib.Path(args.out) if args.out else
+                    REPO / "ops" / "reqloop" / "g4" /
+                    f"fire_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}")
+        try:
+            run_g4(base, out_root,
+                   channel=channel if channel is not None else GlmChannel(),
+                   pi_channel=pi_channel if pi_channel is not None
+                   else PiChannel(base, out_root=out_root,
+                                  tasks_dir=REPO / "ops" / "reqloop" / "g3_2" / "tasks"))
+        except LaunchRefused:
+            print("G4 FIRE REFUSED: human_signoff is null")
+            return 2
+        except Exception as e:
+            print(f"G4 FIRE FAIL: {e}")
+            return 1
+        print(f"G4 FIRE DONE: out={out_root}（hidden_after 全 UNKNOWN；打分流給 /srv/vlab scorer）")
+        return RC_OK
 
     try:
         plan = g3gate.G3Plan.load(args.manifest)
