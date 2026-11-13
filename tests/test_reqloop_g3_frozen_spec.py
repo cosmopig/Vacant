@@ -391,3 +391,20 @@ def test_g3_cli_g4_dry_run_and_fire_fail_closed():
         rc = g3.main(["--manifest", str(G4_MANIFEST), "--fire"])
     assert rc == 2
     assert "G4 FIRE REFUSED" in buf2.getvalue()
+
+
+def test_g3_cli_g4_dry_run_tampered_spec_fails_closed_exit_1(tmp_path):
+    """票 P20261113_1810-3：g3 CLI G4 --dry-run 遇篡改 spec_sha256→SpecIntegrityError 被捕獲，
+    印 `G4 DRY-RUN FAIL`、RC 1、無 Traceback（對齊 --fire 通用失敗出口；0 model calls、未發射）。"""
+    m = json.loads(G4_MANIFEST.read_text(encoding="utf-8"))
+    task = m["tasks"][0]
+    m["specs"][task]["spec_sha256"] = "deadbeef" + m["specs"][task]["spec_sha256"][8:]
+    manifest = tmp_path / "manifest_tampered.json"
+    manifest.write_text(json.dumps(m), encoding="utf-8")
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        rc = g3.main(["--dry-run", "--manifest", str(manifest)])
+    assert rc == 1
+    assert "G4 DRY-RUN FAIL" in out.getvalue()
+    assert task in out.getvalue()  # 點名哪一題的 spec_sha256 不符
+    assert "Traceback" not in err.getvalue()  # 乾淨退出，非未捕獲例外
