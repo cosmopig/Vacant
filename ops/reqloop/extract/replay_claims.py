@@ -183,7 +183,7 @@ def main(argv=None) -> int:
         return selftest()
     rows = collect()
     s = summarize(rows)
-    doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay",
+    doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
            "code_sha": code_sha(),
            "raw_fields_saved": {"verifier": "g3_2_fire 26/26；其餘三來源 0/50", "deliverable": "僅 reason 內截斷 60 字元",

@@ -37,6 +37,9 @@ class RequirementItem:
     authority: str = "client"
     hidden: bool = False
     unverified: bool = False
+    # D2（P20261113_0300-2、11-13 人類裁決第 2 條）：模型原寫的 deliverable 字串。
+    # 只提供紀錄、不參與判定；空字串＝舊行為（未走 trusted 路徑）。
+    deliverable_claimed: str = ""
 
     def __post_init__(self) -> None:
         if not self.id:
@@ -78,6 +81,7 @@ class RequirementItem:
             "authority": self.authority,
             "hidden": self.hidden,
             "unverified": self.unverified,
+            "deliverable_claimed": self.deliverable_claimed,
         }
 
     @classmethod
@@ -99,6 +103,7 @@ class RequirementItem:
             authority=data.get("authority", "client"),
             hidden=data.get("hidden", False),
             unverified=unverified,
+            deliverable_claimed=str(data.get("deliverable_claimed", "") or ""),
         )
 
 

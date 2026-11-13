@@ -36,6 +36,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import dataclasses
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Protocol
@@ -61,6 +62,7 @@ __all__ = [
     "VERIFIER_PARAM_EXAMPLES",
     "build_requirement_set",
     "build_task_prompt",
+    "trusted_deliverable_from_contract",
     "csv_preview",
     "default_prompt",
     "json_preview",
@@ -225,6 +227,73 @@ def _deliverable_problem(deliverable: str, user_text: str) -> str | None:
         if re.search(r"(?<![\w\-])" + re.escape(name) + r"(?![\w\-]|\.\w)", user_text):
             return None
     return f"deliverable_not_in_request:{d[:60]}"
+
+
+# D2（P20261113_0300-2、11-13 裁決第 2 條）：trusted 交付物抽取用的檔案 token 判定。
+# 與 _FILE_PATH_RE 的差異：副檔名必須以字母開頭——純數值（如容差 0.000001）
+# 絕不得誤認為檔名。漏判只落到 None（維持 UNKNOWN），不會製造交付物。
+_TOKEN_FILE_RE = re.compile(
+    r"(?<![\w\-/.])([\w.\-/]+\.[A-Za-z][A-Za-z0-9]{0,7})(?![\w\-]|\.\w)"
+)
+
+
+def trusted_deliverable_from_contract(
+    user_text: str, input_files: Any = ()
+) -> str | None:
+    """交付物是任務的事實，不是模型自報（11-13 裁決第 2 條）：從原文（含公開
+    contract）抽出被點名的輸出檔。
+
+    規則（全部 fail-closed）：
+    - 候選＝完整 token、形如檔案路徑（副檔名以字母開頭）、且不是輸入檔
+      （全名或 basename 都不在 input_files）；
+    - 恰一個候選 → 回傳它；零個或多個 → None（呼叫方照舊 UNKNOWN，不猜）。
+    輸入檔永遠不是交付物（裁決明定的界線）。
+    """
+    names = {str(x).strip() for x in (input_files or ()) if str(x).strip()}
+    names |= {n.rsplit("/", 1)[-1] for n in names}
+    cands: list[str] = []
+    for tok in dict.fromkeys(_TOKEN_FILE_RE.findall(str(user_text or ""))):
+        if tok in names or tok.rsplit("/", 1)[-1] in names:
+            continue
+        cands.append(tok)
+    return cands[0] if len(cands) == 1 else None
+
+
+def _apply_trusted_deliverable(
+    req_set: RequirementSet,
+    report: ExtractReport,
+    trusted: str,
+    user_text: str,
+) -> tuple[RequirementSet, ExtractReport]:
+    """D2：每條目的 deliverable 一律設為 trusted；模型原字串只留紀錄在
+    deliverable_claimed、不參與判定。
+
+    - trusted 本身必須通過 _deliverable_problem（原文點名的檔案）；不通過
+      就什麼都不改（fail-closed，不改寫 _deliverable_problem 本身）；
+    - 因 deliverable_not_in_request:* 而 unverified 的條目重新判定後解除；
+      其他原因（未知 verifier、參數不合、模型自報 unverified）不解除。
+    """
+    t = str(trusted).strip()
+    if not t or _deliverable_problem(t, user_text) is not None:
+        return req_set, report
+    reasons = {u.id: u.reason for u in report.unverified}
+    cleared: set[str] = set()
+    items: list[RequirementItem] = []
+    for it in req_set.items:
+        ni = dataclasses.replace(it, deliverable=t, deliverable_claimed=it.deliverable)
+        r = reasons.get(it.id)
+        if ni.unverified and isinstance(r, str) and r.startswith(
+            "deliverable_not_in_request:"
+        ):
+            ni = dataclasses.replace(ni, unverified=False)
+            cleared.add(it.id)
+        items.append(ni)
+    if cleared:
+        report = dataclasses.replace(
+            report,
+            unverified=tuple(u for u in report.unverified if u.id not in cleared),
+        )
+    return dataclasses.replace(req_set, items=items), report
 
 
 def _unwrap_round_call(expr: str) -> tuple[str, int | None]:
@@ -1188,11 +1257,14 @@ def extract_requirements(
     client: ExtractClient,
     task_id: str = "unnamed_task",
     build_prompt: Any = None,
+    trusted_deliverable: str | None = None,
 ) -> tuple[RequirementSet, ExtractReport]:
     """一輪擷取：組 prompt → client → 解析 → 驗證 → RequirementSet。
 
     fail-closed：client 例外或輸出無法解析 → 空 RequirementSet＋報告記錄，
     不丟例外、不當通過。build_prompt（vq-el4.2）可覆蓋預設 prompt。
+    trusted_deliverable（D2、11-13 裁決第 2 條）：提供時每條目的 deliverable
+    一律設為它、模型原字串只留紀錄在 deliverable_claimed；None＝舊行為。
     """
     try:
         prompt = (build_prompt or default_prompt)(user_text)
@@ -1210,7 +1282,13 @@ def extract_requirements(
             RequirementSet(task_id=task_id, items=[]),
             ExtractReport(parse_error=str(e)),
         )
-    return build_requirement_set(task_id, raw_items, user_text)
+    req_set, report = build_requirement_set(task_id, raw_items, user_text)
+    if trusted_deliverable is not None:
+        # D2：trusted 值由呼叫方以 trusted_deliverable_from_contract 得出（原文
+        # 點名的唯一非輸入輸出檔）；套用後 deliverable 不再是模型自報。
+        req_set, report = _apply_trusted_deliverable(
+            req_set, report, trusted_deliverable, user_text)
+    return req_set, report
 
 
 if __name__ == "__main__":

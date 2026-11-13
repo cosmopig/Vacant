@@ -982,10 +982,16 @@ def run_g3(plan: g3gate.G3Plan, base: pathlib.Path, out_root: pathlib.Path, *,
                                            purpose=f"G3 {tid} 擷取需求",
                                            timeout_s=tpr, ledger=ledger)
             try:
+                # D2（11-13 裁決第 2 條）：交付物是任務的事實——從原文（goal＋公開
+                # contract）抽唯一點名的非輸入輸出檔作為 trusted deliverable；抽不出
+                # （None）時 extract_requirements 保持舊行為（逐條照模型自報＋逐字點名檢查）。
+                _ut = compose_extract_user_text(
+                    inputs["goal"], inputs.get("contract"))
                 req_set, report = _extract.extract_requirements(
-                    user_text=compose_extract_user_text(
-                        inputs["goal"], inputs.get("contract")),
-                    client=client, task_id=tid)
+                    user_text=_ut,
+                    client=client, task_id=tid,
+                    trusted_deliverable=_extract.trusted_deliverable_from_contract(
+                        _ut, list(inputs["data"].keys())))
             except G3QuotaError as e:
                 # 撞額度＝停發、不重試（不得降級成「擷取失敗＝沒有需求」）
                 stopped = True
