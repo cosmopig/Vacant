@@ -26,6 +26,10 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 MANIFEST = REPO / "ops" / "reqloop" / "g3_gate" / "manifest.json"
 BASE = REPO / "ops" / "reqloop" / "g3_gate"
 CONFORMING_ARMS = ("reqlist_only", "full_rloop")
+# G4 原生扁平規格（P20261113_0846-1）：spec_dir＋對應 workspace（g3_2 任務集）。
+G4_SPEC_DIR = REPO / "ops" / "reqloop" / "g4" / "specs"
+G4_MANIFEST = REPO / "ops" / "reqloop" / "g4" / "manifest.json"
+G4_TASKS = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
 
 
 def _sha(text: str) -> str:
@@ -169,3 +173,37 @@ def test_corrupted_spec_refuses(tmp_path):
         g3.run_g3(plan, BASE, tmp_path / "o", channel=fake,
                   approval=_approval(), spec_dir=spec_dir)
     assert fake.calls == [], "拒發必須 0 模型呼叫（不得降級為重新擷取）"
+
+
+def _g4_inputs(tid: str) -> dict:
+    ws = G4_TASKS / tid / "workspace"
+    return {"goal": (ws / "goal.md").read_text(encoding="utf-8"),
+            "contract": (ws / "contract.md").read_text(encoding="utf-8")}
+
+
+def test_load_frozen_spec_real_g4_specs():
+    """正控制（G4 原生扁平格式）：4 份真實規格全部載入成功、task_id／條目數正確。
+
+    改前直對 G4 規格呼叫會招 ValueError（reqset 缺失）；本測試即票面正控制。
+    """
+    manifest = json.loads(G4_MANIFEST.read_text(encoding="utf-8"))
+    assert [t for t in manifest["tasks"]] == ["dab_725", "dab_587", "dab_657", "dab_517"]
+    for tid in manifest["tasks"]:
+        rs = g3.load_frozen_spec(G4_SPEC_DIR, tid, _g4_inputs(tid))
+        assert rs.task_id == tid
+        assert len(rs.items) == manifest["specs"][tid]["n_items"]
+        assert len(rs.items) >= 1
+
+
+def test_flat_spec_goal_hash_tampered_refuses(tmp_path):
+    """負控制（扁平格式）：goal_sha256 改動 1 碼→fail-closed ValueError 拒發。"""
+    tid = "dab_725"
+    src = json.loads((G4_SPEC_DIR / f"{tid}.json").read_text(encoding="utf-8"))
+    src["goal_sha256"] = ("0" if src["goal_sha256"][0] != "0" else "1") + src["goal_sha256"][1:]
+    spec_dir = tmp_path / "specs"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    (spec_dir / f"{tid}.json").write_text(
+        json.dumps(src, ensure_ascii=False), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="goal_sha256"):
+        g3.load_frozen_spec(spec_dir, tid, _g4_inputs(tid))

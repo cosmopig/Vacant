@@ -892,8 +892,11 @@ def max_calls_bound(arm_order: tuple[str, ...], n_tasks: int) -> int:
 def load_frozen_spec(spec_dir: pathlib.Path, tid: str, inputs: dict) -> RequirementSet:
     """D4（11-13 定案第 2 條）：載入預跑通過的需求規格 <spec_dir>/<tid>.json。
 
-    規格檔須記載 task_id、goal_sha256、contract_sha256 與 reqset（RequirementSet
-    序列化）。任一不符／損壞→ValueError 拒發（fail-closed）；絕不默默降級為
+    兩種合法格式（P20261113_0846-1）：
+      - 巢狀：{task_id, goal_sha256, contract_sha256, reqset: <RequirementSet 序列化>}
+      - 扁平（RequirementSet.load() 原生／G4 規格）：items 直接在根物件，
+        goal_sha256／contract_sha256 可載於根或 reqset 內。
+    任一不符／損壞→ValueError 拒發（fail-closed）；絕不默默降級為
     重新擷取——G3.3 證明重新擷取不穩定，發射必須 100% 重用凍結規格。
     """
     p = pathlib.Path(spec_dir) / f"{tid}.json"
@@ -909,25 +912,32 @@ def load_frozen_spec(spec_dir: pathlib.Path, tid: str, inputs: dict) -> Requirem
     if raw.get("task_id") != tid:
         raise ValueError(
             f"D4 凍結規格 task_id 不符：{p} 記載 {raw.get('task_id')!r}、當前 {tid!r}——拒發")
-    goal_sha = hashlib.sha256(inputs["goal"].encode("utf-8")).hexdigest()
-    contract_sha = hashlib.sha256(inputs["contract"].encode("utf-8")).hexdigest()
-    if raw.get("goal_sha256") != goal_sha:
-        raise ValueError(
-            f"D4 凍結規格 goal_sha256 不符：{p} 記載 {raw.get('goal_sha256')!r}、"
-            f"當前 {goal_sha!r}——goal 已變動，拒發（不重新擷取）")
-    if raw.get("contract_sha256") != contract_sha:
-        raise ValueError(
-            f"D4 凍結規格 contract_sha256 不符：{p} 記載 {raw.get('contract_sha256')!r}、"
-            f"當前 {contract_sha!r}——contract 已變動，拒發（不重新擷取）")
-    if not isinstance(raw.get("reqset"), dict):
-        raise ValueError(f"D4 凍結規格損壞（reqset 缺失或非物件）：{p}")
+    if isinstance(raw.get("reqset"), dict):
+        spec_dict = raw["reqset"]
+    elif isinstance(raw.get("items"), list):
+        spec_dict = raw  # 扁平格式（RequirementSet 原生序列化／G4 規格）
+    else:
+        raise ValueError(f"D4 凍結規格損壞（缺少 reqset 或 items 物件）：{p}")
     try:
-        req_set = RequirementSet.from_dict(raw["reqset"])
-    except (KeyError, TypeError, AttributeError) as e:
+        req_set = RequirementSet.from_dict(spec_dict)
+    except (KeyError, TypeError, AttributeError, ValueError) as e:
         raise ValueError(f"D4 凍結規格損壞（reqset 不可反序列化）：{p}: {e}") from e
     if req_set.task_id != tid:
         raise ValueError(
             f"D4 凍結規格 reqset.task_id 不符：{req_set.task_id!r} != {tid!r}——拒發")
+    goal_sha = hashlib.sha256(inputs["goal"].encode("utf-8")).hexdigest()
+    contract_sha = hashlib.sha256(inputs["contract"].encode("utf-8")).hexdigest()
+    # 記載雜湊：根優先、reqset 兜底（兩格式皆合法；皆無＝fail-closed 拒發）。
+    recorded_goal = str(raw.get("goal_sha256") or req_set.goal_sha256 or "")
+    recorded_contract = str(raw.get("contract_sha256") or req_set.contract_sha256 or "")
+    if recorded_goal != goal_sha:
+        raise ValueError(
+            f"D4 凍結規格 goal_sha256 不符：{p} 記載 {recorded_goal!r}、"
+            f"當前 {goal_sha!r}——goal 已變動，拒發（不重新擷取）")
+    if recorded_contract != contract_sha:
+        raise ValueError(
+            f"D4 凍結規格 contract_sha256 不符：{p} 記載 {recorded_contract!r}、"
+            f"當前 {contract_sha!r}——contract 已變動，拒發（不重新擷取）")
     return req_set
 
 
