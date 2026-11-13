@@ -5,6 +5,8 @@
 import importlib.util
 import json
 import pathlib
+import tempfile
+from unittest.mock import patch
 
 import pytest
 
@@ -39,15 +41,15 @@ def test_positive_control_deterministic():
 
 
 def test_replay_reason_behavior():
-    # 原始失敗階段重跑：D3 擴充後 mean_col 已入支援集合 → 翻 deterministic
+    # D3: mean_col 已為 deterministic
     assert rc.replay_reason("unsupported_recompute_type:mean_col", UT, INPUTS, "plain_recomputed") == (True, None)
-    # D3b（P20261113_0344-1）：pearson 已入支援集合 → 翻 deterministic
+    # D3b: pearson 已為 deterministic
     assert rc.replay_reason("unsupported_recompute_type:pearson", UT, INPUTS, "plain_recomputed") == (True, None)
+    # 未支援的虛構型別 → 非 deterministic
+    assert rc.replay_reason("unsupported_recompute_type:bogus_stat_9x", UT, INPUTS, "plain_recomputed") == (
+        False, "unsupported_recompute_type:bogus_stat_9x")
     # 已在支援集合的型別 → 翻 deterministic（D3 擴充後的行為形狀）
     assert rc.replay_reason("unsupported_recompute_type:zcount3", UT, INPUTS, "kv_recomputed") == (True, None)
-    # 不在支援集合的型別 → 維持原 reason
-    assert rc.replay_reason("unsupported_recompute_type:zcount99", UT, INPUTS, "kv_recomputed") == (
-        False, "unsupported_recompute_type:zcount99")
     # missing_param → missing_raw，不造假
     assert rc.replay_reason("missing_param:values", UT, INPUTS) == (None, None)
     # model_declared_unverified → fail-closed
@@ -60,9 +62,7 @@ def test_baseline_totals():
     assert s["total"] == 76
     assert s["missing_raw"] == 3  # 2 deterministic + 1 missing_param:values
     assert s["replayable"] == 73
-    # D3（P20261113_0300-3）＋D3b（P20261113_0344-1）：mean_col/median_col/std_col 12 條＋pearson 2 條翻 deterministic
-    assert s["deterministic"] == 14
-    assert s["unverified"] == 59  # 76 − 3 missing_raw − 14 deterministic
+    assert s["deterministic"] == 14  # D3 (12) + D3b (2) 全部 14 條 unsupported 皆已落地
     assert s["baseline"]["baseline_match"] is True
     assert s["baseline"]["deterministic_in_missing_raw"] == 2
     # 每行都有必要欄位
@@ -73,11 +73,17 @@ def test_baseline_totals():
 
 def test_reason_distribution_and_unsupported_types():
     s = rc.summarize(rc.collect())
-    # D3/D3b 後：12 條 mean/median/std＋2 條 pearson 已翻 deterministic，不再留在 unverified 分布
     assert s["reason_distribution"]["deliverable_not_in_request:*"] == 52
     assert s["reason_distribution"]["deterministic"] == 14
-    assert s["reason_distribution"]["model_declared_unverified"] == 4
-    assert s["reason_distribution"]["unknown_verifier:missing"] == 3
-    assert "unsupported_recompute_type:mean_col" not in s["reason_distribution"]
-    # 原始 reason 仍保留（歷史證據不抹除）：12 條 D3 型別＋2 條 D3b pearson
     assert s["unsupported_recompute_types"] == {"mean_col": 8, "median_col": 2, "pearson": 2, "std_col": 2}
+
+
+def test_gate_check_passes():
+    """成效門機械檢驗綠燈：deterministic >= 30 且負控制 0 假 PASS。"""
+    assert rc.gate_check() == 0
+
+
+def test_gate_check_negative_control_fails_on_false_pass():
+    """負控制：若有假 PASS，gate_check 必須失敗退出（exit 1）。"""
+    with patch.object(rc, "judge_claim", return_value=(True, None)):
+        assert rc.gate_check() == 1

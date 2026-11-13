@@ -5,8 +5,8 @@
 需求重判 deterministic/unverified。不造假：四來源只存 claim id＋原 reason（g3_2_fire 另存
 verifier）；params/quote/deliverable 未存 → 需未存欄位者（missing_param 的 params、2 條
 deterministic）標 missing_raw，不計數不推測。基線：當前代碼下原本 unverified 者無一翻成
-deterministic=14（D3 已落、P20261113_0300-3：mean_col/median_col/std_col 12 條；D3b 已落、
-P20261113_0344-1：pearson 2 條）；taxonomy 的 2 條 deterministic（g3_2_prerun
+deterministic=12（D3 已落、P20261113_0300-3：mean_col/median_col/std_col；pearson 2 條屬
+D3b、P20261113_0344-1，參數未存於來源）；taxonomy 的 2 條 deterministic（g3_2_prerun
 dab_725 R1/R6）落在 missing_raw，差額即這些。D2 量效：K1＝走 trusted_deliverable
 （trusted_deliverable_from_contract 自原文抽唯一非輸入檔；零個或多個＝None＝維持舊判定）；
 checks.py recompute 型別集合擴充後自動反映。末行 REPLAY K0 deterministic=K0 → K1 deterministic=K1（兩數並列報告）
@@ -25,6 +25,7 @@ REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
 from vacant_network.reqloop import checks, extract  # noqa: E402
 from vacant_network.reqloop.g3 import compose_extract_user_text  # noqa: E402
+from vacant_network.reqloop.requirements import RequirementItem, RequirementSet  # noqa: E402
 
 OUT, TAX = REPO / "ops/audits/g26_claim_replay.json", REPO / "ops/audits/g3_series_unverified_taxonomy.json"
 SOURCES = (("g3_1_prerun", "g3_1", "ops/audits/g3_1_h20_prerun_report.json"),
@@ -129,9 +130,9 @@ def summarize(rows):
     tax = json.loads(TAX.read_text(encoding="utf-8"))["totals"]
     det_in_mraw = sum(1 for r in mraw if r["original_verdict"] == "deterministic")
     det_tax, tax_req = int(tax["deterministic_claims"]), int(tax["requirements"])
-    # D3 已落（P20261113_0300-3、11-13 定案第 3 條）：baseline 由「K0 deterministic=0」
-    # 更新為「K0 deterministic=12（mean_col/median_col/std_col）」；D3b 已落
-    # （P20261113_0344-1）：pearson 2 條再翻 deterministic → K0 deterministic=14。
+    # D3/D3b 已落（P20261113_0300-3、P20261113_0344-1、11-13 定案第 3 條）：baseline 由「K0 deterministic=0」
+    # 更新為「K0 deterministic=14（8 mean_col + 2 median_col + 2 std_col + 2 pearson）」；
+    # taxonomy 中 14 條 unsupported 重算型別皆已落地。
     baseline_match = (total == tax_req) and (det == 14) and (det_in_mraw == det_tax)
     dist: dict[str, int] = {}
     urt: dict[str, int] = {}
@@ -151,9 +152,8 @@ def summarize(rows):
             "baseline": {"taxonomy_deterministic": det_tax, "replay_deterministic_within_replayable": det,
                          "deterministic_in_missing_raw": det_in_mraw, "baseline_match": baseline_match,
                          "explanation": (f"replayable={total - len(mraw)} 集合內 deterministic={det}：K0 基線（不走 trusted）下，"
-                                         "unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決："
+                                         "unverified 中 14 條 unsupported 已因 D3/D3b（P20261113_0300-3/0344-1，11-13 裁決："
                                          "extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成"
-                                         " deterministic；2 條 pearson 已因 D3b（P20261113_0344-1：checks.py 支援集合加入 pearson）翻成"
                                          " deterministic；D2 量效見 d2_K1。taxonomy 的 "
                                          f"{det_tax} 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、"
                                          "未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。")}}
@@ -178,16 +178,16 @@ def selftest() -> int:
     check("pos  有效交付物 answer.txt → deterministic", ok and r is None)
     check("replay D3: mean_col 已 deterministic（11-13 定案、P20261113_0300-3 落盤）",
           replay_reason("unsupported_recompute_type:mean_col", ut, inputs, "plain_recomputed")[0] is True)
-    check("replay D3b: pearson 已 deterministic（P20261113_0344-1 落盤：checks.py 支援集合加入 pearson）",
+    check("replay D3b: pearson 已 deterministic（11-13 定案、P20261113_0344-1 落盤）",
           replay_reason("unsupported_recompute_type:pearson", ut, inputs, "plain_recomputed")[0] is True)
     check("replay missing_param → missing_raw（不造假）", replay_reason("missing_param:values", ut, inputs) == (None, None))
     s = summarize(collect())
     check("76 條全收齊且基線對帳通過", s["total"] == 76 and s["baseline"]["baseline_match"] is True)
     s1 = summarize(collect(use_trusted=True))
-    check("D2+D3+D3b K1：66 條 → deterministic（52 可信任交付物＋12 重算型別＋2 pearson，9 任務）", s1["deterministic"] == 66)
+    check("D2+D3+D3b K1：66 條 → deterministic（52 可信任交付物＋14 重算型別，9 任務）", s1["deterministic"] == 66)
     check("D2 K1：deliverable_not_in_request 零殘留（全部解除，非強行翻綠）",
           not any(k.startswith("deliverable_not_in_request") for k in s1["reason_distribution"]))
-    check("D3b K1 未誤動其它類：unverified 7 條＝4 自陳＋3 unknown_verifier（pearson 2 條已翻 deterministic）",
+    check("D3+D3b K1 未誤動其它類：unverified 7 條＝4 自陳＋3 unknown_verifier",
           s1["unverified"] == 7)
     if fails:
         print(f"SELFTEST FAIL ({len(fails)}): {fails}")
@@ -195,17 +195,96 @@ def selftest() -> int:
     print("SELFTEST PASS")
     return 0
 
+def gate_check() -> int:
+    """成效門機械檢驗（2026-11-13 人類定案第 4 條、P20261113_0344-2）：
+    (1) 確定性條數門禁：totals.deterministic >= 30/76
+    (2) 全量負控制測試：對 dab_725 / dab_587 / dab_657 / dab_517 真實任務注入負控制：
+        (a) 故意錯的交付物檔名／缺檔 → 必判 FAIL/UNKNOWN；
+        (b) 輸入檔當交付物（如 auto-mpg.csv）→ 必判 UNKNOWN/FAIL（is_input_file 攔截）；
+        (c) 故意篡改答案值（如 999999.99）→ 必判 FAIL。
+    (3) 斷言在上述所有負控制情境下 false_pass == 0。
+    通過時輸出：GATE_CHECK: deterministic=<K>/76 >= 30 false_pass=0 VERDICT: PASS
+    """
+    rows1 = collect(use_trusted=True)
+    s1 = summarize(rows1)
+    det = s1["deterministic"]
+    if det < 30:
+        print(f"GATE_CHECK FAIL: deterministic={det}/76 < 30")
+        return 1
+
+    false_pass = 0
+    target_tasks = [
+        ("dab_725", "workspace/data/auto-mpg.csv", "mean1", "mean_col", "mpg"),
+        ("dab_587", "workspace/data/20170413_000000_group_statistics.csv", "correlation_coefficient", None, None),
+        ("dab_657", "workspace/data/YAHOO-BTC_USD_D.csv", "mean_close", "mean_col", "Close"),
+        ("dab_517", "workspace/data/titanic.csv", "correlation_pclass_fare", "pearson", ("Pclass", "Fare")),
+    ]
+
+    for tid, data_rel, key_name, rtype, col_spec in target_tasks:
+        ut, inputs = load_task("g3_2", tid)
+        tpath = REPO / "ops/reqloop/g3_2/tasks" / tid
+        keys = [{"key": key_name, "type": "number"}]
+
+        # 負控制 1: 故意錯的交付物檔名／缺檔
+        ok1, _ = judge_claim("answer_kv", "non_existent_output_9x8y.txt", {"keys": keys}, ut, inputs)
+        if ok1:
+            false_pass += 1
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            td = pathlib.Path(tmp_dir)
+            req_item = RequirementItem(id="r_neg1", quote="測試", deliverable="missing_file.txt",
+                                       verifier="plain_recomputed",
+                                       params={"data_file": data_rel, "recompute": {"type": "mean_col", "col": "x"}})
+            res = checks.run_requirement_checks(tpath, RequirementSet("t", [req_item]), td)
+            if res and res[0].status == "PASS":
+                false_pass += 1
+
+        # 負控制 2: 輸入檔當交付物
+        for inp in inputs:
+            ok2, _ = judge_claim("answer_kv", inp, {"keys": keys}, ut, inputs)
+            if ok2:
+                false_pass += 1
+            if not is_input_file(inp, inputs):
+                false_pass += 1
+
+        # 負控制 3: 故意錯值（999999.99）
+        if rtype is not None:
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                td = pathlib.Path(tmp_dir)
+                (td / "answer.txt").write_text(f"@{key_name}[999999.99]\n", encoding="utf-8")
+                rc_dict: dict[str, Any] = {"type": rtype}
+                if isinstance(col_spec, tuple):
+                    rc_dict["col_a"], rc_dict["col_b"] = col_spec
+                else:
+                    rc_dict["col"] = col_spec
+                req_item = RequirementItem(id="r_neg3", quote="測試", deliverable="answer.txt",
+                                           verifier="kv_recomputed",
+                                           params={"key": key_name, "data_file": data_rel, "recompute": rc_dict})
+                res = checks.run_requirement_checks(tpath, RequirementSet("t", [req_item]), td)
+                if res and res[0].status == "PASS":
+                    false_pass += 1
+
+    if false_pass != 0:
+        print(f"GATE_CHECK FAIL: false_pass={false_pass} != 0")
+        return 1
+
+    print(f"GATE_CHECK: deterministic={det}/76 >= 30 false_pass=0 VERDICT: PASS")
+    return 0
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="replay_claims")
     ap.add_argument("--selftest", action="store_true", help="跑負/正控制與基線對帳後即回")
+    ap.add_argument("--gate", action="store_true", help="成效門機械檢驗（確定性 >= 30 且負控制 0 假 PASS）")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
+    if a.gate:
+        return gate_check()
     rows0 = collect()
     s0 = summarize(rows0)
     rows1 = collect(use_trusted=True)
     s1 = summarize(rows1)
-    doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable / P20261113_0344-1-d3b-pearson-recompute（本輪）",
+    doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
            "code_sha": code_sha(),
            "raw_fields_saved": {"verifier": "g3_2_fire 26/26；其餘三來源 0/50", "deliverable": "僅 reason 內截斷 60 字元",

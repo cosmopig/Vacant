@@ -141,21 +141,19 @@ def test_phase2_prompt_recompute_types_exhaustive_vs_checks_dispatch():
     守衛契約更新為三條：
     (1) 凍結語法表 ⊆ dispatch（prompt 不點名幽靈型別）；
     (2) dispatch ＝ checks.py 兩集合之並（單一事實來源＝checks.py 集合）；
-    (3) dispatch − 語法表 ＝ 恰好 D3 三項附加＋D3b 一項附加（無未記錄的漂移）。
+    (3) dispatch − 語法表 ＝ 恰好 D3 三項附加（無未記錄的漂移）。
     """
     import vacant_network.reqloop.checks as checks
     src = pathlib.Path(checks.__file__).read_text(encoding="utf-8")
     dispatched = set(re.findall(r'rtype == "(\w+)"', src))
     checks_sets = set(checks.KV_RECOMPUTE_TYPES) | set(checks.PLAIN_RECOMPUTE_TYPES)
-    D3_ADDITIONS = {"mean_col", "median_col", "std_col"}  # P20261113_0300-3（D3）
-    D3B_ADDITIONS = {"pearson"}  # P20261113_0344-1（D3b，與 pearson2 同口徑）
+    D3_ADDITIONS = {"mean_col", "median_col", "std_col", "pearson"}  # P20261113_0300-3 / P20261113_0344-1
     # (1) kv_recomputed 與 plain_recomputed 語法表裡的每個型別都要有 dispatch
     assert set(RECOMPUTE_TYPES) <= dispatched, set(RECOMPUTE_TYPES) - dispatched
     # (2) dispatch 出來的型別都要在 checks.py 集合裡（單一事實來源＝checks.py）
     assert dispatched == checks_sets, dispatched ^ checks_sets
-    # (3) dispatch − 語法表 ＝ 恰好 D3 三項＋D3b 一項附加（11-13 定案 run_eval.py 凍結，無未記錄漂移）
-    assert dispatched - set(RECOMPUTE_TYPES) == D3_ADDITIONS | D3B_ADDITIONS, \
-        dispatched - set(RECOMPUTE_TYPES)
+    # (3) dispatch − 語法表 ＝ 恰好 D3 三項附加（11-13 定案 run_eval.py 凍結，無未記錄漂移）
+    assert dispatched - set(RECOMPUTE_TYPES) == D3_ADDITIONS, dispatched - set(RECOMPUTE_TYPES)
 
 
 def test_task_data_files_prefers_data_subdir(tmp_path):

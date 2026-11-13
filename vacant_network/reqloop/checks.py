@@ -2046,7 +2046,7 @@ def _pearson_pair(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
     col_a = str(rc.get("col_a", "")).strip()
     col_b = str(rc.get("col_b", "")).strip()
     if not col_a or not col_b:
-        raise UnknownSource("pearson2 需要 col_a 與 col_b")
+        raise UnknownSource("pearson 需要 col_a 與 col_b")
     if not rows or col_a not in rows[0] or col_b not in rows[0]:
         raise UnknownSource(f"資料檔找不到欄 {col_a!r} 或 {col_b!r}")
     xs: list[float] = []
@@ -2059,14 +2059,14 @@ def _pearson_pair(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
         xs.append(x)
         ys.append(y)
     if len(xs) < 2:
-        raise UnknownSource("pearson2: 可用成對數值不足 2")
+        raise UnknownSource("pearson: 可用成對數值不足 2")
     ma = sum(xs) / len(xs)
     mb = sum(ys) / len(ys)
     cov = sum((x - ma) * (y - mb) for x, y in zip(xs, ys))
     va = sum((x - ma) ** 2 for x in xs)
     vb = sum((y - mb) ** 2 for y in ys)
     if va == 0.0 or vb == 0.0:
-        raise UnknownSource("pearson2: 常數欄，相關係數未定義")
+        raise UnknownSource("pearson: 常數欄，相關係數未定義")
     return cov / ((va ** 0.5) * (vb ** 0.5))
 
 

@@ -1,9 +1,9 @@
 {
-  "ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable / P20261113_0344-1-d3b-pearson-recompute（本輪）",
-  "generated_at": "2026-11-13T07:48:03+00:00",
+  "ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
+  "generated_at": "2026-11-13T07:31:18+00:00",
   "code_sha": {
     "vacant_network/reqloop/extract.py": "b502741bcd290d1bfefc257986be838d6356d4f3",
-    "vacant_network/reqloop/checks.py": "764119e29305a20e8b40118ab284888018b23d9e"
+    "vacant_network/reqloop/checks.py": "d401a8ae291e3f5c53972c1a76600e72d629f916"
   },
   "raw_fields_saved": {
     "verifier": "g3_2_fire 26/26；其餘三來源 0/50",
@@ -86,7 +86,7 @@
       "replay_deterministic_within_replayable": 14,
       "deterministic_in_missing_raw": 2,
       "baseline_match": true,
-      "explanation": "replayable=73 集合內 deterministic=14：K0 基線（不走 trusted）下，unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；2 條 pearson 已因 D3b（P20261113_0344-1：checks.py 支援集合加入 pearson）翻成 deterministic；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "replayable=73 集合內 deterministic=14：K0 基線（不走 trusted）下，unverified 中 14 條 unsupported 已因 D3/D3b（P20261113_0300-3/0344-1，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "d2_K1": {
@@ -163,7 +163,7 @@
       "replay_deterministic_within_replayable": 66,
       "deterministic_in_missing_raw": 2,
       "baseline_match": false,
-      "explanation": "replayable=73 集合內 deterministic=66：K0 基線（不走 trusted）下，unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；2 條 pearson 已因 D3b（P20261113_0344-1：checks.py 支援集合加入 pearson）翻成 deterministic；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "replayable=73 集合內 deterministic=66：K0 基線（不走 trusted）下，unverified 中 14 條 unsupported 已因 D3/D3b（P20261113_0300-3/0344-1，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "k0_to_k1": {
@@ -246,7 +246,7 @@
       "replay_deterministic_within_replayable": 66,
       "deterministic_in_missing_raw": 2,
       "baseline_match": false,
-      "explanation": "replayable=73 集合內 deterministic=66：K0 基線（不走 trusted）下，unverified 中 12 條 mean_col/median_col/std_col 已因 D3（P20261113_0300-3，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；2 條 pearson 已因 D3b（P20261113_0344-1：checks.py 支援集合加入 pearson）翻成 deterministic；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "replayable=73 集合內 deterministic=66：K0 基線（不走 trusted）下，unverified 中 14 條 unsupported 已因 D3/D3b（P20261113_0300-3/0344-1，11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing）翻成 deterministic；D2 量效見 d2_K1。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "claims": [
