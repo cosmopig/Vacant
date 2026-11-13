@@ -1309,8 +1309,13 @@ GUARD_CONTENT_PIN = {
     #     → 42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5
     "ops/reqloop/freeze_check.py":
         "42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5",
+    # r1546 解凍記錄（P20261113_0300-3 D3、11-13 定案第 3 條：extract.py/checks.py
+    # 受控解凍；r1544-r1547 重錨 EXTRACT 凍結點；sha256sum 磁碟實算、非轉抄）：
+    #   tests/test_reqloop_frozen_anchors.py
+    #     90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b
+    #     → b3c53dd90da48edb8a91af4ae9f9e2bd143796e3fab7394cc9bceaa922ec4927
     "tests/test_reqloop_frozen_anchors.py":
-        "90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b",
+        "b3c53dd90da48edb8a91af4ae9f9e2bd143796e3fab7394cc9bceaa922ec4927",
     "tests/test_reqloop_ci_contract.py":
         "eafe829013f15de0e0933aad879ea40381f6239873ce885926951ea699b69d58",
     # r1347（vq-el4.56）擴覆蓋：第二收口標準（審查指示 #3 點名）兩檔——r1319 之後建立、
@@ -1589,8 +1594,13 @@ GUARD_CONTENT_PIN = {
     # (2) tests/test_reqloop_g3.py
     #     2168556a5775e68138e636cade988a08f2bd1e1d4740b4b098a48713c82742ca
     #     → 7efb8398e73f84f57723d625ca079c014a9d860b58f295ea0ef4ddc488b321bc
+    # r1544 解凍記錄（P20261113_0300-2 D2、11-13 定案第 2 條：trusted_deliverable
+    # 抽取；r1544-r1547 落盤；sha256sum 磁碟實算、非轉抄）：
+    #   vacant_network/reqloop/g3.py
+    #     24beb4b32a7e3beb7d4f400fc6334629216239a18caa3eeca5773c63183786ba
+    #     → 532a1f89dbb29fd125ac2ea10f3b20e27512364bd5dc64a1fdd23c965b7ae553
     "vacant_network/reqloop/g3.py":
-        "24beb4b32a7e3beb7d4f400fc6334629216239a18caa3eeca5773c63183786ba",
+        "532a1f89dbb29fd125ac2ea10f3b20e27512364bd5dc64a1fdd23c965b7ae553",
     "tests/test_reqloop_g3.py":
         "7efb8398e73f84f57723d625ca079c014a9d860b58f295ea0ef4ddc488b321bc",
     "tests/test_reqloop_g3_conformance.py":
@@ -2261,8 +2271,9 @@ def test_now_redline_negative_controls(tmp_path: Path) -> None:
     g = _now_redline_guard()
 
     # (a) 轉抄漂移：只在紅線契約行內改一個 blob 前綴（重用守衛自己的 _mutate_redline，
-    #     同一把尺；注意：NOW.md 另有狀態行也含 blob e757aec5…，全檔 sub 會打錯行）
-    mutated = g._mutate_redline(REPO / "NOW.md", tmp_path, "e757aec5", "0757aec5")
+    #     同一把尺；注意：NOW.md 其它行可能含同前綴，全檔 sub 會打錯行；前綴取紅線行
+    #     現值 extract.py blob b502741b…，11-13 受控解凍後重錨）
+    mutated = g._mutate_redline(REPO / "NOW.md", tmp_path, "b502741b", "0502741b")
     v = g.redline_violations(mutated)
     assert any("extract.py" in s and "blob 前綴漂移" in s for s in v), (
         f"前置：守衛應抓到該漂移: {v}"

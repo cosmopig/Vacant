@@ -134,14 +134,26 @@ def test_phase2_prompt_carries_recompute_vocabulary():
 
 
 def test_phase2_prompt_recompute_types_exhaustive_vs_checks_dispatch():
-    """RECOMPUTE_TYPES 必須與 checks.py 實際 dispatch 的型別一致（雙向）。"""
+    """RECOMPUTE_TYPES（凍結的 phase2 語法表）與 checks.py 實際 dispatch 的型別對帳。
+
+    r1540 D3（P20261113_0300-3，11-13 人類定案：run_eval.py 保持凍結）：checks.py
+    附加 mean_col/median_col/std_col，phase2 prompt 語法表不可更新（run_eval.py 凍結），
+    守衛契約更新為三條：
+    (1) 凍結語法表 ⊆ dispatch（prompt 不點名幽靈型別）；
+    (2) dispatch ＝ checks.py 兩集合之並（單一事實來源＝checks.py 集合）；
+    (3) dispatch − 語法表 ＝ 恰好 D3 三項附加（無未記錄的漂移）。
+    """
     import vacant_network.reqloop.checks as checks
     src = pathlib.Path(checks.__file__).read_text(encoding="utf-8")
     dispatched = set(re.findall(r'rtype == "(\w+)"', src))
-    # kv_recomputed 與 plain_recomputed 合起來的受支援型別
+    checks_sets = set(checks.KV_RECOMPUTE_TYPES) | set(checks.PLAIN_RECOMPUTE_TYPES)
+    D3_ADDITIONS = {"mean_col", "median_col", "std_col"}  # P20261113_0300-3
+    # (1) kv_recomputed 與 plain_recomputed 語法表裡的每個型別都要有 dispatch
     assert set(RECOMPUTE_TYPES) <= dispatched, set(RECOMPUTE_TYPES) - dispatched
-    # dispatch 出來的型別都要在語法表裡（不讓模型自創、也不讓文檔漏型別）
-    assert dispatched <= set(RECOMPUTE_TYPES), dispatched - set(RECOMPUTE_TYPES)
+    # (2) dispatch 出來的型別都要在 checks.py 集合裡（單一事實來源＝checks.py）
+    assert dispatched == checks_sets, dispatched ^ checks_sets
+    # (3) dispatch − 語法表 ＝ 恰好 D3 三項附加（11-13 定案 run_eval.py 凍結，無未記錄漂移）
+    assert dispatched - set(RECOMPUTE_TYPES) == D3_ADDITIONS, dispatched - set(RECOMPUTE_TYPES)
 
 
 def test_task_data_files_prefers_data_subdir(tmp_path):
