@@ -141,3 +141,4 @@ def test_specs_module_imports_without_model_channel():
     assert mods <= allowed, f"specs.py 引入了模型通道/外部依賴: {mods}"
     assert callable(S.load_frozen_specs)
     assert issubclass(S.SpecIntegrityError, Exception)
+

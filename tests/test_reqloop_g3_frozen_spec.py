@@ -408,3 +408,29 @@ def test_g3_cli_g4_dry_run_tampered_spec_fails_closed_exit_1(tmp_path):
     assert "G4 DRY-RUN FAIL" in out.getvalue()
     assert task in out.getvalue()  # 點名哪一題的 spec_sha256 不符
     assert "Traceback" not in err.getvalue()  # 乾淨退出，非未捕獲例外
+
+
+def test_run_g4_wires_tasks_dir_to_pi_channel(tmp_path):
+    """run_g4 必須自動將 tasks_dir 注入預設未設 tasks_dir 的 PiChannel 實例，
+    避免 native_pi 臂執行時因工作目錄回退至 base/tasks 而拋出 G3CallError。"""
+    m = json.loads(G4_MANIFEST.read_text(encoding="utf-8"))
+    m["human_signoff"] = {"by": "test"}
+    mp = tmp_path / "manifest.json"
+    mp.write_text(json.dumps(m), encoding="utf-8")
+
+    def fake_run(launch, workspace, timeout_s, log_dir):
+        (workspace / "answer.txt").write_text("@mean1[1.0]\n", encoding="utf-8")
+        return {"rc": 0}
+
+    class MockGlm(g3.Channel):
+        def call(self, *, prompt, model, purpose, timeout_s):
+            return "@mean1[1.0]\n", g3.RoundUsage(1, 100, 1)
+
+    pi_ch = g3.PiChannel("ops/reqloop/g4", out_root=tmp_path / "out",
+                         build=lambda p, ws: ["echo"], run=fake_run)
+    assert pi_ch.tasks_dir is None
+    res = g3.run_g4(mp, tmp_path / "out", channel=MockGlm(), pi_channel=pi_ch)
+    assert pi_ch.tasks_dir == REPO / "ops" / "reqloop" / "g3_2" / "tasks"
+    native_pi_cells = [c for c in res["cells"] if c["arm"] == "native_pi"]
+    assert len(native_pi_cells) == 4
+    assert all(c["status"] == "ok" and c.get("error") is None for c in native_pi_cells)

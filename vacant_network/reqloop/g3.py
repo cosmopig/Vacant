@@ -1267,6 +1267,8 @@ def run_g4(manifest_path: pathlib.Path | str = G4_DEFAULT_MANIFEST,
     if tasks_dir is None:
         tasks_dir = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
     tasks_dir = pathlib.Path(tasks_dir)
+    if isinstance(pi_channel, PiChannel) and pi_channel.tasks_dir is None:
+        pi_channel.tasks_dir = tasks_dir
 
     result: dict = {
         "schema": "vacant.reqloop.g4.result/1",

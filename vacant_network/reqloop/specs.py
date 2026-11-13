@@ -55,6 +55,7 @@ def _resolve(file: str) -> pathlib.Path:
 def load_frozen_specs(manifest_input: str | pathlib.Path | dict[str, Any]) -> dict[str, dict[str, Any]]:
     """載入 manifest 的凍結規格並逐檔核驗 spec_sha256。
 
+    支援傳入 manifest 檔案路徑（str 或 Path）或已載入的 manifest dict。
     回傳 {task_id: 規格檔 JSON dict}。任何一題失敗即拋 SpecIntegrityError，
     不返回部分結果、不靜默 fallback（fail-closed）。
     `manifest_input` 可為檔案路徑，或已解析的 manifest dict（其
