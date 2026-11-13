@@ -646,3 +646,8 @@
 - 已驗證（本輪新跑）：票面驗收 1 passed（RC0）；test_replay_claims.py 18 passed；--missing-report 仍含 CLAIM_MISSING: dab_517/req_data_unchanged: values missing_param；--selftest PASS；--gate deterministic=66/76 false_pass=0 VERDICT: PASS；--json det=66 不變、K1 分佈 missing_raw 點名為 missing_param:values；anchors＋frozen_specs 10 passed（4 凍結檔未動）；git diff 2 檔 30+/4−（產品碼 9 行）。
 - 未驗證：CI 裁決（輪首 qwen 還沒跑完；argon 8 紅／worker 11 紅＝他枝新 WIP（argon 85167539b dict 輸入、worker 85956c78f e007 修正）、既有已上報、不代修）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 0 張＋doing/ 空＜3→規劃者依 11-13 §5 補票（每張動產品碼或 D1 重播器）；下一輪 doing/ 取票照做。
+## 2026-11-13 r1589（票 P20261113_1810-1 done：D4 load_frozen_specs 支援 manifest dict 入參；0 model calls）
+- 做了什麼：specs.load_frozen_specs(manifest_input: str|Path|dict)——dict 直接為 manifest、以 _manifest_path 點名來源檔（僅報錯文案）；路徑分支行為不變；無 specs 鍵照舊以 mp_label 點名 fail-closed；TDD 先紅（改前 Path(dict)→TypeError）後綠；測試 (a) json.loads 正控制回 4 題／(b) 篡改 spec_sha256 點名題號／(c) 無 specs 鍵必拋並點名 _manifest_path。
+- 已驗證（本輪新跑）：票面驗收 1 passed（RC0）；test_reqloop_frozen_specs.py 6 passed；test_g4_preregistration.py 6 passed；frozen_anchors 5 passed（4 凍結檔未動）；g4gate --dry-run RC0；git diff 2 檔 35+/9−（產品碼 net +8 行）。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝新 WIP、既有已上報、不代修）；g4gate.py／g3.py 未切 dict 入參（票限 ≤2 檔；呼叫端仍路徑入參＝舊行為）。
+- 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、0 發射（G4 人類簽核仍 null）、4 凍結檔未動（anchors 綠）。open/ 3 張（1810-2／1810-3／1810-4）≥3 達標；下一輪 doing/ 取票照做。
