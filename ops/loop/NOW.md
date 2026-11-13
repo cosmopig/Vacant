@@ -1,18 +1,17 @@
-# NOW.md — Vacant 現況（≤3KB；本檔每輪覆寫、歷史見 STATE.md）
+# NOW.md — Vacant 現況（≤3KB；本檔覆寫不追加，歷史看 STATE.md）
 
-## 現況（r1550、2026-11-13、0 model calls）
-- 本輪實質＝票 P20261113_0344-1（D3b）done：checks.py 重算集合加 "pearson"（KV/PLAIN 雙分派、_pearson_pair 與 pearson2 同口徑）＋tests/test_reqloop_checks_pearson.py 3 測試（已知 r 正控制／錯值負控制／缺欄 UNKNOWN／重算值不進 detail）。零模型、只加法、預設＝舊行為（11-13 定案 §3 受控解凍）。
-- 驗收（本輪新跑）：`pytest tests/test_reqloop_checks_pearson.py`→「3 passed」；`run_eval.py --all`→G1 39/39 冤枉0、REAL14 9/9 冤枉0/5、PHASE3 fixed7/unresolved2/rejected0/r2w0/held0＝g25 filing 三門數字一致；`replay_claims.py --selftest`→SELFTEST PASS（pearson 2 條翻 deterministic、K0=14/76、K1=66/76、unverified 7 條、負控制全紅位不變）。
-- 隨行簿記：replay_claims.py 基線 12→14（D3b 後）＋tests/test_replay_claims.py 6 綠；frozen_anchors 重立 CHECKS 錨 764119e2…/2907 行（filing 仍記解冻前 c7589c61…）；NOW 紅線改「凍結／受控解凍」且全部數值自磁碟重算。
-- 未驗證：CI 完成裁決（延下輪頭一次讀、不 poll）；成效門（11-13 定案 ≥30/76）K1=66 已達、K0=14 未達——最終裁決屬人類，本輪只報數不宣稱。
+## 現況（r1553、2026-11-13、0 model calls）
+- 本輪實質＝票 P20261113_0708-1（G4-SPEC）done：4 題 dab_725／dab_587／dab_657／dab_517 凍結需求規格落盤——ops/reqloop/extract/freeze_specs.py（讀 g26_claim_replay.json＋g3_2 workspace：選 deterministic＋有存驗證原語；共 25 條 6+5+8+6；交付物全為非輸入檔 answer.txt）＋ops/reqloop/g4/specs/4 份（task_id／goal_sha256／contract_sha256／items＋spec_sha256 自 hash）＋tests/test_freeze_g4_specs.py 4 測試（load／workspace hash 吻合／≥10 條 deterministic／負控制 4 全紅）。
+- 驗收（本輪新跑）：`python3 -m pytest tests/test_freeze_g4_specs.py -q`→RC=0（無 -q 複跑「4 passed in 0.07s」）；`freeze_specs.py --check`→4/4 OK；相關回歸 74 passed（g3 系＋replay、舊行為未改）；commit 7e6a52d02（6 檔純新增）。
+- 未驗證：CI 完成裁決（輪首 qwen27b 還沒跑完→下輪頭三分支一次讀、不 poll）；freeze_check 8 紅＝既有（stash 複驗同紅、GUARD_CONTENT_PIN 過時、源自 D4 票 g3.py 改動、非本票引入、未代修）；成效門（11-13 定案 ≥30/76）最終裁決屬人類（現況 K1=66/76 已達、K0=14/76）；G4 發射須人類點頭。
 
 ## 紅線
-- 凍結／受控解凍：repair.py 2795 行／blob 5147f8c3…、run_eval.py 332cd324…（仍凍結）；extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob 764119e2…（受控解凍、只加法、再改須重立錨留記錄）；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
-- 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest；0 model calls。
-- NOW.md ≤3KB；ops/loop/NOW.md cp 鏡像 byte-identical。
-- 不以文書改動充實進度：本輪實質＝D3b 加法＋測試＋replay/錨/紅線更新＋票結案、全可機械複核。
+- 凍結／受控解凍：repair.py 2795 行／blob 5147f8c3…、run_eval.py 332cd324…（凍結未動）；extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob 764119e2…（受控解凍、只加法）；g25 filing（6 sha256）；g3_1/g3_2/g3_3 歷史未改。
+- 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑 full pytest；0 model calls；未發射實驗。
+- NOW.md ≤3KB；ops/loop/NOW.md、ops/STATE.md cp 鏡像 byte-identical。
+- 不以文書改動充實進度：本輪實質＝新工具＋4 規格＋4 測試＋票結案、全可機械複核。
 
-## 下一步（2026-11-13 人類定案改寫，凌駕舊的下一步）
-1. 照 tickets/qwen/open/ 的 D1→D2→D3→D4 做（需求→可檢查條件；成效門 2/76→≥30/76、0 錯判 PASS）。
-2. 不再做任何 closure-check／結案量具／同步類工作（R20261113_0041-2 作廢）。
-3. extract.py／checks.py 受控解凍：只加法、新參數預設＝舊行為、run_eval.py --all 三門數字與 g25 filing 相同。
+## 下一步
+1. 照 tickets/qwen/open/ 做（2 張：g4-preregistration／requirementset-hash-integrity，照票面取下一張；open/ 不足 3 張由規劃者補）。
+2. 不再做任何 closure-check／結案量具／同步類工作（11-13 定案）；freeze_check 8 紅屬既有→上報規劃者、不代修；in-scope diff 6 檔同步裁決留規劃者。
+3. G4 發射前須人類點頭。
