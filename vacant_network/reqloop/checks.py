@@ -1635,7 +1635,7 @@ def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Pa
 # 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
 KV_RECOMPUTE_TYPES: frozenset[str] = frozenset(
     {"count_if", "zcount3", "mean_int_col", "max_row_first", "pearson2", "col_stats", "null_count",
-     "mean_col", "median_col", "std_col"}
+     "mean_col", "median_col", "std_col", "pearson"}
 )
 
 
@@ -1750,31 +1750,12 @@ def check_kv_recomputed(
             # （'630308[495000-801000]' → 630308）取前導點估計參與計算，口徑同 _mean_int_col；
             # 修前這類行被靜默丟棄，只在純數字子集合上算 r（dab_057 實測 297/856 對
             # r=0.52 → 把全量 r=0.97 的正確答案自信地 FAIL）。
-            col_a = str(rc.get("col_a", "")).strip()
-            col_b = str(rc.get("col_b", "")).strip()
-            if not col_a or not col_b:
-                raise UnknownSource("pearson2 需要 col_a 與 col_b")
-            if not rows or col_a not in rows[0] or col_b not in rows[0]:
-                raise UnknownSource(f"資料檔找不到欄 {col_a!r} 或 {col_b!r}")
-            xs: list[float] = []
-            ys: list[float] = []
-            for r in rows:
-                x = _point_estimate(r.get(col_a, ""))
-                y = _point_estimate(r.get(col_b, ""))
-                if x is None or y is None:
-                    continue
-                xs.append(x)
-                ys.append(y)
-            if len(xs) < 2:
-                raise UnknownSource("pearson2: 可用成對數值不足 2")
-            ma = sum(xs) / len(xs)
-            mb = sum(ys) / len(ys)
-            cov = sum((x - ma) * (y - mb) for x, y in zip(xs, ys))
-            va = sum((x - ma) ** 2 for x in xs)
-            vb = sum((y - mb) ** 2 for y in ys)
-            if va == 0.0 or vb == 0.0:
-                raise UnknownSource("pearson2: 常數欄，相關係數未定義")
-            expected = cov / ((va ** 0.5) * (vb ** 0.5))
+            expected = _pearson_pair(rows, rc)
+        elif rtype == "pearson":
+            # D3b（P20261113_0344-1，2026-11-13 人類定案第 3 條受控解凍）：與 pearson2 同口徑
+            # （col_a/col_b 成對 Pearson r）；taxonomy g3_2_prerun dab_517 req_correlation_value /
+            # req_pearson_method（2 條 unsupported_recompute_type:pearson）轉為可重算規則。
+            expected = _pearson_pair(rows, rc)
         elif rtype == "col_stats":
             expected = _col_stats(rows, rc)
         elif rtype == "null_count":
@@ -2053,6 +2034,40 @@ def _point_estimate(cell: Any) -> float | None:
             return None
         f = float(m.group(1))
     return f if math.isfinite(f) else None
+
+
+def _pearson_pair(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """pearson2 / pearson（D3b P20261113_0344-1，與 pearson2 同口徑）：兩欄成對可解析行、Pearson r。
+
+    - col_a/col_b 缺失、找不到欄、可用成對 <2、常數欄 → UnknownSource（不自評 → UNKNOWN）
+    - 缺值行忽略；點估計口徑同 _mean_int_col（vq-el4.10，r1222）
+    - round 由呼叫端統一處理；重算值不進 detail/evidence（防洩漏）
+    """
+    col_a = str(rc.get("col_a", "")).strip()
+    col_b = str(rc.get("col_b", "")).strip()
+    if not col_a or not col_b:
+        raise UnknownSource("pearson 需要 col_a 與 col_b")
+    if not rows or col_a not in rows[0] or col_b not in rows[0]:
+        raise UnknownSource(f"資料檔找不到欄 {col_a!r} 或 {col_b!r}")
+    xs: list[float] = []
+    ys: list[float] = []
+    for r in rows:
+        x = _point_estimate(r.get(col_a, ""))
+        y = _point_estimate(r.get(col_b, ""))
+        if x is None or y is None:
+            continue
+        xs.append(x)
+        ys.append(y)
+    if len(xs) < 2:
+        raise UnknownSource("pearson: 可用成對數值不足 2")
+    ma = sum(xs) / len(xs)
+    mb = sum(ys) / len(ys)
+    cov = sum((x - ma) * (y - mb) for x, y in zip(xs, ys))
+    va = sum((x - ma) ** 2 for x in xs)
+    vb = sum((y - mb) ** 2 for y in ys)
+    if va == 0.0 or vb == 0.0:
+        raise UnknownSource("pearson: 常數欄，相關係數未定義")
+    return cov / ((va ** 0.5) * (vb ** 0.5))
 
 
 def _mean_int_col(
@@ -2419,7 +2434,7 @@ def _fee_ids_lookup(
 # 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
 PLAIN_RECOMPUTE_TYPES: frozenset[str] = frozenset(
     {"fee_ids_lookup", "mode_col", "cond_rate", "unique_count", "col_max", "scheme_fee_avg",
-     "group_ratio_stat", "mean_col", "median_col", "std_col"}
+     "group_ratio_stat", "mean_col", "median_col", "std_col", "pearson"}
 )
 
 
@@ -2493,6 +2508,9 @@ def check_plain_recomputed(
             expected = _median_col(rows, rc)
         elif rtype == "std_col":
             expected = _std_col(rows, rc)
+        elif rtype == "pearson":
+            # D3b（P20261113_0344-1）：與 pearson2 同口徑（col_a/col_b 成對 Pearson r）
+            expected = _pearson_pair(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
         if isinstance(expected, (int, float)) and not isinstance(expected, bool):

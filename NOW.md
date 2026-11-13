@@ -8,7 +8,7 @@
 - 未驗證：CI 完成裁決（輪首三分支皆還沒跑完、延下輪頭一次讀不 poll）；envelope 數值未對 cell.json 逐格獨立重算（採信 envelope_compliance.py 重算、同 e003/e005 口徑）；量具只鎖 smoke 結案文字與數值、非機制效力證明。
 
 ## 紅線
-- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob d401a8ae…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
 - 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest；0 model calls。
 - NOW.md ≤3KB；ops/loop/NOW.md cp 鏡像 byte-identical。
 - 不以文書改動充實進度：本輪實質＝新增量具＋測試 2 檔＋票結案＋簿記、全可機械複核。

@@ -466,6 +466,16 @@ EXPECTED_CI_CONTRACT_TEST_NAMES = (
 )
 
 
+# 2026-11-13 人類裁決 §3 受控解凍：extract.py 與 checks.py 解凍；run_eval.py 仍凍結。
+# g25 filing 為歷史備案（不改）：extract.py 記 51abfec3…、checks.py 記 c7589c61…；
+# 仍凍結的 run_eval.py 須與現行 repo 100% 吻合；
+# 解凍檔之現行基線由 tests/test_reqloop_frozen_anchors.py 與 now_redline 把守。
+HISTORICAL_CODE_FILING_SHA256 = {
+    "vacant_network/reqloop/extract.py": "51abfec319d21813d7223bc5aa48417417680ba09aa0bd4d097b2c49ea223da7",
+    "vacant_network/reqloop/checks.py": "c7589c610c629380f8919a08e1e707bb7ad65143cd4e0131a301158ab82fd4f4",
+}
+
+
 def check_filing_code() -> None:
     d = json.loads(FILING.read_text(encoding="utf-8"))
     keys = set(d["code"])
@@ -487,7 +497,12 @@ def check_filing_code() -> None:
         # r1288（vq-el4.36）：備案 sha256 為 null（未 pin）＝未測量；檔不存在時
         # _sha256→None，舊碼 None == None → True＝「3/3 MATCH」假綠燈（實測）。
         # pin 與實算 sha 皆須非 null 才可 MATCH（I-4：未測量不是通過；H-0 同構）。
-        match = mine is not None and meta["sha256"] is not None and mine == meta["sha256"]
+        if rel in HISTORICAL_CODE_FILING_SHA256:
+            match = bool(mine is not None and mine == meta.get("sha256")) or (
+                meta.get("sha256") == HISTORICAL_CODE_FILING_SHA256[rel]
+            )
+        else:
+            match = mine is not None and meta.get("sha256") is not None and mine == meta["sha256"]
         ok += int(match)
         names.append(f"{Path(rel).name}{'MATCH' if match else 'MISMATCH'}")
     total = len(names)

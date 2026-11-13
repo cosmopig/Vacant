@@ -1305,17 +1305,17 @@ GUARD_CONTENT_PIN = {
     # 依「合法修改須顯式更新錨並留記錄」紀律補 pin（不改 ruler 邏輯、不削守衛；
     # r1393 docstring 虛記同步更正為如實記載）：
     # (1) ops/reqloop/freeze_check.py
-    #     cfbfba31c224756b81e6fdf38d15331e8cd104ad7189399764162f9e274e2f9e
-    #     → 42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5
+    #     42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5
+    #     → a83cb2df864e93a84673f41271cb4f43fc8a4f6130d12c51845cf44c39a57218
     "ops/reqloop/freeze_check.py":
-        "42ab72d217d429638125a3bcccb1b9318dca7d4c8b3d75baef6da4e0120c39d5",
-    # r1546 解凍記錄（P20261113_0300-3 D3、11-13 定案第 3 條：extract.py/checks.py
-    # 受控解凍；r1544-r1547 重錨 EXTRACT 凍結點；sha256sum 磁碟實算、非轉抄）：
+        "a83cb2df864e93a84673f41271cb4f43fc8a4f6130d12c51845cf44c39a57218",
+    # r1546/r1550 解凍記錄（P20261113_0300-3 D3 / 0344-1 D3b、11-13 定案第 3 條：extract.py/checks.py
+    # 受控解凍；r1544-r1550 重錨 EXTRACT/CHECKS 凍結點；sha256sum 磁碟實算、非轉抄）：
     #   tests/test_reqloop_frozen_anchors.py
     #     90d686e3ec2de1c868e3e475d8abb96f63f8a22a7bc747d9898dd1a3ecdf780b
-    #     → b3c53dd90da48edb8a91af4ae9f9e2bd143796e3fab7394cc9bceaa922ec4927
+    #     → 27c0c1245fc76ef5053363067c436a6e9a2c38c885b1d95219b1c6407ce63156
     "tests/test_reqloop_frozen_anchors.py":
-        "b3c53dd90da48edb8a91af4ae9f9e2bd143796e3fab7394cc9bceaa922ec4927",
+        "27c0c1245fc76ef5053363067c436a6e9a2c38c885b1d95219b1c6407ce63156",
     "tests/test_reqloop_ci_contract.py":
         "eafe829013f15de0e0933aad879ea40381f6239873ce885926951ea699b69d58",
     # r1347（vq-el4.56）擴覆蓋：第二收口標準（審查指示 #3 點名）兩檔——r1319 之後建立、

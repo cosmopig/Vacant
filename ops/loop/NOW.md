@@ -8,13 +8,12 @@
 - 未驗證：CI 完成裁決（輪首三分支皆還沒跑完、延下輪頭一次讀不 poll）；envelope 數值未對 cell.json 逐格獨立重算（採信 envelope_compliance.py 重算、同 e003/e005 口徑）；量具只鎖 smoke 結案文字與數值、非機制效力證明。
 
 ## 紅線
-- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1217 行／blob e757aec5…、checks.py c7589c61…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
+- 凍結 4 檔不改：repair.py 2795 行／blob 5147f8c3…、extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob d401a8ae…、run_eval.py 332cd324…；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
 - 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest；0 model calls。
 - NOW.md ≤3KB；ops/loop/NOW.md cp 鏡像 byte-identical。
 - 不以文書改動充實進度：本輪實質＝新增量具＋測試 2 檔＋票結案＋簿記、全可機械複核。
 
-## 下一步
-1. 下輪輪首 CI 三分支一次讀（不 poll）：紅→讀 log 根因、不猜。
-2. 本輪 2 檔產物三分支 worker/argon 同步（in-scope diff 2 檔、下輪頭補、票面 deferred 項）。
-3. 下一票：R20261113_0041-2（smoke opencode 結案複核、tickets/open/）；intake 票 R20261113_0000-1 在途不碰（worker owns）。
-4. G 系列維持停止態、0 呼叫。
+## 下一步（2026-11-13 人類定案改寫，凌駕舊的下一步）
+1. 照 tickets/qwen/open/ 的 D1→D2→D3→D4 做（需求→可檢查條件；成效門 2/76→≥30/76、0 錯判 PASS）。
+2. 不再做任何 closure-check／結案量具／同步類工作（R20261113_0041-2 作廢）。
+3. extract.py／checks.py 受控解凍：只加法、新參數預設＝舊行為、run_eval.py --all 三門數字與 g25 filing 相同。

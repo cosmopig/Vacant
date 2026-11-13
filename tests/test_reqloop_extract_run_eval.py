@@ -147,7 +147,7 @@ def test_phase2_prompt_recompute_types_exhaustive_vs_checks_dispatch():
     src = pathlib.Path(checks.__file__).read_text(encoding="utf-8")
     dispatched = set(re.findall(r'rtype == "(\w+)"', src))
     checks_sets = set(checks.KV_RECOMPUTE_TYPES) | set(checks.PLAIN_RECOMPUTE_TYPES)
-    D3_ADDITIONS = {"mean_col", "median_col", "std_col"}  # P20261113_0300-3
+    D3_ADDITIONS = {"mean_col", "median_col", "std_col", "pearson"}  # P20261113_0300-3 / P20261113_0344-1
     # (1) kv_recomputed 與 plain_recomputed 語法表裡的每個型別都要有 dispatch
     assert set(RECOMPUTE_TYPES) <= dispatched, set(RECOMPUTE_TYPES) - dispatched
     # (2) dispatch 出來的型別都要在 checks.py 集合裡（單一事實來源＝checks.py）
