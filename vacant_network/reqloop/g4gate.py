@@ -123,7 +123,9 @@ def build_g4_execution_plan(manifest: dict[str, Any] | None = None,
 
     在 `g4_dry_run` 通過（4 規格存在＋hash 自校驗＋可檢查性守衛）的基礎上，逐題驗證任務工作區
     （`tasks_dir/<task>/workspace/goal.md`＋`contract.md`，預設 `ops/reqloop/g3_2/tasks`）齊備，
-    組裝每格 task_id/arm/workspace/spec_file/n_checkable；任一題缺工作區檔案→ValueError fail-closed。"""
+    並核對其 sha256 與凍結規格綁定的 `goal_sha256`／`contract_sha256` 吻合
+    （票 P20261113_1307-3：輸入檔漂移在離線組裝時即攔截），
+    組裝每格 task_id/arm/workspace/spec_file/n_checkable；任一題缺工作區檔案或雜湊不符→ValueError fail-closed。"""
     if manifest is None:
         manifest = load_g4_manifest(DEFAULT_MANIFEST)
     if tasks_dir is None:
@@ -137,6 +139,10 @@ def build_g4_execution_plan(manifest: dict[str, Any] | None = None,
         if missing:
             raise ValueError(f"{task}: 任務工作區缺 {', '.join(missing)}（{ws}；fail-closed）")
         spec_file = manifest["specs"][task]["file"]
+        spec_set = RequirementSet.load(REPO / spec_file)
+        ok_hash, why_hash = spec_set.verify_task_hash(ws)
+        if not ok_hash:
+            raise ValueError(f"{task}: 任務工作區檔案雜湊不符（{why_hash}；fail-closed）")
         for arm in manifest["arms"]:
             cells.append({"task_id": task, "arm": arm, "workspace": str(ws),
                           "spec_file": spec_file, "n_checkable": n_checkable[task]})

@@ -103,8 +103,20 @@ def test_dry_run_fails_closed_on_shell_specs(tmp_path):
             it.update({"deliverable": "20170413_000000_group_statistics.csv"}) for it in raw["items"]]))
 
 
+def _copy_real_workspaces(tasks_dir: pathlib.Path) -> None:
+    """把真實任務工作檔（規格已綁 goal／contract sha256）複製到 tasks_dir，作負控制基底。"""
+    real = REPO / "ops" / "reqloop" / "g3_2" / "tasks"
+    for t in EXPECTED_TASKS:
+        dst = tasks_dir / t / "workspace"
+        dst.mkdir(parents=True)
+        for name in ("goal.md", "contract.md"):
+            (dst / name).write_bytes((real / t / "workspace" / name).read_bytes())
+
+
 def test_build_g4_execution_plan(tmp_path):
-    """票 P20261113_1206-1：12 格執行排程矩陣（0 model calls）＋工作區缺檔 fail-closed。"""
+    """票 P20261113_1206-1：12 格執行排程矩陣（0 model calls）＋工作區缺檔 fail-closed。
+
+    票 P20261113_1307-3：＋任務工作區檔案雜湊不符（goal.md 被改一個字元）fail-closed 負控制。"""
     m = json.loads(MANIFEST.read_text(encoding="utf-8"))
     plan = build_g4_execution_plan(m)
     assert plan["status"] == "ready" and plan["n_cells"] == 12 == len(plan["cells"])
@@ -117,13 +129,21 @@ def test_build_g4_execution_plan(tmp_path):
         assert ws.is_dir() and (ws / "goal.md").is_file() and (ws / "contract.md").is_file()
         assert (REPO / c["spec_file"]).is_file()
 
-    # 負控制：任一題工作區缺 goal.md → ValueError（fail-closed，寧拒不空轉）
-    tasks_dir = tmp_path / "tasks"
-    for t in EXPECTED_TASKS:
-        ws = tasks_dir / t / "workspace"
-        ws.mkdir(parents=True)
-        (ws / "goal.md").write_text("g", encoding="utf-8")
-        (ws / "contract.md").write_text("c", encoding="utf-8")
+    # 負控制（缺檔）：任一題工作區缺 goal.md → ValueError（fail-closed，寧拒不空轉）。
+    # 以真實工作檔為基底（規格已綁 hash），才能 isolating 到「缺檔」這一條路徑。
+    tasks_dir = tmp_path / "tasks_missing"
+    _copy_real_workspaces(tasks_dir)
     (tasks_dir / "dab_657" / "workspace" / "goal.md").unlink()
-    with pytest.raises(ValueError, match="dab_657"):
+    with pytest.raises(ValueError, match="dab_657.*缺"):
         build_g4_execution_plan(m, tasks_dir=tasks_dir)
+
+    # 負控制（票 P20261113_1307-3，雜湊不符）：工作區 goal.md 被改一個字元 →
+    # ValueError 含「雜湊不符」（fail-closed：輸入檔漂移在離線組裝時即攔截，
+    # 不必等到真發射 load_frozen_spec 才報錯）。
+    tasks_dir2 = tmp_path / "tasks_tampered"
+    _copy_real_workspaces(tasks_dir2)
+    goal = tasks_dir2 / "dab_657" / "workspace" / "goal.md"
+    orig = goal.read_text(encoding="utf-8")
+    goal.write_text(("x" if orig[0] != "x" else "y") + orig[1:], encoding="utf-8")
+    with pytest.raises(ValueError, match="dab_657.*雜湊不符"):
+        build_g4_execution_plan(m, tasks_dir=tasks_dir2)
