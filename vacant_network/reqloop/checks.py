@@ -1634,7 +1634,8 @@ def audit_kv_preservation(draft_path: pathlib.Path | str, final_path: pathlib.Pa
 # kv_recomputed 支援的重算型別（與下方 rtype 分派鏈保持同步；
 # 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
 KV_RECOMPUTE_TYPES: frozenset[str] = frozenset(
-    {"count_if", "zcount3", "mean_int_col", "max_row_first", "pearson2", "col_stats", "null_count"}
+    {"count_if", "zcount3", "mean_int_col", "max_row_first", "pearson2", "col_stats", "null_count",
+     "mean_col", "median_col", "std_col"}
 )
 
 
@@ -1778,6 +1779,12 @@ def check_kv_recomputed(
             expected = _col_stats(rows, rc)
         elif rtype == "null_count":
             expected = _null_count(rows, rc)
+        elif rtype == "mean_col":
+            expected = _mean_col(rows, rc)
+        elif rtype == "median_col":
+            expected = _median_col(rows, rc)
+        elif rtype == "std_col":
+            expected = _std_col(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
         if not isinstance(expected, (int, float)) or isinstance(expected, bool) or not math.isfinite(float(expected)):
@@ -1894,6 +1901,59 @@ def _col_stats(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
             m4 = sum(v ** 4 for v in d) / n
             val = ((n + 1) * (m4 / m2 ** 2 - 3) + 6) * (n - 1) / ((n - 2) * (n - 3))
     return val
+
+
+def _stat_col_values(rows: list[dict[str, Any]], col: str) -> list[float]:
+    """D3（P20261113_0300-3，2026-11-13 受控解凍）：單欄統計（mean_col/median_col/std_col）
+    取值口徑，同 pearson2（vq-el4.10，r1222）：純數值原樣解析；附信賴區間的點估計字串
+    取前導點估計（'630308[495000-801000]' → 630308）；null/空/不可解析 → 跳過該列
+    （修前這類行被靜默丟棄、只在錯誤子集上計算是已知缺陷，不得重蹈）。
+    欄不存在或全不可解析 → UnknownSource（不自評）。"""
+    if not rows or col not in rows[0]:
+        raise UnknownSource(f"資料檔找不到欄 {col!r}")
+    vals: list[float] = []
+    for r in rows:
+        v = _point_estimate(r.get(col, ""))
+        if v is not None:
+            vals.append(v)
+    if not vals:
+        raise UnknownSource(f"欄 {col!r} 沒有可解析為數值的值")
+    return vals
+
+
+def _mean_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """mean_col（D3，2026-11-13 受控解凍）：單欄均值，pandas 口徑（mean(df[col])；
+    缺失/不可解析值忽略；round 由呼叫端統一處理）。"""
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("mean_col 需要 col")
+    x = _stat_col_values(rows, col)
+    return sum(x) / len(x)
+
+
+def _median_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """median_col（D3，2026-11-13 受控解凍）：單欄中位數（pandas median 口徑；
+    偶數個值取中位兩值平均）。"""
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("median_col 需要 col")
+    x = sorted(_stat_col_values(rows, col))
+    n = len(x)
+    return x[n // 2] if n % 2 == 1 else (x[n // 2 - 1] + x[n // 2]) / 2
+
+
+def _std_col(rows: list[dict[str, Any]], rc: dict[str, Any]) -> float:
+    """std_col（D3，2026-11-13 受控解凍）：單欄標準差，pandas 口徑＝樣本標準差
+    （df[col].std() 預設 ddof=1）；n<2 → UnknownSource（未定義，不自評）。"""
+    col = str(rc.get("col", "")).strip()
+    if not col:
+        raise UnknownSource("std_col 需要 col")
+    x = _stat_col_values(rows, col)
+    n = len(x)
+    if n < 2:
+        raise UnknownSource("std_col 需要 n≥2")
+    m = sum(x) / n
+    return math.sqrt(sum((v - m) ** 2 for v in x) / (n - 1))
 
 
 _DEFAULT_NULL_VALUES = ("", "none", "null", "nan", "na", "n/a")
@@ -2359,7 +2419,7 @@ def _fee_ids_lookup(
 # 守衛測試 tests/test_reqloop_extract.py::test_recompute_type_sets_match_dispatch 以源碼核對）。
 PLAIN_RECOMPUTE_TYPES: frozenset[str] = frozenset(
     {"fee_ids_lookup", "mode_col", "cond_rate", "unique_count", "col_max", "scheme_fee_avg",
-     "group_ratio_stat"}
+     "group_ratio_stat", "mean_col", "median_col", "std_col"}
 )
 
 
@@ -2427,6 +2487,12 @@ def check_plain_recomputed(
             expected = _group_ratio_stat(rows, rc)
         elif rtype == "scheme_fee_avg":
             expected = _scheme_fee_avg(rows, rc)
+        elif rtype == "mean_col":
+            expected = _mean_col(rows, rc)
+        elif rtype == "median_col":
+            expected = _median_col(rows, rc)
+        elif rtype == "std_col":
+            expected = _std_col(rows, rc)
         else:
             raise UnknownSource(f"不支援的重算規則: {rtype!r}")
         if isinstance(expected, (int, float)) and not isinstance(expected, bool):
