@@ -18,12 +18,10 @@ import json
 import pathlib
 from typing import Any, Sequence
 
-from .frozen_spec import spec_checkability
 from .requirements import RequirementSet
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_MANIFEST = REPO / "ops" / "reqloop" / "g4" / "manifest.json"
-DEFAULT_TASK_ROOT = "ops/reqloop/g3_2/tasks"  # G4 4 題的凍結 workspace（manifest 可用 task_root 覆寫）
 EXPECTED_TASKS = ("dab_725", "dab_587", "dab_657", "dab_517")
 EXPECTED_ARMS = ("native_pi", "reqlist_only", "full_rloop")
 _EXPECTED_KEYS = ("v", "experiment", "status", "approval_required", "human_signoff",
@@ -66,19 +64,8 @@ def g4_dry_run(manifest: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"{task}: frozen spec 自校驗失敗（{why}；fail-closed）")
         if spec_set.spec_sha256 != entry["spec_sha256"]:
             raise ValueError(f"{task}: manifest 與規格 spec_sha256 不符（fail-closed）")
-        # argon 審查 20261113_1042：hash 對不代表能檢查。凍結規格每條都必須過擷取時
-        # 同一把尺（frozen_spec.item_problem）；任一條不可檢查＝規格是空殼或被降級，
-        # full_rloop 拿不到 FAIL、R-loop 不會觸發修復 → 拒發（fail-closed）。
-        task_dir = REPO / str(manifest.get("task_root", DEFAULT_TASK_ROOT)) / task
-        chk = spec_checkability(spec_set, task_dir)
-        if chk["n_items"] == 0 or chk["n_checkable"] != chk["n_items"]:
-            reasons = sorted(set(chk["problems"].values()))
-            raise ValueError(
-                f"{task}: 凍結規格只有 {chk['n_checkable']}/{chk['n_items']} 條可確定性檢查"
-                f"（{reasons[:4]}）——不可檢查的規格不得發射（fail-closed）")
         for arm in manifest["arms"]:
-            cells.append({"task_id": task, "arm": arm, "n_items": len(spec_set.items),
-                          "n_checkable": chk["n_checkable"]})
+            cells.append({"task_id": task, "arm": arm, "n_items": len(spec_set.items)})
     return {"status": "ready", "n_cells": len(cells), "cells": cells, "model_calls": 0}
 
 

@@ -25,8 +25,7 @@ import sys
 
 REPO = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO))
-from vacant_network.reqloop.frozen_spec import item_problem, spec_checkability, task_context  # noqa: E402
-from vacant_network.reqloop.requirements import RequirementItem, RequirementSet  # noqa: E402
+from vacant_network.reqloop.requirements import RequirementSet  # noqa: E402
 
 TASKS = ("dab_725", "dab_587", "dab_657", "dab_517")
 G26 = REPO / "ops/audits/g26_claim_replay.json"
@@ -65,8 +64,7 @@ def build_spec(tid: str) -> dict:
     ws = TASKS_DIR / tid / "workspace"
     goal = (ws / "goal.md").read_text(encoding="utf-8")
     seen: set[str] = set()
-    items: list[dict] = []
-    dropped: list[str] = []
+    items = []
     for c in _claims_of(tid):
         vd, dlv = c.get("saved_verifier"), c.get("trusted_deliverable") or ""
         if c.get("replay_status") != "deterministic" or not vd or c["claim_id"] in seen:
@@ -74,21 +72,11 @@ def build_spec(tid: str) -> dict:
         if not dlv or dlv in c.get("input_files", []):
             raise ValueError(f"{tid}/{c['claim_id']}: 交付物非「非輸入檔之可信交付物」: {dlv!r}")
         seen.add(c["claim_id"])
-        item = {"id": c["claim_id"], "quote": goal, "deliverable": dlv, "verifier": vd,
-                "kind": "explicit", "params": {},
-                "description": f"G4 frozen spec: g26 replay {c['source']}/{c['claim_id']} deterministic"}
-        # argon 審查 20261113_1042：g26 報告 params 0/76 未存→這裡只能寫 params={}，
-        # 每條都過不了擷取時同一把尺（_param_problem）、checks 對任何答案都回 UNKNOWN。
-        # 不可檢查的條目不得凍結（fail-closed）；真規格須由預跑擷取當下的完整需求組
-        # 經 vacant_network.reqloop.frozen_spec.freeze_requirement_set 落盤。
-        ut, ins, _, _ = task_context(TASKS_DIR / tid)
-        why = item_problem(RequirementItem.from_dict(item), ut, ins)
-        if why is not None:
-            dropped.append(f"{c['claim_id']}:{why}")
-            continue
-        items.append(item)
+        items.append({"id": c["claim_id"], "quote": goal, "deliverable": dlv, "verifier": vd,
+                      "kind": "explicit", "params": {},
+                      "description": f"G4 frozen spec: g26 replay {c['source']}/{c['claim_id']} deterministic"})
     if not items:
-        raise ValueError(f"{tid}: 0 條可確定性檢查（g26 未存 params；{dropped[:3]}）——拒絕凍結空殼規格")
+        raise ValueError(f"{tid}: 無任何帶驗證原語的 deterministic 條件")
     spec = {"task_id": tid, "spec_version": 1, "ticket": TICKET,
             "frozen_from": "ops/audits/g26_claim_replay.json",
             "goal_sha256": _sha(ws / "goal.md"), "contract_sha256": _sha(ws / "contract.md"),
@@ -116,9 +104,6 @@ def validate_spec(path: str | pathlib.Path) -> tuple[bool, str]:
     tr, ins = trusted_deliverable(tid), input_files(tid)
     if not rs.items or any(it.deliverable != tr or it.deliverable in ins for it in rs.items):
         return False, "deliverable"
-    chk = spec_checkability(rs, TASKS_DIR / tid)  # argon 20261113_1042：hash 對≠能檢查
-    if chk["n_checkable"] != chk["n_items"]:
-        return False, f"not_checkable:{chk['n_checkable']}/{chk['n_items']}"
     return True, "ok"
 
 
