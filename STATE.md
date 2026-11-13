@@ -513,3 +513,10 @@
 - 未驗證：CI 完成裁決（輪首三分支皆「還沒跑完」→延下輪頭一次讀、不 poll）；tests/test_reqloop_freeze_check.py 8 紅＝GUARD_CONTENT_PIN 過時（見 DECISION）；G4 真發射須人類簽核（human_signoff=null、本輪 0 發射）。
 - DECISION（8 紅定案、非本輪引入）：8 紅全在 test_reqloop_freeze_check.py，根因＝2 份守衛檔 GUARD_CONTENT_PIN 過時（g3.py＝D4 r1552 合法 `--spec-dir`、now_redline.py＝r1550 合法 REDLINE_PREFIX）；pin 前後未變（merge 前後 pin 值相同），故非本輪 merge 引入——merge 反而更新了 freeze_check.py/test_frozen_anchors.py 之 pin（argon 新版）。依 standing redline「freeze_check 既有紅→上報規劃者、不代修」（r1553/r1554/r1555 同款）本輪不代修、留規劃者裁決（正確修法＝以 g3.py／now_redline.py 現行 hash 更新 GUARD_CONTENT_PIN 並留記錄）。
 - 紅線＋下一步：無 push（loop 自推 auto/qwen27b）、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、凍結 4 檔＋g25 filing 6 sha 未改、0 model calls、未發射、不以文書改動充實進度（實質＝合併 argon＋9 衝突解析＋紅線修復、全可機械複核）。下一步：下輪頭 CI 三分支一次讀（紅→讀 log 根因不猜）；open/ 空→依 11-13 定案§5 規劃者補票；freeze_check 8 紅上報規劃者、不代修。
+
+## 2026-11-13 r1557（票 P20261113_0846-1 done：g3 load_frozen_spec 相容 G4 原生扁平 RequirementSet 格式＋自校驗；0 model calls）
+- 做了什麼：vacant_network/reqloop/g3.py::load_frozen_spec 雙格式（reqset 巢狀／items 扁平＝RequirementSet.load() 原生＋G4 規格）；記載 goal/contract_sha256 根優先、reqset 兜底（皆無＝fail-closed）；from_dict 例外補 ValueError（RequirementItem 驗證）；tests/test_reqloop_g3_frozen_spec.py＋2（4 份真實 G4 規格載入正控制＝條目數/ task_id 對 g4 manifest；扁平 goal_sha256 篡改 1 碼負控制→ValueError）。票尾 3 行結果→mv done/。
+- 已驗證（本輪新跑）：票面驗收 `python3 -m pytest tests/test_reqloop_g3_frozen_spec.py`→「5 passed in 0.10s」（票面寫 4 passed＝既有 3＋新 2 的計數差，全過為實質達標、未刪既有測試守 reqset 相容性，已記票尾）；回歸 freeze_g4_specs＋g4_preregistration＋reqloop_g3＋g3gate＋requirements→81 passed；git diff 只 2 檔（g3.py＋38/‑15、測試＋38）；凍結 4 檔（repair/extract/checks/run_eval）與 g25 filing 未動。commit 86af7ce4a。
+- 未驗證：CI 裁決（輪首 auto/qwen27b 還沒跑完；argon/worker 紅＝既有 freeze_check/now_redline 系、r1556 已上報規劃者不代修）；G4 真發射仍須人類簽核（human_signoff=null、本輪 0 發射）。
+- DECISION：本票只動 g3.py＋測試（11-13 §3 受控解凍只涵蓋 extract.py/checks.py、本票不涉）；open/ 剩 2 張（0846-2 RequirementSet spec_sha 完整性、0846-3 D1 replay gate CLI）→下輪照做或依 §5 規劃者補至 ≥3。
+- 紅線＋下一步：無 push、main 未動、無 reset/rebase、.github/workflows/ 只讀、hidden/scorer 未讀、未跑全 pytest、0 model calls、未發射。下一步：doing/ 空→開 open/ 下一票（P20261113_0846-2 或 -3）；輪頭一次讀 CI 三分支（紅→讀 log 根因不猜）。
