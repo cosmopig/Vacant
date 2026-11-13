@@ -9,7 +9,7 @@
   `--gate` 仍 66/76 false_pass=0；4 凍結檔未動；G4 簽核仍 null、0 發射。
 
 ## 紅線
-- 凍結：repair.py／run_eval.py 仍凍結；extract.py／checks.py 受控解凍只加法；g25 filing（6 sha256）未動。
+- 凍結／受控解凍：repair.py 2795 行／blob 5147f8c3…、run_eval.py 1298 行／blob b6d2f37f… 仍凍結；extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob d401a8ae… 受控解凍只加法；g25 filing（6 sha256）未動。
 - 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest；0 model calls。
 - G4 真發射仍須人類簽核（human_signoff=null）；本輪 0 發射。
 - CI：輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝 WIP、既有、已上報、不代修。

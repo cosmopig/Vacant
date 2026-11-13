@@ -1,6 +1,6 @@
 {
   "ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
-  "generated_at": "2026-11-13T07:31:18+00:00",
+  "generated_at": "2026-11-13T18:54:53+00:00",
   "code_sha": {
     "vacant_network/reqloop/extract.py": "b502741bcd290d1bfefc257986be838d6356d4f3",
     "vacant_network/reqloop/checks.py": "d401a8ae291e3f5c53972c1a76600e72d629f916"
@@ -13,10 +13,80 @@
   },
   "baseline_K0": {
     "total": 76,
+    "by_task": {
+      "dab_035": {
+        "total": 2,
+        "deterministic": 0,
+        "unverified": 2,
+        "missing_raw": 0
+      },
+      "dab_055": {
+        "total": 5,
+        "deterministic": 4,
+        "unverified": 1,
+        "missing_raw": 0
+      },
+      "dab_105": {
+        "total": 6,
+        "deterministic": 0,
+        "unverified": 6,
+        "missing_raw": 0
+      },
+      "dab_218": {
+        "total": 5,
+        "deterministic": 0,
+        "unverified": 5,
+        "missing_raw": 0
+      },
+      "dab_725": {
+        "total": 18,
+        "deterministic": 0,
+        "unverified": 16,
+        "missing_raw": 2
+      },
+      "dab_587": {
+        "total": 10,
+        "deterministic": 0,
+        "unverified": 10,
+        "missing_raw": 0
+      },
+      "dab_657": {
+        "total": 16,
+        "deterministic": 8,
+        "unverified": 8,
+        "missing_raw": 0
+      },
+      "dab_517": {
+        "total": 14,
+        "deterministic": 2,
+        "unverified": 11,
+        "missing_raw": 1
+      }
+    },
     "replayable": 73,
     "deterministic": 14,
     "unverified": 59,
     "missing_raw": 3,
+    "missing_detail": [
+      {
+        "task_id": "dab_517",
+        "claim_id": "req_data_unchanged",
+        "field": "values",
+        "reason": "missing_param"
+      },
+      {
+        "task_id": "dab_725",
+        "claim_id": "R1",
+        "field": "verifier",
+        "reason": "raw_fields_not_saved"
+      },
+      {
+        "task_id": "dab_725",
+        "claim_id": "R6",
+        "field": "verifier",
+        "reason": "raw_fields_not_saved"
+      }
+    ],
     "missing_raw_claims": [
       {
         "source": "g3_2_prerun",
@@ -59,7 +129,7 @@
         "saved_verifier": "rowset_filter",
         "trusted_deliverable": null,
         "replay_status": "missing_raw",
-        "replay_reason": null,
+        "replay_reason": "missing_param:values",
         "user_text_chars": 1142,
         "input_files": [
           "titanic.csv"
@@ -70,7 +140,7 @@
     "reason_distribution": {
       "deliverable_not_in_request:*": 52,
       "deterministic": 14,
-      "missing_raw": 1,
+      "missing_param:values": 1,
       "model_declared_unverified": 4,
       "raw_fields_not_saved": 2,
       "unknown_verifier:missing": 3
@@ -91,10 +161,80 @@
   },
   "d2_K1": {
     "total": 76,
+    "by_task": {
+      "dab_035": {
+        "total": 2,
+        "deterministic": 2,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_055": {
+        "total": 5,
+        "deterministic": 5,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_105": {
+        "total": 6,
+        "deterministic": 6,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_218": {
+        "total": 5,
+        "deterministic": 5,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_725": {
+        "total": 18,
+        "deterministic": 14,
+        "unverified": 2,
+        "missing_raw": 2
+      },
+      "dab_587": {
+        "total": 10,
+        "deterministic": 7,
+        "unverified": 3,
+        "missing_raw": 0
+      },
+      "dab_657": {
+        "total": 16,
+        "deterministic": 16,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_517": {
+        "total": 14,
+        "deterministic": 11,
+        "unverified": 2,
+        "missing_raw": 1
+      }
+    },
     "replayable": 73,
     "deterministic": 66,
     "unverified": 7,
     "missing_raw": 3,
+    "missing_detail": [
+      {
+        "task_id": "dab_517",
+        "claim_id": "req_data_unchanged",
+        "field": "values",
+        "reason": "missing_param"
+      },
+      {
+        "task_id": "dab_725",
+        "claim_id": "R1",
+        "field": "verifier",
+        "reason": "raw_fields_not_saved"
+      },
+      {
+        "task_id": "dab_725",
+        "claim_id": "R6",
+        "field": "verifier",
+        "reason": "raw_fields_not_saved"
+      }
+    ],
     "missing_raw_claims": [
       {
         "source": "g3_2_prerun",
@@ -137,7 +277,7 @@
         "saved_verifier": "rowset_filter",
         "trusted_deliverable": "answer.txt",
         "replay_status": "missing_raw",
-        "replay_reason": null,
+        "replay_reason": "missing_param:values",
         "user_text_chars": 1142,
         "input_files": [
           "titanic.csv"
@@ -147,7 +287,7 @@
     ],
     "reason_distribution": {
       "deterministic": 66,
-      "missing_raw": 1,
+      "missing_param:values": 1,
       "model_declared_unverified": 4,
       "raw_fields_not_saved": 2,
       "unknown_verifier:missing": 3
@@ -174,10 +314,80 @@
   },
   "totals": {
     "total": 76,
+    "by_task": {
+      "dab_035": {
+        "total": 2,
+        "deterministic": 2,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_055": {
+        "total": 5,
+        "deterministic": 5,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_105": {
+        "total": 6,
+        "deterministic": 6,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_218": {
+        "total": 5,
+        "deterministic": 5,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_725": {
+        "total": 18,
+        "deterministic": 14,
+        "unverified": 2,
+        "missing_raw": 2
+      },
+      "dab_587": {
+        "total": 10,
+        "deterministic": 7,
+        "unverified": 3,
+        "missing_raw": 0
+      },
+      "dab_657": {
+        "total": 16,
+        "deterministic": 16,
+        "unverified": 0,
+        "missing_raw": 0
+      },
+      "dab_517": {
+        "total": 14,
+        "deterministic": 11,
+        "unverified": 2,
+        "missing_raw": 1
+      }
+    },
     "replayable": 73,
     "deterministic": 66,
     "unverified": 7,
     "missing_raw": 3,
+    "missing_detail": [
+      {
+        "task_id": "dab_517",
+        "claim_id": "req_data_unchanged",
+        "field": "values",
+        "reason": "missing_param"
+      },
+      {
+        "task_id": "dab_725",
+        "claim_id": "R1",
+        "field": "verifier",
+        "reason": "raw_fields_not_saved"
+      },
+      {
+        "task_id": "dab_725",
+        "claim_id": "R6",
+        "field": "verifier",
+        "reason": "raw_fields_not_saved"
+      }
+    ],
     "missing_raw_claims": [
       {
         "source": "g3_2_prerun",
@@ -220,7 +430,7 @@
         "saved_verifier": "rowset_filter",
         "trusted_deliverable": "answer.txt",
         "replay_status": "missing_raw",
-        "replay_reason": null,
+        "replay_reason": "missing_param:values",
         "user_text_chars": 1142,
         "input_files": [
           "titanic.csv"
@@ -230,7 +440,7 @@
     ],
     "reason_distribution": {
       "deterministic": 66,
-      "missing_raw": 1,
+      "missing_param:values": 1,
       "model_declared_unverified": 4,
       "raw_fields_not_saved": 2,
       "unknown_verifier:missing": 3
@@ -1309,7 +1519,7 @@
       "saved_verifier": "rowset_filter",
       "trusted_deliverable": "answer.txt",
       "replay_status": "missing_raw",
-      "replay_reason": null,
+      "replay_reason": "missing_param:values",
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"

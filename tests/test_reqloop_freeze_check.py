@@ -1621,12 +1621,25 @@ GUARD_CONTENT_PIN = {
     # (1) vacant_network/reqloop/g3.py
     #     532a1f89dbb29fd125ac2ea10f3b20e27512364bd5dc64a1fdd23c965b7ae553
     #     → 7a2e73a1e47d672624568779cc34055e81353d3b30a4a523614c149478d7c4c5
+    # r1593 補錨記錄（r1386/r1394/r1563 同型：合法修改已落盤而 pin 未更新、守衛
+    # 照設計抓到、本輪依紀律補齊；本輪 RED 實證：green 燈點名恰此 2 檔漂移）：
+    # (a) tests/test_reqloop_g3_conformance.py（pin e6a6d6d4… 建於 r1398 擴覆蓋後）
+    #     P20261113_1307-1（0cd16e997）：PiChannel G4 purpose＋tasks_dir 測試；
+    #     e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b
+    #     → f008af38a6fd25550da23d2b33b67c992000f25041c63febb605b11783d47710
+    # (b) vacant_network/reqloop/g3.py（pin 7a2e73a1… 建於 r1563 補錨後）
+    #     P20261113_1708-1（78593c25a）：run_g4 接 load_frozen_specs 統一 spec_sha256
+    #     核驗；argon（840cbee5e，本輪 merge 353969a29）：run_g4 自動注入 tasks_dir；
+    #     7a2e73a1e47d672624568779cc34055e81353d3b30a4a523614c149478d7c4c5
+    #     → ff334e371e390ef33919675d951654d3b7fe7f1a4745aba7a391485665f47415
+    # repair.py/run_eval.py/extract.py/checks.py 未動、0 model calls、G4 簽核仍 null。
+    # sha256 本輪自磁碟實算、非轉抄：
     "vacant_network/reqloop/g3.py":
-        "7a2e73a1e47d672624568779cc34055e81353d3b30a4a523614c149478d7c4c5",
+        "ff334e371e390ef33919675d951654d3b7fe7f1a4745aba7a391485665f47415",
     "tests/test_reqloop_g3.py":
         "7efb8398e73f84f57723d625ca079c014a9d860b58f295ea0ef4ddc488b321bc",
     "tests/test_reqloop_g3_conformance.py":
-        "e6a6d6d41a1c3b5447fb23abd5e1a71de493556f8e2b9e7d82ab0ff5dab4830b",
+        "f008af38a6fd25550da23d2b33b67c992000f25041c63febb605b11783d47710",
     # r1401 擴覆蓋記錄（vq-el4.87）：GUARD_CONTENT_PIN 擴覆蓋——CI tip 收口對（工具＋
     # 其 10 測測試檔）r1399 輪（rc=124 殘留）建於 r1319/r1347/r1365/r1397 建錨各輪
     # 之後、從未釘住（r1347 同型：verify_effects_summary 對建於 r1333/r1344、r1347
