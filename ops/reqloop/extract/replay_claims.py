@@ -6,8 +6,9 @@
 verifier）；params/quote/deliverable 未存 → 需未存欄位者（missing_param 的 params、2 條
 deterministic）標 missing_raw，不計數不推測。基線：當前代碼下原本 unverified 者無一翻成
 deterministic → replayable 內 deterministic=0；taxonomy 的 2 條 deterministic（g3_2_prerun
-dab_725 R1/R6）落在 missing_raw，差額即這些。D2/D3 量效：trusted_deliverable 走 judge_claim
-參數；checks.py recompute 型別集合擴充後自動反映。末行 REPLAY replayable=N deterministic=K baseline_match=True
+dab_725 R1/R6）落在 missing_raw，差額即這些。D2 量效：K1＝走 trusted_deliverable
+（trusted_deliverable_from_contract 自原文抽唯一非輸入檔；零個或多個＝None＝維持舊判定）；
+checks.py recompute 型別集合擴充後自動反映。末行 REPLAY K0 deterministic=K0 → K1 deterministic=K1（兩數並列報告）
 """
 from __future__ import annotations
 
@@ -87,19 +88,22 @@ def replay_reason(reason, user_text, input_files, saved_verifier=None, trusted=N
         return (not p), (None if not p else p)
     return None, None  # missing_param:* 等：params 未存 → 無法重判，不造假
 
-def collect():
+def collect(*, use_trusted: bool = False):
+    """use_trusted=False＝K0 基線（舊行為）；True＝D2：每任務先自原文抽 trusted
+    交付物（恰一個非輸入檔才回值，否則 None＝維持舊判定），再走 replay_reason。"""
     rows = []
 
     def add(batch, task_root, task_id, cid, verdict, reason, verifier=None):
         ut, inputs = load_task(task_root, task_id)
+        trusted = extract.trusted_deliverable_from_contract(ut, inputs) if use_trusted else None
         if verdict == "deterministic":
             status, r = "missing_raw", "raw_fields_not_saved"  # 原始欄位未存，不複驗不造假
         else:
-            ok, r = replay_reason(reason, ut, inputs, saved_verifier=verifier)
+            ok, r = replay_reason(reason, ut, inputs, saved_verifier=verifier, trusted=trusted)
             status = "missing_raw" if ok is None else ("deterministic" if ok else "unverified")
         rows.append({"source": batch, "task_id": task_id, "claim_id": cid, "original_verdict": verdict,
-                     "original_reason": reason, "saved_verifier": verifier, "replay_status": status,
-                     "replay_reason": r, "user_text_chars": len(ut), "input_files": inputs})
+                     "original_reason": reason, "saved_verifier": verifier, "trusted_deliverable": trusted,
+                     "replay_status": status, "replay_reason": r, "user_text_chars": len(ut), "input_files": inputs})
 
     for batch, root, rel in SOURCES:
         data, claims = json.loads((REPO / rel).read_text(encoding="utf-8")), []
@@ -142,8 +146,9 @@ def summarize(rows):
             "unsupported_recompute_types": dict(sorted(urt.items())),
             "baseline": {"taxonomy_deterministic": det_tax, "replay_deterministic_within_replayable": det,
                          "deterministic_in_missing_raw": det_in_mraw, "baseline_match": baseline_match,
-                         "explanation": (f"replayable={total - len(mraw)} 集合內 deterministic={det}：當前代碼（extract.py/checks.py 凍結 blob）下，"
-                                         "原本 unverified 者無一翻成 deterministic（與原判時同代碼）。taxonomy 的 "
+                         "explanation": (f"replayable={total - len(mraw)} 集合內 deterministic={det}：K0 基線（不走 trusted）下，"
+                                         "原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋"
+                                         "run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 "
                                          f"{det_tax} 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、"
                                          "未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。")}}
 
@@ -169,6 +174,12 @@ def selftest() -> int:
     check("replay missing_param → missing_raw（不造假）", replay_reason("missing_param:values", ut, inputs) == (None, None))
     s = summarize(collect())
     check("76 條全收齊且基線對帳通過", s["total"] == 76 and s["baseline"]["baseline_match"] is True)
+    s1 = summarize(collect(use_trusted=True))
+    check("D2 K1：52 條 deliverable_not_in_request → deterministic（trusted=answer.txt，9 任務）", s1["deterministic"] == 52)
+    check("D2 K1：deliverable_not_in_request 零殘留（全部解除，非強行翻綠）",
+          not any(k.startswith("deliverable_not_in_request") for k in s1["reason_distribution"]))
+    check("D2 K1 未誤動其它類：unverified 21 條＝4 自陳＋3 unknown_verifier＋12 recompute 型別（D3 領地）",
+          s1["unverified"] == 21)
     if fails:
         print(f"SELFTEST FAIL ({len(fails)}): {fails}")
         return 1
@@ -181,18 +192,26 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
-    rows = collect()
-    s = summarize(rows)
+    rows0 = collect()
+    s0 = summarize(rows0)
+    rows1 = collect(use_trusted=True)
+    s1 = summarize(rows1)
     doc = {"ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
            "code_sha": code_sha(),
            "raw_fields_saved": {"verifier": "g3_2_fire 26/26；其餘三來源 0/50", "deliverable": "僅 reason 內截斷 60 字元",
                                 "params": "0/76（未存）", "quote": "0/76（未存）"},
-           "totals": s, "claims": rows}
+           "baseline_K0": s0,
+           "d2_K1": s1,
+           "k0_to_k1": {"K0_deterministic": s0["deterministic"], "K1_deterministic": s1["deterministic"],
+                        "flipped_to_deterministic": s1["deterministic"] - s0["deterministic"],
+                        "K0_baseline_match": s0["baseline"]["baseline_match"]},
+           "totals": s1, "claims": rows1}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"寫入 {OUT}（{s['total']} 條）")
-    print(f"REPLAY replayable={s['replayable']} deterministic={s['deterministic']} baseline_match={s['baseline']['baseline_match']}")
+    print(f"寫入 {OUT}（{s1['total']} 條）")
+    print(f"REPLAY K0 deterministic={s0['deterministic']} (replayable={s0['replayable']}, baseline_match={s0['baseline']['baseline_match']}) "
+          f"→ K1 deterministic={s1['deterministic']} (replayable={s1['replayable']}, flipped={s1['deterministic'] - s0['deterministic']})")
     return 0
 
 if __name__ == "__main__":

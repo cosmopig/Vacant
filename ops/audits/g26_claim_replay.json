@@ -1,8 +1,8 @@
 {
-  "ticket": "P20261113_0300-1-d1-offline-claim-replay",
-  "generated_at": "2026-11-13T03:24:16+00:00",
+  "ticket": "P20261113_0300-1-d1-offline-claim-replay（工具源出）/ P20261113_0300-2-d2-trusted-deliverable（本輪）",
+  "generated_at": "2026-11-13T04:35:41+00:00",
   "code_sha": {
-    "vacant_network/reqloop/extract.py": "e757aec50c16bc6481cd88545672d50884c83f40",
+    "vacant_network/reqloop/extract.py": "b502741bcd290d1bfefc257986be838d6356d4f3",
     "vacant_network/reqloop/checks.py": "f3525b0126788bc8432799a31ab7b50a64c775dc"
   },
   "raw_fields_saved": {
@@ -11,7 +11,7 @@
     "params": "0/76（未存）",
     "quote": "0/76（未存）"
   },
-  "totals": {
+  "baseline_K0": {
     "total": 76,
     "replayable": 73,
     "deterministic": 0,
@@ -25,6 +25,7 @@
         "original_verdict": "deterministic",
         "original_reason": null,
         "saved_verifier": null,
+        "trusted_deliverable": null,
         "replay_status": "missing_raw",
         "replay_reason": "raw_fields_not_saved",
         "user_text_chars": 1669,
@@ -40,6 +41,7 @@
         "original_verdict": "deterministic",
         "original_reason": null,
         "saved_verifier": null,
+        "trusted_deliverable": null,
         "replay_status": "missing_raw",
         "replay_reason": "raw_fields_not_saved",
         "user_text_chars": 1669,
@@ -55,6 +57,7 @@
         "original_verdict": "UNKNOWN",
         "original_reason": "missing_param:values",
         "saved_verifier": "rowset_filter",
+        "trusted_deliverable": null,
         "replay_status": "missing_raw",
         "replay_reason": null,
         "user_text_chars": 1142,
@@ -86,7 +89,175 @@
       "replay_deterministic_within_replayable": 0,
       "deterministic_in_missing_raw": 2,
       "baseline_match": true,
-      "explanation": "replayable=73 集合內 deterministic=0：當前代碼（extract.py/checks.py 凍結 blob）下，原本 unverified 者無一翻成 deterministic（與原判時同代碼）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+      "explanation": "replayable=73 集合內 deterministic=0：K0 基線（不走 trusted）下，原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+    }
+  },
+  "d2_K1": {
+    "total": 76,
+    "replayable": 73,
+    "deterministic": 52,
+    "unverified": 21,
+    "missing_raw": 3,
+    "missing_raw_claims": [
+      {
+        "source": "g3_2_prerun",
+        "task_id": "dab_725",
+        "claim_id": "R1",
+        "original_verdict": "deterministic",
+        "original_reason": null,
+        "saved_verifier": null,
+        "trusted_deliverable": "answer.txt",
+        "replay_status": "missing_raw",
+        "replay_reason": "raw_fields_not_saved",
+        "user_text_chars": 1669,
+        "input_files": [
+          "auto-mpg.csv"
+        ],
+        "why": "deterministic claim; raw fields not saved"
+      },
+      {
+        "source": "g3_2_prerun",
+        "task_id": "dab_725",
+        "claim_id": "R6",
+        "original_verdict": "deterministic",
+        "original_reason": null,
+        "saved_verifier": null,
+        "trusted_deliverable": "answer.txt",
+        "replay_status": "missing_raw",
+        "replay_reason": "raw_fields_not_saved",
+        "user_text_chars": 1669,
+        "input_files": [
+          "auto-mpg.csv"
+        ],
+        "why": "deterministic claim; raw fields not saved"
+      },
+      {
+        "source": "g3_2_fire",
+        "task_id": "dab_517",
+        "claim_id": "req_data_unchanged",
+        "original_verdict": "UNKNOWN",
+        "original_reason": "missing_param:values",
+        "saved_verifier": "rowset_filter",
+        "trusted_deliverable": "answer.txt",
+        "replay_status": "missing_raw",
+        "replay_reason": null,
+        "user_text_chars": 1142,
+        "input_files": [
+          "titanic.csv"
+        ],
+        "why": "missing_param:values"
+      }
+    ],
+    "reason_distribution": {
+      "deterministic": 52,
+      "missing_raw": 1,
+      "model_declared_unverified": 4,
+      "raw_fields_not_saved": 2,
+      "unknown_verifier:missing": 3,
+      "unsupported_recompute_type:mean_col": 8,
+      "unsupported_recompute_type:median_col": 2,
+      "unsupported_recompute_type:pearson": 2,
+      "unsupported_recompute_type:std_col": 2
+    },
+    "unsupported_recompute_types": {
+      "mean_col": 8,
+      "median_col": 2,
+      "pearson": 2,
+      "std_col": 2
+    },
+    "baseline": {
+      "taxonomy_deterministic": 2,
+      "replay_deterministic_within_replayable": 52,
+      "deterministic_in_missing_raw": 2,
+      "baseline_match": false,
+      "explanation": "replayable=73 集合內 deterministic=52：K0 基線（不走 trusted）下，原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
+    }
+  },
+  "k0_to_k1": {
+    "K0_deterministic": 0,
+    "K1_deterministic": 52,
+    "flipped_to_deterministic": 52,
+    "K0_baseline_match": true
+  },
+  "totals": {
+    "total": 76,
+    "replayable": 73,
+    "deterministic": 52,
+    "unverified": 21,
+    "missing_raw": 3,
+    "missing_raw_claims": [
+      {
+        "source": "g3_2_prerun",
+        "task_id": "dab_725",
+        "claim_id": "R1",
+        "original_verdict": "deterministic",
+        "original_reason": null,
+        "saved_verifier": null,
+        "trusted_deliverable": "answer.txt",
+        "replay_status": "missing_raw",
+        "replay_reason": "raw_fields_not_saved",
+        "user_text_chars": 1669,
+        "input_files": [
+          "auto-mpg.csv"
+        ],
+        "why": "deterministic claim; raw fields not saved"
+      },
+      {
+        "source": "g3_2_prerun",
+        "task_id": "dab_725",
+        "claim_id": "R6",
+        "original_verdict": "deterministic",
+        "original_reason": null,
+        "saved_verifier": null,
+        "trusted_deliverable": "answer.txt",
+        "replay_status": "missing_raw",
+        "replay_reason": "raw_fields_not_saved",
+        "user_text_chars": 1669,
+        "input_files": [
+          "auto-mpg.csv"
+        ],
+        "why": "deterministic claim; raw fields not saved"
+      },
+      {
+        "source": "g3_2_fire",
+        "task_id": "dab_517",
+        "claim_id": "req_data_unchanged",
+        "original_verdict": "UNKNOWN",
+        "original_reason": "missing_param:values",
+        "saved_verifier": "rowset_filter",
+        "trusted_deliverable": "answer.txt",
+        "replay_status": "missing_raw",
+        "replay_reason": null,
+        "user_text_chars": 1142,
+        "input_files": [
+          "titanic.csv"
+        ],
+        "why": "missing_param:values"
+      }
+    ],
+    "reason_distribution": {
+      "deterministic": 52,
+      "missing_raw": 1,
+      "model_declared_unverified": 4,
+      "raw_fields_not_saved": 2,
+      "unknown_verifier:missing": 3,
+      "unsupported_recompute_type:mean_col": 8,
+      "unsupported_recompute_type:median_col": 2,
+      "unsupported_recompute_type:pearson": 2,
+      "unsupported_recompute_type:std_col": 2
+    },
+    "unsupported_recompute_types": {
+      "mean_col": 8,
+      "median_col": 2,
+      "pearson": 2,
+      "std_col": 2
+    },
+    "baseline": {
+      "taxonomy_deterministic": 2,
+      "replay_deterministic_within_replayable": 52,
+      "deterministic_in_missing_raw": 2,
+      "baseline_match": false,
+      "explanation": "replayable=73 集合內 deterministic=52：K0 基線（不走 trusted）下，原本 unverified 者無一翻成 deterministic（11-13 裁決：extract.py/checks.py 受控解凍＝新增路徑＋run_eval --all 三門數字＝g25 filing；D2 量效見 d2_K1）。taxonomy 的 2 條 deterministic（g3_2_prerun dab_725 R1/R6）落在 missing_raw：來源報告只存 claim id、未存 verifier/deliverable/params/quote，重播即造假；另 1 條 missing_param:values 因 params 未存同列 missing_raw。"
     }
   },
   "claims": [
@@ -97,8 +268,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:removed_outliers_count",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:removed_outliers_count",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1182,
       "input_files": [
         "imp.score.ldlr.metabolome.csv"
@@ -111,8 +283,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:filtered_rowset",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:filtered_rowset",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1182,
       "input_files": [
         "imp.score.ldlr.metabolome.csv"
@@ -125,6 +298,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1067,
@@ -139,6 +313,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1067,
@@ -153,6 +328,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1067,
@@ -167,8 +343,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:答案以 @mean_cases[正整數] 標籤格式呈現",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:答案以 @mean_cases[正整數] 標籤格式呈現",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1067,
       "input_files": [
         "estimated_numbers.csv"
@@ -181,6 +358,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1067,
@@ -195,8 +373,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:ApplicantIncome 與 LoanAmount 的 Pearson 相關係數",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:ApplicantIncome 與 LoanAmount 的 Pearson 相關係數",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -209,8 +388,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:Pearson 相關係數（線性關係強度與方向）",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:Pearson 相關係數（線性關係強度與方向）",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -223,8 +403,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:計算前排除 ApplicantIncome 或 LoanAmount 任一欄為缺失值的列",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:計算前排除 ApplicantIncome 或 LoanAmount 任一欄為缺失值的列",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -237,8 +418,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:相關係數四捨五入至小數點後兩位",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:相關係數四捨五入至小數點後兩位",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -251,8 +433,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:答案以 @correlation_coefficient[corr_coeff] 標籤格式輸出",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:答案以 @correlation_coefficient[corr_coeff] 標籤格式輸出",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -265,8 +448,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:資料來源檔案 data/test_Y3wMUE5_7gLdaTN.csv",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:資料來源檔案 data/test_Y3wMUE5_7gLdaTN.csv",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1267,
       "input_files": [
         "test_Y3wMUE5_7gLdaTN.csv"
@@ -279,8 +463,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:positive_diffsel 與 negative_diffsel 兩欄的 Pearson 相關係數 (r)",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:positive_diffsel 與 negative_diffsel 兩欄的 Pearson 相關係數 (r)",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -293,8 +478,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:以 @correlation_coefficient[r_value] 標籤格式輸出的相關係數",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:以 @correlation_coefficient[r_value] 標籤格式輸出的相關係數",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -307,8 +493,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:計算前不得移除離群值或修改資料",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:計算前不得移除離群值或修改資料",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -321,8 +508,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:計算須使用全部資料點",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:計算須使用全部資料點",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -335,8 +523,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:資料來源檔案 data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:資料來源檔案 data/ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1251,
       "input_files": [
         "ferret-Pitt-2-preinf-lib2-100_sitediffsel.csv"
@@ -349,8 +538,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:analysis",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:analysis",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -363,8 +553,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:analysis",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:analysis",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -377,6 +568,7 @@
       "original_verdict": "unverified",
       "original_reason": "model_declared_unverified",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
       "user_text_chars": 1669,
@@ -391,8 +583,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:analysis",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:analysis",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -405,6 +598,7 @@
       "original_verdict": "unverified",
       "original_reason": "model_declared_unverified",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
       "user_text_chars": 1669,
@@ -419,6 +613,7 @@
       "original_verdict": "deterministic",
       "original_reason": null,
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "missing_raw",
       "replay_reason": "raw_fields_not_saved",
       "user_text_chars": 1669,
@@ -433,6 +628,7 @@
       "original_verdict": "deterministic",
       "original_reason": null,
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "missing_raw",
       "replay_reason": "raw_fields_not_saved",
       "user_text_chars": 1669,
@@ -447,8 +643,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:answer.txt 中的答案項目 @correlation_coefficient[...]",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中的答案項目 @correlation_coefficient[...]",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -461,8 +658,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:answer.txt 中答案項目的標籤格式",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中答案項目的標籤格式",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -475,6 +673,7 @@
       "original_verdict": "unverified",
       "original_reason": "unknown_verifier:missing",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unknown_verifier:missing",
       "user_text_chars": 1384,
@@ -489,6 +688,7 @@
       "original_verdict": "unverified",
       "original_reason": "unknown_verifier:missing",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unknown_verifier:missing",
       "user_text_chars": 1384,
@@ -503,6 +703,7 @@
       "original_verdict": "unverified",
       "original_reason": "unknown_verifier:missing",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unknown_verifier:missing",
       "user_text_chars": 1384,
@@ -517,8 +718,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:answer.txt 中包含 @mean_close[...] 標籤項目",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @mean_close[...] 標籤項目",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -531,6 +733,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1165,
@@ -545,8 +748,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:answer.txt 中包含 @median_close[...] 標籤項目",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @median_close[...] 標籤項目",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -559,6 +763,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:median_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:median_col",
       "user_text_chars": 1165,
@@ -573,8 +778,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:answer.txt 中包含 @std_close[...] 標籤項目",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @std_close[...] 標籤項目",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -587,6 +793,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:std_col",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:std_col",
       "user_text_chars": 1165,
@@ -601,8 +808,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:工作區根目錄存在 answer.txt，且包含 3 個 @name[value] 項目",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:工作區根目錄存在 answer.txt，且包含 3 個 @name[value] 項目",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -615,8 +823,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:資料檔 data/YAHOO-BTC_USD_D.csv 保持未修改",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:資料檔 data/YAHOO-BTC_USD_D.csv 保持未修改",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -629,6 +838,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:pearson",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:pearson",
       "user_text_chars": 1142,
@@ -643,6 +853,7 @@
       "original_verdict": "unverified",
       "original_reason": "unsupported_recompute_type:pearson",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:pearson",
       "user_text_chars": 1142,
@@ -657,8 +868,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:correlation_pclass_fare",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:correlation_pclass_fare",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -671,8 +883,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:correlation_pclass_fare",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:correlation_pclass_fare",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -685,8 +898,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:correlation_pclass_fare",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:correlation_pclass_fare",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -699,6 +913,7 @@
       "original_verdict": "unverified",
       "original_reason": "model_declared_unverified",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
       "user_text_chars": 1142,
@@ -713,6 +928,7 @@
       "original_verdict": "unverified",
       "original_reason": "model_declared_unverified",
       "saved_verifier": null,
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "model_declared_unverified",
       "user_text_chars": 1142,
@@ -727,8 +943,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:answer.txt 中六個 @name[value] 項目（mean1, median1, mean2, median",
       "saved_verifier": "answer_kv",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中六個 @name[value] 項目（mean1, median1, mean2, median",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -741,8 +958,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:依 displacement 出現次數選出前三大值",
       "saved_verifier": "group_aggregate",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:依 displacement 出現次數選出前三大值",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -755,8 +973,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:各 displacement 值對應列之 mpg 平均數與中位數",
       "saved_verifier": "rowset_filter",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:各 displacement 值對應列之 mpg 平均數與中位數",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -769,8 +988,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:六個數值皆四捨五入至小數點後兩位",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:六個數值皆四捨五入至小數點後兩位",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -783,8 +1003,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:工作區根目錄的 answer.txt 檔案",
       "saved_verifier": "answer_kv",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:工作區根目錄的 answer.txt 檔案",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -797,8 +1018,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:data/auto-mpg.csv 保持未修改",
       "saved_verifier": "answer_kv",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:data/auto-mpg.csv 保持未修改",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -811,8 +1033,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:answer.txt 中包含 @correlation_coefficient[...] 項目",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中包含 @correlation_coefficient[...] 項目",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -825,8 +1048,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:平均等待時間由 HH:MM:SS 字串轉換為秒（整數）",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:平均等待時間由 HH:MM:SS 字串轉換為秒（整數）",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -839,8 +1063,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數並四捨五入至小數三位",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數並四捨五入至小數三位",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -853,8 +1078,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:使用指定資料檔 data/20170413_000000_group_statistics.csv",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:使用指定資料檔 data/20170413_000000_group_statistics.csv",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -867,8 +1093,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:不得修改輸入資料檔",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:不得修改輸入資料檔",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1384,
       "input_files": [
         "20170413_000000_group_statistics.csv"
@@ -881,6 +1108,7 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": "plain_recomputed",
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1165,
@@ -895,6 +1123,7 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "unsupported_recompute_type:median_col",
       "saved_verifier": "plain_recomputed",
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:median_col",
       "user_text_chars": 1165,
@@ -909,6 +1138,7 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "unsupported_recompute_type:std_col",
       "saved_verifier": "plain_recomputed",
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:std_col",
       "user_text_chars": 1165,
@@ -923,8 +1153,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:answer.txt 中 @mean_close 項的格式",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中 @mean_close 項的格式",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -937,8 +1168,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:answer.txt 中 @median_close 項的格式",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中 @median_close 項的格式",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -951,8 +1183,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:answer.txt 中 @std_close 項的格式",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 中 @std_close 項的格式",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1165,
       "input_files": [
         "YAHOO-BTC_USD_D.csv"
@@ -965,6 +1198,7 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": "plain_recomputed",
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1165,
@@ -979,6 +1213,7 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "unsupported_recompute_type:mean_col",
       "saved_verifier": "plain_recomputed",
+      "trusted_deliverable": "answer.txt",
       "replay_status": "unverified",
       "replay_reason": "unsupported_recompute_type:mean_col",
       "user_text_chars": 1165,
@@ -993,8 +1228,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:correlation_pclass_fare 的相關係數值",
       "saved_verifier": "answer_kv",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:correlation_pclass_fare 的相關係數值",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1007,8 +1243,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數",
       "saved_verifier": "answer_kv",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:以 Pearson 方法計算相關係數",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1021,8 +1258,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:計算前排除 Pclass 或 Fare 為 null 的列",
       "saved_verifier": "rowset_filter",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:計算前排除 Pclass 或 Fare 為 null 的列",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1035,8 +1273,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:最終輸出四捨五入至小數點後 2 位",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:最終輸出四捨五入至小數點後 2 位",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1049,8 +1288,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:答案以 @correlation_pclass_fare[浮點數] 格式呈現",
       "saved_verifier": "tag_format",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:答案以 @correlation_pclass_fare[浮點數] 格式呈現",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1063,8 +1303,9 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "deliverable_not_in_request:answer.txt 檔案（工作區根目錄）",
       "saved_verifier": "answer_kv",
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:answer.txt 檔案（工作區根目錄）",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1142,
       "input_files": [
         "titanic.csv"
@@ -1077,6 +1318,7 @@
       "original_verdict": "UNKNOWN",
       "original_reason": "missing_param:values",
       "saved_verifier": "rowset_filter",
+      "trusted_deliverable": "answer.txt",
       "replay_status": "missing_raw",
       "replay_reason": null,
       "user_text_chars": 1142,
@@ -1091,8 +1333,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:分析時僅使用出現次數最多的三個 displacement 值",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:分析時僅使用出現次數最多的三個 displacement 值",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1105,8 +1348,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:每個 displacement 值分別計算 mpg 的平均與中位數，僅使用該 displacement 值的列",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:每個 displacement 值分別計算 mpg 的平均與中位數，僅使用該 displacement 值的列",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1119,8 +1363,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:所有結果四捨五入至小數點後兩位",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:所有結果四捨五入至小數點後兩位",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1133,8 +1378,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:最終答案寫入工作區根目錄的 answer.txt",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:最終答案寫入工作區根目錄的 answer.txt",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"
@@ -1147,8 +1393,9 @@
       "original_verdict": "unverified",
       "original_reason": "deliverable_not_in_request:不得修改輸入資料檔 data/auto-mpg.csv",
       "saved_verifier": null,
-      "replay_status": "unverified",
-      "replay_reason": "deliverable_not_in_request:不得修改輸入資料檔 data/auto-mpg.csv",
+      "trusted_deliverable": "answer.txt",
+      "replay_status": "deterministic",
+      "replay_reason": null,
       "user_text_chars": 1669,
       "input_files": [
         "auto-mpg.csv"

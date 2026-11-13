@@ -69,7 +69,7 @@ class RequirementItem:
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        out = {
             "id": self.id,
             "quote": self.quote,
             "deliverable": self.deliverable,
@@ -81,8 +81,12 @@ class RequirementItem:
             "authority": self.authority,
             "hidden": self.hidden,
             "unverified": self.unverified,
-            "deliverable_claimed": self.deliverable_claimed,
         }
+        # D2：deliverable_claimed 只留紀錄；空字串＝舊行為，不輸出該欄位——舊需求組
+        # 序列化逐位元組不變（phase3 req digest／舊裁決接續不受影響）。
+        if self.deliverable_claimed:
+            out["deliverable_claimed"] = self.deliverable_claimed
+        return out
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> RequirementItem:
