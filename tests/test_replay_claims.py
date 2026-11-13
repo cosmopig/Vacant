@@ -50,8 +50,8 @@ def test_replay_reason_behavior():
         False, "unsupported_recompute_type:bogus_stat_9x")
     # 已在支援集合的型別 → 翻 deterministic（D3 擴充後的行為形狀）
     assert rc.replay_reason("unsupported_recompute_type:zcount3", UT, INPUTS, "kv_recomputed") == (True, None)
-    # missing_param → missing_raw，不造假
-    assert rc.replay_reason("missing_param:values", UT, INPUTS) == (None, None)
+    # missing_param → missing_raw，不造假（P20261113_1708-2：點名保留根因碼）
+    assert rc.replay_reason("missing_param:values", UT, INPUTS) == (None, "missing_param:values")
     # model_declared_unverified → fail-closed
     assert rc.replay_reason("model_declared_unverified", UT, INPUTS)[0] is False
 
@@ -225,3 +225,24 @@ def test_missing_verifier_stays_unverified_negative_control():
     assert len(rows) == 3
     assert all(r["replay_reason"] == "unknown_verifier:missing" for r in rows)
     assert all(r["claim_id"] in ("req-3", "req-4", "req-5") for r in rows)
+
+
+# ── P20261113_1708-2：dab_517 missing_param:values 根因點名＋負控制 ────────────
+
+def test_missing_param_values_stays_missing_raw_negative_control():
+    """P20261113_1708-2：缺必要參數（dab_517 req_data_unchanged missing_param:values）
+    絕不判 deterministic（I-4：未測量不是通過；0 假 PASS 負控制）。
+
+    (a) replay_reason 明確回 (None, "missing_param:values")：missing_raw、但保留缺失原因碼（不抹除根因）；
+    (b) collect(use_trusted=True) 重播 row：replay_status == "missing_raw" 且
+        replay_reason == "missing_param:values"（絕不翻 deterministic）。
+    """
+    # (a) replay_reason 點名：missing_raw 但保留根因碼（而非 (None, None) 抹除）
+    assert rc.replay_reason("missing_param:values", UT, INPUTS) == (None, "missing_param:values")
+    # (b) dab_517/req_data_unchanged 維持 missing_raw（0 假 PASS 負控制）
+    rows = [r for r in rc.collect(use_trusted=True)
+            if r["task_id"] == "dab_517" and r["claim_id"] == "req_data_unchanged"]
+    assert len(rows) == 1
+    assert rows[0]["replay_status"] == "missing_raw"
+    assert rows[0]["replay_reason"] == "missing_param:values"
+    assert rows[0]["replay_status"] != "deterministic"

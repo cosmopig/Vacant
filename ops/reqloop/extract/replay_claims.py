@@ -97,7 +97,11 @@ def replay_reason(reason, user_text, input_files, saved_verifier=None, trusted=N
             return False, "deliverable_is_input_file"
         p = extract._deliverable_problem(str(trusted or claimed), user_text)
         return (not p), (None if not p else p)
-    return None, None  # missing_param:* 等：params 未存 → 無法重判，不造假
+    if reason.startswith("missing_param:"):
+        # P20261113_1708-2：缺必要參數（params 未存於來源）→ missing_raw，但點名保留缺失原因碼
+        # （如 missing_param:values），不抹除根因；None＝絕不翻 deterministic（I-4：未測量不是通過）
+        return None, reason
+    return None, None  # 其它未知原因：raw 欄位未存 → 無法重判，不造假
 
 def collect(*, use_trusted: bool = False):
     """use_trusted=False＝K0 基線（舊行為）；True＝D2：每任務先自原文抽 trusted
@@ -216,7 +220,8 @@ def selftest() -> int:
           replay_reason("unsupported_recompute_type:mean_col", ut, inputs, "plain_recomputed")[0] is True)
     check("replay D3b: pearson 已 deterministic（11-13 定案、P20261113_0344-1 落盤）",
           replay_reason("unsupported_recompute_type:pearson", ut, inputs, "plain_recomputed")[0] is True)
-    check("replay missing_param → missing_raw（不造假）", replay_reason("missing_param:values", ut, inputs) == (None, None))
+    check("replay missing_param → missing_raw（不造假、點名根因碼）",
+          replay_reason("missing_param:values", ut, inputs) == (None, "missing_param:values"))
     s = summarize(collect())
     check("76 條全收齊且基線對帳通過", s["total"] == 76 and s["baseline"]["baseline_match"] is True)
     s1 = summarize(collect(use_trusted=True))
