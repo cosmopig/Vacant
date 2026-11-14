@@ -5,8 +5,9 @@
   同樣 1800 秒，「工作區自己的測試沒過就開全新行程重來（最多 3 次）」是不是比「一次跑到底」交出更多通過的成果。
 - 量具＝`ops/redo/redo.py`（已驗：selftest 26/26；真的 pi 0.87.1 對假模型端點跑通兩臂、端點死掉記成 infra_void）。
   **不要改它的判定邏輯。**
-- 票＝`ops/redo/tickets/T01…T07`，照編號一次一張。現在該做 **T01**（preflight＋冒煙 2 對）。
-- 還沒有任何真模型的 redo 數字（0 對）。
+- 票＝`ops/redo/tickets/T01…T07`，照編號一次一張。現在在 **T01**：selftest 26/26＋preflight OK 已過，
+  冒煙 2 對已發射、跑在輪外（root `~/dev/ops/redo_runs/smoke2`）；票尾三行＋移到 done 要等冒煙驗收成立。
+- 還沒有任何真模型的 redo 數字（冒煙 2 對在跑，第一通真模型呼叫中）。
 
 ## 這一輪怎麼做
 1. 有長跑在跑：`python3 ops/redo/redo.py status --root <root>` 一次，把那一行貼在下面「進度」，結束這一輪。
@@ -24,4 +25,4 @@
 - 口徑：redo 的數字是 harness 裡的機制，不是「裝了 Vacant」的數字；可以說的句子只有計畫檔 `prereg.states` 那幾句。
 
 ## 進度（每輪覆寫這一段，一行）
-- （還沒發射）
+- 2026-11-14 08:32Z 冒煙 smoke2 發射（2 對，root=~/dev/ops/redo_runs/smoke2）；status：INCOMPLETE 0/2 對 A=0/0 R3=0/0 b=0 c=0 infra_void 對=0
