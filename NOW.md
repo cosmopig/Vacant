@@ -5,9 +5,10 @@
   同樣 1800 秒，「工作區自己的測試沒過就開全新行程重來（最多 3 次）」是不是比「一次跑到底」交出更多通過的成果。
 - 量具＝`ops/redo/redo.py`（已驗：selftest 26/26；真的 pi 0.87.1 對假模型端點跑通兩臂、端點死掉記成 infra_void）。
   **不要改它的判定邏輯。**
-- 票＝`ops/redo/tickets/T03…T07`，照編號一次一張。**T01 done、T02 done（GO）**（票尾在 `~/dev/ops/tickets/redo/done/`）；
-  **下一張＝T03**（redo1：34 題×5 次＝170 對，root `~/dev/ops/redo_runs/redo1`）：照票 T03 先 preflight（含「計畫檔已 commit」）
-  再用 MISSION §五的 setsid nohup 發射；每輪最多一次 `status`；runner 再死就同一行重啟，PATH 要含 `~/.local/bin`。
+- 票＝`ops/redo/tickets/T04…T07`，照編號一次一張。**T01／T02 done（GO）、T03 已發射在跑**（票尾在 `~/dev/ops/tickets/redo/done/`）：
+  redo1（34 題×5 次＝170 對，root `~/dev/ops/redo_runs/redo1`）2026-11-14 17:23 發射（preflight PREFLIGHT_OK、計畫 f95f90d86b77 已 commit、runner PID 111807）。
+  **下一輪起：每輪最多一次 `status`、貼進「進度」、結束**；runner 死就同一行重啟（PATH 含 `~/.local/bin`）、不因結果刪格；
+  跑完（state ∈ {EFFECTIVE, UNRESOLVED, CONTRADICTS}）：查 `harness_changed_mid_run`=false → REPORT 複製進 `ops/redo/results/redo1_REPORT.{md,json}` 並 commit → 做 T04。
 - screen16（S1）：EFFECTIVE 16/16 對 A=2/16 R3=9/16 b=0 c=7 p=0.015625、R3 驗收放行卻錯＝0 ⇒ **GO**（計畫檔 `prereg.go_rule`）。
   這 16 題是看過結果挑的（`prereg.role`：「篩選，不是證據」）：**這批數字只是 GO/NO-GO 閘門，不可當成效果引用**；結果在 `ops/redo/results/screen16_REPORT.{md,json}`。
 - ⚠ 同批 8 次嘗試（A 2、R3 6）以 `Model reloaded.` 結束（100.86.226.21 伺服器端錯誤、會話被終止，12:02–16:15 分散），
@@ -33,4 +34,4 @@
 - 口徑：redo 的數字是 harness 裡的機制，不是「裝了 Vacant」的數字；可以說的句子只有計畫檔 `prereg.states` 那幾句。
 
 ## 進度（每輪覆寫這一段，一行）
-- 2026-11-14 17:13（1728 輪）T02 done（GO）：status `screen16_pi_gemma12b: EFFECTIVE  16/16 對  A=2/16  R3=9/16  b=0 c=7  infra_void 對=0`（c=7≥b+3、R3 驗收放行卻錯＝0）；結果歸檔、票尾 commit `c7222db08`；⚠ 8 次嘗試以 `Model reloaded.` 結束（見現況）
+- 2026-11-14 17:25（1729 輪）T03 發射：preflight `VERDICT: PREFLIGHT_OK`＋setsid nohup 發射（170 對、runner PID 111807）；status `redo1_pi_gemma12b_polyglot34: INCOMPLETE  0/170 對  A=0/0  R3=0/0  b=0 c=0  infra_void 對=0`；下一輪起只做 status
