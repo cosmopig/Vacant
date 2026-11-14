@@ -1,23 +1,27 @@
 # NOW.md — Vacant 現況（≤3KB；本檔覆寫不追加，歷史看 STATE.md）
 
-## 現況（r1594、2026-11-13、0 model calls）
-- 本輪（票 P20261113_1900-1 done）：D1 重播 `--unverified-report` 點名全部 7 條非確定性 claim
-  （dab_725 R4/R7、dab_517 req_write_answer_txt／req_do_not_modify_data＝model_declared_unverified；
-  dab_587 req-3/4/5＝unknown_verifier:missing）——原因碼逐條、不印欄位值、唯讀、0 model calls；
-  `--json` totals 旁純加法新增 `named_non_deterministic`（7 條、既有欄位一字未改）；
-  `--missing-report`／`--gate` 輸出逐字不變（deterministic=66/76、false_pass=0、VERDICT: PASS）。
-- 驗收（全綠、本輪新跑）：pytest -k unverified_report 4 passed（RC0）；--unverified-report 7 行點名 RC0；
-  --gate VERDICT: PASS；test_replay_claims 23 passed；anchors＋frozen_specs 11 passed；
-  4 凍結檔未動；G4 簽核仍 null、0 發射。
+## 現況（2026-11-14 人類改向；這條分支＝redo 線）
+- **唯一的任務在 `ops/redo/MISSION.md`，每一輪先讀它。** 問題只有一個：原生 pi＋本機 gemma-4-12b，
+  同樣 1800 秒，「工作區自己的測試沒過就開全新行程重來（最多 3 次）」是不是比「一次跑到底」交出更多通過的成果。
+- 量具＝`ops/redo/redo.py`（已驗：selftest 26/26；真的 pi 0.87.1 對假模型端點跑通兩臂、端點死掉記成 infra_void）。
+  **不要改它的判定邏輯。**
+- 票＝`ops/redo/tickets/T01…T07`，照編號一次一張。現在該做 **T01**（preflight＋冒煙 2 對）。
+- 還沒有任何真模型的 redo 數字（0 對）。
+
+## 這一輪怎麼做
+1. 有長跑在跑：`python3 ops/redo/redo.py status --root <root>` 一次，把那一行貼在下面「進度」，結束這一輪。
+2. 沒有長跑：做編號最小、前提已滿足的那張票。
+3. 沒有票可做：結束這一輪。空輪比亂做好。
+
+## 不准做（MISSION §四）
+- 結案量具、複核腳本、替量具／簿記寫守門測試、只改簿記的輪次、重新驗收以前驗收過的東西。
+- reqloop／G 系列／L008（凍結，不是這條分支的事）。freeze_check／ci_tip_check 的紅燈屬於那條線：不修、不追。
+- 一批跑到一半改 `redo.py` 或計畫檔；因為結果刪格；讀題庫的 hidden／scorer。
 
 ## 紅線
-- 凍結／受控解凍：repair.py 2795 行／blob 5147f8c3…、run_eval.py 1298 行／blob b6d2f37f… 仍凍結；
-  extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob d401a8ae… 受控解凍只加法；g25 filing（6 sha256）未動。
-- 無 push（loop 自推 auto/qwen27b）；main 未動；無 reset/rebase；.github/workflows/ 只讀；hidden/scorer 未讀；未跑全 pytest；0 model calls。
-- G4 真發射仍須人類簽核（human_signoff=null）；本輪 0 發射。
-- CI：輪首 auto/qwen27b 還沒跑完；argon 8 紅／worker 11 紅＝他枝 WIP、既有、已上報、不代修。
+- 凍結／受控解凍：repair.py 2795 行／blob 5147f8c3…、run_eval.py 1298 行／blob b6d2f37f…（仍凍結）；extract.py 1295 行／blob b502741b…、checks.py 2907 行／blob d401a8ae…（受控解凍、只加法、預設＝舊行為）；g25 filing（6 sha256）；g3_1/g3_2 歷史未動。
+- 不 push main；無 reset/rebase；.github/workflows/ 只讀；鐵律 1–6 照舊。
+- 口徑：redo 的數字是 harness 裡的機制，不是「裝了 Vacant」的數字；可以說的句子只有計畫檔 `prereg.states` 那幾句。
 
-## 下一步
-1. **open/ 2 張（1900-2／1900-3）＜3**→規劃者依 11-13 §5 補票（每張動產品碼 vacant_network/reqloop/ 或 D1 重播器；不發 closure-check／結案量具類）。
-2. 下一輪 doing/ 取票照做。
-3. 成效門現況：D1 K1＝66/76 確定性（≥30 達標）＋負控制 false_pass=0；unverified 7 條已全部逐條點名（本輪新增）；G4 預註冊已備、待人類簽核。
+## 進度（每輪覆寫這一段，一行）
+- （還沒發射）

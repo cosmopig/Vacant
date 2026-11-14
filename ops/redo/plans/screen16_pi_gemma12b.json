@@ -1,0 +1,105 @@
+{
+ "id": "screen16_pi_gemma12b",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261114,
+ "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+ "bank_candidates": [
+  "/tmp/bm_tasks/polyglot_py",
+  "/srv/eval/staged/polyglot_py"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R3": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  }
+ },
+ "pair": [
+  "A",
+  "R3"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1004",
+   "provider": "lms1004nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "pg_bottle_song",
+  "pg_bowling",
+  "pg_connect",
+  "pg_food_chain",
+  "pg_go_counting",
+  "pg_grep",
+  "pg_hangman",
+  "pg_list_ops",
+  "pg_phone_number",
+  "pg_pig_latin",
+  "pg_pov",
+  "pg_react",
+  "pg_scale_generator",
+  "pg_transpose",
+  "pg_variable_length_quantity",
+  "pg_wordy"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-14",
+  "role": "篩選，不是證據。這 16 題是看過 e001／e002 的結果之後挑的（每題 4 跑裡有過也有沒過），所以這一批的任何數字都不可以當成效果引用。",
+  "go_rule": "16 對跑完：c ≥ b + 3 且 R3 的驗收放行卻錯（accepted_but_wrong）＝0 ⇒ GO，發射 redo1。否則 NO-GO：停下來回報，不發射 redo1、不改條件重篩。",
+  "why_this_rule": "用 e001／e002 的 4 跑估：這 16 題單跑通過約 4 成、抽 2–3 跑取過的約 6–8 成，預期 c−b 約 4–6。c−b < 3 表示原生 agent 上的重開沒有離線估計的那個量級，170 對也不太可能顯著。"
+ }
+}
