@@ -27,4 +27,4 @@
 - 口徑：redo 的數字是 harness 裡的機制，不是「裝了 Vacant」的數字；可以說的句子只有計畫檔 `prereg.states` 那幾句。
 
 ## 進度（每輪覆寫這一段，一行）
-- 2026-11-14 16:25（1726 輪）status：screen16_pi_gemma12b: INCOMPLETE  14/16 對  A=2/14  R3=7/14  b=0 c=5  infra_void 對=0；smoke2_pi_gemma12b: UNRESOLVED  2/2 對  A=1/2  R3=2/2  b=0 c=1  infra_void 對=0（S0 驗收，數字不可引用）
+- 2026-11-14 16:43（1727 輪）status：screen16_pi_gemma12b: INCOMPLETE  15/16 對  A=2/15  R3=8/15  b=0 c=6  infra_void 對=0；smoke2_pi_gemma12b: UNRESOLVED  2/2 對  A=1/2  R3=2/2  b=0 c=1  infra_void 對=0（S0 驗收，數字不可引用）
