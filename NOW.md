@@ -5,9 +5,9 @@
   同樣 1800 秒，「工作區自己的測試沒過就開全新行程重來（最多 3 次）」是不是比「一次跑到底」交出更多通過的成果。
 - 量具＝`ops/redo/redo.py`（已驗：selftest 26/26；真的 pi 0.87.1 對假模型端點跑通兩臂、端點死掉記成 infra_void）。
   **不要改它的判定邏輯。**
-- 票＝`ops/redo/tickets/T01…T07`，照編號一次一張。現在在 **T01**：selftest 26/26＋preflight OK 已過，
-  冒煙 2 對已發射、跑在輪外（root `~/dev/ops/redo_runs/smoke2`）；票尾三行＋移到 done 要等冒煙驗收成立。
-- 還沒有任何真模型的 redo 數字（冒煙 2 對在跑，第一通真模型呼叫中）。
+- 票＝`ops/redo/tickets/T01…T07`，照編號一次一張。**T01 done**（冒煙 2 對驗收成立，票尾在 `~/dev/ops/tickets/redo/done/`）；
+  現在在 **T02**：篩選 16 題×1 次（S1），尚未發射（root 將為 `~/dev/ops/redo_runs/screen16`）。
+- 尚無可引用數字：冒煙只是 S0 的 harness 驗收（UNRESOLVED 不是結果）；可引用的句子只有 **redo1** 計畫檔的 `prereg.states` 那幾句（smoke2／screen16 計畫沒有 `states` 欄位，兩批數字不可引用）。
 
 ## 這一輪怎麼做
 1. 有長跑在跑：`python3 ops/redo/redo.py status --root <root>` 一次，把那一行貼在下面「進度」，結束這一輪。
@@ -25,4 +25,4 @@
 - 口徑：redo 的數字是 harness 裡的機制，不是「裝了 Vacant」的數字；可以說的句子只有計畫檔 `prereg.states` 那幾句。
 
 ## 進度（每輪覆寫這一段，一行）
-- 2026-11-14 09:26Z（1618 輪）status：smoke2_pi_gemma12b: INCOMPLETE 1/2 對 A=1/2 R3=1/1 b=0 c=1 infra_void 對=0
+- 2026-11-14 09:34Z（1619 輪）T01 驗收成立、票移到 done；status：smoke2_pi_gemma12b: UNRESOLVED  2/2 對  A=1/2  R3=2/2  b=0 c=1  infra_void 對=0
