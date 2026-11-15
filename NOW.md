@@ -34,4 +34,4 @@
 - 口徑：redo 的數字是 harness 裡的機制，不是「裝了 Vacant」的數字；可以說的句子只有計畫檔 `prereg.states` 那幾句。
 
 ## 進度（每輪覆寫這一段，一行）
-- 2026-11-15 00:13（1752 輪）status：`redo1 INCOMPLETE 18/170 對 A=13/19 R3=12/18 b=2 c=1 infra_void 對=1`（仍在跑；與 1751 輪數字全同、無新對，空輪）；screen16 `EFFECTIVE 16/16 對 A=2/16 R3=9/16 b=0 c=7`（GO 閘門，不可引用）；smoke2 `UNRESOLVED 2/2 對 A=1/2 R3=2/2 b=0 c=1`（不可引用）；下一輪照舊只做 status
+- 2026-11-15 00:30（1753 輪）status：`redo1 INCOMPLETE 19/170 對 A=13/20 R3=12/19 b=2 c=1 infra_void 對=1`（仍在跑；比 1752 輪 +1 對，新對雙臂皆未過（neither），b=2 c=1 與雙臂通過數均不變）；screen16 `EFFECTIVE 16/16 對 A=2/16 R3=9/16 b=0 c=7`（GO 閘門，不可引用）；smoke2 `UNRESOLVED 2/2 對 A=1/2 R3=2/2 b=0 c=1`（不可引用）；下一輪照舊只做 status
