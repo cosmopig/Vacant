@@ -24,6 +24,7 @@
 3. 沒有票可做：結束這一輪。空輪比亂做好。
 
 ## 進度
+- 2026-11-15 21:36（第 1821 輪）redo1：`INCOMPLETE 81/170 對 A=44/82 R3=54/81 b=4 c=14 infra_void 對=1`（仍在跑；1820→1821 對數 80→81、A 嘗試 80→82、R3 嘗試 81→81 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 21:16（第 1820 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/81 b=4 c=14 infra_void 對=1`（仍在跑；1819→1820 對數 80→80 未動、R3 嘗試 81→81 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 20:59（第 1819 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/81 b=4 c=14 infra_void 對=1`（仍在跑；1818→1819 對數 80→80 未動、R3 嘗試 80→81）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 20:41（第 1818 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/80 b=4 c=14 infra_void 對=1`（仍在跑；1817→1818 對數 80→80 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
