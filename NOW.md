@@ -24,6 +24,7 @@
 3. 沒有票可做：結束這一輪。空輪比亂做好。
 
 ## 進度
+- 2026-11-15 21:16（第 1820 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/81 b=4 c=14 infra_void 對=1`（仍在跑；1819→1820 對數 80→80 未動、R3 嘗試 81→81 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 20:59（第 1819 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/81 b=4 c=14 infra_void 對=1`（仍在跑；1818→1819 對數 80→80 未動、R3 嘗試 80→81）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 20:41（第 1818 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/80 b=4 c=14 infra_void 對=1`（仍在跑；1817→1818 對數 80→80 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 20:23（第 1817 輪）redo1：`INCOMPLETE 80/170 對 A=44/80 R3=54/80 b=4 c=14 infra_void 對=1`（仍在跑；1816→1817 對數 75→80 +5）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
@@ -35,7 +36,6 @@
 - 2026-11-15 18:37（第 1811 輪）redo1：`INCOMPLETE 70/170 對 A=37/70 R3=46/70 b=4 c=13 infra_void 對=1`（仍在跑；1810→1811 對數 69→70 +1）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 18:19（第 1810 輪）redo1：`INCOMPLETE 69/170 對 A=36/69 R3=45/69 b=4 c=13 infra_void 對=1`（仍在跑；1809→1810 對數 68→69 +1）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 18:02（第 1809 輪）redo1：`INCOMPLETE 68/170 對 A=36/69 R3=44/68 b=4 c=12 infra_void 對=1`（仍在跑；1808→1809 對數 67→68 +1）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
-- 2026-11-15 17:43（第 1808 輪）redo1：`INCOMPLETE 67/170 對 A=36/68 R3=44/67 b=4 c=12 infra_void 對=1`（仍在跑；1807→1808 對數 67→67 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 
 ## 不准做（MISSION §四）
 - 結案量具、複核腳本、替量具／簿記寫守門測試、只改簿記的輪次、重新驗收以前驗收過的東西。
