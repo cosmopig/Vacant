@@ -24,6 +24,7 @@
 3. 沒有票可做：結束這一輪。空輪比亂做好。
 
 ## 進度
+- 2026-11-16 00:40（第 1831 輪）redo1：`INCOMPLETE 89/170 對 A=47/89 R3=60/88 b=4 c=17 infra_void 對=2`（仍在跑；1830→1831 對數 88→89 +1、A 嘗試 88→89 +1、R3 嘗試 87→88 +1、b=4 c=17 未動、infra_void 對 2 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-16 00:20（第 1830 輪）redo1：`INCOMPLETE 88/170 對 A=46/88 R3=59/87 b=4 c=17 infra_void 對=2`（仍在跑；1829→1830 對數 87→88、infra_void 對 1→2、A 嘗試 88→88 未動、R3 嘗試 87→87 未動、b=4 c=17 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-16 00:02（第 1829 輪）redo1：`INCOMPLETE 87/170 對 A=46/88 R3=59/87 b=4 c=17 infra_void 對=1`（仍在跑；1828→1829 對數 87→87 未動、A 嘗試 88→88 未動、R3 嘗試 87→87 未動、b=4 c=17 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
 - 2026-11-15 23:44（第 1828 輪）redo1：`INCOMPLETE 87/170 對 A=46/88 R3=59/87 b=4 c=17 infra_void 對=1`（仍在跑；1827→1828 對數 87→87 未動、A 嘗試 88→88 未動、R3 嘗試 87→87 未動、b=4 c=17 未動）；screen16 `EFFECTIVE 16/16`、smoke2 `UNRESOLVED 2/2`（已完成批）。
