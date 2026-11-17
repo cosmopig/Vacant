@@ -1,0 +1,147 @@
+{
+  "id": "screen16p4_pi_gemma12b_1003_j1",
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261114,
+  "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+  "bank_candidates": [
+    "/tmp/bm_tasks/polyglot_py",
+    "/srv/eval/staged/polyglot_py"
+  ],
+  "arms": {
+    "A": {
+      "policy": "single",
+      "attempt_timeout_s": 1800
+    },
+    "P": {
+      "policy": "single",
+      "attempt_timeout_s": 1900,
+      "agent": {
+        "argv": [
+          "vacant",
+          "do",
+          "pi",
+          "--prompt",
+          "{prompt}",
+          "--timeout",
+          "1800",
+          "--attempt-timeout",
+          "600",
+          "--",
+          "--session-dir",
+          "{logs}/sessions",
+          "--provider",
+          "{provider}",
+          "--model",
+          "{model}"
+        ],
+        "env": {
+          "PI_SKIP_VERSION_CHECK": "1",
+          "VACANT_WORK": "{logs}/vacant-work"
+        },
+        "usage": "none"
+      }
+    }
+  },
+  "pair": [
+    "A",
+    "P"
+  ],
+  "attempt_timeout_s": 1800,
+  "agent": {
+    "argv": [
+      "pi",
+      "-p",
+      "--mode",
+      "json",
+      "--session-dir",
+      "{logs}/sessions",
+      "--provider",
+      "{provider}",
+      "--model",
+      "{model}",
+      "{prompt}"
+    ],
+    "env": {
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "config_dir": {
+      "env": "PI_CODING_AGENT_DIR",
+      "from": "~/.pi/agent",
+      "copy": [
+        "models.json"
+      ]
+    },
+    "log_drop_re": "\"type\":\"message_update\"",
+    "usage": "pi_json"
+  },
+  "providers": [
+    {
+      "name": "lms1003",
+      "provider": "lms1003nothink",
+      "model": "gemma-4-12b-it-qat",
+      "jobs": 1
+    }
+  ],
+  "acceptance": {
+    "kind": "workspace_tests",
+    "patterns": [
+      "*_test.py",
+      "test_*.py"
+    ],
+    "timeout_s": 120
+  },
+  "grader": {
+    "timeout_s": 240,
+    "suite_timeout_s": 60,
+    "visible_equals_grader": true
+  },
+  "analysis": {
+    "alpha": 0.05,
+    "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "tasks": [
+    "pg_bottle_song",
+    "pg_bowling",
+    "pg_connect",
+    "pg_food_chain",
+    "pg_go_counting",
+    "pg_grep",
+    "pg_hangman",
+    "pg_list_ops",
+    "pg_phone_number",
+    "pg_pig_latin",
+    "pg_pov",
+    "pg_react",
+    "pg_scale_generator",
+    "pg_transpose",
+    "pg_variable_length_quantity",
+    "pg_wordy"
+  ],
+  "reps": 1,
+  "prereg": {
+    "registered": "2026-11-17，第一通模型呼叫之前 commit。screen16p 的第三次重跑（同 16 題、同兩臂、同 go_rule）。",
+    "role": "產品指令 `vacant do pi`（零設定重開模式，vacant_network/adapters/restart.py）對原生 pi 單跑。這是產品的數字，與 redo1（harness 機制）分開講。",
+    "go_rule": "16 對跑完：c ≥ b + 3 且 P 的驗收放行卻錯（accepted_but_wrong）＝0 ⇒ GO，複製 redo1 做 34×5 的產品確認批。否則 NO-GO：停下來回報，不改條件重篩。",
+    "why_this_rule": "與 screen16 同一條規則、同 16 題，只換處理臂；篩選批看過結果不可引用。",
+    "differences_from_screen16": [
+      "跑在 1003（lms1003nothink，gemma-4-12b-it-qat，context 65536、parallel 4、jobs 2），不是 1004：1004 正在跑 redo1，不能在一批跑到一半時分它的算力。兩臂同機，配對比較不受影響；但絕對通過率不可與 screen16／redo1 混講。",
+      "P 的 agent 預算＝vacant 自己的 --timeout 1800（每次 600、最多 3 次），與 R3 相同；harness 給 P 的牆鐘 1900 秒，多的 100 秒只給驗收與寫回，agent 用不到。",
+      "P 的 usage＝none：pi 的 JSON 日誌在 {logs}/vacant-work 裡，不在 P 的 stdout。所以 P 的 infra_void 只能靠「工作區沒動＋輸出尾端連線錯誤」判；模型呼叫數事後從 vacant-work 裡的 pi 日誌重算。這是兩臂判 void 的不對稱，報告要列。",
+      "前提偏離 MISSION §三：S3 原定 redo1＝EFFECTIVE 才做；redo1 在 153/170 對時（c=33、b=7）就先跑篩選，因為它不碰 1004、不碰 redo1 的量具與計畫。redo1 若最後不是 EFFECTIVE，這一批只記錄、不往下做確認批。"
+    ],
+    "states": {
+      "EFFECTIVE": "篩選批不下效果結論，只判 GO／NO-GO。",
+      "UNRESOLVED": "同上",
+      "CONTRADICTS": "同上",
+      "INCOMPLETE": "還沒跑完"
+    },
+    "why_rerun": "screen16p（30abb9ce7193）作廢、不判 GO／NO-GO：它跑在 1003 上 ctx 65536 的 gemma，A 臂 16 格裡 14 格以『Context size has been exceeded.』結束（A=1/16，redo1 同設定的 A 是 84/169），P 臂內層嘗試也撞到同一個錯；另外 1003 的 vacant-modelwatch（systemd 自動重啟）整批期間把 qwen 27b 載回同一張卡。兩臂條件都被基礎設施扭曲，數字不可讀。這次改跑 1004、與 redo1 相同的載入設定（ctx 262144），screen16p 的結果不進任何結論。",
+    "differences_from_screen16p": [
+      "端點仍是 1003（lms1003nothink），但 ctx 65536→262144、parallel 4、無 TTL，qwen 已卸載、modelwatch 已停（不再兩個模型擠一張卡）",
+      "jobs 2→1（與 redo1 相同）",
+      "其餘（題目、臂、預算、go_rule）不變"
+    ],
+    "why_rerun_2": "screen16p2（84b13520e698）跑了 3 分鐘就停、作廢、不看結果：jobs 2 時 1004 的 LM Studio 連續回 『got exception: bad allocation』（3 分鐘 3 次，其中一次讓 A 臂 pg_react 被記成失敗）；redo1 用 jobs 1，338 格約 1 次。停批前只完成 1 格（pg_react/A），資料留在 redo_runs/screen16p2.void_badalloc，不進任何結論。這次：jobs 1（與 redo1 相同）、開跑前把 1004 的 gemma 以同設定重載、取消 1 小時 TTL。",
+    "why_rerun_3": "screen16p3（a2932634fbdf）在完成 5 對後停批、作廢：1004 的 C: 被 iCloud Drive 失控日誌塞滿（0 bytes），LM Studio 的子行程從 19:44（當地）起反覆崩潰（Application Error 0xc0000409，3 小時 9 次以上，停批後閒置時仍在崩），其中 pg_food_chain/A 在跑到一半被『Model reloaded.』打斷、照規則記成失敗。崩潰會系統性壓低只有一次機會的 A 臂、P 臂的內層嘗試也沒有 infra 重試，兩臂受的影響不對稱，數字不可讀。停批的決定依據是崩潰記錄，不是方向；已完成的 5 對留在 redo_runs/screen16p3，不進任何結論。這次改跑 1003（C: 有 40 GB、兩天內 1 次崩潰），gemma 以與 redo1 相同的設定載入（ctx 262144、parallel 4、無 TTL），jobs 1；監看會在端點機器有崩潰或 C: < 5 GB 時告警。"
+  }
+}
