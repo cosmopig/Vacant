@@ -35,10 +35,7 @@ def _home() -> pathlib.Path:
 def cmd_do(args) -> int:
     cpath = pathlib.Path(args.contract) if args.contract else C.find(pathlib.Path.cwd())
     if cpath is None:
-        print("vacant do: no task contract found (create one with `vacant contract quick "
-              "--deliverable FILE --lock`, or `vacant contract init`)",
-              file=sys.stderr)
-        return 2
+        return _do_restart(args)
     task = flow.open_task(cpath)
     if args.prompt_file:
         prompt = pathlib.Path(args.prompt_file).read_text(encoding="utf-8")
@@ -100,6 +97,47 @@ def cmd_do(args) -> int:
     if res.get("void"):
         return EXIT["void"]
     return EXIT.get(str(res.get("outcome")), 2)
+
+
+def _do_restart(args) -> int:
+    """沒有契約：零設定重開模式（`restart.py`；政策＝ops/redo 的 R3）。
+
+    預設不掛 Vacant 的每步掛鉤：這一層的檢查是專案自己的測試＋重開，同一個工作階段裡的退回
+    在原生 agent 上沒有量到差別（e001／e002／e016），兩個疊在一起只會讓量到的數字分不清來源。
+    """
+    from . import restart as RS
+    if args.prompt_file:
+        prompt = pathlib.Path(args.prompt_file).read_text(encoding="utf-8")
+    else:
+        prompt = args.prompt or ""
+    if not prompt:
+        print("vacant do: give the task with --prompt or --prompt-file", file=sys.stderr)
+        return 2
+    if args.cmd:
+        import shlex
+        gb = A.generic_build(shlex.split(args.cmd))
+
+        def build(p, ws):
+            return gb(p, ws, hooks=False, extra=args.extra)
+        agent = "generic"
+    else:
+        if args.agent not in A.AGENTS:
+            print(f"vacant do: unknown agent {args.agent!r} (known: {', '.join(A.AGENTS)}; "
+                  f"or use --cmd)", file=sys.stderr)
+            return 2
+        spec = A.AGENTS[args.agent]
+        agent = spec.name
+
+        def build(p, ws, _spec=spec):
+            return _spec.build(p, ws, hooks=bool(args.hooks), extra=args.extra)
+    res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
+                 attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
+                 log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
+    if args.json:
+        print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
+    else:
+        print(RS.summary(res))
+    return EXIT["reject"] if res["accepted"] is False else 0
 
 
 def cmd_install(args) -> int:
@@ -273,6 +311,10 @@ def build_parser() -> argparse.ArgumentParser:
                    default="localized",
                    help="what the next attempt is told: the traced findings (default), the "
                         "generic check summary, or nothing (a fresh re-draw)")
+    p.add_argument("--attempt-timeout", type=float, default=600.0,
+                   help="without a contract: seconds per attempt (total stays under --timeout)")
+    p.add_argument("--hooks", action="store_true",
+                   help="without a contract: also add Vacant's per-step hooks (off by default)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_do, extra=[])
 
