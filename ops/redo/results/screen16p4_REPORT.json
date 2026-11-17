@@ -1,0 +1,168 @@
+{
+ "control": "A",
+ "generated": "2026-11-17T23:49:46Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "c7c6f5842dbfe61570db5ef8dcd40e9bb2b5662ef614f6838d7981222f48255a"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 3,
+  "control_only_b": 0,
+  "delta_pp": 31.25,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 5,
+  "mcnemar_exact_p_two_sided": 0.0625,
+  "neither": 8,
+  "treatment_only_c": 5
+ },
+ "pairs_complete": 16,
+ "pairs_infra_void": [],
+ "pairs_planned": 16,
+ "pairs_scored": 16,
+ "per_arm": {
+  "A": {
+   "accepted": 3,
+   "accepted_but_wrong": 0,
+   "cells": 16,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 1321.1,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 145.3,
+   "model_calls_known_cells": 16,
+   "pass": 3,
+   "rate": 0.1875,
+   "scored": 16,
+   "tests_tampered_attempts": 0,
+   "timeouts": 9
+  },
+  "P": {
+   "accepted": 8,
+   "accepted_but_wrong": 0,
+   "cells": 16,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 1104.1,
+   "mean_attempts": 1.0,
+   "mean_model_calls": null,
+   "model_calls_known_cells": 0,
+   "pass": 8,
+   "rate": 0.5,
+   "scored": 16,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 5,
+   "ctrl_pass": 3,
+   "p": 0.0625,
+   "pairs": 16,
+   "treat_pass": 8
+  }
+ },
+ "per_task": {
+  "pg_bottle_song": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_bowling": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_connect": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_food_chain": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_go_counting": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_grep": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_hangman": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_list_ops": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_phone_number": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_pig_latin": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_pov": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_react": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_scale_generator": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_transpose": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "pg_variable_length_quantity": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "pg_wordy": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  }
+ },
+ "plan_id": "screen16p4_pi_gemma12b_1003_j1",
+ "plan_sha256": "ba8b4a05a782f0e3839fa083efb4eae275b4b53c4d6890fc604cbda832ed5de5",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 11,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 21,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "P"
+}
