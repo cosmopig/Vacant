@@ -197,7 +197,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             break
     d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
     changed = _write_back(project, keep[d], set(originals))
-    res = {"mode": "restart", "project": str(project), "tests": sorted(originals),
+    res = {"mode": "restart", "project": str(project), "tests": sorted(originals), "max_attempts": max_attempts,
            "accepted": None if not originals else bool(attempts[d]["accept"]),
            "delivered_attempt": d + 1, "attempts": attempts, "changed": changed,
            "agent_wall_s": round(spent, 1), "run_dir": str(run_dir)}
@@ -213,8 +213,8 @@ def summary(res: dict) -> str:
         head = (f"[vacant] ran once; no executable acceptance (no *_test.py / test_*.py in the project), "
                 f"so nothing was checked. {files}.")
     elif res["accepted"]:
-        head = (f"[vacant] the project's tests pass on attempt {res['delivered_attempt']} of {n}; "
-                f"delivered that attempt. {files}.")
+        head = (f"[vacant] the project's tests pass on attempt {res['delivered_attempt']} "
+                f"(up to {res.get('max_attempts', n)} allowed); delivered that attempt. {files}.")
     else:
         a = res["attempts"][res["delivered_attempt"] - 1]
         head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
