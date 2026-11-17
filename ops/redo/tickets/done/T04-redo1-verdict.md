@@ -23,6 +23,6 @@
 - 不寫計畫檔沒有的更強說法；不把這個數字寫進 README／CLAUDE.md（那要等 T05 的產品量測＋人類看過）。
 
 ## 票尾（做完填這三行，再把票移到 done）
-- commit：
-- 驗收指令的實際輸出（逐字貼最後一行）：
-- 沒做完的：
+- commit：見本票移到 done/ 的那個 commit（結論檔 decisions/conclusions/CONCLUSION_20261117_REDO1.md、results/redo1_REPORT.{json,md}）
+- 驗收指令的實際輸出（逐字貼最後一行）：`python3 ops/check_repo_links.py | grep REDO1` 無輸出
+- 沒做完的：無。state＝EFFECTIVE ⇒ T05 已完成（f28406d77；產品量測 screen16p 作廢、screen16p2 跑中），T06 可開。

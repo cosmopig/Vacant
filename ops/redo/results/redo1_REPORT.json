@@ -1,0 +1,298 @@
+{
+ "control": "A",
+ "generated": "2026-11-17T10:50:51Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "c7c6f5842dbfe61570db5ef8dcd40e9bb2b5662ef614f6838d7981222f48255a"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 77,
+  "control_only_b": 7,
+  "delta_pp": 17.26,
+  "distinct_tasks_net_negative": 2,
+  "distinct_tasks_net_positive": 19,
+  "mcnemar_exact_p_two_sided": 9e-06,
+  "neither": 48,
+  "treatment_only_c": 36
+ },
+ "pairs_complete": 170,
+ "pairs_infra_void": [
+  "pg_connect/r3",
+  "pg_transpose/r1"
+ ],
+ "pairs_planned": 170,
+ "pairs_scored": 168,
+ "per_arm": {
+  "A": {
+   "accepted": 84,
+   "accepted_but_wrong": 0,
+   "cells": 170,
+   "final_errors_counted_as_attempts": {
+    "Model reloaded.": 12
+   },
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 436.0,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 30.5,
+   "model_calls_known_cells": 170,
+   "pass": 84,
+   "rate": 0.4941,
+   "scored": 170,
+   "tests_tampered_attempts": 0,
+   "timeouts": 12
+  },
+  "R3": {
+   "accepted": 113,
+   "accepted_but_wrong": 0,
+   "cells": 170,
+   "final_errors_counted_as_attempts": {
+    "Model reloaded.": 15,
+    "got exception: bad allocation": 1
+   },
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 2,
+   "mean_agent_wall_s": 703.9,
+   "mean_attempts": 1.935,
+   "mean_model_calls": 61.9,
+   "model_calls_known_cells": 168,
+   "pass": 113,
+   "rate": 0.6726,
+   "scored": 168,
+   "tests_tampered_attempts": 0,
+   "timeouts": 101
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 3,
+   "c": 4,
+   "ctrl_pass": 20,
+   "p": 1.0,
+   "pairs": 33,
+   "treat_pass": 21
+  },
+  "2": {
+   "b": 1,
+   "c": 8,
+   "ctrl_pass": 16,
+   "p": 0.039062,
+   "pairs": 34,
+   "treat_pass": 23
+  },
+  "3": {
+   "b": 0,
+   "c": 12,
+   "ctrl_pass": 14,
+   "p": 0.000488,
+   "pairs": 33,
+   "treat_pass": 26
+  },
+  "4": {
+   "b": 0,
+   "c": 7,
+   "ctrl_pass": 18,
+   "p": 0.015625,
+   "pairs": 34,
+   "treat_pass": 25
+  },
+  "5": {
+   "b": 3,
+   "c": 5,
+   "ctrl_pass": 16,
+   "p": 0.726562,
+   "pairs": 34,
+   "treat_pass": 18
+  }
+ },
+ "per_task": {
+  "pg_affine_cipher": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_beer_song": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 4
+  },
+  "pg_book_store": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_bottle_song": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 4
+  },
+  "pg_bowling": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 1
+  },
+  "pg_connect": {
+   "ctrl": 1,
+   "pairs": 4,
+   "treat": 4
+  },
+  "pg_dominoes": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_dot_dsl": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_food_chain": {
+   "ctrl": 2,
+   "pairs": 5,
+   "treat": 2
+  },
+  "pg_forth": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 1
+  },
+  "pg_go_counting": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "pg_grade_school": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_grep": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 4
+  },
+  "pg_hangman": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 3
+  },
+  "pg_list_ops": {
+   "ctrl": 2,
+   "pairs": 5,
+   "treat": 4
+  },
+  "pg_paasio": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "pg_phone_number": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_pig_latin": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_poker": {
+   "ctrl": 2,
+   "pairs": 5,
+   "treat": 0
+  },
+  "pg_pov": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_proverb": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_react": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 2
+  },
+  "pg_rest_api": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 2
+  },
+  "pg_robot_name": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_scale_generator": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "pg_sgf_parsing": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "pg_simple_linked_list": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_transpose": {
+   "ctrl": 0,
+   "pairs": 4,
+   "treat": 2
+  },
+  "pg_tree_building": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_two_bucket": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_variable_length_quantity": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_wordy": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 2
+  },
+  "pg_zebra_puzzle": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "pg_zipper": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 3
+  }
+ },
+ "plan_id": "redo1_pi_gemma12b_polyglot34",
+ "plan_sha256": "f95f90d86b779fa31747b9325b0484f908a1efe7ad67ca659eee3b1cd1a164cf",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 197,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 301,
+  "reject_pass": 0
+ },
+ "state": "EFFECTIVE",
+ "treatment": "R3"
+}
