@@ -19,6 +19,12 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
 - 驗收＝「擋得住專案自己的測試會抓到的錯」，**不等於需求被滿足**。測試寫得弱，這一層就弱。
 - 暫存副本不是沙箱：agent 以使用者的帳號執行，讀得到磁碟上的其他東西。
 - 等預算是牆鐘的；重開通常讓 agent 用掉更多模型呼叫（redo1 約兩倍），這一層不省算力。
+- `budget_s` 是**整個指令**的牆鐘上限：agent、驗收、複製都算在內，每次嘗試前預留一次驗收的時間
+  （2026-11-19：只算 agent 時間時，confirm1／confirm1c 各有 1 格第三次嘗試跑到外層時限被砍、什麼都沒交回）。
+  ⚠ 這點和 `redo.py` 的 R3 不同（R3 只算 agent 牆鐘）：產品比量到的政策略保守，同樣預算下最後一次嘗試可能短一點。
+- 符號連結：agent 在工作區裡做的 symlink 一律不寫回；驗收還原測試檔時，路徑上的 symlink 會被換成真的目錄
+  （記為 tests_tampered）；寫回時目的地路徑經過專案裡既有的 symlink、或刪除會穿過工作區裡的 symlink，就跳過並記在
+  `changed["skipped"]`，不寫到專案外面、也不刪專案裡的檔（2026-11-19 日報 P1）。
 - 這一層不讀 agent 說了什麼；它只看測試。說「做完了」但測試沒過＝沒過。
 """
 from __future__ import annotations
@@ -72,6 +78,16 @@ def _files(root: pathlib.Path) -> list[str]:
     return sorted(out)
 
 
+def _through_symlink(root: pathlib.Path, rel: str) -> bool:
+    """root/rel 的路徑上（含最後一段）有沒有 symlink。root 本身不算。"""
+    p = root
+    for part in pathlib.PurePosixPath(rel).parts:
+        p = p / part
+        if p.is_symlink():
+            return True
+    return False
+
+
 def find_tests(root: pathlib.Path) -> list[str]:
     return [r for r in _files(root) if any(pathlib.PurePath(r.rsplit("/", 1)[-1]).match(p) for p in PATTERNS)]
 
@@ -94,6 +110,19 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         shutil.copytree(ws, work, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
         for rel, want in originals.items():
             f = work / rel
+            if _through_symlink(work, rel):
+                # agent 把測試檔或它的某一層目錄換成 symlink：拆掉換成真的，免得還原時寫到工作區外面
+                base["tests_tampered"].append(rel)
+                p = work
+                for part in pathlib.PurePosixPath(rel).parts[:-1]:
+                    p = p / part
+                    if p.is_symlink():
+                        p.unlink()
+                    p.mkdir(exist_ok=True)
+                if f.is_symlink():
+                    f.unlink()
+                f.write_bytes(want)
+                continue
             if not f.is_file() or f.read_bytes() != want:
                 base["tests_tampered"].append(rel)
                 f.parent.mkdir(parents=True, exist_ok=True)
@@ -137,9 +166,12 @@ def deliver_index(accs: list[dict]) -> int:
 
 def _write_back(project: pathlib.Path, ws: pathlib.Path, protected: set[str]) -> dict[str, list[str]]:
     before, after = set(_files(project)), set(_files(ws))
-    changed: dict[str, list[str]] = {"added": [], "modified": [], "deleted": []}
+    changed: dict[str, list[str]] = {"added": [], "modified": [], "deleted": [], "skipped": []}
     for rel in sorted(after - protected):
         src, dst = ws / rel, project / rel
+        if _through_symlink(project, rel):          # 會經過專案裡既有的 symlink 寫到別處
+            changed["skipped"].append(rel)
+            continue
         if rel in before:
             if dst.read_bytes() == src.read_bytes():
                 continue
@@ -149,6 +181,9 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path, protected: set[str]) ->
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
     for rel in sorted(before - after - protected):
+        if _through_symlink(ws, rel) or _through_symlink(project, rel):
+            changed["skipped"].append(rel)           # 工作區裡那一層被換成 symlink ⇒ 不是 agent 刪了檔，不動專案
+            continue
         (project / rel).unlink()
         changed["deleted"].append(rel)
     return changed
@@ -168,10 +203,13 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     attempts: list[dict] = []
     keep: list[pathlib.Path] = []
     spent = 0.0
+    t0 = time.monotonic()
+    reserve = min(ACC_TIMEOUT_S, budget_s / 10) if originals else 0.0   # 每次嘗試後留給驗收的時間
     while len(attempts) < max_attempts:
-        remaining = budget_s - spent
+        remaining = budget_s - (time.monotonic() - t0) - reserve
         if attempts and remaining < min_attempt_s:
             break
+        remaining = max(remaining, 1.0)
         k = len(attempts) + 1
         ws = run_dir / f"attempt_{k}" / "w"
         shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
@@ -184,7 +222,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             if launch.cleanup:
                 launch.cleanup()
         spent += r["wall_ms"] / 1000.0
-        acc = acceptance(originals, ws) if originals else {"accept": None, "passed": None, "status": "no_tests",
+        acc_t = max(5.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
+        acc = acceptance(originals, ws, acc_t) if originals else {"accept": None, "passed": None, "status": "no_tests",
                                                            "tests_tampered": [], "run": None}
         attempts.append({"attempt": k, "accept": acc["accept"], "passed": acc["passed"], "run": acc["run"],
                          "status": acc["status"], "tests_tampered": acc["tests_tampered"],
@@ -200,7 +239,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     res = {"mode": "restart", "project": str(project), "tests": sorted(originals), "max_attempts": max_attempts,
            "accepted": None if not originals else bool(attempts[d]["accept"]),
            "delivered_attempt": d + 1, "attempts": attempts, "changed": changed,
-           "agent_wall_s": round(spent, 1), "run_dir": str(run_dir)}
+           "agent_wall_s": round(spent, 1), "total_wall_s": round(time.monotonic() - t0, 1),
+           "run_dir": str(run_dir)}
     (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
     return res
 
@@ -219,6 +259,9 @@ def summary(res: dict) -> str:
         a = res["attempts"][res["delivered_attempt"] - 1]
         head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
                 f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} tests). {files}.")
+    if ch.get("skipped"):
+        head += (f"\n  not written back ({len(ch['skipped'])}): the path goes through a symbolic link "
+                 f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
     tam = sorted({t for a in res["attempts"] for t in a["tests_tampered"]})
     if tam:
         head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
