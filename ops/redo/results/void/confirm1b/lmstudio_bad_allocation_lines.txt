@@ -1,0 +1,9 @@
+2026-11-18.2.log:121568: [2026-11-18 08:11:12][DEBUG] 17.42.650.339 E slot      iterate: id  3 | task 6394 | got exception: bad allocation
+2026-11-18.2.log:121569: [2026-11-18 08:11:12][DEBUG] 17.42.650.473 E srv    send_error: task id = 6394, error: got exception: bad allocation
+2026-11-18.2.log:121572: [2026-11-18 08:11:12][ERROR][gemma-4-12b-it-qat] got exception: bad allocation. Error Data: n/a, Additional Data: n/a
+2026-11-18.2.log:231762: [2026-11-18 08:22:29][DEBUG] 11.04.700.466 E slot      iterate: id  0 | task 29132 | got exception: bad allocation
+2026-11-18.2.log:231763: 11.04.700.478 E srv    send_error: task id = 29132, error: got exception: bad allocation
+2026-11-18.2.log:231766: [2026-11-18 08:22:29][ERROR][gemma-4-12b-it-qat] got exception: bad allocation. Error Data: n/a, Additional Data: n/a
+2026-11-18.2.log:237271: [2026-11-18 08:23:04][DEBUG] 11.39.325.340 E slot      iterate: id  3 | task 30490 | got exception: bad allocation
+2026-11-18.2.log:237272: 11.39.325.371 E srv    send_error: task id = 30490, error: got exception: bad allocation
+2026-11-18.2.log:237276: [2026-11-18 08:23:04][ERROR][gemma-4-12b-it-qat] got exception: bad allocation. Error Data: n/a, Additional Data: n/a

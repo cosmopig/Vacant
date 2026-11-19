@@ -1,0 +1,4 @@
+2026-11-18T00:09:37Z  計畫 confirm1b_vacantdo_pi_gemma12b_1004（e9c1eed0d6e2） 題庫 /home/user1/dev/ops/ref/bm_tasks/polyglot_py  這次要處理 170 對（全計畫 170 對）  harness c7c6f5842dbf
+2026-11-18T00:21:24Z  pg_grep/r1/P                                 pass=False accepted=False attempts=1 wall=707.4s
+2026-11-18T00:22:30Z  pg_hangman/r1/P                              pass=False accepted=False attempts=1 wall=773.6s
+2026-11-18T00:23:05Z  pg_hangman/r1/A                              pass=False accepted=False attempts=1 wall=34.5s
