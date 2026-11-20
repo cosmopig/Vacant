@@ -1015,3 +1015,516 @@ def test_legacy_vacant_audit_body_still_works(tmp_path: pathlib.Path):
     assert rc2 == 0, err2.getvalue()
     assert "alice" in out2.getvalue()
     assert "沒有東西可驗" in out2.getvalue()
+
+
+# ── 7. Restart Mode Signed Receipts Join, Verification, Fallback & Mismatch ───
+
+def _setup_restart_project(tmp_path: pathlib.Path, name: str = "proj_restart") -> pathlib.Path:
+    proj = tmp_path / name
+    proj.mkdir(parents=True, exist_ok=True)
+    (proj / "sol_test.py").write_text(
+        "import unittest\n"
+        "from sol import f\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_one(self):\n"
+        "        self.assertEqual(f(1), 2)\n"
+        "    def test_two(self):\n"
+        "        self.assertEqual(f(41), 42)\n",
+        encoding="utf-8",
+    )
+    (proj / "sol.py").write_text("def f(x):\n    raise NotImplementedError\n", encoding="utf-8")
+    return proj
+
+
+def _make_fake_restart_builder(tmp_path: pathlib.Path, plan: str, *, name: str = "fake_agent.py"):
+    import sys
+    from vacant_network.adapters.run import Launch
+
+    script = tmp_path / name
+    script.write_text(
+        "import json, os, pathlib\n"
+        "st = pathlib.Path(os.environ['STUB_STATE'])\n"
+        "n = json.loads(st.read_text())['n'] + 1 if st.exists() else 1\n"
+        "st.write_text(json.dumps({'n': n}))\n"
+        "plan = os.environ['STUB_PLAN'].split(',')\n"
+        "what = plan[min(n, len(plan)) - 1]\n"
+        "if what == 'good':\n"
+        "    pathlib.Path('sol.py').write_text('def f(x):\\n    return x + 1\\n')\n"
+        "else:\n"
+        "    pathlib.Path('sol.py').write_text('def f(x):\\n    return x\\n')\n",
+        encoding="utf-8",
+    )
+    state = tmp_path / f"{name}.state.json"
+
+    def build(prompt: str, ws: pathlib.Path) -> Launch:
+        return Launch(
+            argv=[sys.executable, str(script), "--api-key=sk-proj-secret123456", prompt],
+            env={"STUB_STATE": str(state), "STUB_PLAN": plan},
+        )
+
+    return build
+
+
+def test_restart_signed_receipt_end_to_end_single_verified_record(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    from vacant_network.adapters import restart as RS
+
+    vh = tmp_path / ".vacant"
+    wr = tmp_path / ".vacant-work"
+    vr = tmp_path / ".vacant-run"
+    ph = vh / "possess"
+    env = {
+        "VACANT_HOME": str(vh),
+        "VACANT_WORK": str(wr),
+        "VACANT_RUN_DIR": str(vr),
+        "VACANT_POSSESS_HOME": str(ph),
+        "VACANT_HOOK_NO_GC": "1",
+    }
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+
+    proj = _setup_restart_project(tmp_path)
+    res = RS.run(
+        proj,
+        _make_fake_restart_builder(tmp_path, "bad,good"),
+        "make f(x) return x + 1",
+        max_attempts=3,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    assert res["accepted"] is True
+    assert res["delivered_attempt"] == 2
+    assert res["receipt"]["recorded"] is True
+    run_name = pathlib.Path(res["run_dir"]).name
+    pkey = project_key(proj)
+
+    # collect_all -> EXACTLY ONE record (no duplicate trace:<project>!)
+    records = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[vr], possess_home=ph)
+    assert len(records) == 1, f"expected 1 record, got {[r['record_id'] for r in records]}"
+    rec = records[0]
+    assert rec["record_id"] == f"restart:{run_name}"
+    assert rec["kind"] == "restart"
+    assert rec["project"] == str(proj.resolve())
+    assert rec["project_key"] == pkey
+    assert rec["agent"] == "pi"
+    assert rec["agents"] == ["pi"]
+    assert rec["attempts"] == {"count": 2, "max": 3, "delivered": 2}
+    assert rec["acceptance"]["result"] == "accepted"
+    assert rec["acceptance"]["passed"] is True
+    assert rec["acceptance"]["kind"] == "python_unittest"
+    assert rec["acceptance"]["checks_passed"] == 2
+    assert rec["acceptance"]["checks_total"] == 2
+    assert rec["sent_back"] == {"count": 0, "items": []}
+
+    # Signed and verified via the trace chain, with companion result.json anchor checked
+    assert rec["signature"]["verified"] is True
+    assert rec["signature"]["status"] == "verified"
+    assert rec["signature"]["scheme"] == "ed25519_trusted_chain"
+    assert rec["signature"]["anchor_checked"] is True
+    assert rec["source"]["path"].endswith("chain.ndjson")
+    assert any(p.endswith("result.json") for p in rec["source"]["auxiliary_paths"])
+
+    # No unsigned_source, unattributed_source, or mismatch gaps
+    gap_codes = {g["code"] for g in rec["gaps"]}
+    assert "unsigned_source" not in gap_codes
+    assert "unattributed_source" not in gap_codes
+    assert "result_json_mismatch" not in gap_codes
+    assert rec["gaps"] == []
+
+    # Signed receipt details populated (argv redacted, attempts + snapshot hashes, written_back)
+    det = rec["details"]
+    assert det["source_type"] == "signed_receipt"
+    assert det["run_id"] == run_name
+    assert isinstance(det["argv"], list) and "--api-key=[REDACTED]" in det["argv"]
+    assert "sk-proj-secret123456" not in json.dumps(rec)
+    assert len(det["attempts"]) == 2
+    assert len(det["snapshot_hashes"]) == 2
+    assert all(
+        isinstance(s["snapshot_tree_sha256"], str) and len(s["snapshot_tree_sha256"]) == 64
+        for s in det["snapshot_hashes"]
+    )
+    assert det["delivered_snapshot_sha256"] == det["snapshot_hashes"][1]["snapshot_tree_sha256"]
+    assert det["changed"]["modified"] == ["sol.py"]
+
+    # CLI: audit list / show / export
+    rc, out_list, err = _run_cli(["audit", "list"], monkeypatch, env)
+    assert rc == 0, err
+    assert "Total: 1 record(s)." in out_list
+    assert "pi" in out_list
+    assert "accepted" in out_list
+    assert "yes" in out_list
+    assert "unsigned" not in out_list.splitlines()[2]
+
+    rc, out_show, err = _run_cli(["audit", "show", f"restart:{run_name}", "--json"], monkeypatch, env)
+    assert rc == 0, err
+    shown = json.loads(out_show)
+    assert shown["record_id"] == f"restart:{run_name}"
+    assert shown["signature"]["verified"] is True
+    assert shown["agent"] == "pi"
+
+    rc, out_exp, err = _run_cli(["audit", "export", "--jsonl"], monkeypatch, env)
+    assert rc == 0, err
+    exp_rows = [json.loads(line) for line in out_exp.splitlines() if line.strip()]
+    assert len(exp_rows) == 1
+    assert exp_rows[0]["record_id"] == f"restart:{run_name}"
+    assert exp_rows[0]["signature"]["verified"] is True
+
+    # Filter --kind trace returns empty (no spurious trace:<proj> record), --kind restart & --agent pi match
+    assert AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[vr], possess_home=ph, kinds=["trace"]) == []
+    only_restart = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[vr], possess_home=ph, kinds=["restart"])
+    assert [r["record_id"] for r in only_restart] == [f"restart:{run_name}"]
+    assert [r["record_id"] for r in AE.filter_records(records, agent="pi")] == [f"restart:{run_name}"]
+
+
+def test_restart_multiple_runs_and_deleted_result_json(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    from vacant_network.adapters import restart as RS
+
+    vh = tmp_path / ".vacant"
+    wr = tmp_path / ".vacant-work"
+    vr = tmp_path / ".vacant-run"
+    for k, v in (
+        ("VACANT_HOME", str(vh)),
+        ("VACANT_WORK", str(wr)),
+        ("VACANT_RUN_DIR", str(vr)),
+        ("VACANT_HOOK_NO_GC", "1"),
+    ):
+        monkeypatch.setenv(k, v)
+
+    proj = _setup_restart_project(tmp_path, "proj_multi")
+    r1 = RS.run(
+        proj,
+        _make_fake_restart_builder(tmp_path, "bad", name="ag1.py"),
+        "attempt 1",
+        max_attempts=1,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    r2 = RS.run(
+        proj,
+        _make_fake_restart_builder(tmp_path, "good", name="ag2.py"),
+        "attempt 2",
+        max_attempts=1,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="codex",
+    )
+    id1 = f"restart:{pathlib.Path(r1['run_dir']).name}"
+    id2 = f"restart:{pathlib.Path(r2['run_dir']).name}"
+
+    recs = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[vr], possess_home=vh / "possess")
+    assert {r["record_id"] for r in recs} == {id1, id2}
+    by_id = {r["record_id"]: r for r in recs}
+    assert by_id[id1]["agent"] == "pi" and by_id[id1]["acceptance"]["result"] == "rejected"
+    assert by_id[id2]["agent"] == "codex" and by_id[id2]["acceptance"]["result"] == "accepted"
+    assert all(r["signature"]["verified"] is True for r in recs)
+
+    # Delete run1's result.json -> still 2 verified restart records from chain.ndjson
+    (pathlib.Path(r1["run_dir"]) / "result.json").unlink()
+    recs2 = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[vr], possess_home=vh / "possess")
+    assert {r["record_id"] for r in recs2} == {id1, id2}
+    r1_rec = {r["record_id"]: r for r in recs2}[id1]
+    assert r1_rec["signature"]["verified"] is True
+    assert r1_rec["signature"]["anchor_checked"] is False
+    assert r1_rec["agent"] == "pi"
+    assert r1_rec["project"] == str(proj.resolve())
+    assert r1_rec["details"]["run_dir"] is None
+    assert "unsigned_source" not in {g["code"] for g in r1_rec["gaps"]}
+    assert "unanchored_chain" in {g["code"] for g in r1_rec["gaps"]}
+
+
+def test_restart_tampered_and_truncated_receipt_not_verified(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    from vacant_network.adapters import restart as RS
+    from vacant_network.canonical import canonical_bytes
+
+    vh = tmp_path / ".vacant"
+    wr = tmp_path / ".vacant-work"
+    vr = tmp_path / ".vacant-run"
+    env = {
+        "VACANT_HOME": str(vh),
+        "VACANT_WORK": str(wr),
+        "VACANT_RUN_DIR": str(vr),
+        "VACANT_POSSESS_HOME": str(vh / "possess"),
+        "VACANT_HOOK_NO_GC": "1",
+    }
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+
+    # Case 1: Tampered restart_receipt payload in chain.ndjson -> verified=False, NOT dropped
+    proj1 = _setup_restart_project(tmp_path, "proj_tamper")
+    res1 = RS.run(
+        proj1,
+        _make_fake_restart_builder(tmp_path, "bad", name="ag_t.py"),
+        "fix it",
+        max_attempts=1,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    chain_p = pathlib.Path(res1["receipt"]["chain_path"])
+    lines = chain_p.read_text(encoding="utf-8").splitlines()
+    obj = json.loads(lines[1])
+    obj["payload"]["accepted"] = True  # forge pass
+    lines[1] = canonical_bytes(obj).decode("utf-8")
+    chain_p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    recs1 = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[vr], possess_home=vh / "possess")
+    assert len(recs1) == 1
+    trec = recs1[0]
+    assert trec["record_id"] == f"restart:{pathlib.Path(res1['run_dir']).name}"
+    assert trec["signature"]["verified"] is False
+    assert trec["signature"]["status"] == "failed"
+    assert any(g["code"] == "signature_failed" for g in trec["gaps"])
+
+    rc, out_list, err = _run_cli(["audit", "list"], monkeypatch, env)
+    assert rc == 0, err
+    assert "FAIL" in out_list
+
+    # Case 2: Tail-truncated chain (receipt line deleted + head.json deleted) -> caught by result.json anchor
+    vh2 = tmp_path / ".vacant2"
+    wr2 = tmp_path / ".vacant2-work"
+    monkeypatch.setenv("VACANT_HOME", str(vh2))
+    monkeypatch.setenv("VACANT_WORK", str(wr2))
+    proj2 = _setup_restart_project(tmp_path, "proj_trunc")
+    res2 = RS.run(
+        proj2,
+        _make_fake_restart_builder(tmp_path, "good", name="ag_tr.py"),
+        "fix it",
+        max_attempts=1,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    chain_p2 = pathlib.Path(res2["receipt"]["chain_path"])
+    lines2 = chain_p2.read_text(encoding="utf-8").splitlines()
+    chain_p2.write_text(lines2[0] + "\n", encoding="utf-8")  # drop restart_receipt
+    (chain_p2.parent / "head.json").unlink()  # also delete head.json
+
+    recs2 = AE.collect_all(vacant_home=vh2, work_root=wr2, vrun_dirs=[vr], possess_home=vh2 / "possess")
+    assert len(recs2) == 1, f"expected 1 truncated restart record, got {[r['record_id'] for r in recs2]}"
+    tr2 = recs2[0]
+    assert tr2["record_id"] == f"restart:{pathlib.Path(res2['run_dir']).name}"
+    assert tr2["signature"]["verified"] is False
+    assert tr2["signature"]["status"] == "failed"
+    assert tr2["signature"]["anchor_checked"] is True
+    assert any(g["code"] == "chain_truncated" for g in tr2["gaps"])
+
+
+def test_restart_legacy_and_missing_chain_fallback_unsigned(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    from vacant_network.adapters import restart as RS
+
+    # 1. Legacy run with only result.json (before receipts existed)
+    vh = tmp_path / ".vacant_legacy"
+    wr = tmp_path / ".vacant_legacy-work"
+    _make_restart_run(
+        wr,
+        "restart-20261110T090000-42-deadbe",
+        {
+            "mode": "restart",
+            "project": str(tmp_path / "old_proj"),
+            "acceptance": {"kind": "python_unittest", "command": "unittest"},
+            "max_attempts": 3,
+            "accepted": True,
+            "delivered_attempt": 1,
+            "attempts": [{"attempt": 1, "accept": True, "passed": 2, "run": 2, "status": "ok", "tests_tampered": []}],
+            "changed": {"added": [], "modified": ["sol.py"], "deleted": [], "skipped": []},
+        },
+    )
+    recs = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[], possess_home=vh / "possess")
+    assert len(recs) == 1
+    leg = recs[0]
+    assert leg["record_id"] == "restart:restart-20261110T090000-42-deadbe"
+    assert leg["signature"]["verified"] is None
+    assert leg["signature"]["status"] == "unsigned"
+    assert any(g["code"] == "unsigned_source" for g in leg["gaps"])
+    assert leg["details"]["source_type"] == "result_json_fallback"
+
+    # 2. Run whose trace chain is missing -> fallback to unsigned result.json with gap
+    vh2 = tmp_path / ".vacant_miss"
+    wr2 = tmp_path / ".vacant_miss-work"
+    monkeypatch.setenv("VACANT_HOME", str(vh2))
+    monkeypatch.setenv("VACANT_WORK", str(wr2))
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
+    proj = _setup_restart_project(tmp_path, "proj_miss")
+    res = RS.run(
+        proj,
+        _make_fake_restart_builder(tmp_path, "good", name="ag_miss.py"),
+        "fix it",
+        max_attempts=1,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    import shutil
+
+    shutil.rmtree(vh2 / "trace")  # chain completely missing
+    recs2 = AE.collect_all(vacant_home=vh2, work_root=wr2, vrun_dirs=[], possess_home=vh2 / "possess")
+    assert len(recs2) == 1
+    miss = recs2[0]
+    assert miss["record_id"] == f"restart:{pathlib.Path(res['run_dir']).name}"
+    assert miss["signature"]["verified"] is None
+    assert miss["signature"]["status"] == "unsigned"
+    assert "missing" in miss["signature"]["reason"]
+    assert any(g["code"] == "unsigned_source" for g in miss["gaps"])
+    assert miss["details"]["source_type"] == "result_json_fallback"
+
+
+def test_restart_result_json_mismatch_prefers_signed_receipt_and_flags_gap(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    from vacant_network.adapters import restart as RS
+
+    vh = tmp_path / ".vacant_mis"
+    wr = tmp_path / ".vacant_mis-work"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    monkeypatch.setenv("VACANT_WORK", str(wr))
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
+
+    proj = _setup_restart_project(tmp_path, "proj_mismatch")
+    res = RS.run(
+        proj,
+        _make_fake_restart_builder(tmp_path, "bad", name="ag_mis.py"),
+        "fix it",
+        max_attempts=2,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    assert res["accepted"] is False
+    res_p = pathlib.Path(res["run_dir"]) / "result.json"
+    rj = json.loads(res_p.read_text(encoding="utf-8"))
+    # Tamper with unsigned result.json to claim success and different agent/counts
+    rj["accepted"] = True
+    rj["delivered_attempt"] = 1
+    rj["agent"] = "forged-agent"
+    rj["attempts"][0]["passed"] = 2
+    rj["attempts"][0]["accept"] = True
+    rj["changed"]["modified"] = ["other.py"]
+    res_p.write_text(json.dumps(rj, indent=2), encoding="utf-8")
+
+    recs = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[], possess_home=vh / "possess")
+    assert len(recs) == 1
+    rec = recs[0]
+    # Signed receipt is preferred for EVERY field
+    assert rec["signature"]["verified"] is True
+    assert rec["agent"] == "pi"
+    assert rec["acceptance"]["result"] == "rejected"
+    assert rec["acceptance"]["passed"] is False
+    assert rec["acceptance"]["checks_passed"] == 0
+    assert rec["attempts"]["delivered"] == 2  # tie-break last attempt in 2-attempt rejected run
+    assert rec["details"]["changed"]["modified"] == ["sol.py"]
+
+    # Explicit mismatch gap + details.mismatches
+    mis_gaps = [g for g in rec["gaps"] if g["code"] == "result_json_mismatch"]
+    assert len(mis_gaps) == 1
+    assert mis_gaps[0]["severity"] == "warning"
+    assert mis_gaps[0]["count"] >= 4
+    assert len(rec["details"]["mismatches"]) >= 4
+
+
+def test_restart_mixed_trace_project_and_legacy_receipt_without_run_id(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    from vacant_network.adapters import restart as RS
+
+    # 1. Mixed project: hook trace events + restart_receipt -> emits BOTH trace:<pk> and restart:<run_id>
+    vh = tmp_path / ".vacant_mix"
+    wr = tmp_path / ".vacant_mix-work"
+    ident, _ = _init_trust(vh)
+    proj = _setup_restart_project(tmp_path, "proj_mix")
+    pkey, pdir, _ = _make_trace_project(vh, ident, proj, platform="claude")
+
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    monkeypatch.setenv("VACANT_WORK", str(wr))
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
+    res = RS.run(
+        proj,
+        _make_fake_restart_builder(tmp_path, "good", name="ag_mix.py"),
+        "fix sol",
+        max_attempts=1,
+        attempt_timeout_s=20,
+        budget_s=120,
+        agent="pi",
+    )
+    run_id = pathlib.Path(res["run_dir"]).name
+    recs = AE.collect_all(vacant_home=vh, work_root=wr, vrun_dirs=[], possess_home=vh / "possess")
+    by_id = {r["record_id"]: r for r in recs}
+    assert set(by_id) == {f"trace:{pkey}", f"restart:{run_id}"}
+    assert by_id[f"trace:{pkey}"]["signature"]["verified"] is True
+    assert by_id[f"trace:{pkey}"]["details"]["n_restart_receipts"] == 1
+    assert by_id[f"restart:{run_id}"]["signature"]["verified"] is True
+    assert by_id[f"restart:{run_id}"]["agent"] == "pi"
+
+    # 2. Backward-compat: signed restart_receipt lacking `run_id`, joined via (project_key, seq, hash)
+    vh2 = tmp_path / ".vacant_compat"
+    wr2 = tmp_path / ".vacant_compat-work"
+    ident2, _ = _init_trust(vh2)
+    proj2 = tmp_path / "proj_compat"
+    proj2.mkdir()
+    pk2 = project_key(proj2)
+    pdir2 = vh2 / "trace" / "projects" / pk2
+    pdir2.mkdir(parents=True, exist_ok=True)
+    book = Logbook()
+    book.append(
+        "trace_genesis",
+        {"schema": TRACE_SCHEMA, "workspace": str(proj2.resolve()), "signer": pub_to_hex(ident2.pub)},
+        ident2,
+        ts_ms=1_760_000_000_000,
+    )
+    e2 = book.append(
+        "restart_receipt",
+        {
+            "schema": TRACE_SCHEMA,
+            "receipt_schema": RS.RECEIPT_SCHEMA,
+            # intentionally omit run_id to verify backward-compat join
+            "agent": "opencode",
+            "argv": ["opencode", "fix"],
+            "project_key": pk2,
+            "project_path_sha256": hashlib.sha256(str(proj2.resolve()).encode("utf-8")).hexdigest(),
+            "acceptance": {"kind": "python_unittest", "command": "unittest", "protected": [], "reason": None},
+            "max_attempts": 1,
+            "attempts": [{"attempt": 1, "accept": True, "passed": 1, "run": 1, "status": "ok", "rc": 0, "timed_out": False, "wall_s": 0.5, "tests_tampered": [], "snapshot_tree_sha256": "a" * 64}],
+            "delivered_attempt": 1,
+            "accepted": True,
+            "written_back": [],
+            "deleted": [],
+            "skipped": [],
+            "agent_wall_s": 0.5,
+            "total_wall_s": 0.6,
+        },
+        ident2,
+        ts_ms=1_760_000_005_000,
+    )
+    book.save(pdir2 / "chain.ndjson")
+    (pdir2 / "head.json").write_text(json.dumps({"seq": e2.seq, "hash": e2.hash()}), encoding="utf-8")
+    _make_restart_run(
+        wr2,
+        "restart-20261118T120000-7-abcdef",
+        {
+            "mode": "restart",
+            "project": str(proj2.resolve()),
+            "acceptance": {"kind": "python_unittest", "command": "unittest"},
+            "max_attempts": 1,
+            "accepted": True,
+            "delivered_attempt": 1,
+            "attempts": [{"attempt": 1, "accept": True, "passed": 1, "run": 1, "status": "ok", "rc": 0, "timed_out": False, "tests_tampered": []}],
+            "changed": {"added": [], "modified": [], "deleted": [], "skipped": []},
+            "receipt": {"recorded": True, "schema": RS.RECEIPT_SCHEMA, "project_key": pk2, "seq": e2.seq, "hash": e2.hash()},
+        },
+    )
+    recs_compat = AE.collect_all(vacant_home=vh2, work_root=wr2, vrun_dirs=[], possess_home=vh2 / "possess")
+    assert len(recs_compat) == 1
+    cr = recs_compat[0]
+    assert cr["record_id"] == "restart:restart-20261118T120000-7-abcdef"
+    assert cr["signature"]["verified"] is True
+    assert cr["signature"]["anchor_checked"] is True
+    assert cr["agent"] == "opencode"
+    assert cr["gaps"] == []
