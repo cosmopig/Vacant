@@ -38,6 +38,8 @@ Options:
   --colab-config <path>      Optional `colab --config <path>` for session isolation
   --colab-auth <adc|oauth2>  Optional `colab --auth=<mode>` flag
   --allow-uncommitted-plan   Allow uncommitted plan.json (smoke tests ONLY)
+  --extra-wheel <path>       Upload a product wheel and install it into /opt/redo/rc_venv on the VM
+                             (plans reference /opt/redo/rc_venv/bin/vacant); its sha256 goes into launch metadata
   --dry-run                  Print exact colab commands; run nothing remote
   -h, --help                 Show this help
 EOF
@@ -56,6 +58,7 @@ COLAB_CONFIG=""
 COLAB_AUTH=""
 ALLOW_UNCOMMITTED=0
 DRY_RUN=0
+EXTRA_WHEEL=""
 POSITIONAL=()
 
 while [ $# -gt 0 ]; do
@@ -73,6 +76,7 @@ while [ $# -gt 0 ]; do
     --colab-auth) COLAB_AUTH="$2"; shift 2 ;;
     --allow-uncommitted-plan) ALLOW_UNCOMMITTED=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
+    --extra-wheel) EXTRA_WHEEL="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     -*) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
     *) POSITIONAL+=("$1"); shift ;;
@@ -198,6 +202,13 @@ REMOTE_PLAN="/content/redo_plan_${BATCH_NAME}.json"
 REMOTE_VLLM_CFG="/content/redo_vllm_config_${BATCH_NAME}.json"
 REMOTE_LAUNCH_META="/content/redo_launch_meta_${BATCH_NAME}.json"
 REMOTE_BOOTSTRAP="/content/redo_bootstrap_${BATCH_NAME}.sh"
+EXTRA_WHEEL_SHA=""
+REMOTE_WHEEL=""
+if [ -n "$EXTRA_WHEEL" ]; then
+  [ -f "$EXTRA_WHEEL" ] || { echo "ERROR: --extra-wheel not found: $EXTRA_WHEEL" >&2; exit 2; }
+  EXTRA_WHEEL_SHA=$(sha256sum "$EXTRA_WHEEL" | cut -d' ' -f1)
+  REMOTE_WHEEL="/content/$(basename "$EXTRA_WHEEL")"
+fi
 REMOTE_RESULTS_TAR="/content/redo_results_${BATCH_NAME}.tar.gz"
 
 # Build colab CLI prefix (global flags MUST precede subcommand).
@@ -256,7 +267,7 @@ tar -czf "$BANK_TAR_LOCAL" -C "$BANK_ABS" .
 BANK_TAR_SHA=$(sha256sum "$BANK_TAR_LOCAL" | cut -d' ' -f1)
 
 # Write launch metadata JSON (uploaded to VM & stored inside run root).
-python3 - "$LAUNCH_META_LOCAL" "$BATCH_NAME" "$SESSION" "$GPU" "$HIGH_MEM" "$COMMIT_SHA" \
+EXTRA_WHEEL_SHA="$EXTRA_WHEEL_SHA" EXTRA_WHEEL_NAME="$(basename "${EXTRA_WHEEL:-}")" python3 - "$LAUNCH_META_LOCAL" "$BATCH_NAME" "$SESSION" "$GPU" "$HIGH_MEM" "$COMMIT_SHA" \
   "$PLAN_ID" "$PLAN_SHA256" "$REPO_TAR_SHA" "$BANK_TAR_SHA" "$VLLM_CFG_ABS" "$ALLOW_UNCOMMITTED" <<'PY'
 import json, pathlib, sys, time
 (out_p, batch, session, gpu, hm, commit, plan_id, plan_sha,
@@ -276,6 +287,10 @@ doc = {
     "allow_uncommitted_plan": allow_unc == "1",
     "vllm_config": json.loads(pathlib.Path(cfg_p).read_text(encoding="utf-8")),
 }
+import os as _os
+if _os.environ.get("EXTRA_WHEEL_SHA"):
+    doc["extra_wheel"] = {"name": _os.environ.get("EXTRA_WHEEL_NAME"), "sha256": _os.environ["EXTRA_WHEEL_SHA"],
+                          "venv": "/opt/redo/rc_venv"}
 pathlib.Path(out_p).write_text(json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
 
@@ -286,6 +301,13 @@ set -euo pipefail
 mkdir -p ${REMOTE_WORK}/repo ${REMOTE_RUN_ROOT}
 tar -xzf ${REMOTE_REPO_TAR} -C ${REMOTE_WORK}/repo --strip-components=1
 chmod +x ${REMOTE_WORK}/repo/ops/redo/colab/*.sh ${REMOTE_WORK}/repo/ops/redo/colab/*.py
+if [ -n "${REMOTE_WHEEL}" ]; then
+  echo "${EXTRA_WHEEL_SHA}  ${REMOTE_WHEEL}" | sha256sum -c -
+  python3 -m venv /opt/redo/rc_venv
+  /opt/redo/rc_venv/bin/pip install -q "${REMOTE_WHEEL}"
+  /opt/redo/rc_venv/bin/vacant do --help >/dev/null
+  echo "EXTRA_WHEEL_OK /opt/redo/rc_venv/bin/vacant"
+fi
 setsid nohup bash ${REMOTE_WORK}/repo/ops/redo/colab/vm_run_batch.sh \\
   --repo-dir ${REMOTE_WORK}/repo \\
   --bank-tar ${REMOTE_BANK_TAR} \\
@@ -312,6 +334,9 @@ echo "4/6 Uploading repo snapshot, bank tarball, plan, config, metadata, and boo
 "${COLAB_CMD[@]}" upload -s "$SESSION" "$VLLM_CFG_ABS" "$REMOTE_VLLM_CFG"
 "${COLAB_CMD[@]}" upload -s "$SESSION" "$LAUNCH_META_LOCAL" "$REMOTE_LAUNCH_META"
 "${COLAB_CMD[@]}" upload -s "$SESSION" "$BOOTSTRAP_LOCAL" "$REMOTE_BOOTSTRAP"
+if [ -n "$EXTRA_WHEEL" ]; then
+  "${COLAB_CMD[@]}" upload -s "$SESSION" "$EXTRA_WHEEL" "$REMOTE_WHEEL"
+fi
 
 echo "5/6 Starting VM setup + redo.py batch under setsid/nohup (transport=${TRANSPORT})"
 if [ "$TRANSPORT" = "ssh" ]; then
