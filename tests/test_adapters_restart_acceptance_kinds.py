@@ -64,6 +64,9 @@ def _make_fake_tool(bin_dir: pathlib.Path, name: str, script_body: str) -> pathl
 @pytest.fixture(autouse=True)
 def _isolated_work(tmp_path, monkeypatch):
     monkeypatch.setenv("VACANT_WORK", str(tmp_path / "work"))
+    # 若測試是直接以 .venv/bin/python -m pytest 呼叫而未設定 VIRTUAL_ENV，補設之讓 W1 測試能解析到目前 venv
+    if not os.environ.get("VIRTUAL_ENV") and sys.prefix != sys.base_prefix:
+        monkeypatch.setenv("VIRTUAL_ENV", sys.prefix)
 
 
 # ---------------------------------------------------------------------------
@@ -472,7 +475,7 @@ def test_detect_npm_cargo_go_present_and_absent_via_path(tmp_path, monkeypatch):
     assert res["acceptance"]["command"] == "npm test"
     assert "npm test" in R.summary(res)
 
-    # npm 不在 PATH 上 ⇒ 視為不可用，不重試
+    # npm 不在 PATH 上 ⇒ 基線即停（0 次 agent 嘗試），回報環境無法執行
     empty_bin = tmp_path / "emptybin"
     empty_bin.mkdir()
     monkeypatch.setenv("PATH", str(empty_bin))
@@ -482,10 +485,13 @@ def test_detect_npm_cargo_go_present_and_absent_via_path(tmp_path, monkeypatch):
     (tmp_path / "js_miss").mkdir()
     build_m, state_m = _multi_build(tmp_path / "js_miss", ["pass\n", "pass\n"])
     res_m = R.run(js_proj, build_m, "fix js", attempt_timeout_s=20, budget_s=120)
-    assert _calls(state_m) == 1
+    assert _calls(state_m) == 0
+    assert res_m["attempts"] == []
     assert res_m["accepted"] is None
-    assert res_m["attempts"][0]["status"] == "runner_unavailable"
-    assert "npm" in R.summary(res_m)
+    assert res_m["baseline_error"] and "npm" in res_m["baseline_error"]
+    msg_m = R.summary(res_m)
+    assert "acceptance cannot run in this environment:" in msg_m
+    assert "npm" in msg_m
 
     # package.json 沒有 test script 或只有 npm init 預設佔位腳本 ⇒ 忽略
     no_test_js = tmp_path / "no_test_js"
@@ -603,7 +609,7 @@ def test_pytest_zero_tests_collected_returns_no_tests_collected(tmp_path):
 
 
 def test_runner_unavailable_original_test_syntax_error_and_missing_pytest(tmp_path, monkeypatch):
-    # Case A: 原受保護測試檔本身有語法錯誤（非 agent 造成）⇒ 跑一次、不重試
+    # Case A: 原受保護測試檔本身有語法錯誤（非 agent 造成）⇒ 基線即停（0 次嘗試），專案不動
     proj_syn = tmp_path / "proj_syn"
     proj_syn.mkdir()
     (proj_syn / "app.py").write_text("x = 1\n", encoding="utf-8")
@@ -614,12 +620,14 @@ def test_runner_unavailable_original_test_syntax_error_and_missing_pytest(tmp_pa
         "pass\n",
     ])
     res_s = R.run(proj_syn, build_s, "edit app", max_attempts=3, attempt_timeout_s=20, budget_s=120)
-    assert _calls(state_s) == 1
+    assert _calls(state_s) == 0
+    assert res_s["attempts"] == []
     assert res_s["accepted"] is None
-    assert res_s["attempts"][0]["status"] == "runner_unavailable"
-    assert "nothing could be checked" in R.summary(res_s)
+    assert res_s["baseline_error"]
+    assert "acceptance cannot run in this environment:" in R.summary(res_s)
+    assert (proj_syn / "app.py").read_text(encoding="utf-8") == "x = 1\n"
 
-    # Case B: 測試函式需要 pytest fixture 且 pytest 缺席 ⇒ 跑一次、不重試
+    # Case B: 測試函式需要 pytest fixture 且 pytest 缺席 ⇒ 基線即停（0 次嘗試）
     monkeypatch.setattr(R, "_pytest_available", lambda *a, **kw: False)
 
     proj_fix = tmp_path / "proj_fix"
@@ -628,16 +636,19 @@ def test_runner_unavailable_original_test_syntax_error_and_missing_pytest(tmp_pa
     (tmp_path / "fix_stubs").mkdir()
     build_f, state_f = _multi_build(tmp_path / "fix_stubs", ["pass\n", "pass\n"])
     res_f = R.run(proj_fix, build_f, "do it", max_attempts=3, attempt_timeout_s=20, budget_s=120)
-    assert _calls(state_f) == 1
+    assert _calls(state_f) == 0
+    assert res_f["attempts"] == []
     assert res_f["accepted"] is None
-    assert res_f["attempts"][0]["status"] == "runner_unavailable"
-    assert "fixtures" in (res_f["attempts"][0]["first_problem"] or "")
+    assert "fixtures" in (res_f["baseline_error"] or "")
+    assert "acceptance cannot run in this environment:" in R.summary(res_f)
 
-    # Case C: 測試檔 `import pytest` 且測試直譯器確實沒有裝 pytest ⇒ 跑一次、不重試
+    # Case C: 測試檔 `import pytest` 且專案直譯器確實沒有裝 pytest ⇒ 基線即停（0 次嘗試）
     sys_py = "/usr/bin/python3"
     if pathlib.Path(sys_py).is_file():
         monkeypatch.undo()
         monkeypatch.setenv("VACANT_WORK", str(tmp_path / "work"))
+        monkeypatch.delenv("VIRTUAL_ENV", raising=False)
+        monkeypatch.setenv("PATH", "/usr/bin:/bin")
         if not R._pytest_available(sys_py):
             monkeypatch.setattr(R.sys, "executable", sys_py)
             proj_imp = tmp_path / "proj_imp"
@@ -646,10 +657,11 @@ def test_runner_unavailable_original_test_syntax_error_and_missing_pytest(tmp_pa
             (tmp_path / "imp_stubs").mkdir()
             build_i, state_i = _multi_build(tmp_path / "imp_stubs", ["pass\n", "pass\n"])
             res_i = R.run(proj_imp, build_i, "do it", max_attempts=3, attempt_timeout_s=20, budget_s=120)
-            assert _calls(state_i) == 1
+            assert _calls(state_i) == 0
+            assert res_i["attempts"] == []
             assert res_i["accepted"] is None
-            assert res_i["attempts"][0]["status"] == "runner_unavailable"
-            assert "nothing could be checked" in R.summary(res_i)
+            assert res_i["baseline_error"]
+            assert "acceptance cannot run in this environment:" in R.summary(res_i)
 
 
 # ---------------------------------------------------------------------------

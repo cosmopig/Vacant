@@ -17,13 +17,22 @@ R3 是這個 repo 裡第一個在**原生 agent**上量到交付變好的設定�
         `Cargo.toml`（`PATH` 有 `cargo`）⇒ `cargo test`；
         `go.mod`（`PATH` 有 `go`）⇒ `go test ./...`。這幾種以退出碼 0 判通過（`passed`／`run` 為 `None`）。
       - 都沒有 ⇒ 跑一次、照實交回、明講「沒有可執行的驗收」，不假裝檢查過。
-   c. 保護測試檔：開始時就存在的測試檔在跑驗收前還原成原位元組；被改過的記在 `tests_tampered`，也**不寫回專案**。
-   d. 若選到的執行器只收到 0 個測試（`no_tests_collected`）或無法啟動（工具缺席、非候選碼導致的載入錯誤，
-      記為 `runner_unavailable`）：不把該次算成驗收失敗也不重試，比照無驗收處理（跑一次、照實交回、明講原因）。
-2. 每一次嘗試：全新的暫存副本＋全新的 agent 行程。嘗試之間不留東西、不給失敗原文。
-3. 驗收通過就停、交那一次；最多 `max_attempts` 次、每次 `attempt_timeout_s`、合計 `budget_s`。
+   c. 保護測試檔與驗收定義（開始時鎖定）：跨生態系測試檔（`*_test.py`、`test_*.py`、`*.test.*`、`*.spec.*`、
+      `*_test.go`、`__tests__/**`、`tests/**`、`test/**`）、決定驗收指令的 manifest（`package.json`／`Cargo.toml`／
+      `go.mod`）以及 `--protect PATH/GLOB` 指定檔案，在跑驗收前還原成原位元組；被改過的記在 `tests_tampered`，
+      也**不寫回專案**。若沒有任何受保護檔案，交付訊息明講 agent 可能改動驗收所執行的內容。
+   d. 基線預檢（BASELINE）：在第一次嘗試前先對未動過的專案副本跑一次驗收並記錄；若因環境問題無法執行
+      （`load_error`／收集期 `ImportError`、缺 `pytest`／`npm`、指令不存在退出碼 126／127 等），立即停住
+      （0 次 agent 嘗試、專案不動、非零退出碼），明講原因、指令與直譯器。若能執行但收到 0 個測試
+      （`no_tests_collected`），仍照舊跑一次並明講未檢查。
+2. Python 驗收優先使用專案直譯器（`$VIRTUAL_ENV/bin/python` ＞ `<project>/.venv` ＞ `<project>/venv` ＞ `PATH`
+   ＞ `sys.executable`），保留 `-B`、捨 `-I` 改以工作區外私密腳本＋匯入前清 `sys.path` 維持 C3 防護，並把實際直譯器
+   記在結果、簽章收據與訊息中。`node_modules` 不複製也不暴露給 agent 工作區，僅於外部驗收當下以 acceptance-only
+   symlink＋`NODE_PATH` 提供並在驗收結束立刻移除。
+3. 每一次嘗試：全新的暫存副本＋全新的 agent 行程。嘗試之間不留東西、不給失敗原文。
+4. 驗收通過就停、交那一次；最多 `max_attempts` 次、每次 `attempt_timeout_s`、合計 `budget_s`。
    都沒過就交原件測試過最多的那一次（同分取後面那次；僅看退出碼的種類 `passed` 為 `None`，
-   故依同分規則交最後一次），給人的訊息明講沒有通過，並列出實際使用的驗收種類／指令與受保護檔案。
+   故依同分規則交最後一次），給人的訊息明講沒有通過，並列出實際使用的驗收種類／指令、直譯器與受保護檔案。
 
 交回：被選中那一次的工作區同步回專案（新增／修改／刪除），**受保護的測試檔除外**——跟使用者直接在專案裡跑
 agent 的結果同一種形狀，只是多了「選哪一次」。
@@ -44,14 +53,18 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
 - 快照與驗收一致性：每次 agent 結束並殺完其行程群組後，先拍一次只含一般檔案的私密快照（跳過符號連結、FIFO／socket／
   裝置檔、`COPY_SKIP` 名稱與無法讀取的項目），驗收與寫回皆以**同一份快照**為準（驗收測試的正是實際會寫回的檔案集合），
   避免殘留背景行程在驗收與寫回之間偷改工作區（TOCTOU），也避免 symlink 只在驗收生效卻不寫回。
-- 驗收執行隔離邊界：Python 驗收路徑（`python_unittest`、`python_pytest`、`python_bare`）皆以 `python -I -B`
-  在工作區外的獨立腳本檔執行（不把 `""` 或 user site 放進 `sys.path`）、獨立 session（結束或逾時皆 `killpg` 整組清除）、
-  先載入標準庫（及 `pytest`）再把工作區附在 `sys.path` 尾端、依原測試檔精確路徑載入（防止套件目錄或標準庫遮蔽），
-  並透過獨立管線（FD）與單次隨機 nonce 回傳結果（不依賴 stdout 固定標記；`pytest` 的 junitxml 寫在工作區外私密目錄）。
-  外部指令（`--check`、`npm`、`cargo`、`go`）同樣於快照副本中以獨立 session（結束或逾時皆 `killpg`）與共用期限執行。
-  ⚠ 但 Python 路徑的**候選程式碼與測試框架仍在同一個 Python 行程內執行**，故無法防禦惡意候選碼在行程內 monkey-patch
-  測試框架或執行期狀態（若需要雙行程隔離，請用 `vacant_network.checks.run_python_check`）；另只保護 `find_tests`
-  找到的測試檔，不保護 `conftest.py`、`pyproject.toml` 等設定檔。
+- 驗收執行隔離邊界：Python 驗收路徑（`python_unittest`、`python_pytest`、`python_bare`）皆以專案直譯器＋`-B`
+  （保留不寫 `.pyc`，捨 `-I` 以支援 `pip install --user` 與 `PYTHONPATH`）在工作區外的私密空目錄獨立腳本檔執行，
+  於匯入標準庫／`pytest` 之前先從 `sys.path` 剔除 `""`、`.`、腳本目錄與工作區，再把工作區附在 `sys.path` 尾端，
+  依原測試檔精確路徑載入（防止套件目錄或標準庫遮蔽），並透過獨立 session（結束或逾時皆 `killpg` 整組清除）、
+  獨立管線（FD）與單次隨機 nonce 回傳結果（不依賴 stdout 固定標記；`pytest` 的 junitxml 寫在工作區外私密目錄）。
+  外部指令（`--check`、`npm`、`cargo`、`go`）同樣於快照副本中以獨立 session（結束或逾時皆 `killpg`）與共用期限執行；
+  若原專案有 `node_modules`，僅於外部驗收當下以 acceptance-only symlink（＋`NODE_PATH`）掛進驗收副本並於結束後立即移除
+  （不放進 agent 的 `ws` 也不寫回；但驗收期間執行的候選碼仍以使用者權限執行，理論上仍可透過 symlink 寫入 `node_modules`）。
+  ⚠ 另 Python 路徑的**候選程式碼與測試框架仍在同一個 Python 行程內執行**，故無法防禦惡意候選碼在行程內 monkey-patch
+  測試框架或執行期狀態（若需要雙行程隔離，請用 `vacant_network.checks.run_python_check`）；另除跨生態系測試檔、
+  manifest（`package.json`／`Cargo.toml`／`go.mod`）與 `--protect` 指定檔外，未涵蓋之設定檔（如根目錄 `conftest.py`、
+  `pyproject.toml`、`jest.config.*`）與 agent 新建檔案皆不受保護。
 - 寫回安全邊界：寫回前先規劃與驗證所有增／改／刪操作再套用，先刪後增、透過同目錄暫存檔＋`os.replace` 原子置換
   （不原地覆寫硬連結 inode、不把檔案寫進既有目錄）；符號連結、無法讀取的目錄／檔案、或與非空／受保護目錄衝突的路徑
   一律跳過並記於 `changed["skipped"]`，不會寫到專案外面也不會誤刪原檔；若套用途中遇非預期錯誤會回滾，維持原專案不變。
@@ -123,16 +136,19 @@ _SECRET_VAL_RE = re.compile(
 
 _UNITTEST_RUNNER = r"""
 def _main():
+    import os as _os
+    import sys as _sys
+
+    _here = _os.path.dirname(_os.path.abspath(__file__))
+    _init_cwd = _os.path.abspath(_os.getcwd())
+    _sys.path[:] = [p for p in _sys.path if p not in ("", ".", _here, _init_cwd)]
+
     import importlib.util
     import json
-    import os
-    import sys
     import traceback
     import unittest
 
-    _os = os
     _json = json
-    _sys = sys
     _tb = traceback
     _Loader = unittest.TestLoader
     _Result = unittest.TestResult
@@ -153,11 +169,27 @@ def _main():
     w_fd = int(cfg["w_fd"])
     nonce = str(cfg["nonce"])
     cwd = str(cfg["cwd"])
+    work_root = cfg.get("work_root")
+    project_root = cfg.get("project_root")
     tests = cfg["tests"]
     try:
         _os.set_inheritable(w_fd, False)
     except OSError:
         pass
+
+    if project_root and work_root and project_root != work_root:
+        _proj_src = _os.path.join(project_root, "src")
+        _work_src = _os.path.join(work_root, "src")
+        _new_path = []
+        for _p in _sys.path:
+            _ap = _os.path.abspath(_p) if _p else _p
+            if _ap == project_root:
+                _new_path.append(work_root)
+            elif _ap == _proj_src and _os.path.isdir(_work_src):
+                _new_path.append(_work_src)
+            else:
+                _new_path.append(_p)
+        _sys.path[:] = _new_path
 
     if cwd not in _sys.path:
         _sys.path.append(cwd)
@@ -221,13 +253,16 @@ _main()
 
 _PYTEST_RUNNER = r"""
 def _main():
-    import json
-    import os
-    import sys
+    import os as _os
+    import sys as _sys
 
-    _os = os
+    _here = _os.path.dirname(_os.path.abspath(__file__))
+    _init_cwd = _os.path.abspath(_os.getcwd())
+    _sys.path[:] = [p for p in _sys.path if p not in ("", ".", _here, _init_cwd)]
+
+    import json
+
     _json = json
-    _sys = sys
 
     raw_cfg = _sys.stdin.read()
     try:
@@ -243,6 +278,8 @@ def _main():
     w_fd = int(cfg["w_fd"])
     nonce = str(cfg["nonce"])
     extra_paths = cfg["extra_paths"]
+    work_root = cfg.get("work_root")
+    project_root = cfg.get("project_root")
     junit_xml = str(cfg["junit_xml"])
     tests = cfg["tests"]
     try:
@@ -275,6 +312,20 @@ def _main():
     except BaseException as exc:
         _emit({"pytest_rc": None, "unavailable_reason": f"cannot import pytest: {exc}"})
 
+    if project_root and work_root and project_root != work_root:
+        _proj_src = _os.path.join(project_root, "src")
+        _work_src = _os.path.join(work_root, "src")
+        _new_path = []
+        for _p in _sys.path:
+            _ap = _os.path.abspath(_p) if _p else _p
+            if _ap == project_root:
+                _new_path.append(work_root)
+            elif _ap == _proj_src and _os.path.isdir(_work_src):
+                _new_path.append(_work_src)
+            else:
+                _new_path.append(_p)
+        _sys.path[:] = _new_path
+
     for p in extra_paths:
         if p not in _sys.path:
             _sys.path.append(p)
@@ -301,18 +352,21 @@ _main()
 
 _BARE_RUNNER = r"""
 def _main():
+    import os as _os
+    import sys as _sys
+
+    _here = _os.path.dirname(_os.path.abspath(__file__))
+    _init_cwd = _os.path.abspath(_os.getcwd())
+    _sys.path[:] = [p for p in _sys.path if p not in ("", ".", _here, _init_cwd)]
+
     import asyncio
     import importlib.util
     import inspect
     import json
-    import os
-    import sys
     import traceback
     import unittest
 
-    _os = os
     _json = json
-    _sys = sys
     _tb = traceback
     _inspect = inspect
     _asyncio = asyncio
@@ -337,11 +391,27 @@ def _main():
     w_fd = int(cfg["w_fd"])
     nonce = str(cfg["nonce"])
     extra_paths = cfg["extra_paths"]
+    work_root = cfg.get("work_root")
+    project_root = cfg.get("project_root")
     tests = cfg["tests"]
     try:
         _os.set_inheritable(w_fd, False)
     except OSError:
         pass
+
+    if project_root and work_root and project_root != work_root:
+        _proj_src = _os.path.join(project_root, "src")
+        _work_src = _os.path.join(work_root, "src")
+        _new_path = []
+        for _p in _sys.path:
+            _ap = _os.path.abspath(_p) if _p else _p
+            if _ap == project_root:
+                _new_path.append(work_root)
+            elif _ap == _proj_src and _os.path.isdir(_work_src):
+                _new_path.append(_work_src)
+            else:
+                _new_path.append(_p)
+        _sys.path[:] = _new_path
 
     for p in extra_paths:
         if p not in _sys.path:
@@ -815,9 +885,91 @@ def find_protected(root: pathlib.Path, *, kind: str = "none",
     return sorted(out)
 
 
-def _clean_env(home: pathlib.Path) -> dict[str, str]:
-    return {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(home), "LANG": "C.UTF-8",
-            "PYTHONDONTWRITEBYTECODE": "1", "PYTHONHASHSEED": "0", "PYTHONNOUSERSITE": "1"}
+def _is_exec_file(p: pathlib.Path) -> bool:
+    try:
+        return p.is_file() and os.access(str(p), os.X_OK)
+    except OSError:
+        return False
+
+
+def resolve_python(project: pathlib.Path | None = None) -> str:
+    """依優先順序解析專案用的 Python 直譯器（不 dereference venv symlink，保留 pyvenv.cfg 生效）：
+    1. `$VIRTUAL_ENV/bin/python`（或 `python3`）
+    2. `<project>/.venv/bin/python`（或 `python3`）
+    3. `<project>/venv/bin/python`（或 `python3`）
+    4. `PATH` 上的 `python3`／`python`
+    5. `sys.executable`（最後手段）
+    """
+    venv_env = (os.environ.get("VIRTUAL_ENV") or "").strip()
+    if venv_env:
+        base = pathlib.Path(os.path.abspath(venv_env))
+        for name in ("python", "python3"):
+            cand = base / "bin" / name
+            if _is_exec_file(cand):
+                return str(cand)
+
+    if project is not None:
+        proj = project.resolve()
+        for vdir in (".venv", "venv"):
+            for name in ("python", "python3"):
+                cand = proj / vdir / "bin" / name
+                if _is_exec_file(cand):
+                    return str(cand)
+
+    for name in ("python3", "python"):
+        found = shutil.which(name)
+        if found and _is_exec_file(pathlib.Path(found)):
+            return found
+
+    return sys.executable
+
+
+def _venv_root_for(python_exe: str | None) -> str | None:
+    if not python_exe:
+        return None
+    p = pathlib.Path(os.path.abspath(python_exe))
+    if p.parent.name == "bin":
+        root = p.parent.parent
+        if (root / "pyvenv.cfg").is_file():
+            return str(root)
+        env_v = (os.environ.get("VIRTUAL_ENV") or "").strip()
+        if env_v and os.path.abspath(env_v) == str(root):
+            return str(root)
+    return None
+
+
+def _clean_env(home: pathlib.Path, *, python_exe: str | None = None,
+               work_root: pathlib.Path | None = None) -> dict[str, str]:
+    path_val = os.environ.get("PATH", "/usr/bin:/bin")
+    if python_exe:
+        py_bin = os.path.dirname(os.path.abspath(python_exe))
+        parts = path_val.split(os.pathsep) if path_val else []
+        if py_bin and (not parts or parts[0] != py_bin):
+            path_val = os.pathsep.join([py_bin, *parts])
+    env: dict[str, str] = {
+        "PATH": path_val,
+        "HOME": str(home),
+        "LANG": "C.UTF-8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONHASHSEED": "0",
+    }
+    vroot = _venv_root_for(python_exe)
+    if vroot:
+        env["VIRTUAL_ENV"] = vroot
+    raw_pp = os.environ.get("PYTHONPATH")
+    if raw_pp:
+        work_abs = str(work_root.resolve()) if work_root is not None else None
+        safe_pp: list[str] = []
+        for entry in raw_pp.split(os.pathsep):
+            if not entry or not os.path.isabs(entry):
+                continue
+            ep = os.path.abspath(entry)
+            if work_abs and (ep == work_abs or ep.startswith(work_abs + os.sep)):
+                continue
+            safe_pp.append(ep)
+        if safe_pp:
+            env["PYTHONPATH"] = os.pathsep.join(safe_pp)
+    return env
 
 
 @dataclasses.dataclass
@@ -1286,6 +1438,7 @@ class AcceptanceSpec:
     argv: tuple[str, ...] | None = None
     protected: tuple[str, ...] = ()
     reason: str | None = None
+    interpreter: str | None = None
     pinned_script: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -1295,6 +1448,8 @@ class AcceptanceSpec:
             "protected": list(self.protected),
             "reason": self.reason,
         }
+        if self.interpreter is not None:
+            d["interpreter"] = self.interpreter
         if self.pinned_script is not None:
             d["pinned_script"] = self.pinned_script
         return d
@@ -1390,11 +1545,19 @@ def _inspect_python_tests(originals: dict[str, bytes]) -> _PyTestInspection:
 
 
 def _pytest_available(python_exe: str | None = None) -> bool:
-    """檢查測試用直譯器在 `-I -B` 隔離模式下能否匯入 pytest。"""
+    """檢查測試用直譯器在 `-B` 模式下（排除 cwd／"" 以防專案內假 pytest.py 遮蔽）能否匯入 pytest。"""
     exe = python_exe or sys.executable
+    probe = (
+        "import importlib.util, os, sys; "
+        "cwd = os.path.abspath(os.getcwd()); "
+        "sys.path[:] = [p for p in sys.path if p not in ('', '.', cwd)]; "
+        "sys.exit(0 if importlib.util.find_spec('pytest') else 1)"
+    )
     try:
         cp = subprocess.run(
-            [exe, "-I", "-B", "-c", "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('pytest') else 1)"],
+            [exe, "-B", "-c", probe],
+            cwd=tempfile.gettempdir(),
+            env=_clean_env(pathlib.Path(tempfile.gettempdir()), python_exe=exe),
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -1471,30 +1634,35 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         return AcceptanceSpec(kind="check", command=cmd, argv=None, protected=_prot("check"))
 
     if py_orig:
+        py_exe = resolve_python(project)
         insp = _inspect_python_tests(py_orig)
         if insp.syntax_error is not None:
             return AcceptanceSpec(
                 kind="python_unittest",
-                command=f"{sys.executable} -I -B (unittest)",
+                command=f"{py_exe} -B (unittest)",
                 protected=_prot("python_unittest"),
                 reason=f"syntax error in original test file: {insp.syntax_error}",
+                interpreter=py_exe,
             )
         if insp.has_pytest_style:
-            if _pytest_available():
+            if _pytest_available(py_exe):
                 return AcceptanceSpec(
                     kind="python_pytest",
-                    command=f"{sys.executable} -I -B -m pytest -q -rN",
+                    command=f"{py_exe} -B -m pytest -q -rN",
                     protected=_prot("python_pytest"),
+                    interpreter=py_exe,
                 )
             return AcceptanceSpec(
                 kind="python_bare",
-                command=f"{sys.executable} -I -B (stdlib test runner)",
+                command=f"{py_exe} -B (stdlib test runner)",
                 protected=_prot("python_bare"),
+                interpreter=py_exe,
             )
         return AcceptanceSpec(
             kind="python_unittest",
-            command=f"{sys.executable} -I -B (unittest)",
+            command=f"{py_exe} -B (unittest)",
             protected=_prot("python_unittest"),
+            interpreter=py_exe,
         )
 
     missing: list[str] = []
@@ -1635,8 +1803,12 @@ def _parse_junit_xml(xml_path: pathlib.Path) -> tuple[dict[str, Any] | None, str
 def _run_isolated_python_script(runner_script: pathlib.Path, cfg_obj: dict[str, Any],
                                 run_cwd: pathlib.Path, home: pathlib.Path,
                                 runner_dir: pathlib.Path, tag: str,
-                                deadline: float) -> tuple[bool, int | None, bytes, pathlib.Path, pathlib.Path]:
-    """以 `python -I -B`、獨立 session、共用期限與單次隨機 nonce 管線執行隔離腳本。"""
+                                deadline: float, *,
+                                python_exe: str | None = None,
+                                work_root: pathlib.Path | None = None
+                                ) -> tuple[bool, int | None, bytes, pathlib.Path, pathlib.Path, str | None]:
+    """以 `<python_exe> -B`、工作區外獨立腳本、獨立 session、共用期限與單次隨機 nonce 管線執行隔離腳本。"""
+    exe = python_exe or sys.executable
     r_fd, w_fd = os.pipe()
     out_log = runner_dir / f"out_{tag}.log"
     err_log = runner_dir / f"err_{tag}.log"
@@ -1649,32 +1821,37 @@ def _run_isolated_python_script(runner_script: pathlib.Path, cfg_obj: dict[str, 
     timed_out = False
     raw_res = b""
     rc: int | None = None
+    spawn_err: str | None = None
     try:
         with cfg_file.open("rb") as cfg_in, out_log.open("wb") as out_f, err_log.open("wb") as err_f:
             try:
                 cfg_file.unlink(missing_ok=True)
             except OSError:
                 pass
-            proc = subprocess.Popen(
-                [sys.executable, "-I", "-B", str(runner_script)],
-                cwd=str(run_cwd),
-                env=_clean_env(home),
-                stdin=cfg_in,
-                stdout=out_f,
-                stderr=err_f,
-                pass_fds=(w_fd,),
-                start_new_session=True,
-            )
+            try:
+                proc = subprocess.Popen(
+                    [exe, "-B", str(runner_script)],
+                    cwd=str(run_cwd),
+                    env=_clean_env(home, python_exe=exe, work_root=work_root),
+                    stdin=cfg_in,
+                    stdout=out_f,
+                    stderr=err_f,
+                    pass_fds=(w_fd,),
+                    start_new_session=True,
+                )
+            except OSError as e:
+                spawn_err = f"{type(e).__name__}: {e}"[-800:]
         os.close(w_fd)
         w_fd = -1
-        wait_left = deadline - time.monotonic()
-        if wait_left <= 0:
-            timed_out = True
-        else:
-            try:
-                rc = proc.wait(timeout=wait_left)
-            except subprocess.TimeoutExpired:
+        if proc is not None:
+            wait_left = deadline - time.monotonic()
+            if wait_left <= 0:
                 timed_out = True
+            else:
+                try:
+                    rc = proc.wait(timeout=wait_left)
+                except subprocess.TimeoutExpired:
+                    timed_out = True
     finally:
         if w_fd >= 0:
             try:
@@ -1684,7 +1861,7 @@ def _run_isolated_python_script(runner_script: pathlib.Path, cfg_obj: dict[str, 
         if proc is not None:
             _kill_group_and_wait(proc)
         raw_res = _read_all_fd(r_fd)
-    return timed_out, rc, raw_res, out_log, err_log
+    return timed_out, rc, raw_res, out_log, err_log, spawn_err
 
 
 def _tail_logs(out_log: pathlib.Path, err_log: pathlib.Path) -> str | None:
@@ -1701,7 +1878,9 @@ def _tail_logs(out_log: pathlib.Path, err_log: pathlib.Path) -> str | None:
 
 
 def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
-                         home: pathlib.Path, runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+                         home: pathlib.Path, runner_dir: pathlib.Path, deadline: float, *,
+                         python_exe: str | None = None,
+                         project_root: pathlib.Path | None = None) -> dict[str, Any]:
     """既有 unittest 驗收路徑（與 confirm1 相同執行器與計數；僅 0 個測試改記 no_tests_collected）。"""
     runner_script = runner_dir / "runner.py"
     runner_script.write_text(_UNITTEST_RUNNER, encoding="utf-8")
@@ -1712,6 +1891,8 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
         d, _, name = rel.rpartition("/")
         by_dir.setdefault(d, []).append((name[:-3], (work / rel).resolve()))
 
+    work_res = work.resolve()
+    proj_str = str(project_root.resolve()) if project_root is not None else None
     agg = {k: 0 for k in _RESULT_KEYS}
     first: str | None = None
     for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
@@ -1719,11 +1900,21 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
             return {**base, "status": "timeout"}
         run_cwd = (work / d if d else work).resolve()
         nonce = secrets.token_hex(16)
-        timed_out, rc, raw_res, out_log, err_log = _run_isolated_python_script(
+        timed_out, rc, raw_res, out_log, err_log, spawn_err = _run_isolated_python_script(
             runner_script,
-            {"nonce": nonce, "cwd": str(run_cwd), "tests": [[m, str(p)] for m, p in mod_entries]},
+            {
+                "nonce": nonce,
+                "cwd": str(run_cwd),
+                "work_root": str(work_res),
+                "project_root": proj_str,
+                "tests": [[m, str(p)] for m, p in mod_entries],
+            },
             run_cwd, home, runner_dir, f"u_{idx}", deadline,
+            python_exe=python_exe,
+            work_root=work_res,
         )
+        if spawn_err is not None:
+            return {**base, "status": "runner_unavailable", "accept": None, "first_problem": spawn_err}
         if timed_out:
             return {**base, "status": "timeout"}
         if rc != 0:
@@ -1752,7 +1943,9 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
 
 
 def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
-                       home: pathlib.Path, runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+                       home: pathlib.Path, runner_dir: pathlib.Path, deadline: float, *,
+                       python_exe: str | None = None,
+                       project_root: pathlib.Path | None = None) -> dict[str, Any]:
     """pytest 驗收路徑：隔離腳本載入 pytest、依原測試檔精確路徑執行、junitxml 寫於工作區外。"""
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
@@ -1761,6 +1954,7 @@ def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Pat
     os.chmod(runner_script, 0o600)
 
     work_res = work.resolve()
+    proj_str = str(project_root.resolve()) if project_root is not None else None
     extra_paths: list[str] = [str(work_res)]
     for rel in tests:
         parent = str((work / rel).resolve().parent)
@@ -1770,11 +1964,22 @@ def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Pat
     junit_xml = runner_dir / f"junit-{secrets.token_hex(8)}.xml"
     nonce = secrets.token_hex(16)
 
-    timed_out, rc, raw_res, out_log, err_log = _run_isolated_python_script(
+    timed_out, rc, raw_res, out_log, err_log, spawn_err = _run_isolated_python_script(
         runner_script,
-        {"nonce": nonce, "extra_paths": extra_paths, "junit_xml": str(junit_xml), "tests": test_paths},
+        {
+            "nonce": nonce,
+            "extra_paths": extra_paths,
+            "work_root": str(work_res),
+            "project_root": proj_str,
+            "junit_xml": str(junit_xml),
+            "tests": test_paths,
+        },
         work_res, home, runner_dir, "pytest", deadline,
+        python_exe=python_exe,
+        work_root=work_res,
     )
+    if spawn_err is not None:
+        return {**base, "status": "runner_unavailable", "accept": None, "first_problem": spawn_err}
     if timed_out:
         return {**base, "status": "timeout"}
     if rc != 0:
@@ -1822,7 +2027,9 @@ def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Pat
 
 
 def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
-                     home: pathlib.Path, runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+                     home: pathlib.Path, runner_dir: pathlib.Path, deadline: float, *,
+                     python_exe: str | None = None,
+                     project_root: pathlib.Path | None = None) -> dict[str, Any]:
     """pytest 缺席時的極簡標準庫執行器：同時跑 unittest.TestCase、裸 def test_* 與簡易非 TestCase 測試類別。"""
     runner_script = runner_dir / "runner_bare.py"
     runner_script.write_text(_BARE_RUNNER, encoding="utf-8")
@@ -1834,6 +2041,7 @@ def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
         by_dir.setdefault(d, []).append((name[:-3], (work / rel).resolve()))
 
     work_res = work.resolve()
+    proj_str = str(project_root.resolve()) if project_root is not None else None
     agg = {k: 0 for k in _RESULT_KEYS}
     first: str | None = None
     for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
@@ -1844,11 +2052,21 @@ def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
         if str(work_res) not in extra_paths:
             extra_paths.append(str(work_res))
         nonce = secrets.token_hex(16)
-        timed_out, rc, raw_res, out_log, err_log = _run_isolated_python_script(
+        timed_out, rc, raw_res, out_log, err_log, spawn_err = _run_isolated_python_script(
             runner_script,
-            {"nonce": nonce, "extra_paths": extra_paths, "tests": [[m, str(p)] for m, p in mod_entries]},
+            {
+                "nonce": nonce,
+                "extra_paths": extra_paths,
+                "work_root": str(work_res),
+                "project_root": proj_str,
+                "tests": [[m, str(p)] for m, p in mod_entries],
+            },
             run_cwd, home, runner_dir, f"b_{idx}", deadline,
+            python_exe=python_exe,
+            work_root=work_res,
         )
+        if spawn_err is not None:
+            return {**base, "status": "runner_unavailable", "accept": None, "first_problem": spawn_err}
         if timed_out:
             return {**base, "status": "timeout"}
         if rc != 0:
@@ -1875,7 +2093,8 @@ def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
 
 
 def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: pathlib.Path,
-                          runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+                          runner_dir: pathlib.Path, deadline: float, *,
+                          node_modules_dir: pathlib.Path | None = None) -> dict[str, Any]:
     """在快照副本 work 裡執行外部驗收指令（--check／npm／cargo／go），獨立 session、共用期限、沿用使用者環境。"""
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
@@ -1891,6 +2110,14 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
             }
     env = dict(os.environ)
     env["PWD"] = str(work_res)
+    if node_modules_dir is not None and node_modules_dir.is_dir():
+        nm_str = str(node_modules_dir)
+        old_np = env.get("NODE_PATH", "")
+        env["NODE_PATH"] = f"{nm_str}{os.pathsep}{old_np}" if old_np else nm_str
+        nm_bin = node_modules_dir / ".bin"
+        if nm_bin.is_dir():
+            old_path = env.get("PATH", "")
+            env["PATH"] = f"{nm_bin}{os.pathsep}{old_path}" if old_path else str(nm_bin)
     out_log = runner_dir / "ext_out.log"
     err_log = runner_dir / "ext_err.log"
 
@@ -1955,13 +2182,15 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
     """在工作區快照的**潔淨副本**裡、把開始時的受保護檔案還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
     all_protected = sorted(originals)
     py_tests = [rel for rel in all_protected if _is_python_test(rel)]
+    src_root = (_project if _project is not None else ws).resolve()
     if spec is None:
         spec = detect_acceptance(
-            _project if _project is not None else ws,
+            src_root,
             check=check,
             originals=originals,
             protect=protect,
         )
+    py_exe = spec.interpreter or (resolve_python(src_root) if spec.kind.startswith("python_") else None)
     base: dict[str, Any] = {
         "accept": False,
         "tests": py_tests if spec.kind.startswith("python_") else all_protected,
@@ -1972,6 +2201,7 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         "first_problem": None,
         "kind": spec.kind,
         "command": spec.command,
+        "interpreter": py_exe,
     }
     if spec.kind == "none":
         return {
@@ -1999,13 +2229,46 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         runner_dir.mkdir(mode=0o700)
 
         if spec.kind == "python_unittest":
-            return _run_python_unittest(base, py_tests, work, home, runner_dir, deadline)
+            return _run_python_unittest(
+                base, py_tests, work, home, runner_dir, deadline,
+                python_exe=py_exe, project_root=_project,
+            )
         if spec.kind == "python_pytest":
-            return _run_python_pytest(base, py_tests, work, home, runner_dir, deadline)
+            return _run_python_pytest(
+                base, py_tests, work, home, runner_dir, deadline,
+                python_exe=py_exe, project_root=_project,
+            )
         if spec.kind == "python_bare":
-            return _run_python_bare(base, py_tests, work, home, runner_dir, deadline)
+            return _run_python_bare(
+                base, py_tests, work, home, runner_dir, deadline,
+                python_exe=py_exe, project_root=_project,
+            )
         if spec.kind in _EXIT_CODE_ONLY_KINDS:
-            return _run_external_command(base, spec, work, runner_dir, deadline)
+            # 僅於驗收階段將原專案的 node_modules 以 symlink（＋NODE_PATH）提供給驗收副本，
+            # 絕不放進 agent 的 ws 也不會寫回原專案；結束立即 unlink。
+            orig_nm = src_root / "node_modules"
+            nm_target: pathlib.Path | None = None
+            nm_link: pathlib.Path | None = None
+            if orig_nm.is_dir():
+                nm_target = orig_nm.resolve()
+                cand_link = work / "node_modules"
+                if not cand_link.exists() and not cand_link.is_symlink():
+                    try:
+                        os.symlink(nm_target, cand_link)
+                        nm_link = cand_link
+                    except OSError:
+                        nm_link = None
+            try:
+                return _run_external_command(
+                    base, spec, work, runner_dir, deadline,
+                    node_modules_dir=nm_target,
+                )
+            finally:
+                if nm_link is not None and nm_link.is_symlink():
+                    try:
+                        nm_link.unlink(missing_ok=True)
+                    except OSError:
+                        pass
         return {**base, "accept": None, "status": "runner_unavailable",
                 "first_problem": f"unsupported acceptance kind: {spec.kind}"}
     except Exception as e:  # noqa: BLE001 — 單次驗收任何非預期錯誤皆安全判為未通過
@@ -2186,9 +2449,12 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "acceptance": {
                 "kind": spec.kind,
                 "command": spec.command,
+                "interpreter": spec.interpreter,
                 "protected": sorted(protected),
                 "reason": spec.reason,
             },
+            "baseline": res.get("baseline"),
+            "baseline_error": res.get("baseline_error"),
             "max_attempts": res["max_attempts"],
             "attempts": attempt_recs,
             "delivered_attempt": res["delivered_attempt"],
@@ -2264,6 +2530,27 @@ def verify_receipts(project: pathlib.Path, *, state_root: pathlib.Path | None = 
     return True, why, receipts
 
 
+def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None) -> str | None:
+    """判斷基線驗收是否因環境問題無法執行；是則回傳人讀原因，否則 None。"""
+    if spec.kind == "none":
+        return spec.reason  # None＝專案本來就沒測試；非 None＝偵測到專案標記但工具缺席（例如 npm）
+    if spec.reason is not None:
+        return spec.reason
+    if base_acc is None:
+        return None
+    st = base_acc.get("status")
+    fp = base_acc.get("first_problem")
+    if st == "runner_unavailable":
+        return fp or "test runner is unavailable"
+    if st == "load_error":
+        return fp or "import/load error during test collection"
+    if st in ("runner_no_output", "runner_bad_output", "acceptance_error"):
+        return fp or f"acceptance runner failed ({st})"
+    if spec.kind in _EXIT_CODE_ONLY_KINDS and base_acc.get("returncode") in (126, 127):
+        return fp or f"command not found or not executable (exit code {base_acc.get('returncode')})"
+    return None
+
+
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
         min_attempt_s: float = 60.0, check: str | None = None,
@@ -2287,6 +2574,80 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     launch_meta: list[tuple[list[str], dict[str, str]]] = []
     spent = 0.0
     t0 = time.monotonic()
+
+    # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
+    baseline_rec: dict[str, Any] | None = None
+    baseline_error: str | None = None
+    if spec.reason is not None:
+        baseline_rec = {
+            "accept": None,
+            "passed": None,
+            "run": None,
+            "status": "runner_unavailable",
+            "first_problem": spec.reason,
+            "returncode": None,
+        }
+        baseline_error = _baseline_env_reason(spec, baseline_rec)
+    elif has_acceptance:
+        base_t = max(0.0, min(ACC_TIMEOUT_S, budget_s / 2 if budget_s < 10.0 else budget_s))
+        base_acc = acceptance(originals, project, base_t, spec=spec, _project=project)
+        baseline_rec = {
+            "accept": base_acc.get("accept"),
+            "passed": base_acc.get("passed"),
+            "run": base_acc.get("run"),
+            "status": base_acc.get("status"),
+            "first_problem": base_acc.get("first_problem"),
+            "returncode": base_acc.get("returncode"),
+        }
+        baseline_error = _baseline_env_reason(spec, base_acc)
+        if baseline_error is None:
+            if baseline_rec["accept"] is None:
+                say(f"baseline: not checked ({baseline_rec['status']})")
+            elif baseline_rec["run"] is not None:
+                say(f"baseline: {spec.kind} {'PASS' if baseline_rec['accept'] else 'FAIL'} "
+                    f"({baseline_rec['passed']}/{baseline_rec['run']})")
+            else:
+                say(f"baseline: {spec.kind} {'PASS' if baseline_rec['accept'] else 'FAIL'} "
+                    f"(status={baseline_rec['status']})")
+
+    if baseline_error is not None:
+        say(f"baseline: acceptance cannot run in this environment: {baseline_error}")
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": []}
+        res = {
+            "mode": "restart",
+            "project": str(project),
+            "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
+            "protected": sorted(protected),
+            "acceptance": spec.to_dict(),
+            "interpreter": spec.interpreter,
+            "baseline": baseline_rec,
+            "baseline_error": baseline_error,
+            "max_attempts": max_attempts,
+            "accepted": None,
+            "delivered_attempt": 0,
+            "attempts": [],
+            "changed": changed,
+            "agent_wall_s": 0.0,
+            "total_wall_s": round(time.monotonic() - t0, 1),
+            "run_dir": str(run_dir),
+        }
+        res["receipt"] = _record_receipt(
+            project=project,
+            prompt=prompt,
+            agent=agent,
+            launch_meta=launch_meta,
+            spec=spec,
+            protected=protected,
+            attempts=attempts,
+            snaps=snaps,
+            delivered_idx=-1,
+            changed=changed,
+            res=res,
+            run_dir=run_dir,
+        )
+        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+        return res
+
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     while len(attempts) < max_attempts:
         remaining = budget_s - (time.monotonic() - t0) - reserve
@@ -2384,6 +2745,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
         "protected": sorted(protected),
         "acceptance": spec.to_dict(),
+        "interpreter": spec.interpreter,
+        "baseline": baseline_rec,
+        "baseline_error": None,
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,
@@ -2419,9 +2783,18 @@ def summary(res: dict) -> str:
     acc_kind = acc_info.get("kind") or ("python_unittest" if res.get("tests") else "none")
     acc_cmd = acc_info.get("command")
     acc_reason = acc_info.get("reason")
+    acc_interp = acc_info.get("interpreter") or res.get("interpreter")
     protected = list(res.get("protected") if "protected" in res else (res.get("tests") or []))
+    baseline = res.get("baseline") if isinstance(res.get("baseline"), dict) else None
+    baseline_err = res.get("baseline_error")
 
-    if res["accepted"] is None:
+    if baseline_err:
+        reason_txt = str(baseline_err).strip()
+        head = (
+            f"[vacant] acceptance cannot run in this environment: {reason_txt}\n"
+            f"  stopped before running the agent (0 attempts); project unchanged."
+        )
+    elif res["accepted"] is None:
         a0 = res["attempts"][0] if res.get("attempts") else {}
         st = a0.get("status")
         why = acc_reason or a0.get("first_problem")
@@ -2457,6 +2830,21 @@ def summary(res: dict) -> str:
 
     cmd_part = f" ({acc_cmd})" if acc_cmd else ""
     head += f"\n  acceptance: {acc_kind}{cmd_part}"
+    if acc_interp:
+        head += f"\n  interpreter: {acc_interp}"
+    if baseline is not None and not baseline_err:
+        if baseline.get("accept") is True:
+            if baseline.get("run") is not None:
+                head += (f"\n  baseline (before agent): PASS ({baseline['passed']}/{baseline['run']} tests; "
+                         f"already passing before the agent ran)")
+            else:
+                head += "\n  baseline (before agent): PASS (exit 0; already passing before the agent ran)"
+        elif baseline.get("accept") is False:
+            if baseline.get("run") is not None:
+                head += (f"\n  baseline (before agent): FAIL ({baseline['passed'] or 0}/{baseline['run']} tests, "
+                         f"status={baseline.get('status')})")
+            else:
+                head += f"\n  baseline (before agent): FAIL (status={baseline.get('status')})"
     if protected:
         shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
         head += f"\n  protected (restored before check): {shown}"
