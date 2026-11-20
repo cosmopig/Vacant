@@ -702,7 +702,11 @@ def build_parser() -> argparse.ArgumentParser:
     pb.add_argument("-k", type=int, default=3, help="verify-fix 最大嘗試")
     pb.set_defaults(func=cmd_bench)
 
-    pa = sub.add_parser("audit", help="重驗一個 vacant 的 logbook 簽章鏈（對外究責）")
+    pa = sub.add_parser(
+        "audit",
+        help="跨專案稽核紀錄：list / show / export（可偵測竄改、可離線重驗，不宣稱完備；"
+             "舊版單體 logbook：`vacant [--root DIR] audit <name>`）",
+    )
     pa.add_argument("name")
     pa.set_defaults(func=cmd_audit)
 
@@ -1257,6 +1261,9 @@ _ADAPTER_TOP: tuple[str, ...] = ("do", "hook", "adapters", "install", "uninstall
 #: 可究責追緝（`vacant_network/trace/`，2026-09-24）：看病歷、人指出錯處。
 _TRACE_TOP: tuple[str, ...] = ("trace", "flag")
 _TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "actors", "rescan")
+#: 跨專案正規化稽核紀錄（`vacant_network/audit_export.py`，schema vacant-audit-record/1）。
+#: `vacant [--root DIR] audit <name>`（單體 logbook 驗章）仍走下面的舊指令。
+_AUDIT_SUB: tuple[str, ...] = ("list", "show", "export")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1267,6 +1274,11 @@ def main(argv: list[str] | None = None) -> int:
     if raw[:1] and raw[0] in _ADAPTER_TOP:
         from .adapters.cli import main as adapters_main
         return adapters_main(raw)
+    if raw[:1] == ["audit"] and (
+        len(raw) == 1 or raw[1] in _AUDIT_SUB or raw[1].startswith("-")
+    ):
+        from .audit_export import main as audit_main
+        return audit_main(raw[1:])
     if raw[:1] == ["flag"] or (raw[:1] == ["trace"] and raw[1:2] and (
             raw[1] in _TRACE_SUB or raw[1].startswith("-"))):
         # `vacant trace <wire.jsonl>`（MCP tee-proxy 的時間軸）仍走下面的舊指令
