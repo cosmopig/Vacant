@@ -115,6 +115,10 @@ DEFAULT_WIRE_INDEX_BYTES = 8 * 1024 * 1024
 #: 單檔 2 MiB 上限（與 intake 日誌同口徑）；只保留最新 N 個 session，更早的誠實 UNKNOWN。
 DEFAULT_HOOKS_MAX_FILE_BYTES = 2 * 1024 * 1024
 DEFAULT_HOOKS_KEEP_SESSIONS = 200
+#: `vacant do` 零設定重開模式工作目錄（`$VACANT_WORK/restart-*`）命名上限（16 MiB）。
+#: 舊 run 剝離 `attempt_k/w` 與 `attempt_k/snap-*`（保留 `result.json`、`attempt_k/logs/` 與簽章收據）；
+#: 超此上限時再依最舊優先剝離近期 run 的工作區副本，仍計入 256 MiB 穩態封頂內（228.25 + 16 = 244.25 MiB）。
+DEFAULT_RESTART_WORK_CAP_BYTES = 16 * 1024 * 1024
 
 # 2026-10-29 round 166 DECISION（ASSIGNMENT 🔴 最優先「用量有上限」，目標數字見
 # ops/packets/disk_top_priority.md §3）：`~/.vacant` 的**穩態封頂**＝各分組上限的
@@ -1285,32 +1289,141 @@ def compact_quarantine(
     }
 
 
+def _is_restart_run_dir(p: pathlib.Path) -> bool:
+    return p.is_dir() and not p.is_symlink() and p.name.startswith("restart-")
+
+
+def _restart_work_stats(wroot: pathlib.Path) -> tuple[int, int]:
+    """回傳 `(restart-* 執行數, 合計位元組數)`。"""
+    if not wroot.is_dir():
+        return 0, 0
+    runs = 0
+    total = 0
+    for entry in wroot.iterdir():
+        if _is_restart_run_dir(entry):
+            runs += 1
+            total += _tree_size(entry)
+    return runs, total
+
+
+def _strip_restart_run(
+    rdir: pathlib.Path,
+    *,
+    dry_run: bool,
+    budget: _Budget | None = None,
+) -> tuple[int, int]:
+    """剝離單一 `restart-*` 目錄底下的工作區副本（`attempt_k/w`）與快照（`attempt_k/snap-*`）
+    以及任何殘留寫回備份（`bkp-*`）；**保留 `result.json`、收據檔與 `attempt_k/logs/`**。"""
+    freed = 0
+    removed = 0
+    for child in sorted(rdir.iterdir(), key=lambda p: p.name):
+        if budget is not None and budget.expired():
+            break
+        if child.is_symlink():
+            continue
+        if child.is_dir() and child.name.startswith("attempt_"):
+            for sub in sorted(child.iterdir(), key=lambda p: p.name):
+                if budget is not None and budget.expired():
+                    break
+                if sub.name == "w" or sub.name.startswith("snap-"):
+                    b, c = _remove_path(sub, dry_run=dry_run)
+                    freed += b
+                    removed += c
+        elif child.is_dir() and child.name.startswith("bkp-"):
+            b, c = _remove_path(child, dry_run=dry_run)
+            freed += b
+            removed += c
+    return freed, removed
+
+
+def _truncate_restart_logs(
+    rdir: pathlib.Path,
+    *,
+    keep_bytes: int,
+    dry_run: bool,
+) -> tuple[int, int]:
+    """僅在剝除全部工作區與快照後仍超 `restart_work` 位元組上限時，截短舊 run 過大的 `attempt_*/logs/*.log`
+    （保留尾部完整行）；絕不刪 `result.json` 或收據。"""
+    freed = 0
+    touched = 0
+    keep_bytes = max(4096, keep_bytes)
+    for child in sorted(rdir.iterdir(), key=lambda p: p.name):
+        if not child.is_dir() or child.is_symlink() or not child.name.startswith("attempt_"):
+            continue
+        ldir = child / "logs"
+        if not ldir.is_dir() or ldir.is_symlink():
+            continue
+        for lf in sorted(ldir.iterdir(), key=lambda p: p.name):
+            if not lf.is_file() or lf.is_symlink() or not lf.name.endswith(".log"):
+                continue
+            try:
+                sz = lf.lstat().st_size
+                if sz <= keep_bytes:
+                    continue
+                raw = lf.read_bytes()[-keep_bytes:]
+                nl = raw.find(b"\n")
+                if 0 <= nl < len(raw) - 1:
+                    raw = raw[nl + 1:]
+                text = raw.decode("utf-8", errors="replace")
+                new_sz = len(text.encode("utf-8"))
+                if not dry_run:
+                    atomic_write_text(lf, text)
+                    new_sz = lf.lstat().st_size
+                diff = max(0, sz - new_sz)
+                if diff > 0:
+                    freed += diff
+                    touched += 1
+            except OSError:
+                continue
+    return freed, touched
+
+
 def compact_work(
     wroot: pathlib.Path | None = None,
     *,
     keep_runs_per_task: int = DEFAULT_KEEP_RUNS,
     max_age_days: float | None = None,
     strip_workspaces_only: bool = True,
+    max_restart_bytes: int | None = None,
     dry_run: bool = False,
     budget: _Budget | None = None,
 ) -> dict[str, Any]:
     """清理 `~/.vacant-work/`（`vacant do` 的隔離工作區副本）。
 
-    - 同一次執行若重試產生了 `ws`、`ws2`、`ws3`，中間被淘汰的 `ws`、`ws2` 副本直接回收，只留最後一個。
-    - 每個 task 超過 `keep_runs_per_task` 的舊執行：移除佔空間的 `ws*` 工作區副本（`strip_workspaces_only=True`
-      時保留輕量的 `a*/agent_stdout.log`；`False` 時連同舊 run 目錄一併移除）。
+    - 契約模式（`<task_id>/<run_id>/ws*`）：
+      - 同一次執行若重試產生了 `ws`、`ws2`、`ws3`，中間被淘汰的 `ws`、`ws2` 副本直接回收，只留最後一個。
+      - 每個 task 超過 `keep_runs_per_task` 的舊執行：移除佔空間的 `ws*` 工作區副本（`strip_workspaces_only=True`
+        時保留輕量的 `a*/agent_stdout.log`；`False` 時連同舊 run 目錄一併移除）。
+    - 零設定重開模式（`restart-<ts>-<pid>-<hex>/attempt_k/{w,snap-*,logs}`）：
+      - 超過 `keep_runs_per_task` 或逾齡的舊執行：剝離 `attempt_k/w` 與 `attempt_k/snap-*`（及殘留 `bkp-*`），
+        **保留 `result.json`、收據與 `attempt_k/logs/`**。
+      - 總量若仍超過 `max_restart_bytes`（預設 `DEFAULT_RESTART_WORK_CAP_BYTES`＝16 MiB，
+        `VACANT_RESTART_WORK_CAP_BYTES` 可覆寫，0＝關）：依最舊優先連近期執行的 `w`/`snap-*` 一併剝離；
+        仍超標則截短舊執行過大的日誌，絕不刪除專案檔、`result.json` 或簽章收據。
     """
     base = _resolve_work_dir(wroot)
     if not base.is_dir():
         return {"bytes_freed": 0, "files_removed": 0, "runs_scanned": 0}
 
+    if max_restart_bytes is None:
+        max_restart_bytes = _resolve_restart_work_budget()
     now = time.time()
     cutoff_ts = (now - max_age_days * 86400.0) if max_age_days is not None else None
     bytes_freed = 0
     files_removed = 0
     runs_scanned = 0
 
-    for task_d in sorted(x for x in base.iterdir() if x.is_dir()):
+    restart_runs: list[pathlib.Path] = []
+    task_dirs: list[pathlib.Path] = []
+    for entry in sorted(base.iterdir(), key=lambda p: p.name):
+        if not entry.is_dir() or entry.is_symlink():
+            continue
+        if _is_restart_run_dir(entry):
+            restart_runs.append(entry)
+        else:
+            task_dirs.append(entry)
+
+    for task_d in task_dirs:
         if budget is not None and budget.expired():
             break
         runs = sorted(
@@ -1354,10 +1467,64 @@ def compact_work(
                 if not any(task_d.iterdir()):
                     task_d.rmdir()
 
+    # 3) 零設定重開模式（restart-*）
+    restart_runs.sort(key=lambda p: (p.stat().st_mtime if p.exists() else 0, p.name))
+    runs_scanned += len(restart_runs)
+    restart_total_before = sum(_tree_size(r) for r in restart_runs)
+    restart_freed = 0
+    restart_removed = 0
+    keep_n = max(0, keep_runs_per_task)
+    old_restart = restart_runs[:-keep_n] if keep_n > 0 else list(restart_runs)
+    if cutoff_ts is not None:
+        for rdir in restart_runs:
+            with contextlib.suppress(OSError):
+                if rdir not in old_restart and rdir.stat().st_mtime < cutoff_ts:
+                    old_restart.append(rdir)
+    stripped_set: set[pathlib.Path] = set()
+    for rdir in old_restart:
+        if budget is not None and budget.expired():
+            break
+        b, c = _strip_restart_run(rdir, dry_run=dry_run, budget=budget)
+        restart_freed += b
+        restart_removed += c
+        stripped_set.add(rdir)
+
+    remaining_restart = max(0, restart_total_before - restart_freed)
+    if max_restart_bytes > 0 and remaining_restart > max_restart_bytes:
+        # 仍超命名上限：依最舊優先連近期保留的 restart run 也剝離 w 與 snap-*
+        for rdir in restart_runs:
+            if remaining_restart <= max_restart_bytes or (budget is not None and budget.expired()):
+                break
+            if rdir in stripped_set:
+                continue
+            b, c = _strip_restart_run(rdir, dry_run=dry_run, budget=budget)
+            restart_freed += b
+            restart_removed += c
+            remaining_restart = max(0, restart_total_before - restart_freed)
+            stripped_set.add(rdir)
+        # 最後防線：若舊 run 龐大的 agent 日誌單獨撐爆上限，截短日誌（保留 result.json 與收據）
+        if remaining_restart > max_restart_bytes:
+            log_keep = max(4096, min(DEFAULT_MAX_LOG_BYTES // 2, max_restart_bytes // 4))
+            for rdir in old_restart or restart_runs:
+                if remaining_restart <= max_restart_bytes or (budget is not None and budget.expired()):
+                    break
+                b, c = _truncate_restart_logs(rdir, keep_bytes=log_keep, dry_run=dry_run)
+                restart_freed += b
+                restart_removed += c
+                remaining_restart = max(0, restart_total_before - restart_freed)
+
+    bytes_freed += restart_freed
+    files_removed += restart_removed
+
     return {
         "bytes_freed": bytes_freed,
         "files_removed": files_removed,
         "runs_scanned": runs_scanned,
+        "restart_runs_scanned": len(restart_runs),
+        "restart_bytes_freed": restart_freed,
+        "restart_files_removed": restart_removed,
+        "restart_bytes_remaining": remaining_restart,
+        "restart_cap_bytes": max_restart_bytes if max_restart_bytes > 0 else None,
     }
 
 
@@ -1637,6 +1804,18 @@ def _resolve_wire_index_budget() -> int:
         except ValueError:
             return DEFAULT_WIRE_INDEX_BYTES
     return DEFAULT_WIRE_INDEX_BYTES
+
+
+def _resolve_restart_work_budget() -> int:
+    """`VACANT_RESTART_WORK_CAP_BYTES` 覆寫（0＝關），否則 16 MiB 預設。"""
+    env = os.environ.get("VACANT_RESTART_WORK_CAP_BYTES")
+    if env is not None:
+        try:
+            v = int(env)
+            return max(0, v)
+        except ValueError:
+            return DEFAULT_RESTART_WORK_CAP_BYTES
+    return DEFAULT_RESTART_WORK_CAP_BYTES
 
 
 def compact_wire(
@@ -2008,6 +2187,8 @@ def usage_report(
             ("adapters", sroot / "adapters"),
         ):
             out["areas"][name] = _tree_size(sub)
+        restart_runs, restart_bytes = _restart_work_stats(wroot)
+        out["areas"]["restart_work"] = restart_bytes
         # 物件前 10
         obj_root = sroot / "trace" / "objects"
         if obj_root.is_dir():
@@ -2048,6 +2229,15 @@ def usage_report(
             "wire_index_budget_bytes": _resolve_wire_index_budget(),
             "override_env": ["VACANT_WIRE_BODY_BYTES", "VACANT_WIRE_INDEX_BYTES"],
         }
+        rw_cap_raw = _resolve_restart_work_budget()
+        rw_cap: int | None = rw_cap_raw if rw_cap_raw > 0 else None
+        out["budget"]["restart_work"] = {
+            "bytes": restart_bytes,
+            "runs": restart_runs,
+            "cap_bytes": rw_cap,
+            "within_budget": (rw_cap is None) or (restart_bytes <= rw_cap),
+            "override_env": "VACANT_RESTART_WORK_CAP_BYTES",
+        }
         # 2026-10-29 round 168（ASSIGNMENT 🔴 最優先、驗收條件 1 → 常規量具）：
         # 穩態封頂＝各分組上限的**加總**（STABLE_ENVELOPE_BYTES；口徑與理由見
         # ops/packets/disk_top_priority.md §3/§4）＋各分組餘量。⚠ 它不是一條程式
@@ -2079,6 +2269,8 @@ def usage_report(
                  "headroom_bytes": (body_cap - body_bytes) if body_cap is not None else None},
                 {"name": "wire_index", "bytes": idx_bytes, "cap_bytes": idx_cap,
                  "headroom_bytes": (idx_cap - idx_bytes) if idx_cap is not None else None},
+                {"name": "restart_work", "bytes": restart_bytes, "cap_bytes": rw_cap,
+                 "headroom_bytes": (rw_cap - restart_bytes) if rw_cap is not None else None},
             ]
             within_groups = all(
                 g["cap_bytes"] is None or g["bytes"] <= g["cap_bytes"]
@@ -2088,7 +2280,7 @@ def usage_report(
                 "planned_steady_state_bytes": STABLE_ENVELOPE_BYTES,
                 "note": ("各分組上限的加總（trace objects 64 MiB ＋ projects 子 32 MiB ＋"
                          "wire body 96 MiB ＋ wire index 8 MiB＋intake 總 8 MiB＋"
-                         "quarantine 總 16 MiB＋日誌 2 MiB/檔＋固定安裝面 1 MiB/件），"
+                         "quarantine 總 16 MiB＋restart_work 16 MiB＋日誌 2 MiB/檔＋固定安裝面 1 MiB/件），"
                          "不是一條單一開關；每個 top-level 組件都須有命名上限"
                          "（accounting.unaccounted 為空、accounting.within_caps 為真才算帳目完整）；"
                          "口徑與理由見 ops/packets/disk_top_priority.md §3/§4"),
@@ -2176,7 +2368,10 @@ def usage_main(argv: list[str] | None = None) -> int:
     for name, b in rep.get("areas", {}).items():
         print(f"  · {name:<16}: {h(b)}")
     if "work_dir" in tot:
-        print(f"  工作區目錄    : {h(tot['work_dir'])}（{rep['work_dir']}）")
+        rw_info = (rep.get("budget") or {}).get("restart_work") or {}
+        rw_runs = rw_info.get("runs", 0)
+        rw_note = f"，含 {rw_runs} 次 restart" if rw_runs else ""
+        print(f"  工作區目錄    : {h(tot['work_dir'])}（{rep['work_dir']}{rw_note}）")
     ob = rep.get("objects", {})
     if ob:
         print(f"  trace 物件    : {ob['count']:,} 個、{h(ob['bytes'])}")

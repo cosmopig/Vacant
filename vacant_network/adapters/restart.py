@@ -70,6 +70,7 @@ import hmac
 import json
 import os
 import pathlib
+import re
 import secrets
 import shutil
 import signal
@@ -90,6 +91,27 @@ _RESULT_KEYS = ("run", "failures", "errors", "skipped", "unexpected_successes")
 _UNCHECKABLE_STATUSES = frozenset({"no_tests", "no_tests_collected", "runner_unavailable"})
 _EXIT_CODE_ONLY_KINDS = frozenset({"check", "npm", "cargo", "go"})
 _NPM_DEFAULT_TEST_MARKER = "Error: no test specified"
+RECEIPT_SCHEMA = "vacant-restart-receipt/1"
+_RECEIPT_MAX_BYTES = 48 * 1024  # 留足餘量低於 Logbook.MAX_PAYLOAD_BYTES (64 KiB)，不進可被 gc 的 blob
+_MAX_ARG_LEN = 512
+
+_SECRET_KEY_RE = re.compile(
+    r"(?i)(?:api[_-]?key|secret|token|password|passwd|auth|credential|cookie|"
+    r"private[_-]?key|bearer|jwt|dsn|database[_-]?url|connection[_-]?string|"
+    r"signature|client[_-]?secret|access[_-]?key|signing[_-]?key|passphrase|"
+    r"(?:^|[_-])(?:key|pass|cert)(?:$|[_-]))"
+)
+_SECRET_FLAG_RE = re.compile(
+    r"(?i)^--?(?:api[_-]?key|token|secret|password|passwd|auth|bearer|key|cookie|credential|passphrase)(?:=|$)"
+)
+_SECRET_VAL_RE = re.compile(
+    r"(?:sk-(?:ant-|proj-)?[A-Za-z0-9_-]{8,}|gh[pousr]_[A-Za-z0-9]{10,}|"
+    r"github_pat_[A-Za-z0-9_]{10,}|glpat-[A-Za-z0-9_-]{8,}|"
+    r"xox[baprs]-[A-Za-z0-9-]{8,}|AKIA[0-9A-Z]{16}|"
+    r"(?i:^(?:bearer|basic)\s+\S+)|"
+    r"-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|"
+    r"://[^/\s:@]+:[^/\s@]+@)"
+)
 
 _UNITTEST_RUNNER = r"""
 def _main():
@@ -1844,9 +1866,250 @@ def deliver_index(accs: list[dict]) -> int:
     return max(range(len(accs)), key=lambda i: (accs[i]["passed"] or 0, i))
 
 
+def _truncate_str(s: str, limit: int = _MAX_ARG_LEN) -> str:
+    if len(s) <= limit:
+        return s
+    h = hashlib.sha256(s.encode("utf-8", "replace")).hexdigest()[:12]
+    return f"{s[:limit // 2]}...[truncated:{len(s)}ch,sha256={h}]"
+
+
+def _is_secret_key(key: str) -> bool:
+    return bool(_SECRET_KEY_RE.search(key))
+
+
+def _is_secret_value(val: str) -> bool:
+    return bool(_SECRET_VAL_RE.search(val))
+
+
+def _redact_env(env: dict[str, str]) -> dict[str, str]:
+    """對收據記錄的 Launch.env 遮罩機密值（只讀複本，絕不修改交給 agent 的 env）。"""
+    out: dict[str, str] = {}
+    for k in sorted(env):
+        ks = str(k)
+        vs = str(env[k])
+        if _is_secret_key(ks) or _is_secret_value(vs):
+            out[ks] = "[REDACTED]"
+        else:
+            out[ks] = _truncate_str(vs)
+    return out
+
+
+def _redact_argv(argv: list[str]) -> list[str]:
+    """對收據記錄的 argv 遮罩機密參數並截短過長引數（不改原 argv）。"""
+    out: list[str] = []
+    redact_next = False
+    for raw in argv:
+        s = str(raw)
+        if redact_next:
+            out.append("[REDACTED]")
+            redact_next = False
+            continue
+        if _SECRET_FLAG_RE.match(s):
+            if "=" in s:
+                flag, _ = s.split("=", 1)
+                out.append(f"{flag}=[REDACTED]")
+            else:
+                out.append(s)
+                redact_next = True
+            continue
+        if "=" in s and not s.startswith("-"):
+            k, _, v = s.partition("=")
+            if k and (k.replace("_", "").isalnum()) and (_is_secret_key(k) or _is_secret_value(v)):
+                out.append(f"{k}=[REDACTED]")
+                continue
+        if _is_secret_value(s):
+            out.append("[REDACTED]")
+        else:
+            out.append(_truncate_str(s))
+    return out
+
+
+def _snapshot_tree_sha256(snap: _Snapshot | None) -> str | None:
+    """對快照檔案樹算確定性 SHA-256（按排序相對路徑與檔案 SHA-256 逐筆串接）。"""
+    if snap is None:
+        return None
+    h = hashlib.sha256()
+    for rel in sorted(snap.files):
+        h.update(rel.encode("utf-8"))
+        h.update(b"\x00")
+        h.update(snap.files[rel].encode("ascii"))
+        h.update(b"\n")
+    return h.hexdigest()
+
+
+def _written_back_entries(project: pathlib.Path, snap: _Snapshot | None,
+                          changed: dict[str, list[str]]) -> list[dict[str, Any]]:
+    """收集實際寫回專案的檔案清單及其 SHA-256（按相對路徑排序）。"""
+    ops: list[tuple[str, str]] = (
+        [(rel, "added") for rel in changed.get("added") or ()]
+        + [(rel, "modified") for rel in changed.get("modified") or ()]
+    )
+    ops.sort(key=lambda t: t[0])
+    out: list[dict[str, Any]] = []
+    for rel, op in ops:
+        sha = _sha256_file(project / rel)
+        if sha is None and snap is not None:
+            sha = snap.files.get(rel)
+        out.append({"path": rel, "op": op, "sha256": sha})
+    return out
+
+
+def _list_sha256(items: Any) -> str:
+    from ..canonical import canonical_bytes
+    return hashlib.sha256(canonical_bytes(items)).hexdigest()
+
+
+def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """確保收據 payload 永遠低於 Logbook.MAX_PAYLOAD_BYTES（不依賴可被 gc 的外部 blob）。"""
+    from ..canonical import canonical_bytes
+    if len(canonical_bytes(payload)) <= _RECEIPT_MAX_BYTES:
+        return payload
+    out = dict(payload)
+    for key in ("written_back", "deleted", "skipped"):
+        items = out.get(key)
+        if isinstance(items, list) and len(items) > 64:
+            out[f"{key}_count"] = len(items)
+            out[f"{key}_sha256"] = _list_sha256(items)
+            out[f"{key}_truncated"] = True
+            out[key] = items[:64]
+            if len(canonical_bytes(out)) <= _RECEIPT_MAX_BYTES:
+                return out
+    acc = dict(out.get("acceptance") or {})
+    prot = acc.get("protected")
+    if isinstance(prot, list) and len(prot) > 64:
+        acc["protected_count"] = len(prot)
+        acc["protected_sha256"] = _list_sha256(prot)
+        acc["protected_truncated"] = True
+        acc["protected"] = prot[:64]
+        out["acceptance"] = acc
+    return out
+
+
+def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
+                    launch_meta: list[tuple[list[str], dict[str, str]]],
+                    spec: AcceptanceSpec, protected: set[str],
+                    attempts: list[dict[str, Any]], snaps: list[_Snapshot | None],
+                    delivered_idx: int, changed: dict[str, list[str]],
+                    res: dict[str, Any], run_dir: pathlib.Path) -> dict[str, Any]:
+    """把這次 restart-mode 執行簽進專案既有的 trace 簽章鏈（`$VACANT_HOME/trace/projects/<proj>/chain.ndjson`）。
+    完全事後記錄、fail-open（簽章失敗只記在回傳與 result.json，不影響已完成的交回）。"""
+    try:
+        from ..trace.recorder import Recorder, project_key
+        first_argv, first_env = launch_meta[0] if launch_meta else ([], {})
+        agent_name = agent or (pathlib.Path(first_argv[0]).name if first_argv else "unknown")
+        proj_str = str(project)
+        proj_sha = hashlib.sha256(proj_str.encode("utf-8")).hexdigest()
+        pkey = project_key(project)
+        attempt_recs: list[dict[str, Any]] = []
+        for idx, a in enumerate(attempts):
+            snap = snaps[idx] if idx < len(snaps) else None
+            attempt_recs.append({
+                "attempt": a["attempt"],
+                "wall_s": a["wall_s"],
+                "rc": a["rc"],
+                "timed_out": a["timed_out"],
+                "accept": a["accept"],
+                "passed": a["passed"],
+                "run": a["run"],
+                "status": a["status"],
+                "tests_tampered": list(a["tests_tampered"]),
+                "snapshot_tree_sha256": _snapshot_tree_sha256(snap),
+            })
+        delivered_snap = snaps[delivered_idx] if 0 <= delivered_idx < len(snaps) else None
+        payload: dict[str, Any] = {
+            "receipt_schema": RECEIPT_SCHEMA,
+            "run_id": run_dir.name,
+            "request_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+            "agent": agent_name,
+            "argv": _redact_argv(first_argv),
+            "env": _redact_env(first_env),
+            "project_path_sha256": proj_sha,
+            "project_key": pkey,
+            "acceptance": {
+                "kind": spec.kind,
+                "command": spec.command,
+                "protected": sorted(protected),
+                "reason": spec.reason,
+            },
+            "max_attempts": res["max_attempts"],
+            "attempts": attempt_recs,
+            "delivered_attempt": res["delivered_attempt"],
+            "accepted": res["accepted"],
+            "written_back": _written_back_entries(project, delivered_snap, changed),
+            "deleted": list(changed.get("deleted") or ()),
+            "skipped": list(changed.get("skipped") or ()),
+            "agent_wall_s": res["agent_wall_s"],
+            "total_wall_s": res["total_wall_s"],
+        }
+        payload = _bound_receipt_payload(payload)
+        rec = Recorder(project)
+        ref = rec.append("restart_receipt", payload)
+        return {
+            "recorded": True,
+            "schema": RECEIPT_SCHEMA,
+            "project_key": rec.dir.name,
+            "chain_path": str(rec.chain_path),
+            "seq": ref["seq"],
+            "hash": ref["hash"],
+        }
+    except Exception as e:  # noqa: BLE001 — fail-open：記錄失敗不影響已交回結果
+        return {
+            "recorded": False,
+            "schema": RECEIPT_SCHEMA,
+            "error": f"{type(e).__name__}: {e}"[:300],
+        }
+
+
+def verify_receipts(project: pathlib.Path, *, state_root: pathlib.Path | None = None,
+                    trust: Any = None,
+                    expected_head: dict[str, Any] | None = None
+                    ) -> tuple[bool, str, list[dict[str, Any]]]:
+    """離線驗證專案簽章鏈（`vacant trace verify` 同源機制）並回傳所有 `restart_receipt` 紀錄。
+
+    除了 `Recorder.verify()`（驗 Ed25519 簽章、seq 連續、prev_hash 連結、stream_id、
+    `trace_genesis`、`head.json`、`trust.json` verifier 清單與選用 `expected_head` 錨點），
+    另對鏈檔做嚴格逐行完整性檢查（拒收損壞 JSON 行或截斷半行，防無 head.json 時的半行省略）。
+    """
+    from ..intake import keys as _keys
+    from ..logbook import LogEntry
+    from ..trace.recorder import Recorder, _volume_bytes
+
+    troot = (pathlib.Path(state_root) / "trace") if state_root is not None else None
+    rec = Recorder(project, root=troot)
+    if trust is None and state_root is not None:
+        trust = _keys.Trust.load(pathlib.Path(state_root) / "intake" / "trust.json")
+
+    vols = rec._sealed_volume_paths()
+    all_files = list(vols) + ([rec.chain_path] if rec.chain_path.is_file() else [])
+    if not all_files:
+        return False, "no trace chain", []
+
+    for fp in all_files:
+        try:
+            raw = _volume_bytes(fp)
+        except Exception as e:  # noqa: BLE001
+            return False, f"unreadable chain file {fp.name}: {type(e).__name__}", []
+        if raw and not raw.endswith(b"\n"):
+            return False, f"truncated trailing line in {fp.name}", []
+        for idx, line in enumerate(raw.split(b"\n"), start=1):
+            if not line:
+                continue
+            try:
+                LogEntry.from_json(json.loads(line))
+            except Exception:  # noqa: BLE001
+                return False, f"malformed entry at {fp.name}:{idx}", []
+
+    ok, why = rec.verify(trust=trust, anchor=expected_head)
+    if not ok:
+        return False, why, []
+    receipts = [e for e in rec.events() if e.get("type") == "restart_receipt"]
+    return True, why, receipts
+
+
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
         min_attempt_s: float = 60.0, check: str | None = None,
+        agent: str | None = None,
         log: Callable[[str], None] | None = None) -> dict:
     project = project.resolve()
     say = log or (lambda m: None)
@@ -1861,6 +2124,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     run_dir.mkdir(parents=True, exist_ok=True)
     attempts: list[dict] = []
     snaps: list[_Snapshot | None] = []
+    launch_meta: list[tuple[list[str], dict[str, str]]] = []
     spent = 0.0
     t0 = time.monotonic()
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
@@ -1874,6 +2138,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         ws = attempt_dir / "w"
         shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
         launch = build(prompt, ws)
+        launch_meta.append((list(launch.argv), dict(launch.env)))
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
         try:
             r = run_agent(launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
@@ -1968,6 +2233,20 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "total_wall_s": round(time.monotonic() - t0, 1),
         "run_dir": str(run_dir),
     }
+    res["receipt"] = _record_receipt(
+        project=project,
+        prompt=prompt,
+        agent=agent,
+        launch_meta=launch_meta,
+        spec=spec,
+        protected=protected,
+        attempts=attempts,
+        snaps=snaps,
+        delivered_idx=d,
+        changed=changed,
+        res=res,
+        run_dir=run_dir,
+    )
     (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
     return res
 

@@ -32,6 +32,18 @@ def _home() -> pathlib.Path:
     return pathlib.Path.home()
 
 
+def _trigger_auto_gc(agent: str) -> None:
+    """在 `vacant do` 結束後觸發既有背景 auto-gc（單例鎖＋1 小時頻率限制＋時間預算，fail-open）。"""
+    import os
+    if os.environ.get("VACANT_HOOK_NO_GC"):
+        return
+    try:
+        from .hook import _spawn_auto_gc
+        _spawn_auto_gc(agent, "do")
+    except Exception:  # noqa: BLE001 — fail-open：自動清理失敗不得影響交件或退出碼
+        pass
+
+
 def cmd_do(args) -> int:
     cpath = pathlib.Path(args.contract) if args.contract else C.find(pathlib.Path.cwd())
     if cpath is None:
@@ -94,6 +106,7 @@ def cmd_do(args) -> int:
             print(f"  open issues: {tr['report']}")
         if oc == "accept":
             print("  next: `vacant release` (nothing has been published yet)")
+    _trigger_auto_gc(agent)
     if res.get("void"):
         return EXIT["void"]
     return EXIT.get(str(res.get("outcome")), 2)
@@ -133,11 +146,13 @@ def _do_restart(args) -> int:
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
                  check=getattr(args, "check", None),
+                 agent=agent,
                  log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
         print(RS.summary(res))
+    _trigger_auto_gc(agent)
     return EXIT["reject"] if res["accepted"] is False else 0
 
 
