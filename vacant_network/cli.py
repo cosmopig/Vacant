@@ -582,6 +582,8 @@ def build_parser() -> argparse.ArgumentParser:
         description="Vacant — 先驗證交付，再啟動 AI agent",
     )
     p.add_argument("--root", default=str(_default_root()), help="vacant 身體根目錄（預設 ~/.vacant）")
+    from . import __version__ as _ver
+    p.add_argument("--version", action="version", version=f"vacant {_ver}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pi = sub.add_parser("init", help="鑄出一個 vacant 身體")

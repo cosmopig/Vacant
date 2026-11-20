@@ -79,6 +79,10 @@ def cmd_do(args) -> int:
             return 2
         spec = A.AGENTS[args.agent]
         agent = spec.name
+        if not A.which(spec.binaries):
+            print(f"vacant do: {args.agent} is not installed or not on PATH (looked for: "
+                  f"{', '.join(spec.binaries)}); nothing was run, project unchanged", file=sys.stderr)
+            return EXIT["void"]
 
         def build(p, ws, _spec=spec):
             return _spec.build(p, ws, hooks=not args.no_hooks, extra=args.extra)
@@ -128,6 +132,12 @@ def _do_restart(args) -> int:
         return 2
     if args.cmd:
         import shlex
+        argv0 = (shlex.split(args.cmd) or [""])[0]
+        import shutil as _sh
+        if not argv0 or not (_sh.which(argv0) or (pathlib.Path(argv0).is_file() and "/" in argv0)):
+            print(f"vacant do: command not found: {argv0!r} (from --cmd); nothing was run, project unchanged",
+                  file=sys.stderr)
+            return EXIT["void"]
         gb = A.generic_build(shlex.split(args.cmd))
 
         def build(p, ws):
@@ -140,6 +150,10 @@ def _do_restart(args) -> int:
             return 2
         spec = A.AGENTS[args.agent]
         agent = spec.name
+        if not A.which(spec.binaries):
+            print(f"vacant do: {args.agent} is not installed or not on PATH (looked for: "
+                  f"{', '.join(spec.binaries)}); nothing was run, project unchanged", file=sys.stderr)
+            return EXIT["void"]
 
         def build(p, ws, _spec=spec):
             return _spec.build(p, ws, hooks=bool(args.hooks), extra=args.extra)
