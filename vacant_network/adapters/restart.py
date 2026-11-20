@@ -65,6 +65,7 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import fnmatch
 import hashlib
 import hmac
 import json
@@ -80,11 +81,18 @@ import sys
 import tempfile
 import time
 import xml.etree.ElementTree as ET
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 from .run import COPY_SKIP, Launch, run_agent, work_root
 
 PATTERNS = ("*_test.py", "test_*.py")
+_UNIVERSAL_TEST_NAME_PATTERNS = ("*_test.py", "test_*.py", "*.test.*", "*.spec.*", "*_test.go")
+_UNIVERSAL_TEST_DIRS = frozenset({"__tests__", "tests", "test"})
+_MANIFEST_BY_KIND: dict[str, tuple[str, ...]] = {
+    "npm": ("package.json",),
+    "cargo": ("Cargo.toml",),
+    "go": ("go.mod",),
+}
 ACC_TIMEOUT_S = 120.0
 _CHUNK_SIZE = 65536
 _RESULT_KEYS = ("run", "failures", "errors", "skipped", "unexpected_successes")
@@ -695,8 +703,116 @@ def _read_all_fd(fd: int) -> bytes:
     return b"".join(chunks)
 
 
+def _is_python_test(rel: str) -> bool:
+    name = rel.rsplit("/", 1)[-1]
+    return any(fnmatch.fnmatchcase(name, p) for p in PATTERNS)
+
+
+def _is_universal_test(rel: str) -> bool:
+    parts = pathlib.PurePosixPath(rel).parts
+    if any(d in _UNIVERSAL_TEST_DIRS for d in parts[:-1]):
+        return True
+    name = parts[-1]
+    return any(fnmatch.fnmatchcase(name, p) for p in _UNIVERSAL_TEST_NAME_PATTERNS)
+
+
 def find_tests(root: pathlib.Path) -> list[str]:
-    return [r for r in _files(root) if any(pathlib.PurePath(r.rsplit("/", 1)[-1]).match(p) for p in PATTERNS)]
+    return [r for r in _files(root) if _is_python_test(r)]
+
+
+def _normalize_protect_pattern(pat: str, project: pathlib.Path) -> str:
+    raw = str(pat).strip().replace("\\", "/")
+    if not raw:
+        raise ValueError("--protect pattern must not be empty")
+    p = pathlib.Path(raw)
+    if p.is_absolute():
+        try:
+            raw = p.resolve().relative_to(project.resolve()).as_posix()
+        except ValueError as exc:
+            raise ValueError(f"--protect pattern must stay inside project: {pat!r}") from exc
+    while raw.startswith("./"):
+        raw = raw[2:]
+    raw = raw.rstrip("/")
+    if not raw or raw == ".":
+        raise ValueError(f"--protect pattern must name a path inside project: {pat!r}")
+    parts = pathlib.PurePosixPath(raw).parts
+    if ".." in parts:
+        raise ValueError(f"--protect pattern must stay inside project: {pat!r}")
+    return "/".join(parts)
+
+
+def _glob_to_regex(pat: str) -> re.Pattern[str]:
+    """將支援 `**` 的 POSIX glob 轉成完整比對正則。"""
+    i = 0
+    n = len(pat)
+    out = ["^"]
+    while i < n:
+        c = pat[i]
+        if c == "*":
+            if i + 1 < n and pat[i + 1] == "*":
+                if i + 2 < n and pat[i + 2] == "/":
+                    out.append("(?:.+/)?")
+                    i += 3
+                else:
+                    out.append(".*")
+                    i += 2
+            else:
+                out.append("[^/]*")
+                i += 1
+        elif c == "?":
+            out.append("[^/]")
+            i += 1
+        elif c == "[":
+            j = i + 1
+            if j < n and pat[j] in ("!", "^"):
+                j += 1
+            if j < n and pat[j] == "]":
+                j += 1
+            while j < n and pat[j] != "]":
+                j += 1
+            if j >= n:
+                out.append(re.escape(c))
+                i += 1
+            else:
+                stuff = pat[i + 1:j]
+                if stuff.startswith("!"):
+                    stuff = "^" + stuff[1:]
+                out.append(f"[{stuff}]")
+                i = j + 1
+        else:
+            out.append(re.escape(c))
+            i += 1
+    out.append("$")
+    return re.compile("".join(out))
+
+
+def _match_protect_pattern(rel: str, norm_pat: str) -> bool:
+    has_glob = any(ch in norm_pat for ch in "*?[")
+    if not has_glob:
+        return rel == norm_pat or rel.startswith(norm_pat + "/")
+    rx = _glob_to_regex(norm_pat)
+    if "/" not in norm_pat:
+        return bool(rx.match(rel) or rx.match(rel.rsplit("/", 1)[-1]))
+    return bool(rx.match(rel))
+
+
+def find_protected(root: pathlib.Path, *, kind: str = "none",
+                   protect: Sequence[str] | None = None,
+                   _all_files: list[str] | None = None) -> list[str]:
+    """列出開始時應受保護（驗收前還原原位元組、不寫回 agent 改動）的相對路徑。"""
+    root = root.resolve()
+    files = _all_files if _all_files is not None else _files(root)
+    files_set = set(files)
+    out: set[str] = {r for r in files if _is_universal_test(r)}
+    for mf in _MANIFEST_BY_KIND.get(kind, ()):
+        if mf in files_set:
+            out.add(mf)
+    if protect:
+        norm_pats = [_normalize_protect_pattern(p, root) for p in protect]
+        for r in files:
+            if any(_match_protect_pattern(r, np) for np in norm_pats):
+                out.add(r)
+    return sorted(out)
 
 
 def _clean_env(home: pathlib.Path) -> dict[str, str]:
@@ -1170,14 +1286,18 @@ class AcceptanceSpec:
     argv: tuple[str, ...] | None = None
     protected: tuple[str, ...] = ()
     reason: str | None = None
+    pinned_script: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        d: dict[str, Any] = {
             "kind": self.kind,
             "command": self.command,
             "protected": list(self.protected),
             "reason": self.reason,
         }
+        if self.pinned_script is not None:
+            d["pinned_script"] = self.pinned_script
+        return d
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1297,51 +1417,66 @@ def _has_reg_file(path: pathlib.Path) -> bool:
     return True
 
 
-def _has_npm_test_script(project: pathlib.Path) -> bool:
+def _npm_test_script(project: pathlib.Path) -> str | None:
     opened = _open_reg_readonly(project / "package.json")
     if opened is None:
-        return False
+        return None
     fd, _ = opened
     try:
         with os.fdopen(fd, "rb") as f:
             raw = f.read(1 << 20)
         data = json.loads(raw.decode("utf-8"))
     except (OSError, ValueError, UnicodeDecodeError):
-        return False
+        return None
     if not isinstance(data, dict):
-        return False
+        return None
     scripts = data.get("scripts")
     if not isinstance(scripts, dict):
-        return False
+        return None
     test_cmd = scripts.get("test")
     if not isinstance(test_cmd, str) or not test_cmd.strip():
-        return False
+        return None
     if _NPM_DEFAULT_TEST_MARKER in test_cmd:
-        return False
-    return True
+        return None
+    return test_cmd.strip()
+
+
+def _has_npm_test_script(project: pathlib.Path) -> bool:
+    return _npm_test_script(project) is not None
 
 
 def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
-                      originals: dict[str, bytes] | None = None) -> AcceptanceSpec:
-    """依固定優先順序選擇驗收種類：--check ＞ Python 測試檔 ＞ package.json ＞ Cargo.toml ＞ go.mod ＞ none。"""
+                      originals: dict[str, bytes] | None = None,
+                      protect: Sequence[str] | None = None) -> AcceptanceSpec:
+    """依固定優先順序選擇驗收種類：--check ＞ Python 測試檔 ＞ package.json ＞ Cargo.toml ＞ go.mod ＞ none。
+    同時於任務開始時鎖定驗收定義與受保護檔案清單（跨生態系測試檔、manifest 與使用者 `--protect`）。"""
     project = project.resolve()
-    if originals is None:
-        originals = {rel: (project / rel).read_bytes() for rel in find_tests(project)}
-    prot = tuple(sorted(originals))
+    all_files = _files(project)
+    extra_orig = set(originals) if originals is not None else set()
+    py_orig: dict[str, bytes]
+    if originals is not None:
+        py_orig = {rel: raw for rel, raw in originals.items() if _is_python_test(rel)}
+    else:
+        py_orig = {rel: (project / rel).read_bytes() for rel in all_files if _is_python_test(rel)}
+
+    def _prot(kind: str) -> tuple[str, ...]:
+        base = set(find_protected(project, kind=kind, protect=protect, _all_files=all_files))
+        base |= extra_orig
+        return tuple(sorted(base))
 
     if check is not None:
         cmd = check.strip()
         if not cmd:
             raise ValueError("--check command must not be empty")
-        return AcceptanceSpec(kind="check", command=cmd, argv=None, protected=prot)
+        return AcceptanceSpec(kind="check", command=cmd, argv=None, protected=_prot("check"))
 
-    if originals:
-        insp = _inspect_python_tests(originals)
+    if py_orig:
+        insp = _inspect_python_tests(py_orig)
         if insp.syntax_error is not None:
             return AcceptanceSpec(
                 kind="python_unittest",
                 command=f"{sys.executable} -I -B (unittest)",
-                protected=prot,
+                protected=_prot("python_unittest"),
                 reason=f"syntax error in original test file: {insp.syntax_error}",
             )
         if insp.has_pytest_style:
@@ -1349,40 +1484,47 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 return AcceptanceSpec(
                     kind="python_pytest",
                     command=f"{sys.executable} -I -B -m pytest -q -rN",
-                    protected=prot,
+                    protected=_prot("python_pytest"),
                 )
             return AcceptanceSpec(
                 kind="python_bare",
                 command=f"{sys.executable} -I -B (stdlib test runner)",
-                protected=prot,
+                protected=_prot("python_bare"),
             )
         return AcceptanceSpec(
             kind="python_unittest",
             command=f"{sys.executable} -I -B (unittest)",
-            protected=prot,
+            protected=_prot("python_unittest"),
         )
 
     missing: list[str] = []
-    if _has_npm_test_script(project):
+    npm_script = _npm_test_script(project)
+    if npm_script is not None:
         if shutil.which("npm"):
-            return AcceptanceSpec(kind="npm", command="npm test", argv=("npm", "test"), protected=prot)
+            return AcceptanceSpec(
+                kind="npm",
+                command="npm test",
+                argv=("npm", "test"),
+                protected=_prot("npm"),
+                pinned_script=npm_script,
+            )
         missing.append("package.json has a \"test\" script, but 'npm' was not found on PATH")
 
     if _has_reg_file(project / "Cargo.toml"):
         if shutil.which("cargo"):
-            return AcceptanceSpec(kind="cargo", command="cargo test", argv=("cargo", "test"), protected=prot)
+            return AcceptanceSpec(kind="cargo", command="cargo test", argv=("cargo", "test"), protected=_prot("cargo"))
         missing.append("Cargo.toml found, but 'cargo' was not found on PATH")
 
     if _has_reg_file(project / "go.mod"):
         if shutil.which("go"):
-            return AcceptanceSpec(kind="go", command="go test ./...", argv=("go", "test", "./..."), protected=prot)
+            return AcceptanceSpec(kind="go", command="go test ./...", argv=("go", "test", "./..."), protected=_prot("go"))
         missing.append("go.mod found, but 'go' was not found on PATH")
 
     return AcceptanceSpec(
         kind="none",
         command=None,
         argv=None,
-        protected=prot,
+        protected=_prot("none"),
         reason="; ".join(missing) if missing else None,
     )
 
@@ -1738,6 +1880,15 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
     work_res = work.resolve()
+    if spec.kind == "npm" and spec.pinned_script is not None:
+        # 雙重防線：確認驗收副本中的 package.json scripts.test 與開始時鎖定的一致
+        if _npm_test_script(work_res) != spec.pinned_script:
+            return {
+                **base,
+                "status": "acceptance_error",
+                "accept": False,
+                "first_problem": "package.json scripts.test does not match the pinned start definition",
+            }
     env = dict(os.environ)
     env["PWD"] = str(work_res)
     out_log = runner_dir / "ext_out.log"
@@ -1797,16 +1948,23 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
 def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float = ACC_TIMEOUT_S, *,
                spec: AcceptanceSpec | None = None,
                check: str | None = None,
+               protect: Sequence[str] | None = None,
                _snapshot: _Snapshot | None = None,
                _project: pathlib.Path | None = None,
                _plan: _WritePlan | None = None) -> dict:
-    """在工作區快照的**潔淨副本**裡、把開始時的測試檔還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
-    tests = sorted(originals)
+    """在工作區快照的**潔淨副本**裡、把開始時的受保護檔案還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
+    all_protected = sorted(originals)
+    py_tests = [rel for rel in all_protected if _is_python_test(rel)]
     if spec is None:
-        spec = detect_acceptance(_project if _project is not None else ws, check=check, originals=originals)
+        spec = detect_acceptance(
+            _project if _project is not None else ws,
+            check=check,
+            originals=originals,
+            protect=protect,
+        )
     base: dict[str, Any] = {
         "accept": False,
-        "tests": tests,
+        "tests": py_tests if spec.kind.startswith("python_") else all_protected,
         "passed": None,
         "run": None,
         "tests_tampered": [],
@@ -1841,11 +1999,11 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         runner_dir.mkdir(mode=0o700)
 
         if spec.kind == "python_unittest":
-            return _run_python_unittest(base, tests, work, home, runner_dir, deadline)
+            return _run_python_unittest(base, py_tests, work, home, runner_dir, deadline)
         if spec.kind == "python_pytest":
-            return _run_python_pytest(base, tests, work, home, runner_dir, deadline)
+            return _run_python_pytest(base, py_tests, work, home, runner_dir, deadline)
         if spec.kind == "python_bare":
-            return _run_python_bare(base, tests, work, home, runner_dir, deadline)
+            return _run_python_bare(base, py_tests, work, home, runner_dir, deadline)
         if spec.kind in _EXIT_CODE_ONLY_KINDS:
             return _run_external_command(base, spec, work, runner_dir, deadline)
         return {**base, "accept": None, "status": "runner_unavailable",
@@ -2109,13 +2267,15 @@ def verify_receipts(project: pathlib.Path, *, state_root: pathlib.Path | None = 
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
         min_attempt_s: float = 60.0, check: str | None = None,
+        protect: Sequence[str] | None = None,
         agent: str | None = None,
         log: Callable[[str], None] | None = None) -> dict:
     project = project.resolve()
     say = log or (lambda m: None)
-    originals = {rel: (project / rel).read_bytes() for rel in find_tests(project)}
+    spec = detect_acceptance(project, check=check, protect=protect)
+    originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
     protected = set(originals)
-    spec = detect_acceptance(project, check=check, originals=originals)
+    py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
     has_acceptance = spec.kind != "none" and spec.reason is None
     if not has_acceptance:
         max_attempts = 1
@@ -2221,7 +2381,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     res = {
         "mode": "restart",
         "project": str(project),
-        "tests": sorted(originals),
+        "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
         "protected": sorted(protected),
         "acceptance": spec.to_dict(),
         "max_attempts": max_attempts,
@@ -2300,6 +2460,8 @@ def summary(res: dict) -> str:
     if protected:
         shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
         head += f"\n  protected (restored before check): {shown}"
+    elif acc_kind != "none":
+        head += "\n  protected (restored before check): none — the agent could have edited what this check runs"
     else:
         head += "\n  protected (restored before check): none"
     if ch.get("skipped"):
@@ -2307,5 +2469,8 @@ def summary(res: dict) -> str:
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
     tam = sorted({t for a in res["attempts"] for t in a["tests_tampered"]})
     if tam:
-        head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
+        if all(_is_universal_test(t) for t in tam):
+            head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
+        else:
+            head += f"\n  the agent edited protected files ({', '.join(tam)}); checked against the originals, not written back."
     return head + f"\n  attempts and logs: {res['run_dir']}"

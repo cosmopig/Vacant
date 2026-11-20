@@ -146,6 +146,7 @@ def _do_restart(args) -> int:
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
                  check=getattr(args, "check", None),
+                 protect=getattr(args, "protect", None) or None,
                  agent=agent,
                  log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
     if args.json:
@@ -331,6 +332,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="without a contract: seconds per attempt (total stays under --timeout)")
     p.add_argument("--check",
                    help="without a contract: shell command used as acceptance (exit 0 = accept)")
+    p.add_argument("--protect", action="append", default=[], metavar="PATH_OR_GLOB",
+                   help="without a contract: file, directory, or glob to restore before acceptance "
+                        "and never write back (repeatable)")
     p.add_argument("--hooks", action="store_true",
                    help="without a contract: also add Vacant's per-step hooks (off by default)")
     p.add_argument("--json", action="store_true")
