@@ -89,7 +89,7 @@ def __dir__():
     return sorted(set(globals()) | set(_LAZY))
 
 
-__version__ = "0.9.2rc2"
+__version__ = "0.9.2"
 
 __all__ = [
     "Vacant",

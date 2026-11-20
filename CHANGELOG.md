@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.9.2 — unreleased (release candidate rc2, not published)
+
+`vacant do <agent>` without a contract: run the agent on a copy, check with the project's own tests, start a fresh
+attempt if they fail (up to 3), write back the delivered attempt. This entry lists behaviour; it makes no claim
+about how much it helps — measured numbers live in `ops/redo/results/` with their conditions.
+
+- **Acceptance beyond unittest.** pytest-style tests run with pytest when the project's interpreter has it, else a
+  stdlib runner; npm (`npm test`), cargo, go and `--check "<command>"` are supported. A project with 0 tests is run
+  once and the message says nothing was checked.
+- **The check cannot be passed by editing it.** The acceptance command is pinned when the run starts. Test files of
+  every ecosystem (`*_test.py`, `test_*.py`, `*.test.*`, `*.spec.*`, `*_test.go`, `__tests__/`, `tests/`, `test/`)
+  and the manifest that defines the command (`package.json`, `Cargo.toml`, `go.mod`) are restored before each check
+  and never written back with the agent's edits; the message lists any the agent touched. `--protect PATH/GLOB`
+  adds files for `--check`. When nothing is protected the message says the agent could have edited the check.
+- **Runs in the project's environment.** Python acceptance uses `$VIRTUAL_ENV`, then `.venv/` or `venv/` in the
+  project, then `python3` on PATH. `node_modules` is reachable during the check only. A baseline check runs on the
+  untouched project first; if the runner itself is missing or a declared dependency is not installed, Vacant says
+  so and stops before running the agent (exit 43). A test that imports a module the agent has yet to write is a
+  normal start, not an environment error.
+- **Fails fast when the agent cannot start.** A named agent that is not on PATH, a `--cmd` binary that does not
+  exist, or an agent that exits with an error within 30 s without changing anything stops the run with the agent's
+  own last output (exit 43) instead of silently using up the remaining attempts.
+- **Signed receipts and one audit record per run.** Each restart run appends a signed receipt (agent, argv,
+  acceptance, every attempt, snapshot hashes) to the project's trace chain. `vacant audit list|show|export` builds
+  one verified record per run from that receipt; `result.json` is only a fallback (marked unsigned) and a mismatch
+  with the receipt is flagged. Restart work directories are covered by retention/`vacant gc`.
+- `vacant --version`.
+
 ## 0.9.1 — 2026-10-12
 
 - **`vacant dashboard`: one local page for everything Vacant is doing.** After `vacant install` there was no way to
