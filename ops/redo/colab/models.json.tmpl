@@ -1,0 +1,66 @@
+{
+  "providers": {
+    "colab-vllm": {
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "api": "openai-completions",
+      "apiKey": "vllm-local",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma-4-12b-it-qat (colab-vllm)",
+          "reasoning": false,
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "samplingParams": {
+            "reasoning_effort": "none"
+          }
+        }
+      ]
+    },
+    "colab-vllm-nothink": {
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "api": "openai-completions",
+      "apiKey": "vllm-local",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma-4-12b-it-qat (colab-vllm-nothink)",
+          "reasoning": false,
+          "contextWindow": 262144,
+          "maxTokens": 16384,
+          "samplingParams": {
+            "reasoning_effort": "none"
+          }
+        }
+      ]
+    },
+    "colab-vllm-think": {
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "api": "openai-completions",
+      "apiKey": "vllm-local",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": true
+      },
+      "models": [
+        {
+          "id": "gemma-4-12b-it-qat",
+          "name": "gemma-4-12b-it-qat (colab-vllm-think)",
+          "reasoning": true,
+          "contextWindow": 262144,
+          "maxTokens": 16384
+        }
+      ]
+    }
+  },
+  "defaultProvider": "colab-vllm-nothink",
+  "defaultModel": "gemma-4-12b-it-qat"
+}
