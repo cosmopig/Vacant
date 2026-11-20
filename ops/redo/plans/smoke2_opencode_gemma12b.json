@@ -1,0 +1,86 @@
+{
+  "id": "smoke2_opencode_gemma12b",
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261114,
+  "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+  "bank_candidates": [
+    "/tmp/bm_tasks/polyglot_py",
+    "/srv/eval/staged/polyglot_py"
+  ],
+  "arms": {
+    "A": {
+      "policy": "single",
+      "attempt_timeout_s": 1800
+    },
+    "R3": {
+      "policy": "restart",
+      "max_attempts": 3,
+      "attempt_timeout_s": 600,
+      "budget_s": 1800,
+      "hint": "none"
+    }
+  },
+  "pair": [
+    "A",
+    "R3"
+  ],
+  "attempt_timeout_s": 1800,
+  "agent": {
+    "argv": [
+      "opencode",
+      "run",
+      "--model",
+      "{provider}/{model}",
+      "{prompt}"
+    ],
+    "env": {
+      "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1003\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1003\", \"options\": {\"baseURL\": \"http://100.119.113.56:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1003/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}"
+    },
+    "config_dir": {
+      "env": "XDG_DATA_HOME",
+      "from": "~/.pi/agent",
+      "copy": []
+    },
+    "usage": "none",
+    "infra_re": "ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|fetch failed|socket hang up|Connection error|connection refused|Premature close|\\bterminated\\b|model[^\\n]{0,40}(?:not (?:found|loaded)|crashed|unloaded)|\\b50[234]\\b[^\\n]{0,40}(?:Bad Gateway|Service Unavailable|Gateway Timeout)|Cannot connect to API|Unable to connect"
+  },
+  "providers": [
+    {
+      "name": "lms1003",
+      "provider": "lms1003",
+      "model": "gemma-4-12b-it-qat",
+      "jobs": 1
+    }
+  ],
+  "acceptance": {
+    "kind": "workspace_tests",
+    "patterns": [
+      "*_test.py",
+      "test_*.py"
+    ],
+    "timeout_s": 120
+  },
+  "grader": {
+    "timeout_s": 240,
+    "suite_timeout_s": 60,
+    "visible_equals_grader": true
+  },
+  "analysis": {
+    "alpha": 0.05,
+    "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "tasks": [
+    "pg_affine_cipher",
+    "pg_wordy"
+  ],
+  "reps": 1,
+  "prereg": {
+    "registered": "2026-11-20，第一通模型呼叫之前 commit。T07 冒煙（OpenCode 1.18.33 headless `opencode run`，本機 gemma-4-12b，1003）。",
+    "role": "冒煙：只確認機制（格子跑得完、結果寫得出、端點斷線記成 infra_void）。數字不引用。",
+    "t07_notes": [
+      "agent 改成 OpenCode：設定經 OPENCODE_CONFIG_CONTENT 指向 1003 的 LM Studio；XDG_DATA_HOME 指到每格自己的空目錄（工作階段不跨格）。",
+      "usage＝none：呼叫數記 null 不填 0；void 只剩 infra_re 那條，已補 OpenCode 的斷線字樣（2026-11-20 實測：端點關掉時印 `Cannot connect to API: Unable to connect`、rc=1）。",
+      "手動確認：pg_affine_cipher 一格 320 秒自己結束（rc=0），有寫檔。"
+    ]
+  }
+}
