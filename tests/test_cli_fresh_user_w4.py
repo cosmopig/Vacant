@@ -45,3 +45,34 @@ def test_version_flag():
     r = subprocess.run([sys.executable, "-m", "vacant_network", "--version"], capture_output=True, text=True)
     assert r.returncode == 0
     assert __version__ in r.stdout
+
+
+def test_agent_crashing_at_start_is_not_restarted_and_error_is_shown(tmp_path, monkeypatch, capsys):
+    p = _proj(tmp_path)
+    monkeypatch.setenv("VACANT_WORK", str(tmp_path / "work"))
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "home"))
+    crash = tmp_path / "crash.py"
+    crash.write_text("import sys\nprint('SyntaxError: node too old for this agent', file=sys.stderr)\nsys.exit(1)\n")
+    monkeypatch.chdir(p)
+    rc = adapters_cli.main(["do", "--cmd", f"{sys.executable} {crash} {{prompt}}", "--prompt", "x",
+                            "--attempts", "3"])
+    out = capsys.readouterr().out
+    assert rc == adapters_cli.EXIT["void"]
+    assert "attempt 2" not in out
+    assert "node too old for this agent" in out
+    assert "was not restarted" in out
+
+
+def test_agent_that_fails_but_edits_files_is_still_restarted(tmp_path, monkeypatch, capsys):
+    """有改檔的失敗（例如 agent 寫了錯的程式後以非 0 結束）照原政策重開，不能被誤判成啟動失敗。"""
+    p = _proj(tmp_path)
+    monkeypatch.setenv("VACANT_WORK", str(tmp_path / "work"))
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "home"))
+    ag = tmp_path / "ag.py"
+    ag.write_text("import pathlib,sys\npathlib.Path('calc.py').write_text('def add(a, b):\\n    return a * b\\n')\nsys.exit(1)\n")
+    monkeypatch.chdir(p)
+    rc = adapters_cli.main(["do", "--cmd", f"{sys.executable} {ag} {{prompt}}", "--prompt", "x",
+                            "--attempts", "3", "--timeout", "120", "--attempt-timeout", "30"])
+    out = capsys.readouterr().out
+    assert "attempt 3" in out
+    assert rc == adapters_cli.EXIT["reject"]

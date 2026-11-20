@@ -2575,6 +2575,24 @@ def _declared_dependency(project: pathlib.Path, module: str) -> bool:
     return want in names
 
 
+AGENT_QUICK_FAIL_MS = 30_000
+
+
+def _agent_error_tail(log_dir: pathlib.Path, r: dict[str, Any], max_lines: int = 8) -> str:
+    """agent 啟動即失敗時，給人看的錯誤摘要：spawn 錯誤，或 stderr（沒有就 stdout）的最後幾行。"""
+    if r.get("spawn_error"):
+        return str(r["spawn_error"])[-800:]
+    for name in ("agent_stderr.log", "agent_stdout.log"):
+        try:
+            txt = (log_dir / name).read_text(encoding="utf-8", errors="replace").strip()
+        except OSError:
+            continue
+        if txt:
+            lines = [ln for ln in txt.splitlines() if ln.strip()]
+            return "\n".join(lines[-max_lines:])[-1200:]
+    return f"exit code {r.get('rc')}, no output"
+
+
 def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None,
                          project: pathlib.Path | None = None) -> str | None:
     """判斷基線驗收是否因環境問題無法執行；是則回傳人讀原因，否則 None。"""
@@ -2707,6 +2725,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         return res
 
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
+    agent_error: str | None = None
     while len(attempts) < max_attempts:
         remaining = budget_s - (time.monotonic() - t0) - reserve
         if attempts and remaining < min_attempt_s:
@@ -2789,6 +2808,18 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
         if acc["accept"] is None or acc["accept"] is True:
             break
+        # agent 一啟動就失敗（找不到執行檔、版本不合當場崩潰、沒設定模型就退出）：重開也只會一樣，
+        # 停下來把 agent 自己的錯誤講出來，而不是靜靜燒完剩下的嘗試。
+        quick_fail = (r["spawn_error"] is not None
+                      or (r["rc"] not in (0, None) and not r["timed_out"]
+                          and r["wall_ms"] < AGENT_QUICK_FAIL_MS))
+        untouched = plan is not None and not (plan.added or plan.modified or plan.deleted)
+        if quick_fail and untouched:
+            agent_error = _agent_error_tail(attempt_dir / "logs", r)
+            attempts[-1]["agent_failed_to_start"] = True
+            say(f"attempt {k}: the agent exited with an error after {r['wall_ms'] / 1000.0:.1f}s without "
+                f"changing anything; not restarting. agent said: {agent_error.splitlines()[-1] if agent_error else '(nothing)'}")
+            break
 
     d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
     if snaps[d] is not None:
@@ -2806,6 +2837,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "interpreter": spec.interpreter,
         "baseline": baseline_rec,
         "baseline_error": None,
+        "agent_error": agent_error,
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,
@@ -2851,6 +2883,14 @@ def summary(res: dict) -> str:
         head = (
             f"[vacant] acceptance cannot run in this environment: {reason_txt}\n"
             f"  stopped before running the agent (0 attempts); project unchanged."
+        )
+    elif res.get("agent_error"):
+        a = res["attempts"][-1] if res.get("attempts") else {}
+        tail = "\n".join("    " + ln for ln in str(res["agent_error"]).splitlines())
+        head = (
+            f"[vacant] the agent failed on attempt {a.get('attempt', n)} (exit code {a.get('rc')}, "
+            f"{a.get('wall_s')}s) without changing anything, so it was not restarted. {files}.\n"
+            f"  the agent's last output:\n{tail}"
         )
     elif res["accepted"] is None:
         a0 = res["attempts"][0] if res.get("attempts") else {}
