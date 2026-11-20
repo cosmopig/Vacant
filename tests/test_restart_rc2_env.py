@@ -272,6 +272,8 @@ def test_baseline_load_error_stops_with_zero_attempts_and_nonzero_cli_exit(tmp_p
     proj = tmp_path / "broken_env_proj"
     proj.mkdir()
     (proj / "app.py").write_text("x = 1\n", encoding="utf-8")
+    # 宣告過的相依沒裝在直譯器裡＝環境問題（沒宣告的缺模組多半是 agent 要寫的，見下一個測試）
+    (proj / "requirements.txt").write_text("definitely-missing-dep-rc2-999>=1.0\n", encoding="utf-8")
     (proj / "test_app.py").write_text(
         "import definitely_missing_dep_rc2_999\n"
         "def test_ok(): assert True\n",
@@ -305,6 +307,48 @@ def test_baseline_load_error_stops_with_zero_attempts_and_nonzero_cli_exit(tmp_p
     assert "definitely_missing_dep_rc2_999" in out
     assert "interpreter:" in out
     assert "acceptance:" in out
+
+
+@pytest.mark.parametrize("style", ["unittest", "pytest"])
+def test_baseline_missing_module_the_agent_must_write_does_not_stop(tmp_path, monkeypatch, capsys, style):
+    """回歸（rc2 審查時重現）：測試 import 了還沒寫的 m.py，基線是 load_error，但那是正常起點，agent 必須照常跑。"""
+    proj = tmp_path / f"newmod_{style}"
+    proj.mkdir()
+    if style == "unittest":
+        test_src = ("import unittest\nfrom m import f\n"
+                    "class T(unittest.TestCase):\n    def test_f(self):\n        self.assertEqual(f(), 2)\n")
+    else:
+        test_src = "from m import f\ndef test_f():\n    assert f() == 2\n"
+    (proj / "test_m.py").write_text(test_src, encoding="utf-8")
+    agent = tmp_path / "agent.py"
+    agent.write_text('import pathlib\npathlib.Path("m.py").write_text("def f():\\n    return 2\\n")\n',
+                     encoding="utf-8")
+    monkeypatch.delenv("VIRTUAL_ENV", raising=False)
+    monkeypatch.chdir(proj)
+    rc = adapters_cli.main([
+        "do",
+        "--cmd", f"{sys.executable} {agent} {{prompt}}",
+        "--prompt", "write m.py",
+        "--attempts", "3",
+        "--attempt-timeout", "20",
+    ])
+    out = capsys.readouterr().out
+    assert "cannot run in this environment" not in out
+    assert rc == 0, out
+    assert (proj / "m.py").read_text(encoding="utf-8") == "def f():\n    return 2\n"
+
+
+def test_declared_dependency_parsing(tmp_path):
+    from vacant_network.adapters.restart import _declared_dependency, _missing_module_name
+    (tmp_path / "requirements-dev.txt").write_text("# c\n-r base.txt\nPyYAML==6.0  # yaml\nfoo_bar[x]>=1\n")
+    (tmp_path / "pyproject.toml").write_text('[project]\ndependencies = ["requests>=2", "attrs"]\n')
+    assert _declared_dependency(tmp_path, "pyyaml")
+    assert _declared_dependency(tmp_path, "foo_bar")
+    assert _declared_dependency(tmp_path, "requests")
+    assert _declared_dependency(tmp_path, "attrs")
+    assert not _declared_dependency(tmp_path, "m")
+    assert _missing_module_name("x\nModuleNotFoundError: No module named 'a.b'\n") == "a.b"
+    assert _missing_module_name("ImportError: cannot import name 'f' from 'm'") is None
 
 
 def test_baseline_check_command_not_found_stops_with_zero_attempts(tmp_path, monkeypatch, capsys):

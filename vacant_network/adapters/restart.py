@@ -2530,7 +2530,53 @@ def verify_receipts(project: pathlib.Path, *, state_root: pathlib.Path | None = 
     return True, why, receipts
 
 
-def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None) -> str | None:
+_MISSING_MOD_RE = re.compile(r"No module named '([A-Za-z0-9_.]+)'")
+
+
+def _missing_module_name(text: str | None) -> str | None:
+    """從載入錯誤的 traceback 取出 ModuleNotFoundError 的模組名；沒有就 None。"""
+    if not text:
+        return None
+    found = _MISSING_MOD_RE.findall(text)
+    return found[-1] if found else None
+
+
+def _norm_dist(name: str) -> str:
+    return re.sub(r"[-_.]+", "_", name).lower()
+
+
+def _declared_dependency(project: pathlib.Path, module: str) -> bool:
+    """`module` 是否出現在專案宣告的相依裡（以名稱正規化比對；只認頂層名＝發行名的常見情形）。"""
+    want = _norm_dist(module)
+    names: set[str] = set()
+    req_line = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
+    try:
+        for req in sorted(project.glob("requirements*.txt")):
+            for line in req.read_text(errors="replace").splitlines():
+                line = line.split("#", 1)[0].strip()
+                if not line or line.startswith("-"):
+                    continue
+                m = req_line.match(line)
+                if m:
+                    names.add(_norm_dist(m.group(1)))
+        for meta in ("pyproject.toml", "setup.cfg", "setup.py"):
+            f = project / meta
+            if f.is_file():
+                txt = f.read_text(errors="replace")
+                for m in re.finditer(r"[\"']\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*(?:[<>=!~;\[ ][^\"']*)?[\"']", txt):
+                    names.add(_norm_dist(m.group(1)))
+                if meta == "setup.cfg":
+                    for line in txt.splitlines():
+                        m = req_line.match(line)
+                        if m and line[:1].isspace():
+                            names.add(_norm_dist(m.group(1)))
+    except OSError:
+        return False
+    return want in names
+
+
+def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None,
+                         project: pathlib.Path | None = None) -> str | None:
     """判斷基線驗收是否因環境問題無法執行；是則回傳人讀原因，否則 None。"""
     if spec.kind == "none":
         return spec.reason  # None＝專案本來就沒測試；非 None＝偵測到專案標記但工具缺席（例如 npm）
@@ -2543,7 +2589,19 @@ def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None) 
     if st == "runner_unavailable":
         return fp or "test runner is unavailable"
     if st == "load_error":
-        return fp or "import/load error during test collection"
+        # 收集期載入錯誤多半是「agent 要寫的模組還不存在」（例如測試 import 了待實作的 m.py），那是正常起點，
+        # 不是環境問題。只有兩種算環境跑不起來：測試工具本身匯入不了（pytest／_pytest），或缺的是專案
+        # 在 requirements*.txt／pyproject.toml／setup.cfg／setup.py 宣告過的相依（宣告了卻沒裝在這個直譯器）。
+        missing = _missing_module_name(fp)
+        if missing is None:
+            return None
+        top = missing.split(".")[0]
+        if top in ("pytest", "_pytest"):
+            return fp or f"test runner module {top!r} is not importable"
+        if project is not None and _declared_dependency(project, top):
+            return (f"module {top!r} is declared as a project dependency but is not installed for "
+                    f"{spec.interpreter or 'the resolved interpreter'}")
+        return None
     if st in ("runner_no_output", "runner_bad_output", "acceptance_error"):
         return fp or f"acceptance runner failed ({st})"
     if spec.kind in _EXIT_CODE_ONLY_KINDS and base_acc.get("returncode") in (126, 127):
@@ -2587,7 +2645,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "first_problem": spec.reason,
             "returncode": None,
         }
-        baseline_error = _baseline_env_reason(spec, baseline_rec)
+        baseline_error = _baseline_env_reason(spec, baseline_rec, project)
     elif has_acceptance:
         base_t = max(0.0, min(ACC_TIMEOUT_S, budget_s / 2 if budget_s < 10.0 else budget_s))
         base_acc = acceptance(originals, project, base_t, spec=spec, _project=project)
@@ -2599,7 +2657,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "first_problem": base_acc.get("first_problem"),
             "returncode": base_acc.get("returncode"),
         }
-        baseline_error = _baseline_env_reason(spec, base_acc)
+        baseline_error = _baseline_env_reason(spec, base_acc, project)
         if baseline_error is None:
             if baseline_rec["accept"] is None:
                 say(f"baseline: not checked ({baseline_rec['status']})")
