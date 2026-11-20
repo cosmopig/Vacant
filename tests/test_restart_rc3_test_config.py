@@ -115,3 +115,24 @@ def test_existing_configs_are_protected_by_default(tmp_path):
     prot = RS.find_protected(tmp_path)
     assert {"conftest.py", "pyproject.toml", "jest.config.js"} <= set(prot)
     assert "src/x.py" not in prot
+
+
+def test_audit_task_column_and_strict_exit(tmp_path, monkeypatch, capsys):
+    from vacant_network import audit_export as AE
+    p = _proj(tmp_path)
+    rc = _run(tmp_path, monkeypatch, p, {"calc.py": "def add(a, b):\n    return a + b\n"})
+    assert rc == 0
+    capsys.readouterr()
+    home, work = str(tmp_path / "home"), str(tmp_path / "work")
+    recs = AE.collect_all(vacant_home=home, work_root=work)
+    assert len(recs) == 1 and str(recs[0]["task"]).startswith("request:")
+    assert AE.main(["list", "--vacant-home", home, "--work-root", work, "--strict"]) == 0
+    chain = next((tmp_path / "home").rglob("chain.ndjson"))
+    import re
+    txt = chain.read_text()
+    new = re.sub(r'"accepted":\s*true', '"accepted": false', txt)
+    assert new != txt
+    chain.write_text(new)
+    assert AE.main(["list", "--vacant-home", home, "--work-root", work]) == 0
+    assert AE.main(["list", "--vacant-home", home, "--work-root", work, "--strict"]) == 3
+    assert AE.main(["export", "--vacant-home", home, "--work-root", work, "--strict"]) == 3

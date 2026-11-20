@@ -2107,6 +2107,10 @@ def _build_restart_record_from_receipt(
     agent_raw = _as_str(payload.get("agent"))
     agent, agents = _agents_fields({agent_raw} if agent_raw else set())
     task_id = _as_str(payload.get("task_id")) or _as_str(payload.get("task"))
+    if task_id is None:
+        _req = _as_str(payload.get("request_sha256"))
+        if _req:
+            task_id = f"request:{_req[:12]}"  # 簽章收據裡的要求雜湊：對得上「這是哪個任務」，不洩漏內容
     if agent is None:
         gaps.append(
             _gap(
@@ -3197,6 +3201,27 @@ def _add_filter_args(p: argparse.ArgumentParser) -> None:
                    help=f"filter by acceptance result ({', '.join(RESULTS)}; repeatable or comma-separated)")
 
 
+def _add_strict_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--strict", action="store_true",
+                   help="exit 3 if any listed record fails signature verification (for scripts/CI)")
+    p.add_argument("--require-signed", action="store_true",
+                   help="like --strict, and also exit 3 if any listed record is unsigned")
+
+
+def _strict_rc(records: list[dict[str, Any]], args: argparse.Namespace) -> int:
+    if not (getattr(args, "strict", False) or getattr(args, "require_signed", False)):
+        return 0
+    failed = [r for r in records if (r.get("signature") or {}).get("verified") is False]
+    unsigned = [r for r in records if (r.get("signature") or {}).get("verified") is None]
+    bad = failed + (unsigned if getattr(args, "require_signed", False) else [])
+    if bad:
+        print(f"vacant audit: {len(failed)} record(s) failed verification"
+              + (f", {len(unsigned)} unsigned" if getattr(args, "require_signed", False) else "")
+              + f": {', '.join(r['record_id'] for r in bad[:5])}{' …' if len(bad) > 5 else ''}", file=sys.stderr)
+        return 3
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
         prog="vacant audit",
@@ -3219,6 +3244,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_path_args(plist)
     _add_filter_args(plist)
     plist.add_argument("--limit", type=int, default=None, help="maximum number of records to display")
+    _add_strict_args(plist)
     fmt_g = plist.add_mutually_exclusive_group()
     fmt_g.add_argument("--json", dest="as_json", action="store_true", help="output JSON array")
     fmt_g.add_argument("--jsonl", dest="as_jsonl", action="store_true", help="output JSONL")
@@ -3243,6 +3269,7 @@ def build_parser() -> argparse.ArgumentParser:
     efmt.add_argument("--json", dest="as_json", action="store_true",
                       help="export a single JSON array")
     pexp.add_argument("--out", default=None, help="write output to FILE instead of stdout")
+    _add_strict_args(pexp)
 
     return ap
 
@@ -3311,7 +3338,7 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(filtered, ensure_ascii=False, indent=2))
         else:
             sys.stdout.write(format_list(filtered))
-        return 0
+        return _strict_rc(filtered, args)
 
     if args.audit_cmd == "export":
         payload = (
@@ -3325,7 +3352,7 @@ def main(argv: list[str] | None = None) -> int:
             out_p.write_text(payload, encoding="utf-8")
         else:
             sys.stdout.write(payload)
-        return 0
+        return _strict_rc(filtered, args)
 
     return 2
 
