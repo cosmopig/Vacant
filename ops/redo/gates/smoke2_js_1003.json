@@ -1,0 +1,9 @@
+{
+ "smoke_plan": "ops/redo/plans/smoke2_pi_gemma12b_js_1003.json",
+ "smoke_root": "~/dev/ops/redo_runs/smoke2_js_1003",
+ "queue": "~/dev/ops/queue_1003.txt",
+ "next_line": "/home/user1/dev/wt/nonpy ops/redo/plans/redo1_pi_gemma12b_js34_1003.json /home/user1/dev/ops/redo_runs/redo1_js34_1003",
+ "expect_pairs": 2,
+ "expect_grader": "visible_tests_pristine",
+ "criteria": "只看基礎設施：2/2 對完成、0 infra_void、harness 沒變、兩臂評分都是 visible_tests_pristine、每格模型呼叫數量得到且平均 > 0、每次驗收 acc_status=ok。不看通過與否。"
+}
