@@ -2976,8 +2976,12 @@ def summary(res: dict) -> str:
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
     cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
     if cfg_new:
+        d_att = res["attempts"][res["delivered_attempt"] - 1] if res.get("attempts") else {}
+        where = next((a.get("workspace") for a in ([d_att] + list(res["attempts"]))
+                      if a.get("config_ignored") and a.get("workspace")), None)
         head += (f"\n  the agent added test configuration ({', '.join(cfg_new[:10])}"
-                 f"{' …' if len(cfg_new) > 10 else ''}); not used for the check and not written back.")
+                 f"{' …' if len(cfg_new) > 10 else ''}); not used for the check and not written back"
+                 + (f" — still in the attempt workspace: {where}" if where else "") + ".")
     tam = sorted({t for a in res["attempts"] for t in a["tests_tampered"]})
     if tam:
         if all(_is_universal_test(t) or _is_test_config(t) for t in tam):

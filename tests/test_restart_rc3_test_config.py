@@ -57,6 +57,9 @@ def test_new_conftest_hook_does_not_pass_the_check(tmp_path, monkeypatch, capsys
     assert not (p / rel).exists(), "agent-added conftest.py must not be written back"
     assert (p / "calc.py").read_text() == WRONG
     assert "added test configuration (conftest.py)" in out
+    assert "still in the attempt workspace:" in out
+    ws = out.split("still in the attempt workspace: ", 1)[1].split("\n", 1)[0].rstrip(".")
+    assert (pathlib.Path(ws) / rel).exists()
 
 
 @needs_pytest
