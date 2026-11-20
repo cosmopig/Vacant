@@ -53,8 +53,10 @@ def test_committed_plans_load_and_are_consistent():
         # 兩臂用同一個 agent 指令（差別只在父行程的迴圈）
         assert "agent" not in ctrl and "agent" not in treat, name
         # 三份計畫除了題目／重複數之外，條件必須相同（篩選和確認量的是同一件事）
+        # T06（換模型）／T07（換 agent）：只准換 providers／agent，其餘條件與主計畫相同
+        swap = ("providers",) if "qwen" in plan["id"] else ("providers", "agent") if "opencode" in plan["id"] else ()
         strip = lambda p: {k: v for k, v in p.items()                                    # noqa: E731
-                           if k not in ("id", "tasks", "reps", "prereg", "_sha256", "_path", "seed")}
+                           if k not in ("id", "tasks", "reps", "prereg", "_sha256", "_path", "seed") + swap}
         assert strip(plan) == strip(main), name
 
 

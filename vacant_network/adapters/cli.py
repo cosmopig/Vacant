@@ -132,6 +132,7 @@ def _do_restart(args) -> int:
             return _spec.build(p, ws, hooks=bool(args.hooks), extra=args.extra)
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
+                 check=getattr(args, "check", None),
                  log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
@@ -313,6 +314,8 @@ def build_parser() -> argparse.ArgumentParser:
                         "generic check summary, or nothing (a fresh re-draw)")
     p.add_argument("--attempt-timeout", type=float, default=600.0,
                    help="without a contract: seconds per attempt (total stays under --timeout)")
+    p.add_argument("--check",
+                   help="without a contract: shell command used as acceptance (exit 0 = accept)")
     p.add_argument("--hooks", action="store_true",
                    help="without a contract: also add Vacant's per-step hooks (off by default)")
     p.add_argument("--json", action="store_true")

@@ -1,47 +1,69 @@
-"""零設定的重開模式——`vacant do <agent>` 在沒有任務契約時的預設行為（T05／S3，2026-11-17）。
+"""零設定的重開模式——`vacant do <agent>` 在沒有任務契約時的預設行為（T05／S3，2026-11-17；W1 擴充多驗收種類）。
 
 這支在架構裡承重什麼：把 `ops/redo/redo.py` 的 R3 政策做成使用者打得到的一個指令。
 R3 是這個 repo 裡第一個在**原生 agent**上量到交付變好的設定（redo1：pi＋gemma-4-12b、34 題×5，
 進行中數字見 `ops/redo/`；結論以該批的 `REPORT.md` 為準，這裡不引用數字）。
 
 政策（與 `redo.py` 的 `_policy_stop`／`_policy_deliver` 逐條相同，`tests/test_adapters_restart.py` 對照）：
-1. 驗收訊號＝專案在**開始那一刻**就有的測試檔（`*_test.py`／`test_*.py`，`unittest` 跑）。
-   跑驗收之前把它們還原成開始時的內容；被改過的記在 `tests_tampered`，也**不寫回專案**。
+1. 驗收訊號（依序選擇）：
+   a. 明確指定 `--check "<shell command>"`：在快照副本中執行該指令，退出碼 0 即通過；
+      若專案裡有 `find_tests` 找到的測試檔，跑驗收前仍會還原為開始時的位元組並保護不寫回。
+   b. 自動偵測（未給 `--check` 時）：
+      - Python 測試檔（`*_test.py`／`test_*.py`）：若皆為 `unittest.TestCase`，沿用既有 `unittest`
+        執行器與計數（不改動）；若含 pytest 風格測試（模組層 `def test_*` 或非 `TestCase` 測試類別），
+        則在測試直譯器可匯入 `pytest` 時跑 `pytest`（輸出於工作區外的 junitxml 解析通過／失敗數），
+        否則退回極簡標準庫執行器（執行 `unittest.TestCase` 與裸 `def test_*` 函式／簡易 `Test*` 類別）。
+      - `package.json`（含 `scripts.test` 且 `PATH` 有 `npm`）⇒ `npm test`；
+        `Cargo.toml`（`PATH` 有 `cargo`）⇒ `cargo test`；
+        `go.mod`（`PATH` 有 `go`）⇒ `go test ./...`。這幾種以退出碼 0 判通過（`passed`／`run` 為 `None`）。
+      - 都沒有 ⇒ 跑一次、照實交回、明講「沒有可執行的驗收」，不假裝檢查過。
+   c. 保護測試檔：開始時就存在的測試檔在跑驗收前還原成原位元組；被改過的記在 `tests_tampered`，也**不寫回專案**。
+   d. 若選到的執行器只收到 0 個測試（`no_tests_collected`）或無法啟動（工具缺席、非候選碼導致的載入錯誤，
+      記為 `runner_unavailable`）：不把該次算成驗收失敗也不重試，比照無驗收處理（跑一次、照實交回、明講原因）。
 2. 每一次嘗試：全新的暫存副本＋全新的 agent 行程。嘗試之間不留東西、不給失敗原文。
 3. 驗收通過就停、交那一次；最多 `max_attempts` 次、每次 `attempt_timeout_s`、合計 `budget_s`。
-   都沒過就交原件測試過最多的那一次（同分取後面那次），給人的訊息明講測試沒有全過。
-4. 專案裡沒有測試檔 ⇒ 跑一次、照實交回、明講「沒有可執行的驗收」，不假裝檢查過。
+   都沒過就交原件測試過最多的那一次（同分取後面那次；僅看退出碼的種類 `passed` 為 `None`，
+   故依同分規則交最後一次），給人的訊息明講沒有通過，並列出實際使用的驗收種類／指令與受保護檔案。
 
-交回：被選中那一次的工作區同步回專案（新增／修改／刪除），**測試檔除外**——跟使用者直接在專案裡跑
+交回：被選中那一次的工作區同步回專案（新增／修改／刪除），**受保護的測試檔除外**——跟使用者直接在專案裡跑
 agent 的結果同一種形狀，只是多了「選哪一次」。
 
 誠實邊界（改碼請保留）：
+- **未量測邊界**：`ops/redo/` 中量到的重開模式數字（redo1／confirm1 等）**只適用於既有的 `python_unittest` 路徑**；
+  其餘新增的驗收種類（`check`、`python_pytest`、`python_bare`、`npm`、`cargo`、`go`）皆未經過對照實驗量測。
 - 驗收＝「擋得住專案自己的測試會抓到的錯」，**不等於需求被滿足**。測試寫得弱，這一層就弱。
-- 暫存副本**不是沙箱**：agent 以使用者的帳號執行，讀寫得到磁碟上你讀寫得到的一切；這層只保護「交回寫回」
-  與「驗收流程」本身，擋不住 agent 在執行期間直接讀寫專案外或其他路徑的檔案，也殺不到自己 `setsid()`
-  脫離行程群組的背景子行程。
+- 暫存副本**不是沙箱**：agent 與外部驗收指令（`--check`、`npm`、`cargo`、`go`）皆以使用者的帳號權限與環境變數執行，
+  讀寫得到磁碟上你讀寫得到的一切；這層只保護「交回寫回」與「驗收流程」本身，擋不住執行期間直接讀寫專案外或其他路徑的檔案，
+  也殺不到自己 `setsid()` 脫離行程群組的背景子行程。另 `COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`）
+  不會複製進暫存工作區或快照副本。
 - 等預算是牆鐘的；重開通常讓 agent 用掉更多模型呼叫（redo1 約兩倍），這一層不省算力。
-- `budget_s` 是**整個指令**的牆鐘上限：agent、驗收（所有測試目錄共用同一條期限，不設超額下限）、複製都算在內，
+- `budget_s` 是**整個指令**的牆鐘上限：agent、驗收（所有測試目錄與外部指令共用同一條期限，不設超額下限）、複製都算在內，
   每次嘗試前預留一次驗收的時間（2026-11-19：只算 agent 時間時，confirm1／confirm1c 各有 1 格第三次嘗試跑到
   外層時限被砍、什麼都沒交回）。
   ⚠ 這點和 `redo.py` 的 R3 不同（R3 只算 agent 牆鐘）：產品比量到的政策略保守，同樣預算下最後一次嘗試可能短一點。
 - 快照與驗收一致性：每次 agent 結束並殺完其行程群組後，先拍一次只含一般檔案的私密快照（跳過符號連結、FIFO／socket／
   裝置檔、`COPY_SKIP` 名稱與無法讀取的項目），驗收與寫回皆以**同一份快照**為準（驗收測試的正是實際會寫回的檔案集合），
   避免殘留背景行程在驗收與寫回之間偷改工作區（TOCTOU），也避免 symlink 只在驗收生效卻不寫回。
-- 驗收執行隔離邊界：驗收子行程以 `python -I -B` 在工作區外的獨立腳本檔執行（不把 `""` 或 user site 放進 `sys.path`）、
-  獨立 session（結束或逾時皆 `killpg` 整組清除）、先載入標準庫再把工作區附在 `sys.path` 尾端、依原測試檔精確路徑載入
-  （防止套件目錄或標準庫遮蔽），並透過獨立管線（FD）與單次隨機 nonce 回傳結果（不依賴 stdout 固定標記）。
-  ⚠ 但**候選程式碼與 `unittest` 仍在同一個 Python 行程內執行**，故無法防禦惡意候選碼在行程內 monkey-patch
-  `unittest` 或執行期狀態（若需要雙行程隔離，請用 `vacant_network.checks.run_python_check`）。
+- 驗收執行隔離邊界：Python 驗收路徑（`python_unittest`、`python_pytest`、`python_bare`）皆以 `python -I -B`
+  在工作區外的獨立腳本檔執行（不把 `""` 或 user site 放進 `sys.path`）、獨立 session（結束或逾時皆 `killpg` 整組清除）、
+  先載入標準庫（及 `pytest`）再把工作區附在 `sys.path` 尾端、依原測試檔精確路徑載入（防止套件目錄或標準庫遮蔽），
+  並透過獨立管線（FD）與單次隨機 nonce 回傳結果（不依賴 stdout 固定標記；`pytest` 的 junitxml 寫在工作區外私密目錄）。
+  外部指令（`--check`、`npm`、`cargo`、`go`）同樣於快照副本中以獨立 session（結束或逾時皆 `killpg`）與共用期限執行。
+  ⚠ 但 Python 路徑的**候選程式碼與測試框架仍在同一個 Python 行程內執行**，故無法防禦惡意候選碼在行程內 monkey-patch
+  測試框架或執行期狀態（若需要雙行程隔離，請用 `vacant_network.checks.run_python_check`）；另只保護 `find_tests`
+  找到的測試檔，不保護 `conftest.py`、`pyproject.toml` 等設定檔。
 - 寫回安全邊界：寫回前先規劃與驗證所有增／改／刪操作再套用，先刪後增、透過同目錄暫存檔＋`os.replace` 原子置換
   （不原地覆寫硬連結 inode、不把檔案寫進既有目錄）；符號連結、無法讀取的目錄／檔案、或與非空／受保護目錄衝突的路徑
   一律跳過並記於 `changed["skipped"]`，不會寫到專案外面也不會誤刪原檔；若套用途中遇非預期錯誤會回滾，維持原專案不變。
 - 容錯邊界：單次嘗試在快照或驗收時發生任何非預期錯誤，該次嘗試一律記為未通過（例如 `acceptance_error`），不中斷整個
   `run()`、也不遺失前面嘗試的成果。
-- 這一層不讀 agent 說了什麼；它只看測試。說「做完了」但測試沒過＝沒過。
+- 僅看退出碼的種類（`--check`、`npm`、`cargo`、`go`）沒有逐測試計數（`passed`／`run` 皆為 `None`）；若所有嘗試皆未通過，
+  交回政策依同分規則交最後一次嘗試。
+- 這一層不讀 agent 說了什麼；它只看驗收結果。說「做完了」但驗收沒過＝沒過。
 """
 from __future__ import annotations
 
+import ast
 import dataclasses
 import hashlib
 import hmac
@@ -56,6 +78,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 from typing import Any, Callable
 
 from .run import COPY_SKIP, Launch, run_agent, work_root
@@ -64,6 +87,9 @@ PATTERNS = ("*_test.py", "test_*.py")
 ACC_TIMEOUT_S = 120.0
 _CHUNK_SIZE = 65536
 _RESULT_KEYS = ("run", "failures", "errors", "skipped", "unexpected_successes")
+_UNCHECKABLE_STATUSES = frozenset({"no_tests", "no_tests_collected", "runner_unavailable"})
+_EXIT_CODE_ONLY_KINDS = frozenset({"check", "npm", "cargo", "go"})
+_NPM_DEFAULT_TEST_MARKER = "Error: no test specified"
 
 _UNITTEST_RUNNER = r"""
 def _main():
@@ -138,6 +164,291 @@ def _main():
         probs = res.failures + res.errors
         if probs and out["first_problem"] is None:
             out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+
+    try:
+        _sys.stdout.flush()
+        _sys.stderr.flush()
+    except BaseException:
+        pass
+
+    payload = (nonce + "\n" + _json.dumps(out) + "\n").encode("utf-8")
+    view = memoryview(payload)
+    written = 0
+    while written < len(view):
+        n = _os.write(w_fd, view[written:])
+        if n <= 0:
+            break
+        written += n
+    try:
+        _os.close(w_fd)
+    except OSError:
+        pass
+    _os._exit(0)
+
+
+_main()
+"""
+
+_PYTEST_RUNNER = r"""
+def _main():
+    import json
+    import os
+    import sys
+
+    _os = os
+    _json = json
+    _sys = sys
+
+    raw_cfg = _sys.stdin.read()
+    try:
+        dn = _os.open(_os.devnull, _os.O_RDONLY)
+        try:
+            _os.dup2(dn, 0)
+        finally:
+            _os.close(dn)
+    except OSError:
+        pass
+
+    cfg = _json.loads(raw_cfg)
+    w_fd = int(cfg["w_fd"])
+    nonce = str(cfg["nonce"])
+    extra_paths = cfg["extra_paths"]
+    junit_xml = str(cfg["junit_xml"])
+    tests = cfg["tests"]
+    try:
+        _os.set_inheritable(w_fd, False)
+    except OSError:
+        pass
+
+    def _emit(obj):
+        try:
+            _sys.stdout.flush()
+            _sys.stderr.flush()
+        except BaseException:
+            pass
+        payload = (nonce + "\n" + _json.dumps(obj) + "\n").encode("utf-8")
+        view = memoryview(payload)
+        written = 0
+        while written < len(view):
+            n = _os.write(w_fd, view[written:])
+            if n <= 0:
+                break
+            written += n
+        try:
+            _os.close(w_fd)
+        except OSError:
+            pass
+        _os._exit(0)
+
+    try:
+        import pytest
+    except BaseException as exc:
+        _emit({"pytest_rc": None, "unavailable_reason": f"cannot import pytest: {exc}"})
+
+    for p in extra_paths:
+        if p not in _sys.path:
+            _sys.path.append(p)
+
+    argv = [
+        "-q",
+        "-rN",
+        "-p", "no:cacheprovider",
+        "--import-mode=importlib",
+        "-o", "addopts=",
+        f"--junitxml={junit_xml}",
+        *tests,
+    ]
+    try:
+        rc = int(pytest.main(argv))
+    except SystemExit as se:
+        code = se.code
+        rc = int(code) if isinstance(code, int) else 1
+    _emit({"pytest_rc": rc, "unavailable_reason": None})
+
+
+_main()
+"""
+
+_BARE_RUNNER = r"""
+def _main():
+    import asyncio
+    import importlib.util
+    import inspect
+    import json
+    import os
+    import sys
+    import traceback
+    import unittest
+
+    _os = os
+    _json = json
+    _sys = sys
+    _tb = traceback
+    _inspect = inspect
+    _asyncio = asyncio
+    _Loader = unittest.TestLoader
+    _Result = unittest.TestResult
+    _TestCase = unittest.TestCase
+    _SkipTest = unittest.SkipTest
+    _spec_from_file = importlib.util.spec_from_file_location
+    _mod_from_spec = importlib.util.module_from_spec
+
+    raw_cfg = _sys.stdin.read()
+    try:
+        dn = _os.open(_os.devnull, _os.O_RDONLY)
+        try:
+            _os.dup2(dn, 0)
+        finally:
+            _os.close(dn)
+    except OSError:
+        pass
+
+    cfg = _json.loads(raw_cfg)
+    w_fd = int(cfg["w_fd"])
+    nonce = str(cfg["nonce"])
+    extra_paths = cfg["extra_paths"]
+    tests = cfg["tests"]
+    try:
+        _os.set_inheritable(w_fd, False)
+    except OSError:
+        pass
+
+    for p in extra_paths:
+        if p not in _sys.path:
+            _sys.path.append(p)
+
+    def _needs_required_args(fn):
+        try:
+            sig = _inspect.signature(fn)
+        except (ValueError, TypeError):
+            return False
+        for param in sig.parameters.values():
+            if param.kind in (
+                _inspect.Parameter.POSITIONAL_ONLY,
+                _inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                _inspect.Parameter.KEYWORD_ONLY,
+            ) and param.default is _inspect.Parameter.empty:
+                return True
+        return False
+
+    def _run_callable(label, fn, out):
+        out["run"] += 1
+        try:
+            if _inspect.iscoroutinefunction(fn):
+                _asyncio.run(fn())
+            else:
+                fn()
+        except _SkipTest:
+            out["skipped"] += 1
+        except AssertionError:
+            out["failures"] += 1
+            if out["first_problem"] is None:
+                out["first_problem"] = (label + "\n" + _tb.format_exc(limit=5))[-800:]
+        except BaseException:
+            out["errors"] += 1
+            if out["first_problem"] is None:
+                out["first_problem"] = (label + "\n" + _tb.format_exc(limit=5))[-800:]
+
+    out = {
+        "run": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "unexpected_successes": 0,
+        "load_error": None,
+        "unavailable_reason": None,
+        "first_problem": None,
+    }
+
+    for idx, (mod_name, file_path) in enumerate(tests):
+        try:
+            load_name = mod_name if mod_name not in _sys.modules else f"__vacant_test_{idx}_{mod_name}"
+            spec = _spec_from_file(load_name, file_path)
+            if spec is None or spec.loader is None:
+                raise ImportError(f"cannot load test file: {file_path}")
+            mod = _mod_from_spec(spec)
+            _sys.modules[load_name] = mod
+            spec.loader.exec_module(mod)
+        except BaseException as exc:
+            if isinstance(exc, ModuleNotFoundError) and getattr(exc, "name", None) in ("pytest", "_pytest"):
+                out["unavailable_reason"] = f"test file requires pytest ({exc}), which is not installed"
+                break
+            if isinstance(exc, SyntaxError) and getattr(exc, "filename", None) == file_path:
+                out["unavailable_reason"] = f"syntax error in original test file: {file_path}"
+                break
+            out["load_error"] = _tb.format_exc(limit=3)[-800:]
+            break
+
+        try:
+            suite = _Loader().loadTestsFromModule(mod)
+        except BaseException:
+            out["load_error"] = _tb.format_exc(limit=3)[-800:]
+            break
+        res = _Result()
+        suite.run(res)
+        out["run"] += res.testsRun
+        out["failures"] += len(res.failures)
+        out["errors"] += len(res.errors)
+        out["skipped"] += len(res.skipped)
+        out["unexpected_successes"] += len(res.unexpectedSuccesses)
+        probs = res.failures + res.errors
+        if probs and out["first_problem"] is None:
+            out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+
+        abort_unavail = False
+        for name, obj in list(mod.__dict__.items()):
+            if not name.startswith("test_"):
+                continue
+            if not _inspect.isfunction(obj):
+                continue
+            if getattr(obj, "__module__", None) != mod.__name__:
+                continue
+            if _needs_required_args(obj):
+                out["unavailable_reason"] = f"test {mod_name}.{name} requires fixtures (pytest is not installed)"
+                abort_unavail = True
+                break
+            _run_callable(f"{mod_name}.{name}", obj, out)
+        if abort_unavail:
+            break
+
+        for cname, cobj in list(mod.__dict__.items()):
+            if not cname.startswith("Test"):
+                continue
+            if not _inspect.isclass(cobj):
+                continue
+            if getattr(cobj, "__module__", None) != mod.__name__:
+                continue
+            if issubclass(cobj, _TestCase):
+                continue
+            method_names = [
+                mname for mname, mval in cobj.__dict__.items()
+                if mname.startswith("test_") and callable(mval)
+            ]
+            if not method_names:
+                continue
+            if _needs_required_args(cobj):
+                out["unavailable_reason"] = f"test class {mod_name}.{cname} requires constructor args (pytest is not installed)"
+                abort_unavail = True
+                break
+            for mname in method_names:
+                try:
+                    inst = cobj()
+                except BaseException:
+                    out["run"] += 1
+                    out["errors"] += 1
+                    if out["first_problem"] is None:
+                        out["first_problem"] = (f"{mod_name}.{cname}.{mname}\n" + _tb.format_exc(limit=5))[-800:]
+                    continue
+                meth = getattr(inst, mname)
+                if _needs_required_args(meth):
+                    out["unavailable_reason"] = f"test {mod_name}.{cname}.{mname} requires fixtures (pytest is not installed)"
+                    abort_unavail = True
+                    break
+                _run_callable(f"{mod_name}.{cname}.{mname}", meth, out)
+            if abort_unavail:
+                break
+        if abort_unavail:
+            break
 
     try:
         _sys.stdout.flush()
@@ -268,11 +579,12 @@ def _sha256_file(path: pathlib.Path) -> str | None:
         return None
 
 
-def _copy_reg_file(src: pathlib.Path, dst: pathlib.Path, mode: int = 0o600) -> bool:
+def _copy_reg_file(src: pathlib.Path, dst: pathlib.Path, mode: int = 0o600, *,
+                   preserve_exec: bool = False) -> bool:
     opened = _open_reg_readonly(src)
     if opened is None:
         return False
-    fd, _ = opened
+    fd, st = opened
     try:
         dst.parent.mkdir(parents=True, exist_ok=True)
         with os.fdopen(fd, "rb") as src_f:
@@ -283,7 +595,8 @@ def _copy_reg_file(src: pathlib.Path, dst: pathlib.Path, mode: int = 0o600) -> b
                     if not chunk:
                         break
                     dst_f.write(chunk)
-        os.chmod(dst, mode)
+        final_mode = (mode | 0o100) if (preserve_exec and (st.st_mode & 0o100)) else mode
+        os.chmod(dst, final_mode)
         return True
     except OSError:
         if fd >= 0:
@@ -813,20 +1126,247 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
         written_set = set(plan.added) | set(plan.modified)
         # 1. 保留專案中未被刪除、未被改寫、且非測試檔的一般檔案（包含因安全原因跳過刪除者）
         for rel in sorted(plan.before_files - deleted_set - written_set - protected):
-            _copy_reg_file(project / rel, work / rel, mode=0o600)
+            _copy_reg_file(project / rel, work / rel, mode=0o600, preserve_exec=True)
         # 2. 放入計畫中真正會寫回的新增／修改檔案（跳過不安全而不會寫回的檔案）
         for rel in sorted(written_set):
-            _copy_reg_file(snap.root / rel, work / rel, mode=0o600)
+            m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
+            _copy_reg_file(snap.root / rel, work / rel, mode=m)
     else:
         for rel in sorted(snap.files):
             if rel not in protected:
-                _copy_reg_file(snap.root / rel, work / rel, mode=0o600)
+                m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
+                _copy_reg_file(snap.root / rel, work / rel, mode=m)
     # 3. 最後以開始時的原始測試檔覆寫
     for rel, want in sorted(originals.items()):
         _restore_test_file(work, rel, want)
 
 
-def _parse_runner_output(raw: bytes, nonce: str) -> tuple[dict[str, Any] | None, str | None]:
+@dataclasses.dataclass(frozen=True)
+class AcceptanceSpec:
+    kind: str                          # check | python_unittest | python_pytest | python_bare | npm | cargo | go | none
+    command: str | None
+    argv: tuple[str, ...] | None = None
+    protected: tuple[str, ...] = ()
+    reason: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "kind": self.kind,
+            "command": self.command,
+            "protected": list(self.protected),
+            "reason": self.reason,
+        }
+
+
+@dataclasses.dataclass(frozen=True)
+class _PyTestInspection:
+    has_pytest_style: bool
+    has_unittest: bool
+    syntax_error: str | None = None
+
+
+def _iter_module_stmts(stmts: list[ast.stmt]) -> list[ast.stmt]:
+    """展開模組層（不含函式與類別內部）的 if／try 區塊，以偵測條件定義的測試。"""
+    out: list[ast.stmt] = []
+    for st in stmts:
+        out.append(st)
+        if isinstance(st, ast.If):
+            out.extend(_iter_module_stmts(st.body))
+            out.extend(_iter_module_stmts(st.orelse))
+        elif isinstance(st, ast.Try):
+            out.extend(_iter_module_stmts(st.body))
+            out.extend(_iter_module_stmts(st.orelse))
+            out.extend(_iter_module_stmts(st.finalbody))
+            for h in st.handlers:
+                out.extend(_iter_module_stmts(h.body))
+    return out
+
+
+def _inspect_python_tests(originals: dict[str, bytes]) -> _PyTestInspection:
+    """以靜態 AST 檢查原測試檔是純 unittest 還是含 pytest 風格（裸 def test_* 或非 TestCase 測試類別）。"""
+    has_pytest_style = False
+    has_unittest = False
+
+    for rel, raw in sorted(originals.items()):
+        try:
+            tree = ast.parse(raw, filename=rel)
+        except SyntaxError as e:
+            return _PyTestInspection(
+                has_pytest_style=False,
+                has_unittest=False,
+                syntax_error=f"{rel}:{e.lineno or 0}: {e.msg}",
+            )
+
+        stmts = _iter_module_stmts(tree.body)
+        testcase_names: set[str] = {"TestCase", "IsolatedAsyncioTestCase", "FunctionTestCase"}
+        for st in stmts:
+            if isinstance(st, ast.ImportFrom) and st.module in (
+                "unittest", "unittest.case", "unittest.async_case"
+            ):
+                for alias in st.names:
+                    if alias.name in testcase_names or alias.name.endswith("TestCase"):
+                        testcase_names.add(alias.asname or alias.name)
+
+        def _base_is_testcase(expr: ast.expr, local_tc: set[str]) -> bool:
+            if isinstance(expr, ast.Name):
+                return expr.id in testcase_names or expr.id in local_tc or expr.id.endswith("TestCase")
+            if isinstance(expr, ast.Attribute):
+                return expr.attr in testcase_names or expr.attr.endswith("TestCase")
+            if isinstance(expr, ast.Subscript):
+                return _base_is_testcase(expr.value, local_tc)
+            return False
+
+        classes = [st for st in stmts if isinstance(st, ast.ClassDef)]
+        local_tc: set[str] = set()
+        changed = True
+        while changed:
+            changed = False
+            for cls in classes:
+                if cls.name in local_tc:
+                    continue
+                if any(_base_is_testcase(b, local_tc) for b in cls.bases):
+                    local_tc.add(cls.name)
+                    changed = True
+
+        for st in stmts:
+            if isinstance(st, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if st.name.startswith("test_"):
+                    has_pytest_style = True
+                elif st.name == "load_tests":
+                    has_unittest = True
+            elif isinstance(st, ast.ClassDef):
+                has_test_methods = any(
+                    isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name.startswith("test_")
+                    for m in st.body
+                )
+                if st.name in local_tc:
+                    has_unittest = True
+                elif st.name.startswith("Test") and has_test_methods:
+                    has_pytest_style = True
+
+    return _PyTestInspection(has_pytest_style=has_pytest_style, has_unittest=has_unittest)
+
+
+def _pytest_available(python_exe: str | None = None) -> bool:
+    """檢查測試用直譯器在 `-I -B` 隔離模式下能否匯入 pytest。"""
+    exe = python_exe or sys.executable
+    try:
+        cp = subprocess.run(
+            [exe, "-I", "-B", "-c", "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('pytest') else 1)"],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10.0,
+        )
+        return cp.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def _has_reg_file(path: pathlib.Path) -> bool:
+    opened = _open_reg_readonly(path)
+    if opened is None:
+        return False
+    fd, _ = opened
+    try:
+        os.close(fd)
+    except OSError:
+        pass
+    return True
+
+
+def _has_npm_test_script(project: pathlib.Path) -> bool:
+    opened = _open_reg_readonly(project / "package.json")
+    if opened is None:
+        return False
+    fd, _ = opened
+    try:
+        with os.fdopen(fd, "rb") as f:
+            raw = f.read(1 << 20)
+        data = json.loads(raw.decode("utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    scripts = data.get("scripts")
+    if not isinstance(scripts, dict):
+        return False
+    test_cmd = scripts.get("test")
+    if not isinstance(test_cmd, str) or not test_cmd.strip():
+        return False
+    if _NPM_DEFAULT_TEST_MARKER in test_cmd:
+        return False
+    return True
+
+
+def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
+                      originals: dict[str, bytes] | None = None) -> AcceptanceSpec:
+    """依固定優先順序選擇驗收種類：--check ＞ Python 測試檔 ＞ package.json ＞ Cargo.toml ＞ go.mod ＞ none。"""
+    project = project.resolve()
+    if originals is None:
+        originals = {rel: (project / rel).read_bytes() for rel in find_tests(project)}
+    prot = tuple(sorted(originals))
+
+    if check is not None:
+        cmd = check.strip()
+        if not cmd:
+            raise ValueError("--check command must not be empty")
+        return AcceptanceSpec(kind="check", command=cmd, argv=None, protected=prot)
+
+    if originals:
+        insp = _inspect_python_tests(originals)
+        if insp.syntax_error is not None:
+            return AcceptanceSpec(
+                kind="python_unittest",
+                command=f"{sys.executable} -I -B (unittest)",
+                protected=prot,
+                reason=f"syntax error in original test file: {insp.syntax_error}",
+            )
+        if insp.has_pytest_style:
+            if _pytest_available():
+                return AcceptanceSpec(
+                    kind="python_pytest",
+                    command=f"{sys.executable} -I -B -m pytest -q -rN",
+                    protected=prot,
+                )
+            return AcceptanceSpec(
+                kind="python_bare",
+                command=f"{sys.executable} -I -B (stdlib test runner)",
+                protected=prot,
+            )
+        return AcceptanceSpec(
+            kind="python_unittest",
+            command=f"{sys.executable} -I -B (unittest)",
+            protected=prot,
+        )
+
+    missing: list[str] = []
+    if _has_npm_test_script(project):
+        if shutil.which("npm"):
+            return AcceptanceSpec(kind="npm", command="npm test", argv=("npm", "test"), protected=prot)
+        missing.append("package.json has a \"test\" script, but 'npm' was not found on PATH")
+
+    if _has_reg_file(project / "Cargo.toml"):
+        if shutil.which("cargo"):
+            return AcceptanceSpec(kind="cargo", command="cargo test", argv=("cargo", "test"), protected=prot)
+        missing.append("Cargo.toml found, but 'cargo' was not found on PATH")
+
+    if _has_reg_file(project / "go.mod"):
+        if shutil.which("go"):
+            return AcceptanceSpec(kind="go", command="go test ./...", argv=("go", "test", "./..."), protected=prot)
+        missing.append("go.mod found, but 'go' was not found on PATH")
+
+    return AcceptanceSpec(
+        kind="none",
+        command=None,
+        argv=None,
+        protected=prot,
+        reason="; ".join(missing) if missing else None,
+    )
+
+
+def _parse_runner_output(raw: bytes, nonce: str, *,
+                         allow_unavailable: bool = False) -> tuple[dict[str, Any] | None, str | None]:
     """嚴格驗證並解析 runner 經獨立管線送回的結果；任何格式異常皆回失敗。"""
     if not raw:
         return None, "runner_no_output"
@@ -853,19 +1393,416 @@ def _parse_runner_output(raw: bytes, nonce: str) -> tuple[dict[str, Any] | None,
         return None, "runner_bad_output"
     if fp is not None and not isinstance(fp, str):
         return None, "runner_bad_output"
+    if allow_unavailable:
+        ur = data.get("unavailable_reason")
+        if ur is not None and not isinstance(ur, str):
+            return None, "runner_bad_output"
     return data, None
 
 
+def _parse_pytest_pipe(raw: bytes, nonce: str) -> tuple[dict[str, Any] | None, str | None]:
+    """嚴格驗證並解析 _PYTEST_RUNNER 經獨立管線送回的退出碼與狀態。"""
+    if not raw:
+        return None, "runner_no_output"
+    try:
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError:
+        return None, "runner_bad_output"
+    lines = [ln for ln in text.splitlines() if ln]
+    if len(lines) != 2 or not hmac.compare_digest(lines[0], nonce):
+        return None, "runner_bad_output"
+    try:
+        data = json.loads(lines[1])
+    except (ValueError, TypeError):
+        return None, "runner_bad_output"
+    if not isinstance(data, dict):
+        return None, "runner_bad_output"
+    prc = data.get("pytest_rc")
+    ur = data.get("unavailable_reason")
+    if prc is not None and (not isinstance(prc, int) or isinstance(prc, bool)):
+        return None, "runner_bad_output"
+    if ur is not None and not isinstance(ur, str):
+        return None, "runner_bad_output"
+    return data, None
+
+
+def _parse_junit_xml(xml_path: pathlib.Path) -> tuple[dict[str, Any] | None, str | None]:
+    """解析工作區外由 pytest 產生的 junitxml，彙總測試數、失敗數、錯誤數、跳過數與第一個問題。"""
+    if not xml_path.is_file():
+        return None, "runner_bad_output"
+    try:
+        tree = ET.parse(xml_path)
+    except (OSError, ET.ParseError):
+        return None, "runner_bad_output"
+    root = tree.getroot()
+    suites = [root] if root.tag == "testsuite" else list(root.findall(".//testsuite"))
+    if not suites:
+        return None, "runner_bad_output"
+    tests_n = 0
+    failures = 0
+    errors = 0
+    skipped = 0
+    first: str | None = None
+    for ts in suites:
+        try:
+            tests_n += int(ts.attrib.get("tests", "0"))
+            failures += int(ts.attrib.get("failures", "0"))
+            errors += int(ts.attrib.get("errors", "0"))
+            skipped += int(ts.attrib.get("skipped", "0"))
+        except ValueError:
+            return None, "runner_bad_output"
+        if first is None:
+            for tc in ts.findall("testcase"):
+                prob = tc.find("failure")
+                if prob is None:
+                    prob = tc.find("error")
+                if prob is not None:
+                    name = tc.attrib.get("name", "")
+                    msg = prob.attrib.get("message", "")
+                    body = (prob.text or "").strip()
+                    detail = body or msg
+                    first = (f"{name}\n{detail}" if name and detail else (detail or name))[-800:]
+                    break
+    if tests_n < 0 or failures < 0 or errors < 0 or skipped < 0:
+        return None, "runner_bad_output"
+    return {"tests": tests_n, "failures": failures, "errors": errors, "skipped": skipped, "first_problem": first}, None
+
+
+def _run_isolated_python_script(runner_script: pathlib.Path, cfg_obj: dict[str, Any],
+                                run_cwd: pathlib.Path, home: pathlib.Path,
+                                runner_dir: pathlib.Path, tag: str,
+                                deadline: float) -> tuple[bool, int | None, bytes, pathlib.Path, pathlib.Path]:
+    """以 `python -I -B`、獨立 session、共用期限與單次隨機 nonce 管線執行隔離腳本。"""
+    r_fd, w_fd = os.pipe()
+    out_log = runner_dir / f"out_{tag}.log"
+    err_log = runner_dir / f"err_{tag}.log"
+    cfg_file = runner_dir / f"cfg_{tag}.json"
+    cfg_data = json.dumps({**cfg_obj, "w_fd": w_fd}).encode("utf-8")
+    cfg_file.write_bytes(cfg_data)
+    os.chmod(cfg_file, 0o600)
+
+    proc: subprocess.Popen | None = None
+    timed_out = False
+    raw_res = b""
+    rc: int | None = None
+    try:
+        with cfg_file.open("rb") as cfg_in, out_log.open("wb") as out_f, err_log.open("wb") as err_f:
+            try:
+                cfg_file.unlink(missing_ok=True)
+            except OSError:
+                pass
+            proc = subprocess.Popen(
+                [sys.executable, "-I", "-B", str(runner_script)],
+                cwd=str(run_cwd),
+                env=_clean_env(home),
+                stdin=cfg_in,
+                stdout=out_f,
+                stderr=err_f,
+                pass_fds=(w_fd,),
+                start_new_session=True,
+            )
+        os.close(w_fd)
+        w_fd = -1
+        wait_left = deadline - time.monotonic()
+        if wait_left <= 0:
+            timed_out = True
+        else:
+            try:
+                rc = proc.wait(timeout=wait_left)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+    finally:
+        if w_fd >= 0:
+            try:
+                os.close(w_fd)
+            except OSError:
+                pass
+        if proc is not None:
+            _kill_group_and_wait(proc)
+        raw_res = _read_all_fd(r_fd)
+    return timed_out, rc, raw_res, out_log, err_log
+
+
+def _tail_logs(out_log: pathlib.Path, err_log: pathlib.Path) -> str | None:
+    try:
+        parts = []
+        if out_log.is_file():
+            parts.append(out_log.read_bytes())
+        if err_log.is_file():
+            parts.append(err_log.read_bytes())
+        text = b"\n".join(p for p in parts if p).decode("utf-8", "replace").strip()
+        return text[-800:] if text else None
+    except OSError:
+        return None
+
+
+def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
+                         home: pathlib.Path, runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+    """既有 unittest 驗收路徑（與 confirm1 相同執行器與計數；僅 0 個測試改記 no_tests_collected）。"""
+    runner_script = runner_dir / "runner.py"
+    runner_script.write_text(_UNITTEST_RUNNER, encoding="utf-8")
+    os.chmod(runner_script, 0o600)
+
+    by_dir: dict[str, list[tuple[str, pathlib.Path]]] = {}
+    for rel in tests:
+        d, _, name = rel.rpartition("/")
+        by_dir.setdefault(d, []).append((name[:-3], (work / rel).resolve()))
+
+    agg = {k: 0 for k in _RESULT_KEYS}
+    first: str | None = None
+    for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
+        if deadline - time.monotonic() <= 0:
+            return {**base, "status": "timeout"}
+        run_cwd = (work / d if d else work).resolve()
+        nonce = secrets.token_hex(16)
+        timed_out, rc, raw_res, out_log, err_log = _run_isolated_python_script(
+            runner_script,
+            {"nonce": nonce, "cwd": str(run_cwd), "tests": [[m, str(p)] for m, p in mod_entries]},
+            run_cwd, home, runner_dir, f"u_{idx}", deadline,
+        )
+        if timed_out:
+            return {**base, "status": "timeout"}
+        if rc != 0:
+            return {**base, "status": "runner_no_output" if not raw_res else "runner_bad_output",
+                    "first_problem": _tail_logs(out_log, err_log)}
+        r, err_status = _parse_runner_output(raw_res, nonce)
+        if err_status is not None or r is None:
+            out_tail = None
+            try:
+                out_tail = out_log.read_bytes().decode("utf-8", "replace")[-800:] or None
+            except OSError:
+                pass
+            return {**base, "status": err_status or "runner_bad_output", "first_problem": out_tail}
+        if r["load_error"]:
+            return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
+        for k in _RESULT_KEYS:
+            agg[k] += r[k]
+        first = first or r["first_problem"]
+
+    bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
+    if agg["run"] == 0 and bad == 0:
+        return {**base, "status": "no_tests_collected", "run": 0, "passed": 0,
+                "accept": None, "first_problem": first}
+    return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
+            "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
+
+
+def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
+                       home: pathlib.Path, runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+    """pytest 驗收路徑：隔離腳本載入 pytest、依原測試檔精確路徑執行、junitxml 寫於工作區外。"""
+    if deadline - time.monotonic() <= 0:
+        return {**base, "status": "timeout"}
+    runner_script = runner_dir / "runner_pytest.py"
+    runner_script.write_text(_PYTEST_RUNNER, encoding="utf-8")
+    os.chmod(runner_script, 0o600)
+
+    work_res = work.resolve()
+    extra_paths: list[str] = [str(work_res)]
+    for rel in tests:
+        parent = str((work / rel).resolve().parent)
+        if parent not in extra_paths:
+            extra_paths.append(parent)
+    test_paths = [str((work / rel).resolve()) for rel in tests]
+    junit_xml = runner_dir / f"junit-{secrets.token_hex(8)}.xml"
+    nonce = secrets.token_hex(16)
+
+    timed_out, rc, raw_res, out_log, err_log = _run_isolated_python_script(
+        runner_script,
+        {"nonce": nonce, "extra_paths": extra_paths, "junit_xml": str(junit_xml), "tests": test_paths},
+        work_res, home, runner_dir, "pytest", deadline,
+    )
+    if timed_out:
+        return {**base, "status": "timeout"}
+    if rc != 0:
+        return {**base, "status": "runner_no_output" if not raw_res else "runner_bad_output",
+                "first_problem": _tail_logs(out_log, err_log)}
+    pipe_data, err_status = _parse_pytest_pipe(raw_res, nonce)
+    if err_status is not None or pipe_data is None:
+        return {**base, "status": err_status or "runner_bad_output", "first_problem": _tail_logs(out_log, err_log)}
+    if pipe_data["unavailable_reason"]:
+        return {**base, "status": "runner_unavailable", "accept": None,
+                "first_problem": pipe_data["unavailable_reason"]}
+
+    prc = pipe_data["pytest_rc"]
+    if prc == 5:
+        return {**base, "status": "no_tests_collected", "run": 0, "passed": 0, "accept": None}
+    if prc in (3, 4):
+        return {**base, "status": "runner_unavailable", "accept": None,
+                "first_problem": _tail_logs(out_log, err_log)}
+
+    parsed, xml_err = _parse_junit_xml(junit_xml)
+    if xml_err is not None or parsed is None:
+        if prc == 2:
+            return {**base, "status": "load_error", "run": 0, "passed": 0, "accept": False,
+                    "first_problem": _tail_logs(out_log, err_log)}
+        return {**base, "status": xml_err or "runner_bad_output", "first_problem": _tail_logs(out_log, err_log)}
+
+    tests_n = parsed["tests"]
+    failures = parsed["failures"]
+    errors = parsed["errors"]
+    skipped = parsed["skipped"]
+    first = parsed["first_problem"] or _tail_logs(out_log, err_log)
+
+    if prc == 2:
+        passed = max(0, tests_n - failures - errors - skipped)
+        return {**base, "status": "load_error", "run": 0 if errors == tests_n else tests_n,
+                "passed": passed, "accept": False, "first_problem": first}
+    if tests_n == 0 and failures == 0 and errors == 0:
+        return {**base, "status": "no_tests_collected", "run": 0, "passed": 0, "accept": None}
+
+    bad = failures + errors
+    passed = max(0, tests_n - bad - skipped)
+    accept = (prc == 0 and passed > 0 and bad == 0)
+    return {**base, "status": "ok", "run": tests_n, "passed": passed,
+            "accept": accept, "first_problem": first if not accept else None}
+
+
+def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
+                     home: pathlib.Path, runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+    """pytest 缺席時的極簡標準庫執行器：同時跑 unittest.TestCase、裸 def test_* 與簡易非 TestCase 測試類別。"""
+    runner_script = runner_dir / "runner_bare.py"
+    runner_script.write_text(_BARE_RUNNER, encoding="utf-8")
+    os.chmod(runner_script, 0o600)
+
+    by_dir: dict[str, list[tuple[str, pathlib.Path]]] = {}
+    for rel in tests:
+        d, _, name = rel.rpartition("/")
+        by_dir.setdefault(d, []).append((name[:-3], (work / rel).resolve()))
+
+    work_res = work.resolve()
+    agg = {k: 0 for k in _RESULT_KEYS}
+    first: str | None = None
+    for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
+        if deadline - time.monotonic() <= 0:
+            return {**base, "status": "timeout"}
+        run_cwd = (work / d if d else work).resolve()
+        extra_paths = [str(run_cwd)]
+        if str(work_res) not in extra_paths:
+            extra_paths.append(str(work_res))
+        nonce = secrets.token_hex(16)
+        timed_out, rc, raw_res, out_log, err_log = _run_isolated_python_script(
+            runner_script,
+            {"nonce": nonce, "extra_paths": extra_paths, "tests": [[m, str(p)] for m, p in mod_entries]},
+            run_cwd, home, runner_dir, f"b_{idx}", deadline,
+        )
+        if timed_out:
+            return {**base, "status": "timeout"}
+        if rc != 0:
+            return {**base, "status": "runner_no_output" if not raw_res else "runner_bad_output",
+                    "first_problem": _tail_logs(out_log, err_log)}
+        r, err_status = _parse_runner_output(raw_res, nonce, allow_unavailable=True)
+        if err_status is not None or r is None:
+            return {**base, "status": err_status or "runner_bad_output", "first_problem": _tail_logs(out_log, err_log)}
+        if r.get("unavailable_reason"):
+            return {**base, "status": "runner_unavailable", "accept": None,
+                    "first_problem": r["unavailable_reason"]}
+        if r["load_error"]:
+            return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
+        for k in _RESULT_KEYS:
+            agg[k] += r[k]
+        first = first or r["first_problem"]
+
+    bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
+    if agg["run"] == 0 and bad == 0:
+        return {**base, "status": "no_tests_collected", "run": 0, "passed": 0,
+                "accept": None, "first_problem": first}
+    return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
+            "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
+
+
+def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: pathlib.Path,
+                          runner_dir: pathlib.Path, deadline: float) -> dict[str, Any]:
+    """在快照副本 work 裡執行外部驗收指令（--check／npm／cargo／go），獨立 session、共用期限、沿用使用者環境。"""
+    if deadline - time.monotonic() <= 0:
+        return {**base, "status": "timeout"}
+    work_res = work.resolve()
+    env = dict(os.environ)
+    env["PWD"] = str(work_res)
+    out_log = runner_dir / "ext_out.log"
+    err_log = runner_dir / "ext_err.log"
+
+    proc: subprocess.Popen | None = None
+    timed_out = False
+    rc: int | None = None
+    try:
+        with out_log.open("wb") as out_f, err_log.open("wb") as err_f:
+            try:
+                if spec.kind == "check":
+                    proc = subprocess.Popen(
+                        str(spec.command),
+                        shell=True,
+                        cwd=str(work_res),
+                        env=env,
+                        stdin=subprocess.DEVNULL,
+                        stdout=out_f,
+                        stderr=err_f,
+                        start_new_session=True,
+                    )
+                else:
+                    proc = subprocess.Popen(
+                        list(spec.argv or ()),
+                        cwd=str(work_res),
+                        env=env,
+                        stdin=subprocess.DEVNULL,
+                        stdout=out_f,
+                        stderr=err_f,
+                        start_new_session=True,
+                    )
+            except OSError as e:
+                return {**base, "status": "runner_unavailable", "accept": None,
+                        "first_problem": f"{type(e).__name__}: {e}"[-800:]}
+        wait_left = deadline - time.monotonic()
+        if wait_left <= 0:
+            timed_out = True
+        else:
+            try:
+                rc = proc.wait(timeout=wait_left)
+            except subprocess.TimeoutExpired:
+                timed_out = True
+    finally:
+        if proc is not None:
+            _kill_group_and_wait(proc)
+
+    if timed_out:
+        return {**base, "status": "timeout"}
+    if rc == 0:
+        return {**base, "status": "ok", "accept": True, "returncode": 0}
+    tail = _tail_logs(out_log, err_log)
+    return {**base, "status": "failed", "accept": False, "returncode": rc,
+            "first_problem": tail or f"exit code {rc}"}
+
+
 def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float = ACC_TIMEOUT_S, *,
+               spec: AcceptanceSpec | None = None,
+               check: str | None = None,
                _snapshot: _Snapshot | None = None,
                _project: pathlib.Path | None = None,
                _plan: _WritePlan | None = None) -> dict:
-    """在工作區快照的**潔淨副本**裡、把開始時的測試檔還原之後跑它們。驗收自己壞掉＝沒過（不是通過）。"""
+    """在工作區快照的**潔淨副本**裡、把開始時的測試檔還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
     tests = sorted(originals)
-    base: dict[str, Any] = {"accept": False, "tests": tests, "passed": None, "run": None,
-                            "tests_tampered": [], "status": None, "first_problem": None}
-    if not tests:
-        return {**base, "status": "no_tests"}
+    if spec is None:
+        spec = detect_acceptance(_project if _project is not None else ws, check=check, originals=originals)
+    base: dict[str, Any] = {
+        "accept": False,
+        "tests": tests,
+        "passed": None,
+        "run": None,
+        "tests_tampered": [],
+        "status": None,
+        "first_problem": None,
+        "kind": spec.kind,
+        "command": spec.command,
+    }
+    if spec.kind == "none":
+        return {
+            **base,
+            "accept": None,
+            "status": "runner_unavailable" if spec.reason else "no_tests",
+            "first_problem": spec.reason,
+        }
+    if spec.reason is not None:
+        return {**base, "accept": None, "status": "runner_unavailable", "first_problem": spec.reason}
+
     deadline = time.monotonic() + max(0.0, timeout_s)
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="vrun-"))
     os.chmod(tmp, 0o700)
@@ -880,103 +1817,17 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         home.mkdir(mode=0o700)
         runner_dir = tmp / "r"
         runner_dir.mkdir(mode=0o700)
-        runner_script = runner_dir / "runner.py"
-        runner_script.write_text(_UNITTEST_RUNNER, encoding="utf-8")
-        os.chmod(runner_script, 0o600)
 
-        by_dir: dict[str, list[tuple[str, pathlib.Path]]] = {}
-        for rel in tests:
-            d, _, name = rel.rpartition("/")
-            by_dir.setdefault(d, []).append((name[:-3], (work / rel).resolve()))
-
-        agg = {k: 0 for k in _RESULT_KEYS}
-        first: str | None = None
-        for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
-            left = deadline - time.monotonic()
-            if left <= 0:
-                return {**base, "status": "timeout"}
-            run_cwd = (work / d if d else work).resolve()
-            nonce = secrets.token_hex(16)
-            r_fd, w_fd = os.pipe()
-            out_log = runner_dir / f"out_{idx}.log"
-            err_log = runner_dir / f"err_{idx}.log"
-            cfg_file = runner_dir / f"cfg_{idx}.json"
-            cfg_data = json.dumps({
-                "w_fd": w_fd,
-                "nonce": nonce,
-                "cwd": str(run_cwd),
-                "tests": [[m, str(p)] for m, p in mod_entries],
-            }).encode("utf-8")
-            cfg_file.write_bytes(cfg_data)
-            os.chmod(cfg_file, 0o600)
-
-            proc: subprocess.Popen | None = None
-            timed_out = False
-            raw_res = b""
-            rc: int | None = None
-            try:
-                with cfg_file.open("rb") as cfg_in, out_log.open("wb") as out_f, err_log.open("wb") as err_f:
-                    try:
-                        cfg_file.unlink(missing_ok=True)
-                    except OSError:
-                        pass
-                    proc = subprocess.Popen(
-                        [sys.executable, "-I", "-B", str(runner_script)],
-                        cwd=str(run_cwd),
-                        env=_clean_env(home),
-                        stdin=cfg_in,
-                        stdout=out_f,
-                        stderr=err_f,
-                        pass_fds=(w_fd,),
-                        start_new_session=True,
-                    )
-                os.close(w_fd)
-                w_fd = -1
-                wait_left = deadline - time.monotonic()
-                if wait_left <= 0:
-                    timed_out = True
-                else:
-                    try:
-                        rc = proc.wait(timeout=wait_left)
-                    except subprocess.TimeoutExpired:
-                        timed_out = True
-            finally:
-                if w_fd >= 0:
-                    try:
-                        os.close(w_fd)
-                    except OSError:
-                        pass
-                if proc is not None:
-                    _kill_group_and_wait(proc)
-                raw_res = _read_all_fd(r_fd)
-
-            if timed_out:
-                return {**base, "status": "timeout"}
-            if rc != 0:
-                out_tail = ""
-                try:
-                    out_tail = (out_log.read_bytes() + b"\n" + err_log.read_bytes()).decode("utf-8", "replace")[-800:]
-                except OSError:
-                    pass
-                return {**base, "status": "runner_no_output" if not raw_res else "runner_bad_output",
-                        "first_problem": out_tail or None}
-            r, err_status = _parse_runner_output(raw_res, nonce)
-            if err_status is not None or r is None:
-                out_tail = ""
-                try:
-                    out_tail = out_log.read_bytes().decode("utf-8", "replace")[-800:]
-                except OSError:
-                    pass
-                return {**base, "status": err_status or "runner_bad_output", "first_problem": out_tail or None}
-            if r["load_error"]:
-                return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
-            for k in _RESULT_KEYS:
-                agg[k] += r[k]
-            first = first or r["first_problem"]
-
-        bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
-        return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
-                "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
+        if spec.kind == "python_unittest":
+            return _run_python_unittest(base, tests, work, home, runner_dir, deadline)
+        if spec.kind == "python_pytest":
+            return _run_python_pytest(base, tests, work, home, runner_dir, deadline)
+        if spec.kind == "python_bare":
+            return _run_python_bare(base, tests, work, home, runner_dir, deadline)
+        if spec.kind in _EXIT_CODE_ONLY_KINDS:
+            return _run_external_command(base, spec, work, runner_dir, deadline)
+        return {**base, "accept": None, "status": "runner_unavailable",
+                "first_problem": f"unsupported acceptance kind: {spec.kind}"}
     except Exception as e:  # noqa: BLE001 — 單次驗收任何非預期錯誤皆安全判為未通過
         return {**base, "status": "acceptance_error", "first_problem": f"{type(e).__name__}: {e}"[-800:]}
     finally:
@@ -984,7 +1835,9 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
 
 
 def deliver_index(accs: list[dict]) -> int:
-    """交哪一次：第一個驗收通過的；都沒過就交原件測試過最多的（同分取最後一次）。＝redo.py `_policy_deliver`。"""
+    """交哪一次：第一個驗收通過的；都沒過就交原件測試過最多的（同分取最後一次）。
+    僅看退出碼的驗收種類（check／npm／cargo／go）的 `passed` 為 `None`，故都沒過時依同分規則交最後一次。
+    ＝redo.py `_policy_deliver`。"""
     for i, a in enumerate(accs):
         if a["accept"]:
             return i
@@ -993,12 +1846,15 @@ def deliver_index(accs: list[dict]) -> int:
 
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
-        min_attempt_s: float = 60.0, log: Callable[[str], None] | None = None) -> dict:
+        min_attempt_s: float = 60.0, check: str | None = None,
+        log: Callable[[str], None] | None = None) -> dict:
     project = project.resolve()
     say = log or (lambda m: None)
     originals = {rel: (project / rel).read_bytes() for rel in find_tests(project)}
     protected = set(originals)
-    if not originals:
+    spec = detect_acceptance(project, check=check, originals=originals)
+    has_acceptance = spec.kind != "none" and spec.reason is None
+    if not has_acceptance:
         max_attempts = 1
         attempt_timeout_s = budget_s
     run_dir = work_root() / f"restart-{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}-{secrets.token_hex(3)}"
@@ -1007,7 +1863,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     snaps: list[_Snapshot | None] = []
     spent = 0.0
     t0 = time.monotonic()
-    reserve = min(ACC_TIMEOUT_S, budget_s / 10) if originals else 0.0   # 每次嘗試後留給驗收的時間
+    reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     while len(attempts) < max_attempts:
         remaining = budget_s - (time.monotonic() - t0) - reserve
         if attempts and remaining < min_attempt_s:
@@ -1033,36 +1889,85 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             snap_dir = attempt_dir / f"snap-{secrets.token_hex(8)}"
             snap = _snapshot_workspace(ws, snap_dir)
             plan = _plan_write_back(project, snap, protected)
-            if originals:
+            if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
-                acc = acceptance(originals, ws, acc_t, _snapshot=snap, _project=project, _plan=plan)
+                acc = acceptance(originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project, _plan=plan)
             else:
-                acc = {"accept": None, "passed": None, "status": "no_tests",
-                       "tests_tampered": [], "run": None}
+                tam = _detect_tampered(snap, originals) if originals else []
+                acc = {
+                    "accept": None,
+                    "passed": None,
+                    "run": None,
+                    "status": "runner_unavailable" if spec.reason else "no_tests",
+                    "tests_tampered": tam,
+                    "first_problem": spec.reason,
+                }
         except Exception as e:  # noqa: BLE001 — 單次評估失敗安全判為未通過，不影響其他嘗試
-            acc = {"accept": False if originals else None, "passed": None, "run": None,
-                   "status": "acceptance_error", "tests_tampered": [],
-                   "first_problem": f"{type(e).__name__}: {e}"[-800:]}
+            acc = {
+                "accept": False if has_acceptance else None,
+                "passed": None,
+                "run": None,
+                "status": "acceptance_error",
+                "tests_tampered": [],
+                "first_problem": f"{type(e).__name__}: {e}"[-800:],
+            }
 
-        attempts.append({"attempt": k, "accept": acc["accept"], "passed": acc["passed"], "run": acc["run"],
-                         "status": acc["status"], "tests_tampered": acc["tests_tampered"],
-                         "rc": r["rc"], "timed_out": r["timed_out"], "wall_s": round(r["wall_ms"] / 1000.0, 1),
-                         "spawn_error": r["spawn_error"], "workspace": str(ws)})
+        uncheckable = acc["status"] in _UNCHECKABLE_STATUSES
+        if uncheckable and not attempts:
+            acc["accept"] = None
+        elif uncheckable and attempts:
+            # 前一次已有可執行的驗收；後續嘗試若突然收集不到測試或壞掉，仍視為該次未通過而非放棄先前的驗收結果
+            acc["accept"] = False
+
+        attempts.append({
+            "attempt": k,
+            "accept": acc["accept"],
+            "passed": acc["passed"],
+            "run": acc["run"],
+            "status": acc["status"],
+            "acceptance_kind": spec.kind,
+            "tests_tampered": acc["tests_tampered"],
+            "first_problem": acc.get("first_problem"),
+            "rc": r["rc"],
+            "timed_out": r["timed_out"],
+            "wall_s": round(r["wall_ms"] / 1000.0, 1),
+            "spawn_error": r["spawn_error"],
+            "workspace": str(ws),
+        })
         snaps.append(snap)
-        say(f"attempt {k}: " + ("no tests to run" if not originals else
-                                f"tests {'PASS' if acc['accept'] else 'FAIL'} ({acc['passed']}/{acc['run']})"))
-        if not originals or acc["accept"]:
+
+        if acc["accept"] is None:
+            say(f"attempt {k}: not checked ({acc['status']})")
+        elif acc["run"] is not None:
+            say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} ({acc['passed']}/{acc['run']})")
+        else:
+            say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} (status={acc['status']})")
+
+        if acc["accept"] is None or acc["accept"] is True:
             break
+
     d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
     if snaps[d] is not None:
         changed = _write_back(project, snaps[d], protected, _backup_root=run_dir)
     else:
         changed = {"added": [], "modified": [], "deleted": [], "skipped": []}
-    res = {"mode": "restart", "project": str(project), "tests": sorted(originals), "max_attempts": max_attempts,
-           "accepted": None if not originals else bool(attempts[d]["accept"]),
-           "delivered_attempt": d + 1, "attempts": attempts, "changed": changed,
-           "agent_wall_s": round(spent, 1), "total_wall_s": round(time.monotonic() - t0, 1),
-           "run_dir": str(run_dir)}
+
+    only_uncheckable = len(attempts) == 1 and attempts[0]["accept"] is None
+    res = {
+        "mode": "restart",
+        "project": str(project),
+        "tests": sorted(originals),
+        "protected": sorted(protected),
+        "acceptance": spec.to_dict(),
+        "max_attempts": max_attempts,
+        "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
+        "delivered_attempt": d + 1,
+        "attempts": attempts,
+        "changed": changed,
+        "agent_wall_s": round(spent, 1),
+        "total_wall_s": round(time.monotonic() - t0, 1),
+        "run_dir": str(run_dir),
+    }
     (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
     return res
 
@@ -1071,16 +1976,53 @@ def summary(res: dict) -> str:
     n = len(res["attempts"])
     ch = res["changed"]
     files = f"{len(ch['added'])} added, {len(ch['modified'])} modified, {len(ch['deleted'])} deleted"
+    acc_info = res.get("acceptance") or {}
+    acc_kind = acc_info.get("kind") or ("python_unittest" if res.get("tests") else "none")
+    acc_cmd = acc_info.get("command")
+    acc_reason = acc_info.get("reason")
+    protected = list(res.get("protected") if "protected" in res else (res.get("tests") or []))
+
     if res["accepted"] is None:
-        head = (f"[vacant] ran once; no executable acceptance (no *_test.py / test_*.py in the project), "
-                f"so nothing was checked. {files}.")
+        a0 = res["attempts"][0] if res.get("attempts") else {}
+        st = a0.get("status")
+        why = acc_reason or a0.get("first_problem")
+        if st == "no_tests_collected":
+            head = (f"[vacant] ran once; 0 tests were collected by {acc_kind}, "
+                    f"so nothing could be checked. {files}.")
+        elif st == "runner_unavailable":
+            detail = why or "runner could not start"
+            head = (f"[vacant] ran once; no executable acceptance ({detail}), "
+                    f"so nothing could be checked. {files}.")
+        else:
+            head = (f"[vacant] ran once; no executable acceptance (no tests or supported test runner detected), "
+                    f"so nothing was checked. {files}.")
     elif res["accepted"]:
-        head = (f"[vacant] the project's tests pass on attempt {res['delivered_attempt']} "
-                f"(up to {res.get('max_attempts', n)} allowed); delivered that attempt. {files}.")
+        a = res["attempts"][res["delivered_attempt"] - 1]
+        if a.get("run") is not None:
+            detail = f"{a['passed']}/{a['run']} tests"
+        else:
+            detail = "exit 0"
+        head = (f"[vacant] acceptance passed on attempt {res['delivered_attempt']} "
+                f"(up to {res.get('max_attempts', n)} allowed; {detail}); delivered that attempt. {files}.")
     else:
         a = res["attempts"][res["delivered_attempt"] - 1]
-        head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
-                f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} tests). {files}.")
+        if a.get("run") is not None:
+            head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
+                    f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} tests). {files}.")
+        elif acc_kind in _EXIT_CODE_ONLY_KINDS:
+            head = (f"[vacant] acceptance did not pass after {n} attempt(s); delivered latest attempt "
+                    f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
+        else:
+            head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
+                    f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
+
+    cmd_part = f" ({acc_cmd})" if acc_cmd else ""
+    head += f"\n  acceptance: {acc_kind}{cmd_part}"
+    if protected:
+        shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
+        head += f"\n  protected (restored before check): {shown}"
+    else:
+        head += "\n  protected (restored before check): none"
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
