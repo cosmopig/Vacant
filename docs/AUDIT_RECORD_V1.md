@@ -7,8 +7,8 @@
 > Signed records are **tamper-evident** and **re-verifiable** offline against their signing
 > key (and against external anchors when present). They are **never guaranteed to be complete**:
 >
-> - Unsigned sources (`restart`, `possess_wire`, or `vrun` runs with no receipt chain) provide
->   no cryptographic integrity guarantee.
+> - Unsigned sources (legacy/fallback `restart` runs with only `result.json`, `possess_wire`,
+>   or `vrun` runs with no receipt chain) provide no cryptographic integrity guarantee.
 > - A signed hash chain without an external anchor (such as `head.json` or a receiver-held
 >   ledger head) detects edits and interior deletions, **not** clean truncation from the tail
 >   (Ma & Tsudik 2009: integrity != completeness).
@@ -29,7 +29,7 @@ existing writer:
 | `trace` | `$VACANT_HOME/trace/projects/<key>/chain.ndjson` (+ sealed volumes `chain-NNNNNN.ndjson[.gz]`, `state.json`, `head.json`, `delivery.json`) | `vacant_network/trace/recorder.py`, `zerostop.py`, `stopcheck.py` | Ed25519 hash chain verified against `$VACANT_HOME/intake/trust.json` (`verifier` role), `head.json`, and any intake ledger `trace_head`/`trace_broken` anchor |
 | `intake_ledger` | `$VACANT_HOME/intake/ledger/<task_id>.ndjson` | `vacant_network/intake/ledger.py`, `flow.py`, `adapters/run.py` | Ed25519 hash chain verified against `$VACANT_HOME/intake/trust.json` (`verifier` role) |
 | `vrun` | `<vrun_root>/<run_id>/receipts_<ARM>.ndjson` (+ `.pub.json`, `rows.jsonl`, `run_<ARM>.json`, `possess.json`, `NOT_CERTIFIED.json`) | `vacant_network/vrun/launcher.py`, `receipts.py`, `attest.py`, `gateshim.py` | Per-run ephemeral Ed25519 hash chain verified via `verify_receipts` against sibling `.pub.json`, `rows.jsonl`, `verdict_hash`, and `attestation_sha256` (or unsigned when `infra_void` / `RUN-OFF` / `NOT_CERTIFIED`) |
-| `restart` | `$VACANT_WORK/restart-*/result.json` (`work_root()/restart-*`) | `vacant_network/adapters/restart.py` | None (unsigned JSON file) |
+| `restart` | Signed `restart_receipt` entries in `$VACANT_HOME/trace/projects/<key>/chain.ndjson` joined by `run_id` with `$VACANT_WORK/restart-*/result.json` (fallback to unsigned `result.json` only for legacy runs or missing chains) | `vacant_network/adapters/restart.py` | Ed25519 hash chain verified against `$VACANT_HOME/intake/trust.json` (`verifier` role), `head.json`, and companion `result.json["receipt"]` anchor (or `none` when falling back to unsigned `result.json`) |
 | `possess_wire` | `$VACANT_POSSESS_HOME/proxyd/wire/index.jsonl` (default `$VACANT_HOME/possess/proxyd/wire/index.jsonl`) | `vacant_network/vrun/wireproxy.py`, `possess.py` | None (unsigned JSONL file) |
 
 `vacant-audit-record/1` normalizes all five into one versioned JSON object per record (exported
@@ -152,12 +152,12 @@ Every record states whether its source was signature-verified and why.
 |---|---|---|---|
 | `verified` | `boolean \| null` | Yes | `true` = signature chain verified cleanly; `false` = verification failed (edited, truncated, torn tail, broken hash link, bad signature, untrusted signer, missing pubkey, empty/unreadable chain); `null` = source format is unsigned (no signature mechanism exists for this source). |
 | `status` | `string` | No | `"verified"`, `"failed"`, `"unverifiable"`, or `"unsigned"`. |
-| `scheme` | `string` | No | `"ed25519_trusted_chain"` (`trace`, `intake_ledger`), `"ed25519_ephemeral_chain"` (`vrun`), or `"none"` (unsigned sources). |
+| `scheme` | `string` | No | `"ed25519_trusted_chain"` (`trace`, `intake_ledger`, signed `restart`), `"ed25519_ephemeral_chain"` (`vrun`), or `"none"` (unsigned sources). |
 | `reason` | `string` | No | Concrete verification outcome or exact failure reason. |
 | `signer` | `string \| null` | Yes | Signer public key hex or `vacant_id` when present, else `null`. |
 | `entries_checked` | `integer \| null` | Yes | Number of chain entries parsed/checked, or `null` for unsigned/unreadable chains. |
 | `chain_head` | `string \| null` | Yes | Hex hash of the last parsed chain entry, or `null` when unavailable. |
-| `anchor_checked` | `boolean \| null` | Yes | `true` if checked against a signed external anchor (e.g. intake ledger `trace_head`) or companion reconciliation (`rows.jsonl` / `verdict_hash`); `false` if only self-contained chain verification ran (tail truncation not detectable); `null` for unsigned sources. |
+| `anchor_checked` | `boolean \| null` | Yes | `true` if checked against a signed external anchor (e.g. intake ledger `trace_head`) or companion reconciliation (`rows.jsonl` / `verdict_hash` / `result.json["receipt"]`); `false` if only self-contained chain verification ran (tail truncation not detectable); `null` for unsigned sources. |
 
 **Rule on broken/truncated chains:** A truncated, torn, edited, reordered, empty, or untrusted
 chain is **never dropped**. It is always emitted with `signature.verified = false`,
@@ -170,18 +170,18 @@ entry in `gaps`.
 
 | Field | `trace` | `intake_ledger` | `vrun` | `restart` | `possess_wire` |
 |---|---|---|---|---|---|
-| `project` | `state.json.workspace` or `trace_genesis.workspace` | Parent of `task_opened.contract_path` or `attempt_started.workspace` | `run_<ARM>.json.workspace` or `possess.json.cwd` | `result.json.project` | `null` (machine-level) |
-| `project_key` | Trace directory name (16 hex) | Linked `trace_head.project` if present, else `null` | `null` | `null` | `null` |
-| `agent` / `agents` | Platforms from `step`, `session_seen`, `session_closed`, `review`, `consequence`, `state.json.sessions` | `attempt_started.agent` (fallback: `candidate_frozen.source` prefix) | `possess.json.possess_agent`, `attestation.agent`, `framework_hook.agent`, or `gateshim`/`agentwrap` argv | `result.json.agent` if present, else `null` | `null` (proxy cannot attribute per agent) |
-| `task` | Linked ledger `task_id` or `consequence.task_id`, else `null` | `task_id` (events or filename stem) | `ws_verdict` / `ws_attempt` / `run_<ARM>.json` `task_id` | `result.json.task_id` if present, else `null` | `null` |
-| `attempts.count` | Count of `review` events (if >= 1), else `null` | Count of `attempt_started` (or `max(candidate_frozen, decisions)` if direct submit); `null` if unreadable | `attempts_used` or count of `ws_attempt`; `null` if unavailable | `len(result.json.attempts)` | `null` |
-| `attempts.max` | `null` | `null` | `max_attempts` | `result.json.max_attempts` | `null` |
-| `attempts.delivered` | `null` | `null` | `attempts_used` when accepted, else `null` | `result.json.delivered_attempt` | `null` |
-| `acceptance.result` | From `consequence.outcome` or last `review` (`allow`+no open -> `accepted`, open/`continue` -> `rejected`), else `unchecked` | `ledger.state_of(events).state` (`accepted`/`released`/`rejected`/`held`/`escalated`/`void`/`open`/`withdrawn`/`release_unconfirmed`/`unreadable`) | From `infra_void` -> `void`, `accepted_is_null`/`ungated` -> `unchecked`, `accepted` -> `accepted`/`rejected` | `accepted`: `true`->`accepted`, `false`->`rejected`, `null`->`unchecked`; missing->`unknown` | `"unchecked"` (`"unreadable"` if unreadable) |
-| `acceptance.checks_*` | `null` | Latest `decision.results` PASS / total | `visible_passed` / `visible_total` | Delivered attempt `passed` / `run` | `null` |
+| `project` | `state.json.workspace` or `trace_genesis.workspace` | Parent of `task_opened.contract_path` or `attempt_started.workspace` | `run_<ARM>.json.workspace` or `possess.json.cwd` | `trace_genesis.workspace` (signed receipt), fallback `result.json.project` | `null` (machine-level) |
+| `project_key` | Trace directory name (16 hex) | Linked `trace_head.project` if present, else `null` | `null` | Trace project key (16 hex) when backed by chain, else `null` | `null` |
+| `agent` / `agents` | Platforms from `step`, `session_seen`, `session_closed`, `review`, `consequence`, `state.json.sessions` | `attempt_started.agent` (fallback: `candidate_frozen.source` prefix) | `possess.json.possess_agent`, `attestation.agent`, `framework_hook.agent`, or `gateshim`/`agentwrap` argv | Signed `restart_receipt.agent` (fallback: `result.json.agent` if present, else `null`) | `null` (proxy cannot attribute per agent) |
+| `task` | Linked ledger `task_id` or `consequence.task_id`, else `null` | `task_id` (events or filename stem) | `ws_verdict` / `ws_attempt` / `run_<ARM>.json` `task_id` | `restart_receipt.task_id` / `result.json.task_id` if present, else `null` | `null` |
+| `attempts.count` | Count of `review` events (if >= 1), else `null` | Count of `attempt_started` (or `max(candidate_frozen, decisions)` if direct submit); `null` if unreadable | `attempts_used` or count of `ws_attempt`; `null` if unavailable | `len(restart_receipt.attempts)` (fallback: `len(result.json.attempts)`) | `null` |
+| `attempts.max` | `null` | `null` | `max_attempts` | `restart_receipt.max_attempts` (fallback: `result.json.max_attempts`) | `null` |
+| `attempts.delivered` | `null` | `null` | `attempts_used` when accepted, else `null` | `restart_receipt.delivered_attempt` (fallback: `result.json.delivered_attempt`) | `null` |
+| `acceptance.result` | From `consequence.outcome` or last `review` (`allow`+no open -> `accepted`, open/`continue` -> `rejected`), else `unchecked` | `ledger.state_of(events).state` (`accepted`/`released`/`rejected`/`held`/`escalated`/`void`/`open`/`withdrawn`/`release_unconfirmed`/`unreadable`) | From `infra_void` -> `void`, `accepted_is_null`/`ungated` -> `unchecked`, `accepted` -> `accepted`/`rejected` | From signed `restart_receipt.accepted` (fallback: `result.json.accepted`): `true`->`accepted`, `false`->`rejected`, `null`->`unchecked`; missing->`unknown` | `"unchecked"` (`"unreadable"` if unreadable) |
+| `acceptance.checks_*` | `null` | Latest `decision.results` PASS / total | `visible_passed` / `visible_total` | Delivered attempt `passed` / `run` from signed receipt (fallback: `result.json`) | `null` |
 | `sent_back` | `review(action=continue)`, `nudge`, `prompt(source=vacant_feedback)` | `decision(outcome in reject/hold/escalate)`, `release_refused` | Retry feedback deliveries + gate refusals (`refused=true`) | `count=0, items=[]` (restart policy sends no feedback to agent); `null` if unreadable | `count=null, items=null` |
-| `signature.verified` | `true`/`false` (`Recorder.verify` + raw torn-line check + ledger anchor check) | `true`/`false` (`Ledger.verify` + raw torn-line check) | `true`/`false` (`verify_receipts` + raw torn-line + `verdict_hash` + `attestation_sha256`), or `null` if no chain emitted | `null` (`unsigned`) | `null` (`unsigned`) |
-| `timestamp_ms` | Max `ts_ms` across entries | Max `ts_ms` across entries | Max `ts_ms` across entries (or `attestation.assembled_at`) | Parsed from `restart-YYYYMMDDTHHMMSS-...` dir name (or `result.json.timestamp_ms`), else `null` | Max `ts * 1000` across valid lines |
+| `signature.verified` | `true`/`false` (`Recorder.verify` + raw torn-line check + ledger anchor check) | `true`/`false` (`Ledger.verify` + raw torn-line check) | `true`/`false` (`verify_receipts` + raw torn-line + `verdict_hash` + `attestation_sha256`), or `null` if no chain emitted | `true`/`false` (`Recorder.verify` + raw torn-line + companion `result.json["receipt"]` anchor), or `null` (`unsigned`) when falling back to legacy/missing-chain `result.json` | `null` (`unsigned`) |
+| `timestamp_ms` | Max `ts_ms` across entries | Max `ts_ms` across entries | Max `ts_ms` across entries (or `attestation.assembled_at`) | Signed `restart_receipt` entry `ts_ms` (fallback: `result.json.timestamp_ms` or parsed `restart-YYYYMMDDTHHMMSS-...` dir name), else `null` | Max `ts * 1000` across valid lines |
 
 ---
 
@@ -210,6 +210,7 @@ entry in `gaps`.
 | `contract_unlocked` | `info` | Intake task has no owner-signed `contract_locked` event. |
 | `tests_tampered` | `warning` | Restart mode detected edits to protected test files (restored before check, not written back). |
 | `skipped_writeback` | `warning` | Restart mode skipped unsafe paths (symlink, conflict, unreadable) during write-back. |
+| `result_json_mismatch` | `warning` | Companion unsigned `result.json` disagreed with the signed `restart_receipt` in `chain.ndjson`; the signed receipt was preferred and discrepancies are listed in `details.mismatches`. |
 | `unchecked` | `warning` / `info` | No executable acceptance check ran (`no_tests`, `no_tests_collected`, `runner_unavailable`, `ungated`, or wire-only log). |
 | `unmediated` | `error` | `vrun` receipt recorded `requests_seen == 0` (model channel mediation not observed). |
 | `unattested` | `warning` | `vrun` attestation tier is below `"A"` (`B`, `B'`, `C`, or `NOT_CERTIFIED.json`). |
@@ -267,6 +268,20 @@ the argument is not one of `list`, `show`, `export`, or a flag.
 3. **Same-account key boundary:** When signing keys live in plaintext under the same OS account
    as the agent, a hostile process in that account can read them. Stronger separation requires
    moving the receiver and signing keys to another OS account or machine.
-4. **No cross-source deduplication:** A single `vacant do` run with a task contract writes both
-   an `intake_ledger` record and a `trace` chain; both are exported as distinct records linked by
-   `task` and `project_key` so each source's verification status remains independently visible.
+4. **Deduplication boundary:**
+   - **Restart mode (joined):** A `vacant do` restart run writes a signed `restart_receipt`
+     into the project's trace chain (`chain.ndjson`) and a companion `result.json` under
+     `$VACANT_WORK/restart-*`. These are joined by `run_id` (falling back to `(project_key,
+     seq, hash)` for older receipts without `run_id`) into **one** `restart:<run_id>` record
+     whose fields come from the signed receipt (including `agent`, `argv`, `acceptance`,
+     `attempts`, `delivered_attempt`, `snapshot_hashes`, and `written_back` in `details`).
+     Restart-only trace chains (containing only `trace_genesis` + `restart_receipt` entries)
+     do not emit a duplicate empty `trace:<project_key>` record. If `result.json` disagrees
+     with the signed receipt, the signed receipt is preferred and `result_json_mismatch` is
+     flagged. Unsigned `result.json` is used as a fallback only for legacy runs (before
+     receipts existed) or when the referenced trace chain is missing, in which case the record
+     remains `unsigned` with an `unsigned_source` gap.
+   - **Contract mode (distinct records):** A single `vacant do` run with a task contract writes
+     both an `intake_ledger` record and a `trace` chain; both are exported as distinct records
+     linked by `task` and `project_key` so each source's verification status remains
+     independently visible.

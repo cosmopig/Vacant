@@ -7,7 +7,9 @@ Sources (read-only; this module never writes to `$VACANT_HOME`, `work_root`, or 
   2. `intake_ledger` — `$VACANT_HOME/intake/ledger/*.ndjson`
   3. `vrun`          — `<vrun_root>/*/receipts_*.ndjson` (+ `run_*.json`, `possess.json`,
                        `NOT_CERTIFIED.json`, `rows.jsonl`)
-  4. `restart`       — `work_root()/restart-*/result.json`
+  4. `restart`       — signed `restart_receipt` entries in `$VACANT_HOME/trace/projects/*/chain.ndjson`
+                       joined by `run_id` with `work_root()/restart-*/result.json`
+                       (unsigned `result.json` is fallback only when no receipt / chain exists)
   5. `possess_wire`  — `$VACANT_POSSESS_HOME/proxyd/wire/index.jsonl` (if present)
 
 Honest boundaries:
@@ -717,16 +719,29 @@ def _last_scan_disabled(events: list[dict[str, Any]], state: dict[str, Any]) -> 
     return str(sd) if sd else None
 
 
-def _collect_trace(
+_STRUCTURAL_TRACE_TYPES = frozenset({
+    "trace_genesis",
+    "restart_receipt",
+    "volume_seal",
+    "volume_reclaimed",
+})
+
+
+def _inspect_trace_projects(
     vacant_home: pathlib.Path,
     trace_anchors: dict[str, dict[str, Any]],
-) -> list[dict[str, Any]]:
+) -> dict[str, dict[str, Any]]:
+    """Inspect and verify all `$VACANT_HOME/trace/projects/*` chains (read-only).
+
+    Returns `{project_key: proj_info}` shared by both `trace` and signed `restart`
+    record builders so each chain is read and verified once.
+    """
     trace_root = vacant_home / "trace"
     pdir = trace_root / "projects"
     intake_root = vacant_home / "intake"
-    records: list[dict[str, Any]] = []
+    out: dict[str, dict[str, Any]] = {}
     if not pdir.is_dir():
-        return records
+        return out
 
     trust, trust_err = _load_trust_readonly(intake_root)
     trust_path = intake_root / "trust.json"
@@ -789,9 +804,9 @@ def _collect_trace(
             signer = _as_str(entries[0].payload.get("signer"))
         chain_head = entries[-1].hash() if entries else None
 
-        gaps: list[dict[str, Any]] = []
+        chain_gaps: list[dict[str, Any]] = []
         if trust_err:
-            gaps.append(_gap("chain_unverifiable", "error", trust_err))
+            chain_gaps.append(_gap("chain_unverifiable", "error", trust_err))
 
         # Verify chain using Recorder.verify + raw torn-line/malformed check + ledger anchor
         anchor = anchor_info.get("anchor") if anchor_info else None
@@ -799,6 +814,7 @@ def _collect_trace(
         sig_verified: bool
         sig_status: str
         sig_reason: str
+        rec = _recorder_for_dir(d, trace_root, workspace)
 
         if not has_chain_files:
             sig_verified = False
@@ -810,13 +826,13 @@ def _collect_trace(
                 )
             else:
                 sig_reason = "trace chain.ndjson missing despite head.json / anchor metadata"
-            gaps.append(_gap("chain_truncated", "error", sig_reason))
+            chain_gaps.append(_gap("chain_truncated", "error", sig_reason))
         elif raw_problems:
             sig_verified = False
             sig_status = "failed"
             sig_reason = "; ".join(raw_problems)
             is_trunc = total_torn > 0 or any("truncated" in x for x in raw_problems)
-            gaps.append(
+            chain_gaps.append(
                 _gap(
                     "chain_truncated" if is_trunc else "signature_failed",
                     "error",
@@ -824,7 +840,6 @@ def _collect_trace(
                 )
             )
         else:
-            rec = _recorder_for_dir(d, trace_root, workspace)
             if anchor_info and anchor_info.get("broken"):
                 b = anchor_info["broken"][0]
                 sig_verified = False
@@ -832,14 +847,14 @@ def _collect_trace(
                 sig_reason = (
                     f"task ledger recorded trace_broken at entry {b.get('seq')} ({b.get('why')})"
                 )
-                gaps.append(_gap("trace_broken", "error", sig_reason))
+                chain_gaps.append(_gap("trace_broken", "error", sig_reason))
             elif anchor_info and not anchor_info.get("ledger_ok"):
                 sig_verified = False
                 sig_status = "failed"
                 sig_reason = (
                     f"anchoring task ledger does not verify ({anchor_info.get('ledger_reason')})"
                 )
-                gaps.append(_gap("signature_failed", "error", sig_reason))
+                chain_gaps.append(_gap("signature_failed", "error", sig_reason))
             else:
                 ok, why = rec.verify(trust=trust, anchor=anchor)
                 sig_verified = ok
@@ -854,7 +869,7 @@ def _collect_trace(
                         or "missing volume" in low
                         or "initial volume missing" in low
                     )
-                    gaps.append(
+                    chain_gaps.append(
                         _gap(
                             "chain_truncated" if is_trunc else "signature_failed",
                             "error",
@@ -862,296 +877,380 @@ def _collect_trace(
                         )
                     )
 
-        if sig_verified and not anchor_checked:
-            gaps.append(
-                _gap(
-                    "unanchored_chain",
-                    "info",
-                    "verified against local chain/head.json without a signed intake ledger anchor; "
-                    "tail truncation cannot be ruled out if head.json was also modified",
-                )
-            )
-
-        # Extract agents, task, steps, reviews, findings, gaps
-        agent_names: set[str] = set()
-        for sk in (state_obj.get("sessions") or {}):
-            plat = _platform_from_session_key(sk)
-            if plat:
-                agent_names.add(plat)
-
-        task_id: str | None = anchor_info.get("task_id") if anchor_info else None
-        unreadable_entirely = bool(raw_problems) and not events
-        sent_back_items: list[dict[str, Any]] | None = None if unreadable_entirely else []
-
-        n_steps = 0
-        n_reviews = 0
-        n_gaps = 0
-        n_gap_paths = 0
-        n_post_missing = 0
-        n_pre_missing = 0
-        n_writes_unknown = 0
-        n_ended = 0
-        flags_open: dict[str, dict[str, Any]] = {}
-        flags_dismissed: set[str] = set()
-        last_review: dict[str, Any] | None = None
-        last_consequence_outcome: str | None = None
-
-        for ev in events:
-            et = ev.get("type")
-            if et == "step":
-                n_steps += 1
-                a = ev.get("actor") or {}
-                if isinstance(a, dict) and _as_str(a.get("platform")):
-                    agent_names.add(str(a["platform"]))
-                if ev.get("post_missing"):
-                    n_post_missing += 1
-                if ev.get("pre_missing"):
-                    n_pre_missing += 1
-                if ev.get("writes_unknown"):
-                    n_writes_unknown += 1
-            elif et in ("session_seen", "session_closed"):
-                a = ev.get("actor") or {}
-                if isinstance(a, dict) and _as_str(a.get("platform")):
-                    agent_names.add(str(a["platform"]))
-            elif et == "unrecorded_change":
-                n_gaps += 1
-                ch = ev.get("changes")
-                n_gap_paths += len(ch) if isinstance(ch, list) else (_as_int(ev.get("n")) or 1)
-            elif et == "review":
-                n_reviews += 1
-                last_review = ev
-                plat = _platform_from_session_key(_as_str(ev.get("session")))
-                if plat:
-                    agent_names.add(plat)
-                if ev.get("action") == "continue" and sent_back_items is not None:
-                    findings = ev.get("findings") or []
-                    f_details = [
-                        str(f.get("kind") or f.get("finding_id") or f)
-                        for f in findings
-                        if isinstance(f, dict)
-                    ]
-                    sent_back_items.append(
-                        _send_back_item(
-                            action="continue",
-                            round_n=_as_int(ev.get("round")),
-                            channel="hook_review",
-                            summary=(
-                                f"review round {ev.get('round') or '?'}: "
-                                f"sent back {len(ev.get('sent') or f_details)} finding(s)"
-                            ),
-                            details=f_details or [str(x) for x in (ev.get("sent") or [])],
-                        )
-                    )
-            elif et == "nudge":
-                plat = _platform_from_session_key(_as_str(ev.get("session")))
-                if plat:
-                    agent_names.add(plat)
-                if sent_back_items is not None:
-                    paths = [str(x) for x in (ev.get("paths") or [])]
-                    sent_back_items.append(
-                        _send_back_item(
-                            action="nudge",
-                            round_n=_as_int(ev.get("turn")),
-                            channel="hook_review",
-                            summary="turn-budget nudge sent back to agent",
-                            details=paths,
-                        )
-                    )
-            elif et == "prompt" and ev.get("source") == "vacant_feedback":
-                if sent_back_items is not None:
-                    sent_back_items.append(
-                        _send_back_item(
-                            action="retry_feedback",
-                            channel="prompt_feedback",
-                            summary="localized failure feedback appended to retry prompt",
-                            details=[],
-                        )
-                    )
-            elif et == "ended":
-                n_ended += 1
-                plat = _platform_from_session_key(_as_str(ev.get("session")))
-                if plat:
-                    agent_names.add(plat)
-            elif et == "flag":
-                if ev.get("dismisses"):
-                    flags_dismissed.add(str(ev["dismisses"]))
-                elif ev.get("flag_id"):
-                    flags_open[str(ev["flag_id"])] = ev
-            elif et == "consequence":
-                a = ev.get("actor") or {}
-                if isinstance(a, dict) and _as_str(a.get("platform")):
-                    agent_names.add(str(a["platform"]))
-                if _as_str(ev.get("task_id")) and task_id is None:
-                    task_id = _as_str(ev.get("task_id"))
-                oc = _as_str(ev.get("outcome"))
-                if oc:
-                    last_consequence_outcome = oc
-
-        active_flags = [fid for fid in flags_open if fid not in flags_dismissed]
-        scan_disabled = _last_scan_disabled(events, state_obj)
-
-        if n_gaps:
-            gaps.append(
-                _gap(
-                    "unrecorded_change",
-                    "warning",
-                    f"{n_gaps} unrecorded workspace change event(s) ({n_gap_paths} path(s))",
-                    count=n_gaps,
-                )
-            )
-        if scan_disabled:
-            gaps.append(
-                _gap(
-                    "scan_disabled",
-                    "warning",
-                    f"file-change observation disabled: {scan_disabled}",
-                )
-            )
-        if n_post_missing:
-            gaps.append(
-                _gap(
-                    "post_missing",
-                    "warning",
-                    f"{n_post_missing} step(s) missing post-tool hook event",
-                    count=n_post_missing,
-                )
-            )
-        if n_pre_missing:
-            gaps.append(
-                _gap(
-                    "pre_missing",
-                    "warning",
-                    f"{n_pre_missing} step(s) missing pre-tool hook event",
-                    count=n_pre_missing,
-                )
-            )
-        if n_writes_unknown:
-            gaps.append(
-                _gap(
-                    "writes_unknown",
-                    "warning",
-                    f"{n_writes_unknown} step(s) had unobserved workspace writes",
-                    count=n_writes_unknown,
-                )
-            )
-        if active_flags:
-            gaps.append(
-                _gap(
-                    "open_flags",
-                    "warning",
-                    f"{len(active_flags)} unresolved human flag(s): {', '.join(sorted(active_flags)[:6])}",
-                    count=len(active_flags),
-                )
-            )
-
-        # Acceptance mapping for trace
-        acceptance_kind: str | None = None
-        if unreadable_entirely or not has_chain_files:
-            result = "unreadable"
-            raw_status = "unreadable"
-            gaps.append(_gap("unreadable_source", "error", sig_reason))
-        elif last_consequence_outcome is not None:
-            oc_map = {
-                "accept": "accepted",
-                "reject": "rejected",
-                "hold": "held",
-                "escalate": "escalated",
-            }
-            result = oc_map.get(last_consequence_outcome, "unknown")
-            raw_status = last_consequence_outcome
-            acceptance_kind = "contract"
-        elif last_review is not None:
-            mode = _as_str(last_review.get("mode"))
-            acceptance_kind = f"zero_config_{mode}" if mode else "zero_config_review"
-            action = _as_str(last_review.get("action"))
-            left_open = last_review.get("left_open") or []
-            if action == "allow" and not left_open:
-                result = "accepted"
-                raw_status = "allow"
-            elif action == "allow" and left_open:
-                result = "rejected"
-                raw_status = "allow_with_open_findings"
-            elif action == "continue":
-                result = "rejected"
-                raw_status = "continue"
-            else:
-                result = "unknown"
-                raw_status = action
-        elif n_steps > 0 or bool(state_obj.get("sessions")):
-            result = "unchecked"
-            raw_status = "no_review"
-            gaps.append(
-                _gap(
-                    "unchecked",
-                    "info",
-                    "trace recorded activity without a stop-check review or contract outcome",
-                )
-            )
-        else:
-            result = "unknown"
-            raw_status = None
-
-        attempts_count = n_reviews if n_reviews > 0 else None
-        agent, agents = _agents_fields(agent_names)
+        restart_entries = [e for e in entries if e.type == "restart_receipt"]
+        has_non_restart_events = any(e.type not in _STRUCTURAL_TRACE_TYPES for e in entries)
+        has_state_activity = bool(
+            (state_obj.get("sessions") or {})
+            or (_as_int(state_obj.get("n_steps")) or 0) > 0
+            or state_obj.get("scan_disabled")
+        )
+        has_non_restart_trace_activity = bool(
+            has_non_restart_events
+            or has_state_activity
+            or delivery_obj is not None
+            or anchor_info is not None
+        )
         primary_path = chain_p if chain_p.is_file() else (vols[-1] if vols else chain_p)
 
-        signature = {
-            "verified": sig_verified,
-            "status": sig_status,
-            "scheme": "ed25519_trusted_chain",
-            "reason": sig_reason,
+        out[key] = {
+            "key": key,
+            "dir": d,
+            "chain_path": chain_p,
+            "primary_path": primary_path,
+            "vols": vols,
+            "aux": aux,
+            "has_chain_files": has_chain_files,
+            "state_obj": state_obj,
+            "delivery_obj": delivery_obj,
+            "anchor_info": anchor_info,
+            "entries": entries,
+            "events": events,
+            "restart_entries": restart_entries,
+            "has_non_restart_trace_activity": has_non_restart_trace_activity,
+            "started_ms": started_ms,
+            "ended_ms": ended_ms,
+            "workspace": workspace,
             "signer": signer,
-            "entries_checked": len(entries) if entries or not raw_problems else None,
             "chain_head": chain_head,
+            "raw_problems": raw_problems,
+            "total_torn": total_torn,
+            "chain_gaps": chain_gaps,
+            "sig_verified": sig_verified,
+            "sig_status": sig_status,
+            "sig_reason": sig_reason,
             "anchor_checked": anchor_checked,
+            "recorder": rec,
+            "trust": trust,
         }
 
-        records.append(
-            _base_record(
-                record_id=f"trace:{key}",
-                kind="trace",
-                source_path=primary_path,
-                auxiliary_paths=aux,
-                started_at_ms=started_ms,
-                ended_at_ms=ended_ms,
-                timestamp_ms=ended_ms if ended_ms is not None else started_ms,
-                project=workspace,
-                project_key=key,
-                agent=agent,
-                agents=agents,
-                task=task_id,
-                attempts_count=attempts_count,
-                attempts_max=None,
-                attempts_delivered=None,
-                result=result,
-                raw_status=raw_status,
-                acceptance_kind=acceptance_kind,
-                checks_passed=None,
-                checks_total=None,
-                sent_back_count=len(sent_back_items) if sent_back_items is not None else None,
-                sent_back_items=sent_back_items,
-                gaps=gaps,
-                signature=signature,
-                details={
-                    "n_steps": n_steps if not unreadable_entirely else None,
-                    "n_reviews": n_reviews if not unreadable_entirely else None,
-                    "n_ended_early": n_ended if not unreadable_entirely else None,
-                    "n_sealed_volumes": len(vols),
-                    "n_sessions": len(state_obj.get("sessions") or {}) if state_obj else None,
-                    "scan_disabled": scan_disabled,
-                    "delivery": (
-                        {
-                            "at": delivery_obj.get("at"),
-                            "mode": delivery_obj.get("mode"),
-                            "broken": delivery_obj.get("broken"),
-                        }
-                        if delivery_obj
-                        else None
-                    ),
-                },
+    return out
+
+
+def _build_trace_record(info: dict[str, Any]) -> dict[str, Any]:
+    key = info["key"]
+    vols = info["vols"]
+    aux = list(info["aux"])
+    has_chain_files = info["has_chain_files"]
+    state_obj = info["state_obj"]
+    delivery_obj = info["delivery_obj"]
+    anchor_info = info["anchor_info"]
+    entries = info["entries"]
+    events = info["events"]
+    started_ms = info["started_ms"]
+    ended_ms = info["ended_ms"]
+    workspace = info["workspace"]
+    signer = info["signer"]
+    chain_head = info["chain_head"]
+    raw_problems = info["raw_problems"]
+    sig_verified = info["sig_verified"]
+    sig_status = info["sig_status"]
+    sig_reason = info["sig_reason"]
+    anchor_checked = info["anchor_checked"]
+    primary_path = info["primary_path"]
+
+    gaps: list[dict[str, Any]] = [dict(g) for g in info["chain_gaps"]]
+    if sig_verified and not anchor_checked:
+        gaps.append(
+            _gap(
+                "unanchored_chain",
+                "info",
+                "verified against local chain/head.json without a signed intake ledger anchor; "
+                "tail truncation cannot be ruled out if head.json was also modified",
             )
         )
 
+    # Extract agents, task, steps, reviews, findings, gaps
+    agent_names: set[str] = set()
+    for sk in (state_obj.get("sessions") or {}):
+        plat = _platform_from_session_key(sk)
+        if plat:
+            agent_names.add(plat)
+
+    task_id: str | None = anchor_info.get("task_id") if anchor_info else None
+    unreadable_entirely = bool(raw_problems) and not events
+    sent_back_items: list[dict[str, Any]] | None = None if unreadable_entirely else []
+
+    n_steps = 0
+    n_reviews = 0
+    n_gaps = 0
+    n_gap_paths = 0
+    n_post_missing = 0
+    n_pre_missing = 0
+    n_writes_unknown = 0
+    n_ended = 0
+    flags_open: dict[str, dict[str, Any]] = {}
+    flags_dismissed: set[str] = set()
+    last_review: dict[str, Any] | None = None
+    last_consequence_outcome: str | None = None
+
+    for ev in events:
+        et = ev.get("type")
+        if et == "step":
+            n_steps += 1
+            a = ev.get("actor") or {}
+            if isinstance(a, dict) and _as_str(a.get("platform")):
+                agent_names.add(str(a["platform"]))
+            if ev.get("post_missing"):
+                n_post_missing += 1
+            if ev.get("pre_missing"):
+                n_pre_missing += 1
+            if ev.get("writes_unknown"):
+                n_writes_unknown += 1
+        elif et in ("session_seen", "session_closed"):
+            a = ev.get("actor") or {}
+            if isinstance(a, dict) and _as_str(a.get("platform")):
+                agent_names.add(str(a["platform"]))
+        elif et == "unrecorded_change":
+            n_gaps += 1
+            ch = ev.get("changes")
+            n_gap_paths += len(ch) if isinstance(ch, list) else (_as_int(ev.get("n")) or 1)
+        elif et == "review":
+            n_reviews += 1
+            last_review = ev
+            plat = _platform_from_session_key(_as_str(ev.get("session")))
+            if plat:
+                agent_names.add(plat)
+            if ev.get("action") == "continue" and sent_back_items is not None:
+                findings = ev.get("findings") or []
+                f_details = [
+                    str(f.get("kind") or f.get("finding_id") or f)
+                    for f in findings
+                    if isinstance(f, dict)
+                ]
+                sent_back_items.append(
+                    _send_back_item(
+                        action="continue",
+                        round_n=_as_int(ev.get("round")),
+                        channel="hook_review",
+                        summary=(
+                            f"review round {ev.get('round') or '?'}: "
+                            f"sent back {len(ev.get('sent') or f_details)} finding(s)"
+                        ),
+                        details=f_details or [str(x) for x in (ev.get("sent") or [])],
+                    )
+                )
+        elif et == "nudge":
+            plat = _platform_from_session_key(_as_str(ev.get("session")))
+            if plat:
+                agent_names.add(plat)
+            if sent_back_items is not None:
+                paths = [str(x) for x in (ev.get("paths") or [])]
+                sent_back_items.append(
+                    _send_back_item(
+                        action="nudge",
+                        round_n=_as_int(ev.get("turn")),
+                        channel="hook_review",
+                        summary="turn-budget nudge sent back to agent",
+                        details=paths,
+                    )
+                )
+        elif et == "prompt" and ev.get("source") == "vacant_feedback":
+            if sent_back_items is not None:
+                sent_back_items.append(
+                    _send_back_item(
+                        action="retry_feedback",
+                        channel="prompt_feedback",
+                        summary="localized failure feedback appended to retry prompt",
+                        details=[],
+                    )
+                )
+        elif et == "ended":
+            n_ended += 1
+            plat = _platform_from_session_key(_as_str(ev.get("session")))
+            if plat:
+                agent_names.add(plat)
+        elif et == "flag":
+            if ev.get("dismisses"):
+                flags_dismissed.add(str(ev["dismisses"]))
+            elif ev.get("flag_id"):
+                flags_open[str(ev["flag_id"])] = ev
+        elif et == "consequence":
+            a = ev.get("actor") or {}
+            if isinstance(a, dict) and _as_str(a.get("platform")):
+                agent_names.add(str(a["platform"]))
+            if _as_str(ev.get("task_id")) and task_id is None:
+                task_id = _as_str(ev.get("task_id"))
+            oc = _as_str(ev.get("outcome"))
+            if oc:
+                last_consequence_outcome = oc
+
+    active_flags = [fid for fid in flags_open if fid not in flags_dismissed]
+    scan_disabled = _last_scan_disabled(events, state_obj)
+
+    if n_gaps:
+        gaps.append(
+            _gap(
+                "unrecorded_change",
+                "warning",
+                f"{n_gaps} unrecorded workspace change event(s) ({n_gap_paths} path(s))",
+                count=n_gaps,
+            )
+        )
+    if scan_disabled:
+        gaps.append(
+            _gap(
+                "scan_disabled",
+                "warning",
+                f"file-change observation disabled: {scan_disabled}",
+            )
+        )
+    if n_post_missing:
+        gaps.append(
+            _gap(
+                "post_missing",
+                "warning",
+                f"{n_post_missing} step(s) missing post-tool hook event",
+                count=n_post_missing,
+            )
+        )
+    if n_pre_missing:
+        gaps.append(
+            _gap(
+                "pre_missing",
+                "warning",
+                f"{n_pre_missing} step(s) missing pre-tool hook event",
+                count=n_pre_missing,
+            )
+        )
+    if n_writes_unknown:
+        gaps.append(
+            _gap(
+                "writes_unknown",
+                "warning",
+                f"{n_writes_unknown} step(s) had unobserved workspace writes",
+                count=n_writes_unknown,
+            )
+        )
+    if active_flags:
+        gaps.append(
+            _gap(
+                "open_flags",
+                "warning",
+                f"{len(active_flags)} unresolved human flag(s): {', '.join(sorted(active_flags)[:6])}",
+                count=len(active_flags),
+            )
+        )
+
+    # Acceptance mapping for trace
+    acceptance_kind: str | None = None
+    if unreadable_entirely or not has_chain_files:
+        result = "unreadable"
+        raw_status = "unreadable"
+        gaps.append(_gap("unreadable_source", "error", sig_reason))
+    elif last_consequence_outcome is not None:
+        oc_map = {
+            "accept": "accepted",
+            "reject": "rejected",
+            "hold": "held",
+            "escalate": "escalated",
+        }
+        result = oc_map.get(last_consequence_outcome, "unknown")
+        raw_status = last_consequence_outcome
+        acceptance_kind = "contract"
+    elif last_review is not None:
+        mode = _as_str(last_review.get("mode"))
+        acceptance_kind = f"zero_config_{mode}" if mode else "zero_config_review"
+        action = _as_str(last_review.get("action"))
+        left_open = last_review.get("left_open") or []
+        if action == "allow" and not left_open:
+            result = "accepted"
+            raw_status = "allow"
+        elif action == "allow" and left_open:
+            result = "rejected"
+            raw_status = "allow_with_open_findings"
+        elif action == "continue":
+            result = "rejected"
+            raw_status = "continue"
+        else:
+            result = "unknown"
+            raw_status = action
+    elif n_steps > 0 or bool(state_obj.get("sessions")):
+        result = "unchecked"
+        raw_status = "no_review"
+        gaps.append(
+            _gap(
+                "unchecked",
+                "info",
+                "trace recorded activity without a stop-check review or contract outcome",
+            )
+        )
+    else:
+        result = "unknown"
+        raw_status = None
+
+    attempts_count = n_reviews if n_reviews > 0 else None
+    agent, agents = _agents_fields(agent_names)
+
+    signature = {
+        "verified": sig_verified,
+        "status": sig_status,
+        "scheme": "ed25519_trusted_chain",
+        "reason": sig_reason,
+        "signer": signer,
+        "entries_checked": len(entries) if entries or not raw_problems else None,
+        "chain_head": chain_head,
+        "anchor_checked": anchor_checked,
+    }
+
+    details: dict[str, Any] = {
+        "n_steps": n_steps if not unreadable_entirely else None,
+        "n_reviews": n_reviews if not unreadable_entirely else None,
+        "n_ended_early": n_ended if not unreadable_entirely else None,
+        "n_sealed_volumes": len(vols),
+        "n_sessions": len(state_obj.get("sessions") or {}) if state_obj else None,
+        "scan_disabled": scan_disabled,
+        "delivery": (
+            {
+                "at": delivery_obj.get("at"),
+                "mode": delivery_obj.get("mode"),
+                "broken": delivery_obj.get("broken"),
+            }
+            if delivery_obj
+            else None
+        ),
+    }
+    if info["restart_entries"]:
+        details["n_restart_receipts"] = len(info["restart_entries"])
+
+    return _base_record(
+        record_id=f"trace:{key}",
+        kind="trace",
+        source_path=primary_path,
+        auxiliary_paths=aux,
+        started_at_ms=started_ms,
+        ended_at_ms=ended_ms,
+        timestamp_ms=ended_ms if ended_ms is not None else started_ms,
+        project=workspace,
+        project_key=key,
+        agent=agent,
+        agents=agents,
+        task=task_id,
+        attempts_count=attempts_count,
+        attempts_max=None,
+        attempts_delivered=None,
+        result=result,
+        raw_status=raw_status,
+        acceptance_kind=acceptance_kind,
+        checks_passed=None,
+        checks_total=None,
+        sent_back_count=len(sent_back_items) if sent_back_items is not None else None,
+        sent_back_items=sent_back_items,
+        gaps=gaps,
+        signature=signature,
+        details=details,
+    )
+
+
+def _collect_trace(
+    vacant_home: pathlib.Path,
+    trace_anchors: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    infos = _inspect_trace_projects(vacant_home, trace_anchors)
+    records: list[dict[str, Any]] = []
+    for info in infos.values():
+        if info["restart_entries"] and not info["has_non_restart_trace_activity"]:
+            continue
+        records.append(_build_trace_record(info))
     return records
 
 
@@ -1733,7 +1832,7 @@ def _collect_vrun(vrun_dirs: list[pathlib.Path]) -> list[dict[str, Any]]:
     return records
 
 
-# ── Source 4: Restart Mode (`work_root()/restart-*/result.json`) ──────────────
+# ── Source 4: Restart Mode (signed `restart_receipt` + `result.json` fallback) ─
 
 def _parse_restart_dir_ts_ms(dirname: str) -> int | None:
     m = _RESTART_TS_RE.match(dirname)
@@ -1746,215 +1845,857 @@ def _parse_restart_dir_ts_ms(dirname: str) -> int | None:
         return None
 
 
-def _collect_restart(work_root: pathlib.Path) -> list[dict[str, Any]]:
-    records: list[dict[str, Any]] = []
-    if not work_root.is_dir():
-        return records
+def _strict_eq(a: Any, b: Any) -> bool:
+    """Equality that never conflates Python `bool` with `int`."""
+    if isinstance(a, bool) != isinstance(b, bool):
+        return False
+    return a == b
 
+
+def _scan_restart_result_files(work_root: pathlib.Path) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    if not work_root.is_dir():
+        return items
     for res_p in sorted(work_root.glob("restart-*/result.json")):
         if not res_p.is_file():
             continue
         run_dir = res_p.parent
-        dir_ts_ms = _parse_restart_dir_ts_ms(run_dir.name)
         loaded, err = _read_json_file(res_p)
-        gaps: list[dict[str, Any]] = [
-            _gap("unsigned_source", "warning", "restart result.json has no cryptographic signature")
-        ]
+        data = loaded if (err is None and isinstance(loaded, dict)) else None
+        if err is None and data is None:
+            err = "result.json is not a JSON object"
+        items.append(
+            {
+                "path": res_p,
+                "run_dir": run_dir,
+                "run_id": run_dir.name,
+                "data": data,
+                "err": err,
+            }
+        )
+    return items
+
+
+def _changed_from_receipt(payload: dict[str, Any]) -> dict[str, list[str]]:
+    added: list[str] = []
+    modified: list[str] = []
+    wb = payload.get("written_back")
+    if isinstance(wb, list):
+        for item in wb:
+            if not isinstance(item, dict):
+                continue
+            rel = _as_str(item.get("path"))
+            op = _as_str(item.get("op"))
+            if not rel:
+                continue
+            if op == "added":
+                added.append(rel)
+            elif op == "modified":
+                modified.append(rel)
+    deleted = [str(x) for x in (payload.get("deleted") or []) if isinstance(x, str)]
+    skipped = [str(x) for x in (payload.get("skipped") or []) if isinstance(x, str)]
+    return {
+        "added": sorted(added),
+        "modified": sorted(modified),
+        "deleted": sorted(deleted),
+        "skipped": sorted(skipped),
+    }
+
+
+def _compare_receipt_and_result_json(
+    entry: LogEntry,
+    payload: dict[str, Any],
+    pkey: str,
+    rj: dict[str, Any],
+) -> tuple[list[str], bool]:
+    """Compare a signed `restart_receipt` against companion unsigned `result.json`.
+
+    Returns `(mismatches, companion_anchor_ok)`.
+    """
+    mismatches: list[str] = []
+    companion_anchor_ok = False
+
+    rj_rcpt = rj.get("receipt")
+    if isinstance(rj_rcpt, dict):
+        if rj_rcpt.get("recorded") is True:
+            r_seq = _as_int(rj_rcpt.get("seq"))
+            r_hash = _as_str(rj_rcpt.get("hash"))
+            r_pk = _as_str(rj_rcpt.get("project_key"))
+            ref_ok = True
+            if r_seq != entry.seq:
+                mismatches.append(f"receipt.seq (receipt={entry.seq}, result.json={r_seq})")
+                ref_ok = False
+            if r_hash != entry.hash():
+                mismatches.append(
+                    f"receipt.hash (receipt={entry.hash()[:12]}, result.json={(r_hash or 'none')[:12]})"
+                )
+                ref_ok = False
+            if r_pk is not None and r_pk != pkey:
+                mismatches.append(f"receipt.project_key (receipt={pkey}, result.json={r_pk})")
+                ref_ok = False
+            companion_anchor_ok = ref_ok
+        elif rj_rcpt.get("recorded") is False:
+            mismatches.append("receipt.recorded (signed receipt exists in chain, result.json says recorded=false)")
+
+    if "accepted" in payload and "accepted" in rj:
+        if not _strict_eq(payload.get("accepted"), rj.get("accepted")):
+            mismatches.append(
+                f"accepted (receipt={payload.get('accepted')!r}, result.json={rj.get('accepted')!r})"
+            )
+
+    if "delivered_attempt" in payload and "delivered_attempt" in rj:
+        if not _strict_eq(_as_int(payload.get("delivered_attempt")), _as_int(rj.get("delivered_attempt"))):
+            mismatches.append(
+                f"delivered_attempt (receipt={payload.get('delivered_attempt')!r}, "
+                f"result.json={rj.get('delivered_attempt')!r})"
+            )
+
+    if "max_attempts" in payload and "max_attempts" in rj:
+        if not _strict_eq(_as_int(payload.get("max_attempts")), _as_int(rj.get("max_attempts"))):
+            mismatches.append(
+                f"max_attempts (receipt={payload.get('max_attempts')!r}, "
+                f"result.json={rj.get('max_attempts')!r})"
+            )
+
+    rj_agent = _as_str(rj.get("agent"))
+    rcpt_agent = _as_str(payload.get("agent"))
+    if rj_agent is not None and rcpt_agent is not None and rj_agent != rcpt_agent:
+        mismatches.append(f"agent (receipt={rcpt_agent!r}, result.json={rj_agent!r})")
+
+    rj_proj = _as_str(rj.get("project"))
+    rcpt_proj_sha = _as_str(payload.get("project_path_sha256"))
+    if rj_proj is not None and rcpt_proj_sha is not None:
+        rj_sha = hashlib.sha256(rj_proj.encode("utf-8")).hexdigest()
+        if rj_sha != rcpt_proj_sha:
+            mismatches.append("project_path_sha256 (result.json project path differs from signed receipt)")
+
+    rcpt_acc = payload.get("acceptance") if isinstance(payload.get("acceptance"), dict) else None
+    rj_acc = rj.get("acceptance") if isinstance(rj.get("acceptance"), dict) else None
+    if rcpt_acc is not None and rj_acc is not None:
+        if _as_str(rcpt_acc.get("kind")) != _as_str(rj_acc.get("kind")):
+            mismatches.append(
+                f"acceptance.kind (receipt={rcpt_acc.get('kind')!r}, result.json={rj_acc.get('kind')!r})"
+            )
+        if _as_str(rcpt_acc.get("command")) != _as_str(rj_acc.get("command")):
+            mismatches.append("acceptance.command differs")
+
+    rcpt_atts = (
+        [a for a in payload["attempts"] if isinstance(a, dict)]
+        if isinstance(payload.get("attempts"), list)
+        else None
+    )
+    rj_atts = (
+        [a for a in rj["attempts"] if isinstance(a, dict)]
+        if isinstance(rj.get("attempts"), list)
+        else None
+    )
+    if rcpt_atts is not None and rj_atts is not None:
+        if len(rcpt_atts) != len(rj_atts):
+            mismatches.append(f"attempts.count (receipt={len(rcpt_atts)}, result.json={len(rj_atts)})")
+        else:
+            for idx, (ra, ja) in enumerate(zip(rcpt_atts, rj_atts), start=1):
+                for field in ("attempt", "accept", "passed", "run", "status", "rc", "timed_out"):
+                    if field in ra and field in ja and not _strict_eq(ra.get(field), ja.get(field)):
+                        mismatches.append(
+                            f"attempts[{idx}].{field} (receipt={ra.get(field)!r}, result.json={ja.get(field)!r})"
+                        )
+                rtam = sorted(str(x) for x in (ra.get("tests_tampered") or []) if isinstance(x, str))
+                jtam = sorted(str(x) for x in (ja.get("tests_tampered") or []) if isinstance(x, str))
+                if rtam != jtam:
+                    mismatches.append(f"attempts[{idx}].tests_tampered differs")
+
+    rj_changed = rj.get("changed") if isinstance(rj.get("changed"), dict) else None
+    if rj_changed is not None:
+        rcpt_changed = _changed_from_receipt(payload)
+        if not payload.get("written_back_truncated"):
+            for k in ("added", "modified"):
+                if isinstance(rj_changed.get(k), list):
+                    jvals = sorted(str(x) for x in rj_changed[k] if isinstance(x, str))
+                    if rcpt_changed[k] != jvals:
+                        mismatches.append(f"changed.{k} differs")
+        if not payload.get("deleted_truncated") and isinstance(rj_changed.get("deleted"), list):
+            jdel = sorted(str(x) for x in rj_changed["deleted"] if isinstance(x, str))
+            if rcpt_changed["deleted"] != jdel:
+                mismatches.append("changed.deleted differs")
+        if not payload.get("skipped_truncated") and isinstance(rj_changed.get("skipped"), list):
+            jskip = sorted(str(x) for x in rj_changed["skipped"] if isinstance(x, str))
+            if rcpt_changed["skipped"] != jskip:
+                mismatches.append("changed.skipped differs")
+
+    return mismatches, companion_anchor_ok
+
+
+def _build_restart_record_from_receipt(
+    entry: LogEntry,
+    proj_info: dict[str, Any],
+    companion: dict[str, Any] | None,
+    *,
+    seen_record_ids: set[str],
+) -> dict[str, Any]:
+    payload = entry.payload if isinstance(entry.payload, dict) else {}
+    pkey = proj_info["key"]
+    run_id = _as_str(payload.get("run_id"))
+    if run_id is None and companion is not None:
+        run_id = companion["run_id"]
+    if run_id is None:
+        run_id = f"{pkey}:seq{entry.seq}"
+
+    record_id = f"restart:{run_id}"
+    if record_id in seen_record_ids:
+        record_id = f"restart:{run_id}:seq{entry.seq}"
+    seen_record_ids.add(record_id)
+
+    aux: list[pathlib.Path] = list(proj_info["aux"])
+    if companion is not None and companion["path"] not in aux:
+        aux.append(companion["path"])
+
+    gaps: list[dict[str, Any]] = [dict(g) for g in proj_info["chain_gaps"]]
+
+    sig_verified: bool = proj_info["sig_verified"]
+    sig_status: str = proj_info["sig_status"]
+    sig_reason: str = proj_info["sig_reason"]
+    anchor_checked: bool = bool(proj_info["anchor_checked"])
+
+    mismatches: list[str] = []
+    if companion is not None:
+        if companion["data"] is None:
+            gaps.append(
+                _gap(
+                    "unreadable_source",
+                    "warning",
+                    f"companion result.json unreadable (using signed receipt): {companion['err']}",
+                )
+            )
+        else:
+            mismatches, companion_anchor_ok = _compare_receipt_and_result_json(
+                entry, payload, pkey, companion["data"]
+            )
+            if companion_anchor_ok:
+                anchor_checked = True
+            if mismatches:
+                gaps.append(
+                    _gap(
+                        "result_json_mismatch",
+                        "warning",
+                        "companion result.json disagrees with signed receipt (preferring signed receipt): "
+                        + "; ".join(mismatches[:6]),
+                        count=len(mismatches),
+                    )
+                )
+
+    if sig_verified and not anchor_checked:
+        gaps.append(
+            _gap(
+                "unanchored_chain",
+                "info",
+                "verified against local chain/head.json without companion result.json or signed "
+                "intake ledger anchor; tail truncation cannot be ruled out if head.json was also modified",
+            )
+        )
+
+    # Project path: prefer trace_genesis/state workspace; fall back to companion only if hash matches
+    project: str | None = proj_info["workspace"]
+    if project is None and companion is not None and companion["data"] is not None:
+        cand_proj = _as_str(companion["data"].get("project"))
+        rcpt_proj_sha = _as_str(payload.get("project_path_sha256"))
+        if cand_proj is not None and (
+            rcpt_proj_sha is None
+            or hashlib.sha256(cand_proj.encode("utf-8")).hexdigest() == rcpt_proj_sha
+        ):
+            project = cand_proj
+
+    agent_raw = _as_str(payload.get("agent"))
+    agent, agents = _agents_fields({agent_raw} if agent_raw else set())
+    task_id = _as_str(payload.get("task_id")) or _as_str(payload.get("task"))
+    if agent is None:
+        gaps.append(
+            _gap(
+                "unattributed_source",
+                "info",
+                "restart_receipt does not record agent",
+            )
+        )
+
+    raw_attempts = payload.get("attempts")
+    attempts_list = [a for a in raw_attempts if isinstance(a, dict)] if isinstance(raw_attempts, list) else None
+    attempts_count = len(attempts_list) if attempts_list is not None else None
+    attempts_max = _as_int(payload.get("max_attempts"))
+    attempts_delivered = _as_int(payload.get("delivered_attempt"))
+
+    if "accepted" not in payload:
+        result = "unknown"
+        gaps.append(_gap("missing_fields", "warning", "restart_receipt missing 'accepted' field"))
+    else:
+        acc_val = payload.get("accepted")
+        if acc_val is True:
+            result = "accepted"
+        elif acc_val is False:
+            result = "rejected"
+        elif acc_val is None:
+            result = "unchecked"
+        else:
+            result = "unknown"
+            gaps.append(
+                _gap(
+                    "missing_fields",
+                    "warning",
+                    f"unexpected type for 'accepted' in restart_receipt: {type(acc_val).__name__}",
+                )
+            )
+
+    acc_meta = payload.get("acceptance") if isinstance(payload.get("acceptance"), dict) else {}
+    acc_kind = _as_str(acc_meta.get("kind"))
+
+    delivered_entry: dict[str, Any] | None = None
+    if attempts_list:
+        if attempts_delivered is not None and 1 <= attempts_delivered <= len(attempts_list):
+            delivered_entry = attempts_list[attempts_delivered - 1]
+        else:
+            delivered_entry = attempts_list[-1]
+
+    raw_status = _as_str((delivered_entry or {}).get("status"))
+    checks_passed = _as_int((delivered_entry or {}).get("passed"))
+    checks_total = _as_int((delivered_entry or {}).get("run"))
+
+    if result == "unchecked":
+        why_un = _as_str(acc_meta.get("reason")) or raw_status or "no_tests"
+        gaps.append(_gap("unchecked", "warning", f"restart ran without executable acceptance ({why_un})"))
+
+    tampered: set[str] = set()
+    n_timeouts = 0
+    n_acc_err = 0
+    norm_attempts: list[dict[str, Any]] | None = None
+    snapshot_hashes: list[dict[str, Any]] | None = None
+    if attempts_list is not None:
+        norm_attempts = []
+        snapshot_hashes = []
+        for a in attempts_list:
+            tlist = [t for t in (a.get("tests_tampered") or []) if isinstance(t, str) and t]
+            tampered.update(tlist)
+            if a.get("timed_out") is True:
+                n_timeouts += 1
+            if a.get("status") == "acceptance_error":
+                n_acc_err += 1
+            snap_sha = _as_str(a.get("snapshot_tree_sha256"))
+            att_n = _as_int(a.get("attempt"))
+            norm_attempts.append(
+                {
+                    "attempt": att_n,
+                    "accept": _as_bool(a.get("accept")),
+                    "passed": _as_int(a.get("passed")),
+                    "run": _as_int(a.get("run")),
+                    "status": _as_str(a.get("status")),
+                    "rc": _as_int(a.get("rc")),
+                    "timed_out": _as_bool(a.get("timed_out")),
+                    "wall_s": a.get("wall_s") if not isinstance(a.get("wall_s"), bool) else None,
+                    "tests_tampered": tlist,
+                    "snapshot_tree_sha256": snap_sha,
+                }
+            )
+            snapshot_hashes.append({"attempt": att_n, "snapshot_tree_sha256": snap_sha})
+
+    if tampered:
+        gaps.append(
+            _gap(
+                "tests_tampered",
+                "warning",
+                f"agent modified protected test file(s) (restored before check): {', '.join(sorted(tampered))}",
+                count=len(tampered),
+            )
+        )
+
+    skipped_list = payload.get("skipped") if isinstance(payload.get("skipped"), list) else []
+    skipped_count = _as_int(payload.get("skipped_count"))
+    eff_skipped_n = skipped_count if skipped_count is not None else len(skipped_list)
+    if eff_skipped_n > 0:
+        gaps.append(
+            _gap(
+                "skipped_writeback",
+                "warning",
+                f"{eff_skipped_n} unsafe path(s) skipped during write-back",
+                count=eff_skipped_n,
+            )
+        )
+
+    if n_timeouts or n_acc_err:
+        parts = []
+        if n_timeouts:
+            parts.append(f"{n_timeouts} timeout(s)")
+        if n_acc_err:
+            parts.append(f"{n_acc_err} acceptance error(s)")
+        gaps.append(_gap("infra_void", "warning", "restart attempt issues: " + ", ".join(parts)))
+
+    entry_ts = _as_int(entry.ts_ms)
+    ts_ms = entry_ts if entry_ts is not None else _parse_restart_dir_ts_ms(run_id)
+    argv_list = (
+        [str(tok) for tok in payload["argv"]]
+        if isinstance(payload.get("argv"), list)
+        else None
+    )
+    changed_summary = _changed_from_receipt(payload)
+
+    signature = {
+        "verified": sig_verified,
+        "status": sig_status,
+        "scheme": "ed25519_trusted_chain",
+        "reason": sig_reason,
+        "signer": proj_info["signer"],
+        "entries_checked": (
+            len(proj_info["entries"])
+            if proj_info["entries"] or not proj_info["raw_problems"]
+            else None
+        ),
+        "chain_head": proj_info["chain_head"],
+        "anchor_checked": anchor_checked,
+    }
+
+    details: dict[str, Any] = {
+        "source_type": "signed_receipt",
+        "run_id": run_id,
+        "run_dir": str(companion["run_dir"]) if companion is not None else None,
+        "receipt_schema": _as_str(payload.get("receipt_schema")),
+        "receipt_seq": entry.seq,
+        "receipt_hash": entry.hash(),
+        "request_sha256": _as_str(payload.get("request_sha256")),
+        "project_path_sha256": _as_str(payload.get("project_path_sha256")),
+        "argv": argv_list,
+        "acceptance_command": _as_str(acc_meta.get("command")),
+        "protected": acc_meta.get("protected") if isinstance(acc_meta.get("protected"), list) else None,
+        "attempts": norm_attempts,
+        "snapshot_hashes": snapshot_hashes,
+        "delivered_snapshot_sha256": _as_str((delivered_entry or {}).get("snapshot_tree_sha256")),
+        "tests_tampered": sorted(tampered) if tampered else [],
+        "written_back": payload.get("written_back") if isinstance(payload.get("written_back"), list) else None,
+        "deleted": payload.get("deleted") if isinstance(payload.get("deleted"), list) else None,
+        "skipped": skipped_list,
+        "changed": changed_summary,
+        "agent_wall_s": payload.get("agent_wall_s"),
+        "total_wall_s": payload.get("total_wall_s"),
+    }
+    if mismatches:
+        details["mismatches"] = mismatches
+
+    return _base_record(
+        record_id=record_id,
+        kind="restart",
+        source_path=proj_info["primary_path"],
+        auxiliary_paths=aux,
+        started_at_ms=entry_ts,
+        ended_at_ms=entry_ts,
+        timestamp_ms=ts_ms,
+        project=project,
+        project_key=pkey,
+        agent=agent,
+        agents=agents,
+        task=task_id,
+        attempts_count=attempts_count,
+        attempts_max=attempts_max,
+        attempts_delivered=attempts_delivered,
+        result=result,
+        raw_status=raw_status,
+        acceptance_kind=acc_kind,
+        checks_passed=checks_passed,
+        checks_total=checks_total,
+        sent_back_count=0 if attempts_list is not None else None,
+        sent_back_items=[] if attempts_list is not None else None,
+        gaps=gaps,
+        signature=signature,
+        details=details,
+    )
+
+
+def _build_restart_record_from_result_json(
+    rj_item: dict[str, Any],
+    *,
+    broken_trace_info: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build a `restart` record from `result.json` (fallback when unsigned or chain truncated)."""
+    res_p: pathlib.Path = rj_item["path"]
+    run_dir: pathlib.Path = rj_item["run_dir"]
+    loaded: dict[str, Any] | None = rj_item["data"]
+    err: str | None = rj_item["err"]
+    dir_ts_ms = _parse_restart_dir_ts_ms(run_dir.name)
+
+    gaps: list[dict[str, Any]] = []
+    aux: list[pathlib.Path] = []
+    source_path: pathlib.Path = res_p
+    project_key: str | None = None
+
+    rj_rcpt = loaded.get("receipt") if isinstance(loaded, dict) and isinstance(loaded.get("receipt"), dict) else None
+
+    if broken_trace_info is not None:
+        # Chain directory exists on disk and result.json claimed a signed receipt there,
+        # yet the receipt is missing/unparseable in the chain -> truncation / corruption!
+        project_key = broken_trace_info["key"]
+        source_path = broken_trace_info["primary_path"]
+        aux = [*broken_trace_info["aux"], res_p]
+        anchor_checked = bool(broken_trace_info["anchor_checked"])
+        if not broken_trace_info["sig_verified"]:
+            sig_reason = broken_trace_info["sig_reason"]
+            gaps.extend(dict(g) for g in broken_trace_info["chain_gaps"])
+        else:
+            ref_anchor = {
+                "seq": _as_int((rj_rcpt or {}).get("seq")),
+                "hash": _as_str((rj_rcpt or {}).get("hash")),
+            }
+            anchor_checked = True
+            ok, why = broken_trace_info["recorder"].verify(
+                trust=broken_trace_info["trust"],
+                anchor=ref_anchor,
+            )
+            sig_reason = (
+                why
+                if not ok
+                else f"restart_receipt for {run_dir.name} not found in trace chain"
+            )
+            low = sig_reason.lower()
+            is_trunc = (
+                "truncated" in low
+                or "anchored entry" in low
+                or "recorded head" in low
+                or "not found" in low
+            )
+            gaps.append(
+                _gap(
+                    "chain_truncated" if is_trunc else "signature_failed",
+                    "error",
+                    sig_reason,
+                )
+            )
+        signature = {
+            "verified": False,
+            "status": "failed",
+            "scheme": "ed25519_trusted_chain",
+            "reason": sig_reason,
+            "signer": broken_trace_info["signer"],
+            "entries_checked": (
+                len(broken_trace_info["entries"])
+                if broken_trace_info["entries"] or not broken_trace_info["raw_problems"]
+                else None
+            ),
+            "chain_head": broken_trace_info["chain_head"],
+            "anchor_checked": anchor_checked,
+        }
+        source_type = "result_json_chain_failed"
+    else:
+        if rj_rcpt is not None and rj_rcpt.get("recorded") is True:
+            sig_reason = "referenced trace chain is missing; fell back to unsigned restart result.json"
+            project_key = _as_str(rj_rcpt.get("project_key"))
+        elif rj_rcpt is not None and rj_rcpt.get("recorded") is False:
+            rec_err = _as_str(rj_rcpt.get("error"))
+            sig_reason = (
+                f"restart receipt was not recorded ({rec_err}); fell back to unsigned result.json"
+                if rec_err
+                else "restart receipt was not recorded; fell back to unsigned result.json"
+            )
+        else:
+            sig_reason = "restart result.json is unsigned"
+        gaps.append(_gap("unsigned_source", "warning", sig_reason))
         signature = {
             "verified": None,
             "status": "unsigned",
             "scheme": "none",
-            "reason": "restart result.json is unsigned",
+            "reason": sig_reason,
             "signer": None,
             "entries_checked": None,
             "chain_head": None,
             "anchor_checked": None,
         }
+        source_type = "result_json_fallback"
 
-        if err or not isinstance(loaded, dict):
-            reason = err or "result.json is not a JSON object"
-            gaps.append(_gap("unreadable_source", "error", reason))
-            records.append(
-                _base_record(
-                    record_id=f"restart:{run_dir.name}",
-                    kind="restart",
-                    source_path=res_p,
-                    auxiliary_paths=[],
-                    started_at_ms=None,
-                    ended_at_ms=None,
-                    timestamp_ms=dir_ts_ms,
-                    project=None,
-                    project_key=None,
-                    agent=None,
-                    agents=None,
-                    task=None,
-                    attempts_count=None,
-                    attempts_max=None,
-                    attempts_delivered=None,
-                    result="unreadable",
-                    raw_status="unreadable",
-                    acceptance_kind=None,
-                    checks_passed=None,
-                    checks_total=None,
-                    sent_back_count=None,
-                    sent_back_items=None,
-                    gaps=gaps,
-                    signature=signature,
-                    details={"run_dir": str(run_dir), "error": reason},
-                )
-            )
-            continue
+    if err or loaded is None:
+        reason = err or "result.json is not a JSON object"
+        gaps.append(_gap("unreadable_source", "error", reason))
+        return _base_record(
+            record_id=f"restart:{run_dir.name}",
+            kind="restart",
+            source_path=source_path,
+            auxiliary_paths=aux,
+            started_at_ms=None,
+            ended_at_ms=None,
+            timestamp_ms=dir_ts_ms,
+            project=None,
+            project_key=project_key,
+            agent=None,
+            agents=None,
+            task=None,
+            attempts_count=None,
+            attempts_max=None,
+            attempts_delivered=None,
+            result="unreadable",
+            raw_status="unreadable",
+            acceptance_kind=None,
+            checks_passed=None,
+            checks_total=None,
+            sent_back_count=None,
+            sent_back_items=None,
+            gaps=gaps,
+            signature=signature,
+            details={"source_type": source_type, "run_dir": str(run_dir), "error": reason},
+        )
 
-        project = _as_str(loaded.get("project"))
-        agent_raw = _as_str(loaded.get("agent"))
-        agent, agents = _agents_fields({agent_raw} if agent_raw else set())
-        task_id = _as_str(loaded.get("task_id")) or _as_str(loaded.get("task"))
+    project = _as_str(loaded.get("project"))
+    agent_raw = _as_str(loaded.get("agent"))
+    agent, agents = _agents_fields({agent_raw} if agent_raw else set())
+    task_id = _as_str(loaded.get("task_id")) or _as_str(loaded.get("task"))
 
-        if agent is None or task_id is None:
-            missing_id = [k for k, v in (("agent", agent), ("task", task_id)) if v is None]
-            gaps.append(
-                _gap(
-                    "unattributed_source",
-                    "info",
-                    f"restart result.json does not record {', '.join(missing_id)}",
-                )
-            )
-
-        raw_attempts = loaded.get("attempts")
-        attempts_list = [a for a in raw_attempts if isinstance(a, dict)] if isinstance(raw_attempts, list) else None
-        attempts_count = len(attempts_list) if attempts_list is not None else None
-        attempts_max = _as_int(loaded.get("max_attempts"))
-        attempts_delivered = _as_int(loaded.get("delivered_attempt"))
-
-        if "accepted" not in loaded:
-            result = "unknown"
-            gaps.append(_gap("missing_fields", "warning", "restart result.json missing 'accepted' field"))
-        else:
-            acc_val = loaded.get("accepted")
-            if acc_val is True:
-                result = "accepted"
-            elif acc_val is False:
-                result = "rejected"
-            elif acc_val is None:
-                result = "unchecked"
-            else:
-                result = "unknown"
-                gaps.append(
-                    _gap(
-                        "missing_fields",
-                        "warning",
-                        f"unexpected type for 'accepted': {type(acc_val).__name__}",
-                    )
-                )
-
-        acc_meta = loaded.get("acceptance") if isinstance(loaded.get("acceptance"), dict) else {}
-        acc_kind = _as_str(acc_meta.get("kind"))
-
-        delivered_entry: dict[str, Any] | None = None
-        if attempts_list:
-            if attempts_delivered is not None and 1 <= attempts_delivered <= len(attempts_list):
-                delivered_entry = attempts_list[attempts_delivered - 1]
-            else:
-                delivered_entry = attempts_list[-1]
-
-        raw_status = _as_str((delivered_entry or {}).get("status"))
-        checks_passed = _as_int((delivered_entry or {}).get("passed"))
-        checks_total = _as_int((delivered_entry or {}).get("run"))
-
-        if result == "unchecked":
-            why_un = _as_str(acc_meta.get("reason")) or _as_str((delivered_entry or {}).get("first_problem")) or raw_status or "no_tests"
-            gaps.append(_gap("unchecked", "warning", f"restart ran without executable acceptance ({why_un})"))
-
-        tampered: set[str] = set()
-        n_timeouts = 0
-        n_spawn_err = 0
-        n_acc_err = 0
-        for a in attempts_list or []:
-            for t in a.get("tests_tampered") or []:
-                if isinstance(t, str) and t:
-                    tampered.add(t)
-            if a.get("timed_out") is True:
-                n_timeouts += 1
-            if _as_str(a.get("spawn_error")):
-                n_spawn_err += 1
-            if a.get("status") == "acceptance_error":
-                n_acc_err += 1
-
-        if tampered:
-            gaps.append(
-                _gap(
-                    "tests_tampered",
-                    "warning",
-                    f"agent modified protected test file(s) (restored before check): {', '.join(sorted(tampered))}",
-                    count=len(tampered),
-                )
-            )
-        changed = loaded.get("changed") if isinstance(loaded.get("changed"), dict) else {}
-        skipped = changed.get("skipped") if isinstance(changed.get("skipped"), list) else []
-        if skipped:
-            gaps.append(
-                _gap(
-                    "skipped_writeback",
-                    "warning",
-                    f"{len(skipped)} unsafe path(s) skipped during write-back",
-                    count=len(skipped),
-                )
-            )
-        if n_timeouts or n_spawn_err or n_acc_err:
-            parts = []
-            if n_timeouts:
-                parts.append(f"{n_timeouts} timeout(s)")
-            if n_spawn_err:
-                parts.append(f"{n_spawn_err} spawn error(s)")
-            if n_acc_err:
-                parts.append(f"{n_acc_err} acceptance error(s)")
-            gaps.append(_gap("infra_void", "warning", "restart attempt issues: " + ", ".join(parts)))
-
-        recorded_ts = _as_int(loaded.get("timestamp_ms"))
-        ts_ms = recorded_ts if recorded_ts is not None else dir_ts_ms
-        ts_source = "recorded" if recorded_ts is not None else ("run_dir_name" if dir_ts_ms is not None else None)
-
-        records.append(
-            _base_record(
-                record_id=f"restart:{run_dir.name}",
-                kind="restart",
-                source_path=res_p,
-                auxiliary_paths=[],
-                started_at_ms=recorded_ts,
-                ended_at_ms=recorded_ts,
-                timestamp_ms=ts_ms,
-                project=project,
-                project_key=None,
-                agent=agent,
-                agents=agents,
-                task=task_id,
-                attempts_count=attempts_count,
-                attempts_max=attempts_max,
-                attempts_delivered=attempts_delivered,
-                result=result,
-                raw_status=raw_status,
-                acceptance_kind=acc_kind,
-                checks_passed=checks_passed,
-                checks_total=checks_total,
-                sent_back_count=0 if attempts_list is not None else None,
-                sent_back_items=[] if attempts_list is not None else None,
-                gaps=gaps,
-                signature=signature,
-                details={
-                    "run_dir": str(run_dir),
-                    "timestamp_source": ts_source,
-                    "acceptance_command": _as_str(acc_meta.get("command")),
-                    "protected": loaded.get("protected"),
-                    "tests_tampered": sorted(tampered) if tampered else [],
-                    "changed": changed or None,
-                    "agent_wall_s": loaded.get("agent_wall_s"),
-                    "total_wall_s": loaded.get("total_wall_s"),
-                    "first_problem": _as_str((delivered_entry or {}).get("first_problem")),
-                },
+    if agent is None or task_id is None:
+        missing_id = [k for k, v in (("agent", agent), ("task", task_id)) if v is None]
+        gaps.append(
+            _gap(
+                "unattributed_source",
+                "info",
+                f"restart result.json does not record {', '.join(missing_id)}",
             )
         )
 
-    return records
+    raw_attempts = loaded.get("attempts")
+    attempts_list = [a for a in raw_attempts if isinstance(a, dict)] if isinstance(raw_attempts, list) else None
+    attempts_count = len(attempts_list) if attempts_list is not None else None
+    attempts_max = _as_int(loaded.get("max_attempts"))
+    attempts_delivered = _as_int(loaded.get("delivered_attempt"))
+
+    if "accepted" not in loaded:
+        result = "unknown"
+        gaps.append(_gap("missing_fields", "warning", "restart result.json missing 'accepted' field"))
+    else:
+        acc_val = loaded.get("accepted")
+        if acc_val is True:
+            result = "accepted"
+        elif acc_val is False:
+            result = "rejected"
+        elif acc_val is None:
+            result = "unchecked"
+        else:
+            result = "unknown"
+            gaps.append(
+                _gap(
+                    "missing_fields",
+                    "warning",
+                    f"unexpected type for 'accepted': {type(acc_val).__name__}",
+                )
+            )
+
+    acc_meta = loaded.get("acceptance") if isinstance(loaded.get("acceptance"), dict) else {}
+    acc_kind = _as_str(acc_meta.get("kind"))
+
+    delivered_entry: dict[str, Any] | None = None
+    if attempts_list:
+        if attempts_delivered is not None and 1 <= attempts_delivered <= len(attempts_list):
+            delivered_entry = attempts_list[attempts_delivered - 1]
+        else:
+            delivered_entry = attempts_list[-1]
+
+    raw_status = _as_str((delivered_entry or {}).get("status"))
+    checks_passed = _as_int((delivered_entry or {}).get("passed"))
+    checks_total = _as_int((delivered_entry or {}).get("run"))
+
+    if result == "unchecked":
+        why_un = (
+            _as_str(acc_meta.get("reason"))
+            or _as_str((delivered_entry or {}).get("first_problem"))
+            or raw_status
+            or "no_tests"
+        )
+        gaps.append(_gap("unchecked", "warning", f"restart ran without executable acceptance ({why_un})"))
+
+    tampered: set[str] = set()
+    n_timeouts = 0
+    n_spawn_err = 0
+    n_acc_err = 0
+    for a in attempts_list or []:
+        for t in a.get("tests_tampered") or []:
+            if isinstance(t, str) and t:
+                tampered.add(t)
+        if a.get("timed_out") is True:
+            n_timeouts += 1
+        if _as_str(a.get("spawn_error")):
+            n_spawn_err += 1
+        if a.get("status") == "acceptance_error":
+            n_acc_err += 1
+
+    if tampered:
+        gaps.append(
+            _gap(
+                "tests_tampered",
+                "warning",
+                f"agent modified protected test file(s) (restored before check): {', '.join(sorted(tampered))}",
+                count=len(tampered),
+            )
+        )
+    changed = loaded.get("changed") if isinstance(loaded.get("changed"), dict) else {}
+    skipped = changed.get("skipped") if isinstance(changed.get("skipped"), list) else []
+    if skipped:
+        gaps.append(
+            _gap(
+                "skipped_writeback",
+                "warning",
+                f"{len(skipped)} unsafe path(s) skipped during write-back",
+                count=len(skipped),
+            )
+        )
+    if n_timeouts or n_spawn_err or n_acc_err:
+        parts = []
+        if n_timeouts:
+            parts.append(f"{n_timeouts} timeout(s)")
+        if n_spawn_err:
+            parts.append(f"{n_spawn_err} spawn error(s)")
+        if n_acc_err:
+            parts.append(f"{n_acc_err} acceptance error(s)")
+        gaps.append(_gap("infra_void", "warning", "restart attempt issues: " + ", ".join(parts)))
+
+    recorded_ts = _as_int(loaded.get("timestamp_ms"))
+    ts_ms = recorded_ts if recorded_ts is not None else dir_ts_ms
+    ts_source = "recorded" if recorded_ts is not None else ("run_dir_name" if dir_ts_ms is not None else None)
+
+    details: dict[str, Any] = {
+        "source_type": source_type,
+        "run_id": run_dir.name,
+        "run_dir": str(run_dir),
+        "timestamp_source": ts_source,
+        "acceptance_command": _as_str(acc_meta.get("command")),
+        "protected": loaded.get("protected"),
+        "tests_tampered": sorted(tampered) if tampered else [],
+        "changed": changed or None,
+        "agent_wall_s": loaded.get("agent_wall_s"),
+        "total_wall_s": loaded.get("total_wall_s"),
+        "first_problem": _as_str((delivered_entry or {}).get("first_problem")),
+    }
+    if rj_rcpt is not None and rj_rcpt.get("recorded") is False and _as_str(rj_rcpt.get("error")):
+        details["receipt_error"] = _as_str(rj_rcpt.get("error"))
+
+    return _base_record(
+        record_id=f"restart:{run_dir.name}",
+        kind="restart",
+        source_path=source_path,
+        auxiliary_paths=aux,
+        started_at_ms=recorded_ts,
+        ended_at_ms=recorded_ts,
+        timestamp_ms=ts_ms,
+        project=project,
+        project_key=project_key,
+        agent=agent,
+        agents=agents,
+        task=task_id,
+        attempts_count=attempts_count,
+        attempts_max=attempts_max,
+        attempts_delivered=attempts_delivered,
+        result=result,
+        raw_status=raw_status,
+        acceptance_kind=acc_kind,
+        checks_passed=checks_passed,
+        checks_total=checks_total,
+        sent_back_count=0 if attempts_list is not None else None,
+        sent_back_items=[] if attempts_list is not None else None,
+        gaps=gaps,
+        signature=signature,
+        details=details,
+    )
+
+
+def _collect_trace_and_restart(
+    vacant_home: pathlib.Path,
+    work_root: pathlib.Path,
+    trace_anchors: dict[str, dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Collect `trace` and `restart` records together, joining signed restart receipts
+    from trace chains with companion `result.json` files by `run_id` (or `(project_key, seq, hash)`).
+
+    Guarantees one run = one record:
+      - Signed `restart_receipt` entries produce verified `restart:<run_id>` records and
+        consume their companion `result.json` (preferring the receipt and flagging any mismatch).
+      - Restart-only trace chains (containing only `trace_genesis` + `restart_receipt` /
+        volume structural entries) do NOT emit an empty duplicate `trace:<project_key>` record.
+      - Unmatched `result.json` files fall back to unsigned `restart:<run_id>` records (or
+        failed/truncated records if the referenced trace chain exists on disk without that receipt).
+    """
+    trace_infos = _inspect_trace_projects(vacant_home, trace_anchors)
+    result_items = _scan_restart_result_files(work_root)
+
+    by_run_id: dict[str, dict[str, Any]] = {}
+    by_receipt_ref: dict[tuple[str, int, str], dict[str, Any]] = {}
+    for item in result_items:
+        by_run_id[item["run_id"]] = item
+        data = item["data"]
+        if isinstance(data, dict):
+            rcpt_ref = data.get("receipt")
+            if isinstance(rcpt_ref, dict) and rcpt_ref.get("recorded") is True:
+                r_pk = _as_str(rcpt_ref.get("project_key"))
+                r_seq = _as_int(rcpt_ref.get("seq"))
+                r_hash = _as_str(rcpt_ref.get("hash"))
+                if r_pk and r_seq is not None and r_hash:
+                    by_receipt_ref[(r_pk, r_seq, r_hash)] = item
+
+    matched_result_paths: set[pathlib.Path] = set()
+    claimed_restart_only_pkeys: set[str] = set()
+    seen_restart_ids: set[str] = set()
+    restart_records: list[dict[str, Any]] = []
+
+    # 1. Signed restart receipts from trace chains (authoritative)
+    for pkey, info in trace_infos.items():
+        if not info["restart_entries"]:
+            continue
+        for entry in info["restart_entries"]:
+            payload = entry.payload if isinstance(entry.payload, dict) else {}
+            run_id = _as_str(payload.get("run_id"))
+            companion: dict[str, Any] | None = None
+            if run_id is not None and run_id in by_run_id:
+                companion = by_run_id[run_id]
+            else:
+                ref_key = (pkey, entry.seq, entry.hash())
+                if ref_key in by_receipt_ref:
+                    companion = by_receipt_ref[ref_key]
+            if companion is not None:
+                matched_result_paths.add(companion["path"])
+            restart_records.append(
+                _build_restart_record_from_receipt(
+                    entry, info, companion, seen_record_ids=seen_restart_ids
+                )
+            )
+        if not info["has_non_restart_trace_activity"]:
+            claimed_restart_only_pkeys.add(pkey)
+
+    # 2. Unmatched result.json files (legacy fallback, missing chain, or truncated chain)
+    for item in result_items:
+        if item["path"] in matched_result_paths:
+            continue
+        data = item["data"]
+        broken_info: dict[str, Any] | None = None
+        if isinstance(data, dict):
+            rcpt_ref = data.get("receipt")
+            if isinstance(rcpt_ref, dict) and rcpt_ref.get("recorded") is True:
+                r_pk = _as_str(rcpt_ref.get("project_key"))
+                if r_pk and r_pk in trace_infos:
+                    # Referenced chain exists on disk, yet this receipt is missing from it
+                    broken_info = trace_infos[r_pk]
+                    if not broken_info["has_non_restart_trace_activity"]:
+                        claimed_restart_only_pkeys.add(r_pk)
+        restart_records.append(
+            _build_restart_record_from_result_json(item, broken_trace_info=broken_info)
+        )
+
+    # 3. Trace records (skipping restart-only chains already emitted as restart records)
+    trace_records: list[dict[str, Any]] = []
+    for pkey, info in trace_infos.items():
+        if pkey in claimed_restart_only_pkeys:
+            continue
+        trace_records.append(_build_trace_record(info))
+
+    return trace_records, restart_records
+
+
+def _collect_restart(
+    work_root: pathlib.Path,
+    *,
+    vacant_home: pathlib.Path | None = None,
+    trace_anchors: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    if vacant_home is not None:
+        _, restart_records = _collect_trace_and_restart(
+            vacant_home, work_root, trace_anchors or {}
+        )
+        return restart_records
+    return [_build_restart_record_from_result_json(item) for item in _scan_restart_result_files(work_root)]
 
 
 # ── Source 5: Possess Wire Logs ───────────────────────────────────────────────
@@ -2166,20 +2907,24 @@ def collect_all(
     want = set(kinds) if kinds else set(KINDS)
     records: list[dict[str, Any]] = []
 
-    # Always collect ledger anchors if trace OR intake_ledger is requested
+    # Always collect ledger anchors if intake_ledger, trace, or restart is requested
     ledger_records: list[dict[str, Any]] = []
     trace_anchors: dict[str, dict[str, Any]] = {}
-    if "intake_ledger" in want or "trace" in want:
+    if "intake_ledger" in want or "trace" in want or "restart" in want:
         ledger_records, trace_anchors = _collect_intake_ledgers(paths["vacant_home"])
 
-    if "trace" in want:
-        records.extend(_collect_trace(paths["vacant_home"], trace_anchors))
+    if "trace" in want or "restart" in want:
+        trace_records, restart_records = _collect_trace_and_restart(
+            paths["vacant_home"], paths["work_root"], trace_anchors
+        )
+        if "trace" in want:
+            records.extend(trace_records)
+        if "restart" in want:
+            records.extend(restart_records)
     if "intake_ledger" in want:
         records.extend(ledger_records)
     if "vrun" in want:
         records.extend(_collect_vrun(paths["vrun_dirs"]))
-    if "restart" in want:
-        records.extend(_collect_restart(paths["work_root"]))
     if "possess_wire" in want:
         records.extend(_collect_possess_wire(paths["possess_home"]))
 
