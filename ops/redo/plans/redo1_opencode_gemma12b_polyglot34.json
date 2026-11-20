@@ -1,0 +1,138 @@
+{
+  "id": "redo1_opencode_gemma12b_polyglot34",
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261114,
+  "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+  "bank_candidates": [
+    "/tmp/bm_tasks/polyglot_py",
+    "/srv/eval/staged/polyglot_py"
+  ],
+  "arms": {
+    "A": {
+      "policy": "single",
+      "attempt_timeout_s": 1800
+    },
+    "R3": {
+      "policy": "restart",
+      "max_attempts": 3,
+      "attempt_timeout_s": 600,
+      "budget_s": 1800,
+      "hint": "none"
+    }
+  },
+  "pair": [
+    "A",
+    "R3"
+  ],
+  "attempt_timeout_s": 1800,
+  "agent": {
+    "argv": [
+      "opencode",
+      "run",
+      "--model",
+      "{provider}/{model}",
+      "{prompt}"
+    ],
+    "env": {
+      "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1003\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1003\", \"options\": {\"baseURL\": \"http://100.119.113.56:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1003/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}"
+    },
+    "config_dir": {
+      "env": "XDG_DATA_HOME",
+      "from": "~/.pi/agent",
+      "copy": []
+    },
+    "usage": "none",
+    "infra_re": "ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|fetch failed|socket hang up|Connection error|connection refused|Premature close|\\bterminated\\b|model[^\\n]{0,40}(?:not (?:found|loaded)|crashed|unloaded)|\\b50[234]\\b[^\\n]{0,40}(?:Bad Gateway|Service Unavailable|Gateway Timeout)|Cannot connect to API|Unable to connect"
+  },
+  "providers": [
+    {
+      "name": "lms1003",
+      "provider": "lms1003",
+      "model": "gemma-4-12b-it-qat",
+      "jobs": 1
+    }
+  ],
+  "acceptance": {
+    "kind": "workspace_tests",
+    "patterns": [
+      "*_test.py",
+      "test_*.py"
+    ],
+    "timeout_s": 120
+  },
+  "grader": {
+    "timeout_s": 240,
+    "suite_timeout_s": 60,
+    "visible_equals_grader": true
+  },
+  "analysis": {
+    "alpha": 0.05,
+    "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "tasks": [
+    "pg_affine_cipher",
+    "pg_beer_song",
+    "pg_book_store",
+    "pg_bottle_song",
+    "pg_bowling",
+    "pg_connect",
+    "pg_dominoes",
+    "pg_dot_dsl",
+    "pg_food_chain",
+    "pg_forth",
+    "pg_go_counting",
+    "pg_grade_school",
+    "pg_grep",
+    "pg_hangman",
+    "pg_list_ops",
+    "pg_paasio",
+    "pg_phone_number",
+    "pg_pig_latin",
+    "pg_poker",
+    "pg_pov",
+    "pg_proverb",
+    "pg_react",
+    "pg_rest_api",
+    "pg_robot_name",
+    "pg_scale_generator",
+    "pg_sgf_parsing",
+    "pg_simple_linked_list",
+    "pg_transpose",
+    "pg_tree_building",
+    "pg_two_bucket",
+    "pg_variable_length_quantity",
+    "pg_wordy",
+    "pg_zebra_puzzle",
+    "pg_zipper"
+  ],
+  "reps": 5,
+  "prereg": {
+    "registered": "2026-11-20，第一通模型呼叫之前 commit。T07 確認批（OpenCode 1.18.33 headless，本機 gemma-4-12b，1003，jobs 1）。",
+    "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+    "question": "同一個原生 agent（OpenCode 1.18.33，`opencode run`）、同一個本機模型（gemma-4-12b-it-qat）、同一個牆鐘上限（1800 秒）：把預算切成「工作區原本的測試沒過就丟掉工作區、開全新行程重來，最多 3 次、每次 600 秒」，交出通過評分的成果的比例，是不是比「一次跑到底」高？",
+    "why": "screen16_opencode_gemma12b（281461c95d39）：A 4/16、R3 9/16、b=2、c=7、驗收放行卻錯 0 ⇒ GO。pi 上的 redo1（EFFECTIVE）換成第二個原生 agent。",
+    "primary": "R3 對 A，34 題 × 5 次重複＝170 對；精確雙尾 McNemar，α＝0.05。b＝只有 A 過、c＝只有 R3 過。",
+    "states": {
+      "EFFECTIVE": "170 對全部完成、c > b 且 p < 0.05。可以說：「在這 34 題、OpenCode 1.18.33、gemma-4-12b（1003，llama.cpp 2.73.0）、同樣 1800 秒上限下，測試沒過就重開（最多 3 次）交出通過的成果較多（數字、平均嘗試數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／題庫／沒有可執行測試的工作。這是 harness 裡的機制，不是產品指令的數字。",
+      "UNRESOLVED": "完成但 p ≥ 0.05（不論方向）。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+      "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+      "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+      "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+    },
+    "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+    "known_limits": [
+      "等預算是牆鐘的；R3 的模型呼叫數可能比 A 多或少，報告照實列，不當成主張的一部分。",
+      "polyglot_py 的可見測試就是評分器，驗收訊號在這個題庫上是真的；換題庫要先看報告的 signal.accept_fail。",
+      "34 題在 e001／e002／e016／realrun 都用過：這是同一批題上的確認，不是沒看過的題。",
+      "A 的時限 1800 秒與 e001／e002 相同，但那些批次的格子環境（vlab cell）與本 harness 不同，數字不可併表。",
+      "agent 改成 OpenCode：設定經 OPENCODE_CONFIG_CONTENT 指向 1003 的 LM Studio；XDG_DATA_HOME 指到每格自己的空目錄（工作階段不跨格）。",
+      "usage＝none：呼叫數記 null 不填 0；void 只剩 infra_re 那條，已補 OpenCode 的斷線字樣（2026-11-20 實測：端點關掉時印 `Cannot connect to API: Unable to connect`、rc=1）。",
+      "手動確認：pg_affine_cipher 一格 320 秒自己結束（rc=0），有寫檔。",
+      "冒煙 smoke2_opencode_gemma12b（fd5fbc41292c）：4/4 格完成、R3 有重開（attempts=2）；端點關掉的暫時計畫：R3 與 A 都被記成 infra_marker、4 次後 infra_void（不算嘗試）。",
+      "這 16 題是替 pi＋gemma 挑的；NO-GO 時只能寫「篩選題組是替 pi＋gemma 挑的」，不可寫成「OpenCode 上沒效」。",
+      "1003 的 llama.cpp 是 2.73.0；與 pi 的批次不併表。",
+      "OpenCode 的呼叫數 harness 量不到（usage=none）：報告的平均模型呼叫為 None；void 只靠 infra_re。",
+      "數字不與 pi 的批次併表、不合併成一個 p 值。"
+    ]
+  }
+}
