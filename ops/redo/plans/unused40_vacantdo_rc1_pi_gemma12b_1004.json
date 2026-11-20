@@ -1,0 +1,178 @@
+{
+  "id": "unused40_vacantdo_rc1_pi_gemma12b_1004",
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261114,
+  "bank": "/home/user1/dev/ops/ref/bm_tasks/exercism_py_unused",
+  "bank_candidates": [
+    "/tmp/bm_tasks/polyglot_py",
+    "/srv/eval/staged/polyglot_py"
+  ],
+  "arms": {
+    "A": {
+      "policy": "single",
+      "attempt_timeout_s": 1800
+    },
+    "P": {
+      "policy": "single",
+      "attempt_timeout_s": 1900,
+      "agent": {
+        "argv": [
+          "/home/user1/dev/ops/rc1_venv/bin/vacant",
+          "do",
+          "pi",
+          "--prompt",
+          "{prompt}",
+          "--timeout",
+          "1800",
+          "--attempt-timeout",
+          "600",
+          "--",
+          "--session-dir",
+          "{logs}/sessions",
+          "--provider",
+          "{provider}",
+          "--model",
+          "{model}"
+        ],
+        "env": {
+          "PI_SKIP_VERSION_CHECK": "1",
+          "VACANT_WORK": "{logs}/vacant-work"
+        },
+        "usage": "none",
+        "config_dir": {
+          "env": "PI_CODING_AGENT_DIR",
+          "from": "~/.pi/agent",
+          "copy": [
+            "models.json"
+          ]
+        }
+      }
+    }
+  },
+  "pair": [
+    "A",
+    "P"
+  ],
+  "attempt_timeout_s": 1800,
+  "agent": {
+    "argv": [
+      "pi",
+      "-p",
+      "--mode",
+      "json",
+      "--session-dir",
+      "{logs}/sessions",
+      "--provider",
+      "{provider}",
+      "--model",
+      "{model}",
+      "{prompt}"
+    ],
+    "env": {
+      "PI_SKIP_VERSION_CHECK": "1"
+    },
+    "config_dir": {
+      "env": "PI_CODING_AGENT_DIR",
+      "from": "~/.pi/agent",
+      "copy": [
+        "models.json"
+      ]
+    },
+    "log_drop_re": "\"type\":\"message_update\"",
+    "usage": "pi_json"
+  },
+  "providers": [
+    {
+      "name": "lms1004",
+      "provider": "lms1004nothink",
+      "model": "gemma-4-12b-it-qat",
+      "jobs": 1
+    }
+  ],
+  "acceptance": {
+    "kind": "workspace_tests",
+    "patterns": [
+      "*_test.py",
+      "test_*.py"
+    ],
+    "timeout_s": 120
+  },
+  "grader": {
+    "timeout_s": 240,
+    "suite_timeout_s": 60,
+    "visible_equals_grader": true
+  },
+  "analysis": {
+    "alpha": 0.05,
+    "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "tasks": [
+    "ex_all_your_base",
+    "ex_robot_simulator",
+    "ex_roman_numerals",
+    "ex_hamming",
+    "ex_change",
+    "ex_etl",
+    "ex_error_handling",
+    "ex_accumulate",
+    "ex_crypto_square",
+    "ex_matching_brackets",
+    "ex_rational_numbers",
+    "ex_flower_field",
+    "ex_isbn_verifier",
+    "ex_rectangles",
+    "ex_square_root",
+    "ex_protein_translation",
+    "ex_run_length_encoding",
+    "ex_satellite",
+    "ex_hexadecimal",
+    "ex_raindrops",
+    "ex_nth_prime",
+    "ex_isogram",
+    "ex_allergies",
+    "ex_word_search",
+    "ex_strain",
+    "ex_tournament",
+    "ex_word_count",
+    "ex_swift_scheduling",
+    "ex_pythagorean_triplet",
+    "ex_nucleotide_count",
+    "ex_state_of_tic_tac_toe",
+    "ex_binary_search_tree",
+    "ex_game_of_life",
+    "ex_trinary",
+    "ex_gigasecond",
+    "ex_resistor_color_expert",
+    "ex_saddle_points",
+    "ex_binary_search",
+    "ex_sieve",
+    "ex_clock"
+  ],
+  "reps": 5,
+  "prereg": {
+    "registered": "2026-11-20，第一通模型呼叫之前 commit。W3-3：沒用過的題（exercism_py_unused，40 題，選題規則事先固定，見 ops/redo/banks/exercism_py_unused.json）。",
+    "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+    "question": "同一個本機模型（gemma-4-12b-it-qat，1004）、同一個牆鐘上限（1800 秒）、**沒用過的 40 題**：發布候選版的 `vacant do pi`（零設定重開，rc1 3eed78fed）交出通過評分的成果的比例，是不是比原生 pi 一次跑到底高？",
+    "why": "confirm1（34 題，EFFECTIVE）的題目在 e001／e002／e016／realrun 都用過；這批換成事先固定規則選出、沒有人看過結果的題，看效果是否留得住。",
+    "primary": "P 對 A，40 題 × 5 次重複＝200 對；精確雙尾 McNemar，α＝0.05。b＝只有 A 過、c＝只有 P 過。",
+    "states": {
+      "EFFECTIVE": "200 對全部完成、c > b 且 p < 0.05。可以說：「在這 40 題沒用過的 Python 題（exercism，事先固定規則選出）、pi、gemma-4-12b（1004，llama.cpp 2.46.0）、同樣 1800 秒上限下，發布候選版 `vacant do pi`（零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／語言／沒有可執行測試的工作。",
+      "UNRESOLVED": "完成但 p ≥ 0.05（不論方向）。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+      "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+      "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+      "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+    },
+    "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+    "known_limits": [
+      "與 confirm1 的差別：P 臂的 pi 用 harness 的乾淨設定目錄（PI_CODING_AGENT_DIR），不載入 `~/.pi/agent` 的 Vacant 擴充——量的是重開模式本身；P 臂用 rc1 獨立 venv（~/dev/ops/rc1_venv，3eed78fed），不受主 checkout 合併影響。",
+      "exercism 的測試是 unittest.TestCase，P 臂走的是 rc1 的 python_unittest 驗收路徑（與 confirm1 量的同一條）。",
+      "等預算是牆鐘的；P 的模型呼叫數 harness 量不到（usage=none），結案用 ops/redo/analysis/p_model_calls.py 補算（UNKNOWN 照列）。",
+      "P 臂的內層嘗試沒有 harness 的 infra 重試；這個不對稱只會壓低 P。",
+      "跑在 1004（llama.cpp 2.46.0、jobs 1，與 redo1／confirm1c 同一台）；數字不與 1003 或 Colab 的批次併表。"
+    ],
+    "stop_rules": [
+      "jobs 2：監看若在任何 10 分鐘內看到 ≥2 次 `bad allocation`／端點崩潰，停批、改 jobs 1 重新預註冊（已完成的格作廢）；這條只看基礎設施記錄，不看方向。",
+      "端點機器 C: < 5 GB 或 Application Error 崩潰在 1 小時內 ≥3 次：停批、修好再續跑（續跑＝同計畫同 harness，未完成的格重做）。"
+    ]
+  }
+}
