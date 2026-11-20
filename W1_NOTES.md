@@ -95,3 +95,27 @@ Target files:
 - If a project's *own* broken source file causes a `SyntaxError` or `ImportError` during baseline test collection (`load_error`), the baseline pre-check treats it as an environment/collection error and stops with 0 attempts rather than trying to guess whether the missing symbol is a missing dependency or a file the user wanted the agent to create.
 - A project using a non-standard virtualenv location (e.g. Poetry/Hatch/Conda outside `$VIRTUAL_ENV`, `.venv`, `venv`, and `PATH`) must activate it (`VIRTUAL_ENV`) or put its `bin/` on `PATH`.
 - Acceptance-only `node_modules` symlink is not read-only at the OS level; malicious candidate code executed during `npm test` can still modify files the user's OS account can write.
+
+## rc3 — 測試設定檔與測試檔同等對待
+
+rc2 查證時重現的放行卻錯：agent 新增 `conftest.py`（`pytest_pyfunc_call` 回 True）→ pytest 1/1 PASS、conftest 寫回、
+calc.py 仍錯。同一類：ini 的 `pythonpath` 把 agent 寫的 `hack/calc.py` 排到前面（pyproject／pytest.ini／setup.cfg／tox.ini
+四種都重現得到）。
+
+現在：
+- 測試設定檔＝`conftest.py`（任何深度）、`pytest.ini`、`.pytest.ini`、`tox.ini`、`setup.cfg`、`pyproject.toml`、
+  `jest.config.*`、`jest.setup.*`、`vitest.config.*`、`vitest.workspace.*`、`vite.config.*`、`.mocharc*`、`babel.config.*`、
+  `.babelrc*`、`karma.conf.*`。
+- 開始時就有的：和測試檔一樣受保護（驗收前還原、agent 的修改不寫回、訊息列出）。注意這代表 agent 對 `pyproject.toml`／
+  `setup.cfg` 的正當修改（例如加相依）也不會寫回——訊息會列出，留在嘗試的工作區裡讓人自己決定。
+- agent 新增的：驗收副本裡不放、不寫回、訊息寫「added test configuration (…); not used for the check and not written back」。
+- pytest 本來就有的：只跑開始時的測試檔（明列路徑，agent 新增的測試檔不收集）、`-o addopts=`、`-p no:cacheprovider`、
+  pytest 從清過的 sys.path 匯入（專案裡的假 `pytest.py` 遮不到）。
+
+**擋不住的（誠實邊界）：**
+- 測試讀的資料檔、fixture 檔、被測試 import 的輔助模組（例如 `tests/` 之外的 `helpers.py`），agent 改得動，改了就照改過的驗。
+- agent 新增同名套件遮蔽模組（例如在 `calc.py` 旁邊新增 `calc/__init__.py`）：Python 會優先匯入套件。這時交出去的專案
+  確實照這個樣子運作，不算假通過，但 `calc.py` 本身沒被修。
+- 專案環境本身：agent 若對專案的 venv／`node_modules`（在原位置、不在副本裡）安裝 pytest 外掛或改套件，驗收會用到。
+- go：agent 新增的 `*_test.go` 若在同一個 package 裡用 `init()` 改套件層級變數，`go test` 會一起編譯。
+- `--check` 的指令若讀的是沒被 `--protect` 的檔，agent 改得動（訊息有寫）。

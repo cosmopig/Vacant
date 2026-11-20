@@ -101,6 +101,11 @@ from .run import COPY_SKIP, Launch, run_agent, work_root
 PATTERNS = ("*_test.py", "test_*.py")
 _UNIVERSAL_TEST_NAME_PATTERNS = ("*_test.py", "test_*.py", "*.test.*", "*.spec.*", "*_test.go")
 _UNIVERSAL_TEST_DIRS = frozenset({"__tests__", "tests", "test"})
+#: 測試設定檔：能改變「測試怎麼跑、算不算過」的檔（pytest 的 conftest 掛鉤、ini 選項；jest／vitest／mocha／babel 設定）。
+#: 開始時就有的：和測試檔一樣受保護（驗收前還原、不寫回）。agent 新增的：驗收副本裡不放、不寫回、交件訊息列出。
+_TEST_CONFIG_NAMES = frozenset({"conftest.py", "pytest.ini", ".pytest.ini", "tox.ini", "setup.cfg", "pyproject.toml"})
+_TEST_CONFIG_PATTERNS = ("jest.config.*", "jest.setup.*", "vitest.config.*", "vitest.workspace.*", "vite.config.*",
+                         ".mocharc*", "babel.config.*", ".babelrc*", "karma.conf.*")
 _MANIFEST_BY_KIND: dict[str, tuple[str, ...]] = {
     "npm": ("package.json",),
     "cargo": ("Cargo.toml",),
@@ -778,12 +783,21 @@ def _is_python_test(rel: str) -> bool:
     return any(fnmatch.fnmatchcase(name, p) for p in PATTERNS)
 
 
+def _is_test_config(rel: str) -> bool:
+    name = pathlib.PurePosixPath(rel).name
+    return name in _TEST_CONFIG_NAMES or any(fnmatch.fnmatchcase(name, p) for p in _TEST_CONFIG_PATTERNS)
+
+
 def _is_universal_test(rel: str) -> bool:
     parts = pathlib.PurePosixPath(rel).parts
     if any(d in _UNIVERSAL_TEST_DIRS for d in parts[:-1]):
         return True
     name = parts[-1]
     return any(fnmatch.fnmatchcase(name, p) for p in _UNIVERSAL_TEST_NAME_PATTERNS)
+
+
+def _is_protected_by_default(rel: str) -> bool:
+    return _is_universal_test(rel) or _is_test_config(rel)
 
 
 def find_tests(root: pathlib.Path) -> list[str]:
@@ -873,7 +887,7 @@ def find_protected(root: pathlib.Path, *, kind: str = "none",
     root = root.resolve()
     files = _all_files if _all_files is not None else _files(root)
     files_set = set(files)
-    out: set[str] = {r for r in files if _is_universal_test(r)}
+    out: set[str] = {r for r in files if _is_protected_by_default(r)}
     for mf in _MANIFEST_BY_KIND.get(kind, ()):
         if mf in files_set:
             out.add(mf)
@@ -1084,6 +1098,7 @@ class _WritePlan:
     skipped: list[str]
     dirs_to_remove: list[str]         # deepest-first relative dir paths safe to rmdir
     before_files: set[str]
+    config_ignored: list[str] = dataclasses.field(default_factory=list)  # agent 新增的測試設定檔：不驗、不寫回
 
 
 def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str]) -> list[str] | None:
@@ -1150,8 +1165,12 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
     dirs_to_remove: list[str] = []
     dirs_seen: set[str] = set()
 
+    config_ignored: list[str] = []
     for rel in sorted(after - protected):
         if _has_copy_skip(rel):
+            continue
+        if rel not in before and _is_test_config(rel):
+            config_ignored.append(rel)
             continue
         if _through_symlink(project, rel) or _matches_prefix(rel, proj_unreadable):
             write_skips.add(rel)
@@ -1227,6 +1246,7 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
         skipped=sorted(delete_skips | write_skips),
         dirs_to_remove=dirs_to_remove,
         before_files=before,
+        config_ignored=config_ignored,
     )
 
 
@@ -1423,7 +1443,7 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
             _copy_reg_file(snap.root / rel, work / rel, mode=m)
     else:
         for rel in sorted(snap.files):
-            if rel not in protected:
+            if rel not in protected and not _is_test_config(rel):
                 m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
                 _copy_reg_file(snap.root / rel, work / rel, mode=m)
     # 3. 最後以開始時的原始測試檔覆寫
@@ -2790,6 +2810,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "status": acc["status"],
             "acceptance_kind": spec.kind,
             "tests_tampered": acc["tests_tampered"],
+            "config_ignored": list(plan.config_ignored) if plan is not None else [],
             "first_problem": acc.get("first_problem"),
             "rc": r["rc"],
             "timed_out": r["timed_out"],
@@ -2953,9 +2974,13 @@ def summary(res: dict) -> str:
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
+    cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
+    if cfg_new:
+        head += (f"\n  the agent added test configuration ({', '.join(cfg_new[:10])}"
+                 f"{' …' if len(cfg_new) > 10 else ''}); not used for the check and not written back.")
     tam = sorted({t for a in res["attempts"] for t in a["tests_tampered"]})
     if tam:
-        if all(_is_universal_test(t) for t in tam):
+        if all(_is_universal_test(t) or _is_test_config(t) for t in tam):
             head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
         else:
             head += f"\n  the agent edited protected files ({', '.join(tam)}); checked against the originals, not written back."
