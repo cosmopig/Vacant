@@ -3226,12 +3226,70 @@ def _project_lstat_listing(project: pathlib.Path, *,
                            skip_abs: set[pathlib.Path] | None = None,
                            skip_root_nm: bool = False) -> dict[str, tuple]:
     """對原專案做純 lstat 清單（不讀檔內容、不跟隨 symlink）：
-    涵蓋整棵 `.git`（唯獨略過 `.git/objects/`）、以及任意深度的 `node_modules`、`.venv`、
-    `__pycache__`、`.pytest_cache` 與任意處的 symlink。
+    涵蓋整棵 `.git`（含 `.git/objects/info/**` 與 `.git/objects/pack/**` 的完整 lstat，以及
+    `.git/objects/??/` 下鬆散物件的純檔名集合 scandir 不做每檔 lstat、不讀內容）、以及任意深度的
+    `node_modules`、`.venv`、`__pycache__`、`.pytest_cache` 與任意處的 symlink。
     若根目錄 `node_modules` 已由 B3 清單追蹤（`skip_root_nm=True`），則僅跳過根層 `node_modules` 避免重複走訪。
     永遠排除 Vacant 狀態與工作區根目錄。"""
     out: dict[str, tuple] = {}
     skip_rels = _skip_rels_for(project, skip_abs)
+
+    def _walk_git_full(cur: pathlib.Path, rel_prefix: str) -> None:
+        try:
+            entries = sorted(os.scandir(cur), key=lambda e: e.name)
+        except OSError:
+            out[rel_prefix + "/"] = ("unreadable",)
+            return
+        for entry in entries:
+            name = entry.name
+            rel = f"{rel_prefix}/{name}"
+            if rel in skip_rels:
+                continue
+            full = cur / name
+            try:
+                st = entry.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                _walk_git_full(full, rel)
+            else:
+                out[rel] = _lstat_tuple(full, st)
+
+    def _walk_git_objects(cur: pathlib.Path, rel_prefix: str) -> None:
+        try:
+            entries = sorted(os.scandir(cur), key=lambda e: e.name)
+        except OSError:
+            out[rel_prefix + "/"] = ("unreadable",)
+            return
+        for entry in entries:
+            name = entry.name
+            rel = f"{rel_prefix}/{name}"
+            if rel in skip_rels:
+                continue
+            full = cur / name
+            # Fanout loose-object dirs (.git/objects/??/): scandir names only, no per-file lstat, no content reads
+            if len(name) == 2 and all(c in "0123456789abcdefABCDEF" for c in name):
+                try:
+                    if entry.is_dir(follow_symlinks=False):
+                        try:
+                            for sub in os.scandir(full):
+                                sub_rel = f"{rel}/{sub.name}"
+                                if sub_rel not in skip_rels:
+                                    out[sub_rel] = ("git_loose",)
+                        except OSError:
+                            out[rel + "/"] = ("unreadable",)
+                        continue
+                except OSError:
+                    continue
+            try:
+                st = entry.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                # info/**, pack/**, or any unexpected subdir under .git/objects/ -> full lstat
+                _walk_git_full(full, rel)
+            else:
+                out[rel] = _lstat_tuple(full, st)
 
     def _walk_git(cur: pathlib.Path, rel_prefix: str) -> None:
         try:
@@ -3250,6 +3308,7 @@ def _project_lstat_listing(project: pathlib.Path, *,
             except OSError:
                 continue
             if name == "objects" and stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                _walk_git_objects(full, rel)
                 continue
             if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
                 _walk_git(full, rel)
@@ -4962,6 +5021,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "write_back_conflicts": list(res.get("write_back_conflicts") or ()),
             "outside_changes": list(res.get("outside_changes") or ()),
             "protected_outside_changes": list(res.get("protected_outside_changes") or ()),
+            "lstat_listing_s": res.get("lstat_listing_s"),
             "detached_processes": res.get("detached_processes"),
             "acceptance_dependencies_changed": list(res.get("acceptance_dependencies_changed") or ()),
             "not_delivered": list(res.get("not_delivered") or ()),
@@ -6267,6 +6327,14 @@ def summary(res: dict) -> str:
             shown_r = ", ".join(git_refs[:10]) + (f" … (+{len(git_refs) - 10} more)" if len(git_refs) > 10 else "")
             head += (f"\n  WARNING: git refs/HEAD changed outside the delivered attempt "
                      f"({shown_r}) — inspect before running git commands!")
+        git_objects = [
+            p for p in outside_list
+            if p == ".git/objects" or p.startswith(".git/objects/") or "/.git/objects/" in p
+        ]
+        if git_objects:
+            shown_go = ", ".join(git_objects[:10]) + (f" … (+{len(git_objects) - 10} more)" if len(git_objects) > 10 else "")
+            head += (f"\n  WARNING: .git/objects was added, changed, or deleted outside the delivered attempt "
+                     f"({shown_go}) — inspect repository integrity (e.g. `git fsck`) before trusting git!")
         venv_pths = [
             p for p in outside_list
             if p.endswith(".pth") and ".venv" in pathlib.PurePosixPath(p).parts[:-1]
