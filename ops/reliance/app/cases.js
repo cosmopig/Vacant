@@ -1,5 +1,5 @@
 window.RELIANCE_CASES = {
-  "version": 1,
+  "version": 2,
   "selection_seed": 20260925,
   "source": "DABstep / pi / local models / 2026-09-25",
   "cases": [

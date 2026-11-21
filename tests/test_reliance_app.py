@@ -76,6 +76,10 @@ def test_duplicate_and_partial_exports_rejected(bank):
     broken['responses'].pop()
     with pytest.raises(ValueError, match='8 distinct'):
         aggregate.aggregate([broken])
+    broken = copy.deepcopy(e)
+    broken['case_version'] = bank['version'] - 1
+    with pytest.raises(ValueError, match='unsupported schema/case version'):
+        aggregate.aggregate([broken])
 
 
 def test_tampered_reward_and_invalid_time_rejected(bank):

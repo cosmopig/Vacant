@@ -80,6 +80,21 @@ def test_echo_is_not_computation_or_verification():
     assert check_claim(c, [tool(command='echo python calc.py')])['status'] == 'CONTRADICTED'
 
 
+def test_batched_verification_uses_only_the_selected_command_output():
+    c = {'kind': 'verified', 'text': 'I double-checked.'}
+    batch = tool(command='python independent.py', output='17')
+    batch['tool_calls'].append({'tool_call_id': 'unrelated', 'function_name': 'bash',
+                                'arguments': {'command': 'cat reference.txt'}})
+    batch['observation']['results'].append({'source_call_id': 'unrelated', 'content': '42'})
+    assert check_claim(c, [tool(), batch], '42')['status'] == 'UNCHECKABLE'
+    assert check_claim(c, [batch, tool()], '42')['status'] == 'UNCHECKABLE'
+    batch['observation']['results'][0]['content'] = '42'
+    assert check_claim(c, [tool(), batch], '42')['status'] == 'SUPPORTED'
+    assert check_claim(c, [batch, tool()], '42')['status'] == 'SUPPORTED'
+    batch['observation']['results'][0]['content'] = ''
+    assert check_claim(c, [tool(), batch], '42')['status'] == 'UNCHECKABLE'
+
+
 def test_consistency_is_not_semantically_checkable():
     c = extract_claims('It consistently exceeded the threshold.')[0]
     assert check_claim(c, [tool()])['status'] == 'UNCHECKABLE'

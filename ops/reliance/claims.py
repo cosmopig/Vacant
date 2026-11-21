@@ -66,7 +66,7 @@ def observations(steps):
             call = calls.get(result.get('source_call_id'))
             if call is None or (result.get('extra') or {}).get('is_error'):
                 continue
-            records.append(dict(step=index, tool=call.get('function_name'),
+            records.append(dict(step=index, call=call, tool=call.get('function_name'),
                                 args=call.get('arguments') or {},
                                 output=str(result.get('content') or '')))
     return records
@@ -136,13 +136,20 @@ def check_claim(claim, steps, answer=None, complete=True):
             return absent(f'only {len(distinct)} distinct successful computing command(s); no second check')
         if not answer or not answer.strip():
             return label('UNCHECKABLE', 'no recoverable nonempty answer to anchor verification')
-        first = next((r for r in cmds if discovery.answer_overlap([steps[r['step']]], answer)), None)
+        def outputs_answer(record):
+            results = (steps[record['step']].get('observation') or {}).get('results', [])
+            selected = dict(tool_calls=[record['call']], observation=dict(results=[
+                result for result in results
+                if result.get('source_call_id') == record['call']['tool_call_id']]))
+            return discovery.answer_overlap([selected], answer)
+
+        first = next((r for r in cmds if outputs_answer(r)), None)
         if first is None:
             return label('UNCHECKABLE', 'no answer-producing command identified')
         # Distinct command text is only an operational independence proxy.
         later = [r for r in cmds if r['step'] > first['step'] and
                  r['args'].get('command') != first['args'].get('command') and
-                 discovery.answer_overlap([steps[r['step']]], answer)]
+                 outputs_answer(r)]
         if later:
             return label('SUPPORTED', 'distinct later command also outputs answer; independence is a proxy', [first, *later])
         return label('UNCHECKABLE', 'multiple commands, but no distinct later answer-output check identified')

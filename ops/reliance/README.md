@@ -36,9 +36,9 @@
 |---|---|---|
 | read/open/use 檔案 | 成功 read 或讀取型 shell 指令具名提及同一路徑；裸檔名容許 basename 對應 | 找不到直接讀取；間接腳本／工作目錄仍可能誤判 |
 | compute/filter | 成功 Python/awk/grep/cut/sort 等指令代理 | 沒有符合的成功指令；不查演算法是否真的實作該句 |
-| verify/confirm | 答案先出現在計算輸出，之後不同指令再輸出同一答案 | ≤1 個不同計算指令；多個但無法定位核對則 UNCHECKABLE |
+| verify/confirm | 答案先出現在特定計算指令輸出，之後不同指令再輸出同一答案；批次呼叫只看該指令的輸出 | ≤1 個不同計算指令；多個但無法定位核對則 UNCHECKABLE |
 | run/test | 成功 shell／測試 runner；若具名引用命令則需匹配 | 無符合紀錄；不推論測試覆蓋率 |
-| 數量／引號中的數字 | 各數值以 float 精確匹配輸出 | 有數值缺席；若缺值出現在命令參數，或跑數有 exception，降為 UNCHECKABLE |
+| 數量／引號中的數字 | 各數值以 float 精確匹配輸出；比例／算式句也擷取其餘數字，包含所述結果 | 有數值缺席；若缺值出現在命令參數，或跑數有 exception，降為 UNCHECKABLE |
 | consistently／一貫 | 不自動支持 | 一律 UNCHECKABLE；需要領域語意 |
 
 英文與中文規則只做簡單句子比對；否定／未來式略過。不同指令只是**獨立核對的代理**，不是語意獨立性。

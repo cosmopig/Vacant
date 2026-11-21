@@ -96,7 +96,7 @@ def build():
                           steps=timeline, delivery_lines=note, answer_source=source,
                           process_claims=process, manual_note=MANUAL.get(row['trial_id']),
                           reward=int(row['reward'])))
-    return dict(version=1, selection_seed=SEED, source='DABstep / pi / local models / 2026-09-25', cases=cases)
+    return dict(version=2, selection_seed=SEED, source='DABstep / pi / local models / 2026-09-25', cases=cases)
 
 
 def serialize(data):
