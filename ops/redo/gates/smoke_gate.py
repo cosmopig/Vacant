@@ -32,6 +32,16 @@ def check(g: dict) -> list[str]:
             bad.append(f"{arm} infra_void={s['infra_void']}")
         if s.get("grader_kinds") != [g["expect_grader"]]:
             bad.append(f"{arm} grader_kinds={s.get('grader_kinds')}")
+        if arm in g.get("arms_without_usage", []):
+            # harness 量不到（usage=none）：改用 p_model_calls.py 從 agent 自己的日誌補算，要每格都算得到且平均 > 0
+            here = pathlib.Path(__file__).resolve().parents[1]
+            cp = subprocess.run([sys.executable, str(here / "analysis" / "p_model_calls.py"), str(root)],
+                                capture_output=True, text=True)
+            import re as _re
+            m = _re.search(r"可算 (\d+)、UNKNOWN (\d+)；可算的格平均模型呼叫 ([0-9.]+)", cp.stdout + cp.stderr)
+            if not m or int(m.group(2)) != 0 or not float(m.group(3)) > 0:
+                bad.append(f"{arm} 從日誌補算的模型呼叫不完整或為 0：{(cp.stdout + cp.stderr).strip()[-200:]}")
+            continue
         if s.get("model_calls_known_cells") != s.get("cells") or not (s.get("mean_model_calls") or 0) > 0:
             bad.append(f"{arm} 模型呼叫量不到或為 0（known {s.get('model_calls_known_cells')}/{s.get('cells')}，mean {s.get('mean_model_calls')}）")
     if len(r.get("per_arm") or {}) != 2:

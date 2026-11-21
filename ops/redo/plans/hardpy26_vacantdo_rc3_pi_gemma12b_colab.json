@@ -1,0 +1,163 @@
+{
+ "id": "hardpy26_vacantdo_rc3_pi_gemma12b_colab",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261124,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "P": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/opt/redo/rc_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "A",
+  "P"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 6,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-12b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "ex_satellite",
+  "ex_alphametics",
+  "ex_binary_search_tree",
+  "ex_bank_account",
+  "ex_rail_fence_cipher",
+  "ex_tournament",
+  "ex_flower_field",
+  "ex_knapsack",
+  "ex_trinary",
+  "ex_meetup",
+  "ex_custom_set",
+  "ex_spiral_matrix",
+  "ex_pascals_triangle",
+  "ex_rational_numbers",
+  "ex_linked_list",
+  "ex_word_search",
+  "ex_relative_distance",
+  "ex_swift_scheduling",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_minesweeper",
+  "ex_largest_series_product",
+  "ex_all_your_base",
+  "ex_camicia",
+  "ex_change",
+  "ex_complex_numbers"
+ ],
+ "reps": 5,
+ "prereg": {
+  "registered": "2026-11-21，第一通模型呼叫之前 commit。W3-4：沒用過而且有難度的 Python 題（exercism_py_hard，26 題）。Colab GPU，vLLM 0.30.0（google/gemma-4-12B-it-qat-w4a16-ct），jobs 6。1004 與 Colab 各一批、互相獨立，不併表、不合併 p 值。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "question": "同一個模型（gemma-4-12b-it QAT，Colab GPU，vLLM 0.30.0（google/gemma-4-12B-it-qat-w4a16-ct），jobs 6）、同一個牆鐘上限（1800 秒）、沒用過而且有難度的 26 題 Python：發布候選版 `vacant do pi` 交出通過評分的成果的比例，是不是比原生 pi 一次跑到底高？",
+  "why": "unused40 撞天花板（題目四分之三 difficulty ≤ 3）。選題改用 exercism 的 difficulty ≥ 4（事先存在的外部資訊）。",
+  "primary": "P 對 A，26 題 × 5 次重複＝130 對；精確雙尾 McNemar，α＝0.05。b＝只有 A 過、c＝只有 P 過。",
+  "states": {
+   "EFFECTIVE": "全部對完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這 26 題沒用過、difficulty ≥ 4 的 Python 題（exercism，事先固定規則選出）、pi、gemma-4-12b QAT（Colab，vLLM 0.30.0，w4a16）、同樣 1800 秒上限下，發布候選版 `vacant do pi`（rc3.1 0.9.2，零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數、模型呼叫數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／語言／沒有可執行測試的工作。",
+   "UNRESOLVED": "完成但 p ≥ 0.05（不論方向），或 A 接近天花板／地板。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+   "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "known_limits": [
+   "P 臂是 rc3.1（redo/rc2 5d8892020，wheel sha256 490a90516a44…）裝在獨立 venv；config_dir 只複製 models.json，不載入 Vacant 的 pi 擴充：量的是零設定重開模式＋產品自己的驗收。",
+   "P 的模型呼叫數 harness 量不到（usage=none），結案時用 ops/redo/analysis/p_model_calls.py 從 {logs}/vacant-work 補算。",
+   "選題規則只用 exercism 自己的 difficulty 標籤（≥4）與事先寫死的 sha256 排序；從沒給任何模型跑過。",
+   "數字不與其他批併表、不合併 p 值。",
+   "10 題與 exercism_py_unused 重疊（unused40 那批正在 1004 跑）：overlap 見 ops/redo/banks/exercism_py_hard.json。",
+   "可見測試＝評分器（visible_equals_grader）。",
+   "jobs 6：vLLM 連續批次，6 格共用一張 GPU；兩臂受同樣壅塞，配對照常。KV 不夠時 vLLM 搶占重算，不回錯。",
+   "產品臂是 rc3.1 wheel（sha256 記在 launch metadata），裝在 VM 的 /opt/redo/rc_venv。",
+   "Colab 單元用完或 VM 被回收：那就是 INCOMPLETE，照實報告，不改計畫。"
+  ]
+ }
+}

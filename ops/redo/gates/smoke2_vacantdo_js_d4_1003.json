@@ -1,0 +1,12 @@
+{
+ "smoke_plan": "ops/redo/plans/smoke2_vacantdo_rc3_js_d4_1003.json",
+ "smoke_root": "~/dev/ops/redo_runs/smoke2_vacantdo_js_d4_1003",
+ "queue": "~/dev/ops/queue_1003.txt",
+ "next_line": "/home/user1/dev/wt/nonpy ops/redo/plans/hardjs34_vacantdo_rc3_pi_gemma12b_1003.json /home/user1/dev/ops/redo_runs/hardjs34_1003",
+ "expect_pairs": 2,
+ "expect_grader": "visible_tests_pristine",
+ "criteria": "只看基礎設施：2/2 對完成、0 infra_void、harness 沒變、兩臂評分都是 visible_tests_pristine、每次驗收 acc_status=ok。P 臂 usage=none（量不到呼叫數），所以模型呼叫條件只套用在量得到的臂（A）。不看通過與否。",
+ "arms_without_usage": [
+  "P"
+ ]
+}
