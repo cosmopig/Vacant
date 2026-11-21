@@ -3793,6 +3793,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                 "wall_s": a["wall_s"],
                 "rc": a["rc"],
                 "timed_out": a["timed_out"],
+                "time_limit_s": a.get("time_limit_s"),
                 "accept": a["accept"],
                 "passed": a["passed"],
                 "run": a["run"],
@@ -4612,7 +4613,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             launch = build(prompt, ws)
             launch_meta.append((list(launch.argv), dict(launch.env)))
             attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
-            say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
+            attempt_limit_s = min(attempt_timeout_s, remaining)
+            say(f"attempt {k} of {max_attempts} (up to {attempt_limit_s:.0f}s)")
             # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
             try:
                 r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
@@ -4737,6 +4739,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 "first_problem": acc.get("first_problem"),
                 "rc": r["rc"],
                 "timed_out": r["timed_out"],
+                "time_limit_s": round(attempt_limit_s, 1),
                 "wall_s": round(r["wall_ms"] / 1000.0, 1),
                 "spawn_error": r["spawn_error"],
                 "workspace": str(ws),
@@ -4927,6 +4930,29 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             _set_child_subreaper(bool(prev_subreaper))
 
 
+def _time_limit_notice(res: dict) -> str:
+    """rc5：嘗試被單次時限切斷時講出來（只改訊息，不改政策）。
+
+    推論慢的機器上，一次嘗試可能連一輪「改→測→改」都做不完；重開也一樣撞上限，這時重開沒有意義。
+    使用者唯一看得到這件事的地方是交件訊息，所以每一次被切斷都列出來；全部被切斷時明講該調時限。
+    """
+    atts = [a for a in (res.get("attempts") or []) if isinstance(a, dict)]
+    cut = [a for a in atts if a.get("timed_out")]
+    if not cut:
+        return ""
+    lines = []
+    for a in cut:
+        lim = a.get("time_limit_s")
+        lim_txt = f"{lim:.0f}s" if isinstance(lim, (int, float)) else "its"
+        lines.append(f"\n  attempt {a.get('attempt')} was cut off at the {lim_txt} time limit "
+                     f"(ran {a.get('wall_s')}s; its result is whatever the agent had written by then)")
+    if len(cut) == len(atts) and res.get("accepted") is not True:
+        lines.append("\n  every attempt hit the time limit: this looks like too little time rather than wrong work. "
+                     "Restarting cannot help if one attempt cannot finish; raise --attempt-timeout (per attempt) "
+                     "and --timeout (total), e.g. --attempt-timeout 1800 --timeout 1800 for a single long run.")
+    return "".join(lines)
+
+
 def summary(res: dict) -> str:
     res, _ = _sanitize_json_obj(res)
     n = len(res["attempts"])
@@ -5012,6 +5038,7 @@ def summary(res: dict) -> str:
             head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
                     f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
 
+    head += _time_limit_notice(res)
     cmd_part = f" ({acc_cmd})" if acc_cmd else ""
     head += f"\n  acceptance: {acc_kind}{cmd_part}"
     if acc_info.get("shell_expansion"):
