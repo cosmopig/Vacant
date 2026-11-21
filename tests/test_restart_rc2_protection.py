@@ -309,8 +309,10 @@ def test_defect1_check_without_protect_warns_agent_could_edit_check(tmp_path):
                 check=f"{sys.executable} -c 'import app, sys; sys.exit(0 if app.v == 2 else 1)'",
                 attempt_timeout_s=20, budget_s=120)
     assert res["protected"] == []
+    assert res["acceptance_integrity"] == "unverified"
     msg = R.summary(res)
-    assert "protected (restored before check): none — the agent could have edited what this check runs" in msg
+    assert "WARNING: this check runs files in the project that the agent could change" in msg
+    assert "protected (restored before check):" not in msg
 
 
 def test_defect1_check_with_protect_blocks_script_tampering_and_cli_repeatable(tmp_path, monkeypatch, capsys):

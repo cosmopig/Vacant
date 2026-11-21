@@ -222,8 +222,11 @@ def test_a4_check_script_auto_protected(tmp_path, monkeypatch, capsys):
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "verify.sh").read_text(encoding="utf-8") == orig_sh
-    prot_line = [ln for ln in out.splitlines() if "protected (restored before check):" in ln][0]
-    assert "verify.sh" in prot_line
+    assert "WARNING: this check runs files in the project that the agent could change" in out
+    assert "protected (restored before check):" not in out
+    rj = _latest_result_json(tmp_path)
+    assert "verify.sh" in rj["protected"]
+    assert rj["acceptance_integrity"] == "unverified"
 
     # Python harness script token variant
     proj2 = tmp_path / "proj2"
@@ -236,8 +239,11 @@ def test_a4_check_script_auto_protected(tmp_path, monkeypatch, capsys):
     out2 = capsys.readouterr().out
     assert rc2 == adapters_cli.EXIT["reject"], out2
     assert (proj2 / "run_checks.py").read_text(encoding="utf-8") == orig_py
-    prot_line2 = [ln for ln in out2.splitlines() if "protected (restored before check):" in ln][0]
-    assert "run_checks.py" in prot_line2
+    assert "WARNING: this check runs files in the project that the agent could change" in out2
+    assert "protected (restored before check):" not in out2
+    rj2 = _latest_result_json(tmp_path)
+    assert "run_checks.py" in rj2["protected"]
+    assert rj2["acceptance_integrity"] == "unverified"
 
 
 @needs_make
@@ -255,8 +261,11 @@ def test_a4_check_make_auto_protects_makefile(tmp_path, monkeypatch, capsys):
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "Makefile").read_text(encoding="utf-8") == orig_mk
-    prot_line = [ln for ln in out.splitlines() if "protected (restored before check):" in ln][0]
-    assert "Makefile" in prot_line
+    assert "WARNING: this check runs files in the project that the agent could change" in out
+    assert "protected (restored before check):" not in out
+    rj = _latest_result_json(tmp_path)
+    assert "Makefile" in rj["protected"]
+    assert rj["acceptance_integrity"] == "unverified"
 
 
 def test_a3_check_cargo_go_yarn_pnpm_npx_manifests_pinned(tmp_path):

@@ -2004,6 +2004,12 @@ def _compare_receipt_and_result_json(
             )
         if _as_str(rcpt_acc.get("command")) != _as_str(rj_acc.get("command")):
             mismatches.append("acceptance.command differs")
+    rcpt_integ = _as_str(payload.get("acceptance_integrity")) or _as_str((rcpt_acc or {}).get("integrity"))
+    rj_integ = _as_str(rj.get("acceptance_integrity")) or _as_str((rj_acc or {}).get("integrity"))
+    if rcpt_integ is not None and rj_integ is not None and rcpt_integ != rj_integ:
+        mismatches.append(
+            f"acceptance_integrity (receipt={rcpt_integ!r}, result.json={rj_integ!r})"
+        )
 
     rcpt_atts = (
         [a for a in payload["attempts"] if isinstance(a, dict)]
@@ -2302,6 +2308,14 @@ def _build_restart_record_from_receipt(
         "agent_wall_s": payload.get("agent_wall_s"),
         "total_wall_s": payload.get("total_wall_s"),
     }
+    acc_integ = _as_str(payload.get("acceptance_integrity")) or _as_str(acc_meta.get("integrity"))
+    raw_ir = payload.get("acceptance_integrity_reasons")
+    if not isinstance(raw_ir, list):
+        raw_ir = acc_meta.get("integrity_reasons") if isinstance(acc_meta.get("integrity_reasons"), list) else []
+    acc_integ_reasons = [str(x) for x in raw_ir if isinstance(x, str) and x]
+    if acc_integ is not None:
+        details["acceptance_integrity"] = acc_integ
+        details["acceptance_integrity_reasons"] = acc_integ_reasons
     if payload.get("non_utf8_paths"):
         details["non_utf8_paths"] = True
         if _as_str(payload.get("path_encoding")):
@@ -2595,6 +2609,14 @@ def _build_restart_record_from_result_json(
         "total_wall_s": loaded.get("total_wall_s"),
         "first_problem": _as_str((delivered_entry or {}).get("first_problem")),
     }
+    acc_integ = _as_str(loaded.get("acceptance_integrity")) or _as_str(acc_meta.get("integrity"))
+    raw_ir = loaded.get("acceptance_integrity_reasons")
+    if not isinstance(raw_ir, list):
+        raw_ir = acc_meta.get("integrity_reasons") if isinstance(acc_meta.get("integrity_reasons"), list) else []
+    acc_integ_reasons = [str(x) for x in raw_ir if isinstance(x, str) and x]
+    if acc_integ is not None:
+        details["acceptance_integrity"] = acc_integ
+        details["acceptance_integrity_reasons"] = acc_integ_reasons
     if rj_rcpt is not None and rj_rcpt.get("recorded") is False and _as_str(rj_rcpt.get("error")):
         details["receipt_error"] = _as_str(rj_rcpt.get("error"))
 
@@ -3134,7 +3156,7 @@ def format_list(records: list[dict[str, Any]]) -> str:
 
     header = (
         f"{'RECORD_ID':<34} {'KIND':<14} {'AGENT':<10} {'TASK':<18} "
-        f"{'ATT':>4} {'RESULT':<12} {'BACK':>4} {'VERIFIED':<9} {'GAPS':>4}  TIMESTAMP"
+        f"{'ATT':>4} {'RESULT':<12} {'BACK':>4} {'VERIFIED':<9} {'INTEGRITY':<10} {'GAPS':>4}  TIMESTAMP"
     )
     lines.append(header)
     lines.append("-" * len(header))
@@ -3145,6 +3167,7 @@ def format_list(records: list[dict[str, Any]]) -> str:
         back_s = str(back_n) if back_n is not None else "-"
         res_s = str((r.get("acceptance") or {}).get("result") or "unknown")
         ver_s = _fmt_verified(r.get("signature") or {})
+        integ_s = str((r.get("details") or {}).get("acceptance_integrity") or "-")
         gaps_n = len(r.get("gaps") or [])
         lines.append(
             f"{str(r['record_id'])[:34]:<34} "
@@ -3155,6 +3178,7 @@ def format_list(records: list[dict[str, Any]]) -> str:
             f"{res_s[:12]:<12} "
             f"{back_s:>4} "
             f"{ver_s:<9} "
+            f"{integ_s[:10]:<10} "
             f"{gaps_n:>4}  "
             f"{_fmt_ts(r.get('timestamp_ms'))}"
         )
@@ -3188,6 +3212,12 @@ def format_show(rec: dict[str, Any]) -> str:
     ]
     if acc.get("checks_total") is not None:
         lines.append(f"checks     : {acc.get('checks_passed')}/{acc.get('checks_total')}")
+    details = rec.get("details") or {}
+    acc_integ = details.get("acceptance_integrity")
+    if acc_integ is not None:
+        ir = details.get("acceptance_integrity_reasons") or []
+        ir_s = f" ({'; '.join(str(x) for x in ir[:5])})" if ir else ""
+        lines.append(f"integrity  : {acc_integ}{ir_s}")
     lines.append(
         f"signature  : verified={sig.get('verified')}  status={sig.get('status')}  "
         f"scheme={sig.get('scheme')}  anchor_checked={sig.get('anchor_checked')}"

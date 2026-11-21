@@ -1766,7 +1766,7 @@ def _parse_check_shell_cmd(cmd: str, *, _cur_dir: tuple[str, ...] = (),
     return cmd_words, all_tokens, uses_exp
 
 
-def _npm_test_script_at(pkg_json: pathlib.Path) -> str | None:
+def _npm_script_at(pkg_json: pathlib.Path, script_name: str = "test") -> str | None:
     opened = _open_reg_readonly(pkg_json)
     if opened is None:
         return None
@@ -1782,12 +1782,1093 @@ def _npm_test_script_at(pkg_json: pathlib.Path) -> str | None:
     scripts = data.get("scripts")
     if not isinstance(scripts, dict):
         return None
-    test_cmd = scripts.get("test")
-    if not isinstance(test_cmd, str) or not test_cmd.strip():
+    sc = scripts.get(script_name)
+    if not isinstance(sc, str) or not sc.strip():
         return None
-    if _NPM_DEFAULT_TEST_MARKER in test_cmd:
+    if script_name == "test" and _NPM_DEFAULT_TEST_MARKER in sc:
         return None
-    return test_cmd.strip()
+    return sc.strip()
+
+
+def _npm_test_script_at(pkg_json: pathlib.Path) -> str | None:
+    return _npm_script_at(pkg_json, "test")
+
+
+_SHELL_RESERVED_WORDS = frozenset({
+    "if", "then", "else", "elif", "fi", "for", "while", "until", "do", "done",
+    "case", "esac", "select", "function", "{", "}", "[[", "]]", "!", "coproc",
+})
+_UNSAFE_ENV_ASSIGN_KEYS = frozenset({
+    "PATH", "PYTHONPATH", "NODE_PATH", "NODE_OPTIONS", "PYTHONSTARTUP",
+    "LD_PRELOAD", "LD_LIBRARY_PATH", "BASH_ENV", "ENV", "PERL5LIB",
+    "RUBYLIB", "PYTHONHOME", "PYTHONUSERBASE",
+})
+_KNOWN_JS_RUNNERS = frozenset({"jest", "vitest", "mocha"})
+_PY_TOOL_RE = re.compile(r"^python(?:3(?:\.\d+)?)?$")
+_JS_ANY_REL_IMPORT_RES = (
+    re.compile(r"""\brequire\s*\(\s*['"`](\.\.?/[^'"`]*)['"`]\s*\)"""),
+    re.compile(r"""\bimport\s+(?:[^'"]+?\s+from\s+)?['"](\.\.?/[^'"]*)['"]"""),
+    re.compile(r"""\bexport\s+[^'"]+?\s+from\s+['"](\.\.?/[^'"]*)['"]"""),
+    re.compile(r"""\bimport\s*\(\s*['"`](\.\.?/[^'"`]*)['"`]\s*\)"""),
+)
+_JS_DYN_OR_EXEC_RES = (
+    re.compile(r"""\brequire\s*\(\s*(?!['"`])"""),
+    re.compile(r"""\bimport\s*\(\s*(?!['"`])"""),
+    re.compile(r"""\beval\s*\("""),
+    re.compile(r"""\bnew\s+Function\b"""),
+    re.compile(r"""\bchild_process\b"""),
+)
+_PY_DYN_CALL_NAMES = frozenset({"__import__", "eval", "exec", "compile"})
+_PY_DYN_MODULES = frozenset({"importlib", "runpy", "subprocess"})
+_PY_INLINE_IO_NAMES = frozenset({"open", "Path", "PurePath"})
+_PY_INLINE_IO_ATTRS = frozenset({"read_text", "read_bytes", "open", "system", "popen"})
+_MAKE_COMPLEX_DIRECTIVES = frozenset({
+    "include", "-include", "sinclude", "define", "endef",
+    "ifeq", "ifneq", "ifdef", "ifndef", "else", "endif", "override", "export",
+})
+_UNVERIFIED_CHECK_WARNING = (
+    "WARNING: this check runs files in the project that the agent could change "
+    "(Vacant could not fully trace what it executes); passing does not prove the "
+    "check was not tampered with"
+)
+
+
+@dataclasses.dataclass
+class _AcceptanceAnalysis:
+    integrity: str                                  # "verified" | "unverified"
+    reasons: list[str]
+    protected: set[str]
+    pinned_scripts: dict[str, str]                  # pkg_rel -> scripts.test
+    pinned_named_scripts: dict[str, dict[str, str]] # pkg_rel -> {script_name: cmd}
+    shell_expansion: bool = False
+
+
+def _tokenize_simple_shell(cmd: str) -> tuple[list[list[str]], list[str], bool]:
+    """Conservative POSIX shell lexer for acceptance integrity analysis.
+    Accepts ONLY simple commands separated by `;`, `&&`, `||`, `|`.
+    Any expansion, redirection, here-doc, subshell, brace grouping, background `&`,
+    unquoted glob (`*`, `?`, `[`), or unclosed quote records a reason."""
+    reasons: list[str] = []
+    uses_exp = False
+    segments: list[list[str]] = []
+    cur_seg: list[str] = []
+    buf: list[str] = []
+    has_tok = False
+    in_single = False
+    in_double = False
+    escaped = False
+    i = 0
+    n = len(cmd)
+
+    def _add_reason(msg: str) -> None:
+        if msg not in reasons:
+            reasons.append(msg)
+
+    def _flush_tok() -> None:
+        nonlocal has_tok
+        if has_tok:
+            cur_seg.append("".join(buf))
+            buf.clear()
+            has_tok = False
+
+    def _flush_seg() -> None:
+        _flush_tok()
+        if cur_seg:
+            segments.append(list(cur_seg))
+            cur_seg.clear()
+
+    while i < n:
+        ch = cmd[i]
+        if escaped:
+            buf.append(ch)
+            has_tok = True
+            escaped = False
+            i += 1
+            continue
+        if in_single:
+            if ch == "'":
+                in_single = False
+            else:
+                buf.append(ch)
+            i += 1
+            continue
+        if in_double:
+            if ch == "\\":
+                if i + 1 < n and cmd[i + 1] in ('"', "\\", "$", "`", "\n"):
+                    if cmd[i + 1] != "\n":
+                        buf.append(cmd[i + 1])
+                    i += 2
+                    continue
+                buf.append(ch)
+                i += 1
+                continue
+            if ch == '"':
+                in_double = False
+                i += 1
+                continue
+            if ch == "`":
+                uses_exp = True
+                _add_reason("uses shell expansion (backticks)")
+                buf.append(ch)
+                i += 1
+                continue
+            if ch == "$" and i + 1 < n:
+                nxt = cmd[i + 1]
+                if nxt.isalpha() or nxt in ("_", "{", "(", "*", "@", "?", "#", "$", "!") or nxt.isdigit():
+                    uses_exp = True
+                    _add_reason("uses shell expansion ($VAR or $(...))")
+            buf.append(ch)
+            i += 1
+            continue
+
+        # Unquoted context
+        if ch in (" ", "\t", "\r"):
+            _flush_tok()
+            i += 1
+            continue
+        if ch == "\n":
+            _flush_seg()
+            i += 1
+            continue
+        if ch == "#" and not has_tok:
+            # Comment to end of line
+            while i < n and cmd[i] != "\n":
+                i += 1
+            continue
+        if ch == "\\":
+            if i + 1 < n and cmd[i + 1] == "\n":
+                i += 2
+                continue
+            escaped = True
+            has_tok = True
+            i += 1
+            continue
+        if ch == "'":
+            in_single = True
+            has_tok = True
+            i += 1
+            continue
+        if ch == '"':
+            in_double = True
+            has_tok = True
+            i += 1
+            continue
+        if ch == "`":
+            uses_exp = True
+            _add_reason("uses shell expansion (backticks)")
+            buf.append(ch)
+            has_tok = True
+            i += 1
+            continue
+        if ch == "$" and i + 1 < n:
+            nxt = cmd[i + 1]
+            if nxt.isalpha() or nxt in ("_", "{", "(", "*", "@", "?", "#", "$", "!") or nxt.isdigit():
+                uses_exp = True
+                _add_reason("uses shell expansion ($VAR or $(...))")
+            buf.append(ch)
+            has_tok = True
+            i += 1
+            continue
+        if ch == ";":
+            if i + 1 < n and cmd[i + 1] == ";":
+                _add_reason("shell case syntax (;;)")
+                i += 2
+                continue
+            _flush_seg()
+            i += 1
+            continue
+        if ch == "&":
+            if i + 1 < n and cmd[i + 1] == "&":
+                _flush_seg()
+                i += 2
+                continue
+            _add_reason("background or fd operator (&)")
+            _flush_seg()
+            i += 1
+            continue
+        if ch == "|":
+            if i + 1 < n and cmd[i + 1] == "|":
+                _flush_seg()
+                i += 2
+                continue
+            if i + 1 < n and cmd[i + 1] == "&":
+                _add_reason("shell stderr pipe operator (|&)")
+                _flush_seg()
+                i += 2
+                continue
+            _flush_seg()
+            i += 1
+            continue
+        if ch in ("(", ")"):
+            _add_reason("subshell or function syntax")
+            _flush_seg()
+            i += 1
+            continue
+        if ch == "<":
+            if i + 1 < n and cmd[i + 1] == "<":
+                _add_reason("here-doc or here-string redirection")
+                i += 3 if (i + 2 < n and cmd[i + 2] == "<") else 2
+                _flush_seg()
+                continue
+            if i + 1 < n and cmd[i + 1] == "(":
+                _add_reason("process substitution")
+                i += 2
+                _flush_seg()
+                continue
+            _add_reason("shell input redirection")
+            _flush_seg()
+            i += 1
+            continue
+        if ch == ">":
+            if i + 1 < n and cmd[i + 1] == "(":
+                _add_reason("process substitution")
+                i += 2
+                _flush_seg()
+                continue
+            _add_reason("shell output redirection")
+            _flush_seg()
+            i += 2 if (i + 1 < n and cmd[i + 1] in (">", "&")) else 1
+            continue
+        if ch in ("*", "?", "["):
+            _add_reason("unquoted shell globbing")
+            buf.append(ch)
+            has_tok = True
+            i += 1
+            continue
+        buf.append(ch)
+        has_tok = True
+        i += 1
+
+    if in_single or in_double or escaped:
+        _add_reason("unclosed quote or trailing escape")
+    _flush_seg()
+    return segments, reasons, uses_exp
+
+
+def _resolve_project_file(project: pathlib.Path, proj_res: pathlib.Path, files_set: set[str],
+                          tok: str, cur_dir: tuple[str, ...]) -> str | None:
+    raw = tok.strip().replace("\\", "/")
+    if not raw or raw in (".", ".."):
+        return None
+    p = pathlib.Path(raw)
+    if p.is_absolute():
+        try:
+            rel = p.resolve().relative_to(proj_res).as_posix()
+        except (ValueError, OSError):
+            return None
+        return rel if rel in files_set else None
+    joined = _norm_posix_join(cur_dir, raw)
+    if joined and joined in files_set:
+        return joined
+    return None
+
+
+def _resolve_project_subdir(project: pathlib.Path, proj_res: pathlib.Path,
+                            tok: str, cur_dir: tuple[str, ...]) -> tuple[str, ...] | None:
+    raw = tok.strip().replace("\\", "/")
+    if not raw:
+        return None
+    if raw == ".":
+        return cur_dir
+    p = pathlib.Path(raw)
+    if p.is_absolute():
+        try:
+            rel = p.resolve().relative_to(proj_res).as_posix()
+        except (ValueError, OSError):
+            return None
+        if rel == ".":
+            return ()
+        return tuple(rel.split("/"))
+    joined = _norm_posix_join(cur_dir, raw)
+    if joined is None:
+        return None
+    cand = project / joined
+    try:
+        if not cand.is_dir() or _through_symlink(project, joined):
+            return None
+    except OSError:
+        return None
+    return tuple(joined.split("/"))
+
+
+def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
+                         inline: bool = False) -> list[str]:
+    """Check whether Python script/inline code imports project-local modules or uses dynamic exec/imports."""
+    try:
+        tree = ast.parse(raw, filename=label)
+    except SyntaxError:
+        return [f"could not parse python code: {label}"]
+
+    reasons: list[str] = []
+    rel_for_imports = label if not inline else "__inline__.py"
+    local_mods = _extract_py_imports(raw, rel_for_imports, files_set)
+    rel_imports: set[str] = set()
+    dyn_hits: set[str] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                top = alias.name.split(".", 1)[0]
+                if top in _PY_DYN_MODULES:
+                    dyn_hits.add(top)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level and node.level > 0:
+                rel_imports.add("." * node.level + (node.module or ""))
+            top = (node.module or "").split(".", 1)[0]
+            if top in _PY_DYN_MODULES:
+                dyn_hits.add(top)
+        elif isinstance(node, ast.Call):
+            fn = node.func
+            if isinstance(fn, ast.Name):
+                if fn.id in _PY_DYN_CALL_NAMES:
+                    dyn_hits.add(fn.id)
+                elif inline and fn.id in _PY_INLINE_IO_NAMES:
+                    dyn_hits.add(fn.id)
+            elif isinstance(fn, ast.Attribute):
+                if fn.attr in ("import_module", "run_path", "run_module"):
+                    dyn_hits.add(fn.attr)
+                elif inline and fn.attr in _PY_INLINE_IO_ATTRS:
+                    dyn_hits.add(fn.attr)
+
+    all_local = sorted(local_mods | rel_imports)
+    if all_local:
+        if inline:
+            reasons.append(f"python -c imports project modules: {', '.join(all_local[:8])}")
+        else:
+            reasons.append(f"script imports project modules: {label} -> {', '.join(all_local[:8])}")
+    if dyn_hits:
+        kind_s = "python -c" if inline else f"script {label}"
+        reasons.append(f"{kind_s} uses dynamic import/io/exec: {', '.join(sorted(dyn_hits)[:8])}")
+    return reasons
+
+
+def _js_analyze_file(raw: bytes, rel_path: str, files_set: set[str]) -> list[str]:
+    """Check whether JS/TS script imports project-local modules or uses dynamic require/eval/child_process."""
+    reasons: list[str] = []
+    resolved_local = _extract_js_imports(raw, rel_path, files_set)
+    txt = raw.decode("utf-8", errors="replace")
+    raw_rel_specs: set[str] = set()
+    for rx in _JS_ANY_REL_IMPORT_RES:
+        for m in rx.finditer(txt):
+            raw_rel_specs.add(m.group(1))
+    local_labels = sorted(resolved_local) if resolved_local else sorted(raw_rel_specs)
+    if local_labels:
+        reasons.append(f"script imports project modules: {rel_path} -> {', '.join(local_labels[:8])}")
+    for rx in _JS_DYN_OR_EXEC_RES:
+        if rx.search(txt):
+            reasons.append(f"script uses dynamic require/eval/child_process: {rel_path}")
+            break
+    return reasons
+
+
+def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[list[str], list[str]]], str | None, list[str]]:
+    """Conservative Makefile parser. Returns (targets_map, default_target, reasons).
+    targets_map: target_name -> (prerequisites, recipe_lines)."""
+    reasons: list[str] = []
+    if b"\x00" in raw:
+        return {}, None, [f"binary Makefile: {rel_path}"]
+    text = raw.decode("utf-8", errors="replace")
+    raw_lines = text.splitlines()
+    # Join backslash-continued lines
+    lines: list[tuple[bool, str]] = []
+    i = 0
+    while i < len(raw_lines):
+        ln = raw_lines[i]
+        is_tab = ln.startswith("\t")
+        while ln.endswith("\\") and i + 1 < len(raw_lines):
+            i += 1
+            ln = ln[:-1] + " " + raw_lines[i].lstrip()
+        lines.append((is_tab, ln))
+        i += 1
+
+    targets: dict[str, tuple[list[str], list[str]]] = {}
+    default_target: str | None = None
+    cur_targets: list[str] = []
+
+    for is_tab, ln in lines:
+        if is_tab:
+            if cur_targets:
+                recipe = ln.lstrip("\t").strip()
+                if recipe and not recipe.startswith("#"):
+                    for t in cur_targets:
+                        targets[t][1].append(recipe)
+            continue
+        stripped = ln.strip()
+        if not stripped or stripped.startswith("#"):
+            cur_targets = []
+            continue
+        first_word = stripped.split(None, 1)[0]
+        if first_word in _MAKE_COMPLEX_DIRECTIVES:
+            reasons.append(f"Makefile uses untraceable directive ({first_word}): {rel_path}")
+            cur_targets = []
+            continue
+        if "$(shell" in stripped or "${shell" in stripped:
+            reasons.append(f"Makefile uses $(shell ...): {rel_path}")
+            cur_targets = []
+            continue
+        # Variable assignment (outside rule)
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_.-]*\s*(?::=|:=|\?=|\+=|=)", stripped):
+            cur_targets = []
+            continue
+        # Rule header: target(s): prereqs
+        if "::" in stripped:
+            reasons.append(f"Makefile uses double-colon rule: {rel_path}")
+            cur_targets = []
+            continue
+        if ":" in stripped:
+            lhs, _, rhs = stripped.partition(":")
+            lhs_s = lhs.strip()
+            if "%" in lhs_s or "$" in lhs_s:
+                reasons.append(f"Makefile uses pattern/variable target: {rel_path}")
+                cur_targets = []
+                continue
+            rhs_clean = rhs.split("#", 1)[0].strip()
+            inline_recipe: str | None = None
+            if ";" in rhs_clean:
+                rhs_clean, _, inline_recipe = rhs_clean.partition(";")
+                inline_recipe = inline_recipe.strip()
+            t_names = lhs_s.split()
+            prereqs = rhs_clean.split()
+            if t_names == [".PHONY"]:
+                cur_targets = []
+                continue
+            cur_targets = []
+            for t in t_names:
+                if t.startswith("."):
+                    continue
+                if default_target is None:
+                    default_target = t
+                if t not in targets:
+                    targets[t] = (list(prereqs), [])
+                else:
+                    targets[t][0].extend(prereqs)
+                if inline_recipe:
+                    targets[t][1].append(inline_recipe)
+                cur_targets.append(t)
+            continue
+        reasons.append(f"unrecognized Makefile line in {rel_path}: {stripped[:60]}")
+        cur_targets = []
+
+    return targets, default_target, reasons
+
+
+def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
+                                files_set: set[str]) -> _AcceptanceAnalysis:
+    """Binary acceptance integrity analyzer: either FULLY UNDERSTOOD ('verified') or 'unverified'.
+    Conservative by design: when unsure -> unverified."""
+    proj_res = project.resolve()
+    reasons: list[str] = []
+    protected: set[str] = set()
+    pinned_scripts: dict[str, str] = {}
+    pinned_named_scripts: dict[str, dict[str, str]] = {}
+    uses_exp = False
+    visited: set[tuple[str, str, str]] = set()
+    max_depth = 12
+
+    def _fail(msg: str) -> None:
+        if msg not in reasons:
+            reasons.append(msg)
+
+    def _analyze_py_file(rel: str) -> None:
+        protected.add(rel)
+        raw = _read_source_bytes(rel, project, {})
+        if raw is None:
+            _fail(f"could not read python script: {rel}")
+            return
+        for r in _py_analyze_code_ast(raw, rel, files_set, inline=False):
+            _fail(r)
+
+    def _analyze_js_file(rel: str) -> None:
+        protected.add(rel)
+        raw = _read_source_bytes(rel, project, {})
+        if raw is None:
+            _fail(f"could not read js script: {rel}")
+            return
+        for r in _js_analyze_file(raw, rel, files_set):
+            _fail(r)
+
+    def _analyze_shell_file(rel: str, cur_dir: tuple[str, ...], depth: int) -> None:
+        protected.add(rel)
+        vkey = ("sh", rel, "/".join(cur_dir))
+        if vkey in visited:
+            return
+        if depth > max_depth:
+            _fail(f"recursion limit reached tracing {rel}")
+            return
+        visited.add(vkey)
+        raw = _read_source_bytes(rel, project, {})
+        if raw is None:
+            _fail(f"could not read shell script: {rel}")
+            return
+        if b"\x00" in raw:
+            _fail(f"binary shell script: {rel}")
+            return
+        text = raw.decode("utf-8", errors="replace")
+        # Join backslash-continued lines
+        raw_lines = text.splitlines()
+        joined_lines: list[str] = []
+        i = 0
+        while i < len(raw_lines):
+            ln = raw_lines[i]
+            while ln.endswith("\\") and i + 1 < len(raw_lines):
+                i += 1
+                ln = ln[:-1] + raw_lines[i]
+            joined_lines.append(ln)
+            i += 1
+        # Check the whole script for multi-line constructs like here-docs before line splitting
+        _, whole_reasons, whole_exp = _tokenize_simple_shell(text)
+        nonlocal uses_exp
+        uses_exp = uses_exp or whole_exp
+        if whole_reasons:
+            for wr in whole_reasons:
+                _fail(f"{rel}: {wr}")
+            return
+        script_dir = cur_dir
+        for ln in joined_lines:
+            stripped = ln.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            script_dir = _analyze_cmd_str(stripped, script_dir, depth + 1, in_script=rel)
+
+    def _analyze_executable_file(rel: str, cur_dir: tuple[str, ...], depth: int) -> None:
+        protected.add(rel)
+        raw = _read_source_bytes(rel, project, {})
+        if raw is None:
+            _fail(f"could not read executable script: {rel}")
+            return
+        first_line = raw.splitlines()[0].decode("utf-8", errors="replace").strip() if raw else ""
+        if first_line.startswith("#!"):
+            shebang = first_line[2:].strip().split()
+            interp = pathlib.PurePosixPath(shebang[0]).name if shebang else ""
+            if interp == "env" and len(shebang) >= 2:
+                interp = pathlib.PurePosixPath(shebang[1]).name
+            if interp in ("sh", "bash", "dash"):
+                _analyze_shell_file(rel, cur_dir, depth)
+                return
+            if _PY_TOOL_RE.match(interp):
+                _analyze_py_file(rel)
+                return
+            if interp == "node":
+                _analyze_js_file(rel)
+                return
+            _fail(f"executable script has unsupported shebang ({interp or 'empty'}): {rel}")
+            return
+        if rel.endswith((".sh", ".bash")):
+            _analyze_shell_file(rel, cur_dir, depth)
+        elif rel.endswith(".py"):
+            _analyze_py_file(rel)
+        elif rel.endswith(_JS_EXTS):
+            _analyze_js_file(rel)
+        else:
+            _fail(f"executable file of untraceable type: {rel}")
+
+    def _follow_npm_script(target_dir: tuple[str, ...], script_name: str, depth: int) -> None:
+        pkg_rel = "/".join((*target_dir, "package.json")) if target_dir else "package.json"
+        if pkg_rel not in files_set:
+            _fail(f"package.json not found: {pkg_rel}")
+            return
+        protected.add(pkg_rel)
+        vkey = ("npm", pkg_rel, script_name)
+        if vkey in visited:
+            return
+        if depth > max_depth:
+            _fail(f"recursion limit reached tracing {pkg_rel}:{script_name}")
+            return
+        visited.add(vkey)
+        sc = _npm_script_at(project / pkg_rel, script_name)
+        if sc is None:
+            _fail(f"{pkg_rel} has no resolvable scripts.{script_name}")
+            return
+        pinned_named_scripts.setdefault(pkg_rel, {})[script_name] = sc
+        if script_name == "test":
+            pinned_scripts[pkg_rel] = sc
+        # Follow pre<script> and post<script> lifecycle hooks if defined
+        for hook in (f"pre{script_name}", f"post{script_name}"):
+            hsc = _npm_script_at(project / pkg_rel, hook)
+            if hsc is not None:
+                pinned_named_scripts.setdefault(pkg_rel, {})[hook] = hsc
+                _analyze_cmd_str(hsc, target_dir, depth + 1)
+        _analyze_cmd_str(sc, target_dir, depth + 1)
+
+    def _analyze_make(rest: list[str], cur_dir: tuple[str, ...], depth: int) -> None:
+        target_dir = cur_dir
+        explicit_mf: str | None = None
+        req_targets: list[str] = []
+        j = 0
+        while j < len(rest):
+            t = rest[j]
+            if t in ("-C", "--directory") and j + 1 < len(rest):
+                nd = _resolve_project_subdir(project, proj_res, rest[j + 1], target_dir)
+                if nd is None:
+                    _fail(f"make -C directory cannot be resolved inside project: {rest[j + 1]}")
+                    return
+                target_dir = nd
+                j += 2
+                continue
+            if t.startswith("--directory="):
+                nd = _resolve_project_subdir(project, proj_res, t.split("=", 1)[1], target_dir)
+                if nd is None:
+                    _fail(f"make --directory cannot be resolved inside project: {t}")
+                    return
+                target_dir = nd
+                j += 1
+                continue
+            if t in ("-f", "--file", "--makefile") and j + 1 < len(rest):
+                explicit_mf = rest[j + 1]
+                j += 2
+                continue
+            if t.startswith(("--file=", "--makefile=")):
+                explicit_mf = t.split("=", 1)[1]
+                j += 1
+                continue
+            if t in ("-s", "--silent", "--quiet", "-i", "-k", "-B", "--no-print-directory", "-j") or re.match(r"^-j\d+$", t):
+                j += 1
+                continue
+            if t.startswith("-"):
+                _fail(f"unsupported make option: {t}")
+                return
+            if "=" in t:
+                _fail(f"make variable override cannot be traced: {t}")
+                return
+            req_targets.append(t)
+            j += 1
+
+        mk_rel: str | None = None
+        if explicit_mf is not None:
+            mk_rel = _resolve_project_file(project, proj_res, files_set, explicit_mf, target_dir)
+        else:
+            for cand_name in ("GNUmakefile", "makefile", "Makefile"):
+                cand = "/".join((*target_dir, cand_name)) if target_dir else cand_name
+                if cand in files_set:
+                    mk_rel = cand
+                    break
+        if mk_rel is None:
+            _fail("Makefile not found in project")
+            return
+        protected.add(mk_rel)
+        raw = _read_source_bytes(mk_rel, project, {})
+        if raw is None:
+            _fail(f"could not read Makefile: {mk_rel}")
+            return
+        targets_map, default_target, mk_reasons = _parse_makefile_targets(raw, mk_rel)
+        for mr in mk_reasons:
+            _fail(mr)
+        if not req_targets:
+            if default_target is None:
+                _fail(f"no default target found in {mk_rel}")
+                return
+            req_targets = [default_target]
+
+        def _follow_target(tname: str, d: int) -> None:
+            vkey = ("make", mk_rel, tname)
+            if vkey in visited:
+                return
+            if d > max_depth:
+                _fail(f"recursion limit reached tracing make target {mk_rel}:{tname}")
+                return
+            visited.add(vkey)
+            if tname not in targets_map:
+                _fail(f"make target not found in {mk_rel}: {tname}")
+                return
+            prereqs, recipes = targets_map[tname]
+            for pr in prereqs:
+                if pr in targets_map:
+                    _follow_target(pr, d + 1)
+                else:
+                    _fail(f"make target {tname} has untraceable prerequisite: {pr}")
+            for rec_line in recipes:
+                cleaned = rec_line.lstrip("@-+ \t")
+                if not cleaned:
+                    continue
+                if "$" in cleaned:
+                    _fail(f"make recipe in {mk_rel}:{tname} uses variable/shell expansion")
+                    continue
+                _analyze_cmd_str(cleaned, target_dir, d + 1)
+
+        for tn in req_targets:
+            _follow_target(tn, depth + 1)
+
+    def _analyze_simple_segment(tokens: list[str], cur_dir: tuple[str, ...], depth: int, *,
+                                in_script: str | None = None) -> tuple[str, ...]:
+        if not tokens:
+            return cur_dir
+        if depth > max_depth:
+            _fail("check command recursion limit exceeded")
+            return cur_dir
+        i = 0
+        while i < len(tokens) and _is_env_assign(tokens[i]):
+            k = tokens[i].split("=", 1)[0]
+            if k in _UNSAFE_ENV_ASSIGN_KEYS:
+                _fail(f"env assignment alters runtime resolution: {k}")
+            i += 1
+        if i >= len(tokens):
+            _fail("shell variable assignment without known command")
+            return cur_dir
+        cmd_tok = tokens[i]
+        rest = tokens[i + 1:]
+
+        if cmd_tok in _SHELL_RESERVED_WORDS:
+            _fail(f"shell control-flow construct: {cmd_tok}")
+            return cur_dir
+
+        # Trivial no-op/control builtins safe in scripts or commands
+        if cmd_tok in ("true", "false"):
+            return cur_dir
+        if cmd_tok == "exit":
+            if not rest or (len(rest) == 1 and rest[0].isdigit()):
+                return cur_dir
+            _fail(f"unsupported exit argument: {' '.join(rest)}")
+            return cur_dir
+        if cmd_tok == "set" and in_script is not None:
+            ok_set = True
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t == "-o" and j + 1 < len(rest) and rest[j + 1] in ("pipefail", "errexit", "nounset", "noglob", "xtrace"):
+                    j += 2
+                    continue
+                if t.startswith("-") and len(t) > 1 and all(c in "euxf" for c in t[1:]):
+                    j += 1
+                    continue
+                ok_set = False
+                break
+            if ok_set:
+                return cur_dir
+            _fail(f"{in_script}: unsupported set command")
+            return cur_dir
+
+        if cmd_tok == "cd":
+            if len(rest) == 1 and not rest[0].startswith("-"):
+                nd = _resolve_project_subdir(project, proj_res, rest[0], cur_dir)
+                if nd is not None:
+                    return nd
+            _fail(f"cd target cannot be resolved inside project: {' '.join(rest)}")
+            return cur_dir
+
+        # Project-local executable (contains "/" and resolves inside project, or relative path)
+        if "/" in cmd_tok:
+            local_exec = _resolve_project_file(project, proj_res, files_set, cmd_tok, cur_dir)
+            if local_exec is not None:
+                _analyze_executable_file(local_exec, cur_dir, depth + 1)
+                return cur_dir
+            if not os.path.isabs(cmd_tok):
+                _fail(f"project executable not found: {cmd_tok}")
+                return cur_dir
+            # Absolute path outside project (e.g. /usr/bin/python3, /path/to/.venv/bin/python)
+            tool = pathlib.PurePosixPath(cmd_tok).name
+        else:
+            tool = cmd_tok
+
+        # 1. npm
+        if tool == "npm":
+            target_dir = cur_dir
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t in ("--prefix", "-C") and j + 1 < len(rest):
+                    nd = _resolve_project_subdir(project, proj_res, rest[j + 1], target_dir)
+                    if nd is None:
+                        _fail(f"npm --prefix directory not inside project: {rest[j + 1]}")
+                        return cur_dir
+                    target_dir = nd
+                    j += 2
+                    continue
+                if t.startswith("--prefix="):
+                    nd = _resolve_project_subdir(project, proj_res, t.split("=", 1)[1], target_dir)
+                    if nd is None:
+                        _fail(f"npm --prefix directory not inside project: {t}")
+                        return cur_dir
+                    target_dir = nd
+                    j += 1
+                    continue
+                if t in ("-s", "--silent", "--no-audit", "--no-fund") or t.startswith("--loglevel="):
+                    j += 1
+                    continue
+                if t.startswith("-"):
+                    _fail(f"unsupported npm flag: {t}")
+                    return cur_dir
+                break
+            if j >= len(rest):
+                _fail("npm missing subcommand")
+                return cur_dir
+            sub = rest[j]
+            if sub in ("test", "t"):
+                _follow_npm_script(target_dir, "test", depth + 1)
+                return cur_dir
+            if sub in ("run", "run-script") and j + 1 < len(rest):
+                _follow_npm_script(target_dir, rest[j + 1], depth + 1)
+                return cur_dir
+            _fail(f"unsupported npm subcommand: {sub}")
+            return cur_dir
+
+        # 2. yarn / pnpm
+        if tool in ("yarn", "pnpm"):
+            target_dir = cur_dir
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t in ("--cwd", "--dir", "-C") and j + 1 < len(rest):
+                    nd = _resolve_project_subdir(project, proj_res, rest[j + 1], target_dir)
+                    if nd is None:
+                        _fail(f"{tool} directory option not inside project: {rest[j + 1]}")
+                        return cur_dir
+                    target_dir = nd
+                    j += 2
+                    continue
+                if t in ("-s", "--silent"):
+                    j += 1
+                    continue
+                if t.startswith("-"):
+                    _fail(f"unsupported {tool} flag: {t}")
+                    return cur_dir
+                break
+            if j >= len(rest):
+                _fail(f"{tool} missing subcommand")
+                return cur_dir
+            sub = rest[j]
+            if sub == "test":
+                _follow_npm_script(target_dir, "test", depth + 1)
+                return cur_dir
+            if sub == "run" and j + 1 < len(rest):
+                _follow_npm_script(target_dir, rest[j + 1], depth + 1)
+                return cur_dir
+            _fail(f"unsupported {tool} subcommand: {sub}")
+            return cur_dir
+
+        # 3. npx jest|vitest|mocha
+        if tool == "npx":
+            j = 0
+            while j < len(rest) and rest[j] in ("--no-install", "-y", "--yes", "-q", "--quiet"):
+                j += 1
+            if j >= len(rest):
+                _fail("npx missing command")
+                return cur_dir
+            runner = rest[j]
+            if runner in _KNOWN_JS_RUNNERS:
+                pkg_rel = "/".join((*cur_dir, "package.json")) if cur_dir else "package.json"
+                if pkg_rel in files_set:
+                    protected.add(pkg_rel)
+                for arg in rest[j + 1:]:
+                    if arg in ("-r", "--require"):
+                        _fail(f"npx {runner} uses --require")
+                        return cur_dir
+                    f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
+                    if f_rel is not None:
+                        protected.add(f_rel)
+                return cur_dir
+            _fail(f"npx runs unknown command: {runner}")
+            return cur_dir
+
+        # 4. Known direct test runners: pytest, jest, vitest, mocha, cargo test, go test
+        if tool == "pytest":
+            j = 0
+            while j < len(rest):
+                arg = rest[j]
+                if arg == "-p" and j + 1 < len(rest):
+                    pmod = rest[j + 1]
+                    if not pmod.startswith("no:") and (pmod.replace(".", "/") + ".py") in files_set:
+                        _fail(f"pytest loads local plugin: {pmod}")
+                        return cur_dir
+                    j += 2
+                    continue
+                f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
+                if f_rel is not None:
+                    protected.add(f_rel)
+                j += 1
+            return cur_dir
+
+        if tool in _KNOWN_JS_RUNNERS:
+            pkg_rel = "/".join((*cur_dir, "package.json")) if cur_dir else "package.json"
+            if pkg_rel in files_set:
+                protected.add(pkg_rel)
+            for arg in rest:
+                if arg in ("-r", "--require"):
+                    _fail(f"{tool} uses --require")
+                    return cur_dir
+                f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
+                if f_rel is not None:
+                    protected.add(f_rel)
+            return cur_dir
+
+        if tool == "cargo":
+            if rest and rest[0] == "test":
+                ct = "/".join((*cur_dir, "Cargo.toml")) if cur_dir else "Cargo.toml"
+                if ct in files_set:
+                    protected.add(ct)
+                return cur_dir
+            _fail(f"unsupported cargo subcommand: {rest[0] if rest else '(none)'}")
+            return cur_dir
+
+        if tool == "go":
+            if rest and rest[0] == "test":
+                gm = "/".join((*cur_dir, "go.mod")) if cur_dir else "go.mod"
+                if gm in files_set:
+                    protected.add(gm)
+                return cur_dir
+            _fail(f"unsupported go subcommand: {rest[0] if rest else '(none)'}")
+            return cur_dir
+
+        # 5. python / python3
+        if _PY_TOOL_RE.match(tool):
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t in ("-B", "-E", "-I", "-O", "-OO", "-S", "-s", "-u", "-v", "-q", "-P", "-bb", "-b", "-d", "-x"):
+                    j += 1
+                    continue
+                if t in ("-W", "-X") and j + 1 < len(rest):
+                    j += 2
+                    continue
+                if (t.startswith("-W") or t.startswith("-X")) and len(t) > 2:
+                    j += 1
+                    continue
+                break
+            if j >= len(rest):
+                _fail("python invoked without script or module")
+                return cur_dir
+            mode_tok = rest[j]
+            if mode_tok == "-m" and j + 1 < len(rest):
+                mod_name = rest[j + 1]
+                mod_args = rest[j + 2:]
+                if mod_name in ("pytest", "unittest") or mod_name.startswith("unittest."):
+                    for ma in mod_args:
+                        if not ma.startswith("-"):
+                            f_rel = _resolve_project_file(project, proj_res, files_set, ma, cur_dir)
+                            if f_rel is not None:
+                                protected.add(f_rel)
+                            else:
+                                mod_py = ma.replace(".", "/") + ".py"
+                                f_mod = _resolve_project_file(project, proj_res, files_set, mod_py, cur_dir)
+                                if f_mod is not None:
+                                    protected.add(f_mod)
+                    return cur_dir
+                # Look up MOD.py / MOD/__main__.py in project
+                mod_parts = [p for p in mod_name.split(".") if p]
+                mod_sub = "/".join(mod_parts)
+                found_files: list[str] = []
+                search_bases: list[tuple[str, ...]] = [cur_dir]
+                if () not in search_bases:
+                    search_bases.append(())
+                if ("src",) not in search_bases:
+                    search_bases.append(("src",))
+                for base_p in search_bases:
+                    pref = "/".join(base_p)
+                    cand_py = f"{pref}/{mod_sub}.py" if pref else f"{mod_sub}.py"
+                    cand_main = f"{pref}/{mod_sub}/__main__.py" if pref else f"{mod_sub}/__main__.py"
+                    cand_init = f"{pref}/{mod_sub}/__init__.py" if pref else f"{mod_sub}/__init__.py"
+                    if cand_py in files_set:
+                        found_files.append(cand_py)
+                        break
+                    if cand_main in files_set:
+                        found_files.append(cand_main)
+                        if cand_init in files_set:
+                            found_files.append(cand_init)
+                        break
+                if found_files:
+                    for fp in found_files:
+                        _analyze_py_file(fp)
+                    return cur_dir
+                _fail(f"python -m module cannot be resolved in project: {mod_name}")
+                return cur_dir
+            if mode_tok == "-c" and j + 1 < len(rest):
+                code_str = rest[j + 1]
+                for r in _py_analyze_code_ast(code_str.encode("utf-8", "replace"), "<python -c>", files_set, inline=True):
+                    _fail(r)
+                return cur_dir
+            if mode_tok.startswith("-"):
+                _fail(f"unsupported python option: {mode_tok}")
+                return cur_dir
+            f_rel = _resolve_project_file(project, proj_res, files_set, mode_tok, cur_dir)
+            if f_rel is None:
+                _fail(f"python script not found in project: {mode_tok}")
+                return cur_dir
+            _analyze_py_file(f_rel)
+            return cur_dir
+
+        # 6. node
+        if tool == "node":
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t in ("-e", "--eval", "-p", "--print"):
+                    _fail(f"node inline code ({t}) cannot be resolved")
+                    return cur_dir
+                if t in ("-r", "--require", "--import", "--loader"):
+                    _fail(f"node preload option ({t}) cannot be resolved")
+                    return cur_dir
+                if t in ("--no-warnings", "--enable-source-maps", "--experimental-vm-modules"):
+                    j += 1
+                    continue
+                if t.startswith("-"):
+                    _fail(f"unsupported node option: {t}")
+                    return cur_dir
+                break
+            if j >= len(rest):
+                _fail("node invoked without script file")
+                return cur_dir
+            f_rel = _resolve_project_file(project, proj_res, files_set, rest[j], cur_dir)
+            if f_rel is None:
+                _fail(f"node script not found in project: {rest[j]}")
+                return cur_dir
+            _analyze_js_file(f_rel)
+            return cur_dir
+
+        # 7. bash / sh / dash FILE
+        if tool in ("bash", "sh", "dash"):
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t.startswith("-") and not t.startswith("--") and len(t) > 1 and all(c in "eux" for c in t[1:]):
+                    j += 1
+                    continue
+                break
+            if j >= len(rest):
+                _fail(f"{tool} invoked without script file")
+                return cur_dir
+            if rest[j].startswith("-"):
+                _fail(f"unsupported {tool} option: {rest[j]}")
+                return cur_dir
+            f_rel = _resolve_project_file(project, proj_res, files_set, rest[j], cur_dir)
+            if f_rel is None:
+                _fail(f"shell script not found in project: {rest[j]}")
+                return cur_dir
+            _analyze_shell_file(f_rel, cur_dir, depth + 1)
+            return cur_dir
+
+        # 8. make / gmake
+        if tool in ("make", "gmake"):
+            _analyze_make(rest, cur_dir, depth + 1)
+            return cur_dir
+
+        # Everything else -> unverified
+        _fail(f"unknown command: {tool}")
+        return cur_dir
+
+    def _analyze_cmd_str(cmd_str: str, cur_dir: tuple[str, ...], depth: int, *,
+                         in_script: str | None = None) -> tuple[str, ...]:
+        nonlocal uses_exp
+        segs, tok_reasons, exp = _tokenize_simple_shell(cmd_str)
+        uses_exp = uses_exp or exp
+        for tr in tok_reasons:
+            _fail(f"{in_script}: {tr}" if in_script else tr)
+        if not segs and not tok_reasons:
+            _fail("empty acceptance command")
+            return cur_dir
+        d = cur_dir
+        for seg in segs:
+            d = _analyze_simple_segment(seg, d, depth, in_script=in_script)
+        return d
+
+    _analyze_cmd_str(cmd, (), 0)
+    integrity = "verified" if not reasons else "unverified"
+    return _AcceptanceAnalysis(
+        integrity=integrity,
+        reasons=reasons,
+        protected=protected,
+        pinned_scripts=pinned_scripts,
+        pinned_named_scripts=pinned_named_scripts,
+        shell_expansion=uses_exp,
+    )
 
 
 def _check_command_protections(project: pathlib.Path, cmd: str,
@@ -2699,7 +3780,10 @@ class AcceptanceSpec:
     interpreter: str | None = None
     pinned_script: str | None = None
     pinned_scripts: dict[str, str] = dataclasses.field(default_factory=dict)
+    pinned_named_scripts: dict[str, dict[str, str]] = dataclasses.field(default_factory=dict)
     shell_expansion: bool = False
+    integrity: str | None = None       # "verified" | "unverified" | None (for kind == "none")
+    integrity_reasons: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -2714,8 +3798,13 @@ class AcceptanceSpec:
             d["pinned_script"] = self.pinned_script
         if self.pinned_scripts:
             d["pinned_scripts"] = dict(self.pinned_scripts)
+        if self.pinned_named_scripts:
+            d["pinned_named_scripts"] = {k: dict(v) for k, v in self.pinned_named_scripts.items()}
         if self.shell_expansion:
             d["shell_expansion"] = True
+        if self.integrity is not None:
+            d["integrity"] = self.integrity
+            d["integrity_reasons"] = list(self.integrity_reasons)
         return d
 
 
@@ -2895,18 +3984,25 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         cmd = check.strip()
         if not cmd:
             raise ValueError("--check command must not be empty")
-        extra_check, pinned_script, pinned_scripts, uses_exp = _check_command_protections(
-            project, cmd, set(all_files)
+        files_set = set(all_files)
+        extra_check, pinned_script_r2, pinned_scripts_r2, uses_exp = _check_command_protections(
+            project, cmd, files_set
         )
-        prot = tuple(sorted(set(_prot("check")) | extra_check))
+        analysis = _analyze_acceptance_command(project, cmd, files_set)
+        merged_pinned = {**pinned_scripts_r2, **analysis.pinned_scripts}
+        pinned_script = merged_pinned.get("package.json") or pinned_script_r2
+        prot = tuple(sorted(set(_prot("check")) | extra_check | analysis.protected))
         return AcceptanceSpec(
             kind="check",
             command=cmd,
             argv=None,
             protected=prot,
             pinned_script=pinned_script,
-            pinned_scripts=pinned_scripts,
-            shell_expansion=uses_exp,
+            pinned_scripts=merged_pinned,
+            pinned_named_scripts=analysis.pinned_named_scripts,
+            shell_expansion=bool(uses_exp or analysis.shell_expansion),
+            integrity=analysis.integrity,
+            integrity_reasons=tuple(analysis.reasons),
         )
 
     if py_orig:
@@ -2919,6 +4015,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 protected=_prot("python_unittest"),
                 reason=f"syntax error in original test file: {insp.syntax_error}",
                 interpreter=py_exe,
+                integrity="verified",
             )
         if insp.has_pytest_style:
             if _pytest_available(py_exe):
@@ -2927,41 +4024,58 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                     command=f"{py_exe} -B -m pytest -q -rN",
                     protected=_prot("python_pytest"),
                     interpreter=py_exe,
+                    integrity="verified",
                 )
             return AcceptanceSpec(
                 kind="python_bare",
                 command=f"{py_exe} -B (stdlib test runner)",
                 protected=_prot("python_bare"),
                 interpreter=py_exe,
+                integrity="verified",
             )
         return AcceptanceSpec(
             kind="python_unittest",
             command=f"{py_exe} -B (unittest)",
             protected=_prot("python_unittest"),
             interpreter=py_exe,
+            integrity="verified",
         )
 
     missing: list[str] = []
     npm_script = _npm_test_script(project)
     if npm_script is not None:
         if shutil.which("npm"):
+            analysis = _analyze_acceptance_command(project, "npm test", set(all_files))
+            merged_pinned = {"package.json": npm_script, **analysis.pinned_scripts}
+            prot = tuple(sorted(set(_prot("npm")) | analysis.protected))
             return AcceptanceSpec(
                 kind="npm",
                 command="npm test",
                 argv=("npm", "test"),
-                protected=_prot("npm"),
+                protected=prot,
                 pinned_script=npm_script,
+                pinned_scripts=merged_pinned,
+                pinned_named_scripts=analysis.pinned_named_scripts,
+                shell_expansion=analysis.shell_expansion,
+                integrity=analysis.integrity,
+                integrity_reasons=tuple(analysis.reasons),
             )
         missing.append("package.json has a \"test\" script, but 'npm' was not found on PATH")
 
     if _has_reg_file(project / "Cargo.toml"):
         if shutil.which("cargo"):
-            return AcceptanceSpec(kind="cargo", command="cargo test", argv=("cargo", "test"), protected=_prot("cargo"))
+            return AcceptanceSpec(
+                kind="cargo", command="cargo test", argv=("cargo", "test"),
+                protected=_prot("cargo"), integrity="verified",
+            )
         missing.append("Cargo.toml found, but 'cargo' was not found on PATH")
 
     if _has_reg_file(project / "go.mod"):
         if shutil.which("go"):
-            return AcceptanceSpec(kind="go", command="go test ./...", argv=("go", "test", "./..."), protected=_prot("go"))
+            return AcceptanceSpec(
+                kind="go", command="go test ./...", argv=("go", "test", "./..."),
+                protected=_prot("go"), integrity="verified",
+            )
         missing.append("go.mod found, but 'go' was not found on PATH")
 
     return AcceptanceSpec(
@@ -2970,6 +4084,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         argv=None,
         protected=_prot("none"),
         reason="; ".join(missing) if missing else None,
+        integrity=None,
     )
 
 
@@ -3395,6 +4510,15 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
                     "accept": False,
                     "first_problem": f"{pkg_rel} scripts.test does not match the pinned start definition",
                 }
+        for pkg_rel, named_map in sorted(spec.pinned_named_scripts.items()):
+            for sc_name, want_script in sorted(named_map.items()):
+                if _npm_script_at(work_res / pkg_rel, sc_name) != want_script:
+                    return {
+                        **base,
+                        "status": "acceptance_error",
+                        "accept": False,
+                        "first_problem": f"{pkg_rel} scripts.{sc_name} does not match the pinned start definition",
+                    }
     env = dict(os.environ)
     env["PWD"] = str(work_res)
     if run_id:
@@ -3750,7 +4874,7 @@ def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
     out = dict(payload)
     for key in ("written_back", "deleted", "skipped", "appeared_during_run", "conflicts",
                 "write_back_conflicts", "outside_changes", "acceptance_dependencies_changed",
-                "not_delivered", "detached_processes"):
+                "acceptance_integrity_reasons", "not_delivered", "detached_processes"):
         items = out.get(key)
         if isinstance(items, list) and len(items) > 64:
             out[f"{key}_count"] = len(items)
@@ -3818,7 +4942,11 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                 "interpreter": spec.interpreter,
                 "protected": sorted(protected),
                 "reason": spec.reason,
+                "integrity": spec.integrity,
+                "integrity_reasons": list(spec.integrity_reasons),
             },
+            "acceptance_integrity": spec.integrity,
+            "acceptance_integrity_reasons": list(spec.integrity_reasons),
             "baseline": res.get("baseline"),
             "baseline_error": res.get("baseline_error"),
             "node_modules_changed": res.get("node_modules_changed") or [],
@@ -4388,6 +5516,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
             "protected": sorted(protected),
             "acceptance": spec.to_dict(),
+            "acceptance_integrity": spec.integrity,
+            "acceptance_integrity_reasons": list(spec.integrity_reasons),
             "interpreter": spec.interpreter,
             "baseline": None,
             "baseline_error": None,
@@ -4521,6 +5651,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
                 "protected": sorted(protected),
                 "acceptance": spec.to_dict(),
+                "acceptance_integrity": spec.integrity,
+                "acceptance_integrity_reasons": list(spec.integrity_reasons),
                 "interpreter": spec.interpreter,
                 "baseline": baseline_rec,
                 "baseline_error": baseline_error,
@@ -4871,6 +6003,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
             "protected": sorted(protected),
             "acceptance": spec.to_dict(),
+            "acceptance_integrity": spec.integrity,
+            "acceptance_integrity_reasons": list(spec.integrity_reasons),
             "interpreter": spec.interpreter,
             "baseline": baseline_rec,
             "baseline_error": None,
@@ -5062,7 +6196,37 @@ def summary(res: dict) -> str:
                          f"status={baseline.get('status')})")
             else:
                 head += f"\n  baseline (before agent): FAIL (status={baseline.get('status')})"
-    if protected:
+    acc_integrity = res.get("acceptance_integrity")
+    if acc_integrity is None:
+        acc_integrity = acc_info.get("integrity")
+    acc_integrity_reasons = list(
+        res.get("acceptance_integrity_reasons")
+        or acc_info.get("integrity_reasons")
+        or ()
+    )
+    if acc_integrity == "unverified":
+        head += f"\n  {_UNVERIFIED_CHECK_WARNING}"
+        if acc_integrity_reasons:
+            shown_ir = "; ".join(str(r) for r in acc_integrity_reasons[:6]) + (
+                f" … (+{len(acc_integrity_reasons) - 6} more)" if len(acc_integrity_reasons) > 6 else ""
+            )
+            head += f"\n  unverified reason(s): {shown_ir}"
+        if protected:
+            shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
+            head += f"\n  partially restored before check (incomplete): {shown}"
+        deliv_changed = (
+            [f"+{p}" for p in (ch.get("added") or ())]
+            + [f"~{p}" for p in (ch.get("modified") or ())]
+            + [f"-{p}" for p in (ch.get("deleted") or ())]
+        )
+        if deliv_changed:
+            shown_dc = ", ".join(deliv_changed[:20]) + (
+                f" … (+{len(deliv_changed) - 20} more)" if len(deliv_changed) > 20 else ""
+            )
+            head += f"\n  files changed by delivered attempt: {shown_dc}"
+        else:
+            head += "\n  files changed by delivered attempt: none"
+    elif protected:
         shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
         head += f"\n  protected (restored before check): {shown}"
     elif acc_kind != "none":
