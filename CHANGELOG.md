@@ -17,49 +17,65 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   `go.mod`) are restored before each check and never written back with the agent's edits; the message lists any the
   agent touched. `--protect PATH/GLOB` adds files for `--check`. When nothing is protected the message says the agent
   could have edited the check.
-- **`--check` auto-protects manifests and referenced project files (rc5, A3/A4).** When `--check "<cmd>"` starts with
-  `npm`/`npx`/`yarn`/`pnpm`, `package.json` (and its `scripts.test`) is pinned and restored; `cargo` protects
-  `Cargo.toml`, `go` protects `go.mod`, and `make` protects `Makefile`/`makefile`/`GNUmakefile`. Any command-line
-  token naming an existing regular file inside the project (e.g. `verify.sh`, `run_checks.py`) is also restored before
-  the check, never written back, and listed in `protected (restored before check)`.
+- **`--check` robust command parsing, manifest pinning, and exec-bit preservation (rc5, A3/A4/R5/R7).** `--check "<cmd>"`
+  is split across shell operators (`;`, `&&`, `||`, `|`) and recursively unwrapped through `sh -c`/`bash -c`, `env`,
+  `timeout`, `nice`, and `cd DIR &&`. If any command word is `npm`/`npx`/`yarn`/`pnpm`, every `package.json` in the
+  project (excluding `node_modules`) is protected and its `scripts.test` is pinned; `make`/`gmake` protects every
+  `Makefile`/`makefile`/`GNUmakefile` and `*.mk`; `cargo` protects every `Cargo.toml`; `go` protects every `go.mod`.
+  Any token at any depth naming an existing project file (relative, `./x`, or absolute inside the project) is also
+  protected, and restoring protected files preserves original mode bits including exec (so `--check './verify.sh'` works).
+  If the command uses unresolvable shell expansion (`$VAR` or backticks), Vacant prints a warning.
 - **Additional runner configs protected (rc5, A5).** Added `playwright.config.*`, `cypress.config.*`, `cypress.json`,
   `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`, `noxfile.py`, and `.mocharc.*` to the protected test-config set
   (restored before check and not written back).
-- **Flagged acceptance dependencies (rc5, A1/A2).** Files changed by the delivered attempt that are directly imported
-  by protected tests (Python AST `import`/`from` and JS/TS relative `require`/`import`) or live under `fixtures/`,
-  `testdata/`, `test_data/`, `__fixtures__/`, or test directories are not blocked, but are flagged in the summary
-  ("the check depends on these files and the agent changed them — review them yourself") and recorded in `result.json`
-  and the signed receipt as `acceptance_dependencies_changed`.
-- **Runs in the project's environment; isolated `node_modules` copy and content manifest (rc5, B3).** Python
+- **Flagged acceptance dependencies (rc5, A1/A2/R6).** Files changed by the delivered attempt are flagged in
+  `acceptance_dependencies_changed` (ordered, with reasons `literal`/`import`/`dir`) when: (a) their basename or
+  relative path appears as a string literal in a protected test file, (b) they are imported by protected Python tests
+  transitively up to depth 2 (AST), (c) they are required/imported/`jest.mock`-ed by protected JS/TS tests up to depth 2,
+  or (d) they live under `fixtures/`, `testdata/`, `test_data/`, `__fixtures__/`, `__mocks__/`, `mocks/`, `golden/`,
+  `data/`, or test directories. A module is not flagged when it is the sole non-test source directly imported by a test
+  (the module under test). Dynamic imports and paths computed at runtime are not traced.
+- **Isolated `node_modules` copy, lstat manifest, and external symlink handling (rc5, B3/R8/R10/R13).** Python
   acceptance uses `$VIRTUAL_ENV`, then `.venv/` or `venv/` in the project, then `python3` on PATH. The agent workspace
-  receives its own copy of `node_modules` (`cp --reflink=auto -a`, falling back to a plain copy) that is never written
-  back; acceptance runs against the untouched original `node_modules`. A content manifest (sha256, mode, type, symlink
-  target) of the original `node_modules` is recorded at start and re-verified before every acceptance and at the end
-  (catching same-size / restored-mtime writes via absolute paths); on mismatch, the attempt is not accepted, the run
-  stops, nothing is written back, and the changed paths are listed (exit 43). Copy and hash durations are reported in
-  `result.json` (`node_modules_copy_s`, `node_modules_hash_s`). A baseline check runs on the untouched project first;
-  if the runner itself is missing or a declared dependency is not installed, Vacant says so and stops before running
-  the agent (exit 43). A test that imports a module the agent has yet to write is a normal start, not an environment
-  error.
-- **Start-snapshot-relative write-back prevents concurrent data loss (rc5, D3).** Write-back now diffs against the
-  project snapshot taken at start: it deletes only paths that existed at start and were deleted by the delivered
-  attempt; files that appear in the project during the run are never deleted and are listed in `appeared_during_run`
-  (summary, `result.json`, receipt); paths modified or deleted by the delivered attempt whose live content differs from
-  the start snapshot are marked `conflict`, listed, and left with the user's version.
-- **Outside-project-change detection via `lstat` (rc5, B1).** An `lstat` listing of the original project (including
-  `.git/hooks/`, `.git/config`, and symlinks anywhere in the project, excluding the rest of `.git` and `node_modules`)
-  is taken before and after the run; any change outside the planned write-back is reported in the message,
-  `result.json`, and signed receipt (`outside_changes`), with a prominent warning when `.git/hooks/*` was added or
-  changed. Detection only (nothing reverted, exit codes unchanged).
-- **Detached process detection (rc5, B2).** The agent environment receives a unique `VACANT_RUN_ID` marker; on Linux,
-  `/proc/*/environ` is scanned after each attempt for surviving processes carrying that marker, recorded in
-  `detached_processes` (`result.json` and signed receipt) with a warning; elsewhere recorded as `null`. A write by a
-  detached process after delivery is not recorded.
-- **Non-UTF-8 filenames keep signed receipts intact (rc5, C1).** Surrogate-escaped paths are serialized consistently
-  via `os.fsencode(p).decode("utf-8", "backslashreplace")` with `non_utf8_paths: true` /
-  `path_encoding: "utf-8-backslashreplace"` across `result.json`, signed receipts, summaries, and `vacant audit`
-  (documented in `docs/AUDIT_RECORD_V1.md`), so runs with non-UTF-8 filenames no longer exit 2 or drop their signed
-  receipt.
+  receives its own copy of `node_modules` (probing `cp --reflink=always` and warning on fallback to a plain copy), with
+  any symlink whose resolved target lies outside the copied `node_modules` replaced by a real copy (dereferenced) so the
+  agent cannot write through it into the original project. Vacant no longer `chmod`s the original project's `node_modules`
+  (so SIGTERM/SIGKILL mid-run leaves original modes untouched); integrity of the original is verified via a fast `lstat`
+  manifest of `(type, size, mtime_ns, ctime_ns, ino, mode, symlink_target)` that also follows external symlinks (plus one
+  cheap sha256 pass when small), recording `node_modules_manifest_s` and `copy_s` in `result.json`. On mismatch, the
+  attempt is not accepted, the run stops, nothing is written back, and the changed paths are listed (exit 43). A baseline
+  check runs on the untouched project first; environment errors stop before running the agent (exit 43).
+- **Vacant state/work roots excluded inside projects (rc5, R1).** `VACANT_HOME` and `VACANT_WORK` are excluded from
+  every copy, scan, snapshot, B1 listing, and write-back plan when they lie inside the project (mirroring contract mode's
+  `_skip_dirs`), preventing signing-key leaks and recursive `copytree` crashes.
+- **Start-snapshot acceptance, outside-change overlap refusal, and plan→apply TOCTOU guard (rc5, D3/R11/Item 12).**
+  Acceptance always runs against the START snapshot of the project plus the attempt's own changes (never live project
+  files for unchanged paths). At write-back time, if live project changes overlap with any path the delivered attempt
+  writes (add/modify/delete), Vacant writes nothing back (no partial delivery), exits 43, records `write_back_conflicts`
+  in `result.json` and the receipt, and prints the conflicting paths and attempt workspace for manual merge. Non-overlapping
+  outside changes (including `appeared_during_run` and modified protected test/config files) are delivered as usual,
+  recorded in `outside_changes`, and printed prominently ("your project changed during the run, not by this delivery: … —
+  not checked and not touched"; plus a dedicated line for any protected test/config file). `_apply_write_plan` re-checks
+  each live file against the start snapshot just before `os.replace`/unlink to close plan→apply TOCTOU races.
+- **Expanded B1 `lstat`-only outside-change listing and `COPY_SKIP` visibility (rc5, B1/R4/R12).** The `lstat`-only B1
+  listing covers all of `.git` except `.git/objects/` (refs, HEAD, packed-refs, index, info/, config, hooks/, …) as well
+  as `node_modules`, `.venv`, `__pycache__`, and `.pytest_cache` at any depth (skipping root `node_modules` only when
+  already tracked by the item-4 manifest) and records `lstat_listing_s`. Changes under `.git/hooks`, `.git/refs`,
+  `.git/HEAD`, `.git/packed-refs`, or `.pth` files under `.venv` print prominent warnings. Files created by the agent
+  under `COPY_SKIP`-named dirs are not delivered and are listed in `not_delivered` (`result.json`, receipt, and summary)
+  with the reason.
+- **Linux child subreaper detached-process cleanup (rc5, B2/R2/R3).** On Linux, `vacant do` enables
+  `prctl(PR_SET_CHILD_SUBREAPER, 1)` for the run and scans `/proc/*/stat` (`ppid == vacant_pid`) plus the `VACANT_RUN_ID`
+  marker after each agent attempt (before acceptance), after baseline/acceptance, and at the end, killing detached
+  descendants (`SIGKILL` to their process groups, catching even `setsid` + `env -i` and acceptance-spawned processes) and
+  recording `{phase, pid, cmdline, killed}` in `detached_processes` with a warning count. On non-Linux platforms,
+  `detached_processes` is recorded as `null` and the message states that this layer does not exist on that platform.
+  A write by a detached process after delivery is not recorded.
+- **Byte-safe UTF-8 encoding for all strings (rc5, C1/R9).** Every string serialized into `result.json`, signed
+  receipts, CLI summaries, and `vacant audit` exports (paths, prompt, argv, `--check` command, env-derived strings,
+  output tails, `/proc/<pid>/cmdline`) is converted via `os.fsencode(s).decode("utf-8", "backslashreplace")` when
+  surrogates are present, and `request_sha256` hashes original raw bytes (`os.fsencode(prompt)`). Surrogate filenames
+  and prompts now yield recorded, verified receipts (`vacant audit list --strict` exits 0).
 - **Read-only project and subdirectory safeguards (rc5, D1/D2).** If the project root is not writable, `vacant do`
   refuses up front before running the agent (exit 43); otherwise the agent's workspace copy is made writable (`u+w`).
   Non-zero agent exit codes and last stderr lines are shown on passing runs too. Summaries state which directory was

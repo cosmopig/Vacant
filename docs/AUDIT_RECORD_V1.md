@@ -59,24 +59,27 @@ one record per line in JSONL) so humans, scripts, and agents can answer six ques
 Type strictness: Python `bool` is a subclass of `int`, so integer count fields explicitly reject
 booleans (`true`/`false` in a count field is treated as invalid/unknown, never as `1`/`0`).
 
-### 2.1 Non-UTF-8 Filesystem Paths
+### 2.1 Non-UTF-8 Filesystem Paths and Strings
 
-POSIX filesystems allow arbitrary non-UTF-8 byte sequences in filenames (which Python surfaces via
-`surrogateescape` code points `U+DC80..U+DCFF`). Raw surrogates cannot be serialized into strict
-UTF-8 JSON or Ed25519 canonical bytes (`canonical_bytes()`).
+POSIX filesystems and argv allow arbitrary non-UTF-8 byte sequences in filenames, prompts,
+commands, and environment strings (which Python surfaces via `surrogateescape` code points
+`U+DC80..U+DCFF`). Raw surrogates cannot be serialized into strict UTF-8 JSON or Ed25519
+canonical bytes (`canonical_bytes()`).
 
 To guarantee that signed receipts, `result.json`, CLI summaries, and `vacant audit` exports never
-crash or silently drop a run when a non-UTF-8 filename exists:
+crash or silently drop a run when a non-UTF-8 filename or string exists:
 
-- Valid UTF-8 path strings are emitted unchanged.
-- Any path string containing surrogateescape code points is converted deterministically by encoding
-  back to raw OS bytes with `os.fsencode(p)` and decoding as UTF-8 with `errors="backslashreplace"`
-  (e.g. raw byte `0xff` becomes the four-character sequence `\xff`).
+- Valid UTF-8 strings are emitted unchanged.
+- Any string containing surrogateescape code points (paths, prompt, argv, `--check` command,
+  env-derived strings, agent output tails, `/proc/<pid>/cmdline`, or audit fields) is converted
+  deterministically by encoding back to raw OS bytes with `os.fsencode(s)` and decoding as UTF-8
+  with `errors="backslashreplace"` (e.g. raw byte `0xff` becomes the four-character sequence `\xff`).
+- `request_sha256` hashes the original raw bytes (`os.fsencode(prompt)`).
 - The same representation is applied consistently across `result.json`, the signed
   `restart_receipt` payload, CLI summaries, and `vacant audit` exports so companion reconciliation
   agrees without false mismatches.
-- When any path in a restart run required backslashreplace escaping, both `result.json` and the
-  signed `restart_receipt` set `"non_utf8_paths": true` and
+- When any string or path in a restart run required backslashreplace escaping, both `result.json`
+  and the signed `restart_receipt` set `"non_utf8_paths": true` and
   `"path_encoding": "utf-8-backslashreplace"` (propagated to `details` in `vacant-audit-record/1`).
 - Snapshot tree hashes (`snapshot_tree_sha256`) continue to hash the raw OS filename bytes
   (`os.fsencode(rel)`), which is byte-identical to UTF-8 encoding for all valid UTF-8 paths.
@@ -290,11 +293,17 @@ the argument is not one of `list`, `show`, `export`, or a flag.
 3. **Same-account key boundary:** When signing keys live in plaintext under the same OS account
    as the agent, a hostile process in that account can read them. Stronger separation requires
    moving the receiver and signing keys to another OS account or machine.
-4. **Detached processes (restart mode):** On Linux, `vacant do` scans `/proc/*/environ` at the end
-   of each attempt for live processes carrying its `VACANT_RUN_ID` marker and records them in
-   `detached_processes` (elsewhere `null`). A write by a detached process after delivery is not
-   recorded.
-5. **Deduplication boundary:**
+4. **Detached processes (restart mode):** On Linux, `vacant do` enables `prctl(PR_SET_CHILD_SUBREAPER, 1)`
+   for the duration of the run, scans `/proc/*/stat` (`ppid == vacant_pid`) plus the `VACANT_RUN_ID`
+   env marker after each agent attempt (before acceptance), after baseline and each acceptance, and
+   at the end, kills surviving detached descendants (`SIGKILL`), and records `{phase, pid, cmdline, killed}`
+   in `detached_processes`. On non-Linux platforms this layer does not exist (`detached_processes: null`,
+   stated in the CLI message). A write by a detached process after delivery is not recorded.
+5. **Acceptance dependency tracing (restart mode):** `acceptance_dependencies_changed` covers string
+   literals in protected tests, Python/JS transitive imports up to depth 2 (including `jest.mock`),
+   and fixture/mock/golden/data/test directories, excluding a test's sole direct non-test import.
+   Dynamic imports and paths computed at runtime are not traced.
+6. **Deduplication boundary:**
    - **Restart mode (joined):** A `vacant do` restart run writes a signed `restart_receipt`
      into the project's trace chain (`chain.ndjson`) and a companion `result.json` under
      `$VACANT_WORK/restart-*`. These are joined by `run_id` (falling back to `(project_key,

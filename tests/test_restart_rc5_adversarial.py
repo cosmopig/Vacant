@@ -346,21 +346,24 @@ def test_d3_concurrent_edit_conflict_preserves_user_version(tmp_path, monkeypatc
     rc = _run_cli_do(monkeypatch, proj, agent, prompt="edit files", attempts=1)
     out = capsys.readouterr().out
 
-    assert rc == 0, out
+    # Round 2 (R11b): overlap between live project changes and delivered attempt writes NOTHING back and exits 43
+    assert rc == adapters_cli.EXIT["void"], out
     assert (proj / "shared.txt").read_text(encoding="utf-8") == "user_shared\n"
     assert (proj / "delme.txt").read_text(encoding="utf-8") == "user_delme\n"
-    assert (proj / "clean.txt").read_text(encoding="utf-8") == "agent_clean\n"
-    assert "conflict" in out.lower()
+    assert (proj / "clean.txt").read_text(encoding="utf-8") == "start_clean\n"
+    assert "overlapping" in out.lower() or "conflict" in out.lower()
     assert "shared.txt" in out and "delme.txt" in out
 
     rj = _latest_result_json(tmp_path)
+    assert set(rj["write_back_conflicts"]) == {"shared.txt", "delme.txt"}
     assert set(rj["conflicts"]) == {"shared.txt", "delme.txt"}
     assert set(rj["changed"]["conflict"]) == {"shared.txt", "delme.txt"}
-    assert rj["changed"]["modified"] == ["clean.txt"]
+    assert rj["changed"]["modified"] == []
     assert rj["changed"]["deleted"] == []
 
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
+    assert set(receipts[0]["write_back_conflicts"]) == {"shared.txt", "delme.txt"}
     assert set(receipts[0]["conflicts"]) == {"shared.txt", "delme.txt"}
 
 
@@ -494,7 +497,7 @@ def test_b1_direct_escape_detected_for_git_hooks_config_and_symlinks(tmp_path, m
     assert (proj / "planted_link").is_symlink()
     assert (proj / "pwned_regular.txt").is_file()
 
-    assert "changed in your project outside the delivered attempt:" in out
+    assert "your project changed during the run, not by this delivery:" in out
     assert ".git/hooks/post-commit" in out
     assert ".git/config" in out
     assert "planted_link" in out
@@ -547,12 +550,12 @@ def test_b2_detached_process_detected_and_recorded(tmp_path, monkeypatch, capsys
 
         rj = _latest_result_json(tmp_path)
         assert isinstance(rj["detached_processes"], list)
-        assert bg_pid in rj["detached_processes"]
+        assert any(isinstance(d, dict) and d["pid"] == bg_pid and d["killed"] is True for d in rj["detached_processes"])
         assert "detached" in out.lower() and str(bg_pid) in out
 
         ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
         assert ok, why
-        assert bg_pid in receipts[0]["detached_processes"]
+        assert any(isinstance(d, dict) and d["pid"] == bg_pid for d in receipts[0]["detached_processes"])
     finally:
         if pid_file.exists():
             try:
@@ -700,18 +703,18 @@ def test_a1_fixture_change_flagged_in_summary_result_and_receipt(tmp_path, monke
     assert "fixtures/expected.txt" in out
 
     rj = _latest_result_json(tmp_path)
-    assert "fixtures/expected.txt" in rj["acceptance_dependencies_changed"]
+    assert any(d["path"] == "fixtures/expected.txt" for d in rj["acceptance_dependencies_changed"])
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert "fixtures/expected.txt" in receipts[0]["acceptance_dependencies_changed"]
+    assert any(d["path"] == "fixtures/expected.txt" for d in receipts[0]["acceptance_dependencies_changed"])
 
-    # Also verify testdata/, test_data/, __fixtures__/, and ES import resolution
+    # Also verify testdata/, test_data/, __fixtures__/, and ES import resolution (with two imports so helper2 isn't sole MUT)
     deps = R._find_acceptance_dependencies(
-        {"app.test.mjs": b"import { x } from './helper2.mjs';\n"},
-        {"app.test.mjs", "helper2.mjs", "testdata/a.json", "test_data/b.txt", "__fixtures__/c.txt", "unrelated.txt"},
+        {"app.test.mjs": b"import { a } from './app.mjs';\nimport { x } from './helper2.mjs';\n"},
+        {"app.test.mjs", "app.mjs", "helper2.mjs", "testdata/a.json", "test_data/b.txt", "__fixtures__/c.txt", "unrelated.txt"},
         {"helper2.mjs", "testdata/a.json", "test_data/b.txt", "__fixtures__/c.txt", "unrelated.txt"},
     )
-    assert deps == ["__fixtures__/c.txt", "helper2.mjs", "test_data/b.txt", "testdata/a.json"]
+    assert {d["path"] for d in deps} == {"__fixtures__/c.txt", "helper2.mjs", "test_data/b.txt", "testdata/a.json"}
 
 
 def test_a2_python_imported_helper_flagged(tmp_path, monkeypatch, capsys):
@@ -735,10 +738,10 @@ def test_a2_python_imported_helper_flagged(tmp_path, monkeypatch, capsys):
     assert "the check depends on these files and the agent changed them — review them yourself:" in out
     assert "helpers.py" in out
     rj = _latest_result_json(tmp_path)
-    assert "helpers.py" in rj["acceptance_dependencies_changed"]
+    assert any(d["path"] == "helpers.py" for d in rj["acceptance_dependencies_changed"])
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert "helpers.py" in receipts[0]["acceptance_dependencies_changed"]
+    assert any(d["path"] == "helpers.py" for d in receipts[0]["acceptance_dependencies_changed"])
 
 
 @needs_node
@@ -765,10 +768,10 @@ def test_a2_js_imported_helper_flagged(tmp_path, monkeypatch, capsys):
     assert "the check depends on these files and the agent changed them — review them yourself:" in out
     assert "helper.js" in out
     rj = _latest_result_json(tmp_path)
-    assert "helper.js" in rj["acceptance_dependencies_changed"]
+    assert any(d["path"] == "helper.js" for d in rj["acceptance_dependencies_changed"])
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert "helper.js" in receipts[0]["acceptance_dependencies_changed"]
+    assert any(d["path"] == "helper.js" for d in receipts[0]["acceptance_dependencies_changed"])
 
 
 # ============================================================================

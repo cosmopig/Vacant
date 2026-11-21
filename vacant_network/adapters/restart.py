@@ -44,12 +44,16 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
   其餘新增的驗收種類（`check`、`python_pytest`、`python_bare`、`npm`、`cargo`、`go`）皆未經過對照實驗量測。
 - 驗收＝「擋得住專案自己的測試會抓到的錯」，**不等於需求被滿足**。測試寫得弱，這一層就弱。
 - 暫存副本**不是沙箱**：agent 與外部驗收指令（`--check`、`npm`、`cargo`、`go`）皆以使用者的帳號權限與環境變數執行，
-  讀寫得到磁碟上你讀寫得到的一切；這層只保護「交回寫回」與「驗收流程」本身，擋不住執行期間直接讀寫專案外或其他路徑的檔案，
-  也殺不到自己 `setsid()` 脫離行程群組的背景子行程（Linux 上於每次嘗試結束後以 `VACANT_RUN_ID` 掃描 `/proc/*/environ`
-  偵測並記於結果與收據；其他平台記 `null`）。**A write by a detached process after delivery is not recorded.**
-  另結束時會對原專案做不跟隨 symlink 的 `lstat` 前後比對（含 `.git/hooks/`、`.git/config` 與任意處 symlink），
-  僅偵測並回報計畫寫回以外的異動（不自動還原、不改退出碼）。`COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`）
-  不會複製進快照副本（agent 工作區僅對 `node_modules` 取得獨立副本，絕不寫回）。
+  讀寫得到磁碟上你讀寫得到的一切；這層只保護「交回寫回」與「驗收流程」本身，擋不住執行期間直接讀寫專案外或其他路徑的檔案。
+  Linux 上於執行期間啟用 `prctl(PR_SET_CHILD_SUBREAPER, 1)`，於每次 agent 嘗試後（驗收前）、每次驗收／基線後與結束前，
+  透過 `/proc/*/stat`（`ppid == vacant_pid`）與 `VACANT_RUN_ID` 雙訊號抓出並 `SIGKILL` 脫離子孫行程（即使 `setsid`＋`env -i`），
+  記於 `detached_processes`；**非 Linux 平台沒有此防護層**（記 `null` 並在交付訊息明講）。**A write by a detached process after delivery is not recorded.**
+  另開始與結束時會對原專案做純 `lstat` 清單比對（含整棵 `.git`（唯略過 `.git/objects/`）、任意深度的 `node_modules`／`.venv`／
+  `__pycache__`／`.pytest_cache` 與任意處 symlink，並排除 Vacant 自己的 `VACANT_HOME`／`VACANT_WORK`），偵測並回報計畫寫回以外的異動。
+  `COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`、`__pycache__`、`.pytest_cache`）不會寫回原專案（agent 在其下新建的檔案會列在 `not_delivered`）。
+- 驗收依賴標記（`acceptance_dependencies_changed`）涵蓋測試檔字串常值、Python／JS 最深 2 層遞移匯入（含 `jest.mock`）與
+  `fixtures/`／`testdata/`／`test_data/`／`__fixtures__/`／`__mocks__/`／`mocks/`／`golden/`／`data/`／測試目錄，且排除受測模組本身（單一直接匯入）。
+  **Dynamic imports and paths computed at runtime are not traced.**
 - 等預算是牆鐘的；重開通常讓 agent 用掉更多模型呼叫（redo1 約兩倍），這一層不省算力。
 - `budget_s` 是**整個指令**的牆鐘上限：agent、驗收（所有測試目錄與外部指令共用同一條期限，不設超額下限）、複製都算在內，
   每次嘗試前預留一次驗收的時間（2026-11-19：只算 agent 時間時，confirm1／confirm1c 各有 1 格第三次嘗試跑到
