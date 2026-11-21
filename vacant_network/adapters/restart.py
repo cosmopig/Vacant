@@ -111,15 +111,20 @@ from .run import COPY_SKIP, Launch, run_agent, work_root
 PATTERNS = ("*_test.py", "test_*.py")
 _UNIVERSAL_TEST_NAME_PATTERNS = ("*_test.py", "test_*.py", "*.test.*", "*.spec.*", "*_test.go")
 _UNIVERSAL_TEST_DIRS = frozenset({"__tests__", "tests", "test"})
-_FIXTURE_DIRS = frozenset({"fixtures", "testdata", "test_data", "__fixtures__"})
+_FIXTURE_DIRS = frozenset({
+    "fixtures", "testdata", "test_data", "__fixtures__",
+    "__mocks__", "mocks", "golden", "data",
+})
 _DETACHED_MARKER_ENV = "VACANT_RUN_ID"
 _JS_EXTS = (".js", ".cjs", ".mjs", ".ts", ".cts", ".mts", ".jsx", ".tsx")
 _JS_REL_IMPORT_RES = (
-    re.compile(r"""\brequire\s*\(\s*['"](\.\.?/[^'"]+)['"]\s*\)"""),
+    re.compile(r"""\brequire\s*\(\s*['"`](\.\.?/[^'"`$]+)['"`]\s*\)"""),
     re.compile(r"""\bimport\s+(?:[^'"]+?\s+from\s+)?['"](\.\.?/[^'"]+)['"]"""),
     re.compile(r"""\bexport\s+[^'"]+?\s+from\s+['"](\.\.?/[^'"]+)['"]"""),
-    re.compile(r"""\bimport\s*\(\s*['"](\.\.?/[^'"]+)['"]\s*\)"""),
+    re.compile(r"""\bimport\s*\(\s*['"`](\.\.?/[^'"`$]+)['"`]\s*\)"""),
+    re.compile(r"""\b(?:jest|vi)\.(?:do)?[Mm]ock\s*\(\s*['"`](\.\.?/[^'"`$]+)['"`]"""),
 )
+_QUOTED_LIT_RE = re.compile(r"""'([^'\n\\]{2,240})'|"([^"\n\\]{2,240})"|`([^`\n\\$]{2,240})`""")
 #: 測試設定檔：能改變「測試怎麼跑、算不算過」的檔（pytest 的 conftest 掛鉤、ini 選項；jest／vitest／mocha／babel 設定）。
 #: 開始時就有的：和測試檔一樣受保護（驗收前還原、不寫回）。agent 新增的：驗收副本裡不放、不寫回、交件訊息列出。
 _TEST_CONFIG_NAMES = frozenset({
@@ -961,85 +966,213 @@ def _norm_posix_join(base_parts: tuple[str, ...], rel_spec: str) -> str | None:
     return "/".join(parts) if parts else None
 
 
-def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[str],
-                                  delivered_changed: set[str]) -> list[str]:
-    """找出交件嘗試所改動、且驗收直接依賴的檔案（僅標記提醒人審閱，不阻擋交件）：
-    (a) 受保護測試檔直接匯入的專案模組（Python AST import/from；JS/TS 相對路徑 require/import）；
-    (b) 位於 fixtures/、testdata/、test_data/、__fixtures__/ 或測試目錄下的檔案。"""
-    if not delivered_changed:
-        return []
-    flagged: set[str] = set()
+def _extract_py_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set[str]:
+    try:
+        tree = ast.parse(raw, filename=rel_path)
+    except SyntaxError:
+        return set()
+    parent = pathlib.PurePosixPath(rel_path).parent
+    parent_parts = () if parent == pathlib.PurePosixPath(".") else parent.parts
+    search_prefixes: list[tuple[str, ...]] = [()]
+    if parent_parts and parent_parts not in search_prefixes:
+        search_prefixes.append(parent_parts)
+    if ("src",) not in search_prefixes:
+        search_prefixes.append(("src",))
 
-    # (b) fixture / test-data / test 目錄
-    for rel in delivered_changed:
-        parts = pathlib.PurePosixPath(rel).parts
-        if any(d in (_FIXTURE_DIRS | _UNIVERSAL_TEST_DIRS) for d in parts[:-1]):
-            flagged.add(rel)
+    out: set[str] = set()
 
-    def _resolve_py_mod(base_prefixes: list[tuple[str, ...]], mod_parts: list[str]) -> None:
+    def _resolve(base_prefixes: list[tuple[str, ...]], mod_parts: list[str]) -> None:
         if not mod_parts:
             return
         for pref in base_prefixes:
             cand_base = "/".join((*pref, *mod_parts))
             for cand in (cand_base + ".py", cand_base + "/__init__.py"):
                 if cand in known_files:
-                    flagged.add(cand)
+                    out.add(cand)
 
-    # (a) 受保護測試檔直接匯入的專案模組
-    for test_rel, raw in originals.items():
-        test_parent = pathlib.PurePosixPath(test_rel).parent
-        parent_parts = () if test_parent == pathlib.PurePosixPath(".") else test_parent.parts
-        if test_rel.endswith(".py"):
-            try:
-                tree = ast.parse(raw, filename=test_rel)
-            except SyntaxError:
-                continue
-            search_prefixes: list[tuple[str, ...]] = [()]
-            if parent_parts and parent_parts not in search_prefixes:
-                search_prefixes.append(parent_parts)
-            if ("src",) not in search_prefixes:
-                search_prefixes.append(("src",))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                mod_parts = [p for p in alias.name.split(".") if p]
+                _resolve(search_prefixes, mod_parts)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level and node.level > 0:
+                up = node.level - 1
+                if up <= len(parent_parts):
+                    rel_pref = [parent_parts[:len(parent_parts) - up]]
+                else:
+                    rel_pref = []
+            else:
+                rel_pref = search_prefixes
+            mod_parts = [p for p in (node.module or "").split(".") if p]
+            if mod_parts:
+                _resolve(rel_pref, mod_parts)
+            for alias in node.names:
+                if alias.name == "*":
+                    continue
+                _resolve(rel_pref, [*mod_parts, alias.name])
+    out.discard(rel_path)
+    return out
+
+
+def _extract_js_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set[str]:
+    parent = pathlib.PurePosixPath(rel_path).parent
+    parent_parts = () if parent == pathlib.PurePosixPath(".") else parent.parts
+    txt = raw.decode("utf-8", errors="replace")
+    specs: set[str] = set()
+    for rx in _JS_REL_IMPORT_RES:
+        for m in rx.finditer(txt):
+            specs.add(m.group(1))
+    out: set[str] = set()
+    for sp in specs:
+        norm = _norm_posix_join(parent_parts, sp)
+        if not norm:
+            continue
+        if norm in known_files:
+            out.add(norm)
+            continue
+        for ext in (*_JS_EXTS, ".json"):
+            if norm + ext in known_files:
+                out.add(norm + ext)
+            if f"{norm}/index{ext}" in known_files:
+                out.add(f"{norm}/index{ext}")
+    out.discard(rel_path)
+    return out
+
+
+def _extract_string_literals(raw: bytes, rel_path: str) -> set[str]:
+    lits: set[str] = set()
+    if rel_path.endswith(".py"):
+        try:
+            tree = ast.parse(raw, filename=rel_path)
             for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        mod_parts = [p for p in alias.name.split(".") if p]
-                        _resolve_py_mod(search_prefixes, mod_parts)
-                elif isinstance(node, ast.ImportFrom):
-                    if node.level and node.level > 0:
-                        up = node.level - 1
-                        if up <= len(parent_parts):
-                            rel_pref = [parent_parts[:len(parent_parts) - up]]
-                        else:
-                            rel_pref = []
-                    else:
-                        rel_pref = search_prefixes
-                    mod_parts = [p for p in (node.module or "").split(".") if p]
-                    if mod_parts:
-                        _resolve_py_mod(rel_pref, mod_parts)
-                    for alias in node.names:
-                        if alias.name == "*":
-                            continue
-                        _resolve_py_mod(rel_pref, [*mod_parts, alias.name])
-        elif test_rel.endswith(_JS_EXTS):
-            txt = raw.decode("utf-8", errors="replace")
-            specs: set[str] = set()
-            for rx in _JS_REL_IMPORT_RES:
-                for m in rx.finditer(txt):
-                    specs.add(m.group(1))
-            for sp in specs:
-                norm = _norm_posix_join(parent_parts, sp)
-                if not norm:
-                    continue
-                if norm in known_files:
-                    flagged.add(norm)
-                    continue
-                for ext in (*_JS_EXTS, ".json"):
-                    if norm + ext in known_files:
-                        flagged.add(norm + ext)
-                    if f"{norm}/index{ext}" in known_files:
-                        flagged.add(f"{norm}/index{ext}")
+                if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                    val = node.value.strip().replace("\\", "/")
+                    while val.startswith("./"):
+                        val = val[2:]
+                    if 2 <= len(val) <= 240:
+                        lits.add(val)
+            return lits
+        except SyntaxError:
+            pass
+    txt = raw.decode("utf-8", errors="replace")
+    for m in _QUOTED_LIT_RE.finditer(txt):
+        raw_s = m.group(1) or m.group(2) or m.group(3) or ""
+        val = raw_s.strip().replace("\\", "/")
+        while val.startswith("./"):
+            val = val[2:]
+        if 2 <= len(val) <= 240:
+            lits.add(val)
+    return lits
 
-    return sorted(flagged & delivered_changed)
+
+def _read_source_bytes(rel: str, source_root: pathlib.Path | None, originals: dict[str, bytes]) -> bytes | None:
+    if source_root is not None:
+        p = source_root / rel
+        try:
+            if p.is_file() and not p.is_symlink():
+                return p.read_bytes()
+        except OSError:
+            pass
+    return originals.get(rel)
+
+
+def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[str],
+                                  delivered_changed: set[str], *,
+                                  source_root: pathlib.Path | None = None) -> list[dict[str, Any]]:
+    """找出交件嘗試所改動、且驗收依賴的檔案（僅標記提醒人審閱，不阻擋交件）：
+    (a) 受保護測試檔中以字串常值出現其檔名或相對路徑的已變更檔（reason: literal）；
+    (b) 受保護 Python 測試檔遞移匯入（最深 2 層 AST）的專案模組（reason: import）；
+    (c) 受保護 JS/TS 測試檔遞移 require/import/jest.mock（最深 2 層）的專案模組（reason: import）；
+    (d) 位於 fixtures/、testdata/、test_data/、__fixtures__/、__mocks__/、mocks/、golden/、data/
+        或測試目錄下的檔案（reason: dir）。
+    若某非測試模組是單一測試檔唯一直接匯入的非測試原始碼（即受測模組本身），不因該直接匯入將其標記。
+    註：動態匯入（importlib/__import__）與執行期組合之路徑不追蹤。"""
+    if not delivered_changed:
+        return []
+    protected_set = set(originals)
+    dir_roots = _FIXTURE_DIRS | _UNIVERSAL_TEST_DIRS
+    reasons: dict[str, set[str]] = {}
+
+    def _add_reason(rel: str, why: str) -> None:
+        if rel in delivered_changed:
+            reasons.setdefault(rel, set()).add(why)
+
+    def _in_special_dir(rel: str) -> bool:
+        parts = pathlib.PurePosixPath(rel).parts
+        return any(d in dir_roots for d in parts[:-1])
+
+    # (d) fixture / mock / golden / data / test 目錄
+    for rel in delivered_changed:
+        if _in_special_dir(rel):
+            _add_reason(rel, "dir")
+
+    # 收集每個測試檔的字串常值與深度 1/2 匯入
+    all_literals: set[str] = set()
+    for test_rel, raw in originals.items():
+        if not (_is_universal_test(test_rel) or _is_python_test(test_rel) or test_rel.endswith((".sh", ".bash"))):
+            # 仍對非純設定檔（排除 package.json/Cargo.toml/go.mod）抽出字面路徑
+            bn = pathlib.PurePosixPath(test_rel).name
+            if bn in ("package.json", "Cargo.toml", "go.mod") or _is_test_config(test_rel):
+                continue
+        all_literals |= _extract_string_literals(raw, test_rel)
+
+        if test_rel.endswith(".py"):
+            d1 = _extract_py_imports(raw, test_rel, known_files)
+            non_test_d1 = {m for m in d1 if m not in protected_set and not _in_special_dir(m)}
+            # 單一直接匯入非測試源檔（受測模組）不以直接匯入標記
+            if len(non_test_d1) > 1:
+                for m in non_test_d1:
+                    _add_reason(m, "import")
+            # 深度 2（遞移匯入，包含從受測模組出發的第 2 層）
+            for m1 in d1:
+                if not m1.endswith(".py"):
+                    continue
+                m1_raw = _read_source_bytes(m1, source_root, originals)
+                if m1_raw is None:
+                    continue
+                for m2 in _extract_py_imports(m1_raw, m1, known_files):
+                    if m2 not in protected_set:
+                        _add_reason(m2, "import")
+        elif test_rel.endswith(_JS_EXTS):
+            d1 = _extract_js_imports(raw, test_rel, known_files)
+            non_test_d1 = {m for m in d1 if m not in protected_set and not _in_special_dir(m)}
+            if len(non_test_d1) > 1:
+                for m in non_test_d1:
+                    _add_reason(m, "import")
+            for m1 in d1:
+                if not m1.endswith(_JS_EXTS):
+                    continue
+                m1_raw = _read_source_bytes(m1, source_root, originals)
+                if m1_raw is None:
+                    continue
+                for m2 in _extract_js_imports(m1_raw, m1, known_files):
+                    if m2 not in protected_set:
+                        _add_reason(m2, "import")
+
+    # (a) 受保護測試檔中的字串常值比對已變更檔的相對路徑或檔名
+    if all_literals:
+        for rel in delivered_changed:
+            if rel in protected_set:
+                continue
+            bn = pathlib.PurePosixPath(rel).name
+            if len(bn) < 2:
+                continue
+            for lit in all_literals:
+                if lit == rel or lit == bn or lit.endswith("/" + rel) or lit.endswith("/" + bn):
+                    _add_reason(rel, "literal")
+                    break
+
+    # 排序：先列 literal/dir（直接驗收資料/常值），再列 import（匯入輔助模組），同層按路徑字母排序
+    def _sort_key(item: tuple[str, set[str]]) -> tuple[int, str]:
+        rel, rs = item
+        prio = 0 if ("literal" in rs or "dir" in rs) else 1
+        return (prio, rel)
+
+    return [
+        {"path": rel, "reasons": sorted(rs)}
+        for rel, rs in sorted(reasons.items(), key=_sort_key)
+    ]
 
 
 def _rmtree_force(path: pathlib.Path) -> None:
@@ -1206,60 +1339,297 @@ def _match_protect_pattern(rel: str, norm_pat: str) -> bool:
     return bool(rx.match(rel))
 
 
-def _first_cmd_word(tokens: Sequence[str]) -> str | None:
-    """從 `--check` 指令拆出的 tokens 取第一個實際執行指令名稱（略過前導 VAR=VAL 與 env）。"""
+_SHELL_OPS = frozenset({";", "&&", "||", "|", "&", "|&", "\n"})
+_SHELL_WRAPPER_CMDS = frozenset({"sh", "bash", "dash", "zsh", "ash", "ksh"})
+
+
+def _has_shell_expansion(cmd: str) -> bool:
+    """偵測命令字串是否含單引號外的 $VAR / ${...} / $(...) 或反引號展開。"""
+    in_single = False
+    escaped = False
     i = 0
-    n = len(tokens)
+    n = len(cmd)
     while i < n:
-        tok = tokens[i]
-        if "=" in tok and not tok.startswith("=") and tok.split("=", 1)[0].replace("_", "").isalnum():
+        ch = cmd[i]
+        if escaped:
+            escaped = False
             i += 1
             continue
-        base = pathlib.PurePosixPath(tok).name
-        if base == "env":
+        if in_single:
+            if ch == "'":
+                in_single = False
             i += 1
-            while i < n:
-                t2 = tokens[i]
-                if t2 == "--":
-                    i += 1
+            continue
+        if ch == "\\":
+            escaped = True
+            i += 1
+            continue
+        if ch == "'":
+            in_single = True
+            i += 1
+            continue
+        if ch == "`":
+            return True
+        if ch == "$" and i + 1 < n:
+            nxt = cmd[i + 1]
+            if nxt.isalpha() or nxt in ("_", "{", "(", "*", "@", "?", "#", "$", "!") or nxt.isdigit():
+                return True
+        i += 1
+    return False
+
+
+def _split_shell_segments(cmd: str) -> list[list[str]]:
+    """將 shell 指令字串依 `;`, `&&`, `||`, `|` 等運算子拆成多個指令段（保留引號語義）。"""
+    try:
+        lex = shlex.shlex(cmd, posix=True, punctuation_chars=";&|")
+        lex.whitespace_split = True
+        raw_tokens = list(lex)
+    except ValueError:
+        raw_tokens = []
+        for part in re.split(r"(?:&&|\|\||[;|])", cmd):
+            toks = part.split()
+            if toks:
+                raw_tokens.extend(toks)
+                raw_tokens.append(";")
+    segments: list[list[str]] = []
+    cur: list[str] = []
+    for tok in raw_tokens:
+        if tok in _SHELL_OPS:
+            if cur:
+                segments.append(cur)
+                cur = []
+        else:
+            cur.append(tok)
+    if cur:
+        segments.append(cur)
+    return segments
+
+
+def _is_env_assign(tok: str) -> bool:
+    return "=" in tok and not tok.startswith("=") and tok.split("=", 1)[0].replace("_", "").isalnum()
+
+
+def _parse_check_shell_cmd(cmd: str, *, _cur_dir: tuple[str, ...] = (),
+                           _depth: int = 0) -> tuple[set[str], list[tuple[str, tuple[str, ...]]], bool]:
+    """遞迴解析 `--check` 指令：拆開 `;`/`&&`/`||`/`|`，遞迴展開 `sh -c`/`bash -c`/`env`/`timeout`/`nice`/`cd`，
+    回傳 `(cmd_words, [(token, cur_dir_parts), ...], uses_shell_expansion)`。"""
+    if _depth > 8:
+        return set(), [], False
+    uses_exp = _has_shell_expansion(cmd)
+    cmd_words: set[str] = set()
+    all_tokens: list[tuple[str, tuple[str, ...]]] = []
+    cur_dir = _cur_dir
+
+    def _consume_segment(tokens: list[str], seg_dir: tuple[str, ...], depth: int) -> tuple[str, ...]:
+        nonlocal uses_exp
+        if not tokens or depth > 8:
+            return seg_dir
+        for t in tokens:
+            all_tokens.append((t, seg_dir))
+        i = 0
+        n = len(tokens)
+        while i < n and _is_env_assign(tokens[i]):
+            i += 1
+        if i >= n:
+            return seg_dir
+        base = pathlib.PurePosixPath(tokens[i]).name
+        cmd_words.add(base)
+        rest = tokens[i + 1:]
+
+        if base == "cd":
+            for t in rest:
+                if t == "--" or t.startswith("-"):
+                    continue
+                if t.startswith("/"):
+                    return ()
+                joined = _norm_posix_join(seg_dir, t)
+                return tuple(joined.split("/")) if joined else ()
+            return seg_dir
+
+        if base == "env":
+            j = 0
+            new_dir = seg_dir
+            while j < len(rest):
+                t = rest[j]
+                if t == "--":
+                    j += 1
                     break
-                if t2 in ("-u", "-C", "-S") and i + 1 < n:
-                    i += 2
+                if t == "-C" and j + 1 < len(rest):
+                    d_arg = rest[j + 1]
+                    joined = _norm_posix_join(new_dir, d_arg) if not d_arg.startswith("/") else None
+                    new_dir = tuple(joined.split("/")) if joined else ()
+                    j += 2
                     continue
-                if t2.startswith("-"):
-                    i += 1
+                if t == "-S" and j + 1 < len(rest):
+                    cw, at, ex = _parse_check_shell_cmd(rest[j + 1], _cur_dir=new_dir, _depth=depth + 1)
+                    cmd_words.update(cw)
+                    all_tokens.extend(at)
+                    uses_exp = uses_exp or ex
+                    j += 2
                     continue
-                if "=" in t2 and not t2.startswith("="):
-                    i += 1
+                if t in ("-u", "-P") and j + 1 < len(rest):
+                    j += 2
+                    continue
+                if t.startswith("-") or _is_env_assign(t):
+                    j += 1
                     continue
                 break
-            continue
-        return base
-    return None
+            if j < len(rest):
+                return _consume_segment(rest[j:], new_dir, depth + 1)
+            return new_dir
+
+        if base == "timeout":
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t == "--":
+                    j += 1
+                    break
+                if t in ("-k", "-s", "--kill-after", "--signal") and j + 1 < len(rest):
+                    j += 2
+                    continue
+                if t.startswith("-"):
+                    j += 1
+                    continue
+                break
+            if j < len(rest):
+                j += 1  # skip DURATION
+            if j < len(rest):
+                return _consume_segment(rest[j:], seg_dir, depth + 1)
+            return seg_dir
+
+        if base == "nice":
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t == "--":
+                    j += 1
+                    break
+                if t == "-n" and j + 1 < len(rest):
+                    j += 2
+                    continue
+                if t.startswith("-"):
+                    j += 1
+                    continue
+                break
+            if j < len(rest):
+                return _consume_segment(rest[j:], seg_dir, depth + 1)
+            return seg_dir
+
+        if base in ("sudo", "nohup", "time", "exec", "command", "setsid"):
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t == "--":
+                    j += 1
+                    break
+                if base == "sudo" and t in ("-u", "-g", "-C", "-D", "-p", "-r", "-t") and j + 1 < len(rest):
+                    j += 2
+                    continue
+                if t.startswith("-"):
+                    j += 1
+                    continue
+                break
+            if j < len(rest):
+                return _consume_segment(rest[j:], seg_dir, depth + 1)
+            return seg_dir
+
+        if base in _SHELL_WRAPPER_CMDS:
+            j = 0
+            while j < len(rest):
+                t = rest[j]
+                if t == "--":
+                    break
+                if t == "-c" or (t.startswith("-") and not t.startswith("--") and "c" in t[1:]):
+                    if j + 1 < len(rest):
+                        cw, at, ex = _parse_check_shell_cmd(rest[j + 1], _cur_dir=seg_dir, _depth=depth + 1)
+                        cmd_words.update(cw)
+                        all_tokens.extend(at)
+                        uses_exp = uses_exp or ex
+                    break
+                if t in ("-o", "+o") and j + 1 < len(rest):
+                    j += 2
+                    continue
+                if t.startswith("-") or t.startswith("+"):
+                    j += 1
+                    continue
+                break
+            return seg_dir
+
+        if base == "eval" and rest:
+            cw, at, ex = _parse_check_shell_cmd(" ".join(rest), _cur_dir=seg_dir, _depth=depth + 1)
+            cmd_words.update(cw)
+            all_tokens.extend(at)
+            uses_exp = uses_exp or ex
+            return seg_dir
+
+        return seg_dir
+
+    for seg in _split_shell_segments(cmd):
+        cur_dir = _consume_segment(seg, cur_dir, _depth)
+    return cmd_words, all_tokens, uses_exp
+
+
+def _npm_test_script_at(pkg_json: pathlib.Path) -> str | None:
+    opened = _open_reg_readonly(pkg_json)
+    if opened is None:
+        return None
+    fd, _ = opened
+    try:
+        with os.fdopen(fd, "rb") as f:
+            raw = f.read(1 << 20)
+        data = json.loads(raw.decode("utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    scripts = data.get("scripts")
+    if not isinstance(scripts, dict):
+        return None
+    test_cmd = scripts.get("test")
+    if not isinstance(test_cmd, str) or not test_cmd.strip():
+        return None
+    if _NPM_DEFAULT_TEST_MARKER in test_cmd:
+        return None
+    return test_cmd.strip()
 
 
 def _check_command_protections(project: pathlib.Path, cmd: str,
-                               files_set: set[str]) -> tuple[set[str], str | None]:
-    """解析 `--check "<cmd>"` 自動應受保護的專案檔案與鎖定的 npm test 腳本：
-    1. 第一個指令詞為 npm/npx/yarn/pnpm ⇒ 鎖定並保護 package.json（含 scripts.test）；
-       cargo ⇒ Cargo.toml；go ⇒ go.mod；make/gmake ⇒ Makefile/makefile/GNUmakefile。
-    2. 指令列任一 token 若對應專案內既有一般檔案（如 verify.sh、run_checks.py），自動納入保護。"""
-    try:
-        tokens = shlex.split(cmd)
-    except ValueError:
-        tokens = cmd.split()
+                               files_set: set[str]) -> tuple[set[str], str | None, dict[str, str], bool]:
+    """解析 `--check "<cmd>"` 自動應受保護的專案檔案、鎖定的 scripts.test 與是否含 shell 展開：
+    1. 拆開 `;`/`&&`/`||`/`|` 並遞迴展開 `sh -c`/`bash -c`/`env`/`timeout`/`nice`/`cd`，收集所有指令詞。
+    2. 若含 npm/npx/yarn/pnpm ⇒ 保護專案內所有 `package.json`（不含 node_modules）並鎖定各自的 `scripts.test`；
+       make/gmake ⇒ 所有 Makefile/makefile/GNUmakefile 與 `*.mk`；
+       cargo ⇒ 所有 `Cargo.toml`；go ⇒ 所有 `go.mod`。
+    3. 任一深度的 token 若對應專案內既有一般檔案（相對、`./x` 或專案內絕對路徑），納入保護。"""
+    cmd_words, all_tokens, uses_expansion = _parse_check_shell_cmd(cmd)
     out: set[str] = set()
-    pinned_script: str | None = None
-    cmd0 = _first_cmd_word(tokens)
-    if cmd0 in _CHECK_MANIFEST_BY_CMD:
-        for mf in _CHECK_MANIFEST_BY_CMD[cmd0]:
-            if mf in files_set:
-                out.add(mf)
-        if cmd0 in _NPM_LIKE_CMDS:
-            pinned_script = _npm_test_script(project)
+    pinned_scripts: dict[str, str] = {}
 
+    if cmd_words & _NPM_LIKE_CMDS:
+        for rel in sorted(files_set):
+            if pathlib.PurePosixPath(rel).name == "package.json":
+                out.add(rel)
+                sc = _npm_test_script_at(project / rel)
+                if sc is not None:
+                    pinned_scripts[rel] = sc
+    if cmd_words & {"make", "gmake"}:
+        for rel in files_set:
+            bn = pathlib.PurePosixPath(rel).name
+            if bn in ("Makefile", "makefile", "GNUmakefile") or bn.endswith(".mk"):
+                out.add(rel)
+    if "cargo" in cmd_words:
+        for rel in files_set:
+            if pathlib.PurePosixPath(rel).name == "Cargo.toml":
+                out.add(rel)
+    if "go" in cmd_words:
+        for rel in files_set:
+            if pathlib.PurePosixPath(rel).name == "go.mod":
+                out.add(rel)
+
+    pinned_script = pinned_scripts.get("package.json")
     proj_res = project.resolve()
-    for tok in tokens:
+    for tok, tok_dir in all_tokens:
         candidates = [tok]
         if "=" in tok and not tok.startswith("="):
             candidates.append(tok.split("=", 1)[1])
@@ -1277,14 +1647,19 @@ def _check_command_protections(project: pathlib.Path, cmd: str,
                     rel = p.resolve().relative_to(proj_res).as_posix()
                 except (ValueError, OSError):
                     continue
+                if rel in files_set:
+                    out.add(rel)
             else:
                 parts = pathlib.PurePosixPath(raw).parts
-                if ".." in parts:
-                    continue
-                rel = "/".join(parts)
-            if rel in files_set:
-                out.add(rel)
-    return out, pinned_script
+                if ".." not in parts:
+                    rel = "/".join(parts)
+                    if rel in files_set:
+                        out.add(rel)
+                if tok_dir:
+                    joined = _norm_posix_join(tok_dir, raw)
+                    if joined and joined in files_set:
+                        out.add(joined)
+    return out, pinned_script, pinned_scripts, uses_expansion
 
 
 def find_protected(root: pathlib.Path, *, kind: str = "none",
@@ -1300,7 +1675,7 @@ def find_protected(root: pathlib.Path, *, kind: str = "none",
         if mf in files_set:
             out.add(mf)
     if check:
-        extra_check, _ = _check_command_protections(root, check, files_set)
+        extra_check, _, _, _ = _check_command_protections(root, check, files_set)
         out |= extra_check
     if protect:
         norm_pats = [_normalize_protect_pattern(p, root) for p in protect]
@@ -1406,10 +1781,41 @@ class _Snapshot:
     unreadable_dirs: set[str]         # rel dirs in ws that could not be listed
     unreadable_files: set[str]        # rel files in ws that could not be read
     special_files: set[str]           # rel non-reg, non-dir, non-symlink paths (FIFO/socket/dev)
+    copy_skip_created: list[dict[str, str]] = dataclasses.field(default_factory=list)
+
+
+_COPY_SKIP_RECORD_LIMIT = 500
+
+
+def _collect_copy_skip_files(cur_dir: pathlib.Path, rel_prefix: str, skip_name: str,
+                             out: list[dict[str, str]]) -> None:
+    """收集 agent 在 COPY_SKIP 同名目錄下建立的檔案，供 not_delivered 回報（不跟隨 symlink，設上限）。"""
+    stack = [(cur_dir, rel_prefix)]
+    reason = f"under skipped directory ({skip_name})"
+    while stack and len(out) < _COPY_SKIP_RECORD_LIMIT:
+        d, pref = stack.pop()
+        try:
+            entries = sorted(os.scandir(d), key=lambda e: e.name)
+        except OSError:
+            continue
+        for e in entries:
+            if len(out) >= _COPY_SKIP_RECORD_LIMIT:
+                break
+            rel = f"{pref}/{e.name}" if pref else e.name
+            try:
+                st = e.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                stack.append((pathlib.Path(e.path), rel))
+            else:
+                out.append({"path": rel, "reason": reason})
 
 
 def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path, *,
-                        skip_abs: set[pathlib.Path] | None = None) -> _Snapshot:
+                        skip_abs: set[pathlib.Path] | None = None,
+                        record_copy_skip: bool = False,
+                        had_root_nm: bool = False) -> _Snapshot:
     """將工作區拍成只含一般檔案的私密快照（不跟隨 symlink、跳過特殊檔、Vacant 狀態/工作區根與 COPY_SKIP）。"""
     dest.mkdir(parents=True, exist_ok=True)
     os.chmod(dest, 0o700)
@@ -1419,6 +1825,7 @@ def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path, *,
     unreadable_dirs: set[str] = set()
     unreadable_files: set[str] = set()
     special_files: set[str] = set()
+    copy_skip_created: list[dict[str, str]] = []
     skip_rels = _skip_rels_for(ws, skip_abs)
 
     def _walk(cur: pathlib.Path, rel_prefix: str) -> None:
@@ -1429,9 +1836,18 @@ def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path, *,
             return
         for entry in entries:
             name = entry.name
-            if name in COPY_SKIP:
-                continue
             rel = f"{rel_prefix}/{name}" if rel_prefix else name
+            if name in COPY_SKIP:
+                if record_copy_skip and not (rel_prefix == "" and name == "node_modules" and had_root_nm):
+                    try:
+                        st_cs = entry.stat(follow_symlinks=False)
+                    except OSError:
+                        st_cs = None
+                    if st_cs is not None and stat.S_ISDIR(st_cs.st_mode) and not stat.S_ISLNK(st_cs.st_mode):
+                        _collect_copy_skip_files(cur / name, rel, name, copy_skip_created)
+                    elif st_cs is not None:
+                        copy_skip_created.append({"path": rel, "reason": f"skipped name ({name})"})
+                continue
             if rel in skip_rels:
                 continue
             try:
@@ -1483,6 +1899,7 @@ def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path, *,
                 unreadable_files.add(rel)
 
     _walk(ws, "")
+    copy_skip_created.sort(key=lambda d: d["path"])
     return _Snapshot(
         root=dest,
         files=files,
@@ -1491,6 +1908,7 @@ def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path, *,
         unreadable_dirs=unreadable_dirs,
         unreadable_files=unreadable_files,
         special_files=special_files,
+        copy_skip_created=copy_skip_created,
     )
 
 
@@ -1525,43 +1943,38 @@ def _scan_file_hashes(root: pathlib.Path) -> dict[str, str | None]:
 
 
 def _project_lstat_listing(project: pathlib.Path, *,
-                           skip_abs: set[pathlib.Path] | None = None) -> dict[str, tuple]:
-    """對原專案做不跟隨 symlink 的 lstat 清單（含 .git/hooks/、.git/config 與任意處的 symlink；
-    略過 node_modules（由 B3 涵蓋）與 .git 其餘內容、.venv 內部與 Vacant 狀態/工作區根）。供 B1 偵測計畫寫回以外的異動。"""
+                           skip_abs: set[pathlib.Path] | None = None,
+                           skip_root_nm: bool = False) -> dict[str, tuple]:
+    """對原專案做純 lstat 清單（不讀檔內容、不跟隨 symlink）：
+    涵蓋整棵 `.git`（唯獨略過 `.git/objects/`）、以及任意深度的 `node_modules`、`.venv`、
+    `__pycache__`、`.pytest_cache` 與任意處的 symlink。
+    若根目錄 `node_modules` 已由 B3 清單追蹤（`skip_root_nm=True`），則僅跳過根層 `node_modules` 避免重複走訪。
+    永遠排除 Vacant 狀態與工作區根目錄。"""
     out: dict[str, tuple] = {}
     skip_rels = _skip_rels_for(project, skip_abs)
 
-    def _entry_sig(full: pathlib.Path, st: os.stat_result) -> tuple:
-        mode = stat.S_IMODE(st.st_mode)
-        if stat.S_ISLNK(st.st_mode):
-            try:
-                tgt = os.readlink(full)
-            except OSError:
-                tgt = None
-            return ("l", tgt)
-        if stat.S_ISREG(st.st_mode):
-            if st.st_size > 64 * 1024 * 1024:
-                return ("f", mode, f"big:{st.st_size}:{st.st_mtime_ns}")
-            return ("f", mode, _sha256_file(full))
-        return ("o", mode, st.st_mode)
-
-    def _walk_git_hooks(cur: pathlib.Path, rel_prefix: str) -> None:
+    def _walk_git(cur: pathlib.Path, rel_prefix: str) -> None:
         try:
             entries = sorted(os.scandir(cur), key=lambda e: e.name)
         except OSError:
             out[rel_prefix + "/"] = ("unreadable",)
             return
         for entry in entries:
-            rel = f"{rel_prefix}/{entry.name}"
-            full = cur / entry.name
+            name = entry.name
+            rel = f"{rel_prefix}/{name}"
+            if rel in skip_rels:
+                continue
+            full = cur / name
             try:
                 st = entry.stat(follow_symlinks=False)
             except OSError:
                 continue
+            if name == "objects" and stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                continue
             if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
-                _walk_git_hooks(full, rel)
+                _walk_git(full, rel)
             else:
-                out[rel] = _entry_sig(full, st)
+                out[rel] = _lstat_tuple(full, st)
 
     def _walk(cur: pathlib.Path, rel_prefix: str) -> None:
         try:
@@ -1579,33 +1992,16 @@ def _project_lstat_listing(project: pathlib.Path, *,
                 st = entry.stat(follow_symlinks=False)
             except OSError:
                 continue
-            if name == "node_modules" and not stat.S_ISLNK(st.st_mode) and stat.S_ISDIR(st.st_mode):
+            is_real_dir = stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode)
+            if skip_root_nm and rel == "node_modules" and is_real_dir:
                 continue
-            if rel == ".git" and not stat.S_ISLNK(st.st_mode) and stat.S_ISDIR(st.st_mode):
-                cfg = full / "config"
-                try:
-                    st_cfg = cfg.lstat()
-                except OSError:
-                    st_cfg = None
-                if st_cfg is not None:
-                    out[".git/config"] = _entry_sig(cfg, st_cfg)
-                hooks = full / "hooks"
-                try:
-                    st_h = hooks.lstat()
-                except OSError:
-                    st_h = None
-                if st_h is not None:
-                    if stat.S_ISDIR(st_h.st_mode) and not stat.S_ISLNK(st_h.st_mode):
-                        _walk_git_hooks(hooks, ".git/hooks")
-                    else:
-                        out[".git/hooks"] = _entry_sig(hooks, st_h)
+            if name == ".git" and is_real_dir:
+                _walk_git(full, rel)
                 continue
-            if name in (".venv", "__pycache__", ".pytest_cache") and not stat.S_ISLNK(st.st_mode) and stat.S_ISDIR(st.st_mode):
-                continue
-            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+            if is_real_dir:
                 _walk(full, rel)
             else:
-                out[rel] = _entry_sig(full, st)
+                out[rel] = _lstat_tuple(full, st)
 
     _walk(project, "")
     return out
@@ -2030,6 +2426,8 @@ class AcceptanceSpec:
     reason: str | None = None
     interpreter: str | None = None
     pinned_script: str | None = None
+    pinned_scripts: dict[str, str] = dataclasses.field(default_factory=dict)
+    shell_expansion: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -2042,6 +2440,10 @@ class AcceptanceSpec:
             d["interpreter"] = self.interpreter
         if self.pinned_script is not None:
             d["pinned_script"] = self.pinned_script
+        if self.pinned_scripts:
+            d["pinned_scripts"] = dict(self.pinned_scripts)
+        if self.shell_expansion:
+            d["shell_expansion"] = True
         return d
 
 
@@ -2221,7 +2623,9 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         cmd = check.strip()
         if not cmd:
             raise ValueError("--check command must not be empty")
-        extra_check, pinned_script = _check_command_protections(project, cmd, set(all_files))
+        extra_check, pinned_script, pinned_scripts, uses_exp = _check_command_protections(
+            project, cmd, set(all_files)
+        )
         prot = tuple(sorted(set(_prot("check")) | extra_check))
         return AcceptanceSpec(
             kind="check",
@@ -2229,6 +2633,8 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             argv=None,
             protected=prot,
             pinned_script=pinned_script,
+            pinned_scripts=pinned_scripts,
+            shell_expansion=uses_exp,
         )
 
     if py_orig:
@@ -2697,15 +3103,18 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
     work_res = work.resolve()
-    if spec.kind in ("npm", "check") and spec.pinned_script is not None:
-        # 雙重防線：確認驗收副本中的 package.json scripts.test 與開始時鎖定的一致
-        if _npm_test_script(work_res) != spec.pinned_script:
-            return {
-                **base,
-                "status": "acceptance_error",
-                "accept": False,
-                "first_problem": "package.json scripts.test does not match the pinned start definition",
-            }
+    if spec.kind in ("npm", "check"):
+        pinned_map = dict(spec.pinned_scripts)
+        if spec.pinned_script is not None and "package.json" not in pinned_map:
+            pinned_map["package.json"] = spec.pinned_script
+        for pkg_rel, want_script in sorted(pinned_map.items()):
+            if _npm_test_script_at(work_res / pkg_rel) != want_script:
+                return {
+                    **base,
+                    "status": "acceptance_error",
+                    "accept": False,
+                    "first_problem": f"{pkg_rel} scripts.test does not match the pinned start definition",
+                }
     env = dict(os.environ)
     env["PWD"] = str(work_res)
     if node_modules_dir is not None and node_modules_dir.is_dir():
@@ -3054,7 +3463,8 @@ def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
         return payload
     out = dict(payload)
     for key in ("written_back", "deleted", "skipped", "appeared_during_run", "conflicts",
-                "outside_changes", "acceptance_dependencies_changed"):
+                "write_back_conflicts", "outside_changes", "acceptance_dependencies_changed",
+                "not_delivered", "detached_processes"):
         items = out.get(key)
         if isinstance(items, list) and len(items) > 64:
             out[f"{key}_count"] = len(items)
@@ -3137,6 +3547,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "outside_changes": list(res.get("outside_changes") or ()),
             "detached_processes": res.get("detached_processes"),
             "acceptance_dependencies_changed": list(res.get("acceptance_dependencies_changed") or ()),
+            "not_delivered": list(res.get("not_delivered") or ()),
             "agent_wall_s": res["agent_wall_s"],
             "total_wall_s": res["total_wall_s"],
         }
@@ -3698,6 +4109,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "conflicts": [],
             "outside_changes": [],
             "acceptance_dependencies_changed": [],
+            "not_delivered": [],
+            "lstat_listing_s": 0.0,
             "node_modules_changed": [],
             "node_modules_manifest_s": 0.0,
             "copy_s": 0.0,
@@ -3801,6 +4214,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "outside_changes": [],
             "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
             "acceptance_dependencies_changed": [],
+            "not_delivered": [],
+            "lstat_listing_s": 0.0,
             "max_attempts": max_attempts,
             "accepted": None,
             "delivered_attempt": 0,
@@ -3833,9 +4248,12 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     agent_error: str | None = None
-    # 開始時的原專案檔案雜湊快照（D3）與 lstat 清單（B1，含 .git/hooks、.git/config 與任意 symlink）
+    # 開始時的原專案檔案雜湊快照（D3）與純 lstat 清單（B1）
     start_hashes = _scan_file_hashes(project)
-    orig_lstat_start = _project_lstat_listing(project)
+    lstat_listing_s = 0.0
+    t_ls = time.monotonic()
+    orig_lstat_start = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+    lstat_listing_s += time.monotonic() - t_ls
     # 開始時的 node_modules lstat 清單（含外部 symlink 目標；很小時另做一次低成本 sha256 校驗）
     if nm_root is not None:
         t_nm = time.monotonic()
@@ -3910,7 +4328,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         plan: _WritePlan | None = None
         try:
             snap_dir = attempt_dir / f"snap-{secrets.token_hex(8)}"
-            snap = _snapshot_workspace(ws, snap_dir)
+            snap = _snapshot_workspace(
+                ws, snap_dir, skip_abs=skip_abs, record_copy_skip=True, had_root_nm=(nm_root is not None)
+            )
             plan = _plan_write_back(project, snap, protected, start_hashes=start_hashes)
             if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
@@ -4039,17 +4459,23 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             rel for rel in (set(live_now) - set(start_hashes) - protected) if not _has_copy_skip(rel)
         )
 
-    # B1：結束時再拍一次原專案 lstat 清單，找出計畫寫回以外的所有異動（僅偵測、不還原、不改退出碼）
-    orig_lstat_end = _project_lstat_listing(project)
+    # B1：結束時再拍一次原專案純 lstat 清單，找出計畫寫回以外的所有異動
+    t_ls = time.monotonic()
+    orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+    lstat_listing_s += time.monotonic() - t_ls
     planned_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
     outside_changes = sorted(
         k for k in (set(orig_lstat_start) | set(orig_lstat_end))
         if orig_lstat_start.get(k) != orig_lstat_end.get(k) and k not in planned_paths
     )
 
-    # A1/A2：標記交件嘗試所改動、且驗收直接依賴的檔案（匯入模組與 fixture／測試資料目錄）
+    # A1/A2/R6：標記交件嘗試所改動、且驗收依賴的檔案（字串常值、2 層遞移匯入、fixture/mock/data 目錄）
     known_files = set(start_hashes) | planned_paths
-    acc_deps_changed = _find_acceptance_dependencies(originals, known_files, planned_paths)
+    dep_src_root = snaps[d].root if (0 <= d < len(snaps) and snaps[d] is not None) else project
+    acc_deps_changed = _find_acceptance_dependencies(
+        originals, known_files, planned_paths, source_root=dep_src_root
+    )
+    not_delivered = list(snaps[d].copy_skip_created) if (0 <= d < len(snaps) and snaps[d] is not None) else []
 
     # B2：彙總各次嘗試偵測到的脫離行程（非 Linux 為 None）
     if any(a.get("detached_processes") is None for a in attempts):
@@ -4078,8 +4504,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "appeared_during_run": appeared_during_run,
         "conflicts": conflicts,
         "outside_changes": outside_changes,
+        "lstat_listing_s": round(lstat_listing_s, 3),
         "detached_processes": detached_all,
         "acceptance_dependencies_changed": acc_deps_changed,
+        "not_delivered": not_delivered,
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,
@@ -4187,6 +4615,8 @@ def summary(res: dict) -> str:
 
     cmd_part = f" ({acc_cmd})" if acc_cmd else ""
     head += f"\n  acceptance: {acc_kind}{cmd_part}"
+    if acc_info.get("shell_expansion"):
+        head += "\n  warning: the check command uses shell expansion; Vacant could not see which files it runs"
     if res.get("project"):
         head += f"\n  scanned: {res['project']} (parent directories were not scanned)"
     if res.get("parent_tests_dir"):
@@ -4228,11 +4658,42 @@ def summary(res: dict) -> str:
     if outside_list:
         shown_o = ", ".join(outside_list[:10]) + (f" … (+{len(outside_list) - 10} more)" if len(outside_list) > 10 else "")
         head += f"\n  changed in your project outside the delivered attempt: {shown_o}"
-        git_hooks = [p for p in outside_list if p == ".git/hooks" or p.startswith(".git/hooks/")]
+        git_hooks = [
+            p for p in outside_list
+            if p == ".git/hooks" or p.startswith(".git/hooks/") or "/.git/hooks/" in p
+        ]
         if git_hooks:
             shown_h = ", ".join(git_hooks[:10]) + (f" … (+{len(git_hooks) - 10} more)" if len(git_hooks) > 10 else "")
             head += (f"\n  WARNING: .git/hooks was added or changed outside the delivered attempt "
                      f"({shown_h}) — inspect before running git commands!")
+        git_refs = [
+            p for p in outside_list
+            if (p == ".git/refs" or p.startswith(".git/refs/") or "/.git/refs/" in p
+                or p == ".git/HEAD" or p.startswith(".git/HEAD") or "/.git/HEAD" in p
+                or p == ".git/packed-refs" or p.endswith("/.git/packed-refs"))
+        ]
+        if git_refs:
+            shown_r = ", ".join(git_refs[:10]) + (f" … (+{len(git_refs) - 10} more)" if len(git_refs) > 10 else "")
+            head += (f"\n  WARNING: git refs/HEAD changed outside the delivered attempt "
+                     f"({shown_r}) — inspect before running git commands!")
+        venv_pths = [
+            p for p in outside_list
+            if p.endswith(".pth") and ".venv" in pathlib.PurePosixPath(p).parts[:-1]
+        ]
+        if venv_pths:
+            shown_v = ", ".join(venv_pths[:10]) + (f" … (+{len(venv_pths) - 10} more)" if len(venv_pths) > 10 else "")
+            head += (f"\n  WARNING: .pth file under .venv was added or changed outside the delivered attempt "
+                     f"({shown_v}) — executes code at Python startup!")
+    not_deliv = list(res.get("not_delivered") or ())
+    if not_deliv:
+        def _fmt_nd(item: Any) -> str:
+            if isinstance(item, dict):
+                return f"{item.get('path')} ({item.get('reason')})"
+            return str(item)
+        shown_nd = ", ".join(_fmt_nd(x) for x in not_deliv[:10]) + (
+            f" … (+{len(not_deliv) - 10} more)" if len(not_deliv) > 10 else ""
+        )
+        head += f"\n  not delivered ({len(not_deliv)}): {shown_nd}"
     cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
     if cfg_new:
         d_att = res["attempts"][res["delivered_attempt"] - 1] if res.get("attempts") else {}
@@ -4259,7 +4720,14 @@ def summary(res: dict) -> str:
                 head += f"\n  the agent's last output:\n{tail_fmt}"
     dep_changed = list(res.get("acceptance_dependencies_changed") or ())
     if dep_changed:
-        shown_dep = ", ".join(dep_changed[:20]) + (f" … (+{len(dep_changed) - 20} more)" if len(dep_changed) > 20 else "")
+        def _fmt_dep(item: Any) -> str:
+            if isinstance(item, dict):
+                rs = ", ".join(str(r) for r in (item.get("reasons") or ()))
+                return f"{item.get('path')} ({rs})" if rs else str(item.get("path"))
+            return str(item)
+        shown_dep = ", ".join(_fmt_dep(x) for x in dep_changed[:20]) + (
+            f" … (+{len(dep_changed) - 20} more)" if len(dep_changed) > 20 else ""
+        )
         head += f"\n  the check depends on these files and the agent changed them — review them yourself: {shown_dep}"
     det_pids = res.get("detached_processes")
     if isinstance(det_pids, list) and det_pids:
