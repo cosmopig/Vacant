@@ -27,7 +27,7 @@ R3 是這個 repo 裡第一個在**原生 agent**上量到交付變好的設定�
       （`no_tests_collected`），仍照舊跑一次並明講未檢查。
 2. Python 驗收優先使用專案直譯器（`$VIRTUAL_ENV/bin/python` ＞ `<project>/.venv` ＞ `<project>/venv` ＞ `PATH`
    ＞ `sys.executable`），保留 `-B`、捨 `-I` 改以工作區外私密腳本＋匯入前清 `sys.path` 維持 C3 防護，並把實際直譯器
-   記在結果、簽章收據與訊息中。`node_modules` 不複製也不暴露給 agent 工作區，僅於外部驗收當下以 acceptance-only
+   記在結果、簽章收據與訊息中。`node_modules` 不複製；agent 工作區與外部驗收都以指向原專案的 symlink 取用（驗收時另以
    symlink＋`NODE_PATH` 提供並在驗收結束立刻移除。
 3. 每一次嘗試：全新的暫存副本＋全新的 agent 行程。嘗試之間不留東西、不給失敗原文。
 4. 驗收通過就停、交那一次；最多 `max_attempts` 次、每次 `attempt_timeout_s`、合計 `budget_s`。
@@ -2598,6 +2598,20 @@ def _declared_dependency(project: pathlib.Path, module: str) -> bool:
 AGENT_QUICK_FAIL_MS = 30_000
 
 
+def _link_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> None:
+    """agent 的副本不複製 node_modules（太大）；改放一個指向原專案 node_modules 的 symlink，agent 才能自己跑
+    `npm test`（W4／JS 冒煙前重現：沒有它時 agent 在副本裡跑測試只得到 `jest: not found`）。
+    快照與寫回都跳過 node_modules（COPY_SKIP），所以這個連結不會寫回；代價：agent 透過它寫得到使用者的
+    node_modules（與專案外的 .venv 相同），寫在誠實邊界。"""
+    orig = project / "node_modules"
+    link = ws / "node_modules"
+    if orig.is_dir() and not link.exists() and not link.is_symlink():
+        try:
+            os.symlink(orig.resolve(), link)
+        except OSError:
+            pass
+
+
 def _agent_error_tail(log_dir: pathlib.Path, r: dict[str, Any], max_lines: int = 8) -> str:
     """agent 啟動即失敗時，給人看的錯誤摘要：spawn 錯誤，或 stderr（沒有就 stdout）的最後幾行。"""
     if r.get("spawn_error"):
@@ -2755,6 +2769,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         attempt_dir = run_dir / f"attempt_{k}"
         ws = attempt_dir / "w"
         shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
+        _link_node_modules_for_agent(project, ws)
         launch = build(prompt, ws)
         launch_meta.append((list(launch.argv), dict(launch.env)))
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")

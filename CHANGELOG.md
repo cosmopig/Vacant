@@ -15,7 +15,7 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   and never written back with the agent's edits; the message lists any the agent touched. `--protect PATH/GLOB`
   adds files for `--check`. When nothing is protected the message says the agent could have edited the check.
 - **Runs in the project's environment.** Python acceptance uses `$VIRTUAL_ENV`, then `.venv/` or `venv/` in the
-  project, then `python3` on PATH. `node_modules` is reachable during the check only. A baseline check runs on the
+  project, then `python3` on PATH. `node_modules` is not copied: the agent's copy and the check get a symlink to the project's own, so the agent can run `npm test` itself (it can therefore write into it, like a project `.venv` outside the copy). A baseline check runs on the
   untouched project first; if the runner itself is missing or a declared dependency is not installed, Vacant says
   so and stops before running the agent (exit 43). A test that imports a module the agent has yet to write is a
   normal start, not an environment error.

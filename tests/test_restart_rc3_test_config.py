@@ -139,3 +139,25 @@ def test_audit_task_column_and_strict_exit(tmp_path, monkeypatch, capsys):
     assert AE.main(["list", "--vacant-home", home, "--work-root", work]) == 0
     assert AE.main(["list", "--vacant-home", home, "--work-root", work, "--strict"]) == 3
     assert AE.main(["export", "--vacant-home", home, "--work-root", work, "--strict"]) == 3
+
+
+def test_agent_workspace_can_reach_node_modules(tmp_path, monkeypatch, capsys):
+    """agent 在副本裡要能用專案的 node_modules（例如跑 npm test）；連結不寫回、原 node_modules 不被複製。"""
+    p = tmp_path / "jsproj"
+    (p / "node_modules" / "dep").mkdir(parents=True)
+    (p / "node_modules" / "dep" / "index.js").write_text("module.exports = 1;\n")
+    (p / "x.txt").write_text("a\n")
+    seen = tmp_path / "seen.txt"
+    agent = tmp_path / "agent.py"
+    agent.write_text(
+        "import os, pathlib\n"
+        f"pathlib.Path({str(seen)!r}).write_text(str(os.path.exists('node_modules/dep/index.js')))\n"
+        "pathlib.Path('x.txt').write_text('b\\n')\n")
+    monkeypatch.setenv("VACANT_WORK", str(tmp_path / "work"))
+    monkeypatch.setenv("VACANT_HOME", str(tmp_path / "home"))
+    monkeypatch.chdir(p)
+    adapters_cli.main(["do", "--cmd", f"{sys.executable} {agent} {{prompt}}", "--prompt", "x", "--attempts", "1"])
+    capsys.readouterr()
+    assert seen.read_text() == "True"
+    assert (p / "x.txt").read_text() == "b\n"
+    assert not (p / "node_modules").is_symlink() and (p / "node_modules" / "dep" / "index.js").exists()

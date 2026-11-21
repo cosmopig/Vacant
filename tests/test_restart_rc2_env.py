@@ -382,7 +382,7 @@ def test_baseline_check_command_not_found_stops_with_zero_attempts(tmp_path, mon
 # ---------------------------------------------------------------------------
 
 @pytest.mark.skipif(not _has_node_and_npm(), reason="node/npm not installed")
-def test_npm_project_uses_node_modules_in_acceptance_without_copying_or_exposing_to_agent(tmp_path):
+def test_npm_project_uses_node_modules_via_symlink_without_copying(tmp_path):
     proj = tmp_path / "nm_proj"
     proj.mkdir()
     pkg = json.dumps({"name": "nm-demo", "version": "1.0.0", "scripts": {"test": "node m.test.js"}}, indent=2) + "\n"
@@ -401,22 +401,19 @@ def test_npm_project_uses_node_modules_in_acceptance_without_copying_or_exposing
     orig_dep = "exports.add = (a, b) => a + b;\n"
     (nm_mod / "index.js").write_text(orig_dep, encoding="utf-8")
 
-    # 假 agent：確認 ws 裡沒有 node_modules（也沒被 symlink 暴露給 agent），嘗試建立假 node_modules 並修好 m.js
+    # 假 agent：確認 ws 裡看得到 node_modules（指向原專案的 symlink，agent 才能自己跑測試），並修好 m.js
     marker = tmp_path / "agent_saw_nm.txt"
     build, state = _counting_build(tmp_path, textwrap.dedent(f"""\
         import pathlib
         nm = pathlib.Path("node_modules")
-        pathlib.Path({str(marker)!r}).write_text(str(nm.exists() or nm.is_symlink()))
-        # 即使 agent 自己建了 node_modules/tiny-math 寫髒資料，也不得透過 symlink 寫穿到原專案
-        (nm / "tiny-math").mkdir(parents=True, exist_ok=True)
-        (nm / "tiny-math" / "index.js").write_text("exports.add = () => 9999;\\n")
+        pathlib.Path({str(marker)!r}).write_text(f"{{nm.is_symlink()}} {{(nm / 'tiny-math' / 'index.js').exists()}}")
         pathlib.Path("m.js").write_text("const tm = require('tiny-math'); exports.val = () => tm.add(2, 3);\\n")
         """))
 
     res = R.run(proj, build, "make m.val() return 5", max_attempts=2, attempt_timeout_s=20, budget_s=120)
 
     assert _calls(state) == 1
-    assert marker.read_text(encoding="utf-8") == "False", "node_modules must NOT be copied or symlinked into agent ws"
+    assert marker.read_text(encoding="utf-8") == "True True", "agent ws must reach node_modules via a symlink (not a copy)"
     assert res["baseline"]["status"] == "failed" and res["baseline"]["accept"] is False
     assert res["accepted"] is True
     assert res["delivered_attempt"] == 1

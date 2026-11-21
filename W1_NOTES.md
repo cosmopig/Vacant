@@ -119,3 +119,10 @@ calc.py 仍錯。同一類：ini 的 `pythonpath` 把 agent 寫的 `hack/calc.py
 - 專案環境本身：agent 若對專案的 venv／`node_modules`（在原位置、不在副本裡）安裝 pytest 外掛或改套件，驗收會用到。
 - go：agent 新增的 `*_test.go` 若在同一個 package 裡用 `init()` 改套件層級變數，`go test` 會一起編譯。
 - `--check` 的指令若讀的是沒被 `--protect` 的檔，agent 改得動（訊息有寫）。
+
+## rc3.1 — agent 的副本看得到 node_modules
+
+JS 冒煙前重現：`vacant do` 的副本不放 node_modules，agent 在副本裡跑 `npm test` 只得到 `jest: not found`（exit 127），
+等於拿掉 agent 自己驗證的能力。現在副本裡放一個指向原專案 node_modules 的 symlink；快照與寫回照樣跳過它。
+誠實邊界：agent 透過它寫得到使用者的 node_modules（和專案外的 .venv 一樣）；agent 本來就以使用者權限執行、
+用絕對路徑也寫得到原專案，副本隔離防的是誤寫回，不是惡意的 agent。
