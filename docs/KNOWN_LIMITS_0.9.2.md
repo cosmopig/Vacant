@@ -1,5 +1,7 @@
 # 0.9.2 (rc5): known limits of `vacant do` restart mode
 
+Applies to the final rc5: `redo/rc5` tag `rc5-final` = `1d764cc69`.
+
 These are written down rather than fixed, under the convergence rule agreed on 2026-11-21. Only three classes were must-fix:
 - accepted-but-wrong with no warning on a kept-fixed (`traced`) check, **through a file outside the code under test** (a test, config, check script, manifest, runner config, shadowing file or package init);
 - silent damage to user files;
@@ -19,7 +21,7 @@ The code under test itself is outside that class: see the section "The code unde
 ## The code under test runs inside the check (structural)
 
 4. **The code under test can tamper with the test framework in the check's own process.** It runs in the same process as the check. Examples: a line at the end of a module that replaces `unittest.TestCase.assertEqual`, or code that patches pytest's `TestReport`. Such a run can be `traced`, show no NOTE, and pass. Separating the check and the code under test into different processes would change what is measured, so it is not done in 0.9.2. The README's "what it does not do" says this.
-5. **The only module a test imports directly is treated as the code under test**, so it does not trigger the dependency NOTE, even when it is really a helper that re-exports the expected answers. Package `__init__.py` files and new files shadowing an existing module are NOT exempt.
+5. **The only module a test imports directly is treated as the code under test**, so it does not trigger the dependency NOTE, even when it is really a helper that re-exports the expected answers. Package `__init__.py` files and new files shadowing an existing module are NOT exempt. The reverse noise also happens: when a test imports two project modules directly, a correct change to the module under test can still produce a NOTE.
 6. **"accepted-but-wrong = 0" in all batches** uses the task's pristine visible tests as the grader (`grader_kinds = visible_tests_pristine`). It means nobody got a pass by tampering with the tests. It does not mean the answers are correct beyond those tests.
 
 ## What `traced` means and does not mean
