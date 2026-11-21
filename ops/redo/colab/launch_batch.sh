@@ -303,8 +303,10 @@ tar -xzf ${REMOTE_REPO_TAR} -C ${REMOTE_WORK}/repo --strip-components=1
 chmod +x ${REMOTE_WORK}/repo/ops/redo/colab/*.sh ${REMOTE_WORK}/repo/ops/redo/colab/*.py
 if [ -n "${REMOTE_WHEEL}" ]; then
   echo "${EXTRA_WHEEL_SHA}  ${REMOTE_WHEEL}" | sha256sum -c -
-  python3 -m venv /opt/redo/rc_venv
-  /opt/redo/rc_venv/bin/pip install -q "${REMOTE_WHEEL}"
+  # Colab 的 python3 沒有 ensurepip（python3 -m venv 會失敗）：用 uv 建 venv、裝 wheel
+  python3 -m pip install -q uv
+  python3 -m uv venv -q -p python3 /opt/redo/rc_venv
+  python3 -m uv pip install -q -p /opt/redo/rc_venv/bin/python "${REMOTE_WHEEL}"
   /opt/redo/rc_venv/bin/vacant do --help >/dev/null
   echo "EXTRA_WHEEL_OK /opt/redo/rc_venv/bin/vacant"
 fi
