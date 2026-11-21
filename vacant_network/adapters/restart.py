@@ -238,6 +238,8 @@ def _main():
     cwd = str(cfg["cwd"])
     work_root = cfg.get("work_root")
     project_root = cfg.get("project_root")
+    pkg_chain = cfg.get("pkg_chain") or []
+    pkg_prefix = cfg.get("pkg_prefix")
     tests = cfg["tests"]
     try:
         _os.set_inheritable(w_fd, False)
@@ -271,29 +273,53 @@ def _main():
         "load_error": None,
         "first_problem": None,
     }
-    for idx, (mod_name, file_path) in enumerate(tests):
+    use_pkg_prefix = False
+    if pkg_chain and pkg_prefix and pkg_chain[0][0] not in _sys.modules:
         try:
-            load_name = mod_name if mod_name not in _sys.modules else f"__vacant_test_{idx}_{mod_name}"
-            spec = _spec_from_file(load_name, file_path)
-            if spec is None or spec.loader is None:
-                raise ImportError(f"cannot load test file: {file_path}")
-            mod = _mod_from_spec(spec)
-            _sys.modules[load_name] = mod
-            spec.loader.exec_module(mod)
-            suite = _Loader().loadTestsFromModule(mod)
+            for _pkg_name, _pkg_init, _pkg_dir in pkg_chain:
+                if _pkg_name in _sys.modules:
+                    continue
+                _pspec = _spec_from_file(_pkg_name, _pkg_init, submodule_search_locations=[_pkg_dir])
+                if _pspec is None or _pspec.loader is None:
+                    raise ImportError(f"cannot load test package: {_pkg_init}")
+                _pmod = _mod_from_spec(_pspec)
+                _sys.modules[_pkg_name] = _pmod
+                if "." in _pkg_name:
+                    _parent_name, _child_attr = _pkg_name.rsplit(".", 1)
+                    if _parent_name in _sys.modules:
+                        setattr(_sys.modules[_parent_name], _child_attr, _pmod)
+                _pspec.loader.exec_module(_pmod)
+            use_pkg_prefix = True
         except BaseException:
             out["load_error"] = _tb.format_exc(limit=3)[-800:]
-            break
-        res = _Result()
-        suite.run(res)
-        out["run"] += res.testsRun
-        out["failures"] += len(res.failures)
-        out["errors"] += len(res.errors)
-        out["skipped"] += len(res.skipped)
-        out["unexpected_successes"] += len(res.unexpectedSuccesses)
-        probs = res.failures + res.errors
-        if probs and out["first_problem"] is None:
-            out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+
+    if out["load_error"] is None:
+        for idx, (mod_name, file_path) in enumerate(tests):
+            try:
+                full_name = f"{pkg_prefix}.{mod_name}" if use_pkg_prefix else mod_name
+                load_name = full_name if full_name not in _sys.modules else f"__vacant_test_{idx}_{mod_name}"
+                spec = _spec_from_file(load_name, file_path)
+                if spec is None or spec.loader is None:
+                    raise ImportError(f"cannot load test file: {file_path}")
+                mod = _mod_from_spec(spec)
+                _sys.modules[load_name] = mod
+                if use_pkg_prefix and load_name == full_name and pkg_prefix in _sys.modules:
+                    setattr(_sys.modules[pkg_prefix], mod_name, mod)
+                spec.loader.exec_module(mod)
+                suite = _Loader().loadTestsFromModule(mod)
+            except BaseException:
+                out["load_error"] = _tb.format_exc(limit=3)[-800:]
+                break
+            res = _Result()
+            suite.run(res)
+            out["run"] += res.testsRun
+            out["failures"] += len(res.failures)
+            out["errors"] += len(res.errors)
+            out["skipped"] += len(res.skipped)
+            out["unexpected_successes"] += len(res.unexpectedSuccesses)
+            probs = res.failures + res.errors
+            if probs and out["first_problem"] is None:
+                out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
 
     try:
         _sys.stdout.flush()
@@ -5863,7 +5889,26 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
     for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
         if deadline - time.monotonic() <= 0:
             return {**base, "status": "timeout"}
-        run_cwd = (work / d if d else work).resolve()
+        run_cwd = work_res
+        pkg_chain: list[list[str]] = []
+        pkg_prefix: str | None = None
+        if d:
+            parts = d.split("/")
+            if all(p.isidentifier() for p in parts):
+                cand_chain: list[list[str]] = []
+                all_have_init = True
+                for k in range(1, len(parts) + 1):
+                    sub_parts = parts[:k]
+                    pkg_dir = (work_res / pathlib.PurePosixPath(*sub_parts)).resolve()
+                    pkg_init = pkg_dir / "__init__.py"
+                    if pkg_init.is_file():
+                        cand_chain.append([".".join(sub_parts), str(pkg_init), str(pkg_dir)])
+                    else:
+                        all_have_init = False
+                        break
+                if all_have_init:
+                    pkg_chain = cand_chain
+                    pkg_prefix = ".".join(parts)
         nonce = secrets.token_hex(16)
         timed_out, rc, raw_res, out_log, err_log, spawn_err = _run_isolated_python_script(
             runner_script,
@@ -5872,6 +5917,8 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
                 "cwd": str(run_cwd),
                 "work_root": str(work_res),
                 "project_root": proj_str,
+                "pkg_chain": pkg_chain,
+                "pkg_prefix": pkg_prefix,
                 "tests": [[m, str(p)] for m, p in mod_entries],
             },
             run_cwd, home, runner_dir, f"u_{idx}", deadline,
