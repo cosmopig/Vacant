@@ -263,6 +263,13 @@ def _main():
     while cwd in _sys.path:
         _sys.path.remove(cwd)
     _sys.path.insert(0, cwd)
+    # 非套件的測試目錄：和 `python -m unittest discover -s <dir>`／pytest 一樣，測試目錄排第一、專案根目錄在後
+    # （rc5 定案收尾：根目錄排前面會讓根目錄的同名模組蓋掉測試目錄裡被固定住的那一個）。
+    _test_dir = cfg.get("test_dir")
+    if _test_dir:
+        while _test_dir in _sys.path:
+            _sys.path.remove(_test_dir)
+        _sys.path.insert(0, _test_dir)
 
     out = {
         "run": 0,
@@ -6041,6 +6048,7 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
                 "project_root": proj_str,
                 "pkg_chain": pkg_chain,
                 "pkg_prefix": pkg_prefix,
+                "test_dir": str((work_res / d).resolve()) if (d and not pkg_chain) else None,
                 "tests": [[m, str(p)] for m, p in mod_entries],
             },
             run_cwd, home, runner_dir, f"u_{idx}", deadline,
@@ -8122,6 +8130,32 @@ def _short_integrity_code(reason: str) -> str:
     return slug[:36] or "untraced"
 
 
+def _load_error_notice(res: dict) -> str:
+    """rc5 定案收尾：測試載入失敗（load_error）時，把 ImportError／ModuleNotFoundError 那一行印進交件訊息。
+
+    只改訊息：例如 src/ 排法沒設 PYTHONPATH 時，使用者要看得到「為什麼不過」，不必翻 result.json。
+    """
+    atts = [a for a in (res.get("attempts") or []) if isinstance(a, dict)]
+    d_idx = (res.get("delivered_attempt") or 0) - 1
+    cand = []
+    if 0 <= d_idx < len(atts):
+        cand.append(atts[d_idx])
+    cand += list(reversed(atts))
+    base = res.get("baseline") if isinstance(res.get("baseline"), dict) else None
+    if base:
+        cand.append(base)
+    for a in cand:
+        if a.get("status") != "load_error":
+            continue
+        txt = str(a.get("first_problem") or "")
+        lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+        pick = next((ln for ln in reversed(lines) if "Error" in ln.split(":", 1)[0]), lines[-1] if lines else "")
+        if pick:
+            return f"\n  tests could not be loaded: {pick[:300]}"
+        return ""
+    return ""
+
+
 def summary(res: dict) -> str:
     res, _ = _sanitize_json_obj(res)
     n = len(res["attempts"])
@@ -8215,6 +8249,7 @@ def summary(res: dict) -> str:
                     f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
 
     head += _time_limit_notice(res)
+    head += _load_error_notice(res)
     acc_integrity = res.get("acceptance_integrity")
     if acc_integrity is None:
         acc_integrity = acc_info.get("integrity")

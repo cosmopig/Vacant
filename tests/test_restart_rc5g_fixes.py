@@ -186,7 +186,8 @@ def test_n1b_non_package_tests_dir_root_import_and_no_extra_paths(
             assert rc == adapters_cli.EXIT["reject"], out
             assert rj["accepted"] is False
 
-    # No extra paths invented: bare `import sibling` from non-package tests/ must NOT resolve
+    # rc5 final (3rd verification): a non-package tests/ dir is put FIRST on sys.path, project root after it,
+    # exactly like `python -m unittest discover -s tests` / pytest. So `import sibling` from tests/ resolves.
     base_sib = tmp_path / "no_extra_path"
     proj_sib = base_sib / "proj"
     (proj_sib / "tests").mkdir(parents=True)
@@ -203,10 +204,10 @@ def test_n1b_non_package_tests_dir_root_import_and_no_extra_paths(
     rc_sib = _run_cli_do(monkeypatch, proj_sib, agent_noop, attempts=1)
     capsys.readouterr()
     rj_sib = _latest_result_json(base_sib / "vwork")
-    assert rc_sib == adapters_cli.EXIT["reject"]
-    assert rj_sib["accepted"] is False
-    assert rj_sib["attempts"][0]["status"] == "load_error"
-    assert "No module named 'sibling'" in (rj_sib["attempts"][0]["first_problem"] or "")
+    # the test already passes at baseline (VAL == 1); with the tests dir on sys.path it loads and passes
+    assert rj_sib["attempts"][0]["status"] != "load_error"
+    assert rj_sib["accepted"] is True
+    assert rc_sib == 0
 
 
 def test_n1c_flat_project_unchanged_fix_and_break(

@@ -1,7 +1,7 @@
 # rc5 compared with rc4 / wheel 37005ec2 — what changed in `vacant do` restart mode
 
 - rc4 is `652c50d36`. Its code is identical to the release candidate wheel `37005ec2aa91…`, which the running confirm2, confirm2c and atimeout batches measure.
-- rc5 was first frozen at `83e84da29`. It was reopened twice for the independent verification: first for P1/P5, refrozen with product code at `4457b3ecb`; then for N1/N2. **The final product code is `redo/rc5` `f65f40b5c`.** Later commits on `redo/rc5` change only tests, reference material and docs. The final freeze is tagged `rc5-final` on `redo/rc5`. The release branch's commits are listed in RELEASE_PREP. It came out of five rounds of adversarial review by Devin, written up in `tests/adversarial_rc5_repro/` (round 1 and round2–round5).
+- rc5 was first frozen at `83e84da29`. It was reopened twice for the independent verification: first for P1/P5, refrozen with product code at `4457b3ecb`; then for N1/N2. **The final product code is on `redo/rc5` at the commit tagged `rc5-final`.** After N1/N2 there was one more small closing fix: the non-package test-dir import order, plus the load-error line in the message. Later commits on `redo/rc5` change only tests, reference material and docs. The final freeze is tagged `rc5-final` on `redo/rc5`. The release branch's commits are listed in RELEASE_PREP. It came out of five rounds of adversarial review by Devin, written up in `tests/adversarial_rc5_repro/` (round 1 and round2–round5).
 - The fixes were written by agy and reviewed by Claude. Every round reran the full test suite and the policy differential.
 
 ## The delivery policy did not change (evidence)
@@ -87,7 +87,8 @@ Also changed when the freeze was reopened:
 ## N1 and N2 (fixed when the freeze was reopened the second time)
 - **N1.** On the `python_unittest` path, tests in a `tests/` package that import a module at the project root (`tests/test_mycal.py` doing `import mycal`) failed with `ModuleNotFoundError`, even when the fix was correct. The project root is now on the path, matching `python3 -m unittest` run at the project root.
   - Flat projects are unchanged; every measured batch is flat.
-  - For a non-package `tests/` dir, rc5 runs the collected test files with the root on the path. Plain `python3 -m unittest` discovery would not find those tests at all, so rc5 is more lenient here, but it runs the user's actual tests.
+  - For a non-package `tests/` dir, the import order is: **test dir first, project root second**. This is the same order as `python3 -m unittest discover -s tests` and pytest, so a module in `tests/` (e.g. a kept-fixed `tests/expected.py`) wins over a same-named module at the root. This order was corrected after the third verification; for a short while N1 had the root first.
+  - Where rc5 is more lenient than plain `python3 -m unittest` run at the root: default discovery does not descend into a non-package `tests/` dir, so it would run no tests at all. rc5 still runs those collected test files.
   - The `src/` layout (`src/pkg` plus `tests/`) is NOT given an extra path entry: it fails just as running unittest directly would without PYTHONPATH.
   - **Effect on measured batches: none.** All measured Python banks are flat; their test files sit at the workspace root.
 - **N2.** A dynamic import inside a helper module the tests import, up to depth 2, now makes the run `untraced` with reason `dynamic-import:<file>`. The module under test itself is not scanned.
