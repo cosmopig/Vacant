@@ -142,11 +142,14 @@ _QUOTED_LIT_RE = re.compile(r"""'([^'\n\\]{2,240})'|"([^"\n\\]{2,240})"|`([^`\n\
 _TEST_CONFIG_NAMES = frozenset({
     "conftest.py", "pytest.ini", ".pytest.ini", "tox.ini", "setup.cfg", "pyproject.toml",
     "cypress.json", ".nycrc", "noxfile.py",
+    ".npmrc", ".yarnrc", ".yarnrc.yml", ".pnpmrc", "pnpm-workspace.yaml",
+    ".babelrc", ".swcrc", "tsconfig.json",
 })
 _TEST_CONFIG_PATTERNS = (
     "jest.config.*", "jest.setup.*", "vitest.config.*", "vitest.workspace.*", "vite.config.*",
-    ".mocharc*", ".mocharc.*", "babel.config.*", ".babelrc*", "karma.conf.*",
+    ".mocharc*", ".mocharc.*", "babel.config.*", ".babelrc*", ".babelrc.*", "karma.conf.*",
     "playwright.config.*", "cypress.config.*", "wdio.conf.*", "ava.config.*", ".nycrc.*",
+    "tsconfig*.json",
 )
 _MANIFEST_BY_KIND: dict[str, tuple[str, ...]] = {
     "npm": ("package.json",),
@@ -1843,12 +1846,16 @@ _UNVERIFIED_CHECK_WARNING = (
 
 @dataclasses.dataclass
 class _AcceptanceAnalysis:
-    integrity: str                                  # "verified" | "unverified"
+    integrity: str                                  # "verified" | "unverified" (renamed in F8/UX)
     reasons: list[str]
     protected: set[str]
     pinned_scripts: dict[str, str]                  # pkg_rel -> scripts.test
     pinned_named_scripts: dict[str, dict[str, str]] # pkg_rel -> {script_name: cmd}
     shell_expansion: bool = False
+    ignored_new_paths: set[str] = dataclasses.field(default_factory=set)
+    ignored_new_globs: list[tuple[str, str]] = dataclasses.field(default_factory=list)
+    unfixed_deps: dict[str, set[str]] = dataclasses.field(default_factory=dict)
+    runs_project_code: bool = False
 
 
 def _tokenize_simple_shell(cmd: str) -> tuple[list[list[str]], list[str], bool]:
@@ -2169,12 +2176,12 @@ def _js_analyze_file(raw: bytes, rel_path: str, files_set: set[str]) -> list[str
     return reasons
 
 
-def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[list[str], list[str]]], str | None, list[str]]:
-    """Conservative Makefile parser. Returns (targets_map, default_target, reasons).
+def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[list[str], list[str]]], str | None, set[str], list[str]]:
+    """Conservative Makefile parser. Returns (targets_map, default_target, phony_targets, reasons).
     targets_map: target_name -> (prerequisites, recipe_lines)."""
     reasons: list[str] = []
     if b"\x00" in raw:
-        return {}, None, [f"binary Makefile: {rel_path}"]
+        return {}, None, set(), [f"binary Makefile: {rel_path}"]
     text = raw.decode("utf-8", errors="replace")
     raw_lines = text.splitlines()
     # Join backslash-continued lines
@@ -2190,7 +2197,11 @@ def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[
         i += 1
 
     targets: dict[str, tuple[list[str], list[str]]] = {}
-    default_target: str | None = None
+    phony_targets: set[str] = set()
+    first_target: str | None = None
+    default_goal_set = False
+    default_goal_val: str | None = None
+    default_goal_unresolvable = False
     cur_targets: list[str] = []
 
     for is_tab, ln in lines:
@@ -2214,8 +2225,40 @@ def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[
             reasons.append(f"Makefile uses $(shell ...): {rel_path}")
             cur_targets = []
             continue
-        # Variable assignment (outside rule)
-        if re.match(r"^[A-Za-z_][A-Za-z0-9_.-]*\s*(?::=|:=|\?=|\+=|=)", stripped):
+        # Variable assignment (outside rule), including names starting with '.' (e.g. .DEFAULT_GOAL)
+        m_assign = re.match(r"^([A-Za-z_.][A-Za-z0-9_.-]*)\s*(::=|:=|\?=|\+=|!=|=)(.*)$", stripped)
+        if m_assign:
+            var_name, op, rhs_val = m_assign.group(1), m_assign.group(2), m_assign.group(3)
+            if op == "!=":
+                reasons.append(f"Makefile uses != shell assignment: {rel_path}")
+            elif var_name == ".DEFAULT_GOAL":
+                val = rhs_val.split("#", 1)[0].strip()
+                if op == "+=":
+                    default_goal_unresolvable = True
+                elif op == "?=":
+                    if not default_goal_set:
+                        if "$" in val or "%" in val:
+                            default_goal_unresolvable = True
+                        elif val:
+                            toks = val.split()
+                            if len(toks) == 1:
+                                default_goal_val = toks[0]
+                                default_goal_set = True
+                            else:
+                                default_goal_unresolvable = True
+                else:  # "=", ":=", "::="
+                    if "$" in val or "%" in val:
+                        default_goal_unresolvable = True
+                    elif not val:
+                        default_goal_val = None
+                        default_goal_set = False
+                    else:
+                        toks = val.split()
+                        if len(toks) == 1:
+                            default_goal_val = toks[0]
+                            default_goal_set = True
+                        else:
+                            default_goal_unresolvable = True
             cur_targets = []
             continue
         # Rule header: target(s): prereqs
@@ -2237,15 +2280,18 @@ def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[
                 inline_recipe = inline_recipe.strip()
             t_names = lhs_s.split()
             prereqs = rhs_clean.split()
-            if t_names == [".PHONY"]:
+            if ".PHONY" in t_names:
+                for pr in prereqs:
+                    if "$" not in pr and "%" not in pr:
+                        phony_targets.add(pr)
                 cur_targets = []
                 continue
             cur_targets = []
             for t in t_names:
                 if t.startswith("."):
                     continue
-                if default_target is None:
-                    default_target = t
+                if first_target is None:
+                    first_target = t
                 if t not in targets:
                     targets[t] = (list(prereqs), [])
                 else:
@@ -2257,7 +2303,15 @@ def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[
         reasons.append(f"unrecognized Makefile line in {rel_path}: {stripped[:60]}")
         cur_targets = []
 
-    return targets, default_target, reasons
+    if default_goal_unresolvable:
+        reasons.append(f"Makefile defines .DEFAULT_GOAL unresolvably: {rel_path}")
+        default_target = first_target
+    elif default_goal_set and default_goal_val:
+        default_target = default_goal_val
+    else:
+        default_target = first_target
+
+    return targets, default_target, phony_targets, reasons
 
 
 def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
@@ -2269,13 +2323,21 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
     protected: set[str] = set()
     pinned_scripts: dict[str, str] = {}
     pinned_named_scripts: dict[str, dict[str, str]] = {}
+    ignored_new_paths: set[str] = set()
+    ignored_new_globs: list[tuple[str, str]] = []
+    unfixed_deps: dict[str, set[str]] = {}
     uses_exp = False
+    runs_project_code = False
     visited: set[tuple[str, str, str]] = set()
     max_depth = 12
 
     def _fail(msg: str) -> None:
         if msg not in reasons:
             reasons.append(msg)
+
+    def _add_unfixed(rel: str, why: str) -> None:
+        if rel:
+            unfixed_deps.setdefault(rel, set()).add(why)
 
     def _analyze_py_file(rel: str) -> None:
         protected.add(rel)
@@ -2458,7 +2520,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
         if raw is None:
             _fail(f"could not read Makefile: {mk_rel}")
             return
-        targets_map, default_target, mk_reasons = _parse_makefile_targets(raw, mk_rel)
+        targets_map, default_target, phony_targets, mk_reasons = _parse_makefile_targets(raw, mk_rel)
         for mr in mk_reasons:
             _fail(mr)
         if not req_targets:
@@ -2478,12 +2540,30 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             if tname not in targets_map:
                 _fail(f"make target not found in {mk_rel}: {tname}")
                 return
+            if tname not in phony_targets:
+                t_rel = _norm_posix_join(target_dir, tname)
+                if t_rel is not None:
+                    exists_in_proj = (
+                        t_rel in files_set
+                        or any(f.startswith(t_rel + "/") for f in files_set)
+                        or os.path.lexists(project / t_rel)
+                    )
+                    if exists_in_proj:
+                        _fail(f"make target '{tname}' is not .PHONY and a file named {tname} exists")
+                        if t_rel in files_set:
+                            _add_unfixed(t_rel, "make-target")
+                    ignored_new_paths.add(t_rel)
+                else:
+                    _fail(f"make target '{tname}' is not .PHONY and cannot be resolved inside project")
             prereqs, recipes = targets_map[tname]
             for pr in prereqs:
                 if pr in targets_map:
                     _follow_target(pr, d + 1)
                 else:
                     _fail(f"make target {tname} has untraceable prerequisite: {pr}")
+                    pr_rel = _resolve_project_file(project, proj_res, files_set, pr, target_dir)
+                    if pr_rel is not None:
+                        _add_unfixed(pr_rel, "make-prereq")
             for rec_line in recipes:
                 cleaned = rec_line.lstrip("@-+ \t")
                 if not cleaned:
@@ -2498,6 +2578,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
 
     def _analyze_simple_segment(tokens: list[str], cur_dir: tuple[str, ...], depth: int, *,
                                 in_script: str | None = None) -> tuple[str, ...]:
+        nonlocal runs_project_code
         if not tokens:
             return cur_dir
         if depth > max_depth:
@@ -2552,6 +2633,9 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                     return nd
             _fail(f"cd target cannot be resolved inside project: {' '.join(rest)}")
             return cur_dir
+
+        # Anything past trivial shell builtins executes external/project code
+        runs_project_code = True
 
         # Project-local executable (contains "/" and resolves inside project, or relative path)
         if "/" in cmd_tok:
@@ -2738,17 +2822,145 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             if mode_tok == "-m" and j + 1 < len(rest):
                 mod_name = rest[j + 1]
                 mod_args = rest[j + 2:]
-                if mod_name in ("pytest", "unittest") or mod_name.startswith("unittest."):
-                    for ma in mod_args:
+                if mod_name == "pytest":
+                    k_idx = 0
+                    while k_idx < len(mod_args):
+                        ma = mod_args[k_idx]
+                        if ma == "-p" and k_idx + 1 < len(mod_args):
+                            pmod = mod_args[k_idx + 1]
+                            if not pmod.startswith("no:") and (pmod.replace(".", "/") + ".py") in files_set:
+                                _fail(f"pytest loads local plugin: {pmod}")
+                                _add_unfixed(pmod.replace(".", "/") + ".py", "runner-plugin")
+                                return cur_dir
+                            k_idx += 2
+                            continue
                         if not ma.startswith("-"):
                             f_rel = _resolve_project_file(project, proj_res, files_set, ma, cur_dir)
                             if f_rel is not None:
                                 protected.add(f_rel)
-                            else:
-                                mod_py = ma.replace(".", "/") + ".py"
-                                f_mod = _resolve_project_file(project, proj_res, files_set, mod_py, cur_dir)
-                                if f_mod is not None:
-                                    protected.add(f_mod)
+                        k_idx += 1
+                    return cur_dir
+                if mod_name == "unittest" or mod_name.startswith("unittest."):
+                    # Strip leading unittest flags before checking for `discover`
+                    u_idx = 0
+                    u_bool_long = frozenset({"--verbose", "--quiet", "--failfast", "--catch", "--buffer", "--locals"})
+                    while u_idx < len(mod_args):
+                        tok = mod_args[u_idx]
+                        if tok in ("-k",) and u_idx + 1 < len(mod_args):
+                            u_idx += 2
+                            continue
+                        if tok.startswith("-k") and len(tok) > 2:
+                            u_idx += 1
+                            continue
+                        if tok in u_bool_long or (tok.startswith("-") and not tok.startswith("--") and len(tok) > 1 and all(c in "vqfcb" for c in tok[1:])):
+                            u_idx += 1
+                            continue
+                        break
+                    rem = mod_args[u_idx:]
+                    if not rem or rem[0] == "discover":
+                        d_args = rem[1:] if (rem and rem[0] == "discover") else []
+                        start_tok = "."
+                        pat_tok = "test*.py"
+                        top_tok: str | None = None
+                        pos_args: list[str] = []
+                        di = 0
+                        while di < len(d_args):
+                            dt = d_args[di]
+                            if dt in ("-s", "--start-directory") and di + 1 < len(d_args):
+                                start_tok = d_args[di + 1]
+                                di += 2
+                                continue
+                            if dt.startswith("--start-directory="):
+                                start_tok = dt.split("=", 1)[1]
+                                di += 1
+                                continue
+                            if dt.startswith("-s") and len(dt) > 2:
+                                start_tok = dt[2:]
+                                di += 1
+                                continue
+                            if dt in ("-p", "--pattern") and di + 1 < len(d_args):
+                                pat_tok = d_args[di + 1]
+                                di += 2
+                                continue
+                            if dt.startswith("--pattern="):
+                                pat_tok = dt.split("=", 1)[1]
+                                di += 1
+                                continue
+                            if dt.startswith("-p") and len(dt) > 2:
+                                pat_tok = dt[2:]
+                                di += 1
+                                continue
+                            if dt in ("-t", "--top-level-directory") and di + 1 < len(d_args):
+                                top_tok = d_args[di + 1]
+                                di += 2
+                                continue
+                            if dt.startswith("--top-level-directory="):
+                                top_tok = dt.split("=", 1)[1]
+                                di += 1
+                                continue
+                            if dt.startswith("-t") and len(dt) > 2:
+                                top_tok = dt[2:]
+                                di += 1
+                                continue
+                            if dt == "-k" and di + 1 < len(d_args):
+                                di += 2
+                                continue
+                            if dt.startswith("-k") and len(dt) > 2:
+                                di += 1
+                                continue
+                            if dt in u_bool_long or (dt.startswith("-") and not dt.startswith("--") and len(dt) > 1 and all(c in "vqfcb" for c in dt[1:])):
+                                di += 1
+                                continue
+                            if dt.startswith("-"):
+                                _fail(f"unsupported unittest discover option: {dt}")
+                                return cur_dir
+                            pos_args.append(dt)
+                            di += 1
+                        if len(pos_args) >= 1:
+                            start_tok = pos_args[0]
+                        if len(pos_args) >= 2:
+                            pat_tok = pos_args[1]
+                        if len(pos_args) >= 3:
+                            top_tok = pos_args[2]
+                        if len(pos_args) > 3:
+                            _fail("unsupported extra unittest discover arguments")
+                            return cur_dir
+                        sd = _resolve_project_subdir(project, proj_res, start_tok, cur_dir)
+                        if sd is None:
+                            _fail(f"unittest discover start directory not inside project: {start_tok}")
+                            return cur_dir
+                        if top_tok is not None:
+                            td = _resolve_project_subdir(project, proj_res, top_tok, cur_dir)
+                            if td is None:
+                                _fail(f"unittest discover top-level directory not inside project: {top_tok}")
+                                return cur_dir
+                        start_pref = "/".join(sd)
+                        for rel in files_set:
+                            if start_pref == "" or rel.startswith(start_pref + "/"):
+                                bn = pathlib.PurePosixPath(rel).name
+                                if fnmatch.fnmatchcase(bn, pat_tok):
+                                    protected.add(rel)
+                        ignored_new_globs.append((start_pref, pat_tok))
+                        return cur_dir
+                    # Explicit unittest target(s): files or dotted module/class/method specs
+                    for ma in rem:
+                        if ma.startswith("-"):
+                            continue
+                        f_rel = _resolve_project_file(project, proj_res, files_set, ma, cur_dir)
+                        if f_rel is not None:
+                            protected.add(f_rel)
+                            continue
+                        parts_m = [p for p in ma.split(".") if p]
+                        found_m = False
+                        for end_i in range(len(parts_m), 0, -1):
+                            sub_m = "/".join(parts_m[:end_i])
+                            f_mod = _resolve_project_file(project, proj_res, files_set, sub_m + ".py", cur_dir)
+                            if f_mod is not None:
+                                protected.add(f_mod)
+                                found_m = True
+                                break
+                        if not found_m:
+                            _fail(f"unittest target cannot be resolved in project: {ma}")
                     return cur_dir
                 # Look up MOD.py / MOD/__main__.py in project
                 mod_parts = [p for p in mod_name.split(".") if p]
@@ -2876,6 +3088,10 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
         pinned_scripts=pinned_scripts,
         pinned_named_scripts=pinned_named_scripts,
         shell_expansion=uses_exp,
+        ignored_new_paths=ignored_new_paths,
+        ignored_new_globs=ignored_new_globs,
+        unfixed_deps=unfixed_deps,
+        runs_project_code=runs_project_code,
     )
 
 
@@ -3399,7 +3615,8 @@ def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str], *,
 
 
 def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str], *,
-                     start_hashes: dict[str, str | None] | None = None) -> _WritePlan:
+                     start_hashes: dict[str, str | None] | None = None,
+                     ignore_new: Callable[[str], bool] | None = None) -> _WritePlan:
     """規劃寫回專案的所有操作（唯讀掃描 project，不做任何變更）。
     當提供 `start_hashes`（任務開始時的原專案快照）時：
     - 僅刪除「開始時存在且交件嘗試刪掉」的檔案；執行期間新出現在原專案的檔案絕不刪除，改記 `appeared`。
@@ -3455,7 +3672,7 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
     for rel in sorted(after - protected):
         if _has_copy_skip(rel) or _matches_prefix(rel, proj_skip_rels):
             continue
-        if rel not in start_set and _is_test_config(rel):
+        if rel not in start_set and (_is_test_config(rel) or (ignore_new is not None and ignore_new(rel))):
             config_ignored.append(rel)
             continue
         # 交件嘗試相對於開始時並未改動此檔 ⇒ 絕不覆寫原專案（即使原專案有並發編輯）
@@ -3799,7 +4016,8 @@ def _restore_test_file(work: pathlib.Path, rel: str, want: bytes, *, mode: int |
 def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], snap: _Snapshot,
                               project: pathlib.Path | None, plan: _WritePlan | None, *,
                               orig_modes: dict[str, int] | None = None,
-                              start_snap: _Snapshot | None = None) -> None:
+                              start_snap: _Snapshot | None = None,
+                              ignore_new: Callable[[str], bool] | None = None) -> None:
     """組裝驗收目錄 work：完全不含 symlink，以「開始快照＋本輪嘗試改動」組裝（絕不讀 live 專案的未改動檔），
     最後覆寫原測試檔（保留原始 mode 位元）。"""
     work.mkdir(parents=True, exist_ok=True)
@@ -3828,7 +4046,7 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
             _copy_reg_file(snap.root / rel, work / rel, mode=m)
     else:
         for rel in sorted(snap.files):
-            if rel not in protected and not _is_test_config(rel):
+            if rel not in protected and not _is_test_config(rel) and not (ignore_new is not None and ignore_new(rel)):
                 m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
                 _copy_reg_file(snap.root / rel, work / rel, mode=m)
     # 3. 最後以開始時的原始測試檔覆寫（保留原始 mode 位元含執行權限）
@@ -3851,6 +4069,20 @@ class AcceptanceSpec:
     shell_expansion: bool = False
     integrity: str | None = None       # "verified" | "unverified" | None (for kind == "none")
     integrity_reasons: tuple[str, ...] = ()
+    ignored_new_paths: tuple[str, ...] = ()
+    ignored_new_globs: tuple[tuple[str, str], ...] = ()
+    unfixed_deps: dict[str, tuple[str, ...]] = dataclasses.field(default_factory=dict)
+
+    def should_ignore_new_file(self, rel: str) -> bool:
+        for p in self.ignored_new_paths:
+            if rel == p or rel.startswith(p + "/"):
+                return True
+        if self.ignored_new_globs:
+            bn = pathlib.PurePosixPath(rel).name
+            for pref, pat in self.ignored_new_globs:
+                if (pref == "" or rel.startswith(pref + "/")) and fnmatch.fnmatchcase(bn, pat):
+                    return True
+        return False
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -4070,6 +4302,9 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             shell_expansion=bool(uses_exp or analysis.shell_expansion),
             integrity=analysis.integrity,
             integrity_reasons=tuple(analysis.reasons),
+            ignored_new_paths=tuple(sorted(analysis.ignored_new_paths)),
+            ignored_new_globs=tuple(analysis.ignored_new_globs),
+            unfixed_deps={k: tuple(sorted(v)) for k, v in analysis.unfixed_deps.items()},
         )
 
     if py_orig:
@@ -4126,6 +4361,9 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 shell_expansion=analysis.shell_expansion,
                 integrity=analysis.integrity,
                 integrity_reasons=tuple(analysis.reasons),
+                ignored_new_paths=tuple(sorted(analysis.ignored_new_paths)),
+                ignored_new_globs=tuple(analysis.ignored_new_globs),
+                unfixed_deps={k: tuple(sorted(v)) for k, v in analysis.unfixed_deps.items()},
             )
         missing.append("package.json has a \"test\" script, but 'npm' was not found on PATH")
 
@@ -4713,7 +4951,8 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
                 except OSError:
                     pass
         _populate_acceptance_work(
-            work, originals, snap, _project, _plan, orig_modes=eff_orig_modes, start_snap=_start_snap
+            work, originals, snap, _project, _plan, orig_modes=eff_orig_modes, start_snap=_start_snap,
+            ignore_new=(spec.should_ignore_new_file if spec is not None else None),
         )
         home = tmp / "h"
         home.mkdir(mode=0o700)
@@ -5946,7 +6185,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 )
                 # R11：驗收階段一律以開始快照為基準規劃本輪改動（排除開始時就不安全的路徑如 symlink），
                 # 使驗收永遠只測試「開始狀態＋本輪嘗試改動」，不受 live 專案並發改動或逃逸寫入影響。
-                plan = _plan_write_back(start_snap.root, snap, protected, start_hashes=start_hashes)
+                plan = _plan_write_back(
+                    start_snap.root, snap, protected, start_hashes=start_hashes,
+                    ignore_new=spec.should_ignore_new_file,
+                )
                 if start_unsafe:
                     blocked_add = [r for r in plan.added if _matches_prefix(r, start_unsafe)]
                     blocked_mod = [r for r in plan.modified if _matches_prefix(r, start_unsafe)]
@@ -6085,7 +6327,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             t_ls = time.monotonic()
             orig_lstat_before_wb = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
             lstat_listing_s += time.monotonic() - t_ls
-            final_plan = _plan_write_back(project, snaps[d], protected, start_hashes=start_hashes)
+            final_plan = _plan_write_back(
+                project, snaps[d], protected, start_hashes=start_hashes,
+                ignore_new=spec.should_ignore_new_file,
+            )
             appeared_during_run = list(final_plan.appeared)
             attempt_writes = (
                 set(final_plan.added) | set(final_plan.modified) | set(final_plan.deleted) | set(final_plan.conflicts)
