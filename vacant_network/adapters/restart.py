@@ -48,9 +48,17 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
   Linux 上於執行期間啟用 `prctl(PR_SET_CHILD_SUBREAPER, 1)`，於每次 agent 嘗試後（驗收前）、每次驗收／基線後與結束前，
   透過 `/proc/*/stat`（`ppid == vacant_pid`）與 `VACANT_RUN_ID` 雙訊號抓出並 `SIGKILL` 脫離子孫行程（即使 `setsid`＋`env -i`），
   記於 `detached_processes`；**非 Linux 平台沒有此防護層**（記 `null` 並在交付訊息明講）。**A write by a detached process after delivery is not recorded.**
-  另開始與結束時會對原專案做純 `lstat` 清單比對（含整棵 `.git`（唯略過 `.git/objects/`）、任意深度的 `node_modules`／`.venv`／
+  另開始與結束時會對原專案做純 `lstat` 清單比對（含整棵 `.git`——包括 `.git/objects/info/**` 與 `.git/objects/pack/**` 的完整 `lstat`，
+  以及 `.git/objects/??/` 鬆散物件的純檔名集合比對（不讀物件內容、不對鬆散物件逐檔 `lstat`）——以及任意深度的 `node_modules`／`.venv`／
   `__pycache__`／`.pytest_cache` 與任意處 symlink，並排除 Vacant 自己的 `VACANT_HOME`／`VACANT_WORK`），偵測並回報計畫寫回以外的異動。
   `COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`、`__pycache__`、`.pytest_cache`）不會寫回原專案（agent 在其下新建的檔案會列在 `not_delivered`）。
+- 驗收完整性判定（`acceptance_integrity: "verified" | "unverified"`）：指令分析器採保守二分法——唯有完全理解每個執行的簡單指令與其觸及的專案檔案
+  （且所有執行的腳本／manifest 受保護、直接執行的 Python／JS 腳本不匯入專案內部模組）時才記為 `verified`；任何未完全理解的殼層語法、未知指令、
+  無法追蹤到底的腳本／recipe／inline 程式碼一律標為 `unverified`，不印正常 `protected (restored before check):` 行，改印明顯警告並列出交付嘗試改動的檔案。
+- **同帳號簽署金鑰結構邊界（0.9.2 未修正）**：簽章私鑰（`$VACANT_HOME/intake/keys/verifier/identity.key`）是同帳號所有行程都讀得到的檔案，
+  包含 agent 本身。兩面如實陳述：
+  - 收據**能防事後竄改**（改動或刪除任一筆紀錄，其後所有雜湊與簽章都會驗證失敗）；
+  - 收據**不能防同一 OS 使用者底下的行程偽造**，因為同使用者行程（包括 agent 自己）讀得到私鑰並能簽出可通過驗證的紀錄。
 - 驗收依賴標記（`acceptance_dependencies_changed`）涵蓋測試檔字串常值、Python／JS 最深 2 層遞移匯入（含 `jest.mock`）與
   `fixtures/`／`testdata/`／`test_data/`／`__fixtures__/`／`__mocks__/`／`mocks/`／`golden/`／`data/`／測試目錄，且排除受測模組本身（單一直接匯入）。
   **Dynamic imports and paths computed at runtime are not traced.**

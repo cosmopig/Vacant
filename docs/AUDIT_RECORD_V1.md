@@ -14,8 +14,13 @@
 >   (Ma & Tsudik 2009: integrity != completeness).
 > - Activity that bypassed Vacant (direct agent execution without hooks/controller, deleted
 >   files, or runs stored outside scanned directories) is absent from this export.
+> - **Same-user key limit (structural in 0.9.2):** The signing key is a file readable by any
+>   process running as the user, including the agent. Signed receipts protect against
+>   **tampering after the fact** (change one record and every later hash stops matching); they
+>   do **NOT** protect against **forgery by a process running as the same user**, because it
+>   can read the key — and that includes the agent itself.
 > - Do not describe these records as complete or tamper-proof; use **accountability** rather
-  than trust.
+>   than trust.
 
 ---
 
@@ -290,9 +295,16 @@ the argument is not one of `list`, `show`, `export`, or a flag.
 2. **Tamper-evident and re-verifiable, not complete:** Verification checks every recorded entry
    against its signing key and available anchors. It cannot prove that no separate run happened
    outside Vacant or that an unanchored chain was never truncated from its tail.
-3. **Same-account key boundary:** When signing keys live in plaintext under the same OS account
-   as the agent, a hostile process in that account can read them. Stronger separation requires
-   moving the receiver and signing keys to another OS account or machine.
+3. **Same-account key boundary (structural limit, not fixed in 0.9.2):** The signing key
+   (`$VACANT_HOME/intake/keys/<role>/identity.key`) is a file readable by any process running
+   as the user, including the agent. State both sides honestly:
+   - Signed receipts **do** protect against tampering after the fact: change or delete one
+     record in the chain and every later hash stops matching (`vacant audit list --strict`
+     and `verify_receipts` catch it).
+   - Signed receipts do **NOT** protect against forgery by a process running as the same OS
+     user, because it can read the signing key and append a valid signed receipt that
+     verifies — and that includes the agent itself. Preventing same-user forgery requires
+     moving the verifier/receiver and signing keys to a separate OS account or machine.
 4. **Detached processes (restart mode):** On Linux, `vacant do` enables `prctl(PR_SET_CHILD_SUBREAPER, 1)`
    for the duration of the run, scans `/proc/*/stat` (`ppid == vacant_pid`) plus the `VACANT_RUN_ID`
    env marker after each agent attempt (before acceptance), after baseline and each acceptance, and

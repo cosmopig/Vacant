@@ -57,13 +57,36 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   recorded in `outside_changes`, and printed prominently ("your project changed during the run, not by this delivery: … —
   not checked and not touched"; plus a dedicated line for any protected test/config file). `_apply_write_plan` re-checks
   each live file against the start snapshot just before `os.replace`/unlink to close plan→apply TOCTOU races.
-- **Expanded B1 `lstat`-only outside-change listing and `COPY_SKIP` visibility (rc5, B1/R4/R12).** The `lstat`-only B1
-  listing covers all of `.git` except `.git/objects/` (refs, HEAD, packed-refs, index, info/, config, hooks/, …) as well
-  as `node_modules`, `.venv`, `__pycache__`, and `.pytest_cache` at any depth (skipping root `node_modules` only when
-  already tracked by the item-4 manifest) and records `lstat_listing_s`. Changes under `.git/hooks`, `.git/refs`,
-  `.git/HEAD`, `.git/packed-refs`, or `.pth` files under `.venv` print prominent warnings. Files created by the agent
-  under `COPY_SKIP`-named dirs are not delivered and are listed in `not_delivered` (`result.json`, receipt, and summary)
+- **Binary acceptance integrity analysis (`verified` | `unverified`) (rc5, F1/F2).** Acceptance commands (both `--check`
+  and auto-detected `npm`) are conservatively analyzed into two outcomes: `verified` (every simple command separated by
+  `;`/`&&`/`||`/`|` is understood and every executed manifest/script — following `npm test`/`npm run`/`npm --prefix`,
+  `yarn`/`pnpm`, `make [TARGET]` recipes, `bash|sh FILE` / `./FILE` lines, `python -m MOD`, and `node`/`python` scripts
+  with no project-local imports — is protected and pinned) or `unverified` (any unknown shell construct, unknown command,
+  unresolvable script/recipe/inline code, or directly executed script importing project modules). On `unverified` runs,
+  Vacant suppresses the normal `protected (restored before check):` line, prints a prominent `WARNING` that passing does
+  not prove the check was not tampered with, and lists all files changed by the delivered attempt (while still restoring
+  whatever was understood). `acceptance_integrity` and `acceptance_integrity_reasons` are recorded in `result.json` and
+  the signed receipt, and shown in `vacant audit list` (`INTEGRITY` column) and `vacant audit show`.
+- **Expanded B1 `lstat`-only outside-change listing, `.git/objects` coverage, and `COPY_SKIP` visibility (rc5, B1/R4/R12/F3).**
+  The `lstat`-only B1 listing covers all of `.git` including full `lstat` of `.git/objects/info/**` and
+  `.git/objects/pack/**` plus the set of loose-object names under `.git/objects/??/` (`scandir` names only, no per-file
+  `lstat`, no content reads), as well as `node_modules`, `.venv`, `__pycache__`, and `.pytest_cache` at any depth
+  (skipping root `node_modules` only when already tracked by the item-4 manifest) and records `lstat_listing_s` in both
+  `result.json` and the signed receipt. Changes under `.git/hooks`, `.git/refs`, `.git/HEAD`, `.git/packed-refs`,
+  `.git/objects`, or `.pth` files under `.venv` print prominent warnings. Files created by the agent under
+  `COPY_SKIP`-named dirs are not delivered and are listed in `not_delivered` (`result.json`, receipt, and summary)
   with the reason.
+- **Receipt write resilience, prominent failure warning, and strict unsigned-restart checks (rc5, F4).** Before writing
+  a signed restart receipt, Vacant repairs user permissions (`u+rwx` on directories, `u+rw` on files, never following
+  symlinks) from `$VACANT_HOME` down to the trace chain, signing keys, `trust.json`, and `head.json`, and retries once
+  on failure (defeating agent `chmod` suppression). If writing still fails, the exit code is unchanged, `receipt_error`
+  is recorded in `result.json`, and the summary starts with a prominent `WARNING` that the run has no verifiable record.
+  `vacant audit list --strict` and `export --strict` now exit 3 when a restart run has `result.json` without a signed
+  receipt (`unsigned` with `unsigned_source`).
+- **Documented same-user signing key limit (rc5, F5).** `docs/AUDIT_RECORD_V1.md` and the restart honesty notes explicitly
+  state both sides: signed receipts protect against tampering after the fact (alter one record and every later hash stops
+  matching), and do NOT protect against forgery by a process running as the same user (including the agent itself),
+  because it can read the key file. This is a structural limit not fixed in 0.9.2.
 - **Linux child subreaper detached-process cleanup (rc5, B2/R2/R3).** On Linux, `vacant do` enables
   `prctl(PR_SET_CHILD_SUBREAPER, 1)` for the run and scans `/proc/*/stat` (`ppid == vacant_pid`) plus the `VACANT_RUN_ID`
   marker after each agent attempt (before acceptance), after baseline/acceptance, and at the end, killing detached
