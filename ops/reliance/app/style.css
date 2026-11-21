@@ -1,0 +1,69 @@
+:root{font-family:system-ui,-apple-system,"Noto Sans CJK TC",sans-serif;color:#162b37;background:#f3f5f3;font-size:16px;line-height:1.7;--teal:#006e65;--muted:#536770;--orange:#914400}
+*{box-sizing:border-box}
+body{margin:0}
+header{padding:18px 22px;display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #d7dfdb;background:#fff;font-size:12px}
+.brand{font-weight:850;letter-spacing:.07em}
+.brand b{font-weight:500;letter-spacing:0}
+#progress{white-space:nowrap;color:var(--muted)}
+main{max-width:720px;margin:auto;padding:26px 20px 50px}
+h1{font-size:38px;line-height:1.3;letter-spacing:-.045em;margin:18px 0}
+h2{font-size:23px;line-height:1.4;margin:10px 0 18px}
+h3{font-size:17px;margin:0 0 10px}
+p{margin:12px 0}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--teal)}
+.lead{font-size:18px}
+.muted,small{color:var(--muted)}
+small{font-size:12px}
+.card,.bubble,.notice{background:white;border:1px solid #d9e1dd;border-radius:18px;padding:20px;margin:18px 0;overflow-wrap:anywhere}
+.bubble{border-radius:4px 20px 20px 20px;background:#e8efec}
+.bubble p{white-space:pre-wrap;font-size:14px;line-height:1.8}
+.answer{display:block;padding:12px 15px;margin-top:16px;border:1px solid #8abeb5;background:#fff;border-radius:10px;font-weight:750;color:#004d46;overflow-wrap:anywhere}
+.notice{background:#fff3df;border-color:#e2c896;color:#693800}
+.source{background:#e2f3ed;border-color:#8ebeb0;color:#00594e}
+.pill,.chip{display:inline-block;border-radius:7px;background:#e9efeb;padding:3px 8px;font-size:12px;margin:3px 4px 3px 0}
+.pill{font-weight:750;padding:5px 10px;background:#dcece5;color:#005a50}
+.plain{background:#e5e9ef;color:#364d68}
+button{font:inherit;font-weight:700;min-height:50px;border:1px solid #b3c9c1;border-radius:12px;padding:10px 16px;background:white;color:#193e39;cursor:pointer}
+button.primary{background:var(--teal);border-color:var(--teal);color:white}
+button.full{width:100%;margin-top:14px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #c3781e;outline-offset:3px}
+.choices{display:flex;gap:12px}
+.choices button{flex:1}
+button[aria-pressed="true"]{background:#004f49;color:white;box-shadow:0 0 0 3px #9fc9bb}
+input[type=range]{width:100%;accent-color:var(--teal);min-height:36px}
+.decision{position:static;background:#fff;padding:18px;border:1px solid #abc7bd;border-radius:18px;box-shadow:none;margin-top:26px}
+.timeline{padding:0 0 0 15px;border-left:2px solid #a9c6bb;margin-left:9px}
+.step{position:relative;background:#fff;border-radius:12px;border:1px solid #dce4df;padding:10px 12px;margin:12px 0}
+.step:before{content:"";position:absolute;left:-22px;top:19px;width:10px;height:10px;border-radius:50%;background:#438b79}
+.step.origin{border:2px solid #1c8871}
+.step summary{cursor:pointer;min-height:38px;display:flex;align-items:center;gap:8px}
+.step summary small{margin-left:auto}
+.step pre,.receipt{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 ui-monospace,monospace;background:#f2f5f3;border-radius:8px;padding:10px;margin:8px 0}
+.claims blockquote{font-size:13px;margin:12px 0 4px;padding-left:12px;border-left:3px solid #94b8a8}
+.claims p{font-size:13px}
+.big{font-size:48px;font-weight:850;line-height:1.2;color:var(--teal)}
+.reveal-icon{font-size:44px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stats .card{margin:0;padding:15px}
+.bar-track{height:12px;border-radius:8px;background:#e3e9e5;overflow:hidden;margin:7px 0 16px}
+.bar-fill{height:100%;background:var(--teal);min-width:0}
+.without{background:#7b8ba3}
+.wrong{background:#aa561f}
+.chart-label{display:flex;justify-content:space-between;font-size:13px;gap:10px}
+.time-chart{height:120px;display:flex;align-items:end;gap:8px;margin:18px 0 4px}
+.time-col{flex:1;background:#006e65;border-radius:5px 5px 0 0;min-height:3px;position:relative}
+.time-col span{position:absolute;bottom:-25px;width:100%;text-align:center;font-size:11px}
+.time-label{margin:32px 0 0;font-size:12px;color:var(--muted)}
+textarea{width:100%;height:160px;font:12px monospace;border:1px solid #a0b9af;border-radius:8px;padding:10px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+footer{font-size:12px;color:var(--muted);margin-top:22px}
+#status{font-size:13px;color:var(--orange)}
+.hidden{display:none}
+@media(max-width:420px){header{padding:14px 16px;font-size:11px}
+.brand b{display:none}
+main{padding:22px 18px 40px}
+h1{font-size:37px}
+.card,.bubble,.notice{padding:17px}
+.decision{padding:15px;bottom:8px}
+}

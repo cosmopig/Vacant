@@ -8,9 +8,9 @@ import re
 from pathlib import Path
 
 if __package__:
-    from .cache import CACHE as ROOT, REPO, prepare
+    from .cache import CACHE, REPO, prepare
 else:
-    from cache import CACHE as ROOT, REPO, prepare
+    from cache import CACHE, REPO, prepare
 
 GIVEN = ['acquirer_countries.csv', 'fees.json', 'manual.md', 'merchant_category_codes.csv',
          'merchant_data.json', 'payments-readme.md', 'payments.csv']
@@ -89,7 +89,7 @@ def build():
     rows, missing = [], []
     runs = json.loads((REPO/'ops/eval/evidence_20260925/formal/runs.json').read_text())
     for r in runs:
-        base = ROOT/'formal/jobs'/r['job']/r['trial']
+        base = CACHE/'formal/jobs'/r['job']/r['trial']
         tp = base/'agent/trajectory.json'
         if not tp.exists():
             missing.append(r['trial'])
@@ -148,7 +148,7 @@ def build():
     assert sum(r['arm'] == 'C' for r in rows) == 119
     assert sum(r['reward'] == 0 for r in rows if r['arm'] == 'C') == 16
     assert len({r['trial_id'] for r in rows}) == len(rows)
-    (ROOT/'receipt_rows.jsonl').write_text(''.join(json.dumps(r, ensure_ascii=False)+'\n' for r in rows))
+    (CACHE/'receipt_rows.jsonl').write_text(''.join(json.dumps(r, ensure_ascii=False)+'\n' for r in rows))
     print('Rows:', collections.Counter(r['arm'] for r in rows), 'missing trajectories:', missing)
     return rows
 
@@ -220,5 +220,5 @@ if __name__ == '__main__':
     with contextlib.redirect_stdout(output):
         main()
     report = output.getvalue()
-    (ROOT/'receipt_analysis.md').write_text(report)
+    (CACHE/'receipt_analysis.md').write_text(report)
     print(report, end='')
