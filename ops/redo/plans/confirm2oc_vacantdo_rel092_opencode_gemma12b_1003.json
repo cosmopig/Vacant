@@ -32,7 +32,6 @@
     ],
     "env": {
      "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1003\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1003\", \"options\": {\"baseURL\": \"http://100.119.113.56:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1003/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}",
-     "XDG_CONFIG_HOME": "{logs}/xdg-config",
      "VACANT_WORK": "{logs}/vacant-work"
     },
     "usage": "none",
@@ -58,8 +57,7 @@
    "{prompt}"
   ],
   "env": {
-   "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1003\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1003\", \"options\": {\"baseURL\": \"http://100.119.113.56:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1003/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}",
-   "XDG_CONFIG_HOME": "{logs}/xdg-config"
+   "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1003\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1003\", \"options\": {\"baseURL\": \"http://100.119.113.56:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1003/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}"
   },
   "config_dir": {
    "env": "XDG_DATA_HOME",
@@ -147,7 +145,7 @@
   "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
   "known_limits": [
    "P 臂＝發布 wheel（sha256 37005ec2aa91af874f6697d7ea55434ba6889c5e116ad9de05eb06aca7d4ac2c）裝在 ~/dev/ops/release_0.9.2_venv。",
-   "兩臂都把 XDG_CONFIG_HOME 指到每格自己的空目錄：這台機器的 ~/.config/opencode 裝了 Vacant 外掛，不隔離就會被兩臂載入（redo1_opencode 那批沒有隔離，兩臂都載入了）。",
+   "兩臂都讀同一份全域 ~/.config/opencode（權限 edit／bash allow，和 redo1_opencode 相同）；2026-11-21 查證：plugin/ 是空的、opencode.json 沒有 plugin 條目，這台機器沒有裝 Vacant 的 opencode 外掛，所以兩臂都不載入擴充。`vacant do` 重開模式預設不注入掛鉤。",
    "P 經 vacant 呼叫 `opencode run --format json --dir <副本>`，A 是 `opencode run`（文字輸出）：輸出格式不同，模型看到的提示相同。",
    "OpenCode 的模型呼叫數 harness 量不到（usage=none）。",
    "與 redo1_opencode 只並列、不合併。"
