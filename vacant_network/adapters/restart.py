@@ -27,8 +27,10 @@ R3 是這個 repo 裡第一個在**原生 agent**上量到交付變好的設定�
       （`no_tests_collected`），仍照舊跑一次並明講未檢查。
 2. Python 驗收優先使用專案直譯器（`$VIRTUAL_ENV/bin/python` ＞ `<project>/.venv` ＞ `<project>/venv` ＞ `PATH`
    ＞ `sys.executable`），保留 `-B`、捨 `-I` 改以工作區外私密腳本＋匯入前清 `sys.path` 維持 C3 防護，並把實際直譯器
-   記在結果、簽章收據與訊息中。`node_modules` 不複製；agent 工作區與外部驗收都以指向原專案的 symlink 取用（驗收時另以
-   symlink＋`NODE_PATH` 提供並在驗收結束立刻移除。
+   記在結果、簽章收據與訊息中。`node_modules` 給 agent 獨立副本（優先 `cp --reflink=auto -a`，失敗退回一般複製，
+   絕不給 agent 指向原專案 `node_modules` 的可寫路徑，且絕不寫回）；外部驗收對未動過的原專案 `node_modules`
+   以唯讀＋symlink／`NODE_PATH` 執行並在結束後立刻移除，且於開始、每次驗收前／後與結束時以內容清單（sha256＋mode＋
+   型別＋symlink 目標）重驗原專案 `node_modules`。
 3. 每一次嘗試：全新的暫存副本＋全新的 agent 行程。嘗試之間不留東西、不給失敗原文。
 4. 驗收通過就停、交那一次；最多 `max_attempts` 次、每次 `attempt_timeout_s`、合計 `budget_s`。
    都沒過就交原件測試過最多的那一次（同分取後面那次；僅看退出碼的種類 `passed` 為 `None`，
@@ -43,8 +45,11 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
 - 驗收＝「擋得住專案自己的測試會抓到的錯」，**不等於需求被滿足**。測試寫得弱，這一層就弱。
 - 暫存副本**不是沙箱**：agent 與外部驗收指令（`--check`、`npm`、`cargo`、`go`）皆以使用者的帳號權限與環境變數執行，
   讀寫得到磁碟上你讀寫得到的一切；這層只保護「交回寫回」與「驗收流程」本身，擋不住執行期間直接讀寫專案外或其他路徑的檔案，
-  也殺不到自己 `setsid()` 脫離行程群組的背景子行程。另 `COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`）
-  不會複製進暫存工作區或快照副本。
+  也殺不到自己 `setsid()` 脫離行程群組的背景子行程（Linux 上於每次嘗試結束後以 `VACANT_RUN_ID` 掃描 `/proc/*/environ`
+  偵測並記於結果與收據；其他平台記 `null`）。**A write by a detached process after delivery is not recorded.**
+  另結束時會對原專案做不跟隨 symlink 的 `lstat` 前後比對（含 `.git/hooks/`、`.git/config` 與任意處 symlink），
+  僅偵測並回報計畫寫回以外的異動（不自動還原、不改退出碼）。`COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`）
+  不會複製進快照副本（agent 工作區僅對 `node_modules` 取得獨立副本，絕不寫回）。
 - 等預算是牆鐘的；重開通常讓 agent 用掉更多模型呼叫（redo1 約兩倍），這一層不省算力。
 - `budget_s` 是**整個指令**的牆鐘上限：agent、驗收（所有測試目錄與外部指令共用同一條期限，不設超額下限）、複製都算在內，
   每次嘗試前預留一次驗收的時間（2026-11-19：只算 agent 時間時，confirm1／confirm1c 各有 1 格第三次嘗試跑到
@@ -62,12 +67,16 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
   若原專案有 `node_modules`，僅於外部驗收當下以 acceptance-only symlink（＋`NODE_PATH`）掛進驗收副本並於結束後立即移除
   （不放進 agent 的 `ws` 也不寫回；但驗收期間執行的候選碼仍以使用者權限執行，理論上仍可透過 symlink 寫入 `node_modules`）。
   ⚠ 另 Python 路徑的**候選程式碼與測試框架仍在同一個 Python 行程內執行**，故無法防禦惡意候選碼在行程內 monkey-patch
-  測試框架或執行期狀態（若需要雙行程隔離，請用 `vacant_network.checks.run_python_check`）；另除跨生態系測試檔、
-  manifest（`package.json`／`Cargo.toml`／`go.mod`）與 `--protect` 指定檔外，未涵蓋之設定檔（如根目錄 `conftest.py`、
-  `pyproject.toml`、`jest.config.*`）與 agent 新建檔案皆不受保護。
-- 寫回安全邊界：寫回前先規劃與驗證所有增／改／刪操作再套用，先刪後增、透過同目錄暫存檔＋`os.replace` 原子置換
-  （不原地覆寫硬連結 inode、不把檔案寫進既有目錄）；符號連結、無法讀取的目錄／檔案、或與非空／受保護目錄衝突的路徑
-  一律跳過並記於 `changed["skipped"]`，不會寫到專案外面也不會誤刪原檔；若套用途中遇非預期錯誤會回滾，維持原專案不變。
+  測試框架或執行期狀態（若需要雙行程隔離，請用 `vacant_network.checks.run_python_check`）；跨生態系測試檔、測試設定檔
+  （含 `conftest.py`、`pytest.ini`、`pyproject.toml`、`jest.config.*`、`playwright.config.*`、`cypress.config.*`、
+  `wdio.conf.*`、`ava.config.*`、`.nycrc*`、`noxfile.py` 等）、manifest（`package.json`／`Cargo.toml`／`go.mod`／
+  `Makefile`）、`--check` 指令列點名的專案既有檔案與 `--protect` 指定檔受保護；測試所匯入的輔助模組與 `fixtures/`／
+  `testdata/`／`test_data/`／`__fixtures__/` 下被改動的檔案不阻擋，改以 `acceptance_dependencies_changed` 標記提醒審閱。
+- 寫回安全邊界：寫回前先相對「開始時的原專案快照」規劃與驗證所有增／改／刪操作再套用——只刪除開始時存在且交件嘗試刪除的檔，
+  執行期間新出現在原專案的檔絕不刪除（記於 `appeared_during_run`），開始後在原專案已被改動且交件嘗試亦欲改／刪的檔標為 `conflict`
+  並保留原專案版本；先刪後增、透過同目錄暫存檔＋`os.replace` 原子置換（不原地覆寫硬連結 inode、不把檔案寫進既有目錄）；
+  符號連結、無法讀取的目錄／檔案、或與非空／受保護目錄衝突的路徑一律跳過並記於 `changed["skipped"]`，不會寫到專案外面也不會誤刪原檔；
+  若套用途中遇非預期錯誤會回滾，維持原專案不變。
 - 容錯邊界：單次嘗試在快照或驗收時發生任何非預期錯誤，該次嘗試一律記為未通過（例如 `acceptance_error`），不中斷整個
   `run()`、也不遺失前面嘗試的成果。
 - 僅看退出碼的種類（`--check`、`npm`、`cargo`、`go`）沒有逐測試計數（`passed`／`run` 皆為 `None`）；若所有嘗試皆未通過，

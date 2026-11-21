@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.2 — unreleased (release candidate rc2, not published)
+## 0.9.2 — unreleased (release candidate rc5, not published)
 
 `vacant do <agent>` without a contract: run the agent on a copy, check with the project's own tests, start a fresh
 attempt if they fail (up to 3), write back the delivered attempt. This entry lists behaviour; it makes no claim
@@ -10,15 +10,61 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   stdlib runner; npm (`npm test`), cargo, go and `--check "<command>"` are supported. A project with 0 tests is run
   once and the message says nothing was checked.
 - **The check cannot be passed by editing it.** The acceptance command is pinned when the run starts. Test files of
-  every ecosystem (`*_test.py`, `test_*.py`, `*.test.*`, `*.spec.*`, `*_test.go`, `__tests__/`, `tests/`, `test/`)
-  and the manifest that defines the command (`package.json`, `Cargo.toml`, `go.mod`) are restored before each check
-  and never written back with the agent's edits; the message lists any the agent touched. `--protect PATH/GLOB`
-  adds files for `--check`. When nothing is protected the message says the agent could have edited the check.
-- **Runs in the project's environment.** Python acceptance uses `$VIRTUAL_ENV`, then `.venv/` or `venv/` in the
-  project, then `python3` on PATH. `node_modules` is not copied: the agent's copy and the check get a symlink to the project's own, so the agent can run `npm test` itself While an attempt runs — and while the check runs the candidate code — the project's `node_modules` is made read-only and its file list (size, mtime, inode) is compared before and after; if anything changed, that attempt is not accepted, the run stops, nothing is written back, and the message lists the changed paths. A baseline check runs on the
-  untouched project first; if the runner itself is missing or a declared dependency is not installed, Vacant says
-  so and stops before running the agent (exit 43). A test that imports a module the agent has yet to write is a
-  normal start, not an environment error.
+  every ecosystem (`*_test.py`, `test_*.py`, `*.test.*`, `*.spec.*`, `*_test.go`, `__tests__/`, `tests/`, `test/`),
+  test runner config files (`conftest.py`, `pytest.ini`, `pyproject.toml`, `jest.config.*`, `vitest.config.*`,
+  `playwright.config.*`, `cypress.config.*`, `cypress.json`, `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`,
+  `noxfile.py`, `.mocharc.*`, etc.), and the manifest that defines the command (`package.json`, `Cargo.toml`,
+  `go.mod`) are restored before each check and never written back with the agent's edits; the message lists any the
+  agent touched. `--protect PATH/GLOB` adds files for `--check`. When nothing is protected the message says the agent
+  could have edited the check.
+- **`--check` auto-protects manifests and referenced project files (rc5, A3/A4).** When `--check "<cmd>"` starts with
+  `npm`/`npx`/`yarn`/`pnpm`, `package.json` (and its `scripts.test`) is pinned and restored; `cargo` protects
+  `Cargo.toml`, `go` protects `go.mod`, and `make` protects `Makefile`/`makefile`/`GNUmakefile`. Any command-line
+  token naming an existing regular file inside the project (e.g. `verify.sh`, `run_checks.py`) is also restored before
+  the check, never written back, and listed in `protected (restored before check)`.
+- **Additional runner configs protected (rc5, A5).** Added `playwright.config.*`, `cypress.config.*`, `cypress.json`,
+  `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`, `noxfile.py`, and `.mocharc.*` to the protected test-config set
+  (restored before check and not written back).
+- **Flagged acceptance dependencies (rc5, A1/A2).** Files changed by the delivered attempt that are directly imported
+  by protected tests (Python AST `import`/`from` and JS/TS relative `require`/`import`) or live under `fixtures/`,
+  `testdata/`, `test_data/`, `__fixtures__/`, or test directories are not blocked, but are flagged in the summary
+  ("the check depends on these files and the agent changed them — review them yourself") and recorded in `result.json`
+  and the signed receipt as `acceptance_dependencies_changed`.
+- **Runs in the project's environment; isolated `node_modules` copy and content manifest (rc5, B3).** Python
+  acceptance uses `$VIRTUAL_ENV`, then `.venv/` or `venv/` in the project, then `python3` on PATH. The agent workspace
+  receives its own copy of `node_modules` (`cp --reflink=auto -a`, falling back to a plain copy) that is never written
+  back; acceptance runs against the untouched original `node_modules`. A content manifest (sha256, mode, type, symlink
+  target) of the original `node_modules` is recorded at start and re-verified before every acceptance and at the end
+  (catching same-size / restored-mtime writes via absolute paths); on mismatch, the attempt is not accepted, the run
+  stops, nothing is written back, and the changed paths are listed (exit 43). Copy and hash durations are reported in
+  `result.json` (`node_modules_copy_s`, `node_modules_hash_s`). A baseline check runs on the untouched project first;
+  if the runner itself is missing or a declared dependency is not installed, Vacant says so and stops before running
+  the agent (exit 43). A test that imports a module the agent has yet to write is a normal start, not an environment
+  error.
+- **Start-snapshot-relative write-back prevents concurrent data loss (rc5, D3).** Write-back now diffs against the
+  project snapshot taken at start: it deletes only paths that existed at start and were deleted by the delivered
+  attempt; files that appear in the project during the run are never deleted and are listed in `appeared_during_run`
+  (summary, `result.json`, receipt); paths modified or deleted by the delivered attempt whose live content differs from
+  the start snapshot are marked `conflict`, listed, and left with the user's version.
+- **Outside-project-change detection via `lstat` (rc5, B1).** An `lstat` listing of the original project (including
+  `.git/hooks/`, `.git/config`, and symlinks anywhere in the project, excluding the rest of `.git` and `node_modules`)
+  is taken before and after the run; any change outside the planned write-back is reported in the message,
+  `result.json`, and signed receipt (`outside_changes`), with a prominent warning when `.git/hooks/*` was added or
+  changed. Detection only (nothing reverted, exit codes unchanged).
+- **Detached process detection (rc5, B2).** The agent environment receives a unique `VACANT_RUN_ID` marker; on Linux,
+  `/proc/*/environ` is scanned after each attempt for surviving processes carrying that marker, recorded in
+  `detached_processes` (`result.json` and signed receipt) with a warning; elsewhere recorded as `null`. A write by a
+  detached process after delivery is not recorded.
+- **Non-UTF-8 filenames keep signed receipts intact (rc5, C1).** Surrogate-escaped paths are serialized consistently
+  via `os.fsencode(p).decode("utf-8", "backslashreplace")` with `non_utf8_paths: true` /
+  `path_encoding: "utf-8-backslashreplace"` across `result.json`, signed receipts, summaries, and `vacant audit`
+  (documented in `docs/AUDIT_RECORD_V1.md`), so runs with non-UTF-8 filenames no longer exit 2 or drop their signed
+  receipt.
+- **Read-only project and subdirectory safeguards (rc5, D1/D2).** If the project root is not writable, `vacant do`
+  refuses up front before running the agent (exit 43); otherwise the agent's workspace copy is made writable (`u+w`).
+  Non-zero agent exit codes and last stderr lines are shown on passing runs too. Summaries state which directory was
+  scanned and that parent directories were not, and report `tests found in <parent>; run from there to check them` when
+  a parent directory (up to the git root or 5 levels) contains detectable tests or test-runner config.
 - **Fails fast when the agent cannot start.** A named agent that is not on PATH, a `--cmd` binary that does not
   exist, or an agent that exits with an error within 30 s without changing anything stops the run with the agent's
   own last output (exit 43) instead of silently using up the remaining attempts.

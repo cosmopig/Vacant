@@ -290,7 +290,11 @@ the argument is not one of `list`, `show`, `export`, or a flag.
 3. **Same-account key boundary:** When signing keys live in plaintext under the same OS account
    as the agent, a hostile process in that account can read them. Stronger separation requires
    moving the receiver and signing keys to another OS account or machine.
-4. **Deduplication boundary:**
+4. **Detached processes (restart mode):** On Linux, `vacant do` scans `/proc/*/environ` at the end
+   of each attempt for live processes carrying its `VACANT_RUN_ID` marker and records them in
+   `detached_processes` (elsewhere `null`). A write by a detached process after delivery is not
+   recorded.
+5. **Deduplication boundary:**
    - **Restart mode (joined):** A `vacant do` restart run writes a signed `restart_receipt`
      into the project's trace chain (`chain.ndjson`) and a companion `result.json` under
      `$VACANT_WORK/restart-*`. These are joined by `run_id` (falling back to `(project_key,
