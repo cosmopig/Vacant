@@ -8158,9 +8158,16 @@ def summary(res: dict) -> str:
         d_att = res["attempts"][res["delivered_attempt"] - 1] if res.get("attempts") else {}
         where = next((a.get("workspace") for a in ([d_att] + list(res["attempts"]))
                       if a.get("config_ignored") and a.get("workspace")), None)
-        head += (f"\n  the agent added test configuration ({', '.join(_fmt_cfg(p) for p in cfg_new[:10])}"
-                 f"{' …' if len(cfg_new) > 10 else ''}); not used for the check and not written back"
-                 + (f" — still in the attempt workspace: {where}" if where else "") + ".")
+        shadow_new = [p for p in cfg_new if cfg_reasons.get(p, "").startswith("shadows module ")]
+        real_cfg_new = [p for p in cfg_new if not cfg_reasons.get(p, "").startswith("shadows module ")]
+        if real_cfg_new:
+            head += (f"\n  the agent added test configuration ({', '.join(_fmt_cfg(p) for p in real_cfg_new[:10])}"
+                     f"{' …' if len(real_cfg_new) > 10 else ''}); not used for the check and not written back"
+                     + (f" — still in the attempt workspace: {where}" if where else "") + ".")
+        if shadow_new:
+            head += (f"\n  left out of the check and not written back: {', '.join(_fmt_cfg(p) for p in shadow_new[:10])}"
+                     f"{' …' if len(shadow_new) > 10 else ''}"
+                     + (f" — still in the attempt workspace: {where}" if where else "") + ".")
     tam = sorted({t for a in res["attempts"] for t in a["tests_tampered"]})
     if tam:
         if all(_is_universal_test(t) or _is_test_config(t) for t in tam):

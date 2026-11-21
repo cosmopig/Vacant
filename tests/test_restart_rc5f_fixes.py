@@ -488,4 +488,56 @@ def test_audit_display_for_write_back_conflict_run(
     assert "write_back_conflict" in out_show
 
 
+# ============================================================================
+# Smaller item 3: Wording for shadowed modules vs real test-config files
+# ============================================================================
+
+def test_wording_shadow_module_not_called_test_configuration(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """A new file excluded for shadowing a module uses `left out of the check and not written back:`
+    (not `added test configuration`); real test-config files keep `added test configuration`."""
+    proj = tmp_path / "proj"
+    (proj / "tests").mkdir(parents=True)
+    (proj / "tests" / "__init__.py").write_text("", encoding="utf-8")
+    (proj / "tests" / "test_x.py").write_text(
+        "import unittest\nclass T(unittest.TestCase):\n    def test_f(self): self.assertEqual(1, 2)\n",
+        encoding="utf-8",
+    )
+    # 1. Shadowing module only
+    agent_s = _write_agent(
+        tmp_path,
+        "import pathlib\npathlib.Path('unittest.py').write_text('import os\\nos._exit(0)\\n')\n",
+        name="ag_shadow.py",
+    )
+    rc_s = _run_cli_do(
+        monkeypatch, proj, agent_s, attempts=1,
+        extra_args=["--check", f"{sys.executable} -m unittest discover -s tests -t ."],
+        vhome=tmp_path / "vh_w1", vwork=tmp_path / "vw_w1",
+    )
+    out_s = capsys.readouterr().out
+    assert rc_s == adapters_cli.EXIT["reject"]
+    assert "left out of the check and not written back: unittest.py (shadows module 'unittest')" in out_s
+    assert "added test configuration" not in out_s
+
+    # 2. Both a real test-config (conftest.py) and a shadowed module (unittest.py)
+    agent_both = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "pathlib.Path('conftest.py').write_text('# hook\\n')\n"
+        "pathlib.Path('unittest.py').write_text('import os\\nos._exit(0)\\n')\n",
+        name="ag_both.py",
+    )
+    rc_b = _run_cli_do(
+        monkeypatch, proj, agent_both, attempts=1,
+        extra_args=["--check", f"{sys.executable} -m unittest discover -s tests -t ."],
+        vhome=tmp_path / "vh_w2", vwork=tmp_path / "vw_w2",
+    )
+    out_b = capsys.readouterr().out
+    assert rc_b == adapters_cli.EXIT["reject"]
+    assert "the agent added test configuration (conftest.py); not used for the check and not written back" in out_b
+    assert "left out of the check and not written back: unittest.py (shadows module 'unittest')" in out_b
+
+
+
 
