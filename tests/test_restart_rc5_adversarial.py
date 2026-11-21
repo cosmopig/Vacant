@@ -241,7 +241,12 @@ def test_a4_check_script_auto_protected(tmp_path, monkeypatch, capsys):
     assert (proj2 / "run_checks.py").read_text(encoding="utf-8") == orig_py
     assert "WARNING: this check runs files in the project that the agent could change" in out2
     assert "protected (restored before check):" not in out2
-    rj2 = _latest_result_json(tmp_path)
+    assert "partially restored before check (incomplete): run_checks.py" in out2
+    rjs2 = [
+        json.loads(p.read_text(encoding="utf-8"))
+        for p in (tmp_path / "vwork").glob("restart-*/result.json")
+    ]
+    rj2 = next(r for r in rjs2 if r.get("project") == str(proj2.resolve()))
     assert "run_checks.py" in rj2["protected"]
     assert rj2["acceptance_integrity"] == "unverified"
 
