@@ -3254,38 +3254,121 @@ def _nm_root(project: pathlib.Path) -> pathlib.Path | None:
         return None
 
 
-def _nm_manifest(root: pathlib.Path) -> dict[str, tuple]:
-    """node_modules 的內容清單（不跟隨內部 symlink）：相對路徑 → (型別, mode, sha256 或 symlink 目標)。
-    須於原權限狀態下（`_nm_make_readonly` 前、`_nm_restore_modes` 後）呼叫。"""
-    out: dict[str, tuple] = {}
-    stack = [root]
-    while stack:
-        d = stack.pop()
+_NM_CHEAP_SHA_MAX_FILES = 500
+_NM_CHEAP_SHA_MAX_BYTES = 5 * 1024 * 1024
+
+
+def _is_within_dir(path: pathlib.Path, parent: pathlib.Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def _lstat_tuple(full: str | os.PathLike[str], st: os.stat_result) -> tuple:
+    """lstat 摘要：(type, size, mtime_ns, ctime_ns, ino, mode, symlink_target)。
+    一般使用者無法偽造 ctime_ns，故同長度覆寫並還原 mtime 仍會改變 ctime_ns。"""
+    mode = stat.S_IMODE(st.st_mode)
+    if stat.S_ISLNK(st.st_mode):
         try:
-            it = list(os.scandir(d))
+            tgt = os.readlink(full)
         except OSError:
-            out[pathlib.Path(d).relative_to(root).as_posix() + "/"] = ("unreadable",)
-            continue
+            tgt = None
+        return ("l", st.st_size, st.st_mtime_ns, st.st_ctime_ns, st.st_ino, mode, tgt)
+    if stat.S_ISDIR(st.st_mode):
+        return ("d", st.st_size, st.st_mtime_ns, st.st_ctime_ns, st.st_ino, mode, None)
+    if stat.S_ISREG(st.st_mode):
+        return ("f", st.st_size, st.st_mtime_ns, st.st_ctime_ns, st.st_ino, mode, None)
+    return ("o", st.st_size, st.st_mtime_ns, st.st_ctime_ns, st.st_ino, mode, None)
+
+
+def _nm_manifest(root: pathlib.Path) -> dict[str, tuple]:
+    """node_modules 的 lstat 清單：相對路徑 → (type, size, mtime_ns, ctime_ns, ino, mode, symlink_target)。
+    對於指向 node_modules 外部的 symlink，追蹤並納入其目標檔案（含循環保護），
+    使直接寫入 symlink 目標的逃逸會被偵測為 node_modules_modified。"""
+    out: dict[str, tuple] = {}
+    root_res = root.resolve()
+    visited_dirs: set[tuple[int, int]] = set()
+    try:
+        rst = os.stat(root_res)
+        visited_dirs.add((rst.st_dev, rst.st_ino))
+    except OSError:
+        pass
+
+    def _walk_dir(cur_dir: pathlib.Path, rel_prefix: str) -> None:
+        try:
+            it = list(os.scandir(cur_dir))
+        except OSError:
+            out[(rel_prefix + "/") if rel_prefix else "./"] = ("unreadable",)
+            return
         for e in it:
             try:
                 st = e.stat(follow_symlinks=False)
             except OSError:
                 continue
-            rel = pathlib.Path(e.path).relative_to(root).as_posix()
-            mode = stat.S_IMODE(st.st_mode)
+            rel = f"{rel_prefix}/{e.name}" if rel_prefix else e.name
             if stat.S_ISLNK(st.st_mode):
+                out[rel] = _lstat_tuple(e.path, st)
                 try:
-                    tgt = os.readlink(e.path)
+                    resolved = pathlib.Path(e.path).resolve()
                 except OSError:
-                    tgt = None
-                out[rel] = ("l", mode, tgt)
+                    continue
+                if not _is_within_dir(resolved, root_res):
+                    try:
+                        tst = resolved.stat()
+                    except OSError:
+                        continue
+                    if stat.S_ISREG(tst.st_mode):
+                        out[f"{rel} -> target"] = _lstat_tuple(resolved, tst)
+                    elif stat.S_ISDIR(tst.st_mode):
+                        dkey = (tst.st_dev, tst.st_ino)
+                        if dkey not in visited_dirs:
+                            visited_dirs.add(dkey)
+                            out[rel + "/"] = _lstat_tuple(resolved, tst)
+                            _walk_dir(resolved, rel)
             elif stat.S_ISDIR(st.st_mode):
-                out[rel + "/"] = ("d", mode, None)
-                stack.append(e.path)
-            elif stat.S_ISREG(st.st_mode):
-                out[rel] = ("f", mode, _sha256_file(pathlib.Path(e.path)))
+                dkey = (st.st_dev, st.st_ino)
+                out[rel + "/"] = _lstat_tuple(e.path, st)
+                if dkey not in visited_dirs:
+                    visited_dirs.add(dkey)
+                    _walk_dir(pathlib.Path(e.path), rel)
             else:
-                out[rel] = ("o", mode, st.st_mode)
+                out[rel] = _lstat_tuple(e.path, st)
+
+    _walk_dir(root_res, "")
+    return out
+
+
+def _nm_cheap_sha_manifest(root: pathlib.Path, lstat_manifest: dict[str, tuple]) -> dict[str, str | None] | None:
+    """只有在 node_modules 很小（<=500 檔且 <=5MB）時做一次低成本 sha256 校驗，否則回傳 None 略過。"""
+    reg_entries: list[tuple[str, int]] = []
+    total_bytes = 0
+    for rel, tup in lstat_manifest.items():
+        if len(tup) >= 2 and tup[0] == "f" and " -> " not in rel:
+            reg_entries.append((rel, tup[1]))
+            total_bytes += tup[1]
+            if len(reg_entries) > _NM_CHEAP_SHA_MAX_FILES or total_bytes > _NM_CHEAP_SHA_MAX_BYTES:
+                return None
+    root_res = root.resolve()
+    out: dict[str, str | None] = {}
+    for rel, _ in reg_entries:
+        p = root_res / rel
+        try:
+            # 允許透過外部 symlink 走進目標檔
+            if p.is_file():
+                h = hashlib.sha256()
+                with p.open("rb") as f:
+                    while True:
+                        chunk = f.read(_CHUNK_SIZE)
+                        if not chunk:
+                            break
+                        h.update(chunk)
+                out[rel] = h.hexdigest()
+            else:
+                out[rel] = None
+        except OSError:
+            out[rel] = None
     return out
 
 
@@ -3294,54 +3377,183 @@ def _nm_diff(a: dict[str, tuple], b: dict[str, tuple]) -> list[str]:
     return sorted(k for k in keys if a.get(k) != b.get(k))
 
 
-def _nm_make_readonly(root: pathlib.Path) -> list[tuple[str, int]]:
-    """把 node_modules（含根目錄）所有項目的寫入位元拿掉；回傳 (路徑, 原 mode) 供還原。不跟隨 symlink。"""
-    changed: list[tuple[str, int]] = []
-    paths = [str(root)]
-    for dp, dns, fns in os.walk(root, followlinks=False):
-        paths.extend(os.path.join(dp, n) for n in dns + fns)
-    for pth in paths:
+def _nm_sha_diff(a: dict[str, str | None], b: dict[str, str | None]) -> list[str]:
+    keys = set(a) | set(b)
+    return sorted(k for k in keys if a.get(k) != b.get(k))
+
+
+def _copy_deref_tree(src_dir: pathlib.Path, dst_dir: pathlib.Path, visited: set[tuple[int, int]]) -> None:
+    """將外部 symlink 目標目錄複製為真實目錄（展開內部指到外部的 symlink，附循環保護）。"""
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        entries = list(os.scandir(src_dir))
+    except OSError:
+        return
+    for e in entries:
+        src_p = pathlib.Path(e.path)
+        dst_p = dst_dir / e.name
         try:
-            st = os.lstat(pth)
+            lst = e.stat(follow_symlinks=False)
         except OSError:
             continue
-        if stat.S_ISLNK(st.st_mode):
-            continue
-        mode = stat.S_IMODE(st.st_mode)
-        ro = mode & ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
-        if ro != mode:
+        if stat.S_ISLNK(lst.st_mode):
             try:
-                os.chmod(pth, ro)
-                changed.append((pth, mode))
+                tgt = src_p.resolve()
+                tst = tgt.stat()
+            except OSError:
+                continue
+            if stat.S_ISDIR(tst.st_mode):
+                dkey = (tst.st_dev, tst.st_ino)
+                if dkey not in visited:
+                    visited.add(dkey)
+                    _copy_deref_tree(tgt, dst_p, visited)
+            elif stat.S_ISREG(tst.st_mode):
+                try:
+                    shutil.copy2(tgt, dst_p)
+                except OSError:
+                    pass
+        elif stat.S_ISDIR(lst.st_mode):
+            dkey = (lst.st_dev, lst.st_ino)
+            if dkey not in visited:
+                visited.add(dkey)
+                _copy_deref_tree(src_p, dst_p, visited)
+        elif stat.S_ISREG(lst.st_mode):
+            try:
+                shutil.copy2(src_p, dst_p)
             except OSError:
                 pass
-    return changed
 
 
-def _nm_restore_modes(changed: list[tuple[str, int]]) -> None:
-    for pth, mode in changed:
+def _dereference_external_symlinks(nm_dst: pathlib.Path, nm_orig: pathlib.Path) -> None:
+    """在 agent 的 node_modules 副本中，把任何解析目標落在副本 node_modules 之外的 symlink
+    換成目標的真實副本（或移除懸空外部 symlink），防止 agent 透過 symlink 寫回原專案。"""
+    dst_res = nm_dst.resolve()
+    orig_res = nm_orig.resolve()
+    stack: list[pathlib.Path] = [dst_res]
+    while stack:
+        cur = stack.pop()
         try:
-            os.chmod(pth, mode)
+            entries = list(os.scandir(cur))
         except OSError:
-            pass
+            continue
+        for e in entries:
+            p = pathlib.Path(e.path)
+            try:
+                st = e.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISLNK(st.st_mode):
+                try:
+                    raw_tgt = os.readlink(p)
+                except OSError:
+                    continue
+                if os.path.isabs(raw_tgt):
+                    resolved = pathlib.Path(raw_tgt).resolve()
+                else:
+                    resolved = (p.parent / raw_tgt).resolve()
+                if _is_within_dir(resolved, dst_res):
+                    continue
+                # 目標落在副本 node_modules 之外：優先從原專案對應 symlink 解析真實來源
+                rel_from_dst = p.relative_to(dst_res)
+                orig_cand = orig_res / rel_from_dst
+                src_target: pathlib.Path | None = None
+                try:
+                    if orig_cand.is_symlink() or orig_cand.exists():
+                        oc_res = orig_cand.resolve()
+                        if oc_res.exists():
+                            src_target = oc_res
+                except OSError:
+                    pass
+                if src_target is None and resolved.exists():
+                    src_target = resolved
+                try:
+                    p.unlink()
+                except OSError:
+                    continue
+                if src_target is None:
+                    continue
+                try:
+                    tst = src_target.stat()
+                except OSError:
+                    continue
+                if stat.S_ISDIR(tst.st_mode):
+                    visited = {(tst.st_dev, tst.st_ino)}
+                    _copy_deref_tree(src_target, p, visited)
+                    _make_tree_writable(p)
+                elif stat.S_ISREG(tst.st_mode):
+                    try:
+                        shutil.copy2(src_target, p)
+                        os.chmod(p, stat.S_IMODE(p.lstat().st_mode) | stat.S_IWUSR)
+                    except OSError:
+                        pass
+            elif stat.S_ISDIR(st.st_mode):
+                stack.append(p)
 
 
-def _copy_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> float:
+def _find_first_reg_file(root: pathlib.Path) -> pathlib.Path | None:
+    stack = [root]
+    while stack:
+        cur = stack.pop()
+        try:
+            entries = list(os.scandir(cur))
+        except OSError:
+            continue
+        for e in entries:
+            try:
+                st = e.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISREG(st.st_mode):
+                return pathlib.Path(e.path)
+            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                stack.append(pathlib.Path(e.path))
+    return None
+
+
+def _copy_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> tuple[float, bool]:
     """給 agent 工作區一份獨立的 node_modules 副本（絕不提供指向原專案 node_modules 的可寫路徑）。
-    優先嘗試 `cp --reflink=auto -a`，失敗則退回 `shutil.copytree(..., symlinks=True)`。
-    快照與寫回仍跳過 node_modules（COPY_SKIP），故副本絕不寫回。回傳複製耗時（秒）。"""
+    先以單檔探測 `cp --reflink=always` 是否支援 CoW reflink，不支援時退回一般複製並回傳 fallback=True。
+    複製後將任何指向副本 node_modules 外部的 symlink 展開為真實副本。
+    回傳 `(複製耗時秒數, reflink_fallback)`。"""
     orig = project / "node_modules"
     dst = ws / "node_modules"
     if not orig.is_dir() or dst.exists() or dst.is_symlink():
-        return 0.0
+        return 0.0, False
     src = orig.resolve()
     t0 = time.monotonic()
     copied = False
+    reflink_fallback = False
     cp_bin = shutil.which("cp")
     if cp_bin:
+        probe_file = _find_first_reg_file(src)
+        reflink_ok = False
+        if probe_file is not None:
+            probe_dst = ws / f".vacant-reflink-probe-{secrets.token_hex(4)}"
+            try:
+                pr = subprocess.run(
+                    [cp_bin, "--reflink=always", str(probe_file), str(probe_dst)],
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=10.0,
+                )
+                reflink_ok = (pr.returncode == 0 and probe_dst.is_file())
+            except (OSError, subprocess.SubprocessError):
+                reflink_ok = False
+            finally:
+                try:
+                    probe_dst.unlink(missing_ok=True)
+                except OSError:
+                    pass
+        else:
+            reflink_ok = True  # 無一般檔案，不需警示 fallback
+
+        if not reflink_ok:
+            reflink_fallback = True
+        cp_args = [cp_bin, "--reflink=always", "-a", str(src), str(dst)] if reflink_ok else [cp_bin, "-a", str(src), str(dst)]
         try:
             cp = subprocess.run(
-                [cp_bin, "--reflink=auto", "-a", str(src), str(dst)],
+                cp_args,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -3351,11 +3563,19 @@ def _copy_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> flo
                 copied = True
             else:
                 _rmtree_force(dst)
+                if reflink_ok:
+                    reflink_fallback = True
         except (OSError, subprocess.SubprocessError):
             _rmtree_force(dst)
+            if reflink_ok:
+                reflink_fallback = True
+    else:
+        reflink_fallback = True
     if not copied:
         shutil.copytree(src, dst, symlinks=True)
-    return time.monotonic() - t0
+    _dereference_external_symlinks(dst, src)
+    _make_tree_writable(dst)
+    return time.monotonic() - t0, reflink_fallback
 
 
 def _agent_error_tail(log_dir: pathlib.Path, r: dict[str, Any], max_lines: int = 8) -> str:
@@ -3461,6 +3681,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "outside_changes": [],
             "acceptance_dependencies_changed": [],
             "node_modules_changed": [],
+            "node_modules_manifest_s": 0.0,
+            "copy_s": 0.0,
             "node_modules_copy_s": 0.0,
             "node_modules_hash_s": 0.0,
             "max_attempts": max_attempts,
@@ -3497,9 +3719,14 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     baseline_rec: dict[str, Any] | None = None
     nm_root = _nm_root(project)
     nm_start: dict[str, tuple] | None = None
+    nm_sha_start: dict[str, str | None] | None = None
     nm_changed: list[str] = []
     nm_copy_s = 0.0
+    copy_s = 0.0
+    nm_manifest_s = 0.0
     nm_hash_s = 0.0
+    nm_reflink_fallback = False
+    nm_reflink_warned = False
     baseline_error: str | None = None
     if spec.reason is not None:
         baseline_rec = {
@@ -3547,6 +3774,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "baseline_error": baseline_error,
             "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
             "node_modules_changed": [],
+            "node_modules_manifest_s": 0.0,
+            "copy_s": 0.0,
             "node_modules_copy_s": 0.0,
             "node_modules_hash_s": 0.0,
             "appeared_during_run": [],
@@ -3589,11 +3818,14 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     # 開始時的原專案檔案雜湊快照（D3）與 lstat 清單（B1，含 .git/hooks、.git/config 與任意 symlink）
     start_hashes = _scan_file_hashes(project)
     orig_lstat_start = _project_lstat_listing(project)
-    # 開始時的 node_modules 內容清單（sha256＋mode＋type＋symlink 目標；基線之後拍）
+    # 開始時的 node_modules lstat 清單（含外部 symlink 目標；很小時另做一次低成本 sha256 校驗）
     if nm_root is not None:
         t_nm = time.monotonic()
         nm_start = _nm_manifest(nm_root)
-        nm_hash_s += time.monotonic() - t_nm
+        nm_manifest_s += time.monotonic() - t_nm
+        t_sh = time.monotonic()
+        nm_sha_start = _nm_cheap_sha_manifest(nm_root, nm_start)
+        nm_hash_s += time.monotonic() - t_sh
     while len(attempts) < max_attempts:
         remaining = budget_s - (time.monotonic() - t0) - reserve
         if attempts and remaining < min_attempt_s:
@@ -3602,9 +3834,17 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         k = len(attempts) + 1
         attempt_dir = run_dir / f"attempt_{k}"
         ws = attempt_dir / "w"
+        t_cp = time.monotonic()
         shutil.copytree(project, ws, symlinks=True, ignore=_copytree_ignore(skip_abs))
         _make_tree_writable(ws)
-        nm_copy_s += _copy_node_modules_for_agent(project, ws)
+        nm_c_s, fb = _copy_node_modules_for_agent(project, ws)
+        nm_copy_s += nm_c_s
+        copy_s += time.monotonic() - t_cp
+        if fb:
+            nm_reflink_fallback = True
+            if not nm_reflink_warned:
+                nm_reflink_warned = True
+                say("warning: node_modules reflink copy is not supported on this filesystem; fell back to plain copy")
         launch = build(prompt, ws)
         launch_meta.append((list(launch.argv), dict(launch.env)))
         attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
@@ -3624,8 +3864,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         stderr_tail = _agent_error_tail(attempt_dir / "logs", r, max_lines=5) if r["rc"] not in (0, None) else None
         if nm_start is not None:
             t_nm = time.monotonic()
-            nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
-            nm_hash_s += time.monotonic() - t_nm
+            nm_cur = _nm_manifest(nm_root)
+            nm_changed = _nm_diff(nm_start, nm_cur)
+            nm_manifest_s += time.monotonic() - t_nm
+            if not nm_changed and nm_sha_start is not None:
+                t_sh = time.monotonic()
+                nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
+                if nm_sha_cur is not None:
+                    nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
+                nm_hash_s += time.monotonic() - t_sh
             if nm_changed:
                 say(f"attempt {k}: the agent changed the project's node_modules ({len(nm_changed)} path(s), e.g. "
                     f"{', '.join(nm_changed[:3])}); not accepted, stopping, nothing written back")
@@ -3655,8 +3902,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 )
                 if nm_start is not None:
                     t_nm = time.monotonic()
-                    nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
-                    nm_hash_s += time.monotonic() - t_nm
+                    nm_cur = _nm_manifest(nm_root)
+                    nm_changed = _nm_diff(nm_start, nm_cur)
+                    nm_manifest_s += time.monotonic() - t_nm
+                    if not nm_changed and nm_sha_start is not None:
+                        t_sh = time.monotonic()
+                        nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
+                        if nm_sha_cur is not None:
+                            nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
+                        nm_hash_s += time.monotonic() - t_sh
                     if nm_changed:
                         acc = {**acc, "accept": False, "status": "node_modules_modified",
                                "first_problem": "node_modules changed during acceptance: " + ", ".join(nm_changed[:20])}
@@ -3735,8 +3989,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     if nm_start is not None and not nm_changed:
         t_nm = time.monotonic()
-        nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
-        nm_hash_s += time.monotonic() - t_nm
+        nm_cur = _nm_manifest(nm_root)
+        nm_changed = _nm_diff(nm_start, nm_cur)
+        nm_manifest_s += time.monotonic() - t_nm
+        if not nm_changed and nm_sha_start is not None:
+            t_sh = time.monotonic()
+            nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
+            if nm_sha_cur is not None:
+                nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
+            nm_hash_s += time.monotonic() - t_sh
         if nm_changed and attempts:
             attempts[-1]["accept"] = False
             attempts[-1]["status"] = "node_modules_modified"
@@ -3791,8 +4052,11 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "agent_error": agent_error,
         "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
         "node_modules_changed": nm_changed[:200],
+        "node_modules_manifest_s": round(nm_manifest_s, 3),
+        "copy_s": round(copy_s, 3),
         "node_modules_copy_s": round(nm_copy_s, 3),
         "node_modules_hash_s": round(nm_hash_s, 3),
+        "node_modules_reflink_fallback": nm_reflink_fallback,
         "appeared_during_run": appeared_during_run,
         "conflicts": conflicts,
         "outside_changes": outside_changes,
