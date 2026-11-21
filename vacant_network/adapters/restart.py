@@ -2570,13 +2570,16 @@ def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
 
 def _py_find_dynamic_imports(raw: bytes, label: str) -> list[str]:
     """Detect dynamic import/execution constructs in Python source:
-    importlib.import_module, importlib.util.spec_from_file_location, __import__, exec, eval, runpy."""
+    importlib.import_module, importlib.util.spec_from_file_location, __import__,
+    exec, eval, runpy, and getattr(importlib, ...)."""
     try:
         tree = ast.parse(raw, filename=label)
     except SyntaxError:
         return []
     hits: set[str] = set()
     builtins_aliases: set[str] = {"builtins"}
+    importlib_aliases: set[str] = {"importlib"}
+    getattr_aliases: set[str] = {"getattr"}
     dyn_name_map: dict[str, str] = {
         "__import__": "__import__",
         "exec": "exec",
@@ -2591,6 +2594,8 @@ def _py_find_dynamic_imports(raw: bytes, label: str) -> list[str]:
                     hits.add("runpy")
                 elif top == "builtins" and alias.name == "builtins":
                     builtins_aliases.add(as_name)
+                elif top == "importlib":
+                    importlib_aliases.add(as_name)
         elif isinstance(node, ast.ImportFrom):
             mod = node.module or ""
             top = mod.split(".", 1)[0]
@@ -2602,6 +2607,8 @@ def _py_find_dynamic_imports(raw: bytes, label: str) -> list[str]:
                         hits.add("importlib.import_module")
                         if alias.name == "import_module":
                             dyn_name_map[alias.asname or "import_module"] = "importlib.import_module"
+                    elif alias.name in ("util", "machinery", "abc"):
+                        importlib_aliases.add(alias.asname or alias.name)
             elif mod == "importlib.util":
                 for alias in node.names:
                     if alias.name in ("spec_from_file_location", "*"):
@@ -2613,6 +2620,8 @@ def _py_find_dynamic_imports(raw: bytes, label: str) -> list[str]:
                     if alias.name in ("__import__", "exec", "eval"):
                         hits.add(alias.name)
                         dyn_name_map[alias.asname or alias.name] = alias.name
+                    elif alias.name == "getattr":
+                        getattr_aliases.add(alias.asname or "getattr")
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute):
             if node.attr == "import_module":
@@ -2629,7 +2638,94 @@ def _py_find_dynamic_imports(raw: bytes, label: str) -> list[str]:
             fn = node.func
             if isinstance(fn, ast.Name) and fn.id in dyn_name_map:
                 hits.add(dyn_name_map[fn.id])
+            is_getattr = (
+                (isinstance(fn, ast.Name) and fn.id in getattr_aliases)
+                or (isinstance(fn, ast.Attribute) and fn.attr == "getattr"
+                    and isinstance(fn.value, ast.Name) and fn.value.id in builtins_aliases)
+            )
+            if is_getattr and len(node.args) >= 2:
+                cur = node.args[0]
+                while isinstance(cur, ast.Attribute):
+                    cur = cur.value
+                if isinstance(cur, ast.Name) and cur.id in importlib_aliases:
+                    hits.add("getattr(importlib)")
+                elif isinstance(cur, ast.Name) and cur.id in builtins_aliases:
+                    attr_arg = node.args[1]
+                    if (not (isinstance(attr_arg, ast.Constant) and isinstance(attr_arg.value, str))
+                            or attr_arg.value in ("__import__", "exec", "eval")):
+                        hits.add("getattr(builtins)")
     return sorted(hits)
+
+
+def _collect_py_dep_modules_for_dynamic_scan(
+    source_root: pathlib.Path,
+    protected: Sequence[str],
+    known_files: set[str],
+    *,
+    originals: dict[str, bytes] | None = None,
+    start_files: set[str] | frozenset[str] | None = None,
+) -> list[str]:
+    """Collect Python dependency modules reached from protected Python files up to depth 2
+    (mirroring `_find_acceptance_dependencies`), excluding each file's single direct
+    non-test import (the module under test itself)."""
+    protected_set = set(protected)
+    orig_map = originals or {}
+    dir_roots = _FIXTURE_DIRS | _UNIVERSAL_TEST_DIRS
+
+    def _in_special_dir(rel: str) -> bool:
+        parts = pathlib.PurePosixPath(rel).parts
+        return any(d in dir_roots for d in parts[:-1])
+
+    reached: set[str] = set()
+    for test_rel in sorted(protected_set):
+        is_py = test_rel.endswith(".py")
+        raw = orig_map.get(test_rel)
+        if raw is None:
+            raw = _read_source_bytes(test_rel, source_root, {})
+        if raw is None:
+            continue
+        if not is_py:
+            first_line = raw.splitlines()[0].decode("utf-8", errors="replace").strip() if raw else ""
+            if not (first_line.startswith("#!") and "python" in first_line.lower()):
+                continue
+
+        d1, d1_inits = _extract_py_imports_and_inits(
+            raw, test_rel, known_files, start_files=start_files
+        )
+        non_test_d1 = {
+            m for m in d1
+            if m not in protected_set and not _in_special_dir(m) and m not in d1_inits
+        }
+        sole_mut = next(iter(non_test_d1)) if len(non_test_d1) == 1 else None
+
+        for m1 in (d1 | d1_inits):
+            if not m1.endswith(".py"):
+                continue
+            if m1 not in protected_set and m1 != sole_mut:
+                reached.add(m1)
+
+        for m1 in (d1 | d1_inits):
+            if not m1.endswith(".py"):
+                continue
+            m1_raw = _read_source_bytes(m1, source_root, orig_map)
+            if m1_raw is None:
+                continue
+            is_brand_new_sole_mut = (
+                start_files is not None
+                and sole_mut is not None
+                and m1 == sole_mut
+                and m1 not in start_files
+            )
+            m2_direct, m2_inits = _extract_py_imports_and_inits(
+                m1_raw, m1, known_files, start_files=start_files
+            )
+            for m2 in (m2_direct | m2_inits):
+                if not m2.endswith(".py") or m2 in protected_set or m2 == sole_mut:
+                    continue
+                if is_brand_new_sole_mut and m2 not in start_files:
+                    continue
+                reached.add(m2)
+    return sorted(reached)
 
 
 def _scan_protected_dynamic_imports(
@@ -2638,26 +2734,47 @@ def _scan_protected_dynamic_imports(
     *,
     originals: dict[str, bytes] | None = None,
     existing_reasons: Sequence[str] = (),
+    known_files: set[str] | None = None,
+    start_files: set[str] | frozenset[str] | None = None,
 ) -> list[str]:
-    """Scan protected Python test files / kept-fixed scripts for dynamic imports/exec."""
+    """Scan protected Python test files / kept-fixed scripts and reached Python dependency
+    modules (up to depth 2, excluding sole direct non-test MUT) for dynamic imports/exec."""
     out: list[str] = []
     orig_map = originals or {}
-    for rel in sorted(protected):
+    seen: set[str] = set()
+
+    def _scan_one(rel: str, *, allow_shebang: bool) -> None:
+        if rel in seen:
+            return
+        seen.add(rel)
         is_py = rel.endswith(".py")
         raw = orig_map.get(rel)
         if raw is None:
             raw = _read_source_bytes(rel, project, {})
         if raw is None:
-            continue
+            return
         if not is_py:
+            if not allow_shebang:
+                return
             first_line = raw.splitlines()[0].decode("utf-8", errors="replace").strip() if raw else ""
             if not (first_line.startswith("#!") and "python" in first_line.lower()):
-                continue
-        if any(r.startswith("dynamic-import:") and rel in r for r in existing_reasons):
-            continue
+                return
+        reason = f"dynamic-import:{rel}"
+        if reason in existing_reasons or any(r.startswith("dynamic-import:") and rel in r for r in existing_reasons):
+            return
         hits = _py_find_dynamic_imports(raw, rel)
         if hits:
-            out.append(f"dynamic-import: {rel} uses {', '.join(hits)}")
+            out.append(reason)
+
+    for rel in sorted(protected):
+        _scan_one(rel, allow_shebang=True)
+    if known_files:
+        dep_mods = _collect_py_dep_modules_for_dynamic_scan(
+            project, protected, known_files,
+            originals=orig_map, start_files=start_files,
+        )
+        for rel in dep_mods:
+            _scan_one(rel, allow_shebang=False)
     return out
 
 
@@ -5497,7 +5614,8 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             if "no project files kept fixed" not in integ_reasons:
                 integ_reasons.append("no project files kept fixed")
         dyn_reasons = _scan_protected_dynamic_imports(
-            project, prot, originals=originals, existing_reasons=integ_reasons
+            project, prot, originals=originals, existing_reasons=integ_reasons,
+            known_files=files_set, start_files=start_files_fs,
         )
         if dyn_reasons:
             integ = "untraced"
@@ -5544,7 +5662,10 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         def _auto_py_integrity(prot_files: Sequence[str]) -> tuple[str, tuple[str, ...]]:
             if not prot_files:
                 return "untraced", ("no project files kept fixed",)
-            dyn = _scan_protected_dynamic_imports(project, prot_files, originals=py_orig)
+            dyn = _scan_protected_dynamic_imports(
+                project, prot_files, originals=py_orig,
+                known_files=set(all_files), start_files=start_files_fs,
+            )
             if dyn:
                 return "untraced", tuple(dyn)
             return "traced", ()
@@ -5612,7 +5733,8 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 if "no project files kept fixed" not in integ_reasons:
                     integ_reasons.append("no project files kept fixed")
             npm_dyn = _scan_protected_dynamic_imports(
-                project, prot, originals=originals, existing_reasons=integ_reasons
+                project, prot, originals=originals, existing_reasons=integ_reasons,
+                known_files=set(all_files), start_files=start_files_fs,
             )
             if npm_dyn:
                 integ = "untraced"
@@ -7785,18 +7907,37 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             extra_unfixed=spec.unfixed_deps,
             start_files=set(start_hashes),
         )
+        eff_spec = spec
+        if spec.kind != "none" and spec.integrity is not None:
+            post_dyn = _scan_protected_dynamic_imports(
+                dep_src_root, sorted(protected),
+                originals=originals,
+                existing_reasons=spec.integrity_reasons,
+                known_files=known_files,
+                start_files=set(start_hashes),
+            )
+            if post_dyn:
+                eff_reasons = list(spec.integrity_reasons)
+                for dr in post_dyn:
+                    if dr not in eff_reasons:
+                        eff_reasons.append(dr)
+                eff_spec = dataclasses.replace(
+                    spec,
+                    integrity="untraced",
+                    integrity_reasons=tuple(eff_reasons),
+                )
         not_delivered = list(snaps[d].copy_skip_created) if (0 <= d < len(snaps) and snaps[d] is not None) else []
 
         only_uncheckable = len(attempts) == 1 and attempts[0]["accept"] is None
         res = {
             "mode": "restart",
             "project": str(project),
-            "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
+            "tests": py_tests if eff_spec.kind.startswith("python_") else sorted(originals),
             "protected": sorted(protected),
-            "acceptance": spec.to_dict(),
-            "acceptance_integrity": spec.integrity,
-            "acceptance_integrity_reasons": list(spec.integrity_reasons),
-            "interpreter": spec.interpreter,
+            "acceptance": eff_spec.to_dict(),
+            "acceptance_integrity": eff_spec.integrity,
+            "acceptance_integrity_reasons": list(eff_spec.integrity_reasons),
+            "interpreter": eff_spec.interpreter,
             "baseline": baseline_rec,
             "baseline_error": None,
             "agent_error": agent_error,
@@ -7835,7 +7976,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             prompt=prompt,
             agent=agent,
             launch_meta=launch_meta,
-            spec=spec,
+            spec=eff_spec,
             protected=protected,
             attempts=attempts,
             snaps=snaps,

@@ -328,3 +328,208 @@ def test_n1_v3_tests_package_with_root_calendar_stdlib_clash(
             assert rj["accepted"] is False
             assert rj["attempts"][0]["status"] == "ok"
             assert rj["attempts"][0]["accept"] is False
+
+
+# ============================================================================
+# N2: Dynamic-import scan on reached depth-1 & depth-2 helpers (not sole MUT)
+# ============================================================================
+
+def test_n2_direct_helper_dynamic_import_oracle_repro_is_untraced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """N2 exact repro: test does `import impl, helpers`; helpers.py does
+    `importlib.import_module("ora" + "cle")`; agent edits oracle.py -> verdict MUST be
+    untraced with reason `dynamic-import:helpers.py`."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "impl.py").write_text("def val():\n    return 1\n", encoding="utf-8")
+    (proj / "oracle.py").write_text("EXPECTED = 2\n", encoding="utf-8")
+    (proj / "helpers.py").write_text(
+        "import importlib\n"
+        "def want():\n"
+        "    return importlib.import_module('ora' + 'cle').EXPECTED\n",
+        encoding="utf-8",
+    )
+    (proj / "test_impl.py").write_text(
+        "import unittest\n"
+        "import impl, helpers\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_v(self):\n"
+        "        self.assertEqual(impl.val(), helpers.want())\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\npathlib.Path('oracle.py').write_text('EXPECTED = 1\\n')\n",
+    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=1)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == 0, out
+    assert rj["acceptance_integrity"] == "untraced"
+    assert "dynamic-import:helpers.py" in rj["acceptance_integrity_reasons"]
+    assert "[dynamic-import]" in out
+
+
+@pytest.mark.parametrize("label,snippet", [
+    ("import_module", "import importlib\ndef want(): return importlib.import_module('ora' + 'cle').EXPECTED\n"),
+    ("dunder_import", "def want(): return __import__('ora' + 'cle').EXPECTED\n"),
+    ("exec", "def want():\n    ns = {}\n    exec('import oracle; v = oracle.EXPECTED', ns)\n    return ns['v']\n"),
+    ("eval", "def want(): return eval('1 + 1')\n"),
+    ("runpy", "import runpy\ndef want(): return 2\n"),
+    ("spec_from_file_location", "import importlib.util\nfn = importlib.util.spec_from_file_location\ndef want(): return 2\n"),
+    ("getattr_importlib", "import importlib\ndef want(): return getattr(importlib, 'import_' + 'module')('oracle').EXPECTED\n"),
+    ("getattr_importlib_alias", "import importlib as il\ndef want(): return getattr(il, 'import_' + 'module')('oracle').EXPECTED\n"),
+    ("getattr_importlib_util", "import importlib.util\ndef want(): return getattr(importlib.util, 'spec_from_file_location')\n"),
+])
+def test_n2_all_dynamic_import_constructs_in_helper_marked_untraced(
+    tmp_path: pathlib.Path, label: str, snippet: str
+):
+    """Every required dynamic-import construct inside a depth-1 helper triggers
+    `untraced` with reason `dynamic-import:helpers.py`."""
+    proj = tmp_path / label
+    proj.mkdir()
+    (proj / "impl.py").write_text("def val(): return 1\n", encoding="utf-8")
+    (proj / "oracle.py").write_text("EXPECTED = 2\n", encoding="utf-8")
+    (proj / "helpers.py").write_text(snippet, encoding="utf-8")
+    (proj / "test_impl.py").write_text(
+        "import unittest\nimport impl, helpers\n"
+        "class T(unittest.TestCase):\n    def test_v(self): self.assertEqual(impl.val(), 1)\n",
+        encoding="utf-8",
+    )
+    spec = R.detect_acceptance(proj)
+    assert spec.integrity == "untraced"
+    assert "dynamic-import:helpers.py" in spec.integrity_reasons
+    assert R._short_integrity_code("dynamic-import:helpers.py") == "dynamic-import"
+
+
+def test_n2_depth2_indirect_helper_dynamic_import_is_untraced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """N2 depth-2 variant: test imports `impl, helpers`; helpers.py imports `subhelper`;
+    subhelper.py uses dynamic import -> verdict `untraced` with `dynamic-import:subhelper.py`."""
+    # Variant 1: flat depth-2 helper using importlib.import_module
+    base1 = tmp_path / "d2_flat"
+    proj1 = base1 / "proj"
+    proj1.mkdir(parents=True)
+    (proj1 / "impl.py").write_text("def val(): return 1\n", encoding="utf-8")
+    (proj1 / "oracle.py").write_text("EXPECTED = 2\n", encoding="utf-8")
+    (proj1 / "subhelper.py").write_text(
+        "import importlib\n"
+        "def load_expected():\n"
+        "    return getattr(importlib, 'import_' + 'module')('ora' + 'cle').EXPECTED\n",
+        encoding="utf-8",
+    )
+    (proj1 / "helpers.py").write_text(
+        "import subhelper\n"
+        "def want():\n"
+        "    return subhelper.load_expected()\n",
+        encoding="utf-8",
+    )
+    (proj1 / "test_impl.py").write_text(
+        "import unittest\nimport impl, helpers\n"
+        "class T(unittest.TestCase):\n    def test_v(self): self.assertEqual(impl.val(), helpers.want())\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(base1, "import pathlib\npathlib.Path('oracle.py').write_text('EXPECTED = 1\\n')\n")
+    rc = _run_cli_do(monkeypatch, proj1, agent, attempts=1)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(base1 / "vwork")
+
+    assert rc == 0, out
+    assert rj["acceptance_integrity"] == "untraced"
+    assert "dynamic-import:subhelper.py" in rj["acceptance_integrity_reasons"]
+    assert "[dynamic-import]" in out
+
+    # Variant 2: tests/ package helper importing depth-2 root loader with dynamic import
+    base2 = tmp_path / "d2_pkg"
+    proj2 = base2 / "proj"
+    (proj2 / "tests").mkdir(parents=True)
+    (proj2 / "impl.py").write_text("def val(): return 1\n", encoding="utf-8")
+    (proj2 / "oracle.py").write_text("EXPECTED = 2\n", encoding="utf-8")
+    (proj2 / "loader.py").write_text(
+        "import importlib\n"
+        "def load_expected():\n"
+        "    return importlib.import_module('ora' + 'cle').EXPECTED\n",
+        encoding="utf-8",
+    )
+    (proj2 / "tests" / "__init__.py").write_text("", encoding="utf-8")
+    (proj2 / "tests" / "helpers.py").write_text(
+        "import loader\ndef want(): return loader.load_expected()\n",
+        encoding="utf-8",
+    )
+    (proj2 / "tests" / "test_impl.py").write_text(
+        "import unittest\nimport impl\nfrom . import helpers\n"
+        "class T(unittest.TestCase):\n    def test_v(self): self.assertEqual(impl.val(), helpers.want())\n",
+        encoding="utf-8",
+    )
+    spec2 = R.detect_acceptance(proj2)
+    assert spec2.integrity == "untraced"
+    assert "dynamic-import:loader.py" in spec2.integrity_reasons
+
+
+def test_n2_sole_module_under_test_using_eval_stays_traced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """N2 constraint: the module under test itself (single direct non-test import) is NOT
+    scanned for dynamic imports, so ordinary code using eval() keeps verdict `traced`."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def compute(expr):\n    return 0\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text(
+        "import unittest\nimport calc\n"
+        "class T(unittest.TestCase):\n    def test_c(self): self.assertEqual(calc.compute('2 + 3'), 5)\n",
+        encoding="utf-8",
+    )
+    # Even if calc.py already uses eval at start:
+    (proj / "calc.py").write_text("def compute(expr):\n    return eval(expr) - 1\n", encoding="utf-8")
+    spec = R.detect_acceptance(proj)
+    assert spec.integrity == "traced", spec.integrity_reasons
+    assert spec.integrity_reasons == ()
+
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\npathlib.Path('calc.py').write_text('def compute(expr):\\n    return eval(expr)\\n')\n",
+    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=1)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == 0, out
+    assert rj["accepted"] is True
+    assert rj["acceptance_integrity"] == "traced"
+    assert rj["acceptance_integrity_reasons"] == []
+    assert "[dynamic-import]" not in out
+    assert "NOTE:" not in out
+
+
+def test_n2_agent_added_dynamic_import_in_helper_marked_untraced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """If helpers.py starts clean and the agent edits helpers.py to add a dynamic import,
+    the delivered run verdict is also `untraced` with `dynamic-import:helpers.py`."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "impl.py").write_text("def val(): return 1\n", encoding="utf-8")
+    (proj / "oracle.py").write_text("EXPECTED = 1\n", encoding="utf-8")
+    (proj / "helpers.py").write_text("def want(): return 2\n", encoding="utf-8")
+    (proj / "test_impl.py").write_text(
+        "import unittest\nimport impl, helpers\n"
+        "class T(unittest.TestCase):\n    def test_v(self): self.assertEqual(impl.val(), helpers.want())\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "pathlib.Path('helpers.py').write_text("
+        "'import importlib\\ndef want(): return importlib.import_module(\"ora\" + \"cle\").EXPECTED\\n')\n",
+    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=1)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == 0, out
+    assert rj["acceptance_integrity"] == "untraced"
+    assert "dynamic-import:helpers.py" in rj["acceptance_integrity_reasons"]
+    assert "[dynamic-import]" in out
