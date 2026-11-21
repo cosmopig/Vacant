@@ -78,6 +78,18 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   changed an unfixed file the check reads or executes. `acceptance_integrity` (`traced`/`untraced`) and full
   `acceptance_integrity_reasons` are recorded in `result.json` and the signed receipt, and displayed by
   `vacant audit list` (`INTEGRITY` column) and `vacant audit show`.
+- **Python module-shadow exclusion, package `__init__.py` dependency chains, and `.cargo/config*` protection (rc5, round 5 F1–F3).**
+  Across both `--check` and auto Python kinds (`python_unittest`, `python_pytest`, `python_bare`), any agent-created
+  `X.py` or package `X/` (containing `__init__.py`) on the check's `sys.path` (project root, `python FILE` script dir,
+  `src/` if present, `unittest discover` start dir, or protected test dirs) is excluded from the check copy and
+  write-back and listed with `shadows module 'X'` if and only if `X` already resolved at the start of the run (stdlib,
+  an installed distribution in the check interpreter with project dirs removed, or a start-time project module elsewhere
+  on the path); brand-new modules that resolved to nothing at start (e.g. `solution.py` or `solution/__init__.py`) and
+  pre-existing stdlib-named project modules (e.g. `queue.py`) are untouched. Dotted Python imports (`a.b.c`, including
+  `src/`-layout equivalents) in protected tests and kept-fixed scripts now include their package `__init__.py` chains in
+  `acceptance_dependencies_changed` with reason `package-init` (never exempted as the sole module under test). New
+  `__init__.py` files under `tests/`, `test/`, `__tests__/`, or next to protected test files, as well as
+  `.cargo/config.toml` and `.cargo/config`, are treated as test-config.
 - **Expanded B1 `lstat`-only outside-change listing, `.git/objects` coverage, and `COPY_SKIP` visibility (rc5, B1/R4/R12/F3).**
   The `lstat`-only B1 listing covers all of `.git` including full `lstat` of `.git/objects/info/**` and
   `.git/objects/pack/**` plus the set of loose-object names under `.git/objects/??/` (`scandir` names only, no per-file

@@ -156,6 +156,7 @@ _TEST_CONFIG_PATTERNS = (
     "playwright.config.*", "cypress.config.*", "wdio.conf.*", "ava.config.*", ".nycrc.*",
     "tsconfig*.json",
 )
+_TEST_CONFIG_REL_SUFFIXES = (".cargo/config.toml", ".cargo/config")
 _MANIFEST_BY_KIND: dict[str, tuple[str, ...]] = {
     "npm": ("package.json",),
     "cargo": ("Cargo.toml",),
@@ -1178,11 +1179,18 @@ def _norm_posix_join(base_parts: tuple[str, ...], rel_spec: str) -> str | None:
     return "/".join(parts) if parts else None
 
 
-def _extract_py_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set[str]:
+def _extract_py_imports_and_inits(raw: bytes, rel_path: str, known_files: set[str], *,
+                                  start_files: set[str] | frozenset[str] | None = None) -> tuple[set[str], set[str]]:
+    """Extract Python imports from `raw` and package `__init__.py` chains.
+    Returns `(direct_modules, package_inits)`:
+    - `direct_modules`: resolved target `.py` / `/__init__.py` files.
+    - `package_inits`: parent package `__init__.py` files along dotted import chains `a.b.c`
+      (`a/__init__.py`, `a/b/__init__.py`, plus `src/`-layout and relative equivalents), and
+      pre-existing directly imported package `__init__.py` files (never exempted as MUT)."""
     try:
         tree = ast.parse(raw, filename=rel_path)
     except SyntaxError:
-        return set()
+        return set(), set()
     parent = pathlib.PurePosixPath(rel_path).parent
     parent_parts = () if parent == pathlib.PurePosixPath(".") else parent.parts
     search_prefixes: list[tuple[str, ...]] = [()]
@@ -1192,21 +1200,44 @@ def _extract_py_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set
         search_prefixes.append(("src",))
 
     out: set[str] = set()
+    pkg_inits: set[str] = set()
 
-    def _resolve(base_prefixes: list[tuple[str, ...]], mod_parts: list[str]) -> None:
-        if not mod_parts:
+    def _add_parent_inits(base_prefixes: list[tuple[str, ...]], mod_parts: list[str]) -> None:
+        if len(mod_parts) < 2:
             return
+        for k in range(1, len(mod_parts)):
+            for pref in base_prefixes:
+                cand = "/".join((*pref, *mod_parts[:k], "__init__.py"))
+                if cand in known_files:
+                    pkg_inits.add(cand)
+
+    def _resolve(base_prefixes: list[tuple[str, ...]], mod_parts: list[str], *,
+                 is_dotted: bool = False) -> bool:
+        if not mod_parts:
+            return False
+        found = False
         for pref in base_prefixes:
             cand_base = "/".join((*pref, *mod_parts))
-            for cand in (cand_base + ".py", cand_base + "/__init__.py"):
-                if cand in known_files:
-                    out.add(cand)
+            cand_py = cand_base + ".py"
+            cand_init = cand_base + "/__init__.py"
+            if cand_py in known_files:
+                out.add(cand_py)
+                found = True
+            if cand_init in known_files:
+                out.add(cand_init)
+                found = True
+                if (is_dotted or start_files is None
+                        or cand_init in start_files
+                        or any(f.startswith(cand_base + "/") for f in start_files)):
+                    pkg_inits.add(cand_init)
+        return found
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 mod_parts = [p for p in alias.name.split(".") if p]
-                _resolve(search_prefixes, mod_parts)
+                _add_parent_inits(search_prefixes, mod_parts)
+                _resolve(search_prefixes, mod_parts, is_dotted=(len(mod_parts) >= 2))
         elif isinstance(node, ast.ImportFrom):
             if node.level and node.level > 0:
                 up = node.level - 1
@@ -1217,14 +1248,25 @@ def _extract_py_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set
             else:
                 rel_pref = search_prefixes
             mod_parts = [p for p in (node.module or "").split(".") if p]
-            if mod_parts:
-                _resolve(rel_pref, mod_parts)
+            submod_resolved = False
             for alias in node.names:
                 if alias.name == "*":
                     continue
-                _resolve(rel_pref, [*mod_parts, alias.name])
+                sub_parts = [*mod_parts, alias.name]
+                if _resolve(rel_pref, sub_parts, is_dotted=(len(sub_parts) >= 2)):
+                    submod_resolved = True
+                    _add_parent_inits(rel_pref, sub_parts)
+            if mod_parts:
+                _add_parent_inits(rel_pref, mod_parts)
+                _resolve(rel_pref, mod_parts, is_dotted=(len(mod_parts) >= 2 or submod_resolved))
     out.discard(rel_path)
-    return out
+    pkg_inits.discard(rel_path)
+    return out, pkg_inits
+
+
+def _extract_py_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set[str]:
+    direct, _ = _extract_py_imports_and_inits(raw, rel_path, known_files)
+    return direct
 
 
 def _extract_js_imports(raw: bytes, rel_path: str, known_files: set[str]) -> set[str]:
@@ -1292,10 +1334,12 @@ def _read_source_bytes(rel: str, source_root: pathlib.Path | None, originals: di
 def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[str],
                                   delivered_changed: set[str], *,
                                   source_root: pathlib.Path | None = None,
-                                  extra_unfixed: dict[str, tuple[str, ...]] | None = None) -> list[dict[str, Any]]:
+                                  extra_unfixed: dict[str, tuple[str, ...]] | None = None,
+                                  start_files: set[str] | frozenset[str] | None = None) -> list[dict[str, Any]]:
     """找出交件嘗試所改動、且驗收依賴的檔案（僅標記提醒人審閱，不阻擋交件）：
     (a) 受保護測試檔中以字串常值出現其檔名或相對路徑的已變更檔（reason: literal）；
-    (b) 受保護 Python 測試檔遞移匯入（最深 2 層 AST）的專案模組（reason: import）；
+    (b) 受保護 Python 測試檔與固定腳本遞移匯入（最深 2 層 AST）的專案模組（reason: import），
+        以及點狀匯入鏈與既有套件的 `__init__.py`（reason: package-init，不適用單一受測模組豁免）；
     (c) 受保護 JS/TS 測試檔遞移 require/import/jest.mock（最深 2 層）的專案模組（reason: import）；
     (d) 位於 fixtures/、testdata/、test_data/、__fixtures__/、__mocks__/、mocks/、golden/、data/
         或測試目錄下的檔案（reason: dir）。
@@ -1331,8 +1375,14 @@ def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[
         all_literals |= _extract_string_literals(raw, test_rel)
 
         if test_rel.endswith(".py"):
-            d1 = _extract_py_imports(raw, test_rel, known_files)
-            non_test_d1 = {m for m in d1 if m not in protected_set and not _in_special_dir(m)}
+            d1, d1_inits = _extract_py_imports_and_inits(raw, test_rel, known_files, start_files=start_files)
+            for init_rel in d1_inits:
+                if init_rel not in protected_set:
+                    _add_reason(init_rel, "package-init")
+            non_test_d1 = {
+                m for m in d1
+                if m not in protected_set and not _in_special_dir(m) and m not in d1_inits
+            }
             # 單一直接匯入非測試源檔（受測模組）不以直接匯入標記
             if len(non_test_d1) > 1:
                 for m in non_test_d1:
@@ -1344,9 +1394,27 @@ def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[
                 m1_raw = _read_source_bytes(m1, source_root, originals)
                 if m1_raw is None:
                     continue
-                for m2 in _extract_py_imports(m1_raw, m1, known_files):
-                    if m2 not in protected_set:
-                        _add_reason(m2, "import")
+                is_brand_new_sole_mut = (
+                    start_files is not None
+                    and len(non_test_d1) == 1
+                    and m1 in non_test_d1
+                    and m1 not in start_files
+                )
+                m2_direct, m2_inits = _extract_py_imports_and_inits(
+                    m1_raw, m1, known_files, start_files=start_files
+                )
+                for m2 in m2_direct:
+                    if m2 in protected_set or m2 in m2_inits:
+                        continue
+                    if is_brand_new_sole_mut and m2 not in start_files:
+                        continue
+                    _add_reason(m2, "import")
+                for m2_init in m2_inits:
+                    if m2_init in protected_set:
+                        continue
+                    if is_brand_new_sole_mut and m2_init not in start_files:
+                        continue
+                    _add_reason(m2_init, "package-init")
         elif test_rel.endswith(_JS_EXTS):
             d1 = _extract_js_imports(raw, test_rel, known_files)
             non_test_d1 = {m for m in d1 if m not in protected_set and not _in_special_dir(m)}
@@ -1463,7 +1531,10 @@ def _is_python_test(rel: str) -> bool:
 
 
 def _is_test_config(rel: str) -> bool:
-    name = pathlib.PurePosixPath(rel).name
+    norm = rel.replace("\\", "/")
+    if norm in _TEST_CONFIG_REL_SUFFIXES or any(norm.endswith("/" + s) for s in _TEST_CONFIG_REL_SUFFIXES):
+        return True
+    name = pathlib.PurePosixPath(norm).name
     return name in _TEST_CONFIG_NAMES or any(fnmatch.fnmatchcase(name, p) for p in _TEST_CONFIG_PATTERNS)
 
 
@@ -1881,6 +1952,10 @@ class _AcceptanceAnalysis:
     ignored_new_globs: list[tuple[str, str]] = dataclasses.field(default_factory=list)
     unfixed_deps: dict[str, set[str]] = dataclasses.field(default_factory=dict)
     runs_project_code: bool = False
+    py_sys_path_dirs: set[str] = dataclasses.field(default_factory=set)
+    py_interpreters: list[str] = dataclasses.field(default_factory=list)
+    uses_python: bool = False
+    unittest_start_dirs: set[str] = dataclasses.field(default_factory=set)
 
 
 def _tokenize_simple_shell(cmd: str) -> tuple[list[list[str]], list[str], bool]:
@@ -2260,7 +2335,8 @@ def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
     reasons: list[str] = []
     kind_s = "python -c" if inline else f"script {label}"
     rel_for_imports = label if not inline else "__inline__.py"
-    local_mods = _extract_py_imports(raw, rel_for_imports, files_set)
+    _local_direct, _local_inits = _extract_py_imports_and_inits(raw, rel_for_imports, files_set)
+    local_mods = _local_direct | _local_inits
     rel_imports: set[str] = set()
     proc_hits: set[str] = set()
     dyn_hits: set[str] = set()
@@ -2770,10 +2846,25 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
     ignored_new_paths: set[str] = set()
     ignored_new_globs: list[tuple[str, str]] = []
     unfixed_deps: dict[str, set[str]] = {}
+    py_sys_path_dirs: set[str] = set()
+    py_interpreters: list[str] = []
+    unittest_start_dirs: set[str] = set()
     uses_exp = False
     runs_project_code = False
+    uses_python = False
     visited: set[tuple[str, str, str]] = set()
     max_depth = 12
+
+    def _note_py_interp(tok: str) -> None:
+        nonlocal uses_python
+        uses_python = True
+        resolved = tok if os.path.isabs(tok) else shutil.which(tok)
+        if resolved and resolved not in py_interpreters:
+            py_interpreters.append(resolved)
+
+    def _note_py_file_dir(rel: str) -> None:
+        p = pathlib.PurePosixPath(rel).parent
+        py_sys_path_dirs.add("" if p == pathlib.PurePosixPath(".") else p.as_posix())
 
     def _fail(msg: str) -> None:
         if msg not in reasons:
@@ -2784,6 +2875,10 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             unfixed_deps.setdefault(rel, set()).add(why)
 
     def _analyze_py_file(rel: str, cur_dir: tuple[str, ...] = ()) -> None:
+        nonlocal uses_python
+        uses_python = True
+        py_sys_path_dirs.add("/".join(cur_dir))
+        _note_py_file_dir(rel)
         protected.add(rel)
         raw = _read_source_bytes(rel, project, {})
         if raw is None:
@@ -3376,6 +3471,21 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
 
         # 4. Known direct test runners: pytest, jest, vitest, mocha, ava, cargo test, go test
         if tool == "pytest":
+            nonlocal uses_python
+            uses_python = True
+            py_sys_path_dirs.add("/".join(cur_dir))
+            pytest_bin = cmd_tok if os.path.isabs(cmd_tok) else shutil.which(cmd_tok)
+            if pytest_bin:
+                try:
+                    with open(pytest_bin, "rb") as _pf:
+                        _she = _pf.readline(256).decode("utf-8", errors="replace").strip()
+                    if _she.startswith("#!"):
+                        _sh_parts = _she[2:].strip().split()
+                        if _sh_parts:
+                            _pi = _sh_parts[1] if (pathlib.PurePosixPath(_sh_parts[0]).name == "env" and len(_sh_parts) >= 2) else _sh_parts[0]
+                            _note_py_interp(_pi)
+                except OSError:
+                    pass
             j = 0
             while j < len(rest):
                 arg = rest[j]
@@ -3390,6 +3500,8 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                 f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
                 if f_rel is not None:
                     protected.add(f_rel)
+                    if f_rel.endswith(".py"):
+                        _note_py_file_dir(f_rel)
                 j += 1
             return cur_dir
 
@@ -3417,6 +3529,8 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
 
         # 5. python / python3
         if _PY_TOOL_RE.match(tool):
+            _note_py_interp(cmd_tok)
+            py_sys_path_dirs.add("/".join(cur_dir))
             j = 0
             while j < len(rest):
                 t = rest[j]
@@ -3549,7 +3663,10 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                             if td is None:
                                 _fail(f"unittest discover top-level directory not inside project: {top_tok}")
                                 return cur_dir
+                            py_sys_path_dirs.add("/".join(td))
                         start_pref = "/".join(sd)
+                        py_sys_path_dirs.add(start_pref)
+                        unittest_start_dirs.add(start_pref)
                         for rel in files_set:
                             if start_pref == "" or rel.startswith(start_pref + "/"):
                                 bn = pathlib.PurePosixPath(rel).name
@@ -3720,6 +3837,10 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
         ignored_new_globs=ignored_new_globs,
         unfixed_deps=unfixed_deps,
         runs_project_code=runs_project_code,
+        py_sys_path_dirs=py_sys_path_dirs,
+        py_interpreters=py_interpreters,
+        uses_python=uses_python,
+        unittest_start_dirs=unittest_start_dirs,
     )
 
 
@@ -4064,6 +4185,7 @@ class _WritePlan:
     dirs_to_remove: list[str]         # deepest-first relative dir paths safe to rmdir
     before_files: set[str]
     config_ignored: list[str] = dataclasses.field(default_factory=list)  # agent 新增的測試設定檔：不驗、不寫回
+    config_ignored_reasons: dict[str, str] = dataclasses.field(default_factory=dict)  # rel -> reason (e.g. shadows module)
     appeared: list[str] = dataclasses.field(default_factory=list)        # 執行期間出現在原專案的檔案：絕不刪除
     conflicts: list[str] = dataclasses.field(default_factory=list)       # 開始後原專案與交件嘗試皆改動：保留原專案版本
 
@@ -4244,7 +4366,8 @@ def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str], *,
 
 def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str], *,
                      start_hashes: dict[str, str | None] | None = None,
-                     ignore_new: Callable[[str], bool] | None = None) -> _WritePlan:
+                     ignore_new: Callable[[str], bool] | None = None,
+                     ignore_new_reason: Callable[[str, set[str] | None, set[str] | frozenset[str] | None], str | None] | None = None) -> _WritePlan:
     """規劃寫回專案的所有操作（唯讀掃描 project，不做任何變更）。
     當提供 `start_hashes`（任務開始時的原專案快照）時：
     - 僅刪除「開始時存在且交件嘗試刪掉」的檔案；執行期間新出現在原專案的檔案絕不刪除，改記 `appeared`。
@@ -4297,12 +4420,24 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
     dirs_seen: set[str] = set()
 
     config_ignored: list[str] = []
+    config_ignored_reasons: dict[str, str] = {}
     for rel in sorted(after - protected):
         if _has_copy_skip(rel) or _matches_prefix(rel, proj_skip_rels):
             continue
-        if rel not in start_set and (_is_test_config(rel) or (ignore_new is not None and ignore_new(rel))):
-            config_ignored.append(rel)
-            continue
+        if rel not in start_set:
+            if _is_test_config(rel):
+                config_ignored.append(rel)
+                continue
+            if ignore_new_reason is not None:
+                ig_why = ignore_new_reason(rel, after, start_set)
+                if ig_why is not None:
+                    config_ignored.append(rel)
+                    if ig_why:
+                        config_ignored_reasons[rel] = ig_why
+                    continue
+            elif ignore_new is not None and ignore_new(rel):
+                config_ignored.append(rel)
+                continue
         # 交件嘗試相對於開始時並未改動此檔 ⇒ 絕不覆寫原專案（即使原專案有並發編輯）
         if start_hashes is not None and rel in start_set:
             start_sha = start_hashes.get(rel)
@@ -4397,6 +4532,7 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
         dirs_to_remove=dirs_to_remove,
         before_files=before,
         config_ignored=config_ignored,
+        config_ignored_reasons=config_ignored_reasons,
         appeared=appeared,
         conflicts=sorted(conflicts),
     )
@@ -4645,7 +4781,9 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
                               project: pathlib.Path | None, plan: _WritePlan | None, *,
                               orig_modes: dict[str, int] | None = None,
                               start_snap: _Snapshot | None = None,
-                              ignore_new: Callable[[str], bool] | None = None) -> None:
+                              ignore_new: Callable[[str], bool] | None = None,
+                              ignore_new_reason: Callable[[str, set[str] | None, set[str] | frozenset[str] | None], str | None] | None = None,
+                              start_files: set[str] | frozenset[str] | None = None) -> None:
     """組裝驗收目錄 work：完全不含 symlink，以「開始快照＋本輪嘗試改動」組裝（絕不讀 live 專案的未改動檔），
     最後覆寫原測試檔（保留原始 mode 位元）。"""
     work.mkdir(parents=True, exist_ok=True)
@@ -4673,14 +4811,149 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
             m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
             _copy_reg_file(snap.root / rel, work / rel, mode=m)
     else:
+        after_set = set(snap.files)
         for rel in sorted(snap.files):
-            if rel not in protected and not _is_test_config(rel) and not (ignore_new is not None and ignore_new(rel)):
-                m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
-                _copy_reg_file(snap.root / rel, work / rel, mode=m)
+            if rel in protected:
+                continue
+            is_new = start_files is None or rel not in start_files
+            if is_new:
+                if _is_test_config(rel):
+                    continue
+                if ignore_new_reason is not None:
+                    if ignore_new_reason(rel, after_set, start_files) is not None:
+                        continue
+                elif ignore_new is not None and ignore_new(rel):
+                    continue
+            m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
+            _copy_reg_file(snap.root / rel, work / rel, mode=m)
     # 3. 最後以開始時的原始測試檔覆寫（保留原始 mode 位元含執行權限）
     modes_map = orig_modes or {}
     for rel, want in sorted(originals.items()):
         _restore_test_file(work, rel, want, mode=modes_map.get(rel))
+
+
+_SHADOW_PROBE = (
+    "import importlib.metadata, importlib.util, json, os, sys\n"
+    "proj_roots = [os.path.realpath(p) for p in json.loads(sys.argv[1])]\n"
+    "drop = {os.path.abspath(p) for p in json.loads(sys.argv[1])} | {'', '.', os.path.abspath(os.getcwd())}\n"
+    "drop_real = {os.path.realpath(p) for p in drop} | set(proj_roots)\n"
+    "sys.path[:] = [\n"
+    "    p for p in sys.path\n"
+    "    if p not in ('', '.') and os.path.abspath(p) not in drop and os.path.realpath(p) not in drop_real\n"
+    "]\n"
+    "name = sys.argv[2]\n"
+    "if name in getattr(sys, 'stdlib_module_names', ()):\n"
+    "    sys.exit(0)\n"
+    "try:\n"
+    "    dists = importlib.metadata.packages_distributions()\n"
+    "    if name in dists:\n"
+    "        sys.exit(0)\n"
+    "except Exception:\n"
+    "    pass\n"
+    "try:\n"
+    "    spec = importlib.util.find_spec(name)\n"
+    "    if spec is not None:\n"
+    "        orig = getattr(spec, 'origin', None)\n"
+    "        locs = list(getattr(spec, 'submodule_search_locations', None) or ())\n"
+    "        def _in_proj(path):\n"
+    "            if not path or path in ('built-in', 'frozen'):\n"
+    "                return False\n"
+    "            rp = os.path.realpath(path)\n"
+    "            return any(rp == r or rp.startswith(r + os.sep) for r in proj_roots)\n"
+    "        if (orig and _in_proj(orig)) or (locs and all(_in_proj(l) for l in locs)):\n"
+    "            sys.exit(1)\n"
+    "        sys.exit(0)\n"
+    "except Exception:\n"
+    "    pass\n"
+    "sys.exit(1)\n"
+)
+
+
+def _python_module_resolves_in_interpreter(
+    python_exe: str,
+    mod_name: str,
+    project_dirs: Sequence[str],
+    *,
+    clean_env: bool = False,
+    cache: dict[str, bool] | None = None,
+) -> bool:
+    """Check whether top-level module `mod_name` already resolves in `python_exe`
+    (stdlib, installed distribution, or find_spec) with project directories removed from sys.path."""
+    if not mod_name or mod_name == "__pycache__" or not mod_name.isidentifier():
+        return False
+    if cache is not None and mod_name in cache:
+        return cache[mod_name]
+    try:
+        same_interp = os.path.realpath(python_exe) == os.path.realpath(sys.executable)
+    except OSError:
+        same_interp = False
+    if same_interp and mod_name in sys.stdlib_module_names:
+        if cache is not None:
+            cache[mod_name] = True
+        return True
+    drop_dirs = sorted({os.path.abspath(d) for d in project_dirs if d})
+    if clean_env:
+        env = _clean_env(pathlib.Path(tempfile.gettempdir()), python_exe=python_exe)
+    else:
+        env = dict(os.environ)
+        # Strip PYTHONPATH entries pointing inside project directories
+        if "PYTHONPATH" in env:
+            drop_reals = {os.path.realpath(d) for d in drop_dirs}
+            kept: list[str] = []
+            for entry in env["PYTHONPATH"].split(os.pathsep):
+                if not entry or entry == ".":
+                    continue
+                re_p = os.path.realpath(entry)
+                if any(re_p == dr or re_p.startswith(dr + os.sep) for dr in drop_reals):
+                    continue
+                kept.append(entry)
+            if kept:
+                env["PYTHONPATH"] = os.pathsep.join(kept)
+            else:
+                env.pop("PYTHONPATH", None)
+    try:
+        cp = subprocess.run(
+            [python_exe, "-B", "-c", _SHADOW_PROBE, json.dumps(drop_dirs), mod_name],
+            cwd=tempfile.gettempdir(),
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10.0,
+        )
+        res = cp.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        res = mod_name in sys.stdlib_module_names
+    if cache is not None:
+        cache[mod_name] = res
+    return res
+
+
+def _collect_start_project_modules(all_files: Sequence[str], py_dirs: set[str]) -> dict[str, tuple[str, ...]]:
+    """Map top-level Python module names existing at start in `py_dirs` -> their start rel paths."""
+    if not py_dirs:
+        return {}
+    mods: dict[str, set[str]] = {}
+    for rel in all_files:
+        if not rel.endswith(".py"):
+            continue
+        for d in py_dirs:
+            if d == "":
+                sub = rel
+            elif rel.startswith(d + "/"):
+                sub = rel[len(d) + 1:]
+            else:
+                continue
+            parts = sub.split("/")
+            if len(parts) == 1 and parts[0].endswith(".py"):
+                stem = parts[0][:-3]
+                if stem and stem != "__init__" and stem != "__pycache__" and stem.isidentifier():
+                    mods.setdefault(stem, set()).add(rel)
+            elif len(parts) == 2 and parts[1] == "__init__.py":
+                pkg = parts[0]
+                if pkg and pkg != "__pycache__" and pkg.isidentifier():
+                    mods.setdefault(pkg, set()).add(rel)
+    return {k: tuple(sorted(v)) for k, v in mods.items()}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -4700,17 +4973,94 @@ class AcceptanceSpec:
     ignored_new_paths: tuple[str, ...] = ()
     ignored_new_globs: tuple[tuple[str, str], ...] = ()
     unfixed_deps: dict[str, tuple[str, ...]] = dataclasses.field(default_factory=dict)
+    py_sys_path_dirs: tuple[str, ...] = ()
+    protected_test_dirs: tuple[str, ...] = ()
+    start_files: frozenset[str] = dataclasses.field(default_factory=frozenset)
+    start_project_modules: dict[str, tuple[str, ...]] = dataclasses.field(default_factory=dict)
+    shadow_check_python: str | None = None
+    shadow_check_clean_env: bool = False
+    project_root: str | None = None
+    _shadow_cache: dict[str, bool] = dataclasses.field(default_factory=dict, repr=False, compare=False)
 
-    def should_ignore_new_file(self, rel: str) -> bool:
+    def ignored_new_file_reason(
+        self,
+        rel: str,
+        all_files: set[str] | None = None,
+        start_files: set[str] | frozenset[str] | None = None,
+    ) -> str | None:
+        """Return None if `rel` is a normal new file; return '' if it is ignored as
+        test-config / make-target / unittest-discover-glob / test-dir __init__.py;
+        return `\"shadows module 'X'\"` if it shadows a module that already resolved at start."""
         for p in self.ignored_new_paths:
             if rel == p or rel.startswith(p + "/"):
-                return True
+                return ""
         if self.ignored_new_globs:
             bn = pathlib.PurePosixPath(rel).name
             for pref, pat in self.ignored_new_globs:
                 if (pref == "" or rel.startswith(pref + "/")) and fnmatch.fnmatchcase(bn, pat):
-                    return True
-        return False
+                    return ""
+        # New __init__.py under a test directory (tests/, test/, __tests__) or next to a protected test file
+        parts = pathlib.PurePosixPath(rel).parts
+        if parts and parts[-1] == "__init__.py":
+            parent_parts = parts[:-1]
+            parent_dir = "/".join(parent_parts)
+            if any(d in _UNIVERSAL_TEST_DIRS for d in parent_parts) or parent_dir in self.protected_test_dirs:
+                return ""
+        # Python module shadowing: new X.py or new dir X/ containing __init__.py on check's sys.path
+        if self.py_sys_path_dirs:
+            eff_start = start_files if start_files is not None else self.start_files
+            for d in self.py_sys_path_dirs:
+                if d == "":
+                    sub = rel
+                elif rel.startswith(d + "/"):
+                    sub = rel[len(d) + 1:]
+                else:
+                    continue
+                sub_parts = sub.split("/")
+                cand_mod: str | None = None
+                if len(sub_parts) == 1 and sub_parts[0].endswith(".py"):
+                    stem = sub_parts[0][:-3]
+                    if stem and stem != "__init__" and stem != "__pycache__" and stem.isidentifier():
+                        cand_mod = stem
+                elif len(sub_parts) == 2 and sub_parts[1] == "__init__.py":
+                    pkg = sub_parts[0]
+                    if pkg and pkg != "__pycache__" and pkg.isidentifier():
+                        cand_mod = pkg
+                elif len(sub_parts) >= 2 and all_files is not None:
+                    pkg = sub_parts[0]
+                    pkg_prefix = f"{d}/{pkg}" if d else pkg
+                    pkg_init = f"{pkg_prefix}/__init__.py"
+                    if (pkg and pkg != "__pycache__" and pkg.isidentifier()
+                            and pkg_init in all_files
+                            and pkg_init not in eff_start
+                            and not any(f.startswith(pkg_prefix + "/") for f in eff_start)):
+                        cand_mod = pkg
+                if cand_mod is None:
+                    continue
+                resolved_at_start = False
+                if cand_mod in self.start_project_modules:
+                    resolved_at_start = True
+                elif self.shadow_check_python:
+                    drop_dirs: list[str] = []
+                    if self.project_root:
+                        drop_dirs.append(self.project_root)
+                        for pd in self.py_sys_path_dirs:
+                            drop_dirs.append(os.path.join(self.project_root, pd) if pd else self.project_root)
+                    resolved_at_start = _python_module_resolves_in_interpreter(
+                        self.shadow_check_python,
+                        cand_mod,
+                        drop_dirs,
+                        clean_env=self.shadow_check_clean_env,
+                        cache=self._shadow_cache,
+                    )
+                else:
+                    resolved_at_start = cand_mod in sys.stdlib_module_names
+                if resolved_at_start:
+                    return f"shadows module '{cand_mod}'"
+        return None
+
+    def should_ignore_new_file(self, rel: str) -> bool:
+        return self.ignored_new_file_reason(rel) is not None
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {
@@ -4907,6 +5257,42 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         base |= extra_orig
         return tuple(sorted(base))
 
+    start_files_fs = frozenset(all_files)
+    has_src_dir = (project / "src").is_dir() or any(f.startswith("src/") for f in all_files)
+
+    def _py_guard_kwargs(
+        prot: Sequence[str],
+        *,
+        is_python: bool,
+        extra_py_dirs: set[str] | None = None,
+        extra_test_dirs: set[str] | None = None,
+        shadow_python: str | None = None,
+        clean_env: bool = False,
+    ) -> dict[str, Any]:
+        prot_test_dirs: set[str] = set(extra_test_dirs or ())
+        for rel in prot:
+            if _is_python_test(rel) or _is_universal_test(rel) or (is_python and rel.endswith(".py")):
+                p = pathlib.PurePosixPath(rel).parent
+                prot_test_dirs.add("" if p == pathlib.PurePosixPath(".") else p.as_posix())
+        py_dirs: set[str] = set()
+        if is_python:
+            py_dirs.add("")
+            if has_src_dir:
+                py_dirs.add("src")
+            if extra_py_dirs:
+                py_dirs |= extra_py_dirs
+            py_dirs |= prot_test_dirs
+        start_mods = _collect_start_project_modules(all_files, py_dirs) if py_dirs else {}
+        return {
+            "py_sys_path_dirs": tuple(sorted(py_dirs)),
+            "protected_test_dirs": tuple(sorted(prot_test_dirs)),
+            "start_files": start_files_fs,
+            "start_project_modules": start_mods,
+            "shadow_check_python": shadow_python if is_python else None,
+            "shadow_check_clean_env": clean_env,
+            "project_root": str(project),
+        }
+
     if check is not None:
         cmd = check.strip()
         if not cmd:
@@ -4925,6 +5311,15 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             integ = "untraced"
             if "no project files kept fixed" not in integ_reasons:
                 integ_reasons.append("no project files kept fixed")
+        is_py_check = analysis.uses_python or any(r.endswith(".py") for r in extra_check)
+        if not is_py_check:
+            cw, _, _ = _parse_check_shell_cmd(cmd)
+            is_py_check = any(_PY_TOOL_RE.match(w) or w == "pytest" for w in cw)
+        shadow_py = (
+            analysis.py_interpreters[0]
+            if analysis.py_interpreters
+            else (resolve_python(project) if is_py_check else None)
+        )
         return AcceptanceSpec(
             kind="check",
             command=cmd,
@@ -4939,6 +5334,14 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             ignored_new_paths=tuple(sorted(analysis.ignored_new_paths)),
             ignored_new_globs=tuple(analysis.ignored_new_globs),
             unfixed_deps={k: tuple(sorted(v)) for k, v in analysis.unfixed_deps.items()},
+            **_py_guard_kwargs(
+                prot,
+                is_python=is_py_check,
+                extra_py_dirs=analysis.py_sys_path_dirs,
+                extra_test_dirs=analysis.unittest_start_dirs,
+                shadow_python=shadow_py,
+                clean_env=False,
+            ),
         )
 
     if py_orig:
@@ -4954,6 +5357,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 interpreter=py_exe,
                 integrity="traced" if prot_u else "untraced",
                 integrity_reasons=() if prot_u else ("no project files kept fixed",),
+                **_py_guard_kwargs(prot_u, is_python=True, shadow_python=py_exe, clean_env=True),
             )
         if insp.has_pytest_style:
             if _pytest_available(py_exe):
@@ -4965,6 +5369,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                     interpreter=py_exe,
                     integrity="traced" if prot_p else "untraced",
                     integrity_reasons=() if prot_p else ("no project files kept fixed",),
+                    **_py_guard_kwargs(prot_p, is_python=True, shadow_python=py_exe, clean_env=True),
                 )
             prot_b = _prot("python_bare")
             return AcceptanceSpec(
@@ -4974,6 +5379,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 interpreter=py_exe,
                 integrity="traced" if prot_b else "untraced",
                 integrity_reasons=() if prot_b else ("no project files kept fixed",),
+                **_py_guard_kwargs(prot_b, is_python=True, shadow_python=py_exe, clean_env=True),
             )
         prot_u = _prot("python_unittest")
         return AcceptanceSpec(
@@ -4983,6 +5389,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             interpreter=py_exe,
             integrity="traced" if prot_u else "untraced",
             integrity_reasons=() if prot_u else ("no project files kept fixed",),
+            **_py_guard_kwargs(prot_u, is_python=True, shadow_python=py_exe, clean_env=True),
         )
 
     missing: list[str] = []
@@ -4998,6 +5405,12 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 integ = "untraced"
                 if "no project files kept fixed" not in integ_reasons:
                     integ_reasons.append("no project files kept fixed")
+            npm_py = analysis.uses_python
+            npm_shadow_py = (
+                analysis.py_interpreters[0]
+                if analysis.py_interpreters
+                else (resolve_python(project) if npm_py else None)
+            )
             return AcceptanceSpec(
                 kind="npm",
                 command="npm test",
@@ -5012,6 +5425,14 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 ignored_new_paths=tuple(sorted(analysis.ignored_new_paths)),
                 ignored_new_globs=tuple(analysis.ignored_new_globs),
                 unfixed_deps={k: tuple(sorted(v)) for k, v in analysis.unfixed_deps.items()},
+                **_py_guard_kwargs(
+                    prot,
+                    is_python=npm_py,
+                    extra_py_dirs=analysis.py_sys_path_dirs,
+                    extra_test_dirs=analysis.unittest_start_dirs,
+                    shadow_python=npm_shadow_py,
+                    clean_env=False,
+                ),
             )
         missing.append("package.json has a \"test\" script, but 'npm' was not found on PATH")
 
@@ -5023,6 +5444,7 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 protected=prot_c,
                 integrity="traced" if prot_c else "untraced",
                 integrity_reasons=() if prot_c else ("no project files kept fixed",),
+                **_py_guard_kwargs(prot_c, is_python=False),
             )
         missing.append("Cargo.toml found, but 'cargo' was not found on PATH")
 
@@ -5034,16 +5456,19 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 protected=prot_g,
                 integrity="traced" if prot_g else "untraced",
                 integrity_reasons=() if prot_g else ("no project files kept fixed",),
+                **_py_guard_kwargs(prot_g, is_python=False),
             )
         missing.append("go.mod found, but 'go' was not found on PATH")
 
+    prot_n = _prot("none")
     return AcceptanceSpec(
         kind="none",
         command=None,
         argv=None,
-        protected=_prot("none"),
+        protected=prot_n,
         reason="; ".join(missing) if missing else None,
         integrity=None,
+        **_py_guard_kwargs(prot_n, is_python=False),
     )
 
 
@@ -5607,6 +6032,8 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         _populate_acceptance_work(
             work, originals, snap, _project, _plan, orig_modes=eff_orig_modes, start_snap=_start_snap,
             ignore_new=(spec.should_ignore_new_file if spec is not None else None),
+            ignore_new_reason=(spec.ignored_new_file_reason if spec is not None else None),
+            start_files=(spec.start_files if (spec is not None and spec.start_files) else None),
         )
         home = tmp / "h"
         home.mkdir(mode=0o700)
@@ -6842,6 +7269,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 plan = _plan_write_back(
                     start_snap.root, snap, protected, start_hashes=start_hashes,
                     ignore_new=spec.should_ignore_new_file,
+                    ignore_new_reason=spec.ignored_new_file_reason,
                 )
                 if start_unsafe:
                     blocked_add = [r for r in plan.added if _matches_prefix(r, start_unsafe)]
@@ -6916,6 +7344,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 "acceptance_kind": spec.kind,
                 "tests_tampered": acc["tests_tampered"],
                 "config_ignored": list(plan.config_ignored) if plan is not None else [],
+                **({"config_ignored_reasons": dict(plan.config_ignored_reasons)} if (plan is not None and plan.config_ignored_reasons) else {}),
                 "first_problem": acc.get("first_problem"),
                 "rc": r["rc"],
                 "timed_out": r["timed_out"],
@@ -6984,6 +7413,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             final_plan = _plan_write_back(
                 project, snaps[d], protected, start_hashes=start_hashes,
                 ignore_new=spec.should_ignore_new_file,
+                ignore_new_reason=spec.ignored_new_file_reason,
             )
             appeared_during_run = list(final_plan.appeared)
             attempt_writes = (
@@ -7045,6 +7475,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         acc_deps_changed = _find_acceptance_dependencies(
             originals, known_files, planned_paths, source_root=dep_src_root,
             extra_unfixed=spec.unfixed_deps,
+            start_files=set(start_hashes),
         )
         not_delivered = list(snaps[d].copy_skip_created) if (0 <= d < len(snaps) and snaps[d] is not None) else []
 
@@ -7446,10 +7877,18 @@ def summary(res: dict) -> str:
         head += f"\n  not delivered ({len(not_deliv)}): {shown_nd}"
     cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
     if cfg_new:
+        cfg_reasons: dict[str, str] = {}
+        for a in res["attempts"]:
+            for k_p, v_r in (a.get("config_ignored_reasons") or {}).items():
+                if k_p not in cfg_reasons and v_r:
+                    cfg_reasons[k_p] = str(v_r)
+        def _fmt_cfg(p: str) -> str:
+            why = cfg_reasons.get(p)
+            return f"{p} ({why})" if why else p
         d_att = res["attempts"][res["delivered_attempt"] - 1] if res.get("attempts") else {}
         where = next((a.get("workspace") for a in ([d_att] + list(res["attempts"]))
                       if a.get("config_ignored") and a.get("workspace")), None)
-        head += (f"\n  the agent added test configuration ({', '.join(cfg_new[:10])}"
+        head += (f"\n  the agent added test configuration ({', '.join(_fmt_cfg(p) for p in cfg_new[:10])}"
                  f"{' …' if len(cfg_new) > 10 else ''}); not used for the check and not written back"
                  + (f" — still in the attempt workspace: {where}" if where else "") + ".")
     tam = sorted({t for a in res["attempts"] for t in a["tests_tampered"]})
