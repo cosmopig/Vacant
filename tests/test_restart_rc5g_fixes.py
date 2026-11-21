@@ -533,3 +533,36 @@ def test_n2_agent_added_dynamic_import_in_helper_marked_untraced(
     assert rj["acceptance_integrity"] == "untraced"
     assert "dynamic-import:helpers.py" in rj["acceptance_integrity_reasons"]
     assert "[dynamic-import]" in out
+
+
+# ============================================================================
+# P5 message fix: unreadable paths must not print `acceptance: none`
+# ============================================================================
+
+def test_p5_message_does_not_say_acceptance_none(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """P5 stops before acceptance detection; summary must not suggest `acceptance: none`."""
+    import os
+    if os.geteuid() == 0:
+        pytest.skip("running as root bypasses chmod 000")
+
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "test_ok.py").write_text(
+        "import unittest\nclass T(unittest.TestCase):\n    def test_a(self): self.assertTrue(True)\n",
+        encoding="utf-8",
+    )
+    secret = proj / "secret.txt"
+    secret.write_text("hidden\n", encoding="utf-8")
+    agent = _write_agent(tmp_path, "pass\n")
+
+    secret.chmod(0o000)
+    try:
+        rc = _run_cli_do(monkeypatch, proj, agent, attempts=1)
+        out = capsys.readouterr().out
+        assert rc == adapters_cli.EXIT["void"], out
+        assert "acceptance: none" not in out
+        assert "acceptance: not detected (stopped before detection)" in out
+    finally:
+        secret.chmod(0o600)

@@ -8224,7 +8224,9 @@ def summary(res: dict) -> str:
         or ()
     )
     cmd_part = f" ({acc_cmd})" if acc_cmd else ""
-    if acc_integrity in ("untraced", "unverified"):
+    if res.get("unreadable_paths"):
+        head += "\n  acceptance: not detected (stopped before detection)"
+    elif acc_integrity in ("untraced", "unverified"):
         codes: list[str] = []
         for r in acc_integrity_reasons:
             c = _short_integrity_code(str(r))

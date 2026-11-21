@@ -345,6 +345,8 @@ def test_p5_unreadable_file_and_dir_stop_upfront_exit_43_with_receipt(
         assert rj["unreadable_paths"] == ["locked_dir", "secret.txt"]
         assert "[vacant] cannot read 2 path(s) in the project (permission denied): locked_dir, secret.txt; " \
                "fix the permissions or move them out of the project. Nothing was run." in out
+        assert "acceptance: none" not in out
+        assert "acceptance: not detected (stopped before detection)" in out
         assert (proj / "calc.py").read_text(encoding="utf-8") == "def add(a, b): return a + b\n"
         assert rj["receipt"]["recorded"] is True
         ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
