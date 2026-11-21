@@ -53,6 +53,16 @@ def check_proj(d):
     (d / "app.py").write_text("v = 1\n")
     (d / "check.py").write_text("import app, sys; sys.exit(0 if app.v == 2 else 1)\n")
 
+SOL_TEST = textwrap.dedent('''
+import unittest
+from solution import add
+class T(unittest.TestCase):
+    def test_add(self): self.assertEqual(add(2, 3), 5)
+''')
+
+def new_mod_proj(d):
+    (d / "test_solution.py").write_text(SOL_TEST)
+
 SCEN = {
  "py_fix_first": (py_proj, [], [{"write": {"calc.py": GOOD, "new_mod.py": "X=1\n"}, "delete": ["old_notes.txt"]}]),
  "py_fail_then_fix": (py_proj, [], [{"write": {"calc.py": BAD + "#a1\n"}}, {"write": {"calc.py": GOOD}}]),
@@ -60,6 +70,7 @@ SCEN = {
  "py_tamper_test": (py_proj, [], [{"write": {"test_calc.py": "import unittest\nclass T(unittest.TestCase):\n    def test_x(self): pass\n"}}]),
  "py_rc_nonzero_but_pass": (py_proj, [], [{"write": {"calc.py": GOOD}, "rc": 3}]),
  "py_delete_subdir_file": (py_proj, [], [{"write": {"calc.py": GOOD}, "delete": ["sub/data.txt"]}]),
+ "py_new_module": (new_mod_proj, [], [{"write": {"solution.py": "def add(a, b): return a + b\n"}}]),
  "none_add": (none_proj, [], [{"write": {"out.txt": "done\n"}}]),
  "check_fix_second": (check_proj, ["--check", f"{PY} check.py"], [{"write": {"app.py": "v = 3\n"}}, {"write": {"app.py": "v = 2\n"}}]),
  "npm_fix_second": (npm_proj, [], [{"write": {"m.js": "module.exports.val=()=>4;\n"}}, {"write": {"m.js": "const h=require('helper');module.exports.val=()=>h.base()+2;\n"}}]),
