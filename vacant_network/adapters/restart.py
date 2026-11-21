@@ -102,6 +102,15 @@ from .run import COPY_SKIP, Launch, run_agent, work_root
 PATTERNS = ("*_test.py", "test_*.py")
 _UNIVERSAL_TEST_NAME_PATTERNS = ("*_test.py", "test_*.py", "*.test.*", "*.spec.*", "*_test.go")
 _UNIVERSAL_TEST_DIRS = frozenset({"__tests__", "tests", "test"})
+_FIXTURE_DIRS = frozenset({"fixtures", "testdata", "test_data", "__fixtures__"})
+_DETACHED_MARKER_ENV = "VACANT_RUN_ID"
+_JS_EXTS = (".js", ".cjs", ".mjs", ".ts", ".cts", ".mts", ".jsx", ".tsx")
+_JS_REL_IMPORT_RES = (
+    re.compile(r"""\brequire\s*\(\s*['"](\.\.?/[^'"]+)['"]\s*\)"""),
+    re.compile(r"""\bimport\s+(?:[^'"]+?\s+from\s+)?['"](\.\.?/[^'"]+)['"]"""),
+    re.compile(r"""\bexport\s+[^'"]+?\s+from\s+['"](\.\.?/[^'"]+)['"]"""),
+    re.compile(r"""\bimport\s*\(\s*['"](\.\.?/[^'"]+)['"]\s*\)"""),
+)
 #: 測試設定檔：能改變「測試怎麼跑、算不算過」的檔（pytest 的 conftest 掛鉤、ini 選項；jest／vitest／mocha／babel 設定）。
 #: 開始時就有的：和測試檔一樣受保護（驗收前還原、不寫回）。agent 新增的：驗收副本裡不放、不寫回、交件訊息列出。
 _TEST_CONFIG_NAMES = frozenset({
@@ -732,6 +741,229 @@ def _copy_reg_file(src: pathlib.Path, dst: pathlib.Path, mode: int = 0o600, *,
         except OSError:
             pass
         return False
+
+
+def _make_tree_writable(root: pathlib.Path) -> None:
+    """讓 agent 的工作區副本可寫（對所有非 symlink 目錄與檔案加上 u+w，不跟隨 symlink）。"""
+    if root.is_symlink() or not root.exists():
+        return
+    try:
+        st = root.lstat()
+        os.chmod(root, stat.S_IMODE(st.st_mode) | stat.S_IWUSR)
+    except OSError:
+        pass
+    for dp, dns, fns in os.walk(root, topdown=True, followlinks=False):
+        try:
+            st = os.lstat(dp)
+            if not stat.S_ISLNK(st.st_mode):
+                os.chmod(dp, stat.S_IMODE(st.st_mode) | stat.S_IWUSR)
+        except OSError:
+            pass
+        for name in list(dns) + list(fns):
+            p = os.path.join(dp, name)
+            try:
+                st = os.lstat(p)
+                if not stat.S_ISLNK(st.st_mode):
+                    os.chmod(p, stat.S_IMODE(st.st_mode) | stat.S_IWUSR)
+            except OSError:
+                pass
+
+
+def _find_detached_processes(marker_val: str) -> list[int] | None:
+    """在 Linux 上掃描 /proc/*/environ，找出仍帶著 VACANT_RUN_ID=<marker_val> 的存活行程（排除自身與僵屍）。
+    非 Linux 或無 /proc 回傳 None（表示未檢查）。"""
+    if not sys.platform.startswith("linux") or not os.path.isdir("/proc"):
+        return None
+    needle = f"{_DETACHED_MARKER_ENV}={marker_val}".encode("utf-8")
+    me = os.getpid()
+    found: list[int] = []
+    try:
+        entries = list(os.scandir("/proc"))
+    except OSError:
+        return None
+    for entry in entries:
+        if not entry.name.isdigit():
+            continue
+        pid = int(entry.name)
+        if pid == me:
+            continue
+        try:
+            raw = pathlib.Path(entry.path, "environ").read_bytes()
+        except OSError:
+            continue
+        if needle not in raw.split(b"\x00"):
+            continue
+        try:
+            stat_txt = pathlib.Path(entry.path, "stat").read_text(encoding="utf-8", errors="replace")
+            rp = stat_txt.rfind(")")
+            if rp >= 0 and stat_txt[rp + 2:rp + 3] == "Z":
+                continue
+        except OSError:
+            pass
+        found.append(pid)
+    return sorted(found)
+
+
+def _dir_has_detectable_tests(d: pathlib.Path) -> bool:
+    """快速淺層檢查目錄 d 是否有會被偵測到的測試檔、測試設定檔或測試目錄（不遞迴整棵樹）。"""
+    try:
+        entries = list(os.scandir(d))
+    except OSError:
+        return False
+    for e in entries:
+        name = e.name
+        if name in COPY_SKIP:
+            continue
+        try:
+            st = e.stat(follow_symlinks=False)
+        except OSError:
+            continue
+        if stat.S_ISLNK(st.st_mode):
+            continue
+        if stat.S_ISREG(st.st_mode):
+            if (_is_python_test(name) or _is_universal_test(name) or _is_test_config(name)
+                    or name in ("Cargo.toml", "go.mod")):
+                return True
+            if name == "package.json" and _npm_test_script(d) is not None:
+                return True
+        elif stat.S_ISDIR(st.st_mode) and name in _UNIVERSAL_TEST_DIRS:
+            # 確認測試目錄內至少有檔案（淺層、上限 200 項）
+            seen = 0
+            stack = [pathlib.Path(e.path)]
+            while stack and seen < 200:
+                cur = stack.pop()
+                try:
+                    sub_entries = list(os.scandir(cur))
+                except OSError:
+                    continue
+                for se in sub_entries:
+                    seen += 1
+                    if se.name in COPY_SKIP:
+                        continue
+                    try:
+                        sst = se.stat(follow_symlinks=False)
+                    except OSError:
+                        continue
+                    if stat.S_ISREG(sst.st_mode):
+                        return True
+                    if stat.S_ISDIR(sst.st_mode) and not stat.S_ISLNK(sst.st_mode):
+                        stack.append(pathlib.Path(se.path))
+    return False
+
+
+def _find_parent_with_tests(project: pathlib.Path, max_levels: int = 5) -> pathlib.Path | None:
+    """向上檢查父目錄（最多 max_levels 層、遇 git 根即止，且不掃 $HOME 與 /）是否含有可偵測的測試。"""
+    cur = project.resolve()
+    try:
+        home = pathlib.Path.home().resolve()
+    except (RuntimeError, OSError):
+        home = None
+    for _ in range(max_levels):
+        parent = cur.parent
+        if parent == cur or parent == pathlib.Path("/") or (home is not None and parent == home):
+            break
+        is_git_root = (parent / ".git").exists()
+        if _dir_has_detectable_tests(parent):
+            return parent
+        if is_git_root:
+            break
+        cur = parent
+    return None
+
+
+def _norm_posix_join(base_parts: tuple[str, ...], rel_spec: str) -> str | None:
+    parts = list(base_parts)
+    for seg in rel_spec.replace("\\", "/").split("/"):
+        if not seg or seg == ".":
+            continue
+        if seg == "..":
+            if not parts:
+                return None
+            parts.pop()
+        else:
+            parts.append(seg)
+    return "/".join(parts) if parts else None
+
+
+def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[str],
+                                  delivered_changed: set[str]) -> list[str]:
+    """找出交件嘗試所改動、且驗收直接依賴的檔案（僅標記提醒人審閱，不阻擋交件）：
+    (a) 受保護測試檔直接匯入的專案模組（Python AST import/from；JS/TS 相對路徑 require/import）；
+    (b) 位於 fixtures/、testdata/、test_data/、__fixtures__/ 或測試目錄下的檔案。"""
+    if not delivered_changed:
+        return []
+    flagged: set[str] = set()
+
+    # (b) fixture / test-data / test 目錄
+    for rel in delivered_changed:
+        parts = pathlib.PurePosixPath(rel).parts
+        if any(d in (_FIXTURE_DIRS | _UNIVERSAL_TEST_DIRS) for d in parts[:-1]):
+            flagged.add(rel)
+
+    def _resolve_py_mod(base_prefixes: list[tuple[str, ...]], mod_parts: list[str]) -> None:
+        if not mod_parts:
+            return
+        for pref in base_prefixes:
+            cand_base = "/".join((*pref, *mod_parts))
+            for cand in (cand_base + ".py", cand_base + "/__init__.py"):
+                if cand in known_files:
+                    flagged.add(cand)
+
+    # (a) 受保護測試檔直接匯入的專案模組
+    for test_rel, raw in originals.items():
+        test_parent = pathlib.PurePosixPath(test_rel).parent
+        parent_parts = () if test_parent == pathlib.PurePosixPath(".") else test_parent.parts
+        if test_rel.endswith(".py"):
+            try:
+                tree = ast.parse(raw, filename=test_rel)
+            except SyntaxError:
+                continue
+            search_prefixes: list[tuple[str, ...]] = [()]
+            if parent_parts and parent_parts not in search_prefixes:
+                search_prefixes.append(parent_parts)
+            if ("src",) not in search_prefixes:
+                search_prefixes.append(("src",))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        mod_parts = [p for p in alias.name.split(".") if p]
+                        _resolve_py_mod(search_prefixes, mod_parts)
+                elif isinstance(node, ast.ImportFrom):
+                    if node.level and node.level > 0:
+                        up = node.level - 1
+                        if up <= len(parent_parts):
+                            rel_pref = [parent_parts[:len(parent_parts) - up]]
+                        else:
+                            rel_pref = []
+                    else:
+                        rel_pref = search_prefixes
+                    mod_parts = [p for p in (node.module or "").split(".") if p]
+                    if mod_parts:
+                        _resolve_py_mod(rel_pref, mod_parts)
+                    for alias in node.names:
+                        if alias.name == "*":
+                            continue
+                        _resolve_py_mod(rel_pref, [*mod_parts, alias.name])
+        elif test_rel.endswith(_JS_EXTS):
+            txt = raw.decode("utf-8", errors="replace")
+            specs: set[str] = set()
+            for rx in _JS_REL_IMPORT_RES:
+                for m in rx.finditer(txt):
+                    specs.add(m.group(1))
+            for sp in specs:
+                norm = _norm_posix_join(parent_parts, sp)
+                if not norm:
+                    continue
+                if norm in known_files:
+                    flagged.add(norm)
+                    continue
+                for ext in (*_JS_EXTS, ".json"):
+                    if norm + ext in known_files:
+                        flagged.add(norm + ext)
+                    if f"{norm}/index{ext}" in known_files:
+                        flagged.add(f"{norm}/index{ext}")
+
+    return sorted(flagged & delivered_changed)
 
 
 def _rmtree_force(path: pathlib.Path) -> None:
@@ -2703,7 +2935,8 @@ def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if len(canonical_bytes(payload)) <= _RECEIPT_MAX_BYTES:
         return payload
     out = dict(payload)
-    for key in ("written_back", "deleted", "skipped", "appeared_during_run", "conflicts", "outside_changes"):
+    for key in ("written_back", "deleted", "skipped", "appeared_during_run", "conflicts",
+                "outside_changes", "acceptance_dependencies_changed"):
         items = out.get(key)
         if isinstance(items, list) and len(items) > 64:
             out[f"{key}_count"] = len(items)
@@ -2784,6 +3017,8 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "appeared_during_run": list(res.get("appeared_during_run") or ()),
             "conflicts": list(res.get("conflicts") or ()),
             "outside_changes": list(res.get("outside_changes") or ()),
+            "detached_processes": res.get("detached_processes"),
+            "acceptance_dependencies_changed": list(res.get("acceptance_dependencies_changed") or ()),
             "agent_wall_s": res["agent_wall_s"],
             "total_wall_s": res["total_wall_s"],
         }
@@ -3084,11 +3319,66 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         attempt_timeout_s = budget_s
     run_dir = work_root() / f"restart-{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}-{secrets.token_hex(3)}"
     run_dir.mkdir(parents=True, exist_ok=True)
+    run_id = run_dir.name
     attempts: list[dict] = []
     snaps: list[_Snapshot | None] = []
     launch_meta: list[tuple[list[str], dict[str, str]]] = []
     spent = 0.0
     t0 = time.monotonic()
+    parent_tests_dir = _find_parent_with_tests(project) if spec.kind == "none" else None
+
+    # D1：原專案根目錄不可寫 ⇒ 寫回一定會失敗，跑 agent 前先停下並明講（exit 43）
+    if not os.access(str(project), os.W_OK):
+        say(f"project directory is not writable ({project}); write-back would fail, stopping before running the agent")
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+        res = {
+            "mode": "restart",
+            "project": str(project),
+            "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
+            "protected": sorted(protected),
+            "acceptance": spec.to_dict(),
+            "interpreter": spec.interpreter,
+            "baseline": None,
+            "baseline_error": None,
+            "project_not_writable": True,
+            "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
+            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+            "appeared_during_run": [],
+            "conflicts": [],
+            "outside_changes": [],
+            "acceptance_dependencies_changed": [],
+            "node_modules_changed": [],
+            "node_modules_copy_s": 0.0,
+            "node_modules_hash_s": 0.0,
+            "max_attempts": max_attempts,
+            "accepted": None,
+            "delivered_attempt": 0,
+            "attempts": [],
+            "changed": changed,
+            "agent_wall_s": 0.0,
+            "total_wall_s": round(time.monotonic() - t0, 1),
+            "run_dir": str(run_dir),
+        }
+        res, res_non_utf8 = _sanitize_json_obj(res)
+        res["non_utf8_paths"] = res_non_utf8
+        if res_non_utf8:
+            res["path_encoding"] = "utf-8-backslashreplace"
+        res["receipt"] = _record_receipt(
+            project=project,
+            prompt=prompt,
+            agent=agent,
+            launch_meta=launch_meta,
+            spec=spec,
+            protected=protected,
+            attempts=attempts,
+            snaps=snaps,
+            delivered_idx=-1,
+            changed=changed,
+            res=res,
+            run_dir=run_dir,
+        )
+        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+        return res
 
     # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
     baseline_rec: dict[str, Any] | None = None
@@ -3132,7 +3422,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     if baseline_error is not None:
         say(f"baseline: acceptance cannot run in this environment: {baseline_error}")
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": []}
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
         res = {
             "mode": "restart",
             "project": str(project),
@@ -3142,6 +3432,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "interpreter": spec.interpreter,
             "baseline": baseline_rec,
             "baseline_error": baseline_error,
+            "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
+            "node_modules_changed": [],
+            "node_modules_copy_s": 0.0,
+            "node_modules_hash_s": 0.0,
+            "appeared_during_run": [],
+            "conflicts": [],
+            "outside_changes": [],
+            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+            "acceptance_dependencies_changed": [],
             "max_attempts": max_attempts,
             "accepted": None,
             "delivered_attempt": 0,
@@ -3191,21 +3490,28 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         attempt_dir = run_dir / f"attempt_{k}"
         ws = attempt_dir / "w"
         shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
+        _make_tree_writable(ws)
         nm_copy_s += _copy_node_modules_for_agent(project, ws)
         launch = build(prompt, ws)
         launch_meta.append((list(launch.argv), dict(launch.env)))
+        attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
         # 嘗試期間原專案 node_modules 唯讀（agent 拿到的是自己的副本），結束後還原權限並重算內容雜湊清單，
         # 抓出任何透過絕對路徑直接改動原專案 node_modules 的行為。
         nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
         try:
-            r = run_agent(launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
+            r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
                           log_dir=attempt_dir / "logs")
         finally:
             if launch.cleanup:
                 launch.cleanup()
             _nm_restore_modes(nm_modes)
         spent += r["wall_ms"] / 1000.0
+        detached_pids = _find_detached_processes(run_id)
+        if detached_pids:
+            say(f"attempt {k}: WARNING: detached process(es) survived after agent exited "
+                f"(PIDs: {', '.join(str(p) for p in detached_pids)})")
+        stderr_tail = _agent_error_tail(attempt_dir / "logs", r, max_lines=5) if r["rc"] not in (0, None) else None
         if nm_start is not None:
             t_nm = time.monotonic()
             nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
@@ -3219,6 +3525,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                     "config_ignored": [], "first_problem": "node_modules changed: " + ", ".join(nm_changed[:20]),
                     "rc": r["rc"], "timed_out": r["timed_out"], "wall_s": round(r["wall_ms"] / 1000.0, 1),
                     "spawn_error": r["spawn_error"], "workspace": str(ws), "node_modules_changed": nm_changed[:200],
+                    "detached_processes": detached_pids,
+                    **({"agent_stderr_tail": stderr_tail} if stderr_tail else {}),
                 })
                 snaps.append(None)
                 break
@@ -3286,6 +3594,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "wall_s": round(r["wall_ms"] / 1000.0, 1),
             "spawn_error": r["spawn_error"],
             "workspace": str(ws),
+            "detached_processes": detached_pids,
+            **({"agent_stderr_tail": stderr_tail} if stderr_tail else {}),
         })
         snaps.append(snap)
 
@@ -3350,6 +3660,16 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         if orig_lstat_start.get(k) != orig_lstat_end.get(k) and k not in planned_paths
     )
 
+    # A1/A2：標記交件嘗試所改動、且驗收直接依賴的檔案（匯入模組與 fixture／測試資料目錄）
+    known_files = set(start_hashes) | planned_paths
+    acc_deps_changed = _find_acceptance_dependencies(originals, known_files, planned_paths)
+
+    # B2：彙總各次嘗試偵測到的脫離行程（非 Linux 為 None）
+    if any(a.get("detached_processes") is None for a in attempts):
+        detached_all: list[int] | None = None
+    else:
+        detached_all = sorted({pid for a in attempts for pid in (a.get("detached_processes") or [])})
+
     only_uncheckable = len(attempts) == 1 and attempts[0]["accept"] is None
     res = {
         "mode": "restart",
@@ -3361,12 +3681,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "baseline": baseline_rec,
         "baseline_error": None,
         "agent_error": agent_error,
+        "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
         "node_modules_changed": nm_changed[:200],
         "node_modules_copy_s": round(nm_copy_s, 3),
         "node_modules_hash_s": round(nm_hash_s, 3),
         "appeared_during_run": appeared_during_run,
         "conflicts": conflicts,
         "outside_changes": outside_changes,
+        "detached_processes": detached_all,
+        "acceptance_dependencies_changed": acc_deps_changed,
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,
@@ -3413,7 +3736,12 @@ def summary(res: dict) -> str:
     baseline = res.get("baseline") if isinstance(res.get("baseline"), dict) else None
     baseline_err = res.get("baseline_error")
 
-    if baseline_err:
+    if res.get("project_not_writable"):
+        head = (
+            f"[vacant] project directory is not writable ({res.get('project')}); "
+            f"write-back would fail, so nothing was run and the project is unchanged."
+        )
+    elif baseline_err:
         reason_txt = str(baseline_err).strip()
         head = (
             f"[vacant] acceptance cannot run in this environment: {reason_txt}\n"
@@ -3469,6 +3797,10 @@ def summary(res: dict) -> str:
 
     cmd_part = f" ({acc_cmd})" if acc_cmd else ""
     head += f"\n  acceptance: {acc_kind}{cmd_part}"
+    if res.get("project"):
+        head += f"\n  scanned: {res['project']} (parent directories were not scanned)"
+    if res.get("parent_tests_dir"):
+        head += f"\n  tests found in {res['parent_tests_dir']}; run from there to check them"
     if acc_interp:
         head += f"\n  interpreter: {acc_interp}"
     if baseline is not None and not baseline_err:
@@ -3525,4 +3857,23 @@ def summary(res: dict) -> str:
             head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
         else:
             head += f"\n  the agent edited protected files ({', '.join(tam)}); checked against the originals, not written back."
+    if (not res.get("project_not_writable") and not baseline_err and not res.get("node_modules_changed")
+            and not res.get("agent_error") and res.get("attempts") and res.get("delivered_attempt")):
+        d_att = res["attempts"][res["delivered_attempt"] - 1]
+        if d_att.get("rc") not in (0, None):
+            head += (f"\n  warning: the agent exited with code {d_att.get('rc')} on delivered attempt "
+                     f"{res['delivered_attempt']}")
+            stail = d_att.get("agent_stderr_tail")
+            if stail:
+                tail_fmt = "\n".join("    " + ln for ln in str(stail).splitlines()[-5:])
+                head += f"\n  the agent's last output:\n{tail_fmt}"
+    dep_changed = list(res.get("acceptance_dependencies_changed") or ())
+    if dep_changed:
+        shown_dep = ", ".join(dep_changed[:20]) + (f" … (+{len(dep_changed) - 20} more)" if len(dep_changed) > 20 else "")
+        head += f"\n  the check depends on these files and the agent changed them — review them yourself: {shown_dep}"
+    det_pids = res.get("detached_processes")
+    if isinstance(det_pids, list) and det_pids:
+        shown_p = ", ".join(str(p) for p in det_pids[:10]) + (f" … (+{len(det_pids) - 10} more)" if len(det_pids) > 10 else "")
+        head += (f"\n  WARNING: detached process(es) survived after the agent exited (PIDs: {shown_p}); "
+                 f"writes after delivery are not recorded.")
     return head + f"\n  attempts and logs: {res['run_dir']}"
