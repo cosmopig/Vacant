@@ -2608,8 +2608,8 @@ def _nm_root(project: pathlib.Path) -> pathlib.Path | None:
 
 
 def _nm_manifest(root: pathlib.Path) -> dict[str, tuple]:
-    """node_modules 的清單（不跟隨內部 symlink）：相對路徑 → (型別, 大小, mtime_ns, inode, symlink 目標)。
-    權限位元不算（嘗試期間會被暫時改成唯讀）。"""
+    """node_modules 的內容清單（不跟隨內部 symlink）：相對路徑 → (型別, mode, sha256 或 symlink 目標)。
+    須於原權限狀態下（`_nm_make_readonly` 前、`_nm_restore_modes` 後）呼叫。"""
     out: dict[str, tuple] = {}
     stack = [root]
     while stack:
@@ -2617,25 +2617,28 @@ def _nm_manifest(root: pathlib.Path) -> dict[str, tuple]:
         try:
             it = list(os.scandir(d))
         except OSError:
-            out[str(pathlib.Path(d).relative_to(root)) + "/"] = ("unreadable",)
+            out[pathlib.Path(d).relative_to(root).as_posix() + "/"] = ("unreadable",)
             continue
         for e in it:
             try:
                 st = e.stat(follow_symlinks=False)
             except OSError:
                 continue
-            rel = str(pathlib.Path(e.path).relative_to(root))
+            rel = pathlib.Path(e.path).relative_to(root).as_posix()
+            mode = stat.S_IMODE(st.st_mode)
             if stat.S_ISLNK(st.st_mode):
                 try:
                     tgt = os.readlink(e.path)
                 except OSError:
                     tgt = None
-                out[rel] = ("l", 0, st.st_mtime_ns, st.st_ino, tgt)
+                out[rel] = ("l", mode, tgt)
             elif stat.S_ISDIR(st.st_mode):
-                out[rel + "/"] = ("d", 0, 0, st.st_ino, None)
+                out[rel + "/"] = ("d", mode, None)
                 stack.append(e.path)
+            elif stat.S_ISREG(st.st_mode):
+                out[rel] = ("f", mode, _sha256_file(pathlib.Path(e.path)))
             else:
-                out[rel] = ("f", st.st_size, st.st_mtime_ns, st.st_ino, None)
+                out[rel] = ("o", mode, st.st_mode)
     return out
 
 
@@ -2676,18 +2679,36 @@ def _nm_restore_modes(changed: list[tuple[str, int]]) -> None:
             pass
 
 
-def _link_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> None:
-    """agent 的副本不複製 node_modules（太大）；改放一個指向原專案 node_modules 的 symlink，agent 才能自己跑
-    `npm test`（W4／JS 冒煙前重現：沒有它時 agent 在副本裡跑測試只得到 `jest: not found`）。
-    快照與寫回都跳過 node_modules（COPY_SKIP），所以這個連結不會寫回；代價：agent 透過它寫得到使用者的
-    node_modules（與專案外的 .venv 相同），寫在誠實邊界。"""
+def _copy_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> float:
+    """給 agent 工作區一份獨立的 node_modules 副本（絕不提供指向原專案 node_modules 的可寫路徑）。
+    優先嘗試 `cp --reflink=auto -a`，失敗則退回 `shutil.copytree(..., symlinks=True)`。
+    快照與寫回仍跳過 node_modules（COPY_SKIP），故副本絕不寫回。回傳複製耗時（秒）。"""
     orig = project / "node_modules"
-    link = ws / "node_modules"
-    if orig.is_dir() and not link.exists() and not link.is_symlink():
+    dst = ws / "node_modules"
+    if not orig.is_dir() or dst.exists() or dst.is_symlink():
+        return 0.0
+    src = orig.resolve()
+    t0 = time.monotonic()
+    copied = False
+    cp_bin = shutil.which("cp")
+    if cp_bin:
         try:
-            os.symlink(orig.resolve(), link)
-        except OSError:
-            pass
+            cp = subprocess.run(
+                [cp_bin, "--reflink=auto", "-a", str(src), str(dst)],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=120.0,
+            )
+            if cp.returncode == 0 and dst.is_dir() and not dst.is_symlink():
+                copied = True
+            else:
+                _rmtree_force(dst)
+        except (OSError, subprocess.SubprocessError):
+            _rmtree_force(dst)
+    if not copied:
+        shutil.copytree(src, dst, symlinks=True)
+    return time.monotonic() - t0
 
 
 def _agent_error_tail(log_dir: pathlib.Path, r: dict[str, Any], max_lines: int = 8) -> str:
@@ -2768,6 +2789,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     nm_root = _nm_root(project)
     nm_start: dict[str, tuple] | None = None
     nm_changed: list[str] = []
+    nm_copy_s = 0.0
+    nm_hash_s = 0.0
     baseline_error: str | None = None
     if spec.reason is not None:
         baseline_rec = {
@@ -2841,8 +2864,11 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     agent_error: str | None = None
-    # 開始時的 node_modules 清單（基線之後拍：專案自己的測試若正當地寫快取，不算 agent 的改動）
-    nm_start = _nm_manifest(nm_root) if nm_root is not None else None
+    # 開始時的 node_modules 內容清單（sha256＋mode＋type＋symlink 目標；基線之後拍）
+    if nm_root is not None:
+        t_nm = time.monotonic()
+        nm_start = _nm_manifest(nm_root)
+        nm_hash_s += time.monotonic() - t_nm
     while len(attempts) < max_attempts:
         remaining = budget_s - (time.monotonic() - t0) - reserve
         if attempts and remaining < min_attempt_s:
@@ -2852,12 +2878,12 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         attempt_dir = run_dir / f"attempt_{k}"
         ws = attempt_dir / "w"
         shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
-        _link_node_modules_for_agent(project, ws)
+        nm_copy_s += _copy_node_modules_for_agent(project, ws)
         launch = build(prompt, ws)
         launch_meta.append((list(launch.argv), dict(launch.env)))
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
-        # 嘗試期間 node_modules 唯讀（agent 透過副本裡的 symlink 只能讀），結束後還原權限；
-        # 之後比對清單：被改過 ⇒ 這次嘗試不放行、整個執行停下、不寫回（見下方）。
+        # 嘗試期間原專案 node_modules 唯讀（agent 拿到的是自己的副本），結束後還原權限並重算內容雜湊清單，
+        # 抓出任何透過絕對路徑直接改動原專案 node_modules 的行為。
         nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
         try:
             r = run_agent(launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
@@ -2868,7 +2894,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             _nm_restore_modes(nm_modes)
         spent += r["wall_ms"] / 1000.0
         if nm_start is not None:
+            t_nm = time.monotonic()
             nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
+            nm_hash_s += time.monotonic() - t_nm
             if nm_changed:
                 say(f"attempt {k}: the agent changed the project's node_modules ({len(nm_changed)} path(s), e.g. "
                     f"{', '.join(nm_changed[:3])}); not accepted, stopping, nothing written back")
@@ -2890,14 +2918,16 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             plan = _plan_write_back(project, snap, protected)
             if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
-                # 驗收時跑的是候選碼：node_modules 一樣唯讀，跑完再比對一次
+                # 驗收時跑的是候選碼：對原專案 node_modules 唯讀保護，跑完再重驗內容清單
                 nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
                 try:
                     acc = acceptance(originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project, _plan=plan)
                 finally:
                     _nm_restore_modes(nm_modes)
                 if nm_start is not None:
+                    t_nm = time.monotonic()
                     nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
+                    nm_hash_s += time.monotonic() - t_nm
                     if nm_changed:
                         acc = {**acc, "accept": False, "status": "node_modules_modified",
                                "first_problem": "node_modules changed during acceptance: " + ", ".join(nm_changed[:20])}
@@ -2972,6 +3002,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 f"changing anything; not restarting. agent said: {agent_error.splitlines()[-1] if agent_error else '(nothing)'}")
             break
 
+    if nm_start is not None and not nm_changed:
+        t_nm = time.monotonic()
+        nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
+        nm_hash_s += time.monotonic() - t_nm
+        if nm_changed and attempts:
+            attempts[-1]["accept"] = False
+            attempts[-1]["status"] = "node_modules_modified"
+            attempts[-1]["node_modules_changed"] = nm_changed[:200]
+
     d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
     if nm_changed:
         d = len(attempts) - 1
@@ -2992,6 +3031,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "baseline_error": None,
         "agent_error": agent_error,
         "node_modules_changed": nm_changed[:200],
+        "node_modules_copy_s": round(nm_copy_s, 3),
+        "node_modules_hash_s": round(nm_hash_s, 3),
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,

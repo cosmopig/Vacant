@@ -401,7 +401,7 @@ def test_npm_project_uses_node_modules_via_symlink_without_copying(tmp_path):
     orig_dep = "exports.add = (a, b) => a + b;\n"
     (nm_mod / "index.js").write_text(orig_dep, encoding="utf-8")
 
-    # 假 agent：確認 ws 裡看得到 node_modules（指向原專案的 symlink，agent 才能自己跑測試），並修好 m.js
+    # 假 agent：確認 ws 裡拿到獨立的 node_modules 副本（不是指向原專案的 symlink），並修好 m.js
     marker = tmp_path / "agent_saw_nm.txt"
     build, state = _counting_build(tmp_path, textwrap.dedent(f"""\
         import pathlib
@@ -413,7 +413,7 @@ def test_npm_project_uses_node_modules_via_symlink_without_copying(tmp_path):
     res = R.run(proj, build, "make m.val() return 5", max_attempts=2, attempt_timeout_s=20, budget_s=120)
 
     assert _calls(state) == 1
-    assert marker.read_text(encoding="utf-8") == "True True", "agent ws must reach node_modules via a symlink (not a copy)"
+    assert marker.read_text(encoding="utf-8") == "False True", "agent ws must get its own copy of node_modules (not a symlink)"
     assert res["baseline"]["status"] == "failed" and res["baseline"]["accept"] is False
     assert res["accepted"] is True
     assert res["delivered_attempt"] == 1

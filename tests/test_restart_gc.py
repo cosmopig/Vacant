@@ -300,8 +300,8 @@ def test_copy_skip_behavior_for_large_dirs(env_proj, tmp_path):
     for skipped in (".git", ".venv"):
         assert not (ws / skipped).exists()
         assert not (snap / skipped).exists()
-    # node_modules 不複製：agent 的副本裡只有一個指向原專案的 symlink（讓 agent 能跑 npm test），快照不收
-    assert (ws / "node_modules").is_symlink()
+    # node_modules（rc5）：agent 工作區拿到獨立副本（非指向原專案的 symlink），快照仍跳過、絕不寫回
+    assert (ws / "node_modules").is_dir() and not (ws / "node_modules").is_symlink()
     assert not (snap / "node_modules").exists()
     # target/ 目前不在 COPY_SKIP：會進工作區也會進快照
     assert (ws / "target" / "blob.bin").is_file()
