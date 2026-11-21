@@ -643,7 +643,10 @@ def test_d1_readonly_subfile_copied_writable_and_nonzero_exit_shown_on_pass(tmp_
         os.chmod(ro_file, 0o644)
 
     assert rc == 0, out
-    assert (proj / "wrote_ok.txt").read_text(encoding="utf-8") == "ok\n", "agent must have succeeded writing ro_sub/data.txt in its copy"
+    rj = _latest_result_json(tmp_path)
+    ws = pathlib.Path(rj["attempts"][0]["workspace"])
+    assert (ws / "ro_sub" / "data.txt").read_text(encoding="utf-8") == "edited\n", "agent's copy of read-only dir/file must be writable"
+    assert (ws / "wrote_ok.txt").read_text(encoding="utf-8") == "ok\n"
     assert "exited with code 7" in out or "exit code 7" in out
     assert "agent partial failure detail" in out
 
