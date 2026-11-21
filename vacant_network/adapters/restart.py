@@ -4443,6 +4443,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
     detached_records: list[dict[str, Any]] | None = [] if _linux_proc_available() else None
     start_snap: _Snapshot | None = None
+    start_copy: pathlib.Path | None = None
 
     def _reap_phase(phase: str, label: str = "") -> list[dict[str, Any]] | None:
         nonlocal detached_records
@@ -4569,8 +4570,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
         reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
         agent_error: str | None = None
-        # 開始時的原專案快照（R11：驗收永遠測 start_snap + 嘗試改動，不讀 live 專案）與純 lstat 清單（B1）
+        # 開始時的原專案快照（R11：驗收與各輪工作區皆從開始狀態出發，不讀 live 專案）與純 lstat 清單（B1）
         start_snap = _snapshot_workspace(project, run_dir / f"start-snap-{secrets.token_hex(6)}", skip_abs=skip_abs)
+        start_copy = run_dir / f"start-copy-{secrets.token_hex(6)}"
+        shutil.copytree(project, start_copy, symlinks=True, ignore=_copytree_ignore(skip_abs))
         start_hashes = start_snap.files
         start_unsafe = (
             start_snap.symlinks | start_snap.unreadable_dirs | start_snap.unreadable_files | start_snap.special_files
@@ -4596,7 +4599,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             attempt_dir = run_dir / f"attempt_{k}"
             ws = attempt_dir / "w"
             t_cp = time.monotonic()
-            shutil.copytree(project, ws, symlinks=True, ignore=_copytree_ignore(skip_abs))
+            shutil.copytree(start_copy, ws, symlinks=True)
             _make_tree_writable(ws)
             nm_c_s, fb = _copy_node_modules_for_agent(project, ws)
             nm_copy_s += nm_c_s
@@ -4918,6 +4921,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     finally:
         if start_snap is not None:
             _rmtree_force(start_snap.root)
+        if start_copy is not None:
+            _rmtree_force(start_copy)
         if prev_subreaper is not None:
             _set_child_subreaper(bool(prev_subreaper))
 

@@ -700,11 +700,12 @@ def test_r11_acceptance_uses_start_snapshot_not_live_project(tmp_path, monkeypat
         pathlib.Path({str(proj / 'impl.py')!r}).write_text("def answer():\\n    return 42\\n")
         """))
 
-    rc = _run_cli_do(monkeypatch, proj, agent, prompt="direct write", attempts=1)
+    rc = _run_cli_do(monkeypatch, proj, agent, prompt="direct write", attempts=2)
     out = capsys.readouterr().out
     assert rc == adapters_cli.EXIT["reject"], out
     rj = _latest_result_json(tmp_path / "vwork")
     assert rj["accepted"] is False
+    assert len(rj["attempts"]) == 2 and all(a["accept"] is False for a in rj["attempts"])
     assert "impl.py" in rj["outside_changes"]
     assert "your project changed during the run, not by this delivery:" in out
     assert "not checked and not touched" in out
