@@ -170,6 +170,7 @@ def _do_restart(args) -> int:
     _trigger_auto_gc(agent)
     if (res.get("baseline_error") or res.get("agent_error")
             or res.get("node_modules_changed") or res.get("project_not_writable")
+            or res.get("unreadable_paths")
             or res.get("write_back_conflicts")):
         return EXIT["void"]
     return EXIT["reject"] if res["accepted"] is False else 0

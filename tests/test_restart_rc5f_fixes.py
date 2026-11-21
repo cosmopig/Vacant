@@ -300,3 +300,59 @@ def test_p1_new_stdlib_shadow_still_excluded_across_python_runners(
         assert rj_p["acceptance"]["kind"] == "python_pytest"
         assert not (proj_p / "statistics.py").exists()
         assert "statistics.py" in rj_p["attempts"][0]["config_ignored"]
+
+
+# ============================================================================
+# P5: Unreadable files and directories stop upfront with exit 43 + receipt
+# ============================================================================
+
+def test_p5_unreadable_file_and_dir_stop_upfront_exit_43_with_receipt(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """Project with an unreadable file (chmod 000) and unreadable dir (chmod 000)
+    stops before running the agent: exit 43, 0 attempts, clear message, project unchanged,
+    signed receipt written and verifiable."""
+    import os
+    if os.geteuid() == 0:
+        pytest.skip("running as root bypasses chmod 000")
+
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def add(a, b): return a + b\n", encoding="utf-8")
+    secret = proj / "secret.txt"
+    secret.write_text("hidden\n", encoding="utf-8")
+    locked = proj / "locked_dir"
+    locked.mkdir()
+    (locked / "inside.txt").write_text("nope\n", encoding="utf-8")
+    marker = tmp_path / "agent_ran.txt"
+    agent = _write_agent(
+        tmp_path,
+        f"import pathlib\npathlib.Path({str(marker)!r}).write_text('ran')\n"
+        "pathlib.Path('calc.py').write_text('broken')\n",
+    )
+
+    secret.chmod(0o000)
+    locked.chmod(0o000)
+    try:
+        rc = _run_cli_do(monkeypatch, proj, agent, attempts=3)
+        out = capsys.readouterr().out
+        rj = _latest_result_json(tmp_path / "vwork")
+
+        assert rc == adapters_cli.EXIT["void"], out
+        assert not marker.exists(), "agent must not have been run"
+        assert rj["attempts"] == []
+        assert rj["delivered_attempt"] == 0
+        assert rj["unreadable_paths"] == ["locked_dir", "secret.txt"]
+        assert "[vacant] cannot read 2 path(s) in the project (permission denied): locked_dir, secret.txt; " \
+               "fix the permissions or move them out of the project. Nothing was run." in out
+        assert (proj / "calc.py").read_text(encoding="utf-8") == "def add(a, b): return a + b\n"
+        assert rj["receipt"]["recorded"] is True
+        ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
+        assert ok, why
+        assert len(receipts) == 1
+        assert receipts[0]["unreadable_paths"] == ["locked_dir", "secret.txt"]
+        assert receipts[0]["attempts"] == []
+    finally:
+        locked.chmod(0o700)
+        secret.chmod(0o600)
+

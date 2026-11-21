@@ -761,6 +761,62 @@ def _files(root: pathlib.Path) -> list[str]:
     return _scan_files(root)[0]
 
 
+def _find_unreadable_paths(root: pathlib.Path, *, skip_abs: set[pathlib.Path] | None = None) -> list[str]:
+    """掃描專案內（跳過 COPY_SKIP、Vacant 狀態/工作區根目錄與 symlink）任何不可讀的檔案或目錄。"""
+    unreadable: set[str] = set()
+    skip_rels = _skip_rels_for(root, skip_abs)
+    open_flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+
+    def _walk(cur: pathlib.Path, rel_prefix: str) -> None:
+        try:
+            entries = sorted(os.scandir(cur), key=lambda e: e.name)
+        except PermissionError:
+            unreadable.add(rel_prefix or ".")
+            return
+        except OSError:
+            return
+        if rel_prefix and not os.access(str(cur), os.X_OK):
+            unreadable.add(rel_prefix)
+            return
+        for entry in entries:
+            name = entry.name
+            if name in COPY_SKIP:
+                continue
+            rel = f"{rel_prefix}/{name}" if rel_prefix else name
+            if rel in skip_rels:
+                continue
+            try:
+                st = entry.stat(follow_symlinks=False)
+            except PermissionError:
+                if rel_prefix:
+                    unreadable.add(rel_prefix)
+                    return
+                unreadable.add(rel)
+                continue
+            except OSError:
+                continue
+            mode = st.st_mode
+            if stat.S_ISLNK(mode):
+                continue
+            if stat.S_ISDIR(mode):
+                _walk(cur / name, rel)
+            elif stat.S_ISREG(mode):
+                try:
+                    fd = os.open(str(cur / name), open_flags)
+                except PermissionError:
+                    unreadable.add(rel)
+                except OSError:
+                    pass
+                else:
+                    try:
+                        os.close(fd)
+                    except OSError:
+                        pass
+
+    _walk(root, "")
+    return sorted(unreadable)
+
+
 def _through_symlink(root: pathlib.Path, rel: str) -> bool:
     """root/rel 的路徑上（含最後一段）有沒有 symlink。root 本身不算。"""
     p = root
@@ -6264,7 +6320,8 @@ def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
     out = dict(payload)
     for key in ("written_back", "deleted", "skipped", "appeared_during_run", "conflicts",
                 "write_back_conflicts", "outside_changes", "acceptance_dependencies_changed",
-                "acceptance_integrity_reasons", "not_delivered", "detached_processes"):
+                "acceptance_integrity_reasons", "not_delivered", "detached_processes",
+                "unreadable_paths"):
         items = out.get(key)
         if isinstance(items, list) and len(items) > 64:
             out[f"{key}_count"] = len(items)
@@ -6431,6 +6488,8 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "agent_wall_s": res["agent_wall_s"],
             "total_wall_s": res["total_wall_s"],
         }
+        if res.get("unreadable_paths"):
+            payload["unreadable_paths"] = list(res["unreadable_paths"])
         payload, payload_non_utf8 = _sanitize_json_obj(payload)
         any_non_utf8 = bool(
             proj_non_utf8 or wb_non_utf8 or payload_non_utf8
@@ -6952,6 +7011,85 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     project = project.resolve()
     _raw_say = log or (lambda m: None)
     say = lambda m: _raw_say(_safe_str(m)[0])  # noqa: E731
+    skip_abs = _vacant_skip_dirs()
+    run_dir = work_root() / f"restart-{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}-{secrets.token_hex(3)}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    run_id = run_dir.name
+    attempts: list[dict] = []
+    snaps: list[_Snapshot | None] = []
+    launch_meta: list[tuple[list[str], dict[str, str]]] = []
+    spent = 0.0
+    t0 = time.monotonic()
+
+    # P5：專案內有不可讀的檔案或目錄（chmod 000／docker 留下的 root 檔）⇒ 複製工作區前先停下、明講並寫收據（exit 43）
+    unreadable_paths = _find_unreadable_paths(project, skip_abs=skip_abs)
+    if unreadable_paths:
+        shown_up = ", ".join(unreadable_paths[:10]) + (
+            f", … (+{len(unreadable_paths) - 10} more)" if len(unreadable_paths) > 10 else ""
+        )
+        say(f"cannot read {len(unreadable_paths)} path(s) in the project (permission denied): "
+            f"{shown_up}; stopping before running the agent")
+        empty_spec = AcceptanceSpec(kind="none", command=None)
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+        res = {
+            "mode": "restart",
+            "project": str(project),
+            "tests": [],
+            "protected": [],
+            "acceptance": empty_spec.to_dict(),
+            "acceptance_integrity": empty_spec.integrity,
+            "acceptance_integrity_reasons": list(empty_spec.integrity_reasons),
+            "interpreter": empty_spec.interpreter,
+            "baseline": None,
+            "baseline_error": None,
+            "unreadable_paths": list(unreadable_paths),
+            "parent_tests_dir": None,
+            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+            "appeared_during_run": [],
+            "conflicts": [],
+            "write_back_conflicts": [],
+            "outside_changes": [],
+            "protected_outside_changes": [],
+            "acceptance_dependencies_changed": [],
+            "not_delivered": [],
+            "lstat_listing_s": 0.0,
+            "node_modules_changed": [],
+            "node_modules_manifest_s": 0.0,
+            "copy_s": 0.0,
+            "node_modules_copy_s": 0.0,
+            "node_modules_hash_s": 0.0,
+            "max_attempts": max_attempts,
+            "accepted": None,
+            "delivered_attempt": 0,
+            "attempts": [],
+            "changed": changed,
+            "agent_wall_s": 0.0,
+            "total_wall_s": round(time.monotonic() - t0, 1),
+            "run_dir": str(run_dir),
+        }
+        res, res_non_utf8 = _sanitize_json_obj(res)
+        res["non_utf8_paths"] = res_non_utf8
+        if res_non_utf8:
+            res["path_encoding"] = "utf-8-backslashreplace"
+        res["receipt"] = _record_receipt(
+            project=project,
+            prompt=prompt,
+            agent=agent,
+            launch_meta=launch_meta,
+            spec=empty_spec,
+            protected=set(),
+            attempts=attempts,
+            snaps=snaps,
+            delivered_idx=-1,
+            changed=changed,
+            res=res,
+            run_dir=run_dir,
+        )
+        if not res["receipt"].get("recorded"):
+            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+        return res
+
     spec = detect_acceptance(project, check=check, protect=protect)
     originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
     orig_modes: dict[str, int] = {}
@@ -6961,20 +7099,11 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         except OSError:
             pass
     protected = set(originals)
-    skip_abs = _vacant_skip_dirs()
     py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
     has_acceptance = spec.kind != "none" and spec.reason is None
     if not has_acceptance:
         max_attempts = 1
         attempt_timeout_s = budget_s
-    run_dir = work_root() / f"restart-{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}-{secrets.token_hex(3)}"
-    run_dir.mkdir(parents=True, exist_ok=True)
-    run_id = run_dir.name
-    attempts: list[dict] = []
-    snaps: list[_Snapshot | None] = []
-    launch_meta: list[tuple[list[str], dict[str, str]]] = []
-    spent = 0.0
-    t0 = time.monotonic()
     parent_tests_dir = _find_parent_with_tests(project) if spec.kind == "none" else None
 
     # D1：原專案根目錄不可寫 ⇒ 寫回一定會失敗，跑 agent 前先停下並明講（exit 43）
@@ -7693,6 +7822,13 @@ def summary(res: dict) -> str:
             f"[vacant] project directory is not writable ({res.get('project')}); "
             f"write-back would fail, so nothing was run and the project is unchanged."
         )
+    elif res.get("unreadable_paths"):
+        up = list(res["unreadable_paths"])
+        shown_up = ", ".join(up[:10]) + (f", … (+{len(up) - 10} more)" if len(up) > 10 else "")
+        head = (
+            f"[vacant] cannot read {len(up)} path(s) in the project (permission denied): "
+            f"{shown_up}; fix the permissions or move them out of the project. Nothing was run."
+        )
     elif baseline_err:
         reason_txt = str(baseline_err).strip()
         head = (
@@ -7900,7 +8036,8 @@ def summary(res: dict) -> str:
             head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
         else:
             head += f"\n  the agent edited kept-fixed files ({', '.join(tam)}); checked against the originals, not written back."
-    if (not res.get("project_not_writable") and not baseline_err and not res.get("node_modules_changed")
+    if (not res.get("project_not_writable") and not res.get("unreadable_paths")
+            and not baseline_err and not res.get("node_modules_changed")
             and not res.get("agent_error") and res.get("attempts") and res.get("delivered_attempt")):
         d_att = res["attempts"][res["delivered_attempt"] - 1]
         if d_att.get("rc") not in (0, None):
