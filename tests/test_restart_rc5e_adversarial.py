@@ -162,47 +162,52 @@ def test_normal_existing_stdlib_named_project_module_queue_py(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     """Normal case 3: project already has queue.py at start (same name as stdlib module)
-    and test imports it; agent fixes queue.py -> not ignored, written back, no NOTE."""
+    and test does `from queue import Q` (stdlib queue has no Q, so wrong resolution fails
+    with ImportError); agent fixes queue.py -> not ignored, written back, traced, no NOTE."""
     proj = tmp_path / "proj"
     proj.mkdir()
     (proj / "queue.py").write_text(textwrap.dedent("""\
-        def make_queue():
-            return []
+        class Q:
+            def __init__(self):
+                self.items = []
 
-        def enqueue(q, item):
-            return q  # bug
+            def push(self, x):
+                self.items.append(x)
+
+            def pop(self):
+                return self.items.pop()  # bug: LIFO instead of FIFO
     """), encoding="utf-8")
     (proj / "test_queue.py").write_text(textwrap.dedent("""\
         import unittest
-        import queue
+        from queue import Q
 
         class T(unittest.TestCase):
-            def test_enqueue(self):
-                q = queue.make_queue()
-                queue.enqueue(q, 42)
-                self.assertEqual(q, [42])
+            def test_fifo(self):
+                q = Q()
+                q.push(1)
+                q.push(2)
+                self.assertEqual(q.pop(), 1)
     """), encoding="utf-8")
 
     agent = _write_agent(
         tmp_path,
         textwrap.dedent("""\
             import pathlib
-            pathlib.Path('queue.py').write_text(
-                'def make_queue():\\n    return []\\n\\ndef enqueue(q, item):\\n    q.append(item)\\n    return q\\n'
-            )
+            p = pathlib.Path('queue.py')
+            p.write_text(p.read_text().replace('self.items.pop()', 'self.items.pop(0)'))
         """),
     )
-    rc = _run_cli_do(
-        monkeypatch, proj, agent, attempts=1,
-        extra_args=["--check", f"{sys.executable} -m unittest test_queue.py"],
-    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=1)
     out = capsys.readouterr().out
     rj = _latest_result_json(tmp_path / "vwork")
 
     assert rc == 0, out
+    assert rj["acceptance"]["kind"] == "python_unittest"
     assert rj["accepted"] is True
     assert rj["acceptance_integrity"] == "traced"
-    assert "q.append(item)" in (proj / "queue.py").read_text(encoding="utf-8")
+    assert rj["baseline"]["accept"] is False
+    assert rj["baseline"]["run"] == 1
+    assert "self.items.pop(0)" in (proj / "queue.py").read_text(encoding="utf-8")
     assert rj["attempts"][0]["config_ignored"] == []
     assert rj["acceptance_dependencies_changed"] == []
     assert "NOTE:" not in out

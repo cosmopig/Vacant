@@ -77,7 +77,7 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
   避免殘留背景行程在驗收與寫回之間偷改工作區（TOCTOU），也避免 symlink 只在驗收生效卻不寫回。
 - 驗收執行隔離邊界：Python 驗收路徑（`python_unittest`、`python_pytest`、`python_bare`）皆以專案直譯器＋`-B`
   （保留不寫 `.pyc`，捨 `-I` 以支援 `pip install --user` 與 `PYTHONPATH`）在工作區外的私密空目錄獨立腳本檔執行，
-  於匯入標準庫／`pytest` 之前先從 `sys.path` 剔除 `""`、`.`、腳本目錄與工作區，再把工作區附在 `sys.path` 尾端，
+  於匯入標準庫／`pytest` 之前先從 `sys.path` 剔除 `""`、`.`、腳本目錄與工作區，匯入執行器自身相依後再把工作區插在 `sys.path` 前端（與使用者直接跑 `python -m unittest`／`pytest` 一致；開始時不存在且會遮蔽已解析模組的新檔仍由 rc5e 排除於驗收副本外），
   依原測試檔精確路徑載入（防止套件目錄或標準庫遮蔽），並透過獨立 session（結束或逾時皆 `killpg` 整組清除）、
   獨立管線（FD）與單次隨機 nonce 回傳結果（不依賴 stdout 固定標記；`pytest` 的 junitxml 寫在工作區外私密目錄）。
   外部指令（`--check`、`npm`、`cargo`、`go`）同樣於快照副本中以獨立 session（結束或逾時皆 `killpg`）與共用期限執行；
@@ -258,8 +258,9 @@ def _main():
                 _new_path.append(_p)
         _sys.path[:] = _new_path
 
-    if cwd not in _sys.path:
-        _sys.path.append(cwd)
+    while cwd in _sys.path:
+        _sys.path.remove(cwd)
+    _sys.path.insert(0, cwd)
 
     out = {
         "run": 0,
@@ -393,9 +394,10 @@ def _main():
                 _new_path.append(_p)
         _sys.path[:] = _new_path
 
-    for p in extra_paths:
-        if p not in _sys.path:
-            _sys.path.append(p)
+    for p in reversed(extra_paths):
+        while p in _sys.path:
+            _sys.path.remove(p)
+        _sys.path.insert(0, p)
 
     argv = [
         "-q",
@@ -480,9 +482,10 @@ def _main():
                 _new_path.append(_p)
         _sys.path[:] = _new_path
 
-    for p in extra_paths:
-        if p not in _sys.path:
-            _sys.path.append(p)
+    for p in reversed(extra_paths):
+        while p in _sys.path:
+            _sys.path.remove(p)
+        _sys.path.insert(0, p)
 
     def _needs_required_args(fn):
         try:

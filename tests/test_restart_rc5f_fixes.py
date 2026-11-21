@@ -1,0 +1,302 @@
+"""Regression tests for rc5f narrow-unfreeze fixes:
+- P1: project modules named like stdlib modules resolve to the project in all Python runners
+  (python_unittest, python_pytest, python_bare) while keeping rc5e new-shadow exclusion.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+import pathlib
+import subprocess
+import sys
+import textwrap
+
+import pytest
+
+from vacant_network.adapters import cli as adapters_cli
+from vacant_network.adapters import restart as R
+
+
+def _write_agent(tmp_path: pathlib.Path, body: str, name: str = "agent.py") -> pathlib.Path:
+    p = tmp_path / name
+    p.write_text(body, encoding="utf-8")
+    return p
+
+
+def _run_cli_do(
+    monkeypatch: pytest.MonkeyPatch,
+    proj: pathlib.Path,
+    agent_py: pathlib.Path,
+    *,
+    prompt: str = "fix",
+    attempts: int = 3,
+    extra_args: list[str] | None = None,
+    vhome: pathlib.Path | None = None,
+    vwork: pathlib.Path | None = None,
+) -> int:
+    vh = vhome or (proj.parent / "vhome")
+    vw = vwork or (proj.parent / "vwork")
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    monkeypatch.setenv("VACANT_WORK", str(vw))
+    monkeypatch.setenv("VACANT_HOOK_NO_GC", "1")
+    monkeypatch.delenv("VIRTUAL_ENV", raising=False)
+    monkeypatch.chdir(proj)
+    argv = [
+        "do",
+        "--cmd", f"{sys.executable} {agent_py} {{prompt}}",
+        "--prompt", prompt,
+        "--attempts", str(attempts),
+        "--attempt-timeout", "30",
+        "--timeout", "120",
+        *(extra_args or []),
+    ]
+    return adapters_cli.main(argv)
+
+
+def _latest_result_json(vwork: pathlib.Path) -> dict:
+    rjs = sorted(vwork.glob("restart-*/result.json"))
+    assert rjs, f"no result.json under {vwork}"
+    return json.loads(rjs[-1].read_text(encoding="utf-8"))
+
+
+def _make_project_venv_with_pytest(proj: pathlib.Path) -> pathlib.Path:
+    """Create a real `.venv` inside `proj` with pytest importable (reusing current pytest site-packages)."""
+    spec = importlib.util.find_spec("pytest")
+    if spec is None or not spec.origin:
+        pytest.skip("pytest not available")
+    venv_dir = proj / ".venv"
+    subprocess.run([sys.executable, "-m", "venv", str(venv_dir)], check=True)
+    vpy = venv_dir / "bin" / "python"
+    vsp = subprocess.check_output(
+        [str(vpy), "-c", "import site; print(site.getsitepackages()[0])"],
+        text=True,
+    ).strip()
+    pytest_root = str(pathlib.Path(spec.origin).resolve().parent.parent)
+    (pathlib.Path(vsp) / "vacant_test_pytest.pth").write_text(pytest_root + "\n", encoding="utf-8")
+    return vpy
+
+
+# ============================================================================
+# P1: Project modules named like stdlib modules resolve to project first
+# ============================================================================
+
+def test_p1_ud_existing_queue_py_unittest(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """(u_d) Project has queue.py with FIFO bug; test does `from queue import Q`; agent fixes it."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "queue.py").write_text(
+        "class Q:\n"
+        "    def __init__(self): self.items=[]\n"
+        "    def push(self,x): self.items.append(x)\n"
+        "    def pop(self): return self.items.pop()   # bug: should be FIFO\n",
+        encoding="utf-8",
+    )
+    (proj / "test_queue.py").write_text(
+        "import unittest\n"
+        "from queue import Q\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_fifo(self):\n"
+        "        q=Q(); q.push(1); q.push(2); self.assertEqual(q.pop(),1)\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "p = pathlib.Path('queue.py')\n"
+        "p.write_text(p.read_text().replace('self.items.pop()', 'self.items.pop(0)'))\n",
+    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=3)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == 0, out
+    assert rj["acceptance"]["kind"] == "python_unittest"
+    assert rj["baseline"]["accept"] is False
+    assert rj["baseline"]["status"] == "ok"
+    assert rj["baseline"]["run"] == 1
+    assert rj["accepted"] is True
+    assert rj["delivered_attempt"] == 1
+    assert rj["acceptance_integrity"] == "traced"
+    assert "NOTE:" not in out
+    assert "self.items.pop(0)" in (proj / "queue.py").read_text(encoding="utf-8")
+
+
+def test_p1_ud2_existing_queue_py_pytest(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """(u_d2) Same as u_d with pytest inside project `.venv`."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    vpy = _make_project_venv_with_pytest(proj)
+    (proj / "queue.py").write_text(
+        "class Q:\n"
+        "    def __init__(self): self.items=[]\n"
+        "    def push(self,x): self.items.append(x)\n"
+        "    def pop(self): return self.items.pop()   # bug: should be FIFO\n",
+        encoding="utf-8",
+    )
+    (proj / "test_queue.py").write_text(
+        "from queue import Q\n"
+        "def test_fifo():\n"
+        "    q=Q(); q.push(1); q.push(2); assert q.pop()==1\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "p = pathlib.Path('queue.py')\n"
+        "p.write_text(p.read_text().replace('self.items.pop()', 'self.items.pop(0)'))\n",
+    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=3)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == 0, out
+    assert rj["acceptance"]["kind"] == "python_pytest"
+    assert rj["interpreter"] == str(vpy)
+    assert rj["baseline"]["accept"] is False
+    assert rj["baseline"]["run"] == 1
+    assert rj["accepted"] is True
+    assert rj["delivered_attempt"] == 1
+    assert rj["acceptance_integrity"] == "traced"
+    assert "NOTE:" not in out
+    assert "self.items.pop(0)" in (proj / "queue.py").read_text(encoding="utf-8")
+
+
+def test_p1_mine_m1_existing_statistics_py_unittest_broken(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """(mine_m1) Project statistics.py is buggy; agent makes it return None -> must FAIL (exit 40)."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "statistics.py").write_text(
+        "def median(xs):\n    return sorted(xs)[0]\n",
+        encoding="utf-8",
+    )
+    (proj / "test_stats.py").write_text(
+        "import unittest\n"
+        "from statistics import median\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_median(self):\n"
+        "        self.assertEqual(median([3, 1, 2]), 2)\n"
+        "        self.assertEqual(median([5, 9, 7]), 7)\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "pathlib.Path('statistics.py').write_text('def median(xs):\\n    return None\\n')\n",
+    )
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=3)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == adapters_cli.EXIT["reject"], out
+    assert rj["acceptance"]["kind"] == "python_unittest"
+    assert rj["baseline"]["accept"] is False
+    assert rj["accepted"] is False
+    assert all(a["accept"] is False for a in rj["attempts"])
+
+
+def test_p1_m10_existing_statistics_py_bare_broken(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """(m10) Same as mine_m1 on the python_bare runner -> must FAIL (exit 40)."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "statistics.py").write_text(
+        "def median(xs):\n    return sorted(xs)[0]\n",
+        encoding="utf-8",
+    )
+    (proj / "test_stats.py").write_text(
+        "from statistics import median\n"
+        "def test_median():\n"
+        "    assert median([3, 1, 2]) == 2\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "pathlib.Path('statistics.py').write_text('def median(xs):\\n    return None\\n')\n",
+    )
+    monkeypatch.setattr(R, "_pytest_available", lambda py_exe=None: False)
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=2)
+    out = capsys.readouterr().out
+    rj = _latest_result_json(tmp_path / "vwork")
+
+    assert rc == adapters_cli.EXIT["reject"], out
+    assert rj["acceptance"]["kind"] == "python_bare"
+    assert rj["baseline"]["accept"] is False
+    assert rj["accepted"] is False
+    assert all(a["accept"] is False for a in rj["attempts"])
+
+
+def test_p1_new_stdlib_shadow_still_excluded_across_python_runners(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """rc5e compatibility: a NEW statistics.py (absent at start) that would shadow stdlib
+    must remain excluded from the check copy and not written back under python_unittest,
+    python_pytest, and python_bare."""
+    # 1. python_unittest
+    proj_u = tmp_path / "proj_u"
+    proj_u.mkdir()
+    (proj_u / "test_s.py").write_text(
+        "import unittest\n"
+        "from statistics import median\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_m(self):\n"
+        "        self.assertEqual(median([1, 2, 3]), 99)\n",
+        encoding="utf-8",
+    )
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "pathlib.Path('statistics.py').write_text('def median(xs): return 99\\n')\n",
+    )
+    rc_u = _run_cli_do(monkeypatch, proj_u, agent, attempts=1, vhome=tmp_path / "vh_u", vwork=tmp_path / "vw_u")
+    capsys.readouterr()
+    rj_u = _latest_result_json(tmp_path / "vw_u")
+    assert rc_u == adapters_cli.EXIT["reject"]
+    assert rj_u["acceptance"]["kind"] == "python_unittest"
+    assert not (proj_u / "statistics.py").exists()
+    assert "statistics.py" in rj_u["attempts"][0]["config_ignored"]
+
+    # 2. python_bare
+    proj_b = tmp_path / "proj_b"
+    proj_b.mkdir()
+    (proj_b / "test_s.py").write_text(
+        "from statistics import median\n"
+        "def test_m():\n"
+        "    assert median([1, 2, 3]) == 99\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(R, "_pytest_available", lambda py_exe=None: False)
+    rc_b = _run_cli_do(monkeypatch, proj_b, agent, attempts=1, vhome=tmp_path / "vh_b", vwork=tmp_path / "vw_b")
+    capsys.readouterr()
+    rj_b = _latest_result_json(tmp_path / "vw_b")
+    assert rc_b == adapters_cli.EXIT["reject"]
+    assert rj_b["acceptance"]["kind"] == "python_bare"
+    assert not (proj_b / "statistics.py").exists()
+    assert "statistics.py" in rj_b["attempts"][0]["config_ignored"]
+
+    # 3. python_pytest (if pytest available)
+    if importlib.util.find_spec("pytest") is not None:
+        monkeypatch.undo()
+        proj_p = tmp_path / "proj_p"
+        proj_p.mkdir()
+        _make_project_venv_with_pytest(proj_p)
+        (proj_p / "test_s.py").write_text(
+            "from statistics import median\n"
+            "def test_m():\n"
+            "    assert median([1, 2, 3]) == 99\n",
+            encoding="utf-8",
+        )
+        rc_p = _run_cli_do(monkeypatch, proj_p, agent, attempts=1, vhome=tmp_path / "vh_p", vwork=tmp_path / "vw_p")
+        capsys.readouterr()
+        rj_p = _latest_result_json(tmp_path / "vw_p")
+        assert rc_p == adapters_cli.EXIT["reject"]
+        assert rj_p["acceptance"]["kind"] == "python_pytest"
+        assert not (proj_p / "statistics.py").exists()
+        assert "statistics.py" in rj_p["attempts"][0]["config_ignored"]
