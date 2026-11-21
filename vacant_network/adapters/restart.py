@@ -844,14 +844,102 @@ def _make_tree_writable(root: pathlib.Path) -> None:
                 pass
 
 
-def _find_detached_processes(marker_val: str) -> list[int] | None:
-    """在 Linux 上掃描 /proc/*/environ，找出仍帶著 VACANT_RUN_ID=<marker_val> 的存活行程（排除自身與僵屍）。
-    非 Linux 或無 /proc 回傳 None（表示未檢查）。"""
-    if not sys.platform.startswith("linux") or not os.path.isdir("/proc"):
+_PR_SET_CHILD_SUBREAPER = 36
+_PR_GET_CHILD_SUBREAPER = 37
+
+
+def _linux_proc_available() -> bool:
+    return sys.platform.startswith("linux") and os.path.isdir("/proc")
+
+
+def _set_child_subreaper(enable: bool) -> int | None:
+    """在 Linux 上透過 ctypes 呼叫 prctl(PR_SET_CHILD_SUBREAPER, 1/0)，回傳原值；非 Linux 或失敗回傳 None。"""
+    if not sys.platform.startswith("linux"):
+        return None
+    try:
+        import ctypes
+        libc = ctypes.CDLL(None, use_errno=True)
+        prev = ctypes.c_int(0)
+        if libc.prctl(_PR_GET_CHILD_SUBREAPER, ctypes.byref(prev), 0, 0, 0) != 0:
+            prev_val = 0
+        else:
+            prev_val = int(prev.value)
+        if libc.prctl(_PR_SET_CHILD_SUBREAPER, 1 if enable else 0, 0, 0, 0) != 0:
+            return None
+        return prev_val
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _read_proc_stat(pid: int) -> tuple[str, str, int, int] | None:
+    """讀取 /proc/<pid>/stat，回傳 `(comm, state, ppid, pgrp)`；讀不到回傳 None。"""
+    try:
+        raw = pathlib.Path("/proc", str(pid), "stat").read_bytes()
+    except OSError:
+        return None
+    txt = raw.decode("utf-8", errors="backslashreplace")
+    lp = txt.find("(")
+    rp = txt.rfind(")")
+    if lp < 0 or rp <= lp:
+        return None
+    comm = txt[lp + 1:rp]
+    fields = txt[rp + 2:].split()
+    if len(fields) < 3:
+        return None
+    try:
+        return comm, fields[0], int(fields[1]), int(fields[2])
+    except ValueError:
+        return None
+
+
+def _read_proc_cmdline(pid: int, fallback_comm: str = "") -> str:
+    """讀取 /proc/<pid>/cmdline 並轉為 byte-safe UTF-8 字串（空時退回 comm）。"""
+    try:
+        raw = pathlib.Path("/proc", str(pid), "cmdline").read_bytes()
+    except OSError:
+        raw = b""
+    parts = [p for p in raw.split(b"\x00") if p]
+    if parts:
+        txt = " ".join(p.decode("utf-8", errors="backslashreplace") for p in parts)
+    else:
+        txt = fallback_comm
+    return _safe_str(txt)[0][:512]
+
+
+def _direct_children_pids() -> set[int]:
+    """列出目前 /proc 中 ppid == os.getpid() 且非僵屍的子行程 PID 集合。"""
+    if not _linux_proc_available():
+        return set()
+    me = os.getpid()
+    out: set[int] = set()
+    try:
+        entries = list(os.scandir("/proc"))
+    except OSError:
+        return out
+    for entry in entries:
+        if not entry.name.isdigit():
+            continue
+        pid = int(entry.name)
+        if pid == me:
+            continue
+        info = _read_proc_stat(pid)
+        if info is None:
+            continue
+        _, state, ppid, _ = info
+        if ppid == me and state != "Z":
+            out.add(pid)
+    return out
+
+
+def _find_detached_processes(marker_val: str, *, known_pids: set[int] | None = None) -> list[int] | None:
+    """在 Linux 上以 child subreaper（/proc/*/stat ppid==self）＋環境變數標記（/proc/*/environ）
+    找出仍存活的脫離子孫行程（排除自身、既知子行程與僵屍）。非 Linux 或無 /proc 回傳 None。"""
+    if not _linux_proc_available():
         return None
     needle = f"{_DETACHED_MARKER_ENV}={marker_val}".encode("utf-8")
     me = os.getpid()
-    found: list[int] = []
+    known = known_pids or set()
+    found: set[int] = set()
     try:
         entries = list(os.scandir("/proc"))
     except OSError:
@@ -860,23 +948,127 @@ def _find_detached_processes(marker_val: str) -> list[int] | None:
         if not entry.name.isdigit():
             continue
         pid = int(entry.name)
-        if pid == me:
+        if pid == me or pid in known:
+            continue
+        info = _read_proc_stat(pid)
+        if info is None:
+            continue
+        _, state, ppid, _ = info
+        if state == "Z":
+            continue
+        if ppid == me:
+            found.add(pid)
             continue
         try:
             raw = pathlib.Path(entry.path, "environ").read_bytes()
         except OSError:
             continue
-        if needle not in raw.split(b"\x00"):
-            continue
+        if needle in raw.split(b"\x00"):
+            found.add(pid)
+    return sorted(found)
+
+
+def _kill_and_reap_detached(pid: int, pgrp: int, my_pgrp: int) -> bool:
+    """以 SIGKILL 結束脫離子孫（安全時殺其行程群組）並短暫等待／reap，回傳是否成功結束。"""
+    if pgrp > 1 and pgrp != my_pgrp:
         try:
-            stat_txt = pathlib.Path(entry.path, "stat").read_text(encoding="utf-8", errors="replace")
-            rp = stat_txt.rfind(")")
-            if rp >= 0 and stat_txt[rp + 2:rp + 3] == "Z":
-                continue
+            os.killpg(pgrp, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError, OSError):
+            pass
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    except (PermissionError, OSError):
+        pass
+
+    deadline = time.monotonic() + 0.4
+    while time.monotonic() < deadline:
+        try:
+            wpid, _ = os.waitpid(pid, os.WNOHANG)
+            if wpid == pid:
+                return True
+        except ChildProcessError:
+            pass
         except OSError:
             pass
-        found.append(pid)
-    return sorted(found)
+        info = _read_proc_stat(pid)
+        if info is None or info[1] == "Z":
+            try:
+                os.waitpid(pid, os.WNOHANG)
+            except OSError:
+                pass
+            return True
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return True
+        except OSError:
+            pass
+        time.sleep(0.015)
+
+    info = _read_proc_stat(pid)
+    return info is None or info[1] == "Z"
+
+
+def _reap_detached_processes(phase: str, marker_val: str, *,
+                             known_pids: set[int]) -> list[dict[str, Any]] | None:
+    """在 Linux 上掃描並 SIGKILL 脫離子孫（subreaper ppid 為主、VACANT_RUN_ID 環境變數為輔），
+    回傳 `[{"phase", "pid", "cmdline", "killed"}, ...]`；非 Linux 回傳 None。"""
+    if not _linux_proc_available():
+        return None
+    me = os.getpid()
+    my_pgrp = os.getpgrp()
+    needle = f"{_DETACHED_MARKER_ENV}={marker_val}".encode("utf-8")
+    recorded: dict[int, dict[str, Any]] = {}
+
+    for _pass in range(5):
+        targets: list[tuple[int, str, int]] = []
+        try:
+            entries = list(os.scandir("/proc"))
+        except OSError:
+            return None
+        for entry in entries:
+            if not entry.name.isdigit():
+                continue
+            pid = int(entry.name)
+            if pid == me or pid in known_pids or pid in recorded:
+                continue
+            info = _read_proc_stat(pid)
+            if info is None:
+                continue
+            comm, state, ppid, pgrp = info
+            if state == "Z":
+                if ppid == me:
+                    try:
+                        os.waitpid(pid, os.WNOHANG)
+                    except OSError:
+                        pass
+                continue
+            matched = (ppid == me)
+            if not matched:
+                try:
+                    raw = pathlib.Path(entry.path, "environ").read_bytes()
+                    matched = needle in raw.split(b"\x00")
+                except OSError:
+                    matched = False
+            if matched:
+                targets.append((pid, comm, pgrp))
+        if not targets:
+            break
+        for pid, comm, pgrp in sorted(targets):
+            cmdline = _read_proc_cmdline(pid, comm)
+            killed = _kill_and_reap_detached(pid, pgrp, my_pgrp)
+            recorded[pid] = {
+                "phase": phase,
+                "pid": pid,
+                "cmdline": cmdline,
+                "killed": killed,
+            }
+        # 短暫讓新被 reparent 到 subreaper 的孫行程浮現
+        time.sleep(0.03)
+
+    return [recorded[pid] for pid in sorted(recorded)]
 
 
 def _dir_has_detectable_tests(d: pathlib.Path) -> bool:
@@ -1739,7 +1931,8 @@ def _venv_root_for(python_exe: str | None) -> str | None:
 
 
 def _clean_env(home: pathlib.Path, *, python_exe: str | None = None,
-               work_root: pathlib.Path | None = None) -> dict[str, str]:
+               work_root: pathlib.Path | None = None,
+               run_id: str | None = None) -> dict[str, str]:
     path_val = os.environ.get("PATH", "/usr/bin:/bin")
     if python_exe:
         py_bin = os.path.dirname(os.path.abspath(python_exe))
@@ -1753,6 +1946,8 @@ def _clean_env(home: pathlib.Path, *, python_exe: str | None = None,
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONHASHSEED": "0",
     }
+    if run_id:
+        env[_DETACHED_MARKER_ENV] = run_id
     vroot = _venv_root_for(python_exe)
     if vroot:
         env["VIRTUAL_ENV"] = vroot
@@ -2882,7 +3077,8 @@ def _run_isolated_python_script(runner_script: pathlib.Path, cfg_obj: dict[str, 
                                 runner_dir: pathlib.Path, tag: str,
                                 deadline: float, *,
                                 python_exe: str | None = None,
-                                work_root: pathlib.Path | None = None
+                                work_root: pathlib.Path | None = None,
+                                run_id: str | None = None
                                 ) -> tuple[bool, int | None, bytes, pathlib.Path, pathlib.Path, str | None]:
     """以 `<python_exe> -B`、工作區外獨立腳本、獨立 session、共用期限與單次隨機 nonce 管線執行隔離腳本。"""
     exe = python_exe or sys.executable
@@ -2909,7 +3105,7 @@ def _run_isolated_python_script(runner_script: pathlib.Path, cfg_obj: dict[str, 
                 proc = subprocess.Popen(
                     [exe, "-B", str(runner_script)],
                     cwd=str(run_cwd),
-                    env=_clean_env(home, python_exe=exe, work_root=work_root),
+                    env=_clean_env(home, python_exe=exe, work_root=work_root, run_id=run_id),
                     stdin=cfg_in,
                     stdout=out_f,
                     stderr=err_f,
@@ -2957,7 +3153,8 @@ def _tail_logs(out_log: pathlib.Path, err_log: pathlib.Path) -> str | None:
 def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
                          home: pathlib.Path, runner_dir: pathlib.Path, deadline: float, *,
                          python_exe: str | None = None,
-                         project_root: pathlib.Path | None = None) -> dict[str, Any]:
+                         project_root: pathlib.Path | None = None,
+                         run_id: str | None = None) -> dict[str, Any]:
     """既有 unittest 驗收路徑（與 confirm1 相同執行器與計數；僅 0 個測試改記 no_tests_collected）。"""
     runner_script = runner_dir / "runner.py"
     runner_script.write_text(_UNITTEST_RUNNER, encoding="utf-8")
@@ -2989,6 +3186,7 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
             run_cwd, home, runner_dir, f"u_{idx}", deadline,
             python_exe=python_exe,
             work_root=work_res,
+            run_id=run_id,
         )
         if spawn_err is not None:
             return {**base, "status": "runner_unavailable", "accept": None, "first_problem": spawn_err}
@@ -3022,7 +3220,8 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
 def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
                        home: pathlib.Path, runner_dir: pathlib.Path, deadline: float, *,
                        python_exe: str | None = None,
-                       project_root: pathlib.Path | None = None) -> dict[str, Any]:
+                       project_root: pathlib.Path | None = None,
+                       run_id: str | None = None) -> dict[str, Any]:
     """pytest 驗收路徑：隔離腳本載入 pytest、依原測試檔精確路徑執行、junitxml 寫於工作區外。"""
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
@@ -3054,6 +3253,7 @@ def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Pat
         work_res, home, runner_dir, "pytest", deadline,
         python_exe=python_exe,
         work_root=work_res,
+        run_id=run_id,
     )
     if spawn_err is not None:
         return {**base, "status": "runner_unavailable", "accept": None, "first_problem": spawn_err}
@@ -3106,7 +3306,8 @@ def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Pat
 def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
                      home: pathlib.Path, runner_dir: pathlib.Path, deadline: float, *,
                      python_exe: str | None = None,
-                     project_root: pathlib.Path | None = None) -> dict[str, Any]:
+                     project_root: pathlib.Path | None = None,
+                     run_id: str | None = None) -> dict[str, Any]:
     """pytest 缺席時的極簡標準庫執行器：同時跑 unittest.TestCase、裸 def test_* 與簡易非 TestCase 測試類別。"""
     runner_script = runner_dir / "runner_bare.py"
     runner_script.write_text(_BARE_RUNNER, encoding="utf-8")
@@ -3141,6 +3342,7 @@ def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
             run_cwd, home, runner_dir, f"b_{idx}", deadline,
             python_exe=python_exe,
             work_root=work_res,
+            run_id=run_id,
         )
         if spawn_err is not None:
             return {**base, "status": "runner_unavailable", "accept": None, "first_problem": spawn_err}
@@ -3171,7 +3373,8 @@ def _run_python_bare(base: dict[str, Any], tests: list[str], work: pathlib.Path,
 
 def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: pathlib.Path,
                           runner_dir: pathlib.Path, deadline: float, *,
-                          node_modules_dir: pathlib.Path | None = None) -> dict[str, Any]:
+                          node_modules_dir: pathlib.Path | None = None,
+                          run_id: str | None = None) -> dict[str, Any]:
     """在快照副本 work 裡執行外部驗收指令（--check／npm／cargo／go），獨立 session、共用期限、沿用使用者環境。"""
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
@@ -3190,6 +3393,8 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
                 }
     env = dict(os.environ)
     env["PWD"] = str(work_res)
+    if run_id:
+        env[_DETACHED_MARKER_ENV] = run_id
     if node_modules_dir is not None and node_modules_dir.is_dir():
         nm_str = str(node_modules_dir)
         old_np = env.get("NODE_PATH", "")
@@ -3260,7 +3465,8 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
                _project: pathlib.Path | None = None,
                _plan: _WritePlan | None = None,
                _orig_modes: dict[str, int] | None = None,
-               _start_snap: _Snapshot | None = None) -> dict:
+               _start_snap: _Snapshot | None = None,
+               _run_id: str | None = None) -> dict:
     """在工作區快照的**潔淨副本**裡、把開始時的受保護檔案還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
     all_protected = sorted(originals)
     py_tests = [rel for rel in all_protected if _is_python_test(rel)]
@@ -3322,17 +3528,17 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         if spec.kind == "python_unittest":
             return _run_python_unittest(
                 base, py_tests, work, home, runner_dir, deadline,
-                python_exe=py_exe, project_root=_project,
+                python_exe=py_exe, project_root=_project, run_id=_run_id,
             )
         if spec.kind == "python_pytest":
             return _run_python_pytest(
                 base, py_tests, work, home, runner_dir, deadline,
-                python_exe=py_exe, project_root=_project,
+                python_exe=py_exe, project_root=_project, run_id=_run_id,
             )
         if spec.kind == "python_bare":
             return _run_python_bare(
                 base, py_tests, work, home, runner_dir, deadline,
-                python_exe=py_exe, project_root=_project,
+                python_exe=py_exe, project_root=_project, run_id=_run_id,
             )
         if spec.kind in _EXIT_CODE_ONLY_KINDS:
             # 僅於驗收階段將原專案的 node_modules 以 symlink（＋NODE_PATH）提供給驗收副本，
@@ -3352,7 +3558,7 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
             try:
                 return _run_external_command(
                     base, spec, work, runner_dir, deadline,
-                    node_modules_dir=nm_target,
+                    node_modules_dir=nm_target, run_id=_run_id,
                 )
             finally:
                 if nm_link is not None and nm_link.is_symlink():
@@ -4227,53 +4433,428 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         return res
 
     # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
-    baseline_rec: dict[str, Any] | None = None
-    nm_root = _nm_root(project)
-    nm_start: dict[str, tuple] | None = None
-    nm_sha_start: dict[str, str | None] | None = None
-    nm_changed: list[str] = []
-    nm_copy_s = 0.0
-    copy_s = 0.0
-    nm_manifest_s = 0.0
-    nm_hash_s = 0.0
-    nm_reflink_fallback = False
-    nm_reflink_warned = False
-    baseline_error: str | None = None
-    if spec.reason is not None:
-        baseline_rec = {
-            "accept": None,
-            "passed": None,
-            "run": None,
-            "status": "runner_unavailable",
-            "first_problem": spec.reason,
-            "returncode": None,
-        }
-        baseline_error = _baseline_env_reason(spec, baseline_rec, project)
-    elif has_acceptance:
-        base_t = max(0.0, min(ACC_TIMEOUT_S, budget_s / 2 if budget_s < 10.0 else budget_s))
-        base_acc = acceptance(originals, project, base_t, spec=spec, _project=project, _orig_modes=orig_modes)
-        baseline_rec = {
-            "accept": base_acc.get("accept"),
-            "passed": base_acc.get("passed"),
-            "run": base_acc.get("run"),
-            "status": base_acc.get("status"),
-            "first_problem": base_acc.get("first_problem"),
-            "returncode": base_acc.get("returncode"),
-        }
-        baseline_error = _baseline_env_reason(spec, base_acc, project)
-        if baseline_error is None:
-            if baseline_rec["accept"] is None:
-                say(f"baseline: not checked ({baseline_rec['status']})")
-            elif baseline_rec["run"] is not None:
-                say(f"baseline: {spec.kind} {'PASS' if baseline_rec['accept'] else 'FAIL'} "
-                    f"({baseline_rec['passed']}/{baseline_rec['run']})")
-            else:
-                say(f"baseline: {spec.kind} {'PASS' if baseline_rec['accept'] else 'FAIL'} "
-                    f"(status={baseline_rec['status']})")
+    # R2/R3：在 Linux 上於整個 run() 期間啟用 PR_SET_CHILD_SUBREAPER，使 setsid/env -i 脫離子孫
+    # 全部收歸本行程底下，可列出並 SIGKILL 清理；結束時在 finally 還原。
+    prev_subreaper = _set_child_subreaper(True) if _linux_proc_available() else None
+    known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
+    detached_records: list[dict[str, Any]] | None = [] if _linux_proc_available() else None
+    start_snap: _Snapshot | None = None
 
-    if baseline_error is not None:
-        say(f"baseline: acceptance cannot run in this environment: {baseline_error}")
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+    def _reap_phase(phase: str, label: str = "") -> list[dict[str, Any]] | None:
+        nonlocal detached_records
+        found = _reap_detached_processes(phase, run_id, known_pids=known_child_pids)
+        if found is None:
+            detached_records = None
+            return None
+        if detached_records is not None and found:
+            detached_records.extend(found)
+            n_k = sum(1 for x in found if x.get("killed"))
+            prefix = f"{label}: " if label else ""
+            say(
+                f"{prefix}WARNING: {len(found)} detached descendant process(es) detected in {phase} phase "
+                f"({n_k}/{len(found)} killed; PIDs: {', '.join(str(x['pid']) for x in found)})"
+            )
+        return found
+
+    try:
+        baseline_rec: dict[str, Any] | None = None
+        nm_root = _nm_root(project)
+        nm_start: dict[str, tuple] | None = None
+        nm_sha_start: dict[str, str | None] | None = None
+        nm_changed: list[str] = []
+        nm_copy_s = 0.0
+        copy_s = 0.0
+        nm_manifest_s = 0.0
+        nm_hash_s = 0.0
+        nm_reflink_fallback = False
+        nm_reflink_warned = False
+        baseline_error: str | None = None
+        if spec.reason is not None:
+            baseline_rec = {
+                "accept": None,
+                "passed": None,
+                "run": None,
+                "status": "runner_unavailable",
+                "first_problem": spec.reason,
+                "returncode": None,
+            }
+            baseline_error = _baseline_env_reason(spec, baseline_rec, project)
+        elif has_acceptance:
+            base_t = max(0.0, min(ACC_TIMEOUT_S, budget_s / 2 if budget_s < 10.0 else budget_s))
+            base_acc = acceptance(
+                originals, project, base_t, spec=spec, _project=project,
+                _orig_modes=orig_modes, _run_id=run_id,
+            )
+            _reap_phase("acceptance", "baseline")
+            baseline_rec = {
+                "accept": base_acc.get("accept"),
+                "passed": base_acc.get("passed"),
+                "run": base_acc.get("run"),
+                "status": base_acc.get("status"),
+                "first_problem": base_acc.get("first_problem"),
+                "returncode": base_acc.get("returncode"),
+            }
+            baseline_error = _baseline_env_reason(spec, base_acc, project)
+            if baseline_error is None:
+                if baseline_rec["accept"] is None:
+                    say(f"baseline: not checked ({baseline_rec['status']})")
+                elif baseline_rec["run"] is not None:
+                    say(f"baseline: {spec.kind} {'PASS' if baseline_rec['accept'] else 'FAIL'} "
+                        f"({baseline_rec['passed']}/{baseline_rec['run']})")
+                else:
+                    say(f"baseline: {spec.kind} {'PASS' if baseline_rec['accept'] else 'FAIL'} "
+                        f"(status={baseline_rec['status']})")
+
+        if baseline_error is not None:
+            _reap_phase("end")
+            say(f"baseline: acceptance cannot run in this environment: {baseline_error}")
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+            res = {
+                "mode": "restart",
+                "project": str(project),
+                "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
+                "protected": sorted(protected),
+                "acceptance": spec.to_dict(),
+                "interpreter": spec.interpreter,
+                "baseline": baseline_rec,
+                "baseline_error": baseline_error,
+                "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
+                "node_modules_changed": [],
+                "node_modules_manifest_s": 0.0,
+                "copy_s": 0.0,
+                "node_modules_copy_s": 0.0,
+                "node_modules_hash_s": 0.0,
+                "appeared_during_run": [],
+                "conflicts": [],
+                "write_back_conflicts": [],
+                "outside_changes": [],
+                "protected_outside_changes": [],
+                "detached_processes": detached_records,
+                "acceptance_dependencies_changed": [],
+                "not_delivered": [],
+                "lstat_listing_s": 0.0,
+                "max_attempts": max_attempts,
+                "accepted": None,
+                "delivered_attempt": 0,
+                "attempts": [],
+                "changed": changed,
+                "agent_wall_s": 0.0,
+                "total_wall_s": round(time.monotonic() - t0, 1),
+                "run_dir": str(run_dir),
+            }
+            res, res_non_utf8 = _sanitize_json_obj(res)
+            res["non_utf8_paths"] = res_non_utf8
+            if res_non_utf8:
+                res["path_encoding"] = "utf-8-backslashreplace"
+            res["receipt"] = _record_receipt(
+                project=project,
+                prompt=prompt,
+                agent=agent,
+                launch_meta=launch_meta,
+                spec=spec,
+                protected=protected,
+                attempts=attempts,
+                snaps=snaps,
+                delivered_idx=-1,
+                changed=changed,
+                res=res,
+                run_dir=run_dir,
+            )
+            (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+            return res
+
+        reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
+        agent_error: str | None = None
+        # 開始時的原專案快照（R11：驗收永遠測 start_snap + 嘗試改動，不讀 live 專案）與純 lstat 清單（B1）
+        start_snap = _snapshot_workspace(project, run_dir / f"start-snap-{secrets.token_hex(6)}", skip_abs=skip_abs)
+        start_hashes = start_snap.files
+        start_unsafe = (
+            start_snap.symlinks | start_snap.unreadable_dirs | start_snap.unreadable_files | start_snap.special_files
+        )
+        lstat_listing_s = 0.0
+        t_ls = time.monotonic()
+        orig_lstat_start = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+        lstat_listing_s += time.monotonic() - t_ls
+        # 開始時的 node_modules lstat 清單（含外部 symlink 目標；很小時另做一次低成本 sha256 校驗）
+        if nm_root is not None:
+            t_nm = time.monotonic()
+            nm_start = _nm_manifest(nm_root)
+            nm_manifest_s += time.monotonic() - t_nm
+            t_sh = time.monotonic()
+            nm_sha_start = _nm_cheap_sha_manifest(nm_root, nm_start)
+            nm_hash_s += time.monotonic() - t_sh
+        while len(attempts) < max_attempts:
+            remaining = budget_s - (time.monotonic() - t0) - reserve
+            if attempts and remaining < min_attempt_s:
+                break
+            remaining = max(remaining, min(0.1, budget_s))
+            k = len(attempts) + 1
+            attempt_dir = run_dir / f"attempt_{k}"
+            ws = attempt_dir / "w"
+            t_cp = time.monotonic()
+            shutil.copytree(project, ws, symlinks=True, ignore=_copytree_ignore(skip_abs))
+            _make_tree_writable(ws)
+            nm_c_s, fb = _copy_node_modules_for_agent(project, ws)
+            nm_copy_s += nm_c_s
+            copy_s += time.monotonic() - t_cp
+            if fb:
+                nm_reflink_fallback = True
+                if not nm_reflink_warned:
+                    nm_reflink_warned = True
+                    say("warning: node_modules reflink copy is not supported on this filesystem; fell back to plain copy")
+            launch = build(prompt, ws)
+            launch_meta.append((list(launch.argv), dict(launch.env)))
+            attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
+            say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
+            # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
+            try:
+                r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
+                              log_dir=attempt_dir / "logs")
+            finally:
+                if launch.cleanup:
+                    launch.cleanup()
+            spent += r["wall_ms"] / 1000.0
+            # R2：agent 結束後、快照與驗收開始前立刻掃描並 SIGKILL 脫離子孫，避免它們在驗收途中改工作區
+            agent_detached = _reap_phase("agent", f"attempt {k}")
+            stderr_tail = _agent_error_tail(attempt_dir / "logs", r, max_lines=5) if r["rc"] not in (0, None) else None
+            if nm_start is not None:
+                t_nm = time.monotonic()
+                nm_cur = _nm_manifest(nm_root)
+                nm_changed = _nm_diff(nm_start, nm_cur)
+                nm_manifest_s += time.monotonic() - t_nm
+                if not nm_changed and nm_sha_start is not None:
+                    t_sh = time.monotonic()
+                    nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
+                    if nm_sha_cur is not None:
+                        nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
+                    nm_hash_s += time.monotonic() - t_sh
+                if nm_changed:
+                    say(f"attempt {k}: the agent changed the project's node_modules ({len(nm_changed)} path(s), e.g. "
+                        f"{', '.join(nm_changed[:3])}); not accepted, stopping, nothing written back")
+                    attempts.append({
+                        "attempt": k, "accept": False, "passed": None, "run": None,
+                        "status": "node_modules_modified", "acceptance_kind": spec.kind, "tests_tampered": [],
+                        "config_ignored": [], "first_problem": "node_modules changed: " + ", ".join(nm_changed[:20]),
+                        "rc": r["rc"], "timed_out": r["timed_out"], "wall_s": round(r["wall_ms"] / 1000.0, 1),
+                        "spawn_error": r["spawn_error"], "workspace": str(ws), "node_modules_changed": nm_changed[:200],
+                        "detached_processes": agent_detached,
+                        **({"agent_stderr_tail": stderr_tail} if stderr_tail else {}),
+                    })
+                    snaps.append(None)
+                    break
+
+            snap: _Snapshot | None = None
+            plan: _WritePlan | None = None
+            acc_detached: list[dict[str, Any]] | None = [] if _linux_proc_available() else None
+            try:
+                snap_dir = attempt_dir / f"snap-{secrets.token_hex(8)}"
+                snap = _snapshot_workspace(
+                    ws, snap_dir, skip_abs=skip_abs, record_copy_skip=True, had_root_nm=(nm_root is not None)
+                )
+                # R11：驗收階段一律以開始快照為基準規劃本輪改動（排除開始時就不安全的路徑如 symlink），
+                # 使驗收永遠只測試「開始狀態＋本輪嘗試改動」，不受 live 專案並發改動或逃逸寫入影響。
+                plan = _plan_write_back(start_snap.root, snap, protected, start_hashes=start_hashes)
+                if start_unsafe:
+                    blocked_add = [r for r in plan.added if _matches_prefix(r, start_unsafe)]
+                    blocked_mod = [r for r in plan.modified if _matches_prefix(r, start_unsafe)]
+                    blocked_del = [r for r in plan.deleted if _matches_prefix(r, start_unsafe)]
+                    if blocked_add or blocked_mod or blocked_del:
+                        blk = set(blocked_add) | set(blocked_mod) | set(blocked_del)
+                        plan.added = [r for r in plan.added if r not in blk]
+                        plan.modified = [r for r in plan.modified if r not in blk]
+                        plan.deleted = [r for r in plan.deleted if r not in blk]
+                        plan.skipped = sorted(set(plan.skipped) | blk)
+                if has_acceptance:
+                    acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
+                    acc = acceptance(
+                        originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project,
+                        _plan=plan, _orig_modes=orig_modes, _start_snap=start_snap, _run_id=run_id,
+                    )
+                    acc_detached = _reap_phase("acceptance", f"attempt {k} acceptance")
+                    if nm_start is not None:
+                        t_nm = time.monotonic()
+                        nm_cur = _nm_manifest(nm_root)
+                        nm_changed = _nm_diff(nm_start, nm_cur)
+                        nm_manifest_s += time.monotonic() - t_nm
+                        if not nm_changed and nm_sha_start is not None:
+                            t_sh = time.monotonic()
+                            nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
+                            if nm_sha_cur is not None:
+                                nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
+                            nm_hash_s += time.monotonic() - t_sh
+                        if nm_changed:
+                            acc = {**acc, "accept": False, "status": "node_modules_modified",
+                                   "first_problem": "node_modules changed during acceptance: " + ", ".join(nm_changed[:20])}
+                else:
+                    tam = _detect_tampered(snap, originals) if originals else []
+                    acc = {
+                        "accept": None,
+                        "passed": None,
+                        "run": None,
+                        "status": "runner_unavailable" if spec.reason else "no_tests",
+                        "tests_tampered": tam,
+                        "first_problem": spec.reason,
+                    }
+            except Exception as e:  # noqa: BLE001 — 單次評估失敗安全判為未通過，不影響其他嘗試
+                acc_detached = _reap_phase("acceptance", f"attempt {k} acceptance")
+                acc = {
+                    "accept": False if has_acceptance else None,
+                    "passed": None,
+                    "run": None,
+                    "status": "acceptance_error",
+                    "tests_tampered": [],
+                    "first_problem": f"{type(e).__name__}: {e}"[-800:],
+                }
+
+            uncheckable = acc["status"] in _UNCHECKABLE_STATUSES
+            if uncheckable and not attempts:
+                acc["accept"] = None
+            elif uncheckable and attempts:
+                # 前一次已有可執行的驗收；後續嘗試若突然收集不到測試或壞掉，仍視為該次未通過而非放棄先前的驗收結果
+                acc["accept"] = False
+
+            if agent_detached is None or acc_detached is None:
+                att_detached: list[dict[str, Any]] | None = None
+            else:
+                att_detached = list(agent_detached) + list(acc_detached)
+
+            attempts.append({
+                "attempt": k,
+                "accept": acc["accept"],
+                "passed": acc["passed"],
+                "run": acc["run"],
+                "status": acc["status"],
+                "acceptance_kind": spec.kind,
+                "tests_tampered": acc["tests_tampered"],
+                "config_ignored": list(plan.config_ignored) if plan is not None else [],
+                "first_problem": acc.get("first_problem"),
+                "rc": r["rc"],
+                "timed_out": r["timed_out"],
+                "wall_s": round(r["wall_ms"] / 1000.0, 1),
+                "spawn_error": r["spawn_error"],
+                "workspace": str(ws),
+                "detached_processes": att_detached,
+                **({"agent_stderr_tail": stderr_tail} if stderr_tail else {}),
+            })
+            snaps.append(snap)
+
+            if acc["accept"] is None:
+                say(f"attempt {k}: not checked ({acc['status']})")
+            elif acc["run"] is not None:
+                say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} ({acc['passed']}/{acc['run']})")
+            else:
+                say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} (status={acc['status']})")
+
+            if nm_changed:
+                attempts[-1]["node_modules_changed"] = nm_changed[:200]
+                say(f"attempt {k}: node_modules changed during the check; not accepted, stopping, nothing written back")
+                break
+            if acc["accept"] is None or acc["accept"] is True:
+                break
+            # agent 一啟動就失敗（找不到執行檔、版本不合當場崩潰、沒設定模型就退出）：重開也只會一樣，
+            # 停下來把 agent 自己的錯誤講出來，而不是靜靜燒完剩下的嘗試。
+            quick_fail = (r["spawn_error"] is not None
+                          or (r["rc"] not in (0, None) and not r["timed_out"]
+                              and r["wall_ms"] < AGENT_QUICK_FAIL_MS))
+            untouched = plan is not None and not (plan.added or plan.modified or plan.deleted)
+            if quick_fail and untouched:
+                agent_error = _agent_error_tail(attempt_dir / "logs", r)
+                attempts[-1]["agent_failed_to_start"] = True
+                say(f"attempt {k}: the agent exited with an error after {r['wall_ms'] / 1000.0:.1f}s without "
+                    f"changing anything; not restarting. agent said: {agent_error.splitlines()[-1] if agent_error else '(nothing)'}")
+                break
+
+        if nm_start is not None and not nm_changed:
+            t_nm = time.monotonic()
+            nm_cur = _nm_manifest(nm_root)
+            nm_changed = _nm_diff(nm_start, nm_cur)
+            nm_manifest_s += time.monotonic() - t_nm
+            if not nm_changed and nm_sha_start is not None:
+                t_sh = time.monotonic()
+                nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
+                if nm_sha_cur is not None:
+                    nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
+                nm_hash_s += time.monotonic() - t_sh
+            if nm_changed and attempts:
+                attempts[-1]["accept"] = False
+                attempts[-1]["status"] = "node_modules_modified"
+                attempts[-1]["node_modules_changed"] = nm_changed[:200]
+
+        d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
+        if nm_changed:
+            d = len(attempts) - 1
+        appeared_during_run: list[str] = []
+        conflicts: list[str] = []
+        write_back_conflicts: list[str] = []
+        outside_changes: list[str] = []
+        if snaps[d] is not None and not nm_changed:
+            t_ls = time.monotonic()
+            orig_lstat_before_wb = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+            lstat_listing_s += time.monotonic() - t_ls
+            final_plan = _plan_write_back(project, snaps[d], protected, start_hashes=start_hashes)
+            appeared_during_run = list(final_plan.appeared)
+            attempt_writes = (
+                set(final_plan.added) | set(final_plan.modified) | set(final_plan.deleted) | set(final_plan.conflicts)
+            )
+            lstat_live_diff = {
+                k for k in (set(orig_lstat_start) | set(orig_lstat_before_wb))
+                if orig_lstat_start.get(k) != orig_lstat_before_wb.get(k)
+            }
+            live_changed_paths = lstat_live_diff | set(final_plan.conflicts) | set(final_plan.appeared)
+            overlap = sorted(set(final_plan.conflicts) | (attempt_writes & live_changed_paths))
+            if overlap:
+                # R11(b)：交件寫回路徑與執行期間原專案異動重疊 ⇒ 什麼都不寫回（無部分交件），exit 43
+                write_back_conflicts = list(overlap)
+                conflicts = list(overlap)
+                changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": list(overlap)}
+                outside_changes = sorted(live_changed_paths)
+            else:
+                # R11(a)：無重疊 ⇒ 照常寫回（並於 _apply_write_plan 內做 TOCTOU 複檢）
+                changed = _write_back(
+                    project, snaps[d], protected, _plan=final_plan, _backup_root=run_dir, start_hashes=start_hashes
+                )
+                if changed.get("conflict"):
+                    write_back_conflicts = list(changed["conflict"])
+                    conflicts = list(changed["conflict"])
+                t_ls = time.monotonic()
+                orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+                lstat_listing_s += time.monotonic() - t_ls
+                written_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
+                outside_changes = sorted(
+                    k for k in (set(orig_lstat_start) | set(orig_lstat_end) | set(appeared_during_run))
+                    if (orig_lstat_start.get(k) != orig_lstat_end.get(k) or k in appeared_during_run)
+                    and k not in written_paths
+                )
+        else:
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+            # 仍檢查並發出現的檔案與 B1 異動（如 node_modules 異常中止時）
+            live_now, _ = _scan_files(project, skip_abs=skip_abs)
+            appeared_during_run = sorted(
+                rel for rel in (set(live_now) - set(start_hashes) - protected) if not _has_copy_skip(rel)
+            )
+            t_ls = time.monotonic()
+            orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+            lstat_listing_s += time.monotonic() - t_ls
+            outside_changes = sorted(
+                k for k in (set(orig_lstat_start) | set(orig_lstat_end) | set(appeared_during_run))
+                if (orig_lstat_start.get(k) != orig_lstat_end.get(k) or k in appeared_during_run)
+            )
+
+        protected_outside_changes = sorted(p for p in outside_changes if p in protected)
+
+        # R2/R3：結束前最後再清一次任何殘留脫離子孫
+        _reap_phase("end")
+
+        # A1/A2/R6：標記交件嘗試所改動、且驗收依賴的檔案（字串常值、2 層遞移匯入、fixture/mock/data 目錄）
+        planned_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
+        known_files = set(start_hashes) | planned_paths
+        dep_src_root = snaps[d].root if (0 <= d < len(snaps) and snaps[d] is not None) else project
+        acc_deps_changed = _find_acceptance_dependencies(
+            originals, known_files, planned_paths, source_root=dep_src_root
+        )
+        not_delivered = list(snaps[d].copy_skip_created) if (0 <= d < len(snaps) and snaps[d] is not None) else []
+
+        only_uncheckable = len(attempts) == 1 and attempts[0]["accept"] is None
         res = {
             "mode": "restart",
             "project": str(project),
@@ -4282,31 +4863,34 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "acceptance": spec.to_dict(),
             "interpreter": spec.interpreter,
             "baseline": baseline_rec,
-            "baseline_error": baseline_error,
+            "baseline_error": None,
+            "agent_error": agent_error,
             "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
-            "node_modules_changed": [],
-            "node_modules_manifest_s": 0.0,
-            "copy_s": 0.0,
-            "node_modules_copy_s": 0.0,
-            "node_modules_hash_s": 0.0,
-            "appeared_during_run": [],
-            "conflicts": [],
-            "write_back_conflicts": [],
-            "outside_changes": [],
-            "protected_outside_changes": [],
-            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
-            "acceptance_dependencies_changed": [],
-            "not_delivered": [],
-            "lstat_listing_s": 0.0,
+            "node_modules_changed": nm_changed[:200],
+            "node_modules_manifest_s": round(nm_manifest_s, 3),
+            "copy_s": round(copy_s, 3),
+            "node_modules_copy_s": round(nm_copy_s, 3),
+            "node_modules_hash_s": round(nm_hash_s, 3),
+            "node_modules_reflink_fallback": nm_reflink_fallback,
+            "appeared_during_run": appeared_during_run,
+            "conflicts": conflicts,
+            "write_back_conflicts": write_back_conflicts,
+            "outside_changes": outside_changes,
+            "protected_outside_changes": protected_outside_changes,
+            "lstat_listing_s": round(lstat_listing_s, 3),
+            "detached_processes": detached_records,
+            "acceptance_dependencies_changed": acc_deps_changed,
+            "not_delivered": not_delivered,
             "max_attempts": max_attempts,
-            "accepted": None,
-            "delivered_attempt": 0,
-            "attempts": [],
+            "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
+            "delivered_attempt": d + 1,
+            "attempts": attempts,
             "changed": changed,
-            "agent_wall_s": 0.0,
+            "agent_wall_s": round(spent, 1),
             "total_wall_s": round(time.monotonic() - t0, 1),
             "run_dir": str(run_dir),
         }
+        raw_changed = changed
         res, res_non_utf8 = _sanitize_json_obj(res)
         res["non_utf8_paths"] = res_non_utf8
         if res_non_utf8:
@@ -4320,360 +4904,18 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             protected=protected,
             attempts=attempts,
             snaps=snaps,
-            delivered_idx=-1,
-            changed=changed,
+            delivered_idx=d,
+            changed=raw_changed,
             res=res,
             run_dir=run_dir,
         )
         (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         return res
-
-    reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
-    agent_error: str | None = None
-    # 開始時的原專案快照（R11：驗收永遠測 start_snap + 嘗試改動，不讀 live 專案）與純 lstat 清單（B1）
-    start_snap = _snapshot_workspace(project, run_dir / f"start-snap-{secrets.token_hex(6)}", skip_abs=skip_abs)
-    start_hashes = start_snap.files
-    start_unsafe = (
-        start_snap.symlinks | start_snap.unreadable_dirs | start_snap.unreadable_files | start_snap.special_files
-    )
-    lstat_listing_s = 0.0
-    t_ls = time.monotonic()
-    orig_lstat_start = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
-    lstat_listing_s += time.monotonic() - t_ls
-    # 開始時的 node_modules lstat 清單（含外部 symlink 目標；很小時另做一次低成本 sha256 校驗）
-    if nm_root is not None:
-        t_nm = time.monotonic()
-        nm_start = _nm_manifest(nm_root)
-        nm_manifest_s += time.monotonic() - t_nm
-        t_sh = time.monotonic()
-        nm_sha_start = _nm_cheap_sha_manifest(nm_root, nm_start)
-        nm_hash_s += time.monotonic() - t_sh
-    while len(attempts) < max_attempts:
-        remaining = budget_s - (time.monotonic() - t0) - reserve
-        if attempts and remaining < min_attempt_s:
-            break
-        remaining = max(remaining, min(0.1, budget_s))
-        k = len(attempts) + 1
-        attempt_dir = run_dir / f"attempt_{k}"
-        ws = attempt_dir / "w"
-        t_cp = time.monotonic()
-        shutil.copytree(project, ws, symlinks=True, ignore=_copytree_ignore(skip_abs))
-        _make_tree_writable(ws)
-        nm_c_s, fb = _copy_node_modules_for_agent(project, ws)
-        nm_copy_s += nm_c_s
-        copy_s += time.monotonic() - t_cp
-        if fb:
-            nm_reflink_fallback = True
-            if not nm_reflink_warned:
-                nm_reflink_warned = True
-                say("warning: node_modules reflink copy is not supported on this filesystem; fell back to plain copy")
-        launch = build(prompt, ws)
-        launch_meta.append((list(launch.argv), dict(launch.env)))
-        attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
-        say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
-        # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
-        try:
-            r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
-                          log_dir=attempt_dir / "logs")
-        finally:
-            if launch.cleanup:
-                launch.cleanup()
-        spent += r["wall_ms"] / 1000.0
-        detached_pids = _find_detached_processes(run_id)
-        if detached_pids:
-            say(f"attempt {k}: WARNING: detached process(es) survived after agent exited "
-                f"(PIDs: {', '.join(str(p) for p in detached_pids)})")
-        stderr_tail = _agent_error_tail(attempt_dir / "logs", r, max_lines=5) if r["rc"] not in (0, None) else None
-        if nm_start is not None:
-            t_nm = time.monotonic()
-            nm_cur = _nm_manifest(nm_root)
-            nm_changed = _nm_diff(nm_start, nm_cur)
-            nm_manifest_s += time.monotonic() - t_nm
-            if not nm_changed and nm_sha_start is not None:
-                t_sh = time.monotonic()
-                nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
-                if nm_sha_cur is not None:
-                    nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
-                nm_hash_s += time.monotonic() - t_sh
-            if nm_changed:
-                say(f"attempt {k}: the agent changed the project's node_modules ({len(nm_changed)} path(s), e.g. "
-                    f"{', '.join(nm_changed[:3])}); not accepted, stopping, nothing written back")
-                attempts.append({
-                    "attempt": k, "accept": False, "passed": None, "run": None,
-                    "status": "node_modules_modified", "acceptance_kind": spec.kind, "tests_tampered": [],
-                    "config_ignored": [], "first_problem": "node_modules changed: " + ", ".join(nm_changed[:20]),
-                    "rc": r["rc"], "timed_out": r["timed_out"], "wall_s": round(r["wall_ms"] / 1000.0, 1),
-                    "spawn_error": r["spawn_error"], "workspace": str(ws), "node_modules_changed": nm_changed[:200],
-                    "detached_processes": detached_pids,
-                    **({"agent_stderr_tail": stderr_tail} if stderr_tail else {}),
-                })
-                snaps.append(None)
-                break
-
-        snap: _Snapshot | None = None
-        plan: _WritePlan | None = None
-        try:
-            snap_dir = attempt_dir / f"snap-{secrets.token_hex(8)}"
-            snap = _snapshot_workspace(
-                ws, snap_dir, skip_abs=skip_abs, record_copy_skip=True, had_root_nm=(nm_root is not None)
-            )
-            # R11：驗收階段一律以開始快照為基準規劃本輪改動（排除開始時就不安全的路徑如 symlink），
-            # 使驗收永遠只測試「開始狀態＋本輪嘗試改動」，不受 live 專案並發改動或逃逸寫入影響。
-            plan = _plan_write_back(start_snap.root, snap, protected, start_hashes=start_hashes)
-            if start_unsafe:
-                blocked_add = [r for r in plan.added if _matches_prefix(r, start_unsafe)]
-                blocked_mod = [r for r in plan.modified if _matches_prefix(r, start_unsafe)]
-                blocked_del = [r for r in plan.deleted if _matches_prefix(r, start_unsafe)]
-                if blocked_add or blocked_mod or blocked_del:
-                    blk = set(blocked_add) | set(blocked_mod) | set(blocked_del)
-                    plan.added = [r for r in plan.added if r not in blk]
-                    plan.modified = [r for r in plan.modified if r not in blk]
-                    plan.deleted = [r for r in plan.deleted if r not in blk]
-                    plan.skipped = sorted(set(plan.skipped) | blk)
-            if has_acceptance:
-                acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
-                acc = acceptance(
-                    originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project,
-                    _plan=plan, _orig_modes=orig_modes, _start_snap=start_snap,
-                )
-                if nm_start is not None:
-                    t_nm = time.monotonic()
-                    nm_cur = _nm_manifest(nm_root)
-                    nm_changed = _nm_diff(nm_start, nm_cur)
-                    nm_manifest_s += time.monotonic() - t_nm
-                    if not nm_changed and nm_sha_start is not None:
-                        t_sh = time.monotonic()
-                        nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
-                        if nm_sha_cur is not None:
-                            nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
-                        nm_hash_s += time.monotonic() - t_sh
-                    if nm_changed:
-                        acc = {**acc, "accept": False, "status": "node_modules_modified",
-                               "first_problem": "node_modules changed during acceptance: " + ", ".join(nm_changed[:20])}
-            else:
-                tam = _detect_tampered(snap, originals) if originals else []
-                acc = {
-                    "accept": None,
-                    "passed": None,
-                    "run": None,
-                    "status": "runner_unavailable" if spec.reason else "no_tests",
-                    "tests_tampered": tam,
-                    "first_problem": spec.reason,
-                }
-        except Exception as e:  # noqa: BLE001 — 單次評估失敗安全判為未通過，不影響其他嘗試
-            acc = {
-                "accept": False if has_acceptance else None,
-                "passed": None,
-                "run": None,
-                "status": "acceptance_error",
-                "tests_tampered": [],
-                "first_problem": f"{type(e).__name__}: {e}"[-800:],
-            }
-
-        uncheckable = acc["status"] in _UNCHECKABLE_STATUSES
-        if uncheckable and not attempts:
-            acc["accept"] = None
-        elif uncheckable and attempts:
-            # 前一次已有可執行的驗收；後續嘗試若突然收集不到測試或壞掉，仍視為該次未通過而非放棄先前的驗收結果
-            acc["accept"] = False
-
-        attempts.append({
-            "attempt": k,
-            "accept": acc["accept"],
-            "passed": acc["passed"],
-            "run": acc["run"],
-            "status": acc["status"],
-            "acceptance_kind": spec.kind,
-            "tests_tampered": acc["tests_tampered"],
-            "config_ignored": list(plan.config_ignored) if plan is not None else [],
-            "first_problem": acc.get("first_problem"),
-            "rc": r["rc"],
-            "timed_out": r["timed_out"],
-            "wall_s": round(r["wall_ms"] / 1000.0, 1),
-            "spawn_error": r["spawn_error"],
-            "workspace": str(ws),
-            "detached_processes": detached_pids,
-            **({"agent_stderr_tail": stderr_tail} if stderr_tail else {}),
-        })
-        snaps.append(snap)
-
-        if acc["accept"] is None:
-            say(f"attempt {k}: not checked ({acc['status']})")
-        elif acc["run"] is not None:
-            say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} ({acc['passed']}/{acc['run']})")
-        else:
-            say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} (status={acc['status']})")
-
-        if nm_changed:
-            attempts[-1]["node_modules_changed"] = nm_changed[:200]
-            say(f"attempt {k}: node_modules changed during the check; not accepted, stopping, nothing written back")
-            break
-        if acc["accept"] is None or acc["accept"] is True:
-            break
-        # agent 一啟動就失敗（找不到執行檔、版本不合當場崩潰、沒設定模型就退出）：重開也只會一樣，
-        # 停下來把 agent 自己的錯誤講出來，而不是靜靜燒完剩下的嘗試。
-        quick_fail = (r["spawn_error"] is not None
-                      or (r["rc"] not in (0, None) and not r["timed_out"]
-                          and r["wall_ms"] < AGENT_QUICK_FAIL_MS))
-        untouched = plan is not None and not (plan.added or plan.modified or plan.deleted)
-        if quick_fail and untouched:
-            agent_error = _agent_error_tail(attempt_dir / "logs", r)
-            attempts[-1]["agent_failed_to_start"] = True
-            say(f"attempt {k}: the agent exited with an error after {r['wall_ms'] / 1000.0:.1f}s without "
-                f"changing anything; not restarting. agent said: {agent_error.splitlines()[-1] if agent_error else '(nothing)'}")
-            break
-
-    if nm_start is not None and not nm_changed:
-        t_nm = time.monotonic()
-        nm_cur = _nm_manifest(nm_root)
-        nm_changed = _nm_diff(nm_start, nm_cur)
-        nm_manifest_s += time.monotonic() - t_nm
-        if not nm_changed and nm_sha_start is not None:
-            t_sh = time.monotonic()
-            nm_sha_cur = _nm_cheap_sha_manifest(nm_root, nm_cur)
-            if nm_sha_cur is not None:
-                nm_changed = _nm_sha_diff(nm_sha_start, nm_sha_cur)
-            nm_hash_s += time.monotonic() - t_sh
-        if nm_changed and attempts:
-            attempts[-1]["accept"] = False
-            attempts[-1]["status"] = "node_modules_modified"
-            attempts[-1]["node_modules_changed"] = nm_changed[:200]
-
-    d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
-    if nm_changed:
-        d = len(attempts) - 1
-    appeared_during_run: list[str] = []
-    conflicts: list[str] = []
-    write_back_conflicts: list[str] = []
-    outside_changes: list[str] = []
-    if snaps[d] is not None and not nm_changed:
-        t_ls = time.monotonic()
-        orig_lstat_before_wb = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
-        lstat_listing_s += time.monotonic() - t_ls
-        final_plan = _plan_write_back(project, snaps[d], protected, start_hashes=start_hashes)
-        appeared_during_run = list(final_plan.appeared)
-        attempt_writes = (
-            set(final_plan.added) | set(final_plan.modified) | set(final_plan.deleted) | set(final_plan.conflicts)
-        )
-        lstat_live_diff = {
-            k for k in (set(orig_lstat_start) | set(orig_lstat_before_wb))
-            if orig_lstat_start.get(k) != orig_lstat_before_wb.get(k)
-        }
-        live_changed_paths = lstat_live_diff | set(final_plan.conflicts) | set(final_plan.appeared)
-        overlap = sorted(set(final_plan.conflicts) | (attempt_writes & live_changed_paths))
-        if overlap:
-            # R11(b)：交件寫回路徑與執行期間原專案異動重疊 ⇒ 什麼都不寫回（無部分交件），exit 43
-            write_back_conflicts = list(overlap)
-            conflicts = list(overlap)
-            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": list(overlap)}
-            outside_changes = sorted(live_changed_paths)
-        else:
-            # R11(a)：無重疊 ⇒ 照常寫回（並於 _apply_write_plan 內做 TOCTOU 複檢）
-            changed = _write_back(
-                project, snaps[d], protected, _plan=final_plan, _backup_root=run_dir, start_hashes=start_hashes
-            )
-            if changed.get("conflict"):
-                write_back_conflicts = list(changed["conflict"])
-                conflicts = list(changed["conflict"])
-            t_ls = time.monotonic()
-            orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
-            lstat_listing_s += time.monotonic() - t_ls
-            written_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
-            outside_changes = sorted(
-                k for k in (set(orig_lstat_start) | set(orig_lstat_end) | set(appeared_during_run))
-                if (orig_lstat_start.get(k) != orig_lstat_end.get(k) or k in appeared_during_run)
-                and k not in written_paths
-            )
-    else:
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
-        # 仍檢查並發出現的檔案與 B1 異動（如 node_modules 異常中止時）
-        live_now, _ = _scan_files(project, skip_abs=skip_abs)
-        appeared_during_run = sorted(
-            rel for rel in (set(live_now) - set(start_hashes) - protected) if not _has_copy_skip(rel)
-        )
-        t_ls = time.monotonic()
-        orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
-        lstat_listing_s += time.monotonic() - t_ls
-        outside_changes = sorted(
-            k for k in (set(orig_lstat_start) | set(orig_lstat_end) | set(appeared_during_run))
-            if (orig_lstat_start.get(k) != orig_lstat_end.get(k) or k in appeared_during_run)
-        )
-
-    protected_outside_changes = sorted(p for p in outside_changes if p in protected)
-    _rmtree_force(start_snap.root)
-
-    # A1/A2/R6：標記交件嘗試所改動、且驗收依賴的檔案（字串常值、2 層遞移匯入、fixture/mock/data 目錄）
-    planned_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
-    known_files = set(start_hashes) | planned_paths
-    dep_src_root = snaps[d].root if (0 <= d < len(snaps) and snaps[d] is not None) else project
-    acc_deps_changed = _find_acceptance_dependencies(
-        originals, known_files, planned_paths, source_root=dep_src_root
-    )
-    not_delivered = list(snaps[d].copy_skip_created) if (0 <= d < len(snaps) and snaps[d] is not None) else []
-
-    # B2：彙總各次嘗試偵測到的脫離行程（非 Linux 為 None）
-    if any(a.get("detached_processes") is None for a in attempts):
-        detached_all: list[int] | None = None
-    else:
-        detached_all = sorted({pid for a in attempts for pid in (a.get("detached_processes") or [])})
-
-    only_uncheckable = len(attempts) == 1 and attempts[0]["accept"] is None
-    res = {
-        "mode": "restart",
-        "project": str(project),
-        "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
-        "protected": sorted(protected),
-        "acceptance": spec.to_dict(),
-        "interpreter": spec.interpreter,
-        "baseline": baseline_rec,
-        "baseline_error": None,
-        "agent_error": agent_error,
-        "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
-        "node_modules_changed": nm_changed[:200],
-        "node_modules_manifest_s": round(nm_manifest_s, 3),
-        "copy_s": round(copy_s, 3),
-        "node_modules_copy_s": round(nm_copy_s, 3),
-        "node_modules_hash_s": round(nm_hash_s, 3),
-        "node_modules_reflink_fallback": nm_reflink_fallback,
-        "appeared_during_run": appeared_during_run,
-        "conflicts": conflicts,
-        "write_back_conflicts": write_back_conflicts,
-        "outside_changes": outside_changes,
-        "protected_outside_changes": protected_outside_changes,
-        "lstat_listing_s": round(lstat_listing_s, 3),
-        "detached_processes": detached_all,
-        "acceptance_dependencies_changed": acc_deps_changed,
-        "not_delivered": not_delivered,
-        "max_attempts": max_attempts,
-        "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
-        "delivered_attempt": d + 1,
-        "attempts": attempts,
-        "changed": changed,
-        "agent_wall_s": round(spent, 1),
-        "total_wall_s": round(time.monotonic() - t0, 1),
-        "run_dir": str(run_dir),
-    }
-    raw_changed = changed
-    res, res_non_utf8 = _sanitize_json_obj(res)
-    res["non_utf8_paths"] = res_non_utf8
-    if res_non_utf8:
-        res["path_encoding"] = "utf-8-backslashreplace"
-    res["receipt"] = _record_receipt(
-        project=project,
-        prompt=prompt,
-        agent=agent,
-        launch_meta=launch_meta,
-        spec=spec,
-        protected=protected,
-        attempts=attempts,
-        snaps=snaps,
-        delivered_idx=d,
-        changed=raw_changed,
-        res=res,
-        run_dir=run_dir,
-    )
-    (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-    return res
+    finally:
+        if start_snap is not None:
+            _rmtree_force(start_snap.root)
+        if prev_subreaper is not None:
+            _set_child_subreaper(bool(prev_subreaper))
 
 
 def summary(res: dict) -> str:
@@ -4878,9 +5120,23 @@ def summary(res: dict) -> str:
             f" … (+{len(dep_changed) - 20} more)" if len(dep_changed) > 20 else ""
         )
         head += f"\n  the check depends on these files and the agent changed them — review them yourself: {shown_dep}"
-    det_pids = res.get("detached_processes")
-    if isinstance(det_pids, list) and det_pids:
-        shown_p = ", ".join(str(p) for p in det_pids[:10]) + (f" … (+{len(det_pids) - 10} more)" if len(det_pids) > 10 else "")
-        head += (f"\n  WARNING: detached process(es) survived after the agent exited (PIDs: {shown_p}); "
-                 f"writes after delivery are not recorded.")
+    det_items = res.get("detached_processes")
+    if "detached_processes" in res and det_items is None:
+        head += (
+            "\n  note: detached-process detection and cleanup does not exist on this platform "
+            "(Linux child subreaper and /proc required)."
+        )
+    elif isinstance(det_items, list) and det_items:
+        n_det = len(det_items)
+        n_killed = sum(1 for x in det_items if isinstance(x, dict) and x.get("killed"))
+        parts = [
+            f"pid={x['pid']}({x.get('phase')},{'killed' if x.get('killed') else 'alive'})"
+            if isinstance(x, dict) else str(x)
+            for x in det_items[:10]
+        ]
+        shown_p = ", ".join(parts) + (f" … (+{n_det - 10} more)" if n_det > 10 else "")
+        head += (
+            f"\n  WARNING: {n_det} detached descendant process(es) detected "
+            f"({n_killed}/{n_det} killed: {shown_p}); writes after delivery are not recorded."
+        )
     return head + f"\n  attempts and logs: {res['run_dir']}"
