@@ -63,6 +63,45 @@ class T(unittest.TestCase):
 def new_mod_proj(d):
     (d / "test_solution.py").write_text(SOL_TEST)
 
+QUEUE_BAD = textwrap.dedent('''\
+class Q:
+    def __init__(self): self.items = []
+    def push(self, x): self.items.append(x)
+    def pop(self): return self.items.pop()
+''')
+QUEUE_GOOD = textwrap.dedent('''\
+class Q:
+    def __init__(self): self.items = []
+    def push(self, x): self.items.append(x)
+    def pop(self): return self.items.pop(0)
+''')
+QUEUE_TEST = textwrap.dedent('''\
+import unittest
+from queue import Q
+class T(unittest.TestCase):
+    def test_fifo(self):
+        q = Q(); q.push(1); q.push(2); self.assertEqual(q.pop(), 1)
+''')
+
+def queue_proj(d):
+    (d / "queue.py").write_text(QUEUE_BAD)
+    (d / "test_queue.py").write_text(QUEUE_TEST)
+
+STATS_BAD = "def median(xs):\n    return sorted(xs)[0]\n"
+STATS_BROKEN = "def median(xs):\n    return None\n"
+STATS_TEST = textwrap.dedent('''\
+import unittest
+from statistics import median
+class T(unittest.TestCase):
+    def test_median(self):
+        self.assertEqual(median([3, 1, 2]), 2)
+        self.assertEqual(median([5, 9, 7]), 7)
+''')
+
+def stats_proj(d):
+    (d / "statistics.py").write_text(STATS_BAD)
+    (d / "test_stats.py").write_text(STATS_TEST)
+
 SCEN = {
  "py_fix_first": (py_proj, [], [{"write": {"calc.py": GOOD, "new_mod.py": "X=1\n"}, "delete": ["old_notes.txt"]}]),
  "py_fail_then_fix": (py_proj, [], [{"write": {"calc.py": BAD + "#a1\n"}}, {"write": {"calc.py": GOOD}}]),
@@ -74,6 +113,13 @@ SCEN = {
  "none_add": (none_proj, [], [{"write": {"out.txt": "done\n"}}]),
  "check_fix_second": (check_proj, ["--check", f"{PY} check.py"], [{"write": {"app.py": "v = 3\n"}}, {"write": {"app.py": "v = 2\n"}}]),
  "npm_fix_second": (npm_proj, [], [{"write": {"m.js": "module.exports.val=()=>4;\n"}}, {"write": {"m.js": "const h=require('helper');module.exports.val=()=>h.base()+2;\n"}}]),
+ "py_stdlib_name_fixed": (queue_proj, [], [{"write": {"queue.py": QUEUE_GOOD}}]),
+ "py_stdlib_name_broken": (stats_proj, [], [{"write": {"statistics.py": STATS_BROKEN}}]),
+}
+
+EXPECTED_DIFF = {
+    "py_stdlib_name_fixed": {"accepted": True, "exit": 0},
+    "py_stdlib_name_broken": {"accepted": False, "exit": 40},
 }
 
 def tree(d):
@@ -104,15 +150,35 @@ def run(tree_root, name):
             "attempts": att, "calls": int((base / "state").read_text()) if (base / "state").exists() else 0,
             "tree": tree(proj)}, p.stdout + p.stderr
 
-diffs = 0
+same_total = 0
+same_ok = 0
+exp_total = 0
+exp_ok = 0
 for name in SCEN:
     a, la = run(RC4, name); b, lb = run(RC5, name)
     same = a == b
-    diffs += not same
-    print(f"{'SAME' if same else 'DIFF'}  {name}: exit {a['exit']}/{b['exit']} accepted {a['accepted']}/{b['accepted']} "
-          f"delivered {a['delivered']}/{b['delivered']} calls {a['calls']}/{b['calls']} attempts {a['attempts']}")
-    if not same:
-        for k in a:
-            if a[k] != b[k]: print(f"    {k}: rc4={a[k]}\n    {' '*len(k)}  rc5={b[k]}")
-        (OUT / f"{name}.rc4.log").write_text(la); (OUT / f"{name}.rc5.log").write_text(lb)
-print(f"\n{len(SCEN) - diffs}/{len(SCEN)} scenarios identical")
+    if name in EXPECTED_DIFF:
+        exp_total += 1
+        want = EXPECTED_DIFF[name]
+        rc5_correct = (b["accepted"] == want["accepted"] and b["exit"] == want["exit"])
+        ok = (not same) and rc5_correct
+        exp_ok += int(ok)
+        tag = "EXPECTED-DIFF" if ok else "UNEXPECTED"
+        print(f"{tag:<14} {name}: exit {a['exit']}/{b['exit']} accepted {a['accepted']}/{b['accepted']} "
+              f"delivered {a['delivered']}/{b['delivered']} calls {a['calls']}/{b['calls']} "
+              f"attempts rc4={a['attempts']} rc5={b['attempts']}")
+        if not ok:
+            print(f"    expected diff with rc5={want}, got same={same} rc5=(exit={b['exit']}, accepted={b['accepted']})")
+            (OUT / f"{name}.rc4.log").write_text(la); (OUT / f"{name}.rc5.log").write_text(lb)
+    else:
+        same_total += 1
+        same_ok += int(same)
+        tag = "SAME" if same else "DIFF"
+        print(f"{tag:<14} {name}: exit {a['exit']}/{b['exit']} accepted {a['accepted']}/{b['accepted']} "
+              f"delivered {a['delivered']}/{b['delivered']} calls {a['calls']}/{b['calls']} attempts {a['attempts']}")
+        if not same:
+            for k in a:
+                if a[k] != b[k]: print(f"    {k}: rc4={a[k]}\n    {' '*len(k)}  rc5={b[k]}")
+            (OUT / f"{name}.rc4.log").write_text(la); (OUT / f"{name}.rc5.log").write_text(lb)
+print(f"\n{same_ok}/{same_total} identical; {exp_ok}/{exp_total} expected differences correct")
+sys.exit(0 if (same_ok == same_total and exp_ok == exp_total) else 1)
