@@ -169,11 +169,11 @@ fi
 
 # Verify tar structure and presence of RUN.json.
 LISTING=$(tar -tzf "$LOCAL_TAR")
-if ! printf '%s\n' "$LISTING" | grep -qE '(^\./)?RUN\.json$'; then
+if ! grep -qE '(^\./)?RUN\.json$' <<<"$LISTING"; then
   echo "ERROR: tarball ${LOCAL_TAR} does not contain RUN.json; VM session ${SESSION} was NOT stopped." >&2
   exit 1
 fi
-if [ "$HAVE_DONE" = "1" ] && ! printf '%s\n' "$LISTING" | grep -qE '(^\./)?REPORT\.json$'; then
+if [ "$HAVE_DONE" = "1" ] && ! grep -qE '(^\./)?REPORT\.json$' <<<"$LISTING"; then
   echo "WARNING: completed tarball does not contain REPORT.json" >&2
 fi
 
