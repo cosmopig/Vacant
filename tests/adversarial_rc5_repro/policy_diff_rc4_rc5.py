@@ -102,6 +102,23 @@ def stats_proj(d):
     (d / "statistics.py").write_text(STATS_BAD)
     (d / "test_stats.py").write_text(STATS_TEST)
 
+MYCAL_BAD = "def days_in_feb(y):\n    return 28\n"
+MYCAL_GOOD = "def days_in_feb(y):\n    return 29 if (y % 4 == 0 and y % 100 != 0) or y % 400 == 0 else 28\n"
+MYCAL_TEST = textwrap.dedent('''\
+import unittest
+import mycal
+class T(unittest.TestCase):
+    def test_leap(self):
+        self.assertEqual(mycal.days_in_feb(2024), 29)
+        self.assertEqual(mycal.days_in_feb(2023), 28)
+''')
+
+def mycal_pkg_proj(d):
+    (d / "mycal.py").write_text(MYCAL_BAD)
+    (d / "tests").mkdir()
+    (d / "tests" / "__init__.py").write_text("")
+    (d / "tests" / "test_mycal.py").write_text(MYCAL_TEST)
+
 SCEN = {
  "py_fix_first": (py_proj, [], [{"write": {"calc.py": GOOD, "new_mod.py": "X=1\n"}, "delete": ["old_notes.txt"]}]),
  "py_fail_then_fix": (py_proj, [], [{"write": {"calc.py": BAD + "#a1\n"}}, {"write": {"calc.py": GOOD}}]),
@@ -115,11 +132,13 @@ SCEN = {
  "npm_fix_second": (npm_proj, [], [{"write": {"m.js": "module.exports.val=()=>4;\n"}}, {"write": {"m.js": "const h=require('helper');module.exports.val=()=>h.base()+2;\n"}}]),
  "py_stdlib_name_fixed": (queue_proj, [], [{"write": {"queue.py": QUEUE_GOOD}}]),
  "py_stdlib_name_broken": (stats_proj, [], [{"write": {"statistics.py": STATS_BROKEN}}]),
+ "py_tests_package": (mycal_pkg_proj, [], [{"write": {"mycal.py": MYCAL_GOOD}}]),
 }
 
 EXPECTED_DIFF = {
     "py_stdlib_name_fixed": {"accepted": True, "exit": 0},
     "py_stdlib_name_broken": {"accepted": False, "exit": 40},
+    "py_tests_package": {"accepted": True, "exit": 0},
 }
 
 def tree(d):
