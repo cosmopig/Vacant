@@ -1,0 +1,200 @@
+{
+ "id": "screen_native_pypool_colab",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261125,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "A2": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  }
+ },
+ "pair": [
+  "A",
+  "A2"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 6,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-12b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "ex_rational_numbers",
+  "ex_secret_handshake",
+  "ex_crypto_square",
+  "ex_hello_world",
+  "ex_difference_of_squares",
+  "ex_perfect_numbers",
+  "ex_ocr_numbers",
+  "ex_binary_search",
+  "ex_game_of_life",
+  "ex_dnd_character",
+  "ex_space_age",
+  "ex_satellite",
+  "ex_pangram",
+  "ex_queen_attack",
+  "ex_alphametics",
+  "ex_camicia",
+  "ex_spiral_matrix",
+  "ex_octal",
+  "ex_line_up",
+  "ex_hamming",
+  "ex_bank_account",
+  "ex_killer_sudoku_helper",
+  "ex_largest_series_product",
+  "ex_isbn_verifier",
+  "ex_run_length_encoding",
+  "ex_resistor_color_trio",
+  "ex_reverse_string",
+  "ex_protein_translation",
+  "ex_roman_numerals",
+  "ex_rna_transcription",
+  "ex_flatten_array",
+  "ex_collatz_conjecture",
+  "ex_custom_set",
+  "ex_kindergarten_garden",
+  "ex_pascals_triangle",
+  "ex_gigasecond",
+  "ex_nth_prime",
+  "ex_rail_fence_cipher",
+  "ex_meetup",
+  "ex_yacht",
+  "ex_say",
+  "ex_atbash_cipher",
+  "ex_hexadecimal",
+  "ex_minesweeper",
+  "ex_change",
+  "ex_complex_numbers",
+  "ex_resistor_color_expert",
+  "ex_luhn",
+  "ex_leap",
+  "ex_palindrome_products",
+  "ex_error_handling",
+  "ex_binary_search_tree",
+  "ex_triangle",
+  "ex_point_mutations",
+  "ex_word_count",
+  "ex_isogram",
+  "ex_resistor_color_duo",
+  "ex_word_search",
+  "ex_trinary",
+  "ex_pythagorean_triplet",
+  "ex_relative_distance",
+  "ex_high_scores",
+  "ex_sieve",
+  "ex_strain",
+  "ex_saddle_points",
+  "ex_sum_of_multiples",
+  "ex_rectangles",
+  "ex_anagram",
+  "ex_square_root",
+  "ex_linked_list",
+  "ex_raindrops",
+  "ex_matching_brackets",
+  "ex_swift_scheduling",
+  "ex_darts",
+  "ex_matrix",
+  "ex_series",
+  "ex_bob",
+  "ex_two_fer",
+  "ex_rotational_cipher",
+  "ex_all_your_base",
+  "ex_flower_field",
+  "ex_clock",
+  "ex_etl",
+  "ex_eliuds_eggs",
+  "ex_accumulate",
+  "ex_acronym",
+  "ex_allergies",
+  "ex_binary",
+  "ex_robot_simulator",
+  "ex_tournament",
+  "ex_circular_buffer",
+  "ex_diamond",
+  "ex_parallel_letter_frequency",
+  "ex_resistor_color",
+  "ex_simple_cipher",
+  "ex_grains",
+  "ex_knapsack",
+  "ex_house",
+  "ex_prime_factors",
+  "ex_diffie_hellman",
+  "ex_state_of_tic_tac_toe",
+  "ex_armstrong_numbers",
+  "ex_scrabble_score",
+  "ex_nucleotide_count",
+  "ex_twelve_days",
+  "ex_sublist"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-21，第一通模型呼叫之前 commit。W3-5 篩選批（只跑原生臂）。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "role": "只跑原生 pi（gemma-4-12b，Colab vLLM）在全部 106 題沒用過的 Python（exercism_py_pool，106 題）上各 2 次，用事先寫死的規則選出原生不穩的題，給確認批用。這一批不檢定任何效果（A 與 A2 是同一個臂），通過率只當分母報告。",
+  "rule": "入選規則（篩選前寫死，見 ops/redo/analysis/screen_select.py）：每題原生 pi 跑 2 次（兩個完全相同的單次臂 A、A2）；兩次都有效才計分，有 infra_void 的題不入選但列在分母；2 次裡過 ≤1 次者入選；超過 N=30 照 sha256(task+salt) 取前 30；少於 15 照跑並寫明檢定力不足，不加題、不改門檻。確認批：入選題 × 5 次全新 rep，A 對 P（rc4），同一個後端（Colab L4、vLLM、jobs 6）。",
+  "denominator": "結論必須報完整分母：篩選幾題、各題原生 2 次過幾次（2/2、1/2、0/2 各幾題）、void 幾題、入選幾題；「原生本來就穩過的題沒有增益也沒有多花」與「入選題上的差距」分開講，不得只報確認批的差距。",
+  "known_limits": [
+   "A、A2 完全相同：McNemar 欄位沒有意義，不引用。",
+   "選題只看原生臂；確認批兩臂都用全新 rep 重跑。被選中的題原生在確認批會往上回歸（被選中是因為剛好失敗），會縮小差距、對 P 不利。",
+   "Colab 單元用完或 VM 被回收：INCOMPLETE，照實報告，不改計畫。"
+  ],
+  "selection_salt": ":w35-py-2026-11-21",
+  "selection_cap_n": 30,
+  "selection_min": 15
+ }
+}

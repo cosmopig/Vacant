@@ -38,6 +38,8 @@ Options:
   --colab-config <path>      Optional `colab --config <path>` for session isolation
   --colab-auth <adc|oauth2>  Optional `colab --auth=<mode>` flag
   --allow-uncommitted-plan   Allow uncommitted plan.json (smoke tests ONLY)
+  --extra-tar <tgz>:<dir>    Upload a .tar.gz and extract it into <dir> on the VM before the batch (repeatable),
+                             e.g. the shared node_modules cache at the same absolute path the bank's symlinks point to
   --extra-wheel <path>       Upload a product wheel and install it into /opt/redo/rc_venv on the VM
                              (plans reference /opt/redo/rc_venv/bin/vacant); its sha256 goes into launch metadata
   --dry-run                  Print exact colab commands; run nothing remote
@@ -59,6 +61,7 @@ COLAB_AUTH=""
 ALLOW_UNCOMMITTED=0
 DRY_RUN=0
 EXTRA_WHEEL=""
+EXTRA_TARS=()
 POSITIONAL=()
 
 while [ $# -gt 0 ]; do
@@ -76,6 +79,7 @@ while [ $# -gt 0 ]; do
     --colab-auth) COLAB_AUTH="$2"; shift 2 ;;
     --allow-uncommitted-plan) ALLOW_UNCOMMITTED=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
+    --extra-tar) EXTRA_TARS+=("$2"); shift 2 ;;
     --extra-wheel) EXTRA_WHEEL="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     -*) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
@@ -301,6 +305,7 @@ set -euo pipefail
 mkdir -p ${REMOTE_WORK}/repo ${REMOTE_RUN_ROOT}
 tar -xzf ${REMOTE_REPO_TAR} -C ${REMOTE_WORK}/repo --strip-components=1
 chmod +x ${REMOTE_WORK}/repo/ops/redo/colab/*.sh ${REMOTE_WORK}/repo/ops/redo/colab/*.py
+$(for et in "${EXTRA_TARS[@]}"; do src=${et%%:*}; dst=${et#*:}; sha=$(sha256sum "$src" | cut -d' ' -f1); echo "echo '${sha}  /content/xtar_$(basename "$src")' | sha256sum -c -"; echo "mkdir -p '${dst}' && tar -xzf '/content/xtar_$(basename "$src")' -C '${dst}' && echo EXTRA_TAR_OK '${dst}'"; done)
 if [ -n "${REMOTE_WHEEL}" ]; then
   echo "${EXTRA_WHEEL_SHA}  ${REMOTE_WHEEL}" | sha256sum -c -
   # Colab 的 python3 沒有 ensurepip（python3 -m venv 會失敗）：用 uv 建 venv、裝 wheel
@@ -339,6 +344,10 @@ echo "4/6 Uploading repo snapshot, bank tarball, plan, config, metadata, and boo
 if [ -n "$EXTRA_WHEEL" ]; then
   "${COLAB_CMD[@]}" upload -s "$SESSION" "$EXTRA_WHEEL" "$REMOTE_WHEEL"
 fi
+for et in "${EXTRA_TARS[@]}"; do
+  src=${et%%:*}
+  "${COLAB_CMD[@]}" upload -s "$SESSION" "$src" "/content/xtar_$(basename "$src")"
+done
 
 echo "5/6 Starting VM setup + redo.py batch under setsid/nohup (transport=${TRANSPORT})"
 if [ "$TRANSPORT" = "ssh" ]; then
