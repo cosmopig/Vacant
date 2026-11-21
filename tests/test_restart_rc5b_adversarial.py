@@ -772,7 +772,7 @@ def test_r11_protected_file_changed_in_original_printed_prominently(tmp_path, mo
     out = capsys.readouterr().out
     assert rc == 0, out
     assert (proj / "calc.py").read_text(encoding="utf-8") == "def add(a, b): return a + b\n"
-    assert "a protected test/config file changed in your project during the run:" in out
+    assert "a kept-fixed test/config file changed in your project during the run:" in out
     assert "test_calc.py" in out
 
 

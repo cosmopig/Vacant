@@ -3216,7 +3216,7 @@ def format_show(rec: dict[str, Any]) -> str:
     acc_integ = details.get("acceptance_integrity")
     if acc_integ is not None:
         ir = details.get("acceptance_integrity_reasons") or []
-        ir_s = f" ({'; '.join(str(x) for x in ir[:5])})" if ir else ""
+        ir_s = f" ({'; '.join(str(x) for x in ir)})" if ir else ""
         lines.append(f"integrity  : {acc_integ}{ir_s}")
     lines.append(
         f"signature  : verified={sig.get('verified')}  status={sig.get('status')}  "

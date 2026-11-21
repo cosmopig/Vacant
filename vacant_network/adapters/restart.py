@@ -52,9 +52,14 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
   以及 `.git/objects/??/` 鬆散物件的純檔名集合比對（不讀物件內容、不對鬆散物件逐檔 `lstat`）——以及任意深度的 `node_modules`／`.venv`／
   `__pycache__`／`.pytest_cache` 與任意處 symlink，並排除 Vacant 自己的 `VACANT_HOME`／`VACANT_WORK`），偵測並回報計畫寫回以外的異動。
   `COPY_SKIP` 名稱（如 `.git`、`node_modules`、`.venv`、`__pycache__`、`.pytest_cache`）不會寫回原專案（agent 在其下新建的檔案會列在 `not_delivered`）。
-- 驗收完整性判定（`acceptance_integrity: "verified" | "unverified"`）：指令分析器採保守二分法——唯有完全理解每個執行的簡單指令與其觸及的專案檔案
-  （且所有執行的腳本／manifest 受保護、直接執行的 Python／JS 腳本不匯入專案內部模組）時才記為 `verified`；任何未完全理解的殼層語法、未知指令、
-  無法追蹤到底的腳本／recipe／inline 程式碼一律標為 `unverified`，不印正常 `protected (restored before check):` 行，改印明顯警告並列出交付嘗試改動的檔案。
+- 驗收追蹤狀態（`acceptance_integrity: "traced" | "untraced"`）：指令分析器採保守二分法——唯有完全追蹤每個執行的簡單指令、
+  其直接執行的專案檔案、npm/yarn/pnpm 腳本與設定、make 目標（含 `.PHONY` 與 `.DEFAULT_GOAL`）、`unittest discover` 匹配檔、
+  與 runner 設定（`package.json`／`jest.config.*`／`vitest.config.*`／`.mocharc.*`），且**固定不變清單非空**時才記為 `traced`；
+  只要有任何無法追蹤到底的語法／指令／腳本逃逸（Python `os.system`/`subprocess`/`ctypes`/動態匯入/非固定 `open`/`pathlib`、
+  Node `fs`/`child_process`/`vm`/動態 `require`/`import`/`eval`/`process.binding`、或直接執行腳本匯入專案模組），一律標為 `untraced`。
+  多數實務上的檢查腳本會是 `untraced`；`traced` 只代表分析器追蹤了每個執行的檔案並將它們固定為開始時內容，**不代表檢查本身正確，也不代表沒有其他檔案影響結果**。
+  交付訊息只陳述事實（`kept fixed (restored to their start content before each check):`、變更檔列表、`untraced` 短標籤），
+  僅當具體偵測到交件嘗試改動了檢查會讀取或執行且未固定的檔案時，才印出 `NOTE:` 提醒。
 - **同帳號簽署金鑰結構邊界（0.9.2 未修正）**：簽章私鑰（`$VACANT_HOME/intake/keys/verifier/identity.key`）是同帳號所有行程都讀得到的檔案，
   包含 agent 本身。兩面如實陳述：
   - 收據**能防事後竄改**（改動或刪除任一筆紀錄，其後所有雜湊與簽章都會驗證失敗）；
@@ -1864,16 +1869,9 @@ _MAKE_COMPLEX_DIRECTIVES = frozenset({
     "include", "-include", "sinclude", "define", "endef",
     "ifeq", "ifneq", "ifdef", "ifndef", "else", "endif", "override", "export",
 })
-_UNVERIFIED_CHECK_WARNING = (
-    "WARNING: this check runs files in the project that the agent could change "
-    "(Vacant could not fully trace what it executes); passing does not prove the "
-    "check was not tampered with"
-)
-
-
 @dataclasses.dataclass
 class _AcceptanceAnalysis:
-    integrity: str                                  # "verified" | "unverified" (renamed in F8/UX)
+    integrity: str                                  # "traced" | "untraced"
     reasons: list[str]
     protected: set[str]
     pinned_scripts: dict[str, str]                  # pkg_rel -> scripts.test
@@ -3710,7 +3708,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
         return d
 
     _analyze_cmd_str(cmd, (), 0)
-    integrity = "verified" if not reasons else "unverified"
+    integrity = "traced" if not reasons else "untraced"
     return _AcceptanceAnalysis(
         integrity=integrity,
         reasons=reasons,
@@ -4697,7 +4695,7 @@ class AcceptanceSpec:
     pinned_scripts: dict[str, str] = dataclasses.field(default_factory=dict)
     pinned_named_scripts: dict[str, dict[str, str]] = dataclasses.field(default_factory=dict)
     shell_expansion: bool = False
-    integrity: str | None = None       # "verified" | "unverified" | None (for kind == "none")
+    integrity: str | None = None       # "traced" | "untraced" | None (for kind == "none")
     integrity_reasons: tuple[str, ...] = ()
     ignored_new_paths: tuple[str, ...] = ()
     ignored_new_globs: tuple[tuple[str, str], ...] = ()
@@ -4921,6 +4919,12 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         merged_pinned = {**pinned_scripts_r2, **analysis.pinned_scripts}
         pinned_script = merged_pinned.get("package.json") or pinned_script_r2
         prot = tuple(sorted(set(_prot("check")) | extra_check | analysis.protected))
+        integ = analysis.integrity
+        integ_reasons = list(analysis.reasons)
+        if not prot and analysis.runs_project_code:
+            integ = "untraced"
+            if "no project files kept fixed" not in integ_reasons:
+                integ_reasons.append("no project files kept fixed")
         return AcceptanceSpec(
             kind="check",
             command=cmd,
@@ -4930,8 +4934,8 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             pinned_scripts=merged_pinned,
             pinned_named_scripts=analysis.pinned_named_scripts,
             shell_expansion=bool(uses_exp or analysis.shell_expansion),
-            integrity=analysis.integrity,
-            integrity_reasons=tuple(analysis.reasons),
+            integrity=integ,
+            integrity_reasons=tuple(integ_reasons),
             ignored_new_paths=tuple(sorted(analysis.ignored_new_paths)),
             ignored_new_globs=tuple(analysis.ignored_new_globs),
             unfixed_deps={k: tuple(sorted(v)) for k, v in analysis.unfixed_deps.items()},
@@ -4941,36 +4945,44 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         py_exe = resolve_python(project)
         insp = _inspect_python_tests(py_orig)
         if insp.syntax_error is not None:
+            prot_u = _prot("python_unittest")
             return AcceptanceSpec(
                 kind="python_unittest",
                 command=f"{py_exe} -B (unittest)",
-                protected=_prot("python_unittest"),
+                protected=prot_u,
                 reason=f"syntax error in original test file: {insp.syntax_error}",
                 interpreter=py_exe,
-                integrity="verified",
+                integrity="traced" if prot_u else "untraced",
+                integrity_reasons=() if prot_u else ("no project files kept fixed",),
             )
         if insp.has_pytest_style:
             if _pytest_available(py_exe):
+                prot_p = _prot("python_pytest")
                 return AcceptanceSpec(
                     kind="python_pytest",
                     command=f"{py_exe} -B -m pytest -q -rN",
-                    protected=_prot("python_pytest"),
+                    protected=prot_p,
                     interpreter=py_exe,
-                    integrity="verified",
+                    integrity="traced" if prot_p else "untraced",
+                    integrity_reasons=() if prot_p else ("no project files kept fixed",),
                 )
+            prot_b = _prot("python_bare")
             return AcceptanceSpec(
                 kind="python_bare",
                 command=f"{py_exe} -B (stdlib test runner)",
-                protected=_prot("python_bare"),
+                protected=prot_b,
                 interpreter=py_exe,
-                integrity="verified",
+                integrity="traced" if prot_b else "untraced",
+                integrity_reasons=() if prot_b else ("no project files kept fixed",),
             )
+        prot_u = _prot("python_unittest")
         return AcceptanceSpec(
             kind="python_unittest",
             command=f"{py_exe} -B (unittest)",
-            protected=_prot("python_unittest"),
+            protected=prot_u,
             interpreter=py_exe,
-            integrity="verified",
+            integrity="traced" if prot_u else "untraced",
+            integrity_reasons=() if prot_u else ("no project files kept fixed",),
         )
 
     missing: list[str] = []
@@ -4980,6 +4992,12 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             analysis = _analyze_acceptance_command(project, "npm test", set(all_files))
             merged_pinned = {"package.json": npm_script, **analysis.pinned_scripts}
             prot = tuple(sorted(set(_prot("npm")) | analysis.protected))
+            integ = analysis.integrity
+            integ_reasons = list(analysis.reasons)
+            if not prot:
+                integ = "untraced"
+                if "no project files kept fixed" not in integ_reasons:
+                    integ_reasons.append("no project files kept fixed")
             return AcceptanceSpec(
                 kind="npm",
                 command="npm test",
@@ -4989,8 +5007,8 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 pinned_scripts=merged_pinned,
                 pinned_named_scripts=analysis.pinned_named_scripts,
                 shell_expansion=analysis.shell_expansion,
-                integrity=analysis.integrity,
-                integrity_reasons=tuple(analysis.reasons),
+                integrity=integ,
+                integrity_reasons=tuple(integ_reasons),
                 ignored_new_paths=tuple(sorted(analysis.ignored_new_paths)),
                 ignored_new_globs=tuple(analysis.ignored_new_globs),
                 unfixed_deps={k: tuple(sorted(v)) for k, v in analysis.unfixed_deps.items()},
@@ -4999,17 +5017,23 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
 
     if _has_reg_file(project / "Cargo.toml"):
         if shutil.which("cargo"):
+            prot_c = _prot("cargo")
             return AcceptanceSpec(
                 kind="cargo", command="cargo test", argv=("cargo", "test"),
-                protected=_prot("cargo"), integrity="verified",
+                protected=prot_c,
+                integrity="traced" if prot_c else "untraced",
+                integrity_reasons=() if prot_c else ("no project files kept fixed",),
             )
         missing.append("Cargo.toml found, but 'cargo' was not found on PATH")
 
     if _has_reg_file(project / "go.mod"):
         if shutil.which("go"):
+            prot_g = _prot("go")
             return AcceptanceSpec(
                 kind="go", command="go test ./...", argv=("go", "test", "./..."),
-                protected=_prot("go"), integrity="verified",
+                protected=prot_g,
+                integrity="traced" if prot_g else "untraced",
+                integrity_reasons=() if prot_g else ("no project files kept fixed",),
             )
         missing.append("go.mod found, but 'go' was not found on PATH")
 
@@ -7117,6 +7141,105 @@ def _time_limit_notice(res: dict) -> str:
     return "".join(lines)
 
 
+def _short_integrity_code(reason: str) -> str:
+    """Convert a full acceptance_integrity_reasons string into a short, readable tag code."""
+    s = reason.strip()
+    if not s:
+        return "untraced"
+    if "imports project modules" in s:
+        return "script-imports-project-modules"
+    m = re.search(r"unknown command:\s*(\S+)", s)
+    if m:
+        return f"unknown-command:{m.group(1)}"
+    if "shell output redirection" in s or "shell input redirection" in s:
+        return "shell-redirection"
+    if "here-doc" in s or "here-string" in s:
+        return "shell-heredoc"
+    if "process substitution" in s:
+        return "process-substitution"
+    if "shell expansion" in s:
+        return "shell-expansion"
+    if "unquoted shell globbing" in s:
+        return "shell-glob"
+    if "subshell or function syntax" in s:
+        return "shell-subshell"
+    m = re.search(r"shell control-flow construct:\s*(\S+)", s)
+    if m:
+        return f"shell-control-flow:{m.group(1)}"
+    m = re.search(r"unsupported (\S+) option:\s*(\S+)", s)
+    if m:
+        return f"unsupported-option:{m.group(1)}:{m.group(2)}"
+    m = re.match(r"make target '([^']+)' is not \.PHONY", s)
+    if m:
+        return f"make-non-phony:{m.group(1)}"
+    if ".DEFAULT_GOAL" in s:
+        return "make-default-goal"
+    m = re.search(r"Makefile uses untraceable directive \(([^)]+)\)", s)
+    if m:
+        return f"make-directive:{m.group(1)}"
+    if "$(shell" in s:
+        return "make-shell-func"
+    if "double-colon rule" in s:
+        return "make-double-colon"
+    if "pattern/variable target" in s:
+        return "make-pattern-target"
+    if "!= shell assignment" in s:
+        return "make-shell-assign"
+    if "untraceable prerequisite" in s:
+        return "make-untraced-prereq"
+    if "make variable override" in s:
+        return "make-var-override"
+    if "uses variable/shell expansion" in s:
+        return "make-recipe-expansion"
+    m = re.search(r"uses process execution:\s*([^,\s]+)", s)
+    if m:
+        return f"py-exec:{m.group(1)}"
+    m = re.search(r"uses dynamic code:\s*([^,\s]+)", s)
+    if m:
+        return f"py-dynamic:{m.group(1)}"
+    if "uses open() with non-constant path" in s:
+        return "py-open-dynamic"
+    if "uses open() of unprotected path" in s:
+        return "py-open-unprotected"
+    if "uses open() of outside path" in s:
+        return "py-open-outside"
+    m = re.search(r"uses pathlib\.(\w+)\(\)", s)
+    if m:
+        return f"py-pathlib:{m.group(1)}"
+    m = re.search(r"requires/imports\s+([^,\s]+)", s)
+    if m:
+        return f"js-require:{m.group(1)}"
+    if "uses non-literal require()" in s or "non-literal require()" in s:
+        return "js-dynamic-require"
+    if "uses dynamic import()" in s or "dynamic import()" in s:
+        return "js-dynamic-import"
+    if "uses process.binding" in s:
+        return "js-process-binding"
+    if "uses eval()" in s:
+        return "js-eval"
+    if "uses new Function" in s:
+        return "js-new-function"
+    if "<rootDir>" in s or "unresolvable config path" in s or "non-literal path" in s or "runner config" in s or "--config" in s:
+        return "runner-config-untraced"
+    if "uses --require" in s:
+        return "runner-require"
+    if "loads local plugin" in s:
+        return "runner-plugin"
+    if s == "no project files kept fixed":
+        return "no-fixed-files"
+    if "node inline code" in s:
+        return "node-inline"
+    if "node preload option" in s:
+        return "node-preload"
+    m = re.search(r"env assignment alters runtime resolution:\s*(\S+)", s)
+    if m:
+        return f"env-override:{m.group(1)}"
+    if "python -m module cannot be resolved" in s:
+        return "py-module-untraced"
+    slug = re.sub(r"[^a-z0-9:._-]+", "-", s.lower()).strip("-")
+    return slug[:36] or "untraced"
+
+
 def summary(res: dict) -> str:
     res, _ = _sanitize_json_obj(res)
     n = len(res["attempts"])
@@ -7203,8 +7326,28 @@ def summary(res: dict) -> str:
                     f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
 
     head += _time_limit_notice(res)
+    acc_integrity = res.get("acceptance_integrity")
+    if acc_integrity is None:
+        acc_integrity = acc_info.get("integrity")
+    acc_integrity_reasons = list(
+        res.get("acceptance_integrity_reasons")
+        or acc_info.get("integrity_reasons")
+        or ()
+    )
     cmd_part = f" ({acc_cmd})" if acc_cmd else ""
-    head += f"\n  acceptance: {acc_kind}{cmd_part}"
+    if acc_integrity in ("untraced", "unverified"):
+        codes: list[str] = []
+        for r in acc_integrity_reasons:
+            c = _short_integrity_code(str(r))
+            if c not in codes:
+                codes.append(c)
+        if codes:
+            shown_codes = ", ".join(codes[:3]) + (f", +{len(codes) - 3}" if len(codes) > 3 else "")
+            head += f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced [{shown_codes}]"
+        else:
+            head += f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced"
+    else:
+        head += f"\n  acceptance: {acc_kind}{cmd_part}"
     if acc_info.get("shell_expansion"):
         head += "\n  warning: the check command uses shell expansion; Vacant could not see which files it runs"
     if res.get("project"):
@@ -7226,43 +7369,21 @@ def summary(res: dict) -> str:
                          f"status={baseline.get('status')})")
             else:
                 head += f"\n  baseline (before agent): FAIL (status={baseline.get('status')})"
-    acc_integrity = res.get("acceptance_integrity")
-    if acc_integrity is None:
-        acc_integrity = acc_info.get("integrity")
-    acc_integrity_reasons = list(
-        res.get("acceptance_integrity_reasons")
-        or acc_info.get("integrity_reasons")
-        or ()
-    )
-    if acc_integrity == "unverified":
-        head += f"\n  {_UNVERIFIED_CHECK_WARNING}"
-        if acc_integrity_reasons:
-            shown_ir = "; ".join(str(r) for r in acc_integrity_reasons[:6]) + (
-                f" … (+{len(acc_integrity_reasons) - 6} more)" if len(acc_integrity_reasons) > 6 else ""
-            )
-            head += f"\n  unverified reason(s): {shown_ir}"
-        if protected:
-            shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
-            head += f"\n  partially restored before check (incomplete): {shown}"
-        deliv_changed = (
-            [f"+{p}" for p in (ch.get("added") or ())]
-            + [f"~{p}" for p in (ch.get("modified") or ())]
-            + [f"-{p}" for p in (ch.get("deleted") or ())]
-        )
-        if deliv_changed:
-            shown_dc = ", ".join(deliv_changed[:20]) + (
-                f" … (+{len(deliv_changed) - 20} more)" if len(deliv_changed) > 20 else ""
-            )
-            head += f"\n  files changed by delivered attempt: {shown_dc}"
-        else:
-            head += "\n  files changed by delivered attempt: none"
-    elif protected:
+    if protected:
         shown = ", ".join(protected[:20]) + (f" … (+{len(protected) - 20} more)" if len(protected) > 20 else "")
-        head += f"\n  protected (restored before check): {shown}"
-    elif acc_kind != "none":
-        head += "\n  protected (restored before check): none — the agent could have edited what this check runs"
+        head += f"\n  kept fixed (restored to their start content before each check): {shown}"
     else:
-        head += "\n  protected (restored before check): none"
+        head += "\n  kept fixed (restored to their start content before each check): none"
+    deliv_changed = (
+        [f"+{p}" for p in (ch.get("added") or ())]
+        + [f"~{p}" for p in (ch.get("modified") or ())]
+        + [f"-{p}" for p in (ch.get("deleted") or ())]
+    )
+    if deliv_changed:
+        shown_dc = ", ".join(deliv_changed[:10]) + (
+            f" (+{len(deliv_changed) - 10} more)" if len(deliv_changed) > 10 else ""
+        )
+        head += f"\n  changed files: {shown_dc}"
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
@@ -7278,7 +7399,7 @@ def summary(res: dict) -> str:
         prot_outside = list(res.get("protected_outside_changes") or [p for p in outside_list if p in prot_set])
         if prot_outside:
             shown_po = ", ".join(prot_outside[:10]) + (f" … (+{len(prot_outside) - 10} more)" if len(prot_outside) > 10 else "")
-            head += f"\n  a protected test/config file changed in your project during the run: {shown_po}"
+            head += f"\n  a kept-fixed test/config file changed in your project during the run: {shown_po}"
         git_hooks = [
             p for p in outside_list
             if p == ".git/hooks" or p.startswith(".git/hooks/") or "/.git/hooks/" in p
@@ -7336,7 +7457,7 @@ def summary(res: dict) -> str:
         if all(_is_universal_test(t) or _is_test_config(t) for t in tam):
             head += f"\n  the agent edited test files ({', '.join(tam)}); checked against the originals, not written back."
         else:
-            head += f"\n  the agent edited protected files ({', '.join(tam)}); checked against the originals, not written back."
+            head += f"\n  the agent edited kept-fixed files ({', '.join(tam)}); checked against the originals, not written back."
     if (not res.get("project_not_writable") and not baseline_err and not res.get("node_modules_changed")
             and not res.get("agent_error") and res.get("attempts") and res.get("delivered_attempt")):
         d_att = res["attempts"][res["delivered_attempt"] - 1]
@@ -7357,7 +7478,10 @@ def summary(res: dict) -> str:
         shown_dep = ", ".join(_fmt_dep(x) for x in dep_changed[:20]) + (
             f" … (+{len(dep_changed) - 20} more)" if len(dep_changed) > 20 else ""
         )
-        head += f"\n  the check depends on these files and the agent changed them — review them yourself: {shown_dep}"
+        head += (
+            f"\n  NOTE: the delivered attempt changed files the check reads or runs "
+            f"that were not kept fixed: {shown_dep}"
+        )
     det_items = res.get("detached_processes")
     if "detached_processes" in res and det_items is None:
         head += (

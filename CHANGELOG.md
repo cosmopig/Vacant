@@ -25,9 +25,11 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   Any token at any depth naming an existing project file (relative, `./x`, or absolute inside the project) is also
   protected, and restoring protected files preserves original mode bits including exec (so `--check './verify.sh'` works).
   If the command uses unresolvable shell expansion (`$VAR` or backticks), Vacant prints a warning.
-- **Additional runner configs protected (rc5, A5).** Added `playwright.config.*`, `cypress.config.*`, `cypress.json`,
-  `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`, `noxfile.py`, and `.mocharc.*` to the protected test-config set
-  (restored before check and not written back).
+- **Additional runner & package-manager configs kept fixed (rc5, A5/F1).** Added `playwright.config.*`,
+  `cypress.config.*`, `cypress.json`, `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`, `noxfile.py`, `.mocharc.*`,
+  `.npmrc`, `.yarnrc`, `.yarnrc.yml`, `.pnpmrc`, `pnpm-workspace.yaml`, `.babelrc`, `.babelrc.*`, `babel.config.*`,
+  `.swcrc`, and `tsconfig*.json` to the test-config class (existing ones restored before check and not written back;
+  agent-created ones excluded from the check copy and write-back via `config_ignored`).
 - **Flagged acceptance dependencies (rc5, A1/A2/R6).** Files changed by the delivered attempt are flagged in
   `acceptance_dependencies_changed` (ordered, with reasons `literal`/`import`/`dir`) when: (a) their basename or
   relative path appears as a string literal in a protected test file, (b) they are imported by protected Python tests
@@ -57,16 +59,25 @@ about how much it helps — measured numbers live in `ops/redo/results/` with th
   recorded in `outside_changes`, and printed prominently ("your project changed during the run, not by this delivery: … —
   not checked and not touched"; plus a dedicated line for any protected test/config file). `_apply_write_plan` re-checks
   each live file against the start snapshot just before `os.replace`/unlink to close plan→apply TOCTOU races.
-- **Binary acceptance integrity analysis (`verified` | `unverified`) (rc5, F1/F2).** Acceptance commands (both `--check`
-  and auto-detected `npm`) are conservatively analyzed into two outcomes: `verified` (every simple command separated by
-  `;`/`&&`/`||`/`|` is understood and every executed manifest/script — following `npm test`/`npm run`/`npm --prefix`,
-  `yarn`/`pnpm`, `make [TARGET]` recipes, `bash|sh FILE` / `./FILE` lines, `python -m MOD`, and `node`/`python` scripts
-  with no project-local imports — is protected and pinned) or `unverified` (any unknown shell construct, unknown command,
-  unresolvable script/recipe/inline code, or directly executed script importing project modules). On `unverified` runs,
-  Vacant suppresses the normal `protected (restored before check):` line, prints a prominent `WARNING` that passing does
-  not prove the check was not tampered with, and lists all files changed by the delivered attempt (while still restoring
-  whatever was understood). `acceptance_integrity` and `acceptance_integrity_reasons` are recorded in `result.json` and
-  the signed receipt, and shown in `vacant audit list` (`INTEGRITY` column) and `vacant audit show`.
+- **Acceptance tracing (`traced` | `untraced`) and factual delivery summary (rc5, F1–F8).** Acceptance commands (both
+  `--check` and auto-detected runners) are conservatively analyzed into two outcomes: `traced` (every simple command
+  separated by `;`/`&&`/`||`/`|` is traced and every executed manifest/script/config — following `npm test`/`npm run`/
+  `npm --prefix`, `yarn`/`pnpm`, `make [TARGET]` including `.PHONY` and `.DEFAULT_GOAL`, `python -m unittest discover`
+  patterns, `bash|sh FILE` / `./FILE`, `python -m MOD`, `package.json` runner keys (`jest`/`mocha`/`ava`/`vitest`/`nyc`/
+  `c8`/`babel`/`eslintConfig`), `jest.config.*`/`vitest.config.*`/`.mocharc.*`, `jest --config`, and clean `node`/
+  `python` scripts — is kept fixed, and the kept-fixed set is non-empty whenever project code runs) or `untraced` (any
+  untraced shell construct, unknown command, non-`.PHONY` make target with an existing file/dir, Python process/dynamic/
+  non-constant `open`/`pathlib` escape, Node `fs`/`child_process`/`worker_threads`/`vm`/non-literal `require`/`import`/
+  `process.binding`/`eval`/`new Function` escape, unresolvable runner config path, or directly executed script importing
+  project modules). Agent-created files matching a traced non-`.PHONY` make target or `unittest discover` pattern are
+  excluded from the check copy and write-back (`config_ignored`). Most real-world check scripts come out `untraced`;
+  `traced` means the analyzer traced every executed file and kept them fixed, not that the check is correct nor that no
+  other file influences it. The delivery message states facts only (`kept fixed (restored to their start content before
+  each check):`, changed files list up to 10 + `+N more`, and a short `— inputs not fully traced [codes]` tag on the
+  `acceptance:` line when `untraced`), printing a prominent `NOTE:` line only when the delivered attempt concretely
+  changed an unfixed file the check reads or executes. `acceptance_integrity` (`traced`/`untraced`) and full
+  `acceptance_integrity_reasons` are recorded in `result.json` and the signed receipt, and displayed by
+  `vacant audit list` (`INTEGRITY` column) and `vacant audit show`.
 - **Expanded B1 `lstat`-only outside-change listing, `.git/objects` coverage, and `COPY_SKIP` visibility (rc5, B1/R4/R12/F3).**
   The `lstat`-only B1 listing covers all of `.git` including full `lstat` of `.git/objects/info/**` and
   `.git/objects/pack/**` plus the set of loose-object names under `.git/objects/??/` (`scandir` names only, no per-file

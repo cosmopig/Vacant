@@ -40,7 +40,9 @@ needs_make = pytest.mark.skipif(shutil.which("make") is None, reason="make not o
 needs_git = pytest.mark.skipif(shutil.which("git") is None, reason="git not on PATH")
 needs_bash = pytest.mark.skipif(shutil.which("bash") is None, reason="bash not on PATH")
 
-UNVERIFIED_WARNING = (
+UNTRACED_TAG = "— inputs not fully traced"
+KEPT_FIXED_PREFIX = "kept fixed (restored to their start content before each check):"
+OLD_UNVERIFIED_WARNING = (
     "WARNING: this check runs files in the project that the agent could change "
     "(Vacant could not fully trace what it executes); passing does not prove the "
     "check was not tampered with"
@@ -113,17 +115,18 @@ def test_f1_r1_npm_script_target_protected_and_unverified_due_to_local_import(
     # verify.js was protected & restored -> agent tampering rejected!
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "verify.js").read_text(encoding="utf-8") == orig_verify
-    assert UNVERIFIED_WARNING in out
-    assert "protected (restored before check):" not in out
+    assert UNTRACED_TAG in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
 
     rj = _latest_result_json(tmp_path / "vwork")
     assert "verify.js" in rj["protected"]
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
     assert any("script imports project modules" in r for r in rj["acceptance_integrity_reasons"])
 
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert receipts[-1]["acceptance_integrity"] == "unverified"
+    assert receipts[-1]["acceptance_integrity"] == "untraced"
     assert any("script imports project modules" in r for r in receipts[-1]["acceptance_integrity_reasons"])
 
 
@@ -131,7 +134,7 @@ def test_f1_r2_check_python_m_module_protected_and_unverified(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     """r2: --check 'python3 -m verify' protects verify.py; because verify.py imports impl,
-    it is rejected on tamper AND flagged unverified."""
+    it is rejected on tamper AND flagged untraced."""
     proj = tmp_path / "proj"
     proj.mkdir()
     orig_verify = "import sys\nimport impl\nsys.exit(0 if impl.answer() == 42 else 1)\n"
@@ -148,17 +151,18 @@ def test_f1_r2_check_python_m_module_protected_and_unverified(
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "verify.py").read_text(encoding="utf-8") == orig_verify
-    assert UNVERIFIED_WARNING in out
-    assert "protected (restored before check):" not in out
+    assert UNTRACED_TAG in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
 
     rj = _latest_result_json(tmp_path / "vwork")
     assert "verify.py" in rj["protected"]
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
     assert any("script imports project modules" in r for r in rj["acceptance_integrity_reasons"])
 
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert receipts[-1]["acceptance_integrity"] == "unverified"
+    assert receipts[-1]["acceptance_integrity"] == "untraced"
 
 
 @needs_node
@@ -170,8 +174,8 @@ def test_f1_r2_check_python_m_module_protected_and_unverified(
 def test_f1_r3_shell_constructs_hiding_npm_flagged_unverified(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], check_cmd: str
 ):
-    """r3: if/then, subshell, xargs hiding npm test must yield unverified WARNING,
-    suppress normal protected line, list changed files, and record in result.json + receipt + audit."""
+    """r3: if/then, subshell, xargs hiding npm test must yield untraced tag,
+    list kept-fixed & changed files, and record in result.json + receipt + audit."""
     proj = tmp_path / "proj"
     proj.mkdir()
     (proj / "package.json").write_text('{"name":"x","scripts":{"test":"node verify.test.js"}}\n', encoding="utf-8")
@@ -190,28 +194,29 @@ def test_f1_r3_shell_constructs_hiding_npm_flagged_unverified(
     _run_cli_do(monkeypatch, proj, agent, extra_args=["--check", check_cmd])
     out = capsys.readouterr().out
 
-    assert UNVERIFIED_WARNING in out
-    assert "protected (restored before check):" not in out
-    assert "package.json" in out  # listed among files changed by delivered attempt (or tampered)
+    assert UNTRACED_TAG in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
+    assert "package.json" in out  # listed among kept-fixed / tampered files
 
     rj = _latest_result_json(tmp_path / "vwork")
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
     assert rj["acceptance_integrity_reasons"]
 
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert receipts[-1]["acceptance_integrity"] == "unverified"
+    assert receipts[-1]["acceptance_integrity"] == "untraced"
     assert receipts[-1]["acceptance_integrity_reasons"]
 
-    # Check audit list and audit show display unverified
+    # Check audit list and audit show display untraced
     vh, vw = str(tmp_path / "vhome"), str(tmp_path / "vwork")
     assert AE.main(["list", "--vacant-home", vh, "--work-root", vw]) == 0
     list_out = capsys.readouterr().out
-    assert "unverified" in list_out
+    assert "untraced" in list_out
     rec_id = f"restart:{pathlib.Path(rj['run_dir']).name}"
     assert AE.main(["show", rec_id, "--vacant-home", vh, "--work-root", vw]) == 0
     show_out = capsys.readouterr().out
-    assert "unverified" in show_out
+    assert "untraced" in show_out
 
 
 @needs_node
@@ -221,7 +226,7 @@ def test_f1_r3b_make_recipe_calling_npm_protects_package_json_and_verifies(
 ):
     """r3b: --check 'make test' where recipe calls 'npm test' -> follows Makefile ->
     protects & pins package.json -> follows node verify.test.js (no local imports) ->
-    verified, agent tampering package.json is rejected."""
+    traced, agent tampering package.json is rejected."""
     proj = tmp_path / "proj"
     proj.mkdir()
     (proj / "Makefile").write_text("test:\n\tnpm test\n", encoding="utf-8")
@@ -240,11 +245,12 @@ def test_f1_r3b_make_recipe_calling_npm_protects_package_json_and_verifies(
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "package.json").read_text(encoding="utf-8") == orig_pkg
-    assert UNVERIFIED_WARNING not in out
-    assert "protected (restored before check):" in out
+    assert UNTRACED_TAG not in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
 
     rj = _latest_result_json(tmp_path / "vwork")
-    assert rj["acceptance_integrity"] == "verified"
+    assert rj["acceptance_integrity"] == "traced"
     assert rj["acceptance_integrity_reasons"] == []
     assert {"Makefile", "package.json", "verify.test.js"} <= set(rj["protected"])
 
@@ -254,7 +260,7 @@ def test_f1_r9_npm_workspace_prefix_protects_sub_package_json_and_verifies(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     """r9: auto npm kind with scripts.test='npm --prefix sub test' follows sub/package.json,
-    protects & pins it, rejects agent rewrite of sub/package.json, and is verified."""
+    protects & pins it, rejects agent rewrite of sub/package.json, and is traced."""
     proj = tmp_path / "proj"
     (proj / "sub").mkdir(parents=True)
     (proj / "package.json").write_text(
@@ -276,11 +282,12 @@ def test_f1_r9_npm_workspace_prefix_protects_sub_package_json_and_verifies(
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "sub" / "package.json").read_text(encoding="utf-8") == orig_sub
-    assert UNVERIFIED_WARNING not in out
-    assert "protected (restored before check):" in out
+    assert UNTRACED_TAG not in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
 
     rj = _latest_result_json(tmp_path / "vwork")
-    assert rj["acceptance_integrity"] == "verified"
+    assert rj["acceptance_integrity"] == "traced"
     assert "sub/package.json" in rj["protected"]
 
 
@@ -289,7 +296,7 @@ def test_f2_r7b_bash_verify_unquoted_file_flagged_unverified_and_lists_changed(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
     """r7b: --check 'bash verify.sh' where verify.sh runs 'python3 impl.py | diff -q - expected.txt'.
-    Analyzer cannot trace diff/expected.txt -> unverified WARNING, no misleading protected line,
+    Analyzer cannot trace diff/expected.txt -> untraced tag + NOTE naming expected.txt,
     lists expected.txt in changed files."""
     proj = tmp_path / "proj"
     proj.mkdir()
@@ -309,22 +316,23 @@ def test_f2_r7b_bash_verify_unquoted_file_flagged_unverified_and_lists_changed(
     out = capsys.readouterr().out
 
     assert rc == 0, out
-    assert UNVERIFIED_WARNING in out
-    assert "protected (restored before check):" not in out
+    assert UNTRACED_TAG in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert "NOTE: the delivered attempt changed files the check reads or runs that were not kept fixed:" in out
     assert "expected.txt" in out
 
     rj = _latest_result_json(tmp_path / "vwork")
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
     assert rj["acceptance_integrity_reasons"]
     assert "verify.sh" in rj["protected"]  # still protected what was understood
 
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert receipts[-1]["acceptance_integrity"] == "unverified"
+    assert receipts[-1]["acceptance_integrity"] == "untraced"
 
 
 # ============================================================================
-# F1 + F2 (ii): 8+ unresolvable shell/inline constructs -> unverified + WARNING
+# F1 + F2 (ii): 8+ unresolvable shell/inline constructs -> untraced tag
 # ============================================================================
 
 @pytest.mark.parametrize("label,check_cmd", [
@@ -359,23 +367,24 @@ def test_f1_f2_unresolvable_constructs_yield_unverified_and_warning(
     out = capsys.readouterr().out
 
     assert rc == 0, f"{label}: unexpected rc={rc}\n{out}"
-    assert UNVERIFIED_WARNING in out, f"{label}: missing WARNING\n{out}"
-    assert "protected (restored before check):" not in out, f"{label}: must not print normal protected line\n{out}"
+    assert UNTRACED_TAG in out, f"{label}: missing untraced tag\n{out}"
+    assert OLD_UNVERIFIED_WARNING not in out, f"{label}: must not print old WARNING\n{out}"
+    assert KEPT_FIXED_PREFIX in out, f"{label}: missing kept fixed line\n{out}"
     assert "work.txt" in out, f"{label}: changed file not listed\n{out}"
 
     rj = _latest_result_json(tmp_path / "vwork")
-    assert rj["acceptance_integrity"] == "unverified", f"{label}: {rj}"
+    assert rj["acceptance_integrity"] == "untraced", f"{label}: {rj}"
     assert rj["acceptance_integrity_reasons"], f"{label}: empty reasons"
 
     ok, why, receipts = R.verify_receipts(proj, state_root=tmp_path / "vhome")
     assert ok, why
-    assert receipts[-1]["acceptance_integrity"] == "unverified"
+    assert receipts[-1]["acceptance_integrity"] == "untraced"
 
 
 def test_f1_f2_source_in_shell_script_unresolvable_yields_unverified(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
-    """`source ./lib.sh` inside verify.sh (or directly via --check) yields unverified + WARNING."""
+    """`source ./lib.sh` inside verify.sh (or directly via --check) yields untraced tag."""
     proj = tmp_path / "proj"
     proj.mkdir()
     (proj / "lib.sh").write_text("diff -q a.txt a.txt\n", encoding="utf-8")
@@ -387,20 +396,21 @@ def test_f1_f2_source_in_shell_script_unresolvable_yields_unverified(
     out = capsys.readouterr().out
 
     assert rc == 0, out
-    assert UNVERIFIED_WARNING in out
-    assert "protected (restored before check):" not in out
+    assert UNTRACED_TAG in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
     rj = _latest_result_json(tmp_path / "vwork")
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
 
 
 # ============================================================================
-# F1 + F2 (iii): Common verified cases stay verified, with no warning
+# F1 + F2 (iii): Common traced cases stay traced, with no tag and no NOTE
 # ============================================================================
 
 def test_f1_f2_common_verified_cases_stay_verified_no_warning(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ):
-    """Plain unittest, pytest, npm+jest, clean bash verify.sh, and simple make test all stay verified."""
+    """Plain unittest, pytest, npm+jest, clean bash verify.sh, and simple make test all stay traced."""
     # 1. Plain unittest
     p_uni = tmp_path / "uni"
     p_uni.mkdir()
@@ -414,20 +424,21 @@ def test_f1_f2_common_verified_cases_stay_verified_no_warning(
     rc = _run_cli_do(monkeypatch, p_uni, ag_uni, vhome=tmp_path / "vh_uni", vwork=tmp_path / "vw_uni")
     out = capsys.readouterr().out
     assert rc == 0, out
-    assert UNVERIFIED_WARNING not in out
-    assert "protected (restored before check):" in out
+    assert UNTRACED_TAG not in out
+    assert OLD_UNVERIFIED_WARNING not in out
+    assert KEPT_FIXED_PREFIX in out
     rj = _latest_result_json(tmp_path / "vw_uni")
-    assert rj["acceptance_integrity"] == "verified"
+    assert rj["acceptance_integrity"] == "traced"
     assert rj["acceptance_integrity_reasons"] == []
 
-    # Audit list & show display "verified"
+    # Audit list & show display "traced"
     assert AE.main(["list", "--vacant-home", str(tmp_path / "vh_uni"), "--work-root", str(tmp_path / "vw_uni")]) == 0
     l_out = capsys.readouterr().out
-    assert "INTEGRITY" in l_out and "verified" in l_out
+    assert "INTEGRITY" in l_out and "traced" in l_out
     rec_id = f"restart:{pathlib.Path(rj['run_dir']).name}"
     assert AE.main(["show", rec_id, "--vacant-home", str(tmp_path / "vh_uni"), "--work-root", str(tmp_path / "vw_uni")]) == 0
     s_out = capsys.readouterr().out
-    assert "verified" in s_out
+    assert "traced" in s_out
 
     # 2. Plain pytest-style
     p_pyt = tmp_path / "pyt"
@@ -437,8 +448,8 @@ def test_f1_f2_common_verified_cases_stay_verified_no_warning(
     rc = _run_cli_do(monkeypatch, p_pyt, ag_uni, vhome=tmp_path / "vh_pyt", vwork=tmp_path / "vw_pyt")
     out = capsys.readouterr().out
     assert rc == 0, out
-    assert UNVERIFIED_WARNING not in out
-    assert _latest_result_json(tmp_path / "vw_pyt")["acceptance_integrity"] == "verified"
+    assert UNTRACED_TAG not in out
+    assert _latest_result_json(tmp_path / "vw_pyt")["acceptance_integrity"] == "traced"
 
     # 3. npm kind with scripts.test: "jest"
     p_npm = tmp_path / "npm_jest"
@@ -448,7 +459,7 @@ def test_f1_f2_common_verified_cases_stay_verified_no_warning(
     if shutil.which("npm"):
         spec_npm = R.detect_acceptance(p_npm)
         assert spec_npm.kind == "npm"
-        assert spec_npm.integrity == "verified"
+        assert spec_npm.integrity == "traced"
         assert spec_npm.integrity_reasons == ()
 
     # 4. --check "bash verify.sh" with only understood lines
@@ -468,10 +479,10 @@ def test_f1_f2_common_verified_cases_stay_verified_no_warning(
     )
     out = capsys.readouterr().out
     assert rc == 0, out
-    assert UNVERIFIED_WARNING not in out
-    assert "protected (restored before check):" in out
+    assert UNTRACED_TAG not in out
+    assert KEPT_FIXED_PREFIX in out
     rj_sh = _latest_result_json(tmp_path / "vw_sh")
-    assert rj_sh["acceptance_integrity"] == "verified"
+    assert rj_sh["acceptance_integrity"] == "traced"
     assert "verify.sh" in rj_sh["protected"]
 
     # 5. --check "make test" with a simple recipe
@@ -492,10 +503,10 @@ def test_f1_f2_common_verified_cases_stay_verified_no_warning(
         )
         out = capsys.readouterr().out
         assert rc == 0, out
-        assert UNVERIFIED_WARNING not in out
-        assert "protected (restored before check):" in out
+        assert UNTRACED_TAG not in out
+        assert KEPT_FIXED_PREFIX in out
         rj_mk = _latest_result_json(tmp_path / "vw_mk")
-        assert rj_mk["acceptance_integrity"] == "verified"
+        assert rj_mk["acceptance_integrity"] == "traced"
         assert "Makefile" in rj_mk["protected"]
 
 

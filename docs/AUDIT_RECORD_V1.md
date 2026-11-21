@@ -311,10 +311,19 @@ the argument is not one of `list`, `show`, `export`, or a flag.
    at the end, kills surviving detached descendants (`SIGKILL`), and records `{phase, pid, cmdline, killed}`
    in `detached_processes`. On non-Linux platforms this layer does not exist (`detached_processes: null`,
    stated in the CLI message). A write by a detached process after delivery is not recorded.
-5. **Acceptance dependency tracing (restart mode):** `acceptance_dependencies_changed` covers string
-   literals in protected tests, Python/JS transitive imports up to depth 2 (including `jest.mock`),
-   and fixture/mock/golden/data/test directories, excluding a test's sole direct non-test import.
-   Dynamic imports and paths computed at runtime are not traced.
+5. **Acceptance tracing and dependency reporting (restart mode):**
+   - `acceptance_integrity` is `"traced"` or `"untraced"` (or `null` when no acceptance exists).
+     `traced` means the analyzer traced every project file the check executes and all of them were
+     kept fixed (restored to their start content before each check); it is never `"traced"` when
+     the kept-fixed set is empty and the check runs project code. Most real-world check scripts
+     come out `untraced`; `traced` does **not** mean the check is correct, nor that no other file
+     influences it.
+   - `acceptance_dependencies_changed` covers string literals in kept-fixed tests, Python/JS
+     transitive imports up to depth 2 (including `jest.mock`), fixture/mock/golden/data/test
+     directories (excluding a test's sole direct non-test import), and concrete unfixed files the
+     command analyzer detected (e.g. `os.system` targets, `source` targets, non-`.PHONY` make
+     targets/prereqs, unfixed runner config paths). Dynamic imports and paths computed at runtime
+     are not traced.
 6. **Deduplication boundary:**
    - **Restart mode (joined):** A `vacant do` restart run writes a signed `restart_receipt`
      into the project's trace chain (`chain.ndjson`) and a companion `result.json` under

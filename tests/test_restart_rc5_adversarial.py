@@ -196,8 +196,8 @@ def test_a3_check_npm_pins_and_restores_package_json(tmp_path, monkeypatch, caps
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "package.json").read_text(encoding="utf-8") == orig_pkg
-    assert "protected (restored before check):" in out
-    prot_line = [ln for ln in out.splitlines() if "protected (restored before check):" in ln][0]
+    assert "kept fixed (restored to their start content before each check):" in out
+    prot_line = [ln for ln in out.splitlines() if "kept fixed (restored to their start content before each check):" in ln][0]
     assert "package.json" in prot_line
     rj = _latest_result_json(tmp_path)
     assert rj["acceptance"]["pinned_script"] == "node verify.test.js"
@@ -222,11 +222,11 @@ def test_a4_check_script_auto_protected(tmp_path, monkeypatch, capsys):
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "verify.sh").read_text(encoding="utf-8") == orig_sh
-    assert "WARNING: this check runs files in the project that the agent could change" in out
-    assert "protected (restored before check):" not in out
+    assert "— inputs not fully traced" in out
+    assert "kept fixed (restored to their start content before each check): verify.sh" in out
     rj = _latest_result_json(tmp_path)
     assert "verify.sh" in rj["protected"]
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
 
     # Python harness script token variant
     proj2 = tmp_path / "proj2"
@@ -239,16 +239,15 @@ def test_a4_check_script_auto_protected(tmp_path, monkeypatch, capsys):
     out2 = capsys.readouterr().out
     assert rc2 == adapters_cli.EXIT["reject"], out2
     assert (proj2 / "run_checks.py").read_text(encoding="utf-8") == orig_py
-    assert "WARNING: this check runs files in the project that the agent could change" in out2
-    assert "protected (restored before check):" not in out2
-    assert "partially restored before check (incomplete): run_checks.py" in out2
+    assert "— inputs not fully traced [script-imports-project-modules]" in out2
+    assert "kept fixed (restored to their start content before each check): run_checks.py" in out2
     rjs2 = [
         json.loads(p.read_text(encoding="utf-8"))
         for p in (tmp_path / "vwork").glob("restart-*/result.json")
     ]
     rj2 = next(r for r in rjs2 if r.get("project") == str(proj2.resolve()))
     assert "run_checks.py" in rj2["protected"]
-    assert rj2["acceptance_integrity"] == "unverified"
+    assert rj2["acceptance_integrity"] == "untraced"
 
 
 @needs_make
@@ -266,11 +265,11 @@ def test_a4_check_make_auto_protects_makefile(tmp_path, monkeypatch, capsys):
 
     assert rc == adapters_cli.EXIT["reject"], out
     assert (proj / "Makefile").read_text(encoding="utf-8") == orig_mk
-    assert "WARNING: this check runs files in the project that the agent could change" in out
-    assert "protected (restored before check):" not in out
+    assert "— inputs not fully traced" in out
+    assert "kept fixed (restored to their start content before each check): Makefile" in out
     rj = _latest_result_json(tmp_path)
     assert "Makefile" in rj["protected"]
-    assert rj["acceptance_integrity"] == "unverified"
+    assert rj["acceptance_integrity"] == "untraced"
 
 
 def test_a3_check_cargo_go_yarn_pnpm_npx_manifests_pinned(tmp_path):
@@ -713,7 +712,7 @@ def test_a1_fixture_change_flagged_in_summary_result_and_receipt(tmp_path, monke
     out = capsys.readouterr().out
 
     assert rc == 0, out
-    assert "the check depends on these files and the agent changed them — review them yourself:" in out
+    assert "NOTE: the delivered attempt changed files the check reads or runs that were not kept fixed:" in out
     assert "fixtures/expected.txt" in out
 
     rj = _latest_result_json(tmp_path)
@@ -749,7 +748,7 @@ def test_a2_python_imported_helper_flagged(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out
 
     assert rc == 0, out
-    assert "the check depends on these files and the agent changed them — review them yourself:" in out
+    assert "NOTE: the delivered attempt changed files the check reads or runs that were not kept fixed:" in out
     assert "helpers.py" in out
     rj = _latest_result_json(tmp_path)
     assert any(d["path"] == "helpers.py" for d in rj["acceptance_dependencies_changed"])
@@ -779,7 +778,7 @@ def test_a2_js_imported_helper_flagged(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out
 
     assert rc == 0, out
-    assert "the check depends on these files and the agent changed them — review them yourself:" in out
+    assert "NOTE: the delivered attempt changed files the check reads or runs that were not kept fixed:" in out
     assert "helper.js" in out
     rj = _latest_result_json(tmp_path)
     assert any(d["path"] == "helper.js" for d in rj["acceptance_dependencies_changed"])

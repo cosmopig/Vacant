@@ -321,7 +321,8 @@ def test_check_cli_accepts_on_attempt1(tmp_path, monkeypatch, capsys):
     assert (proj / "app.py").read_text(encoding="utf-8") == "x = 2\n"
     assert "acceptance: check" in out
     assert check_cmd in out
-    assert "protected (restored before check): none" in out
+    assert "kept fixed (restored to their start content before each check): none" in out
+    assert "— inputs not fully traced" in out
 
 
 def test_check_failing_retries_and_delivers_latest_on_all_fail(tmp_path):
