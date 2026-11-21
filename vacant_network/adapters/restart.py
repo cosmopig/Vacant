@@ -4953,6 +4953,77 @@ def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _repair_vacant_state_permissions(project: pathlib.Path) -> None:
+    """Repair user permissions on Vacant's own state paths (u+rwx dirs, u+rw files; never follows symlinks)
+    from $VACANT_HOME down to the trace chain path, key paths, trust.json, and head.json."""
+    from ..intake.statepaths import state_dir
+    from ..trace.recorder import project_key
+
+    def _fix_dir(p: pathlib.Path) -> None:
+        try:
+            st = p.lstat()
+        except OSError:
+            return
+        if stat.S_ISLNK(st.st_mode) or not stat.S_ISDIR(st.st_mode):
+            return
+        try:
+            os.chmod(p, stat.S_IMODE(st.st_mode) | stat.S_IRWXU)
+        except OSError:
+            pass
+
+    def _fix_file(p: pathlib.Path) -> None:
+        try:
+            st = p.lstat()
+        except OSError:
+            return
+        if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
+            return
+        try:
+            os.chmod(p, stat.S_IMODE(st.st_mode) | stat.S_IRUSR | stat.S_IWUSR)
+        except OSError:
+            pass
+
+    vh = state_dir()
+    pkey = project_key(project)
+    trace_root = vh / "trace"
+    trace_projects = trace_root / "projects"
+    trace_proj = trace_projects / pkey
+    trace_objs = trace_root / "objects"
+    intake_root = vh / "intake"
+    keys_root = intake_root / "keys"
+
+    # Top-down directory repair so parent dirs are traversable/writable before touching children
+    for d in (vh, trace_root, trace_projects, trace_proj, trace_objs, intake_root, keys_root):
+        _fix_dir(d)
+    for role in ("verifier", "approver", "reviewer", "owner"):
+        rdir = keys_root / role
+        _fix_dir(rdir)
+        for fname in ("identity.key", "identity.pub", "identity.json"):
+            _fix_file(rdir / fname)
+        try:
+            for e in os.scandir(rdir):
+                _fix_file(pathlib.Path(e.path))
+        except OSError:
+            pass
+
+    for f in (
+        intake_root / "trust.json",
+        intake_root / "keys.lock",
+        trace_proj / "chain.ndjson",
+        trace_proj / "head.json",
+        trace_proj / "state.json",
+        trace_proj / "lock",
+        trace_proj / ".lock",
+    ):
+        _fix_file(f)
+    try:
+        for e in os.scandir(trace_proj):
+            ep = pathlib.Path(e.path)
+            _fix_file(ep)
+    except OSError:
+        pass
+
+
 def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                     launch_meta: list[tuple[list[str], dict[str, str]]],
                     spec: AcceptanceSpec, protected: set[str],
@@ -4960,7 +5031,8 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                     delivered_idx: int, changed: dict[str, list[str]],
                     res: dict[str, Any], run_dir: pathlib.Path) -> dict[str, Any]:
     """把這次 restart-mode 執行簽進專案既有的 trace 簽章鏈（`$VACANT_HOME/trace/projects/<proj>/chain.ndjson`）。
-    完全事後記錄、fail-open（簽章失敗只記在回傳與 result.json，不影響已完成的交回）。"""
+    寫入前先修復 `$VACANT_HOME` 至簽章鏈／金鑰／`trust.json`／`head.json` 的使用者權限並於失敗時重試一次；
+    仍失敗則 fail-open（不改結束碼、記 `receipt_error` 並於摘要最前一行明講警告）。"""
     try:
         from ..trace.recorder import Recorder, project_key
         first_argv, first_env = launch_meta[0] if launch_meta else ([], {})
@@ -5037,16 +5109,24 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
         if any_non_utf8:
             payload["path_encoding"] = "utf-8-backslashreplace"
         payload = _bound_receipt_payload(payload)
-        rec = Recorder(project)
-        ref = rec.append("restart_receipt", payload)
-        return {
-            "recorded": True,
-            "schema": RECEIPT_SCHEMA,
-            "project_key": rec.dir.name,
-            "chain_path": _safe_str(rec.chain_path)[0],
-            "seq": ref["seq"],
-            "hash": ref["hash"],
-        }
+        last_exc: Exception | None = None
+        for _attempt in range(2):
+            _repair_vacant_state_permissions(project)
+            try:
+                rec = Recorder(project)
+                ref = rec.append("restart_receipt", payload)
+                return {
+                    "recorded": True,
+                    "schema": RECEIPT_SCHEMA,
+                    "project_key": rec.dir.name,
+                    "chain_path": _safe_str(rec.chain_path)[0],
+                    "seq": ref["seq"],
+                    "hash": ref["hash"],
+                }
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+        assert last_exc is not None
+        raise last_exc
     except Exception as e:  # noqa: BLE001 — fail-open：記錄失敗不影響已交回結果
         err_safe = _safe_str(f"{type(e).__name__}: {e}")[0]
         return {
@@ -5624,6 +5704,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             res=res,
             run_dir=run_dir,
         )
+        if not res["receipt"].get("recorded"):
+            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
         (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         return res
 
@@ -5758,6 +5840,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 res=res,
                 run_dir=run_dir,
             )
+            if not res["receipt"].get("recorded"):
+                res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
             (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
             return res
 
@@ -6113,6 +6197,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             res=res,
             run_dir=run_dir,
         )
+        if not res["receipt"].get("recorded"):
+            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
         (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         return res
     finally:
@@ -6407,4 +6493,15 @@ def summary(res: dict) -> str:
             f"\n  WARNING: {n_det} detached descendant process(es) detected "
             f"({n_killed}/{n_det} killed: {shown_p}); writes after delivery are not recorded."
         )
-    return head + f"\n  attempts and logs: {res['run_dir']}"
+    rcpt_err = res.get("receipt_error")
+    if not rcpt_err:
+        rcpt_obj = res.get("receipt")
+        if isinstance(rcpt_obj, dict) and rcpt_obj.get("recorded") is False:
+            rcpt_err = rcpt_obj.get("error") or "unknown error"
+    out = head + f"\n  attempts and logs: {res['run_dir']}"
+    if rcpt_err:
+        out = (
+            f"WARNING: the signed receipt for this run could NOT be written ({rcpt_err}); "
+            f"this run has no verifiable record\n{out}"
+        )
+    return out

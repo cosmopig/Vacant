@@ -3266,7 +3266,7 @@ def _add_filter_args(p: argparse.ArgumentParser) -> None:
 
 def _add_strict_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--strict", action="store_true",
-                   help="exit 3 if any listed record fails signature verification (for scripts/CI)")
+                   help="exit 3 if any listed record fails signature verification or any restart record has no signed receipt (for scripts/CI)")
     p.add_argument("--require-signed", action="store_true",
                    help="like --strict, and also exit 3 if any listed record is unsigned")
 
@@ -3275,12 +3275,26 @@ def _strict_rc(records: list[dict[str, Any]], args: argparse.Namespace) -> int:
     if not (getattr(args, "strict", False) or getattr(args, "require_signed", False)):
         return 0
     failed = [r for r in records if (r.get("signature") or {}).get("verified") is False]
-    unsigned = [r for r in records if (r.get("signature") or {}).get("verified") is None]
-    bad = failed + (unsigned if getattr(args, "require_signed", False) else [])
+    unsigned_all = [r for r in records if (r.get("signature") or {}).get("verified") is None]
+    unsigned_restart = [
+        r for r in unsigned_all
+        if r.get("kind") == "restart"
+        and any(g.get("code") == "unsigned_source" for g in (r.get("gaps") or []))
+    ]
+    bad_unsigned = unsigned_all if getattr(args, "require_signed", False) else unsigned_restart
+    bad = failed + bad_unsigned
     if bad:
-        print(f"vacant audit: {len(failed)} record(s) failed verification"
-              + (f", {len(unsigned)} unsigned" if getattr(args, "require_signed", False) else "")
-              + f": {', '.join(r['record_id'] for r in bad[:5])}{' …' if len(bad) > 5 else ''}", file=sys.stderr)
+        parts: list[str] = []
+        if failed:
+            parts.append(f"{len(failed)} record(s) failed verification")
+        if bad_unsigned:
+            label = "unsigned" if getattr(args, "require_signed", False) else "unsigned restart record(s)"
+            parts.append(f"{len(bad_unsigned)} {label}")
+        print(
+            f"vacant audit: {', '.join(parts)}"
+            f": {', '.join(r['record_id'] for r in bad[:5])}{' …' if len(bad) > 5 else ''}",
+            file=sys.stderr,
+        )
         return 3
     return 0
 
