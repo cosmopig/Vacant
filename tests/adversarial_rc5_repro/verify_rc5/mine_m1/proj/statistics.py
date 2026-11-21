@@ -1,2 +1,2 @@
 def median(xs):
-    return None   # agent broke it further
+    return sorted(xs)[0]   # bug: not the median
