@@ -1,0 +1,181 @@
+{
+ "id": "confirm2_vacantdo_rel092_pi_gemma12b_1004",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261131,
+ "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+ "bank_candidates": [
+  "/tmp/bm_tasks/polyglot_py",
+  "/srv/eval/staged/polyglot_py"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "P": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/home/user1/dev/ops/release_0.9.2_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "A",
+  "P"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1004",
+   "provider": "lms1004nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "pg_affine_cipher",
+  "pg_beer_song",
+  "pg_book_store",
+  "pg_bottle_song",
+  "pg_bowling",
+  "pg_connect",
+  "pg_dominoes",
+  "pg_dot_dsl",
+  "pg_food_chain",
+  "pg_forth",
+  "pg_go_counting",
+  "pg_grade_school",
+  "pg_grep",
+  "pg_hangman",
+  "pg_list_ops",
+  "pg_paasio",
+  "pg_phone_number",
+  "pg_pig_latin",
+  "pg_poker",
+  "pg_pov",
+  "pg_proverb",
+  "pg_react",
+  "pg_rest_api",
+  "pg_robot_name",
+  "pg_scale_generator",
+  "pg_sgf_parsing",
+  "pg_simple_linked_list",
+  "pg_transpose",
+  "pg_tree_building",
+  "pg_two_bucket",
+  "pg_variable_length_quantity",
+  "pg_wordy",
+  "pg_zebra_puzzle",
+  "pg_zipper"
+ ],
+ "reps": 5,
+ "prereg": {
+  "registered": "2026-11-21，第一通模型呼叫之前 commit。confirm2：發布 wheel 本身在 confirm1／1c 同一批題上的複製（1004，jobs 1，其餘條件同 confirm1c，harness 同 c7c6f5842dbf）。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "question": "同一個本機模型（gemma-4-12b-it-qat，1004）、同一個牆鐘上限（1800 秒）、同樣的 34 題 polyglot_py：要發布的 0.9.2 wheel（sha256 37005ec2aa91…）裝在獨立 venv、pi 不載入任何 Vacant 擴充，`vacant do pi` 交出通過評分的成果的比例，是不是比原生 pi 一次跑到底高？",
+  "why": "(1) 使用者會裝到的就是這個 wheel，它還沒有任何真模型數字（confirm1／1c 量的是舊碼）；(2) confirm1／1c 的 P 臂同時裝了 pi 擴充，增益不能單獨歸給重開——這批不載入擴充，解掉那個但書；(3) 這批題原生約五成、不在天花板，是 11/25 前確定有檢定力的產品數字。",
+  "primary": "P 對 A，34 題 × 5 次重複＝170 對；精確雙尾 McNemar，α＝0.05。b＝只有 A 過、c＝只有 P 過。",
+  "states": {
+   "EFFECTIVE": "170 對全部完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這 34 題、pi、gemma-4-12b（1004，llama.cpp 2.46.0）、同樣 1800 秒上限下，要發布的 0.9.2（`vacant do pi`，零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數、模型呼叫數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／題庫／沒有可執行測試的工作；這 34 題用過多次，是同一批題上的複製，不是泛化證據。",
+   "UNRESOLVED": "完成但 p ≥ 0.05（不論方向）。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+   "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "known_limits": [
+   "等預算是牆鐘的；R3 的模型呼叫數可能比 A 多或少，報告照實列，不當成主張的一部分。",
+   "polyglot_py 的可見測試就是評分器，驗收訊號在這個題庫上是真的；換題庫要先看報告的 signal.accept_fail。",
+   "34 題在 e001／e002／e016／realrun 都用過：這是同一批題上的確認，不是沒看過的題。",
+   "A 的時限 1800 秒與 e001／e002 相同，但那些批次的格子環境（vlab cell）與本 harness 不同，數字不可併表。",
+   "P 臂的內層嘗試沒有 harness 的 infra 重試（模型崩潰會吃掉一次嘗試），A 臂有；這個不對稱只會壓低 P。",
+   "P 的模型呼叫數 harness 量不到（usage=none），結案時從 {logs}/vacant-work 的 pi 日誌補算。",
+   "跑在 1004（llama.cpp 2.46.0，與 redo1 同一台、同一個引擎），但 P 臂與 A 臂的定義與 confirm1 相同；1004 的 gemma 與實驗室助手共用。",
+   "P 臂＝發布 wheel（~/dev/ops/release_0.9.2/2c9791759，sha256 37005ec2aa91af874f6697d7ea55434ba6889c5e116ad9de05eb06aca7d4ac2c）裝在 ~/dev/ops/release_0.9.2_venv；config_dir 只複製 models.json，不載入 Vacant 的 pi 擴充。",
+   "34 題在 e001／e002／e016／realrun／confirm1／confirm1c 都用過：同一批題上的複製，不是沒看過的題。",
+   "P 的模型呼叫數 harness 量不到（usage=none），結案時用 p_model_calls.py 補算。",
+   "與 confirm1／confirm1c 只並列、不併表、不合併 p 值。"
+  ],
+  "stop_rules": [
+   "jobs 1 之下若 1 小時內 ≥2 次 `bad allocation`：停批、回報，不再自行改條件。",
+   "端點機器 C: < 5 GB 或 Application Error 崩潰在 1 小時內 ≥3 次：停批、修好再續跑（續跑＝同計畫同 harness，未完成的格重做）。"
+  ],
+  "replication": "與 confirm1（1003，llama.cpp 2.73.0）各自獨立判 state，不合併成一個 p 值、不挑比較好看的那台講。1004 的引擎（2.46.0）與 redo1 相同，絕對數字可以和 redo1 的 A 臂對照。兩批都 EFFECTIVE 才講「兩台機器都複製到」；一批 EFFECTIVE、一批不是，兩個 state 一起講。",
+  "infra_before_launch": "1004 在 2026-11-18 修過：iCloud Drive 失控日誌（6.8 GB）移到 D:、iCloud 關閉，C: 10.7 GB；LM Studio 整個重啟（原本從 2026-09-26 沒重啟過）；發射前 15 分鐘雙併發長提示壓測 636 次請求 0 錯誤、0 次崩潰。",
+  "why_rerun": "confirm1b（e9c1eed0d6e2）跑 13 分鐘、完成 2 格後停批、作廢：jobs 2 下 1004 的 llama.cpp 2.46.0 在 08:11:12 與 08:22:29 各回一次 『got exception: bad allocation』（slot 快取命中後的提示處理階段），兩次都打在 P 臂的內層嘗試。字面上相隔 11 分鐘、沒有達到「10 分鐘內 ≥2 次」，但頻率顯示問題持續，照停批規則的處置改 jobs 1（redo1 在 1004 jobs 1 是 338 格約 1 次）。停批依據只看基礎設施記錄。資料留在 redo_runs/confirm1b.void_badalloc，不進任何結論。"
+ }
+}
