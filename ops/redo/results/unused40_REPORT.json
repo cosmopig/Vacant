@@ -1,0 +1,320 @@
+{
+ "control": "A",
+ "generated": "2026-11-21T12:36:28Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "c7c6f5842dbfe61570db5ef8dcd40e9bb2b5662ef614f6838d7981222f48255a"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 183,
+  "control_only_b": 1,
+  "delta_pp": 4.0,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 5,
+  "mcnemar_exact_p_two_sided": 0.021484,
+  "neither": 7,
+  "treatment_only_c": 9
+ },
+ "pairs_complete": 200,
+ "pairs_infra_void": [],
+ "pairs_planned": 200,
+ "pairs_scored": 200,
+ "per_arm": {
+  "A": {
+   "accepted": 184,
+   "accepted_but_wrong": 0,
+   "cells": 200,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 84.4,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 12.7,
+   "model_calls_known_cells": 200,
+   "pass": 184,
+   "rate": 0.92,
+   "scored": 200,
+   "tests_tampered_attempts": 0,
+   "timeouts": 3
+  },
+  "P": {
+   "accepted": 192,
+   "accepted_but_wrong": 0,
+   "cells": 200,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 90.6,
+   "mean_attempts": 1.0,
+   "mean_model_calls": null,
+   "model_calls_known_cells": 0,
+   "pass": 192,
+   "rate": 0.96,
+   "scored": 200,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 1,
+   "ctrl_pass": 37,
+   "p": 1.0,
+   "pairs": 40,
+   "treat_pass": 38
+  },
+  "2": {
+   "b": 0,
+   "c": 3,
+   "ctrl_pass": 36,
+   "p": 0.25,
+   "pairs": 40,
+   "treat_pass": 39
+  },
+  "3": {
+   "b": 1,
+   "c": 2,
+   "ctrl_pass": 37,
+   "p": 1.0,
+   "pairs": 40,
+   "treat_pass": 38
+  },
+  "4": {
+   "b": 0,
+   "c": 2,
+   "ctrl_pass": 36,
+   "p": 0.5,
+   "pairs": 40,
+   "treat_pass": 38
+  },
+  "5": {
+   "b": 0,
+   "c": 1,
+   "ctrl_pass": 38,
+   "p": 1.0,
+   "pairs": 40,
+   "treat_pass": 39
+  }
+ },
+ "per_task": {
+  "ex_accumulate": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_all_your_base": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_allergies": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_binary_search": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_binary_search_tree": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_change": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_clock": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_crypto_square": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_error_handling": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_etl": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_flower_field": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_game_of_life": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_gigasecond": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_hamming": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_hexadecimal": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_isbn_verifier": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_isogram": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_matching_brackets": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_nth_prime": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_nucleotide_count": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_protein_translation": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_pythagorean_triplet": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_raindrops": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_rational_numbers": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_rectangles": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 4
+  },
+  "ex_resistor_color_expert": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_robot_simulator": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_roman_numerals": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_run_length_encoding": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_saddle_points": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_satellite": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_sieve": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_square_root": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_state_of_tic_tac_toe": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 3
+  },
+  "ex_strain": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_swift_scheduling": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_tournament": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "ex_trinary": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_word_count": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "ex_word_search": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  }
+ },
+ "plan_id": "unused40_vacantdo_rc1_pi_gemma12b_1004",
+ "plan_sha256": "a70735a137264ce65b87d1c46a27a337579053312bf0eb62b00d8a2c9c53ff6c",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 376,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 24,
+  "reject_pass": 0
+ },
+ "state": "EFFECTIVE",
+ "treatment": "P"
+}
