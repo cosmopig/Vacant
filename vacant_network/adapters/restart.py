@@ -1988,6 +1988,10 @@ _JS_EVAL_RE = re.compile(r"""\beval\s*\(""")
 _JS_NEW_FUNC_RE = re.compile(r"""\bnew\s+Function\b""")
 _PY_DYN_CALL_NAMES = frozenset({"__import__", "eval", "exec", "compile"})
 _PY_DYN_MODULES = frozenset({"importlib", "runpy"})
+_PY_DYN_IMPORT_HITS = frozenset({
+    "importlib", "import_module", "spec_from_file_location",
+    "runpy", "run_path", "run_module", "__import__", "eval", "exec",
+})
 _PY_PROC_MODULES = frozenset({"subprocess", "pty", "ctypes"})
 _PY_PROC_OS_FUNCS = frozenset({
     "system", "popen",
@@ -2473,7 +2477,7 @@ def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
         if isinstance(fn, ast.Name) and fn.id in _PY_DYN_CALL_NAMES:
             dyn_hits.add(fn.id)
             continue
-        if isinstance(fn, ast.Attribute) and fn.attr in ("import_module", "run_path", "run_module"):
+        if isinstance(fn, ast.Attribute) and fn.attr in ("import_module", "spec_from_file_location", "run_path", "run_module"):
             dyn_hits.add(fn.attr)
             continue
 
@@ -2530,9 +2534,105 @@ def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
     if proc_hits:
         reasons.append(f"{kind_s} uses process execution: {', '.join(sorted(proc_hits)[:8])}")
     if dyn_hits:
-        reasons.append(f"{kind_s} uses dynamic code: {', '.join(sorted(dyn_hits)[:8])}")
+        if dyn_hits & _PY_DYN_IMPORT_HITS:
+            reasons.append(f"dynamic-import: {kind_s} uses {', '.join(sorted(dyn_hits)[:8])}")
+        else:
+            reasons.append(f"{kind_s} uses dynamic code: {', '.join(sorted(dyn_hits)[:8])}")
     reasons.extend(io_reasons)
     return reasons, extra_protected, unfixed_deps
+
+
+def _py_find_dynamic_imports(raw: bytes, label: str) -> list[str]:
+    """Detect dynamic import/execution constructs in Python source:
+    importlib.import_module, importlib.util.spec_from_file_location, __import__, exec, eval, runpy."""
+    try:
+        tree = ast.parse(raw, filename=label)
+    except SyntaxError:
+        return []
+    hits: set[str] = set()
+    builtins_aliases: set[str] = {"builtins"}
+    dyn_name_map: dict[str, str] = {
+        "__import__": "__import__",
+        "exec": "exec",
+        "eval": "eval",
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                top = alias.name.split(".", 1)[0]
+                as_name = alias.asname or top
+                if top == "runpy":
+                    hits.add("runpy")
+                elif top == "builtins" and alias.name == "builtins":
+                    builtins_aliases.add(as_name)
+        elif isinstance(node, ast.ImportFrom):
+            mod = node.module or ""
+            top = mod.split(".", 1)[0]
+            if top == "runpy":
+                hits.add("runpy")
+            elif mod == "importlib":
+                for alias in node.names:
+                    if alias.name in ("import_module", "*"):
+                        hits.add("importlib.import_module")
+                        if alias.name == "import_module":
+                            dyn_name_map[alias.asname or "import_module"] = "importlib.import_module"
+            elif mod == "importlib.util":
+                for alias in node.names:
+                    if alias.name in ("spec_from_file_location", "*"):
+                        hits.add("importlib.util.spec_from_file_location")
+                        if alias.name == "spec_from_file_location":
+                            dyn_name_map[alias.asname or "spec_from_file_location"] = "importlib.util.spec_from_file_location"
+            elif mod == "builtins":
+                for alias in node.names:
+                    if alias.name in ("__import__", "exec", "eval"):
+                        hits.add(alias.name)
+                        dyn_name_map[alias.asname or alias.name] = alias.name
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            if node.attr == "import_module":
+                hits.add("importlib.import_module")
+            elif node.attr == "spec_from_file_location":
+                hits.add("importlib.util.spec_from_file_location")
+            elif node.attr in ("run_path", "run_module"):
+                hits.add("runpy")
+            elif (node.attr in ("__import__", "exec", "eval")
+                  and isinstance(node.value, ast.Name)
+                  and node.value.id in builtins_aliases):
+                hits.add(node.attr)
+        elif isinstance(node, ast.Call):
+            fn = node.func
+            if isinstance(fn, ast.Name) and fn.id in dyn_name_map:
+                hits.add(dyn_name_map[fn.id])
+    return sorted(hits)
+
+
+def _scan_protected_dynamic_imports(
+    project: pathlib.Path,
+    protected: Sequence[str],
+    *,
+    originals: dict[str, bytes] | None = None,
+    existing_reasons: Sequence[str] = (),
+) -> list[str]:
+    """Scan protected Python test files / kept-fixed scripts for dynamic imports/exec."""
+    out: list[str] = []
+    orig_map = originals or {}
+    for rel in sorted(protected):
+        is_py = rel.endswith(".py")
+        raw = orig_map.get(rel)
+        if raw is None:
+            raw = _read_source_bytes(rel, project, {})
+        if raw is None:
+            continue
+        if not is_py:
+            first_line = raw.splitlines()[0].decode("utf-8", errors="replace").strip() if raw else ""
+            if not (first_line.startswith("#!") and "python" in first_line.lower()):
+                continue
+        if any(r.startswith("dynamic-import:") and rel in r for r in existing_reasons):
+            continue
+        hits = _py_find_dynamic_imports(raw, rel)
+        if hits:
+            out.append(f"dynamic-import: {rel} uses {', '.join(hits)}")
+    return out
 
 
 def _js_analyze_file(raw: bytes, rel_path: str, files_set: set[str]) -> list[str]:
@@ -5370,6 +5470,14 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
             integ = "untraced"
             if "no project files kept fixed" not in integ_reasons:
                 integ_reasons.append("no project files kept fixed")
+        dyn_reasons = _scan_protected_dynamic_imports(
+            project, prot, originals=originals, existing_reasons=integ_reasons
+        )
+        if dyn_reasons:
+            integ = "untraced"
+            for dr in dyn_reasons:
+                if dr not in integ_reasons:
+                    integ_reasons.append(dr)
         is_py_check = analysis.uses_python or any(r.endswith(".py") for r in extra_check)
         if not is_py_check:
             cw, _, _ = _parse_check_shell_cmd(cmd)
@@ -5406,48 +5514,61 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
     if py_orig:
         py_exe = resolve_python(project)
         insp = _inspect_python_tests(py_orig)
+
+        def _auto_py_integrity(prot_files: Sequence[str]) -> tuple[str, tuple[str, ...]]:
+            if not prot_files:
+                return "untraced", ("no project files kept fixed",)
+            dyn = _scan_protected_dynamic_imports(project, prot_files, originals=py_orig)
+            if dyn:
+                return "untraced", tuple(dyn)
+            return "traced", ()
+
         if insp.syntax_error is not None:
             prot_u = _prot("python_unittest")
+            integ_u, reasons_u = _auto_py_integrity(prot_u)
             return AcceptanceSpec(
                 kind="python_unittest",
                 command=f"{py_exe} -B (unittest)",
                 protected=prot_u,
                 reason=f"syntax error in original test file: {insp.syntax_error}",
                 interpreter=py_exe,
-                integrity="traced" if prot_u else "untraced",
-                integrity_reasons=() if prot_u else ("no project files kept fixed",),
+                integrity=integ_u,
+                integrity_reasons=reasons_u,
                 **_py_guard_kwargs(prot_u, is_python=True, shadow_python=py_exe, clean_env=True),
             )
         if insp.has_pytest_style:
             if _pytest_available(py_exe):
                 prot_p = _prot("python_pytest")
+                integ_p, reasons_p = _auto_py_integrity(prot_p)
                 return AcceptanceSpec(
                     kind="python_pytest",
                     command=f"{py_exe} -B -m pytest -q -rN",
                     protected=prot_p,
                     interpreter=py_exe,
-                    integrity="traced" if prot_p else "untraced",
-                    integrity_reasons=() if prot_p else ("no project files kept fixed",),
+                    integrity=integ_p,
+                    integrity_reasons=reasons_p,
                     **_py_guard_kwargs(prot_p, is_python=True, shadow_python=py_exe, clean_env=True),
                 )
             prot_b = _prot("python_bare")
+            integ_b, reasons_b = _auto_py_integrity(prot_b)
             return AcceptanceSpec(
                 kind="python_bare",
                 command=f"{py_exe} -B (stdlib test runner)",
                 protected=prot_b,
                 interpreter=py_exe,
-                integrity="traced" if prot_b else "untraced",
-                integrity_reasons=() if prot_b else ("no project files kept fixed",),
+                integrity=integ_b,
+                integrity_reasons=reasons_b,
                 **_py_guard_kwargs(prot_b, is_python=True, shadow_python=py_exe, clean_env=True),
             )
         prot_u = _prot("python_unittest")
+        integ_u, reasons_u = _auto_py_integrity(prot_u)
         return AcceptanceSpec(
             kind="python_unittest",
             command=f"{py_exe} -B (unittest)",
             protected=prot_u,
             interpreter=py_exe,
-            integrity="traced" if prot_u else "untraced",
-            integrity_reasons=() if prot_u else ("no project files kept fixed",),
+            integrity=integ_u,
+            integrity_reasons=reasons_u,
             **_py_guard_kwargs(prot_u, is_python=True, shadow_python=py_exe, clean_env=True),
         )
 
@@ -5464,6 +5585,14 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
                 integ = "untraced"
                 if "no project files kept fixed" not in integ_reasons:
                     integ_reasons.append("no project files kept fixed")
+            npm_dyn = _scan_protected_dynamic_imports(
+                project, prot, originals=originals, existing_reasons=integ_reasons
+            )
+            if npm_dyn:
+                integ = "untraced"
+                for dr in npm_dyn:
+                    if dr not in integ_reasons:
+                        integ_reasons.append(dr)
             npm_py = analysis.uses_python
             npm_shadow_py = (
                 analysis.py_interpreters[0]
@@ -7757,6 +7886,8 @@ def _short_integrity_code(reason: str) -> str:
     m = re.search(r"uses process execution:\s*([^,\s]+)", s)
     if m:
         return f"py-exec:{m.group(1)}"
+    if s == "dynamic-import" or s.startswith("dynamic-import:"):
+        return "dynamic-import"
     m = re.search(r"uses dynamic code:\s*([^,\s]+)", s)
     if m:
         return f"py-dynamic:{m.group(1)}"

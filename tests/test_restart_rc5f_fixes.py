@@ -356,3 +356,79 @@ def test_p5_unreadable_file_and_dir_stop_upfront_exit_43_with_receipt(
         locked.chmod(0o700)
         secret.chmod(0o600)
 
+
+# ============================================================================
+# Smaller item 1: Dynamic imports in protected test files / kept-fixed scripts
+# ============================================================================
+
+@pytest.mark.parametrize("label,snippet", [
+    ("import_module", "import importlib\nm = importlib.import_module('math')\n"),
+    ("dunder_import", "m = __import__('math')\n"),
+    ("exec", "exec('x = 1')\n"),
+    ("eval", "y = eval('1 + 1')\n"),
+    ("runpy", "import runpy\n"),
+    ("spec_from_file_location", "import importlib.util\nfn = importlib.util.spec_from_file_location\n"),
+])
+def test_dynamic_import_in_auto_python_and_check_is_untraced(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+    label: str, snippet: str,
+):
+    """Any protected test file or kept-fixed script using dynamic import/exec must be
+    verdict `untraced` with reason `dynamic-import` across auto python kinds and --check."""
+    # 1. Auto python_unittest
+    proj_u = tmp_path / f"{label}_u"
+    proj_u.mkdir()
+    (proj_u / "test_dyn.py").write_text(
+        "import unittest\n" + snippet +
+        "class T(unittest.TestCase):\n    def test_ok(self): self.assertTrue(True)\n",
+        encoding="utf-8",
+    )
+    spec_u = R.detect_acceptance(proj_u)
+    assert spec_u.kind == "python_unittest"
+    assert spec_u.integrity == "untraced"
+    assert any("dynamic-import" in r for r in spec_u.integrity_reasons), spec_u.integrity_reasons
+    assert any(R._short_integrity_code(r) == "dynamic-import" for r in spec_u.integrity_reasons)
+
+    # 2. Auto python_bare
+    proj_b = tmp_path / f"{label}_b"
+    proj_b.mkdir()
+    (proj_b / "test_dyn.py").write_text(snippet + "def test_ok():\n    assert True\n", encoding="utf-8")
+    monkeypatch.setattr(R, "_pytest_available", lambda py_exe=None: False)
+    spec_b = R.detect_acceptance(proj_b)
+    assert spec_b.kind == "python_bare"
+    assert spec_b.integrity == "untraced"
+    assert any("dynamic-import" in r for r in spec_b.integrity_reasons), spec_b.integrity_reasons
+
+    # 3. Auto python_pytest (when pytest is available)
+    if importlib.util.find_spec("pytest") is not None:
+        monkeypatch.setattr(R, "_pytest_available", lambda py_exe=None: True)
+        spec_p = R.detect_acceptance(proj_b)
+        assert spec_p.kind == "python_pytest"
+        assert spec_p.integrity == "untraced"
+        assert any("dynamic-import" in r for r in spec_p.integrity_reasons), spec_p.integrity_reasons
+
+    # 4. --check kept-fixed script
+    proj_c = tmp_path / f"{label}_c"
+    proj_c.mkdir()
+    (proj_c / "check.py").write_text("import sys\n" + snippet + "sys.exit(0)\n", encoding="utf-8")
+    spec_c = R.detect_acceptance(proj_c, check=f"{sys.executable} check.py")
+    assert spec_c.integrity == "untraced"
+    assert any("dynamic-import" in r for r in spec_c.integrity_reasons), spec_c.integrity_reasons
+    assert any(R._short_integrity_code(r) == "dynamic-import" for r in spec_c.integrity_reasons)
+
+    # 5. End-to-end auto python_unittest prints [dynamic-import] in summary
+    if label == "import_module":
+        monkeypatch.undo()
+        agent = _write_agent(tmp_path, "pass\n", name="noop_agent.py")
+        rc = _run_cli_do(
+            monkeypatch, proj_u, agent, attempts=1,
+            vhome=tmp_path / "vh_dyn", vwork=tmp_path / "vw_dyn",
+        )
+        out = capsys.readouterr().out
+        rj = _latest_result_json(tmp_path / "vw_dyn")
+        assert rc == 0, out
+        assert rj["acceptance_integrity"] == "untraced"
+        assert any("dynamic-import" in r for r in rj["acceptance_integrity_reasons"])
+        assert "[dynamic-import]" in out
+
+
