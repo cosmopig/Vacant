@@ -1,0 +1,557 @@
+{
+ "screen_plan": "screen_native_pypool_colab",
+ "tasks_screened": 106,
+ "scored": 106,
+ "voided": [],
+ "passes_2of2": 97,
+ "passes_1of2": 6,
+ "passes_0of2": 3,
+ "eligible": 9,
+ "cap_n": 30,
+ "chosen": [
+  "ex_resistor_color_expert",
+  "ex_ocr_numbers",
+  "ex_palindrome_products",
+  "ex_camicia",
+  "ex_alphametics",
+  "ex_rectangles",
+  "ex_relative_distance",
+  "ex_kindergarten_garden",
+  "ex_tournament"
+ ],
+ "chosen_count": 9,
+ "underpowered": true,
+ "salt": ":w35-py-2026-11-21",
+ "per_task": {
+  "ex_accumulate": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_acronym": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_all_your_base": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_allergies": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_alphametics": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "ex_anagram": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_armstrong_numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_atbash_cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_bank_account": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_binary": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_binary_search": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_binary_search_tree": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_bob": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_camicia": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "ex_change": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_circular_buffer": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_clock": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_collatz_conjecture": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_complex_numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_crypto_square": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_custom_set": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_darts": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_diamond": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_difference_of_squares": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_diffie_hellman": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_dnd_character": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_eliuds_eggs": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_error_handling": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_etl": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_flatten_array": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_flower_field": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_game_of_life": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_gigasecond": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_grains": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_hamming": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_hello_world": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_hexadecimal": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_high_scores": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_house": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_isbn_verifier": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_isogram": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_killer_sudoku_helper": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_kindergarten_garden": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "ex_knapsack": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_largest_series_product": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_leap": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_line_up": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_linked_list": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_luhn": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_matching_brackets": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_matrix": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_meetup": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_minesweeper": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_nth_prime": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_nucleotide_count": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_ocr_numbers": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "ex_octal": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_palindrome_products": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "ex_pangram": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_parallel_letter_frequency": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_pascals_triangle": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_perfect_numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_point_mutations": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_prime_factors": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_protein_translation": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_pythagorean_triplet": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_queen_attack": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_rail_fence_cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_raindrops": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_rational_numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_rectangles": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "ex_relative_distance": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "ex_resistor_color": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_resistor_color_duo": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_resistor_color_expert": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "ex_resistor_color_trio": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_reverse_string": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_rna_transcription": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_robot_simulator": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_roman_numerals": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_rotational_cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_run_length_encoding": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_saddle_points": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_satellite": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_say": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_scrabble_score": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_secret_handshake": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_series": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_sieve": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_simple_cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_space_age": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_spiral_matrix": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_square_root": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_state_of_tic_tac_toe": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_strain": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_sublist": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_sum_of_multiples": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_swift_scheduling": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_tournament": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "ex_triangle": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_trinary": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_twelve_days": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_two_fer": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_word_count": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_word_search": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "ex_yacht": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  }
+ }
+}
