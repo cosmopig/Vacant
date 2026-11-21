@@ -2253,6 +2253,21 @@ def _build_restart_record_from_receipt(
             )
         )
 
+    wbc_raw = payload.get("write_back_conflicts")
+    wb_conflicts = [str(p) for p in wbc_raw if isinstance(p, str) and p] if isinstance(wbc_raw, list) else []
+    wbc_count = _as_int(payload.get("write_back_conflicts_count"))
+    eff_wbc_n = wbc_count if wbc_count is not None else len(wb_conflicts)
+    if eff_wbc_n > 0:
+        shown_wbc = ", ".join(wb_conflicts[:5]) + (f" … (+{eff_wbc_n - 5} more)" if eff_wbc_n > 5 else "")
+        gaps.append(
+            _gap(
+                "write_back_conflict",
+                "warning",
+                f"write-back stopped due to {eff_wbc_n} conflicting path(s): {shown_wbc}",
+                count=eff_wbc_n,
+            )
+        )
+
     if n_timeouts or n_acc_err:
         parts = []
         if n_timeouts:
@@ -2322,6 +2337,9 @@ def _build_restart_record_from_receipt(
             details["path_encoding"] = _as_str(payload.get("path_encoding"))
     if mismatches:
         details["mismatches"] = mismatches
+    if eff_wbc_n > 0:
+        details["write_back_conflicts"] = wb_conflicts
+        details["write_back_conflicts_count"] = eff_wbc_n
 
     return _base_record(
         record_id=record_id,
@@ -2582,6 +2600,18 @@ def _build_restart_record_from_result_json(
                 count=len(skipped),
             )
         )
+    wbc_raw = loaded.get("write_back_conflicts")
+    wb_conflicts = [str(p) for p in wbc_raw if isinstance(p, str) and p] if isinstance(wbc_raw, list) else []
+    if wb_conflicts:
+        shown_wbc = ", ".join(wb_conflicts[:5]) + (f" … (+{len(wb_conflicts) - 5} more)" if len(wb_conflicts) > 5 else "")
+        gaps.append(
+            _gap(
+                "write_back_conflict",
+                "warning",
+                f"write-back stopped due to {len(wb_conflicts)} conflicting path(s): {shown_wbc}",
+                count=len(wb_conflicts),
+            )
+        )
     if n_timeouts or n_spawn_err or n_acc_err:
         parts = []
         if n_timeouts:
@@ -2619,6 +2649,9 @@ def _build_restart_record_from_result_json(
         details["acceptance_integrity_reasons"] = acc_integ_reasons
     if rj_rcpt is not None and rj_rcpt.get("recorded") is False and _as_str(rj_rcpt.get("error")):
         details["receipt_error"] = _as_str(rj_rcpt.get("error"))
+    if wb_conflicts:
+        details["write_back_conflicts"] = wb_conflicts
+        details["write_back_conflicts_count"] = len(wb_conflicts)
 
     return _base_record(
         record_id=f"restart:{run_dir.name}",
@@ -3147,6 +3180,17 @@ def _fmt_verified(sig: dict[str, Any]) -> str:
     return "unsigned"
 
 
+def _fmt_result(rec: dict[str, Any]) -> str:
+    res = str((rec.get("acceptance") or {}).get("result") or "unknown")
+    details = rec.get("details") or {}
+    wbc = details.get("write_back_conflicts")
+    wbc_n = details.get("write_back_conflicts_count")
+    has_wbc = bool(wbc) or (isinstance(wbc_n, int) and wbc_n > 0)
+    if has_wbc:
+        return f"{res}, not written back (conflict)"
+    return res
+
+
 def format_list(records: list[dict[str, Any]]) -> str:
     lines: list[str] = []
     if not records:
@@ -3154,18 +3198,19 @@ def format_list(records: list[dict[str, Any]]) -> str:
         lines.append(f"Note: {WORDING_BOUNDARY}")
         return "\n".join(lines) + "\n"
 
+    res_vals = [_fmt_result(r) for r in records]
+    res_w = max(12, max((len(v) for v in res_vals), default=12))
     header = (
         f"{'RECORD_ID':<34} {'KIND':<14} {'AGENT':<10} {'TASK':<18} "
-        f"{'ATT':>4} {'RESULT':<12} {'BACK':>4} {'VERIFIED':<9} {'INTEGRITY':<10} {'GAPS':>4}  TIMESTAMP"
+        f"{'ATT':>4} {'RESULT':<{res_w}} {'BACK':>4} {'VERIFIED':<9} {'INTEGRITY':<10} {'GAPS':>4}  TIMESTAMP"
     )
     lines.append(header)
     lines.append("-" * len(header))
-    for r in records:
+    for r, res_s in zip(records, res_vals):
         att_n = (r.get("attempts") or {}).get("count")
         att_s = str(att_n) if att_n is not None else "-"
         back_n = (r.get("sent_back") or {}).get("count")
         back_s = str(back_n) if back_n is not None else "-"
-        res_s = str((r.get("acceptance") or {}).get("result") or "unknown")
         ver_s = _fmt_verified(r.get("signature") or {})
         integ_s = str((r.get("details") or {}).get("acceptance_integrity") or "-")
         gaps_n = len(r.get("gaps") or [])
@@ -3175,7 +3220,7 @@ def format_list(records: list[dict[str, Any]]) -> str:
             f"{str(r.get('agent') or '-')[:10]:<10} "
             f"{str(r.get('task') or '-')[:18]:<18} "
             f"{att_s:>4} "
-            f"{res_s[:12]:<12} "
+            f"{res_s:<{res_w}} "
             f"{back_s:>4} "
             f"{ver_s:<9} "
             f"{integ_s[:10]:<10} "
@@ -3207,12 +3252,15 @@ def format_show(rec: dict[str, Any]) -> str:
         f"attempts   : count={att.get('count') if att.get('count') is not None else 'unknown'}"
         f"  max={att.get('max') if att.get('max') is not None else 'unknown'}"
         f"  delivered={att.get('delivered') if att.get('delivered') is not None else 'unknown'}",
-        f"acceptance : result={acc.get('result')}  passed={acc.get('passed')}  "
+        f"acceptance : result={_fmt_result(rec)}  passed={acc.get('passed')}  "
         f"raw={acc.get('raw_status') or 'unknown'}  kind={acc.get('kind') or 'unknown'}",
     ]
     if acc.get("checks_total") is not None:
         lines.append(f"checks     : {acc.get('checks_passed')}/{acc.get('checks_total')}")
     details = rec.get("details") or {}
+    wbc = details.get("write_back_conflicts")
+    if wbc:
+        lines.append(f"write_back : not written back (conflict: {', '.join(str(x) for x in wbc[:10])})")
     acc_integ = details.get("acceptance_integrity")
     if acc_integ is not None:
         ir = details.get("acceptance_integrity_reasons") or []

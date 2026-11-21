@@ -432,3 +432,60 @@ def test_dynamic_import_in_auto_python_and_check_is_untraced(
         assert "[dynamic-import]" in out
 
 
+# ============================================================================
+# Smaller item 2: Audit display for conflict runs
+# ============================================================================
+
+def test_audit_display_for_write_back_conflict_run(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+):
+    """A run that passed acceptance but wrote nothing back due to write_back_conflicts (exit 43)
+    must show `accepted, not written back (conflict)` in `vacant audit list` and `show`,
+    while remaining cryptographically verifiable (`--strict` exit 0)."""
+    from vacant_network import audit_export as AE
+
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def add(a, b):\n    return a - b\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text(
+        "import unittest, calc\n"
+        "class T(unittest.TestCase):\n"
+        "    def test_add(self): self.assertEqual(calc.add(2, 3), 5)\n",
+        encoding="utf-8",
+    )
+    # Agent fixes calc.py in workspace AND edits the live project's calc.py to simulate concurrent edit
+    agent = _write_agent(
+        tmp_path,
+        "import pathlib\n"
+        "pathlib.Path('calc.py').write_text('def add(a, b):\\n    return a + b\\n')\n"
+        f"pathlib.Path({str(proj / 'calc.py')!r}).write_text('def add(a, b):\\n    return a * 100\\n')\n",
+    )
+    vh = tmp_path / "vh_conf"
+    vw = tmp_path / "vw_conf"
+    rc = _run_cli_do(monkeypatch, proj, agent, attempts=1, vhome=vh, vwork=vw)
+    capsys.readouterr()
+    rj = _latest_result_json(vw)
+
+    assert rc == adapters_cli.EXIT["void"]
+    assert rj["accepted"] is True
+    assert rj["write_back_conflicts"] == ["calc.py"]
+    assert "return a * 100" in (proj / "calc.py").read_text(encoding="utf-8")
+
+    # audit list --strict: verifiable (exit 0) and shows conflict status, not plain accepted
+    rc_list = AE.main(["list", "--vacant-home", str(vh), "--work-root", str(vw), "--strict"])
+    out_list = capsys.readouterr().out
+    assert rc_list == 0, out_list
+    assert "accepted, not written back (conflict)" in out_list
+    assert "yes" in out_list
+
+    # audit show: shows conflict status and remains verified=True
+    run_id = pathlib.Path(rj["run_dir"]).name
+    rc_show = AE.main(["show", f"restart:{run_id}", "--vacant-home", str(vh), "--work-root", str(vw)])
+    out_show = capsys.readouterr().out
+    assert rc_show == 0, out_show
+    assert "result=accepted, not written back (conflict)" in out_show
+    assert "verified=True" in out_show
+    assert "write_back_conflict" in out_show
+
+
+
