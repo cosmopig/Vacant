@@ -1,7 +1,7 @@
 # rc5 compared with rc4 / wheel 37005ec2 — what changed in `vacant do` restart mode
 
 - rc4 is `652c50d36`. Its code is identical to the release candidate wheel `37005ec2aa91…`, which the running confirm2, confirm2c and atimeout batches measure.
-- rc5 was first frozen at `83e84da29` (branch `redo/rc5`), then reopened once for the independent verification's P1/P5 items and refrozen. The final freeze commit is recorded in RELEASE_PREP. It came out of five rounds of adversarial review by Devin, written up in `tests/adversarial_rc5_repro/` (round 1 and round2–round5).
+- rc5 was first frozen at `83e84da29`. It was reopened twice for the independent verification: first for P1/P5, refrozen with product code at `4457b3ecb`; then for N1/N2. **The final product code is `redo/rc5` `f65f40b5c`.** Later commits on `redo/rc5` change only tests, reference material and docs. The final freeze is tagged `rc5-final` on `redo/rc5`. The release branch's commits are listed in RELEASE_PREP. It came out of five rounds of adversarial review by Devin, written up in `tests/adversarial_rc5_repro/` (round 1 and round2–round5).
 - The fixes were written by agy and reviewed by Claude. Every round reran the full test suite and the policy differential.
 
 ## The delivery policy did not change (evidence)
@@ -13,7 +13,7 @@
 - the number of agent calls;
 - a sha256 of every file in the project tree afterwards.
 
-Result at the final freeze: **10/10 identical, plus 2/2 expected differences correct** (see P1 below). The 10 identical scenarios are:
+Result at the final freeze: **10/10 identical, plus 3/3 expected differences correct** (see P1 and N1 below). The 10 identical scenarios are:
 - passes on the first attempt;
 - fails, then passes on the second;
 - never passes, so the best attempt is delivered;
@@ -28,6 +28,7 @@ Result at the final freeze: **10/10 identical, plus 2/2 expected differences cor
 The two expected differences are bug fixes:
 - `py_stdlib_name_fixed`: rc4 rejected a correct fix; rc5 accepts it.
 - `py_stdlib_name_broken`: rc4 accepted a broken module; rc5 rejects it.
+- `py_tests_package` (N1): rc4 rejected a correct fix when the tests live in a `tests/` package; rc5 accepts it.
 
 Not covered by the differential: cargo and go (not installed on the test machine), and a real 600 s time-limit cut. pytest was exercised by the independent verification inside a project `.venv`.
 
@@ -82,6 +83,14 @@ Also changed when the freeze was reopened:
 - Dynamic imports in kept-fixed files make the run `untraced`.
 - `vacant audit list` / `show` mark a write-back conflict run as "accepted, not written back (conflict)".
 - Shadowing files get their own wording.
+
+## N1 and N2 (fixed when the freeze was reopened the second time)
+- **N1.** On the `python_unittest` path, tests in a `tests/` package that import a module at the project root (`tests/test_mycal.py` doing `import mycal`) failed with `ModuleNotFoundError`, even when the fix was correct. The project root is now on the path, matching `python3 -m unittest` run at the project root.
+  - Flat projects are unchanged; every measured batch is flat.
+  - For a non-package `tests/` dir, rc5 runs the collected test files with the root on the path. Plain `python3 -m unittest` discovery would not find those tests at all, so rc5 is more lenient here, but it runs the user's actual tests.
+  - The `src/` layout (`src/pkg` plus `tests/`) is NOT given an extra path entry: it fails just as running unittest directly would without PYTHONPATH.
+  - **Effect on measured batches: none.** All measured Python banks are flat; their test files sit at the workspace root.
+- **N2.** A dynamic import inside a helper module the tests import, up to depth 2, now makes the run `untraced` with reason `dynamic-import:<file>`. The module under test itself is not scanned.
 
 ## The measured path: zero-config `python_unittest`
 - The confirm and unused40 batches measured this path. rc5 changes it only in abnormal cases: shadow files and new test-directory `__init__.py` are left out of the check; a changed package `__init__.py` prints a NOTE; the check runs against the start snapshot.
