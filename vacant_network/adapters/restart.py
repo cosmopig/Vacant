@@ -634,11 +634,70 @@ def _matches_prefix(rel: str, prefixes: set[str]) -> bool:
     return False
 
 
-def _scan_files(root: pathlib.Path) -> tuple[list[str], set[str]]:
-    """掃描 root 底下的所有一般檔案（跳過 COPY_SKIP 的目錄與檔案、symlink 與特殊檔）。
+def _vacant_skip_dirs() -> set[pathlib.Path]:
+    """Vacant 自己的狀態與工作區根目錄：若落在專案裡面，不可複製進 agent 工作區，
+    也不可列入掃描、快照、B1 清單或寫回計畫（同契約路徑 `_skip_dirs`）。"""
+    from ..intake.statepaths import state_dir
+    out: set[pathlib.Path] = set()
+    for p in (state_dir(), work_root()):
+        try:
+            out.add(p.resolve())
+        except OSError:
+            out.add(pathlib.Path(os.path.abspath(str(p))))
+    return out
+
+
+def _skip_rels_for(root: pathlib.Path, skip_abs: set[pathlib.Path] | None = None) -> set[str]:
+    """計算 `skip_abs` 中嚴格位於 `root` 底下的相對 POSIX 路徑集合。"""
+    sabs = _vacant_skip_dirs() if skip_abs is None else skip_abs
+    if not sabs:
+        return set()
+    try:
+        root_res = root.resolve()
+    except OSError:
+        root_res = pathlib.Path(os.path.abspath(str(root)))
+    rels: set[str] = set()
+    for sd in sabs:
+        if sd == root_res:
+            continue
+        try:
+            rel = sd.relative_to(root_res).as_posix()
+        except ValueError:
+            continue
+        if rel and rel != ".":
+            rels.add(rel)
+    return rels
+
+
+def _copytree_ignore(skip_abs: set[pathlib.Path]) -> Callable[[str, list[str]], set[str]]:
+    def _ignore(d: str, names: list[str]) -> set[str]:
+        ignored = {n for n in names if n in COPY_SKIP}
+        try:
+            d_res = pathlib.Path(d).resolve()
+        except OSError:
+            d_res = pathlib.Path(os.path.abspath(d))
+        for n in names:
+            if n in ignored:
+                continue
+            cand = d_res / n
+            if cand in skip_abs:
+                ignored.add(n)
+                continue
+            try:
+                if (pathlib.Path(d) / n).resolve() in skip_abs:
+                    ignored.add(n)
+            except OSError:
+                pass
+        return ignored
+    return _ignore
+
+
+def _scan_files(root: pathlib.Path, *, skip_abs: set[pathlib.Path] | None = None) -> tuple[list[str], set[str]]:
+    """掃描 root 底下的所有一般檔案（跳過 COPY_SKIP 的目錄與檔案、Vacant 狀態/工作區根目錄、symlink 與特殊檔）。
     同時回傳無法列出內容的目錄相對路徑集合。"""
     out: list[str] = []
     unreadable_dirs: set[str] = set()
+    skip_rels = _skip_rels_for(root, skip_abs)
 
     def _walk(cur: pathlib.Path, rel_prefix: str) -> None:
         try:
@@ -651,6 +710,8 @@ def _scan_files(root: pathlib.Path) -> tuple[list[str], set[str]]:
             if name in COPY_SKIP:
                 continue
             rel = f"{rel_prefix}/{name}" if rel_prefix else name
+            if rel in skip_rels:
+                continue
             try:
                 st = entry.stat(follow_symlinks=False)
             except OSError:
@@ -815,6 +876,7 @@ def _find_detached_processes(marker_val: str) -> list[int] | None:
 
 def _dir_has_detectable_tests(d: pathlib.Path) -> bool:
     """快速淺層檢查目錄 d 是否有會被偵測到的測試檔、測試設定檔或測試目錄（不遞迴整棵樹）。"""
+    skip_abs = _vacant_skip_dirs()
     try:
         entries = list(os.scandir(d))
     except OSError:
@@ -823,6 +885,11 @@ def _dir_has_detectable_tests(d: pathlib.Path) -> bool:
         name = e.name
         if name in COPY_SKIP:
             continue
+        try:
+            if pathlib.Path(e.path).resolve() in skip_abs:
+                continue
+        except OSError:
+            pass
         try:
             st = e.stat(follow_symlinks=False)
         except OSError:
@@ -1341,8 +1408,9 @@ class _Snapshot:
     special_files: set[str]           # rel non-reg, non-dir, non-symlink paths (FIFO/socket/dev)
 
 
-def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path) -> _Snapshot:
-    """將工作區拍成只含一般檔案的私密快照（不跟隨 symlink、跳過特殊檔與 COPY_SKIP）。"""
+def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path, *,
+                        skip_abs: set[pathlib.Path] | None = None) -> _Snapshot:
+    """將工作區拍成只含一般檔案的私密快照（不跟隨 symlink、跳過特殊檔、Vacant 狀態/工作區根與 COPY_SKIP）。"""
     dest.mkdir(parents=True, exist_ok=True)
     os.chmod(dest, 0o700)
     files: dict[str, str] = {}
@@ -1351,6 +1419,7 @@ def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path) -> _Snapshot:
     unreadable_dirs: set[str] = set()
     unreadable_files: set[str] = set()
     special_files: set[str] = set()
+    skip_rels = _skip_rels_for(ws, skip_abs)
 
     def _walk(cur: pathlib.Path, rel_prefix: str) -> None:
         try:
@@ -1363,6 +1432,8 @@ def _snapshot_workspace(ws: pathlib.Path, dest: pathlib.Path) -> _Snapshot:
             if name in COPY_SKIP:
                 continue
             rel = f"{rel_prefix}/{name}" if rel_prefix else name
+            if rel in skip_rels:
+                continue
             try:
                 st = entry.stat(follow_symlinks=False)
             except OSError:
@@ -1453,10 +1524,12 @@ def _scan_file_hashes(root: pathlib.Path) -> dict[str, str | None]:
     return {rel: _sha256_file(root / rel) for rel in files}
 
 
-def _project_lstat_listing(project: pathlib.Path) -> dict[str, tuple]:
+def _project_lstat_listing(project: pathlib.Path, *,
+                           skip_abs: set[pathlib.Path] | None = None) -> dict[str, tuple]:
     """對原專案做不跟隨 symlink 的 lstat 清單（含 .git/hooks/、.git/config 與任意處的 symlink；
-    略過 node_modules（由 B3 涵蓋）與 .git 其餘內容、.venv 內部）。供 B1 偵測計畫寫回以外的異動。"""
+    略過 node_modules（由 B3 涵蓋）與 .git 其餘內容、.venv 內部與 Vacant 狀態/工作區根）。供 B1 偵測計畫寫回以外的異動。"""
     out: dict[str, tuple] = {}
+    skip_rels = _skip_rels_for(project, skip_abs)
 
     def _entry_sig(full: pathlib.Path, st: os.stat_result) -> tuple:
         mode = stat.S_IMODE(st.st_mode)
@@ -1499,6 +1572,8 @@ def _project_lstat_listing(project: pathlib.Path) -> dict[str, tuple]:
         for entry in entries:
             name = entry.name
             rel = f"{rel_prefix}/{name}" if rel_prefix else name
+            if rel in skip_rels:
+                continue
             full = cur / name
             try:
                 st = entry.stat(follow_symlinks=False)
@@ -1536,12 +1611,16 @@ def _project_lstat_listing(project: pathlib.Path) -> dict[str, tuple]:
     return out
 
 
-def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str]) -> list[str] | None:
-    """檢查 project/rel 目錄底下是否只包含即將刪除的一般檔案（無 symlink、COPY_SKIP、保護檔、特殊檔或不可讀目錄）。
+def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str], *,
+                    skip_rels: set[str] | None = None) -> list[str] | None:
+    """檢查 project/rel 目錄底下是否只包含即將刪除的一般檔案（無 symlink、COPY_SKIP、Vacant 狀態根、保護檔、特殊檔或不可讀目錄）。
     安全時回傳由深到淺的相對目錄清單（含 rel 本身），否則回傳 None。"""
     dirs_out: list[str] = []
+    srels = _skip_rels_for(project) if skip_rels is None else skip_rels
 
     def _check(cur: pathlib.Path, cur_rel: str) -> bool:
+        if cur_rel in srels:
+            return False
         try:
             entries = sorted(os.scandir(cur), key=lambda e: e.name)
         except OSError:
@@ -1551,6 +1630,8 @@ def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str]) -> list[
             if name in COPY_SKIP:
                 return False
             child_rel = f"{cur_rel}/{name}"
+            if child_rel in srels:
+                return False
             try:
                 st = entry.stat(follow_symlinks=False)
             except OSError:
@@ -1584,10 +1665,14 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
     before = set(before_list)
     after = set(snap.files)
     ws_unsafe = snap.symlinks | snap.unreadable_dirs | snap.unreadable_files | snap.special_files
+    proj_skip_rels = _skip_rels_for(project)
 
     start_set = set(start_hashes) if start_hashes is not None else before
     appeared = (
-        sorted(rel for rel in (before - start_set - protected) if not _has_copy_skip(rel))
+        sorted(
+            rel for rel in (before - start_set - protected)
+            if not _has_copy_skip(rel) and not _matches_prefix(rel, proj_skip_rels)
+        )
         if start_hashes is not None
         else []
     )
@@ -1596,7 +1681,7 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
     deletes: list[str] = []
     delete_skips: set[str] = set()
     for rel in sorted(start_set - after - protected):
-        if _has_copy_skip(rel):
+        if _has_copy_skip(rel) or _matches_prefix(rel, proj_skip_rels):
             continue
         if start_hashes is not None and rel not in before:
             continue  # 原專案自己已經刪掉，不需再刪
@@ -1625,7 +1710,7 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
 
     config_ignored: list[str] = []
     for rel in sorted(after - protected):
-        if _has_copy_skip(rel):
+        if _has_copy_skip(rel) or _matches_prefix(rel, proj_skip_rels):
             continue
         if rel not in start_set and _is_test_config(rel):
             config_ignored.append(rel)
@@ -1874,8 +1959,9 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path | _Snapshot, protected: 
             _rmtree_force(tmp_dir)
 
 
-def _restore_test_file(work: pathlib.Path, rel: str, want: bytes) -> None:
-    """在驗收副本 work 裡強制還原單一原測試檔（處理路徑上被換成檔案、目錄、symlink 或唯讀權限的情況）。"""
+def _restore_test_file(work: pathlib.Path, rel: str, want: bytes, *, mode: int | None = None) -> None:
+    """在驗收副本 work 裡強制還原單一原測試檔（處理路徑上被換成檔案、目錄、symlink 或唯讀權限的情況；
+    保留原檔案的權限位元含執行權限）。"""
     p = work
     for part in pathlib.PurePosixPath(rel).parts[:-1]:
         p = p / part
@@ -1903,11 +1989,13 @@ def _restore_test_file(work: pathlib.Path, rel: str, want: bytes) -> None:
         else:
             f.unlink()
     f.write_bytes(want)
-    os.chmod(f, 0o600)
+    final_mode = (mode & 0o777) if mode is not None else 0o600
+    os.chmod(f, final_mode)
 
 
 def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], snap: _Snapshot,
-                              project: pathlib.Path | None, plan: _WritePlan | None) -> None:
+                              project: pathlib.Path | None, plan: _WritePlan | None, *,
+                              orig_modes: dict[str, int] | None = None) -> None:
     """組裝驗收目錄 work：完全不含 symlink，且與實際會寫回專案的檔案集合一致，最後覆寫原測試檔。"""
     work.mkdir(parents=True, exist_ok=True)
     os.chmod(work, 0o700)
@@ -1927,9 +2015,10 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
             if rel not in protected and not _is_test_config(rel):
                 m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
                 _copy_reg_file(snap.root / rel, work / rel, mode=m)
-    # 3. 最後以開始時的原始測試檔覆寫
+    # 3. 最後以開始時的原始測試檔覆寫（保留原始 mode 位元含執行權限）
+    modes_map = orig_modes or {}
     for rel, want in sorted(originals.items()):
-        _restore_test_file(work, rel, want)
+        _restore_test_file(work, rel, want, mode=modes_map.get(rel))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -2687,7 +2776,8 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
                protect: Sequence[str] | None = None,
                _snapshot: _Snapshot | None = None,
                _project: pathlib.Path | None = None,
-               _plan: _WritePlan | None = None) -> dict:
+               _plan: _WritePlan | None = None,
+               _orig_modes: dict[str, int] | None = None) -> dict:
     """在工作區快照的**潔淨副本**裡、把開始時的受保護檔案還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
     all_protected = sorted(originals)
     py_tests = [rel for rel in all_protected if _is_python_test(rel)]
@@ -2731,7 +2821,14 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         if deadline - time.monotonic() <= 0:
             return {**base, "status": "timeout"}
         work = tmp / "w"
-        _populate_acceptance_work(work, originals, snap, _project, _plan)
+        eff_orig_modes = dict(_orig_modes) if _orig_modes is not None else {}
+        if _orig_modes is None and _project is not None:
+            for rel in originals:
+                try:
+                    eff_orig_modes[rel] = stat.S_IMODE((_project / rel).lstat().st_mode) & 0o777
+                except OSError:
+                    pass
+        _populate_acceptance_work(work, originals, snap, _project, _plan, orig_modes=eff_orig_modes)
         home = tmp / "h"
         home.mkdir(mode=0o700)
         runner_dir = tmp / "r"
@@ -3320,7 +3417,14 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     say = log or (lambda m: None)
     spec = detect_acceptance(project, check=check, protect=protect)
     originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
+    orig_modes: dict[str, int] = {}
+    for rel in spec.protected:
+        try:
+            orig_modes[rel] = stat.S_IMODE((project / rel).lstat().st_mode) & 0o777
+        except OSError:
+            pass
     protected = set(originals)
+    skip_abs = _vacant_skip_dirs()
     py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
     has_acceptance = spec.kind != "none" and spec.reason is None
     if not has_acceptance:
@@ -3409,7 +3513,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         baseline_error = _baseline_env_reason(spec, baseline_rec, project)
     elif has_acceptance:
         base_t = max(0.0, min(ACC_TIMEOUT_S, budget_s / 2 if budget_s < 10.0 else budget_s))
-        base_acc = acceptance(originals, project, base_t, spec=spec, _project=project)
+        base_acc = acceptance(originals, project, base_t, spec=spec, _project=project, _orig_modes=orig_modes)
         baseline_rec = {
             "accept": base_acc.get("accept"),
             "passed": base_acc.get("passed"),
@@ -3498,23 +3602,20 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         k = len(attempts) + 1
         attempt_dir = run_dir / f"attempt_{k}"
         ws = attempt_dir / "w"
-        shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
+        shutil.copytree(project, ws, symlinks=True, ignore=_copytree_ignore(skip_abs))
         _make_tree_writable(ws)
         nm_copy_s += _copy_node_modules_for_agent(project, ws)
         launch = build(prompt, ws)
         launch_meta.append((list(launch.argv), dict(launch.env)))
         attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
-        # 嘗試期間原專案 node_modules 唯讀（agent 拿到的是自己的副本），結束後還原權限並重算內容雜湊清單，
-        # 抓出任何透過絕對路徑直接改動原專案 node_modules 的行為。
-        nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
+        # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
         try:
             r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
                           log_dir=attempt_dir / "logs")
         finally:
             if launch.cleanup:
                 launch.cleanup()
-            _nm_restore_modes(nm_modes)
         spent += r["wall_ms"] / 1000.0
         detached_pids = _find_detached_processes(run_id)
         if detached_pids:
@@ -3548,12 +3649,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             plan = _plan_write_back(project, snap, protected, start_hashes=start_hashes)
             if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
-                # 驗收時跑的是候選碼：對原專案 node_modules 唯讀保護，跑完再重驗內容清單
-                nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
-                try:
-                    acc = acceptance(originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project, _plan=plan)
-                finally:
-                    _nm_restore_modes(nm_modes)
+                acc = acceptance(
+                    originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project,
+                    _plan=plan, _orig_modes=orig_modes,
+                )
                 if nm_start is not None:
                     t_nm = time.monotonic()
                     nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
