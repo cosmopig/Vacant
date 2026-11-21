@@ -91,3 +91,61 @@ To create a committed plan targeting this bank:
 2. Set `"tasks"` to task IDs from `chosen_tasks` in `ops/redo/banks/exercism_py_unused.json` (e.g., `["ex_all_your_base", "ex_robot_simulator", ...]`).
 3. Keep `"grader": {"visible_equals_grader": true, ...}` (this bank has visible workspace tests and no separate `scorer.py`/`hidden/`, same as `polyglot_py`).
 4. Commit the plan file before running `python3 ops/redo/redo.py preflight --plan <plan.json>` and `python3 ops/redo/redo.py run --plan <plan.json> --root <out_dir>`.
+
+---
+
+## `exercism_py_hard` (`difficulty >= 4`, all eligible)
+
+Added alongside `exercism_py_unused` (without modifying `exercism_py_unused` or its manifest) to avoid baseline ceiling effects on easy exercises while relying strictly on pre-existing external metadata (`config.json` `exercises.practice[].difficulty`, zero model results used).
+
+- **Bank directory:** `~/dev/ops/ref/bm_tasks/exercism_py_hard` (26 tasks, 104 files total, prefix `ex_<slug_with_underscores>`)
+- **Manifest:** `ops/redo/banks/exercism_py_hard.json`
+- **Source clone & commit:** `~/dev/ops/ref/src/exercism-python` @ `479f11b44b02337b0413e805b948491c2179615a`
+
+### Selection Rule
+
+Same eligibility and isolated `unittest` validation rules as `exercism_py_unused` (not in `polyglot_py`, required files, stdlib/local-only imports and no external network/file I/O, `(a)` `.meta/example.py` passes `unittest` with >0 tests and `(b)` starter stub fails), **plus** `difficulty >= 4` from `exercism-python/config.json` (`exercises.practice[].difficulty`). Order all surviving slugs ascending by `sha256(slug + ':redo-pyhard-2026-11-21')` and take **all** eligible exercises (`--take-all`).
+
+### Counts & Exclusions
+
+| Stage | Count | Notes |
+|---|---:|---|
+| Practice exercises under `exercises/practice/*` | 142 | Total directories |
+| Excluded — overlap with `polyglot_py` (Rule 1) | 34 | Same 34 `pg_*` tasks |
+| Non-polyglot candidates | 108 | — |
+| Excluded — `difficulty < 4` (Rule 1, `min_difficulty=4`) | 80 | Pre-existing `config.json` difficulty 1–3 |
+| Candidates with `difficulty >= 4` | 28 | — |
+| Excluded — required files / stdlib & I/O / validation (a) | 0 | — |
+| Excluded — validation (b) original stub passed all tests | 2 | `ledger` (difficulty 4, 11 tests OK) and `markdown` (difficulty 4, 17 tests OK) — upstream refactoring exercises |
+| Eligible & selected (`--take-all`) | 26 | 104 bank files total; `ex_satellite` (rank 1) through `ex_complex_numbers` (rank 26) |
+
+- Note: `ex_alphametics` (rank 2, difficulty 6) contains one upstream `@unittest.skip("extra-credit")` test.
+
+### Difficulty Histogram (26 selected)
+
+| Difficulty | Count |
+|---|---:|
+| 4 | 16 |
+| 5 | 6 |
+| 6 | 3 |
+| 7 | 1 |
+
+### Overlap with `exercism_py_unused` (10 slugs)
+
+`all-your-base`, `binary-search-tree`, `change`, `flower-field`, `rational-numbers`, `satellite`, `swift-scheduling`, `tournament`, `trinary`, `word-search`
+
+### Build & Verify Commands
+
+```bash
+python3 ops/redo/banks/build_exercism_py_unused.py \
+  --bank-id exercism_py_hard --min-difficulty 4 \
+  --salt ':redo-pyhard-2026-11-21' --take-all \
+  --out ~/dev/ops/ref/bm_tasks/exercism_py_hard \
+  --manifest ops/redo/banks/exercism_py_hard.json \
+  --overlap-manifest ops/redo/banks/exercism_py_unused.json \
+  --workers 3
+
+python3 ops/redo/banks/build_exercism_py_unused.py --check \
+  --out ~/dev/ops/ref/bm_tasks/exercism_py_hard \
+  --manifest ops/redo/banks/exercism_py_hard.json
+```

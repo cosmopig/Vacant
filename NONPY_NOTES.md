@@ -118,3 +118,63 @@ python3 ops/redo/redo.py preflight \
 4. **Upstream `test.skip` preserved**: Consistent with upstream `exercism/javascript` CI (`scripts/helpers.mjs`), `xtest`/`xdescribe` are enabled while `test.skip`/`describe.skip` are kept skipped. Among the 34 chosen tasks, `js_reverse-string` has 7 active tests and 2 upstream-skipped tests (`ref_passed=7, ref_total=9`).
 5. **Stub load-time throw**: In `js_simple-cipher`, the starter stub throws inside `constructor()` which is invoked during `describe()` setup, so Jest exits non-zero before running individual tests (`stub_failed=None, stub_total=0`); the reference passes 12/12.
 6. **Visible tests equal grader**: `visible_equals_grader` is `true` for this bank (`grader_kind = "visible_tests_pristine"`). There are no separate hidden test suites; acceptance measures passing the full pristine `*.spec.js`.
+
+---
+
+## 5. Harder JavaScript Bank: `exercism_js_d4` (`difficulty >= 4`, first 34)
+
+Added alongside `exercism_js` (leaving `exercism_js` and its manifest untouched) to avoid baseline ceiling effects on easy exercises, selected strictly from pre-existing external metadata (`config.json` `exercises.practice[].difficulty`, zero model results used).
+
+- **Bank directory**: `~/dev/ops/ref/bm_tasks/exercism_js_d4` (34 tasks, 311 entries; same shared `node_modules` symlink strategy pointing to `~/dev/ops/ref/cache/exercism_js/node_modules`)
+- **Manifest**: `ops/redo/banks/exercism_js_d4.json`
+- **Source clone & commit**: `~/dev/ops/ref/src/exercism-javascript` @ `70364d04ee58ae548fb2a14603d1dc1d46ddc8c1`
+
+### Selection Rule
+
+Same eligibility, CI test-marker enabling, and offline Jest validation rules as `exercism_js`, **plus** `difficulty >= 4` from `exercism-javascript/config.json` (`exercises.practice[].difficulty`). Order survivors ascending by `sha256(slug + ':redo-js-d4-2026-11-21')` and take the first 34.
+
+### Counts & Exclusions
+
+| Stage | Count | Notes |
+|---|---:|---|
+| Practice exercises under `exercises/practice/*` | 139 | Total directories |
+| Excluded — `difficulty < 4` (`min_difficulty=4`) | 43 | Pre-existing `config.json` difficulty 1 (9), 2 (18), 3 (16) |
+| Candidates with `difficulty >= 4` | 96 | — |
+| Excluded — files / extra npm deps / network / reference validation | 0 | — |
+| Excluded — stub unexpectedly passed spec (`rc=0`) | 2 | `ledger` (difficulty 5) and `markdown` (difficulty 5) — upstream refactoring exercises |
+| Total excluded | 45 | Logged with per-slug reasons in `exercism_js_d4.json` |
+| Survivors (`difficulty >= 4` and validated) | 94 | — |
+| Selected (first 34 by `sha256(slug + ':redo-js-d4-2026-11-21')`) | 34 | 311 bank entries (`js_spiral-matrix` through `js_promises`) |
+
+- Notes: `js_lens-person` carries 5 supporting editor files (`address.js`, `born.js`, `lens.js`, `name.js`, `person.js`) preserved in `workspace/` and documented in `contract.md`. `js_crypto-square` has 1 upstream `test.skip` (`ref_passed=7, ref_total=8`). `js_dominoes` and `js_promises` throw at load/setup time on the starter stub (`stub_failed=None, stub_total=0`; references pass `40/40` and `27/27`).
+
+### Difficulty Histogram
+
+| Difficulty | Selected (34) | All Survivors (94) |
+|---|---:|---:|
+| 4 | 8 | 28 |
+| 5 | 11 | 28 |
+| 6 | 7 | 14 |
+| 7 | 6 | 15 |
+| 8 | 1 | 8 |
+| 9 | 1 | 1 |
+
+### Overlap with `exercism_js` (9 slugs)
+
+`accumulate`, `all-your-base`, `bowling`, `clock`, `flatten-array`, `go-counting`, `nucleotide-count`, `robot-simulator`, `spiral-matrix`
+
+### Build & Verify Commands
+
+```bash
+python3 ops/redo/banks/build_exercism_js.py \
+  --bank-id exercism_js_d4 --min-difficulty 4 \
+  --salt ':redo-js-d4-2026-11-21' --take 34 \
+  --bank ~/dev/ops/ref/bm_tasks/exercism_js_d4 \
+  --manifest ops/redo/banks/exercism_js_d4.json \
+  --overlap-manifest ops/redo/banks/exercism_js.json \
+  --jobs 3
+
+python3 ops/redo/banks/build_exercism_js.py --check \
+  --bank ~/dev/ops/ref/bm_tasks/exercism_js_d4 \
+  --manifest ops/redo/banks/exercism_js_d4.json
+```

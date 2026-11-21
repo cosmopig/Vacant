@@ -27,6 +27,7 @@ DEFAULT_SRC = pathlib.Path.home() / "dev/ops/ref/src/exercism-javascript"
 DEFAULT_CACHE = pathlib.Path.home() / "dev/ops/ref/cache/exercism_js"
 DEFAULT_BANK = pathlib.Path.home() / "dev/ops/ref/bm_tasks/exercism_js"
 DEFAULT_MANIFEST = REPO_ROOT / "ops/redo/banks/exercism_js.json"
+DEFAULT_BANK_ID = "exercism_js"
 
 ORDER_SALT = ":redo-js-2026-11-20"
 TARGET_COUNT = 34
@@ -67,8 +68,95 @@ def sha256_file(p: pathlib.Path) -> str:
     return sha256_bytes(p.read_bytes())
 
 
-def order_key(slug: str) -> str:
-    return hashlib.sha256((slug + ORDER_SALT).encode("utf-8")).hexdigest()
+def order_key(slug: str, salt: str = ORDER_SALT) -> str:
+    return hashlib.sha256((slug + salt).encode("utf-8")).hexdigest()
+
+
+def load_track_difficulties(src_dir: pathlib.Path) -> dict[str, int]:
+    cfg_path = src_dir / "config.json"
+    if not cfg_path.is_file():
+        raise RuntimeError(f"track config.json not found: {cfg_path}")
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    practice = cfg.get("exercises", {}).get("practice", [])
+    out: dict[str, int] = {}
+    for entry in practice:
+        if isinstance(entry, dict) and isinstance(entry.get("slug"), str):
+            diff = entry.get("difficulty")
+            if isinstance(diff, int) and not isinstance(diff, bool):
+                out[entry["slug"]] = diff
+    return out
+
+
+def compute_difficulty_histogram(
+    slugs: list[str], difficulties: dict[str, int]
+) -> dict[str, int]:
+    counts: dict[int, int] = {}
+    unknown = 0
+    for s in slugs:
+        d = difficulties.get(s)
+        if d is None:
+            unknown += 1
+        else:
+            counts[d] = counts.get(d, 0) + 1
+    out = {str(k): counts[k] for k in sorted(counts)}
+    if unknown:
+        out["unknown"] = unknown
+    return out
+
+
+def display_repo_path(p: pathlib.Path) -> str:
+    try:
+        return p.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(p)
+
+
+def compute_overlap(
+    chosen_slugs: list[str], overlap_manifest: pathlib.Path
+) -> dict[str, Any]:
+    if not overlap_manifest.is_file():
+        raise RuntimeError(f"overlap manifest not found: {overlap_manifest}")
+    other = json.loads(overlap_manifest.read_text(encoding="utf-8"))
+    other_slugs = set(other.get("chosen_slugs", []))
+    overlap = sorted(s for s in chosen_slugs if s in other_slugs)
+    return {
+        "bank_id": other.get("bank_id", overlap_manifest.stem),
+        "manifest": display_repo_path(overlap_manifest),
+        "count": len(overlap),
+        "slugs": overlap,
+    }
+
+
+def build_rule_description(
+    *,
+    min_difficulty: int | None,
+    salt: str,
+    take: int,
+    take_all: bool,
+) -> str:
+    if min_difficulty is None and salt == ORDER_SALT and not take_all and take == TARGET_COUNT:
+        return RULE_DESCRIPTION
+    diff_clause = (
+        f"Filter to exercises with difficulty >= {min_difficulty} in track config.json "
+        "(exercises.practice[].difficulty). "
+        if min_difficulty is not None
+        else ""
+    )
+    take_clause = "take all survivors" if take_all else f"take the first {take}"
+    return (
+        "Source: exercism/javascript exercises/practice/*. "
+        f"{diff_clause}"
+        "Require .meta/config.json, .meta/proof.ci.js (reference), exactly one *.spec.js test file, "
+        "exactly one solution stub .js file, and .docs/instructions.md. "
+        "Exclude exercises requiring npm dependencies/devDependencies beyond the repo root "
+        "package.json devDependencies (jest/babel toolchain) or network access. "
+        "Enable Exercism CI test markers in *.spec.js (\\bx(test|it)\\( -> test(, \\bxdescribe\\( -> describe(, "
+        "matching scripts/helpers.mjs without altering test.skip/describe.skip). "
+        "Validate offline via `npm test --silent` using the repo's babel.config.js, jest.config.js, and shared "
+        "node_modules cache: (a) reference solution passes (exit 0, >=1 test passed), "
+        "(b) starter stub fails at least one test (exit != 0, status ok). "
+        f"Order survivors ascending by sha256(slug + {salt!r}) and {take_clause}."
+    )
 
 
 def git_rev_parse(repo: pathlib.Path) -> str:
@@ -266,7 +354,22 @@ def evaluate_exercise(
     cache_nm: pathlib.Path,
     root_dev_deps: set[str],
     root_deps: set[str],
+    *,
+    salt: str = ORDER_SALT,
+    difficulty: int | None = None,
+    min_difficulty: int | None = None,
 ) -> dict[str, Any]:
+    if min_difficulty is not None:
+        if difficulty is None:
+            return {"slug": slug, "ok": False, "stage": "min_difficulty", "reason": "missing difficulty in config.json"}
+        if difficulty < min_difficulty:
+            return {
+                "slug": slug,
+                "ok": False,
+                "stage": "min_difficulty",
+                "reason": f"difficulty {difficulty} < {min_difficulty}",
+            }
+
     ex_dir = src_dir / "exercises" / "practice" / slug
     cfg_p = ex_dir / ".meta" / "config.json"
     if not cfg_p.is_file():
@@ -344,7 +447,8 @@ def evaluate_exercise(
         return {
             "slug": slug,
             "ok": True,
-            "order_sha256": order_key(slug),
+            "difficulty": difficulty,
+            "order_sha256": order_key(slug, salt),
             "sol_file": sol_file,
             "spec_file": spec_file,
             "editor_files": editor,
@@ -393,6 +497,11 @@ def cmd_build(args: argparse.Namespace) -> int:
     cache_nm = cache_dir / "node_modules"
     bank_dir = pathlib.Path(args.bank).expanduser().resolve()
     manifest_path = pathlib.Path(args.manifest).expanduser().resolve()
+    overlap_manifest = (
+        pathlib.Path(args.overlap_manifest).expanduser().resolve()
+        if args.overlap_manifest
+        else None
+    )
 
     if not (src_dir / "exercises" / "practice").is_dir():
         print(f"ERROR: source repo not found at {src_dir}", file=sys.stderr)
@@ -402,6 +511,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         return 2
 
     commit_sha = git_rev_parse(src_dir)
+    difficulties = load_track_difficulties(src_dir)
     root_pkg = json.loads((src_dir / "package.json").read_text(encoding="utf-8"))
     root_dev_deps = set(root_pkg.get("devDependencies", {}))
     root_deps = set(root_pkg.get("dependencies", {}))
@@ -410,12 +520,26 @@ def cmd_build(args: argparse.Namespace) -> int:
 
     practice_dir = src_dir / "exercises" / "practice"
     all_slugs = sorted(p.name for p in practice_dir.iterdir() if p.is_dir())
-    print(f"Validating {len(all_slugs)} practice exercises from {src_dir} ({commit_sha[:12]})...", flush=True)
+    print(
+        f"Validating {len(all_slugs)} practice exercises from {src_dir} ({commit_sha[:12]}) "
+        f"(min_difficulty={args.min_difficulty}, jobs={args.jobs})...",
+        flush=True,
+    )
 
     results: list[dict[str, Any]] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as ex:
         futs = {
-            ex.submit(evaluate_exercise, slug, src_dir, cache_nm, root_dev_deps, root_deps): slug
+            ex.submit(
+                evaluate_exercise,
+                slug,
+                src_dir,
+                cache_nm,
+                root_dev_deps,
+                root_deps,
+                salt=args.salt,
+                difficulty=difficulties.get(slug),
+                min_difficulty=args.min_difficulty,
+            ): slug
             for slug in all_slugs
         }
         done = 0
@@ -428,20 +552,27 @@ def cmd_build(args: argparse.Namespace) -> int:
 
     results.sort(key=lambda r: r["slug"])
     exclusions = [{"slug": r["slug"], "reason": r["reason"]} for r in results if not r["ok"]]
+    excluded_min_diff = sum(1 for r in results if not r["ok"] and r.get("stage") == "min_difficulty")
     survivors = [r for r in results if r["ok"]]
     survivors.sort(key=lambda r: (r["order_sha256"], r["slug"]))
 
-    if len(survivors) < TARGET_COUNT:
-        print(f"ERROR: only {len(survivors)} survivors (< {TARGET_COUNT})", file=sys.stderr)
-        return 1
+    if args.take_all:
+        if not survivors:
+            print("ERROR: 0 survivors; cannot build empty bank", file=sys.stderr)
+            return 1
+        chosen = survivors
+    else:
+        if len(survivors) < args.take:
+            print(f"ERROR: only {len(survivors)} survivors (< {args.take})", file=sys.stderr)
+            return 1
+        chosen = survivors[: args.take]
 
-    chosen = survivors[:TARGET_COUNT]
     chosen_slugs = [r["slug"] for r in chosen]
     chosen_tasks = [f"js_{slug}" for slug in chosen_slugs]
 
     print(
         f"Validation done: {len(survivors)}/{len(all_slugs)} survived, "
-        f"{len(exclusions)} excluded. Building first {TARGET_COUNT} tasks into {bank_dir}...",
+        f"{len(exclusions)} excluded. Building {len(chosen)} tasks into {bank_dir}...",
         flush=True,
     )
 
@@ -470,6 +601,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         chosen_meta.append({
             "task": task,
             "slug": slug,
+            **({"difficulty": r["difficulty"]} if r.get("difficulty") is not None else {}),
             "order_sha256": r["order_sha256"],
             "solution_file": r["sol_file"],
             "spec_file": r["spec_file"],
@@ -489,9 +621,21 @@ def cmd_build(args: argparse.Namespace) -> int:
         if "proof.ci.js" in rel or ".meta/" in rel:
             raise AssertionError(f"Refusing to emit reference/meta file in bank: {rel}")
 
-    manifest = {
+    counts: dict[str, int] = {
+        "total_practice": len(all_slugs),
+    }
+    if args.min_difficulty is not None:
+        counts["excluded_min_difficulty"] = excluded_min_diff
+        counts["candidates_after_min_difficulty"] = len(all_slugs) - excluded_min_diff
+    counts.update({
+        "excluded": len(exclusions),
+        "survivors": len(survivors),
+        "chosen": len(chosen_slugs),
+    })
+
+    manifest: dict[str, Any] = {
         "schema": "vacant.redo.bank/1",
-        "bank_id": "exercism_js",
+        "bank_id": args.bank_id,
         "source_repo": "https://github.com/exercism/javascript",
         "source_dir": str(src_dir),
         "source_commit_sha": commit_sha,
@@ -506,20 +650,31 @@ def cmd_build(args: argparse.Namespace) -> int:
         ),
         "runtime_versions": tools,
         "dev_dependencies_versions": dev_versions,
-        "order_formula": f"sha256(slug + {ORDER_SALT!r})",
-        "rule": RULE_DESCRIPTION,
-        "counts": {
-            "total_practice": len(all_slugs),
-            "excluded": len(exclusions),
-            "survivors": len(survivors),
-            "chosen": len(chosen_slugs),
-        },
+        "order_formula": f"sha256(slug + {args.salt!r})",
+        "order_salt": args.salt,
+        **({"min_difficulty": args.min_difficulty} if args.min_difficulty is not None else {}),
+        "take": "all" if args.take_all else args.take,
+        "rule": build_rule_description(
+            min_difficulty=args.min_difficulty,
+            salt=args.salt,
+            take=args.take,
+            take_all=args.take_all,
+        ),
+        "counts": counts,
+        "difficulty_histogram": compute_difficulty_histogram(chosen_slugs, difficulties),
+        "survivor_difficulty_histogram": compute_difficulty_histogram(
+            [r["slug"] for r in survivors], difficulties
+        ),
+    }
+    if overlap_manifest is not None:
+        manifest["overlap_with"] = compute_overlap(chosen_slugs, overlap_manifest)
+    manifest.update({
         "exclusions": exclusions,
         "chosen_slugs": chosen_slugs,
         "chosen_tasks": chosen_tasks,
         "chosen_details": chosen_meta,
         "bank_files": bank_files,
-    }
+    })
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
@@ -527,6 +682,16 @@ def cmd_build(args: argparse.Namespace) -> int:
     )
     print(f"Wrote manifest {manifest_path} ({len(bank_files)} entries).")
     return 0
+
+
+def _manifest_salt(manifest: dict[str, Any], fallback: str) -> str:
+    if isinstance(manifest.get("order_salt"), str):
+        return manifest["order_salt"]
+    formula = manifest.get("order_formula", "")
+    m = re.match(r"^sha256\(slug \+ (['\"])(.*)\1\)$", formula)
+    if m:
+        return m.group(2)
+    return fallback
 
 
 def cmd_check(args: argparse.Namespace) -> int:
@@ -558,14 +723,23 @@ def cmd_check(args: argparse.Namespace) -> int:
     except Exception as e:
         errors.append(f"shared cache check failed: {e}")
 
-    # 3. Check ordering determinism
+    # 3. Check ordering determinism and min_difficulty (if set)
     slugs = manifest["chosen_slugs"]
     tasks = manifest["chosen_tasks"]
-    if len(slugs) != TARGET_COUNT or tasks != [f"js_{s}" for s in slugs]:
-        errors.append(f"chosen_slugs/chosen_tasks count or naming mismatch (len={len(slugs)})")
-    keys = [order_key(s) for s in slugs]
+    expected_count = manifest.get("counts", {}).get("chosen", TARGET_COUNT)
+    if len(slugs) != expected_count or tasks != [f"js_{s}" for s in slugs]:
+        errors.append(f"chosen_slugs/chosen_tasks count or naming mismatch (len={len(slugs)}, expected={expected_count})")
+    salt = _manifest_salt(manifest, args.salt)
+    keys = [order_key(s, salt) for s in slugs]
     if keys != sorted(keys):
-        errors.append("chosen_slugs are not sorted by sha256(slug + ':redo-js-2026-11-20')")
+        errors.append(f"chosen_slugs are not sorted by sha256(slug + {salt!r})")
+
+    min_diff = manifest.get("min_difficulty")
+    if min_diff is not None and (src_dir / "config.json").is_file():
+        diffs = load_track_difficulties(src_dir)
+        bad_diff = [s for s in slugs if diffs.get(s) is None or diffs[s] < min_diff]
+        if bad_diff:
+            errors.append(f"chosen_slugs violate min_difficulty={min_diff}: {bad_diff}")
 
     # 4. Check bank directory contents match manifest bank_files byte-for-byte
     if not bank_dir.is_dir():
@@ -595,7 +769,7 @@ def cmd_check(args: argparse.Namespace) -> int:
         return 1
 
     print(
-        f"OK    source={manifest['source_commit_sha'][:12]} "
+        f"OK    bank_id={manifest.get('bank_id')} source={manifest['source_commit_sha'][:12]} "
         f"tasks={len(tasks)} files={len(manifest['bank_files'])} "
         f"exclusions={len(manifest['exclusions'])}"
     )
@@ -608,9 +782,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--check", action="store_true", help="Verify existing bank and manifest without rebuilding.")
     ap.add_argument("--src", default=str(DEFAULT_SRC), help="Path to exercism/javascript git clone.")
     ap.add_argument("--cache", default=str(DEFAULT_CACHE), help="Path to shared node_modules cache dir.")
-    ap.add_argument("--bank", default=str(DEFAULT_BANK), help="Output bank directory.")
+    ap.add_argument("--bank", "--out", dest="bank", default=str(DEFAULT_BANK), help="Output bank directory.")
     ap.add_argument("--manifest", default=str(DEFAULT_MANIFEST), help="Output manifest JSON path.")
-    ap.add_argument("--jobs", type=int, default=6, help="Parallel validation workers (default: 6).")
+    ap.add_argument("--bank-id", default=DEFAULT_BANK_ID, help="Bank identifier written into manifest.")
+    ap.add_argument("--min-difficulty", type=int, default=None, help="Minimum exercism config.json difficulty (inclusive).")
+    ap.add_argument("--salt", default=ORDER_SALT, help=f"SHA-256 ordering salt (default: {ORDER_SALT!r}).")
+    ap.add_argument("--take", type=int, default=TARGET_COUNT, help=f"Number of ordered survivors to select (default: {TARGET_COUNT}).")
+    ap.add_argument("--take-all", action="store_true", help="Select all survivors instead of slicing to --take.")
+    ap.add_argument("--overlap-manifest", default=None, help="Optional existing bank manifest JSON to record slug overlap against.")
+    ap.add_argument("--jobs", "--workers", dest="jobs", type=int, default=6, help="Parallel validation workers (default: 6).")
     args = ap.parse_args(argv)
     return cmd_check(args) if args.check else cmd_build(args)
 
