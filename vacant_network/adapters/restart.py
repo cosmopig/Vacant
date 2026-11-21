@@ -1202,6 +1202,97 @@ class _WritePlan:
     dirs_to_remove: list[str]         # deepest-first relative dir paths safe to rmdir
     before_files: set[str]
     config_ignored: list[str] = dataclasses.field(default_factory=list)  # agent 新增的測試設定檔：不驗、不寫回
+    appeared: list[str] = dataclasses.field(default_factory=list)        # 執行期間出現在原專案的檔案：絕不刪除
+    conflicts: list[str] = dataclasses.field(default_factory=list)       # 開始後原專案與交件嘗試皆改動：保留原專案版本
+
+
+def _scan_file_hashes(root: pathlib.Path) -> dict[str, str | None]:
+    """掃描 root 下所有一般檔案並計算 SHA-256（供 D3 寫回比對開始狀態）。"""
+    files, _ = _scan_files(root)
+    return {rel: _sha256_file(root / rel) for rel in files}
+
+
+def _project_lstat_listing(project: pathlib.Path) -> dict[str, tuple]:
+    """對原專案做不跟隨 symlink 的 lstat 清單（含 .git/hooks/、.git/config 與任意處的 symlink；
+    略過 node_modules（由 B3 涵蓋）與 .git 其餘內容、.venv 內部）。供 B1 偵測計畫寫回以外的異動。"""
+    out: dict[str, tuple] = {}
+
+    def _entry_sig(full: pathlib.Path, st: os.stat_result) -> tuple:
+        mode = stat.S_IMODE(st.st_mode)
+        if stat.S_ISLNK(st.st_mode):
+            try:
+                tgt = os.readlink(full)
+            except OSError:
+                tgt = None
+            return ("l", tgt)
+        if stat.S_ISREG(st.st_mode):
+            if st.st_size > 64 * 1024 * 1024:
+                return ("f", mode, f"big:{st.st_size}:{st.st_mtime_ns}")
+            return ("f", mode, _sha256_file(full))
+        return ("o", mode, st.st_mode)
+
+    def _walk_git_hooks(cur: pathlib.Path, rel_prefix: str) -> None:
+        try:
+            entries = sorted(os.scandir(cur), key=lambda e: e.name)
+        except OSError:
+            out[rel_prefix + "/"] = ("unreadable",)
+            return
+        for entry in entries:
+            rel = f"{rel_prefix}/{entry.name}"
+            full = cur / entry.name
+            try:
+                st = entry.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                _walk_git_hooks(full, rel)
+            else:
+                out[rel] = _entry_sig(full, st)
+
+    def _walk(cur: pathlib.Path, rel_prefix: str) -> None:
+        try:
+            entries = sorted(os.scandir(cur), key=lambda e: e.name)
+        except OSError:
+            out[(rel_prefix or ".") + "/"] = ("unreadable",)
+            return
+        for entry in entries:
+            name = entry.name
+            rel = f"{rel_prefix}/{name}" if rel_prefix else name
+            full = cur / name
+            try:
+                st = entry.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            if name == "node_modules" and not stat.S_ISLNK(st.st_mode) and stat.S_ISDIR(st.st_mode):
+                continue
+            if rel == ".git" and not stat.S_ISLNK(st.st_mode) and stat.S_ISDIR(st.st_mode):
+                cfg = full / "config"
+                try:
+                    st_cfg = cfg.lstat()
+                except OSError:
+                    st_cfg = None
+                if st_cfg is not None:
+                    out[".git/config"] = _entry_sig(cfg, st_cfg)
+                hooks = full / "hooks"
+                try:
+                    st_h = hooks.lstat()
+                except OSError:
+                    st_h = None
+                if st_h is not None:
+                    if stat.S_ISDIR(st_h.st_mode) and not stat.S_ISLNK(st_h.st_mode):
+                        _walk_git_hooks(hooks, ".git/hooks")
+                    else:
+                        out[".git/hooks"] = _entry_sig(hooks, st_h)
+                continue
+            if name in (".venv", "__pycache__", ".pytest_cache") and not stat.S_ISLNK(st.st_mode) and stat.S_ISDIR(st.st_mode):
+                continue
+            if stat.S_ISDIR(st.st_mode) and not stat.S_ISLNK(st.st_mode):
+                _walk(full, rel)
+            else:
+                out[rel] = _entry_sig(full, st)
+
+    _walk(project, "")
+    return out
 
 
 def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str]) -> list[str] | None:
@@ -1242,23 +1333,46 @@ def _can_remove_dir(project: pathlib.Path, rel: str, deletes: set[str]) -> list[
     return dirs_out
 
 
-def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]) -> _WritePlan:
-    """規劃寫回專案的所有操作（唯讀掃描 project，不做任何變更）。"""
+def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str], *,
+                     start_hashes: dict[str, str | None] | None = None) -> _WritePlan:
+    """規劃寫回專案的所有操作（唯讀掃描 project，不做任何變更）。
+    當提供 `start_hashes`（任務開始時的原專案快照）時：
+    - 僅刪除「開始時存在且交件嘗試刪掉」的檔案；執行期間新出現在原專案的檔案絕不刪除，改記 `appeared`。
+    - 交件嘗試欲修改或刪除的路徑若在開始後已被原專案改動（雜湊異於開始時或已刪），保留原專案版本並記 `conflicts`。"""
     before_list, proj_unreadable = _scan_files(project)
     before = set(before_list)
     after = set(snap.files)
     ws_unsafe = snap.symlinks | snap.unreadable_dirs | snap.unreadable_files | snap.special_files
 
+    start_set = set(start_hashes) if start_hashes is not None else before
+    appeared = (
+        sorted(rel for rel in (before - start_set - protected) if not _has_copy_skip(rel))
+        if start_hashes is not None
+        else []
+    )
+    conflicts: set[str] = set()
+
     deletes: list[str] = []
     delete_skips: set[str] = set()
-    for rel in sorted(before - after - protected):
+    for rel in sorted(start_set - after - protected):
         if _has_copy_skip(rel):
             continue
+        if start_hashes is not None and rel not in before:
+            continue  # 原專案自己已經刪掉，不需再刪
         if (_matches_prefix(rel, ws_unsafe)
                 or _matches_prefix(rel, proj_unreadable)
                 or _through_symlink(project, rel)):
             delete_skips.add(rel)
             continue
+        if start_hashes is not None:
+            live_sha = _sha256_file(project / rel)
+            if live_sha is None:
+                delete_skips.add(rel)
+                continue
+            start_sha = start_hashes.get(rel)
+            if start_sha is not None and live_sha != start_sha:
+                conflicts.add(rel)
+                continue
         deletes.append(rel)
     delete_set = set(deletes)
 
@@ -1272,9 +1386,14 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
     for rel in sorted(after - protected):
         if _has_copy_skip(rel):
             continue
-        if rel not in before and _is_test_config(rel):
+        if rel not in start_set and _is_test_config(rel):
             config_ignored.append(rel)
             continue
+        # 交件嘗試相對於開始時並未改動此檔 ⇒ 絕不覆寫原專案（即使原專案有並發編輯）
+        if start_hashes is not None and rel in start_set:
+            start_sha = start_hashes.get(rel)
+            if start_sha is not None and snap.files[rel] == start_sha:
+                continue
         if _through_symlink(project, rel) or _matches_prefix(rel, proj_unreadable):
             write_skips.add(rel)
             continue
@@ -1335,10 +1454,24 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
             if dst_sha is None:
                 write_skips.add(rel)
                 continue
+            if start_hashes is not None:
+                if rel not in start_set:
+                    if dst_sha == snap.files[rel]:
+                        continue
+                    conflicts.add(rel)
+                    continue
+                start_sha = start_hashes.get(rel)
+                if start_sha is not None and dst_sha != start_sha:
+                    conflicts.add(rel)
+                    continue
             if dst_sha == snap.files[rel]:
                 continue
             modified.append(rel)
         else:
+            if start_hashes is not None and rel in start_set:
+                # 開始時存在、執行期間被使用者刪掉、而 agent 改動過 ⇒ conflict，保留使用者版本
+                conflicts.add(rel)
+                continue
             added.append(rel)
 
     dirs_to_remove.sort(key=lambda r: (-len(pathlib.PurePosixPath(r).parts), r))
@@ -1350,6 +1483,8 @@ def _plan_write_back(project: pathlib.Path, snap: _Snapshot, protected: set[str]
         dirs_to_remove=dirs_to_remove,
         before_files=before,
         config_ignored=config_ignored,
+        appeared=appeared,
+        conflicts=sorted(conflicts),
     )
 
 
@@ -1391,7 +1526,7 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
     for rel in plan.added + plan.modified:
         if _sha256_file(snap.root / rel) != snap.files.get(rel):
             all_planned = sorted(set(plan.skipped) | set(plan.added) | set(plan.modified) | set(plan.deleted))
-            return {"added": [], "modified": [], "deleted": [], "skipped": all_planned}
+            return {"added": [], "modified": [], "deleted": [], "skipped": all_planned, "conflict": list(plan.conflicts)}
 
     backup_dir.mkdir(parents=True, exist_ok=True)
     os.chmod(backup_dir, 0o700)
@@ -1459,6 +1594,7 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
             "modified": list(plan.modified),
             "deleted": list(plan.deleted),
             "skipped": list(plan.skipped),
+            "conflict": list(plan.conflicts),
         }
     except Exception:  # noqa: BLE001
         for fn in reversed(undo):
@@ -1467,14 +1603,15 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
             except Exception:  # noqa: BLE001
                 pass
         all_planned = sorted(set(plan.skipped) | set(plan.added) | set(plan.modified) | set(plan.deleted))
-        return {"added": [], "modified": [], "deleted": [], "skipped": all_planned}
+        return {"added": [], "modified": [], "deleted": [], "skipped": all_planned, "conflict": list(plan.conflicts)}
     finally:
         _rmtree_force(backup_dir)
 
 
 def _write_back(project: pathlib.Path, ws: pathlib.Path | _Snapshot, protected: set[str], *,
                 _plan: _WritePlan | None = None,
-                _backup_root: pathlib.Path | None = None) -> dict[str, list[str]]:
+                _backup_root: pathlib.Path | None = None,
+                start_hashes: dict[str, str | None] | None = None) -> dict[str, list[str]]:
     tmp_dir: pathlib.Path | None = None
     try:
         if isinstance(ws, _Snapshot):
@@ -1482,7 +1619,7 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path | _Snapshot, protected: 
         else:
             tmp_dir = pathlib.Path(tempfile.mkdtemp(prefix="vsnap-"))
             snap = _snapshot_workspace(ws, tmp_dir / "s")
-        plan = _plan if _plan is not None else _plan_write_back(project, snap, protected)
+        plan = _plan if _plan is not None else _plan_write_back(project, snap, protected, start_hashes=start_hashes)
         bkp_base = _backup_root if _backup_root is not None else pathlib.Path(tempfile.mkdtemp(prefix="vbkp-"))
         try:
             return _apply_write_plan(project, snap, plan, bkp_base / f"bkp-{secrets.token_hex(6)}")
@@ -1490,7 +1627,7 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path | _Snapshot, protected: 
             if _backup_root is None:
                 _rmtree_force(bkp_base)
     except Exception:  # noqa: BLE001
-        return {"added": [], "modified": [], "deleted": [], "skipped": []}
+        return {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
     finally:
         if tmp_dir is not None:
             _rmtree_force(tmp_dir)
@@ -1537,8 +1674,8 @@ def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], s
     if project is not None and plan is not None:
         deleted_set = set(plan.deleted)
         written_set = set(plan.added) | set(plan.modified)
-        # 1. 保留專案中未被刪除、未被改寫、且非測試檔的一般檔案（包含因安全原因跳過刪除者）
-        for rel in sorted(plan.before_files - deleted_set - written_set - protected):
+        # 1. 保留專案中未被刪除、未被改寫、且非測試檔的一般檔案（包含因安全原因跳過刪除者；跳過執行期間新出現的並發檔）
+        for rel in sorted(plan.before_files - deleted_set - written_set - protected - set(plan.appeared)):
             _copy_reg_file(project / rel, work / rel, mode=0o600, preserve_exec=True)
         # 2. 放入計畫中真正會寫回的新增／修改檔案（跳過不安全而不會寫回的檔案）
         for rel in sorted(written_set):
@@ -2594,6 +2731,9 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "written_back": _written_back_entries(project, delivered_snap, changed),
             "deleted": list(changed.get("deleted") or ()),
             "skipped": list(changed.get("skipped") or ()),
+            "appeared_during_run": list(res.get("appeared_during_run") or ()),
+            "conflicts": list(res.get("conflicts") or ()),
+            "outside_changes": list(res.get("outside_changes") or ()),
             "agent_wall_s": res["agent_wall_s"],
             "total_wall_s": res["total_wall_s"],
         }
@@ -2975,6 +3115,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     agent_error: str | None = None
+    # 開始時的原專案檔案雜湊快照（D3）與 lstat 清單（B1，含 .git/hooks、.git/config 與任意 symlink）
+    start_hashes = _scan_file_hashes(project)
+    orig_lstat_start = _project_lstat_listing(project)
     # 開始時的 node_modules 內容清單（sha256＋mode＋type＋symlink 目標；基線之後拍）
     if nm_root is not None:
         t_nm = time.monotonic()
@@ -3026,7 +3169,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         try:
             snap_dir = attempt_dir / f"snap-{secrets.token_hex(8)}"
             snap = _snapshot_workspace(ws, snap_dir)
-            plan = _plan_write_back(project, snap, protected)
+            plan = _plan_write_back(project, snap, protected, start_hashes=start_hashes)
             if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
                 # 驗收時跑的是候選碼：對原專案 node_modules 唯讀保護，跑完再重驗內容清單
@@ -3125,10 +3268,28 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
     if nm_changed:
         d = len(attempts) - 1
+    appeared_during_run: list[str] = []
+    conflicts: list[str] = []
     if snaps[d] is not None and not nm_changed:
-        changed = _write_back(project, snaps[d], protected, _backup_root=run_dir)
+        final_plan = _plan_write_back(project, snaps[d], protected, start_hashes=start_hashes)
+        appeared_during_run = list(final_plan.appeared)
+        conflicts = list(final_plan.conflicts)
+        changed = _write_back(project, snaps[d], protected, _plan=final_plan, _backup_root=run_dir)
     else:
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": []}
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+        # 仍檢查並發出現的檔案（如 node_modules 異常中止時）
+        live_now, _ = _scan_files(project)
+        appeared_during_run = sorted(
+            rel for rel in (set(live_now) - set(start_hashes) - protected) if not _has_copy_skip(rel)
+        )
+
+    # B1：結束時再拍一次原專案 lstat 清單，找出計畫寫回以外的所有異動（僅偵測、不還原、不改退出碼）
+    orig_lstat_end = _project_lstat_listing(project)
+    planned_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
+    outside_changes = sorted(
+        k for k in (set(orig_lstat_start) | set(orig_lstat_end))
+        if orig_lstat_start.get(k) != orig_lstat_end.get(k) and k not in planned_paths
+    )
 
     only_uncheckable = len(attempts) == 1 and attempts[0]["accept"] is None
     res = {
@@ -3144,6 +3305,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "node_modules_changed": nm_changed[:200],
         "node_modules_copy_s": round(nm_copy_s, 3),
         "node_modules_hash_s": round(nm_hash_s, 3),
+        "appeared_during_run": appeared_during_run,
+        "conflicts": conflicts,
+        "outside_changes": outside_changes,
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,
@@ -3265,6 +3429,23 @@ def summary(res: dict) -> str:
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
+    conflicts_list = list(res.get("conflicts") or ch.get("conflict") or ())
+    if conflicts_list:
+        shown_c = ", ".join(conflicts_list[:10]) + (f" … (+{len(conflicts_list) - 10} more)" if len(conflicts_list) > 10 else "")
+        head += f"\n  conflict (changed in your project since start; kept your version): {shown_c}"
+    appeared_list = list(res.get("appeared_during_run") or ())
+    if appeared_list:
+        shown_a = ", ".join(appeared_list[:10]) + (f" … (+{len(appeared_list) - 10} more)" if len(appeared_list) > 10 else "")
+        head += f"\n  appeared during run (not deleted): {shown_a}"
+    outside_list = list(res.get("outside_changes") or ())
+    if outside_list:
+        shown_o = ", ".join(outside_list[:10]) + (f" … (+{len(outside_list) - 10} more)" if len(outside_list) > 10 else "")
+        head += f"\n  changed in your project outside the delivered attempt: {shown_o}"
+        git_hooks = [p for p in outside_list if p == ".git/hooks" or p.startswith(".git/hooks/")]
+        if git_hooks:
+            shown_h = ", ".join(git_hooks[:10]) + (f" … (+{len(git_hooks) - 10} more)" if len(git_hooks) > 10 else "")
+            head += (f"\n  WARNING: .git/hooks was added or changed outside the delivered attempt "
+                     f"({shown_h}) — inspect before running git commands!")
     cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
     if cfg_new:
         d_att = res["attempts"][res["delivered_attempt"] - 1] if res.get("attempts") else {}
