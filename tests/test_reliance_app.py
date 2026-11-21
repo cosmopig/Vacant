@@ -2,6 +2,9 @@
 
 import copy
 import json
+import re
+import shutil
+import subprocess
 
 import pytest
 
@@ -91,3 +94,63 @@ def test_tampered_reward_and_invalid_time_rejected(bank):
     e['responses'][0]['time_ms'] = float('nan')
     with pytest.raises(ValueError, match='time'):
         aggregate.aggregate([e])
+
+
+@pytest.fixture(scope='module')
+def rendered_end(bank):
+    node = shutil.which('node')
+    if node is None:
+        pytest.skip('node 不在 PATH 上；瀏覽器互動另作檢查')
+    state = synthetic_export(bank, 'synthetic-ui')
+    state['phase'] = 'end'
+    for r in state['responses']:
+        r['correct'] = r['condition'] == 'record'
+    for condition, confidence in [('record', [50, 50, 75, 100]), ('plain', [50, 75, 75, 75])]:
+        for row, value in zip([r for r in state['responses'] if r['condition'] == condition], confidence):
+            row['confidence'] = value
+    script = r"""
+const fs = require('node:fs'), vm = require('node:vm');
+const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+const nodes = {}, get = id => nodes[id] ||= {innerHTML:'', textContent:''};
+let allowClear = false, removed = false;
+vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), {
+  window:{RELIANCE_CASES:input.bank, scrollTo(){}},
+  document:{querySelector:get},
+  localStorage:{getItem:()=>JSON.stringify(input.state), removeItem(){removed=true;}},
+  confirm:()=>allowClear
+});
+get('#resume').onclick();
+const html = get('#app').innerHTML, progress = get('#progress').textContent;
+get('#restart').onclick();
+const cancelled = {progress:get('#progress').textContent, removed};
+allowClear = true;
+get('#restart').onclick();
+console.log(JSON.stringify({html, progress, cancelled, removed,
+  clearedHTML:get('#app').innerHTML, clearedProgress:get('#progress').textContent}));
+"""
+    result = subprocess.run([node, '-e', script, str(build_cases.OUT.parent / 'app.js')],
+                            input=json.dumps(dict(bank=bank, state=state)),
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    return json.loads(result.stdout)
+
+
+def test_confidence_charts_are_condition_specific(rendered_end):
+    html = rendered_end['html']
+    record = re.search(r'data-confidence="record">(.*?)</section>', html).group(1)
+    plain = re.search(r'data-confidence="plain">(.*?)</section>', html).group(1)
+    assert '加看 Vacant 紀錄' in record and '只看 agent 說的' in plain
+    assert '2/2 正確' in record and '1/1 正確' in record
+    assert '0/1 正確' in plain and '0/3 正確' in plain
+    assert '把握 90–100%：無回答' in plain
+    assert '無回答' not in record
+    assert 'bar-fill without' in plain
+
+
+def test_clear_resets_progress_immediately_and_cancel_preserves_it(rendered_end):
+    assert rendered_end['progress'] == '8 / 8 完成'
+    assert rendered_end['cancelled'] == dict(progress='8 / 8 完成', removed=False)
+    assert rendered_end['removed']
+    assert rendered_end['clearedProgress'] == '離線・8 回合'
+    assert '我願意參與，開始 8 回合' in rendered_end['clearedHTML']
+    assert 'id="resume"' not in rendered_end['clearedHTML']

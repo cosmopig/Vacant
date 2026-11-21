@@ -48,7 +48,7 @@ input[type=range]{width:100%;accent-color:var(--teal);min-height:36px}
 .stats .card{margin:0;padding:15px}
 .bar-track{height:12px;border-radius:8px;background:#e3e9e5;overflow:hidden;margin:7px 0 16px}
 .bar-fill{height:100%;background:var(--teal);min-width:0}
-.without{background:#7b8ba3}
+.bar-fill.without,.time-col.without{background:#7b8ba3}
 .wrong{background:#aa561f}
 .chart-label{display:flex;justify-content:space-between;font-size:13px;gap:10px}
 .time-chart{height:120px;display:flex;align-items:end;gap:8px;margin:18px 0 4px}
