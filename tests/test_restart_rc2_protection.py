@@ -301,12 +301,12 @@ def test_defect1_check_without_protect_warns_agent_could_edit_check(tmp_path):
     proj = tmp_path / "unprot"
     proj.mkdir()
     (proj / "app.py").write_text("v = 1\n", encoding="utf-8")
-    (proj / "verify.py").write_text("import app, sys; sys.exit(0 if app.v == 2 else 1)\n", encoding="utf-8")
 
     build, _ = _multi_build(tmp_path, [
         "import pathlib\npathlib.Path('app.py').write_text('v = 2\\n')\n",
     ])
-    res = R.run(proj, build, "set v=2", max_attempts=1, check=f"{sys.executable} verify.py",
+    res = R.run(proj, build, "set v=2", max_attempts=1,
+                check=f"{sys.executable} -c 'import app, sys; sys.exit(0 if app.v == 2 else 1)'",
                 attempt_timeout_s=20, budget_s=120)
     assert res["protected"] == []
     msg = R.summary(res)

@@ -86,6 +86,7 @@ import os
 import pathlib
 import re
 import secrets
+import shlex
 import shutil
 import signal
 import stat
@@ -103,13 +104,30 @@ _UNIVERSAL_TEST_NAME_PATTERNS = ("*_test.py", "test_*.py", "*.test.*", "*.spec.*
 _UNIVERSAL_TEST_DIRS = frozenset({"__tests__", "tests", "test"})
 #: 測試設定檔：能改變「測試怎麼跑、算不算過」的檔（pytest 的 conftest 掛鉤、ini 選項；jest／vitest／mocha／babel 設定）。
 #: 開始時就有的：和測試檔一樣受保護（驗收前還原、不寫回）。agent 新增的：驗收副本裡不放、不寫回、交件訊息列出。
-_TEST_CONFIG_NAMES = frozenset({"conftest.py", "pytest.ini", ".pytest.ini", "tox.ini", "setup.cfg", "pyproject.toml"})
-_TEST_CONFIG_PATTERNS = ("jest.config.*", "jest.setup.*", "vitest.config.*", "vitest.workspace.*", "vite.config.*",
-                         ".mocharc*", "babel.config.*", ".babelrc*", "karma.conf.*")
+_TEST_CONFIG_NAMES = frozenset({
+    "conftest.py", "pytest.ini", ".pytest.ini", "tox.ini", "setup.cfg", "pyproject.toml",
+    "cypress.json", ".nycrc", "noxfile.py",
+})
+_TEST_CONFIG_PATTERNS = (
+    "jest.config.*", "jest.setup.*", "vitest.config.*", "vitest.workspace.*", "vite.config.*",
+    ".mocharc*", ".mocharc.*", "babel.config.*", ".babelrc*", "karma.conf.*",
+    "playwright.config.*", "cypress.config.*", "wdio.conf.*", "ava.config.*", ".nycrc.*",
+)
 _MANIFEST_BY_KIND: dict[str, tuple[str, ...]] = {
     "npm": ("package.json",),
     "cargo": ("Cargo.toml",),
     "go": ("go.mod",),
+}
+_NPM_LIKE_CMDS = frozenset({"npm", "npx", "yarn", "pnpm"})
+_CHECK_MANIFEST_BY_CMD: dict[str, tuple[str, ...]] = {
+    "npm": ("package.json",),
+    "npx": ("package.json",),
+    "yarn": ("package.json",),
+    "pnpm": ("package.json",),
+    "cargo": ("Cargo.toml",),
+    "go": ("go.mod",),
+    "make": ("Makefile", "makefile", "GNUmakefile"),
+    "gmake": ("Makefile", "makefile", "GNUmakefile"),
 }
 ACC_TIMEOUT_S = 120.0
 _CHUNK_SIZE = 65536
@@ -880,8 +898,90 @@ def _match_protect_pattern(rel: str, norm_pat: str) -> bool:
     return bool(rx.match(rel))
 
 
+def _first_cmd_word(tokens: Sequence[str]) -> str | None:
+    """從 `--check` 指令拆出的 tokens 取第一個實際執行指令名稱（略過前導 VAR=VAL 與 env）。"""
+    i = 0
+    n = len(tokens)
+    while i < n:
+        tok = tokens[i]
+        if "=" in tok and not tok.startswith("=") and tok.split("=", 1)[0].replace("_", "").isalnum():
+            i += 1
+            continue
+        base = pathlib.PurePosixPath(tok).name
+        if base == "env":
+            i += 1
+            while i < n:
+                t2 = tokens[i]
+                if t2 == "--":
+                    i += 1
+                    break
+                if t2 in ("-u", "-C", "-S") and i + 1 < n:
+                    i += 2
+                    continue
+                if t2.startswith("-"):
+                    i += 1
+                    continue
+                if "=" in t2 and not t2.startswith("="):
+                    i += 1
+                    continue
+                break
+            continue
+        return base
+    return None
+
+
+def _check_command_protections(project: pathlib.Path, cmd: str,
+                               files_set: set[str]) -> tuple[set[str], str | None]:
+    """解析 `--check "<cmd>"` 自動應受保護的專案檔案與鎖定的 npm test 腳本：
+    1. 第一個指令詞為 npm/npx/yarn/pnpm ⇒ 鎖定並保護 package.json（含 scripts.test）；
+       cargo ⇒ Cargo.toml；go ⇒ go.mod；make/gmake ⇒ Makefile/makefile/GNUmakefile。
+    2. 指令列任一 token 若對應專案內既有一般檔案（如 verify.sh、run_checks.py），自動納入保護。"""
+    try:
+        tokens = shlex.split(cmd)
+    except ValueError:
+        tokens = cmd.split()
+    out: set[str] = set()
+    pinned_script: str | None = None
+    cmd0 = _first_cmd_word(tokens)
+    if cmd0 in _CHECK_MANIFEST_BY_CMD:
+        for mf in _CHECK_MANIFEST_BY_CMD[cmd0]:
+            if mf in files_set:
+                out.add(mf)
+        if cmd0 in _NPM_LIKE_CMDS:
+            pinned_script = _npm_test_script(project)
+
+    proj_res = project.resolve()
+    for tok in tokens:
+        candidates = [tok]
+        if "=" in tok and not tok.startswith("="):
+            candidates.append(tok.split("=", 1)[1])
+        for cand in candidates:
+            raw = cand.strip().replace("\\", "/")
+            if not raw or raw in (".", ".."):
+                continue
+            while raw.startswith("./"):
+                raw = raw[2:]
+            if not raw:
+                continue
+            p = pathlib.Path(raw)
+            if p.is_absolute():
+                try:
+                    rel = p.resolve().relative_to(proj_res).as_posix()
+                except (ValueError, OSError):
+                    continue
+            else:
+                parts = pathlib.PurePosixPath(raw).parts
+                if ".." in parts:
+                    continue
+                rel = "/".join(parts)
+            if rel in files_set:
+                out.add(rel)
+    return out, pinned_script
+
+
 def find_protected(root: pathlib.Path, *, kind: str = "none",
                    protect: Sequence[str] | None = None,
+                   check: str | None = None,
                    _all_files: list[str] | None = None) -> list[str]:
     """列出開始時應受保護（驗收前還原原位元組、不寫回 agent 改動）的相對路徑。"""
     root = root.resolve()
@@ -891,6 +991,9 @@ def find_protected(root: pathlib.Path, *, kind: str = "none",
     for mf in _MANIFEST_BY_KIND.get(kind, ()):
         if mf in files_set:
             out.add(mf)
+    if check:
+        extra_check, _ = _check_command_protections(root, check, files_set)
+        out |= extra_check
     if protect:
         norm_pats = [_normalize_protect_pattern(p, root) for p in protect]
         for r in files:
@@ -1651,7 +1754,15 @@ def detect_acceptance(project: pathlib.Path, *, check: str | None = None,
         cmd = check.strip()
         if not cmd:
             raise ValueError("--check command must not be empty")
-        return AcceptanceSpec(kind="check", command=cmd, argv=None, protected=_prot("check"))
+        extra_check, pinned_script = _check_command_protections(project, cmd, set(all_files))
+        prot = tuple(sorted(set(_prot("check")) | extra_check))
+        return AcceptanceSpec(
+            kind="check",
+            command=cmd,
+            argv=None,
+            protected=prot,
+            pinned_script=pinned_script,
+        )
 
     if py_orig:
         py_exe = resolve_python(project)
@@ -2119,7 +2230,7 @@ def _run_external_command(base: dict[str, Any], spec: AcceptanceSpec, work: path
     if deadline - time.monotonic() <= 0:
         return {**base, "status": "timeout"}
     work_res = work.resolve()
-    if spec.kind == "npm" and spec.pinned_script is not None:
+    if spec.kind in ("npm", "check") and spec.pinned_script is not None:
         # 雙重防線：確認驗收副本中的 package.json scripts.test 與開始時鎖定的一致
         if _npm_test_script(work_res) != spec.pinned_script:
             return {
