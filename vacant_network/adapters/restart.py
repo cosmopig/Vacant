@@ -2242,8 +2242,11 @@ def _atomic_write_from_file(src: pathlib.Path, dst: pathlib.Path, mode: int | No
 
 
 def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
-                      backup_dir: pathlib.Path) -> dict[str, list[str]]:
-    """套用已驗證的寫回計畫；任何非預期錯誤都會回滾，維持專案不變。"""
+                      backup_dir: pathlib.Path, *,
+                      start_hashes: dict[str, str | None] | None = None) -> dict[str, list[str]]:
+    """套用已驗證的寫回計畫；任何非預期錯誤都會回滾，維持專案不變。
+    若提供 `start_hashes`，在每個 unlink／os.replace 之前再次確認原專案檔案仍符合開始快照，
+    不符時跳過該檔並標記為 conflict（防 plan→apply TOCTOU）。"""
     # 套用前驗證所有待寫檔案的快照雜湊仍完整無誤
     for rel in plan.added + plan.modified:
         if _sha256_file(snap.root / rel) != snap.files.get(rel):
@@ -2254,6 +2257,11 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
     os.chmod(backup_dir, 0o700)
     undo: list[Callable[[], None]] = []
     bkp_seq = 0
+    applied_deleted: list[str] = []
+    applied_added: list[str] = []
+    applied_modified: list[str] = []
+    runtime_conflicts: set[str] = set()
+    removed_dirs: set[str] = set()
 
     def _backup_existing(target: pathlib.Path) -> tuple[pathlib.Path, int]:
         nonlocal bkp_seq
@@ -2269,15 +2277,35 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
         # 1. 先刪除（避免檔案變目錄時的 FileExistsError，也先清空可移除的目錄）
         for rel in plan.deleted:
             target = project / rel
+            if start_hashes is not None:
+                try:
+                    st_live = target.lstat()
+                except OSError:
+                    runtime_conflicts.add(rel)
+                    continue
+                if stat.S_ISLNK(st_live.st_mode) or not stat.S_ISREG(st_live.st_mode):
+                    runtime_conflicts.add(rel)
+                    continue
+                live_sha = _sha256_file(target)
+                start_sha = start_hashes.get(rel)
+                if live_sha is None or (start_sha is not None and live_sha != start_sha):
+                    runtime_conflicts.add(rel)
+                    continue
             bkp, old_mode = _backup_existing(target)
             target.unlink()
+            applied_deleted.append(rel)
             undo.append(lambda t=target, b=bkp, m=old_mode: _atomic_write_from_file(b, t, m))
 
         # 2. 移除即將改為一般檔案的空目錄（由深到淺）
         for rel_dir in plan.dirs_to_remove:
             d = project / rel_dir
-            old_mode = stat.S_IMODE(d.lstat().st_mode) & 0o777
-            d.rmdir()
+            try:
+                old_mode = stat.S_IMODE(d.lstat().st_mode) & 0o777
+                d.rmdir()
+            except OSError:
+                runtime_conflicts.add(rel_dir)
+                continue
+            removed_dirs.add(rel_dir)
 
             def _restore_dir(p: pathlib.Path = d, m: int = old_mode) -> None:
                 p.mkdir(exist_ok=True)
@@ -2290,6 +2318,33 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
         for rel in sorted(plan.added + plan.modified):
             dst = project / rel
             src = snap.root / rel
+            if start_hashes is not None:
+                if rel in modified_set:
+                    try:
+                        st_live = dst.lstat()
+                    except OSError:
+                        runtime_conflicts.add(rel)
+                        continue
+                    if stat.S_ISLNK(st_live.st_mode) or not stat.S_ISREG(st_live.st_mode):
+                        runtime_conflicts.add(rel)
+                        continue
+                    live_sha = _sha256_file(dst)
+                    start_sha = start_hashes.get(rel)
+                    if live_sha is None or (start_sha is not None and live_sha != start_sha):
+                        runtime_conflicts.add(rel)
+                        continue
+                else:
+                    if rel not in removed_dirs:
+                        try:
+                            dst.lstat()
+                            # 開始時不存在、現在卻冒出來了 ⇒ TOCTOU conflict，跳過不覆寫
+                            runtime_conflicts.add(rel)
+                            continue
+                        except FileNotFoundError:
+                            pass
+                        except OSError:
+                            runtime_conflicts.add(rel)
+                            continue
             missing_dirs: list[pathlib.Path] = []
             cur = dst.parent
             while cur != project:
@@ -2306,17 +2361,19 @@ def _apply_write_plan(project: pathlib.Path, snap: _Snapshot, plan: _WritePlan,
             if rel in modified_set:
                 bkp, old_mode = _backup_existing(dst)
                 _atomic_write_from_file(src, dst, snap.modes.get(rel))
+                applied_modified.append(rel)
                 undo.append(lambda t=dst, b=bkp, m=old_mode: _atomic_write_from_file(b, t, m))
             else:
                 _atomic_write_from_file(src, dst, snap.modes.get(rel))
+                applied_added.append(rel)
                 undo.append(lambda t=dst: t.unlink(missing_ok=True))
 
         return {
-            "added": list(plan.added),
-            "modified": list(plan.modified),
-            "deleted": list(plan.deleted),
+            "added": applied_added,
+            "modified": applied_modified,
+            "deleted": applied_deleted,
             "skipped": list(plan.skipped),
-            "conflict": list(plan.conflicts),
+            "conflict": sorted(set(plan.conflicts) | runtime_conflicts),
         }
     except Exception:  # noqa: BLE001
         for fn in reversed(undo):
@@ -2344,7 +2401,10 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path | _Snapshot, protected: 
         plan = _plan if _plan is not None else _plan_write_back(project, snap, protected, start_hashes=start_hashes)
         bkp_base = _backup_root if _backup_root is not None else pathlib.Path(tempfile.mkdtemp(prefix="vbkp-"))
         try:
-            return _apply_write_plan(project, snap, plan, bkp_base / f"bkp-{secrets.token_hex(6)}")
+            return _apply_write_plan(
+                project, snap, plan, bkp_base / f"bkp-{secrets.token_hex(6)}",
+                start_hashes=start_hashes,
+            )
         finally:
             if _backup_root is None:
                 _rmtree_force(bkp_base)
@@ -2391,12 +2451,25 @@ def _restore_test_file(work: pathlib.Path, rel: str, want: bytes, *, mode: int |
 
 def _populate_acceptance_work(work: pathlib.Path, originals: dict[str, bytes], snap: _Snapshot,
                               project: pathlib.Path | None, plan: _WritePlan | None, *,
-                              orig_modes: dict[str, int] | None = None) -> None:
-    """組裝驗收目錄 work：完全不含 symlink，且與實際會寫回專案的檔案集合一致，最後覆寫原測試檔。"""
+                              orig_modes: dict[str, int] | None = None,
+                              start_snap: _Snapshot | None = None) -> None:
+    """組裝驗收目錄 work：完全不含 symlink，以「開始快照＋本輪嘗試改動」組裝（絕不讀 live 專案的未改動檔），
+    最後覆寫原測試檔（保留原始 mode 位元）。"""
     work.mkdir(parents=True, exist_ok=True)
     os.chmod(work, 0o700)
     protected = set(originals)
-    if project is not None and plan is not None:
+    if start_snap is not None and plan is not None:
+        deleted_set = set(plan.deleted)
+        written_set = set(plan.added) | set(plan.modified)
+        # 1. 未被本輪刪除、未被本輪改寫的非受保護檔案一律取自 START 快照（不讀 live 專案）
+        for rel in sorted(set(start_snap.files) - deleted_set - written_set - protected):
+            m = 0o700 if (start_snap.modes.get(rel, 0) & 0o100) else 0o600
+            _copy_reg_file(start_snap.root / rel, work / rel, mode=m)
+        # 2. 放入本輪嘗試真正要寫回的新增／修改檔案
+        for rel in sorted(written_set):
+            m = 0o700 if (snap.modes.get(rel, 0) & 0o100) else 0o600
+            _copy_reg_file(snap.root / rel, work / rel, mode=m)
+    elif project is not None and plan is not None:
         deleted_set = set(plan.deleted)
         written_set = set(plan.added) | set(plan.modified)
         # 1. 保留專案中未被刪除、未被改寫、且非測試檔的一般檔案（包含因安全原因跳過刪除者；跳過執行期間新出現的並發檔）
@@ -3186,7 +3259,8 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
                _snapshot: _Snapshot | None = None,
                _project: pathlib.Path | None = None,
                _plan: _WritePlan | None = None,
-               _orig_modes: dict[str, int] | None = None) -> dict:
+               _orig_modes: dict[str, int] | None = None,
+               _start_snap: _Snapshot | None = None) -> dict:
     """在工作區快照的**潔淨副本**裡、把開始時的受保護檔案還原之後跑驗收。驗收自己壞掉＝沒過（不是通過）。"""
     all_protected = sorted(originals)
     py_tests = [rel for rel in all_protected if _is_python_test(rel)]
@@ -3237,7 +3311,9 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
                     eff_orig_modes[rel] = stat.S_IMODE((_project / rel).lstat().st_mode) & 0o777
                 except OSError:
                     pass
-        _populate_acceptance_work(work, originals, snap, _project, _plan, orig_modes=eff_orig_modes)
+        _populate_acceptance_work(
+            work, originals, snap, _project, _plan, orig_modes=eff_orig_modes, start_snap=_start_snap
+        )
         home = tmp / "h"
         home.mkdir(mode=0o700)
         runner_dir = tmp / "r"
@@ -3544,7 +3620,9 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "skipped": list(changed.get("skipped") or ()),
             "appeared_during_run": list(res.get("appeared_during_run") or ()),
             "conflicts": list(res.get("conflicts") or ()),
+            "write_back_conflicts": list(res.get("write_back_conflicts") or ()),
             "outside_changes": list(res.get("outside_changes") or ()),
+            "protected_outside_changes": list(res.get("protected_outside_changes") or ()),
             "detached_processes": res.get("detached_processes"),
             "acceptance_dependencies_changed": list(res.get("acceptance_dependencies_changed") or ()),
             "not_delivered": list(res.get("not_delivered") or ()),
@@ -4107,7 +4185,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
             "appeared_during_run": [],
             "conflicts": [],
+            "write_back_conflicts": [],
             "outside_changes": [],
+            "protected_outside_changes": [],
             "acceptance_dependencies_changed": [],
             "not_delivered": [],
             "lstat_listing_s": 0.0,
@@ -4211,7 +4291,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "node_modules_hash_s": 0.0,
             "appeared_during_run": [],
             "conflicts": [],
+            "write_back_conflicts": [],
             "outside_changes": [],
+            "protected_outside_changes": [],
             "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
             "acceptance_dependencies_changed": [],
             "not_delivered": [],
@@ -4248,8 +4330,12 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     agent_error: str | None = None
-    # 開始時的原專案檔案雜湊快照（D3）與純 lstat 清單（B1）
-    start_hashes = _scan_file_hashes(project)
+    # 開始時的原專案快照（R11：驗收永遠測 start_snap + 嘗試改動，不讀 live 專案）與純 lstat 清單（B1）
+    start_snap = _snapshot_workspace(project, run_dir / f"start-snap-{secrets.token_hex(6)}", skip_abs=skip_abs)
+    start_hashes = start_snap.files
+    start_unsafe = (
+        start_snap.symlinks | start_snap.unreadable_dirs | start_snap.unreadable_files | start_snap.special_files
+    )
     lstat_listing_s = 0.0
     t_ls = time.monotonic()
     orig_lstat_start = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
@@ -4331,12 +4417,24 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             snap = _snapshot_workspace(
                 ws, snap_dir, skip_abs=skip_abs, record_copy_skip=True, had_root_nm=(nm_root is not None)
             )
-            plan = _plan_write_back(project, snap, protected, start_hashes=start_hashes)
+            # R11：驗收階段一律以開始快照為基準規劃本輪改動（排除開始時就不安全的路徑如 symlink），
+            # 使驗收永遠只測試「開始狀態＋本輪嘗試改動」，不受 live 專案並發改動或逃逸寫入影響。
+            plan = _plan_write_back(start_snap.root, snap, protected, start_hashes=start_hashes)
+            if start_unsafe:
+                blocked_add = [r for r in plan.added if _matches_prefix(r, start_unsafe)]
+                blocked_mod = [r for r in plan.modified if _matches_prefix(r, start_unsafe)]
+                blocked_del = [r for r in plan.deleted if _matches_prefix(r, start_unsafe)]
+                if blocked_add or blocked_mod or blocked_del:
+                    blk = set(blocked_add) | set(blocked_mod) | set(blocked_del)
+                    plan.added = [r for r in plan.added if r not in blk]
+                    plan.modified = [r for r in plan.modified if r not in blk]
+                    plan.deleted = [r for r in plan.deleted if r not in blk]
+                    plan.skipped = sorted(set(plan.skipped) | blk)
             if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
                 acc = acceptance(
                     originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project,
-                    _plan=plan, _orig_modes=orig_modes,
+                    _plan=plan, _orig_modes=orig_modes, _start_snap=start_snap,
                 )
                 if nm_start is not None:
                     t_nm = time.monotonic()
@@ -4446,30 +4544,66 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         d = len(attempts) - 1
     appeared_during_run: list[str] = []
     conflicts: list[str] = []
+    write_back_conflicts: list[str] = []
+    outside_changes: list[str] = []
     if snaps[d] is not None and not nm_changed:
+        t_ls = time.monotonic()
+        orig_lstat_before_wb = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+        lstat_listing_s += time.monotonic() - t_ls
         final_plan = _plan_write_back(project, snaps[d], protected, start_hashes=start_hashes)
         appeared_during_run = list(final_plan.appeared)
-        conflicts = list(final_plan.conflicts)
-        changed = _write_back(project, snaps[d], protected, _plan=final_plan, _backup_root=run_dir)
+        attempt_writes = (
+            set(final_plan.added) | set(final_plan.modified) | set(final_plan.deleted) | set(final_plan.conflicts)
+        )
+        lstat_live_diff = {
+            k for k in (set(orig_lstat_start) | set(orig_lstat_before_wb))
+            if orig_lstat_start.get(k) != orig_lstat_before_wb.get(k)
+        }
+        live_changed_paths = lstat_live_diff | set(final_plan.conflicts) | set(final_plan.appeared)
+        overlap = sorted(set(final_plan.conflicts) | (attempt_writes & live_changed_paths))
+        if overlap:
+            # R11(b)：交件寫回路徑與執行期間原專案異動重疊 ⇒ 什麼都不寫回（無部分交件），exit 43
+            write_back_conflicts = list(overlap)
+            conflicts = list(overlap)
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": list(overlap)}
+            outside_changes = sorted(live_changed_paths)
+        else:
+            # R11(a)：無重疊 ⇒ 照常寫回（並於 _apply_write_plan 內做 TOCTOU 複檢）
+            changed = _write_back(
+                project, snaps[d], protected, _plan=final_plan, _backup_root=run_dir, start_hashes=start_hashes
+            )
+            if changed.get("conflict"):
+                write_back_conflicts = list(changed["conflict"])
+                conflicts = list(changed["conflict"])
+            t_ls = time.monotonic()
+            orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+            lstat_listing_s += time.monotonic() - t_ls
+            written_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
+            outside_changes = sorted(
+                k for k in (set(orig_lstat_start) | set(orig_lstat_end) | set(appeared_during_run))
+                if (orig_lstat_start.get(k) != orig_lstat_end.get(k) or k in appeared_during_run)
+                and k not in written_paths
+            )
     else:
         changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
-        # 仍檢查並發出現的檔案（如 node_modules 異常中止時）
-        live_now, _ = _scan_files(project)
+        # 仍檢查並發出現的檔案與 B1 異動（如 node_modules 異常中止時）
+        live_now, _ = _scan_files(project, skip_abs=skip_abs)
         appeared_during_run = sorted(
             rel for rel in (set(live_now) - set(start_hashes) - protected) if not _has_copy_skip(rel)
         )
+        t_ls = time.monotonic()
+        orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
+        lstat_listing_s += time.monotonic() - t_ls
+        outside_changes = sorted(
+            k for k in (set(orig_lstat_start) | set(orig_lstat_end) | set(appeared_during_run))
+            if (orig_lstat_start.get(k) != orig_lstat_end.get(k) or k in appeared_during_run)
+        )
 
-    # B1：結束時再拍一次原專案純 lstat 清單，找出計畫寫回以外的所有異動
-    t_ls = time.monotonic()
-    orig_lstat_end = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
-    lstat_listing_s += time.monotonic() - t_ls
-    planned_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
-    outside_changes = sorted(
-        k for k in (set(orig_lstat_start) | set(orig_lstat_end))
-        if orig_lstat_start.get(k) != orig_lstat_end.get(k) and k not in planned_paths
-    )
+    protected_outside_changes = sorted(p for p in outside_changes if p in protected)
+    _rmtree_force(start_snap.root)
 
     # A1/A2/R6：標記交件嘗試所改動、且驗收依賴的檔案（字串常值、2 層遞移匯入、fixture/mock/data 目錄）
+    planned_paths = set(changed["added"]) | set(changed["modified"]) | set(changed["deleted"])
     known_files = set(start_hashes) | planned_paths
     dep_src_root = snaps[d].root if (0 <= d < len(snaps) and snaps[d] is not None) else project
     acc_deps_changed = _find_acceptance_dependencies(
@@ -4503,7 +4637,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "node_modules_reflink_fallback": nm_reflink_fallback,
         "appeared_during_run": appeared_during_run,
         "conflicts": conflicts,
+        "write_back_conflicts": write_back_conflicts,
         "outside_changes": outside_changes,
+        "protected_outside_changes": protected_outside_changes,
         "lstat_listing_s": round(lstat_listing_s, 3),
         "detached_processes": detached_all,
         "acceptance_dependencies_changed": acc_deps_changed,
@@ -4571,6 +4707,18 @@ def summary(res: dict) -> str:
                 f"({len(nmc)} path(s): {', '.join(nmc[:8])}{' …' if len(nmc) > 8 else ''}). That attempt was not "
                 f"accepted, the run stopped, and nothing was written back. node_modules is NOT restored: "
                 f"reinstall it (e.g. `npm ci`) before trusting it again.")
+    elif res.get("write_back_conflicts"):
+        wbc = list(res["write_back_conflicts"])
+        shown_wbc = ", ".join(wbc[:10]) + (f" … (+{len(wbc) - 10} more)" if len(wbc) > 10 else "")
+        d_idx = (res.get("delivered_attempt") or 1) - 1
+        d_att = res["attempts"][d_idx] if (res.get("attempts") and 0 <= d_idx < len(res["attempts"])) else {}
+        ws_dir = d_att.get("workspace") or res.get("run_dir")
+        acc_tag = "accepted" if res.get("accepted") is True else ("not accepted" if res.get("accepted") is False else "unchecked")
+        head = (
+            f"[vacant] write-back stopped due to overlapping changes in your project during the run "
+            f"({len(wbc)} path(s): {shown_wbc}); nothing was written back (no partial delivery).\n"
+            f"  the delivered ({acc_tag}) attempt's files are kept at: {ws_dir} (merge by hand)."
+        )
     elif res.get("agent_error"):
         a = res["attempts"][-1] if res.get("attempts") else {}
         tail = "\n".join("    " + ln for ln in str(res["agent_error"]).splitlines())
@@ -4646,18 +4794,19 @@ def summary(res: dict) -> str:
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
-    conflicts_list = list(res.get("conflicts") or ch.get("conflict") or ())
-    if conflicts_list:
+    conflicts_list = list(res.get("write_back_conflicts") or res.get("conflicts") or ch.get("conflict") or ())
+    if conflicts_list and not res.get("write_back_conflicts"):
         shown_c = ", ".join(conflicts_list[:10]) + (f" … (+{len(conflicts_list) - 10} more)" if len(conflicts_list) > 10 else "")
-        head += f"\n  conflict (changed in your project since start; kept your version): {shown_c}"
-    appeared_list = list(res.get("appeared_during_run") or ())
-    if appeared_list:
-        shown_a = ", ".join(appeared_list[:10]) + (f" … (+{len(appeared_list) - 10} more)" if len(appeared_list) > 10 else "")
-        head += f"\n  appeared during run (not deleted): {shown_a}"
+        head += f"\n  conflicting paths (skipped during write-back): {shown_c}"
     outside_list = list(res.get("outside_changes") or ())
     if outside_list:
         shown_o = ", ".join(outside_list[:10]) + (f" … (+{len(outside_list) - 10} more)" if len(outside_list) > 10 else "")
-        head += f"\n  changed in your project outside the delivered attempt: {shown_o}"
+        head += f"\n  your project changed during the run, not by this delivery: {shown_o} — not checked and not touched"
+        prot_set = set(protected)
+        prot_outside = list(res.get("protected_outside_changes") or [p for p in outside_list if p in prot_set])
+        if prot_outside:
+            shown_po = ", ".join(prot_outside[:10]) + (f" … (+{len(prot_outside) - 10} more)" if len(prot_outside) > 10 else "")
+            head += f"\n  a protected test/config file changed in your project during the run: {shown_po}"
         git_hooks = [
             p for p in outside_list
             if p == ".git/hooks" or p.startswith(".git/hooks/") or "/.git/hooks/" in p
