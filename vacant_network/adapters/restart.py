@@ -1286,7 +1286,8 @@ def _read_source_bytes(rel: str, source_root: pathlib.Path | None, originals: di
 
 def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[str],
                                   delivered_changed: set[str], *,
-                                  source_root: pathlib.Path | None = None) -> list[dict[str, Any]]:
+                                  source_root: pathlib.Path | None = None,
+                                  extra_unfixed: dict[str, tuple[str, ...]] | None = None) -> list[dict[str, Any]]:
     """找出交件嘗試所改動、且驗收依賴的檔案（僅標記提醒人審閱，不阻擋交件）：
     (a) 受保護測試檔中以字串常值出現其檔名或相對路徑的已變更檔（reason: literal）；
     (b) 受保護 Python 測試檔遞移匯入（最深 2 層 AST）的專案模組（reason: import）；
@@ -1370,10 +1371,17 @@ def _find_acceptance_dependencies(originals: dict[str, bytes], known_files: set[
                     _add_reason(rel, "literal")
                     break
 
-    # 排序：先列 literal/dir（直接驗收資料/常值），再列 import（匯入輔助模組），同層按路徑字母排序
+    # (e) files found by the acceptance command analyzer that could not be kept fixed
+    if extra_unfixed:
+        for rel, rs in extra_unfixed.items():
+            if rel not in protected_set and rel in delivered_changed:
+                for why in rs:
+                    _add_reason(rel, why)
+
+    # 排序：先列 literal/dir/analyzer（直接驗收資料/常值/未固定腳本目標），再列 import（匯入輔助模組），同層按路徑字母排序
     def _sort_key(item: tuple[str, set[str]]) -> tuple[int, str]:
         rel, rs = item
-        prio = 0 if ("literal" in rs or "dir" in rs) else 1
+        prio = 0 if (rs - {"import"}) else 1
         return (prio, rel)
 
     return [
@@ -1814,7 +1822,18 @@ _UNSAFE_ENV_ASSIGN_KEYS = frozenset({
     "LD_PRELOAD", "LD_LIBRARY_PATH", "BASH_ENV", "ENV", "PERL5LIB",
     "RUBYLIB", "PYTHONHOME", "PYTHONUSERBASE",
 })
-_KNOWN_JS_RUNNERS = frozenset({"jest", "vitest", "mocha"})
+_KNOWN_JS_RUNNERS = frozenset({"jest", "vitest", "mocha", "ava"})
+_PKG_RUNNER_CONFIG_KEYS = ("jest", "mocha", "ava", "vitest", "nyc", "c8", "babel", "eslintConfig")
+_JS_RUNNER_DEFAULT_CONFIG_PATTERNS: dict[str, tuple[str, ...]] = {
+    "jest": ("jest.config.*",),
+    "vitest": ("vitest.config.*",),
+    "mocha": (".mocharc", ".mocharc.*"),
+    "ava": ("ava.config.*",),
+}
+_CONFIG_PATH_EXTS = (
+    ".js", ".cjs", ".mjs", ".ts", ".cts", ".mts", ".jsx", ".tsx",
+    ".json", ".jsonc", ".yaml", ".yml", ".toml", ".py", ".sh", ".bash", ".txt",
+)
 _PY_TOOL_RE = re.compile(r"^python(?:3(?:\.\d+)?)?$")
 _JS_ANY_REL_IMPORT_RES = (
     re.compile(r"""\brequire\s*\(\s*['"`](\.\.?/[^'"`]*)['"`]\s*\)"""),
@@ -1822,17 +1841,25 @@ _JS_ANY_REL_IMPORT_RES = (
     re.compile(r"""\bexport\s+[^'"]+?\s+from\s+['"](\.\.?/[^'"]*)['"]"""),
     re.compile(r"""\bimport\s*\(\s*['"`](\.\.?/[^'"`]*)['"`]\s*\)"""),
 )
-_JS_DYN_OR_EXEC_RES = (
-    re.compile(r"""\brequire\s*\(\s*(?!['"`])"""),
-    re.compile(r"""\bimport\s*\(\s*(?!['"`])"""),
-    re.compile(r"""\beval\s*\("""),
-    re.compile(r"""\bnew\s+Function\b"""),
-    re.compile(r"""\bchild_process\b"""),
+_JS_FORBIDDEN_MOD_RES = (
+    re.compile(r"""\brequire\s*\(\s*['"`](?:node:)?(fs(?:/promises)?|child_process|worker_threads|vm)['"`]\s*\)"""),
+    re.compile(r"""\b(?:import|export)\s+(?:[^'"]+?\s+from\s+)?['"](?:node:)?(fs(?:/promises)?|child_process|worker_threads|vm)['"]"""),
+    re.compile(r"""\bimport\s*\(\s*['"`](?:node:)?(fs(?:/promises)?|child_process|worker_threads|vm)['"`]\s*\)"""),
 )
+_JS_REQUIRE_CALL_RE = re.compile(r"""\brequire\s*\(""")
+_JS_IMPORT_CALL_RE = re.compile(r"""\bimport\s*\(""")
+_JS_PROCESS_BINDING_RE = re.compile(r"""\bprocess\s*\.\s*binding\b""")
+_JS_EVAL_RE = re.compile(r"""\beval\s*\(""")
+_JS_NEW_FUNC_RE = re.compile(r"""\bnew\s+Function\b""")
 _PY_DYN_CALL_NAMES = frozenset({"__import__", "eval", "exec", "compile"})
-_PY_DYN_MODULES = frozenset({"importlib", "runpy", "subprocess"})
-_PY_INLINE_IO_NAMES = frozenset({"open", "Path", "PurePath"})
-_PY_INLINE_IO_ATTRS = frozenset({"read_text", "read_bytes", "open", "system", "popen"})
+_PY_DYN_MODULES = frozenset({"importlib", "runpy"})
+_PY_PROC_MODULES = frozenset({"subprocess", "pty", "ctypes"})
+_PY_PROC_OS_FUNCS = frozenset({
+    "system", "popen",
+    "execl", "execle", "execlp", "execlpe", "execv", "execve", "execvp", "execvpe",
+    "spawnl", "spawnle", "spawnlp", "spawnlpe", "spawnv", "spawnve", "spawnvp", "spawnvpe",
+    "posix_spawn", "posix_spawnp",
+})
 _MAKE_COMPLEX_DIRECTIVES = frozenset({
     "include", "-include", "sinclude", "define", "endef",
     "ifeq", "ifneq", "ifdef", "ifndef", "else", "endif", "override", "export",
@@ -2106,44 +2133,260 @@ def _resolve_project_subdir(project: pathlib.Path, proj_res: pathlib.Path,
     return tuple(joined.split("/"))
 
 
+def _strip_js_comments(src: str) -> str:
+    """Strip // and /* */ comments from JS/JSONC while preserving string literals and newlines."""
+    out: list[str] = []
+    i = 0
+    n = len(src)
+    while i < n:
+        ch = src[i]
+        if ch in ("'", '"', "`"):
+            quote = ch
+            out.append(ch)
+            i += 1
+            while i < n:
+                c = src[i]
+                out.append(c)
+                if c == "\\" and i + 1 < n:
+                    out.append(src[i + 1])
+                    i += 2
+                    continue
+                if c == quote:
+                    i += 1
+                    break
+                i += 1
+            continue
+        if ch == "/" and i + 1 < n and src[i + 1] == "/":
+            i += 2
+            while i < n and src[i] != "\n":
+                i += 1
+            continue
+        if ch == "/" and i + 1 < n and src[i + 1] == "*":
+            i += 2
+            while i + 1 < n and not (src[i] == "*" and src[i + 1] == "/"):
+                if src[i] == "\n":
+                    out.append("\n")
+                i += 1
+            i = min(n, i + 2)
+            out.append(" ")
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def _is_pure_js_literal_arg(text: str, pos: int, *, allow_second_obj: bool = False) -> bool:
+    """Return True iff text[pos:] (immediately after '(') begins with a pure string literal
+    (no concatenation, no template ${...}) followed directly by ')' (or ', {' if allow_second_obj)."""
+    n = len(text)
+    i = pos
+    while i < n and text[i] in (" ", "\t", "\r", "\n"):
+        i += 1
+    if i >= n or text[i] not in ("'", '"', "`"):
+        return False
+    quote = text[i]
+    i += 1
+    while i < n:
+        c = text[i]
+        if c == "\\" and i + 1 < n:
+            i += 2
+            continue
+        if quote == "`" and c == "$" and i + 1 < n and text[i + 1] == "{":
+            return False
+        if c == quote:
+            i += 1
+            break
+        i += 1
+    else:
+        return False
+    while i < n and text[i] in (" ", "\t", "\r", "\n"):
+        i += 1
+    if i < n and text[i] == ")":
+        return True
+    if i < n and text[i] == ",":
+        i += 1
+        while i < n and text[i] in (" ", "\t", "\r", "\n"):
+            i += 1
+        if i < n and text[i] == ")":
+            return True
+        if allow_second_obj and i < n and text[i] == "{":
+            return True
+    return False
+
+
+def _extract_cmd_file_refs(node: ast.Call, project: pathlib.Path | None, proj_res: pathlib.Path | None,
+                           files_set: set[str], cur_dir: tuple[str, ...]) -> set[str]:
+    """Best-effort extraction of existing project files named in constant string/list args of os.system/subprocess."""
+    refs: set[str] = set()
+    if project is None or proj_res is None:
+        return refs
+    tokens: list[str] = []
+    if node.args:
+        a0 = node.args[0]
+        if isinstance(a0, ast.Constant) and isinstance(a0.value, str):
+            try:
+                tokens.extend(shlex.split(a0.value))
+            except ValueError:
+                tokens.extend(a0.value.split())
+        elif isinstance(a0, (ast.List, ast.Tuple)):
+            for el in a0.elts:
+                if isinstance(el, ast.Constant) and isinstance(el.value, str):
+                    tokens.append(el.value)
+    for tok in tokens:
+        rel = _resolve_project_file(project, proj_res, files_set, tok, cur_dir)
+        if rel is not None:
+            refs.add(rel)
+    return refs
+
+
 def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
-                         inline: bool = False) -> list[str]:
-    """Check whether Python script/inline code imports project-local modules or uses dynamic exec/imports."""
+                         inline: bool = False,
+                         project: pathlib.Path | None = None,
+                         proj_res: pathlib.Path | None = None,
+                         cur_dir: tuple[str, ...] = ()) -> tuple[list[str], set[str], dict[str, set[str]]]:
+    """Unified AST check for both Python FILE scripts and `python -c` inline code.
+    Flags:
+    - project-local imports;
+    - process execution: os.system, os.popen, os.exec*/os.spawn*, subprocess.*, pty.*, ctypes;
+    - dynamic code: importlib, runpy, __import__, eval, exec, compile;
+    - file reads: open() with non-constant path, open() of unprotected relative path,
+      pathlib read_text/read_bytes/open.
+    A constant open() path resolving to an existing project file is added to extra_protected instead."""
+    extra_protected: set[str] = set()
+    unfixed_deps: dict[str, set[str]] = {}
     try:
         tree = ast.parse(raw, filename=label)
     except SyntaxError:
-        return [f"could not parse python code: {label}"]
+        return [f"could not parse python code: {label}"], extra_protected, unfixed_deps
 
     reasons: list[str] = []
+    kind_s = "python -c" if inline else f"script {label}"
     rel_for_imports = label if not inline else "__inline__.py"
     local_mods = _extract_py_imports(raw, rel_for_imports, files_set)
     rel_imports: set[str] = set()
+    proc_hits: set[str] = set()
     dyn_hits: set[str] = set()
+    io_reasons: list[str] = []
 
+    os_aliases: set[str] = {"os"}
+    from_os_proc: dict[str, str] = {}
+    open_aliases: set[str] = {"open"}
+    io_mod_aliases: set[str] = {"io", "builtins", "codecs"}
+
+    def _add_io(msg: str) -> None:
+        if msg not in io_reasons:
+            io_reasons.append(msg)
+
+    # First pass: track imports & aliases
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 top = alias.name.split(".", 1)[0]
-                if top in _PY_DYN_MODULES:
+                as_name = alias.asname or top
+                if top == "os" and alias.name == "os":
+                    os_aliases.add(as_name)
+                if top in ("io", "builtins", "codecs") and alias.name == top:
+                    io_mod_aliases.add(as_name)
+                if top in _PY_PROC_MODULES:
+                    proc_hits.add(top)
+                elif top in _PY_DYN_MODULES:
                     dyn_hits.add(top)
         elif isinstance(node, ast.ImportFrom):
             if node.level and node.level > 0:
                 rel_imports.add("." * node.level + (node.module or ""))
-            top = (node.module or "").split(".", 1)[0]
-            if top in _PY_DYN_MODULES:
+            mod = node.module or ""
+            top = mod.split(".", 1)[0]
+            if top in _PY_PROC_MODULES:
+                proc_hits.add(top)
+            elif top in _PY_DYN_MODULES:
                 dyn_hits.add(top)
-        elif isinstance(node, ast.Call):
-            fn = node.func
-            if isinstance(fn, ast.Name):
-                if fn.id in _PY_DYN_CALL_NAMES:
-                    dyn_hits.add(fn.id)
-                elif inline and fn.id in _PY_INLINE_IO_NAMES:
-                    dyn_hits.add(fn.id)
-            elif isinstance(fn, ast.Attribute):
-                if fn.attr in ("import_module", "run_path", "run_module"):
-                    dyn_hits.add(fn.attr)
-                elif inline and fn.attr in _PY_INLINE_IO_ATTRS:
-                    dyn_hits.add(fn.attr)
+            elif mod == "os":
+                for alias in node.names:
+                    if alias.name in _PY_PROC_OS_FUNCS:
+                        full = f"os.{alias.name}"
+                        proc_hits.add(full)
+                        from_os_proc[alias.asname or alias.name] = full
+            elif mod in ("io", "builtins", "codecs"):
+                for alias in node.names:
+                    if alias.name == "open":
+                        open_aliases.add(alias.asname or "open")
+                    elif mod == "builtins" and alias.name in _PY_DYN_CALL_NAMES:
+                        dyn_hits.add(alias.name)
+
+    # Second pass: inspect calls
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        fn = node.func
+        # 1. Process execution calls
+        if isinstance(fn, ast.Attribute) and fn.attr in _PY_PROC_OS_FUNCS:
+            is_os = isinstance(fn.value, ast.Name) and fn.value.id in os_aliases
+            proc_hits.add(f"os.{fn.attr}" if is_os else fn.attr)
+            for ref in _extract_cmd_file_refs(node, project, proj_res, files_set, cur_dir):
+                unfixed_deps.setdefault(ref, set()).add("script-exec")
+            continue
+        if isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id == "subprocess":
+            proc_hits.add(f"subprocess.{fn.attr}")
+            for ref in _extract_cmd_file_refs(node, project, proj_res, files_set, cur_dir):
+                unfixed_deps.setdefault(ref, set()).add("script-exec")
+            continue
+        if isinstance(fn, ast.Name) and fn.id in from_os_proc:
+            proc_hits.add(from_os_proc[fn.id])
+            for ref in _extract_cmd_file_refs(node, project, proj_res, files_set, cur_dir):
+                unfixed_deps.setdefault(ref, set()).add("script-exec")
+            continue
+
+        # 2. Dynamic code calls
+        if isinstance(fn, ast.Name) and fn.id in _PY_DYN_CALL_NAMES:
+            dyn_hits.add(fn.id)
+            continue
+        if isinstance(fn, ast.Attribute) and fn.attr in ("import_module", "run_path", "run_module"):
+            dyn_hits.add(fn.attr)
+            continue
+
+        # 3. File reading: open(...)
+        is_builtin_open = (
+            (isinstance(fn, ast.Name) and fn.id in open_aliases)
+            or (isinstance(fn, ast.Attribute) and fn.attr == "open"
+                and isinstance(fn.value, ast.Name) and fn.value.id in io_mod_aliases)
+        )
+        if is_builtin_open:
+            path_arg: ast.expr | None = node.args[0] if node.args else None
+            if path_arg is None:
+                for kw in node.keywords:
+                    if kw.arg in ("file", "filename"):
+                        path_arg = kw.value
+                        break
+            if isinstance(path_arg, ast.Constant) and isinstance(path_arg.value, str):
+                s = path_arg.value
+                rel: str | None = None
+                if project is not None and proj_res is not None:
+                    rel = _resolve_project_file(project, proj_res, files_set, s, cur_dir)
+                elif s in files_set:
+                    rel = s
+                if rel is not None:
+                    extra_protected.add(rel)
+                elif not os.path.isabs(s):
+                    _add_io(f"{kind_s} uses open() of unprotected path {s!r}")
+                    cand = _norm_posix_join(cur_dir, s)
+                    if cand:
+                        unfixed_deps.setdefault(cand, set()).add("script-open")
+                elif s != "/dev/null":
+                    _add_io(f"{kind_s} uses open() of outside path {s!r}")
+            else:
+                _add_io(f"{kind_s} uses open() with non-constant path")
+            continue
+
+        # 4. pathlib read_text / read_bytes / open
+        if isinstance(fn, ast.Attribute) and fn.attr in ("read_text", "read_bytes", "open"):
+            _add_io(f"{kind_s} uses pathlib.{fn.attr}()")
+            # Best-effort: extract constant Path("foo.txt") target for concrete NOTE reporting
+            if isinstance(fn.value, ast.Call) and fn.value.args:
+                p0 = fn.value.args[0]
+                if isinstance(p0, ast.Constant) and isinstance(p0.value, str) and not os.path.isabs(p0.value):
+                    cand = _norm_posix_join(cur_dir, p0.value)
+                    if cand:
+                        unfixed_deps.setdefault(cand, set()).add("script-read")
 
     all_local = sorted(local_mods | rel_imports)
     if all_local:
@@ -2151,29 +2394,232 @@ def _py_analyze_code_ast(raw: bytes, label: str, files_set: set[str], *,
             reasons.append(f"python -c imports project modules: {', '.join(all_local[:8])}")
         else:
             reasons.append(f"script imports project modules: {label} -> {', '.join(all_local[:8])}")
+    if proc_hits:
+        reasons.append(f"{kind_s} uses process execution: {', '.join(sorted(proc_hits)[:8])}")
     if dyn_hits:
-        kind_s = "python -c" if inline else f"script {label}"
-        reasons.append(f"{kind_s} uses dynamic import/io/exec: {', '.join(sorted(dyn_hits)[:8])}")
-    return reasons
+        reasons.append(f"{kind_s} uses dynamic code: {', '.join(sorted(dyn_hits)[:8])}")
+    reasons.extend(io_reasons)
+    return reasons, extra_protected, unfixed_deps
 
 
 def _js_analyze_file(raw: bytes, rel_path: str, files_set: set[str]) -> list[str]:
-    """Check whether JS/TS script imports project-local modules or uses dynamic require/eval/child_process."""
+    """Check whether JS/TS script imports project-local modules or uses fs/process/vm/dynamic require/eval."""
     reasons: list[str] = []
+
+    def _add(msg: str) -> None:
+        if msg not in reasons:
+            reasons.append(msg)
+
     resolved_local = _extract_js_imports(raw, rel_path, files_set)
-    txt = raw.decode("utf-8", errors="replace")
+    txt = _strip_js_comments(raw.decode("utf-8", errors="replace"))
     raw_rel_specs: set[str] = set()
     for rx in _JS_ANY_REL_IMPORT_RES:
         for m in rx.finditer(txt):
             raw_rel_specs.add(m.group(1))
     local_labels = sorted(resolved_local) if resolved_local else sorted(raw_rel_specs)
     if local_labels:
-        reasons.append(f"script imports project modules: {rel_path} -> {', '.join(local_labels[:8])}")
-    for rx in _JS_DYN_OR_EXEC_RES:
-        if rx.search(txt):
-            reasons.append(f"script uses dynamic require/eval/child_process: {rel_path}")
+        _add(f"script imports project modules: {rel_path} -> {', '.join(local_labels[:8])}")
+
+    # Forbidden Node built-ins: fs, fs/promises, child_process, worker_threads, vm
+    forbidden_mods: list[str] = []
+    for rx in _JS_FORBIDDEN_MOD_RES:
+        for m in rx.finditer(txt):
+            mod = m.group(1)
+            if mod not in forbidden_mods:
+                forbidden_mods.append(mod)
+    if forbidden_mods:
+        _add(f"script {rel_path} requires/imports {', '.join(forbidden_mods[:6])}")
+
+    # Non-literal require(...)
+    for m in _JS_REQUIRE_CALL_RE.finditer(txt):
+        if not _is_pure_js_literal_arg(txt, m.end()):
+            _add(f"script {rel_path} uses non-literal require()")
             break
+
+    # Dynamic import(...) with non-literal argument
+    for m in _JS_IMPORT_CALL_RE.finditer(txt):
+        if not _is_pure_js_literal_arg(txt, m.end(), allow_second_obj=True):
+            _add(f"script {rel_path} uses dynamic import()")
+            break
+
+    if _JS_PROCESS_BINDING_RE.search(txt):
+        _add(f"script {rel_path} uses process.binding")
+    if _JS_EVAL_RE.search(txt):
+        _add(f"script {rel_path} uses eval()")
+    if _JS_NEW_FUNC_RE.search(txt):
+        _add(f"script {rel_path} uses new Function")
     return reasons
+
+
+def _looks_like_config_path(s: str) -> bool:
+    """Return True if a runner-config string value looks like a filesystem path (vs env/package name)."""
+    t = s.strip()
+    if not t:
+        return False
+    if "<rootDir>" in t:
+        return True
+    if t.startswith(("./", "../", "/", "~/")):
+        return True
+    if t.startswith(("http://", "https://")):
+        return False
+    if any(t.lower().endswith(ext) for ext in _CONFIG_PATH_EXTS):
+        return True
+    if "/" in t:
+        # Exclude scoped npm package names like @babel/preset-env or @jest/globals
+        if re.match(r"^@[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$", t):
+            return False
+        # Exclude obvious regexes without path prefix
+        if t.startswith("^") or "\\" in t:
+            return False
+        return True
+    return False
+
+
+def _resolve_js_config_file(project: pathlib.Path, proj_res: pathlib.Path, files_set: set[str],
+                            spec_s: str, base_dir: tuple[str, ...]) -> str | None:
+    """Resolve a path-like string in a JS runner config to an existing project file (supporting JS/TS ext fallback)."""
+    raw = spec_s.strip().replace("\\", "/")
+    if not raw or raw in (".", ".."):
+        return None
+    direct = _resolve_project_file(project, proj_res, files_set, raw, base_dir)
+    if direct is not None:
+        return direct
+    for ext in (*_JS_EXTS, ".json"):
+        cand = _resolve_project_file(project, proj_res, files_set, raw + ext, base_dir)
+        if cand is not None:
+            return cand
+    for ext in _JS_EXTS:
+        cand = _resolve_project_file(project, proj_res, files_set, raw.rstrip("/") + "/index" + ext, base_dir)
+        if cand is not None:
+            return cand
+    return None
+
+
+def _parse_simple_yaml(text: str) -> tuple[Any, bool]:
+    """Parse YAML runner config (uses PyYAML if available, else a conservative stdlib parser).
+    Returns (parsed_obj, ok)."""
+    try:
+        import yaml  # type: ignore[import-not-found]
+        return yaml.safe_load(text), True
+    except ImportError:
+        pass
+    except Exception:  # noqa: BLE001
+        return None, False
+
+    def _unquote(v: str) -> str:
+        s = v.strip()
+        if len(s) >= 2 and s[0] == s[-1] and s[0] in ("'", '"'):
+            return s[1:-1]
+        return s
+
+    out: list[Any] = []
+    for raw_ln in text.splitlines():
+        ln = raw_ln.strip()
+        if not ln or ln.startswith("#"):
+            continue
+        # Strip inline comment outside quotes
+        if "#" in ln and not (ln.startswith(("'", '"'))):
+            ln = re.split(r"\s+#", ln, maxsplit=1)[0].strip()
+        if not ln:
+            continue
+        if re.search(r"(?:^|\s)[&*!]\S", ln):
+            return None, False
+        if ln.startswith("- "):
+            item = ln[2:].strip()
+            if item.startswith("[") and item.endswith("]"):
+                out.extend(_unquote(x) for x in item[1:-1].split(",") if x.strip())
+            else:
+                out.append(_unquote(item))
+            continue
+        if ":" in ln:
+            _, _, rhs = ln.partition(":")
+            rhs = rhs.strip()
+            if not rhs:
+                continue
+            if rhs.startswith("[") and rhs.endswith("]"):
+                out.extend(_unquote(x) for x in rhs[1:-1].split(",") if x.strip())
+            elif rhs.startswith("{") and rhs.endswith("}"):
+                try:
+                    out.append(json.loads(rhs))
+                except ValueError:
+                    return None, False
+            else:
+                out.append(_unquote(rhs))
+            continue
+        return None, False
+    return out, True
+
+
+_JS_CFG_NONLITERAL_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\bpath\s*\.\s*(?:resolve|join)\s*\("), "path.resolve/join"),
+    (re.compile(r"\b__dirname\b|\b__filename\b"), "__dirname/__filename"),
+    (re.compile(r"\bprocess\s*\.\s*cwd\s*\("), "process.cwd()"),
+    (re.compile(r"`[^`]*\$\{"), "template interpolation"),
+    (re.compile(r"""['"`]\s*\+|\+\s*['"`]"""), "string concatenation"),
+    (_JS_EVAL_RE, "eval()"),
+    (_JS_NEW_FUNC_RE, "new Function"),
+    (_JS_PROCESS_BINDING_RE, "process.binding"),
+)
+_JS_CFG_PATH_KEYS_RE = re.compile(
+    r"""\b(?:setupFiles|setupFilesAfterEnv|globalSetup|globalTeardown|require|spec|"""
+    r"""resolver|runner|transform|moduleNameMapper|preset|roots|testMatch|testRegex|"""
+    r"""file|files|include|exclude|config)\s*:\s*([^,}\]\n]+)"""
+)
+_JS_STR_LIT_RE = re.compile(
+    r"""'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\\n$]|\\.)*)`"""
+)
+
+
+def _analyze_js_runner_config_text(raw: bytes, rel_path: str) -> tuple[list[str], list[str]]:
+    """Scan a JS/TS runner config file (e.g. jest.config.js, vitest.config.ts, .mocharc.js).
+    Returns (string_literals, unverified_reasons)."""
+    reasons: list[str] = []
+
+    def _add(msg: str) -> None:
+        if msg not in reasons:
+            reasons.append(msg)
+
+    txt = _strip_js_comments(raw.decode("utf-8", errors="replace"))
+    for rx, label in _JS_CFG_NONLITERAL_PATTERNS:
+        if rx.search(txt):
+            _add(f"{rel_path}: non-literal path expression ({label})")
+    for rx in _JS_FORBIDDEN_MOD_RES:
+        m = rx.search(txt)
+        if m:
+            _add(f"{rel_path}: requires/imports {m.group(1)}")
+    for m in _JS_REQUIRE_CALL_RE.finditer(txt):
+        if not _is_pure_js_literal_arg(txt, m.end()):
+            _add(f"{rel_path}: non-literal require()")
+            break
+    for m in _JS_IMPORT_CALL_RE.finditer(txt):
+        if not _is_pure_js_literal_arg(txt, m.end(), allow_second_obj=True):
+            _add(f"{rel_path}: dynamic import()")
+            break
+    # Check path-bearing config keys for non-literal values (e.g. setupFiles: [getSetup()] or setupFiles: arr)
+    for m in _JS_CFG_PATH_KEYS_RE.finditer(txt):
+        val = m.group(1).strip()
+        if not val:
+            continue
+        if val[0] in ("'", '"', "`", "{"):
+            continue
+        if val.startswith("["):
+            # Inspect items inside the array up to matching ']'
+            start_b = m.start(1) + 1
+            end_b = txt.find("]", start_b)
+            inner = txt[start_b:end_b] if end_b >= 0 else val[1:]
+            # Remove all string literals from inner; only commas/whitespace should remain
+            rem = _JS_STR_LIT_RE.sub("", inner)
+            if re.sub(r"[\s,]+", "", rem):
+                _add(f"{rel_path}: non-literal path in runner config array")
+        elif val not in ("true", "false", "null", "undefined") and not re.match(r"^\d+$", val):
+            _add(f"{rel_path}: non-literal path value in runner config")
+
+    lits: list[str] = []
+    for m in _JS_STR_LIT_RE.finditer(txt):
+        s = m.group(1) if m.group(1) is not None else (m.group(2) if m.group(2) is not None else m.group(3))
+        if s is not None:
+            lits.append(s)
+    return lits, reasons
 
 
 def _parse_makefile_targets(raw: bytes, rel_path: str) -> tuple[dict[str, tuple[list[str], list[str]]], str | None, set[str], list[str]]:
@@ -2339,13 +2785,20 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
         if rel:
             unfixed_deps.setdefault(rel, set()).add(why)
 
-    def _analyze_py_file(rel: str) -> None:
+    def _analyze_py_file(rel: str, cur_dir: tuple[str, ...] = ()) -> None:
         protected.add(rel)
         raw = _read_source_bytes(rel, project, {})
         if raw is None:
             _fail(f"could not read python script: {rel}")
             return
-        for r in _py_analyze_code_ast(raw, rel, files_set, inline=False):
+        py_reasons, extra_prot, py_unfixed = _py_analyze_code_ast(
+            raw, rel, files_set, inline=False, project=project, proj_res=proj_res, cur_dir=cur_dir
+        )
+        protected.update(extra_prot)
+        for u_rel, u_rs in py_unfixed.items():
+            for ur in u_rs:
+                _add_unfixed(u_rel, ur)
+        for r in py_reasons:
             _fail(r)
 
     def _analyze_js_file(rel: str) -> None:
@@ -2356,6 +2809,186 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             return
         for r in _js_analyze_file(raw, rel, files_set):
             _fail(r)
+
+    def _scan_config_string(s: str, source_rel: str, base_dir: tuple[str, ...]) -> None:
+        t = s.strip()
+        if not t:
+            return
+        if "<rootDir>" in t:
+            if t.startswith("<rootDir>/"):
+                sub = t[len("<rootDir>/"):]
+                if any(c in "$*?[](){}<>" for c in sub):
+                    _fail(f"{source_rel}: unresolvable <rootDir> expansion {t!r}")
+                    return
+                rel = _resolve_js_config_file(project, proj_res, files_set, sub, base_dir)
+                if rel is not None:
+                    protected.add(rel)
+                    return
+                _fail(f"{source_rel}: unresolvable <rootDir> path {t!r}")
+                cand = _norm_posix_join(base_dir, sub)
+                if cand:
+                    _add_unfixed(cand, "runner-config")
+                return
+            _fail(f"{source_rel}: unresolvable <rootDir> reference {t!r}")
+            return
+        if _looks_like_config_path(t):
+            rel = _resolve_js_config_file(project, proj_res, files_set, t, base_dir)
+            if rel is not None:
+                protected.add(rel)
+                return
+            _fail(f"{source_rel}: unresolvable config path {t!r}")
+            if not os.path.isabs(t) and not any(c in "*?[]" for c in t):
+                cand = _norm_posix_join(base_dir, t)
+                if cand:
+                    _add_unfixed(cand, "runner-config")
+
+    def _scan_runner_config_obj(obj: Any, source_rel: str, base_dir: tuple[str, ...]) -> None:
+        if isinstance(obj, str):
+            _scan_config_string(obj, source_rel, base_dir)
+        elif isinstance(obj, list):
+            for item in obj:
+                _scan_runner_config_obj(item, source_rel, base_dir)
+        elif isinstance(obj, dict):
+            for v in obj.values():
+                _scan_runner_config_obj(v, source_rel, base_dir)
+
+    def _scan_runner_config_file(cfg_rel: str) -> None:
+        protected.add(cfg_rel)
+        vkey = ("rcfg", cfg_rel, "")
+        if vkey in visited:
+            return
+        visited.add(vkey)
+        raw = _read_source_bytes(cfg_rel, project, {})
+        if raw is None:
+            _fail(f"could not read runner config: {cfg_rel}")
+            return
+        cfg_parts = pathlib.PurePosixPath(cfg_rel).parts[:-1]
+        base_dir = tuple(cfg_parts)
+        bn = pathlib.PurePosixPath(cfg_rel).name.lower()
+        if bn.endswith((".json", ".jsonc")) or (bn == ".mocharc" and raw.lstrip().startswith(b"{")):
+            txt = raw.decode("utf-8", errors="replace")
+            if bn.endswith(".jsonc"):
+                txt = _strip_js_comments(txt)
+            try:
+                data = json.loads(txt)
+            except ValueError:
+                _fail(f"could not parse runner config JSON: {cfg_rel}")
+                return
+            _scan_runner_config_obj(data, cfg_rel, base_dir)
+            return
+        if bn.endswith((".yml", ".yaml")):
+            data, ok = _parse_simple_yaml(raw.decode("utf-8", errors="replace"))
+            if not ok:
+                _fail(f"could not parse runner config YAML: {cfg_rel}")
+                return
+            _scan_runner_config_obj(data, cfg_rel, base_dir)
+            return
+        if bn.endswith(_JS_EXTS):
+            lits, js_reasons = _analyze_js_runner_config_text(raw, cfg_rel)
+            for jr in js_reasons:
+                _fail(jr)
+            for lit in lits:
+                _scan_config_string(lit, cfg_rel, base_dir)
+            return
+        _fail(f"unsupported runner config format: {cfg_rel}")
+
+    def _scan_pkg_runner_configs(pkg_rel: str, pkg_dir: tuple[str, ...]) -> None:
+        vkey = ("pkgcfg", pkg_rel, "")
+        if vkey in visited:
+            return
+        visited.add(vkey)
+        raw = _read_source_bytes(pkg_rel, project, {})
+        if raw is None:
+            return
+        try:
+            data = json.loads(raw.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            return
+        if not isinstance(data, dict):
+            return
+        for key in _PKG_RUNNER_CONFIG_KEYS:
+            if key in data and data[key] is not None:
+                _scan_runner_config_obj(data[key], f"{pkg_rel}[{key}]", pkg_dir)
+
+    def _analyze_js_runner(runner: str, args: list[str], cur_dir: tuple[str, ...], *, prefix: str = "") -> None:
+        label = f"{prefix}{runner}"
+        pkg_rel = "/".join((*cur_dir, "package.json")) if cur_dir else "package.json"
+        if pkg_rel in files_set:
+            protected.add(pkg_rel)
+            _scan_pkg_runner_configs(pkg_rel, cur_dir)
+        # Scan any existing default runner config files in cur_dir
+        dir_pref = "/".join(cur_dir)
+        pats = _JS_RUNNER_DEFAULT_CONFIG_PATTERNS.get(runner, ())
+        if pats:
+            for rel in sorted(files_set):
+                parent_rel = "/".join(pathlib.PurePosixPath(rel).parts[:-1])
+                if parent_rel != dir_pref:
+                    continue
+                bn = pathlib.PurePosixPath(rel).name
+                if any(fnmatch.fnmatchcase(bn, p) for p in pats):
+                    _scan_runner_config_file(rel)
+        # Parse runner CLI args (--config, --require, --setupFiles*, positional files)
+        ai = 0
+        while ai < len(args):
+            arg = args[ai]
+            if arg in ("-r", "--require") and ai + 1 < len(args):
+                req_tok = args[ai + 1]
+                _fail(f"{label} uses --require")
+                r_rel = _resolve_js_config_file(project, proj_res, files_set, req_tok, cur_dir)
+                if r_rel is not None:
+                    _add_unfixed(r_rel, "runner-require")
+                ai += 2
+                continue
+            if arg.startswith("--require="):
+                req_tok = arg.split("=", 1)[1]
+                _fail(f"{label} uses --require")
+                r_rel = _resolve_js_config_file(project, proj_res, files_set, req_tok, cur_dir)
+                if r_rel is not None:
+                    _add_unfixed(r_rel, "runner-require")
+                ai += 1
+                continue
+            if arg in ("-r", "--require"):
+                _fail(f"{label} uses --require")
+                ai += 1
+                continue
+            cfg_tok: str | None = None
+            if arg in ("--config", "-c") and ai + 1 < len(args):
+                cfg_tok = args[ai + 1]
+                ai += 2
+            elif arg.startswith("--config="):
+                cfg_tok = arg.split("=", 1)[1]
+                ai += 1
+            elif arg.startswith("-c="):
+                cfg_tok = arg.split("=", 1)[1]
+                ai += 1
+            if cfg_tok is not None:
+                if cfg_tok.lstrip().startswith("{"):
+                    try:
+                        inline_cfg = json.loads(cfg_tok)
+                    except ValueError:
+                        _fail(f"{label} --config JSON could not be parsed")
+                    else:
+                        _scan_runner_config_obj(inline_cfg, f"{label} --config", cur_dir)
+                else:
+                    c_rel = _resolve_js_config_file(project, proj_res, files_set, cfg_tok, cur_dir)
+                    if c_rel is None:
+                        _fail(f"{label} --config file not found in project: {cfg_tok}")
+                    else:
+                        _scan_runner_config_file(c_rel)
+                continue
+            if arg in ("--setupFiles", "--setupFilesAfterEnv", "--globalSetup", "--globalTeardown") and ai + 1 < len(args):
+                _scan_config_string(args[ai + 1], f"{label} {arg}", cur_dir)
+                ai += 2
+                continue
+            if arg.startswith(("--setupFiles=", "--setupFilesAfterEnv=", "--globalSetup=", "--globalTeardown=")):
+                flag_k, _, flag_v = arg.partition("=")
+                _scan_config_string(flag_v, f"{label} {flag_k}", cur_dir)
+                ai += 1
+                continue
+            f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
+            if f_rel is not None:
+                protected.add(f_rel)
+            ai += 1
 
     def _analyze_shell_file(rel: str, cur_dir: tuple[str, ...], depth: int) -> None:
         protected.add(rel)
@@ -2416,7 +3049,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                 _analyze_shell_file(rel, cur_dir, depth)
                 return
             if _PY_TOOL_RE.match(interp):
-                _analyze_py_file(rel)
+                _analyze_py_file(rel, cur_dir)
                 return
             if interp == "node":
                 _analyze_js_file(rel)
@@ -2426,7 +3059,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
         if rel.endswith((".sh", ".bash")):
             _analyze_shell_file(rel, cur_dir, depth)
         elif rel.endswith(".py"):
-            _analyze_py_file(rel)
+            _analyze_py_file(rel, cur_dir)
         elif rel.endswith(_JS_EXTS):
             _analyze_js_file(rel)
         else:
@@ -2438,6 +3071,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             _fail(f"package.json not found: {pkg_rel}")
             return
         protected.add(pkg_rel)
+        _scan_pkg_runner_configs(pkg_rel, target_dir)
         vkey = ("npm", pkg_rel, script_name)
         if vkey in visited:
             return
@@ -2727,7 +3361,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             _fail(f"unsupported {tool} subcommand: {sub}")
             return cur_dir
 
-        # 3. npx jest|vitest|mocha
+        # 3. npx jest|vitest|mocha|ava
         if tool == "npx":
             j = 0
             while j < len(rest) and rest[j] in ("--no-install", "-y", "--yes", "-q", "--quiet"):
@@ -2737,21 +3371,12 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                 return cur_dir
             runner = rest[j]
             if runner in _KNOWN_JS_RUNNERS:
-                pkg_rel = "/".join((*cur_dir, "package.json")) if cur_dir else "package.json"
-                if pkg_rel in files_set:
-                    protected.add(pkg_rel)
-                for arg in rest[j + 1:]:
-                    if arg in ("-r", "--require"):
-                        _fail(f"npx {runner} uses --require")
-                        return cur_dir
-                    f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
-                    if f_rel is not None:
-                        protected.add(f_rel)
+                _analyze_js_runner(runner, rest[j + 1:], cur_dir, prefix="npx ")
                 return cur_dir
             _fail(f"npx runs unknown command: {runner}")
             return cur_dir
 
-        # 4. Known direct test runners: pytest, jest, vitest, mocha, cargo test, go test
+        # 4. Known direct test runners: pytest, jest, vitest, mocha, ava, cargo test, go test
         if tool == "pytest":
             j = 0
             while j < len(rest):
@@ -2760,6 +3385,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                     pmod = rest[j + 1]
                     if not pmod.startswith("no:") and (pmod.replace(".", "/") + ".py") in files_set:
                         _fail(f"pytest loads local plugin: {pmod}")
+                        _add_unfixed(pmod.replace(".", "/") + ".py", "runner-plugin")
                         return cur_dir
                     j += 2
                     continue
@@ -2770,16 +3396,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             return cur_dir
 
         if tool in _KNOWN_JS_RUNNERS:
-            pkg_rel = "/".join((*cur_dir, "package.json")) if cur_dir else "package.json"
-            if pkg_rel in files_set:
-                protected.add(pkg_rel)
-            for arg in rest:
-                if arg in ("-r", "--require"):
-                    _fail(f"{tool} uses --require")
-                    return cur_dir
-                f_rel = _resolve_project_file(project, proj_res, files_set, arg, cur_dir)
-                if f_rel is not None:
-                    protected.add(f_rel)
+            _analyze_js_runner(tool, rest, cur_dir)
             return cur_dir
 
         if tool == "cargo":
@@ -2986,13 +3603,21 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
                         break
                 if found_files:
                     for fp in found_files:
-                        _analyze_py_file(fp)
+                        _analyze_py_file(fp, cur_dir)
                     return cur_dir
                 _fail(f"python -m module cannot be resolved in project: {mod_name}")
                 return cur_dir
             if mode_tok == "-c" and j + 1 < len(rest):
                 code_str = rest[j + 1]
-                for r in _py_analyze_code_ast(code_str.encode("utf-8", "replace"), "<python -c>", files_set, inline=True):
+                py_reasons, extra_prot, py_unfixed = _py_analyze_code_ast(
+                    code_str.encode("utf-8", "replace"), "<python -c>", files_set,
+                    inline=True, project=project, proj_res=proj_res, cur_dir=cur_dir,
+                )
+                protected.update(extra_prot)
+                for u_rel, u_rs in py_unfixed.items():
+                    for ur in u_rs:
+                        _add_unfixed(u_rel, ur)
+                for r in py_reasons:
                     _fail(r)
                 return cur_dir
             if mode_tok.startswith("-"):
@@ -3002,7 +3627,7 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             if f_rel is None:
                 _fail(f"python script not found in project: {mode_tok}")
                 return cur_dir
-            _analyze_py_file(f_rel)
+            _analyze_py_file(f_rel, cur_dir)
             return cur_dir
 
         # 6. node
@@ -3060,8 +3685,13 @@ def _analyze_acceptance_command(project: pathlib.Path, cmd: str,
             _analyze_make(rest, cur_dir, depth + 1)
             return cur_dir
 
-        # Everything else -> unverified
+        # Everything else -> untraced; record any existing project file args as unfixed deps
         _fail(f"unknown command: {tool}")
+        dep_why = "script-source" if tool in ("source", ".") else "script-ref"
+        for tok in rest:
+            f_rel = _resolve_project_file(project, proj_res, files_set, tok, cur_dir)
+            if f_rel is not None:
+                _add_unfixed(f_rel, dep_why)
         return cur_dir
 
     def _analyze_cmd_str(cmd_str: str, cur_dir: tuple[str, ...], depth: int, *,
@@ -6389,7 +7019,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         known_files = set(start_hashes) | planned_paths
         dep_src_root = snaps[d].root if (0 <= d < len(snaps) and snaps[d] is not None) else project
         acc_deps_changed = _find_acceptance_dependencies(
-            originals, known_files, planned_paths, source_root=dep_src_root
+            originals, known_files, planned_paths, source_root=dep_src_root,
+            extra_unfixed=spec.unfixed_deps,
         )
         not_delivered = list(snaps[d].copy_skip_created) if (0 <= d < len(snaps) and snaps[d] is not None) else []
 
