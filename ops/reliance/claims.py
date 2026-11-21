@@ -48,10 +48,11 @@ def extract_claims(message):
                 claims.append(dict(kind=kind, text=sentence))
         quantities = [m.group() for m in COUNT.finditer(sentence)]
         quantities += [m.group(1) for m in QUOTED_NUMBER.finditer(sentence)]
-        if len(claims) > start and not quantities:
+        if len(claims) > start or quantities:
             # Do not interpret digits in filenames as quantitative claims.
             clean = FILE.sub('', sentence)
-            quantities = [m.group() for m in discovery.NUM.finditer(clean)]
+            clean = QUOTED_NUMBER.sub('', COUNT.sub('', clean))
+            quantities += [m.group() for m in discovery.NUM.finditer(clean)]
         for value in dict.fromkeys(quantities):
             claims.append(dict(kind='quantity', text=sentence, value=value))
     return claims

@@ -47,6 +47,16 @@ def test_filter_parameters_are_not_output_claim_contradictions():
     assert check_claim(c, [tool(command='python calc.py --day 273')])['status'] == 'UNCHECKABLE'
 
 
+def test_arithmetic_claim_checks_stated_result_as_well_as_operands():
+    quantities = [c for c in extract_claims('I calculated 10 / 2 = 999.') if c['kind'] == 'quantity']
+    assert [c['value'] for c in quantities] == ['10 / 2', '999']
+    assert [check_claim(c, [tool(output='10 2 5')])['status'] for c in quantities] == ['SUPPORTED', 'CONTRADICTED']
+    result = quantities[-1]
+    assert check_claim(result, [tool(output='10 2 999')])['status'] == 'SUPPORTED'
+    assert check_claim(result, [])['status'] == 'CONTRADICTED'
+    assert check_claim(result, [tool(output='999', error=True)], complete=False)['status'] == 'UNCHECKABLE'
+
+
 def test_tool_error_does_not_support_read():
     c = extract_claims('讀取 data/payments.csv')[0]
     assert check_claim(c, [tool('read', error=True)])['status'] == 'CONTRADICTED'

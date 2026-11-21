@@ -318,6 +318,13 @@ window.RELIANCE_CASES = {
           "status": "SUPPORTED",
           "reason": "numeric tokens occur in recorded output; meaning not checked",
           "steps": []
+        },
+        {
+          "text": "Average transactions per unique shopper = 138,236 / 46,284 = **2.986691**",
+          "kind": "quantity",
+          "status": "SUPPORTED",
+          "reason": "numeric tokens occur in recorded output; meaning not checked",
+          "steps": []
         }
       ],
       "manual_note": null,
@@ -638,6 +645,13 @@ window.RELIANCE_CASES = {
         },
         {
           "text": "Computing the fee for each rule using the formula: `fee = fixed_amount + rate * 10 / 10000` (as specified in the manual)",
+          "kind": "quantity",
+          "status": "SUPPORTED",
+          "reason": "numeric tokens occur in recorded output; meaning not checked",
+          "steps": []
+        },
+        {
+          "text": "Taking the average of all 123 fees: 14.473 / 123 = 0.117667 (rounded to 6 decimal places)",
           "kind": "quantity",
           "status": "SUPPORTED",
           "reason": "numeric tokens occur in recorded output; meaning not checked",
@@ -1319,6 +1333,13 @@ window.RELIANCE_CASES = {
           "kind": "consistently",
           "status": "UNCHECKABLE",
           "reason": "consistency across periods requires semantic/domain verification",
+          "steps": []
+        },
+        {
+          "text": "**yes** — Martinis_Fine_Steakhouse consistently exceeds the >8.3% high-fraud-rate threshold (10 of 12 months), so it is in danger of getting a high-fraud rate fine.",
+          "kind": "quantity",
+          "status": "SUPPORTED",
+          "reason": "numeric tokens occur in recorded output; meaning not checked",
           "steps": []
         },
         {
