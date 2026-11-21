@@ -2276,6 +2276,10 @@ def _build_restart_record_from_receipt(
         "agent_wall_s": payload.get("agent_wall_s"),
         "total_wall_s": payload.get("total_wall_s"),
     }
+    if payload.get("non_utf8_paths"):
+        details["non_utf8_paths"] = True
+        if _as_str(payload.get("path_encoding")):
+            details["path_encoding"] = _as_str(payload.get("path_encoding"))
     if mismatches:
         details["mismatches"] = mismatches
 

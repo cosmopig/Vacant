@@ -2613,13 +2613,59 @@ def _redact_argv(argv: list[str]) -> list[str]:
     return out
 
 
+def _has_surrogates(s: str) -> bool:
+    return any(0xD800 <= ord(ch) <= 0xDFFF for ch in s)
+
+
+def _safe_path_str(p: str | os.PathLike[str]) -> tuple[str, bool]:
+    """將可能含 surrogateescape（非 UTF-8 位元組）的路徑轉為確定性 UTF-8 安全字串。
+    合法 UTF-8 字串原樣回傳 `(s, False)`；含 surrogate 時經 `os.fsencode(s)` 還原原始位元組，
+    再以 UTF-8 `backslashreplace` 解碼（如 0xff → `\\xff`），回傳 `(safe, True)`。"""
+    s = os.fspath(p)
+    if not _has_surrogates(s):
+        return s, False
+    return os.fsencode(s).decode("utf-8", errors="backslashreplace"), True
+
+
+def _sanitize_json_obj(obj: Any) -> tuple[Any, bool]:
+    """遞迴將結構內所有含 surrogate 的字串轉為 byte-safe UTF-8 字串，回傳 `(new_obj, had_non_utf8)`。"""
+    if isinstance(obj, str):
+        return _safe_path_str(obj)
+    if isinstance(obj, list):
+        had = False
+        out = []
+        for item in obj:
+            v, f = _sanitize_json_obj(item)
+            had = had or f
+            out.append(v)
+        return out, had
+    if isinstance(obj, tuple):
+        had = False
+        out = []
+        for item in obj:
+            v, f = _sanitize_json_obj(item)
+            had = had or f
+            out.append(v)
+        return out, had
+    if isinstance(obj, dict):
+        had = False
+        out_d: dict[Any, Any] = {}
+        for k, v in obj.items():
+            nk, fk = _sanitize_json_obj(k) if isinstance(k, str) else (k, False)
+            nv, fv = _sanitize_json_obj(v)
+            had = had or fk or fv
+            out_d[nk] = nv
+        return out_d, had
+    return obj, False
+
+
 def _snapshot_tree_sha256(snap: _Snapshot | None) -> str | None:
-    """對快照檔案樹算確定性 SHA-256（按排序相對路徑與檔案 SHA-256 逐筆串接）。"""
+    """對快照檔案樹算確定性 SHA-256（按排序相對路徑原始位元組與檔案 SHA-256 逐筆串接）。"""
     if snap is None:
         return None
     h = hashlib.sha256()
     for rel in sorted(snap.files):
-        h.update(rel.encode("utf-8"))
+        h.update(os.fsencode(rel))
         h.update(b"\x00")
         h.update(snap.files[rel].encode("ascii"))
         h.update(b"\n")
@@ -2627,20 +2673,23 @@ def _snapshot_tree_sha256(snap: _Snapshot | None) -> str | None:
 
 
 def _written_back_entries(project: pathlib.Path, snap: _Snapshot | None,
-                          changed: dict[str, list[str]]) -> list[dict[str, Any]]:
-    """收集實際寫回專案的檔案清單及其 SHA-256（按相對路徑排序）。"""
+                          changed: dict[str, list[str]]) -> tuple[list[dict[str, Any]], bool]:
+    """收集實際寫回專案的檔案清單及其 SHA-256（按相對路徑排序；非 UTF-8 檔名採一致 backslashreplace）。"""
     ops: list[tuple[str, str]] = (
         [(rel, "added") for rel in changed.get("added") or ()]
         + [(rel, "modified") for rel in changed.get("modified") or ()]
     )
     ops.sort(key=lambda t: t[0])
     out: list[dict[str, Any]] = []
+    had_non_utf8 = False
     for rel, op in ops:
         sha = _sha256_file(project / rel)
         if sha is None and snap is not None:
             sha = snap.files.get(rel)
-        out.append({"path": rel, "op": op, "sha256": sha})
-    return out
+        safe_rel, flag = _safe_path_str(rel)
+        had_non_utf8 = had_non_utf8 or flag
+        out.append({"path": safe_rel, "op": op, "sha256": sha})
+    return out, had_non_utf8
 
 
 def _list_sha256(items: Any) -> str:
@@ -2654,7 +2703,7 @@ def _bound_receipt_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if len(canonical_bytes(payload)) <= _RECEIPT_MAX_BYTES:
         return payload
     out = dict(payload)
-    for key in ("written_back", "deleted", "skipped"):
+    for key in ("written_back", "deleted", "skipped", "appeared_during_run", "conflicts", "outside_changes"):
         items = out.get(key)
         if isinstance(items, list) and len(items) > 64:
             out[f"{key}_count"] = len(items)
@@ -2686,8 +2735,8 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
         from ..trace.recorder import Recorder, project_key
         first_argv, first_env = launch_meta[0] if launch_meta else ([], {})
         agent_name = agent or (pathlib.Path(first_argv[0]).name if first_argv else "unknown")
-        proj_str = str(project)
-        proj_sha = hashlib.sha256(proj_str.encode("utf-8")).hexdigest()
+        proj_safe, proj_non_utf8 = _safe_path_str(project)
+        proj_sha = hashlib.sha256(proj_safe.encode("utf-8")).hexdigest()
         pkey = project_key(project)
         attempt_recs: list[dict[str, Any]] = []
         for idx, a in enumerate(attempts):
@@ -2705,6 +2754,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                 "snapshot_tree_sha256": _snapshot_tree_sha256(snap),
             })
         delivered_snap = snaps[delivered_idx] if 0 <= delivered_idx < len(snaps) else None
+        wb_entries, wb_non_utf8 = _written_back_entries(project, delivered_snap, changed)
         payload: dict[str, Any] = {
             "receipt_schema": RECEIPT_SCHEMA,
             "run_id": run_dir.name,
@@ -2728,7 +2778,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "attempts": attempt_recs,
             "delivered_attempt": res["delivered_attempt"],
             "accepted": res["accepted"],
-            "written_back": _written_back_entries(project, delivered_snap, changed),
+            "written_back": wb_entries,
             "deleted": list(changed.get("deleted") or ()),
             "skipped": list(changed.get("skipped") or ()),
             "appeared_during_run": list(res.get("appeared_during_run") or ()),
@@ -2737,6 +2787,11 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "agent_wall_s": res["agent_wall_s"],
             "total_wall_s": res["total_wall_s"],
         }
+        payload, payload_non_utf8 = _sanitize_json_obj(payload)
+        any_non_utf8 = bool(proj_non_utf8 or wb_non_utf8 or payload_non_utf8 or res.get("non_utf8_paths"))
+        payload["non_utf8_paths"] = any_non_utf8
+        if any_non_utf8:
+            payload["path_encoding"] = "utf-8-backslashreplace"
         payload = _bound_receipt_payload(payload)
         rec = Recorder(project)
         ref = rec.append("restart_receipt", payload)
@@ -2744,7 +2799,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "recorded": True,
             "schema": RECEIPT_SCHEMA,
             "project_key": rec.dir.name,
-            "chain_path": str(rec.chain_path),
+            "chain_path": _safe_path_str(rec.chain_path)[0],
             "seq": ref["seq"],
             "hash": ref["hash"],
         }
@@ -3096,6 +3151,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "total_wall_s": round(time.monotonic() - t0, 1),
             "run_dir": str(run_dir),
         }
+        res, res_non_utf8 = _sanitize_json_obj(res)
+        res["non_utf8_paths"] = res_non_utf8
+        if res_non_utf8:
+            res["path_encoding"] = "utf-8-backslashreplace"
         res["receipt"] = _record_receipt(
             project=project,
             prompt=prompt,
@@ -3317,6 +3376,11 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "total_wall_s": round(time.monotonic() - t0, 1),
         "run_dir": str(run_dir),
     }
+    raw_changed = changed
+    res, res_non_utf8 = _sanitize_json_obj(res)
+    res["non_utf8_paths"] = res_non_utf8
+    if res_non_utf8:
+        res["path_encoding"] = "utf-8-backslashreplace"
     res["receipt"] = _record_receipt(
         project=project,
         prompt=prompt,
@@ -3327,7 +3391,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         attempts=attempts,
         snaps=snaps,
         delivered_idx=d,
-        changed=changed,
+        changed=raw_changed,
         res=res,
         run_dir=run_dir,
     )
@@ -3336,6 +3400,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
 
 def summary(res: dict) -> str:
+    res, _ = _sanitize_json_obj(res)
     n = len(res["attempts"])
     ch = res["changed"]
     files = f"{len(ch['added'])} added, {len(ch['modified'])} modified, {len(ch['deleted'])} deleted"

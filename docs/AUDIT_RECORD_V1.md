@@ -59,6 +59,28 @@ one record per line in JSONL) so humans, scripts, and agents can answer six ques
 Type strictness: Python `bool` is a subclass of `int`, so integer count fields explicitly reject
 booleans (`true`/`false` in a count field is treated as invalid/unknown, never as `1`/`0`).
 
+### 2.1 Non-UTF-8 Filesystem Paths
+
+POSIX filesystems allow arbitrary non-UTF-8 byte sequences in filenames (which Python surfaces via
+`surrogateescape` code points `U+DC80..U+DCFF`). Raw surrogates cannot be serialized into strict
+UTF-8 JSON or Ed25519 canonical bytes (`canonical_bytes()`).
+
+To guarantee that signed receipts, `result.json`, CLI summaries, and `vacant audit` exports never
+crash or silently drop a run when a non-UTF-8 filename exists:
+
+- Valid UTF-8 path strings are emitted unchanged.
+- Any path string containing surrogateescape code points is converted deterministically by encoding
+  back to raw OS bytes with `os.fsencode(p)` and decoding as UTF-8 with `errors="backslashreplace"`
+  (e.g. raw byte `0xff` becomes the four-character sequence `\xff`).
+- The same representation is applied consistently across `result.json`, the signed
+  `restart_receipt` payload, CLI summaries, and `vacant audit` exports so companion reconciliation
+  agrees without false mismatches.
+- When any path in a restart run required backslashreplace escaping, both `result.json` and the
+  signed `restart_receipt` set `"non_utf8_paths": true` and
+  `"path_encoding": "utf-8-backslashreplace"` (propagated to `details` in `vacant-audit-record/1`).
+- Snapshot tree hashes (`snapshot_tree_sha256`) continue to hash the raw OS filename bytes
+  (`os.fsencode(rel)`), which is byte-identical to UTF-8 encoding for all valid UTF-8 paths.
+
 ---
 
 ## 3. Top-Level Record Schema (`vacant-audit-record/1`)
