@@ -73,3 +73,19 @@ state＝**EFFECTIVE**，harness_changed_mid_run＝false，harness＝c7c6f5842dbf
 | W3-5 Python | Colab L4 vLLM／3c741397 | rc4 | 篩選入選 9×5 | 27/45 | 25/45 | 6 | 4 | 0.75 | UNRESOLVED |
 
 三批的題、後端、產品版本都不同，這張表只是讓讀者看到同一天的全部結果，不構成合併的估計。
+
+## 後端速度（2026-11-21 補；事後量測，不改結論）
+
+用 `ops/redo/analysis/turn_latency.py`（redo/nonpy-bank 分支）從日誌量：每輪模型回應時間，是 pi session 裡每則 assistant 訊息與前一則訊息的時間差；P 內層撞上限的比例來自 restart 的 result.json；原生單次的數字來自 cell.json。本批是 **unused40**（本機），表中其他批是對照。
+
+| 批 | 後端 | 每輪回應 中位／平均／p90（秒） | P 內層撞 600 秒 | 原生單次中位牆鐘、逾時 |
+|---|---|---|---|---|
+| confirm1c | 1004 llama.cpp，jobs 1 | 5.6／11.8／21.8 | 118/328＝36% | 367 秒、19/170 |
+| unused40 | 1004 llama.cpp，jobs 1 | 1.3／5.4／10.9 | 14/225＝6% | 12 秒、3/200 |
+| hardpy26 | Colab L4 vLLM，jobs 6 | 6.7／24.5／57.9 | 44/169＝26% | 118 秒、6/130 |
+| W3-5 Python | Colab L4 vLLM，jobs 6 | 11.9／43.8／91.7 | 63/100＝63% | 791 秒、9/45 |
+
+讀法：
+- 本機（3090、llama.cpp、jobs 1）每輪平均 5–12 秒；Colab（L4、vLLM、jobs 6）中位數相近，但平均與 p90 是本機的 2–4 倍。
+- 撞上限不等於沒效：本批 P 的內層嘗試有一部分撞上限，結果仍是 EFFECTIVE。
+- 單次上限本身的效果由預註冊的 atimeout 量，不從這張表推。
