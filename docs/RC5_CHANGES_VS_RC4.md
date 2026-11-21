@@ -1,7 +1,7 @@
 # rc5 compared with rc4 / wheel 37005ec2 — what changed in `vacant do` restart mode
 
 - rc4 is `652c50d36`. Its code is identical to the release candidate wheel `37005ec2aa91…`, which the running confirm2, confirm2c and atimeout batches measure.
-- rc5 is frozen at `3aa33b344` (branch `redo/rc5`). It came out of five rounds of adversarial review by Devin, written up in `tests/adversarial_rc5_repro/` (round 1 and round2–round5).
+- rc5 was first frozen at `83e84da29` (branch `redo/rc5`), then reopened once for the independent verification's P1/P5 items and refrozen. The final freeze commit is recorded in RELEASE_PREP. It came out of five rounds of adversarial review by Devin, written up in `tests/adversarial_rc5_repro/` (round 1 and round2–round5).
 - The fixes were written by agy and reviewed by Claude. Every round reran the full test suite and the policy differential.
 
 ## The delivery policy did not change (evidence)
@@ -13,7 +13,7 @@
 - the number of agent calls;
 - a sha256 of every file in the project tree afterwards.
 
-Result at the freeze: **10/10 scenarios identical**. The scenarios are:
+Result at the final freeze: **10/10 identical, plus 2/2 expected differences correct** (see P1 below). The 10 identical scenarios are:
 - passes on the first attempt;
 - fails, then passes on the second;
 - never passes, so the best attempt is delivered;
@@ -25,7 +25,11 @@ Result at the freeze: **10/10 scenarios identical**. The scenarios are:
 - `--check`;
 - npm.
 
-Not covered by the differential: pytest, cargo and go (not installed on the test machine), and a real 600 s time-limit cut.
+The two expected differences are bug fixes:
+- `py_stdlib_name_fixed`: rc4 rejected a correct fix; rc5 accepts it.
+- `py_stdlib_name_broken`: rc4 accepted a broken module; rc5 rejects it.
+
+Not covered by the differential: cargo and go (not installed on the test machine), and a real 600 s time-limit cut. pytest was exercised by the independent verification inside a project `.venv`.
 
 ## Behaviour changes, all outside a normal run
 These only take effect when something abnormal happens: an escape, a concurrent edit, tampering, or an odd filename.
@@ -61,7 +65,25 @@ These only take effect when something abnormal happens: an escape, a concurrent 
    - Changes made to the project outside the delivered attempt are listed, with prominent lines for `.git/hooks`, refs, `.pth` files and `.git/objects`.
 10. **Mode bits.** Restored files keep their mode bits, so `./verify.sh` stays executable. The original `node_modules` is no longer chmod-ed, so killing Vacant can no longer leave it read-only. Both were regressions introduced inside rc5 and fixed before the freeze.
 
+## P1: a project module named like a stdlib module (fixed when the freeze was reopened)
+- In rc4 (`37005ec2`) and in rc5 up to `83e84da29`, the isolated Python runners appended the project dir to `sys.path`, so it came after the stdlib.
+- Effect: a project's own `queue.py` or `statistics.py` was shadowed by the stdlib module of the same name during the check. A correct fix was judged FAIL, and a broken module could be judged PASS.
+- The runners now put the project dir first, which is what `python -m unittest` / `pytest` do in the project. New files that would shadow a name that already resolved at start are still left out (rc5e).
+- **Effect on measured batches: none.** The modules of all 206 Python tasks used with rc1+ wheels were checked against `sys.stdlib_module_names`:
+  - polyglot_py: 34;
+  - exercism_py_unused: 40;
+  - exercism_py_hard: 26;
+  - exercism_py_pool: 106.
+
+  None collides. The JS batches use relative imports and are not affected.
+
+Also changed when the freeze was reopened:
+- **P5:** unreadable project files now stop the run before the agent starts, with exit 43, a message and a receipt, instead of a traceback.
+- Dynamic imports in kept-fixed files make the run `untraced`.
+- `vacant audit list` / `show` mark a write-back conflict run as "accepted, not written back (conflict)".
+- Shadowing files get their own wording.
+
 ## The measured path: zero-config `python_unittest`
 - The confirm and unused40 batches measured this path. rc5 changes it only in abnormal cases: shadow files and new test-directory `__init__.py` are left out of the check; a changed package `__init__.py` prints a NOTE; the check runs against the start snapshot.
 - A normal run of this path is covered by the differential and is identical.
-- In every batch run so far, the native arm and the product arm both have **accepted_but_wrong = 0** and per-attempt `signal.accept_fail = 0`. The batches are confirm1, confirm1c, unused40, hardpy26, W3-5 (screen and confirm), redo1_pi, redo1_opencode, the screen16 runs, and confirm2 partial. Source: each batch's REPORT.json.
+- In every batch run so far, the native arm and the product arm both have **accepted_but_wrong = 0** and per-attempt `signal.accept_fail = 0`. The batches are confirm1, confirm1c, unused40, hardpy26, W3-5 (screen and confirm), redo1_pi, redo1_opencode, the screen16 runs, and confirm2 partial. Source: each batch's REPORT.json. The grader is the task's pristine visible tests (`grader_kinds = visible_tests_pristine`). So the 0 means "nobody got a pass by tampering with the tests". It does NOT mean "the answers are correct beyond the tests".

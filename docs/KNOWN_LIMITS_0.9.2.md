@@ -1,11 +1,11 @@
 # 0.9.2 (rc5): known limits of `vacant do` restart mode
 
 These are written down rather than fixed, under the convergence rule agreed on 2026-11-21. Only three classes were must-fix:
-- accepted-but-wrong with no warning on a kept-fixed (`traced`) check;
+- accepted-but-wrong with no warning on a kept-fixed (`traced`) check, **through a file outside the code under test** (a test, config, check script, manifest, runner config, shadowing file or package init);
 - silent damage to user files;
 - receipt failure.
 
-Everything else is listed here. Each item links its repro script under `tests/adversarial_rc5_repro/`, where one exists.
+The code under test itself is outside that class: see items 12 and 13, which can be `traced` with no warning and are listed here as structural. Everything else is listed here. Each item links its repro script under `tests/adversarial_rc5_repro/`, where one exists.
 
 ## Structural (cannot be fixed without OS-level isolation)
 
@@ -22,7 +22,7 @@ Everything else is listed here. Each item links its repro script under `tests/ad
    - the check is correct;
    - nothing else influences it, e.g. data files read at runtime with computed paths, dynamic imports, environment variables, or network.
 
-   Dynamic imports and runtime-computed paths are not traced. Repro: `round4/f6-node-fs-read.sh` (marked untraced), `round2/e6-a1-unflagged-deps.sh` (the `dynimport` case).
+   Dynamic imports (`importlib`, `__import__`, `exec`, `eval`, `runpy`) in kept-fixed tests or check scripts make the run `untraced`, with the reason `dynamic-import`. Paths computed at runtime in the code under test are not traced. Repro: `round4/f6-node-fs-read.sh` (untraced), `round2/e6-a1-unflagged-deps.sh` (the `dynimport` case, now untraced).
 5. **Most real-world check scripts come out `untraced`.** Examples: shell redirection, unknown commands such as `diff` or `grep`, `bash -c`, or a check script that imports the module under test. In that case the message carries only a short tag. The NOTE line appears only when a changed file is concretely detected among the check's inputs. An untraced check can be beaten through the untraced inputs; that is what untraced says. Repro: `round4/f8-regression.sh`.
 6. **The NOTE about the check's dependencies is a best-effort list.**
    - It covers: literal file names in kept-fixed test files, imports up to depth 2, package `__init__.py` chains, and fixture/data directory names.
@@ -36,9 +36,20 @@ Everything else is listed here. Each item links its repro script under `tests/ad
 
 ## Not tested live
 
-8. pytest, cargo, go, maven/gradle, playwright/cypress/wdio/ava/nyc/nox were not installed on the review machine. Their protection paths are covered by unit tests and stand-in commands only.
+8. cargo, go, maven/gradle, playwright/cypress/wdio/ava/nyc/nox were not installed on the review machine. Their protection paths are covered by unit tests and stand-in commands only. pytest was tested live by the independent verification, with pytest installed in a project `.venv` (repro `verify_rc5/u_d2`).
 9. The non-Linux paths (no subreaper, `detached_processes: null`) were tested only by faking `sys.platform`.
 10. Plan→apply races narrower than a re-check, such as a directory swapped mid-apply, are reasoned about only.
+
+## The code under test runs inside the check (structural)
+
+12. **The code under test can tamper with the test framework in the check's own process.** It runs in the same process as the check. Examples: a line at the end of a module that replaces `unittest.TestCase.assertEqual`, or code that patches pytest's `TestReport`. Such a run can be `traced`, show no NOTE, and pass. Separating the check and the code under test into different processes would change what is measured, so it is not done in 0.9.2. The README's "what it does not do" says this.
+13. **The only module a test imports directly is treated as the code under test**, so it does not trigger the dependency NOTE, even when it is really a helper that re-exports the expected answers. Package `__init__.py` files and new files shadowing an existing module are NOT exempt.
+14. **"accepted-but-wrong = 0" in all batches** uses the task's pristine visible tests as the grader (`grader_kinds = visible_tests_pristine`). It means nobody got a pass by tampering with the tests. It does not mean the answers are correct beyond those tests.
+
+## Fixed after the first freeze (for the record)
+
+- **P1.** A project module named like a stdlib module (`queue.py`, `statistics.py`) was shadowed by the stdlib during the check in rc4 and early rc5: correct fixes were judged FAIL, and broken modules could be judged PASS. The runners now put the project dir first. No measured task was affected (0 of 206 Python task modules collide with a stdlib name). Repro: `verify_rc5/u_d`, `u_d2`, `mine_m1`, `m10_from_attacks.sh.txt`.
+- **P5.** Unreadable project files crashed with a traceback; now the run stops before the agent starts (exit 43, with a message and a receipt).
 
 ## Cost
 
