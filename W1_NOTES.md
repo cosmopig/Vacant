@@ -126,3 +126,13 @@ JS 冒煙前重現：`vacant do` 的副本不放 node_modules，agent 在副本�
 等於拿掉 agent 自己驗證的能力。現在副本裡放一個指向原專案 node_modules 的 symlink；快照與寫回照樣跳過它。
 誠實邊界：agent 透過它寫得到使用者的 node_modules（和專案外的 .venv 一樣）；agent 本來就以使用者權限執行、
 用絕對路徑也寫得到原專案，副本隔離防的是誤寫回，不是惡意的 agent。
+
+## rc4 — node_modules 不能被改（rc3.1 查證時重現的洞）
+
+重現：m.test.js 用 node_modules/helper 判斷；agent 經副本裡的 symlink 把 helper 改成永遠 true ⇒ rc3.1 判 PASS、
+**原專案**的 helper 在嘗試當下就被改（被丟掉的嘗試也會留下改動，嘗試之間不再獨立）。
+現在：每次嘗試與每次驗收期間，node_modules（含 symlink 指向的真實目錄）所有項目拿掉寫入位元，結束後還原；前後比清單
+（型別、大小、mtime_ns、inode、symlink 目標）。有變動 ⇒ 該次不放行（status=node_modules_modified）、整個執行停下、什麼都不寫回、
+exit 43、訊息列出路徑、提醒重裝（不自動還原：沒有開始時的內容備份）。
+誠實邊界：唯讀位元擋得住一般寫入，擋不住刻意先 chmod 回來的 agent——那種情形靠清單比對抓到並拒絕，但改動已經發生。
+清單只看中繼資料，同大小、同 mtime 的竄改（例如刻意還原 mtime）抓不到。驗收開始前與結束後之間的 TOCTOU 不處理。

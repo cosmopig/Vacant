@@ -168,7 +168,7 @@ def _do_restart(args) -> int:
     else:
         print(RS.summary(res))
     _trigger_auto_gc(agent)
-    if res.get("baseline_error") or res.get("agent_error"):
+    if res.get("baseline_error") or res.get("agent_error") or res.get("node_modules_changed"):
         return EXIT["void"]
     return EXIT["reject"] if res["accepted"] is False else 0
 

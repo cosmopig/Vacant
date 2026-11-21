@@ -2475,6 +2475,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             },
             "baseline": res.get("baseline"),
             "baseline_error": res.get("baseline_error"),
+            "node_modules_changed": res.get("node_modules_changed") or [],
             "max_attempts": res["max_attempts"],
             "attempts": attempt_recs,
             "delivered_attempt": res["delivered_attempt"],
@@ -2598,6 +2599,83 @@ def _declared_dependency(project: pathlib.Path, module: str) -> bool:
 AGENT_QUICK_FAIL_MS = 30_000
 
 
+def _nm_root(project: pathlib.Path) -> pathlib.Path | None:
+    nm = project / "node_modules"
+    try:
+        return nm.resolve() if nm.is_dir() else None
+    except OSError:
+        return None
+
+
+def _nm_manifest(root: pathlib.Path) -> dict[str, tuple]:
+    """node_modules 的清單（不跟隨內部 symlink）：相對路徑 → (型別, 大小, mtime_ns, inode, symlink 目標)。
+    權限位元不算（嘗試期間會被暫時改成唯讀）。"""
+    out: dict[str, tuple] = {}
+    stack = [root]
+    while stack:
+        d = stack.pop()
+        try:
+            it = list(os.scandir(d))
+        except OSError:
+            out[str(pathlib.Path(d).relative_to(root)) + "/"] = ("unreadable",)
+            continue
+        for e in it:
+            try:
+                st = e.stat(follow_symlinks=False)
+            except OSError:
+                continue
+            rel = str(pathlib.Path(e.path).relative_to(root))
+            if stat.S_ISLNK(st.st_mode):
+                try:
+                    tgt = os.readlink(e.path)
+                except OSError:
+                    tgt = None
+                out[rel] = ("l", 0, st.st_mtime_ns, st.st_ino, tgt)
+            elif stat.S_ISDIR(st.st_mode):
+                out[rel + "/"] = ("d", 0, 0, st.st_ino, None)
+                stack.append(e.path)
+            else:
+                out[rel] = ("f", st.st_size, st.st_mtime_ns, st.st_ino, None)
+    return out
+
+
+def _nm_diff(a: dict[str, tuple], b: dict[str, tuple]) -> list[str]:
+    keys = set(a) | set(b)
+    return sorted(k for k in keys if a.get(k) != b.get(k))
+
+
+def _nm_make_readonly(root: pathlib.Path) -> list[tuple[str, int]]:
+    """把 node_modules（含根目錄）所有項目的寫入位元拿掉；回傳 (路徑, 原 mode) 供還原。不跟隨 symlink。"""
+    changed: list[tuple[str, int]] = []
+    paths = [str(root)]
+    for dp, dns, fns in os.walk(root, followlinks=False):
+        paths.extend(os.path.join(dp, n) for n in dns + fns)
+    for pth in paths:
+        try:
+            st = os.lstat(pth)
+        except OSError:
+            continue
+        if stat.S_ISLNK(st.st_mode):
+            continue
+        mode = stat.S_IMODE(st.st_mode)
+        ro = mode & ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
+        if ro != mode:
+            try:
+                os.chmod(pth, ro)
+                changed.append((pth, mode))
+            except OSError:
+                pass
+    return changed
+
+
+def _nm_restore_modes(changed: list[tuple[str, int]]) -> None:
+    for pth, mode in changed:
+        try:
+            os.chmod(pth, mode)
+        except OSError:
+            pass
+
+
 def _link_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> None:
     """agent 的副本不複製 node_modules（太大）；改放一個指向原專案 node_modules 的 symlink，agent 才能自己跑
     `npm test`（W4／JS 冒煙前重現：沒有它時 agent 在副本裡跑測試只得到 `jest: not found`）。
@@ -2687,6 +2765,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
     baseline_rec: dict[str, Any] | None = None
+    nm_root = _nm_root(project)
+    nm_start: dict[str, tuple] | None = None
+    nm_changed: list[str] = []
     baseline_error: str | None = None
     if spec.reason is not None:
         baseline_rec = {
@@ -2760,6 +2841,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
 
     reserve = min(ACC_TIMEOUT_S, budget_s / 10) if has_acceptance else 0.0   # 每次嘗試後留給驗收的時間
     agent_error: str | None = None
+    # 開始時的 node_modules 清單（基線之後拍：專案自己的測試若正當地寫快取，不算 agent 的改動）
+    nm_start = _nm_manifest(nm_root) if nm_root is not None else None
     while len(attempts) < max_attempts:
         remaining = budget_s - (time.monotonic() - t0) - reserve
         if attempts and remaining < min_attempt_s:
@@ -2773,13 +2856,31 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         launch = build(prompt, ws)
         launch_meta.append((list(launch.argv), dict(launch.env)))
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
+        # 嘗試期間 node_modules 唯讀（agent 透過副本裡的 symlink 只能讀），結束後還原權限；
+        # 之後比對清單：被改過 ⇒ 這次嘗試不放行、整個執行停下、不寫回（見下方）。
+        nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
         try:
             r = run_agent(launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
                           log_dir=attempt_dir / "logs")
         finally:
             if launch.cleanup:
                 launch.cleanup()
+            _nm_restore_modes(nm_modes)
         spent += r["wall_ms"] / 1000.0
+        if nm_start is not None:
+            nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
+            if nm_changed:
+                say(f"attempt {k}: the agent changed the project's node_modules ({len(nm_changed)} path(s), e.g. "
+                    f"{', '.join(nm_changed[:3])}); not accepted, stopping, nothing written back")
+                attempts.append({
+                    "attempt": k, "accept": False, "passed": None, "run": None,
+                    "status": "node_modules_modified", "acceptance_kind": spec.kind, "tests_tampered": [],
+                    "config_ignored": [], "first_problem": "node_modules changed: " + ", ".join(nm_changed[:20]),
+                    "rc": r["rc"], "timed_out": r["timed_out"], "wall_s": round(r["wall_ms"] / 1000.0, 1),
+                    "spawn_error": r["spawn_error"], "workspace": str(ws), "node_modules_changed": nm_changed[:200],
+                })
+                snaps.append(None)
+                break
 
         snap: _Snapshot | None = None
         plan: _WritePlan | None = None
@@ -2789,7 +2890,17 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             plan = _plan_write_back(project, snap, protected)
             if has_acceptance:
                 acc_t = max(0.0, min(ACC_TIMEOUT_S, budget_s - (time.monotonic() - t0)))
-                acc = acceptance(originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project, _plan=plan)
+                # 驗收時跑的是候選碼：node_modules 一樣唯讀，跑完再比對一次
+                nm_modes = _nm_make_readonly(nm_root) if nm_root is not None else []
+                try:
+                    acc = acceptance(originals, ws, acc_t, spec=spec, _snapshot=snap, _project=project, _plan=plan)
+                finally:
+                    _nm_restore_modes(nm_modes)
+                if nm_start is not None:
+                    nm_changed = _nm_diff(nm_start, _nm_manifest(nm_root))
+                    if nm_changed:
+                        acc = {**acc, "accept": False, "status": "node_modules_modified",
+                               "first_problem": "node_modules changed during acceptance: " + ", ".join(nm_changed[:20])}
             else:
                 tam = _detect_tampered(snap, originals) if originals else []
                 acc = {
@@ -2842,6 +2953,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         else:
             say(f"attempt {k}: {spec.kind} {'PASS' if acc['accept'] else 'FAIL'} (status={acc['status']})")
 
+        if nm_changed:
+            attempts[-1]["node_modules_changed"] = nm_changed[:200]
+            say(f"attempt {k}: node_modules changed during the check; not accepted, stopping, nothing written back")
+            break
         if acc["accept"] is None or acc["accept"] is True:
             break
         # agent 一啟動就失敗（找不到執行檔、版本不合當場崩潰、沒設定模型就退出）：重開也只會一樣，
@@ -2858,7 +2973,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             break
 
     d = deliver_index([{"accept": bool(a["accept"]), "passed": a["passed"]} for a in attempts])
-    if snaps[d] is not None:
+    if nm_changed:
+        d = len(attempts) - 1
+    if snaps[d] is not None and not nm_changed:
         changed = _write_back(project, snaps[d], protected, _backup_root=run_dir)
     else:
         changed = {"added": [], "modified": [], "deleted": [], "skipped": []}
@@ -2874,6 +2991,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         "baseline": baseline_rec,
         "baseline_error": None,
         "agent_error": agent_error,
+        "node_modules_changed": nm_changed[:200],
         "max_attempts": max_attempts,
         "accepted": None if only_uncheckable else bool(attempts[d]["accept"]),
         "delivered_attempt": d + 1,
@@ -2920,6 +3038,12 @@ def summary(res: dict) -> str:
             f"[vacant] acceptance cannot run in this environment: {reason_txt}\n"
             f"  stopped before running the agent (0 attempts); project unchanged."
         )
+    elif res.get("node_modules_changed"):
+        nmc = res["node_modules_changed"]
+        head = (f"[vacant] the agent changed the project's node_modules during attempt {len(res['attempts'])} "
+                f"({len(nmc)} path(s): {', '.join(nmc[:8])}{' …' if len(nmc) > 8 else ''}). That attempt was not "
+                f"accepted, the run stopped, and nothing was written back. node_modules is NOT restored: "
+                f"reinstall it (e.g. `npm ci`) before trusting it again.")
     elif res.get("agent_error"):
         a = res["attempts"][-1] if res.get("attempts") else {}
         tail = "\n".join("    " + ln for ln in str(res["agent_error"]).splitlines())
