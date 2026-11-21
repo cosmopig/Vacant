@@ -90,6 +90,32 @@ WORDING_BOUNDARY = (
 
 # ── Helpers (type-strict: never confuse bool with int or missing with 0) ──────
 
+def _safe_utf8_str(val: str | os.PathLike[str]) -> str:
+    s = os.fspath(val)
+    if not any(0xD800 <= ord(ch) <= 0xDFFF for ch in s):
+        return s
+    try:
+        raw = os.fsencode(s)
+    except UnicodeEncodeError:
+        raw = s.encode("utf-8", errors="surrogatepass")
+    return raw.decode("utf-8", errors="backslashreplace")
+
+
+def _sanitize_utf8_obj(obj: Any) -> Any:
+    if isinstance(obj, str):
+        return _safe_utf8_str(obj)
+    if isinstance(obj, list):
+        return [_sanitize_utf8_obj(x) for x in obj]
+    if isinstance(obj, tuple):
+        return [_sanitize_utf8_obj(x) for x in obj]
+    if isinstance(obj, dict):
+        return {
+            (_safe_utf8_str(k) if isinstance(k, str) else k): _sanitize_utf8_obj(v)
+            for k, v in obj.items()
+        }
+    return obj
+
+
 def _as_int(v: Any) -> int | None:
     if isinstance(v, bool) or not isinstance(v, int):
         return None
@@ -227,14 +253,14 @@ def _base_record(
 ) -> dict[str, Any]:
     if result not in _RESULT_PASSED:
         result = "unknown"
-    return {
+    return _sanitize_utf8_obj({
         "schema": AUDIT_RECORD_SCHEMA,
         "record_id": record_id,
         "kind": kind,
         "source": {
-            "path": str(source_path),
+            "path": _safe_utf8_str(source_path),
             "kind": kind,
-            "auxiliary_paths": [str(p) for p in auxiliary_paths],
+            "auxiliary_paths": [_safe_utf8_str(p) for p in auxiliary_paths],
         },
         "timestamp_ms": _as_int(timestamp_ms),
         "started_at_ms": _as_int(started_at_ms),
@@ -264,7 +290,7 @@ def _base_record(
         "gaps": gaps,
         "signature": signature,
         "details": details,
-    }
+    })
 
 
 # ── Path Resolution ───────────────────────────────────────────────────────────
@@ -3074,7 +3100,10 @@ def filter_records(
 def export_jsonl(records: list[dict[str, Any]]) -> str:
     if not records:
         return ""
-    return "\n".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) for r in records) + "\n"
+    return "\n".join(
+        json.dumps(_sanitize_utf8_obj(r), ensure_ascii=False, separators=(",", ":"))
+        for r in records
+    ) + "\n"
 
 
 def _fmt_ts(ts_ms: int | None) -> str:

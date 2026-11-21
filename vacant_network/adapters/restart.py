@@ -2894,6 +2894,7 @@ def deliver_index(accs: list[dict]) -> int:
 
 
 def _truncate_str(s: str, limit: int = _MAX_ARG_LEN) -> str:
+    s, _ = _safe_str(s)
     if len(s) <= limit:
         return s
     h = hashlib.sha256(s.encode("utf-8", "replace")).hexdigest()[:12]
@@ -2955,20 +2956,31 @@ def _has_surrogates(s: str) -> bool:
     return any(0xD800 <= ord(ch) <= 0xDFFF for ch in s)
 
 
-def _safe_path_str(p: str | os.PathLike[str]) -> tuple[str, bool]:
-    """將可能含 surrogateescape（非 UTF-8 位元組）的路徑轉為確定性 UTF-8 安全字串。
+def _to_raw_bytes(s: str) -> bytes:
+    """還原字串的原始位元組：對 surrogateescape 字串用 os.fsencode，其餘孤立 surrogate 退回 surrogatepass。"""
+    try:
+        return os.fsencode(s)
+    except UnicodeEncodeError:
+        return s.encode("utf-8", errors="surrogatepass")
+
+
+def _safe_str(val: str | os.PathLike[str]) -> tuple[str, bool]:
+    """將可能含 surrogateescape（非 UTF-8 位元組）的任意字串或路徑轉為確定性 UTF-8 安全字串。
     合法 UTF-8 字串原樣回傳 `(s, False)`；含 surrogate 時經 `os.fsencode(s)` 還原原始位元組，
     再以 UTF-8 `backslashreplace` 解碼（如 0xff → `\\xff`），回傳 `(safe, True)`。"""
-    s = os.fspath(p)
+    s = os.fspath(val)
     if not _has_surrogates(s):
         return s, False
-    return os.fsencode(s).decode("utf-8", errors="backslashreplace"), True
+    return _to_raw_bytes(s).decode("utf-8", errors="backslashreplace"), True
+
+
+_safe_path_str = _safe_str
 
 
 def _sanitize_json_obj(obj: Any) -> tuple[Any, bool]:
     """遞迴將結構內所有含 surrogate 的字串轉為 byte-safe UTF-8 字串，回傳 `(new_obj, had_non_utf8)`。"""
     if isinstance(obj, str):
-        return _safe_path_str(obj)
+        return _safe_str(obj)
     if isinstance(obj, list):
         had = False
         out = []
@@ -3097,7 +3109,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
         payload: dict[str, Any] = {
             "receipt_schema": RECEIPT_SCHEMA,
             "run_id": run_dir.name,
-            "request_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+            "request_sha256": hashlib.sha256(_to_raw_bytes(prompt)).hexdigest(),
             "agent": agent_name,
             "argv": _redact_argv(first_argv),
             "env": _redact_env(first_env),
@@ -3129,7 +3141,10 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "total_wall_s": res["total_wall_s"],
         }
         payload, payload_non_utf8 = _sanitize_json_obj(payload)
-        any_non_utf8 = bool(proj_non_utf8 or wb_non_utf8 or payload_non_utf8 or res.get("non_utf8_paths"))
+        any_non_utf8 = bool(
+            proj_non_utf8 or wb_non_utf8 or payload_non_utf8
+            or res.get("non_utf8_paths") or _has_surrogates(prompt)
+        )
         payload["non_utf8_paths"] = any_non_utf8
         if any_non_utf8:
             payload["path_encoding"] = "utf-8-backslashreplace"
@@ -3140,15 +3155,16 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
             "recorded": True,
             "schema": RECEIPT_SCHEMA,
             "project_key": rec.dir.name,
-            "chain_path": _safe_path_str(rec.chain_path)[0],
+            "chain_path": _safe_str(rec.chain_path)[0],
             "seq": ref["seq"],
             "hash": ref["hash"],
         }
     except Exception as e:  # noqa: BLE001 — fail-open：記錄失敗不影響已交回結果
+        err_safe = _safe_str(f"{type(e).__name__}: {e}")[0]
         return {
             "recorded": False,
             "schema": RECEIPT_SCHEMA,
-            "error": f"{type(e).__name__}: {e}"[:300],
+            "error": err_safe[:300],
         }
 
 
@@ -3581,12 +3597,13 @@ def _copy_node_modules_for_agent(project: pathlib.Path, ws: pathlib.Path) -> tup
 def _agent_error_tail(log_dir: pathlib.Path, r: dict[str, Any], max_lines: int = 8) -> str:
     """agent 啟動即失敗時，給人看的錯誤摘要：spawn 錯誤，或 stderr（沒有就 stdout）的最後幾行。"""
     if r.get("spawn_error"):
-        return str(r["spawn_error"])[-800:]
+        return _safe_str(str(r["spawn_error"]))[0][-800:]
     for name in ("agent_stderr.log", "agent_stdout.log"):
         try:
-            txt = (log_dir / name).read_text(encoding="utf-8", errors="replace").strip()
+            raw = (log_dir / name).read_bytes()
         except OSError:
             continue
+        txt = raw.decode("utf-8", errors="backslashreplace").strip()
         if txt:
             lines = [ln for ln in txt.splitlines() if ln.strip()]
             return "\n".join(lines[-max_lines:])[-1200:]
@@ -3634,7 +3651,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         agent: str | None = None,
         log: Callable[[str], None] | None = None) -> dict:
     project = project.resolve()
-    say = log or (lambda m: None)
+    _raw_say = log or (lambda m: None)
+    say = lambda m: _raw_say(_safe_str(m)[0])  # noqa: E731
     spec = detect_acceptance(project, check=check, protect=protect)
     originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
     orig_modes: dict[str, int] = {}
