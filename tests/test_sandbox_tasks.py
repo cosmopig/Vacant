@@ -61,6 +61,19 @@ def test_task_controls(task, tmp_path):
     if meta.get('output_check'):
         (ws / meta['output_check']['path']).write_text('{broken')
         assert scorer._output_ok(meta['output_check'], ws) is False
+        invalid = scorer.score(task, ws)
+        assert invalid['output_file_ok'] is False
+        assert not invalid['hidden_pass']
+
+
+def test_output_check_overrides_passing_test_suites(tmp_path, monkeypatch):
+    task = scorer.TASKS / 'inventory_output'
+    ws = tmp_path / 'ws'
+    shutil.copytree(task / 'repo', ws)
+    monkeypatch.setattr(scorer, '_pytest', lambda *args: (True, 1, 0, None))
+    result = scorer.score(task, ws)
+    assert result['visible_pass'] and result['output_file_ok'] is False
+    assert not result['hidden_pass']
 
 
 def test_tar_workspace_and_unsafe_members(tmp_path):

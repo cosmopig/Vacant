@@ -145,6 +145,8 @@ def score(task_dir: str | Path, workspace: str | Path) -> dict:
                 if error:
                     errors.append(error)
             result['error'] = '; '.join(errors) or None
+            if result['output_file_ok'] is False:
+                result['hidden_pass'] = False
     except (OSError, ValueError, tarfile.TarError, ET.ParseError, KeyError) as exc:
         result['error'] = f'{type(exc).__name__}: {exc}'
     return result
