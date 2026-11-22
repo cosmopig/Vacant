@@ -32,3 +32,8 @@
 ## 6. 單次上限不只看牆鐘（原型在 proto/0.9.3-attempt-budget）
 
 - 等 atimeout 的結果再接著量；接量測前先把每秒 `os.walk` 的成本處理掉（排除 node_modules／.venv／.git、拉長間隔），收據多出的 `cap_mode`／`cut_reason` 欄位寫進變更說明。
+
+## 7. rc6 定案查證留下的小項
+
+- 啟動期的 Ctrl-C：極少數情況（370 次裡 1 次，run 開始後約 31ms）SIGINT 被 Python 的 import 鎖吞掉，run 照常跑完交件——使用者按了 Ctrl-C 卻沒有停（KNOWN_LIMITS 20）。可能做法：入口更早裝上「只記下」的處理器、並在 run() 開始時檢查。
+- `vacant audit show` 對語法錯誤（load_error）那一行沒有檔名與行號（交件訊息已有，audit 的格式化沒有跟上）。
