@@ -153,7 +153,8 @@
    "P 臂是 rc4 wheel（sha256 28e5480c84aa…），裝在 VM 的 /opt/redo/rc_venv；不載入擴充。",
    "和 12B 那批（rc3.1）P 臂版本不同：rc4 只多了 node_modules 保護，Python unittest 路徑行為相同；兩批只並列、不合併。",
    "P 的模型呼叫數 harness 量不到（usage=none），結案時用 p_model_calls.py 補算。",
-   "jobs 6：兩臂受同樣壅塞。"
+   "jobs 6：兩臂受同樣壅塞。",
+   "E4B 的上下文上限是 131072（模型 config 的 max_position_embeddings），12B 是 262144；vllm_gemma4_e4b.json 照此設定，pi 的 contextWindow 也跟著是 131072。11/22 第一次發射冒煙時誤設 262144，vLLM 起不來、0 次模型呼叫，該次作廢不計。"
   ]
  }
 }
