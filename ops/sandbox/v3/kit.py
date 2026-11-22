@@ -139,6 +139,9 @@ this kit root (`git clone --single-branch --depth 1 --branch ...`). Read
 The workspace is an independent history-free base snapshot. Install the
 repository's own dependencies using this kit-root environment; no environment
 is bundled with the workspace. Django additionally needs `pytest-django`.
+Install all dependencies needed by the selected tests, not only the project's
+minimal runtime dependencies. The scikit-learn workspace needs pandas (for
+example `python -m pip install 'pandas>=1.5,<2.1'` with compatible NumPy/SciPy).
 The pytest range supports older repository hooks; setuptools supplies the
 legacy distutils compatibility module on Python 3.12. Match any further
 repository-specific dependency constraints before using its gate.
@@ -150,7 +153,8 @@ Other arms do not inspect gates. Newly added tests are excluded even when their
 labels appear in the passing-test list. There are no newly introduced acceptance tests
 or reference fixes here. Parser labels are mapped to base test modules; labels
 that describe several inherited/parameterized cases select those same labels,
-not all tests in the module. Missing selected labels fail closed.
+not all tests in the module. Every selected case must actually pass: skipped,
+deselected, missing and unexecuted cases cause refusal with their IDs in feedback.
 
 From `INSTANCE/`, with a fresh receipts directory each time:
 

@@ -28,24 +28,55 @@ def matches(item, target):
 
 class OnlySelected:
     def __init__(self, targets):
-        self.targets = targets
-
-    def pytest_collection_modifyitems(self, config, items):
         import pytest
 
-        seen, keep, drop = set(), [], []
+        self.targets = targets
+        self.selected = set()
+        self.passed = set()
+        self.skipped = set()
+        self.deselected = set()
+
+        @pytest.hookimpl(hookwrapper=True, tryfirst=True)
+        def collect(config, items):
+            seen = set()
+            for item in items:
+                found = [i for i, target in enumerate(self.targets) if matches(item, target)]
+                if found:
+                    seen.update(found)
+                    self.selected.add(item.nodeid)
+            yield
+            keep, drop = [], []
+            for item in items:
+                (keep if item.nodeid in self.selected else drop).append(item)
+            self.deselected.update(self.selected - {item.nodeid for item in keep})
+            missing = [t['label'] for i, t in enumerate(self.targets) if i not in seen]
+            if missing or not keep:
+                raise pytest.UsageError('Selected pre-existing tests missing: ' + repr(missing))
+            config.hook.pytest_deselected(items=drop)
+            items[:] = keep
+
+        self.pytest_collection_modifyitems = collect
+
+    def pytest_deselected(self, items):
         for item in items:
-            selected = [i for i, target in enumerate(self.targets) if matches(item, target)]
-            if selected:
-                seen.update(selected)
-                keep.append(item)
-            else:
-                drop.append(item)
-        missing = [t['label'] for i, t in enumerate(self.targets) if i not in seen]
-        if missing or not keep:
-            raise pytest.UsageError('Selected pre-existing tests missing: ' + repr(missing))
-        config.hook.pytest_deselected(items=drop)
-        items[:] = keep
+            if any(matches(item, target) for target in self.targets):
+                self.deselected.add(item.nodeid)
+
+    def pytest_runtest_logreport(self, report):
+        if report.nodeid not in self.selected:
+            return
+        if report.skipped or hasattr(report, 'wasxfail'):
+            self.skipped.add(report.nodeid)
+        elif report.when == 'call' and report.passed:
+            self.passed.add(report.nodeid)
+
+    def incomplete(self):
+        groups = {'skipped': self.skipped, 'deselected': self.deselected,
+                  'not passed': self.selected - self.passed - self.skipped - self.deselected}
+        for reason, names in groups.items():
+            if names:
+                print(f'P2P {reason}:\n' + '\n'.join(sorted(names)), file=sys.stderr)
+        return any(groups.values())
 
 
 def main(argv=None):
@@ -70,8 +101,9 @@ def main(argv=None):
         values = dict(verbosity=0, test_labels=labels, parallel=1, start_at=None, start_after=None)
         setup(**{key: value for key, value in values.items() if key in parameters})
         extra = ['-p', 'pytest_django.plugin']
-    return pytest.main(['-q', '--tb=short', '-p', 'no:cacheprovider', *extra, *files],
-                       plugins=[OnlySelected(targets)])
+    selected = OnlySelected(targets)
+    code = pytest.main(['-q', '--tb=short', '-p', 'no:cacheprovider', *extra, *files], plugins=[selected])
+    return 1 if selected.incomplete() else code
 
 
 if __name__ == '__main__':

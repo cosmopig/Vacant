@@ -83,6 +83,27 @@ def test_description_and_parameter_label_matching():
     assert not p2p_runner.matches(item, dict(kind='function', file='tests/b.py', label='test_a'))
 
 
+def test_runtime_refuses_skips_deselection_and_collection_skips(tmp_path):
+    test = tmp_path / 'test_selected.py'
+    test.write_text('import pytest\n@pytest.mark.skip(reason="missing optional dependency")\ndef test_old(): pass\ndef test_other(): pass\n')
+    selection = tmp_path / 'selection.json'
+    selection.write_text(json.dumps(dict(django=False, selectors=[
+        dict(kind='nodeid', file=test.name, label='test_selected.py::test_old')])))
+    command = [sys.executable, '-I', str(Path(p2p_runner.__file__)), str(tmp_path), str(selection)]
+    env = {**os.environ, 'PYTEST_DISABLE_PLUGIN_AUTOLOAD': '1'}
+    skipped = subprocess.run(command, capture_output=True, text=True, env=env)
+    assert skipped.returncode != 0 and 'P2P skipped:' in skipped.stderr
+    assert 'test_selected.py::test_old' in skipped.stderr
+    test.write_text('def test_old(): pass\ndef test_other(): pass\n')
+    deselected = subprocess.run(command, capture_output=True, text=True, env={**env, 'PYTEST_ADDOPTS': '-k other'})
+    assert deselected.returncode != 0 and 'P2P deselected:' in deselected.stderr
+    assert 'test_selected.py::test_old' in deselected.stderr
+    test.write_text('import pytest\npytest.importorskip("_missing_v3_test_dependency")\ndef test_old(): pass\n')
+    uncollected = subprocess.run(command, capture_output=True, text=True, env=env)
+    assert uncollected.returncode != 0 and 'Selected pre-existing tests missing' in uncollected.stderr
+    assert 'test_selected.py::test_old' in uncollected.stderr
+
+
 def test_export_is_exact_prompt_and_visible_selectors_only(tmp_path):
     root = tmp_path / 'base'
     root.mkdir()
