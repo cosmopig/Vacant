@@ -82,6 +82,26 @@ def test_missing_external_branches(tmp_path, handbacks):
     assert summary['arms']['A']['n'] == 0 and len(summary['missing']) == 36
 
 
+@pytest.mark.parametrize(('error', 'failed', 'infra'), [
+    ('tests: timeout', 1, True), ('ValueError: invalid archive', 0, True),
+    ('tests: pytest exit 1', 1, False), (None, 0, False),
+])
+def test_scorer_infra_overrides_hidden_pass(tmp_path, handbacks, monkeypatch, error, failed, infra):
+    repo, remote = handbacks
+    scored = dict(hidden_pass=True, visible_pass=not error, n_failed=failed, error=error)
+    monkeypatch.setattr(score_devin, 'score', lambda *args: scored)
+    out = tmp_path / 'scorer-error'
+    score_devin.score_branches(repo, remote, ['sandbox-devin/billing-plain'], out)
+    result = json.loads((out / 'cells/billing-s1-A/result.json').read_text())
+    assert result['score']['hidden_pass'] is True
+    assert result['infra_void'] is infra
+    assert result['hidden_pass'] is (not infra)
+    assert result['infra_reason'] == ('scorer: ' + error if infra else None)
+    arm = analyze.analyze(out)['arms']['A']
+    assert arm['n'] == 1 and arm['infra_void'] == int(infra)
+    assert arm['hidden_passed'] == int(not infra)
+
+
 @pytest.mark.parametrize('branches', [
     ['sandbox-devin/billing-plain', 'sandbox-devin/billing-plain'],
     ['sandbox-devin/unknown-plain'], ['sandbox-devin/billing-other'], ['--bad'],

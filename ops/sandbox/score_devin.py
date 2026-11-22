@@ -76,11 +76,13 @@ def score_branches(repo, remote, branches, out, kit_branch='sandbox-devin-kit'):
         (cell / 'diff.patch').write_bytes(diff)
         evidence = contamination_evidence(cell)
         scored = score(TASKS / task, archive)
+        infra = bool(scored['error'] and ('timeout' in scored['error'] or not scored['n_failed']))
         result = dict(task=task, sample=1, arm=arm, external_arm='devin-' + external_arm,
                       branch=branch, git_sha=sha, kit_sha=kit_sha,
                       evidence='external-devin', score=scored,
-                      hidden_pass=scored['hidden_pass'], visible_pass=scored['visible_pass'],
-                      infra_void=False, infra_reason=None,
+                      hidden_pass=scored['hidden_pass'] and not infra,
+                      visible_pass=scored['visible_pass'] and not infra,
+                      infra_void=infra, infra_reason='scorer: ' + scored['error'] if infra else None,
                       contamination=bool(evidence), contamination_evidence=evidence,
                       calls_complete=False,
                       **{k: UNKNOWN for k in ('model_calls', 'prompt_tokens',
