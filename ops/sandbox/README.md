@@ -42,3 +42,36 @@ This is hermetic test configuration, **not a security boundary against malicious
 Python**: candidate code executes under the scorer's OS account and can access
 the VM/network. Use an isolated VM/container and OS controls for hostile code.
 Synthetic tasks and two successful runtime smokes do not establish a Vacant gain.
+
+## Paired runner (preregister before executing)
+
+Read `PREREG.md`. The default full run is 12 tasks × 4 arms × 1 sample;
+the billing-only example below is a wiring smoke, not the full experiment:
+
+```bash
+.venv/bin/python ops/sandbox/runtime/proxy.py --port 18081 --log ~/sandbox-rt/tagged-calls.jsonl
+.venv/bin/python ops/sandbox/run.py --tasks billing --arms A C G --samples 1 --seed 42 --out ~/sandbox-runs/billing-smoke
+.venv/bin/python ops/sandbox/analyze.py ~/sandbox-runs/billing-smoke
+```
+
+For the full run use `--tasks all --arms A A2 C G`. Repeating the exact runner
+command skips completed result.json cells. A partial cell gets a fresh work
+directory; old partial evidence is preserved but excluded from the new run tag.
+Changing the configuration under an existing output directory is refused.
+All outputs must be outside this repository. `--agent-cmd` is a JSON argv
+override for offline scripted tests only; it labels results L-fake.
+
+The runner includes no global extension disable flag. Only C installs Vacant,
+via the user's `vacant install --agents pi` command under that cell's HOME.
+G's pytest adapter embeds original visible tests inside vrun's main() protocol;
+bare pytest files would not be recognized by that gate. G uses `--sandbox none`
+explicitly: trusted VM, not network/filesystem isolation. Its model still goes
+directly through the tagged accounting proxy because pi uses models.json rather
+than base-URL environment variables. G's `gate_requests_seen` may therefore be
+zero: this arm tests the real executable acceptance/revise loop, **not** model
+channel mediation. Visible-gate retries never contain hidden-test information.
+
+The cell result distinguishes raw score from primary intention-to-treat outcome
+(infra_void means primary failure). Analysis keeps infra cells in denominators
+and lists missing scheduled cells. Costs without accounting rows are UNKNOWN.
+Final-message success detection is deliberately a heuristic; inspect raw text.
