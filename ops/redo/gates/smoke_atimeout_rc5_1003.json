@@ -1,0 +1,10 @@
+{
+ "smoke_plan": "ops/redo/plans/smoke_atimeout_rc5_1003.json",
+ "smoke_root": "~/dev/ops/redo_runs/smoke_atimeout_rc5_1003",
+ "queue": "~/dev/ops/queue_1003.txt",
+ "next_line": "/home/user1/dev/wt/nonpy ops/redo/plans/atimeout_p900_vs_p600_rc5_1003.json /home/user1/dev/ops/redo_runs/atimeout_rc5_1003",
+ "expect_pairs": 2,
+ "expect_grader": "visible_tests_pristine",
+ "criteria": "只看基礎設施：2/2 對完成、0 infra_void、harness 沒變、兩臂評分都是 visible_tests_pristine、每次驗收 acc_status=ok。兩臂都是 vacant do（usage=none），模型呼叫數用 p_model_calls.py 補算。不看通過與否。",
+ "arms_without_usage": ["P600", "P900"]
+}

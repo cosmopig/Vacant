@@ -35,7 +35,7 @@ def check(g: dict) -> list[str]:
         if arm in g.get("arms_without_usage", []):
             # harness 量不到（usage=none）：改用 p_model_calls.py 從 agent 自己的日誌補算，要每格都算得到且平均 > 0
             here = pathlib.Path(__file__).resolve().parents[1]
-            cp = subprocess.run([sys.executable, str(here / "analysis" / "p_model_calls.py"), str(root)],
+            cp = subprocess.run([sys.executable, str(here / "analysis" / "p_model_calls.py"), str(root), "--arm", arm],
                                 capture_output=True, text=True)
             import re as _re
             m = _re.search(r"可算 (\d+)、UNKNOWN (\d+)；可算的格平均模型呼叫 ([0-9.]+)", cp.stdout + cp.stderr)

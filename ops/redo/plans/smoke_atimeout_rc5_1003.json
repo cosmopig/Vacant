@@ -1,0 +1,149 @@
+{
+ "id": "smoke_atimeout_rc5_1003",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261142,
+ "bank": "~/dev/ops/ref/bm_tasks/py_mix_pg34_hard26",
+ "bank_candidates": [],
+ "arms": {
+  "P600": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/home/user1/dev/ops/rc5final_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  },
+  "P900": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/home/user1/dev/ops/rc5final_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "900",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "P600",
+  "P900"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1003",
+   "provider": "lms1003nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 2
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "pg_affine_cipher",
+  "ex_complex_numbers"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-22，第一通模型呼叫之前 commit。atimeout_p900_vs_p600_rc5_1003 的冒煙：同 wheel（rc5-final）、同 1003、jobs 2，2 題 × 1 rep。只看基礎設施（2/2 對完成、0 infra_void、驗收都能跑），不看通過與否、不下任何結論。",
+  "states": {
+   "INCOMPLETE": "冒煙，不判 state。"
+  }
+ }
+}
