@@ -76,7 +76,7 @@
   function track(c) {
     const points = c.steps.map((s,i)=>({x:34+(Math.floor(i/4)%2?3-i%4:i%4)*84,y:36+Math.floor(i/4)*76}));
     const height = Math.ceil(points.length/4)*76+20;
-    const sourceIndex = c.steps.findIndex(s=>s.step===c.answer_source);
+    const sourceIndex = c.answer_source_index ?? -1;
     const target = sourceIndex>=0?{x:points[sourceIndex].x-20,y:points[sourceIndex].y-23}:{x:160,y:height-10};
     const line = points.map(p=>`${p.x} ${p.y}`).join(' L ');
     const route = sourceIndex>=0 ? `M160 0 L310 0 L310 ${points.at(-1).y} L${points.slice(sourceIndex).reverse().map(p=>`${p.x} ${p.y}`).join(' L ')} L${target.x} ${target.y}` : `M160 0 L${line} L${target.x} ${target.y}`;

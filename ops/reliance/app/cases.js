@@ -150,6 +150,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 6,
+      "answer_source_index": 5,
       "process_claims": [
         {
           "text": "Based on the `payments.csv` dataset (documented in `payments-readme.md`, where `ip_address` is the \"Hashed shopper's IP\"), I counted rows where the `ip_address` field is empty: 27,647 out of 138,236 transactions.",
@@ -226,6 +227,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": null,
+      "answer_source_index": null,
       "process_claims": [],
       "manual_note": null,
       "reward": 1
@@ -311,6 +313,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 5,
+      "answer_source_index": 4,
       "process_claims": [
         {
           "text": "Average transactions per unique shopper = 138,236 / 46,284 = **2.986691**",
@@ -429,6 +432,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": null,
+      "answer_source_index": null,
       "process_claims": [],
       "manual_note": null,
       "reward": 0
@@ -514,6 +518,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": null,
+      "answer_source_index": null,
       "process_claims": [
         {
           "text": "- Data check confirmed: matching rule groups show is_credit=False averages rate ~54.7 vs ~56.6 for True.",
@@ -632,6 +637,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 5,
+      "answer_source_index": 4,
       "process_claims": [
         {
           "text": "This was computed by:",
@@ -774,6 +780,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 5,
+      "answer_source_index": 3,
       "process_claims": [],
       "manual_note": null,
       "reward": 1
@@ -872,6 +879,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 3,
+      "answer_source_index": 2,
       "process_claims": [
         {
           "text": "Reasoning: Using `payments.csv`, I computed each merchant's monthly fraud rate (fraudulent disputes / total volume, per the manual's definition of fraud as ratio of fraudulent volume over total volume) for 2023, then took the standard deviation across months.",
@@ -986,6 +994,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 4,
+      "answer_source_index": 3,
       "process_claims": [
         {
           "text": "- Computed the mean `eur_amount` per merchant across all 138,336 transactions in `payments.csv`:",
@@ -1102,6 +1111,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": null,
+      "answer_source_index": null,
       "process_claims": [],
       "manual_note": null,
       "reward": 0
@@ -1221,6 +1231,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": 4,
+      "answer_source_index": 2,
       "process_claims": [],
       "manual_note": null,
       "reward": 1
@@ -1327,6 +1338,7 @@ window.RELIANCE_CASES = {
         "This note lists what the record shows; it does not say whether the answer is right."
       ],
       "answer_source": null,
+      "answer_source_index": null,
       "process_claims": [
         {
           "text": "**yes** — Martinis_Fine_Steakhouse consistently exceeds the >8.3% high-fraud-rate threshold (10 of 12 months), so it is in danger of getting a high-fraud rate fine.",

@@ -35,6 +35,75 @@ def test_committed_cases_match_real_archive(bank):
         assert all(len(s['command']) <= 200 and len(s['output']) <= 300 for s in c['steps'])
 
 
+def test_batched_source_identifies_the_answer_command(bank):
+    case = next(c for c in bank['cases'] if c['id'] == 'dabstep-61__UtyGPmT')
+    assert case['answer_source'] == 3
+    assert case['answer_source_index'] == 2
+    unrelated, source = case['steps'][1:3]
+    assert unrelated['step'] == source['step'] == 3
+    assert case['answer'] not in unrelated['output']
+    assert case['answer'] in source['output']
+    assert 'merchant_data.json' in source['command']
+
+
+def test_batched_source_node_opens_matching_command(bank):
+    node = shutil.which('node')
+    if node is None:
+        pytest.skip('node 不在 PATH 上；瀏覽器互動另作檢查')
+    case = next(c for c in bank['cases'] if c['id'] == 'dabstep-61__UtyGPmT')
+    state = dict(schema_version=1, case_version=bank['version'], phase='round', responses=[],
+                 rounds=[dict(case_id=case['id'], condition='record')])
+    script = r"""
+const fs = require('node:fs'), vm = require('node:vm');
+const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+const nodes = {}, get = id => nodes[id] ||= {innerHTML:'', setAttribute(){},
+  showModal(){this.open=true;}};
+const steps = input.case.steps.map((_,i)=>({dataset:{step:String(i)}}));
+vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), {
+  window:{RELIANCE_CASES:input.bank, scrollTo(){}},
+  document:{querySelector:get, querySelectorAll:s=>s==='[data-step]'?steps:[]},
+  localStorage:{getItem:()=>JSON.stringify(input.state)}
+});
+get('#resume').onclick();
+const origin = get('#app').innerHTML.match(/class="node origin" data-step="(\d+)"/)[1];
+steps[Number(origin)].onclick();
+console.log(JSON.stringify({origin:Number(origin), open:get('#sheet').open,
+  title:get('#sheet-title').textContent, body:get('#sheet-body').innerHTML}));
+"""
+    result = subprocess.run([node, '-e', script, str(build_cases.OUT.parent / 'app.js')],
+                            input=json.dumps(dict(bank=bank, case=case, state=state)),
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    sheet = json.loads(result.stdout)
+    assert sheet['origin'] == 2
+    assert sheet['open'] and sheet['title'] == '第 3 步 · bash'
+    assert 'merchant_data.json' in sheet['body']
+    assert case['answer'] in sheet['body']
+    assert 'cat /app/data/payments-readme.md' not in sheet['body']
+
+
+@pytest.mark.parametrize('command,error,output,expected', [
+    ('python calc.py', False, '1,234', 0),
+    ('python calc.py', True, '1234', None),
+    ('cat answer.txt', False, '1234', None),
+    ('echo 1234', False, '1234', None),
+    ('python calc.py', False, 'unrelated', None),
+])
+def test_command_source_uses_frozen_eligibility(command, error, output, expected):
+    steps = [dict(tool_calls=[dict(tool_call_id='call', function_name='bash',
+                                  arguments=dict(command=command))],
+                  observation=dict(results=[dict(source_call_id='call', content=output,
+                                                 extra=dict(is_error=error))]))]
+    timeline, source, source_index = build_cases.recorded_steps(steps, '1234')
+    assert len(timeline) == 1
+    assert source_index == expected
+    assert source == (1 if expected is not None else None)
+
+
+def test_empty_command_record_has_no_source():
+    assert build_cases.recorded_steps([], '1234') == ([], None, None)
+
+
 def synthetic_export(bank, pid, record_correct=True, plain_correct=False):
     """合成：以真實案例 ID 配上人工製造的判斷，不是真人回覆。"""
     rs = []

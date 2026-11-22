@@ -56,6 +56,32 @@ def select_rows():
     return chosen
 
 
+def recorded_steps(steps, answer):
+    timeline = []
+    source = source_index = None
+    for i, step in enumerate(steps):
+        calls = {c['tool_call_id']: c for c in step.get('tool_calls', [])}
+        for obs in (step.get('observation') or {}).get('results', []):
+            c = calls.get(obs.get('source_call_id'), {})
+            tool, args = c.get('function_name', 'unknown'), c.get('arguments') or {}
+            command = str(args.get('command', args.get('path', '')))
+            output = str(obs.get('content') or '')
+            single = dict(step, observation={'results': [obs]})
+            if source_index is None and archive.answer_overlap([single], answer):
+                source, source_index = i + 1, len(timeline)
+            pos = output.lower().find(answer.lower()) if len(timeline) == source_index else -1
+            start = max(0, pos - 65) if pos >= 0 else 0
+            read = []
+            if tool == 'read':
+                read = [str(args.get('path', ''))]
+            elif tool == 'bash' and claims.READ_COMMAND.search(command):
+                read = sorted(set(claims.FILE.findall(command)))
+            timeline.append(dict(step=i + 1, tool=tool, command=command[:200],
+                                 output=output[start:start + 300], files_read=read,
+                                 error=bool((obs.get('extra') or {}).get('is_error'))))
+    return timeline, source, source_index
+
+
 def build():
     cases = []
     for row in select_rows():
@@ -64,25 +90,7 @@ def build():
         final = [s for s in steps if s.get('source') == 'agent' and s.get('message') and not s.get('tool_calls')][-1]
         before = steps[:steps.index(final)]
         answer = row['archived_answer_value'].strip()
-        source = next((i + 1 for i, s in enumerate(before) if archive.answer_overlap([s], answer)), None)
-        timeline = []
-        for i, step in enumerate(before):
-            calls = {c['tool_call_id']: c for c in step.get('tool_calls', [])}
-            for obs in (step.get('observation') or {}).get('results', []):
-                c = calls.get(obs.get('source_call_id'), {})
-                tool, args = c.get('function_name', 'unknown'), c.get('arguments') or {}
-                command = str(args.get('command', args.get('path', '')))
-                output = str(obs.get('content') or '')
-                pos = output.lower().find(answer.lower()) if i + 1 == source else -1
-                start = max(0, pos - 65) if pos >= 0 else 0
-                read = []
-                if tool == 'read':
-                    read = [str(args.get('path', ''))]
-                elif tool == 'bash' and claims.READ_COMMAND.search(command):
-                    read = sorted(set(claims.FILE.findall(command)))
-                timeline.append(dict(step=i + 1, tool=tool, command=command[:200],
-                                     output=output[start:start + 300], files_read=read,
-                                     error=bool((obs.get('extra') or {}).get('is_error'))))
+        timeline, source, source_index = recorded_steps(before, answer)
         prompt = next(s['message'] for s in steps if s.get('source') == 'user')
         match = re.search(r'Here is the question you need to answer:\s*(.*?)\n\n', prompt, re.S)
         question = match[1] if match else prompt[:600]
@@ -94,6 +102,7 @@ def build():
         cases.append(dict(id=row['trial_id'], task=row['task'], model=row['model'],
                           question=question, message=row['final_message'], answer=answer,
                           steps=timeline, delivery_lines=note, answer_source=source,
+                          answer_source_index=source_index,
                           process_claims=process, manual_note=MANUAL.get(row['trial_id']),
                           reward=int(row['reward'])))
     return dict(version=2, selection_seed=SEED, source='DABstep / pi / local models / 2026-09-25', cases=cases)
