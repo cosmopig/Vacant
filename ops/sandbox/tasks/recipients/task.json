@@ -1,0 +1,6 @@
+{
+  "id": "recipients",
+  "category": "bugfix",
+  "prompt": "Fix recipients in mail.py: strip surrounding whitespace, drop empty addresses, and deduplicate case-insensitively while preserving first-seen spelling and order.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

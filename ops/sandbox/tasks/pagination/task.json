@@ -1,0 +1,6 @@
+{
+  "id": "pagination",
+  "category": "bugfix",
+  "prompt": "Fix page in pages.py: page numbers are one-based, the last page may be short, and pages beyond the end are empty. Reject page numbers or page sizes below one with ValueError.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

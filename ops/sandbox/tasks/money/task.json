@@ -1,0 +1,6 @@
+{
+  "id": "money",
+  "category": "bugfix",
+  "prompt": "Fix to_cents in money.py: convert a decimal currency string to integer cents, rounding half away from zero. Avoid binary floating-point rounding errors.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}
