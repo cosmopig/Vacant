@@ -14,9 +14,10 @@ from .adapters.workspace import DIR, directory
 from .intake.statepaths import work_dir
 
 
-def _active() -> tuple[list[pathlib.Path], int]:
+def _active() -> tuple[list[pathlib.Path], int, set[pathlib.Path]]:
     paths = [pathlib.Path.cwd()]
     uninspectable = 0
+    non_append = set()
     proc = pathlib.Path("/proc")
     if not proc.is_dir():
         raise OSError("cannot inspect active processes on this platform")
@@ -27,17 +28,24 @@ def _active() -> tuple[list[pathlib.Path], int]:
             if p.stat().st_uid != os.getuid():
                 continue
             found = [pathlib.Path(os.readlink(p / "cwd"))]
+            writers = set()
             for f in (p / "fd").iterdir():
                 try:
-                    found.append(pathlib.Path(os.readlink(f)))
+                    path = pathlib.Path(os.readlink(f))
+                    found.append(path)
+                    info = (p / "fdinfo" / f.name).read_text()
+                    flags = next(int(line.split()[1], 8) for line in info.splitlines() if line.startswith("flags:"))
+                    if flags & os.O_ACCMODE in (os.O_WRONLY, os.O_RDWR) and not flags & os.O_APPEND:
+                        writers.add(path)
                 except FileNotFoundError:
                     pass
             paths.extend(found)
+            non_append.update(writers)
         except PermissionError:
             uninspectable += 1
         except (FileNotFoundError, ProcessLookupError):
             pass
-    return paths, uninspectable
+    return paths, uninspectable, non_append
 
 
 def _rotate(fd: int, slots: list[str], expected: os.stat_result, copying: bool):
@@ -102,7 +110,7 @@ def clean(*, work: pathlib.Path, project: pathlib.Path | None, age: float = 7 * 
           max_bytes: int = 10 * 1024 * 1024, keep: int = 3, apply: bool = False) -> list[dict]:
     if age < 0 or max_bytes < 1 or keep < 1:
         raise ValueError("age >= 0, max_bytes >= 1, keep >= 1 required")
-    active, uninspectable = _active()
+    active, uninspectable, non_append = _active()
     cutoff = time.time() - age
     actions = []
     if uninspectable:
@@ -151,6 +159,10 @@ def clean(*, work: pathlib.Path, project: pathlib.Path | None, age: float = 7 * 
                 except FileNotFoundError:
                     continue
                 if not stat.S_ISREG(st.st_mode) or st.st_size < max_bytes:
+                    continue
+                if root / "nohup.log" in non_append:
+                    actions.append({"action": "skip", "path": str(root / "nohup.log"),
+                                    "reason": "non-append writer"})
                     continue
                 slots = ["nohup.log"] + [f"nohup.log.{i}" for i in range(1, keep + 1)]
                 blocked = False

@@ -9,6 +9,7 @@ Linux 上掃描 `/proc` 同帳號行程的 cwd／開啟檔案，使用中的工�
 不可讀的行程略過，在輸出 note 的 `uninspectable_processes` 報數；這些行程的工作區只能靠年齡門檻保護。
 沒有 `/proc` 仍拒絕清理。日誌有開啟中的描述符時使用 copytruncate，否則重新命名；
 若有不可讀行程，也保守採 copytruncate。備份檔若正在使用則略過這次輪替。
+`fdinfo` 顯示有非 `O_APPEND` 寫入者時不輪替，輸出 `skip`／`non-append writer`，避免截斷後寫出 NUL 洞。
 copytruncate 保留寫入者的描述符，但複製與截斷之間的新資料可能遺失；不是無損日誌封存。
 不掃任意系統暫存目錄，不追蹤符號連結；根路徑的父目錄也不接受符號連結。
 

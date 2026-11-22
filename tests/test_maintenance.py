@@ -10,12 +10,18 @@ def own_processes(monkeypatch):
     original = M._active
     def active():
         paths = [M.pathlib.Path.cwd()]
+        non_append = set()
         for p in M.pathlib.Path('/proc/self/fd').iterdir():
             try:
-                paths.append(M.pathlib.Path(os.readlink(p)))
+                path = M.pathlib.Path(os.readlink(p))
+                paths.append(path)
+                info = (M.pathlib.Path('/proc/self/fdinfo') / p.name).read_text()
+                flags = next(int(line.split()[1], 8) for line in info.splitlines() if line.startswith('flags:'))
+                if flags & os.O_ACCMODE in (os.O_WRONLY, os.O_RDWR) and not flags & os.O_APPEND:
+                    non_append.add(path)
             except FileNotFoundError:
                 pass
-        return paths, 0
+        return paths, 0, non_append
     monkeypatch.setattr(M, '_active', active)
     return original
 
@@ -167,3 +173,15 @@ def test_recent_idle_log_rotates_by_size(tmp_path):
     assert actions[0]["method"] == "rename"
     assert (tmp_path / "nohup.log.1").stat().st_ino == inode
     assert log.read_bytes() == b""
+
+
+def test_non_append_writer_is_not_truncated(tmp_path):
+    from vacant_network.maintenance import clean
+    log = tmp_path / "nohup.log"
+    with log.open("wb", buffering=0) as writer:
+        writer.write(b"before rotation")
+        actions = clean(work=tmp_path / "missing", project=tmp_path, max_bytes=4, apply=True)
+        assert actions == [{"action": "skip", "path": str(log), "reason": "non-append writer"}]
+        assert not (tmp_path / "nohup.log.1").exists()
+        writer.write(b"after rotation")
+        assert log.read_bytes() == b"before rotationafter rotation"
