@@ -55,7 +55,7 @@ def main(argv=None):
     workspace = workspace.resolve()
     config = json.loads(selection.read_text())
     os.chdir(workspace)
-    sys.path.insert(0, str(workspace))
+    sys.path[:0] = [str(path) for path in (workspace, workspace / 'src', workspace / 'lib') if path.is_dir()]
     targets = config['selectors']
     files = sorted({t['file'] for t in targets})
     extra = []
