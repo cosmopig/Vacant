@@ -68,7 +68,8 @@ get('#resume').onclick();
 const origin = get('#app').innerHTML.match(/class="node origin" data-step="(\d+)"/)[1];
 steps[Number(origin)].onclick();
 console.log(JSON.stringify({origin:Number(origin), open:get('#sheet').open,
-  title:get('#sheet-title').textContent, body:get('#sheet-body').innerHTML}));
+  title:get('#sheet-title').textContent, body:get('#sheet-body').innerHTML,
+  html:get('#app').innerHTML}));
 """
     result = subprocess.run([node, '-e', script, str(build_cases.OUT.parent / 'app.js')],
                             input=json.dumps(dict(bank=bank, case=case, state=state)),
@@ -80,6 +81,12 @@ console.log(JSON.stringify({origin:Number(origin), open:get('#sheet').open,
     assert 'merchant_data.json' in sheet['body']
     assert case['answer'] in sheet['body']
     assert 'cat /app/data/payments-readme.md' not in sheet['body']
+    assert 'class="token-value"' in sheet['html']
+    assert f'lengthAdjust="spacingAndGlyphs">{case["answer"]}</text>' in sheet['html']
+    assert '有出處 ≠ 答對；未找到 ≠ 答錯' in sheet['html']
+    assert 'class="message-toggle"' in sheet['html']
+    assert '閱讀完整交件訊息' in sheet['html']
+    assert 'class="round-content"' in sheet['html']
 
 
 @pytest.mark.parametrize('command,error,output,expected', [
