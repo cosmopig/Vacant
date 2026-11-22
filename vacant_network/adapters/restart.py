@@ -7359,7 +7359,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         min_attempt_s: float = 60.0, check: str | None = None,
         protect: Sequence[str] | None = None,
         agent: str | None = None,
-        log: Callable[[str], None] | None = None) -> dict:
+        log: Callable[[str], None] | None = None,
+        stream: bool = False) -> dict:
     project = project.resolve()
     _raw_say = log or (lambda m: None)
     say = lambda m: _raw_say(_safe_str(m)[0])  # noqa: E731
@@ -7724,11 +7725,19 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             cur_attempt_ws = ws
             cur_attempt_t0 = time.monotonic()
             cur_attempt_limit_s = attempt_limit_s
+            attempt_log_dir = attempt_dir / "logs"
+            attempt_log_dir.mkdir(parents=True, exist_ok=True)
+            attempt_stdout_log = attempt_log_dir / "agent_stdout.log"
+            attempt_stdout_log.touch(exist_ok=True)
             say(f"attempt {k} of {max_attempts} (up to {attempt_limit_s:.0f}s)")
+            if stream:
+                say(f"attempt {k} output: {attempt_stdout_log} (streaming to terminal; can also tail -f {shlex.quote(str(attempt_stdout_log))})")
+            else:
+                say(f"attempt {k} output: {attempt_stdout_log} (you can run `tail -f {shlex.quote(str(attempt_stdout_log))}` to follow)")
             # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
             try:
                 r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
-                              log_dir=attempt_dir / "logs")
+                              log_dir=attempt_log_dir, stream=stream)
             finally:
                 if launch.cleanup:
                     launch.cleanup()

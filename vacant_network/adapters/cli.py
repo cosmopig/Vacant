@@ -162,7 +162,8 @@ def _do_restart(args) -> int:
                  check=getattr(args, "check", None),
                  protect=getattr(args, "protect", None) or None,
                  agent=agent,
-                 log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
+                 log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True),
+                 stream=bool(getattr(args, "stream", False)))
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
@@ -358,6 +359,8 @@ def build_parser() -> argparse.ArgumentParser:
                         "and never write back (repeatable)")
     p.add_argument("--hooks", action="store_true",
                    help="without a contract: also add Vacant's per-step hooks (off by default)")
+    p.add_argument("--stream", action="store_true",
+                   help="without a contract: stream agent stdout/stderr directly to the terminal while running (off by default)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_do, extra=[])
 
