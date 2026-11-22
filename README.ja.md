@@ -26,6 +26,7 @@ Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前�
 
 ```bash
 pipx install vacant-network   # 0.9.0 からゼロ設定版。pipx がなければ Ubuntu／Debian は `sudo apt install pipx`、macOS は `brew install pipx`
+vacant do claude --prompt "失敗しているテストを直してください。テストファイルは変更しないこと"   # 隔離コピーで 1 回実行し、受入後に書き戻して領収書に署名（任意の CLI は --cmd）
 vacant install                # この機械の pi／Claude Code／OpenCode／Codex を見つけ、それぞれにフックを一つ追加（元に戻す：`vacant uninstall`）
 vacant dashboard --open       # 任意：この機械で Vacant の状態をすべて見る（フック、記録したプロジェクト、差し戻しと納品メモ；読み取り専用）
 ```
@@ -60,6 +61,48 @@ vacant dashboard --open       # 任意：この機械で Vacant の状態をす�
 ⚠ **「Vacant は agent を良くする」とは読まないこと**、「役に立たない」とも読まないこと。捕まえられるのは「依頼されたファイルを書かずに終わった」場合で、
 それが多い条件（ターン上限、一部の推論エンジン）では差が出て、少なければ出ません。各ステップに根拠のある判断ミスや、時間切れで打ち切られた回は見えません。
 既知の制限：用意されたテストが赤のまま「終わった」と言っても差し戻されない。実モデルで測ったのは pi のみで、すべて `pi --print`（対話 TUI はスクリプト化したモデルでのみ検証）。
+
+## `vacant do` で一度のタスクを包む（隔離作業領域・テスト固定・領収書）
+
+常駐フックを入れたくない場合は、`vacant do` でその 1 回だけを包めます（契約なしの再試行モード）。実行前にベースライン受入を走らせ、プロジェクトを隔離コピーして agent に作業させ、毎回の受入前にテストや設定ファイルを初期状態へ復元し、最後にプロジェクトへ書き戻して領収書へ署名します。
+
+```bash
+vacant do claude --prompt "tests/test_cart.py の失敗を直してください。テストファイルは編集しないこと"
+vacant do claude --prompt-file task.md
+vacant do --cmd 'devin -p -- {prompt}' --prompt "失敗しているテストを直してください"   # 任意の CLI agent（{prompt} を安全に展開）
+vacant do claude --prompt "API を修正" --check "npm run test:ci" --protect "fixtures/**"
+vacant do claude --prompt "API を修正" --attempt-timeout 600 --timeout 1800 --stream
+```
+
+### 主なオプション
+
+| オプション | 用途 |
+|---|---|
+| `--cmd '<コマンド>'` | 任意の外部 CLI（Devin や自作スクリプトなど）を接続；`{prompt}` に依頼文、`{workspace}` に隔離作業領域パスが入る |
+| `--prompt-file <ファイル>` | `--prompt` の代わりにファイルから依頼文を読む |
+| `--check '<コマンド>'` | 独自の受入コマンドを指定（終了コード `0`＝通過）；省略時は pytest／unittest／npm 等を自動検出 |
+| `--protect <パスまたは glob>` | 追加で固定するファイル・ディレクトリ・glob（複数指定可）：毎回の受入前に復元し、書き戻さない |
+| `--attempt-timeout <秒>` | 1 回の試行の上限時間（既定 `600` 秒）；超過したらその試行を打ち切る |
+| `--timeout <秒>` | 全体の予算時間（既定 `1800` 秒、最大 3 回試行；各試行は残り時間内に収まる） |
+| `--stream` | 実行中の agent の stdout／stderr を端末へ直接流す（既定はオフ） |
+
+### 終了コード
+
+| 終了コード | 意味 |
+|---|---|
+| `0` | 受入テストに通過して書き戻した（または実行可能な受入テストがなく 1 回実行した） |
+| `40` | 全試行で全テスト通過に至らなかった；通過数が最も多い（または最後の）試行をプロジェクトへ書き戻し、最初の失敗テストと原因を表示する |
+| `43` | 環境エラーまたは競合による無効終了（書込不可・読取不可ファイル・受入実行不能・`node_modules` 変更・実行中の同時編集との競合など）；**何も書き戻さない** |
+| `130` | 中断（Ctrl-C／`SIGINT`／`SIGTERM`）：agent のプロセスグループと切り離された子孫プロセスを終了し、**プロジェクトは無変更**のまま `interrupted` と記録した署名付き領収書を残す |
+
+### 実行中の出力確認・保存先・記号の意味
+
+- **実行中の agent 出力**：各試行の開始時に `attempt_N/logs/agent_stdout.log` のパスを表示するので、`tail -f <パス>` で追えます。端末へ直接流したいときは `--stream` を付けます。
+- **作業領域と結果**：各試行の作業領域・ログ・`result.json` は `$VACANT_WORK/restart-*/`（既定 `~/.vacant-work/`）に保存されます。中断時に残る作業ディレクトリは確認後に削除して構いません。
+- **署名付き領収書と監査**：Ed25519 署名チェーンは `$VACANT_HOME/trace/projects/<プロジェクト鍵>/chain.ndjson`（既定 `~/.vacant/`）に記録されます。`vacant audit list` で一覧、`vacant audit show <record_id>` で各試行の結果と最初の失敗テストを確認できます。
+- **`N/M` と `+`／`~`／`-` の意味**：`N/M` は「通過数／総テスト数」（例：`8/9`＝9 件中 8 件通過；`npm` や `--check` など終了コードのみを見る受入は件数が出ないため通過／不通過のみと明記されます）。変更ファイル一覧の `+`＝追加、`~`＝変更、`-`＝削除です。
+
+> **誠実な境界（強いクラウド agent に同じ再試行効果があると誤読しないこと）**：強いクラウド agent は通常 1 回目で通過します（Claude Code と Devin の計 8 回の実走では 8/8 が 1 回目で通過）。その場合の Vacant の価値は**ベースライン確認・テスト固定・署名付き領収書**にあり、再試行による通過率の伸びは主に**弱いローカルモデル**で現れます。
 
 ## エージェントへの接続：pi／Claude Code／OpenCode／Codex（2026-09-24〜）
 
@@ -168,16 +211,16 @@ vacant selftest          # まずこのインストールが生きているか�
 vacant demo gate         # 次にゲートが納品を一度止めるところを見る
 ```
 
-`vacant selftest` の逐語出力（vacant-dev、Ubuntu 24.04／Python 3.12.3、**0.3 秒**）：
+`vacant selftest` の逐語出力（Ubuntu 24.04／Python 3.12.3、**0.2 秒**）：
 
 ```
-端到端迴圈    : ✓（6 次呼叫無例外，4/6 答對）
+端到端迴圈    : ✓（6 次呼叫無例外，1/6 答對）
 expert 鏈驗   : ✓
 requester 鏈驗: ✓
-暫存目錄      : /tmp/vacant-selftest-_bqraq82
+暫存目錄      : /tmp/vacant-selftest-gbx7ueav
 ```
 
-⚠ **`4/6` は判定基準でも性能値でもない**（同じ版が macOS では `3/6` と出る）。
+⚠ **`1/6` は判定基準でも性能値でもない**（実行や環境によって数字は変わる）。
 `selftest` が見るのは「端から端のループが例外を投げないこと」と
 「二本の署名チェーンが検証を通ること」であり、何問正解したかは数に入らない。
 
@@ -533,7 +576,7 @@ vacant --help                     # インストール後に使える CLI
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed の門**であって、パスの打ち間違いではない | 正本の受入ディレクトリは作業区の**外**に置く。agent に見せたいなら別途コピーを中へ置く |
 | `vacant run` が `22`（`infra_void`）で終わる | 基盤が壊れた場合で、**納品とも拒否とも判定しない**。最多の原因は `--` の後に相対パスを渡したこと——launcher は `cwd=<workspace>` で起動するため作業区の下に解決される | `--` の後は絶対パスにする |
 | 自分の agent をつないだのに `requests_seen` が `0` | そのモデル経路は**仲介されていない**（framework が base url を設定ファイルに持っている）か、その実行がモデルを呼んでいない。**エラーメッセージは一切出ない**——しかもその実行の他の欄は正当な拒否枠と寸分違わない（誠実な境界 23 の生体標本） | 〈五つの agent のつなぎ方〉を参照。環境変数一覧の単一の真実は `vacant_network/vrun/envmap.py` |
-| `vacant selftest` の「正解数」が毎回変わる | それは判定基準ではない（Linux は `4/6`、macOS は `3/6`） | `✓` の三行が全部通っているかだけを見る |
+| `vacant selftest` の「正解数」が毎回変わる | それは判定基準ではない（環境により `1/6`、`3/6` 等） | `✓` の三行が全部通っているかだけを見る |
 | `run_RUN-ON.json` に `upstreams_defaulted` が無い | **PyPI の `vacant-network` 0.7.0 にはまだその二つの欄が無い**。repo HEAD にはある——バージョン番号が上がっていない | その欄が要るならソースから入れる（`pip install -e .`） |
 | Windows | **全く計測していない**。しかも `vacant_network/checks.py` に使える Windows サンドボックス分岐は無い | Linux／macOS を使うか、コンテナに入れる |
 

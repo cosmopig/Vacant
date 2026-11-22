@@ -212,3 +212,31 @@ def test_rc6_6_npm_node_test_human_message_and_pass_fail_only(tmp_path):
     assert "unsupported-option:node:--test" not in out
     assert "node --test" in out
     assert "pass/fail only" in out
+
+
+def test_rc6_9_readmes_synced_for_vacant_do_and_selftest():
+    """rc6(9): All 3 READMEs cover `vacant do` flags, exit codes, output/receipt locations,
+    markers, honest cloud-agent caveat, and updated selftest output."""
+    for name in ("README.md", "README.en.md", "README.ja.md"):
+        txt = (REPO_ROOT / name).read_text(encoding="utf-8")
+        for token in (
+            "vacant do claude",
+            "--cmd",
+            "--prompt-file",
+            "--check",
+            "--protect",
+            "--timeout",
+            "--attempt-timeout",
+            "--stream",
+            "tail -f",
+            "VACANT_WORK",
+            "VACANT_HOME",
+            "vacant audit show",
+            "| `0` |",
+            "| `40` |",
+            "| `43` |",
+            "| `130` |",
+            "1/6",
+        ):
+            assert token in txt, f"{name} missing {token!r}"
+        assert "4/6" not in txt, f"{name} still has stale 4/6 selftest count"

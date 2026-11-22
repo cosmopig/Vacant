@@ -23,6 +23,7 @@
 
 ```bash
 pipx install vacant-network   # 0.9.0 起就是零設定版。沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
+vacant do claude --prompt "修好失敗的測試，不要改測試檔"   # 直接在隔離副本裡跑一次，驗收過才交回並寫收據（也支援 --cmd 接任何 CLI）
 vacant install                # 找到你機器上的 pi／Claude Code／OpenCode／Codex，各加一個掛鉤（可逆：`vacant uninstall`）
 vacant dashboard --open       # 選用：在本機看 Vacant 的每一個狀態（掛鉤在不在、記了哪些專案、每次退回與交件說明；只讀）
 ```
@@ -66,6 +67,48 @@ vacant dashboard --open       # 選用：在本機看 Vacant 的每一個狀態�
 [`CONCLUSION_20260925_ZERO_CONFIG_DABSTEP`](decisions/conclusions/CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md)、
 [`CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL`](decisions/conclusions/CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md)；
 為什麼零設定大多量不到差、和過去的實驗比：[`docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md`](docs/ZERO_CONFIG_EVAL_REPORT_2026-09-26.md)。
+
+## 用 `vacant do` 包住一次任務（隔離工作區、固定測試、收據）
+
+不想改 agent 常駐設定時，直接用 `vacant do` 包住這一次執行（零契約模式）。它會先對原專案跑一次基線驗收，把專案複製到隔離工作區讓 agent 改，每次驗收前把測試檔與設定檔還原成開始時的原樣，最後把結果寫回專案並簽下收據。
+
+```bash
+vacant do claude --prompt "修好 tests/test_cart.py 失敗的測試，不要改測試檔"
+vacant do claude --prompt-file task.md
+vacant do --cmd 'devin -p -- {prompt}' --prompt "修好失敗的測試"   # 接任何 CLI agent（{prompt} 會安全代入）
+vacant do claude --prompt "修好 API" --check "npm run test:ci" --protect "fixtures/**"
+vacant do claude --prompt "修好 API" --attempt-timeout 600 --timeout 1800 --stream
+```
+
+### 常用選項
+
+| 選項 | 用途 |
+|---|---|
+| `--cmd '<命令>'` | 接任何外部 CLI（例如 Devin 或自訂腳本）；`{prompt}` 代入任務說明、`{workspace}` 代入隔離工作區路徑 |
+| `--prompt-file <檔>` | 從檔案讀取任務提示（取代 `--prompt`） |
+| `--check '<命令>'` | 指定自己的驗收指令（退出碼 `0` 視為通過）；未指定時自動偵測 pytest／unittest／npm 等 |
+| `--protect <路徑或 glob>` | 額外釘住的檔案、目錄或 glob（可重複指定）：每次驗收前還原原樣、絕不寫回 |
+| `--attempt-timeout <秒>` | 單次嘗試的時限（預設 `600` 秒）；超過就切斷該次嘗試 |
+| `--timeout <秒>` | 整輪任務的總時限（預設 `1800` 秒，最多嘗試 3 次；每次單次上限仍受剩餘總時限約束） |
+| `--stream` | 把 agent 的 stdout／stderr 即時串流到終端機（預設關閉，不影響預設輸出） |
+
+### 結束碼
+
+| 結束碼 | 意思 |
+|---|---|
+| `0` | 驗收通過並已寫回專案（或專案無可執行驗收、照常跑完一次） |
+| `40` | 所有嘗試都未全過；已將通過數最高（或最後一次）的嘗試寫回專案，並列出第一個失敗測試與原因 |
+| `43` | 環境或衝突作廢（例如專案不可寫、檔案不可讀、驗收環境無法啟動、`node_modules` 遭動、或寫回與原專案並發改動衝突）；**未寫回任何檔案** |
+| `130` | 收到中斷訊號（Ctrl-C／`SIGINT`／`SIGTERM`）：已清理 agent 與脫離子行程、**專案未動**、已寫入標為 `interrupted` 的簽章收據 |
+
+### 執行中看輸出、結果與收據位置、符號說明
+
+- **執行中看 agent 輸出**：每次嘗試開始時會印出 `attempt_N/logs/agent_stdout.log` 的路徑，可以直接 `tail -f <該路徑>` 追蹤；或啟動時加上 `--stream` 直接串流到終端機。
+- **工作目錄與結果**：各次嘗試的工作區、日誌與 `result.json` 放在 `$VACANT_WORK/restart-*/`（預設 `~/.vacant-work/`）。被中斷時該目錄會留下方便檢視，可自行刪除。
+- **簽章收據與查詢**：Ed25519 簽章鏈記在 `$VACANT_HOME/trace/projects/<專案鍵>/chain.ndjson`（預設 `~/.vacant/`）。用 `vacant audit list` 看紀錄列表、`vacant audit show <record_id>` 看逐次嘗試結果與第一個失敗測試。
+- **`N/M` 與 `+`／`~`／`-`**：`N/M` 代表「通過數／總測試數」（例如 `8/9`＝9 條裡過了 8 條；`npm` 或 `--check` 這類只看退出碼的驗收沒有分項數，訊息會明講只回報通過或不通過）。檔案變更清單裡 `+`＝新增、`~`＝修改、`-`＝刪除。
+
+> **誠實邊界（不要誤讀成重開對所有模型都有效）**：強的雲端 agent 通常第一次就過（實測 8 次真跑——Claude Code 與 Devin 各 4 次——全部第一次就通過），這時 Vacant 的價值在**基線檢查、固定測試不被改動與簽章收據**；重開帶來的通過率增益主要在**弱的本機模型**上。
 
 ## 接到你的 agent 上：pi／Claude Code／OpenCode／Codex（2026-09-24 起）
 
@@ -215,16 +258,16 @@ vacant selftest          # 先確認這份安裝是活的（端到端迴圈＋�
 vacant demo gate         # 再看閘門判一次拒交（判決；阻擋要靠下面的收件口）
 ```
 
-`vacant selftest` 的逐字輸出（vacant-dev，Ubuntu 24.04／Python 3.12.3，**0.3 秒**）：
+`vacant selftest` 的逐字輸出（Ubuntu 24.04／Python 3.12.3，**0.2 秒**）：
 
 ```
-端到端迴圈    : ✓（6 次呼叫無例外，4/6 答對）
+端到端迴圈    : ✓（6 次呼叫無例外，1/6 答對）
 expert 鏈驗   : ✓
 requester 鏈驗: ✓
-暫存目錄      : /tmp/vacant-selftest-_bqraq82
+暫存目錄      : /tmp/vacant-selftest-gbx7ueav
 ```
 
-⚠ **`4/6` 不是判準、也不是效能數字**（同一版在 macOS 上印 `3/6`）。`selftest` 驗的是
+⚠ **`1/6` 不是判準、也不是效能數字**（不同執行或平台會印不同數字）。`selftest` 驗的是
 「端到端迴圈不丟例外」＋「兩條簽章鏈驗得過」，答對幾題不算數。
 
 **不需要 clone。**（2026-09-18 起：閘門的判斷層搬進套件了——同一份，不是複製；
@@ -543,7 +586,7 @@ vacant --help                     # 安裝後可用的 CLI
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | **fail-closed 擋門**，不是你的路徑打錯 | 權威的驗收目錄放在工作區**外面**；要給 agent 看就另外複製一份進去 |
 | `vacant run` 回 `22`（`infra_void`） | 基礎設施壞了，**既不判交付也不判拒交**。最常見的原因是 `--` 之後給了相對路徑——launcher 用 `cwd=<workspace>` spawn，相對路徑會解析到工作區底下 | `--` 之後改成絕對路徑 |
 | 接上了自己的 agent，但 `requests_seen` 是 `0` | 那條模型通道**沒有被中介到**（框架把 base url 寫在設定檔裡），或那一跑根本沒呼叫模型。**不會有任何錯誤訊息**——而且那一跑的其他欄位會長得跟合法拒交格一模一樣（誠實邊界 23 的活體標本） | 看〈五個 agent 的接線〉；環境變數名單的單一真相是 `vacant_network/vrun/envmap.py` |
-| `vacant selftest` 印的「答對」數字每次不一樣 | 那不是判準（Linux 印 `4/6`、macOS 印 `3/6`） | 只看 `✓` 那三行有沒有全過 |
+| `vacant selftest` 印的「答對」數字每次不一樣 | 那不是判準（視執行環境而異，例如 `1/6`、`3/6`） | 只看 `✓` 那三行有沒有全過 |
 | `run_RUN-ON.json` 裡找不到 `upstreams_defaulted` | **PyPI 的 `vacant-network` 0.7.0 還沒有那兩個欄位**，repo HEAD 有——版本號沒有跟著 bump | 需要那個欄位就從原始碼裝（`pip install -e .`） |
 | Windows | **完全沒量**。而且 `vacant_network/checks.py` 沒有可用的 Windows 沙箱分支 | 用 Linux／macOS，或放進容器 |
 
