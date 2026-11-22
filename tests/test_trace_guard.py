@@ -91,6 +91,15 @@ def test_compaction_marker_is_not_read_back_as_tool_output(env):
     assert "1 failed, 4 passed in 0.31s" in out[-200:]
 
 
+def test_compact_head_and_tail_do_not_overlap():
+    rows = [f"row {i:07d}\n" for i in range(G.MAX_OUTPUT_BLOB // 12 + 2000)]
+    data = "".join(rows).encode()
+    assert G.MAX_OUTPUT_BLOB < len(data) < G.COMPACT_HEAD + G.COMPACT_TAIL
+    out = G.strip_mark(G.compact_output(data).decode())
+    assert out.count(rows[-1]) == 1 and out.count(rows[len(rows) // 2]) == 1
+    assert out.replace("\n", "") == data.decode().replace("\n", "")
+
+
 def test_compact_is_identity_below_threshold():
     assert G.compact_output(b"small") == b"small"
 

@@ -129,7 +129,8 @@ def compact_output(data: bytes) -> bytes:
     text = as_text(data)
     mark = (f"\n…[vacant: {len(data)} bytes of output, middle elided; "
             f"full sha256 {hashlib.sha256(data).hexdigest()}]…\n")
-    return (text[:COMPACT_HEAD] + mark + text[-COMPACT_TAIL:]).encode()
+    tail = text[max(COMPACT_HEAD, len(text) - COMPACT_TAIL):]      # 頭尾不重疊（同一列不算兩次）
+    return (text[:COMPACT_HEAD] + mark + tail).encode()
 
 
 #: `compact_output` 插的那一行：出處，不是工具印的內容（讀回來找數字出處時要拿掉）
