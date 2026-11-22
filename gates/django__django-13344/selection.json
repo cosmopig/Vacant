@@ -2,2753 +2,1836 @@
   "django": true,
   "selectors": [
     {
-      "kind": "description",
-      "label": "Nonexistent cache keys return as None/default.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheClosingTests::test_close",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "set_many() returns an empty list when all keys are inserted.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheHEADTest::test_head_caches_correctly",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_createcachetable_observes_database_router (cache.tests.CreateCacheTableForDBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_createcachetable_observes_database_router",
-      "module": "cache.tests",
-      "class": "CreateCacheTableForDBCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_per_thread (cache.tests.CacheHandlerTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_per_thread",
-      "module": "cache.tests",
-      "class": "CacheHandlerTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_same_instance (cache.tests.CacheHandlerTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_same_instance",
-      "module": "cache.tests",
-      "class": "CacheHandlerTest"
-    },
-    {
-      "kind": "description",
-      "label": "If None is cached, get() returns it instead of the default.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheHEADTest::test_head_with_cached_get",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_key_varies_by_url (cache.tests.PrefixedCacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_varies_by_url",
-      "module": "cache.tests",
-      "class": "PrefixedCacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_cache_key (cache.tests.PrefixedCacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_cache_key",
-      "module": "cache.tests",
-      "class": "PrefixedCacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_cache_key_with_query (cache.tests.PrefixedCacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_cache_key_with_query",
-      "module": "cache.tests",
-      "class": "PrefixedCacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_learn_cache_key (cache.tests.PrefixedCacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_learn_cache_key",
-      "module": "cache.tests",
-      "class": "PrefixedCacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_patch_cache_control (cache.tests.PrefixedCacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_patch_cache_control",
-      "module": "cache.tests",
-      "class": "PrefixedCacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_patch_vary_headers (cache.tests.PrefixedCacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_patch_vary_headers",
-      "module": "cache.tests",
-      "class": "PrefixedCacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_long_vary_on (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_long_vary_on",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_proper_escaping (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_proper_escaping",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_with_ints_vary_on (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_with_ints_vary_on",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_with_many_vary_on (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_with_many_vary_on",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_with_one_vary_on (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_with_one_vary_on",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_with_unicode_vary_on (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_with_unicode_vary_on",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_without_vary_on (cache.tests.TestMakeTemplateFragmentKey)",
-      "file": "tests/cache/tests.py",
-      "method": "test_without_vary_on",
-      "module": "cache.tests",
-      "class": "TestMakeTemplateFragmentKey"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_cache_key (cache.tests.TestWithTemplateResponse)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_cache_key",
-      "module": "cache.tests",
-      "class": "TestWithTemplateResponse"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_cache_key_with_query (cache.tests.TestWithTemplateResponse)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_cache_key_with_query",
-      "module": "cache.tests",
-      "class": "TestWithTemplateResponse"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_patch_vary_headers (cache.tests.TestWithTemplateResponse)",
-      "file": "tests/cache/tests.py",
-      "method": "test_patch_vary_headers",
-      "module": "cache.tests",
-      "class": "TestWithTemplateResponse"
-    },
-    {
-      "kind": "description",
-      "label": "Memory caches that have the TIMEOUT parameter set to `None` in the",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheHandlerTest::test_per_thread",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Memory caches that have the TIMEOUT parameter set to `None` will set",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheHandlerTest::test_same_instance",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Caches that have the TIMEOUT parameter undefined in the default",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheI18nTest::test_cache_key_i18n_timezone",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Memory caches that have the TIMEOUT parameter unset will set cache",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheI18nTest::test_cache_key_i18n_translation",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "The default expiration time of a cache key is 5 minutes.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheI18nTest::test_cache_key_i18n_translation_accept_language",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_head_caches_correctly (cache.tests.CacheHEADTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_head_caches_correctly",
-      "module": "cache.tests",
-      "class": "CacheHEADTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_head_with_cached_get (cache.tests.CacheHEADTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_head_with_cached_get",
-      "module": "cache.tests",
-      "class": "CacheHEADTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_custom_key_validation (cache.tests.CustomCacheKeyValidationTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_custom_key_validation",
-      "module": "cache.tests",
-      "class": "CustomCacheKeyValidationTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_close (cache.tests.CacheClosingTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_close",
-      "module": "cache.tests",
-      "class": "CacheClosingTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_varies_by_url (cache.tests.CacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_varies_by_url",
-      "module": "cache.tests",
-      "class": "CacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_cache_key (cache.tests.CacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_cache_key",
-      "module": "cache.tests",
-      "class": "CacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_cache_key_with_query (cache.tests.CacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_cache_key_with_query",
-      "module": "cache.tests",
-      "class": "CacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_learn_cache_key (cache.tests.CacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_learn_cache_key",
-      "module": "cache.tests",
-      "class": "CacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_patch_cache_control (cache.tests.CacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_patch_cache_control",
-      "module": "cache.tests",
-      "class": "CacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_patch_vary_headers (cache.tests.CacheUtils)",
-      "file": "tests/cache/tests.py",
-      "method": "test_patch_vary_headers",
-      "module": "cache.tests",
-      "class": "CacheUtils"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_passing_explicit_none (deprecation.test_middleware_mixin.MiddlewareMixinTests)",
-      "file": "tests/deprecation/test_middleware_mixin.py",
-      "method": "test_passing_explicit_none",
-      "module": "deprecation.test_middleware_mixin",
-      "class": "MiddlewareMixinTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_sync_to_async_uses_base_thread_and_connection (deprecation.test_middleware_mixin.MiddlewareMixinTests)",
-      "file": "tests/deprecation/test_middleware_mixin.py",
-      "method": "test_sync_to_async_uses_base_thread_and_connection",
-      "module": "deprecation.test_middleware_mixin",
-      "class": "MiddlewareMixinTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_i18n_timezone (cache.tests.CacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_i18n_timezone",
-      "module": "cache.tests",
-      "class": "CacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_i18n_translation (cache.tests.CacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_i18n_translation",
-      "module": "cache.tests",
-      "class": "CacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_i18n_translation_accept_language (cache.tests.CacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_i18n_translation_accept_language",
-      "module": "cache.tests",
-      "class": "CacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_no_i18n (cache.tests.CacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_no_i18n",
-      "module": "cache.tests",
-      "class": "CacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_middleware (cache.tests.CacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_middleware",
-      "module": "cache.tests",
-      "class": "CacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_middleware_doesnt_cache_streaming_response (cache.tests.CacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_middleware_doesnt_cache_streaming_response",
-      "module": "cache.tests",
-      "class": "CacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_i18n_timezone (cache.tests.PrefixedCacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_i18n_timezone",
-      "module": "cache.tests",
-      "class": "PrefixedCacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_i18n_translation (cache.tests.PrefixedCacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_i18n_translation",
-      "module": "cache.tests",
-      "class": "PrefixedCacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_i18n_translation_accept_language (cache.tests.PrefixedCacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_i18n_translation_accept_language",
-      "module": "cache.tests",
-      "class": "PrefixedCacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_key_no_i18n (cache.tests.PrefixedCacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_key_no_i18n",
-      "module": "cache.tests",
-      "class": "PrefixedCacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_middleware (cache.tests.PrefixedCacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_middleware",
-      "module": "cache.tests",
-      "class": "PrefixedCacheI18nTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_middleware_doesnt_cache_streaming_response (cache.tests.PrefixedCacheI18nTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_middleware_doesnt_cache_streaming_response",
-      "module": "cache.tests",
-      "class": "PrefixedCacheI18nTest"
-    },
-    {
-      "kind": "description",
-      "label": "Add doesn't do anything in dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheI18nTest::test_cache_key_no_i18n",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "clear does nothing for the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheI18nTest::test_middleware",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "All data types are ignored equally by the dummy cache",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheI18nTest::test_middleware_doesnt_cache_streaming_response",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Dummy cache values can't be decremented",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_304_response_has_http_caching_headers_but_not_cached",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Dummy cache versions can't be decremented",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_cache_page_timeout",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Cache deletion is transparently ignored on the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_cached_control_private_not_cached",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "delete_many does nothing for the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_constructor",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many_invalid_key (cache.tests.DummyCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many_invalid_key",
-      "module": "cache.tests",
-      "class": "DummyCacheTests"
-    },
-    {
-      "kind": "description",
-      "label": "Expiration has no effect on the dummy cache",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_middleware",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "get_many returns nothing for the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_sensitive_cookie_not_cached",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many_invalid_key (cache.tests.DummyCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many_invalid_key",
-      "module": "cache.tests",
-      "class": "DummyCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set (cache.tests.DummyCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set",
-      "module": "cache.tests",
-      "class": "DummyCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable (cache.tests.DummyCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable",
-      "module": "cache.tests",
-      "class": "DummyCacheTests"
-    },
-    {
-      "kind": "description",
-      "label": "The has_key method doesn't ever return True for the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheMiddlewareTest::test_view_decorator",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "The in operator doesn't ever return True for the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheUtils::test_cache_key_varies_by_url",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Dummy cache values can't be incremented",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheUtils::test_get_cache_key",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Dummy cache versions can't be incremented",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheUtils::test_get_cache_key_with_query",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Nonexistent keys aren't found in the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheUtils::test_learn_cache_key",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "set_many does nothing for the dummy cache backend",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheUtils::test_patch_cache_control",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many_invalid_key (cache.tests.DummyCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many_invalid_key",
-      "module": "cache.tests",
-      "class": "DummyCacheTests"
-    },
-    {
-      "kind": "description",
-      "label": "Dummy cache backend ignores cache set calls",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CacheUtils::test_patch_vary_headers",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Dummy cache can't do touch().",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CreateCacheTableForDBCacheTests::test_createcachetable_observes_database_router",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Unicode values are ignored by the dummy cache",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::CustomCacheKeyValidationTests::test_custom_key_validation",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_304_response_has_http_caching_headers_but_not_cached (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_304_response_has_http_caching_headers_but_not_cached",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_page_timeout (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_page_timeout",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "description",
-      "label": "Responses with 'Cache-Control: private' are not cached.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_add",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_constructor (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_constructor",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_fetch_cache_middleware_constructor (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_fetch_cache_middleware_constructor",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_middleware (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_middleware",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_sensitive_cookie_not_cached (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_sensitive_cookie_not_cached",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_update_cache_middleware_constructor (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_update_cache_middleware_constructor",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_view_decorator (cache.tests.CacheMiddlewareTest)",
-      "file": "tests/cache/tests.py",
-      "method": "test_view_decorator",
-      "module": "cache.tests",
-      "class": "CacheMiddlewareTest"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_add (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_add_fail_on_pickleerror (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_binary_string (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_binary_string",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance_with_deferred (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_versioning_add (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_add",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_versioning_delete (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_delete",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set_many (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set_many",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_versioning_has_key (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_has_key",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_versioning_incr_decr (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_incr_decr",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_write_for_model_instance_with_deferred (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_write_unpicklable_object (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_unpicklable_object",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_clear (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_close (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_close",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cull (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cull_delete_when_store_empty (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull_delete_when_store_empty",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_custom_key_func (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_custom_key_func",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_data_types (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_data_types",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_decr (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_decr_version (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr_version",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_delete (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_delete_many (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_delete_nonexistent (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_nonexistent",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_expiration (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_expiration",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_float_timeout (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_float_timeout",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_forever_timeout (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_forever_timeout",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_many (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable_returning_none (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable_returning_none",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set_racing (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_racing",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_get_or_set_version (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_version",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_has_key (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_has_key",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_in (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_in",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_incr (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "description",
-      "label": "incr/decr does not modify expiry time (matches memcached behavior)",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_add_fail_on_pickleerror",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr_version (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr_version",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_invalid_key_characters (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_characters",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_invalid_key_length (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_length",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "description",
-      "label": "#20613/#18541 -- Ensures pickling is done outside of the lock.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_binary_string",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_long_timeout (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_long_timeout",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "description",
-      "label": "get() moves cache keys.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_read_for_model_instance",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "incr() moves cache keys.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_read_for_model_instance_with_deferred",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "set() moves cache keys.",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_versioning_add",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "description",
-      "label": "Multiple locmem caches are isolated",
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_versioning_delete",
       "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_prefix (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_prefix",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_set_fail_on_pickleerror (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_set_many (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_set_many_expiration (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many_expiration",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_simple (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_simple",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_touch (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_touch",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_unicode (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_unicode",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_zero_cull (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_cull",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_zero_timeout (cache.tests.LocMemCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_timeout",
-      "module": "cache.tests",
-      "class": "LocMemCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_add (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_add_fail_on_pickleerror (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_binary_string (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_binary_string",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_versioning_get_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance_with_deferred (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_versioning_get_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_add (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_add",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_versioning_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_delete (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_delete",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_versioning_incr_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_write_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set_many (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set_many",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cache_write_unpicklable_object",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_has_key (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_has_key",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_clear",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_incr_decr (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_incr_decr",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_close",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_for_model_instance_with_deferred (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_createcachetable_dry_run_mode",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_unpicklable_object (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_unpicklable_object",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_createcachetable_with_table_argument",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_clear (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cull",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_clear_does_not_remove_cache_dir (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear_does_not_remove_cache_dir",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_cull_delete_when_store_empty",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_close (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_close",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_custom_key_func",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_creates_cache_dir_if_nonexistent (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_creates_cache_dir_if_nonexistent",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_data_types",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull_delete_when_store_empty (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull_delete_when_store_empty",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_decr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_custom_key_func (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_custom_key_func",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_default_used_when_none_is_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_data_types (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_data_types",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_delete_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr_version (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr_version",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_delete_many_num_queries",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_delete_nonexistent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_nonexistent (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_nonexistent",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_float_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_empty_cache_file_considered_expired (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_empty_cache_file_considered_expired",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_forever_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_expiration (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_expiration",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_float_timeout (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_float_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_many_num_queries",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_forever_timeout (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_forever_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_or_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_does_not_ignore_non_filenotfound_exceptions (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_does_not_ignore_non_filenotfound_exceptions",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_or_set_callable",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_ignores_enoent (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_ignores_enoent",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_or_set_callable_returning_none",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_or_set_racing",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_get_or_set_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable_returning_none (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable_returning_none",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_in",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_racing (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_racing",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_incr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_version (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_version",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_incr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_has_key (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_has_key",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_invalid_key_characters",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_ignores_non_cache_files (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_ignores_non_cache_files",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_invalid_key_length",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_in (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_in",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_long_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_non_existent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr_version (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr_version",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_prefix",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_characters (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_characters",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_second_call_doesnt_crash",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_length (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_length",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_set_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_long_timeout (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_long_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_prefix (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_prefix",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_set_many_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_fail_on_pickleerror (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_set_many_returns_empty_list_on_success",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_simple",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many_expiration (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many_expiration",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_touch",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_simple (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_simple",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_unicode",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_touch (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_touch",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_zero_cull",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_unicode (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_unicode",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheTests::test_zero_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_zero_cull (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_cull",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_zero_timeout (cache.tests.FileBasedCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_add_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_add (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_binary_string",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_add_fail_on_pickleerror (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_read_for_model_instance",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_binary_string (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_binary_string",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_read_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_versioning_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance_with_deferred (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_versioning_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_add (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_add",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_versioning_get_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_delete (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_delete",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_versioning_get_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_versioning_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set_many (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set_many",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_versioning_incr_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_has_key (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_has_key",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_write_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_incr_decr (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_incr_decr",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cache_write_unpicklable_object",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_for_model_instance_with_deferred (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_clear",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_unpicklable_object (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_unpicklable_object",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_close",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_clear (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_createcachetable_dry_run_mode",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_clear_does_not_remove_cache_dir (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear_does_not_remove_cache_dir",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_createcachetable_with_table_argument",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_close (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_close",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cull",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_creates_cache_dir_if_nonexistent (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_creates_cache_dir_if_nonexistent",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_cull_delete_when_store_empty",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_custom_key_func",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull_delete_when_store_empty (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull_delete_when_store_empty",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_data_types",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_custom_key_func (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_custom_key_func",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_data_types (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_data_types",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_decr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_default_used_when_none_is_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr_version (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr_version",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_delete_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_delete_many_num_queries",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_nonexistent (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_nonexistent",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_delete_nonexistent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_empty_cache_file_considered_expired (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_empty_cache_file_considered_expired",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_expiration (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_expiration",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_float_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_float_timeout (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_float_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_forever_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_forever_timeout (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_forever_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_does_not_ignore_non_filenotfound_exceptions (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_does_not_ignore_non_filenotfound_exceptions",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_many_num_queries",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_ignores_enoent (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_ignores_enoent",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_or_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_or_set_callable",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_or_set_callable_returning_none",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_or_set_racing",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable_returning_none (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable_returning_none",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_get_or_set_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_racing (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_racing",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_version (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_version",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_in",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_has_key (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_has_key",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_incr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_ignores_non_cache_files (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_ignores_non_cache_files",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_incr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_in (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_in",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_invalid_key_characters",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_invalid_key_length",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr_version (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr_version",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_long_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_characters (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_characters",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_non_existent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_length (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_length",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_prefix",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_long_timeout (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_long_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_second_call_doesnt_crash",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_prefix (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_prefix",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_set_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_fail_on_pickleerror (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_set_many_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many_expiration (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many_expiration",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_set_many_returns_empty_list_on_success",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_simple (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_simple",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_simple",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_touch (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_touch",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_touch",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_unicode (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_unicode",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_unicode",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_zero_cull (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_cull",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_zero_cull",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_zero_timeout (cache.tests.FileBasedCachePathLibTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_timeout",
-      "module": "cache.tests",
-      "class": "FileBasedCachePathLibTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DBCacheWithTimeZoneTests::test_zero_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_add (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DefaultNonExpiringCacheKeyTests::test_caches_set_with_timeout_as_none_has_correct_default_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_add_fail_on_pickleerror (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DefaultNonExpiringCacheKeyTests::test_caches_set_with_timeout_as_none_set_non_expiring_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_binary_string (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_binary_string",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DefaultNonExpiringCacheKeyTests::test_caches_with_unset_timeout_has_correct_default_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DefaultNonExpiringCacheKeyTests::test_caches_with_unset_timeout_set_expiring_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance_with_deferred (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DefaultNonExpiringCacheKeyTests::test_default_expiration_time_for_keys_is_5_minutes",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_add (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_add",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_delete (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_delete",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_clear",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_data_types",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set_many (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set_many",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_has_key (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_has_key",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_decr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_incr_decr (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_incr_decr",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_for_model_instance_with_deferred (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_delete_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_unpicklable_object (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_unpicklable_object",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_delete_many_invalid_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_clear (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_close (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_close",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_get_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_createcachetable_dry_run_mode (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_createcachetable_dry_run_mode",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_get_many_invalid_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_createcachetable_with_table_argument (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_createcachetable_with_table_argument",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_get_or_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_get_or_set_callable",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull_delete_when_store_empty (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull_delete_when_store_empty",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_custom_key_func (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_custom_key_func",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_in",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_data_types (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_data_types",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_incr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_incr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr_version (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr_version",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_non_existent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_set_many_invalid_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many_num_queries (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many_num_queries",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_simple",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_nonexistent (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_nonexistent",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_touch",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_expiration (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_expiration",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::DummyCacheTests::test_unicode",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_float_timeout (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_float_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_forever_timeout (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_forever_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_add_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_binary_string",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many_num_queries (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many_num_queries",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_read_for_model_instance",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_read_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_versioning_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable_returning_none (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable_returning_none",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_versioning_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_racing (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_racing",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_versioning_get_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_version (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_version",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_versioning_get_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_has_key (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_has_key",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_versioning_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_in (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_in",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_versioning_incr_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_write_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr_version (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr_version",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cache_write_unpicklable_object",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_characters (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_characters",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_clear",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_length (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_length",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_clear_does_not_remove_cache_dir",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_long_timeout (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_long_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_close",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_prefix (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_prefix",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_creates_cache_dir_if_nonexistent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_second_call_doesnt_crash (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_second_call_doesnt_crash",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cull",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_fail_on_pickleerror (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_cull_delete_when_store_empty",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_custom_key_func",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_set_many_expiration (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many_expiration",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_data_types",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_simple (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_simple",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_decr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_touch (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_touch",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_decr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_unicode (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_unicode",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_default_used_when_none_is_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_zero_cull (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_cull",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_zero_timeout (cache.tests.DBCacheTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_delete_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_add (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_delete_nonexistent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_add_fail_on_pickleerror (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_add_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_empty_cache_file_considered_expired",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_binary_string (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_binary_string",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_float_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_read_for_model_instance_with_deferred (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_read_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_forever_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_add (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_add",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_does_not_ignore_non_filenotfound_exceptions",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_delete (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_delete",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_ignores_enoent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_get_set_many (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_get_set_many",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_or_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_has_key (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_has_key",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_or_set_callable",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_versioning_incr_decr (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_versioning_incr_decr",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_or_set_callable_returning_none",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_for_model_instance_with_deferred (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_for_model_instance_with_deferred",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_or_set_racing",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cache_write_unpicklable_object (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cache_write_unpicklable_object",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_get_or_set_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_clear (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_clear",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_has_key",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_close (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_close",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_ignores_non_cache_files",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_createcachetable_dry_run_mode (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_createcachetable_dry_run_mode",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_in",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_createcachetable_with_table_argument (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_createcachetable_with_table_argument",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_incr",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_incr_version",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_cull_delete_when_store_empty (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_cull_delete_when_store_empty",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_invalid_key_characters",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_custom_key_func (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_custom_key_func",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_invalid_key_length",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_data_types (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_data_types",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_long_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_non_existent",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_decr_version (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_decr_version",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_prefix",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_set_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_many_num_queries (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_many_num_queries",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_set_many_expiration",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_delete_nonexistent (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_delete_nonexistent",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_set_many_returns_empty_list_on_success",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_expiration (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_expiration",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_simple",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_float_timeout (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_float_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_touch",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_forever_timeout (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_forever_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_unicode",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_zero_cull",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_many_num_queries (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_many_num_queries",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCachePathLibTests::test_zero_timeout",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_add_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_callable_returning_none (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_callable_returning_none",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_binary_string",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_racing (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_racing",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_read_for_model_instance",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_get_or_set_version (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_get_or_set_version",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_read_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_has_key (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_has_key",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_versioning_add",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_in (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_in",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_versioning_delete",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_versioning_get_set",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_incr_version (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_incr_version",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_versioning_get_set_many",
+      "file": "tests/cache/tests.py"
     },
     {
-      "kind": "unittest",
-      "label": "test_invalid_key_characters (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_characters",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_invalid_key_length (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_invalid_key_length",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_long_timeout (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_long_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_prefix (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_prefix",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_second_call_doesnt_crash (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_second_call_doesnt_crash",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_set_fail_on_pickleerror (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_fail_on_pickleerror",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_set_many (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_set_many_expiration (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_set_many_expiration",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_simple (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_simple",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_touch (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_touch",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_unicode (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_unicode",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_zero_cull (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_cull",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
-    },
-    {
-      "kind": "unittest",
-      "label": "test_zero_timeout (cache.tests.DBCacheWithTimeZoneTests)",
-      "file": "tests/cache/tests.py",
-      "method": "test_zero_timeout",
-      "module": "cache.tests",
-      "class": "DBCacheWithTimeZoneTests"
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_versioning_has_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_versioning_incr_decr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_write_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cache_write_unpicklable_object",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_clear",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_clear_does_not_remove_cache_dir",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_close",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_creates_cache_dir_if_nonexistent",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cull",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_cull_delete_when_store_empty",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_custom_key_func",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_data_types",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_decr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_decr_version",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_default_used_when_none_is_set",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_delete",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_delete_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_delete_nonexistent",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_empty_cache_file_considered_expired",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_expiration",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_float_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_forever_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_does_not_ignore_non_filenotfound_exceptions",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_ignores_enoent",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_or_set",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_or_set_callable",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_or_set_callable_returning_none",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_or_set_racing",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_get_or_set_version",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_has_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_ignores_non_cache_files",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_in",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_incr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_incr_version",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_invalid_key_characters",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_invalid_key_length",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_long_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_non_existent",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_prefix",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_set_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_set_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_set_many_expiration",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_set_many_returns_empty_list_on_success",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_simple",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_touch",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_unicode",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_zero_cull",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::FileBasedCacheTests::test_zero_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_add",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_add_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_binary_string",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_read_for_model_instance",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_read_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_versioning_add",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_versioning_delete",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_versioning_get_set",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_versioning_get_set_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_versioning_has_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_versioning_incr_decr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_write_for_model_instance_with_deferred",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cache_write_unpicklable_object",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_clear",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_close",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cull",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_cull_delete_when_store_empty",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_custom_key_func",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_data_types",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_decr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_decr_version",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_default_used_when_none_is_set",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_delete",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_delete_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_delete_nonexistent",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_expiration",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_float_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_forever_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_get_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_get_or_set",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_get_or_set_callable",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_get_or_set_callable_returning_none",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_get_or_set_racing",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_get_or_set_version",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_has_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_in",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_incr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_incr_decr_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_incr_version",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_invalid_key_characters",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_invalid_key_length",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_locking_on_pickle",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_long_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_lru_get",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_lru_incr",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_lru_set",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_multiple_caches",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_non_existent",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_prefix",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_set_fail_on_pickleerror",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_set_many",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_set_many_expiration",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_set_many_returns_empty_list_on_success",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_simple",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_touch",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_unicode",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_zero_cull",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::LocMemCacheTests::test_zero_timeout",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheI18nTest::test_cache_key_i18n_timezone",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheI18nTest::test_cache_key_i18n_translation",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheI18nTest::test_cache_key_i18n_translation_accept_language",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheI18nTest::test_cache_key_no_i18n",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheI18nTest::test_middleware",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheI18nTest::test_middleware_doesnt_cache_streaming_response",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheUtils::test_cache_key_varies_by_url",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheUtils::test_get_cache_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheUtils::test_get_cache_key_with_query",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheUtils::test_learn_cache_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheUtils::test_patch_cache_control",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::PrefixedCacheUtils::test_patch_vary_headers",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_long_vary_on",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_proper_escaping",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_with_ints_vary_on",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_with_many_vary_on",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_with_one_vary_on",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_with_unicode_vary_on",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestMakeTemplateFragmentKey::test_without_vary_on",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestWithTemplateResponse::test_get_cache_key",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestWithTemplateResponse::test_get_cache_key_with_query",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/cache/tests.py::TestWithTemplateResponse::test_patch_vary_headers",
+      "file": "tests/cache/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/deprecation/test_middleware_mixin.py::MiddlewareMixinTests::test_passing_explicit_none",
+      "file": "tests/deprecation/test_middleware_mixin.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/deprecation/test_middleware_mixin.py::MiddlewareMixinTests::test_sync_to_async_uses_base_thread_and_connection",
+      "file": "tests/deprecation/test_middleware_mixin.py"
     }
-  ]
+  ],
+  "interpreter": ".envs/django__django-13344/bin/python",
+  "timeout_s": 250
 }

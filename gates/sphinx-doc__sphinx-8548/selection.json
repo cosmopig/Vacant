@@ -2,24 +2,26 @@
   "django": false,
   "selectors": [
     {
-      "kind": "nodeid",
+      "kind": "exact",
       "label": "tests/test_ext_autodoc_autoclass.py::test_classes",
       "file": "tests/test_ext_autodoc_autoclass.py"
     },
     {
-      "kind": "nodeid",
+      "kind": "exact",
       "label": "tests/test_ext_autodoc_autoclass.py::test_decorators",
       "file": "tests/test_ext_autodoc_autoclass.py"
     },
     {
-      "kind": "nodeid",
-      "label": "tests/test_ext_autodoc_autoclass.py::test_slots_attribute",
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_autoclass.py::test_show_inheritance_for_subclass_of_generic_type",
       "file": "tests/test_ext_autodoc_autoclass.py"
     },
     {
-      "kind": "nodeid",
-      "label": "tests/test_ext_autodoc_autoclass.py::test_show_inheritance_for_subclass_of_generic_type",
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_autoclass.py::test_slots_attribute",
       "file": "tests/test_ext_autodoc_autoclass.py"
     }
-  ]
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-8548/bin/python",
+  "timeout_s": 120
 }
