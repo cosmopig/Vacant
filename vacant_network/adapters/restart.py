@@ -8408,6 +8408,8 @@ def _failure_details_notice(res: dict) -> str:
     fp = d_att.get("first_problem")
     if fp and d_att.get("status") != "load_error":
         test_name, reason_lines = _format_first_problem_lines(str(fp))
+        # 只有 ^／~ 的行是 Python traceback 的位置標記，對新手沒有資訊，略過
+        reason_lines = [ln for ln in reason_lines if ln.strip(" ^~")]
         if test_name:
             out += f"\n  first failing test: {test_name}"
             for rln in reason_lines[:2]:
