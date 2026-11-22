@@ -172,7 +172,7 @@ def cell(args, task_id, sample, arm):
     tag = hashlib.sha256(tag.encode()).hexdigest()[:24]
     result = dict(task=task_id, sample=sample, arm=arm, run_tag=tag,
                   infra_void=False, infra_reason=None, work_dir=str(work),
-                  git_sha=args.runtime_git_sha)
+                  git_sha=args.runtime_git_sha, calls_complete=False)
     start = time.monotonic()
     env = {'HOME': str(home), 'VACANT_HOME': str(vh), 'PATH': str(Path(sys.executable).parent) + os.pathsep + os.environ['PATH'],
            'PYTHONPATH': str(REPO), 'PYTHONNOUSERSITE': '1', 'LANG': 'C.UTF-8',
@@ -239,6 +239,7 @@ def cell(args, task_id, sample, arm):
             result.update(infra_void=True, infra_reason='scorer: ' + result['score']['error'])
         result['hidden_pass'] = result['score']['hidden_pass'] and not result['infra_void']
         result['visible_pass'] = result['score']['visible_pass'] and not result['infra_void']
+        result['calls_complete'] = not result['infra_void']
         subprocess.run(['git', 'add', '-A'], cwd=ws, env=env, check=True, capture_output=True)
         diff = subprocess.run(['git', 'diff', '--cached', 'HEAD', '--'], cwd=ws, env=env, capture_output=True, text=True)
         (work / 'diff.patch').write_text(diff.stdout)
@@ -251,7 +252,8 @@ def cell(args, task_id, sample, arm):
                         archive.add(p, arcname=str(p.relative_to(ws)), recursive=False)
         result.update(vacant_home_bytes=disk(vh), trace_bytes=disk(vh / 'trace'), workspace_bytes=leftovers(ws))
     except Exception as exc:
-        result.update(infra_void=True, infra_reason=f'{type(exc).__name__}: {exc}', hidden_pass=False, visible_pass=False)
+        result.update(infra_void=True, infra_reason=f'{type(exc).__name__}: {exc}',
+                      hidden_pass=False, visible_pass=False, calls_complete=False)
         result.update(calls(args.call_log, tag))
     result['wall_s'] = round(time.monotonic() - start, 3)
     result['contamination_evidence'] = contamination_evidence(work)

@@ -44,6 +44,8 @@ def analyze(run_dir):
         outcomes[arm] = {(r['task'], r['sample']): bool(r.get('hidden_pass')) and not r['infra_void'] for r in group}
         passed = sum(outcomes[arm].values())
         arms[arm] = dict(n=n, hidden_passed=passed, hidden_rate=passed/n if n else None,
+            calls_complete=bool(group) and all(r.get('calls_complete', False) for r in group),
+            incomplete_cost_cells=sum(not r.get('calls_complete', False) for r in group),
             visible_passed=sum(bool(r.get('visible_pass')) for r in group),
             infra_void=sum(r['infra_void'] for r in group), false_success=sum(r.get('false_success', False) for r in group),
             wall_s=total(group, 'wall_s'), model_calls=total(group, 'model_calls'),
@@ -91,9 +93,13 @@ def analyze(run_dir):
         lines.append(f"| {arm} | {r['hidden_passed']}/{r['n']} | {r['visible_passed']}/{r['n']} | {r['infra_void']} | {r['false_success']} |")
     lines += ['', '## Paired comparisons', '', f'A/A2 control: `{json.dumps(floor)}`']
     lines += [f'- {name}: `{json.dumps(value)}`' for name, value in comparisons.items()]
-    lines += ['', '## Costs (totals)', '', '| Arm | Wall s | Calls | Input tokens | Output tokens | Feedback | Vacant bytes | Trace bytes | Workspace bytes (cache/log/other) |', '|---|---:|---:|---:|---:|---:|---:|---:|---|']
+    lines += ['', '## Costs (totals)', '',
+              'Incomplete call/token totals are lower bounds (>=), not final costs; UNKNOWN stays unknown. No cost means are estimated.', '',
+              '| Arm | Wall s | Calls | Input tokens | Output tokens | Incomplete cells | Feedback | Vacant bytes | Trace bytes | Workspace bytes (cache/log/other) |', '|---|---:|---:|---:|---:|---:|---:|---:|---:|---|']
     for arm, r in arms.items():
-        lines.append(f"| {arm} | {r['wall_s']} | {r['model_calls']} | {r['prompt_tokens']} | {r['completion_tokens']} | {r['feedback_rounds']} | {r['vacant_home_bytes']} | {r['trace_bytes']} | {r['workspace_bytes']} |")
+        cost = {k: f">= {r[k]}" if not r['calls_complete'] and isinstance(r[k], (int, float)) else r[k]
+                for k in ('model_calls', 'prompt_tokens', 'completion_tokens')}
+        lines.append(f"| {arm} | {r['wall_s']} | {cost['model_calls']} | {cost['prompt_tokens']} | {cost['completion_tokens']} | {r['incomplete_cost_cells']} | {r['feedback_rounds']} | {r['vacant_home_bytes']} | {r['trace_bytes']} | {r['workspace_bytes']} |")
     lines += ['', '## Per-task matrix', '', '| Task | Sample | Arm | Hidden | Visible | Infra |', '|---|---:|---|---|---|---|']
     for r in matrix:
         lines.append('| ' + ' | '.join(str(r[k]) for k in ('task', 'sample', 'arm', 'hidden_pass', 'visible_pass', 'infra_void')) + ' |')

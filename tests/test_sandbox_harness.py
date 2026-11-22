@@ -88,13 +88,19 @@ def test_hand_computed_mcnemar():
     assert analyze.paired({}, {})['p'] is None
 
 
-def test_timeout_is_infra_void_in_denominator(tmp_path, fake):
+def test_timeout_is_infra_void_in_denominator(tmp_path, fake, monkeypatch):
+    monkeypatch.setattr(run, 'calls', lambda *args: dict(
+        model_calls=1, prompt_tokens=10, completion_tokens=2, model_errors=0))
     out, cells, _ = launch(tmp_path, fake, 'timeout', ['A'], timeout=0.1)
     result = cells['A']
     assert result['infra_void'] and result['infra_reason'] == 'timeout'
     assert not result['hidden_pass']
+    assert result['calls_complete'] is False
     arm = analyze.analyze(out)['arms']['A']
     assert arm['n'] == 1 and arm['infra_void'] == 1 and arm['hidden_rate'] == 0
+    assert arm['calls_complete'] is False and arm['incomplete_cost_cells'] == 1
+    assert arm['model_calls'] == 1
+    assert '>= 1 | >= 10 | >= 2' in (out / 'summary.md').read_text()
 
 
 def test_missing_and_model_error_semantics(tmp_path):
