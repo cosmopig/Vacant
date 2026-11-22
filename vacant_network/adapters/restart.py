@@ -24,9 +24,10 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
 from __future__ import annotations
 
 import json
+import logging
 import os
 import pathlib
-import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -34,6 +35,7 @@ import time
 from typing import Any, Callable
 
 from .run import COPY_SKIP, Launch, run_agent, work_root
+from . import workspace as safe
 
 PATTERNS = ("*_test.py", "test_*.py")
 ACC_TIMEOUT_S = 120.0
@@ -91,13 +93,14 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="vacant-acc-"))
     try:
         work = tmp / "w"
-        shutil.copytree(ws, work, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
+        safe.copy_workspace(ws, work, COPY_SKIP)
         for rel, want in originals.items():
             f = work / rel
-            if not f.is_file() or f.read_bytes() != want:
+            if not f.is_file() or f.is_symlink() or safe.read(work, rel) != want:
                 base["tests_tampered"].append(rel)
-                f.parent.mkdir(parents=True, exist_ok=True)
-                f.write_bytes(want)
+                if f.is_symlink():
+                    safe.unlink(work, rel)
+                safe.write(work, rel, want)
         by_dir: dict[str, list[str]] = {}
         for rel in tests:
             d, _, name = rel.rpartition("/")
@@ -124,7 +127,10 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
                 "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+        try:
+            safe.remove_tree(tmp)
+        except OSError as exc:
+            logging.getLogger(__name__).warning("acceptance cleanup failed for %s: %s", tmp, exc)
 
 
 def deliver_index(accs: list[dict]) -> int:
@@ -139,17 +145,18 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path, protected: set[str]) ->
     before, after = set(_files(project)), set(_files(ws))
     changed: dict[str, list[str]] = {"added": [], "modified": [], "deleted": []}
     for rel in sorted(after - protected):
-        src, dst = ws / rel, project / rel
+        src = ws / rel
+        mode = stat.S_IMODE(src.stat().st_mode)
         if rel in before:
-            if dst.read_bytes() == src.read_bytes():
+            if (safe.read(project, rel) == safe.read(ws, rel)
+                    and stat.S_IMODE((project / rel).stat().st_mode) == mode):
                 continue
             changed["modified"].append(rel)
         else:
             changed["added"].append(rel)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dst)
+        safe.write(project, rel, safe.read(ws, rel), mode)
     for rel in sorted(before - after - protected):
-        (project / rel).unlink()
+        safe.unlink(project, rel)
         changed["deleted"].append(rel)
     return changed
 
@@ -157,14 +164,17 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path, protected: set[str]) ->
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
         min_attempt_s: float = 60.0, log: Callable[[str], None] | None = None) -> dict:
-    project = project.resolve()
+    project = project.absolute()
+    with safe.directory(project):
+        pass
     say = log or (lambda m: None)
     originals = {rel: (project / rel).read_bytes() for rel in find_tests(project)}
     if not originals:
         max_attempts = 1
         attempt_timeout_s = budget_s
     run_dir = work_root() / f"restart-{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
-    run_dir.mkdir(parents=True, exist_ok=True)
+    with safe.directory(run_dir, True):
+        pass
     attempts: list[dict] = []
     keep: list[pathlib.Path] = []
     spent = 0.0
@@ -174,7 +184,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             break
         k = len(attempts) + 1
         ws = run_dir / f"attempt_{k}" / "w"
-        shutil.copytree(project, ws, symlinks=True, ignore=shutil.ignore_patterns(*COPY_SKIP))
+        safe.copy_workspace(project, ws, COPY_SKIP)
         launch = build(prompt, ws)
         say(f"attempt {k} of {max_attempts} (up to {min(attempt_timeout_s, remaining):.0f}s)")
         try:

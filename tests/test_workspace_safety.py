@@ -1,0 +1,159 @@
+"""工作區複製及回寫的連結邊界。"""
+import pathlib
+import os
+import stat
+
+import pytest
+
+from vacant_network.adapters import restart as R
+
+
+def test_copy_and_write_back_preserve_modes_under_umask(tmp_path):
+    from vacant_network.adapters.workspace import copy_workspace
+    project, ws = tmp_path / "project", tmp_path / "ws"
+    project.mkdir(mode=0o700)
+    private = project / "private"
+    private.mkdir(mode=0o700)
+    source = private / "data"
+    source.write_text("original")
+    source.chmod(0o664)
+    previous = os.umask(0o022)
+    try:
+        copy_workspace(project, ws, set())
+        assert stat.S_IMODE(ws.stat().st_mode) == 0o700
+        assert stat.S_IMODE((ws / "private").stat().st_mode) == 0o700
+        copied = ws / "private/data"
+        assert stat.S_IMODE(copied.stat().st_mode) == 0o664
+        copied.write_text("changed")
+        R._write_back(project, ws, set())
+        assert source.read_text() == "changed"
+        assert stat.S_IMODE(source.stat().st_mode) == 0o664
+        copied.chmod(0o600)
+        R._write_back(project, ws, set())
+        assert stat.S_IMODE(source.stat().st_mode) == 0o600
+    finally:
+        os.umask(previous)
+
+
+@pytest.mark.skipif(os.getuid() == 0, reason="requires non-root permissions")
+def test_acceptance_removes_readonly_copy(tmp_path, monkeypatch):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    readonly = ws / "readonly"
+    readonly.mkdir()
+    (readonly / "child").write_text("data")
+    readonly.chmod(0o555)
+    temp = tmp_path / "acceptance"
+    def mkdtemp(**kwargs):
+        temp.mkdir()
+        return str(temp)
+    monkeypatch.setattr(R.tempfile, "mkdtemp", mkdtemp)
+    try:
+        R.acceptance({"test_x.py": b"import unittest\n"}, ws)
+        assert not temp.exists()
+    finally:
+        readonly.chmod(0o755)
+
+
+@pytest.mark.skipif(os.getuid() == 0, reason="requires non-root permissions")
+@pytest.mark.parametrize("root_mode", [0o755, 0o000])
+def test_remove_tree_handles_inaccessible_owned_directories(tmp_path, root_mode):
+    from vacant_network.adapters.workspace import remove_tree
+    root = tmp_path / "tree"
+    root.mkdir()
+    child = root / "child"
+    child.mkdir()
+    (child / "data").write_text("data")
+    child.chmod(0o000)
+    root.chmod(root_mode)
+    try:
+        remove_tree(root)
+        assert not root.exists()
+    finally:
+        if root.exists():
+            root.chmod(0o700)
+            if child.exists():
+                child.chmod(0o700)
+
+
+def test_acceptance_cleanup_failure_keeps_result(tmp_path, monkeypatch, caplog):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    original_remove = R.safe.remove_tree
+    leftovers = []
+    def denied(path):
+        leftovers.append(path)
+        raise PermissionError("simulated cleanup failure")
+    monkeypatch.setattr(R.safe, "remove_tree", denied)
+    try:
+        result = R.acceptance({"test_x.py": b"import unittest\nclass T(unittest.TestCase):\n def test_ok(self): pass\n"}, ws)
+        assert result["accept"] is True and result["status"] == "ok"
+        assert "simulated cleanup failure" in caplog.text
+    finally:
+        monkeypatch.setattr(R.safe, "remove_tree", original_remove)
+        for path in leftovers:
+            original_remove(path)
+
+
+def test_acceptance_never_restores_through_external_link(tmp_path):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    outside = tmp_path / "outside"
+    outside.write_bytes(b"unchanged")
+    (ws / "test_x.py").symlink_to(outside)
+    try:
+        R.acceptance({"test_x.py": b"import unittest\n"}, ws)
+    except (OSError, ValueError):
+        pass
+    assert outside.read_bytes() == b"unchanged"
+
+
+@pytest.mark.parametrize("parent", [False, True])
+def test_write_back_rejects_destination_links(tmp_path, parent):
+    project, ws, outside = (tmp_path / n for n in ("project", "ws", "outside"))
+    for p in (project, ws, outside):
+        p.mkdir()
+    rel = pathlib.Path("d/x") if parent else pathlib.Path("x")
+    (ws / rel).parent.mkdir(exist_ok=True)
+    (ws / rel).write_text("attack")
+    (outside / "x").write_text("safe")
+    (project / ("d" if parent else "x")).symlink_to(outside if parent else outside / "x")
+    with pytest.raises((OSError, ValueError)):
+        R._write_back(project, ws, set())
+    assert (outside / "x").read_text() == "safe"
+
+
+def test_fresh_copy_rejects_escape_and_preserves_relative_link(tmp_path):
+    from vacant_network.adapters.workspace import copy_workspace
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "x").write_text("ok")
+    (src / "link").symlink_to("x")
+    copy_workspace(src, tmp_path / "dest", set())
+    assert (tmp_path / "dest/link").is_symlink()
+    (src / "escape").symlink_to("../../outside")
+    with pytest.raises(ValueError):
+        copy_workspace(src, tmp_path / "bad", set())
+
+
+def test_copy_rejects_symlinked_destination_parent(tmp_path):
+    from vacant_network.adapters.workspace import copy_workspace
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "x").write_text("ok")
+    (tmp_path / "link").symlink_to(src)
+    with pytest.raises(OSError):
+        copy_workspace(src, tmp_path / "link/dest", set())
+
+
+def test_copy_rejects_planted_destination_and_source_parent(tmp_path):
+    from vacant_network.adapters.workspace import copy_workspace
+    src, dest = tmp_path / "src", tmp_path / "dest"
+    src.mkdir()
+    (src / "x").write_text("ok")
+    dest.symlink_to(src)
+    with pytest.raises(FileExistsError):
+        copy_workspace(src, dest, set())
+    with pytest.raises(OSError):
+        copy_workspace(dest, tmp_path / "other", set())
+    assert (src / "x").read_text() == "ok"
