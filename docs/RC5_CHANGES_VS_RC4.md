@@ -97,3 +97,36 @@ Also changed when the freeze was reopened:
 - The confirm and unused40 batches measured this path. rc5 changes it only in abnormal cases: shadow files and new test-directory `__init__.py` are left out of the check; a changed package `__init__.py` prints a NOTE; the check runs against the start snapshot.
 - A normal run of this path is covered by the differential and is identical.
 - In every batch run so far, the native arm and the product arm both have **accepted_but_wrong = 0** and per-attempt `signal.accept_fail = 0`. The batches are confirm1, confirm1c, unused40, hardpy26, W3-5 (screen and confirm), redo1_pi, redo1_opencode, the screen16 runs, and confirm2 partial. Source: each batch's REPORT.json. The grader is the task's pristine visible tests (`grader_kinds = visible_tests_pristine`). So the 0 means "nobody got a pass by tampering with the tests". It does NOT mean "the answers are correct beyond the tests".
+
+---
+
+## rc6 相對 rc5-final：只有訊息、輸出與中斷處理
+
+基於 rc5-final（`1d764cc69`）的 11 次新使用者實測（`~/dev/ops/ux_rc5final/logs/`），rc6 在 `redo/rc6` 分支只調整**訊息、輸出、中斷處理與三語 README**；選哪一次、交什麼、次數與時限、驗收執行方式、結束碼 `0`／`40`／`43` 條件全部維持不變。
+
+### 九項變動摘要
+
+1. **Ctrl-C／SIGTERM 中斷處理（`b3d380380`）**：收到 `SIGINT`／`SIGTERM` 時，忽略重複訊號、砍掉 agent 行程群組並沿用既有 Linux subreaper／`/proc` 機制清理脫離子孫，不改動原專案，印出單行中斷與工作目錄可刪提示，寫入標為 `interrupted` 的 Ed25519 簽章收據（`vacant audit list/show` 亦識別為 `result=interrupted`），以 `130` 結束、無 Python traceback。
+2. **執行中可視性與 `--stream`（`6f78d71cc`）**：每次嘗試開始時印出 `attempt_N/logs/agent_stdout.log` 路徑與 `tail -f` 指令；新增 `--stream`（預設關閉）即時串流 agent stdout／stderr 至終端機並同步寫入日誌檔。
+3. **未全過時的失敗摘要（`983c0104f`）**：明寫 `passed/total tests`、列出各次嘗試的通過數與 `[delivered]` 標記、摘錄第一個失敗測試名稱與 1–2 行原因（`first_problem`）、明講交回的那次已寫入專案，並補一行 `exit code 40` 說明。
+4. **基線已通過標題（`27d2cbb30`）**：政策不變（agent 照跑 1 次），但標題改為先講 `tests were already passing before the agent ran`，再說明 agent 改了檔案或未做改動。
+5. **降噪與符號說明（`fd8205c09`）**：`not delivered` 裡的 `__pycache__`／`.pytest_cache` 快取檔於人讀摘要折成單一數量（`result.json` 保留完整清單、非快取未交回檔照列）；於 `changed files` 行內與 `vacant do --help` 說明 `+`／`~`／`-` 含義。
+6. **npm／`node --test` 人話說明（`262074d8a`）**：保留既有的 untraced 判定（不動保護／寫回政策），於人讀摘要將 `[unsupported-option:node:--test]` 換成說明 `node --test` 動態探索測試檔、Vacant 無法靜態追蹤全部輸入的句子；並對僅看退出碼的驗收（含 `npm`）明講只回報通過或不通過、無分項數。
+7. **`vacant demo gate` 尊重 `VACANT_HOME`（`64c16ce8f`）**：未給 `--root` 且設了 `VACANT_HOME` 時寫入 `$VACANT_HOME/demo-gate`（不再寫進真實 `~/.vacant-run/demo-gate`），並於輸出開頭明講寫入目錄。
+8. **`vacant audit show` 顯示逐次嘗試與第一個失敗測試（`c4b8d3f15`）**：簽章收據的每次嘗試保留 `first_problem`（有失敗時）；`vacant audit show` 列出每次嘗試的結果、`[delivered]` 與收據裡記載的 `first_problem`（舊收據無該欄時只顯示收據裡有的欄位）。
+9. **三語 README 同步（`b866187d6`）**：`README.md`、`README.en.md`、`README.ja.md` 首屏加入 `vacant do claude` 範例，首屏後補上 `vacant do` 專節（常用參數、兩組時限、結束碼表 `0`/`40`/`43`/`130`、看輸出與收據位置、`N/M` 與 `+`/`~`/`-`、以及強雲端 agent 與弱本機模型的誠實邊界），並將 `vacant selftest` 範例輸出由過時的 `4/6` 更新為實測 `1/6`。
+
+### 政策差分（`rc5-final` vs `rc6`）
+
+執行 `tests/adversarial_rc5_repro/policy_diff_rc5_rc6.py`（比對 `~/dev/ops/rc5final_venv/bin/vacant` 與 `redo/rc6`，完整輸出見 [`tests/adversarial_rc5_repro/POLICY_DIFF_RC6_RESULT.md`](../tests/adversarial_rc5_repro/POLICY_DIFF_RC6_RESULT.md)）：
+
+- **原有 13 個情境**：**13/13 完全相同**（結束碼、`accepted`、`delivered_attempt`、每次嘗試 `(accept, passed, run)`、agent 呼叫次數、專案樹逐檔 sha256 全部一致）。
+- **新增情境 14（`py_baseline_already_pass`）**：**1/1 政策與寫回結果完全相同**，僅摘要標題改為先講測試原本已全過。
+- **新增情境 15（`ctrl_c_interrupt`，前景行程群組 `SIGINT`）**：**1/1 預期不同**——rc5-final 拋出 traceback 且無收據；rc6 以 `130` 結束、無 traceback、印出中斷與工作目錄訊息、專案逐位元組不變、寫出標為 `interrupted` 的簽章收據。
+
+### 回歸測試摘要
+
+- `PYTHONPATH=. /home/user1/dev/Vacant/.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_restart*.py`：**247 passed, 1 skipped, 0 failed**（共 248）。
+- 完整 `PYTHONPATH=. /home/user1/dev/Vacant/.venv/bin/python -m pytest -q -p no:cacheprovider tests/`（單行程、未用 `-n auto`）：**5789 passed, 69 skipped, 5 failed, 0 errors**（共 5863）。5 個失敗皆為與 rc6 無關的既有／本機環境失敗（未修動）：
+  - `tests/test_reqloop_freeze_check.py::test_freeze_check_verdict_ok`、`test_freeze_check_covers_all_mandated_checks`（2 項）：本機 `auto/worker`／`NOW.md`／`auto/qwen27b` 凍結狀態既有不符。
+  - `tests/test_retention.py::test_auto_gc_dry_run_missing_dir_safe`、`test_retention_main_auto_dry_run_human_output_safe`、`test_retention_main_gc_dry_run_human_output_safe`（3 項）：測試未隔離 `VACANT_WORK`，掃到本機 `~/.vacant-work/` 中既有（2026-11-21 22:34 留下）的 4 個舊目錄共 490 B／8 檔；以空 `VACANT_WORK` 單獨執行該 3 項全過。
