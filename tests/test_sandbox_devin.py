@@ -126,7 +126,7 @@ def test_external_task_ids_from_bank(tmp_path, handbacks, task_id):
     result = score_devin.score_branches(repo, remote, [branch], out, bank=bank)
     row = json.loads((out / f'cells/{task_id}-s1-A/result.json').read_text())
     assert result['missing_branches'] == []
-    assert row['task'] == task_id and row['git_sha'] == sha and row['n_failed'] > 0
+    assert row['task'] == task_id and row['git_sha'] == sha and row['score']['n_failed'] > 0
 
 
 @pytest.mark.parametrize(('error', 'failed', 'infra'), [
