@@ -60,6 +60,8 @@ def write(root: pathlib.Path, rel: str, data: bytes, mode: int = 0o644):
         try:
             with os.fdopen(f, "wb") as stream:
                 stream.write(data)
+                stream.flush()
+                os.fchmod(stream.fileno(), mode)
             os.replace(tmp, name, src_dir_fd=fd, dst_dir_fd=fd)
         finally:
             try:
@@ -100,6 +102,8 @@ def entries(root: pathlib.Path, skip: set | frozenset, ignore=None):
 
 
 def copy_workspace(src: pathlib.Path, dest: pathlib.Path, skip: set | frozenset, ignore=None):
+    with directory(src) as fd:
+        root_mode = stat.S_IMODE(os.fstat(fd).st_mode)
     items = list(entries(src, skip, ignore))
     for rel, st, link in items:
         if link is not None:
@@ -107,7 +111,7 @@ def copy_workspace(src: pathlib.Path, dest: pathlib.Path, skip: set | frozenset,
             if target.is_absolute() or not (src / pathlib.Path(rel).parent / target).resolve().is_relative_to(src.resolve()):
                 raise ValueError("workspace symlink escapes root: " + rel)
     with directory(dest.parent, True) as fd:
-        os.mkdir(dest.name, dir_fd=fd)
+        os.mkdir(dest.name, 0o700, dir_fd=fd)
     for rel, st, link in items:
         if stat.S_ISDIR(st.st_mode):
             with directory(dest / rel, True):
@@ -121,3 +125,9 @@ def copy_workspace(src: pathlib.Path, dest: pathlib.Path, skip: set | frozenset,
         if link is not None and not (dest / rel).resolve().is_relative_to(dest.resolve()):
             unlink(dest, rel)
             raise ValueError("copied symlink escapes root: " + rel)
+    for rel, st, link in reversed(items):
+        if stat.S_ISDIR(st.st_mode):
+            with directory(dest / rel) as fd:
+                os.fchmod(fd, stat.S_IMODE(st.st_mode))
+    with directory(dest) as fd:
+        os.fchmod(fd, root_mode)

@@ -1,9 +1,38 @@
 """工作區複製及回寫的連結邊界。"""
 import pathlib
+import os
+import stat
 
 import pytest
 
 from vacant_network.adapters import restart as R
+
+
+def test_copy_and_write_back_preserve_modes_under_umask(tmp_path):
+    from vacant_network.adapters.workspace import copy_workspace
+    project, ws = tmp_path / "project", tmp_path / "ws"
+    project.mkdir(mode=0o700)
+    private = project / "private"
+    private.mkdir(mode=0o700)
+    source = private / "data"
+    source.write_text("original")
+    source.chmod(0o664)
+    previous = os.umask(0o022)
+    try:
+        copy_workspace(project, ws, set())
+        assert stat.S_IMODE(ws.stat().st_mode) == 0o700
+        assert stat.S_IMODE((ws / "private").stat().st_mode) == 0o700
+        copied = ws / "private/data"
+        assert stat.S_IMODE(copied.stat().st_mode) == 0o664
+        copied.write_text("changed")
+        R._write_back(project, ws, set())
+        assert source.read_text() == "changed"
+        assert stat.S_IMODE(source.stat().st_mode) == 0o664
+        copied.chmod(0o600)
+        R._write_back(project, ws, set())
+        assert stat.S_IMODE(source.stat().st_mode) == 0o600
+    finally:
+        os.umask(previous)
 
 
 def test_acceptance_never_restores_through_external_link(tmp_path):

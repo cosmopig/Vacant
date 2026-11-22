@@ -27,6 +27,7 @@ import json
 import os
 import pathlib
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -142,13 +143,15 @@ def _write_back(project: pathlib.Path, ws: pathlib.Path, protected: set[str]) ->
     changed: dict[str, list[str]] = {"added": [], "modified": [], "deleted": []}
     for rel in sorted(after - protected):
         src = ws / rel
+        mode = stat.S_IMODE(src.stat().st_mode)
         if rel in before:
-            if safe.read(project, rel) == safe.read(ws, rel):
+            if (safe.read(project, rel) == safe.read(ws, rel)
+                    and stat.S_IMODE((project / rel).stat().st_mode) == mode):
                 continue
             changed["modified"].append(rel)
         else:
             changed["added"].append(rel)
-        safe.write(project, rel, safe.read(ws, rel), src.stat().st_mode & 0o777)
+        safe.write(project, rel, safe.read(ws, rel), mode)
     for rel in sorted(before - after - protected):
         safe.unlink(project, rel)
         changed["deleted"].append(rel)
