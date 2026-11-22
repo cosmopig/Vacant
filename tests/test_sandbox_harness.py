@@ -137,7 +137,7 @@ def test_resume_refuses_runtime_drift(tmp_path, fake, monkeypatch, capsys):
     out, _, cmd = launch(tmp_path, fake, 'solve', ['A'])
     identity = run.runtime_identity(type('Args', (), {'agent_cmd': True})())
     before = (out / 'progress.jsonl').read_bytes()
-    for key in ('model_digest', 'pi', 'ollama', 'vacant', 'git_sha'):
+    for key in ('model_digest', 'pi', 'ollama', 'vacant', 'git_sha', 'python'):
         monkeypatch.setattr(run, 'runtime_identity', lambda args, k=key: {**identity, k: 'changed'})
         with pytest.raises(SystemExit) as exc:
             run.main(cmd)

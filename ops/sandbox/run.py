@@ -284,7 +284,7 @@ def runtime_identity(args):
         except (OSError, ValueError):
             pass
     return dict(pi=version(['pi', '--version']), ollama=version(['ollama', '--version']),
-                model_digest=model_digest, vacant=vacant_network.__version__,
+                model_digest=model_digest, vacant=vacant_network.__version__, python=sys.version,
                 git_sha=version(['git', '-C', str(REPO), 'rev-parse', 'HEAD']))
 
 
@@ -322,7 +322,7 @@ def main(argv=None):
         if changed:
             parser.error('resume runtime differs: ' + ', '.join(changed) + '; use a fresh --out directory')
     else:
-        meta_path.write_text(json.dumps(dict(config=config, task_ids=task_ids, python=sys.version, **identity,
+        meta_path.write_text(json.dumps(dict(config=config, task_ids=task_ids, **identity,
             evidence='L-fake' if args.agent_cmd else 'real-agent'), indent=2))
     rng = random.Random(args.seed)
     for task_id in task_ids:
