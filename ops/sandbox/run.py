@@ -117,6 +117,10 @@ def execute(cmd, cwd, env, timeout, stdout, stderr):
             terminate_tree(proc.pid)
             proc.wait()
             return proc.returncode, True
+        except BaseException:
+            terminate_tree(proc.pid)
+            proc.wait()
+            raise
 
 
 def gate_suite(task, dest):

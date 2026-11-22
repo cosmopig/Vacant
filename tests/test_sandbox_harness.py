@@ -138,3 +138,19 @@ def test_resume_refuses_runtime_drift(tmp_path, fake, monkeypatch, capsys):
         assert exc.value.code == 2
         assert 'resume runtime differs: ' + key in capsys.readouterr().err
         assert (out / 'progress.jsonl').read_bytes() == before
+
+
+@pytest.mark.parametrize('failure', [KeyboardInterrupt, SystemExit, RuntimeError])
+def test_execute_cleans_up_before_reraising(tmp_path, monkeypatch, failure):
+    from unittest.mock import Mock
+    process = Mock(pid=12345)
+    error = failure('interrupted')
+    process.wait.side_effect = [error, -9]
+    monkeypatch.setattr(run.subprocess, 'Popen', lambda *args, **kwargs: process)
+    cleanup = Mock()
+    monkeypatch.setattr(run, 'terminate_tree', cleanup)
+    with pytest.raises(failure) as exc:
+        run.execute(['fake'], tmp_path, {}, 1, tmp_path / 'stdout', tmp_path / 'stderr')
+    assert exc.value is error
+    cleanup.assert_called_once_with(12345)
+    assert process.wait.call_count == 2
