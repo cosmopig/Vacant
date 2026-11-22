@@ -7339,6 +7339,25 @@ def _install_restart_signal_handlers() -> dict[int, Any]:
     return old
 
 
+def _defer_restart_signals() -> list[str]:
+    """rc6：寫回與收據這段臨界區內不讓 Ctrl-C／SIGTERM 中途打斷（否則專案會只寫回一半，而中斷訊息卻說「沒有改動」）。
+    收到的訊號只記下名稱，跑完臨界區後照常交件，並在訊息裡說明。回傳的 list 會被就地追加訊號名稱。"""
+    pending: list[str] = []
+
+    def _record(signum: int, _frame: Any) -> None:
+        try:
+            pending.append(signal.Signals(signum).name)
+        except ValueError:
+            pending.append(f"SIG{signum}")
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            signal.signal(sig, _record)
+        except (ValueError, OSError):
+            pass
+    return pending
+
+
 def _ignore_restart_signals() -> None:
     for sig in (signal.SIGINT, signal.SIGTERM):
         try:
@@ -7922,6 +7941,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         conflicts: list[str] = []
         write_back_conflicts: list[str] = []
         outside_changes: list[str] = []
+        # rc6：從這裡起到 result.json 寫完是臨界區——中斷不再走「專案沒有被改動」的路徑（見 _defer_restart_signals）
+        deferred_signals = _defer_restart_signals()
         if snaps[d] is not None and not nm_changed:
             t_ls = time.monotonic()
             orig_lstat_before_wb = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
@@ -8073,6 +8094,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         )
         if not res["receipt"].get("recorded"):
             res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+        if deferred_signals:
+            res["interrupt_deferred"] = deferred_signals[0]
         (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         return res
     except (_RestartInterrupted, KeyboardInterrupt) as exc:
@@ -8428,6 +8451,16 @@ def _load_error_notice(res: dict) -> str:
 
 
 def summary(res: dict) -> str:
+    """交件訊息。rc6：寫回途中收到的 Ctrl-C／SIGTERM 被延後到寫回完成（不留下寫一半的專案），在訊息最後說明。"""
+    out = _summary_body(res)
+    sig = res.get("interrupt_deferred")
+    if sig:
+        out += (f"\n  {sig} arrived while Vacant was writing the result into your project; it finished writing "
+                f"first so the project is not left half-written (the outcome above is final).")
+    return out
+
+
+def _summary_body(res: dict) -> str:
     res, _ = _sanitize_json_obj(res)
     n = len(res["attempts"])
     ch = res["changed"]

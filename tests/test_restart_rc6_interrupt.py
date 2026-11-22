@@ -259,3 +259,42 @@ def test_rc6_interrupt_foreground_pgrp_sigint(tmp_path):
 def test_rc6_interrupt_sigterm(tmp_path):
     """SIGTERM sent to the vacant process."""
     _run_and_interrupt(tmp_path, mode="sigterm")
+
+
+def test_sigint_during_write_back_is_deferred_and_project_not_half_written(tmp_path, monkeypatch):
+    """寫回途中收到 Ctrl-C：不能走「專案沒有被改動」的中斷路徑（那時專案已經寫了一部分）。
+    rc6 把寫回到 result.json 這段當臨界區：訊號延後，寫回完整做完，照常交件，訊息說明收到過中斷。"""
+    proj = tmp_path / "proj"
+    _make_project(proj)
+    (proj / "extra.py").write_text("X = 1\n", encoding="utf-8")
+    agent = tmp_path / "agent.py"
+    agent.write_text(textwrap.dedent("""\
+        import pathlib
+        pathlib.Path('calc.py').write_text('def add(a, b):\\n    return a + b\\n')
+        pathlib.Path('extra.py').write_text('X = 2\\n')
+        pathlib.Path('new_mod.py').write_text('Y = 3\\n')
+    """), encoding="utf-8")
+    real_write_back = R._write_back
+    calls = []
+
+    def _write_back_with_sigint(*a, **kw):
+        calls.append(1)
+        os.kill(os.getpid(), signal.SIGINT)  # 模擬寫回途中按 Ctrl-C：handler 在下一個 bytecode 邊界就會被叫到
+        time.sleep(0.05)
+        return real_write_back(*a, **kw)
+
+    monkeypatch.setattr(R, "_write_back", _write_back_with_sigint)
+    res = R.run(proj, lambda p, ws: R.Launch(argv=[sys.executable, str(agent)], env={}), "fix",
+                max_attempts=1, attempt_timeout_s=30, budget_s=60)
+    assert calls, "write-back was not reached"
+    assert not res.get("interrupted")
+    assert res.get("interrupt_deferred") == "SIGINT"
+    assert res["accepted"] is True
+    # 寫回是完整的：三個改動都在，沒有寫一半
+    assert (proj / "calc.py").read_text() == "def add(a, b):\n    return a + b\n"
+    assert (proj / "extra.py").read_text() == "X = 2\n"
+    assert (proj / "new_mod.py").read_text() == "Y = 3\n"
+    msg = R.summary(res)
+    assert "project unchanged" not in msg
+    assert "SIGINT arrived while Vacant was writing" in msg
+    assert res["receipt"].get("recorded") is True
