@@ -27,6 +27,7 @@ An existing pattern, not one we invented: supply-chain security does the same th
 
 ```bash
 pipx install vacant-network   # 0.9.0 is the zero-config release. No pipx? `sudo apt install pipx` (Ubuntu/Debian) or `brew install pipx` (macOS)
+vacant do claude --prompt "Fix the failing tests without editing test files"   # run one task in an isolated copy, verify, write back, and sign a receipt (or `--cmd` for any CLI)
 vacant install                # finds pi / Claude Code / OpenCode / Codex on this machine and adds one hook to each (undo: `vacant uninstall`)
 vacant dashboard --open       # optional: see every Vacant status on this machine (hooks, recorded projects, each send-back and delivery note; read-only)
 ```
@@ -67,6 +68,50 @@ test script that stays red until the agent says done is not sent back; only pi w
 (the interactive TUI was verified with scripted models).
 Conclusions: `decisions/conclusions/CONCLUSION_20261002_COLAB_DABSTEP_V37.md`, `CONCLUSION_20261002_COLAB_TASK3_V37.md`,
 `CONCLUSION_20261003_VACANTDEV_TASK3_INTERIM.md`, `CONCLUSION_20260925_ZERO_CONFIG_DABSTEP.md`, `CONCLUSION_20260926_ZERO_CONFIG_V3_LOCAL.md`.
+
+## Wrapping a task with `vacant do` (isolated workspace, fixed tests, receipts)
+
+If you do not want to install persistent hooks, wrap a single run with `vacant do` (zero-contract restart mode). It runs a baseline check before the agent starts, copies the project into an isolated workspace for the agent to edit, restores kept-fixed test and config files before every check, writes the delivered attempt back to your project, and signs a receipt.
+
+```bash
+vacant do claude --prompt "Fix the failing tests in tests/test_cart.py without editing test files"
+vacant do claude --prompt-file task.md
+vacant do --cmd 'devin -p -- {prompt}' --prompt "Fix the failing tests"   # any CLI agent ({prompt} is safely substituted)
+vacant do claude --prompt "Fix the API" --check "npm run test:ci" --protect "fixtures/**"
+vacant do claude --prompt "Fix the API" --attempt-timeout 600 --timeout 1800 --stream
+```
+
+### Common flags
+
+| Flag | Purpose |
+|---|---|
+| `--cmd '<command>'` | Run any external CLI (e.g. Devin or a custom script); `{prompt}` receives the task prompt and `{workspace}` receives the isolated copy path |
+| `--prompt-file <file>` | Read the task prompt from a file instead of `--prompt` |
+| `--check '<command>'` | Custom shell command used as acceptance (exit `0` = pass); when omitted, Vacant auto-detects pytest / unittest / npm / etc. |
+| `--protect <path_or_glob>` | Extra file, directory, or glob to keep fixed (repeatable): restored before every check and never written back |
+| `--attempt-timeout <sec>` | Per-attempt time limit (default `600` s); cuts off a single attempt when reached |
+| `--timeout <sec>` | Total run budget across all attempts (default `1800` s, up to 3 attempts; each attempt stays within the remaining budget) |
+| `--stream` | Stream agent stdout/stderr directly to the terminal while running (off by default) |
+
+> **cargo and go: experimental support.** The basic cases were tested live and work (a correct fix is accepted, a wrong one rejected, the baseline is judged, tampering with a test file or the manifest is caught). It gets these wrong: `Cargo.lock` / `go.sum` are not kept fixed (changes are written back; a broken one makes even a correct fix fail); cargo auto-detection keeps only the root `Cargo.toml` fixed; a `go.work` added by the agent enters the check and can make a correct fix fail; a deliberately added `build.rs` (cargo) or a new test file with a `TestMain` (go) can make a wrong implementation pass. Details and repros: [`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md) items 15–19; fixes are planned for 0.9.3.
+
+### Exit codes
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Acceptance passed and was written back (or the project had no executable acceptance and ran once) |
+| `40` | Not all acceptance checks passed after all attempts; the best (or latest) attempt was written to your project, with the first failing test and reason printed |
+| `43` | Environment or conflict void (project not writable, unreadable files, acceptance runner cannot start, `node_modules` modified, or write-back overlapped concurrent project edits); **nothing was written back** |
+| `130` | Interrupted (Ctrl-C / `SIGINT` / `SIGTERM`): agent process group and detached descendants killed, **project unchanged**, signed receipt recorded as `interrupted` |
+
+### Watching output, where files & receipts live, and summary markers
+
+- **Watching live agent output**: Each attempt prints the path to `attempt_N/logs/agent_stdout.log` so you can follow it with `tail -f <path>`, or pass `--stream` to stream stdout/stderr directly to the terminal.
+- **Workspaces and results**: Per-attempt workspaces, logs, and `result.json` are stored under `$VACANT_WORK/restart-*/` (default `~/.vacant-work/`). After an interrupt, that directory is kept for inspection and is safe to delete.
+- **Signed receipts and audit**: Ed25519 signature chains live in `$VACANT_HOME/trace/projects/<project_key>/chain.ndjson` (default `~/.vacant/`). Inspect them with `vacant audit list` and `vacant audit show <record_id>` (which displays per-attempt results and the first failing test when recorded).
+- **Meaning of `N/M` and `+` / `~` / `-`**: `N/M` means `passed/total` tests (e.g. `8/9` = 8 of 9 passed; exit-code-only checks such as `npm` or `--check` report pass/fail only with no per-test count). In the changed-files list, `+` = added, `~` = modified, `-` = deleted.
+
+> **Honest boundary (do not assume restart boosts strong cloud models the same way)**: Strong cloud agents usually pass on the first attempt (in 8 real-agent runs across Claude Code and Devin: the 6 on projects with tests all passed on attempt 1; the other 2 were projects with no tests, so nothing was checked). For them, Vacant's value is the **baseline check, kept-fixed tests, and signed receipts**; the restart pass-rate gain is mainly on **weaker local models**.
 
 ## Plugging into your agent: pi / Claude Code / OpenCode / Codex (from 2026-09-24)
 
@@ -240,17 +285,17 @@ vacant selftest          # first, confirm this install is alive (end-to-end loop
 vacant demo gate         # then watch the gate refuse one delivery
 ```
 
-Verbatim output of `vacant selftest` (vacant-dev, Ubuntu 24.04 / Python 3.12.3, **0.3 s**):
+Verbatim output of `vacant selftest` (Ubuntu 24.04 / Python 3.12.3, **0.2 s**):
 
 ```
-端到端迴圈    : ✓（6 次呼叫無例外，4/6 答對）
+端到端迴圈    : ✓（6 次呼叫無例外，1/6 答對）
 expert 鏈驗   : ✓
 requester 鏈驗: ✓
-暫存目錄      : /tmp/vacant-selftest-_bqraq82
+暫存目錄      : /tmp/vacant-selftest-gbx7ueav
 ```
 
-⚠ **`4/6` is neither a criterion nor a performance number** (the same version prints
-`3/6` on macOS). `selftest` checks that the end-to-end loop throws nothing and that both
+⚠ **`1/6` is neither a criterion nor a performance number** (it varies across runs and
+platforms). `selftest` checks that the end-to-end loop throws nothing and that both
 signature chains verify; how many answers were right does not count.
 
 **No clone needed.** (Since 2026-09-18 the gate's judgement layer lives inside the package —
@@ -612,7 +657,7 @@ with per-step timings, is
 | `--suite 不可以在工作區底下（… ⊂ …）：agent 改得到的驗收不是驗收。… 停。` | a **fail-closed** guard, not a typo in your path | keep the authoritative suite **outside** the workspace; copy a version in if the agent should see one |
 | `vacant run` exits `22` (`infra_void`) | infrastructure broke, and **neither delivery nor refusal is recorded**. The most common cause is a relative path after `--`: the launcher spawns with `cwd=<workspace>`, so it resolves under the workspace | use an absolute path after `--` |
 | your agent is wired up but `requests_seen` is `0` | that model channel **was not mediated** (the framework keeps its base url in a config file), or that run made no model call at all. **There is no error message** — and every other field of that run will look exactly like a legitimate refuse cell (the live specimen in honest boundary 23) | see "Wiring the five agents"; the single source of truth for the variable list is `vacant_network/vrun/envmap.py` |
-| the "correct answers" count printed by `vacant selftest` changes between runs | it is not a criterion (Linux prints `4/6`, macOS `3/6`) | only look at whether the three `✓` lines all passed |
+| the "correct answers" count printed by `vacant selftest` changes between runs | it is not a criterion (varies by environment, e.g. `1/6`, `3/6`) | only look at whether the three `✓` lines all passed |
 | `upstreams_defaulted` is missing from `run_RUN-ON.json` | **`vacant-network` 0.7.0 on PyPI does not have those two fields yet**; repo HEAD does — the version was not bumped | install from source (`pip install -e .`) if you need that field |
 | Windows | **not measured at all**, and `vacant_network/checks.py` has no usable Windows sandbox branch | use Linux / macOS, or a container |
 

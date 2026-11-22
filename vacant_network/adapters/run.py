@@ -37,6 +37,8 @@ import pathlib
 import shutil
 import signal
 import subprocess
+import sys
+import threading
 import time
 from typing import Any, Callable
 
@@ -257,9 +259,39 @@ def _wait_budget(proc: subprocess.Popen, out_p: pathlib.Path, timeout_s: float,
     return rc, budget, tool_calls, tokens, timed_out
 
 
+def _tee_pipe(src_pipe: Any, dst_file: Any, term_stream: Any) -> None:
+    """Copy bytes from a subprocess PIPE to both a log file and a terminal stream."""
+    fd = src_pipe.fileno()
+    try:
+        while True:
+            chunk = os.read(fd, 4096)
+            if not chunk:
+                break
+            dst_file.write(chunk)
+            dst_file.flush()
+            try:
+                buf = getattr(term_stream, "buffer", None)
+                if buf is not None:
+                    buf.write(chunk)
+                    buf.flush()
+                else:
+                    term_stream.write(chunk.decode("utf-8", errors="replace"))
+                    term_stream.flush()
+            except OSError:
+                pass
+    except OSError:
+        pass
+    finally:
+        try:
+            src_pipe.close()
+        except OSError:
+            pass
+
+
 def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
               log_dir: pathlib.Path,
-              max_tool_calls: int | None = None, max_tokens: int | None = None
+              max_tool_calls: int | None = None, max_tokens: int | None = None,
+              stream: bool = False
               ) -> dict[str, Any]:
     """跑 agent，回 rc／timed_out／wall_ms／日誌路徑。
 
@@ -271,6 +303,7 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
     觸發時 `budget_exceeded`＝`"tool_calls"` 或 `"tokens"`，否則 None；
     `observed_tool_calls`／`observed_tokens` 是實際量到的值，未啟用輪詢＝None（沒量就是 None，不填 0）。
     輪詢迴圈同時照舊守 `timeout_s`（逾時＝`timed_out=True`，語義與以前相同）。
+    `stream=True` 時同時把 agent 的 stdout／stderr 即時串流到終端機並寫入日誌檔（預設 False，不改預設行為）。
     """
     env = {**os.environ, **launch.env, "PWD": str(workspace)}
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -283,13 +316,25 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
     observed_tool_calls: int | None = None
     observed_tokens: int | None = None
     with out_p.open("wb") as out, err_p.open("wb") as err:
+        p_stdout = subprocess.PIPE if stream else out
+        p_stderr = subprocess.PIPE if stream else err
         try:
             proc = subprocess.Popen(launch.argv, cwd=str(workspace), env=env,
-                                    stdin=subprocess.DEVNULL, stdout=out, stderr=err,
+                                    stdin=subprocess.DEVNULL, stdout=p_stdout, stderr=p_stderr,
                                     start_new_session=True)
         except OSError as e:
             spawn_error = f"{type(e).__name__}: {e}"
         else:
+            pumps: list[threading.Thread] = []
+            if stream:
+                assert proc.stdout is not None and proc.stderr is not None
+                for pipe, fobj, tstream in (
+                    (proc.stdout, out, sys.stdout),
+                    (proc.stderr, err, sys.stderr),
+                ):
+                    th = threading.Thread(target=_tee_pipe, args=(pipe, fobj, tstream), daemon=True)
+                    th.start()
+                    pumps.append(th)
             if max_tool_calls is None and max_tokens is None:
                 try:
                     rc = proc.wait(timeout=timeout_s)
@@ -305,6 +350,8 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
                         proc.wait(timeout=5)
                     except Exception:  # noqa: BLE001
                         pass
+                    for th in pumps:
+                        th.join(timeout=1.0)
                     raise
             else:
                 try:
@@ -318,8 +365,12 @@ def run_agent(launch: Launch, *, workspace: pathlib.Path, timeout_s: float,
                         proc.wait(timeout=5)
                     except Exception:  # noqa: BLE001
                         pass
+                    for th in pumps:
+                        th.join(timeout=1.0)
                     raise
             _kill_group(proc)
+            for th in pumps:
+                th.join(timeout=5.0)
     return {"rc": rc, "timed_out": timed_out, "wall_ms": int((time.time() - t0) * 1000),
             "spawn_error": spawn_error, "stdout_log": str(out_p), "stderr_log": str(err_p),
             "budget_exceeded": budget_exceeded,

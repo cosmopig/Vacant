@@ -269,6 +269,7 @@ def run_demo(root: pathlib.Path, *, sandbox: str = "auto",
     say()
     say("vacant demo gate — 零設定、零模型端點、零 API key、零網路。")
     say("               一隻假 agent，一道真閘門，一張真收據。")
+    say(f"寫入目錄　　：{_tilde(paths['root'])}")
     say()
     say(f"客戶的需求　：{_tilde(paths['ws_vacant'] / 'TASK.md')}")
     say("　　　　　　　  solution.py 要有 add(a, b) 與 mul(a, b)")
@@ -428,6 +429,9 @@ def run_demo(root: pathlib.Path, *, sandbox: str = "auto",
 
 
 def default_root() -> pathlib.Path:
+    vh = os.environ.get("VACANT_HOME")
+    if vh:
+        return pathlib.Path(vh).expanduser() / "demo-gate"
     return pathlib.Path.home() / ".vacant-run" / "demo-gate"
 
 

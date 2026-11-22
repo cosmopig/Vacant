@@ -202,6 +202,23 @@ _SECRET_VAL_RE = re.compile(
 )
 
 _UNITTEST_RUNNER = r"""
+def _fp(head, body):
+    # rc6：第一個沒過的測試名稱放在最前面；太長時保留名稱＋尾端（斷言在尾端），不再只留尾端把名稱截掉
+    s = str(head) + "\n" + str(body)
+    if len(s) <= 800:
+        return s
+    h = str(head)[:200]
+    b = str(body)
+    exc = ""  # 例外那一行（AssertionError: …）常在長 diff 的前面，尾端截掉時單獨留下
+    for ln in b.splitlines():
+        t = ln.strip()
+        tok = t.split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc = t[:240]
+    keep = 800 - len(h) - len(exc) - 10
+    return h + "\n" + (exc + "\n" if exc else "") + "...\n" + b[-max(keep, 100):]
+
+
 def _main():
     import os as _os
     import sys as _sys
@@ -326,7 +343,7 @@ def _main():
             out["unexpected_successes"] += len(res.unexpectedSuccesses)
             probs = res.failures + res.errors
             if probs and out["first_problem"] is None:
-                out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+                out["first_problem"] = _fp(probs[0][0], probs[0][1])
 
     try:
         _sys.stdout.flush()
@@ -353,6 +370,23 @@ _main()
 """
 
 _PYTEST_RUNNER = r"""
+def _fp(head, body):
+    # rc6：第一個沒過的測試名稱放在最前面；太長時保留名稱＋尾端（斷言在尾端），不再只留尾端把名稱截掉
+    s = str(head) + "\n" + str(body)
+    if len(s) <= 800:
+        return s
+    h = str(head)[:200]
+    b = str(body)
+    exc = ""  # 例外那一行（AssertionError: …）常在長 diff 的前面，尾端截掉時單獨留下
+    for ln in b.splitlines():
+        t = ln.strip()
+        tok = t.split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc = t[:240]
+    keep = 800 - len(h) - len(exc) - 10
+    return h + "\n" + (exc + "\n" if exc else "") + "...\n" + b[-max(keep, 100):]
+
+
 def _main():
     import os as _os
     import sys as _sys
@@ -453,6 +487,23 @@ _main()
 """
 
 _BARE_RUNNER = r"""
+def _fp(head, body):
+    # rc6：第一個沒過的測試名稱放在最前面；太長時保留名稱＋尾端（斷言在尾端），不再只留尾端把名稱截掉
+    s = str(head) + "\n" + str(body)
+    if len(s) <= 800:
+        return s
+    h = str(head)[:200]
+    b = str(body)
+    exc = ""  # 例外那一行（AssertionError: …）常在長 diff 的前面，尾端截掉時單獨留下
+    for ln in b.splitlines():
+        t = ln.strip()
+        tok = t.split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc = t[:240]
+    keep = 800 - len(h) - len(exc) - 10
+    return h + "\n" + (exc + "\n" if exc else "") + "...\n" + b[-max(keep, 100):]
+
+
 def _main():
     import os as _os
     import sys as _sys
@@ -546,11 +597,11 @@ def _main():
         except AssertionError:
             out["failures"] += 1
             if out["first_problem"] is None:
-                out["first_problem"] = (label + "\n" + _tb.format_exc(limit=5))[-800:]
+                out["first_problem"] = _fp(label, _tb.format_exc(limit=5))
         except BaseException:
             out["errors"] += 1
             if out["first_problem"] is None:
-                out["first_problem"] = (label + "\n" + _tb.format_exc(limit=5))[-800:]
+                out["first_problem"] = _fp(label, _tb.format_exc(limit=5))
 
     out = {
         "run": 0,
@@ -596,7 +647,7 @@ def _main():
         out["unexpected_successes"] += len(res.unexpectedSuccesses)
         probs = res.failures + res.errors
         if probs and out["first_problem"] is None:
-            out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+            out["first_problem"] = _fp(probs[0][0], probs[0][1])
 
         abort_unavail = False
         for name, obj in list(mod.__dict__.items()):
@@ -640,7 +691,7 @@ def _main():
                     out["run"] += 1
                     out["errors"] += 1
                     if out["first_problem"] is None:
-                        out["first_problem"] = (f"{mod_name}.{cname}.{mname}\n" + _tb.format_exc(limit=5))[-800:]
+                        out["first_problem"] = _fp(f"{mod_name}.{cname}.{mname}", _tb.format_exc(limit=5))
                     continue
                 meth = getattr(inst, mname)
                 if _needs_required_args(meth):
@@ -5911,7 +5962,10 @@ def _parse_junit_xml(xml_path: pathlib.Path) -> tuple[dict[str, Any] | None, str
                     msg = prob.attrib.get("message", "")
                     body = (prob.text or "").strip()
                     detail = body or msg
-                    first = (f"{name}\n{detail}" if name and detail else (detail or name))[-800:]
+                    first = (f"{name}\n{detail}" if name and detail else (detail or name))
+                    if len(first) > 800 and name and detail:  # rc6：保留測試名稱＋尾端
+                        first = name[:200] + "\n...\n" + detail[-(800 - len(name[:200]) - 5):]
+                    first = first[-800:] if not (name and detail) else first
                     break
     if tests_n < 0 or failures < 0 or errors < 0 or skipped < 0:
         return None, "runner_bad_output"
@@ -5991,7 +6045,17 @@ def _tail_logs(out_log: pathlib.Path, err_log: pathlib.Path) -> str | None:
         if err_log.is_file():
             parts.append(err_log.read_bytes())
         text = b"\n".join(p for p in parts if p).decode("utf-8", "replace").strip()
-        return text[-800:] if text else None
+        if not text:
+            return None
+        # rc6：TAP 輸出（node --test 等）的尾端只有統計行；有 `not ok` 就從第一個 `not ok` 那一段取（含它的錯誤區塊）
+        m = re.search(r"^not ok \d+.*$", text, re.M)
+        if m:
+            block = text[m.start():]
+            nxt = re.search(r"^(?:ok \d+|not ok \d+|# Subtest|1\.\.\d+)", block[m.end() - m.start():], re.M)
+            if nxt:
+                block = block[:m.end() - m.start() + nxt.start()]
+            return block.strip()[:800]
+        return text[-800:]
     except OSError:
         return None
 
@@ -6749,6 +6813,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                 "status": a["status"],
                 "tests_tampered": list(a["tests_tampered"]),
                 "snapshot_tree_sha256": _snapshot_tree_sha256(snap),
+                **({"first_problem": a["first_problem"]} if a.get("first_problem") else {}),
             })
         delivered_snap = snaps[delivered_idx] if 0 <= delivered_idx < len(snaps) else None
         wb_entries, wb_non_utf8 = _written_back_entries(project, delivered_snap, changed)
@@ -6796,6 +6861,10 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
         }
         if res.get("unreadable_paths"):
             payload["unreadable_paths"] = list(res["unreadable_paths"])
+        if res.get("interrupted"):
+            payload["interrupted"] = True
+            if res.get("interrupt_signal"):
+                payload["interrupt_signal"] = res["interrupt_signal"]
         payload, payload_non_utf8 = _sanitize_json_obj(payload)
         any_non_utf8 = bool(
             proj_non_utf8 or wb_non_utf8 or payload_non_utf8
@@ -7308,12 +7377,78 @@ def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None,
     return None
 
 
+#: rc6：`vacant do` 在 run() 外面（開始前、結束後）收到的 SIGINT／SIGTERM 名稱；run() 開始時若非空就當成一開始被中斷。
+OUTSIDE_RUN_SIGNALS: list[str] = []
+
+
+class _RestartInterrupted(BaseException):
+    """SIGINT/SIGTERM converted into an exception so restart.run() cleans up processes and writes a receipt."""
+
+    def __init__(self, signum: int) -> None:
+        self.signum = signum
+        try:
+            self.signal_name = signal.Signals(signum).name
+        except ValueError:
+            self.signal_name = f"SIG{signum}"
+        super().__init__(self.signal_name)
+
+
+def _install_restart_signal_handlers() -> dict[int, Any]:
+    old: dict[int, Any] = {}
+
+    def _handle(signum: int, _frame: Any) -> None:
+        raise _RestartInterrupted(signum)
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            old[sig] = signal.signal(sig, _handle)
+        except (ValueError, OSError):
+            pass
+    return old
+
+
+def _defer_restart_signals() -> list[str]:
+    """rc6：寫回與收據這段臨界區內不讓 Ctrl-C／SIGTERM 中途打斷（否則專案會只寫回一半，而中斷訊息卻說「沒有改動」）。
+    收到的訊號只記下名稱，跑完臨界區後照常交件，並在訊息裡說明。回傳的 list 會被就地追加訊號名稱。"""
+    pending: list[str] = []
+
+    def _record(signum: int, _frame: Any) -> None:
+        try:
+            pending.append(signal.Signals(signum).name)
+        except ValueError:
+            pending.append(f"SIG{signum}")
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            signal.signal(sig, _record)
+        except (ValueError, OSError):
+            pass
+    return pending
+
+
+def _ignore_restart_signals() -> None:
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            signal.signal(sig, signal.SIG_IGN)
+        except (ValueError, OSError):
+            pass
+
+
+def _restore_restart_signal_handlers(old: dict[int, Any]) -> None:
+    for sig, h in old.items():
+        try:
+            signal.signal(sig, h)
+        except (ValueError, OSError):
+            pass
+
+
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
         min_attempt_s: float = 60.0, check: str | None = None,
         protect: Sequence[str] | None = None,
         agent: str | None = None,
-        log: Callable[[str], None] | None = None) -> dict:
+        log: Callable[[str], None] | None = None,
+        stream: bool = False) -> dict:
     project = project.resolve()
     _raw_say = log or (lambda m: None)
     say = lambda m: _raw_say(_safe_str(m)[0])  # noqa: E731
@@ -7327,162 +7462,27 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     spent = 0.0
     t0 = time.monotonic()
 
-    # P5：專案內有不可讀的檔案或目錄（chmod 000／docker 留下的 root 檔）⇒ 複製工作區前先停下、明講並寫收據（exit 43）
-    unreadable_paths = _find_unreadable_paths(project, skip_abs=skip_abs)
-    if unreadable_paths:
-        shown_up = ", ".join(unreadable_paths[:10]) + (
-            f", … (+{len(unreadable_paths) - 10} more)" if len(unreadable_paths) > 10 else ""
-        )
-        say(f"cannot read {len(unreadable_paths)} path(s) in the project (permission denied): "
-            f"{shown_up}; stopping before running the agent")
-        empty_spec = AcceptanceSpec(kind="none", command=None)
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
-        res = {
-            "mode": "restart",
-            "project": str(project),
-            "tests": [],
-            "protected": [],
-            "acceptance": empty_spec.to_dict(),
-            "acceptance_integrity": empty_spec.integrity,
-            "acceptance_integrity_reasons": list(empty_spec.integrity_reasons),
-            "interpreter": empty_spec.interpreter,
-            "baseline": None,
-            "baseline_error": None,
-            "unreadable_paths": list(unreadable_paths),
-            "parent_tests_dir": None,
-            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
-            "appeared_during_run": [],
-            "conflicts": [],
-            "write_back_conflicts": [],
-            "outside_changes": [],
-            "protected_outside_changes": [],
-            "acceptance_dependencies_changed": [],
-            "not_delivered": [],
-            "lstat_listing_s": 0.0,
-            "node_modules_changed": [],
-            "node_modules_manifest_s": 0.0,
-            "copy_s": 0.0,
-            "node_modules_copy_s": 0.0,
-            "node_modules_hash_s": 0.0,
-            "max_attempts": max_attempts,
-            "accepted": None,
-            "delivered_attempt": 0,
-            "attempts": [],
-            "changed": changed,
-            "agent_wall_s": 0.0,
-            "total_wall_s": round(time.monotonic() - t0, 1),
-            "run_dir": str(run_dir),
-        }
-        res, res_non_utf8 = _sanitize_json_obj(res)
-        res["non_utf8_paths"] = res_non_utf8
-        if res_non_utf8:
-            res["path_encoding"] = "utf-8-backslashreplace"
-        res["receipt"] = _record_receipt(
-            project=project,
-            prompt=prompt,
-            agent=agent,
-            launch_meta=launch_meta,
-            spec=empty_spec,
-            protected=set(),
-            attempts=attempts,
-            snaps=snaps,
-            delivered_idx=-1,
-            changed=changed,
-            res=res,
-            run_dir=run_dir,
-        )
-        if not res["receipt"].get("recorded"):
-            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
-        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-        return res
-
-    spec = detect_acceptance(project, check=check, protect=protect)
-    originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
-    orig_modes: dict[str, int] = {}
-    for rel in spec.protected:
-        try:
-            orig_modes[rel] = stat.S_IMODE((project / rel).lstat().st_mode) & 0o777
-        except OSError:
-            pass
-    protected = set(originals)
-    py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
-    has_acceptance = spec.kind != "none" and spec.reason is None
-    if not has_acceptance:
-        max_attempts = 1
-        attempt_timeout_s = budget_s
-    parent_tests_dir = _find_parent_with_tests(project) if spec.kind == "none" else None
-
-    # D1：原專案根目錄不可寫 ⇒ 寫回一定會失敗，跑 agent 前先停下並明講（exit 43）
-    if not os.access(str(project), os.W_OK):
-        say(f"project directory is not writable ({project}); write-back would fail, stopping before running the agent")
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
-        res = {
-            "mode": "restart",
-            "project": str(project),
-            "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
-            "protected": sorted(protected),
-            "acceptance": spec.to_dict(),
-            "acceptance_integrity": spec.integrity,
-            "acceptance_integrity_reasons": list(spec.integrity_reasons),
-            "interpreter": spec.interpreter,
-            "baseline": None,
-            "baseline_error": None,
-            "project_not_writable": True,
-            "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
-            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
-            "appeared_during_run": [],
-            "conflicts": [],
-            "write_back_conflicts": [],
-            "outside_changes": [],
-            "protected_outside_changes": [],
-            "acceptance_dependencies_changed": [],
-            "not_delivered": [],
-            "lstat_listing_s": 0.0,
-            "node_modules_changed": [],
-            "node_modules_manifest_s": 0.0,
-            "copy_s": 0.0,
-            "node_modules_copy_s": 0.0,
-            "node_modules_hash_s": 0.0,
-            "max_attempts": max_attempts,
-            "accepted": None,
-            "delivered_attempt": 0,
-            "attempts": [],
-            "changed": changed,
-            "agent_wall_s": 0.0,
-            "total_wall_s": round(time.monotonic() - t0, 1),
-            "run_dir": str(run_dir),
-        }
-        res, res_non_utf8 = _sanitize_json_obj(res)
-        res["non_utf8_paths"] = res_non_utf8
-        if res_non_utf8:
-            res["path_encoding"] = "utf-8-backslashreplace"
-        res["receipt"] = _record_receipt(
-            project=project,
-            prompt=prompt,
-            agent=agent,
-            launch_meta=launch_meta,
-            spec=spec,
-            protected=protected,
-            attempts=attempts,
-            snaps=snaps,
-            delivered_idx=-1,
-            changed=changed,
-            res=res,
-            run_dir=run_dir,
-        )
-        if not res["receipt"].get("recorded"):
-            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
-        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-        return res
-
-    # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
-    # R2/R3：在 Linux 上於整個 run() 期間啟用 PR_SET_CHILD_SUBREAPER，使 setsid/env -i 脫離子孫
-    # 全部收歸本行程底下，可列出並 SIGKILL 清理；結束時在 finally 還原。
-    prev_subreaper = _set_child_subreaper(True) if _linux_proc_available() else None
+    prev_subreaper: int | None = None
     known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
     detached_records: list[dict[str, Any]] | None = [] if _linux_proc_available() else None
     start_snap: _Snapshot | None = None
     start_copy: pathlib.Path | None = None
+    cur_spec: AcceptanceSpec = AcceptanceSpec(kind="none", command=None)
+    cur_protected: set[str] = set()
+    cur_py_tests: list[str] = []
+    cur_originals: dict[str, bytes] = {}
+    cur_parent_tests_dir: pathlib.Path | None = None
+    baseline_rec: dict[str, Any] | None = None
+    cur_attempt_k: int | None = None
+    cur_attempt_ws: pathlib.Path | None = None
+    cur_attempt_t0: float | None = None
+    cur_attempt_limit_s: float | None = None
+    nm_changed: list[str] = []
+    nm_copy_s = 0.0
+    copy_s = 0.0
+    nm_manifest_s = 0.0
+    nm_hash_s = 0.0
+    lstat_listing_s = 0.0
 
     def _reap_phase(phase: str, label: str = "") -> list[dict[str, Any]] | None:
         nonlocal detached_records
@@ -7500,16 +7500,181 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             )
         return found
 
+    # rc6：先記下原本的處理器（getsignal 沒有副作用），進了 try 才裝會丟例外的處理器——
+    # 之前裝在函式前段，裝好到進 try 之間收到訊號會沒人接（結束碼 1、traceback、沒有收據）。
+    old_sig_handlers: dict[int, Any] = {}
+    for _sig in (signal.SIGINT, signal.SIGTERM):
+        _h = signal.getsignal(_sig)
+        if _h is not None:
+            old_sig_handlers[_sig] = _h
     try:
-        baseline_rec: dict[str, Any] | None = None
+        _install_restart_signal_handlers()
+        # 呼叫端（`vacant do`）在 run() 開始前、處理器還沒裝上時記下的訊號：當成一開始就被中斷（什麼都還沒做）
+        if OUTSIDE_RUN_SIGNALS:
+            _sig_name = OUTSIDE_RUN_SIGNALS[0]
+            OUTSIDE_RUN_SIGNALS.clear()
+            raise _RestartInterrupted(getattr(signal, _sig_name, signal.SIGINT))
+        # P5：專案內有不可讀的檔案或目錄（chmod 000／docker 留下的 root 檔）⇒ 複製工作區前先停下、明講並寫收據（exit 43）
+        unreadable_paths = _find_unreadable_paths(project, skip_abs=skip_abs)
+        if unreadable_paths:
+            shown_up = ", ".join(unreadable_paths[:10]) + (
+                f", … (+{len(unreadable_paths) - 10} more)" if len(unreadable_paths) > 10 else ""
+            )
+            say(f"cannot read {len(unreadable_paths)} path(s) in the project (permission denied): "
+                f"{shown_up}; stopping before running the agent")
+            empty_spec = AcceptanceSpec(kind="none", command=None)
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+            res = {
+                "mode": "restart",
+                "project": str(project),
+                "tests": [],
+                "protected": [],
+                "acceptance": empty_spec.to_dict(),
+                "acceptance_integrity": empty_spec.integrity,
+                "acceptance_integrity_reasons": list(empty_spec.integrity_reasons),
+                "interpreter": empty_spec.interpreter,
+                "baseline": None,
+                "baseline_error": None,
+                "unreadable_paths": list(unreadable_paths),
+                "parent_tests_dir": None,
+                "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+                "appeared_during_run": [],
+                "conflicts": [],
+                "write_back_conflicts": [],
+                "outside_changes": [],
+                "protected_outside_changes": [],
+                "acceptance_dependencies_changed": [],
+                "not_delivered": [],
+                "lstat_listing_s": 0.0,
+                "node_modules_changed": [],
+                "node_modules_manifest_s": 0.0,
+                "copy_s": 0.0,
+                "node_modules_copy_s": 0.0,
+                "node_modules_hash_s": 0.0,
+                "max_attempts": max_attempts,
+                "accepted": None,
+                "delivered_attempt": 0,
+                "attempts": [],
+                "changed": changed,
+                "agent_wall_s": 0.0,
+                "total_wall_s": round(time.monotonic() - t0, 1),
+                "run_dir": str(run_dir),
+            }
+            res, res_non_utf8 = _sanitize_json_obj(res)
+            res["non_utf8_paths"] = res_non_utf8
+            if res_non_utf8:
+                res["path_encoding"] = "utf-8-backslashreplace"
+            res["receipt"] = _record_receipt(
+                project=project,
+                prompt=prompt,
+                agent=agent,
+                launch_meta=launch_meta,
+                spec=empty_spec,
+                protected=set(),
+                attempts=attempts,
+                snaps=snaps,
+                delivered_idx=-1,
+                changed=changed,
+                res=res,
+                run_dir=run_dir,
+            )
+            if not res["receipt"].get("recorded"):
+                res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+            (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+            return res
+
+        spec = detect_acceptance(project, check=check, protect=protect)
+        cur_spec = spec
+        originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
+        cur_originals = originals
+        orig_modes: dict[str, int] = {}
+        for rel in spec.protected:
+            try:
+                orig_modes[rel] = stat.S_IMODE((project / rel).lstat().st_mode) & 0o777
+            except OSError:
+                pass
+        protected = set(originals)
+        cur_protected = protected
+        py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
+        cur_py_tests = py_tests
+        has_acceptance = spec.kind != "none" and spec.reason is None
+        if not has_acceptance:
+            max_attempts = 1
+            attempt_timeout_s = budget_s
+        parent_tests_dir = _find_parent_with_tests(project) if spec.kind == "none" else None
+        cur_parent_tests_dir = parent_tests_dir
+
+        # D1：原專案根目錄不可寫 ⇒ 寫回一定會失敗，跑 agent 前先停下並明講（exit 43）
+        if not os.access(str(project), os.W_OK):
+            say(f"project directory is not writable ({project}); write-back would fail, stopping before running the agent")
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+            res = {
+                "mode": "restart",
+                "project": str(project),
+                "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
+                "protected": sorted(protected),
+                "acceptance": spec.to_dict(),
+                "acceptance_integrity": spec.integrity,
+                "acceptance_integrity_reasons": list(spec.integrity_reasons),
+                "interpreter": spec.interpreter,
+                "baseline": None,
+                "baseline_error": None,
+                "project_not_writable": True,
+                "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
+                "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+                "appeared_during_run": [],
+                "conflicts": [],
+                "write_back_conflicts": [],
+                "outside_changes": [],
+                "protected_outside_changes": [],
+                "acceptance_dependencies_changed": [],
+                "not_delivered": [],
+                "lstat_listing_s": 0.0,
+                "node_modules_changed": [],
+                "node_modules_manifest_s": 0.0,
+                "copy_s": 0.0,
+                "node_modules_copy_s": 0.0,
+                "node_modules_hash_s": 0.0,
+                "max_attempts": max_attempts,
+                "accepted": None,
+                "delivered_attempt": 0,
+                "attempts": [],
+                "changed": changed,
+                "agent_wall_s": 0.0,
+                "total_wall_s": round(time.monotonic() - t0, 1),
+                "run_dir": str(run_dir),
+            }
+            res, res_non_utf8 = _sanitize_json_obj(res)
+            res["non_utf8_paths"] = res_non_utf8
+            if res_non_utf8:
+                res["path_encoding"] = "utf-8-backslashreplace"
+            res["receipt"] = _record_receipt(
+                project=project,
+                prompt=prompt,
+                agent=agent,
+                launch_meta=launch_meta,
+                spec=spec,
+                protected=protected,
+                attempts=attempts,
+                snaps=snaps,
+                delivered_idx=-1,
+                changed=changed,
+                res=res,
+                run_dir=run_dir,
+            )
+            if not res["receipt"].get("recorded"):
+                res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+            (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+            return res
+
+        # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
+        # R2/R3：在 Linux 上於整個 run() 期間啟用 PR_SET_CHILD_SUBREAPER，使 setsid/env -i 脫離子孫
+        # 全部收歸本行程底下，可列出並 SIGKILL 清理；結束時在 finally 還原。
+        prev_subreaper = _set_child_subreaper(True) if _linux_proc_available() else None
+        known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
         nm_root = _nm_root(project)
         nm_start: dict[str, tuple] | None = None
         nm_sha_start: dict[str, str | None] | None = None
-        nm_changed: list[str] = []
-        nm_copy_s = 0.0
-        copy_s = 0.0
-        nm_manifest_s = 0.0
-        nm_hash_s = 0.0
         nm_reflink_fallback = False
         nm_reflink_warned = False
         baseline_error: str | None = None
@@ -7656,11 +7821,23 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             launch_meta.append((list(launch.argv), dict(launch.env)))
             attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
             attempt_limit_s = min(attempt_timeout_s, remaining)
+            cur_attempt_k = k
+            cur_attempt_ws = ws
+            cur_attempt_t0 = time.monotonic()
+            cur_attempt_limit_s = attempt_limit_s
+            attempt_log_dir = attempt_dir / "logs"
+            attempt_log_dir.mkdir(parents=True, exist_ok=True)
+            attempt_stdout_log = attempt_log_dir / "agent_stdout.log"
+            attempt_stdout_log.touch(exist_ok=True)
             say(f"attempt {k} of {max_attempts} (up to {attempt_limit_s:.0f}s)")
+            if stream:
+                say(f"attempt {k} output: {attempt_stdout_log} (streaming to terminal; can also tail -f {shlex.quote(str(attempt_stdout_log))})")
+            else:
+                say(f"attempt {k} output: {attempt_stdout_log} (you can run `tail -f {shlex.quote(str(attempt_stdout_log))}` to follow)")
             # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
             try:
                 r = run_agent(attempt_launch, workspace=ws, timeout_s=min(attempt_timeout_s, remaining),
-                              log_dir=attempt_dir / "logs")
+                              log_dir=attempt_log_dir, stream=stream)
             finally:
                 if launch.cleanup:
                     launch.cleanup()
@@ -7844,6 +8021,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         conflicts: list[str] = []
         write_back_conflicts: list[str] = []
         outside_changes: list[str] = []
+        # rc6：從這裡起到 result.json 寫完是臨界區——中斷不再走「專案沒有被改動」的路徑（見 _defer_restart_signals）
+        deferred_signals = _defer_restart_signals()
         if snaps[d] is not None and not nm_changed:
             t_ls = time.monotonic()
             orig_lstat_before_wb = _project_lstat_listing(project, skip_abs=skip_abs, skip_root_nm=(nm_root is not None))
@@ -7995,6 +8174,96 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         )
         if not res["receipt"].get("recorded"):
             res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+        if deferred_signals:
+            res["interrupt_deferred"] = deferred_signals[0]
+        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+        return res
+    except (_RestartInterrupted, KeyboardInterrupt) as exc:
+        # rc6(1): Ctrl-C / SIGTERM — ignore further signals during cleanup, kill detached descendants,
+        # never modify the project, record a signed receipt marked interrupted, and return cleanly (exit 130).
+        _ignore_restart_signals()
+        sig_name = exc.signal_name if isinstance(exc, _RestartInterrupted) else "SIGINT"
+        int_detached = _reap_phase("interrupted")
+        if cur_attempt_k is not None and len(attempts) < cur_attempt_k:
+            wall_k = round(time.monotonic() - cur_attempt_t0, 1) if cur_attempt_t0 is not None else 0.0
+            spent += wall_k
+            attempts.append({
+                "attempt": cur_attempt_k,
+                "accept": None,
+                "passed": None,
+                "run": None,
+                "status": "interrupted",
+                "acceptance_kind": cur_spec.kind,
+                "tests_tampered": [],
+                "config_ignored": [],
+                "first_problem": f"interrupted ({sig_name})",
+                "rc": None,
+                "timed_out": False,
+                "time_limit_s": round(cur_attempt_limit_s, 1) if cur_attempt_limit_s is not None else None,
+                "wall_s": wall_k,
+                "spawn_error": None,
+                "workspace": str(cur_attempt_ws) if cur_attempt_ws is not None else None,
+                "detached_processes": int_detached,
+            })
+            snaps.append(None)
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+        res = {
+            "mode": "restart",
+            "project": str(project),
+            "interrupted": True,
+            "interrupt_signal": sig_name,
+            "tests": cur_py_tests if cur_spec.kind.startswith("python_") else sorted(cur_originals),
+            "protected": sorted(cur_protected),
+            "acceptance": cur_spec.to_dict(),
+            "acceptance_integrity": cur_spec.integrity,
+            "acceptance_integrity_reasons": list(cur_spec.integrity_reasons),
+            "interpreter": cur_spec.interpreter,
+            "baseline": baseline_rec,
+            "baseline_error": None,
+            "parent_tests_dir": str(cur_parent_tests_dir) if cur_parent_tests_dir is not None else None,
+            "node_modules_changed": nm_changed[:200],
+            "node_modules_manifest_s": round(nm_manifest_s, 3),
+            "copy_s": round(copy_s, 3),
+            "node_modules_copy_s": round(nm_copy_s, 3),
+            "node_modules_hash_s": round(nm_hash_s, 3),
+            "appeared_during_run": [],
+            "conflicts": [],
+            "write_back_conflicts": [],
+            "outside_changes": [],
+            "protected_outside_changes": [],
+            "lstat_listing_s": round(lstat_listing_s, 3),
+            "detached_processes": detached_records,
+            "acceptance_dependencies_changed": [],
+            "not_delivered": [],
+            "max_attempts": max_attempts,
+            "accepted": None,
+            "delivered_attempt": 0,
+            "attempts": attempts,
+            "changed": changed,
+            "agent_wall_s": round(spent, 1),
+            "total_wall_s": round(time.monotonic() - t0, 1),
+            "run_dir": str(run_dir),
+        }
+        res, res_non_utf8 = _sanitize_json_obj(res)
+        res["non_utf8_paths"] = res_non_utf8
+        if res_non_utf8:
+            res["path_encoding"] = "utf-8-backslashreplace"
+        res["receipt"] = _record_receipt(
+            project=project,
+            prompt=prompt,
+            agent=agent,
+            launch_meta=launch_meta,
+            spec=cur_spec,
+            protected=cur_protected,
+            attempts=attempts,
+            snaps=snaps,
+            delivered_idx=-1,
+            changed=changed,
+            res=res,
+            run_dir=run_dir,
+        )
+        if not res["receipt"].get("recorded"):
+            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
         (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         return res
     finally:
@@ -8004,6 +8273,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             _rmtree_force(start_copy)
         if prev_subreaper is not None:
             _set_child_subreaper(bool(prev_subreaper))
+        _restore_restart_signal_handlers(old_sig_handlers)
 
 
 def _time_limit_notice(res: dict) -> str:
@@ -8130,6 +8400,129 @@ def _short_integrity_code(reason: str) -> str:
     return slug[:36] or "untraced"
 
 
+def _format_first_problem_lines(fp: str) -> tuple[str | None, list[str]]:
+    """Extract a concise test name (if present) and 1-2 lines of failure reason from `first_problem`."""
+    lines = [ln.strip() for ln in str(fp).splitlines() if ln.strip()]
+    if not lines:
+        return None, []
+    first = lines[0]
+    rest = lines[1:]
+    if first.startswith("not ok "):
+        # TAP（node --test 等）：`not ok 1 - 名稱`，原因在 YAML 區塊的 `error:` 底下
+        name = first.split(" - ", 1)[1] if " - " in first else first
+        reason: list[str] = []
+        in_err = False
+        for ln in rest:
+            if ln.startswith("error:"):
+                v = ln[len("error:"):].strip().strip("'\"")
+                if v and v not in ("|-", "|", ">-"):
+                    reason.append(v)
+                in_err = True
+                continue
+            if in_err:
+                if re.match(r"^[A-Za-z_]+:( |$)", ln) or ln == "...":
+                    break
+                reason.append(ln)
+        return name[:200], [r[:240] for r in reason[:2]]
+    if not rest:
+        return None, [first[:240]]
+
+    # Detect unittest/pytest style where line 0 is the failing test identifier
+    has_tb = any(
+        ln.startswith("Traceback (most recent call last):")
+        or ln.startswith("E   ")
+        or ln.startswith(">   ")
+        or ln.startswith("AssertionError")
+        for ln in rest
+    )
+    looks_like_test_id = (
+        has_tb
+        or first.startswith("test_")
+        or "::test_" in first
+        or (".test_" in first and len(first) <= 200)
+    )
+    if looks_like_test_id:
+        test_name = first[:200]
+        # Prefer pytest E-lines or Python exception/assertion lines at the end of the traceback
+        e_lines = [ln[4:].strip() for ln in rest if ln.startswith("E   ") and ln[4:].strip()]
+        if e_lines:
+            return test_name, [ln[:240] for ln in e_lines[:2]]
+        # Find the final error/exception line (e.g. AssertionError: 10 != 12)
+        err_idx: int | None = None
+        for idx in range(len(rest) - 1, -1, -1):
+            head_tok = rest[idx].split(":", 1)[0].strip()
+            if head_tok.endswith(("Error", "Exception", "Failure")) or head_tok == "AssertionError":
+                err_idx = idx
+                break
+        if err_idx is not None:
+            picked: list[str] = []
+            # Include the failing code line right above the exception if it isn't a File "..." frame
+            if err_idx > 0 and not rest[err_idx - 1].startswith("File "):
+                picked.append(rest[err_idx - 1][:240])
+            picked.append(rest[err_idx][:240])
+            return test_name, picked[:2]
+        return test_name, [ln[:240] for ln in rest[-2:]]
+
+    return None, [ln[:240] for ln in lines[-2:]]
+
+
+def _failure_details_notice(res: dict) -> str:
+    """rc6(3): Detailed breakdown when acceptance fails and a best attempt was delivered."""
+    if (res.get("accepted") is not False
+            or res.get("interrupted")
+            or res.get("project_not_writable")
+            or res.get("unreadable_paths")
+            or res.get("baseline_error")
+            or res.get("node_modules_changed")
+            or res.get("write_back_conflicts")
+            or res.get("agent_error")):
+        return ""
+    atts = [a for a in (res.get("attempts") or []) if isinstance(a, dict)]
+    if not atts:
+        return ""
+    d_num = res.get("delivered_attempt")
+    has_counts = any(a.get("run") is not None for a in atts)
+    parts: list[str] = []
+    for a in atts:
+        anum = a.get("attempt")
+        if a.get("run") is not None:
+            seg = f"#{anum} {a.get('passed') or 0}/{a.get('run')} {'PASS' if a.get('accept') else 'FAIL'}"
+        else:
+            seg = f"#{anum} {'PASS' if a.get('accept') else 'FAIL'} (status={a.get('status')})"
+        if a.get("timed_out"):
+            seg += " [timed out]"
+        if anum == d_num:
+            seg += " [delivered]"
+        parts.append(seg)
+    out = ""
+    if has_counts:
+        out += f"\n  attempts (passed/total): {', '.join(parts)}"
+    else:
+        out += f"\n  attempts: {', '.join(parts)}"
+
+    d_idx = (d_num or len(atts)) - 1
+    d_att = atts[d_idx] if 0 <= d_idx < len(atts) else atts[-1]
+    fp = d_att.get("first_problem")
+    if fp and d_att.get("status") != "load_error":
+        test_name, reason_lines = _format_first_problem_lines(str(fp))
+        # 只有 ^／~ 的行是 Python traceback 的位置標記，對新手沒有資訊，略過
+        reason_lines = [ln for ln in reason_lines if ln.strip(" ^~")]
+        if test_name:
+            out += f"\n  first failing test: {test_name}"
+            for rln in reason_lines[:2]:
+                out += f"\n    {rln}"
+        elif reason_lines:
+            out += f"\n  first failure: {reason_lines[0]}"
+            for rln in reason_lines[1:2]:
+                out += f"\n    {rln}"
+
+    out += (
+        "\n  exit code 40: acceptance did not pass "
+        "(the delivered attempt above has been written to your project)."
+    )
+    return out
+
+
 def _load_error_notice(res: dict) -> str:
     """rc5 定案收尾：測試載入失敗（load_error）時，把 ImportError／ModuleNotFoundError 那一行印進交件訊息。
 
@@ -8150,6 +8543,12 @@ def _load_error_notice(res: dict) -> str:
         txt = str(a.get("first_problem") or "")
         lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
         pick = next((ln for ln in reversed(lines) if "Error" in ln.split(":", 1)[0]), lines[-1] if lines else "")
+        if pick and pick.split(":", 1)[0] in ("SyntaxError", "IndentationError", "TabError"):
+            # 語法錯誤的位置就在測試檔裡：帶上檔名與行號（traceback 最後一個 File 行）
+            locs = re.findall(r'File "([^"]+)", line (\d+)', txt)
+            if locs:
+                f_, n_ = locs[-1]
+                pick = f"{pick} ({os.path.basename(f_)}, line {n_})"
         if pick:
             return f"\n  tests could not be loaded: {pick[:300]}"
         return ""
@@ -8157,6 +8556,16 @@ def _load_error_notice(res: dict) -> str:
 
 
 def summary(res: dict) -> str:
+    """交件訊息。rc6：寫回途中收到的 Ctrl-C／SIGTERM 被延後到寫回完成（不留下寫一半的專案），在訊息最後說明。"""
+    out = _summary_body(res)
+    sig = res.get("interrupt_deferred")
+    if sig:
+        out += (f"\n  {sig} arrived while Vacant was writing the result into your project; it finished writing "
+                f"first so the project is not left half-written (the outcome above is final).")
+    return out
+
+
+def _summary_body(res: dict) -> str:
     res, _ = _sanitize_json_obj(res)
     n = len(res["attempts"])
     ch = res["changed"]
@@ -8169,6 +8578,24 @@ def summary(res: dict) -> str:
     protected = list(res.get("protected") if "protected" in res else (res.get("tests") or []))
     baseline = res.get("baseline") if isinstance(res.get("baseline"), dict) else None
     baseline_err = res.get("baseline_error")
+
+    if res.get("interrupted"):
+        sig_txt = f" ({res['interrupt_signal']})" if res.get("interrupt_signal") else ""
+        out = (
+            f"[vacant] interrupted{sig_txt}; project unchanged. "
+            f"This run's working directory is at {res.get('run_dir')} (safe to delete)."
+        )
+        rcpt_err = res.get("receipt_error")
+        if not rcpt_err:
+            rcpt_obj = res.get("receipt")
+            if isinstance(rcpt_obj, dict) and rcpt_obj.get("recorded") is False:
+                rcpt_err = rcpt_obj.get("error") or "unknown error"
+        if rcpt_err:
+            out = (
+                f"WARNING: the signed receipt for this run could NOT be written ({rcpt_err}); "
+                f"this run has no verifiable record\n{out}"
+            )
+        return out
 
     if res.get("project_not_writable"):
         head = (
@@ -8233,21 +8660,36 @@ def summary(res: dict) -> str:
         if a.get("run") is not None:
             detail = f"{a['passed']}/{a['run']} tests"
         else:
-            detail = "exit 0"
-        head = (f"[vacant] acceptance passed on attempt {res['delivered_attempt']} "
-                f"(up to {res.get('max_attempts', n)} allowed; {detail}); delivered that attempt. {files}.")
+            detail = "exit 0; this check reports pass/fail only, no per-test count"
+        if baseline is not None and baseline.get("accept") is True:
+            n_changed = len(ch["added"]) + len(ch["modified"]) + len(ch["deleted"])
+            if n_changed == 0:
+                head = (f"[vacant] tests were already passing before the agent ran ({detail}); "
+                        f"the agent ran attempt {res['delivered_attempt']} and made no changes "
+                        f"(still passing; {files}).")
+            else:
+                head = (f"[vacant] tests were already passing before the agent ran ({detail}); "
+                        f"the agent ran attempt {res['delivered_attempt']} and changed files "
+                        f"({files}; delivered that attempt, still passing).")
+        else:
+            head = (f"[vacant] acceptance passed on attempt {res['delivered_attempt']} "
+                    f"(up to {res.get('max_attempts', n)} allowed; {detail}); delivered that attempt. {files}.")
     else:
         a = res["attempts"][res["delivered_attempt"] - 1]
         if a.get("run") is not None:
             head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
-                    f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} tests). {files}.")
+                    f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} passed/total tests) "
+                    f"— written to your project. {files}.")
         elif acc_kind in _EXIT_CODE_ONLY_KINDS:
             head = (f"[vacant] acceptance did not pass after {n} attempt(s); delivered latest attempt "
-                    f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
+                    f"{res['delivered_attempt']} (status: {a.get('status')}; this check reports pass/fail only, "
+                    f"no per-test count) — written to your project. {files}.")
         else:
             head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
-                    f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
+                    f"{res['delivered_attempt']} (status: {a.get('status')}) "
+                    f"— written to your project. {files}.")
 
+    head += _failure_details_notice(res)
     head += _time_limit_notice(res)
     head += _load_error_notice(res)
     acc_integrity = res.get("acceptance_integrity")
@@ -8267,8 +8709,19 @@ def summary(res: dict) -> str:
             c = _short_integrity_code(str(r))
             if c not in codes:
                 codes.append(c)
-        if codes:
-            shown_codes = ", ".join(codes[:3]) + (f", +{len(codes) - 3}" if len(codes) > 3 else "")
+        if codes == ["unsupported-option:node:--test"]:
+            head += (
+                f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced "
+                f"(Node's built-in test runner `node --test` discovers test files dynamically, "
+                f"so Vacant cannot trace every file it runs)"
+            )
+        elif codes:
+            human_codes = [
+                "Node's built-in test runner (`node --test`) discovers test files dynamically"
+                if c == "unsupported-option:node:--test" else c
+                for c in codes
+            ]
+            shown_codes = ", ".join(human_codes[:3]) + (f", +{len(human_codes) - 3}" if len(human_codes) > 3 else "")
             head += f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced [{shown_codes}]"
         else:
             head += f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced"
@@ -8309,7 +8762,7 @@ def summary(res: dict) -> str:
         shown_dc = ", ".join(deliv_changed[:10]) + (
             f" (+{len(deliv_changed) - 10} more)" if len(deliv_changed) > 10 else ""
         )
-        head += f"\n  changed files: {shown_dc}"
+        head += f"\n  changed files (+ added, ~ modified, - deleted): {shown_dc}"
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
@@ -8362,14 +8815,31 @@ def summary(res: dict) -> str:
                      f"({shown_v}) — executes code at Python startup!")
     not_deliv = list(res.get("not_delivered") or ())
     if not_deliv:
+        _cache_skip_names = frozenset({"__pycache__", ".pytest_cache"})
+
+        def _is_cache_nd(item: Any) -> bool:
+            p_raw = str(item.get("path") or "") if isinstance(item, dict) else str(item)
+            return any(part in _cache_skip_names for part in pathlib.PurePosixPath(p_raw).parts)
+
         def _fmt_nd(item: Any) -> str:
             if isinstance(item, dict):
                 return f"{item.get('path')} ({item.get('reason')})"
             return str(item)
-        shown_nd = ", ".join(_fmt_nd(x) for x in not_deliv[:10]) + (
-            f" … (+{len(not_deliv) - 10} more)" if len(not_deliv) > 10 else ""
-        )
-        head += f"\n  not delivered ({len(not_deliv)}): {shown_nd}"
+
+        cache_nd = [x for x in not_deliv if _is_cache_nd(x)]
+        other_nd = [x for x in not_deliv if not _is_cache_nd(x)]
+        cache_word = "cache file" if len(cache_nd) == 1 else "cache files"
+        if other_nd:
+            shown_nd = ", ".join(_fmt_nd(x) for x in other_nd[:10]) + (
+                f" … (+{len(other_nd) - 10} more)" if len(other_nd) > 10 else ""
+            )
+            extra_cache = (
+                f"; plus {len(cache_nd)} {cache_word} not delivered (__pycache__/.pytest_cache)"
+                if cache_nd else ""
+            )
+            head += f"\n  not delivered ({len(other_nd)}): {shown_nd}{extra_cache}"
+        else:
+            head += f"\n  not delivered: {len(cache_nd)} {cache_word} (__pycache__/.pytest_cache)"
     cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
     if cfg_new:
         cfg_reasons: dict[str, str] = {}

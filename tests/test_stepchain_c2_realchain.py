@@ -44,8 +44,14 @@ def test_g2_script_and_receipt_committed():
     assert r.get("missing_preregistered") == []
 
 
+# 匯入時（tests/conftest.py 的隔離 fixture 生效之前）記下真的狀態目錄：這個測試刻意讀本機真鏈，
+# 只讀、複製到 /tmp 再驗（絕不碰活鏈），所以要明確指回真的位置，不能用每個測試的隔離 HOME。
+_REAL_VACANT_HOME = Path(os.environ["VACANT_TEST_REAL_HOME"]) / ".vacant" if os.environ.get("VACANT_TEST_REAL_HOME") \
+    else Path(os.environ.get("VACANT_HOME") or (Path.home() / ".vacant"))
+
+
 def _real_chains_present() -> bool:
-    home = Path(os.environ.get("VACANT_HOME") or (Path.home() / ".vacant"))
+    home = _REAL_VACANT_HOME
     return all((home / "trace" / "projects" / n).is_dir()
                for n in ("b0a568dfe7dbe3b0", "535f1510326fb03a"))
 
@@ -53,9 +59,10 @@ def _real_chains_present() -> bool:
 @pytest.mark.skipif(not _real_chains_present(),
                     reason="real pre-registered chains not on this machine; "
                            "committed receipt (ops/stepchain/c2_receipt_round895.json) is the evidence")
-def test_g2_live_reaccept_on_local_copy():
+def test_g2_live_reaccept_on_local_copy(monkeypatch):
     """本機有真鏈時：同一程序在 /tmp 複製體上重跑，兩鏈仍 PASS（絕不碰活鏈）。"""
     import ops.stepchain.c2_realchain_acceptance as c2
+    monkeypatch.setenv("VACANT_HOME", str(_REAL_VACANT_HOME))
     result = c2.run()
     by = {c["project"]: c for c in result["chains"]}
     assert result["all_pass"], json.dumps(result, ensure_ascii=False)[:600]

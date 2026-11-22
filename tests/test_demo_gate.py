@@ -179,6 +179,33 @@ def test_cli_demo_gate_exits_zero_and_prints_json(tmp_path):
     assert got["gated_rc"] == 20 and got["accepted"] is False
 
 
+def test_demo_gate_respects_vacant_home_env(tmp_path):
+    """rc6(7): Without --root, `vacant demo gate` writes under $VACANT_HOME/demo-gate
+    instead of touching ~/.vacant-run/demo-gate."""
+    import os
+
+    fake_home = tmp_path / "fake_home"
+    fake_home.mkdir()
+    vh = tmp_path / "custom_vhome"
+    env = {**os.environ, "HOME": str(fake_home), "VACANT_HOME": str(vh)}
+    out = subprocess.run(
+        [sys.executable, "-m", "vacant_network.cli", "demo", "gate", "--json"],
+        cwd=str(ROOT), env=env, capture_output=True, text=True, timeout=600,
+    )
+    assert out.returncode == 0, out.stderr[-2000:]
+    got = json.loads(out.stdout)
+    assert pathlib.Path(got["root"]).resolve() == (vh / "demo-gate").resolve()
+    assert (vh / "demo-gate" / "receipts" / "run_RUN-ON.json").is_file()
+    assert not (fake_home / ".vacant-run").exists()
+
+
+def test_demo_gate_default_root_without_vacant_home(monkeypatch, tmp_path):
+    """rc6(7): When VACANT_HOME is unset, default_root() falls back to ~/.vacant-run/demo-gate."""
+    monkeypatch.delenv("VACANT_HOME", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert demo.default_root() == tmp_path / ".vacant-run" / "demo-gate"
+
+
 # ── 自檢指令：requests_seen 才是「被中介了」的證據 ────────────────────────
 _CALLER = '''
 import os, urllib.request

@@ -29,13 +29,15 @@ import hashlib
 import json
 import subprocess
 import sys
+import os
 from pathlib import Path
 
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 SCRIPT = REPO / "ops" / "audits" / "g3_fire_20261111_summary.py"
-LIVE_RAW = Path.home() / "dev" / "ops" / "g3_fire_20261111" / "g3_result.json"
+# 本機真資料（只讀）：tests/conftest.py 把 HOME 換成暫存目錄，這裡用它記下的真家目錄
+LIVE_RAW = Path(os.environ.get("VACANT_TEST_REAL_HOME") or Path.home()) / "dev" / "ops" / "g3_fire_20261111" / "g3_result.json"
 REPO_SUMMARY = REPO / "ops" / "audits" / "g3_fire_20261111_summary.json"
 
 OK_VERDICT = "VERDICT: G3_FIRE_SUMMARY_OK"

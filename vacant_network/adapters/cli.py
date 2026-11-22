@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import signal
 import sys
 
 from ..intake import contract as C
@@ -116,6 +117,10 @@ def cmd_do(args) -> int:
     return EXIT.get(str(res.get("outcome")), 2)
 
 
+#: `vacant` 指令本身（行程入口）才設 True：見 _do_restart 的 finally。
+KEEP_SIGNAL_GUARD_UNTIL_EXIT = False
+
+
 def _do_restart(args) -> int:
     """沒有契約：零設定重開模式（`restart.py`；政策＝ops/redo 的 R3）。
 
@@ -157,16 +162,63 @@ def _do_restart(args) -> int:
 
         def build(p, ws, _spec=spec):
             return _spec.build(p, ws, hooks=bool(args.hooks), extra=args.extra)
+    # rc6：run() 結束（含它的寫回臨界區）到 summary 印完、結束碼決定之間，Ctrl-C／SIGTERM 一律只記下、不打斷——
+    # 否則會被 main() 的總攔截接住，印出不知道專案狀態的訊息、蓋掉真正的交件摘要。run() 執行中會換上自己的處理器
+    # （寫回前中斷＝乾淨收尾、寫回中延後），結束時還原成這裡的「只記下」處理器，所以兩段之間沒有空窗。
+    from . import restart as RS
+    pending = RS.OUTSIDE_RUN_SIGNALS  # run() 開始時看這份：處理器還沒裝上時收到的訊號＝一開始就被中斷
+    pending.clear()
+
+    def _record(signum, _frame):
+        try:
+            pending.append(signal.Signals(signum).name)
+        except ValueError:
+            pending.append(f"SIG{signum}")
+
+    saved = {}
+    for _sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            saved[_sig] = signal.signal(_sig, _record)
+        except (ValueError, OSError):
+            pass
+    try:
+        return _run_restart_and_report(args, build, prompt, agent, pending)
+    finally:
+        # 當成指令執行時（`vacant do`，由 vacant_network.cli.main 設旗標）不還原：結束碼已定，之後到行程結束前
+        # 再按 Ctrl-C 只記下、不改結束碼（否則 sys.exit 途中的 KeyboardInterrupt 會把結束碼變成 -2）。
+        # 在同一個行程裡被當函式呼叫（測試、程式庫）就照常還原。
+        if KEEP_SIGNAL_GUARD_UNTIL_EXIT:
+            saved = {}
+        for _sig, _h in saved.items():
+            try:
+                signal.signal(_sig, _h)
+            except (ValueError, OSError):
+                pass
+
+
+def _run_restart_and_report(args, build, prompt, agent, pending: list[str]) -> int:
+    from . import restart as RS
+    if pending:  # 還沒開始跑就收到中斷：什麼都沒做
+        print(f"[vacant] interrupted ({pending[0]}) before the run started; nothing was run, project unchanged.",
+              file=sys.stderr)
+        return 130
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
                  check=getattr(args, "check", None),
                  protect=getattr(args, "protect", None) or None,
                  agent=agent,
-                 log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
+                 log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True),
+                 stream=bool(getattr(args, "stream", False)))
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
         print(RS.summary(res))
+    if res.get("interrupted"):
+        return 130
+    if pending and not res.get("interrupt_deferred"):
+        # 這裡的 pending 只會是 run() 回傳之後收到的（之前的在 run() 開始時已被當成中斷處理並清掉）
+        print(f"  {pending[0]} arrived after the result was written; nothing was interrupted (the outcome above is final).",
+              flush=True)
     _trigger_auto_gc(agent)
     if (res.get("baseline_error") or res.get("agent_error")
             or res.get("node_modules_changed") or res.get("project_not_writable")
@@ -328,7 +380,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="vacant")
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("do", help="run an agent headless in an isolated workspace, then submit "
-                                 "its work to the intake")
+                                 "its work to the intake",
+                      epilog="Summary markers: + added, ~ modified, - deleted; N/M = passed/total tests; "
+                             "exit codes: 0 accepted/unchecked, 40 acceptance failed, 43 void/conflict, 130 interrupted.")
     p.add_argument("agent", nargs="?", default="",
                    help=f"one of {', '.join(A.AGENTS)}, or `auto` (pick by this task family's "
                         f"record; explores until each has enough runs)")
@@ -356,6 +410,8 @@ def build_parser() -> argparse.ArgumentParser:
                         "and never write back (repeatable)")
     p.add_argument("--hooks", action="store_true",
                    help="without a contract: also add Vacant's per-step hooks (off by default)")
+    p.add_argument("--stream", action="store_true",
+                   help="without a contract: stream agent stdout/stderr directly to the terminal while running (off by default)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_do, extra=[])
 
@@ -401,6 +457,10 @@ def main(argv: list[str] | None = None) -> int:
     args.extra = extra
     try:
         return int(args.func(args))
+    except KeyboardInterrupt:
+        # 這裡不知道專案的狀態（install／uninstall／hook／有契約的 do 都會落到這裡），只說已中斷
+        print("[vacant] interrupted.", file=sys.stderr)
+        return 130
     except C.ContractError as e:
         print("vacant: contract problems:\n" + "\n".join(f"  - {p}" for p in e.problems),
               file=sys.stderr)

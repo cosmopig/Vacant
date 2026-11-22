@@ -2145,3 +2145,29 @@ def test_remove_path_rmtree_failure_not_counted_freed(tmp_path, monkeypatch):
     assert (freed, count) == (0, 0), "rmtree 失敗不得計為已釋放"
     assert d.exists() and (d / "a.txt").exists()
 
+
+
+def test_incomplete_restart_run_keeps_backups_for_recovery(tmp_path):
+    """rc6（第二次查證 P4）：寫回途中被 SIGKILL 的 run 沒有 result.json；它的 bkp-*（被換掉的原檔）與
+    start-copy-*（開始時的專案複本）是唯一的救援材料，gc／auto-gc 在 7 天內不能清；有 result.json 的照舊清。"""
+    import os as _os
+    base = tmp_path / "work"
+    killed = base / "restart-20261122T000000-1-aaaaaa"
+    done = base / "restart-20261122T000001-2-bbbbbb"
+    for r in (killed, done):
+        (r / "bkp-123" ).mkdir(parents=True)
+        (r / "bkp-123" / "bkp_1").write_text("original\n")
+        (r / "start-copy-456").mkdir()
+        (r / "start-copy-456" / "calc.py").write_text("x = 1\n")
+        (r / "attempt_1" / "w").mkdir(parents=True)
+        (r / "attempt_1" / "w" / "f").write_text("y")
+    (done / "result.json").write_text("{}")
+    rep = retention.compact_work(base, keep_runs_per_task=0, dry_run=False)
+    assert (killed / "bkp-123" / "bkp_1").exists()
+    assert (killed / "start-copy-456" / "calc.py").exists()
+    assert not (done / "bkp-123").exists()
+    # 超過 7 天就照常清
+    old = __import__("time").time() - 8 * 86400
+    _os.utime(killed, (old, old))
+    retention.compact_work(base, keep_runs_per_task=0, dry_run=False)
+    assert not (killed / "bkp-123").exists()

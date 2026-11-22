@@ -1,4 +1,4 @@
-# 0.9.2 (rc5): known limits of `vacant do` restart mode
+# 0.9.2 (rc5 / rc6): known limits of `vacant do` restart mode
 
 Applies to the final rc5: `redo/rc5` tag `rc5-final` = `1d764cc69`.
 
@@ -44,13 +44,31 @@ The code under test itself is outside that class: see the section "The code unde
 
 ## Not tested live
 
-11. cargo, go, maven/gradle, playwright/cypress/wdio/ava/nyc/nox were not installed on the review machine. Their protection paths are covered by unit tests and stand-in commands only. pytest was tested live by the independent verification, with pytest installed in a project `.venv` (repro `verify_rc5/u_d2`).
+11. maven/gradle, playwright/cypress/wdio/ava/nyc/nox were not installed on the review machine. (cargo and go were tested live on 2026-11-22; see items 15–19.) Their protection paths are covered by unit tests and stand-in commands only. pytest was tested live by the independent verification, with pytest installed in a project `.venv` (repro `verify_rc5/u_d2`).
 12. The non-Linux paths (no subreaper, `detached_processes: null`) were tested only by faking `sys.platform`.
 13. Plan→apply races narrower than a re-check, such as a directory swapped mid-apply, are reasoned about only.
 
 ## Cost
 
 14. npm projects: the agent gets its own copy of `node_modules` (reflink when the filesystem supports it, otherwise a full copy). The message warns when it falls back to a full copy. The copy time is recorded as `copy_s`. On a 36 MB / 3000-file `node_modules`: copy 0.14 s, manifest 0.04 s.
+
+## cargo and go: experimental (tested live 2026-11-22)
+
+Tested with rc5-final, scripted stand-in agents, Rust 1.100 and Go 1.27.4, both auto-detection and `--check`. Report, raw outputs and the scenario runner: `~/dev/ops/cg_test/` (`REPORT.md`, `logs/<scenario>.{log,rc,diff}`, `run_scenario.sh`). Correct on both: fix accepted, wrong fix rejected, baseline, tampering with a test file, tampering with the manifest, and test layout (Rust `tests/` + `#[cfg(test)]`; Go same-package and `_test` package). Exit-code-only acceptance has no N/M, by design. Wrong in these cases (fixes are planned for 0.9.3; see `docs/TODO_0.9.3.md`):
+
+Wrong in normal use:
+15. **Lockfiles are not kept fixed.** `Cargo.lock` and `go.sum` are read by the check but are not in the kept-fixed set: an agent's change is written back, and a broken lockfile makes the check fail even for a correct fix. Repro: `cargo_e`, `go_e`. (npm: `package.json` is kept fixed; `package-lock.json` is not; `node_modules` changes are checked separately.)
+16. **cargo auto-detection keeps only the root `Cargo.toml` fixed.** Nested manifests (workspace members, path dependencies) can be changed, are used by the check and are written back. `--check` keeps them fixed, so the two paths disagree. Repro: `cargo_d2`.
+17. **A new `go.work` added by the agent enters the check copy** and can make `go test ./...` fail even for a correct fix (exit 40); it is also written back, with no specific note. Repro: `go_i2`.
+
+Wrong only under deliberate cheating:
+18. **cargo: a new `build.rs` can rewrite a kept-fixed test file at build time**, after Vacant restored it, so a wrong implementation passes (exit 0). Repro: `cargo_i2`.
+19. **go: a new `*_test.go` with a `TestMain` that exits 0** makes a wrong implementation pass (exit 0). New test files have no original to restore, and `tests_tampered` only lists files that existed at the start. Repro: `go_f2`. Related: new build-affecting files (`build.rs`, `go.work`, build-tag files, new test files) are listed under "changed files" with no specific warning, unlike `.cargo/config.toml`, which is ignored with a note. `#[cfg(test)]` tests live in the same file as the code and cannot be kept fixed separately.
+
+## Interruption (rc6)
+
+20. **Ctrl-C / SIGTERM.** Before write-back starts, the run stops, kills the agent's process group and detached descendants, leaves the project unchanged, writes a signed receipt marked `interrupted` and exits 130. From the start of write-back until `result.json` is written, signals are deferred: a first, second or later SIGINT or SIGTERM waits until the write-back is complete, the run then finishes normally (its usual exit code), and the message says the signal arrived during write-back. A signal that arrives while Python itself is still starting (importing modules, before any Vacant code runs) cannot be handled: Python prints a traceback and exits with 1 or −2. Nothing has run yet and the project is unchanged. Rarely (1 in 370 timed SIGINTs in the final verification, about 31 ms after start), a SIGINT that arrives while Python holds its import lock is swallowed: the run continues and delivers normally, so a Ctrl-C at that instant does not stop it.
+21. **SIGKILL (or power loss) during write-back cannot be deferred.** The project can be left half-written, and no `result.json` and no receipt are written, so neither the next run nor `vacant audit` shows that this happened. What survives in that run directory (`$VACANT_WORK/restart-<time>-<pid>-<hex>/`, default `~/.vacant-work/`): `start-copy-<hex>/`, a full copy of the project as it was when the run started, and `bkp-<hex>/bkp_1…bkp_N`, the originals of the files already replaced (numbered, with no path map). `start-copy-*` is never removed by `vacant gc` or the background auto-gc (it stays until you delete it); since rc6 the gc also keeps `bkp-*` for 7 days in any restart run that has no `result.json` (before rc6 the next `vacant do` removed `bkp-*` within seconds). To recover: (1) find the newest `restart-*` directory without a `result.json`; (2) compare it with your project, e.g. `diff -rq <run>/start-copy-*/ <project>/`; (3) copy back every file that differs or is missing in the project; (4) files that exist **only in the project** were either added by the interrupted write-back or created by you during the run: decide for each one whether to delete it. `.git`, `node_modules`, `__pycache__`, `.venv` and `.pytest_cache` are never in `start-copy-*`: do not delete them from the project. Not fixed in 0.9.2: a write-back journal checked at the next start is planned for 0.9.3.
 
 ## Fixed after the first freeze (for the record)
 

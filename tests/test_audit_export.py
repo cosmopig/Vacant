@@ -1528,3 +1528,79 @@ def test_restart_mixed_trace_project_and_legacy_receipt_without_run_id(
     assert cr["signature"]["anchor_checked"] is True
     assert cr["agent"] == "opencode"
     assert cr["gaps"] == []
+
+
+def test_audit_show_displays_per_attempt_results_and_first_problem(tmp_path, monkeypatch, capsys):
+    """rc6(8): `vacant audit show` prints per-attempt outcomes and first failing test from the signed receipt."""
+    import sys
+    import textwrap
+    from vacant_network.adapters import restart as RS
+    from vacant_network.adapters.run import Launch
+
+    vh = tmp_path / "vh"
+    wr = tmp_path / "wr"
+    monkeypatch.setenv("VACANT_HOME", str(vh))
+    monkeypatch.setenv("VACANT_WORK", str(wr))
+
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text(
+        "def add(a, b): return 0\ndef sub(a, b): return 0\ndef mul(a, b): return 0\n",
+        encoding="utf-8",
+    )
+    (proj / "test_calc.py").write_text(
+        textwrap.dedent("""\
+            import unittest, calc
+            class T(unittest.TestCase):
+                def test_add(self): self.assertEqual(calc.add(2, 3), 5)
+                def test_sub(self): self.assertEqual(calc.sub(5, 3), 2)
+                def test_mul(self): self.assertEqual(calc.mul(2, 3), 6)
+        """),
+        encoding="utf-8",
+    )
+    state = tmp_path / "state.txt"
+    agent = tmp_path / "agent.py"
+    agent.write_text(
+        textwrap.dedent(f"""\
+            import pathlib
+            st = pathlib.Path({str(state)!r})
+            n = int(st.read_text()) + 1 if st.exists() else 1
+            st.write_text(str(n))
+            if n == 2:
+                pathlib.Path("calc.py").write_text(
+                    "def add(a, b): return a + b\\ndef sub(a, b): return a - b\\ndef mul(a, b): return 999\\n"
+                )
+            else:
+                pathlib.Path("calc.py").write_text(
+                    "def add(a, b): return a + b\\ndef sub(a, b): return 0\\ndef mul(a, b): return 0\\n"
+                )
+        """),
+        encoding="utf-8",
+    )
+
+    def build(_p, _ws):
+        return Launch(argv=[sys.executable, str(agent)])
+
+    res = RS.run(proj, build, "fix calc", max_attempts=3, attempt_timeout_s=30, budget_s=120, agent="fake")
+    assert res["accepted"] is False
+    assert res["delivered_attempt"] == 2
+    run_id = pathlib.Path(res["run_dir"]).name
+
+    rc = AE.main(["show", f"restart:{run_id}", "--vacant-home", str(vh), "--work-root", str(wr)])
+    out = capsys.readouterr().out
+    assert rc == 0, out
+    assert "attempt 1: FAIL (1/3 passed" in out
+    assert "attempt 2: FAIL (2/3 passed" in out
+    assert "[delivered]" in out
+    assert "attempt 3: FAIL (1/3 passed" in out
+    assert "first_problem:" in out
+    assert "test_mul" in out
+    assert "AssertionError" in out
+
+
+def test_audit_show_brief_tap_failure_has_name_and_reason():
+    """第三次查證 5：node --test 的 first_problem 在 audit show 不能只剩 `not ok 1 - …`。"""
+    from vacant_network.audit_export import _fmt_first_problem_brief as f
+    fp = ("not ok 1 - adds numbers\n  ---\n  duration_ms: 1.0\n  failureType: 'testCodeFailure'\n"
+          "  error: |-\n    Expected values to be strictly equal:\n    \n    -1 !== 3\n    \n  code: 'ERR_ASSERTION'\n")
+    assert f(fp) == "adds numbers — Expected values to be strictly equal: -1 !== 3"

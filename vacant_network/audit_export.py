@@ -56,6 +56,7 @@ RESULTS = (
     "escalated",
     "void",
     "unchecked",
+    "interrupted",
     "open",
     "withdrawn",
     "release_unconfirmed",
@@ -71,6 +72,7 @@ _RESULT_PASSED: dict[str, bool | None] = {
     "escalated": None,
     "void": None,
     "unchecked": None,
+    "interrupted": None,
     "open": None,
     "withdrawn": None,
     "release_unconfirmed": None,
@@ -2161,6 +2163,8 @@ def _build_restart_record_from_receipt(
     if "accepted" not in payload:
         result = "unknown"
         gaps.append(_gap("missing_fields", "warning", "restart_receipt missing 'accepted' field"))
+    elif payload.get("interrupted") is True:
+        result = "interrupted"
     else:
         acc_val = payload.get("accepted")
         if acc_val is True:
@@ -2190,6 +2194,8 @@ def _build_restart_record_from_receipt(
             delivered_entry = attempts_list[-1]
 
     raw_status = _as_str((delivered_entry or {}).get("status"))
+    if result == "interrupted" and raw_status is None:
+        raw_status = "interrupted"
     checks_passed = _as_int((delivered_entry or {}).get("passed"))
     checks_total = _as_int((delivered_entry or {}).get("run"))
 
@@ -2226,6 +2232,7 @@ def _build_restart_record_from_receipt(
                     "wall_s": a.get("wall_s") if not isinstance(a.get("wall_s"), bool) else None,
                     "tests_tampered": tlist,
                     "snapshot_tree_sha256": snap_sha,
+                    "first_problem": _as_str(a.get("first_problem")),
                 }
             )
             snapshot_hashes.append({"attempt": att_n, "snapshot_tree_sha256": snap_sha})
@@ -2323,6 +2330,9 @@ def _build_restart_record_from_receipt(
         "agent_wall_s": payload.get("agent_wall_s"),
         "total_wall_s": payload.get("total_wall_s"),
     }
+    deliv_fp = _as_str((delivered_entry or {}).get("first_problem"))
+    if deliv_fp is not None:
+        details["first_problem"] = deliv_fp
     acc_integ = _as_str(payload.get("acceptance_integrity")) or _as_str(acc_meta.get("integrity"))
     raw_ir = payload.get("acceptance_integrity_reasons")
     if not isinstance(raw_ir, list):
@@ -2340,6 +2350,10 @@ def _build_restart_record_from_receipt(
     if eff_wbc_n > 0:
         details["write_back_conflicts"] = wb_conflicts
         details["write_back_conflicts_count"] = eff_wbc_n
+    if payload.get("interrupted") is True:
+        details["interrupted"] = True
+        if _as_str(payload.get("interrupt_signal")):
+            details["interrupt_signal"] = _as_str(payload.get("interrupt_signal"))
 
     return _base_record(
         record_id=record_id,
@@ -2524,6 +2538,8 @@ def _build_restart_record_from_result_json(
     if "accepted" not in loaded:
         result = "unknown"
         gaps.append(_gap("missing_fields", "warning", "restart result.json missing 'accepted' field"))
+    elif loaded.get("interrupted") is True:
+        result = "interrupted"
     else:
         acc_val = loaded.get("accepted")
         if acc_val is True:
@@ -2553,6 +2569,8 @@ def _build_restart_record_from_result_json(
             delivered_entry = attempts_list[-1]
 
     raw_status = _as_str((delivered_entry or {}).get("status"))
+    if result == "interrupted" and raw_status is None:
+        raw_status = "interrupted"
     checks_passed = _as_int((delivered_entry or {}).get("passed"))
     checks_total = _as_int((delivered_entry or {}).get("run"))
 
@@ -2569,16 +2587,32 @@ def _build_restart_record_from_result_json(
     n_timeouts = 0
     n_spawn_err = 0
     n_acc_err = 0
-    for a in attempts_list or []:
-        for t in a.get("tests_tampered") or []:
-            if isinstance(t, str) and t:
-                tampered.add(t)
-        if a.get("timed_out") is True:
-            n_timeouts += 1
-        if _as_str(a.get("spawn_error")):
-            n_spawn_err += 1
-        if a.get("status") == "acceptance_error":
-            n_acc_err += 1
+    norm_attempts: list[dict[str, Any]] | None = None
+    if attempts_list is not None:
+        norm_attempts = []
+        for a in attempts_list:
+            tlist = [t for t in (a.get("tests_tampered") or []) if isinstance(t, str) and t]
+            tampered.update(tlist)
+            if a.get("timed_out") is True:
+                n_timeouts += 1
+            if _as_str(a.get("spawn_error")):
+                n_spawn_err += 1
+            if a.get("status") == "acceptance_error":
+                n_acc_err += 1
+            norm_attempts.append(
+                {
+                    "attempt": _as_int(a.get("attempt")),
+                    "accept": _as_bool(a.get("accept")),
+                    "passed": _as_int(a.get("passed")),
+                    "run": _as_int(a.get("run")),
+                    "status": _as_str(a.get("status")),
+                    "rc": _as_int(a.get("rc")),
+                    "timed_out": _as_bool(a.get("timed_out")),
+                    "wall_s": a.get("wall_s") if not isinstance(a.get("wall_s"), bool) else None,
+                    "tests_tampered": tlist,
+                    "first_problem": _as_str(a.get("first_problem")),
+                }
+            )
 
     if tampered:
         gaps.append(
@@ -2633,6 +2667,7 @@ def _build_restart_record_from_result_json(
         "timestamp_source": ts_source,
         "acceptance_command": _as_str(acc_meta.get("command")),
         "protected": loaded.get("protected"),
+        "attempts": norm_attempts,
         "tests_tampered": sorted(tampered) if tampered else [],
         "changed": changed or None,
         "agent_wall_s": loaded.get("agent_wall_s"),
@@ -2652,6 +2687,10 @@ def _build_restart_record_from_result_json(
     if wb_conflicts:
         details["write_back_conflicts"] = wb_conflicts
         details["write_back_conflicts_count"] = len(wb_conflicts)
+    if loaded.get("interrupted") is True:
+        details["interrupted"] = True
+        if _as_str(loaded.get("interrupt_signal")):
+            details["interrupt_signal"] = _as_str(loaded.get("interrupt_signal"))
 
     return _base_record(
         record_id=f"restart:{run_dir.name}",
@@ -3232,12 +3271,57 @@ def format_list(records: list[dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _fmt_first_problem_brief(fp: str) -> str:
+    """Format a recorded `first_problem` into a concise single-line summary for `audit show`."""
+    raw_lines = [ln.strip() for ln in fp.splitlines() if ln.strip()]
+    if not raw_lines:
+        return ""
+    if len(raw_lines) == 1:
+        return raw_lines[0][:240]
+    first = raw_lines[0][:160]
+    rest = raw_lines[1:]
+    if first.startswith("not ok "):
+        # TAP（node --test 等）：測試名稱＋`error:` 區塊的第一行有內容的原因
+        name = first.split(" - ", 1)[1] if " - " in first else first
+        reason: list[str] = []
+        in_err = False
+        for ln in rest:
+            if ln.startswith("error:"):
+                v = ln[len("error:"):].strip().strip("'\"")
+                if v and v not in ("|-", "|", ">-"):
+                    reason.append(v)
+                in_err = True
+                continue
+            if in_err:
+                if (ln.split(":", 1)[0].isidentifier() and ": " in ln + " ") or ln == "...":
+                    break
+                reason.append(ln)
+        return f"{name} — {' '.join(reason[:2])[:200]}" if reason else name
+    # Prefer pytest E-line or final Python Error/AssertionError line
+    e_line = next((ln[4:].strip() for ln in rest if ln.startswith("E   ") and ln[4:].strip()), None)
+    if e_line:
+        return f"{first} — {e_line[:200]}"
+    err_line = next(
+        (
+            ln for ln in reversed(rest)
+            if ln.split(":", 1)[0].strip().endswith(("Error", "Exception", "Failure"))
+            or ln.split(":", 1)[0].strip() == "AssertionError"
+        ),
+        None,
+    )
+    if err_line and err_line != first:
+        return f"{first} — {err_line[:200]}"
+    tail = rest[-1][:200]
+    return f"{first} — {tail}" if tail != first else first
+
+
 def format_show(rec: dict[str, Any]) -> str:
     sig = rec.get("signature") or {}
     acc = rec.get("acceptance") or {}
     att = rec.get("attempts") or {}
     sb = rec.get("sent_back") or {}
     src = rec.get("source") or {}
+    details = rec.get("details") or {}
     lines = [
         f"record_id  : {rec['record_id']}",
         f"schema     : {rec['schema']}",
@@ -3252,12 +3336,54 @@ def format_show(rec: dict[str, Any]) -> str:
         f"attempts   : count={att.get('count') if att.get('count') is not None else 'unknown'}"
         f"  max={att.get('max') if att.get('max') is not None else 'unknown'}"
         f"  delivered={att.get('delivered') if att.get('delivered') is not None else 'unknown'}",
-        f"acceptance : result={_fmt_result(rec)}  passed={acc.get('passed')}  "
-        f"raw={acc.get('raw_status') or 'unknown'}  kind={acc.get('kind') or 'unknown'}",
     ]
+    att_items = details.get("attempts")
+    shown_any_fp = False
+    if isinstance(att_items, list) and att_items:
+        delivered_num = att.get("delivered")
+        for idx, item in enumerate(att_items, start=1):
+            if not isinstance(item, dict):
+                continue
+            anum = item.get("attempt") if item.get("attempt") is not None else idx
+            st = item.get("status")
+            acc_flag = item.get("accept")
+            if acc_flag is True:
+                verdict = "PASS"
+            elif acc_flag is False:
+                verdict = "FAIL"
+            elif st == "interrupted":
+                verdict = "INTERRUPTED"
+            else:
+                verdict = "UNCHECKED"
+            meta_parts: list[str] = []
+            if item.get("run") is not None:
+                meta_parts.append(f"{item.get('passed') if item.get('passed') is not None else 0}/{item.get('run')} passed")
+            if st:
+                meta_parts.append(f"status={st}")
+            if item.get("timed_out") is True:
+                meta_parts.append("timed_out")
+            if item.get("wall_s") is not None:
+                meta_parts.append(f"wall={item.get('wall_s')}s")
+            meta_s = f" ({', '.join(meta_parts)})" if meta_parts else ""
+            deliv_s = " [delivered]" if (delivered_num is not None and anum == delivered_num) else ""
+            lines.append(f"  - attempt {anum}: {verdict}{meta_s}{deliv_s}")
+            fp = item.get("first_problem")
+            if isinstance(fp, str) and fp.strip():
+                brief = _fmt_first_problem_brief(fp)
+                if brief:
+                    lines.append(f"      first_problem: {brief}")
+                    shown_any_fp = True
+    lines.append(
+        f"acceptance : result={_fmt_result(rec)}  passed={acc.get('passed')}  "
+        f"raw={acc.get('raw_status') or 'unknown'}  kind={acc.get('kind') or 'unknown'}"
+    )
     if acc.get("checks_total") is not None:
         lines.append(f"checks     : {acc.get('checks_passed')}/{acc.get('checks_total')}")
-    details = rec.get("details") or {}
+    top_fp = details.get("first_problem")
+    if not shown_any_fp and isinstance(top_fp, str) and top_fp.strip():
+        brief = _fmt_first_problem_brief(top_fp)
+        if brief:
+            lines.append(f"first_fail : {brief}")
     wbc = details.get("write_back_conflicts")
     if wbc:
         lines.append(f"write_back : not written back (conflict: {', '.join(str(x) for x in wbc[:10])})")
