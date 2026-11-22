@@ -1,11 +1,13 @@
 """新題庫的真量尺正負控制、SPEC 引用與可見匯出測試。"""
 import json
 import shutil
+import subprocess
 import sys
 
 import pytest
 
 from ops.sandbox import kit, score, validate_bank
+from ops.sandbox.run import gate_suite
 
 
 @pytest.fixture
@@ -119,3 +121,28 @@ def test_v2_project_shape():
         assert 150 <= lines <= 400
     assert categories.count('bugfix') == categories.count('feature') == 5
     assert categories.count('output-file') == 2
+
+
+def test_gate_embeds_all_visible_tests_and_data(bank, tmp_path):
+    task = bank / 'candidate'
+    nested = task / 'repo/tests/nested'
+    nested.mkdir()
+    (nested / 'test_visible.py').write_text(
+        'from pathlib import Path\nfrom api import compute\n'
+        'def test_second_file():\n    assert compute(1) == int(Path(__file__).with_name("expected.txt").read_text())\n')
+    (nested / 'expected.txt').write_text('2')
+    gate = tmp_path / 'gate'
+    gate_suite(task, gate)
+    command = [sys.executable, '-I', '-c',
+               'import runpy,sys; runpy.run_path(sys.argv[1])["main"]()', str(gate / 'test_visible.py')]
+    run = subprocess.run(command, cwd=task / 'repo', capture_output=True, text=True, timeout=20)
+    assert run.returncode != 0 and 'test_second_file' in run.stderr
+    shutil.copyfile(task / 'solution/api.py', task / 'repo/api.py')
+    run = subprocess.run(command, cwd=task / 'repo', capture_output=True, text=True, timeout=20)
+    assert run.returncode == 0, run.stderr
+    empty = tmp_path / 'empty-task/repo/tests'
+    empty.mkdir(parents=True)
+    gate_suite(empty.parents[1], tmp_path / 'empty-gate')
+    command[-1] = str(tmp_path / 'empty-gate/test_visible.py')
+    run = subprocess.run(command, cwd=task / 'repo', capture_output=True, text=True, timeout=20)
+    assert run.returncode != 0 and 'no tests ran' in run.stderr

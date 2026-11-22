@@ -126,17 +126,23 @@ def execute(cmd, cwd, env, timeout, stdout, stderr):
 def gate_suite(task, dest, *, portable=False):
     """vrun 接 check_*/main，不接 pytest；包裝的內容僅有原始可見測試。"""
     dest.mkdir()
-    source = (task / 'repo/tests/test_visible.py').read_text()
+    tests = task / 'repo/tests'
+    sources = {str(p.relative_to(tests)): p.read_bytes() for p in sorted(tests.rglob('*'))
+               if p.is_file() and not p.is_symlink() and '__pycache__' not in p.parts}
     python = ('next(str(p / ".venv/bin/python") for p in pathlib.Path(os.getcwd()).parents '
               'if (p / ".venv/bin/python").is_file())') if portable else repr(sys.executable)
     code = (
         'import os, pathlib, subprocess, tempfile\n\n'
         'def main():\n'
         '    with tempfile.TemporaryDirectory() as temp:\n'
-        '        path = pathlib.Path(temp) / "test_public.py"\n'
-        f'        path.write_text({source!r})\n'
+        '        path = pathlib.Path(temp) / "tests"\n'
+        '        path.mkdir()\n'
+        f'        for name, content in {sources!r}.items():\n'
+        '            target = path / name\n'
+        '            target.parent.mkdir(parents=True, exist_ok=True)\n'
+        '            target.write_bytes(content)\n'
         '        driver = "import sys,pytest; sys.path.insert(0,sys.argv.pop(1)); raise SystemExit(pytest.main(sys.argv[1:]))"\n'
-        f'        run = subprocess.run([{python}, "-I", "-c", driver, os.getcwd(), str(path), "-q", "-p", "no:cacheprovider", "--noconftest"], capture_output=True, text=True, timeout=10, env={{**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"}})\n'
+        f'        run = subprocess.run([{python}, "-I", "-c", driver, os.getcwd(), str(path), "-q", "-p", "no:cacheprovider", "--noconftest", "--import-mode=importlib"], capture_output=True, text=True, timeout=10, env={{**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"}})\n'
         '        assert run.returncode == 0, run.stdout + run.stderr\n'
     )
     (dest / 'test_visible.py').write_text(code)
