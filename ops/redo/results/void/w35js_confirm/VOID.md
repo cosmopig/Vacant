@@ -18,7 +18,11 @@
 
 ## 處置
 
-- 不在 Colab 重跑（vacant-hope 11/22 決定）：這個後端（L4、vLLM、jobs 6，每輪平均約 34 秒）量到的本來就是「產品預設值在慢後端上」；
+- 當時（11/22 上午）決定不在 Colab 重跑（vacant-hope）：這個後端（L4、vLLM、jobs 6，每輪平均約 34 秒）量到的本來就是「產品預設值在慢後端上」；
   JS 的判斷依據是 1003 本機的 hardjs34（快後端、同一個 rc4 產品）。
+- **後來改變（11/22 中午）**：有了第二個 Colab 帳號與 A100（confirm3 在同一種機器上量到 P 撞上限比例與本機相同），
+  改成重跑，條件見新計畫 [`w35confirm_js_vacantdo_rc5_a100.json`](../../../plans/w35confirm_js_vacantdo_rc5_a100.json)：
+  同樣的 30 題（選題與 salt 不變）、P 臂改為發布版 rc5-final、Colab A100 jobs 4、新 seed；因預算改為 30 題×3 次（發射前修訂，f9ab2aed1）。
+  這一批的數字不會與重跑合併，重跑從頭跑。
 - 教訓（寫進操作規則）：批次進行中不改 harness，**也不換批次周邊的程式**（keepalive、fetch、量測）；並行數量測另開短命 session。
   keepalive 的「一次沒看到就判定消失」是兩份腳本共有的弱點，之後的新腳本改成連續多次確認、且以伺服器 assignment 清單為準。
