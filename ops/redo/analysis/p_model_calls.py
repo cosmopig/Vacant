@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import glob
 import json
+import math
 import statistics
 import sys
 
@@ -33,6 +34,9 @@ def count_log(path: str) -> tuple[int, int]:
             try:
                 e = json.loads(line)
             except ValueError:
+                bad += 1
+                continue
+            if not isinstance(e, dict) or (e.get("type") == "message_end" and not isinstance(e.get("message"), dict)):
                 bad += 1
                 continue
             if e.get("type") != "message_end" or (e.get("message") or {}).get("role") != "assistant":
@@ -64,7 +68,18 @@ def cell_calls(cell_dir: str) -> dict:
                 "why": ("result.json 沒有 attempts 欄位" if not isinstance(atts, list) else "result.json 的 attempts 是空陣列") + extra}
     total = 0
     for a in atts:
+        if not isinstance(a, dict):
+            return {"status": "unknown", "calls": None, "attempts": len(atts), "why": "attempts 的項目不是物件"}
         k = a.get("attempt")
+        if k is None:
+            return {"status": "unknown", "calls": None, "attempts": len(atts), "why": "嘗試沒有 attempt 欄位"}
+        try:
+            wall_s = float(a.get("wall_s"))
+        except (TypeError, ValueError, OverflowError):
+            wall_s = float("nan")
+        if isinstance(a.get("wall_s"), bool) or not math.isfinite(wall_s) or wall_s < 0:
+            return {"status": "unknown", "calls": None, "attempts": len(atts),
+                    "why": f"第 {k} 次嘗試的 wall_s 缺失或無效，無法判斷是否秒退"}
         log = f"{base}/attempt_{k}/logs/agent_stdout.log"
         try:
             n, bad = count_log(log)
@@ -73,7 +88,7 @@ def cell_calls(cell_dir: str) -> dict:
         if bad:
             return {"status": "unknown", "calls": None, "attempts": len(r["attempts"]),
                     "why": f"第 {k} 次嘗試的日誌有 {bad} 行無法解析"}
-        if n == 0 and float(a.get("wall_s") or 0) > MIN_WALL_S:
+        if n == 0 and wall_s > MIN_WALL_S:
             return {"status": "unknown", "calls": None, "attempts": len(r["attempts"]),
                     "why": f"第 {k} 次嘗試跑了 {a.get('wall_s')}s 卻沒有任何呼叫紀錄"}
         total += n

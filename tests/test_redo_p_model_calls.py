@@ -5,6 +5,8 @@ import importlib.util
 import json
 import pathlib
 
+import pytest
+
 _spec = importlib.util.spec_from_file_location(
     "p_model_calls", pathlib.Path(__file__).resolve().parents[1] / "ops" / "redo" / "analysis" / "p_model_calls.py")
 pmc = importlib.util.module_from_spec(_spec)
@@ -106,3 +108,39 @@ def test_summary_does_not_average_in_empty_attempt_cells(tmp_path):
     _cell_raw(tmp_path, "empty", {"attempts": []})
     s = pmc.summarize(str(tmp_path))
     assert s["known"] == 1 and s["unknown"] == 1 and s["mean_calls"] == 2
+
+
+@pytest.mark.parametrize("entry", [{"attempt": 1}, {"attempt": 1, "wall_s": None},
+                                   {"attempt": 1, "wall_s": "abc"}, "x", 3])
+def test_corrupt_attempt_is_unknown(tmp_path, entry):
+    c = _cell(tmp_path, "t", [(2, "")])
+    result = next(c.glob("attempt_*/logs/vacant-work/restart-*/result.json"))
+    result.write_text(json.dumps({"attempts": [entry]}))
+    r = pmc.cell_calls(str(c))
+    assert r["status"] == "unknown" and r["calls"] is None and r["why"]
+
+
+@pytest.mark.parametrize("line", ["[]", '"x"', "3", "null",
+                                  '{"type":"message_end","message":3}'])
+def test_non_object_log_is_unknown(tmp_path, line):
+    c = _cell(tmp_path, "t", [(2, line + "\n")])
+    r = pmc.cell_calls(str(c))
+    assert r["status"] == "unknown" and r["calls"] is None and "無法解析" in r["why"]
+
+
+def test_missing_attempt_identifier_is_explicitly_unknown(tmp_path):
+    c = _cell_raw(tmp_path, "t", {"attempts": [{"wall_s": 2}]})
+    r = pmc.cell_calls(str(c))
+    assert r["status"] == "unknown" and r["calls"] is None and "attempt 欄位" in r["why"]
+
+
+def test_summary_survives_corrupt_cell(tmp_path):
+    _cell(tmp_path, "good", [(2, CALL)])
+    _cell_raw(tmp_path, "corrupt", {"attempts": [3]})
+    s = pmc.summarize(str(tmp_path))
+    assert s["known"] == 1 and s["unknown"] == 1 and s["mean_calls"] == 1
+
+
+def test_empty_log_at_duration_boundary_is_known(tmp_path):
+    c = _cell(tmp_path, "t", [(pmc.MIN_WALL_S, "")])
+    assert pmc.cell_calls(str(c))["calls"] == 0
