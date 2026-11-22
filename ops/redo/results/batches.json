@@ -1,0 +1,178 @@
+{
+ "_doc": "結果總表的來源清單：只放路徑與分類，不放任何數字（數字一律由 results_table.py 從 REPORT.json／計畫檔／run root 讀）。批次結案：把 REPORT.json 複製進本目錄、這一列改成 closed 並填 report，重跑 results_table.py。",
+ "batches": [
+  {
+   "name": "redo1",
+   "category": "closed",
+   "report": "redo1_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/redo1"
+  },
+  {
+   "name": "redo1_opencode",
+   "category": "closed",
+   "report": "redo1_opencode_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/redo1_opencode"
+  },
+  {
+   "name": "screen16",
+   "category": "closed",
+   "report": "screen16_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/screen16"
+  },
+  {
+   "name": "screen16_opencode",
+   "category": "closed",
+   "report": "screen16_opencode_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/screen16_opencode"
+  },
+  {
+   "name": "screen16_qwen27b",
+   "category": "closed",
+   "report": "screen16_qwen27b_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/screen16_qwen27b"
+  },
+  {
+   "name": "screen16p4",
+   "category": "closed",
+   "report": "screen16p4_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/screen16p4"
+  },
+  {
+   "name": "confirm1",
+   "category": "closed",
+   "report": "confirm1_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/confirm1"
+  },
+  {
+   "name": "confirm1c",
+   "category": "closed",
+   "report": "confirm1c_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/confirm1c"
+  },
+  {
+   "name": "unused40",
+   "category": "closed",
+   "report": "unused40_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs/unused40_1004"
+  },
+  {
+   "name": "hardpy26（Colab）",
+   "category": "closed",
+   "report": "hardpy26_colab_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/hardpy26_vacantdo_rc3_pi_gemma12_20261121T021015Z/run"
+  },
+  {
+   "name": "W3-5 Py 篩選",
+   "category": "closed",
+   "report": "w35py_screen_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/screen_native_pypool_colab_20261121T023807Z/run"
+  },
+  {
+   "name": "W3-5 Py 確認",
+   "category": "closed",
+   "report": "w35py_confirm_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/w35_vacantdo_rc4_pypool_colab_20261121T062339Z/run"
+  },
+  {
+   "name": "W3-5 JS 篩選",
+   "category": "closed",
+   "report": "w35js_screen_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/screen_native_jspool_colab_20261121T070341Z/run"
+  },
+  {
+   "name": "confirm2c（Colab）",
+   "category": "closed",
+   "report": "confirm2c_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/confirm2c_vacantdo_rel092_pi_gem_20261121T124447Z/run"
+  },
+  {
+   "name": "confirm2",
+   "category": "running",
+   "plan_id": "confirm2_vacantdo_rel092_pi_gemma12b_1004",
+   "run_root": "~/dev/ops/redo_runs/confirm2_1004"
+  },
+  {
+   "name": "hardjs34",
+   "category": "running",
+   "plan_id": "hardjs34_vacantdo_rc4_pi_gemma12b_1003",
+   "run_root": "~/dev/ops/redo_runs/hardjs34_rc4_1003"
+  },
+  {
+   "name": "E4B hardpy26",
+   "category": "running",
+   "plan_id": "e4b_hardpy26_vacantdo_rc5_colab",
+   "keepalive": "~/dev/ops/redo_runs_colab/e4b_hardpy26_vacantdo_rc5_colab_20261122T081842Z/keepalive.log",
+   "note": "第一個 Colab 帳號（L4）"
+  },
+  {
+   "name": "confirm3",
+   "category": "running",
+   "plan_id": "confirm3_vacantdo_rc5_pi_gemma12b_a100",
+   "keepalive": "~/dev/ops/redo_runs_colab/confirm3_vacantdo_rc5_pi_gemma12_20261122T091912Z/keepalive.log",
+   "note": "colab2 A100"
+  },
+  {
+   "name": "W3-5 JS 確認（重跑）",
+   "category": "queued",
+   "plan_id": "w35confirm_js_vacantdo_rc5_a100",
+   "status_text": "冒煙等 A100",
+   "note": "30×3（預算，見 prereg.amended）"
+  },
+  {
+   "name": "atimeout",
+   "category": "queued",
+   "plan_id": "atimeout_p900_vs_p600_rc5_1003",
+   "status_text": "排在 hardjs34 之後（1003）"
+  },
+  {
+   "name": "confirm2oc",
+   "category": "queued",
+   "plan_id": "confirm2oc_vacantdo_rc5_opencode_gemma12b_1004",
+   "status_text": "排在 confirm2 之後（1004）"
+  },
+  {
+   "name": "confirm1b",
+   "category": "void",
+   "plan_id": "confirm1b_vacantdo_pi_gemma12b_1004",
+   "doc": "ops/redo/results/void/confirm1b/VOID.md"
+  },
+  {
+   "name": "W3-5 JS 確認（第一次）",
+   "category": "void",
+   "plan_id": "w35_vacantdo_rc4_jspool_colab",
+   "doc": "ops/redo/results/void/w35js_confirm/VOID.md",
+   "note": "約 100/150 對時基礎設施中斷，數字不可引用",
+   "run_root": "~/dev/ops/redo_runs_colab/w35_vacantdo_rc4_jspool_colab_20261121T125817Z/run"
+  },
+  {
+   "name": "confirm2oc_vacantdo_rel092_opencode_gemma12b_1003",
+   "category": "withdrawn",
+   "plan_id": "confirm2oc_vacantdo_rel092_opencode_gemma12b_1003",
+   "doc": "ops/redo/plans/confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md"
+  },
+  {
+   "name": "unused40_vacantdo_rc1_pi_gemma12b_colab",
+   "category": "withdrawn",
+   "plan_id": "unused40_vacantdo_rc1_pi_gemma12b_colab",
+   "doc": "ops/redo/plans/unused40_vacantdo_rc1_pi_gemma12b_colab.WITHDRAWN.md"
+  },
+  {
+   "name": "hardpy26_vacantdo_rc3_pi_gemma12b_1004",
+   "category": "withdrawn",
+   "plan_id": "hardpy26_vacantdo_rc3_pi_gemma12b_1004",
+   "doc": "ops/redo/plans/hardpy26_vacantdo_rc3_pi_gemma12b_1004.WITHDRAWN.md"
+  },
+  {
+   "name": "atimeout_p900_vs_p600_rel092_colab",
+   "category": "withdrawn",
+   "plan_id": "atimeout_p900_vs_p600_rel092_colab",
+   "doc": "ops/redo/plans/atimeout_p900_vs_p600_rel092_colab.WITHDRAWN.md"
+  },
+  {
+   "name": "e4b_hardpy26_vacantdo_rc4_colab",
+   "category": "withdrawn",
+   "plan_id": "e4b_hardpy26_vacantdo_rc4_colab",
+   "doc": "ops/redo/plans/e4b_hardpy26_vacantdo_rc4_colab.WITHDRAWN.md"
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "36057947df305c413fcbb9fe31205105b33d07e0a3669bccd3f61bfb246626af": {
+  "a_cells": 170,
+  "a_median_wall": 225.5,
+  "a_timeouts": 0,
+  "p_cap_rate": null,
+  "turn_mean": null,
+  "turn_median": null,
+  "turn_p90": null
+ },
+ "3c62e5e518fee509fcf34d4a2e9edae7c0d258bb007449fd9e79f78095dd3f9a": {
+  "a_cells": 137,
+  "a_median_wall": 123.3,
+  "a_timeouts": 13,
+  "p_cap_rate": null,
+  "turn_mean": 31.4,
+  "turn_median": 4.0,
+  "turn_p90": 75.2
+ },
+ "48ed3d26b9b84f5151b9ea24ab9fd6ef173bff43a5d3b995891e0bb11c06f3aa": {
+  "a_cells": 16,
+  "a_median_wall": 255.8,
+  "a_timeouts": 0,
+  "p_cap_rate": null,
+  "turn_mean": null,
+  "turn_median": null,
+  "turn_p90": null
+ },
+ "51ca8400d3da5d84b7b90c20c48b9f8699258eb84b52d3525dd19ef5a991362c": {
+  "a_cells": 130,
+  "a_median_wall": 118.2,
+  "a_timeouts": 6,
+  "p_cap_rate": 0.26,
+  "turn_mean": 24.5,
+  "turn_median": 6.7,
+  "turn_p90": 57.9
+ },
+ "52306de7745a0855c1dfc5051fa1313683ffbc8d30abba76d86b2bc7f455d573": {
+  "a_cells": 106,
+  "a_median_wall": 55.2,
+  "a_timeouts": 4,
+  "p_cap_rate": null,
+  "turn_mean": 19.1,
+  "turn_median": 5.4,
+  "turn_p90": 33.1
+ },
+ "99d1a8ff59d7c865af03cae92d0ea364ef65b98fe802ef82dcb99229c131d431": {
+  "a_cells": 170,
+  "a_median_wall": 474.9,
+  "a_timeouts": 38,
+  "p_cap_rate": 0.673,
+  "turn_mean": 13.4,
+  "turn_median": 6.8,
+  "turn_p90": 28.5
+ },
+ "a023764660c4aa3628beff49d27ab62476fb44dbe60efe0adf4c74d406662039": {
+  "a_cells": 16,
+  "a_median_wall": 1800.0,
+  "a_timeouts": 9,
+  "p_cap_rate": 0.676,
+  "turn_mean": 8.9,
+  "turn_median": 5.2,
+  "turn_p90": 17.8
+ },
+ "a323ebdd65b3792ebc642a95ab6b99bf1b2ca4a3eba9a9588fc7ef95c899f4b1": {
+  "a_cells": 200,
+  "a_median_wall": 12.1,
+  "a_timeouts": 3,
+  "p_cap_rate": 0.062,
+  "turn_mean": 5.4,
+  "turn_median": 1.3,
+  "turn_p90": 10.9
+ },
+ "bd9965f2dfecddde7310af1ce38938cd33896f6d074a17be52ca87af9ade1636": {
+  "a_cells": 45,
+  "a_median_wall": 791.3,
+  "a_timeouts": 9,
+  "p_cap_rate": 0.63,
+  "turn_mean": 43.8,
+  "turn_median": 11.9,
+  "turn_p90": 91.7
+ },
+ "be8adc8f59a42ae90e98abf2119f3b5b25fd4f9081622c604b80558e8beae32d": {
+  "a_cells": 16,
+  "a_median_wall": 79.9,
+  "a_timeouts": 0,
+  "p_cap_rate": null,
+  "turn_mean": 15.4,
+  "turn_median": 3.5,
+  "turn_p90": 55.2
+ },
+ "d4883c0e622a160361f3eee69965eee70eb5f1de5230a225cc7d40387353549e": {
+  "a_cells": 170,
+  "a_median_wall": 367.1,
+  "a_timeouts": 19,
+  "p_cap_rate": 0.36,
+  "turn_mean": 11.8,
+  "turn_median": 5.6,
+  "turn_p90": 21.8
+ },
+ "dc65250b365d98904a8ce9e23485153b9e5a2ba57bb91568833d6685242efe8b": {
+  "a_cells": 170,
+  "a_median_wall": 285.7,
+  "a_timeouts": 12,
+  "p_cap_rate": null,
+  "turn_mean": 11.6,
+  "turn_median": 6.3,
+  "turn_p90": 21.5
+ },
+ "dd6fd6e82d46d4cb97a73dacca6555be8ec9667443bd39db9ae70bcf867ec329": {
+  "a_cells": 16,
+  "a_median_wall": 645.9,
+  "a_timeouts": 1,
+  "p_cap_rate": null,
+  "turn_mean": 12.9,
+  "turn_median": 6.2,
+  "turn_p90": 21.9
+ },
+ "e43bbf648d61ead95117966f2ca00dae6ba5530836eb160f7aa112df965f9949": {
+  "a_cells": 170,
+  "a_median_wall": 1016.2,
+  "a_timeouts": 51,
+  "p_cap_rate": 0.753,
+  "turn_mean": 46.7,
+  "turn_median": 11.7,
+  "turn_p90": 106.4
+ }
+}
