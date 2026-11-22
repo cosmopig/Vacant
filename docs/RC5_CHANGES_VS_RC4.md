@@ -138,3 +138,14 @@ Also changed when the freeze was reopened:
 - **測試隔離（`0fb0a9e12`，只改測試）**：`tests/conftest.py` 讓每個測試的 `HOME`、`VACANT_HOME`、`VACANT_WORK` 都指到自己的暫存目錄（獨立的 MonkeyPatch，測試裡的 `monkeypatch.undo()` 撤不掉）。上面那 3 個 retention 失敗就是沒隔離造成的。驗收：全套跑兩次（真家目錄／空家目錄），失敗集合相同，只剩 2 個依賴活 repo 狀態的 freeze-check；真家目錄那次前後 `~/.vacant`、`~/.vacant-work`、`~/.vacant-run`、`~/.vacant-mcp` 清單 0 差異。
 - **cargo／go 實測**（`~/dev/ops/cg_test`）：README 三語標成實驗性支援，五個會算錯的情況寫進 KNOWN_LIMITS 第 15–19 條；保護集合不動，修正排到 0.9.3（`docs/TODO_0.9.3.md`）。
 - 收據的變化：中斷的 run 多一筆 `interrupted` 收據；每次嘗試多記 `first_problem`；寫回途中收到訊號時 `result.json` 多 `interrupt_deferred`（不進收據）。既有欄位意義不變。
+
+### 第二次查證後的修正（2026-11-22）
+
+- **製品分支**：rc6 的 wheel 一律從 `release/0.9.2-prep` build（成員數與 rc5-final 相同、不含 `vacant_network/reqloop/*`、METADATA 是發布分支的 README）；`redo/rc6` 是開發分支。
+- **訊號空窗（P2）**：`vacant do` 在呼叫 `run()` 之前就換上「只記下」的 SIGINT／SIGTERM 處理器，`run()` 結束時還原成它，所以寫回臨界區、summary 印出、結束碼決定之間沒有空窗；當成指令執行時一路保持到行程結束（最後改成 SIG_IGN，直譯器收尾時不會再把結束碼變 -2）。`run()` 之後才收到的訊號，在摘要下補一行「arrived after the run had finished; nothing was interrupted」。
+- **cli 的總攔截訊息**：`vacant`（adapters 那一層）的 `KeyboardInterrupt` 總攔截從「interrupted; project unchanged.」改成只說「interrupted.」——它也會接到 install／uninstall／hook 與有契約的 `do`，不知道專案狀態就不宣稱。
+- **原因行（P5）**：runner 截斷 `first_problem` 時保留測試名稱與例外行（`AssertionError: …`）再接尾端；只看結束碼的驗收（npm、`--check`）輸出裡有 TAP `not ok` 時，從那一段取，訊息顯示測試名稱與 `error:` 區塊。
+- **SIGKILL 的救援材料（P4，只動留存）**：`vacant gc`／背景 auto-gc 對沒有 `result.json` 的 restart run 在 7 天內不清 `bkp-*`（`start-copy-*` 本來就不清）；KNOWN_LIMITS 第 21 條寫明怎麼用它們救回。交付政策不變。
+- **README（P3）**：新使用者實測的 8 次真跑照實寫成「有測試的 6 次全部第一次就通過，另外 2 次是沒有測試的專案」。
+- **audit export 新增欄位**：restart 紀錄的 `details.interrupted`／`details.interrupt_signal`／`details.first_problem`、`details.attempts[]`（每次嘗試的 accept、passed、run、status、rc、timed_out、wall_s、tests_tampered、first_problem），以及 `result` 的新值 `interrupted`；收據 payload 的 `interrupted`／`interrupt_signal`／`attempts[i].first_problem`。都是向後相容的新增欄位，`receipt_schema` 不升版（`docs/AUDIT_RECORD_V1.md` §6.1）。
+- **測試隔離提到 session 層級（P6）**：`tests/conftest.py` 匯入時就把 HOME／VACANT_HOME／VACANT_WORK 換成暫存目錄（在任何測試模組匯入與 module fixture 之前），每個測試再疊自己的 tmp；刻意讀本機真資料的測試用 `VACANT_TEST_REAL_HOME`。

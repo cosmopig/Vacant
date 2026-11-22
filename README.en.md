@@ -111,7 +111,7 @@ vacant do claude --prompt "Fix the API" --attempt-timeout 600 --timeout 1800 --s
 - **Signed receipts and audit**: Ed25519 signature chains live in `$VACANT_HOME/trace/projects/<project_key>/chain.ndjson` (default `~/.vacant/`). Inspect them with `vacant audit list` and `vacant audit show <record_id>` (which displays per-attempt results and the first failing test when recorded).
 - **Meaning of `N/M` and `+` / `~` / `-`**: `N/M` means `passed/total` tests (e.g. `8/9` = 8 of 9 passed; exit-code-only checks such as `npm` or `--check` report pass/fail only with no per-test count). In the changed-files list, `+` = added, `~` = modified, `-` = deleted.
 
-> **Honest boundary (do not assume restart boosts strong cloud models the same way)**: Strong cloud agents usually pass on the first attempt (in 8 real-agent runs across Claude Code and Devin, all 8 passed on attempt 1). For them, Vacant's value is the **baseline check, kept-fixed tests, and signed receipts**; the restart pass-rate gain is mainly on **weaker local models**.
+> **Honest boundary (do not assume restart boosts strong cloud models the same way)**: Strong cloud agents usually pass on the first attempt (in 8 real-agent runs across Claude Code and Devin: the 6 on projects with tests all passed on attempt 1; the other 2 were projects with no tests, so nothing was checked). For them, Vacant's value is the **baseline check, kept-fixed tests, and signed receipts**; the restart pass-rate gain is mainly on **weaker local models**.
 
 ## Plugging into your agent: pi / Claude Code / OpenCode / Codex (from 2026-09-24)
 

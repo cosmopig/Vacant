@@ -14,12 +14,30 @@
 """
 from __future__ import annotations
 
+import atexit
 import os
+import shutil
+import tempfile
 
 import pytest
 
 # 工具鏈與快取需要的真實位置（不是 Vacant 的狀態）：保留給子行程用，避免 npm／pip／node 因為新 HOME 找不到東西
-_REAL_HOME = os.path.expanduser("~")
+_REAL_HOME = os.environ.get("VACANT_TEST_REAL_HOME") or os.path.expanduser("~")
+#: 刻意讀本機真資料的測試（只讀，例如真鏈驗收）用這個找回真的家目錄
+os.environ["VACANT_TEST_REAL_HOME"] = _REAL_HOME
+
+# session 層級（第二次查證 P6）：conftest 匯入時就把環境換掉——在任何測試模組匯入、任何 module／session
+# 範圍的 fixture 執行之前。否則匯入時算好的家目錄常數、module fixture 裡的呼叫（例如 test_twin_sidecar）
+# 看到的還是真的家目錄。每個測試另外再疊自己的 tmp（下面的 autouse fixture）。
+_SESSION_ROOT = tempfile.mkdtemp(prefix="vacant-tests-home-")
+_SESSION_HOME = os.path.join(_SESSION_ROOT, "home")
+os.makedirs(_SESSION_HOME)
+os.environ["HOME"] = _SESSION_HOME
+os.environ["VACANT_HOME"] = os.path.join(_SESSION_HOME, ".vacant")
+os.environ["VACANT_WORK"] = os.path.join(_SESSION_HOME, ".vacant-work")
+os.environ.setdefault("npm_config_cache", os.path.join(_REAL_HOME, ".npm"))
+os.environ.setdefault("PIP_CACHE_DIR", os.path.join(_REAL_HOME, ".cache", "pip"))
+atexit.register(shutil.rmtree, _SESSION_ROOT, True)
 
 
 @pytest.fixture(autouse=True)

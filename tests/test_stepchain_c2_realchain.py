@@ -46,7 +46,8 @@ def test_g2_script_and_receipt_committed():
 
 # 匯入時（tests/conftest.py 的隔離 fixture 生效之前）記下真的狀態目錄：這個測試刻意讀本機真鏈，
 # 只讀、複製到 /tmp 再驗（絕不碰活鏈），所以要明確指回真的位置，不能用每個測試的隔離 HOME。
-_REAL_VACANT_HOME = Path(os.environ.get("VACANT_HOME") or (Path.home() / ".vacant"))
+_REAL_VACANT_HOME = Path(os.environ["VACANT_TEST_REAL_HOME"]) / ".vacant" if os.environ.get("VACANT_TEST_REAL_HOME") \
+    else Path(os.environ.get("VACANT_HOME") or (Path.home() / ".vacant"))
 
 
 def _real_chains_present() -> bool:

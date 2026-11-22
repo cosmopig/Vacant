@@ -1306,6 +1306,21 @@ def _restart_work_stats(wroot: pathlib.Path) -> tuple[int, int]:
     return runs, total
 
 
+#: 沒有 result.json 的 restart run：bkp-*／start-copy-* 至少保留這麼多天（rc6，資料遺失等級的留存小修）
+INCOMPLETE_RUN_KEEP_DAYS = 7
+
+
+def _incomplete_run_recent(rdir: pathlib.Path) -> bool:
+    """沒有 `result.json`、而且最後修改在 `INCOMPLETE_RUN_KEEP_DAYS` 天內 ⇒ True（要保留救援材料）。"""
+    if (rdir / "result.json").exists():
+        return False
+    try:
+        age = time.time() - rdir.stat().st_mtime
+    except OSError:
+        return True
+    return age < INCOMPLETE_RUN_KEEP_DAYS * 86400.0
+
+
 def _strip_restart_run(
     rdir: pathlib.Path,
     *,
@@ -1313,9 +1328,14 @@ def _strip_restart_run(
     budget: _Budget | None = None,
 ) -> tuple[int, int]:
     """剝離單一 `restart-*` 目錄底下的工作區副本（`attempt_k/w`）與快照（`attempt_k/snap-*`）
-    以及任何殘留寫回備份（`bkp-*`）；**保留 `result.json`、收據檔與 `attempt_k/logs/`**。"""
+    以及任何殘留寫回備份（`bkp-*`）；**保留 `result.json`、收據檔與 `attempt_k/logs/`**。
+
+    rc6：沒有 `result.json` 的 run（寫回途中被 SIGKILL／斷電，或還在跑）在 `INCOMPLETE_RUN_KEEP_DAYS` 天內
+    不清 `bkp-*`（被換掉的原檔）——那是專案寫到一半時唯一的救援材料（見 KNOWN_LIMITS 第 21 條）；
+    `start-copy-*`（開始時的專案複本）本來就不在這裡清。"""
     freed = 0
     removed = 0
+    keep_backups = _incomplete_run_recent(rdir)
     for child in sorted(rdir.iterdir(), key=lambda p: p.name):
         if budget is not None and budget.expired():
             break
@@ -1329,7 +1349,7 @@ def _strip_restart_run(
                     b, c = _remove_path(sub, dry_run=dry_run)
                     freed += b
                     removed += c
-        elif child.is_dir() and child.name.startswith("bkp-"):
+        elif child.is_dir() and child.name.startswith("bkp-") and not keep_backups:
             b, c = _remove_path(child, dry_run=dry_run)
             freed += b
             removed += c

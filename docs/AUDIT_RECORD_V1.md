@@ -289,6 +289,21 @@ the argument is not one of `list`, `show`, `export`, or a flag.
 
 ---
 
+## 6.1 Backward-compatible additions in 0.9.2 rc6 (schema unchanged)
+
+`receipt_schema` and `vacant-audit-record/1` are **not** bumped: every rc6 change only **adds** optional fields, and
+readers of rc5 receipts see the same fields with the same meaning. rc6's `vacant audit` verifies rc5 receipts unchanged.
+
+| Where | Added field | Meaning | Absent means |
+|---|---|---|---|
+| signed `restart_receipt` payload | `interrupted: true` | The run was stopped by SIGINT/SIGTERM **before write-back**; the project was not changed; `delivered_attempt` is `0`. | Not interrupted before write-back. |
+| signed `restart_receipt` payload | `interrupt_signal` | `"SIGINT"` / `"SIGTERM"` for an interrupted run. | — |
+| signed `restart_receipt.attempts[i]` | `first_problem` | The first failing test (name, exception line, tail; at most ~800 chars) recorded for that attempt. | No failure recorded, or a receipt older than rc6. |
+| `result.json` only (not signed) | `interrupt_deferred` | A signal arrived during write-back and was deferred until the write-back finished; the outcome is final. | No signal during write-back. |
+| export `details` (restart) | `interrupted`, `interrupt_signal`, `first_problem` | Copied from the receipt (or `result.json` fallback). | As above. |
+| export `details.attempts[]` (restart) | `attempt`, `accept`, `passed`, `run`, `status`, `rc`, `timed_out`, `wall_s`, `tests_tampered`, `first_problem` | Per-attempt view shown by `vacant audit show`. | Source has no per-attempt list. |
+| export `result` | value `"interrupted"` | New value of the existing field. | — |
+
 ## 7. Honest Boundaries
 
 1. **Read-only:** `vacant audit` never modifies chains, ledgers, keys, `trust.json`, or workspaces.
