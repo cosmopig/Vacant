@@ -34,14 +34,29 @@ def test_selftest_all_green():
     assert "REDO_SELFTEST_OK" in r.stdout
 
 
+_T05_FAMILY = {
+    "confirm1_vacantdo_pi_gemma12b_1003.json", "confirm1b_vacantdo_pi_gemma12b_1004.json",
+    "confirm1c_vacantdo_pi_gemma12b_1004_j1.json", "redo1_opencode_gemma12b_polyglot34.json",
+    "redo1_pi_gemma12b_polyglot34.json", "screen16_opencode_gemma12b.json",
+    "screen16_pi_gemma12b.json", "screen16_pi_qwen27b.json", "screen16p2_pi_gemma12b_1004.json",
+    "screen16p3_pi_gemma12b_1004_j1.json", "screen16p4_pi_gemma12b_1003_j1.json", "screen16p_pi_gemma12b.json",
+    "smoke2_opencode_gemma12b.json", "smoke2_pi_gemma12b.json", }
+
+
 def test_committed_plans_load_and_are_consistent():
     redo = _load()
-    plans = {p.name: redo.load_plan(p) for p in sorted(PLANS.glob("*.json"))}
-    assert {"redo1_pi_gemma12b_polyglot34.json", "screen16_pi_gemma12b.json", "smoke2_pi_gemma12b.json"} <= set(plans)
+    # *.selection.json 是篩選紀錄（不是計畫檔），不載入
+    plans = {p.name: redo.load_plan(p) for p in sorted(PLANS.glob("*.json")) if not p.name.endswith(".selection.json")}
+    assert _T05_FAMILY <= set(plans)
     main, screen = plans["redo1_pi_gemma12b_polyglot34.json"], plans["screen16_pi_gemma12b.json"]
     assert len(main["tasks"]) == 34 and main["reps"] == 5
     assert set(screen["tasks"]) < set(main["tasks"]) and len(screen["tasks"]) == 16
     for name, plan in plans.items():
+        # 下面的嚴格一致性只適用於 T05–T07 那一族（同一個 polyglot34 題庫、同一個驗收與 agent 指令的篩選／確認批）。
+        # 之後的計畫（別的題庫、Colab、發布版 venv 的絕對路徑、P 對 P 的 atimeout、冒煙／量測）各自在預註冊裡寫明條件，
+        # 這裡只要求它們能被 load_plan 載入（schema 與欄位檢查在 load_plan 裡）。
+        if name not in _T05_FAMILY:
+            continue
         ctrl, treat = (plan["arms"][a] for a in plan["pair"])
         if "agent" in treat and treat["agent"]["argv"][:2] == ["vacant", "do"]:
             _check_product_plan(name, plan, ctrl, treat, main)
