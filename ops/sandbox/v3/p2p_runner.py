@@ -80,6 +80,9 @@ class OnlySelected:
 
 
 def main(argv=None):
+    for name in ('OPENBLAS_NUM_THREADS', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS'):
+        os.environ[name] = '1'
+    os.environ['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
     import pytest
 
     workspace, selection = map(Path, (argv or sys.argv[1:]))
