@@ -31,6 +31,12 @@ def total(rows, key):
     return sum(values) if values and all(isinstance(v, (int, float)) for v in values) else UNKNOWN
 
 
+def costs_complete(row):
+    return bool(row.get('calls_complete')) and all(
+        isinstance(row.get(k), (int, float))
+        for k in ('model_calls', 'prompt_tokens', 'completion_tokens'))
+
+
 def analyze(run_dir):
     root = Path(run_dir)
     meta = json.loads((root / 'meta.json').read_text())
@@ -44,8 +50,8 @@ def analyze(run_dir):
         outcomes[arm] = {(r['task'], r['sample']): bool(r.get('hidden_pass')) and not r['infra_void'] for r in group}
         passed = sum(outcomes[arm].values())
         arms[arm] = dict(n=n, hidden_passed=passed, hidden_rate=passed/n if n else None,
-            calls_complete=bool(group) and all(r.get('calls_complete', False) for r in group),
-            incomplete_cost_cells=sum(not r.get('calls_complete', False) for r in group),
+            calls_complete=bool(group) and all(costs_complete(r) for r in group),
+            incomplete_cost_cells=sum(not costs_complete(r) for r in group),
             visible_passed=sum(bool(r.get('visible_pass')) for r in group),
             infra_void=sum(r['infra_void'] for r in group), false_success=sum(r.get('false_success', False) for r in group),
             wall_s=total(group, 'wall_s'), model_calls=total(group, 'model_calls'),

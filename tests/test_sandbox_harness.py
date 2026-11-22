@@ -44,6 +44,7 @@ def test_gate_feedback_positive_control(tmp_path, fake):
     assert cells['G']['vacant_feedback_rounds'] == 1
     assert not cells['G']['infra_void']
     assert cells['G']['model_calls'] == 'UNKNOWN'
+    assert cells['G']['calls_complete'] is False
     summary = analyze.analyze(out)
     assert summary['comparisons']['G-A']['delta'] == 1
     assert summary['comparisons']['G-A']['decision'] == 'no measurable gain'
@@ -160,3 +161,16 @@ def test_execute_cleans_up_before_reraising(tmp_path, monkeypatch, failure):
     assert exc.value is error
     cleanup.assert_called_once_with(12345)
     assert process.wait.call_count == 2
+
+
+@pytest.mark.parametrize('unknown', [None, 'model_calls', 'prompt_tokens', 'completion_tokens'])
+def test_unknown_accounting_is_incomplete(tmp_path, fake, monkeypatch, unknown):
+    cost = dict(model_calls=1, prompt_tokens=10, completion_tokens=2, model_errors=0)
+    if unknown:
+        cost[unknown] = 'UNKNOWN'
+    monkeypatch.setattr(run, 'calls', lambda *args: cost)
+    out, cells, _ = launch(tmp_path, fake, 'solve', ['A'])
+    assert cells['A']['calls_complete'] is (unknown is None)
+    arm = analyze.analyze(out)['arms']['A']
+    assert arm['incomplete_cost_cells'] == int(unknown is not None)
+    assert analyze.costs_complete({**cost, 'calls_complete': True}) is (unknown is None)

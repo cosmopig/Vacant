@@ -239,7 +239,9 @@ def cell(args, task_id, sample, arm):
             result.update(infra_void=True, infra_reason='scorer: ' + result['score']['error'])
         result['hidden_pass'] = result['score']['hidden_pass'] and not result['infra_void']
         result['visible_pass'] = result['score']['visible_pass'] and not result['infra_void']
-        result['calls_complete'] = not result['infra_void']
+        result['calls_complete'] = not result['infra_void'] and all(
+            isinstance(result.get(k), (int, float))
+            for k in ('model_calls', 'prompt_tokens', 'completion_tokens'))
         subprocess.run(['git', 'add', '-A'], cwd=ws, env=env, check=True, capture_output=True)
         diff = subprocess.run(['git', 'diff', '--cached', 'HEAD', '--'], cwd=ws, env=env, capture_output=True, text=True)
         (work / 'diff.patch').write_text(diff.stdout)
