@@ -112,3 +112,84 @@ than presenting it as the full 24-pair comparison.
 Power note: with 24 units, p < .05 needs at least six discordant pairs when none
 are against the intervention (six improvements, zero regressions gives two-sided
 exact p = 0.03125; five gives p = 0.0625).
+
+## v3 bank (SWE-bench Verified; before any v3 session) — 2026-11-22
+
+Bank: the twelve instance IDs in `v3/SELECTION.json`. Reference submissions and
+candidate solve fractions are determined only by the pinned public experiments
+results recorded there (experiments commit
+`40f164d5b8f1d249bf95a6df8b74b577fd8e519d`, Verified dataset revision
+`c104f840cc67f8b6eec6f759ebc8b2693d585d4a`); the outcome-independent gold/base
+validation and repository cap are as recorded in that selection. No Vacant,
+Devin or pi outcomes enter selection. The whole bank is used or rejected;
+there is no subsequent per-instance selection or repair after calibration.
+
+Calibration: twelve fresh plain sessions, one per instance, used only for the
+bank gate and never for comparisons. Apply the gate only when all twelve
+submissions have outcomes; list missing branches and never impute them.
+Proceed only if calibration resolved count is **≤8/12**. Contaminated calibration
+cells count as **resolved** for this gate, regardless of their harness outcome,
+conservatively toward rejection. Otherwise report **"ceiling, v3 rejected"**;
+build and pre-register a new bank rather than salvage a subset.
+
+If the bank proceeds, run plain, plain2 and vacant fresh, with two independent
+samples per instance per arm (72 sessions; 24 scheduled paired units). Do not
+reuse calibration sessions or workspaces. The primary comparison is vacant vs
+plain; plain2 is the A/A2 noise floor. Use paired two-sided exact McNemar and
+paired percentile-bootstrap 95% delta intervals (10,000 resamples, seed
+20261122), as before. A gain requires delta > 0, p < .05 and
+delta > |plain − plain2| on the same paired units; otherwise report "no
+measurable gain". Without the matching plain2 floor it is not evaluable.
+Never pool v3 comparisons with calibration, v1, v2 or pi outcomes.
+
+Primary outcome: **resolved according to the official SWE-bench harness
+3.0.17**, using the per-instance image registry digests pinned in
+`v3/SELECTION.json`, on the patch derived from the handback. Derive that patch
+by diffing the handback tree against its exact base snapshot. Drop all changes
+to every file touched by that instance's `test_patch` before applying the
+independent original `test_patch`. Exclude binary files and build, egg-info and
+cache artifacts (including build/dist, *.egg-info, __pycache__, *.pyc, pytest,
+mypy and ruff caches). A derived patch that fails to apply is **unresolved**,
+not infra_void. Harness or Docker failures, including timeouts, are infra_void,
+kept in denominators and counted as primary failures, with reasons reported.
+Missing submissions are listed, never synthesized; paired comparisons use
+only units with all required scheduled outcomes and a matching plain2 floor.
+Report any incomplete coverage instead of describing it as a full 24-pair run.
+
+Vacant intervention: the gate runs only that instance's **PASS_TO_PASS** test
+IDs from pre-existing base tests, through the kit-root `.venv` Python's pytest
+via `vacant run`. Never export or run FAIL_TO_PASS IDs or `test_patch` content
+in the gate. The vacant arm gets at most **three submissions** and the gate's
+feedback between them. This reveals which existing tests must remain green;
+that extra test-selection information and the feedback loop are **part of the
+intervention**, not a zero-configuration installation effect. Plain/plain2 do
+not get the selected gate IDs. Session setup installs each repository's own
+dependencies; the small kit documents the Python ≥3.11 venv recipe.
+
+Contamination policy, fixed before sessions: a cell is contaminated if its
+session record shows access to the upstream issue, PR or commit for that
+instance; any fork or mirror of the fix; or SWE-bench data, including dataset
+pages, the experiments repository or Hugging Face. Audit the complete browser,
+shell and search events and the final reply, recording matched evidence and
+source locations. The rule concerns observed access, not an assumption that
+an agent's pretraining or filesystem was isolated. An unavailable session
+record is unknown, not certified clean, and must be disclosed before analysis.
+
+The **primary analysis excludes an entire paired (instance, sample) unit if
+any of plain, plain2 or vacant is contaminated**. Apply that same exclusion
+mask to the treatment comparison and noise floor. A sensitivity analysis
+includes contaminated units with their observed harness outcomes, using the
+same statistical and missing/infra rules. Report excluded units and remaining
+paired sample size explicitly; retain all cells in the published raw records.
+Calibration uses the conservative contaminated-as-resolved rule above instead
+of exclusions.
+
+Secondary flag, reported but **not an exclusion**: normalized diff-line
+similarity to the gold patch ≥0.9. For both the derived candidate patch and
+gold patch, apply the same test-file/artifact exclusions, retain added/deleted
+content lines with their +/- polarity, discard diff headers/hunks/context and
+empty content, trim and collapse whitespace within each line. In sorted-path
+diff order, use `difflib.SequenceMatcher(None, gold_lines, candidate_lines,
+autojunk=False).ratio()` (2 × matching lines / total lines). Report this
+separately from event-based contamination; similarity alone does not establish
+that the session accessed a fix.
