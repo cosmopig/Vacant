@@ -1,0 +1,11 @@
+{
+  "id": "settlement_export",
+  "category": "output-file",
+  "prompt": "Implement settlement export and run it on transactions.json to produce settlement.csv. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests",
+  "output_check": {
+    "path": "settlement.csv",
+    "type": "text_exact",
+    "equals": "merchant,currency,total,count\n\"acme, inc\",USD,9.00,2\ncafé,EUR,3.00,3\n"
+  }
+}

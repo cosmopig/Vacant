@@ -1,0 +1,6 @@
+{
+  "id": "batch_pricing",
+  "category": "feature",
+  "prompt": "Add graduated tier pricing and coupon-aware batch invoices to the pricing service. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

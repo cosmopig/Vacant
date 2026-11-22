@@ -1,0 +1,6 @@
+{
+  "id": "config_layers",
+  "category": "bugfix",
+  "prompt": "Repair layered configuration merging and its legacy input adapter. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

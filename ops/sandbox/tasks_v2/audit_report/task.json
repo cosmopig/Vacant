@@ -1,0 +1,11 @@
+{
+  "id": "audit_report",
+  "category": "output-file",
+  "prompt": "Implement the work-log summary and run it on events.jsonl to produce REPORT.md. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests",
+  "output_check": {
+    "path": "REPORT.md",
+    "type": "text_exact",
+    "equals": "# Work log\n\n| Owner | Seconds | Done |\n|---|---:|---:|\n| Ada | 30 | 1 |\n| Zoë \\| Ops | 30 | 1 |\n| Bob | 0 | 0 |\n"
+  }
+}

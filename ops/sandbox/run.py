@@ -66,8 +66,8 @@ def claim_success(text):
     return bool(re.search(r'\b(done|completed|fixed|all tests pass(?:ed)?|\d+ passed)\b', text, re.I))
 
 
-def contamination_evidence(work):
-    markers = (str(TASKS.resolve()), 'ops/sandbox/tasks', '/hidden/', '/solution/', '_hidden')
+def contamination_evidence(work, bank=TASKS):
+    markers = (str(Path(bank).resolve()), 'ops/sandbox/tasks', '/hidden/', '/solution/', '_hidden')
     evidence = []
     for name in ('events.jsonl', 'stderr.txt', 'diff.patch'):
         path = work / name

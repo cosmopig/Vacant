@@ -88,3 +88,25 @@ Both comparisons show **no measurable gain** under `PREREG.md`.
 G input/output token totals are **UNKNOWN**: `csv_export-s1-G` has proxy call
 rows with empty usage after a timeout and a broken pipe, so the all-calls-usage
 requirement makes its token counts, and therefore G's totals, UNKNOWN.
+
+## V2 candidate bank (not agent-evaluated)
+
+`tasks_v2/` contains twelve larger SPEC-driven candidate projects: five bugfixes,
+five features and two exact-output deliverables. Every hidden test cites numbered
+clauses in its project's `SPEC.md`; citations check traceability, not semantic
+completeness. The validator independently scores original and reference-overlay
+workspaces and checks for copied hidden files/test names in visible material.
+Candidate difficulty is unmeasured: no agent runs or v2 kit branch are implied.
+V1 tasks and results are unchanged; all tools still default to v1.
+
+```bash
+.venv/bin/python ops/sandbox/validate_bank.py ops/sandbox/tasks_v2
+.venv/bin/python ops/sandbox/score.py --bank ops/sandbox/tasks_v2 TASK WORKSPACE
+.venv/bin/python ops/sandbox/score_devin.py --bank ops/sandbox/tasks_v2 \
+  --kit-branch YOUR_BANK_KIT --out ~/sandbox-runs/devin-v2 sandbox-devin/TASK-plain
+```
+
+`kit.py --bank BANK --out DIRECTORY` exports only visible repos, prompts and
+portable gates; it does not create or push git branches. Gate generation accepts
+the selected task directory directly via `run.gate_suite`. V2 output checks use
+`text_exact` (UTF-8 bytes, including final newlines); the old v1 checks are unchanged.

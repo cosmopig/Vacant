@@ -80,6 +80,8 @@ def _output_ok(spec: dict | None, workspace: Path) -> bool | None:
             return json.loads(path.read_text()) == spec['equals']
         if spec['type'] == 'text':
             return all(s in path.read_text() for s in spec['contains'])
+        if spec['type'] == 'text_exact':
+            return path.read_bytes() == spec['equals'].encode('utf-8')
         raise ValueError('unknown output check')
     except (UnicodeError, json.JSONDecodeError):
         return False
@@ -154,10 +156,13 @@ def score(task_dir: str | Path, workspace: str | Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('task_id', choices=sorted(p.name for p in TASKS.iterdir()))
+    parser.add_argument('--bank', type=Path, default=TASKS)
+    parser.add_argument('task_id')
     parser.add_argument('workspace')
     args = parser.parse_args()
-    result = score(TASKS / args.task_id, args.workspace)
+    if args.task_id not in {p.name for p in args.bank.iterdir() if (p / 'task.json').is_file()}:
+        parser.error('unknown task in bank: ' + args.task_id)
+    result = score(args.bank / args.task_id, args.workspace)
     print(json.dumps(result, indent=2))
     return 0 if result['visible_pass'] and result['hidden_pass'] and result['output_file_ok'] is not False else 1
 

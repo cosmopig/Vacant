@@ -82,6 +82,23 @@ def test_missing_external_branches(tmp_path, handbacks):
     assert summary['arms']['A']['n'] == 0 and len(summary['missing']) == 36
 
 
+def test_external_scorer_explicit_bank(tmp_path, handbacks):
+    repo, remote = handbacks
+    bank = tmp_path / 'custom-bank'
+    shutil.copytree(score_devin.TASKS / 'billing', bank / 'billing')
+    for path in (bank / 'billing/hidden').glob('*.py'):
+        path.unlink()
+    (bank / 'billing/hidden/test_custom.py').write_text(
+        'from billing import charge_cents\ndef test_custom_bank():\n    assert charge_cents(10,25,3) == 250\n')
+    out = tmp_path / 'custom-results'
+    score_devin.main(['--repo', str(repo), '--remote', remote, '--out', str(out),
+                     '--bank', str(bank), 'sandbox-devin/billing-plain'])
+    result = json.loads((out / 'cells/billing-s1-A/result.json').read_text())
+    assert result['hidden_pass'] is True
+    assert json.loads((out / 'meta.json').read_text())['bank_dir'] == str(bank.resolve())
+    assert len(analyze.analyze(out)['missing']) == 2
+
+
 @pytest.mark.parametrize(('error', 'failed', 'infra'), [
     ('tests: timeout', 1, True), ('ValueError: invalid archive', 0, True),
     ('tests: pytest exit 1', 1, False), (None, 0, False),

@@ -1,0 +1,6 @@
+{
+  "id": "catalog_aliases",
+  "category": "bugfix",
+  "prompt": "Fix catalog renames so aliases, lookups and serialized snapshots agree. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

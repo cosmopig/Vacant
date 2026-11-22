@@ -32,9 +32,10 @@ def fetch(repo, remote, branch):
     return git(repo, 'rev-parse', 'FETCH_HEAD^{commit}')
 
 
-def score_branches(repo, remote, branches, out, kit_branch='sandbox-devin-kit'):
+def score_branches(repo, remote, branches, out, kit_branch='sandbox-devin-kit', *, bank=TASKS):
     repo, out = Path(repo).resolve(), Path(out).resolve()
-    tasks = sorted(p.name for p in TASKS.iterdir() if (p / 'task.json').is_file())
+    bank = Path(bank).resolve()
+    tasks = sorted(p.name for p in bank.iterdir() if (p / 'task.json').is_file())
     parsed = []
     for branch in branches:
         match = re.fullmatch(r'sandbox-devin/([a-z_]+)-(plain2|plain|vacant)', branch)
@@ -59,6 +60,8 @@ def score_branches(repo, remote, branches, out, kit_branch='sandbox-devin-kit'):
                 requested_branches=list(branches), missing_branches=[],
                 note='External manual gate arm; no model costs or final-message claims collected.')
     (out / 'progress.jsonl').touch()
+    if bank != TASKS.resolve():
+        meta['bank_dir'] = str(bank)
     for branch, task, external_arm in parsed:
         sha = fetch(repo, remote, branch)
         if sha is None:
@@ -74,8 +77,8 @@ def score_branches(repo, remote, branches, out, kit_branch='sandbox-devin-kit'):
         diff = subprocess.check_output(['git', '-C', str(repo), 'diff', '--no-ext-diff',
                                        '--no-textconv', f'{kit_sha}:{task}', sha], timeout=120)
         (cell / 'diff.patch').write_bytes(diff)
-        evidence = contamination_evidence(cell)
-        scored = score(TASKS / task, archive)
+        evidence = contamination_evidence(cell, bank)
+        scored = score(bank / task, archive)
         infra = bool(scored['error'] and ('timeout' in scored['error'] or not scored['n_failed']))
         result = dict(task=task, sample=1, arm=arm, external_arm='devin-' + external_arm,
                       branch=branch, git_sha=sha, kit_sha=kit_sha,
@@ -102,9 +105,10 @@ def main(argv=None):
     parser.add_argument('--repo', type=Path, default=REPO)
     parser.add_argument('--remote', default='origin')
     parser.add_argument('--kit-branch', default='sandbox-devin-kit')
+    parser.add_argument('--bank', type=Path, default=TASKS)
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args(argv)
-    meta = score_branches(args.repo, args.remote, args.branches, args.out, args.kit_branch)
+    meta = score_branches(args.repo, args.remote, args.branches, args.out, args.kit_branch, bank=args.bank)
     print(json.dumps({'run_dir': str(args.out), 'missing_branches': meta['missing_branches']}))
     return 0
 
