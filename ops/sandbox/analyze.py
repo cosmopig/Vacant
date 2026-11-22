@@ -41,7 +41,15 @@ def analyze(run_dir):
     root = Path(run_dir)
     meta = json.loads((root / 'meta.json').read_text())
     config = meta['config']
-    cells = [json.loads(p.read_text()) for p in sorted((root / 'cells').glob('*/result.json'))]
+    if (root / 'cells').exists():
+        cells = [json.loads(p.read_text()) for p in sorted((root / 'cells').glob('*/result.json'))]
+    else:
+        latest = {}
+        for line in (root / 'progress.jsonl').read_text().splitlines():
+            if line.strip():
+                row = json.loads(line)
+                latest[(row['task'], row['sample'], row['arm'])] = row
+        cells = [latest[key] for key in sorted(latest)]
     arms = {}
     outcomes = {}
     for arm in config['arms']:

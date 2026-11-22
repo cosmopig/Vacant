@@ -109,6 +109,35 @@ def test_hand_computed_mcnemar():
     assert analyze.paired({}, {})['p'] is None
 
 
+@pytest.mark.parametrize('source', ['rows', 'empty', 'missing', 'malformed', 'cells'])
+def test_analyze_archive_progress(tmp_path, source):
+    (tmp_path / 'meta.json').write_text(json.dumps({'evidence': 'L-fake', 'config': {
+        'arms': ['A'], 'tasks': ['billing'], 'samples': 1, 'seed': 42}}))
+    row = dict(task='billing', sample=1, arm='A', hidden_pass=False,
+               visible_pass=False, infra_void=False)
+    (tmp_path / 'summary.md').write_text('preserve on error')
+    progress = tmp_path / 'progress.jsonl'
+    if source in ('rows', 'cells'):
+        progress.write_text('\n'.join(json.dumps(r) for r in [row, {**row, 'hidden_pass': True}]) + '\n')
+    elif source == 'empty':
+        progress.write_text('')
+    elif source == 'malformed':
+        progress.write_text('{partial')
+    if source == 'cells':
+        cell = tmp_path / 'cells/billing-s1-A'
+        cell.mkdir(parents=True)
+        (cell / 'result.json').write_text(json.dumps(row))
+    if source in ('missing', 'malformed'):
+        with pytest.raises((FileNotFoundError, json.JSONDecodeError)):
+            analyze.analyze(tmp_path)
+        assert (tmp_path / 'summary.md').read_text() == 'preserve on error'
+        return
+    summary = analyze.analyze(tmp_path)
+    assert summary['arms']['A']['n'] == int(source != 'empty')
+    assert summary['arms']['A']['hidden_passed'] == int(source == 'rows')
+    assert len(summary['missing']) == int(source == 'empty')
+
+
 def test_timeout_is_infra_void_in_denominator(tmp_path, fake, monkeypatch):
     monkeypatch.setattr(run, 'calls', lambda *args: dict(
         model_calls=1, prompt_tokens=10, completion_tokens=2, model_errors=0))
