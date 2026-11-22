@@ -1,0 +1,1 @@
+Implement parse_duration in duration.py. Accept a sequence of nonnegative integer amounts with units h, m, s (for example '1h 30m' or '2m5s'), returning seconds. Whitespace may surround tokens. Reject empty or malformed text with ValueError. Add tests.

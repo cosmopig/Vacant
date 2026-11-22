@@ -1,0 +1,1 @@
+Fix to_cents in money.py: convert a decimal currency string to integer cents, rounding half away from zero. Avoid binary floating-point rounding errors.

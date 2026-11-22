@@ -1,0 +1,1 @@
+Fix render_report in report.py to produce a Markdown expense report with a '# Expenses' heading, one '- category: cents' line per category sorted alphabetically, and 'Total: N cents'. Run report.py on the bundled expenses.json and leave the resulting REPORT.md in the deliverable.

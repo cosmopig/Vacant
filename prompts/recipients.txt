@@ -1,0 +1,1 @@
+Fix recipients in mail.py: strip surrounding whitespace, drop empty addresses, and deduplicate case-insensitively while preserving first-seen spelling and order.

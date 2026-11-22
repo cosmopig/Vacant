@@ -1,0 +1,1 @@
+Implement merge_counts in counts.py: sum counts for each key across all input dictionaries without mutating inputs; preserve zero and negative totals. Add tests and keep existing behavior working.

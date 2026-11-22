@@ -1,0 +1,1 @@
+Read sales.csv and implement totals(path='sales.csv') in sales.py. Return per-region integer-cent revenue (quantity times unit_cents), ignoring cancelled rows, trimming region whitespace and combining repeated regions. Support quoted CSV fields and empty input with only a header.

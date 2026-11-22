@@ -1,0 +1,1 @@
+Fix build_summary in inventory.py to total stock quantities by SKU, combining duplicates. Run inventory.py to write out.json for the bundled inventory.json. The JSON must contain the totals object and the number of distinct SKUs. Keep the generated out.json in the deliverable.
