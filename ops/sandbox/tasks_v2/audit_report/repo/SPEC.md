@@ -23,3 +23,5 @@ build leaves an existing output unchanged. Repeating a build is byte-identical.
 codec.loads accepts JSONL with blank lines or a legacy JSON array; missing
 status defaults open and seconds defaults 0. build(input_path="events.jsonl",
 output_path="REPORT.md") returns the summary rows it writes. UTF-8 is used.
+JSONL records are separated by LF (CRLF is accepted too); Unicode U+2028 and
+U+0085 within JSON strings are field content, not record separators.

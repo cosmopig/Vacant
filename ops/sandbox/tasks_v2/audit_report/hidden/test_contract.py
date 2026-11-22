@@ -44,4 +44,15 @@ def test_audit_conflict_and_atomic_errors(tmp_path):
         source.write_text(json.dumps({**row,**change}))
         with pytest.raises(ValueError, match="^"+message+"$"):
             build(source, target)
-        assert target.read_text() == "keep"
+            assert target.read_text() == "keep"
+
+def test_audit_jsonl_preserves_unicode_line_separators():
+    # SPEC §1
+    # SPEC §4
+    for separator in ("\u2028", "\u0085"):
+        name = "a"+separator+"b"
+        rows = [{"id":"a", "owner":name, "seconds":1, "status":"done"},
+                {"id":"b", "owner":name, "seconds":2}]
+        raw = "\r\n\r\n".join(json.dumps(row, ensure_ascii=False) for row in rows)+"\r\n"
+        assert loads(raw) == rows
+        assert summarize(loads(raw)) == [{"owner":name, "seconds":3, "done":1}]

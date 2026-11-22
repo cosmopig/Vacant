@@ -50,3 +50,13 @@ def test_settlement_csv_quotes_embedded_carriage_returns():
     assert list(csv.reader(io.StringIO(encoded, newline=""))) == [
         ["merchant", "currency", "total", "count"], [name, "USD", "2.00", "1"]]
     assert encoded.endswith("\n") and not encoded.endswith("\r\n")
+
+def test_settlement_jsonl_preserves_unicode_line_separators():
+    # SPEC §1
+    # SPEC §4
+    for separator in ("\u2028", "\u0085"):
+        name = "a"+separator+"b"
+        row = {"merchant":name, "currency":"USD", "amount":"2"}
+        raw = json.dumps(row, ensure_ascii=False)+"\r\n\r\n"
+        assert loads(raw) == [row]
+        assert summarize(loads(raw)) == [{"merchant":name, "currency":"USD", "total":"2.00", "count":1}]

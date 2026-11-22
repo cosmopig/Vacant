@@ -26,3 +26,5 @@ codec.loads accepts a JSON array or newline-delimited JSON objects, ignoring
 blank lines. Missing kind defaults sale; missing status defaults posted.
 The file adapter reads UTF-8. build returns the same rows as summarize, each
 {merchant,currency,total,count}, with total as a two-decimal string.
+JSONL records are separated by LF (CRLF is accepted too); Unicode U+2028 and
+U+0085 within JSON strings are field content, not record separators.

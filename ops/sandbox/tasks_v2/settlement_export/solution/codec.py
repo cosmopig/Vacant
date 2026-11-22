@@ -8,7 +8,7 @@ def loads(raw):
     stripped = raw.lstrip()
     if stripped.startswith("["):
         return objects(json.loads(stripped))
-    return objects([json.loads(line) for line in raw.splitlines() if line.strip()])
+    return objects([json.loads(line) for line in raw.split("\n") if line.strip()])
 
 
 def dumps(rows):
