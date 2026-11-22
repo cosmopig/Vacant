@@ -4,14 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
   <title>你收不收？｜讓依賴有根據</title>
   <link rel="stylesheet" href="style.css">
   <script defer src="cases.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
-  <header><span class="brand">VACANT <b>／ 可究責性小實驗</b></span><span id="progress">離線・8 回合</span></header>
+  <header><span class="brand">VACANT<span>讓依賴有根據</span></span><div id="progress" role="img" aria-label="8 回合，尚未開始"></div></header>
   <main id="app"></main>
+  <dialog id="sheet" aria-labelledby="sheet-title">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-heading"><h2 id="sheet-title"></h2><button id="sheet-close" aria-label="關閉詳細內容">✕</button></div>
+    <div id="sheet-body"></div>
+  </dialog>
   <noscript>請開啟 JavaScript。本頁不需要網路，所有回答只存在這台裝置。</noscript>
 </body>
 </html>

@@ -111,7 +111,8 @@ def rendered_end(bank):
     script = r"""
 const fs = require('node:fs'), vm = require('node:vm');
 const input = JSON.parse(fs.readFileSync(0, 'utf8'));
-const nodes = {}, get = id => nodes[id] ||= {innerHTML:'', textContent:''};
+const nodes = {}, get = id => nodes[id] ||= {innerHTML:'', textContent:'',
+  setAttribute(name, value){this[name]=value;}};
 let allowClear = false, removed = false;
 vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), {
   window:{RELIANCE_CASES:input.bank, scrollTo(){}},
@@ -120,13 +121,14 @@ vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), {
   confirm:()=>allowClear
 });
 get('#resume').onclick();
-const html = get('#app').innerHTML, progress = get('#progress').textContent;
+const html = get('#app').innerHTML, progress = get('#progress')['aria-label'];
 get('#restart').onclick();
-const cancelled = {progress:get('#progress').textContent, removed};
+const cancelled = {progress:get('#progress')['aria-label'], removed};
 allowClear = true;
 get('#restart').onclick();
 console.log(JSON.stringify({html, progress, cancelled, removed,
-  clearedHTML:get('#app').innerHTML, clearedProgress:get('#progress').textContent}));
+  clearedHTML:get('#app').innerHTML, clearedProgress:get('#progress')['aria-label'],
+  clearedDots:get('#progress').innerHTML}));
 """
     result = subprocess.run([node, '-e', script, str(build_cases.OUT.parent / 'app.js')],
                             input=json.dumps(dict(bank=bank, state=state)),
@@ -151,6 +153,20 @@ def test_clear_resets_progress_immediately_and_cancel_preserves_it(rendered_end)
     assert rendered_end['progress'] == '8 / 8 完成'
     assert rendered_end['cancelled'] == dict(progress='8 / 8 完成', removed=False)
     assert rendered_end['removed']
-    assert rendered_end['clearedProgress'] == '離線・8 回合'
-    assert '我願意參與，開始 8 回合' in rendered_end['clearedHTML']
+    assert rendered_end['clearedProgress'] == '8 回合，尚未開始'
+    assert rendered_end['clearedDots'].count('class="dot ') == 8
+    assert 'done' not in rendered_end['clearedDots']
+    assert '我願意參與，開始' in rendered_end['clearedHTML']
     assert 'id="resume"' not in rendered_end['clearedHTML']
+
+
+def test_visual_comparison_keeps_four_tokens_per_condition(rendered_end):
+    html = rendered_end['html']
+    record = re.search(r'<section class="lane record">(.*?)</section>', html).group(1)
+    plain = re.search(r'<section class="lane plain">(.*?)</section>', html).group(1)
+    assert record.count('class="round-token ') == 4
+    assert plain.count('class="round-token ') == 4
+    assert record.count('round-token solid') == 4
+    assert plain.count('round-token hollow') == 4
+    assert 'accepted-wrong' in plain
+    assert 'time-col without' in html
