@@ -1,0 +1,20 @@
+{
+  "frozen_date": "2026-11-22",
+  "source_commit": "c371ac8cb88387d7d7028ddd7f38a9a8eeaf9659",
+  "algorithm": "sha256",
+  "hash_recipe": "For each task, sort all regular files recursively by POSIX relative path. Concatenate UTF-8(relative_path) + NUL + ASCII(sha256(file_bytes).hexdigest()) + LF for each file; SHA256 that byte string. Symlinks are forbidden. Bank-level FROZEN.json is outside every task directory.",
+  "task_sha256": {
+    "audit_report": "fe95b99d5f23444f6f0e326517916c6d278b96eeee1fa981bbdc7b583d9d42fd",
+    "batch_pricing": "c48c8d00493ee12c602d29bf442f6b6e4c3f57d73ffc92ac6eea7a2834ea4147",
+    "calendar_slots": "46278842fb03659c6f5220aae8434b0e273797d5f7fff626843bdea4da2b934d",
+    "catalog_aliases": "b10a06ed134897b270f40e05f93f0c9ea7775aec8b09753c8abebe6abfbdf645",
+    "config_layers": "98cd86fcee255242eb7fa3c338bc1cbcc1a01fd79ec72ae87d03f9b52469e4a6",
+    "credit_ledger": "0e99234e33db1bb4f2973184de5c9ab2649c76ef33993d20949f599b27f779f4",
+    "event_projection": "c55c8bded2dcf3e3e08f7e690377f2b5a9522b4be15498722467c64569f7619b",
+    "path_manifest": "1cd974678803e504c827f5ad009ee6ae232e1d3ac9d6e53adf1526e9c4a38383",
+    "quota_windows": "ece1f12a495a5dd236694758aba4e80b0d4fb64ce184ff2749a01ff1c839b0a9",
+    "retry_queue": "a1c9240f28a22c9d6035a8bd0b4ed97e717f0c2bcf0a320d3e5f603e2103db5e",
+    "roster_merge": "31d68b690c3b87b293b8aafda70b164a0c0ac024bae08bf5cfaa128f0a61042a",
+    "settlement_export": "0bab298ae10bd34aca9ccc2fabdf674efa51e3fa3989f04d4dd8df2c5862b9fc"
+  }
+}

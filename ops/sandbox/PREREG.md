@@ -69,3 +69,46 @@ with pi results.
 The 12 devin-plain sessions run first. If devin-plain passes ≥11/12 on hidden
 tests, devin-plain2 and devin-vacant are not launched on this task bank; report
 "ceiling, not evaluable; harder tasks needed".
+
+## v2 bank (amendment, before any v2 run) — 2026-11-22
+
+Bank: all twelve tasks in `tasks_v2/`, frozen by the per-task SHA256 digests and
+reproducible directory-hash recipe in `tasks_v2/FROZEN.json`. Verify those digests
+before use. There is no per-task selection, ever: the whole bank is used or the
+whole bank is rejected. The existing task contents are frozen without changes.
+
+Calibration: twelve fresh plain Devin sessions, one per task, handing back
+`sandbox-devin-cal/<task>-plain`. Calibration outcomes are used **only** for the
+bank gate and are never part of any comparison; their workspaces and sessions
+must not be reused in comparison arms. Apply the gate only after all twelve
+calibration submissions have outcomes; list missing branches, never impute them.
+
+Bank gate: proceed only if calibration plain hidden-pass is **≤8/12**. If it is
+above 8/12, report **"ceiling, v2 rejected"**. A new bank must then be built and
+pre-registered; do not salvage a subset, modify this bank or change the threshold
+after seeing calibration outcomes.
+
+If the bank proceeds, run all three arms fresh: devin-plain, devin-plain2 and
+devin-vacant, with **two independent samples per task per arm** (72 sessions;
+24 paired task/sample units per comparison). Handback branches are
+`sandbox-devin/v2/<task>-<arm>-s<k>`, where arm is `plain`, `plain2` or `vacant`,
+and k is 1 or 2. devin-plain2 repeats the plain protocol as the A/A2 noise floor;
+devin-vacant uses the same manual visible-gate loop, at most three submissions.
+
+Primary outcome remains independently scored hidden_pass. The **primary
+comparison is vacant vs plain**; plain2 is the noise floor. Use the same paired,
+two-sided exact McNemar test and paired percentile-bootstrap 95% delta interval
+(10,000 resamples, seed 20261122) as before. Report a gain only if delta > 0,
+p < .05 and delta > |plain − plain2| on the same paired units. Otherwise report
+"no measurable gain"; without the matching plain2 floor the gain is not
+evaluable. Never pool v2 comparison results with calibration, v1 or pi results.
+
+Infra and missing-branch handling is unchanged: infra_void cells remain in the
+arm denominator and count as primary failures, with reasons reported separately.
+Missing branches are listed, never imputed; only units with both scheduled arms
+present enter a paired comparison. Report incomplete coverage explicitly rather
+than presenting it as the full 24-pair comparison.
+
+Power note: with 24 units, p < .05 needs at least six discordant pairs when none
+are against the intervention (six improvements, zero regressions gives two-sided
+exact p = 0.03125; five gives p = 0.0625).
