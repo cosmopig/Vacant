@@ -43,6 +43,7 @@ from typing import Any, Callable
 from ..intake import flow
 from ..intake.contract import Contract
 from .hookpolicy import vacant_state_dir
+from .workspace import copy_workspace, directory
 
 COPY_SKIP = frozenset({".git", "node_modules", "__pycache__", ".venv", ".pytest_cache"})
 FEEDBACK_MODES = ("localized", "generic", "none")
@@ -143,8 +144,11 @@ def _skip_dirs(contract: Contract) -> set[pathlib.Path]:
 def prepare_workspace(contract: Contract, dest: pathlib.Path) -> pathlib.Path:
     """把專案根複製成一個新的 git 專案（一個初始 commit）。"""
     src = contract.base_dir
-    if dest.exists():
-        shutil.rmtree(dest)
+    with directory(dest.parent, True) as fd:
+        if dest.is_symlink():
+            raise ValueError("workspace destination is a symlink")
+        if dest.exists():
+            shutil.rmtree(dest.name, dir_fd=fd)
     # 契約的放行目的端若在專案裡（`dir:published`），不複製——那是收件端的東西，
     # 不是 agent 的材料；複製進去還會被下一次交件當成成果的一部分。
     skip_abs = _skip_dirs(contract)
@@ -155,7 +159,7 @@ def prepare_workspace(contract: Contract, dest: pathlib.Path) -> pathlib.Path:
             if (pathlib.Path(d) / n).resolve() in skip_abs:
                 out.add(n)
         return out
-    shutil.copytree(src, dest, symlinks=True, ignore=ignore)
+    copy_workspace(src, dest, COPY_SKIP, ignore=ignore)
     env = {**os.environ, "GIT_AUTHOR_NAME": "vacant", "GIT_AUTHOR_EMAIL": "vacant@localhost",
            "GIT_COMMITTER_NAME": "vacant", "GIT_COMMITTER_EMAIL": "vacant@localhost"}
     subprocess.run(["git", "init", "-q", str(dest)], check=True, env=env)
