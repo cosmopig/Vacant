@@ -36,8 +36,14 @@
 
 確認批（30 題 × 5、A 對 rc4、Colab）跑到約 100/150 對時遺失，**沒有可引用的數字**；原因與處置見
 [`ops/redo/results/void/w35js_confirm/VOID.md`](../../ops/redo/results/void/w35js_confirm/VOID.md)（責任在操作者：批次中途換了 keepalive）。
-不在 Colab 重跑；JS 產品臂的判斷依據是 1003 的 hardjs34（快後端）。
+當時決定不在 Colab 重跑（JS 產品臂的判斷依據是 1003 的 hardjs34，快後端）；**後來改變**：有了第二個帳號與 A100 之後改成重跑——同樣 30 題、rc5-final、Colab A100 jobs 4、因預算為 30 題×3 次，計畫 [`w35confirm_js_vacantdo_rc5_a100.json`](../../ops/redo/plans/w35confirm_js_vacantdo_rc5_a100.json)（修訂 f9ab2aed1）。重跑結案時另寫結論，不與這一批合併。
 
 ## 3. 後端速度（篩選批、確認批共用同一後端）
 
-Colab L4、vLLM 0.30.0、jobs 6：同後端其他批每輪平均 24–50 秒（本機 5–12 秒），見 hardpy26／W3-5 Python 結論的「後端速度」。
+Colab L4、vLLM 0.30.0、jobs 6。**篩選批自己的數字**（`python3 ops/redo/analysis/turn_latency.py <篩選批 run root>`，11/22 重跑）：
+
+- 每輪模型回應：中位 4.0 秒／平均 31.4 秒／p90 75.2 秒（n＝3292 輪；兩個原生臂 A、A2 各自 4.0／30.2／72.5 與 4.0／32.6／77.7）
+- 原生單次（A）：中位牆鐘 123.3 秒、逾時 13/137
+- 篩選批兩臂都是原生 pi，沒有 P 臂，所以沒有「P 內層撞上限」這一項
+
+對照：本機 confirm1c 每輪 5.6／11.8／21.8 秒、confirm2 5.4／11.1／21.4 秒。中位數接近本機，平均與長尾約為本機的 2.5–3.5 倍——和同後端其他批（hardpy26、W3-5 Python）一樣是慢後端的樣子。確認批遺失，沒有可量的完整資料。
