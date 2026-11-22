@@ -11,6 +11,22 @@ from ops.sandbox import analyze, run
 @pytest.fixture
 def fake(tmp_path, monkeypatch):
     monkeypatch.setattr(run, 'version', lambda cmd: 'offline-test')
+    gate = tmp_path / 'offline_gate.py'
+    gate.write_text('''from vacant_network.vrun import sandbox, launcher
+def offline_probe(self, workdir, **kwargs):
+    return {'backend': self.name, 'network_isolated': None, 'write_confined': None,
+            'probe_skipped': 'offline test'}
+sandbox.Sandbox.probe = offline_probe
+raise SystemExit(launcher.main())
+''')
+    execute = run.execute
+
+    def offline_execute(cmd, *args, **kwargs):
+        if cmd[:4] == [sys.executable, '-m', 'vacant_network.cli', 'run']:
+            cmd = [sys.executable, str(gate), *cmd[4:]]
+        return execute(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(run, 'execute', offline_execute)
     path = tmp_path / 'fake.py'
     path.write_text('''import json, pathlib, sys, time
 scenario = sys.argv[1]
@@ -39,7 +55,7 @@ def test_gate_feedback_positive_control(tmp_path, fake):
     out, cells, _ = launch(tmp_path, fake, 'feedback', ['A', 'G'])
     assert not cells['A']['hidden_pass']
     assert cells['A']['false_success']
-    assert cells['G']['hidden_pass'], cells['G']
+    assert cells['G']['hidden_pass'], json.dumps(cells['G'], indent=2)
     assert cells['G']['gate_attempts'] == 2
     assert cells['G']['vacant_feedback_rounds'] == 1
     assert not cells['G']['infra_void']
