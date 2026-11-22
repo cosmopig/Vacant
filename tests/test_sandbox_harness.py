@@ -12,7 +12,10 @@ from ops.sandbox import analyze, run
 def fake(tmp_path, monkeypatch):
     monkeypatch.setattr(run, 'version', lambda cmd: 'offline-test')
     gate = tmp_path / 'offline_gate.py'
-    gate.write_text('''from vacant_network.vrun import sandbox, launcher
+    gate.write_text('''import faulthandler, socket
+faulthandler.dump_traceback_later(15)
+socket.getfqdn = lambda host: host
+from vacant_network.vrun import sandbox, launcher
 def offline_probe(self, workdir, **kwargs):
     return {'backend': self.name, 'network_isolated': None, 'write_confined': None,
             'probe_skipped': 'offline test'}
@@ -55,7 +58,8 @@ def test_gate_feedback_positive_control(tmp_path, fake):
     out, cells, _ = launch(tmp_path, fake, 'feedback', ['A', 'G'])
     assert not cells['A']['hidden_pass']
     assert cells['A']['false_success']
-    assert cells['G']['hidden_pass'], json.dumps(cells['G'], indent=2)
+    assert cells['G']['hidden_pass'], (json.dumps(cells['G'], indent=2)
+        + (Path(cells['G']['work_dir']) / 'stderr.txt').read_text())
     assert cells['G']['gate_attempts'] == 2
     assert cells['G']['vacant_feedback_rounds'] == 1
     assert not cells['G']['infra_void']
