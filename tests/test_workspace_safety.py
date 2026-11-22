@@ -55,6 +55,46 @@ def test_acceptance_removes_readonly_copy(tmp_path, monkeypatch):
         readonly.chmod(0o755)
 
 
+@pytest.mark.skipif(os.getuid() == 0, reason="requires non-root permissions")
+@pytest.mark.parametrize("root_mode", [0o755, 0o000])
+def test_remove_tree_handles_inaccessible_owned_directories(tmp_path, root_mode):
+    from vacant_network.adapters.workspace import remove_tree
+    root = tmp_path / "tree"
+    root.mkdir()
+    child = root / "child"
+    child.mkdir()
+    (child / "data").write_text("data")
+    child.chmod(0o000)
+    root.chmod(root_mode)
+    try:
+        remove_tree(root)
+        assert not root.exists()
+    finally:
+        if root.exists():
+            root.chmod(0o700)
+            if child.exists():
+                child.chmod(0o700)
+
+
+def test_acceptance_cleanup_failure_keeps_result(tmp_path, monkeypatch, caplog):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    original_remove = R.safe.remove_tree
+    leftovers = []
+    def denied(path):
+        leftovers.append(path)
+        raise PermissionError("simulated cleanup failure")
+    monkeypatch.setattr(R.safe, "remove_tree", denied)
+    try:
+        result = R.acceptance({"test_x.py": b"import unittest\nclass T(unittest.TestCase):\n def test_ok(self): pass\n"}, ws)
+        assert result["accept"] is True and result["status"] == "ok"
+        assert "simulated cleanup failure" in caplog.text
+    finally:
+        monkeypatch.setattr(R.safe, "remove_tree", original_remove)
+        for path in leftovers:
+            original_remove(path)
+
+
 def test_acceptance_never_restores_through_external_link(tmp_path):
     ws = tmp_path / "ws"
     ws.mkdir()

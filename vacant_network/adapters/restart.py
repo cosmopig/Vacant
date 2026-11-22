@@ -24,6 +24,7 @@ agent 的結果同一種形狀，只是多了「選哪一次」。
 from __future__ import annotations
 
 import json
+import logging
 import os
 import pathlib
 import stat
@@ -126,7 +127,10 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
                 "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
     finally:
-        safe.remove_tree(tmp)
+        try:
+            safe.remove_tree(tmp)
+        except OSError as exc:
+            logging.getLogger(__name__).warning("acceptance cleanup failed for %s: %s", tmp, exc)
 
 
 def deliver_index(accs: list[dict]) -> int:

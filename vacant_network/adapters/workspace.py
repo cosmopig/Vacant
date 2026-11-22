@@ -86,21 +86,53 @@ def remove_tree(path: pathlib.Path | str, *, dir_fd: int | None = None):
     if name in {"", ".", ".."} or "/" in name:
         raise ValueError("removal requires one child name")
 
+    def owner_mode(st):
+        if st.st_uid != os.getuid():
+            raise PermissionError("refusing to chmod a directory owned by another user")
+        return stat.S_IMODE(st.st_mode) | stat.S_IRWXU
+
+    def relax(fd):
+        os.fchmod(fd, owner_mode(os.fstat(fd)))
+
+    def open_dir(child, fd):
+        try:
+            return os.open(child, DIR, dir_fd=fd)
+        except PermissionError:
+            if hasattr(os, "O_PATH"):
+                handle = os.open(child, os.O_PATH | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+                try:
+                    # O_PATH 不能 fchmod；這個 proc 路徑只指向已釘住的描述符，不解析來源連結。
+                    os.chmod(f"/proc/self/fd/{handle}", owner_mode(os.fstat(handle)))
+                finally:
+                    os.close(handle)
+            else:
+                st = os.stat(child, dir_fd=fd, follow_symlinks=False)
+                if not stat.S_ISDIR(st.st_mode):
+                    raise
+                os.chmod(child, owner_mode(st), dir_fd=fd, follow_symlinks=False)
+            return os.open(child, DIR, dir_fd=fd)
+
     def retry(fn, child, fd):
         try:
-            fn(child, dir_fd=fd)
+            return fn(child, dir_fd=fd)
         except PermissionError:
-            st = os.fstat(fd)
-            if st.st_uid != os.getuid():
-                raise
-            os.fchmod(fd, stat.S_IMODE(st.st_mode) | stat.S_IRWXU)
-            fn(child, dir_fd=fd)
+            relax(fd)
+            return fn(child, dir_fd=fd)
 
     def empty(fd):
-        for child in os.listdir(fd):
-            st = os.stat(child, dir_fd=fd, follow_symlinks=False)
+        try:
+            children = os.listdir(fd)
+        except PermissionError:
+            relax(fd)
+            children = os.listdir(fd)
+        for child in children:
+            try:
+                st = os.stat(child, dir_fd=fd, follow_symlinks=False)
+            except PermissionError:
+                relax(fd)
+                st = os.stat(child, dir_fd=fd, follow_symlinks=False)
             if stat.S_ISDIR(st.st_mode):
-                sub = os.open(child, DIR, dir_fd=fd)
+                sub = open_dir(child, fd)
                 try:
                     empty(sub)
                 finally:
@@ -109,7 +141,7 @@ def remove_tree(path: pathlib.Path | str, *, dir_fd: int | None = None):
             else:
                 retry(os.unlink, child, fd)
 
-    fd = os.open(name, DIR, dir_fd=dir_fd)
+    fd = open_dir(name, dir_fd)
     try:
         empty(fd)
     finally:
