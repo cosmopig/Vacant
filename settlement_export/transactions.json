@@ -1,0 +1,44 @@
+[
+  {
+    "merchant": " Café ",
+    "currency": "EUR",
+    "amount": "1.005",
+    "kind": "sale",
+    "status": "posted"
+  },
+  {
+    "merchant": "Café",
+    "currency": "EUR",
+    "amount": "2.015",
+    "kind": "sale",
+    "status": "posted"
+  },
+  {
+    "merchant": "CAFÉ",
+    "currency": "EUR",
+    "amount": "0.015",
+    "kind": "refund",
+    "status": "posted"
+  },
+  {
+    "merchant": "Acme, Inc",
+    "currency": "USD",
+    "amount": "10.005",
+    "kind": "sale",
+    "status": "posted"
+  },
+  {
+    "merchant": "Acme, Inc",
+    "currency": "USD",
+    "amount": "1.005",
+    "kind": "refund",
+    "status": "posted"
+  },
+  {
+    "merchant": "unused",
+    "currency": "USD",
+    "amount": "999",
+    "kind": "sale",
+    "status": "canceled"
+  }
+]

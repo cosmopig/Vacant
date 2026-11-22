@@ -1,0 +1,1 @@
+Repair usage accounting for offset-aware time windows and cached tenant summaries. Follow SPEC.md.

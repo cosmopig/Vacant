@@ -1,0 +1,1 @@
+Implement the work-log summary and run it on events.jsonl to produce REPORT.md. Follow SPEC.md.

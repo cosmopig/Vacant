@@ -1,0 +1,1 @@
+Add normalized manifest updates and deterministic legacy-compatible serialization. Follow SPEC.md.

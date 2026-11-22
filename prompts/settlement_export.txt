@@ -1,0 +1,1 @@
+Implement settlement export and run it on transactions.json to produce settlement.csv. Follow SPEC.md.

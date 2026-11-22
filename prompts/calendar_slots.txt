@@ -1,0 +1,1 @@
+Add offset-aware available-slot generation and a JSON busy-window adapter. Follow SPEC.md.

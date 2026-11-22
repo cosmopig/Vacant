@@ -1,0 +1,1 @@
+Repair layered configuration merging and its legacy input adapter. Follow SPEC.md.

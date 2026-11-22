@@ -1,0 +1,1 @@
+Fix retry scheduling and queue snapshots without breaking old callers. Follow SPEC.md.

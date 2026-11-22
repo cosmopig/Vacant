@@ -1,0 +1,1 @@
+Add atomic event-batch replay to the inventory projection and keep snapshots compatible. Follow SPEC.md.
