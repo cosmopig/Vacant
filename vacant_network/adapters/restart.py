@@ -6749,6 +6749,7 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
                 "status": a["status"],
                 "tests_tampered": list(a["tests_tampered"]),
                 "snapshot_tree_sha256": _snapshot_tree_sha256(snap),
+                **({"first_problem": a["first_problem"]} if a.get("first_problem") else {}),
             })
         delivered_snap = snaps[delivered_idx] if 0 <= delivered_idx < len(snaps) else None
         wb_entries, wb_non_utf8 = _written_back_entries(project, delivered_snap, changed)
