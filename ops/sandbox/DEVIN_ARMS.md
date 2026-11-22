@@ -51,3 +51,46 @@ Score both delivered archives independently, outside the agent session:
 Acceptance is a verdict, not an OS write barrier. Do not advertise rejection as
 preventing Devin from writing files. Success claims and final tests remain
 independent recorded outcomes, not substitutes for the hidden scorer.
+
+## Visible kit and branch handbacks
+
+Clone only `sandbox-devin-kit`. It contains twelve task directories, exact user
+prompts in `prompts/<task>.txt`, visible gates and no hidden tests or solutions.
+Use a fresh session for each task/arm. `devin-plain2` repeats the plain protocol
+with the same prompt; follow the ceiling stopping rule in `PREREG.md` before
+launching plain2 or vacant. At the kit root, install the gate environment with:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+pip install git+https://github.com/cosmopig/Vacant pytest
+```
+
+From `<task>/`, each manual submission uses a new receipts directory (N=1..3):
+
+```bash
+vacant run --workspace . --suite ../gates/<task> --run-dir ../receipts/<task>-N --sandbox none --retry none -- true
+```
+
+The kit ignores `/receipts/`. Gate scripts explicitly use `<kit>/.venv/bin/python`:
+main's vrun verifier runs system `python3` with a cleaned PATH, not the activated
+venv. pytest is a separate prerequisite, not a Vacant runtime dependency. Hand back
+only the task workspace at the **tree root** of branch
+`sandbox-devin/<task>-plain`, `-plain2`, or `-vacant`, not the full kit tree.
+Do not commit receipts or gates into the task workspace.
+
+On the operator's private PR checkout, score an explicit list of handbacks:
+
+```bash
+.venv/bin/python ops/sandbox/score_devin.py --out ~/sandbox-runs/devin1 \
+  sandbox-devin/billing-plain sandbox-devin/billing-plain2 sandbox-devin/billing-vacant
+.venv/bin/python ops/sandbox/analyze.py ~/sandbox-runs/devin1
+```
+
+The scorer fetches from `origin` (override `--repo`/`--remote` for a local bare
+repository), records commit identities, archives and scores each branch tree,
+and scans the diff against the kit's original task subtree for contamination.
+Only submitted branches have cells; all 36 planned task/arm slots remain in the
+metadata so unsubmitted branches are listed as missing, never imputed. Costs
+and feedback counts are UNKNOWN; final-message claims are not assessed. This
+is a separate `external-devin` run, never pooled with the pi experiment.

@@ -123,10 +123,11 @@ def execute(cmd, cwd, env, timeout, stdout, stderr):
             raise
 
 
-def gate_suite(task, dest):
+def gate_suite(task, dest, *, portable=False):
     """vrun 接 check_*/main，不接 pytest；包裝的內容僅有原始可見測試。"""
     dest.mkdir()
     source = (task / 'repo/tests/test_visible.py').read_text()
+    python = 'str(pathlib.Path(os.getcwd()).parent / ".venv/bin/python")' if portable else repr(sys.executable)
     code = (
         'import os, pathlib, subprocess, tempfile\n\n'
         'def main():\n'
@@ -134,7 +135,7 @@ def gate_suite(task, dest):
         '        path = pathlib.Path(temp) / "test_public.py"\n'
         f'        path.write_text({source!r})\n'
         '        driver = "import sys,pytest; sys.path.insert(0,sys.argv.pop(1)); raise SystemExit(pytest.main(sys.argv[1:]))"\n'
-        f'        run = subprocess.run([{sys.executable!r}, "-I", "-c", driver, os.getcwd(), str(path), "-q", "-p", "no:cacheprovider", "--noconftest"], capture_output=True, text=True, timeout=10, env={{**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"}})\n'
+        f'        run = subprocess.run([{python}, "-I", "-c", driver, os.getcwd(), str(path), "-q", "-p", "no:cacheprovider", "--noconftest"], capture_output=True, text=True, timeout=10, env={{**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"}})\n'
         '        assert run.returncode == 0, run.stdout + run.stderr\n'
     )
     (dest / 'test_visible.py').write_text(code)
