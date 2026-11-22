@@ -96,26 +96,52 @@ file-size checks and leak-check counts. Each `sandbox-v3/<instance_id>` branch
 has one parentless commit whose tree is exactly that upstream base tree. No
 patch, added test, dataset file, custom prompt or other metadata is inserted.
 The small, independently rooted `sandbox-devin-kit-v3` branch contains only
-exact problem statements, gates, README and the two ignore rules; it contains
+exact problem statements, gates, README and ignore rules; it contains
 no hints, reference fixes, new acceptance tests or repository workspaces.
 
 `kit.py` maps PASS_TO_PASS parser labels to existing base test modules. Module
 scope for labels without a filename comes from the original harness's test
 file paths, intersected with files present in base; no test-patch code is
 exported. Short labels can represent tests in multiple modules or inherited/
-parameterized cases; the runner selects those labels only, never whole files.
-Newly introduced functions are omitted even if labelled PASS_TO_PASS. The
-Sphinx 8548 list has one such omitted function; its four pre-existing labels
-remain. Missing runtime labels fail closed instead of running extra tests.
+parameterized cases. Before export, `measure.py` freezes concrete base-passing
+node IDs, covering every retained label and rejecting every failing baseline
+variant. Only ambiguous base-skipped variants are excluded. Newly introduced
+functions, methods and parameterizations are omitted even if labelled P2P.
+Omissions and label-to-node mappings are recorded in `KIT.json`. Every frozen
+node must actually pass: skips, deselection and missing nodes refuse.
 
-The kit README defaults to **Python 3.11** (Vacant requires >=3.11), pytest 7
-and setuptools for legacy compatibility. Python 3.12 was not suitable for the
-SymPy 21612 base P2P control. Sessions must install their project's own
-dependencies; only the SymPy 21612 gate has been VM-verified here, with mpmath
-1.3.0 and public Vacant main `c097899e768fe049f0b96f6724b219e8530acc10`.
-Its unchanged base was accepted; changing only the Catalan printer to return
-an incorrect value was refused by `test_Catalan`. No reference overlay was used.
-The other eleven gates still require repository-specific environment preflight.
+Vacant and its wrapper use kit-root `.venv` (Python >=3.11). Tests use the
+instance's official harness Python at `.envs/INSTANCE/bin/python`; no stdlib
+shim is used. The generated README lists each version and harness environment,
+system-provisioning and repository-install commands. Both env directories and
+receipts are gitignored. BLAS/OMP/MKL threads are fixed to one in the runner.
+Django uses its native database setup and warning policy; other repositories
+load their installed pytest plugins. The driver pins compatible pytest versions
+and the legacy `py` API for SymPy. Pandas is required for the sklearn tests.
+
+`measure.py` runs in each registry-digest-pinned official image, retaining the
+image's built dependencies while restoring tracked files from raw base Git
+blobs (image setup may adjust build files). It never applies either patch.
+Gate timeouts are `max(120, ceil(3 * measured_base_seconds + 30))`; the README
+passes that value to `vacant run --test-timeout`, not merely an inner subprocess.
+The inner timeout leaves ten seconds for feedback. Measurements, image and
+runner fingerprints, and passing-node reports are retained externally.
+
+```bash
+~/swebench-venv/bin/python -m ops.sandbox.v3.measure \
+  --dataset-json ~/swebench-data/verified.jsonl \
+  --snapshots ~/sandbox-v3-build/snapshots.json --work ~/sandbox-v3-measurements
+~/swebench-venv/bin/python -m ops.sandbox.v3.kit \
+  --dataset-json ~/swebench-data/verified.jsonl \
+  --snapshots ~/sandbox-v3-build/snapshots.json \
+  --measurements ~/sandbox-v3-measurements/measurements.json --out NEW_KIT_DIR
+```
+
+These commands are operator-only: dataset files never enter the kit. The
+measurement command requires the pinned images locally and reuses evidence
+only when runner, environment, image and selection inputs match. Session hosts
+must still install the documented environments and preflight before starting;
+the Docker measurements do not certify dependency resolution on every host.
 
 Leak checks cover introduced FAIL_TO_PASS function names and **all nonblank
 gold-added lines**, including short fixes. Every kit branch has zero matches
