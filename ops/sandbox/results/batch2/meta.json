@@ -1,0 +1,42 @@
+{
+  "config": {
+    "arms": [
+      "A",
+      "A2",
+      "C",
+      "G"
+    ],
+    "tasks": [
+      "all"
+    ],
+    "samples": 2,
+    "seed": 20261122,
+    "out": "/home/ubuntu/sandbox-runs/batch2",
+    "timeout": 900.0,
+    "model": "qwen3:8b",
+    "proxy_base": "http://127.0.0.1:18081",
+    "call_log": "/home/ubuntu/sandbox-rt/tagged-calls.jsonl",
+    "agent_cmd": null
+  },
+  "task_ids": [
+    "billing",
+    "csv_export",
+    "duration",
+    "inventory_output",
+    "merge_counts",
+    "money",
+    "pagination",
+    "recipients",
+    "report_output",
+    "sales",
+    "shipping",
+    "stock"
+  ],
+  "pi": "0.87.1",
+  "ollama": "ollama version is 0.40.17",
+  "model_digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+  "vacant": "0.9.1",
+  "python": "3.12.16 (main, Nov 11 2026, 00:15:59) [Clang 23.1.3 ]",
+  "git_sha": "41b6c44fd6023b99e59d041a6c4da5b2a52868cd",
+  "evidence": "real-agent"
+}

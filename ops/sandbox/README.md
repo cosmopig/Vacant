@@ -75,3 +75,16 @@ The cell result distinguishes raw score from primary intention-to-treat outcome
 (infra_void means primary failure). Analysis keeps infra cells in denominators
 and lists missing scheduled cells. Costs without accounting rows are UNKNOWN.
 Final-message success detection is deliberately a heuristic; inspect raw text.
+
+## Batch2 results
+
+The completed preregistered run (96/96 cells, 24 paired units) is archived in
+[`results/batch2/`](results/batch2/), including the summary, runtime metadata and
+progress records, but not cell workspaces. Hidden passes were A 8/24, A2 7/24,
+C 8/24 and G 9/24, with infra-void cells retained in the denominators.
+C−A Δ=0, p=1; G−A Δ=+0.042, p=1; the absolute A/A2 noise floor was 0.042.
+Both comparisons show **no measurable gain** under `PREREG.md`.
+
+G input/output token totals are **UNKNOWN**: `csv_export-s1-G` has proxy call
+rows with empty usage after a timeout and a broken pipe, so the all-calls-usage
+requirement makes its token counts, and therefore G's totals, UNKNOWN.
