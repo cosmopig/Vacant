@@ -55,6 +55,7 @@ import shutil
 import tempfile
 from typing import Any
 
+from . import guard as G
 from . import locate as L
 from . import workspace as W
 from .recorder import Recorder
@@ -141,6 +142,8 @@ class Step:
     error: str | None
     ambiguous: list[str]           # 為什麼寫入不確定是它的（空＝確定）
     conc: list[str] = dataclasses.field(default_factory=list)
+    #: 步驟邊界的判定（`guard.signal`）；舊病歷沒有＝None
+    guard: dict[str, Any] | None = None
 
     @property
     def ctx(self) -> tuple[str, str, str]:
@@ -216,7 +219,8 @@ class Trace:
                          input_blob=e.get("input_blob"), output_blob=e.get("output_blob"),
                          writes=list(writes), pre_index=e.get("pre_index"),
                          post_index=e.get("post_index"), error=e.get("error"), ambiguous=amb,
-                         conc=[str(x) for x in e.get("concurrent_with") or []])
+                         conc=[str(x) for x in e.get("concurrent_with") or []],
+                         guard=e.get("guard") if isinstance(e.get("guard"), dict) else None)
                 self.steps.append(s)
                 if self.initial is None and s.pre_index:
                     self.initial = s.pre_index
@@ -370,7 +374,7 @@ class Trace:
             return {}
 
     def output_text(self, s: Step) -> str:
-        return _as_text(self.blob_text(s.output_blob) or "")
+        return G.strip_mark(_as_text(self.blob_text(s.output_blob) or ""))
 
     def latest_index(self) -> str | None:
         for t in reversed(self.transitions):

@@ -42,6 +42,7 @@ from ..canonical import canonical_bytes
 from ..intake import keys as _keys
 from ..intake.statepaths import state_dir, state_dirs
 from ..logbook import MAX_PAYLOAD_BYTES, LogEntry, Logbook, _signed_bytes
+from . import guard as G
 from . import workspace as W
 from .tools import tool_kind
 
@@ -49,7 +50,7 @@ TRACE_SCHEMA = "vacant-trace/1"
 EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_change",
                          "transcript", "session_closed", "finding", "flag", "coverage",
                          "consequence", "prompt", "review", "nudge", "ended"})
-MAX_OUTPUT_BLOB = 2 * 1024 * 1024
+MAX_OUTPUT_BLOB = G.MAX_OUTPUT_BLOB
 #: 一個步驟開著超過這麼久還沒等到 `post`，就當它不會來了（和 Stop 掛鉤的上限同一個數量級）
 STALE_S = 900.0
 #: 掛鉤裡的一次掃描最多這麼久（掛鉤有 30 秒上限；被 agent 砍掉＝靜默略過＝更大的缺口）。
@@ -483,6 +484,10 @@ class Recorder:
             self._save(st)
             return out
 
+    def guard_ledger(self, platform: str, session: str) -> dict[str, Any]:
+        """步驟邊界不變量的帳（`guard.violations` 讀它）：只讀狀態檔，不讀病歷。"""
+        return dict((self._state().get("guard") or {}).get(f"{platform}:{session}") or {})
+
     def session_info(self, platform: str, session: str) -> dict[str, Any]:
         return dict(self._state()["sessions"].get(f"{platform}:{session}") or {})
 
@@ -564,11 +569,11 @@ class Recorder:
                         other["covered"] = sorted(set(other.get("covered") or [])
                                                   | {c.path for c in changes})
             out_blob = None
-            if output is not None:
-                data = output if isinstance(output, bytes) else (
-                    output if isinstance(output, str)
-                    else json.dumps(output, ensure_ascii=False, default=str)).encode()
-                out_blob = self.blobs.put_bytes(data[:MAX_OUTPUT_BLOB])
+            data = G.output_bytes(output) if output is not None else None
+            if data is not None:
+                out_blob = self.blobs.put_bytes(G.compact_output(data))
+            # 步驟邊界的不變量：在完整輸出上判定（存進版本庫的可能只剩頭尾）
+            sig = G.signal(tool, tool_input, data, error) if G.enabled() else None
             inp = json.dumps(tool_input, ensure_ascii=False, sort_keys=True, default=str)
             st["n_steps"] = int(st.get("n_steps", 0)) + 1
             payload = {
@@ -584,6 +589,12 @@ class Recorder:
                 "wall_ms": int((time.time() - pend["t0"]) * 1000) if pend else None}
             if delegated:
                 payload["delegated"] = delegated
+            if G.enabled():
+                ledger = st.setdefault("guard", {}).setdefault(_session_key(actor.to_json()), {})
+                moved = G.ledger_update(ledger, st["n_steps"], G.command_of(tool_input), sig,
+                                        payload["writes"])
+                if sig is not None or moved:
+                    payload["guard"] = {**(sig or {}), **({"ledger": moved} if moved else {})}
             if idx is None or not base_sha:
                 payload["writes_unknown"] = st.get("scan_disabled") or "the workspace was not " \
                     "observed around this step"
@@ -695,6 +706,14 @@ class Recorder:
         if spawned_by:
             payload["spawned_by"] = spawned_by       # 叫它出來的那一步（父 agent 的工具呼叫）
         with self._lock():
+            if source == "user" and session != "*":
+                st = self._state()
+                led = st.get("guard") or {}
+                stale = [k for k in led if k.split(":", 1)[-1] == session]
+                if stale:          # 人的新要求：上一個要求裡開著的不變量不帶過來
+                    for k in stale:
+                        led.pop(k)
+                    self._save(st)
             book = self._tail()
             last = book.entries[-1] if book.entries else None
             if last is not None and last.type == "prompt" and isinstance(last.payload, dict) \

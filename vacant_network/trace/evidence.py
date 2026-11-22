@@ -779,15 +779,9 @@ class Evidence:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
-            if not (RUNNERS.search(cmd) or is_test_script_run(cmd)):
-                continue
-            out = self.tr.output_text(s)
-            if s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out):
-                runs.append((s, "failed", cmd))
-            elif PASS_OUT.search(out) or PASS_OUT_2.search(out):
-                runs.append((s, "passed", cmd))
-            else:
-                runs.append((s, "unreadable", cmd))
+            outcome = self._test_outcome(s, cmd)
+            if outcome is not None:
+                runs.append((s, outcome, cmd))
         if not runs:
             return [{"kind": "test_claim", "sub": "none", "quote": quote}]
         last, outcome, cmd = runs[-1]
@@ -808,6 +802,30 @@ class Evidence:
                      "last_pass": last.n, "path": p}]
         return []
 
+    def _test_outcome(self, s: Step, cmd: str) -> str | None:
+        """跑測試的那一步：綠／紅／讀不出；不是跑測試 ⇒ None。步驟邊界判過的（`guard`，完整輸出）
+        直接用；舊病歷才把存下來的輸出讀回來重新解析。"""
+        g = s.guard
+        if g and g.get("kind") in ("test", "shell"):
+            return str(g["outcome"]) if g["kind"] == "test" else None
+        if not (RUNNERS.search(cmd) or is_test_script_run(cmd)):
+            return None
+        out = self.tr.output_text(s)
+        if s.error or FAIL_OUT.search(out) or FAIL_OUT_2.search(out):
+            return "failed"
+        if PASS_OUT.search(out) or PASS_OUT_2.search(out):
+            return "passed"
+        return "unreadable"
+
+    def _shell_failed(self, s: Step, cmd: str, outp: str | None = None) -> bool:
+        g = s.guard
+        if g and "shell_failed" in g:
+            return bool(g["shell_failed"])
+        outp = self.tr.output_text(s) if outp is None else outp
+        failed = bool(s.error) or bool(re.search(r"Traceback \(most recent call last\)|"
+                                                 r"\bError:|Exception:", outp))
+        return failed and not _no_match_only(cmd, outp + "\n" + str(s.error or ""))
+
     def _failed_steps(self, steps: list[Step], delivs: dict[str, tuple[str, str]],
                       materials: list[str]) -> list[dict[str, Any]]:
         out = []
@@ -817,20 +835,17 @@ class Evidence:
             if tool_kind(s.tool) != "shell":
                 continue
             cmd = _command_of(self.tr, s)
-            outp = self.tr.output_text(s)
-            failed = bool(s.error) or bool(re.search(r"Traceback \(most recent call last\)|"
-                                                     r"\bError:|Exception:", outp))
-            if failed and _no_match_only(cmd, outp + "\n" + str(s.error or "")):
-                failed = False                    # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）
-            if not failed or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd) or RUNNERS.search(cmd):
+            if RUNNERS.search(cmd) or PROBE_CMD.match(cmd) or IMPORT_PROBE.search(cmd):
+                continue
+            # grep／rg 找不到＝結束碼 1，不是失敗（正式批次 2 次誤報）；步驟邊界判過的不再讀輸出
+            if not self._shell_failed(s, cmd):
                 continue
             # v3.7：測試腳本紅了、之後又有一次跑測試是綠的＝修好了，不算略過（換個寫法跑也算：`sh run_tests.sh` → `./run_tests.sh`）；
             # 之後一直沒有綠的，照舊當成失敗的步驟（R530：全部豁免會少掉 7 格真的有問題的退回）
             if is_test_script_run(cmd) and any(
-                    tool_kind(t.tool) == "shell" and (RUNNERS.search(_command_of(self.tr, t)) or
-                                                      is_test_script_run(_command_of(self.tr, t)))
-                    and not t.error and not FAIL_OUT.search(self.tr.output_text(t))
-                    and not FAIL_OUT_2.search(self.tr.output_text(t)) for t in steps[i + 1:]):
+                    tool_kind(t.tool) == "shell"
+                    and self._test_outcome(t, _command_of(self.tr, t)) in ("passed", "unreadable")
+                    for t in steps[i + 1:]):
                 continue
             runs_own = any(re.search(r"(?<![\w.-])" + re.escape(b) + r"\b", cmd)
                            for b in written_scripts)
@@ -842,15 +857,23 @@ class Evidence:
                 continue
             norm = _norm_cmd(cmd)
             if any(tool_kind(t.tool) == "shell" and _norm_cmd(_command_of(self.tr, t)) == norm
-                   and not t.error and not re.search(r"Traceback|\bError:",
-                                                     self.tr.output_text(t)) for t in later):
+                   and not self._failed_after(t) for t in later):
                 continue
             if self.final_text and MENTIONS_FAILURE.search(self.final_text):
                 continue
-            err = next((ln for ln in reversed(outp.strip().splitlines()) if ln.strip()),
-                       str(s.error or "failed"))
+            tail = (s.guard or {}).get("tail")
+            err = tail[-1] if tail else next(
+                (ln for ln in reversed(self.tr.output_text(s).strip().splitlines()) if ln.strip()),
+                str(s.error or "failed"))
             out.append({"kind": "failed_step", "step": s.n, "cmd": cmd, "error": err})
         return out
+
+
+    def _failed_after(self, t: Step) -> bool:
+        g = t.guard
+        if g and "shell_failed" in g:
+            return bool(g["shell_failed"])
+        return bool(t.error) or bool(re.search(r"Traceback|\bError:", self.tr.output_text(t)))
 
 
 # ── module-level helpers ────────────────────────────────────────────────
