@@ -75,6 +75,48 @@ def unlink(root: pathlib.Path, rel: str):
         os.unlink(name, dir_fd=fd)
 
 
+def remove_tree(path: pathlib.Path | str, *, dir_fd: int | None = None):
+    """移除自己擁有的樹；唯讀目錄只在刪除遇到權限錯誤時放寬，不跟隨連結。"""
+    if dir_fd is None:
+        path = pathlib.Path(path)
+        with directory(path.parent) as fd:
+            remove_tree(path.name, dir_fd=fd)
+        return
+    name = str(path)
+    if name in {"", ".", ".."} or "/" in name:
+        raise ValueError("removal requires one child name")
+
+    def retry(fn, child, fd):
+        try:
+            fn(child, dir_fd=fd)
+        except PermissionError:
+            st = os.fstat(fd)
+            if st.st_uid != os.getuid():
+                raise
+            os.fchmod(fd, stat.S_IMODE(st.st_mode) | stat.S_IRWXU)
+            fn(child, dir_fd=fd)
+
+    def empty(fd):
+        for child in os.listdir(fd):
+            st = os.stat(child, dir_fd=fd, follow_symlinks=False)
+            if stat.S_ISDIR(st.st_mode):
+                sub = os.open(child, DIR, dir_fd=fd)
+                try:
+                    empty(sub)
+                finally:
+                    os.close(sub)
+                retry(os.rmdir, child, fd)
+            else:
+                retry(os.unlink, child, fd)
+
+    fd = os.open(name, DIR, dir_fd=dir_fd)
+    try:
+        empty(fd)
+    finally:
+        os.close(fd)
+    os.rmdir(name, dir_fd=dir_fd)
+
+
 def entries(root: pathlib.Path, skip: set | frozenset, ignore=None):
     with directory(root) as fd:
         def walk(d, prefix):

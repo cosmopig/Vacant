@@ -34,7 +34,6 @@ import dataclasses
 import json
 import os
 import pathlib
-import shutil
 import signal
 import subprocess
 import time
@@ -43,7 +42,7 @@ from typing import Any, Callable
 from ..intake import flow
 from ..intake.contract import Contract
 from .hookpolicy import vacant_state_dir
-from .workspace import copy_workspace, directory
+from .workspace import copy_workspace, directory, remove_tree
 
 COPY_SKIP = frozenset({".git", "node_modules", "__pycache__", ".venv", ".pytest_cache"})
 FEEDBACK_MODES = ("localized", "generic", "none")
@@ -148,7 +147,7 @@ def prepare_workspace(contract: Contract, dest: pathlib.Path) -> pathlib.Path:
         if dest.is_symlink():
             raise ValueError("workspace destination is a symlink")
         if dest.exists():
-            shutil.rmtree(dest.name, dir_fd=fd)
+            remove_tree(dest.name, dir_fd=fd)
     # 契約的放行目的端若在專案裡（`dir:published`），不複製——那是收件端的東西，
     # 不是 agent 的材料；複製進去還會被下一次交件當成成果的一部分。
     skip_abs = _skip_dirs(contract)
@@ -463,7 +462,7 @@ def do(task: flow.Task, *, agent: str, build: Callable[[str, pathlib.Path], Laun
     if not in_place and base.is_dir():
         for d in sorted(base.iterdir()):
             if d.is_dir() and d != ws and d.name.startswith("ws"):
-                shutil.rmtree(d, ignore_errors=True)
+                remove_tree(d)
     return {**res, "attempts": history, "workspace": str(ws), "run_dir": str(base),
             "agent": agent}
 

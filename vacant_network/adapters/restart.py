@@ -26,7 +26,6 @@ from __future__ import annotations
 import json
 import os
 import pathlib
-import shutil
 import stat
 import subprocess
 import sys
@@ -127,7 +126,7 @@ def acceptance(originals: dict[str, bytes], ws: pathlib.Path, timeout_s: float =
         return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
                 "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+        safe.remove_tree(tmp)
 
 
 def deliver_index(accs: list[dict]) -> int:

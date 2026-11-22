@@ -185,3 +185,23 @@ def test_non_append_writer_is_not_truncated(tmp_path):
         assert not (tmp_path / "nohup.log.1").exists()
         writer.write(b"after rotation")
         assert log.read_bytes() == b"before rotationafter rotation"
+
+
+@pytest.mark.skipif(os.getuid() == 0, reason="requires non-root permissions")
+def test_cleanup_removes_readonly_workspace(tmp_path):
+    from vacant_network.maintenance import clean
+    work = tmp_path / "work"
+    work.mkdir()
+    stale = work / "stale"
+    stale.mkdir()
+    readonly = stale / "readonly"
+    readonly.mkdir()
+    (readonly / "child").write_text("data")
+    readonly.chmod(0o555)
+    old(stale)
+    try:
+        clean(work=work, project=None, age=1, apply=True)
+        assert not stale.exists()
+    finally:
+        if readonly.exists():
+            readonly.chmod(0o755)

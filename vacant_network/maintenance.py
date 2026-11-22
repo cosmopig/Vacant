@@ -5,12 +5,11 @@ import argparse
 import json
 import os
 import pathlib
-import shutil
 import stat
 import time
 import uuid
 
-from .adapters.workspace import DIR, directory
+from .adapters.workspace import DIR, directory, remove_tree
 from .intake.statepaths import work_dir
 
 
@@ -135,9 +134,7 @@ def clean(*, work: pathlib.Path, project: pathlib.Path | None, age: float = 7 * 
                             now = os.stat(name, dir_fd=fd, follow_symlinks=False)
                             if (now.st_ino, now.st_dev) != (st.st_ino, st.st_dev):
                                 raise OSError("cleanup target changed")
-                            if not shutil.rmtree.avoids_symlink_attacks:
-                                raise OSError("safe rmtree unavailable")
-                            shutil.rmtree(name, dir_fd=fd)
+                            remove_tree(name, dir_fd=fd)
                 elif name not in {".git", ".venv", "node_modules", "vacant_hm"}:
                     visit(root, child, rel + "/", True)
             finally:

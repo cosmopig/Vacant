@@ -35,6 +35,26 @@ def test_copy_and_write_back_preserve_modes_under_umask(tmp_path):
         os.umask(previous)
 
 
+@pytest.mark.skipif(os.getuid() == 0, reason="requires non-root permissions")
+def test_acceptance_removes_readonly_copy(tmp_path, monkeypatch):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    readonly = ws / "readonly"
+    readonly.mkdir()
+    (readonly / "child").write_text("data")
+    readonly.chmod(0o555)
+    temp = tmp_path / "acceptance"
+    def mkdtemp(**kwargs):
+        temp.mkdir()
+        return str(temp)
+    monkeypatch.setattr(R.tempfile, "mkdtemp", mkdtemp)
+    try:
+        R.acceptance({"test_x.py": b"import unittest\n"}, ws)
+        assert not temp.exists()
+    finally:
+        readonly.chmod(0o755)
+
+
 def test_acceptance_never_restores_through_external_link(tmp_path):
     ws = tmp_path / "ws"
     ws.mkdir()
