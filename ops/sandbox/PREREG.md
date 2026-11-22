@@ -57,3 +57,15 @@ do not give hidden tests or solution overlays to the agent or its feedback.
 External Devin arms are documented separately and never pooled with pi arms.
 This harness is not an OS security boundary; run only these trusted task fixtures
 on this isolated VM. Real model runs require internet only for prior installation.
+
+## External Devin arm (amendment, before any Devin run) — 2026-11-22
+
+Arms are devin-plain, devin-plain2 (A/A2 noise floor), and devin-vacant
+(manual visible-gate loop), on 12 tasks × 1 sample. The primary outcome,
+paired exact two-sided McNemar test, bootstrap delta interval and gain decision
+rule are the same as for the pi arms. External Devin results are never pooled
+with pi results.
+
+The 12 devin-plain sessions run first. If devin-plain passes ≥11/12 on hidden
+tests, devin-plain2 and devin-vacant are not launched on this task bank; report
+"ceiling, not evaluable; harder tasks needed".
