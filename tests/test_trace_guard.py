@@ -124,6 +124,13 @@ def test_ledger_stale_green_after_code_write():
     assert G.violations(led) == []
 
 
+def test_writes_inside_the_passing_test_step_are_not_stale():
+    led: dict = {}
+    sig = G.signal("Bash", {"command": "black app.py && pytest"}, b"3 passed", None)
+    G.ledger_update(led, 1, "black app.py && pytest", sig, [{"path": "app.py"}])
+    assert G.violations(led) == []
+
+
 def test_recorder_keeps_a_per_session_ledger_and_a_new_prompt_resets_it(env):
     a = _agent(env, B.APP)
     B.s_stale(a)

@@ -172,9 +172,11 @@ def ledger_update(ledger: dict[str, Any], n: int, cmd: str, sig: dict[str, Any] 
             if sig["outcome"] == "passed":
                 ledger["stale"] = None
                 changes.append("green")
+    # 跑測試那一步自己的寫入（`black app.py && pytest`）發生在測試之前或之中，不算「綠燈之後又改」
+    test_step = sig is not None and sig["kind"] == "test"
     code = [str(w.get("path")) for w in writes if _ext(str(w.get("path"))) in CODE_EXT]
     last = ledger.get("last_test") or {}
-    if code and last.get("outcome") == "passed" and not ledger.get("stale"):
+    if code and not test_step and last.get("outcome") == "passed" and not ledger.get("stale"):
         ledger["stale"] = {"n": n, "path": code[0], "last_pass": last.get("n")}
         changes.append("stale")
     return changes
