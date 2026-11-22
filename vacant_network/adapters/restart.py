@@ -8296,6 +8296,110 @@ def _short_integrity_code(reason: str) -> str:
     return slug[:36] or "untraced"
 
 
+def _format_first_problem_lines(fp: str) -> tuple[str | None, list[str]]:
+    """Extract a concise test name (if present) and 1-2 lines of failure reason from `first_problem`."""
+    lines = [ln.strip() for ln in str(fp).splitlines() if ln.strip()]
+    if not lines:
+        return None, []
+    first = lines[0]
+    rest = lines[1:]
+    if not rest:
+        return None, [first[:240]]
+
+    # Detect unittest/pytest style where line 0 is the failing test identifier
+    has_tb = any(
+        ln.startswith("Traceback (most recent call last):")
+        or ln.startswith("E   ")
+        or ln.startswith(">   ")
+        or ln.startswith("AssertionError")
+        for ln in rest
+    )
+    looks_like_test_id = (
+        has_tb
+        or first.startswith("test_")
+        or "::test_" in first
+        or (".test_" in first and len(first) <= 200)
+    )
+    if looks_like_test_id:
+        test_name = first[:200]
+        # Prefer pytest E-lines or Python exception/assertion lines at the end of the traceback
+        e_lines = [ln[4:].strip() for ln in rest if ln.startswith("E   ") and ln[4:].strip()]
+        if e_lines:
+            return test_name, [ln[:240] for ln in e_lines[:2]]
+        # Find the final error/exception line (e.g. AssertionError: 10 != 12)
+        err_idx: int | None = None
+        for idx in range(len(rest) - 1, -1, -1):
+            head_tok = rest[idx].split(":", 1)[0].strip()
+            if head_tok.endswith(("Error", "Exception", "Failure")) or head_tok == "AssertionError":
+                err_idx = idx
+                break
+        if err_idx is not None:
+            picked: list[str] = []
+            # Include the failing code line right above the exception if it isn't a File "..." frame
+            if err_idx > 0 and not rest[err_idx - 1].startswith("File "):
+                picked.append(rest[err_idx - 1][:240])
+            picked.append(rest[err_idx][:240])
+            return test_name, picked[:2]
+        return test_name, [ln[:240] for ln in rest[-2:]]
+
+    return None, [ln[:240] for ln in lines[-2:]]
+
+
+def _failure_details_notice(res: dict) -> str:
+    """rc6(3): Detailed breakdown when acceptance fails and a best attempt was delivered."""
+    if (res.get("accepted") is not False
+            or res.get("interrupted")
+            or res.get("project_not_writable")
+            or res.get("unreadable_paths")
+            or res.get("baseline_error")
+            or res.get("node_modules_changed")
+            or res.get("write_back_conflicts")
+            or res.get("agent_error")):
+        return ""
+    atts = [a for a in (res.get("attempts") or []) if isinstance(a, dict)]
+    if not atts:
+        return ""
+    d_num = res.get("delivered_attempt")
+    has_counts = any(a.get("run") is not None for a in atts)
+    parts: list[str] = []
+    for a in atts:
+        anum = a.get("attempt")
+        if a.get("run") is not None:
+            seg = f"#{anum} {a.get('passed') or 0}/{a.get('run')} {'PASS' if a.get('accept') else 'FAIL'}"
+        else:
+            seg = f"#{anum} {'PASS' if a.get('accept') else 'FAIL'} (status={a.get('status')})"
+        if a.get("timed_out"):
+            seg += " [timed out]"
+        if anum == d_num:
+            seg += " [delivered]"
+        parts.append(seg)
+    out = ""
+    if has_counts:
+        out += f"\n  attempts (passed/total): {', '.join(parts)}"
+    else:
+        out += f"\n  attempts: {', '.join(parts)}"
+
+    d_idx = (d_num or len(atts)) - 1
+    d_att = atts[d_idx] if 0 <= d_idx < len(atts) else atts[-1]
+    fp = d_att.get("first_problem")
+    if fp and d_att.get("status") != "load_error":
+        test_name, reason_lines = _format_first_problem_lines(str(fp))
+        if test_name:
+            out += f"\n  first failing test: {test_name}"
+            for rln in reason_lines[:2]:
+                out += f"\n    {rln}"
+        elif reason_lines:
+            out += f"\n  first failure: {reason_lines[0]}"
+            for rln in reason_lines[1:2]:
+                out += f"\n    {rln}"
+
+    out += (
+        "\n  exit code 40: acceptance did not pass "
+        "(the delivered attempt above has been written to your project)."
+    )
+    return out
+
+
 def _load_error_notice(res: dict) -> str:
     """rc5 定案收尾：測試載入失敗（load_error）時，把 ImportError／ModuleNotFoundError 那一行印進交件訊息。
 
@@ -8424,14 +8528,18 @@ def summary(res: dict) -> str:
         a = res["attempts"][res["delivered_attempt"] - 1]
         if a.get("run") is not None:
             head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
-                    f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} tests). {files}.")
+                    f"{res['delivered_attempt']} ({a['passed'] or 0}/{a['run'] or 0} passed/total tests) "
+                    f"— written to your project. {files}.")
         elif acc_kind in _EXIT_CODE_ONLY_KINDS:
             head = (f"[vacant] acceptance did not pass after {n} attempt(s); delivered latest attempt "
-                    f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
+                    f"{res['delivered_attempt']} (status: {a.get('status')}) "
+                    f"— written to your project. {files}.")
         else:
             head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
-                    f"{res['delivered_attempt']} (status: {a.get('status')}). {files}.")
+                    f"{res['delivered_attempt']} (status: {a.get('status')}) "
+                    f"— written to your project. {files}.")
 
+    head += _failure_details_notice(res)
     head += _time_limit_notice(res)
     head += _load_error_notice(res)
     acc_integrity = res.get("acceptance_integrity")
