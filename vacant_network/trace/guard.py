@@ -37,7 +37,8 @@ from .tools import tool_kind
 #: 輸出超過這個大小才壓（和舊的截斷門檻同一個數字：門檻以下逐位元不變）
 MAX_OUTPUT_BLOB = 2 * 1024 * 1024
 #: 壓縮後保留的頭與尾（字元）
-COMPACT_HEAD = 256 * 1024
+#: 頭留滿舊的 2MB：舊病歷讀得到的值（數字出處檢查靠它），新的一定也讀得到
+COMPACT_HEAD = MAX_OUTPUT_BLOB
 COMPACT_TAIL = 256 * 1024
 TAIL_LINES = 3
 LINE_MAX = 240
@@ -120,7 +121,7 @@ def signal(tool: str, tool_input: Any, data: bytes | None, error: str | None) ->
 
 
 def compact_output(data: bytes) -> bytes:
-    """門檻以下原封不動；以上只留頭＋尾＋一行出處標記（完整輸出的 sha256 與大小）。"""
+    """門檻以下原封不動；以上留頭（＝舊的前 2MB）＋尾＋一行出處標記（完整輸出的 sha256 與大小）。"""
     if len(data) <= MAX_OUTPUT_BLOB:
         return data
     if not enabled():

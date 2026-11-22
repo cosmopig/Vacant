@@ -77,6 +77,7 @@ def test_compact_keeps_tail_and_provenance():
     out = G.compact_output(data)
     assert len(out) < G.COMPACT_HEAD + G.COMPACT_TAIL + 400
     assert out.endswith(b"1 failed, 4 passed")
+    assert out.startswith(data[:G.MAX_OUTPUT_BLOB])       # 舊的前 2MB 一個位元組都不少
     assert hashlib.sha256(data).hexdigest().encode() in out
     assert str(len(data)).encode() in out
 
