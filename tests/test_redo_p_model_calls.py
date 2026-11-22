@@ -79,3 +79,30 @@ def test_summary_averages_only_known_cells_and_lists_unknown(tmp_path):
     assert s["cells"] == 3 and s["known"] == 2 and s["unknown"] == 1
     assert s["mean_calls"] == 3.0                # (2 + 4) / 2；缺日誌那格不算成 0
     assert list(s["unknown_cells"]) == ["c/r1/P"]
+
+
+def _cell_raw(root: pathlib.Path, name: str, result: dict) -> pathlib.Path:
+    cell = root / "cells" / name / "r1" / "P"
+    run = cell / "attempt_1" / "logs" / "vacant-work" / "restart-x"
+    run.mkdir(parents=True)
+    (cell / "cell.json").write_text("{}")
+    (run / "result.json").write_text(json.dumps(result))
+    return cell
+
+
+def test_missing_attempts_field_is_unknown_not_zero(tmp_path):
+    """2026-11-22 日報 P1 負控制：result.json 沒有 attempts 欄位 ⇒ UNKNOWN，不是 known／0 次呼叫。"""
+    r = pmc.cell_calls(str(_cell_raw(tmp_path, "t", {"accepted": False})))
+    assert r["status"] == "unknown" and r["calls"] is None and "沒有 attempts" in r["why"]
+
+
+def test_empty_attempts_list_is_unknown_not_zero(tmp_path):
+    r = pmc.cell_calls(str(_cell_raw(tmp_path, "t", {"attempts": [], "baseline_error": "x"})))
+    assert r["status"] == "unknown" and r["calls"] is None and "空陣列" in r["why"] and "baseline_error" in r["why"]
+
+
+def test_summary_does_not_average_in_empty_attempt_cells(tmp_path):
+    _cell(tmp_path, "good", [(10.0, CALL + "\n" + CALL2 + "\n")])
+    _cell_raw(tmp_path, "empty", {"attempts": []})
+    s = pmc.summarize(str(tmp_path))
+    assert s["known"] == 1 and s["unknown"] == 1 and s["mean_calls"] == 2

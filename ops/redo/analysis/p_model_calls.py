@@ -56,8 +56,14 @@ def cell_calls(cell_dir: str) -> dict:
     except (OSError, ValueError):
         return {"status": "unknown", "calls": None, "attempts": None, "why": "result.json 無法讀取"}
     base = res[0].rsplit("/", 1)[0]
+    atts = r.get("attempts") if isinstance(r, dict) else None
+    if not isinstance(atts, list) or not atts:
+        # 2026-11-22 日報 P1：attempts 欄位缺失或是空陣列時，不能當成「known、0 次呼叫」——證據不足一律 UNKNOWN
+        extra = "（restart 在 agent 之前就停了：baseline_error）" if isinstance(r, dict) and r.get("baseline_error") else ""
+        return {"status": "unknown", "calls": None, "attempts": None,
+                "why": ("result.json 沒有 attempts 欄位" if not isinstance(atts, list) else "result.json 的 attempts 是空陣列") + extra}
     total = 0
-    for a in r.get("attempts", []):
+    for a in atts:
         k = a.get("attempt")
         log = f"{base}/attempt_{k}/logs/agent_stdout.log"
         try:
@@ -71,7 +77,7 @@ def cell_calls(cell_dir: str) -> dict:
             return {"status": "unknown", "calls": None, "attempts": len(r["attempts"]),
                     "why": f"第 {k} 次嘗試跑了 {a.get('wall_s')}s 卻沒有任何呼叫紀錄"}
         total += n
-    return {"status": "known", "calls": total, "attempts": len(r.get("attempts", [])), "why": None}
+    return {"status": "known", "calls": total, "attempts": len(atts), "why": None}
 
 
 def summarize(root: str, arm: str = "P") -> dict:
