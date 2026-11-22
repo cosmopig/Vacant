@@ -1,0 +1,219 @@
+{
+ "id": "w35confirm_js_vacantdo_rc5_a100",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261153,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "P": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/opt/redo/rc_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "A",
+  "P"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 4,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-12b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "command",
+  "cmd": [
+   "npm",
+   "test",
+   "--silent"
+  ],
+  "timeout_s": 120,
+  "protect": [
+   "*.spec.js"
+  ]
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "js_book-store",
+  "js_binary-search-tree",
+  "js_twelve-days",
+  "js_wordy",
+  "js_crypto-square",
+  "js_kindergarten-garden",
+  "js_promises",
+  "js_transpose",
+  "js_parallel-letter-frequency",
+  "js_rest-api",
+  "js_bowling",
+  "js_pig-latin",
+  "js_tournament",
+  "js_atbash-cipher",
+  "js_react",
+  "js_food-chain",
+  "js_house",
+  "js_two-fer",
+  "js_zebra-puzzle",
+  "js_nth-prime",
+  "js_forth",
+  "js_affine-cipher",
+  "js_ocr-numbers",
+  "js_scale-generator",
+  "js_diffie-hellman",
+  "js_grep",
+  "js_go-counting",
+  "js_camicia",
+  "js_variable-length-quantity",
+  "js_run-length-encoding"
+ ],
+ "reps": 5,
+ "prereg": {
+  "registered": "2026-11-22，第一通模型呼叫之前 commit。**重跑**：前一次 W3-5 JS 確認批（w35confirm_js_vacantdo_rc4_colab，Colab L4）跑到約 100/150 對時因基礎設施中斷而作廢、沒有可引用的數字（ops/redo/results/void/w35js_confirm/VOID.md）。選題不變：同樣的 30 題（規則與 salt `:w35-js-2026-11-21` 都已在篩選前 commit，選題紀錄 w35confirm_js_vacantdo_rc4_colab.json.selection.json）；改變的只有：P 臂改用發布版 rc5-final、後端改成 Colab A100（第二個帳號）jobs 4、新 seed。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "question": "在原生 pi 不穩的JavaScript題上，發布候選版 `vacant do pi`（rc5-final）交出通過評分的成果的比例，是不是比原生 pi 一次跑到底高？",
+  "primary": "P 對 A，入選題 × 5 次重複；精確雙尾 McNemar，α＝0.05。b＝只有 A 過、c＝只有 P 過。",
+  "states": {
+   "EFFECTIVE": "全部對完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這些原生 pi 不穩的JavaScript題（W3-5 篩選批事先固定規則選出）、pi、gemma-4-12b QAT（Colab A100，vLLM 0.30.0，w4a16，每輪時間接近本機）、同樣 1800 秒上限下，發布候選版 `vacant do pi`（rc5-final 0.9.2，零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數、模型呼叫數一起講；同時報篩選批的完整分母）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、把入選題上的差距說成所有題上的差距、外推到別的模型／語言／沒有可執行測試的工作。",
+   "UNRESOLVED": "完成但 p ≥ 0.05（不論方向），或 A 接近天花板／地板。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+   "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "rule": "入選規則（篩選前寫死，見 ops/redo/analysis/screen_select.py）：每題原生 pi 跑 2 次（兩個完全相同的單次臂 A、A2）；兩次都有效才計分，有 infra_void 的題不入選但列在分母；2 次裡過 ≤1 次者入選；超過 N=30 照 sha256(task+salt) 取前 30；少於 15 照跑並寫明檢定力不足，不加題、不改門檻。確認批：入選題 × 5 次全新 rep，A 對 P（rc4），同一個後端（Colab L4、vLLM、jobs 6）。",
+  "denominator": "結論必須報完整分母：篩選幾題、各題原生 2 次過幾次（2/2、1/2、0/2 各幾題）、void 幾題、入選幾題；「原生本來就穩過的題沒有增益也沒有多花」與「入選題上的差距」分開講，不得只報確認批的差距。",
+  "known_limits": [
+   "被選中的題原生在確認批會往上回歸，縮小差距、對 P 不利。",
+   "P 的模型呼叫數 harness 量不到（usage=none），結案時用 p_model_calls.py 補算。",
+   "數字不與其他批併表、不合併 p 值。",
+   "P 臂＝發布版 rc5-final：~/dev/ops/release_0.9.2/757ade62f/vacant_network-0.9.2-py3-none-any.whl（sha256 5bbc57afda540466b8dde88dba5f225b00a52185045541b79f8cb54c79888899，rc5-final＝redo/rc5 1d764cc69），由 launch_batch --extra-wheel 裝進 VM 的 /opt/redo/rc_venv；node_modules 由 --extra-tar 帶上 VM（同前一次）。",
+   "後端與 jobs 照 confirm3 的量測與規則：A100 jobs 4，實際每輪約 10 秒（本機 5–12 秒）；只用 A100，配不到不發。",
+   "前一次的 poll 數字（約 100/150 對）不可引用、也不和這批合併；這批從頭跑 150 對。",
+   "發射前先用同一個 wheel 在 A100 跑 2 對冒煙；發射時帶守門、每小時快照、連續三次確認版 keepalive。"
+  ],
+  "selection_salt": ":w35-js-2026-11-21",
+  "selection_cap_n": 30,
+  "selection_min": 15,
+  "selection": {
+   "screen_plan": "screen_native_jspool_colab",
+   "tasks_screened": 137,
+   "scored": 137,
+   "voided": [],
+   "passes_2of2": 95,
+   "passes_1of2": 22,
+   "passes_0of2": 20,
+   "eligible": 42,
+   "cap_n": 30,
+   "chosen": [
+    "js_book-store",
+    "js_binary-search-tree",
+    "js_twelve-days",
+    "js_wordy",
+    "js_crypto-square",
+    "js_kindergarten-garden",
+    "js_promises",
+    "js_transpose",
+    "js_parallel-letter-frequency",
+    "js_rest-api",
+    "js_bowling",
+    "js_pig-latin",
+    "js_tournament",
+    "js_atbash-cipher",
+    "js_react",
+    "js_food-chain",
+    "js_house",
+    "js_two-fer",
+    "js_zebra-puzzle",
+    "js_nth-prime",
+    "js_forth",
+    "js_affine-cipher",
+    "js_ocr-numbers",
+    "js_scale-generator",
+    "js_diffie-hellman",
+    "js_grep",
+    "js_go-counting",
+    "js_camicia",
+    "js_variable-length-quantity",
+    "js_run-length-encoding"
+   ],
+   "chosen_count": 30,
+   "underpowered": false,
+   "salt": ":w35-js-2026-11-21"
+  }
+ }
+}
