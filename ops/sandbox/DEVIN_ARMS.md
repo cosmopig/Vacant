@@ -144,7 +144,9 @@ prompt for calibration, plain and plain2; only the handback branch differs.
 > test output, raw gate outputs and receipts separately from the workspace.
 
 Each session starts from a fresh kit clone; `.venv/` and `receipts/` are ignored
-at the kit root. Use a separate operator copy for independent hidden scoring.
+at the kit root. The README's venv recipe requires Python ≥3.11 and allows an
+explicit `PYTHON` interpreter path; the VM's system Python 3.10 is too old.
+Use a separate operator copy for independent hidden scoring.
 The visible gate is a manual submission protocol, not a resumable Devin command
 or native Stop hook. Gate acceptance is not the independent primary outcome.
 
