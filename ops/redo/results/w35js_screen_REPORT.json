@@ -1,0 +1,773 @@
+{
+ "control": "A",
+ "generated": "2026-11-21T12:53:54Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "3c74139794f13d3436850f5f6519051a141b61395287108b92cc72878de790e5"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 95,
+  "control_only_b": 11,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 11,
+  "distinct_tasks_net_positive": 11,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 20,
+  "treatment_only_c": 11
+ },
+ "pairs_complete": 137,
+ "pairs_infra_void": [],
+ "pairs_planned": 137,
+ "pairs_scored": 137,
+ "per_arm": {
+  "A": {
+   "accepted": 106,
+   "accepted_but_wrong": 0,
+   "cells": 137,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 420.4,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 12.2,
+   "model_calls_known_cells": 137,
+   "pass": 106,
+   "rate": 0.7737,
+   "scored": 137,
+   "tests_tampered_attempts": 1,
+   "timeouts": 13
+  },
+  "A2": {
+   "accepted": 106,
+   "accepted_but_wrong": 0,
+   "cells": 137,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 428.6,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 11.9,
+   "model_calls_known_cells": 137,
+   "pass": 106,
+   "rate": 0.7737,
+   "scored": 137,
+   "tests_tampered_attempts": 0,
+   "timeouts": 13
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 11,
+   "c": 11,
+   "ctrl_pass": 106,
+   "p": 1.0,
+   "pairs": 137,
+   "treat_pass": 106
+  }
+ },
+ "per_task": {
+  "js_accumulate": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_acronym": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_affine-cipher": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_all-your-base": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_allergies": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_alphametics": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_anagram": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_armstrong-numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_atbash-cipher": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_bank-account": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_beer-song": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_binary": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_binary-search": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_binary-search-tree": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_bob": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_book-store": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_bottle-song": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_bowling": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_camicia": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_change": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_circular-buffer": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_clock": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_collatz-conjecture": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_complex-numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_connect": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_crypto-square": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_custom-set": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_darts": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_diamond": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_difference-of-squares": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_diffie-hellman": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_dnd-character": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_dominoes": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_eliuds-eggs": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_error-handling": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_etl": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_flatten-array": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_flower-field": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_food-chain": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_forth": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_game-of-life": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_gigasecond": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_go-counting": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_grade-school": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_grains": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_grep": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_hamming": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_hello-world": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_hexadecimal": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_high-scores": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_house": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_isbn-verifier": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_isogram": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_killer-sudoku-helper": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_kindergarten-garden": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_knapsack": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_largest-series-product": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_leap": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_lens-person": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_line-up": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_linked-list": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_list-ops": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_luhn": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_matching-brackets": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_matrix": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_meetup": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_micro-blog": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_minesweeper": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_nth-prime": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_nucleotide-count": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_ocr-numbers": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_octal": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_palindrome-products": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_pangram": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_parallel-letter-frequency": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_pascals-triangle": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_perfect-numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_phone-number": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_pig-latin": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_point-mutations": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_poker": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_prime-factors": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_prism": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_promises": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_protein-translation": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_proverb": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_pythagorean-triplet": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_queen-attack": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_rail-fence-cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_raindrops": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_rational-numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_react": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_rectangles": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_relative-distance": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_resistor-color": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_resistor-color-duo": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_resistor-color-trio": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_rest-api": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_reverse-string": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_rna-transcription": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_robot-name": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_robot-simulator": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_roman-numerals": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_rotational-cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_run-length-encoding": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_saddle-points": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_satellite": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_say": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_scale-generator": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_scrabble-score": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_secret-handshake": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_series": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_sieve": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_simple-cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_simple-linked-list": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_space-age": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_spiral-matrix": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_split-second-stopwatch": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_square-root": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_state-of-tic-tac-toe": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_strain": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_sublist": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_sum-of-multiples": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_tournament": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_transpose": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_triangle": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_trinary": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_twelve-days": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_two-bucket": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_two-fer": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_variable-length-quantity": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_word-count": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_word-search": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_wordy": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_yacht": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "js_zebra-puzzle": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "js_zipper": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  }
+ },
+ "plan_id": "screen_native_jspool_colab",
+ "plan_sha256": "94032b63c3739e4e013cff954dc99936bb70b4c608c430e94f574aaebb5d9e16",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 212,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 62,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "A2"
+}
