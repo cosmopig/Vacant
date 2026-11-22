@@ -1,0 +1,93 @@
+{
+ "id": "smoke2_pi_gemma12b_js",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261120,
+ "bank": "~/dev/ops/ref/bm_tasks/exercism_js",
+ "bank_candidates": [
+  "/tmp/bm_tasks/exercism_js",
+  "/srv/eval/staged/exercism_js"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R3": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  }
+ },
+ "pair": [
+  "A",
+  "R3"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1004",
+   "provider": "lms1004nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "command",
+  "cmd": [
+   "npm",
+   "test",
+   "--silent"
+  ],
+  "timeout_s": 120,
+  "protect": [
+   "*.spec.js"
+  ]
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "js_food-chain",
+  "js_high-scores"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-20",
+  "role": "冒煙（非 Python / JS）：只驗 pi 真的有呼叫模型、command 驗收與評分（npm test --silent，原件 *.spec.js）跑得動、沒有 infra_void。這 2 對的通過與否不看、不引用。"
+ }
+}

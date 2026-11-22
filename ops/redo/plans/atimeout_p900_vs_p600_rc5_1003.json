@@ -1,0 +1,237 @@
+{
+ "id": "atimeout_p900_vs_p600_rc5_1003",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261141,
+ "bank": "~/dev/ops/ref/bm_tasks/py_mix_pg34_hard26",
+ "bank_candidates": [],
+ "arms": {
+  "P600": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/home/user1/dev/ops/rc5final_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  },
+  "P900": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/home/user1/dev/ops/rc5final_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "900",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "P600",
+  "P900"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1003",
+   "provider": "lms1003nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 2
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "pg_affine_cipher",
+  "pg_beer_song",
+  "pg_book_store",
+  "pg_bottle_song",
+  "pg_bowling",
+  "pg_connect",
+  "pg_dominoes",
+  "pg_dot_dsl",
+  "pg_food_chain",
+  "pg_forth",
+  "pg_go_counting",
+  "pg_grade_school",
+  "pg_grep",
+  "pg_hangman",
+  "pg_list_ops",
+  "pg_paasio",
+  "pg_phone_number",
+  "pg_pig_latin",
+  "pg_poker",
+  "pg_pov",
+  "pg_proverb",
+  "pg_react",
+  "pg_rest_api",
+  "pg_robot_name",
+  "pg_scale_generator",
+  "pg_sgf_parsing",
+  "pg_simple_linked_list",
+  "pg_transpose",
+  "pg_tree_building",
+  "pg_two_bucket",
+  "pg_variable_length_quantity",
+  "pg_wordy",
+  "pg_zebra_puzzle",
+  "pg_zipper",
+  "ex_satellite",
+  "ex_alphametics",
+  "ex_binary_search_tree",
+  "ex_bank_account",
+  "ex_rail_fence_cipher",
+  "ex_tournament",
+  "ex_flower_field",
+  "ex_knapsack",
+  "ex_trinary",
+  "ex_meetup",
+  "ex_custom_set",
+  "ex_spiral_matrix",
+  "ex_pascals_triangle",
+  "ex_rational_numbers",
+  "ex_linked_list",
+  "ex_word_search",
+  "ex_relative_distance",
+  "ex_swift_scheduling",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_minesweeper",
+  "ex_largest_series_product",
+  "ex_all_your_base",
+  "ex_camicia",
+  "ex_change",
+  "ex_complex_numbers"
+ ],
+ "reps": 3,
+ "prereg": {
+  "registered": "2026-11-22，第一通模型呼叫之前 commit。取代未發射的 atimeout_p900_vs_p600_rel092_colab（0 次模型呼叫，撤回說明見同目錄 .WITHDRAWN.md）：後端改成本機 1003（3090、LM Studio llama.cpp、jobs 2），兩臂改用發布版 rc5-final。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "question": "在**快的後端**上（本機 1003，3090、llama.cpp，gemma-4-12b-it-qat，jobs 2）、同樣總預算 1800 秒、發布版 rc5-final 的 `vacant do pi`、pi 不載入任何 Vacant 擴充：把單次上限從 600 秒（現行預設，約 3 次嘗試）改成 900 秒（約 2 次嘗試），交出通過評分的成果的比例，是不是不比 600 秒差／更好？",
+  "why": "W3-5 Python 與 hardpy26 的結案查到：需要單次超過 600 秒的題上，P 的內層嘗試大量撞 600 秒上限（W3-5 9 題上 100 次有 63 次），而 A 單次跑 841–1640 秒能過。但 3×600 是照 polyglot_py 34 題定的（那批通過的執行幾乎都在 600 秒內），較長的單次上限在那些題上可能吃掉重開的好處。兩種題都要量。",
+  "arms": "P600＝`vacant do pi --timeout 1800 --attempt-timeout 600`（現行預設）；P900＝同一指令、`--attempt-timeout 900`。兩臂同一個 wheel（~/dev/ops/release_0.9.2/757ade62f/vacant_network-0.9.2-py3-none-any.whl（sha256 5bbc57afda540466b8dde88dba5f225b00a52185045541b79f8cb54c79888899，rc5-final＝redo/rc5 1d764cc69），裝在 ~/dev/ops/rc5final_venv）、同樣只複製 models.json。",
+  "strata": "兩層，以題名前綴分：pg_*＝polyglot_py 34 題（600 秒是照它定的）；ex_*＝exercism_py_hard 26 題（有需要長時間的題）。",
+  "primary": "P900 對 P600（control＝P600，treatment＝P900），**合計** 60 題 × 3 次重複＝180 對；精確雙尾 McNemar，α＝0.05。b＝只有 P600 過、c＝只有 P900 過。主要檢定只有這一個。",
+  "secondary": "兩層各自報 b、c、精確 McNemar p（從 cells 依題名前綴分層算，算法同主要檢定）。分層不另做多重比較校正、不當成獨立結論，只用於下面的「結果怎麼用」裡的「不輸」判定。",
+  "states": {
+   "EFFECTIVE": "180 對全部完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這 60 題 Python（polyglot_py 34＋exercism difficulty ≥4 的 26）、pi、gemma-4-12b QAT（本機 1003，llama.cpp，jobs 2）、同樣 1800 秒總預算下，發布版 0.9.2（rc5-final）的 `vacant do pi` 用 `--attempt-timeout 900` 交出通過的成果，比預設 600 多（合計與兩層的數字、內層平均嘗試數、模型呼叫數一起講）」。不可以說：900 是最佳值、外推到別的模型／語言／總預算。",
+   "UNRESOLVED": "完成但 p ≥ 0.05（不論方向）。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+   "CONTRADICTS": "b > c 且 p < 0.05（900 顯著較差）。照實報告；預設不動。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "decision_rule": "結果怎麼用（事先寫死）：主要檢定 EFFECTIVE **且** 兩層各自 c ≥ b（「不輸」）⇒ 下一版（0.9.3）把 `--attempt-timeout` 預設改成 900，並在改版後重新跑一批確認；其他任何結果 ⇒ 預設不動，只在文件裡說明需要長時間單次執行的任務怎麼用 `--attempt-timeout`／`--timeout` 調。",
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "known_limits": [
+   "exercism_py_hard 那 26 題已經看過 P600 一次（hardpy26，rc3.1，P 116/130）；這批是全新的 rep、且 P 換成發布 wheel。polyglot_py 34 題在 e001／e002／e016／realrun／confirm1／confirm1c 都用過，並正在 confirm2／confirm2c 量。這不是沒看過的題。",
+   "結論只回答「在這些題上 2×900 是否不比 3×600 差／更好」，不外推成最佳值；沒有量 1200、1800（不切）或其他次數。",
+   "兩臂都是 P（同一個 `vacant do pi`），不含原生臂；這批不回答「Vacant 比原生好不好」。",
+   "P 的模型呼叫數 harness 量不到（usage=none），結案用 p_model_calls.py 對兩臂分別補算（UNKNOWN 照列）。",
+   "題庫是 ~/dev/ops/ref/bm_tasks/py_mix_pg34_hard26（polyglot_py 與 exercism_py_hard 原樣複製合併、唯讀；兩邊 slug 不重疊，exercism_py_hard 建立時已排除 polyglot 的 34 個 slug）；全部檔案 sha256 清單的 sha256＝6962aff80b1e14f37e99bc04c839f8d0618fbd768a546e07feac2765a45ee742。",
+   "**這批只回答快後端的問題。**「在慢的後端上（例如 Colab L4、每輪 20 秒以上）2×900 是否較好」沒有量；11/22 的並行數量測顯示 L4 上 12B 即使 jobs 1 每輪也要 19 秒以上，達不到本機範圍、餘額也不夠，所以改到本機。不可讀成慢後端的問題已回答。",
+   "跑在 1003（llama.cpp 2.73.0，jobs 2）；不與 1004 或 Colab 的批次併表。1003 先前的批次都是 jobs 1；jobs 2 是否引起 llama.cpp 錯誤由冒煙與 infra_void 規則把關。",
+   "harness 是 nonpy 分支的 redo.py（3c74139794f1）。",
+   "發布版 rc5-final 第一次碰真模型：結案時另外整理（觀察、不是這批的檢定）交件訊息、收據、traced／untraced 分布、有沒有意外的 exit 43——也就是真模型的 W4；並把 P600 在 polyglot 34 題那一層的通過率和 confirm2（1004，rc4 的 P 臂）並列（不同批、不配對、不做檢定）。這批沒有原生臂，不能拿來宣稱增益。",
+   "發射前先用同一個 wheel 在 1003 跑 2 對冒煙（smoke_atimeout_rc5_1003），只看基礎設施，過了才由閘門把這批排進 1003 的佇列。"
+  ],
+  "stop_rules": [
+   "任一 10 分鐘內 ≥3 格 infra_void（端點連線錯誤或 0 次模型呼叫）：停批、回報，不自行改條件。",
+   "Colab 餘額低於 20 單元：停批、取回已完成的格、回報。"
+  ],
+  "budget": "60 題 × 3 rep × 2 臂＝360 格，1003 jobs 2，估約 30 小時（hardjs34 結束後約 11/23 10:00Z 發、11/24 下午結束）。"
+ }
+}

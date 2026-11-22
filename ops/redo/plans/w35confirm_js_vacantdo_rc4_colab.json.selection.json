@@ -1,0 +1,733 @@
+{
+ "screen_plan": "screen_native_jspool_colab",
+ "tasks_screened": 137,
+ "scored": 137,
+ "voided": [],
+ "passes_2of2": 95,
+ "passes_1of2": 22,
+ "passes_0of2": 20,
+ "eligible": 42,
+ "cap_n": 30,
+ "chosen": [
+  "js_book-store",
+  "js_binary-search-tree",
+  "js_twelve-days",
+  "js_wordy",
+  "js_crypto-square",
+  "js_kindergarten-garden",
+  "js_promises",
+  "js_transpose",
+  "js_parallel-letter-frequency",
+  "js_rest-api",
+  "js_bowling",
+  "js_pig-latin",
+  "js_tournament",
+  "js_atbash-cipher",
+  "js_react",
+  "js_food-chain",
+  "js_house",
+  "js_two-fer",
+  "js_zebra-puzzle",
+  "js_nth-prime",
+  "js_forth",
+  "js_affine-cipher",
+  "js_ocr-numbers",
+  "js_scale-generator",
+  "js_diffie-hellman",
+  "js_grep",
+  "js_go-counting",
+  "js_camicia",
+  "js_variable-length-quantity",
+  "js_run-length-encoding"
+ ],
+ "chosen_count": 30,
+ "underpowered": false,
+ "salt": ":w35-js-2026-11-21",
+ "per_task": {
+  "js_accumulate": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_acronym": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_affine-cipher": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_all-your-base": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_allergies": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_alphametics": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_anagram": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_armstrong-numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_atbash-cipher": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_bank-account": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_beer-song": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_binary": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_binary-search": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_binary-search-tree": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_bob": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_book-store": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_bottle-song": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_bowling": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_camicia": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_change": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_circular-buffer": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_clock": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_collatz-conjecture": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_complex-numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_connect": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_crypto-square": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_custom-set": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_darts": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_diamond": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_difference-of-squares": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_diffie-hellman": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_dnd-character": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_dominoes": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_eliuds-eggs": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_error-handling": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_etl": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_flatten-array": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_flower-field": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_food-chain": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_forth": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_game-of-life": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_gigasecond": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_go-counting": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_grade-school": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_grains": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_grep": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_hamming": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_hello-world": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_hexadecimal": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_high-scores": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_house": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_isbn-verifier": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_isogram": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_killer-sudoku-helper": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_kindergarten-garden": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_knapsack": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_largest-series-product": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_leap": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_lens-person": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_line-up": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_linked-list": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_list-ops": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_luhn": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_matching-brackets": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_matrix": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_meetup": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_micro-blog": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_minesweeper": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_nth-prime": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_nucleotide-count": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_ocr-numbers": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_octal": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_palindrome-products": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_pangram": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_parallel-letter-frequency": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_pascals-triangle": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_perfect-numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_phone-number": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_pig-latin": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_point-mutations": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_poker": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_prime-factors": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_prism": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_promises": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_protein-translation": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_proverb": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_pythagorean-triplet": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_queen-attack": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_rail-fence-cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_raindrops": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_rational-numbers": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_react": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_rectangles": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_relative-distance": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_resistor-color": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_resistor-color-duo": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_resistor-color-trio": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_rest-api": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_reverse-string": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_rna-transcription": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_robot-name": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_robot-simulator": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_roman-numerals": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_rotational-cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_run-length-encoding": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_saddle-points": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_satellite": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_say": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_scale-generator": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_scrabble-score": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_secret-handshake": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_series": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_sieve": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_simple-cipher": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_simple-linked-list": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_space-age": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_spiral-matrix": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_split-second-stopwatch": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_square-root": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_state-of-tic-tac-toe": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_strain": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_sublist": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_sum-of-multiples": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_tournament": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_transpose": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_triangle": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_trinary": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_twelve-days": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_two-bucket": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_two-fer": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_variable-length-quantity": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_word-count": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_word-search": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_wordy": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  },
+  "js_yacht": {
+   "runs": 2,
+   "passes": 2,
+   "void": 0
+  },
+  "js_zebra-puzzle": {
+   "runs": 2,
+   "passes": 1,
+   "void": 0
+  },
+  "js_zipper": {
+   "runs": 2,
+   "passes": 0,
+   "void": 0
+  }
+ }
+}

@@ -164,6 +164,13 @@ def load_plan(path: pathlib.Path) -> dict:
             raise PlanError(f"arm {name}: hint 只能是 none／first_failure")
     if len(set(plan["tasks"])) != len(plan["tasks"]):
         raise PlanError("tasks 有重複")
+    acfg = plan.get("acceptance", {})
+    if acfg.get("kind", "workspace_tests") not in ("workspace_tests", "command"):
+        raise PlanError(f"acceptance.kind 只能是 workspace_tests／command：{acfg.get('kind')!r}")
+    if acfg.get("kind") == "command":
+        cmd = acfg.get("cmd")
+        if not (isinstance(cmd, list) and cmd and all(isinstance(x, str) for x in cmd)):
+            raise PlanError("acceptance.kind=command 時 cmd 必須是非空的字串清單")
     plan["_sha256"] = sha256_bytes(canonical({k: v for k, v in plan.items() if not k.startswith("_")}))
     plan["_path"] = str(path)
     return plan
@@ -405,6 +412,80 @@ def _run_quiet(argv: list[str], cwd: pathlib.Path, env: dict[str, str], timeout_
         _track(proc, False)
 
 
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+_JEST_TESTS_RE = re.compile(r"^Tests:\s+(.*)$", re.M)
+
+
+def _parse_command_counts(out: str) -> tuple[int | None, int | None]:
+    """若輸出有 Jest 的 `Tests: ... N total` 摘要列就順手讀出 (passed, run)，否則 (None, None)。"""
+    clean = _ANSI_RE.sub("", out)
+    m = None
+    for m in _JEST_TESTS_RE.finditer(clean):
+        pass
+    if not m:
+        return None, None
+    line = m.group(1)
+    mt = re.search(r"(\d+)\s+total\b", line)
+    if not mt:
+        return None, None
+    total = int(mt.group(1))
+    mp = re.search(r"(\d+)\s+passed\b", line)
+    if mp:
+        return int(mp.group(1)), total
+    if re.search(r"\d+\s+(?:failed|skipped|todo)\b", line):
+        return 0, total
+    return None, total
+
+
+def _acceptance_command(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
+    """`kind="command"` 驗收：在工作區副本裡還原受保護檔案（以及 origin 頂層 SKIP_DIRS 的符號連結）後執行 cmd。"""
+    protect = cfg.get("protect", cfg.get("patterns", []))
+    protected = test_files(origin, protect) if protect else []
+    base = {"accept": False, "kind": "command", "tests": protected, "passed": None, "run": None,
+            "tests_tampered": [], "status": None, "first_problem": None}
+    if protect and not protected:
+        return {**base, "status": "no_tests_in_origin"}
+    cmd = cfg.get("cmd")
+    if isinstance(cmd, str):
+        argv = ["bash", "-c", cmd]
+    elif isinstance(cmd, list) and cmd and all(isinstance(x, str) for x in cmd):
+        argv = list(cmd)
+    else:
+        return {**base, "status": "invalid_cmd"}
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="redo-acc-"))
+    try:
+        work = tmp / "w"
+        shutil.copytree(final_ws, work, symlinks=True, ignore=shutil.ignore_patterns(*SKIP_DIRS))
+        for name in sorted(SKIP_DIRS):
+            src_link = origin / name
+            if src_link.is_symlink():
+                os.symlink(os.readlink(src_link), work / name)
+        for rel in protected:
+            want = (origin / rel).read_bytes()
+            dst = work / rel
+            have = dst.read_bytes() if (dst.is_file() and not dst.is_symlink()) else None
+            if have != want:
+                base["tests_tampered"].append(rel)
+                if dst.is_symlink() or dst.is_file():
+                    dst.unlink()
+                elif dst.is_dir():
+                    shutil.rmtree(dst)
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                dst.write_bytes(want)
+        env = _clean_env(tmp)
+        for k, v in cfg.get("env", {}).items():
+            env[str(k)] = str(v)
+        rc, out = _run_quiet(argv, work, env, float(cfg.get("timeout_s", 120)))
+        if rc is None:
+            status = "timeout" if out == "timeout" else "spawn_error"
+            return {**base, "accept": False, "status": status, "first_problem": out[-800:]}
+        passed, run = _parse_command_counts(out)
+        first = None if rc == 0 else (out.strip()[-800:] or f"exit {rc}")
+        return {**base, "accept": rc == 0, "status": "ok", "passed": passed, "run": run, "first_problem": first}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
     """在最後工作區的**副本**裡、把題目原本的測試檔還原之後，跑那些測試。
 
@@ -412,6 +493,8 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
     ＝ `accept=False` 且 `status` 寫明原因——**壞掉的驗收不是通過**（I-4）。
     """
     kind = cfg.get("kind", "workspace_tests")
+    if kind == "command":
+        return _acceptance_command(origin, final_ws, cfg)
     patterns = cfg.get("patterns", ["*_test.py", "test_*.py"])
     tests = test_files(origin, patterns)
     base = {"accept": False, "kind": kind, "tests": tests, "passed": None, "run": None,
@@ -429,10 +512,6 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
                 base["tests_tampered"].append(rel)
                 (work / rel).parent.mkdir(parents=True, exist_ok=True)
                 (work / rel).write_bytes(want)
-        if kind == "command":
-            rc, out = _run_quiet(["bash", "-c", cfg["cmd"]], work, _clean_env(tmp), float(cfg.get("timeout_s", 120)))
-            return {**base, "accept": rc == 0, "status": "ok" if rc is not None else out,
-                    "first_problem": None if rc == 0 else out[-800:]}
         by_dir: dict[str, list[str]] = {}
         for rel in tests:
             d, _, name = rel.rpartition("/")
@@ -1003,10 +1082,21 @@ def cmd_preflight(a: argparse.Namespace) -> int:
         bank = None
     if bank is not None:
         acfg, gcfg = plan.get("acceptance", {}), plan.get("grader", {})
-        no_tests = [t for t in plan["tasks"]
-                    if not test_files(bank / t / "workspace", acfg.get("patterns", ["*_test.py", "test_*.py"]))]
-        say(not no_tests or acfg.get("kind") == "command",
-            "每一題的工作區都有測試檔（驗收訊號的來源）" if not no_tests else f"{len(no_tests)} 題的工作區沒有測試檔：{no_tests[:5]}")
+        if acfg.get("kind") == "command":
+            cmd0 = acfg["cmd"][0]
+            cexe = shutil.which(cmd0)
+            say(cexe is not None, f"驗收指令 {cmd0} → {cexe}")
+            protect = acfg.get("protect", [])
+            if protect:
+                no_tests = [t for t in plan["tasks"] if not test_files(bank / t / "workspace", protect)]
+                say(not no_tests,
+                    f"每一題的工作區都有受保護檔案（{protect}）" if not no_tests
+                    else f"{len(no_tests)} 題的工作區缺受保護檔案 {protect}：{no_tests[:5]}")
+        else:
+            no_tests = [t for t in plan["tasks"]
+                        if not test_files(bank / t / "workspace", acfg.get("patterns", ["*_test.py", "test_*.py"]))]
+            say(not no_tests,
+                "每一題的工作區都有測試檔（驗收訊號的來源）" if not no_tests else f"{len(no_tests)} 題的工作區沒有測試檔：{no_tests[:5]}")
         no_scorer = [t for t in plan["tasks"] if not ((bank / t / "scorer.py").is_file() and (bank / t / "hidden").is_dir())]
         if no_scorer and gcfg.get("visible_equals_grader"):
             say(len(no_scorer) == len(plan["tasks"]),
@@ -1017,8 +1107,9 @@ def cmd_preflight(a: argparse.Namespace) -> int:
         # 起點必須是紅的：原封不動的工作區不可以通過驗收（否則「通過」沒有資訊）
         t0 = plan["tasks"][0]
         acc0 = acceptance(bank / t0 / "workspace", bank / t0 / "workspace", acfg)
-        say(not acc0["accept"], f"負控制：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
-            if not acc0["accept"] else f"負控制失敗：{t0} 什麼都沒寫就通過驗收")
+        neg_ok = (not acc0["accept"] and acc0["status"] == "ok") if acfg.get("kind") == "command" else (not acc0["accept"])
+        say(neg_ok, f"負控制：{t0} 原封不動的工作區被驗收擋下（status={acc0['status']}）"
+            if neg_ok else f"負控制失敗：{t0} 原封不動的工作區 accept={acc0['accept']} status={acc0['status']}")
     agent = plan["agent"]
     exe = shutil.which(agent["argv"][0])
     say(exe is not None, f"agent 指令 {agent['argv'][0]} → {exe}")
@@ -1038,7 +1129,10 @@ def cmd_preflight(a: argparse.Namespace) -> int:
         if p.get("health_url"):
             say(health_wait({**p, "health_wait_s": 0}, lambda m: None), f"端點 {p['name']} {p['health_url']}")
     dirty = _git(["status", "--porcelain", "--", plan["_path"]], pathlib.Path(plan["_path"]).parent)
-    say(dirty == "", "計畫檔已 commit（預註冊凍結）" if dirty == "" else "計畫檔還沒 commit")
+    if getattr(a, "allow_uncommitted_plan", False):
+        say(True, "計畫檔尚未 commit（--allow-uncommitted-plan 已允許）" if dirty != "" else "計畫檔已 commit（預註冊凍結）")
+    else:
+        say(dirty == "", "計畫檔已 commit（預註冊凍結）" if dirty == "" else "計畫檔還沒 commit")
     print(f"\n計畫 {plan['id']} sha256 {plan['_sha256']}\nVERDICT: {'PREFLIGHT_OK' if ok else 'PREFLIGHT_FAIL'}")
     return 0 if ok else 1
 
@@ -1232,6 +1326,108 @@ def selftest(verbose: bool = True) -> int:
                 "mcnemar_exact 與 vacant_network.research 同值")
         except Exception as e:              # noqa: BLE001
             chk(True, f"（跳過與 vacant_network.research 的對照：{e!r}）")
+        # ── command 驗收種類的 selftest ──
+        cmd_bank = tmp / "cmd_bank"
+        shared_nm = tmp / "shared_nm"
+        shared_nm.mkdir()
+        (shared_nm / "runner.py").write_text(
+            "import pathlib, sys\n"
+            "spec = pathlib.Path('toy.spec.js').read_text().strip()\n"
+            "sol = pathlib.Path('sol.js').read_text().strip() if pathlib.Path('sol.js').is_file() else ''\n"
+            "ok = (sol == spec)\n"
+            "print('Tests:       1 passed, 1 total' if ok else 'Tests:       1 failed, 1 total')\n"
+            "sys.exit(0 if ok else 1)\n"
+        )
+        cmd_cfg = {"kind": "command", "cmd": [sys.executable, "node_modules/runner.py"],
+                   "timeout_s": 10, "protect": ["*.spec.js"]}
+        orig_c = cmd_bank / "c_pass" / "workspace"
+        orig_c.mkdir(parents=True)
+        (orig_c / "toy.spec.js").write_text("EXPECTED=42\n")
+        (orig_c / "sol.js").write_text("STUB\n")
+        os.symlink(shared_nm, orig_c / "node_modules")
+        # 1) 負控制：stub 失敗，回傳 accept=False、status=ok、parsed passed/run
+        acc_stub = acceptance(orig_c, orig_c, cmd_cfg)
+        chk(acc_stub["accept"] is False and acc_stub["status"] == "ok"
+            and acc_stub["passed"] == 0 and acc_stub["run"] == 1 and acc_stub["tests_tampered"] == [],
+            "command 驗收：stub 失敗（accept=False, status=ok, passed=0, run=1）")
+        # 2) 正確解答通過，且 node_modules symlink 雖在 SKIP_DIRS 裡仍被正確還原
+        ws_ok = tmp / "ws_ok"
+        shutil.copytree(orig_c, ws_ok, symlinks=True)
+        (ws_ok / "sol.js").write_text("EXPECTED=42\n")
+        (ws_ok / "node_modules").unlink()   # 即使 agent 刪掉 node_modules symlink，驗收仍還原 origin 的
+        acc_ok = acceptance(orig_c, ws_ok, cmd_cfg)
+        chk(acc_ok["accept"] is True and acc_ok["status"] == "ok"
+            and acc_ok["passed"] == 1 and acc_ok["run"] == 1 and acc_ok["tests_tampered"] == [],
+            "command 驗收：正確解答 exit 0 通過，且 origin 的 node_modules symlink 被還原")
+        # 3) 竄改受保護 spec 檔：還原原件後仍失敗，且記下 tests_tampered
+        ws_tamp = tmp / "ws_tamp"
+        shutil.copytree(orig_c, ws_tamp, symlinks=True)
+        (ws_tamp / "toy.spec.js").write_text("STUB\n")
+        acc_tamp = acceptance(orig_c, ws_tamp, cmd_cfg)
+        chk(acc_tamp["accept"] is False and acc_tamp["tests_tampered"] == ["toy.spec.js"],
+            "command 驗收：竄改 *.spec.js 被還原原件擋下並記 tests_tampered")
+        # 4) 逾時：status=timeout、accept=False
+        acc_to = acceptance(orig_c, orig_c, {"kind": "command", "cmd": [sys.executable, "-c", "import time; time.sleep(30)"],
+                                             "timeout_s": 0.5, "protect": ["*.spec.js"]})
+        chk(acc_to["accept"] is False and acc_to["status"] == "timeout",
+            "command 驗收：逾時回傳 accept=False、status=timeout")
+        # 5) 一般指令沒有 Jest 摘要時 passed/run=None
+        acc_plain = acceptance(orig_c, orig_c, {"kind": "command", "cmd": [sys.executable, "-c", "print('ok')"],
+                                                "timeout_s": 5, "protect": ["*.spec.js"]})
+        chk(acc_plain["accept"] is True and acc_plain["passed"] is None and acc_plain["run"] is None,
+            "command 驗收：無 Jest 摘要時 passed=None、run=None")
+        # 6) 整條 cmd_run 搭配 kind=command + visible_equals_grader=True（A 對 R3）
+        cmd_tasks = ["c_second", "c_tamper"]
+        for t in cmd_tasks:
+            w = cmd_bank / t / "workspace"
+            w.mkdir(parents=True)
+            (w / "toy.spec.js").write_text("EXPECTED=42\n")
+            (w / "sol.js").write_text("STUB\n")
+            os.symlink(shared_nm, w / "node_modules")
+        cmd_stub = tmp / "cmd_stub.py"
+        cmd_stub.write_text(
+            "import json, os, pathlib\n"
+            "state = pathlib.Path(os.environ['STUB_STATE']); state.mkdir(exist_ok=True)\n"
+            "cell = os.environ['REDO_CELL']; task = cell.split('/')[0]\n"
+            "cf = state / (cell.replace('/', '__') + '.n')\n"
+            "n = int(cf.read_text()) + 1 if cf.exists() else 1; cf.write_text(str(n))\n"
+            "print(json.dumps({'type': 'message_end', 'message': {'role': 'assistant', 'usage': {'input': 10, 'output': 5}}}))\n"
+            "if task == 'c_second':\n"
+            "    pathlib.Path('sol.js').write_text('EXPECTED=42\\n' if n >= 2 else 'WRONG\\n')\n"
+            "elif task == 'c_tamper':\n"
+            "    pathlib.Path('toy.spec.js').write_text('STUB\\n')\n"
+        )
+        cmd_plan = {"schema": SCHEMA, "id": "selftest_cmd", "seed": 11, "bank": str(cmd_bank),
+                    "tasks": cmd_tasks, "reps": 1,
+                    "arms": {"A": {"policy": "single", "attempt_timeout_s": 10},
+                             "R3": {"policy": "restart", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                                    "min_attempt_s": 0.5}},
+                    "pair": ["A", "R3"], "attempt_timeout_s": 5, "backoff_scale": 0.0,
+                    "agent": {"argv": [sys.executable, str(cmd_stub), "{prompt}"],
+                              "env": {"STUB_STATE": str(tmp / "cmd_state")},
+                              "export_cell_env": True, "usage": "pi_json"},
+                    "providers": [{"name": "stub", "provider": "p", "model": "m", "jobs": 2}],
+                    "acceptance": cmd_cfg,
+                    "grader": {"timeout_s": 30, "visible_equals_grader": True},
+                    "analysis": {"alpha": 0.05}}
+        cmd_pf = tmp / "cmd_plan.json"
+        write_json(cmd_pf, cmd_plan)
+        cmd_root = tmp / "cmd_root"
+        cmd_ns = argparse.Namespace(plan=str(cmd_pf), root=str(cmd_root), bank=None, only_tasks=None,
+                                    only_reps=None, max_pairs=None, allow_uncommitted_plan=True)
+        sys.stdout = out if not verbose else old
+        try:
+            rc_cmd = cmd_run(cmd_ns)
+        finally:
+            sys.stdout = old
+        cmd_rep = read_json(cmd_root / "REPORT.json")
+        ccell = lambda t, arm: read_json(cmd_root / "cells" / t / "r1" / arm / "cell.json")    # noqa: E731
+        chk(rc_cmd == 0 and cmd_rep["pairs_scored"] == 2
+            and cmd_rep["per_arm"]["A"]["pass"] == 0 and cmd_rep["per_arm"]["R3"]["pass"] == 1
+            and ccell("c_second", "R3")["grader_kind"] == "visible_tests_pristine"
+            and ccell("c_tamper", "R3")["accepted"] is False
+            and all(x["tests_tampered"] == ["toy.spec.js"] for x in ccell("c_tamper", "R3")["attempts"]),
+            "command 驗收端到端（visible_equals_grader=True）：R3 第 2 次過、竄改者被擋下")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     bad = [m for ok_, m in checks if not ok_]
@@ -1250,12 +1446,12 @@ def main(argv: list[str] | None = None) -> int:
         s = sub.add_parser(name)
         s.add_argument("--plan", required=True)
         s.add_argument("--bank")
+        s.add_argument("--allow-uncommitted-plan", action="store_true")
         if name == "run":
             s.add_argument("--root", required=True)
             s.add_argument("--only-tasks", help="逗號分隔；只是篩選，不改計畫")
             s.add_argument("--only-reps", help="逗號分隔，例如 1 或 1,2")
             s.add_argument("--max-pairs", type=int)
-            s.add_argument("--allow-uncommitted-plan", action="store_true")
     for name in ("report", "status"):
         s = sub.add_parser(name); s.add_argument("--root", required=True)
     a = ap.parse_args(argv)

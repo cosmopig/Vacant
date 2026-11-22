@@ -1,0 +1,618 @@
+{
+ "control": "A",
+ "generated": "2026-11-21T06:20:57Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "3c74139794f13d3436850f5f6519051a141b61395287108b92cc72878de790e5"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 97,
+  "control_only_b": 4,
+  "delta_pp": -1.89,
+  "distinct_tasks_net_negative": 4,
+  "distinct_tasks_net_positive": 2,
+  "mcnemar_exact_p_two_sided": 0.6875,
+  "neither": 3,
+  "treatment_only_c": 2
+ },
+ "pairs_complete": 106,
+ "pairs_infra_void": [],
+ "pairs_planned": 106,
+ "pairs_scored": 106,
+ "per_arm": {
+  "A": {
+   "accepted": 101,
+   "accepted_but_wrong": 0,
+   "cells": 106,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 222.6,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 12.6,
+   "model_calls_known_cells": 106,
+   "pass": 101,
+   "rate": 0.9528,
+   "scored": 106,
+   "tests_tampered_attempts": 0,
+   "timeouts": 4
+  },
+  "A2": {
+   "accepted": 99,
+   "accepted_but_wrong": 0,
+   "cells": 106,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 209.0,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 8.1,
+   "model_calls_known_cells": 106,
+   "pass": 99,
+   "rate": 0.934,
+   "scored": 106,
+   "tests_tampered_attempts": 0,
+   "timeouts": 1
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 4,
+   "c": 2,
+   "ctrl_pass": 101,
+   "p": 0.6875,
+   "pairs": 106,
+   "treat_pass": 99
+  }
+ },
+ "per_task": {
+  "ex_accumulate": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_acronym": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_all_your_base": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_allergies": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_alphametics": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_anagram": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_armstrong_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_atbash_cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_bank_account": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_binary": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_binary_search": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_binary_search_tree": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_bob": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_camicia": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_change": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_circular_buffer": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_clock": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_collatz_conjecture": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_complex_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_crypto_square": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_custom_set": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_darts": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_diamond": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_difference_of_squares": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_diffie_hellman": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_dnd_character": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_eliuds_eggs": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_error_handling": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_etl": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_flatten_array": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_flower_field": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_game_of_life": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_gigasecond": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_grains": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_hamming": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_hello_world": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_hexadecimal": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_high_scores": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_house": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_isbn_verifier": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_isogram": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_killer_sudoku_helper": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_kindergarten_garden": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_knapsack": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_largest_series_product": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_leap": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_line_up": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_linked_list": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_luhn": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_matching_brackets": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_matrix": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_meetup": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_minesweeper": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_nth_prime": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_nucleotide_count": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_ocr_numbers": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_octal": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_palindrome_products": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_pangram": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_parallel_letter_frequency": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_pascals_triangle": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_perfect_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_point_mutations": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_prime_factors": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_protein_translation": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_pythagorean_triplet": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_queen_attack": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_rail_fence_cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_raindrops": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_rational_numbers": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_rectangles": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_relative_distance": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_resistor_color": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_resistor_color_duo": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_resistor_color_expert": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_resistor_color_trio": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_reverse_string": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_rna_transcription": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_robot_simulator": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_roman_numerals": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_rotational_cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_run_length_encoding": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_saddle_points": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_satellite": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_say": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_scrabble_score": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_secret_handshake": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_series": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_sieve": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_simple_cipher": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_space_age": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_spiral_matrix": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_square_root": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_state_of_tic_tac_toe": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_strain": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_sublist": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_sum_of_multiples": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_swift_scheduling": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_tournament": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "ex_triangle": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_trinary": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_twelve_days": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_two_fer": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_word_count": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_word_search": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "ex_yacht": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  }
+ },
+ "plan_id": "screen_native_pypool_colab",
+ "plan_sha256": "f4efbe63249f687e9334635096c30c2df4e46a682be73149bb0f0594e720fc83",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 200,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 12,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "A2"
+}

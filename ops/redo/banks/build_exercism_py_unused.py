@@ -20,11 +20,13 @@ import sys
 import tempfile
 from typing import Any
 
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 REPO_URL = "https://github.com/exercism/python"
 DEFAULT_SRC = pathlib.Path("~/dev/ops/ref/src/exercism-python")
 DEFAULT_POLYGLOT = pathlib.Path("~/dev/ops/ref/bm_tasks/polyglot_py")
 DEFAULT_OUT = pathlib.Path("~/dev/ops/ref/bm_tasks/exercism_py_unused")
 DEFAULT_MANIFEST = pathlib.Path(__file__).resolve().with_name("exercism_py_unused.json")
+DEFAULT_BANK_ID = "exercism_py_unused"
 
 ORDER_SALT = ":redo-unused-2026-11-20"
 TAKE_N = 40
@@ -75,6 +77,103 @@ EXTERNAL_IO_MODULES = frozenset({
 
 def expand(p: pathlib.Path | str) -> pathlib.Path:
     return pathlib.Path(os.path.expandvars(os.path.expanduser(str(p)))).resolve()
+
+
+def contract_home(p: pathlib.Path) -> str:
+    home = pathlib.Path.home().resolve()
+    try:
+        rel = p.resolve().relative_to(home)
+        return f"~/{rel.as_posix()}"
+    except ValueError:
+        return str(p)
+
+
+def display_repo_path(p: pathlib.Path) -> str:
+    try:
+        return p.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return contract_home(p)
+
+
+def load_track_difficulties(src_dir: pathlib.Path) -> dict[str, int]:
+    cfg_path = src_dir / "config.json"
+    if not cfg_path.is_file():
+        raise SystemExit(f"track config.json not found: {cfg_path}")
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    practice = cfg.get("exercises", {}).get("practice", [])
+    out: dict[str, int] = {}
+    for entry in practice:
+        if isinstance(entry, dict) and isinstance(entry.get("slug"), str):
+            diff = entry.get("difficulty")
+            if isinstance(diff, int) and not isinstance(diff, bool):
+                out[entry["slug"]] = diff
+    return out
+
+
+def compute_difficulty_histogram(
+    slugs: list[str], difficulties: dict[str, int]
+) -> dict[str, int]:
+    counts: dict[int, int] = {}
+    unknown = 0
+    for s in slugs:
+        d = difficulties.get(s)
+        if d is None:
+            unknown += 1
+        else:
+            counts[d] = counts.get(d, 0) + 1
+    out = {str(k): counts[k] for k in sorted(counts)}
+    if unknown:
+        out["unknown"] = unknown
+    return out
+
+
+def compute_overlap(
+    chosen_slugs: list[str], overlap_manifest: pathlib.Path
+) -> dict[str, Any]:
+    if not overlap_manifest.is_file():
+        raise SystemExit(f"overlap manifest not found: {overlap_manifest}")
+    other = json.loads(overlap_manifest.read_text(encoding="utf-8"))
+    other_slugs = set(other.get("chosen_slugs", []))
+    overlap = sorted(s for s in chosen_slugs if s in other_slugs)
+    return {
+        "bank_id": other.get("bank_id", overlap_manifest.stem),
+        "manifest": display_repo_path(overlap_manifest),
+        "count": len(overlap),
+        "slugs": overlap,
+    }
+
+
+def build_selection_rule_text(
+    *,
+    min_difficulty: int | None,
+    salt: str,
+    take: int,
+    take_all: bool,
+) -> str:
+    if min_difficulty is None and salt == ORDER_SALT and not take_all and take == TAKE_N:
+        return SELECTION_RULE_TEXT
+    diff_clause = (
+        f"has difficulty >= {min_difficulty} in track config.json (exercises.practice[].difficulty), "
+        if min_difficulty is not None
+        else ""
+    )
+    take_clause = "take all eligible exercises" if take_all else f"take the first {take}"
+    return (
+        "1. Candidate = practice exercise under exercises/practice/* whose slug is NOT one of "
+        "the 34 polyglot_py slugs (stripping 'pg_' from ~/dev/ops/ref/bm_tasks/polyglot_py dirs "
+        f"and mapping '_' to '-'), {diff_clause}has .meta/example.py, a *_test.py test file, a stub file, and "
+        ".docs/instructions.md. "
+        "2. Exclude if the tests, helper modules, or example import anything outside the Python "
+        "standard library or local exercise modules, or use network/filesystem APIs outside the "
+        "exercise directory. "
+        "3. Validation in isolated temp copies using system python3 (stdlib only): "
+        "(a) .meta/example.py copied to the stub's module name passes `python3 -B -m unittest <test>` "
+        "with >0 tests run; "
+        "(b) the original stub fails at least one test under `python3 -B -m unittest <test>`. "
+        "Exclude exercises failing (a) or (b) and log the reason. "
+        f"4. Order all remaining slugs ascending by sha256(slug + {salt!r}) "
+        f"(UTF-8 hex digest) and {take_clause}."
+    )
 
 
 def sha256_bytes(b: bytes) -> str:
@@ -334,12 +433,20 @@ def build_bank(
     manifest_path: pathlib.Path,
     timeout_s: float,
     workers: int,
+    *,
+    bank_id: str = DEFAULT_BANK_ID,
+    min_difficulty: int | None = None,
+    salt: str = ORDER_SALT,
+    take: int = TAKE_N,
+    take_all: bool = False,
+    overlap_manifest: pathlib.Path | None = None,
 ) -> int:
     practice_dir = src_dir / "exercises" / "practice"
     if not practice_dir.is_dir():
         raise SystemExit(f"exercises/practice not found under {src_dir}")
 
     commit_sha = git_commit_sha(src_dir)
+    difficulties = load_track_difficulties(src_dir)
     polyglot_slugs = load_polyglot_slugs(polyglot_dir)
     polyglot_set = set(polyglot_slugs)
 
@@ -347,6 +454,7 @@ def build_bank(
     exclusions: list[dict[str, str]] = []
     ready_for_val: dict[str, dict[str, Any]] = {}
     excluded_polyglot_count = 0
+    excluded_difficulty_count = 0
 
     for slug in all_practice:
         if slug in polyglot_set:
@@ -357,6 +465,24 @@ def build_bank(
                 "reason": "already present in polyglot_py (34 tasks)",
             })
             continue
+        if min_difficulty is not None:
+            diff = difficulties.get(slug)
+            if diff is None:
+                excluded_difficulty_count += 1
+                exclusions.append({
+                    "slug": slug,
+                    "stage": "rule_1_min_difficulty",
+                    "reason": "missing difficulty in config.json",
+                })
+                continue
+            if diff < min_difficulty:
+                excluded_difficulty_count += 1
+                exclusions.append({
+                    "slug": slug,
+                    "stage": "rule_1_min_difficulty",
+                    "reason": f"difficulty {diff} < {min_difficulty}",
+                })
+                continue
         ex_dir = practice_dir / slug
         info, err = identify_exercise_files(ex_dir)
         if err is not None or info is None:
@@ -400,7 +526,8 @@ def build_bank(
             {
                 "slug": slug,
                 "task_id": f"ex_{slug.replace('-', '_')}",
-                "order_sha256": sha256_bytes((slug + ORDER_SALT).encode("utf-8")),
+                "order_sha256": sha256_bytes((slug + salt).encode("utf-8")),
+                **({"difficulty": difficulties[slug]} if slug in difficulties else {}),
             }
             for slug in eligible_slugs
         ),
@@ -409,10 +536,14 @@ def build_bank(
     for idx, row in enumerate(ordered, 1):
         row["rank"] = idx
 
-    if len(ordered) < TAKE_N:
-        raise SystemExit(f"only {len(ordered)} eligible exercises; need {TAKE_N}")
-
-    chosen = ordered[:TAKE_N]
+    if take_all:
+        if not ordered:
+            raise SystemExit("0 eligible exercises; cannot build empty bank")
+        chosen = ordered
+    else:
+        if len(ordered) < take:
+            raise SystemExit(f"only {len(ordered)} eligible exercises; need {take}")
+        chosen = ordered[:take]
 
     if out_dir.exists():
         shutil.rmtree(out_dir)
@@ -441,44 +572,70 @@ def build_bank(
     if leaked:
         raise SystemExit(f"FATAL: example.py leaked into bank: {leaked}")
 
-    manifest = {
+    chosen_slugs = [row["slug"] for row in chosen]
+    selection_rule: dict[str, Any] = {
+        "text": build_selection_rule_text(
+            min_difficulty=min_difficulty,
+            salt=salt,
+            take=take,
+            take_all=take_all,
+        ),
+        "order_formula": f"sha256(slug + {salt!r})",
+        "order_salt": salt,
+        "take": "all" if take_all else take,
+        "validation_timeout_s": timeout_s,
+        "validation_python": sys.version.split()[0],
+    }
+    if min_difficulty is not None:
+        selection_rule["min_difficulty"] = min_difficulty
+    if take_all:
+        selection_rule["take_all"] = True
+
+    counts: dict[str, int] = {
+        "practice_exercises_total": len(all_practice),
+        "excluded_polyglot_overlap": excluded_polyglot_count,
+        "non_polyglot_candidates": len(all_practice) - excluded_polyglot_count,
+    }
+    if min_difficulty is not None:
+        counts["excluded_min_difficulty"] = excluded_difficulty_count
+        counts["candidates_after_min_difficulty"] = (
+            len(all_practice) - excluded_polyglot_count - excluded_difficulty_count
+        )
+    counts.update({
+        "excluded_post_polyglot": len(exclusions) - excluded_polyglot_count,
+        "eligible_after_validation": len(ordered),
+        "selected": len(chosen),
+        "bank_files_total": len(files_sha256),
+    })
+
+    manifest: dict[str, Any] = {
         "schema": "vacant.redo.bank/1",
-        "bank_id": "exercism_py_unused",
-        "bank_dir": "~/dev/ops/ref/bm_tasks/exercism_py_unused",
+        "bank_id": bank_id,
+        "bank_dir": contract_home(out_dir),
         "source": {
             "repo": REPO_URL,
-            "clone_dir": "~/dev/ops/ref/src/exercism-python",
+            "clone_dir": contract_home(src_dir),
             "commit_sha": commit_sha,
             "subdir": "exercises/practice",
         },
         "excluded_bank": {
-            "path": "~/dev/ops/ref/bm_tasks/polyglot_py",
+            "path": contract_home(polyglot_dir),
             "count": len(polyglot_slugs),
             "slugs": polyglot_slugs,
         },
-        "selection_rule": {
-            "text": SELECTION_RULE_TEXT,
-            "order_formula": "sha256(slug + ':redo-unused-2026-11-20')",
-            "order_salt": ORDER_SALT,
-            "take": TAKE_N,
-            "validation_timeout_s": timeout_s,
-            "validation_python": sys.version.split()[0],
-        },
-        "counts": {
-            "practice_exercises_total": len(all_practice),
-            "excluded_polyglot_overlap": excluded_polyglot_count,
-            "non_polyglot_candidates": len(all_practice) - excluded_polyglot_count,
-            "excluded_post_polyglot": len(exclusions) - excluded_polyglot_count,
-            "eligible_after_validation": len(ordered),
-            "selected": len(chosen),
-            "bank_files_total": len(files_sha256),
-        },
+        "selection_rule": selection_rule,
+        "counts": counts,
+        "difficulty_histogram": compute_difficulty_histogram(chosen_slugs, difficulties),
+    }
+    if overlap_manifest is not None:
+        manifest["overlap_with"] = compute_overlap(chosen_slugs, overlap_manifest)
+    manifest.update({
         "exclusions": exclusions,
-        "chosen_slugs": [row["slug"] for row in chosen],
+        "chosen_slugs": chosen_slugs,
         "chosen_tasks": [row["task_id"] for row in chosen],
         "ordered_eligible": ordered,
         "files_sha256": files_sha256,
-    }
+    })
 
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(
@@ -492,7 +649,11 @@ def build_bank(
     return 0
 
 
-def check_bank(out_dir: pathlib.Path, manifest_path: pathlib.Path) -> int:
+def check_bank(
+    out_dir: pathlib.Path,
+    manifest_path: pathlib.Path,
+    src_dir: pathlib.Path | None = None,
+) -> int:
     if not manifest_path.is_file():
         print(f"FAIL: manifest not found: {manifest_path}", file=sys.stderr)
         return 1
@@ -509,46 +670,80 @@ def check_bank(out_dir: pathlib.Path, manifest_path: pathlib.Path) -> int:
     mismatched = sorted(k for k in (set(want) & set(have)) if want[k] != have[k])
     leaked = sorted(k for k in have if "example.py" in k)
 
-    ok = not (missing or extra or mismatched or leaked)
+    errors: list[str] = []
     if missing:
-        print(f"FAIL: {len(missing)} missing files (e.g. {missing[:5]})", file=sys.stderr)
+        errors.append(f"{len(missing)} missing files (e.g. {missing[:5]})")
     if extra:
-        print(f"FAIL: {len(extra)} unexpected files (e.g. {extra[:5]})", file=sys.stderr)
+        errors.append(f"{len(extra)} unexpected files (e.g. {extra[:5]})")
     if mismatched:
-        print(f"FAIL: {len(mismatched)} hash mismatches (e.g. {mismatched[:5]})", file=sys.stderr)
+        errors.append(f"{len(mismatched)} hash mismatches (e.g. {mismatched[:5]})")
     if leaked:
-        print(f"FAIL: example.py present in bank: {leaked}", file=sys.stderr)
-    if ok:
-        print(
-            f"CHECK_OK: {len(have)}/{len(want)} files match manifest hashes in {out_dir} "
-            f"(tasks={len(manifest.get('chosen_tasks', []))}, commit={manifest['source']['commit_sha'][:12]})"
-        )
-        return 0
-    return 1
+        errors.append(f"example.py present in bank: {leaked}")
+
+    sel_rule = manifest.get("selection_rule", {})
+    slugs = manifest.get("chosen_slugs", [])
+    tasks = manifest.get("chosen_tasks", [])
+    if tasks != [f"ex_{s.replace('-', '_')}" for s in slugs]:
+        errors.append("chosen_tasks naming mismatch with chosen_slugs")
+    salt = sel_rule.get("order_salt", ORDER_SALT)
+    order_keys = [sha256_bytes((s + salt).encode("utf-8")) for s in slugs]
+    if order_keys != sorted(order_keys):
+        errors.append(f"chosen_slugs are not sorted by sha256(slug + {salt!r})")
+
+    min_diff = sel_rule.get("min_difficulty")
+    if min_diff is not None and src_dir is not None and (src_dir / "config.json").is_file():
+        diffs = load_track_difficulties(src_dir)
+        bad_diff = [s for s in slugs if diffs.get(s) is None or diffs[s] < min_diff]
+        if bad_diff:
+            errors.append(f"chosen slugs violate min_difficulty={min_diff}: {bad_diff}")
+
+    if errors:
+        for e in errors:
+            print(f"FAIL: {e}", file=sys.stderr)
+        return 1
+
+    print(
+        f"CHECK_OK: {len(have)}/{len(want)} files match manifest hashes in {out_dir} "
+        f"(bank_id={manifest.get('bank_id')}, tasks={len(tasks)}, commit={manifest['source']['commit_sha'][:12]})"
+    )
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--src", type=pathlib.Path, default=DEFAULT_SRC)
     ap.add_argument("--polyglot", type=pathlib.Path, default=DEFAULT_POLYGLOT)
-    ap.add_argument("--out", type=pathlib.Path, default=DEFAULT_OUT)
+    ap.add_argument("--out", "--bank", dest="out", type=pathlib.Path, default=DEFAULT_OUT)
     ap.add_argument("--manifest", type=pathlib.Path, default=DEFAULT_MANIFEST)
+    ap.add_argument("--bank-id", default=DEFAULT_BANK_ID, help="Bank identifier written into manifest.")
+    ap.add_argument("--min-difficulty", type=int, default=None, help="Minimum exercism config.json difficulty (inclusive).")
+    ap.add_argument("--salt", default=ORDER_SALT, help=f"SHA-256 ordering salt (default: {ORDER_SALT!r}).")
+    ap.add_argument("--take", type=int, default=TAKE_N, help=f"Number of ordered eligible tasks to select (default: {TAKE_N}).")
+    ap.add_argument("--take-all", action="store_true", help="Select all eligible tasks instead of slicing to --take.")
+    ap.add_argument("--overlap-manifest", type=pathlib.Path, default=None, help="Optional existing bank manifest JSON to record slug overlap against.")
     ap.add_argument("--timeout", type=float, default=120.0)
-    ap.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 4))
+    ap.add_argument("--workers", "--jobs", dest="workers", type=int, default=min(8, os.cpu_count() or 4))
     ap.add_argument("--check", action="store_true", help="Verify bank files match manifest sha256 hashes.")
     args = ap.parse_args(argv)
 
+    src_dir = expand(args.src)
     out_dir = expand(args.out)
     manifest_path = expand(args.manifest)
     if args.check:
-        return check_bank(out_dir, manifest_path)
+        return check_bank(out_dir, manifest_path, src_dir=src_dir)
     return build_bank(
-        src_dir=expand(args.src),
+        src_dir=src_dir,
         polyglot_dir=expand(args.polyglot),
         out_dir=out_dir,
         manifest_path=manifest_path,
         timeout_s=args.timeout,
         workers=args.workers,
+        bank_id=args.bank_id,
+        min_difficulty=args.min_difficulty,
+        salt=args.salt,
+        take=args.take,
+        take_all=args.take_all,
+        overlap_manifest=expand(args.overlap_manifest) if args.overlap_manifest is not None else None,
     )
 
 

@@ -1,0 +1,136 @@
+{
+ "id": "w35_vacantdo_rc4_pypool_colab",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261126,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "P": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/opt/redo/rc_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "A",
+  "P"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 6,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-12b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [],
+ "reps": 5,
+ "prereg": {
+  "registered": "確認批計畫由 screen_select.py 依篩選結果產生，產生後 commit、第一通模型呼叫之前凍結。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "question": "在原生 pi 不穩的Python題上，發布候選版 `vacant do pi`（rc4）交出通過評分的成果的比例，是不是比原生 pi 一次跑到底高？",
+  "primary": "P 對 A，入選題 × 5 次重複；精確雙尾 McNemar，α＝0.05。b＝只有 A 過、c＝只有 P 過。",
+  "states": {
+   "EFFECTIVE": "全部對完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這些原生 pi 不穩的Python題（W3-5 篩選批事先固定規則選出）、pi、gemma-4-12b QAT（Colab，vLLM 0.30.0，w4a16）、同樣 1800 秒上限下，發布候選版 `vacant do pi`（rc4 0.9.2，零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數、模型呼叫數一起講；同時報篩選批的完整分母）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、把入選題上的差距說成所有題上的差距、外推到別的模型／語言／沒有可執行測試的工作。",
+   "UNRESOLVED": "完成但 p ≥ 0.05（不論方向），或 A 接近天花板／地板。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+   "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "rule": "入選規則（篩選前寫死，見 ops/redo/analysis/screen_select.py）：每題原生 pi 跑 2 次（兩個完全相同的單次臂 A、A2）；兩次都有效才計分，有 infra_void 的題不入選但列在分母；2 次裡過 ≤1 次者入選；超過 N=30 照 sha256(task+salt) 取前 30；少於 15 照跑並寫明檢定力不足，不加題、不改門檻。確認批：入選題 × 5 次全新 rep，A 對 P（rc4），同一個後端（Colab L4、vLLM、jobs 6）。",
+  "denominator": "結論必須報完整分母：篩選幾題、各題原生 2 次過幾次（2/2、1/2、0/2 各幾題）、void 幾題、入選幾題；「原生本來就穩過的題沒有增益也沒有多花」與「入選題上的差距」分開講，不得只報確認批的差距。",
+  "known_limits": [
+   "P 臂是 rc4 wheel（sha256 28e5480c84aa…，~/dev/ops/rc4_dist），裝在 VM 的 /opt/redo/rc_venv；config_dir 只複製 models.json。",
+   "被選中的題原生在確認批會往上回歸，縮小差距、對 P 不利。",
+   "P 的模型呼叫數 harness 量不到（usage=none），結案時用 p_model_calls.py 補算。",
+   "jobs 6：兩臂受同樣壅塞，配對照常。",
+   "數字不與其他批併表、不合併 p 值。"
+  ],
+  "selection_salt": ":w35-py-2026-11-21",
+  "selection_cap_n": 30,
+  "selection_min": 15
+ }
+}

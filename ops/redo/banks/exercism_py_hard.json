@@ -1,0 +1,1023 @@
+{
+  "schema": "vacant.redo.bank/1",
+  "bank_id": "exercism_py_hard",
+  "bank_dir": "~/dev/ops/ref/bm_tasks/exercism_py_hard",
+  "source": {
+    "repo": "https://github.com/exercism/python",
+    "clone_dir": "~/dev/ops/ref/src/exercism-python",
+    "commit_sha": "479f11b44b02337b0413e805b948491c2179615a",
+    "subdir": "exercises/practice"
+  },
+  "excluded_bank": {
+    "path": "~/dev/ops/ref/bm_tasks/polyglot_py",
+    "count": 34,
+    "slugs": [
+      "affine-cipher",
+      "beer-song",
+      "book-store",
+      "bottle-song",
+      "bowling",
+      "connect",
+      "dominoes",
+      "dot-dsl",
+      "food-chain",
+      "forth",
+      "go-counting",
+      "grade-school",
+      "grep",
+      "hangman",
+      "list-ops",
+      "paasio",
+      "phone-number",
+      "pig-latin",
+      "poker",
+      "pov",
+      "proverb",
+      "react",
+      "rest-api",
+      "robot-name",
+      "scale-generator",
+      "sgf-parsing",
+      "simple-linked-list",
+      "transpose",
+      "tree-building",
+      "two-bucket",
+      "variable-length-quantity",
+      "wordy",
+      "zebra-puzzle",
+      "zipper"
+    ]
+  },
+  "selection_rule": {
+    "text": "1. Candidate = practice exercise under exercises/practice/* whose slug is NOT one of the 34 polyglot_py slugs (stripping 'pg_' from ~/dev/ops/ref/bm_tasks/polyglot_py dirs and mapping '_' to '-'), has difficulty >= 4 in track config.json (exercises.practice[].difficulty), has .meta/example.py, a *_test.py test file, a stub file, and .docs/instructions.md. 2. Exclude if the tests, helper modules, or example import anything outside the Python standard library or local exercise modules, or use network/filesystem APIs outside the exercise directory. 3. Validation in isolated temp copies using system python3 (stdlib only): (a) .meta/example.py copied to the stub's module name passes `python3 -B -m unittest <test>` with >0 tests run; (b) the original stub fails at least one test under `python3 -B -m unittest <test>`. Exclude exercises failing (a) or (b) and log the reason. 4. Order all remaining slugs ascending by sha256(slug + ':redo-pyhard-2026-11-21') (UTF-8 hex digest) and take all eligible exercises.",
+    "order_formula": "sha256(slug + ':redo-pyhard-2026-11-21')",
+    "order_salt": ":redo-pyhard-2026-11-21",
+    "take": "all",
+    "validation_timeout_s": 120.0,
+    "validation_python": "3.12.3",
+    "min_difficulty": 4,
+    "take_all": true
+  },
+  "counts": {
+    "practice_exercises_total": 142,
+    "excluded_polyglot_overlap": 34,
+    "non_polyglot_candidates": 108,
+    "excluded_min_difficulty": 80,
+    "candidates_after_min_difficulty": 28,
+    "excluded_post_polyglot": 82,
+    "eligible_after_validation": 26,
+    "selected": 26,
+    "bank_files_total": 104
+  },
+  "difficulty_histogram": {
+    "4": 16,
+    "5": 6,
+    "6": 3,
+    "7": 1
+  },
+  "overlap_with": {
+    "bank_id": "exercism_py_unused",
+    "manifest": "ops/redo/banks/exercism_py_unused.json",
+    "count": 10,
+    "slugs": [
+      "all-your-base",
+      "binary-search-tree",
+      "change",
+      "flower-field",
+      "rational-numbers",
+      "satellite",
+      "swift-scheduling",
+      "tournament",
+      "trinary",
+      "word-search"
+    ]
+  },
+  "exclusions": [
+    {
+      "slug": "accumulate",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "acronym",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "allergies",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "anagram",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "armstrong-numbers",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "atbash-cipher",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "binary",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "binary-search",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "bob",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "circular-buffer",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "clock",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "collatz-conjecture",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "crypto-square",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "darts",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "diamond",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "difference-of-squares",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "diffie-hellman",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "dnd-character",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "eliuds-eggs",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "error-handling",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "etl",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "flatten-array",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "game-of-life",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "gigasecond",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "grains",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "hamming",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "hello-world",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "hexadecimal",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "high-scores",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "house",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "isbn-verifier",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "isogram",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "kindergarten-garden",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "leap",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "line-up",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "luhn",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "matching-brackets",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "matrix",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "nth-prime",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "nucleotide-count",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "ocr-numbers",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "octal",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "pangram",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "parallel-letter-frequency",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "perfect-numbers",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "point-mutations",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "prime-factors",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "protein-translation",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "pythagorean-triplet",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "queen-attack",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "raindrops",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "rectangles",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "resistor-color",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "resistor-color-duo",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "resistor-color-expert",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "resistor-color-trio",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "reverse-string",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "rna-transcription",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "robot-simulator",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "roman-numerals",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "rotational-cipher",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "run-length-encoding",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "saddle-points",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "say",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "scrabble-score",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "secret-handshake",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "series",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "sieve",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "simple-cipher",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "space-age",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "square-root",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "state-of-tic-tac-toe",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "strain",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 3 < 4"
+    },
+    {
+      "slug": "sublist",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "sum-of-multiples",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "triangle",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "twelve-days",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "two-fer",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 1 < 4"
+    },
+    {
+      "slug": "word-count",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "yacht",
+      "stage": "rule_1_min_difficulty",
+      "reason": "difficulty 2 < 4"
+    },
+    {
+      "slug": "affine-cipher",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "beer-song",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "book-store",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "bottle-song",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "bowling",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "connect",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "dominoes",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "dot-dsl",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "food-chain",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "forth",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "go-counting",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "grade-school",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "grep",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "hangman",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "list-ops",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "paasio",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "phone-number",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "pig-latin",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "poker",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "pov",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "proverb",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "react",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "rest-api",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "robot-name",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "scale-generator",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "sgf-parsing",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "simple-linked-list",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "transpose",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "tree-building",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "two-bucket",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "variable-length-quantity",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "wordy",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "zebra-puzzle",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "zipper",
+      "stage": "rule_1_polyglot_overlap",
+      "reason": "already present in polyglot_py (34 tasks)"
+    },
+    {
+      "slug": "ledger",
+      "stage": "rule_3_validation_b",
+      "reason": "original stub passed all tests (rc=0): Ran 11 tests in 0.002s |  | OK"
+    },
+    {
+      "slug": "markdown",
+      "stage": "rule_3_validation_b",
+      "reason": "original stub passed all tests (rc=0): Ran 17 tests in 0.001s |  | OK"
+    }
+  ],
+  "chosen_slugs": [
+    "satellite",
+    "alphametics",
+    "binary-search-tree",
+    "bank-account",
+    "rail-fence-cipher",
+    "tournament",
+    "flower-field",
+    "knapsack",
+    "trinary",
+    "meetup",
+    "custom-set",
+    "spiral-matrix",
+    "pascals-triangle",
+    "rational-numbers",
+    "linked-list",
+    "word-search",
+    "relative-distance",
+    "swift-scheduling",
+    "killer-sudoku-helper",
+    "palindrome-products",
+    "minesweeper",
+    "largest-series-product",
+    "all-your-base",
+    "camicia",
+    "change",
+    "complex-numbers"
+  ],
+  "chosen_tasks": [
+    "ex_satellite",
+    "ex_alphametics",
+    "ex_binary_search_tree",
+    "ex_bank_account",
+    "ex_rail_fence_cipher",
+    "ex_tournament",
+    "ex_flower_field",
+    "ex_knapsack",
+    "ex_trinary",
+    "ex_meetup",
+    "ex_custom_set",
+    "ex_spiral_matrix",
+    "ex_pascals_triangle",
+    "ex_rational_numbers",
+    "ex_linked_list",
+    "ex_word_search",
+    "ex_relative_distance",
+    "ex_swift_scheduling",
+    "ex_killer_sudoku_helper",
+    "ex_palindrome_products",
+    "ex_minesweeper",
+    "ex_largest_series_product",
+    "ex_all_your_base",
+    "ex_camicia",
+    "ex_change",
+    "ex_complex_numbers"
+  ],
+  "ordered_eligible": [
+    {
+      "slug": "satellite",
+      "task_id": "ex_satellite",
+      "order_sha256": "057d09ff942d3260b536c5a57df52686c751181795319961fb43802485130599",
+      "difficulty": 7,
+      "rank": 1
+    },
+    {
+      "slug": "alphametics",
+      "task_id": "ex_alphametics",
+      "order_sha256": "08eb689ebe90f1ccd1f390f3a9b81248fc99354dd2234cb7e9c8418ebd5ac6a4",
+      "difficulty": 6,
+      "rank": 2
+    },
+    {
+      "slug": "binary-search-tree",
+      "task_id": "ex_binary_search_tree",
+      "order_sha256": "1b96e0c01e1e596367f7cfd344f87aa76f886a3e971f5519a91605be2938bc71",
+      "difficulty": 5,
+      "rank": 3
+    },
+    {
+      "slug": "bank-account",
+      "task_id": "ex_bank_account",
+      "order_sha256": "2cbcb571b72b8dc7cf34123a139de0e49f43641d2d89f87d9cd8f40a2203a56e",
+      "difficulty": 6,
+      "rank": 4
+    },
+    {
+      "slug": "rail-fence-cipher",
+      "task_id": "ex_rail_fence_cipher",
+      "order_sha256": "3188412fb82e6ea99b4fbbccb9cb6c719c9d23ad2d899464e38f2869b2456d1d",
+      "difficulty": 4,
+      "rank": 5
+    },
+    {
+      "slug": "tournament",
+      "task_id": "ex_tournament",
+      "order_sha256": "335aa8ffb735e6b3fd5512ee76f8a55af76c51bdb4629940e8274542813b3ca4",
+      "difficulty": 4,
+      "rank": 6
+    },
+    {
+      "slug": "flower-field",
+      "task_id": "ex_flower_field",
+      "order_sha256": "460d124d6bab0f1bc4e01f5c7d4546ed11b81caab252ca0cd4ddeff3c071d213",
+      "difficulty": 4,
+      "rank": 7
+    },
+    {
+      "slug": "knapsack",
+      "task_id": "ex_knapsack",
+      "order_sha256": "4886056e848521894b03b4697e78a234f1502515c334732e0ad3640bc777a269",
+      "difficulty": 5,
+      "rank": 8
+    },
+    {
+      "slug": "trinary",
+      "task_id": "ex_trinary",
+      "order_sha256": "4e332583e5ce2215319e981db2bf7bd965f35cfa18a79e64fab831b82b50e27a",
+      "difficulty": 4,
+      "rank": 9
+    },
+    {
+      "slug": "meetup",
+      "task_id": "ex_meetup",
+      "order_sha256": "4f0666d4b382d61e2506883d817130aa84d7d65b76bb3f561c02bb9499f3658e",
+      "difficulty": 4,
+      "rank": 10
+    },
+    {
+      "slug": "custom-set",
+      "task_id": "ex_custom_set",
+      "order_sha256": "56767847132190e0e5d3d0a5217c15167f39ae5b5650228dd8bfb251c6050a7b",
+      "difficulty": 5,
+      "rank": 11
+    },
+    {
+      "slug": "spiral-matrix",
+      "task_id": "ex_spiral_matrix",
+      "order_sha256": "5847010cafed7c880fae19668d2d7bc082ddf4f116ab09dc4d8433e25a7b59df",
+      "difficulty": 4,
+      "rank": 12
+    },
+    {
+      "slug": "pascals-triangle",
+      "task_id": "ex_pascals_triangle",
+      "order_sha256": "651db4d520e822b1b9d635b84d51646a30a9f22fda316c3db71f8b33b0113fdc",
+      "difficulty": 4,
+      "rank": 13
+    },
+    {
+      "slug": "rational-numbers",
+      "task_id": "ex_rational_numbers",
+      "order_sha256": "75d360a84f98e6a19ce750035e9ff71397ab8259a71d1f510565e3739bac07e6",
+      "difficulty": 5,
+      "rank": 14
+    },
+    {
+      "slug": "linked-list",
+      "task_id": "ex_linked_list",
+      "order_sha256": "81ed49643437f83320db4db76eb85c2a7ddaff33b22538dabfd238bacf0850af",
+      "difficulty": 4,
+      "rank": 15
+    },
+    {
+      "slug": "word-search",
+      "task_id": "ex_word_search",
+      "order_sha256": "9470563ab3d4bdc5d4f1e323a4578c08ccc945d88f40570459ce8f334575126e",
+      "difficulty": 6,
+      "rank": 16
+    },
+    {
+      "slug": "relative-distance",
+      "task_id": "ex_relative_distance",
+      "order_sha256": "9811867d6aa36c5b14357552d7751edbfa50608721479b953377e5b1fd4d13bd",
+      "difficulty": 5,
+      "rank": 17
+    },
+    {
+      "slug": "swift-scheduling",
+      "task_id": "ex_swift_scheduling",
+      "order_sha256": "9f87610a281416e9883e16472b2ceb971887b3d13c7e21ec5e74487ba1b61d51",
+      "difficulty": 4,
+      "rank": 18
+    },
+    {
+      "slug": "killer-sudoku-helper",
+      "task_id": "ex_killer_sudoku_helper",
+      "order_sha256": "a35548220d38ca3124e016021c7a48f5e0d4ed785d8f4862a0f265570f47a941",
+      "difficulty": 4,
+      "rank": 19
+    },
+    {
+      "slug": "palindrome-products",
+      "task_id": "ex_palindrome_products",
+      "order_sha256": "a73d453c77d30d152d437148d8eb069691e6074dd1d1a6d0d69e1842158a8ddb",
+      "difficulty": 4,
+      "rank": 20
+    },
+    {
+      "slug": "minesweeper",
+      "task_id": "ex_minesweeper",
+      "order_sha256": "b4046b249f63599d954d088adb4ab38ec1334df43e424837311266cff518d424",
+      "difficulty": 4,
+      "rank": 21
+    },
+    {
+      "slug": "largest-series-product",
+      "task_id": "ex_largest_series_product",
+      "order_sha256": "c907dacdbb06c8d816faad6eefa2729711b6af3d6b49b9616caff627ceb81d49",
+      "difficulty": 4,
+      "rank": 22
+    },
+    {
+      "slug": "all-your-base",
+      "task_id": "ex_all_your_base",
+      "order_sha256": "ef1744638b0dc2ca51b8c2fdf42949b89188779b560a95c44f5c6e8766b17aa6",
+      "difficulty": 4,
+      "rank": 23
+    },
+    {
+      "slug": "camicia",
+      "task_id": "ex_camicia",
+      "order_sha256": "eff7ac2e036e1f1e64dc97d577c562df9f283315e984b2b2c81b1f5a6ef10098",
+      "difficulty": 5,
+      "rank": 24
+    },
+    {
+      "slug": "change",
+      "task_id": "ex_change",
+      "order_sha256": "f34de220f34ee8384f765fd31c0005bae40737a7e32cde047a7cf03a36349cc0",
+      "difficulty": 4,
+      "rank": 25
+    },
+    {
+      "slug": "complex-numbers",
+      "task_id": "ex_complex_numbers",
+      "order_sha256": "fdad4b6602d162cd6e010e259ca2c6252555b3ffebe19afb5f6a9603f0e7ba6f",
+      "difficulty": 4,
+      "rank": 26
+    }
+  ],
+  "files_sha256": {
+    "ex_all_your_base/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_all_your_base/workspace/all_your_base_test.py": "19bdd1173d47dc4e24db251e8fc80258c77c9ea5dbc895e01f20c0fb055b46bf",
+    "ex_all_your_base/workspace/contract.md": "13439910f7bff8578b5e346d47ab26087e7c2dcc4b7625587ca0747930c1a3c7",
+    "ex_all_your_base/workspace/goal.md": "bedd0b2f848093a4f81349fb6c546b3a11d2632b220404dbb7c3eb02a48c18b2",
+    "ex_alphametics/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_alphametics/workspace/alphametics_test.py": "a16bc9bde2cee8acd973f1393a7ec29c09ffd2a4bec093213d21cc750b565222",
+    "ex_alphametics/workspace/contract.md": "9a35ef81240a069fc23200edefe460986c164ed7699182bf20b1ee815e1f4aa0",
+    "ex_alphametics/workspace/goal.md": "8f798632934cfd35d9e2f36b9e66cae5ffa23279a09ddc61974f64e88180c4de",
+    "ex_bank_account/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_bank_account/workspace/bank_account_test.py": "d4bfe068ce35af331541c5420eefb6e08bb0c1bf3920a2043bc3a4b763f1c380",
+    "ex_bank_account/workspace/contract.md": "8903c616e388fcc97bb72a17c440b9e07aede662f404f8cfe90de6f63e568bd0",
+    "ex_bank_account/workspace/goal.md": "5b055928d112d39c8952cd20cbcb9e83abcc6ddf6bc9ab3007ac5a7b25268aa9",
+    "ex_binary_search_tree/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_binary_search_tree/workspace/binary_search_tree_test.py": "031fc58dcc791ea1a366877ad8182f978a80f6390478f1ecce7ae450258d4760",
+    "ex_binary_search_tree/workspace/contract.md": "a2733df7e8f162902d20c81e2bca67d67387c3129571821dc83c39aa3741fb22",
+    "ex_binary_search_tree/workspace/goal.md": "f96d9e51481a318ceaa267fc1f0da31f2dda888266b8549ecb5fbe104d1becd7",
+    "ex_camicia/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_camicia/workspace/camicia_test.py": "c9e94799b30d7d8783c0f49100518a804a3fbff216b5e1c9d7b5ebbcc1349a00",
+    "ex_camicia/workspace/contract.md": "718622542302c7e2b6468655c4352fb9d760d8bd69fa1f36564eea61b57d3b01",
+    "ex_camicia/workspace/goal.md": "0b1cb227f27866030b68af44d9a31f09b8203a0158f37f3519f495eefe35882b",
+    "ex_change/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_change/workspace/change_test.py": "bc27f170f718cce4fbc6e5ef6c90b27496c271bd4aced9d567507ec0589bcc03",
+    "ex_change/workspace/contract.md": "947179bedb1c3c19989df7e843c5d703f15d2a45b13a293ee43b155df4a5e250",
+    "ex_change/workspace/goal.md": "01f77605c3b2b77247bfef470f658d49b666dd0f65dc631d22c0a172e5f77f3f",
+    "ex_complex_numbers/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_complex_numbers/workspace/complex_numbers_test.py": "99bd8bdde2dead4413009c456724569bf8a8039f10f2bb84c709515a82ff828c",
+    "ex_complex_numbers/workspace/contract.md": "1778c43c7831c522dbcc005d65aa694ad2f06b645a3f47ad26376c0f5f899809",
+    "ex_complex_numbers/workspace/goal.md": "0519e65e1f46cb7ad969ff7a9ce5cc7485e5098b75bc444a04c1b2fbb0bba3d7",
+    "ex_custom_set/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_custom_set/workspace/contract.md": "644e4d7f42c6bb3b36350ce6c043b9075fe1b883e4a3a23cad7e8a0063349dca",
+    "ex_custom_set/workspace/custom_set_test.py": "4dd9975b16c003dcf09b90393cb2baf800ad737ca2f3293e6b4bfde744a40900",
+    "ex_custom_set/workspace/goal.md": "2c1f80439e843b6264113d687aa0bc9a2d8314759e987cd163474a50c237f81d",
+    "ex_flower_field/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_flower_field/workspace/contract.md": "41fa919fc6719ce6f7256077343ae6f9deea00dece2e2a7a0d4f424ac0971b2b",
+    "ex_flower_field/workspace/flower_field_test.py": "502a691515753e90d4f1ca5e0571e3019ea2a614076ed22fdcda4ea86c831770",
+    "ex_flower_field/workspace/goal.md": "2336f3047a1d80d20f39786f4e0742287b068a38ba8e5657df1f266642c14266",
+    "ex_killer_sudoku_helper/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_killer_sudoku_helper/workspace/contract.md": "e56140426a2071cdbe2d5fef18d9d448e76979c38704c1e81dbef79af5e72ca4",
+    "ex_killer_sudoku_helper/workspace/goal.md": "629626bf0f7c64d4f2486120d2631855f5d3d7b6e09c577293b24811f66c8139",
+    "ex_killer_sudoku_helper/workspace/killer_sudoku_helper_test.py": "14075986190e1a4573f74a803eeda1aae107581818e889f3272a9ba2bf792fa7",
+    "ex_knapsack/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_knapsack/workspace/contract.md": "a69e729941642514f6746fe044c99edeadc250023c90c877cd76e93e50972e7c",
+    "ex_knapsack/workspace/goal.md": "ce34c464d117fd69bbdfe259b80ae8e167d913f2497f300d2eb683e51794377f",
+    "ex_knapsack/workspace/knapsack_test.py": "74913a1d2d104bceddf8791d0340af1910211ff5099e2e58d29bd9820cd245fe",
+    "ex_largest_series_product/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_largest_series_product/workspace/contract.md": "86fd3d42e5ec0577310bb477f414e1066d8f5d4854a69d2c50e70a1ff2e915c6",
+    "ex_largest_series_product/workspace/goal.md": "6075e3317b1d1d67a5903caf20c144fd9568f11b15aa193b987fa46101245339",
+    "ex_largest_series_product/workspace/largest_series_product_test.py": "8decfc8e65954b761a1763831b178854878b50294fd31b55b237425904bf0999",
+    "ex_linked_list/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_linked_list/workspace/contract.md": "47363a19b9b7924475a71530eab1c455a90b380b473796c093238bec9e2d8202",
+    "ex_linked_list/workspace/goal.md": "b546b5ecbfac371d980227a3516ffb0b990005af7b76ffdc8da5231da42efca0",
+    "ex_linked_list/workspace/linked_list_test.py": "1d93d746f6b501e4ebcf6f56d49b8145247b735110dc2522cf68556943e1debb",
+    "ex_meetup/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_meetup/workspace/contract.md": "2cbfe89bc038b4ef081215e76b6eeb8fcbf4a3d134e927d720fd0b013497d605",
+    "ex_meetup/workspace/goal.md": "98f94bd24da4749ffe1eb815bbb794d4b24fe7df99e485160eee61393eabb478",
+    "ex_meetup/workspace/meetup_test.py": "cf32da5b0dc7e2a66774579c78418b6ad41d204e493f4d407c7ea46c4f5de350",
+    "ex_minesweeper/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_minesweeper/workspace/contract.md": "0fda3f08c0c6d96fcc68308bd6db066a26675e13eb0f41f355ac62a88c4895c5",
+    "ex_minesweeper/workspace/goal.md": "e746d52c641f31f952d83cd62c48a4f8b5dca89ee9b6902ccca640b1e7ad2cca",
+    "ex_minesweeper/workspace/minesweeper_test.py": "00989fc1269cb86216830db44c30a56873c15fc4aef1023392bf8a199ea611ac",
+    "ex_palindrome_products/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_palindrome_products/workspace/contract.md": "4fbc91e9ea9775819d188cdfbfe2d033f5ada36c1df067993f6b6bf3186e588a",
+    "ex_palindrome_products/workspace/goal.md": "ea83ca27e70b6e63efa1cdaab2d1f8166a8d2f21b020ad44473a373339407caf",
+    "ex_palindrome_products/workspace/palindrome_products_test.py": "143791b0fa8e066eaebbb1c7b7fb4c4011bbcffcac4d9060d9823acb4db5e27f",
+    "ex_pascals_triangle/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_pascals_triangle/workspace/contract.md": "c2c41291b67e173c980601f833fcb742d3fa456a5b069a98e5917f0b99ade02e",
+    "ex_pascals_triangle/workspace/goal.md": "f728312d1e4ff7adfebd5aaf4e671605fa0765543d49e423e924c0a46484e131",
+    "ex_pascals_triangle/workspace/pascals_triangle_test.py": "19f2817f931e05554d3516b229a2d5abcbb99b7dbb46292a6c29f8a28fae2596",
+    "ex_rail_fence_cipher/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_rail_fence_cipher/workspace/contract.md": "cd0f07a6ce992e78246981479d716263b24d9896de7f8b4025b40f8ad8dcdbb0",
+    "ex_rail_fence_cipher/workspace/goal.md": "a679c3333cc03ad6d99c4fac745048bc3e0e82412f4d0d7ab7ae667a8a31c234",
+    "ex_rail_fence_cipher/workspace/rail_fence_cipher_test.py": "e970453911ba5656fcaa2dcdef536486d5c641415cb35631d13fff2713303511",
+    "ex_rational_numbers/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_rational_numbers/workspace/contract.md": "e44be20686cf1eb0a079981070ea7d2fea25dd58c54b5430a0b8cdb2d682d53b",
+    "ex_rational_numbers/workspace/goal.md": "982aefbb4814ff536d58bd076f3ee21ead2bb0c893d8cb776b8818eaabbc980d",
+    "ex_rational_numbers/workspace/rational_numbers_test.py": "956cfe266af245f4748073c134135f6c9c7727c19c147916bbe4acbf4a01dad2",
+    "ex_relative_distance/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_relative_distance/workspace/contract.md": "442cca216532af321112284fad7a6479f4b259d49c5fe01623ea8b2bfae9c115",
+    "ex_relative_distance/workspace/goal.md": "96e9afda6d641a775b82e8481a94c3a9c8a0f9bef79edc80c8235cda551dbfae",
+    "ex_relative_distance/workspace/relative_distance_test.py": "64709eabc4b8f3c9087d287afea0365b377f12ba9d34a481f72e01fb98bdaab1",
+    "ex_satellite/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_satellite/workspace/contract.md": "9ea55951c54d1e9192884c842955430fe7af3172063d0c9927111fdbcb3c47ac",
+    "ex_satellite/workspace/goal.md": "6d4c9ee8fdf44df328d13cae135d5dd1cccc0dffb452e178588d60ff82aabc52",
+    "ex_satellite/workspace/satellite_test.py": "2c95ff5ac5bdc8584a13d3f103eaf4dedfef45e131a4bb7196d7e9949ea15d7f",
+    "ex_spiral_matrix/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_spiral_matrix/workspace/contract.md": "fb0cedfc6774f5a4cbf87d6e199691049d07de86833bd0757311b9da411b7e0f",
+    "ex_spiral_matrix/workspace/goal.md": "a738351bf8fc8e0a1c790329230a1eb8b25683c13006018f106e86498384ddab",
+    "ex_spiral_matrix/workspace/spiral_matrix_test.py": "2cc3c91e9f7dc60f1ea92dd882fdd8e798ef640cf9eafd00bd9bf8ef318beb6c",
+    "ex_swift_scheduling/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_swift_scheduling/workspace/contract.md": "a5d7ec1da3a8956340f43e9541f254233c0bbe63372003b9af22e8870a3aab94",
+    "ex_swift_scheduling/workspace/goal.md": "abebc7a7558ec73216b6f646b33ec3d66eb9785a9cc8603adf6f455001eebd21",
+    "ex_swift_scheduling/workspace/swift_scheduling_test.py": "21fc143e4196e1c37abc7806b4ab355d868db410e2a81f251d86e1a6fff4c643",
+    "ex_tournament/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_tournament/workspace/contract.md": "62d38686883da879edcefa1d7a2edfe065b7ba396594f62d6971a645df2cb1dc",
+    "ex_tournament/workspace/goal.md": "a545d4c4160a1d9310ad162434a716f20db989b3a995bb818fec8038c1362b6e",
+    "ex_tournament/workspace/tournament_test.py": "52272f90080beb0d352b281c2aa46c33d6a0208f2707e7b94b9fa1aadb0b1b2a",
+    "ex_trinary/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_trinary/workspace/contract.md": "dc93e9cc53951fc1930204f07ef043f6162851a7652ee6e4345a694a1867217f",
+    "ex_trinary/workspace/goal.md": "0089580f98707988a877f149cb9ad78a69545d2a192d449454615adaabb08d5b",
+    "ex_trinary/workspace/trinary_test.py": "6827eecdc092ee5113393c2e66ae9ae0111acff037f4843ec926f68246519cf8",
+    "ex_word_search/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+    "ex_word_search/workspace/contract.md": "bae7e4c2ae6bcbcc6f81883da496001731e3f1cb4865e10e5f2ee1c34a996e31",
+    "ex_word_search/workspace/goal.md": "ec749d7e2303930a7c00de1885b426947ce2ef1289c5e753646a749cf2f4a26b",
+    "ex_word_search/workspace/word_search_test.py": "fc834a9dc0c75eb4444f7ed1451d8ec0881fa062a3a60374337480892a5a7606"
+  }
+}

@@ -1,0 +1,155 @@
+{
+ "id": "confirm2oc_vacantdo_rc5_opencode_gemma12b_1004",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261143,
+ "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+ "bank_candidates": [
+  "/tmp/bm_tasks/polyglot_py",
+  "/srv/eval/staged/polyglot_py"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "P": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/home/user1/dev/ops/rc5final_venv/bin/vacant",
+     "do",
+     "opencode",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--model",
+     "{provider}/{model}"
+    ],
+    "env": {
+     "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1004\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1004\", \"options\": {\"baseURL\": \"http://100.86.226.21:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1004/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "XDG_DATA_HOME",
+     "from": "~/.pi/agent",
+     "copy": []
+    }
+   }
+  }
+ },
+ "pair": [
+  "A",
+  "P"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "opencode",
+   "run",
+   "--model",
+   "{provider}/{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "OPENCODE_CONFIG_CONTENT": "{\"$schema\": \"https://opencode.ai/config.json\", \"provider\": {\"lms1004\": {\"npm\": \"@ai-sdk/openai-compatible\", \"name\": \"lms1004\", \"options\": {\"baseURL\": \"http://100.86.226.21:1234/v1\"}, \"models\": {\"gemma-4-12b-it-qat\": {\"name\": \"gemma\", \"limit\": {\"context\": 262144, \"output\": 16384}}}}}, \"model\": \"lms1004/gemma-4-12b-it-qat\", \"autoupdate\": false, \"share\": \"disabled\"}"
+  },
+  "config_dir": {
+   "env": "XDG_DATA_HOME",
+   "from": "~/.pi/agent",
+   "copy": []
+  },
+  "usage": "none",
+  "infra_re": "ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|fetch failed|socket hang up|Connection error|connection refused|Premature close|\\bterminated\\b|model[^\\n]{0,40}(?:not (?:found|loaded)|crashed|unloaded)|\\b50[234]\\b[^\\n]{0,40}(?:Bad Gateway|Service Unavailable|Gateway Timeout)|Cannot connect to API|Unable to connect"
+ },
+ "providers": [
+  {
+   "name": "lms1004",
+   "provider": "lms1004",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "pg_affine_cipher",
+  "pg_beer_song",
+  "pg_book_store",
+  "pg_bottle_song",
+  "pg_bowling",
+  "pg_connect",
+  "pg_dominoes",
+  "pg_dot_dsl",
+  "pg_food_chain",
+  "pg_forth",
+  "pg_go_counting",
+  "pg_grade_school",
+  "pg_grep",
+  "pg_hangman",
+  "pg_list_ops",
+  "pg_paasio",
+  "pg_phone_number",
+  "pg_pig_latin",
+  "pg_poker",
+  "pg_pov",
+  "pg_proverb",
+  "pg_react",
+  "pg_rest_api",
+  "pg_robot_name",
+  "pg_scale_generator",
+  "pg_sgf_parsing",
+  "pg_simple_linked_list",
+  "pg_transpose",
+  "pg_tree_building",
+  "pg_two_bucket",
+  "pg_variable_length_quantity",
+  "pg_wordy",
+  "pg_zebra_puzzle",
+  "pg_zipper"
+ ],
+ "reps": 5,
+ "prereg": {
+  "registered": "2026-11-22，第一通模型呼叫之前 commit。取代未發射的 confirm2oc_vacantdo_rel092_opencode_gemma12b_1003（0 次模型呼叫，撤回說明見 .WITHDRAWN.md）：機器改成 1004（排在 confirm2 之後；1003 改跑 atimeout），P 臂改用發布版 rc5-final。會跑到 11/25 之後，到時照實列為進行中。",
+  "authorization": "人類 2026-11-14 原話：「你開新的分支我在去讓他自己迭代 把它自己迭代的任務、harness什麼的有的沒的也都寫好讓他可以比較好做 不要再讓他去做沒有意義的開發」。本機算力上的 A／R3 量測不需要逐批簽字；把結果寫成對外口徑（README／CLAUDE.md 的 ✅ 句子）要人類看過。",
+  "question": "同一個原生 agent（OpenCode 1.18.33）、同一個本機模型（gemma-4-12b-it-qat，1004）、同樣 1800 秒、34 題 polyglot_py：要發布的 0.9.2 wheel （sha256 37005ec2aa91…）的 `vacant do opencode`（零設定重開；不載入任何 Vacant 外掛）交出通過評分的成果的比例，是不是比原生 opencode 一次跑到底高？",
+  "why": "產品指令在第二個 agent 上的數字；目前 OpenCode 只有 harness 機制（redo1_opencode）的數字。",
+  "primary": "P 對 A，34 題 × 5 次重複＝170 對；精確雙尾 McNemar，α＝0.05。",
+  "states": {
+   "EFFECTIVE": "170 對全部完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這 34 題、OpenCode 1.18.33、gemma-4-12b（1004，llama.cpp 2.46.0）、同樣 1800 秒上限下，要發布的 0.9.2 `vacant do opencode`（零設定重開；不載入 Vacant 外掛）交出通過的成果，比原生 opencode 一次跑到底多（數字、內層平均嘗試數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／題庫；這 34 題用過多次，是複製不是泛化證據。",
+   "UNRESOLVED": "完成但 p ≥ 0.05（不論方向）。只記方向與大小；不是負結果。停下來回報，不准加 rep、換題、改時限之後再看一次。",
+   "CONTRADICTS": "b > c 且 p < 0.05。不下任何方向的效果結論；停下來回報。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；一對裡任一臂 infra_void，整對不計。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "known_limits": [
+   "P 臂＝發布 wheel（sha256 37005ec2aa91af874f6697d7ea55434ba6889c5e116ad9de05eb06aca7d4ac2c）裝在 ~/dev/ops/release_0.9.2_venv。",
+   "兩臂都讀同一份全域 ~/.config/opencode（權限 edit／bash allow，和 redo1_opencode 相同）；2026-11-21 查證：plugin/ 是空的、opencode.json 沒有 plugin 條目，這台機器沒有裝 Vacant 的 opencode 外掛，所以兩臂都不載入擴充。`vacant do` 重開模式預設不注入掛鉤。",
+   "P 經 vacant 呼叫 `opencode run --format json --dir <副本>`，A 是 `opencode run`（文字輸出）：輸出格式不同，模型看到的提示相同。",
+   "OpenCode 的模型呼叫數 harness 量不到（usage=none）。",
+   "與 redo1_opencode 只並列、不合併。",
+   "P 臂＝發布版 rc5-final：~/dev/ops/release_0.9.2/757ade62f/vacant_network-0.9.2-py3-none-any.whl（sha256 5bbc57afda540466b8dde88dba5f225b00a52185045541b79f8cb54c79888899，rc5-final＝redo/rc5 1d764cc69），裝在 ~/dev/ops/rc5final_venv。跑在 1004（llama.cpp 2.46.0、jobs 1；1004 的 gemma 永遠不思考），不與 1003 的 redo1_opencode 併表。"
+  ]
+ }
+}

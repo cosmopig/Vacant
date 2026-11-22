@@ -23,7 +23,7 @@
   "tool_call_parser": "gemma4",
   "reasoning_parser": "gemma4",
   "chat_template_url": "https://raw.githubusercontent.com/vllm-project/vllm/v0.30.0/examples/tool_chat_template_gemma4.jinja",
-  "limit_mm_per_prompt": "{\"image\": 0, \"audio\": 0}",
+  "limit_mm_per_prompt": "{\"image\": 0, \"audio\": 0, \"video\": 0}",
   "extra_vllm_args": [],
   "ready_timeout_s": 1200
 }

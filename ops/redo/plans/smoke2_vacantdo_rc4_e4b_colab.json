@@ -1,0 +1,120 @@
+{
+ "id": "smoke2_vacantdo_rc4_e4b_colab",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261130,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "P": {
+   "policy": "single",
+   "attempt_timeout_s": 1900,
+   "agent": {
+    "argv": [
+     "/opt/redo/rc_venv/bin/vacant",
+     "do",
+     "pi",
+     "--prompt",
+     "{prompt}",
+     "--timeout",
+     "1800",
+     "--attempt-timeout",
+     "600",
+     "--",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}"
+    ],
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_WORK": "{logs}/vacant-work"
+    },
+    "usage": "none",
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/.pi/agent",
+     "copy": [
+      "models.json"
+     ]
+    }
+   }
+  }
+ },
+ "pair": [
+  "A",
+  "P"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-e4b-it-qat",
+   "jobs": 6,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-e4b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs"
+ },
+ "tasks": [
+  "ex_satellite",
+  "ex_alphametics"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-21，第一通模型呼叫之前 commit。",
+  "role": "冒煙：只驗 gemma-4-E4B 在 vLLM＋pi 下工具呼叫正常（A 的模型呼叫數 > 0、工作區有改動）、P 臂接得起來、沒有 infra_void。通過與否不看、不引用。過了才發 e4b_hardpy26_vacantdo_rc4_colab。",
+  "known_limits": [
+   "E4B 的上下文上限是 131072（模型 config 的 max_position_embeddings），12B 是 262144；vllm_gemma4_e4b.json 照此設定，pi 的 contextWindow 也跟著是 131072。11/22 第一次發射冒煙時誤設 262144，vLLM 起不來、0 次模型呼叫，該次作廢不計。"
+  ]
+ }
+}
