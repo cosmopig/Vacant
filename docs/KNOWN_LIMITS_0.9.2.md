@@ -1,4 +1,4 @@
-# 0.9.2 (rc5): known limits of `vacant do` restart mode
+# 0.9.2 (rc5 / rc6): known limits of `vacant do` restart mode
 
 These are written down rather than fixed, under the convergence rule agreed on 2026-11-21. Only three classes were must-fix:
 - accepted-but-wrong with no warning on a kept-fixed (`traced`) check, **through a file outside the code under test** (a test, config, check script, manifest, runner config, shadowing file or package init);
@@ -42,13 +42,31 @@ The code under test itself is outside that class: see the section "The code unde
 
 ## Not tested live
 
-11. cargo, go, maven/gradle, playwright/cypress/wdio/ava/nyc/nox were not installed on the review machine. Their protection paths are covered by unit tests and stand-in commands only. pytest was tested live by the independent verification, with pytest installed in a project `.venv` (repro `verify_rc5/u_d2`).
+11. maven/gradle, playwright/cypress/wdio/ava/nyc/nox were not installed on the review machine. (cargo and go were tested live on 2026-11-22; see items 15–19.) Their protection paths are covered by unit tests and stand-in commands only. pytest was tested live by the independent verification, with pytest installed in a project `.venv` (repro `verify_rc5/u_d2`).
 12. The non-Linux paths (no subreaper, `detached_processes: null`) were tested only by faking `sys.platform`.
 13. Plan→apply races narrower than a re-check, such as a directory swapped mid-apply, are reasoned about only.
 
 ## Cost
 
 14. npm projects: the agent gets its own copy of `node_modules` (reflink when the filesystem supports it, otherwise a full copy). The message warns when it falls back to a full copy. The copy time is recorded as `copy_s`. On a 36 MB / 3000-file `node_modules`: copy 0.14 s, manifest 0.04 s.
+
+## cargo and go: experimental (tested live 2026-11-22)
+
+Tested with rc5-final, scripted stand-in agents, Rust 1.100 and Go 1.27.4, both auto-detection and `--check`. Report, raw outputs and the scenario runner: `~/dev/ops/cg_test/` (`REPORT.md`, `logs/<scenario>.{log,rc,diff}`, `run_scenario.sh`). Correct on both: fix accepted, wrong fix rejected, baseline, tampering with a test file, tampering with the manifest, and test layout (Rust `tests/` + `#[cfg(test)]`; Go same-package and `_test` package). Exit-code-only acceptance has no N/M, by design. Wrong in these cases (fixes are planned for 0.9.3; see `docs/TODO_0.9.3.md`):
+
+Wrong in normal use:
+15. **Lockfiles are not kept fixed.** `Cargo.lock` and `go.sum` are read by the check but are not in the kept-fixed set: an agent's change is written back, and a broken lockfile makes the check fail even for a correct fix. Repro: `cargo_e`, `go_e`. (npm: `package.json` is kept fixed; `package-lock.json` is not; `node_modules` changes are checked separately.)
+16. **cargo auto-detection keeps only the root `Cargo.toml` fixed.** Nested manifests (workspace members, path dependencies) can be changed, are used by the check and are written back. `--check` keeps them fixed, so the two paths disagree. Repro: `cargo_d2`.
+17. **A new `go.work` added by the agent enters the check copy** and can make `go test ./...` fail even for a correct fix (exit 40); it is also written back, with no specific note. Repro: `go_i2`.
+
+Wrong only under deliberate cheating:
+18. **cargo: a new `build.rs` can rewrite a kept-fixed test file at build time**, after Vacant restored it, so a wrong implementation passes (exit 0). Repro: `cargo_i2`.
+19. **go: a new `*_test.go` with a `TestMain` that exits 0** makes a wrong implementation pass (exit 0). New test files have no original to restore, and `tests_tampered` only lists files that existed at the start. Repro: `go_f2`. Related: new build-affecting files (`build.rs`, `go.work`, build-tag files, new test files) are listed under "changed files" with no specific warning, unlike `.cargo/config.toml`, which is ignored with a note. `#[cfg(test)]` tests live in the same file as the code and cannot be kept fixed separately.
+
+## Interruption (rc6)
+
+20. **Ctrl-C / SIGTERM.** Before write-back starts, the run stops, kills the agent's process group and detached descendants, leaves the project unchanged, writes a signed receipt marked `interrupted` and exits 130. From the start of write-back until `result.json` is written, signals are deferred: a first, second or later SIGINT or SIGTERM waits until the write-back is complete, the run then finishes normally (its usual exit code), and the message says the signal arrived during write-back.
+21. **SIGKILL (or power loss) during write-back cannot be deferred.** The project can be left half-written. The originals of the files already replaced are in the run directory (`$VACANT_WORK/restart-*/bkp-*`), but no `result.json` and no receipt are written, so neither the next run nor `vacant audit` shows that this happened, and nothing points to the backups. `vacant gc` may later remove that run directory. Not fixed in 0.9.2: it would need a write-back journal checked at the next start.
 
 ## Fixed after the first freeze (for the record)
 

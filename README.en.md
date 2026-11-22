@@ -93,6 +93,8 @@ vacant do claude --prompt "Fix the API" --attempt-timeout 600 --timeout 1800 --s
 | `--timeout <sec>` | Total run budget across all attempts (default `1800` s, up to 3 attempts; each attempt stays within the remaining budget) |
 | `--stream` | Stream agent stdout/stderr directly to the terminal while running (off by default) |
 
+> **cargo and go: experimental support.** The basic cases were tested live and work (a correct fix is accepted, a wrong one rejected, the baseline is judged, tampering with a test file or the manifest is caught). It gets these wrong: `Cargo.lock` / `go.sum` are not kept fixed (changes are written back; a broken one makes even a correct fix fail); cargo auto-detection keeps only the root `Cargo.toml` fixed; a `go.work` added by the agent enters the check and can make a correct fix fail; a deliberately added `build.rs` (cargo) or a new test file with a `TestMain` (go) can make a wrong implementation pass. Details and repros: [`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md) items 15–19; fixes are planned for 0.9.3.
+
 ### Exit codes
 
 | Exit code | Meaning |

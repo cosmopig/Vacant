@@ -86,6 +86,8 @@ vacant do claude --prompt "API を修正" --attempt-timeout 600 --timeout 1800 -
 | `--timeout <秒>` | 全体の予算時間（既定 `1800` 秒、最大 3 回試行；各試行は残り時間内に収まる） |
 | `--stream` | 実行中の agent の stdout／stderr を端末へ直接流す（既定はオフ） |
 
+> **cargo と go：実験的サポート。** 基本的なケースは実測で動作確認済み（正しい修正は通過、誤った修正は不通過、ベースライン判定、テストファイルや manifest の改ざんは検出）。次の場合は判定を誤る：`Cargo.lock`／`go.sum` は固定されない（変更は書き戻され、壊れると正しい修正でも不通過になる）；cargo の自動検出はルートの `Cargo.toml` しか固定しない；agent が追加した `go.work` は受入に入り、正しい修正でも不通過になりうる；意図的に追加された `build.rs`（cargo）や `TestMain` を持つ新しいテストファイル（go）で誤った実装が通過しうる。詳細と再現：[`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md) 第 15–19 項；修正は 0.9.3 の予定。
+
 ### 終了コード
 
 | 終了コード | 意味 |

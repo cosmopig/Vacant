@@ -92,6 +92,8 @@ vacant do claude --prompt "修好 API" --attempt-timeout 600 --timeout 1800 --st
 | `--timeout <秒>` | 整輪任務的總時限（預設 `1800` 秒，最多嘗試 3 次；每次單次上限仍受剩餘總時限約束） |
 | `--stream` | 把 agent 的 stdout／stderr 即時串流到終端機（預設關閉，不影響預設輸出） |
 
+> **cargo 與 go：實驗性支援。** 基本情況實測可用（修對放行、改錯不放行、基線判斷、改測試檔或 manifest 作弊會被擋）；下列情況會算錯：`Cargo.lock`／`go.sum` 沒有被固定（被改會寫回，寫壞時連修對也會拒交）；cargo 自動偵測只固定根目錄的 `Cargo.toml`；agent 新增的 `go.work` 會進驗收、可能讓修對也拒交；刻意新增 `build.rs`（cargo）或帶 `TestMain` 的新測試檔（go）可以讓錯的實作通過。細節與重現：[`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md) 第 15–19 條；修正排在 0.9.3。
+
 ### 結束碼
 
 | 結束碼 | 意思 |

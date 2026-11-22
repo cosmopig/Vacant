@@ -298,3 +298,27 @@ def test_sigint_during_write_back_is_deferred_and_project_not_half_written(tmp_p
     assert "project unchanged" not in msg
     assert "SIGINT arrived while Vacant was writing" in msg
     assert res["receipt"].get("recorded") is True
+
+
+def test_second_sigint_and_sigterm_during_write_back_still_wait(tmp_path, monkeypatch):
+    """臨界區裡第二次 SIGINT、再加一次 SIGTERM：仍然等寫回完成，記第一個訊號。"""
+    proj = tmp_path / "proj"
+    _make_project(proj)
+    agent = tmp_path / "agent.py"
+    agent.write_text("import pathlib\npathlib.Path('calc.py').write_text('def add(a, b):\\n    return a + b\\n')\n",
+                     encoding="utf-8")
+    real_write_back = R._write_back
+
+    def _write_back_with_signals(*a, **kw):
+        for sig in (signal.SIGINT, signal.SIGINT, signal.SIGTERM):
+            os.kill(os.getpid(), sig)
+            time.sleep(0.02)
+        return real_write_back(*a, **kw)
+
+    monkeypatch.setattr(R, "_write_back", _write_back_with_signals)
+    res = R.run(proj, lambda p, ws: R.Launch(argv=[sys.executable, str(agent)], env={}), "fix",
+                max_attempts=1, attempt_timeout_s=30, budget_s=60)
+    assert not res.get("interrupted")
+    assert res.get("interrupt_deferred") == "SIGINT"
+    assert res["accepted"] is True
+    assert (proj / "calc.py").read_text() == "def add(a, b):\n    return a + b\n"
