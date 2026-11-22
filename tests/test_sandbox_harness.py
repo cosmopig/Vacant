@@ -103,3 +103,24 @@ def test_missing_and_model_error_semantics(tmp_path):
         'role': 'assistant', 'content': [], 'stopReason': 'error'}}))
     assert run.final_messages(event)[1]
     assert analyze.total([{'model_calls': 'UNKNOWN'}], 'model_calls') == 'UNKNOWN'
+
+
+def test_contamination_flags_stay_in_denominator(tmp_path, fake):
+    out, cells, _ = launch(tmp_path, fake, 'solve', ['A'])
+    result = cells['A']
+    assert result['contamination'] is False
+    work = Path(result['work_dir'])
+    for name, text in [('events.jsonl', str(run.TASKS.resolve()) + '/billing/hidden/test.py'),
+                       ('stderr.txt', 'ops/sandbox/tasks/billing/solution/billing.py'),
+                       ('diff.patch', '+ import _hidden')]:
+        (work / name).write_text(text)
+    evidence = run.contamination_evidence(work)
+    assert len(evidence) == 3
+    assert {m for e in evidence for m in e['markers']} >= {
+        str(run.TASKS.resolve()), 'ops/sandbox/tasks', '/hidden/', '/solution/', '_hidden'}
+    result.update(contamination=True, contamination_evidence=evidence)
+    (out / 'cells/billing-s1-A/result.json').write_text(json.dumps(result))
+    summary = analyze.analyze(out)
+    assert len(summary['contamination']) == 1
+    assert summary['arms']['A']['n'] == summary['arms']['A']['hidden_passed'] == 1
+    assert 'Contamination flags' in (out / 'summary.md').read_text()

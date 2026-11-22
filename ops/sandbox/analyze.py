@@ -78,8 +78,11 @@ def analyze(run_dir):
     matrix = [{k: r.get(k) for k in ('task', 'sample', 'arm', 'hidden_pass', 'visible_pass', 'infra_void')}
               for r in cells]
     infra = [{k: r.get(k) for k in ('task', 'sample', 'arm', 'infra_reason')} for r in cells if r['infra_void']]
+    contaminated = [{k: r.get(k) for k in ('task', 'sample', 'arm', 'contamination_evidence')}
+                    for r in cells if r.get('contamination')]
     summary = dict(evidence=meta.get('evidence'), arms=arms, comparisons=comparisons,
-                   aa_control=floor, missing=missing, per_task=matrix, infra_void=infra)
+                   aa_control=floor, missing=missing, per_task=matrix, infra_void=infra,
+                   contamination=contaminated)
     (root / 'summary.json').write_text(json.dumps(summary, indent=2))
     lines = ['# Sandbox comparison', '', f"Evidence: {meta.get('evidence')}. Completed cells include infra_void in denominators.", '',
              '| Arm | Hidden pass | Visible pass | Infra void | False success heuristic |',
@@ -97,6 +100,8 @@ def analyze(run_dir):
     lines += ['', '## Infra-void table', '', '| Task | Sample | Arm | Reason |', '|---|---:|---|---|']
     for r in infra:
         lines.append(f"| {r['task']} | {r['sample']} | {r['arm']} | {r['infra_reason']} |")
+    lines += ['', '## Contamination flags (retained in denominators)', '']
+    lines += [f'- `{json.dumps(r)}`' for r in contaminated] or ['None detected (heuristic, not proof of isolation).']
     lines += ['', f'Missing scheduled cells: `{json.dumps(missing)}`', '']
     (root / 'summary.md').write_text('\n'.join(lines))
     return summary
