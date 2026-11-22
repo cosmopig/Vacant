@@ -1,0 +1,3225 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_attributes[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[unmasked-timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[masked-timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_make_table[subclass-timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_io_ascii_write",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_quantity_write",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_io_time_write_fits_local[Table]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_io_time_write_fits_local[QTable]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_votable_mixin_write_fail[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_join[unmasked]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_join[masked]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_join[subclass]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_hstack[unmasked]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_hstack[masked]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_hstack[subclass]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_get_items[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_info_preserved_pickle_copy_init[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_add_column[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_vstack",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_insert_row_bad_unit",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_convert_np_array[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_assignment_and_copy",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_conversion_qtable_table",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_setitem_as_column_name",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_quantity_representation",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_representation_representation",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_ndarray_mixin[True]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_possible_string_format_functions",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[arrayswap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[arraywrap]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[cartesianrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[earthlocation]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[latitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[longitude]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[ndarraybig]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[ndarraylil]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[quantity]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[skycoord]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[sphericaldiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[sphericalrep]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[sphericalrepdiff]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[time]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_rename_mixin_columns[timedelta]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_represent_mixins_as_columns_unit_fix",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_primary_data_column_gets_description",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_skycoord_with_velocity",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_ensure_input_info_is_unchanged[Table]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_ensure_input_info_is_unchanged[QTable]",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_mixin.py::test_bad_info_class",
+      "file": "astropy/table/tests/test_mixin.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_existing[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_existing[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_existing[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_fail_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_fail_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_fail_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_fail_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_fail_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_row_fail_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_new_table[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_new_table[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_new_table[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_new_table_quantity[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_new_table_quantity[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_new_table_quantity[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_existing_table[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_existing_table[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_existing_table[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_unmasked_col_existing_table[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_unmasked_col_existing_table[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_unmasked_col_existing_table[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_masked_col_existing_table[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_masked_col_existing_table[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_masked_col_existing_table[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_existing_table_fail[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_existing_table_fail[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetTableColumn::test_set_new_col_existing_table_fail[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_3[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_3[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_3[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_4[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_4[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_4[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_5[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_5[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_5[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_scalar[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_scalar[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_scalar[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_add_via_setitem_and_slice[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_add_via_setitem_and_slice[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestEmptyData::test_add_via_setitem_and_slice[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_simple[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_simple[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_simple[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_from_np_array[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_from_np_array[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_from_np_array[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_size_mismatch[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_size_mismatch[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_size_mismatch[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_name_none[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_name_none[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestNewFromColumns::test_name_none[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse_big[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse_big[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse_big[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse_mixin[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse_mixin[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReverse::test_reverse_mixin[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_int[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_int[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_int[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_dict[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_dict[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_dict[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_invalid[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_invalid[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_invalid[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_kind[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_kind[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRound::test_round_kind[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_itercols[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_itercols[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestColumnAccess::test_itercols[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_right_length[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_right_length[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_right_length[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_too_long[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_too_long[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_too_long[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_too_short[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_too_short[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddLength::test_too_short[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_3[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_3[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_3[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_5[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_5[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_5[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_6[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_6[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_6[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_7[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_7[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_7[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_8[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_8[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_8[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_9[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_9[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_9[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_10[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_10[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddPosition::test_10[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddName::test_override_name[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddName::test_override_name[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddName::test_override_name[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddName::test_default_name[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddName::test_default_name[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddName::test_default_name[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestInitFromTable::test_from_table_cols[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestInitFromTable::test_from_table_cols[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestInitFromTable::test_from_table_cols[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns3[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns3[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns3[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns4[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns4[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns4[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns5[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns5[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns5[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns6[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns6[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns6[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns7[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns7[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_columns7[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_duplicate_column[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_duplicate_column[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_duplicate_column[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_duplicate_columns[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_duplicate_columns[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddColumns::test_add_duplicate_columns[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_none_to_empty_table[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_none_to_empty_table[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_none_to_empty_table[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_stuff_to_empty_table[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_stuff_to_empty_table[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_stuff_to_empty_table[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_table_row[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_table_row[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_table_row[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_table_row_obj[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_table_row_obj[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_table_row_obj[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_qtable_row_multidimensional[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_qtable_row_multidimensional[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_qtable_row_multidimensional[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_tuple[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_tuple[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_tuple[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_list[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_list[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_list[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_dict[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_dict[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_dict[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_none[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_none[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_with_none[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_missing_column[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_missing_column[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_missing_column[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_wrong_size_tuple[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_wrong_size_tuple[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_wrong_size_tuple[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_wrong_vals_type[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_wrong_vals_type[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_wrong_vals_type[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_row_failures[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_row_failures[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_add_row_failures[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_insert_table_row[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_insert_table_row[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestAddRow::test_insert_table_row[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestTableColumn::test_column_view[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestTableColumn::test_column_view[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestTableColumn::test_column_view[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_1d[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_1d[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_1d[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_2d[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_2d[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_2d[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_3d[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_3d[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestArrayColumns::test_3d[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_3[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_3[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_3[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_nonexistent_row[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_nonexistent_row[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_nonexistent_row[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_0[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_0[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_0[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_slice[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_slice[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_slice[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_list[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_list[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_list[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_preserves_meta[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_preserves_meta[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_remove_row_preserves_meta[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_list[unmasked-idx0]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_list[unmasked-idx1]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_list[masked-idx0]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_list[masked-idx1]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_list[subclass-idx0]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_list[subclass-idx1]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_slice[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_slice[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_slice[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_fail[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_fail[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_fail[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_float[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_float[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_row_float[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitems[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitems[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitems[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_fail[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_fail[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRemove::test_delitem_fail[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestKeep::test_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestKeep::test_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestKeep::test_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestKeep::test_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestKeep::test_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestKeep::test_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_1[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_1[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_1[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_2[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_2[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_2[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_rename_by_attr[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_rename_by_attr[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_rename_by_attr[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_rename_columns[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_rename_columns[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestRename::test_rename_columns[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_reverse[unmasked-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_reverse[unmasked-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_reverse[masked-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_reverse[masked-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_reverse[subclass-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_reverse[subclass-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_big[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_big[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_single_big[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_empty_reverse[unmasked-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_empty_reverse[unmasked-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_empty_reverse[masked-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_empty_reverse[masked-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_empty_reverse[subclass-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_empty_reverse[subclass-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_reverse[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_reverse[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_reverse[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_with_bytes[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_with_bytes[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_with_bytes[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_with_unicode[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_with_unicode[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_multiple_with_unicode[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_reverse[unmasked-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_reverse[unmasked-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_reverse[masked-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_reverse[masked-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_reverse[subclass-False]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_reverse[subclass-True]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_bytes[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_bytes[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_bytes[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_unicode[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_unicode[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_argsort_unicode[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_rebuild_column_view_then_rename[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_rebuild_column_view_then_rename[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSort::test_rebuild_column_view_then_rename[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_sort_kind[kwargs0]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_sort_kind[kwargs1]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_sort_kind[kwargs2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestIterator::test_iterator[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestIterator::test_iterator[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestIterator::test_iterator[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetMeta::test_set_meta[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetMeta::test_set_meta[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestSetMeta::test_set_meta[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_convert_numpy_array[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_convert_numpy_array[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_convert_numpy_array[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_as_array_byteswap[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_as_array_byteswap[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_as_array_byteswap[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_byteswap_fits_array[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_byteswap_fits_array[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestConvertNumpyArray::test_byteswap_fits_array[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_copy",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_copy_masked",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_copy_protocol",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_disallow_inequality_comparisons",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_rows_equal",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_equality_masked",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_none",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_mapping_init[meta0]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_mapping_init[meta1]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_mapping_init[meta2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_non_mapping_init[ceci",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_non_mapping_init[1.2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_non_mapping_init[meta2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_mapping_set[meta0]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_mapping_set[meta1]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_mapping_set[meta2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_non_mapping_set[ceci",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_non_mapping_set[1.2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_non_mapping_set[meta2]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestMetaTable::test_meta_fits_header",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_content",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_policy",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_bytestring_conversion[unmasked-\\u043f\\u0438\\u0442\\u043e\\u043d\\u0430]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_bytestring_conversion[unmasked-ascii]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_bytestring_conversion[masked-\\u043f\\u0438\\u0442\\u043e\\u043d\\u0430]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_bytestring_conversion[masked-ascii]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_bytestring_conversion[subclass-\\u043f\\u0438\\u0442\\u043e\\u043d\\u0430]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_unicode_bytestring_conversion[subclass-ascii]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_deletion",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_nested_iteration",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_init_from_degenerate_arrays[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_init_from_degenerate_arrays[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_init_from_degenerate_arrays[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_fail_replace_column[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_fail_replace_column[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_fail_replace_column[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_column[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_column[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_column[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_index_column[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_index_column[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_index_column[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_column_no_copy[unmasked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_column_no_copy[masked]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestReplaceColumn::test_replace_column_no_copy[subclass]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestQTableColumnConversionCornerCases::test_replace_with_masked_col_with_units_in_qtable",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestQTableColumnConversionCornerCases::test_do_not_replace_string_column_with_units_in_qtable",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::Test__Astropy_Table__::test_simple_1",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::Test__Astropy_Table__::test_simple_2",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::Test__Astropy_Table__::test_kwargs_exception",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestUpdate::test_different_lengths",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestUpdate::test_invalid_inputs",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestUpdate::test_metadata_conflict",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestUpdate::test_update",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::TestUpdate::test_update_without_copy",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_meta_copy",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_meta_copy_with_meta_arg",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_column_qtable",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem_warnings_normal",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem_warnings_slice",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem_warnings_attributes",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem_warnings_refcount",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem_warnings_always",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_replace_update_column_via_setitem_replace_inplace",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_primary_key_is_inherited",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_qtable_read_for_ipac_table_with_char_columns",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_create_table_from_final_row",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_key_values_in_as_array",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_tolist",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_attribute",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_attribute_ecsv",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_table_attribute_fail",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_set_units_fail",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_set_units",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_set_descriptions",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_set_units_from_row",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_set_units_descriptions_read",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_broadcasting_8933",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_custom_masked_column_in_nonmasked_table",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_sort_with_mutable_skycoord",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_sort_with_non_mutable",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_init_with_list_of_masked_arrays",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_data_to_col_convert_strategy",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_rows_with_mixins",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_iterrows",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_values_and_types",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_items",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_read_write_not_replaceable",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_keep_columns_with_generator",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_remove_columns_with_generator",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_keep_columns_invalid_names_messages",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_remove_columns_invalid_names_messages",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_read_write_tilde_path[str]",
+      "file": "astropy/table/tests/test_table.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "astropy/table/tests/test_table.py::test_read_write_tilde_path[Path]",
+      "file": "astropy/table/tests/test_table.py"
+    }
+  ]
+}

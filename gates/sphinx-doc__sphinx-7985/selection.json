@@ -1,0 +1,20 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "nodeid",
+      "label": "tests/test_build_linkcheck.py::test_defaults_json",
+      "file": "tests/test_build_linkcheck.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "tests/test_build_linkcheck.py::test_auth",
+      "file": "tests/test_build_linkcheck.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "tests/test_build_linkcheck.py::test_linkcheck_request_headers",
+      "file": "tests/test_build_linkcheck.py"
+    }
+  ]
+}

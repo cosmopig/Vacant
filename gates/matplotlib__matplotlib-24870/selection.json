@@ -1,0 +1,330 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_1d_valid",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_2d_valid",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args0-Length",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args1-Length",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args2-Number",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args3-Number",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args4-Shapes",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args5-Shapes",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args6-Inputs",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args7-Input",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args8-Input",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args9-Input",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_empty_levels",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_Nlevels",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_badlevel_fmt",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_uniform_z",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_manual_labels[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_manual_labels[pdf]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_given_colors_levels_and_extends[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_datetime_axis[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_labels[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_corner_mask[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contourf_decreasing_levels",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contourf_symmetric_locator",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_circular_contour_warning",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[True-123-1234]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[False-123-1234]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[True-123-None]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[False-123-None]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contourf_log_extension[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_addlines[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_uneven[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_linewidth[1.23-None-None-1.23]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_linewidth[1.23-4.24-None-4.24]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_linewidth[1.23-4.24-5.02-5.02]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_label_nonagg",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_closed_line_loop[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_quadcontourset_reuse",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_manual[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_line_start_on_corner_edge[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_find_nearest_contour",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_find_nearest_contour_no_filled",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_autolabel_beyond_powerlimits",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contourf_legend_elements",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_legend_elements",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_name[mpl2005-Mpl2005ContourGenerator]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_name[mpl2014-Mpl2014ContourGenerator]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_name[serial-SerialContourGenerator]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_name[threaded-ThreadedContourGenerator]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_name[invalid-None]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[mpl2005]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[mpl2014]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[serial]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[threaded]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_all_algorithms[png]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_subfigure_clabel",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_linestyles[solid]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_linestyles[dashed]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_linestyles[dashdot]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_linestyles[dotted]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[solid]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[dashed]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[dashdot]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[dotted]",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    },
+    {
+      "kind": "nodeid",
+      "label": "lib/matplotlib/tests/test_contour.py::test_contour_remove",
+      "file": "lib/matplotlib/tests/test_contour.py"
+    }
+  ]
+}

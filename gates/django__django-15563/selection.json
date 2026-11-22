@@ -1,0 +1,204 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "unittest",
+      "label": "test_abstract_base_class_m2m_relation_inheritance (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_abstract_base_class_m2m_relation_inheritance",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_abstract_base_class_m2m_relation_inheritance_manager_reused (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_abstract_base_class_m2m_relation_inheritance_manager_reused",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "verbose_name_plural correctly inherited from ABC if inheritance chain",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "description",
+      "label": "Regression tests for #7588",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "description",
+      "label": "Primary key set correctly with concrete->abstract->concrete inheritance.",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_new_instance_with_pk_equals_none (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_create_new_instance_with_pk_equals_none",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_new_instance_with_pk_equals_none_multi_inheritance (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_create_new_instance_with_pk_equals_none_multi_inheritance",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_filter_with_parent_fk (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_filter_with_parent_fk",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "Regression tests for #8076",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_id_field_update_on_ancestor_change (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_id_field_update_on_ancestor_change",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_inheritance_joins (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_inheritance_joins",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_inheritance_resolve_columns (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_inheritance_resolve_columns",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_inheritance_select_related (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_inheritance_select_related",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "Regression test for #8825 and #9390",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_inherited_nullable_exclude (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_inherited_nullable_exclude",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "A model which has different primary key for the parent model passes",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "description",
+      "label": "Regression test for #11764",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_issue_21554 (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_issue_21554",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "Regression test for #6755",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_issue_7105 (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_issue_7105",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_issue_7276 (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_issue_7276",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "Regression test for #7853",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_model_inheritance (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_model_inheritance",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_ptr_accessor_assigns_state (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_ptr_accessor_assigns_state",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_queries_on_parent_access (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_queries_on_parent_access",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "Regression test for #10362",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_related_filtering_query_efficiency_ticket_15844 (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_related_filtering_query_efficiency_ticket_15844",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    },
+    {
+      "kind": "description",
+      "label": "The connector from child to parent need not be the pk on the child.",
+      "file": "tests/model_inheritance_regress/tests.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_use_explicit_o2o_to_parent_from_abstract_model (model_inheritance_regress.tests.ModelInheritanceTest)",
+      "file": "tests/model_inheritance_regress/tests.py",
+      "method": "test_use_explicit_o2o_to_parent_from_abstract_model",
+      "module": "model_inheritance_regress.tests",
+      "class": "ModelInheritanceTest"
+    }
+  ]
+}

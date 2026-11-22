@@ -1,0 +1,405 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "function",
+      "label": "test_bug1",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Symbol",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_arit0",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_div",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_pow",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_pow2",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_pow3",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_mod_pow",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_pow_E",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_pow_issue_3516",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_pow_im",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_real_mul",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_ncmul",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_ncpow",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_powerbug",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_doesnt_expand_exp",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_Mul_is_integer",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_Mul_is_finite",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_even_odd",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_evenness_in_ternary_integer_product_with_even",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_oddness_in_ternary_integer_product_with_even",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_rational",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_rational",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_even_odd",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_negative_positive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_negative_positive_2",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_nonpositive_nonnegative",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_negative_positive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_nonpositive_nonnegative",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_integer",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_real",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_real_Pow",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_finite",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_even_odd",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_negative_positive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_zero",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_nonpositive_nonnegative",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_imaginary_real",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_hermitian_antihermitian",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_comparable",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_is_comparable",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_is_comparable",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_positive_2",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_is_irrational",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_3531b",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_bug3",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_suppressed_evaluation",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_as_coeff_mul",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_as_coeff_mul_doesnt_expand",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_3514",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_make_args",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_5126",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Rational_as_content_primitive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add_as_content_primitive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_as_content_primitive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow_as_content_primitive",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_5460",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_product_irrational",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_5919",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mod",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mod_is_integer",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mod_is_nonposneg",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_6001",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_polar",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_6040",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_6082",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_6077",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_mul_flatten_oo",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_add_flatten",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_5160_6087_6089_6090",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_float_int",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_6611a",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_denest_add_mul",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_mul_coeff",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_mul_zero_detection",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_with_zero_infinite",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_does_not_cancel_infinities",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Mul_does_not_distribute_infinity",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_8247_8354",
+      "file": "sympy/core/tests/test_arit.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_14392",
+      "file": "sympy/core/tests/test_arit.py"
+    }
+  ]
+}

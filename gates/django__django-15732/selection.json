@@ -1,0 +1,819 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "unittest",
+      "label": "test_reference_field_by_through_fields (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_reference_field_by_through_fields",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_field_by_from_fields (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_field_by_from_fields",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_field_by_name (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_field_by_name",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_field_by_remote_field_model (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_field_by_remote_field_model",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_field_by_through (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_field_by_through",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_field_by_to_fields (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_field_by_to_fields",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_model (migrations.test_operations.FieldOperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_model",
+      "module": "migrations.test_operations",
+      "class": "FieldOperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_references_model_mixin (migrations.test_operations.TestCreateModel)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_references_model_mixin",
+      "module": "migrations.test_operations",
+      "class": "TestCreateModel"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AddField operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "The CreateTable operation ignores swapped models.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the DeleteModel operation ignores swapped models.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Add/RemoveIndex operations ignore swapped models.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AddField operation on TextField/BinaryField.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AddField operation on TextField.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_constraint_combinable (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_constraint_combinable",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_constraint_percent_escaping (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_constraint_percent_escaping",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_covering_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_covering_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_deferred_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_deferred_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AddField operation with a ManyToManyField.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AddField operation's state alteration",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_func_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_func_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_func_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_func_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Test the AddIndex operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_index_state_forwards (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_index_state_forwards",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_or_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_or_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_add_partial_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_add_partial_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterField operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "AlterField operation is a noop when adding only a db_column and the",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_m2m (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_m2m",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "The AlterField operation on primary keys (things like PostgreSQL's",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterField operation on primary keys changes any FKs pointing to it.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "AlterField operation of db_collation on primary keys changes any FKs",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_pk_mti_and_fk_to_base (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_pk_mti_and_fk_to_base",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_pk_mti_fk (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_pk_mti_fk",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_reloads_state_fk_with_to_field_related_name_target_type_change (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_reloads_state_fk_with_to_field_related_name_target_type_change",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "If AlterField doesn't reload state appropriately, the second AlterField",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_reloads_state_on_fk_with_to_field_target_type_change (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_reloads_state_on_fk_with_to_field_target_type_change",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_with_func_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_with_func_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_field_with_func_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_field_with_func_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Test AlterField operation with an index to ensure indexes created via",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Creating and then altering an FK works correctly",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Altering an FK to a non-FK works (#23244)",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterIndexTogether operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_index_together_remove (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_index_together_remove",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_index_together_remove_with_unique_together (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_index_together_remove_with_unique_together",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "The managers on a model are set.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterModelOptions operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "The AlterModelOptions operation removes keys from the dict (#23121)",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterModelTable operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "AlterModelTable should rename auto-generated M2M tables.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterModelTable operation if the table name is set to None.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterModelTable operation if the table name is not changed.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterOrderWithRespectTo operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the AlterUniqueTogether operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_alter_unique_together_remove (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_alter_unique_together_remove",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "A field may be migrated from AutoField to BigAutoField.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Column names that are SQL keywords shouldn't cause problems when used",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Creation of models with a FK to a PK with db_collation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the CreateModel operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the CreateModel operation on a multi-table inheritance setup.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Test the creation of a model with a ManyToMany field and the",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_boolean_expression_in_check_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_boolean_expression_in_check_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_deferred_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_deferred_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_duplicate_base (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_duplicate_base",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_duplicate_field_name (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_duplicate_field_name",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_duplicate_manager_name (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_duplicate_manager_name",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_create_model_with_partial_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_create_model_with_partial_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the CreateModel operation directly followed by an",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "CreateModel ignores proxy models.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "CreateModel ignores unmanaged models.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the DeleteModel operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_delete_mti_model (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_delete_mti_model",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the DeleteModel operation ignores proxy models.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "A model with BigAutoField can be created.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_covering_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_covering_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_deferred_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_deferred_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RemoveField operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_field_m2m (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_field_m2m",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_field_m2m_with_through (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_field_m2m_with_through",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RemoveField operation on a foreign key.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_func_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_func_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_func_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_func_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Test the RemoveIndex operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_index_state_forwards (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_index_state_forwards",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_partial_unique_constraint (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_partial_unique_constraint",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_remove_unique_together_on_pk_field (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_remove_unique_together_on_pk_field",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RenameField operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_field_case (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_field_case",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "If RenameField doesn't reload state appropriately, the AlterField",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_field_with_db_column (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_field_with_db_column",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_index_arguments (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_index_arguments",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_index_state_forwards (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_index_state_forwards",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_index_state_forwards_unnamed_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_index_state_forwards_unnamed_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_index_unknown_unnamed_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_index_unknown_unnamed_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_index_unnamed_index (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_index_unnamed_index",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "RenameModel renames a many-to-many column after a RenameField.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_m2m_target_model (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_m2m_target_model",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_m2m_through_model (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_m2m_through_model",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_missing_field (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_missing_field",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RenameModel operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "RenameModel operations shouldn't trigger the caching of rendered apps",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_model_with_db_table_noop (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_model_with_db_table_noop",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_model_with_m2m (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_model_with_m2m",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RenameModel operation on model with self referential FK.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_model_with_self_referential_m2m (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_model_with_self_referential_m2m",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RenameModel operation on a model which has a superclass that",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_rename_referenced_field_state_forward (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_rename_referenced_field_state_forward",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_repoint_field_m2m (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_repoint_field_m2m",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RunPython operation",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RunPython operation correctly handles the \"atomic\" keyword",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "#24098 - Tests no-op RunPython operations.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "#24282 - Model changes to a FK reverse side update the model",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the RunSQL operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "unittest",
+      "label": "test_run_sql_add_missing_semicolon_on_collect_sql (migrations.test_operations.OperationTests)",
+      "file": "tests/migrations/test_operations.py",
+      "method": "test_run_sql_add_missing_semicolon_on_collect_sql",
+      "module": "migrations.test_operations",
+      "class": "OperationTests"
+    },
+    {
+      "kind": "description",
+      "label": "#24098 - Tests no-op RunSQL operations.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "#23426 - RunSQL should accept parameters.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "#23426 - RunSQL should fail when a list of statements with an incorrect",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "Tests the SeparateDatabaseAndState operation.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "A complex SeparateDatabaseAndState operation: Multiple operations both",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "A field may be migrated from SmallAutoField to AutoField.",
+      "file": "tests/migrations/test_operations.py"
+    },
+    {
+      "kind": "description",
+      "label": "A field may be migrated from SmallAutoField to BigAutoField.",
+      "file": "tests/migrations/test_operations.py"
+    }
+  ]
+}

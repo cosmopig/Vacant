@@ -1,0 +1,495 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "function",
+      "label": "test_printmethod",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Abs",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Add",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Catalan",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_ComplexInfinity",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Derivative",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_dict",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Dict",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Dummy",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_EulerGamma",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Exp",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_factorial",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Function",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Geometry",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_GoldenRatio",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_TribonacciConstant",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_ImaginaryUnit",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Infinity",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Integer",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Integral",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Interval",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_AccumBounds",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Lambda",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Limit",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_list",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Matrix_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_NaN",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_NegativeInfinity",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Order",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Permutation_Cycle",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pi",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Poly",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_PolyRing",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_FracField",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_PolyElement",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_FracElement",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_GaussianInteger",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_GaussianRational",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Pow",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_sqrt",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Rational",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Float",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Relational",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_AppliedBinaryRelation",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_CRootOf",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_RootSum",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_GroebnerBasis",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_set",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_SparseMatrix",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Sum",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Symbol",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_tuple",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Series_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_TransferFunction_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Parallel_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Feedback_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Quaternion_str_printer",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Quantity_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_wild_str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_wild_matchpy",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_zeta",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_3101",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_3103",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_4021",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_sstrrepr",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_infinity",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_full_prec",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_noncommutative",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_empty_printer",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_settings",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_RandomDomain",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_FiniteSet",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_UniversalSet",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_PrettyPoly",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_categories",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Tr",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_6387",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_MatMul_MatAdd",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_MatrixSlice",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_true_false",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Equivalent",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Xor",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Complement",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_SymmetricDifference",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_UnevaluatedExpr",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_MatrixElement_printing",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_MatrixSymbol_printing",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_MatrixExpressions",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Subs_printing",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_15716",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_str_special_matrices",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_14567",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_issue_21119_21460",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Str",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_diffgeom",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_NDimArray",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_Predicate",
+      "file": "sympy/printing/tests/test_str.py"
+    },
+    {
+      "kind": "function",
+      "label": "test_AppliedPredicate",
+      "file": "sympy/printing/tests/test_str.py"
+    }
+  ]
+}
