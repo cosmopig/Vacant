@@ -178,3 +178,37 @@ def test_rc6_5_cache_noise_collapsed_and_markers_explained(tmp_path):
     )
     assert help_cp.returncode == 0
     assert "+ added" in help_cp.stdout and "~ modified" in help_cp.stdout and "- deleted" in help_cp.stdout
+
+
+def test_rc6_6_npm_node_test_human_message_and_pass_fail_only(tmp_path):
+    """rc6(6): `node --test` shows a plain-language note instead of [unsupported-option:node:--test],
+    and npm reports honestly that this check only reports pass/fail (no per-test count)."""
+    import shutil
+    if not shutil.which("npm") or not shutil.which("node"):
+        import pytest
+        pytest.skip("npm/node not installed")
+
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "package.json").write_text(
+        json.dumps({"name": "dur", "version": "1.0.0", "scripts": {"test": "node --test"}}),
+        encoding="utf-8",
+    )
+    (proj / "lib").mkdir()
+    (proj / "lib" / "add.js").write_text("module.exports = (a, b) => a - b;\n", encoding="utf-8")
+    (proj / "test").mkdir()
+    (proj / "test" / "add.test.js").write_text(
+        "const test = require('node:test');\n"
+        "const assert = require('node:assert/strict');\n"
+        "const add = require('../lib/add');\n"
+        "test('adds', () => assert.equal(add(2, 3), 5));\n",
+        encoding="utf-8",
+    )
+    agent_code = "import pathlib\npathlib.Path('lib/add.js').write_text('module.exports = (a, b) => a + b;\\n')\n"
+    cp, rj, _, _ = _run_cli(proj, agent_code, tmp_path)
+    out = cp.stdout
+    assert cp.returncode == 0, out + cp.stderr
+    assert rj["accepted"] is True
+    assert "unsupported-option:node:--test" not in out
+    assert "node --test" in out
+    assert "pass/fail only" in out

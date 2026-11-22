@@ -8521,7 +8521,7 @@ def summary(res: dict) -> str:
         if a.get("run") is not None:
             detail = f"{a['passed']}/{a['run']} tests"
         else:
-            detail = "exit 0"
+            detail = "exit 0; this check reports pass/fail only, no per-test count"
         if baseline is not None and baseline.get("accept") is True:
             n_changed = len(ch["added"]) + len(ch["modified"]) + len(ch["deleted"])
             if n_changed == 0:
@@ -8543,8 +8543,8 @@ def summary(res: dict) -> str:
                     f"— written to your project. {files}.")
         elif acc_kind in _EXIT_CODE_ONLY_KINDS:
             head = (f"[vacant] acceptance did not pass after {n} attempt(s); delivered latest attempt "
-                    f"{res['delivered_attempt']} (status: {a.get('status')}) "
-                    f"— written to your project. {files}.")
+                    f"{res['delivered_attempt']} (status: {a.get('status')}; this check reports pass/fail only, "
+                    f"no per-test count) — written to your project. {files}.")
         else:
             head = (f"[vacant] not all tests pass after {n} attempt(s); delivered attempt "
                     f"{res['delivered_attempt']} (status: {a.get('status')}) "
@@ -8570,8 +8570,19 @@ def summary(res: dict) -> str:
             c = _short_integrity_code(str(r))
             if c not in codes:
                 codes.append(c)
-        if codes:
-            shown_codes = ", ".join(codes[:3]) + (f", +{len(codes) - 3}" if len(codes) > 3 else "")
+        if codes == ["unsupported-option:node:--test"]:
+            head += (
+                f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced "
+                f"(Node's built-in test runner `node --test` discovers test files dynamically, "
+                f"so Vacant cannot trace every file it runs)"
+            )
+        elif codes:
+            human_codes = [
+                "Node's built-in test runner (`node --test`) discovers test files dynamically"
+                if c == "unsupported-option:node:--test" else c
+                for c in codes
+            ]
+            shown_codes = ", ".join(human_codes[:3]) + (f", +{len(human_codes) - 3}" if len(human_codes) > 3 else "")
             head += f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced [{shown_codes}]"
         else:
             head += f"\n  acceptance: {acc_kind}{cmd_part} — inputs not fully traced"
