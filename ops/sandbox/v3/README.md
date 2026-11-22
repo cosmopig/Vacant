@@ -1,7 +1,8 @@
-# V3 feasibility and public-result selection
+# V3 public-result selection and external-session kit
 
-This is a selection procedure, not a kit, agent run, calibration, or gain claim.
-It reads no Vacant/pi/Devin experiment outcomes. `SELECTION.json` is a checkpoint:
+Selection reads no Vacant/pi/Devin experiment outcomes. No agents or calibration
+have been run for v3; gate controls are not agent-performance or gain evidence.
+`SELECTION.json` is a checkpoint:
 only `status: complete` with twelve validated IDs is a finished selection. A
 partial/blocked checkpoint is not a usable task bank.
 
@@ -80,4 +81,46 @@ FAIL_TO_PASS test**, not merely a missing result, parser failure or patch error.
 Full test/build logs and reports live under the external work directory, not the
 repository. Stable input/image/control fingerprints identify reusable harness
 reports; a rerun may read these rather than execute unchanged controls again.
-No source/solution material is exported as an agent workspace in this step.
+The selection procedure itself exports no agent workspace or solution material.
+
+## Preregistration and kit
+
+The dated v3 section in `../PREREG.md` was committed on its own before kit
+creation. It fixes the whole-bank calibration gate, fresh comparison arms,
+official-harness primary outcome and handback-patch rules, P2P intervention,
+event-based contamination exclusions and inclusive sensitivity analysis.
+The v3 handback scorer is not implemented by this kit-building step.
+
+`KIT.json` records the published branch SHAs, upstream base commits/tree IDs,
+file-size checks and leak-check counts. Each `sandbox-v3/<instance_id>` branch
+has one parentless commit whose tree is exactly that upstream base tree. No
+patch, added test, dataset file, custom prompt or other metadata is inserted.
+The small, independently rooted `sandbox-devin-kit-v3` branch contains only
+exact problem statements, gates, README and the two ignore rules; it contains
+no hints, reference fixes, new acceptance tests or repository workspaces.
+
+`kit.py` maps PASS_TO_PASS parser labels to existing base test modules. Module
+scope for labels without a filename comes from the original harness's test
+file paths, intersected with files present in base; no test-patch code is
+exported. Short labels can represent tests in multiple modules or inherited/
+parameterized cases; the runner selects those labels only, never whole files.
+Newly introduced functions are omitted even if labelled PASS_TO_PASS. The
+Sphinx 8548 list has one such omitted function; its four pre-existing labels
+remain. Missing runtime labels fail closed instead of running extra tests.
+
+The kit README defaults to **Python 3.11** (Vacant requires >=3.11), pytest 7
+and setuptools for legacy compatibility. Python 3.12 was not suitable for the
+SymPy 21612 base P2P control. Sessions must install their project's own
+dependencies; only the SymPy 21612 gate has been VM-verified here, with mpmath
+1.3.0 and public Vacant main `c097899e768fe049f0b96f6724b219e8530acc10`.
+Its unchanged base was accepted; changing only the Catalan printer to return
+an incorrect value was refused by `test_Catalan`. No reference overlay was used.
+The other eleven gates still require repository-specific environment preflight.
+
+Leak checks cover introduced FAIL_TO_PASS function names and **all nonblank
+gold-added lines**, including short fixes. Every kit branch has zero matches
+not already present in base. Raw generic-line/name matches are recorded as
+base exceptions, not misreported as a literal zero grep count. Prompt bytes
+preserve the original CRLF, trailing whitespace and ending exactly, despite
+`git diff --check` warnings in the isolated kit checkout. Full control logs
+and private match evidence remain under `/home/ubuntu/sandbox-v3-build/`.
