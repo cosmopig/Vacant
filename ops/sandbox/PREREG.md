@@ -194,7 +194,7 @@ autojunk=False).ratio()` (2 × matching lines / total lines). Report this
 separately from event-based contamination; similarity alone does not establish
 that the session accessed a fix.
 
-### v3 pre-run clarification — 2026-11-23
+### v3 pre-run clarification — 2026-11-22
 
 No v3 session has run. Vacant and its wrapper use kit-root Python >=3.11;
 pytest uses the instance's own Python and dependencies from its official
