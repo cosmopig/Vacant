@@ -12,6 +12,8 @@ quoting, UTF-8 without BOM, LF endings, final newline, two-decimal totals.
 The file must exactly describe the supplied input, not a placeholder or
 hardcoded substitute. build(input_path,output_path) supports other inputs.
 Empty rows produce the header alone. Repeated runs produce identical bytes.
+Internal CR, LF and CRLF in merchant names are quoted and preserved as field
+content; LF record endings do not replace characters inside a name.
 ## §3 Validation and atomic output
 Only USD/EUR currencies, sale/refund kinds, posted/canceled statuses are
 accepted. Errors raise ValueError("invalid currency"), "invalid kind" or

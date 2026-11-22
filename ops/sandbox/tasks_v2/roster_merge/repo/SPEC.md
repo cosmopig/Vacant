@@ -21,3 +21,5 @@ codec.dumps emits exactly email,name,roles,active headers and LF line endings;
 use CSV quoting, pipe-joined roles, lowercase true/false. codec.loads accepts
 that format and legacy email,name headers; absent fields use merge defaults.
 CSV export/import preserves order and identities, including quoted Unicode names.
+Embedded CR, LF and CRLF inside names are quoted and preserved; LF endings refer
+to record separators, not replacements of embedded name characters.

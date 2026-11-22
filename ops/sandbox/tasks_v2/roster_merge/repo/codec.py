@@ -16,18 +16,24 @@ def loads(raw):
     return merge_roster(rows, [])
 
 
-def dumps(rows):
+def _csv_line(fields):
     out = io.StringIO(newline="")
-    writer = csv.writer(out, lineterminator="\n")
-    writer.writerow(["email", "name", "roles", "active"])
-    for row in merge_roster(rows, []):
-        writer.writerow([row["email"], row["name"], "|".join(row["roles"]), str(row["active"]).lower()])
-    return out.getvalue()
+    csv.writer(out, lineterminator="\r\n").writerow(fields)
+    return out.getvalue()[:-2] + "\n"
+
+
+def dumps(rows):
+    header = _csv_line(["email", "name", "roles", "active"])
+    return header + "".join(_csv_line([row["email"], row["name"], "|".join(row["roles"]),
+                                      str(row["active"]).lower()])
+                            for row in merge_roster(rows, []))
 
 
 def load(path):
-    return loads(Path(path).read_text(encoding="utf-8"))
+    with Path(path).open(encoding="utf-8", newline="") as stream:
+        return loads(stream.read())
 
 
 def save(rows, path):
-    Path(path).write_text(dumps(rows), encoding="utf-8")
+    with Path(path).open("w", encoding="utf-8", newline="") as stream:
+        stream.write(dumps(rows))

@@ -1,7 +1,7 @@
 import copy
 import pytest
 from service import merge_roster, role_counts
-from codec import dumps, loads
+from codec import dumps, loads, load, save
 
 def test_roster_unicode_order_roles_and_inactivity():
     # SPEC §1
@@ -36,3 +36,13 @@ def test_roster_exact_validation_errors():
                          ({"email":"a@b","active":1},"invalid active")]:
         with pytest.raises(ValueError, match="^"+message+"$"):
             merge_roster([], [row])
+
+def test_roster_csv_preserves_embedded_carriage_returns(tmp_path):
+    # SPEC §4
+    rows = [{"email":"a@b", "name":"A\rB\r\nC\nD", "roles":[], "active":True}]
+    encoded = dumps(rows)
+    assert loads(encoded) == rows
+    assert encoded.endswith("\n") and not encoded.endswith("\r\n")
+    save(rows, tmp_path/"roster.csv")
+    assert (tmp_path/"roster.csv").read_bytes() == encoded.encode("utf-8")
+    assert load(tmp_path/"roster.csv") == rows

@@ -1,4 +1,6 @@
 import copy
+import csv
+import io
 import json
 from pathlib import Path
 import pytest
@@ -39,3 +41,12 @@ def test_settlement_validation_keeps_existing_output(tmp_path):
         with pytest.raises(ValueError, match="^"+message+"$"):
             build(source, output)
         assert output.read_text() == "keep"
+
+def test_settlement_csv_quotes_embedded_carriage_returns():
+    # SPEC §2
+    name = "a\rb\r\nc\nd"
+    rows = [{"merchant":name, "currency":"USD", "total":"2.00", "count":1}]
+    encoded = render(rows)
+    assert list(csv.reader(io.StringIO(encoded, newline=""))) == [
+        ["merchant", "currency", "total", "count"], [name, "USD", "2.00", "1"]]
+    assert encoded.endswith("\n") and not encoded.endswith("\r\n")

@@ -22,12 +22,16 @@ def summarize(rows):
             for (m,c), (value,count) in sorted(totals.items())]
 
 
-def render(rows):
+def _csv_line(fields):
     out = io.StringIO(newline="")
-    writer = csv.writer(out, lineterminator="\n")
-    writer.writerow(["merchant", "currency", "total", "count"])
-    writer.writerows((r["merchant"], r["currency"], r["total"], r["count"]) for r in rows)
-    return out.getvalue()
+    csv.writer(out, lineterminator="\r\n").writerow(fields)
+    return out.getvalue()[:-2] + "\n"
+
+
+def render(rows):
+    header = _csv_line(["merchant", "currency", "total", "count"])
+    return header + "".join(_csv_line((r["merchant"], r["currency"], r["total"], r["count"]))
+                            for r in rows)
 
 
 def build(input_path="transactions.json", output_path="settlement.csv"):
