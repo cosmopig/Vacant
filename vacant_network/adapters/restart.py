@@ -8522,8 +8522,19 @@ def summary(res: dict) -> str:
             detail = f"{a['passed']}/{a['run']} tests"
         else:
             detail = "exit 0"
-        head = (f"[vacant] acceptance passed on attempt {res['delivered_attempt']} "
-                f"(up to {res.get('max_attempts', n)} allowed; {detail}); delivered that attempt. {files}.")
+        if baseline is not None and baseline.get("accept") is True:
+            n_changed = len(ch["added"]) + len(ch["modified"]) + len(ch["deleted"])
+            if n_changed == 0:
+                head = (f"[vacant] tests were already passing before the agent ran ({detail}); "
+                        f"the agent ran attempt {res['delivered_attempt']} and made no changes "
+                        f"(still passing; {files}).")
+            else:
+                head = (f"[vacant] tests were already passing before the agent ran ({detail}); "
+                        f"the agent ran attempt {res['delivered_attempt']} and changed files "
+                        f"({files}; delivered that attempt, still passing).")
+        else:
+            head = (f"[vacant] acceptance passed on attempt {res['delivered_attempt']} "
+                    f"(up to {res.get('max_attempts', n)} allowed; {detail}); delivered that attempt. {files}.")
     else:
         a = res["attempts"][res["delivered_attempt"] - 1]
         if a.get("run") is not None:

@@ -89,3 +89,46 @@ def test_rc6_3_failure_message_details(tmp_path):
     assert "test_mul" in out
     assert "AssertionError" in out
     assert "exit code 40:" in out
+
+
+def test_rc6_4_baseline_already_passing_no_changes(tmp_path):
+    """rc6(4): When baseline already passes and agent makes no changes, headline states
+    tests were already passing before the agent ran, and that agent made no changes."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def add(a, b): return a + b\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text(
+        "import unittest, calc\nclass T(unittest.TestCase):\n"
+        "    def test_add(self): self.assertEqual(calc.add(2, 3), 5)\n",
+        encoding="utf-8",
+    )
+    cp, rj, _, _ = _run_cli(proj, "pass\n", tmp_path)
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    assert rj["accepted"] is True
+    assert len(rj["attempts"]) == 1
+    headline = next(ln for ln in cp.stdout.splitlines() if ln.startswith("[vacant] "))
+    assert "tests were already passing before the agent ran" in headline
+    assert "made no changes" in headline
+    assert "acceptance passed on attempt" not in headline
+
+
+def test_rc6_4_baseline_already_passing_with_changes(tmp_path):
+    """rc6(4): When baseline already passes and agent modifies a file (still passing),
+    headline leads with baseline already passing, then states what the agent changed."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def add(a, b): return a + b\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text(
+        "import unittest, calc\nclass T(unittest.TestCase):\n"
+        "    def test_add(self): self.assertEqual(calc.add(2, 3), 5)\n",
+        encoding="utf-8",
+    )
+    agent_code = "import pathlib\npathlib.Path('calc.py').write_text('def add(a, b):\\n    return a + b\\n')\n"
+    cp, rj, _, _ = _run_cli(proj, agent_code, tmp_path)
+    assert cp.returncode == 0, cp.stdout + cp.stderr
+    assert rj["accepted"] is True
+    headline = next(ln for ln in cp.stdout.splitlines() if ln.startswith("[vacant] "))
+    assert "tests were already passing before the agent ran" in headline
+    assert "changed files" in headline
+    assert "1 modified" in headline
+    assert "return a + b\n" in (proj / "calc.py").read_text(encoding="utf-8")
