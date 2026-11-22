@@ -99,6 +99,36 @@ def test_external_scorer_explicit_bank(tmp_path, handbacks):
     assert len(analyze.analyze(out)['missing']) == 2
 
 
+@pytest.mark.parametrize('task_id', ['credit_ledger_v2', 'credit-ledger.v2'])
+def test_external_task_ids_from_bank(tmp_path, handbacks, task_id):
+    repo, remote = handbacks
+    env = {**os.environ, 'GIT_AUTHOR_NAME': 'Test', 'GIT_COMMITTER_NAME': 'Test',
+           'GIT_AUTHOR_EMAIL': 'test@example.invalid', 'GIT_COMMITTER_EMAIL': 'test@example.invalid'}
+
+    def git(*args):
+        return subprocess.check_output(['git', '-C', str(repo), *args], env=env,
+                                       stderr=subprocess.PIPE, text=True).strip()
+
+    bank = tmp_path / 'bank'
+    shutil.copytree(score_devin.TASKS / 'billing', bank / task_id)
+    meta = json.loads((bank / task_id / 'task.json').read_text())
+    meta['id'] = task_id
+    (bank / task_id / 'task.json').write_text(json.dumps(meta))
+    shutil.copytree(repo / 'billing', repo / task_id)
+    git('add', task_id)
+    git('commit', '-m', 'new task id')
+    git('push', remote, 'HEAD:refs/heads/sandbox-devin-kit')
+    git('fetch', remote, 'refs/heads/sandbox-devin/billing-plain')
+    sha = git('rev-parse', 'FETCH_HEAD')
+    branch = 'sandbox-devin/' + task_id + '-plain'
+    git('push', remote, sha + ':refs/heads/' + branch)
+    out = tmp_path / 'results'
+    result = score_devin.score_branches(repo, remote, [branch], out, bank=bank)
+    row = json.loads((out / f'cells/{task_id}-s1-A/result.json').read_text())
+    assert result['missing_branches'] == []
+    assert row['task'] == task_id and row['git_sha'] == sha and row['n_failed'] > 0
+
+
 @pytest.mark.parametrize(('error', 'failed', 'infra'), [
     ('tests: timeout', 1, True), ('ValueError: invalid archive', 0, True),
     ('tests: pytest exit 1', 1, False), (None, 0, False),

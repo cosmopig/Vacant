@@ -38,7 +38,7 @@ def score_branches(repo, remote, branches, out, kit_branch='sandbox-devin-kit', 
     tasks = sorted(p.name for p in bank.iterdir() if (p / 'task.json').is_file())
     parsed = []
     for branch in branches:
-        match = re.fullmatch(r'sandbox-devin/([a-z_]+)-(plain2|plain|vacant)', branch)
+        match = re.fullmatch(r'sandbox-devin/(.+)-(plain2|plain|vacant)', branch)
         if not match or match[1] not in tasks:
             raise ValueError('invalid handback branch: ' + branch)
         parsed.append((branch, match[1], match[2]))
