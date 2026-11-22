@@ -167,6 +167,8 @@ def _do_restart(args) -> int:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
         print(RS.summary(res))
+    if res.get("interrupted"):
+        return 130
     _trigger_auto_gc(agent)
     if (res.get("baseline_error") or res.get("agent_error")
             or res.get("node_modules_changed") or res.get("project_not_writable")
@@ -401,6 +403,9 @@ def main(argv: list[str] | None = None) -> int:
     args.extra = extra
     try:
         return int(args.func(args))
+    except KeyboardInterrupt:
+        print("[vacant] interrupted; project unchanged.", file=sys.stderr)
+        return 130
     except C.ContractError as e:
         print("vacant: contract problems:\n" + "\n".join(f"  - {p}" for p in e.problems),
               file=sys.stderr)

@@ -6796,6 +6796,10 @@ def _record_receipt(*, project: pathlib.Path, prompt: str, agent: str | None,
         }
         if res.get("unreadable_paths"):
             payload["unreadable_paths"] = list(res["unreadable_paths"])
+        if res.get("interrupted"):
+            payload["interrupted"] = True
+            if res.get("interrupt_signal"):
+                payload["interrupt_signal"] = res["interrupt_signal"]
         payload, payload_non_utf8 = _sanitize_json_obj(payload)
         any_non_utf8 = bool(
             proj_non_utf8 or wb_non_utf8 or payload_non_utf8
@@ -7308,6 +7312,48 @@ def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None,
     return None
 
 
+class _RestartInterrupted(BaseException):
+    """SIGINT/SIGTERM converted into an exception so restart.run() cleans up processes and writes a receipt."""
+
+    def __init__(self, signum: int) -> None:
+        self.signum = signum
+        try:
+            self.signal_name = signal.Signals(signum).name
+        except ValueError:
+            self.signal_name = f"SIG{signum}"
+        super().__init__(self.signal_name)
+
+
+def _install_restart_signal_handlers() -> dict[int, Any]:
+    old: dict[int, Any] = {}
+
+    def _handle(signum: int, _frame: Any) -> None:
+        raise _RestartInterrupted(signum)
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            old[sig] = signal.signal(sig, _handle)
+        except (ValueError, OSError):
+            pass
+    return old
+
+
+def _ignore_restart_signals() -> None:
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            signal.signal(sig, signal.SIG_IGN)
+        except (ValueError, OSError):
+            pass
+
+
+def _restore_restart_signal_handlers(old: dict[int, Any]) -> None:
+    for sig, h in old.items():
+        try:
+            signal.signal(sig, h)
+        except (ValueError, OSError):
+            pass
+
+
 def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], prompt: str, *,
         max_attempts: int = 3, attempt_timeout_s: float = 600.0, budget_s: float = 1800.0,
         min_attempt_s: float = 60.0, check: str | None = None,
@@ -7327,162 +7373,28 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     spent = 0.0
     t0 = time.monotonic()
 
-    # P5：專案內有不可讀的檔案或目錄（chmod 000／docker 留下的 root 檔）⇒ 複製工作區前先停下、明講並寫收據（exit 43）
-    unreadable_paths = _find_unreadable_paths(project, skip_abs=skip_abs)
-    if unreadable_paths:
-        shown_up = ", ".join(unreadable_paths[:10]) + (
-            f", … (+{len(unreadable_paths) - 10} more)" if len(unreadable_paths) > 10 else ""
-        )
-        say(f"cannot read {len(unreadable_paths)} path(s) in the project (permission denied): "
-            f"{shown_up}; stopping before running the agent")
-        empty_spec = AcceptanceSpec(kind="none", command=None)
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
-        res = {
-            "mode": "restart",
-            "project": str(project),
-            "tests": [],
-            "protected": [],
-            "acceptance": empty_spec.to_dict(),
-            "acceptance_integrity": empty_spec.integrity,
-            "acceptance_integrity_reasons": list(empty_spec.integrity_reasons),
-            "interpreter": empty_spec.interpreter,
-            "baseline": None,
-            "baseline_error": None,
-            "unreadable_paths": list(unreadable_paths),
-            "parent_tests_dir": None,
-            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
-            "appeared_during_run": [],
-            "conflicts": [],
-            "write_back_conflicts": [],
-            "outside_changes": [],
-            "protected_outside_changes": [],
-            "acceptance_dependencies_changed": [],
-            "not_delivered": [],
-            "lstat_listing_s": 0.0,
-            "node_modules_changed": [],
-            "node_modules_manifest_s": 0.0,
-            "copy_s": 0.0,
-            "node_modules_copy_s": 0.0,
-            "node_modules_hash_s": 0.0,
-            "max_attempts": max_attempts,
-            "accepted": None,
-            "delivered_attempt": 0,
-            "attempts": [],
-            "changed": changed,
-            "agent_wall_s": 0.0,
-            "total_wall_s": round(time.monotonic() - t0, 1),
-            "run_dir": str(run_dir),
-        }
-        res, res_non_utf8 = _sanitize_json_obj(res)
-        res["non_utf8_paths"] = res_non_utf8
-        if res_non_utf8:
-            res["path_encoding"] = "utf-8-backslashreplace"
-        res["receipt"] = _record_receipt(
-            project=project,
-            prompt=prompt,
-            agent=agent,
-            launch_meta=launch_meta,
-            spec=empty_spec,
-            protected=set(),
-            attempts=attempts,
-            snaps=snaps,
-            delivered_idx=-1,
-            changed=changed,
-            res=res,
-            run_dir=run_dir,
-        )
-        if not res["receipt"].get("recorded"):
-            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
-        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-        return res
-
-    spec = detect_acceptance(project, check=check, protect=protect)
-    originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
-    orig_modes: dict[str, int] = {}
-    for rel in spec.protected:
-        try:
-            orig_modes[rel] = stat.S_IMODE((project / rel).lstat().st_mode) & 0o777
-        except OSError:
-            pass
-    protected = set(originals)
-    py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
-    has_acceptance = spec.kind != "none" and spec.reason is None
-    if not has_acceptance:
-        max_attempts = 1
-        attempt_timeout_s = budget_s
-    parent_tests_dir = _find_parent_with_tests(project) if spec.kind == "none" else None
-
-    # D1：原專案根目錄不可寫 ⇒ 寫回一定會失敗，跑 agent 前先停下並明講（exit 43）
-    if not os.access(str(project), os.W_OK):
-        say(f"project directory is not writable ({project}); write-back would fail, stopping before running the agent")
-        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
-        res = {
-            "mode": "restart",
-            "project": str(project),
-            "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
-            "protected": sorted(protected),
-            "acceptance": spec.to_dict(),
-            "acceptance_integrity": spec.integrity,
-            "acceptance_integrity_reasons": list(spec.integrity_reasons),
-            "interpreter": spec.interpreter,
-            "baseline": None,
-            "baseline_error": None,
-            "project_not_writable": True,
-            "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
-            "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
-            "appeared_during_run": [],
-            "conflicts": [],
-            "write_back_conflicts": [],
-            "outside_changes": [],
-            "protected_outside_changes": [],
-            "acceptance_dependencies_changed": [],
-            "not_delivered": [],
-            "lstat_listing_s": 0.0,
-            "node_modules_changed": [],
-            "node_modules_manifest_s": 0.0,
-            "copy_s": 0.0,
-            "node_modules_copy_s": 0.0,
-            "node_modules_hash_s": 0.0,
-            "max_attempts": max_attempts,
-            "accepted": None,
-            "delivered_attempt": 0,
-            "attempts": [],
-            "changed": changed,
-            "agent_wall_s": 0.0,
-            "total_wall_s": round(time.monotonic() - t0, 1),
-            "run_dir": str(run_dir),
-        }
-        res, res_non_utf8 = _sanitize_json_obj(res)
-        res["non_utf8_paths"] = res_non_utf8
-        if res_non_utf8:
-            res["path_encoding"] = "utf-8-backslashreplace"
-        res["receipt"] = _record_receipt(
-            project=project,
-            prompt=prompt,
-            agent=agent,
-            launch_meta=launch_meta,
-            spec=spec,
-            protected=protected,
-            attempts=attempts,
-            snaps=snaps,
-            delivered_idx=-1,
-            changed=changed,
-            res=res,
-            run_dir=run_dir,
-        )
-        if not res["receipt"].get("recorded"):
-            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
-        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
-        return res
-
-    # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
-    # R2/R3：在 Linux 上於整個 run() 期間啟用 PR_SET_CHILD_SUBREAPER，使 setsid/env -i 脫離子孫
-    # 全部收歸本行程底下，可列出並 SIGKILL 清理；結束時在 finally 還原。
-    prev_subreaper = _set_child_subreaper(True) if _linux_proc_available() else None
+    old_sig_handlers = _install_restart_signal_handlers()
+    prev_subreaper: int | None = None
     known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
     detached_records: list[dict[str, Any]] | None = [] if _linux_proc_available() else None
     start_snap: _Snapshot | None = None
     start_copy: pathlib.Path | None = None
+    cur_spec: AcceptanceSpec = AcceptanceSpec(kind="none", command=None)
+    cur_protected: set[str] = set()
+    cur_py_tests: list[str] = []
+    cur_originals: dict[str, bytes] = {}
+    cur_parent_tests_dir: pathlib.Path | None = None
+    baseline_rec: dict[str, Any] | None = None
+    cur_attempt_k: int | None = None
+    cur_attempt_ws: pathlib.Path | None = None
+    cur_attempt_t0: float | None = None
+    cur_attempt_limit_s: float | None = None
+    nm_changed: list[str] = []
+    nm_copy_s = 0.0
+    copy_s = 0.0
+    nm_manifest_s = 0.0
+    nm_hash_s = 0.0
+    lstat_listing_s = 0.0
 
     def _reap_phase(phase: str, label: str = "") -> list[dict[str, Any]] | None:
         nonlocal detached_records
@@ -7501,15 +7413,167 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         return found
 
     try:
-        baseline_rec: dict[str, Any] | None = None
+        # P5：專案內有不可讀的檔案或目錄（chmod 000／docker 留下的 root 檔）⇒ 複製工作區前先停下、明講並寫收據（exit 43）
+        unreadable_paths = _find_unreadable_paths(project, skip_abs=skip_abs)
+        if unreadable_paths:
+            shown_up = ", ".join(unreadable_paths[:10]) + (
+                f", … (+{len(unreadable_paths) - 10} more)" if len(unreadable_paths) > 10 else ""
+            )
+            say(f"cannot read {len(unreadable_paths)} path(s) in the project (permission denied): "
+                f"{shown_up}; stopping before running the agent")
+            empty_spec = AcceptanceSpec(kind="none", command=None)
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+            res = {
+                "mode": "restart",
+                "project": str(project),
+                "tests": [],
+                "protected": [],
+                "acceptance": empty_spec.to_dict(),
+                "acceptance_integrity": empty_spec.integrity,
+                "acceptance_integrity_reasons": list(empty_spec.integrity_reasons),
+                "interpreter": empty_spec.interpreter,
+                "baseline": None,
+                "baseline_error": None,
+                "unreadable_paths": list(unreadable_paths),
+                "parent_tests_dir": None,
+                "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+                "appeared_during_run": [],
+                "conflicts": [],
+                "write_back_conflicts": [],
+                "outside_changes": [],
+                "protected_outside_changes": [],
+                "acceptance_dependencies_changed": [],
+                "not_delivered": [],
+                "lstat_listing_s": 0.0,
+                "node_modules_changed": [],
+                "node_modules_manifest_s": 0.0,
+                "copy_s": 0.0,
+                "node_modules_copy_s": 0.0,
+                "node_modules_hash_s": 0.0,
+                "max_attempts": max_attempts,
+                "accepted": None,
+                "delivered_attempt": 0,
+                "attempts": [],
+                "changed": changed,
+                "agent_wall_s": 0.0,
+                "total_wall_s": round(time.monotonic() - t0, 1),
+                "run_dir": str(run_dir),
+            }
+            res, res_non_utf8 = _sanitize_json_obj(res)
+            res["non_utf8_paths"] = res_non_utf8
+            if res_non_utf8:
+                res["path_encoding"] = "utf-8-backslashreplace"
+            res["receipt"] = _record_receipt(
+                project=project,
+                prompt=prompt,
+                agent=agent,
+                launch_meta=launch_meta,
+                spec=empty_spec,
+                protected=set(),
+                attempts=attempts,
+                snaps=snaps,
+                delivered_idx=-1,
+                changed=changed,
+                res=res,
+                run_dir=run_dir,
+            )
+            if not res["receipt"].get("recorded"):
+                res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+            (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+            return res
+
+        spec = detect_acceptance(project, check=check, protect=protect)
+        cur_spec = spec
+        originals = {rel: (project / rel).read_bytes() for rel in spec.protected}
+        cur_originals = originals
+        orig_modes: dict[str, int] = {}
+        for rel in spec.protected:
+            try:
+                orig_modes[rel] = stat.S_IMODE((project / rel).lstat().st_mode) & 0o777
+            except OSError:
+                pass
+        protected = set(originals)
+        cur_protected = protected
+        py_tests = [rel for rel in spec.protected if _is_python_test(rel)]
+        cur_py_tests = py_tests
+        has_acceptance = spec.kind != "none" and spec.reason is None
+        if not has_acceptance:
+            max_attempts = 1
+            attempt_timeout_s = budget_s
+        parent_tests_dir = _find_parent_with_tests(project) if spec.kind == "none" else None
+        cur_parent_tests_dir = parent_tests_dir
+
+        # D1：原專案根目錄不可寫 ⇒ 寫回一定會失敗，跑 agent 前先停下並明講（exit 43）
+        if not os.access(str(project), os.W_OK):
+            say(f"project directory is not writable ({project}); write-back would fail, stopping before running the agent")
+            changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+            res = {
+                "mode": "restart",
+                "project": str(project),
+                "tests": py_tests if spec.kind.startswith("python_") else sorted(originals),
+                "protected": sorted(protected),
+                "acceptance": spec.to_dict(),
+                "acceptance_integrity": spec.integrity,
+                "acceptance_integrity_reasons": list(spec.integrity_reasons),
+                "interpreter": spec.interpreter,
+                "baseline": None,
+                "baseline_error": None,
+                "project_not_writable": True,
+                "parent_tests_dir": str(parent_tests_dir) if parent_tests_dir is not None else None,
+                "detached_processes": None if (not sys.platform.startswith("linux") or not os.path.isdir("/proc")) else [],
+                "appeared_during_run": [],
+                "conflicts": [],
+                "write_back_conflicts": [],
+                "outside_changes": [],
+                "protected_outside_changes": [],
+                "acceptance_dependencies_changed": [],
+                "not_delivered": [],
+                "lstat_listing_s": 0.0,
+                "node_modules_changed": [],
+                "node_modules_manifest_s": 0.0,
+                "copy_s": 0.0,
+                "node_modules_copy_s": 0.0,
+                "node_modules_hash_s": 0.0,
+                "max_attempts": max_attempts,
+                "accepted": None,
+                "delivered_attempt": 0,
+                "attempts": [],
+                "changed": changed,
+                "agent_wall_s": 0.0,
+                "total_wall_s": round(time.monotonic() - t0, 1),
+                "run_dir": str(run_dir),
+            }
+            res, res_non_utf8 = _sanitize_json_obj(res)
+            res["non_utf8_paths"] = res_non_utf8
+            if res_non_utf8:
+                res["path_encoding"] = "utf-8-backslashreplace"
+            res["receipt"] = _record_receipt(
+                project=project,
+                prompt=prompt,
+                agent=agent,
+                launch_meta=launch_meta,
+                spec=spec,
+                protected=protected,
+                attempts=attempts,
+                snaps=snaps,
+                delivered_idx=-1,
+                changed=changed,
+                res=res,
+                run_dir=run_dir,
+            )
+            if not res["receipt"].get("recorded"):
+                res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+            (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+            return res
+
+        # 基線驗收：在第一次跑 agent 之前先對未動過的專案副本跑一次，確認驗收在此環境能執行
+        # R2/R3：在 Linux 上於整個 run() 期間啟用 PR_SET_CHILD_SUBREAPER，使 setsid/env -i 脫離子孫
+        # 全部收歸本行程底下，可列出並 SIGKILL 清理；結束時在 finally 還原。
+        prev_subreaper = _set_child_subreaper(True) if _linux_proc_available() else None
+        known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
         nm_root = _nm_root(project)
         nm_start: dict[str, tuple] | None = None
         nm_sha_start: dict[str, str | None] | None = None
-        nm_changed: list[str] = []
-        nm_copy_s = 0.0
-        copy_s = 0.0
-        nm_manifest_s = 0.0
-        nm_hash_s = 0.0
         nm_reflink_fallback = False
         nm_reflink_warned = False
         baseline_error: str | None = None
@@ -7656,6 +7720,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             launch_meta.append((list(launch.argv), dict(launch.env)))
             attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
             attempt_limit_s = min(attempt_timeout_s, remaining)
+            cur_attempt_k = k
+            cur_attempt_ws = ws
+            cur_attempt_t0 = time.monotonic()
+            cur_attempt_limit_s = attempt_limit_s
             say(f"attempt {k} of {max_attempts} (up to {attempt_limit_s:.0f}s)")
             # 不再對原專案 node_modules 做 chmod（agent 拿到的是自己的副本，原專案完整性由清單比對保障）。
             try:
@@ -7997,6 +8065,94 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
         (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
         return res
+    except (_RestartInterrupted, KeyboardInterrupt) as exc:
+        # rc6(1): Ctrl-C / SIGTERM — ignore further signals during cleanup, kill detached descendants,
+        # never modify the project, record a signed receipt marked interrupted, and return cleanly (exit 130).
+        _ignore_restart_signals()
+        sig_name = exc.signal_name if isinstance(exc, _RestartInterrupted) else "SIGINT"
+        int_detached = _reap_phase("interrupted")
+        if cur_attempt_k is not None and len(attempts) < cur_attempt_k:
+            wall_k = round(time.monotonic() - cur_attempt_t0, 1) if cur_attempt_t0 is not None else 0.0
+            spent += wall_k
+            attempts.append({
+                "attempt": cur_attempt_k,
+                "accept": None,
+                "passed": None,
+                "run": None,
+                "status": "interrupted",
+                "acceptance_kind": cur_spec.kind,
+                "tests_tampered": [],
+                "config_ignored": [],
+                "first_problem": f"interrupted ({sig_name})",
+                "rc": None,
+                "timed_out": False,
+                "time_limit_s": round(cur_attempt_limit_s, 1) if cur_attempt_limit_s is not None else None,
+                "wall_s": wall_k,
+                "spawn_error": None,
+                "workspace": str(cur_attempt_ws) if cur_attempt_ws is not None else None,
+                "detached_processes": int_detached,
+            })
+            snaps.append(None)
+        changed = {"added": [], "modified": [], "deleted": [], "skipped": [], "conflict": []}
+        res = {
+            "mode": "restart",
+            "project": str(project),
+            "interrupted": True,
+            "interrupt_signal": sig_name,
+            "tests": cur_py_tests if cur_spec.kind.startswith("python_") else sorted(cur_originals),
+            "protected": sorted(cur_protected),
+            "acceptance": cur_spec.to_dict(),
+            "acceptance_integrity": cur_spec.integrity,
+            "acceptance_integrity_reasons": list(cur_spec.integrity_reasons),
+            "interpreter": cur_spec.interpreter,
+            "baseline": baseline_rec,
+            "baseline_error": None,
+            "parent_tests_dir": str(cur_parent_tests_dir) if cur_parent_tests_dir is not None else None,
+            "node_modules_changed": nm_changed[:200],
+            "node_modules_manifest_s": round(nm_manifest_s, 3),
+            "copy_s": round(copy_s, 3),
+            "node_modules_copy_s": round(nm_copy_s, 3),
+            "node_modules_hash_s": round(nm_hash_s, 3),
+            "appeared_during_run": [],
+            "conflicts": [],
+            "write_back_conflicts": [],
+            "outside_changes": [],
+            "protected_outside_changes": [],
+            "lstat_listing_s": round(lstat_listing_s, 3),
+            "detached_processes": detached_records,
+            "acceptance_dependencies_changed": [],
+            "not_delivered": [],
+            "max_attempts": max_attempts,
+            "accepted": None,
+            "delivered_attempt": 0,
+            "attempts": attempts,
+            "changed": changed,
+            "agent_wall_s": round(spent, 1),
+            "total_wall_s": round(time.monotonic() - t0, 1),
+            "run_dir": str(run_dir),
+        }
+        res, res_non_utf8 = _sanitize_json_obj(res)
+        res["non_utf8_paths"] = res_non_utf8
+        if res_non_utf8:
+            res["path_encoding"] = "utf-8-backslashreplace"
+        res["receipt"] = _record_receipt(
+            project=project,
+            prompt=prompt,
+            agent=agent,
+            launch_meta=launch_meta,
+            spec=cur_spec,
+            protected=cur_protected,
+            attempts=attempts,
+            snaps=snaps,
+            delivered_idx=-1,
+            changed=changed,
+            res=res,
+            run_dir=run_dir,
+        )
+        if not res["receipt"].get("recorded"):
+            res["receipt_error"] = res["receipt"].get("error") or "unknown receipt error"
+        (run_dir / "result.json").write_text(json.dumps(res, ensure_ascii=False, indent=2), encoding="utf-8")
+        return res
     finally:
         if start_snap is not None:
             _rmtree_force(start_snap.root)
@@ -8004,6 +8160,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             _rmtree_force(start_copy)
         if prev_subreaper is not None:
             _set_child_subreaper(bool(prev_subreaper))
+        _restore_restart_signal_handlers(old_sig_handlers)
 
 
 def _time_limit_notice(res: dict) -> str:
@@ -8169,6 +8326,24 @@ def summary(res: dict) -> str:
     protected = list(res.get("protected") if "protected" in res else (res.get("tests") or []))
     baseline = res.get("baseline") if isinstance(res.get("baseline"), dict) else None
     baseline_err = res.get("baseline_error")
+
+    if res.get("interrupted"):
+        sig_txt = f" ({res['interrupt_signal']})" if res.get("interrupt_signal") else ""
+        out = (
+            f"[vacant] interrupted{sig_txt}; project unchanged. "
+            f"This run's working directory is at {res.get('run_dir')} (safe to delete)."
+        )
+        rcpt_err = res.get("receipt_error")
+        if not rcpt_err:
+            rcpt_obj = res.get("receipt")
+            if isinstance(rcpt_obj, dict) and rcpt_obj.get("recorded") is False:
+                rcpt_err = rcpt_obj.get("error") or "unknown error"
+        if rcpt_err:
+            out = (
+                f"WARNING: the signed receipt for this run could NOT be written ({rcpt_err}); "
+                f"this run has no verifiable record\n{out}"
+            )
+        return out
 
     if res.get("project_not_writable"):
         head = (

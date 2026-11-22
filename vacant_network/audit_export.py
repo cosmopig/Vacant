@@ -56,6 +56,7 @@ RESULTS = (
     "escalated",
     "void",
     "unchecked",
+    "interrupted",
     "open",
     "withdrawn",
     "release_unconfirmed",
@@ -71,6 +72,7 @@ _RESULT_PASSED: dict[str, bool | None] = {
     "escalated": None,
     "void": None,
     "unchecked": None,
+    "interrupted": None,
     "open": None,
     "withdrawn": None,
     "release_unconfirmed": None,
@@ -2161,6 +2163,8 @@ def _build_restart_record_from_receipt(
     if "accepted" not in payload:
         result = "unknown"
         gaps.append(_gap("missing_fields", "warning", "restart_receipt missing 'accepted' field"))
+    elif payload.get("interrupted") is True:
+        result = "interrupted"
     else:
         acc_val = payload.get("accepted")
         if acc_val is True:
@@ -2190,6 +2194,8 @@ def _build_restart_record_from_receipt(
             delivered_entry = attempts_list[-1]
 
     raw_status = _as_str((delivered_entry or {}).get("status"))
+    if result == "interrupted" and raw_status is None:
+        raw_status = "interrupted"
     checks_passed = _as_int((delivered_entry or {}).get("passed"))
     checks_total = _as_int((delivered_entry or {}).get("run"))
 
@@ -2340,6 +2346,10 @@ def _build_restart_record_from_receipt(
     if eff_wbc_n > 0:
         details["write_back_conflicts"] = wb_conflicts
         details["write_back_conflicts_count"] = eff_wbc_n
+    if payload.get("interrupted") is True:
+        details["interrupted"] = True
+        if _as_str(payload.get("interrupt_signal")):
+            details["interrupt_signal"] = _as_str(payload.get("interrupt_signal"))
 
     return _base_record(
         record_id=record_id,
@@ -2524,6 +2534,8 @@ def _build_restart_record_from_result_json(
     if "accepted" not in loaded:
         result = "unknown"
         gaps.append(_gap("missing_fields", "warning", "restart result.json missing 'accepted' field"))
+    elif loaded.get("interrupted") is True:
+        result = "interrupted"
     else:
         acc_val = loaded.get("accepted")
         if acc_val is True:
@@ -2553,6 +2565,8 @@ def _build_restart_record_from_result_json(
             delivered_entry = attempts_list[-1]
 
     raw_status = _as_str((delivered_entry or {}).get("status"))
+    if result == "interrupted" and raw_status is None:
+        raw_status = "interrupted"
     checks_passed = _as_int((delivered_entry or {}).get("passed"))
     checks_total = _as_int((delivered_entry or {}).get("run"))
 
@@ -2652,6 +2666,10 @@ def _build_restart_record_from_result_json(
     if wb_conflicts:
         details["write_back_conflicts"] = wb_conflicts
         details["write_back_conflicts_count"] = len(wb_conflicts)
+    if loaded.get("interrupted") is True:
+        details["interrupted"] = True
+        if _as_str(loaded.get("interrupt_signal")):
+            details["interrupt_signal"] = _as_str(loaded.get("interrupt_signal"))
 
     return _base_record(
         record_id=f"restart:{run_dir.name}",
