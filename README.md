@@ -8,8 +8,13 @@ root, not the entire kit. Use the visible gate only for the manual-gate arm.
 
 ## Gate environment (run at kit root)
 
+Requires Python 3.11 or newer. The default below is Python 3.12; set `PYTHON`
+to the full path of a suitable interpreter if it is not on PATH. Do not use a
+system Python older than 3.11.
+
 ```bash
-python3 -m venv .venv
+PYTHON="${PYTHON:-python3.12}"
+"$PYTHON" -m venv .venv
 . .venv/bin/activate
 python -m pip install git+https://github.com/cosmopig/Vacant pytest
 ```
