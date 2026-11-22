@@ -167,7 +167,8 @@ def cell(args, task_id, sample, arm):
     tag = f'{args.out.name}-{task_id}-s{sample}-{arm}-{time.time_ns()}'
     tag = hashlib.sha256(tag.encode()).hexdigest()[:24]
     result = dict(task=task_id, sample=sample, arm=arm, run_tag=tag,
-                  infra_void=False, infra_reason=None, work_dir=str(work))
+                  infra_void=False, infra_reason=None, work_dir=str(work),
+                  git_sha=args.runtime_git_sha)
     start = time.monotonic()
     env = {'HOME': str(home), 'VACANT_HOME': str(vh), 'PATH': str(Path(sys.executable).parent) + os.pathsep + os.environ['PATH'],
            'PYTHONPATH': str(REPO), 'PYTHONNOUSERSITE': '1', 'LANG': 'C.UTF-8',
@@ -267,6 +268,20 @@ def version(command):
         return UNKNOWN
 
 
+def runtime_identity(args):
+    import vacant_network
+    model_digest = UNKNOWN
+    if not args.agent_cmd:
+        try:
+            with urllib.request.urlopen('http://127.0.0.1:11434/api/tags', timeout=5) as response:
+                model_digest = next((m['digest'] for m in json.load(response)['models'] if m['name'] == args.model), UNKNOWN)
+        except (OSError, ValueError):
+            pass
+    return dict(pi=version(['pi', '--version']), ollama=version(['ollama', '--version']),
+                model_digest=model_digest, vacant=vacant_network.__version__,
+                git_sha=version(['git', '-C', str(REPO), 'rev-parse', 'HEAD']))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--arms', nargs='+', choices=['A', 'A2', 'C', 'G'], default=['A', 'A2', 'C', 'G'])
@@ -291,21 +306,17 @@ def main(argv=None):
     args.out.mkdir(parents=True, exist_ok=True)
     config = {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()}
     meta_path = args.out / 'meta.json'
+    identity = runtime_identity(args)
+    args.runtime_git_sha = identity['git_sha']
     if meta_path.exists():
-        if json.loads(meta_path.read_text())['config'] != config:
+        previous = json.loads(meta_path.read_text())
+        if previous['config'] != config:
             parser.error('resume configuration differs')
+        changed = [key for key, value in identity.items() if previous.get(key) != value]
+        if changed:
+            parser.error('resume runtime differs: ' + ', '.join(changed) + '; use a fresh --out directory')
     else:
-        import vacant_network
-        model_digest = UNKNOWN
-        if not args.agent_cmd:
-            try:
-                with urllib.request.urlopen('http://127.0.0.1:11434/api/tags', timeout=5) as response:
-                    model_digest = next((m['digest'] for m in json.load(response)['models'] if m['name'] == args.model), UNKNOWN)
-            except (OSError, ValueError):
-                pass
-        meta_path.write_text(json.dumps(dict(config=config, task_ids=task_ids, pi=version(['pi', '--version']),
-            ollama=version(['ollama', '--version']), python=sys.version, model_digest=model_digest,
-            vacant=vacant_network.__version__, git_sha=version(['git', '-C', str(REPO), 'rev-parse', 'HEAD']),
+        meta_path.write_text(json.dumps(dict(config=config, task_ids=task_ids, python=sys.version, **identity,
             evidence='L-fake' if args.agent_cmd else 'real-agent'), indent=2))
     rng = random.Random(args.seed)
     for task_id in task_ids:

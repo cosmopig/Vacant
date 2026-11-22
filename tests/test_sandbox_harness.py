@@ -52,6 +52,7 @@ def test_gate_feedback_positive_control(tmp_path, fake):
 def test_aa_negative_and_resume(tmp_path, fake):
     out, cells, cmd = launch(tmp_path, fake, 'solve', ['A', 'A2'])
     assert all(r['hidden_pass'] for r in cells.values())
+    assert all(r['git_sha'] == 'offline-test' for r in cells.values())
     before = (out / 'progress.jsonl').read_bytes()
     assert run.main(cmd) == 0
     assert (out / 'progress.jsonl').read_bytes() == before
@@ -124,3 +125,16 @@ def test_contamination_flags_stay_in_denominator(tmp_path, fake):
     assert len(summary['contamination']) == 1
     assert summary['arms']['A']['n'] == summary['arms']['A']['hidden_passed'] == 1
     assert 'Contamination flags' in (out / 'summary.md').read_text()
+
+
+def test_resume_refuses_runtime_drift(tmp_path, fake, monkeypatch, capsys):
+    out, _, cmd = launch(tmp_path, fake, 'solve', ['A'])
+    identity = run.runtime_identity(type('Args', (), {'agent_cmd': True})())
+    before = (out / 'progress.jsonl').read_bytes()
+    for key in ('model_digest', 'pi', 'ollama', 'vacant', 'git_sha'):
+        monkeypatch.setattr(run, 'runtime_identity', lambda args, k=key: {**identity, k: 'changed'})
+        with pytest.raises(SystemExit) as exc:
+            run.main(cmd)
+        assert exc.value.code == 2
+        assert 'resume runtime differs: ' + key in capsys.readouterr().err
+        assert (out / 'progress.jsonl').read_bytes() == before
