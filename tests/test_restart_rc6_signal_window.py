@@ -69,11 +69,17 @@ def test_signals_after_run_returned_do_not_hide_summary(tmp_path, monkeypatch, c
     assert (proj / "calc.py").read_text() == FIXED
 
 
+def _vacant_cmd() -> list[str]:
+    """預設跑原始碼；設 VACANT_TEST_BIN＝wheel 裝好的 `vacant` 時改跑那個（第二次查證：用製品驗）。"""
+    b = os.environ.get("VACANT_TEST_BIN")
+    return [b] if b else [sys.executable, "-m", "vacant_network.cli"]
+
+
 def _run_with_burst(tmp: pathlib.Path, delay_s: float) -> tuple[int, str, str, str]:
     proj = _project(tmp)
     agent = _agent(tmp)
     env = {**os.environ, "PYTHONPATH": str(REPO), "VACANT_HOME": str(tmp / "vh"), "VACANT_WORK": str(tmp / "vw")}
-    proc = subprocess.Popen([sys.executable, "-m", "vacant_network.cli", "do", "--cmd", f"{sys.executable} {agent}",
+    proc = subprocess.Popen([*_vacant_cmd(), "do", "--cmd", f"{sys.executable} {agent}",
                              "--prompt", "fix"], cwd=proj, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                             text=True)
     time.sleep(delay_s)
@@ -95,7 +101,7 @@ def test_sigint_bursts_at_many_offsets_never_misreport(tmp_path):
     proj = _project(base)
     agent = _agent(base)
     env = {**os.environ, "PYTHONPATH": str(REPO), "VACANT_HOME": str(base / "vh"), "VACANT_WORK": str(base / "vw")}
-    subprocess.run([sys.executable, "-m", "vacant_network.cli", "do", "--cmd", f"{sys.executable} {agent}",
+    subprocess.run([*_vacant_cmd(), "do", "--cmd", f"{sys.executable} {agent}",
                     "--prompt", "fix"], cwd=proj, env=env, capture_output=True, timeout=60)
     total = time.monotonic() - t0
     outcomes = {"interrupted_clean": 0, "delivered": 0}
