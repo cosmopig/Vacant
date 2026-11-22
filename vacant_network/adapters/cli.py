@@ -331,7 +331,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="vacant")
     sp = ap.add_subparsers(dest="cmd", required=True)
     p = sp.add_parser("do", help="run an agent headless in an isolated workspace, then submit "
-                                 "its work to the intake")
+                                 "its work to the intake",
+                      epilog="Summary markers: + added, ~ modified, - deleted; N/M = passed/total tests; "
+                             "exit codes: 0 accepted/unchecked, 40 acceptance failed, 43 void/conflict, 130 interrupted.")
     p.add_argument("agent", nargs="?", default="",
                    help=f"one of {', '.join(A.AGENTS)}, or `auto` (pick by this task family's "
                         f"record; explores until each has enough runs)")

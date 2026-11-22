@@ -132,3 +132,49 @@ def test_rc6_4_baseline_already_passing_with_changes(tmp_path):
     assert "changed files" in headline
     assert "1 modified" in headline
     assert "return a + b\n" in (proj / "calc.py").read_text(encoding="utf-8")
+
+
+def test_rc6_5_cache_noise_collapsed_and_markers_explained(tmp_path):
+    """rc6(5): __pycache__ / .pytest_cache files in not_delivered are collapsed into a single count,
+    non-cache skipped files stay listed, and +/~/- markers are explained inline and in --help."""
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def add(a, b): return a - b\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text(
+        "import unittest, calc\nclass T(unittest.TestCase):\n"
+        "    def test_add(self): self.assertEqual(calc.add(2, 3), 5)\n",
+        encoding="utf-8",
+    )
+    agent_code = textwrap.dedent("""\
+        import pathlib
+        pathlib.Path("calc.py").write_text("def add(a, b): return a + b\\n")
+        for rel in [
+            "__pycache__/calc.cpython-312.pyc",
+            "__pycache__/test_calc.cpython-312.pyc",
+            ".pytest_cache/CACHEDIR.TAG",
+            ".pytest_cache/v/cache/nodeids",
+        ]:
+            p = pathlib.Path(rel)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("x\\n")
+    """)
+    cp, rj, _, _ = _run_cli(proj, agent_code, tmp_path)
+    out = cp.stdout
+    assert cp.returncode == 0, out + cp.stderr
+    # result.json keeps full list
+    assert len(rj["not_delivered"]) == 4
+    # summary collapses cache files and does NOT list individual .pyc / CACHEDIR.TAG paths
+    assert "not delivered: 4 cache files (__pycache__/.pytest_cache)" in out
+    assert "calc.cpython-312.pyc" not in out
+    assert "CACHEDIR.TAG" not in out
+    # + / ~ / - legend explained inline
+    assert "changed files (+ added, ~ modified, - deleted): ~calc.py" in out
+
+    # Also verify --help explains + / ~ / -
+    help_cp = subprocess.run(
+        [sys.executable, "-m", "vacant_network.cli", "do", "--help"],
+        env={**os.environ, "PYTHONPATH": str(REPO_ROOT)},
+        capture_output=True, text=True, timeout=30,
+    )
+    assert help_cp.returncode == 0
+    assert "+ added" in help_cp.stdout and "~ modified" in help_cp.stdout and "- deleted" in help_cp.stdout

@@ -8612,7 +8612,7 @@ def summary(res: dict) -> str:
         shown_dc = ", ".join(deliv_changed[:10]) + (
             f" (+{len(deliv_changed) - 10} more)" if len(deliv_changed) > 10 else ""
         )
-        head += f"\n  changed files: {shown_dc}"
+        head += f"\n  changed files (+ added, ~ modified, - deleted): {shown_dc}"
     if ch.get("skipped"):
         head += (f"\n  not written back ({len(ch['skipped'])}): unsafe path (symlink, conflict, or unreadable) "
                  f"({', '.join(ch['skipped'][:5])}{' …' if len(ch['skipped']) > 5 else ''}); see the attempt workspace.")
@@ -8665,14 +8665,31 @@ def summary(res: dict) -> str:
                      f"({shown_v}) — executes code at Python startup!")
     not_deliv = list(res.get("not_delivered") or ())
     if not_deliv:
+        _cache_skip_names = frozenset({"__pycache__", ".pytest_cache"})
+
+        def _is_cache_nd(item: Any) -> bool:
+            p_raw = str(item.get("path") or "") if isinstance(item, dict) else str(item)
+            return any(part in _cache_skip_names for part in pathlib.PurePosixPath(p_raw).parts)
+
         def _fmt_nd(item: Any) -> str:
             if isinstance(item, dict):
                 return f"{item.get('path')} ({item.get('reason')})"
             return str(item)
-        shown_nd = ", ".join(_fmt_nd(x) for x in not_deliv[:10]) + (
-            f" … (+{len(not_deliv) - 10} more)" if len(not_deliv) > 10 else ""
-        )
-        head += f"\n  not delivered ({len(not_deliv)}): {shown_nd}"
+
+        cache_nd = [x for x in not_deliv if _is_cache_nd(x)]
+        other_nd = [x for x in not_deliv if not _is_cache_nd(x)]
+        cache_word = "cache file" if len(cache_nd) == 1 else "cache files"
+        if other_nd:
+            shown_nd = ", ".join(_fmt_nd(x) for x in other_nd[:10]) + (
+                f" … (+{len(other_nd) - 10} more)" if len(other_nd) > 10 else ""
+            )
+            extra_cache = (
+                f"; plus {len(cache_nd)} {cache_word} not delivered (__pycache__/.pytest_cache)"
+                if cache_nd else ""
+            )
+            head += f"\n  not delivered ({len(other_nd)}): {shown_nd}{extra_cache}"
+        else:
+            head += f"\n  not delivered: {len(cache_nd)} {cache_word} (__pycache__/.pytest_cache)"
     cfg_new = sorted({t for a in res["attempts"] for t in (a.get("config_ignored") or [])})
     if cfg_new:
         cfg_reasons: dict[str, str] = {}
