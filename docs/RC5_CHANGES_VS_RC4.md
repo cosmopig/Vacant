@@ -142,7 +142,7 @@ Also changed when the freeze was reopened:
 ### 第二次查證後的修正（2026-11-22）
 
 - **製品分支**：rc6 的 wheel 一律從 `release/0.9.2-prep` build（成員數與 rc5-final 相同、不含 `vacant_network/reqloop/*`、METADATA 是發布分支的 README）；`redo/rc6` 是開發分支。
-- **訊號空窗（P2）**：`vacant do` 在呼叫 `run()` 之前就換上「只記下」的 SIGINT／SIGTERM 處理器，`run()` 結束時還原成它，所以寫回臨界區、summary 印出、結束碼決定之間沒有空窗；當成指令執行時一路保持到行程結束（最後改成 SIG_IGN，直譯器收尾時不會再把結束碼變 -2）。`run()` 之後才收到的訊號，在摘要下補一行「arrived after the run had finished; nothing was interrupted」。
+- **訊號空窗（P2）**：`vacant do` 在呼叫 `run()` 之前就換上「只記下」的 SIGINT／SIGTERM 處理器，`run()` 結束時還原成它，所以寫回臨界區、summary 印出、結束碼決定之間沒有空窗；當成指令執行時一路保持到行程結束（最後改成 SIG_IGN，直譯器收尾時不會再把結束碼變 -2）。`run()` 回傳之後收到的訊號只記下、不改結束碼也不改摘要；只有在摘要印出之前收到時，摘要下會多一行「arrived after the result was written; nothing was interrupted」，摘要印完之後（包括行程結束前）收到的就安靜地忽略。`run()` 開始前、處理器還沒裝上時收到的訊號，`run()` 一開始就當成中斷處理（130、專案不動、有 interrupted 收據）；`run()` 裡的處理器在 try 裡面才裝（第三次查證：之前裝好到進 try 之間的幾毫秒收到訊號會印 traceback、結束碼 1、沒有收據）。
 - **cli 的總攔截訊息**：`vacant`（adapters 那一層）的 `KeyboardInterrupt` 總攔截從「interrupted; project unchanged.」改成只說「interrupted.」——它也會接到 install／uninstall／hook 與有契約的 `do`，不知道專案狀態就不宣稱。
 - **原因行（P5）**：runner 截斷 `first_problem` 時保留測試名稱與例外行（`AssertionError: …`）再接尾端；只看結束碼的驗收（npm、`--check`）輸出裡有 TAP `not ok` 時，從那一段取，訊息顯示測試名稱與 `error:` 區塊。
 - **SIGKILL 的救援材料（P4，只動留存）**：`vacant gc`／背景 auto-gc 對沒有 `result.json` 的 restart run 在 7 天內不清 `bkp-*`（`start-copy-*` 本來就不清）；KNOWN_LIMITS 第 21 條寫明怎麼用它們救回。交付政策不變。

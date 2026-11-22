@@ -7377,6 +7377,10 @@ def _baseline_env_reason(spec: AcceptanceSpec, base_acc: dict[str, Any] | None,
     return None
 
 
+#: rc6：`vacant do` 在 run() 外面（開始前、結束後）收到的 SIGINT／SIGTERM 名稱；run() 開始時若非空就當成一開始被中斷。
+OUTSIDE_RUN_SIGNALS: list[str] = []
+
+
 class _RestartInterrupted(BaseException):
     """SIGINT/SIGTERM converted into an exception so restart.run() cleans up processes and writes a receipt."""
 
@@ -7458,7 +7462,6 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     spent = 0.0
     t0 = time.monotonic()
 
-    old_sig_handlers = _install_restart_signal_handlers()
     prev_subreaper: int | None = None
     known_child_pids = _direct_children_pids() if _linux_proc_available() else set()
     detached_records: list[dict[str, Any]] | None = [] if _linux_proc_available() else None
@@ -7497,7 +7500,20 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             )
         return found
 
+    # rc6：先記下原本的處理器（getsignal 沒有副作用），進了 try 才裝會丟例外的處理器——
+    # 之前裝在函式前段，裝好到進 try 之間收到訊號會沒人接（結束碼 1、traceback、沒有收據）。
+    old_sig_handlers: dict[int, Any] = {}
+    for _sig in (signal.SIGINT, signal.SIGTERM):
+        _h = signal.getsignal(_sig)
+        if _h is not None:
+            old_sig_handlers[_sig] = _h
     try:
+        _install_restart_signal_handlers()
+        # 呼叫端（`vacant do`）在 run() 開始前、處理器還沒裝上時記下的訊號：當成一開始就被中斷（什麼都還沒做）
+        if OUTSIDE_RUN_SIGNALS:
+            _sig_name = OUTSIDE_RUN_SIGNALS[0]
+            OUTSIDE_RUN_SIGNALS.clear()
+            raise _RestartInterrupted(getattr(signal, _sig_name, signal.SIGINT))
         # P5：專案內有不可讀的檔案或目錄（chmod 000／docker 留下的 root 檔）⇒ 複製工作區前先停下、明講並寫收據（exit 43）
         unreadable_paths = _find_unreadable_paths(project, skip_abs=skip_abs)
         if unreadable_paths:
@@ -8527,6 +8543,12 @@ def _load_error_notice(res: dict) -> str:
         txt = str(a.get("first_problem") or "")
         lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
         pick = next((ln for ln in reversed(lines) if "Error" in ln.split(":", 1)[0]), lines[-1] if lines else "")
+        if pick and pick.split(":", 1)[0] in ("SyntaxError", "IndentationError", "TabError"):
+            # 語法錯誤的位置就在測試檔裡：帶上檔名與行號（traceback 最後一個 File 行）
+            locs = re.findall(r'File "([^"]+)", line (\d+)', txt)
+            if locs:
+                f_, n_ = locs[-1]
+                pick = f"{pick} ({os.path.basename(f_)}, line {n_})"
         if pick:
             return f"\n  tests could not be loaded: {pick[:300]}"
         return ""

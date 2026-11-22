@@ -27,6 +27,7 @@
 
 - 寫回途中被 SIGKILL（或斷電）會留下寫一半的專案；備份在 run 目錄但沒有任何紀錄指過去（KNOWN_LIMITS 第 21 條）。
 - 做法：寫回前寫一份 journal（要換哪些檔、備份在哪），下一次啟動或 `vacant audit` 時檢查未完成的 journal 並提示還原。
+- `start-copy-*`（開始時的整份專案複本）在被 SIGKILL 的 run 裡**永遠不會被 gc 清**，大專案會一直佔空間；有了 journal 之後要定保留期限並讓 gc 能清（rc6 只保證不清，不處理佔用）。
 
 ## 6. 單次上限不只看牆鐘（原型在 proto/0.9.3-attempt-budget）
 

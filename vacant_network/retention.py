@@ -1306,7 +1306,7 @@ def _restart_work_stats(wroot: pathlib.Path) -> tuple[int, int]:
     return runs, total
 
 
-#: 沒有 result.json 的 restart run：bkp-*／start-copy-* 至少保留這麼多天（rc6，資料遺失等級的留存小修）
+#: 沒有 result.json 的 restart run：bkp-* 至少保留這麼多天（rc6，資料遺失等級的留存小修；start-copy-* 本來就不清）
 INCOMPLETE_RUN_KEEP_DAYS = 7
 
 

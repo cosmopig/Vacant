@@ -284,3 +284,19 @@ def test_node_test_tap_failure_shows_not_ok_name_and_error(tmp_path):
     assert "first failing test: adds numbers" in msg, msg
     assert "-1 !== 3" in msg, msg
     assert "# todo" not in msg and "duration_ms" not in msg, msg
+
+
+def test_load_error_syntax_error_names_file_and_line(tmp_path):
+    """第三次查證 5：agent 把受測模組寫成語法錯誤時，訊息帶檔名與行號。"""
+    import sys as _sys
+    from vacant_network.adapters import restart as _R
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def add(a,b):\n    return a-b\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text("import unittest, calc\nclass T(unittest.TestCase):\n"
+                                      "    def test_add(self): self.assertEqual(calc.add(1,2),3)\n", encoding="utf-8")
+    agent = tmp_path / "ag.py"
+    agent.write_text("import pathlib\npathlib.Path('calc.py').write_text('def add(a,b)\\n    return a+b\\n')\n", encoding="utf-8")
+    res = _R.run(proj, lambda p, ws: _R.Launch(argv=[_sys.executable, str(agent)], env={}), "x",
+                 max_attempts=1, attempt_timeout_s=30, budget_s=60)
+    assert "SyntaxError: expected ':' (calc.py, line 1)" in _R.summary(res)

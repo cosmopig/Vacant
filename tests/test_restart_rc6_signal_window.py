@@ -64,7 +64,7 @@ def test_signals_after_run_returned_do_not_hide_summary(tmp_path, monkeypatch, c
     out = capsys.readouterr()
     assert rc == 0, out
     assert "acceptance passed" in out.out or "accepted" in out.out.lower()
-    assert "arrived after the run had finished" in out.out
+    assert "arrived after the result was written" in out.out
     assert "interrupted" not in out.err
     assert (proj / "calc.py").read_text() == FIXED
 
@@ -127,3 +127,41 @@ def test_sigint_bursts_at_many_offsets_never_misreport(tmp_path):
             assert "project unchanged" not in (out + err), (i, out, err)
             outcomes["delivered"] += 1
     assert sum(outcomes.values()) == n
+
+
+def test_signal_before_handlers_installed_is_a_clean_early_interrupt(tmp_path, monkeypatch):
+    """第三次查證 2：run() 裝上處理器之前（`vacant do` 的「只記下」處理器接到）收到的訊號，run() 一開始就當成中斷：
+    結束碼 130、沒有 traceback、專案不動、有 interrupted 收據。這裡在 run() 前段的 _direct_children_pids() 裡送訊號。"""
+    proj = _project(tmp_path)
+    agent = _agent(tmp_path)
+    real = R._direct_children_pids
+
+    def children_with_signal():
+        os.kill(os.getpid(), signal.SIGINT)
+        return real()
+
+    monkeypatch.setattr(R, "_direct_children_pids", children_with_signal)
+    monkeypatch.chdir(proj)
+    rc = CLI.main(["do", "--cmd", f"{sys.executable} {agent}", "--prompt", "fix"])
+    assert rc == 130
+    assert (proj / "calc.py").read_text() != FIXED
+    assert not R.OUTSIDE_RUN_SIGNALS
+
+
+def test_signal_right_after_handlers_installed(tmp_path, monkeypatch):
+    """處理器裝上的那一刻就收到訊號（之前這裡在 try 外面）：乾淨中斷、有收據。"""
+    proj = _project(tmp_path)
+    agent = _agent(tmp_path)
+    real_install = R._install_restart_signal_handlers
+
+    def install_then_signal():
+        out = real_install()
+        os.kill(os.getpid(), signal.SIGINT)
+        return out
+
+    monkeypatch.setattr(R, "_install_restart_signal_handlers", install_then_signal)
+    res = R.run(proj, lambda p, ws: R.Launch(argv=[sys.executable, str(agent)], env={}), "fix",
+                max_attempts=1, attempt_timeout_s=30, budget_s=60)
+    assert res.get("interrupted") is True
+    assert res["receipt"].get("recorded") is True
+    assert (proj / "calc.py").read_text() != FIXED

@@ -165,7 +165,9 @@ def _do_restart(args) -> int:
     # rc6：run() 結束（含它的寫回臨界區）到 summary 印完、結束碼決定之間，Ctrl-C／SIGTERM 一律只記下、不打斷——
     # 否則會被 main() 的總攔截接住，印出不知道專案狀態的訊息、蓋掉真正的交件摘要。run() 執行中會換上自己的處理器
     # （寫回前中斷＝乾淨收尾、寫回中延後），結束時還原成這裡的「只記下」處理器，所以兩段之間沒有空窗。
-    pending: list[str] = []
+    from . import restart as RS
+    pending = RS.OUTSIDE_RUN_SIGNALS  # run() 開始時看這份：處理器還沒裝上時收到的訊號＝一開始就被中斷
+    pending.clear()
 
     def _record(signum, _frame):
         try:
@@ -214,7 +216,8 @@ def _run_restart_and_report(args, build, prompt, agent, pending: list[str]) -> i
     if res.get("interrupted"):
         return 130
     if pending and not res.get("interrupt_deferred"):
-        print(f"  {pending[0]} arrived after the run had finished; nothing was interrupted (the outcome above is final).",
+        # 這裡的 pending 只會是 run() 回傳之後收到的（之前的在 run() 開始時已被當成中斷處理並清掉）
+        print(f"  {pending[0]} arrived after the result was written; nothing was interrupted (the outcome above is final).",
               flush=True)
     _trigger_auto_gc(agent)
     if (res.get("baseline_error") or res.get("agent_error")

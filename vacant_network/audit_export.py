@@ -3280,6 +3280,23 @@ def _fmt_first_problem_brief(fp: str) -> str:
         return raw_lines[0][:240]
     first = raw_lines[0][:160]
     rest = raw_lines[1:]
+    if first.startswith("not ok "):
+        # TAP（node --test 等）：測試名稱＋`error:` 區塊的第一行有內容的原因
+        name = first.split(" - ", 1)[1] if " - " in first else first
+        reason: list[str] = []
+        in_err = False
+        for ln in rest:
+            if ln.startswith("error:"):
+                v = ln[len("error:"):].strip().strip("'\"")
+                if v and v not in ("|-", "|", ">-"):
+                    reason.append(v)
+                in_err = True
+                continue
+            if in_err:
+                if (ln.split(":", 1)[0].isidentifier() and ": " in ln + " ") or ln == "...":
+                    break
+                reason.append(ln)
+        return f"{name} — {' '.join(reason[:2])[:200]}" if reason else name
     # Prefer pytest E-line or final Python Error/AssertionError line
     e_line = next((ln[4:].strip() for ln in rest if ln.startswith("E   ") and ln[4:].strip()), None)
     if e_line:

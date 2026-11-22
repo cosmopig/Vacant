@@ -1596,3 +1596,11 @@ def test_audit_show_displays_per_attempt_results_and_first_problem(tmp_path, mon
     assert "first_problem:" in out
     assert "test_mul" in out
     assert "AssertionError" in out
+
+
+def test_audit_show_brief_tap_failure_has_name_and_reason():
+    """第三次查證 5：node --test 的 first_problem 在 audit show 不能只剩 `not ok 1 - …`。"""
+    from vacant_network.audit_export import _fmt_first_problem_brief as f
+    fp = ("not ok 1 - adds numbers\n  ---\n  duration_ms: 1.0\n  failureType: 'testCodeFailure'\n"
+          "  error: |-\n    Expected values to be strictly equal:\n    \n    -1 !== 3\n    \n  code: 'ERR_ASSERTION'\n")
+    assert f(fp) == "adds numbers — Expected values to be strictly equal: -1 !== 3"
