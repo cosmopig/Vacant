@@ -95,3 +95,60 @@ Only submitted branches have cells; all 36 planned task/arm slots remain in the
 metadata so unsubmitted branches are listed as missing, never imputed. Costs
 and feedback counts are UNKNOWN; final-message claims are not assessed. This
 is a separate `external-devin` run, never pooled with the pi experiment.
+
+## Frozen v2 bank: calibration before comparisons
+
+Use only branch `sandbox-devin-kit-v2`, never the full Vacant repository. The
+operator verifies all twelve digests in `tasks_v2/FROZEN.json` before use. The
+whole bank is used or rejected: no per-task selection. Follow the dated v2 bank
+section in `PREREG.md`; the older v1 ceiling rule above does not govern v2.
+
+Run twelve fresh plain calibration sessions first, one per task, handing back
+`sandbox-devin-cal/<task>-plain`. Calibration is used only for the bank gate,
+never in comparisons. Do not proceed with missing calibration submissions. If
+calibration hidden-pass is above 8/12, report "ceiling, v2 rejected" and build and
+pre-register a new bank. If it is ≤8/12, launch all three comparison arms fresh,
+two samples per task: `sandbox-devin/v2/<task>-<arm>-s<k>` with arm
+`plain|plain2|vacant` and k `1|2`. Never reuse calibration sessions, solutions or
+workspaces. Never pool calibration, v1, pi or v2 comparison outcomes.
+
+### V2 calibration / devin-plain / devin-plain2 session prompt
+
+Substitute TASK and HANDBACK_BRANCH before starting the session. Use the same
+prompt for calibration, plain and plain2; only the handback branch differs.
+
+> Work only on TASK in this visible-only kit. First read `prompts/TASK.txt` at
+> the **kit root** and follow that exact task request and `TASK/SPEC.md`.
+> `prompts/` is not inside the task directory. Work in `TASK/`, preserve the
+> existing public APIs required by SPEC.md, and run the visible tests there.
+> Do not invoke the Vacant gate for this arm. Do not read another session's work,
+> external task-bank files, hidden tests or reference solutions, and do not alter
+> the gates. Deliver only the task workspace at the tree root of
+> HANDBACK_BRANCH, not the whole kit. Include your final explanation and actual
+> test output; do not include `.venv/`, gates or receipts in the workspace.
+
+### V2 devin-vacant session prompt
+
+> Work only on TASK in this visible-only kit. First read `prompts/TASK.txt` at
+> the **kit root** and follow that exact task request and `TASK/SPEC.md`.
+> `prompts/` is not inside the task directory. Work in `TASK/`, preserve the
+> existing public APIs required by SPEC.md, and run the visible tests there.
+> Before delivery, use the README's kit-root `.venv` recipe, then from `TASK/`
+> submit through `vacant run --workspace . --suite ../gates/TASK --run-dir
+> ../receipts/TASK-N --sandbox none --retry none -- true`. Read failure feedback,
+> repair and submit again if needed, using fresh N=1..3 receipts directories;
+> stop after at most three submissions. Do not read another session's work,
+> external task-bank files, hidden tests or reference solutions, and do not alter
+> the gates. Deliver only the task workspace at the tree root of
+> HANDBACK_BRANCH, not the whole kit. Provide your final explanation, actual
+> test output, raw gate outputs and receipts separately from the workspace.
+
+Each session starts from a fresh kit clone; `.venv/` and `receipts/` are ignored
+at the kit root. Use a separate operator copy for independent hidden scoring.
+The visible gate is a manual submission protocol, not a resumable Devin command
+or native Stop hook. Gate acceptance is not the independent primary outcome.
+
+The current `score_devin.py` accepts legacy branch names and one sample only;
+it must be extended before scoring this calibration/two-sample branch protocol.
+Do not silently treat calibration branches as comparison arms or collapse sample
+IDs. No v2 sessions are launched by creating this kit or writing these prompts.

@@ -1,4 +1,5 @@
 """新題庫的真量尺正負控制、SPEC 引用與可見匯出測試。"""
+import hashlib
 import json
 import shutil
 import subprocess
@@ -146,3 +147,20 @@ def test_gate_embeds_all_visible_tests_and_data(bank, tmp_path):
     command[-1] = str(tmp_path / 'empty-gate/test_visible.py')
     run = subprocess.run(command, cwd=task / 'repo', capture_output=True, text=True, timeout=20)
     assert run.returncode != 0 and 'no tests ran' in run.stderr
+
+
+def test_v2_frozen_directory_hashes():
+    bank = score.TASKS.with_name('tasks_v2')
+    frozen = json.loads((bank / 'FROZEN.json').read_text())
+    tasks = sorted(p for p in bank.iterdir() if (p / 'task.json').is_file())
+    assert len(tasks) == 12
+    assert {p.name for p in tasks} == set(frozen['task_sha256'])
+    for task in tasks:
+        paths = sorted(task.rglob('*'))
+        assert not any(p.is_symlink() for p in paths)
+        digest = hashlib.sha256()
+        for path in paths:
+            if path.is_file():
+                digest.update(path.relative_to(task).as_posix().encode('utf-8') + b'\0')
+                digest.update(hashlib.sha256(path.read_bytes()).hexdigest().encode('ascii') + b'\n')
+        assert digest.hexdigest() == frozen['task_sha256'][task.name], task.name
