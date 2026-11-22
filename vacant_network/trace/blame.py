@@ -55,6 +55,7 @@ import shutil
 import tempfile
 from typing import Any
 
+from . import guard as G
 from . import locate as L
 from . import workspace as W
 from .recorder import Recorder
@@ -373,7 +374,7 @@ class Trace:
             return {}
 
     def output_text(self, s: Step) -> str:
-        return _as_text(self.blob_text(s.output_blob) or "")
+        return G.strip_mark(_as_text(self.blob_text(s.output_blob) or ""))
 
     def latest_index(self) -> str | None:
         for t in reversed(self.transitions):

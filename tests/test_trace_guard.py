@@ -82,6 +82,15 @@ def test_compact_keeps_tail_and_provenance():
     assert str(len(data)).encode() in out
 
 
+def test_compaction_marker_is_not_read_back_as_tool_output(env):
+    a = _agent(env, B.APP)
+    B.s_huge_pytest_fail(a)
+    t = blame.Trace(a.recorder())
+    out = t.output_text(t.steps[-1])
+    assert "vacant:" not in out and "sha256" not in out
+    assert "1 failed, 4 passed in 0.31s" in out[-200:]
+
+
 def test_compact_is_identity_below_threshold():
     assert G.compact_output(b"small") == b"small"
 

@@ -132,6 +132,14 @@ def compact_output(data: bytes) -> bytes:
     return (text[:COMPACT_HEAD] + mark + text[-COMPACT_TAIL:]).encode()
 
 
+#: `compact_output` 插的那一行：出處，不是工具印的內容（讀回來找數字出處時要拿掉）
+MARK_RE = re.compile(r"\n…\[vacant: \d+ bytes of output, middle elided; full sha256 [0-9a-f]{64}\]…\n")
+
+
+def strip_mark(text: str) -> str:
+    return MARK_RE.sub("\n", text)
+
+
 # ── I2／I3：逐步維護的帳 ─────────────────────────────────────────────────
 def norm_cmd(cmd: str) -> str:
     from .evidence import _norm_cmd
