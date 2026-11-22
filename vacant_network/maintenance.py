@@ -8,13 +8,15 @@ import pathlib
 import shutil
 import stat
 import time
+import uuid
 
 from .adapters.workspace import DIR, directory
 from .intake.statepaths import work_dir
 
 
-def _active() -> list[pathlib.Path]:
+def _active() -> tuple[list[pathlib.Path], int]:
     paths = [pathlib.Path.cwd()]
+    uninspectable = 0
     proc = pathlib.Path("/proc")
     if not proc.is_dir():
         raise OSError("cannot inspect active processes on this platform")
@@ -24,15 +26,62 @@ def _active() -> list[pathlib.Path]:
         try:
             if p.stat().st_uid != os.getuid():
                 continue
-            paths.append(pathlib.Path(os.readlink(p / "cwd")))
+            found = [pathlib.Path(os.readlink(p / "cwd"))]
             for f in (p / "fd").iterdir():
                 try:
-                    paths.append(pathlib.Path(os.readlink(f)))
+                    found.append(pathlib.Path(os.readlink(f)))
                 except FileNotFoundError:
                     pass
+            paths.extend(found)
+        except PermissionError:
+            uninspectable += 1
         except (FileNotFoundError, ProcessLookupError):
             pass
-    return paths
+    return paths, uninspectable
+
+
+def _rotate(fd: int, slots: list[str], expected: os.stat_result, copying: bool):
+    flags = os.O_RDWR if copying else os.O_RDONLY
+    log = os.open(slots[0], flags | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
+    tmp = ".vacant-rotate-" + uuid.uuid4().hex
+    try:
+        st = os.fstat(log)
+        if not stat.S_ISREG(st.st_mode) or (st.st_ino, st.st_dev) != (expected.st_ino, expected.st_dev):
+            raise OSError("log rotation source changed")
+        if copying:
+            if st.st_nlink != 1:
+                raise ValueError("cannot truncate a multiply linked log")
+            backup = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             stat.S_IMODE(st.st_mode), dir_fd=fd)
+            with os.fdopen(backup, "wb") as out:
+                remaining = st.st_size
+                while remaining:
+                    chunk = os.read(log, min(remaining, 1024 * 1024))
+                    if not chunk:
+                        break
+                    out.write(chunk)
+                    remaining -= len(chunk)
+        for i in range(len(slots) - 1, 1 if copying else 0, -1):
+            try:
+                os.replace(slots[i - 1], slots[i], src_dir_fd=fd, dst_dir_fd=fd)
+            except FileNotFoundError:
+                pass
+        if copying:
+            current = os.stat(slots[0], dir_fd=fd, follow_symlinks=False)
+            if (current.st_ino, current.st_dev) != (st.st_ino, st.st_dev):
+                raise OSError("log rotation source changed")
+            os.replace(tmp, slots[1], src_dir_fd=fd, dst_dir_fd=fd)
+            os.ftruncate(log, 0)
+        else:
+            fresh = os.open(slots[0], os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                            stat.S_IMODE(st.st_mode), dir_fd=fd)
+            os.close(fresh)
+    finally:
+        os.close(log)
+        try:
+            os.unlink(tmp, dir_fd=fd)
+        except FileNotFoundError:
+            pass
 
 
 def _latest(fd: int) -> float:
@@ -53,9 +102,11 @@ def clean(*, work: pathlib.Path, project: pathlib.Path | None, age: float = 7 * 
           max_bytes: int = 10 * 1024 * 1024, keep: int = 3, apply: bool = False) -> list[dict]:
     if age < 0 or max_bytes < 1 or keep < 1:
         raise ValueError("age >= 0, max_bytes >= 1, keep >= 1 required")
-    active = _active()
+    active, uninspectable = _active()
     cutoff = time.time() - age
     actions = []
+    if uninspectable:
+        actions.append({"action": "note", "uninspectable_processes": uninspectable})
 
     def busy(path):
         return any(p == path or p.is_relative_to(path) for p in active if p.is_absolute())
@@ -99,7 +150,7 @@ def clean(*, work: pathlib.Path, project: pathlib.Path | None, age: float = 7 * 
                     st = os.stat("nohup.log", dir_fd=fd, follow_symlinks=False)
                 except FileNotFoundError:
                     continue
-                if not stat.S_ISREG(st.st_mode) or st.st_mtime >= cutoff or st.st_size < max_bytes or busy(root / "nohup.log"):
+                if not stat.S_ISREG(st.st_mode) or st.st_size < max_bytes:
                     continue
                 slots = ["nohup.log"] + [f"nohup.log.{i}" for i in range(1, keep + 1)]
                 blocked = False
@@ -108,21 +159,17 @@ def clean(*, work: pathlib.Path, project: pathlib.Path | None, age: float = 7 * 
                         slot = os.stat(name, dir_fd=fd, follow_symlinks=False)
                         if not stat.S_ISREG(slot.st_mode):
                             raise ValueError("log rotation target is not a regular file")
-                        blocked = blocked or slot.st_mtime >= cutoff or busy(root / name)
+                        if name != "nohup.log":
+                            blocked = blocked or busy(root / name)
                     except FileNotFoundError:
                         pass
                 if blocked:
                     continue
-                actions.append({"action": "rotate", "path": str(root / "nohup.log")})
+                copying = bool(uninspectable) or busy(root / "nohup.log")
+                actions.append({"action": "rotate", "path": str(root / "nohup.log"),
+                                "method": "copytruncate" if copying else "rename"})
                 if apply:
-                    for i in range(keep, 0, -1):
-                        try:
-                            os.replace(slots[i - 1], slots[i], src_dir_fd=fd, dst_dir_fd=fd)
-                        except FileNotFoundError:
-                            pass
-                    log = os.open("nohup.log", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
-                                  stat.S_IMODE(st.st_mode), dir_fd=fd)
-                    os.close(log)
+                    _rotate(fd, slots, st, copying)
         except FileNotFoundError:
             continue
     return actions

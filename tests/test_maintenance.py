@@ -7,6 +7,7 @@ import pytest
 @pytest.fixture(autouse=True)
 def own_processes(monkeypatch):
     from vacant_network import maintenance as M
+    original = M._active
     def active():
         paths = [M.pathlib.Path.cwd()]
         for p in M.pathlib.Path('/proc/self/fd').iterdir():
@@ -14,8 +15,9 @@ def own_processes(monkeypatch):
                 paths.append(M.pathlib.Path(os.readlink(p)))
             except FileNotFoundError:
                 pass
-        return paths
+        return paths, 0
     monkeypatch.setattr(M, '_active', active)
+    return original
 
 
 def old(path):
@@ -105,13 +107,63 @@ def test_rotation_keeps_n_and_refuses_planted_backup(tmp_path):
     assert outside.read_text() == "safe"
 
 
-def test_cli_refuses_uninspectable_processes(tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("part", ["cwd", "fd"])
+def test_cli_reports_uninspectable_processes(tmp_path, monkeypatch, capsys, own_processes, part):
     from vacant_network import maintenance as M
-    def denied():
-        raise PermissionError("cannot inspect active processes")
-    monkeypatch.setattr(M, '_active', denied)
-    monkeypatch.setenv("VACANT_WORK", str(tmp_path))
-    with pytest.raises(SystemExit) as exc:
-        M.main(["--apply"])
-    assert exc.value.code == 1
-    assert "cleanup refused" in capsys.readouterr().err
+    proc = M.pathlib.Path("/proc")
+    process = proc / str(os.getpid())
+    iterdir, readlink = M.pathlib.Path.iterdir, os.readlink
+    def processes(path):
+        if path == process / "fd" and part == "fd":
+            raise PermissionError("uninspectable process")
+        return iter([process]) if path == proc else iterdir(path)
+    def denied(path, *args, **kwargs):
+        if path == process / "cwd" and part == "cwd":
+            raise PermissionError("uninspectable process")
+        return readlink(path, *args, **kwargs)
+    monkeypatch.setattr(M.pathlib.Path, "iterdir", processes)
+    monkeypatch.setattr(os, "readlink", denied)
+    monkeypatch.setattr(M, '_active', own_processes)
+    monkeypatch.setenv("VACANT_WORK", str(tmp_path / "missing"))
+    assert M.main(["--dry-run"]) == 0
+    assert '"uninspectable_processes": 1' in capsys.readouterr().out
+
+
+def test_missing_proc_still_refuses(tmp_path, monkeypatch, own_processes):
+    from vacant_network import maintenance as M
+    is_dir = M.pathlib.Path.is_dir
+    monkeypatch.setattr(M.pathlib.Path, "is_dir",
+                        lambda p: False if p == M.pathlib.Path("/proc") else is_dir(p))
+    with pytest.raises(OSError, match="cannot inspect"):
+        own_processes()
+
+
+def test_busy_log_copytruncate_preserves_writer_fd(tmp_path):
+    from vacant_network.maintenance import clean
+    log = tmp_path / "nohup.log"
+    log.write_bytes(b"before rotation")
+    with log.open("ab", buffering=0) as writer:
+        inode = os.fstat(writer.fileno()).st_ino
+        args = dict(work=tmp_path / "missing", project=tmp_path, max_bytes=4, keep=2)
+        assert clean(**args)[0]["method"] == "copytruncate"
+        assert log.read_bytes() == b"before rotation"
+        clean(**args, apply=True)
+        assert (tmp_path / "nohup.log.1").read_bytes() == b"before rotation"
+        assert log.read_bytes() == b""
+        assert log.stat().st_ino == inode
+        writer.write(b"after rotation")
+        assert log.read_bytes() == b"after rotation"
+        clean(**args, apply=True)
+        assert (tmp_path / "nohup.log.1").read_bytes() == b"after rotation"
+        assert (tmp_path / "nohup.log.2").read_bytes() == b"before rotation"
+
+
+def test_recent_idle_log_rotates_by_size(tmp_path):
+    from vacant_network.maintenance import clean
+    log = tmp_path / "nohup.log"
+    log.write_text("oversized")
+    inode = log.stat().st_ino
+    actions = clean(work=tmp_path / "missing", project=tmp_path, max_bytes=4, apply=True)
+    assert actions[0]["method"] == "rename"
+    assert (tmp_path / "nohup.log.1").stat().st_ino == inode
+    assert log.read_bytes() == b""
