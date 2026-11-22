@@ -1,0 +1,5 @@
+m10) # python_bare runner + project module named like stdlib
+  printf 'def median(xs):\n    return sorted(xs)[0]\n' > proj/statistics.py
+  printf 'from statistics import median\ndef test_median():\n    assert median([3,1,2]) == 2\n' > proj/test_stats.py
+  printf '#!/bin/bash\nprintf "def median(xs):\\n    return None\\n" > statistics.py\n' > agent.sh
+  ;;

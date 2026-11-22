@@ -284,6 +284,15 @@ def cmd_show(args: argparse.Namespace) -> int:
                   f"{e.get('confidence', '')}")
         elif t in ("session_closed", "transcript"):
             print(f"   ·  {t} {(e.get('actor') or {}).get('session', '')}")
+        elif t == "restart_receipt":
+            acc = e.get("acceptance") or {}
+            status_str = ("PASS" if e.get("accepted") is True
+                          else "FAIL" if e.get("accepted") is False else "UNCHECKED")
+            n_att = len(e.get("attempts") or [])
+            clock = _fmt_clock(e.get("ts_ms"))
+            print("   ·  " + (f"{clock}  " if clock else "")
+                  + f"restart {e.get('agent', '?')} {status_str} "
+                  + f"({acc.get('kind', '?')}, delivered={e.get('delivered_attempt')}/{n_att})")
     return 0
 
 

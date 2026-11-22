@@ -43,6 +43,9 @@ def test_committed_plans_load_and_are_consistent():
     assert set(screen["tasks"]) < set(main["tasks"]) and len(screen["tasks"]) == 16
     for name, plan in plans.items():
         ctrl, treat = (plan["arms"][a] for a in plan["pair"])
+        if "agent" in treat and treat["agent"]["argv"][:2] == ["vacant", "do"]:
+            _check_product_plan(name, plan, ctrl, treat, main)
+            continue
         # 等預算：處理臂的總牆鐘上限不超過對照臂的時限（這是主張的一部分，改了就不是同一個實驗）
         assert ctrl["policy"] == "single" and treat["policy"] == "restart", name
         assert treat["budget_s"] <= ctrl["attempt_timeout_s"], name
@@ -50,9 +53,24 @@ def test_committed_plans_load_and_are_consistent():
         # 兩臂用同一個 agent 指令（差別只在父行程的迴圈）
         assert "agent" not in ctrl and "agent" not in treat, name
         # 三份計畫除了題目／重複數之外，條件必須相同（篩選和確認量的是同一件事）
+        # T06（換模型）／T07（換 agent）：只准換 providers／agent，其餘條件與主計畫相同
+        swap = ("providers",) if "qwen" in plan["id"] else ("providers", "agent") if "opencode" in plan["id"] else ()
         strip = lambda p: {k: v for k, v in p.items()                                    # noqa: E731
-                           if k not in ("id", "tasks", "reps", "prereg", "_sha256", "_path", "seed")}
+                           if k not in ("id", "tasks", "reps", "prereg", "_sha256", "_path", "seed") + swap}
         assert strip(plan) == strip(main), name
+
+
+def _check_product_plan(name, plan, ctrl, treat, main):
+    """產品臂（`vacant do pi`，T05 起的 screen16p*／confirm1*）：處理在產品指令裡，不在 harness 的迴圈裡。"""
+    argv = treat["agent"]["argv"]
+    timeout = float(argv[argv.index("--timeout") + 1])
+    assert ctrl["policy"] == "single" and treat["policy"] == "single", name
+    assert "agent" not in ctrl, name                                   # 對照臂＝原生 pi，與 redo1 同一個指令
+    assert timeout <= ctrl["attempt_timeout_s"], name                  # 等預算：產品的總時限不超過對照臂
+    assert treat["attempt_timeout_s"] > timeout, name                  # 外層時限比產品寬，產品自己收尾
+    assert "--hooks" not in argv, name                                 # 產品臂沒有另外開 Vacant 的掛鉤
+    assert plan["acceptance"] == main["acceptance"] and plan["agent"] == main["agent"], name
+    assert ctrl == main["arms"]["A"], name
 
 
 def test_sigterm_kills_running_agents(tmp_path):

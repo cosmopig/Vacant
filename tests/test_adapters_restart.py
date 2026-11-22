@@ -174,3 +174,90 @@ def test_cli_without_contract_uses_restart_mode(proj, tmp_path, monkeypatch, cap
     assert rc == 0
     assert (proj / "sol.py").read_text() == GOOD
     assert "attempt 2 of 2" in out.out or "attempt 2" in out.out
+
+
+# ---- 2026-11-19 日報 P1：符號連結不能讓寫入跑到專案／工作區外面，也不能讓刪除誤刪專案的檔 ----
+
+def _script_build(tmp_path, body: str):
+    script = tmp_path / "agent_sym.py"
+    script.write_text(body)
+
+    def build(prompt, ws):
+        return Launch(argv=[sys.executable, str(script)], env={})
+    return build
+
+
+def test_test_file_replaced_by_symlink_does_not_write_outside(proj, tmp_path):
+    outside = tmp_path / "outside.txt"
+    outside.write_text("precious\n")
+    build = _script_build(tmp_path, textwrap.dedent(f"""\
+        import os, pathlib
+        pathlib.Path("sol_test.py").unlink()
+        os.symlink({str(outside)!r}, "sol_test.py")
+        pathlib.Path("sol.py").write_text({GOOD!r})
+        """))
+    res = R.run(proj, build, "fix it", max_attempts=1, attempt_timeout_s=20, budget_s=300)
+    assert outside.read_text() == "precious\n"          # 還原測試檔時沒有穿過 symlink 寫到外面
+    assert res["attempts"][0]["tests_tampered"] == ["sol_test.py"]
+    assert res["accepted"] is True                       # 用原本的測試驗收，GOOD 會過
+    assert (proj / "sol_test.py").read_text() == TEST and not (proj / "sol_test.py").is_symlink()
+
+
+def test_test_dir_replaced_by_symlink_does_not_write_outside(proj, tmp_path):
+    (proj / "sol_test.py").unlink()
+    (proj / "tests").mkdir()
+    (proj / "tests" / "sol_test.py").write_text(TEST.replace("from sol import f", "import sys; sys.path.insert(0, '..'); from sol import f"))
+    outside = tmp_path / "outside_dir"
+    outside.mkdir()
+    build = _script_build(tmp_path, textwrap.dedent(f"""\
+        import os, pathlib, shutil
+        shutil.rmtree("tests")
+        os.symlink({str(outside)!r}, "tests")
+        """))
+    res = R.run(proj, build, "fix it", max_attempts=1, attempt_timeout_s=20, budget_s=300)
+    assert list(outside.iterdir()) == []                 # 外面的目錄沒有被寫進測試檔
+    assert res["attempts"][0]["tests_tampered"] == ["tests/sol_test.py"]
+    assert (proj / "tests" / "sol_test.py").is_file() and not (proj / "tests").is_symlink()
+
+
+def test_write_back_never_goes_through_a_project_symlink(proj, tmp_path):
+    outside = tmp_path / "linked_dir"
+    outside.mkdir()
+    os.symlink(outside, proj / "link")                   # 使用者自己的 symlink
+    build = _script_build(tmp_path, textwrap.dedent(f"""\
+        import os, pathlib
+        os.unlink("link")
+        os.mkdir("link")
+        pathlib.Path("link/evil.txt").write_text("x")
+        pathlib.Path("sol.py").write_text({GOOD!r})
+        """))
+    res = R.run(proj, build, "fix it", max_attempts=1, attempt_timeout_s=20, budget_s=300)
+    assert list(outside.iterdir()) == []                 # 沒有經過專案的 symlink 寫到外面
+    assert res["changed"]["skipped"] == ["link/evil.txt"]
+    assert (proj / "link").is_symlink()
+    assert (proj / "sol.py").read_text() == GOOD          # 其他改動照常寫回
+    assert "not written back" in R.summary(res)
+
+
+def test_symlinked_dir_in_workspace_does_not_delete_project_files(proj, tmp_path):
+    (proj / "data").mkdir()
+    (proj / "data" / "keep.txt").write_text("keep me\n")
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    build = _script_build(tmp_path, textwrap.dedent(f"""\
+        import os, shutil
+        shutil.rmtree("data")
+        os.symlink({str(elsewhere)!r}, "data")
+        """))
+    res = R.run(proj, build, "fix it", max_attempts=1, attempt_timeout_s=20, budget_s=300)
+    assert (proj / "data" / "keep.txt").read_text() == "keep me\n"
+    assert res["changed"]["deleted"] == [] and res["changed"]["skipped"] == ["data/keep.txt"]
+
+
+def test_budget_includes_acceptance_time(proj, tmp_path):
+    """預算是整個指令的牆鐘：驗收很慢時，最後一次嘗試不能把總時間推過預算。"""
+    (proj / "sol_test.py").write_text(TEST.replace("    def test_one(self):",
+                                                   "    def test_slow(self):\n        import time; time.sleep(1.0)\n\n    def test_one(self):"))
+    res = R.run(proj, _build(tmp_path, "sleep"), "fix it", attempt_timeout_s=2, budget_s=6, min_attempt_s=0.5)
+    assert res["total_wall_s"] <= 6.5, res["total_wall_s"]
+    assert res["accepted"] is False

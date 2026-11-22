@@ -1,5 +1,141 @@
 # Changelog
 
+## 0.9.2 — unreleased (release candidate rc5, not published)
+
+`vacant do <agent>` without a contract: run the agent on a copy, check with the project's own tests, start a fresh
+attempt if they fail (up to 3), write back the delivered attempt. This entry lists behaviour; it makes no claim
+about how much it helps — measured numbers live in `ops/redo/results/` with their conditions.
+
+- **Acceptance beyond unittest.** pytest-style tests run with pytest when the project's interpreter has it, else a
+  stdlib runner; npm (`npm test`), cargo, go and `--check "<command>"` are supported. A project with 0 tests is run
+  once and the message says nothing was checked.
+- **The check cannot be passed by editing it.** The acceptance command is pinned when the run starts. Test files of
+  every ecosystem (`*_test.py`, `test_*.py`, `*.test.*`, `*.spec.*`, `*_test.go`, `__tests__/`, `tests/`, `test/`),
+  test runner config files (`conftest.py`, `pytest.ini`, `pyproject.toml`, `jest.config.*`, `vitest.config.*`,
+  `playwright.config.*`, `cypress.config.*`, `cypress.json`, `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`,
+  `noxfile.py`, `.mocharc.*`, etc.), and the manifest that defines the command (`package.json`, `Cargo.toml`,
+  `go.mod`) are restored before each check and never written back with the agent's edits; the message lists any the
+  agent touched. `--protect PATH/GLOB` adds files for `--check`. When nothing is protected the message says the agent
+  could have edited the check.
+- **`--check` robust command parsing, manifest pinning, and exec-bit preservation (rc5, A3/A4/R5/R7).** `--check "<cmd>"`
+  is split across shell operators (`;`, `&&`, `||`, `|`) and recursively unwrapped through `sh -c`/`bash -c`, `env`,
+  `timeout`, `nice`, and `cd DIR &&`. If any command word is `npm`/`npx`/`yarn`/`pnpm`, every `package.json` in the
+  project (excluding `node_modules`) is protected and its `scripts.test` is pinned; `make`/`gmake` protects every
+  `Makefile`/`makefile`/`GNUmakefile` and `*.mk`; `cargo` protects every `Cargo.toml`; `go` protects every `go.mod`.
+  Any token at any depth naming an existing project file (relative, `./x`, or absolute inside the project) is also
+  protected, and restoring protected files preserves original mode bits including exec (so `--check './verify.sh'` works).
+  If the command uses unresolvable shell expansion (`$VAR` or backticks), Vacant prints a warning.
+- **Additional runner & package-manager configs kept fixed (rc5, A5/F1).** Added `playwright.config.*`,
+  `cypress.config.*`, `cypress.json`, `wdio.conf.*`, `ava.config.*`, `.nycrc`, `.nycrc.*`, `noxfile.py`, `.mocharc.*`,
+  `.npmrc`, `.yarnrc`, `.yarnrc.yml`, `.pnpmrc`, `pnpm-workspace.yaml`, `.babelrc`, `.babelrc.*`, `babel.config.*`,
+  `.swcrc`, and `tsconfig*.json` to the test-config class (existing ones restored before check and not written back;
+  agent-created ones excluded from the check copy and write-back via `config_ignored`).
+- **Flagged acceptance dependencies (rc5, A1/A2/R6).** Files changed by the delivered attempt are flagged in
+  `acceptance_dependencies_changed` (ordered, with reasons `literal`/`import`/`dir`) when: (a) their basename or
+  relative path appears as a string literal in a protected test file, (b) they are imported by protected Python tests
+  transitively up to depth 2 (AST), (c) they are required/imported/`jest.mock`-ed by protected JS/TS tests up to depth 2,
+  or (d) they live under `fixtures/`, `testdata/`, `test_data/`, `__fixtures__/`, `__mocks__/`, `mocks/`, `golden/`,
+  `data/`, or test directories. A module is not flagged when it is the sole non-test source directly imported by a test
+  (the module under test). Dynamic imports and paths computed at runtime are not traced.
+- **Isolated `node_modules` copy, lstat manifest, and external symlink handling (rc5, B3/R8/R10/R13).** Python
+  acceptance uses `$VIRTUAL_ENV`, then `.venv/` or `venv/` in the project, then `python3` on PATH. The agent workspace
+  receives its own copy of `node_modules` (probing `cp --reflink=always` and warning on fallback to a plain copy), with
+  any symlink whose resolved target lies outside the copied `node_modules` replaced by a real copy (dereferenced) so the
+  agent cannot write through it into the original project. Vacant no longer `chmod`s the original project's `node_modules`
+  (so SIGTERM/SIGKILL mid-run leaves original modes untouched); integrity of the original is verified via a fast `lstat`
+  manifest of `(type, size, mtime_ns, ctime_ns, ino, mode, symlink_target)` that also follows external symlinks (plus one
+  cheap sha256 pass when small), recording `node_modules_manifest_s` and `copy_s` in `result.json`. On mismatch, the
+  attempt is not accepted, the run stops, nothing is written back, and the changed paths are listed (exit 43). A baseline
+  check runs on the untouched project first; environment errors stop before running the agent (exit 43).
+- **Vacant state/work roots excluded inside projects (rc5, R1).** `VACANT_HOME` and `VACANT_WORK` are excluded from
+  every copy, scan, snapshot, B1 listing, and write-back plan when they lie inside the project (mirroring contract mode's
+  `_skip_dirs`), preventing signing-key leaks and recursive `copytree` crashes.
+- **Start-snapshot acceptance, outside-change overlap refusal, and plan→apply TOCTOU guard (rc5, D3/R11/Item 12).**
+  Acceptance always runs against the START snapshot of the project plus the attempt's own changes (never live project
+  files for unchanged paths). At write-back time, if live project changes overlap with any path the delivered attempt
+  writes (add/modify/delete), Vacant writes nothing back (no partial delivery), exits 43, records `write_back_conflicts`
+  in `result.json` and the receipt, and prints the conflicting paths and attempt workspace for manual merge. Non-overlapping
+  outside changes (including `appeared_during_run` and modified protected test/config files) are delivered as usual,
+  recorded in `outside_changes`, and printed prominently ("your project changed during the run, not by this delivery: … —
+  not checked and not touched"; plus a dedicated line for any protected test/config file). `_apply_write_plan` re-checks
+  each live file against the start snapshot just before `os.replace`/unlink to close plan→apply TOCTOU races.
+- **Acceptance tracing (`traced` | `untraced`) and factual delivery summary (rc5, F1–F8).** Acceptance commands (both
+  `--check` and auto-detected runners) are conservatively analyzed into two outcomes: `traced` (every simple command
+  separated by `;`/`&&`/`||`/`|` is traced and every executed manifest/script/config — following `npm test`/`npm run`/
+  `npm --prefix`, `yarn`/`pnpm`, `make [TARGET]` including `.PHONY` and `.DEFAULT_GOAL`, `python -m unittest discover`
+  patterns, `bash|sh FILE` / `./FILE`, `python -m MOD`, `package.json` runner keys (`jest`/`mocha`/`ava`/`vitest`/`nyc`/
+  `c8`/`babel`/`eslintConfig`), `jest.config.*`/`vitest.config.*`/`.mocharc.*`, `jest --config`, and clean `node`/
+  `python` scripts — is kept fixed, and the kept-fixed set is non-empty whenever project code runs) or `untraced` (any
+  untraced shell construct, unknown command, non-`.PHONY` make target with an existing file/dir, Python process/dynamic/
+  non-constant `open`/`pathlib` escape, Node `fs`/`child_process`/`worker_threads`/`vm`/non-literal `require`/`import`/
+  `process.binding`/`eval`/`new Function` escape, unresolvable runner config path, or directly executed script importing
+  project modules). Agent-created files matching a traced non-`.PHONY` make target or `unittest discover` pattern are
+  excluded from the check copy and write-back (`config_ignored`). Most real-world check scripts come out `untraced`;
+  `traced` means the analyzer traced every executed file and kept them fixed, not that the check is correct nor that no
+  other file influences it. The delivery message states facts only (`kept fixed (restored to their start content before
+  each check):`, changed files list up to 10 + `+N more`, and a short `— inputs not fully traced [codes]` tag on the
+  `acceptance:` line when `untraced`), printing a prominent `NOTE:` line only when the delivered attempt concretely
+  changed an unfixed file the check reads or executes. `acceptance_integrity` (`traced`/`untraced`) and full
+  `acceptance_integrity_reasons` are recorded in `result.json` and the signed receipt, and displayed by
+  `vacant audit list` (`INTEGRITY` column) and `vacant audit show`.
+- **Python module-shadow exclusion, package `__init__.py` dependency chains, and `.cargo/config*` protection (rc5, round 5 F1–F3).**
+  Across both `--check` and auto Python kinds (`python_unittest`, `python_pytest`, `python_bare`), any agent-created
+  `X.py` or package `X/` (containing `__init__.py`) on the check's `sys.path` (project root, `python FILE` script dir,
+  `src/` if present, `unittest discover` start dir, or protected test dirs) is excluded from the check copy and
+  write-back and listed with `shadows module 'X'` if and only if `X` already resolved at the start of the run (stdlib,
+  an installed distribution in the check interpreter with project dirs removed, or a start-time project module elsewhere
+  on the path); brand-new modules that resolved to nothing at start (e.g. `solution.py` or `solution/__init__.py`) and
+  pre-existing stdlib-named project modules (e.g. `queue.py`) are untouched. Dotted Python imports (`a.b.c`, including
+  `src/`-layout equivalents) in protected tests and kept-fixed scripts now include their package `__init__.py` chains in
+  `acceptance_dependencies_changed` with reason `package-init` (never exempted as the sole module under test). New
+  `__init__.py` files under `tests/`, `test/`, `__tests__/`, or next to protected test files, as well as
+  `.cargo/config.toml` and `.cargo/config`, are treated as test-config.
+- **Expanded B1 `lstat`-only outside-change listing, `.git/objects` coverage, and `COPY_SKIP` visibility (rc5, B1/R4/R12/F3).**
+  The `lstat`-only B1 listing covers all of `.git` including full `lstat` of `.git/objects/info/**` and
+  `.git/objects/pack/**` plus the set of loose-object names under `.git/objects/??/` (`scandir` names only, no per-file
+  `lstat`, no content reads), as well as `node_modules`, `.venv`, `__pycache__`, and `.pytest_cache` at any depth
+  (skipping root `node_modules` only when already tracked by the item-4 manifest) and records `lstat_listing_s` in both
+  `result.json` and the signed receipt. Changes under `.git/hooks`, `.git/refs`, `.git/HEAD`, `.git/packed-refs`,
+  `.git/objects`, or `.pth` files under `.venv` print prominent warnings. Files created by the agent under
+  `COPY_SKIP`-named dirs are not delivered and are listed in `not_delivered` (`result.json`, receipt, and summary)
+  with the reason.
+- **Receipt write resilience, prominent failure warning, and strict unsigned-restart checks (rc5, F4).** Before writing
+  a signed restart receipt, Vacant repairs user permissions (`u+rwx` on directories, `u+rw` on files, never following
+  symlinks) from `$VACANT_HOME` down to the trace chain, signing keys, `trust.json`, and `head.json`, and retries once
+  on failure (defeating agent `chmod` suppression). If writing still fails, the exit code is unchanged, `receipt_error`
+  is recorded in `result.json`, and the summary starts with a prominent `WARNING` that the run has no verifiable record.
+  `vacant audit list --strict` and `export --strict` now exit 3 when a restart run has `result.json` without a signed
+  receipt (`unsigned` with `unsigned_source`).
+- **Documented same-user signing key limit (rc5, F5).** `docs/AUDIT_RECORD_V1.md` and the restart honesty notes explicitly
+  state both sides: signed receipts protect against tampering after the fact (alter one record and every later hash stops
+  matching), and do NOT protect against forgery by a process running as the same user (including the agent itself),
+  because it can read the key file. This is a structural limit not fixed in 0.9.2.
+- **Linux child subreaper detached-process cleanup (rc5, B2/R2/R3).** On Linux, `vacant do` enables
+  `prctl(PR_SET_CHILD_SUBREAPER, 1)` for the run and scans `/proc/*/stat` (`ppid == vacant_pid`) plus the `VACANT_RUN_ID`
+  marker after each agent attempt (before acceptance), after baseline/acceptance, and at the end, killing detached
+  descendants (`SIGKILL` to their process groups, catching even `setsid` + `env -i` and acceptance-spawned processes) and
+  recording `{phase, pid, cmdline, killed}` in `detached_processes` with a warning count. On non-Linux platforms,
+  `detached_processes` is recorded as `null` and the message states that this layer does not exist on that platform.
+  A write by a detached process after delivery is not recorded.
+- **Byte-safe UTF-8 encoding for all strings (rc5, C1/R9).** Every string serialized into `result.json`, signed
+  receipts, CLI summaries, and `vacant audit` exports (paths, prompt, argv, `--check` command, env-derived strings,
+  output tails, `/proc/<pid>/cmdline`) is converted via `os.fsencode(s).decode("utf-8", "backslashreplace")` when
+  surrogates are present, and `request_sha256` hashes original raw bytes (`os.fsencode(prompt)`). Surrogate filenames
+  and prompts now yield recorded, verified receipts (`vacant audit list --strict` exits 0).
+- **Read-only project and subdirectory safeguards (rc5, D1/D2).** If the project root is not writable, `vacant do`
+  refuses up front before running the agent (exit 43); otherwise the agent's workspace copy is made writable (`u+w`).
+  Non-zero agent exit codes and last stderr lines are shown on passing runs too. Summaries state which directory was
+  scanned and that parent directories were not, and report `tests found in <parent>; run from there to check them` when
+  a parent directory (up to the git root or 5 levels) contains detectable tests or test-runner config.
+- **Fails fast when the agent cannot start.** A named agent that is not on PATH, a `--cmd` binary that does not
+  exist, or an agent that exits with an error within 30 s without changing anything stops the run with the agent's
+  own last output (exit 43) instead of silently using up the remaining attempts.
+- **Signed receipts and one audit record per run.** Each restart run appends a signed receipt (agent, argv,
+  acceptance, every attempt, snapshot hashes) to the project's trace chain. `vacant audit list|show|export` builds
+  one verified record per run from that receipt; `result.json` is only a fallback (marked unsigned) and a mismatch
+  with the receipt is flagged. Restart work directories are covered by retention/`vacant gc`.
+- `vacant --version`.
+
 ## 0.9.1 — 2026-10-12
 
 - **`vacant dashboard`: one local page for everything Vacant is doing.** After `vacant install` there was no way to

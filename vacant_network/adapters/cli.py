@@ -32,6 +32,18 @@ def _home() -> pathlib.Path:
     return pathlib.Path.home()
 
 
+def _trigger_auto_gc(agent: str) -> None:
+    """在 `vacant do` 結束後觸發既有背景 auto-gc（單例鎖＋1 小時頻率限制＋時間預算，fail-open）。"""
+    import os
+    if os.environ.get("VACANT_HOOK_NO_GC"):
+        return
+    try:
+        from .hook import _spawn_auto_gc
+        _spawn_auto_gc(agent, "do")
+    except Exception:  # noqa: BLE001 — fail-open：自動清理失敗不得影響交件或退出碼
+        pass
+
+
 def cmd_do(args) -> int:
     cpath = pathlib.Path(args.contract) if args.contract else C.find(pathlib.Path.cwd())
     if cpath is None:
@@ -67,6 +79,10 @@ def cmd_do(args) -> int:
             return 2
         spec = A.AGENTS[args.agent]
         agent = spec.name
+        if not A.which(spec.binaries):
+            print(f"vacant do: {args.agent} is not installed or not on PATH (looked for: "
+                  f"{', '.join(spec.binaries)}); nothing was run, project unchanged", file=sys.stderr)
+            return EXIT["void"]
 
         def build(p, ws, _spec=spec):
             return _spec.build(p, ws, hooks=not args.no_hooks, extra=args.extra)
@@ -94,6 +110,7 @@ def cmd_do(args) -> int:
             print(f"  open issues: {tr['report']}")
         if oc == "accept":
             print("  next: `vacant release` (nothing has been published yet)")
+    _trigger_auto_gc(agent)
     if res.get("void"):
         return EXIT["void"]
     return EXIT.get(str(res.get("outcome")), 2)
@@ -115,6 +132,12 @@ def _do_restart(args) -> int:
         return 2
     if args.cmd:
         import shlex
+        argv0 = (shlex.split(args.cmd) or [""])[0]
+        import shutil as _sh
+        if not argv0 or not (_sh.which(argv0) or (pathlib.Path(argv0).is_file() and "/" in argv0)):
+            print(f"vacant do: command not found: {argv0!r} (from --cmd); nothing was run, project unchanged",
+                  file=sys.stderr)
+            return EXIT["void"]
         gb = A.generic_build(shlex.split(args.cmd))
 
         def build(p, ws):
@@ -127,16 +150,29 @@ def _do_restart(args) -> int:
             return 2
         spec = A.AGENTS[args.agent]
         agent = spec.name
+        if not A.which(spec.binaries):
+            print(f"vacant do: {args.agent} is not installed or not on PATH (looked for: "
+                  f"{', '.join(spec.binaries)}); nothing was run, project unchanged", file=sys.stderr)
+            return EXIT["void"]
 
         def build(p, ws, _spec=spec):
             return _spec.build(p, ws, hooks=bool(args.hooks), extra=args.extra)
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
+                 check=getattr(args, "check", None),
+                 protect=getattr(args, "protect", None) or None,
+                 agent=agent,
                  log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True))
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
         print(RS.summary(res))
+    _trigger_auto_gc(agent)
+    if (res.get("baseline_error") or res.get("agent_error")
+            or res.get("node_modules_changed") or res.get("project_not_writable")
+            or res.get("unreadable_paths")
+            or res.get("write_back_conflicts")):
+        return EXIT["void"]
     return EXIT["reject"] if res["accepted"] is False else 0
 
 
@@ -313,6 +349,11 @@ def build_parser() -> argparse.ArgumentParser:
                         "generic check summary, or nothing (a fresh re-draw)")
     p.add_argument("--attempt-timeout", type=float, default=600.0,
                    help="without a contract: seconds per attempt (total stays under --timeout)")
+    p.add_argument("--check",
+                   help="without a contract: shell command used as acceptance (exit 0 = accept)")
+    p.add_argument("--protect", action="append", default=[], metavar="PATH_OR_GLOB",
+                   help="without a contract: file, directory, or glob to restore before acceptance "
+                        "and never write back (repeatable)")
     p.add_argument("--hooks", action="store_true",
                    help="without a contract: also add Vacant's per-step hooks (off by default)")
     p.add_argument("--json", action="store_true")

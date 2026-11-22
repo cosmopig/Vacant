@@ -51,7 +51,8 @@ TRACE_SCHEMA = "vacant-trace/1"
 EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_change",
                          "transcript", "session_closed", "finding", "flag", "coverage",
                          "consequence", "prompt", "review", "nudge", "ended",
-                         "checkpoint_restore", "volume_seal", "volume_reclaimed"})
+                         "checkpoint_restore", "volume_seal", "volume_reclaimed",
+                         "restart_receipt"})
 #: 分卷封印預設門檻（DECISION_20261103_STEPCHAIN_SEALING.md Phase A）
 DEFAULT_VOLUME_MAX_BYTES = 2 * 1024 * 1024
 DEFAULT_VOLUME_MAX_ENTRIES = 2000
@@ -117,7 +118,7 @@ def trace_home() -> pathlib.Path:
 
 
 def project_key(root: str | os.PathLike) -> str:
-    return hashlib.sha256(str(pathlib.Path(root).resolve()).encode()).hexdigest()[:16]
+    return hashlib.sha256(os.fsencode(pathlib.Path(root).resolve())).hexdigest()[:16]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -501,8 +502,11 @@ class Recorder:
                             new.append(cov_e)
 
         if not book.entries:
+            ws_str = str(self.workspace)
+            if any(0xD800 <= ord(ch) <= 0xDFFF for ch in ws_str):
+                ws_str = os.fsencode(ws_str).decode("utf-8", errors="backslashreplace")
             new.append(book.append("trace_genesis",
-                                   {"schema": TRACE_SCHEMA, "workspace": str(self.workspace),
+                                   {"schema": TRACE_SCHEMA, "workspace": ws_str,
                                     "signer": _keys.pub_hex(ident)}, ident, ts_ms=ts))
         if repaired:
             new.append(book.append("coverage", {"schema": TRACE_SCHEMA, **repaired}, ident,
