@@ -202,6 +202,23 @@ _SECRET_VAL_RE = re.compile(
 )
 
 _UNITTEST_RUNNER = r"""
+def _fp(head, body):
+    # rc6：第一個沒過的測試名稱放在最前面；太長時保留名稱＋尾端（斷言在尾端），不再只留尾端把名稱截掉
+    s = str(head) + "\n" + str(body)
+    if len(s) <= 800:
+        return s
+    h = str(head)[:200]
+    b = str(body)
+    exc = ""  # 例外那一行（AssertionError: …）常在長 diff 的前面，尾端截掉時單獨留下
+    for ln in b.splitlines():
+        t = ln.strip()
+        tok = t.split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc = t[:240]
+    keep = 800 - len(h) - len(exc) - 10
+    return h + "\n" + (exc + "\n" if exc else "") + "...\n" + b[-max(keep, 100):]
+
+
 def _main():
     import os as _os
     import sys as _sys
@@ -326,7 +343,7 @@ def _main():
             out["unexpected_successes"] += len(res.unexpectedSuccesses)
             probs = res.failures + res.errors
             if probs and out["first_problem"] is None:
-                out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+                out["first_problem"] = _fp(probs[0][0], probs[0][1])
 
     try:
         _sys.stdout.flush()
@@ -353,6 +370,23 @@ _main()
 """
 
 _PYTEST_RUNNER = r"""
+def _fp(head, body):
+    # rc6：第一個沒過的測試名稱放在最前面；太長時保留名稱＋尾端（斷言在尾端），不再只留尾端把名稱截掉
+    s = str(head) + "\n" + str(body)
+    if len(s) <= 800:
+        return s
+    h = str(head)[:200]
+    b = str(body)
+    exc = ""  # 例外那一行（AssertionError: …）常在長 diff 的前面，尾端截掉時單獨留下
+    for ln in b.splitlines():
+        t = ln.strip()
+        tok = t.split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc = t[:240]
+    keep = 800 - len(h) - len(exc) - 10
+    return h + "\n" + (exc + "\n" if exc else "") + "...\n" + b[-max(keep, 100):]
+
+
 def _main():
     import os as _os
     import sys as _sys
@@ -453,6 +487,23 @@ _main()
 """
 
 _BARE_RUNNER = r"""
+def _fp(head, body):
+    # rc6：第一個沒過的測試名稱放在最前面；太長時保留名稱＋尾端（斷言在尾端），不再只留尾端把名稱截掉
+    s = str(head) + "\n" + str(body)
+    if len(s) <= 800:
+        return s
+    h = str(head)[:200]
+    b = str(body)
+    exc = ""  # 例外那一行（AssertionError: …）常在長 diff 的前面，尾端截掉時單獨留下
+    for ln in b.splitlines():
+        t = ln.strip()
+        tok = t.split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc = t[:240]
+    keep = 800 - len(h) - len(exc) - 10
+    return h + "\n" + (exc + "\n" if exc else "") + "...\n" + b[-max(keep, 100):]
+
+
 def _main():
     import os as _os
     import sys as _sys
@@ -546,11 +597,11 @@ def _main():
         except AssertionError:
             out["failures"] += 1
             if out["first_problem"] is None:
-                out["first_problem"] = (label + "\n" + _tb.format_exc(limit=5))[-800:]
+                out["first_problem"] = _fp(label, _tb.format_exc(limit=5))
         except BaseException:
             out["errors"] += 1
             if out["first_problem"] is None:
-                out["first_problem"] = (label + "\n" + _tb.format_exc(limit=5))[-800:]
+                out["first_problem"] = _fp(label, _tb.format_exc(limit=5))
 
     out = {
         "run": 0,
@@ -596,7 +647,7 @@ def _main():
         out["unexpected_successes"] += len(res.unexpectedSuccesses)
         probs = res.failures + res.errors
         if probs and out["first_problem"] is None:
-            out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
+            out["first_problem"] = _fp(probs[0][0], probs[0][1])
 
         abort_unavail = False
         for name, obj in list(mod.__dict__.items()):
@@ -640,7 +691,7 @@ def _main():
                     out["run"] += 1
                     out["errors"] += 1
                     if out["first_problem"] is None:
-                        out["first_problem"] = (f"{mod_name}.{cname}.{mname}\n" + _tb.format_exc(limit=5))[-800:]
+                        out["first_problem"] = _fp(f"{mod_name}.{cname}.{mname}", _tb.format_exc(limit=5))
                     continue
                 meth = getattr(inst, mname)
                 if _needs_required_args(meth):
@@ -5911,7 +5962,10 @@ def _parse_junit_xml(xml_path: pathlib.Path) -> tuple[dict[str, Any] | None, str
                     msg = prob.attrib.get("message", "")
                     body = (prob.text or "").strip()
                     detail = body or msg
-                    first = (f"{name}\n{detail}" if name and detail else (detail or name))[-800:]
+                    first = (f"{name}\n{detail}" if name and detail else (detail or name))
+                    if len(first) > 800 and name and detail:  # rc6：保留測試名稱＋尾端
+                        first = name[:200] + "\n...\n" + detail[-(800 - len(name[:200]) - 5):]
+                    first = first[-800:] if not (name and detail) else first
                     break
     if tests_n < 0 or failures < 0 or errors < 0 or skipped < 0:
         return None, "runner_bad_output"
@@ -5991,7 +6045,17 @@ def _tail_logs(out_log: pathlib.Path, err_log: pathlib.Path) -> str | None:
         if err_log.is_file():
             parts.append(err_log.read_bytes())
         text = b"\n".join(p for p in parts if p).decode("utf-8", "replace").strip()
-        return text[-800:] if text else None
+        if not text:
+            return None
+        # rc6：TAP 輸出（node --test 等）的尾端只有統計行；有 `not ok` 就從第一個 `not ok` 那一段取（含它的錯誤區塊）
+        m = re.search(r"^not ok \d+.*$", text, re.M)
+        if m:
+            block = text[m.start():]
+            nxt = re.search(r"^(?:ok \d+|not ok \d+|# Subtest|1\.\.\d+)", block[m.end() - m.start():], re.M)
+            if nxt:
+                block = block[:m.end() - m.start() + nxt.start()]
+            return block.strip()[:800]
+        return text[-800:]
     except OSError:
         return None
 
@@ -8327,6 +8391,23 @@ def _format_first_problem_lines(fp: str) -> tuple[str | None, list[str]]:
         return None, []
     first = lines[0]
     rest = lines[1:]
+    if first.startswith("not ok "):
+        # TAP（node --test 等）：`not ok 1 - 名稱`，原因在 YAML 區塊的 `error:` 底下
+        name = first.split(" - ", 1)[1] if " - " in first else first
+        reason: list[str] = []
+        in_err = False
+        for ln in rest:
+            if ln.startswith("error:"):
+                v = ln[len("error:"):].strip().strip("'\"")
+                if v and v not in ("|-", "|", ">-"):
+                    reason.append(v)
+                in_err = True
+                continue
+            if in_err:
+                if re.match(r"^[A-Za-z_]+:( |$)", ln) or ln == "...":
+                    break
+                reason.append(ln)
+        return name[:200], [r[:240] for r in reason[:2]]
     if not rest:
         return None, [first[:240]]
 

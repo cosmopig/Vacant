@@ -240,3 +240,47 @@ def test_rc6_9_readmes_synced_for_vacant_do_and_selftest():
         ):
             assert token in txt, f"{name} missing {token!r}"
         assert "4/6" not in txt, f"{name} still has stale 4/6 selftest count"
+
+
+def test_long_traceback_keeps_test_name_and_assertion_line(tmp_path):
+    """第二次查證 P5：traceback 超過 800 字元時，原本只留尾端、把測試名稱截掉（訊息變成 `first failure: -  196,`）。"""
+    import sys as _sys
+    from vacant_network.adapters import restart as _R
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "calc.py").write_text("def items(): return []\n", encoding="utf-8")
+    (proj / "test_calc.py").write_text(
+        "import unittest, calc\nclass T(unittest.TestCase):\n    maxDiff=None\n"
+        "    def test_items(self): self.assertEqual(calc.items(), list(range(100)))\n"
+        "    def test_ok(self): pass\n", encoding="utf-8")
+    agent = tmp_path / "ag.py"
+    agent.write_text("import pathlib\npathlib.Path('calc.py').write_text('def items(): return list(range(0,200,2))\\n')\n",
+                     encoding="utf-8")
+    res = _R.run(proj, lambda p, ws: _R.Launch(argv=[_sys.executable, str(agent)], env={}), "x",
+                 max_attempts=1, attempt_timeout_s=30, budget_s=60)
+    msg = _R.summary(res)
+    assert "first failing test: test_items" in msg, msg
+    assert "AssertionError: Lists differ" in msg, msg
+
+
+def test_node_test_tap_failure_shows_not_ok_name_and_error(tmp_path):
+    """第二次查證 P5：`node --test` 失敗時原本印 TAP 尾端的 `# todo 0`／`# duration_ms`。"""
+    import shutil as _sh
+    import sys as _sys
+    import pytest as _pt
+    from vacant_network.adapters import restart as _R
+    if not (_sh.which("node") and _sh.which("npm")):
+        _pt.skip("node/npm not installed")
+    proj = tmp_path / "proj"
+    proj.mkdir()
+    (proj / "package.json").write_text('{"name":"t","version":"1.0.0","scripts":{"test":"node --test"}}\n', encoding="utf-8")
+    (proj / "calc.js").write_text("exports.add=(a,b)=>a-b;\n", encoding="utf-8")
+    (proj / "calc.test.js").write_text(
+        "const test=require('node:test');const assert=require('node:assert');const {add}=require('./calc');\n"
+        "test('adds numbers',()=>{assert.strictEqual(add(1,2),3);});\ntest('ok',()=>{});\n", encoding="utf-8")
+    res = _R.run(proj, lambda p, ws: _R.Launch(argv=[_sys.executable, "-c", "pass"], env={}), "x",
+                 max_attempts=1, attempt_timeout_s=60, budget_s=120)
+    msg = _R.summary(res)
+    assert "first failing test: adds numbers" in msg, msg
+    assert "-1 !== 3" in msg, msg
+    assert "# todo" not in msg and "duration_ms" not in msg, msg

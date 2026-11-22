@@ -1274,8 +1274,19 @@ def main(argv: list[str] | None = None) -> int:
         from .intake.cli import main as intake_main
         return intake_main(raw)
     if raw[:1] and raw[0] in _ADAPTER_TOP:
-        from .adapters.cli import main as adapters_main
-        return adapters_main(raw)
+        from .adapters import cli as _acli
+        if argv is None:  # 行程入口（console script／python -m）：`vacant do` 結束碼定了之後不再被 Ctrl-C 改掉
+            _acli.KEEP_SIGNAL_GUARD_UNTIL_EXIT = True
+            rc = _acli.main(raw)
+            # 直譯器結束時會把 Python 層的處理器還原成預設（之後一個 SIGINT 就讓結束碼變 -2），SIG_IGN 則會保留
+            import signal as _signal
+            for _sig in (_signal.SIGINT, _signal.SIGTERM):
+                try:
+                    _signal.signal(_sig, _signal.SIG_IGN)
+                except (ValueError, OSError):
+                    pass
+            return rc
+        return _acli.main(raw)
     if raw[:1] == ["audit"] and (
         len(raw) == 1 or raw[1] in _AUDIT_SUB or raw[1].startswith("-")
     ):

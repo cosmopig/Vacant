@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import signal
 import sys
 
 from ..intake import contract as C
@@ -116,6 +117,10 @@ def cmd_do(args) -> int:
     return EXIT.get(str(res.get("outcome")), 2)
 
 
+#: `vacant` 指令本身（行程入口）才設 True：見 _do_restart 的 finally。
+KEEP_SIGNAL_GUARD_UNTIL_EXIT = False
+
+
 def _do_restart(args) -> int:
     """沒有契約：零設定重開模式（`restart.py`；政策＝ops/redo 的 R3）。
 
@@ -157,6 +162,44 @@ def _do_restart(args) -> int:
 
         def build(p, ws, _spec=spec):
             return _spec.build(p, ws, hooks=bool(args.hooks), extra=args.extra)
+    # rc6：run() 結束（含它的寫回臨界區）到 summary 印完、結束碼決定之間，Ctrl-C／SIGTERM 一律只記下、不打斷——
+    # 否則會被 main() 的總攔截接住，印出不知道專案狀態的訊息、蓋掉真正的交件摘要。run() 執行中會換上自己的處理器
+    # （寫回前中斷＝乾淨收尾、寫回中延後），結束時還原成這裡的「只記下」處理器，所以兩段之間沒有空窗。
+    pending: list[str] = []
+
+    def _record(signum, _frame):
+        try:
+            pending.append(signal.Signals(signum).name)
+        except ValueError:
+            pending.append(f"SIG{signum}")
+
+    saved = {}
+    for _sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            saved[_sig] = signal.signal(_sig, _record)
+        except (ValueError, OSError):
+            pass
+    try:
+        return _run_restart_and_report(args, build, prompt, agent, pending)
+    finally:
+        # 當成指令執行時（`vacant do`，由 vacant_network.cli.main 設旗標）不還原：結束碼已定，之後到行程結束前
+        # 再按 Ctrl-C 只記下、不改結束碼（否則 sys.exit 途中的 KeyboardInterrupt 會把結束碼變成 -2）。
+        # 在同一個行程裡被當函式呼叫（測試、程式庫）就照常還原。
+        if KEEP_SIGNAL_GUARD_UNTIL_EXIT:
+            saved = {}
+        for _sig, _h in saved.items():
+            try:
+                signal.signal(_sig, _h)
+            except (ValueError, OSError):
+                pass
+
+
+def _run_restart_and_report(args, build, prompt, agent, pending: list[str]) -> int:
+    from . import restart as RS
+    if pending:  # 還沒開始跑就收到中斷：什麼都沒做
+        print(f"[vacant] interrupted ({pending[0]}) before the run started; nothing was run, project unchanged.",
+              file=sys.stderr)
+        return 130
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
                  check=getattr(args, "check", None),
@@ -170,6 +213,9 @@ def _do_restart(args) -> int:
         print(RS.summary(res))
     if res.get("interrupted"):
         return 130
+    if pending and not res.get("interrupt_deferred"):
+        print(f"  {pending[0]} arrived after the run had finished; nothing was interrupted (the outcome above is final).",
+              flush=True)
     _trigger_auto_gc(agent)
     if (res.get("baseline_error") or res.get("agent_error")
             or res.get("node_modules_changed") or res.get("project_not_writable")
@@ -409,7 +455,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return int(args.func(args))
     except KeyboardInterrupt:
-        print("[vacant] interrupted; project unchanged.", file=sys.stderr)
+        # 這裡不知道專案的狀態（install／uninstall／hook／有契約的 do 都會落到這裡），只說已中斷
+        print("[vacant] interrupted.", file=sys.stderr)
         return 130
     except C.ContractError as e:
         print("vacant: contract problems:\n" + "\n".join(f"  - {p}" for p in e.problems),
