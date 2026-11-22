@@ -193,3 +193,21 @@ diff order, use `difflib.SequenceMatcher(None, gold_lines, candidate_lines,
 autojunk=False).ratio()` (2 × matching lines / total lines). Report this
 separately from event-based contamination; similarity alone does not establish
 that the session accessed a fix.
+
+### v3 pre-run clarification — 2026-11-23
+
+No v3 session has run. Vacant and its wrapper use kit-root Python >=3.11;
+pytest uses the instance's own Python and dependencies from its official
+SWE-bench 3.0.17 harness specification, at the per-instance interpreter path
+recorded in the kit. No stdlib compatibility shim is used. Measure base P2P
+wall time inside the pinned official instance image and set each gate timeout
+to max(120 seconds, ceil(3 * measured seconds + 30 seconds)).
+
+Before sessions, freeze concrete pre-existing base-passing pytest node IDs.
+Every retained P2P label must be covered; no failing-at-base variant may be
+dropped. Omit test-patch-introduced tests even if listed as P2P. Record all
+omissions and label-to-node mappings in KIT.json. Ambiguous labels may exclude
+base-skipped variants only when covered by passing variants. Once frozen,
+any selected test skipped, deselected or not collected causes refusal.
+Set OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS to 1 inside
+the test runner's environment, independently of the caller.
