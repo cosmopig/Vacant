@@ -130,3 +130,11 @@ Also changed when the freeze was reopened:
 - 完整 `PYTHONPATH=. /home/user1/dev/Vacant/.venv/bin/python -m pytest -q -p no:cacheprovider tests/`（單行程、未用 `-n auto`）：**5789 passed, 69 skipped, 5 failed, 0 errors**（共 5863）。5 個失敗皆為與 rc6 無關的既有／本機環境失敗（未修動）：
   - `tests/test_reqloop_freeze_check.py::test_freeze_check_verdict_ok`、`test_freeze_check_covers_all_mandated_checks`（2 項）：本機 `auto/worker`／`NOW.md`／`auto/qwen27b` 凍結狀態既有不符。
   - `tests/test_retention.py::test_auto_gc_dry_run_missing_dir_safe`、`test_retention_main_auto_dry_run_human_output_safe`、`test_retention_main_gc_dry_run_human_output_safe`（3 項）：測試未隔離 `VACANT_WORK`，掃到本機 `~/.vacant-work/` 中既有（2026-11-21 22:34 留下）的 4 個舊目錄共 490 B／8 檔；以空 `VACANT_WORK` 單獨執行該 3 項全過。
+
+### 審查後的補充（Claude，2026-11-22）
+
+- **寫回途中的 Ctrl-C（`729ae83fe`）**：agy 的第 1 項把整段執行都包在「中斷 ⇒ 專案沒有被改動」裡；寫回途中按 Ctrl-C 會讓專案寫到一半，訊息卻說沒改動、收據記成沒交件。改成寫回開始到 `result.json` 寫完是臨界區：期間的 `SIGINT`／`SIGTERM`（第一次、第二次或更多）延後到寫回完成，照常交件（原本的結束碼），訊息最後說明收到過中斷。回歸：`test_sigint_during_write_back_is_deferred_and_project_not_half_written`（關掉延後時會失敗）、`test_second_sigint_and_sigterm_during_write_back_still_wait`。SIGKILL 擋不住，見 KNOWN_LIMITS 第 21 條。
+- **沒過時的原因行（`47e442797`）**：略過只有 `^`／`~` 的 traceback 位置標記行。
+- **測試隔離（`0fb0a9e12`，只改測試）**：`tests/conftest.py` 讓每個測試的 `HOME`、`VACANT_HOME`、`VACANT_WORK` 都指到自己的暫存目錄（獨立的 MonkeyPatch，測試裡的 `monkeypatch.undo()` 撤不掉）。上面那 3 個 retention 失敗就是沒隔離造成的。驗收：全套跑兩次（真家目錄／空家目錄），失敗集合相同，只剩 2 個依賴活 repo 狀態的 freeze-check；真家目錄那次前後 `~/.vacant`、`~/.vacant-work`、`~/.vacant-run`、`~/.vacant-mcp` 清單 0 差異。
+- **cargo／go 實測**（`~/dev/ops/cg_test`）：README 三語標成實驗性支援，五個會算錯的情況寫進 KNOWN_LIMITS 第 15–19 條；保護集合不動，修正排到 0.9.3（`docs/TODO_0.9.3.md`）。
+- 收據的變化：中斷的 run 多一筆 `interrupted` 收據；每次嘗試多記 `first_problem`；寫回途中收到訊號時 `result.json` 多 `interrupt_deferred`（不進收據）。既有欄位意義不變。
