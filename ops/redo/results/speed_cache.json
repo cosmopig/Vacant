@@ -1,4 +1,13 @@
 {
+ "1bd4ab7886cb52850e88f418c93c4b5538e368b31a776d23a727d47a8187a947": {
+  "a_cells": 130,
+  "a_median_wall": 66.5,
+  "a_timeouts": 0,
+  "p_cap_rate": 0.02,
+  "turn_mean": 10.3,
+  "turn_median": 3.6,
+  "turn_p90": 28.6
+ },
  "36057947df305c413fcbb9fe31205105b33d07e0a3669bccd3f61bfb246626af": {
   "a_cells": 170,
   "a_median_wall": 225.5,

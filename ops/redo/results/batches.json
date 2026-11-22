@@ -99,10 +99,9 @@
   },
   {
    "name": "E4B hardpy26",
-   "category": "running",
-   "plan_id": "e4b_hardpy26_vacantdo_rc5_colab",
-   "keepalive": "~/dev/ops/redo_runs_colab/e4b_hardpy26_vacantdo_rc5_colab_20261122T081842Z/keepalive.log",
-   "note": "第一個 Colab 帳號（L4）"
+   "category": "closed",
+   "report": "e4b_hardpy26_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/e4b_hardpy26_vacantdo_rc5_colab_20261122T081842Z/run"
   },
   {
    "name": "confirm3",
@@ -113,10 +112,10 @@
   },
   {
    "name": "W3-5 JS 確認（重跑）",
-   "category": "queued",
+   "category": "running",
    "plan_id": "w35confirm_js_vacantdo_rc5_a100",
-   "status_text": "冒煙等 A100",
-   "note": "30×3（預算，見 prereg.amended）"
+   "note": "30×3（預算，見 prereg.amended）",
+   "keepalive": "~/dev/ops/redo_runs_colab/w35confirm_js_vacantdo_rc5_a100_20261122T135219Z/keepalive.log"
   },
   {
    "name": "atimeout",
