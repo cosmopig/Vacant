@@ -1,6 +1,6 @@
 # Vacant 量測結果總表
 
-> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-22 12:03Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
+> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-22 12:46Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
 > 引用規則照 REPORT 的 quoting_rule：只有 state=EFFECTIVE 且沒有 harness 中途變更的整批數字可以引用，引用時連同模型、agent、題庫、對數一起講；UNRESOLVED／INCOMPLETE 不是負結果。
 
 ## 已結案
@@ -9,7 +9,7 @@
 
 | 批次 | 題庫 題數×重複 | 對照 對 處理 | 模型／後端 | 產品 wheel | 通過數 | b／c／p | state | 放行卻錯 | 後端速度 | 結論 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| redo1 | polyglot_py 34×5 | 原生 pi 對 harness 重開×3 | gemma-4-12b-it-qat／1004 llama.cpp j1 | — | 84/170 → 113/168 | 7／36／9e-06 | **EFFECTIVE** | 0 | 每輪 6.3／11.6／21.5 s；P 撞上限 —；A 中位 285.7s、逾時 12/170 | [CONCLUSION_20261117_REDO1.md](../decisions/conclusions/CONCLUSION_20261117_REDO1.md) |
+| redo1 | polyglot_py 34×5 | 原生 pi 對 harness 重開×3 | gemma-4-12b-it-qat／1004 llama.cpp j1 | — | 84/170 → 113/168（2 對 infra_void 不計） | 7／36／9e-06 | **EFFECTIVE** | 0 | 每輪 6.3／11.6／21.5 s；P 撞上限 —；A 中位 285.7s、逾時 12/170 | [CONCLUSION_20261117_REDO1.md](../decisions/conclusions/CONCLUSION_20261117_REDO1.md) |
 | redo1_opencode | polyglot_py 34×5 | 原生 opencode 對 harness 重開×3 | gemma-4-12b-it-qat／1003 llama.cpp j1 | — | 79/170 → 114/170 | 10／45／2e-06 | **EFFECTIVE** | 0 | 每輪 —／—／— s；P 撞上限 —；A 中位 225.5s、逾時 0/170 | [CONCLUSION_20261121_REDO1_OPENCODE.md](../decisions/conclusions/CONCLUSION_20261121_REDO1_OPENCODE.md) |
 | screen16 | polyglot_py 16×1 | 原生 pi 對 harness 重開×3 | gemma-4-12b-it-qat／1004 llama.cpp j1 | — | 2/16 → 9/16 | 0／7／0.015625 | **EFFECTIVE** | 0 | 每輪 6.2／12.9／21.9 s；P 撞上限 —；A 中位 645.9s、逾時 1/16 | — |
 | screen16_opencode | polyglot_py 16×1 | 原生 opencode 對 harness 重開×3 | gemma-4-12b-it-qat／1003 llama.cpp j1 | — | 4/16 → 9/16 | 2／7／0.179688 | **UNRESOLVED** | 0 | 每輪 —／—／— s；P 撞上限 —；A 中位 255.8s、逾時 0/16 | — |
@@ -17,8 +17,8 @@
 | screen16p4 | polyglot_py 16×1 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j1 | （本機 checkout） | 3/16 → 8/16 | 0／5／0.0625 | **UNRESOLVED** | 0 | 每輪 5.2／8.9／17.8 s；P 撞上限 68%；A 中位 1800.0s、逾時 9/16 | [CONCLUSION_20261120_CONFIRM1.md](../decisions/conclusions/CONCLUSION_20261120_CONFIRM1.md) |
 | confirm1 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j2 | （本機 checkout） | 89/170 → 105/170 | 13／29／0.01952 | **EFFECTIVE** | 0 | 每輪 6.8／13.4／28.5 s；P 撞上限 67%；A 中位 474.9s、逾時 38/170 | [CONCLUSION_20261120_CONFIRM1.md](../decisions/conclusions/CONCLUSION_20261120_CONFIRM1.md) |
 | confirm1c | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | （本機 checkout） | 80/170 → 103/170 | 6／29／0.000117 | **EFFECTIVE** | 0 | 每輪 5.6／11.8／21.8 s；P 撞上限 36%；A 中位 367.1s、逾時 19/170 | [CONCLUSION_20261121_CONFIRM1C.md](../decisions/conclusions/CONCLUSION_20261121_CONFIRM1C.md) |
-| unused40 | exercism_py_unused 40×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | （本機 checkout） | 184/200 → 192/200 | 1／9／0.021484 | **EFFECTIVE** | 0 | 每輪 1.3／5.4／10.9 s；P 撞上限 6%；A 中位 12.1s、逾時 3/200 | [CONCLUSION_20261121_UNUSED40.md](../decisions/conclusions/CONCLUSION_20261121_UNUSED40.md) |
-| hardpy26（Colab） | exercism_py_hard 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 490a9051 | 114/130 → 116/130 | 3／5／0.726562 | **UNRESOLVED** | 0 | 每輪 6.7／24.5／57.9 s；P 撞上限 26%；A 中位 118.2s、逾時 6/130 | [CONCLUSION_20261121_HARDPY26_COLAB.md](../decisions/conclusions/CONCLUSION_20261121_HARDPY26_COLAB.md) |
+| unused40 | exercism_py_unused 40×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 1aad1444（venv 已刪，依 rc1_dist） | 184/200 → 192/200 | 1／9／0.021484 | **EFFECTIVE** | 0 | 每輪 1.3／5.4／10.9 s；P 撞上限 6%；A 中位 12.1s、逾時 3/200 | [CONCLUSION_20261121_UNUSED40.md](../decisions/conclusions/CONCLUSION_20261121_UNUSED40.md) |
+| hardpy26（Colab） | exercism_py_hard 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 490a9051（計畫文字） | 114/130 → 116/130 | 3／5／0.726562 | **UNRESOLVED** | 0 | 每輪 6.7／24.5／57.9 s；P 撞上限 26%；A 中位 118.2s、逾時 6/130 | [CONCLUSION_20261121_HARDPY26_COLAB.md](../decisions/conclusions/CONCLUSION_20261121_HARDPY26_COLAB.md) |
 | W3-5 Py 篩選 | exercism_py_pool 106×1 | 原生 pi 對 原生 pi | gemma-4-12b-it-qat／Colab L4 vLLM j6 | — | 101/106 → 99/106 | 4／2／0.6875 | **UNRESOLVED** | 0 | 每輪 5.4／19.1／33.1 s；P 撞上限 —；A 中位 55.2s、逾時 4/106 | [CONCLUSION_20261121_W35_PY.md](../decisions/conclusions/CONCLUSION_20261121_W35_PY.md) |
 | W3-5 Py 確認 | exercism_py_pool 9×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 28e5480c | 27/45 → 25/45 | 6／4／0.753906 | **UNRESOLVED** | 0 | 每輪 11.9／43.8／91.7 s；P 撞上限 63%；A 中位 791.3s、逾時 9/45 | [CONCLUSION_20261121_W35_PY.md](../decisions/conclusions/CONCLUSION_20261121_W35_PY.md) |
 | W3-5 JS 篩選 | exercism_js_pool 137×1 | 原生 pi 對 原生 pi | gemma-4-12b-it-qat／Colab L4 vLLM j6 | — | 106/137 → 106/137 | 11／11／1.0 | **UNRESOLVED** | 0 | 每輪 4.0／31.4／75.2 s；P 撞上限 —；A 中位 123.3s、逾時 13/137 | [CONCLUSION_20261122_W35_JS.md](../decisions/conclusions/CONCLUSION_20261122_W35_JS.md) |
@@ -30,17 +30,17 @@
 
 | 批次 | 狀態 | 題庫 題數×重複 | 對照 對 處理 | 模型／後端 | 產品 wheel | 進度 | 備註 | 文件 |
 |---|---|---|---|---|---|---|---|---|
-| confirm2 | 進行中 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 37005ec2 | 80 對完成 |  | — |
-| hardjs34 | 進行中 | exercism_js_d4 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j1 | 28e5480c | 85 對完成 |  | — |
-| E4B hardpy26 | 進行中 | exercism_py_hard 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-e4b-it-qat／Colab L4 vLLM j2 | 5bbc57af | 69/130 對 | 第一個 Colab 帳號（L4） | — |
-| confirm3 | 進行中 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab A100 vLLM j4 | 5bbc57af | 29/170 對 | colab2 A100 | — |
+| confirm2 | 進行中 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 37005ec2 | 81 對完成 |  | — |
+| hardjs34 | 進行中 | exercism_js_d4 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j1 | 28e5480c | 86 對完成 |  | — |
+| E4B hardpy26 | 進行中 | exercism_py_hard 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-e4b-it-qat／Colab L4 vLLM j2 | 5bbc57af | 79/130 對 | 第一個 Colab 帳號（L4） | — |
+| confirm3 | 進行中 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab A100 vLLM j4 | 5bbc57af | 36/170 對 | colab2 A100 | — |
 | W3-5 JS 確認（重跑） | 排隊中 | （Colab 題庫：發射時指定） 30×3 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab A100 vLLM j4 | 5bbc57af | 冒煙等 A100 | 30×3（預算，見 prereg.amended） | — |
 | atimeout | 排隊中 | py_mix_pg34_hard26 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／1003 llama.cpp j2 | 5bbc57af | 排在 hardjs34 之後（1003） |  | — |
-| confirm2oc | 排隊中 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 37005ec2 | 排在 confirm2 之後（1004） |  | — |
+| confirm2oc | 排隊中 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 5bbc57af | 排在 confirm2 之後（1004） |  | — |
 | confirm1b | 作廢 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j2 | （本機 checkout） | — |  | [VOID.md](../ops/redo/results/void/confirm1b/VOID.md) |
 | W3-5 JS 確認（第一次） | 作廢 | exercism_js_pool 30×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 28e5480c | — | 約 100/150 對時基礎設施中斷，數字不可引用 | [VOID.md](../ops/redo/results/void/w35js_confirm/VOID.md) |
 | confirm2oc_vacantdo_rel092_opencode_gemma12b_1003 | 撤回 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j1 | 37005ec2 | — |  | [confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md](../ops/redo/plans/confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md) |
-| unused40_vacantdo_rc1_pi_gemma12b_colab | 撤回 | （Colab 題庫：發射時指定） 40×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j4 | （本機 checkout） | — |  | [unused40_vacantdo_rc1_pi_gemma12b_colab.WITHDRAWN.md](../ops/redo/plans/unused40_vacantdo_rc1_pi_gemma12b_colab.WITHDRAWN.md) |
-| hardpy26_vacantdo_rc3_pi_gemma12b_1004 | 撤回 | exercism_py_hard 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 490a9051 | — |  | [hardpy26_vacantdo_rc3_pi_gemma12b_1004.WITHDRAWN.md](../ops/redo/plans/hardpy26_vacantdo_rc3_pi_gemma12b_1004.WITHDRAWN.md) |
-| atimeout_p900_vs_p600_rel092_colab | 撤回 | （Colab 題庫：發射時指定） 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 37005ec2 | — |  | [atimeout_p900_vs_p600_rel092_colab.WITHDRAWN.md](../ops/redo/plans/atimeout_p900_vs_p600_rel092_colab.WITHDRAWN.md) |
-| e4b_hardpy26_vacantdo_rc4_colab | 撤回 | （Colab 題庫：發射時指定） 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-e4b-it-qat／Colab L4 vLLM j6 | 28e5480c | — |  | [e4b_hardpy26_vacantdo_rc4_colab.WITHDRAWN.md](../ops/redo/plans/e4b_hardpy26_vacantdo_rc4_colab.WITHDRAWN.md) |
+| unused40_vacantdo_rc1_pi_gemma12b_colab | 撤回 | （Colab 題庫：發射時指定） 40×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j4 | （VM wheel，計畫未寫） | — |  | [unused40_vacantdo_rc1_pi_gemma12b_colab.WITHDRAWN.md](../ops/redo/plans/unused40_vacantdo_rc1_pi_gemma12b_colab.WITHDRAWN.md) |
+| hardpy26_vacantdo_rc3_pi_gemma12b_1004 | 撤回 | exercism_py_hard 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 490a9051（venv 已刪，依 rc3_dist） | — |  | [hardpy26_vacantdo_rc3_pi_gemma12b_1004.WITHDRAWN.md](../ops/redo/plans/hardpy26_vacantdo_rc3_pi_gemma12b_1004.WITHDRAWN.md) |
+| atimeout_p900_vs_p600_rel092_colab | 撤回 | （Colab 題庫：發射時指定） 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | （VM wheel，計畫未寫） | — |  | [atimeout_p900_vs_p600_rel092_colab.WITHDRAWN.md](../ops/redo/plans/atimeout_p900_vs_p600_rel092_colab.WITHDRAWN.md) |
+| e4b_hardpy26_vacantdo_rc4_colab | 撤回 | （Colab 題庫：發射時指定） 26×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-e4b-it-qat／Colab L4 vLLM j6 | （VM wheel，計畫未寫） | — |  | [e4b_hardpy26_vacantdo_rc4_colab.WITHDRAWN.md](../ops/redo/plans/e4b_hardpy26_vacantdo_rc4_colab.WITHDRAWN.md) |

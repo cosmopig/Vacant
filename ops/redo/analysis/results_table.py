@@ -59,6 +59,54 @@ def _plans_by_id() -> dict:
     return out
 
 
+def _file_sha8(path: str) -> str | None:
+    try:
+        return hashlib.sha256(open(path, "rb").read()).hexdigest()[:8]
+    except OSError:
+        return None
+
+
+def _arm_wheel(arm: dict, raw: str) -> str | None:
+    """產品臂實際用的 wheel（從臂的結構欄位取，不從全文抓第一個雜湊）：
+    - argv[0] 是本機 venv 的 vacant ⇒ 讀那個 venv 裡 vacant_network 的 direct_url.json（pip 記下的 wheel sha256）；editable ⇒ 本機 checkout。
+    - argv[0] 在 /opt/redo/（Colab VM，由 launch_batch --extra-wheel 裝）⇒ 計畫裡寫明的 .whl 檔，重算它的 sha256（只認存在的檔，多個不同就全列）。
+    - 裸 `vacant` ⇒ 當時 PATH 上的本機 checkout。
+    不是產品臂（沒有 vacant do）⇒ None。"""
+    argv = (arm.get("agent") or {}).get("argv") or []
+    if len(argv) < 2 or os.path.basename(argv[0]) != "vacant" or argv[1] != "do":
+        return None
+    exe = os.path.expanduser(argv[0])
+    if exe == "vacant":
+        return "（本機 checkout）"
+    if exe.startswith("/opt/redo/"):
+        shas = sorted({h for h in (_file_sha8(os.path.expanduser(w)) for w in re.findall(r"(~?/[^\s：，；（）\"']+\.whl)", raw)) if h})
+        if not shas:  # 計畫寫的是 dist 目錄（~/dev/ops/rcN_dist）：重算目錄裡那個 wheel
+            for d in sorted(set(re.findall(r"(~/dev/ops/rc\d+_dist)", raw))):
+                shas += [h for h in (_file_sha8(w) for w in glob.glob(os.path.join(os.path.expanduser(d), "*.whl"))) if h]
+            shas = sorted(set(shas))
+        if shas:
+            return "／".join(shas)
+        m = re.search(r"wheel sha256 ([0-9a-f]{8})", raw)  # 最後才用計畫文字裡寫明的 P 臂 wheel 雜湊（標出來）
+        return f"{m.group(1)}（計畫文字）" if m else "（VM wheel，計畫未寫）"
+    venv = os.path.dirname(os.path.dirname(exe))
+    for du in glob.glob(os.path.join(venv, "lib", "python*", "site-packages", "vacant_network-*.dist-info", "direct_url.json")):
+        try:
+            d = json.load(open(du))
+        except (OSError, ValueError):
+            continue
+        if (d.get("dir_info") or {}).get("editable"):
+            return "（本機 checkout）"
+        h = ((d.get("archive_info") or {}).get("hashes") or {}).get("sha256") or (d.get("archive_info") or {}).get("hash", "").split("=")[-1]
+        if h:
+            return h[:8]
+    m = re.fullmatch(r"(rc\d+)_venv", os.path.basename(venv))  # venv 已刪（dist 保留）：依同名 dist 目錄的 wheel，標出來
+    if m:
+        shas = sorted({h for h in (_file_sha8(w) for w in glob.glob(os.path.expanduser(f"~/dev/ops/{m.group(1)}_dist/*.whl"))) if h})
+        if shas:
+            return "／".join(shas) + f"（venv 已刪，依 {m.group(1)}_dist）"
+    return f"（{os.path.basename(venv)}：讀不到 wheel 紀錄）"
+
+
 def _plan_facts(plan: dict, raw: str) -> dict:
     bank = (plan.get("prereg") or {}).get("bank_name") or plan.get("bank", "")
     if bank.startswith("/srv/"):  # Colab：題庫在 VM 上的固定位置，真名看計畫 id／選題
@@ -79,13 +127,7 @@ def _plan_facts(plan: dict, raw: str) -> dict:
             return f"harness 重開×{a.get('max_attempts', '?')}"
         return f"原生 {base_agent}"
 
-    wheel = None
-    m = re.search(r"sha256 ([0-9a-f]{8})[0-9a-f]*", raw)
-    if m and ("wheel" in raw or "whl" in raw):
-        wheel = m.group(1)
-    elif "--extra-wheel" not in raw and any(os.path.basename((a.get("agent") or {}).get("argv", [""])[0]) == "vacant"
-                                            for a in (ctrl, treat)):
-        wheel = "（本機 checkout）"
+    wheel = _arm_wheel(treat, raw) or _arm_wheel(ctrl, raw)
     host = prov.get("name", "?")
     backend = {"colab": "Colab vLLM", "lms1003": "1003 llama.cpp", "lms1004": "1004 llama.cpp"}.get(host, host)
     if host == "colab":
@@ -194,8 +236,10 @@ def build(use_speed: bool = True) -> str:
                                       f"P 撞上限 {_fmt(None if sp['p_cap_rate'] is None else round(sp['p_cap_rate'] * 100), '%')}；"
                                       f"A 中位 {_fmt(sp['a_median_wall'], 's')}、逾時 {sp['a_timeouts']}/{sp['a_cells']}")
             flag = "（harness 中途變更）" if rep.get("harness_changed_mid_run") else ""
+            voids = rep.get("pairs_infra_void") or []
+            vnote = f"（{len(voids)} 對 infra_void 不計）" if voids else ""
             closed.append(f"| {e['name']} | {facts['bank']} {facts['n']} | {facts['arms']} | {facts['model']}／{facts['backend']} | "
-                          f"{facts['wheel']} | {pa['pass']}/{pa['scored']} → {pr['pass']}/{pr['scored']} | "
+                          f"{facts['wheel']} | {pa['pass']}/{pa['scored']} → {pr['pass']}/{pr['scored']}{vnote} | "
                           f"{_fmt(pdd.get('control_only_b'))}／{_fmt(pdd.get('treatment_only_c'))}／{_fmt(pdd.get('mcnemar_exact_p_two_sided'))} | "
                           f"**{rep['state']}**{flag} | {abw} | {spd} | {links} |")
         else:
