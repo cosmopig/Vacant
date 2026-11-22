@@ -99,9 +99,25 @@ def test_fetch_errors_are_not_missing(tmp_path, handbacks):
         score_devin.fetch(repo, str(tmp_path / 'no-repo'), 'sandbox-devin-kit')
 
 
-def test_gate_uses_runtime_python(tmp_path):
+def test_gate_uses_runtime_python(tmp_path, monkeypatch):
+    import runpy
+    from types import SimpleNamespace
     from ops.sandbox.run import gate_suite
     gate_suite(score_devin.TASKS / 'billing', tmp_path / 'gate', portable=True)
     source = (tmp_path / 'gate/test_visible.py').read_text()
-    assert 'pathlib.Path(os.getcwd()).parent / ".venv/bin/python"' in source
     assert str(Path(__file__).resolve().parents[1]) not in source
+    python = tmp_path / '.venv/bin/python'
+    python.parent.mkdir(parents=True)
+    python.touch()
+    frozen = tmp_path / 'receipts/billing-1/_frozen_RUN-ON'
+    frozen.mkdir(parents=True)
+    monkeypatch.chdir(frozen)
+    commands = []
+
+    def execute(cmd, **kwargs):
+        commands.append(cmd)
+        return SimpleNamespace(returncode=0, stdout='', stderr='')
+
+    monkeypatch.setattr(subprocess, 'run', execute)
+    runpy.run_path(str(tmp_path / 'gate/test_visible.py'))['main']()
+    assert commands[0][0] == str(python)

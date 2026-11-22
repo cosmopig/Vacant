@@ -74,7 +74,8 @@ vacant run --workspace . --suite ../gates/<task> --run-dir ../receipts/<task>-N 
 
 The kit ignores `/receipts/`. Gate scripts explicitly use `<kit>/.venv/bin/python`:
 main's vrun verifier runs system `python3` with a cleaned PATH, not the activated
-venv. pytest is a separate prerequisite, not a Vacant runtime dependency. Hand back
+venv. The wrapper searches workspace ancestors because vrun checks a frozen copy
+under `receipts/`. pytest is a separate prerequisite, not a Vacant runtime dependency. Hand back
 only the task workspace at the **tree root** of branch
 `sandbox-devin/<task>-plain`, `-plain2`, or `-vacant`, not the full kit tree.
 Do not commit receipts or gates into the task workspace.

@@ -127,7 +127,8 @@ def gate_suite(task, dest, *, portable=False):
     """vrun 接 check_*/main，不接 pytest；包裝的內容僅有原始可見測試。"""
     dest.mkdir()
     source = (task / 'repo/tests/test_visible.py').read_text()
-    python = 'str(pathlib.Path(os.getcwd()).parent / ".venv/bin/python")' if portable else repr(sys.executable)
+    python = ('next(str(p / ".venv/bin/python") for p in pathlib.Path(os.getcwd()).parents '
+              'if (p / ".venv/bin/python").is_file())') if portable else repr(sys.executable)
     code = (
         'import os, pathlib, subprocess, tempfile\n\n'
         'def main():\n'
