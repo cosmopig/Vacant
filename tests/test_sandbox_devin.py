@@ -188,3 +188,180 @@ def test_gate_uses_runtime_python(tmp_path, monkeypatch):
     monkeypatch.setattr(subprocess, 'run', execute)
     runpy.run_path(str(tmp_path / 'gate/test_visible.py'))['main']()
     assert commands[0][0] == str(python)
+
+
+@pytest.fixture
+def v2_handbacks(tmp_path):
+    env = {**os.environ, 'GIT_AUTHOR_NAME': 'Test', 'GIT_COMMITTER_NAME': 'Test',
+           'GIT_AUTHOR_EMAIL': 'test@example.invalid', 'GIT_COMMITTER_EMAIL': 'test@example.invalid'}
+
+    def git(path, *args):
+        return subprocess.check_output(['git', '-C', str(path), *args], env=env,
+                                       stderr=subprocess.PIPE, text=True).strip()
+
+    remote = tmp_path / 'v2.git'
+    subprocess.run(['git', 'init', '--bare', str(remote)], check=True, capture_output=True)
+    repo = tmp_path / 'v2-kit'
+    repo.mkdir()
+    git(repo, 'init')
+    tasks = sorted(p.name for p in score_devin.V2_BANK.iterdir() if (p / 'task.json').is_file())
+    for task in tasks:
+        shutil.copytree(score_devin.V2_BANK / task / 'repo', repo / task)
+    git(repo, 'add', *tasks)
+    git(repo, 'commit', '-m', 'v2 visible kit')
+    git(repo, 'push', str(remote), 'HEAD:refs/heads/sandbox-devin-kit-v2')
+    deliveries = {}
+    for task in tasks:
+        root = tmp_path / ('delivery-' + task)
+        shutil.copytree(score_devin.V2_BANK / task / 'repo', root)
+        git(root, 'init')
+        paths = [str(p.relative_to(root)) for p in root.rglob('*') if p.is_file() and '.git' not in p.parts]
+        git(root, 'add', *paths)
+        git(root, 'commit', '-m', 'original')
+        original = git(root, 'rev-parse', 'HEAD')
+        shutil.copytree(score_devin.V2_BANK / task / 'solution', root, dirs_exist_ok=True)
+        paths = [str(p.relative_to(root)) for p in root.rglob('*') if p.is_file() and '.git' not in p.parts]
+        git(root, 'add', *paths)
+        git(root, 'commit', '-m', 'reference overlay')
+        deliveries[task] = root, original, git(root, 'rev-parse', 'HEAD')
+
+    def publish(task, branch, solved):
+        root, original, fixed = deliveries[task]
+        sha = fixed if solved else original
+        git(root, 'push', str(remote), sha + ':refs/heads/' + branch)
+        return sha
+
+    return repo, str(remote), tasks, publish
+
+
+@pytest.mark.parametrize(('passed', 'decision'), [(8, 'proceed'), (9, 'ceiling, v2 rejected')])
+def test_v2_calibration_gate_real_scoring(tmp_path, v2_handbacks, capsys, passed, decision):
+    repo, remote, tasks, publish = v2_handbacks
+    for i, task in enumerate(tasks):
+        publish(task, f'sandbox-devin-cal/{task}-plain', i < passed)
+    out = tmp_path / 'calibration'
+    assert score_devin.main(['--repo', str(repo), '--remote', remote, '--protocol', 'calibration',
+                             '--out', str(out)]) == 0
+    stdout = json.loads(capsys.readouterr().out)
+    meta = json.loads((out / 'meta.json').read_text())
+    report = json.loads((out / 'calibration.json').read_text())
+    assert stdout['calibration'] == meta['calibration'] == report
+    assert report['hidden_passed'] == passed and report['scored'] == report['planned'] == 12
+    assert report['threshold'] == 8 and report['complete'] is True
+    assert report['decision'] == decision and report['proceed'] is (passed == 8)
+    assert meta['evidence'] == 'external-devin-calibration' and meta['calibration_only']
+    assert meta['config']['arms'] == ['calibration-plain']
+    assert meta['bank_freeze'] == json.loads((score_devin.V2_BANK / 'FROZEN.json').read_text())
+    assert '≤8/12' in (out / 'calibration.md').read_text()
+    rows = [json.loads(p.read_text()) for p in (out / 'cells').glob('*/result.json')]
+    assert len(rows) == 12 and {r['arm'] for r in rows} == {'calibration-plain'}
+    assert all(r['calibration_only'] and r['sample'] == 1 for r in rows)
+    summary = analyze.analyze(out)
+    assert summary['comparisons'] == {} and summary['missing'] == []
+
+
+def test_v2_calibration_partial_and_isolation(tmp_path, v2_handbacks):
+    repo, remote, tasks, publish = v2_handbacks
+    branch = f'sandbox-devin-cal/{tasks[0]}-plain'
+    publish(tasks[0], branch, True)
+    absent = f'sandbox-devin-cal/{tasks[1]}-plain'
+    out = tmp_path / 'partial-calibration'
+    meta = score_devin.score_branches(repo, remote, [branch, absent], out)
+    report = meta['calibration']
+    assert report['hidden_passed'] == report['scored'] == 1
+    assert len(report['missing_branches']) == 11 and absent in report['missing_branches']
+    assert len(meta['unrequested_branches']) == 10
+    assert not report['complete'] and not report['proceed'] and report['decision'] == 'incomplete'
+    assert len(list((out / 'cells').iterdir())) == 1
+    assert len(analyze.analyze(out)['missing']) == 11
+    with pytest.raises(ValueError, match='already exists'):
+        score_devin.score_branches(repo, remote, [], out, protocol='v2')
+
+
+def test_v2_calibration_empty_and_infra(tmp_path, v2_handbacks, monkeypatch):
+    repo, remote, tasks, publish = v2_handbacks
+    out = tmp_path / 'empty-calibration'
+    meta = score_devin.score_branches(repo, remote, [], out, protocol='calibration')
+    report = meta['calibration']
+    assert report['scored'] == report['hidden_passed'] == 0 and len(meta['missing_branches']) == 12
+    assert report['decision'] == 'incomplete' and not report['proceed']
+    assert (out / 'progress.jsonl').read_text() == ''
+    for task in tasks:
+        publish(task, f'sandbox-devin-cal/{task}-plain', True)
+
+    def score(task, archive):
+        error = 'tests: timeout' if task.name in tasks[:4] else None
+        return dict(hidden_pass=True, visible_pass=True, n_failed=int(bool(error)), error=error)
+
+    monkeypatch.setattr(score_devin, 'score', score)
+    meta = score_devin.score_branches(repo, remote, [], tmp_path / 'infra-calibration', protocol='calibration')
+    report = meta['calibration']
+    assert report['complete'] and report['scored'] == 12 and report['infra_void'] == 4
+    assert report['hidden_passed'] == 8 and report['decision'] == 'proceed'
+
+
+def test_v2_comparison_samples_and_missing(tmp_path, v2_handbacks):
+    repo, remote, tasks, publish = v2_handbacks
+    empty_out = tmp_path / 'empty-comparison'
+    empty = score_devin.score_branches(repo, remote, [], empty_out, protocol='v2')
+    assert len(empty['missing_branches']) == 72
+    assert (empty_out / 'progress.jsonl').read_text() == ''
+    task = tasks[0]
+    expected = {}
+    for arm in ('plain', 'plain2', 'vacant'):
+        for sample in (1, 2):
+            solved = (arm == 'vacant') == (sample == 1)
+            branch = f'sandbox-devin/v2/{task}-{arm}-s{sample}'
+            expected[branch] = publish(task, branch, solved), solved
+    out = tmp_path / 'comparison'
+    meta = score_devin.score_branches(repo, remote, list(expected), out)
+    assert meta['protocol'] == 'v2' and not meta['calibration_only']
+    assert meta['kit_branch'] == 'sandbox-devin-kit-v2'
+    assert meta['bank_dir'] == str(score_devin.V2_BANK.resolve())
+    assert meta['config']['samples'] == 2 and meta['config']['arms'] == ['A', 'A2', 'G']
+    assert len(meta['expected_branches']) == 72 and len(meta['missing_branches']) == 66
+    assert 'calibration' not in meta and not (out / 'calibration.json').exists()
+    assert len(list((out / 'cells').iterdir())) == 6
+    for branch, (sha, solved) in expected.items():
+        _, _, arm, sample = score_devin.parse_branch(branch)
+        row = json.loads((out / f'cells/{task}-s{sample}-{score_devin.ARMS[arm]}/result.json').read_text())
+        assert row['sample'] == sample and row['hidden_pass'] is solved and row['git_sha'] == sha
+        assert row['evidence'] == 'external-devin' and row['calibration_only'] is False
+    summary = analyze.analyze(out)
+    assert len(summary['missing']) == 66
+    paired = summary['comparisons']['G-A']
+    assert paired['n'] == 2 and paired['improved'] == paired['regressed'] == 1
+    assert paired['delta'] == 0 and paired['p'] == 1 and paired['noise_floor'] == 0
+    scheduled = score_devin.score_branches(repo, remote, [], tmp_path / 'scheduled-comparison', protocol='v2')
+    assert len(scheduled['missing_branches']) == 66
+
+
+@pytest.mark.parametrize(('branches', 'protocol'), [
+    (['sandbox-devin-cal/audit_report-plain', 'sandbox-devin/v2/audit_report-plain-s1'], 'auto'),
+    (['sandbox-devin/billing-plain', 'sandbox-devin/v2/audit_report-plain-s1'], 'auto'),
+    (['sandbox-devin-cal/audit_report-plain'], 'v2'),
+    (['sandbox-devin-cal/audit_report-vacant'], 'auto'),
+    (['sandbox-devin/v2/audit_report-plain-s0'], 'auto'),
+    (['sandbox-devin/v2/audit_report-plain-s3'], 'auto'),
+    (['sandbox-devin/v2/audit_report-other-s1'], 'auto'),
+    (['sandbox-devin/v2/unknown-plain-s1'], 'auto'),
+    (['sandbox-devin/v2/audit_report-plain-s1'] * 2, 'v2'),
+])
+def test_v2_invalid_protocols(tmp_path, branches, protocol):
+    out = tmp_path / 'invalid'
+    with pytest.raises(ValueError):
+        score_devin.score_branches(tmp_path, 'unused', branches, out, protocol=protocol)
+    assert not out.exists()
+
+
+def test_v2_requires_frozen_bank(tmp_path, monkeypatch):
+    out = tmp_path / 'result'
+    with pytest.raises(ValueError, match='frozen v2 bank'):
+        score_devin.score_branches(tmp_path, 'unused', [], out, bank=score_devin.TASKS, protocol='v2')
+    bank = tmp_path / 'bank'
+    shutil.copytree(score_devin.V2_BANK, bank)
+    monkeypatch.setattr(score_devin, 'V2_BANK', bank)
+    (bank / 'audit_report/repo/SPEC.md').write_text('changed')
+    with pytest.raises(ValueError, match='differs from FROZEN'):
+        score_devin.score_branches(tmp_path, 'unused', [], out, protocol='calibration')
+    assert not out.exists()

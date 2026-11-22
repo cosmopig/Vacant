@@ -150,7 +150,37 @@ Use a separate operator copy for independent hidden scoring.
 The visible gate is a manual submission protocol, not a resumable Devin command
 or native Stop hook. Gate acceptance is not the independent primary outcome.
 
-The current `score_devin.py` accepts legacy branch names and one sample only;
-it must be extended before scoring this calibration/two-sample branch protocol.
-Do not silently treat calibration branches as comparison arms or collapse sample
-IDs. No v2 sessions are launched by creating this kit or writing these prompts.
+### Operator scoring (not session commands)
+
+The scorer recognizes v1, calibration and v2 comparison branch names automatically
+and rejects mixed protocols in one run. V1 defaults are unchanged. V2 protocols
+select `tasks_v2/` and `sandbox-devin-kit-v2` and verify every frozen task digest.
+Use a fresh output directory for each run; calibration and comparison evidence
+cannot share a run directory. Scoring never launches an agent.
+
+```bash
+# With no branch arguments, request the complete preregistered schedule.
+.venv/bin/python ops/sandbox/score_devin.py --protocol calibration \
+  --out ~/sandbox-runs/devin-v2-calibration
+# Only after the bank proceeds, and after fresh comparison sessions return:
+.venv/bin/python ops/sandbox/score_devin.py --protocol v2 \
+  --out ~/sandbox-runs/devin-v2-comparison
+.venv/bin/python ops/sandbox/analyze.py ~/sandbox-runs/devin-v2-comparison
+```
+
+Calibration writes `calibration.json` and `calibration.md` and prints its scored
+hidden-pass count against the ≤8/12 gate. Its evidence and `calibration-plain`
+arm are separate from A/A2/G. A missing calibration submission makes the gate
+incomplete, never a pass or rejection inferred from a partial denominator.
+Infra-void submissions count as primary failures and remain in the denominator.
+The report is "proceed" at ≤8/12 only with all twelve outcomes, otherwise
+"ceiling, v2 rejected" above 8/12. Calibration is never a comparison input.
+
+Explicit branch arguments score only those submissions; the metadata still
+declares the whole twelve-task schedule (72 comparison cells). `missing_branches`
+lists every scheduled branch absent from the run, including branches not
+requested; `unrequested_branches` distinguishes those from requested-but-absent
+remote refs. No missing cells are synthesized. Comparison samples stay distinct
+as sample indices 1 and 2, with plain/plain2/vacant mapped to A/A2/G. Record
+incomplete coverage; do not present partial paired results as a full 24-pair run.
+The operator, not an automatic launch mechanism, applies the calibration gate.
