@@ -3,7 +3,7 @@
 計畫：`ops/redo/plans/e4b_hardpy26_vacantdo_rc5_colab.json`（第一通模型呼叫前 commit）；REPORT：`ops/redo/results/e4b_hardpy26_REPORT.{md,json}`（原樣複製自 run root）。
 P 臂＝發布版 rc5-final wheel（sha256 `5bbc57af…`，`757ade62f`），由 `launch_batch --extra-wheel` 裝進 VM；pi 不載入任何 Vacant 擴充。
 
-**量的是 rc5-final。** 之後要發布的 rc6（`release/0.9.2-prep` `b1ca9b1ff`，wheel `a575c661…`）相對 rc5-final 只差訊息、輸出與中斷處理（外加 gc 保留被強制中斷那一跑的備份）；交付政策相同（政策差分兩邊用 wheel 跑：13/13 相同，見 `docs/RC5_CHANGES_VS_RC4.md` 的 rc6 節）。這一批的數字是 rc5-final 的數字，引用時照這樣講，不寫成 rc6 量到的。
+**量的是 rc5-final，要發的是 rc6-final。** rc6-final（`release/0.9.2-prep` tag `rc6-final`＝`b1ca9b1ff`，wheel `a575c661…`）相對 rc5-final 只差訊息、輸出、中斷處理與 gc 留存；交付政策相同（政策差分兩邊用 wheel 跑：13/13 相同，見 `docs/RC5_CHANGES_VS_RC4.md` 的 rc6 節）。這一批的數字是 rc5-final 的數字，引用時照這樣講，不寫成 rc6 量到的。
 
 ## 0. 一句話
 
