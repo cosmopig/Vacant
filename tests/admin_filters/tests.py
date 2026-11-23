@@ -3,7 +3,7 @@ import sys
 import unittest
 
 from django.contrib.admin import (
-    AllValuesFieldListFilter, BooleanFieldListFilter, ModelAdmin,
+    AdminSite, AllValuesFieldListFilter, BooleanFieldListFilter, ModelAdmin,
     RelatedOnlyFieldListFilter, SimpleListFilter, site,
 )
 from django.contrib.admin.options import IncorrectLookupParameters
@@ -591,6 +591,29 @@ class ListFiltersTests(TestCase):
         expected = [(self.john.pk, 'John Blue'), (self.jack.pk, 'Jack Red')]
         self.assertEqual(filterspec.lookup_choices, expected)
 
+    def test_related_filters_model_ordering(self):
+        self.djangonaut_book.employee = self.john
+        self.djangonaut_book.save()
+        self.bio_book.employee = self.jack
+        self.bio_book.save()
+
+        class BookAdmin(ModelAdmin):
+            list_filter = ('employee', ('employee', RelatedOnlyFieldListFilter))
+
+        request = self.request_factory.get('/')
+        request.user = self.alfred
+        expected = [(self.jack.pk, 'Jack Red'), (self.john.pk, 'John Blue')]
+        for registered in (False, True):
+            with self.subTest(registered=registered):
+                admin_site = AdminSite()
+                if registered:
+                    admin_site.register(Employee)
+                modeladmin = BookAdmin(Book, admin_site)
+                changelist = modeladmin.get_changelist_instance(request)
+                for filterspec in changelist.get_filters(request)[0]:
+                    with self.subTest(filter_class=type(filterspec)):
+                        self.assertEqual(filterspec.lookup_choices, expected)
+
     def test_relatedfieldlistfilter_manytomany(self):
         modeladmin = BookAdmin(Book, site)
 
@@ -707,6 +730,20 @@ class ListFiltersTests(TestCase):
         filterspec = changelist.get_filters(request)[0][4]
         expected = [(self.alfred.pk, 'alfred'), (self.bob.pk, 'bob')]
         self.assertEqual(sorted(filterspec.lookup_choices), sorted(expected))
+
+    def test_relatedonlyfieldlistfilter_foreignkey_ordering(self):
+        class OrderedUserAdmin(ModelAdmin):
+            ordering = ('-username',)
+
+        admin_site = AdminSite()
+        admin_site.register(User, OrderedUserAdmin)
+        modeladmin = BookAdminRelatedOnlyFilter(Book, admin_site)
+        request = self.request_factory.get('/')
+        request.user = self.alfred
+        changelist = modeladmin.get_changelist_instance(request)
+        filterspec = changelist.get_filters(request)[0][4]
+        expected = [(self.bob.pk, 'bob'), (self.alfred.pk, 'alfred')]
+        self.assertEqual(filterspec.lookup_choices, expected)
 
     def test_relatedonlyfieldlistfilter_underscorelookup_foreignkey(self):
         Department.objects.create(code='TEST', description='Testing')
