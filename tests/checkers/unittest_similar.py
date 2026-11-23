@@ -23,6 +23,7 @@
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -337,6 +338,43 @@ TOTAL lines=62 duplicates=5 percent=8.06
 """
         ).strip()
     )
+
+
+def test_zero_minimum_skips_line_comparisons() -> None:
+    output = StringIO()
+    with patch.object(
+        similar, "hash_lineset", wraps=similar.hash_lineset
+    ) as hash_lines:
+        with redirect_stdout(output), pytest.raises(SystemExit) as ex:
+            similar.Run(["--duplicates=0", SIMILAR1, SIMILAR2])
+    assert ex.value.code == 0
+    assert output.getvalue().strip() == "TOTAL lines=62 duplicates=0 percent=0.00"
+    hash_lines.assert_not_called()
+
+
+@pytest.mark.parametrize("min_lines", [0, 4])
+def test_min_similarity_lines_from_config(tmp_path: Path, min_lines: int) -> None:
+    rcfile = tmp_path / "pylintrc"
+    rcfile.write_text(
+        f"[SIMILARITIES]\nmin-similarity-lines={min_lines}\n", encoding="utf-8"
+    )
+    reporter = Reporter()
+    linter = PyLinter(reporter=reporter)
+    checker = similar.SimilarChecker(linter)
+    linter.register_checker(checker)
+    linter.read_config_file(str(rcfile))
+    linter.load_config_file()
+
+    linter.check([str(INPUT / "similar_lines_a.py"), str(INPUT / "similar_lines_b.py")])
+
+    if min_lines == 0:
+        assert checker.get_map_data() == []
+        assert "R0801" not in reporter.message_ids
+        assert linter.stats["nb_duplicated_lines"] == 0
+        assert linter.stats["percent_duplicated_lines"] == 0
+    else:
+        assert "R0801" in reporter.message_ids
+        assert linter.stats["nb_duplicated_lines"] > 0
 
 
 def test_lines_without_meaningful_content_do_not_trigger_similarity() -> None:

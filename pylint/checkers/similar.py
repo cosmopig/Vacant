@@ -531,6 +531,9 @@ class Similar:
         """iterate on similarities among all files, by making a cartesian
         product
         """
+        if self.min_lines == 0:
+            return
+
         for idx, lineset in enumerate(self.linesets[:-1]):
             for lineset2 in self.linesets[idx + 1 :]:
                 yield from self._find_common(lineset, lineset2)
@@ -739,7 +742,8 @@ class SimilarChecker(BaseChecker, Similar, MapReduceMixin):
                 "default": DEFAULT_MIN_SIMILARITY_LINE,
                 "type": "int",
                 "metavar": "<int>",
-                "help": "Minimum lines number of a similarity.",
+                "help": "Minimum number of lines for a similarity. "
+                "Set to 0 to disable duplicate code checking.",
             },
         ),
         (
@@ -825,6 +829,9 @@ class SimilarChecker(BaseChecker, Similar, MapReduceMixin):
 
         stream must implement the readlines method
         """
+        if self.min_lines == 0:
+            return
+
         with node.stream() as stream:
             self.append_stream(self.linter.current_name, stream, node.file_encoding)
 
