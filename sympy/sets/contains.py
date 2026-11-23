@@ -44,5 +44,9 @@ class Contains(BooleanFunction):
             if i.is_Boolean or i.is_Symbol or
             isinstance(i, (Eq, Ne))])
 
-    def as_set(self):
-        raise NotImplementedError()
+    def _eval_as_set(self):
+        x, s = self.args
+        if x.is_Symbol and x not in s.free_symbols:
+            return s
+        raise NotImplementedError("as_set is only implemented for containment "
+                                  "of a symbol in a set independent of it")
