@@ -1,0 +1,354 @@
+============================================
+Django 4.1 release notes - UNDER DEVELOPMENT
+============================================
+
+*Expected August 2022*
+
+Welcome to Django 4.1!
+
+These release notes cover the :ref:`new features <whats-new-4.1>`, as well as
+some :ref:`backwards incompatible changes <backwards-incompatible-4.1>` you'll
+want to be aware of when upgrading from Django 4.0 or earlier. We've
+:ref:`begun the deprecation process for some features
+<deprecated-features-4.1>`.
+
+See the :doc:`/howto/upgrade-version` guide if you're updating an existing
+project.
+
+Python compatibility
+====================
+
+Django 4.1 supports Python 3.8, 3.9, and 3.10. We **highly recommend** and only
+officially support the latest release of each series.
+
+.. _whats-new-4.1:
+
+What's new in Django 4.1
+========================
+
+.. _csrf-cookie-masked-usage:
+
+``CSRF_COOKIE_MASKED`` setting
+------------------------------
+
+The new :setting:`CSRF_COOKIE_MASKED` transitional setting allows specifying
+whether to mask the CSRF cookie.
+
+:class:`~django.middleware.csrf.CsrfViewMiddleware` no longer masks the CSRF
+cookie like it does the CSRF token in the DOM. If you are upgrading multiple
+instances of the same project to Django 4.1, you should set
+:setting:`CSRF_COOKIE_MASKED` to ``True`` during the transition, in
+order to allow compatibility with the older versions of Django. Once the
+transition to 4.1 is complete you can stop overriding
+:setting:`CSRF_COOKIE_MASKED`.
+
+This setting is deprecated as of this release and will be removed in Django
+5.0.
+
+Minor features
+--------------
+
+:mod:`django.contrib.admin`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The admin :ref:`dark mode CSS variables <admin-theming>` are now applied in a
+  separate stylesheet and template block.
+
+* :ref:`modeladmin-list-filters` providing custom ``FieldListFilter``
+  subclasses can now control the query string value separator when filtering
+  for multiple values using the ``__in`` lookup.
+
+:mod:`django.contrib.admindocs`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.auth`
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The default iteration count for the PBKDF2 password hasher is increased from
+  320,000 to 390,000.
+
+:mod:`django.contrib.contenttypes`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.gis`
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The new :meth:`.GEOSGeometry.make_valid()` method allows converting invalid
+  geometries to valid ones.
+
+:mod:`django.contrib.messages`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.postgres`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The new :class:`BitXor() <django.contrib.postgres.aggregates.BitXor>`
+  aggregate function returns an ``int`` of the bitwise ``XOR`` of all non-null
+  input values.
+
+* :class:`~django.contrib.postgres.indexes.SpGistIndex` now supports covering
+  indexes on PostgreSQL 14+.
+
+* :class:`~django.contrib.postgres.constraints.ExclusionConstraint` now
+  supports covering exclusion constraints using SP-GiST indexes on PostgreSQL
+  14+.
+
+* The new ``default_bounds`` attribute of :attr:`DateTimeRangeField
+  <django.contrib.postgres.fields.DateTimeRangeField.default_bounds>` and
+  :attr:`DecimalRangeField
+  <django.contrib.postgres.fields.DecimalRangeField.default_bounds>` allows
+  specifying bounds for list and tuple inputs.
+
+:mod:`django.contrib.redirects`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.sessions`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.sitemaps`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The default sitemap index template ``<sitemapindex>`` now includes the
+  ``<lastmod>`` timestamp where available, through the new
+  :meth:`~django.contrib.sitemaps.Sitemap.get_latest_lastmod` method. Custom
+  sitemap index templates should be updated for the adjusted :ref:`context
+  variables <sitemap-index-context-variables>`.
+
+:mod:`django.contrib.sites`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.staticfiles`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+:mod:`django.contrib.syndication`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+Cache
+~~~~~
+
+* ...
+
+CSRF
+~~~~
+
+* ...
+
+Decorators
+~~~~~~~~~~
+
+* ...
+
+Email
+~~~~~
+
+* ...
+
+Error Reporting
+~~~~~~~~~~~~~~~
+
+* ...
+
+File Storage
+~~~~~~~~~~~~
+
+* ...
+
+File Uploads
+~~~~~~~~~~~~
+
+* ...
+
+Forms
+~~~~~
+
+* The new :meth:`~django.forms.BoundField.legend_tag` allows rendering field
+  labels in ``<legend>`` tags via the new ``tag`` argument of
+  :meth:`~django.forms.BoundField.label_tag`.
+
+Generic Views
+~~~~~~~~~~~~~
+
+* ...
+
+Internationalization
+~~~~~~~~~~~~~~~~~~~~
+
+* The :func:`~django.conf.urls.i18n.i18n_patterns` function now supports
+  languages with both scripts and regions.
+
+Logging
+~~~~~~~
+
+* ...
+
+Management Commands
+~~~~~~~~~~~~~~~~~~~
+
+* :option:`makemigrations --no-input` now logs default answers and reasons why
+  migrations cannot be created.
+
+Migrations
+~~~~~~~~~~
+
+* ...
+
+Models
+~~~~~~
+
+* The ``order_by`` argument of the
+  :class:`~django.db.models.expressions.Window` expression now accepts string
+  references to fields and transforms.
+
+* The new :setting:`CONN_HEALTH_CHECKS` setting allows enabling health checks
+  for :ref:`persistent database connections <persistent-database-connections>`
+  in order to reduce the number of failed requests, e.g. after database server
+  restart.
+
+Requests and Responses
+~~~~~~~~~~~~~~~~~~~~~~
+
+* ...
+
+Security
+~~~~~~~~
+
+* ...
+
+Serialization
+~~~~~~~~~~~~~
+
+* ...
+
+Signals
+~~~~~~~
+
+* ...
+
+Templates
+~~~~~~~~~
+
+* :tfilter:`json_script` template filter now allows wrapping in a ``<script>``
+  tag without the HTML ``id`` attribute.
+
+Tests
+~~~~~
+
+* A nested atomic block marked as durable in :class:`django.test.TestCase` now
+  raises a ``RuntimeError``, the same as outside of tests.
+
+URLs
+~~~~
+
+* ...
+
+Utilities
+~~~~~~~~~
+
+* ...
+
+Validators
+~~~~~~~~~~
+
+* ...
+
+.. _backwards-incompatible-4.1:
+
+Backwards incompatible changes in 4.1
+=====================================
+
+Database backend API
+--------------------
+
+This section describes changes that may be needed in third-party database
+backends.
+
+* ``BaseDatabaseFeatures.has_case_insensitive_like`` is changed from ``True``
+  to ``False`` to reflect the behavior of most databases.
+
+* ``DatabaseIntrospection.get_key_columns()`` is removed. Use
+  ``DatabaseIntrospection.get_relations()`` instead.
+
+Dropped support for MariaDB 10.2
+--------------------------------
+
+Upstream support for MariaDB 10.2 ends in May 2022. Django 4.1 supports MariaDB
+10.3 and higher.
+
+Miscellaneous
+-------------
+
+* Related managers for :class:`~django.db.models.ForeignKey`,
+  :class:`~django.db.models.ManyToManyField`, and
+  :class:`~django.contrib.contenttypes.fields.GenericRelation` are now cached
+  on the :class:`~django.db.models.Model` instance to which they belong.
+
+* The Django test runner now returns a non-zero error code for unexpected
+  successes from tests marked with :py:func:`unittest.expectedFailure`.
+
+* :class:`~django.middleware.csrf.CsrfViewMiddleware` no longer masks the CSRF
+  cookie like it does the CSRF token in the DOM.
+
+* :class:`~django.middleware.csrf.CsrfViewMiddleware` now uses
+  ``request.META['CSRF_COOKIE']`` for storing the unmasked CSRF secret rather
+  than a masked version. This is an undocumented, private API.
+
+.. _deprecated-features-4.1:
+
+Features deprecated in 4.1
+==========================
+
+Miscellaneous
+-------------
+
+* The context for sitemap index templates of a flat list of URLs is deprecated.
+  Custom sitemap index templates should be updated for the adjusted
+  :ref:`context variables <sitemap-index-context-variables>`, expecting a list
+  of objects with ``location`` and optional ``lastmod`` attributes.
+
+* ``CSRF_COOKIE_MASKED`` transitional setting is deprecated.
+
+Features removed in 4.1
+=======================
+
+These features have reached the end of their deprecation cycle and are removed
+in Django 4.1.
+
+See :ref:`deprecated-features-3.2` for details on these changes, including how
+to remove usage of these features.
+
+* Support for assigning objects which don't support creating deep copies with
+  ``copy.deepcopy()`` to class attributes in ``TestCase.setUpTestData()`` is
+  removed.
+
+* Support for using a boolean value in
+  :attr:`.BaseCommand.requires_system_checks` is removed.
+
+* The ``whitelist`` argument and ``domain_whitelist`` attribute of
+  ``django.core.validators.EmailValidator`` are removed.
+
+* The ``default_app_config`` application configuration variable is removed.
+
+* ``TransactionTestCase.assertQuerysetEqual()`` no longer calls ``repr()`` on a
+  queryset when compared to string values.
+
+* The ``django.core.cache.backends.memcached.MemcachedCache`` backend is
+  removed.
+
+* Support for the pre-Django 3.2 format of messages used by
+  ``django.contrib.messages.storage.cookie.CookieStorage`` is removed.
