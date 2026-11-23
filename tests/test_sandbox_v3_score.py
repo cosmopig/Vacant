@@ -98,6 +98,8 @@ def test_calibration_all_threshold_review_and_outside_help(bank, tmp_path):
     (out / 'NOTES.md').write_text('preserve session notes\n')
     (out / 'SESSIONS.txt').write_text('preserve session IDs\n')
     meta = collect(bank, out)
+    assert meta['config']['seed'] == 20261122
+    assert meta['selection_seed'] == bank['selection']['seed']
     assert meta['calibration']['resolved_count'] == 8
     assert meta['calibration']['decision'] == 'incomplete'
     assert len(meta['unreviewed_branches']) == 12
