@@ -156,7 +156,7 @@ def _sqrt_match(p):
         res = (p, S.Zero, S.Zero)
     elif p.is_Add:
         pargs = sorted(p.args, key=default_sort_key)
-        if all((x**2).is_Rational for x in pargs):
+        if all(x.is_real and (x**2).is_Rational for x in pargs):
             r, b, a = split_surds(p)
             res = a, b, r
             return list(res)
@@ -227,7 +227,8 @@ def _sqrtdenest0(expr):
         if d is S.One:  # n is a square root
             if n.base.is_Add:
                 args = sorted(n.base.args, key=default_sort_key)
-                if len(args) > 2 and all((x**2).is_Integer for x in args):
+                if len(args) > 2 and all(
+                        x.is_real and (x**2).is_Integer for x in args):
                     try:
                         return _sqrtdenest_rec(n)
                     except SqrtdenestStopIteration:

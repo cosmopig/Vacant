@@ -1,4 +1,4 @@
-from sympy import sqrt, root, S, Symbol, sqrtdenest, Integral, cos
+from sympy import sqrt, root, S, Symbol, sqrtdenest, Integral, cos, I
 from sympy.simplify.sqrtdenest import _subsets as subsets
 from sympy.utilities.pytest import slow
 
@@ -18,6 +18,11 @@ def test_sqrtdenest():
         sqrt(3 + 2*r3): 3**(S(3)/4)*(r6/2 + 3*r2/2)/3}
     for i in d:
         assert sqrtdenest(i) == d[i]
+
+
+def test_sqrtdenest_complex():
+    for expr in (sqrt(1 + I), sqrt(1 + sqrt(2) + I)):
+        assert sqrtdenest(expr) == expr
 
 
 def test_sqrtdenest2():
