@@ -1,5 +1,5 @@
 from sympy import (S, Dummy, Lambda, symbols, Interval, Intersection, Set,
-                   EmptySet, FiniteSet, Union, ComplexRegion, Mul)
+                   EmptySet, FiniteSet, Union, ComplexRegion)
 from sympy.multipledispatch import dispatch
 from sympy.sets.conditionset import ConditionSet
 from sympy.sets.fancysets import (Integers, Naturals, Reals, Range,
@@ -278,8 +278,11 @@ def intersection_sets(self, other): # noqa:F811
 
     if other == S.Reals:
         from sympy.core.function import expand_complex
-        from sympy.solvers.solvers import denoms, solve_linear
-        from sympy.core.relational import Eq
+        from sympy.solvers.solvers import denoms
+        from sympy.solvers.solveset import solveset
+
+        if not base_set.is_subset(S.Reals):
+            return None
         f = self.lamda.expr
         n = self.lamda.variables[0]
 
@@ -291,35 +294,18 @@ def intersection_sets(self, other): # noqa:F811
 
         re = re.subs(n_, n)
         im = im.subs(n_, n)
-        ifree = im.free_symbols
-        lam = Lambda(n, re)
-        if im.is_zero:
-            # allow re-evaluation
-            # of self in this case to make
-            # the result canonical
-            pass
-        elif im.is_zero is False:
+        if im.is_zero is False:
             return S.EmptySet
-        elif ifree != {n}:
-            return None
-        else:
-            # univarite imaginary part in same variable
-            x, xis = zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols])
-            if x and all(i == n for i in x):
-                base_set -= FiniteSet(xis)
-            else:
-                base_set -= ConditionSet(n, Eq(im, 0), S.Integers)
+        if not im.is_zero:
+            if im.free_symbols != {n}:
+                return None
+            base_set = base_set.intersect(solveset(im, n, S.Reals))
         # exclude values that make denominators 0
-        for i in denoms(f):
-            if i.has(n):
-                sol = list(zip(*[solve_linear(i, 0) for i in Mul.make_args(im) if n in i.free_symbols]))
-                if sol != []:
-                    x, xis = sol
-                    if x and all(i == n for i in x):
-                        base_set -= FiniteSet(xis)
-                else:
-                    base_set -= ConditionSet(n, Eq(i, 0), S.Integers)
-        return imageset(lam, base_set)
+        for denom in denoms(f, n):
+            if denom.free_symbols != {n}:
+                return None
+            base_set -= solveset(denom, n, S.Reals)
+        return imageset(Lambda(n, re), base_set)
 
     elif isinstance(other, Interval):
         from sympy.solvers.solveset import (invert_real, invert_complex,
