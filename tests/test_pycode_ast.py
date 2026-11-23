@@ -33,6 +33,8 @@ from sphinx.pycode import ast
     ("...", "..."),                             # Ellipsis
     ("a // b", "a // b"),                       # FloorDiv
     ("Tuple[int, int]", "Tuple[int, int]"),     # Index, Subscript
+    ("items[1,]", "items[1,]"),                 # Singleton tuple index
+    ("items[()]", "items[()]"),                 # Empty tuple index
     ("~ 1", "~ 1"),                             # Invert
     ("lambda x, y: x + y",
      "lambda x, y: ..."),                       # Lambda
@@ -53,7 +55,9 @@ from sphinx.pycode import ast
     ("+ a", "+ a"),                             # UAdd
     ("- 1", "- 1"),                             # UnaryOp
     ("- a", "- a"),                             # USub
-    ("(1, 2, 3)", "1, 2, 3"),                   # Tuple
+    ("(1, 2, 3)", "(1, 2, 3)"),                 # Tuple
+    ("(1,)", "(1,)"),                           # Tuple (singleton)
+    ("((1, 2), 3)", "((1, 2), 3)"),              # Tuple (nested)
     ("()", "()"),                               # Tuple (empty)
 ])
 def test_unparse(source, expected):

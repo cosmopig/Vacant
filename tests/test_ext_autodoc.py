@@ -1321,6 +1321,16 @@ def test_automethod_for_decorated(app):
     ]
 
 
+@pytest.mark.sphinx('html', testroot='ext-autodoc', srcdir='ext-autodoc-tuple-default')
+def test_automethod_tuple_default(app):
+    (app.srcdir / 'index.rst').write_text(
+        '.. automethod:: target.methods.Base.meth_with_tuple_default\n')
+    app.builder.build_all()
+
+    content = (app.outdir / 'index.html').read_text()
+    assert '<span class="default_value">(1, 1, 1)</span>' in content
+
+
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_abstractmethods(app):
     options = {"members": None,
