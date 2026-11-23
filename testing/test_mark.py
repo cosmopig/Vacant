@@ -561,6 +561,55 @@ class TestFunctional:
         items, rec = pytester.inline_genitems(p)
         self.assert_markers(items, test_foo=("a", "b", "c"), test_bar=("a", "b", "d"))
 
+    def test_marks_from_multiple_base_classes(self, pytester: Pytester) -> None:
+        pytester.makeini(
+            """
+            [pytest]
+            markers =
+                foo
+                bar
+        """
+        )
+        p = pytester.makepyfile(
+            """
+            import pytest
+
+            @pytest.mark.foo("root")
+            class Root:
+                pass
+
+            @pytest.mark.foo("left")
+            class Left(Root):
+                pass
+
+            class Right(Root):
+                pytestmark = [pytest.mark.foo("right"), pytest.mark.bar]
+
+            class TestCombined(Left, Right):
+                def test_combined(self):
+                    pass
+
+            @pytest.mark.foo("child")
+            class TestDecorated(TestCombined):
+                pass
+        """
+        )
+        items, _ = pytester.inline_genitems(p)
+        combined, decorated = items
+        assert [mark.args[0] for mark in combined.iter_markers("foo")] == [
+            "root",
+            "right",
+            "left",
+        ]
+        assert [mark.args[0] for mark in decorated.iter_markers("foo")] == [
+            "root",
+            "right",
+            "left",
+            "child",
+        ]
+        assert list(combined.iter_markers("bar"))
+        assert list(decorated.iter_markers("bar"))
+
     def test_mark_closest(self, pytester: Pytester) -> None:
         p = pytester.makepyfile(
             """

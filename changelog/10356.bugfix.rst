@@ -1,0 +1,1 @@
+Test classes now inherit marks from all their base classes, not just the first base with marks.

@@ -355,12 +355,19 @@ class MarkDecorator:
         return self.with_args(*args, **kwargs)
 
 
-def get_unpacked_marks(obj: object) -> Iterable[Mark]:
-    """Obtain the unpacked marks that are stored on an object."""
-    mark_list = getattr(obj, "pytestmark", [])
-    if not isinstance(mark_list, list):
-        mark_list = [mark_list]
-    return normalize_mark_list(mark_list)
+def get_unpacked_marks(obj: object, *, consider_mro: bool = True) -> Iterable[Mark]:
+    """Obtain the unpacked marks on an object, including bases for classes."""
+    if isinstance(obj, type):
+        # Read only the marks declared on each class, in base-to-subclass order.
+        classes = obj.__mro__ if consider_mro else (obj,)
+        mark_lists = [cls.__dict__.get("pytestmark", []) for cls in reversed(classes)]
+    else:
+        mark_lists = [getattr(obj, "pytestmark", [])]
+
+    for mark_list in mark_lists:
+        yield from normalize_mark_list(
+            mark_list if isinstance(mark_list, list) else [mark_list]
+        )
 
 
 def normalize_mark_list(
@@ -386,9 +393,8 @@ def store_mark(obj, mark: Mark) -> None:
     This is used to implement the Mark declarations/decorators correctly.
     """
     assert isinstance(mark, Mark), mark
-    # Always reassign name to avoid updating pytestmark in a reference that
-    # was only borrowed.
-    obj.pytestmark = [*get_unpacked_marks(obj), mark]
+    # Keep inherited marks on the bases so collection doesn't see them twice.
+    obj.pytestmark = [*get_unpacked_marks(obj, consider_mro=False), mark]
 
 
 # Typing for builtin pytest marks. This is cheating; it gives builtin marks
