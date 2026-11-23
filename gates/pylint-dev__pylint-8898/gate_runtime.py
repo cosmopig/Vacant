@@ -48,13 +48,15 @@ def manifest(workspace):
     return nodes
 
 
-def command(arguments, cwd, deadline, step, nodes):
+def command(arguments, cwd, deadline, step, nodes, interpreter_bin=None):
     remaining = deadline - time.monotonic()
     if remaining <= 0:
         raise Refusal(step, nodes, 'Per-instance gate timeout exhausted.')
     env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
     env.update(PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', OPENBLAS_NUM_THREADS='1',
                OMP_NUM_THREADS='1', MKL_NUM_THREADS='1')
+    if interpreter_bin is not None:
+        env['PATH'] = str(interpreter_bin) + os.pathsep + env.get('PATH', os.defpath)
     process = subprocess.Popen(arguments, cwd=cwd, env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, start_new_session=True)
     try:
@@ -160,7 +162,8 @@ def check(workspace, suite, base_workspace=None):
         for step, tree in (('A', base), ('B', workspace)):
             report = scratch / (step + '.json')
             code, stdout, stderr = command([str(interpreter), '-I', '-B', str(suite / 'node_runner.py'),
-                                            str(tree), str(request), str(report)], workspace, deadline, step, nodes)
+                                            str(tree), str(request), str(report)], workspace, deadline, step, nodes,
+                                            interpreter.parent)
             evidence = json.loads(report.read_text()) if report.is_file() else {}
             if step == 'A':
                 ok = bool(set(evidence.get('body_failed', [])) & set(nodes))
@@ -181,7 +184,7 @@ def check(workspace, suite, base_workspace=None):
                   'sys.argv=sys.argv[1:]; runpy.run_path(runner,run_name="__main__")')
         code, stdout, stderr = command([str(interpreter), '-I', '-B', '-c', launch,
                                         str(suite / 'p2p_runner.py'), str(workspace), str(selected)],
-                                       workspace, deadline, 'C', p2p_nodes)
+                                       workspace, deadline, 'C', p2p_nodes, interpreter.parent)
         if code:
             raise Refusal('C', p2p_nodes, stdout.decode(errors='replace') + stderr.decode(errors='replace'))
     return dict(A='pass', B='pass', C='pass', nodes=nodes)
