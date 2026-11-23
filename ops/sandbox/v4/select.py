@@ -274,9 +274,15 @@ def main(argv=None):
     parser.add_argument('--dataset-json', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--out', type=Path, default=HERE / 'SELECTION.json')
+    parser.add_argument('--overwrite-frozen', action='store_true',
+                        help='Explicitly permit replacing a completed frozen bank and its calibration.')
     parser.add_argument('--jobs', type=int, choices=(1, 2, 3, 4), default=2)
     parser.add_argument('--timeout', type=int, default=1800)
     args = parser.parse_args(argv)
+    if args.out.exists() and not args.overwrite_frozen:
+        previous = json.loads(args.out.read_text())
+        if previous.get('status', '').startswith('complete'):
+            parser.error('refusing to overwrite frozen bank; use --overwrite-frozen or a different --out')
     log(f'Starting v4 selector: jobs={args.jobs}, target={TARGET}, initial cap={INITIAL_CAP}; pull backoff=900..3600s')
     if version('swebench') != v3.HARNESS_VERSION:
         raise ValueError('requires swebench==' + v3.HARNESS_VERSION)

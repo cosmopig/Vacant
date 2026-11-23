@@ -83,6 +83,9 @@ planning assumptions, not a guarantee of the v4 discordance or achieved power.
 See `../PREREG.md` for the frozen design and the agent-test red/green gate.
 
 The selector itself creates no workspaces or v4 dispatch sessions.
+Completed outputs are frozen: rerunning the default command refuses before
+validation or writes. Use a different `--out` for an independent reconstruction;
+`--overwrite-frozen` explicitly permits replacing a completed bank and calibration.
 
 ## Bank-independent gate template
 

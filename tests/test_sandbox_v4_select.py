@@ -22,6 +22,39 @@ def test_inclusive_pool_exclusions_and_fraction_buckets():
         select.candidates(rows, refs[:9], set())
 
 
+@pytest.mark.parametrize('status', ['complete', 'complete_undersized'])
+def test_default_main_refuses_frozen_bank_before_validation(tmp_path, monkeypatch, status):
+    output = tmp_path / 'SELECTION.json'
+    saved = json.dumps(dict(status=status, replacements=[dict(outgoing='old', incoming='new')],
+                            calibration_instance_ids=['frozen']))
+    output.write_text(saved)
+    monkeypatch.setattr(select, 'HERE', tmp_path)
+    monkeypatch.setattr(select, 'version', lambda _: pytest.fail('guard must run before validation'))
+    with pytest.raises(SystemExit) as exc:
+        select.main(['--experiments', 'missing', '--dataset-json', 'missing', '--work-dir', str(tmp_path / 'work')])
+    assert exc.value.code == 2 and output.read_text() == saved
+    assert not (tmp_path / 'work').exists()
+
+
+@pytest.mark.parametrize('status,flags', [(None, []), ('incomplete', []), ('blocked', []),
+                                        ('complete', ['--overwrite-frozen'])])
+def test_main_can_start_resume_or_explicitly_overwrite(tmp_path, monkeypatch, status, flags):
+    output = tmp_path / 'SELECTION.json'
+    if status is not None:
+        output.write_text(json.dumps(dict(status=status)))
+    monkeypatch.setattr(select, 'HERE', tmp_path)
+
+    class ReachedValidation(Exception):
+        pass
+
+    def version(_):
+        raise ReachedValidation()
+
+    monkeypatch.setattr(select, 'version', version)
+    with pytest.raises(ReachedValidation):
+        select.main(['--experiments', 'missing', '--dataset-json', 'missing', '--work-dir', str(tmp_path / 'work'), *flags])
+
+
 def test_seeded_draw_and_calibration_do_not_modify_global_rng():
     pool = [dict(instance_id=f'i{i}') for i in range(70)]
     state = random.getstate()
