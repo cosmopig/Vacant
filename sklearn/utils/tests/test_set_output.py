@@ -36,6 +36,17 @@ def test__wrap_in_pandas_container_dense_update_columns_and_index():
     assert_array_equal(new_df.index, new_index)
 
 
+def test__wrap_in_pandas_container_dense_keeps_index_on_length_mismatch():
+    """Check that the index of a dataframe with a different number of rows than
+    the original input is kept (e.g. a transformer that aggregates samples)."""
+    pd = pytest.importorskip("pandas")
+    X_df = pd.DataFrame([[1, 0, 3], [0, 0, 1]], columns=["a", "b", "c"], index=[3, 7])
+    new_index = [10, 12, 14]
+
+    new_df = _wrap_in_pandas_container(X_df, columns=None, index=new_index)
+    assert_array_equal(new_df.index, [3, 7])
+
+
 def test__wrap_in_pandas_container_error_validation():
     """Check errors in _wrap_in_pandas_container."""
     X = np.asarray([[1, 0, 3], [0, 0, 1]])

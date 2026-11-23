@@ -34,7 +34,9 @@ def _wrap_in_pandas_container(
         `range(n_features)`.
 
     index : array-like, default=None
-        Index for data.
+        Index for data. If `data_to_wrap` is already a dataframe whose number
+        of rows differs from `len(index)` (e.g. a transformer that aggregates
+        samples), its own index is kept.
 
     Returns
     -------
@@ -55,7 +57,7 @@ def _wrap_in_pandas_container(
     if isinstance(data_to_wrap, pd.DataFrame):
         if columns is not None:
             data_to_wrap.columns = columns
-        if index is not None:
+        if index is not None and len(index) == len(data_to_wrap):
             data_to_wrap.index = index
         return data_to_wrap
 
