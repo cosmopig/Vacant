@@ -1937,6 +1937,55 @@ def test_where_attrs() -> None:
     assert actual.attrs == {}
 
 
+def test_where_attrs_coords() -> None:
+    cond = xr.DataArray(
+        [True, False],
+        dims="x",
+        coords={"x": ("x", [0, 1], {"attr": "cond_coord"})},
+        attrs={"attr": "cond"},
+    )
+    x = xr.DataArray(
+        [1, 1],
+        dims="x",
+        coords={
+            "x": ("x", [0, 1], {"attr": "x_coord"}),
+            "a": ("x", [2, 3], {"attr": "x_a"}),
+        },
+        attrs={"attr": "x"},
+    )
+    y = xr.DataArray(
+        [0, 0],
+        dims="x",
+        coords={
+            "x": ("x", [0, 1], {"attr": "y_coord"}),
+            "b": ("x", [4, 5], {"attr": "y_b"}),
+        },
+        attrs={"attr": "y"},
+    )
+    actual = xr.where(cond, x, y, keep_attrs=True)
+    assert actual.attrs == {"attr": "x"}
+    assert actual.x.attrs == {"attr": "x_coord"}
+    assert actual.a.attrs == {"attr": "x_a"}
+    assert actual.b.attrs == {"attr": "y_b"}
+
+    # coordinates of the inputs are not modified
+    assert x.x.attrs == {"attr": "x_coord"}
+    assert y.b.attrs == {"attr": "y_b"}
+
+    # Dataset
+    ds_x = x.to_dataset(name="v")
+    ds_y = y.to_dataset(name="v")
+    ds_x.attrs = {"attr": "ds_x"}
+    actual_ds = xr.where(cond, ds_x, ds_y, keep_attrs=True)
+    assert actual_ds.attrs == {"attr": "ds_x"}
+    assert actual_ds.x.attrs == {"attr": "x_coord"}
+    assert actual_ds.b.attrs == {"attr": "y_b"}
+
+    # keep_attrs=False drops coordinate attrs as before
+    actual = xr.where(cond, x, y, keep_attrs=False)
+    assert actual.attrs == {}
+
+
 @pytest.mark.parametrize(
     "use_dask", [pytest.param(False, id="nodask"), pytest.param(True, id="dask")]
 )
