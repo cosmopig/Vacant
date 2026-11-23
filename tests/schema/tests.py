@@ -2570,6 +2570,48 @@ class SchemaTests(TransactionTestCase):
         with connection.schema_editor() as editor:
             editor.alter_unique_together(Book, [["author", "title"]], [])
 
+    def _unique_constraints_on(self, table, columns):
+        return [
+            name
+            for name, details in self.get_constraints(table).items()
+            if details["columns"] == columns
+            and details["unique"]
+            and not details["primary_key"]
+        ]
+
+    def test_unique_together_on_primary_key_field(self):
+        with connection.schema_editor() as editor:
+            editor.create_model(Author)
+        self.local_models = [Author]
+        table = Author._meta.db_table
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Author, [], [["id"]])
+        if connection.features.allows_multiple_constraints_on_same_fields:
+            self.assertEqual(len(self._unique_constraints_on(table, ["id"])), 1)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Author, [["id"]], [])
+        self.assertEqual(self._unique_constraints_on(table, ["id"]), [])
+        # The primary key is kept.
+        self.assertEqual(self.get_primary_key(table), "id")
+
+    @skipUnlessDBFeature("allows_multiple_constraints_on_same_fields")
+    def test_unique_together_on_unique_field(self):
+        with connection.schema_editor() as editor:
+            editor.create_model(Tag)
+        self.local_models = [Tag]
+        table = Tag._meta.db_table
+        constraints_before = self._unique_constraints_on(table, ["slug"])
+        self.assertEqual(len(constraints_before), 1)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Tag, [], [["slug"]])
+        self.assertEqual(len(self._unique_constraints_on(table, ["slug"])), 2)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Tag, [["slug"]], [])
+        # The field's own unique constraint is kept.
+        self.assertEqual(
+            self._unique_constraints_on(table, ["slug"]), constraints_before
+        )
+
     @skipUnlessDBFeature("allows_multiple_constraints_on_same_fields")
     def test_remove_unique_together_does_not_remove_meta_constraints(self):
         with connection.schema_editor() as editor:

@@ -562,12 +562,27 @@ class BaseDatabaseSchemaEditor:
         }
         meta_index_names = {constraint.name for constraint in model._meta.indexes}
         columns = [model._meta.get_field(field).column for field in fields]
+        if constraint_kwargs.get("unique") is True:
+            # A primary key is also unique but never belongs to unique_together.
+            constraint_kwargs = {"primary_key": False, **constraint_kwargs}
         constraint_names = self._constraint_names(
             model,
             columns,
             exclude=meta_constraint_names | meta_index_names,
             **constraint_kwargs,
         )
+        if (
+            constraint_kwargs.get("unique") is True
+            and len(constraint_names) > 1
+            and self.connection.features.allows_multiple_constraints_on_same_fields
+        ):
+            # Several unique constraints (e.g. a field's own unique=True), prefer
+            # the one named as unique_together creates it.
+            default_name = self._create_index_name(
+                model._meta.db_table, columns, suffix="_uniq"
+            )
+            if default_name in constraint_names:
+                constraint_names = [default_name]
         if len(constraint_names) != 1:
             raise ValueError(
                 "Found wrong number (%s) of constraints for %s(%s)"
