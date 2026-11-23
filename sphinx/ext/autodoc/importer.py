@@ -14,7 +14,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from sphinx.deprecation import RemovedInSphinx40Warning, deprecated_alias
-from sphinx.pycode import ModuleAnalyzer
+from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
 from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
                                  safe_getattr)
@@ -296,6 +296,30 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
                     members[unmangled] = ClassAttribute(None, unmangled, value)
         except AttributeError:
             continue
+
+    # docstrings of attributes (cf. ``attr = None  #: doc``) defined in the
+    # superclasses
+    try:
+        for cls in getmro(subject)[1:]:
+            try:
+                modname = safe_getattr(cls, '__module__')
+                qualname = safe_getattr(cls, '__qualname__')
+                cls_analyzer = ModuleAnalyzer.for_module(modname)
+                cls_analyzer.analyze()
+            except (AttributeError, PycodeError):
+                continue
+
+            for (ns, name), docstring in cls_analyzer.attr_docs.items():
+                if ns != qualname:
+                    continue
+                if name not in members:
+                    # instance attribute defined in __init__() of the superclass
+                    members[name] = ClassAttribute(cls, name, INSTANCEATTR,
+                                                   '\n'.join(docstring))
+                elif members[name].class_ is None and members[name].docstring is None:
+                    members[name].docstring = '\n'.join(docstring)
+    except AttributeError:
+        pass
 
     # annotation only member (ex. attr: int)
     for cls in getmro(subject):

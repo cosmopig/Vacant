@@ -2234,3 +2234,76 @@ def test_name_mangling(app):
         '      name of Foo',
         '',
     ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_inherited_attributes(app):
+    options = {"members": None,
+               "inherited-members": None}
+    actual = do_autodoc(app, 'class', 'target.inherited_attributes.Derived', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Derived()',
+        '   :module: target.inherited_attributes',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr1',
+        '      :module: target.inherited_attributes',
+        '      :value: None',
+        '',
+        '      docstring for attr1',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr2',
+        '      :module: target.inherited_attributes',
+        '      :value: None',
+        '',
+        '      docstring for attr2',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr3',
+        '      :module: target.inherited_attributes',
+        '',
+        '      docstring for attr3',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr4',
+        '      :module: target.inherited_attributes',
+        '      :value: None',
+        '',
+        '      docstring for attr4',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_inherited_attributes_without_inherited_members(app):
+    options = {"members": None}
+    actual = do_autodoc(app, 'class', 'target.inherited_attributes.Derived', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Derived()',
+        '   :module: target.inherited_attributes',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr4',
+        '      :module: target.inherited_attributes',
+        '      :value: None',
+        '',
+        '      docstring for attr4',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autoattribute_inherited_attribute(app):
+    actual = do_autodoc(app, 'attribute', 'target.inherited_attributes.Derived.attr1')
+    assert list(actual) == [
+        '',
+        '.. py:attribute:: Derived.attr1',
+        '   :module: target.inherited_attributes',
+        '   :value: None',
+        '',
+        '   docstring for attr1',
+        '',
+    ]
