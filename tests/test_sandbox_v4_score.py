@@ -185,6 +185,21 @@ def test_comparison_full_372_cells_primary_sensitivity_and_null_bound(bank, tmp_
     assert sensitivity['comparisons']['G-A']['n'] == sensitivity['aa_control']['n'] == 124
     assert primary['analysis_complete']
     assert primary['comparisons']['G-A']['largest_gain_not_ruled_out'] == primary['comparisons']['G-A']['ci95'][1]
+    original_views = report['analysis_views'].copy()
+    report['cell_states'] = {expected[1]: dict(status='base_mismatch')}
+    score.write_json(out / 'meta.json', report)
+    report = score.review(out)
+    assert report['analysis_views'] != original_views
+    assert load(out / 'analysis-primary.json')['comparisons']['G-A']['n'] == 122
+    assert load(out / 'analysis-sensitivity.json')['comparisons']['G-A']['n'] == 123
+    report['cell_states'] = {b: dict(status='base_mismatch') for b in expected}
+    score.write_json(out / 'meta.json', report)
+    report = score.review(out)
+    assert load(out / 'analysis-primary.json')['comparisons']['G-A']['n'] == 0
+    assert load(out / 'analysis-sensitivity.json')['comparisons']['G-A']['n'] == 0
+    report['cell_states'] = {}
+    score.write_json(out / 'meta.json', report)
+    assert score.review(out)['analysis_views'] == original_views
 
 
 def test_schedule_validation_and_session_mapping(bank, tmp_path):

@@ -240,10 +240,14 @@ def review(out, *, version=3, excluded_branches=()):
         write_json(out / 'calibration.json', report)
         meta['calibration'] = report
     else:
-        review_hash = digest(canonical(verdicts))
+        review_inputs = dict(verdicts=verdicts, rows=rows, excluded_branches=sorted(excluded_branches),
+                             protocol=meta['protocol'], task_ids=meta['task_ids'],
+                             control_only=meta['control_only'], missing_branches=meta['missing_branches'])
+        review_hash = digest(canonical(review_inputs))
         archive = out / 'reviews' / review_hash
         archive.mkdir(parents=True, exist_ok=True)
         write_json(archive / 'contamination.json', verdicts)
+        write_json(archive / 'review-inputs.json', review_inputs)
         meta['analysis_views'] = {}
         for name in ('primary', 'sensitivity'):
             view = archive / name
