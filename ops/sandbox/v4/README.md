@@ -188,9 +188,10 @@ Other infrastructure failures remain infra_void failures in the denominator.
 Images are retained; the puller pauses at 85% disk use, without deleting any
 images. Check disk capacity before the full comparison. Harness attempts and
 interrupted cells are archived, not overwritten. Resume checks frozen inputs,
-protocol and timeout. A moved or deleted delivered branch makes results
-incomplete; it is never silently rescored. Use a fresh results directory to
-score a different delivery. `--control-only` cannot clear calibration.
+protocol and timeout. A moved or deleted delivered branch archives its old
+score and audit and makes results incomplete. A present replacement delivery
+is rescored with both audits reset to unknown; a deleted branch remains missing.
+Unchanged cached scores are reused. `--control-only` cannot clear calibration.
 
 ### Session audits and review
 

@@ -55,6 +55,12 @@ def slot(session=None, sha=None):
                 reviewer=None, session_id=session, handback_sha=sha)
 
 
+def cell_path(out, branch):
+    protocol, task, external_arm, sample = parse_branch(branch)
+    arm = 'calibration-plain' if protocol == 'calibration' else v3.ARMS[external_arm]
+    return Path(out) / 'cells' / f'{task}-s{sample}-{arm}'
+
+
 def official_runner(python, timeout):
     def run(instance, candidate, image, cell):
         images.ensure_image(image)
@@ -83,11 +89,20 @@ def _review(out):
     meta = json.loads((out / 'meta.json').read_text())
     if meta.get('version') != 4:
         raise ValueError('not a v4 run')
+    verdicts = json.loads((out / 'contamination.json').read_text())
+    for branch in meta.get('changed_branches', []):
+        cell = cell_path(out, branch)
+        if cell.exists():
+            archive = out / 'superseded' / f'{cell.name}-{time.time_ns()}'
+            archive.parent.mkdir(exist_ok=True)
+            shutil.move(str(cell), archive)
+            write_json(archive / 'audit.json', verdicts[branch])
+        verdicts[branch] = slot(meta['sessions'].get(branch))
+    write_json(out / 'contamination.json', verdicts)
     rows = [json.loads(p.read_text()) for p in sorted((out / 'cells').glob('*/result.json'))]
     branches = [r['branch'] for r in rows]
     if len(set(branches)) != len(branches) or not set(branches) <= set(meta['expected_branches']):
         raise ValueError('duplicate or unscheduled scored cells')
-    verdicts = json.loads((out / 'contamination.json').read_text())
     for row in rows:
         verdict = verdicts[row['branch']]
         if any(verdict.get(k) is not None for k in ('contaminated', 'outside_help')):
@@ -95,7 +110,7 @@ def _review(out):
                     or verdict.get('session_id') != row['session_id'] or verdict.get('handback_sha') != row['git_sha']
                     or meta['sessions'].get(row['branch']) != row['session_id']):
                 raise ValueError('audit must bind reviewer, session and scored handback: ' + row['branch'])
-    meta['missing_branches'] = [b for b in meta['expected_branches'] if b not in branches]
+    meta['missing_branches'] = [b for b in meta['expected_branches'] if b not in branches or b in meta.get('changed_branches', [])]
     write_json(out / 'meta.json', meta)
     meta = v3.review(out, version=4)
     if meta.get('changed_branches') and meta['protocol'] == 'calibration':
@@ -184,22 +199,26 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
                 raise ValueError('cannot replace a bound session ID')
         meta['sessions'].update(sessions)
         (out / 'cells').mkdir(exist_ok=True)
-        meta['changed_branches'] = []
+        meta.setdefault('changed_branches', [])
         write_json(out / 'meta.json', meta)
-        _review(out)
+        meta = _review(out)
         for branch in expected:
             _, task, external_arm, sample = parse_branch(branch)
             arm = 'calibration-plain' if protocol == 'calibration' else v3.ARMS[external_arm]
-            cell = out / 'cells' / f'{task}-s{sample}-{arm}'
+            cell = cell_path(out, branch)
             sha = v3.fetch(repo, remote, branch)
             if (cell / 'result.json').exists():
                 result = json.loads((cell / 'result.json').read_text())
                 if result['git_sha'] != sha:
                     meta['changed_branches'].append(branch)
+                    write_json(out / 'meta.json', meta)
+                    meta = _review(out)
                 elif not result.get('session_id') and branch in meta['sessions']:
                     result['session_id'] = meta['sessions'][branch]
                     write_json(cell / 'result.json', result)
-                continue
+                    continue
+                else:
+                    continue
             if sha is None:
                 continue
             if cell.exists():
@@ -221,6 +240,7 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
             verdicts = json.loads((out / 'contamination.json').read_text())
             verdicts[branch] = slot(result['session_id'], sha)
             write_json(out / 'contamination.json', verdicts)
+            meta['changed_branches'] = [b for b in meta['changed_branches'] if b != branch]
             write_json(out / 'meta.json', meta)
             if protocol == 'calibration':
                 _review(out)

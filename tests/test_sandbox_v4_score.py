@@ -111,8 +111,10 @@ def test_calibration_resume_rejects_inputs_and_changed_branch(bank, tmp_path):
     bank.git('commit', '-qm', 'later delivery')
     bank.git('push', str(bank.remote), 'HEAD:refs/heads/' + bank.branches[0])
     meta = bank.collect(out)
-    assert meta['changed_branches'] == [bank.branches[0]]
-    assert meta['calibration']['decision'] == 'incomplete' and len(bank.calls) == 12
+    assert meta['changed_branches'] == []
+    assert meta['calibration']['decision'] == 'incomplete' and len(bank.calls) == 13
+    assert load(out / 'contamination.json')[bank.branches[0]]['contaminated'] is None
+    assert len(list((out / 'superseded').glob('*/audit.json'))) == 1
 
 
 def test_control_cannot_clear_and_audit_identity_must_match(bank, tmp_path):
@@ -294,3 +296,27 @@ def test_gate_conflicting_exit_is_unknown():
     row = dict(branch='branch', session_id='session', messages='',
                final_reply='Submission 1\n[vacant run] RUN-ON 交付（visible_pass） 1/1 次\nexit=20\n```')
     assert gates.parse_cell(row)['submissions'][0]['steps'] == dict.fromkeys('ABC', 'UNKNOWN')
+
+
+def test_recorded_delivery_mismatch_never_clears_before_fetch(bank, tmp_path, monkeypatch):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    reviewed(out)
+    assert score.review(out)['calibration']['proceed']
+    branch = bank.branches[0]
+    meta = load(out / 'meta.json')
+    meta['changed_branches'] = [branch]
+    score.write_json(out / 'meta.json', meta)
+    original = score.v3.fetch
+
+    def fetch(repo, remote, requested):
+        assert not load(out / 'calibration.json')['proceed']
+        assert load(out / 'contamination.json')[branch]['contaminated'] is None
+        return None if requested == branch else original(repo, remote, requested)
+
+    monkeypatch.setattr(score.v3, 'fetch', fetch)
+    result = bank.collect(out)
+    assert result['changed_branches'] == [branch]
+    assert result['calibration']['scored'] == 11 and not result['calibration']['proceed']
+    assert len(bank.calls) == 12
