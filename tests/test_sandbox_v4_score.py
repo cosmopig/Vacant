@@ -512,3 +512,42 @@ def test_rejected_audit_import_never_mutates_existing_valid_verdict(bank, tmp_pa
     assert bank.branches[0] in audit.ingest(out, source)['rejected_branches']
     assert load(out / 'contamination.json')[bank.branches[0]] == before
     assert score.review(out)['calibration']['proceed']
+
+
+@pytest.mark.parametrize('problem', ['scalar', 'duplicate', 'legacy_base_mismatch'])
+def test_general_review_quarantines_bad_cells_and_recovers_without_stopping_others(bank, tmp_path, problem):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    reviewed(out)
+    path = score.cell_path(out, bank.branches[0]) / 'result.json'
+    row = load(path)
+    if problem == 'scalar':
+        row['gold_similarity'] = True
+        score.write_json(path, row)
+    elif problem == 'duplicate':
+        duplicate = out / 'cells/duplicate'
+        duplicate.mkdir()
+        score.write_json(duplicate / 'result.json', row)
+    else:
+        row.update(resolved=False, infra_void=True, error_stage='score_preparation', error='ValueError: frozen base mismatch: old')
+        score.write_json(path, row)
+    assert score.review(out)['calibration']['scored'] == 11
+    assert not load(out / 'calibration.json')['proceed']
+    assert bank.collect(out)['calibration']['scored'] == 12
+    assert len(bank.calls) == 13
+
+
+def test_invalid_secondary_export_and_one_bad_audit_slot_do_not_abort_other_cells(bank, tmp_path):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    verdicts = reviewed(out)
+    verdicts[bank.branches[0]] = None
+    score.write_json(out / 'contamination.json', verdicts)
+    score.write_json(out / 'gate-evidence.json', {'previous': 'valid evidence'})
+    (out / 'gate-export.json').write_text('{"partial":')
+    report = bank.collect(out)
+    assert report['calibration']['scored'] == 12 and not report['calibration']['proceed']
+    assert load(out / 'gate-evidence.json') == {'previous': 'valid evidence'}
+    assert 'error' in load(out / 'gate-ingestion.json')

@@ -1,5 +1,6 @@
 """v4 分支輪詢與獨立官方計分；重用 v3 匯出、harness、審核與配對量尺。"""
 import argparse
+from collections import Counter
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -102,6 +103,16 @@ def _review(out):
         write_json(out / 'calibration.json', meta['calibration'])
     validate_sessions(meta['sessions'], meta['expected_branches'])
     verdicts = json.loads((out / 'contamination.json').read_text())
+    for branch in meta['expected_branches']:
+        verdict = verdicts.get(branch)
+        if (not isinstance(verdict, dict) or not {'contaminated', 'outside_help'} <= verdict.keys()
+                or any(verdict.get(k) is not None and type(verdict[k]) is not bool
+                                                for k in ('contaminated', 'outside_help'))
+                or not all(isinstance(verdict.get(k), list) for k in ('evidence', 'outside_help_evidence'))):
+            archive = out / 'invalid-audits'
+            archive.mkdir(exist_ok=True)
+            write_json(archive / (digest(canonical([branch, verdict])) + '.json'), dict(branch=branch, verdict=verdict))
+            verdicts[branch] = slot(meta['sessions'].get(branch))
     for branch in meta.get('changed_branches', []):
         cell = cell_path(out, branch)
         if cell.exists():
@@ -111,27 +122,53 @@ def _review(out):
             write_json(archive / 'audit.json', verdicts[branch])
         verdicts[branch] = slot(meta['sessions'].get(branch))
     write_json(out / 'contamination.json', verdicts)
-    rows = []
+    rows, paths = [], {}
+
+    def quarantine(path, branch=None):
+        archive = out / 'unreadable' / f'{path.parent.name}-{time.time_ns()}'
+        archive.parent.mkdir(exist_ok=True)
+        shutil.move(str(path.parent), archive)
+        if not isinstance(branch, str) or branch not in verdicts:
+            branch = next((b for b in meta['expected_branches'] if cell_path(out, b) == path.parent), None)
+        if branch:
+            write_json(archive / 'audit.json', verdicts[branch])
+            verdicts[branch] = slot(meta['sessions'].get(branch))
+        meta.setdefault('result_errors', {})[path.parent.name] = 'malformed, duplicate or nonfinal cached result'
+
     for path in sorted((out / 'cells').glob('*/result.json')):
         try:
             row = json.loads(path.read_text())
-        except (ValueError, UnicodeError):
+        except (OSError, ValueError, UnicodeError):
             row = None
         required = {'branch', 'git_sha', 'task', 'sample', 'arm', 'resolved', 'infra_void', 'gold_similarity', 'manifest_present'}
-        if not isinstance(row, dict) or not required <= row.keys():
-            archive = out / 'unreadable' / f'{path.parent.name}-{time.time_ns()}'
-            archive.parent.mkdir(exist_ok=True)
-            shutil.move(str(path.parent), archive)
-            branch = next((b for b in meta['expected_branches'] if cell_path(out, b) == path.parent), None)
-            if branch:
-                write_json(archive / 'audit.json', verdicts[branch])
-                verdicts[branch] = slot(meta['sessions'].get(branch))
+        valid = isinstance(row, dict) and required <= row.keys()
+        if valid:
+            try:
+                protocol, task, arm, sample = parse_branch(row['branch'])
+                valid = (row['branch'] in meta['expected_branches'] and protocol == meta['protocol']
+                         and type(row['sample']) is int
+                         and (row['task'], row['sample'], row['arm']) ==
+                         (task, sample, 'calibration-plain' if protocol == 'calibration' else v3.ARMS[arm])
+                         and all(type(row[k]) is bool for k in ('resolved', 'infra_void', 'manifest_present'))
+                         and isinstance(row['git_sha'], str) and bool(re.fullmatch(r'[0-9a-f]{40}', row['git_sha']))
+                         and (row['gold_similarity'] is None or isinstance(row['gold_similarity'], dict)
+                              and type(row['gold_similarity'].get('flagged')) is bool))
+            except (TypeError, ValueError, KeyError):
+                valid = False
+        legacy_mismatch = (valid and row.get('error_stage') == 'score_preparation'
+                           and 'frozen base mismatch:' in str(row.get('error')))
+        if not valid or legacy_mismatch:
+            quarantine(path)
             continue
         rows.append(row)
+        paths.setdefault(row['branch'], []).append(path)
+    duplicates = {b for b, count in Counter(r['branch'] for r in rows).items() if count > 1}
+    for branch in duplicates:
+        for path in paths[branch]:
+            quarantine(path, branch)
+    rows = [r for r in rows if r['branch'] not in duplicates]
     write_json(out / 'contamination.json', verdicts)
     branches = [r['branch'] for r in rows]
-    if len(set(branches)) != len(branches) or not set(branches) <= set(meta['expected_branches']):
-        raise ValueError('duplicate or unscheduled scored cells')
     for row in rows:
         verdict = verdicts[row['branch']]
         flags = [verdict.get(k) for k in ('contaminated', 'outside_help')]
@@ -175,9 +212,13 @@ def _review(out):
                      manifest_presence={r['branch']: r['manifest_present'] for r in rows},
                      agent_costs=v3.UNKNOWN, receipt_verification=v3.UNKNOWN)
     if (out / 'gate-export.json').is_file():
-        evidence = gates.parse_export(out / 'gate-export.json', rows, meta['sessions'])
-        write_json(out / 'gate-evidence.json', evidence)
-        secondary['vacant_gate'] = evidence
+        try:
+            evidence = gates.parse_export(out / 'gate-export.json', rows, meta['sessions'])
+        except Exception as exc:
+            write_json(out / 'gate-ingestion.json', dict(error=f'{type(exc).__name__}: {exc}'))
+        else:
+            write_json(out / 'gate-evidence.json', evidence)
+            secondary['vacant_gate'] = evidence
     write_json(out / 'secondary.json', secondary)
     return meta
 
@@ -256,6 +297,10 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
                 meta = _review(out)
                 continue
             meta['poll_errors'].pop(branch, None)
+            if (cell / 'result.json').exists() and json.loads((cell / 'result.json').read_text())['git_sha'] != sha:
+                meta['changed_branches'].append(branch)
+                write_json(out / 'meta.json', meta)
+                meta = _review(out)
             if sha is not None:
                 try:
                     v3.verify_base(repo, remote, instances_by_id[task], records[task], base_prefix='sandbox-v4/')
@@ -269,6 +314,8 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
                     write_json(out / 'meta.json', meta)
                     meta = _review(out)
                     continue
+                meta['cell_states'].pop(branch, None)
+            else:
                 meta['cell_states'].pop(branch, None)
             if (cell / 'result.json').exists():
                 result = json.loads((cell / 'result.json').read_text())

@@ -16,7 +16,12 @@ def ingest(out, source):
 def _ingest(out, source):
     out, source = Path(out), Path(source)
     meta = json.loads((out / 'meta.json').read_text())
-    raw = source.read_bytes()
+    try:
+        raw = source.read_bytes()
+    except OSError as exc:
+        result = dict(applied_branches=[], rejected_branches={}, export_error=str(exc))
+        write_json(out / 'audit-ingestion.json', result)
+        return result
     source_hash = digest(raw)
     archive = out / 'audit-sources'
     archive.mkdir(exist_ok=True)
@@ -35,13 +40,14 @@ def _ingest(out, source):
         try:
             cell = json.loads(path.read_text())
             cells[cell['branch']] = cell
-        except (ValueError, UnicodeError, KeyError, TypeError):
+        except (OSError, ValueError, UnicodeError, KeyError, TypeError):
             continue
     counts = Counter(row.get('branch') for row in records if isinstance(row, dict) and isinstance(row.get('branch'), str))
     for index, row in enumerate(records):
         branch = row.get('branch') if isinstance(row, dict) else None
         try:
-            if branch not in meta['expected_branches'] or meta['sessions'].get(branch) != row.get('session_id'):
+            if (branch not in meta['expected_branches'] or not isinstance(row.get('session_id'), str)
+                    or not row['session_id'] or meta['sessions'].get(branch) != row['session_id']):
                 raise ValueError('audit export branch/session mismatch')
             if counts[branch] != 1:
                 raise ValueError('duplicate audit records')
