@@ -7,7 +7,8 @@ import re
 
 UNKNOWN = 'UNKNOWN'
 EVENT = re.compile(r'^\[devin\]\s+@\s+\d+\s+\((event-[^)]+)\)\s*\n', re.M)
-VERDICT = re.compile(r'^\[vacant run\].*(?:交付（visible_pass）|拒交（visible_fail）).*$', re.M)
+VERDICT = re.compile(r'^\[vacant run\]\s+\S+\s+(交付|拒交|infra_void|未 gate)（[^）]+）[^\n]*$', re.M)
+VERDICTS = {'交付': 'accepted', '拒交': 'refused', 'infra_void': 'infra_void', '未 gate': 'ungated'}
 
 
 def assistant_events(row):
@@ -43,7 +44,7 @@ def parse_cell(row):
             codes = {int(code) for code in re.findall(r'\bexit(?:\s+code)?\s*(?:=|:)?\s*(-?\d+)\b', excerpt, re.I)}
             exit_code = next(iter(codes)) if len(codes) == 1 else UNKNOWN
             item = dict(number=ordinal, exit_code=exit_code,
-                        verdict='accepted' if 'visible_pass' in match[0] else 'refused',
+                        verdict=VERDICTS[match[1]],
                         raw_verdict_line=match[0], event_id=event_id, source=source,
                         source_line=body.count('\n', 0, start) + 1, excerpt=excerpt)
             key = ordinal, match[0]
@@ -55,10 +56,12 @@ def parse_cell(row):
     count = len(submissions) if complete_numbering else UNKNOWN
     body = '\n'.join(text for text, _ in events.values())
     never = bool(re.search(r"(?:never ran|did not run|didn't run) (?:the )?(?:Vacant )?gate", body, re.I))
+    gated = any(s['verdict'] in ('accepted', 'refused') and '（no_suite）' not in s['raw_verdict_line'] for s in submissions)
+    ungated = bool(submissions) and all(s['verdict'] == 'ungated' or '（no_suite）' in s['raw_verdict_line'] for s in submissions)
     return dict(branch=row['branch'], session_id=row['session_id'],
                 number_of_submissions=count, submissions=submissions,
                 final_gate_verdict=submissions[-1]['verdict'] if complete_numbering else UNKNOWN,
-                gate_never_run=False if submissions else True if never else UNKNOWN,
+                gate_never_run=False if gated else True if ungated or never else UNKNOWN,
                 receipt_verification=UNKNOWN, complete_execution_history=UNKNOWN,
                 gate_to_final_handback_binding=UNKNOWN)
 
