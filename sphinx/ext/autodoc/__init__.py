@@ -276,11 +276,12 @@ class ObjectMember(tuple):
         return super().__new__(cls, (name, obj))  # type: ignore
 
     def __init__(self, name: str, obj: Any, docstring: Optional[str] = None,
-                 skipped: bool = False) -> None:
+                 class_: Any = None, skipped: bool = False) -> None:
         self.__name__ = name
         self.object = obj
         self.docstring = docstring
         self.skipped = skipped
+        self.class_ = class_
 
 
 ObjectMembers = Union[List[ObjectMember], List[Tuple[str, Any]]]
@@ -666,7 +667,7 @@ class Documenter:
         The user can override the skipping decision by connecting to the
         ``autodoc-skip-member`` event.
         """
-        def is_filtered_inherited_member(name: str) -> bool:
+        def is_filtered_inherited_member(name: str, obj: Any) -> bool:
             if inspect.isclass(self.object):
                 for cls in self.object.__mro__:
                     if cls.__name__ == self.options.inherited_members and cls != self.object:
@@ -675,6 +676,8 @@ class Documenter:
                     elif name in cls.__dict__:
                         return False
                     elif name in self.get_attr(cls, '__annotations__', {}):
+                        return False
+                    elif isinstance(obj, ObjectMember) and obj.class_ is cls:
                         return False
 
             return False
@@ -740,7 +743,7 @@ class Documenter:
                 if self.options.special_members and membername in self.options.special_members:
                     if membername == '__doc__':
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, obj):
                         keep = False
                     else:
                         keep = has_doc or self.options.undoc_members
@@ -760,14 +763,14 @@ class Documenter:
                 if has_doc or self.options.undoc_members:
                     if self.options.private_members is None:
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, obj):
                         keep = False
                     else:
                         keep = membername in self.options.private_members
                 else:
                     keep = False
             else:
-                if self.options.members is ALL and is_filtered_inherited_member(membername):
+                if self.options.members is ALL and is_filtered_inherited_member(membername, obj):
                     keep = False
                 else:
                     # ignore undocumented members if :undoc-members: is not given
@@ -1593,13 +1596,15 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
             for name in self.options.members:  # type: str
                 if name in members:
                     selected.append(ObjectMember(name, members[name].value,
-                                                 docstring=members[name].docstring))
+                                                 docstring=members[name].docstring,
+                                                 class_=members[name].class_))
                 else:
                     logger.warning(__('missing attribute %s in object %s') %
                                    (name, self.fullname), type='autodoc')
             return False, selected
         elif self.options.inherited_members:
-            return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
+            return False, [ObjectMember(m.name, m.value, docstring=m.docstring,
+                                        class_=m.class_)
                            for m in members.values()]
         else:
             return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
@@ -2359,6 +2364,11 @@ class AttributeDocumenter(GenericAliasMixin, NewTypeMixin, SlotsMixin,  # type: 
                 pass
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
+        # Check the attribute has a docstring-comment
+        comment = self.get_attribute_comment(self.parent)
+        if comment:
+            return [comment]
+
         if self.object is INSTANCEATTR:
             return []
 

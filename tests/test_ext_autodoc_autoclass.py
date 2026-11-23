@@ -118,3 +118,72 @@ def test_show_inheritance_for_subclass_of_generic_type(app):
         '   A subclass of List[Union[int, float]]',
         '',
     ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_inherited_instance_variable_and_class_variable(app):
+    options = {'members': None,
+               'inherited-members': None}
+    actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Bar()',
+        '   :module: target.instance_variable',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr1',
+        '      :module: target.instance_variable',
+        '      :value: 1',
+        '',
+        '      docstring for attr1',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr2',
+        '      :module: target.instance_variable',
+        '',
+        '      docstring for attr2',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr3',
+        '      :module: target.instance_variable',
+        '',
+        '      docstring for attr3',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_instance_variable_without_inherited_members(app):
+    options = {'members': None}
+    actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Bar()',
+        '   :module: target.instance_variable',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr3',
+        '      :module: target.instance_variable',
+        '',
+        '      docstring for attr3',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_inherited_attribute_explicit_member(app):
+    options = {'members': 'attr1'}
+    actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Bar()',
+        '   :module: target.instance_variable',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr1',
+        '      :module: target.instance_variable',
+        '      :value: 1',
+        '',
+        '      docstring for attr1',
+        '',
+    ]

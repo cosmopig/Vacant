@@ -14,6 +14,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from sphinx.deprecation import RemovedInSphinx40Warning, deprecated_alias
+from sphinx.errors import PycodeError
 from sphinx.pycode import ModuleAnalyzer
 from sphinx.util import logging
 from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
@@ -314,6 +315,27 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
             if namespace == ns and name not in members:
                 members[name] = ClassAttribute(subject, name, INSTANCEATTR,
                                                '\n'.join(docstring))
+
+    # attributes documented by doc-comments in the base classes
+    for cls in getmro(subject)[1:]:
+        try:
+            modname = safe_getattr(cls, '__module__')
+            qualname = safe_getattr(cls, '__qualname__')
+            cls_analyzer = ModuleAnalyzer.for_module(modname)
+            cls_analyzer.analyze()
+        except (AttributeError, PycodeError):
+            continue
+
+        for (ns, name), docstring in cls_analyzer.attr_docs.items():
+            if ns != qualname:
+                continue
+            if name not in members:
+                members[name] = ClassAttribute(cls, name, INSTANCEATTR,
+                                               '\n'.join(docstring))
+            elif members[name].class_ is not subject and members[name].docstring is None:
+                if members[name].class_ is None:
+                    members[name].class_ = cls
+                members[name].docstring = '\n'.join(docstring)
 
     return members
 
