@@ -219,3 +219,46 @@ evidence: treat it as contamination for primary paired exclusions and as resolve
 for the calibration gate. A PR alone is not that flag; check feedback delivery
 and timing. Leave unaudited verdicts unknown, including the distinct access-based
 contamination verdict, until session-log review is complete.
+
+## V4 SWE-bench calibration and comparison dispatch — 2026-11-23
+
+Use only `sandbox-devin-kit-v4` and the frozen 62-instance v4 bank. Run the 12
+fresh plain calibration sessions on the recorded subset before any comparison;
+proceed only with all twelve scored and at most 8/12 resolved. Calibration never
+enters comparisons. Each comparison session is fresh, with two samples per
+instance; never reuse calibration work or pool v4 with earlier versions.
+Placeholders: `<id>` instance, `<arm>` plain|plain2|vacant, `<k>` 1|2.
+Comparison title: `Sandbox v4 <id> <arm> s<k>`.
+The prompts below retain the v3 dispatch text except for v4 paths and the
+approved arm instructions. This document does not authorize launching sessions.
+
+### V4 calibration
+
+```text
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v4` (this is the kit root). Inside it, clone only branch `sandbox-v4/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v4/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Do not open `gates/`. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin-cal4/<id>-plain`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
+```
+
+### V4 plain
+
+```text
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v4` (this is the kit root). Inside it, clone only branch `sandbox-v4/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v4/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Do not open `gates/`. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin/v4/<id>-<arm>-s<k>`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
+```
+
+### V4 plain2
+
+```text
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v4` (this is the kit root). Inside it, clone only branch `sandbox-v4/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v4/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Do not open `gates/`. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin/v4/<id>-<arm>-s<k>`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
+```
+
+### V4 vacant
+
+```text
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v4` (this is the kit root). Inside it, clone only branch `sandbox-v4/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v4/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Before delivering, write at least one test that reproduces the issue (it must fail on the original code and pass with your fix) inside the `<id>/` test suite, and list its pytest node IDs, one per line, in `<id>/VACANT_TESTS.txt`. Then create the kit-root `.venv` with Vacant as the README says and submit through the gate with the README's `vacant run` command from inside `<id>/` (`--suite ../gates/<id>`, `--run-dir ../receipts/<id>-N`, N = 1, 2, 3, timeout from `../gates/<id>/selection.json`). Exit 0 means accepted. Exit 20 means refused: read its feedback, fix, and submit again, at most 3 submissions. Do not edit `gates/`. Include each submission's raw gate output in your reply. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin/v4/<id>-<arm>-s<k>`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
+```
+
+Platform-default PR instructions must not override this dispatch. If PR review
+feedback reached a session before its final push, record `outside_help` and its
+evidence: treat it as contamination for primary paired exclusions and as resolved
+for the calibration gate. A PR alone is not that flag; check feedback delivery
+and timing. Leave unaudited verdicts unknown, including the distinct access-based
+contamination verdict, until session-log review is complete.
