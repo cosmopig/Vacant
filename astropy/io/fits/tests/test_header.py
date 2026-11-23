@@ -484,6 +484,21 @@ class TestHeaderFunctions(FitsTestCase):
 
         assert str(h1) == str(h2)
 
+    def test_long_string_with_null_string_roundtrip(self):
+        # Null strings ('') in long string values must survive a
+        # str/fromstring round trip regardless of where CONTINUE splits.
+        for n in range(50, 80):
+            for value in (
+                "x" * n + "''",
+                "x" * n + "''" + "x" * 10,
+                "x" * n + "'",
+                "x" * n + "''''" + "x" * 3,
+            ):
+                card1 = fits.Card("CONFIG", value)
+                card2 = fits.Card.fromstring(str(card1))
+                assert card2.value == value
+                assert str(card2) == str(card1)
+
     def test_long_string_repr(self):
         """Regression test for https://aeon.stsci.edu/ssb/trac/pyfits/ticket/193
 
