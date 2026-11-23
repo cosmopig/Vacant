@@ -163,6 +163,25 @@ class M2mThroughTests(TestCase):
         with self.assertRaises(IntegrityError):
             self.rock.nodefaultsnonulls.update_or_create(name="Test")
 
+    async def test_async_create_methods_with_through_defaults(self):
+        for manager, target in (
+            (self.rock.members, "person"),
+            (self.bob.group_set, "group"),
+        ):
+            for method in ("acreate", "aget_or_create", "aupdate_or_create"):
+                with self.subTest(manager=manager, method=method):
+                    obj = await getattr(manager, method)(
+                        name=method, through_defaults={"invite_reason": method}
+                    )
+                    if method != "acreate":
+                        obj, created = obj
+                        self.assertIs(created, True)
+                    self.assertEqual(await manager.aget(name=method), obj)
+                    membership = await manager.instance.membership_set.aget(
+                        **{target: obj}
+                    )
+                    self.assertEqual(membership.invite_reason, method)
+
     def test_remove_on_m2m_with_intermediate_model(self):
         Membership.objects.create(person=self.jim, group=self.rock)
         self.rock.members.remove(self.jim)
