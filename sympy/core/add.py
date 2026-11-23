@@ -560,8 +560,9 @@ class Add(Expr, AssocOp):
         if b.is_zero:
             if not im_or_z and not im:
                 return True
-            if im and not im_or_z:
-                return False
+            # a sum of imaginary terms may still be zero, e.g.
+            # (1 + I)**2 - 2*I, so nothing can be concluded here
+            return
         if b.is_zero is False:
             return False
 
