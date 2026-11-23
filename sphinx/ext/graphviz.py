@@ -12,7 +12,7 @@ from itertools import chain
 from os import path
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from docutils import nodes
 from docutils.nodes import Node
@@ -217,8 +217,9 @@ class GraphvizSimple(SphinxDirective):
             return [figure]
 
 
-def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
-    """Change relative links in generated svg files to be relative to imgpath."""
+def fix_svg_relative_paths(self: SphinxTranslator, filepath: str,
+                           *, link_base: str | None = None) -> None:
+    """Rebase SVG links, optionally resolving them from an HTML document URI."""
     tree = ET.parse(filepath)  # NoQA: S314
     root = tree.getroot()
     ns = {'svg': 'http://www.w3.org/2000/svg', 'xlink': 'http://www.w3.org/1999/xlink'}
@@ -230,15 +231,21 @@ def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
         root.findall('.//svg:a[@xlink:href]', ns),
     ):
         scheme, hostname, url, query, fragment = urlsplit(element.attrib[href_name])
-        if hostname:
+        if scheme or hostname or url.startswith('/'):
             # not a relative link
             continue
 
-        old_path = path.join(self.builder.outdir, url)
-        new_path = path.relpath(
-            old_path,
-            start=path.join(self.builder.outdir, self.builder.imgpath),
-        )
+        if link_base is None:
+            old_path = path.join(self.builder.outdir, url)
+            new_path = path.relpath(
+                old_path,
+                start=path.join(self.builder.outdir, self.builder.imgpath),
+            )
+        else:
+            target_path = urljoin('/' + link_base, url)
+            new_path = posixpath.relpath(target_path, start='/' + self.builder.imagedir)
+            if target_path.endswith('/'):
+                new_path += '/'
         modified_url = urlunsplit((scheme, hostname, new_path, query, fragment))
 
         element.set(href_name, modified_url)
@@ -300,7 +307,7 @@ def render_dot(self: SphinxTranslator, code: str, options: dict, format: str,
                                '[stdout]\n%r') % (ret.stderr, ret.stdout))
 
     if format == 'svg':
-        fix_svg_relative_paths(self, outfn)
+        fix_svg_relative_paths(self, outfn, link_base=options.get('svg_link_base'))
 
     return relfn, outfn
 

@@ -3,6 +3,8 @@
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
+from urllib.parse import urljoin
 
 import pytest
 
@@ -169,6 +171,55 @@ def test_inheritance_diagram_svg_html(app, status, warning):
                'title="Permalink to this image">\xb6</a></p>\n</figcaption>\n</figure>\n')
 
     assert re.search(pattern, content, re.M)
+
+
+@pytest.mark.sphinx(testroot='ext-inheritance_diagram',
+                    confoverrides={'graphviz_output_format': 'svg'})
+@pytest.mark.usefixtures('if_graphviz_found')
+@pytest.mark.parametrize(
+    'page_uri, sibling_uri, root_uri',
+    [
+        pytest.param('nested/diagram.html', 'nested/bar.html', 'index.html',
+                     marks=pytest.mark.sphinx('html', srcdir='inheritance-links-html'),
+                     id='html'),
+        pytest.param('nested/diagram/', 'nested/bar/', '',
+                     marks=pytest.mark.sphinx('dirhtml', srcdir='inheritance-links-dirhtml'),
+                     id='dirhtml'),
+    ],
+)
+def test_inheritance_diagram_svg_links(app, page_uri, sibling_uri, root_uri):
+    (app.srcdir / 'index.rst').write_text(
+        'Index\n=====\n\n'
+        '.. py:class:: test.Foo\n\n'
+        '.. toctree::\n\n'
+        '   nested/diagram\n'
+        '   nested/bar\n'
+    )
+    nested = app.srcdir / 'nested'
+    nested.mkdir()
+    (nested / 'diagram.rst').write_text(
+        'Diagram\n=======\n\n'
+        '.. py:class:: test.Baz\n\n'
+        '.. inheritance-diagram:: test.Baz\n'
+    )
+    (nested / 'bar.rst').write_text('Bar\n===\n\n.. py:class:: test.Bar\n')
+    app.builder.build_all()
+
+    filename = page_uri + 'index.html' if page_uri.endswith('/') else page_uri
+    content = (app.outdir / filename).read_text(encoding='utf8')
+    match = re.search(r'<object data="([^"]+\.svg)"', content)
+    assert match is not None
+    base_url = 'https://example.org/docs/'
+    svg_url = urljoin(base_url + page_uri, match[1])
+    assert svg_url.startswith(base_url)
+    svg = ET.parse(app.outdir / svg_url.removeprefix(base_url))  # NoQA: S314
+    ns = {'svg': 'http://www.w3.org/2000/svg'}
+    href = '{http://www.w3.org/1999/xlink}href'
+    assert {urljoin(svg_url, link.attrib[href]) for link in svg.findall('.//svg:a', ns)} == {
+        base_url + page_uri + '#test.Baz',
+        base_url + sibling_uri + '#test.Bar',
+        base_url + root_uri + '#test.Foo',
+    }
 
 
 @pytest.mark.sphinx('latex', testroot='ext-inheritance_diagram')
