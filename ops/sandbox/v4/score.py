@@ -50,6 +50,14 @@ def session_map(path, expected):
     return result
 
 
+def validate_sessions(sessions, expected):
+    if (not isinstance(sessions, dict) or not set(sessions) <= set(expected)
+            or not all(isinstance(s, str) and s for s in sessions.values())):
+        raise ValueError('invalid session map')
+    if len(set(sessions.values())) != len(sessions):
+        raise ValueError('duplicate session ID bound to multiple branches')
+
+
 def slot(session=None, sha=None):
     return dict(contaminated=None, outside_help=None, evidence=[], outside_help_evidence=[],
                 reviewer=None, session_id=session, handback_sha=sha)
@@ -92,6 +100,7 @@ def _review(out):
     if meta['protocol'] == 'calibration' and meta.get('calibration'):
         meta['calibration'].update(complete=False, proceed=False, decision='incomplete')
         write_json(out / 'calibration.json', meta['calibration'])
+    validate_sessions(meta['sessions'], meta['expected_branches'])
     verdicts = json.loads((out / 'contamination.json').read_text())
     for branch in meta.get('changed_branches', []):
         cell = cell_path(out, branch)
@@ -168,10 +177,8 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
     if out == repo or repo in out.parents or out == v3.REPO or v3.REPO in out.parents:
         raise ValueError('results must be outside the repository')
     expected = schedule(selection, protocol)
-    sessions = sessions or {}
-    if (not set(sessions) <= set(expected) or len(set(sessions.values())) != len(sessions)
-            or not all(isinstance(s, str) and s for s in sessions.values())):
-        raise ValueError('invalid session map')
+    sessions = {} if sessions is None else sessions
+    validate_sessions(sessions, expected)
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     if runner is None:
@@ -217,6 +224,7 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
         for branch, session in sessions.items():
             if branch in meta['sessions'] and meta['sessions'][branch] != session:
                 raise ValueError('cannot replace a bound session ID')
+        validate_sessions({**meta['sessions'], **sessions}, expected)
         meta['sessions'].update(sessions)
         (out / 'cells').mkdir(exist_ok=True)
         meta.setdefault('changed_branches', [])

@@ -361,3 +361,30 @@ def test_interrupted_review_never_truncates_cached_result(bank, tmp_path, monkey
     assert not load(out / 'calibration.json')['proceed']
     assert score.review(out)['calibration']['proceed']
     assert len(bank.calls) == 12
+
+
+def test_duplicate_session_across_incremental_maps_is_rejected(bank, tmp_path):
+    out = tmp_path / 'results'
+
+    def collect(sessions):
+        return score.collect(bank.repo, str(bank.remote), out, bank.instances, bank.selection, bank.manifest,
+                             protocol='calibration', sessions=sessions, runner=bank.runner)
+
+    collect({bank.branches[0]: 'shared-session'})
+    with pytest.raises(ValueError, match='duplicate session'):
+        collect({bank.branches[1]: 'shared-session'})
+    assert load(out / 'meta.json')['sessions'] == {bank.branches[0]: 'shared-session'}
+
+
+def test_review_rejects_preexisting_duplicate_sessions(bank, tmp_path):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    reviewed(out)
+    assert score.review(out)['calibration']['proceed']
+    meta = load(out / 'meta.json')
+    meta['sessions'][bank.branches[1]] = meta['sessions'][bank.branches[0]]
+    score.write_json(out / 'meta.json', meta)
+    with pytest.raises(ValueError, match='duplicate session'):
+        score.review(out)
+    assert not load(out / 'calibration.json')['proceed']
