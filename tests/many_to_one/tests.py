@@ -72,6 +72,30 @@ class ManyToOneTests(TestCase):
         a4.save()
         self.assertEqual(repr(a4.reporter), "<Reporter: John Smith>")
 
+    async def test_acreate(self):
+        article = await self.r.article_set.acreate(
+            headline="New article", pub_date=datetime.date(2005, 7, 27)
+        )
+        self.assertEqual(article.reporter_id, self.r.pk)
+
+    async def test_aget_or_create(self):
+        article, created = await self.r.article_set.aget_or_create(
+            headline="New article", defaults={"pub_date": datetime.date(2005, 7, 27)}
+        )
+        self.assertIs(created, True)
+        self.assertEqual(article.reporter_id, self.r.pk)
+        self.assertEqual(
+            await self.r.article_set.aget_or_create(headline=article.headline),
+            (article, False),
+        )
+
+    async def test_aupdate_or_create(self):
+        article, created = await self.r.article_set.aupdate_or_create(
+            headline="New article", defaults={"pub_date": datetime.date(2005, 7, 27)}
+        )
+        self.assertIs(created, True)
+        self.assertEqual(article.reporter_id, self.r.pk)
+
     def test_add(self):
         # Create an Article via the Reporter object.
         new_article = self.r.article_set.create(

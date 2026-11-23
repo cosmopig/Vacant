@@ -163,6 +163,38 @@ class M2mThroughTests(TestCase):
         with self.assertRaises(IntegrityError):
             self.rock.nodefaultsnonulls.update_or_create(name="Test")
 
+    async def test_acreate(self):
+        person = await self.rock.members.acreate(name="Annie")
+        self.assertEqual(await self.rock.members.aget(), person)
+
+    async def test_aget_or_create(self):
+        group, created = await self.bob.group_set.aget_or_create(
+            name="Funk", through_defaults={"invite_reason": "Founding member"}
+        )
+        self.assertIs(created, True)
+        self.assertEqual(await self.bob.group_set.aget(), group)
+        membership = await Membership.objects.aget(person=self.bob, group=group)
+        self.assertEqual(membership.invite_reason, "Founding member")
+        self.assertEqual(
+            await self.bob.group_set.aget_or_create(name=group.name), (group, False)
+        )
+
+    async def test_aupdate_or_create(self):
+        person, created = await self.rock.members.aupdate_or_create(
+            name="Annie", through_defaults={"invite_reason": "Founding member"}
+        )
+        self.assertIs(created, True)
+        self.assertEqual(await self.rock.members.aget(), person)
+
+        updated, created = await self.rock.members.aupdate_or_create(
+            pk=person.pk, defaults={"name": "Anne"}
+        )
+        self.assertIs(created, False)
+        self.assertEqual(updated.pk, person.pk)
+        self.assertEqual(updated.name, "Anne")
+        membership = await Membership.objects.aget(person=person, group=self.rock)
+        self.assertEqual(membership.invite_reason, "Founding member")
+
     def test_remove_on_m2m_with_intermediate_model(self):
         Membership.objects.create(person=self.jim, group=self.rock)
         self.rock.members.remove(self.jim)
