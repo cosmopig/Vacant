@@ -3020,6 +3020,9 @@ class Figure(FigureBase):
         # re-attached to another.
         state.pop("canvas")
 
+        if self.canvas.device_pixel_ratio != 1:
+            state["_unscaled_dpi"] = self.dpi / self.canvas.device_pixel_ratio
+
         # Set cached renderer to None -- it can't be pickled.
         state["_cachedRenderer"] = None
 
@@ -3035,6 +3038,7 @@ class Figure(FigureBase):
     def __setstate__(self, state):
         version = state.pop('__mpl_version__')
         restore_to_pylab = state.pop('_restore_to_pylab', False)
+        unscaled_dpi = state.pop("_unscaled_dpi", None)
 
         if version != mpl.__version__:
             _api.warn_external(
@@ -3042,6 +3046,9 @@ class Figure(FigureBase):
                 f"is unlikely to function correctly.")
 
         self.__dict__ = state
+
+        if unscaled_dpi is not None:
+            self._set_dpi(unscaled_dpi, forward=False)
 
         # re-initialise some of the unstored state information
         FigureCanvasBase(self)  # Set self.canvas.

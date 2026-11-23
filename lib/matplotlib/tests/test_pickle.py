@@ -217,6 +217,33 @@ def test_unpickle_canvas():
     assert fig2.canvas is not None
 
 
+@pytest.mark.parametrize("restored_ratio", [1, 2])
+def test_unpickle_device_pixel_ratio(monkeypatch, restored_ratio):
+    fig = plt.figure(figsize=(3, 2), dpi=100)
+    fig.canvas._set_device_pixel_ratio(2)
+    backend = plt._get_backend_mod()
+    new_manager = backend.new_figure_manager_given_figure
+
+    def new_scaled_manager(num, figure):
+        manager = new_manager(num, figure)
+        manager.canvas._set_device_pixel_ratio(restored_ratio)
+        return manager
+
+    monkeypatch.setattr(backend, "new_figure_manager_given_figure",
+                        new_scaled_manager)
+    ratio = 2
+    for _ in range(3):
+        data = pickle.dumps(fig)
+        assert fig.dpi == 100 * ratio
+        assert fig.canvas.get_width_height(physical=True) == (
+            300 * ratio, 200 * ratio)
+        fig = pickle.loads(data)
+        ratio = restored_ratio
+        assert fig.dpi == 100 * ratio
+        assert fig.canvas.get_width_height(physical=True) == (
+            300 * ratio, 200 * ratio)
+
+
 def test_mpl_toolkits():
     ax = parasite_axes.host_axes([0, 0, 1, 1])
     assert type(pickle.loads(pickle.dumps(ax))) == parasite_axes.HostAxes
