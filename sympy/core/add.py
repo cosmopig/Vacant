@@ -5,7 +5,7 @@ from functools import cmp_to_key
 
 from .basic import Basic
 from .compatibility import reduce, is_sequence, range
-from .logic import _fuzzy_group, fuzzy_or, fuzzy_not
+from .logic import _fuzzy_group, fuzzy_and, fuzzy_or, fuzzy_not
 from .singleton import S
 from .operations import AssocOp
 from .cache import cacheit
@@ -535,35 +535,24 @@ class Add(Expr, AssocOp):
             # is zero or not
             return
         nz = []
-        z = 0
-        im_or_z = False
-        im = False
+        im_I = []
         for a in self.args:
             if a.is_real:
-                if a.is_zero:
-                    z += 1
-                elif a.is_zero is False:
+                if a.is_zero is False:
                     nz.append(a)
-                else:
+                elif a.is_zero is None:
                     return
-            elif a.is_imaginary:
-                im = True
-            elif (S.ImaginaryUnit*a).is_real:
-                im_or_z = True
             else:
-                return
-        if z == len(self.args):
-            return True
+                ai = a*S.ImaginaryUnit
+                if not (a.is_imaginary or ai.is_real):
+                    return
+                im_I.append(ai)
         if len(nz) == len(self.args):
             return None
-        b = self.func(*nz)
-        if b.is_zero:
-            if not im_or_z and not im:
-                return True
-            if im and not im_or_z:
-                return False
-        if b.is_zero is False:
-            return False
+        real_zero = self.func(*nz).is_zero
+        if real_zero is False or not im_I:
+            return real_zero
+        return fuzzy_and((real_zero, self.func(*im_I).is_zero))
 
     def _eval_is_odd(self):
         l = [f for f in self.args if not (f.is_even is True)]
