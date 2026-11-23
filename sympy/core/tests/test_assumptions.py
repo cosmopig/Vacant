@@ -111,8 +111,8 @@ def test_infinity():
     assert oo.is_negative is False
     assert oo.is_nonpositive is False
     assert oo.is_nonnegative is True
-    assert oo.is_even is None
-    assert oo.is_odd is None
+    assert oo.is_even is False
+    assert oo.is_odd is False
     assert oo.is_finite is False
     assert oo.is_infinite is True
     assert oo.is_comparable is True
@@ -138,8 +138,8 @@ def test_neg_infinity():
     assert mm.is_negative is True
     assert mm.is_nonpositive is True
     assert mm.is_nonnegative is False
-    assert mm.is_even is None
-    assert mm.is_odd is None
+    assert mm.is_even is False
+    assert mm.is_odd is False
     assert mm.is_finite is False
     assert mm.is_infinite is True
     assert mm.is_comparable is True
@@ -358,6 +358,11 @@ def test_symbol_zero():
     # See https://github.com/sympy/sympy/pull/9583
     assert x.is_nonzero is False
     assert x.is_finite is True
+
+
+def test_symbol_parity_implies_finite():
+    assert Symbol('x', even=True).is_finite is True
+    assert Symbol('x', odd=True).is_finite is True
 
 
 def test_symbol_positive():
