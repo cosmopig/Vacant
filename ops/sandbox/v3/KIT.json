@@ -17356,6 +17356,8 @@
     "module": "ops.sandbox.v3.patch",
     "pre_run_clarification_commit": "efb3c4fe50a0a6daddb755df6f1baaba5fa60129",
     "verification": "Six normalized setup files byte-match the two Sphinx and two Astropy official images",
-    "full_handback_harness_scorer_implemented": false
+    "full_handback_harness_scorer_implemented": false,
+    "untracked_setup_outputs": "Omit new paths matched by the base snapshot ignore rules, using isolated git check-ignore; keep tracked edits and non-ignored new source",
+    "generated_path_verification": "Official-image candidate generated paths replayed with real base ignore files: Astropy 13236 (24), Astropy 14598 (25), Matplotlib 24870 (2); all derived patches empty"
   }
 }

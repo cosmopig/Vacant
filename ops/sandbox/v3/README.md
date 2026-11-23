@@ -96,6 +96,10 @@ not execute project code or installation commands. It excludes test-patch
 files, binary files and generated artifacts, while retaining agent changes
 even in setup files. The official harness image has its own pre-install edits.
 Setup-only Sphinx/Astropy handbacks therefore produce empty candidate patches.
+New paths ignored by the base snapshot's own `.gitignore` files are omitted too,
+including generated Astropy/Matplotlib version modules and generated C sources.
+Ignore rules are taken only from base, not from the handback or host settings;
+tracked edits and non-ignored new source files remain eligible for scoring.
 
 ```bash
 .venv/bin/python -m ops.sandbox.v3.patch --base BASE_SNAPSHOT --handback HANDBACK \

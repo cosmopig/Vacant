@@ -82,3 +82,58 @@ def test_setup_normalization_rejects_unsafe_or_unknown_operations(tmp_path):
         normalize_setup({'setup.py': (0o120000, b'outside')}, ["sed -i 's/x/y/' setup.py"])
     with pytest.raises(ValueError, match='directories'):
         derive_patch(tmp_path / 'missing', tmp_path)
+
+
+@pytest.mark.parametrize('fix', [False, True])
+def test_setup_generated_untracked_files_are_not_candidate_changes(tmp_path, fix):
+    base, handback = setup_trees(tmp_path)
+    rules = ('astropy/_version.py\nlib/matplotlib/_version.py\n*.c\n'
+             '!astropy/example/src/*.c\nsetup-output/\n')
+    for root in (base, handback):
+        (root / '.gitignore').write_text(rules)
+        (root / 'nested').mkdir()
+        (root / 'nested/.gitignore').write_text('*.generated\n')
+    generated = ['astropy/_version.py', 'lib/matplotlib/_version.py',
+                 'astropy/generated.c', 'astropy/compiled.so',
+                 'setup-output/report.py', 'nested/setup.generated']
+    for name in generated:
+        target = handback / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('generated at install time\n')
+    if fix:
+        (handback / 'service.py').write_text('value = 2\n')
+    patch = derive_patch(base, handback, setup_commands=COMMANDS)
+    if fix:
+        assert patch.count(b'diff --git ') == 1
+        assert b'+value = 2' in patch
+    else:
+        assert patch == b''
+
+
+def test_base_ignore_rules_keep_tracked_edits_new_source_and_negations(tmp_path):
+    base, handback = setup_trees(tmp_path)
+    for root in (base, handback):
+        (root / '.gitignore').write_text('*.c\n!astropy/example/src/*.c\n')
+        (root / 'tracked.c').write_text('old\n')
+    (handback / 'tracked.c').write_text('fixed\n')
+    (handback / 'new.py').write_text('new source\n')
+    allowed = handback / 'astropy/example/src/new.c'
+    allowed.parent.mkdir(parents=True)
+    allowed.write_text('new C source\n')
+    (handback / '.gitignore').write_text('*\n')
+    patch = derive_patch(base, handback, setup_commands=COMMANDS)
+    assert b'+fixed' in patch and b'+new source' in patch and b'+new C source' in patch
+    assert b'diff --git a/.gitignore b/.gitignore' in patch
+
+
+def test_ignore_query_errors_fail_closed(tmp_path, monkeypatch):
+    base, handback = setup_trees(tmp_path)
+    (handback / 'new.py').write_text('new\n')
+    run = subprocess.run
+    def fail_ignore(command, **kwargs):
+        if 'check-ignore' in command:
+            return subprocess.CompletedProcess(command, 128, b'', b'ignore query failed')
+        return run(command, **kwargs)
+    monkeypatch.setattr(subprocess, 'run', fail_ignore)
+    with pytest.raises(subprocess.CalledProcessError):
+        derive_patch(base, handback, setup_commands=COMMANDS)

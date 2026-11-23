@@ -217,3 +217,7 @@ snapshot with the same documented tracked-file setup recipe edits applied
 (Sphinx tox/setup pins and Astropy build pins). Setup-only changes therefore
 produce no candidate patch; additional agent edits remain. The official
 harness image already applies its own pre-install steps. No v3 session has run.
+
+Pre-run clarification — 2026-11-23: generated untracked setup outputs are
+excluded using the base snapshot's own ignore rules, not the handback's;
+tracked source edits remain in the patch. No v3 session has run.

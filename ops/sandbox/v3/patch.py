@@ -112,7 +112,8 @@ def derive_patch(base, handback, test_patch='', setup_commands=()):
     if not base.is_dir() or not handback.is_dir():
         raise ValueError('base and handback directories required')
     excluded = {line[6:] for line in test_patch.splitlines() if line.startswith(('--- a/', '+++ b/'))}
-    before = normalize_setup(_files(base, set()), setup_commands)
+    baseline = _files(base, set())
+    before = normalize_setup(baseline, setup_commands)
     after = _files(handback, excluded)
     binary = {name for name, (_, data) in [*before.items(), *after.items()] if b'\0' in data}
     before = {name: value for name, value in before.items() if name not in binary and name not in excluded}
@@ -124,6 +125,30 @@ def derive_patch(base, handback, test_patch='', setup_commands=()):
         environment = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
         environment.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM='1')
         subprocess.run(['git', 'init', '--bare', '--quiet', str(repo)], check=True, env=environment)
+        new_paths = set(after) - set(baseline)
+        if new_paths:
+            worktree = root / 'ignore-worktree'
+            worktree.mkdir()
+            for name in new_paths:
+                target = worktree / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.touch()
+            for name, (mode, data) in baseline.items():
+                path = Path(name)
+                if (path.name != '.gitignore' or mode == 0o120000
+                        or any(parent.as_posix() in after for parent in path.parents)):
+                    continue
+                target = worktree / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+            ignored = subprocess.run(['git', '--git-dir', str(repo), '--work-tree', str(worktree),
+                                      'check-ignore', '--no-index', '-z', '--stdin'],
+                                     input=b''.join(os.fsencode(name)+b'\0' for name in sorted(new_paths)),
+                                     cwd=worktree, env=environment, capture_output=True)
+            if ignored.returncode not in (0, 1):
+                ignored.check_returncode()
+            omitted = {os.fsdecode(name) for name in ignored.stdout.split(b'\0') if name}
+            after = {name: value for name, value in after.items() if name not in omitted}
         def git(*args, data=None, index=None):
             env = {**environment, **({'GIT_INDEX_FILE': str(index)} if index else {})}
             return subprocess.run(['git', '--git-dir', str(repo), *args], input=data,
