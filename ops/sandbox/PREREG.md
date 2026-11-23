@@ -221,3 +221,24 @@ harness image already applies its own pre-install steps. No v3 session has run.
 Pre-run clarification — 2026-11-23: generated untracked setup outputs are
 excluded using the base snapshot's own ignore rules, not the handback's;
 tracked source edits remain in the patch. No v3 session has run.
+
+### v3 amendment — 2026-11-23: outside help and PR reviews
+
+Recorded after calibration began and before comparisons. Every v3 comparison
+arm prompt (plain, plain2, vacant) includes the identical instruction:
+"Do not open a pull request; the pushed branch is the only deliverable."
+Platform-default instructions otherwise request PRs, whose reviews can provide
+outside help. This instruction also applies to subsequent calibration dispatches.
+
+A cell is flagged **outside_help** if a PR review (Devin Review or human
+comments) reached its session before its final push. Audit delivery to the
+session and the final-push timestamp, not just PR creation or review publication.
+Treat outside_help exactly like contamination: exclude its entire paired unit
+from primary analysis, retain it in sensitivity analysis, and count a flagged
+calibration cell as resolved for the whole-bank gate. Unknown review/access
+verdicts remain unknown; calibration cannot proceed until both are reviewed.
+
+PR creation alone is not outside help. The operator records in the calibration
+NOTES.md that PRs #101 (SymPy 15875) and #102 (Matplotlib 24870) were closed
+without review feedback reaching either session before its final push. These
+reports do not certify other contamination criteria as clean.

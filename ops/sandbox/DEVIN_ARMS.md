@@ -184,3 +184,50 @@ remote refs. No missing cells are synthesized. Comparison samples stay distinct
 as sample indices 1 and 2, with plain/plain2/vacant mapped to A/A2/G. Record
 incomplete coverage; do not present partial paired results as a full 24-pair run.
 The operator, not an automatic launch mechanism, applies the calibration gate.
+
+## V3 SWE-bench comparison dispatch — 2026-11-23 amendment
+
+Use only the whole selected bank and only after the v3 calibration gate proceeds.
+Each comparison is fresh, with two samples per instance; never reuse calibration
+work. Insert the exact problem statement from kit-root `prompts/<instance_id>.txt`
+at `<problem_statement>` below. The handback root is the upstream repository,
+not the small kit. Do not supply selected gate IDs to plain or plain2.
+
+### V3 plain
+
+```text
+Start from sandbox-v3/<instance_id> and solve this problem in the repository:
+<problem_statement>
+Push the repository-root handback to sandbox-devin/v3/<instance_id>-plain-s<k>.
+Do not open a pull request; the pushed branch is the only deliverable.
+```
+
+### V3 plain2
+
+```text
+Start from sandbox-v3/<instance_id> and solve this problem in the repository:
+<problem_statement>
+Push the repository-root handback to sandbox-devin/v3/<instance_id>-plain2-s<k>.
+Do not open a pull request; the pushed branch is the only deliverable.
+```
+
+### V3 vacant
+
+```text
+Start from sandbox-v3/<instance_id> and solve this problem in the repository:
+<problem_statement>
+Follow the sandbox-devin-kit-v3 README to install Vacant and the instance's native
+test environment. Use that instance's gate, at most three submissions; use its
+feedback between submissions. The gate reveals existing tests to keep green.
+Push the repository-root handback to sandbox-devin/v3/<instance_id>-vacant-s<k>.
+Do not open a pull request; the pushed branch is the only deliverable.
+```
+
+Calibration uses the plain template with handback branch
+`sandbox-devin-cal3/<instance_id>-plain`, including the same no-PR instruction.
+Platform-default PR instructions must not override this dispatch. If PR review
+feedback reached a session before its final push, record `outside_help` and its
+evidence: treat it as contamination for primary paired exclusions and as resolved
+for the calibration gate. A PR alone is not that flag; check feedback delivery
+and timing. Leave unaudited verdicts unknown, including the distinct access-based
+contamination verdict, until session-log review is complete.
