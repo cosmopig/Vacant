@@ -1117,12 +1117,16 @@ class ContourSet(cm.ScalarMappable, ContourLabeler):
 
         return lev[i0:i1]
 
-    def _process_contour_level_args(self, args):
+    def _process_contour_level_args(self, args, z_dtype=None):
         """
         Determine the contour levels and store in self.levels.
         """
         if self.levels is None:
             if len(args) == 0:
+                if z_dtype == bool:
+                    self.levels = np.array(
+                        [0, .5, 1] if self.filled else [.5], dtype=np.float64)
+                    return
                 levels_arg = 7  # Default, hard-wired.
             else:
                 levels_arg = args[0]
@@ -1447,7 +1451,7 @@ class QuadContourSet(ContourSet):
             fn = 'contour'
         nargs = len(args)
         if nargs <= 2:
-            z = ma.asarray(args[0], dtype=np.float64)
+            z = ma.asarray(args[0])
             x, y = self._initialize_x_y(z)
             args = args[1:]
         elif nargs <= 4:
@@ -1455,14 +1459,15 @@ class QuadContourSet(ContourSet):
             args = args[3:]
         else:
             raise _api.nargs_error(fn, takes="from 1 to 4", given=nargs)
-        z = ma.masked_invalid(z, copy=False)
+        z_dtype = z.dtype
+        z = ma.masked_invalid(ma.asarray(z, dtype=np.float64), copy=False)
         self.zmax = float(z.max())
         self.zmin = float(z.min())
         if self.logscale and self.zmin <= 0:
             z = ma.masked_where(z <= 0, z)
             _api.warn_external('Log scale: values of z <= 0 have been masked')
             self.zmin = float(z.min())
-        self._process_contour_level_args(args)
+        self._process_contour_level_args(args, z_dtype)
         return (x, y, z)
 
     def _check_xyz(self, args, kwargs):
@@ -1475,7 +1480,7 @@ class QuadContourSet(ContourSet):
 
         x = np.asarray(x, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
-        z = ma.asarray(args[2], dtype=np.float64)
+        z = ma.asarray(args[2])
 
         if z.ndim != 2:
             raise TypeError(f"Input z must be 2D, not {z.ndim}D")
@@ -1577,6 +1582,10 @@ Z : (M, N) array-like
 
 levels : int or array-like, optional
     Determines the number and positions of the contour lines / regions.
+
+    If not given, defaults to a single level of ``0.5`` for boolean *Z*
+    with `.contour`, or ``[0, 0.5, 1]`` with `.contourf`.  For other data
+    types, defaults to 7, as described below.
 
     If an int *n*, use `~matplotlib.ticker.MaxNLocator`, which tries
     to automatically choose no more than *n+1* "nice" contour levels

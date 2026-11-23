@@ -84,6 +84,52 @@ def test_contour_Nlevels():
     assert (cs1.levels == cs2.levels).all()
 
 
+@pytest.mark.parametrize('filled', [False, True])
+@pytest.mark.parametrize('coordinates', [False, True])
+@pytest.mark.parametrize('data', ['mixed', 'false', 'true', 'masked', 'list'])
+def test_contour_bool_levels(filled, coordinates, data):
+    z = np.array([[False, True], [True, False]])
+    if data == 'false':
+        z[:] = False
+    elif data == 'true':
+        z[:] = True
+    elif data == 'masked':
+        z = np.ma.array(z, mask=[[False, False], [False, True]])
+    elif data == 'list':
+        z = z.tolist()
+    fig, ax = plt.subplots()
+    contour = ax.contourf if filled else ax.contour
+    args = ([0, 1], [0, 1], z) if coordinates else (z,)
+    cs = contour(*args)
+    assert_array_almost_equal(cs.levels, [0, .5, 1] if filled else [.5])
+
+
+@pytest.mark.parametrize('filled', [False, True])
+@pytest.mark.parametrize('positional', [False, True])
+@pytest.mark.parametrize('levels', [[.25, .75], 3])
+def test_contour_bool_explicit_levels(filled, positional, levels):
+    z = np.array([[False, True], [True, False]])
+    fig, ax = plt.subplots()
+    contour = ax.contourf if filled else ax.contour
+    if positional:
+        cs = contour(z, levels)
+        expected = contour(z.astype(float), levels)
+    else:
+        cs = contour(z, levels=levels)
+        expected = contour(z.astype(float), levels=levels)
+    assert_array_almost_equal(cs.levels, expected.levels)
+
+
+@pytest.mark.parametrize('levels, message', [
+    ([], 'Filled contours require at least 2 levels'),
+    ([.75, .25], 'Contour levels must be increasing'),
+])
+def test_contour_bool_invalid_levels(levels, message):
+    z = np.array([[False, True], [True, False]])
+    with pytest.raises(ValueError, match=message):
+        plt.contourf(z, levels=levels)
+
+
 def test_contour_badlevel_fmt():
     # Test edge case from https://github.com/matplotlib/matplotlib/issues/9742
     # User supplied fmt for each level as a dictionary, but Matplotlib changed
