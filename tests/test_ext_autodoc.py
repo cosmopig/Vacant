@@ -715,6 +715,16 @@ def test_autodoc_special_members(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_empty_module_all(app):
+    actual = do_autodoc(app, 'module', 'target.empty_all', {"members": None})
+    assert list(actual) == [
+        '',
+        '.. py:module:: target.empty_all',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autodoc_ignore_module_all(app):
     # default (no-ignore-module-all)
     options = {"members": None}
