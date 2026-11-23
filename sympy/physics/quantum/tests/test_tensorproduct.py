@@ -1,5 +1,6 @@
-from sympy import I, symbols, Matrix
+from sympy import I, S, symbols, Matrix
 
+from sympy.physics.paulialgebra import Pauli
 from sympy.physics.quantum.commutator import Commutator as Comm
 from sympy.physics.quantum.tensorproduct import TensorProduct
 from sympy.physics.quantum.tensorproduct import TensorProduct as TP
@@ -47,6 +48,21 @@ def test_tensor_product_commutator():
 
 def test_tensor_product_simp():
     assert tensor_product_simp(TP(A, B)*TP(B, C)) == TP(A*B, B*C)
+
+
+def test_tensor_product_powers():
+    identity = TP(1, 1)
+    pauli = TP(1, Pauli(3))
+    for expr, expected in [(identity*identity, identity),
+                           (pauli*pauli, identity),
+                           (2*pauli**3, 2*pauli),
+                           (TP(A, B)**3, TP(A**3, B**3)),
+                           (TP(A, B)**S.Half, TP(A, B)**S.Half)]:
+        assert tensor_product_simp(expr) == expected
+        assert expr.expand(tensorproduct=True) == expected
+
+    assert tensor_product_simp(TP(A, B)**2*TP(B, C)) == TP(A**2*B, B**2*C)
+    assert tensor_product_simp(pauli**2*TP(1, Pauli(1))**2) == identity
 
 
 def test_issue_5923():

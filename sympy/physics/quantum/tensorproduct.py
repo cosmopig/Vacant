@@ -257,6 +257,10 @@ class TensorProduct(Expr):
         else:
             return self
 
+    def _eval_expand_tensorproduct_power(self, exp):
+        if exp.is_integer and exp.is_positive:
+            return TensorProduct(*[arg**exp for arg in self.args])
+
     def _eval_trace(self, **kwargs):
         indices = kwargs.get('indices', None)
         exp = tensor_product_simp(self)
@@ -273,9 +277,8 @@ def tensor_product_simp_Mul(e):
 
     Current the main use of this is to simplify a ``Mul`` of ``TensorProduct``s
     to a ``TensorProduct`` of ``Muls``. It currently only works for relatively
-    simple cases where the initial ``Mul`` only has scalars and raw
-    ``TensorProduct``s, not ``Add``, ``Pow``, ``Commutator``s of
-    ``TensorProduct``s.
+    simple cases where the initial ``Mul`` only has scalars, raw
+    ``TensorProduct``s and positive integer powers of ``TensorProduct``s.
 
     Parameters
     ==========
@@ -310,21 +313,28 @@ def tensor_product_simp_Mul(e):
 
     """
     # TODO: This won't work with Muls that have other composites of
-    # TensorProducts, like an Add, Pow, Commutator, etc.
+    # TensorProducts, like an Add or Commutator.
     # TODO: This only works for the equivalent of single Qbit gates.
     if not isinstance(e, Mul):
         return e
     c_part, nc_part = e.args_cnc()
-    n_nc = len(nc_part)
-    if n_nc == 0 or n_nc == 1:
-        return e
-    elif e.has(TensorProduct):
-        current = nc_part[0]
+    factors = []
+    for arg in nc_part:
+        if isinstance(arg, Pow):
+            expanded = arg._eval_expand_tensorproduct()
+            if expanded != arg:
+                c_args, nc_args = expanded.args_cnc()
+                c_part.extend(c_args)
+                factors.extend(nc_args)
+                continue
+        factors.append(arg)
+    if len(factors) > 1 and any(arg.has(TensorProduct) for arg in factors):
+        current = factors[0]
         if not isinstance(current, TensorProduct):
             raise TypeError('TensorProduct expected, got: %r' % current)
         n_terms = len(current.args)
         new_args = list(current.args)
-        for next in nc_part[1:]:
+        for next in factors[1:]:
             # TODO: check the hilbert spaces of next and current here.
             if isinstance(next, TensorProduct):
                 if n_terms != len(next.args):
@@ -341,17 +351,17 @@ def tensor_product_simp_Mul(e):
                     new_args[i] = new_args[i] * next
             current = next
         return Mul(*c_part) * TensorProduct(*new_args)
-    else:
-        return e
+    if factors != nc_part:
+        return Mul(*(c_part + factors))
+    return e
 
 
 def tensor_product_simp(e, **hints):
     """Try to simplify and combine TensorProducts.
 
-    In general this will try to pull expressions inside of ``TensorProducts``.
-    It currently only works for relatively simple cases where the products have
-    only scalars, raw ``TensorProducts``, not ``Add``, ``Pow``, ``Commutators``
-    of ``TensorProducts``. It is best to see what it does by showing examples.
+    This pulls products and positive integer powers inside of
+    ``TensorProduct``s. Products containing more complicated expressions, such
+    as sums or commutators of tensor products, are not supported.
 
     Examples
     ========
@@ -376,13 +386,16 @@ def tensor_product_simp(e, **hints):
     commutators and anticommutators as well:
 
     >>> tensor_product_simp(e**2)
-    (A*C)x(B*D)**2
+    ((A*C)**2)x((B*D)**2)
 
     """
     if isinstance(e, Add):
         return Add(*[tensor_product_simp(arg) for arg in e.args])
     elif isinstance(e, Pow):
-        return tensor_product_simp(e.base) ** e.exp
+        result = tensor_product_simp(e.base)**e.exp
+        if isinstance(result, Pow):
+            return result._eval_expand_tensorproduct()
+        return result
     elif isinstance(e, Mul):
         return tensor_product_simp_Mul(e)
     elif isinstance(e, Commutator):
