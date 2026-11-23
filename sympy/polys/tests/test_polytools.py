@@ -1445,6 +1445,22 @@ def test_Poly_clear_denoms():
         x + 3*sqrt(2), x, domain='EX') and poly.get_domain() == EX
 
 
+def test_Poly_clear_denoms_zero_coefficients():
+    a = ((sqrt(2) + 1)*(sqrt(2) - 1) - 1)/z
+
+    for gens in [(x,), (x, y)]:
+        f = Poly(a, *gens, domain=EX, expand=False)
+        coeff, poly = f.clear_denoms()
+        assert coeff == z
+        assert poly.is_zero
+        assert poly.terms_gcd() == ((0,)*len(gens), Poly(0, *gens, domain=EX))
+
+    f = Poly(a*x**2 + a*x*y**2 + x*y + 1, x, y, domain=EX, expand=False)
+    coeff, poly = f.clear_denoms()
+    assert coeff == z
+    assert poly == Poly(z*x*y + z, x, y, domain=EX)
+
+
 def test_Poly_rat_clear_denoms():
     f = Poly(x**2/y + 1, x)
     g = Poly(x**3 + y, x)
