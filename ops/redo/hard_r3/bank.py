@@ -5,9 +5,11 @@ import heapq
 from itertools import combinations
 import random
 
+import extra_bank
+
 
 def mesh(data):
-    n, events = data["n"], data["events"]
+    events = data["events"]
     edges = Counter()
     out = []
     for op, a, *rest in events:
@@ -138,10 +140,10 @@ def patch(data):
             conflicts.update((a, b))
     pos = 0
     parts = []
-    for _, l, r, text in sorted((e for e in hunks if e[0] not in conflicts),
-                                 key=lambda h: (h[1], h[1] != h[2], h[0])):
-        parts.extend((data["base"][pos:l], text))
-        pos = r
+    for _, left, right, text in sorted((e for e in hunks if e[0] not in conflicts),
+                                       key=lambda h: (h[1], h[1] != h[2], h[0])):
+        parts.extend((data["base"][pos:left], text))
+        pos = right
     parts.append(data["base"][pos:])
     return {"text": "".join(parts), "rejected": sorted(conflicts)}
 
@@ -287,6 +289,7 @@ SMALL = {
 }
 
 ORACLES = dict(zip(SPECS, (mesh, cache, intervals, route, spans, patch, rank, reconcile), strict=True))
+SPECS.update(extra_bank.SPECS)
 
 
 def random_input(task, r, visible=False):
@@ -380,15 +383,20 @@ EXTRA = {
 
 
 def suite(task, hidden):
-    oracle = ORACLES[task]
+    if task in ORACLES:
+        oracle, small, extra, gen_case, large_case = ORACLES[task], SMALL, EXTRA, random_input, stress
+    else:
+        oracle = extra_bank.ORACLES[task]
+        small, extra = extra_bank.SMALL, extra_bank.EXTRA
+        gen_case, large_case = extra_bank.random_input, extra_bank.stress
     if not hidden:
         r = random.Random(f"r3-hard-visible-v1:{task}")
-        examples = [SMALL[task], *(random_input(task, r, visible=True) for _ in range(3))]
+        examples = [small[task], *(gen_case(task, r, visible=True) for _ in range(3))]
         return [(case, oracle(case)) for case in examples]
     r = random.Random(f"r3-hard-v1:{task}")
-    cases = EXTRA.get(task, []) + [random_input(task, r) for _ in range(24)]
+    cases = extra.get(task, []) + [gen_case(task, r, visible=False) for _ in range(24)]
     out = [(case, oracle(case)) for case in cases]
-    large = stress(task)
+    large = large_case(task)
     if large:
         out.append(large)
     return out

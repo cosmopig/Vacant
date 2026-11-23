@@ -36,8 +36,9 @@ def wire_stats(events):
 def archive(root, wire, replay):
     run_meta = read(root / "RUN.json")
     runtime = read(root / "runtime.json")
+    inputs = run.sources(Path(run_meta["plan_path"]).name)
     if any(runtime["files"].get(str(p.relative_to(run.REPO))) !=
-           run.redo.sha256_bytes(p.read_bytes()) for p in run.SCRIPTS):
+           run.redo.sha256_bytes(p.read_bytes()) for p in inputs):
         raise SystemExit("Frozen inputs differ from the runtime inventory")
     replay_audit = read(replay)
     if not replay_audit["attempts"] or replay_audit["mismatches"]:

@@ -9,7 +9,6 @@ from pathlib import Path
 import platform
 from queue import Queue
 import re
-import shutil
 import signal
 import stat
 import subprocess
@@ -35,18 +34,10 @@ MODEL = "local/qwen3-coder-30b-a3b"
 MODEL_SHA = "fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad"
 NETWORK = "hard-r3-inference"
 TRACE_HOST = "http://hard-r3-trace:8080"
-SLOTS = 4
 DOCKER_LABEL = f"vacant.hard-r3={uuid.uuid4().hex}"
 DOCKER_STOP = Event()
 DOCKER_LAUNCH = Lock()
-SERVER_ARGS = (
-    "--host 0.0.0.0 --port 8080 --model /model/model.gguf --alias qwen3-coder-30b-a3b "
-    f"--n-gpu-layers 0 --ctx-size 65536 --parallel {SLOTS} --threads 8 --threads-batch 8 "
-    "--jinja --n-predict 4096 --no-cache-prompt --cache-ram 0 --ctx-checkpoints 0 "
-    "--temp 0.7 --top-p 0.8 --top-k 20 --min-p 0 --repeat-penalty 1.05 --seed -1 --no-webui"
-).split()
-SCRIPTS = [HERE / f for f in ("run.py", "bank.py", "plan.json", "judge.py", "trace_proxy.py", "archive.py",
-                              "PROTOCOL.md")] + [HERE.parent / "redo.py"]
+PLANS = {"plan.json": "PROTOCOL.md", "serial_plan.json": "SERIAL_PROTOCOL.md"}
 CONFIG = {
     "autoupdate": False, "share": "disabled", "enabled_providers": ["local"],
     "permission": {"*": "deny", "bash": "allow", "read": "allow"},
@@ -68,7 +59,31 @@ INFRA = re.compile(r"usage limit|rate.?limit|too many requests|cannot connect to
                    r"bad gateway|gateway timeout|loading model", re.I)
 
 
-def runtime(binary: Path, rg: Path) -> list[str]:
+def sources(plan_name):
+    return [HERE / name for name in ("run.py", "bank.py", "extra_bank.py", "judge.py", "trace_proxy.py",
+                                    "archive.py", plan_name, PLANS[plan_name])] + [HERE.parent / "redo.py"]
+
+
+def inference_slots(plan):
+    providers = plan["providers"]
+    if len(providers) != 1 or providers[0]["provider"] != "local":
+        raise SystemExit("The locked model runner requires exactly one local provider")
+    jobs = providers[0]["jobs"]
+    if type(jobs) is not int or not 1 <= jobs <= 4:
+        raise SystemExit("The frozen plan must select 1–4 inference slots")
+    return jobs
+
+
+def server_args(slots):
+    return (
+        "--host 0.0.0.0 --port 8080 --model /model/model.gguf --alias qwen3-coder-30b-a3b "
+        f"--n-gpu-layers 0 --ctx-size {16384 * slots} --parallel {slots} --threads 8 --threads-batch 8 "
+        "--jinja --n-predict 4096 --no-cache-prompt --cache-ram 0 --ctx-checkpoints 0 "
+        "--temp 0.7 --top-p 0.8 --top-k 20 --min-p 0 --repeat-penalty 1.05 --seed -1 --no-webui"
+    ).split()
+
+
+def runtime(binary: Path, rg: Path, slots: int) -> list[str]:
     if not binary.is_file() or hashlib.sha256(binary.read_bytes()).hexdigest() != BINARY_SHA:
         raise SystemExit(f"Use the pinned OpenCode {VERSION} baseline binary; SHA-256 must be {BINARY_SHA}")
     image = subprocess.run(["docker", "image", "inspect", IMAGE, "--format", "{{.Id}}"],
@@ -81,7 +96,7 @@ def runtime(binary: Path, rg: Path) -> list[str]:
     server = json.loads(info.stdout)[0]
     if server["Config"]["Image"] != LLAMA_IMAGE or not server["State"]["Running"]:
         raise SystemExit("The pinned local inference container must be running")
-    if server["Args"] != SERVER_ARGS:
+    if server["Args"] != server_args(slots):
         raise SystemExit(f"Unexpected local inference configuration: {server['Args']}")
     internal = subprocess.check_output(["docker", "network", "inspect", NETWORK, "--format", "{{.Internal}}"],
                                        text=True).strip()
@@ -304,7 +319,7 @@ def one_attempt(binary: Path, rg: Path, slot: int, plan, arm, tdir, provider, ad
     return {**meta, "void": None, "acc": acc, "grade": grade}
 
 
-def preflight(out: Path):
+def preflight(out: Path, tasks):
     manual = {
         "mesh": [True, 2, False],
         "cache": [True, True, False, 2, None, True],
@@ -314,6 +329,7 @@ def preflight(out: Path):
         "patch": {"text": "aöXQ!d", "rejected": []},
         "rank": [[2, -3, 0, "-3/2"], [1, 0, None, "0"], [0, 0, None, None]],
         "reconcile": {"a": 0, "b": 1, "d": 2},
+        **bank.extra_bank.MANUAL,
     }
     summaries = {}
 
@@ -327,7 +343,7 @@ def preflight(out: Path):
             "    return None\n"
         ).encode()
 
-    for task in bank.SPECS:
+    for task in tasks:
         visible = bank.suite(task, False)
         hidden = bank.suite(task, True)
         positive_stub = fixture_stub(visible)
@@ -353,14 +369,17 @@ def preflight(out: Path):
     print(f"Preflight controls passed: {len(summaries)} tasks")
 
 
-def run(out: Path, binary: Path, rg: Path):
-    msgs = runtime(binary, rg)
-    dirty = redo._git(["status", "--porcelain", "--", *(str(p) for p in SCRIPTS)], REPO)
+def run(out: Path, binary: Path, rg: Path, plan):
+    plan_path = Path(plan["_path"])
+    inputs = sources(plan_path.name)
+    nslots = inference_slots(plan)
+    msgs = runtime(binary, rg, nslots)
+    dirty = redo._git(["status", "--porcelain", "--", *(str(p) for p in inputs)], REPO)
     if dirty is None or dirty:
         raise SystemExit("Commit every experiment input before running")
-    redo.HARNESS_SHA = redo.sha256_bytes(redo.canonical({p.name: redo.sha256_bytes(p.read_bytes()) for p in SCRIPTS}))
+    redo.HARNESS_SHA = redo.sha256_bytes(redo.canonical({p.name: redo.sha256_bytes(p.read_bytes()) for p in inputs}))
     slots = Queue()
-    for slot in range(SLOTS):
+    for slot in range(nslots):
         slots.put(slot)
 
     def slotted_attempt(*args):
@@ -374,15 +393,15 @@ def run(out: Path, binary: Path, rg: Path):
     out.mkdir(parents=True, exist_ok=False)
     controls = out / "preflight"
     controls.mkdir()
-    preflight(controls)
+    preflight(controls, plan["tasks"])
     emit_json(out / "runtime.json", {"runtime": msgs, "image": IMAGE, "agent_version": VERSION,
                                     "llama_image": LLAMA_IMAGE, "gguf_sha256": MODEL_SHA, "rg_sha256": RG_SHA,
                                     "opencode_sha256": BINARY_SHA, "model_alias": MODEL,
-                                    "files": {str(p.relative_to(REPO)): redo.sha256_bytes(p.read_bytes()) for p in SCRIPTS}})
+                                    "files": {str(p.relative_to(REPO)): redo.sha256_bytes(p.read_bytes()) for p in inputs}})
     with tempfile.TemporaryDirectory(prefix="r3-bank-") as tmp:
-        for task in bank.SPECS:
+        for task in plan["tasks"]:
             (Path(tmp) / task / "workspace").mkdir(parents=True)
-        rc = redo.cmd_run(argparse.Namespace(plan=str(HERE / "plan.json"), root=str(out), bank=tmp,
+        rc = redo.cmd_run(argparse.Namespace(plan=str(plan_path), root=str(out), bank=tmp,
                                             only_tasks=None, only_reps=None, max_pairs=None,
                                             allow_uncommitted_plan=False))
     report_path = out / "REPORT.json"
@@ -401,21 +420,23 @@ def main():
     p.add_argument("out", type=Path, nargs="?")
     p.add_argument("--opencode", type=Path)
     p.add_argument("--rg", default=Path("/usr/bin/rg"), type=Path)
+    p.add_argument("--plan", choices=PLANS, default="plan.json", help="Frozen local plan for server, preflight and run")
     p.add_argument("--verify-output", type=Path, help="Output directory for offline replay")
     a = p.parse_args()
+    plan = redo.load_plan(HERE / a.plan) if a.action != "regrade" else None
     if a.action == "server-args":
-        print(" ".join(SERVER_ARGS))
+        print(" ".join(server_args(inference_slots(plan))))
         return 0
     if a.out is None:
         p.error("an output directory is required")
     out = a.out.resolve()
     if a.action == "preflight":
         out.mkdir(parents=True, exist_ok=False)
-        preflight(out)
+        preflight(out, plan["tasks"])
     elif a.action == "run":
         if a.opencode is None:
             p.error("--opencode is required for a live run")
-        return run(out, a.opencode.resolve(), a.rg.resolve())
+        return run(out, a.opencode.resolve(), a.rg.resolve(), plan)
     else:
         if a.verify_output is None:
             p.error("--verify-output is required to keep evidence immutable")
