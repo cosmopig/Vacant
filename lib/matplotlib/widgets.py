@@ -2144,12 +2144,14 @@ class SpanSelector(_SelectorWidget):
         else:
             trans = ax.get_yaxis_transform()
             w, h = 1, 0
-        self._rect = Rectangle((0, 0), w, h,
+        # Widget geometry should not contribute to the axes' data limits.
+        self._rect = Rectangle((0, 0), 0, 0,
                                transform=trans,
                                visible=False,
                                **self._rectprops)
 
         self.ax.add_patch(self._rect)
+        self._rect.set_bounds(0, 0, w, h)
         if len(self.artists) > 0:
             self.artists[0] = self._rect
         else:
@@ -2366,10 +2368,22 @@ class ToolLineHandles:
             line_props = {}
         line_props.update({'visible': False, 'animated': useblit})
 
-        line_fun = ax.axvline if self.direction == 'horizontal' else ax.axhline
         self._line_props = line_props
 
-        self.artists = [line_fun(p, **line_props) for p in positions]
+        if direction == 'horizontal':
+            trans = ax.get_xaxis_transform()
+            line_data = (([p, p], [0, 1]) for p in positions)
+        else:
+            trans = ax.get_yaxis_transform()
+            line_data = (([0, 1], [p, p]) for p in positions)
+
+        self.artists = []
+        for x, y in line_data:
+            # Handles are widget overlays, not data for autoscaling.
+            line = Line2D([], [], transform=trans, **line_props)
+            ax.add_line(line)
+            line.set_data(x, y)
+            self.artists.append(line)
 
     @property
     def positions(self):
