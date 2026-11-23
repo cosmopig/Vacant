@@ -6,7 +6,7 @@ from operator import attrgetter
 
 from django.core.exceptions import EmptyResultSet, FieldError
 from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, F, Q
+from django.db.models import Count, Exists, F, OuterRef, Q
 from django.db.models.sql.constants import LOUTER
 from django.db.models.sql.where import NothingNode, WhereNode
 from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
@@ -2807,6 +2807,15 @@ class ExcludeTests(TestCase):
         annotation = Annotation.objects.create(name='annotation', tag=tag)
         self.assertEqual(Annotation.objects.exclude(tag__note__note=F('name')).get(), annotation)
 
+    def test_exclude_reverse_fk_outerref_to_field(self):
+        root = Node.objects.create(num=42)
+        Node.objects.create(num=1, parent=root)
+        Number.objects.create(num=42)
+        other = Number.objects.create(num=7)
+        subquery = Node.objects.filter(pk=root.pk).exclude(node__parent=OuterRef('num'))
+        numbers = Number.objects.annotate(unrelated=Exists(subquery)).filter(unrelated=True)
+        self.assertEqual(numbers.get(), other)
+
     def test_exclude_with_circular_fk_relation(self):
         self.assertEqual(ObjectB.objects.exclude(objecta__objectb__name=F('name')).count(), 0)
 
@@ -3452,6 +3461,24 @@ class DisjunctionPromotionTests(TestCase):
 
 
 class ManyToManyExcludeTest(TestCase):
+    def test_exclude_outerref(self):
+        program_identifier = Identifier.objects.create(name='program')
+        channel_identifier = Identifier.objects.create(name='channel')
+        program = Program.objects.create(identifier=program_identifier)
+        channel = Channel.objects.create(identifier=channel_identifier)
+        channel.programs.add(program)
+
+        condition = {'programs__identifier_id': OuterRef('pk')}
+        for operation, subquery in (
+            ('exclude', Channel.objects.exclude(**condition)),
+            ('negated_q', Channel.objects.filter(~Q(**condition))),
+        ):
+            with self.subTest(operation=operation):
+                identifiers = Identifier.objects.annotate(
+                    has_unrelated_channel=Exists(subquery),
+                ).filter(has_unrelated_channel=True)
+                self.assertEqual(identifiers.get(), channel_identifier)
+
     def test_exclude_many_to_many(self):
         Identifier.objects.create(name='extra')
         program = Program.objects.create(identifier=Identifier.objects.create(name='program'))
