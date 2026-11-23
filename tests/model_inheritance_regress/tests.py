@@ -315,6 +315,39 @@ class ModelInheritanceTest(TestCase):
         pos = fragment.find("pub_date")
         self.assertEqual(fragment.find("pub_date", pos + 1), -1)
 
+    def test_queryset_update_on_second_parent_model(self):
+        """
+        update() of a field from the second parent of a multi-table model
+        with multiple parents updates the right rows of that parent.
+        """
+        other = Politician.objects.create(title="other 1")
+        other2 = Politician.objects.create(title="other 2")
+        c1 = Congressman.objects.create(name="c1", state="PA", title="t1")
+        c2 = Congressman.objects.create(name="c2", state="NY", title="t2")
+        self.assertNotEqual(c1.pk, c1.politician_id)
+        self.assertEqual(Congressman.objects.update(title="senator"), 2)
+        self.assertSequenceEqual(
+            Congressman.objects.order_by("pk").values_list("title", flat=True),
+            ["senator", "senator"],
+        )
+        other.refresh_from_db()
+        other2.refresh_from_db()
+        self.assertEqual(other.title, "other 1")
+        self.assertEqual(other2.title, "other 2")
+        # Filtered update on both parents and a grandchild.
+        Congressman.objects.filter(pk=c1.pk).update(name="c1b", title="gov")
+        c1.refresh_from_db()
+        c2.refresh_from_db()
+        self.assertEqual((c1.name, c1.title), ("c1b", "gov"))
+        self.assertEqual((c2.name, c2.title), ("c2", "senator"))
+        s = Senator.objects.create(name="s", state="CA", title="t3")
+        self.assertEqual(Senator.objects.update(title="sen", name="s2"), 1)
+        s.refresh_from_db()
+        self.assertEqual((s.name, s.title), ("s2", "sen"))
+        c2.refresh_from_db()
+        self.assertEqual(c2.title, "senator")
+        self.assertEqual(Politician.objects.filter(title="other 1").count(), 1)
+
     def test_queryset_update_on_parent_model(self):
         """
         Regression test for #10362
