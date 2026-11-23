@@ -1,0 +1,2 @@
+lib/matplotlib/tests/test_widgets.py::test_span_selector_preserves_limits[horizontal]
+lib/matplotlib/tests/test_widgets.py::test_span_selector_preserves_limits[vertical]

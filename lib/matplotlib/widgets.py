@@ -2144,12 +2144,15 @@ class SpanSelector(_SelectorWidget):
         else:
             trans = ax.get_yaxis_transform()
             w, h = 1, 0
-        self._rect = Rectangle((0, 0), w, h,
+        self._rect = Rectangle((0, 0), 0, 0,
                                transform=trans,
                                visible=False,
                                **self._rectprops)
 
+        # A rectangle with no area in either direction does not set data limits.
         self.ax.add_patch(self._rect)
+        self._rect.set_width(w)
+        self._rect.set_height(h)
         if len(self.artists) > 0:
             self.artists[0] = self._rect
         else:
@@ -2366,10 +2369,22 @@ class ToolLineHandles:
             line_props = {}
         line_props.update({'visible': False, 'animated': useblit})
 
-        line_fun = ax.axvline if self.direction == 'horizontal' else ax.axhline
+        horizontal = direction == 'horizontal'
+        axis = 'x' if horizontal else 'y'
+        transform = (ax.get_xaxis_transform() if horizontal
+                     else ax.get_yaxis_transform())
         self._line_props = line_props
 
-        self.artists = [line_fun(p, **line_props) for p in positions]
+        self.artists = []
+        for p in positions:
+            props = line_props.copy()
+            ax._process_unit_info([(axis, p)], props, convert=False)
+            line = Line2D([], [], transform=transform, **props)
+            # Install the handle before assigning data to keep limits unchanged.
+            ax.add_line(line)
+            line.set_data(*(([p, p], [0, 1]) if horizontal
+                            else ([0, 1], [p, p])))
+            self.artists.append(line)
 
     @property
     def positions(self):
