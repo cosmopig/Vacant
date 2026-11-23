@@ -822,6 +822,14 @@ class Pow(Expr):
             return Mul(*expr)
         return self.func(b, e)
 
+    def _eval_expand_tensorproduct(self, **hints):
+        expand_power = getattr(self.base, '_eval_expand_tensorproduct_power', None)
+        if expand_power is not None and self.exp.is_integer:
+            if self.exp.is_zero:
+                return S.One
+            return expand_power(self.exp)
+        return self
+
     def _eval_expand_power_base(self, **hints):
         """(a*b)**n -> a**n * b**n"""
         force = hints.get('force', False)
