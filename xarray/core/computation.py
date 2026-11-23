@@ -1861,9 +1861,12 @@ def where(cond, x, y, keep_attrs=None):
         # keep the attributes of x, the second parameter, by default to
         # be consistent with the `where` method of `DataArray` and `Dataset`
         keep_attrs = lambda attrs, context: getattr(x, "attrs", {})
+        restore_coord_attrs = True
+    else:
+        restore_coord_attrs = False
 
     # alignment for three arguments is complicated, so don't support it yet
-    return apply_ufunc(
+    result = apply_ufunc(
         duck_array_ops.where,
         cond,
         x,
@@ -1873,6 +1876,26 @@ def where(cond, x, y, keep_attrs=None):
         dask="allowed",
         keep_attrs=keep_attrs,
     )
+
+    # the callable above is also applied when merging coordinates, which
+    # would overwrite coordinate attrs with the attrs of ``x``; keep the
+    # coordinate attrs of the inputs instead (``x`` first, then cond, y)
+    if restore_coord_attrs and hasattr(result, "coords"):
+        new_coords = {}
+        for name in result.coords:
+            for obj in (x, cond, y):
+                coords = getattr(obj, "coords", None)
+                if coords is not None and name in coords:
+                    attrs = coords[name].attrs
+                    break
+            else:
+                attrs = {}
+            var = result.coords[name].variable.copy(deep=False)
+            var.attrs = dict(attrs)
+            new_coords[name] = var
+        result = result.assign_coords(new_coords)
+
+    return result
 
 
 @overload

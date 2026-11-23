@@ -1936,6 +1936,60 @@ def test_where_attrs() -> None:
     actual = xr.where(cond, 1, 0, keep_attrs=True)
     assert actual.attrs == {}
 
+    # ensure keep_attrs handles DataArray with coordinates
+    cond = xr.DataArray(
+        [True, False], dims="x", coords={"x": ("x", [0, 1], {"attr": "cond_coord"})}
+    )
+    x = xr.DataArray(
+        [1, 1],
+        dims="x",
+        coords={"x": ("x", [0, 1], {"attr": "x_coord"})},
+        attrs={"attr": "x_da"},
+    )
+    y = xr.DataArray(
+        [0, 0],
+        dims="x",
+        coords={"x": ("x", [0, 1], {"attr": "y_coord"})},
+        attrs={"attr": "y_da"},
+    )
+    actual = xr.where(cond, x, y, keep_attrs=True)
+    expected = xr.DataArray(
+        [1, 0],
+        dims="x",
+        coords={"x": ("x", [0, 1], {"attr": "x_coord"})},
+        attrs={"attr": "x_da"},
+    )
+    assert_identical(expected, actual)
+    # inputs are not modified
+    assert x.x.attrs == {"attr": "x_coord"}
+    assert cond.x.attrs == {"attr": "cond_coord"}
+
+    # coordinate attrs are kept when x is the same object as y
+    da = xr.DataArray(
+        [1, 2],
+        dims="time",
+        coords={"time": ("time", [0, 1], {"standard_name": "time"})},
+        attrs={"units": "K"},
+    )
+    actual = xr.where(True, da, da, keep_attrs=True)
+    assert actual.attrs == {"units": "K"}
+    assert actual.time.attrs == {"standard_name": "time"}
+
+    # ensure keep_attrs handles Dataset with coordinates
+    ds_x = xr.Dataset(
+        {"a": ("x", [1, 1])},
+        coords={"x": ("x", [0, 1], {"attr": "x_coord"})},
+        attrs={"attr": "x_ds"},
+    )
+    ds_y = xr.Dataset(
+        {"a": ("x", [0, 0])},
+        coords={"x": ("x", [0, 1], {"attr": "y_coord"})},
+        attrs={"attr": "y_ds"},
+    )
+    actual = xr.where(cond, ds_x, ds_y, keep_attrs=True)
+    assert actual.attrs == {"attr": "x_ds"}
+    assert actual.x.attrs == {"attr": "x_coord"}
+
 
 @pytest.mark.parametrize(
     "use_dask", [pytest.param(False, id="nodask"), pytest.param(True, id="dask")]
