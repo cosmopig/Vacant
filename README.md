@@ -21,7 +21,8 @@ Install all dependencies needed by the selected tests, not only the project's
 minimal runtime dependencies. The scikit-learn workspace needs pandas; use
 the harness constraints below rather than separately upgrading NumPy/SciPy.
 The commands are taken from the official harness environment and repository
-installation specifications, adapting only environment/workspace paths. Pytest
+installation specifications, adapting paths, temporary requirements files and
+the digest-pinned official HTTPS Qhull download. Pytest
 and pytest-django are added where listed. Django uses its own DiscoverRunner
 for database setup; other projects load their environment's pytest plugins.
 System provisioning commands require operator privileges and must be reviewed
@@ -58,7 +59,11 @@ Python 3.9; measured base P2P 1.570s; gate timeout 120s.
 
 ```bash
 conda create --prefix "$PWD/.envs/django__django-15732" python=3.9 -y
-cat <<'EOF_59812759871' > $HOME/requirements.txt
+(
+set -e
+VACANT_REQUIREMENTS=$(mktemp)
+trap 'rm -f -- "$VACANT_REQUIREMENTS"' EXIT
+cat <<'EOF_59812759871' > "$VACANT_REQUIREMENTS"
 aiosmtpd
 asgiref >= 3.6.0
 argon2-cffi >= 19.2.0
@@ -83,8 +88,8 @@ tzdata
 colorama; sys.platform == 'win32'
 
 EOF_59812759871
-conda activate "$PWD/.envs/django__django-15732" && python -m pip install -r $HOME/requirements.txt
-rm $HOME/requirements.txt
+conda activate "$PWD/.envs/django__django-15732" && python -m pip install -r "$VACANT_REQUIREMENTS"
+)
 conda activate "$PWD/.envs/django__django-15732"
 cd django__django-15732
 python -m pip install -e .
@@ -184,11 +189,13 @@ conda activate "$PWD/.envs/matplotlib__matplotlib-24870"
 python -m pip install contourpy==1.1.0 cycler==0.11.0 fonttools==4.42.1 ghostscript kiwisolver==1.4.5 numpy==1.25.2 packaging==23.1 pillow==10.0.0 pikepdf pyparsing==3.0.9 python-dateutil==2.8.2 six==1.16.0 setuptools==68.1.2 setuptools-scm==7.1.0 typing-extensions==4.7.1
 cd matplotlib__matplotlib-24870
 apt-get -y update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get install -y imagemagick ffmpeg texlive texlive-latex-extra texlive-fonts-recommended texlive-xetex texlive-luatex cm-super dvipng
-QHULL_URL="http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz"
+QHULL_URL="https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2"
+QHULL_SHA256="59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5"
 QHULL_TAR="/tmp/qhull-2020-src-8.0.2.tgz"
 QHULL_BUILD_DIR="$PWD/build"
-wget -O "$QHULL_TAR" "$QHULL_URL"
+curl --fail --location --proto "=https" --tlsv1.2 --output "$QHULL_TAR" "$QHULL_URL" || exit 1
 mkdir -p "$QHULL_BUILD_DIR"
+python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else "Qhull sha256 mismatch")' "$QHULL_TAR" "$QHULL_SHA256" || exit 1
 tar -xvzf "$QHULL_TAR" -C "$QHULL_BUILD_DIR"
 python -m pip install -e .
 python -m pip install pytest==7.4.4
@@ -200,7 +207,11 @@ Python 3.6; measured base P2P 73.113s; gate timeout 250s.
 
 ```bash
 conda create --prefix "$PWD/.envs/django__django-13344" python=3.6 -y
-cat <<'EOF_59812759871' > $HOME/requirements.txt
+(
+set -e
+VACANT_REQUIREMENTS=$(mktemp)
+trap 'rm -f -- "$VACANT_REQUIREMENTS"' EXIT
+cat <<'EOF_59812759871' > "$VACANT_REQUIREMENTS"
 asgiref >= 3.3.2
 argon2-cffi >= 16.1.0
 backports.zoneinfo; python_version < '3.9'
@@ -223,8 +234,8 @@ tzdata
 colorama; sys.platform == 'win32'
 
 EOF_59812759871
-conda activate "$PWD/.envs/django__django-13344" && python -m pip install -r $HOME/requirements.txt
-rm $HOME/requirements.txt
+conda activate "$PWD/.envs/django__django-13344" && python -m pip install -r "$VACANT_REQUIREMENTS"
+)
 conda activate "$PWD/.envs/django__django-13344"
 cd django__django-13344
 python -m pip install -e .
@@ -247,7 +258,7 @@ python -m pip install pytest==7.4.4
 
 ## sympy__sympy-14248
 
-Python 3.9; measured base P2P 2.822s; gate timeout 120s.
+Python 3.9; measured base P2P 4.077s; gate timeout 120s.
 
 ```bash
 conda create --prefix "$PWD/.envs/sympy__sympy-14248" python=3.9 mpmath flake8 -y
@@ -255,7 +266,7 @@ conda activate "$PWD/.envs/sympy__sympy-14248"
 python -m pip install mpmath==1.3.0 flake8-comprehensions
 cd sympy__sympy-14248
 python -m pip install -e .
-python -m pip install pytest==7.4.4
+python -m pip install pytest==7.4.4 py==1.10.0
 ```
 
 ## scikit-learn__scikit-learn-25747
@@ -308,7 +319,7 @@ python -m pip install pytest==7.4.4 py==1.10.0
 
 ## sympy__sympy-21612
 
-Python 3.9; measured base P2P 1.052s; gate timeout 120s.
+Python 3.9; measured base P2P 0.849s; gate timeout 120s.
 
 ```bash
 conda create --prefix "$PWD/.envs/sympy__sympy-21612" python=3.9 mpmath flake8 -y
@@ -316,7 +327,7 @@ conda activate "$PWD/.envs/sympy__sympy-21612"
 python -m pip install mpmath==1.3.0 flake8-comprehensions
 cd sympy__sympy-21612
 python -m pip install -e .
-python -m pip install pytest==7.4.4
+python -m pip install pytest==7.4.4 py==1.10.0
 ```
 
 ## sphinx-doc__sphinx-7985
@@ -347,7 +358,11 @@ Python 3.9; measured base P2P 0.680s; gate timeout 120s.
 
 ```bash
 conda create --prefix "$PWD/.envs/django__django-15563" python=3.9 -y
-cat <<'EOF_59812759871' > $HOME/requirements.txt
+(
+set -e
+VACANT_REQUIREMENTS=$(mktemp)
+trap 'rm -f -- "$VACANT_REQUIREMENTS"' EXIT
+cat <<'EOF_59812759871' > "$VACANT_REQUIREMENTS"
 aiosmtpd
 asgiref >= 3.4.1
 argon2-cffi >= 16.1.0
@@ -372,8 +387,8 @@ tzdata
 colorama; sys.platform == 'win32'
 
 EOF_59812759871
-conda activate "$PWD/.envs/django__django-15563" && python -m pip install -r $HOME/requirements.txt
-rm $HOME/requirements.txt
+conda activate "$PWD/.envs/django__django-15563" && python -m pip install -r "$VACANT_REQUIREMENTS"
+)
 conda activate "$PWD/.envs/django__django-15563"
 cd django__django-15563
 python -m pip install -e .
