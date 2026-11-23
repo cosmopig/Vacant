@@ -1,4 +1,5 @@
 from io import BytesIO
+from unittest import mock
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.servers.basehttp import WSGIRequestHandler, WSGIServer
@@ -55,6 +56,47 @@ class WSGIRequestHandlerTestCase(SimpleTestCase):
             "but it only supports HTTP.",
             cm.records[0].getMessage(),
         )
+
+    def test_head_response_has_no_body(self):
+        def single_chunk(environ, start_response):
+            start_response("200 OK", [("Content-Type", "text/plain")])
+            return [b"firstsecond"]
+
+        def streaming(environ, start_response):
+            start_response(
+                "200 OK",
+                [("Content-Type", "text/plain"), ("Content-Length", "11")],
+            )
+            yield b"first"
+            yield b"second"
+
+        def write_callable(environ, start_response):
+            write = start_response(
+                "200 OK",
+                [("Content-Type", "text/plain"), ("Content-Length", "11")],
+            )
+            write(b"first")
+            write(b"second")
+            return []
+
+        for app in (single_chunk, streaming, write_callable):
+            for method in (b"GET", b"HEAD"):
+                with self.subTest(app=app.__name__, method=method):
+                    rfile = BytesIO(method + b" / HTTP/1.0\r\n\r\n")
+                    wfile = BytesIO()
+                    files = {"rb": rfile, "wb": wfile}
+                    request = Stub(makefile=lambda mode, *args: files[mode])
+                    server = Stub(base_environ={}, get_app=lambda: app)
+                    with (
+                        mock.patch.object(wfile, "close"),
+                        self.assertLogs("django.server", "INFO"),
+                    ):
+                        WSGIRequestHandler(request, "192.168.0.2", server)
+                    headers, body = wfile.getvalue().split(b"\r\n\r\n", 1)
+                    self.assertIn(b"200 OK", headers)
+                    self.assertIn(b"Content-Type: text/plain", headers)
+                    self.assertIn(b"Content-Length: 11", headers)
+                    self.assertEqual(body, b"" if method == b"HEAD" else b"firstsecond")
 
     def test_strips_underscore_headers(self):
         """WSGIRequestHandler ignores headers containing underscores.

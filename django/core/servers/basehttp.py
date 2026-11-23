@@ -143,6 +143,22 @@ class ServerHandler(simple_server.ServerHandler):
         if self.headers.get("Connection") == "close":
             self.request_handler.close_connection = True
 
+    def write(self, data):
+        if self.environ["REQUEST_METHOD"] != "HEAD":
+            super().write(data)
+            return
+
+        assert type(data) is bytes, "write() argument must be a bytes instance"
+        if not self.status:
+            raise AssertionError("write() before start_response()")
+
+        if not self.headers_sent:
+            # Preserve the usual Content-Length inference without writing a body.
+            self.bytes_sent = len(data)
+            self.send_headers()
+            self.bytes_sent = 0
+            self._flush()
+
     def close(self):
         self.get_stdin().read()
         super().close()
