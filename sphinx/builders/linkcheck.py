@@ -36,6 +36,9 @@ from sphinx.util.requests import is_ssl_error
 logger = logging.getLogger(__name__)
 
 
+scheme_re = re.compile(r'^[a-zA-Z][a-zA-Z0-9+.\-]*:')
+
+
 DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
 }
@@ -208,12 +211,43 @@ class CheckExternalLinksBuilder(Builder):
                 else:
                     return 'redirected', new_url, 0
 
+        def check_local_uri() -> Tuple[str, str, int]:
+            # strip off anchor and query string
+            target = unquote(uri.split('#', 1)[0].split('?', 1)[0])
+            if not target:
+                return 'working', '', 0
+
+            if target.startswith('/'):
+                basedir = self.srcdir
+                target = target.lstrip('/')
+            else:
+                basedir = path.dirname(self.env.doc2path(docname))
+            filename = path.normpath(path.join(basedir, target))
+            if path.exists(filename):
+                return 'working', '', 0
+
+            # a link to another document (ex. "otherdoc", "otherdoc.html" or "subdir/")
+            docpath = path.relpath(filename, self.srcdir).replace(path.sep, '/')
+            if docpath.endswith('.html'):
+                docpath = docpath[:-len('.html')]
+            if docpath in self.env.found_docs or \
+               docpath + '/index' in self.env.found_docs:
+                return 'working', '', 0
+
+            return 'broken', __('local file or document not found: %s') % target, 0
+
         def check() -> Tuple[str, str, int]:
             # check for various conditions without bothering the network
             if len(uri) == 0 or uri.startswith(('#', 'mailto:', 'ftp:')):
                 return 'unchecked', '', 0
             elif not uri.startswith(('http:', 'https:')):
-                return 'local', '', 0
+                for rex in self.to_ignore:
+                    if rex.match(uri):
+                        return 'ignored', '', 0
+                if uri.startswith('//') or scheme_re.match(uri):
+                    # non supported URI schemes (ex. ftp, tel, data)
+                    return 'unchecked', '', 0
+                return check_local_uri()
             elif uri in self.good:
                 return 'working', 'old', 0
             elif uri in self.broken:
@@ -280,6 +314,7 @@ class CheckExternalLinksBuilder(Builder):
                                location=(filename, lineno))
             else:
                 logger.info(red('broken    ') + uri + red(' - ' + info))
+            self.app.statuscode = 1
             self.write_entry('broken', docname, filename, lineno, uri + ': ' + info)
             self.write_linkstat(linkstat)
         elif status == 'redirected':

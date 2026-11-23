@@ -442,6 +442,11 @@ name is ``rinoh``. Refer to the `rinohtype manual`_ for details.
 
       Since Sphinx-1.5, the linkcheck builder comes to use requests module.
 
+   .. versionchanged:: 3.2
+
+      Local (internal) links are now checked too: a link to a file or document
+      that does not exist in the source directory is reported as broken.
+
 .. module:: sphinx.builders.xml
 .. class:: XMLBuilder
 

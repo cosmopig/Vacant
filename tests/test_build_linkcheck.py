@@ -157,3 +157,29 @@ def test_linkcheck_request_headers(app, status, warning):
                 assert headers["X-Secret"] == "open sesami"
             else:
                 assert headers["Accept"] == "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8"
+
+
+@pytest.mark.sphinx('linkcheck', testroot='linkcheck-localfiles', freshenv=True,
+                    confoverrides={'linkcheck_ignore': ['^ignored-local$']})
+def test_local_links(app, status, warning):
+    app.builder.build_all()
+
+    content = (app.outdir / 'output.json').read_text()
+    rows = [json.loads(x) for x in content.splitlines()]
+    rowsby = {(row['filename'], row['uri']): row for row in rows}
+
+    for uri in ['other', 'other.html#section', 'sub/page', 'conf.py', '/sub/page.rst']:
+        assert rowsby[('index.rst', uri)]['status'] == 'working', uri
+    assert rowsby[('sub/page.rst', '../other')]['status'] == 'working'
+
+    assert rowsby[('index.rst', 'doesntexist')]['status'] == 'broken'
+    assert rowsby[('index.rst', 'missing/file.txt#anchor')]['status'] == 'broken'
+    assert rowsby[('sub/page.rst', 'sibling')]['status'] == 'broken'
+    assert rowsby[('index.rst', 'ignored-local')]['status'] == 'ignored'
+    assert rowsby[('index.rst', 'tel:+1-555-0100')]['status'] == 'unchecked'
+
+    output = (app.outdir / 'output.txt').read_text()
+    assert ('index.rst:9: [broken] doesntexist: '
+            'local file or document not found: doesntexist') in output
+    assert len(output.splitlines()) == 3
+    assert app.statuscode == 1
