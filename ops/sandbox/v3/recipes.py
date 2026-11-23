@@ -28,3 +28,22 @@ def secure_downloads(commands):
         else:
             hardened.append(command)
     return hardened
+
+
+def temporary_requirements(commands):
+    safe, index = [], 0
+    while index < len(commands):
+        command = commands[index]
+        if '$HOME/requirements.txt' not in command:
+            safe.append(command)
+            index += 1
+            continue
+        group = commands[index:index+3]
+        if (len(group) != 3 or not command.startswith('cat <<')
+                or '$HOME/requirements.txt' not in group[1] or group[2] != 'rm $HOME/requirements.txt'):
+            raise ValueError('unsupported requirements-file recipe')
+        safe.append('\n'.join(['(', 'set -e', 'VACANT_REQUIREMENTS=$(mktemp)',
+            'trap \'rm -f -- "$VACANT_REQUIREMENTS"\' EXIT',
+            *[line.replace('$HOME/requirements.txt', '"$VACANT_REQUIREMENTS"') for line in group[:2]], ')']))
+        index += 3
+    return safe

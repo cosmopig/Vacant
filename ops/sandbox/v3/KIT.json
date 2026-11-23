@@ -1054,9 +1054,7 @@
           "python": "3.9",
           "commands": [
             "conda create --prefix \"$PWD/.envs/django__django-15732\" python=3.9 -y",
-            "cat <<'EOF_59812759871' > $HOME/requirements.txt\naiosmtpd\nasgiref >= 3.6.0\nargon2-cffi >= 19.2.0\nbackports.zoneinfo; python_version < '3.9'\nbcrypt\nblack\ndocutils\ngeoip2; python_version < '3.12'\njinja2 >= 2.11.0\nnumpy; python_version < '3.12'\nPillow >= 6.2.1; sys.platform != 'win32' or python_version < '3.12'\npylibmc; sys.platform != 'win32'\npymemcache >= 3.4.0\npytz\npywatchman; sys.platform != 'win32'\nPyYAML\nredis >= 3.4.0\nselenium\nsqlparse >= 0.3.1\ntblib >= 1.5.0\ntzdata\ncolorama; sys.platform == 'win32'\n\nEOF_59812759871",
-            "conda activate \"$PWD/.envs/django__django-15732\" && python -m pip install -r $HOME/requirements.txt",
-            "rm $HOME/requirements.txt",
+            "(\nset -e\nVACANT_REQUIREMENTS=$(mktemp)\ntrap 'rm -f -- \"$VACANT_REQUIREMENTS\"' EXIT\ncat <<'EOF_59812759871' > \"$VACANT_REQUIREMENTS\"\naiosmtpd\nasgiref >= 3.6.0\nargon2-cffi >= 19.2.0\nbackports.zoneinfo; python_version < '3.9'\nbcrypt\nblack\ndocutils\ngeoip2; python_version < '3.12'\njinja2 >= 2.11.0\nnumpy; python_version < '3.12'\nPillow >= 6.2.1; sys.platform != 'win32' or python_version < '3.12'\npylibmc; sys.platform != 'win32'\npymemcache >= 3.4.0\npytz\npywatchman; sys.platform != 'win32'\nPyYAML\nredis >= 3.4.0\nselenium\nsqlparse >= 0.3.1\ntblib >= 1.5.0\ntzdata\ncolorama; sys.platform == 'win32'\n\nEOF_59812759871\nconda activate \"$PWD/.envs/django__django-15732\" && python -m pip install -r \"$VACANT_REQUIREMENTS\"\n)",
             "conda activate \"$PWD/.envs/django__django-15732\"",
             "cd django__django-15732",
             "python -m pip install -e .",
@@ -9787,9 +9785,7 @@
           "python": "3.6",
           "commands": [
             "conda create --prefix \"$PWD/.envs/django__django-13344\" python=3.6 -y",
-            "cat <<'EOF_59812759871' > $HOME/requirements.txt\nasgiref >= 3.3.2\nargon2-cffi >= 16.1.0\nbackports.zoneinfo; python_version < '3.9'\nbcrypt\ndocutils\ngeoip2\njinja2 >= 2.9.2\nnumpy\nPillow >= 6.2.0\npylibmc; sys.platform != 'win32'\npymemcache >= 3.4.0\npython-memcached >= 1.59\npytz\npywatchman; sys.platform != 'win32'\nPyYAML\nselenium\nsqlparse >= 0.2.2\ntblib >= 1.5.0\ntzdata\ncolorama; sys.platform == 'win32'\n\nEOF_59812759871",
-            "conda activate \"$PWD/.envs/django__django-13344\" && python -m pip install -r $HOME/requirements.txt",
-            "rm $HOME/requirements.txt",
+            "(\nset -e\nVACANT_REQUIREMENTS=$(mktemp)\ntrap 'rm -f -- \"$VACANT_REQUIREMENTS\"' EXIT\ncat <<'EOF_59812759871' > \"$VACANT_REQUIREMENTS\"\nasgiref >= 3.3.2\nargon2-cffi >= 16.1.0\nbackports.zoneinfo; python_version < '3.9'\nbcrypt\ndocutils\ngeoip2\njinja2 >= 2.9.2\nnumpy\nPillow >= 6.2.0\npylibmc; sys.platform != 'win32'\npymemcache >= 3.4.0\npython-memcached >= 1.59\npytz\npywatchman; sys.platform != 'win32'\nPyYAML\nselenium\nsqlparse >= 0.2.2\ntblib >= 1.5.0\ntzdata\ncolorama; sys.platform == 'win32'\n\nEOF_59812759871\nconda activate \"$PWD/.envs/django__django-13344\" && python -m pip install -r \"$VACANT_REQUIREMENTS\"\n)",
             "conda activate \"$PWD/.envs/django__django-13344\"",
             "cd django__django-13344",
             "python -m pip install -e .",
@@ -17229,9 +17225,7 @@
           "python": "3.9",
           "commands": [
             "conda create --prefix \"$PWD/.envs/django__django-15563\" python=3.9 -y",
-            "cat <<'EOF_59812759871' > $HOME/requirements.txt\naiosmtpd\nasgiref >= 3.4.1\nargon2-cffi >= 16.1.0\nbackports.zoneinfo; python_version < '3.9'\nbcrypt\nblack\ndocutils\ngeoip2\njinja2 >= 2.9.2\nnumpy\nPillow >= 6.2.0\npylibmc; sys.platform != 'win32'\npymemcache >= 3.4.0\npytz\npywatchman; sys.platform != 'win32'\nPyYAML\nredis >= 3.0.0\nselenium\nsqlparse >= 0.2.2\ntblib >= 1.5.0\ntzdata\ncolorama; sys.platform == 'win32'\n\nEOF_59812759871",
-            "conda activate \"$PWD/.envs/django__django-15563\" && python -m pip install -r $HOME/requirements.txt",
-            "rm $HOME/requirements.txt",
+            "(\nset -e\nVACANT_REQUIREMENTS=$(mktemp)\ntrap 'rm -f -- \"$VACANT_REQUIREMENTS\"' EXIT\ncat <<'EOF_59812759871' > \"$VACANT_REQUIREMENTS\"\naiosmtpd\nasgiref >= 3.4.1\nargon2-cffi >= 16.1.0\nbackports.zoneinfo; python_version < '3.9'\nbcrypt\nblack\ndocutils\ngeoip2\njinja2 >= 2.9.2\nnumpy\nPillow >= 6.2.0\npylibmc; sys.platform != 'win32'\npymemcache >= 3.4.0\npytz\npywatchman; sys.platform != 'win32'\nPyYAML\nredis >= 3.0.0\nselenium\nsqlparse >= 0.2.2\ntblib >= 1.5.0\ntzdata\ncolorama; sys.platform == 'win32'\n\nEOF_59812759871\nconda activate \"$PWD/.envs/django__django-15563\" && python -m pip install -r \"$VACANT_REQUIREMENTS\"\n)",
             "conda activate \"$PWD/.envs/django__django-15563\"",
             "cd django__django-15563",
             "python -m pip install -e .",

@@ -10,7 +10,7 @@ import tarfile
 import time
 
 from ops.sandbox.v3 import kit
-from ops.sandbox.v3.recipes import secure_downloads
+from ops.sandbox.v3.recipes import secure_downloads, temporary_requirements
 
 
 def measure(key, row, snapshot, pinned, work):
@@ -37,7 +37,8 @@ def measure(key, row, snapshot, pinned, work):
         pytest_install += ' py==1.10.0'
     commands += [f'cd {shlex.quote(key)}', *[command.replace('/testbed', '$PWD') for command in settings.get('pre_install', [])],
                  settings.get('install', 'true'), pytest_install]
-    environment = dict(instance_id=key, python=settings['python'], commands=secure_downloads(commands))
+    environment = dict(instance_id=key, python=settings['python'],
+                       commands=temporary_requirements(secure_downloads(commands)))
     saved = case / 'selection.json'
     if saved.exists():
         cached = json.loads(saved.read_text())

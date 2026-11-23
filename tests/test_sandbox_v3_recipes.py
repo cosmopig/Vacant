@@ -6,6 +6,8 @@ import subprocess
 import sys
 import tarfile
 
+import pytest
+
 from ops.sandbox.v3 import recipes
 
 
@@ -39,3 +41,32 @@ def test_qhull_download_is_https_pinned_and_fail_closed(tmp_path):
     assert recipes.secure_downloads([]) == []
     assert recipes.secure_downloads(['echo normal']) == ['echo normal']
     assert recipes.secure_downloads(commands) == commands
+
+
+@pytest.mark.parametrize('status', [0, 7])
+def test_requirements_file_is_temporary_and_cleaned_on_error(tmp_path, status):
+    home, temps = tmp_path / 'home', tmp_path / 'temps'
+    home.mkdir()
+    temps.mkdir()
+    original = home / 'requirements.txt'
+    original.write_text('preserve user file\n')
+    installer = ('import os,sys;from pathlib import Path; '
+                 'assert Path(sys.argv[1]).read_text() == "example\\n"; '
+                 'Path(os.environ["SEEN"]).write_text(sys.argv[1]); '
+                 'sys.exit(int(os.environ["STATUS"]))')
+    commands = recipes.temporary_requirements([
+        "cat <<'EOF' > $HOME/requirements.txt\nexample\nEOF",
+        shlex.quote(sys.executable) + ' -c ' + shlex.quote(installer) + ' $HOME/requirements.txt',
+        'rm $HOME/requirements.txt',
+    ])
+    env = {**os.environ, 'HOME': str(home), 'TMPDIR': str(temps),
+           'SEEN': str(tmp_path / 'seen'), 'STATUS': str(status)}
+    result = subprocess.run(['bash', '-c', '\n'.join(commands)], env=env, capture_output=True)
+    assert result.returncode == status, result.stderr
+    assert original.read_text() == 'preserve user file\n'
+    assert str(temps) in (tmp_path / 'seen').read_text()
+    assert not list(temps.iterdir())
+    assert recipes.temporary_requirements(commands) == commands
+    assert recipes.temporary_requirements([]) == []
+    with pytest.raises(ValueError, match='unsupported'):
+        recipes.temporary_requirements(['rm $HOME/requirements.txt'])
