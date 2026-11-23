@@ -1,5 +1,7 @@
-from django.db.models import F, Q
+from django.db.models import Exists, F, Q
 from django.test import SimpleTestCase
+
+from .models import Tag
 
 
 class QTests(SimpleTestCase):
@@ -27,6 +29,13 @@ class QTests(SimpleTestCase):
     def test_combine_or_both_empty(self):
         self.assertEqual(Q() | Q(), Q())
 
+    def test_combine_empty_with_boolean_expression(self):
+        q = Q(Exists(Tag.objects.filter(name='test')))
+        self.assertEqual(q & Q(), q)
+        self.assertEqual(Q() & q, q)
+        self.assertEqual(q | Q(), q)
+        self.assertEqual(Q() | q, q)
+
     def test_combine_not_q_object(self):
         obj = object()
         q = Q(x=1)
@@ -39,17 +48,14 @@ class QTests(SimpleTestCase):
         q = Q(price__gt=F('discounted_price'))
         path, args, kwargs = q.deconstruct()
         self.assertEqual(path, 'django.db.models.Q')
-        self.assertEqual(args, ())
-        self.assertEqual(kwargs, {'price__gt': F('discounted_price')})
+        self.assertEqual(args, (('price__gt', F('discounted_price')),))
+        self.assertEqual(kwargs, {})
 
     def test_deconstruct_negated(self):
         q = ~Q(price__gt=F('discounted_price'))
         path, args, kwargs = q.deconstruct()
-        self.assertEqual(args, ())
-        self.assertEqual(kwargs, {
-            'price__gt': F('discounted_price'),
-            '_negated': True,
-        })
+        self.assertEqual(args, (('price__gt', F('discounted_price')),))
+        self.assertEqual(kwargs, {'_negated': True})
 
     def test_deconstruct_or(self):
         q1 = Q(price__gt=F('discounted_price'))
@@ -86,6 +92,12 @@ class QTests(SimpleTestCase):
         q = Q(Q(price__gt=F('discounted_price')))
         path, args, kwargs = q.deconstruct()
         self.assertEqual(args, (Q(price__gt=F('discounted_price')),))
+        self.assertEqual(kwargs, {})
+
+    def test_deconstruct_boolean_expression(self):
+        condition = Exists(Tag.objects.filter(name='test'))
+        path, args, kwargs = Q(condition).deconstruct()
+        self.assertEqual(args, (condition,))
         self.assertEqual(kwargs, {})
 
     def test_reconstruct(self):
