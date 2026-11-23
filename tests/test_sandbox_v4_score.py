@@ -388,3 +388,32 @@ def test_review_rejects_preexisting_duplicate_sessions(bank, tmp_path):
     with pytest.raises(ValueError, match='duplicate session'):
         score.review(out)
     assert not load(out / 'calibration.json')['proceed']
+
+
+@pytest.mark.parametrize('change', ['changed', 'removed'])
+def test_unchanged_gitlink_is_exported_without_fetching_submodule_and_changes_refused(bank, tmp_path, change):
+    task, branch = bank.ids[0], bank.branches[0]
+    bank.git('read-tree', bank.base)
+    bank.git('update-index', '--add', '--cacheinfo', '160000,' + bank.base + ',astropy_helpers')
+    base_tree = bank.git('write-tree')
+    base = bank.git('commit-tree', base_tree, '-p', bank.base, '-m', 'base with submodule')
+    bank.git('read-tree', bank.handback)
+    bank.git('update-index', '--add', '--cacheinfo', '160000,' + bank.base + ',astropy_helpers')
+    candidate = bank.git('commit-tree', bank.git('write-tree'), '-p', base, '-m', 'unchanged submodule')
+    bank.instances[0]['base_commit'] = base
+    bank.manifest['cases'][task]['snapshot'].update(sha=base, base_tree=base_tree, base_commit=base)
+    bank.git('push', str(bank.remote), base + ':refs/heads/sandbox-v4/' + task, candidate + ':refs/heads/' + branch)
+    out = tmp_path / 'results'
+    assert bank.collect(out)['calibration']['scored'] == 1
+    cell = score.cell_path(out, branch)
+    assert (cell / 'base/astropy_helpers').is_dir()
+    assert not list((cell / 'base/astropy_helpers').iterdir())
+    assert load(cell / 'result.json')['unchanged_gitlinks'] == {'astropy_helpers': bank.base}
+    if change == 'changed':
+        bank.git('update-index', '--cacheinfo', '160000,' + bank.handback + ',astropy_helpers')
+    else:
+        bank.git('update-index', '--force-remove', 'astropy_helpers')
+    changed = bank.git('commit-tree', bank.git('write-tree'), '-p', candidate, '-m', change)
+    bank.git('push', str(bank.remote), changed + ':refs/heads/' + branch)
+    with pytest.raises(ValueError, match='changed Git submodules'):
+        bank.collect(out)

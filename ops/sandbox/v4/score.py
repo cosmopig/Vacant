@@ -256,10 +256,12 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
             cell.mkdir()
             images.log('Scoring ' + branch + ' @ ' + sha)
             result = v3.score_handback(repo, remote, sha, instances_by_id[task], records[task], cell, runner,
-                                       base_prefix='sandbox-v4/', patch_deriver=patch.derive_patch)
+                                       base_prefix='sandbox-v4/', patch_deriver=patch.derive_patch,
+                                       allow_unchanged_gitlinks=True)
             root_manifest = cell / 'handback' / 'VACANT_TESTS.txt'
             result.update(task=task, sample=sample, arm=arm, external_arm='devin-' + external_arm,
                           branch=branch, git_sha=sha, evidence=meta['evidence'], protocol=protocol,
+                          scorer_git_sha=v3.git(v3.REPO, 'rev-parse', 'HEAD'),
                           session_id=meta['sessions'].get(branch), calls_complete=False,
                           manifest_present=root_manifest.exists() or root_manifest.is_symlink(),
                           **{k: v3.UNKNOWN for k in ('model_calls', 'prompt_tokens', 'completion_tokens', 'wall_s',

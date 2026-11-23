@@ -34,19 +34,34 @@ def parse_branch(branch):
     raise ValueError('invalid v3 handback branch: ' + branch)
 
 
-def export_tree(repo, sha, target):
+def gitlinks_at(repo, sha):
+    records = subprocess.check_output(['git', '--no-replace-objects', '-C', str(repo), 'ls-tree', '-rz', sha]).split(b'\0')
+    links = {}
+    for record in filter(None, records):
+        header, name = record.split(b'\t', 1)
+        mode, kind, oid = header.split()
+        if mode == b'160000' and kind == b'commit':
+            links[os.fsdecode(name)] = oid.decode()
+    return links
+
+
+def export_tree(repo, sha, target, *, gitlinks=None):
     target.mkdir()
     records = subprocess.check_output(['git', '--no-replace-objects', '-C', str(repo),
                                        'ls-tree', '-rz', sha]).split(b'\0')
-    entries = []
+    entries, submodules = [], []
     for record in filter(None, records):
         header, raw_name = record.split(b'\t', 1)
         mode, kind, oid = header.split()
         name = os.fsdecode(raw_name)
         parts = PurePosixPath(name).parts
-        if (kind != b'blob' or mode not in (b'100644', b'100755', b'120000')
-                or not parts or name.startswith('/') or '\\' in name
+        if (not parts or name.startswith('/') or '\\' in name
                 or any(p in ('.', '..') or p.lower() == '.git' for p in parts)):
+            raise ValueError('unsupported or unsafe Git tree entry: ' + name)
+        if mode == b'160000' and kind == b'commit' and (gitlinks or {}).get(name) == oid.decode():
+            submodules.append(name)
+            continue
+        if kind != b'blob' or mode not in (b'100644', b'100755', b'120000'):
             raise ValueError('unsupported or unsafe Git tree entry: ' + name)
         entries.append((mode, oid, name))
     objects = list(dict.fromkeys(oid for _, oid, _ in entries))
@@ -73,6 +88,11 @@ def export_tree(repo, sha, target):
         else:
             path.write_bytes(blobs[oid])
             path.chmod(0o755 if mode == b'100755' else 0o644)
+    for name in submodules:
+        path = target / name
+        if any(parent.is_symlink() for parent in path.parents) or path.exists() or path.is_symlink():
+            raise ValueError('unsafe or colliding submodule path: ' + name)
+        path.mkdir(parents=True)
 
 
 def normalized_lines(patch):
@@ -124,7 +144,8 @@ def call_harness(instance, patch, image_digest, cell, python, timeout):
     return result
 
 
-def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_prefix='sandbox-v3/', patch_deriver=None):
+def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_prefix='sandbox-v3/', patch_deriver=None,
+                   allow_unchanged_gitlinks=False):
     base_branch = base_prefix + instance['instance_id']
     patch_deriver = patch_deriver or derive_patch
     base_sha = fetch(repo, remote, base_branch)
@@ -132,8 +153,11 @@ def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_pr
             or git(repo, '--no-replace-objects', 'rev-parse', base_sha+'^{tree}') != record['base_tree']):
         raise ValueError('frozen base mismatch: ' + base_branch)
     base, handback = cell / 'base', cell / 'handback'
-    export_tree(repo, base_sha, base)
-    export_tree(repo, sha, handback)
+    links = gitlinks_at(repo, base_sha) if allow_unchanged_gitlinks else {}
+    if allow_unchanged_gitlinks and links != gitlinks_at(repo, sha):
+        raise ValueError('changed Git submodules cannot be silently omitted from the scored patch')
+    export_tree(repo, base_sha, base, gitlinks=links)
+    export_tree(repo, sha, handback, gitlinks=links)
     config = record['selection']
     candidate = patch_deriver(base, handback, instance['test_patch'], config['environment']['commands'])
     patch = cell / 'candidate.patch'
@@ -162,7 +186,8 @@ def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_pr
                 base_sha=base_sha, base_tree=record['base_tree'],
                 patch_sha256=digest(candidate), patch_bytes=len(candidate),
                 gold_similarity=secondary, harness_wall_s=time.monotonic()-started,
-                image_digest=config['measurement']['image_digest'], harness_version=HARNESS_VERSION)
+                image_digest=config['measurement']['image_digest'], harness_version=HARNESS_VERSION,
+                **({'unchanged_gitlinks': links} if allow_unchanged_gitlinks else {}))
 
 
 def review(out, *, version=3):
