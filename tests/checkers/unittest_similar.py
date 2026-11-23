@@ -212,6 +212,14 @@ TOTAL lines=35 duplicates=0 percent=0.00
     )
 
 
+def test_set_duplicate_lines_to_zero() -> None:
+    output = StringIO()
+    with redirect_stdout(output), pytest.raises(SystemExit) as ex:
+        similar.Run(["--duplicates=0", SIMILAR1, SIMILAR2])
+    assert ex.value.code == 0
+    assert output.getvalue().strip() == "TOTAL lines=62 duplicates=0 percent=0.00"
+
+
 def test_ignore_signatures_class_methods_fail() -> None:
     output = StringIO()
     with redirect_stdout(output), pytest.raises(SystemExit) as ex:

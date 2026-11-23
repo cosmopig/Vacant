@@ -471,6 +471,8 @@ class Similar:
         Last regroups all successive couples in a bigger one. It allows to take into account common chunk of lines that have more
         than the minimal number of successive lines required.
         """
+        if self.min_lines == 0:
+            return
         hash_to_index_1: HashToIndex_T
         hash_to_index_2: HashToIndex_T
         index_to_lines_1: IndexToLines_T
@@ -739,7 +741,7 @@ class SimilarChecker(BaseChecker, Similar, MapReduceMixin):
                 "default": DEFAULT_MIN_SIMILARITY_LINE,
                 "type": "int",
                 "metavar": "<int>",
-                "help": "Minimum lines number of a similarity.",
+                "help": "Minimum lines number of a similarity. Set to 0 to disable the check.",
             },
         ),
         (
