@@ -284,7 +284,7 @@ class StrPrinter(Printer):
                 pre = [str(d.pop(0))]
             else:
                 pre = []
-            dfactors = pre + [self.parenthesize(a, prec, strict=False)
+            dfactors = pre + [self._print_denominator_factor(a, prec)
                 for a in d]
 
             n = '*'.join(nfactors)
@@ -348,7 +348,7 @@ class StrPrinter(Printer):
         a = a or [S.One]
 
         a_str = [self.parenthesize(x, prec, strict=False) for x in a]
-        b_str = [self.parenthesize(x, prec, strict=False) for x in b]
+        b_str = [self._print_denominator_factor(x, prec) for x in b]
 
         # To parenthesize Pow with exp = -1 and having more than one Symbol
         for item in pow_paren:
@@ -361,6 +361,14 @@ class StrPrinter(Printer):
             return sign + '*'.join(a_str) + "/" + b_str[0]
         else:
             return sign + '*'.join(a_str) + "/(%s)" % '*'.join(b_str)
+
+    def _print_denominator_factor(self, item, prec):
+        # A base that is itself a reciprocal (e.g. unevaluated 1/x) prints
+        # with a "/" and must be bracketed to stay a single divisor.
+        if (isinstance(item, Pow) and item.is_commutative and
+                bool(item.exp.as_coeff_Mul()[0] < 0)):
+            return "(%s)" % self._print(item)
+        return self.parenthesize(item, prec, strict=False)
 
     def _print_MatMul(self, expr):
         c, m = expr.as_coeff_mmul()

@@ -231,6 +231,10 @@ def test_Mul():
     assert str(x/y) == "x/y"
     assert str(y/x) == "y/x"
     assert str(x/y/z) == "x/(y*z)"
+    assert str(Mul(x, Pow(1/y, -1, evaluate=False), evaluate=False)) == "x/(1/y)"
+    assert str(Mul(1, Pow(1/y, -1, evaluate=False), evaluate=False)) == "1/(1/y)"
+    assert str(Mul(Mul(x, 1/y, evaluate=False), Pow(Pow(z**2, -1,
+        evaluate=False), -1, evaluate=False), evaluate=False)) == "(x/y)/(1/(z**2))"
     assert str((x + 1)/(y + 2)) == "(x + 1)/(y + 2)"
     assert str(2*x/3) == '2*x/3'
     assert str(-2*x/3) == '-2*x/3'

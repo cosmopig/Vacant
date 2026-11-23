@@ -119,6 +119,7 @@ GOOD_PAIRS = [
     (r"\sin(\cos \theta)", sin(cos(theta))),
     (r"\frac{a}{b}", a / b),
     (r"\frac{a + b}{c}", _Mul(a + b, _Pow(c, -1))),
+    (r"\frac{\frac{a^3+b}{c}}{\frac{1}{c^2}}", _Mul(_Mul(_Add(_Pow(a, 3), b), _Pow(c, -1)), _Pow(_Pow(_Pow(c, 2), -1), -1))),
     (r"\frac{7}{3}", _Mul(7, _Pow(3, -1))),
     (r"(\csc x)(\sec y)", csc(x)*sec(y)),
     (r"\lim_{x \to 3} a", Limit(a, x, 3)),
