@@ -124,7 +124,9 @@ def derive_patch(base, handback, test_patch='', setup_commands=()):
         blobs.mkdir()
         environment = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
         environment.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM='1')
-        subprocess.run(['git', 'init', '--bare', '--quiet', str(repo)], check=True, env=environment)
+        subprocess.run(['git', 'init', '--bare', '--quiet', '--template=', str(repo)], check=True, env=environment)
+        (repo / 'info').mkdir(exist_ok=True)
+        (repo / 'info/exclude').write_bytes(b'')
         new_paths = set(after) - set(baseline)
         if new_paths:
             worktree = root / 'ignore-worktree'
@@ -141,7 +143,8 @@ def derive_patch(base, handback, test_patch='', setup_commands=()):
                 target = worktree / path
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(data)
-            ignored = subprocess.run(['git', '--git-dir', str(repo), '--work-tree', str(worktree),
+            ignored = subprocess.run(['git', '-c', 'core.excludesFile='+os.devnull,
+                                      '--git-dir', str(repo), '--work-tree', str(worktree),
                                       'check-ignore', '--no-index', '-z', '--stdin'],
                                      input=b''.join(os.fsencode(name)+b'\0' for name in sorted(new_paths)),
                                      cwd=worktree, env=environment, capture_output=True)

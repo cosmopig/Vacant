@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import shutil
 import subprocess
 
@@ -137,3 +139,42 @@ def test_ignore_query_errors_fail_closed(tmp_path, monkeypatch):
     monkeypatch.setattr(subprocess, 'run', fail_ignore)
     with pytest.raises(subprocess.CalledProcessError):
         derive_patch(base, handback, setup_commands=COMMANDS)
+
+
+def test_host_global_and_info_excludes_cannot_hide_new_source(tmp_path, monkeypatch):
+    base, handback = setup_trees(tmp_path)
+    (handback / 'new.py').write_text('new source\n')
+    home = tmp_path / 'home'
+    xdg = home / '.config'
+    (xdg / 'git').mkdir(parents=True)
+    excludes = home / 'global-ignore'
+    excludes.write_text('new.py\n')
+    (xdg / 'git/ignore').write_text('new.py\n')
+    config = home / '.gitconfig'
+    config.write_text('[core]\nexcludesFile = '+excludes.as_posix()+'\n')
+    monkeypatch.setenv('HOME', str(home))
+    monkeypatch.setenv('XDG_CONFIG_HOME', str(xdg))
+    monkeypatch.setenv('GIT_CONFIG_GLOBAL', str(config))
+    monkeypatch.setenv('GIT_CONFIG_NOSYSTEM', '1')
+    host_repo = tmp_path / 'host.git'
+    subprocess.run(['git', 'init', '--bare', '--quiet', str(host_repo)], check=True)
+    control = subprocess.run(['git', '--git-dir', str(host_repo), '--work-tree', str(handback),
+                              'check-ignore', 'new.py'], cwd=handback, capture_output=True)
+    assert control.returncode == 0
+    run = subprocess.run
+    def inject_info_excludes(command, **kwargs):
+        if 'check-ignore' in command:
+            assert 'core.excludesFile='+os.devnull in command
+            assert kwargs['env']['GIT_CONFIG_GLOBAL'] == os.devnull
+            assert kwargs['env']['GIT_CONFIG_NOSYSTEM'] == '1'
+            repo = Path(command[command.index('--git-dir')+1])
+            assert (repo / 'info/exclude').read_bytes() == b''
+        result = run(command, **kwargs)
+        if command[:2] == ['git', 'init']:
+            info = Path(command[-1]) / 'info'
+            info.mkdir(exist_ok=True)
+            (info / 'exclude').write_text('new.py\n')
+        return result
+    monkeypatch.setattr(subprocess, 'run', inject_info_excludes)
+    patch = derive_patch(base, handback, setup_commands=COMMANDS)
+    assert b'diff --git a/new.py b/new.py' in patch and b'+new source' in patch
