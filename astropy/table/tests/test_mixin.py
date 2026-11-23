@@ -699,9 +699,10 @@ def test_skycoord_representation():
 
 def test_ndarray_mixin():
     """
-    Test directly adding a plain structured array into a table instead of the
-    view as an NdarrayMixin.  Once added as an NdarrayMixin then all the previous
-    tests apply.
+    Test directly adding various forms of structured ndarray columns to a table.
+    Adding as NdarrayMixin is expected to be somewhat unusual after #12644
+    (which provides full support for structured array Column's). This test shows
+    that the end behavior is the same in both cases.
     """
     a = np.array([(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')],
                  dtype='<i4,' + ('|U1'))
@@ -710,14 +711,17 @@ def test_ndarray_mixin():
     c = np.rec.fromrecords([(100., 'raa'), (200., 'rbb'), (300., 'rcc'), (400., 'rdd')],
                            names=['rx', 'ry'])
     d = np.arange(8, dtype='i8').reshape(4, 2).view(NdarrayMixin)
+    e = np.array([(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')],
+                 dtype='<i4,' + ('|U1')).view(NdarrayMixin)
 
     # Add one during initialization and the next as a new column.
     t = Table([a], names=['a'])
     t['b'] = b
     t['c'] = c
     t['d'] = d
+    t['e'] = e
 
-    assert isinstance(t['a'], NdarrayMixin)
+    assert isinstance(t['a'], Column)
 
     assert t['a'][1][1] == a[1][1]
     assert t['a'][2][0] == a[2][0]
@@ -725,7 +729,7 @@ def test_ndarray_mixin():
     assert t[1]['a'][1] == a[1][1]
     assert t[2]['a'][0] == a[2][0]
 
-    assert isinstance(t['b'], NdarrayMixin)
+    assert isinstance(t['b'], Column)
 
     assert t['b'][1]['x'] == b[1]['x']
     assert t['b'][1]['y'] == b[1]['y']
@@ -733,7 +737,7 @@ def test_ndarray_mixin():
     assert t[1]['b']['x'] == b[1]['x']
     assert t[1]['b']['y'] == b[1]['y']
 
-    assert isinstance(t['c'], NdarrayMixin)
+    assert isinstance(t['c'], Column)
 
     assert t['c'][1]['rx'] == c[1]['rx']
     assert t['c'][1]['ry'] == c[1]['ry']
@@ -749,14 +753,19 @@ def test_ndarray_mixin():
     assert t[1]['d'][0] == d[1][0]
     assert t[1]['d'][1] == d[1][1]
 
+    assert isinstance(t['e'], NdarrayMixin)
+
+    assert t['e'][1][1] == e[1][1]
+    assert t[1]['e'][1] == e[1][1]
+
     assert t.pformat(show_dtype=True) == [
-        '  a [f0, f1]     b [x, y]      c [rx, ry]      d    ',
-        '(int32, str1) (int32, str2) (float64, str3) int64[2]',
-        '------------- ------------- --------------- --------',
-        "     (1, 'a')    (10, 'aa')   (100., 'raa')   0 .. 1",
-        "     (2, 'b')    (20, 'bb')   (200., 'rbb')   2 .. 3",
-        "     (3, 'c')    (30, 'cc')   (300., 'rcc')   4 .. 5",
-        "     (4, 'd')    (40, 'dd')   (400., 'rdd')   6 .. 7"]
+        '  a [f0, f1]     b [x, y]      c [rx, ry]      d       e [f0, f1] ',
+        '(int32, str1) (int32, str2) (float64, str3) int64[2] (int32, str1)',
+        '------------- ------------- --------------- -------- -------------',
+        "     (1, 'a')    (10, 'aa')   (100., 'raa')   0 .. 1      (1, 'a')",
+        "     (2, 'b')    (20, 'bb')   (200., 'rbb')   2 .. 3      (2, 'b')",
+        "     (3, 'c')    (30, 'cc')   (300., 'rcc')   4 .. 5      (3, 'c')",
+        "     (4, 'd')    (40, 'dd')   (400., 'rdd')   6 .. 7      (4, 'd')"]
 
 
 def test_possible_string_format_functions():
