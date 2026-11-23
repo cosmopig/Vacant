@@ -279,6 +279,15 @@ def test_upretty_multiindex():
     assert upretty( Symbol('F^+-') ) == 'F⁺⁻'
 
 
+def test_upretty_unicode_symbol_subscripts():
+    omega = Symbol('ω0')
+    assert upretty(omega) == 'ω₀'
+    assert upretty(Symbol('Ω12^2')) == 'Ω²₁₂'
+    assert pretty(omega) == 'ω0'
+    assert upretty(Matrix([[-Symbol('t0')*omega, -Symbol('t1')*omega,
+                            -Symbol('t2')*omega]])) == '[-t₀⋅ω₀  -t₁⋅ω₀  -t₂⋅ω₀]'
+
+
 def test_upretty_sub_super():
     assert upretty( Symbol('beta_1_2') ) == 'β₁ ₂'
     assert upretty( Symbol('beta^1^2') ) == 'β¹ ²'

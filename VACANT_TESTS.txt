@@ -1,0 +1,1 @@
+sympy/printing/pretty/tests/test_pretty.py::test_upretty_unicode_symbol_subscripts

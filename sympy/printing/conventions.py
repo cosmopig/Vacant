@@ -2,12 +2,8 @@
 A few practical conventions common to all printers.
 """
 
-import re
-
 from collections.abc import Iterable
 from sympy import Derivative
-
-_name_with_digits_p = re.compile(r'^([a-zA-Z]+)([0-9]+)$')
 
 
 def split_super_sub(text):
@@ -62,10 +58,10 @@ def split_super_sub(text):
 
     # make a little exception when a name ends with digits, i.e. treat them
     # as a subscript too.
-    m = _name_with_digits_p.match(name)
-    if m:
-        name, sub = m.groups()
-        subs.insert(0, sub)
+    name_without_digits = name.rstrip('0123456789')
+    if name_without_digits != name and name_without_digits.isalpha():
+        subs.insert(0, name[len(name_without_digits):])
+        name = name_without_digits
 
     return name, supers, subs
 
