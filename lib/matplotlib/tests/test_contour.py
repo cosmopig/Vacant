@@ -10,6 +10,7 @@ import matplotlib as mpl
 from matplotlib.testing.decorators import image_comparison
 from matplotlib import pyplot as plt, rc_context
 from matplotlib.colors import LogNorm, same_color
+from matplotlib.ticker import FixedLocator
 import pytest
 
 
@@ -82,6 +83,30 @@ def test_contour_Nlevels():
     assert len(cs1.levels) > 1
     cs2 = ax.contour(z, levels=5)
     assert (cs1.levels == cs2.levels).all()
+
+
+@pytest.mark.parametrize("xy", [(), ([0, 2], [0, 1])])
+@pytest.mark.parametrize("z", [
+    [[False, True], [False, True]],
+    np.ma.array([[False, True], [False, True]], mask=[[False, False],
+                                                    [True, False]]),
+])
+def test_contour_boolean_default_levels(xy, z):
+    _, ax = plt.subplots()
+    cs = ax.contour(*xy, z)
+    np.testing.assert_array_equal(cs.levels, [0.5])
+    assert len(cs.allsegs[0]) == 1
+
+
+def test_contour_boolean_explicit_levels():
+    z = np.array([[False, True], [False, True]])
+    _, ax = plt.subplots()
+    np.testing.assert_array_equal(ax.contour(z, [0.25]).levels, [0.25])
+    np.testing.assert_array_equal(ax.contour(z, levels=[0.75]).levels, [0.75])
+    np.testing.assert_array_equal(
+        ax.contour(z, locator=FixedLocator([0.25, 0.75])).levels, [0.25, 0.75])
+    np.testing.assert_array_equal(
+        ax.contourf(z).levels, ax.contourf(z.astype(float)).levels)
 
 
 def test_contour_badlevel_fmt():

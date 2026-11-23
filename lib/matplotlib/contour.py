@@ -1447,7 +1447,7 @@ class QuadContourSet(ContourSet):
             fn = 'contour'
         nargs = len(args)
         if nargs <= 2:
-            z = ma.asarray(args[0], dtype=np.float64)
+            z = ma.asarray(args[0])
             x, y = self._initialize_x_y(z)
             args = args[1:]
         elif nargs <= 4:
@@ -1455,6 +1455,10 @@ class QuadContourSet(ContourSet):
             args = args[3:]
         else:
             raise _api.nargs_error(fn, takes="from 1 to 4", given=nargs)
+        if (z.dtype == np.bool_ and not self.filled and not args
+                and self.levels is None and self.locator is None):
+            self.levels = [0.5]
+        z = ma.asarray(z, dtype=np.float64)
         z = ma.masked_invalid(z, copy=False)
         self.zmax = float(z.max())
         self.zmin = float(z.min())
@@ -1475,7 +1479,7 @@ class QuadContourSet(ContourSet):
 
         x = np.asarray(x, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
-        z = ma.asarray(args[2], dtype=np.float64)
+        z = ma.asarray(args[2])
 
         if z.ndim != 2:
             raise TypeError(f"Input z must be 2D, not {z.ndim}D")
@@ -1584,6 +1588,9 @@ levels : int or array-like, optional
 
     If array-like, draw contour lines at the specified levels.
     The values must be in increasing order.
+
+    If omitted and *Z* is boolean, `.contour` draws a single line level at
+    0.5 unless a *locator* is specified.
 
 Returns
 -------
