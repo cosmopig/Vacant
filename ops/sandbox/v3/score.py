@@ -122,8 +122,9 @@ def call_harness(instance, patch, image_digest, cell, python, timeout):
     return result
 
 
-def score_handback(repo, remote, sha, instance, record, cell, runner):
-    base_branch = 'sandbox-v3/' + instance['instance_id']
+def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_prefix='sandbox-v3/', patch_deriver=None):
+    base_branch = base_prefix + instance['instance_id']
+    patch_deriver = patch_deriver or derive_patch
     base_sha = fetch(repo, remote, base_branch)
     if (base_sha != record['sha'] or record['base_commit'] != instance['base_commit']
             or git(repo, '--no-replace-objects', 'rev-parse', base_sha+'^{tree}') != record['base_tree']):
@@ -132,7 +133,7 @@ def score_handback(repo, remote, sha, instance, record, cell, runner):
     export_tree(repo, base_sha, base)
     export_tree(repo, sha, handback)
     config = record['selection']
-    candidate = derive_patch(base, handback, instance['test_patch'], config['environment']['commands'])
+    candidate = patch_deriver(base, handback, instance['test_patch'], config['environment']['commands'])
     patch = cell / 'candidate.patch'
     patch.write_bytes(candidate)
     with tempfile.TemporaryDirectory(prefix='v3-gold-') as temporary:
@@ -140,7 +141,7 @@ def score_handback(repo, remote, sha, instance, record, cell, runner):
         shutil.copytree(base, gold, symlinks=True)
         subprocess.run(['git', 'apply', '--whitespace=nowarn', '-'], cwd=gold,
                        input=instance['patch'].encode(), check=True, capture_output=True)
-        gold_patch = derive_patch(base, gold, instance['test_patch'])
+        gold_patch = patch_deriver(base, gold, instance['test_patch'])
     secondary = similarity(gold_patch, candidate)
     started = time.monotonic()
     try:
@@ -162,7 +163,7 @@ def score_handback(repo, remote, sha, instance, record, cell, runner):
                 image_digest=config['measurement']['image_digest'], harness_version=HARNESS_VERSION)
 
 
-def review(out):
+def review(out, *, version=3):
     out = Path(out)
     meta = json.loads((out / 'meta.json').read_text())
     verdicts = json.loads((out / 'contamination.json').read_text())
@@ -192,7 +193,7 @@ def review(out):
         count = sum(r['resolved'] for r in rows)
         conservative = sum(r['resolved'] or r['contamination'] is True for r in rows)
         complete = not meta['missing_branches'] and not meta['unreviewed_branches'] and not meta['control_only']
-        decision = 'incomplete' if not complete else 'proceed' if conservative <= 8 else 'ceiling, v3 rejected'
+        decision = 'incomplete' if not complete else 'proceed' if conservative <= 8 else f'ceiling, v{version} rejected'
         report = dict(resolved_count=count, conservative_resolved_count=conservative, scored=len(rows),
                       planned=12, threshold=8, complete=complete, proceed=complete and conservative <= 8,
                       decision=decision, infra_void=sum(r['infra_void'] for r in rows),

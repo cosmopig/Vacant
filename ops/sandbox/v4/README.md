@@ -149,3 +149,91 @@ the bank-specific native kit separately. Harness-version pins remain setup
 authority. Xarray disables the user site during setup and gating; pytest sets
 its SCM version to the harness version key in both places. Approved base-failing
 P2P omissions and supplied-prompt exceptions are explicit in KIT.json and PREREG.
+
+## Official scoring and incremental collection
+
+The v4 adapter reuses v3's safe Git export, official SWE-bench 3.0.17 harness,
+review views and paired analyzer. It uses v4 patch derivation: agent tests stay,
+root `VACANT_TESTS.txt` is dropped. Its presence is recorded from the original
+pushed tree, separately from the scored patch. No gate result is a hidden-test
+outcome. Calibration schedules only the frozen twelve-ID subset; comparison
+schedules exactly 62 × 3 × 2 = 372 distinct cells, never calibration cells.
+
+Keep the calibration images, by their feasibility-recorded registry digests:
+
+```sh
+nohup .venv/bin/python -u -m ops.sandbox.v4.images > ~/sandbox-v4-images.log 2>&1 < /dev/null &
+```
+
+`sessions.json` maps full scheduled branch names to session IDs. For calibration
+only, instance-ID keys are also accepted. Partial maps may be extended, but an
+existing session binding cannot change. Run outside-repository results under
+`results/devin-v4-cal-*` or `results/devin-v4-cmp-*`:
+
+```sh
+nohup .venv/bin/python -u -m ops.sandbox.v4.score watch \
+  --protocol calibration --sessions ~/sandbox-v4-scoring/calibration-sessions.json \
+  --dataset-json ~/swebench-data/verified.jsonl \
+  --harness-python ~/swebench-venv/bin/python \
+  --out ~/sandbox-runs/results/devin-v4-cal-YYYYMMDD \
+  --audit-export ~/sandbox-v4-scoring/audits.json \
+  > ~/sandbox-v4-scoring/scorer.log 2>&1 < /dev/null &
+```
+
+Use `--protocol comparison` and the 372-cell session map for comparisons.
+`score` performs one polling pass; `watch` polls every 300 seconds until all
+outcomes and both audits exist. Pull rate limits retry the same pinned image or
+candidate at 900, 1800, then 3600 seconds (capped), never as a scored rejection.
+Other infrastructure failures remain infra_void failures in the denominator.
+Images are retained; the puller pauses at 85% disk use, without deleting any
+images. Check disk capacity before the full comparison. Harness attempts and
+interrupted cells are archived, not overwritten. Resume checks frozen inputs,
+protocol and timeout. A moved or deleted delivered branch makes results
+incomplete; it is never silently rescored. Use a fresh results directory to
+score a different delivery. `--control-only` cannot clear calibration.
+
+### Session audits and review
+
+The v3 session-event search is an operator/lead operation, not a credentialed
+session API client in this repository. Reuse that scanner with the session IDs
+from the map, including browser/terminal accesses and received PR/review
+messages before the final push. PR creation alone is not outside help. Raw
+`browser_events`/`hits` scanner exports can be ingested but never establish
+clean verdicts. Missing transcripts or either unknown verdict leave the gate
+incomplete; absence of scanner hits is not evidence that an audit is complete.
+
+The audit export is a JSON list, one record per branch, containing `branch`,
+`session_id`, and the scanner evidence. To apply reviewed verdicts, also supply:
+`handback_sha` equal to the scored commit; `reviewer`; boolean `contaminated`
+and `outside_help`; `access_audit_complete: true` and
+`outside_help_audit_complete: true`; nonempty `evidence` and
+`outside_help_evidence` lists; and nonempty `final_push_evidence` and
+`pr_review_evidence` describing the timing/receipt check. Source exports are
+archived by SHA256. The watcher ingests this file between scoring passes, or:
+
+```sh
+.venv/bin/python -m ops.sandbox.v4.audit --out RUN_DIR --export audits.json
+.venv/bin/python -m ops.sandbox.v4.score review --out RUN_DIR
+```
+
+Scoring and review use a single nonblocking run lock. If the watcher is scoring,
+let it ingest the export after its pass rather than editing state concurrently.
+`calibration.json` clears only with all twelve official outcomes and both audits
+complete, counting either flagged cell as resolved regardless of harness result.
+Above eight reports `ceiling, v4 rejected`. Costs stay UNKNOWN without usage data.
+
+Comparison review writes `analysis-primary.json`, `analysis-sensitivity.json`,
+the v3-style verdict-addressed review views, and `secondary.json`. Complete
+A/A2/G triples use exact McNemar and the existing 10,000-resample paired
+bootstrap (seed 20261122), with the same gain/noise-floor rule. Primary excludes
+whole flagged/unreviewed triples; sensitivity includes complete triples.
+Incomplete coverage/audits is explicitly provisional. Null comparisons include
+the CI upper endpoint as `largest_gain_not_ruled_out`.
+
+For gate evidence, place the v3-format reply export (`branch`, `session_id`,
+`messages`, `final_reply`) in `RUN_DIR/gate-export.json`. The v3 parser is reused;
+v4 adds A/B/C step verdicts, with sequential-step inferences explicitly labeled.
+Unshown steps remain UNKNOWN. `gate-evidence.json` and `secondary.json` preserve
+raw excerpts, source hashes, final-branch manifest presence and UNKNOWN receipt
+verification/handback binding. Pasted acceptance is not an independently
+verified receipt, and `1/1 次` is not a session submission count.
