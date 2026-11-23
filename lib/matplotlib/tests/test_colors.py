@@ -117,6 +117,21 @@ def test_register_cmap():
             cm.register_cmap('nome', cmap='not a cmap')
 
 
+def test_set_cmap_registered_name():
+    cmap = mcolors.ListedColormap(['red', 'blue'], name='original_cmap')
+    name = 'registered_cmap'
+    with pytest.warns(mpl.MatplotlibDeprecationWarning):
+        cm.register_cmap(name=name, cmap=cmap)
+    try:
+        image = plt.imshow([[0, 1]])
+        plt.set_cmap(name)
+        assert image.get_cmap() == cmap
+        assert plt.imshow([[0, 1]]).get_cmap() == cmap
+        assert mpl.rcParams['image.cmap'] == name
+    finally:
+        mpl.colormaps.unregister(name)
+
+
 def test_colormaps_get_cmap():
     cr = mpl.colormaps
 
