@@ -5,7 +5,7 @@ import warnings
 
 import numpy as np
 
-from .util import _str_to_num, _is_int, translate, _words_group
+from .util import _str_to_num, _is_int, translate, _words_group, decode_ascii
 from .verify import _Verify, _ErrList, VerifyError, VerifyWarning
 
 from . import conf
@@ -547,11 +547,14 @@ class Card(_Verify):
     @classmethod
     def fromstring(cls, image):
         """
-        Construct a `Card` object from a (raw) string. It will pad the string
-        if it is not the length of a card image (80 columns).  If the card
-        image is longer than 80 columns, assume it contains ``CONTINUE``
-        card(s).
+        Construct a `Card` object from a raw string or ASCII bytes. It will
+        pad the string if it is not the length of a card image (80 columns).
+        If the card image is longer than 80 columns, assume it contains
+        ``CONTINUE`` card(s).
         """
+
+        if isinstance(image, bytes):
+            image = decode_ascii(image)
 
         card = cls()
         card._image = _pad(image)

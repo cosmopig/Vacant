@@ -329,13 +329,12 @@ class Header:
     @classmethod
     def fromstring(cls, data, sep=''):
         """
-        Creates an HDU header from a byte string containing the entire header
-        data.
+        Creates an HDU header from a string containing the entire header data.
 
         Parameters
         ----------
-        data : str
-           String containing the entire header.
+        data : str or bytes
+           String or ASCII bytes containing the entire header.
 
         sep : str, optional
             The string separating cards from each other, such as a newline.  By
@@ -347,6 +346,9 @@ class Header:
         header
             A new `Header` instance.
         """
+
+        if isinstance(data, bytes):
+            data = decode_ascii(data)
 
         cards = []
 

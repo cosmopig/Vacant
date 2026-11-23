@@ -66,6 +66,27 @@ def test_init_with_ordereddict():
     assert all(h1[val] == list1[i][1] for i, val in enumerate(h1))
 
 
+@pytest.mark.parametrize('sep', ['', '\n'])
+def test_header_fromstring_bytes(sep):
+    value = 'x' * 100
+    original = fits.Header([('LONGSTR', value), ('NUMBER', 42)])
+    data = original.tostring(sep=sep, padding=False)
+    data += sep + str(fits.Card('IGNORED', 1))
+
+    header = fits.Header.fromstring(data.encode('ascii'), sep=sep)
+
+    assert list(header.items()) == [('LONGSTR', value), ('NUMBER', 42)]
+
+
+def test_card_fromstring_bytes():
+    image = b'ANSWER  = 42 / A comment'
+
+    card = fits.Card.fromstring(image)
+
+    assert (card.keyword, card.value, card.comment) == ('ANSWER', 42, 'A comment')
+    assert card.image == image.decode('ascii').ljust(80)
+
+
 class TestHeaderFunctions(FitsTestCase):
     """Test Header and Card objects."""
 
