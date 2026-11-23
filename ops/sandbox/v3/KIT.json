@@ -17258,7 +17258,7 @@
       "nonbase_leak_matches": 0,
       "base_exception_matches": 127,
       "files": 50,
-      "sha": "d4b9bbd9fdc94efcddc560b43a58c3e132a8e98f",
+      "sha": "71618ab8995e9ddb451cf03151b9127369a6f85d",
       "largest_file_bytes": 114674
     }
   },
@@ -17343,6 +17343,19 @@
   "qhull_archive": {
     "url": "https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2",
     "sha256": "59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5",
-    "provenance": "Official qhull/qhull 2020.2 GitHub tag archive fetched over verified HTTPS; qhull.org HTTPS certificate hostname invalid"
+    "provenance": "Official qhull/qhull 2020.2 GitHub tag archive fetched over verified HTTPS; qhull.org HTTPS certificate hostname invalid",
+    "source_verification": "100 C/header files byte-match the pinned Matplotlib image"
+  },
+  "followup_fixes": {
+    "qhull": "11cf14085063f68e0e11f06b17de34ac6beed356",
+    "requirements": "8871f6267690487c52c21b395165ce068f90ce50",
+    "normalized_patch_and_prereg_note": "efb3c4fe50a0a6daddb755df6f1baaba5fa60129",
+    "measurement_binding": "17d4675f7ebbae0f416e82b0ae90ad69225a1a8f"
+  },
+  "setup_normalization": {
+    "module": "ops.sandbox.v3.patch",
+    "pre_run_clarification_commit": "efb3c4fe50a0a6daddb755df6f1baaba5fa60129",
+    "verification": "Six normalized setup files byte-match the two Sphinx and two Astropy official images",
+    "full_handback_harness_scorer_implemented": false
   }
 }
