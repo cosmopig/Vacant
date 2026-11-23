@@ -2530,6 +2530,31 @@ class SchemaTests(TransactionTestCase):
             UniqueTest.objects.create(year=2012, slug="foo")
         UniqueTest.objects.all().delete()
 
+    @skipUnlessDBFeature("allows_multiple_constraints_on_same_fields")
+    @isolate_apps("schema")
+    def test_remove_unique_together_with_field_uniqueness(self):
+        class UniqueFields(Model):
+            number = IntegerField(unique=True, db_column="unique_number")
+
+            class Meta:
+                app_label = "schema"
+
+        with connection.schema_editor() as editor:
+            editor.create_model(UniqueFields)
+        self.isolated_local_models = [UniqueFields]
+        table = UniqueFields._meta.db_table
+        for field in ("id", "number"):
+            with self.subTest(field=field):
+                original_constraints = self.get_constraints(table)
+                unique_together = [(field,)]
+                with connection.schema_editor() as editor:
+                    editor.alter_unique_together(UniqueFields, [], unique_together)
+                constraints = self.get_constraints(table)
+                self.assertEqual(len(constraints), len(original_constraints) + 1)
+                with connection.schema_editor() as editor:
+                    editor.alter_unique_together(UniqueFields, unique_together, [])
+                self.assertEqual(self.get_constraints(table), original_constraints)
+
     def test_unique_together_with_fk(self):
         """
         Tests removing and adding unique_together constraints that include

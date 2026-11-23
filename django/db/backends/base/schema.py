@@ -528,7 +528,10 @@ class BaseDatabaseSchemaEditor:
         # Deleted uniques
         for fields in olds.difference(news):
             self._delete_composed_index(
-                model, fields, {"unique": True}, self.sql_delete_unique
+                model,
+                fields,
+                {"unique": True, "primary_key": False},
+                self.sql_delete_unique,
             )
         # Created uniques
         for field_names in news.difference(olds):
@@ -568,6 +571,13 @@ class BaseDatabaseSchemaEditor:
             exclude=meta_constraint_names | meta_index_names,
             **constraint_kwargs,
         )
+        if constraint_kwargs.get("unique") and len(constraint_names) > 1:
+            # A field-level unique constraint may cover the same columns.
+            default_name = self.connection.introspection.identifier_converter(
+                self._create_index_name(model._meta.db_table, columns, "_uniq")
+            )
+            if default_name in constraint_names:
+                constraint_names = [default_name]
         if len(constraint_names) != 1:
             raise ValueError(
                 "Found wrong number (%s) of constraints for %s(%s)"
