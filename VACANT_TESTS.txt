@@ -1,0 +1,1 @@
+lib/matplotlib/tests/test_dates.py::test_date_axis_minute_spacing_usetex
