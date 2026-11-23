@@ -1,0 +1,1 @@
+sympy/ntheory/tests/test_residue.py::test_nthroot_mod_zero_residue

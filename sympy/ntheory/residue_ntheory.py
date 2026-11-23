@@ -775,6 +775,8 @@ def nthroot_mod(a, n, p, all_roots=False):
         return None
     if not isprime(p):
         raise NotImplementedError("Not implemented for composite p")
+    if a % p == 0:
+        return [0] if all_roots else 0
 
     if (p - 1) % n == 0:
         return _nthroot_mod1(a, n, p, all_roots)

@@ -13,6 +13,13 @@ from sympy.polys.domains import ZZ
 from sympy.utilities.pytest import raises
 
 
+def test_nthroot_mod_zero_residue():
+    for a, n, p in [(17**2, 32, 17), (17**2, 5, 17), (0, 4, 17),
+                    (17, 1, 17), (2, 3, 2)]:
+        assert nthroot_mod(a, n, p) == 0
+        assert nthroot_mod(a, n, p, all_roots=True) == [0]
+
+
 def test_residue():
     assert n_order(2, 13) == 12
     assert [n_order(a, 7) for a in range(1, 7)] == \
