@@ -10,10 +10,12 @@ import platform
 from queue import Queue
 import re
 import shutil
+import signal
 import stat
 import subprocess
 import sys
 import tempfile
+from threading import Event, Lock
 import time
 import uuid
 
@@ -34,6 +36,9 @@ MODEL_SHA = "fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad"
 NETWORK = "hard-r3-inference"
 TRACE_HOST = "http://hard-r3-trace:8080"
 SLOTS = 4
+DOCKER_LABEL = f"vacant.hard-r3={uuid.uuid4().hex}"
+DOCKER_STOP = Event()
+DOCKER_LAUNCH = Lock()
 SERVER_ARGS = (
     "--host 0.0.0.0 --port 8080 --model /model/model.gguf --alias qwen3-coder-30b-a3b "
     f"--n-gpu-layers 0 --ctx-size 65536 --parallel {SLOTS} --threads 8 --threads-batch 8 "
@@ -109,7 +114,7 @@ def docker(work: Path, command: list[str], timeout: float, log: Path, *,
            config: dict | None = None, stdin: bytes | None = None) -> dict:
     name = f"hard-r3-{uuid.uuid4().hex}"
     agent = binary is not None
-    cmd = ["docker", "run", "--rm", "--name", name, "--pull", "never", "--read-only",
+    cmd = ["docker", "run", "--rm", "--name", name, "--label", DOCKER_LABEL, "--pull", "never", "--read-only",
            "--cap-drop", "ALL", "--security-opt", "no-new-privileges", "--pids-limit", "128",
            "--memory", "1g", "--cpus", "1", "--user", f"{os.getuid()}:{os.getgid()}",
            "--network", NETWORK if agent else "none", "--tmpfs", "/tmp:rw,nosuid,nodev,size=256m",
@@ -124,16 +129,40 @@ def docker(work: Path, command: list[str], timeout: float, log: Path, *,
     if stdin is not None:
         cmd += ["-i"]
     start = time.monotonic()
-    try:
-        with log.open("wb") as stdout, log.with_suffix(log.suffix + ".stderr").open("wb") as stderr:
-            proc = subprocess.run([*cmd, IMAGE, *command], input=stdin, stdout=stdout, stderr=stderr,
-                                  timeout=timeout, check=False)
-        return {"rc": proc.returncode, "timed_out": False, "wall_s": round(time.monotonic() - start, 3)}
-    except subprocess.TimeoutExpired:
-        wall = time.monotonic() - start
-        subprocess.run(["docker", "rm", "-f", name], stdout=subprocess.DEVNULL,
+    with log.open("wb") as stdout, log.with_suffix(log.suffix + ".stderr").open("wb") as stderr:
+        with DOCKER_LAUNCH:
+            if DOCKER_STOP.is_set():
+                raise RuntimeError("experiment interrupted")
+            proc = subprocess.Popen([*cmd, IMAGE, *command], stdout=stdout, stderr=stderr,
+                                    stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
+                                    start_new_session=True)
+            redo._track(proc, True)
+        try:
+            proc.communicate(input=stdin, timeout=timeout)
+            return {"rc": proc.returncode, "timed_out": False, "wall_s": round(time.monotonic() - start, 3)}
+        except subprocess.TimeoutExpired:
+            wall = time.monotonic() - start
+            proc.kill()
+            proc.communicate()
+            remove_containers([name])
+            return {"rc": None, "timed_out": True, "wall_s": round(wall, 3)}
+        finally:
+            redo._track(proc, False)
+
+
+def remove_containers(names: list[str]):
+    if names:
+        subprocess.run(["docker", "rm", "-f", *names], stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, timeout=15, check=False)
-        return {"rc": None, "timed_out": True, "wall_s": round(wall, 3)}
+
+
+def stop_docker():
+    with DOCKER_LAUNCH:
+        DOCKER_STOP.set()
+        redo.kill_all_live()
+    active = subprocess.check_output(["docker", "ps", "-aq", "--filter", f"label={DOCKER_LABEL}"],
+                                     text=True, timeout=15)
+    remove_containers(active.split())
 
 
 def emit_json(path: Path, val) -> None:
@@ -405,5 +434,18 @@ def main():
         return int(not count or bool(mismatches))
 
 
+def interrupt(signum, frame):
+    raise KeyboardInterrupt
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("preflight", "run", "regrade"):
+        signal.signal(signal.SIGTERM, interrupt)
+        signal.signal(signal.SIGHUP, interrupt)
+        try:
+            sys.exit(main())
+        except KeyboardInterrupt:
+            sys.exit(130)
+        finally:
+            stop_docker()
     sys.exit(main())
