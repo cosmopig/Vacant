@@ -232,6 +232,11 @@ Changelog
   `pandas.DataFrame`
   :pr:`25220` by :user:`Ian Thompson <it176131>`.
 
+- |Fix| :class:`pipeline.FeatureUnion` with `transform="pandas"` output now
+  works with transformers that return a DataFrame or Series with a different
+  number of rows than the input, e.g. by aggregating. The index of a DataFrame
+  returned by a transformer is no longer overwritten by the index of the input.
+
 :mod:`sklearn.preprocessing`
 ............................
 

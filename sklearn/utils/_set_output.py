@@ -15,9 +15,10 @@ def _wrap_in_pandas_container(
 ):
     """Create a Pandas DataFrame.
 
-    If `data_to_wrap` is a DataFrame, then the `columns` and `index` will be changed
-    inplace. If `data_to_wrap` is a ndarray, then a new DataFrame is created with
-    `columns` and `index`.
+    If `data_to_wrap` is a DataFrame, then only the `columns` will be changed
+    inplace and its `index` is kept, since the transformer may have changed the
+    number or order of the rows (e.g. by aggregating). If `data_to_wrap` is a
+    ndarray, then a new DataFrame is created with `columns` and `index`.
 
     Parameters
     ----------
@@ -34,7 +35,8 @@ def _wrap_in_pandas_container(
         `range(n_features)`.
 
     index : array-like, default=None
-        Index for data.
+        Index for data. `index` is ignored if `data_to_wrap` is already a
+        DataFrame.
 
     Returns
     -------
@@ -55,8 +57,6 @@ def _wrap_in_pandas_container(
     if isinstance(data_to_wrap, pd.DataFrame):
         if columns is not None:
             data_to_wrap.columns = columns
-        if index is not None:
-            data_to_wrap.index = index
         return data_to_wrap
 
     return pd.DataFrame(data_to_wrap, index=index, columns=columns)

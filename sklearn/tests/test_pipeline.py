@@ -20,6 +20,7 @@ from sklearn.utils._testing import (
     MinimalRegressor,
     MinimalTransformer,
 )
+from sklearn import config_context
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
 from sklearn.utils.validation import check_is_fitted
@@ -1618,6 +1619,33 @@ def test_feature_union_set_output():
     assert isinstance(X_trans, pd.DataFrame)
     assert_array_equal(X_trans.columns, union.get_feature_names_out())
     assert_array_equal(X_trans.index, X_test.index)
+
+
+def test_feature_union_set_output_aggregating_transformer():
+    """Check FeatureUnion with pandas output and a transformer that changes
+    the number of rows (e.g. aggregation)."""
+    pd = pytest.importorskip("pandas")
+
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", freq="H")[:-1]
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class AggregatingTransformer(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X, y=None):
+            return X["value"].groupby(X["date"]).sum()
+
+    expected = make_union(AggregatingTransformer()).fit_transform(data)
+
+    with config_context(transform_output="pandas"):
+        X_trans = make_union(AggregatingTransformer()).fit_transform(data)
+
+    assert isinstance(X_trans, pd.DataFrame)
+    assert X_trans.shape == (4, 1)
+    assert_array_equal(X_trans.index, sorted(set(index.date)))
+    assert_array_equal(X_trans.to_numpy().ravel(), np.ravel(expected))
 
 
 def test_feature_union_getitem():

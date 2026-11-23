@@ -25,15 +25,29 @@ def test__wrap_in_pandas_container_dense():
 
 
 def test__wrap_in_pandas_container_dense_update_columns_and_index():
-    """Check that _wrap_in_pandas_container overrides columns and index."""
+    """Check that _wrap_in_pandas_container overrides columns but keeps the
+    index of an existing DataFrame."""
     pd = pytest.importorskip("pandas")
     X_df = pd.DataFrame([[1, 0, 3], [0, 0, 1]], columns=["a", "b", "c"])
     new_columns = np.asarray(["f0", "f1", "f2"], dtype=object)
+    original_index = X_df.index.copy()
     new_index = [10, 12]
 
     new_df = _wrap_in_pandas_container(X_df, columns=new_columns, index=new_index)
     assert_array_equal(new_df.columns, new_columns)
-    assert_array_equal(new_df.index, new_index)
+    assert_array_equal(new_df.index, original_index)
+
+
+def test__wrap_in_pandas_container_dataframe_with_different_length():
+    """Check that a DataFrame whose number of rows differs from the original
+    input (e.g. aggregated) keeps its own index instead of raising."""
+    pd = pytest.importorskip("pandas")
+    X_df = pd.DataFrame({"a": [1, 2]}, index=["x", "y"])
+    original_index = pd.RangeIndex(5)
+
+    new_df = _wrap_in_pandas_container(X_df, columns=None, index=original_index)
+    assert_array_equal(new_df.index, ["x", "y"])
+    assert_array_equal(new_df.columns, ["a"])
 
 
 def test__wrap_in_pandas_container_error_validation():
