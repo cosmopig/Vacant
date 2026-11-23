@@ -33,6 +33,7 @@ from __future__ import annotations
 import builtins
 import hashlib
 import inspect
+import posixpath
 import re
 from collections.abc import Iterable
 from importlib import import_module
@@ -406,19 +407,19 @@ def html_visit_inheritance_diagram(self: HTML5Translator, node: inheritance_diag
     name = 'inheritance%s' % graph_hash
 
     # Create a mapping from fully-qualified class names to URLs.
+    # Links are relative to the current document; for SVG output,
+    # render_dot_html() rewrites them to be relative to the SVG file.
     graphviz_output_format = self.builder.env.config.graphviz_output_format.upper()
-    current_filename = self.builder.current_docname + self.builder.out_suffix
+    current_filename = posixpath.basename(
+        self.builder.get_target_uri(self.builder.current_docname)) or './'
     urls = {}
     pending_xrefs = cast(Iterable[addnodes.pending_xref], node)
     for child in pending_xrefs:
         if child.get('refuri') is not None:
-            if graphviz_output_format == 'SVG':
-                urls[child['reftitle']] = "../" + child.get('refuri')
-            else:
-                urls[child['reftitle']] = child.get('refuri')
+            urls[child['reftitle']] = child.get('refuri')
         elif child.get('refid') is not None:
             if graphviz_output_format == 'SVG':
-                urls[child['reftitle']] = '../' + current_filename + '#' + child.get('refid')
+                urls[child['reftitle']] = current_filename + '#' + child.get('refid')
             else:
                 urls[child['reftitle']] = '#' + child.get('refid')
 

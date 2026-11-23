@@ -171,6 +171,51 @@ def test_inheritance_diagram_svg_html(app, status, warning):
     assert re.search(pattern, content, re.M)
 
 
+def _svg_links(app, docname):
+    content = (app.outdir / docname).read_text(encoding='utf8')
+    svgs = re.findall('<object data="([^"]+\\.svg)"', content)
+    assert len(svgs) == 1
+    svg = (app.outdir / docname).parent / svgs[0]
+    svg_content = svg.read_text(encoding='utf8')
+    links = re.findall(r'<(?:\w+:)?a (?:\w+:)?href="([^"]+)" (?:\w+:)?title="([^"]+)"',
+                       svg_content)
+    return svg, {title: href for href, title in links}
+
+
+@pytest.mark.sphinx('html', testroot='ext-inheritance_diagram-svg')
+@pytest.mark.usefixtures('if_graphviz_found')
+def test_inheritance_diagram_svg_html_links_in_subdir(app, status, warning):
+    app.builder.build_all()
+
+    expected = {
+        'test.Foo': '../index.html#test.Foo',
+        'test.Bar': '../subdir/index.html#test.Bar',
+        'test.Baz': '../subdir/other.html#test.Baz',
+    }
+    for docname in ('index.html', 'subdir/index.html'):
+        svg, links = _svg_links(app, docname)
+        assert links == expected
+        # each link must resolve, relative to the SVG file, to an existing page
+        for href in links.values():
+            target = (svg.parent / href.split('#')[0]).resolve()
+            assert target.is_file(), (docname, href)
+
+
+@pytest.mark.sphinx('dirhtml', testroot='ext-inheritance_diagram-svg')
+@pytest.mark.usefixtures('if_graphviz_found')
+def test_inheritance_diagram_svg_dirhtml_links_in_subdir(app, status, warning):
+    app.builder.build_all()
+
+    expected = {
+        'test.Foo': '../#test.Foo',
+        'test.Bar': '../subdir/#test.Bar',
+        'test.Baz': '../subdir/other/#test.Baz',
+    }
+    for docname in ('index.html', 'subdir/index.html'):
+        _, links = _svg_links(app, docname)
+        assert links == expected
+
+
 @pytest.mark.sphinx('latex', testroot='ext-inheritance_diagram')
 @pytest.mark.usefixtures('if_graphviz_found')
 def test_inheritance_diagram_latex(app, status, warning):

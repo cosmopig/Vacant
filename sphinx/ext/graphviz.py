@@ -218,27 +218,34 @@ class GraphvizSimple(SphinxDirective):
 
 
 def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
-    """Change relative links in generated svg files to be relative to imgpath."""
+    """Change relative links in generated svg files to be relative to imgpath.
+
+    Relative links are written relative to the current document, but an SVG
+    embedded with ``<object>`` resolves them relative to the SVG file itself.
+    """
     tree = ET.parse(filepath)  # NoQA: S314
     root = tree.getroot()
     ns = {'svg': 'http://www.w3.org/2000/svg', 'xlink': 'http://www.w3.org/1999/xlink'}
     href_name = '{http://www.w3.org/1999/xlink}href'
     modified = False
 
+    docdir = posixpath.dirname(self.builder.get_target_uri(self.builder.current_docname))
     for element in chain(
         root.findall('.//svg:image[@xlink:href]', ns),
         root.findall('.//svg:a[@xlink:href]', ns),
     ):
         scheme, hostname, url, query, fragment = urlsplit(element.attrib[href_name])
-        if hostname:
+        if scheme or hostname or url.startswith('/'):
             # not a relative link
             continue
 
-        old_path = path.join(self.builder.outdir, url)
+        old_path = path.join(self.builder.outdir, docdir, url)
         new_path = path.relpath(
             old_path,
-            start=path.join(self.builder.outdir, self.builder.imgpath),
-        )
+            start=path.join(self.builder.outdir, docdir, self.builder.imgpath),
+        ).replace(path.sep, '/')
+        if url.endswith('/'):
+            new_path += '/'
         modified_url = urlunsplit((scheme, hostname, new_path, query, fragment))
 
         element.set(href_name, modified_url)
@@ -253,8 +260,13 @@ def render_dot(self: SphinxTranslator, code: str, options: dict, format: str,
                ) -> tuple[str | None, str | None]:
     """Render graphviz code into a PNG or PDF output file."""
     graphviz_dot = options.get('graphviz_dot', self.builder.config.graphviz_dot)
-    hashkey = (code + str(options) + str(graphviz_dot) +
-               str(self.builder.config.graphviz_dot_args)).encode()
+    hashkey_parts = code + str(options) + str(graphviz_dot) + \
+        str(self.builder.config.graphviz_dot_args)
+    if format == 'svg':
+        # relative links in SVG files depend on the location of the document
+        hashkey_parts += posixpath.dirname(
+            self.builder.get_target_uri(self.builder.current_docname))
+    hashkey = hashkey_parts.encode()
 
     fname = f'{prefix}-{sha1(hashkey, usedforsecurity=False).hexdigest()}.{format}'
     relfn = posixpath.join(self.builder.imgpath, fname)
