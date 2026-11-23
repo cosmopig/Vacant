@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any, cast
 
-from docutils import nodes
+from docutils import nodes, statemachine
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.admonitions import BaseAdmonition
 from docutils.parsers.rst.directives.misc import Class
@@ -376,7 +376,42 @@ class Include(BaseInclude, SphinxDirective):
         rel_filename, filename = self.env.relfn2path(self.arguments[0])
         self.arguments[0] = filename
         self.env.note_included(filename)
-        return super().run()
+
+        if not self.env.events.listeners.get('source-read'):
+            return super().run()
+
+        insert_input = self.state_machine.insert_input
+        previous_insert_input = vars(self.state_machine).get('insert_input')
+
+        def insert_input_with_source_read(lines: list[str], source: str) -> None:
+            # Docutils appends a blank line and an end-of-inclusion marker.
+            content = '\n'.join(lines[:-2])
+            arg = [content]
+            docname = self.env.path2doc(rel_filename) or rel_filename
+            previous = self.env.temp_data.get('source-read-include')
+            self.env.temp_data['source-read-include'] = True
+            try:
+                self.env.events.emit('source-read', docname, arg)
+            finally:
+                if previous is None:
+                    self.env.temp_data.pop('source-read-include', None)
+                else:
+                    self.env.temp_data['source-read-include'] = previous
+
+            if arg[0] != content:
+                tab_width = self.options.get('tab-width', self.state.document.settings.tab_width)
+                lines = statemachine.string2lines(arg[0], tab_width,
+                                                  convert_whitespace=True) + lines[-2:]
+            insert_input(lines, source)
+
+        self.state_machine.insert_input = insert_input_with_source_read
+        try:
+            return super().run()
+        finally:
+            if previous_insert_input is None:
+                del self.state_machine.insert_input
+            else:
+                self.state_machine.insert_input = previous_insert_input
 
 
 def setup(app: Sphinx) -> dict[str, Any]:

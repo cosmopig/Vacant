@@ -644,6 +644,8 @@ def install_dispatcher(app: Sphinx, docname: str, source: list[str]) -> None:
     .. note:: The installed dispatcher will be uninstalled on disabling sphinx_domain
               automatically.
     """
+    if app.env.temp_data.get('source-read-include'):
+        return
     dispatcher = IntersphinxDispatcher()
     dispatcher.enable()
 

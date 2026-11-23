@@ -254,6 +254,13 @@ Here is a more detailed list of these events.
    whose single element is the contents of the source file.  You can process the
    contents and replace this item to implement source-level transformations.
 
+   This event is also emitted when a reStructuredText :rst:dir:`include`
+   directive inserts a project file into the current reStructuredText input. In this case,
+   *docname* identifies the included file (or is its path relative to the source
+   directory if it has no docname), and *source* contains only the selected
+   fragment after any clipping options have been applied. The current document
+   in the build environment is still the containing document.
+
    For example, if you want to use ``$`` signs to delimit inline math, like in
    LaTeX, you can use a regular expression to replace ``$...$`` by
    ``:math:`...```.

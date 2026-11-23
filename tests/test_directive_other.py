@@ -148,3 +148,35 @@ def test_toctree_twice(app):
     assert_node(doctree[0][0],
                 entries=[(None, 'foo'), (None, 'foo')],
                 includefiles=['foo', 'foo'])
+
+
+def test_include_source_read(make_app, tmp_path):
+    (tmp_path / 'conf.py').write_text('', encoding='utf8')
+    (tmp_path / 'index.rst').write_text(
+        'Index\n=====\n\n'
+        '.. include:: part.rst\n\n'
+        '.. include:: snippet.inc\n'
+        '   :start-after: START\n'
+        '   :end-before: END\n\n'
+        '&REPLACE_ME;\n',
+        encoding='utf8',
+    )
+    (tmp_path / 'part.rst').write_text('&REPLACE_ME;\n', encoding='utf8')
+    (tmp_path / 'snippet.inc').write_text(
+        'Excluded before\nSTART\n&REPLACE_ME;\nEND\nExcluded after\n',
+        encoding='utf8',
+    )
+
+    def replace(app, docname, source):
+        source[0] = source[0].replace('&REPLACE_ME;', f'Replaced in {docname}')
+
+    app = make_app('html', srcdir=tmp_path)
+    app.connect('source-read', replace)
+    app.build()
+
+    html = (app.outdir / 'index.html').read_text(encoding='utf8')
+    assert '<p>Replaced in index</p>' in html
+    assert '<p>Replaced in part</p>' in html
+    assert '<p>Replaced in snippet.inc</p>' in html
+    assert 'REPLACE_ME' not in html
+    assert 'Excluded' not in html
