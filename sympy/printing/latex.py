@@ -156,11 +156,11 @@ class LatexPrinter(Printer):
             "times": r" \times "
         }
 
-        self._settings['mul_symbol_latex'] = \
-            mul_symbol_table[self._settings['mul_symbol']]
-
-        self._settings['mul_symbol_latex_numbers'] = \
-            mul_symbol_table[self._settings['mul_symbol'] or 'dot']
+        mul_symbol = self._settings['mul_symbol']
+        separator = mul_symbol_table.get(mul_symbol, mul_symbol)
+        self._settings['mul_symbol_latex'] = separator
+        self._settings['mul_symbol_latex_numbers'] = (
+            mul_symbol_table['dot'] if mul_symbol is None else separator)
 
         self._delim_dict = {'(': ')', '[': ']'}
 
@@ -331,8 +331,7 @@ class LatexPrinter(Printer):
         dps = prec_to_dps(expr._prec)
         str_real = mlib.to_str(expr._mpf_, dps, strip_zeros=True)
 
-        # Must always have a mul symbol (as 2.5 10^{20} just looks odd)
-        # thus we use the number separator
+        # Use the number separator so scientific notation has a dot by default.
         separator = self._settings['mul_symbol_latex_numbers']
 
         if 'e' in str_real:
@@ -2154,8 +2153,10 @@ def latex(expr, **settings):
     >>> print(latex(Integral(r, r)/2/pi, long_frac_ratio=0))
     \frac{1}{2 \pi} \int r\, dr
 
-    mul_symbol: The symbol to use for multiplication. Can be one of None,
-    "ldot", "dot", or "times".
+    mul_symbol: The symbol to use for multiplication. Use None for the
+    default, one of "ldot", "dot", or "times" for a predefined symbol, or a
+    custom LaTeX string. Custom strings are inserted verbatim, including any
+    spaces.
 
     >>> print(latex((2*tau)**sin(Rational(7,2)), mul_symbol="times"))
     \left(2 \times \tau\right)^{\sin{\left (\frac{7}{2} \right )}}
