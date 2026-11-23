@@ -2,7 +2,7 @@
 from sympy.core.expr import unchanged
 from sympy.sets.fancysets import (ImageSet, Range, normalize_theta_set,
                                   ComplexRegion)
-from sympy.sets.sets import (Complement, FiniteSet, Interval, Union, imageset,
+from sympy.sets.sets import (FiniteSet, Interval, Union, imageset,
                              Intersection, ProductSet, Contains)
 from sympy.simplify.simplify import simplify
 from sympy import (S, Symbol, Lambda, symbols, cos, sin, pi, oo, Basic,
@@ -657,7 +657,16 @@ def test_infinitely_indexed_set_2():
 def test_imageset_intersect_real():
     from sympy import I
     from sympy.abc import n
-    assert imageset(Lambda(n, n + (n - 1)*(n + 1)*I), S.Integers).intersect(S.Reals) == Complement(S.Integers, FiniteSet((-1, 1)))
+    s = imageset(Lambda(n, n + (n - 1)*(n + 1)*I), S.Integers)
+    assert 2 not in s
+    assert 2 not in s.intersect(S.Reals)
+    assert s.intersect(S.Reals) == FiniteSet(-1, 1)
+    assert ImageSet(Lambda(n, n + I*(n**2 - 1)), S.Naturals).intersect(
+        S.Reals) == FiniteSet(1)
+    assert ImageSet(Lambda(n, n + I*(n**2 - 2)), S.Integers).intersect(
+        S.Reals) == S.EmptySet
+    assert ImageSet(Lambda(n, 1/(n - 1) + I*n*(n - 1)), S.Integers).intersect(
+        S.Reals) == FiniteSet(-1)
     s = ImageSet(
         Lambda(n, -I*(I*(2*pi*n - pi/4) + log(Abs(sqrt(-I))))),
         S.Integers)
