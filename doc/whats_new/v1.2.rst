@@ -86,6 +86,12 @@ Changelog
   non-finite validation with the Array API specification. :pr:`25619` by
   `Thomas Fan`_.
 
+- |Fix| Fixes a bug where the `set_output` API with `transform="pandas"` would
+  overwrite the index of a DataFrame returned by a transformer with the index of
+  the input, failing when the transformer changes the number of rows (e.g.
+  aggregation in a :class:`pipeline.FeatureUnion`). The index of a returned
+  DataFrame is now kept.
+
 .. _changes_1_2_1:
 
 Version 1.2.1

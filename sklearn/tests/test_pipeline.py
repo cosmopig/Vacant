@@ -24,6 +24,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
 from sklearn.utils.validation import check_is_fitted
 from sklearn.base import clone, is_classifier, BaseEstimator, TransformerMixin
+from sklearn import config_context
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline, make_union
 from sklearn.svm import SVC
 from sklearn.neighbors import LocalOutlierFactor
@@ -1679,3 +1680,30 @@ def test_feature_union_feature_names_in_():
     union = FeatureUnion([("pass", "passthrough")])
     union.fit(X_array)
     assert not hasattr(union, "feature_names_in_")
+
+
+def test_feature_union_set_output_aggregating_transformer():
+    """Check FeatureUnion with pandas output and a transformer that changes the
+    number of rows of a DataFrame (e.g. aggregation)."""
+    pd = pytest.importorskip("pandas")
+
+    class AggregatingTransformer(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            return X["value"].groupby(X["date"]).sum().to_frame()
+
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", freq="H")[:-1]
+    X = pd.DataFrame({"value": [10] * len(index)}, index=index)
+    X["date"] = index.date
+
+    union = FeatureUnion([("agg", AggregatingTransformer())])
+    expected = union.fit_transform(X)
+
+    with config_context(transform_output="pandas"):
+        result = union.fit_transform(X)
+    assert isinstance(result, pd.DataFrame)
+    assert result.shape == (4, 1)
+    assert_array_equal(result.index, sorted(set(index.date)))
+    assert_array_equal(result.to_numpy(), np.asarray(expected))

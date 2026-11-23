@@ -25,7 +25,8 @@ def test__wrap_in_pandas_container_dense():
 
 
 def test__wrap_in_pandas_container_dense_update_columns_and_index():
-    """Check that _wrap_in_pandas_container overrides columns and index."""
+    """Check that _wrap_in_pandas_container overrides columns but keeps the index
+    of an existing DataFrame."""
     pd = pytest.importorskip("pandas")
     X_df = pd.DataFrame([[1, 0, 3], [0, 0, 1]], columns=["a", "b", "c"])
     new_columns = np.asarray(["f0", "f1", "f2"], dtype=object)
@@ -33,7 +34,9 @@ def test__wrap_in_pandas_container_dense_update_columns_and_index():
 
     new_df = _wrap_in_pandas_container(X_df, columns=new_columns, index=new_index)
     assert_array_equal(new_df.columns, new_columns)
-    assert_array_equal(new_df.index, new_index)
+
+    # Index does not change when the input is a DataFrame
+    assert_array_equal(new_df.index, X_df.index)
 
 
 def test__wrap_in_pandas_container_error_validation():
