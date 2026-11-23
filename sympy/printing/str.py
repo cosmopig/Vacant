@@ -47,7 +47,7 @@ class StrPrinter(Printer):
             return str(expr)
 
     def _print_Add(self, expr, order=None):
-        if self.order == 'none':
+        if self.order == 'none' or order == 'none':
             terms = list(expr.args)
         else:
             terms = self._as_ordered_terms(expr, order=order)
@@ -304,16 +304,22 @@ class StrPrinter(Printer):
             return sign + '*'.join(a_str) + "/(%s)" % '*'.join(b_str)
 
     def _print_MatMul(self, expr):
-        return '*'.join([self.parenthesize(arg, precedence(expr))
-            for arg in expr.args])
+        args = list(expr.args)
+        sign = ''
+        if args[0].is_Number and args[0].is_negative:
+            sign = '-'
+            args[0] = -args[0]
+            if args[0] == 1:
+                args = args[1:]
+        return sign + '*'.join([self.parenthesize(arg, precedence(expr))
+            for arg in args])
 
     def _print_HadamardProduct(self, expr):
         return '.*'.join([self.parenthesize(arg, precedence(expr))
             for arg in expr.args])
 
     def _print_MatAdd(self, expr):
-        return ' + '.join([self.parenthesize(arg, precedence(expr))
-            for arg in expr.args])
+        return self._print_Add(expr, order='none')
 
     def _print_NaN(self, expr):
         return 'nan'

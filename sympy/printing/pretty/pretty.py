@@ -819,7 +819,7 @@ class PrettyPrinter(Printer):
         return self._print(B.blocks)
 
     def _print_MatAdd(self, expr):
-        return self._print_seq(expr.args, None, None, ' + ')
+        return self._print_Add(expr, order='none')
 
     def _print_MatMul(self, expr):
         args = list(expr.args)
@@ -1409,7 +1409,7 @@ class PrettyPrinter(Printer):
         return pform
 
     def _print_Add(self, expr, order=None):
-        if self.order == 'none':
+        if self.order == 'none' or order == 'none':
             terms = list(expr.args)
         else:
             terms = self._as_ordered_terms(expr, order=order)
@@ -1437,7 +1437,14 @@ class PrettyPrinter(Printer):
             return prettyForm(binding=prettyForm.NEG, *p)
 
         for i, term in enumerate(terms):
-            if term.is_Mul and _coeff_isneg(term):
+            if term.is_MatMul and term.args[0].is_Number and term.args[0].is_negative:
+                args = list(term.args)
+                args[0] = -args[0]
+                if args[0] == 1:
+                    args = args[1:]
+                pform = self._print(term.func(*args))
+                pforms.append(pretty_negative(pform, i))
+            elif term.is_Mul and _coeff_isneg(term):
                 coeff, other = term.as_coeff_mul(rational=False)
                 pform = self._print(Mul(-coeff, *other, evaluate=False))
                 pforms.append(pretty_negative(pform, i))

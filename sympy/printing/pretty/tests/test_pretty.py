@@ -2927,6 +2927,16 @@ def test_diffgeom_print_WedgeProduct():
     assert upretty(wp) == u("ⅆ x∧ⅆ y")
 
 
+def test_MatAdd():
+    A = MatrixSymbol('A', 2, 2)
+    B = MatrixSymbol('B', 2, 2)
+    assert pretty(A - A*B - B) == '-B - A*B + A'
+    assert upretty(A - A*B - B) == u'-B - A⋅B + A'
+    assert pretty(-A) == '-A'
+    assert pretty(A - 2*B) == '-2*B + A'
+    assert pretty(-(A + B)) == '-(A + B)'
+
+
 def test_Adjoint():
     X = MatrixSymbol('X', 2, 2)
     Y = MatrixSymbol('Y', 2, 2)
