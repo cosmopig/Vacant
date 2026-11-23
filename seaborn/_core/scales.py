@@ -36,6 +36,7 @@ from pandas import Series
 
 from seaborn._core.rules import categorical_order
 from seaborn._core.typing import Default, default
+from seaborn.utils import _format_legend_ticks
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -378,7 +379,7 @@ class ContinuousBase(Scale):
             axis.set_view_interval(vmin, vmax)
             locs = axis.major.locator()
             locs = locs[(vmin <= locs) & (locs <= vmax)]
-            labels = axis.major.formatter.format_ticks(locs)
+            labels = _format_legend_ticks(axis.major.formatter, locs)
             new._legend = list(locs), list(labels)
 
         return new

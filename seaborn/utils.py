@@ -5,6 +5,7 @@ import inspect
 import warnings
 import colorsys
 from contextlib import contextmanager
+from copy import copy
 from urllib.request import urlopen, urlretrieve
 
 import numpy as np
@@ -701,13 +702,27 @@ def locator_to_legend_entries(locator, limits, dtype):
         formatter = mpl.ticker.ScalarFormatter()
     formatter.axis = dummy_axis()
 
-    # TODO: The following two lines should be replaced
-    # once pinned matplotlib>=3.1.0 with:
-    # formatted_levels = formatter.format_ticks(raw_levels)
-    formatter.set_locs(raw_levels)
-    formatted_levels = [formatter(x) for x in raw_levels]
+    formatted_levels = _format_legend_ticks(formatter, raw_levels)
 
     return raw_levels, formatted_levels
+
+
+def _format_legend_ticks(formatter, locs):
+    """Format tick values for a legend, where an axis offset text is not shown.
+
+    A :class:`matplotlib.ticker.ScalarFormatter` may move a multiplicative
+    (scientific) or additive offset into a separate offset string. Legends
+    do not display that string, so in that case reformat with a copy of the
+    formatter that has the offset and scientific notation disabled.
+
+    """
+    labels = formatter.format_ticks(locs)
+    if isinstance(formatter, mpl.ticker.ScalarFormatter) and formatter.get_offset():
+        formatter = copy(formatter)
+        formatter.set_useOffset(False)
+        formatter.set_scientific(False)
+        labels = formatter.format_ticks(locs)
+    return labels
 
 
 def relative_luminance(color):

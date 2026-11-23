@@ -335,6 +335,16 @@ def test_locator_to_legend_entries():
         assert re.match(f"1e.0{exp}", str_levels[i])
 
 
+def test_locator_to_legend_entries_large_values():
+
+    locator = mpl.ticker.MaxNLocator(nbins=3)
+    limits = (3e6, 6e6)
+    levels, str_levels = utils.locator_to_legend_entries(
+        locator, limits, float
+    )
+    assert str_levels == [f"{lvl:.0f}" for lvl in levels]
+
+
 def test_move_legend_matplotlib_objects():
 
     fig, ax = plt.subplots()

@@ -15,6 +15,7 @@ from seaborn._core.scales import (
     PseudoAxis,
 )
 from seaborn._core.properties import (
+    PointSize,
     IntervalProperty,
     ObjectProperty,
     Coordinate,
@@ -311,6 +312,20 @@ class TestContinuous:
 
         with pytest.raises(TypeError, match="`like` must be"):
             s.label(like=2)
+
+    def test_legend_large_values_without_offset(self):
+
+        x = pd.Series([3e6, 4e6, 5e6, 6e6], name="x")
+        s = Continuous()._setup(x, PointSize())
+        locs, labels = s._legend
+        assert labels == [f"{loc:.0f}" for loc in locs]
+
+    def test_legend_additive_offset(self):
+
+        x = pd.Series([1e6 + 2, 1e6 + 8], name="x")
+        s = Continuous()._setup(x, PointSize())
+        locs, labels = s._legend
+        assert labels == [f"{loc:.0f}" for loc in locs]
 
 
 class TestNominal:
