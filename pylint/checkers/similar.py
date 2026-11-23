@@ -531,6 +531,8 @@ class Similar:
         """iterate on similarities among all files, by making a cartesian
         product
         """
+        if self.min_lines <= 0:
+            return
         for idx, lineset in enumerate(self.linesets[:-1]):
             for lineset2 in self.linesets[idx + 1 :]:
                 yield from self._find_common(lineset, lineset2)
@@ -739,7 +741,8 @@ class SimilarChecker(BaseChecker, Similar, MapReduceMixin):
                 "default": DEFAULT_MIN_SIMILARITY_LINE,
                 "type": "int",
                 "metavar": "<int>",
-                "help": "Minimum lines number of a similarity.",
+                "help": "Minimum lines number of a similarity. "
+                "Set it to 0 to disable the duplicate code check.",
             },
         ),
         (
@@ -889,7 +892,7 @@ def Run(argv=None):
     if argv is None:
         argv = sys.argv[1:]
 
-    s_opts = "hdi"
+    s_opts = "hd:i"
     l_opts = (
         "help",
         "duplicates=",

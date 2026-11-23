@@ -339,6 +339,47 @@ TOTAL lines=62 duplicates=5 percent=8.06
     )
 
 
+@pytest.mark.parametrize("args", (["--duplicates=0"], ["-d", "0"]))
+def test_min_similarity_lines_zero_disables_check(args) -> None:
+    output = StringIO()
+    with redirect_stdout(output), pytest.raises(SystemExit) as ex:
+        similar.Run(args + [SIMILAR1, SIMILAR2])
+    assert ex.value.code == 0
+    assert output.getvalue().strip() == "TOTAL lines=62 duplicates=0 percent=0.00"
+
+
+def test_short_duplicates_option_takes_value() -> None:
+    output = StringIO()
+    with redirect_stdout(output), pytest.raises(SystemExit) as ex:
+        similar.Run(["-d", "3", "--ignore-comments", SIMILAR1, SIMILAR2])
+    assert ex.value.code == 0
+    assert "TOTAL lines=62 duplicates=10 percent=16.13" in output.getvalue()
+
+
+def _check_duplicate_code(min_similarity_lines=None):
+    linter = PyLinter(reporter=Reporter())
+    linter.register_checker(similar.SimilarChecker(linter))
+    if min_similarity_lines is not None:
+        linter.global_set_option("min-similarity-lines", min_similarity_lines)
+    linter.check(
+        [str(INPUT / "similar_lines_a.py"), str(INPUT / "similar_lines_b.py")]
+    )
+    return linter
+
+
+def test_checker_min_similarity_lines_zero_emits_nothing() -> None:
+    linter = _check_duplicate_code(0)
+    assert "R0801" not in linter.reporter.message_ids
+    assert linter.stats["nb_duplicated_lines"] == 0
+    assert linter.stats["percent_duplicated_lines"] == 0
+
+
+def test_checker_default_min_similarity_lines_still_detects() -> None:
+    linter = _check_duplicate_code()
+    assert "R0801" in linter.reporter.message_ids
+    assert linter.stats["nb_duplicated_lines"] > 0
+
+
 def test_lines_without_meaningful_content_do_not_trigger_similarity() -> None:
     output = StringIO()
     with redirect_stdout(output), pytest.raises(SystemExit) as ex:

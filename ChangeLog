@@ -10,6 +10,9 @@ Release date: TBA
 ..
   Put new features here and also in 'doc/whatsnew/2.11.rst'
 
+* Setting ``min-similarity-lines`` to ``0`` now disables the duplicate code check
+  (``duplicate-code``/``R0801``) instead of flagging every line.
+
 * The python3 porting mode checker and it's ``py3k`` option were removed. You can still find it in older pylint
   versions.
 
