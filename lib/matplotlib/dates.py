@@ -592,11 +592,12 @@ def drange(dstart, dend, delta):
 
 
 def _wrap_in_tex(text):
-    p = r'([a-zA-Z]+)'
+    p = r'([a-zA-Z\s]+)'
     ret_text = re.sub(p, r'}$\1$\\mathdefault{', text)
 
-    # Braces ensure dashes are not spaced like binary operators.
-    ret_text = '$\\mathdefault{'+ret_text.replace('-', '{-}')+'}$'
+    # Braces give dashes and colons ordinary math spacing.
+    ret_text = ret_text.replace('-', '{-}').replace(':', '{:}')
+    ret_text = '$\\mathdefault{'+ret_text+'}$'
     ret_text = ret_text.replace('$\\mathdefault{}$', '')
     return ret_text
 

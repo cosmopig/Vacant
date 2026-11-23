@@ -325,9 +325,11 @@ def test_date_formatter_callable():
     (datetime.timedelta(weeks=52 * 200),
      [r'$\mathdefault{%d}$' % (year,) for year in range(1990, 2171, 20)]),
     (datetime.timedelta(days=30),
-     [r'Jan$\mathdefault{ %02d 1990}$' % (day,) for day in range(1, 32, 3)]),
+     [r'Jan $\mathdefault{%02d}$ $\mathdefault{1990}$' % (day,)
+      for day in range(1, 32, 3)]),
     (datetime.timedelta(hours=20),
-     [r'$\mathdefault{%02d:00:00}$' % (hour,) for hour in range(0, 21, 2)]),
+     [r'$\mathdefault{%02d{:}00{:}00}$' % (hour,)
+      for hour in range(0, 21, 2)]),
 ])
 def test_date_formatter_usetex(delta, expected):
     d1 = datetime.datetime(1990, 1, 1)
@@ -339,6 +341,18 @@ def test_date_formatter_usetex(delta, expected):
 
     formatter = mdates.AutoDateFormatter(locator, usetex=True)
     assert [formatter(loc) for loc in locator()] == expected
+
+
+@plt.style.context('default')
+def test_date_axis_usetex_minute_spacing():
+    start = datetime.datetime(2020, 1, 1)
+    end = start + datetime.timedelta(minutes=10)
+    with rc_context({'text.usetex': True}):
+        _, ax = plt.subplots()
+        ax.plot([start, end], [0, 1])
+        ax.set_xlim(start, end)
+        labels = ax.xaxis.get_major_formatter().format_ticks(ax.get_xticks())
+    assert r'$\mathdefault{01}$ $\mathdefault{00{:}10}$' in labels
 
 
 def test_drange():
@@ -609,14 +623,14 @@ def test_concise_formatter_show_offset(t_delta, expected):
       '$\\mathdefault{25}$', '$\\mathdefault{29}$', 'Feb',
       '$\\mathdefault{05}$', '$\\mathdefault{09}$']),
     (datetime.timedelta(hours=40),
-     ['Jan$\\mathdefault{{-}01}$', '$\\mathdefault{04:00}$',
-      '$\\mathdefault{08:00}$', '$\\mathdefault{12:00}$',
-      '$\\mathdefault{16:00}$', '$\\mathdefault{20:00}$',
-      'Jan$\\mathdefault{{-}02}$', '$\\mathdefault{04:00}$',
-      '$\\mathdefault{08:00}$', '$\\mathdefault{12:00}$',
-      '$\\mathdefault{16:00}$']),
+     ['Jan$\\mathdefault{{-}01}$', '$\\mathdefault{04{:}00}$',
+      '$\\mathdefault{08{:}00}$', '$\\mathdefault{12{:}00}$',
+      '$\\mathdefault{16{:}00}$', '$\\mathdefault{20{:}00}$',
+      'Jan$\\mathdefault{{-}02}$', '$\\mathdefault{04{:}00}$',
+      '$\\mathdefault{08{:}00}$', '$\\mathdefault{12{:}00}$',
+      '$\\mathdefault{16{:}00}$']),
     (datetime.timedelta(seconds=2),
-     ['$\\mathdefault{59.5}$', '$\\mathdefault{00:00}$',
+     ['$\\mathdefault{59.5}$', '$\\mathdefault{00{:}00}$',
       '$\\mathdefault{00.5}$', '$\\mathdefault{01.0}$',
       '$\\mathdefault{01.5}$', '$\\mathdefault{02.0}$',
       '$\\mathdefault{02.5}$']),
