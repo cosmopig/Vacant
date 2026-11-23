@@ -111,10 +111,28 @@ def _regex_transformer(value: str) -> Pattern[str]:
         raise argparse.ArgumentTypeError(msg) from e
 
 
+_REGEX_LIST_TOKEN = re.compile(
+    r"\\.|\(\?#(?:\\.|[^)\\])*\)|\[\^?\]?(?:\\.|[^\]\\])*\]|\{[0-9]*,[0-9]*\}|[(),]",
+    re.DOTALL,
+)
+
+
 def _regexp_csv_transfomer(value: str) -> Sequence[Pattern[str]]:
-    """Transforms a comma separated list of regular expressions."""
+    """Compile regexes separated by commas outside regex constructs."""
     patterns: list[Pattern[str]] = []
-    for pattern in _csv_transformer(value):
+    start = depth = 0
+    for match in _REGEX_LIST_TOKEN.finditer(value):
+        token = match[0]
+        if token == "(":
+            depth += 1
+        elif token == ")" and depth:
+            depth -= 1
+        elif token == "," and not depth:
+            pattern = value[start : match.start()].strip()
+            if pattern:
+                patterns.append(_regex_transformer(pattern))
+            start = match.end()
+    if pattern := value[start:].strip():
         patterns.append(_regex_transformer(pattern))
     return patterns
 

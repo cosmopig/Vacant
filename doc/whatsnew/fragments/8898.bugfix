@@ -1,0 +1,3 @@
+Preserve commas in quantifiers, groups, and character classes in comma-separated
+regular expression options such as ``bad-names-rgxs``. Use ``\,`` for a literal
+comma outside those constructs.

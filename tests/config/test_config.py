@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -137,14 +138,39 @@ def test_csv_regex_error(capsys: CaptureFixture) -> None:
     """
     with pytest.raises(SystemExit):
         Run(
-            [str(EMPTY_MODULE), r"--bad-names-rgx=(foo{1,3})"],
+            [str(EMPTY_MODULE), "--bad-names-rgxs=foo,bar("],
             exit=False,
         )
     output = capsys.readouterr()
     assert (
-        r"Error in provided regular expression: (foo{1 beginning at index 0: missing ), unterminated subpattern"
+        "Error in provided regular expression: bar( beginning at index 3: missing ), unterminated subpattern"
         in output.err
     )
+
+
+def test_regex_with_quantifier_in_toml(tmp_path: Path) -> None:
+    config_file = tmp_path / "pyproject.toml"
+    config_file.write_text(
+        '[tool.pylint.basic]\nbad-names-rgxs = "(foo{1,3})"\n', encoding="utf-8"
+    )
+    runner = Run([str(EMPTY_MODULE), f"--rcfile={config_file}"], exit=False)
+
+    assert runner.linter.config.bad_names_rgxs == [re.compile("(foo{1,3})")]
+
+
+def test_csv_regex_with_commas() -> None:
+    runner = Run(
+        [
+            str(EMPTY_MODULE),
+            r"--bad-names-rgxs= , foo{1,}, [),], (x,(y,z)), a\,b, c\\, d, ",
+        ],
+        exit=False,
+    )
+
+    assert runner.linter.config.bad_names_rgxs == [
+        re.compile(pattern)
+        for pattern in ("foo{1,}", "[),]", "(x,(y,z))", r"a\,b", r"c\\", "d")
+    ]
 
 
 def test_short_verbose(capsys: CaptureFixture) -> None:
