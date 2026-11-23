@@ -838,6 +838,38 @@ def test_info_field_list(app):
                 **{"py:module": "example", "py:class": "Class"})
 
 
+@pytest.mark.sphinx('dummy', testroot='domain-py', freshenv=True)
+def test_variable_fields_do_not_link_names(app):
+    text = (".. py:module:: example\n"
+            "\n"
+            ".. py:data:: limit\n"
+            "\n"
+            ".. py:data:: size\n"
+            "\n"
+            ".. py:data:: count\n"
+            "\n"
+            ".. py:class:: Quantity\n"
+            "\n"
+            ".. py:class:: Record\n"
+            "\n"
+            "   :var Quantity limit: See :py:data:`example.limit`.\n"
+            "   :ivar size: An instance variable.\n"
+            "   :cvar count: A class variable.\n")
+    (app.srcdir / 'index.rst').write_text(text)
+    app.builder.build_all()
+    doctree = app.env.get_and_resolve_doctree('index', app.builder)
+    field_list, = doctree.traverse(nodes.field_list)
+
+    assert [node.astext() for node in field_list.traverse(addnodes.literal_strong)] == [
+        'limit', 'size', 'count',
+    ]
+    assert [(node.astext(), node['refid'])
+            for node in field_list.traverse(nodes.reference)] == [
+        ('Quantity', 'example.Quantity'),
+        ('example.limit', 'example.limit'),
+    ]
+
+
 @pytest.mark.sphinx(freshenv=True)
 def test_module_index(app):
     text = (".. py:module:: docutils\n"

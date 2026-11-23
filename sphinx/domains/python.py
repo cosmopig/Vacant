@@ -270,6 +270,9 @@ class PyXrefMixin:
                   contnode: Node = None, env: BuildEnvironment = None) -> Node:
         result = super().make_xref(rolename, domain, target,  # type: ignore
                                    innernode, contnode, env)
+        if not isinstance(result, pending_xref):
+            return result
+
         result['refspecific'] = True
         result['py:module'] = env.ref_context.get('py:module')
         result['py:class'] = env.ref_context.get('py:class')
@@ -354,7 +357,7 @@ class PyObject(ObjectDescription):
                             'keyword', 'kwarg', 'kwparam'),
                      typerolename='class', typenames=('paramtype', 'type'),
                      can_collapse=True),
-        PyTypedField('variable', label=_('Variables'), rolename='obj',
+        PyTypedField('variable', label=_('Variables'),
                      names=('var', 'ivar', 'cvar'),
                      typerolename='class', typenames=('vartype',),
                      can_collapse=True),
