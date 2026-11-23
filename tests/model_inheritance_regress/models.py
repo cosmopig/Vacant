@@ -205,3 +205,26 @@ class Congressman(Person, Politician):
 
 class Senator(Congressman):
     pass
+
+
+class MIBase(models.Model):
+    base_id = models.AutoField(primary_key=True)
+    field_base = models.IntegerField()
+
+
+class MIOtherRoot(models.Model):
+    root_id = models.AutoField(primary_key=True)
+    field_root = models.IntegerField(default=0)
+
+
+class MIOtherBase(MIOtherRoot):
+    otherbase_id = models.AutoField(primary_key=True)
+    field_otherbase = models.IntegerField()
+
+
+class MIChild(MIBase, MIOtherBase):
+    pass
+
+
+class MIGrandChild(MIChild):
+    pass

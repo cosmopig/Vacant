@@ -1836,7 +1836,14 @@ class SQLUpdateCompiler(SQLCompiler):
         query.clear_ordering(force=True)
         query.extra = {}
         query.select = []
-        query.add_fields([query.get_meta().pk.name])
+        related_models = list(self.query.related_updates)
+        query.add_fields(
+            [query.get_meta().pk.name]
+            + [
+                self.query.get_related_ancestor_lookup(model)
+                for model in related_models
+            ]
+        )
         super().pre_sql_setup()
 
         must_pre_select = (
@@ -1851,10 +1858,14 @@ class SQLUpdateCompiler(SQLCompiler):
             # don't want them to change), or the db backend doesn't support
             # selecting from the updating table (e.g. MySQL).
             idents = []
+            related_ids = {model: [] for model in related_models}
             for rows in query.get_compiler(self.using).execute_sql(MULTI):
-                idents.extend(r[0] for r in rows)
+                for row in rows:
+                    idents.append(row[0])
+                    for model, value in zip(related_models, row[1:]):
+                        related_ids[model].append(value)
             self.query.add_filter("pk__in", idents)
-            self.query.related_ids = idents
+            self.query.related_ids = related_ids
         else:
             # The fast path. Filters and updates in one query.
             self.query.add_filter("pk__in", query)

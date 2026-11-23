@@ -3,6 +3,7 @@ Query subclasses which provide extra functionality beyond simple data retrieval.
 """
 
 from django.core.exceptions import FieldError
+from django.db.models.constants import LOOKUP_SEP
 from django.db.models.sql.constants import CURSOR, GET_ITERATOR_CHUNK_SIZE, NO_RESULTS
 from django.db.models.sql.query import Query
 
@@ -121,6 +122,26 @@ class UpdateQuery(Query):
         """
         self.related_updates.setdefault(model, []).append((field, None, value))
 
+    def get_related_ancestor_lookup(self, ancestor):
+        """
+        Return the lookup path from the current model to the field holding
+        the primary key value of the given concrete ancestor model.
+        """
+        opts = self.get_meta().concrete_model._meta
+        path = []
+        while ancestor not in opts.parents:
+            for parent, link in opts.parents.items():
+                if parent._meta.get_ancestor_link(ancestor):
+                    break
+            else:
+                raise ValueError(
+                    "%r is not an ancestor of %r." % (ancestor, opts.model)
+                )
+            path.append(link.name)
+            opts = parent._meta
+        path.append(opts.parents[ancestor].name)
+        return LOOKUP_SEP.join(path)
+
     def get_related_updates(self):
         """
         Return a list of query objects: one for each update required to an
@@ -134,7 +155,7 @@ class UpdateQuery(Query):
             query = UpdateQuery(model)
             query.values = values
             if self.related_ids is not None:
-                query.add_filter("pk__in", self.related_ids)
+                query.add_filter("pk__in", self.related_ids[model])
             result.append(query)
         return result
 

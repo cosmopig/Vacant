@@ -19,6 +19,11 @@ from .models import (
     InternalCertificationAudit,
     ItalianRestaurant,
     M2MChild,
+    MIBase,
+    MIChild,
+    MIGrandChild,
+    MIOtherBase,
+    MIOtherRoot,
     MessyBachelorParty,
     ParkingLot,
     ParkingLot3,
@@ -667,3 +672,49 @@ class ModelInheritanceTest(TestCase):
             Politician.objects.get(pk=c1.politician_ptr_id).title,
             "senator 1",
         )
+
+    def test_queryset_update_on_second_parent_multiple_inheritance(self):
+        MIOtherBase.objects.create(field_otherbase=100)
+        MIOtherBase.objects.create(field_otherbase=101)
+        MIChild.objects.create(field_base=0, field_otherbase=0)
+        MIChild.objects.create(field_base=1, field_otherbase=1)
+        self.assertEqual(MIChild.objects.update(field_otherbase=55), 2)
+        self.assertSequenceEqual(
+            MIChild.objects.order_by("pk").values_list("field_otherbase", flat=True),
+            [55, 55],
+        )
+        self.assertSequenceEqual(
+            MIOtherBase.objects.filter(michild__isnull=True)
+            .order_by("pk")
+            .values_list("field_otherbase", flat=True),
+            [100, 101],
+        )
+
+    def test_queryset_update_on_all_ancestors_multiple_inheritance(self):
+        MIOtherBase.objects.create(field_otherbase=100, field_root=100)
+        child = MIChild.objects.create(field_base=1, field_otherbase=1)
+        grandchild = MIGrandChild.objects.create(field_base=2, field_otherbase=2)
+        MIChild.objects.filter(pk=child.pk).update(
+            field_base=10, field_otherbase=11, field_root=12
+        )
+        child.refresh_from_db()
+        self.assertEqual(
+            (child.field_base, child.field_otherbase, child.field_root), (10, 11, 12)
+        )
+        MIGrandChild.objects.update(field_base=20, field_otherbase=21, field_root=22)
+        grandchild.refresh_from_db()
+        self.assertEqual(
+            (grandchild.field_base, grandchild.field_otherbase, grandchild.field_root),
+            (20, 21, 22),
+        )
+        child.refresh_from_db()
+        self.assertEqual(
+            (child.field_base, child.field_otherbase, child.field_root), (10, 11, 12)
+        )
+        self.assertSequenceEqual(
+            MIOtherRoot.objects.filter(miotherbase__michild__isnull=True).values_list(
+                "field_root", flat=True
+            ),
+            [100],
+        )
+        self.assertEqual(MIBase.objects.count(), 2)
