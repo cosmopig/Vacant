@@ -5,11 +5,12 @@ import datetime
 import json
 from pathlib import Path
 import re
+from threading import Lock
 import urllib.error
 import urllib.request
 import uuid
 
-PATH = re.compile(r"/([a-f0-9]{32})/v1/chat/completions")
+PATH = re.compile(r"/([a-f0-9]{32})/([0-3])/v1/chat/completions")
 
 
 def now():
@@ -27,18 +28,28 @@ class TraceHandler(BaseHTTPRequestHandler):
             self.send_error(413)
             return
         payload = self.rfile.read(length)
+        try:
+            body = json.loads(payload)
+            if not isinstance(body, dict):
+                raise ValueError("expected JSON object")
+        except ValueError:
+            self.send_error(400)
+            return
         trace_dir = self.server.out / match[1]
-        trace_dir.mkdir(exist_ok=True)
+        with self.server.trace_lock:
+            first_request = not trace_dir.exists()
+            trace_dir.mkdir(exist_ok=True)
+        body.update(id_slot=int(match[2]), cache_prompt=not first_request)
         target = trace_dir / f"{uuid.uuid4().hex}.jsonl"
         upstream = urllib.request.Request(
-            self.server.upstream, data=payload, headers={"Content-Type": "application/json"},
+            self.server.upstream, data=json.dumps(body).encode(), headers={"Content-Type": "application/json"},
             method="POST",
         )
         with target.open("w", encoding="utf-8", buffering=1) as trace:
             def event(kind, **data):
                 trace.write(json.dumps({"utc": now(), "kind": kind, **data}) + "\n")
 
-            event("request", body=payload.decode("utf-8", "replace"))
+            event("request", body=payload.decode("utf-8", "replace"), upstream_body=body)
             try:
                 try:
                     response = urllib.request.urlopen(upstream, timeout=900)
@@ -75,4 +86,5 @@ if __name__ == "__main__":
     with ThreadingHTTPServer(("0.0.0.0", 8080), TraceHandler) as server:
         server.out = args.out
         server.upstream = args.upstream
+        server.trace_lock = Lock()
         server.serve_forever()

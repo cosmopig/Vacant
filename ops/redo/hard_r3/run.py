@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import platform
+from queue import Queue
 import re
 import shutil
 import stat
@@ -32,9 +33,10 @@ MODEL = "local/qwen3-coder-30b-a3b"
 MODEL_SHA = "fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad"
 NETWORK = "hard-r3-inference"
 TRACE_HOST = "http://hard-r3-trace:8080"
+SLOTS = 4
 SERVER_ARGS = (
     "--host 0.0.0.0 --port 8080 --model /model/model.gguf --alias qwen3-coder-30b-a3b "
-    "--n-gpu-layers 0 --ctx-size 65536 --parallel 4 --threads 8 --threads-batch 8 "
+    f"--n-gpu-layers 0 --ctx-size 65536 --parallel {SLOTS} --threads 8 --threads-batch 8 "
     "--jinja --n-predict 4096 --no-cache-prompt --cache-ram 0 --ctx-checkpoints 0 "
     "--temp 0.7 --top-p 0.8 --top-k 20 --min-p 0 --repeat-penalty 1.05 --seed -1 --no-webui"
 ).split()
@@ -42,8 +44,10 @@ SCRIPTS = [HERE / f for f in ("run.py", "bank.py", "plan.json", "judge.py", "tra
                               "PROTOCOL.md")] + [HERE.parent / "redo.py"]
 CONFIG = {
     "autoupdate": False, "share": "disabled", "enabled_providers": ["local"],
-    "permission": {"*": "allow", "task": "deny", "webfetch": "deny", "websearch": "deny",
-                   "external_directory": "deny", "lsp": "deny", "skill": "deny"},
+    "permission": {"*": "deny", "bash": "allow", "read": "allow"},
+    "agent": {"build": {"prompt": "Implement the user's task in the current workspace. "
+                                 "Use the bash tool to write the solution before running the provided test. "
+                                 "Use only local files and commands; do not edit the test."}},
 }
 PROMPT = """Implement the specified solution in solution.py. Use only Python 3.12 standard library.
 Do not modify tests or create other deliverables. The final deliverable is only solution.py.
@@ -73,6 +77,10 @@ def runtime(binary: Path, rg: Path) -> list[str]:
         raise SystemExit("The pinned local inference container must be running")
     if server["Args"] != SERVER_ARGS:
         raise SystemExit(f"Unexpected local inference configuration: {server['Args']}")
+    internal = subprocess.check_output(["docker", "network", "inspect", NETWORK, "--format", "{{.Internal}}"],
+                                       text=True).strip()
+    if internal != "true":
+        raise SystemExit("Agent network must be internal")
     weights = next(m for m in server["Mounts"] if m["Destination"] == "/model/model.gguf")
     with Path(weights["Source"]).open("rb") as gguf:
         if hashlib.file_digest(gguf, "sha256").hexdigest() != MODEL_SHA:
@@ -81,14 +89,14 @@ def runtime(binary: Path, rg: Path) -> list[str]:
             f"runtime: {platform.machine()} uid {os.getuid()}", f"runtime: llama.cpp args {server['Args']}"]
 
 
-def agent_config(trace_id: str) -> dict:
+def agent_config(trace_id: str, slot: int) -> dict:
     return {
         **CONFIG,
         "model": MODEL,
         "small_model": MODEL,
         "provider": {"local": {
             "npm": "@ai-sdk/openai-compatible", "name": "Local llama.cpp",
-            "options": {"baseURL": f"{TRACE_HOST}/{trace_id}/v1", "includeUsage": True},
+            "options": {"baseURL": f"{TRACE_HOST}/{trace_id}/{slot}/v1", "includeUsage": True},
             "models": {MODEL.split("/")[1]: {
                 "name": "Qwen3-Coder-30B-A3B-Instruct", "limit": {"context": 16384, "output": 4096},
             }},
@@ -209,7 +217,8 @@ def evaluate(task: str, candidate: bytes | None, out: Path, hidden: bool) -> dic
                 "checks": checks, **result}
 
 
-def one_attempt(binary: Path, rg: Path, plan, arm, tdir, provider, adir, timeout_s, hint, cell_id, attempt_no):
+def one_attempt(binary: Path, rg: Path, slot: int, plan, arm, tdir, provider, adir, timeout_s, hint,
+                cell_id, attempt_no):
     del arm, provider, hint, cell_id, attempt_no
     task = tdir.name
     prompt = PROMPT + bank.SPECS[task]
@@ -217,7 +226,7 @@ def one_attempt(binary: Path, rg: Path, plan, arm, tdir, provider, adir, timeout
     started = redo.now()
     log = adir / "agent.jsonl"
     trace_id = uuid.uuid4().hex
-    config = agent_config(trace_id)
+    config = agent_config(trace_id, slot)
     emit_json(adir / "agent_input.json", {"model": MODEL, "config": config, "prompt": prompt, "trace_id": trace_id,
                                          "timeout_s": timeout_s, "started": started})
     with tempfile.TemporaryDirectory(prefix="r3-agent-") as tmp:
@@ -268,27 +277,37 @@ def preflight(out: Path):
         "reconcile": {"a": 0, "b": 1, "d": 2},
     }
     summaries = {}
-    for task in bank.SPECS:
-        visible = bank.suite(task, False)
-        hidden = bank.suite(task, True)
-        positive_stub = (
-            f"import json\nrows = json.loads({canonical(visible)!r})\n"
+
+    def fixture_stub(cases):
+        return (
+            f"import json\nrows = json.loads({canonical(cases)!r})\n"
             "def solve(data):\n"
             "    for case, expected in rows:\n"
             "        if data == case:\n"
             "            return expected\n"
             "    return None\n"
         ).encode()
+
+    for task in bank.SPECS:
+        visible = bank.suite(task, False)
+        hidden = bank.suite(task, True)
+        positive_stub = fixture_stub(visible)
         dest = out / task
         dest.mkdir()
         assert canonical(visible[0][1]) == canonical(manual[task]), task
         assert not {canonical(x) for x, _ in visible}.intersection(canonical(x) for x, _ in hidden), task
         assert evaluate(task, positive_stub, dest, False)["pass"] is True, task
         assert evaluate(task, positive_stub, dest, True)["pass"] is False, task
-        assert evaluate(task, STARTER.encode(), dest, False)["pass"] is False, task
+        negative = dest / "unimplemented"
+        negative.mkdir()
+        assert evaluate(task, STARTER.encode(), negative, False)["pass"] is False, task
+        hidden_dest = dest / "hidden_fixture"
+        hidden_dest.mkdir()
+        assert evaluate(task, fixture_stub(hidden), hidden_dest, True)["pass"] is True, task
         summaries[task] = {"manual_example_match": True, "visible_cases": len(visible),
                            "hidden_cases": len(hidden), "visible_fixture_stub_pass": True,
                            "visible_fixture_stub_hidden_pass": False, "unimplemented_stub_pass": False,
+                           "hidden_fixture_stub_pass": True,
                            "visible_hash": hashlib.sha256(canonical(visible).encode()).hexdigest(),
                            "hidden_hash": hashlib.sha256(canonical(hidden).encode()).hexdigest()}
     emit_json(out / "PREFLIGHT.json", summaries)
@@ -301,8 +320,22 @@ def run(out: Path, binary: Path, rg: Path):
     if dirty is None or dirty:
         raise SystemExit("Commit every experiment input before running")
     redo.HARNESS_SHA = redo.sha256_bytes(redo.canonical({p.name: redo.sha256_bytes(p.read_bytes()) for p in SCRIPTS}))
-    redo.one_attempt = lambda *args: one_attempt(binary, rg, *args)
-    out.mkdir(parents=True, exist_ok=True)
+    slots = Queue()
+    for slot in range(SLOTS):
+        slots.put(slot)
+
+    def slotted_attempt(*args):
+        slot = slots.get()
+        try:
+            return one_attempt(binary, rg, slot, *args)
+        finally:
+            slots.put(slot)
+
+    redo.one_attempt = slotted_attempt
+    out.mkdir(parents=True, exist_ok=False)
+    controls = out / "preflight"
+    controls.mkdir()
+    preflight(controls)
     emit_json(out / "runtime.json", {"runtime": msgs, "image": IMAGE, "agent_version": VERSION,
                                     "llama_image": LLAMA_IMAGE, "gguf_sha256": MODEL_SHA, "rg_sha256": RG_SHA,
                                     "opencode_sha256": BINARY_SHA, "model_alias": MODEL,
@@ -310,9 +343,17 @@ def run(out: Path, binary: Path, rg: Path):
     with tempfile.TemporaryDirectory(prefix="r3-bank-") as tmp:
         for task in bank.SPECS:
             (Path(tmp) / task / "workspace").mkdir(parents=True)
-        return redo.cmd_run(argparse.Namespace(plan=str(HERE / "plan.json"), root=str(out), bank=tmp,
-                                             only_tasks=None, only_reps=None, max_pairs=None,
-                                             allow_uncommitted_plan=False))
+        rc = redo.cmd_run(argparse.Namespace(plan=str(HERE / "plan.json"), root=str(out), bank=tmp,
+                                            only_tasks=None, only_reps=None, max_pairs=None,
+                                            allow_uncommitted_plan=False))
+    report_path = out / "REPORT.json"
+    if rc == 0 and report_path.is_file():
+        report = json.loads(report_path.read_bytes())
+        if report["pairs_scored"] != report["pairs_planned"]:
+            report["state"] = "INCOMPLETE"
+            redo.write_json(report_path, report)
+            (out / "REPORT.md").write_text(redo.render_md(report), encoding="utf-8")
+    return rc
 
 
 def main():
@@ -340,7 +381,7 @@ def main():
         if a.verify_output is None:
             p.error("--verify-output is required to keep evidence immutable")
         a.verify_output.mkdir(parents=True, exist_ok=False)
-        mismatches = []
+        mismatches, verified = [], []
         count = 0
         for attempt in sorted(out.glob("cells/*/r*/[AR]*/attempt_*/attempt.json")):
             task = attempt.relative_to(out).parts[1]
@@ -352,12 +393,14 @@ def main():
             candidate = safe_solution(attempt.with_name("solution.py"))
             vis, hidden = evaluate(task, candidate, dest, False), evaluate(task, candidate, dest, True)
             count += 1
+            verified.append(str(attempt.relative_to(out)))
             if (vis["pass"], vis["passed"], hidden["pass"], hidden["passed"]) != (
                 original["acc"]["accept"], original["acc"]["passed"], original["grade"]["pass"],
                 original["grade"]["detail"]["passed"]
             ):
                 mismatches.append(str(attempt.relative_to(out)))
-        emit_json(a.verify_output / "REPLAY.json", {"attempts": count, "mismatches": mismatches})
+        emit_json(a.verify_output / "REPLAY.json", {"attempts": count, "verified": verified,
+                                                   "mismatches": mismatches})
         print(f"Regraded {count} attempts; {len(mismatches)} mismatches")
         return int(not count or bool(mismatches))
 

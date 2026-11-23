@@ -59,6 +59,9 @@ def archive(root, wire, replay):
         summaries[cell["cell"]] = {"arm": cell["arm"], "pair_kind": key, "all": Counter(),
                                    "scored_attempts": Counter(), "void_attempts": Counter()}
     int_paths = sorted(root.glob("cells/*/r*/*/*/attempt.json"))
+    scored_paths = {str(path.relative_to(root)) for path in int_paths if not read(path)["void"]}
+    if set(replay_audit["verified"]) != scored_paths or replay_audit["attempts"] != len(scored_paths):
+        raise SystemExit("Offline grader replay did not cover every scored attempt")
     with (root / "model_io.jsonl").open("w", encoding="utf-8") as target:
         for path in int_paths:
             attempt = read(path)
@@ -73,13 +76,15 @@ def archive(root, wire, replay):
                 issues.append(f"{name}: {attempt['void']}")
             if not attempt["void"] and attempt["acc"]["accept"] != attempt["grade"]["pass"]:
                 issues.append(f"{name}: visible and hidden verdicts differ")
-            if cell_id not in summaries:
-                continue
-            summary = summaries[cell_id]
+            summary = summaries.get(cell_id)
+            if summary is None:
+                issues.append(f"{name}: incomplete cell; excluded from paired analysis")
+                summary = {"arm": path.parent.parent.name, "pair_kind": "unpaired", "all": Counter(),
+                           "scored_attempts": Counter(), "void_attempts": Counter()}
             arm = summary["arm"]
             group = "void_attempts" if attempt["void"] else "scored_attempts"
             traces = sorted((wire / attempt["trace_id"]).glob("*.jsonl"))
-            if not traces and attempt["usage"]:
+            if not traces and not attempt["void"]:
                 raise SystemExit(f"Missing API trace for {name}")
             for source in traces:
                 captured = [json.loads(s) for s in source.read_bytes().splitlines()]

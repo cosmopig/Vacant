@@ -5,14 +5,14 @@
   "arms": {
     "A": {
       "policy": "single",
-      "attempt_timeout_s": 360,
-      "budget_s": 360
+      "attempt_timeout_s": 900,
+      "budget_s": 900
     },
     "R3": {
       "policy": "restart",
       "max_attempts": 3,
-      "attempt_timeout_s": 120,
-      "budget_s": 360,
+      "attempt_timeout_s": 300,
+      "budget_s": 900,
       "min_attempt_s": 10,
       "hint": "none"
     }
@@ -21,7 +21,7 @@
     "A",
     "R3"
   ],
-  "attempt_timeout_s": 360,
+  "attempt_timeout_s": 900,
   "agent": {
     "argv": [
       "opencode",
