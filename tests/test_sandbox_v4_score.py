@@ -320,3 +320,44 @@ def test_recorded_delivery_mismatch_never_clears_before_fetch(bank, tmp_path, mo
     assert result['changed_branches'] == [branch]
     assert result['calibration']['scored'] == 11 and not result['calibration']['proceed']
     assert len(bank.calls) == 12
+
+
+def test_unreadable_result_is_unscored_and_recovered(bank, tmp_path):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    reviewed(out)
+    path = score.cell_path(out, bank.branches[0]) / 'result.json'
+    path.write_text('{"resolved":')
+    report = score.review(out)['calibration']
+    assert report['scored'] == 11 and not report['proceed']
+    assert bank.branches[0] in report['missing_branches']
+    bank.collect(out)
+    assert len(bank.calls) == 13
+    assert len(list((out / 'unreadable').glob('*/result.json'))) == 1
+    assert load(out / 'contamination.json')[bank.branches[0]]['contaminated'] is None
+
+
+def test_interrupted_review_never_truncates_cached_result(bank, tmp_path, monkeypatch):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    reviewed(out)
+    result = score.cell_path(out, bank.branches[0]) / 'result.json'
+    original_bytes = result.read_bytes()
+    original_write = Path.write_text
+
+    def interrupted(path, content, *args, **kwargs):
+        if path.name == 'result.json.tmp':
+            original_write(path, content[:8], *args, **kwargs)
+            raise KeyboardInterrupt('interrupted result write')
+        return original_write(path, content, *args, **kwargs)
+
+    with monkeypatch.context() as patcher:
+        patcher.setattr(Path, 'write_text', interrupted)
+        with pytest.raises(KeyboardInterrupt, match='interrupted result write'):
+            score.review(out)
+    assert result.read_bytes() == original_bytes
+    assert not load(out / 'calibration.json')['proceed']
+    assert score.review(out)['calibration']['proceed']
+    assert len(bank.calls) == 12

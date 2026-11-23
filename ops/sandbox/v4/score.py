@@ -89,6 +89,9 @@ def _review(out):
     meta = json.loads((out / 'meta.json').read_text())
     if meta.get('version') != 4:
         raise ValueError('not a v4 run')
+    if meta['protocol'] == 'calibration' and meta.get('calibration'):
+        meta['calibration'].update(complete=False, proceed=False, decision='incomplete')
+        write_json(out / 'calibration.json', meta['calibration'])
     verdicts = json.loads((out / 'contamination.json').read_text())
     for branch in meta.get('changed_branches', []):
         cell = cell_path(out, branch)
@@ -99,7 +102,24 @@ def _review(out):
             write_json(archive / 'audit.json', verdicts[branch])
         verdicts[branch] = slot(meta['sessions'].get(branch))
     write_json(out / 'contamination.json', verdicts)
-    rows = [json.loads(p.read_text()) for p in sorted((out / 'cells').glob('*/result.json'))]
+    rows = []
+    for path in sorted((out / 'cells').glob('*/result.json')):
+        try:
+            row = json.loads(path.read_text())
+        except (ValueError, UnicodeError):
+            row = None
+        required = {'branch', 'git_sha', 'task', 'sample', 'arm', 'resolved', 'infra_void', 'gold_similarity', 'manifest_present'}
+        if not isinstance(row, dict) or not required <= row.keys():
+            archive = out / 'unreadable' / f'{path.parent.name}-{time.time_ns()}'
+            archive.parent.mkdir(exist_ok=True)
+            shutil.move(str(path.parent), archive)
+            branch = next((b for b in meta['expected_branches'] if cell_path(out, b) == path.parent), None)
+            if branch:
+                write_json(archive / 'audit.json', verdicts[branch])
+                verdicts[branch] = slot(meta['sessions'].get(branch))
+            continue
+        rows.append(row)
+    write_json(out / 'contamination.json', verdicts)
     branches = [r['branch'] for r in rows]
     if len(set(branches)) != len(branches) or not set(branches) <= set(meta['expected_branches']):
         raise ValueError('duplicate or unscheduled scored cells')

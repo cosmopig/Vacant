@@ -19,7 +19,9 @@ HERE = Path(__file__).resolve().parent
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2) + '\n')
+    temporary = path.with_name(path.name + '.tmp')
+    temporary.write_text(json.dumps(value, indent=2) + '\n')
+    temporary.replace(path)
 
 
 def parse_branch(branch):
