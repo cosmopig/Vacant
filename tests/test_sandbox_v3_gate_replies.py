@@ -64,6 +64,19 @@ def test_empty_and_prompt_text_do_not_imply_runs():
     assert parser.parse_cell(row(event('I never ran the gate.')))['gate_never_run'] is True
 
 
+@pytest.mark.parametrize('mark,reason', [('未 gate', 'ungated'), ('拒交', 'no_suite')])
+@pytest.mark.parametrize('number', [2, 3])
+def test_missing_earlier_submissions_do_not_imply_gate_never_ran(mark, reason, number):
+    body = f'Submission {number}\n```\n[vacant run] RUN-ON　{mark}（{reason}）　1/1 次\n```'
+    result = parser.parse_cell(row(event(body)))
+    assert result['gate_never_run'] == 'UNKNOWN'
+    assert result['number_of_submissions'] == 'UNKNOWN'
+    assert parser.parse_cell(row(event('I did not run the gate.\n' + body)))['gate_never_run'] is True
+    if number == 3:
+        sparse = body.replace('Submission 3', 'Submission 1') + '\n' + body
+        assert parser.parse_cell(row(event(sparse)))['gate_never_run'] == 'UNKNOWN'
+
+
 def test_unknown_and_other_exit_codes_are_not_inferred_from_verdict():
     body = f'Submission 1\n```\n{PASS}\n```'
     assert parser.parse_cell(row(event(body)))['submissions'][0]['exit_code'] == 'UNKNOWN'

@@ -57,7 +57,7 @@ def parse_cell(row):
     body = '\n'.join(text for text, _ in events.values())
     never = bool(re.search(r"(?:never ran|did not run|didn't run) (?:the )?(?:Vacant )?gate", body, re.I))
     gated = any(s['verdict'] in ('accepted', 'refused') and '（no_suite）' not in s['raw_verdict_line'] for s in submissions)
-    ungated = bool(submissions) and all(s['verdict'] == 'ungated' or '（no_suite）' in s['raw_verdict_line'] for s in submissions)
+    ungated = complete_numbering and all(s['verdict'] == 'ungated' or '（no_suite）' in s['raw_verdict_line'] for s in submissions)
     return dict(branch=row['branch'], session_id=row['session_id'],
                 number_of_submissions=count, submissions=submissions,
                 final_gate_verdict=submissions[-1]['verdict'] if complete_numbering else UNKNOWN,
