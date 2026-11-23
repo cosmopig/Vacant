@@ -167,7 +167,8 @@ def _review(out):
         write_json(out / f'analysis-{name}.json', summary)
     write_json(out / 'meta.json', meta)
     secondary = dict(gold_similarity_threshold=.9,
-                     gold_similarity_flags=[r['branch'] for r in rows if r['gold_similarity']['flagged']],
+                     gold_similarity_flags=[r['branch'] for r in rows if r['gold_similarity'] and r['gold_similarity']['flagged']],
+                     gold_similarity_unmeasured=[r['branch'] for r in rows if r['gold_similarity'] is None],
                      manifest_presence={r['branch']: r['manifest_present'] for r in rows},
                      agent_costs=v3.UNKNOWN, receipt_verification=v3.UNKNOWN)
     if (out / 'gate-export.json').is_file():
