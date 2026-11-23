@@ -1314,6 +1314,33 @@ class TestRunTC:
             code=0,
         )
 
+    def test_ignore_relative_path_recursive(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "src" / "gen").mkdir(parents=True)
+        (tmp_path / "src" / "gen" / "generated.py").write_text(
+            "print(ignored_name)\n", encoding="utf-8"
+        )
+        (tmp_path / "src" / "kept.py").write_text(
+            "print(kept_name)\n", encoding="utf-8"
+        )
+        config = tmp_path / "pyproject.toml"
+        config.write_text(
+            '[tool.pylint.MASTER]\nignore-paths = ["^src/gen/.*$"]\n',
+            encoding="utf-8",
+        )
+
+        out = StringIO()
+        self._runtest(
+            [f"--rcfile={config}", "--recursive=y", "--errors-only", "./src/"],
+            out=out,
+            code=2,
+        )
+        output = out.getvalue()
+        assert "Undefined variable 'kept_name'" in output
+        assert "ignored_name" not in output
+
     def test_recursive_current_dir(self):
         with _test_sys_path():
             # pytest is including directory HERE/regrtest_data to sys.path which causes

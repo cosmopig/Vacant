@@ -1,0 +1,1 @@
+tests/test_self.py::TestRunTC::test_ignore_relative_path_recursive
