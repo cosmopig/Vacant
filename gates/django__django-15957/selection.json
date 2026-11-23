@@ -1,0 +1,463 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_ambiguous",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_custom_qs",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_filter_deferred",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_generic_rel",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_m2m_through_fk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_m2m_through_gfk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_nested_prefetch_related_are_not_overwritten",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_nested_prefetch_related_with_duplicate_prefetcher",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_o2m_through_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_raw_queryset",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_reverse_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_to_attr_cached_property",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_to_attr_doesnt_cache_through_attr_as_list",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_traverse_multiple_items_property",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_traverse_qs",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_traverse_single_item_property",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::CustomPrefetchTests::test_values_queryset",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::DefaultManagerTests::test_m2m_then_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::DirectPrefetchedObjectCacheReuseTests::test_add_clears_prefetched_objects",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::DirectPrefetchedObjectCacheReuseTests::test_detect_is_fetched",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::DirectPrefetchedObjectCacheReuseTests::test_detect_is_fetched_with_to_attr",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::DirectPrefetchedObjectCacheReuseTests::test_prefetch_reverse_foreign_key",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::DirectPrefetchedObjectCacheReuseTests::test_remove_clears_prefetched_objects",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::ForeignKeyToFieldTest::test_foreignkey",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::ForeignKeyToFieldTest::test_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::ForeignKeyToFieldTest::test_m2m_manager_reused",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_charfield_GFK",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_custom_queryset",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_deleted_GFK",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_generic_relation",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_nullable_GFK",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_prefetch_GFK",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_prefetch_GFK_fk_pk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_prefetch_GFK_nonint_pk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_prefetch_GFK_uuid_pk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::GenericRelationTests::test_traverse_GFK",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::LookupOrderingTest::test_order",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiDbTests::test_using_is_honored_custom_qs",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiDbTests::test_using_is_honored_fkey",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiDbTests::test_using_is_honored_inheritance",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiDbTests::test_using_is_honored_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiTableInheritanceTest::test_child_link_prefetch",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiTableInheritanceTest::test_foreignkey",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiTableInheritanceTest::test_foreignkey_to_inherited",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiTableInheritanceTest::test_m2m_to_inheriting_model",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::MultiTableInheritanceTest::test_parent_link_prefetch",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::NestedPrefetchTests::test_nested_prefetch_is_not_overwritten_by_related_object",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::NullableTest::test_in_bulk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::NullableTest::test_prefetch_nullable",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::NullableTest::test_traverse_nullable",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_attribute_error",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_bool",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_clear",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_count",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_exists",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_filter_deferred",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_foreign_key_then_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_foreignkey_forward",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_foreignkey_reverse",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_forward_m2m_to_attr_conflict",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_get",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_in_and_prefetch_related",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_invalid_final_lookup",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_len",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_forward",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_prefetching_iterator_with_chunks",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_prefetching_iterator_without_chunks",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_prefetching_iterator_without_chunks_warning",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_reverse",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_then_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_then_m2m_object_ids",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_then_reverse_fk_object_ids",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_m2m_then_reverse_one_to_one_object_ids",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_named_values_list",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_onetoone_reverse_no_match",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_onetoone_reverse_with_to_field_pk",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_overriding_prefetch",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_prefetch_eq",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_reverse_m2m_to_attr_conflict",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_reverse_one_to_one_then_m2m",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::PrefetchRelatedTests::test_survives_clone",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::RawQuerySetTests::test_basic",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::RawQuerySetTests::test_clear",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::RawQuerySetTests::test_prefetch_before_raw",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::ReadPrefetchedObjectsCacheTests::test_retrieves_results_from_prefetched_objects_cache",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::Ticket19607Tests::test_bug",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::Ticket21410Tests::test_bug",
+      "file": "tests/prefetch_related/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/prefetch_related/tests.py::Ticket21760Tests::test_bug",
+      "file": "tests/prefetch_related/tests.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-15957/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-15957",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-15957"
+  }
+}

@@ -1,0 +1,478 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_cosm1_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_cosm1_two_cos_terms",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_exp2_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_expm1_cosm1_mixed",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_expm1_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_expm1_two_exp_terms",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_log1p_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_log2_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_logaddexp2_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_logaddexp_opt",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_matsolve",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_optims_c99",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_optims_numpy",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/codegen/tests/test_rewriting.py::test_sinc_opts",
+      "file": "sympy/codegen/tests/test_rewriting.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_Integral",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_MpmathPrinter",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_NumPyPrinter",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_NumPyPrinter_print_seq",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_PythonCodePrinter_standard",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_SciPyPrinter",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_airy",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_airy_prime",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_beta",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_codegen_ast_nodes",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_frac",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_fresnel_integrals",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_issue_14283",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_issue_16535_16536",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_printmethod",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_pycode_reserved_words",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_pycode.py::test_sqrt",
+      "file": "sympy/printing/tests/test_pycode.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_ITE",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_Min_Max",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_atoms",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_bad_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_beta_math",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_curly_matrix_symbol",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_docs",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_double_integral",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_dummification",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_exponentiation",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_imag_real",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_imps",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_imps_errors",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_imps_wrong_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_integral",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_issue9474",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_issue_12092",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_issue_12173",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_issue_14911",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_issue_14941",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_issue_2790",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_lambdify_Derivative_arg_issue_16468",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_lambdify_docstring",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_lambdify_dummy_arg",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_lambdify_imps",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_lambdify_inspect",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_lambdify_mixed_symbol_dummy_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_list_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_math",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_math_lambda",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_math_transl",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_matrix",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_mpmath_lambda",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_mpmath_precision",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_mpmath_transl",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_namespace_order",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_namespace_type",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_nested_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_no_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_number_precision",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_own_module",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_own_namespace_1",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_own_namespace_2",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_python_keywords",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sin",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sinc_mpmath",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_single_arg",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_single_e",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_special_printers",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sqrt",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_str_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sym_integral",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sym_list_args",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sym_single_arg",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_sympy_lambda",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_trig",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_trig_float",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_trig_symbolic",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_true_false",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_vector_discontinuous",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/utilities/tests/test_lambdify.py::test_vector_simple",
+      "file": "sympy/utilities/tests/test_lambdify.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-22080/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-22080",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-22080"
+  }
+}

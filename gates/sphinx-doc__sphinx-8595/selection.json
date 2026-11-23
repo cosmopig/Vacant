@@ -1,0 +1,363 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_abstractmethods",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_attrgetter_using",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autoattribute_instance_attributes",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autoclass_instance_attributes",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_Annotated",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_GenericAlias",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_TYPE_CHECKING",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_TypeVar",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_attributes",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_cached_property",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_class_scope",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_classmethod",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_decorator",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_descriptor",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_exception",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_exclude_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_for_egged_code",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_ignore_module_all",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_imported_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_inherited_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_inherited_members_Base",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_inherited_members_None",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_inner_class",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_member_order",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_module_member_order",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_module_scope",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_noindex",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_process_signature_typehints",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_process_signature_typing_generic",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_special_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_staticmethod",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_subclass_of_builtin_class",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_typed_inherited_instance_variables",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_typed_instance_variables",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_undoc_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_autodoc_warnings",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_automethod_for_builtin",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_automethod_for_decorated",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_bound_method",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_class_attributes",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_coroutine",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_cython",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_descriptor_class",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_enum_class",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_final",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_format_signature",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_get_doc",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_hide_value",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_imported_partialfunction_should_not_shown_without_imported_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_name_conflict",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_name_mangling",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_new_documenter",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_overload",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_overload2",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_parse_name",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_partialfunction",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_partialmethod",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_partialmethod_undoc_members",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_py_module",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_pyclass_for_ClassLevelDocumenter",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_pymodule_for_ClassLevelDocumenter",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_pymodule_for_ModuleLevelDocumenter",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_singledispatch",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_singledispatchmethod",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_singledispatchmethod_automethod",
+      "file": "tests/test_ext_autodoc.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc.py::test_slots",
+      "file": "tests/test_ext_autodoc.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-8595/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini",
+    "sed -i 's/Jinja2>=2.3/Jinja2<3.0/' setup.py",
+    "sed -i 's/sphinxcontrib-applehelp/sphinxcontrib-applehelp<=1.0.7/' setup.py",
+    "sed -i 's/sphinxcontrib-devhelp/sphinxcontrib-devhelp<=1.0.5/' setup.py",
+    "sed -i 's/sphinxcontrib-qthelp/sphinxcontrib-qthelp<=1.0.6/' setup.py",
+    "sed -i 's/alabaster>=0.7,<0.8/alabaster>=0.7,<0.7.12/' setup.py",
+    "sed -i \"s/'packaging',/'packaging', 'markupsafe<=2.0.1',/\" setup.py",
+    "sed -i 's/sphinxcontrib-htmlhelp/sphinxcontrib-htmlhelp<=2.0.4/' setup.py",
+    "sed -i 's/sphinxcontrib-serializinghtml/sphinxcontrib-serializinghtml<=1.1.9/' setup.py"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sphinx'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-8595",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-8595"
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_find_obj",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_objects",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_xrefs",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_exceptions_module_is_ignored",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_function_signatures",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_get_full_qualified_name",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_modindex_common_prefix",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_module_index",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_module_index_not_collapsed",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_module_index_submodule",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_optional_pyfunction_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyattribute",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyclassmethod",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata_signature_old",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydecorator_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydecoratormethod_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyexception_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_signature_full",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pymethod_options",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyobject_prefix",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pystaticmethod",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_resolve_xref_for_properties",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse['str'-'str']",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[(1, 2, 3)-1, 2, 3]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[+ a-+ a]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[- 1-- 1]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[- a-- a]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[...-...]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[1 * 2-1 * 2]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[1234-12340]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[1234-12341]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[Tuple[int, int]-Tuple[int, int]]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[[1, 2, 3]-[1, 2, 3]]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a % b-a % b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a & b-a & b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a * b-a * b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a ** b-a ** b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a + b-a + b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a - b-a - b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a / b-a / b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a // b-a // b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a << b-a << b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a >> b-a >> b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a @ b-a @ b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a ^ b-a ^ b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a and b and c-a and b and c]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a and b-a and b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a or b-a or b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[a | b-a | b]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[b'bytes'-b'bytes']",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[lambda x, y: x + y-lambda x, y: ...]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[not a-not a]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[object()-object()]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[os.path-os.path]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[sys-sys]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[{'key1': 'value1', 'key2': 'value2'}-{'key1': 'value1', 'key2': 'value2'}]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[{1, 2, 3}-{1, 2, 3}]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse[~ 1-~ 1]",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse_None",
+      "file": "tests/test_pycode_ast.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_pycode_ast.py::test_unparse_py38",
+      "file": "tests/test_pycode_ast.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-7462/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini",
+    "sed -i 's/Jinja2>=2.3/Jinja2<3.0/' setup.py",
+    "sed -i 's/sphinxcontrib-applehelp/sphinxcontrib-applehelp<=1.0.7/' setup.py",
+    "sed -i 's/sphinxcontrib-devhelp/sphinxcontrib-devhelp<=1.0.5/' setup.py",
+    "sed -i 's/sphinxcontrib-qthelp/sphinxcontrib-qthelp<=1.0.6/' setup.py",
+    "sed -i 's/alabaster>=0.7,<0.8/alabaster>=0.7,<0.7.12/' setup.py",
+    "sed -i \"s/'packaging',/'packaging', 'markupsafe<=2.0.1',/\" setup.py",
+    "sed -i 's/sphinxcontrib-htmlhelp/sphinxcontrib-htmlhelp<=2.0.4/' setup.py",
+    "sed -i 's/sphinxcontrib-serializinghtml/sphinxcontrib-serializinghtml<=1.1.9/' setup.py"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sphinx'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-7462",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-7462"
+  },
+  "runner_environment": {}
+}

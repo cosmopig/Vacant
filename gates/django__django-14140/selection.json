@@ -1,0 +1,1013 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_aggregate_rawsql_annotation",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_aggregate_subquery_annotation",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_annotate_values_aggregate",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_annotate_values_count",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_annotate_values_filter",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_annotation_with_nested_outerref",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_annotation_with_outerref",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_annotations_within_subquery",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_arithmetic",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_boolean_expression_combined",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_case_in_filter_if_boolean_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_exist_single_field_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_exists_in_filter",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_explicit_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_filter_inter_attribute",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_filter_with_join",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_filtering_on_annotate_that_uses_q",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_filtering_on_q_that_is_boolean",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_filtering_on_rawsql_that_is_boolean",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_in_subquery",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_incorrect_field_in_F_expression",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_incorrect_joined_field_in_F_expression",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_nested_outerref_with_function",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_nested_subquery",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_nested_subquery_join_outer_ref",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_nested_subquery_outer_ref_2",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_nested_subquery_outer_ref_with_autofield",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_new_object_create",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_new_object_save",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_object_create_with_aggregate",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_object_update",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_object_update_fk",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_object_update_unsaved_objects",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_order_by_exists",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_order_by_multiline_sql",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_order_of_operations",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_outerref",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_outerref_mixed_case_table_name",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_outerref_with_operator",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_parenthesis_priority",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_pickle_expression",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery_eq",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery_filter_by_aggregate",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery_filter_by_lazy",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery_group_by_outerref_in_filter",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery_in_filter",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_subquery_references_joined_table_twice",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_ticket_11722_iexact_lookup",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_ticket_16731_startswith_lookup",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_ticket_18375_chained_filters",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_ticket_18375_join_reuse",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_ticket_18375_kwarg_ordering",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_ticket_18375_kwarg_ordering_2",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_update",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_update_inherited_field_value",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_update_with_fk",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_update_with_none",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::BasicExpressionsTests::test_uuid_pk_subquery",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::CombinableTests::test_and",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::CombinableTests::test_negation",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::CombinableTests::test_or",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::CombinableTests::test_reversed_and",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::CombinableTests::test_reversed_or",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::CombinedExpressionTests::test_resolve_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExistsTests::test_optimizations",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_addition",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_bitwise_and",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_bitwise_left_shift_operator",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_bitwise_or",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_bitwise_right_shift_operator",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_bitwise_xor",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_bitwise_xor_null",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_division",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_modulo",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_multiplication",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_power",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_lefthand_transformed_field_bitwise_or",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_right_hand_addition",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_right_hand_division",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_right_hand_modulo",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_right_hand_multiplication",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_right_hand_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionOperatorTests::test_righthand_power",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionWrapperTests::test_empty_group_by",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionWrapperTests::test_non_empty_group_by",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsNumericTests::test_complex_expressions",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsNumericTests::test_fill_with_value_from_same_object",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsNumericTests::test_filter_not_equals_other_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsNumericTests::test_increment_value",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsTests::test_F_reuse",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsTests::test_insensitive_patterns_escape",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ExpressionsTests::test_patterns_escape",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTests::test_deconstruct",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTests::test_deepcopy",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTests::test_equal",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTests::test_hash",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTests::test_not_equal_Value",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_date_case_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_date_comparison",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_date_minus_duration",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_date_subquery_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_date_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_datetime_subquery_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_datetime_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_datetime_subtraction_microseconds",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_delta_add",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_delta_subtract",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_delta_update",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_duration_expressions",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_duration_with_datetime",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_duration_with_datetime_microseconds",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_durationfield_add",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_exclude",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_invalid_operator",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_mixed_comparisons2",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_multiple_query_compilation",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_negative_timedelta_update",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_query_clone",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_time_subquery_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FTimeDeltaTests::test_time_subtraction",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FieldTransformTests::test_month_aggregation",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FieldTransformTests::test_multiple_transforms_in_values",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::FieldTransformTests::test_transform_in_values",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::IterableLookupInnerExpressionsTests::test_complex_expressions_do_not_introduce_sql_injection_via_untrusted_string_inclusion",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::IterableLookupInnerExpressionsTests::test_expressions_in_lookups_join_choice",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::IterableLookupInnerExpressionsTests::test_in_lookup_allows_F_expressions_and_expressions_for_datetimes",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::IterableLookupInnerExpressionsTests::test_in_lookup_allows_F_expressions_and_expressions_for_integers",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::IterableLookupInnerExpressionsTests::test_range_lookup_allows_F_expressions_and_expressions_for_integers",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::IterableLookupInnerExpressionsTests::test_range_lookup_namedtuple",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ReprTests::test_aggregates",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ReprTests::test_distinct_aggregates",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ReprTests::test_expressions",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ReprTests::test_filtered_aggregates",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ReprTests::test_functions",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::SimpleExpressionTests::test_equal",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::SimpleExpressionTests::test_hash",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_compile_unresolved",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_deconstruct",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_deconstruct_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_equal",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_equal_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_hash",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_raise_empty_expressionlist",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_resolve_output_field",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_resolve_output_field_failure",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_update_TimeField_using_Value",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/expressions/tests.py::ValueTests::test_update_UUIDField_using_Value",
+      "file": "tests/expressions/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_combine_and_both_empty",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_combine_and_empty",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_combine_not_q_object",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_combine_or_both_empty",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_combine_or_empty",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_deconstruct_and",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_deconstruct_multiple_kwargs",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_deconstruct_nested",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_deconstruct_or",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_reconstruct",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_reconstruct_and",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_reconstruct_negated",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/test_q.py::QTests::test_reconstruct_or",
+      "file": "tests/queries/test_q.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::InLookupTests::test_in_lookup_query_evaluation",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::InLookupTests::test_in_lookup_queryset_evaluation",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_annotation_values",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_annotation_values_list",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_annotation_with_callable_default",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_datetime_callable_default_all",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_datetime_callable_default_filter",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_doesnotexist_class",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_doesnotexist_exception",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_filter_deferred",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_filter_reverse_fk",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_forward_relatedobjectdoesnotexist_class",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_manager_pickle",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_missing_django_version_unpickling",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_model_pickle",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_model_pickle_dynamic",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_model_pickle_m2m",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_multipleobjectsreturned_class",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_order_by_model_with_abstract_inheritance_and_meta_ordering",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_exists_kwargs_queryset_not_evaluated",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_exists_queryset_not_evaluated",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_exists_queryset_still_usable",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_filteredrelation",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_filteredrelation_m2m",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_prefetch_queryset_not_evaluated",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_prefetch_queryset_still_usable",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_prefetch_queryset_usable_outside_of_prefetch",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_prefetch_related_idempotence",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_prefetch_related_with_m2m_and_objects_deletion",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_pickle_subquery_queryset_not_evaluated",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_related_field",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_reverse_one_to_one_relatedobjectdoesnotexist_class",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_specialized_queryset",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_standalone_method_as_default",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_staticmethod_as_default",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_string_as_default",
+      "file": "tests/queryset_pickle/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queryset_pickle/tests.py::PickleabilityTestCase::test_unsupported_unpickle",
+      "file": "tests/queryset_pickle/tests.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-14140/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-14140",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-14140"
+  }
+}

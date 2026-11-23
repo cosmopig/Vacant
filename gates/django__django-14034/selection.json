@@ -1,0 +1,78 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_bad_choice",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_clean",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_clean_disabled_multivalue",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_disabled_has_changed",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_form_as_table",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_form_as_table_data",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_form_cleaned_data",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_has_changed_first_widget",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_has_changed_last_widget",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_has_changed_no_initial",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_has_changed_same",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/forms_tests/field_tests/test_multivaluefield.py::MultiValueFieldTest::test_no_value",
+      "file": "tests/forms_tests/field_tests/test_multivaluefield.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-14034/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-14034",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-14034"
+  }
+}

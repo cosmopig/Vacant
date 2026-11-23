@@ -1,0 +1,103 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_get_map_data",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_help",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_comments",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_docstrings",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_imports",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_multiline_imports",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_nothing",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_signatures_class_methods_fail",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_signatures_class_methods_pass",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_signatures_empty_functions_fail",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_signatures_empty_functions_pass",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_signatures_fail",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_ignore_signatures_pass",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_lines_without_meaningful_content_do_not_trigger_similarity",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_multiline_imports",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_no_args",
+      "file": "tests/checkers/unittest_similar.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/checkers/unittest_similar.py::test_no_hide_code_with_imports",
+      "file": "tests/checkers/unittest_similar.py"
+    }
+  ],
+  "interpreter": ".envs/pylint-dev__pylint-4970/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'pylint'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/pylint-dev__pylint-4970",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/pylint-dev__pylint-4970"
+  }
+}

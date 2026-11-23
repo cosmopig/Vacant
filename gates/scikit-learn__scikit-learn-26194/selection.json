@@ -1,0 +1,1119 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-10-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-10-20]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-10-2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-10-8]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-2-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-2-20]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-2-2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-2-8]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-5-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-5-20]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-5-2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_alternative_lrap_implementation[0-5-8]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_auc",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_auc_errors",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_auc_score_non_binary_class",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_average_precision_constant_values",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_average_precision_score_pos_label_errors",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_implicit_pos_label[det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_implicit_pos_label[precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_implicit_pos_label[roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_multiclass_error[det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_multiclass_error[precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_multiclass_error[roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_zero_sample_weight[det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_zero_sample_weight[precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_binary_clf_curve_zero_sample_weight[roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_coverage_1d_error_message[y_true0-y_score0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_coverage_1d_error_message[y_true1-y_score1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_coverage_1d_error_message[y_true2-y_score2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_coverage_error",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_coverage_tie_handling",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_dcg_score",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_dcg_ties",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_bad_input[y_true0-y_pred0-inconsistent numbers of samples]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_bad_input[y_true1-y_pred1-inconsistent numbers of samples]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_bad_input[y_true2-y_pred2-Only one class present in y_true]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_bad_input[y_true3-y_pred3-Only one class present in y_true]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_bad_input[y_true4-y_pred4-pos_label is not specified]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_constant_scores[0.25]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_constant_scores[0.5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_constant_scores[0.75]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_constant_scores[0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_constant_scores[1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_perfect_scores[y_true0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_perfect_scores[y_true1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_perfect_scores[y_true2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_perfect_scores[y_true3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_perfect_scores[y_true4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_pos_label",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_sanity_check",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true0-y_score0-expected_fpr0-expected_fnr0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true1-y_score1-expected_fpr1-expected_fnr1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true2-y_score2-expected_fpr2-expected_fnr2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true3-y_score3-expected_fpr3-expected_fnr3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true4-y_score4-expected_fpr4-expected_fnr4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true5-y_score5-expected_fpr5-expected_fnr5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true6-y_score6-expected_fpr6-expected_fnr6]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_tie_handling[y_true7-y_score7-expected_fpr7-expected_fnr7]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true0-y_score0-expected_fpr0-expected_fnr0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true1-y_score1-expected_fpr1-expected_fnr1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true10-y_score10-expected_fpr10-expected_fnr10]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true11-y_score11-expected_fpr11-expected_fnr11]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true12-y_score12-expected_fpr12-expected_fnr12]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true13-y_score13-expected_fpr13-expected_fnr13]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true14-y_score14-expected_fpr14-expected_fnr14]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true15-y_score15-expected_fpr15-expected_fnr15]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true16-y_score16-expected_fpr16-expected_fnr16]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true17-y_score17-expected_fpr17-expected_fnr17]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true18-y_score18-expected_fpr18-expected_fnr18]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true19-y_score19-expected_fpr19-expected_fnr19]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true2-y_score2-expected_fpr2-expected_fnr2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true3-y_score3-expected_fpr3-expected_fnr3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true4-y_score4-expected_fpr4-expected_fnr4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true5-y_score5-expected_fpr5-expected_fnr5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true6-y_score6-expected_fpr6-expected_fnr6]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true7-y_score7-expected_fpr7-expected_fnr7]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true8-y_score8-expected_fpr8-expected_fnr8]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_det_curve_toydata[y_true9-y_score9-expected_fpr9-expected_fnr9]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avg_precision_score_should_allow_csr_matrix_for_y_true_input",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[_my_lrap-check_lrap_only_ties]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[_my_lrap-check_lrap_toy]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[_my_lrap-check_lrap_without_tie_and_increasing_score]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[_my_lrap-check_zero_or_all_relevant_labels]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[label_ranking_average_precision_score-check_lrap_only_ties]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[label_ranking_average_precision_score-check_lrap_toy]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[label_ranking_average_precision_score-check_lrap_without_tie_and_increasing_score]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_avp[label_ranking_average_precision_score-check_zero_or_all_relevant_labels]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_label_ranking_loss",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_lrap_error_raised",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_lrap_sample_weighting_zero_labels",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_micro_averaged_ovr_roc_auc[42]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovo_roc_auc_toydata[y_true0-labels0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovo_roc_auc_toydata[y_true1-None]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovo_roc_auc_toydata[y_true2-labels2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovo_roc_auc_toydata[y_true3-None]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovo_roc_auc_toydata_binary[y_true0-labels0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovo_roc_auc_toydata_binary[y_true1-labels1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovr_roc_auc_toydata[y_true0-None]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovr_roc_auc_toydata[y_true1-None]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovr_roc_auc_toydata[y_true2-labels2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_multiclass_ovr_roc_auc_toydata[y_true3-labels3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_error_single_document",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_ignore_ties_with_k",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_invariant",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_negative_ndarray_warn",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_score",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_toy_examples[False]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ndcg_toy_examples[True]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_partial_roc_auc_score",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_perfect_imperfect_chance_multiclass_roc_auc[ovo-macro]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_perfect_imperfect_chance_multiclass_roc_auc[ovr-macro]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_perfect_imperfect_chance_multiclass_roc_auc[ovr-micro]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_precision_recall_curve[False]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_precision_recall_curve[True]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_precision_recall_curve_drop_intermediate",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_precision_recall_curve_toydata[False]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_precision_recall_curve_toydata[True]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_appropriate_input_shape",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_loss_ties_handling",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes0-average_precision_score]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes0-det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes0-precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes0-roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes1-average_precision_score]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes1-det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes1-precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes1-roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes2-average_precision_score]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes2-det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes2-precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes2-roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes3-average_precision_score]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes3-det_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes3-precision_recall_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_ranking_metric_pos_label_types[classes3-roc_curve]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_error[Partial AUC computation not available in multiclass setting, 'max_fpr' must be set to `None`, received `max_fpr=0.5` instead-kwargs3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_error[average must be one of \\\\('macro', 'weighted', None\\\\) for multiclass problems-kwargs0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_error[average must be one of \\\\('micro', 'macro', 'weighted', None\\\\) for multiclass problems-kwargs1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_error[multi_class must be in \\\\('ovo', 'ovr'\\\\)-kwargs4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_error[sample_weight is not supported for multiclass one-vs-one ROC AUC, 'sample_weight' must be None in this case-kwargs2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-'y_true' contains labels not in parameter 'labels'-y_true10-labels10]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-'y_true' contains labels not in parameter 'labels'-y_true8-labels8]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-'y_true' contains labels not in parameter 'labels'-y_true9-labels9]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Number of classes in y_true not equal to the number of columns in 'y_score'-y_true2-None]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Number of given labels, 2, not equal to the number of columns in 'y_score', 3-y_true4-labels4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Number of given labels, 2, not equal to the number of columns in 'y_score', 3-y_true5-labels5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Number of given labels, 4, not equal to the number of columns in 'y_score', 3-y_true6-labels6]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Number of given labels, 4, not equal to the number of columns in 'y_score', 3-y_true7-labels7]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Parameter 'labels' must be ordered-y_true3-labels3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Parameter 'labels' must be unique-y_true0-labels0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovo-Parameter 'labels' must be unique-y_true1-labels1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-'y_true' contains labels not in parameter 'labels'-y_true10-labels10]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-'y_true' contains labels not in parameter 'labels'-y_true8-labels8]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-'y_true' contains labels not in parameter 'labels'-y_true9-labels9]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Number of classes in y_true not equal to the number of columns in 'y_score'-y_true2-None]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Number of given labels, 2, not equal to the number of columns in 'y_score', 3-y_true4-labels4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Number of given labels, 2, not equal to the number of columns in 'y_score', 3-y_true5-labels5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Number of given labels, 4, not equal to the number of columns in 'y_score', 3-y_true6-labels6]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Number of given labels, 4, not equal to the number of columns in 'y_score', 3-y_true7-labels7]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Parameter 'labels' must be ordered-y_true3-labels3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Parameter 'labels' must be unique-y_true0-labels0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_auc_score_multiclass_labels_error[ovr-Parameter 'labels' must be unique-y_true1-labels1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve[False]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve[True]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_confidence",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_end_points",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_fpr_tpr_increasing",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_hard",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_multi",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_one_label",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_curve_toydata",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_roc_returns_consistency",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_score_scale_invariance",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score[y_true0-1-0.25]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score[y_true1-2-0.5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score[y_true2-3-0.75]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_binary[y_score0-1-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_binary[y_score1-1-0.5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_binary[y_score2-2-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_binary[y_score3-1-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_binary[y_score4-1-0.5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_binary[y_score5-2-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true0-y_score0-None-y type must be 'binary' or 'multiclass', got 'continuous']",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true1-y_score1-None-Number of classes in 'y_true' \\\\(4\\\\) not equal to the number of classes in 'y_score' \\\\(3\\\\).]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true2-y_score2-labels2-Parameter 'labels' must be unique.]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true3-y_score3-labels3-Parameter 'labels' must be ordered.]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true4-y_score4-labels4-Number of given labels \\\\(4\\\\) not equal to the number of classes in 'y_score' \\\\(3\\\\).]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true5-y_score5-labels5-'y_true' contains labels not in parameter 'labels'.]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_error[y_true6-y_score6-None-`y_true` is binary while y_score is 2d with 3 classes. If `y_true` does not contain all the labels, `labels` must be provided]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_increasing",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[False-y_true0-0.75-labels0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[False-y_true1-0.5-labels1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[False-y_true2-0.5-labels2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[False-y_true3-0.75-labels3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[True-y_true0-0.75-labels0]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[True-y_true1-0.5-labels1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[True-y_true2-0.5-labels2]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_multiclass_with_labels[True-y_true3-0.75-labels3]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_ties[y_true0-1-0.25]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_ties[y_true1-2-0.5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_ties[y_true2-3-1]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_warning[y_true0-4]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/metrics/tests/test_ranking.py::test_top_k_accuracy_score_warning[y_true1-5]",
+      "file": "sklearn/metrics/tests/test_ranking.py"
+    }
+  ],
+  "interpreter": ".envs/scikit-learn__scikit-learn-26194/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'scikit-learn'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {
+    "sklearn/_isotonic.c": "df27010db3815c793e6da59fd7ba74a4c5df6bb082789ad35f61c9a1c2d4d07e",
+    "sklearn/neighbors/_ball_tree.c": "614301d2129d1636a33c24af5866177887c6c87cb306a76a612d66128e97be4e",
+    "sklearn/neighbors/_quad_tree.c": "042ef97c262288e940210cce7f47e9e36cd4fdcfadf80473395c70273b22b098",
+    "sklearn/neighbors/_partition_nodes.cpp": "6d337f7b922dce9ab673d681b7b830c9c8ac03c0c4081cca25f433a1f4339f69",
+    "sklearn/neighbors/_kd_tree.c": "6858a2930a68f6d6ebc4eda90349bea7f4056482fc573e717e4982e1fc29eb81",
+    "sklearn/tree/_splitter.c": "1ca42e0fb239e3647c47d537af6a58910b1d46e2e1d119f5aea576dd0e79ec6d",
+    "sklearn/tree/_criterion.c": "e2e4f15fb57955630e2d87417f2547fd9802d0389f6bfb41064bb20e046822af",
+    "sklearn/tree/_utils.c": "f6af3bb8ede01aded379a3a40e7638c022d39ec0d756d2c0a7bd3b3a0047c873",
+    "sklearn/tree/_tree.cpp": "f356fa69994bbee7547c70ed85210f7fe3030b51f0a26433251daf51eb4872ed",
+    "sklearn/decomposition/_cdnmf_fast.c": "9e1a46f20e6dab6b585e91081d746a65a83ade507c9a80f6d43c1a18ee85a57e",
+    "sklearn/decomposition/_online_lda_fast.c": "e674d5a380421b7eed6be9563dbefb359549d2a7d9f53aa0fda12b8d0ca50a99",
+    "sklearn/svm/_liblinear.c": "9461626c67f6457091bb2c29a47061155de9a2cd226f4e61b2131ede4a36430d",
+    "sklearn/svm/_libsvm_sparse.c": "651408356706473000617e4d82acc9ac52f90cdb39f499a5f2f3212650fbf65e",
+    "sklearn/svm/_newrand.cpp": "83ca283a5b099d6bb95a265d7902112689d00236855efe634857531da8e063de",
+    "sklearn/svm/_libsvm.c": "23acbe1efc97f059e9ca248f012846d0f3b7c7ed32823efd435a0f2d7c878839",
+    "sklearn/feature_extraction/_hashing_fast.cpp": "d16560d3c59bc9b50da75e36c9d0f42d405b918673e9999b65303f4f6da400ca",
+    "sklearn/_loss/_loss.c": "c86243ae9489fd8f7a7b32f3f37026299c4f29a9899182c9583c7d7ab023618c",
+    "sklearn/_loss/_loss.pyx": "f1ff0c01c3e8ef8f19eca8051ebd0910e22f3b66a7a161c06e4204ba86317515",
+    "sklearn/utils/_typedefs.c": "962a06cc58b89ecfb8042791e912401bb09bbfd21a7161519e5aca68196733ad",
+    "sklearn/utils/_seq_dataset.c": "434db28ef0be3dbbdefa0196da31d0b5808a3abcc3936574422bd5d7c90f8e68",
+    "sklearn/utils/_weight_vector.pyx": "6edf35b751cf2a2706af90a214ad470362f9045d29d2bea2bf909b968020cdb8",
+    "sklearn/utils/_logistic_sigmoid.c": "d8aa26d554f5d6d2422485f64abe30385bdaaa1d434864c5c8b1344dba36034f",
+    "sklearn/utils/_openmp_helpers.c": "0f25749d132750d53e6bae94e0f4a61cf905f2cb9634429c38949405d96c1315",
+    "sklearn/utils/_vector_sentinel.cpp": "1259b25fe7b852b6587eb7882909464f3b226404b85c8778dc2ad878309d98cd",
+    "sklearn/utils/_isfinite.c": "e29a99d15531d1e5d1a05ad28fcfa6b741f615c2e85c28ddb930c1aff67e48f1",
+    "sklearn/utils/_weight_vector.c": "d12fc6db4acfb1e4f518e75d42c6c9a0f3175e9aedcc9e2a5482dd41bd98f934",
+    "sklearn/utils/sparsefuncs_fast.c": "8a5f40ca11b3205a3750d4fd6e5c739d174fcae5d057dca1d1a28cd0ec5f3d06",
+    "sklearn/utils/_heap.c": "e76cd50e52c8e6700e81b4ec0abdde80d0eb3c8655ac3819425e07b2f27a42b1",
+    "sklearn/utils/_weight_vector.pxd": "52aa5e654ea3accc70aaa2813d3a8d5e505935b34409325502f7ce533d437fce",
+    "sklearn/utils/_seq_dataset.pyx": "7a64d86b3197fdcc26a73bc26f9a78e665de7bf162b632fe038011253c5d8e6a",
+    "sklearn/utils/murmurhash.c": "df469e8f7bfb3cab0d86e8179b9368cf0a3b087c6c274d4925a5833b6525e753",
+    "sklearn/utils/_random.c": "d7d21604e9e45f247e8c143506476a6d992265d46b17a5fe4f8049125fe3b03f",
+    "sklearn/utils/_seq_dataset.pxd": "41c8f2a4e9899a8c78ab601c8ac2dcbeece4fd46d02c3664ef03e06b0bc71811",
+    "sklearn/utils/arrayfuncs.c": "a09d05bccf8f7b9b4c2ffd7a9654a7f4c71193aa44a03055e1c248ee25dde95e",
+    "sklearn/utils/_cython_blas.c": "8d0434fb0054e792645fbdb3288d2d1c2eb5d1b3a4bda554c604f000acf832f2",
+    "sklearn/utils/_fast_dict.cpp": "1b4a31631a35cded72bf24ca77dce3f4d276cf17dd6cfec5ad6817e8de151a11",
+    "sklearn/utils/_sorting.c": "9fe5e4ccfb4454c1e0f512d1b44f25baa53ebb1c62151cf1bb66cca4e1738066",
+    "sklearn/cluster/_hierarchical_fast.cpp": "097defae1b620cf8133c44323a39823f81ecbc87983c11fd5d8a69ddd119e564",
+    "sklearn/cluster/_k_means_common.c": "5768d3ca5eef17d9feef61fb9d6ce786bdb1ccd49a468972684d2b71822ac47f",
+    "sklearn/cluster/_dbscan_inner.cpp": "c4b31b329479fb2b68a755c3c4c862f96b73ae6a983bf86535e24861b334d366",
+    "sklearn/cluster/_k_means_lloyd.c": "2fe7ead8b6224ba9bec01f002c8a09cd25debf3d39f1fd2dc61643a6b6d444a5",
+    "sklearn/cluster/_k_means_minibatch.c": "5839138c066ada7a394d2a21c15f1a22fe71c8717ef069a1faca500c414f3f0d",
+    "sklearn/cluster/_k_means_elkan.c": "a31341626c6abc2d6d4d53447fb30755d9f956b13f6c55fe17e9e58278022fee",
+    "sklearn/linear_model/_cd_fast.c": "55179322a57d8a308619a636746fa0c03937233693ed9937e7abdc93779c483a",
+    "sklearn/linear_model/_sgd_fast.c": "fad2e15157c63e11341c447e4c6cfd15e39a98ec0d6cb53f02a9530556d85828",
+    "sklearn/linear_model/_sgd_fast.pyx": "3339ee46e945a178ae28b85cd31d2200265b4dfc1f92b421b9fbe7dea51fd54d",
+    "sklearn/linear_model/_sag_fast.c": "09feb902b7aba982a9975cc1bd84a955456ac00616750bfac4ff0b387c3b4c35",
+    "sklearn/linear_model/_sag_fast.pyx": "7e83c28491ecdec7b7318d0155c7ef09d13c638a6c7dbbed3533fe7955d02ae1",
+    "sklearn/datasets/_svmlight_format_fast.c": "0657967685feac04bc0294d4f5c26a62e267488511d196a6220aa106eb1d2cc4",
+    "sklearn/manifold/_barnes_hut_tsne.c": "5a8293c770286a6fb5107b7b86d5b6e7f672d0a74ef2a6f2c053edb67bab3725",
+    "sklearn/manifold/_utils.c": "4b2f74087d6a3dc55ae4bc41e80366dda48e8e2f0e56c65b28777934fffd8651",
+    "sklearn/preprocessing/_csr_polynomial_expansion.c": "9ff8f972deff619e5cebe53e088b918fe469d7af1d597551b4de696bfd19f41a",
+    "sklearn/preprocessing/_target_encoder_fast.cpp": "ed5cab14811af7c3d8ca55815d6cba53a0100802105bb28b0f2bf75faecfa77c",
+    "sklearn/metrics/_dist_metrics.c": "dcba7d3ec5e802bd075ef793c97e52c533e346fb226e26dae57c4b27b65b535c",
+    "sklearn/metrics/_dist_metrics.pyx": "e608fb0e85183546aed5f89bffb1bce64f3f217b6802bb03119783658b6d1322",
+    "sklearn/metrics/_dist_metrics.pxd": "51b4e5f0cbf5a2c3400026921dc40267aef2fef1ee5709ac1f589be6c0140407",
+    "sklearn/metrics/_pairwise_fast.c": "a47ecc273baca43daaa92ff0ef1213800268ad3b9ba5ccf62921d61833b6c1d4",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin_classmode.cpp": "85a787d2c7ae03e15a3fb0f974276b4f19ac2eacf5c276c25ebb09ab4ef91622",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin_classmode.pyx": "093c9574e91057e27e3e494c7c1220d593d9927395601082ae8e2f61774d35cc",
+    "sklearn/metrics/_pairwise_distances_reduction/_base.cpp": "b83fef5b7d44da79ffbe74c6522bb5c546f02996b3a0e816232a076de275955e",
+    "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.cpp": "a03a153ae4967b4b1887b8b465d8b5a44448ff451ff193ee1dc9e72ed5203744",
+    "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.pxd": "683770cd9ad8c13083d41cb5519f357b5dd37ab7578460870faadd968f10d7b3",
+    "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.pyx": "de06a498754bdaf4eab2f68699779a8e12b93df968e31ec1617fc8df3d2290d4",
+    "sklearn/metrics/_pairwise_distances_reduction/_base.pxd": "3228549542f5ffb9c7fdd37f8f5ece7d8f1a67b6aa537e186c24466477715618",
+    "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.cpp": "2dfacec29c7a25dd93515d49290e4e0904e295fc8861027b6cb7e42d7d682c7e",
+    "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.pyx": "ccaaf6464a7411111b3803d9d54af77e9800e5c2d51004764fbe963277468e70",
+    "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.cpp": "577b89fe944a54410b122a7bc5e98c9591fe9d51b0552b13178a1a673e4d4bdb",
+    "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.pxd": "504d923313a64b268f8baef667964da065d00793e046d0fb7ab9bf725f12ff15",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin.cpp": "f0f6fe24cc29dffdb26d68c93de6d697c723f418e9a1553bff58080d6002d9ea",
+    "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.pyx": "cba3732717d66596881ff453a18328d30b576265e1c327e899c8215a9c79078b",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin.pyx": "0f1530d2eba280a04f39e6edf1a3c73912f5024a52a340575f4a4acd8fddd073",
+    "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.pxd": "8a06dfbe9a5c6c0e125e31d2fdaa8ca4adf724e08f808321dcc163bdb29f0929",
+    "sklearn/metrics/_pairwise_distances_reduction/_base.pyx": "05f951ab3714690a32b9dd989be81fe45c8161ce1c8d3ae362ffb7997fc0b3da",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin.pxd": "20abc98951ce8c3525fbeaabb81846c9e6acc98f73c1f5b01fef8f5d199b5de8",
+    "sklearn/metrics/cluster/_expected_mutual_info_fast.c": "5d9ea88b84bbf9226b65a7666daf338648a4087e9c25cf39a82bb9ae0f0b2dc1",
+    "sklearn/__check_build/_check_build.c": "14595e58fc88b8092155cbcc5b6272104a0c9d0fba7fb30a82cadbeeb75b2ac4",
+    "sklearn/ensemble/_gradient_boosting.c": "9e991be2fe594dd3434078c33fe6a28c3906b2bdee7e2088cf2a927331b27468",
+    "sklearn/ensemble/_hist_gradient_boosting/common.c": "6c489ba4796d1c280bb030f2e2db78cf65f425d9608b3e51f4f65dca442da6f9",
+    "sklearn/ensemble/_hist_gradient_boosting/_binning.c": "87898db7a1177d412fb016472198faacd5dc33e92dd5b17f2a957b11d5ab2be1",
+    "sklearn/ensemble/_hist_gradient_boosting/_predictor.c": "ea23c71d3af6b500b1baffefce418b29c6727fd46d480618c585673d5c9b2980",
+    "sklearn/ensemble/_hist_gradient_boosting/splitting.c": "a4ecba1d6d6e329cd3e7c105d7707d0fceab2ea223d5c4be22bccb11b5d82666",
+    "sklearn/ensemble/_hist_gradient_boosting/_gradient_boosting.c": "96049da5f8241a209985efff7fee3af3ee14459d21f139f84783de9c7047bd59",
+    "sklearn/ensemble/_hist_gradient_boosting/histogram.c": "a0acd0d5c00c66b28b543ffd369db26410e97dd5e4066c5bcf24e71dee33fc88",
+    "sklearn/ensemble/_hist_gradient_boosting/_bitset.c": "7688f0b26cde4b27ae403385678b6e4c43f6bb18d50a87df83333db3f5ddbfdd",
+    "sklearn/ensemble/_hist_gradient_boosting/utils.c": "122c8dd9ed41888ad940a3022222807bdcedbf65203528cffdf6b90d27899e1d"
+  },
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/scikit-learn__scikit-learn-26194",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/scikit-learn__scikit-learn-26194"
+  }
+}

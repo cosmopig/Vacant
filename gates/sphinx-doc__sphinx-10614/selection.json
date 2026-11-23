@@ -1,0 +1,41 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_inheritance_diagram.py::test_import_classes",
+      "file": "tests/test_ext_inheritance_diagram.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_inheritance_diagram.py::test_inheritance_diagram",
+      "file": "tests/test_ext_inheritance_diagram.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_inheritance_diagram.py::test_inheritance_diagram_latex",
+      "file": "tests/test_ext_inheritance_diagram.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_inheritance_diagram.py::test_inheritance_diagram_latex_alias",
+      "file": "tests/test_ext_inheritance_diagram.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_inheritance_diagram.py::test_inheritance_diagram_png_html",
+      "file": "tests/test_ext_inheritance_diagram.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-10614/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini"
+  ],
+  "base_rebuild_commands": [],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-10614",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-10614"
+  }
+}

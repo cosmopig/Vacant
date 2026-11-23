@@ -1,0 +1,788 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_GroebnerBasis",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_EC",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_EM",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_ET",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_LC",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_LM",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_LM_custom_order",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_LT",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_TC",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly___call__",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly__args",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly__eq__",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly__gen_to_level",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly__gens",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly__new__",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly__unify",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_abs",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_add",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_add_ground",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_all_coeffs",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_all_monoms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_all_terms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_as_dict",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_as_expr",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_clear_denoms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_coeff",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_coeffs",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_deflate",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_degree",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_degree_list",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_diff",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_divmod",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_eject",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_eq_ne",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_eval",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_exclude",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_exquo_ground",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_free_symbols",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_from_dict",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_from_expr",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_from_list",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_from_poly",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_get_domain",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_get_modulus",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_has_only_gens",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_homogeneous_order",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_homogenize",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_inject",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_integrate",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_is_irreducible",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_l1_norm",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_length",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_lift",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_ltrim",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_max_norm",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_mixed_operations",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_monoms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_mul",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_mul_ground",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_neg",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_nonzero",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_nth",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_one",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_pow",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_precision",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_properties",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_quo_ground",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_rat_clear_denoms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_reorder",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_replace",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_retract",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_root",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_set_domain",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_set_modulus",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_slice",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_sqr",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_sub",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_sub_ground",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_subs",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_terms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_termwise",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_to_exact",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_to_field",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_to_ring",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_total_degree",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_Poly_zero",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_PurePoly_Poly",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_PurePoly__eq__",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_PurePoly_free_symbols",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_all_roots",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_as_list",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_cancel",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_compose",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_content",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_count_roots",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_discriminant",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_dispersion",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_div",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_factor",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_factor_large",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_factor_noeval",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_factor_terms",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_fglm",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_gcd",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_gcd_list",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_gcd_numbers_vs_polys",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_gcdex",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_gff",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_groebner",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_ground_roots",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_intervals",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_is_zero_dimensional",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_11198",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_12400",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_13079",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_14364",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_15669",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_17988",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_18205",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_19113",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_19360",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_5786",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_7864",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_8695",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_issue_9585",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_keep_coeff",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_lcm_list",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_monic",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_noncommutative",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_norm",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_nroots",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_nth_power_roots_poly",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_parallel_poly_from_expr",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_pdiv",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_poly",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_poly_copy_equals_original",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_poly_from_domain_element",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_poly_matching_consistency",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_primitive",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_real_roots",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_reduced",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_refine_root",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_resultant",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_revert",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_shift",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_sqf",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_sqf_norm",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_sturm",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_subresultants",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_terms_gcd",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_to_rational_coeffs",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_torational_factor_list",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_transform",
+      "file": "sympy/polys/tests/test_polytools.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/polys/tests/test_polytools.py::test_trunc",
+      "file": "sympy/polys/tests/test_polytools.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-20428/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-20428",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-20428"
+  }
+}

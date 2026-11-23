@@ -1,0 +1,526 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_afm_kerning",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_agg_text_clip[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_alignment[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_alignment[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_errors[TypeError-print-xycoords callable must return a BboxBase or Transform, not a]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_errors[TypeError-xycoords1-'xycoords' must be an instance of str, tuple]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_errors[ValueError-axes foo-'foo' is not a recognized unit]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_errors[ValueError-foo bar-'foo bar' is not a valid coordinate]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_errors[ValueError-foo-'foo' is not a valid coordinate]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_errors[ValueError-offset foo-xycoords cannot be an offset coordinate]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotate_offset_fontsize",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotation_antialiased",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotation_contains",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotation_negative_ax_coords[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotation_negative_fig_coords[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotation_units[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_annotation_update",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_antialiasing[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_axes_titles[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_bbox_clipping[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_bbox_clipping[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_buffer_size[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_char_index_at",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_contains[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_font_scaling[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_font_styles[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_font_styles[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_fontproperties_kwarg_precedence",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_antialiased",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_rotation_float",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_rotation_int",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_rotation_mod360",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_rotation_none",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_rotation_raises",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_rotation_string",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_get_window_extent_wrapped",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_hinting_factor_backends",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_invalid_color",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_invalid_rotation_values[invalid string]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_invalid_rotation_values[rotation1]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_large_subscript_title[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_long_word_wrap",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_mathwrap",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_multiline2[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_multiline2[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_multiline[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_multiline[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_non_default_dpi[empty]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_non_default_dpi[non-empty]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_nonfinite_pos",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[baseline-center]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[baseline-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[baseline-right]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[bottom-center]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[bottom-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[bottom-right]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[center-center]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[center-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[center-right]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[center_baseline-center]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[center_baseline-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[center_baseline-right]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[top-center]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[top-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_null_rotation_with_rotation_mode[top-right]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_parse_math",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_parse_math_rcparams",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_pdf_chars_beyond_bmp[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_pdf_font42_kerning[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_pdf_kerning[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_set_antialiased",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_set_position",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_single_artist_usenotex[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_single_artist_usenotex[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_single_artist_usenotex[svg]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_antialiased_off_default_vs_manual[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_antialiased_off_default_vs_manual[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_antialiased_on_default_vs_manual[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_antialiased_on_default_vs_manual[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_math_antialiased_off_default_vs_manual[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_math_antialiased_off_default_vs_manual[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_math_antialiased_on_default_vs_manual[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_math_antialiased_on_default_vs_manual[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_repr",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_size_binding",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_text_stale",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_titles[pdf]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_titles[png]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_transform_rotates_text",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_two_2line_texts[0.4-2]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_two_2line_texts[2-0.4]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_two_2line_texts[2-2]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_unsupported_script",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_update_mutate_input",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_validate_linespacing",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_wrap[0.3-0-right]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_wrap[0.3-185-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_wrap[0.5-95-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_wrap[0.7-0-left]",
+      "file": "lib/matplotlib/tests/test_text.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_text.py::test_wrap_no_wrap",
+      "file": "lib/matplotlib/tests/test_text.py"
+    }
+  ],
+  "interpreter": ".envs/matplotlib__matplotlib-26466/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+    "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
+    "QHULL_TAR=\"$VACANT_BUILD_TMP/qhull-2020-src-8.0.2.tgz\"",
+    "QHULL_BUILD_DIR=\"$PWD/build\"",
+    "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
+    "mkdir -p \"$QHULL_BUILD_DIR\"",
+    "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
+    "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'matplotlib'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/matplotlib__matplotlib-26466",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/matplotlib__matplotlib-26466"
+  }
+}

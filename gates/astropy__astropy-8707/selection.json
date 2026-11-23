@@ -1,0 +1,101 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_boolean_value_card",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_constructor_default_args",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_complex_value_card",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_floating_point_value_card",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_integer_value_card",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_rename_keyword",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_string_value_card",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::test_init_with_dict",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::test_init_with_header",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::test_init_with_ordereddict",
+      "file": "astropy/io/fits/tests/test_header.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/fits/tests/test_header.py::test_shallow_copy",
+      "file": "astropy/io/fits/tests/test_header.py"
+    }
+  ],
+  "interpreter": ".envs/astropy__astropy-8707/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'astropy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {
+    "astropy_helpers/astropy_helpers/commands/src/compiler.c": "9fba48813c665b6460cb226c7f53bb336d550a2bd353706fd4612c9ff6be7d08",
+    "astropy/_compiler.c": "9fba48813c665b6460cb226c7f53bb336d550a2bd353706fd4612c9ff6be7d08",
+    "astropy/wcs/src/docstrings.c": "bd300d66af52d357de32bc09ad4d348a892794a0cab5d0d53a31447d356dc994",
+    "astropy/wcs/include/wcsconfig.h": "39b2dcc3ab62c78e4c7cec953c8908662fc0817a441c8f87e8a95843cd2ab647",
+    "astropy/wcs/include/wcslib/wcsmath.h": "bd1c4d3c9e8921ca5cf4f61f01c7db39247d9a3c34858d340e560846b4baf0fc",
+    "astropy/wcs/include/wcslib/prj.h": "a85c6ff47855fdf937da71db5e89c479f46c1c13943e6aa97eaed274baa8e8c8",
+    "astropy/wcs/include/wcslib/lin.h": "f584f1cf17c1c6fef24858f351e9bf61a4a6f41e9d099ba4c817ae8085eff0d5",
+    "astropy/wcs/include/wcslib/tab.h": "554c808c9388276daf363c962e3bd7aac92b0712487ee4cd709cc5853280358f",
+    "astropy/wcs/include/wcslib/spx.h": "127182632892964d5343bfdacd2dab49ff1723a50b29fab8c951cbc4f810b998",
+    "astropy/wcs/include/wcslib/wcsprintf.h": "2887062f1948788a2208e2ba316e4f77ca5ead4bb5d8d7b488709d826fcea287",
+    "astropy/wcs/include/wcslib/cel.h": "93f5bb1056828835cee2d3c7193035f00d1238fd17b343c08c9a9b2ec88ef9d2",
+    "astropy/wcs/include/wcslib/wcserr.h": "af2c1243e80fc825bd791801e533a34079ff8ec1add386182c2dbc3dab33d8d7",
+    "astropy/wcs/include/wcslib/wcs.h": "d7abd06badcd5520acd80f6e1156a12645e32d427e9e552e6af49bbbce947f9c",
+    "astropy/wcs/include/wcslib/spc.h": "aa29514d416830ff1206b0421f3fdd0f48dde48595735fa0263c616c813b2056",
+    "astropy/wcs/include/astropy_wcs/docstrings.h": "d0a50de654ea6c8edfc3b6522ad2812880253ed1fd0f6d03dec8f4103e43f94b",
+    "astropy/wcs/include/astropy_wcs/wcsconfig.h": "39b2dcc3ab62c78e4c7cec953c8908662fc0817a441c8f87e8a95843cd2ab647",
+    "astropy/_erfa/ufunc.c": "2a9cb03a1264f5d89f73fdd10662c5625303e39c7eef7e3478817d225d7c3262",
+    "astropy/timeseries/periodograms/bls/_impl.c": "465f0d741a4295bea66dd6a9a8aeeba10caaf0e09e9e7ac899aaddebe68d21b2",
+    "astropy/timeseries/periodograms/lombscargle/implementations/cython_impl.c": "4496bb3912fd0071840f838949dc7a12fc051d07bd995aba288cf9b56f7db52f",
+    "astropy/modeling/src/projections.c": "9e67291a2d8c9f728bb896f5ee75467903c0592e1d7aad1ee5ea2bb68cb973e1",
+    "astropy/modeling/src/wcsconfig.h": "39b2dcc3ab62c78e4c7cec953c8908662fc0817a441c8f87e8a95843cd2ab647",
+    "astropy/table/_np_utils.c": "13c340c88e4c6f8bd0dbd76f8877148e5b54c7e976c47b1b2eec63b7aac8b19c",
+    "astropy/table/_column_mixins.c": "fd3ec3a65a81bffbbf40101e7ccb4e24efae821d0400bb544026f1a6c7b636f3",
+    "astropy/cosmology/scalar_inv_efuncs.c": "b398ba68783c8b1f740c070e7c7e0e0f7d0a34ffd85a87fa7a216e296dbdd438",
+    "astropy/io/ascii/cparser.c": "3f4a9d9a8f1c371f6b788b39ae9c002e81260b8061ee38cf9693c53f2ed99215",
+    "astropy/io/fits/_utils.c": "08e3a88c2260c30b8a817a61139c06c38d94a2e015a16a9f7bd7a2509d0c9c7f",
+    "astropy/stats/_stats.c": "58810c058148cd6955a28b0fc662b49074b1925330a4757f0a73ab328ec9b771"
+  },
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/astropy__astropy-8707",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/astropy__astropy-8707"
+  }
+}

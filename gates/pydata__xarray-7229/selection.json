@@ -1,0 +1,1421 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_1d_and_0d",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_multiple_inputs",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_new_output_dimension",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_new_output_sizes",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_parallelized_errors",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_parallelized_one_arg",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_parallelized_two_args",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_dask_parallelized_two_outputs",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_exclude",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_groupby_add",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_identity",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_input_core_dimension",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_output_core_dimension",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_two_inputs",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_apply_two_outputs",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[None-da_a0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[None-da_a1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[None-da_a2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[None-da_a3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[None-da_a4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[dim3-da_a0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[dim3-da_a1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[dim3-da_a2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[dim3-da_a3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[dim3-da_a4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[time-da_a0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[time-da_a1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[time-da_a2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[time-da_a3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[time-da_a4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[x-da_a0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[x-da_a1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[x-da_a2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[x-da_a3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_autocov[x-da_a4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_broadcast_compat_data_1d",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_broadcast_compat_data_2d",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_collect_dict_values",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr[None-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr[None-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr[None-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr[time-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr[time-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr[time-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_dtype_error",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a3-da_b3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a4-da_b4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a5-da_b5]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a6-da_b6]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a7-da_b7]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[None-da_a8-da_b8]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a3-da_b3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a4-da_b4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a5-da_b5]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a6-da_b6]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a7-da_b7]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[time-da_a8-da_b8]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a3-da_b3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a4-da_b4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a5-da_b5]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a6-da_b6]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a7-da_b7]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_lazycorr_consistency[x-da_a8-da_b8]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_corr_only_dataarray",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[None-da_a0-da_b0-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[None-da_a0-da_b0-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[None-da_a1-da_b1-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[None-da_a1-da_b1-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[None-da_a2-da_b2-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[None-da_a2-da_b2-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[time-da_a0-da_b0-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[time-da_a0-da_b0-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[time-da_a1-da_b1-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[time-da_a1-da_b1-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[time-da_a2-da_b2-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cov[time-da_a2-da_b2-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a3-da_b3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a4-da_b4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a5-da_b5]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a6-da_b6]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a7-da_b7]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[None-da_a8-da_b8]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a3-da_b3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a4-da_b4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a5-da_b5]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a6-da_b6]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a7-da_b7]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[time-da_a8-da_b8]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a0-da_b0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a1-da_b1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a2-da_b2]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a3-da_b3]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a4-da_b4]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a5-da_b5]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a6-da_b6]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a7-da_b7]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_covcorr_consistency[x-da_a8-da_b8]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a0-b0-ae0-be0-dim_0--1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a0-b0-ae0-be0-dim_0--1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a1-b1-ae1-be1-dim_0--1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a1-b1-ae1-be1-dim_0--1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a2-b2-ae2-be2-dim_0--1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a2-b2-ae2-be2-dim_0--1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a3-b3-ae3-be3-dim_0--1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a3-b3-ae3-be3-dim_0--1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a4-b4-ae4-be4-cartesian-1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a4-b4-ae4-be4-cartesian-1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a5-b5-ae5-be5-cartesian--1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a5-b5-ae5-be5-cartesian--1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a6-b6-ae6-be6-cartesian--1-False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_cross[a6-b6-ae6-be6-cartesian--1-True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_dataset_join",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_dot[False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_dot[True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_dot_align_coords[False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_dot_align_coords[True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_join_dict_keys",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[default]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[drop]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[drop_conflicts]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[no_conflicts]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray[override]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[False-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[False-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[True-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[True-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[default-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[default-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[drop-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[drop-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[drop_conflicts-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[drop_conflicts-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[no_conflicts-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[no_conflicts-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[override-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataarray_variables[override-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[default]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[drop]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[drop_conflicts]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[no_conflicts]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset[override]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[False-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[False-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[False-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[True-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[True-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[True-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[default-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[default-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[default-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[drop-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[drop-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[drop-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[drop_conflicts-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[drop_conflicts-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[drop_conflicts-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[no_conflicts-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[no_conflicts-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[no_conflicts-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[override-coord]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[override-data]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_dataset_variables[override-dim]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[False]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[True]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[default]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[drop]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[drop_conflicts]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[no_conflicts]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_keep_attrs_strategies_variable[override]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a0-da_b0-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a0-da_b0-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a1-da_b1-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a1-da_b1-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a2-da_b2-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a2-da_b2-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a3-da_b3-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a3-da_b3-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a4-da_b4-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a4-da_b4-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a5-da_b5-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[None-da_a5-da_b5-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a0-da_b0-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a0-da_b0-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a1-da_b1-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a1-da_b1-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a2-da_b2-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a2-da_b2-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a3-da_b3-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a3-da_b3-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a4-da_b4-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a4-da_b4-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a5-da_b5-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[time-da_a5-da_b5-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a0-da_b0-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a0-da_b0-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a1-da_b1-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a1-da_b1-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a2-da_b2-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a2-da_b2-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a3-da_b3-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a3-da_b3-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a4-da_b4-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a4-da_b4-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a5-da_b5-0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_lazy_corrcov[x-da_a5-da_b5-1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_ordered_set_intersection",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_ordered_set_union",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_output_wrong_dim_size",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_output_wrong_dims",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_output_wrong_number",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[1D-datetime-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[1D-datetime-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[1D-simple-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[1D-simple-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[1D-timedelta-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[1D-timedelta-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[2D-datetime-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[2D-datetime-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[2D-simple-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[2D-simple-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[2D-timedelta-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyfit_polyval_integration[2D-timedelta-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[array-dataset-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[array-dataset-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[broadcast-x-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[broadcast-x-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[dataset-array-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[dataset-array-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[dataset-dataset-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[dataset-dataset-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[datetime-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[datetime-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[reordered-index-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[reordered-index-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[shared-dim-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[shared-dim-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[simple-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[simple-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[sparse-index-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[sparse-index-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[timedelta-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval[timedelta-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval_cftime[0753-04-21-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval_cftime[0753-04-21-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval_cftime[1970-01-01-dask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval_cftime[1970-01-01-nodask]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_polyval_degree_dim_checks",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_result_name",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_signature_properties",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_unified_dim_sizes",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_dask",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_dask_dtype",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_dask_dtype_without_output_dtypes[data_array0]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_dask_dtype_without_output_dtypes[data_array1]",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_dask_new_output_dims",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_exclude_dims",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_vectorize_exclude_dims_dask",
+      "file": "xarray/tests/test_computation.py"
+    },
+    {
+      "kind": "exact",
+      "label": "xarray/tests/test_computation.py::test_where",
+      "file": "xarray/tests/test_computation.py"
+    }
+  ],
+  "interpreter": ".envs/pydata__xarray-7229/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'xarray'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/pydata__xarray-7229",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/pydata__xarray-7229"
+  },
+  "runner_environment": {
+    "PYTHONNOUSERSITE": "1"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_CheckButtons",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_MultiCursor[False-True]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_MultiCursor[True-False]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_MultiCursor[True-True]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_TextBox",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_check_bunch_of_radio_buttons[png]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_check_radio_buttons_image[png]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_ellipse",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_lasso_selector",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_polygon_selector",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_polygon_selector_redraw",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_polygon_selector_remove[1]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_polygon_selector_remove[2]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_polygon_selector_remove[3]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_polygon_selector_remove_first_point",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_range_slider[horizontal]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_range_slider[vertical]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_rect_visibility[pdf]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_rect_visibility[png]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_rectangle_drag[False-new_center1]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_rectangle_drag[True-new_center0]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_rectangle_handles",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_slider_horizontal_vertical",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_slider_slidermin_slidermax",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_slider_slidermin_slidermax_invalid",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_slider_valmin_valmax",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_slider_valstep_snapping",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_span_selector",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_span_selector_direction",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_span_selector_drag[False]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_span_selector_drag[True]",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_widgets.py::test_tool_line_handle",
+      "file": "lib/matplotlib/tests/test_widgets.py"
+    }
+  ],
+  "interpreter": ".envs/matplotlib__matplotlib-20676/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+    "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
+    "QHULL_TAR=\"$VACANT_BUILD_TMP/qhull-2020-src-8.0.2.tgz\"",
+    "QHULL_BUILD_DIR=\"$PWD/build\"",
+    "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
+    "mkdir -p \"$QHULL_BUILD_DIR\"",
+    "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
+    "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'matplotlib'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/matplotlib__matplotlib-20676",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/matplotlib__matplotlib-20676"
+  }
+}

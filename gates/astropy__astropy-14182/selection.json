@@ -1,0 +1,90 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_normal",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_normal_exclude",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_normal_names",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_normal_names_include",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_right_indented_table",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_unbounded_right_column",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_read_unbounded_right_column_header",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_trailing_spaces_in_row_definition",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/io/ascii/tests/test_rst.py::test_write_normal",
+      "file": "astropy/io/ascii/tests/test_rst.py"
+    }
+  ],
+  "interpreter": ".envs/astropy__astropy-14182/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/requires = \\[\"setuptools\",/requires = \\[\"setuptools==68.0.0\",/' pyproject.toml"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'astropy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {
+    "astropy/_compiler.c": "4b6f8aaeae843d8a45e1c5062b70d5cd2aaa426fdddf95857771d25a38ff0e14",
+    "astropy/wcs/src/docstrings.c": "5cf1b539fa8f8f2e06c88cc34845cb298753d2873c628e3494d71d2737271907",
+    "astropy/wcs/include/wcsconfig.h": "e35bf338175e0a043d41be9dad973b536e5c98d17f7b1918516d85d5d3b92404",
+    "astropy/wcs/include/wcslib/wcsmath.h": "6ae8e1bff7e4ce6d1d9b2bca73521ad78056e96ceb99f48f9e1d672bd89af29a",
+    "astropy/wcs/include/wcslib/prj.h": "11cc096d25569eb916426538381141ebf4620451b18778070fa1896225b5bcd1",
+    "astropy/wcs/include/wcslib/lin.h": "9665ca1f53599dfa337ef8a22b27b73ac7c8053a6d0cdbbe2b26a32ff6ead009",
+    "astropy/wcs/include/wcslib/tab.h": "1e6a42195b505c0a3c4ed4d0df2197d348936a777a96d9893b329fa9f8494abb",
+    "astropy/wcs/include/wcslib/spx.h": "1b647d474305e650774620507a6fde4103d4574de918649c6a67140e6574ea1f",
+    "astropy/wcs/include/wcslib/wcsprintf.h": "2104ac8bb9061d54bba532b23089e35f06ba44c88f66dc3c35c546383aa9303f",
+    "astropy/wcs/include/wcslib/cel.h": "780aa32687b0603d88146dfacd688317c23e69d2b5748cb567dde9597c1a4ec9",
+    "astropy/wcs/include/wcslib/wcserr.h": "1862624ad942cfe1ef4883e6dbd5f68d973200edaf35a06d4832cdc3914b78af",
+    "astropy/wcs/include/wcslib/wcs.h": "750eae45fcb96f2369a45a97d365033d5ed43c5ece88bce7f9bb14d5c25a34e7",
+    "astropy/wcs/include/wcslib/spc.h": "c2867bce9523a0503c5e4924a4f6781c8c1ae508d078ecfcfb84789d1d325501",
+    "astropy/wcs/include/astropy_wcs/docstrings.h": "e726becd0c51dd60f443a4b1deb5fa8f91ef3c396996dd834e24e456dadbae48",
+    "astropy/wcs/include/astropy_wcs/wcsconfig.h": "e35bf338175e0a043d41be9dad973b536e5c98d17f7b1918516d85d5d3b92404",
+    "astropy/timeseries/periodograms/bls/_impl.c": "6fd9e56764269d73db9d18cba0a54694a891694b0b8b936b6eb41e82d6e6b42c",
+    "astropy/timeseries/periodograms/lombscargle/implementations/cython_impl.c": "6440a7b4d3e317e498ad3678361cd259cf857d20d2236f492cc922646086f3e6",
+    "astropy/convolution/_convolve.c": "3d30c095bde71cb15ce00c93ad21960c99b13711bc96bc3d0c4528cf74e24a84",
+    "astropy/table/_np_utils.c": "6549718798192a881ddd6a077453f0e4debdc02988dd9657382f579860e845bc",
+    "astropy/table/_column_mixins.c": "20d0adf6e8d4ef3d933529cfccf49befda899894560ea47f1abcc4a8c6aa83c8",
+    "astropy/cosmology/flrw/scalar_inv_efuncs.c": "f751c739eb7de999d4a7c8c1867e5f1087ce28286d6973fe408e063857c1dd75",
+    "astropy/io/ascii/cparser.c": "de796395fcb3d5d6a9e863d389a9db6f591ae82f2cf2e9e9d0f873c8c5fd6bc3",
+    "astropy/io/fits/_utils.c": "36e80ccb90546e7c701dfa772bd79ec1765246d7fac283266b917607c44ba477",
+    "astropy/stats/_stats.c": "cefbca8ceeca627a1e6949b2fe904ca8ff88599be37f145e3802263213a2faaa"
+  },
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/astropy__astropy-14182",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/astropy__astropy-14182"
+  }
+}

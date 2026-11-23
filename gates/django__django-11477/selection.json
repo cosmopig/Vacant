@@ -1,0 +1,773 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::PathUnusedTests::test_no_lang_activate",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::RequestURLConfTests::test_request_urlconf_considered",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLDisabledTests::test_prefixed_i18n_disabled",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLNamespaceTests::test_account_register",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLPrefixTests::test_invalid_prefix_use",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLPrefixTests::test_not_prefixed",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLPrefixTests::test_prefixed",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_custom_redirect_class",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_en_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_en_redirect_wrong_url",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_nl_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_nl_redirect_wrong_url",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_no_prefix_response",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_pl_pl_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectTests::test_pt_br_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectWithScriptAliasTests::test_language_prefix_with_script_prefix",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectWithoutTrailingSlashSettingTests::test_en_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectWithoutTrailingSlashSettingTests::test_not_prefixed_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectWithoutTrailingSlashTests::test_en_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLRedirectWithoutTrailingSlashTests::test_not_prefixed_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_en_path",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_en_url",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_nl_path",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_nl_url",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_not_prefixed_with_prefix",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_pt_br_url",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_wrong_en_prefix",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLResponseTests::test_wrong_nl_prefix",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLTagTests::test_args",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLTagTests::test_context",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLTagTests::test_kwargs",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLTagTests::test_strings_only",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLTranslationTests::test_no_prefix_translated",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLTranslationTests::test_users_url",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLVaryAcceptLanguageTests::test_en_redirect",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/i18n/patterns/tests.py::URLVaryAcceptLanguageTests::test_no_prefix_response",
+      "file": "tests/i18n/patterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ConversionExceptionTests::test_resolve_type_error_propagates",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ConversionExceptionTests::test_resolve_value_error_means_no_match",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ConversionExceptionTests::test_reverse_value_error_propagates",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ConverterTests::test_matching_urls",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ConverterTests::test_nonmatching_urls",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ParameterRestrictionTests::test_allows_non_ascii_but_valid_identifiers",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::ParameterRestrictionTests::test_non_identifier_parameter_name_causes_exception",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_converter_resolve",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_converter_reverse",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_converter_reverse_with_second_layer_instance_namespace",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_invalid_converter",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_inclusion_is_matchable",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_inclusion_is_reversible",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_lookup_with_double_inclusion",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_lookup_with_empty_string_inclusion",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_lookup_with_inclusion",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_lookup_with_multiple_paramaters",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_lookup_with_typed_parameters",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_lookup_without_parameters",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_reverse_with_parameter",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_path_reverse_without_parameter",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns/tests.py::SimplifiedURLTests::test_re_path",
+      "file": "tests/urlpatterns/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::DefaultErrorHandlerTests::test_default_handler",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ErroneousViewTests::test_invalid_regex",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ErroneousViewTests::test_noncallable_view",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ErrorHandlerResolutionTests::test_callable_handlers",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ErrorHandlerResolutionTests::test_named_handlers",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_2_tuple",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_2_tuple_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_3_tuple",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_3_tuple_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_4_tuple",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_app_name",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_app_name_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::IncludeTests::test_include_urls",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::LookaheadTests::test_invalid_resolve",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::LookaheadTests::test_invalid_reverse",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::LookaheadTests::test_valid_resolve",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::LookaheadTests::test_valid_reverse",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_ambiguous_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_ambiguous_urlpattern",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_app_lookup_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_app_lookup_object_with_default",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_app_lookup_object_without_default",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_app_name_pattern",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_app_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_app_object_default_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_current_app_no_partial_match",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_embedded_namespace_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_multiple_namespace_pattern",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_namespace_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_namespace_pattern",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_namespace_pattern_with_variable_prefix",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_namespaces_with_variables",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_nested_app_lookup",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_nested_namespace_pattern",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_non_existent_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_normal_name",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_simple_included_name",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NamespaceTests::test_special_chars_namespace",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NoRootUrlConfTests::test_no_handler_exception",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::NoURLPatternsTests::test_no_urls_exception",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_reverse_inner_in_response_middleware",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_reverse_inner_in_streaming",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_reverse_outer_in_response_middleware",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_reverse_outer_in_streaming",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_urlconf",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_urlconf_is_reset_after_request",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_urlconf_overridden",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::RequestURLconfTests::test_urlconf_overridden_with_null",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverMatchTests::test_repr",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverMatchTests::test_resolver_match_on_request",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverMatchTests::test_resolver_match_on_request_before_resolution",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverMatchTests::test_urlpattern_resolve",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_404_tried_urls_have_names",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_namespaced_view_detail",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_non_regex",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_populate_concurrency",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_resolver_repr",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_resolver_reverse",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_resolver_reverse_conflict",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_reverse_lazy_object_coercion_by_resolve",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ResolverTests::test_view_detail_as_method",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseLazySettingsTest::test_lazy_in_settings",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseLazyTest::test_inserting_reverse_lazy_into_string",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseLazyTest::test_redirect_with_lazy_reverse",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseLazyTest::test_user_permission_with_lazy_reverse",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseShortcutTests::test_no_illegal_imports",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseShortcutTests::test_redirect_to_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseShortcutTests::test_redirect_to_url",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseShortcutTests::test_redirect_to_view_name",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseShortcutTests::test_redirect_view_object",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ReverseShortcutTests::test_reverse_by_path_nested",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_illegal_args_message",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_illegal_kwargs_message",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_mixing_args_and_kwargs",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_no_args_message",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_non_urlsafe_prefix_with_args",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_patterns_reported",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_prefix_braces",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_prefix_format_char",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_prefix_parenthesis",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_reverse_none",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_script_name_escaping",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_urlpattern_reverse",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::URLPatternReverse::test_view_not_found_message",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_attributeerror_not_hidden",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_module_does_not_exist",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_non_string_value",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_not_callable",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_parent_module_does_not_exist",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_string_without_dot",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_view_does_not_exist",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/urlpatterns_reverse/tests.py::ViewLoadingTests::test_view_loading",
+      "file": "tests/urlpatterns_reverse/tests.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-11477/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-11477",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-11477"
+  }
+}

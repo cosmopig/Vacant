@@ -1,0 +1,1026 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_Bug_2543",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_Issue_1713",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_RcParams_class",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_animation_frame_formats",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_axes_titlecolor_rcparams",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_backend_fallback_headless",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_deprecation",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_keymaps",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_legend_colors[different facecolor0]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_legend_colors[different facecolor1]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_legend_colors[inherited edgecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_legend_colors[inherited facecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_legend_colors[same edgecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_legend_colors[same facecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_mec_rcparams",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_mfc_rcparams",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_rcparams",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_rcparams_reset_after_fail",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontstretch[20.6-20]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontstretch[20.6-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontstretch[EXPANDED-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontstretch[expanded-expanded]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontstretch[stretch4-100]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontstretch[stretch7-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontweight[20.6-20]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontweight[20.6-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontweight[BOLD-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontweight[bold-bold]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontweight[weight4-100]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validate_fontweight[weight7-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_color_or_linecolor-line-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_color_or_linecolor-marker-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-1.23-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-\\xff\\xfed\\x00o\\x00t\\x00t\\x00e\\x00d\\x00-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-aardvark-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-arg65-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-arg67-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-arg68-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-arg69-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-arg70-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[_validate_linestyle-dotted-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_bool--1-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_bool-2-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_bool-aardvark-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_bool-arg3-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_color-(0, 1)-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_color-(0, 1, \"0.5\")-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_color-(0, 1, 0, 1, 0)-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_color-(0, 1, none)-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_color-tab:veryblue-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_colorlist-fish-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-1 + 2-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-4-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-Cycler(\"linewidth\", [1, 2, 3])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-arg31-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-arg32-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler(\"bleh, [])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler(\"waka\", [1, 2, 3])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler('c', [j. __class__(j) for j in ['r', 'b']])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler('c', [j.\\t__class__(j) for j in ['r', 'b']])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler('c', [j.\\x0c__class__(j) for j in ['r', 'b']])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler('c', [j.__class__(j) for j in ['r', 'b']])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler('c', [j.__class__(j).lower() for j in ['r', 'b']])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler(c=[1, 2, 3])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-cycler(lw=['a', 'b', 'c'])-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-def badjuju(a): return a; badjuju(cycler(\"color\", \"rgb\"))-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-import os-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_cycler-os.system(\"echo Gotcha\")-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_floatlist-None-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_floatlist-aardvark-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_floatlist-arg12-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_floatlist-arg13-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_floatlist-arg14-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_hatch---_-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_hatch-8-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_hatch-X-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_hist_bins-aardvark-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_intlist-aardvark-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_intlist-arg10-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_intlist-arg9-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-a-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-abc-TypeError0]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-abc-TypeError1]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg45-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg46-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg47-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg48-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg49-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg50-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg51-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg52-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg53-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg55-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg56-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg57-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg58-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_markevery-arg61-TypeError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_strlist-1-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_strlist-arg4-ValueError]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_strlist-arg6-MatplotlibDeprecationWarning]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_invalid[validate_strlist-arg7-MatplotlibDeprecationWarning]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_color_or_linecolor-linecolor-linecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_color_or_linecolor-markeredgecolor-markeredgecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_color_or_linecolor-markerfacecolor-markerfacecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_color_or_linecolor-mec-markeredgecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_color_or_linecolor-mfc-markerfacecolor]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle- - ]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle------]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle----]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle--.--.]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle--]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-1, 3-target94]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-:-:]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-DoTtEd-dotted]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-None-none]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-arg95-target95]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-arg96-target96]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-arg97-target97]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-arg98-target98]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-dashdot-dashdot]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-dashed-dashed]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-dotted-dotted]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-none-none]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[_validate_linestyle-solid-solid]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-0-False0]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-0-False1]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-1-True0]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-1-True1]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-False-False]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-True-True]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-f-False]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-false-False]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-n-False]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-no-False]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-off-False]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-on-True]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-t-True]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-true-True]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-y-True]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_bool-yes-True]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-(0, 1, 0)-target58]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-(0, 1, 0, 1)-target60]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-AABBCC-#AABBCC]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-AABBCC00-#AABBCC00]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-C12-C12]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-None-none]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-arg59-target59]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-arg61-target61]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-none-none]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_color-tab:blue-tab:blue]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_colorlist-arg47-target47]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_colorlist-arg49-target49]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_colorlist-arg50-target50]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_colorlist-arg51-target51]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_colorlist-r, ,-target48]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_colorlist-r,g,b-target46]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-(cycler(\"color\", [\"r\", \"g\", \"b\"]) +\\n                          cycler(\"mew\", [2, 3, 5]))-target37]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-arg36-target36]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-arg40-target40]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-arg41-target41]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-cycler(\"color\", \"rgb\")-target35]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-cycler('c', 'rgb') * cycler('linestyle', ['-', '--'])-target39]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_cycler-cycler(c='rgb', lw=[1, 2, 3])-target38]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_floatlist-1.5, 2.5-target30]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_floatlist-arg31-target31]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_floatlist-arg32-target32]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_floatlist-arg33-target33]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_floatlist-arg34-target34]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hatch---|---|]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hatch--]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hatch-/+*/.x-/+*/.x]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hatch-\\\\oO-\\\\oO]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hist_bins-1, 2, 3-target70]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hist_bins-10-10]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hist_bins-arg71-target71]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hist_bins-arg72-target72]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hist_bins-auto-auto]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_hist_bins-fd-fd]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_intlist-1, 2-target25]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_intlist-arg26-target26]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_intlist-arg27-target27]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_intlist-arg28-target28]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_intlist-arg29-target29]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-0.1-0.1]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-1-1]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-None-None]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-arg76-target76]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-arg77-target77]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-arg78-target78]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-arg79-target79]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_markevery-arg80-target80]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist--target16]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-a,b-target17]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-aardvark, ,-target20]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-aardvark, -target19]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-aardvark-target18]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-arg21-target21]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-arg22-target22]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-arg23-target23]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_rcparams.py::test_validator_valid[validate_strlist-arg24-target24]",
+      "file": "lib/matplotlib/tests/test_rcparams.py"
+    }
+  ],
+  "interpreter": ".envs/matplotlib__matplotlib-23299/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+    "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
+    "QHULL_TAR=\"$VACANT_BUILD_TMP/qhull-2020-src-8.0.2.tgz\"",
+    "QHULL_BUILD_DIR=\"$PWD/build\"",
+    "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
+    "mkdir -p \"$QHULL_BUILD_DIR\"",
+    "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
+    "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'matplotlib'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/matplotlib__matplotlib-23299",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/matplotlib__matplotlib-23299"
+  }
+}

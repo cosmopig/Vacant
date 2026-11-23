@@ -1,0 +1,51 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_relative_toctree",
+      "file": "tests/test_directive_other.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_reversed_toctree",
+      "file": "tests/test_directive_other.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_toctree",
+      "file": "tests/test_directive_other.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_toctree_glob",
+      "file": "tests/test_directive_other.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_toctree_glob_and_url",
+      "file": "tests/test_directive_other.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_toctree_twice",
+      "file": "tests/test_directive_other.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_directive_other.py::test_toctree_urls_and_titles",
+      "file": "tests/test_directive_other.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-11510/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini"
+  ],
+  "base_rebuild_commands": [],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-11510",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-11510"
+  }
+}

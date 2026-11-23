@@ -1,0 +1,68 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_issue_5653",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_issue_5857",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_issue_6241",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_sqrt_symbolic_denest",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_sqrtdenest",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_sqrtdenest2",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_sqrtdenest3",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_sqrtdenest4",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_sqrtdenest_rec",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/simplify/tests/test_sqrtdenest.py::test_subsets",
+      "file": "sympy/simplify/tests/test_sqrtdenest.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-17318/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-17318",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-17318"
+  }
+}

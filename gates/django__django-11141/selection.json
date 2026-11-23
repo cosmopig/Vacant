@@ -1,0 +1,138 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_check_consistent_history",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_check_consistent_history_squashed",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_explicit_missing_module",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_first",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_ignore_files",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_load",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_load_empty_dir",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_load_import_error",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_load_module_file",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_load_unmigrated_dependency",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_complex",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_complex_multi_apps",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_complex_multi_apps_partially_applied",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_erroneous",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_loading_squashed_ref_squashed",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_marked_as_migrated",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_marked_as_unmigrated",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_name_match",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_plan_handles_repeated_migrations",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::LoaderTests::test_run_before",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::PycLoaderTests::test_invalid",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::PycLoaderTests::test_valid",
+      "file": "tests/migrations/test_loader.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_loader.py::RecorderTests::test_apply",
+      "file": "tests/migrations/test_loader.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-11141/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-11141",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-11141"
+  }
+}

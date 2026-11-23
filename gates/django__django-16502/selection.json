@@ -1,0 +1,38 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/servers/test_basehttp.py::WSGIRequestHandlerTestCase::test_https",
+      "file": "tests/servers/test_basehttp.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/servers/test_basehttp.py::WSGIRequestHandlerTestCase::test_log_message",
+      "file": "tests/servers/test_basehttp.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/servers/test_basehttp.py::WSGIRequestHandlerTestCase::test_strips_underscore_headers",
+      "file": "tests/servers/test_basehttp.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/servers/test_basehttp.py::WSGIServerTestCase::test_broken_pipe_errors",
+      "file": "tests/servers/test_basehttp.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-16502/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-16502",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-16502"
+  }
+}

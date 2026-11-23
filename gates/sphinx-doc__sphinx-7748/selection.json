@@ -1,0 +1,88 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autoclass_content_and_docstring_signature_class",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autoclass_content_both",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autoclass_content_class",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autoclass_content_init",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_default_options",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_default_options_with_values",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_docstring_signature",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_inherit_docstrings",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_typehints_description",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_typehints_none",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_autodoc_typehints_signature",
+      "file": "tests/test_ext_autodoc_configs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_ext_autodoc_configs.py::test_mocked_module_imports",
+      "file": "tests/test_ext_autodoc_configs.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-7748/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini",
+    "sed -i 's/Jinja2>=2.3/Jinja2<3.0/' setup.py",
+    "sed -i 's/sphinxcontrib-applehelp/sphinxcontrib-applehelp<=1.0.7/' setup.py",
+    "sed -i 's/sphinxcontrib-devhelp/sphinxcontrib-devhelp<=1.0.5/' setup.py",
+    "sed -i 's/sphinxcontrib-qthelp/sphinxcontrib-qthelp<=1.0.6/' setup.py",
+    "sed -i 's/alabaster>=0.7,<0.8/alabaster>=0.7,<0.7.12/' setup.py",
+    "sed -i \"s/'packaging',/'packaging', 'markupsafe<=2.0.1',/\" setup.py",
+    "sed -i 's/sphinxcontrib-htmlhelp/sphinxcontrib-htmlhelp<=2.0.4/' setup.py",
+    "sed -i 's/sphinxcontrib-serializinghtml/sphinxcontrib-serializinghtml<=1.1.9/' setup.py"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sphinx'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-7748",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-7748"
+  }
+}

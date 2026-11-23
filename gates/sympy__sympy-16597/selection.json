@@ -1,0 +1,388 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Add_is_algebraic",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Add_is_imaginary",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Add_is_pos_neg",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_E",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_I",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Mul_is_algebraic",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Mul_is_infinite",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Mul_is_prime_composite",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Pow_is_algebraic",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Pow_is_pos_neg",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_Pow_is_prime_composite",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_complex_reciprocal_imaginary",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_composite",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_hash_vs_eq",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_hash_vs_typeinfo",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_hash_vs_typeinfo_2",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_inconsistent",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_10024",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_10302",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_2730",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_2920",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_3825",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_4149",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_4822",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_6631",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_7899",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_8075",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_8642",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_9115_9150",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issue_9165",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_issues_8632_8633_8638_8675_8992",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_nan",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_rational",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_symbol_falsenegative",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_symbol_falsenonnegative_real",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_symbol_falsepositive",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_symbol_falsepositive_real",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_symbol_nonpositive",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_neg_symbol_positive",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_negativeone",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_one",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_pi",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_pos_rational",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_prime",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_prime_symbol",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_sanitize_assumptions",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_special_assumptions",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_special_is_rational",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_falsenonnegative",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_falsenonnegative_real",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_falsepositive",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_falsepositive_mul",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_falsepositive_real",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_imaginary",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_noncommutative",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_nonpositive",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_positive",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_real",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_unset",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_symbol_zero",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_zero",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/core/tests/test_assumptions.py::test_zoo",
+      "file": "sympy/core/tests/test_assumptions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_Max",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_Min",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_instantiation_evaluation",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_issue_11099",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_issue_12638",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_issue_8413",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_minmax_assumptions",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_real_root",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_rewrite_MaxMin_as_Heaviside",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_rewrite_MaxMin_as_Piecewise",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_rewrite_as_Abs",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/elementary/tests/test_miscellaneous.py::test_root",
+      "file": "sympy/functions/elementary/tests/test_miscellaneous.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-16597/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-16597",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-16597"
+  }
+}

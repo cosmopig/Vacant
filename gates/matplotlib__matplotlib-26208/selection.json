@@ -1,0 +1,4091 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_2D[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[0.5-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[None-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case1-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case10-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case11-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case12-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case13-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case14-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case15-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case16-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case17-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case18-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case19-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case20-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case21-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case22-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case23-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case24-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case25-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case26-shape]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case27-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case28-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case29-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case5-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case7-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case8-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[c_case9-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[jaune-conversion]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[none-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_c[red-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_color",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_color_warning[kwargs0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_color_warning[kwargs1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_color_warning[kwargs2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_color_warning[kwargs3]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_decimal[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_different_shapes[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_edgecolor_RGB",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_invalid_color[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_linewidths",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_marker[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_no_invalid_color[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_norm_vminvmax",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_plot[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_plot[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_single_color_c[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_single_point[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_singular_plural_arguments",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_size_arg_size",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_unfillable",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::TestScatter::test_scatter_unfilled",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_2dcolor_plot[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_acorr[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_acorr_integers[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_adjust_numtick_aspect",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_aitoff_proj[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_alpha[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_alpha[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_annotate_across_transforms[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_annotate_default_arrow",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_annotate_signature",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_arc_angles[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_arc_ellipse[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_arc_ellipse[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_arrow_empty",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_arrow_in_view",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_arrow_simple[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_artist_sublists",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_as_mpl_axes_api",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_aspect_nonlinear_adjustable_box",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_aspect_nonlinear_adjustable_datalim",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_auto_numticks",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_auto_numticks_log",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_automatic_legend",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_autoscale_log_shared",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_autoscale_tight",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_autoscale_tiny_range[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_autoscale_tiny_range[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_autoscale_tiny_sticky",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axes_margins",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axes_tick_params_gridlines",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axes_tick_params_xlabelside",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axes_tick_params_ylabelside",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axhspan_epoch[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axhspan_epoch[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_bool_arguments[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_errors[TypeError-args0-kwargs0-axis\\\\(\\\\) takes from 0 to 1 positional arguments but 2 were given]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_errors[TypeError-args2-kwargs2-the first argument to axis*]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_errors[TypeError-args3-kwargs3-axis\\\\(\\\\) got an unexpected keyword argument 'foo']",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_errors[ValueError-args1-kwargs1-Unrecognized string 'foo' to axis; try 'on' or 'off']",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_extent_arg",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_extent_arg2",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_get_tick_params",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_method_errors",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_options[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axis_set_tick_params_labelsize_labelcolor",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axisbelow[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_args",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_loglog[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_loglog[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_minmax[axvline-axhline-args0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_minmax[axvspan-axhspan-args1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_transaxes[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_transaxes[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_transaxes_panzoom[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axline_transaxes_panzoom[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axvspan_epoch[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_axvspan_epoch[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bad_plot_args",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_all_nan[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_broadcast_args",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_color_cycle",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_color_none_alpha",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_datetime_start",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_decimal_center[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_decimal_width[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_edgecolor_none_alpha",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_errbar_zorder",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_hatches[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_hatches[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_fmt[%.2f]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_fmt[format]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_fmt[{:.2f}]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_fmt_error",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_labels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_center",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_errorbars",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_horizontal",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_horizontal_xinverted",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_horizontal_xyinverted",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_horizontal_yinverted",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_vertical",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_location_vertical_yinverted",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_nan_ydata",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_label_nan_ydata_inverted",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_labels[x-1-x-expected_labels0-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_labels[x1-width1-label1-expected_labels1-_nolegend_]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_labels[x2-width2-label2-expected_labels2-_nolegend_]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_labels[x3-width3-bars-expected_labels3-bars]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_labels_length",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_leading_nan",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_pandas",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_pandas_indexed",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_tick_label_multiple[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_tick_label_multiple_old_alignment[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_tick_label_single[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_ticklabel_fail",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_timedelta",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bar_uint8",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_barb_units",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_barh_decimal_center[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_barh_decimal_height[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_barh_tick_label[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_basic_annotate[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_basic_annotate[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bbox_aspect_axes_init",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bezier_autoscale",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_box_aspect",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_box_aspect_custom_position",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_autorange_whiskers[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_bad_ci",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_bad_medians",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_capwidths",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_custom_capwidths[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_dates_pandas",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_marker_behavior",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_mod_artist_after_plotting[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_no_weird_whisker[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_not_single",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_rc_parameters[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_rc_parameters[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_sym2[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_sym[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_with_CIarray[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_boxplot_zorder",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_broken_barh_empty",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_broken_barh_timedelta",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_bad_capwidths",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_bad_positions",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_bad_widths",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_baseline[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_custom_capwidth[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_custom_capwidths[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_custombox[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_customcap[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_custommedian[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_customoutlier[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_custompatchartist[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_custompositions[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_customwhisker[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_customwidths[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_horizontal[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_no_flier_stats[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_nobox[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_nocaps[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_patchartist[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_percentilewhis[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_rangewhis[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_scalarwidth[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_showcustommean[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_showmean[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_showmeanasline[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_shownotches[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_with_xlabels[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_bxp_with_ylabels[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_canonical[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_canonical[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_centered_bar_label_label_beyond_limits",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_cla_clears_children_axes_and_fig",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_cla_not_redefined_internally",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_clim",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_color_None",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_color_alias",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_color_length_mismatch",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_contour_colorbar[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_contour_colorbar[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_contour_hatching[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_contour_hatching[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_dash_offset[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_dash_offset[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_date_timezone_x[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_date_timezone_x_and_y[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_date_timezone_y[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_displaced_spine",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eb_line_zorder[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eb_line_zorder[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ecdf[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ecdf_invalid",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_empty_errorbar_legend",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_empty_eventplot",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_empty_line_plots",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_empty_shared_subplots",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_empty_ticks_fixed_loc",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_colorcycle",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_cycle_ecolor[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_cycle_ecolor[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_dashes[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_every[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_every[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_every_invalid",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs10]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs11]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs12]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs13]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs14]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs15]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs16]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs17]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs18]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs19]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs20]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs21]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs22]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs23]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs24]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs25]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs26]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs27]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs28]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs29]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs30]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs31]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs32]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs33]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs34]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs35]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs36]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs37]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs38]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs39]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs3]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs40]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs41]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs42]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs43]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs44]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs45]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs46]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs47]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs48]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs49]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs4]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs50]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs51]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs5]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs6]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs7]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs8]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_inputs_shotgun[kwargs9]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_limits[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_limits[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_line_specific_kwargs",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_linewidth_type[1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_linewidth_type[elinewidth0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_linewidth_type[elinewidth1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_nan[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_nonefmt",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_shape",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_errorbar_with_prop_cycle[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_alpha",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_colors[colors0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_colors[colors1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_colors[colors2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_defaults[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args0-kwargs0-lineoffsets cannot be empty]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args1-kwargs1-linelengths cannot be empty]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args10-kwargs10-alpha and positions are unequal sized sequences]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args11-kwargs11-colors and positions are unequal sized sequences]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args2-kwargs2-linewidths cannot be empty]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args3-kwargs3-linestyles cannot be empty]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args4-kwargs4-alpha cannot be empty]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args5-kwargs5-positions must be one-dimensional]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args6-kwargs6-lineoffsets and positions are unequal sized sequences]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args7-kwargs7-linelengths and positions are unequal sized sequences]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args8-kwargs8-linewidths and positions are unequal sized sequences]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_errors[ValueError-args9-kwargs9-linestyles and positions are unequal sized sequences]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_legend",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[None-data0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[None-data1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[None-data2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[horizontal-data0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[horizontal-data1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[horizontal-data2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[vertical-data0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[vertical-data1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_orientation[vertical-data2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_problem_kwargs[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_eventplot_units_list[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_extent_units[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_axes_limits",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_input[2d_x_input]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_input[2d_y1_input]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_input[2d_y2_input]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_interpolate[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_interpolate[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_interpolate_decreasing[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_interpolate_decreasing[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_interpolate_nan[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_between_interpolate_nan[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_betweenx_input[2d_x1_input]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_betweenx_input[2d_x2_input]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_betweenx_input[2d_y_input]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fill_units[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_fillbetween_cycle",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_formatter_ticker[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_formatter_ticker[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_funcformatter_auto_formatter",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_get_labels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_get_xticklabel",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_gettightbbox_ignore_nan",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_grid",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_empty[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_extent[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_linear[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_log[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_log_clim",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_mincnt_behavior_upon_C_parameter[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hexbin_pickable",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist2d[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist2d[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist2d_density",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist2d_transpose[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist2d_transpose[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_auto_bins",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_bar_empty[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_barstacked_bottom_unchanged",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_datetime_datasets",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_datetime_datasets_bins[date2num]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_datetime_datasets_bins[datetime.datetime]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_datetime_datasets_bins[np.datetime64]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_density[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_emptydata",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_float16",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_labels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_log[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_log[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_log_2[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_log_barstacked",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_nan_data",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_offset[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_offset[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_range_and_density",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_bar[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_bar[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_density[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_density[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_step[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_step[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_step_bottom_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_step_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_stepfilled[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_stepfilled[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_stepfilled_alpha[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_stepfilled_alpha[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_stepfilled_bottom_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_stepfilled_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_weighted[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stacked_weighted[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step_bottom[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step_bottom_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step_empty[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step_filled[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_step_horiz[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stepfilled_bottom_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_stepfilled_geometry",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_unequal_bins_density",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_with_empty_input[data0-1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_with_empty_input[data1-1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_with_empty_input[data2-2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_zorder[bar-1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_zorder[step-2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hist_zorder[stepfilled-1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hlines[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_hlines_default",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_baseline[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_custompoints_10[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_custompoints_200[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_showall[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_showextrema[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_showmeans[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_horiz_violinplot_showmedians[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_imshow[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_imshow[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_imshow_clip[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_imshow_clip[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_imshow_norm_vminvmax",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_indicate_inset_inverted[False-False]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_indicate_inset_inverted[False-True]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_indicate_inset_inverted[True-False]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_indicate_inset_inverted[True-True]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_inset",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_inset_polar[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_inset_projection",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_inset_subclass",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_invalid_axis_limits",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_inverted_cla",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_inverted_limits",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_invisible_axes[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_invisible_axes_events",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_loc_horizontal[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_loc_horizontal[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_loc_rc[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_loc_rc[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_loc_vertical[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_loc_vertical[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_label_shift",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_large_offset",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_length_one_hist",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_limits_after_scroll_zoom",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_limits_empty_data[png-fill_between]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_limits_empty_data[png-plot]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_limits_empty_data[png-scatter]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_lines_with_colors[png-data0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_lines_with_colors[png-data1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_log_margins",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_log_scales",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_log_scales_invalid",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_log_scales_no_data",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_loglog[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_loglog_nonpos[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_manage_xticks",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[TypeError-args4-kwargs4-Cannot pass both positional and keyword arguments for x and/or y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[TypeError-args5-kwargs5-Cannot pass both positional and keyword arguments for x and/or y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[TypeError-args6-kwargs6-Must pass a single positional argument]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[ValueError-args0-kwargs0-margin must be greater than -0\\\\.5]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[ValueError-args1-kwargs1-margin must be greater than -0\\\\.5]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[ValueError-args2-kwargs2-margin must be greater than -0\\\\.5]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_margins_errors[ValueError-args3-kwargs3-margin must be greater than -0\\\\.5]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_marker_as_markerstyle",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_marker_edges[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_marker_edges[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_marker_styles[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markerfacecolor_none_alpha[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markers_fillstyle_rcparams[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_line[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_line[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_linear_scales[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_linear_scales[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_linear_scales_nans[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_linear_scales_nans[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_linear_scales_zoomed[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_linear_scales_zoomed[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_log_scales[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_log_scales[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_polar[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_markevery_polar[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_matshow[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_minor_accountedfor",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_minorticks_on[log-log]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_minorticks_on[log-symlog]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_minorticks_on[symlog-log]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_minorticks_on[symlog-symlog]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_minorticks_on_rcParams_both[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mismatched_ticklabels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mixed_collection[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mixed_collection[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mixed_errorbar_polar_caps[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mollweide_forward_inverse_closure",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mollweide_grid[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mollweide_grid[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_mollweide_inverse_forward_closure",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_move_offsetlabel",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_multiplot_autoscale",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nan_bar_values",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nan_barlabels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nargs_legend",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nargs_pcolorfast",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nargs_stem",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nodecorator",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_none_kwargs",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nonfinite_limits[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_nonfinite_limits[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_normal_axes",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_normalize_kwarg_pie",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_numerical_hist_label",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_o_marker_path_snap[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_offset_label_color",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_offset_text_visible",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_bar_align_center",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_errorbar_indexing",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_index_shape",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_indexing_dates",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_indexing_hist",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_minimal_plot",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pandas_pcolormesh",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args[params0-expected_result0]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args[params1-expected_result1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args[params2-expected_result2]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args[params3-expected_result3]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args[params4-expected_result4]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs0-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs1-None]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs10-g]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs2-r]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs3-expected_edgecolors3]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs4-r]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs5-face]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs6-none]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs7-r]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs8-r]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_edgecolors[kwargs9-r]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_parse_scatter_color_args_error",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_patch_bounds",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pathological_hexbin",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolor_datetime_axis[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolor_regression",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorargs",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorargs_5205",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorauto[png-False]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorauto[png-True]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data0-xy0-AxesImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data0-xy1-AxesImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data0-xy2-AxesImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data0-xy3-PcolorImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data0-xy4-QuadMesh]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data1-xy0-AxesImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data1-xy1-AxesImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data1-xy2-AxesImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data1-xy3-PcolorImage]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorfast[data1-xy4-QuadMesh]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolorflaterror",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh_alpha[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh_alpha[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh_datetime_axis[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh_rgba[png-3-1]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh_rgba[png-4-0.5]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolormesh_small[eps]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolornearest[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pcolornearestunits[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_ccw_true[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_center_radius[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_default[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_frame_grid[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_get_negative_values",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_hatch_multi[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_hatch_multi[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_hatch_single[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_hatch_single[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_linewidth_0[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_linewidth_2[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_nolabel_but_legend[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_rotatelabels_true[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_shadow[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pie_textprops",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_decimal[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_errors",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[None-:--':-' is not a valid format string \\\\(two linestyle symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[None-:o-r-':o-r' is not a valid format string \\\\(two linestyle symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[None-f-'f' is not a valid format string \\\\(unrecognized character 'f'\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[None-o+-'o\\\\+' is not a valid format string \\\\(two marker symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[None-rk-'rk' is not a valid format string \\\\(two color symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[data1-:--':-' is not a valid format string \\\\(two linestyle symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[data1-:o-r-':o-r' is not a valid format string \\\\(two linestyle symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[data1-f-'f' is not a valid format string \\\\(unrecognized character 'f'\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[data1-o+-'o\\\\+' is not a valid format string \\\\(two marker symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_errors[data1-rk-'rk' is not a valid format string \\\\(two color symbols\\\\)]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_plot_format_kwarg_redundant",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_polar_interpolation_steps_variable_r[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_polycollection_joinstyle[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_polycollection_joinstyle[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_preset_clip_paths[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_psd_csd[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_psd_csd_edge_cases",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_pyplot_axes",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_quiver_units",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rc_axes_label_formatting",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rc_grid[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rc_major_minor_tick",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rc_spines[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rc_tick",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rcparam_grid_minor[both-True-True]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rcparam_grid_minor[major-True-False]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rcparam_grid_minor[minor-False-True]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_redraw_in_frame",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[10]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[12]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[8]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[large]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[larger]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[medium]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[small]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[smaller]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[x-large]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[x-small]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[xx-large]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relative_ticklabel_sizes[xx-small]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_relim_visible_only",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[add_axes-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[add_axes-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[gca-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[gca-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[subplots-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[subplots-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[subplots_shared-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes[subplots_shared-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_remove_shared_axes_relim",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_repr",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_reset_grid",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_reset_ticks[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_retain_tick_visibility[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rgba_markers[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_rgba_markers[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_samesizepcolorflaterror",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_scatter_color_repr_error",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_scatter_empty_data",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_scatter_series_non_zero_index",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_secondary_fail",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_secondary_formatter",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_secondary_minorloc",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_secondary_repr",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_secondary_resize",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_secondary_xy[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_aspect_negative",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_get_ticklabels[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_margin_updates_limits",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_position",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_ticks_inverted",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_ticks_kwargs_raise_error_without_labels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_ticks_with_labels[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_set_xy_bound",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shaped_data[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_aspect_error",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_axes_autoscale",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_axes_clear[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_axes_retick",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_bool",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_scale",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_with_aspect_1",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_with_aspect_2",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_shared_with_aspect_3",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_sharing_does_not_link_positions",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_single_date[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_single_point[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_single_point[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_small_autoscale",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_specgram[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_specgram_angle[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_specgram_fs_none",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_specgram_magnitude[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_specgram_origin_kwarg",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_specgram_origin_rcparam[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_spectrum[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_spines_properbbox_after_zoom",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_spy[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_spy_invalid_kwargs",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_square_plot",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stackplot[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stackplot[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stackplot_baseline[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stackplot_baseline[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_baseline_0[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_datetime[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_edge_handling[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_empty",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_fill[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_invalid_mismatch",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_invalid_nan",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_invalid_update",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_invalid_update2",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_options[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stairs_update[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stem[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stem_args",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stem_dates",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stem_markerfmt",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_stem_orientation[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_step_linestyle[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_step_linestyle[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_sticky_shared_axes[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_strmethodformatter_auto_formatter",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_structured_data",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_subclass_clear_cla",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_subplot_key_hash",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_subsampled_ticklabels",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_symlog2[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_symlog[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_text_labelsize",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_tick_label_update",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_tick_padding_tightbbox",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_tick_param_label_rotation",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_tick_param_labelfont",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_tick_space_size_0",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_tickdirs",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_above_offset[both titles aligned]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_above_offset[center title kept]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_above_offset[left title moved]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_location_roundtrip",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_location_shared[False]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_location_shared[True]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_no_move_off_page",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_pad",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_xticks_top",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_title_xticks_top_both",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_titlesetpos",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_titletwiny",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_transparent_markers[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_transparent_markers[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_axis_locators_formatters[pdf]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_axis_locators_formatters[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_inherit_autoscale_setting",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_logscale[png-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_logscale[png-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_remove[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_spines[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_spines_on_top[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_with_aspect[x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twin_with_aspect[y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twinx_axis_scales[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twinx_cla",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_twinx_knows_limits",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unautoscale[False-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unautoscale[False-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unautoscale[None-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unautoscale[None-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unautoscale[True-x]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unautoscale[True-y]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_unicode_hist_label",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_use_sticky_edges",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_baseline[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_custompoints_10[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_custompoints_200[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_showall[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_showextrema[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_showmeans[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vert_violinplot_showmedians[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vertex_markers[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violin_point_mass",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violinplot_bad_positions",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violinplot_bad_quantiles",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violinplot_bad_widths",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violinplot_outofrange_quantiles",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violinplot_pandas_series[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_violinplot_single_list_quantiles[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vline_limit",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vlines[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vlines_default",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_vlines_hlines_blended_transform[png]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_warn_ignored_scatter_kwargs",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_xaxis_offsetText_color",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_xerr_yerr_not_negative",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_xtickcolor_is_not_markercolor",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_xtickcolor_is_not_xticklabelcolor",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_xticks_bad_args",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_yaxis_offsetText_color",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ylabel_ha_with_position[center]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ylabel_ha_with_position[left]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ylabel_ha_with_position[right]",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ytickcolor_is_not_markercolor",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_ytickcolor_is_not_yticklabelcolor",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_zero_linewidth",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_zoom_inset",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_axes.py::test_zorder_and_explicit_rasterization",
+      "file": "lib/matplotlib/tests/test_axes.py"
+    }
+  ],
+  "interpreter": ".envs/matplotlib__matplotlib-26208/bin/python",
+  "timeout_s": 166,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+    "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
+    "QHULL_TAR=\"$VACANT_BUILD_TMP/qhull-2020-src-8.0.2.tgz\"",
+    "QHULL_BUILD_DIR=\"$PWD/build\"",
+    "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
+    "mkdir -p \"$QHULL_BUILD_DIR\"",
+    "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
+    "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'matplotlib'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/matplotlib__matplotlib-26208",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/matplotlib__matplotlib-26208"
+  }
+}

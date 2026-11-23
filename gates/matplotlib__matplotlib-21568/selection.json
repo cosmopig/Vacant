@@ -1,0 +1,382 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_DateFormatter[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_DayLocator",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_RRuleLocator[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_RRuleLocator_close_minmax",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_RRuleLocator_dayrange",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_YearLocator",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_auto_date_locator",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_auto_date_locator_intmult",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_axhline",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_change_converter",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_change_epoch",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_change_interval_multiples",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_formats",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta0-1997-Jan-01 00:00]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta1-1997-Jan-01 00:01]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta2-1997-Jan-01]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta3-1997-Jan-02]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta4-1997-Jan]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta5-]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_show_offset[t_delta6-]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_subsecond",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_tz",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_usetex[t_delta0-expected0]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_usetex[t_delta1-expected1]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_concise_formatter_zformats",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT[datetime64[ms]]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT[datetime64[ns]]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT[datetime64[s]]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT[datetime64[us]]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT_scalar[ms]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT_scalar[ns]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT_scalar[s]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_NaT_scalar[us]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date2num_dst",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_axhline[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_axhspan[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_axvline[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_axvspan[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[ms]-t00]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[ms]-t01]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[ms]-t02]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[ns]-t00]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[ns]-t01]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[ns]-t02]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[s]-t00]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[s]-t01]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[s]-t02]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[us]-t00]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[us]-t01]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_date2num_numpy[datetime64[us]-t02]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_empty",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_formatter_callable",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_formatter_usetex[delta0-expected0]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_formatter_usetex[delta1-expected1]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_inverted_limit[png]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_not_empty",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_date_numpyx",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_datetime64_in_list",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_drange",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_epoch2num",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_julian2num",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_locator_set_formatter",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_num2timedelta[1-tdelta0]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_num2timedelta[x1-tdelta1]",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_rrulewrapper",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_rrulewrapper_pytz",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_too_many_date_ticks",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_tz_utc",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_warn_notintervals",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_dates.py::test_yearlocator_pytz",
+      "file": "lib/matplotlib/tests/test_dates.py"
+    }
+  ],
+  "interpreter": ".envs/matplotlib__matplotlib-21568/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+    "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
+    "QHULL_TAR=\"$VACANT_BUILD_TMP/qhull-2020-src-8.0.2.tgz\"",
+    "QHULL_BUILD_DIR=\"$PWD/build\"",
+    "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
+    "mkdir -p \"$QHULL_BUILD_DIR\"",
+    "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
+    "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'matplotlib'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/matplotlib__matplotlib-21568",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/matplotlib__matplotlib-21568"
+  },
+  "runner_environment": {}
+}

@@ -1,0 +1,461 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_keyword_added_for_session",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_keywords_at_node_level",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_closest",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_decorator_baseclasses_merged",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_decorator_subclass_does_not_propagate_to_base",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_dynamically_in_funcarg",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_from_parameters",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_should_not_pass_to_siebling_class",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_mark_with_wrong_marker",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_merging_markers_deep",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_no_marker_match_on_unmarked_names",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestFunctional::test_reevaluate_dynamic_expr",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_keyword_extra",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_no_magic_values[+]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_no_magic_values[..]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_no_magic_values[__]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_no_match_directories_outside_the_suite",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_extra_keywords[TestClass and test_2]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_extra_keywords[TestClass]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_extra_keywords[xxx and TestClass and test_2]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_extra_keywords[xxx and not test_1]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_extra_keywords[xxx and test_2]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_extra_keywords[xxx]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestKeywordSelection::test_select_simple",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMark::test_mark_with_param",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMark::test_pytest_exists_in_namespace_all[mark]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMark::test_pytest_exists_in_namespace_all[param]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMark::test_pytest_mark_name_starts_with_underscore",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMark::test_pytest_mark_notcallable",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMarkDecorator::test__eq__[foo-rhs3-False]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMarkDecorator::test__eq__[lhs0-rhs0-True]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMarkDecorator::test__eq__[lhs1-rhs1-False]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMarkDecorator::test__eq__[lhs2-bar-False]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::TestMarkDecorator::test_aliases",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_addmarker_order",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_ini_markers",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_ini_markers_whitespace",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_considers_mark",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[1 or 2-expected_passed5]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[interface-expected_passed0]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[not (1 or 2)-expected_passed6]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[not interface-expected_passed1]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[not not not (pass)-expected_passed4]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[not pass-expected_passed3]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_custom[pass-expected_passed2]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_parametrize[2-3-expected_passed2]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_parametrize[None-expected_passed0]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_parametrize[[1.3]-expected_passed1]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_wrong_arguments[(foo-at column 5: expected right parenthesis; got end of input]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_wrong_arguments[foo bar-at column 5: expected end of input; got identifier]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_wrong_arguments[foo or or-at column 8: expected not OR left parenthesis OR identifier; got or]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_wrong_arguments[foo or-at column 7: expected not OR left parenthesis OR identifier; got end of input]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_wrong_arguments[not or-at column 5: expected not OR left parenthesis OR identifier; got or]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_keyword_option_wrong_arguments[or or-at column 1: expected not OR left parenthesis OR identifier; got or]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_expressions_no_smear",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_on_pseudo_function",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option[(((  xyz))  )-expected_passed1]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option[not not xyz-expected_passed2]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option[xyz and xyz2-expected_passed3]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option[xyz or xyz2-expected_passed5]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option[xyz-expected_passed0]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option[xyz2-expected_passed4]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option_custom[interface-expected_passed0]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_mark_option_custom[not interface-expected_passed1]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_marked_class_run_twice",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_marker_expr_eval_failure_handling[NOT (internal_err)]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_marker_expr_eval_failure_handling[NOT internal_err]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_marker_expr_eval_failure_handling[bogus=]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_marker_without_description",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_markers_from_parametrize",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_markers_option",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_markers_option_with_plugin_in_current_dir",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parameterset_for_fail_at_collect",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parameterset_for_parametrize_bad_markname",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parameterset_for_parametrize_marks[None]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parameterset_for_parametrize_marks[]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parameterset_for_parametrize_marks[skip]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parameterset_for_parametrize_marks[xfail]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parametrize_iterator",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parametrize_with_module",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parametrized_collect_with_wrong_args",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parametrized_collected_from_command_line",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_parametrized_with_kwargs",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_pytest_param_id_allows_none_or_string[None]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_pytest_param_id_allows_none_or_string[hello world]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_pytest_param_id_requires_string",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_strict_prohibits_unregistered_markers[--strict-markers]",
+      "file": "testing/test_mark.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_mark.py::test_strict_prohibits_unregistered_markers[--strict]",
+      "file": "testing/test_mark.py"
+    }
+  ],
+  "interpreter": ".envs/pytest-dev__pytest-10356/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'pytest'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/pytest-dev__pytest-10356",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/pytest-dev__pytest-10356"
+  },
+  "runner_environment": {
+    "SETUPTOOLS_SCM_PRETEND_VERSION": "7.2"
+  }
+}

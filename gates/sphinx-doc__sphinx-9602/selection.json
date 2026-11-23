@@ -1,0 +1,253 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_canonical",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_canonical_definition_overrides",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_canonical_definition_skip",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_canonical_duplicated",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_canonical",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_find_obj",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_objects",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_xrefs",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_domain_py_xrefs_abbreviations",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_function_signatures",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_get_full_qualified_name",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_info_field_list",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_info_field_list_piped_type",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_info_field_list_var",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_modindex_common_prefix",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_module_index",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_module_index_not_collapsed",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_module_index_submodule",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_noindexentry",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_optional_pyfunction_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_parse_annotation",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyattribute",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyclass_options",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyclassmethod",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata_signature_old",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydata_with_union_type_operator",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydecorator_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pydecoratormethod_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyexception_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_signature",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_signature_full",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_signature_full_py38",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_with_number_literals",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyfunction_with_union_type_operator",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pymethod_options",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyobject_prefix",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pyproperty",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_pystaticmethod",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_python_python_use_unqualified_type_names",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_python_python_use_unqualified_type_names_disabled",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_resolve_xref_for_properties",
+      "file": "tests/test_domain_py.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_domain_py.py::test_warn_missing_reference",
+      "file": "tests/test_domain_py.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-9602/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini",
+    "sed -i 's/Jinja2>=2.3/Jinja2<3.0/' setup.py",
+    "sed -i 's/sphinxcontrib-applehelp/sphinxcontrib-applehelp<=1.0.7/' setup.py",
+    "sed -i 's/sphinxcontrib-devhelp/sphinxcontrib-devhelp<=1.0.5/' setup.py",
+    "sed -i 's/sphinxcontrib-qthelp/sphinxcontrib-qthelp<=1.0.6/' setup.py",
+    "sed -i 's/alabaster>=0.7,<0.8/alabaster>=0.7,<0.7.12/' setup.py",
+    "sed -i \"s/'packaging',/'packaging', 'markupsafe<=2.0.1',/\" setup.py",
+    "sed -i 's/sphinxcontrib-htmlhelp>=2.0.0/sphinxcontrib-htmlhelp>=2.0.0,<=2.0.4/' setup.py",
+    "sed -i 's/sphinxcontrib-serializinghtml>=1.1.5/sphinxcontrib-serializinghtml>=1.1.5,<=1.1.9/' setup.py"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sphinx'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-9602",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-9602"
+  }
+}

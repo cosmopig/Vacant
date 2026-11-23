@@ -1,0 +1,1341 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::TestAsinhNorm::test_init",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::TestAsinhNorm::test_norm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_2d_to_rgba",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_BoundaryNorm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_CenteredNorm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_FuncNorm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_LogNorm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_LogNorm_inverse",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_Normalize",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_PowerNorm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_PowerNorm_translation_invariance",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_SymLogNorm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_SymLogNorm_colorbar",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_SymLogNorm_single_zero",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_Even",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_Odd",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_TwoSlopeNorm_VminGTVmax",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_VcenterGTVmax",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_VmaxEqualsVcenter",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_VminEqualsVcenter",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_VminGTVcenter",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_autoscale",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_autoscale_None_vmax",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_autoscale_None_vmin",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_premature_scaling",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_scale",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_scaleout_center",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_TwoSlopeNorm_scaleout_center_max",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_autoscale_masked",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_boundarynorm_and_colorbarbase[png]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_cm_set_cmap_error",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_cmap_and_norm_from_levels_and_colors2",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_cmap_and_norm_from_levels_and_colors[png]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_cn",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_color_names",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_color_sequences",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_alpha_array",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_bad_data_with_alpha",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_copy",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_endian",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_invalid",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_return_types",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Accent]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Accent_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Blues]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Blues_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[BrBG]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[BrBG_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[BuGn]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[BuGn_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[BuPu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[BuPu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[CMRmap]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[CMRmap_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Dark2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Dark2_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[GnBu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[GnBu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Greens]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Greens_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Greys]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Greys_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[OrRd]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[OrRd_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Oranges]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Oranges_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PRGn]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PRGn_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Paired]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Paired_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Pastel1]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Pastel1_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Pastel2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Pastel2_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PiYG]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PiYG_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuBuGn]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuBuGn_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuBu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuBu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuOr]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuOr_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuRd]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[PuRd_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Purples]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Purples_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdBu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdBu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdGy]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdGy_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdPu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdPu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdYlBu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdYlBu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdYlGn]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[RdYlGn_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Reds]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Reds_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Set1]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Set1_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Set2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Set2_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Set3]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Set3_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Spectral]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Spectral_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Wistia]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[Wistia_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlGnBu]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlGnBu_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlGn]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlGn_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlOrBr]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlOrBr_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlOrRd]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[YlOrRd_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[afmhot]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[afmhot_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[autumn]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[autumn_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[binary]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[binary_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[bone]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[bone_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[brg]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[brg_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[bwr]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[bwr_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[cividis]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[cividis_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[cool]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[cool_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[coolwarm]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[coolwarm_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[copper]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[copper_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[cubehelix]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[cubehelix_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[flag]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[flag_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_earth]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_earth_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_gray]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_gray_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_heat]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_heat_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_ncar]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_ncar_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_rainbow]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_rainbow_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_stern]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_stern_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_yarg]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gist_yarg_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gnuplot2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gnuplot2_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gnuplot]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gnuplot_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gray]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[gray_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[hot]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[hot_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[hsv]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[hsv_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[inferno]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[inferno_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[jet]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[jet_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[magma]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[magma_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[nipy_spectral]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[nipy_spectral_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[ocean]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[ocean_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[pink]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[pink_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[plasma]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[plasma_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[prism]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[prism_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[rainbow]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[rainbow_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[seismic]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[seismic_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[spring]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[spring_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[summer]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[summer_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab10]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab10_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab20]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab20_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab20b]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab20b_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab20c]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[tab20c_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[terrain]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[terrain_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[turbo]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[turbo_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[twilight]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[twilight_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[twilight_shifted]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[twilight_shifted_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[viridis]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[viridis_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[winter]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormap_reversing[winter_r]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_colormaps_get_cmap",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_conversions",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_conversions_masked",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_create_lookup_table[1-result2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_create_lookup_table[2-result1]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_create_lookup_table[5-result0]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_failed_conversions",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_get_under_over_bad",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_grey_gray",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_has_alpha_channel",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_hex_shorthand_notation",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_index_dtype[float16]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_index_dtype[float]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_index_dtype[int]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_index_dtype[uint8]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_light_source_hillshading",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_light_source_masked_shading",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_light_source_planar_hillshading",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_light_source_shading_default",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_light_source_shading_empty_mask",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_light_source_topo_surface[png]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_lognorm_invalid[-1-2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_lognorm_invalid[3-1]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_make_norm_from_scale_name",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_ndarray_subclass_norm",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_non_mutable_get_values[bad]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_non_mutable_get_values[over]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_non_mutable_get_values[under]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_norm_callback",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_norm_deepcopy",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_norm_update_figs[pdf]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_norm_update_figs[png]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_pandas_iterable",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_register_cmap",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_repr_html",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_repr_png",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_resampled",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_rgb_hsv_round_trip",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_same_color",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_scalarmappable_norm_update",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_set_dict_to_rgba",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_tableau_order",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_accepts_color_alpha_tuple[rgba_alpha0]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_accepts_color_alpha_tuple[rgba_alpha1]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_accepts_color_alpha_tuple[rgba_alpha2]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_accepts_color_alpha_tuple[rgba_alpha3]",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_array_accepts_color_alpha_tuple",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_array_accepts_color_alpha_tuple_with_multiple_colors",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_array_alpha_array",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_array_error_with_color_invalid_alpha_tuple",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_array_explicit_alpha_overrides_tuple_alpha",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_array_single_str",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_error_with_color_invalid_alpha_tuple",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_to_rgba_explicit_alpha_overrides_tuple_alpha",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    },
+    {
+      "kind": "exact",
+      "label": "lib/matplotlib/tests/test_colors.py::test_unregister_builtin_cmap",
+      "file": "lib/matplotlib/tests/test_colors.py"
+    }
+  ],
+  "interpreter": ".envs/matplotlib__matplotlib-25479/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+    "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
+    "QHULL_TAR=\"$VACANT_BUILD_TMP/qhull-2020-src-8.0.2.tgz\"",
+    "QHULL_BUILD_DIR=\"$PWD/build\"",
+    "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
+    "mkdir -p \"$QHULL_BUILD_DIR\"",
+    "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
+    "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'matplotlib'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/matplotlib__matplotlib-25479",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/matplotlib__matplotlib-25479"
+  }
+}

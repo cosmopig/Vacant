@@ -1,0 +1,838 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_add_field_and_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_add_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_add_model_order_with_respect_to_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_alter_field_and_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_create_model_and_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_empty_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_index_together_no_changes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_index_together_ordering",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_index_together_remove_fk",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_partly_alter_index_together_decrease",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_partly_alter_index_together_increase",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_remove_field_and_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_remove_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_rename_field_and_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_rename_index_together_to_index",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_rename_index_together_to_index_extra_options",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_rename_index_together_to_index_order_fields",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorIndexTogetherTests::test_set_alter_order_with_respect_to_index_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_alter_order_with_respect_to",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_blank_textfield_and_charfield",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_constraints",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_custom_fk_with_hardcoded_to",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_date_fields_with_auto_now_add_asking_for_default",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_date_fields_with_auto_now_add_not_asking_for_null_addition",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_date_fields_with_auto_now_not_asking_for_default",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_field_and_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_field_with_default",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_indexes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_many_to_many",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_order_with_respect_to",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_order_with_respect_to_index_constraint",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_order_with_respect_to_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_model_with_field_removed_from_base_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_non_blank_textfield_and_charfield",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_add_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_add",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_change",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_no_changes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_remove",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_db_table_with_model_change",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_and_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_fk_dependency_other_app",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_not_null_oneoff_default",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_not_null_with_default",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_field_to_not_null_without_default",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_fk_before_model_deletion",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_many_to_many",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_model_managers",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_model_options",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_model_options_proxy",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_regex_string_to_compiled_regex",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_alter_unique_together_fk_to_m2m",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_arrange_for_graph",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_arrange_for_graph_with_multiple_initial",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_bases_first",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_bases_first_mixed_case_app_label",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_mixed_addcreate",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_swappable",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_swappable2",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_dependency_swappable_self",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_circular_fk_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_concrete_field_changed_to_many_to_many",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_model_and_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_model_with_check_constraint",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_model_with_indexes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_create_with_through_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_custom_deconstructible",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_custom_migration_name",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstruct_field_kwarg",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstruct_type",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstructible_dict",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstructible_list",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_deconstructible_tuple",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_default_related_name_option",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_different_regex_does_alter",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_empty_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_first_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_fk_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_fk_dependency_other_app",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_foreign_key_removed_before_target_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_identical_regex_doesnt_alter",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_keep_db_table_with_model_change",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_last_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_m2m_w_through_multistep_remove",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_managed_to_unmanaged",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_many_to_many_changed_to_concrete_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_many_to_many_removed_before_through_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_many_to_many_removed_before_through_model_2",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_mti_inheritance_model_removal",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_multiple_bases",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_nested_deconstructible_objects",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_new_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_non_circular_foreignkey_dependency_removal",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_old_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_order_fields_indexes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_parse_number",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_partly_alter_unique_together_decrease",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_partly_alter_unique_together_increase",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_pk_fk_included",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_bases_first",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_custom_pk",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_fk_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_non_model_parent",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_to_mti_with_fk_to_proxy",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_proxy_to_mti_with_fk_to_proxy_proxy",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_alter_order_with_respect_to",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_constraints",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_field_and_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_indexes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_remove_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_and_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_foreign_key_to_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_preserved_db_column",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_field_with_renamed_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_foreign_object_fields",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_indexes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_m2m_through_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_case",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_reverse_relation_dependencies",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_with_fks_in_different_position",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_model_with_renamed_rel_field",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_referenced_primary_key",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_rename_related_field_preserved_db_column",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_renamed_referenced_m2m_model_case",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_replace_string_with_foreignkey",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_same_app_circular_fk_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_same_app_circular_fk_dependency_with_unique_together_and_indexes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_same_app_no_fk_dependency",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_set_alter_order_with_respect_to",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_set_alter_order_with_respect_to_index_constraint_unique_together",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_supports_functools_partial",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_changed",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_circular_multi_mti",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_first_inheritance",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_first_setting",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_lowercase",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_swappable_many_to_many_model_case",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_trim_apps",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unique_together_no_changes",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unique_together_ordering",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unique_together_remove_fk",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_create",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_custom_pk",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_delete",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::AutodetectorTests::test_unmanaged_to_managed",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_auto",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_many_operations_suffix",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_no_operations",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_no_operations_initial",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_none_name",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_none_name_with_initial_true",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_operation_with_no_suggested_name",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_single_operation",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_single_operation_long_name",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_two_create_models",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_two_create_models_with_initial_true",
+      "file": "tests/migrations/test_autodetector.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/migrations/test_autodetector.py::MigrationSuggestNameTests::test_two_operations",
+      "file": "tests/migrations/test_autodetector.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-15973/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-15973",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-15973"
+  }
+}

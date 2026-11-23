@@ -1,0 +1,113 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_BlockDiagMatrix",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_BlockMatrix",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_BlockMatrix_Determinant",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_BlockMatrix_trace",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_bc_dist_diag",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_bc_matadd",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_bc_matmul",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_bc_transpose",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_block_collapse_explicit_matrices",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_block_plus_ident",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_blockcut",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_deblock",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_reblock_2x2",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_blockmatrix.py::test_squareBlockMatrix",
+      "file": "sympy/matrices/expressions/tests/test_blockmatrix.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_matadd.py::test_doit_args",
+      "file": "sympy/matrices/expressions/tests/test_matadd.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_matadd.py::test_generic_identity",
+      "file": "sympy/matrices/expressions/tests/test_matadd.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_matadd.py::test_matadd_of_matrices",
+      "file": "sympy/matrices/expressions/tests/test_matadd.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_matadd.py::test_matadd_sympify",
+      "file": "sympy/matrices/expressions/tests/test_matadd.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/matrices/expressions/tests/test_matadd.py::test_sort_key",
+      "file": "sympy/matrices/expressions/tests/test_matadd.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-17630/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-17630",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-17630"
+  }
+}

@@ -1,0 +1,1515 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityComparison::test_quantity_comparison",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityComparison::test_quantity_equality",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityComparison::test_quantity_equality_array",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_1",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_2",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_3",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_copy",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_creation_via_view",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_float_dtype_promotion",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_nan_inf",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_ndmin",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_non_quantity_with_unit",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_numpy_style_dtype_inspect",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_order",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_preserve_dtype",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_rshift_warns",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_subok",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityCreation::test_unit_property",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_array_quantity_repr",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_array_quantity_str",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_dimensionless_quantity_format",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_dimensionless_quantity_repr",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_dimensionless_quantity_str",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_repr_latex",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_scalar_quantity_format",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_scalar_quantity_repr",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_scalar_quantity_str",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_to_string",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityDisplay::test_uninitialized_unit_format",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityMimics::test_mimic_function_unit",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityMimics::test_mimic_input[QuantityMimic2]",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityMimics::test_mimic_input[QuantityMimic]",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityMimics::test_mimic_setting[QuantityMimic2]",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityMimics::test_mimic_setting[QuantityMimic]",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_abs",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_addition",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_array_converters",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_commutativity",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_comparison",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_complicated_operation",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_dimensionless_operations",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_division",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_incompatible_units",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_matrix_multiplication",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_multiplication",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_non_number_type",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_numeric_converters",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_power",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_subtraction",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantityOperations::test_unary",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantitySubclassAboveAndBelow::test_attr_propagation",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestQuantitySubclassAboveAndBelow::test_setup",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestSpecificTypeQuantity::test_creation",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestSpecificTypeQuantity::test_operation_precedence_and_fallback",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::TestSpecificTypeQuantity::test_view",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_array_indexing_slicing",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_array_setslice",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_arrays",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_assign_slice_with_quantity_like",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_cgs",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_copy",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_decompose",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_decompose_regression",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_deepcopy",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_equality_numpy_scalar",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_implicit_conversion",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_implicit_conversion_autocomplete",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_insert",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_inverse_quantity",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_masked_quantity_str_repr",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_conversion",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_conversion_equivalency_passed_on",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_conversion_with_equiv",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_fraction_power",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_from_table",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_ilshift",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_initialisation_from_string",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_initialized_with_quantity",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_invalid_unit_string",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_iterability",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_mutability",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_pickelability",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_string_unit",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_to_view",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_tuple_power",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_quantity_value_views",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_regression_12964",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_repr_array_of_quantity",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_self_equivalency",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_si",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_unit_class_override",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_unit_identity",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity.py::test_unsupported",
+      "file": "astropy/units/tests/test_quantity.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_dimensionless",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_errors",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_ndarray",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_ndarray_dimensionless_output",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_quantity_inplace",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_simple",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestClip::test_clip_unitless_parts",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_invalid_units[equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_invalid_units[greater]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_invalid_units[greater_equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_invalid_units[less]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_invalid_units[less_equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_invalid_units[not_equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_valid_units[equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_valid_units[greater]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_valid_units[greater_equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_valid_units[less]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_valid_units[less_equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_comparison_valid_units[not_equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_onearg_test_ufuncs[isfinite]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_onearg_test_ufuncs[isinf]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_onearg_test_ufuncs[isnan]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_onearg_test_ufuncs[signbit]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestComparisonUfuncs::test_sign",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_comparison_ufuncs_inplace[equal]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_comparison_ufuncs_inplace[greater]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_ndarray_inplace_op_with_quantity",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_one_argument_two_output_ufunc_inplace[1.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_one_argument_two_output_ufunc_inplace[value1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_one_argument_ufunc_inplace[1.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_one_argument_ufunc_inplace[value1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_one_argument_ufunc_inplace_2[1.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_one_argument_ufunc_inplace_2[value1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_onearg_test_ufuncs_inplace[isfinite]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_onearg_test_ufuncs_inplace[signbit]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_sign_inplace",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_two_output_ufunc_inplace[1.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_two_output_ufunc_inplace[value1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_ufunc_inplace_1[1.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_ufunc_inplace_1[value1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_ufunc_inplace_2[1.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_ufunc_inplace_2[value1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_two_argument_ufunc_inplace_3",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_ufunc_inplace_non_contiguous_data",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInplaceUfuncs::test_ufunc_inplace_non_standard_dtype",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_array[absolute]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_array[ceil]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_array[conjugate]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_array[floor]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_array[negative]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_array[rint]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[absolute]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[ceil]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[conjugate0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[conjugate1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[fabs]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[floor]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[negative]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[positive]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[rint]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_scalar[spacing]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[add]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[fmod]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[hypot]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[maximum]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[minimum]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[nextafter]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[remainder0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[remainder1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_array[subtract]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[add]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[fmod]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[hypot]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[maximum]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[minimum]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[nextafter]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[remainder0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[remainder1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_invalid_units[subtract]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[add-0.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[fmod-inf]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[hypot-0.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[maximum-0.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[minimum-0.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[nextafter-0.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[remainder-inf0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[remainder-inf1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_one_arbitrary[subtract-0.0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[add]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[fmod]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[hypot]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[maximum]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[minimum]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[nextafter]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[remainder0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[remainder1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestInvariantUfuncs::test_invariant_twoarg_scalar[subtract]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_cbrt_array[cbrt]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_cbrt_scalar[cbrt]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_copysign_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_copysign_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_dimensionless_twoarg_array[logaddexp2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_dimensionless_twoarg_array[logaddexp]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_dimensionless_twoarg_invalid_units[logaddexp2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_dimensionless_twoarg_invalid_units[logaddexp]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_divide_array[divide0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_divide_array[divide1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_divide_scalar[divide0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_divide_scalar[divide1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[exp2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[exp]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[expm1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[log10]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[log1p]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[log2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_array[log]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[exp2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[exp]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[expm1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[log10]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[log1p]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[log2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_invalid_units[log]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[exp2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[exp]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[expm1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[log10]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[log1p]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[log2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_exp_scalar[log]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_float_power_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_floor_divide_remainder_and_divmod",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_frexp_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_frexp_invalid_units",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_frexp_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_heaviside_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_heaviside_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_ldexp_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_ldexp_invalid",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_ldexp_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_matmul",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_modf_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_modf_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_multiply_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_multiply_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_power_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_power_array_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_power_array_array2",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_power_array_array3",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_power_invalid",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_power_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_reciprocal_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_reciprocal_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_sqrt_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_sqrt_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_square_array",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityMathFuncs::test_square_scalar",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc10]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc11]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc12]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc13]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc14]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc15]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc16]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc17]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc18]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc19]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc20]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc21]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc3]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc4]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc5]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc6]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc7]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc8]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testcases[tc9]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te10]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te11]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te1]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te2]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te3]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te4]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te5]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te6]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te7]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te8]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testexcs[te9]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestQuantityTrigonometricFuncs::test_testwarns[tw0]",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncAt::test_one_argument_ufunc_at",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncAt::test_two_argument_ufunc_at",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncHelpers::test_coverage",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncHelpers::test_removal_addition",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncHelpers::test_scipy_registered",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncOuter::test_one_argument_ufunc_outer",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncOuter::test_two_argument_ufunc_outer",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReduceReduceatAccumulate::test_one_argument_ufunc_reduce_accumulate",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    },
+    {
+      "kind": "exact",
+      "label": "astropy/units/tests/test_quantity_ufuncs.py::TestUfuncReduceReduceatAccumulate::test_two_argument_ufunc_reduce_accumulate",
+      "file": "astropy/units/tests/test_quantity_ufuncs.py"
+    }
+  ],
+  "interpreter": ".envs/astropy__astropy-13977/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/requires = \\[\"setuptools\",/requires = \\[\"setuptools==68.0.0\",/' pyproject.toml"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'astropy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {
+    "astropy/_compiler.c": "4b6f8aaeae843d8a45e1c5062b70d5cd2aaa426fdddf95857771d25a38ff0e14",
+    "astropy/wcs/src/docstrings.c": "f0ca83ecd8017559e925f4927213b1f2161937bc40cae7b72807ca0687f375be",
+    "astropy/wcs/include/wcsconfig.h": "e35bf338175e0a043d41be9dad973b536e5c98d17f7b1918516d85d5d3b92404",
+    "astropy/wcs/include/wcslib/wcsmath.h": "6ae8e1bff7e4ce6d1d9b2bca73521ad78056e96ceb99f48f9e1d672bd89af29a",
+    "astropy/wcs/include/wcslib/prj.h": "11cc096d25569eb916426538381141ebf4620451b18778070fa1896225b5bcd1",
+    "astropy/wcs/include/wcslib/lin.h": "9665ca1f53599dfa337ef8a22b27b73ac7c8053a6d0cdbbe2b26a32ff6ead009",
+    "astropy/wcs/include/wcslib/tab.h": "1e6a42195b505c0a3c4ed4d0df2197d348936a777a96d9893b329fa9f8494abb",
+    "astropy/wcs/include/wcslib/spx.h": "1b647d474305e650774620507a6fde4103d4574de918649c6a67140e6574ea1f",
+    "astropy/wcs/include/wcslib/wcsprintf.h": "2104ac8bb9061d54bba532b23089e35f06ba44c88f66dc3c35c546383aa9303f",
+    "astropy/wcs/include/wcslib/cel.h": "780aa32687b0603d88146dfacd688317c23e69d2b5748cb567dde9597c1a4ec9",
+    "astropy/wcs/include/wcslib/wcserr.h": "1862624ad942cfe1ef4883e6dbd5f68d973200edaf35a06d4832cdc3914b78af",
+    "astropy/wcs/include/wcslib/wcs.h": "750eae45fcb96f2369a45a97d365033d5ed43c5ece88bce7f9bb14d5c25a34e7",
+    "astropy/wcs/include/wcslib/spc.h": "c2867bce9523a0503c5e4924a4f6781c8c1ae508d078ecfcfb84789d1d325501",
+    "astropy/wcs/include/astropy_wcs/docstrings.h": "de69c19906e0085887e4b3c58fe56e428f9f2fccf396b66a13d0f4e0aaeadcef",
+    "astropy/wcs/include/astropy_wcs/wcsconfig.h": "e35bf338175e0a043d41be9dad973b536e5c98d17f7b1918516d85d5d3b92404",
+    "astropy/timeseries/periodograms/bls/_impl.c": "46524b44c75ad2044f111115313f1ce031b3965b4f77e342f8295eb7712a5aef",
+    "astropy/timeseries/periodograms/lombscargle/implementations/cython_impl.c": "b67858415cf831f39fe4a67b6b1af1ced657cfb714df55087a8c24c97220c06a",
+    "astropy/convolution/_convolve.c": "7b8ae1259d15c5875079da27a95a7fa439bf729be2207ceda94abf54a9a90eb0",
+    "astropy/table/_np_utils.c": "cdf97d0d5c7ff9f8fdbfc8d1b9994a454bada1c08bea4c17abc9729800bf1b36",
+    "astropy/table/_column_mixins.c": "20d0adf6e8d4ef3d933529cfccf49befda899894560ea47f1abcc4a8c6aa83c8",
+    "astropy/cosmology/flrw/scalar_inv_efuncs.c": "f751c739eb7de999d4a7c8c1867e5f1087ce28286d6973fe408e063857c1dd75",
+    "astropy/io/ascii/cparser.c": "eb274fcd14db311ce9ae3da9d27ffb3ff4cd0a2e297b3a6d3077b0d26a65ba53",
+    "astropy/io/fits/_utils.c": "36e80ccb90546e7c701dfa772bd79ec1765246d7fac283266b917607c44ba477",
+    "astropy/stats/_stats.c": "d3f2218360b3db2ece117cbef33400c4c81fa9cb658230db5f29467bad19b3e9"
+  },
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/astropy__astropy-13977",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/astropy__astropy-13977"
+  }
+}

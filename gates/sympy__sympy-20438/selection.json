@@ -1,0 +1,483 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Complement",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Complement_as_relational",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_DisjointUnion",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_DisjointUnion_contains",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_DisjointUnion_is_empty",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_DisjointUnion_is_iterable",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_DisjointUnion_iter",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_DisjointUnion_len",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_EmptySet",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Finite_as_relational",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Intersection_as_relational",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Interval_as_relational",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Interval_free_symbols",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Interval_is_left_unbounded",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Interval_is_right_unbounded",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_ProductSet",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_ProductSet__len__",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_ProductSet_is_empty",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_ProductSet_of_single_arg_is_not_arg",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_SymmetricDifference",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_SymmetricDifference_as_relational",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Union_as_relational",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Union_contains",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_Union_of_ProductSets_shares",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_boundary",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_boundary_ProductSet",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_boundary_ProductSet_line",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_boundary_Union",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_closure",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_complement",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_contains",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_deprecated_is_EmptySet",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_difference",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_finite_basic",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_finite_set_intersection",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_image_EmptySet",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_image_FiniteSet",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_image_Union",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_image_interval",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_image_piecewise",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_imageset",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interior",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_intersect1",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_intersection",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interval_arguments",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interval_is_empty",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interval_subs",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interval_symbolic",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interval_symbolic_end_points",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_interval_to_mpi",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_closed",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_disjoint",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_empty",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_finiteset",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_number",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_open",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_proper_subset",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_proper_superset",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_subset",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_is_superset",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_10113",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_10248",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_10326",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_10337",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_10931",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_11174",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_11827",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_18505",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_20089",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_2799",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_5724_7680",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_7841",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_8257",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9447",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9536",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9623",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9637",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9706",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9808",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_9956",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_issue_Symbol_inter",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_measure",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_product_basic",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_real",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_set_evalf",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_set_operations_nonsets",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_supinf",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_union",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_union_contains",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_union_intersection_constructor",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_union_is_empty",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_union_iter",
+      "file": "sympy/sets/tests/test_sets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_sets.py::test_universalset",
+      "file": "sympy/sets/tests/test_sets.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-20438/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-20438",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-20438"
+  }
+}

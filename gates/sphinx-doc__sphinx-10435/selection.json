@@ -1,0 +1,390 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_babel_with_language_de",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_babel_with_language_ja",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_babel_with_language_ru",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_babel_with_language_tr",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_babel_with_no_language_settings",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_babel_with_unknown_language",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_default_latex_documents",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_footnote",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_footnote_referred_multiple_times",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_image_in_section",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_index_on_title",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_add_latex_package",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_additional_settings_for_greek",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_additional_settings_for_language_code",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_basic",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_basic_howto",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_basic_howto_ja",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_basic_manual",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_basic_manual_ja",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_container",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_elements_extrapackages",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_equations",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_figure_in_admonition",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_glossary",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_image_in_parsed_literal",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_images",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_index",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_labels",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_logo_if_not_found",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_nested_enumerated_list",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_nested_tables",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_obey_numfig_but_math_numfig_false",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_obey_numfig_is_false",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_obey_numfig_secnum_depth_is_two",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_obey_numfig_secnum_depth_is_zero",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_raw_directive",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_release",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_show_urls_footnote_and_substitutions",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_show_urls_is_footnote",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_show_urls_is_inline",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_show_urls_is_no",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_table_complex_tables",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_table_custom_template_caseA",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_table_custom_template_caseB",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_table_custom_template_caseC",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_table_longtable",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_table_tabulars",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_thebibliography",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_theme",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_theme_options",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_theme_papersize",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_title_after_admonitions",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_toplevel_sectioning_is_None",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_toplevel_sectioning_is_chapter",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_toplevel_sectioning_is_chapter_with_howto",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_toplevel_sectioning_is_part",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_toplevel_sectioning_is_part_with_howto",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_toplevel_sectioning_is_section",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_latex_warnings",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_numref",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_numref_with_language_ja",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_numref_with_prefix1",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_numref_with_prefix2",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_polyglossia_with_language_de",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_polyglossia_with_language_de_1901",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_reference_in_caption_and_codeblock_in_footnote",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_texescape_for_non_unicode_supported_engine",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_texescape_for_unicode_supported_engine",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_toctree_maxdepth_howto",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_toctree_maxdepth_manual",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_toctree_not_found",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_toctree_with_deeper_maxdepth",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_toctree_without_maxdepth",
+      "file": "tests/test_build_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_build_latex.py::test_writer",
+      "file": "tests/test_build_latex.py"
+    }
+  ],
+  "interpreter": ".envs/sphinx-doc__sphinx-10435/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [
+    "sed -i 's/pytest/pytest -rA/' tox.ini"
+  ],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sphinx'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sphinx-doc__sphinx-10435",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sphinx-doc__sphinx-10435"
+  }
+}

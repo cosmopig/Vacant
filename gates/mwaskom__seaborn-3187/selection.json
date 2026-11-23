@@ -1,0 +1,1254 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestDefaultObject::test_default_repr",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d[col]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d[row]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_as_vector[col]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_as_vector[row]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_with_order[col-expand]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_with_order[col-reverse]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_with_order[col-subset]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_with_order[row-expand]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_with_order[row-reverse]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_1d_with_order[row-subset]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_2d",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_2d_with_order[expand]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_2d_with_order[reverse]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_2d_with_order[subset]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_axis_sharing",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_col_wrapping",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_layout_algo[constrained]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_layout_algo[tight]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_row_wrapping",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestFacetInterface::test_unshared_spacing",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_data_only",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_data_only_named",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_df_and_mixed_variables",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_df_and_named_variables",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_empty",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_and_named_data",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_and_named_xy[x]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_and_named_xy[y]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_data_x",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_data_x_y",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_too_many",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_x",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_positional_x_y",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_unknown_keywords",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_vector_variables_no_index",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestInit::test_vector_variables_only",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_column[facet_kws0-pair_kws0]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_column[facet_kws1-pair_kws1]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_column_wrapped",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_column_wrapped_non_cross",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_row[facet_kws0-pair_kws0]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_row[facet_kws1-pair_kws1]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_1d_row_wrapped",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_2d",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_2d_unshared",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLabelVisibility::test_single_subplot",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_drop_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_orient[h-y]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_orient[v-x]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_orient[x-x]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_orient[y-y]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_stat_nondefault",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_type_checks",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_variable_list",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_with_late_data_definition",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_with_new_data_definition",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_with_new_variable_by_name",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_with_new_variable_by_vector",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLayerAddition::test_without_data",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_anonymous_title",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_identity_scale_ignored",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_legendless_mark",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_multi_layer_different_artists",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_multi_layer_multi_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_multi_layer_single_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_single_layer_common_unnamed_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_single_layer_common_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_single_layer_multi_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_single_layer_single_variable",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_suppression_in_add_method",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestLegend::test_three_layers",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_all_numeric[Index]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_all_numeric[list]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_axis_sharing",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_axis_sharing_with_facets",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_computed_coordinate_orient_inference",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_cross_mismatched_lengths",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_error_on_facet_overlap[variables0]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_error_on_facet_overlap[variables1]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_error_on_wrap_overlap[variables0]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_error_on_wrap_overlap[variables1]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_labels",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_limits",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_list_of_vectors",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_non_cross",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_non_cross_wrapping",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_orient_inference",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_single_dimension[x]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_single_dimension[y]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_single_variable_key_raises",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_two_variables_single_order_error",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_with_facets",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_with_no_variables",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_x_wrapping",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPairInterface::test_y_wrapping",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_axis_labels_are_first_name",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_axis_labels_from_constructor",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_axis_labels_from_layer",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_default_is_no_pyplot",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_empty",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_facets_no_subgroups",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_facets_one_subgroup",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_labels_axis",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_labels_facets",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_labels_legend",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_layer_specific_facet_disabling",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_layout_size",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_limits",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_matplotlib_object_creation",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_methods_clone",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_move",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_move_log_scale",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_move_with_range",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_multi_move",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_multi_move_with_pairing",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_no_orient_variance",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_axes",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_axes_with_subplots_error",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_disables_layout_algo",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_figure[False]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_figure[True]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_subfigure[False]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_subfigure[True]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_on_type_check",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_one_grouping_variable[color]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_one_grouping_variable[group]",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_paired_and_faceted",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_paired_one_dimension",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_paired_variables",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_paired_variables_one_subset",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_png_repr",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_save",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_show",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_single_split_multi_layer",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_single_split_single_layer",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_specified_width",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_stat",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_stat_and_move",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_stat_log_scale",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_theme_default",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_theme_error",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_theme_params",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_title_facet_function",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_title_single",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_two_grouping_variables",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestPlotting::test_with_pyplot",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_computed_var_ticks",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_computed_var_transform",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_derived_range_with_axis_scaling",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_explicit_categorical_converter",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_explicit_range_with_axis_scaling",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_facet_categories",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_facet_categories_single_dim_shared",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_facet_categories_unshared",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_faceted_log_scale",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_identity_mapping_color_tuples",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_identity_mapping_linewidth",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_inference",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_inference_from_layer_data",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_inference_joins",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_inferred_categorical_converter",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_inferred_nominal_passed_to_stat",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_mark_data_from_categorical",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_mark_data_from_datetime",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_mark_data_log_transform_is_inverted",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_mark_data_log_transfrom_with_stat",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_nominal_x_axis_tweaks",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_nominal_y_axis_tweaks",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_pair_categories",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_pair_categories_shared",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_pair_single_coordinate_stat_orient",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/_core/test_plot.py::TestScaling::test_paired_single_log_scale",
+      "file": "tests/_core/test_plot.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_axis_labels",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_ci_deprecation",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_color",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_legend_data",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_axes",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_smoke",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics0]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics10]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics11]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics1]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics2]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics3]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics4]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics5]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics6]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics7]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics8]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_lineplot_vs_relplot[long_semantics9]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_log_scale",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_matplotlib_kwargs",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_non_aggregated_data",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_nonmapped_dashes",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_orient",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestLinePlotter::test_plot",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_ax_kwarg_removal",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_facet_variable_collision",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_flat_array_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_flat_list_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_flat_series_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_complex",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_data",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_hues",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_legend",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_simple",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_sizes",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_stringy_numerics",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_styles",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_unshared_axis_labels",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_vectors[list]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_vectors[numpy]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_vectors[series]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_relplot_wide",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_array_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_df_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_df_with_nonnumeric_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_dict_of_arrays_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_dict_of_lists_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_dict_of_series_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_list_of_arrays_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_list_of_list_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestRelationalPlotter::test_wide_list_of_series_variables",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_axis_labels",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_color",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_datetime_scale",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_hue_order",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_legend_data",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_linewidths",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_literal_attribute_vectors",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_plot",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_axes",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_smoke",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics0]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics10]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics11]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics1]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics2]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics3]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics4]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics5]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics6]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics7]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics8]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_scatterplot_vs_relplot[long_semantics9]",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_size_norm_extrapolation",
+      "file": "tests/test_relational.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_relational.py::TestScatterPlotter::test_supplied_color_array",
+      "file": "tests/test_relational.py"
+    }
+  ],
+  "interpreter": ".envs/mwaskom__seaborn-3187/bin/python",
+  "timeout_s": 153,
+  "setup_commands": [],
+  "base_rebuild_commands": [],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/mwaskom__seaborn-3187",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/mwaskom__seaborn-3187"
+  }
+}

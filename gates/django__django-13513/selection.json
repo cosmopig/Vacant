@@ -1,0 +1,458 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::CallableSettingWrapperTests::test_repr",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::CustomExceptionReporterFilterTests::test_cleansed_substitute_override",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::CustomExceptionReporterFilterTests::test_hidden_settings_override",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::CustomExceptionReporterFilterTests::test_setting_allows_custom_subclass",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewQueriesAllowedTests::test_handle_db_exception",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_400",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_400_bad_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_403",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_403_template",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_404",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_404_empty_path_not_in_urls",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_404_not_in_urls",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_classbased_technical_404",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_default_urlconf_template",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_exception_reporter_from_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_exception_reporter_from_settings",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_files",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_no_template_source_loaders",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_non_l10ned_numeric_ids",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_regression_21530",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_technical_404",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_technical_404_converter_raise_404",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_template_encoding",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_template_exceptions",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DebugViewTests::test_template_loader_postmortem",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DecoratorsTests::test_sensitive_post_parameters_not_called",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::DecoratorsTests::test_sensitive_variables_not_called",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_callable_settings",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_callable_settings_forbidding_to_set_attributes",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_cleanse_setting_basic",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_cleanse_setting_ignore_case",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_cleanse_setting_recurses_in_dictionary",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_cleanse_setting_recurses_in_dictionary_with_non_string_key",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_cleanse_setting_recurses_in_list_tuples",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_custom_exception_reporter_filter",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_dict_setting_with_non_str_key",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_exception_report_uses_meta_filtering",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_multivalue_dict_key_error",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_non_sensitive_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_paranoid_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_request_meta_filtering",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_sensitive_function_arguments",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_sensitive_function_keyword_arguments",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_sensitive_method",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_sensitive_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_sensitive_settings",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterFilterTests::test_settings_with_sensitive_keys",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_disallowed_host",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_encoding_error",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_eol_support",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_exception_fetching_user",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_ignore_traceback_evaluation_exceptions",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_local_variable_escaping",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_message_only",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_no_exception",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_no_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_non_utf8_values_handling",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_reporting_frames_for_cyclic_reference",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_reporting_frames_source_not_match",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_reporting_frames_without_source",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_reporting_of_nested_exceptions",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_request_and_exception",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_request_and_message",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_request_with_items_key",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_sharing_traceback",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_suppressed_context",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_template_encoding",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_too_large_values_handling",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_unfrozen_importlib",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_unprintable_values_handling",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonDjangoTemplatesDebugViewTests::test_400",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonDjangoTemplatesDebugViewTests::test_400_bad_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonDjangoTemplatesDebugViewTests::test_403",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonDjangoTemplatesDebugViewTests::test_404",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonDjangoTemplatesDebugViewTests::test_template_not_found_error",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonHTMLResponseExceptionReporterFilter::test_custom_exception_reporter_filter",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonHTMLResponseExceptionReporterFilter::test_non_html_response_encoding",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonHTMLResponseExceptionReporterFilter::test_non_sensitive_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonHTMLResponseExceptionReporterFilter::test_paranoid_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::NonHTMLResponseExceptionReporterFilter::test_sensitive_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_disallowed_host",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_message_only",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_no_exception",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_no_request",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_request_and_exception",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_request_and_message",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_request_with_items_key",
+      "file": "tests/view_tests/tests/test_debug.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/view_tests/tests/test_debug.py::PlainTextReportTests::test_template_exception",
+      "file": "tests/view_tests/tests/test_debug.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-13513/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-13513",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-13513"
+  }
+}

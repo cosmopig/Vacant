@@ -1,0 +1,318 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_builtin_lookup_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_changelist_search_form_validation",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_changelist_view_list_editable_changed_objects_uses_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_clear_all_filters_link",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_clear_all_filters_link_callable_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_computed_list_display_localization",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_custom_lookup_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_custom_lookup_with_pk_shortcut",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_custom_paginator",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_deterministic_order_for_model_ordered_by_its_manager",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_deterministic_order_for_unordered_model",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_dynamic_list_display",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_dynamic_list_display_links",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_dynamic_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_dynamic_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_get_edited_object_ids",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_get_list_editable_queryset",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_get_list_editable_queryset_with_regex_chars_in_prefix",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_get_select_related_custom_method",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_multiuser_edit",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_clear_all_filters_link",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_inherited_m2m_in_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_m2m_in_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_m2m_to_inherited_in_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_many_to_many_at_second_level_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_non_unique_related_object_in_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_non_unique_related_object_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_through_m2m_at_second_level_in_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_duplicates_for_through_m2m_in_list_filter",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_exists_for_m2m_in_list_filter_without_params",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_no_list_display_links",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_object_tools_displayed_no_add_permission",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_pagination",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_pagination_page_range",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_pk_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_repr",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_result_list_editable",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_result_list_editable_html",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_result_list_empty_changelist_value",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_result_list_html",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_result_list_set_empty_value_display_in_model_admin",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_result_list_set_empty_value_display_on_admin_site",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_search_help_text",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_select_related_as_empty_tuple",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_select_related_as_tuple",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_select_related_preserved",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_select_related_preserved_when_multi_valued_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_show_all",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_spanning_relations_with_custom_lookup_in_search_fields",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_specified_ordering_by_f_expression",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_specified_ordering_by_f_expression_without_asc_desc",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_total_ordering_optimization",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_total_ordering_optimization_meta_constraints",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::ChangeListTests::test_tuple_list_display",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::GetAdminLogTests::test_custom_user_pk_not_named_id",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::GetAdminLogTests::test_missing_args",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::GetAdminLogTests::test_no_user",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::GetAdminLogTests::test_non_integer_limit",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::GetAdminLogTests::test_without_as",
+      "file": "tests/admin_changelist/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/admin_changelist/tests.py::GetAdminLogTests::test_without_for_user",
+      "file": "tests/admin_changelist/tests.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-15022/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-15022",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-15022"
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Complex",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ComplexRegion_FiniteSet",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ComplexRegion_contains",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ComplexRegion_from_real",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ComplexRegion_intersect",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ComplexRegion_measure",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ComplexRegion_union",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ImageSet",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ImageSet_contains",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ImageSet_iterator_not_injective",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_ImageSet_simplification",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Integers_eval_imageset",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_NZQRC_unions",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Range_eval_imageset",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Range_set",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Range_symbolic",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Rationals",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_Reals",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_fun",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_halfcircle",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_image_is_ImageSet",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_imageset_intersect_diophantine",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_imageset_intersect_interval",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_imageset_intersection",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_inf_Range_len",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_infinitely_indexed_set_1",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_infinitely_indexed_set_2",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_infinitely_indexed_set_3",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_integers",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_intersections",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_11730",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_11732",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_11914",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_11938",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_16871",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_17858",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_18050",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_9543",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_issue_9980",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_naturals",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_naturals0",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_normalize_theta_set",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_range_interval_intersection",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_range_is_finite_set",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_range_range_intersection",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_fancysets.py::test_union_RealSubSet",
+      "file": "sympy/sets/tests/test_fancysets.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-21596/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-21596",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-21596"
+  }
+}

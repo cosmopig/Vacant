@@ -1,0 +1,38 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/physics/quantum/tests/test_tensorproduct.py::test_issue_5923",
+      "file": "sympy/physics/quantum/tests/test_tensorproduct.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/quantum/tests/test_tensorproduct.py::test_tensor_product_abstract",
+      "file": "sympy/physics/quantum/tests/test_tensorproduct.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/quantum/tests/test_tensorproduct.py::test_tensor_product_commutator",
+      "file": "sympy/physics/quantum/tests/test_tensorproduct.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/quantum/tests/test_tensorproduct.py::test_tensor_product_expand",
+      "file": "sympy/physics/quantum/tests/test_tensorproduct.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-13974/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-13974",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-13974"
+  }
+}

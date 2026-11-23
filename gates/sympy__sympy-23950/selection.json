@@ -1,0 +1,38 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_contains.py::test_binary_symbols",
+      "file": "sympy/sets/tests/test_contains.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_contains.py::test_contains_basic",
+      "file": "sympy/sets/tests/test_contains.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_contains.py::test_issue_10326",
+      "file": "sympy/sets/tests/test_contains.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/sets/tests/test_contains.py::test_issue_6194",
+      "file": "sympy/sets/tests/test_contains.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-23950/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-23950",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-23950"
+  }
+}

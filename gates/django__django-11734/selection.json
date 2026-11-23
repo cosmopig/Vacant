@@ -1,0 +1,1398 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::CloneTests::test_evaluated_queryset_as_argument",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::CloneTests::test_no_fields_cloning",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::CloneTests::test_no_model_options_cloning",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ComparisonTests::test_ticket8597",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ConditionalTests::test_in_list_limit",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ConditionalTests::test_infinite_loop",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::CustomPkTests::test_ticket7371",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DefaultValuesInsertTest::test_no_extra_params",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion1",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion2",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion3",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion3_demote",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion4",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion4_demote",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion5_demote",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion6",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion7",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion_fexpression",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctionPromotionTests::test_disjunction_promotion_select_related",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctiveFilterTests::test_ticket7872",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DisjunctiveFilterTests::test_ticket8283",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::DoubleInSubqueryTests::test_double_subquery_in",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyQuerySetTests::test_emptyqueryset_values",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyQuerySetTests::test_ticket_19151",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyQuerySetTests::test_values_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyStringPromotionTests::test_empty_string_promotion",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyStringsAsNullTest::test_21001",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyStringsAsNullTest::test_direct_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EmptyStringsAsNullTest::test_joined_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::EscapingTests::test_ticket_7302",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Exclude15786::test_ticket15786",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTest17600::test_exclude_plain",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTest17600::test_exclude_plain_distinct",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTest17600::test_exclude_with_q_is_equal_to_plain_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTest17600::test_exclude_with_q_is_equal_to_plain_exclude_variation",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTest17600::test_exclude_with_q_object_distinct",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTest17600::test_exclude_with_q_object_no_distinct",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTests::test_exclude_reverse_fk_field_ref",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTests::test_exclude_with_circular_fk_relation",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTests::test_ticket14511",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExcludeTests::test_to_field",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExistsSql::test_exists",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ExistsSql::test_ticket_18414",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ForeignKeyToBaseExcludeTests::test_ticket_21787",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::GeneratorExpressionTests::test_ticket10432",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::IsNullTests::test_primary_key",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::IsNullTests::test_to_field",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_fk_reuse",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_fk_reuse_annotation",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_fk_reuse_disjunction",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_fk_reuse_order_by",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_fk_reuse_select_related",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_inverted_q_across_relations",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_revfk_noreuse",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::JoinReuseTest::test_revo2o_reuse",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ManyToManyExcludeTest::test_exclude_many_to_many",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ManyToManyExcludeTest::test_ticket_12823",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullInExcludeTest::test_double_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullInExcludeTest::test_null_in_exclude_qs",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_isnull_filter_promotion",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_null_join_demotion",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_ticket_17886",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_ticket_21366",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_ticket_21748",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_ticket_21748_complex_filter",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_ticket_21748_double_negated_and",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullJoinPromotionOrTest::test_ticket_21748_double_negated_or",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullableRelOrderingTests::test_join_already_in_query",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::NullableRelOrderingTests::test_ticket10028",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ProxyQueryCleanupTest::test_evaluated_proxy_count",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_avoid_infinite_loop_on_too_many_subqueries",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_common_mixed_case_foreign_keys",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_deferred_load_qs_pickling",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_double_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_error_raised_on_filter_with_dictionary",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_exclude_in",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_excluded_intermediary_m2m_table_joined",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_get_clears_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_heterogeneous_qs_combination",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_lookup_constraint_fielderror",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_nested_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_order_by_join_unref",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_order_by_tables",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_reasonable_number_of_subq_aliases",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_subquery_condition",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket10205",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket10432",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket1050",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket10742",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket17429",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket1801",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket19672",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket2091",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket2253",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket2306",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket2400",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket2496",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket3037",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket3141",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket4358",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket4464",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket4510",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket6074",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket6154",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket6981",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7076",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7096",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7098",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7155",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7181",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7235",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7277",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7323",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7378",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7791",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket7813",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket8439",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket9411",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket9926",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket9985",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket9997",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_1",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_2",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_3",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_4",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_5",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_6",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_7",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_8",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_10790_combine",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_ticket_20250",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_1878_2939",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_2076_7256",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_2080_3592",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_2874_3002",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_4088_4306",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_5321_7070",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_5324_6704",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_6180_6203",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_7087_12242",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_7204_7506",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries1Tests::test_tickets_7448_7707",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries2Tests::test_ticket12239",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries2Tests::test_ticket4289",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries2Tests::test_ticket7759",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries3Tests::test_ticket22023",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries3Tests::test_ticket7107",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries3Tests::test_ticket8683",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_combine_join_reuse",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_filter_reverse_non_integer_pk",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_join_reuse_order",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_order_by_resetting",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_order_by_reverse_fk",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket10181",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket11811",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket14876",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_exclude_false",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_exclude_true",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_filter_false",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_filter_true",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_one2one_exclude_false",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_one2one_exclude_true",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_one2one_filter_false",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket15316_one2one_filter_true",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket24525",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries4Tests::test_ticket7095",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries5Tests::test_extra_select_literal_percent_s",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries5Tests::test_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries5Tests::test_ticket5261",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries5Tests::test_ticket7045",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries5Tests::test_ticket7256",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries5Tests::test_ticket9848",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_distinct_ordered_sliced_subquery_aggregation",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_multiple_columns_with_the_same_name_slice",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_nested_queries_sql",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_parallel_iterators",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_ticket3739",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_ticket_11320",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Queries6Tests::test_tickets_8921_9188",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetBitwiseOperationTests::test_or_with_both_slice",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetBitwiseOperationTests::test_or_with_both_slice_and_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetBitwiseOperationTests::test_or_with_lhs_slice",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetBitwiseOperationTests::test_or_with_rhs_slice",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetExceptionTests::test_invalid_order_by",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetExceptionTests::test_invalid_qs_list",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetExceptionTests::test_invalid_queryset_model",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetExceptionTests::test_iter_exceptions",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_can_combine_queries_using_and_and_or_operators",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_can_get_items_using_index_and_slice_notation",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_can_get_number_of_items_in_queryset_using_standard_len",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_invalid_index",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_can_slice_again_after_slicing",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_cannot_combine_queries_once_sliced",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_cannot_filter_queryset_once_sliced",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_cannot_reorder_queryset_once_sliced",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_negative_indexing_not_supported_for_range",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_negative_indexing_not_supported_for_single_element",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_with_steps_can_be_used",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_with_tests_is_not_lazy",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerySetSupportsPythonIdioms::test_slicing_without_step_is_lazy",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerysetOrderedTests::test_annotated_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerysetOrderedTests::test_cleared_default_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerysetOrderedTests::test_empty_queryset",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerysetOrderedTests::test_explicit_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerysetOrderedTests::test_no_default_or_explicit_ordering",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::QuerysetOrderedTests::test_order_by_extra",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::RawQueriesTests::test_ticket14729",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::RelabelCloneTest::test_ticket_19964",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::RelatedLookupTypeTests::test_correct_lookup",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::RelatedLookupTypeTests::test_values_queryset_lookup",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::RelatedLookupTypeTests::test_wrong_backward_lookup",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::RelatedLookupTypeTests::test_wrong_type_lookup",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ReverseJoinTrimmingTest::test_reverse_trimming",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ReverseM2MCustomPkTests::test_ticket_21879",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SelectRelatedTests::test_tickets_3045_3288",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SubclassFKTests::test_ticket7778",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SubqueryTests::test_distinct_ordered_sliced_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SubqueryTests::test_ordered_subselect",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SubqueryTests::test_related_sliced_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SubqueryTests::test_slice_subquery_and_query",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::SubqueryTests::test_sliced_delete",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::TestInvalidValuesRelation::test_invalid_values",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::TestTicket24279::test_ticket_24278",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::TestTicket24605::test_ticket_24605",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket12807Tests::test_ticket_12807",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket14056Tests::test_ticket_14056",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket18785Tests::test_ticket_18785",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket20101Tests::test_ticket_20101",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket20788Tests::test_ticket_20788",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket20955Tests::test_ticket_20955",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket21203Tests::test_ticket_21203",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket22429Tests::test_ticket_22429",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::Ticket23605Tests::test_ticket_23605",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_in_query",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_in_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_nested_in_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_recursive_fk",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_recursive_fk_reverse",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_reverse_in",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_single_object",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ToFieldTests::test_single_object_reverse",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::UnionTests::test_AB_ACB",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::UnionTests::test_A_AB",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::UnionTests::test_A_AB2",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::UnionTests::test_BAB_BAC",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::UnionTests::test_BAB_BACB",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::UnionTests::test_BA_BCA__BAB_BAC_BCA",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesJoinPromotionTests::test_non_nullable_fk_not_promoted",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesJoinPromotionTests::test_ticket_21376",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesJoinPromotionTests::test_values_no_promotion_for_existing",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_multiple_select_params_values_order_by",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_select_params_values_order_in_extra",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_values",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_values_list",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_values_order_in_extra",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_values_order_multiple",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_extra_values_order_twice",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_field_error_values_list",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_flat_extra_values_list",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_flat_values_list",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_named_values_list_bad_field_name",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_named_values_list_expression",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_named_values_list_expression_with_default_alias",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_named_values_list_flat",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_named_values_list_with_fields",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesQuerysetTests::test_named_values_list_without_fields",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::ValuesSubqueryTests::test_values_in_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WeirdQuerysetSlicingTests::test_empty_resultset_sql",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WeirdQuerysetSlicingTests::test_empty_sliced_subquery",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WeirdQuerysetSlicingTests::test_empty_sliced_subquery_exclude",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WeirdQuerysetSlicingTests::test_tickets_7698_10202",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WeirdQuerysetSlicingTests::test_zero_length_values_slicing",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WhereNodeTest::test_empty_full_handling_conjunction",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WhereNodeTest::test_empty_full_handling_disjunction",
+      "file": "tests/queries/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/queries/tests.py::WhereNodeTest::test_empty_nodes",
+      "file": "tests/queries/tests.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-11734/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-11734",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-11734"
+  }
+}

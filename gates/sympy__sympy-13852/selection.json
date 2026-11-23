@@ -1,0 +1,38 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/functions/special/tests/test_zeta_functions.py::test_dirichlet_eta_eval",
+      "file": "sympy/functions/special/tests/test_zeta_functions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/special/tests/test_zeta_functions.py::test_stieltjes",
+      "file": "sympy/functions/special/tests/test_zeta_functions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/special/tests/test_zeta_functions.py::test_stieltjes_evalf",
+      "file": "sympy/functions/special/tests/test_zeta_functions.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/functions/special/tests/test_zeta_functions.py::test_zeta_eval",
+      "file": "sympy/functions/special/tests/test_zeta_functions.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-13852/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-13852",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-13852"
+  }
+}

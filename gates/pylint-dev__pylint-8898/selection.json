@@ -1,0 +1,89 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_argument_separator",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_can_read_toml_env_variable",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_clear_cache_post_run",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_disable_before_enable_all_takes_effect",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_empty_confidence",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_enable_all_disable_all_mutually_exclusive",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_enable_before_disable_all_takes_effect",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_regex_error",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_short_verbose",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_unknown_confidence",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_unknown_message_id",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_unknown_option_name",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_unknown_py_version",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_unknown_short_option_name",
+      "file": "tests/config/test_config.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/config/test_config.py::test_unknown_yes_no",
+      "file": "tests/config/test_config.py"
+    }
+  ],
+  "interpreter": ".envs/pylint-dev__pylint-8898/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/pylint-dev__pylint-8898",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/pylint-dev__pylint-8898"
+  }
+}

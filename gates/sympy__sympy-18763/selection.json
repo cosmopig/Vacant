@@ -1,0 +1,723 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Adjoint",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_DiffGeomMethods",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_ElementwiseApplyFunction",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Hadamard",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Identity",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_KroneckerProduct_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_MatrixElement_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_MatrixSymbol_bold",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_MatrixSymbol_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Modules",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Mul",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_OneMatrix",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_PolynomialRingBase",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Pow",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_PrettyPoly",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Quaternion_latex_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_QuotientRing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_TensorProduct_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Tr",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_Transpose",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_WedgeProduct_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_ZeroMatrix",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_boolean_args_order",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_builtin_no_args",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_builtins_without_args",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_categories",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_custom_symbol_names",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_fancyset_symbols",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_function_subclass_different_name",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_greek_symbols",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_hyper_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_imaginary",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_imaginary_unit",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_integral_transforms",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_10489",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_12886",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_13651",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_14041",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_15353",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_15439",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_17092",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_2934",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_3568",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_6853",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_7117",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_7180",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_8409",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_issue_9216",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_lamda",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_AccumuBounds",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Complement",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_ComplexRegion",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_ComplexRootOf",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Complexes",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_ConditionSet",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Contains",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_DiracDelta",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Float",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_FormalPowerSeries",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_FourierSeries",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_FracElement",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Heaviside",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_ImageSet",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Integers",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_KroneckerDelta",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Lambda",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_LeviCivita",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Matrix",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_MatrixSlice",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_NDimArray",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Naturals",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Naturals0",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Piecewise",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Poly",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_PolyElement",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Poly_order",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_RandomDomain",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_Range",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_RootSum",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_SetExpr",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_SingularityFunction",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_UnevaluatedExpr",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_basic",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_bessel",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_brackets",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_builtins",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_commutator",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_cycle",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_decimal_separator",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_derivatives",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_dict",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_emptyset",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_euler",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_fresnel",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_functions",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_greek_functions",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_indexed",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_integrals",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_intersection",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_intervals",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_inverse",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_issue_4381",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_issue_4576",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_limits",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_list",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_log",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_mathieu",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_matrix_with_functions",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_mul_symbol",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_numbers",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_order",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_permutation",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_pow_fraction",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_printer_tensor",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_product",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_productset",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_rational",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_sequences",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_sets",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_sum",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_symbols",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_symmetric_difference",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_union",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_universalset",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_latex_vector_expressions",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_matAdd",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_matMul",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_mode",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_modifiers",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_multiline_latex",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_noncommutative",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_other_symbols",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_print_basic",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_printmethod",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_set_operators_parenthesis",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_settings",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_text_re_im",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_trace",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_translate",
+      "file": "sympy/printing/tests/test_latex.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_latex.py::test_unit_printing",
+      "file": "sympy/printing/tests/test_latex.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-18763/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-18763",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-18763"
+  }
+}

@@ -1,0 +1,271 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_basic_init[global]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_basic_init[inpackage]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_immediate_initialiation_and_incremental_are_the_same[global]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_immediate_initialiation_and_incremental_are_the_same[inpackage]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_by_path[global]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_by_path[inpackage]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_not_existing[global]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_not_existing[inpackage]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_with_confmod[global]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestValueAccessGlobal::test_value_access_with_confmod[inpackage]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-.-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-..-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-./snc-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[package-./swc-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-..-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-../package-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-../package/snc-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[runner-../package/swc-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-.-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-..-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-../..-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[snc-../swc-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-.-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-..-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-../..-3]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::TestConftestVisibility::test_parsefactories_relative_node_ids[swc-../snc-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_confcutdir",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_exception_handling",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_existing_junitxml",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_existing_resultlog",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_found_with_double_dash",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_global_import",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_import_order",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_in_nonpkg_with_init",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_symlink",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftest_symlink_files",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftestcutdir",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_conftestcutdir_inplace_considered",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_doubledash_considered",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_fixture_dependency",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_hook_proxy",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_issue1073_conftest_special_objects",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_issue151_load_all_conftests",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_no_conftest",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_required_option_help",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_search_conftest_up_to_inifile[.-2-0]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_search_conftest_up_to_inifile[None-1-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_search_conftest_up_to_inifile[src-1-1]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_setinitial_conftest_subdirs[.dotdir]",
+      "file": "testing/test_conftest.py"
+    },
+    {
+      "kind": "exact",
+      "label": "testing/test_conftest.py::test_setinitial_conftest_subdirs[whatever]",
+      "file": "testing/test_conftest.py"
+    }
+  ],
+  "interpreter": ".envs/pytest-dev__pytest-5840/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'pytest'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/pytest-dev__pytest-5840",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/pytest-dev__pytest-5840"
+  },
+  "runner_environment": {
+    "SETUPTOOLS_SCM_PRETEND_VERSION": "5.1"
+  }
+}

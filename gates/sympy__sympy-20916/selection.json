@@ -1,0 +1,23 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/printing/tests/test_conventions.py::test_requires_partial",
+      "file": "sympy/printing/tests/test_conventions.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-20916/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-20916",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-20916"
+  }
+}

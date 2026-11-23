@@ -1,0 +1,396 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_base.py::test_get_support",
+      "file": "sklearn/feature_selection/tests/test_base.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_base.py::test_inverse_transform_dense",
+      "file": "sklearn/feature_selection/tests/test_base.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_base.py::test_inverse_transform_sparse",
+      "file": "sklearn/feature_selection/tests/test_base.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_base.py::test_transform_dense",
+      "file": "sklearn/feature_selection/tests/test_base.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_base.py::test_transform_sparse",
+      "file": "sklearn/feature_selection/tests/test_base.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_boundary_case_ch2",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_classif",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_classif_constant_feature",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_classif_multi_class",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_oneway_ints",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_oneway_vs_scipy_stats",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_center",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X0-y0-expected_f_statistic0-expected_p_values0-True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X1-y1-expected_f_statistic1-expected_p_values1-True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X2-y2-expected_f_statistic2-expected_p_values2-True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X3-y3-expected_f_statistic3-expected_p_values3-True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X4-y4-expected_f_statistic4-expected_p_values4-False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X5-y5-expected_f_statistic5-expected_p_values5-False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X6-y6-expected_f_statistic6-expected_p_values6-False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_corner_case[X7-y7-expected_f_statistic7-expected_p_values7-False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_f_regression_input_dtype",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_invalid_k",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_mutual_info_classif",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_mutual_info_regression",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_nans",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_no_feature_selected",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_r_regression[False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_r_regression[True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_r_regression_force_finite[X0-y0-expected_corr_coef0-True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_r_regression_force_finite[X1-y1-expected_corr_coef1-True]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_r_regression_force_finite[X2-y2-expected_corr_coef2-False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_r_regression_force_finite[X3-y3-expected_corr_coef3-False]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_scorefunc_multilabel",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[1-0.001]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[1-0.01]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[1-0.1]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[10-0.001]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[10-0.01]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[10-0.1]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[5-0.001]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[5-0.01]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fdr_regression[5-0.1]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_fwe_regression",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_heuristics_classif",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_heuristics_regression",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_kbest_all",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_kbest_classif",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_kbest_regression",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_kbest_zero[float32]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_kbest_zero[float64]",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_percentile_classif",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_percentile_classif_sparse",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_percentile_regression",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_select_percentile_regression_full",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_selectkbest_tiebreaking",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_selectpercentile_tiebreaking",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_tied_pvalues",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sklearn/feature_selection/tests/test_feature_select.py::test_tied_scores",
+      "file": "sklearn/feature_selection/tests/test_feature_select.py"
+    }
+  ],
+  "interpreter": ".envs/scikit-learn__scikit-learn-25102/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'scikit-learn'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {
+    "sklearn/_isotonic.c": "942661e391bd60da89d72650f01b5d13d6a340b695650e1c8c0dff4966fee912",
+    "sklearn/neighbors/_ball_tree.c": "5056003f6a076bc17ce51819c454a909202172040ac605111ed3f977c577e448",
+    "sklearn/neighbors/_quad_tree.c": "d466bf17dc806d55c8f174230754ac6c1744d4153796f39d892419d2943e9e17",
+    "sklearn/neighbors/_partition_nodes.cpp": "a6bdb8f1c39cc149f4c50b69a6f34e3dc28e78404f7b13d3ee4ee40e35cc1c98",
+    "sklearn/neighbors/_kd_tree.c": "57ee5df63782cdde042ff4a66337f62b7527c3d8264ab6ba4532ef8f05aa50ad",
+    "sklearn/tree/_splitter.c": "a12249a87a25322d3183e448fdc1e8098b364bbe07729426905b6189c91f5138",
+    "sklearn/tree/_criterion.c": "e22559fb14f3a197646a9152581bda392f84704b77aaa692e2fbff1780f8f9e7",
+    "sklearn/tree/_utils.c": "d6de329bea091cd4a63e56c96776699536986f36ff7b0ab0b8c77d9657bf8650",
+    "sklearn/tree/_tree.cpp": "30d32a15564519dbf4c2241994f5a56bf354b438eda1fa2b7ac8fe23f0dc059c",
+    "sklearn/decomposition/_cdnmf_fast.c": "9e1a46f20e6dab6b585e91081d746a65a83ade507c9a80f6d43c1a18ee85a57e",
+    "sklearn/decomposition/_online_lda_fast.c": "dc02e15f0be96f35474dcbe60a9c42d7da5e74e1acbe83f557e911805694b83d",
+    "sklearn/svm/_liblinear.c": "023af50d565da87e1d357e6917e1999c8ee775eef363d6e99d11e971474f5508",
+    "sklearn/svm/_libsvm_sparse.c": "01f50631c8e1c461f21349a26b508efdbc2b30856ac40cf9344cae85af97f473",
+    "sklearn/svm/_newrand.cpp": "83ca283a5b099d6bb95a265d7902112689d00236855efe634857531da8e063de",
+    "sklearn/svm/_libsvm.c": "5a85e8d5fcb543c1671890350128ae4c0fcf42d53727c94b4353dc3dd8a63fbc",
+    "sklearn/feature_extraction/_hashing_fast.cpp": "6e1801dca736e807ae23a16e6c8c121be33e0cd0ec665c76dfa3bf03a3dd1ede",
+    "sklearn/_loss/_loss.c": "a362051f36535f4e5259c1dd9a7346ec3a7fddfb88d36ca15f115c031e30301b",
+    "sklearn/_loss/_loss.pyx": "2fe75337f2eb48868bf5f8e9d3fba2a2757b4a36e57d7d767161f2fd64b568f0",
+    "sklearn/utils/_typedefs.c": "231b4ee4fb8a7034b29051844fb8337b5008730e496fb5631268089d64faf5b2",
+    "sklearn/utils/_seq_dataset.c": "91d2765a67d38d725b9f4eef25ccf15dc4b108b75dc4bac2ef8b531ef8e8878f",
+    "sklearn/utils/_weight_vector.pyx": "f6b37269d12f49183b568bee82b00966b6655f8e69a69f83bc9a40cffd2a8683",
+    "sklearn/utils/_logistic_sigmoid.c": "219fd5983291f89c835f5361ff4d8e324630d6bb8f0b8a67af851ce9bc980e8b",
+    "sklearn/utils/_openmp_helpers.c": "8ed8165ed55ddb541752540c52a8638f07eb38c72e64089790ac8b252a97d344",
+    "sklearn/utils/_vector_sentinel.cpp": "0d125d917c75b9399fa90d075634eaa6df333435104c64146262d9a85caafd87",
+    "sklearn/utils/_isfinite.c": "a4a6f3f453acdda756cc0faab18ded3b92d46ecbdf510d53630618753a713972",
+    "sklearn/utils/_weight_vector.c": "0294a7bc954e7e6ab0a24eee3934a768dd25ba8783234bf2b4b10ca2677e244a",
+    "sklearn/utils/sparsefuncs_fast.c": "7154b83a75519b4861acd69b901f37a504b2033e7ad1b785747f3c33da688653",
+    "sklearn/utils/_heap.c": "84bdc4518f83a11f75471968cb860a80b3817bedefd799787104f3eb5a9a1129",
+    "sklearn/utils/_weight_vector.pxd": "390ea5169f1d9d6b4b4df5f1be49d23866b9e4412fd0b3cff784da56dde09776",
+    "sklearn/utils/_readonly_array_wrapper.c": "84d3e271587f4c50ae11beb92758f2d01047bb2a815c1ce2fbea39f939d7634a",
+    "sklearn/utils/_seq_dataset.pyx": "413168d9fe7dd0d917c530103bfe9961a7e9840e2e6b96cb7baf33a25a4562ff",
+    "sklearn/utils/murmurhash.c": "6b81e545d6ea16eef4858fa72c73d91e84de8f3fe6d43f9cb67287826177a436",
+    "sklearn/utils/_random.c": "1e6ddf944ab270ad0d05c9a0fd60b3e090d9a3bf4c1297e7c8590ecd223b4431",
+    "sklearn/utils/_seq_dataset.pxd": "ceee4eadf6aaa80a5a0e38fc54fa23ae1092e66f7610cef63a206003b9f53392",
+    "sklearn/utils/arrayfuncs.c": "2ceaecccfda7456badd935594b014b2efefc899b2417ad98bb3a91ebf2c47554",
+    "sklearn/utils/_cython_blas.c": "f4dac1ab17eba0db44a03c00680adb24bd8c20f3a03de1cabac3b0da3d102444",
+    "sklearn/utils/_fast_dict.cpp": "bff3a3390b558351aaf5d835ae9427e1a1f10fd3d05836f92fe7fd7d3ec0ce48",
+    "sklearn/utils/_sorting.c": "0acb5b4bbfa9262f9b755bcc14f4e66ef2b0c974663a3e82a458fc0168b60b92",
+    "sklearn/cluster/_hierarchical_fast.cpp": "1018044ad115da5154f29dba83a9684c4594d150b64c73d7671ff57f7240a653",
+    "sklearn/cluster/_k_means_common.c": "1a91ddc65471140447d5022e28ed4bb9948e5f21508b9e9f0fd5cdc13298130d",
+    "sklearn/cluster/_dbscan_inner.cpp": "a556974f8c1ebc200e11c3437f93270ff389d6048bb71c783916c87e34793208",
+    "sklearn/cluster/_k_means_lloyd.c": "ef77624445bd64827fa244b92a28f4da384709c35eca7063ced17f49bb15c51f",
+    "sklearn/cluster/_k_means_minibatch.c": "1641e662c8354bd1f03c904c05fd6507431ecb851180546f8b7de5fab6baa276",
+    "sklearn/cluster/_k_means_elkan.c": "cb5b8f14188c3139ff17abae5c77f7e9715117ef86e1ed834469d6b9dca745d1",
+    "sklearn/linear_model/_cd_fast.c": "4713687c2771909b4ded56916c331b8146658e9e790828c6d1ec9eba1361183c",
+    "sklearn/linear_model/_sgd_fast.c": "4683fb9f4552391a2433d22ad1853001102be7e9ddba602cfedcbbb997ccc856",
+    "sklearn/linear_model/_sag_fast.c": "9529192948ff01c206d9894a066d311606c6b33d1eda180353af0cbc6cadae76",
+    "sklearn/linear_model/_sag_fast.pyx": "24c873f31cab8c2c1a11a2271591e90c261b716ef126e8a8784a6102ad1a131f",
+    "sklearn/datasets/_svmlight_format_fast.c": "0657967685feac04bc0294d4f5c26a62e267488511d196a6220aa106eb1d2cc4",
+    "sklearn/manifold/_barnes_hut_tsne.c": "4f2d6a7da7aadcb7a242156fe24b402b1f35a8f11c86b4d107684c06dda19bd1",
+    "sklearn/manifold/_utils.c": "b5186cc48de2397f425aa11316122639120d94d4992ece7cc731998ff921595b",
+    "sklearn/preprocessing/_csr_polynomial_expansion.c": "2ae0a305b789e162a4d289ac21a45826ab2af8bfa02db3ccec1ee090824c2e6c",
+    "sklearn/metrics/_dist_metrics.c": "8b74814e892cd6b8d8e44ecbf30ef7a7982a1e9edc531d65304241520a100d90",
+    "sklearn/metrics/_dist_metrics.pyx": "f1ffa9cbe5a8b6b6015bebdffaeb650bae4de0e6d50c3331d80900851e75da5a",
+    "sklearn/metrics/_dist_metrics.pxd": "25c114355ced5faa0f78583711a29a268417d1627399c4eccda428f08a30cdaa",
+    "sklearn/metrics/_pairwise_fast.c": "ff9eb31888bdb75633990c12b09f9be27cdca865fc8c274379a1338962dde183",
+    "sklearn/metrics/_pairwise_distances_reduction/_base.cpp": "c15e76f302fe86e76ed6bdbc64c6bacdf32dcd2290a3c31372bdc0e02a37d76d",
+    "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.cpp": "4ec5b0ca244c0f28f43b052f9a4884db151783f7660a860e6dd9271b3ed37142",
+    "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.pxd": "72d336526047200a3c849aad551e1027943984c2787dddc50ce5b24bdf270bc5",
+    "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.pyx": "c99475f319760a461cabd0f86bb78d7e7301f2ca876e5334cbaba77e3d47a872",
+    "sklearn/metrics/_pairwise_distances_reduction/_base.pxd": "2e7ec06d2b2f5310bf33fd5653e5e94cc69c9dbc1e96de1cafc7828639085a24",
+    "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.cpp": "61bef4b3ac6d19fdaa9a35415793ebd82560bc068710ba4d1c456c2e6155030f",
+    "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.pyx": "88bd24a53d2a09e30cbdbb40d38f5e0d4577c25991338a412b66783b8c746507",
+    "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.cpp": "f084a11f7c33a237f2f65c12c9e6149649e8e2d720383d4814a1337cc1f8d8d3",
+    "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.pxd": "d3b6ebcc6ea076f4b87732160161f65d30055afb4a2c8999816ef8c44572bb94",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin.cpp": "6037fedef56b7061352394ce2dff22c850067347ef6a1c02676cfd38db60cc54",
+    "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.pyx": "f92ddd95de86bb2365f6e613c124cd563e803cd096183e7fd40e3ee401dedc2d",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin.pyx": "9d0173a156eb305446bd60f25047a0ac4d8305e3b9f9ebc523ecf9121019bc99",
+    "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.pxd": "99fb7cd893670561d1bfa3e43e5ceec4cde44912a319af0f35d84857aeb8098f",
+    "sklearn/metrics/_pairwise_distances_reduction/_base.pyx": "1a650bf5dfbfdcab0d47ede0b604400f7a01943660151a23a7630648dba7454e",
+    "sklearn/metrics/_pairwise_distances_reduction/_argkmin.pxd": "240bd913f2d2ce064294997b6b8dce4d71ccfb8c77720fac65cba644780cee74",
+    "sklearn/metrics/cluster/_expected_mutual_info_fast.c": "067a0acb4ebbf7475dcd7f632fc5863329576cde91c669fb08707c705003aa9c",
+    "sklearn/__check_build/_check_build.c": "14595e58fc88b8092155cbcc5b6272104a0c9d0fba7fb30a82cadbeeb75b2ac4",
+    "sklearn/ensemble/_gradient_boosting.c": "f4bdf3f1d6b053254f4df7ac7c1e08911c43368d8889a47f25954b563fd852c3",
+    "sklearn/ensemble/_hist_gradient_boosting/common.c": "0690ea79168273d68d9a7b487e6df64239a7220acab8be66a2ae845a911dabbf",
+    "sklearn/ensemble/_hist_gradient_boosting/_binning.c": "732010d60aba4c7b903eab2510ebb8fc6898424f455422a09cfc765a75c16c44",
+    "sklearn/ensemble/_hist_gradient_boosting/_predictor.c": "11d3fd852ac2805584ab8396b1669c770e5269e7b1e961b18b8adab07184aeca",
+    "sklearn/ensemble/_hist_gradient_boosting/splitting.c": "20ddc4a92d01f47e58c5aec677f8ff6ea3901ffec178af73d06bc1f1582f5c63",
+    "sklearn/ensemble/_hist_gradient_boosting/_gradient_boosting.c": "1ababe5be546520d10f3a2690261662a823cc6b42e88eebb3630e4ba9a1c410b",
+    "sklearn/ensemble/_hist_gradient_boosting/histogram.c": "0395f61eb26537ec855e2724e699a53c9607e56490fc8005dbc065cd4d162884",
+    "sklearn/ensemble/_hist_gradient_boosting/_bitset.c": "fa5ef713fc43bc90555b05ad9bed9b164198df797131806082d51f67360b542d",
+    "sklearn/ensemble/_hist_gradient_boosting/utils.c": "fc092fc4e2de9beadcdd9827990d8920d977907a3c4eab635d6fe89d13a11707"
+  },
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/scikit-learn__scikit-learn-25102",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/scikit-learn__scikit-learn-25102"
+  }
+}

@@ -1,0 +1,618 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_enable_all_extensions",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_errors_only",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_errors_only_functions_as_disable",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_generate_config_disable_symbolic_names",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_generate_rcfile",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_help_msg[args0-:unreachable (W0101)-False]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_help_msg[args1-No such message id-False]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_help_msg[args2---help-msg: expected at least one argumen-True]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command0-Emittable messages with current interpreter:]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command1-Enabled messages:]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command2-nonascii-checker]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command3-Confidence(name='HIGH', description=]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command4-pylint.extensions.empty_comment]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command5-Pylint global options and switches]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_output_of_callback_options[command6-Environment variables:]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestCallbackOptions::test_verbose",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_all",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_allow_import_of_files_found_in_modules_during_parallel_check",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_bom_marker",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_can_list_directories_without_dunder_init",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_confidence_levels",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_do_not_import_files_from_local_directory",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_do_not_import_files_from_local_directory_with_pythonpath",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_enable_all_works",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_error_missing_arguments",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_error_mode_shows_no_score",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_evaluation_score_shown_by_default",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_exit_zero",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-C-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-C0115-fail_under_plus7_5.py-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-C0116-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-broad-except-fail_under_minus10.py-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-broad-except-fail_under_plus7_5.py-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-fake1,C,fake2-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-missing-function-docstring-fail_under_minus10.py-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-10-missing-function-docstring-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-11-broad-except-fail_under_minus10.py-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-11-missing-function-docstring-fail_under_minus10.py-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-5-broad-except-fail_under_minus10.py-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-5-missing-function-docstring-fail_under_minus10.py-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-9-broad-except-fail_under_minus10.py-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[-9-missing-function-docstring-fail_under_minus10.py-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[6-broad-except-fail_under_plus7_5.py-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[6-missing-function-docstring-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[7.5-broad-except-fail_under_plus7_5.py-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[7.5-missing-function-docstring-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[7.6-broad-except-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on[7.6-missing-function-docstring-fail_under_plus7_5.py-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_edge_case[opts0-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_edge_case[opts1-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_edge_case[opts2-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_edge_case[opts3-16]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args0-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args1-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args2-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args3-6]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args4-6]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args5-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args6-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args7-6]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_exit_code[args8-22]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args0-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args1-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args2-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args3-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args4-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args5-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args6-0]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args7-1]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_on_info_only_exit_code[args8-1]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_fail_under",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_getdefaultencoding_crashes_with_lc_ctype_utf8",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_ignore_path_recursive",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_ignore_pattern_recursive",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_ignore_recursive",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_import_itself_not_accounted_for_relative_imports",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_import_plugin_from_local_directory_if_pythonpath_cwd",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_information_category_disabled_by_default",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_json_report_does_not_escape_quotes",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_json_report_when_file_has_syntax_error",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_json_report_when_file_is_missing",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_load_text_repoter_if_not_provided",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_max_inferred_for_complicated_class_hierarchy",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_modify_sys_path",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_no_crash_with_formatting_regex_defaults",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_no_ext_file",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_no_out_encoding",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_nonexistent_config_file",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_one_module_fatal_error",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_can_be_combined_with_custom_reporter",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_can_be_combined_with_output_format_option[colorized-tests/regrtest_data/unused_variable.py:4:4: W0612: \\x1b[35mUnused variable 'variable'\\x1b[0m (\\x1b[35munused-variable\\x1b[0m)]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_can_be_combined_with_output_format_option[json-\"message\": \"Unused variable 'variable'\",]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_can_be_combined_with_output_format_option[msvs-tests/regrtest_data/unused_variable.py(4): [W0612(unused-variable)test] Unused variable 'variable']",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_can_be_combined_with_output_format_option[parseable-tests/regrtest_data/unused_variable.py:4: [W0612(unused-variable), test] Unused variable 'variable']",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_can_be_combined_with_output_format_option[text-tests/regrtest_data/unused_variable.py:4:4: W0612: Unused variable 'variable' (unused-variable)]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_invalid_path_exits_with_code_32",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_specified_in_rcfile",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_output_file_valid_path",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_parallel_execution",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_parallel_execution_missing_arguments",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_parseable_file_path",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_pkginfo",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_pylintrc_comments_in_values",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_pylintrc_plugin_duplicate_options",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_recursive",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_recursive_current_dir",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_regex_paths_csv_validator",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_regression_parallel_mode_without_filepath",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_regression_recursive",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_regression_recursive_current_dir",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_reject_empty_indent_strings",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_relative_imports[False]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_relative_imports[True]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_stdin[/home/ubuntu/sandbox-v4-build/kit/pylint-dev__pylint-7080/tests/mymodule.py-mymodule-/home/ubuntu/sandbox-v4-build/kit/pylint-dev__pylint-7080/tests/mymodule.py]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_stdin[mymodule.py-mymodule-mymodule.py]",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_stdin_missing_modulename",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_stdin_syntaxerror",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_version",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_w0704_ignored",
+      "file": "tests/test_self.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/test_self.py::TestRunTC::test_wrong_import_position_when_others_disabled",
+      "file": "tests/test_self.py"
+    }
+  ],
+  "interpreter": ".envs/pylint-dev__pylint-7080/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'pylint'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/pylint-dev__pylint-7080",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/pylint-dev__pylint-7080"
+  }
+}

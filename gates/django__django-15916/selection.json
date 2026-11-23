@@ -1,0 +1,768 @@
+{
+  "django": true,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::CustomCleanTests::test_model_form_clean_applies_to_model",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::CustomCleanTests::test_override_clean",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::CustomMetaclassTestCase::test_modelform_factory_metaclass",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_clean_false",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_clean_false_required",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_clear_and_file_contradiction",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_custom_file_field_save",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_file_field_data",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_file_field_multiple_save",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_file_path_field_blank",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_filefield_required_false",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_full_clear",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_image_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FileAndImageFieldTests::test_render_empty_file_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_bad_callback",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_baseform_with_widgets_in_meta",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_custom_callback",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_factory_with_widget_argument",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_inherit_after_custom_callback",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_modelform_factory_with_all_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::FormFieldCallbackTests::test_modelform_factory_without_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_callable_called_each_time_form_is_instantiated",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_custom_field_with_queryset_but_no_limit_choices_to",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_fields_for_model_applies_limit_choices_to",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_limit_choices_to_callable_for_fk_rel",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_limit_choices_to_callable_for_m2m_rel",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_limit_choices_to_m2m_through",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LimitChoicesToTests::test_limit_choices_to_no_duplicates",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LocalizedModelFormTest::test_model_form_applies_localize_to_all_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LocalizedModelFormTest::test_model_form_applies_localize_to_some_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::LocalizedModelFormTest::test_model_form_refuses_arbitrary_string",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_article_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_bad_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_base_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_blank_false_with_null_true_foreign_key_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_blank_foreign_key_with_radio",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_blank_with_null_foreign_key_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_confused_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_filefield",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_not_populated_on_checkboxselectmultiple",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_not_populated_on_non_empty_value_in_cleaned_data",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_not_populated_on_optional_checkbox_input",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_not_populated_on_selectmultiple",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_populated_on_optional_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_selectdatewidget",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_default_splitdatetime_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_empty_fields_on_modelform",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_empty_fields_to_construct_instance",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_empty_fields_to_fields_for_model",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_exclude_and_validation",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_exclude_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_exclude_fields_with_string",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_exclude_nonexistent_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_extra_declared_field_model_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_extra_field_model_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_extra_field_modelform_factory",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_extra_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_invalid_meta_model",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_limit_fields_with_string",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_limit_nonexistent_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_missing_fields_attribute",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_mixmodel_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_no_model_class",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_non_blank_foreign_key_with_radio",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_orderfields2_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_orderfields_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_override_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_prefixed_form_with_default_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_renderer_kwarg",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_replace_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_replace_field_variant_2",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_replace_field_variant_3",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_save_blank_false_with_required_false",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_save_blank_null_unique_charfield_saves_null",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_subcategory_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBaseTest::test_subclassmeta_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_auto_id",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_base_form",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_basic_creation",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_custom_form_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_initial_values",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_m2m_editing",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_m2m_initial_callable",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_multi_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_recleaning_model_form_instance",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_runtime_choicefield_populated",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_save_commit_false",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_save_with_data_errors",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_subset_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_validate_foreign_key_to_model_with_overridden_manager",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormBasicTests::test_validate_foreign_key_uses_default_manager",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormCustomErrorTests::test_custom_error_messages",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormCustomErrorTests::test_model_clean_error_messages",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormInheritanceTests::test_field_removal",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormInheritanceTests::test_field_removal_name_clashes",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelFormInheritanceTests::test_form_subclass_inheritance",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_clean_does_deduplicate_values",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_model_multiple_choice_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_model_multiple_choice_field_22745",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_model_multiple_choice_number_of_queries",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_model_multiple_choice_required_false",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_model_multiple_choice_run_validators",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_model_multiple_choice_show_hidden_initial",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_show_hidden_initial_changed_queries_efficiently",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelMultipleChoiceFieldTests::test_to_field_name_with_initial_data",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOneToOneFieldTests::test_assignment_of_none",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOneToOneFieldTests::test_assignment_of_none_null_false",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOneToOneFieldTests::test_modelform_onetoonefield",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOneToOneFieldTests::test_modelform_subclassed_model",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOneToOneFieldTests::test_onetoonefield",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOtherFieldTests::test_big_integer_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOtherFieldTests::test_http_prefixing",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOtherFieldTests::test_modelform_non_editable_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelOtherFieldTests::test_url_on_modelform",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ModelToDictTests::test_many_to_many",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_callable_field_default",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_choices_type",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_foreignkeys_which_use_to_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_iterable_model_m2m",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_media_on_modelform",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_model_field_that_returns_none_to_exclude_itself_with_explicit_fields",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::OtherModelFormTests::test_prefetch_related_queryset",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::StrictAssignmentTests::test_setattr_raises_validation_error_field_specific",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::StrictAssignmentTests::test_setattr_raises_validation_error_non_field",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::TestFieldOverridesByFormMeta::test_error_messages_overrides",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::TestFieldOverridesByFormMeta::test_field_type_overrides",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::TestFieldOverridesByFormMeta::test_help_text_overrides",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::TestFieldOverridesByFormMeta::test_label_overrides",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::TestFieldOverridesByFormMeta::test_widget_overrides",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_abstract_inherited_unique",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_abstract_inherited_unique_together",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_explicitpk_unique",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_explicitpk_unspecified",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_inherited_unique",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_inherited_unique_for_date",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_inherited_unique_together",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_multiple_field_unique_together",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_override_unique_for_date_message",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_override_unique_message",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_override_unique_together_message",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_simple_unique",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_unique_for_date",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_unique_for_date_in_exclude",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_unique_for_date_with_nullable_date",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_unique_null",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_unique_together",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::UniqueTest::test_unique_together_exclusion",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ValidationTest::test_notrequired_overrides_notblank",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ValidationTest::test_validates_with_replaced_field_excluded",
+      "file": "tests/model_forms/tests.py"
+    },
+    {
+      "kind": "exact",
+      "label": "tests/model_forms/tests.py::ValidationTest::test_validates_with_replaced_field_not_specified",
+      "file": "tests/model_forms/tests.py"
+    }
+  ],
+  "interpreter": ".envs/django__django-15916/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'django'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/django__django-15916",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/django__django-15916"
+  }
+}

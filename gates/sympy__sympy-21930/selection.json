@@ -1,0 +1,243 @@
+{
+  "django": false,
+  "selectors": [
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_PermutationOperator",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_annihilate",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_annihilate_b",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_annihilate_f",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_basic_apply",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_basic_state",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_complex_apply",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_contraction",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_create_b",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dagger",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dummy_order_ambiguous",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dummy_order_inner_outer_lines_VT1T1T1",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dummy_order_inner_outer_lines_VT1T1T1T1",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dummy_order_inner_outer_lines_VT1T1T1T1_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dummy_order_inner_outer_lines_VT1T1T1_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_dummy_order_well_defined",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT1T1",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT1T1_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT2",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT2_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT2conjT2",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT2conjT2_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT2conjT2_ambiguous_order",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_equivalent_internal_lines_VT2conjT2_ambiguous_order_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_evaluate_deltas",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_fixed_bosonic_basis",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_fully_contracted",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_get_subNO",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_index_permutations_with_dummies",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_inner_product",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_internal_external_VT2T2",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_internal_external_VT2T2_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_internal_external_pqrs",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_internal_external_pqrs_AT",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_matrix_elements",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_number_operator",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_operator",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_sorting",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_substitute_dummies_NO_operator",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_substitute_dummies_SQ_operator",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_substitute_dummies_new_indices",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_substitute_dummies_substitution_order",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_substitute_dummies_without_dummies",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_symbolic_matrix_elements",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    },
+    {
+      "kind": "exact",
+      "label": "sympy/physics/tests/test_secondquant.py::test_wicks",
+      "file": "sympy/physics/tests/test_secondquant.py"
+    }
+  ],
+  "interpreter": ".envs/sympy__sympy-21930/bin/python",
+  "timeout_s": 120,
+  "setup_commands": [],
+  "base_rebuild_commands": [
+    "SETUPTOOLS_SCM_PRETEND_VERSION=\"$(python -I -c 'try:\n from importlib.metadata import version\nexcept ImportError:\n from pkg_resources import get_distribution\n version = lambda name: get_distribution(name).version\nprint(version('\"'\"'sympy'\"'\"'))')\"",
+    "export SETUPTOOLS_SCM_PRETEND_VERSION",
+    "python setup.py build_ext --inplace"
+  ],
+  "generated_compiled_sources": {},
+  "nodeid_paths": {
+    "workspace": "/home/ubuntu/sandbox-v4-build/kit/sympy__sympy-21930",
+    "environment": "/home/ubuntu/sandbox-v4-build/kit/.envs/sympy__sympy-21930"
+  }
+}
