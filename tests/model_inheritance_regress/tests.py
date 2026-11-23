@@ -315,6 +315,36 @@ class ModelInheritanceTest(TestCase):
         pos = fragment.find("pub_date")
         self.assertEqual(fragment.find("pub_date", pos + 1), -1)
 
+    def test_queryset_update_on_second_parent_model(self):
+        """
+        update() of a field from a non-primary parent of a model with
+        multiple inheritance updates only the rows linked to the child.
+        """
+        Politician.objects.create(title="other 1")
+        Politician.objects.create(title="other 2")
+        c1 = Congressman.objects.create(name="John", state="PA", title="senator 1")
+        c2 = Congressman.objects.create(name="Bill", state="NY", title="senator 2")
+        self.assertNotEqual(c1.pk, c1.politician_id)
+        Congressman.objects.update(title="senator 3")
+        self.assertQuerysetEqual(
+            Congressman.objects.order_by("pk").values_list("title", flat=True),
+            ["senator 3", "senator 3"],
+        )
+        self.assertQuerysetEqual(
+            Politician.objects.order_by("pk").values_list("title", flat=True),
+            ["other 1", "other 2", "senator 3", "senator 3"],
+        )
+        Congressman.objects.filter(pk=c2.pk).update(title="senator 4", state="CA")
+        self.assertEqual(Politician.objects.get(pk=c1.politician_id).title, "senator 3")
+        self.assertEqual(Politician.objects.get(pk=c2.politician_id).title, "senator 4")
+        self.assertEqual(Congressman.objects.get(pk=c2.pk).state, "CA")
+        Senator.objects.create(name="Ann", state="TX", title="senator 5")
+        Senator.objects.update(title="senator 6")
+        self.assertQuerysetEqual(
+            Politician.objects.order_by("pk").values_list("title", flat=True),
+            ["other 1", "other 2", "senator 3", "senator 4", "senator 6"],
+        )
+
     def test_queryset_update_on_parent_model(self):
         """
         Regression test for #10362
