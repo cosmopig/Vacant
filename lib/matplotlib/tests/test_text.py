@@ -251,6 +251,17 @@ def test_annotation_contains():
     assert ann.contains(event) == (False, {})
 
 
+@pytest.mark.parametrize("make_xy", [list, np.array])
+@check_figures_equal(extensions=["png"])
+def test_annotation_copies_xy(fig_test, fig_ref, make_xy):
+    xy = make_xy((0.2, 0.4))
+    fig_test.subplots().annotate(
+        "", xy=xy, xytext=(0.8, 0.4), arrowprops={"arrowstyle": "<->"})
+    xy[1] = 0.6
+    fig_ref.subplots().annotate(
+        "", xy=(0.2, 0.4), xytext=(0.8, 0.4), arrowprops={"arrowstyle": "<->"})
+
+
 @pytest.mark.parametrize('err, xycoords, match', (
     (TypeError, print, "xycoords callable must return a BboxBase or Transform, not a"),
     (TypeError, [0, 0], r"'xycoords' must be an instance of str, tuple"),
