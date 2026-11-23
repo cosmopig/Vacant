@@ -967,7 +967,20 @@ class RenameIndex(IndexOperation):
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         if self.old_fields:
-            # Backward operation with unnamed index is a no-op.
+            model = to_state.apps.get_model(app_label, self.model_name)
+            if not self.allow_migrate_model(schema_editor.connection.alias, model):
+                return
+            from_model_state = from_state.models[app_label, self.model_name_lower]
+            old_index = from_model_state.get_index_by_name(self.new_name)
+            columns = [model._meta.get_field(field).column for field in self.old_fields]
+            # Restore the auto-generated name of the unnamed index.
+            new_index = models.Index(
+                fields=self.old_fields,
+                name=schema_editor._create_index_name(
+                    model._meta.db_table, columns, suffix="_idx"
+                ),
+            )
+            schema_editor.rename_index(model, old_index, new_index)
             return
 
         self.new_name_lower, self.old_name_lower = (

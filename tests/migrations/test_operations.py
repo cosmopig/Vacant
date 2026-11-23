@@ -2984,10 +2984,24 @@ class OperationTests(OperationTestBase):
         with connection.schema_editor() as editor:
             operation.database_forwards(app_label, editor, project_state, new_state)
         self.assertIndexNameExists(table_name, "new_pony_test_idx")
-        # Reverse is a no-op.
-        with connection.schema_editor() as editor, self.assertNumQueries(0):
+        # Reverse restores the auto-generated name.
+        with connection.schema_editor() as editor:
             operation.database_backwards(app_label, editor, new_state, project_state)
+        self.assertIndexNameNotExists(table_name, "new_pony_test_idx")
+        with connection.schema_editor() as editor:
+            auto_name = editor._create_index_name(
+                table_name, ["weight", "pink"], suffix="_idx"
+            )
+        self.assertIndexNameExists(table_name, auto_name)
+        # Re-apply renaming.
+        with connection.schema_editor() as editor:
+            operation.database_forwards(app_label, editor, project_state, new_state)
         self.assertIndexNameExists(table_name, "new_pony_test_idx")
+        # Reverse again.
+        with connection.schema_editor() as editor:
+            operation.database_backwards(app_label, editor, new_state, project_state)
+        self.assertIndexNameNotExists(table_name, "new_pony_test_idx")
+        self.assertIndexNameExists(table_name, auto_name)
         # Deconstruction.
         definition = operation.deconstruct()
         self.assertEqual(definition[0], "RenameIndex")
