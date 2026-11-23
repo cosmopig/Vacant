@@ -1,4 +1,4 @@
-"""Original single-file work samples and independent offline grading fixtures."""
+"""定義原創題庫與可見／隱藏測資，承接 PROTOCOL.md 的 Tasks 與 Outcome。"""
 from collections import Counter, defaultdict
 from fractions import Fraction
 import heapq

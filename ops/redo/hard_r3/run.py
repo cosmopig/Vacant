@@ -1,4 +1,4 @@
-"""Reproduce the R3 mechanism with isolated OpenCode runs and a separate grader."""
+"""以隔離的 OpenCode 執行及獨立評分重驗 R3；承接 PROTOCOL.md 的 Arms、Ordering 與 Outcome。"""
 from __future__ import annotations
 
 import argparse

@@ -1,4 +1,4 @@
-"""Assemble, validate and verify the experiment's RECORD_SPEC evidence."""
+"""組裝並核對實驗證據，承接 PROTOCOL.md 的 Evidence 與 docs/RECORD_SPEC.md §2–3。"""
 import argparse
 from collections import Counter, defaultdict
 import json

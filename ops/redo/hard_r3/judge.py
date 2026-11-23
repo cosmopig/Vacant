@@ -1,4 +1,4 @@
-"""Run one case per subprocess. This container never receives expected outputs."""
+"""每筆測資以子行程執行候選解，不接收預期答案；承接 PROTOCOL.md 的 Ordering。"""
 import json
 import subprocess
 import sys

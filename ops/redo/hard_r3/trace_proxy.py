@@ -1,4 +1,4 @@
-"""Local OpenAI-compatible pass-through with per-request JSONL capture."""
+"""固定推論槽並逐請求記錄模型 I/O；承接 PROTOCOL.md 的 Ordering 與 Evidence。"""
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import argparse
 import datetime
