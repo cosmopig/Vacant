@@ -189,38 +189,26 @@ The operator, not an automatic launch mechanism, applies the calibration gate.
 
 Use only the whole selected bank and only after the v3 calibration gate proceeds.
 Each comparison is fresh, with two samples per instance; never reuse calibration
-work. Insert the exact problem statement from kit-root `prompts/<instance_id>.txt`
-at `<problem_statement>` below. The handback root is the upstream repository,
-not the small kit. Do not supply selected gate IDs to plain or plain2.
+work. This amendment adopts the validated calibration prompt form before any
+comparison session. Placeholders: `<id>` instance, `<arm>` plain|plain2|vacant,
+`<k>` 1|2. Title: `Sandbox v3 <id> <arm> s<k>`.
 
 ### V3 plain
 
 ```text
-Start from sandbox-v3/<instance_id> and solve this problem in the repository:
-<problem_statement>
-Push the repository-root handback to sandbox-devin/v3/<instance_id>-plain-s<k>.
-Do not open a pull request; the pushed branch is the only deliverable.
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v3` (this is the kit root). Inside it, clone only branch `sandbox-v3/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v3/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Do not open `gates/`. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin/v3/<id>-<arm>-s<k>`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
 ```
 
 ### V3 plain2
 
 ```text
-Start from sandbox-v3/<instance_id> and solve this problem in the repository:
-<problem_statement>
-Push the repository-root handback to sandbox-devin/v3/<instance_id>-plain2-s<k>.
-Do not open a pull request; the pushed branch is the only deliverable.
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v3` (this is the kit root). Inside it, clone only branch `sandbox-v3/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v3/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Do not open `gates/`. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin/v3/<id>-<arm>-s<k>`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
 ```
 
 ### V3 vacant
 
 ```text
-Start from sandbox-v3/<instance_id> and solve this problem in the repository:
-<problem_statement>
-Follow the sandbox-devin-kit-v3 README to install Vacant and the instance's native
-test environment. Use that instance's gate, at most three submissions; use its
-feedback between submissions. The gate reveals existing tests to keep green.
-Push the repository-root handback to sandbox-devin/v3/<instance_id>-vacant-s<k>.
-Do not open a pull request; the pushed branch is the only deliverable.
+Clone github.com/cosmopig/Vacant branch `sandbox-devin-kit-v3` (this is the kit root). Inside it, clone only branch `sandbox-v3/<id>` into `<id>/` (`git clone --single-branch --depth 1 --branch sandbox-v3/<id> https://github.com/cosmopig/Vacant <id>`). The issue to fix is `prompts/<id>.txt` at the kit root. Set up the test environment exactly as the README's `<id>` section says (its Python version and commands, creating `.envs/<id>/bin/python`). Fix the issue in the `<id>/` source and run whatever tests you think are relevant. Do not open any other branch of this repo or any other session's work. Do not look up this issue's upstream GitHub issue, PR or commit, any fork or mirror of the fix, or any SWE-bench data or leaderboard. Before delivering, create the kit-root `.venv` with Vacant as the README says, then submit through the gate with the README's `vacant run` command from inside `<id>/` (`--suite ../gates/<id>`, `--run-dir ../receipts/<id>-N`, N = 1, 2, 3, timeout from `../gates/<id>/selection.json`). Exit 0 means accepted. Exit 20 means refused: read its feedback, fix, and submit again, at most 3 submissions. Do not edit `gates/`. Include each submission's raw gate output in your reply. When done, push the contents of `<id>/` as the tree root (no kit, no .envs, .venv, receipts or build artifacts) to a new branch `sandbox-devin/v3/<id>-<arm>-s<k>`. Do not open a pull request; the pushed branch is the only deliverable. Reply with the branch name, your final explanation, and the actual output of the tests you ran.
 ```
 
 Calibration uses the plain template with handback branch

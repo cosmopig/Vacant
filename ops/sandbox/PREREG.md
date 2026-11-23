@@ -242,3 +242,5 @@ PR creation alone is not outside help. The operator records in the calibration
 NOTES.md that PRs #101 (SymPy 15875) and #102 (Matplotlib 24870) were closed
 without review feedback reaching either session before its final push. These
 reports do not certify other contamination criteria as clean.
+
+V3 amendment — 2026-11-23: replace the three DEVIN_ARMS.md comparison templates with the exact validated calibration-form dispatch texts; this amendment is committed before any comparison session.
