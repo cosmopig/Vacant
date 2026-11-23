@@ -156,8 +156,6 @@ def test_autoattribute_GenericAlias(app):
             '',
             '   A list of int',
             '',
-            '   alias of :class:`~typing.List`\\ [:class:`int`]',
-            '',
         ]
 
 

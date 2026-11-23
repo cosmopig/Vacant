@@ -1625,6 +1625,11 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
         else:
             return None
 
+    def get_real_modname(self) -> str:
+        if self.doc_as_attr:
+            return self.modname
+        return super().get_real_modname()
+
     def add_directive_header(self, sig: str) -> None:
         sourcename = self.get_sourcename()
 
@@ -1724,10 +1729,12 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
     def add_content(self, more_content: Optional[StringList], no_docstring: bool = False
                     ) -> None:
         if self.doc_as_attr:
-            try:
-                more_content = StringList([_('alias of %s') % restify(self.object)], source='')
-            except AttributeError:
-                pass  # Invalid class object is passed.
+            key = ('.'.join(self.objpath[:-1]), self.objpath[-1])
+            if not (self.analyzer and key in self.analyzer.find_attr_docs()):
+                try:
+                    more_content = StringList([_('alias of %s') % restify(self.object)], source='')
+                except AttributeError:
+                    pass  # Invalid class object is passed.
 
         super().add_content(more_content)
 
@@ -1781,6 +1788,9 @@ class DataDocumenterMixinBase:
         """Check :value: header should be suppressed."""
         return False
 
+    def _get_docstring_comment(self) -> Optional[List[str]]:
+        return None
+
     def update_content(self, more_content: StringList) -> None:
         """Update docstring for the NewType object."""
         pass
@@ -1797,7 +1807,7 @@ class GenericAliasMixin(DataDocumenterMixinBase):
                 super().should_suppress_directive_header())
 
     def update_content(self, more_content: StringList) -> None:
-        if inspect.isgenericalias(self.object):
+        if inspect.isgenericalias(self.object) and not self._get_docstring_comment():
             more_content.append(_('alias of %s') % restify(self.object), '')
             more_content.append('', '')
 
@@ -1998,9 +2008,11 @@ class DataDocumenter(GenericAliasMixin, NewTypeMixin, TypeVarMixin,
 
         return None
 
+    def _get_docstring_comment(self) -> Optional[List[str]]:
+        return self.get_module_comment(self.objpath[-1])
+
     def get_doc(self, ignore: int = None) -> Optional[List[List[str]]]:
-        # Check the variable has a docstring-comment
-        comment = self.get_module_comment(self.objpath[-1])
+        comment = self._get_docstring_comment()
         if comment:
             return [comment]
         else:
@@ -2571,9 +2583,11 @@ class AttributeDocumenter(GenericAliasMixin, NewTypeMixin, SlotsMixin,  # type: 
 
         return None
 
+    def _get_docstring_comment(self) -> Optional[List[str]]:
+        return self.get_attribute_comment(self.parent, self.objpath[-1])
+
     def get_doc(self, ignore: int = None) -> Optional[List[List[str]]]:
-        # Check the attribute has a docstring-comment
-        comment = self.get_attribute_comment(self.parent, self.objpath[-1])
+        comment = self._get_docstring_comment()
         if comment:
             return [comment]
 

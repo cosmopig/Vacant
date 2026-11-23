@@ -327,3 +327,32 @@ def test_class_alias(app):
         '',
         '   alias of :class:`target.classes.Foo`',
     ]
+
+
+def test_documented_type_aliases(app, tmp_path, monkeypatch):
+    modname = 'type_alias_docstrings'
+    (tmp_path / (modname + '.py')).write_text(
+        'import pathlib\n'
+        'from typing import Any, Callable, Dict, Union\n\n'
+        'Options = Dict[str, Any]\n'
+        '"""Options for the operation.\n\n'
+        'Treat these options as immutable.\n"""\n\n'
+        'Contents = Union[str, None]\n'
+        '"""Contents to write, or None to skip writing."""\n\n'
+        'Operation = Callable[[pathlib.Path, Contents, Options], Union[pathlib.Path, None]]\n'
+        '"""An operation on a file."""\n\n'
+        'FilePath = pathlib.Path\n'
+        '"""Path to a file."""\n',
+        encoding='utf-8',
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    actual = list(do_autodoc(app, 'module', modname, {'members': None}))
+    expected = {
+        '   Options for the operation.',
+        '   Treat these options as immutable.',
+        '   Contents to write, or None to skip writing.',
+        '   An operation on a file.',
+        '   Path to a file.',
+    }
+    assert expected - set(actual) == set()
+    assert not any(line.strip().startswith('alias of ') for line in actual)
