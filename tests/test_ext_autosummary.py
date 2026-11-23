@@ -503,18 +503,20 @@ def test_autosummary_imported_members(app, status, warning):
 
 @pytest.mark.sphinx(testroot='ext-autodoc',
                     confoverrides={'extensions': ['sphinx.ext.autosummary']})
-def test_generate_autosummary_docs_property(app):
+@pytest.mark.parametrize('module, name', [('methods', 'Base.prop'),
+                                          ('properties', 'ClassProperties.class_prop')])
+def test_generate_autosummary_docs_property(app, module, name):
+    modname = 'target.' + module
+    fullname = modname + '.' + name
     with patch('sphinx.ext.autosummary.generate.find_autosummary_in_files') as mock:
-        mock.return_value = [AutosummaryEntry('target.methods.Base.prop', 'prop', None, False)]
+        mock.return_value = [AutosummaryEntry(fullname, name, None, False)]
         generate_autosummary_docs([], output_dir=app.srcdir, app=app)
 
-    content = (app.srcdir / 'target.methods.Base.prop.rst').read_text()
-    assert content == ("target.methods.Base.prop\n"
-                       "========================\n"
-                       "\n"
-                       ".. currentmodule:: target.methods\n"
-                       "\n"
-                       ".. autoproperty:: Base.prop")
+    content = (app.srcdir / (fullname + '.rst')).read_text()
+    title = fullname.replace('_', r'\_')
+    assert content == (title + "\n" + '=' * len(title) + "\n\n"
+                       ".. currentmodule:: " + modname + "\n\n"
+                       ".. autoproperty:: " + name)
 
 
 @pytest.mark.sphinx(testroot='ext-autosummary-skip-member')

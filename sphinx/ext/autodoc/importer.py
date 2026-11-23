@@ -17,8 +17,8 @@ from sphinx.deprecation import RemovedInSphinx50Warning
 from sphinx.ext.autodoc.mock import ismock, undecorate
 from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
-from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
-                                 safe_getattr)
+from sphinx.util.inspect import (getannotations, getattr_for_documentation, getmro, getslots,
+                                 isclass, isenumclass, safe_getattr)
 
 if False:
     # For type annotation
@@ -103,11 +103,14 @@ def import_object(modname: str, objpath: List[str], objtype: str = '',
         obj = module
         parent = None
         object_name = None
-        for attrname in objpath:
+        for i, attrname in enumerate(objpath):
             parent = obj
             logger.debug('[autodoc] getattr(_, %r)', attrname)
             mangled_name = mangle(obj, attrname)
-            obj = attrgetter(obj, mangled_name)
+            if i == len(objpath) - 1:
+                obj = getattr_for_documentation(obj, mangled_name, attrgetter)
+            else:
+                obj = attrgetter(obj, mangled_name)
 
             try:
                 logger.debug('[autodoc] => %r', obj)
@@ -256,7 +259,7 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable
         superclass = subject.__mro__[1]
         for name in obj_dict:
             if name not in superclass.__dict__:
-                value = safe_getattr(subject, name)
+                value = getattr_for_documentation(subject, name)
                 members[name] = ObjectMember(name, value, class_=subject)
 
     # members in __slots__
@@ -274,7 +277,7 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable
     # other members
     for name in dir(subject):
         try:
-            value = attrgetter(subject, name)
+            value = getattr_for_documentation(subject, name, attrgetter)
             if ismock(value):
                 value = undecorate(value)
 

@@ -16,6 +16,9 @@ Features added
 Bugs fixed
 ----------
 
+* #9461: autodoc and autosummary now document class properties defined with
+  ``@classmethod`` and ``@property``.
+
 Testing
 --------
 

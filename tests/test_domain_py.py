@@ -810,12 +810,17 @@ def test_pyattribute(app):
     assert domain.objects['Class.attr'] == ('index', 'Class.attr', 'attribute', False)
 
 
-def test_pyproperty(app):
+@pytest.mark.parametrize('is_class_property', [False, True])
+def test_pyproperty(app, is_class_property):
     text = (".. py:class:: Class\n"
             "\n"
             "   .. py:property:: prop\n"
             "      :abstractmethod:\n"
             "      :type: str\n")
+    prefix = "abstract property "
+    if is_class_property:
+        text += "      :classmethod:\n"
+        prefix = "abstract class property "
     domain = app.env.get_domain('py')
     doctree = restructuredtext.parse(app, text)
     assert_node(doctree, (addnodes.index,
@@ -825,7 +830,7 @@ def test_pyproperty(app):
                                                   desc)])]))
     assert_node(doctree[1][1][0], addnodes.index,
                 entries=[('single', 'prop (Class property)', 'Class.prop', '', None)])
-    assert_node(doctree[1][1][1], ([desc_signature, ([desc_annotation, "abstract property "],
+    assert_node(doctree[1][1][1], ([desc_signature, ([desc_annotation, prefix],
                                                      [desc_name, "prop"],
                                                      [desc_annotation, ": str"])],
                                    [desc_content, ()]))

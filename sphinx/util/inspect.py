@@ -383,6 +383,11 @@ def iscoroutinefunction(obj: Any) -> bool:
         return False
 
 
+def isclassproperty(obj: Any) -> bool:
+    """Check if the object is a classmethod wrapping a property."""
+    return isinstance(obj, classmethod) and isinstance(obj.__func__, property)
+
+
 def isproperty(obj: Any) -> bool:
     """Check if the object is property."""
     if sys.version_info >= (3, 8):
@@ -390,7 +395,7 @@ def isproperty(obj: Any) -> bool:
         if isinstance(obj, cached_property):
             return True
 
-    return isinstance(obj, property)
+    return isinstance(obj, property) or isclassproperty(obj)
 
 
 def isgenericalias(obj: Any) -> bool:
@@ -428,6 +433,17 @@ def safe_getattr(obj: Any, name: str, *defargs: Any) -> Any:
             return defargs[0]
 
         raise AttributeError(name) from exc
+
+
+def getattr_for_documentation(obj: Any, name: str, attrgetter: Callable = safe_getattr,
+                              *defargs: Any) -> Any:
+    """Get an attribute, keeping class properties unbound for introspection."""
+    if isclass(obj):
+        descriptor = inspect.getattr_static(obj, name, None)
+        if isclassproperty(descriptor):
+            return descriptor
+
+    return attrgetter(obj, name, *defargs)
 
 
 def object_description(object: Any) -> str:
@@ -837,15 +853,18 @@ def getdoc(obj: Any, attrgetter: Callable = safe_getattr,
     * inherited docstring
     * inherited decorated methods
     """
-    doc = attrgetter(obj, '__doc__', None)
+    class_property = isclassproperty(obj)
+    doc = attrgetter(obj.__func__ if class_property else obj, '__doc__', None)
     if ispartial(obj) and doc == obj.__class__.__doc__:
         return getdoc(obj.func)
     elif doc is None and allow_inherited:
         if cls and name:
             # Check a docstring of the attribute or method from super classes.
             for basecls in getmro(cls):
-                meth = safe_getattr(basecls, name, None)
+                meth = getattr_for_documentation(basecls, name, safe_getattr, None)
                 if meth is not None:
+                    if isclassproperty(meth):
+                        meth = meth.__func__
                     doc = attrgetter(meth, '__doc__', None)
                     if doc is not None:
                         break
@@ -853,13 +872,13 @@ def getdoc(obj: Any, attrgetter: Callable = safe_getattr,
             if doc is None:
                 # retry using `inspect.getdoc()`
                 for basecls in getmro(cls):
-                    meth = safe_getattr(basecls, name, None)
-                    if meth is not None:
+                    meth = getattr_for_documentation(basecls, name, safe_getattr, None)
+                    if meth is not None and not isclassproperty(meth):
                         doc = inspect.getdoc(meth)
                         if doc is not None:
                             break
 
-        if doc is None:
+        if doc is None and not class_property:
             doc = inspect.getdoc(obj)
 
     return doc

@@ -698,6 +698,26 @@ def test_getdoc_inherited_decorated_method():
     assert inspect.getdoc(Bar.meth, getattr, True, Bar, "meth") == Foo.meth.__doc__
 
 
+def test_getdoc_class_property():
+    class Base:
+        @classmethod
+        @property
+        def prop(cls):
+            """Inherited property docstring."""
+            pytest.fail('Class property getter was called')
+
+    class Child(Base):
+        @classmethod
+        @property
+        def prop(cls):
+            pytest.fail('Class property getter was called')
+
+    prop = Child.__dict__['prop']
+    assert inspect.getdoc(prop, allow_inherited=False) is None
+    assert inspect.getdoc(prop, allow_inherited=True, cls=Child, name='prop') == (
+        'Inherited property docstring.')
+
+
 def test_is_builtin_class_method():
     class MyInt(int):
         def my_method(self):

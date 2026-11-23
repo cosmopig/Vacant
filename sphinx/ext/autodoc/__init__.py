@@ -2673,12 +2673,18 @@ class PropertyDocumenter(DocstringStripSignatureMixin, ClassLevelDocumenter):  #
     def add_directive_header(self, sig: str) -> None:
         super().add_directive_header(sig)
         sourcename = self.get_sourcename()
+        if inspect.isclassproperty(self.object):
+            self.add_line('   :classmethod:', sourcename)
+            prop = self.object.__func__
+        else:
+            prop = self.object
+
         if inspect.isabstractmethod(self.object):
             self.add_line('   :abstractmethod:', sourcename)
 
-        if safe_getattr(self.object, 'fget', None) and self.config.autodoc_typehints != 'none':
+        if safe_getattr(prop, 'fget', None) and self.config.autodoc_typehints != 'none':
             try:
-                signature = inspect.signature(self.object.fget,
+                signature = inspect.signature(prop.fget,
                                               type_aliases=self.config.autodoc_type_aliases)
                 if signature.return_annotation is not Parameter.empty:
                     objrepr = stringify_typehint(signature.return_annotation)

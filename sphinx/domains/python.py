@@ -852,6 +852,7 @@ class PyProperty(PyObject):
     option_spec = PyObject.option_spec.copy()
     option_spec.update({
         'abstractmethod': directives.flag,
+        'classmethod': directives.flag,
         'type': directives.unchanged,
     })
 
@@ -866,6 +867,8 @@ class PyProperty(PyObject):
 
     def get_signature_prefix(self, sig: str) -> str:
         prefix = ['property']
+        if 'classmethod' in self.options:
+            prefix.insert(0, 'class')
         if 'abstractmethod' in self.options:
             prefix.insert(0, 'abstract')
 
