@@ -561,6 +561,49 @@ class TestFunctional:
         items, rec = pytester.inline_genitems(p)
         self.assert_markers(items, test_foo=("a", "b", "c"), test_bar=("a", "b", "d"))
 
+    def test_mark_multiple_inheritance(self, pytester: Pytester) -> None:
+        pytester.makeini(
+            """
+            [pytest]
+            markers =
+                foo: a marker with arguments
+                bar: a second marker
+            """
+        )
+        p = pytester.makepyfile(
+            """
+            import pytest
+
+            @pytest.mark.foo("root")
+            class Root:
+                pass
+
+            @pytest.mark.foo("left")
+            class Left(Root):
+                pass
+
+            class Right(Root):
+                pytestmark = pytest.mark.bar
+
+            class TestInherited(Left, Right):
+                def test_inherited(self):
+                    pass
+
+            @pytest.mark.foo("child")
+            class TestDecorated(Left, Right):
+                def test_decorated(self):
+                    pass
+            """
+        )
+        items, _ = pytester.inline_genitems(p)
+        inherited, decorated = items
+        inherited_marks = [("foo", ("root",)), ("bar", ()), ("foo", ("left",))]
+        assert [(m.name, m.args) for m in inherited.iter_markers()] == inherited_marks
+        assert [(m.name, m.args) for m in decorated.iter_markers()] == [
+            *inherited_marks,
+            ("foo", ("child",)),
+        ]
+
     def test_mark_closest(self, pytester: Pytester) -> None:
         p = pytester.makepyfile(
             """
