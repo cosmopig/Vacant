@@ -1,0 +1,678 @@
+{
+  "evidence": "external-devin-v3",
+  "arms": {
+    "A": {
+      "n": 24,
+      "hidden_passed": 18,
+      "hidden_rate": 0.75,
+      "calls_complete": false,
+      "incomplete_cost_cells": 24,
+      "visible_passed": 0,
+      "infra_void": 0,
+      "false_success": 0,
+      "wall_s": "UNKNOWN",
+      "model_calls": "UNKNOWN",
+      "prompt_tokens": "UNKNOWN",
+      "completion_tokens": "UNKNOWN",
+      "feedback_rounds": "UNKNOWN",
+      "vacant_home_bytes": "UNKNOWN",
+      "trace_bytes": "UNKNOWN",
+      "workspace_bytes": {
+        "pytest_cache": 0,
+        "logs": 0,
+        "other": 0
+      }
+    },
+    "A2": {
+      "n": 24,
+      "hidden_passed": 18,
+      "hidden_rate": 0.75,
+      "calls_complete": false,
+      "incomplete_cost_cells": 24,
+      "visible_passed": 0,
+      "infra_void": 0,
+      "false_success": 0,
+      "wall_s": "UNKNOWN",
+      "model_calls": "UNKNOWN",
+      "prompt_tokens": "UNKNOWN",
+      "completion_tokens": "UNKNOWN",
+      "feedback_rounds": "UNKNOWN",
+      "vacant_home_bytes": "UNKNOWN",
+      "trace_bytes": "UNKNOWN",
+      "workspace_bytes": {
+        "pytest_cache": 0,
+        "logs": 0,
+        "other": 0
+      }
+    },
+    "G": {
+      "n": 24,
+      "hidden_passed": 20,
+      "hidden_rate": 0.8333333333333334,
+      "calls_complete": false,
+      "incomplete_cost_cells": 24,
+      "visible_passed": 0,
+      "infra_void": 0,
+      "false_success": 0,
+      "wall_s": "UNKNOWN",
+      "model_calls": "UNKNOWN",
+      "prompt_tokens": "UNKNOWN",
+      "completion_tokens": "UNKNOWN",
+      "feedback_rounds": "UNKNOWN",
+      "vacant_home_bytes": "UNKNOWN",
+      "trace_bytes": "UNKNOWN",
+      "workspace_bytes": {
+        "pytest_cache": 0,
+        "logs": 0,
+        "other": 0
+      }
+    }
+  },
+  "comparisons": {
+    "G-A": {
+      "n": 24,
+      "delta": 0.08333333333333333,
+      "improved": 5,
+      "regressed": 3,
+      "p": 0.7265625,
+      "ci95": [
+        -0.16666666666666666,
+        0.2916666666666667
+      ],
+      "noise_floor": 0.0,
+      "decision": "no measurable gain"
+    }
+  },
+  "aa_control": {
+    "n": 24,
+    "delta": 0.0,
+    "improved": 1,
+    "regressed": 1,
+    "p": 1.0,
+    "ci95": [
+      -0.125,
+      0.125
+    ]
+  },
+  "missing": [],
+  "per_task": [
+    {
+      "task": "astropy__astropy-13236",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-13236",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-13236",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-13236",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-13236",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-13236",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-14598",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-14598",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-14598",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-14598",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-14598",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "astropy__astropy-14598",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-13344",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-13344",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-13344",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-13344",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-13344",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-13344",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15563",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15563",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15563",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15563",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15563",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15563",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15732",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15732",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15732",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15732",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15732",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "django__django-15732",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "matplotlib__matplotlib-24870",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "matplotlib__matplotlib-24870",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "matplotlib__matplotlib-24870",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "matplotlib__matplotlib-24870",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "matplotlib__matplotlib-24870",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "matplotlib__matplotlib-24870",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "scikit-learn__scikit-learn-25747",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "scikit-learn__scikit-learn-25747",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "scikit-learn__scikit-learn-25747",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "scikit-learn__scikit-learn-25747",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "scikit-learn__scikit-learn-25747",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "scikit-learn__scikit-learn-25747",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-7985",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-7985",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-7985",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-7985",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-7985",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-7985",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-8548",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-8548",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-8548",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-8548",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-8548",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sphinx-doc__sphinx-8548",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-14248",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-14248",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-14248",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-14248",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-14248",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-14248",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-15875",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-15875",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-15875",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-15875",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-15875",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-15875",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-21612",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-21612",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-21612",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-21612",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-21612",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    },
+    {
+      "task": "sympy__sympy-21612",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": null,
+      "infra_void": false
+    }
+  ],
+  "infra_void": [],
+  "contamination": []
+}

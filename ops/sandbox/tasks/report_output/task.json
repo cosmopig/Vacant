@@ -1,0 +1,16 @@
+{
+  "id": "report_output",
+  "category": "output",
+  "prompt": "Fix render_report in report.py to produce a Markdown expense report with a '# Expenses' heading, one '- category: cents' line per category sorted alphabetically, and 'Total: N cents'. Run report.py on the bundled expenses.json and leave the resulting REPORT.md in the deliverable.",
+  "visible_test_cmd": "python -m pytest -q tests",
+  "output_check": {
+    "path": "REPORT.md",
+    "type": "text",
+    "contains": [
+      "# Expenses",
+      "- food: 1250",
+      "- travel: 800",
+      "Total: 2050 cents"
+    ]
+  }
+}

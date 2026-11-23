@@ -1,0 +1,6 @@
+{
+  "id": "shipping",
+  "category": "input",
+  "prompt": "Read shipping.json and implement shipping_cost(weight, config_path='shipping.json') in shipping.py using its ordered maximum-weight tiers (inclusive boundaries). Above all tiers use overflow_cost. Reload the named config each call rather than hardcoding rates; reject negative weight.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

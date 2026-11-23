@@ -1,0 +1,6 @@
+{
+  "id": "billing",
+  "category": "bugfix",
+  "prompt": "Fix charge_cents in billing.py: each invoice includes free_units at no charge; bill only units above that allowance, never a negative quantity.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

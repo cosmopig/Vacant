@@ -1,0 +1,18 @@
+{
+  "applied_branches": [
+    "sandbox-devin-cal4/sympy__sympy-18763-plain",
+    "sandbox-devin-cal4/sympy__sympy-21596-plain",
+    "sandbox-devin-cal4/astropy__astropy-13977-plain",
+    "sandbox-devin-cal4/matplotlib__matplotlib-21568-plain",
+    "sandbox-devin-cal4/pydata__xarray-7229-plain",
+    "sandbox-devin-cal4/scikit-learn__scikit-learn-26194-plain",
+    "sandbox-devin-cal4/django__django-15957-plain",
+    "sandbox-devin-cal4/astropy__astropy-8707-plain",
+    "sandbox-devin-cal4/pytest-dev__pytest-5840-plain",
+    "sandbox-devin-cal4/matplotlib__matplotlib-26466-plain",
+    "sandbox-devin-cal4/django__django-14140-plain",
+    "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain"
+  ],
+  "rejected_branches": {},
+  "source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+}

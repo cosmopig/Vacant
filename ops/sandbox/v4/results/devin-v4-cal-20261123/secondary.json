@@ -1,0 +1,21 @@
+{
+  "gold_similarity_threshold": 0.9,
+  "gold_similarity_flags": [],
+  "gold_similarity_unmeasured": [],
+  "manifest_presence": {
+    "sandbox-devin-cal4/astropy__astropy-13977-plain": false,
+    "sandbox-devin-cal4/astropy__astropy-8707-plain": false,
+    "sandbox-devin-cal4/django__django-14140-plain": false,
+    "sandbox-devin-cal4/django__django-15957-plain": false,
+    "sandbox-devin-cal4/matplotlib__matplotlib-21568-plain": false,
+    "sandbox-devin-cal4/matplotlib__matplotlib-26466-plain": false,
+    "sandbox-devin-cal4/pydata__xarray-7229-plain": false,
+    "sandbox-devin-cal4/pytest-dev__pytest-5840-plain": false,
+    "sandbox-devin-cal4/scikit-learn__scikit-learn-26194-plain": false,
+    "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain": false,
+    "sandbox-devin-cal4/sympy__sympy-18763-plain": false,
+    "sandbox-devin-cal4/sympy__sympy-21596-plain": false
+  },
+  "agent_costs": "UNKNOWN",
+  "receipt_verification": "UNKNOWN"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "stock",
+  "category": "bugfix",
+  "prompt": "Fix reserve in stock.py. A reservation succeeds when stock covers the requested positive quantity, including an exact match. Failed or nonpositive requests must leave stock unchanged and return False.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

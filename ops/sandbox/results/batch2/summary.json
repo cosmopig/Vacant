@@ -1,0 +1,942 @@
+{
+  "evidence": "real-agent",
+  "arms": {
+    "A": {
+      "n": 24,
+      "hidden_passed": 8,
+      "hidden_rate": 0.3333333333333333,
+      "calls_complete": false,
+      "incomplete_cost_cells": 1,
+      "visible_passed": 15,
+      "infra_void": 1,
+      "false_success": 0,
+      "wall_s": 3608.7490000000003,
+      "model_calls": 106,
+      "prompt_tokens": 291569,
+      "completion_tokens": 11620,
+      "feedback_rounds": 0,
+      "vacant_home_bytes": 0,
+      "trace_bytes": 0,
+      "workspace_bytes": {
+        "pytest_cache": 0,
+        "logs": 0,
+        "other": 700296
+      }
+    },
+    "A2": {
+      "n": 24,
+      "hidden_passed": 7,
+      "hidden_rate": 0.2916666666666667,
+      "calls_complete": false,
+      "incomplete_cost_cells": 1,
+      "visible_passed": 17,
+      "infra_void": 1,
+      "false_success": 0,
+      "wall_s": 3140.37,
+      "model_calls": 81,
+      "prompt_tokens": 189374,
+      "completion_tokens": 10757,
+      "feedback_rounds": 0,
+      "vacant_home_bytes": 0,
+      "trace_bytes": 0,
+      "workspace_bytes": {
+        "pytest_cache": 0,
+        "logs": 0,
+        "other": 703469
+      }
+    },
+    "C": {
+      "n": 24,
+      "hidden_passed": 8,
+      "hidden_rate": 0.3333333333333333,
+      "calls_complete": true,
+      "incomplete_cost_cells": 0,
+      "visible_passed": 15,
+      "infra_void": 0,
+      "false_success": 0,
+      "wall_s": 3642.223,
+      "model_calls": 133,
+      "prompt_tokens": 329377,
+      "completion_tokens": 11863,
+      "feedback_rounds": 3,
+      "vacant_home_bytes": 422376,
+      "trace_bytes": 325897,
+      "workspace_bytes": {
+        "pytest_cache": 0,
+        "logs": 0,
+        "other": 704571
+      }
+    },
+    "G": {
+      "n": 24,
+      "hidden_passed": 9,
+      "hidden_rate": 0.375,
+      "calls_complete": false,
+      "incomplete_cost_cells": 4,
+      "visible_passed": 19,
+      "infra_void": 4,
+      "false_success": 0,
+      "wall_s": 7320.477,
+      "model_calls": 228,
+      "prompt_tokens": "UNKNOWN",
+      "completion_tokens": "UNKNOWN",
+      "feedback_rounds": 8,
+      "vacant_home_bytes": 0,
+      "trace_bytes": 0,
+      "workspace_bytes": {
+        "pytest_cache": 3065,
+        "logs": 0,
+        "other": 736247
+      }
+    }
+  },
+  "comparisons": {
+    "C-A": {
+      "n": 24,
+      "delta": 0.0,
+      "improved": 1,
+      "regressed": 1,
+      "p": 1.0,
+      "ci95": [
+        -0.125,
+        0.125
+      ],
+      "noise_floor": 0.041666666666666664,
+      "decision": "no measurable gain"
+    },
+    "G-A": {
+      "n": 24,
+      "delta": 0.041666666666666664,
+      "improved": 5,
+      "regressed": 4,
+      "p": 1.0,
+      "ci95": [
+        -0.20833333333333334,
+        0.2916666666666667
+      ],
+      "noise_floor": 0.041666666666666664,
+      "decision": "no measurable gain"
+    }
+  },
+  "aa_control": {
+    "n": 24,
+    "delta": -0.041666666666666664,
+    "improved": 2,
+    "regressed": 3,
+    "p": 1.0,
+    "ci95": [
+      -0.20833333333333334,
+      0.125
+    ]
+  },
+  "missing": [],
+  "per_task": [
+    {
+      "task": "billing",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "billing",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": true
+    },
+    {
+      "task": "csv_export",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "csv_export",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "duration",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "inventory_output",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "merge_counts",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "money",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "pagination",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "recipients",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "report_output",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "report_output",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": true
+    },
+    {
+      "task": "report_output",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "report_output",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": true
+    },
+    {
+      "task": "report_output",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": true
+    },
+    {
+      "task": "report_output",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "report_output",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "report_output",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "sales",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": true
+    },
+    {
+      "task": "shipping",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": false
+    },
+    {
+      "task": "shipping",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": false,
+      "visible_pass": false,
+      "infra_void": true
+    },
+    {
+      "task": "stock",
+      "sample": 1,
+      "arm": "A",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 1,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 1,
+      "arm": "C",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 1,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 2,
+      "arm": "A",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 2,
+      "arm": "A2",
+      "hidden_pass": false,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 2,
+      "arm": "C",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    },
+    {
+      "task": "stock",
+      "sample": 2,
+      "arm": "G",
+      "hidden_pass": true,
+      "visible_pass": true,
+      "infra_void": false
+    }
+  ],
+  "infra_void": [
+    {
+      "task": "csv_export",
+      "sample": 1,
+      "arm": "G",
+      "infra_reason": "model/process error"
+    },
+    {
+      "task": "report_output",
+      "sample": 1,
+      "arm": "A2",
+      "infra_reason": "timeout"
+    },
+    {
+      "task": "report_output",
+      "sample": 1,
+      "arm": "G",
+      "infra_reason": "timeout"
+    },
+    {
+      "task": "report_output",
+      "sample": 2,
+      "arm": "A",
+      "infra_reason": "timeout"
+    },
+    {
+      "task": "sales",
+      "sample": 2,
+      "arm": "G",
+      "infra_reason": "timeout"
+    },
+    {
+      "task": "shipping",
+      "sample": 2,
+      "arm": "G",
+      "infra_reason": "timeout"
+    }
+  ],
+  "contamination": []
+}

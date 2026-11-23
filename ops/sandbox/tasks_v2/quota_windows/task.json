@@ -1,0 +1,6 @@
+{
+  "id": "quota_windows",
+  "category": "bugfix",
+  "prompt": "Repair usage accounting for offset-aware time windows and cached tenant summaries. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "retry_queue",
+  "category": "bugfix",
+  "prompt": "Fix retry scheduling and queue snapshots without breaking old callers. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

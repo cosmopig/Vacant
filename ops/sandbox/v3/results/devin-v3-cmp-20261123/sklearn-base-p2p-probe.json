@@ -1,0 +1,42 @@
+[
+  {
+    "cell": "scikit-learn__scikit-learn-25747-s1-A",
+    "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
+    "node": "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense_update_columns_and_index",
+    "test_patch_applied": false,
+    "patch_sha256": "c997e0e7c8816e547f28032bd0bcb9f738fc3f1ad834f065904e53067a4a19c1",
+    "exit_code": 0,
+    "stdout": "\u001b[32m.\u001b[0m\u001b[32m                                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 0.16s\u001b[0m\u001b[0m\n",
+    "stderr": "warning: sklearn/tests/test_pipeline.py has type 100755, expected 100644\nwarning: sklearn/utils/_set_output.py has type 100755, expected 100644\n"
+  },
+  {
+    "cell": "scikit-learn__scikit-learn-25747-s2-A",
+    "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
+    "node": "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense_update_columns_and_index",
+    "test_patch_applied": false,
+    "patch_sha256": "e4189ccd13dc7f7206c8f79760cee82a146dfad0ee2fb59c15b38ec809263cf1",
+    "exit_code": 1,
+    "stdout": "\u001b[31mF\u001b[0m\u001b[31m                                                                        [100%]\u001b[0m\n=================================== FAILURES ===================================\n\u001b[31m\u001b[1m________ test__wrap_in_pandas_container_dense_update_columns_and_index _________\u001b[0m\n\n    def test__wrap_in_pandas_container_dense_update_columns_and_index():\n        \"\"\"Check that _wrap_in_pandas_container overrides columns and index.\"\"\"\n        pd = pytest.importorskip(\"pandas\")\n        X_df = pd.DataFrame([[1, 0, 3], [0, 0, 1]], columns=[\"a\", \"b\", \"c\"])\n        new_columns = np.asarray([\"f0\", \"f1\", \"f2\"], dtype=object)\n        new_index = [10, 12]\n    \n        new_df = _wrap_in_pandas_container(X_df, columns=new_columns, index=new_index)\n        assert_array_equal(new_df.columns, new_columns)\n>       assert_array_equal(new_df.index, new_index)\n\u001b[1m\u001b[31mE       AssertionError: \u001b[0m\n\u001b[1m\u001b[31mE       Arrays are not equal\u001b[0m\n\u001b[1m\u001b[31mE       \u001b[0m\n\u001b[1m\u001b[31mE       Mismatched elements: 2 / 2 (100%)\u001b[0m\n\u001b[1m\u001b[31mE       Max absolute difference: 11\u001b[0m\n\u001b[1m\u001b[31mE       Max relative difference: 1.\u001b[0m\n\u001b[1m\u001b[31mE        x: array([0, 1])\u001b[0m\n\u001b[1m\u001b[31mE        y: array([10, 12])\u001b[0m\n\n\u001b[1m\u001b[31msklearn/utils/tests/test_set_output.py\u001b[0m:36: AssertionError\n\u001b[31m\u001b[31m\u001b[1m1 failed\u001b[0m\u001b[31m in 0.30s\u001b[0m\u001b[0m\n",
+    "stderr": "warning: sklearn/tests/test_pipeline.py has type 100755, expected 100644\nwarning: sklearn/utils/_set_output.py has type 100755, expected 100644\n"
+  },
+  {
+    "cell": "scikit-learn__scikit-learn-25747-s1-G",
+    "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
+    "node": "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense_update_columns_and_index",
+    "test_patch_applied": false,
+    "patch_sha256": "e3fdb471169f23aeac1057a5730954f1b39c337d100ecd841325c6f4ea3a4c9d",
+    "exit_code": 0,
+    "stdout": "\u001b[32m.\u001b[0m\u001b[32m                                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 0.17s\u001b[0m\u001b[0m\n",
+    "stderr": "warning: sklearn/tests/test_pipeline.py has type 100755, expected 100644\nwarning: sklearn/utils/_set_output.py has type 100755, expected 100644\n"
+  },
+  {
+    "cell": "scikit-learn__scikit-learn-25747-s2-G",
+    "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
+    "node": "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense_update_columns_and_index",
+    "test_patch_applied": false,
+    "patch_sha256": "cb68300626e7b91a99abd9a585b7f40a7068d9d44d8a37964c3c67da1fa1ecb4",
+    "exit_code": 0,
+    "stdout": "\u001b[32m.\u001b[0m\u001b[32m                                                                        [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 0.23s\u001b[0m\u001b[0m\n",
+    "stderr": "warning: sklearn/tests/test_pipeline.py has type 100755, expected 100644\nwarning: sklearn/utils/_set_output.py has type 100755, expected 100644\n"
+  }
+]

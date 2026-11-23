@@ -1,0 +1,85 @@
+{
+  "score": {
+    "resolved": false,
+    "infra_void": false,
+    "patch_applied": true,
+    "error": null,
+    "report": {
+      "patch_is_None": false,
+      "patch_exists": true,
+      "patch_successfully_applied": true,
+      "resolved": false,
+      "tests_status": {
+        "FAIL_TO_PASS": {
+          "success": [],
+          "failure": [
+            "tests/test_ext_autodoc_automodule.py::test_empty_all"
+          ]
+        },
+        "PASS_TO_PASS": {
+          "success": [],
+          "failure": []
+        },
+        "FAIL_TO_FAIL": {
+          "success": [],
+          "failure": []
+        },
+        "PASS_TO_FAIL": {
+          "success": [],
+          "failure": []
+        }
+      }
+    },
+    "image_digest": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8595@sha256:d24f9894d781546578028592ad7630cb40973b69af4705582b5e274afc573628",
+    "harness_version": "3.0.17",
+    "log_dir": "/home/ubuntu/sandbox-runs/results/devin-v4-cal-20261123/cells/sphinx-doc__sphinx-8595-s1-calibration-plain/attempts/1/harness/logs/run_evaluation/v3-4f4c0153554b4c6da7e1f7c9ef11a304/handback/sphinx-doc__sphinx-8595"
+  },
+  "resolved": false,
+  "hidden_pass": false,
+  "visible_pass": null,
+  "infra_void": false,
+  "infra_reason": null,
+  "base_sha": "c0f0ac9b0d30defb571e765a9420b98f8041083a",
+  "base_tree": "a77429efc88d910c40d73826c07a39f25c2d180b",
+  "patch_sha256": "ea590dd3cb95abc2e3c8f96e79cb578740c73afa87c188a5ef06e8868482c790",
+  "patch_bytes": 1957,
+  "gold_similarity": {
+    "ratio": 0.25,
+    "flagged": false,
+    "threshold": 0.9
+  },
+  "harness_wall_s": 19.565686415007804,
+  "image_digest": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8595@sha256:d24f9894d781546578028592ad7630cb40973b69af4705582b5e274afc573628",
+  "harness_version": "3.0.17",
+  "unchanged_gitlinks": {},
+  "task": "sphinx-doc__sphinx-8595",
+  "sample": 1,
+  "arm": "calibration-plain",
+  "external_arm": "devin-plain",
+  "branch": "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain",
+  "git_sha": "66f00562e1c015a2c754020c9a97cf0f97848d9e",
+  "evidence": "external-devin-v4",
+  "protocol": "calibration",
+  "scorer_git_sha": "6a6e26b4da2d8790e7f69ba1c40ea390cb7434f7",
+  "session_id": "devin-7b23125faa1c4be4ab6e337203d98e06",
+  "calls_complete": false,
+  "manifest_present": false,
+  "model_calls": "UNKNOWN",
+  "prompt_tokens": "UNKNOWN",
+  "completion_tokens": "UNKNOWN",
+  "wall_s": "UNKNOWN",
+  "vacant_feedback_rounds": "UNKNOWN",
+  "vacant_home_bytes": "UNKNOWN",
+  "trace_bytes": "UNKNOWN",
+  "contamination": false,
+  "access_contamination": false,
+  "outside_help": false,
+  "contamination_evidence": [
+    "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+    "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)",
+    "incoming messages=1 (the initial dispatch only)",
+    "[event-01a208e6acc27873ac73bb89dcbfc080] 2026-11-23 14:54:24 UTC >>> devin_message (message): devin: I pushed the fix to [`sand",
+    "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+  ],
+  "contamination_reviewed": true
+}

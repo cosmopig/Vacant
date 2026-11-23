@@ -1,0 +1,6 @@
+{
+  "id": "credit_ledger",
+  "category": "bugfix",
+  "prompt": "Fix transfers and balance snapshots in the credit ledger, including reloads. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

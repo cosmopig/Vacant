@@ -1,0 +1,185 @@
+{
+  "scope": "All 62 pinned supplied problem statements against all-bank leak patterns and each pristine base tree",
+  "already_approved": [
+    "django__django-16256"
+  ],
+  "approved": {
+    "astropy__astropy-13398": {
+      "approved": true,
+      "date_requested": "2026-11-23",
+      "scope": "Only byte-exact supplied problem statement; same text all arms; no gate or official-scoring exception.",
+      "problem_statement_sha256": "c26c8dc258dc5cb9dd34f30bdbaaed3f19a8ada137e0f19d81d7f57dc5f11bba",
+      "matches": [
+        {
+          "kind": "gold_added_line",
+          "needle": "# AltAz frame is left handed",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "# HADec frame is left handed",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "# form ITRS to AltAz matrix",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "# form ITRS to HADec matrix",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "@frame_transform_graph.transform(FunctionTransformWithFiniteDifference, AltAz, ITRS)",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "@frame_transform_graph.transform(FunctionTransformWithFiniteDifference, HADec, ITRS)",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "@frame_transform_graph.transform(FunctionTransformWithFiniteDifference, ITRS, AltAz)",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "@frame_transform_graph.transform(FunctionTransformWithFiniteDifference, ITRS, HADec)",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "def itrs_to_observed(itrs_coo, observed_frame):",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "def observed_to_itrs(observed_coo, itrs_frame):",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "from astropy.coordinates.matrix_utilities import rotation_matrix, matrix_transpose",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "lon, lat, height = observed_frame.location.to_geodetic('WGS84')",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "mat = (minus_x",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "mat = (minus_y",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "minus_x = np.eye(3)",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "minus_x[0][0] = -1.0",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "minus_y = np.eye(3)",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "minus_y[1][1] = -1.0",
+          "file": "prompts/astropy__astropy-13398.txt",
+          "base_matches": []
+        }
+      ]
+    },
+    "scikit-learn__scikit-learn-26194": {
+      "approved": true,
+      "date_requested": "2026-11-23",
+      "scope": "Only byte-exact supplied problem statement; same text all arms; no gate or official-scoring exception.",
+      "problem_statement_sha256": "55520f2fb243de6275b76da65b6d282fcbfcbfdd7806865b90f6aa1885675038",
+      "matches": [
+        {
+          "kind": "introduced_test_name",
+          "needle": "test_roc_curve_with_probablity_estimates",
+          "file": "prompts/scikit-learn__scikit-learn-26194.txt",
+          "base_matches": []
+        }
+      ]
+    },
+    "astropy__astropy-14182": {
+      "approved": true,
+      "date_requested": "2026-11-23",
+      "scope": "Only byte-exact supplied problem statement; same text all arms; no gate or official-scoring exception.",
+      "problem_statement_sha256": "2f743a72613ab0e8e063ff7b7f0a233015ad12ba14992625d9f84b315fa885fd",
+      "matches": [
+        {
+          "kind": "gold_added_line",
+          "needle": "350.0      0.7",
+          "file": "prompts/astropy__astropy-14182.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "950.0      1.2",
+          "file": "prompts/astropy__astropy-14182.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": ">>> tbl.write(sys.stdout,  format=\"ascii.rst\")",
+          "file": "prompts/astropy__astropy-14182.txt",
+          "base_matches": []
+        },
+        {
+          "kind": "gold_added_line",
+          "needle": "wave response",
+          "file": "prompts/astropy__astropy-14182.txt",
+          "base_matches": []
+        }
+      ]
+    },
+    "sphinx-doc__sphinx-7462": {
+      "approved": true,
+      "date_requested": "2026-11-23",
+      "scope": "Only byte-exact supplied problem statement; same text all arms; no gate or official-scoring exception.",
+      "problem_statement_sha256": "8b7f970ed7e3c847eb7675a3564030771ff64e2f479027f3bb628d7d7c925acc",
+      "matches": [
+        {
+          "kind": "gold_added_line",
+          "needle": "return ()",
+          "file": "prompts/sphinx-doc__sphinx-7462.txt",
+          "base_matches": []
+        }
+      ]
+    }
+  },
+  "owner_decision_date": "2026-11-23"
+}

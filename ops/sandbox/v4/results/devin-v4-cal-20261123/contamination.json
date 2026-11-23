@@ -1,0 +1,206 @@
+{
+  "sandbox-devin-cal4/sympy__sympy-18763-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e6aa3b78d2bfc9072ed9189941] 2026-11-23 14:54:24 UTC >>> devin_message (message): devin: The fix is pushed to [sand",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-1ecfdcdc9b7f443dab12d8273c694973",
+    "handback_sha": "a429fb0178bc551f0578d7e4e7e4675c39f6775e",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/sympy__sympy-21596-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e76bd47122ace5dfa50973a163] 2026-11-23 14:55:13 UTC >>> devin_message (message): devin: Done. I pushed the fix to ",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-6b16bccda86d428ab80d4613a9d841be",
+    "handback_sha": "5fc9afd95f8e30060d036676f5bbb59f7c77206c",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/astropy__astropy-13977-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e764a571df9b456c1c00d5cb4b] 2026-11-23 14:55:12 UTC <<< git_push (other): git_push",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-fc0a2fdaf77c4e1ab68cec6ba12c7f10",
+    "handback_sha": "30e29db01b4c170ebf407b8ae3f8f9e478df8f70",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/matplotlib__matplotlib-21568-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e957d67a329050ac12706d4888] 2026-11-23 14:57:19 UTC >>> devin_message (message): devin: I pushed the fix for matpl",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-41adc8d4028242e88d608029bb8069ea",
+    "handback_sha": "b1974a74005b4b096cd3846193739c4e09833261",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/pydata__xarray-7229-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e9fbd47f42b91799f7dfcbaf5f] 2026-11-23 14:58:01 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-d4029375d179449183eb0016e293d283",
+    "handback_sha": "6af1fdfe5154f0042f001c738a15904cf885db04",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/scikit-learn__scikit-learn-26194-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208edd78a7235878cd872d3023ff0] 2026-11-23 15:02:14 UTC <<< git_push (other): git_push",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-a96abb47a3c74a93bbe3d1698563b7a1",
+    "handback_sha": "b787e7a3d1b64c8a00c4282613db77c2dd75f36c",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/django__django-15957-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e858d67883b6c0f1d5ff3c54db] 2026-11-23 14:56:14 UTC >>> devin_message (message): devin: Fixed and pushed to [`sand",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-1955805b196d4bc6b9052b7d8536a348",
+    "handback_sha": "7ae9cf1e6756392d3df02a56c17bce9924bec2a0",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/astropy__astropy-8707-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e987f375e3b7ecc7350b2b4ab8] 2026-11-23 14:57:32 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-5c3653e88d2e4a6ba2a702cacff893b5",
+    "handback_sha": "07549dcc77793708743df854c1c30220d0adc6fe",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/pytest-dev__pytest-5840-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e773587043a74115da9a95a949] 2026-11-23 14:55:15 UTC >>> devin_message (message): devin: I fixed the pytest-dev__py",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-e52567ce43424fafab1faba905810b48",
+    "handback_sha": "5b81e5881a295696eed5e9ecb9f2c240d6fe46be",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/matplotlib__matplotlib-26466-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e84b487fc1b64250b91920aef1] 2026-11-23 14:56:11 UTC >>> devin_message (message): devin: Fixed and pushed [sandbox-",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-f8c1d369c7cf4bc4b543dc18e3a3a878",
+    "handback_sha": "beb67642e51a266fb178c4a5cb6865bbf20c3722",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/django__django-14140-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e678927463b397231b192be17f] 2026-11-23 14:54:11 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-c667034d55e4419a957e08f1a45c3738",
+    "handback_sha": "6d4227a51a11bc7413eb52a9d1f6500e1c364ffd",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  },
+  "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+      "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)"
+    ],
+    "outside_help_evidence": [
+      "incoming messages=1 (the initial dispatch only)",
+      "[event-01a208e6acc27873ac73bb89dcbfc080] 2026-11-23 14:54:24 UTC >>> devin_message (message): devin: I pushed the fix to [`sand",
+      "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+    ],
+    "reviewer": "devin-ad6be772a95a4333bfd0c57a61e7779e (session-event scan + manual review of every keyword hit)",
+    "session_id": "devin-7b23125faa1c4be4ab6e337203d98e06",
+    "handback_sha": "66f00562e1c015a2c754020c9a97cf0f97848d9e",
+    "audit_source_sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+  }
+}

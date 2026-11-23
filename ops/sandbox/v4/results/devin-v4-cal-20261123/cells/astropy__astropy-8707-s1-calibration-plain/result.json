@@ -1,0 +1,99 @@
+{
+  "score": {
+    "resolved": true,
+    "infra_void": false,
+    "patch_applied": true,
+    "error": null,
+    "report": {
+      "patch_is_None": false,
+      "patch_exists": true,
+      "patch_successfully_applied": true,
+      "resolved": true,
+      "tests_status": {
+        "FAIL_TO_PASS": {
+          "success": [
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_from_bytes"
+          ],
+          "failure": []
+        },
+        "PASS_TO_PASS": {
+          "success": [
+            "astropy/io/fits/tests/test_header.py::test_shallow_copy",
+            "astropy/io/fits/tests/test_header.py::test_init_with_header",
+            "astropy/io/fits/tests/test_header.py::test_init_with_dict",
+            "astropy/io/fits/tests/test_header.py::test_init_with_ordereddict",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_rename_keyword",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_card_constructor_default_args",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_string_value_card",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_boolean_value_card",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_long_integer_value_card",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_floating_point_value_card",
+            "astropy/io/fits/tests/test_header.py::TestHeaderFunctions::test_complex_value_card"
+          ],
+          "failure": []
+        },
+        "FAIL_TO_FAIL": {
+          "success": [],
+          "failure": []
+        },
+        "PASS_TO_FAIL": {
+          "success": [],
+          "failure": []
+        }
+      }
+    },
+    "image_digest": "swebench/sweb.eval.x86_64.astropy_1776_astropy-8707@sha256:9415ee47831f190ea4ee7971dec718e386d064e7c495feca6ba0fef7b0ede715",
+    "harness_version": "3.0.17",
+    "log_dir": "/home/ubuntu/sandbox-runs/results/devin-v4-cal-20261123/cells/astropy__astropy-8707-s1-calibration-plain/attempts/1/harness/logs/run_evaluation/v3-c371090f27794d7ebec9b9f8a23b1aa0/handback/astropy__astropy-8707"
+  },
+  "resolved": true,
+  "hidden_pass": true,
+  "visible_pass": null,
+  "infra_void": false,
+  "infra_reason": null,
+  "base_sha": "072635a716ac7015de4d323ef9188fd7ca4a9312",
+  "base_tree": "a1021067d1cbeaf94a58f631a49807d7bdd479dd",
+  "patch_sha256": "0fb839966d881c8a35b3aa8a0e540cfee4da163056f1260d4996035a96f9f319",
+  "patch_bytes": 4067,
+  "gold_similarity": {
+    "ratio": 0.17094017094017094,
+    "flagged": false,
+    "threshold": 0.9
+  },
+  "harness_wall_s": 22.87673665699549,
+  "image_digest": "swebench/sweb.eval.x86_64.astropy_1776_astropy-8707@sha256:9415ee47831f190ea4ee7971dec718e386d064e7c495feca6ba0fef7b0ede715",
+  "harness_version": "3.0.17",
+  "unchanged_gitlinks": {
+    "astropy_helpers": "32b440b52f4c60592148b3254c7ddbf14df3c6e0"
+  },
+  "task": "astropy__astropy-8707",
+  "sample": 1,
+  "arm": "calibration-plain",
+  "external_arm": "devin-plain",
+  "branch": "sandbox-devin-cal4/astropy__astropy-8707-plain",
+  "git_sha": "07549dcc77793708743df854c1c30220d0adc6fe",
+  "evidence": "external-devin-v4",
+  "protocol": "calibration",
+  "scorer_git_sha": "8a91f75b1d37a325ac4a50f66bc067918d9cb71c",
+  "session_id": "devin-5c3653e88d2e4a6ba2a702cacff893b5",
+  "calls_complete": false,
+  "manifest_present": false,
+  "model_calls": "UNKNOWN",
+  "prompt_tokens": "UNKNOWN",
+  "completion_tokens": "UNKNOWN",
+  "wall_s": "UNKNOWN",
+  "vacant_feedback_rounds": "UNKNOWN",
+  "vacant_home_bytes": "UNKNOWN",
+  "trace_bytes": "UNKNOWN",
+  "contamination": false,
+  "access_contamination": false,
+  "outside_help": false,
+  "contamination_evidence": [
+    "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+    "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)",
+    "incoming messages=1 (the initial dispatch only)",
+    "[event-01a208e987f375e3b7ecc7350b2b4ab8] 2026-11-23 14:57:32 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_",
+    "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+  ],
+  "contamination_reviewed": true
+}

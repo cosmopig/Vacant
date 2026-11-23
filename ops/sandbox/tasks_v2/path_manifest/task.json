@@ -1,0 +1,6 @@
+{
+  "id": "path_manifest",
+  "category": "feature",
+  "prompt": "Add normalized manifest updates and deterministic legacy-compatible serialization. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

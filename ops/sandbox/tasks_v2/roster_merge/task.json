@@ -1,0 +1,6 @@
+{
+  "id": "roster_merge",
+  "category": "feature",
+  "prompt": "Add identity-aware roster merging and CSV export while retaining legacy rows. Follow SPEC.md.",
+  "visible_test_cmd": "python -m pytest -q tests"
+}

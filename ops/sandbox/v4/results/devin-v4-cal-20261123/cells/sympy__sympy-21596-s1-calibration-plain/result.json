@@ -1,0 +1,130 @@
+{
+  "score": {
+    "resolved": false,
+    "infra_void": false,
+    "patch_applied": true,
+    "error": null,
+    "report": {
+      "patch_is_None": false,
+      "patch_exists": true,
+      "patch_successfully_applied": true,
+      "resolved": false,
+      "tests_status": {
+        "FAIL_TO_PASS": {
+          "success": [],
+          "failure": [
+            "test_imageset_intersect_real"
+          ]
+        },
+        "PASS_TO_PASS": {
+          "success": [
+            "test_naturals",
+            "test_naturals0",
+            "test_integers",
+            "test_ImageSet",
+            "test_image_is_ImageSet",
+            "test_halfcircle",
+            "test_ImageSet_iterator_not_injective",
+            "test_inf_Range_len",
+            "test_Range_set",
+            "test_Range_symbolic",
+            "test_range_range_intersection",
+            "test_range_interval_intersection",
+            "test_range_is_finite_set",
+            "test_Integers_eval_imageset",
+            "test_Range_eval_imageset",
+            "test_fun",
+            "test_Reals",
+            "test_Complex",
+            "test_intersections",
+            "test_infinitely_indexed_set_1",
+            "test_infinitely_indexed_set_2",
+            "test_imageset_intersect_interval",
+            "test_imageset_intersect_diophantine",
+            "test_infinitely_indexed_set_3",
+            "test_ImageSet_simplification",
+            "test_ImageSet_contains",
+            "test_ComplexRegion_contains",
+            "test_ComplexRegion_intersect",
+            "test_ComplexRegion_union",
+            "test_ComplexRegion_from_real",
+            "test_ComplexRegion_measure",
+            "test_normalize_theta_set",
+            "test_ComplexRegion_FiniteSet",
+            "test_union_RealSubSet",
+            "test_issue_9980",
+            "test_issue_11732",
+            "test_issue_11730",
+            "test_issue_11938",
+            "test_issue_11914",
+            "test_issue_9543",
+            "test_issue_16871",
+            "test_issue_18050",
+            "test_Rationals",
+            "test_NZQRC_unions",
+            "test_imageset_intersection",
+            "test_issue_17858"
+          ],
+          "failure": []
+        },
+        "FAIL_TO_FAIL": {
+          "success": [],
+          "failure": []
+        },
+        "PASS_TO_FAIL": {
+          "success": [],
+          "failure": []
+        }
+      }
+    },
+    "image_digest": "swebench/sweb.eval.x86_64.sympy_1776_sympy-21596@sha256:1df616eb9faad0688c22d0e38984918699b28fea9e60f5c1158f1e99b8eb2a6f",
+    "harness_version": "3.0.17",
+    "log_dir": "/home/ubuntu/sandbox-runs/results/devin-v4-cal-20261123/cells/sympy__sympy-21596-s1-calibration-plain/attempts/1/harness/logs/run_evaluation/v3-e774edaec93d4bb89b10a82cf7aa8351/handback/sympy__sympy-21596"
+  },
+  "resolved": false,
+  "hidden_pass": false,
+  "visible_pass": null,
+  "infra_void": false,
+  "infra_reason": null,
+  "base_sha": "c515df864dcb37a80e6adff6215893acb0982d22",
+  "base_tree": "63d177592d7f32b407a1ea1a273c6b4fb420d916",
+  "patch_sha256": "110ae74ebaa34fee72ab6cf7f681434a3288568ce515619ab829bbd46dff2f1f",
+  "patch_bytes": 4721,
+  "gold_similarity": {
+    "ratio": 0.32608695652173914,
+    "flagged": false,
+    "threshold": 0.9
+  },
+  "harness_wall_s": 27.807711183006177,
+  "image_digest": "swebench/sweb.eval.x86_64.sympy_1776_sympy-21596@sha256:1df616eb9faad0688c22d0e38984918699b28fea9e60f5c1158f1e99b8eb2a6f",
+  "harness_version": "3.0.17",
+  "task": "sympy__sympy-21596",
+  "sample": 1,
+  "arm": "calibration-plain",
+  "external_arm": "devin-plain",
+  "branch": "sandbox-devin-cal4/sympy__sympy-21596-plain",
+  "git_sha": "5fc9afd95f8e30060d036676f5bbb59f7c77206c",
+  "evidence": "external-devin-v4",
+  "protocol": "calibration",
+  "session_id": "devin-6b16bccda86d428ab80d4613a9d841be",
+  "calls_complete": false,
+  "manifest_present": false,
+  "model_calls": "UNKNOWN",
+  "prompt_tokens": "UNKNOWN",
+  "completion_tokens": "UNKNOWN",
+  "wall_s": "UNKNOWN",
+  "vacant_feedback_rounds": "UNKNOWN",
+  "vacant_home_bytes": "UNKNOWN",
+  "trace_bytes": "UNKNOWN",
+  "contamination": false,
+  "access_contamination": false,
+  "outside_help": false,
+  "contamination_evidence": [
+    "browser events=0, web-search events=0; MCP events only devin_ticket_manage",
+    "keyword hits (swe-bench/leaderboard/upstream github/issues/pull) reviewed: all are the dispatch prompt, the task's own problem statement/diff text, or git-push 'remote:' lines; curl/wget only fetched env installers (miniforge/micromamba/anaconda)",
+    "incoming messages=1 (the initial dispatch only)",
+    "[event-01a208e76bd47122ace5dfa50973a163] 2026-11-23 14:55:13 UTC >>> devin_message (message): devin: Done. I pushed the fix to ",
+    "no PR exists for the handback head in any state (calibration-pr-check.json); no review feedback possible"
+  ],
+  "contamination_reviewed": true
+}
