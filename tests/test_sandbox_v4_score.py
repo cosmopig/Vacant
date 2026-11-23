@@ -477,3 +477,25 @@ def test_one_branch_fetch_failure_keeps_cache_pending_and_scores_others(bank, tm
     assert not report['calibration']['proceed']
     assert bank.collect(out)['calibration']['proceed']
     assert len(bank.calls) == 12
+
+
+def test_base_mismatch_is_nonfinal_rechecked_and_other_cells_continue(bank, tmp_path):
+    bank.publish()
+    out = tmp_path / 'results'
+    task, branch = bank.ids[0], bank.branches[0]
+    bank.git('push', str(bank.remote), bank.handback + ':refs/heads/sandbox-v4/' + task)
+    report = bank.collect(out)
+    assert report['cell_states'][branch]['status'] == 'base_mismatch'
+    assert report['calibration']['scored'] == 11 and not report['calibration']['proceed']
+    assert not (score.cell_path(out, branch) / 'result.json').exists()
+    bank.git('push', '--delete', str(bank.remote), 'sandbox-v4/' + task)
+    bank.git('push', str(bank.remote), bank.base + ':refs/heads/sandbox-v4/' + task)
+    assert bank.collect(out)['calibration']['scored'] == 12
+    assert len(bank.calls) == 12
+    reviewed(out)
+    assert score.review(out)['calibration']['proceed']
+    bank.git('push', str(bank.remote), bank.handback + ':refs/heads/sandbox-v4/' + task)
+    report = bank.collect(out)
+    assert report['calibration']['scored'] == 11 and not report['calibration']['proceed']
+    assert (score.cell_path(out, branch) / 'result.json').exists()
+    assert len(bank.calls) == 12

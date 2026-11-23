@@ -144,14 +144,23 @@ def call_harness(instance, patch, image_digest, cell, python, timeout):
     return result
 
 
-def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_prefix='sandbox-v3/', patch_deriver=None,
-                   allow_unchanged_gitlinks=False):
+class BaseMismatchError(ValueError):
+    pass
+
+
+def verify_base(repo, remote, instance, record, *, base_prefix='sandbox-v3/'):
     base_branch = base_prefix + instance['instance_id']
-    patch_deriver = patch_deriver or derive_patch
     base_sha = fetch(repo, remote, base_branch)
     if (base_sha != record['sha'] or record['base_commit'] != instance['base_commit']
             or git(repo, '--no-replace-objects', 'rev-parse', base_sha+'^{tree}') != record['base_tree']):
-        raise ValueError('frozen base mismatch: ' + base_branch)
+        raise BaseMismatchError('frozen base mismatch: ' + base_branch)
+    return base_sha
+
+
+def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_prefix='sandbox-v3/', patch_deriver=None,
+                   allow_unchanged_gitlinks=False):
+    patch_deriver = patch_deriver or derive_patch
+    base_sha = verify_base(repo, remote, instance, record, base_prefix=base_prefix)
     base, handback = cell / 'base', cell / 'handback'
     links = gitlinks_at(repo, base_sha) if allow_unchanged_gitlinks else {}
     if allow_unchanged_gitlinks and links != gitlinks_at(repo, sha):
@@ -190,7 +199,7 @@ def score_handback(repo, remote, sha, instance, record, cell, runner, *, base_pr
                 **({'unchanged_gitlinks': links} if allow_unchanged_gitlinks else {}))
 
 
-def review(out, *, version=3):
+def review(out, *, version=3, excluded_branches=()):
     out = Path(out)
     meta = json.loads((out / 'meta.json').read_text())
     verdicts = json.loads((out / 'contamination.json').read_text())
@@ -204,6 +213,8 @@ def review(out, *, version=3):
     rows = []
     for path in sorted((out / 'cells').glob('*/result.json')):
         row = json.loads(path.read_text())
+        if row['branch'] in excluded_branches:
+            continue
         verdict = verdicts[row['branch']]
         flags = [verdict['contaminated'], verdict['outside_help']]
         complete = all(type(value) is bool for value in flags)

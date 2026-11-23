@@ -146,9 +146,12 @@ def _review(out):
                                       'pending_reason': 'invalid or stale audit binding; pending re-audit'}
     write_json(out / 'contamination.json', verdicts)
     meta['missing_branches'] = [b for b in meta['expected_branches'] if b not in branches
-                                or b in meta.get('changed_branches', []) or b in meta.get('poll_errors', {})]
+                                or b in meta.get('changed_branches', []) or b in meta.get('poll_errors', {})
+                                or b in meta.get('cell_states', {})]
+    excluded = set(meta.get('cell_states', {})) | set(meta.get('poll_errors', {}))
+    rows = [r for r in rows if r['branch'] not in excluded]
     write_json(out / 'meta.json', meta)
-    meta = v3.review(out, version=4)
+    meta = v3.review(out, version=4, excluded_branches=excluded)
     if meta.get('changed_branches') and meta['protocol'] == 'calibration':
         meta['calibration'].update(complete=False, proceed=False, decision='incomplete')
         write_json(out / 'calibration.json', meta['calibration'])
@@ -238,6 +241,7 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
         (out / 'cells').mkdir(exist_ok=True)
         meta.setdefault('changed_branches', [])
         meta.setdefault('poll_errors', {})
+        meta.setdefault('cell_states', {})
         write_json(out / 'meta.json', meta)
         meta = _review(out)
         for branch in expected:
@@ -252,6 +256,20 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
                 meta = _review(out)
                 continue
             meta['poll_errors'].pop(branch, None)
+            if sha is not None:
+                try:
+                    v3.verify_base(repo, remote, instances_by_id[task], records[task], base_prefix='sandbox-v4/')
+                except v3.BaseMismatchError as exc:
+                    meta['cell_states'][branch] = dict(status='base_mismatch', error=str(exc), handback_sha=sha)
+                    write_json(out / 'meta.json', meta)
+                    meta = _review(out)
+                    continue
+                except Exception as exc:
+                    meta['poll_errors'][branch] = f'{type(exc).__name__}: {exc}'
+                    write_json(out / 'meta.json', meta)
+                    meta = _review(out)
+                    continue
+                meta['cell_states'].pop(branch, None)
             if (cell / 'result.json').exists():
                 result = json.loads((cell / 'result.json').read_text())
                 if result['git_sha'] != sha:
@@ -276,6 +294,11 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
                 result = v3.score_handback(repo, remote, sha, instances_by_id[task], records[task], cell, runner,
                                            base_prefix='sandbox-v4/', patch_deriver=patch.derive_patch,
                                            allow_unchanged_gitlinks=True)
+            except v3.BaseMismatchError as exc:
+                meta['cell_states'][branch] = dict(status='base_mismatch', error=str(exc), handback_sha=sha)
+                write_json(out / 'meta.json', meta)
+                meta = _review(out)
+                continue
             except Exception as exc:
                 result = dict(resolved=False, infra_void=True, error=f'{type(exc).__name__}: {exc}',
                               error_stage='score_preparation', patch_applied=None, gold_similarity=None,
