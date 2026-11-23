@@ -1836,7 +1836,16 @@ class SQLUpdateCompiler(SQLCompiler):
         query.clear_ordering(force=True)
         query.extra = {}
         query.select = []
-        query.add_fields([query.get_meta().pk.name])
+        meta = query.get_meta()
+        fields = [meta.pk.name]
+        # Each ancestor table is updated by its own primary key, which isn't
+        # necessarily equal to the primary key of the updated model (e.g. for
+        # a non-primary parent in multi-table inheritance).
+        related_ids_index = []
+        for related in self.query.related_updates:
+            related_ids_index.append((related, len(fields)))
+            fields.append(self._get_ancestor_pk_path(meta, related))
+        query.add_fields(fields)
         super().pre_sql_setup()
 
         must_pre_select = (
@@ -1851,14 +1860,32 @@ class SQLUpdateCompiler(SQLCompiler):
             # don't want them to change), or the db backend doesn't support
             # selecting from the updating table (e.g. MySQL).
             idents = []
+            related_ids = collections.defaultdict(list)
             for rows in query.get_compiler(self.using).execute_sql(MULTI):
                 idents.extend(r[0] for r in rows)
+                for parent, index in related_ids_index:
+                    related_ids[parent].extend(r[index] for r in rows)
             self.query.add_filter("pk__in", idents)
-            self.query.related_ids = idents
+            self.query.related_ids = related_ids
         else:
             # The fast path. Filters and updates in one query.
             self.query.add_filter("pk__in", query)
         self.query.reset_refcounts(refcounts_before)
+
+    @staticmethod
+    def _get_ancestor_pk_path(opts, ancestor):
+        """
+        Return the lookup path from the model described by opts to the primary
+        key of the given concrete ancestor model, following parent links.
+        """
+        names = []
+        opts = opts.concrete_model._meta
+        while opts.concrete_model is not ancestor:
+            link = opts.get_ancestor_link(ancestor)
+            names.append(link.name)
+            opts = link.remote_field.model._meta.concrete_model._meta
+        names.append("pk")
+        return LOOKUP_SEP.join(names)
 
 
 class SQLAggregateCompiler(SQLCompiler):

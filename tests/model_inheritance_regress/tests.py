@@ -346,6 +346,49 @@ class ModelInheritanceTest(TestCase):
         derivedms = list(DerivedM.objects.all())
         self.assertEqual(derivedms, [derivedm1])
 
+    def test_queryset_update_on_non_primary_parent_model(self):
+        """
+        update() on a field of a non-primary parent in multi-table
+        inheritance updates the rows of that parent which belong to the
+        queried objects, and no other rows.
+        """
+        p1 = Politician.objects.create(title="p1")
+        p2 = Politician.objects.create(title="p2")
+        c1 = Congressman.objects.create(state="PA", name="John", title="c1")
+        c2 = Congressman.objects.create(state="NY", name="Jane", title="c2")
+        # Primary keys of the Person and Politician parents don't match.
+        self.assertNotEqual(c1.pk, c1.politician_ptr_id)
+        self.assertEqual(Congressman.objects.update(title="new"), 2)
+        self.assertSequenceEqual(
+            Congressman.objects.values_list("title", flat=True), ["new", "new"]
+        )
+        self.assertEqual(Politician.objects.get(pk=p1.pk).title, "p1")
+        self.assertEqual(Politician.objects.get(pk=p2.pk).title, "p2")
+        # Filtering and updating fields of both parents and the child.
+        self.assertEqual(
+            Congressman.objects.filter(pk=c1.pk).update(
+                title="c1 title", name="c1 name", state="CA"
+            ),
+            1,
+        )
+        c1.refresh_from_db()
+        c2.refresh_from_db()
+        self.assertEqual((c1.title, c1.name, c1.state), ("c1 title", "c1 name", "CA"))
+        self.assertEqual((c2.title, c2.name, c2.state), ("new", "Jane", "NY"))
+        self.assertEqual(Politician.objects.get(pk=p1.pk).title, "p1")
+
+    def test_queryset_update_on_grandparent_of_non_primary_parent(self):
+        p1 = Politician.objects.create(title="p1")
+        Politician.objects.create(title="p2")
+        Person.objects.create(name="person")
+        senator = Senator.objects.create(name="John", title="s1", state="PA")
+        self.assertNotEqual(senator.pk, senator.politician_ptr_id)
+        self.assertEqual(Senator.objects.update(title="new", name="new name"), 1)
+        senator.refresh_from_db()
+        self.assertEqual((senator.title, senator.name), ("new", "new name"))
+        self.assertEqual(Politician.objects.get(pk=p1.pk).title, "p1")
+        self.assertEqual(Person.objects.get(name="person").name, "person")
+
     def test_use_explicit_o2o_to_parent_as_pk(self):
         """
         The connector from child to parent need not be the pk on the child.
