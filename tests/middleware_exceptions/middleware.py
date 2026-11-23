@@ -4,6 +4,7 @@ from django.template.response import TemplateResponse
 from django.utils.decorators import (
     async_only_middleware, sync_and_async_middleware, sync_only_middleware,
 )
+from django.utils.deprecation import MiddlewareMixin
 
 log = []
 
@@ -130,3 +131,12 @@ class NotSyncOrAsyncMiddleware(BaseMiddleware):
 
     def __call__(self, request):
         return self.get_response(request)
+
+
+class ResponseTypeMiddleware(MiddlewareMixin):
+    """Record the type of the response passed to process_response()."""
+    response_types = []
+
+    def process_response(self, request, response):
+        self.response_types.append(type(response))
+        return response

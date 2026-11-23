@@ -282,6 +282,19 @@ class MiddlewareSyncAsyncTests(SimpleTestCase):
         self.assertEqual(response.content, b'OK')
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(MIDDLEWARE=[
+        'middleware_exceptions.middleware.ResponseTypeMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.cache.UpdateCacheMiddleware',
+        'django.middleware.cache.FetchFromCacheMiddleware',
+    ])
+    async def test_first_middleware_receives_response_async(self):
+        mw.ResponseTypeMiddleware.response_types.clear()
+        response = await self.async_client.get('/middleware_exceptions/view/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mw.ResponseTypeMiddleware.response_types, [HttpResponse])
+
 
 @override_settings(ROOT_URLCONF='middleware_exceptions.urls')
 class AsyncMiddlewareTests(SimpleTestCase):
