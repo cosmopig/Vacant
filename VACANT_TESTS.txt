@@ -1,0 +1,1 @@
+sympy/printing/tests/test_latex.py::test_latex_custom_mul_symbol

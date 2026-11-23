@@ -156,11 +156,14 @@ class LatexPrinter(Printer):
             "times": r" \times "
         }
 
-        self._settings['mul_symbol_latex'] = \
-            mul_symbol_table[self._settings['mul_symbol']]
+        mul_symbol = self._settings['mul_symbol']
+        separator = mul_symbol_table.get(mul_symbol, mul_symbol)
+        self._settings['mul_symbol_latex'] = separator
 
-        self._settings['mul_symbol_latex_numbers'] = \
-            mul_symbol_table[self._settings['mul_symbol'] or 'dot']
+        if separator.strip() in ("", "\\", r"\,", r"\:", r"\;", r"\!",
+                                 r"\quad", r"\qquad"):
+            separator = mul_symbol_table['dot']
+        self._settings['mul_symbol_latex_numbers'] = separator
 
         self._delim_dict = {'(': ')', '[': ']'}
 
@@ -2154,8 +2157,10 @@ def latex(expr, **settings):
     >>> print(latex(Integral(r, r)/2/pi, long_frac_ratio=0))
     \frac{1}{2 \pi} \int r\, dr
 
-    mul_symbol: The symbol to use for multiplication. Can be one of None,
-    "ldot", "dot", or "times".
+    mul_symbol: The separator to use for multiplication. Defaults to None.
+    Use "ldot", "dot", or "times" for a predefined separator, or supply a
+    custom LaTeX string (including any desired spaces). For numeric factors,
+    a dot is used instead of a spacing-only separator.
 
     >>> print(latex((2*tau)**sin(Rational(7,2)), mul_symbol="times"))
     \left(2 \times \tau\right)^{\sin{\left (\frac{7}{2} \right )}}
