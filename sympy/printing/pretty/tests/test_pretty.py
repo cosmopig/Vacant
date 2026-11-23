@@ -279,6 +279,12 @@ def test_upretty_multiindex():
     assert upretty( Symbol('F^+-') ) == 'F⁺⁻'
 
 
+def test_upretty_greek_numeric_subscripts():
+    assert upretty(Symbol('ω0')) == 'ω₀'
+    assert upretty(Symbol('Ω12^2_3')) == 'Ω²₁₂ ₃'
+    assert pretty(Symbol('ω0')) == 'ω0'
+
+
 def test_upretty_sub_super():
     assert upretty( Symbol('beta_1_2') ) == 'β₁ ₂'
     assert upretty( Symbol('beta^1^2') ) == 'β¹ ²'
