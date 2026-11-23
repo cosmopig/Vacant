@@ -543,6 +543,14 @@ substring false positive `a = []` inside the unchanged v3 runner's `extra = []`;
 an actual `a = []` export is still flagged unless present at base. No source or
 gate-file provenance waiver is granted. Prompt-only exceptions remain as above.
 
+Pre-run review correction: A/B/C subprocesses explicitly prepend the instance
+interpreter's bin directory to PATH. Original native preparation already supplied
+that PATH; the correction restores it under Vacant's sanitized runner. On frozen
+Sphinx 10614, an actual CLI control initially refused C (one pass, four Graphviz
+skips) and passed after the correction. Historical native-control runtime hashes
+are preserved separately from the updated shipped-runtime digest in KIT.json;
+the other 61 native controls were not rerun for this PATH-only correction.
+
 Use the same v3 event-based contamination policy: observed access to this
 instance's upstream issue/PR/commit, a fork/mirror of its fix, or SWE-bench data
 (including dataset pages, experiments or Hugging Face) flags contamination.

@@ -282,6 +282,31 @@ def test_suite_runs_through_vacant_run(fixture, tmp_path, runner_environment):
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+@pytest.mark.parametrize('installed', [True, False])
+def test_vacant_run_resolves_instance_tools_and_still_refuses_missing_tools(fixture, tmp_path, installed):
+    workspace, suite = fixture
+    binary = workspace.parent / '.envs/fixture/bin'
+    if installed:
+        tool = binary / 'native-kit-tool'
+        tool.write_text('#!/bin/sh\necho ready\n')
+        tool.chmod(0o755)
+        agent_test(workspace, 'import subprocess\nfrom behavior import VALUE\ndef test_fix():\n'
+                   ' assert subprocess.check_output(["native-kit-tool"]).strip() == b"ready"\n'
+                   ' assert VALUE == 1\n')
+    (workspace / 'test_old.py').write_text('import subprocess\ndef test_old():\n'
+        ' assert subprocess.check_output(["native-kit-tool"]).strip() == b"ready"\n')
+    git(workspace, 'add', 'test_old.py')
+    git(workspace, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+        'commit', '--quiet', '-m', 'Base P2P requires instance tool')
+    result = subprocess.run([sys.executable, '-m', 'vacant_network', 'run', '--workspace', str(workspace),
+        '--suite', str(suite), '--run-dir', str(workspace.parent / 'receipts/native-tool'), '--sandbox', 'none',
+        '--test-timeout', '120', '--retry', 'none', '--', 'true'], capture_output=True, text=True,
+        timeout=135, env={**os.environ, 'VACANT_HOME': str(tmp_path / 'vacant-home')})
+    assert result.returncode == (0 if installed else 20), result.stdout + result.stderr
+    if not installed:
+        assert 'Step C refused' in result.stdout + result.stderr
+
+
 def test_frozen_candidate_uses_only_original_git_head_for_base(fixture, tmp_path):
     workspace, suite = fixture
     frozen = tmp_path / 'frozen'

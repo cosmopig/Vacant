@@ -119,6 +119,9 @@ failure on that base; Step B requires every listed node green on the candidate;
 Step C uses the unmodified v3 P2P runner. One per-instance timeout covers all
 three steps. Refusals identify the step and nodes. At most three submissions
 are allowed by the dispatch protocol, not by this stateless suite itself.
+A/B/C subprocesses prepend the instance interpreter's bin directory to PATH,
+including under Vacant's sanitized environment, so recipe-installed tools such
+as Graphviz resolve exactly as they did during native preparation.
 
 Do not commit candidate implementation changes over the base HEAD before
 submitting. New test helpers/conftest files are not overlaid unless themselves
