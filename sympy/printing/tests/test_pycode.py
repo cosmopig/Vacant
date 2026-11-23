@@ -29,7 +29,7 @@ def test_PythonCodePrinter():
     assert not prntr.module_imports
 
     assert prntr.doprint(x**y) == 'x**y'
-    assert prntr.doprint(Mod(x, 2)) == 'x % 2'
+    assert prntr.doprint(Mod(x, 2)) == '(x % 2)'
     assert prntr.doprint(And(x, y)) == 'x and y'
     assert prntr.doprint(Or(x, y)) == 'x or y'
     assert not prntr.module_imports
@@ -221,7 +221,7 @@ def test_frac():
     assert prntr.doprint(expr) == 'numpy.mod(x, 1)'
 
     prntr = PythonCodePrinter()
-    assert prntr.doprint(expr) == 'x % 1'
+    assert prntr.doprint(expr) == '(x % 1)'
 
     prntr = MpmathPrinter()
     assert prntr.doprint(expr) == 'mpmath.frac(x)'

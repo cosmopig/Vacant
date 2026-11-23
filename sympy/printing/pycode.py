@@ -234,7 +234,8 @@ class AbstractPythonCodePrinter(CodePrinter):
 
     def _print_Mod(self, expr):
         PREC = precedence(expr)
-        return ('{} % {}'.format(*map(lambda x: self.parenthesize(x, PREC), expr.args)))
+        # Mod has function precedence in SymPy, but % is a Python operator.
+        return '({} % {})'.format(*map(lambda x: self.parenthesize(x, PREC), expr.args))
 
     def _print_Piecewise(self, expr):
         result = []

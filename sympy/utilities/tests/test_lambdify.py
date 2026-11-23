@@ -10,7 +10,7 @@ from sympy import (
     true, false, And, Or, Not, ITE, Min, Max, floor, diff, IndexedBase, Sum,
     DotProduct, Eq, Dummy, sinc, erf, erfc, factorial, gamma, loggamma,
     digamma, RisingFactorial, besselj, bessely, besseli, besselk, S, beta,
-    betainc, betainc_regularized, fresnelc, fresnels)
+    betainc, betainc_regularized, fresnelc, fresnels, Mod)
 from sympy.codegen.cfunctions import expm1, log1p, exp2, log2, log10, hypot
 from sympy.codegen.numpy_nodes import logaddexp, logaddexp2
 from sympy.codegen.scipy_nodes import cosm1
@@ -120,6 +120,14 @@ def test_atoms():
     assert f(1) == 1 + 1j
 
 #================== Test different modules =========================
+
+def test_mod_precedence():
+    remainder = Mod(x, y)
+    exprs = [-remainder, z*remainder, z/remainder, remainder**2,
+             Mod(x + 2, y - 1)]
+    f = lambdify((x, y, z), exprs, modules=[])
+    assert f(3, 7, 24) == [-3, 72, 8, 9, 5]
+
 
 # high precision output of sin(0.2*pi) is used to detect if precision is lost unwanted
 
