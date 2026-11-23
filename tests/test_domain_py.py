@@ -839,6 +839,31 @@ def test_info_field_list(app):
 
 
 @pytest.mark.sphinx(freshenv=True)
+@pytest.mark.parametrize('field', ['var', 'ivar', 'cvar'])
+def test_variable_field_does_not_link_name(app, field):
+    text = (".. py:module:: example\n"
+            "\n"
+            ".. py:data:: limit\n"
+            "\n"
+            ".. py:class:: LimitType\n"
+            "\n"
+            ".. py:class:: Options\n"
+            "\n"
+            "   :%s limit: See :py:data:`limit`.\n"
+            "   :vartype limit: LimitType\n" % field)
+    doctree = restructuredtext.parse(app, text)
+    app.env.resolve_references(doctree, 'index', app.builder)
+
+    field_body, = doctree.traverse(nodes.field_body)
+    paragraph = field_body[0]
+    assert_node(paragraph[0], [addnodes.literal_strong, 'limit'])
+    assert [(ref.astext(), ref['refid']) for ref in field_body.traverse(nodes.reference)] == [
+        ('LimitType', 'example.LimitType'),
+        ('limit', 'example.limit'),
+    ]
+
+
+@pytest.mark.sphinx(freshenv=True)
 def test_module_index(app):
     text = (".. py:module:: docutils\n"
             ".. py:module:: sphinx\n"
