@@ -439,7 +439,9 @@ def strip_arg_typehint(s: str) -> str:
 
 
 def mangle_signature(sig: str, max_chars: int = 30) -> str:
-    """Reformat a function signature to a more compact form."""
+    """Reformat a function signature to a more compact form, using the first overload."""
+    sig = sig.partition('\n')[0]
+
     # Strip return type annotation
     s = re.sub(r"\)\s*->\s.*$", ")", sig)
 

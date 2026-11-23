@@ -322,6 +322,52 @@ def test_autodoc_docstring_signature(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_overloaded_docstring_signatures(app):
+    signatures = []
+
+    def process_signature(app, what, name, obj, options, args, retann):
+        signatures.append((args, retann))
+        if retann == 'str':
+            return args, 'bytes'
+
+    app.connect('autodoc-process-signature', process_signature)
+    actual = do_autodoc(app, 'method', 'target.OverloadedDocstringSig.convert')
+    assert list(actual) == [
+        '',
+        '.. py:method:: OverloadedDocstringSig.convert(value: int) -> int',
+        '               OverloadedDocstringSig.convert(value: str, base=10) -> bytes',
+        '               OverloadedDocstringSig.convert()',
+        '   :module: target',
+        '',
+        '   other(value)',
+        '   convert(value: bytes)',
+        '',
+    ]
+    assert signatures == [('(value: int)', 'int'), ('(value: str, base=10)', 'str'),
+                          ('()', None)]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+@pytest.mark.parametrize('suffix, enabled, signature',
+                         [('(explicit)', True, '(explicit)'), ('', False, '(*args)')])
+def test_autodoc_overloaded_docstring_signatures_override(app, suffix, enabled, signature):
+    app.config.autodoc_docstring_signature = enabled
+    actual = do_autodoc(app, 'method', 'target.OverloadedDocstringSig.convert' + suffix)
+    assert list(actual) == [
+        '',
+        '.. py:method:: OverloadedDocstringSig.convert' + signature,
+        '   :module: target',
+        '',
+        '   convert(value: int) -> int',
+        '   OverloadedDocstringSig.convert(value: str, base=10) -> str',
+        '   convert()',
+        '   other(value)',
+        '   convert(value: bytes)',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autoclass_content_and_docstring_signature_class(app):
     app.config.autoclass_content = 'class'
     options = {"members": None,

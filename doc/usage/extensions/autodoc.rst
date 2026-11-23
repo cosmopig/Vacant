@@ -446,15 +446,18 @@ There are also config values that you can set:
 
    Functions imported from C modules cannot be introspected, and therefore the
    signature for such functions cannot be automatically determined.  However, it
-   is an often-used convention to put the signature into the first line of the
-   function's docstring.
+   is an often-used convention to put signatures at the beginning of the
+   function's docstring, one per line for overloaded functions and methods.
 
    If this boolean value is set to ``True`` (which is the default), autodoc will
-   look at the first line of the docstring for functions and methods, and if it
-   looks like a signature, use the line as the signature and remove it from the
-   docstring content.
+   use consecutive signature lines at the beginning of the docstring as the
+   signatures and remove those lines from the docstring content. A signature
+   given explicitly in the directive takes precedence.
 
    .. versionadded:: 1.1
+
+   .. versionchanged:: 3.1
+      Support multiple signatures at the beginning of the docstring.
 
 .. confval:: autodoc_mock_imports
 

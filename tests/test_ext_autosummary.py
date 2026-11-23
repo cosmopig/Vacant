@@ -74,6 +74,8 @@ def test_mangle_signature():
         res = mangle_signature(inp).strip().replace("\u00a0", " ")
         assert res == outp, ("'%s' -> '%s' != '%s'" % (inp, res, outp))
 
+    assert mangle_signature("(value: int) -> int\n(value: str) -> str") == "(value)"
+
 
 def test_extract_summary(capsys):
     settings = Mock(language_code='',

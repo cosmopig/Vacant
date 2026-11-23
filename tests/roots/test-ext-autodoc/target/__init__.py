@@ -144,6 +144,16 @@ First line of docstring
         return 456
 
 
+class OverloadedDocstringSig:
+    def convert(self, *args):
+        """convert(value: int) -> int
+        OverloadedDocstringSig.convert(value: str, base=10) -> str
+        convert()
+        other(value)
+        convert(value: bytes)
+        """
+
+
 class StrRepr(str):
     """docstring"""
 
