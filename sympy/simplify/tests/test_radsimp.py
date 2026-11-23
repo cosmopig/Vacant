@@ -4,7 +4,8 @@ from sympy import (
     Mul, radsimp, diff, root, Symbol, Rational, exp)
 
 from sympy.core.mul import _unevaluated_Mul as umul
-from sympy.simplify.radsimp import _unevaluated_Add, collect_sqrt, fraction_expand
+from sympy.simplify.radsimp import (_unevaluated_Add, collect_sqrt,
+    fraction_expand, _split_gcd)
 from sympy.utilities.pytest import XFAIL, raises
 
 from sympy.abc import x, y, z, a, b, c, d
@@ -423,3 +424,8 @@ def test_issue_14608():
     raises(AttributeError, lambda: collect(a*b + b*a, a))
     assert collect(x*y + y*(x+1), a) == x*y + y*(x+1)
     assert collect(x*y + y*(x+1) + a*b + b*a, y) == y*(2*x + 1) + a*b + b*a
+
+
+def test_split_gcd_empty():
+    assert _split_gcd() == (1, [], [])
+    assert _split_gcd(55, 35, 22, 14, 77, 10) == (5, [55, 35, 10], [22, 14, 77])

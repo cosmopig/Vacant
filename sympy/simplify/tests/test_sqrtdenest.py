@@ -1,4 +1,4 @@
-from sympy import sqrt, root, S, Symbol, sqrtdenest, Integral, cos
+from sympy import sqrt, root, S, Symbol, sqrtdenest, Integral, cos, I
 from sympy.simplify.sqrtdenest import _subsets as subsets
 from sympy.utilities.pytest import slow
 
@@ -183,3 +183,12 @@ def test_issue_5653():
 
 def test_sqrt_ratcomb():
     assert sqrtdenest(sqrt(1 + r3) + sqrt(3 + 3*r3) - sqrt(10 + 6*r3)) == 0
+
+
+def test_issue_12420():
+    assert sqrtdenest(sqrt(3 + I)) == sqrt(3 + I)
+    assert sqrtdenest(3 + sqrt(2 + I)) == 3 + sqrt(2 + I)
+    assert sqrtdenest(sqrt(1 + sqrt(3 + I))) == sqrt(1 + sqrt(3 + I))
+    e = 3 - sqrt(2)*sqrt(4 + 3*I) + 3*I
+    assert sqrtdenest(e) == 2*I
+    assert sqrtdenest(e/2) == I
