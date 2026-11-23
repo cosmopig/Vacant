@@ -1,0 +1,2 @@
+tests/migrations/test_loader.py::NamespacePackageLoaderTests::test_loading_namespace_package
+tests/migrations/test_commands.py::MigrateTests::test_migrate_namespace_package

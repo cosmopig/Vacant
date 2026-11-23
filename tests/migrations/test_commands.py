@@ -63,6 +63,22 @@ class MigrateTests(MigrationTestBase):
         self.assertTableNotExists("migrations_tribble")
         self.assertTableNotExists("migrations_book")
 
+    def test_migrate_namespace_package(self):
+        """Migration directories without an __init__.py file are applied."""
+        with self.temporary_migration_module(module='migrations.test_migrations') as migration_dir:
+            os.remove(os.path.join(migration_dir, '__init__.py'))
+            self.assertTableNotExists('migrations_author')
+            stdout = io.StringIO()
+            call_command('migrate', 'migrations', verbosity=1, stdout=stdout, no_color=True)
+            stdout = stdout.getvalue()
+            self.assertIn('Applying migrations.0001_initial... OK', stdout)
+            self.assertIn('Applying migrations.0002_second... OK', stdout)
+            self.assertTableExists('migrations_author')
+            self.assertTableExists('migrations_book')
+            call_command('migrate', 'migrations', 'zero', verbosity=0)
+            self.assertTableNotExists('migrations_author')
+            self.assertTableNotExists('migrations_book')
+
     @override_settings(INSTALLED_APPS=[
         'django.contrib.auth',
         'django.contrib.contenttypes',
