@@ -1857,13 +1857,14 @@ def where(cond, x, y, keep_attrs=None):
     """
     if keep_attrs is None:
         keep_attrs = _get_keep_attrs(default=False)
-    if keep_attrs is True:
+    keep_x_attrs = keep_attrs is True
+    if keep_x_attrs:
         # keep the attributes of x, the second parameter, by default to
         # be consistent with the `where` method of `DataArray` and `Dataset`
         keep_attrs = lambda attrs, context: getattr(x, "attrs", {})
 
     # alignment for three arguments is complicated, so don't support it yet
-    return apply_ufunc(
+    result = apply_ufunc(
         duck_array_ops.where,
         cond,
         x,
@@ -1873,6 +1874,39 @@ def where(cond, x, y, keep_attrs=None):
         dask="allowed",
         keep_attrs=keep_attrs,
     )
+
+    if keep_x_attrs and hasattr(result, "coords"):
+        # the callable above is also applied to coordinates and the data
+        # variables of a Dataset, so restore their attributes from the inputs
+        result = _where_restore_variable_attrs(result, cond, x, y)
+
+    return result
+
+
+def _where_restore_variable_attrs(result, cond, x, y):
+    from .dataarray import DataArray
+    from .dataset import Dataset
+
+    def find_attrs(name, is_coord):
+        # prefer x, the object whose attributes are kept
+        for obj in (x, cond, y):
+            if isinstance(obj, Dataset):
+                if name in obj.variables:
+                    return obj.variables[name].attrs
+            elif isinstance(obj, DataArray):
+                if name in obj.coords:
+                    return obj.coords[name].attrs
+                if not is_coord and obj is x:
+                    return obj.attrs
+        return {}
+
+    result = result.copy(deep=False)
+    for name in result.coords:
+        result[name].attrs = dict(find_attrs(name, is_coord=True))
+    if isinstance(result, Dataset):
+        for name in result.data_vars:
+            result[name].attrs = dict(find_attrs(name, is_coord=False))
+    return result
 
 
 @overload

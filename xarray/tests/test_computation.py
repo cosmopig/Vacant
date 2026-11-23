@@ -1937,6 +1937,64 @@ def test_where_attrs() -> None:
     assert actual.attrs == {}
 
 
+def test_where_attrs_coords() -> None:
+    cond = xr.DataArray(
+        [True, False],
+        dims="x",
+        coords={"x": ("x", [0, 1], {"attr": "cond_coord"})},
+        attrs={"attr": "cond"},
+    )
+    x = xr.DataArray(
+        [1, 1],
+        dims="x",
+        coords={
+            "x": ("x", [0, 1], {"attr": "x_coord"}),
+            "a": ("x", [2, 3], {"attr": "x_a"}),
+        },
+        attrs={"attr": "x"},
+    )
+    y = xr.DataArray(
+        [0, 0],
+        dims="x",
+        coords={"x": ("x", [0, 1], {"attr": "y_coord"})},
+        attrs={"attr": "y"},
+    )
+    actual = xr.where(cond, x, y, keep_attrs=True)
+    expected = xr.DataArray(
+        [1, 0],
+        dims="x",
+        coords={
+            "x": ("x", [0, 1], {"attr": "x_coord"}),
+            "a": ("x", [2, 3], {"attr": "x_a"}),
+        },
+        attrs={"attr": "x"},
+    )
+    assert_identical(expected, actual)
+    # inputs are not modified
+    assert x.x.attrs == {"attr": "x_coord"}
+    assert cond.x.attrs == {"attr": "cond_coord"}
+
+    # scalar condition, as in xr.where(True, da, da, keep_attrs=True)
+    actual = xr.where(True, x, x, keep_attrs=True)
+    assert_identical(x, actual)
+
+    # coordinates only present on another input keep their own attributes
+    cond_b = cond.assign_coords(b=("x", [4, 5], {"attr": "cond_b"}))
+    actual = xr.where(cond_b, x, y, keep_attrs=True)
+    assert actual.b.attrs == {"attr": "cond_b"}
+    assert actual.x.attrs == {"attr": "x_coord"}
+    assert actual.attrs == {"attr": "x"}
+
+    # Dataset: data variables and coordinates keep their own attributes
+    ds_x = x.to_dataset(name="v").assign_attrs(attr="ds_x")
+    ds_y = y.to_dataset(name="v").assign_attrs(attr="ds_y")
+    actual_ds = xr.where(cond, ds_x, ds_y, keep_attrs=True)
+    assert actual_ds.attrs == {"attr": "ds_x"}
+    assert actual_ds.v.attrs == {"attr": "x"}
+    assert actual_ds.x.attrs == {"attr": "x_coord"}
+    assert actual_ds.a.attrs == {"attr": "x_a"}
+
+
 @pytest.mark.parametrize(
     "use_dask", [pytest.param(False, id="nodask"), pytest.param(True, id="dask")]
 )
