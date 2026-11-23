@@ -64,7 +64,7 @@ on one CPU. Times and memory required by your algorithm count toward grading.
 """
 STARTER = "def solve(data):\n    raise NotImplementedError\n"
 INFRA = re.compile(r"usage limit|rate.?limit|too many requests|cannot connect to API|ECONN[A-Z]+|"
-                   r"ENOTFOUND|unexpected server error|service (?:overloaded|unavailable)|"
+                   r"ENOTFOUND|(?:internal|unexpected) server error|service (?:overloaded|unavailable)|"
                    r"bad gateway|gateway timeout|loading model", re.I)
 
 
@@ -215,7 +215,8 @@ def attempt_void(result: dict, usage: dict | None, errors: list[dict], stderr: s
         return True
     if errors:
         data = errors[-1].get("data") or {}
-        return str(data.get("statusCode")) in {"429", "502", "503", "504"} or bool(
+        status = str(data.get("statusCode", ""))
+        return status == "429" or bool(re.fullmatch(r"5[0-9]{2}", status)) or bool(
             INFRA.search(str(data.get("message", "")))
         )
     return usage is None and (bool(INFRA.search(stderr)) or not result["timed_out"])
