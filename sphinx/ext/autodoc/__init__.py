@@ -26,8 +26,9 @@ from sphinx.config import ENUM, Config
 from sphinx.deprecation import (RemovedInSphinx40Warning, RemovedInSphinx50Warning,
                                 RemovedInSphinx60Warning)
 from sphinx.environment import BuildEnvironment
-from sphinx.ext.autodoc.importer import (get_class_members, get_module_members,
-                                         get_object_members, import_object)
+from sphinx.ext.autodoc.importer import (get_class_analyzer, get_class_members,
+                                         get_module_members, get_object_members, import_object,
+                                         mangle)
 from sphinx.ext.autodoc.mock import mock
 from sphinx.locale import _, __
 from sphinx.pycode import ModuleAnalyzer, PycodeError
@@ -276,11 +277,12 @@ class ObjectMember(tuple):
         return super().__new__(cls, (name, obj))  # type: ignore
 
     def __init__(self, name: str, obj: Any, docstring: Optional[str] = None,
-                 skipped: bool = False) -> None:
+                 skipped: bool = False, class_: Any = None) -> None:
         self.__name__ = name
         self.object = obj
         self.docstring = docstring
         self.skipped = skipped
+        self.class_ = class_
 
 
 ObjectMembers = Union[List[ObjectMember], List[Tuple[str, Any]]]
@@ -666,13 +668,13 @@ class Documenter:
         The user can override the skipping decision by connecting to the
         ``autodoc-skip-member`` event.
         """
-        def is_filtered_inherited_member(name: str) -> bool:
+        def is_filtered_inherited_member(name: str, member_class: Any = None) -> bool:
             if inspect.isclass(self.object):
                 for cls in self.object.__mro__:
                     if cls.__name__ == self.options.inherited_members and cls != self.object:
                         # given member is a member of specified *super class*
                         return True
-                    elif name in cls.__dict__:
+                    elif cls is member_class or name in cls.__dict__:
                         return False
                     elif name in self.get_attr(cls, '__annotations__', {}):
                         return False
@@ -716,6 +718,9 @@ class Documenter:
                 # hack for ClassDocumenter to inject docstring via ObjectMember
                 doc = obj.docstring
 
+            member_class = obj.class_ if isinstance(obj, ObjectMember) else None
+            has_inherited_attr_doc = (member_class is not None and member_class is not self.object
+                                      and bool(obj.docstring))
             has_doc = bool(doc)
 
             metadata = extract_metadata(doc)
@@ -740,13 +745,15 @@ class Documenter:
                 if self.options.special_members and membername in self.options.special_members:
                     if membername == '__doc__':
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, member_class):
                         keep = False
                     else:
                         keep = has_doc or self.options.undoc_members
                 else:
                     keep = False
-            elif (namespace, membername) in attr_docs:
+            elif has_inherited_attr_doc and is_filtered_inherited_member(membername, member_class):
+                pass
+            elif (namespace, membername) in attr_docs or has_inherited_attr_doc:
                 if want_all and isprivate:
                     if self.options.private_members is None:
                         keep = False
@@ -1599,7 +1606,7 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
                                    (name, self.fullname), type='autodoc')
             return False, selected
         elif self.options.inherited_members:
-            return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
+            return False, [ObjectMember(m.name, m.value, docstring=m.docstring, class_=m.class_)
                            for m in members.values()]
         else:
             return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
@@ -2161,21 +2168,25 @@ class UninitializedInstanceAttributeMixin(DataDocumenterMixinBase):
     """
 
     def get_attribute_comment(self, parent: Any) -> Optional[List[str]]:
+        if not self.objpath:
+            return None
+
+        name = self.objpath[-1]
         try:
             for cls in inspect.getmro(parent):
-                try:
-                    module = safe_getattr(cls, '__module__')
-                    qualname = safe_getattr(cls, '__qualname__')
-
-                    analyzer = ModuleAnalyzer.for_module(module)
-                    analyzer.analyze()
-                    if qualname and self.objpath:
-                        key = (qualname, self.objpath[-1])
-                        if key in analyzer.attr_docs:
-                            return list(analyzer.attr_docs[key])
-                except (AttributeError, PycodeError):
-                    pass
-        except (AttributeError, PycodeError):
+                mangled_name = mangle(cls, name)
+                if cls is not parent and mangled_name != name:
+                    break
+                source = get_class_analyzer(cls)
+                if source:
+                    analyzer, namespace = source
+                    key = (namespace, name)
+                    if key in analyzer.attr_docs:
+                        self.directive.filename_set.add(analyzer.srcname)
+                        return list(analyzer.attr_docs[key])
+                if mangled_name in cls.__dict__:
+                    break
+        except AttributeError:
             pass
 
         return None
@@ -2217,14 +2228,6 @@ class UninitializedInstanceAttributeMixin(DataDocumenterMixinBase):
     def should_suppress_value_header(self) -> bool:
         return (self.object is UNINITIALIZED_ATTR or
                 super().should_suppress_value_header())
-
-    def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
-        if self.object is UNINITIALIZED_ATTR:
-            comment = self.get_attribute_comment(self.parent)
-            if comment:
-                return [comment]
-
-        return super().get_doc(encoding, ignore)  # type: ignore
 
     def add_content(self, more_content: Optional[StringList], no_docstring: bool = False
                     ) -> None:
@@ -2359,6 +2362,10 @@ class AttributeDocumenter(GenericAliasMixin, NewTypeMixin, SlotsMixin,  # type: 
                 pass
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
+        comment = self.get_attribute_comment(self.parent)
+        if comment:
+            return [comment]
+
         if self.object is INSTANCEATTR:
             return []
 

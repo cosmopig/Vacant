@@ -1,3 +1,6 @@
+from target.inherited_attributes import Container
+
+
 class Base(object):
     def inheritedmeth(self):
         """Inherited function."""
@@ -15,3 +18,7 @@ class Derived(Base):
     def inheritedmeth(self):
         # no docstring here
         pass
+
+
+class DerivedAttributes(Container.Base):
+    shadowed = 4

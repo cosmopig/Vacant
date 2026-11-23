@@ -14,7 +14,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from sphinx.deprecation import RemovedInSphinx40Warning, deprecated_alias
-from sphinx.pycode import ModuleAnalyzer
+from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
 from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
                                  safe_getattr)
@@ -251,6 +251,17 @@ class ClassAttribute:
         self.docstring = docstring
 
 
+def get_class_analyzer(cls: Any) -> Optional[Tuple[ModuleAnalyzer, str]]:
+    try:
+        module = safe_getattr(cls, '__module__')
+        namespace = safe_getattr(cls, '__qualname__')
+        analyzer = ModuleAnalyzer.for_module(module)
+        analyzer.analyze()
+        return analyzer, namespace
+    except (AttributeError, PycodeError):
+        return None
+
+
 def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
                       analyzer: ModuleAnalyzer = None) -> Dict[str, ClassAttribute]:
     """Get members and attributes of target class."""
@@ -314,6 +325,21 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
             if namespace == ns and name not in members:
                 members[name] = ClassAttribute(subject, name, INSTANCEATTR,
                                                '\n'.join(docstring))
+
+    shadowed = set(obj_dict)
+    for cls in getmro(subject)[1:]:
+        source = get_class_analyzer(cls)
+        if source:
+            base_analyzer, namespace = source
+            for (ns, name), docstring in base_analyzer.find_attr_docs().items():
+                if ns != namespace or name in shadowed or mangle(cls, name) != name:
+                    continue
+                member = members.get(name)
+                if member is None or not member.docstring:
+                    value = member.value if member else INSTANCEATTR
+                    members[name] = ClassAttribute(cls, name, value, '\n'.join(docstring))
+                shadowed.add(name)
+        shadowed.update(attrgetter(cls, '__dict__', {}))
 
     return members
 
