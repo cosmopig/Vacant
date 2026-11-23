@@ -251,6 +251,15 @@ def test_parseable():
     for latex_str, sympy_expr in GOOD_PAIRS:
         assert parse_latex(latex_str) == sympy_expr, latex_str
 
+
+def test_nested_fraction():
+    from sympy.parsing.latex import parse_latex
+    expr = parse_latex(r"\frac{\frac{a^3+b}{c}}{\frac{1}{c^2}}")
+    assert expr == _Mul(_Mul(_Add(a**3, b), _Pow(c, -1)),
+                        _Pow(_Pow(c**2, -1), -1))
+    assert str(expr) == "((a**3 + b)/c)/(1/(c**2))"
+
+
 # These bad LaTeX strings should raise a LaTeXParsingError when parsed
 BAD_STRINGS = [
     r"(",

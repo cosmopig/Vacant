@@ -494,6 +494,14 @@ def test_Pow():
     assert str(Pow(S(2), -1.0, evaluate=False)) == '2**(-1.0)'
 
 
+def test_reciprocal_denominator():
+    for exponent, printed in [(-1, '1/y'), (-S.Half, '1/sqrt(y)')]:
+        denominator = Pow(y, exponent, evaluate=False)
+        inverse = Pow(denominator, -1, evaluate=False)
+        assert str(Mul(x, inverse, evaluate=False)) == 'x/(%s)' % printed
+        assert str(Mul(x, 2, inverse, evaluate=False)) == 'x*2/(%s)' % printed
+
+
 def test_sqrt():
     assert str(sqrt(x)) == "sqrt(x)"
     assert str(sqrt(x**2)) == "sqrt(x**2)"
