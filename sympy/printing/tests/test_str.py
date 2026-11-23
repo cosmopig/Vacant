@@ -1025,6 +1025,18 @@ def test_issue_21119_21460():
     assert ss('2*3*1*4**(-2*3)') == '2*3*1/4**(2*3)'
 
 
+def test_Mul_reciprocal_in_denominator():
+    a, b, c = symbols('a b c')
+    inv = lambda e: Pow(e, -1, evaluate=False)
+    num = Mul(a**3 + b, inv(c), evaluate=False)
+    expr = Mul(num, inv(inv(Pow(c, 2, evaluate=False))), evaluate=False)
+    assert str(expr) == '((a**3 + b)/c)/(1/(c**2))'
+    assert str(Mul(a, inv(inv(c)), evaluate=False)) == 'a/(1/c)'
+    assert str(Mul(2, inv(inv(c)), evaluate=False)) == '2/(1/c)'
+    assert str(Mul(1, inv(inv(c)), evaluate=False)) == '1/(1/c)'
+    assert str(Mul(a, inv(Pow(c, 2, evaluate=False)), evaluate=False)) == 'a/c**2'
+
+
 def test_Str():
     from sympy.core.symbol import Str
     assert str(Str('x')) == 'x'

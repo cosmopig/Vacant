@@ -284,7 +284,7 @@ class StrPrinter(Printer):
                 pre = [str(d.pop(0))]
             else:
                 pre = []
-            dfactors = pre + [self.parenthesize(a, prec, strict=False)
+            dfactors = pre + [self._print_denominator_factor(a, prec)
                 for a in d]
 
             n = '*'.join(nfactors)
@@ -336,6 +336,9 @@ class StrPrinter(Printer):
                             isinstance(item.base, Mul)):
                         # To avoid situations like #14160
                         pow_paren.append(item)
+                    elif self._is_reciprocal_pow(item.base):
+                        # e.g. a/(1/b) must not be printed as a/1/b
+                        pow_paren.append(item)
                     b.append(item.base)
             elif item.is_Rational and item is not S.Infinity:
                 if item.p != 1:
@@ -361,6 +364,16 @@ class StrPrinter(Printer):
             return sign + '*'.join(a_str) + "/" + b_str[0]
         else:
             return sign + '*'.join(a_str) + "/(%s)" % '*'.join(b_str)
+
+    @staticmethod
+    def _is_reciprocal_pow(expr):
+        return (isinstance(expr, Pow) and
+                bool(expr.exp.as_coeff_Mul()[0] < 0))
+
+    def _print_denominator_factor(self, expr, prec):
+        if self._is_reciprocal_pow(expr):
+            return "(%s)" % self._print(expr)
+        return self.parenthesize(expr, prec, strict=False)
 
     def _print_MatMul(self, expr):
         c, m = expr.as_coeff_mmul()
