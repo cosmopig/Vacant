@@ -2,11 +2,11 @@ from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection
+from django.db import NotSupportedError, connection
 from django.db.models import Prefetch, QuerySet, prefetch_related_objects
 from django.db.models.query import get_prefetcher
 from django.db.models.sql import Query
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext, ignore_warnings
 from django.utils.deprecation import RemovedInDjango50Warning
 
@@ -1908,3 +1908,135 @@ class NestedPrefetchTests(TestCase):
         self.assertIs(Room.house.is_cached(self.room), True)
         with self.assertNumQueries(0):
             house.rooms.first().house.address
+
+
+@skipUnlessDBFeature("supports_over_clause")
+class PrefetchLimitTests(TestDataMixin, TestCase):
+    def test_m2m_forward(self):
+        authors = Author.objects.all()  # Meta.ordering
+        with self.assertNumQueries(3):
+            books = list(
+                Book.objects.prefetch_related(
+                    Prefetch("authors", authors),
+                    Prefetch("authors", authors[1:], to_attr="authors_sliced"),
+                )
+            )
+        for book in books:
+            with self.subTest(book=book):
+                self.assertEqual(book.authors_sliced, list(book.authors.all())[1:])
+
+    def test_m2m_reverse(self):
+        books = Book.objects.order_by("-id")
+        with self.assertNumQueries(3):
+            authors = list(
+                Author.objects.prefetch_related(
+                    Prefetch("books", books),
+                    Prefetch("books", books[:1], to_attr="books_sliced"),
+                )
+            )
+        for author in authors:
+            with self.subTest(author=author):
+                self.assertEqual(author.books_sliced, list(author.books.all())[:1])
+
+    def test_foreignkey_reverse(self):
+        authors = Author.objects.order_by("-name")
+        with self.assertNumQueries(3):
+            books = list(
+                Book.objects.prefetch_related(
+                    Prefetch("first_time_authors", authors),
+                    Prefetch(
+                        "first_time_authors",
+                        authors[1:2],
+                        to_attr="first_time_authors_sliced",
+                    ),
+                )
+            )
+        for book in books:
+            with self.subTest(book=book):
+                self.assertEqual(
+                    book.first_time_authors_sliced,
+                    list(book.first_time_authors.all())[1:2],
+                )
+        self.assertEqual(
+            {book: book.first_time_authors_sliced for book in books},
+            {
+                self.book1: [self.author1],
+                self.book2: [],
+                self.book3: [],
+                self.book4: [],
+            },
+        )
+
+    def test_reverse_ordering(self):
+        authors = Author.objects.reverse()  # Reverse Meta.ordering
+        with self.assertNumQueries(3):
+            books = list(
+                Book.objects.prefetch_related(
+                    Prefetch("authors", authors),
+                    Prefetch("authors", authors[1:], to_attr="authors_sliced"),
+                )
+            )
+        for book in books:
+            with self.subTest(book=book):
+                self.assertEqual(book.authors_sliced, list(book.authors.all())[1:])
+
+    def test_without_to_attr(self):
+        with self.assertNumQueries(2):
+            books = list(
+                Book.objects.order_by("id").prefetch_related(
+                    Prefetch("authors", Author.objects.order_by("-name")[:2])
+                )
+            )
+        with self.assertNumQueries(0):
+            self.assertEqual(
+                [list(book.authors.all()) for book in books],
+                [
+                    [self.author3, self.author1],
+                    [self.author1],
+                    [self.author3],
+                    [self.author4],
+                ],
+            )
+
+    def test_prefetch_queryset_is_not_mutated(self):
+        authors = Author.objects.all()[:1]
+        prefetch = Prefetch("authors", authors, to_attr="authors_sliced")
+        books = list(Book.objects.order_by("id").prefetch_related(prefetch))
+        self.assertIs(authors.query.is_sliced, True)
+        self.assertEqual(
+            [book.authors_sliced for book in books],
+            [[self.author1], [self.author1], [self.author3], [self.author4]],
+        )
+
+    def test_generic_relation(self):
+        bookmark1 = Bookmark.objects.create(url="http://www.djangoproject.com/")
+        bookmark2 = Bookmark.objects.create(url="http://www.python.org/")
+        tags = [
+            TaggedItem.objects.create(content_object=bookmark, tag=tag)
+            for bookmark in (bookmark1, bookmark2)
+            for tag in ("a", "b", "c")
+        ]
+        with self.assertNumQueries(2):
+            bookmarks = list(
+                Bookmark.objects.order_by("id").prefetch_related(
+                    Prefetch(
+                        "tags",
+                        TaggedItem.objects.order_by("-tag")[1:],
+                        to_attr="tags_sliced",
+                    )
+                )
+            )
+        self.assertEqual(
+            [bookmark.tags_sliced for bookmark in bookmarks],
+            [[tags[1], tags[0]], [tags[4], tags[3]]],
+        )
+
+    def test_window_not_supported(self):
+        authors = Author.objects.all()
+        msg = (
+            "Prefetching from a limited queryset is only supported on backends that "
+            "support window functions."
+        )
+        with self.assertRaisesMessage(NotSupportedError, msg):
+            with mock.patch.object(connection.features, "supports_over_clause", False):
+                list(Book.objects.prefetch_related(Prefetch("authors", authors[1:])))

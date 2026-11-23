@@ -1,0 +1,8 @@
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_m2m_forward
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_m2m_reverse
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_foreignkey_reverse
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_reverse_ordering
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_without_to_attr
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_prefetch_queryset_is_not_mutated
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_generic_relation
+tests/prefetch_related/tests.py::PrefetchLimitTests::test_window_not_supported

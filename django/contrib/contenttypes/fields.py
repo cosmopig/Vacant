@@ -13,6 +13,7 @@ from django.db.models.fields.related import (
     ReverseManyToOneDescriptor,
     lazy_related_operation,
 )
+from django.db.models.fields.related_descriptors import _filter_prefetch_queryset
 from django.db.models.query_utils import PathInfo
 from django.db.models.sql import AND
 from django.db.models.sql.where import WhereNode
@@ -644,8 +645,13 @@ def create_generic_related_manager(superclass, rel):
             # instances' PK in order to match up instances:
             object_id_converter = instances[0]._meta.pk.to_python
             content_type_id_field_name = "%s_id" % self.content_type_field_name
+            queryset = _filter_prefetch_queryset(
+                queryset,
+                query,
+                [self.content_type_field_name, self.object_id_field_name],
+            )
             return (
-                queryset.filter(query),
+                queryset,
                 lambda relobj: (
                     object_id_converter(getattr(relobj, self.object_id_field_name)),
                     getattr(relobj, content_type_id_field_name),
