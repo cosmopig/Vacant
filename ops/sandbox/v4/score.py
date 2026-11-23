@@ -145,7 +145,8 @@ def _review(out):
             verdicts[row['branch']] = {**slot(row.get('session_id'), row['git_sha']),
                                       'pending_reason': 'invalid or stale audit binding; pending re-audit'}
     write_json(out / 'contamination.json', verdicts)
-    meta['missing_branches'] = [b for b in meta['expected_branches'] if b not in branches or b in meta.get('changed_branches', [])]
+    meta['missing_branches'] = [b for b in meta['expected_branches'] if b not in branches
+                                or b in meta.get('changed_branches', []) or b in meta.get('poll_errors', {})]
     write_json(out / 'meta.json', meta)
     meta = v3.review(out, version=4)
     if meta.get('changed_branches') and meta['protocol'] == 'calibration':
@@ -192,6 +193,7 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
             raise ValueError('harness Python is required')
         runner = official_runner(harness_python, timeout)
     instances_by_id = {r['instance_id']: r for r in instances}
+    scorer_revision = v3.git(v3.REPO, 'rev-parse', 'HEAD')
     ids = selection['calibration_instance_ids'] if protocol == 'calibration' else selection['final_instance_ids']
     records = {}
     for task in ids:
@@ -234,13 +236,21 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
         meta['sessions'].update(sessions)
         (out / 'cells').mkdir(exist_ok=True)
         meta.setdefault('changed_branches', [])
+        meta.setdefault('poll_errors', {})
         write_json(out / 'meta.json', meta)
         meta = _review(out)
         for branch in expected:
             _, task, external_arm, sample = parse_branch(branch)
             arm = 'calibration-plain' if protocol == 'calibration' else v3.ARMS[external_arm]
             cell = cell_path(out, branch)
-            sha = v3.fetch(repo, remote, branch)
+            try:
+                sha = v3.fetch(repo, remote, branch)
+            except Exception as exc:
+                meta['poll_errors'][branch] = f'{type(exc).__name__}: {exc}'
+                write_json(out / 'meta.json', meta)
+                meta = _review(out)
+                continue
+            meta['poll_errors'].pop(branch, None)
             if (cell / 'result.json').exists():
                 result = json.loads((cell / 'result.json').read_text())
                 if result['git_sha'] != sha:
@@ -261,13 +271,22 @@ def collect(repo, remote, out, instances, selection, manifest, *, protocol, sess
                 shutil.move(str(cell), recovery)
             cell.mkdir()
             images.log('Scoring ' + branch + ' @ ' + sha)
-            result = v3.score_handback(repo, remote, sha, instances_by_id[task], records[task], cell, runner,
-                                       base_prefix='sandbox-v4/', patch_deriver=patch.derive_patch,
-                                       allow_unchanged_gitlinks=True)
+            try:
+                result = v3.score_handback(repo, remote, sha, instances_by_id[task], records[task], cell, runner,
+                                           base_prefix='sandbox-v4/', patch_deriver=patch.derive_patch,
+                                           allow_unchanged_gitlinks=True)
+            except Exception as exc:
+                result = dict(resolved=False, infra_void=True, error=f'{type(exc).__name__}: {exc}',
+                              error_stage='score_preparation', patch_applied=None, gold_similarity=None,
+                              base_sha=records[task]['sha'], base_tree=records[task]['base_tree'],
+                              patch_sha256=None, patch_bytes=None, harness_wall_s=None,
+                              image_digest=records[task]['selection']['measurement']['image_digest'],
+                              harness_version=HARNESS_VERSION)
+                images.log(branch + ': recorded infra_void; continuing other cells: ' + result['error'])
             root_manifest = cell / 'handback' / 'VACANT_TESTS.txt'
             result.update(task=task, sample=sample, arm=arm, external_arm='devin-' + external_arm,
                           branch=branch, git_sha=sha, evidence=meta['evidence'], protocol=protocol,
-                          scorer_git_sha=v3.git(v3.REPO, 'rev-parse', 'HEAD'),
+                          scorer_git_sha=scorer_revision,
                           session_id=meta['sessions'].get(branch), calls_complete=False,
                           manifest_present=root_manifest.exists() or root_manifest.is_symlink(),
                           **{k: v3.UNKNOWN for k in ('model_calls', 'prompt_tokens', 'completion_tokens', 'wall_s',

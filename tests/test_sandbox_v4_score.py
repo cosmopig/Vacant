@@ -415,8 +415,13 @@ def test_unchanged_gitlink_is_exported_without_fetching_submodule_and_changes_re
         bank.git('update-index', '--force-remove', 'astropy_helpers')
     changed = bank.git('commit-tree', bank.git('write-tree'), '-p', candidate, '-m', change)
     bank.git('push', str(bank.remote), changed + ':refs/heads/' + branch)
-    with pytest.raises(ValueError, match='changed Git submodules'):
-        bank.collect(out)
+    bank.git('push', str(bank.remote), bank.handback + ':refs/heads/' + bank.branches[1])
+    report = bank.collect(out)
+    assert report['calibration']['scored'] == 2
+    failed = load(cell / 'result.json')
+    assert failed['infra_void'] and not failed['resolved']
+    assert 'changed Git submodules' in failed['error']
+    assert (score.cell_path(out, bank.branches[1]) / 'result.json').exists()
 
 
 def test_stale_audit_export_is_pending_while_other_cells_are_audited(bank, tmp_path):
@@ -449,3 +454,26 @@ def test_empty_or_bad_audit_export_does_not_abort_polling(bank, tmp_path, conten
     source.write_text(content)
     assert audit.ingest(out, source)['applied_branches'] == []
     assert not score.review(out)['calibration']['proceed']
+
+
+def test_one_branch_fetch_failure_keeps_cache_pending_and_scores_others(bank, tmp_path, monkeypatch):
+    bank.publish()
+    out = tmp_path / 'results'
+    bank.collect(out)
+    reviewed(out)
+    assert score.review(out)['calibration']['proceed']
+    original = score.v3.fetch
+
+    def fetch(repo, remote, branch):
+        if branch == bank.branches[0]:
+            raise RuntimeError('branch transport failed')
+        return original(repo, remote, branch)
+
+    with monkeypatch.context() as patcher:
+        patcher.setattr(score.v3, 'fetch', fetch)
+        report = bank.collect(out)
+    assert len(bank.calls) == 12
+    assert report['poll_errors'] == {bank.branches[0]: 'RuntimeError: branch transport failed'}
+    assert not report['calibration']['proceed']
+    assert bank.collect(out)['calibration']['proceed']
+    assert len(bank.calls) == 12
