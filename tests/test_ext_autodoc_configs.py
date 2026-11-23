@@ -763,3 +763,49 @@ def test_autodoc_default_options_with_values(app):
         assert '      list of weak references to the object (if defined)' not in actual
     assert '   .. py:method:: CustomIter.snafucate()' not in actual
     assert '      Makes this snafucated.' not in actual
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_docstring_signature_overloads(app):
+    actual = do_autodoc(app, 'function', 'target.docstring_signature_overload.func')
+    assert list(actual) == [
+        '',
+        '.. py:function:: func(x: int) -> int',
+        '                 func(x: str) -> str',
+        '   :module: target.docstring_signature_overload',
+        '',
+        '   Overloaded function.',
+        '',
+    ]
+
+    options = {"members": None}
+    actual = do_autodoc(app, 'class', 'target.docstring_signature_overload.Math', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Math()',
+        '   :module: target.docstring_signature_overload',
+        '',
+        '',
+        '   .. py:method:: Math.add(a: int, b: int) -> int',
+        '                  Math.add(a: float, b: float) -> float',
+        '                  Math.add(a: str, b: str)',
+        '      :module: target.docstring_signature_overload',
+        '',
+        '      Add two values.',
+        '',
+    ]
+
+    # disabled: signatures stay in the docstring
+    app.config.autodoc_docstring_signature = False
+    actual = do_autodoc(app, 'function', 'target.docstring_signature_overload.func')
+    assert list(actual) == [
+        '',
+        '.. py:function:: func()',
+        '   :module: target.docstring_signature_overload',
+        '',
+        '   func(x: int) -> int',
+        '   func(x: str) -> str',
+        '',
+        '   Overloaded function.',
+        '',
+    ]
