@@ -9,9 +9,58 @@
 """
 
 import json
+import os
 import re
 from unittest import mock
 import pytest
+
+
+def test_local_links(make_app, tempdir):
+    (tempdir / 'conf.py').write_text("linkcheck_ignore = [r'^ignored$']\n")
+    (tempdir / 'index.rst').write_text(
+        'Local links\n'
+        '===========\n'
+        '\n'
+        '.. toctree::\n'
+        '\n'
+        '   nested/index\n'
+        '\n'
+        '`Present <asset.txt>`_\n'
+    )
+    (tempdir / 'asset.txt').write_text('asset\n')
+    (tempdir / 'other file.txt').write_text('another asset\n')
+    (tempdir / 'nested').makedirs()
+    (tempdir / 'nested' / 'index.rst').write_text(
+        'Nested links\n'
+        '============\n'
+        '\n'
+        '`Missing <asset.txt>`_\n'
+        '`Parent <../other%20file.txt?download=1#section>`_\n'
+        '`Root </asset.txt>`_\n'
+        '`Ignored <ignored>`_\n'
+        '`Anchor <#nested-links>`_\n'
+        '`Email <mailto:example@example.org>`_\n'
+    )
+    app = make_app('linkcheck', srcdir=tempdir)
+
+    app.builder.build_all()
+
+    assert app.statuscode == 1
+    nested = os.path.join('nested', 'index.rst')
+    output = (app.outdir / 'output.txt').read_text()
+    assert 'index.rst:8: [local] asset.txt' in output
+    assert '%s:4: [broken] asset.txt:' % nested in output
+    rows = [json.loads(line) for line in (app.outdir / 'output.json').read_text().splitlines()]
+    assert {(row['filename'], row['uri']): row['status'] for row in rows} == {
+        ('index.rst', ''): 'unchecked',
+        ('index.rst', 'asset.txt'): 'local',
+        (nested, 'asset.txt'): 'broken',
+        (nested, '../other%20file.txt?download=1#section'): 'local',
+        (nested, '/asset.txt'): 'local',
+        (nested, 'ignored'): 'ignored',
+        (nested, '#nested-links'): 'unchecked',
+        (nested, 'mailto:example@example.org'): 'unchecked',
+    }
 
 
 @pytest.mark.sphinx('linkcheck', testroot='linkcheck', freshenv=True)

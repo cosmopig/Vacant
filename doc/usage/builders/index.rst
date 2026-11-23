@@ -428,9 +428,12 @@ name is ``rinoh``. Refer to the `rinohtype manual`_ for details.
 .. module:: sphinx.builders.linkcheck
 .. class:: CheckExternalLinksBuilder
 
-   This builder scans all documents for external links, tries to open them with
-   ``requests``, and writes an overview which ones are broken and redirected to
-   standard output and to :file:`output.txt` in the output directory.
+   This builder scans all documents for links. It tries to open HTTP(S) links
+   with ``requests`` and checks that local link targets exist in the source tree.
+   Relative paths are resolved from the containing document, and paths starting
+   with ``/`` are resolved from the source directory. Fragments in local links are
+   not checked. The builder reports broken and redirected links to standard
+   output and to :file:`output.txt` in the output directory.
 
    .. autoattribute:: name
 

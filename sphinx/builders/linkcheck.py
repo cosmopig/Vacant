@@ -16,7 +16,7 @@ import threading
 from html.parser import HTMLParser
 from os import path
 from typing import Any, Dict, List, Set, Tuple
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urlparse, urlsplit
 
 from docutils import nodes
 from docutils.nodes import Node
@@ -77,7 +77,7 @@ def check_anchor(response: requests.requests.Response, anchor: str) -> bool:
 
 class CheckExternalLinksBuilder(Builder):
     """
-    Checks for broken external links.
+    Checks for broken links.
     """
     name = 'linkcheck'
     epilog = __('Look for any errors in the above output or in '
@@ -212,17 +212,30 @@ class CheckExternalLinksBuilder(Builder):
             # check for various conditions without bothering the network
             if len(uri) == 0 or uri.startswith(('#', 'mailto:', 'ftp:')):
                 return 'unchecked', '', 0
-            elif not uri.startswith(('http:', 'https:')):
-                return 'local', '', 0
-            elif uri in self.good:
+            for rex in self.to_ignore:
+                if rex.match(uri):
+                    return 'ignored', '', 0
+
+            if not uri.startswith(('http:', 'https:')):
+                try:
+                    target = urlsplit(uri)
+                except ValueError as err:
+                    return 'broken', str(err), 0
+                if target.scheme or target.netloc:
+                    return 'local', '', 0
+                if not target.path:
+                    return 'unchecked', '', 0
+                _, filename = self.env.relfn2path(unquote(target.path), docname)
+                if path.exists(filename):
+                    return 'local', '', 0
+                return 'broken', __('Local file not found'), 0
+
+            if uri in self.good:
                 return 'working', 'old', 0
             elif uri in self.broken:
                 return 'broken', self.broken[uri], 0
             elif uri in self.redirected:
                 return 'redirected', self.redirected[uri][0], self.redirected[uri][1]
-            for rex in self.to_ignore:
-                if rex.match(uri):
-                    return 'ignored', '', 0
 
             # need to actually check the URI
             for _ in range(self.app.config.linkcheck_retries):
@@ -275,6 +288,7 @@ class CheckExternalLinksBuilder(Builder):
             logger.info(darkgreen('ok        ') + uri + info)
             self.write_linkstat(linkstat)
         elif status == 'broken':
+            self.app.statuscode = 1
             if self.app.quiet or self.app.warningiserror:
                 logger.warning(__('broken link: %s (%s)'), uri, info,
                                location=(filename, lineno))
@@ -333,9 +347,6 @@ class CheckExternalLinksBuilder(Builder):
         while done < n:
             self.process_result(self.rqueue.get())
             done += 1
-
-        if self.broken:
-            self.app.statuscode = 1
 
     def write_entry(self, what: str, docname: str, filename: str, line: int,
                     uri: str) -> None:
