@@ -90,6 +90,34 @@ class MultiValueFieldTest(SimpleTestCase):
         with self.assertRaisesMessage(ValidationError, msg):
             self.field.clean(['some text', ['JP']])
 
+    def test_empty_input_with_required_subfield(self):
+        class OptionalField(MultiValueField):
+            def compress(self, data_list):
+                return data_list
+
+        class OptionalFieldForm(Form):
+            field = OptionalField(
+                fields=(CharField(required=False), CharField()),
+                widget=MultiWidget(widgets=(TextInput, TextInput)),
+                required=False,
+                require_all_fields=False,
+            )
+
+        for data in ({}, {'field_0': '', 'field_1': ''}, {'field_0': 'text', 'field_1': ''}):
+            with self.subTest(data=data):
+                form = OptionalFieldForm(data)
+                self.assertFalse(form.is_valid())
+                self.assertEqual(form.errors['field'], ['Enter a complete value.'])
+
+        form = OptionalFieldForm({'field_0': '', 'field_1': 'text'})
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['field'], ['', 'text'])
+
+        form = OptionalFieldForm({'field_0': '', 'field_1': ''})
+        form.fields['field'].fields[1].required = False
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['field'], [])
+
     def test_has_changed_no_initial(self):
         self.assertTrue(self.field.has_changed(None, ['some text', ['J', 'P'], ['2007-04-25', '6:24:00']]))
 
