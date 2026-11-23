@@ -193,9 +193,21 @@ class LoaderTests(TestCase):
         with override_settings(MIGRATION_MODULES={"migrations": "migrations.faulty_migrations.namespace"}):
             loader = MigrationLoader(connection)
             self.assertIn(
-                "migrations", loader.unmigrated_apps,
-                "App missing __init__.py in migrations module not in unmigrated apps."
+                "migrations", loader.migrated_apps,
+                "App missing __init__.py in migrations module not in migrated apps."
             )
+            self.assertNotIn("migrations", loader.unmigrated_apps)
+
+    @override_settings(
+        MIGRATION_MODULES={'migrations': 'migrations.test_migrations_namespace_package'},
+    )
+    def test_loading_namespace_package(self):
+        """Migration directories without an __init__.py file are loaded."""
+        migration_loader = MigrationLoader(connection)
+        self.assertEqual(
+            migration_loader.graph.forwards_plan(('migrations', '0001_initial')),
+            [('migrations', '0001_initial')],
+        )
 
     @override_settings(
         INSTALLED_APPS=['migrations.migrations_test_apps.migrated_app'],

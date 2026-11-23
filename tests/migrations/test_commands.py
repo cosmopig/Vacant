@@ -94,6 +94,15 @@ class MigrateTests(MigrationTestBase):
         with self.assertRaisesMessage(CommandError, msg):
             call_command('migrate', app_label='migrations', migration_name='nonexistent')
 
+    @override_settings(MIGRATION_MODULES={'migrations': 'migrations.test_migrations_namespace_package'})
+    def test_migrate_namespace_package(self):
+        """Migration directories without an __init__.py file are applied."""
+        self.assertTableNotExists('migrations_author')
+        call_command('migrate', 'migrations', verbosity=0)
+        self.assertTableExists('migrations_author')
+        call_command('migrate', 'migrations', 'zero', verbosity=0)
+        self.assertTableNotExists('migrations_author')
+
     @override_settings(MIGRATION_MODULES={"migrations": "migrations.test_migrations_initial_false"})
     def test_migrate_initial_false(self):
         """
