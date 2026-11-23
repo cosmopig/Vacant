@@ -193,6 +193,11 @@ Models
   :ref:`window-functions` with the exception of disjunctive filter lookups
   against window functions when performing aggregation.
 
+* :class:`~django.db.models.Prefetch` now supports sliced querysets for
+  reverse foreign key, many-to-many, and generic relations on databases that
+  support window functions. The slice is applied separately to each object's
+  related results.
+
 Requests and Responses
 ~~~~~~~~~~~~~~~~~~~~~~
 

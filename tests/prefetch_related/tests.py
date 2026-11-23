@@ -2,11 +2,11 @@ from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection
+from django.db import NotSupportedError, connection
 from django.db.models import Prefetch, QuerySet, prefetch_related_objects
 from django.db.models.query import get_prefetcher
 from django.db.models.sql import Query
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext, ignore_warnings
 from django.utils.deprecation import RemovedInDjango50Warning
 
@@ -108,6 +108,89 @@ class PrefetchRelatedTests(TestDataMixin, TestCase):
             ]
 
         self.assertSequenceEqual(self.book2.authors.all(), [self.author1])
+
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_foreignkey_reverse_sliced(self):
+        authors = Author.objects.order_by("-name")
+        with self.assertNumQueries(3):
+            books = list(
+                Book.objects.prefetch_related(
+                    Prefetch("first_time_authors", authors[:2], to_attr="top_authors"),
+                    Prefetch("first_time_authors", authors[1:]),
+                )
+            )
+        with self.assertNumQueries(0):
+            self.assertEqual(
+                [book.top_authors for book in books],
+                [[self.author3, self.author1], [], [], [self.author4]],
+            )
+            self.assertEqual(
+                [list(book.first_time_authors.all()) for book in books],
+                [[self.author1, self.author2], [], [], []],
+            )
+
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_m2m_forward_sliced(self):
+        self.book4.authors.add(self.author2, self.author3)
+        authors = Author.objects.only("id").order_by("-name")[1:3]
+        with self.assertNumQueries(2):
+            books = list(
+                Book.objects.prefetch_related(
+                    Prefetch("authors", authors, to_attr="sliced_authors")
+                )
+            )
+        self.assertEqual(
+            [book.sliced_authors for book in books],
+            [[self.author1, self.author2], [], [], [self.author3, self.author2]],
+        )
+        self.assertSequenceEqual(authors, [self.author3, self.author1])
+
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_m2m_reverse_sliced(self):
+        with self.assertNumQueries(2):
+            authors = list(
+                Author.objects.prefetch_related(
+                    Prefetch("books", Book.objects.all()[:1])
+                )
+            )
+        with self.assertNumQueries(0):
+            self.assertEqual(
+                [list(author.books.all()) for author in authors],
+                [[self.book1], [self.book1], [self.book1], [self.book4]],
+            )
+
+    def test_sliced_without_window_support(self):
+        with mock.patch.object(connection.features, "supports_over_clause", False):
+            with self.assertRaisesMessage(
+                NotSupportedError,
+                "Prefetching from a limited queryset is only supported on backends "
+                "that support window functions.",
+            ):
+                list(
+                    Book.objects.prefetch_related(
+                        Prefetch("authors", Author.objects.all()[:1], to_attr="top")
+                    )
+                )
+
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_generic_relation_sliced(self):
+        first = Bookmark.objects.create(url="https://example.com/first")
+        second = Bookmark.objects.create(url="https://example.com/second")
+        first.tags.create(tag="a")
+        first_tag = first.tags.create(tag="b")
+        second.tags.create(tag="c")
+        second_tag = second.tags.create(tag="d")
+        with self.assertNumQueries(2):
+            bookmarks = list(
+                Bookmark.objects.prefetch_related(
+                    Prefetch("tags", TaggedItem.objects.order_by("-tag")[:1])
+                )
+            )
+        with self.assertNumQueries(0):
+            self.assertEqual(
+                [list(bookmark.tags.all()) for bookmark in bookmarks],
+                [[first_tag], [second_tag]],
+            )
 
     def test_onetoone_reverse_no_match(self):
         # Regression for #17439

@@ -2520,7 +2520,15 @@ def prefetch_one_level(instances, prefetcher, lookup, level):
             else:
                 manager = getattr(obj, to_attr)
                 if leaf and lookup.queryset is not None:
-                    qs = manager._apply_rel_filters(lookup.queryset)
+                    qs = lookup.queryset
+                    if qs.query.is_sliced:
+                        low_mark, high_mark = qs.query.low_mark, qs.query.high_mark
+                        qs = qs._chain()
+                        qs.query.clear_limits()
+                        qs = manager._apply_rel_filters(qs)
+                        qs.query.set_limits(low_mark, high_mark)
+                    else:
+                        qs = manager._apply_rel_filters(qs)
                 else:
                     qs = manager.get_queryset()
                 qs._result_cache = vals
