@@ -568,6 +568,24 @@ class BaseDatabaseSchemaEditor:
             exclude=meta_constraint_names | meta_index_names,
             **constraint_kwargs,
         )
+        if len(constraint_names) > 1 and constraint_kwargs.get("unique"):
+            # A primary key isn't created by unique_together; ignore it.
+            constraint_names = self._constraint_names(
+                model,
+                columns,
+                exclude=meta_constraint_names | meta_index_names,
+                primary_key=False,
+                **constraint_kwargs,
+            )
+        if len(constraint_names) > 1:
+            # Prefer the constraint with the name unique/index_together uses,
+            # e.g. when the field also has its own unique=True constraint.
+            suffix = "_uniq" if constraint_kwargs.get("unique") else "_idx"
+            default_name = self.connection.introspection.identifier_converter(
+                self._create_index_name(model._meta.db_table, columns, suffix=suffix)
+            )
+            if default_name in constraint_names:
+                constraint_names = [default_name]
         if len(constraint_names) != 1:
             raise ValueError(
                 "Found wrong number (%s) of constraints for %s(%s)"
