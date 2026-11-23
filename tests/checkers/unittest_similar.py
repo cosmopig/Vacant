@@ -23,11 +23,13 @@
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from pylint.checkers import similar
-from pylint.lint import PyLinter
+from pylint.lint import PyLinter, Run
+from pylint.reporters import CollectingReporter
 from pylint.testutils import GenericTestReporter as Reporter
 
 INPUT = Path(__file__).parent / ".." / "input"
@@ -391,6 +393,39 @@ def test_no_args() -> None:
             assert ex.code == 1
         else:
             pytest.fail("not system exit")
+
+
+@pytest.mark.parametrize("jobs", [1, 2])
+def test_zero_min_similarity_lines_disables_duplicate_code(
+    tmp_path: Path, jobs: int
+) -> None:
+    rcfile = tmp_path / "pylintrc"
+    rcfile.write_text("[SIMILARITIES]\nmin-similarity-lines=0\n", encoding="utf-8")
+    reporter = CollectingReporter()
+
+    with patch.object(
+        similar.Similar,
+        "_find_common",
+        autospec=True,
+        side_effect=similar.Similar._find_common,
+    ) as find_common:
+        Run(
+            [
+                f"--rcfile={rcfile}",
+                f"--jobs={jobs}",
+                "--disable=all",
+                "--enable=duplicate-code",
+                "--persistent=no",
+                "--score=no",
+                str(INPUT / "similar_lines_a.py"),
+                str(INPUT / "similar_lines_b.py"),
+            ],
+            reporter=reporter,
+            exit=False,
+        )
+
+    assert not reporter.messages
+    find_common.assert_not_called()
 
 
 def test_get_map_data() -> None:

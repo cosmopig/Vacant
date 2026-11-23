@@ -739,7 +739,7 @@ class SimilarChecker(BaseChecker, Similar, MapReduceMixin):
                 "default": DEFAULT_MIN_SIMILARITY_LINE,
                 "type": "int",
                 "metavar": "<int>",
-                "help": "Minimum lines number of a similarity.",
+                "help": "Minimum number of similar lines. Set to 0 to disable the check.",
             },
         ),
         (
@@ -825,11 +825,15 @@ class SimilarChecker(BaseChecker, Similar, MapReduceMixin):
 
         stream must implement the readlines method
         """
+        if self.min_lines == 0:
+            return
         with node.stream() as stream:
             self.append_stream(self.linter.current_name, stream, node.file_encoding)
 
     def close(self):
         """compute and display similarities on closing (i.e. end of parsing)"""
+        if self.min_lines == 0:
+            return
         total = sum(len(lineset) for lineset in self.linesets)
         duplicated = 0
         stats = self.stats
