@@ -33,6 +33,10 @@ from sphinx.util.nodes import get_node_line
 from sphinx.util.requests import is_ssl_error
 
 
+# matches a URI scheme (foo:) or a protocol relative URL (//)
+uri_re = re.compile(r'([a-z][a-z0-9+.-]*:|//)', re.IGNORECASE)
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -208,12 +212,45 @@ class CheckExternalLinksBuilder(Builder):
                 else:
                     return 'redirected', new_url, 0
 
+        def check_local_uri() -> Tuple[str, str, int]:
+            for rex in self.to_ignore:
+                if rex.match(uri):
+                    return 'ignored', '', 0
+
+            target = unquote(uri.split('#', 1)[0].split('?', 1)[0])
+            if not target:
+                return 'working', '', 0
+
+            if target.startswith('/'):
+                candidate = path.join(self.app.srcdir, target.lstrip('/'))
+            else:
+                candidate = path.join(self.app.srcdir, path.dirname(docname), target)
+            candidate = path.normpath(candidate)
+
+            if path.exists(candidate):
+                return 'working', '', 0
+
+            # a link to another document by its docname or output file name
+            relname = path.relpath(candidate, self.app.srcdir).replace(path.sep, '/')
+            docname_candidate = path.splitext(relname)[0]
+            for name in (relname, relname.rstrip('/'), docname_candidate):
+                if name in self.env.found_docs:
+                    return 'working', '', 0
+            if relname.endswith('/') or path.isdir(candidate):
+                if docname_candidate.rstrip('/') + '/index' in self.env.found_docs:
+                    return 'working', '', 0
+
+            return 'broken', __('local file not found: %s') % target, 0
+
         def check() -> Tuple[str, str, int]:
             # check for various conditions without bothering the network
             if len(uri) == 0 or uri.startswith(('#', 'mailto:', 'ftp:')):
                 return 'unchecked', '', 0
             elif not uri.startswith(('http:', 'https:')):
-                return 'local', '', 0
+                if uri_re.match(uri):
+                    # other URI schemes (e.g. tel:, irc:) can't be checked
+                    return 'unchecked', '', 0
+                return check_local_uri()
             elif uri in self.good:
                 return 'working', 'old', 0
             elif uri in self.broken:

@@ -14,3 +14,6 @@ Some additional anchors to exercise ignore code
 
 .. image:: https://www.google.com/image.png
 .. figure:: https://www.google.com/image2.png
+
+* `Example valid local file <conf.py>`_
+* `Example invalid local file <path/to/notfound>`_
