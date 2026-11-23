@@ -75,6 +75,19 @@ def calibration(ids):
     return random.Random(CALIBRATION_SEED).sample(sorted(ids), 12)
 
 
+def bank_calibration(report):
+    replacements = report.get('replacements', [])
+    if replacements and 'pre_replacement_instance_ids' not in report:
+        raise ValueError('replacement calibration requires the original bank')
+    original = report.get('pre_replacement_instance_ids', report['final_instance_ids'])
+    previous = calibration(original)
+    recorded = report.get('pre_replacement_calibration_ids')
+    if recorded is not None and recorded != previous:
+        raise ValueError('original calibration differs from seeded original-bank draw')
+    removed = {replacement['outgoing'] for replacement in replacements}
+    return calibration(report['final_instance_ids']) if set(previous) & removed else previous
+
+
 def replacement_candidates(ordered, retained, retired, cap):
     if cap < INITIAL_CAP:
         raise ValueError('replacement cap cannot be below initial cap')
@@ -126,8 +139,7 @@ def replay_replacements(report):
     final = sorted((row['instance_id'] for row in retained), key=report['ordered_draw'].index)
     if next(attempts, None) is not None or final != report['final_instance_ids'] or cap != report['repo_cap']:
         raise ValueError('final bank/cap differs from replay')
-    previous = report['pre_replacement_calibration_ids']
-    expected = calibration(final) if set(previous) & set(removed) else previous
+    expected = bank_calibration(report)
     if report['calibration_instance_ids'] != expected:
         raise ValueError('calibration differs from conditional seeded redraw')
     return final
@@ -290,7 +302,7 @@ def main(argv=None):
             if not ids:
                 parser.error('completed checkpoint has no saved instance IDs; refusing to replace it')
             if missing_calibration:
-                previous['calibration_instance_ids'] = calibration(ids)
+                previous['calibration_instance_ids'] = bank_calibration(previous)
             if missing_power:
                 previous['power'] = power_summary(len(ids))
             write_json(args.out, previous)
@@ -352,7 +364,7 @@ def main(argv=None):
 
         state = choose(ordered, validate_many, checkpoint, jobs=args.jobs)
     if state['status'].startswith('complete'):
-        report['calibration_instance_ids'] = calibration(state['final_instance_ids'])
+        report['calibration_instance_ids'] = bank_calibration(report)
         report['power'] = power_summary(len(state['final_instance_ids']))
         checkpoint({})
     print(json.dumps(dict(status=report['status'], selected=len(report['final_instance_ids']),

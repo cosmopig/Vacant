@@ -61,8 +61,10 @@ def test_main_resumes_completed_checkpoint_missing_final_metadata(tmp_path, monk
     output = tmp_path / 'SELECTION.json'
     size = 48 if status == 'complete_undersized' else 62
     ids = [f'selected-{index}' for index in range(size)]
+    original = ids[:-1] + ['old']
     checkpoint = dict(status=status, final_instance_ids=ids, selected=[dict(instance_id=key) for key in ids],
         validation={key: dict(status='pass', evidence='preserve-me') for key in ids},
+        pre_replacement_instance_ids=original, pre_replacement_calibration_ids=select.calibration(original),
         replacements=[dict(outgoing='old', incoming=ids[-1])], repo_cap=15,
         calibration_instance_ids=list(reversed(ids[-12:])), power=dict(exact_power=.123))
     if missing == 'both':
@@ -86,7 +88,8 @@ def test_main_resumes_completed_checkpoint_missing_final_metadata(tmp_path, monk
                         '--work-dir', str(tmp_path / 'work')]) == 0
     expected = dict(checkpoint)
     if not expected.get('calibration_instance_ids'):
-        expected['calibration_instance_ids'] = select.calibration(ids)
+        initial = select.calibration(original)
+        expected['calibration_instance_ids'] = select.calibration(ids) if 'old' in initial else initial
     if not expected.get('power'):
         expected['power'] = select.power_summary(len(ids))
     assert json.loads(output.read_text()) == expected
@@ -293,7 +296,7 @@ def test_replacement_replay_checks_order_evidence_and_calibration():
     original = [row['instance_id'] for row in rows[:12]]
     final = [row['instance_id'] for row in rows[1:13]]
     report = dict(candidates=rows, ordered_draw=original + ['12', '13'],
-        pre_replacement_instance_ids=original, pre_replacement_calibration_ids=original,
+        pre_replacement_instance_ids=original, pre_replacement_calibration_ids=select.calibration(original),
         replacements=[dict(outgoing='0', incoming='12', repo_cap=12)], cap_attempts=[dict(repo_cap=12)],
         replacement_attempts=[dict(instance_id='12', repo_cap=12, official_status='pass', native_status='ready')],
         validation={'12': dict(status='pass')}, final_instance_ids=final, repo_cap=12,
@@ -307,8 +310,43 @@ def test_replacement_replay_checks_order_evidence_and_calibration():
     with pytest.raises(ValueError, match='infrastructure'):
         select.replay_replacements(dict(report, replacement_attempts=[attempt], validation={'12': dict(status='blocked')}))
     empty = dict(report, replacements=[], replacement_attempts=[], final_instance_ids=original,
-                 calibration_instance_ids=original)
+                 calibration_instance_ids=select.calibration(original))
     assert select.replay_replacements(empty) == original
+
+
+@pytest.mark.parametrize('touches_calibration', [False, True])
+def test_resume_and_replay_share_conditional_original_bank_calibration(tmp_path, monkeypatch, touches_calibration):
+    original = [str(index) for index in range(20)]
+    initial = select.calibration(original)
+    outgoing = next(key for key in original if (key in initial) == touches_calibration
+                    and select.calibration([key2 for key2 in original if key2 != key] + ['20']) != initial)
+    final = [key for key in original if key != outgoing] + ['20']
+    expected = select.calibration(final) if touches_calibration else initial
+    rows = [dict(instance_id=key, repo='a') for key in original + ['20']]
+    report = dict(status='complete', candidates=rows, ordered_draw=original + ['20'],
+        pre_replacement_instance_ids=original, pre_replacement_calibration_ids=initial,
+        replacements=[dict(outgoing=outgoing, incoming='20', repo_cap=20)], cap_attempts=[dict(repo_cap=20)],
+        replacement_attempts=[dict(instance_id='20', repo_cap=20, official_status='pass', native_status='ready')],
+        validation={'20': dict(status='pass')}, final_instance_ids=final, repo_cap=20, power=select.power_summary(20))
+    output = tmp_path / 'SELECTION.json'
+    output.write_text(json.dumps(report))
+    monkeypatch.setattr(select, 'HERE', tmp_path)
+    monkeypatch.setattr(select.subprocess, 'run', lambda *args, **kwargs: pytest.fail('metadata needs no Docker'))
+    assert select.main(['--experiments', 'missing', '--dataset-json', 'missing',
+                        '--work-dir', str(tmp_path / 'work')]) == 0
+    resumed = json.loads(output.read_text())
+    assert resumed == dict(report, calibration_instance_ids=expected)
+    assert select.replay_replacements(resumed) == final
+
+
+def test_calibration_policy_refuses_missing_or_inconsistent_original_provenance():
+    ids = [str(index) for index in range(20)]
+    report = dict(final_instance_ids=ids, replacements=[dict(outgoing='old', incoming=ids[-1])])
+    with pytest.raises(ValueError, match='original bank'):
+        select.bank_calibration(report)
+    report.update(pre_replacement_instance_ids=ids, pre_replacement_calibration_ids=[])
+    with pytest.raises(ValueError, match='original calibration'):
+        select.bank_calibration(report)
 
 
 def test_cleanup_absent_images_and_real_errors(monkeypatch):

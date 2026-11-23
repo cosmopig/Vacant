@@ -87,6 +87,10 @@ Completed outputs with calibration and power recorded are frozen: rerunning the
 default command refuses before validation or writes. Completed checkpoints
 missing either final field resume offline: saved IDs, validation and replacement
 records stay intact, and only missing calibration/power metadata is added atomically.
+Initial selection, offline resume and replacement replay share the same calibration
+policy: seed 20261125 on the original bank, redrawn from the final bank only when
+a replacement removed an original calibration ID. Missing original-bank provenance
+for replacements is an error, not permission to silently redraw.
 Use a different `--out` for an independent reconstruction;
 `--overwrite-frozen` explicitly permits replacing a completed bank and calibration.
 
