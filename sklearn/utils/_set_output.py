@@ -119,17 +119,21 @@ def _wrap_data_with_container(method, data_to_wrap, original_input, estimator):
         If the output config is "default" or the estimator is not configured
         for wrapping return `data_to_wrap` unchanged.
         If the output config is "pandas", return `data_to_wrap` as a pandas
-        DataFrame.
+        DataFrame, preserving its index if it already has pandas row labels.
     """
     output_config = _get_output_config(method, estimator)
 
     if output_config["dense"] == "default" or not _auto_wrap_is_configured(estimator):
         return data_to_wrap
 
-    # dense_config == "pandas"
+    index = (
+        data_to_wrap.index
+        if hasattr(data_to_wrap, "iloc")
+        else getattr(original_input, "index", None)
+    )
     return _wrap_in_pandas_container(
         data_to_wrap=data_to_wrap,
-        index=getattr(original_input, "index", None),
+        index=index,
         columns=estimator.get_feature_names_out,
     )
 

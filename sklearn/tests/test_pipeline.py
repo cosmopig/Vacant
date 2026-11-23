@@ -24,6 +24,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
 from sklearn.utils.validation import check_is_fitted
 from sklearn.base import clone, is_classifier, BaseEstimator, TransformerMixin
+from sklearn import config_context
 from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline, make_union
 from sklearn.svm import SVC
 from sklearn.neighbors import LocalOutlierFactor
@@ -1618,6 +1619,38 @@ def test_feature_union_set_output():
     assert isinstance(X_trans, pd.DataFrame)
     assert_array_equal(X_trans.columns, union.get_feature_names_out())
     assert_array_equal(X_trans.index, X_test.index)
+
+
+@pytest.mark.parametrize("method", ["fit_transform", "transform"])
+@pytest.mark.parametrize(
+    "groups, sums",
+    [
+        (["b", "a", "b"], {"a": 2, "b": 4}),
+        (["b", "a", "c"], {"a": 2, "b": 1, "c": 3}),
+    ],
+    ids=["aggregate", "reorder"],
+)
+def test_feature_union_pandas_output_index(method, groups, sums):
+    """Preserve the row labels returned by pandas transformers."""
+    pd = pytest.importorskip("pandas")
+
+    class GroupSum(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            return X.groupby("group")["value"].sum()
+
+    X = pd.DataFrame({"group": groups, "value": [1, 2, 3]}, index=[10, 20, 30])
+    expected = pd.DataFrame({"value": sums}).rename_axis(index="group")
+    union = make_union(GroupSum())
+
+    with config_context(transform_output="pandas"):
+        if method == "transform":
+            union.fit(X)
+        result = getattr(union, method)(X)
+
+    pd.testing.assert_frame_equal(result, expected)
 
 
 def test_feature_union_getitem():
