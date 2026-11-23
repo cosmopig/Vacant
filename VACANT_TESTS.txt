@@ -1,0 +1,1 @@
+sympy/matrices/expressions/tests/test_blockmatrix.py::test_block_collapse_zero_blocks
