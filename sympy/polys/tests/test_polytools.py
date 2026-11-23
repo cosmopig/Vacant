@@ -1445,6 +1445,23 @@ def test_Poly_clear_denoms():
         x + 3*sqrt(2), x, domain='EX') and poly.get_domain() == EX
 
 
+def test_Poly_clear_denoms_zero():
+    r = Rational(1, 3)
+    coeff, poly = Poly((18**r - 2**r*3**(2*r))/5, x, domain=EX).clear_denoms()
+    assert coeff == 5
+    assert poly.is_zero
+    assert poly.terms_gcd() == ((0,), Poly(0, x, domain=EX))
+    assert poly.primitive() == (0, Poly(0, x, domain=EX))
+
+
+def test_Poly_clear_denoms_multivariate_leading_zeros():
+    r = Rational(1, 3)
+    c = (18**r - 2**r*3**(2*r))/5
+    coeff, poly = Poly(c*(x**2 + x*y**2) + x*y + 1, x, y, domain=EX).clear_denoms()
+    assert coeff == 5
+    assert poly == Poly(5*x*y + 5, x, y, domain=EX)
+
+
 def test_Poly_rat_clear_denoms():
     f = Poly(x**2/y + 1, x)
     g = Poly(x**3 + y, x)

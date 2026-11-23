@@ -16,7 +16,7 @@ from sympy.polys.densearith import (
     dup_exquo_ground, dmp_exquo_ground,
 )
 from sympy.polys.densebasic import (
-    dup_strip, dmp_strip,
+    dup_strip, dmp_strip, _rec_strip,
     dup_convert, dmp_convert,
     dup_degree, dmp_degree,
     dmp_to_dict,
@@ -1196,7 +1196,7 @@ def dup_clear_denoms(f, K0, K1=None, convert=False):
         common = K1.lcm(common, K0.denom(c))
 
     if not K1.is_one(common):
-        f = dup_mul_ground(f, common, K0)
+        f = dup_strip(dup_mul_ground(f, common, K0))
 
     if not convert:
         return common, f
@@ -1250,7 +1250,7 @@ def dmp_clear_denoms(f, u, K0, K1=None, convert=False):
     common = _rec_clear_denoms(f, u, K0, K1)
 
     if not K1.is_one(common):
-        f = dmp_mul_ground(f, common, u, K0)
+        f = _rec_strip(dmp_mul_ground(f, common, u, K0), u)
 
     if not convert:
         return common, f

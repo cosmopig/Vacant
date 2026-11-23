@@ -1,0 +1,2 @@
+sympy/polys/tests/test_polytools.py::test_Poly_clear_denoms_zero
+sympy/polys/tests/test_polytools.py::test_Poly_clear_denoms_multivariate_leading_zeros
