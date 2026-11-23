@@ -1,0 +1,6 @@
+Changed behavior so that when a structured ``numpy.ndarray`` is added as a
+column to a ``Table``, it is now converted to a ``Column`` (or ``MaskedColumn``)
+instead of being viewed as an ``NdarrayMixin``. Structured ``Column`` objects
+are now fully supported, including for serialization. To get the previous
+behavior, view the array as ``NdarrayMixin`` before adding it to the table,
+e.g. ``t['a'] = data.view(NdarrayMixin)``.
