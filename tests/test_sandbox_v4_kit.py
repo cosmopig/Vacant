@@ -167,7 +167,7 @@ def test_approved_base_only_freeze_records_uncollected_omissions():
 
 
 def test_native_controls_inherit_environment_tools(tmp_path):
-    root = tmp_path / 'kit'
+    root = tmp_path / ('kit-' + 'x' * 100)
     workspace = root / 'task'
     workspace.mkdir(parents=True)
     (workspace / 'sample').mkdir()
@@ -211,7 +211,7 @@ def test_native_controls_inherit_environment_tools(tmp_path):
     path.write_text(path.read_text() + '\nimport pytest\n'
         '@pytest.mark.parametrize("value", [12, 12])\ndef test_counter(value): assert value\n'
         '@pytest.mark.parametrize("value", [12, 12, 120])\ndef test_exact(value): assert value\n'
-        '@pytest.mark.parametrize("path", [__file__])\ndef test_path(path): assert path\n')
+        '@pytest.mark.parametrize("path", [__file__], ids=str)\ndef test_path(path): assert path\n')
     aliases = ['test_old.py::test_counter[120]', 'test_old.py::test_counter[121]',
                'test_old.py::test_path[/test_old.py]', 'test_old.py::test_exact[120]']
     kit.save(discovery, dict(config, selectors=[*config['selectors'],

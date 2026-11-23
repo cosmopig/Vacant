@@ -25,7 +25,7 @@ def fixture(tmp_path):
     (workspace / 'behavior.py').write_text('VALUE = 0\n')
     (workspace / 'native.c').write_text('0\n')
     (workspace / 'test_old.py').write_text('import pytest\ndef test_old(): assert True\n'
-        '@pytest.mark.parametrize("path", [__file__])\ndef test_path(path): assert path\n')
+        '@pytest.mark.parametrize("path", [__file__], ids=str)\ndef test_path(path): assert path\n')
     (workspace / 'setup.cfg').write_text('[metadata]\nname = fixture-old\n')
     git(workspace, 'init', '--quiet', '--template=')
     git(workspace, 'add', 'behavior.py', 'native.c', 'test_old.py', 'setup.cfg')
@@ -173,7 +173,7 @@ def test_frozen_p2p_rebases_absolute_parameter_ids(fixture, tmp_path):
     config['selectors'] = [dict(kind='exact', file='test_old.py', label=node)]
     config['nodeid_paths'] = dict(workspace=str(workspace))
     (suite / 'selection.json').write_text(json.dumps(config))
-    frozen = tmp_path / 'frozen'
+    frozen = tmp_path / ('frozen-' + 'x' * 100)
     shutil.copytree(workspace, frozen, ignore=shutil.ignore_patterns('.git'))
     assert gate_runtime.check(frozen, suite, workspace)['C'] == 'pass'
 
