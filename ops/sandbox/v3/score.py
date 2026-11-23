@@ -326,7 +326,7 @@ def main(argv=None):
         meta = score_branches(args.repo, args.remote, args.out, instances,
                               json.loads((HERE / 'SELECTION.json').read_text()),
                               json.loads((HERE / 'KIT.json').read_text()), protocol=args.protocol,
-                              branches=args.branches, harness_python=args.harness_python.resolve(),
+                              branches=args.branches, harness_python=args.harness_python.absolute(),
                               timeout=args.timeout, control_only=args.control_only)
     print(json.dumps({k: meta[k] for k in ('missing_branches', 'unreviewed_branches', 'calibration', 'analysis_views') if k in meta}))
     return meta

@@ -298,6 +298,25 @@ def test_cli_rejects_unfrozen_dataset(tmp_path):
                     '--dataset-json', str(data), '--harness-python', 'unused'])
 
 
+def test_cli_preserves_venv_interpreter_symlink(tmp_path, monkeypatch):
+    interpreter = tmp_path / 'venv/bin/python'
+    interpreter.parent.mkdir(parents=True)
+    interpreter.symlink_to(sys.executable)
+    data = tmp_path / 'data.jsonl'
+    data.write_text('{}\n')
+    monkeypatch.setattr(score, 'DATASET_CONTENT_SHA256', score.digest(score.canonical([{}])))
+    received = []
+
+    def collect(*args, **kwargs):
+        received.append(kwargs['harness_python'])
+        return dict(missing_branches=[])
+
+    monkeypatch.setattr(score, 'score_branches', collect)
+    score.main(['score', '--out', str(tmp_path / 'out'), '--protocol', 'calibration',
+                '--dataset-json', str(data), '--harness-python', str(interpreter)])
+    assert received == [interpreter] and received[0] != interpreter.resolve()
+
+
 def test_comparison_prompts_have_identical_no_pr_instruction():
     text = (Path(score.REPO) / 'ops/sandbox/DEVIN_ARMS.md').read_text().split('## V3 SWE-bench')[1]
     assert text.count('Do not open a pull request; the pushed branch is the only deliverable.') == 3
