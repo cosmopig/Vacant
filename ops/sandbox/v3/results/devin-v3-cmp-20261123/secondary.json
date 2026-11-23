@@ -1,0 +1,17 @@
+{
+  "gold_similarity_threshold": 0.9,
+  "gold_similarity_flags": [],
+  "vacant_gate": {
+    "submissions": "UNKNOWN",
+    "accepted_cells": "UNKNOWN",
+    "known_cells": 0,
+    "planned_cells": 24,
+    "reason": "Session audit export contains access-search results, not gate receipts or raw submission outputs."
+  },
+  "acus": {
+    "A": "UNKNOWN",
+    "A2": "UNKNOWN",
+    "G": "UNKNOWN"
+  },
+  "acu_reason": "No session billing/usage export or configured Devin API credential available."
+}

@@ -1,0 +1,866 @@
+{
+  "sandbox-devin/v3/django__django-15732-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "e398fdcdbac69b84c070bd037b881918643a9df5"
+  },
+  "sandbox-devin/v3/django__django-15732-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "ed54c606f1049d5be42e7d709f8f8cd16f309655"
+  },
+  "sandbox-devin/v3/django__django-15732-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "bf00b3c3fad27dc594d599f5bf929e77359a8cb8"
+  },
+  "sandbox-devin/v3/django__django-15732-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "f62afd4ec9310894e2a8ba224d43614d757d057f"
+  },
+  "sandbox-devin/v3/django__django-15732-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "adf784d82a9a72753226a1c53647ccccbd50ec4e"
+  },
+  "sandbox-devin/v3/django__django-15732-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "bfdcd29070420b7bdad71c1bce675c267b7f4cd6"
+  },
+  "sandbox-devin/v3/astropy__astropy-13236-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "ad27f590a8f7b31f7eeb9281a07468616cb09b9c"
+  },
+  "sandbox-devin/v3/astropy__astropy-13236-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "eb467df8275465d50fb75ae5b27c7f48e57277f1"
+  },
+  "sandbox-devin/v3/astropy__astropy-13236-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "58ca8d0d09a906f3df0348b3691d7e22cd56157b"
+  },
+  "sandbox-devin/v3/astropy__astropy-13236-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "fae2fcd680dcc44e655704b914d7c334f69cf9e7"
+  },
+  "sandbox-devin/v3/astropy__astropy-13236-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "441faa0beb541a5b267ef0d23bafdcec1aeb902c"
+  },
+  "sandbox-devin/v3/astropy__astropy-13236-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "0f566a502a484cd4512c1ed3fa1b89f84b87ee1f"
+  },
+  "sandbox-devin/v3/matplotlib__matplotlib-24870-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "b724efdf9ac5e63889ddf9ed264e9057eec64319"
+  },
+  "sandbox-devin/v3/matplotlib__matplotlib-24870-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "d6a6251e61b1609289407e6a1eebb74591e5d428"
+  },
+  "sandbox-devin/v3/matplotlib__matplotlib-24870-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "4bbd2b01584759041c4ae16b53a9aba59a7cd1a9"
+  },
+  "sandbox-devin/v3/matplotlib__matplotlib-24870-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "3f224e516cbc1f8bb506921b4278dc2941457cfb"
+  },
+  "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "ad67f25012ffca15a8200f075113500bfb6aa768"
+  },
+  "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "48c31db87b9d30cc537aabcbdd733455f07c5143"
+  },
+  "sandbox-devin/v3/django__django-13344-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "89b7d1726a374d3c768b3e58ab5e4e21a5cde977"
+  },
+  "sandbox-devin/v3/django__django-13344-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "090b2fac6b9b74ee7e3f6e6c9543b9d4a2efe55d"
+  },
+  "sandbox-devin/v3/django__django-13344-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "e68d4284bcc0ed5a1ad078ff8bf578d431992bba"
+  },
+  "sandbox-devin/v3/django__django-13344-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "121f55873d52fa672b4df927f80417b6ce0d8405"
+  },
+  "sandbox-devin/v3/django__django-13344-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "b3d825318f0c9a74e71490850d892524f7339bd6"
+  },
+  "sandbox-devin/v3/django__django-13344-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "dfa174f7009713c69d2f4d8b7ffad74e660fd732"
+  },
+  "sandbox-devin/v3/astropy__astropy-14598-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "2a27b5692d5667d8978947d9b47bf38c015484b0"
+  },
+  "sandbox-devin/v3/astropy__astropy-14598-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "99b35c3bfd676dd226233e000cdf5c899784c8df"
+  },
+  "sandbox-devin/v3/astropy__astropy-14598-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "94c9e5b418ed658343bf1e1e8ddbedaa84603414"
+  },
+  "sandbox-devin/v3/astropy__astropy-14598-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "4d48319cfc1b2b952162c98cf064c7afd6e7b43a"
+  },
+  "sandbox-devin/v3/astropy__astropy-14598-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "290259e6f8e00c64315efafb310f7415bcba7bc2"
+  },
+  "sandbox-devin/v3/astropy__astropy-14598-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "1b13cd23158a2618e18c91216cd71c78c54bf437"
+  },
+  "sandbox-devin/v3/sympy__sympy-14248-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "b55a9486ccdd1497f4be8f41f654c13ac291074e"
+  },
+  "sandbox-devin/v3/sympy__sympy-14248-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "918c2540370625374bb6bb9f552b2c74d120dab4"
+  },
+  "sandbox-devin/v3/sympy__sympy-14248-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "962bb1725ab824c2b985e6d4f7db497107718307"
+  },
+  "sandbox-devin/v3/sympy__sympy-14248-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "2b92f289c14fea3942fd613ae3379e978411e24f"
+  },
+  "sandbox-devin/v3/sympy__sympy-14248-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "c2b373d9ab64e4e23400d7b00602967238c85309"
+  },
+  "sandbox-devin/v3/sympy__sympy-14248-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "75a1c5f655cf7c2fa9465447da460547685d1d94"
+  },
+  "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "4b03a92f360e2b16cc33cfdc269c0b7ba40085b9"
+  },
+  "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "762efa535dd8a7722a1e574a4a2f10979032ac95"
+  },
+  "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "6e40a3351ccd38240a7247deda6a5055815a025a"
+  },
+  "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "b9a80f00d254aa3aa29ea8d6c0c3f0e87b87ff4f"
+  },
+  "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "e1e47d1e03647a903d3d19779169bf90560ff2ae"
+  },
+  "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "c4d53a2e0931c25ea29723a34fefbc55be724a7e"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "9ab2f4f740075eadb15625290204fce6b126c4eb"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "4cbee9d36153afd9012e9bc44f4e10563afc42cf"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "6cf18f79befe7531efc05508c402e37a8c879a55"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "594e97831a4e535a3fae64eef83a020e3dba8375"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "67f4326e677e83183fe05cd7d7b82d0925b3f08a"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "f3ab15a73d79787299ffa6fe6ebef8c8c07ab3f9"
+  },
+  "sandbox-devin/v3/sympy__sympy-15875-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "a9443570b52d737442f94557cf93fc8f33cafede"
+  },
+  "sandbox-devin/v3/sympy__sympy-15875-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "0080636323db88214cf9c7dc236bd286c0d5b1eb"
+  },
+  "sandbox-devin/v3/sympy__sympy-15875-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "1e967345743d32b726d16c54fcf62e0ca39dc2db"
+  },
+  "sandbox-devin/v3/sympy__sympy-15875-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "ded008cd18d9937c9e895d0555c91b265b3472b4"
+  },
+  "sandbox-devin/v3/sympy__sympy-15875-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "bce48b3108b0fc06de0ae70d973986068943226b"
+  },
+  "sandbox-devin/v3/sympy__sympy-15875-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "6fa0cd5cfebcac69c51bed9d5bb752dcb1eba196"
+  },
+  "sandbox-devin/v3/sympy__sympy-21612-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "4e729e7e05c6e9c47f5e99d4fe73bf309c47b2e6"
+  },
+  "sandbox-devin/v3/sympy__sympy-21612-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "040e632a71736210aabeaf9e4c595a34258a176f"
+  },
+  "sandbox-devin/v3/sympy__sympy-21612-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "ecd513f8203ae76980ba7cd1fed4c7d649ff1d30"
+  },
+  "sandbox-devin/v3/sympy__sympy-21612-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "5d796b4d84bac82de925303eeaaf931abc57297e"
+  },
+  "sandbox-devin/v3/sympy__sympy-21612-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "54778daa63cbcfc73d0e3b140c3143676161361c"
+  },
+  "sandbox-devin/v3/sympy__sympy-21612-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "ffa325e02afc7cb78653345399d024bdac74dcf4"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "69a48ef15f44ba275c75760c6bf9e26b1140d417"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "73eebfbaabbf37813b9eb6642debd18a720062c0"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "089bc11595d7b897890ecb84968e074aa95997e8"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "5854aaf60e91ccd6ccccb612377f92a360f4ae29"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "b8f1ec2d7a73ddeb28155ca3d895922abc8af6b7"
+  },
+  "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "84d4defbf7157ec1faaecf797114430d6bff06a4"
+  },
+  "sandbox-devin/v3/django__django-15563-plain-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "e7021feea315539358e9cd702d916d87efdc0bb8"
+  },
+  "sandbox-devin/v3/django__django-15563-plain-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "f4a9e0c3cb58341a95e7319a27fcc2cada7c6375"
+  },
+  "sandbox-devin/v3/django__django-15563-plain2-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "d60d032f96ad3e0e24ab24eb8dbc1400d28e7d91"
+  },
+  "sandbox-devin/v3/django__django-15563-plain2-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "76e52e967292ceead8de7041c4ef8a760bf10b01"
+  },
+  "sandbox-devin/v3/django__django-15563-vacant-s1": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "16e29d9f11bba8aa5d3166182e5a33653438fd87"
+  },
+  "sandbox-devin/v3/django__django-15563-vacant-s2": {
+    "contaminated": false,
+    "outside_help": false,
+    "evidence": [
+      "NOTES.md and audit_raw.json: lead/user verdict false for all 72 sessions; 0 browser events; SWE-bench/HF hits only in dispatch prohibitions; upstream URLs only in local files or supplied problem statements."
+    ],
+    "outside_help_evidence": [
+      "NOTES.md: 0 pr_created events; PE confirms no PR opened by any cell; lead/user outside_help=false verdict for all 72."
+    ],
+    "reviewer": "lead/user session-event audit",
+    "handback_sha": "db6800cb85e7f1946b7abb8c4ef0b4389490ca75"
+  }
+}

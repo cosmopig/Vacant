@@ -1,0 +1,366 @@
+{
+ "seed": 20261123,
+ "prompt_commit": "944761215a1cdcc765d6a00e72d0c4d3b9d8bb19",
+ "launches": [
+  {
+   "order": 0,
+   "branch": "sandbox-devin/v3/django__django-15563-plain-s2",
+   "session_id": "devin-020866b6165b4d8c9ca702c672a1e9d5"
+  },
+  {
+   "order": 1,
+   "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-plain-s2",
+   "session_id": "devin-8e2e50ef531641eabaad80811ba1b119"
+  },
+  {
+   "order": 2,
+   "branch": "sandbox-devin/v3/sympy__sympy-15875-vacant-s2",
+   "session_id": "devin-31a913fb14804b44bed42a49df050ffd"
+  },
+  {
+   "order": 3,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain2-s2",
+   "session_id": "devin-19e92dbc39d04bd1b517c545c95a9f53"
+  },
+  {
+   "order": 4,
+   "branch": "sandbox-devin/v3/django__django-15563-plain2-s1",
+   "session_id": "devin-b37caccecf9d42629a0b4add05c50abf"
+  },
+  {
+   "order": 5,
+   "branch": "sandbox-devin/v3/django__django-13344-plain-s2",
+   "session_id": "devin-ab09eb3495864e5b9b10237034df11b9"
+  },
+  {
+   "order": 6,
+   "branch": "sandbox-devin/v3/django__django-15732-vacant-s2",
+   "session_id": "devin-cbd7b4e0e08849b9af0526c5cd5da045"
+  },
+  {
+   "order": 7,
+   "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-plain2-s1",
+   "session_id": "devin-f5794082db084a81beee13a005cf03cd"
+  },
+  {
+   "order": 8,
+   "branch": "sandbox-devin/v3/sympy__sympy-15875-vacant-s1",
+   "session_id": "devin-82dc7c7a8e9c4b79be1df22c14091bfd"
+  },
+  {
+   "order": 9,
+   "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s1",
+   "session_id": "devin-a1c8b2434e8c4244b505f5719c3aa9ba"
+  },
+  {
+   "order": 10,
+   "branch": "sandbox-devin/v3/astropy__astropy-14598-plain-s1",
+   "session_id": "devin-14800aba390043978c242760314b1ca1"
+  },
+  {
+   "order": 11,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain2-s1",
+   "session_id": "devin-720769e8dc274661bae24052a879d0de"
+  },
+  {
+   "order": 12,
+   "branch": "sandbox-devin/v3/astropy__astropy-14598-vacant-s1",
+   "session_id": "devin-390cefc5c7554a8c9e38daba9b36fb4a"
+  },
+  {
+   "order": 13,
+   "branch": "sandbox-devin/v3/django__django-15732-plain-s1",
+   "session_id": "devin-6dffe86615e64c52bfabff012b18d81b"
+  },
+  {
+   "order": 14,
+   "branch": "sandbox-devin/v3/sympy__sympy-14248-plain-s2",
+   "session_id": "devin-c05e9efa37a94d119287f45174cb7818"
+  },
+  {
+   "order": 15,
+   "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain2-s1",
+   "session_id": "devin-7daa43f252fb414cae2d9a1944870f0d"
+  },
+  {
+   "order": 16,
+   "branch": "sandbox-devin/v3/sympy__sympy-15875-plain2-s1",
+   "session_id": "devin-a8fee32d4f4146eeb82aa9f8c016a530"
+  },
+  {
+   "order": 17,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain-s1",
+   "session_id": "devin-292f6ec35ea045448a839a16a6ed72fe"
+  },
+  {
+   "order": 18,
+   "branch": "sandbox-devin/v3/astropy__astropy-13236-vacant-s1",
+   "session_id": "devin-8b9de667097b42aaa550805bd2e14031"
+  },
+  {
+   "order": 19,
+   "branch": "sandbox-devin/v3/sympy__sympy-21612-plain-s2",
+   "session_id": "devin-bb00331f78524081b5ec1a2d116a9eda"
+  },
+  {
+   "order": 20,
+   "branch": "sandbox-devin/v3/django__django-15732-vacant-s1",
+   "session_id": "devin-d2bec5685e424e32b5d6016eadf4efb7"
+  },
+  {
+   "order": 21,
+   "branch": "sandbox-devin/v3/django__django-15563-plain2-s2",
+   "session_id": "devin-ba3e36cf01ea4552bb3547b8ac9ab2c3"
+  },
+  {
+   "order": 22,
+   "branch": "sandbox-devin/v3/django__django-15563-vacant-s2",
+   "session_id": "devin-24ce0487b75d4f07be7f0d1b2bd96193"
+  },
+  {
+   "order": 23,
+   "branch": "sandbox-devin/v3/astropy__astropy-13236-plain2-s1",
+   "session_id": "devin-b97e471a0b494327a8a6f52c5580915d"
+  },
+  {
+   "order": 24,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain-s2",
+   "session_id": "devin-dd594b13992949e58d5ea5ffd7e2411c"
+  },
+  {
+   "order": 25,
+   "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain2-s2",
+   "session_id": "devin-88d9d7392c3e4c3585f4ab6addeb7c08"
+  },
+  {
+   "order": 26,
+   "branch": "sandbox-devin/v3/sympy__sympy-14248-plain2-s1",
+   "session_id": "devin-b9360562aa39430c9fa120a0e2f3cd24"
+  },
+  {
+   "order": 27,
+   "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s1",
+   "session_id": "devin-372b4685a975485e99fc3a3fc9f46a65"
+  },
+  {
+   "order": 28,
+   "branch": "sandbox-devin/v3/sympy__sympy-21612-vacant-s1",
+   "session_id": "devin-afa04e24abe8447db9dc12c3a37d43a3"
+  },
+  {
+   "order": 29,
+   "branch": "sandbox-devin/v3/django__django-15732-plain-s2",
+   "session_id": "devin-0a7deb5502a241be96689e7aea72f074"
+  },
+  {
+   "order": 30,
+   "branch": "sandbox-devin/v3/sympy__sympy-14248-vacant-s1",
+   "session_id": "devin-a237e8f91168478980354775ba3d89f8"
+  },
+  {
+   "order": 31,
+   "branch": "sandbox-devin/v3/sympy__sympy-14248-vacant-s2",
+   "session_id": "devin-a90e09af3e77482e91b2a09b402822ef"
+  },
+  {
+   "order": 32,
+   "branch": "sandbox-devin/v3/sympy__sympy-21612-plain2-s1",
+   "session_id": "devin-79639f8f9ffa4f87b75036c3f00e1720"
+  },
+  {
+   "order": 33,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s2",
+   "session_id": "devin-588894d8d08546f0994efa738e769293"
+  },
+  {
+   "order": 34,
+   "branch": "sandbox-devin/v3/sympy__sympy-14248-plain2-s2",
+   "session_id": "devin-37f3228a166b49439785792af96c31ae"
+  },
+  {
+   "order": 35,
+   "branch": "sandbox-devin/v3/astropy__astropy-14598-plain-s2",
+   "session_id": "devin-1058611b797a429cbcdb24943ebfe66e"
+  },
+  {
+   "order": 36,
+   "branch": "sandbox-devin/v3/astropy__astropy-14598-plain2-s1",
+   "session_id": "devin-0008c7450328426db3d673bd808072a6"
+  },
+  {
+   "order": 37,
+   "branch": "sandbox-devin/v3/django__django-15563-plain-s1",
+   "session_id": "devin-d4d5bebc8806492ba490c908796bd28f"
+  },
+  {
+   "order": 38,
+   "branch": "sandbox-devin/v3/sympy__sympy-21612-plain2-s2",
+   "session_id": "devin-86c9a68a6e24439abcda52619a0a45c7"
+  },
+  {
+   "order": 39,
+   "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain-s2",
+   "session_id": "devin-9a5f1a2ea899411c85e4fe407db3fbf2"
+  },
+  {
+   "order": 40,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain2-s1",
+   "session_id": "devin-4f93ffda3e8248cfbfe607469f98e724"
+  },
+  {
+   "order": 41,
+   "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-plain-s1",
+   "session_id": "devin-e1c7b2f296b6424d909e3f23092d4b8a"
+  },
+  {
+   "order": 42,
+   "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-plain2-s2",
+   "session_id": "devin-b34560bf977c46fd9414b43d750852bb"
+  },
+  {
+   "order": 43,
+   "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-plain-s1",
+   "session_id": "devin-4d9ed6dcbd3c4618942ea8c6fea9733c"
+  },
+  {
+   "order": 44,
+   "branch": "sandbox-devin/v3/sympy__sympy-14248-plain-s1",
+   "session_id": "devin-35fd49406e5e4fa9a5d7c0d572f5edfc"
+  },
+  {
+   "order": 45,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s2",
+   "session_id": "devin-2284f29df2fe4486a2cf29597ff2fbe1"
+  },
+  {
+   "order": 46,
+   "branch": "sandbox-devin/v3/sympy__sympy-21612-vacant-s2",
+   "session_id": "devin-02df398794e24fc78c3f7189b20218bf"
+  },
+  {
+   "order": 47,
+   "branch": "sandbox-devin/v3/sympy__sympy-21612-plain-s1",
+   "session_id": "devin-e81ae5901f844becaadefd5af5bc0330"
+  },
+  {
+   "order": 48,
+   "branch": "sandbox-devin/v3/django__django-15732-plain2-s1",
+   "session_id": "devin-d7a861f483444f3caa061837acd6d4cb"
+  },
+  {
+   "order": 49,
+   "branch": "sandbox-devin/v3/django__django-15563-vacant-s1",
+   "session_id": "devin-574b79f1dc394c1ea389d13b6ee72493"
+  },
+  {
+   "order": 50,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain-s1",
+   "session_id": "devin-a19e3bdb496f40799810ba1cfdfa191c"
+  },
+  {
+   "order": 51,
+   "branch": "sandbox-devin/v3/astropy__astropy-14598-vacant-s2",
+   "session_id": "devin-5cac400e11ad43fe842bdf565abef6bf"
+  },
+  {
+   "order": 52,
+   "branch": "sandbox-devin/v3/django__django-13344-plain2-s2",
+   "session_id": "devin-1409114949484c8da8f9499f0f044342"
+  },
+  {
+   "order": 53,
+   "branch": "sandbox-devin/v3/django__django-13344-plain-s1",
+   "session_id": "devin-46d620d2750b4488ba3e197b5251b925"
+  },
+  {
+   "order": 54,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s1",
+   "session_id": "devin-5ec1df16434544039b1c265453d68fe6"
+  },
+  {
+   "order": 55,
+   "branch": "sandbox-devin/v3/sympy__sympy-15875-plain2-s2",
+   "session_id": "devin-7e1398df79a945a4b0843191829f7237"
+  },
+  {
+   "order": 56,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-plain-s2",
+   "session_id": "devin-4524c6cec7dc469f95d82cd17d8950ad"
+  },
+  {
+   "order": 57,
+   "branch": "sandbox-devin/v3/astropy__astropy-13236-plain-s2",
+   "session_id": "devin-99bd9a70ce1b4f80bc025090904ade31"
+  },
+  {
+   "order": 58,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s1",
+   "session_id": "devin-4b06ea661d594907a1c2c435ef488857"
+  },
+  {
+   "order": 59,
+   "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s2",
+   "session_id": "devin-a9bc4d7ccf7642c7b10e7c0d82746336"
+  },
+  {
+   "order": 60,
+   "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s2",
+   "session_id": "devin-519c91334771444c92033cf1b31e7b8e"
+  },
+  {
+   "order": 61,
+   "branch": "sandbox-devin/v3/astropy__astropy-14598-plain2-s2",
+   "session_id": "devin-446d8e40c8f44bb8b2912bb6f02293c0"
+  },
+  {
+   "order": 62,
+   "branch": "sandbox-devin/v3/astropy__astropy-13236-plain-s1",
+   "session_id": "devin-1b813262e11743d3b3f03b679f64d144"
+  },
+  {
+   "order": 63,
+   "branch": "sandbox-devin/v3/astropy__astropy-13236-plain2-s2",
+   "session_id": "devin-fa724943c2ce49b4ae94ebc41cf659f4"
+  },
+  {
+   "order": 64,
+   "branch": "sandbox-devin/v3/django__django-15732-plain2-s2",
+   "session_id": "devin-89e6b167107b4b4991155e1d627f3ebc"
+  },
+  {
+   "order": 65,
+   "branch": "sandbox-devin/v3/django__django-13344-vacant-s2",
+   "session_id": "devin-109abffd19a54314b418f692d881895a"
+  },
+  {
+   "order": 66,
+   "branch": "sandbox-devin/v3/sympy__sympy-15875-plain-s2",
+   "session_id": "devin-d8c9757ff4994892a3c1e347f065c6f4"
+  },
+  {
+   "order": 67,
+   "branch": "sandbox-devin/v3/sympy__sympy-15875-plain-s1",
+   "session_id": "devin-4d28bd3e21cc400393b9a7778b98dc2c"
+  },
+  {
+   "order": 68,
+   "branch": "sandbox-devin/v3/astropy__astropy-13236-vacant-s2",
+   "session_id": "devin-9532b790c98e461e9e44d04f81055af4"
+  },
+  {
+   "order": 69,
+   "branch": "sandbox-devin/v3/django__django-13344-vacant-s1",
+   "session_id": "devin-3c81dc5cf1ca4a738aafdc30f6f111a2"
+  },
+  {
+   "order": 70,
+   "branch": "sandbox-devin/v3/django__django-13344-plain2-s1",
+   "session_id": "devin-d10997b08f974e88ad200d5626ad5b5b"
+  },
+  {
+   "order": 71,
+   "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-plain2-s2",
+   "session_id": "devin-1fc09460fe5c4d1b8ae9ae46ff2d33f1"
+  }
+ ]
+}

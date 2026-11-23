@@ -1,0 +1,49 @@
+{
+  "task_ids": [
+    "django__django-15732",
+    "astropy__astropy-13236",
+    "matplotlib__matplotlib-24870",
+    "django__django-13344",
+    "astropy__astropy-14598",
+    "sympy__sympy-14248",
+    "scikit-learn__scikit-learn-25747",
+    "sphinx-doc__sphinx-8548",
+    "sympy__sympy-15875",
+    "sympy__sympy-21612",
+    "sphinx-doc__sphinx-7985",
+    "django__django-15563"
+  ],
+  "config": {
+    "arms": [
+      "A",
+      "A2",
+      "G"
+    ],
+    "tasks": [
+      "all"
+    ],
+    "samples": 2,
+    "seed": 20261122
+  },
+  "selection_seed": 20261123,
+  "git_sha": "944761215a1cdcc765d6a00e72d0c4d3b9d8bb19",
+  "prompt_commit": "944761215a1cdcc765d6a00e72d0c4d3b9d8bb19",
+  "launch_sha256": "65464aa765005bc6c72c8b14d24b1aacee936cb7ecab3cf16ff05ad120932133",
+  "dataset_sha256": "4f74c5cff0d5838cd8026295d7ed61ed8171147207ead7d795ff18c977712ae2",
+  "selection_sha256": "e042a64b24703e8d4ad3080392a1b2c39712546eb8f3cab9e3012aeddb1b2116",
+  "manifest_sha256": "46b52864cec88898b97fa44bc016877c8640b5845058c35580768c5571d7c5e7",
+  "implementation_sha256": {
+    "score.py": "a375a3b00efe7e35bc5b5be7d3b2dfbf4c74887b33b65ae24196c7036e4d27cc",
+    "harness.py": "020f347391427af495313062c7dcb459661b2ca047d238a6d77f9341902d9ecb",
+    "patch.py": "b7288f1ff080fd46c73ed403e37dba7c3603a3f57d44f10870cda91484ced513"
+  },
+  "incremental_sha256": "567f60089f337bbb5e33838afe055701a9e703c82e18ee2bbb0c930f940e6215",
+  "harness_version": "3.0.17",
+  "harness_timeout_s": 1800,
+  "bootstrap_seed": 20261122,
+  "bootstrap_resamples": 10000,
+  "calibration_resolved": 7,
+  "calibration_planned": 12,
+  "audit_raw_sha256": "5f70f5d44269cc1473962c6c2146eaa88d29be2403372888fb9b5739ea4b4963",
+  "note": "No pooling with calibration/v1/v2/pi. Raw logs and handback trees remain in the run directory."
+}
