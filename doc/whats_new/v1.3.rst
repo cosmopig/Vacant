@@ -327,6 +327,12 @@ Changelog
   for averages, the value returned is `np.nan`.
   :pr:`25531` by :user:`Marc Torrellas Socastro <marctorsoc>`.
 
+- |Fix| :func:`metrics.roc_curve` now sets the extra first threshold, which
+  represents no instances being predicted positive, to `np.inf` instead of
+  `max(y_score) + 1`, so that thresholds stay within [0, 1] when `y_score` is a
+  probability estimate.
+  :user:`Guillaume Lemaitre <glemaitre>`.
+
 - |Fix| :func:`metric.manhattan_distances` now supports readonly sparse datasets.
   :pr:`25432` by :user:`Julien Jerphanion <jjerphan>`.
 
