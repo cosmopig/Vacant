@@ -628,6 +628,44 @@ def test_ProductSet_is_empty():
     assert ProductSet(Interval(x, 1), S.Reals).is_empty == None
 
 
+def test_ProductSet_FiniteSet_subset():
+    a = FiniteSet(1, 2)
+    product = ProductSet(a, a)
+    explicit = FiniteSet((1, 1), (1, 2), (2, 1), (2, 2))
+    assert product.is_subset(explicit) is True
+    assert explicit.is_subset(product) is True
+    assert product.is_subset(FiniteSet((1, 1), (1, 2), (2, 1))) is False
+    assert ProductSet(FiniteSet(x)).is_subset(FiniteSet((1,))) is None
+    k = Symbol('k', integer=True, positive=True)
+    assert ProductSet(Range(k)).is_subset(FiniteSet((0,))) is None
+
+
+def test_ProductSet_rewrite_FiniteSet():
+    a = FiniteSet(1, 2)
+    assert ProductSet(a, a).rewrite(FiniteSet) == FiniteSet(
+        (1, 1), (1, 2), (2, 1), (2, 2))
+    assert ProductSet(Range(2), a).rewrite(FiniteSet) == FiniteSet(
+        (0, 1), (0, 2), (1, 1), (1, 2))
+    infinite_product = ProductSet(S.Integers, a)
+    assert infinite_product.rewrite(FiniteSet) == infinite_product
+    k = Symbol('k', integer=True, positive=True)
+    symbolic_product = ProductSet(Range(k), a)
+    assert symbolic_product.rewrite(FiniteSet) == symbolic_product
+
+
+def test_ProductSet_FiniteSet_equality():
+    a = FiniteSet(1, 2)
+    product = ProductSet(a, a)
+    explicit = FiniteSet((1, 1), (1, 2), (2, 1), (2, 2))
+    assert Eq(product, explicit, evaluate=False).simplify() is S.true
+    assert Eq(explicit, product) is S.true
+    assert Eq(product, FiniteSet((1, 1))) is S.false
+
+    relation = Eq(ProductSet(FiniteSet(x)), FiniteSet((1,)))
+    assert isinstance(relation, Eq)
+    assert relation.simplify() == relation.canonical
+
+
 def test_interval_subs():
     a = Symbol('a', real=True)
 

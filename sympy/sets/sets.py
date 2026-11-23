@@ -843,6 +843,14 @@ class ProductSet(Set):
         """
         return iproduct(*self.sets)
 
+    def _eval_rewrite_as_FiniteSet(self, *sets, **kwargs):
+        try:
+            product = ProductSet(*sets)
+            if product.is_finite_set is True and product.is_iterable:
+                return FiniteSet(*iter(product))
+        except (TypeError, ValueError):
+            return None
+
     @property
     def is_empty(self):
         return fuzzy_or(s.is_empty for s in self.sets)

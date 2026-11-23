@@ -49,6 +49,11 @@ def _eval_is_eq(lhs, rhs): # noqa: F811
     return tfn[fuzzy_and(map(fuzzy_bool, eqs))]
 
 
+@dispatch(ProductSet, FiniteSet) # type:ignore
+def _eval_is_eq(lhs, rhs): # noqa: F811
+    return tfn[fuzzy_and(a.is_subset(b) for a, b in ((lhs, rhs), (rhs, lhs)))]
+
+
 @dispatch(Set, Basic) # type:ignore
 def _eval_is_eq(lhs, rhs): # noqa: F811
     return False
