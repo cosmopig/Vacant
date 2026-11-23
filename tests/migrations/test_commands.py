@@ -781,6 +781,19 @@ class MigrateTests(MigrationTestBase):
         self.assertNotIn(("migrations", "0001_initial"), applied_migrations)
 
 
+    @override_settings(MIGRATION_MODULES={'migrations': 'migrations.test_migrations_namespace_package'})
+    def test_migrate_namespace_package(self):
+        """migrate works on a migrations package without __init__.py."""
+        out = io.StringIO()
+        try:
+            call_command('migrate', 'migrations', '0001', verbosity=1, stdout=out, no_color=True)
+            self.assertIn('Applying migrations.0001_initial... OK', out.getvalue())
+            self.assertTableExists('migrations_author')
+        finally:
+            call_command('migrate', 'migrations', 'zero', verbosity=0)
+        self.assertTableNotExists('migrations_author')
+
+
 class MakeMigrationsTests(MigrationTestBase):
     """
     Tests running the makemigrations command.
