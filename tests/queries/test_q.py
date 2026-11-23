@@ -1,5 +1,7 @@
-from django.db.models import F, Q
+from django.db.models import Exists, F, Q
 from django.test import SimpleTestCase
+
+from .models import Tag
 
 
 class QTests(SimpleTestCase):
@@ -39,17 +41,14 @@ class QTests(SimpleTestCase):
         q = Q(price__gt=F('discounted_price'))
         path, args, kwargs = q.deconstruct()
         self.assertEqual(path, 'django.db.models.Q')
-        self.assertEqual(args, ())
-        self.assertEqual(kwargs, {'price__gt': F('discounted_price')})
+        self.assertEqual(args, (('price__gt', F('discounted_price')),))
+        self.assertEqual(kwargs, {})
 
     def test_deconstruct_negated(self):
         q = ~Q(price__gt=F('discounted_price'))
         path, args, kwargs = q.deconstruct()
-        self.assertEqual(args, ())
-        self.assertEqual(kwargs, {
-            'price__gt': F('discounted_price'),
-            '_negated': True,
-        })
+        self.assertEqual(args, (('price__gt', F('discounted_price')),))
+        self.assertEqual(kwargs, {'_negated': True})
 
     def test_deconstruct_or(self):
         q1 = Q(price__gt=F('discounted_price'))
@@ -87,6 +86,20 @@ class QTests(SimpleTestCase):
         path, args, kwargs = q.deconstruct()
         self.assertEqual(args, (Q(price__gt=F('discounted_price')),))
         self.assertEqual(kwargs, {})
+
+    def test_deconstruct_boolean_expression(self):
+        expression = Exists(Tag.objects.filter(name='test'))
+        q = Q(expression)
+        path, args, kwargs = q.deconstruct()
+        self.assertEqual(path, 'django.db.models.Q')
+        self.assertEqual(args, (expression,))
+        self.assertEqual(kwargs, {})
+        self.assertEqual(Q(*args, **kwargs), q)
+
+    def test_combine_boolean_expression_and_empty(self):
+        q = Q(Exists(Tag.objects.filter(name='test')))
+        self.assertEqual(q & Q(), q)
+        self.assertEqual(Q() | q, q)
 
     def test_reconstruct(self):
         q = Q(price__gt=F('discounted_price'))

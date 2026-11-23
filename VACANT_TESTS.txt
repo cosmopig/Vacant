@@ -1,0 +1,2 @@
+tests/queries/test_q.py::QTests::test_deconstruct_boolean_expression
+tests/queries/test_q.py::QTests::test_combine_boolean_expression_and_empty
