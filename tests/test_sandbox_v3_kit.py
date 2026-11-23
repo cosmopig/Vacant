@@ -128,6 +128,7 @@ def test_export_is_exact_prompt_and_visible_selectors_only(tmp_path):
     config = dict(django=False, selectors=[dict(kind='exact', label='test_old.py::test_old', file='test_old.py')],
                   measured_base_seconds=1, timeout_s=120, interpreter='.envs/task/bin/python',
                   environment=dict(instance_id='task', python='3.9', commands=['python -m pip install -e .']))
+    config['measurement'] = dict(runner_sha256=kit.runner_sha256(), selectors_sha256=kit.selectors_sha256(config))
     configs = kit.build({'task': metadata}, {'task': dict(workspace=str(root))}, out, {'task': config})
     assert configs['task']['selectors'][0]['label'] == 'test_old.py::test_old'
     assert (out / 'prompts/task.txt').read_bytes() == metadata['problem_statement'].encode()
@@ -144,6 +145,32 @@ def test_export_is_exact_prompt_and_visible_selectors_only(tmp_path):
     compile((out / 'gates/task/test_gate.py').read_text(), '<gate>', 'exec')
     with pytest.raises(FileExistsError):
         kit.build({'task': metadata}, {'task': dict(workspace=str(root))}, out, {'task': config})
+
+
+@pytest.mark.parametrize('change', ['missing', 'runner', 'selectors', 'django', 'empty'])
+def test_build_refuses_stale_measurements_before_writing(tmp_path, change):
+    config = dict(django=False, selectors=[dict(kind='exact', file='a.py', label='a.py::test_old')])
+    config['measurement'] = dict(runner_sha256=kit.runner_sha256(), selectors_sha256=kit.selectors_sha256(config))
+    if change == 'missing':
+        config.pop('measurement')
+    elif change == 'runner':
+        config['measurement']['runner_sha256'] = 'stale'
+    elif change == 'selectors':
+        config['selectors'][0]['label'] = 'a.py::test_other'
+    elif change == 'empty':
+        config['selectors'] = []
+        config['measurement']['selectors_sha256'] = kit.selectors_sha256(config)
+    else:
+        config['django'] = True
+    out = tmp_path / 'out'
+    with pytest.raises(ValueError, match='measurement (runner|selector) mismatch'):
+        kit.build({'task': row(['a.py::test_old'])}, {'task': {}}, out, {'task': config})
+    assert not out.exists()
+
+
+def test_selector_fingerprint_is_order_independent():
+    config = dict(django=False, selectors=[dict(label='a'), dict(label='b')])
+    assert kit.selectors_sha256(config) == kit.selectors_sha256({**config, 'selectors': list(reversed(config['selectors']))})
 
 
 def test_freeze_covers_labels_without_dropping_failing_variants():

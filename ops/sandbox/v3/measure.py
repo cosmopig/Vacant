@@ -44,6 +44,7 @@ def measure(key, row, snapshot, pinned, work):
         cached = json.loads(saved.read_text())
         evidence = cached.get('measurement', {})
         if (evidence.get('runner_sha256') == hashlib.sha256(runner.read_bytes()).hexdigest()
+                and evidence.get('selectors_sha256') == kit.selectors_sha256(cached)
                 and evidence.get('image_id') == pinned['image_id']
                 and cached['environment'] == environment
                 and set(cached['label_nodes']) == {t['label'] for t in broad['selectors']}
@@ -104,6 +105,7 @@ def measure(key, row, snapshot, pinned, work):
         config['omitted_nonbase_labels'] = omissions
         config['measurement'] = dict(image_id=image.id, image_digest=pinned['repo_digests'][0],
             runner_sha256=hashlib.sha256(runner.read_bytes()).hexdigest(), container_id=container.id,
+            selectors_sha256=kit.selectors_sha256(config),
             base_report_sha256=hashlib.sha256((case / 'base-report.json').read_bytes()).hexdigest())
         (case / 'selection.json').write_text(json.dumps(config, indent=2) + '\n')
         print(key, 'PASS', round(seconds, 3), config['timeout_s'], flush=True)

@@ -1069,7 +1069,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.django_1776_django-15732@sha256:83ea0f1ce2aab3468ec104b3788afcfa76bb81ae31db2107e9cf73d284e5fb5e",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "1c06515f5adbb4c3a5e3162d727c8eb1f6bea957899dff039020135743bc4b23",
-          "base_report_sha256": "2599a5cf50fcadcfddbd9071b4fe7bb2798fef8d2da9238015f385d2bd8ae495"
+          "base_report_sha256": "2599a5cf50fcadcfddbd9071b4fe7bb2798fef8d2da9238015f385d2bd8ae495",
+          "selectors_sha256": "e067b66ce4d17f5f8f9d17f542a99db6c1ef86eefb2d9e6f43e92c9483f3ce0e"
         }
       }
     },
@@ -6263,7 +6264,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13236@sha256:dede759cb182b28dc949fe9ee05d6fd09d032df5a802af190121a8f9cec36b9e",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "97c280d8ff1759f6a072bd63c144c4844e073c94c2e55feb5baff79fece4288b",
-          "base_report_sha256": "10f13c7409f47a2ceb4e95d12980354da7571c5f71bf61f5b86b318568c5662e"
+          "base_report_sha256": "10f13c7409f47a2ceb4e95d12980354da7571c5f71bf61f5b86b318568c5662e",
+          "selectors_sha256": "b89acbea3f11ad6d851e446b940bf7563b5449ed8b483e8c85caa13159d79322"
         }
       }
     },
@@ -6840,7 +6842,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24870@sha256:e7387d51d146c5aa492184a1ba8b4be444964ba3f653b3304e8d5d9a27ea3c33",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "ee05f4da93ab784748277bc9c4c507e012aad856cbf79bd4a1c93e9d68fef96f",
-          "base_report_sha256": "9eecd4ed3be1df72a51d18567f694a1700a3db5a865ee246dca9a90fbc072f73"
+          "base_report_sha256": "9eecd4ed3be1df72a51d18567f694a1700a3db5a865ee246dca9a90fbc072f73",
+          "selectors_sha256": "132a345028f11a375def0ad371546fdffb097cef03bcac1ad404eaa7df2d1272"
         }
       }
     },
@@ -9801,7 +9804,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.django_1776_django-13344@sha256:bb7a5fef7132badf4cc18c9ae47d3f1fbc8f9102c447772d0c5fa0b27d85fad4",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "7ae0ff0cb3c4187c15c23d039448c9c281083afb59993356fb27e1d2008f013a",
-          "base_report_sha256": "672388a9efe0dd16c114bb4027411467eb937170cc1d475b12bb4e0c613efa1e"
+          "base_report_sha256": "672388a9efe0dd16c114bb4027411467eb937170cc1d475b12bb4e0c613efa1e",
+          "selectors_sha256": "f78a20d66a3fe9c4d47dfd91b68bb57ee6e4fb25ea87f9087a7d852103d3fc49"
         }
       }
     },
@@ -11247,7 +11251,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.astropy_1776_astropy-14598@sha256:e6a7291cea12126cd739997769070d60e4ebac363af4065261073750cb617bf3",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "4e29fc69e843dbca981e6a3a9a984c0e57d7e0f4b78559f4899e9b84c6a9f706",
-          "base_report_sha256": "d3a07403a832d17bede5c4f1888bf0f70c69b31ca46db1f6ce209489698f7d57"
+          "base_report_sha256": "d3a07403a832d17bede5c4f1888bf0f70c69b31ca46db1f6ce209489698f7d57",
+          "selectors_sha256": "6271a697aec6c33c34f7ffb0869f525b5af7c8d0d528da7b5d62483e7ff962ca"
         }
       }
     },
@@ -15122,7 +15127,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.sympy_1776_sympy-14248@sha256:eb3a63364062801d29fbdf423d80ac39157f00ec4f30a0ded10c332ecb1090fd",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "ddcbda77fc7a5abe993097b3cdc38ea68c52808eed69251af767017b4975e78e",
-          "base_report_sha256": "1df3fb5a1b5b1f86b48c9a3cb1c0b38bfa587d0cb10f2507a0c18b65a14a2187"
+          "base_report_sha256": "1df3fb5a1b5b1f86b48c9a3cb1c0b38bfa587d0cb10f2507a0c18b65a14a2187",
+          "selectors_sha256": "b69aa54c135c9e8134400674eb985bb99ac467ff362c1f6745f3e9ba8924e611"
         }
       }
     },
@@ -15279,7 +15285,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "022140fd2c34a4142989c170873ec2f94af09fb21364bf5e48bc3ebf4fbb402b",
-          "base_report_sha256": "148a79433db22462ba0e6ce39493c616208a7c6a15e0bb034f6e08411ba29da8"
+          "base_report_sha256": "148a79433db22462ba0e6ce39493c616208a7c6a15e0bb034f6e08411ba29da8",
+          "selectors_sha256": "d49b9b2b3f19071586b89d8cc504c5b7b80e7aeeeb0081f56d6baead2c243ab5"
         }
       }
     },
@@ -15369,7 +15376,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8548@sha256:2a068d5390185b7b54da95f749fab5fc9e3bcfc4c182a4132d6cf57207d6385a",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "044284cf201d09da5097bfe62363fcf7984b4faabf0969150fc5cd3e357b61bb",
-          "base_report_sha256": "c557d32dee38115741f5ba5e47d33374bed228223ca9ce50f5640535823c586a"
+          "base_report_sha256": "c557d32dee38115741f5ba5e47d33374bed228223ca9ce50f5640535823c586a",
+          "selectors_sha256": "b40a7407d69aaa251e99140944c9c54ec438053fb2f47bee276d1615098689ac"
         }
       }
     },
@@ -16054,7 +16062,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.sympy_1776_sympy-15875@sha256:e2812656720310590f43b2773a81f896dafe9e36efa151494a6663bb26ec49f0",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "d27913b5c54cec44047ee67da763a6dbdd22faa49eb9fb696b2bde6dcd568770",
-          "base_report_sha256": "591149bac603031a53ae0a6af8b2df1bc436e0f72908a98cc262806313e710b1"
+          "base_report_sha256": "591149bac603031a53ae0a6af8b2df1bc436e0f72908a98cc262806313e710b1",
+          "selectors_sha256": "73ba0421d76da221f821512bcf2b2f1a0bcad72e5f594476cdf40e29f118c591"
         }
       }
     },
@@ -16883,7 +16892,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.sympy_1776_sympy-21612@sha256:437a3dfe3b51447b629262879d8dec70c613fd9a1ef9e475454546c7fa740e9a",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "43b9149d30eeed73c250f4bc41eb0baf8232550d0c98d7aa4bb343e5ad9e138c",
-          "base_report_sha256": "13145f578e824029b45f4a582ca3c3bc5242d3c8e6913996009986aa3b58d25e"
+          "base_report_sha256": "13145f578e824029b45f4a582ca3c3bc5242d3c8e6913996009986aa3b58d25e",
+          "selectors_sha256": "f08de3159c59a7aecd7bd01d8e04be910baa0f3c365be5595a2f859ec8f11097"
         }
       }
     },
@@ -16961,7 +16971,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7985@sha256:c82a2b449cb7709d069a6bf6a623ca8063ebdbbce3ded5ce6a066d24ac3816c1",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "9f89be37801ecad01cb3f66d0983ad206d50562d45bac799108b1578f828dad0",
-          "base_report_sha256": "715de32eaea65d28559e8c93ae5d02fbb23b08adfdfa0711dc728046af6147c2"
+          "base_report_sha256": "715de32eaea65d28559e8c93ae5d02fbb23b08adfdfa0711dc728046af6147c2",
+          "selectors_sha256": "f943327b437e14f9f1e7d980b9c70805e30b00303c9666d5cb9d83b582cfa2f6"
         }
       }
     },
@@ -17238,7 +17249,8 @@
           "image_digest": "swebench/sweb.eval.x86_64.django_1776_django-15563@sha256:8ad1a52cd8c746541f87d77df6e56e3ad1fe17742494153ec4215c86108a641a",
           "runner_sha256": "aee15783220f4afbcb6432b79245c92de83e6d057f64623e64b51661f745e70c",
           "container_id": "c264c3ef14e9f640dccc9b5ba8bd3998684ed33dcb3fb31602f8cf7ef5c5682b",
-          "base_report_sha256": "86d4ff3143502d893756715956d7ea672ce9e62270e1167a0f3bb0d67788944a"
+          "base_report_sha256": "86d4ff3143502d893756715956d7ea672ce9e62270e1167a0f3bb0d67788944a",
+          "selectors_sha256": "8a1f66f3fd466868a3f989d9c5267b776e28e490928b55d91f2aad374f398568"
         }
       }
     },
@@ -17320,7 +17332,8 @@
     "no_failing_base_variants_dropped": true,
     "omissions": "test_patch-introduced functions, methods and parameterizations only",
     "base_skipped_variants": "Excluded only for ambiguous labels; every retained label has passing concrete nodes",
-    "selected_skipped_deselected_missing_unexecuted": "refuse"
+    "selected_skipped_deselected_missing_unexecuted": "refuse",
+    "fingerprints": "Runner bytes and canonical selector set (including Django driver). Existing reports rebound only after checking recorded report SHA256, all-passing selected nodes and unchanged runner."
   },
   "audit": {
     "pattern_count": 146,

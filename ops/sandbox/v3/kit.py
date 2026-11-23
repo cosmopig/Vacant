@@ -1,6 +1,7 @@
 """只從 base snapshot 對映原有 P2P 測試；不匯出 test patch 或參考修復。"""
 import argparse
 import ast
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -151,6 +152,16 @@ def freeze(config, report, seconds, environment):
                 interpreter=f".envs/{environment['instance_id']}/bin/python", environment=environment)
 
 
+def runner_sha256():
+    return hashlib.sha256(Path(__file__).with_name('p2p_runner.py').read_bytes()).hexdigest()
+
+
+def selectors_sha256(config):
+    selectors = sorted(config['selectors'], key=lambda target: json.dumps(target, sort_keys=True))
+    payload = json.dumps(dict(django=config['django'], selectors=selectors), sort_keys=True, separators=(',', ':'))
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
 WRAPPER = '''import json, os, pathlib, subprocess
 
 def main():
@@ -190,7 +201,8 @@ Install all dependencies needed by the selected tests, not only the project's
 minimal runtime dependencies. The scikit-learn workspace needs pandas; use
 the harness constraints below rather than separately upgrading NumPy/SciPy.
 The commands are taken from the official harness environment and repository
-installation specifications, adapting only environment/workspace paths. Pytest
+installation specifications, adapting paths, temporary requirements files and
+the digest-pinned official HTTPS Qhull download. Pytest
 and pytest-django are added where listed. Django uses its own DiscoverRunner
 for database setup; other projects load their environment's pytest plugins.
 System provisioning commands require operator privileges and must be reviewed
@@ -228,6 +240,12 @@ def build(rows, snapshots, out, measurements=None):
     if measurements is None or set(measurements) != set(snapshots):
         raise ValueError('successful per-instance measurements required')
     configs = {key: measurements[key] for key in snapshots}
+    for key, config in configs.items():
+        evidence = config.get('measurement', {})
+        if evidence.get('runner_sha256') != runner_sha256():
+            raise ValueError('measurement runner mismatch: ' + key)
+        if not config['selectors'] or evidence.get('selectors_sha256') != selectors_sha256(config):
+            raise ValueError('measurement selector mismatch: ' + key)
     out.mkdir(parents=True)
     (out / 'prompts').mkdir()
     (out / 'gates').mkdir()

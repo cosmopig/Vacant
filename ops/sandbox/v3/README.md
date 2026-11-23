@@ -150,7 +150,9 @@ runner fingerprints, and passing-node reports are retained externally.
 
 These commands are operator-only: dataset files never enter the kit. The
 measurement command requires the pinned images locally and reuses evidence
-only when runner, environment, image and selection inputs match. Session hosts
+only when runner, environment, image and selection inputs match. The builder
+rejects missing or stale runner/selector SHA256 fingerprints before writing any
+kit files. Session hosts
 must still install the documented environments and preflight before starting;
 the Docker measurements do not certify dependency resolution on every host.
 
