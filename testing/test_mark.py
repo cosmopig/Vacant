@@ -759,6 +759,54 @@ class TestFunctional:
         reprec.assertoutcome(passed=1, skipped=1)
 
 
+    def test_mark_mro(self) -> None:
+        xfail = pytest.mark.xfail
+
+        @xfail("a")
+        class A:
+            pass
+
+        @xfail("b")
+        class B:
+            pass
+
+        @xfail("c")
+        class C(A, B):
+            pass
+
+        from _pytest.mark.structures import get_unpacked_marks
+
+        all_marks = get_unpacked_marks(C)
+
+        assert all_marks == [xfail("c").mark, xfail("a").mark, xfail("b").mark]
+
+        assert get_unpacked_marks(C, consider_mro=False) == [xfail("c").mark]
+
+    def test_marks_from_multiple_base_classes(self, pytester: Pytester) -> None:
+        pytester.makepyfile(
+            """
+            import pytest
+
+            @pytest.mark.foo
+            class Foo:
+                pass
+
+            @pytest.mark.bar
+            class Bar:
+                pass
+
+            class TestDings(Foo, Bar):
+                def test_dings(self):
+                    pass
+            """
+        )
+        items, rec = pytester.inline_genitems()
+        (item,) = items
+        assert {m.name for m in item.iter_markers()} >= {"foo", "bar"}
+        assert len([m for m in item.iter_markers() if m.name == "foo"]) == 1
+        assert len([m for m in item.iter_markers() if m.name == "bar"]) == 1
+
+
 class TestKeywordSelection:
     def test_select_simple(self, pytester: Pytester) -> None:
         file_test = pytester.makepyfile(
