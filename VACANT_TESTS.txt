@@ -1,0 +1,1 @@
+tests/invalid_models_tests/test_models.py::OtherModelTests::test_ordering_pointing_to_related_pk

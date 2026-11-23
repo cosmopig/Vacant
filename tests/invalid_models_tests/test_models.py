@@ -836,6 +836,22 @@ class OtherModelTests(SimpleTestCase):
 
         self.assertFalse(Child.check())
 
+    def test_ordering_pointing_to_related_pk(self):
+        class Grandparent(models.Model):
+            pass
+
+        class Parent(models.Model):
+            key = models.IntegerField(primary_key=True)
+            grandparent = models.ForeignKey(Grandparent, models.CASCADE)
+
+        class Child(models.Model):
+            parent = models.ForeignKey(Parent, models.CASCADE)
+
+            class Meta:
+                ordering = ('parent__pk', '-parent__grandparent__pk')
+
+        self.assertEqual(Child.check(), [])
+
     def test_name_beginning_with_underscore(self):
         class _Model(models.Model):
             pass
