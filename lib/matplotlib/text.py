@@ -1811,7 +1811,7 @@ or callable, default: value of *xycoords*
 
         """
         _AnnotationBase.__init__(self,
-                                 xy,
+                                 tuple(xy),
                                  xycoords=xycoords,
                                  annotation_clip=annotation_clip)
         # warn about wonky input data
