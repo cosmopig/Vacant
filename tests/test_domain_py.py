@@ -342,6 +342,52 @@ def test_parse_annotation(app):
     assert_node(doctree[0], pending_xref, refdomain="py", reftype="obj", reftarget="None")
 
 
+@pytest.mark.parametrize('literal', ['Literal', 'typing.Literal', 'typing_extensions.Literal'])
+def test_parse_literal_annotation(app, literal):
+    annotation = "Tuple[%s[True, None, 'int', -1, Color.RED], int]" % literal
+    doctree = _parse_annotation(annotation, app.env)
+    assert_node(doctree, ([pending_xref, "Tuple"],
+                          [desc_sig_punctuation, "["],
+                          [pending_xref, literal],
+                          [desc_sig_punctuation, "["],
+                          [nodes.inline, "True"],
+                          [desc_sig_punctuation, ", "],
+                          [nodes.inline, "None"],
+                          [desc_sig_punctuation, ", "],
+                          [nodes.inline, "'int'"],
+                          [desc_sig_punctuation, ", "],
+                          [nodes.inline, "-1"],
+                          [desc_sig_punctuation, ", "],
+                          [nodes.inline, "Color.RED"],
+                          [desc_sig_punctuation, "]"],
+                          [desc_sig_punctuation, ", "],
+                          [pending_xref, "int"],
+                          [desc_sig_punctuation, "]"]))
+
+
+@pytest.mark.skipif(sys.version_info < (3, 8), reason='typing.Literal requires Python 3.8')
+def test_autodoc_literal_annotations_nitpicky(make_app, tempdir, monkeypatch):
+    monkeypatch.syspath_prepend(str(tempdir))
+    (tempdir / 'conf.py').write_text("extensions = ['sphinx.ext.autodoc']\nnitpicky = True\n")
+    (tempdir / 'literal_annotations.py').write_text(
+        'import typing\n'
+        '@typing.overload\n'
+        'def foo(x: "typing.Literal[True]") -> int: ...\n'
+        '@typing.overload\n'
+        'def foo(x: "typing.Literal[False]") -> str: ...\n'
+        'def foo(x: bool):\n'
+        '    """A function with overloaded signatures."""\n'
+        '    return 1 if x else "foo"\n'
+    )
+    (tempdir / 'index.rst').write_text('.. autofunction:: literal_annotations.foo\n')
+    app = make_app('text', srcdir=tempdir)
+    app.build()
+    assert app._warning.getvalue() == ''
+    content = (app.outdir / 'index.txt').read_text()
+    assert 'Literal[True]) -> int' in content
+    assert 'Literal[False]) -> str' in content
+
+
 def test_pyfunction_signature(app):
     text = ".. py:function:: hello(name: str) -> str"
     doctree = restructuredtext.parse(app, text)

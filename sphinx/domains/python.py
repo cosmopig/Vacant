@@ -33,6 +33,7 @@ from sphinx.environment import BuildEnvironment
 from sphinx.locale import _, __
 from sphinx.pycode.ast import ast
 from sphinx.pycode.ast import parse as ast_parse
+from sphinx.pycode.ast import unparse as ast_unparse
 from sphinx.roles import XRefRole
 from sphinx.util import logging
 from sphinx.util.docfields import Field, GroupedField, TypedField
@@ -109,8 +110,17 @@ def type_to_xref(text: str, env: BuildEnvironment = None) -> addnodes.pending_xr
 
 def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Node]:
     """Parse type annotation."""
-    def unparse(node: ast.AST) -> List[Node]:
-        if isinstance(node, ast.Attribute):
+    def unparse(node: ast.AST, literal: bool = False) -> List[Node]:
+        if literal and not isinstance(node, (ast.Index, ast.Tuple)):
+            try:
+                if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+                    text = ast_unparse(node.op) + ast_unparse(node.operand)
+                else:
+                    text = ast_unparse(node)
+            except NotImplementedError:
+                raise SyntaxError from None
+            return [nodes.inline('', text, support_smartquotes=False)]
+        elif isinstance(node, ast.Attribute):
             return [nodes.Text("%s.%s" % (unparse(node.value)[0], node.attr))]
         elif isinstance(node, ast.BinOp):
             result: List[Node] = unparse(node.left)
@@ -127,7 +137,7 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
         elif isinstance(node, ast.Expr):
             return unparse(node.value)
         elif isinstance(node, ast.Index):
-            return unparse(node.value)
+            return unparse(node.value, literal)
         elif isinstance(node, ast.List):
             result = [addnodes.desc_sig_punctuation('', '[')]
             if node.elts:
@@ -146,15 +156,16 @@ def _parse_annotation(annotation: str, env: BuildEnvironment = None) -> List[Nod
             return [nodes.Text(node.id)]
         elif isinstance(node, ast.Subscript):
             result = unparse(node.value)
+            is_literal = result[0] in ('Literal', 'typing.Literal', 'typing_extensions.Literal')
             result.append(addnodes.desc_sig_punctuation('', '['))
-            result.extend(unparse(node.slice))
+            result.extend(unparse(node.slice, is_literal))
             result.append(addnodes.desc_sig_punctuation('', ']'))
             return result
         elif isinstance(node, ast.Tuple):
             if node.elts:
                 result = []
                 for elem in node.elts:
-                    result.extend(unparse(elem))
+                    result.extend(unparse(elem, literal))
                     result.append(addnodes.desc_sig_punctuation('', ', '))
                 result.pop()
             else:
