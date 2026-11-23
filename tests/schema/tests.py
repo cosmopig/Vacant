@@ -2530,6 +2530,57 @@ class SchemaTests(TransactionTestCase):
             UniqueTest.objects.create(year=2012, slug="foo")
         UniqueTest.objects.all().delete()
 
+    @isolate_apps("schema")
+    def test_unique_together_on_primary_key_remove(self):
+        class Thing(Model):
+            class Meta:
+                app_label = "schema"
+                unique_together = [["id"]]
+
+        with connection.schema_editor() as editor:
+            editor.create_model(Thing)
+        self.isolated_local_models = [Thing]
+        table = Thing._meta.db_table
+
+        def id_constraints(**kwargs):
+            return [
+                name
+                for name, details in self.get_constraints(table).items()
+                if details["columns"] == ["id"]
+                and all(details[key] == value for key, value in kwargs.items())
+            ]
+
+        self.assertEqual(len(id_constraints(unique=True, primary_key=False)), 1)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Thing, [["id"]], [])
+        self.assertEqual(id_constraints(unique=True, primary_key=False), [])
+        self.assertEqual(len(id_constraints(primary_key=True)), 1)
+
+    @skipUnlessDBFeature("allows_multiple_constraints_on_same_fields")
+    def test_remove_unique_together_on_unique_field(self):
+        with connection.schema_editor() as editor:
+            editor.create_model(Tag)
+        self.local_models = [Tag]
+        table = Tag._meta.db_table
+
+        def slug_uniques():
+            return sorted(
+                name
+                for name, details in self.get_constraints(table).items()
+                if details["columns"] == ["slug"]
+                and details["unique"]
+                and not details["primary_key"]
+            )
+
+        original = slug_uniques()
+        self.assertEqual(len(original), 1)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Tag, [], [["slug"]])
+        self.assertEqual(len(slug_uniques()), 2)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Tag, [["slug"]], [])
+        self.assertEqual(slug_uniques(), original)
+
     def test_unique_together_with_fk(self):
         """
         Tests removing and adding unique_together constraints that include
