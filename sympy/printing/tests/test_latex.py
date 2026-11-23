@@ -1710,7 +1710,7 @@ def test_MatrixElement_printing():
     assert latex(3 * A[0, 0]) == r"3 A_{0, 0}"
 
     F = C[0, 0].subs(C, A - B)
-    assert latex(F) == r"\left(-1 B + A\right)_{0, 0}"
+    assert latex(F) == r"\left(-B + A\right)_{0, 0}"
 
 
 def test_Quaternion_latex_printing():
@@ -1748,3 +1748,14 @@ def test_latex_degree():
     assert latex(expr2) == r"x ^\circ"
     expr3 = cos(x*degree + 90*degree)
     assert latex(expr3) == r'\cos{\left (x ^\circ + 90 ^\circ \right )}'
+
+
+def test_MatrixSymbol_subtraction():
+    from sympy import MatrixSymbol
+    A = MatrixSymbol('A', 2, 2)
+    B = MatrixSymbol('B', 2, 2)
+    assert latex(A - A*B - B) == "-B - A B + A"
+    assert latex(-A) == "-A"
+    assert latex(-2*A*B + B) == "-2 A B + B"
+    assert latex(A - sqrt(2)*B) == r"-\sqrt{2} B + A"
+    assert latex(A*B - B*A) == "A B - B A"

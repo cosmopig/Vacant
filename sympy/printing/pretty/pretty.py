@@ -5,6 +5,7 @@ import itertools
 from sympy.core import S
 from sympy.core.containers import Tuple
 from sympy.core.function import _coeff_isneg
+from sympy.printing.str import _matmul_sign_args
 from sympy.core.mod import Mod
 from sympy.core.mul import Mul
 from sympy.core.numbers import Rational
@@ -819,11 +820,23 @@ class PrettyPrinter(Printer):
         return self._print(B.blocks)
 
     def _print_MatAdd(self, expr):
-        return self._print_seq(expr.args, None, None, ' + ')
+        s = None
+        for item in expr.args:
+            if item.is_MatMul and _matmul_sign_args(item)[0]:
+                pform = self._print_MatMul(item, sign=False)
+                sep = ' - ' if s is not None else '-'
+            else:
+                pform = self._print(item)
+                sep = ' + ' if s is not None else ''
+            if s is None:
+                s = prettyForm(*stringPict.next(sep, pform)) if sep else pform
+            else:
+                s = prettyForm(*stringPict.next(s, sep, pform))
+        return s
 
-    def _print_MatMul(self, expr):
-        args = list(expr.args)
+    def _print_MatMul(self, expr, sign=True):
         from sympy import Add, MatAdd, HadamardProduct
+        neg, args = _matmul_sign_args(expr)
         for i, a in enumerate(args):
             if (isinstance(a, (Add, MatAdd, HadamardProduct))
                     and len(expr.args) > 1):
@@ -831,7 +844,11 @@ class PrettyPrinter(Printer):
             else:
                 args[i] = self._print(a)
 
-        return prettyForm.__mul__(*args)
+        pform = prettyForm.__mul__(*args)
+        if neg and sign:
+            pform = prettyForm(binding=prettyForm.NEG,
+                               *stringPict.next('-', pform))
+        return pform
 
     def _print_DotProduct(self, expr):
         args = list(expr.args)

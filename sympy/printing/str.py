@@ -6,6 +6,7 @@ from __future__ import print_function, division
 
 from sympy.core import S, Rational, Pow, Basic, Mul
 from sympy.core.mul import _keep_coeff
+from sympy.core.function import _coeff_isneg
 from .printer import Printer
 from sympy.printing.precedence import precedence, PRECEDENCE
 
@@ -13,6 +14,21 @@ import mpmath.libmp as mlib
 from mpmath.libmp import prec_to_dps
 
 from sympy.utilities import default_sort_key
+
+
+def _matmul_sign_args(expr):
+    """Split the sign off a MatMul's scalar coefficient.
+
+    Returns ``("-", args)`` when the scalar coefficient is negative, with
+    ``args`` the factors of ``-expr`` (a coefficient of 1 is dropped),
+    and ``("", expr.args)`` otherwise.
+    """
+    coeff, matrices = expr.as_coeff_matrices()
+    if _coeff_isneg(coeff):
+        coeff = -coeff
+        args = list(matrices) if coeff == 1 else [coeff] + list(matrices)
+        return "-", args
+    return "", list(expr.args)
 
 
 class StrPrinter(Printer):
@@ -304,16 +320,30 @@ class StrPrinter(Printer):
             return sign + '*'.join(a_str) + "/(%s)" % '*'.join(b_str)
 
     def _print_MatMul(self, expr):
-        return '*'.join([self.parenthesize(arg, precedence(expr))
-            for arg in expr.args])
+        sign, args = _matmul_sign_args(expr)
+        return sign + '*'.join(
+            [self.parenthesize(arg, precedence(expr)) for arg in args]
+        )
 
     def _print_HadamardProduct(self, expr):
         return '.*'.join([self.parenthesize(arg, precedence(expr))
             for arg in expr.args])
 
     def _print_MatAdd(self, expr):
-        return ' + '.join([self.parenthesize(arg, precedence(expr))
-            for arg in expr.args])
+        terms = [self.parenthesize(arg, precedence(expr))
+             for arg in expr.args]
+        l = []
+        for t in terms:
+            if t.startswith('-'):
+                sign = "-"
+                t = t[1:]
+            else:
+                sign = "+"
+            l.extend([sign, t])
+        sign = l.pop(0)
+        if sign == '+':
+            sign = ""
+        return sign + ' '.join(l)
 
     def _print_NaN(self, expr):
         return 'nan'
