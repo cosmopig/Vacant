@@ -1,0 +1,1 @@
+tests/test_build_latex.py::test_latex_inline_code_without_padding
