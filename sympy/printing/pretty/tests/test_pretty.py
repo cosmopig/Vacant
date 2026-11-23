@@ -6112,3 +6112,11 @@ def test_vector_expr_pretty_printing():
 
     assert upretty(Gradient(A.x+3*A.y)) == u("∇⋅(A_x + 3⋅A_y)")
     # TODO: add support for ASCII pretty.
+
+
+def test_MatrixSymbol_subtraction():
+    A = MatrixSymbol("A", 2, 2)
+    B = MatrixSymbol("B", 2, 2)
+    assert upretty(A - A*B - B) == u"-B - A⋅B + A"
+    assert pretty(A - A*B - B) == "-B - A*B + A"
+    assert upretty(A - 2*B) == u"-2⋅B + A"

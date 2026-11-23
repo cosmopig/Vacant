@@ -1477,9 +1477,19 @@ class LatexPrinter(Printer):
             return r"%s^\dagger" % self._print(mat)
 
     def _print_MatAdd(self, expr):
-        terms = list(expr.args)
-        tex = " + ".join(map(self._print, terms))
-        return tex
+        terms = [self._print(t) for t in expr.args]
+        l = []
+        for t in terms:
+            if t.startswith('-'):
+                sign = "-"
+                t = t[1:].lstrip()
+            else:
+                sign = "+"
+            l.extend([sign, t])
+        sign = l.pop(0)
+        if sign == '+':
+            sign = ""
+        return sign + ' '.join(l)
 
     def _print_MatMul(self, expr):
         from sympy import Add, MatAdd, HadamardProduct
@@ -1488,6 +1498,9 @@ class LatexPrinter(Printer):
             if isinstance(x, (Add, MatAdd, HadamardProduct)):
                 return r"\left(%s\right)" % self._print(x)
             return self._print(x)
+
+        if expr.args[0] == -1:
+            return '-' + ' '.join(map(parens, expr.args[1:]))
         return ' '.join(map(parens, expr.args))
 
     def _print_Mod(self, expr, exp=None):
