@@ -252,6 +252,9 @@ def test_Mul():
     # For issue 14160
     assert str(Mul(-2, x, Pow(Mul(y,y,evaluate=False), -1, evaluate=False),
                                                 evaluate=False)) == '-2*x/(y*y)'
+    # issue 21537
+    assert str(Mul(x, Pow(1/y, -1, evaluate=False), evaluate=False)) == 'x/(1/y)'
+    assert str(Mul(x, Pow(y**-2, -1, evaluate=False), evaluate=False)) == 'x/(y**(-2))'
 
 
     class CustomClass1(Expr):
