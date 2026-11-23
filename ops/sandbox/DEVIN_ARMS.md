@@ -223,10 +223,18 @@ contamination verdict, until session-log review is complete.
 ## V4 SWE-bench calibration and comparison dispatch — 2026-11-23
 
 Use only `sandbox-devin-kit-v4` and the frozen 62-instance v4 bank. Run the 12
-fresh plain calibration sessions on the recorded subset before any comparison;
-proceed only with all twelve scored and at most 8/12 resolved. Calibration never
-enters comparisons. Each comparison session is fresh, with two samples per
-instance; never reuse calibration work or pool v4 with earlier versions.
+fresh plain calibration sessions on the recorded subset before any comparison.
+Calibration clearance defers to the v4 rule in `PREREG.md`:
+
+Calibration is only the whole-bank gate; it never enters comparisons. Apply it only when
+all twelve outcomes and contamination/outside-help audits are available.
+Proceed only if the conservative resolved count is **≤8/12**. Contaminated
+or outside-help calibration cells count as resolved regardless of their
+harness outcome. Unknown audits leave the gate incomplete. Above 8/12 report
+**"ceiling, v4 rejected"**; never salvage a subset or change the threshold.
+
+Each comparison session is fresh, with two samples per instance; never reuse
+calibration work or pool v4 with earlier versions.
 Placeholders: `<id>` instance, `<arm>` plain|plain2|vacant, `<k>` 1|2.
 Comparison title: `Sandbox v4 <id> <arm> s<k>`.
 The prompts below retain the v3 dispatch text except for v4 paths and the
