@@ -602,6 +602,9 @@ def test_parse_header_links(value, expected):
         ('example.com/path', 'http://example.com/path'),
         ('//example.com/path', 'http://example.com/path'),
         ('example.com:80', 'http://example.com:80'),
+        ('http://user:pass@example.com', 'http://user:pass@example.com'),
+        ('//user:@example.com:8080', 'http://user:@example.com:8080'),
+        ('https://user:p%40ss@[::1]:8080', 'https://user:p%40ss@[::1]:8080'),
     ))
 def test_prepend_scheme_if_needed(value, expected):
     assert prepend_scheme_if_needed(value, 'http') == expected

@@ -21,6 +21,27 @@ def echo_response_handler(sock):
     sock.send(text_200)
 
 
+def test_proxy_auth_from_url():
+    def proxy_handler(sock):
+        request = consume_socket_content(sock)
+        if b'Proxy-Authorization: Basic dXNlcjpwQHNz' in request.split(b'\r\n'):
+            sock.sendall(b'HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n')
+        else:
+            sock.sendall(
+                b'HTTP/1.1 407 Proxy Authentication Required\r\n'
+                b'Proxy-Authenticate: Basic realm="test"\r\n'
+                b'Content-Length: 0\r\n\r\n'
+            )
+
+    with Server(proxy_handler) as (host, port):
+        with requests.Session() as session:
+            session.trust_env = False
+            proxy = 'http://user:p%40ss@{}:{}'.format(host, port)
+            r = session.get('http://example.com/', proxies={'http': proxy}, timeout=5)
+
+    assert r.status_code == 200
+
+
 def test_chunked_upload():
     """can safely send generators"""
     close_server = threading.Event()
