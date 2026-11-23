@@ -79,6 +79,18 @@ class MigrateTests(MigrationTestBase):
         with self.assertRaisesMessage(CommandError, msg):
             call_command('migrate', app_label='unmigrated_app_syncdb')
 
+    @override_settings(MIGRATION_MODULES={'migrations': 'migrations.test_migrations_namespace_package'})
+    def test_migrate_namespace_package(self):
+        """
+        migrate works on a migrations package without an __init__.py file.
+        """
+        try:
+            call_command('migrate', 'migrations', verbosity=0)
+            self.assertTableExists('migrations_author')
+        finally:
+            call_command('migrate', 'migrations', 'zero', verbosity=0)
+        self.assertTableNotExists('migrations_author')
+
     @override_settings(MIGRATION_MODULES={'migrations': 'migrations.test_migrations_clashing_prefix'})
     def test_ambiguous_prefix(self):
         msg = (
