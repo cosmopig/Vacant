@@ -143,6 +143,23 @@ class ServerHandler(simple_server.ServerHandler):
         if self.headers.get("Connection") == "close":
             self.request_handler.close_connection = True
 
+    def finish_response(self):
+        if self.environ["REQUEST_METHOD"] == "HEAD":
+            # Responses to HEAD requests must not include a message body
+            # (RFC 9110 Section 9.3.2). Send the headers as for GET, including
+            # the Content-Length computed by wsgiref, but don't write the body.
+            try:
+                for data in self.result:
+                    if not self.headers_sent:
+                        self.bytes_sent = len(data)
+                        self.send_headers()
+                if not self.headers_sent:
+                    self.send_headers()
+            finally:
+                self.close()
+        else:
+            super().finish_response()
+
     def close(self):
         self.get_stdin().read()
         super().close()
