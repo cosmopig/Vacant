@@ -395,13 +395,67 @@ def test_completed_cap_redraw_reconciles_63_incremental_admissions(tmp_path, mon
                      '--micromamba', str(tmp_path / 'mamba')]) == 0
 
 
-def test_reconciliation_keeps_incomplete_cases_and_records_late_results():
+def test_reconciliation_keeps_incomplete_cases_and_records_late_results(tmp_path):
     state = dict(admitted=['kept', 'pending'], cases={})
-    kit.reconcile_selection(state, dict(status='incomplete', final_instance_ids=[]))
+    kit.reconcile_selection(state, dict(status='incomplete', final_instance_ids=[]), tmp_path)
     assert state['admitted'] == ['kept', 'pending']
     complete = dict(status='complete', final_instance_ids=['kept'])
-    kit.reconcile_selection(state, complete)
+    kit.reconcile_selection(state, complete, tmp_path)
     state['cases']['pending'] = dict(status='blocked', error='late failure')
-    kit.reconcile_selection(state, complete)
+    kit.reconcile_selection(state, complete, tmp_path)
     assert state['admitted'] == ['kept'] and state['cases'] == {}
     assert state['superseded_cases']['pending']['case']['error'] == 'late failure'
+
+
+def test_completed_redraw_removes_tracked_and_late_exports_before_finalization(tmp_path, monkeypatch):
+    public = tmp_path / 'kit'
+    for key in ('old', 'new'):
+        (public / 'gates' / key).mkdir(parents=True)
+        (public / 'gates' / key / 'gate.py').write_text('pass\n')
+        (public / 'prompts').mkdir(exist_ok=True)
+        (public / 'prompts' / (key + '.txt')).write_text(key)
+    for name in ('README.md', '.gitignore'):
+        (public / name).write_text('')
+    kit.git(public, 'init', '--quiet', '--template=')
+    kit.git(public, 'symbolic-ref', 'HEAD', 'refs/heads/sandbox-devin-kit-v4')
+    kit.git(public, 'add', '--', 'gates/old', 'prompts/old.txt')
+    kit.git(public, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+            'commit', '--quiet', '-m', 'Previous bank')
+    state = dict(admitted=['old', 'new'], cases={key: dict(snapshot={}) for key in ('old', 'new')})
+    state['superseded_cases'] = dict(new=dict(reason='Earlier provisional selection'))
+    completed = dict(status='complete', final_instance_ids=['new'])
+    kit.reconcile_selection(state, dict(completed, status='incomplete'), public)
+    assert (public / 'prompts/old.txt').exists()
+    with pytest.raises(RuntimeError, match='unexpected'):
+        kit.audit_exports(public, ['new'])
+    kit.reconcile_selection(state, completed, public)
+    assert not (public / 'gates/old').exists() and not (public / 'prompts/old.txt').exists()
+    (public / 'gates/old').mkdir()
+    (public / 'prompts/old.txt').write_text('late export')
+    kit.reconcile_selection(state, completed, public, active=['old'])
+    assert (public / 'gates/old').exists() and (public / 'prompts/old.txt').exists()
+    kit.reconcile_selection(state, completed, public)
+    kit.audit_exports(public, ['new'])
+    monkeypatch.setattr(kit.v3, 'needles', lambda *args: [])
+    monkeypatch.setattr(kit, 'audit_case', lambda *args: {})
+    monkeypatch.setattr(kit, 'save', lambda *args: None)
+    for role in ('AUTHOR', 'COMMITTER'):
+        monkeypatch.setenv('GIT_' + role + '_NAME', 'Fixture')
+        monkeypatch.setenv('GIT_' + role + '_EMAIL', 'fixture@example.invalid')
+    kit.finalize(tmp_path, state, dict(new={}))
+    tracked = kit.git(public, 'ls-tree', '-r', '--name-only', 'HEAD').decode().splitlines()
+    assert set(tracked) == {'.gitignore', 'README.md', 'gates/new/gate.py', 'prompts/new.txt'}
+
+
+@pytest.mark.parametrize('folder', ['gates', 'prompts'])
+def test_export_audit_rejects_unlisted_task_directories(tmp_path, folder):
+    public = tmp_path / 'kit'
+    kit.audit_exports(public, [])
+    (public / folder / 'unlisted').mkdir(parents=True)
+    with pytest.raises(RuntimeError, match='unexpected'):
+        kit.finalize(tmp_path, dict(admitted=[], cases={}), {})
+
+
+def test_export_audit_refuses_missing_bank_exports(tmp_path):
+    with pytest.raises(RuntimeError, match='missing'):
+        kit.audit_exports(tmp_path, ['missing'])

@@ -533,9 +533,20 @@ def readme(root, admitted, cases, mamba):
                                        ''.join('/' + key + '/\n' for key in admitted))
 
 
+def audit_exports(public_root, admitted):
+    expected = dict(gates=set(admitted), prompts={key + '.txt' for key in admitted})
+    for folder, names in expected.items():
+        directory = public_root / folder
+        actual = {path.name for path in directory.iterdir()} if directory.exists() else set()
+        if actual != names:
+            raise RuntimeError(f'Task export inventory differs from bank: {folder}; '
+                               f'unexpected={sorted(actual - names)}; missing={sorted(names - actual)}')
+
+
 def finalize(root, state, lookup):
     patterns = list(dict.fromkeys(p for key in state['admitted'] for p in v3.needles(lookup[key], {})))
     public_root = root / 'kit'
+    audit_exports(public_root, state['admitted'])
     common = [(public_root / name).read_bytes() for name in ('README.md', '.gitignore')]
     unchecked = {needle for _, needle in patterns if any(fingerprint_in(needle, data) for data in common)}
     for key in state['admitted']:
@@ -549,10 +560,7 @@ def finalize(root, state, lookup):
         raise RuntimeError('README/gitignore has non-base leak matches; publishing blocked')
     git(public_root, 'init', '--quiet', '--template=')
     git(public_root, 'symbolic-ref', 'HEAD', 'refs/heads/sandbox-devin-kit-v4')
-    paths = ['README.md', '.gitignore']
-    for key in state['admitted']:
-        paths.extend(['gates/' + key, 'prompts/' + key + '.txt'])
-    git(public_root, 'add', '--', *paths)
+    git(public_root, 'add', '-A', '--', 'README.md', '.gitignore', 'gates', 'prompts')
     git(public_root, 'commit', '--quiet', '-m', 'Frozen v4 native task kit')
     state.update(status='ready; all 62 audited; local branches only', final_leak_audit='pass',
                  kit_sha=git(public_root, 'rev-parse', 'HEAD').decode().strip(), pushed=False)
@@ -560,7 +568,7 @@ def finalize(root, state, lookup):
     save(Path(__file__).with_name('KIT.json'), state)
 
 
-def reconcile_selection(state, selected):
+def reconcile_selection(state, selected, public_root, active=()):
     if not selected['status'].startswith('complete'):
         return
     final = set(selected['final_instance_ids'])
@@ -571,6 +579,15 @@ def reconcile_selection(state, selected):
         if key in state['cases']:
             record['case'] = state['cases'].pop(key)
     state['admitted'] = [key for key in state['admitted'] if key in final]
+    for key in (superseded | set(state.get('superseded_cases', {}))) - final - set(active):
+        if Path(key).name != key or key in ('', '.', '..'):
+            raise ValueError('Invalid superseded task ID: ' + key)
+        gate = public_root / 'gates' / key
+        if gate.is_symlink() or gate.is_file():
+            gate.unlink()
+        elif gate.exists():
+            shutil.rmtree(gate)
+        (public_root / 'prompts' / (key + '.txt')).unlink(missing_ok=True)
 
 
 def main(argv=None):
@@ -606,7 +623,7 @@ def main(argv=None):
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         while True:
             selected = json.loads(args.selection.read_text())
-            reconcile_selection(state, selected)
+            reconcile_selection(state, selected, root / 'kit', inflight.values())
             for key in selected['final_instance_ids']:
                 if key not in state['admitted']:
                     state['admitted'].append(key)
@@ -628,7 +645,7 @@ def main(argv=None):
                 print(result['status'].upper() + ' ' + key + ' ' + result.get('error', ''), flush=True)
                 if result['status'] == 'blocked':
                     save(root / 'BLOCKERS.json', {k: v for k, v in state['cases'].items() if v['status'] == 'blocked'})
-            reconcile_selection(state, selected)
+            reconcile_selection(state, selected, root / 'kit', inflight.values())
             state['ready'] = [key for key in state['admitted'] if state['cases'].get(key, {}).get('status') == 'ready']
             state['inflight'] = list(inflight.values())
             state['selector_status'] = selected['status']
