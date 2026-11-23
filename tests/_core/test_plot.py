@@ -2042,6 +2042,22 @@ class TestLegend:
         legend, = p._figure.legends
         assert legend.get_title().get_text() == ""
 
+    def test_legend_title_includes_formatter_offset(self, xy):
+
+        s = pd.Series([3e6, 4e6, 5e6, 6e6], name="s")
+        p = Plot(**xy, pointsize=s).add(MockMark()).plot()
+        legend, = p._figure.legends
+        assert legend.get_title().get_text() == "s 1e6"
+        labels = [t.get_text() for t in legend.get_texts()]
+        assert all("e6" not in label for label in labels)
+
+    def test_legend_title_without_offset(self, xy):
+
+        s = pd.Series([3, 4, 5, 6], name="s")
+        p = Plot(**xy, pointsize=s).add(MockMark()).plot()
+        legend, = p._figure.legends
+        assert legend.get_title().get_text() == "s"
+
     def test_legendless_mark(self, xy):
 
         class NoLegendMark(MockMark):

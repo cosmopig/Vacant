@@ -1569,6 +1569,9 @@ class Plotter:
                         break
                 else:
                     title = self._resolve_label(p, var, data.names[var])
+                    offset = getattr(scales[var], "_legend_offset", "")
+                    if offset:
+                        title = f"{title} {offset}" if title else offset
                     entry = (title, data.ids[var]), [var], (values, labels)
                     schema.append(entry)
 

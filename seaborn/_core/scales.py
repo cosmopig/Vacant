@@ -61,12 +61,14 @@ class Scale:
     _matplotlib_scale: ScaleBase
     _spacer: staticmethod
     _legend: tuple[list[str], list[Any]] | None
+    _legend_offset: str = ""
 
     def __post_init__(self):
 
         self._tick_params = None
         self._label_params = None
         self._legend = None
+        self._legend_offset = ""
 
     def tick(self):
         raise NotImplementedError()
@@ -378,8 +380,13 @@ class ContinuousBase(Scale):
             axis.set_view_interval(vmin, vmax)
             locs = axis.major.locator()
             locs = locs[(vmin <= locs) & (locs <= vmax)]
-            labels = axis.major.formatter.format_ticks(locs)
+            formatter = axis.major.formatter
+            labels = formatter.format_ticks(locs)
             new._legend = list(locs), list(labels)
+            # Formatters like ScalarFormatter can factor out an offset and/or a
+            # multiplicative order of magnitude that the tick labels do not show
+            if hasattr(formatter, "get_offset"):
+                new._legend_offset = formatter.get_offset().strip()
 
         return new
 

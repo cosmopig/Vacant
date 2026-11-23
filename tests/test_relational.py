@@ -595,6 +595,23 @@ class TestRelationalPlotter(Helpers):
         assert not mask.any()
         assert_array_equal(xys, long_df[["x", "y"]])
 
+    def test_legend_offset_in_title(self, long_df):
+
+        long_df = long_df.assign(z_big=long_df["z"] * 1e6 + 1e6)
+        ax = scatterplot(data=long_df, x="x", y="y", size="z_big")
+        legend = ax.get_legend()
+        assert legend.get_title().get_text().startswith("z_big ")
+        offset = legend.get_title().get_text().split(" ", 1)[1]
+        assert "e" in offset or "10^" in offset
+
+        ax.clear()
+        ax = scatterplot(
+            data=long_df, x="x", y="y", hue="a", size="z_big", ax=ax
+        )
+        texts = [t.get_text() for t in ax.get_legend().get_texts()]
+        assert any(t.startswith("z_big ") and t != "z_big" for t in texts)
+        assert "a" in texts
+
     def test_relplot_legend(self, long_df):
 
         g = relplot(data=long_df, x="x", y="y")
