@@ -614,6 +614,13 @@ def test_MatAdd_postprocessor():
     assert isinstance(a, Add)
     assert a.args == (2*x, A + 2*M)
 
+def test_MatAdd_postprocessor_zero_matrices():
+    z = ZeroMatrix(2, 3)
+    A = MatrixSymbol('A', 2, 3)
+
+    assert Add(z, z) == z
+    assert Add(A, -A) == z
+
 def test_simplify_matrix_expressions():
     # Various simplification functions
     assert type(gcd_terms(C*D + D*C)) == MatAdd

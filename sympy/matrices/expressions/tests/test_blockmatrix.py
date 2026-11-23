@@ -3,7 +3,7 @@ from sympy.matrices.expressions.blockmatrix import (
     BlockMatrix, bc_dist, bc_matadd, bc_transpose, bc_inverse,
     blockcut, reblock_2x2, deblock)
 from sympy.matrices.expressions import (MatrixSymbol, Identity,
-        Inverse, trace, Transpose, det)
+        Inverse, trace, Transpose, det, ZeroMatrix)
 from sympy.matrices import (
     Matrix, ImmutableMatrix, ImmutableSparseMatrix)
 from sympy.core import Tuple, symbols, Expr
@@ -22,6 +22,18 @@ b2 = BlockMatrix([[G], [H]])
 
 def test_bc_matmul():
     assert bc_matmul(H*b1*b2*G) == BlockMatrix([[(H*G*G + H*H*H)*G]])
+
+def test_bc_matmul_zero_blocks():
+    a = MatrixSymbol('a', 2, 2)
+    z = ZeroMatrix(2, 2)
+    b = BlockMatrix([[a, z], [z, z]])
+    squared = BlockMatrix([[a**2, z], [z, z]])
+    cubed = BlockMatrix([[a**3, z], [z, z]])
+
+    assert b._blockmul(b) == squared
+    assert b._blockmul(b)._blockmul(b) == cubed
+    assert block_collapse(b * b) == squared
+    assert block_collapse(b * b * b) == cubed
 
 def test_bc_matadd():
     assert bc_matadd(BlockMatrix([[G, H]]) + BlockMatrix([[H, H]])) == \
