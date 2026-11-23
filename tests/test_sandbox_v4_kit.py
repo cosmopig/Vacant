@@ -365,3 +365,43 @@ def test_incremental_admission_and_failed_instance_retention(tmp_path, monkeypat
         state = json.loads((root / 'KIT.json').read_text())
         assert prepared == ['first', 'second'] == state['admitted'] == state['ready']
     assert state['pushed'] is False
+
+
+def test_completed_cap_redraw_reconciles_63_incremental_admissions(tmp_path, monkeypatch):
+    keys = ['astropy__astropy-13033'] + [f'final-{index}' for index in range(62)]
+    rows = [dict(instance_id=key, repo='owner/repo', test_patch='', patch='', FAIL_TO_PASS='[]') for key in keys]
+    dataset = tmp_path / 'dataset.jsonl'
+    dataset.write_text('\n'.join(json.dumps(row) for row in rows))
+    selection = tmp_path / 'selection.json'
+    selection.write_text(json.dumps(dict(final_instance_ids=keys[1:], status='complete')))
+    root = tmp_path / 'build'
+    root.mkdir()
+    cases = {key: dict(instance_id=key, status='ready') for key in keys}
+    kit.save(root / 'KIT.json', dict(admitted=keys, cases=cases))
+    monkeypatch.setattr(kit, 'version', lambda _: kit.selection_tools.HARNESS_VERSION)
+    monkeypatch.setattr(kit.selection_tools, 'DATASET_CONTENT_SHA256',
+                        kit.selection_tools.digest(kit.selection_tools.canonical(rows)))
+    monkeypatch.setattr(kit, 'current_case', lambda _: True)
+    monkeypatch.setattr(kit, 'readme', lambda *args: None)
+    monkeypatch.setattr(kit, 'prepare', lambda *args: pytest.fail('ready bank must not rebuild'))
+
+    def finalized(root, state, lookup):
+        assert state['admitted'] == state['ready'] == keys[1:]
+        assert len(state['cases']) == 62
+        assert state['superseded_cases'][keys[0]]['case'] == cases[keys[0]]
+
+    monkeypatch.setattr(kit, 'finalize', finalized)
+    assert kit.main(['--dataset-json', str(dataset), '--selection', str(selection), '--root', str(root),
+                     '--micromamba', str(tmp_path / 'mamba')]) == 0
+
+
+def test_reconciliation_keeps_incomplete_cases_and_records_late_results():
+    state = dict(admitted=['kept', 'pending'], cases={})
+    kit.reconcile_selection(state, dict(status='incomplete', final_instance_ids=[]))
+    assert state['admitted'] == ['kept', 'pending']
+    complete = dict(status='complete', final_instance_ids=['kept'])
+    kit.reconcile_selection(state, complete)
+    state['cases']['pending'] = dict(status='blocked', error='late failure')
+    kit.reconcile_selection(state, complete)
+    assert state['admitted'] == ['kept'] and state['cases'] == {}
+    assert state['superseded_cases']['pending']['case']['error'] == 'late failure'

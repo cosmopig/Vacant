@@ -560,6 +560,19 @@ def finalize(root, state, lookup):
     save(Path(__file__).with_name('KIT.json'), state)
 
 
+def reconcile_selection(state, selected):
+    if not selected['status'].startswith('complete'):
+        return
+    final = set(selected['final_instance_ids'])
+    superseded = (set(state['admitted']) | set(state['cases'])) - final
+    for key in superseded:
+        record = state.setdefault('superseded_cases', {}).setdefault(key, dict(
+            reason='Not present in the completed selector bank after cap redraw.'))
+        if key in state['cases']:
+            record['case'] = state['cases'].pop(key)
+    state['admitted'] = [key for key in state['admitted'] if key in final]
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--selection', type=Path, default=Path(__file__).with_name('SELECTION.json'))
@@ -593,10 +606,11 @@ def main(argv=None):
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         while True:
             selected = json.loads(args.selection.read_text())
+            reconcile_selection(state, selected)
             for key in selected['final_instance_ids']:
                 if key not in state['admitted']:
                     state['admitted'].append(key)
-            if len(state['admitted']) > 62:
+            if selected['status'].startswith('complete') and len(state['admitted']) > 62:
                 raise RuntimeError('selector admitted more than 62 IDs; owner decision required, none dropped')
             patterns = list(dict.fromkeys(pattern for key in state['admitted'] for pattern in v3.needles(lookup[key], {})))
             pending = [key for key in state['admitted'] if key not in state['cases'] and key not in inflight.values()]
@@ -614,6 +628,7 @@ def main(argv=None):
                 print(result['status'].upper() + ' ' + key + ' ' + result.get('error', ''), flush=True)
                 if result['status'] == 'blocked':
                     save(root / 'BLOCKERS.json', {k: v for k, v in state['cases'].items() if v['status'] == 'blocked'})
+            reconcile_selection(state, selected)
             state['ready'] = [key for key in state['admitted'] if state['cases'].get(key, {}).get('status') == 'ready']
             state['inflight'] = list(inflight.values())
             state['selector_status'] = selected['status']
@@ -635,7 +650,7 @@ def main(argv=None):
             if selected['status'].startswith('complete'):
                 if set(selected['final_instance_ids']) != set(state['admitted']):
                     raise RuntimeError('frozen/admitted IDs differ from selector final bank; owner decision required')
-                if len(state['ready']) == 62:
+                if len(state['ready']) == 62 and not inflight:
                     finalize(root, state, lookup)
                     return 0
                 if not inflight and all(key in state['cases'] for key in state['admitted']):
