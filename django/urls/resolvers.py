@@ -155,6 +155,7 @@ class RegexPattern(CheckURLMixin):
             # positional arguments.
             kwargs = match.groupdict()
             args = () if kwargs else match.groups()
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
             return path[match.end():], args, kwargs
         return None
 

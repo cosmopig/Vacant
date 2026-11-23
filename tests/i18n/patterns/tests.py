@@ -1,14 +1,15 @@
 import os
 
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.core.exceptions import ImproperlyConfigured
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.middleware.locale import LocaleMiddleware
 from django.template import Context, Template
 from django.test import SimpleTestCase, override_settings
 from django.test.client import RequestFactory
 from django.test.utils import override_script_prefix
-from django.urls import clear_url_caches, reverse, translate_url
+from django.urls import clear_url_caches, re_path, reverse, translate_url
 from django.utils import translation
 
 
@@ -162,6 +163,19 @@ class URLTranslationTests(URLTestCaseBase):
         with translation.override('nl'):
             self.assertEqual(translate_url('/nl/gebruikers/', 'en'), '/en/users/')
             self.assertEqual(translation.get_language(), 'nl')
+
+    def test_translate_url_with_optional_named_group(self):
+        urlpatterns = i18n_patterns(
+            re_path(
+                r'^optional(?:/(?P<slug>[\w-]*))?/$',
+                lambda request, slug=None: HttpResponse(),
+                name='optional',
+            ),
+        )
+        with override_settings(ROOT_URLCONF=tuple(urlpatterns)), translation.override('en'):
+            for path in ('/optional/', '/optional/example/', '/optional//'):
+                with self.subTest(path=path):
+                    self.assertEqual(translate_url('/en' + path, 'nl'), '/nl' + path)
 
 
 class URLNamespaceTests(URLTestCaseBase):
