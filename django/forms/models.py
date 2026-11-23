@@ -253,6 +253,7 @@ class ModelFormOptions:
         self.help_texts = getattr(options, "help_texts", None)
         self.error_messages = getattr(options, "error_messages", None)
         self.field_classes = getattr(options, "field_classes", None)
+        self.formfield_callback = getattr(options, "formfield_callback", None)
 
 
 class ModelFormMetaclass(DeclarativeFieldsMetaclass):
@@ -263,7 +264,7 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
                 base_formfield_callback = b.Meta.formfield_callback
                 break
 
-        formfield_callback = attrs.pop("formfield_callback", base_formfield_callback)
+        formfield_callback = attrs.pop("formfield_callback", None)
 
         new_class = super().__new__(mcs, name, bases, attrs)
 
@@ -271,6 +272,8 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
             return new_class
 
         opts = new_class._meta = ModelFormOptions(getattr(new_class, "Meta", None))
+        if formfield_callback is None:
+            formfield_callback = opts.formfield_callback or base_formfield_callback
 
         # We check if a string was passed to `fields` or `exclude`,
         # which is likely to be a mistake where the user typed ('foo') instead
@@ -636,7 +639,9 @@ def modelform_factory(
     class_name = model.__name__ + "Form"
 
     # Class attributes for the new form class.
-    form_class_attrs = {"Meta": Meta, "formfield_callback": formfield_callback}
+    form_class_attrs = {"Meta": Meta}
+    if formfield_callback:
+        form_class_attrs["formfield_callback"] = formfield_callback
 
     if getattr(Meta, "fields", None) is None and getattr(Meta, "exclude", None) is None:
         raise ImproperlyConfigured(
