@@ -320,5 +320,5 @@ def test_cli_preserves_venv_interpreter_symlink(tmp_path, monkeypatch):
 
 
 def test_comparison_prompts_have_identical_no_pr_instruction():
-    text = (Path(score.REPO) / 'ops/sandbox/DEVIN_ARMS.md').read_text().split('## V3 SWE-bench')[1]
+    text = (Path(score.REPO) / 'ops/sandbox/DEVIN_ARMS.md').read_text().split('## V3 SWE-bench')[1].split('\n## ', 1)[0]
     assert text.count('Do not open a pull request; the pushed branch is the only deliverable.') == 3
