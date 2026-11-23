@@ -11,7 +11,6 @@ from functools import partial
 from os.path import expanduser
 from os.path import expandvars
 from os.path import isabs
-from os.path import normcase
 from os.path import sep
 from posixpath import sep as posix_sep
 
@@ -338,9 +337,11 @@ def parts(s):
 
 
 def unique_path(path):
-    """Returns a unique path in case-insensitive (but case-preserving) file
-    systems such as Windows.
-
-    This is needed only for ``py.path.local``; ``pathlib.Path`` handles this
-    natively with ``resolve()``."""
-    return type(path)(normcase(str(path.realpath())))
+    """Resolve symlinks and preserve filesystem casing for Python imports."""
+    if sys.platform == "win32":
+        # Older Windows versions of os.path.realpath don't recover on-disk casing.
+        try:
+            return type(path)(str(Path(str(path)).resolve()))
+        except OSError:
+            pass
+    return path.realpath()

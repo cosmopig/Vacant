@@ -4,6 +4,7 @@ import textwrap
 import py
 
 import pytest
+from _pytest import pathlib
 from _pytest.config import PytestPluginManager
 from _pytest.main import ExitCode
 from _pytest.pathlib import unique_path
@@ -290,6 +291,19 @@ def test_conftest_badcase(testdir):
     testdir.tmpdir.join("jenkinsroot/test").chdir()
     result = testdir.runpytest()
     assert result.ret == ExitCode.NO_TESTS_COLLECTED
+
+
+def test_conftest_preserves_package_case(testdir, monkeypatch):
+    # Emulate Windows normcase so the regression is also caught on POSIX.
+    monkeypatch.setattr(pathlib, "normcase", str.lower, raising=False)
+    package = testdir.mkdir("MixedCasePackage")
+    package.ensure("__init__.py")
+    package.join("conftest.py").write("print('conftest package:', __package__)")
+    package.join("test_example.py").write("def test_example(): pass")
+
+    result = testdir.runpytest_inprocess("-s", "--collect-only", str(package))
+    assert result.ret == ExitCode.OK
+    result.stdout.fnmatch_lines(["conftest package: MixedCasePackage", "*test_example*"])
 
 
 def test_no_conftest(testdir):
