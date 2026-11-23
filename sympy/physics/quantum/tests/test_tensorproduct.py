@@ -49,6 +49,21 @@ def test_tensor_product_simp():
     assert tensor_product_simp(TP(A, B)*TP(B, C)) == TP(A*B, B*C)
 
 
+def test_tensor_product_simp_pow():
+    from sympy import Symbol
+    from sympy.physics.paulialgebra import Pauli
+    a = Symbol('a', commutative=False)
+    assert tensor_product_simp(TP(1, 1)*TP(1, 1)) == TP(1, 1)
+    assert tensor_product_simp(TP(A, B)**2) == TP(A**2, B**2)
+    assert tensor_product_simp(TP(A, B)*TP(A, B)) == TP(A**2, B**2)
+    assert tensor_product_simp(TP(A, B)**2*TP(C, A)) == TP(A**2*C, B**2*A)
+    assert tensor_product_simp(x*TP(A, B)**3) == x*TP(A**3, B**3)
+    t2 = TP(1, Pauli(3))*TP(1, Pauli(3))
+    assert tensor_product_simp(t2) == TP(1, 1)
+    assert tensor_product_simp(t2) == \
+        tensor_product_simp(TP(1, Pauli(3))*TP(1, a)).subs(a, Pauli(3))
+
+
 def test_issue_5923():
     # most of the issue regarding sympification of args has been handled
     # and is tested internally by the use of args_cnc through the quantum
