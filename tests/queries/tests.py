@@ -6,7 +6,7 @@ from operator import attrgetter
 
 from django.core.exceptions import EmptyResultSet, FieldError
 from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, F, Q
+from django.db.models import Count, Exists, F, OuterRef, Q
 from django.db.models.sql.constants import LOUTER
 from django.db.models.sql.where import NothingNode, WhereNode
 from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
@@ -83,6 +83,27 @@ class Queries1Tests(TestCase):
 
         Cover.objects.create(title="first", item=i4)
         Cover.objects.create(title="second", item=cls.i2)
+
+    def test_exclude_with_outerref(self):
+        category_id = self.t1.category_id
+        Number.objects.create(pk=category_id, num=1)
+        unmatched = Number.objects.create(pk=category_id + 1, num=2)
+        items = Item.objects.filter(pk=self.i2.pk)
+        condition = Q(tags__category_id=OuterRef('pk'))
+        for method in ('exclude', 'negated Q'):
+            with self.subTest(method=method):
+                inner = items.exclude(condition) if method == 'exclude' else items.filter(~condition)
+                numbers = Number.objects.annotate(has_item=Exists(inner)).filter(has_item=True)
+                self.assertSequenceEqual(numbers, [unmatched])
+
+    def test_exclude_with_nested_outerref(self):
+        Number.objects.create(num=self.t1.category_id)
+        unmatched = Number.objects.create(num=-1)
+        items = Item.objects.filter(pk=self.i2.pk).exclude(
+            tags__category_id=OuterRef(OuterRef('num')),
+        )
+        notes = Note.objects.filter(pk=self.n1.pk).annotate(has_item=Exists(items)).filter(has_item=True)
+        self.assertSequenceEqual(Number.objects.filter(Exists(notes)), [unmatched])
 
     def test_subquery_condition(self):
         qs1 = Tag.objects.filter(pk__lte=0)
