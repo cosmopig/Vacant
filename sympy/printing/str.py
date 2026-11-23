@@ -284,7 +284,9 @@ class StrPrinter(Printer):
                 pre = [str(d.pop(0))]
             else:
                 pre = []
-            dfactors = pre + [self.parenthesize(a, prec, strict=False)
+            dfactors = pre + ['(%s)' % self._print(a)
+                if isinstance(a, Pow) and a.exp.is_negative
+                else self.parenthesize(a, prec, strict=False)
                 for a in d]
 
             n = '*'.join(nfactors)
@@ -332,8 +334,10 @@ class StrPrinter(Printer):
                 if item.exp is not S.NegativeOne:
                     b.append(apow(item))
                 else:
-                    if (len(item.args[0].args) != 1 and
-                            isinstance(item.base, Mul)):
+                    if ((isinstance(item.base, Pow) and
+                            item.base.exp.is_negative) or
+                            (len(item.args[0].args) != 1 and
+                            isinstance(item.base, Mul))):
                         # To avoid situations like #14160
                         pow_paren.append(item)
                     b.append(item.base)

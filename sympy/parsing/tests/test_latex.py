@@ -120,6 +120,8 @@ GOOD_PAIRS = [
     (r"\frac{a}{b}", a / b),
     (r"\frac{a + b}{c}", _Mul(a + b, _Pow(c, -1))),
     (r"\frac{7}{3}", _Mul(7, _Pow(3, -1))),
+    (r"\frac{\frac{a}{b}}{\frac{1}{c}}",
+     _Mul(_Mul(a, _Pow(b, -1)), _Pow(_Pow(c, -1), -1))),
     (r"(\csc x)(\sec y)", csc(x)*sec(y)),
     (r"\lim_{x \to 3} a", Limit(a, x, 3)),
     (r"\lim_{x \rightarrow 3} a", Limit(a, x, 3)),
@@ -250,6 +252,12 @@ def test_parseable():
     from sympy.parsing.latex import parse_latex
     for latex_str, sympy_expr in GOOD_PAIRS:
         assert parse_latex(latex_str) == sympy_expr, latex_str
+
+
+def test_nested_frac_str():
+    from sympy.parsing.latex import parse_latex
+    expr = parse_latex(r"\frac{\frac{a^3+b}{c}}{\frac{1}{c^2}}")
+    assert str(expr) == "((a**3 + b)/c)/(1/(c**2))"
 
 # These bad LaTeX strings should raise a LaTeXParsingError when parsed
 BAD_STRINGS = [
