@@ -157,3 +157,25 @@ def test_linkcheck_request_headers(app, status, warning):
                 assert headers["X-Secret"] == "open sesami"
             else:
                 assert headers["Accept"] == "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8"
+
+
+@pytest.mark.sphinx('linkcheck', testroot='linkcheck-localfile', freshenv=True)
+def test_local_links(app, status, warning):
+    app.builder.build_all()
+
+    content = (app.outdir / 'output.txt').read_text()
+    assert sorted(content.splitlines()) == sorted([
+        'index.rst:4: [broken] doesntexist: Local file not found',
+        'sub/page.rst:5: [broken] missing.txt: Local file not found',
+    ])
+
+    rows = [json.loads(x) for x in (app.outdir / 'output.json').read_text().splitlines()]
+    rowsby = {row["uri"]: row for row in rows}
+    assert rowsby['doesntexist']['status'] == 'broken'
+    assert rowsby['missing.txt']['status'] == 'broken'
+    assert rowsby['conf.py']['status'] == 'working'
+    assert rowsby['../conf.py']['status'] == 'working'
+    assert rowsby['sub/page.html#section']['status'] == 'working'
+    assert rowsby['sub/page']['status'] == 'working'
+    assert rowsby['tel:+123456789']['status'] == 'unchecked'
+    assert app.statuscode == 1
