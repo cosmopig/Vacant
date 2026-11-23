@@ -513,6 +513,24 @@ class ChangeListTests(TestCase):
         cl.queryset.delete()
         self.assertEqual(cl.queryset.count(), 0)
 
+    def test_multi_word_search_reuses_reverse_fk_join(self):
+        matching = Parent.objects.create(name='Matching')
+        Child.objects.create(parent=matching, name='Alice Marie Jones Smith')
+        nonmatching = Parent.objects.create(name='Nonmatching')
+        Child.objects.create(parent=nonmatching, name='Alice Marie')
+        Child.objects.create(parent=nonmatching, name='Jones Smith')
+
+        m = admin.ModelAdmin(Parent, custom_site)
+        m.search_fields = ['child__name']
+        request = self.factory.get(
+            '/parent/', data={SEARCH_VAR: 'Alice Marie Jones Smith'},
+        )
+        request.user = self.superuser
+
+        cl = m.get_changelist_instance(request)
+        self.assertEqual(str(cl.queryset.query).count(' JOIN '), 1)
+        self.assertSequenceEqual(cl.queryset, [matching])
+
     def test_multiple_search_fields(self):
         """
         All rows containing each of the searched words are returned, where each
@@ -555,7 +573,7 @@ class ChangeListTests(TestCase):
             ('Finlayson', 1),
             ('Finlayson Hype', 0),
             ('Jonathan Finlayson Duo', 1),
-            ('Mary Jonathan Duo', 1),
+            ('Mary Jonathan Duo', 0),
             ('Oscar Finlayson Duo', 0),
         ):
             with self.subTest(search_string=search_string):

@@ -1156,6 +1156,16 @@ subclass::
         WHERE (first_name ILIKE '%john%' OR last_name ILIKE '%john%')
         AND (first_name ILIKE '%lennon%' OR last_name ILIKE '%lennon%')
 
+    .. versionchanged:: 4.1
+
+        When searching across a multi-valued relationship, terms matched
+        through that relationship must match the same related object. For
+        example, with ``search_fields = ['children__name']``, a search for
+        ``Jamal 17`` matches a parent with a child whose name contains both
+        terms, but not a parent with one child named Jamal and another whose
+        name contains 17. Older versions allowed different related objects
+        to match different terms.
+
     The search query can contain quoted phrases with spaces. For example, if a
     user searches for ``"john winston"`` or ``'john winston'``, Django will do
     the equivalent of this SQL ``WHERE`` clause:

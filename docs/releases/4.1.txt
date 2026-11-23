@@ -308,6 +308,10 @@ Miscellaneous
   ``request.META['CSRF_COOKIE']`` for storing the unmasked CSRF secret rather
   than a masked version. This is an undocumented, private API.
 
+* Admin searches across multi-valued relationships now reuse joins. Terms
+  matched through the same relationship must match the same related object.
+  See :attr:`.ModelAdmin.search_fields`.
+
 .. _deprecated-features-4.1:
 
 Features deprecated in 4.1
