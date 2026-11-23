@@ -547,6 +547,14 @@ class TestHeaderFunctions(FitsTestCase):
             "CONTINUE  '' / long comment                                                     "
         )
 
+    def test_long_string_with_null_string_roundtrip(self):
+        """Doubled single quotes must survive splitting into CONTINUE cards."""
+        for n in range(50, 75):
+            for value in ("x" * n + "''", "x" * n + "''" + "x" * 10, "x" * n + "'"):
+                card1 = fits.Card("CONFIG", value)
+                card2 = fits.Card.fromstring(str(card1))
+                assert card2.value == card1.value == value
+
     def test_word_in_long_string_too_long(self):
         # if a word in a long string is too long, it will be cut in the middle
         c = fits.Card("abc", "longstringvalue" * 10, "longcomment" * 10)
