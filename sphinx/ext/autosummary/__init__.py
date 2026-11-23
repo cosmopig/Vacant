@@ -87,6 +87,7 @@ from sphinx.registry import SphinxComponentRegistry
 from sphinx.util import logging, rst
 from sphinx.util.docutils import (NullReporter, SphinxDirective, SphinxRole, new_document,
                                   switch_source_input)
+from sphinx.util.inspect import get_class_property
 from sphinx.util.matching import Matcher
 from sphinx.util.typing import OptionSpec
 from sphinx.writers.html import HTMLTranslator
@@ -661,11 +662,12 @@ def _import_by_name(name: str) -> Tuple[Any, Any, str]:
                 break
 
         if last_j < len(name_parts):
-            parent = None
-            obj = sys.modules[modname]
-            for obj_name in name_parts[last_j:]:
-                parent = obj
-                obj = getattr(obj, obj_name)
+            parent: Any = sys.modules[modname]
+            for obj_name in name_parts[last_j:-1]:
+                parent = getattr(parent, obj_name)
+            obj_name = name_parts[-1]
+            descriptor = get_class_property(parent, obj_name)
+            obj = getattr(parent, obj_name) if descriptor is None else descriptor
             return obj, parent, modname
         else:
             return sys.modules[modname], None, modname
