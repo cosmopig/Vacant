@@ -36,7 +36,7 @@ def test_default_main_refuses_frozen_bank_before_validation(tmp_path, monkeypatc
     assert not (tmp_path / 'work').exists()
 
 
-@pytest.mark.parametrize('status,flags', [(None, []), ('incomplete', []), ('blocked', []), ('complete', []),
+@pytest.mark.parametrize('status,flags', [(None, []), ('incomplete', []), ('blocked', []),
                                         ('complete', ['--overwrite-frozen'])])
 def test_main_can_start_resume_or_explicitly_overwrite(tmp_path, monkeypatch, status, flags):
     output = tmp_path / 'SELECTION.json'
@@ -56,22 +56,69 @@ def test_main_can_start_resume_or_explicitly_overwrite(tmp_path, monkeypatch, st
 
 
 @pytest.mark.parametrize('status', ['complete', 'complete_undersized'])
-@pytest.mark.parametrize('missing', ['calibration_instance_ids', 'power'])
+@pytest.mark.parametrize('missing', ['calibration_instance_ids', 'power', 'both', 'empty_calibration'])
 def test_main_resumes_completed_checkpoint_missing_final_metadata(tmp_path, monkeypatch, status, missing):
     output = tmp_path / 'SELECTION.json'
-    checkpoint = dict(status=status, final_instance_ids=['selected'], calibration_instance_ids=[],
-                      power=dict(exact_power=.8))
-    del checkpoint[missing]
+    size = 48 if status == 'complete_undersized' else 62
+    ids = [f'selected-{index}' for index in range(size)]
+    checkpoint = dict(status=status, final_instance_ids=ids, selected=[dict(instance_id=key) for key in ids],
+        validation={key: dict(status='pass', evidence='preserve-me') for key in ids},
+        replacements=[dict(outgoing='old', incoming=ids[-1])], repo_cap=15,
+        calibration_instance_ids=list(reversed(ids[-12:])), power=dict(exact_power=.123))
+    if missing == 'both':
+        checkpoint.pop('power')
+        checkpoint['calibration_instance_ids'] = []
+    elif missing == 'empty_calibration':
+        checkpoint['calibration_instance_ids'] = []
+    else:
+        checkpoint.pop(missing)
     output.write_text(json.dumps(checkpoint))
     monkeypatch.setattr(select, 'HERE', tmp_path)
+    monkeypatch.setattr(select, 'version', lambda _: pytest.fail('metadata resume needs no harness'))
+    docker_calls = []
 
-    def version(_):
-        raise RuntimeError('resume reached validation')
+    def docker_unavailable(*args, **kwargs):
+        docker_calls.append(args)
+        return SimpleNamespace(returncode=1, stderr='Docker unavailable', stdout='')
 
-    monkeypatch.setattr(select, 'version', version)
-    with pytest.raises(RuntimeError, match='resume reached validation'):
+    monkeypatch.setattr(select.subprocess, 'run', docker_unavailable)
+    assert select.main(['--experiments', 'missing', '--dataset-json', 'missing',
+                        '--work-dir', str(tmp_path / 'work')]) == 0
+    expected = dict(checkpoint)
+    if not expected.get('calibration_instance_ids'):
+        expected['calibration_instance_ids'] = select.calibration(ids)
+    if not expected.get('power'):
+        expected['power'] = select.power_summary(len(ids))
+    assert json.loads(output.read_text()) == expected
+    assert not docker_calls and not (tmp_path / 'work').exists()
+
+
+@pytest.mark.parametrize('ids', [[], None])
+def test_completed_resume_refuses_missing_saved_ids_without_overwriting(tmp_path, monkeypatch, ids):
+    output = tmp_path / 'SELECTION.json'
+    saved = json.dumps(dict(status='complete', final_instance_ids=ids, validation={'saved': 'preserve'}))
+    output.write_text(saved)
+    monkeypatch.setattr(select, 'HERE', tmp_path)
+    monkeypatch.setattr(select.subprocess, 'run', lambda *args, **kwargs: pytest.fail('must not call Docker'))
+    with pytest.raises(SystemExit) as exc:
         select.main(['--experiments', 'missing', '--dataset-json', 'missing', '--work-dir', str(tmp_path / 'work')])
-    assert json.loads(output.read_text()) == checkpoint
+    assert exc.value.code == 2 and output.read_text() == saved
+
+
+def test_completed_resume_metadata_error_preserves_saved_bank(tmp_path, monkeypatch):
+    output = tmp_path / 'SELECTION.json'
+    saved = json.dumps(dict(status='complete', final_instance_ids=[str(index) for index in range(12)],
+                            calibration_instance_ids=[], validation={'saved': 'preserve'}))
+    output.write_text(saved)
+    monkeypatch.setattr(select, 'HERE', tmp_path)
+
+    def fail_power(_):
+        raise RuntimeError('power computation failed')
+
+    monkeypatch.setattr(select, 'power_summary', fail_power)
+    with pytest.raises(RuntimeError, match='power computation failed'):
+        select.main(['--experiments', 'missing', '--dataset-json', 'missing', '--work-dir', str(tmp_path / 'work')])
+    assert output.read_text() == saved
 
 
 def test_seeded_draw_and_calibration_do_not_modify_global_rng():

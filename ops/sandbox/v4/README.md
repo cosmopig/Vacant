@@ -84,8 +84,10 @@ See `../PREREG.md` for the frozen design and the agent-test red/green gate.
 
 The selector itself creates no workspaces or v4 dispatch sessions.
 Completed outputs with calibration and power recorded are frozen: rerunning the
-default command refuses before validation or writes. Interrupted checkpoints
-missing either final field remain resumable. Use a different `--out` for an independent reconstruction;
+default command refuses before validation or writes. Completed checkpoints
+missing either final field resume offline: saved IDs, validation and replacement
+records stay intact, and only missing calibration/power metadata is added atomically.
+Use a different `--out` for an independent reconstruction;
 `--overwrite-frozen` explicitly permits replacing a completed bank and calibration.
 
 ## Bank-independent gate template

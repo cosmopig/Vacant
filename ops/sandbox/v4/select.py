@@ -281,10 +281,21 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.out.exists() and not args.overwrite_frozen:
         previous = json.loads(args.out.read_text())
-        if (previous.get('status', '').startswith('complete')
-                and previous.get('calibration_instance_ids') is not None
-                and previous.get('power') is not None):
-            parser.error('refusing to overwrite frozen bank; use --overwrite-frozen or a different --out')
+        if previous.get('status', '').startswith('complete'):
+            missing_calibration = not previous.get('calibration_instance_ids')
+            missing_power = not previous.get('power')
+            if not missing_calibration and not missing_power:
+                parser.error('refusing to overwrite frozen bank; use --overwrite-frozen or a different --out')
+            ids = previous.get('final_instance_ids')
+            if not ids:
+                parser.error('completed checkpoint has no saved instance IDs; refusing to replace it')
+            if missing_calibration:
+                previous['calibration_instance_ids'] = calibration(ids)
+            if missing_power:
+                previous['power'] = power_summary(len(ids))
+            write_json(args.out, previous)
+            log(f'Resumed completed checkpoint: preserved {len(ids)} IDs and validation; finalized metadata offline')
+            return 0
     log(f'Starting v4 selector: jobs={args.jobs}, target={TARGET}, initial cap={INITIAL_CAP}; pull backoff=900..3600s')
     if version('swebench') != v3.HARNESS_VERSION:
         raise ValueError('requires swebench==' + v3.HARNESS_VERSION)
