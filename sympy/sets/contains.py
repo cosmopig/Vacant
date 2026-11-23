@@ -45,4 +45,8 @@ class Contains(BooleanFunction):
             isinstance(i, (Eq, Ne))])
 
     def as_set(self):
+        """Return the set for membership of a symbol in a fixed set."""
+        x, s = self.args
+        if x.is_Symbol and not s.free_symbols:
+            return s
         raise NotImplementedError()

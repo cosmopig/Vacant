@@ -46,6 +46,17 @@ def test_as_set():
     raises(NotImplementedError, lambda:
            Contains(x, FiniteSet(y)).as_set())
 
+
+def test_as_set_symbol_membership():
+    x = Symbol('x')
+    assert Contains(x, S.Reals).as_set() == S.Reals
+    assert Contains(x, Interval(0, 1)).as_set() == Interval(0, 1)
+    assert Contains(x, FiniteSet(0, 2)).as_set() == FiniteSet(0, 2)
+    raises(NotImplementedError, lambda: Contains(x**2, Interval(0, 1)).as_set())
+    raises(NotImplementedError, lambda:
+           Contains(x, FiniteSet(x), evaluate=False).as_set())
+
+
 def test_type_error():
     # Pass in a parameter not of type "set"
     raises(TypeError, lambda: Contains(2, None))

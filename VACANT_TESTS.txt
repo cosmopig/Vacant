@@ -1,0 +1,2 @@
+sympy/sets/tests/test_contains.py::test_as_set_symbol_membership
+sympy/functions/elementary/tests/test_piecewise.py::test_as_expr_set_pairs_contains

@@ -866,6 +866,11 @@ def test_as_expr_set_pairs():
         [((x - 2)**2, Interval(0, oo)), (0, Interval(-oo, 0, True, True))]
 
 
+def test_as_expr_set_pairs_contains():
+    p = Piecewise((6, Contains(x, S.Reals)), (7, True))
+    assert p.as_expr_set_pairs() == [(6, S.Reals)]
+
+
 def test_S_srepr_is_identity():
     p = Piecewise((10, Eq(x, 0)), (12, True))
     q = S(srepr(p))
