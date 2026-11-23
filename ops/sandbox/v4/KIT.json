@@ -1,5 +1,5 @@
 {
-  "status": "ready; all 62 audited; local branches only",
+  "status": "published; all 62 audited; kit and 62 base refs verified",
   "admitted": [
     "django__django-11400",
     "sphinx-doc__sphinx-10614",
@@ -55187,7 +55187,7 @@
     }
   },
   "kit_branch": "sandbox-devin-kit-v4",
-  "pushed": false,
+  "pushed": true,
   "ready": [
     "django__django-11400",
     "sphinx-doc__sphinx-10614",
