@@ -1,0 +1,3 @@
+Structured NumPy arrays added as table columns are now stored as ``Column``
+objects instead of being automatically converted to ``NdarrayMixin`` objects.
+Explicit ``NdarrayMixin`` views continue to be stored as mixin columns.
