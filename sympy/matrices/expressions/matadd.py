@@ -126,7 +126,8 @@ def merge_explicit(matadd):
         return matadd
 
 
-rules = (rm_id(lambda x: x == 0 or isinstance(x, ZeroMatrix)),
+rules = (rm_id(lambda x: x == 0),
+         rm_id(lambda x: isinstance(x, ZeroMatrix)),
          unpack,
          flatten,
          glom(matrix_of, factor_of, combine),

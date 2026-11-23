@@ -5,7 +5,7 @@ from sympy.matrices.expressions.blockmatrix import (
 from sympy.matrices.expressions import (MatrixSymbol, Identity,
         Inverse, trace, Transpose, det)
 from sympy.matrices import (
-    Matrix, ImmutableMatrix, ImmutableSparseMatrix)
+    Matrix, ImmutableMatrix, ImmutableSparseMatrix, ZeroMatrix)
 from sympy.core import Tuple, symbols, Expr
 from sympy.core.compatibility import range
 from sympy.functions import transpose
@@ -22,6 +22,19 @@ b2 = BlockMatrix([[G], [H]])
 
 def test_bc_matmul():
     assert bc_matmul(H*b1*b2*G) == BlockMatrix([[(H*G*G + H*H*H)*G]])
+
+def test_blockmul_zero_blocks():
+    X = BlockMatrix([[A, ZeroMatrix(n, m)],
+                     [ZeroMatrix(m, n), ZeroMatrix(m, m)]])
+    expected_square = BlockMatrix([[A**2, ZeroMatrix(n, m)],
+                                   [ZeroMatrix(m, n), ZeroMatrix(m, m)]])
+    expected_cube = BlockMatrix([[A**3, ZeroMatrix(n, m)],
+                                 [ZeroMatrix(m, n), ZeroMatrix(m, m)]])
+
+    square = X._blockmul(X)
+    assert square == expected_square
+    assert square._blockmul(X) == expected_cube
+    assert block_collapse(X*X*X) == expected_cube
 
 def test_bc_matadd():
     assert bc_matadd(BlockMatrix([[G, H]]) + BlockMatrix([[H, H]])) == \

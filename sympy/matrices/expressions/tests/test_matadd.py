@@ -1,7 +1,7 @@
-from sympy.matrices.expressions import MatrixSymbol, MatAdd, MatPow, MatMul
+from sympy.matrices.expressions import MatrixSymbol, MatAdd, MatPow, MatMul, ZeroMatrix
 from sympy.matrices.expressions.matexpr import GenericZeroMatrix
 from sympy.matrices import eye, ImmutableMatrix
-from sympy.core import Basic, S
+from sympy.core import Add, Basic, S
 
 X = MatrixSymbol('X', 2, 2)
 Y = MatrixSymbol('Y', 2, 2)
@@ -30,3 +30,9 @@ def test_doit_args():
 def test_generic_identity():
     assert MatAdd.identity == GenericZeroMatrix()
     assert MatAdd.identity != S.Zero
+
+
+def test_zero_matrix_sum():
+    Z = ZeroMatrix(2, 3)
+    assert Add(Z, Z) == Z
+    assert MatAdd(S.Zero, Z, Z).doit() == Z
