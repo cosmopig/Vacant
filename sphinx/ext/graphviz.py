@@ -20,13 +20,14 @@ from docutils.parsers.rst import Directive, directives
 
 import sphinx
 from sphinx.application import Sphinx
+from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.errors import SphinxError
 from sphinx.locale import _, __
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective, SphinxTranslator
 from sphinx.util.i18n import search_image_for_language
 from sphinx.util.nodes import set_source_info
-from sphinx.util.osutil import ensuredir
+from sphinx.util.osutil import ensuredir, relative_uri
 from sphinx.util.typing import OptionSpec
 from sphinx.writers.html import HTML5Translator
 from sphinx.writers.latex import LaTeXTranslator
@@ -217,8 +218,8 @@ class GraphvizSimple(SphinxDirective):
             return [figure]
 
 
-def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
-    """Change relative links in generated svg files to be relative to imgpath."""
+def fix_svg_relative_paths(filepath: str, page_uri: str, image_dir: str) -> None:
+    """Rebase links from the embedding page to the generated SVG."""
     tree = ET.parse(filepath)  # NoQA: S314
     root = tree.getroot()
     ns = {'svg': 'http://www.w3.org/2000/svg', 'xlink': 'http://www.w3.org/1999/xlink'}
@@ -230,15 +231,13 @@ def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
         root.findall('.//svg:a[@xlink:href]', ns),
     ):
         scheme, hostname, url, query, fragment = urlsplit(element.attrib[href_name])
-        if hostname:
-            # not a relative link
+        if scheme or hostname or url.startswith('/'):
             continue
 
-        old_path = path.join(self.builder.outdir, url)
-        new_path = path.relpath(
-            old_path,
-            start=path.join(self.builder.outdir, self.builder.imgpath),
-        )
+        target = posixpath.join(posixpath.dirname(page_uri), url) if url else page_uri
+        new_path = posixpath.normpath(relative_uri(image_dir + '/', target))
+        if posixpath.basename(target) in ('', '.', '..'):
+            new_path += '/'
         modified_url = urlunsplit((scheme, hostname, new_path, query, fragment))
 
         element.set(href_name, modified_url)
@@ -253,10 +252,13 @@ def render_dot(self: SphinxTranslator, code: str, options: dict, format: str,
                ) -> tuple[str | None, str | None]:
     """Render graphviz code into a PNG or PDF output file."""
     graphviz_dot = options.get('graphviz_dot', self.builder.config.graphviz_dot)
-    hashkey = (code + str(options) + str(graphviz_dot) +
-               str(self.builder.config.graphviz_dot_args)).encode()
+    hashkey = code + str(options) + str(graphviz_dot) + str(self.builder.config.graphviz_dot_args)
+    page_uri = None
+    if format == 'svg' and isinstance(self.builder, StandaloneHTMLBuilder):
+        page_uri = urlsplit(self.builder.get_target_uri(self.builder.current_docname)).path
+        hashkey += '\0' + page_uri
 
-    fname = f'{prefix}-{sha1(hashkey, usedforsecurity=False).hexdigest()}.{format}'
+    fname = f'{prefix}-{sha1(hashkey.encode(), usedforsecurity=False).hexdigest()}.{format}'
     relfn = posixpath.join(self.builder.imgpath, fname)
     outfn = path.join(self.builder.outdir, self.builder.imagedir, fname)
 
@@ -299,8 +301,8 @@ def render_dot(self: SphinxTranslator, code: str, options: dict, format: str,
         raise GraphvizError(__('dot did not produce an output file:\n[stderr]\n%r\n'
                                '[stdout]\n%r') % (ret.stderr, ret.stdout))
 
-    if format == 'svg':
-        fix_svg_relative_paths(self, outfn)
+    if page_uri is not None:
+        fix_svg_relative_paths(outfn, page_uri, self.builder.imagedir)
 
     return relfn, outfn
 

@@ -3,6 +3,8 @@
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
+from urllib.parse import urljoin
 
 import pytest
 
@@ -169,6 +171,33 @@ def test_inheritance_diagram_svg_html(app, status, warning):
                'title="Permalink to this image">\xb6</a></p>\n</figcaption>\n</figure>\n')
 
     assert re.search(pattern, content, re.M)
+
+
+@pytest.mark.sphinx(testroot='ext-inheritance_diagram-links')
+@pytest.mark.usefixtures('if_graphviz_found')
+@pytest.mark.parametrize(
+    ('page_uri', 'base_uri'),
+    [
+        pytest.param('nested/diagram.html', 'nested/base.html', marks=pytest.mark.sphinx('html')),
+        pytest.param('nested/diagram/', 'nested/base/', marks=pytest.mark.sphinx('dirhtml')),
+    ],
+)
+def test_inheritance_diagram_svg_nested_links(app, page_uri, base_uri):
+    app.builder.build_all()
+
+    page_file = page_uri + 'index.html' if page_uri.endswith('/') else page_uri
+    content = (app.outdir / page_file).read_text(encoding='utf8')
+    match = re.search(r'<object data="([^"]+\.svg)"', content)
+    assert match is not None
+    svg_uri = urljoin('/docs/' + page_uri, match[1])
+    svg = ET.parse(app.outdir / svg_uri.removeprefix('/docs/'))  # NoQA: S314
+    ns = {'svg': 'http://www.w3.org/2000/svg', 'xlink': 'http://www.w3.org/1999/xlink'}
+    href = '{http://www.w3.org/1999/xlink}href'
+    links = svg.findall('.//svg:a[@xlink:href]', ns)
+    assert {urljoin(svg_uri, link.attrib[href]) for link in links} == {
+        '/docs/' + base_uri + '#logging.StreamHandler',
+        '/docs/' + page_uri + '#logging.FileHandler',
+    }
 
 
 @pytest.mark.sphinx('latex', testroot='ext-inheritance_diagram')

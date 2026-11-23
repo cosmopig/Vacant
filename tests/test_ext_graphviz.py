@@ -91,7 +91,7 @@ def test_graphviz_svg_html(app, status, warning):
     assert '"./_static/' not in image_content
     assert '<ns0:image ns1:href="../_static/images/test.svg"' in image_content
     assert '<ns0:a ns1:href="../_static/images/test.svg"' in image_content
-    assert '<ns0:a ns1:href="..#graphviz"' in image_content
+    assert '<ns0:a ns1:href="../index.html#graphviz"' in image_content
 
 
 @pytest.mark.sphinx('latex', testroot='ext-graphviz')
