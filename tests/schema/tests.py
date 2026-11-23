@@ -2571,6 +2571,66 @@ class SchemaTests(TransactionTestCase):
             editor.alter_unique_together(Book, [["author", "title"]], [])
 
     @skipUnlessDBFeature("allows_multiple_constraints_on_same_fields")
+    @isolate_apps("schema")
+    def test_remove_unique_together_on_pk_field(self):
+        class Thing(Model):
+            id = AutoField(primary_key=True)
+
+            class Meta:
+                app_label = "schema"
+                unique_together = [["id"]]
+
+        with connection.schema_editor() as editor:
+            editor.create_model(Thing)
+        self.isolated_local_models = [Thing]
+
+        def id_constraints(**filters):
+            return [
+                name
+                for name, details in self.get_constraints(Thing._meta.db_table).items()
+                if details["columns"] == ["id"]
+                and all(details[key] == value for key, value in filters.items())
+            ]
+
+        self.assertEqual(len(id_constraints(primary_key=True)), 1)
+        self.assertEqual(len(id_constraints(unique=True, primary_key=False)), 1)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Thing, Thing._meta.unique_together, [])
+        self.assertEqual(len(id_constraints(primary_key=True)), 1)
+        self.assertEqual(len(id_constraints(unique=True, primary_key=False)), 0)
+
+    @isolate_apps("schema")
+    def test_remove_unique_together_on_unique_field(self):
+        class Thing(Model):
+            name = CharField(max_length=255, unique=True)
+
+            class Meta:
+                app_label = "schema"
+                unique_together = [["name"]]
+
+        with connection.schema_editor() as editor:
+            editor.create_model(Thing)
+        self.isolated_local_models = [Thing]
+        unique_together_name = editor._create_index_name(
+            Thing._meta.db_table, ["name"], suffix="_uniq"
+        )
+        unique_constraints = [
+            name
+            for name, details in self.get_constraints(Thing._meta.db_table).items()
+            if details["columns"] == ["name"] and details["unique"]
+        ]
+        self.assertEqual(len(unique_constraints), 2)
+        self.assertIn(unique_together_name, unique_constraints)
+        with connection.schema_editor() as editor:
+            editor.alter_unique_together(Thing, Thing._meta.unique_together, [])
+        unique_constraints = [
+            name
+            for name, details in self.get_constraints(Thing._meta.db_table).items()
+            if details["columns"] == ["name"] and details["unique"]
+        ]
+        self.assertEqual(len(unique_constraints), 1)
+        self.assertNotIn(unique_together_name, unique_constraints)
+
     def test_remove_unique_together_does_not_remove_meta_constraints(self):
         with connection.schema_editor() as editor:
             editor.create_model(AuthorWithUniqueNameAndBirthday)
