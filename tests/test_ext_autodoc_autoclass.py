@@ -118,3 +118,69 @@ def test_show_inheritance_for_subclass_of_generic_type(app):
         '   A subclass of List[Union[int, float]]',
         '',
     ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_inherited_instance_variable(app):
+    options = {'members': True,
+               'inherited-members': True}
+    actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Bar()',
+        '   :module: target.instance_variable',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr1',
+        '      :module: target.instance_variable',
+        '',
+        '      docstring foo',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr2',
+        '      :module: target.instance_variable',
+        '',
+        '      docstring bar',
+        '',
+        '',
+        '   .. py:attribute:: Bar.attr3',
+        '      :module: target.instance_variable',
+        '',
+        '      docstring bar',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_instance_variable_without_inherited_members(app):
+    options = {'members': True}
+    actual = do_autodoc(app, 'class', 'target.instance_variable.Bar', options)
+    assert '   .. py:attribute:: Bar.attr1' not in list(actual)
+    assert '   .. py:attribute:: Bar.attr3' in list(actual)
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_inherited_class_attribute_with_doc_comment(app):
+    options = {'members': True,
+               'inherited-members': True}
+    actual = do_autodoc(app, 'class', 'target.class_attr_inheritance.Derived', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Derived()',
+        '   :module: target.class_attr_inheritance',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr1',
+        '      :module: target.class_attr_inheritance',
+        '      :value: 1',
+        '',
+        '      docstring for attr1',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr2',
+        '      :module: target.class_attr_inheritance',
+        '      :value: 3',
+        '',
+        '      docstring for attr2 in Derived',
+        '',
+    ]

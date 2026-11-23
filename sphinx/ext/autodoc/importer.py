@@ -14,6 +14,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from sphinx.deprecation import RemovedInSphinx40Warning, deprecated_alias
+from sphinx.errors import PycodeError
 from sphinx.pycode import ModuleAnalyzer
 from sphinx.util import logging
 from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
@@ -314,6 +315,31 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
             if namespace == ns and name not in members:
                 members[name] = ClassAttribute(subject, name, INSTANCEATTR,
                                                '\n'.join(docstring))
+
+    # attributes documented by doc-comments in the class or its base classes
+    mro = getmro(subject)
+    for i, cls in enumerate(mro):
+        try:
+            modname = safe_getattr(cls, '__module__')
+            qualname = safe_getattr(cls, '__qualname__')
+            cls_analyzer = ModuleAnalyzer.for_module(modname)
+            cls_analyzer.analyze()
+        except (AttributeError, PycodeError):
+            continue
+
+        for (ns, name), docstring in cls_analyzer.attr_docs.items():
+            if ns != qualname:
+                continue
+
+            if name not in members:
+                # instance attribute (cf. self.attr1) defined in the class
+                members[name] = ClassAttribute(cls, name, INSTANCEATTR,
+                                               '\n'.join(docstring))
+            elif members[name].docstring is None:
+                # attribute defined in the class; skip if overridden by subclasses
+                overridden = any(name in attrgetter(c, '__dict__', {}) for c in mro[:i])
+                if not overridden:
+                    members[name].docstring = '\n'.join(docstring)
 
     return members
 

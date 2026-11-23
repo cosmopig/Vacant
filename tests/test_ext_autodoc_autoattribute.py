@@ -189,3 +189,30 @@ def test_autoattribute_TypeVar(app):
         "   alias of TypeVar('T1')",
         '',
     ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autoattribute_inherited_class_attribute(app):
+    actual = do_autodoc(app, 'attribute', 'target.class_attr_inheritance.Derived.attr1')
+    assert list(actual) == [
+        '',
+        '.. py:attribute:: Derived.attr1',
+        '   :module: target.class_attr_inheritance',
+        '   :value: 1',
+        '',
+        '   docstring for attr1',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autoattribute_inherited_instance_variable(app):
+    actual = do_autodoc(app, 'attribute', 'target.instance_variable.Bar.attr1')
+    assert list(actual) == [
+        '',
+        '.. py:attribute:: Bar.attr1',
+        '   :module: target.instance_variable',
+        '',
+        '   docstring foo',
+        '',
+    ]
