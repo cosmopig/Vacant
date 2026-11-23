@@ -2359,6 +2359,11 @@ class AttributeDocumenter(GenericAliasMixin, NewTypeMixin, SlotsMixin,  # type: 
                 pass
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
+        # Check the attribute has a docstring-comment (also in base classes)
+        comment = self.get_attribute_comment(self.parent)
+        if comment:
+            return [comment]
+
         if self.object is INSTANCEATTR:
             return []
 

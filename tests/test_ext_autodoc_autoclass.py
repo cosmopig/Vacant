@@ -118,3 +118,45 @@ def test_show_inheritance_for_subclass_of_generic_type(app):
         '   A subclass of List[Union[int, float]]',
         '',
     ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_inherited_attributes(app):
+    options = {'members': True,
+               'inherited-members': True}
+    actual = do_autodoc(app, 'class', 'target.inherited_attributes.Derived', options)
+    assert list(actual) == [
+        '',
+        '.. py:class:: Derived()',
+        '   :module: target.inherited_attributes',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr1',
+        '      :module: target.inherited_attributes',
+        '      :value: None',
+        '',
+        '      docstring for attr1',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr2',
+        '      :module: target.inherited_attributes',
+        '',
+        '      docstring for attr2',
+        '',
+        '',
+        '   .. py:attribute:: Derived.attr3',
+        '      :module: target.inherited_attributes',
+        '      :value: None',
+        '',
+        '      docstring for attr3',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_inherited_attributes_without_inherited_members(app):
+    options = {'members': True}
+    actual = do_autodoc(app, 'class', 'target.inherited_attributes.Derived', options)
+    assert '   .. py:attribute:: Derived.attr1' not in actual
+    assert '   .. py:attribute:: Derived.attr2' not in actual
+    assert '   .. py:attribute:: Derived.attr3' in actual
