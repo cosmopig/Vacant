@@ -301,6 +301,11 @@ Miscellaneous
 * The Django test runner now returns a non-zero error code for unexpected
   successes from tests marked with :py:func:`unittest.expectedFailure`.
 
+* Searches using :attr:`.ModelAdmin.search_fields` now apply all search terms
+  in a single call to ``filter()``. Search terms matched against the same
+  multi-valued relationship must now match the same related object. Previously,
+  different related objects could match different search terms.
+
 * :class:`~django.middleware.csrf.CsrfViewMiddleware` no longer masks the CSRF
   cookie like it does the CSRF token in the DOM.
 

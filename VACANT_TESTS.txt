@@ -1,0 +1,1 @@
+tests/admin_changelist/tests.py::ChangeListTests::test_search_reuses_reverse_foreign_key_join

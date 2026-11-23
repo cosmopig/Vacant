@@ -489,6 +489,25 @@ class ChangeListTests(TestCase):
         cl.queryset.delete()
         self.assertEqual(cl.queryset.count(), 0)
 
+    def test_search_reuses_reverse_foreign_key_join(self):
+        class SearchParentAdmin(admin.ModelAdmin):
+            search_fields = ('name', 'child__name')
+
+        parent = Parent.objects.create(name='North')
+        Child.objects.create(parent=parent, name='Central Service Desk')
+        split_parent = Parent.objects.create(name='North Annex')
+        Child.objects.create(parent=split_parent, name='Central Desk')
+        Child.objects.create(parent=split_parent, name='Service Desk')
+
+        model_admin = SearchParentAdmin(Parent, custom_site)
+        request = self.factory.get('/parent/', {SEARCH_VAR: 'north "service desk" central'})
+        request.user = self.superuser
+        queryset = model_admin.get_changelist_instance(request).queryset
+
+        child_table = connection.ops.quote_name(Child._meta.db_table)
+        self.assertEqual(str(queryset.query).count('JOIN %s ' % child_table), 1)
+        self.assertSequenceEqual(queryset, [parent])
+
     def test_no_duplicates_for_many_to_many_at_second_level_in_search_fields(self):
         """
         When using a ManyToMany in search_fields at the second level behind a
@@ -555,7 +574,7 @@ class ChangeListTests(TestCase):
             ('Finlayson', 1),
             ('Finlayson Hype', 0),
             ('Jonathan Finlayson Duo', 1),
-            ('Mary Jonathan Duo', 1),
+            ('Mary Jonathan Duo', 0),
             ('Oscar Finlayson Duo', 0),
         ):
             with self.subTest(search_string=search_string):
