@@ -3020,6 +3020,10 @@ class Figure(FigureBase):
         # re-attached to another.
         state.pop("canvas")
 
+        # The new canvas will apply its own device pixel ratio.
+        if self.canvas.device_pixel_ratio != 1:
+            state["_restore_dpi"] = self.dpi / self.canvas.device_pixel_ratio
+
         # Set cached renderer to None -- it can't be pickled.
         state["_cachedRenderer"] = None
 
@@ -3035,6 +3039,7 @@ class Figure(FigureBase):
     def __setstate__(self, state):
         version = state.pop('__mpl_version__')
         restore_to_pylab = state.pop('_restore_to_pylab', False)
+        restore_dpi = state.pop('_restore_dpi', None)
 
         if version != mpl.__version__:
             _api.warn_external(
@@ -3042,6 +3047,9 @@ class Figure(FigureBase):
                 f"is unlikely to function correctly.")
 
         self.__dict__ = state
+        if restore_dpi is not None:
+            self._dpi = restore_dpi
+            self.dpi_scale_trans.clear().scale(restore_dpi)
 
         # re-initialise some of the unstored state information
         FigureCanvasBase(self)  # Set self.canvas.

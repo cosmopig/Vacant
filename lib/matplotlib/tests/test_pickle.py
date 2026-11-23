@@ -112,6 +112,31 @@ def test_gcf():
     assert fig.get_label() == "a label"
 
 
+def test_hi_dpi(monkeypatch):
+    fig = plt.figure(figsize=(2, 3), dpi=100)
+    fig.canvas._set_device_pixel_ratio(2)
+    backend = plt._get_backend_mod()
+    new_manager = backend.new_figure_manager_given_figure
+
+    def new_hi_dpi_manager(num, figure):
+        manager = new_manager(num, figure)
+        manager.canvas._set_device_pixel_ratio(2)
+        return manager
+
+    with monkeypatch.context() as m:
+        m.setattr(backend, "new_figure_manager_given_figure", new_hi_dpi_manager)
+        for _ in range(3):
+            loaded = pickle.loads(pickle.dumps(fig))
+            assert fig.dpi == loaded.dpi == 200
+            assert loaded.canvas.get_width_height() == (200, 300)
+            plt.close(fig)
+            fig = loaded
+
+    loaded = pickle.loads(pickle.dumps(fig))
+    assert loaded.dpi == 100
+    assert loaded.canvas.get_width_height() == (200, 300)
+
+
 def test_no_pyplot():
     # tests pickle-ability of a figure not created with pyplot
     from matplotlib.backends.backend_pdf import FigureCanvasPdf
