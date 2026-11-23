@@ -39,9 +39,11 @@ from sympy.polys.polyerrors import (
 )
 
 from sympy.polys.specialpolys import f_polys
-from sympy.polys.domains import FF, ZZ, QQ
+from sympy.polys.domains import FF, ZZ, QQ, EX
 
 from sympy.testing.pytest import raises
+
+from sympy.abc import x
 
 f_0, f_1, f_2, f_3, f_4, f_5, f_6 = [ f.to_dense() for f in f_polys() ]
 F_0 = dmp_mul_ground(dmp_normal(f_0, 2, QQ), QQ(1, 7), 2, QQ)
@@ -179,6 +181,10 @@ def test_dup_mul_ground():
 
     assert dup_mul_ground(f, ZZ(0), ZZ) == dup_normal([], ZZ)
     assert dup_mul_ground(f, ZZ(2), ZZ) == dup_normal([2, 4, 6], ZZ)
+
+    zero = EX((x**2 - 1)/(x - 1) - x - 1)
+    assert dup_mul_ground([zero], EX(1), EX) == []
+    assert dup_mul_ground([zero, EX(3)], EX(2), EX) == [EX(6)]
 
 
 def test_dmp_mul_ground():

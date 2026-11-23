@@ -269,7 +269,7 @@ def dup_mul_ground(f, c, K):
     if not c or not f:
         return []
     else:
-        return [ cf * c for cf in f ]
+        return dup_strip([ cf * c for cf in f ])
 
 
 def dmp_mul_ground(f, c, u, K):
@@ -291,7 +291,7 @@ def dmp_mul_ground(f, c, u, K):
 
     v = u - 1
 
-    return [ dmp_mul_ground(cf, c, v, K) for cf in f ]
+    return dmp_strip([ dmp_mul_ground(cf, c, v, K) for cf in f ], u)
 
 
 def dup_quo_ground(f, c, K):

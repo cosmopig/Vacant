@@ -1445,6 +1445,22 @@ def test_Poly_clear_denoms():
         x + 3*sqrt(2), x, domain='EX') and poly.get_domain() == EX
 
 
+def test_issue_20427():
+    r = (24201 + 253*sqrt(9165))**Rational(1, 3)
+    d = 217603955769048*r + 2273005839412*sqrt(9165)*r
+    f = Poly(-117968192370600*18**Rational(1, 3)/d
+             - 15720318185*2**Rational(2, 3)*3**Rational(1, 3)*r**2/d
+             + 15720318185*12**Rational(1, 3)*r**2/d
+             + 117968192370600*2**Rational(1, 3)*3**Rational(2, 3)/d, x)
+    assert f.rep.rep != []
+    coeff, poly = f.clear_denoms()
+    assert poly == Poly(0, x, domain='EX')
+    assert poly.rep == Poly(0, x, domain='EX').rep
+    assert poly.is_zero
+    assert poly.terms_gcd() == ((0,), Poly(0, x, domain='EX'))
+    assert poly.primitive() == (0, Poly(0, x, domain='EX'))
+
+
 def test_Poly_rat_clear_denoms():
     f = Poly(x**2/y + 1, x)
     g = Poly(x**3 + y, x)
