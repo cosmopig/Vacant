@@ -2,11 +2,12 @@ from unittest import mock
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import connection
-from django.db.models import Prefetch, QuerySet, prefetch_related_objects
+from django.db import NotSupportedError, connection
+from django.db.models import Prefetch, QuerySet, Value, prefetch_related_objects
+from django.db.models.functions import Concat
 from django.db.models.query import get_prefetcher
 from django.db.models.sql import Query
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext, ignore_warnings
 from django.utils.deprecation import RemovedInDjango50Warning
 
@@ -64,6 +65,61 @@ class TestDataMixin:
 
 
 class PrefetchRelatedTests(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_sliced_reverse_fk(self):
+        authors = Author.objects.annotate(
+            sort_name=Concat("name", Value("!"))
+        ).order_by("-sort_name")[:2]
+        with self.assertNumQueries(2):
+            books = list(
+                Book.objects.prefetch_related(Prefetch("first_time_authors", authors))
+            )
+            self.assertEqual(
+                [list(book.first_time_authors.all()) for book in books],
+                [[self.author3, self.author1], [], [], [self.author4]],
+            )
+        self.assertEqual(list(authors), [self.author4, self.author3])
+
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_sliced_m2m(self):
+        authors = Author.objects.order_by("-name")
+        with self.assertNumQueries(2):
+            books = list(
+                Book.objects.prefetch_related(
+                    Prefetch("authors", authors[1:3], to_attr="example_authors")
+                )
+            )
+        self.assertEqual(
+            [book.example_authors for book in books],
+            [[self.author1, self.author2], [], [], []],
+        )
+
+    @skipUnlessDBFeature("supports_over_clause")
+    def test_sliced_reverse_m2m(self):
+        with self.assertNumQueries(2):
+            authors = list(
+                Author.objects.prefetch_related(
+                    Prefetch("books", Book.objects.all()[1:], to_attr="other_books")
+                )
+            )
+        self.assertEqual(
+            [author.other_books for author in authors],
+            [[self.book2], [], [self.book3], []],
+        )
+
+    def test_sliced_prefetch_without_window_functions(self):
+        with mock.patch.object(connection.features, "supports_over_clause", False):
+            with self.assertRaisesMessage(
+                NotSupportedError,
+                "Prefetching from a limited queryset is only supported on backends "
+                "that support window functions.",
+            ):
+                list(
+                    Book.objects.prefetch_related(
+                        Prefetch("authors", Author.objects.all()[:1], to_attr="first")
+                    )
+                )
+
     def assertWhereContains(self, sql, needle):
         where_idx = sql.index("WHERE")
         self.assertEqual(

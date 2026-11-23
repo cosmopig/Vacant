@@ -189,6 +189,10 @@ Migrations
 Models
 ~~~~~~
 
+* :class:`~django.db.models.Prefetch` now supports sliced querysets for reverse
+  foreign key and many-to-many relations on databases with window function
+  support.
+
 * ``QuerySet`` now extensively supports filtering against
   :ref:`window-functions` with the exception of disjunctive filter lookups
   against window functions when performing aggregation.

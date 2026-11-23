@@ -1276,6 +1276,10 @@ applicable to reduce the number of queries even further:
     >>> Pizza.objects.prefetch_related(
     ...     Prefetch('restaurants', queryset=Restaurant.objects.select_related('best_pizza')))
 
+For reverse foreign key and many-to-many relations, a sliced queryset limits
+the results for each object being prefetched. This requires a database backend
+that supports window functions.
+
 You can also assign the prefetched result to a custom attribute with the optional
 ``to_attr`` argument. The result will be stored directly in a list.
 

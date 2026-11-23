@@ -587,7 +587,7 @@ class SQLCompiler:
             params.extend(part)
         return result, params
 
-    def get_qualify_sql(self):
+    def get_qualify_sql(self, order_by):
         where_parts = []
         if self.where:
             where_parts.append(self.where)
@@ -605,22 +605,34 @@ class SQLCompiler:
         }
         qual_aliases = set()
         replacements = {}
+
+        def select_alias(expr):
+            alias = select.get(expr) or replacements.get(expr)
+            if alias is None:
+                alias = f"qual{len(qual_aliases)}"
+                while alias in inner_query.annotations or alias in select.values():
+                    alias += "_"
+                qual_aliases.add(alias)
+                inner_query.add_annotation(expr, alias)
+            replacements[expr] = alias
+            return alias
+
         expressions = list(self.qualify.leaves())
         while expressions:
             expr = expressions.pop()
-            if select_alias := (select.get(expr) or replacements.get(expr)):
-                replacements[expr] = select_alias
-            elif isinstance(expr, Lookup):
+            if isinstance(expr, Lookup) and expr not in select:
                 expressions.extend(expr.get_source_expressions())
             else:
-                num_qual_alias = len(qual_aliases)
-                select_alias = f"qual{num_qual_alias}"
-                qual_aliases.add(select_alias)
-                inner_query.add_annotation(expr, select_alias)
-                replacements[expr] = select_alias
+                select_alias(expr)
         self.qualify = self.qualify.replace_expressions(
             {expr: Ref(alias, expr) for expr, alias in replacements.items()}
         )
+        outer_order_by = []
+        for expr, (_, _, is_ref) in order_by:
+            if not is_ref:
+                expr = expr.copy()
+                expr.expression = Ref(select_alias(expr.expression), expr.expression)
+            outer_order_by.append(expr)
         inner_query_compiler = inner_query.get_compiler(
             self.using, elide_empty=self.elide_empty
         )
@@ -653,7 +665,15 @@ class SQLCompiler:
                 ")",
                 self.connection.ops.quote_name("qualify_mask"),
             ]
-        return result, list(inner_params) + qualify_params
+        params = list(inner_params) + qualify_params
+        if outer_order_by:
+            ordering = []
+            for expr in outer_order_by:
+                sql, order_params = self.compile(expr)
+                ordering.append(sql)
+                params.extend(order_params)
+            result.append("ORDER BY %s" % ", ".join(ordering))
+        return result, params
 
     def as_sql(self, with_limits=True, with_col_aliases=False):
         """
@@ -686,7 +706,7 @@ class SQLCompiler:
                     combinator, self.query.combinator_all
                 )
             elif self.qualify:
-                result, params = self.get_qualify_sql()
+                result, params = self.get_qualify_sql(order_by)
                 order_by = None
             else:
                 distinct_fields, distinct_params = self.get_distinct()
