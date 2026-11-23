@@ -269,6 +269,15 @@ def test_Mul():
     assert str(cc1*Rational(2)*cc2) == '2*CustomClass1()*CustomClass2()'
 
 
+def test_Mul_reciprocal_denominator():
+    reciprocal = Pow(Pow(y, -1), -1, evaluate=False)
+    assert str(Mul(x, reciprocal, evaluate=False)) == "x/(1/y)"
+    assert str(Mul(1, reciprocal, evaluate=False)) == "1/(1/y)"
+
+    reciprocal_sqrt = Pow(1/sqrt(y), -1, evaluate=False)
+    assert str(Mul(x, reciprocal_sqrt, evaluate=False)) == "x/(1/sqrt(y))"
+
+
 def test_NaN():
     assert str(nan) == "nan"
 

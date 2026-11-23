@@ -250,6 +250,13 @@ class StrPrinter(Printer):
 
         prec = precedence(expr)
 
+        def parenthesize_denominator(factor):
+            # These powers print as divisions, not exponentiations.
+            if (isinstance(factor, Pow) and factor.is_commutative
+                    and (factor.exp is S.NegativeOne or -factor.exp is S.Half)):
+                return "(%s)" % self._print(factor)
+            return self.parenthesize(factor, prec, strict=False)
+
         # Check for unevaluated Mul. In this case we need to make sure the
         # identities are visible, multiple Rational factors are not combined
         # etc so we display in a straight-forward form that fully preserves all
@@ -284,8 +291,7 @@ class StrPrinter(Printer):
                 pre = [str(d.pop(0))]
             else:
                 pre = []
-            dfactors = pre + [self.parenthesize(a, prec, strict=False)
-                for a in d]
+            dfactors = pre + [parenthesize_denominator(a) for a in d]
 
             n = '*'.join(nfactors)
             d = '*'.join(dfactors)
@@ -348,7 +354,7 @@ class StrPrinter(Printer):
         a = a or [S.One]
 
         a_str = [self.parenthesize(x, prec, strict=False) for x in a]
-        b_str = [self.parenthesize(x, prec, strict=False) for x in b]
+        b_str = [parenthesize_denominator(x) for x in b]
 
         # To parenthesize Pow with exp = -1 and having more than one Symbol
         for item in pow_paren:
