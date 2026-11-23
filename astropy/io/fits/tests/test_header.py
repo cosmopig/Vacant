@@ -547,6 +547,14 @@ class TestHeaderFunctions(FitsTestCase):
             "CONTINUE  '' / long comment                                                     "
         )
 
+    @pytest.mark.parametrize("n", range(50, 80))
+    @pytest.mark.parametrize("suffix", ["", "x" * 10, "''", "''" + "y" * 30])
+    def test_long_string_with_double_single_quotes_roundtrip(self, n, suffix):
+        """Null strings ('') in long (CONTINUE) values must round-trip."""
+        c1 = fits.Card("CONFIG", "x" * n + "''" + suffix)
+        c2 = fits.Card.fromstring(str(c1))
+        assert c2.value == c1.value
+
     def test_word_in_long_string_too_long(self):
         # if a word in a long string is too long, it will be cut in the middle
         c = fits.Card("abc", "longstringvalue" * 10, "longcomment" * 10)
