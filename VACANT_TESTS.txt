@@ -1,0 +1,1 @@
+tests/servers/test_basehttp.py::WSGIRequestHandlerTestCase::test_no_body_returned_for_head_requests

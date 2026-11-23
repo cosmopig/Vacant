@@ -143,6 +143,22 @@ class ServerHandler(simple_server.ServerHandler):
         if self.headers.get("Connection") == "close":
             self.request_handler.close_connection = True
 
+    def write(self, data):
+        # RFC 9110 Section 9.3.2: a server must not send a body in a response
+        # to a HEAD request. Send the headers (computed as for GET) but
+        # discard the body, since there is no upstream server to strip it.
+        if self.environ.get("REQUEST_METHOD") == "HEAD":
+            if not self.status:
+                raise AssertionError("write() before start_response()")
+            if not self.headers_sent:
+                self.bytes_sent = len(data)
+                self.send_headers()
+            else:
+                self.bytes_sent += len(data)
+            self._flush()
+            return
+        super().write(data)
+
     def close(self):
         self.get_stdin().read()
         super().close()
