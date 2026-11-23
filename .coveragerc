@@ -1,0 +1,28 @@
+[paths]
+source =
+   pylint
+
+[report]
+include =
+    pylint/*
+omit =
+    */test/*
+# TODO: 3.0: Remove these after these files have been removed
+    pylint/config/configuration_mixin.py
+    pylint/config/option.py
+    pylint/config/option_manager_mixin.py
+    pylint/config/option_parser.py
+    pylint/config/options_provider_mixin.py
+exclude_lines =
+    # Re-enable default pragma
+    pragma: no cover
+
+    # Debug-only code
+    def __repr__
+
+    # Type checking code not executed during pytest runs
+    if TYPE_CHECKING:
+    @overload
+
+    # Abstract methods are not executed during pytest runs
+    raise NotImplementedError()
