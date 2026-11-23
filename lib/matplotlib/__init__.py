@@ -1059,6 +1059,8 @@ def rc_context(rc=None, fname=None):
     """
     Return a context manager for temporarily changing rcParams.
 
+    The :rc:`backend` rcParam will not be reset by the context manager.
+
     Parameters
     ----------
     rc : dict
@@ -1088,6 +1090,7 @@ def rc_context(rc=None, fname=None):
 
     """
     orig = rcParams.copy()
+    dict.pop(orig, 'backend', None)
     try:
         if fname:
             rc_file(fname)

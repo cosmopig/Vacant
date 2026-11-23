@@ -270,6 +270,26 @@ def test_lazy_auto_backend_selection():
                 timeout=_test_timeout)
 
 
+def _impl_test_backend_selection_in_rc_context():
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    assert mpl.rcParams._get_backend_or_none() is None
+    with mpl.rc_context():
+        fig = plt.figure()
+        backend = mpl.get_backend()
+
+    assert plt.fignum_exists(fig.number)
+    assert mpl.get_backend() == backend
+    assert plt.fignum_exists(fig.number)
+    assert plt.gcf() is fig
+
+
+def test_backend_selection_in_rc_context():
+    _run_helper(_impl_test_backend_selection_in_rc_context,
+                timeout=_test_timeout, extra_env={"MPLBACKEND": ""})
+
+
 def _implqt5agg():
     import matplotlib.backends.backend_qt5agg  # noqa
     import sys
