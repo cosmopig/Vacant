@@ -1,0 +1,65 @@
+{
+  "scope": "All PRs in cosmopig/Vacant with each exact calibration handback head; not a full session/outside-help audit.",
+  "results": [
+    {
+      "task": "sympy__sympy-18763",
+      "checked_at": "2026-11-23T15:47:13.443Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "sympy__sympy-21596",
+      "checked_at": "2026-11-23T15:47:13.443Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "astropy__astropy-13977",
+      "checked_at": "2026-11-23T15:47:13.444Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "matplotlib__matplotlib-21568",
+      "checked_at": "2026-11-23T15:47:13.444Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "pydata__xarray-7229",
+      "checked_at": "2026-11-23T15:47:13.444Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "scikit-learn__scikit-learn-26194",
+      "checked_at": "2026-11-23T15:47:13.444Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "django__django-15957",
+      "checked_at": "2026-11-23T15:47:13.444Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "astropy__astropy-8707",
+      "checked_at": "2026-11-23T15:47:13.444Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "pytest-dev__pytest-5840",
+      "checked_at": "2026-11-23T15:47:13.447Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "matplotlib__matplotlib-26466",
+      "checked_at": "2026-11-23T15:47:13.447Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "django__django-14140",
+      "checked_at": "2026-11-23T15:47:13.447Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    },
+    {
+      "task": "sphinx-doc__sphinx-8595",
+      "checked_at": "2026-11-23T15:47:13.447Z",
+      "result": "No pull requests in github.com/cosmopig/Vacant match these filters.\n"
+    }
+  ]
+}

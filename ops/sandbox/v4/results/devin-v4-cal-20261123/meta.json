@@ -1,0 +1,99 @@
+{
+  "version": 4,
+  "protocol": "calibration",
+  "evidence": "external-devin-v4",
+  "calibration_only": true,
+  "control_only": false,
+  "task_ids": [
+    "sympy__sympy-18763",
+    "sympy__sympy-21596",
+    "astropy__astropy-13977",
+    "matplotlib__matplotlib-21568",
+    "pydata__xarray-7229",
+    "scikit-learn__scikit-learn-26194",
+    "django__django-15957",
+    "astropy__astropy-8707",
+    "pytest-dev__pytest-5840",
+    "matplotlib__matplotlib-26466",
+    "django__django-14140",
+    "sphinx-doc__sphinx-8595"
+  ],
+  "expected_branches": [
+    "sandbox-devin-cal4/sympy__sympy-18763-plain",
+    "sandbox-devin-cal4/sympy__sympy-21596-plain",
+    "sandbox-devin-cal4/astropy__astropy-13977-plain",
+    "sandbox-devin-cal4/matplotlib__matplotlib-21568-plain",
+    "sandbox-devin-cal4/pydata__xarray-7229-plain",
+    "sandbox-devin-cal4/scikit-learn__scikit-learn-26194-plain",
+    "sandbox-devin-cal4/django__django-15957-plain",
+    "sandbox-devin-cal4/astropy__astropy-8707-plain",
+    "sandbox-devin-cal4/pytest-dev__pytest-5840-plain",
+    "sandbox-devin-cal4/matplotlib__matplotlib-26466-plain",
+    "sandbox-devin-cal4/django__django-14140-plain",
+    "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain"
+  ],
+  "remote": "origin",
+  "fingerprints": {
+    "selection": "46b9fa8a5c01e9caf0d527c56eefb16b2c972598f64c8559cb6cf4f58ca662d7",
+    "manifest": "42686ae90c581eb8e404e1c80d178c9c9631d9448e8f8d4c891cd3feede6d8fa",
+    "dataset": "4f74c5cff0d5838cd8026295d7ed61ed8171147207ead7d795ff18c977712ae2"
+  },
+  "git_sha": "6fa41c908345c5a06f3022ae680ca4f2fcb37b69",
+  "harness_version": "3.0.17",
+  "harness_timeout_s": 1800,
+  "sessions": {
+    "sandbox-devin-cal4/sympy__sympy-18763-plain": "devin-1ecfdcdc9b7f443dab12d8273c694973",
+    "sandbox-devin-cal4/sympy__sympy-21596-plain": "devin-6b16bccda86d428ab80d4613a9d841be",
+    "sandbox-devin-cal4/astropy__astropy-13977-plain": "devin-fc0a2fdaf77c4e1ab68cec6ba12c7f10",
+    "sandbox-devin-cal4/matplotlib__matplotlib-21568-plain": "devin-41adc8d4028242e88d608029bb8069ea",
+    "sandbox-devin-cal4/pydata__xarray-7229-plain": "devin-d4029375d179449183eb0016e293d283",
+    "sandbox-devin-cal4/scikit-learn__scikit-learn-26194-plain": "devin-a96abb47a3c74a93bbe3d1698563b7a1",
+    "sandbox-devin-cal4/django__django-15957-plain": "devin-1955805b196d4bc6b9052b7d8536a348",
+    "sandbox-devin-cal4/astropy__astropy-8707-plain": "devin-5c3653e88d2e4a6ba2a702cacff893b5",
+    "sandbox-devin-cal4/pytest-dev__pytest-5840-plain": "devin-e52567ce43424fafab1faba905810b48",
+    "sandbox-devin-cal4/matplotlib__matplotlib-26466-plain": "devin-f8c1d369c7cf4bc4b543dc18e3a3a878",
+    "sandbox-devin-cal4/django__django-14140-plain": "devin-c667034d55e4419a957e08f1a45c3738",
+    "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain": "devin-7b23125faa1c4be4ab6e337203d98e06"
+  },
+  "config": {
+    "arms": [
+      "calibration-plain"
+    ],
+    "tasks": [
+      "all"
+    ],
+    "samples": 1,
+    "seed": 20261122
+  },
+  "implementation_sha256": {
+    "sandbox/v3/score.py": "cb74cca74ad42163ce9a3a668c506108c034c5b2d460db8bce43b020c0e0d0b3",
+    "sandbox/v3/harness.py": "020f347391427af495313062c7dcb459661b2ca047d238a6d77f9341902d9ecb",
+    "sandbox/v4/score.py": "e33226c7ff33b8fc0172cb1b344aa275588b8f78e54e3416b36ad8e5a1c10a2c",
+    "sandbox/v4/patch.py": "b355f566cc9600272a0aed6148b614ad22eb73b51930573f1611bd403f4ca726",
+    "sandbox/v4/images.py": "b8b3e19a7d53448d1e0585e393b9c83557b5e5bd14ea00b9d0d64a7b6b63d1dd",
+    "sandbox/v4/gates.py": "07efddb40621656dd4fe4ef4d0eea85a3f1873a9e7c92492632241cc3fb2f318",
+    "sandbox/v4/audit.py": "4de67fbe47b19f906b81426dfca8fb906a868de06af5fc2628b56305fae650c4",
+    "sandbox/v4/state.py": "56e65696775873eddd9c93fafb25ccf7b5a011d4cce793f8de5067d29bb75b1d",
+    "sandbox/analyze.py": "491ac8a8e840b55e186dd54152e7774cd8b15a841af338fe878bffe5f1a4f55e",
+    "sandbox/v3/results/devin-v3-cmp-20261123/parse_gates.py": "2ffe4c08e0f91a331aa81dd15ab0a0f40d4a9b124f9ebba983212f12154936bc"
+  },
+  "changed_branches": [],
+  "missing_branches": [],
+  "unreviewed_branches": [],
+  "calibration": {
+    "resolved_count": 4,
+    "conservative_resolved_count": 4,
+    "scored": 12,
+    "planned": 12,
+    "threshold": 8,
+    "complete": true,
+    "proceed": true,
+    "decision": "proceed",
+    "infra_void": 0,
+    "outside_help": 0,
+    "missing_branches": [],
+    "unreviewed_branches": []
+  },
+  "poll_errors": {},
+  "cell_states": {}
+}

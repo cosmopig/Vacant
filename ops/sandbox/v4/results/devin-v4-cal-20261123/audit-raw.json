@@ -1,0 +1,482 @@
+[
+ {
+  "branch": "sandbox-devin-cal4/sympy__sympy-18763-plain",
+  "sid": "devin-1ecfdcdc9b7f443dab12d8273c694973",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    4,
+    [
+     "[event-01a208e45bdd79089bda6357fccd5205] 2026-11-23 14:51:53 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sympy__sympy-18763**",
+     "[event-01a208e4a4557b028e7b148a1f3d4a6c] 2026-11-23 14:52:11 UTC >>> subagent_started (other): subagent started: Sidekick",
+     "[event-01a208e4ea4670f08b476361c91d5f73] 2026-11-23 14:52:29 UTC >>> shell_process_completed (shell): exit_code=0, output: ls: cannot access '/home/ubuntu/miniforge3': No such file or directory",
+     "[event-01a208e4ea4670f08b4763aeef11495f] 2026-11-23 14:52:29 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e45bdd79089bda6357fccd5205] 2026-11-23 14:51:53 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sympy__sympy-18763**",
+     "[event-01a208e4a4557b028e7b148a1f3d4a6c] 2026-11-23 14:52:11 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "github.com/sympy": [
+    2,
+    [
+     "[event-01a208e5b06575e3b7736e1db3f529c6] 2026-11-23 14:53:20 UTC >>> shell_process_completed (shell): exit_code=0, output: diff --git a/sympy/printing/tests/test_latex.py b/sympy/printing/tests/test_latex.py",
+     "[event-01a208e5b06972b1927a552526b67efa] 2026-11-23 14:53:20 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "issues/": [
+    2,
+    [
+     "[event-01a208e5b06575e3b7736e1db3f529c6] 2026-11-23 14:53:20 UTC >>> shell_process_completed (shell): exit_code=0, output: diff --git a/sympy/printing/tests/test_latex.py b/sympy/printing/tests/test_latex.py",
+     "[event-01a208e5b06972b1927a552526b67efa] 2026-11-23 14:53:20 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "/pull/": [
+    2,
+    [
+     "[event-01a208e6299e7e9182acede84967fcae] 2026-11-23 14:53:51 UTC >>> shell_process_completed (shell): exit_code=0, output: Switched to a new branch 'sandbox-devin-cal4/sympy__sympy-18763-plain'",
+     "[event-01a208e629b27c81972fdb606af254cc] 2026-11-23 14:53:51 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e45bdd79089bda6357fccd5205] 2026-11-23 14:51:53 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sympy__sympy-18763**"
+  ],
+  "push": [
+   "[event-01a208e6aa3b78d2bfc9072ed9189941] 2026-11-23 14:54:24 UTC >>> devin_message (message): devin: The fix is pushed to [sand"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/sympy__sympy-21596-plain",
+  "sid": "devin-6b16bccda86d428ab80d4613a9d841be",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    4,
+    [
+     "[event-01a208e458fa785d8383d933a8430c8d] 2026-11-23 14:51:52 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sympy__sympy-21596**",
+     "[event-01a208e4a8ba7640a5e8cdcf62c226c0] 2026-11-23 14:52:12 UTC >>> subagent_started (other): subagent started: Sidekick",
+     "[event-01a208e4f63279d2b125140d25843630] 2026-11-23 14:52:32 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit",
+     "[event-01a208e4f6637292b64bf4f8d1752bfc] 2026-11-23 14:52:32 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e458fa785d8383d933a8430c8d] 2026-11-23 14:51:52 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sympy__sympy-21596**",
+     "[event-01a208e4a8ba7640a5e8cdcf62c226c0] 2026-11-23 14:52:12 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "github.com/sympy": [
+    2,
+    [
+     "[event-01a208e6589073009c1c0b7023bfaa1e] 2026-11-23 14:54:03 UTC >>> shell_process_completed (shell): exit_code=0, output: ..............................................................x......... [ 20%]",
+     "[event-01a208e65a2174f2978d1bd931edf5f6] 2026-11-23 14:54:03 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "issues/": [
+    2,
+    [
+     "[event-01a208e6589073009c1c0b7023bfaa1e] 2026-11-23 14:54:03 UTC >>> shell_process_completed (shell): exit_code=0, output: ..............................................................x......... [ 20%]",
+     "[event-01a208e65a2174f2978d1bd931edf5f6] 2026-11-23 14:54:03 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "/pull/": [
+    3,
+    [
+     "[event-01a208e6f99576e3a03176a2c653f771] 2026-11-23 14:54:44 UTC >>> shell_process_completed_background (shell): exit_code=0, output: remote: ",
+     "[event-01a208e6facb70928f69c84758f07366] 2026-11-23 14:54:44 UTC >>> shell_process_completed (shell): exit_code=0, output: remote: ",
+     "[event-01a208e6fad4721181b68dc807474671] 2026-11-23 14:54:44 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e458fa785d8383d933a8430c8d] 2026-11-23 14:51:52 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sympy__sympy-21596**"
+  ],
+  "push": [
+   "[event-01a208e76bd47122ace5dfa50973a163] 2026-11-23 14:55:13 UTC >>> devin_message (message): devin: Done. I pushed the fix to "
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/astropy__astropy-13977-plain",
+  "sid": "devin-fc0a2fdaf77c4e1ab68cec6ba12c7f10",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    2,
+    [
+     "[event-01a208e45594791e929f263b9a043ddf] 2026-11-23 14:51:51 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal astropy__astropy-13977**",
+     "[event-01a208e4ca9d7e138a77ac02b5229c1b] 2026-11-23 14:52:21 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit"
+    ]
+   ],
+   "leaderboard": [
+    1,
+    [
+     "[event-01a208e45594791e929f263b9a043ddf] 2026-11-23 14:51:51 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal astropy__astropy-13977**"
+    ]
+   ],
+   "/pull/": [
+    1,
+    [
+     "[event-01a208e76aea7cf18d7bee00ef6846e8] 2026-11-23 14:55:13 UTC >>> shell_process_completed (shell): exit_code=0, output: Updated 1 path from the index"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e45594791e929f263b9a043ddf] 2026-11-23 14:51:51 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal astropy__astropy-13977**"
+  ],
+  "push": [
+   "[event-01a208e764a571df9b456c1c00d5cb4b] 2026-11-23 14:55:12 UTC <<< git_push (other): git_push"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/matplotlib__matplotlib-21568-plain",
+  "sid": "devin-41adc8d4028242e88d608029bb8069ea",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    4,
+    [
+     "[event-01a208e4647979a0bbd042ca8a7ff9b3] 2026-11-23 14:51:55 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal matplotlib__matplotlib-21568**",
+     "[event-01a208e4b95c7e539fb41dffce21b9b4] 2026-11-23 14:52:17 UTC >>> subagent_started (other): subagent started: Sidekick",
+     "[event-01a208e628cd70e3be1cf060c2c0f7eb] 2026-11-23 14:53:51 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit",
+     "[event-01a208e628f57743b44d764d70231d69] 2026-11-23 14:53:51 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e4647979a0bbd042ca8a7ff9b3] 2026-11-23 14:51:55 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal matplotlib__matplotlib-21568**",
+     "[event-01a208e4b95c7e539fb41dffce21b9b4] 2026-11-23 14:52:17 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "/pull/": [
+    3,
+    [
+     "[event-01a208e8d39770b282850fe061f83be8] 2026-11-23 14:56:45 UTC >>> shell_process_completed_background (shell): exit_code=0, output: Switched to a new branch 'sandbox-devin-cal4/matplotlib__matplotlib-21568-plain'",
+     "[event-01a208e8d3da7fc29cbaf7d33dbdf0da] 2026-11-23 14:56:46 UTC >>> shell_process_completed (shell): exit_code=0, output: remote: ",
+     "[event-01a208e8d4157391ab3c79c990b73504] 2026-11-23 14:56:46 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e4647979a0bbd042ca8a7ff9b3] 2026-11-23 14:51:55 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal matplotlib__matplotlib-21568**"
+  ],
+  "push": [
+   "[event-01a208e957d67a329050ac12706d4888] 2026-11-23 14:57:19 UTC >>> devin_message (message): devin: I pushed the fix for matpl"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/pydata__xarray-7229-plain",
+  "sid": "devin-d4029375d179449183eb0016e293d283",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    1,
+    [
+     "[event-01a208e469267c0eb51711bca42038a0] 2026-11-23 14:51:56 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal pydata__xarray-7229**"
+    ]
+   ],
+   "leaderboard": [
+    1,
+    [
+     "[event-01a208e469267c0eb51711bca42038a0] 2026-11-23 14:51:56 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal pydata__xarray-7229**"
+    ]
+   ],
+   "/pull/": [
+    1,
+    [
+     "[event-01a208e9c8b279f39cd4bb8bdb3f880b] 2026-11-23 14:57:48 UTC >>> shell_process_completed (shell): exit_code=0, output:  M xarray/core/computation.py"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e469267c0eb51711bca42038a0] 2026-11-23 14:51:56 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal pydata__xarray-7229**"
+  ],
+  "push": [
+   "[event-01a208e9fbd47f42b91799f7dfcbaf5f] 2026-11-23 14:58:01 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/scikit-learn__scikit-learn-26194-plain",
+  "sid": "devin-a96abb47a3c74a93bbe3d1698563b7a1",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    1,
+    [
+     "[event-01a208e44a90703a89d68ca4e9d13637] 2026-11-23 14:51:48 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal scikit-learn__scikit-learn-26194**"
+    ]
+   ],
+   "leaderboard": [
+    1,
+    [
+     "[event-01a208e44a90703a89d68ca4e9d13637] 2026-11-23 14:51:48 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal scikit-learn__scikit-learn-26194**"
+    ]
+   ],
+   "github.com/scikit-learn": [
+    3,
+    [
+     "[event-01a208e49dc47ca29d7d0cd4d0ff6f5b] 2026-11-23 14:52:10 UTC >>> shell_process_completed (shell): exit_code=0, output: Thresholds can exceed 1 in `roc_curve` while providing probability estimate",
+     "[event-01a208e50dae7690acc1dcd138834087] 2026-11-23 14:52:38 UTC >>> shell_process_started (shell): exec: cd ~/kit/scikit-learn__scikit-learn-26194 && python3 - <<'EOF'",
+     "[event-01a208e520667f30be621aa1d97f0018] 2026-11-23 14:52:43 UTC >>> shell_process_started (shell): exec: cd ~/kit/scikit-learn__scikit-learn-26194 && python3 - <<'EOF'"
+    ]
+   ],
+   "issues/": [
+    2,
+    [
+     "[event-01a208e50dae7690acc1dcd138834087] 2026-11-23 14:52:38 UTC >>> shell_process_started (shell): exec: cd ~/kit/scikit-learn__scikit-learn-26194 && python3 - <<'EOF'",
+     "[event-01a208e520667f30be621aa1d97f0018] 2026-11-23 14:52:43 UTC >>> shell_process_started (shell): exec: cd ~/kit/scikit-learn__scikit-learn-26194 && python3 - <<'EOF'"
+    ]
+   ],
+   "/pull/": [
+    2,
+    [
+     "[event-01a208e49dc47ca29d7d0cd4d0ff6f5b] 2026-11-23 14:52:10 UTC >>> shell_process_completed (shell): exit_code=0, output: Thresholds can exceed 1 in `roc_curve` while providing probability estimate",
+     "[event-01a208eddf8b7772934ebde757d6953c] 2026-11-23 15:02:16 UTC >>> shell_process_completed (shell): exit_code=0, output:  doc/whats_new/v1.3.rst                |  6 ++++++"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e44a90703a89d68ca4e9d13637] 2026-11-23 14:51:48 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal scikit-learn__scikit-learn-26194**"
+  ],
+  "push": [
+   "[event-01a208edd78a7235878cd872d3023ff0] 2026-11-23 15:02:14 UTC <<< git_push (other): git_push"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/django__django-15957-plain",
+  "sid": "devin-1955805b196d4bc6b9052b7d8536a348",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    4,
+    [
+     "[event-01a208e457987e28b15446e32e135f2b] 2026-11-23 14:51:52 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal django__django-15957**",
+     "[event-01a208e4a7bc781184457331e2616fa4] 2026-11-23 14:52:12 UTC >>> subagent_started (other): subagent started: Sidekick",
+     "[event-01a208e4f37f7782a2881a6753317404] 2026-11-23 14:52:31 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit",
+     "[event-01a208e4f3a57251ab3d47cad91d1e26] 2026-11-23 14:52:32 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e457987e28b15446e32e135f2b] 2026-11-23 14:51:52 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal django__django-15957**",
+     "[event-01a208e4a7bc781184457331e2616fa4] 2026-11-23 14:52:12 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "/pull/": [
+    3,
+    [
+     "[event-01a208e7d0677af1a55bea084ae4bb36] 2026-11-23 14:55:39 UTC >>> shell_process_completed (shell): exit_code=0, output: remote: ",
+     "[event-01a208e7d07177f3be435b9754b70c19] 2026-11-23 14:55:39 UTC >>> scripted_tools (other): scripted_tools",
+     "[event-01a208e7d4117973995101b77bc85f04] 2026-11-23 14:55:40 UTC >>> shell_process_completed_background (shell): exit_code=0, output: remote: "
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e457987e28b15446e32e135f2b] 2026-11-23 14:51:52 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal django__django-15957**"
+  ],
+  "push": [
+   "[event-01a208e858d67883b6c0f1d5ff3c54db] 2026-11-23 14:56:14 UTC >>> devin_message (message): devin: Fixed and pushed to [`sand"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/astropy__astropy-8707-plain",
+  "sid": "devin-5c3653e88d2e4a6ba2a702cacff893b5",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    1,
+    [
+     "[event-01a208e46fd0714bb886ccc4e10303c0] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal astropy__astropy-8707**"
+    ]
+   ],
+   "leaderboard": [
+    1,
+    [
+     "[event-01a208e46fd0714bb886ccc4e10303c0] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal astropy__astropy-8707**"
+    ]
+   ],
+   "/pull/": [
+    1,
+    [
+     "[event-01a208e95b9a7c93b42ebd6dcc4f14f0] 2026-11-23 14:57:20 UTC >>> shell_process_completed (shell): exit_code=0, output: remote: "
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e46fd0714bb886ccc4e10303c0] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal astropy__astropy-8707**"
+  ],
+  "push": [
+   "[event-01a208e987f375e3b7ecc7350b2b4ab8] 2026-11-23 14:57:32 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/pytest-dev__pytest-5840-plain",
+  "sid": "devin-e52567ce43424fafab1faba905810b48",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    4,
+    [
+     "[event-01a208e471a274448f0ccfa16ba42447] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal pytest-dev__pytest-5840**",
+     "[event-01a208e4d1cd77e3b69bbcfc43d0e637] 2026-11-23 14:52:23 UTC >>> subagent_started (other): subagent started: Sidekick",
+     "[event-01a208e52f9f72b0bb18c6a874e53f8b] 2026-11-23 14:52:47 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit",
+     "[event-01a208e52fd57b808d7ed0de8bbffa5f] 2026-11-23 14:52:47 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e471a274448f0ccfa16ba42447] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal pytest-dev__pytest-5840**",
+     "[event-01a208e4d1cd77e3b69bbcfc43d0e637] 2026-11-23 14:52:23 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e471a274448f0ccfa16ba42447] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal pytest-dev__pytest-5840**"
+  ],
+  "push": [
+   "[event-01a208e773587043a74115da9a95a949] 2026-11-23 14:55:15 UTC >>> devin_message (message): devin: I fixed the pytest-dev__py"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/matplotlib__matplotlib-26466-plain",
+  "sid": "devin-f8c1d369c7cf4bc4b543dc18e3a3a878",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    2,
+    [
+     "[event-01a208e44b11750e8569a8cc76003d41] 2026-11-23 14:51:48 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal matplotlib__matplotlib-26466**",
+     "[event-01a208e48ef072f0b9ecc17672a8a634] 2026-11-23 14:52:06 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e44b11750e8569a8cc76003d41] 2026-11-23 14:51:48 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal matplotlib__matplotlib-26466**",
+     "[event-01a208e48ef072f0b9ecc17672a8a634] 2026-11-23 14:52:06 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "/pull/": [
+    3,
+    [
+     "[event-01a208e7f0067d91b67e33f3da639994] 2026-11-23 14:55:47 UTC >>> shell_process_completed_background (shell): exit_code=0, output: remote: ",
+     "[event-01a208e7f2a07ea18ae0ac70a6fab31e] 2026-11-23 14:55:48 UTC >>> shell_process_completed (shell): exit_code=0, output: remote: ",
+     "[event-01a208e7f2de73129b29913f468dca3e] 2026-11-23 14:55:48 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e44b11750e8569a8cc76003d41] 2026-11-23 14:51:48 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal matplotlib__matplotlib-26466**"
+  ],
+  "push": [
+   "[event-01a208e84b487fc1b64250b91920aef1] 2026-11-23 14:56:11 UTC >>> devin_message (message): devin: Fixed and pushed [sandbox-"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/django__django-14140-plain",
+  "sid": "devin-c667034d55e4419a957e08f1a45c3738",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    2,
+    [
+     "[event-01a208e451b17a9bba99c67feb002c27] 2026-11-23 14:51:50 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal django__django-14140**",
+     "[event-01a208e4de17751299d814c34b505e8e] 2026-11-23 14:52:26 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit"
+    ]
+   ],
+   "leaderboard": [
+    1,
+    [
+     "[event-01a208e451b17a9bba99c67feb002c27] 2026-11-23 14:51:50 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal django__django-14140**"
+    ]
+   ],
+   "github.com/django": [
+    1,
+    [
+     "[event-01a208e4bfcc75d3b2489d0e17954d5e] 2026-11-23 14:52:18 UTC >>> shell_process_completed (shell): exit_code=0, output: Combining Q() objects with boolean expressions crashes."
+    ]
+   ],
+   "/pull/": [
+    2,
+    [
+     "[event-01a208e4bfcc75d3b2489d0e17954d5e] 2026-11-23 14:52:18 UTC >>> shell_process_completed (shell): exit_code=0, output: Combining Q() objects with boolean expressions crashes.",
+     "[event-01a208e654397661a520855c5418f7c6] 2026-11-23 14:54:02 UTC >>> shell_process_completed (shell): exit_code=0, output: ERROR: test_deconstruct_boolean_expression (queries.test_q.QTests)"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e451b17a9bba99c67feb002c27] 2026-11-23 14:51:50 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal django__django-14140**"
+  ],
+  "push": [
+   "[event-01a208e678927463b397231b192be17f] 2026-11-23 14:54:11 UTC >>> mcp_tool_call (mcp): devin_mcp.devin_ticket_manage \u2192 exit_"
+  ]
+ },
+ {
+  "branch": "sandbox-devin-cal4/sphinx-doc__sphinx-8595-plain",
+  "sid": "devin-7b23125faa1c4be4ab6e337203d98e06",
+  "browser": 0,
+  "search": 0,
+  "mcp": 4,
+  "hits": {
+   "swe-bench": [
+    4,
+    [
+     "[event-01a208e4727072ee968e603bd07687ad] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sphinx-doc__sphinx-8595**",
+     "[event-01a208e4c1e47f53a89cd5d08bf83add] 2026-11-23 14:52:19 UTC >>> subagent_started (other): subagent started: Sidekick",
+     "[event-01a208e511727f03b00a1e857ac57872] 2026-11-23 14:52:39 UTC >>> shell_process_completed (shell): exit_code=0, output: # v4 native task kit",
+     "[event-01a208e511bf72c2bab89312421c59e5] 2026-11-23 14:52:39 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ],
+   "leaderboard": [
+    2,
+    [
+     "[event-01a208e4727072ee968e603bd07687ad] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sphinx-doc__sphinx-8595**",
+     "[event-01a208e4c1e47f53a89cd5d08bf83add] 2026-11-23 14:52:19 UTC >>> subagent_started (other): subagent started: Sidekick"
+    ]
+   ],
+   "/pull/": [
+    3,
+    [
+     "[event-01a208e662787e93877ea1042b47bba5] 2026-11-23 14:54:05 UTC >>> shell_process_completed_background (shell): exit_code=0, output: remote: ",
+     "[event-01a208e662dc7b60b037036a3bf61679] 2026-11-23 14:54:06 UTC >>> shell_process_completed (shell): exit_code=0, output: remote: ",
+     "[event-01a208e662e77233bcbf06be3c889377] 2026-11-23 14:54:06 UTC >>> scripted_tools (other): scripted_tools"
+    ]
+   ]
+  },
+  "incoming": [
+   "[event-01a208e4727072ee968e603bd07687ad] 2026-11-23 14:51:58 UTC <<< initial_user_message (message): user: **Solve sandbox v4 cal sphinx-doc__sphinx-8595**"
+  ],
+  "push": [
+   "[event-01a208e6acc27873ac73bb89dcbfc080] 2026-11-23 14:54:24 UTC >>> devin_message (message): devin: I pushed the fix to [`sand"
+  ]
+ }
+]

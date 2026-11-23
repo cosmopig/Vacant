@@ -1,0 +1,14 @@
+{
+  "resolved_count": 4,
+  "conservative_resolved_count": 4,
+  "scored": 12,
+  "planned": 12,
+  "threshold": 8,
+  "complete": true,
+  "proceed": true,
+  "decision": "proceed",
+  "infra_void": 0,
+  "outside_help": 0,
+  "missing_branches": [],
+  "unreviewed_branches": []
+}

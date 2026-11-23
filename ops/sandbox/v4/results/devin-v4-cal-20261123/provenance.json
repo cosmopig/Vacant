@@ -1,0 +1,106 @@
+{
+  "format_version": 1,
+  "protocol": "v4-calibration",
+  "source_run": "/home/ubuntu/sandbox-runs/results/devin-v4-cal-20261123",
+  "final_review_source_git_sha": "6a6e26b4da2d8790e7f69ba1c40ea390cb7434f7",
+  "published_kit_git_sha": "0ed267bfc094a73c6f63e169a8e10ad3f38b38f6",
+  "harness_version": "3.0.17",
+  "frozen_input_fingerprints": {
+    "selection": "46b9fa8a5c01e9caf0d527c56eefb16b2c972598f64c8559cb6cf4f58ca662d7",
+    "manifest": "42686ae90c581eb8e404e1c80d178c9c9631d9448e8f8d4c891cd3feede6d8fa",
+    "dataset": "4f74c5cff0d5838cd8026295d7ed61ed8171147207ead7d795ff18c977712ae2"
+  },
+  "selection_file_sha256": "efdd532ceb646f2b5e8119106f4f9b6e19e7eb26810e150adc57ee8254fceaf6",
+  "kit_manifest_file_sha256": "247f8b01d2cd5103aef6343d65b20829feeeb3f2dfeb28e3ebad13fef26ff98c",
+  "audit_sources": {
+    "reviewed_verdicts": "audit-sources/d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d.json",
+    "scanner_summary": "audit-raw.json",
+    "supplementary_pr_query": "calibration-pr-check.json"
+  },
+  "files": {
+    "NOTES.md": {
+      "bytes": 6736,
+      "sha256": "5b380f78c7ab761e252fb94a45337af0646c611f511586d22c02ac8e6a08f35f"
+    },
+    "audit-ingestion.json": {
+      "bytes": 813,
+      "sha256": "2217b69714111c0891e2365de70e1d1cb3688bf2b199169c39e305356eebbe0f"
+    },
+    "audit-raw.json": {
+      "bytes": 21665,
+      "sha256": "73ea508b18185907ea0c302bb562ddedf50cecc3bda77fb873844486cd961911"
+    },
+    "audit-sources/d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d.json": {
+      "bytes": 13809,
+      "sha256": "d295ad171b702c34f0532b338678776db7d826f8174b59e21156d68138a8114d"
+    },
+    "calibration-pr-check.json": {
+      "bytes": 2421,
+      "sha256": "b8b2becbc8fef8f417d6a488d03a1e646aff56ade5228e7ebd4b4bed5b5b834b"
+    },
+    "calibration.json": {
+      "bytes": 272,
+      "sha256": "3e057d61f21f40c4e3285fc7cbd97cb0c5a97395b93b7df2561becbd71d4c625"
+    },
+    "cells/astropy__astropy-13977-s1-calibration-plain/result.json": {
+      "bytes": 41513,
+      "sha256": "7054f435d47ac8ea5c4c14613549dda398d08c8e90f6ee75b2831b2e81c5317f"
+    },
+    "cells/astropy__astropy-8707-s1-calibration-plain/result.json": {
+      "bytes": 4404,
+      "sha256": "00ab0c5fcf5ea9c5885c3be7c5d09eaf8f9af56ddbb482224003bc3306efefb1"
+    },
+    "cells/django__django-14140-s1-calibration-plain/result.json": {
+      "bytes": 19983,
+      "sha256": "01e6a31c8099aaa513f65dd0de219e874eab0feadd251285f9eb976ce5c66866"
+    },
+    "cells/django__django-15957-s1-calibration-plain/result.json": {
+      "bytes": 10939,
+      "sha256": "b9eb5342e87514a0583262bef644537556ef4a5d0a1b4e4a4db1ff20f203c156"
+    },
+    "cells/matplotlib__matplotlib-21568-s1-calibration-plain/result.json": {
+      "bytes": 9643,
+      "sha256": "e9ae4aed919d628960500716d7f793ace6a63a00e49720c5d22835453352a1d1"
+    },
+    "cells/matplotlib__matplotlib-26466-s1-calibration-plain/result.json": {
+      "bytes": 11567,
+      "sha256": "2b380fc0d34d9f65f016c18d06f3a4b50f80ab28229421f15b733dbc0fac1a01"
+    },
+    "cells/pydata__xarray-7229-s1-calibration-plain/result.json": {
+      "bytes": 28022,
+      "sha256": "cff5752c5cffe2699dc6154bd369392387dbfc705437f08384a53e2395471ccd"
+    },
+    "cells/pytest-dev__pytest-5840-s1-calibration-plain/result.json": {
+      "bytes": 8238,
+      "sha256": "1038d62050892cb7a86580c5b6e7416439cb2b3e04fc3901f984e46425d3fc7e"
+    },
+    "cells/scikit-learn__scikit-learn-26194-s1-calibration-plain/result.json": {
+      "bytes": 23027,
+      "sha256": "12b8522994cf8b27530d6fbbf7345a189b2b8e615fb6f9aa0e6a2fee046df5ea"
+    },
+    "cells/sphinx-doc__sphinx-8595-s1-calibration-plain/result.json": {
+      "bytes": 3292,
+      "sha256": "72792b344b3726d3906e2aa4335b76e1d6c2adc35e2e6912907d663d70b40bab"
+    },
+    "cells/sympy__sympy-18763-s1-calibration-plain/result.json": {
+      "bytes": 8088,
+      "sha256": "154e8ae24869c2457dbcfc927e48d92ccce51cce6e9180d2ef2f74e5a627fe50"
+    },
+    "cells/sympy__sympy-21596-s1-calibration-plain/result.json": {
+      "bytes": 4877,
+      "sha256": "8e25da3439ebaca673a3690c90e192ed8bd82d34c8cdf43cb486fb9ffd055f25"
+    },
+    "contamination.json": {
+      "bytes": 13846,
+      "sha256": "7a22f4112ef167e39af1d775e5486fa7a1c7549c2960fdc429cd6d250d779f1a"
+    },
+    "meta.json": {
+      "bytes": 4427,
+      "sha256": "0dff0eae58077d626920193f06e10a2d6be1b5ff7b8ee9c119c5d880f26e07c2"
+    },
+    "secondary.json": {
+      "bytes": 952,
+      "sha256": "4394a4eadb4f6f2ff481b65b92571e72d609744c2a09c98de3d0f85f80a87be9"
+    }
+  }
+}
