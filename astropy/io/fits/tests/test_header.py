@@ -484,6 +484,18 @@ class TestHeaderFunctions(FitsTestCase):
 
         assert str(h1) == str(h2)
 
+    @pytest.mark.parametrize("prefix_len", range(50, 70))
+    @pytest.mark.parametrize("suffix", ["", "x" * 10, "''", "' x"])
+    def test_long_string_value_with_null_string_roundtrip(self, prefix_len, suffix):
+        """Doubled single quotes must survive round-tripping through
+        CONTINUE cards, wherever the card split happens to fall."""
+
+        value = "x" * prefix_len + "''" + suffix
+        card1 = fits.Card("CONFIG", value)
+        card2 = fits.Card.fromstring(str(card1))
+        assert card2.value == value
+        assert card1.value == card2.value
+
     def test_long_string_repr(self):
         """Regression test for https://aeon.stsci.edu/ssb/trac/pyfits/ticket/193
 

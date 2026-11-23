@@ -854,12 +854,14 @@ class Card(_Verify):
 
                 # Should match a string followed by a comment; if not it
                 # might be an invalid Card, so we just take it verbatim
-                m = self._strg_comment_RE.match(vc)
+                m = self._strg_comment_RE.fullmatch(vc)
+                if not m:
+                    m = self._strg_comment_RE.match(vc)
                 if not m:
                     return kw, vc
 
                 value = m.group("strg") or ""
-                value = value.rstrip().replace("''", "'")
+                value = value.rstrip()
                 if value and value[-1] == "&":
                     value = value[:-1]
                 values.append(value)
@@ -1058,7 +1060,15 @@ class Card(_Verify):
 
         # do the value string
         value = self._value.replace("'", "''")
-        words = _words_group(value, value_length)
+        words = []
+        while value:
+            word = _words_group(value, value_length)[0]
+            # Never split an escaped quote ('') across two cards
+            if len(word) < len(value) and (len(word) - len(word.rstrip("'"))) % 2:
+                word = word[:-1]
+            words.append(word)
+            value = value[len(word) :]
+        words = words or [""]
         for idx, word in enumerate(words):
             if idx == 0:
                 headstr = "{:{len}}= ".format(self.keyword, len=KEYWORD_LENGTH)
