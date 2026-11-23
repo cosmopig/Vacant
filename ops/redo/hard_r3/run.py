@@ -63,8 +63,9 @@ on one CPU. Times and memory required by your algorithm count toward grading.
 
 """
 STARTER = "def solve(data):\n    raise NotImplementedError\n"
-INFRA = re.compile(r"usage limit|rate.?limit|too many requests|429|connection|ECONN|ENOTFOUND|"
-                   r"503|unavailable|unexpected server error|service overloaded|bad gateway", re.I)
+INFRA = re.compile(r"usage limit|rate.?limit|too many requests|cannot connect to API|ECONN[A-Z]+|"
+                   r"ENOTFOUND|unexpected server error|service (?:overloaded|unavailable)|"
+                   r"bad gateway|gateway timeout|loading model", re.I)
 
 
 def runtime(binary: Path, rg: Path) -> list[str]:
@@ -197,14 +198,27 @@ def usage_from_events(log: Path) -> tuple[dict | None, list[dict]]:
             steps.append(event["part"])
         elif event.get("type") == "error":
             errors.append(event["error"])
-    if not steps:
+    if not steps and not errors:
         return None, errors
     keys = ("input", "output", "reasoning", "total")
     tokens = {k: sum(step["tokens"].get(k) or 0 for step in steps) for k in keys}
     for k in ("read", "write"):
         tokens[f"cache_{k}"] = sum((step["tokens"].get("cache") or {}).get(k) or 0 for step in steps)
-    return {"calls": len(steps), "calls_are_observed_completed_steps": True, "tokens": tokens,
-            "reported_cost": sum(step.get("cost") or 0 for step in steps), "final_error": None}, errors
+    return {"calls": len(steps) or None, "calls_are_observed_completed_steps": True,
+            "tokens": tokens if steps else None,
+            "reported_cost": sum(step.get("cost") or 0 for step in steps) if steps else None,
+            "final_error": errors[-1].get("name", "AgentError") if errors else None}, errors
+
+
+def attempt_void(result: dict, usage: dict | None, errors: list[dict], stderr: str) -> bool:
+    if result["rc"] in (125, 126, 127):
+        return True
+    if errors:
+        data = errors[-1].get("data") or {}
+        return str(data.get("statusCode")) in {"429", "502", "503", "504"} or bool(
+            INFRA.search(str(data.get("message", "")))
+        )
+    return usage is None and (bool(INFRA.search(stderr)) or not result["timed_out"])
 
 
 def safe_solution(path: Path) -> bytes | None:
@@ -270,11 +284,7 @@ def one_attempt(binary: Path, rg: Path, slot: int, plan, arm, tdir, provider, ad
     meta = {"started": started, "timeout_s": timeout_s, "usage": usage, "trace_id": trace_id,
             "workspace_changed": candidate != STARTER.encode(), "agent_errors": errors, **result}
     stderr = log.with_suffix(".jsonl.stderr").read_text(errors="replace")[-10_000:]
-    if result["rc"] in (125, 126, 127) or any(INFRA.search(str(e)) for e in errors) or (
-        not usage and INFRA.search(stderr)
-    ) or (
-        not result["timed_out"] and (usage is None or (result["rc"] != 0 and not errors))
-    ):
+    if attempt_void(result, usage, errors, stderr):
         out = {**meta, "void": "docker_or_provider_error"}
         emit_json(adir / "attempt.json", out)
         return out

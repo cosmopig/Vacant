@@ -843,7 +843,7 @@ def build_report(root: pathlib.Path) -> dict:
         cs = [c for c in cells if c["arm"] == arm]
         ok = [c for c in cs if not c["infra_void"]]
         calls = [sum((x["usage"] or {}).get("calls") or 0 for x in c["attempts"]) for c in ok
-                 if all(x["usage"] is not None for x in c["attempts"])]
+                 if all(x["usage"] is not None and x["usage"].get("calls") is not None for x in c["attempts"])]
         per_arm[arm] = {
             "cells": len(cs), "scored": len(ok), "infra_void": len(cs) - len(ok),
             "pass": sum(1 for c in ok if c["pass"]),
