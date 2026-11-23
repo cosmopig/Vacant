@@ -125,8 +125,8 @@ def test_control_cannot_clear_and_audit_identity_must_match(bank, tmp_path):
     assert not score.review(out)['calibration']['proceed']
     verdicts[bank.branches[0]]['session_id'] = 'wrong-session'
     score.write_json(out / 'contamination.json', verdicts)
-    with pytest.raises(ValueError, match='audit must bind'):
-        score.review(out)
+    assert not score.review(out)['calibration']['proceed']
+    assert load(out / 'contamination.json')[bank.branches[0]]['contaminated'] is None
 
 
 def test_audit_ingestion_keeps_raw_scan_unknown_and_requires_pr_push_evidence(bank, tmp_path):
@@ -144,8 +144,8 @@ def test_audit_ingestion_keeps_raw_scan_unknown_and_requires_pr_push_evidence(ba
                    final_push_evidence='final push timestamp and SHA verified', pr_review_evidence='no review received before push')
     rows[0].pop('pr_review_evidence')
     score.write_json(source, rows)
-    with pytest.raises(ValueError, match='final-push and PR/review evidence'):
-        audit.ingest(out, source)
+    rejected = audit.ingest(out, source)['rejected_branches']
+    assert 'final-push and PR/review evidence' in rejected[bank.branches[0]]
     rows[0]['pr_review_evidence'] = 'full event log reviewed'
     score.write_json(source, rows)
     assert len(audit.ingest(out, source)['applied_branches']) == 12
@@ -417,3 +417,35 @@ def test_unchanged_gitlink_is_exported_without_fetching_submodule_and_changes_re
     bank.git('push', str(bank.remote), changed + ':refs/heads/' + branch)
     with pytest.raises(ValueError, match='changed Git submodules'):
         bank.collect(out)
+
+
+def test_stale_audit_export_is_pending_while_other_cells_are_audited(bank, tmp_path):
+    bank.publish()
+    out, source = tmp_path / 'results', tmp_path / 'audits.json'
+    bank.collect(out)
+    records = [dict(branch=b, session_id=bank.sessions[b], handback_sha=bank.handback,
+                    contaminated=False, outside_help=False, reviewer='fixture reviewer',
+                    access_audit_complete=True, outside_help_audit_complete=True,
+                    evidence=['full access audit'], outside_help_evidence=['full outside-help audit'],
+                    final_push_evidence='final-push timestamp checked', pr_review_evidence='no review received before push')
+               for b in bank.branches]
+    score.write_json(source, records)
+    (bank.repo / 'later.txt').write_text('later delivery\n')
+    bank.git('add', 'later.txt')
+    bank.git('commit', '-qm', 'replace delivery')
+    bank.git('push', str(bank.remote), 'HEAD:refs/heads/' + bank.branches[0])
+    bank.collect(out)
+    result = audit.ingest(out, source)
+    assert bank.branches[0] in result['rejected_branches']
+    assert len(result['applied_branches']) == 11
+    assert not score.review(out)['calibration']['proceed']
+    assert load(out / 'contamination.json')[bank.branches[0]]['outside_help'] is None
+
+
+@pytest.mark.parametrize('content', ['[]', '{"incomplete":', '[null, {"branch": []}]'])
+def test_empty_or_bad_audit_export_does_not_abort_polling(bank, tmp_path, content):
+    out, source = tmp_path / 'results', tmp_path / 'audits.json'
+    bank.collect(out)
+    source.write_text(content)
+    assert audit.ingest(out, source)['applied_branches'] == []
+    assert not score.review(out)['calibration']['proceed']

@@ -134,11 +134,17 @@ def _review(out):
         raise ValueError('duplicate or unscheduled scored cells')
     for row in rows:
         verdict = verdicts[row['branch']]
-        if any(verdict.get(k) is not None for k in ('contaminated', 'outside_help')):
-            if (not verdict.get('reviewer') or not row.get('session_id')
-                    or verdict.get('session_id') != row['session_id'] or verdict.get('handback_sha') != row['git_sha']
-                    or meta['sessions'].get(row['branch']) != row['session_id']):
-                raise ValueError('audit must bind reviewer, session and scored handback: ' + row['branch'])
+        flags = [verdict.get(k) for k in ('contaminated', 'outside_help')]
+        invalid = (any(value is not None and type(value) is not bool for value in flags)
+                   or not all(isinstance(verdict.get(k), list) for k in ('evidence', 'outside_help_evidence')))
+        mismatched = (any(value is not None for value in flags) and
+                      (not verdict.get('reviewer') or not row.get('session_id')
+                       or verdict.get('session_id') != row['session_id'] or verdict.get('handback_sha') != row['git_sha']
+                       or meta['sessions'].get(row['branch']) != row['session_id']))
+        if invalid or mismatched:
+            verdicts[row['branch']] = {**slot(row.get('session_id'), row['git_sha']),
+                                      'pending_reason': 'invalid or stale audit binding; pending re-audit'}
+    write_json(out / 'contamination.json', verdicts)
     meta['missing_branches'] = [b for b in meta['expected_branches'] if b not in branches or b in meta.get('changed_branches', [])]
     write_json(out / 'meta.json', meta)
     meta = v3.review(out, version=4)
