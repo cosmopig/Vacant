@@ -211,3 +211,9 @@ base-skipped variants only when covered by passing variants. Once frozen,
 any selected test skipped, deselected or not collected causes refusal.
 Set OPENBLAS_NUM_THREADS, OMP_NUM_THREADS and MKL_NUM_THREADS to 1 inside
 the test runner's environment, independently of the caller.
+
+Pre-run clarification — 2026-11-22: derive the handback patch against a base
+snapshot with the same documented tracked-file setup recipe edits applied
+(Sphinx tox/setup pins and Astropy build pins). Setup-only changes therefore
+produce no candidate patch; additional agent edits remain. The official
+harness image already applies its own pre-install steps. No v3 session has run.

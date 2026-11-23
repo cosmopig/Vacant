@@ -90,6 +90,17 @@ creation. It fixes the whole-bank calibration gate, fresh comparison arms,
 official-harness primary outcome and handback-patch rules, P2P intervention,
 event-based contamination exclusions and inclusive sensitivity analysis.
 The v3 handback scorer is not implemented by this kit-building step.
+`patch.py` is its canonical patch-derivation module/CLI: normalize the base with
+the recorded tracked setup edits before comparing with the handback. It does
+not execute project code or installation commands. It excludes test-patch
+files, binary files and generated artifacts, while retaining agent changes
+even in setup files. The official harness image has its own pre-install edits.
+Setup-only Sphinx/Astropy handbacks therefore produce empty candidate patches.
+
+```bash
+.venv/bin/python -m ops.sandbox.v3.patch --base BASE_SNAPSHOT --handback HANDBACK \
+  --dataset-json ~/swebench-data/verified.jsonl --instance INSTANCE --out candidate.patch
+```
 
 `KIT.json` records the published branch SHAs, upstream base commits/tree IDs,
 file-size checks and leak-check counts. Each `sandbox-v3/<instance_id>` branch
