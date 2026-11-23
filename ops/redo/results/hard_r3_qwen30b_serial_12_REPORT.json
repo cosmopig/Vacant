@@ -1,0 +1,148 @@
+{
+ "control": "A",
+ "generated": "2026-11-23T08:54:53Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "b6f9ab7cd50e6d04dd52986d71ede9711b16edd93531a97cf55d56397b9a2263"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 0,
+  "control_only_b": 1,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 1,
+  "distinct_tasks_net_positive": 1,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 10,
+  "treatment_only_c": 1
+ },
+ "pairs_complete": 12,
+ "pairs_infra_void": [],
+ "pairs_planned": 12,
+ "pairs_scored": 12,
+ "per_arm": {
+  "A": {
+   "accepted": 5,
+   "accepted_but_wrong": 4,
+   "cells": 12,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "independent_hidden_cases"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 951.1,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 12.0,
+   "model_calls_known_cells": 12,
+   "pass": 1,
+   "rate": 0.0833,
+   "scored": 12,
+   "tests_tampered_attempts": 4,
+   "timeouts": 9
+  },
+  "R3": {
+   "accepted": 8,
+   "accepted_but_wrong": 7,
+   "cells": 12,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "independent_hidden_cases"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 647.5,
+   "mean_attempts": 1.833,
+   "mean_model_calls": 8.7,
+   "model_calls_known_cells": 11,
+   "pass": 1,
+   "rate": 0.0833,
+   "scored": 12,
+   "tests_tampered_attempts": 8,
+   "timeouts": 21
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 1,
+   "c": 1,
+   "ctrl_pass": 1,
+   "p": 1.0,
+   "pairs": 12,
+   "treat_pass": 1
+  }
+ },
+ "per_task": {
+  "cache": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "dispatcher": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "grammar": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "intervals": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "mesh": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "patch": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 1
+  },
+  "rank": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "reconcile": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "route": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 0
+  },
+  "settlement": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "spans": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "terrain": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  }
+ },
+ "plan_id": "hard_r3_qwen30b_serial_12",
+ "plan_sha256": "3d4fcaf7117cd808cdf7b6784b866f8245a4e95e94f913b8790f054cc996f0f8",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 11,
+  "accept_pass": 2,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 21,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "R3"
+}
