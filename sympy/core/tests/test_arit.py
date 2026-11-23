@@ -1985,6 +1985,11 @@ def test_issue_8247_8354():
 def test_Add_is_zero():
     x, y = symbols('x y', zero=True)
     assert (x + y).is_zero
+    assert ((1 + I)**2 - 2*I).is_zero is not False
+    assert Add(I, -I, evaluate=False).is_zero is True
+    i = Symbol('i', imaginary=True)
+    assert (I + i).is_zero is None
+    assert (1 + I + i).is_zero is False
 
 
 def test_issue_14392():

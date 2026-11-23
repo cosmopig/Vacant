@@ -536,8 +536,7 @@ class Add(Expr, AssocOp):
             return
         nz = []
         z = 0
-        im_or_z = False
-        im = False
+        im_I = []
         for a in self.args:
             if a.is_real:
                 if a.is_zero:
@@ -546,22 +545,19 @@ class Add(Expr, AssocOp):
                     nz.append(a)
                 else:
                     return
-            elif a.is_imaginary:
-                im = True
-            elif (S.ImaginaryUnit*a).is_real:
-                im_or_z = True
             else:
-                return
+                ai = S.ImaginaryUnit*a
+                if a.is_imaginary or ai.is_real:
+                    im_I.append(ai)
+                else:
+                    return
         if z == len(self.args):
             return True
         if len(nz) == len(self.args):
             return None
         b = self.func(*nz)
         if b.is_zero:
-            if not im_or_z and not im:
-                return True
-            if im and not im_or_z:
-                return False
+            return self.func(*im_I).is_zero
         if b.is_zero is False:
             return False
 
