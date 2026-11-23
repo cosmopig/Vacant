@@ -122,13 +122,30 @@ def myexpand(func, target):
                - expanded.replace(exp_polar, exp).subs(subs).n()) < 1e-10
 
 
+def test_polylog_values():
+    from sympy import log, Rational, pi, sqrt, Abs
+    assert polylog(2, 2) == pi**2/4 - I*pi*log(2)
+    assert polylog(2, S.Half) == pi**2/12 - log(2)**2/2
+    assert polylog(2, Rational(1, 2)).expand(func=True) == \
+        pi**2/12 - log(2)**2/2
+    for z in [S.Half, 2, (sqrt(5)-1)/2, -(sqrt(5)-1)/2, -(sqrt(5)+1)/2, (3-sqrt(5))/2]:
+        assert Abs(polylog(2, z).evalf() - polylog(2, z, evaluate=False).evalf()) < 1e-15
+
+
+def test_polylog_expansion_log():
+    from sympy import log, diff
+    assert expand_func(polylog(1, z)) == -log(1 - z)
+    assert not expand_func(polylog(1, z)).has(exp_polar)
+    assert expand_func(diff(polylog(1, z) - expand_func(polylog(1, z)), z)) == 0
+
+
 def test_polylog_expansion():
     from sympy import log
     assert polylog(s, 0) == 0
     assert polylog(s, 1) == zeta(s)
     assert polylog(s, -1) == -dirichlet_eta(s)
 
-    assert myexpand(polylog(1, z), -log(1 + exp_polar(-I*pi)*z))
+    assert myexpand(polylog(1, z), -log(1 - z))
     assert myexpand(polylog(0, z), z/(1 - z))
     assert myexpand(polylog(-1, z), z**2/(1 - z)**2 + z/(1 - z))
     assert myexpand(polylog(-5, z), None)
