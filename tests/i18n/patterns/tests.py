@@ -163,6 +163,15 @@ class URLTranslationTests(URLTestCaseBase):
             self.assertEqual(translate_url('/nl/gebruikers/', 'en'), '/en/users/')
             self.assertEqual(translation.get_language(), 'nl')
 
+    def test_translate_url_with_optional_named_group(self):
+        with translation.override('en'):
+            for suffix in ('', 'tag/django/', 'tag//'):
+                with self.subTest(suffix=suffix):
+                    self.assertEqual(
+                        translate_url('/en/articles/' + suffix, 'nl'),
+                        '/nl/articles/' + suffix,
+                    )
+
 
 class URLNamespaceTests(URLTestCaseBase):
     """
