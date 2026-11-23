@@ -1937,6 +1937,37 @@ def test_where_attrs() -> None:
     assert actual.attrs == {}
 
 
+@pytest.mark.parametrize("as_dataset", [False, True])
+def test_where_coordinate_attrs(as_dataset) -> None:
+    cond = xr.DataArray(
+        [True, False],
+        dims="time",
+        coords={
+            "time": ("time", [0, 1], {"source": "condition"}),
+            "label": ("time", ["a", "b"], {"source": "condition only"}),
+        },
+        name="data",
+    )
+    x = xr.DataArray(
+        [1, 1],
+        dims="time",
+        coords={"time": ("time", [0, 1], {"source": "x"})},
+        name="data",
+        attrs={"units": "m"},
+    )
+    expected = x.copy(data=[1, 0]).assign_coords(label=cond.coords.variables["label"])
+    if as_dataset:
+        cond = cond.to_dataset()
+        x = x.to_dataset().assign_attrs(title="dataset")
+        expected = expected.to_dataset().assign_attrs(title="dataset")
+
+    actual = xr.where(cond, x, 0, keep_attrs=True)
+
+    assert_identical(expected, actual)
+    assert cond.coords["time"].attrs == {"source": "condition"}
+    assert x.coords["time"].attrs == {"source": "x"}
+
+
 @pytest.mark.parametrize(
     "use_dask", [pytest.param(False, id="nodask"), pytest.param(True, id="dask")]
 )
