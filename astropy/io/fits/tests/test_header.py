@@ -79,6 +79,42 @@ class TestHeaderFunctions(FitsTestCase):
         assert header['B'] == 'B'
         assert header.comments['B'] == 'C'
 
+    def test_card_from_bytes(self):
+        """
+        Test loading a Card from a `bytes` object (assuming latin-1 encoding).
+        """
+
+        c = fits.Card.fromstring(b"ABC     = 'abc'")
+        assert c.keyword == 'ABC'
+        assert c.value == 'abc'
+
+    def test_header_fromstring_bytes(self):
+        """
+        Test reading a Header from a `bytes` string.
+        """
+
+        with open(self.data('test0.fits'), 'rb') as fobj:
+            pri_hdr_from_bytes = fits.Header.fromstring(fobj.read())
+
+        pri_hdr = fits.getheader(self.data('test0.fits'))
+        assert pri_hdr['NAXIS'] == pri_hdr_from_bytes['NAXIS']
+        assert pri_hdr == pri_hdr_from_bytes
+        assert pri_hdr.tostring() == pri_hdr_from_bytes.tostring()
+
+    def test_header_fromstring_bytes_sep(self):
+        """
+        Test Header.fromstring with bytes data and a bytes separator.
+        """
+
+        hdr = fits.Header([('A', 1), ('B', 'x')])
+        s = hdr.tostring(sep='\n')
+        from_str = fits.Header.fromstring(s, sep='\n')
+        from_bytes = fits.Header.fromstring(s.encode('ascii'), sep=b'\n')
+        from_mixed = fits.Header.fromstring(s.encode('ascii'), sep='\n')
+        assert from_str == hdr
+        assert from_bytes == hdr
+        assert from_mixed == hdr
+
     def test_card_constructor_default_args(self):
         """Test Card constructor with default argument values."""
 
