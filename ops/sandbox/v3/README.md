@@ -1,7 +1,7 @@
 # V3 public-result selection and external-session kit
 
-Selection reads no Vacant/pi/Devin experiment outcomes. No agents or calibration
-have been run for v3; gate controls are not agent-performance or gain evidence.
+Selection reads no Vacant/pi/Devin experiment outcomes. These tools launch no
+agents; gate and synthetic harness controls are not agent-performance or gain evidence.
 `SELECTION.json` is a checkpoint:
 only `status: complete` with twelve validated IDs is a finished selection. A
 partial/blocked checkpoint is not a usable task bank.
@@ -167,3 +167,78 @@ base exceptions, not misreported as a literal zero grep count. Prompt bytes
 preserve the original CRLF, trailing whitespace and ending exactly, despite
 `git diff --check` warnings in the isolated kit checkout. Full control logs
 and private match evidence remain under `/home/ubuntu/sandbox-v3-build/`.
+
+## Independent handback scorer (operator only)
+
+The scorer uses the frozen twelve-instance bank, not v1/v2 task scoring. Keep
+the dataset and all scorer artifacts off session hosts and out of kit branches.
+Use the project venv for collection and a separate Python >=3.11 environment
+with `swebench==3.0.17` for the isolated harness worker:
+
+```bash
+.venv/bin/python -m ops.sandbox.v3.score score --protocol calibration \
+  --dataset-json ~/swebench-data/verified.jsonl \
+  --harness-python ~/swebench-venv/bin/python \
+  --out ~/sandbox-runs/devin-v3-cal
+```
+
+Calibration reads `sandbox-devin-cal3/<instance_id>-plain`. Comparison uses
+`--protocol comparison` and `sandbox-devin/v3/<instance_id>-<arm>-s<k>`, where
+arms plain/plain2/vacant map to A/A2/G and k is 1 or 2. With no branch arguments,
+all scheduled refs are attempted. Explicit arguments restrict collection but
+not the whole-bank schedule: all absent/unrequested submissions are listed in
+`missing_branches`, never imputed. Output must be fresh and outside the repo;
+an existing directory containing only `NOTES.md` is permitted and preserved.
+
+Base refs must match the committed KIT SHA, raw tree and dataset base commit.
+Raw Git blobs are exported without archive export-ignore/export-subst effects.
+No handback code executes on the collector host. `patch.py` derives the patch;
+the harness applies the official test patch and executes in the digest-pinned
+official image, never a checked-but-mutable tag. Its report supplies resolved
+(`hidden_pass` in the generic analyzer schema). Candidate application failure
+is unresolved, not infra. Missing/invalid reports, Docker errors and timeouts
+are infra_void, retained as failures. The default official test timeout is
+1800 seconds, independent of the visible gate deadline. Canonical empty patches
+are submitted unchanged; an empty-patch application refusal is unresolved.
+`visible_pass` is null: the scorer does not measure the Vacant gate outcome;
+the generic analyzer's visible counter must not be read as a v3 gate pass rate.
+
+`cells/*/` retains the raw base/handback, canonical candidate patch, harness
+request, report and logs. Metadata records code/input fingerprints. Agent costs
+remain UNKNOWN; harness timing is separate. Gold similarity uses the same
+test-file/artifact exclusions and the PREREG whitespace-normalized polarized
+diff-line SequenceMatcher rule; ≥0.9 is a secondary flag, never a contamination
+verdict. Synthetic e2e controls use `--control-only` and cannot pass calibration.
+
+### Human verdicts and analysis
+
+`contamination.json` has a slot for every scheduled branch. Fill `contaminated`
+(access-based) and `outside_help` with JSON true/false, plus `evidence`,
+`outside_help_evidence` and reviewer. Null means pending, not clean. For PR help,
+audit whether Devin Review or human comments reached the session **before its
+final push**; PR creation alone does not establish outside help. The dispatch
+instruction prohibiting PRs and the dated amendment are in `DEVIN_ARMS.md` and
+`PREREG.md`. Review does not fetch or rerun tests:
+
+```bash
+.venv/bin/python -m ops.sandbox.v3.score review ~/sandbox-runs/devin-v3-cal
+```
+
+`calibration.json` reports observed resolved and conservative gate counts.
+Either positive verdict makes a calibration cell count as resolved even if its
+harness outcome failed/was infra. The ≤8/12 gate is incomplete until all twelve
+branches and both verdicts per cell are present; otherwise it says proceed or
+"ceiling, v3 rejected". Calibration is never a comparison input.
+
+The raw root is analyzer-compatible but **is not the primary comparison view**.
+For comparisons, review exports verdict-addressed `primary` and `sensitivity`
+views; paths are in `meta.json.analysis_views`. Both use complete A/A2/G triples
+so treatment and noise floor share units. Primary excludes the entire unit if
+any arm is contaminated, outside-helped or unreviewed; sensitivity retains
+complete triples with their observed outcomes. Infra remains failure in both.
+Missing and excluded units are explicit; unknown review/coverage is not a full
+24-pair result. Run the existing analyzer on the chosen exported view:
+
+```bash
+.venv/bin/python -m ops.sandbox.analyze PATH_FROM_META_ANALYSIS_VIEWS
+```
