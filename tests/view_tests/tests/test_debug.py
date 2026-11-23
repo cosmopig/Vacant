@@ -497,6 +497,59 @@ class ExceptionReporterTests(SimpleTestCase):
         self.assertIn(implicit_exc.format('<p>Second exception</p>'), text)
         self.assertEqual(3, text.count('<p>Final exception</p>'))
 
+    def test_innermost_exception_without_traceback(self):
+        try:
+            try:
+                raise RuntimeError('Oops')
+            except Exception as exc:
+                new_exc = RuntimeError('My context')
+                exc.__context__ = new_exc
+                raise
+        except Exception:
+            exc_type, exc_value, tb = sys.exc_info()
+
+        reporter = ExceptionReporter(None, exc_type, exc_value, tb)
+        frames = reporter.get_traceback_frames()
+        self.assertEqual(len(frames), 2)
+        self.assertIsNone(frames[0]['tb'])
+        self.assertEqual(frames[1]['function'], 'test_innermost_exception_without_traceback')
+        html = reporter.get_traceback_html()
+        self.assertInHTML('<h1>RuntimeError</h1>', html)
+        self.assertIn('<pre class="exception_value">Oops</pre>', html)
+        self.assertIn('<th>Exception Type:</th>', html)
+        self.assertIn('<th>Exception Value:</th>', html)
+        self.assertIn('<h2>Traceback ', html)
+        self.assertIn('<h2>Request information</h2>', html)
+        self.assertIn('<p>Request data not supplied</p>', html)
+        self.assertIn(
+            'During handling of the above exception (My context), another '
+            'exception occurred',
+            html,
+        )
+        self.assertIn('in test_innermost_exception_without_traceback', html)
+
+    def test_explicit_cause_without_traceback(self):
+        try:
+            raise ValueError('Final exception') from RuntimeError('Never raised')
+        except ValueError:
+            exc_type, exc_value, tb = sys.exc_info()
+
+        reporter = ExceptionReporter(None, exc_type, exc_value, tb)
+        frames = reporter.get_traceback_frames()
+        self.assertEqual(len(frames), 2)
+        self.assertIsNone(frames[0]['tb'])
+        self.assertEqual(frames[1]['function'], 'test_explicit_cause_without_traceback')
+        explicit_exc = (
+            'The above exception (Never raised) was the direct cause of the '
+            'following exception:'
+        )
+        html = reporter.get_traceback_html()
+        self.assertEqual(2, html.count(explicit_exc))
+        self.assertIn('in test_explicit_cause_without_traceback', html)
+        text = reporter.get_traceback_text()
+        self.assertIn(explicit_exc, text)
+        self.assertIn('in test_explicit_cause_without_traceback', text)
+
     def test_reporting_frames_without_source(self):
         try:
             source = "def funcName():\n    raise Error('Whoops')\nfuncName()"

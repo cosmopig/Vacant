@@ -1,0 +1,2 @@
+tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_innermost_exception_without_traceback
+tests/view_tests/tests/test_debug.py::ExceptionReporterTests::test_explicit_cause_without_traceback
