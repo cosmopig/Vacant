@@ -132,7 +132,7 @@ def check(workspace, suite, base_workspace=None):
             if paths.get(kind):
                 target['label'] = target['label'].replace(paths[kind], str(current))
     with tempfile.TemporaryDirectory(prefix='vacant-v4-gate-') as temporary:
-        scratch = Path(temporary)
+        scratch = Path(temporary).resolve()
         base = scratch / 'base'
         base.mkdir()
         code, archive, errors = command(['git', 'archive', '--format=tar', 'HEAD'], base_workspace, deadline, 'A', nodes)
