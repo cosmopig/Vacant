@@ -210,7 +210,7 @@ def usage_from_events(log: Path) -> tuple[dict | None, list[dict]]:
             "final_error": errors[-1].get("name", "AgentError") if errors else None}, errors
 
 
-def attempt_void(result: dict, usage: dict | None, errors: list[dict], stderr: str) -> bool:
+def attempt_void(result: dict, usage: dict | None, errors: list[dict]) -> bool:
     if result["rc"] in (125, 126, 127):
         return True
     if errors:
@@ -219,7 +219,7 @@ def attempt_void(result: dict, usage: dict | None, errors: list[dict], stderr: s
         return status == "429" or bool(re.fullmatch(r"5[0-9]{2}", status)) or bool(
             INFRA.search(str(data.get("message", "")))
         )
-    return usage is None and (bool(INFRA.search(stderr)) or not result["timed_out"])
+    return usage is None and not result["timed_out"]
 
 
 def safe_solution(path: Path) -> bytes | None:
@@ -284,8 +284,7 @@ def one_attempt(binary: Path, rg: Path, slot: int, plan, arm, tdir, provider, ad
     usage, errors = usage_from_events(log)
     meta = {"started": started, "timeout_s": timeout_s, "usage": usage, "trace_id": trace_id,
             "workspace_changed": candidate != STARTER.encode(), "agent_errors": errors, **result}
-    stderr = log.with_suffix(".jsonl.stderr").read_text(errors="replace")[-10_000:]
-    if attempt_void(result, usage, errors, stderr):
+    if attempt_void(result, usage, errors):
         out = {**meta, "void": "docker_or_provider_error"}
         emit_json(adir / "attempt.json", out)
         return out
