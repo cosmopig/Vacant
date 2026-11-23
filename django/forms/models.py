@@ -253,6 +253,7 @@ class ModelFormOptions:
         self.help_texts = getattr(options, "help_texts", None)
         self.error_messages = getattr(options, "error_messages", None)
         self.field_classes = getattr(options, "field_classes", None)
+        self.formfield_callback = getattr(options, "formfield_callback", None)
 
 
 class ModelFormMetaclass(DeclarativeFieldsMetaclass):
@@ -264,6 +265,9 @@ class ModelFormMetaclass(DeclarativeFieldsMetaclass):
                 break
 
         formfield_callback = attrs.pop("formfield_callback", base_formfield_callback)
+        meta = attrs.get("Meta")
+        if meta is not None and getattr(meta, "formfield_callback", None):
+            formfield_callback = meta.formfield_callback
 
         new_class = super().__new__(mcs, name, bases, attrs)
 
@@ -636,7 +640,9 @@ def modelform_factory(
     class_name = model.__name__ + "Form"
 
     # Class attributes for the new form class.
-    form_class_attrs = {"Meta": Meta, "formfield_callback": formfield_callback}
+    form_class_attrs = {"Meta": Meta}
+    if formfield_callback:
+        form_class_attrs["formfield_callback"] = formfield_callback
 
     if getattr(Meta, "fields", None) is None and getattr(Meta, "exclude", None) is None:
         raise ImproperlyConfigured(
