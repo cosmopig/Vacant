@@ -218,7 +218,7 @@ class GraphvizSimple(SphinxDirective):
 
 
 def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
-    """Change relative links in generated svg files to be relative to imgpath."""
+    """Rebase links from the output root to the generated SVG's directory."""
     tree = ET.parse(filepath)  # NoQA: S314
     root = tree.getroot()
     ns = {'svg': 'http://www.w3.org/2000/svg', 'xlink': 'http://www.w3.org/1999/xlink'}
@@ -229,17 +229,14 @@ def fix_svg_relative_paths(self: SphinxTranslator, filepath: str) -> None:
         root.findall('.//svg:image[@xlink:href]', ns),
         root.findall('.//svg:a[@xlink:href]', ns),
     ):
-        scheme, hostname, url, query, fragment = urlsplit(element.attrib[href_name])
-        if hostname:
-            # not a relative link
+        scheme, netloc, url, query, fragment = urlsplit(element.attrib[href_name])
+        if scheme or netloc or url.startswith('/'):
             continue
 
-        old_path = path.join(self.builder.outdir, url)
-        new_path = path.relpath(
-            old_path,
-            start=path.join(self.builder.outdir, self.builder.imgpath),
-        )
-        modified_url = urlunsplit((scheme, hostname, new_path, query, fragment))
+        new_path = posixpath.relpath(url or '.', start=self.builder.imagedir)
+        if url.endswith('/'):
+            new_path += '/'
+        modified_url = urlunsplit((scheme, netloc, new_path, query, fragment))
 
         element.set(href_name, modified_url)
         modified = True

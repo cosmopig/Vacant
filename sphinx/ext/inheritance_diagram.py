@@ -33,10 +33,12 @@ from __future__ import annotations
 import builtins
 import hashlib
 import inspect
+import posixpath
 import re
 from collections.abc import Iterable
 from importlib import import_module
 from typing import Any, cast
+from urllib.parse import urlsplit, urlunsplit
 
 from docutils import nodes
 from docutils.nodes import Node
@@ -396,31 +398,33 @@ def get_graph_hash(node: inheritance_diagram) -> str:
 
 
 def html_visit_inheritance_diagram(self: HTML5Translator, node: inheritance_diagram) -> None:
-    """
-    Output the graph for HTML.  This will insert a PNG with clickable
-    image map.
-    """
+    """Output the graph as an SVG or a PNG with a clickable image map."""
     graph = node['graph']
 
     graph_hash = get_graph_hash(node)
     name = 'inheritance%s' % graph_hash
 
     # Create a mapping from fully-qualified class names to URLs.
-    graphviz_output_format = self.builder.env.config.graphviz_output_format.upper()
-    current_filename = self.builder.current_docname + self.builder.out_suffix
+    svg = self.builder.config.graphviz_output_format == 'svg'
+    page_path = ''
+    if svg:
+        page_path = urlsplit(self.builder.get_target_uri(self.builder.current_docname)).path
     urls = {}
     pending_xrefs = cast(Iterable[addnodes.pending_xref], node)
     for child in pending_xrefs:
         if child.get('refuri') is not None:
-            if graphviz_output_format == 'SVG':
-                urls[child['reftitle']] = "../" + child.get('refuri')
-            else:
-                urls[child['reftitle']] = child.get('refuri')
+            uri = child['refuri']
         elif child.get('refid') is not None:
-            if graphviz_output_format == 'SVG':
-                urls[child['reftitle']] = '../' + current_filename + '#' + child.get('refid')
-            else:
-                urls[child['reftitle']] = '#' + child.get('refid')
+            uri = '#' + child['refid']
+        else:
+            continue
+        if svg:
+            scheme, netloc, path, query, fragment = urlsplit(uri)
+            if not (scheme or netloc or path.startswith('/')):
+                page_dir = posixpath.dirname(page_path)
+                path = posixpath.join(page_dir, path) if path else page_path
+                uri = urlunsplit(('', '', path, query, fragment))
+        urls[child['reftitle']] = uri
 
     dotcode = graph.generate_dot(name, urls, env=self.builder.env)
     render_dot_html(self, node, dotcode, {}, 'inheritance', 'inheritance',

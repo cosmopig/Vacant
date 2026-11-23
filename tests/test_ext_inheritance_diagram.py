@@ -3,6 +3,8 @@
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
+from urllib.parse import urljoin
 
 import pytest
 
@@ -169,6 +171,55 @@ def test_inheritance_diagram_svg_html(app, status, warning):
                'title="Permalink to this image">\xb6</a></p>\n</figcaption>\n</figure>\n')
 
     assert re.search(pattern, content, re.M)
+
+
+@pytest.mark.usefixtures('if_graphviz_found')
+@pytest.mark.parametrize('pages', [
+    pytest.param(('index.html', 'nested/diagram.html', 'nested/classes.html'),
+                 marks=pytest.mark.sphinx('html', srcdir='inheritance-svg-html'), id='html'),
+    pytest.param(('', 'nested/diagram/', 'nested/classes/'),
+                 marks=pytest.mark.sphinx('dirhtml', srcdir='inheritance-svg-dirhtml'),
+                 id='dirhtml'),
+])
+@pytest.mark.sphinx(testroot='ext-inheritance_diagram',
+                    confoverrides={'graphviz_output_format': 'svg'})
+def test_inheritance_diagram_svg_links(app, pages):
+    (app.srcdir / 'index.rst').write_text(
+        'Inheritance diagram\n===================\n\n'
+        '.. py:class:: test.Baz\n\n'
+        '.. inheritance-diagram:: test.Baz\n\n'
+        '.. toctree::\n\n   nested/diagram\n   nested/classes\n',
+        encoding='utf8',
+    )
+    (app.srcdir / 'nested').mkdir()
+    (app.srcdir / 'nested/diagram.rst').write_text(
+        'Nested diagram\n==============\n\n'
+        '.. py:class:: test.Foo\n\n'
+        '.. inheritance-diagram:: test.Baz\n',
+        encoding='utf8',
+    )
+    (app.srcdir / 'nested/classes.rst').write_text(
+        'Classes\n=======\n\n.. py:class:: test.Bar\n',
+        encoding='utf8',
+    )
+    app.builder.build_all()
+
+    root_page, diagram_page, classes_page = pages
+    base_url = 'https://example.org/docs/'
+    expected = {
+        base_url + root_page + '#test.Baz',
+        base_url + diagram_page + '#test.Foo',
+        base_url + classes_page + '#test.Bar',
+    }
+    for docname, page in [('index', root_page), ('nested/diagram', diagram_page)]:
+        content = (app.outdir / app.builder.get_outfilename(docname)).read_text(encoding='utf8')
+        match = re.search(r'<object data="([^"]+\.svg)"', content)
+        assert match
+        image = urljoin(page, match.group(1))
+        svg = ET.parse(app.outdir / image)  # NoQA: S314  # using known data in tests
+        href = '{http://www.w3.org/1999/xlink}href'
+        assert {urljoin(base_url + image, a.attrib[href])
+                for a in svg.iter('{http://www.w3.org/2000/svg}a')} == expected
 
 
 @pytest.mark.sphinx('latex', testroot='ext-inheritance_diagram')
