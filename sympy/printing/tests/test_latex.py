@@ -992,6 +992,15 @@ def test_latex_mul_symbol():
     assert latex(4*x, mul_symbol='ldot') == r"4 \,.\, x"
 
 
+def test_latex_custom_mul_symbol():
+    assert latex(3*x**2*y, mul_symbol=r" \, ") == r"3 \, x^{2} \, y"
+    assert latex(2*x, mul_symbol=r"\,") == r"2\,x"
+    assert latex(4*4**x, mul_symbol=r" \ast ") == r"4 \ast 4^{x}"
+    assert latex(Float(1.0e-100), mul_symbol=r" \ast ") == r"1.0 \ast 10^{-100}"
+    assert latex(Integral(2*x**2*y, x), mul_symbol=r"\,") == \
+        r"\int 2\,x^{2}\,y\, dx"
+
+
 def test_latex_issue_4381():
     y = 4*4**log(2)
     assert latex(y) == r'4 \cdot 4^{\log{\left (2 \right )}}'
