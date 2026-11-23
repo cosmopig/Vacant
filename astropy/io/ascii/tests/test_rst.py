@@ -2,7 +2,9 @@
 
 from io import StringIO
 
+from astropy import units as u
 from astropy.io import ascii
+from astropy.table import QTable
 
 from .common import assert_almost_equal, assert_equal
 
@@ -185,3 +187,26 @@ Col1      Col2 Col3 Col4
 ==== ========= ==== ====
 """,
     )
+
+
+def test_write_header_rows():
+    table = QTable({"wave": [350, 950] * u.nm, "response": [0.7, 1.2] * u.count})
+    out = StringIO()
+    table.write(out, format="ascii.rst", header_rows=["name", "unit"])
+    assert_equal_splitlines(
+        out.getvalue(),
+        """\
+===== ========
+ wave response
+   nm       ct
+===== ========
+350.0      0.7
+950.0      1.2
+===== ========
+""",
+    )
+
+    result = QTable.read(out.getvalue(), format="ascii.rst", header_rows=["name", "unit"])
+    assert result.colnames == table.colnames
+    for name in table.colnames:
+        assert (result[name] == table[name]).all()

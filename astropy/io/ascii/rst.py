@@ -27,9 +27,16 @@ class SimpleRSTHeader(FixedWidthHeader):
 
 
 class SimpleRSTData(FixedWidthData):
-    start_line = 3
     end_line = -1
     splitter_class = FixedWidthTwoLineDataSplitter
+
+    def write(self, lines):
+        header_start = len(lines)
+        super().write(lines)
+        border = lines[header_start + len(self.header_rows)]
+        lines.insert(header_start, border)
+        lines.append(border)
+        return lines
 
 
 class RST(FixedWidth):
@@ -46,6 +53,9 @@ class RST(FixedWidth):
           2    4.5  Worlds
         ==== ===== ======
 
+    Use ``header_rows`` to specify the column attributes represented in the
+    header, for example ``header_rows=["name", "unit"]``.
+
     Currently there is no support for reading tables which utilize continuation lines,
     or for ones which define column spans through the use of an additional
     line of dashes in the header.
@@ -57,10 +67,6 @@ class RST(FixedWidth):
     data_class = SimpleRSTData
     header_class = SimpleRSTHeader
 
-    def __init__(self):
-        super().__init__(delimiter_pad=None, bookend=False)
-
-    def write(self, lines):
-        lines = super().write(lines)
-        lines = [lines[1]] + lines + [lines[1]]
-        return lines
+    def __init__(self, header_rows=None):
+        super().__init__(delimiter_pad=None, bookend=False, header_rows=header_rows)
+        self.data.start_line = self.header.start_line + len(self.header.header_rows) + 1
