@@ -2803,6 +2803,61 @@ class OperationTests(OperationTestBase):
             definition[2], {"name": "Pony", "unique_together": {("pink", "weight")}}
         )
 
+    @skipUnlessDBFeature("allows_multiple_constraints_on_same_fields")
+    def test_remove_unique_together_on_unique_field(self):
+        def constraint_names(table, column):
+            with connection.cursor() as cursor:
+                constraints = connection.introspection.get_constraints(cursor, table)
+            return {
+                name
+                for name, details in constraints.items()
+                if details["columns"] == [column]
+                and (details["unique"] or details["primary_key"])
+            }
+
+        for field, column in (("id", "id"), ("pink", "pink_column")):
+            with self.subTest(field=field):
+                app_label = f"test_rmut_{field}"
+                table = f"{app_label}_pony"
+                project_state = self.apply_operations(
+                    app_label,
+                    ProjectState(),
+                    [
+                        migrations.CreateModel(
+                            "Pony",
+                            [
+                                ("id", models.AutoField(primary_key=True)),
+                                (
+                                    "pink",
+                                    models.IntegerField(
+                                        unique=True, db_column="pink_column"
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ],
+                )
+                original_names = constraint_names(table, column)
+                self.assertEqual(len(original_names), 1)
+                add_unique_together = migrations.AlterUniqueTogether("Pony", [(field,)])
+                unique_together_state = self.apply_operations(
+                    app_label, project_state, [add_unique_together]
+                )
+                names_with_unique_together = constraint_names(table, column)
+                self.assertEqual(len(names_with_unique_together), 2)
+
+                remove_unique_together = migrations.AlterUniqueTogether("Pony", set())
+                self.apply_operations(
+                    app_label, unique_together_state.clone(), [remove_unique_together]
+                )
+                self.assertEqual(constraint_names(table, column), original_names)
+                self.unapply_operations(
+                    app_label, unique_together_state, [remove_unique_together]
+                )
+                self.assertEqual(
+                    constraint_names(table, column), names_with_unique_together
+                )
+
     def test_alter_unique_together_remove(self):
         operation = migrations.AlterUniqueTogether("Pony", None)
         self.assertEqual(
