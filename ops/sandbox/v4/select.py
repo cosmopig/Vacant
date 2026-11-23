@@ -281,7 +281,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.out.exists() and not args.overwrite_frozen:
         previous = json.loads(args.out.read_text())
-        if previous.get('status', '').startswith('complete'):
+        if (previous.get('status', '').startswith('complete')
+                and previous.get('calibration_instance_ids') is not None
+                and previous.get('power') is not None):
             parser.error('refusing to overwrite frozen bank; use --overwrite-frozen or a different --out')
     log(f'Starting v4 selector: jobs={args.jobs}, target={TARGET}, initial cap={INITIAL_CAP}; pull backoff=900..3600s')
     if version('swebench') != v3.HARNESS_VERSION:

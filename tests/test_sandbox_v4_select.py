@@ -26,7 +26,7 @@ def test_inclusive_pool_exclusions_and_fraction_buckets():
 def test_default_main_refuses_frozen_bank_before_validation(tmp_path, monkeypatch, status):
     output = tmp_path / 'SELECTION.json'
     saved = json.dumps(dict(status=status, replacements=[dict(outgoing='old', incoming='new')],
-                            calibration_instance_ids=['frozen']))
+                            calibration_instance_ids=['frozen'], power=dict(exact_power=.8)))
     output.write_text(saved)
     monkeypatch.setattr(select, 'HERE', tmp_path)
     monkeypatch.setattr(select, 'version', lambda _: pytest.fail('guard must run before validation'))
@@ -36,7 +36,7 @@ def test_default_main_refuses_frozen_bank_before_validation(tmp_path, monkeypatc
     assert not (tmp_path / 'work').exists()
 
 
-@pytest.mark.parametrize('status,flags', [(None, []), ('incomplete', []), ('blocked', []),
+@pytest.mark.parametrize('status,flags', [(None, []), ('incomplete', []), ('blocked', []), ('complete', []),
                                         ('complete', ['--overwrite-frozen'])])
 def test_main_can_start_resume_or_explicitly_overwrite(tmp_path, monkeypatch, status, flags):
     output = tmp_path / 'SELECTION.json'
@@ -53,6 +53,25 @@ def test_main_can_start_resume_or_explicitly_overwrite(tmp_path, monkeypatch, st
     monkeypatch.setattr(select, 'version', version)
     with pytest.raises(ReachedValidation):
         select.main(['--experiments', 'missing', '--dataset-json', 'missing', '--work-dir', str(tmp_path / 'work'), *flags])
+
+
+@pytest.mark.parametrize('status', ['complete', 'complete_undersized'])
+@pytest.mark.parametrize('missing', ['calibration_instance_ids', 'power'])
+def test_main_resumes_completed_checkpoint_missing_final_metadata(tmp_path, monkeypatch, status, missing):
+    output = tmp_path / 'SELECTION.json'
+    checkpoint = dict(status=status, final_instance_ids=['selected'], calibration_instance_ids=[],
+                      power=dict(exact_power=.8))
+    del checkpoint[missing]
+    output.write_text(json.dumps(checkpoint))
+    monkeypatch.setattr(select, 'HERE', tmp_path)
+
+    def version(_):
+        raise RuntimeError('resume reached validation')
+
+    monkeypatch.setattr(select, 'version', version)
+    with pytest.raises(RuntimeError, match='resume reached validation'):
+        select.main(['--experiments', 'missing', '--dataset-json', 'missing', '--work-dir', str(tmp_path / 'work')])
+    assert json.loads(output.read_text()) == checkpoint
 
 
 def test_seeded_draw_and_calibration_do_not_modify_global_rng():
