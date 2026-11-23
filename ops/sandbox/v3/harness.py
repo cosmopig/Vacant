@@ -48,7 +48,7 @@ def evaluate(request):
     client = docker.from_env(timeout=60)
     try:
         pred = dict(instance_id=row['instance_id'], model_name_or_path='handback',
-                    model_patch=Path(request['patch_path']).read_text())
+                    model_patch=Path(request['patch_path']).read_bytes().decode('utf-8'))
         result = run_instance(spec, pred, False, False, client, request['run_id'],
                               timeout=request['timeout'])
         log_dir = Path('logs/run_evaluation') / request['run_id'] / 'handback' / row['instance_id']

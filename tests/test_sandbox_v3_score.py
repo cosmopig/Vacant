@@ -226,7 +226,8 @@ def test_worker_classifies_apply_failure_not_test_parser_failure(tmp_path):
     assert harness.classify(('id', {'id': valid}), 'id', tmp_path)['resolved'] is False
 
 
-def test_adapter_passes_immutable_image_to_official_harness(tmp_path, monkeypatch):
+@pytest.mark.parametrize('contents', [b'', b'preserve\r\npatch\r\n'])
+def test_adapter_passes_immutable_image_to_official_harness(tmp_path, monkeypatch, contents):
     @dataclass
     class Spec:
         instance_id: str
@@ -236,11 +237,11 @@ def test_adapter_passes_immutable_image_to_official_harness(tmp_path, monkeypatc
     client = SimpleNamespace(close=lambda: closed.append(True))
     image = 'swebench/image@sha256:'+'b'*64
     patch = tmp_path / 'candidate.patch'
-    patch.write_text('')
+    patch.write_bytes(contents)
 
     def run(spec, prediction, rm_image, force_rebuild, actual_client, run_id, timeout):
         assert spec.instance_image_key == image and spec.namespace == 'swebench'
-        assert prediction['model_patch'] == '' and not rm_image and not force_rebuild
+        assert prediction['model_patch'] == contents.decode('utf-8') and not rm_image and not force_rebuild
         assert actual_client is client and timeout == 1800
         return 'id', {'id': dict(resolved=False, patch_successfully_applied=True,
                                 tests_status={'FAIL_TO_PASS': {'failure': ['test']}})}

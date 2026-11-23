@@ -73,7 +73,9 @@ pulled by this validator are removed afterward; pre-existing images are retained
 
 Gold applies the dataset's gold patch. Base leaves all source and tests unchanged:
 it adds only `.swebench_v3_base_control`, an inert dotfile. This is necessary
-because 3.0.17 rejects empty predictions/patches before testing. Both controls run
+to avoid the 3.0.17 CLI's empty-prediction filter. The handback scorer instead
+calls `run_instance` directly and submits canonical empty patches unchanged.
+Both feasibility controls run
 the dataset's test patch through the unmodified official harness. A pass requires
 gold resolved=true and base resolved=false **with an actually observed failing
 FAIL_TO_PASS test**, not merely a missing result, parser failure or patch error.
