@@ -68,9 +68,6 @@ def _ingest(out, source):
             applied.append(branch)
         except (ValueError, TypeError, KeyError) as exc:
             rejected[branch if isinstance(branch, str) else f'record-{index}'] = str(exc)
-            if isinstance(branch, str) and branch in verdicts:
-                verdicts[branch].update(contaminated=None, outside_help=None, reviewer=None,
-                                        evidence=[], outside_help_evidence=[], pending_reason=str(exc))
     write_json(out / 'contamination.json', verdicts)
     result = dict(applied_branches=applied, rejected_branches=rejected, source_sha256=source_hash)
     write_json(out / 'audit-ingestion.json', result)

@@ -499,3 +499,16 @@ def test_base_mismatch_is_nonfinal_rechecked_and_other_cells_continue(bank, tmp_
     assert report['calibration']['scored'] == 11 and not report['calibration']['proceed']
     assert (score.cell_path(out, branch) / 'result.json').exists()
     assert len(bank.calls) == 12
+
+
+def test_rejected_audit_import_never_mutates_existing_valid_verdict(bank, tmp_path):
+    bank.publish()
+    out, source = tmp_path / 'results', tmp_path / 'audits.json'
+    bank.collect(out)
+    before = reviewed(out)[bank.branches[0]]
+    assert score.review(out)['calibration']['proceed']
+    score.write_json(source, [dict(branch=bank.branches[0], session_id=bank.sessions[bank.branches[0]],
+                                   handback_sha='0' * 40, contaminated=False, outside_help=False)])
+    assert bank.branches[0] in audit.ingest(out, source)['rejected_branches']
+    assert load(out / 'contamination.json')[bank.branches[0]] == before
+    assert score.review(out)['calibration']['proceed']
