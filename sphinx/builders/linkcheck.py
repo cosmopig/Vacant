@@ -36,6 +36,10 @@ from sphinx.util.requests import is_ssl_error
 logger = logging.getLogger(__name__)
 
 
+uri_re = re.compile('([a-z]+:)?//')  # matches to foo:// and // (a protocol relative URL)
+scheme_re = re.compile('^[a-zA-Z][a-zA-Z0-9+.-]*:')
+
+
 DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
 }
@@ -208,12 +212,39 @@ class CheckExternalLinksBuilder(Builder):
                 else:
                     return 'redirected', new_url, 0
 
+        def check_local_uri() -> Tuple[str, str, int]:
+            for rex in self.to_ignore:
+                if rex.match(uri):
+                    return 'ignored', '', 0
+
+            # strip off anchor and query
+            target = unquote(uri.split('#', 1)[0].split('?', 1)[0])
+            if not target:
+                return 'unchecked', '', 0
+
+            if target.startswith('/'):
+                filename = path.join(self.env.srcdir, target.lstrip('/'))
+            else:
+                docdir = path.dirname(self.env.doc2path(docname))
+                filename = path.join(docdir, target)
+
+            if path.exists(filename):
+                return 'working', '', 0
+            else:
+                return 'broken', __('local file not found: %s') % target, 0
+
         def check() -> Tuple[str, str, int]:
             # check for various conditions without bothering the network
             if len(uri) == 0 or uri.startswith(('#', 'mailto:', 'ftp:')):
                 return 'unchecked', '', 0
             elif not uri.startswith(('http:', 'https:')):
-                return 'local', '', 0
+                if uri_re.match(uri) or scheme_re.match(uri):
+                    # other schemes (ftp://, irc://, tel:, etc.) can't be checked
+                    return 'unchecked', '', 0
+                status, info, code = check_local_uri()
+                if status == 'broken':
+                    self.broken[uri] = info
+                return status, info, code
             elif uri in self.good:
                 return 'working', 'old', 0
             elif uri in self.broken:
