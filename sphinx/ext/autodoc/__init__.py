@@ -1676,7 +1676,11 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
     def get_doc(self, ignore: int = None) -> Optional[List[List[str]]]:
         if self.doc_as_attr:
             # Don't show the docstring of the class when it is an alias.
-            return None
+            comment = self.get_variable_comment()
+            if comment:
+                return [comment]
+            else:
+                return None
 
         lines = getattr(self, '_new_docstrings', None)
         if lines is not None:
@@ -1721,9 +1725,26 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
         tab_width = self.directive.state.document.settings.tab_width
         return [prepare_docstring(docstring, ignore, tab_width) for docstring in docstrings]
 
+    def get_variable_comment(self) -> Optional[List[str]]:
+        """Get the docstring-comment of the variable this alias is assigned to."""
+        try:
+            analyzer = ModuleAnalyzer.for_module(self.modname)
+            analyzer.analyze()
+            key = ('.'.join(self.objpath[:-1]), self.objpath[-1])
+            if key in analyzer.attr_docs:
+                return list(analyzer.attr_docs[key])
+        except PycodeError:
+            pass
+
+        return None
+
     def add_content(self, more_content: Optional[StringList], no_docstring: bool = False
                     ) -> None:
         if self.doc_as_attr:
+            # The docstring-comment of the alias is handled by get_doc(); disable
+            # analyzing it again on Documenter.add_content().
+            self.analyzer = None
+
             try:
                 more_content = StringList([_('alias of %s') % restify(self.object)], source='')
             except AttributeError:
