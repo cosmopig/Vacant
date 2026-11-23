@@ -322,6 +322,39 @@ def test_autodoc_docstring_signature(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_docstring_signature_multiple(app):
+    options = {"members": None}
+    actual = do_autodoc(app, 'module', 'target.overloaded_docstring_signature', options)
+    assert list(actual) == [
+        '',
+        '.. py:module:: target.overloaded_docstring_signature',
+        '',
+        '',
+        '.. py:class:: E(foo: int, bar: int, baz: int) -> None',
+        '              E(foo: str, bar: str, baz: str) -> None',
+        '   :module: target.overloaded_docstring_signature',
+        '',
+        '',
+        '   .. py:method:: E.meth(FOO, BAR=1) -> BAZ',
+        '                  E.meth(FOO, BAR=1, QUX=2) -> BAZ',
+        '                  E.meth(FOO) -> BAZ',
+        '      :module: target.overloaded_docstring_signature',
+        '',
+        '      First line of docstring',
+        '',
+        '      rest of docstring',
+        '',
+        '',
+        '.. py:function:: func(a: int) -> int',
+        '                 func(a: str) -> str',
+        '   :module: target.overloaded_docstring_signature',
+        '',
+        '   Overloaded function.',
+        '',
+    ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autoclass_content_and_docstring_signature_class(app):
     app.config.autoclass_content = 'class'
     options = {"members": None,

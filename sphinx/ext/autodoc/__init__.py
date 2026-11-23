@@ -1044,31 +1044,42 @@ class DocstringSignatureMixin:
                           RemovedInSphinx40Warning, stacklevel=2)
         docstrings = self.get_doc()
         self._new_docstrings = docstrings[:]
+        self._signatures = []  # type: List[Tuple[str, str]]
         result = None
         for i, doclines in enumerate(docstrings):
-            # no lines in docstring, no match
-            if not doclines:
-                continue
-            # match first line of docstring against signature RE
-            match = py_ext_sig_re.match(doclines[0])
-            if not match:
-                continue
-            exmod, path, base, args, retann = match.groups()
-            # the base name must match ours
-            valid_names = [self.objpath[-1]]  # type: ignore
-            if isinstance(self, ClassDocumenter):
-                valid_names.append('__init__')
-                if hasattr(self.object, '__mro__'):
-                    valid_names.extend(cls.__name__ for cls in self.object.__mro__)
-            if base not in valid_names:
-                continue
-            # re-prepare docstring to ignore more leading indentation
-            tab_width = self.directive.state.document.settings.tab_width  # type: ignore
-            self._new_docstrings[i] = prepare_docstring('\n'.join(doclines[1:]),
-                                                        tabsize=tab_width)
-            result = args, retann
-            # don't look any further
-            break
+            for j, line in enumerate(doclines):
+                if j == len(doclines) - 1 and not line:
+                    break  # trailing empty line added by prepare_docstring
+                # match leading lines of docstring against signature RE
+                match = py_ext_sig_re.match(line)
+                if not match:
+                    break
+                exmod, path, base, args, retann = match.groups()
+                # the base name must match ours
+                valid_names = [self.objpath[-1]]  # type: ignore
+                if isinstance(self, ClassDocumenter):
+                    valid_names.append('__init__')
+                    if hasattr(self.object, '__mro__'):
+                        valid_names.extend(cls.__name__ for cls in self.object.__mro__)
+                if base not in valid_names:
+                    break
+
+                # re-prepare docstring to ignore more leading indentation
+                tab_width = self.directive.state.document.settings.tab_width  # type: ignore
+                self._new_docstrings[i] = prepare_docstring('\n'.join(doclines[j + 1:]),
+                                                            tabsize=tab_width)
+
+                if result is None:
+                    # first signature
+                    result = args, retann
+                else:
+                    # subsequent signatures (e.g. overloaded methods)
+                    self._signatures.append((args, retann))
+
+            if result:
+                # don't look any further
+                break
+
         return result
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
@@ -1088,7 +1099,20 @@ class DocstringSignatureMixin:
             result = self._find_signature()
             if result is not None:
                 self.args, self.retann = result
-        return super().format_signature(**kwargs)  # type: ignore
+        sig = super().format_signature(**kwargs)  # type: ignore
+        extra = getattr(self, '_signatures', None)
+        if extra:
+            sigs = [sig]
+            args, retann = self.args, self.retann
+            try:
+                for self.args, self.retann in extra:
+                    if self.args is None:
+                        continue
+                    sigs.append(super().format_signature(**kwargs))  # type: ignore
+            finally:
+                self.args, self.retann = args, retann
+            sig = "\n".join(sigs)
+        return sig
 
 
 class DocstringStripSignatureMixin(DocstringSignatureMixin):

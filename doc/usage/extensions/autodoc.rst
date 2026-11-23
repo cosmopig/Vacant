@@ -454,7 +454,14 @@ There are also config values that you can set:
    looks like a signature, use the line as the signature and remove it from the
    docstring content.
 
+   autodoc will continue to look for multiple signature lines,
+   stopping at the first line that does not look like a signature.
+   This is useful for declaring overloaded function signatures.
+
    .. versionadded:: 1.1
+   .. versionchanged:: 3.1
+
+      Support overloaded signatures
 
 .. confval:: autodoc_mock_imports
 
