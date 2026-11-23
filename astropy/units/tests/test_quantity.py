@@ -150,6 +150,25 @@ class TestQuantityCreation:
         q5 = u.Quantity(decimal.Decimal('10.25'), u.m, dtype=object)
         assert q5.dtype == object
 
+    def test_preserve_float_dtypes(self):
+        """Test that all float types are preserved, including float16
+        (which cannot be cast from float32 without loss)."""
+        for float_type in (np.float16, np.float32, np.float64,
+                           np.longdouble):
+            value = float_type(1)
+            q1 = u.Quantity(value, u.m)
+            assert q1.dtype == float_type
+            q2 = value * u.m
+            assert q2.dtype == float_type
+            q3 = u.Quantity(np.array([1., 2.], dtype=float_type), u.yr)
+            assert q3.dtype == float_type
+            q4 = u.Quantity(q3)
+            assert q4.dtype == float_type
+            q5 = u.Quantity(q3, copy=True)
+            assert q5.dtype == float_type
+            q6 = u.Quantity(q3, u.day)
+            assert q6.dtype == float_type
+
     def test_copy(self):
 
         # By default, a new quantity is constructed, but not if copy=False

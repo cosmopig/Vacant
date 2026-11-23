@@ -215,8 +215,8 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
     dtype : ~numpy.dtype, optional
         The dtype of the resulting Numpy array or scalar that will
         hold the value.  If not provided, it is determined from the input,
-        except that any input that cannot represent float (integer and bool)
-        is converted to float.
+        except that any input that is not a float or complex type (e.g.,
+        integer and bool) is converted to float.
 
     copy : bool, optional
         If `True` (default), then the value is copied.  Otherwise, a copy will
@@ -297,7 +297,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
                     return value
 
                 if not (np.can_cast(np.float32, value.dtype) or
-                        value.dtype.fields):
+                        value.dtype.kind == 'f' or value.dtype.fields):
                     dtype = float
 
             return np.array(value, dtype=dtype, copy=copy, order=order,
@@ -378,6 +378,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
 
         # by default, cast any integer, boolean, etc., to float
         if dtype is None and (not (np.can_cast(np.float32, value.dtype)
+                                   or value.dtype.kind == 'f'
                                    or value.dtype.fields)
                               or value.dtype.kind == 'O'):
             value = value.astype(float)
