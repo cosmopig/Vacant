@@ -1445,6 +1445,25 @@ def test_Poly_clear_denoms():
         x + 3*sqrt(2), x, domain='EX') and poly.get_domain() == EX
 
 
+def test_Poly_clear_denoms_cancels_coefficients():
+    denom = 1 + sqrt(2)
+    coeff = 1/denom + 1 - sqrt(2)
+
+    for gens in [(x,), (x, y)]:
+        f = Poly(coeff, *gens, domain=EX)
+        assert not f.is_zero
+
+        common, p = f.clear_denoms()
+        zero = Poly(0, *gens, domain=EX)
+        assert common == denom
+        assert p.is_zero
+        assert p == zero
+        assert p.terms_gcd() == ((0,) * len(gens), zero)
+
+    f = Poly(coeff*x**2 + coeff*x*y + x + 1, x, y, domain=EX)
+    assert f.clear_denoms() == (denom, Poly(denom*(x + 1), x, y, domain=EX))
+
+
 def test_Poly_rat_clear_denoms():
     f = Poly(x**2/y + 1, x)
     g = Poly(x**3 + y, x)
