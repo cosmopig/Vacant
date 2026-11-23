@@ -188,7 +188,8 @@ arms plain/plain2/vacant map to A/A2/G and k is 1 or 2. With no branch arguments
 all scheduled refs are attempted. Explicit arguments restrict collection but
 not the whole-bank schedule: all absent/unrequested submissions are listed in
 `missing_branches`, never imputed. Output must be fresh and outside the repo;
-an existing directory containing only `NOTES.md` is permitted and preserved.
+an existing directory containing only `NOTES.md` and/or `SESSIONS.txt` is
+permitted; both operator metadata files are preserved.
 
 Base refs must match the committed KIT SHA, raw tree and dataset base commit.
 Raw Git blobs are exported without archive export-ignore/export-subst effects.

@@ -250,7 +250,7 @@ def score_branches(repo, remote, out, instances, selection, manifest, *, protoco
     branches = list(branches) or expected
     if len(set(branches)) != len(branches) or any(b not in expected for b in branches):
         raise ValueError('duplicate, mixed or invalid handback branches')
-    if ((out.exists() and (not out.is_dir() or any(p.name != 'NOTES.md' for p in out.iterdir())))
+    if ((out.exists() and (not out.is_dir() or any(p.name not in ('NOTES.md', 'SESSIONS.txt') for p in out.iterdir())))
             or out == REPO or REPO in out.parents):
         raise ValueError('use a fresh output directory outside the repository')
     for task in ids:

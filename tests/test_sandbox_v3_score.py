@@ -96,6 +96,7 @@ def test_calibration_all_threshold_review_and_outside_help(bank, tmp_path):
     out = tmp_path / 'cal'
     out.mkdir()
     (out / 'NOTES.md').write_text('preserve session notes\n')
+    (out / 'SESSIONS.txt').write_text('preserve session IDs\n')
     meta = collect(bank, out)
     assert meta['calibration']['resolved_count'] == 8
     assert meta['calibration']['decision'] == 'incomplete'
@@ -116,6 +117,7 @@ def test_calibration_all_threshold_review_and_outside_help(bank, tmp_path):
     assert score.review(out)['calibration']['conservative_resolved_count'] == 9
     assert len(bank['calls']) == 12  # Human review never reruns the harness.
     assert (out / 'NOTES.md').read_text() == 'preserve session notes\n'
+    assert (out / 'SESSIONS.txt').read_text() == 'preserve session IDs\n'
     rows = [json.loads(p.read_text()) for p in (out / 'cells').glob('*/result.json')]
     assert all(r['calls_complete'] is False and r['model_calls'] == 'UNKNOWN' for r in rows)
     assert any(r['gold_similarity']['flagged'] and r['contamination'] is False for r in rows)
