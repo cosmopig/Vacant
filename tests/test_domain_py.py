@@ -838,6 +838,42 @@ def test_info_field_list(app):
                 **{"py:module": "example", "py:class": "Class"})
 
 
+@pytest.mark.sphinx('dummy', testroot='domain-py', freshenv=True)
+@pytest.mark.parametrize('field_name', ['var', 'ivar', 'cvar'])
+def test_variable_field_links(app, field_name):
+    text = """\
+.. py:module:: database
+
+.. py:class:: Query
+
+   .. py:attribute:: offset
+
+.. py:module:: config
+
+.. py:data:: limit
+
+.. py:class:: Setting
+
+.. py:class:: Options
+
+   :{field_name} limit: See :py:data:`config.limit`.
+   :vartype limit: Setting
+   :{field_name} offset: An unrelated variable.
+""".format(field_name=field_name)
+    (app.srcdir / 'index.rst').write_text(text)
+    app.builder.build_all()
+
+    doctree = app.env.get_and_resolve_doctree('index', app.builder)
+    fields = next(iter(doctree.traverse(nodes.field_list)))
+    assert [name.astext() for name in fields.traverse(addnodes.literal_strong)] == [
+        'limit', 'offset',
+    ]
+    assert [(ref.astext(), ref['refid']) for ref in fields.traverse(nodes.reference)] == [
+        ('Setting', 'config.Setting'),
+        ('config.limit', 'config.limit'),
+    ]
+
+
 @pytest.mark.sphinx(freshenv=True)
 def test_module_index(app):
     text = (".. py:module:: docutils\n"
