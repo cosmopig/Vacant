@@ -1,0 +1,4 @@
+Changed behavior so that when adding a structured ``numpy.ndarray`` to a
+``Table`` it is stored as a ``Column`` instead of being converted to an
+``NdarrayMixin``. To get the previous behavior, view the array as
+``NdarrayMixin`` (e.g. ``data.view(NdarrayMixin)``) before adding it.

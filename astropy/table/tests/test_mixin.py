@@ -699,9 +699,10 @@ def test_skycoord_representation():
 
 def test_ndarray_mixin():
     """
-    Test directly adding a plain structured array into a table instead of the
-    view as an NdarrayMixin.  Once added as an NdarrayMixin then all the previous
-    tests apply.
+    Test directly adding various forms of structured ndarray columns to a table.
+    Adding as NdarrayMixin is expected to be somewhat unusual after #12644
+    (which provides full support for structured array Column's). This test shows
+    that the end behavior is the same in both cases.
     """
     a = np.array([(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')],
                  dtype='<i4,' + ('|U1'))
@@ -717,7 +718,8 @@ def test_ndarray_mixin():
     t['c'] = c
     t['d'] = d
 
-    assert isinstance(t['a'], NdarrayMixin)
+    assert isinstance(t['a'], Column)
+    assert not isinstance(t['a'], NdarrayMixin)
 
     assert t['a'][1][1] == a[1][1]
     assert t['a'][2][0] == a[2][0]
@@ -725,7 +727,8 @@ def test_ndarray_mixin():
     assert t[1]['a'][1] == a[1][1]
     assert t[2]['a'][0] == a[2][0]
 
-    assert isinstance(t['b'], NdarrayMixin)
+    assert isinstance(t['b'], Column)
+    assert not isinstance(t['b'], NdarrayMixin)
 
     assert t['b'][1]['x'] == b[1]['x']
     assert t['b'][1]['y'] == b[1]['y']
@@ -733,7 +736,8 @@ def test_ndarray_mixin():
     assert t[1]['b']['x'] == b[1]['x']
     assert t[1]['b']['y'] == b[1]['y']
 
-    assert isinstance(t['c'], NdarrayMixin)
+    assert isinstance(t['c'], Column)
+    assert not isinstance(t['c'], NdarrayMixin)
 
     assert t['c'][1]['rx'] == c[1]['rx']
     assert t['c'][1]['ry'] == c[1]['ry']
