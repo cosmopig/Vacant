@@ -244,3 +244,10 @@ def test_residue():
     args = 5779, 3528, 6215
     assert discrete_log(*args) == 687
     assert discrete_log(*Tuple(*args)) == 687
+
+
+def test_nthroot_mod_zero_residue():
+    assert nthroot_mod(17**2, 5, 17) == 0
+    assert nthroot_mod(17**2, 5, 17, all_roots=True) == [0]
+    assert nthroot_mod(0, 3, 7) == 0
+    assert nthroot_mod(0, 3, 7, all_roots=True) == [0]
