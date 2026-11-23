@@ -2144,12 +2144,13 @@ class SpanSelector(_SelectorWidget):
         else:
             trans = ax.get_yaxis_transform()
             w, h = 1, 0
-        self._rect = Rectangle((0, 0), w, h,
+        self._rect = Rectangle((0, 0), 0, 0,
                                transform=trans,
                                visible=False,
                                **self._rectprops)
 
         self.ax.add_patch(self._rect)
+        self._rect.set_bounds(0, 0, w, h)
         if len(self.artists) > 0:
             self.artists[0] = self._rect
         else:
@@ -2366,10 +2367,18 @@ class ToolLineHandles:
             line_props = {}
         line_props.update({'visible': False, 'animated': useblit})
 
-        line_fun = ax.axvline if self.direction == 'horizontal' else ax.axhline
         self._line_props = line_props
 
-        self.artists = [line_fun(p, **line_props) for p in positions]
+        horizontal = self.direction == 'horizontal'
+        transform = (ax.get_xaxis_transform(which='grid') if horizontal
+                     else ax.get_yaxis_transform(which='grid'))
+        self.artists = []
+        for p in positions:
+            line = Line2D([], [], transform=transform, **line_props)
+            ax.add_line(line)
+            x, y = ([p, p], [0, 1]) if horizontal else ([0, 1], [p, p])
+            line.set_data(x, y)
+            self.artists.append(line)
 
     @property
     def positions(self):

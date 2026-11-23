@@ -223,6 +223,18 @@ def test_span_selector():
     check_span('horizontal', rectprops=dict(fill=True))
 
 
+@pytest.mark.parametrize('direction', ['horizontal', 'vertical'])
+def test_span_selector_autoscale(direction):
+    fig, ax = plt.subplots()
+    ax.plot([10, 20], [10, 20])
+    ax.margins(0.05)
+    _ = widgets.SpanSelector(ax, lambda *_: None, direction, interactive=True)
+
+    fig.canvas.draw()
+    assert_allclose(ax.get_xlim(), (9.5, 20.5))
+    assert_allclose(ax.get_ylim(), (9.5, 20.5))
+
+
 @pytest.mark.parametrize('drag_from_anywhere', [True, False])
 def test_span_selector_drag(drag_from_anywhere):
     ax = get_ax()
