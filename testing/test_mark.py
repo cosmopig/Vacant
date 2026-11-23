@@ -561,6 +561,33 @@ class TestFunctional:
         items, rec = pytester.inline_genitems(p)
         self.assert_markers(items, test_foo=("a", "b", "c"), test_bar=("a", "b", "d"))
 
+    def test_mark_multiple_inheritance(self, pytester: Pytester) -> None:
+        p = pytester.makepyfile(
+            """
+            import pytest
+
+            @pytest.mark.common
+            class Base: pass
+
+            @pytest.mark.left
+            class Left(Base): pass
+
+            class Right(Base):
+                pytestmark = pytest.mark.right
+
+            @pytest.mark.derived
+            class TestDerived(Left, Right):
+                def test_method(self): pass
+        """
+        )
+        (item,), _ = pytester.inline_genitems(p)
+        assert [mark.name for mark in item.iter_markers()] == [
+            "common",
+            "right",
+            "left",
+            "derived",
+        ]
+
     def test_mark_closest(self, pytester: Pytester) -> None:
         p = pytester.makepyfile(
             """

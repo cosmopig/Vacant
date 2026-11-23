@@ -288,7 +288,8 @@ its test methods:
             pass
 
 This is equivalent to directly applying the decorator to the
-two test functions.
+two test functions. If a test class inherits from multiple base classes,
+marks from all of those base classes apply to its tests.
 
 To apply marks at the module level, use the :globalvar:`pytestmark` global variable::
 

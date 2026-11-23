@@ -1,0 +1,1 @@
+Tests in classes with multiple inheritance now receive marks from all their base classes.
