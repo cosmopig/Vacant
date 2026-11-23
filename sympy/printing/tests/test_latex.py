@@ -1200,6 +1200,15 @@ def test_matAdd():
     assert l._print_MatAdd(B + 2*C) in ['B + 2 C', '2 C + B']
 
 
+def test_MatrixSymbol_subtraction_latex():
+    from sympy import MatrixSymbol
+    A = MatrixSymbol('A', 2, 2)
+    B = MatrixSymbol('B', 2, 2)
+    assert latex(A - A*B - B) == '-B - A B + A'
+    assert latex(-A*B) == '-A B'
+    assert latex(A - 2*B) == '-2 B + A'
+
+
 def test_matMul():
     from sympy import MatrixSymbol
     from sympy.printing.latex import LatexPrinter
@@ -1710,7 +1719,7 @@ def test_MatrixElement_printing():
     assert latex(3 * A[0, 0]) == r"3 A_{0, 0}"
 
     F = C[0, 0].subs(C, A - B)
-    assert latex(F) == r"\left(-1 B + A\right)_{0, 0}"
+    assert latex(F) == r"\left(-B + A\right)_{0, 0}"
 
 
 def test_Quaternion_latex_printing():
