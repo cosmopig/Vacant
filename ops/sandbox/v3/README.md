@@ -195,6 +195,10 @@ permitted; both operator metadata files are preserved.
 
 Base refs must match the committed KIT SHA, raw tree and dataset base commit.
 Raw Git blobs are exported without archive export-ignore/export-subst effects.
+Tracked setup targets left byte-identical to the raw base are interpreted as
+their image-preinstalled versions, just like already-setup handbacks; untouched
+files do not revert the image's reporting flags or dependency pins. Actual
+agent changes remain, and neither archived snapshot is modified.
 No handback code executes on the collector host. `patch.py` derives the patch;
 the harness applies the official test patch and executes in the digest-pinned
 official image, never a checked-but-mutable tag. Its report supplies resolved

@@ -39,6 +39,20 @@ def test_setup_only_handback_has_empty_patch(tmp_path):
     assert derive_patch(empty, empty) == b''
 
 
+@pytest.mark.parametrize('untouched', [('tox.ini',), ('setup.py',),
+                                     ('tox.ini', 'setup.py', 'pyproject.toml')])
+def test_untouched_sphinx_setup_files_use_image_baseline(tmp_path, untouched):
+    base, handback = setup_trees(tmp_path)
+    for name in untouched:
+        (handback / name).write_bytes((base / name).read_bytes())
+    original = {p.name: p.read_bytes() for p in handback.iterdir()}
+    assert derive_patch(base, handback, setup_commands=COMMANDS) == b''
+    (handback / 'service.py').write_text('value = 2\n')
+    patch = derive_patch(base, handback, setup_commands=COMMANDS)
+    assert patch.count(b'diff --git ') == 1 and b'+value = 2' in patch
+    assert all((handback / name).read_bytes() == original[name] for name in untouched)
+
+
 def test_agent_changes_remain_and_patch_applies_to_normalized_base(tmp_path):
     base, handback = setup_trees(tmp_path)
     target = tmp_path / 'target'

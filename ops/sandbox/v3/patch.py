@@ -115,6 +115,10 @@ def derive_patch(base, handback, test_patch='', setup_commands=()):
     baseline = _files(base, set())
     before = normalize_setup(baseline, setup_commands)
     after = _files(handback, excluded)
+    for name, raw in baseline.items():
+        if (before[name] != raw and name in after and after[name][0] != 0o120000
+                and after[name][1] == raw[1]):
+            after[name] = (after[name][0], before[name][1])
     binary = {name for name, (_, data) in [*before.items(), *after.items()] if b'\0' in data}
     before = {name: value for name, value in before.items() if name not in binary and name not in excluded}
     after = {name: value for name, value in after.items() if name not in binary}
