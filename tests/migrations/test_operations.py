@@ -2966,6 +2966,14 @@ class OperationTests(OperationTestBase):
         project_state = self.set_up_test_model(app_label, index_together=True)
         table_name = app_label + "_pony"
         self.assertIndexNameNotExists(table_name, "new_pony_test_idx")
+        with connection.cursor() as cursor:
+            (old_index_name,) = [
+                name
+                for name, constraint in connection.introspection.get_constraints(
+                    cursor, table_name
+                ).items()
+                if constraint["index"] and constraint["columns"] == ["weight", "pink"]
+            ]
         operation = migrations.RenameIndex(
             "Pony", new_name="new_pony_test_idx", old_fields=("weight", "pink")
         )
@@ -2983,10 +2991,16 @@ class OperationTests(OperationTestBase):
         # Rename index.
         with connection.schema_editor() as editor:
             operation.database_forwards(app_label, editor, project_state, new_state)
+        self.assertIndexNameNotExists(table_name, old_index_name)
         self.assertIndexNameExists(table_name, "new_pony_test_idx")
-        # Reverse is a no-op.
-        with connection.schema_editor() as editor, self.assertNumQueries(0):
+        # Reverse and reapply the rename.
+        with connection.schema_editor() as editor:
             operation.database_backwards(app_label, editor, new_state, project_state)
+        self.assertIndexNameExists(table_name, old_index_name)
+        self.assertIndexNameNotExists(table_name, "new_pony_test_idx")
+        with connection.schema_editor() as editor:
+            operation.database_forwards(app_label, editor, project_state, new_state)
+        self.assertIndexNameNotExists(table_name, old_index_name)
         self.assertIndexNameExists(table_name, "new_pony_test_idx")
         # Deconstruction.
         definition = operation.deconstruct()
