@@ -1456,7 +1456,7 @@ class _AnnotationBase:
                  xycoords='data',
                  annotation_clip=None):
 
-        self.xy = xy
+        self.xy = tuple(xy)
         self.xycoords = xycoords
         self.set_annotation_clip(annotation_clip)
 

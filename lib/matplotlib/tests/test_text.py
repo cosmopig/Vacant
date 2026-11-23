@@ -664,6 +664,21 @@ def test_annotation_update():
                            rtol=1e-6)
 
 
+def test_annotation_xy_array_mutation():
+    fig, ax = plt.subplots()
+    xy = np.array([0.2, 0.5])
+    annotation = ax.annotate("", xy, xytext=(0.8, 0.5),
+                             arrowprops={"arrowstyle": "<->"})
+    fig.draw_without_rendering()
+    vertices = annotation.arrow_patch.get_path().vertices
+
+    xy[1] = 0.8
+    fig.draw_without_rendering()
+
+    np.testing.assert_array_equal(annotation.arrow_patch.get_path().vertices,
+                                  vertices)
+
+
 @check_figures_equal(extensions=["png"])
 def test_annotation_units(fig_test, fig_ref):
     ax = fig_test.add_subplot()

@@ -1306,7 +1306,7 @@ or callable, default: value of *xycoords*
         self.offsetbox = offsetbox
         self.arrowprops = arrowprops.copy() if arrowprops is not None else None
         self.set_fontsize(fontsize)
-        self.xybox = xybox if xybox is not None else xy
+        self.xybox = xybox if xybox is not None else self.xy
         self.boxcoords = boxcoords if boxcoords is not None else xycoords
         self._box_alignment = box_alignment
 

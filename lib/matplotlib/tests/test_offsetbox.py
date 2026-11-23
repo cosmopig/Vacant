@@ -401,6 +401,18 @@ def test_annotationbbox_properties():
     assert ab.anncoords == 'axes fraction'  # boxcoords if given
 
 
+def test_annotationbbox_xy_array_mutation():
+    fig, ax = plt.subplots()
+    xy = np.array([0.2, 0.5])
+    annotation = AnnotationBbox(TextArea("test"), xy)
+    ax.add_artist(annotation)
+    extent = annotation.get_window_extent().bounds
+
+    xy[1] = 0.8
+
+    assert annotation.get_window_extent().bounds == extent
+
+
 def test_textarea_properties():
     ta = TextArea('Foo')
     assert ta.get_text() == 'Foo'
