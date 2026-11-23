@@ -1,0 +1,1 @@
+yield-inside-async-function:16:4:bad:Yield inside async function:HIGH
