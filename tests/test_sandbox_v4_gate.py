@@ -67,6 +67,28 @@ def test_red_green_then_unchanged_v3_p2p_accepts(fixture):
     assert (suite / 'p2p_runner.py').read_bytes() == Path(gate.p2p_runner.__file__).read_bytes()
 
 
+def test_pristine_base_accepts_symlinked_system_temp_root(fixture, tmp_path, monkeypatch):
+    workspace, suite = fixture
+    directory = tmp_path / 'real-temp'
+    directory.mkdir()
+    alias = tmp_path / 'system-temp'
+    alias.symlink_to(directory, target_is_directory=True)
+    monkeypatch.setattr(gate_runtime.tempfile, 'tempdir', str(alias))
+    assert gate_runtime.check(workspace, suite)['C'] == 'pass'
+
+
+def test_pristine_base_still_refuses_archived_test_symlink(fixture):
+    workspace, suite = fixture
+    (workspace / 'test_agent.py').unlink()
+    (workspace / 'test_agent.py').symlink_to('behavior.py')
+    git(workspace, 'add', 'test_agent.py')
+    git(workspace, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+        'commit', '--quiet', '-m', 'Base contains a test symlink')
+    (workspace / 'test_agent.py').unlink()
+    agent_test(workspace, 'from behavior import VALUE\ndef test_fix(): assert VALUE == 1\n')
+    assert 'base test path uses a symlink' in refused(fixture, 'A')
+
+
 def test_suite_export_can_resume_after_a_failed_control(fixture):
     workspace, suite = fixture
     before = {path.name: path.read_bytes() for path in suite.iterdir() if path.is_file()}

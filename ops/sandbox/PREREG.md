@@ -551,6 +551,11 @@ skips) and passed after the correction. Historical native-control runtime hashes
 are preserved separately from the updated shipped-runtime digest in KIT.json;
 the other 61 native controls were not rerun for this PATH-only correction.
 
+CI portability correction: canonicalize the system temporary directory before
+checking archived test paths for symlinks. This permits macOS's `/var` alias
+without relaxing refusal of symlinks inside the pristine base. A fixture covers
+both a symlinked system temp root and an archived test symlink.
+
 Use the same v3 event-based contamination policy: observed access to this
 instance's upstream issue/PR/commit, a fork/mirror of its fix, or SWE-bench data
 (including dataset pages, experiments or Hugging Face) flags contamination.
