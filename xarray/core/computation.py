@@ -1857,13 +1857,14 @@ def where(cond, x, y, keep_attrs=None):
     """
     if keep_attrs is None:
         keep_attrs = _get_keep_attrs(default=False)
-    if keep_attrs is True:
+    keep_attrs_of_x = keep_attrs is True
+    if keep_attrs_of_x:
         # keep the attributes of x, the second parameter, by default to
         # be consistent with the `where` method of `DataArray` and `Dataset`
         keep_attrs = lambda attrs, context: getattr(x, "attrs", {})
 
     # alignment for three arguments is complicated, so don't support it yet
-    return apply_ufunc(
+    result = apply_ufunc(
         duck_array_ops.where,
         cond,
         x,
@@ -1873,6 +1874,46 @@ def where(cond, x, y, keep_attrs=None):
         dask="allowed",
         keep_attrs=keep_attrs,
     )
+
+    if keep_attrs_of_x:
+        result = _restore_variable_attrs(result, [x, y, cond])
+
+    return result
+
+
+def _restore_variable_attrs(result, sources):
+    """Give each coordinate (and data variable) of ``result`` the attrs of the
+    variable with the same name in the first of ``sources`` that has it."""
+    from .dataarray import DataArray
+    from .dataset import Dataset
+
+    if isinstance(result, DataArray):
+        variables = result._coords
+        names = list(variables)
+    elif isinstance(result, Dataset):
+        variables = result._variables
+        names = list(result.coords) + [
+            name for name in result.data_vars if isinstance(sources[0], Dataset)
+        ]
+    else:
+        return result
+
+    for name in names:
+        for source in sources:
+            if isinstance(source, Dataset):
+                source_vars = source.variables
+            elif isinstance(source, DataArray):
+                source_vars = source.coords
+            else:
+                continue
+            if name in source_vars:
+                # copy so the inputs' variables are never modified in place
+                variable = variables[name].copy(deep=False)
+                variable.attrs = dict(source_vars[name].attrs)
+                variables[name] = variable
+                break
+
+    return result
 
 
 @overload

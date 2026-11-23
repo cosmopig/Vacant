@@ -1,0 +1,2 @@
+xarray/tests/test_computation.py::test_where_attrs_keeps_coord_attrs
+xarray/tests/test_computation.py::test_where_attrs_dataset_keeps_variable_attrs
