@@ -6,7 +6,6 @@ import py
 import pytest
 from _pytest.config import PytestPluginManager
 from _pytest.main import ExitCode
-from _pytest.pathlib import unique_path
 
 
 def ConftestWithSetinitial(path):
@@ -143,11 +142,11 @@ def test_conftestcutdir(testdir):
     # but we can still import a conftest directly
     conftest._importconftest(conf)
     values = conftest._getconftestmodules(conf.dirpath())
-    assert values[0].__file__.startswith(str(unique_path(conf)))
+    assert values[0].__file__.startswith(str(conf.realpath()))
     # and all sub paths get updated properly
     values = conftest._getconftestmodules(p)
     assert len(values) == 1
-    assert values[0].__file__.startswith(str(unique_path(conf)))
+    assert values[0].__file__.startswith(str(conf.realpath()))
 
 
 def test_conftestcutdir_inplace_considered(testdir):
@@ -156,7 +155,7 @@ def test_conftestcutdir_inplace_considered(testdir):
     conftest_setinitial(conftest, [conf.dirpath()], confcutdir=conf.dirpath())
     values = conftest._getconftestmodules(conf.dirpath())
     assert len(values) == 1
-    assert values[0].__file__.startswith(str(unique_path(conf)))
+    assert values[0].__file__.startswith(str(conf.realpath()))
 
 
 @pytest.mark.parametrize("name", "test tests whatever .dotdir".split())
@@ -166,7 +165,7 @@ def test_setinitial_conftest_subdirs(testdir, name):
     conftest = PytestPluginManager()
     conftest_setinitial(conftest, [sub.dirpath()], confcutdir=testdir.tmpdir)
     if name not in ("whatever", ".dotdir"):
-        assert unique_path(subconftest) in conftest._conftestpath2mod
+        assert subconftest.realpath() in conftest._conftestpath2mod
         assert len(conftest._conftestpath2mod) == 1
     else:
         assert subconftest not in conftest._conftestpath2mod
@@ -290,6 +289,21 @@ def test_conftest_badcase(testdir):
     testdir.tmpdir.join("jenkinsroot/test").chdir()
     result = testdir.runpytest()
     assert result.ret == ExitCode.NO_TESTS_COLLECTED
+
+
+def test_conftest_in_mixed_case_package(testdir):
+    testdir.makepyfile(
+        **{
+            "Python/__init__.py": "",
+            "Python/PIsys/__init__.py": "",
+            "Python/PIsys/conftest.py": "assert __name__ == 'Python.PIsys.conftest'",
+            "Python/PIsys/test_example.py": "def test_example(): pass",
+        }
+    )
+    testdir.tmpdir.join("Python").chdir()
+    result = testdir.runpytest_subprocess("--collect-only", "PIsys")
+    assert result.ret == ExitCode.OK
+    result.stdout.fnmatch_lines(["*test_example*"])
 
 
 def test_no_conftest(testdir):

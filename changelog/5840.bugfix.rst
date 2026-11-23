@@ -1,0 +1,1 @@
+Fix loading ``conftest.py`` on Windows when the containing package has a mixed-case name.

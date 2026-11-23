@@ -30,7 +30,6 @@ from _pytest._code import filter_traceback
 from _pytest.compat import importlib_metadata
 from _pytest.outcomes import fail
 from _pytest.outcomes import Skipped
-from _pytest.pathlib import unique_path
 from _pytest.warning_types import PytestConfigWarning
 
 hookimpl = HookimplMarker("pytest")
@@ -367,7 +366,7 @@ class PytestPluginManager(PluginManager):
         """
         current = py.path.local()
         self._confcutdir = (
-            unique_path(current.join(namespace.confcutdir, abs=True))
+            current.join(namespace.confcutdir, abs=True).realpath()
             if namespace.confcutdir
             else None
         )
@@ -406,7 +405,7 @@ class PytestPluginManager(PluginManager):
         else:
             directory = path
 
-        directory = unique_path(directory)
+        directory = directory.realpath()
 
         # XXX these days we may rather want to use config.rootdir
         # and allow users to opt into looking into the rootdir parent
@@ -435,7 +434,7 @@ class PytestPluginManager(PluginManager):
         # Use realpath to avoid loading the same conftest twice
         # with build systems that create build directories containing
         # symlinks to actual files.
-        conftestpath = unique_path(conftestpath)
+        conftestpath = conftestpath.realpath()
         try:
             return self._conftestpath2mod[conftestpath]
         except KeyError:
