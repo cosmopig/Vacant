@@ -85,7 +85,11 @@ class Q(tree.Node):
         if path.startswith('django.db.models.query_utils'):
             path = path.replace('django.db.models.query_utils', 'django.db.models')
         args, kwargs = (), {}
-        if len(self.children) == 1 and not isinstance(self.children[0], Q):
+        if (
+            len(self.children) == 1 and
+            isinstance(self.children[0], tuple) and
+            len(self.children[0]) == 2
+        ):
             child = self.children[0]
             kwargs = {child[0]: child[1]}
         else:

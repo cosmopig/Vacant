@@ -1,4 +1,5 @@
-from django.db.models import F, Q
+from django.contrib.auth import get_user_model
+from django.db.models import Exists, F, OuterRef, Q
 from django.test import SimpleTestCase
 
 
@@ -87,6 +88,26 @@ class QTests(SimpleTestCase):
         path, args, kwargs = q.deconstruct()
         self.assertEqual(args, (Q(price__gt=F('discounted_price')),))
         self.assertEqual(kwargs, {})
+
+    def test_deconstruct_boolean_expression(self):
+        tagged = get_user_model().objects.filter(username='jim')
+        q = Q(Exists(tagged))
+        _, args, kwargs = q.deconstruct()
+        self.assertEqual(args, (Exists(tagged),))
+        self.assertEqual(kwargs, {})
+        self.assertEqual(Q(*args, **kwargs), q)
+
+    def test_combine_and_boolean_expression(self):
+        exists = Exists(get_user_model().objects.filter(pk=OuterRef('pk')))
+        for combined in (exists & Q(), exists | Q(), Q(x=1) & exists):
+            with self.subTest(combined=combined):
+                self.assertIsInstance(combined, Q)
+
+    def test_reconstruct_boolean_expression(self):
+        q = Q(Exists(get_user_model().objects.filter(username='jim')))
+        path, args, kwargs = q.deconstruct()
+        self.assertEqual(path, 'django.db.models.Q')
+        self.assertEqual(Q(*args, **kwargs), q)
 
     def test_reconstruct(self):
         q = Q(price__gt=F('discounted_price'))
