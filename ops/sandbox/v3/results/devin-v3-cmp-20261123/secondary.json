@@ -2,16 +2,367 @@
   "gold_similarity_threshold": 0.9,
   "gold_similarity_flags": [],
   "vacant_gate": {
-    "submissions": "UNKNOWN",
-    "accepted_cells": "UNKNOWN",
-    "known_cells": 0,
+    "submissions": 25,
+    "accepted_cells": 24,
+    "known_cells": 24,
     "planned_cells": 24,
-    "reason": "Session audit export contains access-search results, not gate receipts or raw submission outputs."
+    "first_submission_accepted_cells": 23,
+    "refused_submissions": 1,
+    "gate_never_run_cells": 0,
+    "exit_code_counts": {
+      "0": 24,
+      "20": 1
+    },
+    "measurement": "Reply-reported/pasted stdout; not independent receipt verification. Repeated messages are deduplicated; 1/1 次 is not a submission count. Unknown or unshown execution history remains UNKNOWN.",
+    "source_file": "vacant_replies.json (run directory)",
+    "source_sha256": "850e9a9b5f3bed1639b7274a9e5ccc51c3e48f57a8793a237b9583525f06f488",
+    "evidence_file": "gate-evidence.json",
+    "actual_total_executions": "UNKNOWN",
+    "receipt_verification": "UNKNOWN",
+    "cells": [
+      {
+        "branch": "sandbox-devin/v3/astropy__astropy-13236-vacant-s1",
+        "session_id": "devin-8b9de667097b42aaa550805bd2e14031",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066198e97501ba3b221932237e6e"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/astropy__astropy-13236-vacant-s2",
+        "session_id": "devin-9532b790c98e461e9e44d04f81055af4",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20661d5637e7092ab1417e9793e7a"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/astropy__astropy-14598-vacant-s1",
+        "session_id": "devin-390cefc5c7554a8c9e38daba9b36fb4a",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066131d67fe39e298bbb0d232708"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/astropy__astropy-14598-vacant-s2",
+        "session_id": "devin-5cac400e11ad43fe842bdf565abef6bf",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20660184979f1acfe8afbc99b477f"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/django__django-13344-vacant-s1",
+        "session_id": "devin-3c81dc5cf1ca4a738aafdc30f6f111a2",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20660d65e70a1a78b90821a0f56fd"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/django__django-13344-vacant-s2",
+        "session_id": "devin-109abffd19a54314b418f692d881895a",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066170d57360b93b99be021e69b7"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/django__django-15563-vacant-s1",
+        "session_id": "devin-574b79f1dc394c1ea389d13b6ee72493",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2065fd4527f13a5e1e7e6da1dbe2c"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/django__django-15563-vacant-s2",
+        "session_id": "devin-24ce0487b75d4f07be7f0d1b2bd96193",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a206634afd70529cb4f2f5c3526e02"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/django__django-15732-vacant-s1",
+        "session_id": "devin-d2bec5685e424e32b5d6016eadf4efb7",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20660a9af79f0af8bd626b1508a3f"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/django__django-15732-vacant-s2",
+        "session_id": "devin-cbd7b4e0e08849b9af0526c5cd5da045",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20660539c70d2a2802605371965c4"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s1",
+        "session_id": "devin-372b4685a975485e99fc3a3fc9f46a65",
+        "number_of_submissions": 2,
+        "exit_codes": [
+          20,
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066322057e618b43ebe45c29eaa9"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s2",
+        "session_id": "devin-a9bc4d7ccf7642c7b10e7c0d82746336",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20662aa6c7e60aa3eb025e9ff068c"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s1",
+        "session_id": "devin-a1c8b2434e8c4244b505f5719c3aa9ba",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a206637d717673ac5c1495eed1689a"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s2",
+        "session_id": "devin-519c91334771444c92033cf1b31e7b8e",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066527ea7860a7dc74e3f1e32dbd"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s1",
+        "session_id": "devin-5ec1df16434544039b1c265453d68fe6",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2065fefa37411a314df2328ad5938"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s2",
+        "session_id": "devin-588894d8d08546f0994efa738e769293",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2065f1ec371e1872ce0a85987559c"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s1",
+        "session_id": "devin-4b06ea661d594907a1c2c435ef488857",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a206600f037162a7134008c9ca2506"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s2",
+        "session_id": "devin-2284f29df2fe4486a2cf29597ff2fbe1",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066187af7143915b5c531b55256a"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sympy__sympy-14248-vacant-s1",
+        "session_id": "devin-a237e8f91168478980354775ba3d89f8",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2066058d87b23b4680f60f0109d9e"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sympy__sympy-14248-vacant-s2",
+        "session_id": "devin-a90e09af3e77482e91b2a09b402822ef",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20661437172c191789240fae992a2"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sympy__sympy-15875-vacant-s1",
+        "session_id": "devin-82dc7c7a8e9c4b79be1df22c14091bfd",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20661702c7c40b94ed48b99595b55"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sympy__sympy-15875-vacant-s2",
+        "session_id": "devin-31a913fb14804b44bed42a49df050ffd",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2065eff707c229301dab3e67a19f1"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sympy__sympy-21612-vacant-s1",
+        "session_id": "devin-afa04e24abe8447db9dc12c3a37d43a3",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a20660457c76128eeeb8c2387bc8d8"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      },
+      {
+        "branch": "sandbox-devin/v3/sympy__sympy-21612-vacant-s2",
+        "session_id": "devin-02df398794e24fc78c3f7189b20218bf",
+        "number_of_submissions": 1,
+        "exit_codes": [
+          0
+        ],
+        "final_gate_verdict": "accepted",
+        "gate_never_run": false,
+        "evidence_event_ids": [
+          "event-01a2065fe2a97fe09328d811e648fe92"
+        ],
+        "gate_to_final_handback_binding": "UNKNOWN"
+      }
+    ]
   },
   "acus": {
     "A": "UNKNOWN",
     "A2": "UNKNOWN",
     "G": "UNKNOWN"
   },
-  "acu_reason": "No session billing/usage export or configured Devin API credential available."
+  "acu_reason": "User reports session API 0.0 for all 72; per instruction this is not treated as measured usage or free execution. ACUs remain UNKNOWN."
 }

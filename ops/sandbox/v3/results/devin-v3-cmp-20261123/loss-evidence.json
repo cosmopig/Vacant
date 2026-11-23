@@ -1,0 +1,170 @@
+[
+  {
+    "cell": "scikit-learn__scikit-learn-25747-s1-G",
+    "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s1",
+    "git_sha": "e1e47d1e03647a903d3d19779169bf90560ff2ae",
+    "patch_sha256": "e3fdb471169f23aeac1057a5730954f1b39c337d100ecd841325c6f4ea3a4c9d",
+    "image_digest": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
+    "harness_version": "3.0.17",
+    "patch_applied": true,
+    "infra_void": false,
+    "resolved": false,
+    "fail_to_pass": {
+      "success": [],
+      "failure": [
+        "sklearn/utils/tests/test_set_output.py::test_set_output_pandas_keep_index"
+      ]
+    },
+    "pass_to_pass": {
+      "success": [
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense",
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense_update_columns_and_index",
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_error_validation",
+        "sklearn/utils/tests/test_set_output.py::test__safe_set_output",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_mixin",
+        "sklearn/utils/tests/test_set_output.py::test__safe_set_output_error",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_method",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_method_error",
+        "sklearn/utils/tests/test_set_output.py::test__get_output_config",
+        "sklearn/utils/tests/test_set_output.py::test_get_output_auto_wrap_false",
+        "sklearn/utils/tests/test_set_output.py::test_auto_wrap_output_keys_errors_with_incorrect_input",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_mixin_custom_mixin",
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_column_errors",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_mro"
+      ],
+      "failure": []
+    },
+    "test_output_file": "revisions/scikit-learn__scikit-learn-25747-s1-G/e1e47d1e03647a903d3d19779169bf90560ff2ae/harness/logs/run_evaluation/v3-630c2e4feac444e3a658a1ffdf98cdcb/handback/scikit-learn__scikit-learn-25747/test_output.txt",
+    "test_output_sha256": "c80262efdf8b27a2bbe35345f08918f35ddc64e5c4765b6a1355a73607da3362",
+    "failure_excerpt": "10009: =================================== FAILURES ===================================\n10010: ______________________ test_set_output_pandas_keep_index _______________________\n10011: \n10012:     def test_set_output_pandas_keep_index():\n10013:         \"\"\"Check that set_output does not override index.\n10014:     \n10015:         Non-regression test for gh-25730.\n10016:         \"\"\"\n10017:         pd = pytest.importorskip(\"pandas\")\n10018:     \n10019:         X = pd.DataFrame([[1, 2, 3], [4, 5, 6]], index=[0, 1])\n10020:         est = EstimatorWithSetOutputIndex().set_output(transform=\"pandas\")\n10021:         est.fit(X)\n10022:     \n10023:         X_trans = est.transform(X)\n10024: >       assert_array_equal(X_trans.index, [\"s0\", \"s1\"])\n10025: E       AssertionError: \n10026: E       Arrays are not equal\n10027: E       \n10028: E       Mismatched elements: 1 / 1 (100%)\n10029: E        x: array([0, 1])\n10030: E        y: array(['s0', 's1'], dtype='<U2')\n10031: \n10032: sklearn/utils/tests/test_set_output.py:294: AssertionError"
+  },
+  {
+    "cell": "scikit-learn__scikit-learn-25747-s2-G",
+    "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s2",
+    "git_sha": "c4d53a2e0931c25ea29723a34fefbc55be724a7e",
+    "patch_sha256": "cb68300626e7b91a99abd9a585b7f40a7068d9d44d8a37964c3c67da1fa1ecb4",
+    "image_digest": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25747@sha256:557967b5382d23ea1842e6dc9ba11e4816756c6bde57243523a64f8a404141fa",
+    "harness_version": "3.0.17",
+    "patch_applied": true,
+    "infra_void": false,
+    "resolved": false,
+    "fail_to_pass": {
+      "success": [],
+      "failure": [
+        "sklearn/utils/tests/test_set_output.py::test_set_output_pandas_keep_index"
+      ]
+    },
+    "pass_to_pass": {
+      "success": [
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense",
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_dense_update_columns_and_index",
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_error_validation",
+        "sklearn/utils/tests/test_set_output.py::test__safe_set_output",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_mixin",
+        "sklearn/utils/tests/test_set_output.py::test__safe_set_output_error",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_method",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_method_error",
+        "sklearn/utils/tests/test_set_output.py::test__get_output_config",
+        "sklearn/utils/tests/test_set_output.py::test_get_output_auto_wrap_false",
+        "sklearn/utils/tests/test_set_output.py::test_auto_wrap_output_keys_errors_with_incorrect_input",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_mixin_custom_mixin",
+        "sklearn/utils/tests/test_set_output.py::test__wrap_in_pandas_container_column_errors",
+        "sklearn/utils/tests/test_set_output.py::test_set_output_mro"
+      ],
+      "failure": []
+    },
+    "test_output_file": "revisions/scikit-learn__scikit-learn-25747-s2-G/c4d53a2e0931c25ea29723a34fefbc55be724a7e/harness/logs/run_evaluation/v3-61a4f6604d8d43f2bde61d64ab0d9cab/handback/scikit-learn__scikit-learn-25747/test_output.txt",
+    "test_output_sha256": "6882bbbc3242fbf812e3c7a265919fa75783f47ff014bd418ef8ef05a3c2ad41",
+    "failure_excerpt": "10004: =================================== FAILURES ===================================\n10005: ______________________ test_set_output_pandas_keep_index _______________________\n10006: \n10007:     def test_set_output_pandas_keep_index():\n10008:         \"\"\"Check that set_output does not override index.\n10009:     \n10010:         Non-regression test for gh-25730.\n10011:         \"\"\"\n10012:         pd = pytest.importorskip(\"pandas\")\n10013:     \n10014:         X = pd.DataFrame([[1, 2, 3], [4, 5, 6]], index=[0, 1])\n10015:         est = EstimatorWithSetOutputIndex().set_output(transform=\"pandas\")\n10016:         est.fit(X)\n10017:     \n10018:         X_trans = est.transform(X)\n10019: >       assert_array_equal(X_trans.index, [\"s0\", \"s1\"])\n10020: E       AssertionError: \n10021: E       Arrays are not equal\n10022: E       \n10023: E       Mismatched elements: 1 / 1 (100%)\n10024: E        x: array([0, 1])\n10025: E        y: array(['s0', 's1'], dtype='<U2')\n10026: \n10027: sklearn/utils/tests/test_set_output.py:294: AssertionError"
+  },
+  {
+    "cell": "matplotlib__matplotlib-24870-s1-G",
+    "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s1",
+    "git_sha": "ad67f25012ffca15a8200f075113500bfb6aa768",
+    "patch_sha256": "a313f7f11aa356d9c14c1af523ae04619d3c3fcda1dc0c02527cc502434b4d4e",
+    "image_digest": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24870@sha256:e7387d51d146c5aa492184a1ba8b4be444964ba3f653b3304e8d5d9a27ea3c33",
+    "harness_version": "3.0.17",
+    "patch_applied": true,
+    "infra_void": false,
+    "resolved": false,
+    "fail_to_pass": {
+      "success": [],
+      "failure": [
+        "lib/matplotlib/tests/test_contour.py::test_bool_autolevel"
+      ]
+    },
+    "pass_to_pass": {
+      "success": [
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_1d_valid",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_2d_valid",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args0-Length",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args1-Length",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args2-Number",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args3-Number",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args4-Shapes",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args5-Shapes",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args6-Inputs",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args7-Input",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args8-Input",
+        "lib/matplotlib/tests/test_contour.py::test_contour_shape_error[args9-Input",
+        "lib/matplotlib/tests/test_contour.py::test_contour_empty_levels",
+        "lib/matplotlib/tests/test_contour.py::test_contour_Nlevels",
+        "lib/matplotlib/tests/test_contour.py::test_contour_badlevel_fmt",
+        "lib/matplotlib/tests/test_contour.py::test_contour_uniform_z",
+        "lib/matplotlib/tests/test_contour.py::test_contour_manual_labels[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_manual_labels[pdf]",
+        "lib/matplotlib/tests/test_contour.py::test_given_colors_levels_and_extends[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_datetime_axis[png]",
+        "lib/matplotlib/tests/test_contour.py::test_labels[png]",
+        "lib/matplotlib/tests/test_contour.py::test_corner_mask[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contourf_decreasing_levels",
+        "lib/matplotlib/tests/test_contour.py::test_contourf_symmetric_locator",
+        "lib/matplotlib/tests/test_contour.py::test_circular_contour_warning",
+        "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[True-123-1234]",
+        "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[False-123-1234]",
+        "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[True-123-None]",
+        "lib/matplotlib/tests/test_contour.py::test_clabel_zorder[False-123-None]",
+        "lib/matplotlib/tests/test_contour.py::test_contourf_log_extension[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_addlines[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_uneven[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_linewidth[1.23-None-None-1.23]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_linewidth[1.23-4.24-None-4.24]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_linewidth[1.23-4.24-5.02-5.02]",
+        "lib/matplotlib/tests/test_contour.py::test_label_nonagg",
+        "lib/matplotlib/tests/test_contour.py::test_contour_closed_line_loop[png]",
+        "lib/matplotlib/tests/test_contour.py::test_quadcontourset_reuse",
+        "lib/matplotlib/tests/test_contour.py::test_contour_manual[png]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_line_start_on_corner_edge[png]",
+        "lib/matplotlib/tests/test_contour.py::test_find_nearest_contour",
+        "lib/matplotlib/tests/test_contour.py::test_find_nearest_contour_no_filled",
+        "lib/matplotlib/tests/test_contour.py::test_contour_autolabel_beyond_powerlimits",
+        "lib/matplotlib/tests/test_contour.py::test_contourf_legend_elements",
+        "lib/matplotlib/tests/test_contour.py::test_contour_legend_elements",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_name[mpl2005-Mpl2005ContourGenerator]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_name[mpl2014-Mpl2014ContourGenerator]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_name[serial-SerialContourGenerator]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_name[threaded-ThreadedContourGenerator]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_name[invalid-None]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[mpl2005]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[mpl2014]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[serial]",
+        "lib/matplotlib/tests/test_contour.py::test_algorithm_supports_corner_mask[threaded]",
+        "lib/matplotlib/tests/test_contour.py::test_all_algorithms[png]",
+        "lib/matplotlib/tests/test_contour.py::test_subfigure_clabel",
+        "lib/matplotlib/tests/test_contour.py::test_linestyles[solid]",
+        "lib/matplotlib/tests/test_contour.py::test_linestyles[dashed]",
+        "lib/matplotlib/tests/test_contour.py::test_linestyles[dashdot]",
+        "lib/matplotlib/tests/test_contour.py::test_linestyles[dotted]",
+        "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[solid]",
+        "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[dashed]",
+        "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[dashdot]",
+        "lib/matplotlib/tests/test_contour.py::test_negative_linestyles[dotted]",
+        "lib/matplotlib/tests/test_contour.py::test_contour_remove"
+      ],
+      "failure": []
+    },
+    "test_output_file": "revisions/matplotlib__matplotlib-24870-s1-G/ad67f25012ffca15a8200f075113500bfb6aa768/harness/logs/run_evaluation/v3-075b646dcd504135b30e852ce6f57b33/handback/matplotlib__matplotlib-24870/test_output.txt",
+    "test_output_sha256": "49cabf430a9406b26b7ce3d20e6fde056bd8b9ed12bd50ded4960fd5739bb712",
+    "failure_excerpt": "562: =================================== FAILURES ===================================\n563: _____________________________ test_bool_autolevel ______________________________\n564: \n565:     def test_bool_autolevel():\n566:         x, y = np.random.rand(2, 9)\n567:         z = (np.arange(9) % 2).reshape((3, 3)).astype(bool)\n568:         m = [[False, False, False], [False, True, False], [False, False, False]]\n569:         assert plt.contour(z.tolist()).levels.tolist() == [.5]\n570:         assert plt.contour(z).levels.tolist() == [.5]\n571:         assert plt.contour(np.ma.array(z, mask=m)).levels.tolist() == [.5]\n572:         assert plt.contourf(z.tolist()).levels.tolist() == [0, .5, 1]\n573:         assert plt.contourf(z).levels.tolist() == [0, .5, 1]\n574:         assert plt.contourf(np.ma.array(z, mask=m)).levels.tolist() == [0, .5, 1]\n575:         z = z.ravel()\n576: >       assert plt.tricontour(x, y, z.tolist()).levels.tolist() == [.5]\n577: E       assert [0.0, 0.15000...00000001, ...] == [0.5]\n578: E         \n579: E         At index 0 diff: 0.0 != 0.5\n580: E         Left contains 7 more items, first extra item: 0.15000000000000002\n581: E         Use -v to get more diff\n582: \n583: lib/matplotlib/tests/test_contour.py:709: AssertionError"
+  }
+]

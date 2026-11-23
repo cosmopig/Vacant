@@ -1,0 +1,544 @@
+{
+  "source_sha256": "850e9a9b5f3bed1639b7274a9e5ccc51c3e48f57a8793a237b9583525f06f488",
+  "measurement": "Reply-reported/pasted stdout; not independent receipt verification. Repeated messages are deduplicated; 1/1 次 is not a submission count. Unknown or unshown execution history remains UNKNOWN.",
+  "cells": [
+    {
+      "branch": "sandbox-devin/v3/astropy__astropy-13236-vacant-s1",
+      "session_id": "devin-8b9de667097b42aaa550805bd2e14031",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws e10dd657bfe5→e10dd657bfe5　wire 0 通　收據 /home/ubuntu/kit/receipts/astropy__astropy-13236-1",
+          "event_id": "event-01a2066198e97501ba3b221932237e6e",
+          "source": "messages",
+          "source_line": 8,
+          "excerpt": "**Gate output (submission 1, the only one):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws e10dd657bfe5→e10dd657bfe5　wire 0 通　收據 /home/ubuntu/kit/receipts/astropy__astropy-13236-1\nEXIT 0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/astropy__astropy-13236-vacant-s2",
+      "session_id": "devin-9532b790c98e461e9e44d04f81055af4",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 5459e9f053df→5459e9f053df　wire 0 通　收據 /home/ubuntu/kit/receipts/astropy__astropy-13236-1",
+          "event_id": "event-01a20661d5637e7092ab1417e9793e7a",
+          "source": "messages",
+          "source_line": 9,
+          "excerpt": "**Gate output (submission 1, exit 0):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 5459e9f053df→5459e9f053df　wire 0 通　收據 /home/ubuntu/kit/receipts/astropy__astropy-13236-1"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/astropy__astropy-14598-vacant-s1",
+      "session_id": "devin-390cefc5c7554a8c9e38daba9b36fb4a",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws c9ba7a600169→c9ba7a600169　wire 0 通　收據 /home/ubuntu/kit/receipts/astropy__astropy-14598-1",
+          "event_id": "event-01a2066131d67fe39e298bbb0d232708",
+          "source": "messages",
+          "source_line": 12,
+          "excerpt": "**Gate submission 1 (raw output):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws c9ba7a600169→c9ba7a600169　wire 0 通　收據 /home/ubuntu/kit/receipts/astropy__astropy-14598-1\nEXIT 0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/astropy__astropy-14598-vacant-s2",
+      "session_id": "devin-5cac400e11ad43fe842bdf565abef6bf",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 3ac56897e977→3ac56897e977　wire 0 通　收據 /home/ubuntu/work/kit/receipts/astropy__astropy-14598-1",
+          "event_id": "event-01a20660184979f1acfe8afbc99b477f",
+          "source": "messages",
+          "source_line": 18,
+          "excerpt": "**Gate submission 1, raw output:**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 3ac56897e977→3ac56897e977　wire 0 通　收據 /home/ubuntu/work/kit/receipts/astropy__astropy-14598-1\nexit=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/django__django-13344-vacant-s1",
+      "session_id": "devin-3c81dc5cf1ca4a738aafdc30f6f111a2",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws edfcf94f7693→edfcf94f7693　wire 0 通　收據 /home/ubuntu/kit/receipts/django__django-13344-1",
+          "event_id": "event-01a20660d65e70a1a78b90821a0f56fd",
+          "source": "messages",
+          "source_line": 25,
+          "excerpt": "**Gate submission 1 (raw output):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws edfcf94f7693→edfcf94f7693　wire 0 通　收據 /home/ubuntu/kit/receipts/django__django-13344-1\nexit=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/django__django-13344-vacant-s2",
+      "session_id": "devin-109abffd19a54314b418f692d881895a",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 31fa1a0a06cc→31fa1a0a06cc　wire 0 通　收據 /home/ubuntu/vacant-kit-v3/receipts/django__django-13344-1",
+          "event_id": "event-01a2066170d57360b93b99be021e69b7",
+          "source": "messages",
+          "source_line": 5,
+          "excerpt": "**Vacant submission 1 (exit 0):**\n```text\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 31fa1a0a06cc→31fa1a0a06cc　wire 0 通　收據 /home/ubuntu/vacant-kit-v3/receipts/django__django-13344-1"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/django__django-15563-vacant-s1",
+      "session_id": "devin-574b79f1dc394c1ea389d13b6ee72493",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws c8a4e217b7b6→c8a4e217b7b6　wire 0 通　收據 /home/ubuntu/kit/receipts/django__django-15563-1",
+          "event_id": "event-01a2065fd4527f13a5e1e7e6da1dbe2c",
+          "source": "messages",
+          "source_line": 12,
+          "excerpt": "**Gate submission 1, raw output:**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws c8a4e217b7b6→c8a4e217b7b6　wire 0 通　收據 /home/ubuntu/kit/receipts/django__django-15563-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/django__django-15563-vacant-s2",
+      "session_id": "devin-24ce0487b75d4f07be7f0d1b2bd96193",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 772f2e300c2e→772f2e300c2e　wire 0 通　收據 /home/ubuntu/kit/receipts/django__django-15563-1",
+          "event_id": "event-01a206634afd70529cb4f2f5c3526e02",
+          "source": "messages",
+          "source_line": 7,
+          "excerpt": "**Gate output, submission 1 (raw):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 772f2e300c2e→772f2e300c2e　wire 0 通　收據 /home/ubuntu/kit/receipts/django__django-15563-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/django__django-15732-vacant-s1",
+      "session_id": "devin-d2bec5685e424e32b5d6016eadf4efb7",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws f25d9593a1e3→f25d9593a1e3　wire 0 通　收據 /home/ubuntu/sandbox-django-15732/receipts/django__django-15732-1",
+          "event_id": "event-01a20660a9af79f0af8bd626b1508a3f",
+          "source": "messages",
+          "source_line": 9,
+          "excerpt": "Vacant accepted submission 1 (exit 0). Raw gate output:\n```text\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws f25d9593a1e3→f25d9593a1e3　wire 0 通　收據 /home/ubuntu/sandbox-django-15732/receipts/django__django-15732-1"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/django__django-15732-vacant-s2",
+      "session_id": "devin-cbd7b4e0e08849b9af0526c5cd5da045",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws ee47370c54c7→ee47370c54c7　wire 0 通　收據 /home/ubuntu/vacant-kit-v3/receipts/django__django-15732-1",
+          "event_id": "event-01a20660539c70d2a2802605371965c4",
+          "source": "messages",
+          "source_line": 11,
+          "excerpt": "**Vacant submission 1 — accepted (exit 0)**\n```text\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws ee47370c54c7→ee47370c54c7　wire 0 通　收據 /home/ubuntu/vacant-kit-v3/receipts/django__django-15732-1"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s1",
+      "session_id": "devin-372b4685a975485e99fc3a3fc9f46a65",
+      "number_of_submissions": 2,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 20,
+          "verdict": "refused",
+          "raw_verdict_line": "[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws a51d8803fbde→a51d8803fbde　wire 0 通　收據 /home/ubuntu/kit/receipts/matplotlib__matplotlib-24870-1",
+          "event_id": "event-01a2066322057e618b43ebe45c29eaa9",
+          "source": "messages",
+          "source_line": 11,
+          "excerpt": "Submission 1, EXIT=20. Refused because Ghostscript was missing (an environment gap, not the code):\n```\n[vacant run] RUN-ON　拒交（visible_fail）　1/1 次　ws a51d8803fbde→a51d8803fbde　wire 0 通　收據 /home/ubuntu/kit/receipts/matplotlib__matplotlib-24870-1\ntest_gate.py::main — assert: P2P skipped:\nlib/matplotlib/tests/test_contour.py::test_contour_manual_labels[pdf]\n.................s...............................................        [100%]\n64 passed, 1 skipped, 2 deselected in 2.99s\n [test_gate.py:14: assert proc.returncode == 0, proc.stderr + proc.stdout]\nEXIT=20"
+        },
+        {
+          "number": 2,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 31f40bc2e8e2→31f40bc2e8e2　wire 0 通　收據 /home/ubuntu/kit/receipts/matplotlib__matplotlib-24870-2",
+          "event_id": "event-01a2066322057e618b43ebe45c29eaa9",
+          "source": "messages",
+          "source_line": 22,
+          "excerpt": "Submission 2, EXIT=0, accepted after installing ghostscript (no code change between submissions):\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 31f40bc2e8e2→31f40bc2e8e2　wire 0 通　收據 /home/ubuntu/kit/receipts/matplotlib__matplotlib-24870-2\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/matplotlib__matplotlib-24870-vacant-s2",
+      "session_id": "devin-a9bc4d7ccf7642c7b10e7c0d82746336",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws d948c7a06869→d948c7a06869　wire 0 通　收據 /home/ubuntu/kit/receipts/matplotlib__matplotlib-24870-1",
+          "event_id": "event-01a20662aa6c7e60aa3eb025e9ff068c",
+          "source": "messages",
+          "source_line": 11,
+          "excerpt": "**Gate submission 1, raw output:**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws d948c7a06869→d948c7a06869　wire 0 通　收據 /home/ubuntu/kit/receipts/matplotlib__matplotlib-24870-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s1",
+      "session_id": "devin-a1c8b2434e8c4244b505f5719c3aa9ba",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 4a8319878882→4a8319878882　wire 0 通　收據 /home/ubuntu/kit/receipts/scikit-learn__scikit-learn-25747-1",
+          "event_id": "event-01a206637d717673ac5c1495eed1689a",
+          "source": "final_reply.contents.message",
+          "source_line": 17,
+          "excerpt": "**Gate submission 1 (raw output, exit 0):**\n```\n<frozen site>:101: RuntimeWarning: Unexpected value in sys.prefix, expected /home/ubuntu/kit/.venv, got /home/ubuntu/kit/scikit-learn__scikit-learn-25747/../.venv\n<frozen site>:101: RuntimeWarning: Unexpected value in sys.exec_prefix, expected /home/ubuntu/kit/.venv, got /home/ubuntu/kit/scikit-learn__scikit-learn-25747/../.venv\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 4a8319878882→4a8319878882　wire 0 通　收據 /home/ubuntu/kit/receipts/scikit-learn__scikit-learn-25747-1\nEXIT 0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/scikit-learn__scikit-learn-25747-vacant-s2",
+      "session_id": "devin-519c91334771444c92033cf1b31e7b8e",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 9abdb16e7f7d→9abdb16e7f7d　wire 0 通　收據 /home/ubuntu/kit/receipts/scikit-learn__scikit-learn-25747-1",
+          "event_id": "event-01a2066527ea7860a7dc74e3f1e32dbd",
+          "source": "messages",
+          "source_line": 11,
+          "excerpt": "**Submission 1, raw gate output (exit 0):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 9abdb16e7f7d→9abdb16e7f7d　wire 0 通　收據 /home/ubuntu/kit/receipts/scikit-learn__scikit-learn-25747-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s1",
+      "session_id": "devin-5ec1df16434544039b1c265453d68fe6",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws cbb3e882d47d→cbb3e882d47d　wire 0 通　收據 /home/ubuntu/kit/receipts/sphinx-doc__sphinx-7985-1",
+          "event_id": "event-01a2065fefa37411a314df2328ad5938",
+          "source": "final_reply.contents.message",
+          "source_line": 14,
+          "excerpt": "**Gate submission 1** (raw output):\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws cbb3e882d47d→cbb3e882d47d　wire 0 通　收據 /home/ubuntu/kit/receipts/sphinx-doc__sphinx-7985-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sphinx-doc__sphinx-7985-vacant-s2",
+      "session_id": "devin-588894d8d08546f0994efa738e769293",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 339682b66a7a→339682b66a7a　wire 0 通　收據 /home/ubuntu/kit/receipts/sphinx-doc__sphinx-7985-1",
+          "event_id": "event-01a2065f1ec371e1872ce0a85987559c",
+          "source": "messages",
+          "source_line": 25,
+          "excerpt": "**Gate submission 1** (raw output):\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 339682b66a7a→339682b66a7a　wire 0 通　收據 /home/ubuntu/kit/receipts/sphinx-doc__sphinx-7985-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s1",
+      "session_id": "devin-4b06ea661d594907a1c2c435ef488857",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 0d330492bfce→0d330492bfce　wire 0 通　收據 /home/ubuntu/kit/receipts/sphinx-doc__sphinx-8548-1",
+          "event_id": "event-01a206600f037162a7134008c9ca2506",
+          "source": "final_reply.contents.message",
+          "source_line": 10,
+          "excerpt": "**Gate output, submission 1 (the only one):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 0d330492bfce→0d330492bfce　wire 0 通　收據 /home/ubuntu/kit/receipts/sphinx-doc__sphinx-8548-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sphinx-doc__sphinx-8548-vacant-s2",
+      "session_id": "devin-2284f29df2fe4486a2cf29597ff2fbe1",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws a9d179c39cae→a9d179c39cae　wire 0 通　收據 /home/ubuntu/repos/sandbox-devin-kit-v3/receipts/sphinx-doc__sphinx-8548-1",
+          "event_id": "event-01a2066187af7143915b5c531b55256a",
+          "source": "messages",
+          "source_line": 11,
+          "excerpt": "**Vacant submission 1** (exit 0)\n```text\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws a9d179c39cae→a9d179c39cae　wire 0 通　收據 /home/ubuntu/repos/sandbox-devin-kit-v3/receipts/sphinx-doc__sphinx-8548-1"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sympy__sympy-14248-vacant-s1",
+      "session_id": "devin-a237e8f91168478980354775ba3d89f8",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 26b724143c1f→26b724143c1f　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-14248-1",
+          "event_id": "event-01a2066058d87b23b4680f60f0109d9e",
+          "source": "messages",
+          "source_line": 19,
+          "excerpt": "**Gate submission 1 (raw output):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 26b724143c1f→26b724143c1f　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-14248-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sympy__sympy-14248-vacant-s2",
+      "session_id": "devin-a90e09af3e77482e91b2a09b402822ef",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws f8434265221a→f8434265221a　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-14248-1",
+          "event_id": "event-01a20661437172c191789240fae992a2",
+          "source": "messages",
+          "source_line": 9,
+          "excerpt": "**Gate submission 1** (raw output):\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws f8434265221a→f8434265221a　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-14248-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sympy__sympy-15875-vacant-s1",
+      "session_id": "devin-82dc7c7a8e9c4b79be1df22c14091bfd",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws ff20a4df848f→ff20a4df848f　wire 0 通　收據 /home/ubuntu/work/kit/receipts/sympy__sympy-15875-1",
+          "event_id": "event-01a20661702c7c40b94ed48b99595b55",
+          "source": "messages",
+          "source_line": 5,
+          "excerpt": "**Gate output, submission 1 (the only one):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws ff20a4df848f→ff20a4df848f　wire 0 通　收據 /home/ubuntu/work/kit/receipts/sympy__sympy-15875-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sympy__sympy-15875-vacant-s2",
+      "session_id": "devin-31a913fb14804b44bed42a49df050ffd",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 44ac47ce99bc→44ac47ce99bc　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-15875-1",
+          "event_id": "event-01a2065eff707c229301dab3e67a19f1",
+          "source": "messages",
+          "source_line": 5,
+          "excerpt": "**Gate submission 1** (`../receipts/sympy__sympy-15875-1`, timeout 120), raw output:\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 44ac47ce99bc→44ac47ce99bc　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-15875-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sympy__sympy-21612-vacant-s1",
+      "session_id": "devin-afa04e24abe8447db9dc12c3a37d43a3",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 20be422f10be→20be422f10be　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-21612-1",
+          "event_id": "event-01a20660457c76128eeeb8c2387bc8d8",
+          "source": "messages",
+          "source_line": 18,
+          "excerpt": "**Gate submission 1 (raw output):**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws 20be422f10be→20be422f10be　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-21612-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    },
+    {
+      "branch": "sandbox-devin/v3/sympy__sympy-21612-vacant-s2",
+      "session_id": "devin-02df398794e24fc78c3f7189b20218bf",
+      "number_of_submissions": 1,
+      "submissions": [
+        {
+          "number": 1,
+          "exit_code": 0,
+          "verdict": "accepted",
+          "raw_verdict_line": "[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws a534f064feab→a534f064feab　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-21612-1",
+          "event_id": "event-01a2065fe2a97fe09328d811e648fe92",
+          "source": "messages",
+          "source_line": 13,
+          "excerpt": "**Gate submission 1, raw output:**\n```\n[vacant run] RUN-ON　交付（visible_pass）　1/1 次　ws a534f064feab→a534f064feab　wire 0 通　收據 /home/ubuntu/kit/receipts/sympy__sympy-21612-1\nEXIT=0"
+        }
+      ],
+      "final_gate_verdict": "accepted",
+      "gate_never_run": false,
+      "receipt_verification": "UNKNOWN",
+      "complete_execution_history": "UNKNOWN",
+      "gate_to_final_handback_binding": "UNKNOWN"
+    }
+  ]
+}

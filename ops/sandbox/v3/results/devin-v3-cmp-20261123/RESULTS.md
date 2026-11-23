@@ -58,12 +58,20 @@ Infra voids, if any, remain failures in denominators. No missing cells or unknow
 Gold-similarity flags: **0/72**; detailed ratios are in secondary.json/cells.json.
 Similarity is reported only; it is not a contamination verdict and causes no exclusions.
 
-**Vacant gate submissions and acceptance: UNKNOWN (0/24 cells have gate-output evidence in the available exports).**
-The launch prompt required up to three submissions, but instructions and pushed branches do not prove gate use or acceptance.
-Official-harness resolved is not a Vacant gate-acceptance measurement.
+**Reply-reported Vacant gate results: 25 submissions, 24 final acceptances; 23 accepted on submission 1.**
+The one refusal is Matplotlib s1 (20 → 0), for missing Ghostscript; no cell reports never running the gate.
+All 24 have pasted visible_pass output, including sklearn s1 after decoding the final_reply JSON's Unicode escapes.
+These are reply exports, not independently verified receipts; complete execution history and final-tree binding remain UNKNOWN.
+Per-cell exit codes and evidence: GATE_RESULTS.md, secondary.json and gate-evidence.json.
+All 24 report gate acceptance, while the independent official harness resolves only 20/24 final handbacks.
 
-**ACUs: UNKNOWN for all arms.** No billing export/API credential was available. Agent calls/tokens/costs remain UNKNOWN.
-visible_pass and workspace sizes were not measured; generic analyzer zeros in those fields are defaults, not observed gate/space metrics.
+The three paired losses (both sklearn cells and Matplotlib s1) are **FAIL_TO_PASS not fixed; no official P2P regressions**.
+LOSS_DIAGNOSIS.md and loss-evidence.json give patch comparisons, log lines, and a counterfactual old-P2P probe.
+The sklearn gate's old index-overwrite test is a plausible constraint on the fix, not proof it caused the agents' choices.
+Neither sklearn cell reports refusal feedback. Matplotlib's reported refusal addressed setup, not the missed triangular-contour behavior.
+
+**ACUs: UNKNOWN for all arms.** User-reported API 0.0 values for all 72 are not treated as measured zero usage.
+Original analyzer visible_pass/workspace fields were not collected; its zeros are defaults, not these reply-derived gate counts.
 
 This comparison concerns the disclosed P2P-test gate plus feedback and up to three submissions—not a zero-configuration installation effect.
 It does not establish that Vacant makes an agent intrinsically better or prevents bypass. Small-bank results are not general proof.
