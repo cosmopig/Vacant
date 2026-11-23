@@ -6,7 +6,7 @@ This module contains python code printers for plain python as well as NumPy & Sc
 from collections import defaultdict
 from itertools import chain
 from sympy.core import S
-from .precedence import precedence
+from .precedence import precedence, PRECEDENCE
 from .codeprinter import CodePrinter
 
 _kw_py2and3 = {
@@ -235,6 +235,27 @@ class AbstractPythonCodePrinter(CodePrinter):
     def _print_Mod(self, expr):
         PREC = precedence(expr)
         return ('{} % {}'.format(*map(lambda x: self.parenthesize(x, PREC), expr.args)))
+
+    def _prints_as_mod_operator(self, item):
+        """Whether ``item`` is printed with the binary ``%`` operator."""
+        from sympy.core.mod import Mod
+        from sympy.functions.elementary.integers import frac
+        if type(self)._print_Mod is not AbstractPythonCodePrinter._print_Mod:
+            return False
+        if isinstance(item, Mod):
+            return True
+        _print_frac = getattr(type(self), '_print_frac', None)
+        return (isinstance(item, frac) and
+                _print_frac is PythonCodePrinter._print_frac)
+
+    def parenthesize(self, item, level, strict=False):
+        # ``a % b`` binds like ``a*b`` (so it needs brackets as a factor or
+        # as the base of a power) and, unlike ``*`` and ``/``, it does not
+        # commute with a unary minus: ``-(a % b)`` differs from ``-a % b``.
+        # A negative Mul hands its factors the level of an Add.
+        if level >= PRECEDENCE["Add"] and self._prints_as_mod_operator(item):
+            return "(%s)" % self._print(item)
+        return super().parenthesize(item, level, strict=strict)
 
     def _print_Piecewise(self, expr):
         result = []

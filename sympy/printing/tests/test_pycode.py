@@ -6,7 +6,7 @@ from sympy.codegen.matrix_nodes import MatrixSolve
 from sympy.core import Expr, Mod, symbols, Eq, Le, Gt, zoo, oo, Rational, Pow
 from sympy.core.numbers import pi
 from sympy.core.singleton import S
-from sympy.functions import acos, KroneckerDelta, Piecewise, sign, sqrt
+from sympy.functions import acos, KroneckerDelta, Piecewise, sign, sqrt, frac
 from sympy.logic import And, Or
 from sympy.matrices import SparseMatrix, MatrixSymbol, Identity
 from sympy.printing.pycode import (
@@ -30,6 +30,19 @@ def test_PythonCodePrinter():
 
     assert prntr.doprint(x**y) == 'x**y'
     assert prntr.doprint(Mod(x, 2)) == 'x % 2'
+    assert prntr.doprint(-Mod(x, y)) == '-(x % y)'
+    assert prntr.doprint(Mod(-x, y)) == '(-x) % y'
+    assert prntr.doprint(2*Mod(x, y)) == '2*(x % y)'
+    assert prntr.doprint(-2*Mod(x, y)) == '-2*(x % y)'
+    assert prntr.doprint(x*Mod(x, y)) == 'x*(x % y)'
+    assert prntr.doprint(Mod(x, y)/z) == '(x % y)/z'
+    assert prntr.doprint(z/Mod(x, y)) == 'z/(x % y)'
+    assert prntr.doprint(Mod(x, y)**2) == '(x % y)**2'
+    assert prntr.doprint(Mod(x, y*z)) == 'x % (y*z)'
+    assert prntr.doprint(x + Mod(x, y)) == 'x + x % y'
+    assert prntr.doprint(x - Mod(x, y)) == 'x - (x % y)'
+    assert prntr.doprint(-frac(x)) == '-(x % 1)'
+    assert prntr.doprint(2*frac(x)) == '2*(x % 1)'
     assert prntr.doprint(And(x, y)) == 'x and y'
     assert prntr.doprint(Or(x, y)) == 'x or y'
     assert not prntr.module_imports

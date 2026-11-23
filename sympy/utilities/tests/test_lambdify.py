@@ -10,7 +10,7 @@ from sympy import (
     true, false, And, Or, Not, ITE, Min, Max, floor, diff, IndexedBase, Sum,
     DotProduct, Eq, Dummy, sinc, erf, erfc, factorial, gamma, loggamma,
     digamma, RisingFactorial, besselj, bessely, besseli, besselk, S, beta,
-    betainc, betainc_regularized, fresnelc, fresnels)
+    betainc, betainc_regularized, fresnelc, fresnels, Mod)
 from sympy.codegen.cfunctions import expm1, log1p, exp2, log2, log10, hypot
 from sympy.codegen.numpy_nodes import logaddexp, logaddexp2
 from sympy.codegen.scipy_nodes import cosm1
@@ -1496,3 +1496,11 @@ def test_lambdify_cse():
             f = case.lambdify(cse=cse)
             result = f(*case.num_args)
             case.assertAllClose(result)
+
+
+def test_issue_22080_mod_multiplied():
+    for expr in [-Mod(x, y), 2*Mod(x, y), x*Mod(x, y), -x*Mod(x, y),
+                 Mod(x, y)**2, Mod(x, y)/z, z/Mod(x, y), x - Mod(x, y)]:
+        for modules in [[], None, 'math', 'sympy']:
+            f = lambdify((x, y, z), expr, modules=modules)
+            assert abs(f(3, 7, 2) - expr.subs({x: 3, y: 7, z: 2})) < 1e-15
