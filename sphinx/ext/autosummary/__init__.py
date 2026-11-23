@@ -78,7 +78,7 @@ from sphinx.environment import BuildEnvironment
 from sphinx.environment.adapters.toctree import TocTree
 from sphinx.ext.autodoc import INSTANCEATTR, Documenter
 from sphinx.ext.autodoc.directive import DocumenterBridge, Options
-from sphinx.ext.autodoc.importer import import_module
+from sphinx.ext.autodoc.importer import get_attribute, import_module
 from sphinx.ext.autodoc.mock import mock
 from sphinx.locale import __
 from sphinx.project import Project
@@ -665,7 +665,7 @@ def _import_by_name(name: str) -> Tuple[Any, Any, str]:
             obj = sys.modules[modname]
             for obj_name in name_parts[last_j:]:
                 parent = obj
-                obj = getattr(obj, obj_name)
+                obj = get_attribute(obj, obj_name, getattr)
             return obj, parent, modname
         else:
             return sys.modules[modname], None, modname

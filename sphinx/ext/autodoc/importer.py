@@ -17,8 +17,8 @@ from sphinx.deprecation import RemovedInSphinx50Warning
 from sphinx.ext.autodoc.mock import ismock, undecorate
 from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
-from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
-                                 safe_getattr)
+from sphinx.util.inspect import (get_class_property, getannotations, getmro, getslots,
+                                 isclass, isenumclass, safe_getattr)
 
 if False:
     # For type annotation
@@ -74,6 +74,13 @@ def import_module(modname: str, warningiserror: bool = False) -> Any:
         raise ImportError(exc, traceback.format_exc()) from exc
 
 
+def get_attribute(obj: Any, name: str, attrgetter: Callable[[Any, str], Any]) -> Any:
+    member = get_class_property(obj, name)
+    if member is not None:
+        return member
+    return attrgetter(obj, name)
+
+
 def import_object(modname: str, objpath: List[str], objtype: str = '',
                   attrgetter: Callable[[Any, str], Any] = safe_getattr,
                   warningiserror: bool = False) -> Any:
@@ -107,7 +114,7 @@ def import_object(modname: str, objpath: List[str], objtype: str = '',
             parent = obj
             logger.debug('[autodoc] getattr(_, %r)', attrname)
             mangled_name = mangle(obj, attrname)
-            obj = attrgetter(obj, mangled_name)
+            obj = get_attribute(obj, mangled_name, attrgetter)
 
             try:
                 logger.debug('[autodoc] => %r', obj)
@@ -195,7 +202,7 @@ def get_object_members(subject: Any, objpath: List[str], attrgetter: Callable,
         superclass = subject.__mro__[1]
         for name in obj_dict:
             if name not in superclass.__dict__:
-                value = safe_getattr(subject, name)
+                value = get_attribute(subject, name, safe_getattr)
                 members[name] = Attribute(name, True, value)
 
     # members in __slots__
@@ -212,7 +219,7 @@ def get_object_members(subject: Any, objpath: List[str], attrgetter: Callable,
     # other members
     for name in dir(subject):
         try:
-            value = attrgetter(subject, name)
+            value = get_attribute(subject, name, attrgetter)
             directly_defined = name in obj_dict
             name = unmangle(subject, name)
             if name and name not in members:
@@ -256,7 +263,7 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable
         superclass = subject.__mro__[1]
         for name in obj_dict:
             if name not in superclass.__dict__:
-                value = safe_getattr(subject, name)
+                value = get_attribute(subject, name, safe_getattr)
                 members[name] = ObjectMember(name, value, class_=subject)
 
     # members in __slots__
@@ -274,7 +281,7 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable
     # other members
     for name in dir(subject):
         try:
-            value = attrgetter(subject, name)
+            value = get_attribute(subject, name, attrgetter)
             if ismock(value):
                 value = undecorate(value)
 

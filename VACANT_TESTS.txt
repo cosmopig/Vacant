@@ -1,0 +1,2 @@
+tests/test_ext_autodoc_autoproperty.py::test_class_properties
+tests/test_ext_autodoc_autoproperty.py::test_autosummary_class_property

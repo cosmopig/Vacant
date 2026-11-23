@@ -383,6 +383,21 @@ def iscoroutinefunction(obj: Any) -> bool:
         return False
 
 
+def is_class_property(obj: Any) -> bool:
+    """Check if the object is a classmethod wrapping a property."""
+    return isinstance(obj, classmethod) and isinstance(obj.__func__, property)
+
+
+def get_class_property(obj: Any, name: str) -> Optional[classmethod]:
+    """Get a class property's descriptor without invoking its getter."""
+    if isclass(obj):
+        member = inspect.getattr_static(obj, name, None)
+        if is_class_property(member):
+            return member
+
+    return None
+
+
 def isproperty(obj: Any) -> bool:
     """Check if the object is property."""
     if sys.version_info >= (3, 8):
@@ -390,7 +405,7 @@ def isproperty(obj: Any) -> bool:
         if isinstance(obj, cached_property):
             return True
 
-    return isinstance(obj, property)
+    return isinstance(obj, property) or is_class_property(obj)
 
 
 def isgenericalias(obj: Any) -> bool:
@@ -837,6 +852,15 @@ def getdoc(obj: Any, attrgetter: Callable = safe_getattr,
     * inherited docstring
     * inherited decorated methods
     """
+    def get_inherited_member(basecls: Type, name: str) -> Any:
+        member = get_class_property(basecls, name)
+        if member is not None:
+            return member.__func__
+        return safe_getattr(basecls, name, None)
+
+    if is_class_property(obj):
+        obj = obj.__func__
+
     doc = attrgetter(obj, '__doc__', None)
     if ispartial(obj) and doc == obj.__class__.__doc__:
         return getdoc(obj.func)
@@ -844,7 +868,7 @@ def getdoc(obj: Any, attrgetter: Callable = safe_getattr,
         if cls and name:
             # Check a docstring of the attribute or method from super classes.
             for basecls in getmro(cls):
-                meth = safe_getattr(basecls, name, None)
+                meth = get_inherited_member(basecls, name)
                 if meth is not None:
                     doc = attrgetter(meth, '__doc__', None)
                     if doc is not None:
@@ -853,7 +877,7 @@ def getdoc(obj: Any, attrgetter: Callable = safe_getattr,
             if doc is None:
                 # retry using `inspect.getdoc()`
                 for basecls in getmro(cls):
-                    meth = safe_getattr(basecls, name, None)
+                    meth = get_inherited_member(basecls, name)
                     if meth is not None:
                         doc = inspect.getdoc(meth)
                         if doc is not None:
