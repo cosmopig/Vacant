@@ -1896,6 +1896,16 @@ class TestRequests:
         headers = adapter.proxy_headers("http://user:@httpbin.org")
         assert headers == {'Proxy-Authorization': 'Basic dXNlcjo='}
 
+    @pytest.mark.parametrize("proxy", [
+        pytest.param("http://user:pa%23ss@proxy.example:8080", id="explicit-scheme"),
+        pytest.param("//user:pa%23ss@proxy.example:8080", id="default-scheme"),
+    ])
+    def test_proxy_auth_on_https_connection(self, proxy):
+        with contextlib.closing(HTTPAdapter()) as adapter:
+            conn = adapter.get_connection("https://example.org/", {"https": proxy})
+
+        assert conn.proxy_headers == {"Proxy-Authorization": _basic_auth_str("user", "pa#ss")}
+
     def test_response_json_when_content_is_None(self, httpbin):
         r = requests.get(httpbin('/status/204'))
         # Make sure r.content is None

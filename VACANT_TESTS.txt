@@ -1,0 +1,2 @@
+tests/test_requests.py::TestRequests::test_proxy_auth_on_https_connection[explicit-scheme]
+tests/test_requests.py::TestRequests::test_proxy_auth_on_https_connection[default-scheme]
