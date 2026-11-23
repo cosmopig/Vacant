@@ -859,7 +859,9 @@ class Card(_Verify):
                     return kw, vc
 
                 value = m.group("strg") or ""
-                value = value.rstrip().replace("''", "'")
+                # Keep quotes escaped; they are unescaped once the
+                # subcard values are joined and parsed as a single string.
+                value = value.rstrip()
                 if value and value[-1] == "&":
                     value = value[:-1]
                 values.append(value)

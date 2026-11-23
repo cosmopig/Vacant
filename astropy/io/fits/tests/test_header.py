@@ -484,6 +484,27 @@ class TestHeaderFunctions(FitsTestCase):
 
         assert str(h1) == str(h2)
 
+    def test_long_string_value_with_quotes_roundtrip(self):
+        """Null strings / escaped quotes in long (CONTINUE) values must
+        survive a round trip through the card image."""
+        for n in range(50, 75):
+            for value in (
+                "x" * n + "''",
+                "x" * n + "''" + "x" * 10,
+                "x" * n + "'",
+                "x" * n + "'" + "x" * 10,
+                "''" + "x" * n + "''''" + "x" * n,
+            ):
+                card1 = fits.Card("CONFIG", value)
+                card2 = fits.Card.fromstring(str(card1))
+                assert card2.value == card1.value == value
+                # Long enough to always need CONTINUE cards, with a comment
+                long_value = "y" * 70 + value
+                card3 = fits.Card("CONFIG", long_value, " ".join(["a comment"] * 10))
+                card4 = fits.Card.fromstring(str(card3))
+                assert card4.value == long_value
+                assert card4.comment == card3.comment
+
     def test_long_string_repr(self):
         """Regression test for https://aeon.stsci.edu/ssb/trac/pyfits/ticket/193
 

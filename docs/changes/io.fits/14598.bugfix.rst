@@ -1,0 +1,3 @@
+Fix a bug where single quotes in long string values (spread over ``CONTINUE``
+cards) were unescaped twice when parsing a card image, so that e.g. ``''``
+was read back as ``'``.
