@@ -10,6 +10,7 @@
 """
 
 import sys
+from importlib import import_module
 from unittest.mock import Mock
 from warnings import catch_warnings
 
@@ -712,6 +713,13 @@ def test_autodoc_special_members(app):
         '   .. py:attribute:: Class.udocattr',
         '   .. py:method:: Class.undocmeth()'
     ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_empty_module_all(app, monkeypatch):
+    monkeypatch.setattr(import_module('target'), '__all__', [])
+    actual = do_autodoc(app, 'module', 'target', {'members': None})
+    assert list(actual) == ['', '.. py:module:: target', '']
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
