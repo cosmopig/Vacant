@@ -535,33 +535,23 @@ class Add(Expr, AssocOp):
             # is zero or not
             return
         nz = []
-        z = 0
-        im_or_z = False
-        im = False
+        im_I = []
         for a in self.args:
             if a.is_real:
-                if a.is_zero:
-                    z += 1
-                elif a.is_zero is False:
-                    nz.append(a)
-                else:
+                zero = a.is_zero
+                if zero is None:
                     return
-            elif a.is_imaginary:
-                im = True
-            elif (S.ImaginaryUnit*a).is_real:
-                im_or_z = True
+                if zero is False:
+                    nz.append(a)
+            elif a.is_imaginary or (S.ImaginaryUnit*a).is_real:
+                im_I.append(S.ImaginaryUnit*a)
             else:
                 return
-        if z == len(self.args):
-            return True
         if len(nz) == len(self.args):
             return None
         b = self.func(*nz)
         if b.is_zero:
-            if not im_or_z and not im:
-                return True
-            if im and not im_or_z:
-                return False
+            return self.func(*im_I).is_zero
         if b.is_zero is False:
             return False
 

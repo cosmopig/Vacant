@@ -1,5 +1,5 @@
 from sympy import I, sqrt, log, exp, sin, asin, factorial, Mod, pi
-from sympy.core import Symbol, S, Rational, Integer, Dummy, Wild, Pow
+from sympy.core import Add, Symbol, S, Rational, Integer, Dummy, Wild, Pow
 from sympy.core.facts import InconsistentAssumptions
 from sympy import simplify
 from sympy.core.compatibility import range
@@ -708,6 +708,18 @@ def test_Add_is_pos_neg():
 def test_Add_is_imaginary():
     nn = Dummy(nonnegative=True)
     assert (I*nn + I).is_imaginary  # issue 8046, 17
+
+
+def test_Add_is_zero_imaginary_terms():
+    e = (1 + I)**2 - 2*I
+    assert e.is_zero is not False
+    assert Add(2*I, -2*I, evaluate=False).is_zero is True
+
+    i = Symbol('i', imaginary=True)
+    j = Symbol('j', imaginary=True)
+    assert (i + j).is_zero is None
+    assert (1 + i + j).is_zero is False
+    assert (I + I*pi).is_zero is False
 
 
 def test_Add_is_algebraic():
