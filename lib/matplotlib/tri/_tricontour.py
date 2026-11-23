@@ -74,7 +74,7 @@ class TriContourSet(ContourSet):
         if self.logscale and self.zmin <= 0:
             func = 'contourf' if self.filled else 'contour'
             raise ValueError(f'Cannot {func} log of negative values.')
-        self._process_contour_level_args(args[1:])
+        self._process_contour_level_args(args[1:], z.dtype)
         return (tri, z)
 
 
@@ -122,6 +122,9 @@ levels : int or array-like, optional
 
     If array-like, draw contour lines at the specified levels.  The values must
     be in increasing order.
+
+    If not given and *Z* is a boolean array, the levels default to ``[0.5]``
+    for `.tricontour` and ``[0, 0.5, 1]`` for `.tricontourf`.
 
 Returns
 -------
