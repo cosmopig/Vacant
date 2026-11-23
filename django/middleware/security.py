@@ -20,6 +20,7 @@ class SecurityMiddleware(MiddlewareMixin):
         self.redirect_exempt = [re.compile(r) for r in settings.SECURE_REDIRECT_EXEMPT]
         self.referrer_policy = settings.SECURE_REFERRER_POLICY
         self.get_response = get_response
+        self._async_check()
 
     def process_request(self, request):
         path = request.path.lstrip("/")

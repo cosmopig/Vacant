@@ -11,14 +11,23 @@ from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from django.core.asgi import get_asgi_application
 from django.core.signals import request_finished, request_started
 from django.db import close_old_connections
+from django.http import HttpResponse
 from django.test import (
     AsyncRequestFactory, SimpleTestCase, modify_settings, override_settings,
 )
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.http import http_date
 
 from .urls import test_filename
 
 TEST_STATIC_ROOT = Path(__file__).parent / 'project' / 'static'
+
+
+class ResponseTypeMiddleware(MiddlewareMixin):
+    def process_response(self, request, response):
+        if isinstance(response, HttpResponse):
+            response['X-Response-Type'] = 'HttpResponse'
+        return response
 
 
 @skipIf(sys.platform == 'win32' and (3, 8, 0) < sys.version_info < (3, 8, 1), 'https://bugs.python.org/issue38563')
@@ -55,6 +64,27 @@ class ASGITest(SimpleTestCase):
         response_body = await communicator.receive_output()
         self.assertEqual(response_body['type'], 'http.response.body')
         self.assertEqual(response_body['body'], b'Hello World!')
+
+    async def test_middleware_process_response(self):
+        for middleware in (
+            'django.middleware.security.SecurityMiddleware',
+            'django.middleware.cache.CacheMiddleware',
+            'django.middleware.cache.FetchFromCacheMiddleware',
+            'django.middleware.cache.UpdateCacheMiddleware',
+        ):
+            with self.subTest(middleware=middleware), self.settings(MIDDLEWARE=[
+                'asgi.tests.ResponseTypeMiddleware',
+                middleware,
+            ]):
+                application = get_asgi_application()
+                scope = self.async_request_factory._base_scope(path='/', method='POST')
+                communicator = ApplicationCommunicator(application, scope)
+                await communicator.send_input({'type': 'http.request'})
+                response_start = await communicator.receive_output()
+                await communicator.receive_output()
+                await communicator.wait()
+                self.assertEqual(response_start['status'], 200)
+                self.assertIn((b'X-Response-Type', b'HttpResponse'), response_start['headers'])
 
     async def test_file_response(self):
         """
