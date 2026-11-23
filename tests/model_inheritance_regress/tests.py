@@ -1,6 +1,7 @@
 """
 Regression tests for Model inheritance behavior.
 """
+
 import datetime
 from operator import attrgetter
 from unittest import expectedFailure
@@ -602,6 +603,46 @@ class ModelInheritanceTest(TestCase):
             restaurant = italian_restaurant.restaurant_ptr
             self.assertEqual(restaurant.place_ptr.restaurant, restaurant)
             self.assertEqual(restaurant.italianrestaurant, italian_restaurant)
+
+    def test_queryset_update_on_second_parent_model(self):
+        """
+        update() of fields from a non-primary parent of a model using multiple
+        inheritance updates the parent rows linked to the child, not the
+        parent rows sharing the child's primary key.
+        """
+        p1 = Politician.objects.create(title="p1")
+        p2 = Politician.objects.create(title="p2")
+        c1 = Congressman.objects.create(state="PA", name="John", title="c1")
+        c2 = Congressman.objects.create(state="NY", name="Bill", title="c2")
+        self.assertNotEqual(c1.pk, c1.politician_ptr_id)
+        self.assertEqual(Congressman.objects.update(title="senator"), 2)
+        self.assertSequenceEqual(
+            Congressman.objects.order_by("pk").values_list("title", flat=True),
+            ["senator", "senator"],
+        )
+        p1.refresh_from_db()
+        p2.refresh_from_db()
+        self.assertEqual(p1.title, "p1")
+        self.assertEqual(p2.title, "p2")
+        # Fields from both parents and the child at the same time.
+        Congressman.objects.filter(pk=c1.pk).update(title="t", name="n", state="CA")
+        c1.refresh_from_db()
+        c2.refresh_from_db()
+        self.assertEqual((c1.title, c1.name, c1.state), ("t", "n", "CA"))
+        self.assertEqual((c2.title, c2.name, c2.state), ("senator", "Bill", "NY"))
+
+    def test_queryset_update_on_grandparent_through_second_parent(self):
+        Politician.objects.create(title="p1")
+        Politician.objects.create(title="p2")
+        s1 = Senator.objects.create(state="PA", name="John", title="s1")
+        s2 = Senator.objects.create(state="NY", name="Bill", title="s2")
+        self.assertEqual(Senator.objects.filter(pk=s1.pk).update(title="x"), 1)
+        self.assertEqual(Politician.objects.get(pk=s1.politician_ptr_id).title, "x")
+        self.assertEqual(Politician.objects.get(pk=s2.politician_ptr_id).title, "s2")
+        self.assertSequenceEqual(
+            Politician.objects.order_by("pk").values_list("title", flat=True),
+            ["p1", "p2", "x", "s2"],
+        )
 
     def test_id_field_update_on_ancestor_change(self):
         place1 = Place.objects.create(name="House of Pasta", address="944 Fullerton")
