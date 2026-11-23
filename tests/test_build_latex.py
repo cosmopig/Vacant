@@ -1623,7 +1623,23 @@ def test_latex_code_role(app):
         r'\PYG{p}{)}'
         r'\PYG{p}{:} '
         r'\PYG{k}{pass}')
-    assert (r'Inline \sphinxcode{\sphinxupquote{' + '\n' +
-            common_content + '\n}} code block') in content
+    assert (r'Inline \sphinxcode{\sphinxupquote{%' + '\n' +
+            common_content + '%\n}} code block') in content
     assert (r'\begin{sphinxVerbatim}[commandchars=\\\{\}]' +
             '\n' + common_content + '\n' + r'\end{sphinxVerbatim}') in content
+
+
+@pytest.mark.sphinx('latex', testroot='reST-code-role', srcdir='inline-code-whitespace')
+def test_latex_code_role_no_extra_whitespace(app):
+    (app.srcdir / 'index.rst').write_text(
+        '.. role:: python(code)\n'
+        '   :language: python\n'
+        '\n'
+        'In parentheses (:python:`None`).\n',
+        encoding='utf8',
+    )
+    app.build()
+    content = (app.outdir / 'python.tex').read_text(encoding='utf8')
+
+    assert (r'(\sphinxcode{\sphinxupquote{%' + '\n' +
+            r'\PYG{k+kc}{None}%' + '\n' + r'}})') in content

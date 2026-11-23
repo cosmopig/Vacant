@@ -1,0 +1,1 @@
+tests/test_build_latex.py::test_latex_code_role_no_extra_whitespace
