@@ -35,6 +35,9 @@ from sphinx.util.requests import is_ssl_error
 
 logger = logging.getLogger(__name__)
 
+# matches "scheme:" (ex. tel:, ftp://) and "//" (a protocol relative URL)
+uri_re = re.compile(r'([a-zA-Z][a-zA-Z0-9+.\-]*:|//)')
+
 
 DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
@@ -213,7 +216,16 @@ class CheckExternalLinksBuilder(Builder):
             if len(uri) == 0 or uri.startswith(('#', 'mailto:', 'ftp:')):
                 return 'unchecked', '', 0
             elif not uri.startswith(('http:', 'https:')):
-                return 'local', '', 0
+                if uri_re.match(uri):
+                    # URI with an unsupported scheme or protocol-relative URL
+                    return 'unchecked', '', 0
+                for rex in self.to_ignore:
+                    if rex.match(uri):
+                        return 'ignored', '', 0
+                if self.local_target_exists(uri, docname):
+                    return 'working', '', 0
+                else:
+                    return 'broken', __('local target not found'), 0
             elif uri in self.good:
                 return 'working', 'old', 0
             elif uri in self.broken:
@@ -245,6 +257,27 @@ class CheckExternalLinksBuilder(Builder):
                 break
             status, info, code = check()
             self.rqueue.put((uri, docname, lineno, status, info, code))
+
+    def local_target_exists(self, uri: str, docname: str) -> bool:
+        """Check whether a local (relative) link points to an existing file or document."""
+        target = unquote(uri.split('#', 1)[0].split('?', 1)[0])
+        if not target:
+            return True  # a link to the current document
+
+        if target.startswith('/'):
+            relpath = path.normpath(target.lstrip('/'))
+        else:
+            relpath = path.normpath(path.join(path.dirname(docname), target))
+        relpath = relpath.replace(path.sep, '/')
+        if path.exists(path.join(self.srcdir, relpath)):
+            return True
+
+        # a link to a document by its name, or by its output file name
+        candidates = {relpath.rstrip('/'), relpath.rstrip('/') + '/index'}
+        base, ext = path.splitext(relpath)
+        if ext:
+            candidates.add(base)
+        return any(c in self.env.found_docs for c in candidates)
 
     def process_result(self, result: Tuple[str, str, int, str, str, int]) -> None:
         uri, docname, lineno, status, info, code = result

@@ -9,6 +9,7 @@
 """
 
 import json
+from os import path
 import re
 from unittest import mock
 import pytest
@@ -157,3 +158,40 @@ def test_linkcheck_request_headers(app, status, warning):
                 assert headers["X-Secret"] == "open sesami"
             else:
                 assert headers["Accept"] == "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8"
+
+
+@pytest.mark.sphinx('linkcheck', testroot='linkcheck-localinks', freshenv=True)
+def test_local_links(app, status, warning):
+    app.builder.build_all()
+
+    content = (app.outdir / 'output.json').read_text()
+    rows = {(row['filename'], row['uri']): row
+            for row in (json.loads(x) for x in content.splitlines())
+            if row['uri']}
+    statuses = {key: row['status'] for key, row in rows.items()}
+    assert statuses == {
+        ('index.rst', 'conf.py'): 'working',
+        ('index.rst', 'sub/page.html#section'): 'working',
+        ('index.rst', 'sub/page'): 'working',
+        ('index.rst', '#local-links'): 'unchecked',
+        ('index.rst', 'tel:+123456'): 'unchecked',
+        ('index.rst', 'doesntexist'): 'broken',
+        ('index.rst', 'sub/missing.html'): 'broken',
+        (path.join('sub', 'page.rst'), '../index.html'): 'working',
+        (path.join('sub', 'page.rst'), 'nothere.txt'): 'broken',
+    }
+
+    output = (app.outdir / 'output.txt').read_text()
+    assert "index.rst:13: [broken] doesntexist: local target not found" in output
+    assert len(output.splitlines()) == 3
+
+
+@pytest.mark.sphinx('linkcheck', testroot='linkcheck-localinks', freshenv=True,
+                    confoverrides={'linkcheck_ignore': ['doesntexist', 'sub/missing']})
+def test_local_links_ignored(app, status, warning):
+    app.builder.build_all()
+
+    output = (app.outdir / 'output.txt').read_text()
+    assert 'doesntexist' not in output
+    assert 'sub/missing.html' not in output
+    assert 'nothere.txt' in output
