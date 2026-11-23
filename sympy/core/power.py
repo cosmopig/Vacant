@@ -811,6 +811,15 @@ class Pow(Expr):
             if expanded != self:
                 return transpose(expanded)
 
+    def _eval_expand_tensorproduct(self, **hints):
+        """(A x B)**n -> A**n x B**n for an integer n"""
+        from sympy.physics.quantum.tensorproduct import (TensorProduct,
+            tensor_product_simp_Pow)
+        e = tensor_product_simp_Pow(self)
+        if isinstance(e, TensorProduct):
+            return e._eval_expand_tensorproduct(**hints)
+        return e
+
     def _eval_expand_power_exp(self, **hints):
         """a**(n+m) -> a**n*a**m"""
         b = self.base

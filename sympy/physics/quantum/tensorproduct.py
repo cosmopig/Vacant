@@ -315,9 +315,11 @@ def tensor_product_simp_Mul(e):
     if not isinstance(e, Mul):
         return e
     c_part, nc_part = e.args_cnc()
+    nc_part = [tensor_product_simp_Pow(nc) if isinstance(nc, Pow) else nc
+               for nc in nc_part]
     n_nc = len(nc_part)
     if n_nc == 0 or n_nc == 1:
-        return e
+        return Mul(*(c_part + nc_part))
     elif e.has(TensorProduct):
         current = nc_part[0]
         if not isinstance(current, TensorProduct):
@@ -343,6 +345,32 @@ def tensor_product_simp_Mul(e):
         return Mul(*c_part) * TensorProduct(*new_args)
     else:
         return e
+
+
+def tensor_product_simp_Pow(e):
+    """Evaluate a ``Pow`` whose base is a ``TensorProduct``.
+
+    For an integer exponent ``n``, ``(A x B)**n`` is rewritten as
+    ``(A**n) x (B**n)``. Other expressions are returned unchanged.
+
+    Examples
+    ========
+
+        >>> from sympy.physics.quantum.tensorproduct import \
+                    tensor_product_simp_Pow, TensorProduct
+        >>> from sympy import Symbol
+        >>> A = Symbol('A',commutative=False)
+        >>> B = Symbol('B',commutative=False)
+        >>> tensor_product_simp_Pow(TensorProduct(A,B)**2)
+        (A**2)x(B**2)
+
+    """
+    if not isinstance(e, Pow):
+        return e
+    base, exp = e.as_base_exp()
+    if isinstance(base, TensorProduct) and exp.is_integer:
+        return TensorProduct(*[arg**exp for arg in base.args])
+    return e
 
 
 def tensor_product_simp(e, **hints):
@@ -376,13 +404,13 @@ def tensor_product_simp(e, **hints):
     commutators and anticommutators as well:
 
     >>> tensor_product_simp(e**2)
-    (A*C)x(B*D)**2
+    ((A*C)**2)x((B*D)**2)
 
     """
     if isinstance(e, Add):
         return Add(*[tensor_product_simp(arg) for arg in e.args])
     elif isinstance(e, Pow):
-        return tensor_product_simp(e.base) ** e.exp
+        return tensor_product_simp_Pow(tensor_product_simp(e.base) ** e.exp)
     elif isinstance(e, Mul):
         return tensor_product_simp_Mul(e)
     elif isinstance(e, Commutator):

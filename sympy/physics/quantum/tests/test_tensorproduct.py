@@ -9,6 +9,7 @@ from sympy.physics.quantum.qubit import Qubit, QubitBra
 from sympy.physics.quantum.operator import OuterProduct
 from sympy.physics.quantum.density import Density
 from sympy.core.trace import Tr
+from sympy.physics.paulialgebra import Pauli
 
 A, B, C = symbols('A,B,C', commutative=False)
 x = symbols('x')
@@ -47,6 +48,29 @@ def test_tensor_product_commutator():
 
 def test_tensor_product_simp():
     assert tensor_product_simp(TP(A, B)*TP(B, C)) == TP(A*B, B*C)
+
+
+def test_tensor_product_pow():
+    t1 = TP(1, 1)*TP(1, 1)
+    assert tensor_product_simp(t1) == TP(1, 1)
+    assert t1.expand(tensorproduct=True) == TP(1, 1)
+    t2 = TP(1, Pauli(3))*TP(1, Pauli(3))
+    assert tensor_product_simp(t2) == TP(1, 1)
+    assert t2.expand(tensorproduct=True) == TP(1, 1)
+    assert tensor_product_simp(TP(A, B)**3) == TP(A**3, B**3)
+    assert tensor_product_simp(TP(A, B)**-1) == TP(A**-1, B**-1)
+    assert tensor_product_simp((TP(A, B)*TP(B, C))**2) == \
+        TP((A*B)**2, (B*C)**2)
+    assert tensor_product_simp(TP(A, B)**2*TP(B, C)) == TP(A**2*B, B**2*C)
+    assert tensor_product_simp(x*TP(A, B)**2) == x*TP(A**2, B**2)
+    assert tensor_product_simp(TP(A, B)**2 + TP(B, C)) == \
+        TP(A**2, B**2) + TP(B, C)
+    assert TP(A, B)**2 != TP(A**2, B**2)
+    assert tensor_product_simp((TP(A + B, C)**2).expand(tensorproduct=True)) \
+        == TP(A**2, C**2) + TP(A*B, C**2) + TP(B*A, C**2) + TP(B**2, C**2)
+    # non-integer powers are left alone
+    assert tensor_product_simp(TP(A, B)**x) == TP(A, B)**x
+    assert (TP(A, B)**x).expand(tensorproduct=True) == TP(A, B)**x
 
 
 def test_issue_5923():
