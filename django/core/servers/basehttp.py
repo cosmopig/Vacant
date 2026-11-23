@@ -128,6 +128,33 @@ class ServerHandler(simple_server.ServerHandler):
             LimitedStream(stdin, content_length), stdout, stderr, environ, **kwargs
         )
 
+    def finish_response(self):
+        if self.environ["REQUEST_METHOD"] != "HEAD":
+            return super().finish_response()
+
+        try:
+            # An application may defer calling start_response() until iteration.
+            if not self.status:
+                next(iter(self.result), None)
+            if not self.headers_sent:
+                self.send_headers()
+                self._flush()
+        except BaseException:
+            if hasattr(self.result, "close"):
+                self.result.close()
+            raise
+        else:
+            self.close()
+
+    def write(self, data):
+        if self.environ["REQUEST_METHOD"] == "HEAD":
+            data = b""
+        super().write(data)
+
+    def set_content_length(self):
+        if self.environ["REQUEST_METHOD"] != "HEAD":
+            super().set_content_length()
+
     def cleanup_headers(self):
         super().cleanup_headers()
         # HTTP/1.1 requires support for persistent connections. Send 'close' if

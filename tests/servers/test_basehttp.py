@@ -106,6 +106,68 @@ class WSGIRequestHandlerTestCase(SimpleTestCase):
 
         self.assertEqual(body, b"HTTP_SOME_HEADER:good")
 
+    def test_head_response(self):
+        for headers in ([], [("Content-Length", "12")]):
+            with self.subTest(headers=headers):
+                response = self.HeadResponse()
+
+                def test_app(environ, start_response):
+                    start_response("200 OK", [("Content-Type", "text/plain"), *headers])
+                    return response
+
+                raw_response = self.run_head_request(test_app)
+                status_and_headers, body = raw_response.split(b"\r\n\r\n", 1)
+                self.assertTrue(status_and_headers.startswith(b"HTTP/1.1 200 OK\r\n"))
+                self.assertIn(b"Content-Type: text/plain", status_and_headers)
+                self.assertEqual(body, b"")
+                if headers:
+                    self.assertIn(b"Content-Length: 12", status_and_headers)
+                else:
+                    self.assertNotIn(b"Content-Length:", status_and_headers)
+                self.assertFalse(response.iterated)
+                self.assertTrue(response.closed)
+
+    def test_head_response_with_deferred_start_response(self):
+        for use_write in (False, True):
+            with self.subTest(use_write=use_write):
+
+                def test_app(environ, start_response):
+                    write = start_response("200 OK", [("Content-Length", "12")])
+                    if use_write:
+                        write(b"Hello world!")
+                        yield b""
+                    else:
+                        yield b"Hello world!"
+
+                raw_response = self.run_head_request(test_app)
+                status_and_headers, body = raw_response.split(b"\r\n\r\n", 1)
+                self.assertTrue(status_and_headers.startswith(b"HTTP/1.1 200 OK\r\n"))
+                self.assertIn(b"Content-Length: 12", status_and_headers)
+                self.assertEqual(body, b"")
+
+    def run_head_request(self, app):
+        rfile = BytesIO(b"HEAD / HTTP/1.0\r\n\r\n")
+        wfile = BytesIO()
+        request = Stub(makefile=lambda mode, *a, **kw: rfile if mode == "rb" else wfile)
+        server = Stub(base_environ={}, get_app=lambda: app)
+        with self.assertLogs("django.server", "INFO"):
+            WSGIRequestHandler(request, "192.168.0.2", server)
+        return wfile.getvalue()
+
+    class HeadResponse:
+        iterated = False
+        closed = False
+
+        def __len__(self):
+            return 1
+
+        def __iter__(self):
+            self.iterated = True
+            yield b"Hello world!"
+
+        def close(self):
+            self.closed = True
+
 
 class WSGIServerTestCase(SimpleTestCase):
     request_factory = RequestFactory()
