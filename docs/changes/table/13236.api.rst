@@ -1,0 +1,5 @@
+Adding a structured ``numpy.ndarray`` to a ``Table`` (or ``QTable``) now adds it
+as a regular ``Column`` with a structured dtype instead of automatically
+converting it to an ``NdarrayMixin``. To get the previous behavior, explicitly
+view the array as ``NdarrayMixin`` before adding it, e.g.
+``data.view(NdarrayMixin)``.
