@@ -1164,6 +1164,14 @@ subclass::
 
         WHERE (first_name ILIKE '%john winston%' OR last_name ILIKE '%john winston%')
 
+    .. versionchanged:: 4.1
+
+        Search terms are now applied in a single call to
+        :meth:`~django.db.models.query.QuerySet.filter`. When several terms must
+        match the same multi-valued relationship, such as a reverse
+        ``ForeignKey`` or a ``ManyToManyField``, one related row must match them
+        all. Previously, different related rows could match different terms.
+
     If you don't want to use ``icontains`` as the lookup, you can use any
     lookup by appending it the field. For example, you could use :lookup:`exact`
     by setting ``search_fields`` to ``['first_name__exact']``.

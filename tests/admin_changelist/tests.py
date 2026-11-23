@@ -555,7 +555,7 @@ class ChangeListTests(TestCase):
             ('Finlayson', 1),
             ('Finlayson Hype', 0),
             ('Jonathan Finlayson Duo', 1),
-            ('Mary Jonathan Duo', 1),
+            ('Mary Jonathan Duo', 0),
             ('Oscar Finlayson Duo', 0),
         ):
             with self.subTest(search_string=search_string):
@@ -563,6 +563,22 @@ class ChangeListTests(TestCase):
                 request.user = self.superuser
                 group_changelist = group_model_admin.get_changelist_instance(request)
                 self.assertEqual(group_changelist.queryset.count(), result_count)
+
+    def test_multi_word_search_reuses_reverse_foreign_key_join(self):
+        matching_parent = Parent.objects.create(name='East Clinic')
+        Child.objects.create(parent=matching_parent, name='Blue Green')
+        nonmatching_parent = Parent.objects.create(name='East Clinic')
+        Child.objects.create(parent=nonmatching_parent, name='Blue')
+        Child.objects.create(parent=nonmatching_parent, name='Green')
+
+        model_admin = admin.ModelAdmin(Parent, custom_site)
+        model_admin.search_fields = ['name', 'child__name']
+        request = self.factory.get('/parent/', data={SEARCH_VAR: 'East Clinic Blue Green'})
+        request.user = self.superuser
+        queryset = model_admin.get_changelist_instance(request).queryset
+
+        self.assertEqual(str(queryset.query).count(' JOIN '), 1)
+        self.assertSequenceEqual(queryset, [matching_parent])
 
     def test_pk_in_search_fields(self):
         band = Group.objects.create(name='The Hype')
