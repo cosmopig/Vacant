@@ -1,0 +1,9 @@
+tests/async/test_async_queryset.py::AsyncQuerySetTest::test_related_acreate
+tests/async/test_async_queryset.py::AsyncQuerySetTest::test_related_aget_or_create
+tests/async/test_async_queryset.py::AsyncQuerySetTest::test_related_aupdate_or_create
+tests/generic_relations/tests.py::GenericRelationsTests::test_generic_acreate
+tests/generic_relations/tests.py::GenericRelationsTests::test_generic_aget_or_create
+tests/generic_relations/tests.py::GenericRelationsTests::test_generic_aupdate_or_create
+tests/m2m_through/tests.py::M2mThroughTests::test_acreate_on_m2m_with_intermediate_model
+tests/m2m_through/tests.py::M2mThroughTests::test_aget_or_create_on_m2m_with_intermediate_model
+tests/m2m_through/tests.py::M2mThroughTests::test_aupdate_or_create_on_reverse_m2m_with_intermediate_model

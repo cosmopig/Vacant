@@ -1,3 +1,5 @@
+from asgiref.sync import sync_to_async
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError
 from django.db.models import Q
@@ -44,6 +46,26 @@ class GenericRelationsTests(TestCase):
     def comp_func(self, obj):
         # Original list of tags:
         return obj.tag, obj.content_type.model_class(), obj.object_id
+
+    async def test_generic_acreate(self):
+        tags = await sync_to_async(getattr)(self.bacon, "tags")
+        tag = await tags.acreate(tag="stinky")
+        self.assertEqual(await tags.aget(tag="stinky"), tag)
+
+    async def test_generic_aget_or_create(self):
+        tags = await sync_to_async(getattr)(self.bacon, "tags")
+        tag, created = await tags.aget_or_create(tag="stinky")
+        self.assertIs(created, True)
+        self.assertEqual(await tags.aget_or_create(tag="stinky"), (tag, False))
+
+    async def test_generic_aupdate_or_create(self):
+        tags = await sync_to_async(getattr)(self.bacon, "tags")
+        tag, created = await tags.aupdate_or_create(tag="stinky")
+        self.assertIs(created, True)
+        updated_tag, created = await tags.aupdate_or_create({"tag": "juicy"}, pk=tag.pk)
+        self.assertIs(created, False)
+        self.assertEqual(updated_tag, tag)
+        self.assertEqual(updated_tag.tag, "juicy")
 
     def test_generic_update_or_create_when_created(self):
         """

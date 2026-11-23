@@ -104,6 +104,26 @@ class AsyncQuerySetTest(TestCase):
         self.assertEqual(await SimpleModel.objects.acount(), 4)
         self.assertIs(created, True)
 
+    async def test_related_acreate(self):
+        instance = await self.s1.relatedmodel_set.acreate()
+        self.assertEqual(instance.simple_id, self.s1.pk)
+
+    async def test_related_aget_or_create(self):
+        instance, created = await self.s1.relatedmodel_set.aget_or_create()
+        self.assertIs(created, True)
+        self.assertEqual(instance.simple_id, self.s1.pk)
+        self.assertEqual(
+            await self.s1.relatedmodel_set.aget_or_create(), (instance, False)
+        )
+
+    async def test_related_aupdate_or_create(self):
+        instance, created = await self.s1.relatedmodel_set.aupdate_or_create()
+        self.assertIs(created, True)
+        self.assertEqual(instance.simple_id, self.s1.pk)
+        self.assertEqual(
+            await self.s1.relatedmodel_set.aupdate_or_create(), (instance, False)
+        )
+
     @skipUnlessDBFeature("has_bulk_insert")
     @async_to_sync
     async def test_abulk_create(self):

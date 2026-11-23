@@ -122,6 +122,34 @@ class M2mThroughTests(TestCase):
             self.rock.membership_set.get().invite_reason, "She was just awesome."
         )
 
+    async def test_acreate_on_m2m_with_intermediate_model(self):
+        person = await self.rock.members.acreate(name="Annie")
+        self.assertEqual(await self.rock.members.aget(), person)
+
+    async def test_aget_or_create_on_m2m_with_intermediate_model(self):
+        person, created = await self.rock.members.aget_or_create(
+            {"name": "Annie"}, through_defaults={"invite_reason": "Friend"}
+        )
+        self.assertIs(created, True)
+        membership = await self.rock.membership_set.aget(person=person)
+        self.assertEqual(membership.invite_reason, "Friend")
+        self.assertEqual(
+            await self.rock.members.aget_or_create(name="Annie"), (person, False)
+        )
+
+    async def test_aupdate_or_create_on_reverse_m2m_with_intermediate_model(self):
+        group, created = await self.jane.group_set.aupdate_or_create(
+            {"name": "Jazz"}, through_defaults={"invite_reason": "Friend"}
+        )
+        self.assertIs(created, True)
+        membership = await self.jane.membership_set.aget(group=group)
+        self.assertEqual(membership.invite_reason, "Friend")
+        group, created = await self.jane.group_set.aupdate_or_create(
+            {"name": "Blues"}, pk=group.pk
+        )
+        self.assertIs(created, False)
+        self.assertEqual(group.name, "Blues")
+
     def test_create_on_m2m_with_intermediate_model_callable_through_default(self):
         annie = self.rock.members.create(
             name="Annie",
