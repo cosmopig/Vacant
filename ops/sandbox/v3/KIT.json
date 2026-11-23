@@ -6824,11 +6824,13 @@
             "python -m pip install contourpy==1.1.0 cycler==0.11.0 fonttools==4.42.1 ghostscript kiwisolver==1.4.5 numpy==1.25.2 packaging==23.1 pillow==10.0.0 pikepdf pyparsing==3.0.9 python-dateutil==2.8.2 six==1.16.0 setuptools==68.1.2 setuptools-scm==7.1.0 typing-extensions==4.7.1",
             "cd matplotlib__matplotlib-24870",
             "apt-get -y update && apt-get -y upgrade && DEBIAN_FRONTEND=noninteractive apt-get install -y imagemagick ffmpeg texlive texlive-latex-extra texlive-fonts-recommended texlive-xetex texlive-luatex cm-super dvipng",
-            "QHULL_URL=\"http://www.qhull.org/download/qhull-2020-src-8.0.2.tgz\"",
+            "QHULL_URL=\"https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2\"",
+            "QHULL_SHA256=\"59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5\"",
             "QHULL_TAR=\"/tmp/qhull-2020-src-8.0.2.tgz\"",
             "QHULL_BUILD_DIR=\"$PWD/build\"",
-            "wget -O \"$QHULL_TAR\" \"$QHULL_URL\"",
+            "curl --fail --location --proto \"=https\" --tlsv1.2 --output \"$QHULL_TAR\" \"$QHULL_URL\" || exit 1",
             "mkdir -p \"$QHULL_BUILD_DIR\"",
+            "python -I -c 'import hashlib,pathlib,sys; actual=hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); sys.exit(0 if actual == sys.argv[2] else \"Qhull sha256 mismatch\")' \"$QHULL_TAR\" \"$QHULL_SHA256\" || exit 1",
             "tar -xvzf \"$QHULL_TAR\" -C \"$QHULL_BUILD_DIR\"",
             "python -m pip install -e .",
             "python -m pip install pytest==7.4.4"
@@ -17330,5 +17332,10 @@
     "pattern_count": 146,
     "leak_details_sha256": "8e7c279e60cb2988b92b64a21870959372d4ec05e7eaa6b21392227785d14c03",
     "log_sha256": "c3f8fddc7ac8d4ab414a224bd602e6dcb9fee00c18214cf66ebbce4d0072ea21"
+  },
+  "qhull_archive": {
+    "url": "https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/2020.2",
+    "sha256": "59356b229b768e6e2b09a701448bfa222c37b797a84f87f864f97462d8dbc7c5",
+    "provenance": "Official qhull/qhull 2020.2 GitHub tag archive fetched over verified HTTPS; qhull.org HTTPS certificate hostname invalid"
   }
 }
