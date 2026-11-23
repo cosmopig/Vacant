@@ -9,6 +9,7 @@
 """
 
 import sys
+from typing import Tuple
 from unittest.mock import Mock
 
 import pytest
@@ -289,6 +290,27 @@ def test_pyfunction_signature(app):
                                                       [desc_sig_punctuation, ":"],
                                                       " ",
                                                       [nodes.inline, pending_xref, "str"])])
+
+
+def test_pyfunction_signature_empty_tuple(app):
+    text = ".. py:function:: foo(value: Tuple[()]) -> Tuple[()]"
+    doctree = restructuredtext.parse(app, text)
+    signode = next(iter(doctree.traverse(desc_signature)))
+
+    assert signode[1].astext() == "value: Tuple[()]"
+    assert signode[2].astext() == " -> Tuple[()]"
+    assert [node['reftarget'] for node in signode.traverse(pending_xref)] == ['Tuple', 'Tuple']
+
+
+def empty_tuple() -> Tuple[()]:
+    """Return an empty tuple."""
+    return ()
+
+
+def test_autodoc_signature_empty_tuple(app):
+    doctree = restructuredtext.parse(app, ".. autofunction:: %s.empty_tuple" % __name__)
+
+    assert [node.astext() for node in doctree.traverse(desc_returns)] == [" -> Tuple[()]"]
 
 
 def test_pyfunction_signature_full(app):

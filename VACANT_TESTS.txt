@@ -1,0 +1,2 @@
+tests/test_domain_py.py::test_pyfunction_signature_empty_tuple
+tests/test_domain_py.py::test_autodoc_signature_empty_tuple

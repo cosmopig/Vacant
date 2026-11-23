@@ -114,6 +114,8 @@ def _parse_annotation(annotation: str) -> List[Node]:
             result.append(addnodes.desc_sig_punctuation('', ']'))
             return result
         elif isinstance(node, ast.Tuple):
+            if not node.elts:
+                return [addnodes.desc_sig_punctuation('', '()')]
             result = []
             for elem in node.elts:
                 result.extend(unparse(elem))

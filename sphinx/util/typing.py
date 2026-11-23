@@ -78,6 +78,9 @@ def _stringify_py37(annotation: Any) -> str:
     else:
         qualname = repr(annotation)
 
+    if qualname == 'Tuple' and annotation == Tuple[()]:
+        return 'Tuple[()]'
+
     if getattr(annotation, '__args__', None):
         if qualname == 'Union':
             if len(annotation.__args__) == 2 and annotation.__args__[1] is NoneType:  # type: ignore  # NOQA
