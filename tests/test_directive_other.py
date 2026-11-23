@@ -8,6 +8,50 @@ from sphinx.testing import restructuredtext
 from sphinx.testing.util import assert_node
 
 
+def test_include_source_read(make_app, tmp_path):
+    (tmp_path / 'conf.py').write_text('', encoding='utf-8')
+    (tmp_path / 'index.rst').write_text(
+        'Title\n=====\n\n.. include:: snippet.rst\n\n&REPLACE_ME;\n',
+        encoding='utf-8',
+    )
+    (tmp_path / 'snippet.rst').write_text(
+        'Included\n--------\n\n&REPLACE_ME;\n', encoding='utf-8',
+    )
+    app = make_app(srcdir=tmp_path)
+
+    def replace(app, docname, source):
+        source[0] = source[0].replace('&REPLACE_ME;', 'REPLACED')
+
+    app.connect('source-read', replace)
+    app.build()
+
+    output = (app.outdir / 'index.html').read_text(encoding='utf-8')
+    assert output.count('<p>REPLACED</p>') == 2
+
+
+def test_include_source_read_literal(make_app, tmp_path):
+    (tmp_path / 'conf.py').write_text('', encoding='utf-8')
+    (tmp_path / 'index.rst').write_text(
+        'Title\n=====\n\n.. include:: snippet.txt\n'
+        '   :literal:\n   :start-line: 1\n   :end-line: 2\n',
+        encoding='utf-8',
+    )
+    (tmp_path / 'snippet.txt').write_text(
+        'first\nPLACEHOLDER\nlast\n', encoding='utf-8',
+    )
+    app = make_app(srcdir=tmp_path, buildername='dummy')
+
+    def replace(app, docname, source):
+        if docname == 'snippet.txt':
+            source[0] = source[0].replace('PLACEHOLDER', 'replacement')
+
+    app.connect('source-read', replace)
+    app.build()
+
+    doctree = app.env.get_doctree('index')
+    assert [node.astext() for node in doctree.findall(nodes.literal_block)] == ['replacement\n']
+
+
 @pytest.mark.sphinx(testroot='toctree-glob')
 def test_toctree(app):
     text = (".. toctree::\n"

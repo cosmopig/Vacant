@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, cast
 from urllib.parse import urlsplit, urlunsplit
 
 from docutils import nodes
+from docutils.parsers.rst import roles
 from docutils.utils import relative_path
 
 import sphinx
@@ -644,6 +645,8 @@ def install_dispatcher(app: Sphinx, docname: str, source: list[str]) -> None:
     .. note:: The installed dispatcher will be uninstalled on disabling sphinx_domain
               automatically.
     """
+    if isinstance(getattr(roles.role, '__self__', None), IntersphinxDispatcher):
+        return
     dispatcher = IntersphinxDispatcher()
     dispatcher.enable()
 

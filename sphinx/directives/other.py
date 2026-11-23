@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import re
+from os import path
 from typing import TYPE_CHECKING, Any, cast
 
 from docutils import nodes
+from docutils.io import FileInput
 from docutils.parsers.rst import directives
 from docutils.parsers.rst.directives.admonitions import BaseAdmonition
 from docutils.parsers.rst.directives.misc import Class
@@ -376,7 +378,27 @@ class Include(BaseInclude, SphinxDirective):
         rel_filename, filename = self.env.relfn2path(self.arguments[0])
         self.arguments[0] = filename
         self.env.note_included(filename)
-        return super().run()
+        if not self.env.events.listeners.get('source-read'):
+            return super().run()
+
+        include_path = path.abspath(directives.path(filename))
+        docname = self.env.path2doc(include_path) or rel_filename
+        read = FileInput.read
+
+        def read_include(file: FileInput) -> str:
+            text = read(file)
+            if path.abspath(file.source_path) != include_path:
+                return text
+            FileInput.read = read
+            source = [text]
+            self.env.events.emit('source-read', docname, source)
+            return source[0]
+
+        try:
+            FileInput.read = read_include
+            return super().run()
+        finally:
+            FileInput.read = read
 
 
 def setup(app: Sphinx) -> dict[str, Any]:

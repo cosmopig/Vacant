@@ -52,6 +52,7 @@ Features added
 Bugs fixed
 ----------
 
+* #11510: Apply ``source-read`` transformations to reStructuredText includes.
 * #11077: graphviz: Fix relative links from within the graph.
   Patch by Ralf Grubenmann.
 * #11529: Line Block in LaTeX builder outputs spurious empty token.

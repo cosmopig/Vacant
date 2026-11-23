@@ -175,6 +175,7 @@ type for that event:
          6. source-read(app, docname, source)
          7. run source parsers: text -> docutils.document
             - parsers can be added with the app.add_source_parser() API
+            - source-read(app, docname, source) for each file read by an include directive
          8. apply transforms based on priority: docutils.document -> docutils.document
             - event.doctree-read(app, doctree) is called in the middle of transforms,
               transforms come before/after this event depending on their priority.
@@ -254,11 +255,21 @@ Here is a more detailed list of these events.
    whose single element is the contents of the source file.  You can process the
    contents and replace this item to implement source-level transformations.
 
+   The reStructuredText ``include`` directive also emits this event for
+   project files before applying any clipping options. For such files,
+   *docname* is the included document's name, or its path relative to the
+   source directory if it has no registered source suffix. The current
+   document in the build environment is still the document doing the including.
+
    For example, if you want to use ``$`` signs to delimit inline math, like in
    LaTeX, you can use a regular expression to replace ``$...$`` by
    ``:math:`...```.
 
    .. versionadded:: 0.5
+
+   .. versionchanged:: 7.2
+      The event is now also emitted for files read by the reStructuredText
+      ``include`` directive.
 
 .. event:: object-description-transform (app, domain, objtype, contentnode)
 
