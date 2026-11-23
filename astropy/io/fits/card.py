@@ -859,7 +859,7 @@ class Card(_Verify):
                     return kw, vc
 
                 value = m.group("strg") or ""
-                value = value.rstrip().replace("''", "'")
+                value = value.rstrip()
                 if value and value[-1] == "&":
                     value = value[:-1]
                 values.append(value)
