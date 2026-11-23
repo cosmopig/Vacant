@@ -1,6 +1,7 @@
 import hashlib
 import io
 import os
+from pathlib import Path
 import shlex
 import subprocess
 import sys
@@ -64,7 +65,9 @@ def test_requirements_file_is_temporary_and_cleaned_on_error(tmp_path, status):
     result = subprocess.run(['bash', '-c', '\n'.join(commands)], env=env, capture_output=True)
     assert result.returncode == status, result.stderr
     assert original.read_text() == 'preserve user file\n'
-    assert str(temps) in (tmp_path / 'seen').read_text()
+    allocated = Path((tmp_path / 'seen').read_text())
+    assert allocated.resolve() != original.resolve()
+    assert not allocated.exists()
     assert not list(temps.iterdir())
     assert recipes.temporary_requirements(commands) == commands
     assert recipes.temporary_requirements([]) == []
