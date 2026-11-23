@@ -31,6 +31,16 @@ def test_autoattribute(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autoattribute_inherited(app):
+    name = 'target.inheritance.DerivedWithAttributes'
+    actual = do_autodoc(app, 'attribute', name + '.constant')
+    assert '   Inherited class attribute.' in actual
+    actual = do_autodoc(app, 'attribute', name + '.overridden')
+    assert '   :value: 6' in actual
+    assert '   Base attribute replaced by the subclass.' not in actual
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autoattribute_novalue(app):
     options = {'no-value': True}
     actual = do_autodoc(app, 'attribute', 'target.Class.attr', options)

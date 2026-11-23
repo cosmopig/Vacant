@@ -26,8 +26,8 @@ from sphinx.config import ENUM, Config
 from sphinx.deprecation import (RemovedInSphinx40Warning, RemovedInSphinx50Warning,
                                 RemovedInSphinx60Warning)
 from sphinx.environment import BuildEnvironment
-from sphinx.ext.autodoc.importer import (get_class_members, get_module_members,
-                                         get_object_members, import_object)
+from sphinx.ext.autodoc.importer import (find_class_attr_doc, get_class_members,
+                                        get_module_members, get_object_members, import_object)
 from sphinx.ext.autodoc.mock import mock
 from sphinx.locale import _, __
 from sphinx.pycode import ModuleAnalyzer, PycodeError
@@ -276,11 +276,12 @@ class ObjectMember(tuple):
         return super().__new__(cls, (name, obj))  # type: ignore
 
     def __init__(self, name: str, obj: Any, docstring: Optional[str] = None,
-                 skipped: bool = False) -> None:
+                 skipped: bool = False, class_: Any = None) -> None:
         self.__name__ = name
         self.object = obj
         self.docstring = docstring
         self.skipped = skipped
+        self.class_ = class_
 
 
 ObjectMembers = Union[List[ObjectMember], List[Tuple[str, Any]]]
@@ -594,18 +595,23 @@ class Documenter:
 
         # set sourcename and add content from attribute documentation
         sourcename = self.get_sourcename()
-        if self.analyzer:
-            attr_docs = self.analyzer.find_attr_docs()
-            if self.objpath:
+        attr_doc = None
+        if self.objpath:
+            if self.analyzer:
                 key = ('.'.join(self.objpath[:-1]), self.objpath[-1])
-                if key in attr_docs:
-                    no_docstring = True
-                    # make a copy of docstring for attributes to avoid cache
-                    # the change of autodoc-process-docstring event.
-                    docstrings = [list(attr_docs[key])]
+                attr_doc = self.analyzer.find_attr_docs().get(key)
+            if attr_doc is None and inspect.isclass(self.parent):
+                result = find_class_attr_doc(self.parent, self.objpath[-1])
+                if result:
+                    analyzer, attr_doc = result
+                    self.directive.filename_set.add(analyzer.srcname)
+                    sourcename = '%s:docstring of %s' % (analyzer.srcname, self.fullname)
 
-                    for i, line in enumerate(self.process_doc(docstrings)):
-                        self.add_line(line, sourcename, i)
+        if attr_doc is not None:
+            no_docstring = True
+            # Copy the cached docstring before passing it to autodoc-process-docstring.
+            for i, line in enumerate(self.process_doc([list(attr_doc)])):
+                self.add_line(line, sourcename, i)
 
         # add content from docstrings
         if not no_docstring:
@@ -666,15 +672,16 @@ class Documenter:
         The user can override the skipping decision by connecting to the
         ``autodoc-skip-member`` event.
         """
-        def is_filtered_inherited_member(name: str) -> bool:
+        def is_filtered_inherited_member(name: str, class_: Any) -> bool:
             if inspect.isclass(self.object):
                 for cls in self.object.__mro__:
                     if cls.__name__ == self.options.inherited_members and cls != self.object:
                         # given member is a member of specified *super class*
                         return True
-                    elif name in cls.__dict__:
+                    elif cls is class_:
                         return False
-                    elif name in self.get_attr(cls, '__annotations__', {}):
+                    elif class_ is None and (name in cls.__dict__ or
+                                             name in self.get_attr(cls, '__annotations__', {})):
                         return False
 
             return False
@@ -692,6 +699,7 @@ class Documenter:
         # process members and determine which to skip
         for obj in members:
             membername, member = obj
+            class_ = obj.class_ if isinstance(obj, ObjectMember) else None
             # if isattr is True, the member is documented as an attribute
             if member is INSTANCEATTR:
                 isattr = True
@@ -740,7 +748,7 @@ class Documenter:
                 if self.options.special_members and membername in self.options.special_members:
                     if membername == '__doc__':
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, class_):
                         keep = False
                     else:
                         keep = has_doc or self.options.undoc_members
@@ -760,14 +768,15 @@ class Documenter:
                 if has_doc or self.options.undoc_members:
                     if self.options.private_members is None:
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, class_):
                         keep = False
                     else:
                         keep = membername in self.options.private_members
                 else:
                     keep = False
             else:
-                if self.options.members is ALL and is_filtered_inherited_member(membername):
+                if (self.options.members is ALL and
+                        is_filtered_inherited_member(membername, class_)):
                     keep = False
                 else:
                     # ignore undocumented members if :undoc-members: is not given
@@ -1593,16 +1602,17 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
             for name in self.options.members:  # type: str
                 if name in members:
                     selected.append(ObjectMember(name, members[name].value,
-                                                 docstring=members[name].docstring))
+                                                 docstring=members[name].docstring,
+                                                 class_=members[name].class_))
                 else:
                     logger.warning(__('missing attribute %s in object %s') %
                                    (name, self.fullname), type='autodoc')
             return False, selected
         elif self.options.inherited_members:
-            return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
+            return False, [ObjectMember(m.name, m.value, docstring=m.docstring, class_=m.class_)
                            for m in members.values()]
         else:
-            return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
+            return False, [ObjectMember(m.name, m.value, docstring=m.docstring, class_=m.class_)
                            for m in members.values() if m.class_ == self.object]
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
@@ -2161,22 +2171,10 @@ class UninitializedInstanceAttributeMixin(DataDocumenterMixinBase):
     """
 
     def get_attribute_comment(self, parent: Any) -> Optional[List[str]]:
-        try:
-            for cls in inspect.getmro(parent):
-                try:
-                    module = safe_getattr(cls, '__module__')
-                    qualname = safe_getattr(cls, '__qualname__')
-
-                    analyzer = ModuleAnalyzer.for_module(module)
-                    analyzer.analyze()
-                    if qualname and self.objpath:
-                        key = (qualname, self.objpath[-1])
-                        if key in analyzer.attr_docs:
-                            return list(analyzer.attr_docs[key])
-                except (AttributeError, PycodeError):
-                    pass
-        except (AttributeError, PycodeError):
-            pass
+        if self.objpath:
+            result = find_class_attr_doc(parent, self.objpath[-1])
+            if result:
+                return list(result[1])
 
         return None
 

@@ -626,6 +626,28 @@ def test_autodoc_inherited_members(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_inherited_attributes(app):
+    name = 'target.inheritance.DerivedWithAttributes'
+    actual = do_autodoc(app, 'class', name, {'members': None, 'inherited-members': None})
+    assert '   .. py:attribute:: DerivedWithAttributes.alias' in actual
+    assert '      Inherited class alias.' in actual
+    assert '   .. py:attribute:: DerivedWithAttributes.constant' in actual
+    assert '      :value: 1' in actual
+    assert '      Inherited class attribute.' in actual
+    assert '   .. py:attribute:: DerivedWithAttributes.instance' in actual
+    assert '      Inherited instance attribute.' in actual
+    assert '      Attribute from the first base.' in actual
+    assert '      Attribute from the second base.' not in actual
+    assert '   .. py:attribute:: DerivedWithAttributes.overridden' not in actual
+
+    actual = do_autodoc(app, 'class', name, {'members': None, 'inherited-members': 'Base'})
+    assert not any('py:attribute::' in line for line in actual)
+
+    actual = do_autodoc(app, 'class', name, {'members': None})
+    assert not any('py:attribute::' in line for line in actual)
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autodoc_inherited_members_Base(app):
     options = {"members": None,
                "inherited-members": "Base",

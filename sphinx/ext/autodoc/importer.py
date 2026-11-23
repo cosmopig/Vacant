@@ -14,7 +14,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from sphinx.deprecation import RemovedInSphinx40Warning, deprecated_alias
-from sphinx.pycode import ModuleAnalyzer
+from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
 from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
                                  safe_getattr)
@@ -251,6 +251,37 @@ class ClassAttribute:
         self.docstring = docstring
 
 
+def get_class_attr_analyzer(cls: Any) -> Optional[ModuleAnalyzer]:
+    """Get the source analyzer for the module defining *cls*, if available."""
+    try:
+        analyzer = ModuleAnalyzer.for_module(safe_getattr(cls, '__module__'))
+        analyzer.analyze()
+        return analyzer
+    except (AttributeError, PycodeError):
+        return None
+
+
+def find_class_attr_doc(subject: Any, name: str) -> Optional[Tuple[ModuleAnalyzer, List[str]]]:
+    """Find the attribute's source documentation without crossing an override."""
+    for cls in getmro(subject):
+        attrname = mangle(cls, name)
+        if cls is not subject and attrname != name:
+            continue
+
+        analyzer = get_class_attr_analyzer(cls)
+        if analyzer:
+            key = (safe_getattr(cls, '__qualname__', ''), name)
+            if key in analyzer.attr_docs:
+                return analyzer, analyzer.attr_docs[key]
+            if key in analyzer.annotations:
+                break
+
+        if attrname in safe_getattr(cls, '__dict__', {}):
+            break
+
+    return None
+
+
 def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
                       analyzer: ModuleAnalyzer = None) -> Dict[str, ClassAttribute]:
     """Get members and attributes of target class."""
@@ -297,23 +328,41 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
         except AttributeError:
             continue
 
-    # annotation only member (ex. attr: int)
+    # Collect source-documented and annotation-only attributes in MRO order.
+    seen = set()
     for cls in getmro(subject):
-        try:
-            for name in getannotations(cls):
-                name = unmangle(cls, name)
-                if name and name not in members:
-                    members[name] = ClassAttribute(cls, name, INSTANCEATTR)
-        except AttributeError:
-            pass
+        class_dict = attrgetter(cls, '__dict__', {})
+        annotations = class_dict.get('__annotations__')
+        if not isinstance(annotations, Mapping):
+            annotations = {}
 
-    if analyzer:
-        # append instance attributes (cf. self.attr1) if analyzer knows
-        namespace = '.'.join(objpath)
-        for (ns, name), docstring in analyzer.attr_docs.items():
-            if namespace == ns and name not in members:
-                members[name] = ClassAttribute(subject, name, INSTANCEATTR,
-                                               '\n'.join(docstring))
+        cls_analyzer = analyzer if cls is subject else get_class_attr_analyzer(cls)
+        namespace = ('.'.join(objpath) if cls is subject
+                     else attrgetter(cls, '__qualname__', None))
+        if cls_analyzer:
+            for (ns, name), docstring in cls_analyzer.attr_docs.items():
+                if ns != namespace or name in seen:
+                    continue
+                if cls is not subject and mangle(cls, name) != name:
+                    continue
+                if name not in members:
+                    members[name] = ClassAttribute(cls, name, INSTANCEATTR)
+                member = members[name]
+                member.class_ = cls
+                if member.docstring is None:
+                    member.docstring = '\n'.join(docstring)
+                seen.add(name)
+
+        for name in annotations:
+            name = unmangle(subject, name)
+            if name and name not in members:
+                members[name] = ClassAttribute(cls, name, INSTANCEATTR)
+
+        seen.update(class_dict)
+        if cls_analyzer:
+            seen.update(name for ns, name in cls_analyzer.annotations if ns == namespace)
+        else:
+            seen.update(annotations)
 
     return members
 

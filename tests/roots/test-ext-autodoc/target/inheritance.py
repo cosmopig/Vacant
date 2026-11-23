@@ -1,3 +1,6 @@
+from .inherited_attributes import OtherBase, Outer
+
+
 class Base(object):
     def inheritedmeth(self):
         """Inherited function."""
@@ -15,3 +18,7 @@ class Derived(Base):
     def inheritedmeth(self):
         # no docstring here
         pass
+
+
+class DerivedWithAttributes(Outer.Base, OtherBase):
+    overridden = 6
