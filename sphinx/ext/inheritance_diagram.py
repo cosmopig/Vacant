@@ -397,8 +397,7 @@ def get_graph_hash(node: inheritance_diagram) -> str:
 
 def html_visit_inheritance_diagram(self: HTML5Translator, node: inheritance_diagram) -> None:
     """
-    Output the graph for HTML.  This will insert a PNG with clickable
-    image map.
+    Output the graph for HTML as an SVG or a PNG with a clickable image map.
     """
     graph = node['graph']
 
@@ -406,24 +405,19 @@ def html_visit_inheritance_diagram(self: HTML5Translator, node: inheritance_diag
     name = 'inheritance%s' % graph_hash
 
     # Create a mapping from fully-qualified class names to URLs.
-    graphviz_output_format = self.builder.env.config.graphviz_output_format.upper()
-    current_filename = self.builder.current_docname + self.builder.out_suffix
     urls = {}
     pending_xrefs = cast(Iterable[addnodes.pending_xref], node)
     for child in pending_xrefs:
         if child.get('refuri') is not None:
-            if graphviz_output_format == 'SVG':
-                urls[child['reftitle']] = "../" + child.get('refuri')
-            else:
-                urls[child['reftitle']] = child.get('refuri')
+            urls[child['reftitle']] = child.get('refuri')
         elif child.get('refid') is not None:
-            if graphviz_output_format == 'SVG':
-                urls[child['reftitle']] = '../' + current_filename + '#' + child.get('refid')
-            else:
-                urls[child['reftitle']] = '#' + child.get('refid')
+            urls[child['reftitle']] = '#' + child.get('refid')
 
+    options = {}
+    if self.builder.config.graphviz_output_format == 'svg':
+        options['svg_link_base'] = self.builder.get_target_uri(self.builder.current_docname)
     dotcode = graph.generate_dot(name, urls, env=self.builder.env)
-    render_dot_html(self, node, dotcode, {}, 'inheritance', 'inheritance',
+    render_dot_html(self, node, dotcode, options, 'inheritance', 'inheritance',
                     alt='Inheritance diagram of ' + node['content'])
     raise nodes.SkipNode
 

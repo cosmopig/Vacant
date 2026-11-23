@@ -1,0 +1,1 @@
+tests/test_ext_inheritance_diagram.py::test_inheritance_diagram_svg_nested_links

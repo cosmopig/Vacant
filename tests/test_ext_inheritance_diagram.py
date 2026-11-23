@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
 
 import pytest
 
@@ -169,6 +170,44 @@ def test_inheritance_diagram_svg_html(app, status, warning):
                'title="Permalink to this image">\xb6</a></p>\n</figcaption>\n</figure>\n')
 
     assert re.search(pattern, content, re.M)
+
+
+@pytest.mark.sphinx('html', testroot='ext-inheritance_diagram',
+                    srcdir='ext-inheritance_diagram-svg-nested',
+                    confoverrides={'graphviz_output_format': 'svg'})
+@pytest.mark.usefixtures('if_graphviz_found')
+def test_inheritance_diagram_svg_nested_links(app):
+    nested = app.srcdir / 'nested'
+    os.mkdir(nested)
+    (nested / 'index.rst').write_text(
+        'Nested\n======\n\n'
+        '.. toctree::\n\n   classes\n\n'
+        '.. py:class:: test.Foo\n\n'
+        '.. inheritance-diagram:: test.Bar\n',
+        encoding='utf8',
+    )
+    (nested / 'classes.rst').write_text(
+        'Classes\n=======\n\n.. py:class:: test.Bar\n', encoding='utf8',
+    )
+    (app.srcdir / 'index.rst').write_text(
+        'Root\n====\n\n'
+        '.. toctree::\n\n   nested/index\n\n'
+        '.. inheritance-diagram:: test.Bar\n',
+        encoding='utf8',
+    )
+
+    app.builder.build_all()
+
+    for page in ('nested/index.html', 'index.html'):
+        page_path = app.outdir / page
+        content = page_path.read_text(encoding='utf8')
+        match = re.search(r'<object data="([^"]+\.svg)"', content)
+        assert match
+
+        svg = ET.parse(page_path.parent / match[1])  # NoQA: S314
+        href = '{http://www.w3.org/1999/xlink}href'
+        links = {link.attrib[href] for link in svg.iter('{http://www.w3.org/2000/svg}a')}
+        assert links == {'../nested/index.html#test.Foo', '../nested/classes.html#test.Bar'}
 
 
 @pytest.mark.sphinx('latex', testroot='ext-inheritance_diagram')
