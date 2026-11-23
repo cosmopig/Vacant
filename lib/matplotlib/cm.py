@@ -119,6 +119,7 @@ class ColormapRegistry(Mapping):
 
         name : str, optional
             The name for the colormap. If not given, ``cmap.name`` is used.
+            The registered copy has this name; the original is unchanged.
 
         force : bool, default: False
             If False, a ValueError is raised if trying to overwrite an already
@@ -145,7 +146,9 @@ class ColormapRegistry(Mapping):
             _api.warn_external(f"Overwriting the cmap {name!r} "
                                "that was already in the registry.")
 
-        self._cmaps[name] = cmap.copy()
+        cmap = cmap.copy()
+        cmap.name = name
+        self._cmaps[name] = cmap
 
     def unregister(self, name):
         """

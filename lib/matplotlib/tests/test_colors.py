@@ -80,7 +80,10 @@ def test_register_cmap():
             match=r"matplotlib\.colormaps\.register\(name\)"
     ):
         cm.register_cmap(target, new_cm)
-    assert mpl.colormaps[target] == new_cm
+    assert new_cm.name == "viridis"
+    expected = new_cm.copy()
+    expected.name = target
+    assert mpl.colormaps[target] == expected
 
     with pytest.raises(ValueError,
                        match="Arguments must include a name or a Colormap"):

@@ -75,6 +75,23 @@ def test_pyplot_box():
     assert ax.get_frame_on()
 
 
+def test_set_cmap_registered_alias():
+    cmap = mpl.colors.ListedColormap(["red", "blue"], name="original_cmap")
+    name = "aliased_cmap"
+    mpl.colormaps.register(cmap, name=name)
+    try:
+        current = plt.imshow([[0, 1]])
+        plt.set_cmap(name)
+        new = plt.imshow([[0, 1]])
+        assert mpl.rcParams["image.cmap"] == name
+        for image in [current, new]:
+            assert image.get_cmap().name == name
+            np.testing.assert_array_equal(image.get_cmap().colors, cmap.colors)
+        assert cmap.name == "original_cmap"
+    finally:
+        mpl.colormaps.unregister(name)
+
+
 def test_stackplot_smoke():
     # Small smoke test for stackplot (see #12405)
     plt.stackplot([1, 2, 3], [1, 2, 3])
