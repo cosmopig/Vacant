@@ -5,6 +5,7 @@ A Printer for generating readable representation of most sympy classes.
 from __future__ import print_function, division
 
 from sympy.core import S, Rational, Pow, Basic, Mul
+from sympy.core.function import _coeff_isneg
 from sympy.core.mul import _keep_coeff
 from .printer import Printer
 from sympy.printing.precedence import precedence, PRECEDENCE
@@ -304,16 +305,34 @@ class StrPrinter(Printer):
             return sign + '*'.join(a_str) + "/(%s)" % '*'.join(b_str)
 
     def _print_MatMul(self, expr):
-        return '*'.join([self.parenthesize(arg, precedence(expr))
-            for arg in expr.args])
+        c, matrices = expr.as_coeff_matrices()
+        if _coeff_isneg(c):
+            sign = "-"
+            c = -c
+        else:
+            sign = ""
+        args = ([c] if c != 1 else []) + list(matrices)
+        return sign + '*'.join([self.parenthesize(arg, precedence(expr))
+            for arg in args])
 
     def _print_HadamardProduct(self, expr):
         return '.*'.join([self.parenthesize(arg, precedence(expr))
             for arg in expr.args])
 
     def _print_MatAdd(self, expr):
-        return ' + '.join([self.parenthesize(arg, precedence(expr))
-            for arg in expr.args])
+        l = []
+        for term in expr.args:
+            t = self.parenthesize(term, precedence(expr))
+            if t.startswith('-'):
+                sign = "-"
+                t = t[1:]
+            else:
+                sign = "+"
+            l.extend([sign, t])
+        sign = l.pop(0)
+        if sign == '+':
+            sign = ""
+        return sign + ' '.join(l)
 
     def _print_NaN(self, expr):
         return 'nan'

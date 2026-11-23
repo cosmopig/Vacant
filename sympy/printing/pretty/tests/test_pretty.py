@@ -19,7 +19,7 @@ from sympy.functions import (Abs, Chi, Ci, Ei, KroneckerDelta,
 from sympy.codegen.ast import (Assignment, AddAugmentedAssignment,
     SubAugmentedAssignment, MulAugmentedAssignment, DivAugmentedAssignment, ModAugmentedAssignment)
 
-from sympy.matrices import Adjoint, Inverse, MatrixSymbol, Transpose
+from sympy.matrices import Adjoint, Inverse, MatrixSymbol, Transpose, MatAdd, MatMul
 
 from sympy.printing.pretty import pretty as xpretty
 from sympy.printing.pretty import pprint
@@ -2991,6 +2991,15 @@ tr⎜⎢    ⎥⎟ + tr⎜⎢    ⎥⎟
 
     assert pretty(Trace(X) + Trace(Y)) == ascii_str_2
     assert upretty(Trace(X) + Trace(Y)) == ucode_str_2
+
+
+def test_MatrixSymbol_difference_pretty():
+    A = MatrixSymbol('A', 2, 2)
+    B = MatrixSymbol('B', 2, 2)
+    assert pretty(A - A*B - B) == "-B - A*B + A"
+    assert upretty(A - A*B - B) == u"-B - A⋅B + A"
+    assert pretty(MatAdd(A, -B)) == "A - B"
+    assert pretty(MatAdd(A, MatMul(-1, MatAdd(A, B)))) == "A - (A + B)"
 
 
 def test_MatrixExpressions():

@@ -745,6 +745,18 @@ def test_MatMul_MatAdd():
     assert str(2*(MatrixSymbol("X", 2, 2) + MatrixSymbol("Y", 2, 2))) == \
         "2*(X + Y)"
 
+
+def test_MatrixSymbol_difference():
+    from sympy import MatrixSymbol
+    A = MatrixSymbol('A', 2, 2)
+    B = MatrixSymbol('B', 2, 2)
+    assert str(A - A*B - B) == "-B - A*B + A"
+    assert str(-A) == "-A"
+    assert str(-2*A*B) == "-2*A*B"
+    assert str(-x*A) == "-x*A"
+    assert str(A*B - B) == "-B + A*B"
+    assert str(-(A + B)) == "-(A + B)"
+
 def test_MatrixSlice():
     from sympy.matrices.expressions import MatrixSymbol
     assert str(MatrixSymbol('X', 10, 10)[:5, 1:9:2]) == 'X[:5, 1:9:2]'
@@ -784,4 +796,4 @@ def test_MatrixElement_printing():
     assert(str(3 * A[0, 0]) == "3*A[0, 0]")
 
     F = C[0, 0].subs(C, A - B)
-    assert str(F) == "((-1)*B + A)[0, 0]"
+    assert str(F) == "(-B + A)[0, 0]"
