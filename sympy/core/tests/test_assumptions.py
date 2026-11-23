@@ -710,6 +710,16 @@ def test_Add_is_imaginary():
     assert (I*nn + I).is_imaginary  # issue 8046, 17
 
 
+def test_Add_is_zero():
+    e = (1 + I)**2 - 2*I
+    assert e.is_zero is True
+    assert ((1 + I)**2 + 2*I).is_zero is False
+    assert (1 + e).is_zero is False
+    i = Dummy(imaginary=True)
+    j = Dummy(imaginary=True)
+    assert (i + j).is_zero is None
+
+
 def test_Add_is_algebraic():
     a = Symbol('a', algebraic=True)
     b = Symbol('a', algebraic=True)

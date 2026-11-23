@@ -2798,6 +2798,13 @@ def test_rank():
     p = zeros(3)
     assert p.rank() == 0
 
+
+def test_rank_with_cancelling_imaginary_terms():
+    e = (1 + I)**2 - 2*I
+    assert Matrix([[e]]).rank() == 0
+    assert Matrix([[1, 1], [1, 1 + e]]).rank() == 1
+
+
 def test_issue_11434():
     ax, ay, bx, by, cx, cy, dx, dy, ex, ey, t0, t1 = \
         symbols('a_x a_y b_x b_y c_x c_y d_x d_y e_x e_y t_0 t_1')
