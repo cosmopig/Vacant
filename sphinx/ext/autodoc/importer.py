@@ -14,7 +14,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Tuple
 
 from sphinx.deprecation import RemovedInSphinx40Warning, deprecated_alias
-from sphinx.pycode import ModuleAnalyzer
+from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
 from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
                                  safe_getattr)
@@ -258,6 +258,7 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
 
     # the members directly defined in the class
     obj_dict = attrgetter(subject, '__dict__', {})
+    bases = getmro(subject)[1:]
 
     members = {}  # type: Dict[str, ClassAttribute]
 
@@ -293,13 +294,16 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
                 if name in obj_dict:
                     members[unmangled] = ClassAttribute(subject, unmangled, value)
                 else:
-                    members[unmangled] = ClassAttribute(None, unmangled, value)
+                    owner = next((base for base in bases if name in vars(base)), None)
+                    members[unmangled] = ClassAttribute(owner, unmangled, value)
         except AttributeError:
             continue
 
     # annotation only member (ex. attr: int)
-    for cls in getmro(subject):
+    for cls in (subject, *bases):
         try:
+            if '__annotations__' not in vars(cls):
+                continue
             for name in getannotations(cls):
                 name = unmangle(cls, name)
                 if name and name not in members:
@@ -307,13 +311,24 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable,
         except AttributeError:
             pass
 
-    if analyzer:
-        # append instance attributes (cf. self.attr1) if analyzer knows
-        namespace = '.'.join(objpath)
-        for (ns, name), docstring in analyzer.attr_docs.items():
-            if namespace == ns and name not in members:
-                members[name] = ClassAttribute(subject, name, INSTANCEATTR,
-                                               '\n'.join(docstring))
+    for cls in (subject, *bases):
+        try:
+            if cls is subject and analyzer is not None:
+                namespace = '.'.join(objpath)
+                attr_docs = analyzer.find_attr_docs()
+            else:
+                namespace = cls.__qualname__
+                attr_docs = ModuleAnalyzer.for_module(cls.__module__).find_attr_docs()
+        except (AttributeError, PycodeError):
+            continue
+
+        for (ns, name), docstring in attr_docs.items():
+            if ns != namespace or (cls is not subject and mangle(cls, name) != name):
+                continue
+            if name not in members:
+                members[name] = ClassAttribute(cls, name, INSTANCEATTR)
+            if members[name].class_ is cls:
+                members[name].docstring = '\n'.join(docstring)
 
     return members
 

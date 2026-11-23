@@ -626,6 +626,25 @@ def test_autodoc_inherited_members(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+@pytest.mark.parametrize('options, inherited', [
+    ({'members': None, 'inherited-members': None}, True),
+    ({'members': None, 'inherited-members': 'BaseAttributes'}, False),
+    ({'members': None}, False),
+])
+def test_autodoc_inherited_attributes(app, options, inherited):
+    actual = do_autodoc(app, 'class', 'target.inheritance.DerivedAttributes', options)
+    assert '   .. py:attribute:: DerivedAttributes.overridden_attr' in actual
+    assert '      Subclass documentation.' in actual
+    assert '   .. py:attribute:: DerivedAttributes.shadowed_attr' not in actual
+    assert '      Base documentation for overridden attribute.' not in actual
+
+    for name, doc in [('class_attr', 'Inherited class attribute.'),
+                      ('instance_attr', 'Inherited instance attribute.')]:
+        assert ('   .. py:attribute:: DerivedAttributes.' + name in actual) == inherited
+        assert ('      ' + doc in actual) == inherited
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autodoc_inherited_members_Base(app):
     options = {"members": None,
                "inherited-members": "Base",

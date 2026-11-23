@@ -27,7 +27,7 @@ from sphinx.deprecation import (RemovedInSphinx40Warning, RemovedInSphinx50Warni
                                 RemovedInSphinx60Warning)
 from sphinx.environment import BuildEnvironment
 from sphinx.ext.autodoc.importer import (get_class_members, get_module_members,
-                                         get_object_members, import_object)
+                                         get_object_members, import_object, mangle)
 from sphinx.ext.autodoc.mock import mock
 from sphinx.locale import _, __
 from sphinx.pycode import ModuleAnalyzer, PycodeError
@@ -276,11 +276,12 @@ class ObjectMember(tuple):
         return super().__new__(cls, (name, obj))  # type: ignore
 
     def __init__(self, name: str, obj: Any, docstring: Optional[str] = None,
-                 skipped: bool = False) -> None:
+                 skipped: bool = False, class_: Any = None) -> None:
         self.__name__ = name
         self.object = obj
         self.docstring = docstring
         self.skipped = skipped
+        self.class_ = class_
 
 
 ObjectMembers = Union[List[ObjectMember], List[Tuple[str, Any]]]
@@ -666,12 +667,14 @@ class Documenter:
         The user can override the skipping decision by connecting to the
         ``autodoc-skip-member`` event.
         """
-        def is_filtered_inherited_member(name: str) -> bool:
+        def is_filtered_inherited_member(name: str, member: Any) -> bool:
             if inspect.isclass(self.object):
                 for cls in self.object.__mro__:
                     if cls.__name__ == self.options.inherited_members and cls != self.object:
                         # given member is a member of specified *super class*
                         return True
+                    elif isinstance(member, ObjectMember) and member.class_ is cls:
+                        return False
                     elif name in cls.__dict__:
                         return False
                     elif name in self.get_attr(cls, '__annotations__', {}):
@@ -740,7 +743,7 @@ class Documenter:
                 if self.options.special_members and membername in self.options.special_members:
                     if membername == '__doc__':
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, obj):
                         keep = False
                     else:
                         keep = has_doc or self.options.undoc_members
@@ -760,14 +763,14 @@ class Documenter:
                 if has_doc or self.options.undoc_members:
                     if self.options.private_members is None:
                         keep = False
-                    elif is_filtered_inherited_member(membername):
+                    elif is_filtered_inherited_member(membername, obj):
                         keep = False
                     else:
                         keep = membername in self.options.private_members
                 else:
                     keep = False
             else:
-                if self.options.members is ALL and is_filtered_inherited_member(membername):
+                if self.options.members is ALL and is_filtered_inherited_member(membername, obj):
                     keep = False
                 else:
                     # ignore undocumented members if :undoc-members: is not given
@@ -1584,7 +1587,9 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
                 self.add_line('   ' + _('Bases: %s') % ', '.join(bases), sourcename)
 
     def get_object_members(self, want_all: bool) -> Tuple[bool, ObjectMembers]:
-        members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)
+        class_members = get_class_members(self.object, self.objpath, self.get_attr, self.analyzer)
+        members = {name: ObjectMember(name, m.value, docstring=m.docstring, class_=m.class_)
+                   for name, m in class_members.items()}
         if not want_all:
             if not self.options.members:
                 return False, []  # type: ignore
@@ -1592,18 +1597,15 @@ class ClassDocumenter(DocstringSignatureMixin, ModuleLevelDocumenter):  # type: 
             selected = []
             for name in self.options.members:  # type: str
                 if name in members:
-                    selected.append(ObjectMember(name, members[name].value,
-                                                 docstring=members[name].docstring))
+                    selected.append(members[name])
                 else:
                     logger.warning(__('missing attribute %s in object %s') %
                                    (name, self.fullname), type='autodoc')
             return False, selected
         elif self.options.inherited_members:
-            return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
-                           for m in members.values()]
+            return False, list(members.values())
         else:
-            return False, [ObjectMember(m.name, m.value, docstring=m.docstring)
-                           for m in members.values() if m.class_ == self.object]
+            return False, [m for m in members.values() if m.class_ == self.object]
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
         if encoding is not None:
@@ -2161,20 +2163,29 @@ class UninitializedInstanceAttributeMixin(DataDocumenterMixinBase):
     """
 
     def get_attribute_comment(self, parent: Any) -> Optional[List[str]]:
+        if not self.objpath:
+            return None
+
+        attrname = self.objpath[-1]
         try:
             for cls in inspect.getmro(parent):
+                if cls is not parent and mangle(cls, attrname) != attrname:
+                    break
                 try:
                     module = safe_getattr(cls, '__module__')
                     qualname = safe_getattr(cls, '__qualname__')
 
                     analyzer = ModuleAnalyzer.for_module(module)
-                    analyzer.analyze()
-                    if qualname and self.objpath:
-                        key = (qualname, self.objpath[-1])
-                        if key in analyzer.attr_docs:
-                            return list(analyzer.attr_docs[key])
+                    attr_docs = analyzer.find_attr_docs()
+                    if (qualname, attrname) in attr_docs:
+                        self.directive.filename_set.add(analyzer.srcname)
+                        return list(attr_docs[qualname, attrname])
+                    if (qualname, attrname) in analyzer.annotations:
+                        break
                 except (AttributeError, PycodeError):
                     pass
+                if mangle(cls, attrname) in vars(cls):
+                    break
         except (AttributeError, PycodeError):
             pass
 
@@ -2359,6 +2370,11 @@ class AttributeDocumenter(GenericAliasMixin, NewTypeMixin, SlotsMixin,  # type: 
                 pass
 
     def get_doc(self, encoding: str = None, ignore: int = None) -> List[List[str]]:
+        if self.object is not UNINITIALIZED_ATTR:
+            comment = self.get_attribute_comment(self.parent)
+            if comment:
+                return [comment]
+
         if self.object is INSTANCEATTR:
             return []
 
