@@ -2663,6 +2663,24 @@ class PropertyDocumenter(DocstringStripSignatureMixin, ClassLevelDocumenter):  #
                             ) -> bool:
         return inspect.isproperty(member) and isinstance(parent, ClassDocumenter)
 
+    def import_object(self, raiseerror: bool = False) -> bool:
+        ret = super().import_object(raiseerror)
+        self.isclassmethod = False
+        if ret and not inspect.isproperty(self.object):
+            # ``@classmethod @property`` is evaluated on attribute access;
+            # look up the original descriptor from the class.
+            for cls in inspect.getmro(self.parent) if inspect.isclass(self.parent) else []:
+                __dict__ = safe_getattr(cls, '__dict__', {})
+                if self.objpath[-1] in __dict__:
+                    obj = __dict__[self.objpath[-1]]
+                    if (inspect.isclassmethod(obj) and
+                            inspect.isproperty(safe_getattr(obj, '__func__', None))):
+                        self.object = obj.__func__
+                        self.isclassmethod = True
+                    break
+
+        return ret
+
     def document_members(self, all_members: bool = False) -> None:
         pass
 
@@ -2675,6 +2693,8 @@ class PropertyDocumenter(DocstringStripSignatureMixin, ClassLevelDocumenter):  #
         sourcename = self.get_sourcename()
         if inspect.isabstractmethod(self.object):
             self.add_line('   :abstractmethod:', sourcename)
+        if self.isclassmethod:
+            self.add_line('   :classmethod:', sourcename)
 
         if safe_getattr(self.object, 'fget', None) and self.config.autodoc_typehints != 'none':
             try:

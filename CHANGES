@@ -13,8 +13,13 @@ Deprecated
 Features added
 --------------
 
+* #9461: py domain: Add ``:classmethod:`` option to :rst:dir:`py:property`
+
 Bugs fixed
 ----------
+
+* #9461: autodoc: Support documenting ``@classmethod`` + ``@property``
+  (available since Python 3.9) as a class property
 
 Testing
 --------

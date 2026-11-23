@@ -17,8 +17,8 @@ from sphinx.deprecation import RemovedInSphinx50Warning
 from sphinx.ext.autodoc.mock import ismock, undecorate
 from sphinx.pycode import ModuleAnalyzer, PycodeError
 from sphinx.util import logging
-from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isenumclass,
-                                 safe_getattr)
+from sphinx.util.inspect import (getannotations, getmro, getslots, isclass, isclassmethod,
+                                 isenumclass, isproperty, safe_getattr)
 
 if False:
     # For type annotation
@@ -277,6 +277,16 @@ def get_class_members(subject: Any, objpath: List[str], attrgetter: Callable
             value = attrgetter(subject, name)
             if ismock(value):
                 value = undecorate(value)
+
+            # classmethod-wrapped property (``@classmethod @property``) is evaluated
+            # on attribute access; use the wrapped property object instead.
+            for cls in getmro(subject):
+                cls_dict = attrgetter(cls, '__dict__', {})
+                if name in cls_dict:
+                    raw = cls_dict[name]
+                    if isclassmethod(raw) and isproperty(safe_getattr(raw, '__func__', None)):
+                        value = raw.__func__
+                    break
 
             unmangled = unmangle(subject, name)
             if unmangled and unmangled not in members:

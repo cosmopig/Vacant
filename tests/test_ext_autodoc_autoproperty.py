@@ -9,6 +9,8 @@
     :license: BSD, see LICENSE for details.
 """
 
+import sys
+
 import pytest
 
 from .test_ext_autodoc import do_autodoc
@@ -21,6 +23,22 @@ def test_properties(app):
         '',
         '.. py:property:: Foo.prop',
         '   :module: target.properties',
+        '   :type: int',
+        '',
+        '   docstring',
+        '',
+    ]
+
+
+@pytest.mark.skipif(sys.version_info < (3, 9), reason='python 3.9+ is required.')
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_class_properties(app):
+    actual = do_autodoc(app, 'property', 'target.properties.Foo.classprop')
+    assert list(actual) == [
+        '',
+        '.. py:property:: Foo.classprop',
+        '   :module: target.properties',
+        '   :classmethod:',
         '   :type: int',
         '',
         '   docstring',

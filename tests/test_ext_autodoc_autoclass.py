@@ -200,6 +200,7 @@ def test_decorators(app):
     ]
 
 
+@pytest.mark.skipif(sys.version_info < (3, 9), reason='python 3.9+ is required.')
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_properties(app):
     options = {"members": None}
@@ -210,6 +211,14 @@ def test_properties(app):
         '   :module: target.properties',
         '',
         '   docstring',
+        '',
+        '',
+        '   .. py:property:: Foo.classprop',
+        '      :module: target.properties',
+        '      :classmethod:',
+        '      :type: int',
+        '',
+        '      docstring',
         '',
         '',
         '   .. py:property:: Foo.prop',
