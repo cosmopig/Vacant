@@ -739,6 +739,22 @@ def test_autodoc_ignore_module_all(app):
 
 
 @pytest.mark.sphinx('html', testroot='ext-autodoc')
+def test_autodoc_empty_module_all(app):
+    name = 'target.empty_all'
+    actual = do_autodoc(app, 'module', name, {"members": None})
+    assert [line for line in actual if '::' in line] == [
+        '.. py:module:: target.empty_all',
+    ]
+
+    for options in ({"members": None, "ignore-module-all": None}, {"members": "foo"}):
+        actual = do_autodoc(app, 'module', name, options)
+        assert [line for line in actual if '::' in line] == [
+            '.. py:module:: target.empty_all',
+            '.. py:function:: foo()',
+        ]
+
+
+@pytest.mark.sphinx('html', testroot='ext-autodoc')
 def test_autodoc_noindex(app):
     options = {"noindex": True}
     actual = do_autodoc(app, 'module', 'target', options)
