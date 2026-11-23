@@ -20,6 +20,7 @@ from sklearn.utils._testing import (
     MinimalRegressor,
     MinimalTransformer,
 )
+from sklearn import config_context
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
 from sklearn.utils.validation import check_is_fitted
@@ -35,7 +36,7 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.dummy import DummyRegressor
 from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.datasets import load_iris
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, FunctionTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.impute import SimpleImputer
@@ -1618,6 +1619,41 @@ def test_feature_union_set_output():
     assert isinstance(X_trans, pd.DataFrame)
     assert_array_equal(X_trans.columns, union.get_feature_names_out())
     assert_array_equal(X_trans.index, X_test.index)
+
+
+def test_feature_union_set_output_aggregating_transformer():
+    """Check FeatureUnion with pandas output and a transformer that changes the
+    number of rows."""
+    pd = pytest.importorskip("pandas")
+
+    index = pd.date_range(start="2020-01-01", end="2020-01-05", freq="H")[:-1]
+    data = pd.DataFrame(index=index, data=[10] * len(index), columns=["value"])
+    data["date"] = index.date
+
+    class AggregatingTransformer(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            return X["value"].groupby(X["date"]).sum().to_frame()
+
+        def get_feature_names_out(self, input_features=None):
+            return np.asarray(["value_sum"], dtype=object)
+
+    expected = data["value"].groupby(data["date"]).sum()
+
+    transformers = [
+        AggregatingTransformer(),
+        FunctionTransformer(lambda X: X["value"].groupby(X["date"]).sum()),
+    ]
+    for transformer in transformers:
+        with config_context(transform_output="pandas"):
+            union = make_union(transformer)
+            X_trans = union.fit_transform(data)
+        assert isinstance(X_trans, pd.DataFrame)
+        assert X_trans.shape == (4, 1)
+        assert_array_equal(X_trans.index, expected.index)
+        assert_array_equal(X_trans.iloc[:, 0], expected.values)
 
 
 def test_feature_union_getitem():
