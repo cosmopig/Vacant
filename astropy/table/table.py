@@ -1243,6 +1243,13 @@ class Table:
         # mixin class
         if (not isinstance(data, Column) and not data_is_mixin
                 and isinstance(data, np.ndarray) and len(data.dtype) > 1):
+            warnings.warn(
+                "In Astropy 5.2, structured arrays added as columns will become "
+                "Column objects instead of NdarrayMixin objects. Wrap the array "
+                "in a Column to use the new behavior now.",
+                FutureWarning,
+                stacklevel=3,
+            )
             data = data.view(NdarrayMixin)
             data_is_mixin = True
 

@@ -712,9 +712,13 @@ def test_ndarray_mixin():
     d = np.arange(8, dtype='i8').reshape(4, 2).view(NdarrayMixin)
 
     # Add one during initialization and the next as a new column.
-    t = Table([a], names=['a'])
-    t['b'] = b
-    t['c'] = c
+    match = r"Astropy 5\.2.*Wrap the array in a Column"
+    with pytest.warns(FutureWarning, match=match):
+        t = Table([a], names=['a'])
+    with pytest.warns(FutureWarning, match=match):
+        t['b'] = b
+    with pytest.warns(FutureWarning, match=match):
+        t['c'] = c
     t['d'] = d
 
     assert isinstance(t['a'], NdarrayMixin)
@@ -757,6 +761,13 @@ def test_ndarray_mixin():
         "     (2, 'b')    (20, 'bb')   (200., 'rbb')   2 .. 3",
         "     (3, 'c')    (30, 'cc')   (300., 'rcc')   4 .. 5",
         "     (4, 'd')    (40, 'dd')   (400., 'rdd')   6 .. 7"]
+
+
+def test_structured_array_as_column():
+    data = np.array([(1, 'a'), (2, 'b')], dtype='i4,U1')
+    t = Table([Column(data, name='a')])
+    assert isinstance(t['a'], Column)
+    np.testing.assert_array_equal(t['a'], data)
 
 
 def test_possible_string_format_functions():

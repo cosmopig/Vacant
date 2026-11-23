@@ -351,17 +351,24 @@ including the simple structured array defined previously as a column::
 
   >>> table = Table()
   >>> table['name'] = ['Micah', 'Mazzy']
-  >>> table['arr'] = arr
+  >>> table['arr'] = Column(arr)
   >>> print(table)
    name arr [a, b, c]
   ----- -------------
   Micah  (1, 2., 'x')
   Mazzy  (4, 5., 'y')
 
+Wrapping the array in |Column| avoids the automatic conversion to an
+`~astropy.table.NdarrayMixin`. Starting in Astropy 5.2, the array will be
+added as a |Column| even without the wrapper.
+
 You can access or print a single field in the structured column as follows::
 
   >>> print(table['arr']['b'])
-  [2. 5.]
+  arr
+  ---
+  2.0
+  5.0
 
 **New column names**
 

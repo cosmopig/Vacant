@@ -796,7 +796,7 @@ the value, min and max are stored in the in the column as fields named ``val``,
     ... )
     >>> t = Table()
     >>> t['a'] = [1, 2]
-    >>> t['par'] = pars
+    >>> t['par'] = Column(pars)
     >>> print(t)
      a    par [val, min, max]
     --- ------------------------
