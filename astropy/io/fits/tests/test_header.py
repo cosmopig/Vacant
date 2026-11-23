@@ -468,6 +468,15 @@ class TestHeaderFunctions(FitsTestCase):
             "CONTINUE  'xml'                                                                 "
         )
 
+    def test_long_string_with_double_single_quotes(self):
+        """Null strings ('') in long (CONTINUE) values must round-trip."""
+        for n in range(50, 80):
+            for value in ("x" * n + "''", "x" * n + "''" + "x" * 10):
+                card1 = fits.Card("CONFIG", value)
+                card2 = fits.Card.fromstring(str(card1))
+                assert card2.value == value
+                assert card1.value == card2.value
+
     def test_long_unicode_string(self):
         """Regression test for
         https://github.com/spacetelescope/PyFITS/issues/1
