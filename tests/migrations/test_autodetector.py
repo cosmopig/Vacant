@@ -3585,6 +3585,32 @@ class AutodetectorTests(BaseAutodetectorTests):
             changes, "testapp", 0, 3, model_name="author", name="publishers"
         )
 
+    def test_create_with_cross_app_through_model(self):
+        book = self.book_with_multiple_authors_through_attribution.clone()
+        book.fields["authors"] = models.ManyToManyField(
+            "testapp.Author", through="thirdapp.Attribution"
+        )
+        attribution = self.attribution.clone()
+        attribution.app_label = "thirdapp"
+
+        changes = self.get_changes([], [book, self.author_name, attribution])
+
+        self.assertNumberMigrations(changes, "otherapp", 2)
+        self.assertOperationTypes(changes, "otherapp", 0, ["CreateModel"])
+        self.assertOperationTypes(changes, "otherapp", 1, ["AddField"])
+        self.assertOperationAttributes(
+            changes, "otherapp", 1, 0, model_name="book", name="authors"
+        )
+        self.assertMigrationDependencies(
+            changes,
+            "otherapp",
+            1,
+            [("otherapp", "auto_1"), ("testapp", "auto_1"), ("thirdapp", "auto_1")],
+        )
+        self.assertMigrationDependencies(
+            changes, "thirdapp", 0, [("otherapp", "auto_1"), ("testapp", "auto_1")]
+        )
+
     def test_many_to_many_removed_before_through_model(self):
         """
         Removing a ManyToManyField and the "through" model in the same change
