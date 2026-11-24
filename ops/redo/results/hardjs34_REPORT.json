@@ -1,0 +1,290 @@
+{
+ "control": "A",
+ "generated": "2026-11-23T05:56:43Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "3c74139794f13d3436850f5f6519051a141b61395287108b92cc72878de790e5"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 123,
+  "control_only_b": 1,
+  "delta_pp": 9.41,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 8,
+  "mcnemar_exact_p_two_sided": 0.000145,
+  "neither": 29,
+  "treatment_only_c": 17
+ },
+ "pairs_complete": 170,
+ "pairs_infra_void": [],
+ "pairs_planned": 170,
+ "pairs_scored": 170,
+ "per_arm": {
+  "A": {
+   "accepted": 124,
+   "accepted_but_wrong": 0,
+   "cells": 170,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 372.9,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 44.2,
+   "model_calls_known_cells": 170,
+   "pass": 124,
+   "rate": 0.7294,
+   "scored": 170,
+   "tests_tampered_attempts": 1,
+   "timeouts": 22
+  },
+  "P": {
+   "accepted": 140,
+   "accepted_but_wrong": 0,
+   "cells": 170,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "visible_tests_pristine"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 400.3,
+   "mean_attempts": 1.0,
+   "mean_model_calls": null,
+   "model_calls_known_cells": 0,
+   "pass": 140,
+   "rate": 0.8235,
+   "scored": 170,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 1,
+   "c": 6,
+   "ctrl_pass": 25,
+   "p": 0.125,
+   "pairs": 34,
+   "treat_pass": 30
+  },
+  "2": {
+   "b": 0,
+   "c": 2,
+   "ctrl_pass": 26,
+   "p": 0.5,
+   "pairs": 34,
+   "treat_pass": 28
+  },
+  "3": {
+   "b": 0,
+   "c": 3,
+   "ctrl_pass": 26,
+   "p": 0.25,
+   "pairs": 34,
+   "treat_pass": 29
+  },
+  "4": {
+   "b": 0,
+   "c": 3,
+   "ctrl_pass": 23,
+   "p": 0.25,
+   "pairs": 34,
+   "treat_pass": 26
+  },
+  "5": {
+   "b": 0,
+   "c": 3,
+   "ctrl_pass": 24,
+   "p": 0.25,
+   "pairs": 34,
+   "treat_pass": 27
+  }
+ },
+ "per_task": {
+  "js_accumulate": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_all-your-base": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_atbash-cipher": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_beer-song": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_bowling": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "js_camicia": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "js_clock": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_complex-numbers": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_crypto-square": {
+   "ctrl": 3,
+   "pairs": 5,
+   "treat": 4
+  },
+  "js_custom-set": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_dominoes": {
+   "ctrl": 4,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_flatten-array": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_flower-field": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_go-counting": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 1
+  },
+  "js_hexadecimal": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_isbn-verifier": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_lens-person": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_list-ops": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_nucleotide-count": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_ocr-numbers": {
+   "ctrl": 1,
+   "pairs": 5,
+   "treat": 1
+  },
+  "js_parallel-letter-frequency": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_pascals-triangle": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_pig-latin": {
+   "ctrl": 2,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_promises": {
+   "ctrl": 2,
+   "pairs": 5,
+   "treat": 4
+  },
+  "js_rest-api": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 0
+  },
+  "js_robot-simulator": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_say": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_scrabble-score": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_secret-handshake": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_sieve": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_spiral-matrix": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_sublist": {
+   "ctrl": 5,
+   "pairs": 5,
+   "treat": 5
+  },
+  "js_wordy": {
+   "ctrl": 0,
+   "pairs": 5,
+   "treat": 1
+  },
+  "js_zebra-puzzle": {
+   "ctrl": 2,
+   "pairs": 5,
+   "treat": 4
+  }
+ },
+ "plan_id": "hardjs34_vacantdo_rc4_pi_gemma12b_1003",
+ "plan_sha256": "1c93d0cec8d537090706fc466ae214365b2bb9f819604159d971398ffd1bd107",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 264,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 76,
+  "reject_pass": 0
+ },
+ "state": "EFFECTIVE",
+ "treatment": "P"
+}
