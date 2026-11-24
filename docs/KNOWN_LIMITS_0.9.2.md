@@ -46,6 +46,10 @@ The code under test itself is outside that class: see the section "The code unde
 12. The non-Linux paths (no subreaper, `detached_processes: null`) were tested only by faking `sys.platform`.
 13. Plan→apply races narrower than a re-check, such as a directory swapped mid-apply, are reasoned about only.
 
+## Memory
+
+22. **No memory cap on the agent's or the check's processes.** Code that allocates without bound (for example an agent-written `while True:` that keeps appending) runs inside the check, and in the agent's own tool calls, with no memory limit. On a small machine it can exhaust memory before the attempt's time limit: the kernel's OOM killer then kills it (the attempt is recorded as not accepted, e.g. `runner_no_output`), and it may take other processes on the machine with it. Seen once in the confirm2 batch (11/23, 4 kills of 5–7 GB). Workaround: run `vacant do` inside a memory-limited cgroup (e.g. `systemd-run --user -p MemoryMax=4G …`). A per-check memory limit is planned for 0.9.3.
+
 ## Cost
 
 14. npm projects: the agent gets its own copy of `node_modules` (reflink when the filesystem supports it, otherwise a full copy). The message warns when it falls back to a full copy. The copy time is recorded as `copy_s`. On a 36 MB / 3000-file `node_modules`: copy 0.14 s, manifest 0.04 s.

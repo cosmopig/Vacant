@@ -37,3 +37,8 @@
 
 - 啟動期的 Ctrl-C：極少數情況（370 次裡 1 次，run 開始後約 31ms）SIGINT 被 Python 的 import 鎖吞掉，run 照常跑完交件——使用者按了 Ctrl-C 卻沒有停（KNOWN_LIMITS 20）。可能做法：入口更早裝上「只記下」的處理器、並在 run() 開始時檢查。
 - `vacant audit show` 對語法錯誤（load_error）那一行沒有檔名與行號（交件訊息已有，audit 的格式化沒有跟上）。
+
+## 8. 驗收與 agent 子行程的記憶體上限
+
+- confirm2（11/23）：agent 寫出的 `encode()` 是沒有出口的 `while True`，agent 自己跑測試與驗收時各吃到 5–7 GB，全域 OOM 四次（KNOWN_LIMITS 22）。
+- 做法：驗收子行程設 RLIMIT_AS 或放進有 MemoryMax 的 cgroup，超過就記成這一次嘗試「記憶體超限」、不放行，而不是讓整台機器 OOM；agent 的子行程同理（至少文件建議用 cgroup 跑）。
