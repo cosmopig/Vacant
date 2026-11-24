@@ -94,7 +94,9 @@ fmt_cmd() {
   printf '%s\n' "${out% }"
 }
 
-TAR_REMOTE_CMD="tar -czf ${REMOTE_RESULTS_TAR}.tmp -C ${REMOTE_RUN_ROOT} . && mv -f ${REMOTE_RESULTS_TAR}.tmp ${REMOTE_RESULTS_TAR} && sha256sum ${REMOTE_RESULTS_TAR} > ${REMOTE_TAR_SHA}"
+# 11/24：排除工作區副本（與 vm_run_batch.sh 同一份清單）；tar 回 1（file changed as we read it）在跑到一半的快照裡是正常的
+TAR_EXCLUDES="--exclude=node_modules --exclude='attempt_*/w' --exclude='snap-*' --exclude='start-copy-*' --exclude='start-snap-*' --exclude='bkp-*' --exclude=__pycache__"
+TAR_REMOTE_CMD="{ tar -czf ${REMOTE_RESULTS_TAR}.tmp -C ${REMOTE_RUN_ROOT} ${TAR_EXCLUDES} . || [ \$? -eq 1 ]; } && mv -f ${REMOTE_RESULTS_TAR}.tmp ${REMOTE_RESULTS_TAR} && sha256sum ${REMOTE_RESULTS_TAR} > ${REMOTE_TAR_SHA}"
 
 if [ "$DRY_RUN" = "1" ]; then
   echo "[dry-run] fetch_batch.sh state=${STATE_FILE} session=${SESSION} batch=${BATCH_NAME} force=${FORCE} no_stop=${NO_STOP}"
@@ -145,9 +147,31 @@ else
   echo "1/4 BATCH_DONE.json confirmed on VM (tarball: ${REMOTE_RESULTS_TAR})"
 fi
 
-echo "2/4 Downloading tarball and sha256 via colab download"
+echo "2/4 Downloading tarball and sha256 via colab download (in parts)"
 rm -f "$LOCAL_TAR" "$LOCAL_SHA"
-"${COLAB_CMD[@]}" download -s "$SESSION" "$REMOTE_RESULTS_TAR" "$LOCAL_TAR" </dev/null
+# 11/24（W3-5 JS 重跑 VOID 的根因 2）：`colab download` 會把整個檔放進本機記憶體；大於可用記憶體就被 OOM 殺掉。
+# 改成在 VM 上切成 FETCH_PART_MB（預設 256 MB）的分段、逐段下載再接回來，最後照舊驗整包的 sha256。
+remote_sh() {
+  if [ "$TRANSPORT" = "ssh" ]; then
+    "${COLAB_CMD[@]}" ssh -s "$SESSION" -- bash -lc "$1" </dev/null
+  else
+    printf '!%s\n' "$1" | "${COLAB_CMD[@]}" exec -s "$SESSION" --timeout 1800
+  fi
+}
+PART_MB=${FETCH_PART_MB:-256}
+PARTS_LIST=$(remote_sh "rm -f ${REMOTE_RESULTS_TAR}.part.* && split -b ${PART_MB}M -d -a 4 ${REMOTE_RESULTS_TAR} ${REMOTE_RESULTS_TAR}.part. && ls -1 ${REMOTE_RESULTS_TAR}.part.*" | grep -E '\.part\.[0-9]{4}$' || true)
+if [ -z "$PARTS_LIST" ]; then
+  echo "ERROR: could not split ${REMOTE_RESULTS_TAR} on the VM; session ${SESSION} NOT stopped." >&2
+  exit 1
+fi
+: > "$LOCAL_TAR"
+for part in $PARTS_LIST; do
+  lp="${LOCAL_TAR}.part"
+  rm -f "$lp"
+  "${COLAB_CMD[@]}" download -s "$SESSION" "$part" "$lp" </dev/null || { echo "ERROR: download of $part failed; session NOT stopped." >&2; exit 1; }
+  cat "$lp" >> "$LOCAL_TAR" && rm -f "$lp"
+  echo "  got $(basename "$part")"
+done
 "${COLAB_CMD[@]}" download -s "$SESSION" "$REMOTE_TAR_SHA" "$LOCAL_SHA" </dev/null
 
 echo "3/4 Verifying tarball integrity (SHA-256 + archive listing)"

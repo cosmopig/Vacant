@@ -187,7 +187,10 @@ log "redo.py exited rc=${REDO_RC} status=${STATUS_LINE}"
 # Archive run root + write sha256 + write BATCH_DONE.json atomically.
 mkdir -p "$(dirname "$TAR_OUT")"
 TMP_TAR="${TAR_OUT}.tmp.$$"
-tar -czf "$TMP_TAR" -C "$RUN_ROOT" .
+# 11/24（W3-5 JS 重跑 VOID 的根因 1）：不打包工作區副本——rc5 起每次嘗試都有自己的 node_modules 副本，JS 批次的整包會到數 GB；
+# 結論只用得到 cell.json、result.json、日誌與 REPORT。排除清單與 fetch_batch.sh／colab_snapshot2.sh 共用同一份。
+tar -czf "$TMP_TAR" -C "$RUN_ROOT" --exclude=node_modules --exclude='attempt_*/w' --exclude='snap-*' \
+    --exclude='start-copy-*' --exclude='start-snap-*' --exclude='bkp-*' --exclude=__pycache__ . || [ $? -eq 1 ]
 mv -f "$TMP_TAR" "$TAR_OUT"
 TAR_SHA=$(sha256sum "$TAR_OUT" | cut -d' ' -f1)
 printf '%s  %s\n' "$TAR_SHA" "$(basename "$TAR_OUT")" > "${TAR_OUT}.sha256"
