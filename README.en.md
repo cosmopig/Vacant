@@ -8,22 +8,63 @@
 
 # Vacant
 
-**Vacant is not a mandatory layer wrapped around an agent, and it is not another agent
-framework. It is a receiving desk: a delivery without a verifiable receipt is not
-accepted. Because it looks only at the deliverable and does not care how the agent ran,
-output from any framework can be fed into it.**
+**Run a coding agent inside a copy of your project and accept the result with your project's own tests; if it fails, throw away the copy and start over (up to 3 times). If an attempt passes, ship that one; if none pass, return the one that passed the most tests and state plainly that not all tests passed.**
 
-It runs the customer's own executable acceptance tests, decides ship-or-refuse on the
-result, and signs every attempt — failures included — into a hash chain anyone can
-re-verify offline. Making it the **single exit on a machine** takes containers, ACLs or
-egress policy — that is the deployment layer's job, not Vacant's
-(`vacant_network/controller.py:7-8` has said so verbatim all along; it had simply never appeared
-in anything outward-facing).
+```bash
+pipx install vacant-network
+cd your-project && vacant do pi --prompt "fix calc.add"     # also supports claude / codex / opencode, or --cmd 'any CLI {prompt}'
+vacant do claude --prompt "fix calc.add"                   # if what you have is Claude Code
+```
 
-An existing pattern, not one we invented: supply-chain security does the same thing with
-**in-toto / SLSA / Sigstore** — an artifact without a valid attestation is rejected at intake.
+- Acceptance is your project's own: unittest / pytest (using the project's interpreter and `.venv`), `npm test`, cargo and go (experimental, see below), or `--check "<command>"`.
+- Test files, test config (`conftest.py`, `pytest.ini`, `package.json`, `.npmrc`, etc.) and the scripts the check command runs are restored to their starting state before each check ("kept fixed" in the message); if the agent edited them, those edits are not written back and are listed. When not every project file the check runs could be traced, the message says "inputs not fully traced".
+- Every attempt (failures included) is signed into an offline-verifiable record: `vacant audit list`. ⚠ The record protects against tampering after the fact, not against forgery by a program running as you on the same machine (including the agent): the signing key is a file you can read, so it can too.
+- Projects with no tests: runs once and states plainly that "nothing was checked".
 
-## Install it and keep working: zero-config (0.9.0, v3.7)
+## What was measured (state the conditions together)
+
+**The rc6-final to be released has no real-model batch of its own.** Every row below names the version it measured. rc6-final differs from rc5-final only in messages, output, interrupt handling and gc retention; which attempt is chosen, what is delivered, attempts and time limits, and how acceptance runs are the same (policy differential with both versions installed from their wheels: 13/13 identical, see [`docs/RC5_CHANGES_VS_RC4.md`](docs/RC5_CHANGES_VS_RC4.md)).
+
+**Where it helps (plain words):** on tasks where the native agent passes some of the time, a gain was measured; on tasks the native agent already almost always passes, none was; and when inference is slow (tens of seconds per turn), the default 600 s per-attempt cap cuts the restarts off and the gain disappears.
+
+All are pre-registered paired experiments (native pi in one run vs `vacant do pi`, same 1800 s total; exact two-sided McNemar), each judged on its own: p-values are not pooled, and no single batch may be quoted alone. The models are gemma-4 QAT; 1003 and 1004 are two machines with one RTX 3090 each running local models in LM Studio (llama.cpp).
+
+| Batch | Version measured | Tasks | Model / backend | Native pi | `vacant do pi` | Native only / Vacant only | p | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| confirm1 | pre-0.9.2 code + Vacant's pi extension | polyglot Python, 34 tasks × 5 | 12B / 1003 | 89/170 | 105/170 | 13 / 29 | 0.0195 | difference |
+| confirm1c | same | same | 12B / 1004 | 80/170 | 103/170 | 6 / 29 | 0.000117 | difference |
+| confirm2 | rc4 code (wheel `37005ec2`), no extension | same | 12B / 1004 | 86/170 | 109/170 | 11 / 34 | 0.000824 | difference |
+| confirm2c | same | same | 12B / Colab L4 (slow backend) | 96/170 | 98/170 | 18 / 20 | 0.87 | no difference measured |
+| confirm3 | rc5-final, no extension | same | 12B / Colab A100 | 104/170 | 120/170 | 7 / 23 | 0.0052 | difference |
+| unused40 | rc1, no extension | unused exercism Python, 40 tasks × 5 (on the easy side) | 12B / 1004 | 184/200 | 192/200 | 1 / 9 | 0.0215 | difference |
+| hardpy26 | rc3.1, no extension | unused Python, difficulty ≥4, 26 tasks × 5 | 12B / Colab L4 | 114/130 | 116/130 | 3 / 5 | 0.73 | no difference measured (native 88%, near ceiling) |
+| E4B | rc5-final, no extension | same 26 tasks | **4B-class (E4B)** / Colab L4 | 61/130 | 84/130 | 8 / 31 | 0.000294 | difference |
+| W3-5 Python | rc4, no extension | 106 tasks screened, 9 where native was unstable × 5 | 12B / Colab L4 | 27/45 | 25/45 | 6 / 4 | 0.75 | no difference measured (9 tasks only, underpowered) |
+| hardjs34 | rc4, no extension | exercism JavaScript, difficulty ≥4, 34 tasks × 5 | 12B / 1003 | 124/170 | 140/170 | 1 / 17 | 0.000145 | difference |
+
+Always say these together with the table:
+- **The same 34 tasks were used many times** (confirm1 / 1c / 2 / 2c / 3): those rows are replications on one task set, not evidence of generalisation.
+- **Backend speed decides the outcome:** confirm2c (Colab L4) averaged 46.7 s per turn and 75% of inner attempts hit the 600 s cap; no difference was measured. Local 1004 at jobs 1 (confirm1c, confirm2: about 11 s per turn on average, 30–36% capped) and E4B (about 10 s, 2%) did show one; confirm1 on 1003 at jobs 2 showed one with 67% capped. confirm3 (A100) sits in between: its median is in the local range, but its mean and tail are slower than local, with 43% capped.
+- **E4B and hardpy26 use the same tasks:** with a 4B-class model on the same backend, native drops from 88% to 47% and `vacant do pi` shows a gain. Model, concurrency and version all differ between the two, so they are shown side by side, not pooled.
+- **JavaScript (npm) has rc4 numbers only** (hardjs34). From rc5 on, the agent gets its own `node_modules` copy per attempt, whereas rc4 used a shared read-only cache; the only rc5-final JS batch (on Colab) was voided, so the rc5/rc6 JS path has no real-model numbers.
+- **The pytest and `--check` paths have no real-model numbers at all.** The product command has real-model numbers for pi only (the `vacant do opencode` batch is still running and nothing is written until it is in; claude and codex have none).
+- Cost: restart mode makes more model calls than native (e.g. confirm2 64.1 vs 40.7 on average, confirm3 26.4 vs 17.8, E4B 21.5 vs 9.7): what it buys is delivery rate, not saved compute.
+- Where native already passes most tasks (unused40 92%, hardpy26 88%) the difference is small or not measured. Voided batches (confirm1b, W3-5 JS twice) are not in the table; see `ops/redo/results/void/`.
+- Conclusion files (each row's verbatim quotable sentence, known limits and backend speed): [`CONFIRM1`](decisions/conclusions/CONCLUSION_20261120_CONFIRM1.md), [`CONFIRM1C`](decisions/conclusions/CONCLUSION_20261121_CONFIRM1C.md), [`CONFIRM2`](decisions/conclusions/CONCLUSION_20261124_CONFIRM2.md), [`CONFIRM2C`](decisions/conclusions/CONCLUSION_20261122_CONFIRM2C.md), [`CONFIRM3`](decisions/conclusions/CONCLUSION_20261124_CONFIRM3.md), [`UNUSED40`](decisions/conclusions/CONCLUSION_20261121_UNUSED40.md), [`HARDPY26_COLAB`](decisions/conclusions/CONCLUSION_20261121_HARDPY26_COLAB.md), [`E4B_HARDPY26`](decisions/conclusions/CONCLUSION_20261122_E4B_HARDPY26.md), [`W35_PY`](decisions/conclusions/CONCLUSION_20261121_W35_PY.md), [`HARDJS34`](decisions/conclusions/CONCLUSION_20261124_HARDJS34.md).
+
+## What it does not do
+
+- Does not judge whether an answer is right: bugs not covered by the tests are invisible to it. Data files read by tests and helper modules imported by tests can still be modified by the agent.
+- Not a sandbox: the agent runs with your permissions. Copy isolation guards against accidental write-back, not a malicious agent. The agent gets its own copy of `node_modules`; the project's copy is checked before every check, and if it was modified the run stops and nothing is written back. Changes the agent makes to your project outside the copy are listed when detected, not reverted.
+- Receipts do not protect against same-machine forgery: see the note above. Full list of known limits with repro scripts: [`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md).
+- Does not save money or speed things up: failed attempts restart, so model calls go up.
+- Cannot stop the code under test from tampering inside the check's process: the check and the code under test run in the same process, so the code under test can patch the test framework when it is imported (e.g. replace `assertEqual`). This is not detected and produces no notice.
+- Does not extend a single run: each attempt defaults to at most 600 s (1800 s total). Tasks that need longer in a single run to finish will be cut off, and restarting hits the same limit (on the 9 hard Python tasks, 63% of inner attempts hit it); machines with slow inference hit it more often. For such work, raise `--attempt-timeout` (per attempt) and `--timeout` (total).
+
+
+## Another way to use it: install hooks and keep using your agent as usual (zero-config, 0.9.0, v3.7)
+
+This section is **hook mode**: it does not restart and does not run your tests; it only records, and checks once when the agent says it is done. `vacant do` above is **restart mode**; both can be installed together, and their measured numbers are kept separate (the table below is for hook mode).
 
 ```bash
 pipx install vacant-network   # 0.9.0 is the zero-config release. No pipx? `sudo apt install pipx` (Ubuntu/Debian) or `brew install pipx` (macOS)
@@ -52,7 +93,7 @@ Everything else goes into a delivery note for you (`~/.vacant/trace/projects/<pr
 project. **It does not judge whether an answer is right.** The turn-budget reminder (v3) is **off by default** since v3.6;
 `vacant install --budget-reminder` turns it on.
 
-### What was measured (real models, installed with the two commands above — always quote the conditions)
+### What hook mode measured (real models, installed with the two commands above — always quote the conditions)
 
 | Batch | Setup | not installed → installed | How to read it |
 |---|---|---|---|
@@ -140,8 +181,10 @@ vacant release                # the recipient re-checks everything, publishes, r
 vacant task report            # terminal state of every task ever opened (void and held included)
 ```
 
-No hooks needed at all: `vacant do <agent> --prompt "..."` runs the agent's headless mode in an
-isolated workspace and submits the result; any CLI works with `vacant do --cmd '... {prompt} ...'`;
+No hooks needed at all: in a project with a contract, `vacant do <agent> --prompt "..."` runs the
+agent's headless mode in an isolated workspace and submits the result to the intake (without a
+contract, from 0.9.2 on it runs the zero-config restart mode from the top section instead of
+reporting "no task contract found"); any CLI works with `vacant do --cmd '... {prompt} ...'`;
 closed-source services and human uploads go through `vacant intake serve` (HTTP; a submitter
 cannot supply the verdict).
 

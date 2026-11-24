@@ -8,18 +8,63 @@
 
 # Vacant
 
-**Vacant 不是套在 agent 外面的強制層，也不是另一個 agent framework。
-它是收件口：沒有可驗證收據的交付，不被接受。
-因為它只看交付物、不在乎 agent 怎麼跑，所以任何框架的產出都能套進來。**
+**讓 coding agent 在你專案的副本裡做事，用你專案自己的測試驗收；沒過就丟掉副本重來（最多 3 次）。通過就交那一次；都沒過就交回測試過最多的那一次，並明講測試沒有全過。**
 
-跑客戶自己的可執行驗收測資、依結果決定交或不交，把每一次嘗試（含失敗那幾次）簽進可離線
-重驗的雜湊鏈。要讓它成為**全機唯一出口**，需要容器／ACL／egress policy——那是部署層的事，
-不是 Vacant 的（`vacant_network/controller.py:7-8` 早就逐字寫著，只是從沒出現在對外文字裡）。
+```bash
+pipx install vacant-network
+cd your-project && vacant do pi --prompt "修好 calc.add"     # 也支援 claude／codex／opencode，或 --cmd '任何 CLI {prompt}'
+vacant do claude --prompt "修好 calc.add"                  # 手上是 Claude Code 就用這行
+```
 
-既有模式，不是我們發明的：供應鏈安全的 **in-toto／SLSA／Sigstore** 也是同一條
-——「沒有合法 attestation 的 artifact，在收件時被拒」。
+- 驗收是專案自己的：unittest／pytest（用專案的直譯器與 `.venv`）、`npm test`、cargo 與 go（實驗性，見下方說明），或 `--check "<指令>"`。
+- 測試檔、測試設定（`conftest.py`、`pytest.ini`、`package.json`、`.npmrc` 等）和驗收指令會執行到的腳本，在每次驗收前還原成開始時的樣子（訊息裡寫成 kept fixed）；agent 改了也不寫回、會列出來。驗收會執行的專案內檔案沒有全部追到時，訊息會標「inputs not fully traced」。
+- 每一次嘗試（含沒過的）都簽進可離線重驗的紀錄：`vacant audit list`。⚠ 這份紀錄防的是事後竄改，不防同一台機器上以你的身分執行的程式（包括 agent）偽造：簽章金鑰是你讀得到的檔，它也讀得到。
+- 沒有測試的專案：只跑一次，並明講「什麼都沒檢查」。
 
-## 裝了就用：零設定（0.9.0，v3.7）
+## 量到了什麼（條件要一起講）
+
+**要發的 rc6-final 本身沒有真模型批次。** 下面每一列都標了量的是哪個版本；rc6-final 與 rc5-final 只差訊息、輸出、中斷處理與 gc 留存，選哪一次、交什麼、次數與時限、驗收怎麼跑都相同（兩邊用 wheel 跑的政策差分 13/13 相同，見 [`docs/RC5_CHANGES_VS_RC4.md`](docs/RC5_CHANGES_VS_RC4.md)）。
+
+**適用範圍（白話）**：原生 agent 通過率中等的題目上量得到增益；原生已經接近全過的題目上沒有；推論慢的時候（每輪要幾十秒），預設的單次 600 秒上限會把重開切斷，增益就不見了。
+
+全部是預註冊的配對實驗（原生 pi 一次跑到底 對 `vacant do pi`，同樣 1800 秒總時限；精確 McNemar 雙尾檢定），每批各自判定，不合併 p 值、不能只挑一批講。模型都是 gemma-4 QAT，1003、1004 是兩台各一張 RTX 3090、用 LM Studio（llama.cpp）跑本機模型的機器。
+
+| 批 | 量的版本 | 題 | 模型／後端 | 原生 pi | `vacant do pi` | 只有原生過／只有 Vacant 過 | p | 判定 |
+|---|---|---|---|---|---|---|---|---|
+| confirm1 | 0.9.2 之前的程式碼＋Vacant 的 pi 擴充 | polyglot Python 34 題 × 5 | 12B／1003 | 89/170 | 105/170 | 13／29 | 0.0195 | 有差別 |
+| confirm1c | 同上 | 同上 | 12B／1004 | 80/170 | 103/170 | 6／29 | 0.000117 | 有差別 |
+| confirm2 | rc4 程式碼（wheel `37005ec2`），不載入擴充 | 同上 | 12B／1004 | 86/170 | 109/170 | 11／34 | 0.000824 | 有差別 |
+| confirm2c | 同上 | 同上 | 12B／Colab L4（慢後端） | 96/170 | 98/170 | 18／20 | 0.87 | 沒有量到差別 |
+| confirm3 | rc5-final，不載入擴充 | 同上 | 12B／Colab A100 | 104/170 | 120/170 | 7／23 | 0.0052 | 有差別 |
+| unused40 | rc1，不載入擴充 | 沒用過的 exercism Python 40 題 × 5（偏簡單） | 12B／1004 | 184/200 | 192/200 | 1／9 | 0.0215 | 有差別 |
+| hardpy26 | rc3.1，不載入擴充 | 沒用過、難度 ≥4 的 Python 26 題 × 5 | 12B／Colab L4 | 114/130 | 116/130 | 3／5 | 0.73 | 沒有量到差別（原生 88%，接近天花板） |
+| E4B | rc5-final，不載入擴充 | 同上（同一份 26 題） | **4B 級（E4B）**／Colab L4 | 61/130 | 84/130 | 8／31 | 0.000294 | 有差別 |
+| W3-5 Python | rc4，不載入擴充 | 106 題先篩、原生不穩的 9 題 × 5 | 12B／Colab L4 | 27/45 | 25/45 | 6／4 | 0.75 | 沒有量到差別（只有 9 題，檢定力不足） |
+| hardjs34 | rc4，不載入擴充 | exercism JavaScript 難度 ≥4 的 34 題 × 5 | 12B／1003 | 124/170 | 140/170 | 1／17 | 0.000145 | 有差別 |
+
+讀這張表時一定要一起講的：
+- **同一份 34 題用過很多次**（confirm1／1c／2／2c／3），這幾列是同一批題上的複製，不是泛化證據。
+- **後端速度決定結果**：confirm2c（Colab L4）平均每輪 46.7 秒、75% 的內層嘗試撞到 600 秒上限，沒有量到差別；本機 1004 jobs 1（confirm1c、confirm2：每輪平均約 11 秒、撞上限 30–36%）與 E4B（每輪約 10 秒、2%）量得到；1003 jobs 2 的 confirm1 撞上限 67% 仍量得到。confirm3（A100）介於兩者之間：中位數在本機範圍，平均與長尾比本機慢、撞上限 43%。
+- **E4B 與 hardpy26 是同一份題**：同題同後端換成 4B 級模型，原生從 88% 掉到 47%，`vacant do pi` 的增益就出現了；兩批的模型、並行數、版本都不同，只並列、不併表。
+- **JavaScript（npm）只有 rc4 的數字**（hardjs34）。rc5 起 agent 每次嘗試拿自己的 `node_modules` 副本，rc4 是共用唯讀快取；唯一用 rc5-final 量 JS 的 Colab 批次作廢了，所以 rc5／rc6 的 JS 路徑沒有真模型數字。
+- **pytest、`--check` 路徑沒有任何真模型數字**；產品指令的真模型數字只有 pi（`vacant do opencode` 的批次還在跑，結果出來前不寫；claude、codex 沒有）。
+- 代價：重開模式的模型呼叫比原生多（例如 confirm2 平均 64.1 對 40.7 次、confirm3 26.4 對 17.8 次、E4B 21.5 對 9.7 次）：換到的是交付率，不是省算力。
+- 在原生通過率高的題（unused40 92%、hardpy26 88%）差別小或量不到；作廢的批次（confirm1b、W3-5 JS 兩次）不在表上，原因見 `ops/redo/results/void/`。
+- 結論檔（每一列的逐字可說句子、已知限制、後端速度都在裡面）：[`CONFIRM1`](decisions/conclusions/CONCLUSION_20261120_CONFIRM1.md)、[`CONFIRM1C`](decisions/conclusions/CONCLUSION_20261121_CONFIRM1C.md)、[`CONFIRM2`](decisions/conclusions/CONCLUSION_20261124_CONFIRM2.md)、[`CONFIRM2C`](decisions/conclusions/CONCLUSION_20261122_CONFIRM2C.md)、[`CONFIRM3`](decisions/conclusions/CONCLUSION_20261124_CONFIRM3.md)、[`UNUSED40`](decisions/conclusions/CONCLUSION_20261121_UNUSED40.md)、[`HARDPY26_COLAB`](decisions/conclusions/CONCLUSION_20261121_HARDPY26_COLAB.md)、[`E4B_HARDPY26`](decisions/conclusions/CONCLUSION_20261122_E4B_HARDPY26.md)、[`W35_PY`](decisions/conclusions/CONCLUSION_20261121_W35_PY.md)、[`HARDJS34`](decisions/conclusions/CONCLUSION_20261124_HARDJS34.md)。
+
+## 它不做什麼
+
+- 不判斷答案對不對：測試沒涵蓋的錯，它看不到。測試讀的資料檔、被測試 import 的輔助模組，agent 改得動。
+- 不是沙箱：agent 以你的權限執行。副本隔離防的是誤寫回，不是惡意 agent。agent 拿到的是自己的 `node_modules` 副本，原專案的那份每次驗收前都比對，被改就停下、不寫回。偵測到 agent 在副本之外改了你的專案時，會列出來、不會幫你還原。
+- 收據不防同機偽造：見上面那一條。已知限制的完整清單與重現腳本：[`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md)。
+- 不省錢、不加速：沒過就重來，模型呼叫會變多。
+- 擋不住受測程式在驗收的行程裡動手腳：驗收和受測程式在同一個行程裡跑，受測程式被 import 時可以改掉測試框架（例如把 `assertEqual` 換掉），這種情況看不出來、也不會有提示。
+- 不延長單次執行：每次嘗試預設最多 600 秒（總共 1800 秒）。需要單次跑更久才做得完的任務會被切斷，重來也一樣撞上限（在 9 題有難度的 Python 題上，內層嘗試有 63% 撞到）；推論慢的機器更常撞到。這類工作用 `--attempt-timeout`（單次）與 `--timeout`（總共）調高。
+
+
+## 另一種用法：裝掛鉤、照常用你的 agent（零設定，0.9.0，v3.7）
+
+這一節是**掛鉤模式**：不重開、不跑你的測試，只記錄並在 agent 說做完時查一次。上面的 `vacant do` 是**重開模式**；兩者可以同時裝，量到的數字各自分開（下表是掛鉤模式的）。
 
 ```bash
 pipx install vacant-network   # 0.9.0 起就是零設定版。沒有 pipx：Ubuntu／Debian 用 `sudo apt install pipx`，macOS 用 `brew install pipx`
@@ -48,7 +93,7 @@ vacant dashboard --open       # 選用：在本機看 Vacant 的每一個狀態�
 設計與各版裁決：[`decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md`](decisions/DECISION_20260925_ZERO_CONFIG_DESIGN.md)、
 [`decisions/DECISION_20260926_ZERO_CONFIG_V3.md`](decisions/DECISION_20260926_ZERO_CONFIG_V3.md)。
 
-### 量到了什麼（真模型、照上面兩個指令安裝；條件一定要一起講）
+### 掛鉤模式量到了什麼（真模型、照上面兩個指令安裝；條件一定要一起講）
 
 | 批次 | 設定 | 沒裝 → 裝了 | 讀法 |
 |---|---|---|---|
@@ -135,8 +180,8 @@ vacant release                # 收件端重驗一切、發布、讀回；不合
 vacant task report            # 每一個開過的任務的終態（含作廢、未決），分母不縮
 ```
 
-也可以不裝任何掛鉤：`vacant do <agent> --prompt "…"` 在隔離工作區裡跑 agent 的 headless 模式，
-結束後交進收件口；任何 CLI 用 `vacant do --cmd '… {prompt} …'`；閉源服務或人工上傳走
+也可以不裝任何掛鉤：有契約的專案，`vacant do <agent> --prompt "…"` 在隔離工作區裡跑 agent 的 headless 模式，
+結束後交進收件口（沒有契約時，0.9.2 起它走的是最上面那一節的零設定重開模式，不再報「找不到任務契約」）；任何 CLI 用 `vacant do --cmd '… {prompt} …'`；閉源服務或人工上傳走
 `vacant intake serve`（HTTP，提交者給不了裁決）。
 
 四個真 agent＋照劇本回答的假模型（**L-fake**，Vacant 不碰模型流量），同一份非程式任務

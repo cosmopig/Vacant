@@ -8,21 +8,63 @@
 
 # Vacant
 
-**Vacant はエージェントの外側に被せる強制層ではなく、もう一つの agent framework でもない。
-受付窓口である——検証可能な領収書を伴わない納品は、受理されない。
-成果物だけを見てエージェントの走り方を問わないので、どの framework の出力でも載せられる。**
+**coding agent をプロジェクトのコピーの中で動かし、プロジェクト自身のテストで受入判定する。通らなければコピーを捨ててやり直す（最大 3 回）。通ればその回を納品し、すべて通らなければ最も多くテストを通した回を返しつつ、全テストは通っていないと明示する。**
 
-顧客自身の実行可能な受入テストを走らせ、その結果で納品するか拒否するかを決め、失敗した
-試行も含めて一回ごとにオフラインで再検証できるハッシュチェーンへ署名する。**マシン全体で
-唯一の出口**にするにはコンテナ／ACL／egress policy が要る——それは配備層の仕事であって
-Vacant の仕事ではない（`vacant_network/controller.py:7-8` には以前から逐語でそう書いてあったが、
-対外的な文章に出たことが一度も無かった）。
+```bash
+pipx install vacant-network
+cd your-project && vacant do pi --prompt "calc.add を直す"     # claude／codex／opencode にも対応。任意の CLI は --cmd '任意の CLI {prompt}'
+vacant do claude --prompt "calc.add を直す"                  # Claude Code ならこの行
+```
 
-我々の発明ではなく既存のパターンである：サプライチェーン・セキュリティの
-**in-toto／SLSA／Sigstore** も同じ——正当な attestation を伴わない artifact は受入時に拒否される。
+- 受入はプロジェクト自身のもの：unittest／pytest（プロジェクトのインタプリタと `.venv` を使用）、`npm test`、cargo と go（実験的、下記参照）、または `--check "<コマンド>"`。
+- テストファイル、テスト設定（`conftest.py`、`pytest.ini`、`package.json`、`.npmrc` など）と、受入コマンドが実行するスクリプトは、毎回の受入前に開始時の状態へ戻す（メッセージでは kept fixed）。agent が書き換えても書き戻さず、一覧で示す。受入が実行するプロジェクト内のファイルをすべて追えなかったときは「inputs not fully traced」と表示する。
+- 失敗した回も含め、すべての試行をオフラインで再検証可能な記録へ署名する：`vacant audit list`。⚠ この記録が防ぐのは事後の改ざんであり、同じマシン上であなたの身分で動くプログラム（agent を含む）による偽造は防げない：署名鍵はあなたが読めるファイルなので、それらも読める。
+- テストのないプロジェクト：一度だけ実行し、「何も検査していない」と明示する。
+
+## 測定されたこと（条件は必ず一緒に述べる）
+
+**リリース予定の rc6-final そのものには実モデルのバッチがありません。** 下の各行には測定したバージョンを記しています。rc6-final と rc5-final の違いはメッセージ・出力・中断処理・gc の保持だけで、どの試行を選ぶか、何を納品するか、試行回数と時間制限、受入の実行方法は同じです（両方を wheel から入れたポリシー差分：13/13 同一、[`docs/RC5_CHANGES_VS_RC4.md`](docs/RC5_CHANGES_VS_RC4.md) 参照）。
+
+**効く範囲（平たく言うと）**：素の agent の通過率が中くらいのタスクでは向上が測定されました。素の agent がほぼ全部通るタスクでは測定されませんでした。推論が遅いとき（1 ターン数十秒）は、既定の 1 試行 600 秒の上限が再試行を打ち切り、向上は消えます。
+
+すべて事前登録した対応のある比較実験です（素の pi を一回通し vs `vacant do pi`、総時間は同じ 1800 秒、正確な両側 McNemar 検定）。バッチごとに個別に判定し、p 値は統合せず、一つのバッチだけを選んで語らないこと。モデルはすべて gemma-4 QAT。1003・1004 は RTX 3090 を 1 枚ずつ載せ、LM Studio（llama.cpp）でローカルモデルを動かす 2 台のマシンです。
+
+| バッチ | 測定したバージョン | タスク | モデル／バックエンド | 素の pi | `vacant do pi` | 素のみ通過／Vacant のみ通過 | p | 判定 |
+|---|---|---|---|---|---|---|---|---|
+| confirm1 | 0.9.2 以前のコード＋Vacant の pi 拡張 | polyglot Python 34 問 × 5 | 12B／1003 | 89/170 | 105/170 | 13／29 | 0.0195 | 差あり |
+| confirm1c | 同上 | 同上 | 12B／1004 | 80/170 | 103/170 | 6／29 | 0.000117 | 差あり |
+| confirm2 | rc4 のコード（wheel `37005ec2`）、拡張なし | 同上 | 12B／1004 | 86/170 | 109/170 | 11／34 | 0.000824 | 差あり |
+| confirm2c | 同上 | 同上 | 12B／Colab L4（遅いバックエンド） | 96/170 | 98/170 | 18／20 | 0.87 | 差は測定されず |
+| confirm3 | rc5-final、拡張なし | 同上 | 12B／Colab A100 | 104/170 | 120/170 | 7／23 | 0.0052 | 差あり |
+| unused40 | rc1、拡張なし | 未使用の exercism Python 40 問 × 5（易しめ） | 12B／1004 | 184/200 | 192/200 | 1／9 | 0.0215 | 差あり |
+| hardpy26 | rc3.1、拡張なし | 未使用・難易度 ≥4 の Python 26 問 × 5 | 12B／Colab L4 | 114/130 | 116/130 | 3／5 | 0.73 | 差は測定されず（素で 88%、天井に近い） |
+| E4B | rc5-final、拡張なし | 同じ 26 問 | **4B 級（E4B）**／Colab L4 | 61/130 | 84/130 | 8／31 | 0.000294 | 差あり |
+| W3-5 Python | rc4、拡張なし | 106 問を事前に選別し、素で不安定な 9 問 × 5 | 12B／Colab L4 | 27/45 | 25/45 | 6／4 | 0.75 | 差は測定されず（9 問のみ、検出力不足） |
+| hardjs34 | rc4、拡張なし | exercism JavaScript 難易度 ≥4 の 34 問 × 5 | 12B／1003 | 124/170 | 140/170 | 1／17 | 0.000145 | 差あり |
+
+表と必ず一緒に述べること：
+- **同じ 34 問を何度も使っています**（confirm1／1c／2／2c／3）。これらの行は同じ問題集合での再現であり、汎化の証拠ではありません。
+- **バックエンドの速さが結果を決めます**：confirm2c（Colab L4）は 1 ターン平均 46.7 秒、内部試行の 75% が 600 秒上限に達し、差は測定されませんでした。ローカルの 1004・jobs 1（confirm1c、confirm2：1 ターン平均約 11 秒、上限到達 30–36%）と E4B（約 10 秒、2%）では差が出ました。1003・jobs 2 の confirm1 は上限到達 67% でも差が出ました。confirm3（A100）はその中間で、中央値はローカルの範囲内ですが、平均と裾はローカルより遅く、上限到達は 43% です。
+- **E4B と hardpy26 は同じ問題です**：同じバックエンドで 4B 級モデルにすると素の通過率は 88% から 47% に下がり、`vacant do pi` の向上が現れました。モデル・並列数・バージョンが異なるため、並べて示すだけで統合しません。
+- **JavaScript（npm）は rc4 の数字だけです**（hardjs34）。rc5 以降は試行ごとに agent が自分の `node_modules` のコピーを持ち、rc4 は共有の読み取り専用キャッシュでした。rc5-final で JS を測った唯一のバッチ（Colab）は無効になったため、rc5／rc6 の JS 経路には実モデルの数字がありません。
+- **pytest と `--check` の経路には実モデルの数字がまったくありません。** 製品コマンドの実モデルの数字は pi だけです（`vacant do opencode` のバッチは実行中で、結果が出るまで書きません。claude と codex はありません）。
+- コスト：再試行モードは素より多くモデルを呼びます（例：confirm2 平均 64.1 回対 40.7 回、confirm3 26.4 対 17.8、E4B 21.5 対 9.7）。得られるのは納品率で、計算量の節約ではありません。
+- 素の通過率が高いタスク（unused40 92%、hardpy26 88%）では差は小さいか測定されません。無効になったバッチ（confirm1b、W3-5 JS 二回）は表に入れていません。理由は `ops/redo/results/void/` を参照。
+- 結論ファイル（各行の逐語で言える文、既知の制限、バックエンド速度）：[`CONFIRM1`](decisions/conclusions/CONCLUSION_20261120_CONFIRM1.md)、[`CONFIRM1C`](decisions/conclusions/CONCLUSION_20261121_CONFIRM1C.md)、[`CONFIRM2`](decisions/conclusions/CONCLUSION_20261124_CONFIRM2.md)、[`CONFIRM2C`](decisions/conclusions/CONCLUSION_20261122_CONFIRM2C.md)、[`CONFIRM3`](decisions/conclusions/CONCLUSION_20261124_CONFIRM3.md)、[`UNUSED40`](decisions/conclusions/CONCLUSION_20261121_UNUSED40.md)、[`HARDPY26_COLAB`](decisions/conclusions/CONCLUSION_20261121_HARDPY26_COLAB.md)、[`E4B_HARDPY26`](decisions/conclusions/CONCLUSION_20261122_E4B_HARDPY26.md)、[`W35_PY`](decisions/conclusions/CONCLUSION_20261121_W35_PY.md)、[`HARDJS34`](decisions/conclusions/CONCLUSION_20261124_HARDJS34.md)。
+
+## やらないこと
+
+- 答えが正しいかどうかは判断しない：テストが覆っていない誤りは見えない。テストが読むデータファイルやテストから import される補助モジュールは agent が書き換えられる。
+- サンドボックスではない：agent はあなたの権限で実行される。コピー隔離が防ぐのは誤った書き戻しであり、悪意ある agent ではない。agent には専用の `node_modules` のコピーを渡し、プロジェクト側は毎回の受入前に照合して、改変されていれば停止して書き戻さない。agent がコピーの外でプロジェクトを変えたことを検出した場合は一覧で示すが、元には戻さない。
+- 受領記録は同一マシン上の偽造を防がない：上の注記を参照。既知の制限の全リストと再現スクリプト：[`docs/KNOWN_LIMITS_0.9.2.md`](docs/KNOWN_LIMITS_0.9.2.md)。
+- 費用を節約しない・速くしない：通らなければやり直すため、モデル呼び出しは増える。
+- 受入のプロセス内での受験コードの細工は防げない：受入と受験コードは同じプロセスで動くため、受験コードは import されたときにテストフレームワークを書き換えられる（例：`assertEqual` の差し替え）。これは検出されず、通知も出ない。
+- 単発の実行時間は延ばさない：各試行は既定で最大 600 秒（合計 1800 秒）。終わらせるのに単発でそれより長くかかるタスクは打ち切られ、やり直しても同じ上限に当たる（難しい Python 9 題では、内側の試行の 63% がここに当たった）。推論の遅いマシンほど当たりやすい。こうした仕事では `--attempt-timeout`（単発）と `--timeout`（合計）で引き上げる。
 
 
-## 入れたらそのまま使う：ゼロ設定（0.9.0、v3.7）
+## もう一つの使い方：フックを入れて普段どおり agent を使う（ゼロ設定、0.9.0、v3.7）
+
+この節は**フックモード**である：やり直しもテスト実行も行わず、記録だけして agent が終わったと言った時点で一度確認する。上の `vacant do` は**やり直しモード**であり、両方は同時に入れられ、測定数値は別々に扱う（下の表はフックモードのもの）。
 
 ```bash
 pipx install vacant-network   # 0.9.0 からゼロ設定版。pipx がなければ Ubuntu／Debian は `sudo apt install pipx`、macOS は `brew install pipx`
@@ -49,7 +91,7 @@ vacant dashboard --open       # 任意：この機械で Vacant の状態をす�
 それ以外は人向けの納品メモ（`~/.vacant/trace/projects/<プロジェクト>/delivery.md`）にだけ書き、モデルにもプロジェクトにも送りません。
 **答えが正しいかどうかは判断しません。** ターン予算リマインダー（v3）は v3.6 から**既定でオフ**です（`vacant install --budget-reminder` で有効化）。
 
-### 測定結果（実モデル、上の二つのコマンドで導入。条件と必ずセットで）
+### フックモードの測定結果（実モデル、上の二つのコマンドで導入。条件と必ずセットで）
 
 | バッチ | 条件 | 未導入 → 導入 | 読み方 |
 |---|---|---|---|
@@ -111,6 +153,7 @@ vacant do claude --prompt "API を修正" --attempt-timeout 600 --timeout 1800 -
 判定は阻止ではない——2026-09-24 の外部レビューの指摘を受け、受領口（`vacant_network/intake/`）を実装し、
 4 つのエージェントに接続した（`vacant_network/adapters/`）。モデル通信は一切見ない。
 `vacant contract quick --deliverable report.md --input data/sales.csv --must "Recommendation" --total amount --lock`（一行で、気にすることだけを必須の検査にする。「成果物がある・認証情報ファイルがない」の二つの安全条件を除き、書いたものだけが必須。--total はレポートの 'Total' の後の数字を読む——別の表記なら --total amount=合計。列名の誤り・読めない列・合計行はその場で報告）または `vacant contract init` → `vacant contract lock`（入力を sha256 で固定し、owner 鍵で契約に署名）→ `vacant install` → エージェントを普段どおり使う → `vacant release`。
+フックを一切入れずに使うこともできる：契約のあるプロジェクトでは、`vacant do <agent> --prompt "…"` が隔離ワークスペースで agent の headless モードを実行し、終了後に受領口へ提出する（契約がない場合、0.9.2 からは最上部の節にあるゼロ設定やり直しモードで動き、「タスク契約が見つからない」とは返さない）。任意の CLI は `vacant do --cmd '… {prompt} …'`、クローズドなサービスや人手での提出は `vacant intake serve`（HTTP、提出者は裁定を出せない）を使う。
 4 エージェント × 非コードタスクの実測（L-fake：本物のエージェント＋台本どおりの偽モデル）は
 [`ops/intake/evidence_20260924/SUMMARY.md`](ops/intake/evidence_20260924/SUMMARY.md)、
 裁定は [`decisions/DECISION_20260924_UNIVERSAL_INTAKE.md`](decisions/DECISION_20260924_UNIVERSAL_INTAKE.md)。
