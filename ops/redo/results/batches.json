@@ -87,14 +87,14 @@
   },
   {
    "name": "confirm2",
-   "category": "running",
-   "plan_id": "confirm2_vacantdo_rel092_pi_gemma12b_1004",
+   "category": "closed",
+   "report": "confirm2_REPORT.json",
    "run_root": "~/dev/ops/redo_runs/confirm2_1004"
   },
   {
    "name": "hardjs34",
-   "category": "running",
-   "plan_id": "hardjs34_vacantdo_rc4_pi_gemma12b_1003",
+   "category": "closed",
+   "report": "hardjs34_REPORT.json",
    "run_root": "~/dev/ops/redo_runs/hardjs34_rc4_1003"
   },
   {
@@ -105,29 +105,28 @@
   },
   {
    "name": "confirm3",
-   "category": "running",
-   "plan_id": "confirm3_vacantdo_rc5_pi_gemma12b_a100",
-   "keepalive": "~/dev/ops/redo_runs_colab/confirm3_vacantdo_rc5_pi_gemma12_20261122T091912Z/keepalive.log",
-   "note": "colab2 A100"
+   "category": "closed",
+   "report": "confirm3_REPORT.json",
+   "run_root": "~/dev/ops/redo_runs_colab/confirm3_vacantdo_rc5_pi_gemma12_20261122T091912Z/run"
   },
   {
    "name": "W3-5 JS 確認（重跑）",
-   "category": "running",
+   "category": "void",
    "plan_id": "w35confirm_js_vacantdo_rc5_a100",
-   "note": "30×3（預算，見 prereg.amended）",
-   "keepalive": "~/dev/ops/redo_runs_colab/w35confirm_js_vacantdo_rc5_a100_20261122T135219Z/keepalive.log"
+   "note": "跑完但結果沒取回（取回 OOM、VM 消失），數字不可引用",
+   "doc": "ops/redo/results/void/w35js_rerun_a100/VOID.md"
   },
   {
    "name": "atimeout",
    "category": "queued",
    "plan_id": "atimeout_p900_vs_p600_rc5_1003",
-   "status_text": "排在 hardjs34 之後（1003）"
+   "status_text": "冒煙重跑中（題庫權限已修），過了 gate 才發主批"
   },
   {
    "name": "confirm2oc",
-   "category": "queued",
+   "category": "running",
    "plan_id": "confirm2oc_vacantdo_rc5_opencode_gemma12b_1004",
-   "status_text": "排在 confirm2 之後（1004）"
+   "run_root": "~/dev/ops/redo_runs/confirm2oc_rc5_1004"
   },
   {
    "name": "confirm1b",
