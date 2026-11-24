@@ -190,6 +190,19 @@ def _progress(entry: dict) -> str:
                 last = f"{m.group(1)}/{m.group(2)} 對"
         return last or "已發射、尚無進度"
     root = _x(entry.get("run_root"))
+    if root and os.path.exists(os.path.join(root, "runner.log")):
+        # 從 runner.log 算（不手寫）：每一格一行「task/rN/arm … pass=…」，兩臂都有的才算一對完成；最後一行「完成 N/M 對」若有就用它
+        arms: dict = {}
+        last = None
+        for line in open(os.path.join(root, "runner.log"), errors="replace"):
+            m = re.search(r"\s(\S+)/r(\d+)/(\S+)\s+pass=", line)
+            if m:
+                arms.setdefault((m.group(1), m.group(2)), set()).add(m.group(3))
+            t = re.search(r"完成 (\d+)/(\d+) 對", line)
+            if t:
+                last = f"{t.group(1)}/{t.group(2)} 對（runner.log）"
+        done = sum(1 for v in arms.values() if len(v) >= 2)
+        return last or f"{done} 對完成（runner.log）"
     if root and os.path.isdir(root):
         arms: dict = {}
         for cj in glob.glob(os.path.join(root, "cells", "*", "r*", "*", "cell.json")):
@@ -266,7 +279,8 @@ def build(use_speed: bool = True) -> str:
         "## 已結案",
         "",
         "通過數：對照 → 處理（各臂 通過/計分格數）。b＝只有對照過、c＝只有處理過、p＝精確雙尾 McNemar。"
-        "後端速度：每輪模型回應 中位／平均／p90（秒）、處理臂內層撞單次上限的比例、對照臂單次的中位牆鐘與逾時數。",
+        "後端速度：每輪模型回應 中位／平均／p90（秒）、處理臂內層撞單次上限的比例、對照臂單次的中位牆鐘與逾時數。"
+        "「中位」是 turn_latency.py 的最近秩取法：n 為偶數時取上中位數（例如 confirm2 的 A 單次 300.1 秒，標準中位數 289.9 秒）；p90 同為最近秩。",
         "",
         "| 批次 | 題庫 題數×重複 | 對照 對 處理 | 模型／後端 | 產品 wheel | 通過數 | b／c／p | state | 放行卻錯 | 後端速度 | 結論 |",
         "|---|---|---|---|---|---|---|---|---|---|---|",

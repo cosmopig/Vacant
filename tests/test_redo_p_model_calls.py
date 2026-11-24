@@ -106,3 +106,38 @@ def test_summary_does_not_average_in_empty_attempt_cells(tmp_path):
     _cell_raw(tmp_path, "empty", {"attempts": []})
     s = pmc.summarize(str(tmp_path))
     assert s["known"] == 1 and s["unknown"] == 1 and s["mean_calls"] == 2
+
+
+def _cell_atts(root: pathlib.Path, name: str, nums: list) -> pathlib.Path:
+    """result.json 的 attempts 編號照 nums 寫；每個編號都有一份含 1 次呼叫的日誌（讓唯一的問題是編號本身）。"""
+    cell = root / "cells" / name / "r1" / "P"
+    run = cell / "attempt_1" / "logs" / "vacant-work" / "restart-x"
+    run.mkdir(parents=True)
+    (cell / "cell.json").write_text("{}")
+    (run / "result.json").write_text(json.dumps({"attempts": [{"attempt": k, "wall_s": 10.0} for k in nums]}))
+    for k in set(n for n in nums if isinstance(n, int)):
+        d = run / f"attempt_{k}" / "logs"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "agent_stdout.log").write_text(CALL + "\n")
+    return cell
+
+
+def test_duplicate_attempt_numbers_are_unknown(tmp_path):
+    """2026-11-24 日報 P1 負控制：attempt 編號重複（同一份日誌會被算兩次）⇒ UNKNOWN。"""
+    r = pmc.cell_calls(str(_cell_atts(tmp_path, "t", [1, 1])))
+    assert r["status"] == "unknown" and r["calls"] is None and "重複或不連續" in r["why"]
+
+
+def test_gapped_attempt_numbers_are_unknown(tmp_path):
+    r = pmc.cell_calls(str(_cell_atts(tmp_path, "t", [1, 3])))
+    assert r["status"] == "unknown" and "重複或不連續" in r["why"]
+
+
+def test_non_integer_attempt_number_is_unknown(tmp_path):
+    r = pmc.cell_calls(str(_cell_atts(tmp_path, "t", [1, "2"])))
+    assert r["status"] == "unknown" and "不是整數" in r["why"]
+
+
+def test_contiguous_attempt_numbers_still_known(tmp_path):
+    r = pmc.cell_calls(str(_cell_atts(tmp_path, "t", [1, 2, 3])))
+    assert r["status"] == "known" and r["calls"] == 3

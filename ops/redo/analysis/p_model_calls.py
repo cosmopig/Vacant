@@ -62,6 +62,13 @@ def cell_calls(cell_dir: str) -> dict:
         extra = "（restart 在 agent 之前就停了：baseline_error）" if isinstance(r, dict) and r.get("baseline_error") else ""
         return {"status": "unknown", "calls": None, "attempts": None,
                 "why": ("result.json 沒有 attempts 欄位" if not isinstance(atts, list) else "result.json 的 attempts 是空陣列") + extra}
+    # 2026-11-24 日報 P1：attempt 編號必須是 1..n 不重複、不缺號；否則同一份日誌可能被算兩次或漏算 ⇒ UNKNOWN
+    nums = [a.get("attempt") if isinstance(a, dict) else None for a in atts]
+    if any(not isinstance(k, int) or isinstance(k, bool) for k in nums):
+        return {"status": "unknown", "calls": None, "attempts": len(atts), "why": f"attempt 編號不是整數：{nums}"}
+    if sorted(nums) != list(range(1, len(nums) + 1)):
+        return {"status": "unknown", "calls": None, "attempts": len(atts),
+                "why": f"attempt 編號重複或不連續：{nums}"}
     total = 0
     for a in atts:
         k = a.get("attempt")

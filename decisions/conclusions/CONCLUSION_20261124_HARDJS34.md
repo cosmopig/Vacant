@@ -10,6 +10,11 @@ P 臂＝rc4（`redo/rc4` `652c50d36`，wheel `28e5480c…`，`~/dev/ops/rc4_dist
 
 **EFFECTIVE**：原生 pi 124/170 → `vacant do pi` 140/170，b＝1、c＝17，精確 McNemar 雙尾 p＝0.000145；170/170 對完成、infra_void 0、放行卻錯 0。JS 產品臂在快後端上的依據就是這一批（W3-5 JS 的 Colab 確認批兩次都作廢）。
 
+
+**JS 依據的版本差異（要一起講）**：這一批用 **rc4** 量。rc4 的 npm 路徑讓 agent 透過符號連結使用**共用、唯讀**的 `node_modules` 快取；rc5 起改成每次嘗試給 agent **自己的** `node_modules` 副本（KNOWN_LIMITS 14）。唯一用 rc5-final 量 JS 的批次（W3-5 JS 重跑，Colab A100）作廢、沒有可引用的數字。所以：**npm 路徑的真模型數字只來自 rc4；rc5／rc6 的 JS 路徑沒有真模型的批次數字**。不得寫成「0.9.2（rc6-final）的 JS 有量過」。
+
+**共用 node_modules 快取批後雜湊**：用批前紀錄（`ops/redo/results/js_node_modules_hash_pre.md`）的同一個算法——在 `~/dev/ops/ref/cache/exercism_js/` 下執行 `find -L node_modules -type f | sort | xargs -d "\n" sha256sum | sha256sum`——2026-11-24 重算為 `627e326c4e40667dcfd6702965da724b172fd32707a390d7d57000a059c7fd51`，**與批前相同**（25234 個檔）：整批跑完快取沒有被改動。（批前紀錄裡只寫了 `find -L -type f | sort | sha256sum`，漏了「從上層目錄、逐檔 sha256」兩個條件；換成在 node_modules 裡面跑或只雜湊檔名，得到的值都不同。）
+
 ## 1. REPORT.md（原樣）
 
 ## hardjs34_vacantdo_rc4_pi_gemma12b_1003 — EFFECTIVE

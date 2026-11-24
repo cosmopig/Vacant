@@ -118,9 +118,9 @@
   },
   {
    "name": "atimeout",
-   "category": "queued",
+   "category": "running",
    "plan_id": "atimeout_p900_vs_p600_rc5_1003",
-   "status_text": "冒煙重跑中（題庫權限已修），過了 gate 才發主批"
+   "run_root": "~/dev/ops/redo_runs/atimeout_rc5_1003"
   },
   {
    "name": "confirm2oc",

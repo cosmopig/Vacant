@@ -40,6 +40,8 @@ P 臂＝發布版 rc5-final wheel（`5bbc57af…`，`757ade62f`），由 `launch
 
 170 對全部完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這 34 題、pi、gemma-4-12b QAT（Colab A100，vLLM 0.30.0，w4a16，每輪時間接近本機）、同樣 1800 秒上限下，要發布的 0.9.2（rc5-final，`vacant do pi`，零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數、模型呼叫數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／題庫／沒有可執行測試的工作；這 34 題用過多次（e001／e002／e016／realrun／confirm1／1c／2／2c），是同一批題上的複製，不是泛化證據。
 
+> **註（結案時加，不改上面的逐字句）**：句中「要發布的 0.9.2」是預註冊當時的字眼。這一批量的是 **rc5-final**（wheel `5bbc57af…`）；現在要發的是 **rc6-final**（`release/0.9.2-prep` tag `rc6-final`＝`b1ca9b1ff`，wheel `a575c661…`），兩者只差訊息、輸出、中斷處理與 gc 留存，交付政策相同（政策差分兩邊用 wheel：13/13 相同）。引用這句時連這一行一起引用。
+
 本批數字：**104/170 → 120/170（b＝7、c＝23，p＝0.005223）；P 的內層平均嘗試 1.85；平均模型呼叫 A 17.8、P 26.4（p_model_calls 補算，170/170 格可算）。**
 
 ⚠ 預註冊句子裡的「每輪時間接近本機」要照第 4 節讀：中位數在本機範圍內，平均與長尾比本機慢。
@@ -66,7 +68,7 @@ P 臂＝發布版 rc5-final wheel（`5bbc57af…`，`757ade62f`），由 `launch
 - **subreaper**：2 次 run 偵測到脫離的子孫行程，砍掉 1 個。
 - **孤兒**：Colab VM 上沒有本機的孤兒看門；批次結束後 VM 已停。
 - **內層嘗試狀態**：ok 289、load_error 23（agent 寫出無法匯入的模組，計為不放行）、timeout 2。
-- **訊息樣本**（P 的交件摘要第一行，數字換成 N/M）：「acceptance passed on attempt 1 (up to 3 allowed; N/M tests); delivered that attempt」86 次；「…on attempt 2」19 次、「…on attempt 3」9 次；「not all tests pass after 3 attempt(s); delivered attempt K (N/M tests)」25 次以上。
+- **交件結果分布**（170 份 result.json 逐份計）：放行 120 格，交回的是第 1／2／3 次嘗試各 86／24／10 格；未放行 50 格，交回第 1／2／3 次各 11／21／18 格。訊息第一行對應「acceptance passed on attempt K (up to 3 allowed; N/M tests); delivered that attempt」（放行）與「not all tests pass after 3 attempt(s); delivered attempt K (N/M tests)」（未放行）。
 
 ## 6. 已知限制（逐字抄自 `prereg.known_limits`）
 

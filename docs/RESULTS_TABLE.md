@@ -1,11 +1,11 @@
 # Vacant 量測結果總表
 
-> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-24 16:37Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
+> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-24 16:50Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
 > 引用規則照 REPORT 的 quoting_rule：只有 state=EFFECTIVE 且沒有 harness 中途變更的整批數字可以引用，引用時連同模型、agent、題庫、對數一起講；UNRESOLVED／INCOMPLETE 不是負結果。
 
 ## 已結案
 
-通過數：對照 → 處理（各臂 通過/計分格數）。b＝只有對照過、c＝只有處理過、p＝精確雙尾 McNemar。後端速度：每輪模型回應 中位／平均／p90（秒）、處理臂內層撞單次上限的比例、對照臂單次的中位牆鐘與逾時數。
+通過數：對照 → 處理（各臂 通過/計分格數）。b＝只有對照過、c＝只有處理過、p＝精確雙尾 McNemar。後端速度：每輪模型回應 中位／平均／p90（秒）、處理臂內層撞單次上限的比例、對照臂單次的中位牆鐘與逾時數。「中位」是 turn_latency.py 的最近秩取法：n 為偶數時取上中位數（例如 confirm2 的 A 單次 300.1 秒，標準中位數 289.9 秒）；p90 同為最近秩。
 
 | 批次 | 題庫 題數×重複 | 對照 對 處理 | 模型／後端 | 產品 wheel | 通過數 | b／c／p | state | 放行卻錯 | 後端速度 | 結論 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -35,8 +35,8 @@
 | 批次 | 狀態 | 題庫 題數×重複 | 對照 對 處理 | 模型／後端 | 產品 wheel | 進度 | 備註 | 文件 |
 |---|---|---|---|---|---|---|---|---|
 | W3-5 JS 確認（重跑） | 作廢 | （Colab 題庫：發射時指定） 30×3 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab A100 vLLM j4 | 5bbc57af | — | 跑完但結果沒取回（取回 OOM、VM 消失），數字不可引用 | [VOID.md](../ops/redo/results/void/w35js_rerun_a100/VOID.md) |
-| atimeout | 排隊中 | py_mix_pg34_hard26 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／1003 llama.cpp j2 | 5bbc57af | 冒煙重跑中（題庫權限已修），過了 gate 才發主批 |  | — |
-| confirm2oc | 進行中 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 5bbc57af | 1 對完成 |  | — |
+| atimeout | 進行中 | py_mix_pg34_hard26 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／1003 llama.cpp j2 | 5bbc57af | 1 對完成（runner.log） |  | — |
+| confirm2oc | 進行中 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 5bbc57af | 1 對完成（runner.log） |  | — |
 | confirm1b | 作廢 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j2 | （本機 checkout） | — |  | [VOID.md](../ops/redo/results/void/confirm1b/VOID.md) |
 | W3-5 JS 確認（第一次） | 作廢 | exercism_js_pool 30×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 28e5480c | — | 約 100/150 對時基礎設施中斷，數字不可引用 | [VOID.md](../ops/redo/results/void/w35js_confirm/VOID.md) |
 | confirm2oc_vacantdo_rel092_opencode_gemma12b_1003 | 撤回 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j1 | 37005ec2 | — |  | [confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md](../ops/redo/plans/confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md) |

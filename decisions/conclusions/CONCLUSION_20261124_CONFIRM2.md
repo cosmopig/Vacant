@@ -40,6 +40,8 @@ P 臂＝當時的發布候選 wheel `37005ec2…`（`~/dev/ops/release_0.9.2/2c9
 
 170 對全部完成（扣 infra_void）、c > b 且 p < 0.05、驗收放行卻錯＝0。可以說：「在這 34 題、pi、gemma-4-12b（1004，llama.cpp 2.46.0）、同樣 1800 秒上限下，要發布的 0.9.2（`vacant do pi`，零設定重開；pi 不載入任何 Vacant 擴充）交出通過的成果，比原生 pi 一次跑到底多（數字、P 的內層平均嘗試數、模型呼叫數一起講）」。不可以說：不帶條件的「Vacant 讓 agent 更好」、外推到別的模型／題庫／沒有可執行測試的工作；這 34 題用過多次，是同一批題上的複製，不是泛化證據。
 
+> **註（結案時加，不改上面的逐字句）**：句中「要發布的 0.9.2」是預註冊當時的字眼，指的是當時的候選 wheel `37005ec2…`（rc4 程式碼）。現在要發的是 **rc6-final**（`b1ca9b1ff`，wheel `a575c661…`）：rc5 相對 rc4 的改動見 `docs/RC5_CHANGES_VS_RC4.md`（政策差分 10/10 相同＋3/3 預期不同），rc6 相對 rc5-final 只差訊息、輸出、中斷處理與 gc 留存。這一批的數字是 `37005ec2` 的數字，不是 rc6-final 的；引用這句時連這一行一起引用。
+
 本批數字：**86/170 → 109/170（b＝11、c＝34，p＝0.000824）；P 的內層平均嘗試 1.98；平均模型呼叫 A 40.7、P 64.1（p_model_calls 補算，170/170 格可算）。**
 
 ## 3. 代價
@@ -71,8 +73,8 @@ P 臂＝當時的發布候選 wheel `37005ec2…`（`~/dev/ops/release_0.9.2/2c9
 ### 結案時補記
 
 - **本機 OOM（11/23 16:23–17:37Z）**：kernel 的 OOM killer 殺了 4 個 python3（RSS 5.4–6.9 GB），都在 redo-queue-1004 的 cgroup 裡，時間落在 `pg_sgf_parsing/r5/P`（16:11–16:39，一次）與 `pg_variable_length_quantity/r5/P`（17:24–17:44，三次）。jobs 1，同時只有這一格在跑。
-  - `pg_variable_length_quantity/r5/P`：agent 第 2 次嘗試寫出的 `encode()` 是沒有出口的 `while True` 迴圈（不斷 append），agent 自己跑測試時被殺兩次（17:31、17:33，第 2 次嘗試的 agent 階段），驗收時又被殺一次（17:37:54），所以第 2 次嘗試記為 `runner_no_output`、不放行；第 3 次嘗試 3/26，交回第 1 次（22/26），rc＝40。A 那格通過，所以這一對算進 b。
-  - `pg_sgf_parsing/r5/P`：16:23 那次落在第 2 次嘗試的 agent 階段（agent 自己跑測試的子行程）；兩臂都沒過，這一對不進 b／c。
+  - `pg_variable_length_quantity/r5/P`（**已確認**，讀到原始碼）：agent 第 2 次嘗試寫出的 `encode()` 是沒有出口的 `while True` 迴圈（不斷 append），agent 自己跑測試時被殺兩次（17:31、17:33，第 2 次嘗試的 agent 階段），驗收時又被殺一次（17:37:54），所以第 2 次嘗試記為 `runner_no_output`、不放行；第 3 次嘗試 3/26，交回第 1 次（22/26），rc＝40。A 那格通過，所以這一對算進 b。
+  - `pg_sgf_parsing/r5/P`：16:23 那次落在第 2 次嘗試的 agent 階段。**這一格是推定**：只有時間與 cgroup 對得上，原始碼裡找不到能確認的失控寫法（vlq 那格是讀到原始碼確認的）；兩臂都沒過，這一對不進 b／c。
   - **照 harness 既有規則判斷**：infra_void 只在「工作區沒動＋0 次成功的模型回應，或做到一半的連線類錯誤」時成立；兩格工作區都改過、模型呼叫都成功，所以**不算 void**，照計。被殺的是那個吃掉記憶體的行程本身（OOM killer 選最大的那個），沒有波及別的格。
   - **敏感度分析（拿掉這兩對）**：b＝10、c＝34，p＝0.000388；state 不變（EFFECTIVE），方向與大小不變。
   - 這個 OOM 也讓 systemd 把佇列 unit 判 failed（OOMPolicy 預設 stop），佇列腳本死掉、confirm2oc 沒有接著發（runner 本身照跑完）。之後的佇列 unit 加 OOMPolicy＝continue 並設記憶體上限（見結論以外的 ops 修正）。

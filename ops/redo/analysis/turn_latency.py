@@ -51,6 +51,10 @@ def session_turn_latencies(path: str) -> list[float]:
 
 
 def _q(xs: list[float], q: float) -> float | None:
+    """最近秩分位數：排序後取第 round(q × (n−1)) 個（index 四捨五入）。
+    ⚠ n 為偶數時 q＝0.5 取的是**上中位數**（兩個中間值裡較大的那個），不是兩者平均的標準中位數；
+    例如 confirm2 的 A 單次牆鐘：這裡 300.1 秒，標準中位數 289.9 秒。所有已寫成結論與總表的「中位」都是這個取法，
+    為了和它們可比，這裡不改取法，只在輸出標明（2026-11-24 查證）。"""
     if not xs:
         return None
     xs = sorted(xs)
@@ -129,11 +133,11 @@ def main(argv: list[str]) -> int:
         return 0
     t = m["turn_latency_s"]
     print(f"{root}")
-    print("  每輪回應（秒）：" + "；".join(f"{k} 中位 {v['median']}／平均 {v['mean']}／p90 {v['p90']}（n={v['n']}）" for k, v in t.items()))
+    print("  每輪回應（秒）：" + "；".join(f"{k} 中位（上中位數）{v['median']}／平均 {v['mean']}／p90 {v['p90']}（n={v['n']}）" for k, v in t.items()))
     p = m["p_inner_cap"]
     print(f"  P 內層撞上限：{p['timed_out']}/{p['inner_attempts']}（{p['rate']}）；至少一次 {p['cells_any_cut']}/{p['cells']} 格、每次都撞 {p['cells_all_cut']} 格")
     a = m["control_single_run"]
-    print(f"  {a['arm']} 單次：中位牆鐘 {a['median_wall_s']} 秒、逾時 {a['timeouts']}/{a['cells']}")
+    print(f"  {a['arm']} 單次：中位牆鐘（上中位數）{a['median_wall_s']} 秒、逾時 {a['timeouts']}/{a['cells']}")
     return 0
 
 
