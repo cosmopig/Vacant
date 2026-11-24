@@ -1,6 +1,6 @@
 # Vacant 量測結果總表
 
-> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-24 16:18Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
+> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-24 16:37Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
 > 引用規則照 REPORT 的 quoting_rule：只有 state=EFFECTIVE 且沒有 harness 中途變更的整批數字可以引用，引用時連同模型、agent、題庫、對數一起講；UNRESOLVED／INCOMPLETE 不是負結果。
 
 ## 已結案
