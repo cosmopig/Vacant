@@ -1,0 +1,11 @@
+D2' Analysis Verdict: EFFECTIVE (sets=60, B=10000, seed=20261125)
+  [1] Coverage: 1104/1200 = 92.0% (with_source=1104/1200, threshold>=80%) -> PASS
+  [2] Miss diff (c-b): -0.0090 (95% upper=0.0089, margin<0.10; c=1.4%, b=2.3%, n=221) -> NONINFERIOR
+  [3] Token ratio (b/c): 6.65x 95% CI [5.30, 8.27] (n=240/240) -> EFFECTIVE
+  [3] Calls ratio (b/c): 4.08x 95% CI [3.46, 4.82] (n=240/240)
+  [3] Wall  ratio (b/c): 5.31x 95% CI [4.63, 6.11] (n=240/240)
+  [4] Secondary:
+      c_vs_d: miss(c-d)=n/a (upper95=n/a), tok(d/c)=n/ax [n/a, n/a]
+      d_vs_b: miss(d-b)=n/a (upper95=n/a), tok(b/d)=n/ax [n/a, n/a]
+      false_mod: a=0/3898(0.0% [0.0%, 0.0%]); b=2/4217(0.0% [0.0%, 0.1%]); c=4/4149(0.1% [0.0%, 0.3%]); cC=17/4171(0.4% [0.0%, 1.3%]); cCG=2/4190(0.0% [0.0%, 0.1%]); cCGR=0/4192(0.0% [0.0%, 0.0%]); d_diff=34/4145(0.8% [0.1%, 2.0%])
+      residual_stale: a(c1=53,c2=97,c3=147,c4=221) b(c1=3,c2=1,c3=1,c4=0) c(c1=7,c2=11,c3=12,c4=14) cC(c1=2,c2=2,c3=2,c4=2) cCG(c1=0,c2=2,c3=1,c4=3) cCGR(c1=0,c2=0,c3=3,c4=1) d_diff(c1=0,c2=0,c3=0,c4=1)

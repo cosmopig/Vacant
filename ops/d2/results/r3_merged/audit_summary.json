@@ -1,0 +1,361 @@
+{
+ "attribution_table": {
+  "a": {
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 19,
+    "not maintained (arm a)": 221
+   }
+  },
+  "b": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 2
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 17,
+    "page re-read, not corrected": 5
+   }
+  },
+  "c": {
+   "false_mod": {
+    "agent changed a handed line wrongly": 1,
+    "agent changed a line it was not handed": 3
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 19,
+    "handed to agent, page not re-read": 7,
+    "handed to agent, page re-read, not corrected": 1,
+    "provenance not recorded (no_source); not handed this cycle": 2,
+    "provenance points to the wrong page; not handed": 10
+   }
+  },
+  "c0": {
+   "draft_wrong": {
+    "first draft already wrong": 96
+   }
+  },
+  "cC": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 17
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 21,
+    "page not re-read": 4,
+    "page re-read, not corrected": 1
+   }
+  },
+  "cCG": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 2
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 19,
+    "page not re-read": 12,
+    "page re-read, not corrected": 4
+   }
+  },
+  "cCGR": {
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 19,
+    "page not re-read": 1,
+    "page re-read, not corrected": 2
+   }
+  },
+  "d_diff": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 34
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 16,
+    "page not re-read": 1,
+    "page re-read, not corrected": 1
+   }
+  }
+ },
+ "baseline_refreshed_while_stale": 0,
+ "chain_verification_summary": {
+  "blobs_bad": 0,
+  "blobs_checked": 55591,
+  "chains": 480,
+  "hash_chain_ok": 480,
+  "index_files_bad": 0,
+  "index_files_checked": 1698,
+  "signatures_ok": 480,
+  "signer_trusted": 480
+ },
+ "coverage": {
+  "by_fetch_idiom": {
+   "one url, stdout": {
+    "claims": 1180,
+    "correct_page": 1104,
+    "sets": 59
+   },
+   "redirect into workspace file": {
+    "claims": 20,
+    "correct_page": 0,
+    "sets": 1
+   }
+  },
+  "claims": 1200,
+  "correct_page": 1104,
+  "with_source": 1104
+ },
+ "harness_match": {
+  "examples": [],
+  "mismatches": 0,
+  "rows": 34800
+ },
+ "provenance_summary": {
+  "a": {
+   "candidates_only": 721,
+   "claims": 1200,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 721,
+   "write_step": 1104
+  },
+  "b": {
+   "candidates_only": 728,
+   "claims": 1200,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 728,
+   "write_step": 1118
+  },
+  "c": {
+   "candidates_only": 57,
+   "claims": 1200,
+   "product_provenance": 1006,
+   "product_provenance_correct_page": 984,
+   "server_saw_fetch": 1063,
+   "write_step": 1098
+  },
+  "cC": {
+   "candidates_only": 705,
+   "claims": 1200,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 705,
+   "write_step": 1087
+  },
+  "cCG": {
+   "candidates_only": 721,
+   "claims": 1200,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 721,
+   "write_step": 1104
+  },
+  "cCGR": {
+   "candidates_only": 726,
+   "claims": 1200,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 726,
+   "write_step": 1104
+  },
+  "d_diff": {
+   "candidates_only": 610,
+   "claims": 1200,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 610,
+   "write_step": 1077
+  }
+ },
+ "record_problems": [],
+ "summary": {
+  "arms": {
+   "a": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 221,
+    "false_mod": 0,
+    "latency_hist": {
+     "None": 240
+    },
+    "miss_rate": 1.0,
+    "miss_rate_pre_correct": 1.0,
+    "missed": 240,
+    "missed_pre_correct": 221,
+    "stale_residual_by_cycle": {
+     "1": 53,
+     "2": 97,
+     "3": 147,
+     "4": 221
+    },
+    "unchanged_correct_claims": 3898,
+    "wrong_by_cycle": {
+     "1": 149,
+     "2": 193,
+     "3": 243,
+     "4": 317
+    }
+   },
+   "b": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 223,
+    "false_mod": 2,
+    "latency_hist": {
+     "0": 218,
+     "1": 4,
+     "2": 1,
+     "None": 17
+    },
+    "miss_rate": 0.0917,
+    "miss_rate_pre_correct": 0.0224,
+    "missed": 22,
+    "missed_pre_correct": 5,
+    "stale_residual_by_cycle": {
+     "1": 3,
+     "2": 1,
+     "3": 1,
+     "4": 0
+    },
+    "unchanged_correct_claims": 4217,
+    "wrong_by_cycle": {
+     "1": 99,
+     "2": 84,
+     "3": 81,
+     "4": 82
+    }
+   },
+   "c": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 221,
+    "false_mod": 4,
+    "latency_hist": {
+     "0": 201,
+     "1": 2,
+     "None": 37
+    },
+    "miss_rate": 0.1625,
+    "miss_rate_pre_correct": 0.0905,
+    "missed": 39,
+    "missed_pre_correct": 20,
+    "stale_residual_by_cycle": {
+     "1": 7,
+     "2": 11,
+     "3": 12,
+     "4": 14
+    },
+    "unchanged_correct_claims": 4149,
+    "wrong_by_cycle": {
+     "1": 105,
+     "2": 115,
+     "3": 114,
+     "4": 118
+    }
+   },
+   "cC": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 219,
+    "false_mod": 17,
+    "latency_hist": {
+     "0": 214,
+     "1": 2,
+     "None": 24
+    },
+    "miss_rate": 0.1083,
+    "miss_rate_pre_correct": 0.0228,
+    "missed": 26,
+    "missed_pre_correct": 5,
+    "stale_residual_by_cycle": {
+     "1": 2,
+     "2": 2,
+     "3": 2,
+     "4": 2
+    },
+    "unchanged_correct_claims": 4171,
+    "wrong_by_cycle": {
+     "1": 98,
+     "2": 100,
+     "3": 116,
+     "4": 116
+    }
+   },
+   "cCG": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 221,
+    "false_mod": 2,
+    "latency_hist": {
+     "0": 205,
+     "1": 3,
+     "None": 32
+    },
+    "miss_rate": 0.1458,
+    "miss_rate_pre_correct": 0.0724,
+    "missed": 35,
+    "missed_pre_correct": 16,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 2,
+     "3": 1,
+     "4": 3
+    },
+    "unchanged_correct_claims": 4190,
+    "wrong_by_cycle": {
+     "1": 98,
+     "2": 98,
+     "3": 97,
+     "4": 111
+    }
+   },
+   "cCGR": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 221,
+    "false_mod": 0,
+    "latency_hist": {
+     "0": 218,
+     "1": 2,
+     "None": 20
+    },
+    "miss_rate": 0.0917,
+    "miss_rate_pre_correct": 0.0136,
+    "missed": 22,
+    "missed_pre_correct": 3,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 0,
+     "3": 3,
+     "4": 1
+    },
+    "unchanged_correct_claims": 4192,
+    "wrong_by_cycle": {
+     "1": 96,
+     "2": 96,
+     "3": 99,
+     "4": 97
+    }
+   },
+   "d_diff": {
+    "changed_claims": 240,
+    "changed_claims_pre_correct": 219,
+    "false_mod": 34,
+    "latency_hist": {
+     "0": 222,
+     "None": 18
+    },
+    "miss_rate": 0.075,
+    "miss_rate_pre_correct": 0.0091,
+    "missed": 18,
+    "missed_pre_correct": 2,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 1
+    },
+    "unchanged_correct_claims": 4145,
+    "wrong_by_cycle": {
+     "1": 99,
+     "2": 118,
+     "3": 123,
+     "4": 127
+    }
+   }
+  },
+  "c0": {
+   "claims": 1200,
+   "correct": 1104
+  }
+ }
+}
