@@ -65,9 +65,83 @@ class Record:
         Ed25519 簽章用創世記的 signer 驗；signer 必須是這個 VACANT_HOME 的 trust.json 裡 verifier 角色的一把鑰匙；
         步驟引用的內容（input／output／post_index）在內容定址庫裡、雜湊對得上。結果寫進 `self.verify`。"""
         v = {"entries": len(self.events), "hash_chain_ok": True, "signatures_ok": None, "signer_trusted": None,
-             "blobs_checked": 0, "blobs_bad": 0, "problems": []}
+             "blobs_checked": 0, "blobs_bad": 0, "index_files_checked": 0, "index_files_bad": 0, "problems": []}
         def canon(o):
             return json.dumps(o, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        def check_blob(sha: str | None) -> bytes | None:
+            if not sha:
+                return None
+            v["blobs_checked"] += 1
+            b = self.blob(sha)
+            if b is None or hashlib.sha256(b).hexdigest() != sha:
+                v["blobs_bad"] += 1
+                return None
+            return b
+        seen_indexes: set[str] = set()
+        seen_index_files: set[str] = set()
+        # Store-on-change（vacant_network/trace/workspace.py）：工作區一開始就存在、從未被任何一步改寫過的檔案
+        # 不會被拷進 objects/；只有在發生改動時才把 after 版本寫進 objects/。
+        # 因此：若某個檔案雜湊只在第一份起始索引（pre_index／before_index）出現、從未在任何 writes／changes 的
+        # after 出現、且 objects/ 裡本來就沒有它，不算竄改；但只要檔案存在於 objects/ 就必驗雜湊，
+        # 任何寫入過或非起始的檔案缺件或雜湊不符一律計入 index_files_bad。
+        written_shas: set[str] = set()
+        first_idx_sha: str | None = None
+        for e in self.events:
+            p0 = e.get("payload") or {}
+            et0 = e.get("type")
+            if et0 == "step":
+                if first_idx_sha is None and p0.get("pre_index"):
+                    first_idx_sha = p0["pre_index"]
+                for wr in p0.get("writes") or []:
+                    aft = wr.get("after") if isinstance(wr, dict) else None
+                    if isinstance(aft, str) and aft and ":" not in aft:
+                        written_shas.add(aft)
+            elif et0 == "unrecorded_change":
+                if first_idx_sha is None and p0.get("before_index"):
+                    first_idx_sha = p0["before_index"]
+                for ch in p0.get("changes") or []:
+                    aft = ch.get("after") if isinstance(ch, dict) else None
+                    if isinstance(aft, str) and aft and ":" not in aft:
+                        written_shas.add(aft)
+        first_idx_shas: set[str] = set()
+        if first_idx_sha:
+            b0_idx = self.blob(first_idx_sha)
+            if b0_idx is not None and hashlib.sha256(b0_idx).hexdigest() == first_idx_sha:
+                try:
+                    ix0 = json.loads(b0_idx.decode("utf-8"))
+                    if isinstance(ix0, dict):
+                        for ent in ix0.values():
+                            if isinstance(ent, list) and ent and isinstance(ent[0], str) and ":" not in ent[0]:
+                                first_idx_shas.add(ent[0])
+                except (UnicodeDecodeError, ValueError):
+                    pass
+        def check_index_files(idx_sha: str | None, idx_bytes: bytes | None) -> None:
+            if not idx_sha or idx_bytes is None or idx_sha in seen_indexes:
+                return
+            seen_indexes.add(idx_sha)
+            try:
+                ix = json.loads(idx_bytes.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                v["index_files_bad"] += 1
+                v["problems"].append(f"unparseable index json {idx_sha[:12]}")
+                return
+            if not isinstance(ix, dict):
+                return
+            for _path, ent in ix.items():
+                if not isinstance(ent, list) or not ent:
+                    continue
+                fsha = ent[0]
+                if not isinstance(fsha, str) or not fsha or ":" in fsha:
+                    continue
+                if fsha in seen_index_files:
+                    continue
+                seen_index_files.add(fsha)
+                fb = self.blob(fsha)
+                if fb is None and fsha in first_idx_shas and fsha not in written_shas:
+                    continue
+                v["index_files_checked"] += 1
+                if fb is None or hashlib.sha256(fb).hexdigest() != fsha:
+                    v["index_files_bad"] += 1
         try:
             from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
         except ImportError:                        # 沒有 cryptography：只驗雜湊鏈，照實寫
@@ -105,18 +179,27 @@ class Record:
                     v["problems"].append(f"bad signature at seq {e.get('seq')}")
             prev = h
             p = e.get("payload") or {}
-            if e.get("type") == "step":
-                for key in ("input_blob", "output_blob", "post_index"):
+            et = e.get("type")
+            if et == "step":
+                check_blob(p.get("input_blob"))
+                check_blob(p.get("output_blob"))
+                for key in ("pre_index", "post_index"):
                     sha = p.get(key)
                     if sha:
-                        v["blobs_checked"] += 1
-                        b = self.blob(sha)
-                        if b is None or hashlib.sha256(b).hexdigest() != sha:
-                            v["blobs_bad"] += 1
+                        check_index_files(sha, check_blob(sha))
+            elif et == "prompt":
+                check_blob(p.get("text_blob"))
+            elif et == "unrecorded_change":
+                for key in ("before_index", "after_index"):
+                    sha = p.get(key)
+                    if sha:
+                        check_index_files(sha, check_blob(sha))
         self.verify = v
         self.problems += v["problems"][:20]
         if v["blobs_bad"]:
             self.problems.append(f"{v['blobs_bad']} referenced blobs missing or hash mismatch")
+        if v["index_files_bad"]:
+            self.problems.append(f"{v['index_files_bad']} indexed file objects missing or hash mismatch")
         if v["signer_trusted"] is False:
             self.problems.append("genesis signer is not a verifier key in trust.json")
 
@@ -281,7 +364,7 @@ def fetch_idiom(snap: Record, upto: int) -> str:
     return "no fetch command"
 
 
-def audit(root: pathlib.Path, manifest: dict) -> dict:
+def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None) -> dict:
     sets = {s["set"]: s for s in manifest["sets"]}
     access = []
     if (root / "access.jsonl").exists():
@@ -452,10 +535,17 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
     cov["by_fetch_idiom"] = {k: {"sets": len(v["sets"]), "claims": v["claims"], "correct_page": v["correct_page"]}
                              for k, v in sorted(by_idiom.items())}
     loophole = sum(1 for a in attr_rows if a.get("baseline_refreshed_while_stale"))
-    return {"scores": res, "attribution": attr_rows, "attribution_table": seg_table,
-            "provenance": prov_rows, "provenance_summary": prov_sum, "coverage": cov, "coverage_rows": cov_rows,
-            "baseline_refreshed_while_stale": loophole, "chain_verification": chain_ver,
-            "record_problems": problems}
+    out_doc = {"scores": res, "attribution": attr_rows, "attribution_table": seg_table,
+               "provenance": prov_rows, "provenance_summary": prov_sum, "coverage": cov, "coverage_rows": cov_rows,
+               "baseline_refreshed_while_stale": loophole, "chain_verification": chain_ver,
+               "record_problems": problems}
+    if anchor is not None:
+        from anchor_d2 import check_anchor
+        ac = check_anchor(root, anchor)
+        out_doc["anchor_check"] = ac
+        if not ac["ok"]:
+            problems += [f"anchor: {p}" for p in ac["problems"]]
+    return out_doc
 
 
 def main() -> int:
@@ -463,10 +553,12 @@ def main() -> int:
     ap.add_argument("--root", required=True)
     ap.add_argument("--manifest", required=True)
     ap.add_argument("--out")
+    ap.add_argument("--anchor")
     a = ap.parse_args()
     root = pathlib.Path(a.root)
     manifest = json.loads(pathlib.Path(a.manifest).read_text())
-    res = audit(root, manifest)
+    anchor = json.loads(pathlib.Path(a.anchor).read_text()) if a.anchor else None
+    res = audit(root, manifest, anchor=anchor)
     hr, hc = load_harness(root)
     hs = score(manifest, hr)
     key = lambda r: (r["set"], r["arm"], r["cycle"], r["claim"])        # noqa: E731
@@ -482,12 +574,20 @@ def main() -> int:
         "chains": len(cv), "hash_chain_ok": sum(1 for v in cv.values() if v["hash_chain_ok"]),
         "signatures_ok": sum(1 for v in cv.values() if v["signatures_ok"]),
         "signer_trusted": sum(1 for v in cv.values() if v["signer_trusted"]),
-        "blobs_checked": sum(v["blobs_checked"] for v in cv.values()), "blobs_bad": sum(v["blobs_bad"] for v in cv.values())}
+        "blobs_checked": sum(v["blobs_checked"] for v in cv.values()), "blobs_bad": sum(v["blobs_bad"] for v in cv.values()),
+        "index_files_checked": sum(v["index_files_checked"] for v in cv.values()),
+        "index_files_bad": sum(v["index_files_bad"] for v in cv.values())}
     out = {k: res[k] for k in ("harness_match", "coverage", "provenance_summary", "attribution_table", "record_problems",
                                "chain_verification_summary", "baseline_refreshed_while_stale")}
+    if "anchor_check" in res:
+        out["anchor_check"] = res["anchor_check"]
     out["summary"] = res["scores"]["summary"]
     print(json.dumps(out, ensure_ascii=False, indent=1, sort_keys=True, default=str))
-    return 0 if not mism else 3
+    if mism:
+        return 3
+    if "anchor_check" in res and not res["anchor_check"]["ok"]:
+        return 4
+    return 0
 
 
 if __name__ == "__main__":
