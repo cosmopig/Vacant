@@ -66,3 +66,9 @@
 - `ops/d2/run_d2.py` 的 `NO_PROXY` 原本寫死兩台 GPU 主機的內網位址；最終稽核後改成從環境變數 `D2_MODEL_HOSTS` 讀。在這之前開跑的每一批，RUN.json 記的 runner_sha256 都是寫死位址的舊版。
 - `ops/d2/anchors/*.json` 的 `"root"` 原本是含系統帳號名的絕對家目錄路徑；同一個 commit 起改成只記 root 的名稱（`anchor_d2.py write` 同步改）。舊提交裡的版本留在 git 歷史中，沒有改寫歷史；`check` 不比對 `root` 欄，錨點的雜湊內容不受影響。
 - 邊界測試的抓取寫法分類原本按「指令字串裡有沒有 python 字樣」分，把 `which wget python3` 這種偵測指令誤判成 python（s23、s27）；改成看真的抓了來源網址的指令（`ops/d2/bnd_coverage.py`）。更正後：python urllib 4 組 0/80、wget 6 組 120/120。
+
+## r3haiku_d2（2026-11-25 17:21 UTC 附註，續跑前寫下並推上遠端）
+
+- 17:19 開跑後，看到前 3 組 cCGR 第 1 週期的候選檢查都是 20/20 no_source，17:21 手動停批（SIGTERM）查原因；沒有改任何程式、計畫或教材。
+- 原因（看紀錄得知）：Haiku 在有索引頁的教材上用一個 shell 迴圈抓全部頁面（`cd /tmp && for f in a.md b.html …; do echo "===== $f"; curl -s "http://<host>/$f"; done`），指令裡的網址是 `…/$f` 而不是字面網址，輸出太大被 Claude Code 存成檔再用 Read 讀進來。v3 的候選集合只從指令文字裡的字面網址取候選，這種寫法取不到——這是計畫 known_limits 寫過的「指令裡沒有字面網址時抓不到」。
+- 處置：照預註冊（產品 v3 一行不改）在同一個 root 續跑；被停的 s02 cCGR 週期 4 由執行器的續跑規則重做。這一批預期覆蓋率不過，照實報。
