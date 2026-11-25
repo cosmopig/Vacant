@@ -177,6 +177,10 @@ r2heldout_b s56 第 4 週期（c 臂）：agent 只被交辦 2 行（都是沒�
 - **交辦→守衛→退回的迴圈在 harness 裡**：改之前的版本、退回的起點（since_seq）、退回的提示都是 runner（`ops/d2/run_d2.py`）做的，產品只提供計算（`vacant trace sources --candidates/--snapshot/--guard/--reread`）。要在真實使用裡有這個效果，這個迴圈要做進產品的掛鉤，現在沒有。
 - **d_diff 的資訊比 cCGR 完整**：d_diff 的差異是 harness 用教材前後兩版算的完整文字差異（不受每次抓取的雜訊影響），等於一個理想的頁面變動偵測器；cCGR 只靠 Vacant 自己的快照與宣稱對應。
 
+**越界讀取掃描與剔除後的敏感度**（`ops/d2/scan_escape.py`，`d2_results/r3_merged/escape.json`、`d2_results/r3_merged_noesc/`）：
+- 掃每一次 agent 執行的工具呼叫，找「列舉自己工作目錄以外的 harness 路徑」（find／ls 上層、`cells/`、教材、別組的 live）：13 次執行、10 組（s01、s16、s23、s27、s37、s42、s43、s47、s59、s60）。其中 5 組是初稿壞掉、本來就不進配對的（s16、s37、s47、s59、s60）；**另 5 組（s01 cC 週期 3、s23 c 週期 2、s27 cC 週期 4、s42 d_diff 週期 2、s43 b 週期 3）在配對裡**，多半是找不到自己的 report.md 時去 find 上層。s47 b 週期 4 曾 `find ~`（整個家目錄） 找網頁檔名（教材目錄裡有各週期的網頁）。只是字串比對：沒提到不等於沒讀。
+- 把這 10 組全部剔除重算（50 組，事後的敏感度，不是判定）：對 b 漏 cCGR 3/200、b 5/200（上界 +1.0pp）、token 6.54×（5.34–7.90）；對 d_diff 漏 3/198、2/198（上界 +3.4pp）、token 1.31×（1.07–1.61）。三項門檻都還過；分析程式把它標成 INCOMPLETE 只是因為預期組數照原計畫是 60。
+
 **成本分解（`ops/d2/cycle_costs.py` 產生，`d2_results/r3_merged/cycle_costs.json`；97.5% cluster bootstrap 區間）：**
 
 | 週期 | b token | cCGR token | d_diff token | b/cCGR | d_diff/cCGR |
