@@ -40,6 +40,12 @@ from redo import usage_from_log  # noqa: E402
 
 HOST_FMT = "{set}.d2-sources.example"
 LOCK = threading.Lock()
+#: 只有 `*.d2-sources.example` 走來源伺服器；模型端點（LM Studio）與本機一律直連
+NO_PROXY = "localhost,127.0.0.1,100.119.113.56,100.86.226.21"
+
+
+class InfraError(RuntimeError):
+    """基礎設施失敗（0 次成功的模型回應＋連線錯誤）：不算一次執行；這一組停下，續跑時從頭重做沒完成的部分。"""
 
 PROMPTS = {
     "write": ("Fill in report.md in this directory. Each product has one page: {urls} (read them with curl -s). "
@@ -115,6 +121,7 @@ class Run:
                     "PI_SKIP_VERSION_CHECK": "1",
                     "http_proxy": f"http://127.0.0.1:{p['server']['port']}",
                     "HTTP_PROXY": f"http://127.0.0.1:{p['server']['port']}",
+                    "no_proxy": NO_PROXY, "NO_PROXY": NO_PROXY,
                     "TMPDIR": str(live / "tmp")})
         return env
 
@@ -146,6 +153,8 @@ class Run:
         u = usage_from_log(out / "agent.log") if not self.fake else {"calls": 0, "input": 0, "output": 0}
         res = {"rc": rc, "wall_s": round(time.time() - t0, 1), "usage": u}
         write_json(out / "run.json", res)
+        if not self.fake and (u is None or (u.get("calls") == 0 and u.get("errors"))):
+            raise InfraError(f"infra: {out} usage={u}")
         return res
 
     def _kill(self, pr: subprocess.Popen) -> None:
