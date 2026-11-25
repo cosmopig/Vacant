@@ -1,0 +1,48 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "arms": [
+  "a",
+  "b",
+  "c",
+  "d"
+ ],
+ "jobs": 1,
+ "agent_timeout_s": 600,
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2main_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2main",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2main_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 6dfbb8775",
+  "wheel": "~/dev/ops/d2_release/6dfbb8775/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "8ec7b07977af1b53fe2d97de5c0eba36164cae57ee496fb0ba82c7a68cc2c05b",
+  "venv": "~/dev/ops/d2main_venv（不可編輯安裝）",
+  "pi_extension_sha256_16": "f9d83a7978b30749",
+  "install_json_sha256_16": "1b46dc91ac550624（mode observe；`vacant install --agents pi --mode observe` 在隔離 HOME 真的寫出）",
+  "models_json_sha256_16": "701b346dacaf6fa8"
+ },
+ "id": "hosmoke_d2_qwen9b_1003",
+ "seed": 20261135,
+ "server": {
+  "port": 18207
+ },
+ "purpose": "留出教材的冒煙（只看接線：索引頁提示、多格式頁面、多來源頁、評分與稽核）；用的是另一個 seed 的樣本（99），不是留出主批次的教材；數字不進任何分析。",
+ "materials": {
+  "dir": "~/dev/ops/d2_materials/heldout_sample_seed99",
+  "generator": "ops/d2/heldout_gen/gen_heldout.py --seed 99 --sets 3（heldout_gen aba9982）",
+  "manifest_sha256": "5ecb92766e61d5ac6f31d908cb92be3fdeafeb00be365666f7dbda0341cc6286",
+  "sets": [
+   "s01"
+  ]
+ }
+}
