@@ -1,0 +1,27 @@
+{
+ "write|curl": {
+  "claims": 200,
+  "candidate_correct": 200,
+  "no_source": 0
+ },
+ "notool|curl": {
+  "claims": 180,
+  "candidate_correct": 180,
+  "no_source": 0
+ },
+ "notool|other": {
+  "claims": 20,
+  "candidate_correct": 0,
+  "no_source": 20
+ },
+ "nocurl|python urllib": {
+  "claims": 120,
+  "candidate_correct": 120,
+  "no_source": 0
+ },
+ "nocurl|wget": {
+  "claims": 80,
+  "candidate_correct": 80,
+  "no_source": 0
+ }
+}

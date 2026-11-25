@@ -1,0 +1,247 @@
+{
+ "by_variant_and_fetch": {
+  "nocurl|python urllib": {
+   "sets": 6,
+   "claims": 120,
+   "correct_page": 0,
+   "draft_correct": 120
+  },
+  "nocurl|wget": {
+   "sets": 4,
+   "claims": 80,
+   "correct_page": 60,
+   "draft_correct": 80
+  },
+  "notool|curl": {
+   "sets": 9,
+   "claims": 180,
+   "correct_page": 180,
+   "draft_correct": 180
+  },
+  "notool|other": {
+   "sets": 1,
+   "claims": 20,
+   "correct_page": 0,
+   "draft_correct": 0
+  },
+  "write|curl": {
+   "sets": 10,
+   "claims": 200,
+   "correct_page": 200,
+   "draft_correct": 200
+  }
+ },
+ "rows": [
+  {
+   "set": "s01",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s02",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s03",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s04",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s05",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s06",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s07",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s08",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s09",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s10",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s11",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s12",
+   "variant": "notool",
+   "fetch": "other",
+   "draft_correct": 0,
+   "correct_page": 0
+  },
+  {
+   "set": "s13",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s14",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s15",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s16",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s17",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s18",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s19",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s20",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s21",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s22",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s23",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s24",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s25",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s26",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s27",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s28",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s29",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s30",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  }
+ ],
+ "note": "分類依實際抓取指令（2026-11-25 依最終稽核更正）"
+}
