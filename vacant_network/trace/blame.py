@@ -771,6 +771,7 @@ class Blamer:
                         or w == "--count" for w in rest):
                     return None                           # 數出來的是新值
                 # 過濾器自己讀了檔（`cat 筆記; curl …`）：輸出不全是抓回來的（審查 curl#1c）
+                # 讀的是這個指令前面剛抓下來的檔（`curl U > f && cat f`）：內容還是抓回來的
                 plain = [w for w in rest if not w.startswith("-") and not w.isdigit()
                          and w not in (">", ">>") and w not in outputs]
                 allowed = 1 if head in ("grep", "egrep", "fgrep") else 0
@@ -1557,3 +1558,14 @@ def blame_results(rec: Recorder, contract: Any, results: list[dict[str, Any]],
                 b["expected"] = sources
             out.append(b)
     return out
+
+
+def fetch_of_command(cmd: str) -> dict[str, Any] | None:
+    """只看一個指令字串的 `Blamer._fetch_of`（`sources.py` 用：它要對改寫過的指令再判一次）。"""
+    class _T:
+        @staticmethod
+        def input_obj(_s: Any) -> dict[str, str]:
+            return {"command": cmd}
+    b = Blamer.__new__(Blamer)
+    b.t = _T()                    # type: ignore[assignment]
+    return b._fetch_of(None)      # type: ignore[arg-type]

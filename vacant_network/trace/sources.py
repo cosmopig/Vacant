@@ -92,37 +92,59 @@ def _carriers(text: str, key: str) -> set[str]:
     return {seg for seg in _segments(text) if L.contains(seg, key)}
 
 
+_SEG_SPLIT = re.compile(r"\s*(&&|;)\s*")
+_STANDALONE_NUM = re.compile(r"(?<![A-Za-z])\d")
+
+
+def _strip_separators(cmd: str) -> str:
+    """拿掉只是分隔用的 `echo`／`printf` 段（`echo ""`、`echo "===p1 done==="`）：參數裡沒有獨立的數字
+    （緊跟在字母後面的 `p1` 不算），造不出這支模組要追的數值與版本號。只處理用 `&&`／`;` 串起來的指令；
+    `blame` 自己的判準比較嚴（它也追文字值），所以只在這裡放寬。"""
+    parts = _SEG_SPLIT.split(cmd.strip())
+    segs = parts[0::2]
+    keep = [seg for seg in segs
+            if not (re.match(r"^(echo|printf)\b", seg) and not _STANDALONE_NUM.search(seg[6:]) and "|" not in seg
+                    and ">" not in seg)]
+    return " && ".join(keep) if keep else ""
+
+
 def _fetch_records(trace: B.Trace, blamer: B.Blamer) -> list[dict[str, Any]]:
-    """病歷裡每一次「抓到某個網址的內容」：只抓網頁的步驟（`blame` 同一個判準，本機網址不算），
-    內容是那一步的輸出；導進檔的（`curl U > f`）是那一步寫出的 f。"""
+    """病歷裡每一次「抓到某個網址的內容」：只抓網頁的步驟（`blame` 同一個判準，本機網址不算；
+    數字以外的分隔用 echo 先拿掉），內容來源依序：
+      1. 輸出裡印出的內容（一個網址 ⇒ 整份；好幾個網址 ⇒ HTML 按文件開頭切，份數相符才依序對上）；
+      2. 導進工作區裡的檔（`curl U > f`）⇒ 那一步寫出的 f。"""
     out: list[dict[str, Any]] = []
     for st in trace.steps:
         f = blamer._fetch_of(st)
+        if f is None:
+            cmd = B._command(trace.input_obj(st)) or ""
+            alt = _strip_separators(cmd)
+            f = B.fetch_of_command(alt) if alt and alt != cmd else None
         if not f or f["local"]:
             continue
-        if len(f["urls"]) == 1 and not f["outputs"]:
-            txt = trace.output_text(st)
-            if txt:
+        got: set[str] = set()
+        txt = trace.output_text(st)
+        if txt and txt.strip():
+            if len(f["urls"]) == 1:
                 out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": f["urls"][0],
                             "into": None, "text": txt})
-        elif len(f["urls"]) > 1 and not f["outputs"]:
-            # 一個指令依序抓好幾頁、全部印在輸出裡（`curl U1 && echo "" && curl U2`）：輸出是 HTML 時按文件開頭切，
-            # 份數和網址數相同才依序對上（推論；不是 HTML 或對不上就不當成任何一頁的內容）
-            txt = trace.output_text(st)
-            pat = _DOC_START if txt and _DOC_START.search(txt) else _HTML_START
-            chunks = [c for c in pat.split(txt) if c.strip()] if txt else []
-            if len(chunks) == len(f["urls"]) and all(pat.match(c.lstrip()) for c in chunks):
-                for u, c in zip(f["urls"], chunks):
-                    out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": u,
-                                "into": None, "text": c, "split": True})
+                got.add(f["urls"][0])
+            else:
+                pat = _DOC_START if _DOC_START.search(txt) else _HTML_START
+                chunks = [c for c in pat.split(txt) if c.strip()]
+                if len(chunks) == len(f["urls"]) and all(pat.match(c.lstrip()) for c in chunks):
+                    for u, c in zip(f["urls"], chunks):
+                        out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": u,
+                                    "into": None, "text": c, "split": True})
+                        got.add(u)
         for o, us in (f.get("by_output") or {}).items():
-            if len(us) != 1:
+            if len(us) != 1 or us[0] in got:
                 continue
             rel = blamer._rel(o) or o
-            txt = trace.file_text(st.post_index, rel)
-            if txt:
+            ftxt = trace.file_text(st.post_index, rel)
+            if ftxt:
                 out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": us[0], "into": rel,
-                            "text": txt})
+                            "text": ftxt})
     return out
 
 
