@@ -189,7 +189,7 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                     [json.dumps(e, sort_keys=True) for e in snap.events]:
                 problems.append(f"{sid}/{arm}: chain does not start with the c0 record")
             bounds = [b0]
-            ncyc = len(s["cycles"])
+            ncyc = len(s.get("cycles") or []) or (len(s["truth"]) - 1)
             for k in range(1, ncyc + 1):
                 info = json.loads((adir / f"cycle_{k}" / "cycle.json").read_text())
                 bounds.append(info["chain_len"])
