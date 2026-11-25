@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Fenari Cloud</title></head><body>
+<h1>Fenari Cloud</h1>
+<p>Fenari Cloud is a planning tool for distributed teams. The company was founded in 2015 and is headquartered in Cork. The current release is v5.4.1.</p>
+<p>Plans start at $19 per seat per month, billed annually. A single workspace supports up to 400 members, and every user gets 30 GB of storage. New accounts get a free trial of 60 days.</p>
+<p>The public API allows 120 requests per minute per token. Human support is available Friday–Friday, 13:00–15:00 UTC.</p>
+<h2>Specifications</h2>
+<table><tr><td>monthly price per seat</td><td>$19</td></tr><tr><td>latest version</td><td>v5.4.1</td></tr><tr><td>maximum team size</td><td>400 members</td></tr><tr><td>API rate limit</td><td>120 requests per minute</td></tr><tr><td>storage per user</td><td>30 GB</td></tr><tr><td>free trial length</td><td>60 days</td></tr><tr><td>year founded</td><td>2015</td></tr><tr><td>headquarters city</td><td>Cork</td></tr><tr><td>support hours</td><td>Friday–Friday, 13:00–15:00 UTC</td></tr></table>
+<h2>Previous versions</h2>
+<ul><li>v5.1.9</li><li>v5.0.3</li></ul>
+</body></html>

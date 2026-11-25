@@ -1045,3 +1045,112 @@ def test_runners_only_match_command_position_not_printf_or_git_commit(env):
     assert not any(f["kind"] == "failed_step" for f in ev_fp["findings"]), ev_fp["findings"]
 
 
+# ── 純抓網頁落盤再讀回的出處判定（NOTE_20261125_ZEROCONFIG_FALSE_UNSOURCED）──
+
+def test_replay_s40c0_curl_redirect_read_produces_zero_unsourced(env):
+    """真實病歷重播（NOTE_20261125_ZEROCONFIG_FALSE_UNSOURCED，D2′ 冒煙 s40/c0 seq 1–12）：
+    agent 用 `curl -s http://s40.d2-sources.example/p1..p5.html > p1..p5.html` 抓 5 頁存檔，
+    接著以 `read` 讀回全文，再一次 `edit` 填入 report.md 的 20 個正確值。
+    修之前：`p1..p5.html` 被列入 `deliverables`，`corpus()` 誤把它們的 `read` 輸出當成
+    「回頭讀自己寫的交付物」丟掉，導致 12 個正確值（$9, 300, $39, 1,800, 14, $24, 90, 30, 120, 60, $18, 60）
+    全被判為 `unsourced`。
+    修之後：純非本機抓取（重用 `blame.Blamer._fetch_of`）寫出的檔再讀回算有效來源 ⇒ 0 條 `unsourced`。"""
+    import shutil
+    from vacant_network.identity import PublicIdentity
+    from vacant_network.logbook import Logbook
+    from vacant_network.trace.recorder import project_key
+
+    fixture = pathlib.Path(__file__).resolve().parent / "data" / "zeroconfig_s40c0_curl"
+    ws = env / "work" / "s40c0"
+    ws.mkdir(parents=True)
+    vh = env / "vh"
+    key = project_key(ws)
+    proj_dir = vh / "trace" / "projects" / key
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(fixture / "chain.ndjson", proj_dir / "chain.ndjson")
+    shutil.copytree(fixture / "objects", vh / "trace" / "objects", dirs_exist_ok=True)
+
+    rec = Recorder(ws)
+    book = Logbook.load(rec.chain_path)
+    signer = str((book.entries[0].payload or {})["signer"])
+    assert book.verify_chain(PublicIdentity.from_hex("s40c0", signer))
+    ev = evidence_for(rec, platform="pi", session="01a21114-4956-71b2-a5fb-9aaf6509c750")
+    unsourced = [f for f in ev["findings"] if f["kind"] == "unsourced"]
+    assert unsourced == [], unsourced
+    assert ev["findings"] == [], ev["findings"]
+
+
+def test_self_written_file_read_back_still_unsourced(env):
+    """紅燈（防洗出處）：agent 自己用 Write 工具寫一個暫存檔塞進編造值，再讀回寫進交付物 ⇒ 仍必須判 `unsourced`。
+    同理，先用 `curl U > f` 抓回外部頁、再用 Write/echo 篡改該檔後讀回 ⇒ 也不得洗出處。"""
+    template = "# Report\n- Monthly price: ____\n"
+
+    # 1) Write 工具寫檔 → Read 讀回 → Write 交付物
+    a1 = Agent(_proj(env, name="launder_write", files={"report.md": template}))
+    a1.ask("Fill in report.md with the real monthly price.")
+    a1.read("report.md")
+    a1.write("notes.html", "<p>Monthly price: $777</p>\n")
+    a1.read("notes.html")
+    a1.write("report.md", "# Report\n- Monthly price: $777\n")
+    vals1 = {f["value"] for f in a1.evidence("Done.")["findings"] if f["kind"] == "unsourced"}
+    assert "$777" in vals1
+
+    # 2) echo 寫檔 → Read 讀回 → Write 交付物
+    a2 = Agent(_proj(env, name="launder_echo", files={"report.md": template}))
+    a2.ask("Fill in report.md with the real monthly price.")
+    a2.read("report.md")
+    a2.bash("echo 'Monthly price: $777' > notes.html", "", write={"notes.html": "Monthly price: $777\n"})
+    a2.read("notes.html")
+    a2.write("report.md", "# Report\n- Monthly price: $777\n")
+    vals2 = {f["value"] for f in a2.evidence("Done.")["findings"] if f["kind"] == "unsourced"}
+    assert "$777" in vals2
+
+    # 3) 先純外部 curl > p1.html，再自己篡改 p1.html → Read 讀回 → 寫進交付物
+    a3 = Agent(_proj(env, name="launder_tamper", files={"report.md": template}))
+    a3.ask("Fill in report.md from http://s40.d2-sources.example/p1.html.")
+    a3.read("report.md")
+    a3.bash("curl -s http://s40.d2-sources.example/p1.html > p1.html", "",
+            write={"p1.html": "<p>Monthly price: $39</p>\n"})
+    a3.write("p1.html", "<p>Monthly price: $777</p>\n")
+    a3.read("p1.html")
+    a3.write("report.md", "# Report\n- Monthly price: $777\n")
+    vals3 = {f["value"] for f in a3.evidence("Done.")["findings"] if f["kind"] == "unsourced"}
+    assert "$777" in vals3
+
+
+def test_curl_local_url_redirect_is_not_a_source(env):
+    """紅燈（與 `blame._fetch_of` 一致）：`curl U > f` 的 U 是本機網址（127.0.0.1）時，
+    不視為外部抓取來源，讀回後寫進交付物仍為 `unsourced`；非本機網址在讀回後則為合法來源（未讀仍 `unsourced`）。"""
+    template = "# Report\n- Monthly price: ____\n"
+    page = "<p>Monthly price: $39</p>\n"
+
+    # 1) 本機 URL（127.0.0.1）：不得當成來源
+    a_local = Agent(_proj(env, name="curl_local", files={"report.md": template}))
+    a_local.ask("Fill in report.md from the product page.")
+    a_local.read("report.md")
+    a_local.bash("curl -s http://127.0.0.1:8000/p1.html > p1.html", "", write={"p1.html": page})
+    a_local.read("p1.html")
+    a_local.write("report.md", "# Report\n- Monthly price: $39\n")
+    vals_local = {f["value"] for f in a_local.evidence("Done.")["findings"] if f["kind"] == "unsourced"}
+    assert "$39" in vals_local
+
+    # 2) 非本機 URL：抓完有讀回 ⇒ 合法來源，0 條 unsourced
+    a_ext = Agent(_proj(env, name="curl_ext", files={"report.md": template}))
+    a_ext.ask("Fill in report.md from http://s40.d2-sources.example/p1.html.")
+    a_ext.read("report.md")
+    a_ext.bash("curl -s http://s40.d2-sources.example/p1.html > p1.html", "", write={"p1.html": page})
+    a_ext.read("p1.html")
+    a_ext.write("report.md", "# Report\n- Monthly price: $39\n")
+    assert [f for f in a_ext.evidence("Done.")["findings"] if f["kind"] == "unsourced"] == []
+
+    # 3) 非本機 URL 但抓完沒讀回 ⇒ 仍為 unsourced
+    a_unread = Agent(_proj(env, name="curl_unread", files={"report.md": template}))
+    a_unread.ask("Fill in report.md from http://s40.d2-sources.example/p1.html.")
+    a_unread.read("report.md")
+    a_unread.bash("curl -s http://s40.d2-sources.example/p1.html > p1.html", "", write={"p1.html": page})
+    a_unread.write("report.md", "# Report\n- Monthly price: $39\n")
+    vals_unread = {f["value"] for f in a_unread.evidence("Done.")["findings"] if f["kind"] == "unsourced"}
+    assert "$39" in vals_unread
+
+
+

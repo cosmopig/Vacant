@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Ostyra Sync</title></head><body>
+<h1>Ostyra Sync</h1>
+<p>Ostyra Sync is a planning tool for distributed teams. The company was founded in 2013 and is headquartered in Ghent. The current release is v4.1.9.</p>
+<p>Plans start at $24 per seat per month, billed annually. A single workspace supports up to 25 members, and every user gets 75 GB of storage. New accounts get a free trial of 30 days.</p>
+<p>The public API allows 90 requests per minute per token. Human support is available Monday–Friday, 17:00–20:00 UTC.</p>
+<h2>Specifications</h2>
+<table><tr><td>monthly price per seat</td><td>$24</td></tr><tr><td>latest version</td><td>v4.1.9</td></tr><tr><td>maximum team size</td><td>25 members</td></tr><tr><td>API rate limit</td><td>90 requests per minute</td></tr><tr><td>storage per user</td><td>75 GB</td></tr><tr><td>free trial length</td><td>30 days</td></tr><tr><td>year founded</td><td>2013</td></tr><tr><td>headquarters city</td><td>Ghent</td></tr><tr><td>support hours</td><td>Monday–Friday, 17:00–20:00 UTC</td></tr></table>
+<h2>Previous versions</h2>
+<ul><li>v4.0.1</li><li>v3.15.7</li></ul>
+</body></html>

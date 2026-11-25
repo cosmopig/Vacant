@@ -1,0 +1,33 @@
+# Product comparison
+
+Fill in every ____ with the value exactly as the product's page states it.
+
+## Merondo Ledger
+- Merondo Ledger — monthly price per seat: $9
+- Merondo Ledger — latest version: v7.9.5
+- Merondo Ledger — API rate limit: 300 requests per minute
+- Merondo Ledger — free trial length: 10 days
+
+## Quilet Works
+- Quilet Works — monthly price per seat: $39
+- Quilet Works — latest version: v8.2.10
+- Quilet Works — API rate limit: 1,800 requests per minute
+- Quilet Works — free trial length: 14 days
+
+## Ostyra Sync
+- Ostyra Sync — monthly price per seat: $24
+- Ostyra Sync — latest version: v4.1.9
+- Ostyra Sync — API rate limit: 90 requests per minute
+- Ostyra Sync — free trial length: 30 days
+
+## Fenari Cloud
+- Fenari Cloud — monthly price per seat: $19
+- Fenari Cloud — latest version: v5.4.1
+- Fenari Cloud — API rate limit: 120 requests per minute
+- Fenari Cloud — free trial length: 60 days
+
+## Zanet Works
+- Zanet Works — monthly price per seat: $18
+- Zanet Works — latest version: v5.11.12
+- Zanet Works — API rate limit: 60 requests per minute
+- Zanet Works — free trial length: 10 days

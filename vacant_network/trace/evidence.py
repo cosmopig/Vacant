@@ -39,7 +39,7 @@ import re
 import tomllib
 from typing import Any
 
-from .blame import Step, Trace
+from .blame import Blamer, Step, Trace
 from .recorder import Recorder
 from .tools import tool_kind
 
@@ -1169,9 +1169,48 @@ class Evidence:
         return out
 
     # the corpus of what this task observed ─────────────────────────
+    def _fetched_files(self, steps: list[Step]) -> set[str]:
+        """這一回合裡只由純抓網頁步驟寫出的工作區檔案（重用 `blame.Blamer._fetch_of` 判準）。
+
+        `curl U > f`（非本機 URL、整條指令都是抓網頁）寫出的檔內容來自外部，不是 agent 自己打的；
+        後續 `read`／`cat` 該檔時算有效來源。只要有任何非純抓取步驟（edit/write、echo/printf、腳本、
+        本機 URL 抓取等）也寫過同一檔，就不算純抓取檔，避免先寫假值再 `curl >> f` 或抓完改寫來洗出處。"""
+        blamer = Blamer(self.tr)
+        fetched: set[str] = set()
+        tainted: set[str] = set()
+        for s in steps:
+            if not s.writes:
+                continue
+            outs: set[str] = set()
+            if tool_kind(s.tool) == "shell" and not s.ambiguous:
+                _reads, _scripts, runs_code = blamer._referenced_files(s)
+                fetch = None if runs_code else blamer._fetch_of(s)
+                if fetch is not None and not fetch["local"]:
+                    inp = self.tr.input_obj(s)
+                    cwd = (inp.get("workdir")
+                           if isinstance(inp, dict) and isinstance(inp.get("workdir"), str)
+                           else None)
+                    if cwd:
+                        cwd = blamer._rel(cwd)
+                    for o in fetch.get("outputs") or []:
+                        outs.add(blamer._rel(o, cwd) or blamer._rel(o) or o)
+            for w in s.writes:
+                if isinstance(w, dict) and w.get("after") is None and "after" in w:
+                    continue                      # 刪檔不算寫
+                p = str(w["path"])
+                if p in outs:
+                    fetched.add(p)
+                else:
+                    tainted.add(p)
+        return fetched - tainted
+
     def corpus(self, steps: list[Step], deliverables: set[str], observed_files: set[str],
-               start_idx: str | None, prompt_texts: list[str]) -> str:
+               start_idx: str | None, prompt_texts: list[str],
+               *, fetched_only: set[str] | None = None) -> str:
         parts = list(prompt_texts)
+        if fetched_only is None:
+            fetched_only = self._fetched_files(steps)
+        self_written = deliverables - fetched_only
         for s in steps:
             kind = tool_kind(s.tool)
             if kind == "write":
@@ -1185,7 +1224,7 @@ class Evidence:
             # 2429 被當成「讀自己的交付物」丟掉，答對的答案被退回——6 次誤報的根因）
             runs_code = bool(INTERPRETER.match(inp)) or any(_ext(r) in CODE_HINT_EXT for r in refs)
             if refs and not runs_code and all(any(r.endswith(d) or d.endswith(r)
-                                                   for d in deliverables) for r in refs):
+                                                   for d in self_written) for r in refs):
                 continue                          # 只是回頭讀自己寫的交付物：不算出處
             parts.append(out)
         for f in observed_files:
@@ -1273,8 +1312,11 @@ class Evidence:
                     "target": list(delivs.keys())[0] if delivs else "the requested output"
                 })
         materials_named = bool(named or dir_members)
-        corpus = self.corpus(steps, deliv_set, observed, start_idx, prompt_texts)
-        values, value_notes = self._values(steps, delivs, corpus, task_texts, materials_named)
+        fetched_only = self._fetched_files(steps)
+        corpus = self.corpus(steps, deliv_set, observed, start_idx, prompt_texts,
+                             fetched_only=fetched_only)
+        values, value_notes = self._values(steps, delivs, corpus, task_texts, materials_named,
+                                           fetched_only=fetched_only)
         only_answer = any(ONLY_ANSWER.search(t) for t in task_texts)
         for v in values:
             v["single_answer"] = only_answer or v.pop("_short")
@@ -1312,8 +1354,10 @@ class Evidence:
                 "final_text_seen": bool(self.final_text)}
 
     def _values(self, steps: list[Step], delivs: dict[str, tuple[str, str]], corpus: str,
-                prompt_texts: list[str], materials_named: bool
+                prompt_texts: list[str], materials_named: bool,
+                *, fetched_only: set[str] | None = None
                 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        fetched_only = fetched_only or set()
         notes: dict[str, Any] = {"checked": 0, "traced": 0, "derived": 0, "exempt": 0,
                                  "not_typed": 0, "not_traced_note_only": []}
         step_calc_nums = [n.value * n.scale for s in steps if tool_kind(s.tool) != "read"
@@ -1342,6 +1386,8 @@ class Evidence:
         step_inputs = [(s, self.tr.input_text(s)) for s in steps]
         out = []
         for path, (old, new) in sorted(delivs.items()):
+            if path in fetched_only:
+                continue
             ext = _ext(path)
             if ext in CODE_HINT_EXT or ext not in DOC_EXT:
                 continue

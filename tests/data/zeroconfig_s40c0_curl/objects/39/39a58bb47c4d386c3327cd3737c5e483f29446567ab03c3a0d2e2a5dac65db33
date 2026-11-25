@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Zanet Works</title></head><body>
+<h1>Zanet Works</h1>
+<p>Zanet Works is a workflow tool used by agencies. The company was founded in 2015 and is headquartered in Bergen. The current release is v5.11.12.</p>
+<p>Plans start at $18 per seat per month, billed annually. A single workspace supports up to 250 members, and every user gets 50 GB of storage. New accounts get a free trial of 10 days.</p>
+<p>The public API allows 60 requests per minute per token. Human support is available Wednesday–Saturday, 18:00–20:00 UTC.</p>
+<h2>Specifications</h2>
+<table><tr><td>monthly price per seat</td><td>$18</td></tr><tr><td>latest version</td><td>v5.11.12</td></tr><tr><td>maximum team size</td><td>250 members</td></tr><tr><td>API rate limit</td><td>60 requests per minute</td></tr><tr><td>storage per user</td><td>50 GB</td></tr><tr><td>free trial length</td><td>10 days</td></tr><tr><td>year founded</td><td>2015</td></tr><tr><td>headquarters city</td><td>Bergen</td></tr><tr><td>support hours</td><td>Wednesday–Saturday, 18:00–20:00 UTC</td></tr></table>
+<h2>Previous versions</h2>
+<ul><li>v5.10.9</li><li>v5.7.7</li><li>v5.5.6</li></ul>
+</body></html>

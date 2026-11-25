@@ -1,0 +1,1 @@
+{"command": "curl -s http://s40.d2-sources.example/p1.html > p1.html\ncurl -s http://s40.d2-sources.example/p2.html > p2.html\ncurl -s http://s40.d2-sources.example/p3.html > p3.html\ncurl -s http://s40.d2-sources.example/p4.html > p4.html\ncurl -s http://s40.d2-sources.example/p5.html > p5.html"}
