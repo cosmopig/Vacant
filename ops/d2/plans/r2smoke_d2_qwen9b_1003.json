@@ -1,0 +1,48 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "id": "r2smoke_d2_qwen9b_1003",
+ "seed": 20261144,
+ "purpose": "第二輪冒煙（只看接線：產品 v2 wheel、c_verify 的第二次檢查與退回、d_diff 的差異提示）；s51 不在主批次；數字不進任何分析。",
+ "materials": {
+  "dir": "~/dev/ops/d2_materials/seed20261137_ffnz",
+  "generator": "ops/d2/gen_materials.py --seed 20261137 --sets 60 --cycle-types F,F,N,Z",
+  "manifest_sha256": "1db13cd489c948036b43f2c5abbbee6a1bcb20af92c085bec817c1355dd4d45b",
+  "sets": [
+   "s51"
+  ]
+ },
+ "arms": [
+  "c",
+  "c_verify",
+  "d_diff"
+ ],
+ "jobs": 1,
+ "agent_timeout_s": 600,
+ "server": {
+  "port": 18214
+ },
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2v2_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v2",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v2_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 3ae341ea5",
+  "wheel": "~/dev/ops/d2_release/3ae341ea5/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "bb26b19a77c5b73f07fe8a9c4dde2f40f36db76cc03d7923901dff3cb6877eb9",
+  "venv": "~/dev/ops/d2v2_venv（不可編輯安裝）",
+  "hooks": "`vacant install --agents pi|claude --mode observe` 用這個 venv 在隔離 HOME 真的寫出（~/dev/ops/agentcfg/d2v2、d2claude_v2）"
+ },
+ "prereg": {
+  "note": "冒煙，不預註冊判準。"
+ }
+}
