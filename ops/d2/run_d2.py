@@ -408,6 +408,7 @@ class Run:
                     shutil.rmtree(live / d)
                 shutil.copytree(snap / d, live / d, symlinks=True)
             prev_pages = self.page_hashes(set_id, 0)
+            handed_nosrc: set[str] = set()
             for k in range(1, self.n_cycles[set_id] + 1):
                 if self.stop.is_set():
                     return
@@ -425,14 +426,23 @@ class Run:
                     items = []
                     by_line: dict[int, dict] = {}
                     for e in sc["claims"]:
-                        if e["status"] != "unchanged":
-                            by_line.setdefault(e["line"], e)
+                        if e["status"] == "unchanged":
+                            continue
+                        if e["status"] == "no_source":
+                            # 沒有出處的行只交辦一次（同一行文字）；之後算「沒有在監看」，不再每週期重交（先導第三輪）
+                            sig = lines[e["line"] - 1].strip()
+                            if sig in handed_nosrc:
+                                continue
+                        by_line.setdefault(e["line"], e)
+                    for ln, e in by_line.items():
+                        if e["status"] == "no_source":
+                            handed_nosrc.add(lines[ln - 1].strip())
                     for ln in sorted(by_line):
                         e = by_line[ln]
                         src = (e.get("source") or {}).get("url") or PROMPTS["c_nosrc"].format(urls=" ".join(urls))
                         items.append(PROMPTS["c_item"].format(line=ln, text=lines[ln - 1].strip(), src=src))
                     info["sources_check"] = {"counts": sc["counts"], "affected_lines": sc["affected_lines"],
-                                             "wall_s": sc["_wall_s"]}
+                                             "handed_lines": sorted(by_line), "wall_s": sc["_wall_s"]}
                     if items:
                         info["agent"] = self.run_agent(live, PROMPTS["c"].format(items="\n".join(items)), cdir / "run")
                 elif arm == "d":

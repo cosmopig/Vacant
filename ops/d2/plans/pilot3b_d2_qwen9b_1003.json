@@ -1,0 +1,11 @@
+{"schema": "vacant.d2.plan/1", "id": "pilot3b_d2_qwen9b_1003", "seed": 3104,
+ "purpose": "先導第三輪 b（同組重跑，sources 片段再切到逗號、確認過就更新基準；c 臂沒出處的行只交辦一次。探索性；v2 教材：每組四個週期 F,F,N,Z 洗牌；驗證 N／Z 週期的行為與成本，組 s51–s56 不進主批次）。原第一輪說明：先導（探索性，不進確認性分析）：最小模型 qwen3.5-9b（不思考）在 6 組來源上跑初稿＋四臂×3 週期。看：出處覆蓋率、c 臂漏抓與成本、d 臂、稽核重算是否一致、執行時間。據此決定主批次設計；改了什麼記在 ops/d2/DESIGN_LOG.md。",
+ "materials": {"dir": "~/dev/ops/d2_materials/seed20261126_ffnz", "generator": "ops/d2/gen_materials.py --seed 20261126 --sets 60 --cycle-types F,F,N,Z",
+               "manifest_sha256": "9d1afebe6e63792db3c9f83379f268c7c0632d1c659e41c6c2493820156ba8c6",
+               "sets": ["s51", "s52", "s53", "s54", "s55", "s56"]},
+ "arms": ["a", "b", "c", "d"], "jobs": 3, "agent_timeout_s": 600,
+ "server": {"port": 18194},
+ "model": {"provider": "lms1003q9", "model": "qwen/qwen3.5-9b"},
+ "vacant_python": "~/dev/ops/d2dev_venv/bin/python",
+ "agentcfg": {"dir": "~/dev/ops/agentcfg/d2dev", "copy": ["models.json", "extensions"],
+              "install_json": "~/dev/ops/agentcfg/d2obs_state/adapters/install.json"}}

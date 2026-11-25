@@ -78,7 +78,7 @@ def _segments(text: str) -> set[str]:
     out: set[str] = set()
     for part in re.split(r"<[^>]+>|\n", t):
         part = _html.unescape(part).strip()
-        for seg in re.split(r"(?<=[.!?])\s+", part):
+        for seg in re.split(r"(?<=[.!?])\s+|[,;]\s+", part):     # 「1,800」裡的逗號後面沒有空白，不會被切開
             seg = " ".join(seg.split())
             if seg:
                 out.add(seg)
@@ -129,8 +129,9 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
     1. `blame` 找寫下這一行的那一步，以及它的出處。
     2. 同一個工作階段、寫入之前抓過的內容裡含這個值的，都是候選；不只一個網址時，挑和這一行共用字最多的
        （產品名通常只在自己那一頁），平手照 `blame` 的。`ambiguous` 列出其他也含這個值的網址。⇒ 仍是推論層。
-    3. 基準：寫入之後 agent 又抓了同一個網址、而且帶著這個值的片段**一個都沒變**（＝它看過、來源仍同樣支持這個值）
-       ⇒ 基準換成那一次；否則用寫入前讀到的那一次。
+    3. 基準：寫入之後 agent 又抓了同一個網址、那一頁仍帶著這個值、而這一行之後沒再改（＝它對著新的來源再確認過）
+       ⇒ 基準換成最後那一次；否則用寫入前讀到的那一次。⚠ 新頁面上的值若只剩在別的地方（例如舊版本移進版本紀錄），
+       agent 沒改也會被當成確認過——那是 agent 被交辦後沒改對，不會再被重複交辦。
     """
     ws = pathlib.Path(ws).resolve()
     rec = rec or Recorder(ws)
@@ -175,10 +176,10 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
         top = [u for u in urls if score[u] == best]
         url = bsrc.get("ref") if bsrc.get("ref") in top else max(top, key=lambda u: max(r["seq"] for r in cands if r["url"] == u))
         origin = max((r for r in cands if r["url"] == url), key=lambda r: r["seq"])
-        carriers = _carriers(origin["text"], matched)
         base = origin
         for r in recs:
-            if r["url"] == url and r["seq"] > base["seq"] and carriers and carriers <= _segments(r["text"]):
+            # 寫入之後 agent 又讀了同一頁、那一頁仍帶著這個值，而這一行到現在都沒再改 ⇒ 等於它對著新的來源再確認過
+            if r["url"] == url and r["seq"] > max(base["seq"], w.seq) and _carriers(r["text"], matched):
                 base = r
         e["matched"] = matched
         e["source"] = {"url": url, "into": origin["into"], "step": origin["step"], "step_n": origin["n"],
