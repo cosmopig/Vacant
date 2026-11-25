@@ -1,0 +1,12 @@
+D2' Analysis Verdict: INCOMPLETE (sets=43, B=10000, seed=20261125)
+  INCOMPLETE missing (16): s43/a/c1(both), s43/a/c2(both), s43/a/c3(both), s43/a/c4(both), s43/c_verify/c1(both), s43/c_verify/c2(both), s43/c_verify/c3(both), s43/c_verify/c4(both), s43/d/c1(both), s43/d/c2(both) (+6 more)
+  [1] Coverage: 716/860 = 83.3% (with_source=728/860, threshold>=80%) -> PASS
+  [2] Miss diff (c-b): 0.0437 (95% upper=0.0987, margin<0.10; c=8.8%, b=4.4%, n=160) -> UNRESOLVED
+  [3] Token ratio (b/c): 0.64x 95% CI [0.25, 2.96] (n=172/172) -> FAIL
+  [3] Calls ratio (b/c): 2.55x 95% CI [1.47, 4.99] (n=172/172)
+  [3] Wall  ratio (b/c): 3.24x 95% CI [1.74, 6.78] (n=172/172)
+  [4] Secondary:
+      c_vs_d: miss(c-d)=0.0385 (upper95=0.1118), tok(d/c)=2.52x [0.78, 40.01]
+      d_vs_b: miss(d-b)=0.0063 (upper95=0.0513), tok(b/d)=0.35x [0.17, 0.74]
+      false_mod: a=0/2722(0.0% [0.0%, 0.0%]); b=3/3202(0.1% [0.0%, 0.3%]); c=2/3013(0.1% [0.0%, 0.2%]); c_verify=7/2948(0.2% [0.0%, 0.6%]); d=2/3012(0.1% [0.0%, 0.2%]); d_diff=24/3069(0.8% [0.3%, 1.4%])
+      residual_stale: a(c1=38,c2=88,c3=116,c4=156) b(c1=1,c2=1,c3=6,c4=2) c(c1=2,c2=10,c3=14,c4=14) c_verify(c1=2,c2=3,c3=6,c4=6) d(c1=0,c2=3,c3=5,c4=5) d_diff(c1=0,c2=0,c3=0,c4=2)
