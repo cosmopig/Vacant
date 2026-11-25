@@ -633,6 +633,13 @@ class Run:
 
     def go(self) -> int:
         self.root.mkdir(parents=True, exist_ok=True)
+        # 同一個 root 只准一個執行器（11-25：一次發射的輸出被吞掉、以為沒起來又發一次，兩個執行器共用 live/）
+        import fcntl
+        self._lockf = open(self.root / ".runner.lock", "w")
+        try:
+            fcntl.flock(self._lockf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            raise SystemExit(f"refusing: another runner holds {self.root / '.runner.lock'}")
         runj = self.root / "RUN.json"
         plan_sha = sha_file(self.plan_path)
         if runj.exists():
