@@ -1,0 +1,43 @@
+{
+ "chains": {
+  "s01/a": {
+   "chain_sha256": "c6b9380f2fa048cb47373904eb3dd67e326f0303a1b6f14d8054bf68cd07af06",
+   "entries": 15,
+   "last_hash": "e3b9fe67d0684b4d525035ef4c7909ab71a7181b02b9735b687cef401091e92f",
+   "last_seq": 15,
+   "trust_sha256": "b966848ce6362083ed8f08e2b168cb4e1fa87c639899476c0edd665eb98ecb13"
+  },
+  "s01/b": {
+   "chain_sha256": "f5de9b149ea398c277a995d69fa6459b8d539fff2fcca5c652729ead2f283adb",
+   "entries": 81,
+   "last_hash": "7df4fb128c92f78b9dd867d193a34bb09e6e30e706e79789f1a4253c72ef6ce9",
+   "last_seq": 81,
+   "trust_sha256": "b966848ce6362083ed8f08e2b168cb4e1fa87c639899476c0edd665eb98ecb13"
+  },
+  "s01/c": {
+   "chain_sha256": "5d85f6d3b4884744405f4378cc476e144087400eab40edb49a902236572d405a",
+   "entries": 35,
+   "last_hash": "24a3d3b95e46b7c76456630b2c4451b2a2dac20a45a102175fa0cb4c9839bb42",
+   "last_seq": 35,
+   "trust_sha256": "b966848ce6362083ed8f08e2b168cb4e1fa87c639899476c0edd665eb98ecb13"
+  },
+  "s01/c0": {
+   "chain_sha256": "c6b9380f2fa048cb47373904eb3dd67e326f0303a1b6f14d8054bf68cd07af06",
+   "entries": 15,
+   "last_hash": "e3b9fe67d0684b4d525035ef4c7909ab71a7181b02b9735b687cef401091e92f",
+   "last_seq": 15,
+   "trust_sha256": "b966848ce6362083ed8f08e2b168cb4e1fa87c639899476c0edd665eb98ecb13"
+  },
+  "s01/d": {
+   "chain_sha256": "02eaed6c3a0767e949954212a59dba7abd7c8a3defb516b5dc298e077ae32ec9",
+   "entries": 63,
+   "last_hash": "3c3112277fe01e2d947c1db42a58424bb05b620ddf1d36b74dbf217f3845813a",
+   "last_seq": 63,
+   "trust_sha256": "b966848ce6362083ed8f08e2b168cb4e1fa87c639899476c0edd665eb98ecb13"
+  }
+ },
+ "root": "/home/user1/dev/ops/d2_runs/hosmoke_qwen9b",
+ "run_json_sha256": "5dfc9c656845b9b2a8622982253c8e5f57ce2ca3cfc248bb0a16385a028e2996",
+ "schema": "vacant.d2.anchor/1",
+ "timestamp": "2026-11-25T10:20:41Z"
+}
