@@ -83,7 +83,7 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
                          "changed": False, "pre": None})
         for arm in (arms or sorted({k.split("/")[0] for k in rep if "/" in k})):
             prev = v0
-            ctypes = [c.get("type", "F") for c in s["cycles"]]
+            ctypes = [c.get("type", "F") for c in s.get("cycles") or []] + ["F"] * len(truth)
             for k in range(1, len(truth)):
                 key = f"{arm}/{k}"
                 if key not in rep:

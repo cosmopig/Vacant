@@ -23,3 +23,4 @@
 | 11-25 06:12 | 先導第三輪 c：同 6 組重跑 | 實跑確認上面的修正 | — |
 | 11-25 06:25 | 產品 `sources.py`：抓網頁的步驟先拿掉只做分隔的 `echo`／`printf` 段（參數裡沒有獨立數字，`p1` 這種緊跟字母的不算）再判；一個網址時只要輸出裡有內容就用輸出（`curl U > /tmp/f && cat /tmp/f`），檔在工作區外也行。`blame` 加 `fetch_of_command()` 給它用（`blame` 自己的判準不變——它也追文字值） | 先導第三輪 c：s55 用 `echo "===p1 done==="` 分隔、s56 用 `curl … > /tmp/p1.html && cat /tmp/p1.html`，兩組 20 條都沒有出處，c 臂漏 6 條。修正後重播全部 31 份初稿（含冒煙）：有出處 550 條，548 條指到正確頁；沒有出處的 70 條都是初稿把範本改掉、整份重寫，或重播時絕對路徑對不上 | 先導第三輪 c 的 `sources_check.json` 與 c0 的 agent 指令 |
 | 11-25 06:25 | **到此凍結**：主批次用 auto/redo 這一版 commit 的 wheel（不可編輯安裝），之後不再改 `sources.py`／`blame.py`／執行器／評分的判準；再有改動另開批次、不併入 | 預註冊要在看主批次結果之前定案 | — |
+| 11-25 06:20 | `score_d2.py`：manifest 沒有 `cycles` 欄位時（只有合成測試會這樣）週期類型當成 F；真實 manifest 的結果不變。併入 agy 的零設定誤判修正（`evidence.py`）與報告產生器（`report_d2.py`）——兩者都不在主批次凍結的 wheel 裡 | agy 的報告測試用的合成 manifest 沒有 `cycles` | — |
