@@ -237,7 +237,7 @@ class Run:
         self.plan = json.loads(plan_path.read_text())
         self.root = root
         self.fake = fake
-        self.mat = pathlib.Path(os.path.expanduser(self.plan["materials"]["dir"]))
+        self.mat = pathlib.Path(os.path.expandvars(os.path.expanduser(self.plan["materials"]["dir"])))
         self.manifest_sha = sha_file(self.mat / "manifest.json")
         if self.manifest_sha != self.plan["materials"]["manifest_sha256"]:
             raise SystemExit(f"manifest sha mismatch: {self.manifest_sha}")
@@ -280,6 +280,25 @@ class Run:
         host = HOST_FMT.format(set=set_id)
         return [f"http://{host}/{pg}" for pg in self.pages[set_id]]
 
+    def live_dir(self, set_id: str) -> pathlib.Path:
+        """agent 的工作目錄。計畫有 `private_live`（第三輪稽核 11-25 第 5 點之後的批次）時放在一個不可列舉的目錄（0711）底下、
+        名字是 HMAC(批次秘密, 組號) 的隨機字串：agent 從自己的工作目錄往上 `ls` 看不到別組、也看不到批次目錄與教材。
+        同一個使用者猜得到完整路徑時仍讀得到——這不是沙箱，只是擋掉列舉。"""
+        pl = self.plan.get("private_live")
+        if not pl:
+            return self.root / "live" / set_id
+        import hmac
+        base = pathlib.Path(os.path.expanduser(pl))
+        base.mkdir(parents=True, exist_ok=True)
+        os.chmod(base, 0o711)
+        sec = self.root / ".live_secret"
+        if not sec.exists():
+            import secrets
+            sec.write_text(secrets.token_hex(32))
+            os.chmod(sec, 0o600)
+        tok = hmac.new(bytes.fromhex(sec.read_text().strip()), set_id.encode(), "sha256").hexdigest()[:24]
+        return base / tok
+
     def index_url(self, set_id: str) -> str | None:
         ix = self.index.get(set_id)
         return f"http://{HOST_FMT.format(set=set_id)}/{ix}" if ix else None
@@ -315,7 +334,7 @@ class Run:
 
     def agent_env(self, live: pathlib.Path) -> dict:
         p = self.plan
-        env = {k: v for k, v in os.environ.items() if not k.lower().endswith("_proxy")}
+        env = {k: v for k, v in os.environ.items() if not k.lower().endswith("_proxy") and not k.startswith("D2_")}
         if self.agent_kind() == "claude":
             # 正式跑時保留使用者的 HOME（沿用登入的 Claude 訂閱憑證），靠旗標隔離設定；
             # 測試時由外部環境提供隔離的 HOME／CLAUDE_CONFIG_DIR 與 ANTHROPIC_BASE_URL／API_KEY。
@@ -391,6 +410,9 @@ class Run:
     def run_agent(self, live: pathlib.Path, prompt: str, out: pathlib.Path) -> dict:
         """一次 agent 執行。回用量與結束碼。"""
         out.mkdir(parents=True, exist_ok=True)
+        if self.plan.get("no_tool_mention"):     # heldout-v3：所有臂都不提抓取工具，agent 自己決定怎麼讀
+            import re as _re
+            prompt = _re.sub(r" \(read them with curl -s\)| Read pages with curl -s\.| with curl -s", "", prompt)
         (out / "prompt.txt").write_text(prompt)
         fz = self.forced(out)
         if fz is not None:
@@ -487,7 +509,7 @@ class Run:
     # ---------- 一組 ----------
     def do_set(self, set_id: str, arms: list[str]) -> None:
         p = self.plan
-        live = self.root / "live" / set_id
+        live = self.live_dir(set_id)
         cells = self.root / "cells" / set_id
         host = HOST_FMT.format(set=set_id)
         urls = self.urls(set_id)
@@ -706,7 +728,7 @@ class Run:
         port = self.plan["server"]["port"]
         srv = subprocess.Popen([sys.executable, str(HERE / "source_server.py"), "--port", str(port),
                                 "--routes", str(self.routes), "--log", str(self.root / "access.jsonl"),
-                                "--meta", str(self.routes_meta)],
+                                "--meta", str(self.routes_meta)] + (["--dynamic"] if self.plan.get("dynamic_noise") else []),
                                stdout=subprocess.DEVNULL, stderr=open(self.root / "server.err", "a"),
                                start_new_session=True)
         for _ in range(50):

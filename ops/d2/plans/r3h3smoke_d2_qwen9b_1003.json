@@ -1,0 +1,51 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "agent_timeout_s": 600,
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2v3_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v3",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v3_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 7f46167a5",
+  "wheel": "~/dev/ops/d2_release/7f46167a5/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "416a8f13d9c1582f8546cf6717ad26f96097e270ecfc4dda84c47598e1204d9c",
+  "venv": "~/dev/ops/d2v3_venv（不可編輯安裝）",
+  "hooks": "`vacant install --agents pi --mode observe` 用 d2v3_venv 在隔離 HOME 真的寫出（~/dev/ops/agentcfg/d2v3）"
+ },
+ "id": "r3h3smoke_d2_qwen9b_1003",
+ "seed": 20261162,
+ "jobs": 2,
+ "server": {
+  "port": 18225
+ },
+ "arms": [
+  "a",
+  "b",
+  "cCGR",
+  "d_diff"
+ ],
+ "snapshot_after_c0": true,
+ "dynamic_noise": true,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "materials": {
+  "dir": "${D2_PRIVATE}/heldout_v3_sample_seed99",
+  "generator": "ops/d2/heldout_gen3/gen_heldout3.py --seed 99 --sets 2（heldout-v3 範例，不是確認教材）",
+  "manifest_sha256": "a1eb13e117ab5b9fdef8a3325d34e4b87ac6e03dc385f0fadc67f135650af0dd",
+  "sets": [
+   "s01",
+   "s02"
+  ]
+ },
+ "purpose": "冒煙（不是證據）：第三個產生器（heldout-v3）＋每次抓取的雜訊＋不提工具＋不可列舉的工作目錄，在 runner 與產品 v3 上跑得通。"
+}
