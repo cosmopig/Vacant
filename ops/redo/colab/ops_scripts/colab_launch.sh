@@ -15,8 +15,10 @@ for g in ${GPU_ORDER:-L4 G4 A100}; do
     echo "$(date -u +%FT%TZ) LAUNCH_OK $g" >> $LOG
     # 11/24（W3-5 JS 重跑 VOID 的根因 4）：每個帳號一支預算看門，看這個帳號上所有批次（沒在跑才起）
     BU="redo-budget-$(basename "$CBP")"
+    # 11/25 使用者：第一個帳號（colab）餘額低於 20 就不用 → 那個帳號的地板 20；第二個帳號照預設 5
+    FL=5; [ "$(basename "$CBP")" = colab ] && FL=20
     systemctl --user is-active -q "$BU" || systemd-run --user --unit="$BU" -p KillMode=process --setenv=PATH="$PATH" \
-      /usr/bin/python3 $HOME/dev/ops/colab_budget_watch.py --colab-bin "$CBP" >> $LOG 2>&1
+      /usr/bin/python3 $HOME/dev/ops/colab_budget_watch.py --colab-bin "$CBP" --floor $FL >> $LOG 2>&1
     st=$(echo "$out" | grep -oE "State file : .*" | awk '{print $4}')
     # 量測專用的短命 session（probe_*）：跑完 1 對後在同一台 VM 量並行數再停機；實驗批次一律走下面那行
     case "$NAME" in probe_e4b*) exec $HOME/dev/ops/colab_keepalive_probe2.sh "$st" gemma-4-e4b-it-qat ;; probe_12b*) exec $HOME/dev/ops/colab_keepalive_probe2.sh "$st" gemma-4-12b-it-qat ;; esac
