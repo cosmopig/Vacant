@@ -762,6 +762,9 @@ class Blamer:
             for i, w in enumerate(rest):                  # 重導向的目標
                 if w in (">", ">>") and i + 1 < len(rest):
                     outputs.append(rest[i + 1])
+            if head in ("echo", "printf") and all(not re.search(r"[A-Za-z0-9]", w) for w in rest
+                                                   if w not in (">", ">>") and w not in outputs):
+                continue                                  # `echo ""`、`echo ---`：分隔用，造不出值（D2′ 先導 2026-11-25）
             if head in _PASSTHROUGH:
                 if head in ("grep", "egrep", "fgrep") and any(
                         w.startswith("-") and not w.startswith("--") and "c" in w

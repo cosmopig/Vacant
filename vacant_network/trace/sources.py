@@ -40,6 +40,8 @@ from .locate import Location
 from .recorder import Recorder
 
 VERSION_RE = re.compile(r"(?<![\w.])v?\d+(?:\.\d+){2,}(?![\w.])")
+_DOC_START = re.compile(r"(?i)(?=<!doctype html)")
+_HTML_START = re.compile(r"(?i)(?=<html[\s>])")
 UNIT_RE = re.compile(r"\s?([A-Za-z%][A-Za-z%/]*)")
 PLACEHOLDER_RE = re.compile(r"_{3,}|\bTODO\b|\bTBD\b")
 FETCH_TIMEOUT_S = 20
@@ -103,6 +105,16 @@ def _fetch_records(trace: B.Trace, blamer: B.Blamer) -> list[dict[str, Any]]:
             if txt:
                 out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": f["urls"][0],
                             "into": None, "text": txt})
+        elif len(f["urls"]) > 1 and not f["outputs"]:
+            # 一個指令依序抓好幾頁、全部印在輸出裡（`curl U1 && echo "" && curl U2`）：輸出是 HTML 時按文件開頭切，
+            # 份數和網址數相同才依序對上（推論；不是 HTML 或對不上就不當成任何一頁的內容）
+            txt = trace.output_text(st)
+            pat = _DOC_START if txt and _DOC_START.search(txt) else _HTML_START
+            chunks = [c for c in pat.split(txt) if c.strip()] if txt else []
+            if len(chunks) == len(f["urls"]) and all(pat.match(c.lstrip()) for c in chunks):
+                for u, c in zip(f["urls"], chunks):
+                    out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": u,
+                                "into": None, "text": c, "split": True})
         for o, us in (f.get("by_output") or {}).items():
             if len(us) != 1:
                 continue
@@ -183,7 +195,7 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
                 base = r
         e["matched"] = matched
         e["source"] = {"url": url, "into": origin["into"], "step": origin["step"], "step_n": origin["n"],
-                       "observed": origin["into"] is None,
+                       "observed": origin["into"] is None and not origin.get("split"),
                        "ambiguous": [u for u in urls if u != url] or None,
                        "picked_by": "blame" if url == bsrc.get("ref") else "context",
                        "seen_sha256": _sha(origin["text"]),
