@@ -351,10 +351,31 @@ class Run:
         return ["pi", "-p", "--mode", "json", "--session-dir", str(out / "sessions"),
                 "--provider", p["model"]["provider"], "--model", p["model"]["model"], prompt]
 
+    def forced(self, out: pathlib.Path) -> dict | None:
+        """root/forced_noop.json：{"<set>/<arm>/<k>": {"reason": …, "usage": …}}——事前登記在 ADDENDA 的處理
+        （例如照預註冊字面把一次被伺服器拒絕的執行算成「執行了、沒有改動」）：不叫 agent，照記那一次的用量。"""
+        f = self.root / "forced_noop.json"
+        if not f.exists():
+            return None
+        try:
+            rel = out.relative_to(self.root / "cells")          # <set>/<arm>/cycle_<k>/run
+        except ValueError:
+            return None
+        parts = rel.parts
+        if len(parts) < 3 or not parts[2].startswith("cycle_"):
+            return None
+        return json.loads(f.read_text()).get(f"{parts[0]}/{parts[1]}/{parts[2].split('_')[1]}")
+
     def run_agent(self, live: pathlib.Path, prompt: str, out: pathlib.Path) -> dict:
         """一次 agent 執行。回用量與結束碼。"""
         out.mkdir(parents=True, exist_ok=True)
         (out / "prompt.txt").write_text(prompt)
+        fz = self.forced(out)
+        if fz is not None:
+            res = {"rc": "forced_noop", "wall_s": fz.get("wall_s", 0), "usage": fz.get("usage"), "forced": fz}
+            write_json(out / "run.json", res)
+            self.log(f"forced_noop {out.relative_to(self.root)}: {fz.get('reason', '')[:80]}")
+            return res
         p = self.plan
         t0 = time.time()
         argv = self._agent_argv(live, prompt, out)
