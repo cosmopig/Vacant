@@ -525,6 +525,7 @@ def analyze(
     expected_cycles: Sequence[int] = DEFAULT_CYCLES,
     expected_sets: Sequence[str] | None = None,
     cost_metric: str = "tokens",
+    primary_arm: str = "c",
 ) -> dict[str, Any]:
     """執行完整 D2′ 群集 bootstrap 分析並回傳結構化結果。
     `cost_metric`：主要成本比值用的量；本機模型用 "tokens"，Claude（有提示快取）用 "cost_usd"（各計畫事前寫定）。"""
@@ -535,17 +536,30 @@ def analyze(
     weights = draw_cluster_weights(len(set_ids), n_boot=n_boot, seed=seed)
 
     cov = evaluate_coverage(audit_data, threshold=COVERAGE_THRESHOLD)
-    # 兩個確認性家族（vacant-hope 11-25）：c 對 b、c 對 d，各用 α/2＝0.025
-    miss_cb = compute_miss_diff(rows, "c", "b", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+    # 兩個確認性家族（vacant-hope 11-25）：P 對 b、P 對 d，各用 α/2＝0.025；P＝主要臂（預設 c；r2heldout_b 事前登記為 c_verify）
+    P = primary_arm
+    miss_cb = compute_miss_diff(rows, P, "b", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
                                 upper_q=0.975, pre_correct_both=True)
-    tok_bc = compute_cost_ratio(costs, "b", "c", cost_metric, set_ids=set_ids, weights=weights,
+    tok_bc = compute_cost_ratio(costs, "b", P, cost_metric, set_ids=set_ids, weights=weights,
                                 threshold=RATIO_THRESHOLD, ci_level=0.975)
-    miss_cd = compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+    miss_cd = compute_miss_diff(rows, P, "d", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
                                 upper_q=0.975, pre_correct_both=True)
-    tok_dc = compute_cost_ratio(costs, "d", "c", cost_metric, set_ids=set_ids, weights=weights,
+    tok_dc = compute_cost_ratio(costs, "d", P, cost_metric, set_ids=set_ids, weights=weights,
                                 threshold=1.0, ci_level=0.975)
-    calls_bc = compute_cost_ratio(costs, "b", "c", "calls", set_ids=set_ids, weights=weights)
-    wall_bc = compute_cost_ratio(costs, "b", "c", "wall_s", set_ids=set_ids, weights=weights)
+    calls_bc = compute_cost_ratio(costs, "b", P, "calls", set_ids=set_ids, weights=weights)
+    wall_bc = compute_cost_ratio(costs, "b", P, "wall_s", set_ids=set_ids, weights=weights)
+    # 主要臂不是 c 時，c 對 b、c 對 d 用同一套判準列為次要（描述）
+    c_as_secondary = None
+    if P != "c" and any(str(r.get("arm")) == "c" for r in rows):
+        c_as_secondary = {
+            "miss_diff_c_b": compute_miss_diff(rows, "c", "b", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+                                               upper_q=0.975, pre_correct_both=True),
+            "ratio_b_c": compute_cost_ratio(costs, "b", "c", cost_metric, set_ids=set_ids, weights=weights,
+                                            threshold=RATIO_THRESHOLD, ci_level=0.975),
+            "miss_diff_c_d": compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+                                               upper_q=0.975, pre_correct_both=True),
+            "ratio_d_c": compute_cost_ratio(costs, "d", "c", cost_metric, set_ids=set_ids, weights=weights,
+                                            threshold=1.0, ci_level=0.975)}
 
     arms_present = sorted({str(r["arm"]) for r in rows if str(r.get("arm")) != "c0"})
     secondary = {
@@ -594,6 +608,8 @@ def analyze(
         overall_cd = "UNRESOLVED"
 
     return {
+        "primary_arm": P,
+        "c_as_secondary": c_as_secondary,
         "verdict_c_d": overall_cd,
         "verdict_parts_c_d": {"coverage": cov_v, "miss_diff_c_d": mcd, "token_ratio_d_c": tdc},
         "confirmatory_c_d": {"miss_diff_c_d": miss_cd, "token_ratio_d_c": tok_dc},
@@ -726,6 +742,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     help=f"Random seed (default {DEFAULT_SEED})")
     ap.add_argument("--out", help="Write JSON result to this path")
     ap.add_argument("--text-out", help="Write human-readable text summary to this path")
+    ap.add_argument("--primary-arm", default="c", help="主要比較的臂（計畫事前寫定；r2heldout_b 是 c_verify）")
     ap.add_argument("--cost-metric", default="tokens", choices=["tokens", "cost_usd", "calls", "wall_s"],
                     help="primary cost ratio metric (pre-registered per plan: local models tokens, Claude cost_usd)")
     a = ap.parse_args(argv)
@@ -748,6 +765,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         expected_cycles=sorted({int(r["cycle"]) for r in score_data.get("rows") or [] if r.get("arm") != "c0"})
         or DEFAULT_CYCLES,
         cost_metric=a.cost_metric,
+        primary_arm=a.primary_arm,
     )
     body = json.dumps(res, ensure_ascii=False, indent=1, sort_keys=True)
     text = format_text(res)
