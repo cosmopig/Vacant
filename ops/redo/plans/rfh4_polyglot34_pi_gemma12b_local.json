@@ -26,8 +26,25 @@
     },
     "env": {
      "PI_SKIP_VERSION_CHECK": "1",
-     "VACANT_HOME": "{logs}/vacant-home"
-    }
+     "VACANT_HOME": "{logs}/vacant-home",
+     "H_INSTALL_JSON": "/home/user1/dev/ops/agentcfg/hook_rc6final_state/adapters/install.json"
+    },
+    "argv": [
+     "/bin/sh",
+     "-c",
+     "mkdir -p \"$VACANT_HOME/adapters\" && cp \"$H_INSTALL_JSON\" \"$VACANT_HOME/adapters/install.json\" && exec pi \"$@\"",
+     "pi",
+     "-p",
+     "--mode",
+     "json",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}",
+     "{prompt}"
+    ]
    }
   },
   "R": {
@@ -172,14 +189,14 @@
   "why": "現有證據偏向「重做」：redo1／redo1_opencode 是 harness 重開、沒裝 Vacant；confirm2／3、E4B、unused40 的產品臂不載入擴充；只有紀錄與交件前檢查的零設定掛鉤，9–10 月幾批大多沒量到差別。但那些是跨批並列，沒有一批把兩個因素放在同一組題、同一台機器上配對比較。",
   "arms": {
    "A": "原生 pi 一次跑到底（1800 秒）；harness 的乾淨設定目錄，只複製 models.json（sha256 57bf25b2…）。與 redo1／confirm2 的 A 臂相同。",
-   "H": "只有紀錄：同 A，但 pi 設定目錄另外放 Vacant rc6-final 的 pi 擴充 `extensions/vacant.ts`（由 ~/dev/ops/rc6rel_venv＝wheel a575c66106a4…，以 `pi_extension_text()` 產生，與 `vacant install` 寫進 ~/.pi/agent 的檔逐字相同；sha256 fe0cfbb9ff883b87…）。掛鉤全程記錄，agent 說做完時查一次紀錄，只在幾乎一定是真問題時在同一個工作階段裡退回（README『掛鉤模式』的五條）。不重開、不跑驗收、不給測試結果。掛鉤的病歷寫在每次嘗試自己的 {logs}/vacant-home（VACANT_HOME），不碰使用者的 ~/.vacant。",
+   "H": "只有紀錄：同 A，但 pi 設定目錄另外放 Vacant rc6-final 的 pi 擴充 `extensions/vacant.ts`（sha256 120690a8…），VACANT_HOME 裡放 `vacant install --agents pi` 寫出的 `adapters/install.json`（mode＝evidence，sha256 35d3a3fd…）。兩個檔都是 2026-11-25 在隔離的 HOME 下以 ~/dev/ops/rc6rel_venv（wheel a575c66106a4…）真的執行 `vacant install --agents pi` 產生的，存在 ~/dev/ops/agentcfg/hook_rc6final{,_state}/。沒有 install.json 時零設定模式是 off（adapters/mode.py），掛鉤只記錄不檢查——所以每次嘗試由 argv 的 sh 包裝先把 install.json 複製進該次的 VACANT_HOME（{logs}/vacant-home）再 exec pi，pi 的參數與 A 相同；不設 VACANT_MODE（mode.py：只給測試用，評測的有 Vacant 組不准設）。掛鉤全程記錄，agent 說做完時查一次紀錄，只在幾乎一定是真問題時在同一個工作階段裡退回（README『掛鉤模式』的五條）。不重開、不跑驗收、不給測試結果。病歷寫在每次嘗試自己的 VACANT_HOME，不碰使用者的 ~/.vacant。",
    "R": "只有重做：harness 的 R3（最多 3 次、單次 600 秒、總 1800 秒），每次從原件的乾淨副本、原提示重來，不給任何失敗資訊；驗收通過就停；交第一個通過的，都沒過交原件測試過最多的（同分取最後）。這就是產品零設定重開（`vacant do`，restart.py：『政策＝ops/redo 的 R3』）的政策原型；不經產品碼。",
    "RF": "重做＋失敗資訊：同 R，唯一差別是第 2、3 次嘗試的提示在原提示後面接 `\\n\\n---\\n` 與下面的提示模板（harness 的 hint＝first_failure）。工作區一樣每次從原件乾淨副本開始。"
   },
   "rf_choice": "選 harness 的 hint＝first_failure，不選產品 `--feedback-mode`：產品的 feedback_mode（localized／generic／none）只在有契約的 `vacant do --contract` 路徑（adapters/run.py）存在，零設定重開（restart.py）沒有這個選項、一律盲重開；要在無契約下用就得寫新的產品碼，或替 34 題各寫契約——那會讓 RF 和 R 的差別不只一個因素。用 harness 的 R／RF，兩臂只差提示文字。語意：first_failure＝harness 驗收（原件測試檔）跑出的第一個失敗測試的 id＋traceback（取最後 800 字元），連同模板截到 400 位元組（HINT_CAP，與 v5 fresh_hint 相同）；它來自驗收結果，不是掛鉤病歷的『追緝回饋』（產品 localized 是後者）。所以 RF 回答的是「把驗收的失敗定位交給下一次」，不是「把病歷交給下一次」。",
   "hint_template_verbatim": "An earlier attempt at this task ended with the tests in this directory not passing. First failing test output from that attempt:\n",
   "ks1": "給下一次嘗試的文字只有模板（上面逐字）與測試框架輸出的失敗位置與內容；沒有責備、沒有行動者（不寫 you／the agent／某人做錯）。redo.py 的 make_hint 每次產生時用 _KS1_BANNED 檢查模板，命中就丟例外停批。測試輸出本身是第三方文字，照原樣截斷、不改寫。",
-  "product_version": "H 臂的擴充來自 rc6-final（release/0.9.2-prep b1ca9b1ff，wheel a575c66106a45dc13a1546cf0b4cd5aa35948935ffef607e0111746f2f83dcbb，安裝在 ~/dev/ops/rc6rel_venv）；掛鉤行程以該 venv 的 python 執行（擴充內的 ARGV 寫死絕對路徑）。R／RF 不經產品碼。全批固定。",
+  "product_version": "H 臂的擴充來自 rc6-final（release/0.9.2-prep b1ca9b1ff，wheel a575c66106a45dc13a1546cf0b4cd5aa35948935ffef607e0111746f2f83dcbb，安裝在 ~/dev/ops/rc6rel_venv）；掛鉤行程以該 venv 的 python3 執行（擴充內的 ARGV 寫死絕對路徑）。R／RF 不經產品碼。全批固定。",
   "primary": "三個預先寫死的比較，各 34 題 × 5 次重複＝170 對、精確雙尾 McNemar，Holm 校正（family α＝0.05）：RF 對 R（紀錄給的資訊在重做之上有沒有額外增益）、H 對 A（只有紀錄有沒有增益）、R 對 A（複製）。b＝只有對照過、c＝只有處理過。同一對（題×重複）的四臂在同一台機器上、依計畫種子決定的順序接連跑。",
   "states": {
    "EFFECTIVE": "該比較的 170 對全部完成（扣 infra_void）、c > b、Holm 校正後拒絕、處理臂驗收放行卻錯＝0。",
@@ -208,7 +225,7 @@
   },
   "power": "預估用 confirm1c（b6 c29，不一致對 20.6%）與 confirm2（b11 c34，26.5%）的不一致比例，另算 15%（RF 與 R 同為重做、H 與 A 同為單次，兩兩之間的不一致比例可能比 A 對重做低）。真差別 5 個百分點、170 對、精確雙尾 McNemar：α＝0.05/3（Holm 最嚴的一級）時檢定力 0.10（26.5%）／0.13（20.6%）／0.18（15%）；α＝0.05 時 0.20／0.24／0.31。80% 檢定力（α＝0.05/3）能抓到的最小真差別約 13／11.5／10 個百分點。RF 對 R、H 對 A 都照這組數字讀：這批能回答「差 10 個百分點以上」這一級；5 個百分點級的差別，沒量到不等於沒有。加倍到 340 對（34×10），5 個百分點的檢定力也只有 0.24–0.45（α＝0.05/3）而時間加倍，所以維持 170 對。計算：精確二項，對不一致對數 D～Bin(170, d) 加總。",
   "manipulation_checks": [
-   "H：每格 {logs}/vacant-home 底下掛鉤的病歷與決定紀錄——數掛鉤事件數、在 stop 時退回（同一工作階段要求補）的次數與類別（README 掛鉤模式五條：要求的檔不存在、失敗步驟被略過、說測試通過但對不上、數值找不到出處、點名的檔沒打開）。有 H 格完全沒有病歷＝掛鉤沒載入，那一格照計但結案列出。數法（腳本）在冒煙看過實際檔案格式後、主批任何結果出來前 commit。",
+   "H：ops/redo/analysis/hook_actions.py（發射前 commit；格式在 2026-11-25 用假端點跑過一格 H 看過）讀每次嘗試的 {logs}/vacant-home/trace/projects/*/chain.ndjson——掛鉤事件數、step 數、review（說做完時的檢查，payload.mode 應為 evidence）數、退回＝review 的 action 不是 allow 的次數、有退回的格數、退回的 finding 類別。沒有病歷的嘗試＝掛鉤沒載入，那一格照計但結案列出；review 的 mode 不是 evidence＝install.json 沒放進去，同樣列出。",
    "RF：hint_bytes>0 的嘗試數（R 必須全是 0）；RF 實際送出的 hint 有多少到 400 位元組上限、有多少「看不出期望值」——操作定義：hint 本文不含 `!=`、`AssertionError`、`expected`、`Expected` 任何一個（multi_arm.py 的 hints_at_cap／hints_no_expected_value，讀 attempt.json 的 hint_text）。",
    "R／RF 的平均嘗試數、撞 600 秒上限比例、模型呼叫數一起列（撞上限多時，失敗訊息多半只是逾時、沒有測試輸出，RF 與 R 的差別會被稀釋）。"
   ],

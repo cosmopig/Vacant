@@ -1,0 +1,151 @@
+{
+ "id": "smoke_rfh4_polyglot_pi_gemma12b_1003",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261125,
+ "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+ "bank_candidates": [
+  "/tmp/bm_tasks/polyglot_py",
+  "/srv/eval/staged/polyglot_py"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "H": {
+   "policy": "single",
+   "attempt_timeout_s": 1800,
+   "agent": {
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/dev/ops/agentcfg/hook_rc6final",
+     "copy": [
+      "models.json",
+      "extensions"
+     ]
+    },
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_HOME": "{logs}/vacant-home",
+     "H_INSTALL_JSON": "/home/user1/dev/ops/agentcfg/hook_rc6final_state/adapters/install.json"
+    },
+    "argv": [
+     "/bin/sh",
+     "-c",
+     "mkdir -p \"$VACANT_HOME/adapters\" && cp \"$H_INSTALL_JSON\" \"$VACANT_HOME/adapters/install.json\" && exec pi \"$@\"",
+     "pi",
+     "-p",
+     "--mode",
+     "json",
+     "--session-dir",
+     "{logs}/sessions",
+     "--provider",
+     "{provider}",
+     "--model",
+     "{model}",
+     "{prompt}"
+    ]
+   }
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "RF": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "first_failure"
+  }
+ },
+ "pair": [
+  "R",
+  "RF"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1003",
+   "provider": "lms1003nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs, per comparison",
+  "comparisons": [
+   {
+    "name": "RF_vs_R",
+    "control": "R",
+    "treatment": "RF"
+   },
+   {
+    "name": "H_vs_A",
+    "control": "A",
+    "treatment": "H"
+   },
+   {
+    "name": "R_vs_A",
+    "control": "A",
+    "treatment": "R"
+   }
+  ],
+  "multiplicity": "Holm–Bonferroni over the three comparisons above, family α=0.05 (thresholds 0.05/3, 0.05/2, 0.05 in ascending p order; stop at the first non-rejection).",
+  "script": "ops/redo/analysis/multi_arm.py --root <run root>（發射前 commit；harness 自己的 REPORT 只算 pair＝RF 對 R 的未校正 p，以本腳本的 Holm 結果為準）"
+ },
+ "tasks": [
+  "pg_wordy",
+  "pg_transpose"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-25，rfh4 主批的冒煙（2 對×4 臂，1003）；數字不進任何結論。",
+  "purpose": "只檢查基礎設施與操作：四臂各有成功的模型呼叫、H 的掛鉤有寫病歷、RF 有送出 hint（R 沒有）、驗收都正常、0 個 infra_void。條件寫在 ops/redo/gates/smoke_gate_rfh4.py，與通過率無關。",
+  "tasks_why": "pg_wordy、pg_transpose：confirm2 的 A 臂 0/5，重開有時會過——讓 R／RF 會走到第 2 次嘗試、RF 會送出 hint。"
+ }
+}
