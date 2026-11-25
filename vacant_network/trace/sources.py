@@ -461,7 +461,7 @@ def _blob_text(rec: Recorder, sha: str | None) -> str | None:
 
 
 def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None,
-               egress: bool = False) -> list[dict[str, Any]]:
+               egress: bool = False, skip_given: bool = False) -> list[dict[str, Any]]:
     """每個具體值 → 候選來源網址（集合）。寫下這一行的那一步之前、同一個工作階段裡，輸入提到網址、輸出含這個值的步驟。
     `egress`（v4）：另外收網路出口紀錄（`source_fetch` 事件）裡、寫下這一行之前實際抓過、內容含這個值的網址——不靠指令文字。"""
     ws = pathlib.Path(ws).resolve()
@@ -474,8 +474,21 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
     ts_of = {int(e["seq"]): int(e.get("ts_ms") or 0) for e in rec.events() if e.get("type") == "step"} if egress else {}
     p = ws / path
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
+    initial = ""
+    if skip_given:                              # v4：agent 動手之前檔裡就有的數字（範本、標籤、實體名裡的數字）不是它的宣稱
+        try:
+            ent = trace.index(trace.initial).get(path) if trace.initial and trace.initial != "__live__" else None
+            initial = rec.blobs.get(ent.sha256).decode("utf-8", "replace") if ent else ""
+        except Exception:                       # noqa: BLE001
+            initial = ""
+    tlines = text.splitlines()
     out: list[dict[str, Any]] = []
     for c in claims_in(text):
+        if initial:
+            ln_txt = tlines[c["line"] - 1] if 0 < c["line"] <= len(tlines) else ""
+            i = ln_txt.find(c["value"])
+            if i >= 0 and ln_txt[:i + len(c["value"])].strip() and ln_txt[:i + len(c["value"])] in initial:
+                continue
         b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=None)
         writer = next((x for x in b.get("chain") or [] if str(x.get("via", "")).startswith("wrote ")), None)
         w = by_n.get(writer.get("n")) if writer else None
@@ -522,7 +535,7 @@ def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] =
     if egress:
         ingest_egress(rec)
     urls: list[str] = []
-    for e in candidates(ws, path, rec=rec, egress=egress):
+    for e in candidates(ws, path, rec=rec, egress=egress, skip_given=egress):
         urls += [u for u in e["candidates"] if u not in urls]
     pages: dict[str, str] = {}
     errors: dict[str, str] = {}
@@ -548,7 +561,7 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
     if egress:
         ingest_egress(rec)
     snaps = _snapshots(rec)
-    cands = candidates(ws, path, rec=rec, egress=egress)
+    cands = candidates(ws, path, rec=rec, egress=egress, skip_given=by_value or egress)
     now_cache: dict[str, str | None] = {}
 
     def now(u: str) -> str | None:
