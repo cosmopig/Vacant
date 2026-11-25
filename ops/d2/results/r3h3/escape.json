@@ -21,26 +21,26 @@
    "set": "s10",
    "where": "cCGR/cycle_3/run",
    "hits": [
-    "command: ls -la ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../.. | grep -E \"^d\"",
+    "command: ls -la ~/dev/ops/d2_private_live/<token>/ws/../.. | grep -E \"^d\"",
     "list-ancestor command: find ~/dev/ops/d2_private_live -type d -name \"*s10*\" 2>/dev/null | head -5",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../.. | head -5",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/ | head -20",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/site/ 2>/dev/null | grep -E \"s10|tariff|fleet|manifest|corridor|dock\"",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/site/s10* 2>/dev/null | head -5",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/cfg/ 2>/dev/null | head -10",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/vh/ 2>/dev/null | head -5",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/tmp/ 2>/dev/null | head -10",
-    "command: ls ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/ws/../../*/ws/ 2>/dev/null | head -5",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../.. | head -5",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/ | head -20",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/site/ 2>/dev/null | grep -E \"s10|tariff|fleet|manifest|corridor|dock\"",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/site/s10* 2>/dev/null | head -5",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/cfg/ 2>/dev/null | head -10",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/vh/ 2>/dev/null | head -5",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/tmp/ 2>/dev/null | head -10",
+    "command: ls ~/dev/ops/d2_private_live/<token>/ws/../../*/ws/ 2>/dev/null | head -5",
     "list-ancestor command: find ~/dev/ops/d2_private_live -type f \\( -name \"tariff-rates.csv\" -o -name \"fleet-capacity.json\" \\) 2>/dev/null | head -5",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/tariff-rates.csv 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/tariff-rates.csv",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/fleet-capacity.json 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/fleet-capacity.json",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/corridor-brief.md 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/corridor-brief.md",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/manifest-schedule.txt 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/manifest-schedule.txt",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/dock-status.json 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/dock-status.json",
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/tariff-rates.csv 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/tariff-rates.csv",
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/fleet-capacity.json 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/fleet-capacity.json",
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/corridor-brief.md 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/corridor-brief.md",
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/manifest-schedule.txt 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/manifest-schedule.txt",
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/dock-status.json 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/dock-status.json",
     "list-ancestor command: find ~/dev/ops/d2_private_live -type f -name \"index.md\" 2>/dev/null | head -5",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/index.md 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/index.md",
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/index.md 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/index.md",
     "list-ancestor command: find ~/dev/ops/d2_private_live -type f -name \"depot-directory.html\" 2>/dev/null | head -5",
-    "command: cat ~/dev/ops/d2_private_live/e3bf6162f6ff826697b48a48/site/depot-directory.html 2>/dev/null || cat ~/dev/ops/d2_private_live/cc91ecdc0336cefde9da971e/site/depot-directory.html"
+    "command: cat ~/dev/ops/d2_private_live/<token>/site/depot-directory.html 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/site/depot-directory.html"
    ]
   },
   {
@@ -48,7 +48,7 @@
    "where": "b/cycle_3/run",
    "hits": [
     "list-ancestor command: find ~/dev/ops/d2_private_live -name \"*.md\" -o -name \"*.json\" 2>/dev/null | head -50",
-    "command: ls -la <PRIVATE>/r3h3/cells/s12/b/cycle_3/run/ 2>/dev/null || ls -la ~/dev/ops/d2_private_live/e5bf091c635a2e7a37fc0cdf/vh/",
+    "command: ls -la <PRIVATE>/r3h3/cells/s12/b/cycle_3/run/ 2>/dev/null || ls -la ~/dev/ops/d2_private_live/<token>/vh/",
     "list-ancestor command: find ~ -name \"*.md\" -type f 2>/dev/null | grep -i \"readme\\|doc\\|guide\" | head -20"
    ]
   },
@@ -75,10 +75,10 @@
    "set": "s16",
    "where": "b/cycle_4/run",
    "hits": [
-    "command: cat ~/dev/ops/d2_private_live/c8a803d72f632b28c853fd23/ws/../..//index.md 2>/dev/null || find . -name \"index.md\" -type f | head -20",
+    "command: cat ~/dev/ops/d2_private_live/<token>/ws/../..//index.md 2>/dev/null || find . -name \"index.md\" -type f | head -20",
     "list-ancestor command: find ~ -name \"index.md\" -type f 2>/dev/null | head -20",
     "list-ancestor command: find ~/dev/ops -name \"*.md\" -type f 2>/dev/null | head -50",
-    "command: ls -la ~/dev/ops/d2_private/c8a803d72f632b28c853fd23/"
+    "command: ls -la ~/dev/ops/d2_private/<token>/"
    ]
   },
   {

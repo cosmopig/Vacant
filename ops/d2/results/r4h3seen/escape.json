@@ -21,7 +21,7 @@
    "set": "s06",
    "where": "cV/cycle_3/run",
    "hits": [
-    "command: ls -la ~/dev/ops/d2_private_live/64da91674a1ebb1ce86b5efa/sources 2>/dev/null || ls -la ~/dev/ops/d2_private_live/64da91674a1ebb1ce86b5efa/ws/../.. 2>/dev/null | head -30"
+    "command: ls -la ~/dev/ops/d2_private_live/<token>/sources 2>/dev/null || ls -la ~/dev/ops/d2_private_live/<token>/ws/../.. 2>/dev/null | head -30"
    ]
   },
   {

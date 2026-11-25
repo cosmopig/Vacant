@@ -9,7 +9,7 @@
    "set": "s03",
    "where": "d_diff/cycle_3/run",
    "hits": [
-    "list-ancestor command: cd ~ && git status --short -- dev/ops/d2_private_live/669e129f0539cd0fe0dd0355/ws 2>&1 | head; git log --oneline -2 --all -- '*report.md' 2>&1 | head -5; find ~/dev/ops/d2_private_live/669e129f0539cd0fe0dd0355 -name 'report*.md' 2>/dev/null | head"
+    "list-ancestor command: cd ~ && git status --short -- dev/ops/d2_private_live/<token>/ws 2>&1 | head; git log --oneline -2 --all -- '*report.md' 2>&1 | head -5; find ~/dev/ops/d2_private_live/<token> -name 'report*.md' 2>/dev/null | head"
    ]
   }
  ]

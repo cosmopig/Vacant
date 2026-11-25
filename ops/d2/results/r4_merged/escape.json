@@ -47,7 +47,7 @@
    "set": "s16",
    "where": "d_diff_real/cycle_3/run",
    "hits": [
-    "command: grep -i \"snapshot\\|fetch\" ~/dev/ops/d2_private_live/01adab0193a9746efb3cc/ws/report.md || echo \"No matches found\""
+    "command: grep -i \"snapshot\\|fetch\" ~/dev/ops/d2_private_live/<token>/ws/report.md || echo \"No matches found\""
    ]
   },
   {
@@ -62,7 +62,7 @@
    "set": "s18",
    "where": "b/cycle_4/run",
    "hits": [
-    "path: ~/dev/ops/d2_private_live/ba23d899b5703abeabb77f48/ws/../.."
+    "path: ~/dev/ops/d2_private_live/<token>/ws/../.."
    ]
   },
   {
@@ -121,7 +121,7 @@
    "set": "s35",
    "where": "cV/cycle_2/run_verify",
    "hits": [
-    "list-ancestor command: curl -s http://s35.d2-sources.example/index.html 2>/dev/null || cat ~/dev/ops/d2_private_live/bdc909b4272283fdfa376cf6/ws/sources.txt 2>/dev/null || find ~ -name \"index.html\" -path \"*s35*\" 2>/dev/null | head -5"
+    "list-ancestor command: curl -s http://s35.d2-sources.example/index.html 2>/dev/null || cat ~/dev/ops/d2_private_live/<token>/ws/sources.txt 2>/dev/null || find ~ -name \"index.html\" -path \"*s35*\" 2>/dev/null | head -5"
    ]
   }
  ]
