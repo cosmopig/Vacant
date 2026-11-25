@@ -364,7 +364,7 @@ def fetch_idiom(snap: Record, upto: int) -> str:
     return "no fetch command"
 
 
-def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None) -> dict:
+def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None, coverage_arm: str = "c") -> dict:
     sets = {s["set"]: s for s in manifest["sets"]}
     access = []
     if (root / "access.jsonl").exists():
@@ -398,7 +398,7 @@ def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None) -> 
                 bounds.append(info["chain_len"])
                 reports[sid][f"{arm}/{k}"] = rec.file_at(info["chain_len"]) or ""
             # ---- 出處覆蓋率（c 臂第一次來源檢查）＋初稿的抓取寫法（覆蓋率按寫法分層報；獨立稽核第 4 點）
-            if arm == "c":
+            if arm == coverage_arm:
                 scs = rec.source_checks(bounds[0], bounds[1])
                 if scs:
                     c0_lines = reports[sid]["c0"].splitlines()
@@ -407,7 +407,11 @@ def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None) -> 
                         ln = next((i + 1 for i, x in enumerate(c0_lines) if x.strip().startswith(cl["template_line"].strip())), None)
                         ents = [e for e in scs[0]["payload"]["claims"] if e["line"] == ln]
                         url = next(((e.get("source") or {}).get("url") for e in ents if e.get("source")), None)
+                        cand_urls = [u for e in ents for u in (e.get("per_url") or {})]   # 候選集合模式（第三輪）：帶著這個值的候選頁
+                        if cand_urls and not url:
+                            url = next((u for u in cand_urls if any(u.endswith("/" + pg) for pg in _pages(cl))), cand_urls[0])
                         cov_rows.append({"set": sid, "claim": cl["id"], "line": ln, "url": url, "fetch_idiom": idiom,
+                                         "candidate_urls": cand_urls or None,
                                          "correct_page": bool(url and any(url.endswith("/" + pg) for pg in _pages(cl))),
                                          "picked_by": next(((e.get("source") or {}).get("picked_by") for e in ents if e.get("source")), None),
                                          "status_cycle1": ents[0]["status"] if ents else None})
@@ -553,12 +557,13 @@ def main() -> int:
     ap.add_argument("--root", required=True)
     ap.add_argument("--manifest", required=True)
     ap.add_argument("--out")
+    ap.add_argument("--coverage-arm", default="c", help="覆蓋率從哪一臂的第一次來源檢查算（第三輪：cCGR）")
     ap.add_argument("--anchor")
     a = ap.parse_args()
     root = pathlib.Path(a.root)
     manifest = json.loads(pathlib.Path(a.manifest).read_text())
     anchor = json.loads(pathlib.Path(a.anchor).read_text()) if a.anchor else None
-    res = audit(root, manifest, anchor=anchor)
+    res = audit(root, manifest, anchor=anchor, coverage_arm=a.coverage_arm)
     hr, hc = load_harness(root)
     hs = score(manifest, hr)
     key = lambda r: (r["set"], r["arm"], r["cycle"], r["claim"])        # noqa: E731

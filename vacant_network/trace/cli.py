@@ -519,7 +519,25 @@ def cmd_sources(args: argparse.Namespace) -> int:
     from . import sources as SRC
     ws, c = _workspace(args)
     rel = _rel(ws, args.path)
-    if args.check:
+    if getattr(args, "snapshot", False):
+        print(json.dumps(_mutate(SRC.snapshot, ws, rel), ensure_ascii=False, indent=1, default=str))
+        return 0
+    if getattr(args, "guard", None) is not None:
+        allowed = [int(x) for x in args.guard.split(",") if x.strip()]
+        before = pathlib.Path(args.before).read_text(encoding="utf-8", errors="replace")
+        print(json.dumps(_mutate(SRC.guard, ws, rel, allowed, before), ensure_ascii=False, indent=1, default=str))
+        return 0
+    if getattr(args, "reread", None):
+        spec = {int(k): v for k, v in json.loads(pathlib.Path(args.reread).read_text()).items()}
+        before = pathlib.Path(args.before).read_text(encoding="utf-8", errors="replace")
+        print(json.dumps(SRC.reread(ws, rel, spec, int(args.since), before), ensure_ascii=False, indent=1, default=str))
+        return 0
+    if args.check and getattr(args, "candidates", False):
+        res = _mutate(SRC.check_candidates, ws, rel)
+        if args.json:
+            print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
+            return 0
+    if args.check and not getattr(args, "candidates", False):
         res = _mutate(SRC.check, ws, rel, contract=c)
     else:
         prov = SRC.provenance(ws, rel, contract=c)
@@ -572,6 +590,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("path")
     p.add_argument("--check", action="store_true")
     p.add_argument("--json", action="store_true")
+    p.add_argument("--candidates", action="store_true",
+                   help="with --check: provenance as a candidate set + Vacant's own source snapshots")
+    p.add_argument("--snapshot", action="store_true", help="fetch every candidate source now and record a snapshot")
+    p.add_argument("--guard", metavar="LINES", help="restore every line not in LINES (comma list) from --before")
+    p.add_argument("--reread", metavar="SPEC_JSON", help="flag handed lines changed without re-reading their sources")
+    p.add_argument("--before", metavar="FILE")
+    p.add_argument("--since", metavar="SEQ")
     p.set_defaults(func=cmd_sources)
     p = sp.add_parser("rescan",
                       help="re-observe the workspace: revive step-by-step observation that was "

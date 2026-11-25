@@ -409,3 +409,230 @@ def check(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = de
     if record:
         rec.append("source_check", {"schema": "vacant-source-check/1", **res})
     return res
+
+
+# ───────────────────────── 第三輪（2026-11-25）：候選集合＋快照、越界守衛、沒重讀就改 ─────────────────────────
+#
+# 第二輪的確認批次裡，c 漏掉的 28 條：13 條沒有出處（agent 一個指令連抓好幾張 .md／.txt 頁，輸出切不開）、
+# 8 條指錯頁（同一個值在好幾頁，單選選錯）、7 條交辦了但 agent 沒重讀就改；另有一次 agent 被交辦 2 行卻把整份報告覆寫。
+# 這裡的三個機制都是通用的，彼此用開關分開：
+#   candidates  出處＝候選集合：這一跑裡、寫入之前，**任何**指令裡出現網址、而且輸出含這個值的步驟提到的網址都算候選
+#               （不必解析指令是不是「只抓網頁」——python urllib、迴圈、混合指令都一樣）；Vacant 交件後自己把候選網址抓一份
+#               存成快照（簽進鏈），之後拿「上一次的快照」比「現在」：任一候選頁裡帶著這個值的片段變了 ⇒ 受影響。
+#               寧可多交辦，不要漏。值不在任何已知來源裡 ⇒ no_source。
+#   guard       越界守衛：agent 改完後，交辦清單以外的行被改或被刪 ⇒ 從改之前的版本還原，記一筆 `source_guard`。只保護
+#               沒交辦的行，不替 agent 改答案。只適用逐行的交件（每一行一條宣稱）。
+#   reread      沒重讀就改：交辦的行變了，但這一回合裡沒有任何步驟的輸入提到它的候選網址 ⇒ 標出來（呼叫端退回一次）。
+#
+# 誠實邊界：候選網址是「指令文字裡出現過」——指令裡沒有字面網址（例如網址從檔案讀進來再組出來）就抓不到；
+# 快照是 Vacant 這一側的 GET，來源對不同客戶端回不同內容時會不準；守衛用「行首到第一個數字之前的文字」對行，
+# 交件不是一行一條時不適用。
+
+_URL_IN_TEXT = re.compile(r"https?://[^\s'\"<>|;()\[\]{},]+")
+
+
+def _urls_in(text: str) -> list[str]:
+    out = []
+    for u in _URL_IN_TEXT.findall(text or ""):
+        u = u.rstrip(".,:")
+        if u not in out and not B._is_local_url(u):
+            out.append(u)
+    return out
+
+
+def _snapshots(rec: Recorder) -> dict[str, str]:
+    """鏈上最新的來源快照：網址 → 內容的 sha256（內容在內容定址庫）。"""
+    snap: dict[str, str] = {}
+    for e in rec.events():
+        if e.get("type") == "source_snapshot":
+            snap.update((e.get("payload") or {}).get("pages") or {})
+    return snap
+
+
+def _blob_text(rec: Recorder, sha: str | None) -> str | None:
+    if not sha:
+        return None
+    p = rec.blobs.path(sha)
+    try:
+        return p.read_bytes().decode("utf-8", "replace")
+    except OSError:
+        return None
+
+
+def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None) -> list[dict[str, Any]]:
+    """每個具體值 → 候選來源網址（集合）。寫下這一行的那一步之前、同一個工作階段裡，輸入提到網址、輸出含這個值的步驟。"""
+    ws = pathlib.Path(ws).resolve()
+    rec = rec or Recorder(ws)
+    trace = B.Trace(rec)
+    blamer = B.Blamer(trace)
+    by_n = {st.n: st for st in trace.steps}
+    recs = _fetch_records(trace, blamer)
+    p = ws / path
+    text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
+    out: list[dict[str, Any]] = []
+    for c in claims_in(text):
+        b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=None)
+        writer = next((x for x in b.get("chain") or [] if str(x.get("via", "")).startswith("wrote ")), None)
+        w = by_n.get(writer.get("n")) if writer else None
+        urls: list[str] = []
+        if w is not None:
+            for st in trace.steps:
+                if st.seq >= w.seq or st.ctx != w.ctx:
+                    continue
+                us = _urls_in(trace.input_text(st))
+                if not us:
+                    continue
+                o = trace.output_text(st) or ""
+                if any(L.contains(o, k) for k in dict.fromkeys([c["key"], c["value"]])):
+                    urls += [u for u in us if u not in urls]
+            for r in recs:
+                if r["seq"] < w.seq and r["ctx"] == w.ctx and r["url"] not in urls and \
+                        any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                    urls.append(r["url"])
+        out.append({"line": c["line"], "value": c["value"], "key": c["key"],
+                    "written_by_step": writer.get("step") if writer else None, "candidates": urls,
+                    "_seen": {r["url"]: r["text"] for r in recs if r["url"] in urls}})
+    return out
+
+
+def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
+             record: bool = True) -> dict[str, Any]:
+    """把交件裡每條宣稱的候選網址現在的內容抓一份，存進內容定址庫、簽進鏈（`source_snapshot`）。0 token。"""
+    ws = pathlib.Path(ws).resolve()
+    rec = Recorder(ws)
+    rec.checkpoint("source_snapshot")
+    urls: list[str] = []
+    for e in candidates(ws, path, rec=rec):
+        urls += [u for u in e["candidates"] if u not in urls]
+    pages: dict[str, str] = {}
+    errors: dict[str, str] = {}
+    for u in urls:
+        try:
+            pages[u] = rec.blobs.put_bytes(fetch(u).encode("utf-8"))
+        except Exception as ex:                 # noqa: BLE001
+            errors[u] = f"{type(ex).__name__}: {str(ex)[:120]}"
+    res = {"path": path, "pages": pages, "errors": errors}
+    if record:
+        rec.append("source_snapshot", {"schema": "vacant-source-snapshot/1", **res})
+    return res
+
+
+def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
+                     record: bool = True) -> dict[str, Any]:
+    """候選集合版的來源檢查。每條宣稱：拿每個候選網址的「上一次快照」（沒有快照就用 agent 當時讀到的內容）裡帶著這個值的片段，
+    和現在的頁面比；任一候選頁的那些片段不在了 ⇒ changed；有候選頁帶著這個值、而且都沒變 ⇒ unchanged；
+    沒有任何候選頁帶著這個值 ⇒ no_source；抓不到 ⇒ 當成 changed（寧可多交辦）。檢查完把現在的頁面記成新的快照。"""
+    ws = pathlib.Path(ws).resolve()
+    rec = Recorder(ws)
+    rec.checkpoint("source_check")
+    snaps = _snapshots(rec)
+    cands = candidates(ws, path, rec=rec)
+    now_cache: dict[str, str | None] = {}
+
+    def now(u: str) -> str | None:
+        if u not in now_cache:
+            try:
+                now_cache[u] = fetch(u)
+            except Exception:                   # noqa: BLE001
+                now_cache[u] = None
+        return now_cache[u]
+
+    claims = []
+    for e in cands:
+        seen = e.pop("_seen")
+        per: dict[str, str] = {}
+        for u in e["candidates"]:
+            prev = _blob_text(rec, snaps.get(u)) or seen.get(u) or ""
+            key = e["key"] if _carriers(prev, e["key"]) else e["value"]
+            car = _carriers(prev, key)
+            if not car:
+                continue
+            cur = now(u)
+            per[u] = "unknown" if cur is None else ("unchanged" if car <= _segments(cur) else "changed")
+        if not per:
+            st = "no_source"
+        elif any(v in ("changed", "unknown") for v in per.values()):
+            st = "changed"
+        else:
+            st = "unchanged"
+        claims.append({**e, "status": st, "per_url": per})
+    pages = {}
+    for u, t in now_cache.items():
+        if t is not None:
+            pages[u] = rec.blobs.put_bytes(t.encode("utf-8"))
+    counts: dict[str, int] = {}
+    for e in claims:
+        counts[e["status"]] = counts.get(e["status"], 0) + 1
+    res = {"path": path, "mode": "candidates", "claims": claims, "counts": counts,
+           "affected_lines": sorted({e["line"] for e in claims if e["status"] != "unchanged"}),
+           "changed_lines": sorted({e["line"] for e in claims if e["status"] == "changed"})}
+    if record:
+        rec.append("source_check", {"schema": "vacant-source-check/1", **res})
+        if pages:
+            rec.append("source_snapshot", {"schema": "vacant-source-snapshot/1", "path": path, "pages": pages, "errors": {}})
+    return res
+
+
+def _line_key(line: str) -> str:
+    m = re.search(r"\d", line)
+    return (line[:m.start()] if m else line).strip()
+
+
+def guard(ws: str | pathlib.Path, path: str, allowed_lines: list[int], before_text: str,
+          *, record: bool = True) -> dict[str, Any]:
+    """越界守衛：以改之前的版本為底，交辦的行換成 agent 的新版本（用行首到第一個數字之前的文字對行），
+    其他行一律維持原樣；有被改或被刪的就寫回檔案並簽一筆 `source_guard`。"""
+    ws = pathlib.Path(ws).resolve()
+    p = ws / path
+    new_text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
+    old = before_text.splitlines()
+    new_map: dict[str, str] = {}
+    for ln in new_text.splitlines():
+        new_map.setdefault(_line_key(ln), ln)
+    allowed = set(allowed_lines)
+    out, restored = [], []
+    for i, ln in enumerate(old, start=1):
+        if i in allowed:
+            out.append(new_map.get(_line_key(ln), ln))
+        else:
+            out.append(ln)
+            if new_map.get(_line_key(ln)) != ln:
+                restored.append(i)
+    result = "\n".join(out) + ("\n" if before_text.endswith("\n") else "")
+    changed = result != new_text
+    if changed:
+        p.write_text(result, encoding="utf-8")
+    res = {"path": path, "allowed": sorted(allowed), "restored_lines": restored, "rewrote_file": changed,
+           "before_sha256": _sha(before_text), "agent_sha256": _sha(new_text), "after_sha256": _sha(result)}
+    if record and changed:
+        rec = Recorder(ws)
+        rec.checkpoint("source_guard")          # 還原這次寫檔，在鏈上記成 Vacant 自己的改動
+        rec.append("source_guard", {"schema": "vacant-source-guard/1", **res})
+    return res
+
+
+def reread(ws: str | pathlib.Path, path: str, lines: dict[int, list[str]], since_seq: int,
+           before_text: str) -> dict[str, Any]:
+    """沒重讀就改：交辦的行（行號 → 候選網址）在 `since_seq` 之後被改了，但這段時間裡沒有任何步驟的輸入提到它的任一候選網址
+    （候選集合空的行，看有沒有任何抓取網址的步驟）⇒ 列進 `not_reread`。"""
+    ws = pathlib.Path(ws).resolve()
+    rec = Recorder(ws)
+    trace = B.Trace(rec)
+    after = [st for st in trace.steps if st.seq > since_seq]
+    seen_urls: set[str] = set()
+    for st in after:
+        seen_urls |= set(_urls_in(trace.input_text(st)))
+    p = ws / path
+    cur = (p.read_text(encoding="utf-8", errors="replace") if p.exists() else "").splitlines()
+    old = before_text.splitlines()
+    cur_map = {_line_key(ln): ln for ln in cur}
+    flagged = []
+    for ln_no, urls in sorted(lines.items()):
+        if ln_no < 1 or ln_no > len(old):
+            continue
+        before_line = old[ln_no - 1]
+        if cur_map.get(_line_key(before_line), before_line) == before_line:
+            continue                            # 沒改（或整行不見——那是守衛的事）
+        if (urls and not (set(urls) & seen_urls)) or (not urls and not seen_urls):
+            flagged.append(ln_no)
+    return {"path": path, "since_seq": since_seq, "not_reread": flagged}

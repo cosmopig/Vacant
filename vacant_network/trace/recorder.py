@@ -52,7 +52,7 @@ EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_ch
                          "transcript", "session_closed", "finding", "flag", "coverage",
                          "consequence", "prompt", "review", "nudge", "ended",
                          "checkpoint_restore", "volume_seal", "volume_reclaimed",
-                         "restart_receipt", "source_check"})
+                         "restart_receipt", "source_check", "source_snapshot", "source_guard"})
 #: 分卷封印預設門檻（DECISION_20261103_STEPCHAIN_SEALING.md Phase A）
 DEFAULT_VOLUME_MAX_BYTES = 2 * 1024 * 1024
 DEFAULT_VOLUME_MAX_ENTRIES = 2000

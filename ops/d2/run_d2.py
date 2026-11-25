@@ -170,6 +170,9 @@ PROMPTS = {
           "value no longer matches what the page states, then stop. Do not change any other line.\n{items}"),
     "c_item": "- line {line}: `{text}` (source: {src})",
     "c_nosrc": "source not recorded; the product pages are {urls}",
+    "c_reread": ("According to the record, you changed the lines below without re-reading their sources first. "
+                 "Re-read each listed source with curl -s and correct the line if its value no longer matches what the page "
+                 "states, then stop. Do not change any other line.\n{items}"),
     "c_verify": ("According to the record, some of the lines you were just asked to check still do not match their sources "
                  "(either the source was not re-read before the line was edited, or the value still differs from what the "
                  "page states). Re-read each listed source with curl -s and correct the line, then stop. Do not change any "
@@ -446,13 +449,24 @@ class Run:
                     last = line
         return json.loads(last)["seq"] if last else None
 
-    def sources_check(self, live: pathlib.Path, out: pathlib.Path) -> dict:
+    def vacant_sources(self, live: pathlib.Path, *args: str) -> dict:
+        """產品指令 `vacant trace sources report.md <args>`，回 JSON。"""
+        env = self.agent_env(live)
+        env.pop("PI_CODING_AGENT_DIR", None)
+        r = subprocess.run([os.path.expanduser(self.plan["vacant_python"]), "-I", "-m", "vacant_network", "trace",
+                            "sources", "report.md", *args], cwd=live / "ws", env=env,
+                           capture_output=True, text=True, timeout=600)
+        if r.returncode != 0:
+            raise RuntimeError(f"vacant trace sources {args} rc={r.returncode}: {r.stderr[-300:]}")
+        return json.loads(r.stdout)
+
+    def sources_check(self, live: pathlib.Path, out: pathlib.Path, candidates: bool = False) -> dict:
         env = self.agent_env(live)
         env.pop("PI_CODING_AGENT_DIR", None)
         t0 = time.time()
         r = subprocess.run([os.path.expanduser(self.plan["vacant_python"]), "-I", "-m", "vacant_network", "trace",
-                            "sources", "report.md", "--check", "--json"], cwd=live / "ws", env=env,
-                           capture_output=True, text=True, timeout=600)
+                            "sources", "report.md", "--check", "--json", *(["--candidates"] if candidates else [])],
+                           cwd=live / "ws", env=env, capture_output=True, text=True, timeout=600)
         (out).mkdir(parents=True, exist_ok=True)
         (out / "sources_check.json").write_text(r.stdout)
         (out / "sources_check.stderr").write_text(r.stderr)
@@ -495,6 +509,9 @@ class Run:
             self._nocurl = variant == "nocurl"
             r = self.run_agent(live, wprompt, cells / "c0" / "run")
             self._nocurl = False
+            if p.get("snapshot_after_c0"):
+                # 第三輪：交件後 Vacant 把每條宣稱的候選來源抓一份存成快照（產品指令，0 token；所有臂共用這份初稿，無害）
+                self.vacant_sources(live, "--snapshot")
             if p.get("provenance_after_c0"):
                 # 只量初稿的出處覆蓋率：產品指令 `vacant trace sources report.md --json`（不重讀來源、不簽事件）
                 env = self.agent_env(live)
@@ -587,6 +604,55 @@ class Run:
                                     merged[key] = (u1.get(key) or 0) + (u2.get(key) or 0)
                             info["agent"] = {**a1, "usage": merged, "wall_s": round((a1.get("wall_s") or 0) + (r2.get("wall_s") or 0), 1),
                                              "includes_verify_run": True}
+                elif arm in ("cC", "cCG", "cCGR"):
+                    # 第三輪：候選集合（C）＋越界守衛（G）＋沒重讀就改退回一次（R）。沒有出處的行每週期都交（值不在任何已知來源裡）
+                    sc = self.sources_check(live, cdir, candidates=True)
+                    lines = (live / "ws" / "report.md").read_text().splitlines()
+                    handed = {e["line"]: e for e in sc["claims"] if e["status"] != "unchanged"}
+                    items = []
+                    for ln in sorted(handed):
+                        urls = handed[ln].get("candidates") or []
+                        src = " or ".join(urls[:4]) if urls else self.nosrc_text(set_id)
+                        items.append(PROMPTS["c_item"].format(line=ln, text=lines[ln - 1].strip(), src=src))
+                    info["sources_check"] = {"counts": sc["counts"], "affected_lines": sc["affected_lines"],
+                                             "handed_lines": sorted(handed), "wall_s": sc["_wall_s"], "mode": "candidates"}
+                    if items:
+                        before = (live / "ws" / "report.md").read_text()
+                        bf = cdir / "before_run.md"
+                        bf.write_text(before)
+                        seq0 = self.chain_len(live) or 0
+                        info["agent"] = self.run_agent(live, self.prompt("c", set_id, items="\n".join(items)), cdir / "run")
+                        if arm in ("cCG", "cCGR"):
+                            info["guard"] = self.vacant_sources(live, "--guard", ",".join(map(str, sorted(handed))),
+                                                                "--before", str(bf))
+                        if arm == "cCGR":
+                            spec = cdir / "reread_spec.json"
+                            spec.write_text(json.dumps({str(ln): handed[ln].get("candidates") or [] for ln in handed}))
+                            rr = self.vacant_sources(live, "--reread", str(spec), "--since", str(seq0), "--before", str(bf))
+                            info["reread"] = rr
+                            if rr["not_reread"]:
+                                lines2 = (live / "ws" / "report.md").read_text().splitlines()
+                                before2 = "\n".join(lines2) + "\n"
+                                bf2 = cdir / "before_retry.md"
+                                bf2.write_text(before2)
+                                items2 = []
+                                for ln in rr["not_reread"]:
+                                    urls = handed[ln].get("candidates") or []
+                                    src = " or ".join(urls[:4]) if urls else self.nosrc_text(set_id)
+                                    items2.append(PROMPTS["c_item"].format(line=ln, text=lines2[ln - 1].strip(), src=src))
+                                r2 = self.run_agent(live, PROMPTS["c_reread"].format(items="\n".join(items2)), cdir / "run_verify")
+                                info["agent_verify"] = r2
+                                info["guard_retry"] = self.vacant_sources(live, "--guard", ",".join(map(str, rr["not_reread"])),
+                                                                          "--before", str(bf2))
+                                a1 = info["agent"]
+                                u1, u2 = a1.get("usage") or {}, r2.get("usage") or {}
+                                merged = dict(u1)
+                                for key in ("calls", "errors", "input", "output", "cache_creation_input_tokens", "cache_read_input_tokens"):
+                                    if u1.get(key) is not None or u2.get(key) is not None:
+                                        merged[key] = (u1.get(key) or 0) + (u2.get(key) or 0)
+                                info["agent"] = {**a1, "usage": merged,
+                                                 "wall_s": round((a1.get("wall_s") or 0) + (r2.get("wall_s") or 0), 1),
+                                                 "includes_verify_run": True}
                 elif arm in ("d", "d2", "d_diff"):
                     cur = self.page_hashes(set_id, k)
                     changed = [f"http://{host}/{f}" for f in sorted(cur) if cur[f] != prev_pages.get(f)]
