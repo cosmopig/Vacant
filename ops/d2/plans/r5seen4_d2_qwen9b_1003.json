@@ -1,0 +1,108 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "id": "r5seen4_d2_qwen9b_1003",
+ "seed": 20261176,
+ "jobs": 1,
+ "server": {
+  "port": 18244
+ },
+ "arms": [
+  "a",
+  "b",
+  "cV5",
+  "d_diff_real"
+ ],
+ "snapshot_after_c0": true,
+ "no_tool_mention": true,
+ "nosrc_index": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "egress": {
+  "mode": "per-set proxy, OS-assigned port"
+ },
+ "vacant_python": "~/dev/ops/d2v5_venv/bin/python",
+ "agent_timeout_s": 600,
+ "dynamic_noise": true,
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v5",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v5_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 555cd0568",
+  "wheel": "~/dev/ops/d2_release/555cd0568/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "65a0df6a37362d2b8bfa69b4742c2df7463d5daccee3c0ba3b2f9ba4411fb942",
+  "venv": "~/dev/ops/d2v5_venv（不可編輯安裝）"
+ },
+ "materials": {
+  "dir": "${D2_PRIVATE}/heldout_v4_seed20261171",
+  "generator": "ops/d2/heldout_gen4/gen_heldout4.py --seed 20261171 --sets 16（heldout-v4 新種子）",
+  "manifest_sha256": "1cc9a1cc1917200912363908226ec75db07f66e4aac851343f07d003823f371e",
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16"
+  ]
+ },
+ "purpose": "D2′ 第五輪對照（描述性）：已見過的壓力結構（heldout-v4 產生器、新種子 16 組）上的 v5。",
+ "prereg": {
+  "registered": "2026-11-25，第一通模型呼叫之前 commit 並推到遠端（執行器檢查）。第四輪全部批次已看過結果、降為開發資料；產品 v5 凍結（555cd0568）之後才請隔離的代理寫真實教材的抓取／解析程式、才抓取；教材只跑過檢查器，沒有人看逐條內容。第五輪之後不再自動開下一輪。",
+  "question": "v5 在第四輪那種刻意出難題的結構上的表現，描述，不判定。",
+  "product": "產品 v5（commit 555cd0568，wheel sha256 65a0df6a…；不可編輯安裝；pi／Claude Code 掛鉤用 d2v5_venv 真的跑 `vacant install` 寫出）。相對 v4 只修第四輪歸因出來的兩點：(1) 表格（CSV／TSV／管線表格／定寬表格／HTML 表格）照「表頭＋其他格相同最多的那一列」定位、XML 照元素路徑（`--by-field`）——同一列別的欄位剛好也是這個值時不再被騙；(2) 交辦的行，守衛只允許改值，agent 改掉的標籤還原、值保留（`--keep-labels`）。其餘同 v4（看值判受影響、網路出口紀錄、範本數字不當宣稱）。",
+  "materials": "heldout-v4 新種子 20261171、16 組。",
+  "arms": {
+   "a": "不維護",
+   "b": "整份重查",
+   "cV5": "v5 全開：候選集合（含出口紀錄）＋快照＋看值（照欄位）判受影響＋保留標籤的越界守衛＋沒重讀退回一次（**主要臂**）",
+   "d_diff_real": "頁面通知＋文字差異，真實版（執行器每週期實際抓頁面、和上一週期抓到的比）",
+   "note": "所有臂的提示都不提抓取工具；沒有出處的行交辦時給索引頁。初稿共用；初稿後跑一次 `--snapshot --egress`。"
+  },
+  "primary": {
+   "family_P_vs_b": "覆蓋率（cV5 第 1 週期候選集合含正確頁）≥80%；漏抓差 cV5−b 單側 97.5% 上界 <10pp；成本比 b/cV5 97.5% 區間下界 ≥3。",
+   "family_P_vs_d_real": "同上覆蓋率；漏抓差 cV5−d_diff_real 上界 <10pp；成本比 d_diff_real/cV5 下界 ≥1。",
+   "alpha": "兩個家族各 α/2＝0.025。",
+   "secondary": "F／N＋Z 分週期成本表與只看 F 週期的比值；改錯；不必要的交辦（按原因）；**各值型態的出處覆蓋率與「沒交辦：值還在原位」的發生率**（＝第四輪那種失敗在真實文件裡多常見）；越界讀取逐筆＋剔除敏感度。",
+   "analysis": "同主批次，只描述。"
+  },
+  "states": {
+   "c_vs_b.EFFECTIVE": "覆蓋率≥80%、漏抓差上界<10 個百分點、token 比區間下界≥3、全部完成。可以說：「在這 50 組虛構產品頁、pi＋qwen3.5-9b（本機、不思考）、每組四個週期（2 個需要改宣稱、1 個只有雜訊、1 個沒變）的條件下，用 Vacant 的紀錄只把受影響的宣稱交給 agent，模型 token 是整份重查的 1/X（區間），漏掉的過期宣稱沒有多 10 個百分點以上」，同時一定要說週期類型的比例是設計參數，並附各類型的分開數字。",
+   "c_vs_b.FAIL": "覆蓋率<80%，或漏抓差點估計≥10 個百分點，或 token 比點估計<3。照實寫：紀錄在這個情境下沒有省到 3 倍，或漏得比整份重查多。",
+   "c_vs_d.EFFECTIVE": "覆蓋率≥80%、漏抓差 c−d 上界<10 個百分點、token 比 d/c 區間下界≥1。可以說：「宣稱級的出處比只知道哪幾頁變了更省，而且沒有多漏」（同樣附條件）。",
+   "c_vs_d.FAIL": "漏抓差點估計≥10 個百分點，或 token 比 d/c 點估計<1。結論必須寫成「宣稱級出處沒有比頁面變動通知多帶來東西」。",
+   "UNRESOLVED": "其餘。只報方向與大小，不加組數、不換題再看一次。",
+   "INCOMPLETE": "有組沒跑完。只能續跑，不能看一半的數字改計畫。"
+  },
+  "known_limits": [
+   "v5 是看過第四輪全部結果才改的。",
+   "真實頁面裡的 HTTPS 連結不在這一輪測：所有來源都由本機 HTTP 伺服器提供；出口紀錄的 HTTPS 限制照實寫。",
+   "真實教材只有一個領域（足球員條目的資訊框）；冷門條目降低靠記憶作答的可能，但不排除；評分只對照頁面當時的值。",
+   "工作目錄不可列舉不是沙箱；事後掃描越界讀取。",
+   "已見過的結構：描述性，不當確認證據。",
+   "jobs 1，和主批次共用 1003（同時 9B 不超過 4 段）。"
+  ],
+  "stop_rules": [
+   "任一組基礎設施失敗連續 3 次：停批回報。",
+   "04:00Z 還沒跑完：照 INCOMPLETE 規則停批、報已完成的組。"
+  ]
+ }
+}
