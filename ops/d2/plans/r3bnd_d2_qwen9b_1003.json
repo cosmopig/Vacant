@@ -1,0 +1,115 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "id": "r3bnd_d2_qwen9b_1003",
+ "seed": 20261159,
+ "jobs": 1,
+ "agent_timeout_s": 600,
+ "server": {
+  "port": 18223
+ },
+ "arms": [
+  "cCGR"
+ ],
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2v3_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v3",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v3_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 7f46167a5",
+  "wheel": "~/dev/ops/d2_release/7f46167a5/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "416a8f13d9c1582f8546cf6717ad26f96097e270ecfc4dda84c47598e1204d9c",
+  "venv": "~/dev/ops/d2v3_venv（不可編輯安裝）",
+  "hooks": "`vacant install --agents pi --mode observe` 用 d2v3_venv 在隔離 HOME 真的寫出（~/dev/ops/agentcfg/d2v3）"
+ },
+ "snapshot_after_c0": true,
+ "provenance_after_c0": true,
+ "write_variants": {
+  "s01": "write",
+  "s02": "write",
+  "s03": "write",
+  "s04": "write",
+  "s05": "write",
+  "s06": "write",
+  "s07": "write",
+  "s08": "write",
+  "s09": "write",
+  "s10": "write",
+  "s11": "notool",
+  "s12": "notool",
+  "s13": "notool",
+  "s14": "notool",
+  "s15": "notool",
+  "s16": "notool",
+  "s17": "notool",
+  "s18": "notool",
+  "s19": "notool",
+  "s20": "notool",
+  "s21": "nocurl",
+  "s22": "nocurl",
+  "s23": "nocurl",
+  "s24": "nocurl",
+  "s25": "nocurl",
+  "s26": "nocurl",
+  "s27": "nocurl",
+  "s28": "nocurl",
+  "s29": "nocurl",
+  "s30": "nocurl"
+ },
+ "nocurl_whole_set": true,
+ "materials": {
+  "dir": "~/dev/ops/d2_materials/seed20261156_bnd3",
+  "generator": "ops/d2/gen_materials.py --seed 20261156 --sets 30 --cycle-types F,F,N,Z",
+  "manifest_sha256": "d28c3c639323a464cfdd1308ec0609c1bc8c86c16ea6ac21c2d67ae385302277",
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16",
+   "s17",
+   "s18",
+   "s19",
+   "s20",
+   "s21",
+   "s22",
+   "s23",
+   "s24",
+   "s25",
+   "s26",
+   "s27",
+   "s28",
+   "s29",
+   "s30"
+  ]
+ },
+ "purpose": "第三輪邊界測試（描述性、事前登記）：同第二輪的三種提示變體（原提示／不提工具／curl 被換成失敗的替身，這次整組都不能用 curl），產品 v3；初稿之後量出處覆蓋率（候選集合），並跑 cCGR 臂的 4 個維護週期，量維護階段的漏抓與成本。",
+ "prereg": {
+  "registered": "2026-11-25，第一通模型呼叫之前 commit 並推到遠端。",
+  "reading": "描述，不判定。要看的是：v3 的候選集合在 agent 用 python／wget 抓網頁時，出處與維護是否還能用。",
+  "known_limits": [
+   "每種變體 10 組；只有 cCGR 一臂（沒有 b、d_diff 對照），維護階段只報漏抓與成本的描述。",
+   "nocurl 是 PATH 替身，打完整路徑就繞過；照實記錄。"
+  ]
+ }
+}

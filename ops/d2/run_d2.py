@@ -337,7 +337,9 @@ class Run:
                     "HTTP_PROXY": f"http://127.0.0.1:{p['server']['port']}",
                     "no_proxy": NO_PROXY, "NO_PROXY": NO_PROXY,
                     "TMPDIR": str(live / "tmp")})
-        if getattr(self, "_nocurl", False):
+        if getattr(self, "_nocurl", False) or live.name in set(
+                k for k, v in (self.plan.get("write_variants") or {}).items()
+                if v == "nocurl" and self.plan.get("nocurl_whole_set")):
             # 變體 nocurl：PATH 最前面放一個會失敗的 curl，逼 agent 改用別的方法讀頁面（wget、python…）
             shim = self.root / "nocurl_bin"
             shim.mkdir(exist_ok=True)
