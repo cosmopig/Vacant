@@ -153,6 +153,10 @@ def usage_from_claude_log(log_path: pathlib.Path) -> dict | None:
     }
 
 PROMPTS = {
+    # 邊界測試（11-25 第三次獨立稽核）：不提工具，讓 agent 自己決定怎麼讀頁面
+    "write_notool": ("Fill in report.md in this directory. Each product has one page: {urls}. Read the pages. "
+                     "Replace every ____ in report.md with the value exactly as that product's page states it, then stop. "
+                     "Do not change anything else."),
     "write": ("Fill in report.md in this directory. Each product has one page: {urls} (read them with curl -s). "
               "Replace every ____ in report.md with the value exactly as that product's page states it, then stop. "
               "Do not change anything else."),
@@ -328,6 +332,13 @@ class Run:
                     "HTTP_PROXY": f"http://127.0.0.1:{p['server']['port']}",
                     "no_proxy": NO_PROXY, "NO_PROXY": NO_PROXY,
                     "TMPDIR": str(live / "tmp")})
+        if getattr(self, "_nocurl", False):
+            # 變體 nocurl：PATH 最前面放一個會失敗的 curl，逼 agent 改用別的方法讀頁面（wget、python…）
+            shim = self.root / "nocurl_bin"
+            shim.mkdir(exist_ok=True)
+            (shim / "curl").write_text("#!/bin/sh\necho 'curl: command not found' >&2\nexit 127\n")
+            (shim / "curl").chmod(0o755)
+            env["PATH"] = f"{shim}:{env.get('PATH', '')}"
         return env
 
     def _agent_argv(self, live: pathlib.Path, prompt: str, out: pathlib.Path) -> list[str]:
@@ -476,7 +487,21 @@ class Run:
             shutil.copy(os.path.expanduser(p["agentcfg"]["install_json"]), live / "vh" / "adapters" / "install.json")
             self.install_site(set_id, 0, live)
             self.set_route(host, live / "site", "c0", 0)
-            r = self.run_agent(live, self.prompt("write", set_id), cells / "c0" / "run")
+            variant = (p.get("write_variants") or {}).get(set_id, "write")
+            wprompt = self.prompt("write", set_id) if variant == "write" else \
+                PROMPTS["write_notool"].format(urls=" ".join(urls))
+            self._nocurl = variant == "nocurl"
+            r = self.run_agent(live, wprompt, cells / "c0" / "run")
+            self._nocurl = False
+            if p.get("provenance_after_c0"):
+                # 只量初稿的出處覆蓋率：產品指令 `vacant trace sources report.md --json`（不重讀來源、不簽事件）
+                env = self.agent_env(live)
+                env.pop("PI_CODING_AGENT_DIR", None)
+                pr = subprocess.run([os.path.expanduser(p["vacant_python"]), "-I", "-m", "vacant_network", "trace",
+                                     "sources", "report.md", "--json"], cwd=live / "ws", env=env,
+                                    capture_output=True, text=True, timeout=600)
+                (cells / "c0" / "provenance.json").write_text(pr.stdout)
+                (cells / "c0" / "write_variant.txt").write_text(variant + "\n")
             shutil.copy(live / "ws" / "report.md", cells / "c0" / "report.md")
             if snap.exists():
                 rmtree_retry(snap)
