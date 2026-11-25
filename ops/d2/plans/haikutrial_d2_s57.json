@@ -1,0 +1,42 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "id": "haikutrial_d2_s57",
+ "seed": 20261131,
+ "purpose": "Haiku 小量試（探索性，不進確認性分析）：Claude Code＋claude-haiku-5-5＋掛 `vacant install --agents claude --mode observe` 的掛鉤，1 組（v2 教材 s57）× 四臂 × 4 週期。量每次執行的 token（含快取讀寫）與牆鐘，估全量；也確認 Claude Code 的病歷、出處、來源檢查在真模型下接得起來。",
+ "materials": {
+  "dir": "~/dev/ops/d2_materials/seed20261126_ffnz",
+  "generator": "ops/d2/gen_materials.py --seed 20261126 --sets 60 --cycle-types F,F,N,Z",
+  "manifest_sha256": "9d1afebe6e63792db3c9f83379f268c7c0632d1c659e41c6c2493820156ba8c6",
+  "sets": [
+   "s57"
+  ]
+ },
+ "arms": [
+  "a",
+  "b",
+  "c",
+  "d"
+ ],
+ "jobs": 1,
+ "agent_timeout_s": 600,
+ "server": {
+  "port": 18204
+ },
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5"
+ },
+ "vacant_python": "~/dev/ops/d2main_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2claude_main/.claude",
+  "copy": [
+   "settings.json"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2claude_main/.vacant/adapters/install.json"
+ },
+ "isolation": "使用者的 HOME 不換（走登入的訂閱），用 --setting-sources '' --settings <這一份 settings.json> --strict-mcp-config --disable-slash-commands --no-session-persistence --disallowedTools WebFetch,WebSearch；可能漏進來的使用者層級設定見 agy 的報告（帳號狀態、內建外掛、受管政策）。",
+ "product_version": {
+  "commit": "auto/redo 6dfbb8775",
+  "wheel_sha256": "8ec7b07977af1b53fe2d97de5c0eba36164cae57ee496fb0ba82c7a68cc2c05b"
+ }
+}
