@@ -1,0 +1,34 @@
+{
+ "csv+json": {
+  "claims": 50,
+  "correct_page": 46
+ },
+ "csv+md": {
+  "claims": 25,
+  "correct_page": 23
+ },
+ "json": {
+  "claims": 150,
+  "correct_page": 138
+ },
+ "csv": {
+  "claims": 50,
+  "correct_page": 46
+ },
+ "txt": {
+  "claims": 78,
+  "correct_page": 72
+ },
+ "html+txt": {
+  "claims": 22,
+  "correct_page": 20
+ },
+ "html": {
+  "claims": 50,
+  "correct_page": 45
+ },
+ "md": {
+  "claims": 75,
+  "correct_page": 69
+ }
+}

@@ -1,0 +1,227 @@
+{
+ "attribution_table": {
+  "a": {
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 8,
+    "not maintained (arm a)": 68
+   }
+  },
+  "b": {
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 4,
+    "page not re-read": 2,
+    "page re-read, not corrected": 2
+   }
+  },
+  "c0": {
+   "draft_wrong": {
+    "first draft already wrong": 42
+   }
+  },
+  "cCGR": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 131
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 29,
+    "page re-read, not corrected": 15
+   }
+  },
+  "d_diff": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 2
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 4,
+    "page not re-read": 2
+   }
+  }
+ },
+ "baseline_refreshed_while_stale": 0,
+ "chain_verification_summary": {
+  "blobs_bad": 0,
+  "blobs_checked": 11174,
+  "chains": 95,
+  "hash_chain_ok": 95,
+  "index_files_bad": 0,
+  "index_files_checked": 361,
+  "signatures_ok": 95,
+  "signer_trusted": 95
+ },
+ "coverage": {
+  "by_fetch_idiom": {
+   "no fetch command": {
+    "claims": 40,
+    "correct_page": 0,
+    "sets": 2
+   },
+   "one url, stdout": {
+    "claims": 260,
+    "correct_page": 260,
+    "sets": 13
+   },
+   "redirect into workspace file": {
+    "claims": 80,
+    "correct_page": 80,
+    "sets": 4
+   }
+  },
+  "claims": 380,
+  "correct_page": 340,
+  "with_source": 340
+ },
+ "harness_match": {
+  "examples": [],
+  "mismatches": 0,
+  "rows": 6460
+ },
+ "provenance_summary": {
+  "a": {
+   "candidates_only": 244,
+   "claims": 380,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 244,
+   "write_step": 340
+  },
+  "b": {
+   "candidates_only": 257,
+   "claims": 380,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 257,
+   "write_step": 359
+  },
+  "cCGR": {
+   "candidates_only": 117,
+   "claims": 380,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 117,
+   "write_step": 196
+  },
+  "d_diff": {
+   "candidates_only": 212,
+   "claims": 380,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 212,
+   "write_step": 359
+  }
+ },
+ "record_problems": [],
+ "summary": {
+  "arms": {
+   "a": {
+    "changed_claims": 76,
+    "changed_claims_pre_correct": 68,
+    "false_mod": 0,
+    "latency_hist": {
+     "None": 76
+    },
+    "miss_rate": 1.0,
+    "miss_rate_pre_correct": 1.0,
+    "missed": 76,
+    "missed_pre_correct": 68,
+    "stale_residual_by_cycle": {
+     "1": 14,
+     "2": 34,
+     "3": 48,
+     "4": 68
+    },
+    "unchanged_correct_claims": 1188,
+    "wrong_by_cycle": {
+     "1": 56,
+     "2": 76,
+     "3": 90,
+     "4": 110
+    }
+   },
+   "b": {
+    "changed_claims": 76,
+    "changed_claims_pre_correct": 72,
+    "false_mod": 0,
+    "latency_hist": {
+     "0": 68,
+     "1": 1,
+     "None": 7
+    },
+    "miss_rate": 0.1053,
+    "miss_rate_pre_correct": 0.0556,
+    "missed": 8,
+    "missed_pre_correct": 4,
+    "stale_residual_by_cycle": {
+     "1": 1,
+     "2": 0,
+     "3": 2,
+     "4": 2
+    },
+    "unchanged_correct_claims": 1339,
+    "wrong_by_cycle": {
+     "1": 23,
+     "2": 21,
+     "3": 23,
+     "4": 24
+    }
+   },
+   "cCGR": {
+    "changed_claims": 76,
+    "changed_claims_pre_correct": 47,
+    "false_mod": 131,
+    "latency_hist": {
+     "0": 32,
+     "1": 1,
+     "2": 1,
+     "None": 42
+    },
+    "miss_rate": 0.5789,
+    "miss_rate_pre_correct": 0.3191,
+    "missed": 44,
+    "missed_pre_correct": 15,
+    "stale_residual_by_cycle": {
+     "1": 2,
+     "2": 1,
+     "3": 0,
+     "4": 1
+    },
+    "unchanged_correct_claims": 887,
+    "wrong_by_cycle": {
+     "1": 179,
+     "2": 182,
+     "3": 183,
+     "4": 186
+    }
+   },
+   "d_diff": {
+    "changed_claims": 76,
+    "changed_claims_pre_correct": 72,
+    "false_mod": 2,
+    "latency_hist": {
+     "0": 70,
+     "None": 6
+    },
+    "miss_rate": 0.0789,
+    "miss_rate_pre_correct": 0.0278,
+    "missed": 6,
+    "missed_pre_correct": 2,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 1,
+     "3": 1,
+     "4": 2
+    },
+    "unchanged_correct_claims": 1334,
+    "wrong_by_cycle": {
+     "1": 23,
+     "2": 24,
+     "3": 25,
+     "4": 26
+    }
+   }
+  },
+  "c0": {
+   "claims": 380,
+   "correct": 338
+  }
+ }
+}

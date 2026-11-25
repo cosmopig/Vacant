@@ -1,0 +1,12 @@
+D2' Analysis Verdict: INCOMPLETE (sets=25, B=10000, seed=20261125)
+  INCOMPLETE missing (96): s06/a/c1(both), s06/a/c2(both), s06/a/c3(both), s06/a/c4(both), s06/b/c1(both), s06/b/c2(both), s06/b/c3(both), s06/b/c4(both), s06/cCGR/c1(both), s06/cCGR/c2(both) (+86 more)
+  [1] Coverage: 340/380 = 89.5% (with_source=340/380, threshold>=80%) -> PASS
+  [2] Miss diff (c-b): 0.2553 (95% upper=0.3571, margin<0.10; c=31.9%, b=6.4%, n=47) -> FAIL
+  [3] Token ratio (b/c): 1.05x 95% CI [0.89, 1.27] (n=76/76) -> FAIL
+  [3] Calls ratio (b/c): 1.23x 95% CI [1.08, 1.45] (n=76/76)
+  [3] Wall  ratio (b/c): 1.16x 95% CI [0.97, 1.44] (n=76/76)
+  [4] Secondary:
+      c_vs_d: miss(c-d)=n/a (upper95=n/a), tok(d/c)=n/ax [n/a, n/a]
+      d_vs_b: miss(d-b)=n/a (upper95=n/a), tok(b/d)=n/ax [n/a, n/a]
+      false_mod: a=0/1188(0.0% [0.0%, 0.0%]); b=0/1339(0.0% [0.0%, 0.0%]); cCGR=131/887(14.8% [12.7%, 17.2%]); d_diff=2/1334(0.1% [0.0%, 0.4%])
+      residual_stale: a(c1=14,c2=34,c3=48,c4=68) b(c1=1,c2=0,c3=2,c4=2) cCGR(c1=2,c2=1,c3=0,c4=1) d_diff(c1=0,c2=1,c3=1,c4=2)
