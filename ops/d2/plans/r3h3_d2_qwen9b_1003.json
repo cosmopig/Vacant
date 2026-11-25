@@ -1,0 +1,115 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "agent_timeout_s": 600,
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2v3_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v3",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v3_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 7f46167a5",
+  "wheel": "~/dev/ops/d2_release/7f46167a5/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "416a8f13d9c1582f8546cf6717ad26f96097e270ecfc4dda84c47598e1204d9c",
+  "venv": "~/dev/ops/d2v3_venv（不可編輯安裝）",
+  "hooks": "`vacant install --agents pi --mode observe` 用 d2v3_venv 在隔離 HOME 真的寫出（~/dev/ops/agentcfg/d2v3）"
+ },
+ "id": "r3h3_d2_qwen9b_1003",
+ "seed": 20261163,
+ "jobs": 3,
+ "server": {
+  "port": 18226
+ },
+ "arms": [
+  "a",
+  "b",
+  "cCGR",
+  "d_diff"
+ ],
+ "snapshot_after_c0": true,
+ "dynamic_noise": true,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "materials": {
+  "dir": "${D2_PRIVATE}/heldout_v3_seed20261161",
+  "generator": "ops/d2/heldout_gen3/gen_heldout3.py --seed 20261161 --sets 25（heldout-v3，agy 65bb0d9）",
+  "manifest_sha256": "7c67930e6d64c6fa03cbc377eea770851e77663b1c09ee5d29a96361a93dbadd",
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16",
+   "s17",
+   "s18",
+   "s19",
+   "s20",
+   "s21",
+   "s22",
+   "s23",
+   "s24",
+   "s25"
+  ]
+ },
+ "purpose": "D2′ 第三輪：沒看過結構的留出批次（第三個產生器 heldout-v3），描述性加判定。",
+ "prereg": {
+  "registered": "2026-11-25，第一通模型呼叫之前 commit 並推到遠端（執行器檢查）。**9B 第三輪確認批次的結果與獨立稽核都已知之後才加的批次**（vacant-hope 11-25 指示）。產品 v3 一行不改（wheel 416a8f13…）。教材＝第三個產生器 heldout-v3：由沒看過出處程式與任何紀錄的代理（agy，隔離：空 repo、任務檔只給規格）寫，commit 65bb0d9（複本 ops/d2/heldout_gen3/）；種子 20261161、25 組；產生後只跑過檢查器，沒有人讀內容；教材與執行目錄放在不可列舉的目錄，路徑不寫進 repo（以環境變數 D2_PRIVATE 指定，不傳給 agent）。",
+  "question": "在和開發資料**不同結構**的教材上（JSON／CSV／純文字表格混用、同一頁同一個值屬於不同項目、事實分在兩頁、每次抓取都會變的雜訊、索引頁導覽且不提抓取工具），v3 的候選集合＋守衛＋退回（cCGR）還能不能不比整份重查多漏、省得夠？和頁面通知＋文字差異比呢？",
+  "arms": {
+   "a": "不維護",
+   "b": "整份重查",
+   "cCGR": "候選集合＋快照＋越界守衛＋沒重讀退回一次（主要臂）",
+   "d_diff": "頁面通知＋文字差異",
+   "note": "所有臂的提示都不提抓取工具（no_tool_mention）。初稿共用；初稿後跑一次 `--snapshot`。"
+  },
+  "materials_spec": "heldout-v3 規格（agy 任務檔 ~/dev/ops/agy_tasks/heldout3.md）：每組 5–8 個內容頁＋索引頁；≥4 種格式；≥50% 宣稱的來源全是 json/csv/txt；≥40% 的值在同一頁也屬於別的項目；≥30% 的多宣稱實體分在不同頁；≥35% 的宣稱同一行／同一列有每次抓取都變的雜訊。這一份 25 組的實測：(a) 65.6%、(b) 62.4%、(c) 71.4%、(d) 70.0%。",
+  "harness": "來源伺服器 `--dynamic`：每次請求把 {{FETCH_TS}}／{{FETCH_COUNT}}／{{FETCH_ID}} 換成新值，依副檔名給 Content-Type；存取紀錄另記換之前的 template_sha256。d／d_diff 的「哪幾頁變了」與文字差異照舊用教材檔（換之前）算 ⇒ 等於一個不受雜訊影響的理想變動偵測器（對 d_diff 有利，照實寫）。工作目錄放在 0711 目錄底下、HMAC 隨機名（private_live）。",
+  "primary": {
+   "family_P_vs_b": "同第三輪：覆蓋率（cCGR 第 1 週期候選集合含正確頁）≥80%；漏抓差 cCGR−b 單側 97.5% 上界 <10pp；token 比 b/cCGR 97.5% 區間下界 ≥3。",
+   "family_P_vs_d_diff": "同上覆蓋率；漏抓差 cCGR−d_diff 上界 <10pp；token 比 d_diff/cCGR 下界 ≥1。",
+   "alpha": "兩個家族各 α/2＝0.025。",
+   "analysis": "audit_d2.py --coverage-arm cCGR；analyze_d2.py --primary-arm cCGR --d-arm d_diff；cycle_costs.py（F／N＋Z 分週期成本表與只看 F 週期的比值）。",
+   "reading": "描述性加判定：判定照上面的門檻報，但 25 組約 100 對、檢定力低（真差 3pp 時上界 <10pp 的機率約 0.5），未定論是預期結果之一，照實寫。"
+  },
+  "secondary": "覆蓋率按來源格式分層（json／csv／txt／md／html）；雜訊造成的不必要交辦（正確頁的雜訊片段、錯的候選頁）；改錯；守衛還原與退回次數；越界讀取（agent 讀到自己工作目錄以外的 harness 路徑）的逐筆清單，與剔除那些組的敏感度分析。",
+  "states": {
+   "c_vs_b.EFFECTIVE": "覆蓋率≥80%、漏抓差上界<10 個百分點、token 比區間下界≥3、全部完成。可以說：「在這 50 組虛構產品頁、pi＋qwen3.5-9b（本機、不思考）、每組四個週期（2 個需要改宣稱、1 個只有雜訊、1 個沒變）的條件下，用 Vacant 的紀錄只把受影響的宣稱交給 agent，模型 token 是整份重查的 1/X（區間），漏掉的過期宣稱沒有多 10 個百分點以上」，同時一定要說週期類型的比例是設計參數，並附各類型的分開數字。",
+   "c_vs_b.FAIL": "覆蓋率<80%，或漏抓差點估計≥10 個百分點，或 token 比點估計<3。照實寫：紀錄在這個情境下沒有省到 3 倍，或漏得比整份重查多。",
+   "c_vs_d.EFFECTIVE": "覆蓋率≥80%、漏抓差 c−d 上界<10 個百分點、token 比 d/c 區間下界≥1。可以說：「宣稱級的出處比只知道哪幾頁變了更省，而且沒有多漏」（同樣附條件）。",
+   "c_vs_d.FAIL": "漏抓差點估計≥10 個百分點，或 token 比 d/c 點估計<1。結論必須寫成「宣稱級出處沒有比頁面變動通知多帶來東西」。",
+   "UNRESOLVED": "其餘。只報方向與大小，不加組數、不換題再看一次。",
+   "INCOMPLETE": "有組沒跑完。只能續跑，不能看一半的數字改計畫。"
+  },
+  "models_and_strata": "qwen3.5-9b@1003（ctx 65536），jobs 3。",
+  "known_limits": [
+   "9B 第三輪結果與稽核已知之後才加；主要臂與產品修正是看過第二輪全部結果才定的。",
+   "25 組、檢定力低。",
+   "d_diff 的變動偵測不受雜訊影響（理想化），對 d_diff 有利。",
+   "工作目錄不可列舉不是沙箱：同一個使用者猜得到路徑（例如從行程列表）仍讀得到；事後逐筆掃描。",
+   "只有 qwen3.5-9b；虛構網頁。"
+  ],
+  "stop_rules": [
+   "任一組基礎設施失敗連續 3 次：停批回報。",
+   "23:00Z 還沒跑完：照 INCOMPLETE 規則停批、報已完成的組。"
+  ]
+ }
+}
