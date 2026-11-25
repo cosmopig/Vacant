@@ -42,10 +42,115 @@ HOST_FMT = "{set}.d2-sources.example"
 LOCK = threading.Lock()
 #: 只有 `*.d2-sources.example` 走來源伺服器；模型端點（LM Studio）與本機一律直連
 NO_PROXY = "localhost,127.0.0.1,100.119.113.56,100.86.226.21"
+#: Claude Code 額外直連 Anthropic API 與 claude.ai（僅設 http_proxy，HTTPS 不走來源伺服器）
+CLAUDE_NO_PROXY = NO_PROXY + ",api.anthropic.com,.anthropic.com,claude.ai,.claude.ai,platform.claude.com"
+#: Claude Code 允許的工具（自動放行，避免 -p 下卡權限詢問）與禁止的內建抓頁工具（強制用 curl 走 http_proxy）
+CLAUDE_ALLOWED_TOOLS = "Bash,Edit,Write,Read,Glob,Grep"
+CLAUDE_DISALLOWED_TOOLS = "WebFetch,WebSearch"
 
 
 class InfraError(RuntimeError):
     """基礎設施失敗（0 次成功的模型回應＋連線錯誤）：不算一次執行；這一組停下，續跑時從頭重做沒完成的部分。"""
+
+
+def usage_from_claude_log(log_path: pathlib.Path) -> dict | None:
+    """解析 `claude -p --output-format stream-json --verbose`（亦相容單筆 `--output-format json`）的用量。
+
+    呼叫數口徑：
+    - `stream-json` 下，同一通模型 API 回應若含多個 content block（如平行工具呼叫），Claude Code 會輸出
+      多筆同 `message.id` 的 `type="assistant"` 事件，而 `result.num_turns` 計的是回合／區塊數而非 API 呼叫數。
+      因此以非錯誤、非 `<synthetic>` 的 `assistant` 事件之不重複 `message.id` 計 `calls`（精確 API 呼叫數）；
+      若 log 只有單筆 `result`（`--output-format json`），才退回 `result.num_turns`（僅非錯誤且有實際用量時）。
+    - token 總計優先取最終 `type="result"` 的 `usage`（含 `message_delta` 結算後的精確 `output_tokens` 與
+      `cache_creation_input_tokens`／`cache_read_input_tokens`）；若行程逾時未印出 `result`，退回加總各
+      不重複 `message.id` 最後看到的 `message.usage`。
+    - 錯誤（`is_api_error_message`、`error`、`api_error`、`model=="<synthetic>"` 或 `result.is_error`）計入
+      `errors` 並留 `final_error`，讓上層套用與 pi 相同的基礎設施失敗判定（0 次成功回應＋錯誤 ⇒ InfraError）。
+    """
+    try:
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    saw_json = False
+    saw_assistant = False
+    msg_usage: dict[str, dict] = {}
+    err_ids: set[str] = set()
+    errors = 0
+    final_error: str | None = None
+    result_obj: dict | None = None
+    for idx, raw in enumerate(text.splitlines()):
+        line = raw.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            obj = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(obj, dict) or "type" not in obj:
+            continue
+        saw_json = True
+        etype = obj.get("type")
+        if etype == "assistant":
+            saw_assistant = True
+            msg = obj.get("message") if isinstance(obj.get("message"), dict) else {}
+            is_err = bool(obj.get("is_api_error_message") or obj.get("error")
+                          or obj.get("api_error") or msg.get("model") == "<synthetic>")
+            mid = msg.get("id")
+            if is_err:
+                ekey = str(mid) if mid else f"_err_{idx}"
+                if ekey not in err_ids:
+                    err_ids.add(ekey)
+                    errors += 1
+                err_txt = None
+                content = msg.get("content")
+                if isinstance(content, list):
+                    parts = [str(c.get("text") or "") for c in content if isinstance(c, dict) and c.get("text")]
+                    if parts:
+                        err_txt = " ".join(parts)
+                final_error = str(err_txt or obj.get("api_error") or obj.get("error") or "error")[:300]
+            else:
+                key = str(mid) if mid else f"_anon_{idx}"
+                u = msg.get("usage")
+                msg_usage[key] = u if isinstance(u, dict) else {}
+                final_error = None
+        elif etype == "result":
+            result_obj = obj
+            if obj.get("is_error"):
+                if errors == 0:
+                    errors = 1
+                final_error = str(obj.get("result") or obj.get("api_error") or obj.get("subtype") or "error")[:300]
+    if not saw_json:
+        return None
+    if saw_assistant:
+        calls = len(msg_usage)
+    elif result_obj is not None:
+        has_usage = bool(result_obj.get("modelUsage")) or any(
+            int((result_obj.get("usage") or {}).get(k) or 0) > 0
+            for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens")
+        )
+        calls = int(result_obj.get("num_turns") or 0) if (not result_obj.get("is_error") and has_usage) else 0
+    else:
+        calls = 0
+    ru = result_obj.get("usage") if isinstance(result_obj, dict) and isinstance(result_obj.get("usage"), dict) else None
+    if ru is not None:
+        tin = int(ru.get("input_tokens") or 0)
+        tout = int(ru.get("output_tokens") or 0)
+        cache_create = int(ru.get("cache_creation_input_tokens") or 0)
+        cache_read = int(ru.get("cache_read_input_tokens") or 0)
+    else:
+        tin = sum(int(u.get("input_tokens") or 0) for u in msg_usage.values())
+        tout = sum(int(u.get("output_tokens") or 0) for u in msg_usage.values())
+        cache_create = sum(int(u.get("cache_creation_input_tokens") or 0) for u in msg_usage.values())
+        cache_read = sum(int(u.get("cache_read_input_tokens") or 0) for u in msg_usage.values())
+    return {
+        "calls": calls,
+        "errors": errors,
+        "input": tin if (calls > 0 or tin) else None,
+        "output": tout if (calls > 0 or tout) else None,
+        "cache_creation_input_tokens": cache_create,
+        "cache_read_input_tokens": cache_read,
+        "final_error": final_error,
+    }
 
 PROMPTS = {
     "write": ("Fill in report.md in this directory. Each product has one page: {urls} (read them with curl -s). "
@@ -114,9 +219,36 @@ class Run:
         host = HOST_FMT.format(set=set_id)
         return [f"http://{host}/p{i}.html" for i in range(1, 6)]
 
+    def agent_kind(self) -> str:
+        kind = self.plan["model"].get("agent", "pi")
+        if kind not in ("pi", "claude"):
+            raise SystemExit(f"unsupported model.agent: {kind!r}")
+        return kind
+
+    def _claude_settings_path(self, live: pathlib.Path) -> pathlib.Path:
+        for cand in (live / "cfg" / "settings.json", live / "cfg" / ".claude" / "settings.json"):
+            if cand.is_file():
+                return cand
+        raise FileNotFoundError(f"claude settings.json not found under {live / 'cfg'}")
+
     def agent_env(self, live: pathlib.Path) -> dict:
         p = self.plan
         env = {k: v for k, v in os.environ.items() if not k.lower().endswith("_proxy")}
+        if self.agent_kind() == "claude":
+            # 正式跑時保留使用者的 HOME（沿用登入的 Claude 訂閱憑證），靠旗標隔離設定；
+            # 測試時由外部環境提供隔離的 HOME／CLAUDE_CONFIG_DIR 與 ANTHROPIC_BASE_URL／API_KEY。
+            # 只設 HTTP 代理（*.d2-sources.example），不設 HTTPS 代理，且 NO_PROXY 排除 Anthropic 端點。
+            env.update({"VACANT_HOME": str(live / "vh"),
+                        "http_proxy": f"http://127.0.0.1:{p['server']['port']}",
+                        "HTTP_PROXY": f"http://127.0.0.1:{p['server']['port']}",
+                        "no_proxy": CLAUDE_NO_PROXY, "NO_PROXY": CLAUDE_NO_PROXY,
+                        "TMPDIR": str(live / "tmp"),
+                        "DISABLE_TELEMETRY": "1",
+                        "DISABLE_ERROR_REPORTING": "1",
+                        "DISABLE_AUTOUPDATER": "1",
+                        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+                        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"})
+            return env
         env.update({"PI_CODING_AGENT_DIR": str(live / "cfg"), "VACANT_HOME": str(live / "vh"),
                     "PI_SKIP_VERSION_CHECK": "1",
                     "http_proxy": f"http://127.0.0.1:{p['server']['port']}",
@@ -125,17 +257,38 @@ class Run:
                     "TMPDIR": str(live / "tmp")})
         return env
 
+    def _agent_argv(self, live: pathlib.Path, prompt: str, out: pathlib.Path) -> list[str]:
+        p = self.plan
+        if self.fake:
+            return [sys.executable, str(HERE / "fake_agent.py"), prompt]
+        if self.agent_kind() == "claude":
+            argv = [
+                "claude", "-p",
+                "--model", p["model"]["model"],
+                "--output-format", "stream-json", "--verbose",
+                "--setting-sources", "",
+                "--settings", str(self._claude_settings_path(live)),
+                "--strict-mcp-config",
+                "--disable-slash-commands",
+                "--no-session-persistence",
+                "--permission-mode", "dontAsk",
+                "--allowedTools", CLAUDE_ALLOWED_TOOLS,
+                "--disallowedTools", CLAUDE_DISALLOWED_TOOLS,
+            ]
+            if p["model"].get("max_turns") is not None:
+                argv += ["--max-turns", str(p["model"]["max_turns"])]
+            argv += ["--", prompt]
+            return argv
+        return ["pi", "-p", "--mode", "json", "--session-dir", str(out / "sessions"),
+                "--provider", p["model"]["provider"], "--model", p["model"]["model"], prompt]
+
     def run_agent(self, live: pathlib.Path, prompt: str, out: pathlib.Path) -> dict:
         """一次 agent 執行。回用量與結束碼。"""
         out.mkdir(parents=True, exist_ok=True)
         (out / "prompt.txt").write_text(prompt)
         p = self.plan
         t0 = time.time()
-        if self.fake:
-            argv = [sys.executable, str(HERE / "fake_agent.py"), prompt]
-        else:
-            argv = ["pi", "-p", "--mode", "json", "--session-dir", str(out / "sessions"),
-                    "--provider", p["model"]["provider"], "--model", p["model"]["model"], prompt]
+        argv = self._agent_argv(live, prompt, out)
         rc = None
         with open(out / "agent.log", "w") as lf:
             pr = subprocess.Popen(argv, cwd=live / "ws", env=self.agent_env(live), stdout=lf,
@@ -150,7 +303,12 @@ class Run:
             finally:
                 with LOCK:
                     self.procs.discard(pr)
-        u = usage_from_log(out / "agent.log") if not self.fake else {"calls": 0, "input": 0, "output": 0}
+        if self.fake:
+            u = {"calls": 0, "input": 0, "output": 0}
+        elif self.agent_kind() == "claude":
+            u = usage_from_claude_log(out / "agent.log")
+        else:
+            u = usage_from_log(out / "agent.log")
         res = {"rc": rc, "wall_s": round(time.time() - t0, 1), "usage": u}
         write_json(out / "run.json", res)
         if not self.fake and (u is None or (u.get("calls") == 0 and u.get("errors"))):

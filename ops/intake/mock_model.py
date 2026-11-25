@@ -280,6 +280,28 @@ def _step_call(st: dict[str, Any], tools: list[dict[str, Any]], cwd_hint: str | 
                                              "timeout_ms": 120000}
     if "agent" in st:
         return _agent_tool(tools, st["agent"])
+    if "read" in st:
+        for t in tools:
+            if _tool_name(t).lower() == "read":
+                sch = t.get("input_schema") or t.get("parameters") or {}
+                pk = next((k for k in _PATH_KEYS if k in _props(sch)), "file_path")
+                p = str(st["read"])
+                if cwd_hint and not os.path.isabs(p) and pk in ("file_path", "filePath"):
+                    p = os.path.join(cwd_hint, p)
+                return _tool_name(t), {pk: p}
+        return None
+    if "edit" in st:
+        path, old_s, new_s = st["edit"]
+        for t in tools:
+            if _tool_name(t).lower() == "edit":
+                sch = t.get("input_schema") or t.get("parameters") or {}
+                pr = _props(sch)
+                pk = next((k for k in _PATH_KEYS if k in pr), "file_path")
+                p = str(path)
+                if cwd_hint and not os.path.isabs(p) and pk in ("file_path", "filePath"):
+                    p = os.path.join(cwd_hint, p)
+                return _tool_name(t), {pk: p, "old_string": str(old_s), "new_string": str(new_s)}
+        return None
     if "run" in st:
         sh = _shell_tool(tools)
         if sh and sh[0] != "write":
@@ -507,7 +529,8 @@ class H(BaseHTTPRequestHandler):
         role = role_of(_text_of(msgs[0].get("content")) if msgs else "")
         notified = any(m.get("role") == "user" and "<task-notification>" in _text_of(m.get("content"))
                        for m in msgs)
-        kind, a, b = plan(k, tools, _cwd_hint(json.dumps(body.get("system"))), fed, role,
+        cwd_hint = _cwd_hint(json.dumps(body.get("system"))) or _cwd_hint(json.dumps(msgs[:1]))
+        kind, a, b = plan(k, tools, cwd_hint, fed, role,
                           notified=notified, section=sec)
         log({"proto": "anthropic", "n": n, "k": k, "fed_back": fed, "reply": kind, "role": role,
              "feedback": feedback_excerpt(json.dumps(body)) if fed else None,
@@ -515,22 +538,31 @@ class H(BaseHTTPRequestHandler):
              "tools": [t.get("name") for t in tools][:40], "tool": a if kind == "tool" else ([c[0] for c in a] if kind == "tools" else None)})
         model = body.get("model", "mock")
         calls = a if kind == "tools" else ([(a, b)] if kind == "tool" else [])
+        u_cfg = scenario().get("usage") if isinstance(scenario().get("usage"), dict) else None
         if not body.get("stream"):
             content = ([{"type": "text", "text": a}] if kind == "text" else
                        [{"type": "tool_use", "id": f"toolu_{n}_{i}", "name": nm, "input": ar}
                         for i, (nm, ar) in enumerate(calls)])
+            usage_non_stream = dict(u_cfg) if u_cfg else {"input_tokens": 10, "output_tokens": 5}
             return self._json(200, {"id": f"msg_{n}", "type": "message", "role": "assistant",
                                     "model": model, "content": content,
                                     "stop_reason": "end_turn" if kind == "text" else "tool_use",
                                     "stop_sequence": None,
-                                    "usage": {"input_tokens": 10, "output_tokens": 5}})
+                                    "usage": usage_non_stream})
 
         def ev(name, data):
             return f"event: {name}\ndata: {json.dumps(data)}\n\n".encode()
+        start_usage: dict[str, Any] = {"input_tokens": int((u_cfg or {}).get("input_tokens", 10)),
+                                       "output_tokens": 1}
+        if u_cfg:
+            for ck in ("cache_creation_input_tokens", "cache_read_input_tokens"):
+                if ck in u_cfg:
+                    start_usage[ck] = int(u_cfg[ck])
+        delta_usage = {"output_tokens": int((u_cfg or {}).get("output_tokens", 7))}
         out = [ev("message_start", {"type": "message_start", "message": {
             "id": f"msg_{n}", "type": "message", "role": "assistant", "model": model,
             "content": [], "stop_reason": None, "stop_sequence": None,
-            "usage": {"input_tokens": 10, "output_tokens": 1}}})]
+            "usage": start_usage}})]
         if kind == "text":
             out += [ev("content_block_start", {"type": "content_block_start", "index": 0,
                                                "content_block": {"type": "text", "text": ""}}),
@@ -554,7 +586,7 @@ class H(BaseHTTPRequestHandler):
         out += [ev("content_block_stop", {"type": "content_block_stop", "index": last}),
                 ev("message_delta", {"type": "message_delta",
                                      "delta": {"stop_reason": stop, "stop_sequence": None},
-                                     "usage": {"output_tokens": 7}}),
+                                     "usage": delta_usage}),
                 ev("message_stop", {"type": "message_stop"})]
         return self._sse(out)
 

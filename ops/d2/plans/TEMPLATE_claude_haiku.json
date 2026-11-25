@@ -1,0 +1,24 @@
+{
+  "schema": "vacant.d2.plan/1",
+  "id": "TEMPLATE_claude_haiku",
+  "seed": 201,
+  "purpose": "範本（勿直接啟動）：Claude Code（claude-haiku-4-5）D2′ 實驗計畫。複製並指定 sets、port、seed 後 commit 再執行。",
+  "setup_note": "先在隔離目錄產生 Vacant 掛鉤：HOME=~/dev/ops/agentcfg/d2claude VACANT_HOME=~/dev/ops/agentcfg/d2claude/.vacant ~/dev/ops/d2dev_venv/bin/python -I -m vacant_network install --agents claude --mode observe。正式跑時保留使用者的 HOME（走登入的 Claude 訂閱），以 --setting-sources '' --settings <live/cfg/settings.json> --strict-mcp-config --disable-slash-commands --no-session-persistence --disallowedTools WebFetch,WebSearch 隔離。",
+  "materials": {
+    "dir": "~/dev/ops/d2_materials/seed20261125",
+    "generator": "ops/d2/gen_materials.py --seed 20261125 --sets 40",
+    "manifest_sha256": "2434d465325ec52d8592b4d4c63308489b8a891fbf116e9b67a5bb661c40edbe",
+    "sets": ["s01"]
+  },
+  "arms": ["a", "b", "c", "d"],
+  "jobs": 1,
+  "agent_timeout_s": 600,
+  "server": {"port": 18191},
+  "model": {"agent": "claude", "model": "claude-haiku-4-5"},
+  "vacant_python": "~/dev/ops/d2dev_venv/bin/python",
+  "agentcfg": {
+    "dir": "~/dev/ops/agentcfg/d2claude/.claude",
+    "copy": ["settings.json"],
+    "install_json": "~/dev/ops/agentcfg/d2claude/.vacant/adapters/install.json"
+  }
+}
