@@ -1,0 +1,240 @@
+{
+ "id": "rfh4_polyglot34_pi_gemma12b_local",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261125,
+ "bank": "~/dev/ops/ref/bm_tasks/polyglot_py",
+ "bank_candidates": [
+  "/tmp/bm_tasks/polyglot_py",
+  "/srv/eval/staged/polyglot_py"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "H": {
+   "policy": "single",
+   "attempt_timeout_s": 1800,
+   "agent": {
+    "config_dir": {
+     "env": "PI_CODING_AGENT_DIR",
+     "from": "~/dev/ops/agentcfg/hook_rc6final",
+     "copy": [
+      "models.json",
+      "extensions"
+     ]
+    },
+    "env": {
+     "PI_SKIP_VERSION_CHECK": "1",
+     "VACANT_HOME": "{logs}/vacant-home"
+    }
+   }
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "RF": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "first_failure"
+  }
+ },
+ "pair": [
+  "R",
+  "RF"
+ ],
+ "attempt_timeout_s": 1800,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1003",
+   "provider": "lms1003nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  },
+  {
+   "name": "lms1004",
+   "provider": "lms1004nothink",
+   "model": "gemma-4-12b-it-qat",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": true
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs, per comparison",
+  "comparisons": [
+   {
+    "name": "RF_vs_R",
+    "control": "R",
+    "treatment": "RF"
+   },
+   {
+    "name": "H_vs_A",
+    "control": "A",
+    "treatment": "H"
+   },
+   {
+    "name": "R_vs_A",
+    "control": "A",
+    "treatment": "R"
+   }
+  ],
+  "multiplicity": "Holm–Bonferroni over the three comparisons above, family α=0.05 (thresholds 0.05/3, 0.05/2, 0.05 in ascending p order; stop at the first non-rejection).",
+  "script": "ops/redo/analysis/multi_arm.py --root <run root>（發射前 commit；harness 自己的 REPORT 只算 pair＝RF 對 R 的未校正 p，以本腳本的 Holm 結果為準）"
+ },
+ "tasks": [
+  "pg_affine_cipher",
+  "pg_beer_song",
+  "pg_book_store",
+  "pg_bottle_song",
+  "pg_bowling",
+  "pg_connect",
+  "pg_dominoes",
+  "pg_dot_dsl",
+  "pg_food_chain",
+  "pg_forth",
+  "pg_go_counting",
+  "pg_grade_school",
+  "pg_grep",
+  "pg_hangman",
+  "pg_list_ops",
+  "pg_paasio",
+  "pg_phone_number",
+  "pg_pig_latin",
+  "pg_poker",
+  "pg_pov",
+  "pg_proverb",
+  "pg_react",
+  "pg_rest_api",
+  "pg_robot_name",
+  "pg_scale_generator",
+  "pg_sgf_parsing",
+  "pg_simple_linked_list",
+  "pg_transpose",
+  "pg_tree_building",
+  "pg_two_bucket",
+  "pg_variable_length_quantity",
+  "pg_wordy",
+  "pg_zebra_puzzle",
+  "pg_zipper"
+ ],
+ "reps": 5,
+ "prereg": {
+  "scope": "這批回答三件事：H 對 A＝「全程記錄＋同一工作階段內的交件前退回」（Vacant 的掛鉤，不重做）在原生 pi 之上有沒有增益；RF 對 R＝「把驗收的失敗訊息（第一個失敗測試的輸出，≤400 位元組）交給下一次」在盲目重做之上有沒有增益；R 對 A＝盲目重做比原生一次跑到底好的複製。**不回答**「病歷的追緝回饋（產品契約路徑的 `--feedback-mode localized`）有沒有用」：那個機制比對的是成果裡的數值／引文對照輸入，在單檔解答＋unittest 的題上沒有可追的值；L-fake（pg_proverb，假 agent 交同一個錯解）裡 localized 把位置指進受保護的測試檔（「proverb_test.py:79 says \"self.assertEqual(\"」「the same value is in proverb_test.py line 19 (the given input)」），測試輸出還截得比 generic 短。逐字證據與評估：decisions/notes/NOTE_20261125_CONTRACT_FEEDBACK_MODES.md、ops/redo/results/rfh4_lfake/。",
+  "registered": "2026-11-25，vacant-hope 確認臂定義（四臂 A／H／R／RF，H 保留；契約路徑三模式不發）後、第一通模型呼叫之前 commit。",
+  "authorization": "使用者 11/25 原話（經 vacant-hope）：「我們現在這個有一定成效的我也想知道是是我們的紀錄讓agent可以獲得更好？還是說是其實只要我們讓他重做就會變好」。vacant-hope 11/25 指示設計本批、發射前先給它看。",
+  "question": "同一組 34 題 polyglot_py、pi＋gemma-4-12b-it-qat、本機 llama.cpp、總牆鐘 1800 秒：(1) 重做時把上一次的失敗定位交給新的嘗試（RF），交出通過成果的比例是否高於盲目重做（R）？(2) 只裝 Vacant 的紀錄掛鉤、不重做（H），是否高於原生一次跑到底（A）？(3) 盲目重做（R）是否高於 A（複製 redo1／confirm 系列）？",
+  "why": "現有證據偏向「重做」：redo1／redo1_opencode 是 harness 重開、沒裝 Vacant；confirm2／3、E4B、unused40 的產品臂不載入擴充；只有紀錄與交件前檢查的零設定掛鉤，9–10 月幾批大多沒量到差別。但那些是跨批並列，沒有一批把兩個因素放在同一組題、同一台機器上配對比較。",
+  "arms": {
+   "A": "原生 pi 一次跑到底（1800 秒）；harness 的乾淨設定目錄，只複製 models.json（sha256 57bf25b2…）。與 redo1／confirm2 的 A 臂相同。",
+   "H": "只有紀錄：同 A，但 pi 設定目錄另外放 Vacant rc6-final 的 pi 擴充 `extensions/vacant.ts`（由 ~/dev/ops/rc6rel_venv＝wheel a575c66106a4…，以 `pi_extension_text()` 產生，與 `vacant install` 寫進 ~/.pi/agent 的檔逐字相同；sha256 fe0cfbb9ff883b87…）。掛鉤全程記錄，agent 說做完時查一次紀錄，只在幾乎一定是真問題時在同一個工作階段裡退回（README『掛鉤模式』的五條）。不重開、不跑驗收、不給測試結果。掛鉤的病歷寫在每次嘗試自己的 {logs}/vacant-home（VACANT_HOME），不碰使用者的 ~/.vacant。",
+   "R": "只有重做：harness 的 R3（最多 3 次、單次 600 秒、總 1800 秒），每次從原件的乾淨副本、原提示重來，不給任何失敗資訊；驗收通過就停；交第一個通過的，都沒過交原件測試過最多的（同分取最後）。這就是產品零設定重開（`vacant do`，restart.py：『政策＝ops/redo 的 R3』）的政策原型；不經產品碼。",
+   "RF": "重做＋失敗資訊：同 R，唯一差別是第 2、3 次嘗試的提示在原提示後面接 `\\n\\n---\\n` 與下面的提示模板（harness 的 hint＝first_failure）。工作區一樣每次從原件乾淨副本開始。"
+  },
+  "rf_choice": "選 harness 的 hint＝first_failure，不選產品 `--feedback-mode`：產品的 feedback_mode（localized／generic／none）只在有契約的 `vacant do --contract` 路徑（adapters/run.py）存在，零設定重開（restart.py）沒有這個選項、一律盲重開；要在無契約下用就得寫新的產品碼，或替 34 題各寫契約——那會讓 RF 和 R 的差別不只一個因素。用 harness 的 R／RF，兩臂只差提示文字。語意：first_failure＝harness 驗收（原件測試檔）跑出的第一個失敗測試的 id＋traceback（取最後 800 字元），連同模板截到 400 位元組（HINT_CAP，與 v5 fresh_hint 相同）；它來自驗收結果，不是掛鉤病歷的『追緝回饋』（產品 localized 是後者）。所以 RF 回答的是「把驗收的失敗定位交給下一次」，不是「把病歷交給下一次」。",
+  "hint_template_verbatim": "An earlier attempt at this task ended with the tests in this directory not passing. First failing test output from that attempt:\n",
+  "ks1": "給下一次嘗試的文字只有模板（上面逐字）與測試框架輸出的失敗位置與內容；沒有責備、沒有行動者（不寫 you／the agent／某人做錯）。redo.py 的 make_hint 每次產生時用 _KS1_BANNED 檢查模板，命中就丟例外停批。測試輸出本身是第三方文字，照原樣截斷、不改寫。",
+  "product_version": "H 臂的擴充來自 rc6-final（release/0.9.2-prep b1ca9b1ff，wheel a575c66106a45dc13a1546cf0b4cd5aa35948935ffef607e0111746f2f83dcbb，安裝在 ~/dev/ops/rc6rel_venv）；掛鉤行程以該 venv 的 python 執行（擴充內的 ARGV 寫死絕對路徑）。R／RF 不經產品碼。全批固定。",
+  "primary": "三個預先寫死的比較，各 34 題 × 5 次重複＝170 對、精確雙尾 McNemar，Holm 校正（family α＝0.05）：RF 對 R（紀錄給的資訊在重做之上有沒有額外增益）、H 對 A（只有紀錄有沒有增益）、R 對 A（複製）。b＝只有對照過、c＝只有處理過。同一對（題×重複）的四臂在同一台機器上、依計畫種子決定的順序接連跑。",
+  "states": {
+   "EFFECTIVE": "該比較的 170 對全部完成（扣 infra_void）、c > b、Holm 校正後拒絕、處理臂驗收放行卻錯＝0。",
+   "UNRESOLVED": "完成但 Holm 校正後沒有拒絕（不論方向）。只記方向與大小；不是負結果，也不是『沒有效果』。",
+   "CONTRADICTS": "b > c 且 Holm 校正後拒絕。不下任何方向的效果結論；停下來回報。",
+   "INCOMPLETE": "還沒跑完。只能續跑，不能看了一半的數字改計畫。",
+   "MIXED_GRADER": "同一批裡出現兩種評分方式。不下結論，查題庫。"
+  },
+  "sayable": {
+   "RF_vs_R": {
+    "EFFECTIVE": "「在這 34 題、pi、gemma-4-12b（本機 1003／1004）、同樣 1800 秒與 3 次重做下，重做時把上一次驗收的第一個失敗測試輸出（≤400 位元組）交給新的嘗試，交出通過成果的比例比盲目重做高（數字、Holm 校正後 p、兩臂平均嘗試數一起講）」。不可以說：『Vacant 的紀錄讓 agent 變好』——RF 給的是驗收的失敗定位，不是掛鉤病歷。",
+    "UNRESOLVED": "「在這 34 題…條件下，沒有量到把失敗定位交給下一次比盲目重做好（RF x/170、R y/170，b、c、校正後 p）。這批對 5 個百分點的真差別只有約 10–31% 的機率抓得到（見 power），所以這不表示沒有差別；能排除的大約只到『差別在 10–13 個百分點以上』這一級」。不可以說：『失敗資訊沒有用』『只要重做就夠』。",
+    "CONTRADICTS": "「在這個條件下，給失敗定位的重做交出的通過成果比盲目重做少（數字）」，停下來回報，原因另查（例如提示截斷、模型被誤導）。"
+   },
+   "H_vs_A": {
+    "EFFECTIVE": "「在這 34 題…條件下，只裝 Vacant 的紀錄掛鉤（全程記錄＋交件前在同一工作階段退回，不重做），交出通過成果的比例比原生 pi 高（數字、掛鉤實際退回的次數一起講）」。",
+    "UNRESOLVED": "「在這 34 題…條件下，沒有量到只裝紀錄掛鉤比原生 pi 好（數字；掛鉤實際退回 k 次）。這不表示紀錄沒有用」。若 k 很小，加一句：掛鉤在這批題上很少有可退回的情況，這個比較量到的主要是『裝了但幾乎沒出手』。",
+    "CONTRADICTS": "「在這個條件下，裝了紀錄掛鉤交出的通過成果比原生少（數字）」，停下來回報。"
+   },
+   "R_vs_A": {
+    "EFFECTIVE": "「在這 34 題…條件下，盲目重做（最多 3 次、單次 600 秒、總 1800 秒）交出通過成果的比例比原生 pi 一次跑到底高」——與 redo1、confirm1／1c／2／3 並列為同一批題上的複製，不是泛化證據。",
+    "UNRESOLVED": "「這一批沒有複製到盲目重做比原生好（數字）」，與前幾批並列、不合併。",
+    "CONTRADICTS": "停下來回報。"
+   },
+   "joint_reading": "回答使用者的問題時三個比較一起講，不挑一個。只有 R 對 A 有效、另兩個沒有：說『在這批題上量到的增益可以由重做本身解釋；紀錄（掛鉤）與失敗定位沒有量到額外增益，但這批對小差別的檢定力低』，不說『紀錄沒用』。RF 對 R 有效：說『把驗收的失敗定位交給下一次，在重做之上還有增益』。"
+  },
+  "power": "預估用 confirm1c（b6 c29，不一致對 20.6%）與 confirm2（b11 c34，26.5%）的不一致比例，另算 15%（RF 與 R 同為重做、H 與 A 同為單次，兩兩之間的不一致比例可能比 A 對重做低）。真差別 5 個百分點、170 對、精確雙尾 McNemar：α＝0.05/3（Holm 最嚴的一級）時檢定力 0.10（26.5%）／0.13（20.6%）／0.18（15%）；α＝0.05 時 0.20／0.24／0.31。80% 檢定力（α＝0.05/3）能抓到的最小真差別約 13／11.5／10 個百分點。RF 對 R、H 對 A 都照這組數字讀：這批能回答「差 10 個百分點以上」這一級；5 個百分點級的差別，沒量到不等於沒有。加倍到 340 對（34×10），5 個百分點的檢定力也只有 0.24–0.45（α＝0.05/3）而時間加倍，所以維持 170 對。計算：精確二項，對不一致對數 D～Bin(170, d) 加總。",
+  "manipulation_checks": [
+   "H：每格 {logs}/vacant-home 底下掛鉤的病歷與決定紀錄——數掛鉤事件數、在 stop 時退回（同一工作階段要求補）的次數與類別（README 掛鉤模式五條：要求的檔不存在、失敗步驟被略過、說測試通過但對不上、數值找不到出處、點名的檔沒打開）。有 H 格完全沒有病歷＝掛鉤沒載入，那一格照計但結案列出。數法（腳本）在冒煙看過實際檔案格式後、主批任何結果出來前 commit。",
+   "RF：hint_bytes>0 的嘗試數（R 必須全是 0）；RF 實際送出的 hint 有多少到 400 位元組上限、有多少「看不出期望值」——操作定義：hint 本文不含 `!=`、`AssertionError`、`expected`、`Expected` 任何一個（multi_arm.py 的 hints_at_cap／hints_no_expected_value，讀 attempt.json 的 hint_text）。",
+   "R／RF 的平均嘗試數、撞 600 秒上限比例、模型呼叫數一起列（撞上限多時，失敗訊息多半只是逾時、沒有測試輸出，RF 與 R 的差別會被稀釋）。"
+  ],
+  "exclusions": "infra_void 的格不進分母、逐一列在報告；每個比較各自配對：該比較的兩臂任一臂 infra_void，那一對在該比較裡不計（不影響其他比較）。void 的判定在 redo.py（工作區沒動＋模型呼叫 0 次或連線錯誤），與通過與否無關。",
+  "known_limits": [
+   "34 題在 e001／e002／e016／realrun／redo1／confirm1／1c／2／2c／3 都用過：同一批題上的比較，不是沒看過的題。",
+   "polyglot_py 的可見測試就是評分器：R／RF 的驗收訊號在這個題庫上是真的，RF 給的失敗定位也就是評分器的失敗。換題庫時這兩點都不成立。",
+   "RF 的 hint 是 harness 既有行為：traceback 先取最後 800 字元、再連同模板截到 400 位元組（HINT_CAP，與 v5 fresh_hint 同上限），可能截掉斷言訊息的後半、看不出期望值；本批不改，結案時報實際被截到看不出期望值的比例（見 manipulation_checks）。",
+   "H 的掛鉤在 pi -p（print 模式）下執行；README 的掛鉤數字也都是 pi --print。互動介面不在本批。",
+   "A／H 是單次 1800 秒；R／RF 是單次 600 秒×最多 3 次。H 對 A、R 對 A 各自比的是同一個總牆鐘下的兩種用法。",
+   "兩台機器（1003 llama.cpp 2.73.0、1004 llama.cpp 2.46.0）都 jobs 1；一對的四臂在同一台，機器差異在配對內抵消，但報告分機器列出。",
+   "R／RF 的 R3 重開走 harness，不是產品碼；產品 `vacant do pi` 與 R3 的政策相同，但隔離、測試還原、收據等產品行為不在本批。",
+   "等預算是牆鐘的；模型呼叫數照實列，不當成主張的一部分。",
+   "RF 給的是驗收結果的失敗訊息，不是掛鉤病歷或追緝回饋；本批不回答病歷有沒有用（見 scope）。"
+  ],
+  "stop_rules": [
+   "jobs 1 之下若 1 小時內 ≥2 次 `bad allocation`：停批、回報，不再自行改條件。",
+   "端點機器 C: < 5 GB 或 Application Error 崩潰在 1 小時內 ≥3 次：停批、修好再續跑（續跑＝同計畫同 harness，未完成的格重做）。",
+   "冒煙（2 對）：四臂各至少 1 格有成功的模型呼叫、H 至少 1 格病歷有掛鉤事件、RF 至少 1 次 hint_bytes>0（若兩對第一次都過則改看 R／RF 的 attempts 與 hint 欄位一致），且 0 個 harness 例外，才發主批。"
+  ],
+  "schedule": "冒煙（另一份計畫 smoke_rfh4_*，同四臂、2 對、1003）在 atimeout 結束後先跑；過了之後 1003 用 `--only-providers lms1003` 起主批，1004 在 confirm2oc 結束後用 `--only-providers lms1004` 接同一個 root。兩批照跑、照結案，不搶 GPU。",
+  "primary_reading": {
+   "RF_vs_R": "事先的讀法：若沒有量到差別，結論是「在這批題上，把驗收的失敗訊息交給下一次，沒有量到盲目重做以外的增益；這批能排除的是約 10–13 個百分點以上的差別（依實際不一致對比例換算，結案時照實際 b＋c 重算 80% 檢定力的最小可偵測差）」，不是「失敗訊息沒用」，也不是「紀錄沒用」（RF 給的不是病歷）。",
+   "H_vs_A": "事先的讀法：若沒有量到差別，結論是「在這批題上，全程記錄＋同一工作階段內的交件前退回，沒有量到比原生 pi 好；能排除的是約 10–13 個百分點以上的差別」，並附掛鉤實際退回的次數；退回很少時明講這個比較量到的主要是「裝了但幾乎沒出手」。不是「紀錄沒用」：這批題上紀錄能介入的時機（說做完卻沒寫檔、略過失敗步驟、說測試過但對不上）本來就少。",
+   "R_vs_A": "與 redo1、confirm1／1c／2／3 並列，是同一批題上的複製，不合併 p 值。"
+  },
+  "harness": "需要 2026-11-25 的 redo.py（加 `--only-providers` 篩選與每台機器一把鎖，attempt.json 另記 hint_text；selftest 37/37）。跑中的 atimeout／confirm2oc 用 ~/dev/wt/nonpy 的 harness 3c74139794f1，不受影響；本批的 harness sha 以 RUN 與 REPORT 記的為準。"
+ }
+}

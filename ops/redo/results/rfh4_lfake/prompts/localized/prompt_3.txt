@@ -1,0 +1,12 @@
+Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+
+The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):
+- tests: FAIL — proverb_test.py:79 says "self.assertEqual("  (still open)
+  check says: exit 1: ======================================================================
+FAIL: test_an_optional_qualifier_can_be_added (proverb_test.ProverbTest.test_an_…
+  the same value is in proverb_test.py line 19 (the given input)
+- tests: FAIL — proverb_test.py:29 says "self.assertEqual("  (still open)
+  check says: exit 1: ======================================================================
+FAIL: test_an_optional_qualifier_can_be_added (proverb_test.ProverbTest.test_an_…
+  the same value is in proverb_test.py line 19 (the given input)
+Run `vacant check` to re-check before finishing.

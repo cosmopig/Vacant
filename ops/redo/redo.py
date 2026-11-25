@@ -664,7 +664,8 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
             tail = ""
         infra_re = re.compile(agent.get("infra_re", INFRA_RE_DEFAULT), re.I)
         meta = {"started": started, "argv0": argv[0], "provider": provider["name"], "timeout_s": timeout_s,
-                "workspace_changed": changed, "usage": usage, "hint_bytes": len(hint.encode()) if hint else 0, **r}
+                "workspace_changed": changed, "usage": usage, "hint_bytes": len(hint.encode()) if hint else 0,
+                "hint_text": hint, **r}
         # 基礎設施失敗（不算嘗試）的三種樣子，判定都與「過不過」無關：
         #  a. agent 起不來；b. 工作區沒動，而且一次成功的模型回應都沒有，或輸出尾端是連線類錯誤；
         #  c. 做到一半模型死掉：最後一則 assistant 訊息是連線類錯誤（工作區可能已經動過）。
@@ -800,12 +801,24 @@ def cmd_run(a: argparse.Namespace) -> int:
     plan = load_plan(plan_path)
     root = pathlib.Path(a.root).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    lock = open(root / ".lock", "w")
-    try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except OSError:
-        print(f"拒絕啟動：{root} 已經有一份 runner 在跑", file=sys.stderr)
+    # 每台機器一把鎖（2026-11-25，--only-providers）：兩份 runner 可以在同一個 root 各跑不同的機器，
+    # 但同一台機器的佇列永遠只有一份在跑；沒給篩選＝這份要跑全部機器＝拿全部的鎖。
+    names = [p["name"] for p in plan["providers"]]
+    only_p = [x for x in (getattr(a, "only_providers", None) or "").split(",") if x]
+    if any(x not in names for x in only_p):
+        print(f"拒絕啟動：--only-providers 裡有計畫沒有的機器 {only_p}（計畫裡有 {names}）", file=sys.stderr)
         return 2
+    locks = []
+    for name in (only_p or names):
+        lk = open(root / f".lock-{name}", "w")
+        try:
+            fcntl.flock(lk, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            print(f"拒絕啟動：{root} 已經有一份 runner 在跑機器 {name}", file=sys.stderr)
+            return 2
+        locks.append(lk)
+    rjl = open(root / ".lock-runjson", "w")
+    fcntl.flock(rjl, fcntl.LOCK_EX)          # RUN.json 的建立／比對不能兩份同時做
     runf = root / "RUN.json"
     if runf.is_file():
         prev = read_json(runf)
@@ -823,6 +836,7 @@ def cmd_run(a: argparse.Namespace) -> int:
         write_json(runf, {"plan_id": plan["id"], "plan_sha256": plan["_sha256"], "plan_path": str(plan_path),
                           "plan": {k: v for k, v in plan.items() if not k.startswith("_")},
                           "git_head": _git(["rev-parse", "HEAD"], plan_path.parent), "created": now()})
+    fcntl.flock(rjl, fcntl.LOCK_UN)
     bank = resolve_bank(plan, a.bank)
     loglock = threading.Lock()
 
@@ -839,6 +853,8 @@ def cmd_run(a: argparse.Namespace) -> int:
     work: dict[str, list[tuple[int, str, int]]] = {p["name"]: [] for p in plan["providers"]}
     for i, (t, r) in enumerate(pairs):
         if (only_t and t not in only_t) or (only_r and r not in only_r):
+            continue
+        if only_p and provider_for(plan, i)["name"] not in only_p:
             continue
         work[provider_for(plan, i)["name"]].append((i, t, r))
     if a.max_pairs:
@@ -1229,7 +1245,7 @@ def selftest(verbose: bool = True) -> int:
         write_json(pf, plan)
         root = tmp / "root"
         ns = argparse.Namespace(plan=str(pf), root=str(root), bank=None, only_tasks=None, only_reps=None,
-                                max_pairs=None, allow_uncommitted_plan=True)
+                                max_pairs=None, only_providers=None, allow_uncommitted_plan=True)
         out = open(os.devnull, "w")
         old = sys.stdout
         sys.stdout = out if not verbose else old
@@ -1414,7 +1430,7 @@ def selftest(verbose: bool = True) -> int:
         write_json(cmd_pf, cmd_plan)
         cmd_root = tmp / "cmd_root"
         cmd_ns = argparse.Namespace(plan=str(cmd_pf), root=str(cmd_root), bank=None, only_tasks=None,
-                                    only_reps=None, max_pairs=None, allow_uncommitted_plan=True)
+                                    only_reps=None, max_pairs=None, only_providers=None, allow_uncommitted_plan=True)
         sys.stdout = out if not verbose else old
         try:
             rc_cmd = cmd_run(cmd_ns)
@@ -1428,6 +1444,44 @@ def selftest(verbose: bool = True) -> int:
             and ccell("c_tamper", "R3")["accepted"] is False
             and all(x["tests_tampered"] == ["toy.spec.js"] for x in ccell("c_tamper", "R3")["attempts"]),
             "command 驗收端到端（visible_equals_grader=True）：R3 第 2 次過、竄改者被擋下")
+        # --only-providers（2026-11-25）：兩台機器的佇列各由一份 runner 跑、同一個 root；同一台不能有兩份
+        ah = read_json(root / "cells" / "t_second" / "r1" / "R3H" / "attempt_2" / "attempt.json")
+        chk(isinstance(ah.get("hint_text"), str) and ah["hint_text"].startswith(HINT_HEAD)
+            and ah["hint_bytes"] == len(ah["hint_text"].encode()), "attempt.json 記下送出的 hint 原文（RF 截斷率用）")
+        mp = {**plan, "id": "selftest_mp", "tasks": ["t_always", "t_second", "t_never", "t_tamper"],
+              "arms": {"A": plan["arms"]["A"], "R3": plan["arms"]["R3"]},
+              "providers": [{"name": "s1", "provider": "p", "model": "m", "jobs": 1},
+                            {"name": "s2", "provider": "p", "model": "m", "jobs": 1}]}
+        mp_pf = tmp / "mp_plan.json"
+        write_json(mp_pf, mp)
+        mp_root = tmp / "mp_root"
+        mk = lambda prov: argparse.Namespace(plan=str(mp_pf), root=str(mp_root), bank=None, only_tasks=None,  # noqa: E731
+                                             only_reps=None, max_pairs=None, only_providers=prov,
+                                             allow_uncommitted_plan=True)
+        sys.stdout = out if not verbose else old
+        try:
+            rc_bad = cmd_run(mk("nope"))
+            mp_root.mkdir(parents=True, exist_ok=True)
+            held = open(mp_root / ".lock-s1", "w")
+            fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            rc_busy = cmd_run(mk("s1"))
+            rc_s2 = cmd_run(mk("s2"))
+            fcntl.flock(held, fcntl.LOCK_UN)
+            held.close()
+            provs_after_s2 = {read_json(f)["provider"] for f in (mp_root / "cells").glob("*/r*/*/cell.json")}
+            rc_s1 = cmd_run(mk("s1"))
+        finally:
+            sys.stdout = old
+        mp_cells = [read_json(f) for f in (mp_root / "cells").glob("*/r*/*/cell.json")]
+        by_pair = {}
+        for c in mp_cells:
+            by_pair.setdefault((c["task"], c["rep"]), set()).add(c["provider"])
+        chk(rc_bad == 2, "--only-providers 給了計畫沒有的機器 ⇒ 拒絕啟動")
+        chk(rc_busy == 2, "同一台機器已經有 runner 在跑（鎖被拿著）⇒ 拒絕啟動")
+        chk(rc_s2 == 0 and provs_after_s2 == {"s2"}, "只跑 s2：只產生 s2 的格")
+        chk(rc_s1 == 0 and len(mp_cells) == 8 and all(len(v) == 1 for v in by_pair.values())
+            and read_json(mp_root / "REPORT.json")["pairs_complete"] == 4,
+            "再跑 s1：同一個 root 補齊 4 對 8 格，每一對兩臂在同一台")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     bad = [m for ok_, m in checks if not ok_]
@@ -1452,6 +1506,7 @@ def main(argv: list[str] | None = None) -> int:
             s.add_argument("--only-tasks", help="逗號分隔；只是篩選，不改計畫")
             s.add_argument("--only-reps", help="逗號分隔，例如 1 或 1,2")
             s.add_argument("--max-pairs", type=int)
+            s.add_argument("--only-providers", help="逗號分隔的機器名；只是篩選，不改計畫（一對的機器由計畫決定）")
     for name in ("report", "status"):
         s = sub.add_parser(name); s.add_argument("--root", required=True)
     a = ap.parse_args(argv)

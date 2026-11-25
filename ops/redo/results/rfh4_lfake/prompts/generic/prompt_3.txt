@@ -1,0 +1,15 @@
+Read goal.md and contract.md in this directory and do what they say. Use your tools to write the file.
+
+The task contract's checks do not pass yet (this is feedback from `vacant check`, not a final decision):
+- tests: FAIL — exit 1: ======================================================================
+FAIL: test_an_optional_qualifier_can_be_added (proverb_test.ProverbTest.test_an_optional_qualifier_can_be_added)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/vacant-verify-ia431nq0/cmd_tests_ws/proverb_test.py", line 79, in test_an_optional_qualifier_can_be_added
+    self.assertEqual(
+AssertionError: Lists differ: [] != ['And all for the want of a horseshoe nail.']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'And all fo
+Run `vacant check` to re-check before finishing.
