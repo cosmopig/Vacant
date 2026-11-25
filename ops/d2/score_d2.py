@@ -199,9 +199,10 @@ def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
                     "tokens_in": u.get("input") if a else 0, "tokens_out": u.get("output") if a else 0,
                     "wall_s": a.get("wall_s", 0) if a else 0,
                     "tool_wall_s": (info.get("sources_check") or {}).get("wall_s", 0)}
-                rq = source_requests(access, f"{sid}.d2-sources.example", info.get("t_start", info["ts_start"]),
-                                     info.get("t_end", info["ts_end"]))
-                costs[(sid, adir.name, k)].update(src_req_agent=rq["agent"], src_req_vacant=rq["vacant"])
+                if info.get("ts_start") and info.get("ts_end"):
+                    rq = source_requests(access, f"{sid}.d2-sources.example", info.get("t_start", info["ts_start"]),
+                                         info.get("t_end", info["ts_end"]))
+                    costs[(sid, adir.name, k)].update(src_req_agent=rq["agent"], src_req_vacant=rq["vacant"])
     return reports, costs
 
 

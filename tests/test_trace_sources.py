@@ -63,7 +63,7 @@ def test_claims_in_numbers_versions_and_skips():
         "- X — latest version: v5.7.9\n"
         "- X — bare semver: 2.14.0 and $1,250.50\n"
     )
-    got = S.claims_in(text)
+    got = [{"line": c["line"], "value": c["value"]} for c in S.claims_in(text)]
     assert got == [
         {"line": 8, "value": "$32"},
         {"line": 9, "value": "1,200"},
@@ -178,22 +178,10 @@ def test_check_record_true_appends_source_check_and_chain_verifies(env):
 
 
 def test_provenance_curl_redirect_to_file_then_read(env):
-    """Document current behaviour when the agent saves a page via `curl -s URL > p1.html`
-    and then reads `p1.html` with the Read tool (common real-model pattern).
+    """The agent saves a page via `curl -s URL > p1.html` and then reads `p1.html` (common real-model pattern).
 
-    Current behaviour:
-    1. `blame_location` traces report.md (t3) -> Read p1.html (t2) -> Bash `curl -s URL > p1.html` (t1)
-       and resolves the external URL (`kind="url"`, `ref=PAGE_URL`, `step=t1.n`, `observed=False`,
-       `confidence="heuristic"` because stdout of the curl step was redirected, not captured).
-    2. `sources.provenance()` therefore populates `source["url"] == PAGE_URL` and
-       `source["observed"] is False`, BUT reads `seen = trace.output_text(t1)` which is `""`
-       (the redirected file `p1.html` is in `t1.post_index`, not `t1.output_blob`), so
-       `source["seen_sha256"]` is `None`.
-    3. Consequence in `sources.check()`: because `seen` is empty (`""`), `seen and _still_there(...)`
-       is False even when the fetched page is byte-for-byte identical, so `check()` conservatively
-       reports `status == "changed"` (the line is handed back to the agent rather than silently
-       marked unchanged).
-    """
+    Before 2026-11-25 `seen` was the (empty) stdout of the curl step, so every such claim came out "changed".
+    Now `blame` reports `into` and `sources` takes the file the fetch wrote as what the agent saw."""
     ws, rec = env
     _step(
         rec, "t1", "Bash",
@@ -222,11 +210,14 @@ def test_provenance_curl_redirect_to_file_then_read(env):
     assert entry["source"]["url"] == PAGE_URL
     assert entry["source"]["step"] == "t1"
     assert entry["source"]["observed"] is False
-    assert entry["source"]["seen_sha256"] is None
+    # 2026-11-25 修正後：「當時看到的」是 t1 導出來的 p1.html（不是空的 stdout）
+    assert entry["source"]["into"] == "p1.html"
+    assert entry["source"]["seen_sha256"] == _sha(PAGE_HTML)
 
-    # In check(), empty `seen` causes even an identical fetch to be reported as "changed"
+    # 同一頁 ⇒ unchanged；值所在的片段改了 ⇒ changed
     res = S.check(ws, "report.md", fetch=lambda u: PAGE_HTML, record=False)
-    assert res["claims"][0]["status"] == "changed"
+    assert res["claims"][0]["status"] == "unchanged"
     assert res["claims"][0]["source"]["url"] == PAGE_URL
-    assert res["claims"][0]["source"]["seen_sha256"] is None
+    res2 = S.check(ws, "report.md", fetch=lambda u: PAGE_HTML.replace("$32", "$64"), record=False)
+    assert res2["claims"][0]["status"] == "changed"
     assert res["claims"][0]["source"]["now_sha256"] == _sha(PAGE_HTML)
