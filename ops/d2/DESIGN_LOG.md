@@ -27,3 +27,4 @@
 | 11-25 06:35 | 執行器（不影響已開跑的主批次）：教材可以有自己的頁面清單與索引頁（留出批次用 *_idx 提示，只給索引頁、agent 自己決定怎麼抓；c 臂說 "a website"）；新增 b2／d2（b、d＋`no_rewrite` 一句）。舊教材的四種提示逐字不變（已用程式比對）。評分／稽核支援一條宣稱有好幾個正確來源頁（`source_pages`） | vacant-hope 11-25：(1) 留出檢驗批次；(2) b、d 重寫交件的提示敏感度批次 | 先導第三輪 b 的 d 臂整份重寫 |
 | 11-25 06:45 | 評分：Claude 的輸入 token 含快取寫入與讀取；每週期加 `cost_usd`（Claude Code 的 total_cost_usd，pi 沒有）。分析加 `--cost-metric`（主要成本比值用哪個量，各計畫事前寫定：本機 tokens、Claude cost_usd）。pi 的數字不變 | Haiku 小量試：Claude 回報的 `input` 幾乎是 0（全在快取欄位），原本的 token 比沒有意義 | Haiku 小量試（s57）的 run.json |
 | 11-25 06:45 | Haiku 主批次（s01–s50）事前登記，主要成本量＝美元 | vacant-hope：Haiku 當第三個點、先小量估量再放大；小量試估全量約 1.5 美元 | Haiku 小量試 |
+| 11-25 06:40（約） | 執行器：c_every、d_diff 兩臂；RUN.json 記開跑時 HEAD 與各腳本 sha、續跑追加一筆；計畫要先在遠端 auto/redo 才准開跑；來源伺服器每筆存取紀錄帶臂與週期（`routes_meta.json`）。敏感度批次改成 sens2（七臂），原 sens 撤回（0 次呼叫） | 獨立稽核 11-25 第 5、6、8、9、11 點 | 獨立稽核報告 |

@@ -26,6 +26,7 @@ LOCK = threading.Lock()
 class H(BaseHTTPRequestHandler):
     routes_path: pathlib.Path
     log_path: pathlib.Path
+    meta_path: pathlib.Path | None = None
 
     def log_message(self, *a):          # noqa: D401 — 安靜；自己記 JSONL
         pass
@@ -52,7 +53,14 @@ class H(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+        meta = {}
+        if self.meta_path is not None:
+            try:
+                meta = json.loads(self.meta_path.read_text()).get(host) or {}
+            except (OSError, ValueError):
+                meta = {}
         rec = {"ts": time.time(), "host": host, "path": path, "status": status,
+               "arm": meta.get("arm"), "cycle": meta.get("cycle"),
                "sha256": hashlib.sha256(body).hexdigest(), "ua": self.headers.get("User-Agent", "")[:60]}
         with LOCK, open(self.log_path, "a") as fh:
             fh.write(json.dumps(rec) + "\n")
@@ -63,9 +71,11 @@ def main() -> int:
     ap.add_argument("--port", type=int, required=True)
     ap.add_argument("--routes", required=True)
     ap.add_argument("--log", required=True)
+    ap.add_argument("--meta", help="routes_meta.json：host → {arm, cycle}，寫進每一筆存取紀錄")
     a = ap.parse_args()
     H.routes_path = pathlib.Path(a.routes)
     H.log_path = pathlib.Path(a.log)
+    H.meta_path = pathlib.Path(a.meta) if a.meta else None
     ThreadingHTTPServer(("127.0.0.1", a.port), H).serve_forever()
     return 0
 

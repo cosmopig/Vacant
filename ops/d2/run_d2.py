@@ -221,6 +221,7 @@ class Run:
         self.pages = {s["set"]: list(s.get("pages") or [f"p{i}.html" for i in range(1, 6)]) for s in _m["sets"]}
         self.index = {s["set"]: s.get("index") for s in _m["sets"]}
         self.routes = root / "routes.json"
+        self.routes_meta = root / "routes_meta.json"
         self.stop = threading.Event()
         self.procs: set[subprocess.Popen] = set()
 
@@ -232,10 +233,17 @@ class Run:
             with open(self.root / "runner.log", "a") as f:
                 f.write(line + "\n")
 
-    def set_route(self, host: str, site: pathlib.Path) -> None:
+    def set_route(self, host: str, site: pathlib.Path, arm: str | None = None, cycle: int | None = None) -> None:
+        """路由檔：host → 網站目錄；另記這個 host 現在屬於哪一臂、哪一個週期（來源伺服器把它寫進每一筆存取紀錄，
+        稽核不必再用時間窗猜；獨立稽核 11-25 第 11 點）。"""
         with LOCK:
             r = json.loads(self.routes.read_text()) if self.routes.exists() else {}
             r[host] = str(site)
+            meta = json.loads(self.routes_meta.read_text()) if self.routes_meta.exists() else {}
+            meta[host] = {"arm": arm, "cycle": cycle}
+            tm = self.routes_meta.with_suffix(".tmp")
+            tm.write_text(json.dumps(meta, indent=1))
+            os.replace(tm, self.routes_meta)
             tmp = self.routes.with_suffix(".tmp")
             tmp.write_text(json.dumps(r, indent=1))
             os.replace(tmp, self.routes)
@@ -252,7 +260,7 @@ class Run:
         """同一個臂、兩種教材：有索引頁的（留出）用 *_idx 版，只給索引頁；`b2`／`d2` 在 b、d 後面加一句不要重寫。"""
         ix = self.index_url(set_id)
         urls = " ".join(self.urls(set_id))
-        base = key[0] if key in ("b2", "d2") else key
+        base = key[0] if key in ("b2", "d2", "d_diff", "c_every") else key
         if ix and base in ("write", "b", "c", "d"):
             txt = PROMPTS[base + "_idx"].format(index=ix, **kw)
         else:
@@ -427,7 +435,7 @@ class Run:
                 (shutil.copytree if src.is_dir() else shutil.copy)(src, live / "cfg" / f)
             shutil.copy(os.path.expanduser(p["agentcfg"]["install_json"]), live / "vh" / "adapters" / "install.json")
             self.install_site(set_id, 0, live)
-            self.set_route(host, live / "site")
+            self.set_route(host, live / "site", "c0", 0)
             r = self.run_agent(live, self.prompt("write", set_id), cells / "c0" / "run")
             shutil.copy(live / "ws" / "report.md", cells / "c0" / "report.md")
             if snap.exists():
@@ -457,12 +465,12 @@ class Run:
                 cdir = adir / f"cycle_{k}"
                 cdir.mkdir(parents=True, exist_ok=True)
                 self.install_site(set_id, k, live)
-                self.set_route(host, live / "site")
+                self.set_route(host, live / "site", arm, k)
                 info: dict = {"arm": arm, "cycle": k, "ts_start": now(), "t_start": time.time(), "agent": None,
                               "ctype": self.ctypes[set_id][k - 1]}
                 if arm in ("b", "b2"):
                     info["agent"] = self.run_agent(live, self.prompt(arm, set_id), cdir / "run")
-                elif arm == "c":
+                elif arm in ("c", "c_every"):
                     sc = self.sources_check(live, cdir)
                     lines = (live / "ws" / "report.md").read_text().splitlines()
                     items = []
@@ -473,7 +481,7 @@ class Run:
                         if e["status"] == "no_source":
                             # 沒有出處的行只交辦一次（同一行文字）；之後算「沒有在監看」，不再每週期重交（先導第三輪）
                             sig = lines[e["line"] - 1].strip()
-                            if sig in handed_nosrc:
+                            if arm == "c" and sig in handed_nosrc:   # c_every：每週期都交（量協定的影響）
                                 continue
                         by_line.setdefault(e["line"], e)
                     for ln, e in by_line.items():
@@ -487,14 +495,15 @@ class Run:
                                              "handed_lines": sorted(by_line), "wall_s": sc["_wall_s"]}
                     if items:
                         info["agent"] = self.run_agent(live, self.prompt("c", set_id, items="\n".join(items)), cdir / "run")
-                elif arm in ("d", "d2"):
+                elif arm in ("d", "d2", "d_diff"):
                     cur = self.page_hashes(set_id, k)
                     changed = [f"http://{host}/{f}" for f in sorted(cur) if cur[f] != prev_pages.get(f)]
                     prev_pages = cur
                     info["changed_pages"] = changed
                     if changed:
                         info["agent"] = self.run_agent(
-                            live, self.prompt(arm, set_id, changed=" ".join(changed)), cdir / "run")
+                            live, self.prompt(arm, set_id, changed=" ".join(changed))
+                            + (self.diff_text(set_id, k) if arm == "d_diff" else ""), cdir / "run")
                 shutil.copy(live / "ws" / "report.md", cdir / "report.md")
                 info["chain_len"] = self.chain_len(live)
                 info["ts_end"] = now()
@@ -508,6 +517,26 @@ class Run:
                 shutil.copytree(live / d, fin / d, symlinks=True)
             write_json(adir / "done.json", {"ts": now()})
 
+    def diff_text(self, set_id: str, k: int) -> str:
+        """d_diff 臂：Vacant 這一側比對上一週期與這一週期的每張頁面，附上去掉標籤後的文字差異（像頁面變動偵測工具給的那樣），
+        不給宣稱對應（獨立稽核 11-25 第 6 點）。"""
+        import difflib
+        import html as _h
+        import re as _re
+        def txt(pth: pathlib.Path) -> list[str]:
+            t = _re.sub(r"<[^>]+>", "\n", pth.read_text(errors="replace"))
+            return [ln for ln in (" ".join(_h.unescape(x).split()) for x in t.splitlines()) if ln]
+        host = HOST_FMT.format(set=set_id)
+        out = []
+        for pg in self.pages[set_id]:
+            a = self.mat / "sets" / set_id / f"cycle_{k - 1}" / "site" / pg
+            b = self.mat / "sets" / set_id / f"cycle_{k}" / "site" / pg
+            if sha_file(a) == sha_file(b):
+                continue
+            d = list(difflib.unified_diff(txt(a), txt(b), lineterm="", n=0))
+            out.append(f"http://{host}/{pg}:\n" + "\n".join(x for x in d if not x.startswith(("---", "+++"))))
+        return ("\nWhat changed on those pages (text diff, '-' old, '+' new):\n" + "\n".join(out)) if out else ""
+
     def page_hashes(self, set_id: str, k: int) -> dict:
         site = self.mat / "sets" / set_id / f"cycle_{k}" / "site"
         return {f.name: sha_file(f) for f in sorted(site.iterdir()) if f.name in self.pages[set_id]}
@@ -516,7 +545,8 @@ class Run:
     def start_server(self) -> subprocess.Popen:
         port = self.plan["server"]["port"]
         srv = subprocess.Popen([sys.executable, str(HERE / "source_server.py"), "--port", str(port),
-                                "--routes", str(self.routes), "--log", str(self.root / "access.jsonl")],
+                                "--routes", str(self.routes), "--log", str(self.root / "access.jsonl"),
+                                "--meta", str(self.routes_meta)],
                                stdout=subprocess.DEVNULL, stderr=open(self.root / "server.err", "a"),
                                start_new_session=True)
         for _ in range(50):
@@ -528,6 +558,14 @@ class Run:
                 time.sleep(0.1)
         raise SystemExit("source server did not start")
 
+    def code_state(self) -> dict:
+        def git(*a: str) -> str:
+            return subprocess.run(["git", *a], cwd=REPO, capture_output=True, text=True).stdout.strip()
+        files = ["ops/d2/run_d2.py", "ops/d2/source_server.py", "ops/d2/score_d2.py", "ops/d2/audit_d2.py",
+                 "ops/d2/analyze_d2.py", "ops/d2/gen_materials.py"]
+        return {"head": git("rev-parse", "HEAD"), "head_on_remote": bool(git("branch", "-r", "--contains", "HEAD")),
+                "script_sha256": {f: sha_file(REPO / f) for f in files if (REPO / f).exists()}}
+
     def go(self) -> int:
         self.root.mkdir(parents=True, exist_ok=True)
         runj = self.root / "RUN.json"
@@ -536,10 +574,13 @@ class Run:
             old = json.loads(runj.read_text())
             if old["plan_sha256"] != plan_sha:
                 raise SystemExit("this root was started with a different plan")
+            # 續跑：載入的執行器可能是新版——追加一筆，不蓋掉開跑時的紀錄（獨立稽核 11-25 第 9 點）
+            old.setdefault("resumes", []).append({"ts": now(), **self.code_state()})
+            write_json(runj, old)
         else:
             write_json(runj, {"plan": str(self.plan_path), "plan_sha256": plan_sha, "plan_body": self.plan,
                               "manifest_sha256": self.manifest_sha, "runner_sha256": sha_file(pathlib.Path(__file__)),
-                              "started": now()})
+                              "started": now(), **self.code_state()})
         srv = self.start_server()
         rng = random.Random(self.plan["seed"])
         sets = list(self.plan["materials"]["sets"])
@@ -598,6 +639,12 @@ def main() -> int:
                                cwd=REPO, capture_output=True, text=True).stdout.strip()
         if dirty:
             raise SystemExit(f"refusing: uncommitted changes:\n{dirty}")
+        # 計畫要先推到遠端（外部時間戳）才准開跑（獨立稽核 11-25 第 8 點）
+        subprocess.run(["git", "fetch", "-q", "origin", "auto/redo"], cwd=REPO, capture_output=True, timeout=120)
+        onr = subprocess.run(["git", "merge-base", "--is-ancestor", "HEAD", "origin/auto/redo"], cwd=REPO).returncode == 0 \
+            or subprocess.run(["git", "merge-base", "--is-ancestor", "HEAD", "FETCH_HEAD"], cwd=REPO).returncode == 0
+        if not onr:
+            raise SystemExit("refusing: HEAD is not on the remote auto/redo yet (push the plan first)")
     return Run(plan, pathlib.Path(a.root).expanduser().resolve(), fake=a.fake).go()
 
 

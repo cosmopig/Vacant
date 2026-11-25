@@ -1,0 +1,76 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "id": "sens2_d2_qwen9b_1003",
+ "seed": 20261133,
+ "purpose": "D2′ 敏感度批次第二版（事前登記、描述性）：取代沒有開跑的 sens_d2_prompt_qwen9b_1003（0 次模型呼叫）。多兩個變體：c_every（沒有出處的行每週期都交辦，量「只交辦一次」這個協定的影響）、d_diff（d 再附上 Vacant 這一側算的頁面文字差異，像頁面變動偵測工具那樣，不給宣稱對應）。",
+ "materials": {
+  "dir": "~/dev/ops/d2_materials/seed20261126_ffnz",
+  "generator": "ops/d2/gen_materials.py --seed 20261126 --sets 60 --cycle-types F,F,N,Z",
+  "manifest_sha256": "9d1afebe6e63792db3c9f83379f268c7c0632d1c659e41c6c2493820156ba8c6",
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15"
+  ]
+ },
+ "arms": [
+  "b",
+  "b2",
+  "c",
+  "c_every",
+  "d",
+  "d2",
+  "d_diff"
+ ],
+ "jobs": 3,
+ "agent_timeout_s": 600,
+ "server": {
+  "port": 18206
+ },
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2main_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2main",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2main_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 6dfbb8775",
+  "wheel": "~/dev/ops/d2_release/6dfbb8775/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "8ec7b07977af1b53fe2d97de5c0eba36164cae57ee496fb0ba82c7a68cc2c05b",
+  "venv": "~/dev/ops/d2main_venv（不可編輯安裝）",
+  "pi_extension_sha256_16": "f9d83a7978b30749",
+  "install_json_sha256_16": "1b46dc91ac550624（mode observe；`vacant install --agents pi --mode observe` 在隔離 HOME 真的寫出）",
+  "models_json_sha256_16": "701b346dacaf6fa8"
+ },
+ "prereg": {
+  "registered": "2026-11-25，這一批第一通模型呼叫之前 commit 並推到遠端 auto/redo；執行器開跑前會檢查 HEAD 已在遠端，RUN.json 記 HEAD 與各腳本 sha。",
+  "why": "vacant-hope 11-25：先導第三輪 b 有兩組 d 臂把交件整份重寫成虛構的報告；要排除「c 贏是因為 b、d 的提示寫得差」。主批次的 b、d 提示已經寫了「Do not change anything else」，這一批再加一句更明白的（PROMPTS['no_rewrite']）。 另外（獨立稽核 11-25 第 5、6 點）：「沒出處的行只交辦一次」是 harness 協定，要量它的影響；d 臂只告訴哪幾頁變了、不給差異，比市面工具弱，要有 d＋差異的對照，否則「宣稱級出處比頁面通知多帶來東西」站不穩。",
+  "arms": "b、c、d＝和主批次逐字相同的提示；b2＝b＋no_rewrite；d2＝d＋no_rewrite。五臂共用同一份初稿（新跑的 c0，與主批次的 c0 不同）。模型、產品 wheel、掛鉤、教材 v2 都和 9B 主批次相同；組＝s01–s15（主批次也用過這些組，這一批量的是提示，不是教材）。 c_every＝c 但沒有出處的行每週期都交辦；d_diff＝d 的提示＋每張變動頁去掉標籤後的文字差異（run_d2.diff_text，difflib unified、0 行上下文）。七臂共用同一份初稿。",
+  "measure": "和主批次相同的評分與稽核（score_d2／audit_d2，0 不一致才算數）。報：每臂漏抓（開始時對的、真值變了的宣稱）、誤改、整份重寫的次數（週期結束時範本的宣稱行少了 ≥10 行）、模型 token／呼叫／牆鐘；c 對 b2、c 對 d2 用主批次同一套 cluster bootstrap 的比值與差（描述，不判定）。",
+  "reading": "b2、d2 的誤改與整份重寫明顯少於 b、d，而 c 對 b2／d2 的 token 比與漏抓差和主批次同方向 ⇒ 主批次的結論不是靠提示差；c 對 b2／d2 的漏抓差反過來（c 多漏）⇒ 結論檔要寫明主批次的漏抓比較有提示這個條件。 c 對 d_diff：若 d_diff 的成本和漏抓都不比 c 差，結論檔要寫「有差異的頁面通知和宣稱級出處一樣好」。c_every 對 c：差多少就是協定選擇的影響（成本↑、漏抓↓？），結論檔照寫。",
+  "known_limits": [
+   "15 組、只有 9B；是敏感度，不加入主批次的判定。",
+   "no_rewrite 只是一種寫法，不代表 b、d 的最佳提示。"
+  ]
+ }
+}
