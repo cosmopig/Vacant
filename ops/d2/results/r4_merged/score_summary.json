@@ -1,0 +1,329 @@
+{
+ "arms": {
+  "a": {
+   "changed_claims": 144,
+   "changed_claims_pre_correct": 142,
+   "cost": {
+    "agent_runs": 0,
+    "calls": 0,
+    "cost_usd": 0,
+    "set_cycles": 144,
+    "source_requests_agent": 0,
+    "source_requests_vacant": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 0
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 72,
+     "tokens": 0,
+     "wall_s": 0.0
+    },
+    "N": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 36,
+     "tokens": 0,
+     "wall_s": 0.0
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 36,
+     "tokens": 0,
+     "wall_s": 0.0
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "None": 144
+   },
+   "miss_rate": 1.0,
+   "miss_rate_pre_correct": 1.0,
+   "missed": 144,
+   "missed_pre_correct": 142,
+   "stale_residual_by_cycle": {
+    "1": 38,
+    "2": 67,
+    "3": 109,
+    "4": 142
+   },
+   "unchanged_correct_claims": 2512,
+   "wrong_by_cycle": {
+    "1": 41,
+    "2": 70,
+    "3": 112,
+    "4": 145
+   }
+  },
+  "b": {
+   "changed_claims": 144,
+   "changed_claims_pre_correct": 142,
+   "cost": {
+    "agent_runs": 144,
+    "calls": 2430,
+    "cost_usd": 0,
+    "set_cycles": 144,
+    "source_requests_agent": 1991,
+    "source_requests_vacant": 0,
+    "tokens_in": 15010813,
+    "tokens_out": 314877,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 8221.1
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 72,
+     "calls": 1281,
+     "set_cycles": 72,
+     "tokens": 8710707,
+     "wall_s": 3933.6
+    },
+    "N": {
+     "agent_runs": 36,
+     "calls": 588,
+     "set_cycles": 36,
+     "tokens": 3439863,
+     "wall_s": 2352.4
+    },
+    "Z": {
+     "agent_runs": 36,
+     "calls": 561,
+     "set_cycles": 36,
+     "tokens": 3175120,
+     "wall_s": 1935.1
+    }
+   },
+   "false_mod": 22,
+   "latency_hist": {
+    "0": 126,
+    "1": 10,
+    "None": 8
+   },
+   "miss_rate": 0.125,
+   "miss_rate_pre_correct": 0.1127,
+   "missed": 18,
+   "missed_pre_correct": 16,
+   "stale_residual_by_cycle": {
+    "1": 5,
+    "2": 3,
+    "3": 3,
+    "4": 4
+   },
+   "unchanged_correct_claims": 2692,
+   "wrong_by_cycle": {
+    "1": 12,
+    "2": 14,
+    "3": 17,
+    "4": 29
+   }
+  },
+  "cV": {
+   "changed_claims": 144,
+   "changed_claims_pre_correct": 142,
+   "cost": {
+    "agent_runs": 112,
+    "calls": 913,
+    "cost_usd": 0,
+    "set_cycles": 144,
+    "source_requests_agent": 491,
+    "source_requests_vacant": 1131,
+    "tokens_in": 4394041,
+    "tokens_out": 94341,
+    "tool_wall_s": 38.6,
+    "usage_unknown": 0,
+    "wall_s": 2699.8
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 66,
+     "calls": 531,
+     "set_cycles": 72,
+     "tokens": 2229968,
+     "wall_s": 1233.4
+    },
+    "N": {
+     "agent_runs": 35,
+     "calls": 225,
+     "set_cycles": 36,
+     "tokens": 777779,
+     "wall_s": 716.6
+    },
+    "Z": {
+     "agent_runs": 11,
+     "calls": 157,
+     "set_cycles": 36,
+     "tokens": 1480635,
+     "wall_s": 788.4
+    }
+   },
+   "false_mod": 25,
+   "latency_hist": {
+    "0": 84,
+    "1": 1,
+    "None": 59
+   },
+   "miss_rate": 0.4167,
+   "miss_rate_pre_correct": 0.4085,
+   "missed": 60,
+   "missed_pre_correct": 58,
+   "stale_residual_by_cycle": {
+    "1": 13,
+    "2": 26,
+    "3": 43,
+    "4": 56
+   },
+   "unchanged_correct_claims": 2612,
+   "wrong_by_cycle": {
+    "1": 23,
+    "2": 38,
+    "3": 62,
+    "4": 82
+   }
+  },
+  "d_diff": {
+   "changed_claims": 144,
+   "changed_claims_pre_correct": 136,
+   "cost": {
+    "agent_runs": 108,
+    "calls": 540,
+    "cost_usd": 0,
+    "set_cycles": 144,
+    "source_requests_agent": 107,
+    "source_requests_vacant": 0,
+    "tokens_in": 2152572,
+    "tokens_out": 121844,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 2621.3
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 72,
+     "calls": 338,
+     "set_cycles": 72,
+     "tokens": 1314675,
+     "wall_s": 1246.9
+    },
+    "N": {
+     "agent_runs": 36,
+     "calls": 202,
+     "set_cycles": 36,
+     "tokens": 959741,
+     "wall_s": 1374.4
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 36,
+     "tokens": 0,
+     "wall_s": 0.0
+    }
+   },
+   "false_mod": 83,
+   "latency_hist": {
+    "0": 132,
+    "None": 12
+   },
+   "miss_rate": 0.0833,
+   "miss_rate_pre_correct": 0.0441,
+   "missed": 12,
+   "missed_pre_correct": 6,
+   "stale_residual_by_cycle": {
+    "1": 1,
+    "2": 2,
+    "3": 5,
+    "4": 6
+   },
+   "unchanged_correct_claims": 2616,
+   "wrong_by_cycle": {
+    "1": 16,
+    "2": 43,
+    "3": 66,
+    "4": 90
+   }
+  },
+  "d_diff_real": {
+   "changed_claims": 144,
+   "changed_claims_pre_correct": 140,
+   "cost": {
+    "agent_runs": 144,
+    "calls": 1512,
+    "cost_usd": 0,
+    "set_cycles": 144,
+    "source_requests_agent": 2578,
+    "source_requests_vacant": 0,
+    "tokens_in": 16798415,
+    "tokens_out": 271466,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 6697.9
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 72,
+     "calls": 616,
+     "set_cycles": 72,
+     "tokens": 6477561,
+     "wall_s": 2294.0
+    },
+    "N": {
+     "agent_runs": 36,
+     "calls": 403,
+     "set_cycles": 36,
+     "tokens": 4840020,
+     "wall_s": 2508.1
+    },
+    "Z": {
+     "agent_runs": 36,
+     "calls": 493,
+     "set_cycles": 36,
+     "tokens": 5752300,
+     "wall_s": 1895.8
+    }
+   },
+   "false_mod": 46,
+   "latency_hist": {
+    "0": 125,
+    "1": 6,
+    "2": 2,
+    "3": 1,
+    "None": 10
+   },
+   "miss_rate": 0.1319,
+   "miss_rate_pre_correct": 0.1143,
+   "missed": 19,
+   "missed_pre_correct": 16,
+   "stale_residual_by_cycle": {
+    "1": 3,
+    "2": 7,
+    "3": 8,
+    "4": 7
+   },
+   "unchanged_correct_claims": 2644,
+   "wrong_by_cycle": {
+    "1": 24,
+    "2": 29,
+    "3": 40,
+    "4": 47
+   }
+  }
+ },
+ "c0": {
+  "claims": 720,
+  "correct": 717
+ },
+ "materials": {
+  "bare_number_on_another_page": 157,
+  "claims": 720,
+  "rate_bare_number": 0.2181,
+  "rate_with_unit": 0.0194,
+  "value_with_unit_on_another_page": 14
+ }
+}

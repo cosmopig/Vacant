@@ -1,0 +1,1512 @@
+{
+ "bootstrap": {
+  "n_boot": 10000,
+  "n_sets": 32,
+  "seed": 20261125
+ },
+ "c_as_secondary": null,
+ "completeness": {
+  "complete": false,
+  "expected_arms": [
+   "a",
+   "b",
+   "cV",
+   "d_diff",
+   "d_diff_real"
+  ],
+  "expected_cycles": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "missing": [
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s02"
+   },
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s06"
+   },
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s12"
+   },
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s16"
+   },
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s17"
+   },
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s18"
+   },
+   {
+    "arm": "a",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "a",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "a",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "a",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "b",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "b",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "b",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "b",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "cV",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "cV",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "cV",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "cV",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 1,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 2,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 3,
+    "missing_in": "both",
+    "set": "s23"
+   },
+   {
+    "arm": "d_diff_real",
+    "cycle": 4,
+    "missing_in": "both",
+    "set": "s23"
+   }
+  ],
+  "n_sets": 32,
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16",
+   "s17",
+   "s18",
+   "s19",
+   "s20",
+   "s21",
+   "s22",
+   "s23",
+   "s24",
+   "s25",
+   "s27",
+   "s28",
+   "s29",
+   "s31",
+   "s32",
+   "s33",
+   "s36"
+  ]
+ },
+ "confirmatory_c_d": {
+  "miss_diff_c_d": {
+   "arm1": "cV",
+   "arm2": "d_diff_real",
+   "ci_95": [
+    0.20719944082013048,
+    0.43617021276595747
+   ],
+   "label": "cV-d_diff_real",
+   "margin": 0.1,
+   "miss_rate_arm1": 0.45454545454545453,
+   "miss_rate_arm2": 0.13131313131313133,
+   "missed_arm1": 45,
+   "missed_arm2": 13,
+   "n_pairs": 99,
+   "n_sets": 25,
+   "point": 0.32323232323232326,
+   "pre_correct_both": true,
+   "upper": 0.43617021276595747,
+   "upper_95": 0.41836734693877553,
+   "upper_q": 0.975,
+   "verdict": "FAIL"
+  },
+  "token_ratio_d_c": {
+   "ci": [
+    4.949337334467785,
+    9.131814972816152
+   ],
+   "ci_95": [
+    5.146818289143201,
+    8.768764491170208
+   ],
+   "ci_level": 0.975,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "d_diff_real/cV",
+   "metric": "tokens",
+   "n_paired_total": 100,
+   "n_paired_used": 100,
+   "numerator": "d_diff_real",
+   "point": 6.700972716173895,
+   "sum_denominator": 1808544.0,
+   "sum_numerator": 12119004.0,
+   "threshold": 1.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0,
+   "verdict": "EFFECTIVE"
+  }
+ },
+ "coverage": {
+  "available": true,
+  "claims": 500,
+  "correct_page": 498,
+  "rate": 0.996,
+  "threshold": 0.8,
+  "verdict": "PASS",
+  "with_source": 499,
+  "with_source_rate": 0.998
+ },
+ "d_arm": "d_diff_real",
+ "primary": {
+  "calls_ratio_b_c": {
+   "ci": [
+    2.4077346255859857,
+    3.409185740668196
+   ],
+   "ci_95": [
+    2.4077346255859857,
+    3.409185740668196
+   ],
+   "ci_level": 0.95,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/cV",
+   "metric": "calls",
+   "n_paired_total": 100,
+   "n_paired_used": 100,
+   "numerator": "b",
+   "point": 2.8467289719626168,
+   "sum_denominator": 535.0,
+   "sum_numerator": 1523.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0
+  },
+  "miss_diff_c_b": {
+   "arm1": "cV",
+   "arm2": "b",
+   "ci_95": [
+    0.25263157894736843,
+    0.4731324278438029
+   ],
+   "label": "cV-b",
+   "margin": 0.1,
+   "miss_rate_arm1": 0.44329896907216493,
+   "miss_rate_arm2": 0.08247422680412371,
+   "missed_arm1": 43,
+   "missed_arm2": 8,
+   "n_pairs": 97,
+   "n_sets": 25,
+   "point": 0.36082474226804123,
+   "pre_correct_both": true,
+   "upper": 0.4731324278438029,
+   "upper_95": 0.45569620253164556,
+   "upper_q": 0.975,
+   "verdict": "FAIL"
+  },
+  "token_ratio_b_c": {
+   "ci": [
+    3.525857346673242,
+    6.3024669417652905
+   ],
+   "ci_95": [
+    3.648560179610518,
+    6.0879839558399835
+   ],
+   "ci_level": 0.975,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/cV",
+   "metric": "tokens",
+   "n_paired_total": 100,
+   "n_paired_used": 100,
+   "numerator": "b",
+   "point": 4.705557619831201,
+   "sum_denominator": 1808544.0,
+   "sum_numerator": 8510208.0,
+   "threshold": 3.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0,
+   "verdict": "EFFECTIVE"
+  },
+  "wall_ratio_b_c": {
+   "ci": [
+    3.27184532448585,
+    5.5213215077543145
+   ],
+   "ci_95": [
+    3.2718453244858496,
+    5.5213215077543145
+   ],
+   "ci_level": 0.95,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/cV",
+   "metric": "wall_s",
+   "n_paired_total": 100,
+   "n_paired_used": 100,
+   "numerator": "b",
+   "point": 4.235054347826088,
+   "sum_denominator": 1324.8,
+   "sum_numerator": 5610.6,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0
+  }
+ },
+ "primary_arm": "cV",
+ "schema": "vacant.d2.analysis/1",
+ "secondary": {
+  "c_vs_d": {
+   "calls_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "calls",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "d",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "miss_diff": {
+    "arm1": "c",
+    "arm2": "d",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "c-d",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": true,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   },
+   "token_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "tokens",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "d",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "wall_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "wall_s",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "d",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   }
+  },
+  "d_vs_b": {
+   "calls_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "calls",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "b",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "miss_diff": {
+    "arm1": "d",
+    "arm2": "b",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "d-b",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": true,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   },
+   "token_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "tokens",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "b",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "wall_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "wall_s",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "b",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   }
+  },
+  "false_mod": {
+   "a": {
+    "arm": "a",
+    "ci_95": [
+     0.0,
+     0.0
+    ],
+    "false_mod": 0,
+    "n": 1747,
+    "point": 0.0
+   },
+   "b": {
+    "arm": "b",
+    "ci_95": [
+     0.0011627906976744186,
+     0.010357461971702491
+    ],
+    "false_mod": 10,
+    "n": 1867,
+    "point": 0.005356186395286556
+   },
+   "cV": {
+    "arm": "cV",
+    "ci_95": [
+     0.0052503589959122,
+     0.012763250716958467
+    ],
+    "false_mod": 16,
+    "n": 1810,
+    "point": 0.008839779005524863
+   },
+   "d_diff": {
+    "arm": "d_diff",
+    "ci_95": [
+     0.019244397754438872,
+     0.06321696693643497
+    ],
+    "false_mod": 66,
+    "n": 1807,
+    "point": 0.036524626452684006
+   },
+   "d_diff_real": {
+    "arm": "d_diff_real",
+    "ci_95": [
+     0.00675666169827678,
+     0.023231563404551084
+    ],
+    "false_mod": 26,
+    "n": 1848,
+    "point": 0.01406926406926407
+   }
+  },
+  "miss_all_claims": {
+   "c_b": {
+    "arm1": "c",
+    "arm2": "b",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "c-b",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": false,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   },
+   "c_d": {
+    "arm1": "c",
+    "arm2": "d",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "c-d",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": false,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   }
+  },
+  "residual_stale": {
+   "a": {
+    "1": {
+     "rate": 0.052,
+     "stale": 26,
+     "total": 500
+    },
+    "2": {
+     "rate": 0.09,
+     "stale": 45,
+     "total": 500
+    },
+    "3": {
+     "rate": 0.15,
+     "stale": 75,
+     "total": 500
+    },
+    "4": {
+     "rate": 0.198,
+     "stale": 99,
+     "total": 500
+    }
+   },
+   "b": {
+    "1": {
+     "rate": 0.008,
+     "stale": 4,
+     "total": 500
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 500
+    },
+    "3": {
+     "rate": 0.002,
+     "stale": 1,
+     "total": 500
+    },
+    "4": {
+     "rate": 0.006,
+     "stale": 3,
+     "total": 500
+    }
+   },
+   "cV": {
+    "1": {
+     "rate": 0.02,
+     "stale": 10,
+     "total": 500
+    },
+    "2": {
+     "rate": 0.038,
+     "stale": 19,
+     "total": 500
+    },
+    "3": {
+     "rate": 0.064,
+     "stale": 32,
+     "total": 500
+    },
+    "4": {
+     "rate": 0.086,
+     "stale": 43,
+     "total": 500
+    }
+   },
+   "d_diff": {
+    "1": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 500
+    },
+    "2": {
+     "rate": 0.002,
+     "stale": 1,
+     "total": 500
+    },
+    "3": {
+     "rate": 0.006,
+     "stale": 3,
+     "total": 500
+    },
+    "4": {
+     "rate": 0.008,
+     "stale": 4,
+     "total": 500
+    }
+   },
+   "d_diff_real": {
+    "1": {
+     "rate": 0.004,
+     "stale": 2,
+     "total": 500
+    },
+    "2": {
+     "rate": 0.008,
+     "stale": 4,
+     "total": 500
+    },
+    "3": {
+     "rate": 0.01,
+     "stale": 5,
+     "total": 500
+    },
+    "4": {
+     "rate": 0.012,
+     "stale": 6,
+     "total": 500
+    }
+   }
+  }
+ },
+ "usage_unknown": {
+  "by_arm": {
+   "a": {
+    "calls_unknown": 0,
+    "set_cycles": 100,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "b": {
+    "calls_unknown": 0,
+    "set_cycles": 100,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "cV": {
+    "calls_unknown": 0,
+    "set_cycles": 100,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "d_diff": {
+    "calls_unknown": 0,
+    "set_cycles": 100,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "d_diff_real": {
+    "calls_unknown": 0,
+    "set_cycles": 100,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   }
+  },
+  "total_calls_unknown": 0,
+  "total_tokens_unknown": 0
+ },
+ "verdict": "INCOMPLETE",
+ "verdict_c_d": "INCOMPLETE",
+ "verdict_parts": {
+  "complete": false,
+  "coverage": "PASS",
+  "miss_diff_c_b": "FAIL",
+  "token_ratio_b_c": "EFFECTIVE"
+ },
+ "verdict_parts_c_d": {
+  "coverage": "PASS",
+  "miss_diff_c_d": "FAIL",
+  "token_ratio_d_c": "EFFECTIVE"
+ }
+}

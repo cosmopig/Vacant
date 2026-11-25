@@ -1,0 +1,675 @@
+{
+ "bootstrap": {
+  "n_boot": 4000,
+  "n_sets": 36,
+  "seed": 20261125
+ },
+ "c_as_secondary": null,
+ "completeness": {
+  "complete": true,
+  "expected_arms": [
+   "a",
+   "b",
+   "cV",
+   "d_diff",
+   "d_diff_real"
+  ],
+  "expected_cycles": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "missing": [],
+  "n_sets": 36,
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16",
+   "s17",
+   "s18",
+   "s19",
+   "s20",
+   "s21",
+   "s22",
+   "s23",
+   "s24",
+   "s25",
+   "s26",
+   "s27",
+   "s28",
+   "s29",
+   "s30",
+   "s31",
+   "s32",
+   "s33",
+   "s34",
+   "s35",
+   "s36"
+  ]
+ },
+ "confirmatory_c_d": {
+  "miss_diff_c_d": {
+   "arm1": "cV",
+   "arm2": "d_diff",
+   "ci_95": [
+    0.30357142857142855,
+    0.43333333333333335
+   ],
+   "label": "cV-d_diff",
+   "margin": 0.1,
+   "miss_rate_arm1": 0.3671875,
+   "miss_rate_arm2": 0.0,
+   "missed_arm1": 47,
+   "missed_arm2": 0,
+   "n_pairs": 128,
+   "n_sets": 32,
+   "point": 0.3671875,
+   "pre_correct_both": true,
+   "upper": 0.43333333333333335,
+   "upper_95": 0.42424242424242425,
+   "upper_q": 0.975,
+   "verdict": "FAIL"
+  },
+  "token_ratio_d_c": {
+   "ci": [
+    0.863064127422555,
+    1.373279649262256
+   ],
+   "ci_95": [
+    0.8758264784402852,
+    1.332257787477371
+   ],
+   "ci_level": 0.975,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "d_diff/cV",
+   "metric": "cost_usd",
+   "n_paired_total": 144,
+   "n_paired_used": 144,
+   "numerator": "d_diff",
+   "point": 1.0677559586268925,
+   "sum_denominator": 0.406931,
+   "sum_numerator": 0.434503,
+   "threshold": 1.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0,
+   "verdict": "UNRESOLVED"
+  }
+ },
+ "coverage": {
+  "available": true,
+  "claims": 720,
+  "correct_page": 640,
+  "rate": 0.8888888888888888,
+  "threshold": 0.8,
+  "verdict": "PASS",
+  "with_source": 640,
+  "with_source_rate": 0.8888888888888888
+ },
+ "d_arm": "d_diff",
+ "primary": {
+  "calls_ratio_b_c": {
+   "ci": [
+    1.1527430976176056,
+    1.648714389700845
+   ],
+   "ci_95": [
+    1.1527430976176056,
+    1.648714389700845
+   ],
+   "ci_level": 0.95,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/cV",
+   "metric": "calls",
+   "n_paired_total": 144,
+   "n_paired_used": 144,
+   "numerator": "b",
+   "point": 1.355679702048417,
+   "sum_denominator": 537.0,
+   "sum_numerator": 728.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0
+  },
+  "miss_diff_c_b": {
+   "arm1": "cV",
+   "arm2": "b",
+   "ci_95": [
+    0.22056595365418896,
+    0.41379310344827586
+   ],
+   "label": "cV-b",
+   "margin": 0.1,
+   "miss_rate_arm1": 0.3671875,
+   "miss_rate_arm2": 0.046875,
+   "missed_arm1": 47,
+   "missed_arm2": 6,
+   "n_pairs": 128,
+   "n_sets": 32,
+   "point": 0.3203125,
+   "pre_correct_both": true,
+   "upper": 0.41379310344827586,
+   "upper_95": 0.3984375,
+   "upper_q": 0.975,
+   "verdict": "FAIL"
+  },
+  "token_ratio_b_c": {
+   "ci": [
+    1.3044126159005534,
+    2.104636165910033
+   ],
+   "ci_95": [
+    1.340070565155703,
+    2.03704987292851
+   ],
+   "ci_level": 0.975,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/cV",
+   "metric": "cost_usd",
+   "n_paired_total": 144,
+   "n_paired_used": 144,
+   "numerator": "b",
+   "point": 1.6200240335585148,
+   "sum_denominator": 0.406931,
+   "sum_numerator": 0.659238,
+   "threshold": 3.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0,
+   "verdict": "FAIL"
+  },
+  "wall_ratio_b_c": {
+   "ci": [
+    1.365696101767344,
+    2.0821234133590067
+   ],
+   "ci_95": [
+    1.365696101767344,
+    2.0821234133590067
+   ],
+   "ci_level": 0.95,
+   "denominator": "cV",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/cV",
+   "metric": "wall_s",
+   "n_paired_total": 144,
+   "n_paired_used": 144,
+   "numerator": "b",
+   "point": 1.6503976861894432,
+   "sum_denominator": 1383.0,
+   "sum_numerator": 2282.5,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0
+  }
+ },
+ "primary_arm": "cV",
+ "schema": "vacant.d2.analysis/1",
+ "secondary": {
+  "c_vs_d": {
+   "calls_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "calls",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "d",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "miss_diff": {
+    "arm1": "c",
+    "arm2": "d",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "c-d",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": true,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   },
+   "token_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "tokens",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "d",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "wall_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "wall_s",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "d",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   }
+  },
+  "d_vs_b": {
+   "calls_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "calls",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "b",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "miss_diff": {
+    "arm1": "d",
+    "arm2": "b",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "d-b",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": true,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   },
+   "token_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "tokens",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "b",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "wall_ratio": {
+    "ci": [
+     null,
+     null
+    ],
+    "ci_95": [
+     null,
+     null
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "wall_s",
+    "n_paired_total": 0,
+    "n_paired_used": 0,
+    "numerator": "b",
+    "point": null,
+    "sum_denominator": 0,
+    "sum_numerator": 0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   }
+  },
+  "false_mod": {
+   "a": {
+    "arm": "a",
+    "ci_95": [
+     0.0,
+     0.0
+    ],
+    "false_mod": 0,
+    "n": 2242,
+    "point": 0.0
+   },
+   "b": {
+    "arm": "b",
+    "ci_95": [
+     0.0,
+     0.0
+    ],
+    "false_mod": 0,
+    "n": 2442,
+    "point": 0.0
+   },
+   "cV": {
+    "arm": "cV",
+    "ci_95": [
+     0.0011995082063098023,
+     0.004993191103041307
+    ],
+    "false_mod": 7,
+    "n": 2356,
+    "point": 0.0029711375212224107
+   },
+   "d_diff": {
+    "arm": "d_diff",
+    "ci_95": [
+     0.0,
+     0.0
+    ],
+    "false_mod": 0,
+    "n": 2432,
+    "point": 0.0
+   },
+   "d_diff_real": {
+    "arm": "d_diff_real",
+    "ci_95": [
+     0.0,
+     0.0
+    ],
+    "false_mod": 0,
+    "n": 2432,
+    "point": 0.0
+   }
+  },
+  "miss_all_claims": {
+   "c_b": {
+    "arm1": "c",
+    "arm2": "b",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "c-b",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": false,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   },
+   "c_d": {
+    "arm1": "c",
+    "arm2": "d",
+    "ci_95": [
+     null,
+     null
+    ],
+    "label": "c-d",
+    "miss_rate_arm1": null,
+    "miss_rate_arm2": null,
+    "missed_arm1": 0,
+    "missed_arm2": 0,
+    "n_pairs": 0,
+    "n_sets": 0,
+    "point": null,
+    "pre_correct_both": false,
+    "upper": null,
+    "upper_95": null,
+    "upper_q": 0.95
+   }
+  },
+  "residual_stale": {
+   "a": {
+    "1": {
+     "rate": 0.044444444444444446,
+     "stale": 32,
+     "total": 720
+    },
+    "2": {
+     "rate": 0.08333333333333333,
+     "stale": 60,
+     "total": 720
+    },
+    "3": {
+     "rate": 0.1361111111111111,
+     "stale": 98,
+     "total": 720
+    },
+    "4": {
+     "rate": 0.17777777777777778,
+     "stale": 128,
+     "total": 720
+    }
+   },
+   "b": {
+    "1": {
+     "rate": 0.002777777777777778,
+     "stale": 2,
+     "total": 720
+    },
+    "2": {
+     "rate": 0.002777777777777778,
+     "stale": 2,
+     "total": 720
+    },
+    "3": {
+     "rate": 0.008333333333333333,
+     "stale": 6,
+     "total": 720
+    },
+    "4": {
+     "rate": 0.002777777777777778,
+     "stale": 2,
+     "total": 720
+    }
+   },
+   "cV": {
+    "1": {
+     "rate": 0.013888888888888888,
+     "stale": 10,
+     "total": 720
+    },
+    "2": {
+     "rate": 0.030555555555555555,
+     "stale": 22,
+     "total": 720
+    },
+    "3": {
+     "rate": 0.05,
+     "stale": 36,
+     "total": 720
+    },
+    "4": {
+     "rate": 0.06527777777777778,
+     "stale": 47,
+     "total": 720
+    }
+   },
+   "d_diff": {
+    "1": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    },
+    "3": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    },
+    "4": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    }
+   },
+   "d_diff_real": {
+    "1": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    },
+    "3": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    },
+    "4": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 720
+    }
+   }
+  }
+ },
+ "usage_unknown": {
+  "by_arm": {
+   "a": {
+    "calls_unknown": 0,
+    "set_cycles": 144,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "b": {
+    "calls_unknown": 0,
+    "set_cycles": 144,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "cV": {
+    "calls_unknown": 0,
+    "set_cycles": 144,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "d_diff": {
+    "calls_unknown": 0,
+    "set_cycles": 144,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "d_diff_real": {
+    "calls_unknown": 0,
+    "set_cycles": 144,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   }
+  },
+  "total_calls_unknown": 0,
+  "total_tokens_unknown": 0
+ },
+ "verdict": "FAIL",
+ "verdict_c_d": "FAIL",
+ "verdict_parts": {
+  "complete": true,
+  "coverage": "PASS",
+  "miss_diff_c_b": "FAIL",
+  "token_ratio_b_c": "FAIL"
+ },
+ "verdict_parts_c_d": {
+  "coverage": "PASS",
+  "miss_diff_c_d": "FAIL",
+  "token_ratio_d_c": "UNRESOLVED"
+ }
+}

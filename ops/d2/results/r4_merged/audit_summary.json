@@ -1,0 +1,282 @@
+{
+ "attribution_table": {
+  "a": {
+   "miss": {
+    "not maintained (arm a)": 144
+   }
+  },
+  "b": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 22
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 2,
+    "page not re-read": 7,
+    "page re-read, not corrected": 9
+   }
+  },
+  "c0": {
+   "draft_wrong": {
+    "first draft already wrong": 3
+   }
+  },
+  "cV": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 25
+   },
+   "miss": {
+    "change not detected: value still at its matched position on a candidate page": 56,
+    "page not re-read": 2,
+    "page re-read, not corrected": 2
+   }
+  },
+  "d_diff": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 83
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 6,
+    "page not re-read": 5,
+    "page re-read, not corrected": 1
+   }
+  },
+  "d_diff_real": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 46
+   },
+   "miss": {
+    "claim line missing from the report (draft changed or dropped it)": 2,
+    "page not re-read": 11,
+    "page re-read, not corrected": 6
+   }
+  }
+ },
+ "baseline_refreshed_while_stale": 0,
+ "chain_verification_summary": {
+  "blobs_bad": 0,
+  "blobs_checked": 35789,
+  "chains": 216,
+  "hash_chain_ok": 216,
+  "index_files_bad": 0,
+  "index_files_checked": 856,
+  "signatures_ok": 216,
+  "signer_trusted": 216
+ },
+ "coverage": {
+  "by_fetch_idiom": {
+   "mixed with other commands": {
+    "claims": 20,
+    "correct_page": 20,
+    "sets": 1
+   },
+   "no fetch command": {
+    "claims": 20,
+    "correct_page": 0,
+    "sets": 1
+   },
+   "one url, stdout": {
+    "claims": 580,
+    "correct_page": 578,
+    "sets": 29
+   },
+   "redirect into workspace file": {
+    "claims": 100,
+    "correct_page": 100,
+    "sets": 5
+   }
+  },
+  "claims": 720,
+  "correct_page": 698,
+  "with_source": 699
+ },
+ "harness_match": {
+  "examples": [],
+  "mismatches": 0,
+  "rows": 15120
+ },
+ "provenance_summary": {
+  "a": {
+   "candidates_only": 410,
+   "claims": 720,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 410,
+   "write_step": 720
+  },
+  "b": {
+   "candidates_only": 385,
+   "claims": 720,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 385,
+   "write_step": 696
+  },
+  "cV": {
+   "candidates_only": 390,
+   "claims": 720,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 390,
+   "write_step": 704
+  },
+  "d_diff": {
+   "candidates_only": 281,
+   "claims": 720,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 281,
+   "write_step": 659
+  },
+  "d_diff_real": {
+   "candidates_only": 339,
+   "claims": 720,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 339,
+   "write_step": 689
+  }
+ },
+ "record_problems": [],
+ "summary": {
+  "arms": {
+   "a": {
+    "changed_claims": 144,
+    "changed_claims_pre_correct": 142,
+    "false_mod": 0,
+    "latency_hist": {
+     "None": 144
+    },
+    "miss_rate": 1.0,
+    "miss_rate_pre_correct": 1.0,
+    "missed": 144,
+    "missed_pre_correct": 142,
+    "stale_residual_by_cycle": {
+     "1": 38,
+     "2": 67,
+     "3": 109,
+     "4": 142
+    },
+    "unchanged_correct_claims": 2512,
+    "wrong_by_cycle": {
+     "1": 41,
+     "2": 70,
+     "3": 112,
+     "4": 145
+    }
+   },
+   "b": {
+    "changed_claims": 144,
+    "changed_claims_pre_correct": 142,
+    "false_mod": 22,
+    "latency_hist": {
+     "0": 126,
+     "1": 10,
+     "None": 8
+    },
+    "miss_rate": 0.125,
+    "miss_rate_pre_correct": 0.1127,
+    "missed": 18,
+    "missed_pre_correct": 16,
+    "stale_residual_by_cycle": {
+     "1": 5,
+     "2": 3,
+     "3": 3,
+     "4": 4
+    },
+    "unchanged_correct_claims": 2692,
+    "wrong_by_cycle": {
+     "1": 12,
+     "2": 14,
+     "3": 17,
+     "4": 29
+    }
+   },
+   "cV": {
+    "changed_claims": 144,
+    "changed_claims_pre_correct": 142,
+    "false_mod": 25,
+    "latency_hist": {
+     "0": 84,
+     "1": 1,
+     "None": 59
+    },
+    "miss_rate": 0.4167,
+    "miss_rate_pre_correct": 0.4085,
+    "missed": 60,
+    "missed_pre_correct": 58,
+    "stale_residual_by_cycle": {
+     "1": 13,
+     "2": 26,
+     "3": 43,
+     "4": 56
+    },
+    "unchanged_correct_claims": 2612,
+    "wrong_by_cycle": {
+     "1": 23,
+     "2": 38,
+     "3": 62,
+     "4": 82
+    }
+   },
+   "d_diff": {
+    "changed_claims": 144,
+    "changed_claims_pre_correct": 136,
+    "false_mod": 83,
+    "latency_hist": {
+     "0": 132,
+     "None": 12
+    },
+    "miss_rate": 0.0833,
+    "miss_rate_pre_correct": 0.0441,
+    "missed": 12,
+    "missed_pre_correct": 6,
+    "stale_residual_by_cycle": {
+     "1": 1,
+     "2": 2,
+     "3": 5,
+     "4": 6
+    },
+    "unchanged_correct_claims": 2616,
+    "wrong_by_cycle": {
+     "1": 16,
+     "2": 43,
+     "3": 66,
+     "4": 90
+    }
+   },
+   "d_diff_real": {
+    "changed_claims": 144,
+    "changed_claims_pre_correct": 140,
+    "false_mod": 46,
+    "latency_hist": {
+     "0": 125,
+     "1": 6,
+     "2": 2,
+     "3": 1,
+     "None": 10
+    },
+    "miss_rate": 0.1319,
+    "miss_rate_pre_correct": 0.1143,
+    "missed": 19,
+    "missed_pre_correct": 16,
+    "stale_residual_by_cycle": {
+     "1": 3,
+     "2": 7,
+     "3": 8,
+     "4": 7
+    },
+    "unchanged_correct_claims": 2644,
+    "wrong_by_cycle": {
+     "1": 24,
+     "2": 29,
+     "3": 40,
+     "4": 47
+    }
+   }
+  },
+  "c0": {
+   "claims": 720,
+   "correct": 717
+  }
+ }
+}
