@@ -38,6 +38,7 @@ from .locate import Location
 from .recorder import Recorder
 
 VERSION_RE = re.compile(r"(?<![\w.])v?\d+(?:\.\d+){2,}(?![\w.])")
+UNIT_RE = re.compile(r"\s?([A-Za-z%][A-Za-z%/]*)")
 PLACEHOLDER_RE = re.compile(r"_{3,}|\bTODO\b|\bTBD\b")
 FETCH_TIMEOUT_S = 20
 MAX_BODY = 2 * 1024 * 1024
@@ -57,11 +58,15 @@ def claims_in(text: str) -> list[dict[str, Any]]:
         spans: list[tuple[int, int]] = []
         for m in VERSION_RE.finditer(line):
             spans.append((m.start(), m.end()))
-            out.append({"line": i, "value": m.group(0)})
+            out.append({"line": i, "value": m.group(0), "key": m.group(0)})
         for _n, a, b in numbers_in(line):
             if any(a < e and b > st for st, e in spans):
                 continue
-            out.append({"line": i, "value": line[a:b]})
+            # 數字後面緊接的單位字（`30 days`、`100 GB`）一起當比對鍵：同一個數字在別頁當別的量用時
+            # （`30 GB`）不會被認成出處。找不到時 `provenance` 退回只用數字。
+            m = UNIT_RE.match(line, b)
+            key = line[a:m.end()] if m else line[a:b]
+            out.append({"line": i, "value": line[a:b], "key": key})
     return out
 
 
@@ -76,9 +81,14 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     out: list[dict[str, Any]] = []
     for c in claims_in(text):
-        b = B.blame_location(trace, Location(path, c["line"], value=c["value"]), contract=contract)
+        b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=contract)
+        matched = c["key"]
+        if c["key"] != c["value"] and not (b.get("source") or {}).get("ref"):
+            b2 = B.blame_location(trace, Location(path, c["line"], value=c["value"]), contract=contract)
+            if (b2.get("source") or {}).get("ref"):
+                b, matched = b2, c["value"]
         writer = next((x for x in b.get("chain") or [] if str(x.get("via", "")).startswith("wrote ")), None)
-        e: dict[str, Any] = {"line": c["line"], "value": c["value"], "state": b.get("state"),
+        e: dict[str, Any] = {"line": c["line"], "value": c["value"], "matched": matched, "state": b.get("state"),
                              "confidence": b.get("confidence"), "layer": b.get("layer"),
                              "written_by_step": writer.get("step") if writer else None,
                              "source": None}
@@ -86,7 +96,11 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
         if isinstance(src, dict) and src.get("kind") == "url" and src.get("ref"):
             st = by_n.get(src.get("step"))
             seen = trace.output_text(st) if st is not None else ""
-            e["source"] = {"url": src["ref"], "step": st.id if st else None, "step_n": src.get("step"),
+            if st is not None and src.get("into"):
+                # 抓回來的內容導進了檔案（`curl U > f`）：agent 看到的是那一步寫出的 f
+                seen = trace.file_text(st.post_index, src["into"]) or ""
+            e["source"] = {"url": src["ref"], "into": src.get("into"), "step": st.id if st else None,
+                           "step_n": src.get("step"),
                            "observed": bool(src.get("observed")),
                            "candidates": src.get("candidates"),
                            "seen_sha256": _sha(seen) if seen else None}

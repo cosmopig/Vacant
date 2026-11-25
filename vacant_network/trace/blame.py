@@ -746,9 +746,11 @@ class Blamer:
                 segs[-1].append(tok)
         urls: list[str] = []
         outputs: list[str] = []
+        by_output: dict[str, list[str]] = {}       # 同一段裡：導進這個檔的是哪些網址（`curl U > f`）
         local = False
         fetched = False
         for seg in segs:
+            seg_u0, seg_o0 = len(urls), len(outputs)
             words = list(seg)
             while words and (re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", words[0])
                              or words[0] in _PREFIX_CMDS):
@@ -795,10 +797,13 @@ class Blamer:
                         local = True
                     continue
                 urls.append(w)
+            for o in outputs[seg_o0:]:
+                if urls[seg_u0:]:
+                    by_output.setdefault(o, []).extend(urls[seg_u0:])
         if not fetched or not urls:
             return None
         local = local or any(_is_local_url(u) for u in urls)
-        return {"urls": urls, "local": local, "outputs": outputs}
+        return {"urls": urls, "local": local, "outputs": outputs, "by_output": by_output}
 
     def _own_file_with(self, j: Step, value: str) -> str | None:
         """這個行動者在第 j 步之前自己寫過、而且那時含有這個值的檔（有的話）。"""
@@ -1092,6 +1097,9 @@ class Blamer:
                 return self.value_origin(own, value, chain, before_seq=j.seq, depth=depth + 1)
             urls = fetch["urls"]
             carried = in_output or (into is not None and into in fetch["outputs"])
+            if not in_output and into is not None and len(fetch["by_output"].get(into) or []) == 1:
+                # `curl U1 > a; curl U2 > b`：值在 b 裡 ⇒ 來源是導進 b 的那一個網址，不是第一個（D2′ 冒煙 2026-11-25）
+                urls = fetch["by_output"][into]
             if carried and fetch["local"]:
                 # 這台機器上的伺服器（可能就是 agent 自己開的）：不是外部來源，也說不出是誰算的
                 chain.append({**j.brief(), "via": f"fetched {urls[0]} from this machine"})
@@ -1106,6 +1114,8 @@ class Blamer:
                 chain.append({**j.brief(), "via": f"fetched {urls[0]}"})
                 src: dict[str, Any] = {"kind": "url", "ref": urls[0], "step": j.n,
                                        "observed": exact}
+                if not in_output and into is not None:
+                    src["into"] = into                # 抓回來的內容導進了這個檔（輸出沒有經過紀錄）
                 if len(urls) > 1:
                     src["candidates"] = urls
                 return Origin("external", source=src,
