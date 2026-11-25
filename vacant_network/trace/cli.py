@@ -514,6 +514,31 @@ def cmd_rescan(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_sources(args: argparse.Namespace) -> int:
+    """每條宣稱的來源；`--check` 重讀來源、列出受影響的行，並把結果簽進鏈（`trace/sources.py`）。"""
+    from . import sources as SRC
+    ws, c = _workspace(args)
+    rel = _rel(ws, args.path)
+    if args.check:
+        res = _mutate(SRC.check, ws, rel, contract=c)
+    else:
+        prov = SRC.provenance(ws, rel, contract=c)
+        for e in prov:
+            e.pop("_seen", None)
+        res = {"path": rel, "claims": prov}
+    if args.json:
+        print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
+        return 0
+    for e in res["claims"]:
+        src = e.get("source") or {}
+        st = e.get("status", "")
+        print(f"{rel}:{e['line']}  {e['value']:<14} {st:<10} {src.get('url') or '(no external source)'}"
+              f"{'  step ' + str(src.get('step_n')) if src else ''}")
+    if args.check:
+        print(f"affected lines: {', '.join(map(str, res['affected_lines'])) or 'none'}  {res['counts']}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="vacant trace")
     ap.add_argument("--contract")
@@ -542,6 +567,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--value")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_blame)
+    p = sp.add_parser("sources", help="where each value in a deliverable came from; --check re-reads "
+                                      "those sources and lists the lines whose source changed")
+    p.add_argument("path")
+    p.add_argument("--check", action="store_true")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_sources)
     p = sp.add_parser("rescan",
                       help="re-observe the workspace: revive step-by-step observation that was "
                            "turned off (e.g. after `vacant gc`) — long-running, user-invoked")

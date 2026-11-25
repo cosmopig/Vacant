@@ -1,0 +1,10 @@
+{"schema": "vacant.d2.plan/1", "id": "smoke_d2_gemma12b_1003", "seed": 101,
+ "purpose": "冒煙：真模型走完一組（初稿＋四臂×3 週期），只看接線（病歷、產品指令、評分、稽核），數字不進任何分析。",
+ "materials": {"dir": "~/dev/ops/d2_materials/seed20261125", "generator": "ops/d2/gen_materials.py --seed 20261125 --sets 40",
+               "manifest_sha256": "2434d465325ec52d8592b4d4c63308489b8a891fbf116e9b67a5bb661c40edbe", "sets": ["s40"]},
+ "arms": ["a", "b", "c", "d"], "jobs": 1, "agent_timeout_s": 600,
+ "server": {"port": 18190},
+ "model": {"provider": "lms1003nothink", "model": "gemma-4-12b-it-qat"},
+ "vacant_python": "~/dev/ops/d2dev_venv/bin/python",
+ "agentcfg": {"dir": "~/dev/ops/agentcfg/d2dev", "copy": ["models.json", "extensions"],
+              "install_json": "~/dev/ops/agentcfg/d2dev_state/adapters/install.json"}}

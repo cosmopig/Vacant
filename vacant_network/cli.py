@@ -1262,7 +1262,7 @@ _INTAKE_TOP: tuple[str, ...] = ("contract", "check", "submit", "review", "reveri
 _ADAPTER_TOP: tuple[str, ...] = ("do", "hook", "adapters", "install", "uninstall")
 #: 可究責追緝（`vacant_network/trace/`，2026-09-24）：看病歷、人指出錯處。
 _TRACE_TOP: tuple[str, ...] = ("trace", "flag")
-_TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "actors", "rescan")
+_TRACE_SUB: tuple[str, ...] = ("show", "verify", "report", "blame", "sources", "actors", "rescan")
 #: 跨專案正規化稽核紀錄（`vacant_network/audit_export.py`，schema vacant-audit-record/1）。
 #: `vacant [--root DIR] audit <name>`（單體 logbook 驗章）仍走下面的舊指令。
 _AUDIT_SUB: tuple[str, ...] = ("list", "show", "export")
