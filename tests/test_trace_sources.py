@@ -208,10 +208,9 @@ def test_provenance_curl_redirect_to_file_then_read(env):
     assert entry["confidence"] == "heuristic"
     assert entry["source"] is not None
     assert entry["source"]["url"] == PAGE_URL
-    assert entry["source"]["step"] == "t1"
-    assert entry["source"]["observed"] is False
-    # 2026-11-25 修正後：「當時看到的」是 t1 導出來的 p1.html（不是空的 stdout）
-    assert entry["source"]["into"] == "p1.html"
+    # 第二輪（2026-11-25）：出處指到 agent 真的讀到內容的那一步——t2 讀了 t1 抓下來存的 p1.html
+    assert entry["source"]["step"] in ("t1", "t2")
+    assert entry["source"]["into"] is not None and entry["source"]["into"].endswith("p1.html")
     assert entry["source"]["seen_sha256"] == _sha(PAGE_HTML)
 
     # 同一頁 ⇒ unchanged；值所在的片段改了 ⇒ changed

@@ -89,6 +89,10 @@ def _md_escape(text: Any) -> str:
     return str(text).replace("|", "\\|").replace("\n", " ")
 
 
+PROV_FIELDS = ("claims", "write_step", "product_provenance", "product_provenance_correct_page", "candidates_only",
+               "server_saw_fetch")
+
+
 def _md_table(headers: Sequence[str], rows: Sequence[Sequence[Any]]) -> str:
     lines = [
         "| " + " | ".join(_md_escape(h) for h in headers) + " |",
@@ -462,21 +466,9 @@ def build_audit_section_data(
     for arm in ordered_prov_arms:
         d = prov_sum.get(arm)
         if isinstance(d, Mapping):
-            provenance_rows.append({
-                "arm": arm,
-                "claims": int(d.get("claims", 0)),
-                "write_step": int(d.get("write_step", 0)),
-                "read_step": int(d.get("read_step", 0)),
-                "server_saw_read": int(d.get("server_saw_read", 0)),
-            })
+            provenance_rows.append({"arm": arm, **{k: int(d.get(k, 0)) for k in PROV_FIELDS}})
         else:
-            provenance_rows.append({
-                "arm": arm,
-                "claims": None,
-                "write_step": None,
-                "read_step": None,
-                "server_saw_read": None,
-            })
+            provenance_rows.append({"arm": arm, **{k: None for k in PROV_FIELDS}})
 
     attr_tbl = audit_data.get("attribution_table") or {}
     attr_order = _ordered_arms(list(attr_tbl.keys()), preferred=("c0", *arms))
@@ -842,18 +834,9 @@ def render_audit_section(audit_sec: Mapping[str, Any]) -> str:
     # 5.2 各臂來歷摘要
     parts.append("### 5.2 各臂最終宣稱來歷摘要")
     parts.append("")
-    p_tbl = [
-        [
-            str(r["arm"]),
-            "n/a" if r["claims"] is None else str(r["claims"]),
-            "n/a" if r["write_step"] is None else str(r["write_step"]),
-            "n/a" if r["read_step"] is None else str(r["read_step"]),
-            "n/a" if r["server_saw_read"] is None else str(r["server_saw_read"]),
-        ]
-        for r in prov_rows
-    ]
+    p_tbl = [[str(r["arm"])] + ["n/a" if r[k] is None else str(r[k]) for k in PROV_FIELDS] for r in prov_rows]
     parts.append(_md_table(
-        ["臂", "宣稱數 (claims)", "找到寫入步 (write_step)", "找到讀取步 (read_step)", "伺服器紀錄符合 (server_saw_read)"],
+        ["臂", "宣稱數", "找到寫入步", "有產品出處（source_check）", "產品出處指到正確頁", "只有候選網址（產品沒有出處）", "伺服器紀錄有那次抓取"],
         p_tbl,
     ))
     parts.append("")

@@ -164,6 +164,10 @@ PROMPTS = {
           "value no longer matches what the page states, then stop. Do not change any other line.\n{items}"),
     "c_item": "- line {line}: `{text}` (source: {src})",
     "c_nosrc": "source not recorded; the product pages are {urls}",
+    "c_verify": ("According to the record, some of the lines you were just asked to check still do not match their sources "
+                 "(either the source was not re-read before the line was edited, or the value still differs from what the "
+                 "page states). Re-read each listed source with curl -s and correct the line, then stop. Do not change any "
+                 "other line.\n{items}"),
     "d": ("report.md in this directory was filled in earlier from the product pages {urls}. These pages have changed "
           "since then: {changed}. Re-read them with curl -s and correct any value in report.md that no longer matches "
           "what its page states, then stop. Do not change anything else."),
@@ -506,7 +510,7 @@ class Run:
                               "ctype": self.ctypes[set_id][k - 1]}
                 if arm in ("b", "b2"):
                     info["agent"] = self.run_agent(live, self.prompt(arm, set_id), cdir / "run")
-                elif arm in ("c", "c_every"):
+                elif arm in ("c", "c_every", "c_verify"):
                     sc = self.sources_check(live, cdir)
                     lines = (live / "ws" / "report.md").read_text().splitlines()
                     items = []
@@ -531,6 +535,31 @@ class Run:
                                              "handed_lines": sorted(by_line), "wall_s": sc["_wall_s"]}
                     if items:
                         info["agent"] = self.run_agent(live, self.prompt("c", set_id, items="\n".join(items)), cdir / "run")
+                    if items and arm == "c_verify":
+                        # 用紀錄驗收修正（第二輪，vacant-hope 11-25）：agent 改完後再跑一次產品的來源檢查；
+                        # 交辦過的行仍不是 unchanged（改之前沒重讀來源 ⇒ 新值沒有出處；或重讀了但值仍和來源不符 ⇒ changed）
+                        # ⇒ 退回再交辦一次（上限一次），多出來的呼叫與時間算進這一週期的成本
+                        sc2 = self.sources_check(live, cdir / "verify")
+                        lines2 = (live / "ws" / "report.md").read_text().splitlines()
+                        bad = sorted({e["line"] for e in sc2["claims"] if e["line"] in by_line and e["status"] != "unchanged"})
+                        info["verify"] = {"counts": sc2["counts"], "sent_back": bad, "wall_s": sc2["_wall_s"]}
+                        if bad:
+                            items2 = []
+                            for ln in bad:
+                                e = next(x for x in sc2["claims"] if x["line"] == ln)
+                                src = (by_line[ln].get("source") or {}).get("url") or (e.get("source") or {}).get("url") \
+                                    or self.nosrc_text(set_id)
+                                items2.append(PROMPTS["c_item"].format(line=ln, text=lines2[ln - 1].strip(), src=src))
+                            r2 = self.run_agent(live, PROMPTS["c_verify"].format(items="\n".join(items2)), cdir / "run_verify")
+                            info["agent_verify"] = r2
+                            a1 = info["agent"]
+                            u1, u2 = a1.get("usage") or {}, r2.get("usage") or {}
+                            merged = dict(u1)
+                            for key in ("calls", "errors", "input", "output", "cache_creation_input_tokens", "cache_read_input_tokens"):
+                                if u1.get(key) is not None or u2.get(key) is not None:
+                                    merged[key] = (u1.get(key) or 0) + (u2.get(key) or 0)
+                            info["agent"] = {**a1, "usage": merged, "wall_s": round((a1.get("wall_s") or 0) + (r2.get("wall_s") or 0), 1),
+                                             "includes_verify_run": True}
                 elif arm in ("d", "d2", "d_diff"):
                     cur = self.page_hashes(set_id, k)
                     changed = [f"http://{host}/{f}" for f in sorted(cur) if cur[f] != prev_pages.get(f)]

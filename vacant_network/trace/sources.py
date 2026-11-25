@@ -108,42 +108,172 @@ def _strip_separators(cmd: str) -> str:
     return " && ".join(keep) if keep else ""
 
 
-def _fetch_records(trace: B.Trace, blamer: B.Blamer) -> list[dict[str, Any]]:
-    """病歷裡每一次「抓到某個網址的內容」：只抓網頁的步驟（`blame` 同一個判準，本機網址不算；
-    數字以外的分隔用 echo 先拿掉），內容來源依序：
-      1. 輸出裡印出的內容（一個網址 ⇒ 整份；好幾個網址 ⇒ HTML 按文件開頭切，份數相符才依序對上）；
-      2. 導進工作區裡的檔（`curl U > f`）⇒ 那一步寫出的 f。"""
-    out: list[dict[str, Any]] = []
-    for st in trace.steps:
-        f = blamer._fetch_of(st)
-        if f is None:
-            cmd = B._command(trace.input_obj(st)) or ""
-            alt = _strip_separators(cmd)
-            f = B.fetch_of_command(alt) if alt and alt != cmd else None
-        if not f or f["local"]:
-            continue
-        got: set[str] = set()
-        txt = trace.output_text(st)
-        if txt and txt.strip():
-            if len(f["urls"]) == 1:
-                out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": f["urls"][0],
-                            "into": None, "text": txt})
-                got.add(f["urls"][0])
+_LOOP = re.compile(r"for\s+(\w+)\s+in\s+([^;]+?)\s*;\s*do\s+(.+?)\s*;?\s*done", re.S)
+_SAFE_HEADS = {"echo", "printf", "cat", "ls", "sed", "head", "tail", "grep", "wc", "cd", "true", "sleep", "pwd", "date"}
+_CODE_HEADS = re.compile(r"^(?:python|pypy|node|nodejs|ruby|perl|php|bash|sh|zsh|dash|deno|bun|awk|gawk|jq|xargs|eval|source|\.)\b")
+_HTML_END = re.compile(r"(?is)</html\s*>")
+_LINE_NO = re.compile(r"(?m)^\s*\d+\t")       # Claude Code 的 Read 輸出每行前面的行號
+
+
+def _expand_loops(cmd: str, known_paths: list[str] | None = None) -> str:
+    """`for i in 1 2 3; do curl …/p$i.html; done` ⇒ 依序展開成三段（變數換成值）。只處理單層迴圈；清單是字面值，
+    或是對已知檔案的萬用字元（`/tmp/p[1-5].html`，只對這一跑存過的檔展開、照名字排序）。"""
+    import fnmatch
+
+    def rep(m: re.Match) -> str:
+        var, items, body = m.group(1), m.group(2).split(), m.group(3)
+        exp: list[str] = []
+        for it in items:
+            it = it.strip("\"'")
+            if re.search(r"[*?\[]", it):
+                hits = sorted(x for x in (known_paths or []) if fnmatch.fnmatch(x, it))
+                if not hits:
+                    return m.group(0)
+                exp += hits
+            elif re.search(r"[$`]", it):
+                return m.group(0)
             else:
-                pat = _DOC_START if _DOC_START.search(txt) else _HTML_START
-                chunks = [c for c in pat.split(txt) if c.strip()]
-                if len(chunks) == len(f["urls"]) and all(pat.match(c.lstrip()) for c in chunks):
-                    for u, c in zip(f["urls"], chunks):
-                        out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": u,
-                                    "into": None, "text": c, "split": True})
-                        got.add(u)
-        for o, us in (f.get("by_output") or {}).items():
-            if len(us) != 1 or us[0] in got:
-                continue
-            rel = blamer._rel(o) or o
-            ftxt = trace.file_text(st.post_index, rel)
+                exp.append(it)
+        items = exp
+        return " ; ".join(re.sub(r"\$\{?" + var + r"\}?(?!\w)", it, body) for it in items)
+    return _LOOP.sub(rep, cmd)
+
+
+def _segments_of(cmd: str) -> list[str] | None:
+    """依 `&&` `;` `||` 與換行切段（不切引號裡的）；看到管線以外的子殼、命令替換就放棄（None）。"""
+    out, cur, q = [], [], None
+    i = 0
+    while i < len(cmd):
+        ch = cmd[i]
+        if q:
+            cur.append(ch)
+            if ch == q:
+                q = None
+        elif ch in "\"'":
+            q = ch
+            cur.append(ch)
+        elif cmd.startswith("&&", i) or cmd.startswith("||", i):
+            out.append("".join(cur)); cur = []; i += 2; continue
+        elif ch in ";\n":
+            out.append("".join(cur)); cur = []
+        elif ch == "`" or cmd.startswith("$(", i):
+            return None
+        else:
+            cur.append(ch)
+        i += 1
+    out.append("".join(cur))
+    return [x.strip() for x in out if x.strip()]
+
+
+def _fetch_plan(cmd: str, cwd: str | None, saved: dict[str, str] | None = None) -> dict[str, Any] | None:
+    """一個殼層指令裡的抓網頁動作（第二版，2026-11-25 第二輪）：先展開迴圈、切段；每一段要嘛是只抓網頁
+    （`blame` 的判準，可接 head／grep 之類的過濾器），要嘛是造不出 HTML 的動作（echo、cat 檔、ls、cd…）；
+    有任何一段跑程式（python、bash -c、awk、jq…）就整步放棄。回 {"stdout_urls": [依序印在輸出裡的網址],
+    "files": {絕對或相對路徑: 網址}}。"""
+    saved = dict(saved or {})
+    segs = _segments_of(_expand_loops(cmd, list(saved)))
+    if not segs:
+        return None
+
+    def absp(x: str) -> str:
+        x = x.strip("\"'")
+        return x if x.startswith("/") or not cwd else f"{cwd.rstrip('/')}/{x.lstrip('./')}"
+    stdout_urls: list[str] = []
+    files: dict[str, str] = {}
+    any_fetch = False
+    for seg in segs:
+        f = B.fetch_of_command(seg)
+        if f is not None:
+            if f["local"]:
+                return None
+            any_fetch = True
+            outs = f.get("by_output") or {}
+            if outs:
+                for o, us in outs.items():
+                    if len(us) == 1:
+                        files[absp(o)] = us[0]
+                        saved[absp(o)] = us[0]
+            else:
+                stdout_urls += f["urls"]
+            continue
+        head = seg.split()[0] if seg.split() else ""
+        if _CODE_HEADS.match(head) or "|" in seg and B.fetch_of_command(seg.split("|")[0]) is None and \
+                any(_CODE_HEADS.match(x.strip()) for x in seg.split("|")[1:]):
+            return None
+        if head == "cd" and len(seg.split()) > 1:
+            cwd = seg.split()[1].strip("\"'")
+            continue
+        if head == "cat" and "|" not in seg and ">" not in seg:
+            # 印出這一跑抓下來存好的檔（同一個指令或更早的步驟）＝把那一頁印在輸出裡
+            for arg in seg.split()[1:]:
+                if not arg.startswith("-") and absp(arg) in saved:
+                    stdout_urls.append(saved[absp(arg)])
+            continue
+        if head not in _SAFE_HEADS:
+            return None
+    return {"stdout_urls": stdout_urls, "files": files} if (any_fetch or stdout_urls) else None
+
+
+def _html_docs(txt: str) -> list[str]:
+    """輸出裡的 HTML 文件，依序；每份截到 `</html>`（後面 echo、cat 印的東西不算）。"""
+    pat = _DOC_START if _DOC_START.search(txt) else _HTML_START
+    docs = []
+    for c in pat.split(txt):
+        if not pat.match(c.lstrip()):
+            continue
+        m = _HTML_END.search(c)
+        docs.append(c[:m.end()] if m else c)
+    return docs
+
+
+def _fetch_records(trace: B.Trace, blamer: B.Blamer) -> list[dict[str, Any]]:
+    """病歷裡每一次「抓到某個網址的內容」（第二版）：
+      1. 只抓網頁的步驟（`blame` 的判準）：一個網址 ⇒ 整份輸出；
+      2. 混合指令（迴圈、echo 分隔、先 cat 自己的檔再抓、cd）：`_fetch_plan` 認得出每一段在做什麼時，
+         輸出裡的 HTML 文件依序對上印出來的網址（份數相符才對；推論）；
+      3. 導進檔案的（`curl U > f`）：工作區裡的 f ⇒ 那一步寫出的內容；之後任何一步用讀檔工具讀這個 f
+         （工作區外也算，例如 /tmp）⇒ 那一次讀到的內容。"""
+    out: list[dict[str, Any]] = []
+    saved: dict[str, tuple[str, Any]] = {}          # 絕對路徑 → (網址, 抓的那一步)
+    ws_root = str(trace.rec.workspace)
+    for st in trace.steps:
+        inp = trace.input_obj(st)
+        tool = str(st.tool).lower()
+        if tool in ("read",) and isinstance(inp, dict):
+            pth = str(inp.get("path") or inp.get("file_path") or "")
+            ap = pth if pth.startswith("/") else (f"{ws_root.rstrip('/')}/{pth}" if ws_root else pth)
+            if ap in saved:
+                txt = _LINE_NO.sub("", trace.output_text(st) or "")
+                if txt.strip():
+                    out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": saved[ap][0],
+                                "into": pth, "text": txt, "via_read": True})
+            continue
+        cmd = B._command(inp) or ""
+        if not cmd:
+            continue
+        txt = trace.output_text(st) or ""
+        cwd = (inp.get("workdir") or inp.get("cwd")) if isinstance(inp, dict) else None
+        f = blamer._fetch_of(st)
+        if f is not None and not f["local"] and len(f["urls"]) == 1 and not f["outputs"] and txt.strip():
+            out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": f["urls"][0],
+                        "into": None, "text": txt})
+            continue
+        plan = _fetch_plan(cmd, cwd or ws_root, {k: v[0] for k, v in saved.items()})
+        if plan is None:
+            continue
+        if plan["stdout_urls"] and txt.strip():
+            docs = _html_docs(txt)
+            if len(docs) == len(plan["stdout_urls"]):
+                for u, d in zip(plan["stdout_urls"], docs):
+                    out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": u,
+                                "into": None, "text": d, "split": True})
+        for path, u in plan["files"].items():
+            ap = path if path.startswith("/") else (f"{ws_root.rstrip('/')}/{path}" if ws_root else path)
+            saved[ap] = (u, st)
+            rel = blamer._rel(ap) or blamer._rel(path)
+            ftxt = trace.file_text(st.post_index, rel) if rel else None
             if ftxt:
-                out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": us[0], "into": rel,
+                out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": u, "into": rel,
                             "text": ftxt})
     return out
 

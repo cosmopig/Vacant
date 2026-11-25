@@ -224,11 +224,13 @@ def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
                 u = a.get("usage") or {}
                 cin = (u.get("input") or 0) + (u.get("cache_creation_input_tokens") or 0) + (u.get("cache_read_input_tokens") or 0) \
                     if a and u.get("input") is not None else None
-                costs[(sid, adir.name, k)] = {"ctype": info.get("ctype", "F"), "cost_usd": _cost_usd(cd / "run" / "agent.log") if a else 0.0,
+                cu = [_cost_usd(cd / r / "agent.log") for r in ("run", "run_verify") if (cd / r / "agent.log").exists()]
+                cu = [x for x in cu if x is not None]
+                costs[(sid, adir.name, k)] = {"ctype": info.get("ctype", "F"), "cost_usd": (round(sum(cu), 6) if cu else None) if a else 0.0,
                     "ran": bool(a), "calls": u.get("calls") if a else 0,
                     "tokens_in": cin if a else 0, "tokens_out": u.get("output") if a else 0,
                     "wall_s": a.get("wall_s", 0) if a else 0,
-                    "tool_wall_s": (info.get("sources_check") or {}).get("wall_s", 0)}
+                    "tool_wall_s": (info.get("sources_check") or {}).get("wall_s", 0) + (info.get("verify") or {}).get("wall_s", 0)}
                 if info.get("ts_start") and info.get("ts_end"):
                     rq = source_requests(access, f"{sid}.d2-sources.example", info.get("t_start", info["ts_start"]),
                                          info.get("t_end", info["ts_end"]))
