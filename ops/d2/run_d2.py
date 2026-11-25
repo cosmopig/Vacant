@@ -348,25 +348,30 @@ class Run:
         key = str(live)
         if key in self._egress and self._egress[key][0].poll() is None:
             return self._egress[key][1]
-        sets = self.plan["materials"]["sets"]
-        sid = next((s for s in sets if self.live_dir(s) == live), None)
-        port = int(self.plan["egress"]["port_base"]) + (sets.index(sid) if sid in sets else 999)
         ready = live / "egress.ready"
         ready.unlink(missing_ok=True)
         env = self._agent_env_base(live)
         env.pop("PI_CODING_AGENT_DIR", None)
         proc = subprocess.Popen([os.path.expanduser(self.plan["vacant_python"]), "-I", "-m", "vacant_network", "trace",
-                                 "egress", "--port", str(port), "--upstream-proxy",
+                                 "egress", "--port", "0", "--upstream-proxy",
                                  f"http://127.0.0.1:{self.plan['server']['port']}", "--ready-file", str(ready)],
                                 cwd=live / "ws", env=env, stdout=subprocess.DEVNULL,
                                 stderr=open(live / "egress.err", "a"), start_new_session=True)
-        for _ in range(100):
-            if ready.exists():
+        port = None
+        for _ in range(150):
+            try:
+                port = int(json.loads(ready.read_text())["port"])
                 break
-            time.sleep(0.1)
-        else:
-            raise InfraError(f"egress proxy did not start on {port}")
+            except (OSError, ValueError, KeyError):
+                time.sleep(0.1)
+        if port is None:
+            proc.kill()
+            raise InfraError("egress proxy did not start")
         self._egress[key] = (proc, port)
+        if not getattr(self, "_egress_atexit", False):
+            import atexit
+            atexit.register(lambda: [self.stop_egress(pathlib.Path(k)) for k in list(getattr(self, "_egress", {}))])
+            self._egress_atexit = True
         return port
 
     def stop_egress(self, live: pathlib.Path) -> None:

@@ -114,9 +114,9 @@ def serve(ws: str | os.PathLike, port: int, *, upstream_proxy: str | None = None
             finally:
                 up.close()
 
-    srv = ThreadingHTTPServer(("127.0.0.1", port), H)
+    srv = ThreadingHTTPServer(("127.0.0.1", port), H)     # port 0 ⇒ 系統挑一個空的
     if ready_file:
-        pathlib.Path(ready_file).write_text(str(os.getpid()))
+        pathlib.Path(ready_file).write_text(json.dumps({"pid": os.getpid(), "port": srv.server_address[1]}))
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
