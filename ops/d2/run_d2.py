@@ -167,6 +167,24 @@ PROMPTS = {
     "d": ("report.md in this directory was filled in earlier from the product pages {urls}. These pages have changed "
           "since then: {changed}. Re-read them with curl -s and correct any value in report.md that no longer matches "
           "what its page states, then stop. Do not change anything else."),
+    # 留出批次（教材給的是一個網站的索引頁，agent 自己決定怎麼抓；2026-11-25 vacant-hope 要求）
+    "write_idx": ("Fill in report.md in this directory using the website at {index} (start at that index page; it links "
+                  "to every page). Read pages with curl -s. Replace every ____ in report.md with the value exactly as the "
+                  "website states it, then stop. Do not change anything else."),
+    "b_idx": ("report.md in this directory was filled in earlier from the website at {index} (the index page links to "
+              "every page). The pages may have changed since then. Re-read the pages with curl -s and check every value "
+              "in report.md against them; correct any value that no longer matches what the website states, then stop. "
+              "Do not change anything else."),
+    "c_idx": ("report.md in this directory was filled in earlier from a website. The sources of the lines below "
+              "have changed since they were written. Re-read each listed source with curl -s and correct the line if its "
+              "value no longer matches what the page states, then stop. Do not change any other line.\n{items}"),
+    "c_nosrc_idx": "source not recorded; the website starts at {index}",
+    "d_idx": ("report.md in this directory was filled in earlier from the website at {index} (the index page links to "
+              "every page). These pages have changed since then: {changed}. Re-read them with curl -s and correct any "
+              "value in report.md that no longer matches what the website states, then stop. Do not change anything else."),
+    # 敏感度批次的 b2／d2：b、d 的提示再加一句明講不要重寫（vacant-hope 11-25 第 2 點）
+    "no_rewrite": (" Edit report.md in place: change only the values that are actually wrong, keep every other line exactly "
+                   "as it is, and do not rewrite, reorganize or reformat the file."),
 }
 
 
@@ -199,6 +217,9 @@ class Run:
         self.n_cycles = {s["set"]: len(s["cycles"]) for s in _m["sets"]}
         #: 週期類型只給評分與報告分組用；agent 與 Vacant 都看不到（不進提示、不進病歷）
         self.ctypes = {s["set"]: [c.get("type", "F") for c in s["cycles"]] for s in _m["sets"]}
+        #: 留出教材有自己的頁面清單與索引頁；舊教材是 p1..p5.html
+        self.pages = {s["set"]: list(s.get("pages") or [f"p{i}.html" for i in range(1, 6)]) for s in _m["sets"]}
+        self.index = {s["set"]: s.get("index") for s in _m["sets"]}
         self.routes = root / "routes.json"
         self.stop = threading.Event()
         self.procs: set[subprocess.Popen] = set()
@@ -221,7 +242,28 @@ class Run:
 
     def urls(self, set_id: str) -> list[str]:
         host = HOST_FMT.format(set=set_id)
-        return [f"http://{host}/p{i}.html" for i in range(1, 6)]
+        return [f"http://{host}/{pg}" for pg in self.pages[set_id]]
+
+    def index_url(self, set_id: str) -> str | None:
+        ix = self.index.get(set_id)
+        return f"http://{HOST_FMT.format(set=set_id)}/{ix}" if ix else None
+
+    def prompt(self, key: str, set_id: str, **kw) -> str:
+        """同一個臂、兩種教材：有索引頁的（留出）用 *_idx 版，只給索引頁；`b2`／`d2` 在 b、d 後面加一句不要重寫。"""
+        ix = self.index_url(set_id)
+        urls = " ".join(self.urls(set_id))
+        base = key[0] if key in ("b2", "d2") else key
+        if ix and base in ("write", "b", "c", "d"):
+            txt = PROMPTS[base + "_idx"].format(index=ix, **kw)
+        else:
+            txt = PROMPTS[base].format(urls=urls, **kw)
+        if key in ("b2", "d2"):
+            txt += PROMPTS["no_rewrite"]
+        return txt
+
+    def nosrc_text(self, set_id: str) -> str:
+        ix = self.index_url(set_id)
+        return PROMPTS["c_nosrc_idx"].format(index=ix) if ix else PROMPTS["c_nosrc"].format(urls=" ".join(self.urls(set_id)))
 
     def agent_kind(self) -> str:
         kind = self.plan["model"].get("agent", "pi")
@@ -386,7 +428,7 @@ class Run:
             shutil.copy(os.path.expanduser(p["agentcfg"]["install_json"]), live / "vh" / "adapters" / "install.json")
             self.install_site(set_id, 0, live)
             self.set_route(host, live / "site")
-            r = self.run_agent(live, PROMPTS["write"].format(urls=" ".join(urls)), cells / "c0" / "run")
+            r = self.run_agent(live, self.prompt("write", set_id), cells / "c0" / "run")
             shutil.copy(live / "ws" / "report.md", cells / "c0" / "report.md")
             if snap.exists():
                 shutil.rmtree(snap)
@@ -418,8 +460,8 @@ class Run:
                 self.set_route(host, live / "site")
                 info: dict = {"arm": arm, "cycle": k, "ts_start": now(), "t_start": time.time(), "agent": None,
                               "ctype": self.ctypes[set_id][k - 1]}
-                if arm == "b":
-                    info["agent"] = self.run_agent(live, PROMPTS["b"].format(urls=" ".join(urls)), cdir / "run")
+                if arm in ("b", "b2"):
+                    info["agent"] = self.run_agent(live, self.prompt(arm, set_id), cdir / "run")
                 elif arm == "c":
                     sc = self.sources_check(live, cdir)
                     lines = (live / "ws" / "report.md").read_text().splitlines()
@@ -439,20 +481,20 @@ class Run:
                             handed_nosrc.add(lines[ln - 1].strip())
                     for ln in sorted(by_line):
                         e = by_line[ln]
-                        src = (e.get("source") or {}).get("url") or PROMPTS["c_nosrc"].format(urls=" ".join(urls))
+                        src = (e.get("source") or {}).get("url") or self.nosrc_text(set_id)
                         items.append(PROMPTS["c_item"].format(line=ln, text=lines[ln - 1].strip(), src=src))
                     info["sources_check"] = {"counts": sc["counts"], "affected_lines": sc["affected_lines"],
                                              "handed_lines": sorted(by_line), "wall_s": sc["_wall_s"]}
                     if items:
-                        info["agent"] = self.run_agent(live, PROMPTS["c"].format(items="\n".join(items)), cdir / "run")
-                elif arm == "d":
+                        info["agent"] = self.run_agent(live, self.prompt("c", set_id, items="\n".join(items)), cdir / "run")
+                elif arm in ("d", "d2"):
                     cur = self.page_hashes(set_id, k)
                     changed = [f"http://{host}/{f}" for f in sorted(cur) if cur[f] != prev_pages.get(f)]
                     prev_pages = cur
                     info["changed_pages"] = changed
                     if changed:
                         info["agent"] = self.run_agent(
-                            live, PROMPTS["d"].format(urls=" ".join(urls), changed=" ".join(changed)), cdir / "run")
+                            live, self.prompt(arm, set_id, changed=" ".join(changed)), cdir / "run")
                 shutil.copy(live / "ws" / "report.md", cdir / "report.md")
                 info["chain_len"] = self.chain_len(live)
                 info["ts_end"] = now()
@@ -468,7 +510,7 @@ class Run:
 
     def page_hashes(self, set_id: str, k: int) -> dict:
         site = self.mat / "sets" / set_id / f"cycle_{k}" / "site"
-        return {f.name: sha_file(f) for f in sorted(site.iterdir()) if f.name != "index.html"}
+        return {f.name: sha_file(f) for f in sorted(site.iterdir()) if f.name in self.pages[set_id]}
 
     # ---------- 整批 ----------
     def start_server(self) -> subprocess.Popen:

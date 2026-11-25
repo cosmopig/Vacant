@@ -146,6 +146,11 @@ def reader_before(rec: Record, write_seq: int, value: str) -> dict | None:
     return None
 
 
+def _pages(cl: dict) -> list[str]:
+    """宣稱的正確來源頁：舊教材一頁（`source_page`）；留出教材可能好幾頁（`source_pages`）。"""
+    return list(cl.get("source_pages") or [cl["source_page"]])
+
+
 def file_url(rec: Record, read_step: dict, path: str) -> tuple[str, str] | None:
     """`read <檔>` 讀到的檔是哪一個網址抓來的：最近一個寫了這個檔的步驟，它的指令裡 `curl … URL … > 檔`。
     回（網址、那一步寫出的內容 sha256）。"""
@@ -204,7 +209,7 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                         ents = [e for e in scs[0]["payload"]["claims"] if e["line"] == ln]
                         url = next(((e.get("source") or {}).get("url") for e in ents if e.get("source")), None)
                         cov_rows.append({"set": sid, "claim": cl["id"], "line": ln, "url": url,
-                                         "correct_page": bool(url and url.endswith("/" + cl["source_page"])),
+                                         "correct_page": bool(url and any(url.endswith("/" + pg) for pg in _pages(cl))),
                                          "status_cycle1": ents[0]["status"] if ents else None})
             # ---- 每條最終宣稱的來歷
             final = parse_report(reports[sid][f"{arm}/{ncyc}"], s["claims"])
@@ -252,7 +257,7 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                         continue
                     kind = "miss" if changed else "false_mod"
                     ln = next((i + 1 for i, x in enumerate(lines_now) if x.strip().startswith(cl["template_line"].strip())), None)
-                    page_url = next((u for u in fetched if u.endswith("/" + cl["source_page"])), None)
+                    page_url = next((u for u in fetched if any(u.endswith("/" + pg) for pg in _pages(cl))), None)
                     if pre[cid] is None:
                         seg = "claim line missing from the report (draft changed or dropped it)"
                     elif arm == "a":
@@ -261,7 +266,7 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                         e = sc_by_line.get(ln) or {}
                         src = (e.get("source") or {}).get("url")
                         if kind == "miss" and ln not in handed:
-                            if src and not src.endswith("/" + cl["source_page"]):
+                            if src and not any(src.endswith("/" + pg) for pg in _pages(cl)):
                                 seg = "provenance points to the wrong page (not handed to agent)"
                             elif not src:
                                 seg = "provenance not recorded (and not handed — should not happen)"

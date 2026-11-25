@@ -175,10 +175,12 @@ def materials_stats(manifest: dict, mat_dir: pathlib.Path, sets: list[str] | Non
         if sets and s["set"] not in sets:
             continue
         site = mat_dir / "sets" / s["set"] / "cycle_0" / "site"
-        texts = {f"p{i}.html": _re.sub(r"<[^>]+>", " ", (site / f"p{i}.html").read_text()) for i in range(1, 6)}
+        pages = s.get("pages") or [f"p{i}.html" for i in range(1, 6)]
+        texts = {pg: _re.sub(r"<[^>]+>", " ", (site / pg).read_text()) for pg in pages}
         for c in s["claims"]:
             v = s["truth"][0][c["id"]]
-            others = [t for pg, t in texts.items() if pg != c["source_page"]]
+            own = set(c.get("source_pages") or [c["source_page"]])
+            others = [t for pg, t in texts.items() if pg not in own]
             num = canon(v)
             n += 1
             pat = _re.compile(r"(?<![\w$.,])" + _re.escape(v) + r"(?![\w.,]\d|\w)")
