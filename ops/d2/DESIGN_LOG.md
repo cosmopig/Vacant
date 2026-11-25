@@ -32,3 +32,4 @@
 | 11-25 06:45 | 評分：Claude 的輸入 token 含快取寫入與讀取；每週期加 `cost_usd`（Claude Code 的 total_cost_usd，pi 沒有）。分析加 `--cost-metric`（主要成本比值用哪個量，各計畫事前寫定：本機 tokens、Claude cost_usd）。pi 的數字不變 | Haiku 小量試：Claude 回報的 `input` 幾乎是 0（全在快取欄位），原本的 token 比沒有意義 | Haiku 小量試（s57）的 run.json |
 | 11-25 06:45 | Haiku 主批次（s01–s50）事前登記，主要成本量＝美元 | vacant-hope：Haiku 當第三個點、先小量估量再放大；小量試估全量約 1.5 美元 | Haiku 小量試 |
 | 11-25 06:40（約） | 執行器：c_every、d_diff 兩臂；RUN.json 記開跑時 HEAD 與各腳本 sha、續跑追加一筆；計畫要先在遠端 auto/redo 才准開跑；來源伺服器每筆存取紀錄帶臂與週期（`routes_meta.json`）。敏感度批次改成 sens2（七臂），原 sens 撤回（0 次呼叫） | 獨立稽核 11-25 第 5、6、8、9、11 點 | 獨立稽核報告 |
+| 11-25 06:50（約） | 執行器：刪工作目錄改成會重試（掛鉤的背景行程可能還在寫）。等候腳本停掉，sens2 改成在 1003 的 qwen 換成 ctx 65536 之後手動發射 | 留出批次 s01「Directory not empty」；9B 主批次 s36 的「Context size has been exceeded」——1003 上 qwen 的 32768 是所有同時請求共用的 KV，9B 主批次＋留出批次一起跑時超過；被判成基礎設施失敗（照預註冊停該組、續跑重做） | 兩批的 runner.log |

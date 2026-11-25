@@ -188,6 +188,21 @@ PROMPTS = {
 }
 
 
+def rmtree_retry(path, tries: int = 10) -> None:
+    """刪工作目錄；掛鉤的背景行程（`recorder baseline`）可能還在寫，第一次會遇到「Directory not empty」。
+    重試幾次、每次等一下（留出批次 s01，2026-11-25）。"""
+    for i in range(tries):
+        try:
+            shutil.rmtree(path)
+            return
+        except FileNotFoundError:
+            return
+        except OSError:
+            if i == tries - 1:
+                raise
+            time.sleep(1 + i)
+
+
 def now() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -412,7 +427,7 @@ class Run:
     def install_site(self, set_id: str, k: int, live: pathlib.Path) -> None:
         site = live / "site"
         if site.exists():
-            shutil.rmtree(site)
+            rmtree_retry(site)
         shutil.copytree(self.mat / "sets" / set_id / f"cycle_{k}" / "site", site)
 
     # ---------- 一組 ----------
@@ -425,7 +440,7 @@ class Run:
         snap = cells / "c0" / "snapshot"
         if not (cells / "c0" / "done.json").exists():
             if live.exists():
-                shutil.rmtree(live)
+                rmtree_retry(live)
             for d in ("ws", "vh/adapters", "cfg", "tmp"):
                 (live / d).mkdir(parents=True, exist_ok=True)
             shutil.copy(self.mat / "sets" / set_id / "template.md", live / "ws" / "report.md")
@@ -439,7 +454,7 @@ class Run:
             r = self.run_agent(live, self.prompt("write", set_id), cells / "c0" / "run")
             shutil.copy(live / "ws" / "report.md", cells / "c0" / "report.md")
             if snap.exists():
-                shutil.rmtree(snap)
+                rmtree_retry(snap)
             snap.mkdir(parents=True)
             for d in ("ws", "vh"):
                 shutil.copytree(live / d, snap / d, symlinks=True)
@@ -452,10 +467,10 @@ class Run:
             if (adir / "done.json").exists():
                 continue
             if adir.exists():
-                shutil.rmtree(adir)
+                rmtree_retry(adir)
             for d in ("ws", "vh"):
                 if (live / d).exists():
-                    shutil.rmtree(live / d)
+                    rmtree_retry(live / d)
                 shutil.copytree(snap / d, live / d, symlinks=True)
             prev_pages = self.page_hashes(set_id, 0)
             handed_nosrc: set[str] = set()
