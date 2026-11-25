@@ -1,0 +1,266 @@
+{
+ "arms": {
+  "a": {
+   "changed_claims": 200,
+   "changed_claims_pre_correct": 174,
+   "cost": {
+    "agent_runs": 0,
+    "calls": 0,
+    "cost_usd": 0,
+    "set_cycles": 200,
+    "source_requests_agent": 0,
+    "source_requests_vacant": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 0
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 100,
+     "tokens": 0,
+     "wall_s": 0.0
+    },
+    "N": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 50,
+     "tokens": 0,
+     "wall_s": 0.0
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 50,
+     "tokens": 0,
+     "wall_s": 0.0
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "None": 200
+   },
+   "miss_rate": 1.0,
+   "miss_rate_pre_correct": 1.0,
+   "missed": 200,
+   "missed_pre_correct": 174,
+   "stale_residual_by_cycle": {
+    "1": 42,
+    "2": 82,
+    "3": 124,
+    "4": 174
+   },
+   "unchanged_correct_claims": 3034,
+   "wrong_by_cycle": {
+    "1": 178,
+    "2": 218,
+    "3": 260,
+    "4": 310
+   }
+  },
+  "b": {
+   "changed_claims": 200,
+   "changed_claims_pre_correct": 172,
+   "cost": {
+    "agent_runs": 200,
+    "calls": 1101,
+    "cost_usd": 0,
+    "set_cycles": 200,
+    "source_requests_agent": 1008,
+    "source_requests_vacant": 0,
+    "tokens_in": 3630736,
+    "tokens_out": 164139,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 3865.4
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 100,
+     "calls": 614,
+     "set_cycles": 100,
+     "tokens": 2206922,
+     "wall_s": 2211.6
+    },
+    "N": {
+     "agent_runs": 50,
+     "calls": 246,
+     "set_cycles": 50,
+     "tokens": 794931,
+     "wall_s": 864.7
+    },
+    "Z": {
+     "agent_runs": 50,
+     "calls": 241,
+     "set_cycles": 50,
+     "tokens": 793022,
+     "wall_s": 789.1
+    }
+   },
+   "false_mod": 12,
+   "latency_hist": {
+    "0": 166,
+    "1": 3,
+    "None": 31
+   },
+   "miss_rate": 0.17,
+   "miss_rate_pre_correct": 0.0465,
+   "missed": 34,
+   "missed_pre_correct": 8,
+   "stale_residual_by_cycle": {
+    "1": 0,
+    "2": 2,
+    "3": 1,
+    "4": 5
+   },
+   "unchanged_correct_claims": 3305,
+   "wrong_by_cycle": {
+    "1": 120,
+    "2": 134,
+    "3": 133,
+    "4": 137
+   }
+  },
+  "c": {
+   "changed_claims": 200,
+   "changed_claims_pre_correct": 174,
+   "cost": {
+    "agent_runs": 91,
+    "calls": 371,
+    "cost_usd": 0,
+    "set_cycles": 200,
+    "source_requests_agent": 132,
+    "source_requests_vacant": 799,
+    "tokens_in": 1005607,
+    "tokens_out": 41729,
+    "tool_wall_s": 40.8,
+    "usage_unknown": 0,
+    "wall_s": 1043.7
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 81,
+     "calls": 330,
+     "set_cycles": 100,
+     "tokens": 876330,
+     "wall_s": 929.2
+    },
+    "N": {
+     "agent_runs": 6,
+     "calls": 29,
+     "set_cycles": 50,
+     "tokens": 123864,
+     "wall_s": 98.6
+    },
+    "Z": {
+     "agent_runs": 4,
+     "calls": 12,
+     "set_cycles": 50,
+     "tokens": 47142,
+     "wall_s": 56.7
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "0": 143,
+    "1": 4,
+    "None": 53
+   },
+   "miss_rate": 0.285,
+   "miss_rate_pre_correct": 0.1897,
+   "missed": 57,
+   "missed_pre_correct": 33,
+   "stale_residual_by_cycle": {
+    "1": 2,
+    "2": 8,
+    "3": 14,
+    "4": 24
+   },
+   "unchanged_correct_claims": 3304,
+   "wrong_by_cycle": {
+    "1": 122,
+    "2": 130,
+    "3": 134,
+    "4": 149
+   }
+  },
+  "d": {
+   "changed_claims": 200,
+   "changed_claims_pre_correct": 168,
+   "cost": {
+    "agent_runs": 150,
+    "calls": 691,
+    "cost_usd": 0,
+    "set_cycles": 200,
+    "source_requests_agent": 394,
+    "source_requests_vacant": 0,
+    "tokens_in": 2066649,
+    "tokens_out": 107674,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 2465.9
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 100,
+     "calls": 490,
+     "set_cycles": 100,
+     "tokens": 1531044,
+     "wall_s": 1742.8
+    },
+    "N": {
+     "agent_runs": 50,
+     "calls": 201,
+     "set_cycles": 50,
+     "tokens": 643279,
+     "wall_s": 723.1
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 50,
+     "tokens": 0,
+     "wall_s": 0.0
+    }
+   },
+   "false_mod": 80,
+   "latency_hist": {
+    "0": 159,
+    "1": 1,
+    "2": 3,
+    "None": 37
+   },
+   "miss_rate": 0.205,
+   "miss_rate_pre_correct": 0.0655,
+   "missed": 41,
+   "missed_pre_correct": 11,
+   "stale_residual_by_cycle": {
+    "1": 3,
+    "2": 4,
+    "3": 0,
+    "4": 3
+   },
+   "unchanged_correct_claims": 3193,
+   "wrong_by_cycle": {
+    "1": 155,
+    "2": 176,
+    "3": 172,
+    "4": 211
+   }
+  }
+ },
+ "c0": {
+  "claims": 1000,
+  "correct": 864
+ },
+ "materials": {
+  "bare_number_on_another_page": 416,
+  "claims": 1000,
+  "rate_bare_number": 0.416,
+  "rate_with_unit": 0.324,
+  "value_with_unit_on_another_page": 324
+ }
+}

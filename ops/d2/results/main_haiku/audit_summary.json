@@ -1,0 +1,196 @@
+{
+ "attribution_table": {
+  "a": {
+   "miss": {
+    "not maintained (arm a)": 200
+   }
+  },
+  "b": {
+   "miss": {
+    "page not re-read": 2
+   }
+  },
+  "c": {
+   "miss": {
+    "provenance not recorded (no_source); not handed this cycle": 108
+   }
+  }
+ },
+ "baseline_refreshed_while_stale": 0,
+ "chain_verification_summary": {
+  "blobs_bad": 0,
+  "blobs_checked": 6513,
+  "chains": 250,
+  "hash_chain_ok": 250,
+  "signatures_ok": 250,
+  "signer_trusted": 250
+ },
+ "coverage": {
+  "by_fetch_idiom": {
+   "loop": {
+    "claims": 700,
+    "correct_page": 0,
+    "sets": 35
+   },
+   "several urls, stdout": {
+    "claims": 300,
+    "correct_page": 300,
+    "sets": 15
+   }
+  },
+  "claims": 1000,
+  "correct_page": 300,
+  "with_source": 300
+ },
+ "harness_match": {
+  "examples": [],
+  "mismatches": 0,
+  "rows": 17000
+ },
+ "provenance_summary": {
+  "a": {
+   "candidates_only": 1000,
+   "claims": 1000,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 300,
+   "write_step": 1000
+  },
+  "b": {
+   "candidates_only": 1000,
+   "claims": 1000,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 263,
+   "write_step": 1000
+  },
+  "c": {
+   "candidates_only": 742,
+   "claims": 1000,
+   "product_provenance": 258,
+   "product_provenance_correct_page": 258,
+   "server_saw_fetch": 290,
+   "write_step": 1000
+  },
+  "d": {
+   "candidates_only": 1000,
+   "claims": 1000,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 396,
+   "write_step": 1000
+  }
+ },
+ "record_problems": [],
+ "summary": {
+  "arms": {
+   "a": {
+    "changed_claims": 200,
+    "changed_claims_pre_correct": 200,
+    "false_mod": 0,
+    "latency_hist": {
+     "None": 200
+    },
+    "miss_rate": 1.0,
+    "miss_rate_pre_correct": 1.0,
+    "missed": 200,
+    "missed_pre_correct": 200,
+    "stale_residual_by_cycle": {
+     "1": 46,
+     "2": 94,
+     "3": 146,
+     "4": 200
+    },
+    "unchanged_correct_claims": 3514,
+    "wrong_by_cycle": {
+     "1": 46,
+     "2": 94,
+     "3": 146,
+     "4": 200
+    }
+   },
+   "b": {
+    "changed_claims": 200,
+    "changed_claims_pre_correct": 200,
+    "false_mod": 0,
+    "latency_hist": {
+     "0": 198,
+     "1": 1,
+     "None": 1
+    },
+    "miss_rate": 0.01,
+    "miss_rate_pre_correct": 0.01,
+    "missed": 2,
+    "missed_pre_correct": 2,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 1,
+     "3": 0,
+     "4": 1
+    },
+    "unchanged_correct_claims": 3799,
+    "wrong_by_cycle": {
+     "1": 0,
+     "2": 1,
+     "3": 0,
+     "4": 1
+    }
+   },
+   "c": {
+    "changed_claims": 200,
+    "changed_claims_pre_correct": 200,
+    "false_mod": 0,
+    "latency_hist": {
+     "0": 92,
+     "None": 108
+    },
+    "miss_rate": 0.54,
+    "miss_rate_pre_correct": 0.54,
+    "missed": 108,
+    "missed_pre_correct": 108,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 32,
+     "3": 68,
+     "4": 108
+    },
+    "unchanged_correct_claims": 3700,
+    "wrong_by_cycle": {
+     "1": 0,
+     "2": 32,
+     "3": 68,
+     "4": 108
+    }
+   },
+   "d": {
+    "changed_claims": 200,
+    "changed_claims_pre_correct": 200,
+    "false_mod": 0,
+    "latency_hist": {
+     "0": 200
+    },
+    "miss_rate": 0.0,
+    "miss_rate_pre_correct": 0.0,
+    "missed": 0,
+    "missed_pre_correct": 0,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 0
+    },
+    "unchanged_correct_claims": 3800,
+    "wrong_by_cycle": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 0
+    }
+   }
+  },
+  "c0": {
+   "claims": 1000,
+   "correct": 1000
+  }
+ }
+}

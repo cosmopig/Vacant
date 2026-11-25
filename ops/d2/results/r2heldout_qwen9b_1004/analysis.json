@@ -1,0 +1,696 @@
+{
+ "bootstrap": {
+  "n_boot": 10000,
+  "n_sets": 20,
+  "seed": 20261125
+ },
+ "completeness": {
+  "complete": true,
+  "expected_arms": [
+   "a",
+   "b",
+   "c",
+   "c_verify",
+   "d",
+   "d_diff"
+  ],
+  "expected_cycles": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "missing": [],
+  "n_sets": 20,
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16",
+   "s17",
+   "s18",
+   "s19",
+   "s20"
+  ]
+ },
+ "confirmatory_c_d": {
+  "miss_diff_c_d": {
+   "arm1": "c",
+   "arm2": "d",
+   "ci_95": [
+    -0.05128205128205128,
+    0.12658227848101267
+   ],
+   "label": "c-d",
+   "margin": 0.1,
+   "miss_rate_arm1": 0.05333333333333334,
+   "miss_rate_arm2": 0.02666666666666667,
+   "missed_arm1": 4,
+   "missed_arm2": 2,
+   "n_pairs": 75,
+   "n_sets": 20,
+   "point": 0.02666666666666667,
+   "pre_correct_both": true,
+   "upper": 0.12658227848101267,
+   "upper_95": 0.10810810810810811,
+   "upper_q": 0.975,
+   "verdict": "UNRESOLVED"
+  },
+  "token_ratio_d_c": {
+   "ci": [
+    1.7735273408793473,
+    4.407399413919997
+   ],
+   "ci_95": [
+    1.8620191995629807,
+    4.181175185981062
+   ],
+   "ci_level": 0.975,
+   "denominator": "c",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "d/c",
+   "metric": "tokens",
+   "n_paired_total": 80,
+   "n_paired_used": 80,
+   "numerator": "d",
+   "point": 2.801797387352072,
+   "sum_denominator": 755096.0,
+   "sum_numerator": 2115626.0,
+   "threshold": 1.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0,
+   "verdict": "EFFECTIVE"
+  }
+ },
+ "coverage": {
+  "available": true,
+  "claims": 400,
+  "correct_page": 364,
+  "rate": 0.91,
+  "threshold": 0.8,
+  "verdict": "PASS",
+  "with_source": 372,
+  "with_source_rate": 0.93
+ },
+ "primary": {
+  "calls_ratio_b_c": {
+   "ci": [
+    3.681592039800995,
+    5.514369747899158
+   ],
+   "ci_95": [
+    3.681592039800995,
+    5.514369747899158
+   ],
+   "ci_level": 0.95,
+   "denominator": "c",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/c",
+   "metric": "calls",
+   "n_paired_total": 80,
+   "n_paired_used": 80,
+   "numerator": "b",
+   "point": 4.470588235294118,
+   "sum_denominator": 187.0,
+   "sum_numerator": 836.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0
+  },
+  "miss_diff_c_b": {
+   "arm1": "c",
+   "arm2": "b",
+   "ci_95": [
+    -0.0375,
+    0.1375
+   ],
+   "label": "c-b",
+   "margin": 0.1,
+   "miss_rate_arm1": 0.0625,
+   "miss_rate_arm2": 0.025,
+   "missed_arm1": 5,
+   "missed_arm2": 2,
+   "n_pairs": 80,
+   "n_sets": 20,
+   "point": 0.0375,
+   "pre_correct_both": true,
+   "upper": 0.1375,
+   "upper_95": 0.125,
+   "upper_q": 0.975,
+   "verdict": "UNRESOLVED"
+  },
+  "token_ratio_b_c": {
+   "ci": [
+    6.221019055707149,
+    12.265776352840566
+   ],
+   "ci_95": [
+    6.467889174026249,
+    11.75146502001372
+   ],
+   "ci_level": 0.975,
+   "denominator": "c",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/c",
+   "metric": "tokens",
+   "n_paired_total": 80,
+   "n_paired_used": 80,
+   "numerator": "b",
+   "point": 8.777834871327618,
+   "sum_denominator": 755096.0,
+   "sum_numerator": 6628108.0,
+   "threshold": 3.0,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0,
+   "verdict": "EFFECTIVE"
+  },
+  "wall_ratio_b_c": {
+   "ci": [
+    4.125387342584643,
+    7.3008786214508925
+   ],
+   "ci_95": [
+    4.125387342584643,
+    7.3008786214508925
+   ],
+   "ci_level": 0.95,
+   "denominator": "c",
+   "excluded_unknown": [],
+   "excluded_unknown_count": 0,
+   "label": "b/c",
+   "metric": "wall_s",
+   "n_paired_total": 80,
+   "n_paired_used": 80,
+   "numerator": "b",
+   "point": 5.508162490508733,
+   "sum_denominator": 526.8,
+   "sum_numerator": 2901.7000000000003,
+   "unknown_in_denominator": 0,
+   "unknown_in_numerator": 0
+  }
+ },
+ "schema": "vacant.d2.analysis/1",
+ "secondary": {
+  "c_vs_d": {
+   "calls_ratio": {
+    "ci": [
+     1.572138705510907,
+     2.3315217391304346
+    ],
+    "ci_95": [
+     1.572138705510907,
+     2.3315217391304346
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "calls",
+    "n_paired_total": 80,
+    "n_paired_used": 80,
+    "numerator": "d",
+    "point": 1.9304812834224598,
+    "sum_denominator": 187.0,
+    "sum_numerator": 361.0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "miss_diff": {
+    "arm1": "c",
+    "arm2": "d",
+    "ci_95": [
+     -0.05128205128205128,
+     0.12658227848101267
+    ],
+    "label": "c-d",
+    "miss_rate_arm1": 0.05333333333333334,
+    "miss_rate_arm2": 0.02666666666666667,
+    "missed_arm1": 4,
+    "missed_arm2": 2,
+    "n_pairs": 75,
+    "n_sets": 20,
+    "point": 0.02666666666666667,
+    "pre_correct_both": true,
+    "upper": 0.10810810810810811,
+    "upper_95": 0.10810810810810811,
+    "upper_q": 0.95
+   },
+   "token_ratio": {
+    "ci": [
+     1.862019199562981,
+     4.181175185981062
+    ],
+    "ci_95": [
+     1.8620191995629807,
+     4.181175185981062
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "tokens",
+    "n_paired_total": 80,
+    "n_paired_used": 80,
+    "numerator": "d",
+    "point": 2.801797387352072,
+    "sum_denominator": 755096.0,
+    "sum_numerator": 2115626.0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "wall_ratio": {
+    "ci": [
+     1.963538679193166,
+     3.6784972095412387
+    ],
+    "ci_95": [
+     1.963538679193166,
+     3.6784972095412387
+    ],
+    "ci_level": 0.95,
+    "denominator": "c",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "d/c",
+    "metric": "wall_s",
+    "n_paired_total": 80,
+    "n_paired_used": 80,
+    "numerator": "d",
+    "point": 2.692103264996204,
+    "sum_denominator": 526.8,
+    "sum_numerator": 1418.2,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   }
+  },
+  "d_vs_b": {
+   "calls_ratio": {
+    "ci": [
+     1.8418379186299845,
+     2.9
+    ],
+    "ci_95": [
+     1.8418379186299842,
+     2.9
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "calls",
+    "n_paired_total": 80,
+    "n_paired_used": 80,
+    "numerator": "b",
+    "point": 2.3157894736842106,
+    "sum_denominator": 361.0,
+    "sum_numerator": 836.0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "miss_diff": {
+    "arm1": "d",
+    "arm2": "b",
+    "ci_95": [
+     -0.039473684210526314,
+     0.039473684210526314
+    ],
+    "label": "d-b",
+    "miss_rate_arm1": 0.02666666666666667,
+    "miss_rate_arm2": 0.02666666666666667,
+    "missed_arm1": 2,
+    "missed_arm2": 2,
+    "n_pairs": 75,
+    "n_sets": 20,
+    "point": 0.0,
+    "pre_correct_both": true,
+    "upper": 0.027777777777777776,
+    "upper_95": 0.027777777777777776,
+    "upper_q": 0.95
+   },
+   "token_ratio": {
+    "ci": [
+     2.0284305940593845,
+     4.850733613020942
+    ],
+    "ci_95": [
+     2.0284305940593845,
+     4.850733613020942
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "tokens",
+    "n_paired_total": 80,
+    "n_paired_used": 80,
+    "numerator": "b",
+    "point": 3.1329299223964915,
+    "sum_denominator": 2115626.0,
+    "sum_numerator": 6628108.0,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   },
+   "wall_ratio": {
+    "ci": [
+     1.6032283650288985,
+     2.6153860299049874
+    ],
+    "ci_95": [
+     1.6032283650288985,
+     2.6153860299049874
+    ],
+    "ci_level": 0.95,
+    "denominator": "d",
+    "excluded_unknown": [],
+    "excluded_unknown_count": 0,
+    "label": "b/d",
+    "metric": "wall_s",
+    "n_paired_total": 80,
+    "n_paired_used": 80,
+    "numerator": "b",
+    "point": 2.046044281483571,
+    "sum_denominator": 1418.2,
+    "sum_numerator": 2901.7000000000003,
+    "unknown_in_denominator": 0,
+    "unknown_in_numerator": 0
+   }
+  },
+  "false_mod": {
+   "a": {
+    "arm": "a",
+    "ci_95": [
+     0.0,
+     0.0
+    ],
+    "false_mod": 0,
+    "n": 1402,
+    "point": 0.0
+   },
+   "b": {
+    "arm": "b",
+    "ci_95": [
+     0.0,
+     0.013218770654329148
+    ],
+    "false_mod": 8,
+    "n": 1511,
+    "point": 0.005294506949040371
+   },
+   "c": {
+    "arm": "c",
+    "ci_95": [
+     0.0,
+     0.0033178500331785005
+    ],
+    "false_mod": 2,
+    "n": 1514,
+    "point": 0.001321003963011889
+   },
+   "c_verify": {
+    "arm": "c_verify",
+    "ci_95": [
+     0.0,
+     0.003973509933774834
+    ],
+    "false_mod": 3,
+    "n": 1516,
+    "point": 0.001978891820580475
+   },
+   "d": {
+    "arm": "d",
+    "ci_95": [
+     0.01690302752042103,
+     0.07325792784617648
+    ],
+    "false_mod": 61,
+    "n": 1433,
+    "point": 0.04256803907885555
+   },
+   "d_diff": {
+    "arm": "d_diff",
+    "ci_95": [
+     0.0013183915622940012,
+     0.04814388198396145
+    ],
+    "false_mod": 27,
+    "n": 1493,
+    "point": 0.01808439383791025
+   }
+  },
+  "miss_all_claims": {
+   "c_b": {
+    "arm1": "c",
+    "arm2": "b",
+    "ci_95": [
+     -0.0375,
+     0.1375
+    ],
+    "label": "c-b",
+    "miss_rate_arm1": 0.0625,
+    "miss_rate_arm2": 0.025,
+    "missed_arm1": 5,
+    "missed_arm2": 2,
+    "n_pairs": 80,
+    "n_sets": 20,
+    "point": 0.0375,
+    "pre_correct_both": false,
+    "upper": 0.125,
+    "upper_95": 0.125,
+    "upper_q": 0.95
+   },
+   "c_d": {
+    "arm1": "c",
+    "arm2": "d",
+    "ci_95": [
+     -0.125,
+     0.0875
+    ],
+    "label": "c-d",
+    "miss_rate_arm1": 0.0625,
+    "miss_rate_arm2": 0.0875,
+    "missed_arm1": 5,
+    "missed_arm2": 7,
+    "n_pairs": 80,
+    "n_sets": 20,
+    "point": -0.025,
+    "pre_correct_both": false,
+    "upper": 0.0625,
+    "upper_95": 0.0625,
+    "upper_q": 0.95
+   }
+  },
+  "residual_stale": {
+   "a": {
+    "1": {
+     "rate": 0.04,
+     "stale": 16,
+     "total": 400
+    },
+    "2": {
+     "rate": 0.105,
+     "stale": 42,
+     "total": 400
+    },
+    "3": {
+     "rate": 0.15,
+     "stale": 60,
+     "total": 400
+    },
+    "4": {
+     "rate": 0.2,
+     "stale": 80,
+     "total": 400
+    }
+   },
+   "b": {
+    "1": {
+     "rate": 0.0025,
+     "stale": 1,
+     "total": 400
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "3": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "4": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    }
+   },
+   "c": {
+    "1": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "3": {
+     "rate": 0.005,
+     "stale": 2,
+     "total": 400
+    },
+    "4": {
+     "rate": 0.0125,
+     "stale": 5,
+     "total": 400
+    }
+   },
+   "c_verify": {
+    "1": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "3": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "4": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    }
+   },
+   "d": {
+    "1": {
+     "rate": 0.0025,
+     "stale": 1,
+     "total": 400
+    },
+    "2": {
+     "rate": 0.005,
+     "stale": 2,
+     "total": 400
+    },
+    "3": {
+     "rate": 0.005,
+     "stale": 2,
+     "total": 400
+    },
+    "4": {
+     "rate": 0.005,
+     "stale": 2,
+     "total": 400
+    }
+   },
+   "d_diff": {
+    "1": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "2": {
+     "rate": 0.0,
+     "stale": 0,
+     "total": 400
+    },
+    "3": {
+     "rate": 0.0025,
+     "stale": 1,
+     "total": 400
+    },
+    "4": {
+     "rate": 0.005,
+     "stale": 2,
+     "total": 400
+    }
+   }
+  }
+ },
+ "usage_unknown": {
+  "by_arm": {
+   "a": {
+    "calls_unknown": 0,
+    "set_cycles": 80,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "b": {
+    "calls_unknown": 0,
+    "set_cycles": 80,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "c": {
+    "calls_unknown": 0,
+    "set_cycles": 80,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "c_verify": {
+    "calls_unknown": 0,
+    "set_cycles": 80,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "d": {
+    "calls_unknown": 0,
+    "set_cycles": 80,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   },
+   "d_diff": {
+    "calls_unknown": 0,
+    "set_cycles": 80,
+    "tokens_unknown": 0,
+    "tokens_unknown_keys": [],
+    "wall_unknown": 0
+   }
+  },
+  "total_calls_unknown": 0,
+  "total_tokens_unknown": 0
+ },
+ "verdict": "UNRESOLVED",
+ "verdict_c_d": "UNRESOLVED",
+ "verdict_parts": {
+  "complete": true,
+  "coverage": "PASS",
+  "miss_diff_c_b": "UNRESOLVED",
+  "token_ratio_b_c": "EFFECTIVE"
+ },
+ "verdict_parts_c_d": {
+  "coverage": "PASS",
+  "miss_diff_c_d": "UNRESOLVED",
+  "token_ratio_d_c": "EFFECTIVE"
+ }
+}
