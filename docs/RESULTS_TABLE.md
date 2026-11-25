@@ -1,6 +1,6 @@
 # Vacant 量測結果總表
 
-> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-24 16:50Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
+> 由 `ops/redo/analysis/results_table.py` 從各批 REPORT.json、計畫檔與 run root 直接產生（2026-11-25 00:45Z）。**不要手改**；要改內容就改來源或 `ops/redo/results/batches.json`，再重跑。
 > 引用規則照 REPORT 的 quoting_rule：只有 state=EFFECTIVE 且沒有 harness 中途變更的整批數字可以引用，引用時連同模型、agent、題庫、對數一起講；UNRESOLVED／INCOMPLETE 不是負結果。
 
 ## 已結案
@@ -35,8 +35,8 @@
 | 批次 | 狀態 | 題庫 題數×重複 | 對照 對 處理 | 模型／後端 | 產品 wheel | 進度 | 備註 | 文件 |
 |---|---|---|---|---|---|---|---|---|
 | W3-5 JS 確認（重跑） | 作廢 | （Colab 題庫：發射時指定） 30×3 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab A100 vLLM j4 | 5bbc57af | — | 跑完但結果沒取回（取回 OOM、VM 消失），數字不可引用 | [VOID.md](../ops/redo/results/void/w35js_rerun_a100/VOID.md) |
-| atimeout | 進行中 | py_mix_pg34_hard26 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／1003 llama.cpp j2 | 5bbc57af | 1 對完成（runner.log） |  | — |
-| confirm2oc | 進行中 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 5bbc57af | 1 對完成（runner.log） |  | — |
+| atimeout | 進行中 | py_mix_pg34_hard26 60×3 | vacant do pi（單次 600s） 對 vacant do pi（單次 900s） | gemma-4-12b-it-qat／1003 llama.cpp j2 | 5bbc57af | 46 對完成（runner.log） |  | — |
+| confirm2oc | 進行中 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j1 | 5bbc57af | 31 對完成（runner.log） |  | — |
 | confirm1b | 作廢 | polyglot_py 34×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／1004 llama.cpp j2 | （本機 checkout） | — |  | [VOID.md](../ops/redo/results/void/confirm1b/VOID.md) |
 | W3-5 JS 確認（第一次） | 作廢 | exercism_js_pool 30×5 | 原生 pi 對 vacant do pi（單次 600s） | gemma-4-12b-it-qat／Colab L4 vLLM j6 | 28e5480c | — | 約 100/150 對時基礎設施中斷，數字不可引用 | [VOID.md](../ops/redo/results/void/w35js_confirm/VOID.md) |
 | confirm2oc_vacantdo_rel092_opencode_gemma12b_1003 | 撤回 | polyglot_py 34×5 | 原生 opencode 對 vacant do opencode（單次 600s） | gemma-4-12b-it-qat／1003 llama.cpp j1 | 37005ec2 | — |  | [confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md](../ops/redo/plans/confirm2oc_vacantdo_rel092_opencode_gemma12b_1003.WITHDRAWN.md) |
