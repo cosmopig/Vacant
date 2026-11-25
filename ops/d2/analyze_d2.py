@@ -192,10 +192,16 @@ def compute_miss_diff(
     n_boot: int = DEFAULT_N_BOOT,
     seed: int = DEFAULT_SEED,
     margin: float | None = None,
+    upper_q: float = 0.95,
+    pre_correct_both: bool = False,
 ) -> dict[str, Any]:
-    """(2) 配對漏抓率差 (arm1 − arm2)：changed=True，以 (set, cycle, claim) 配對。"""
+    """(2) 配對漏抓率差 (arm1 − arm2)：changed=True，以 (set, cycle, claim) 配對。
+    `pre_correct_both`：只算兩臂在這個週期開始時都是對的宣稱（量的是「維護」，初稿錯另計；2026-11-25 預註冊的主要口徑）。
+    `upper_q`：單側上界的分位數（兩個確認性家族各用 α/2 ⇒ 0.975）。"""
     m1: dict[tuple[str, int, str], int] = {}
     m2: dict[tuple[str, int, str], int] = {}
+    p1: dict[tuple[str, int, str], bool] = {}
+    p2: dict[tuple[str, int, str], bool] = {}
     for r in rows:
         if not r.get("changed"):
             continue
@@ -206,9 +212,11 @@ def compute_miss_diff(
         miss = 1 if r.get("status") != "correct" else 0
         if arm == arm1:
             m1[key] = miss
+            p1[key] = r.get("pre") == "correct"
         if arm == arm2:
             m2[key] = miss
-    paired = sorted(set(m1) & set(m2))
+            p2[key] = r.get("pre") == "correct"
+    paired = sorted(k for k in set(m1) & set(m2) if not pre_correct_both or (p1[k] and p2[k]))
     per_set_diff: dict[str, int] = {}
     per_set_n: dict[str, int] = {}
     tot_m1 = 0
@@ -246,6 +254,7 @@ def compute_miss_diff(
 
     reps = cluster_bootstrap(sets, _stat, n_boot=n_boot, seed=seed, weights=weights)
     upper_95 = percentile(reps, 0.95)
+    upper = percentile(reps, upper_q)
     ci_lo = percentile(reps, 0.025)
     ci_hi = percentile(reps, 0.975)
 
@@ -261,14 +270,17 @@ def compute_miss_diff(
         "miss_rate_arm2": miss2,
         "point": point,
         "upper_95": upper_95,
+        "upper": upper,
+        "upper_q": upper_q,
+        "pre_correct_both": pre_correct_both,
         "ci_95": [ci_lo, ci_hi],
     }
     if margin is not None:
-        if point is None or upper_95 is None:
+        if point is None or upper is None:
             verdict = "UNRESOLVED"
         elif point >= margin:
             verdict = "FAIL"
-        elif upper_95 < margin:
+        elif upper < margin:
             verdict = "NONINFERIOR"
         else:
             verdict = "UNRESOLVED"
@@ -304,8 +316,10 @@ def compute_cost_ratio(
     n_boot: int = DEFAULT_N_BOOT,
     seed: int = DEFAULT_SEED,
     threshold: float | None = None,
+    ci_level: float = 0.95,
 ) -> dict[str, Any]:
-    """(3) 成本比值 (num_arm / den_arm)：以 (set, cycle) 配對，任一臂未知（None）則雙方成對排除。"""
+    """(3) 成本比值 (num_arm / den_arm)：以 (set, cycle) 配對，任一臂未知（None）則雙方成對排除。
+    判定用 `ci_level` 的雙側區間（確認性家族用 0.975）；`ci_95` 照舊另列。"""
     num_map: dict[tuple[str, int], Mapping[str, Any]] = {}
     den_map: dict[tuple[str, int], Mapping[str, Any]] = {}
     for (sid, arm, cyc), entry in costs.items():
@@ -364,8 +378,10 @@ def compute_cost_ratio(
         return None
 
     reps = cluster_bootstrap(sets, _stat, n_boot=n_boot, seed=seed, weights=weights)
-    ci_lo = percentile(reps, 0.025)
-    ci_hi = percentile(reps, 0.975)
+    ci95_lo = percentile(reps, 0.025)
+    ci95_hi = percentile(reps, 0.975)
+    ci_lo = percentile(reps, (1 - ci_level) / 2)
+    ci_hi = percentile(reps, 1 - (1 - ci_level) / 2)
 
     res: dict[str, Any] = {
         "label": f"{num_arm}/{den_arm}",
@@ -381,7 +397,9 @@ def compute_cost_ratio(
         "sum_numerator": sum_num,
         "sum_denominator": sum_den,
         "point": point,
-        "ci_95": [ci_lo, ci_hi],
+        "ci_95": [ci95_lo, ci95_hi],
+        "ci": [ci_lo, ci_hi],
+        "ci_level": ci_level,
     }
     if threshold is not None:
         if point is None or ci_lo is None:
@@ -512,22 +530,32 @@ def analyze(
     weights = draw_cluster_weights(len(set_ids), n_boot=n_boot, seed=seed)
 
     cov = evaluate_coverage(audit_data, threshold=COVERAGE_THRESHOLD)
-    miss_cb = compute_miss_diff(rows, "c", "b", set_ids=set_ids, weights=weights, margin=MISS_MARGIN)
+    # 兩個確認性家族（vacant-hope 11-25）：c 對 b、c 對 d，各用 α/2＝0.025
+    miss_cb = compute_miss_diff(rows, "c", "b", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+                                upper_q=0.975, pre_correct_both=True)
     tok_bc = compute_cost_ratio(costs, "b", "c", "tokens", set_ids=set_ids, weights=weights,
-                                threshold=RATIO_THRESHOLD)
+                                threshold=RATIO_THRESHOLD, ci_level=0.975)
+    miss_cd = compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+                                upper_q=0.975, pre_correct_both=True)
+    tok_dc = compute_cost_ratio(costs, "d", "c", "tokens", set_ids=set_ids, weights=weights,
+                                threshold=1.0, ci_level=0.975)
     calls_bc = compute_cost_ratio(costs, "b", "c", "calls", set_ids=set_ids, weights=weights)
     wall_bc = compute_cost_ratio(costs, "b", "c", "wall_s", set_ids=set_ids, weights=weights)
 
     arms_present = sorted({str(r["arm"]) for r in rows if str(r.get("arm")) != "c0"})
     secondary = {
+        "miss_all_claims": {
+            "c_b": compute_miss_diff(rows, "c", "b", set_ids=set_ids, weights=weights),
+            "c_d": compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights),
+        },
         "c_vs_d": {
-            "miss_diff": compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights),
+            "miss_diff": compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights, pre_correct_both=True),
             "token_ratio": compute_cost_ratio(costs, "d", "c", "tokens", set_ids=set_ids, weights=weights),
             "calls_ratio": compute_cost_ratio(costs, "d", "c", "calls", set_ids=set_ids, weights=weights),
             "wall_ratio": compute_cost_ratio(costs, "d", "c", "wall_s", set_ids=set_ids, weights=weights),
         },
         "d_vs_b": {
-            "miss_diff": compute_miss_diff(rows, "d", "b", set_ids=set_ids, weights=weights),
+            "miss_diff": compute_miss_diff(rows, "d", "b", set_ids=set_ids, weights=weights, pre_correct_both=True),
             "token_ratio": compute_cost_ratio(costs, "b", "d", "tokens", set_ids=set_ids, weights=weights),
             "calls_ratio": compute_cost_ratio(costs, "b", "d", "calls", set_ids=set_ids, weights=weights),
             "wall_ratio": compute_cost_ratio(costs, "b", "d", "wall_s", set_ids=set_ids, weights=weights),
@@ -550,8 +578,20 @@ def analyze(
         overall = "EFFECTIVE"
     else:
         overall = "UNRESOLVED"
+    mcd, tdc = miss_cd["verdict"], tok_dc["verdict"]
+    if not comp["complete"]:
+        overall_cd = "INCOMPLETE"
+    elif cov_v == "PASS" and mcd == "NONINFERIOR" and tdc == "EFFECTIVE":
+        overall_cd = "EFFECTIVE"          # 宣稱級出處比「只知道哪幾頁變了」省、而且不多漏
+    elif "FAIL" in (cov_v, mcd, tdc):
+        overall_cd = "FAIL"               # 宣稱級出處沒有多帶來東西（或多漏）
+    else:
+        overall_cd = "UNRESOLVED"
 
     return {
+        "verdict_c_d": overall_cd,
+        "verdict_parts_c_d": {"coverage": cov_v, "miss_diff_c_d": mcd, "token_ratio_d_c": tdc},
+        "confirmatory_c_d": {"miss_diff_c_d": miss_cd, "token_ratio_d_c": tok_dc},
         "schema": "vacant.d2.analysis/1",
         "verdict": overall,
         "verdict_parts": {
@@ -698,6 +738,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         seed=a.seed,
         expected_arms=exp_arms or DEFAULT_ARMS,
         expected_sets=exp_sets,
+        expected_cycles=sorted({int(r["cycle"]) for r in score_data.get("rows") or [] if r.get("arm") != "c0"})
+        or DEFAULT_CYCLES,
     )
     body = json.dumps(res, ensure_ascii=False, indent=1, sort_keys=True)
     text = format_text(res)

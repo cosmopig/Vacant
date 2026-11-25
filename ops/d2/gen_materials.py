@@ -122,7 +122,7 @@ def render_index(set_id: str, names: list[str]) -> str:
             f"<h1>Product directory</h1>\n<p>Each product has its own page.</p>\n<ul>{items}</ul>\n</body></html>\n")
 
 
-def make_set(set_id: str, rng: random.Random) -> dict:
+def make_set(set_id: str, rng: random.Random, cycle_types: list[str] | None = None) -> dict:
     names: list[str] = []
     while len(names) < 5:
         n = f"{rng.choice(SYL_A)}{rng.choice(SYL_B)} {rng.choice(NOUN)}"
@@ -143,12 +143,34 @@ def make_set(set_id: str, rng: random.Random) -> dict:
     cycles = []
     fact_pool = list(range(5))
     rng.shuffle(fact_pool)
-    for k in (1, 2, 3):
-        fp = fact_pool[k - 1]
-        npg = rng.choice([i for i in range(5) if i != fp])
-        changed = sorted(rng.sample(asked, 2), key=asked.index)
-        cycles.append({"cycle": k, "fact_page": fp, "fact_attrs": changed,
-                       "noise_page": npg, "noise_attr": rng.choice(noise_attrs)})
+    if cycle_types is None:            # v1（seed20261125 的材料）：三個週期都是 F；保持逐位元相同
+        for k in (1, 2, 3):
+            fp = fact_pool[k - 1]
+            npg = rng.choice([i for i in range(5) if i != fp])
+            changed = sorted(rng.sample(asked, 2), key=asked.index)
+            cycles.append({"cycle": k, "fact_page": fp, "fact_attrs": changed,
+                           "noise_page": npg, "noise_attr": rng.choice(noise_attrs)})
+    else:
+        # v2：週期類型的組合固定、順序每組洗牌。F＝1 頁改 2 個被問到的屬性＋另 1 頁只改沒被問到的屬性；
+        # N＝只有 1 頁改沒被問到的屬性（頁面變了、宣稱沒變）；Z＝什麼都沒變。
+        order = list(cycle_types)
+        rng.shuffle(order)
+        nf = 0
+        for k, t in enumerate(order, start=1):
+            c = {"cycle": k, "type": t, "fact_page": None, "fact_attrs": [], "noise_page": None, "noise_attr": None}
+            if t == "F":
+                fp = fact_pool[nf]
+                nf += 1
+                c["fact_page"] = fp
+                c["fact_attrs"] = sorted(rng.sample(asked, 2), key=asked.index)
+                c["noise_page"] = rng.choice([i for i in range(5) if i != fp])
+                c["noise_attr"] = rng.choice(noise_attrs)
+            elif t == "N":
+                c["noise_page"] = rng.randrange(5)
+                c["noise_attr"] = rng.choice(noise_attrs)
+            elif t != "Z":
+                raise ValueError(t)
+            cycles.append(c)
     return {"set": set_id, "names": names, "asked": asked, "products": prods, "cycles": cycles}
 
 
@@ -162,12 +184,14 @@ def template(s: dict) -> str:
     return "\n".join(lines)
 
 
-def build(seed: int, n_sets: int, out: pathlib.Path) -> dict:
+def build(seed: int, n_sets: int, out: pathlib.Path, cycle_types: list[str] | None = None) -> dict:
     rng = random.Random(seed)
     manifest = {"schema": "vacant.d2.manifest/1", "seed": seed, "n_sets": n_sets, "sets": []}
+    if cycle_types is not None:
+        manifest["cycle_types"] = cycle_types
     for si in range(n_sets):
         set_id = f"s{si + 1:02d}"
-        s = make_set(set_id, rng)
+        s = make_set(set_id, rng, cycle_types)
         sdir = out / "sets" / set_id
         (sdir).mkdir(parents=True, exist_ok=True)
         (sdir / "template.md").write_text(template(s), encoding="utf-8")
@@ -175,17 +199,19 @@ def build(seed: int, n_sets: int, out: pathlib.Path) -> dict:
         truth = []          # truth[k][claim_id] = 字串值
         pages = []          # pages[k][page] = sha256
         crng = random.Random(seed * 1000 + si)
-        for k in range(4):
+        for k in range(len(s["cycles"]) + 1):
             if k > 0:
                 c = s["cycles"][k - 1]
-                st = state[c["fact_page"]]
-                for at in c["fact_attrs"]:
-                    old = st["attrs"][at]
-                    st["attrs"][at] = change_value(at, old, crng)
-                    if at == "version":
-                        st["history"].insert(0, list(old))
-                ns = state[c["noise_page"]]
-                ns["attrs"][c["noise_attr"]] = change_value(c["noise_attr"], ns["attrs"][c["noise_attr"]], crng)
+                if c["fact_page"] is not None:
+                    st = state[c["fact_page"]]
+                    for at in c["fact_attrs"]:
+                        old = st["attrs"][at]
+                        st["attrs"][at] = change_value(at, old, crng)
+                        if at == "version":
+                            st["history"].insert(0, list(old))
+                if c["noise_page"] is not None:
+                    ns = state[c["noise_page"]]
+                    ns["attrs"][c["noise_attr"]] = change_value(c["noise_attr"], ns["attrs"][c["noise_attr"]], crng)
             site = sdir / f"cycle_{k}" / "site"
             site.mkdir(parents=True, exist_ok=True)
             (site / "index.html").write_text(render_index(set_id, s["names"]), encoding="utf-8")
@@ -215,12 +241,14 @@ def main() -> int:
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--sets", type=int, required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--cycle-types", help="v2：逗號分隔的週期類型組合（F／N／Z），每組洗牌；不給＝v1（三個 F）")
     a = ap.parse_args()
     out = pathlib.Path(a.out).expanduser()
     if out.exists() and any(out.iterdir()):
         raise SystemExit(f"refusing to overwrite non-empty {out}")
     out.mkdir(parents=True, exist_ok=True)
-    print(json.dumps(build(a.seed, a.sets, out)))
+    ct = [x.strip() for x in a.cycle_types.split(",")] if a.cycle_types else None
+    print(json.dumps(build(a.seed, a.sets, out, ct)))
     return 0
 
 

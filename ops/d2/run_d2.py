@@ -195,6 +195,10 @@ class Run:
         self.manifest_sha = sha_file(self.mat / "manifest.json")
         if self.manifest_sha != self.plan["materials"]["manifest_sha256"]:
             raise SystemExit(f"manifest sha mismatch: {self.manifest_sha}")
+        _m = json.loads((self.mat / "manifest.json").read_text())
+        self.n_cycles = {s["set"]: len(s["cycles"]) for s in _m["sets"]}
+        #: 週期類型只給評分與報告分組用；agent 與 Vacant 都看不到（不進提示、不進病歷）
+        self.ctypes = {s["set"]: [c.get("type", "F") for c in s["cycles"]] for s in _m["sets"]}
         self.routes = root / "routes.json"
         self.stop = threading.Event()
         self.procs: set[subprocess.Popen] = set()
@@ -404,14 +408,15 @@ class Run:
                     shutil.rmtree(live / d)
                 shutil.copytree(snap / d, live / d, symlinks=True)
             prev_pages = self.page_hashes(set_id, 0)
-            for k in (1, 2, 3):
+            for k in range(1, self.n_cycles[set_id] + 1):
                 if self.stop.is_set():
                     return
                 cdir = adir / f"cycle_{k}"
                 cdir.mkdir(parents=True, exist_ok=True)
                 self.install_site(set_id, k, live)
                 self.set_route(host, live / "site")
-                info: dict = {"arm": arm, "cycle": k, "ts_start": now(), "t_start": time.time(), "agent": None}
+                info: dict = {"arm": arm, "cycle": k, "ts_start": now(), "t_start": time.time(), "agent": None,
+                              "ctype": self.ctypes[set_id][k - 1]}
                 if arm == "b":
                     info["agent"] = self.run_agent(live, PROMPTS["b"].format(urls=" ".join(urls)), cdir / "run")
                 elif arm == "c":

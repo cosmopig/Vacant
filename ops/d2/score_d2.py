@@ -83,7 +83,8 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
                          "changed": False, "pre": None})
         for arm in (arms or sorted({k.split("/")[0] for k in rep if "/" in k})):
             prev = v0
-            for k in (1, 2, 3):
+            ctypes = [c.get("type", "F") for c in s["cycles"]]
+            for k in range(1, len(truth)):
                 key = f"{arm}/{k}"
                 if key not in rep:
                     break
@@ -93,7 +94,7 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
                     rows.append({"set": sid, "arm": arm, "cycle": k, "claim": cid, "value": vk[cid],
                                  "status": status(vk[cid], cid, k, truth),
                                  "changed": truth[k][cid] != truth[k - 1][cid],
-                                 "pre": status(prev[cid], cid, k - 1, truth),
+                                 "pre": status(prev[cid], cid, k - 1, truth), "ctype": ctypes[k - 1],
                                  "edited": canon(vk[cid]) != canon(prev[cid])})
                 prev = vk
     summ: dict = {"c0": {}, "arms": {}}
@@ -106,7 +107,7 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
         lat = []
         for r in ch:
             fixed = None
-            for j in range(r["cycle"], 4):
+            for j in range(r["cycle"], max(x["cycle"] for x in R) + 1):
                 rr = next((x for x in R if x["set"] == r["set"] and x["claim"] == r["claim"] and x["cycle"] == j), None)
                 if rr is None:
                     break
@@ -116,16 +117,29 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
                     fixed = j - r["cycle"]
                     break
             lat.append(fixed)
+        chp = [r for r in ch if r["pre"] == "correct"]
+        cyc = sorted({r["cycle"] for r in R})
         summ["arms"][arm] = {
+            "changed_claims_pre_correct": len(chp), "missed_pre_correct": sum(r["status"] != "correct" for r in chp),
+            "miss_rate_pre_correct": round(sum(r["status"] != "correct" for r in chp) / len(chp), 4) if chp else None,
             "changed_claims": len(ch), "missed": sum(r["status"] != "correct" for r in ch),
             "miss_rate": round(sum(r["status"] != "correct" for r in ch) / len(ch), 4) if ch else None,
             "unchanged_correct_claims": len(un), "false_mod": sum(r["status"] != "correct" for r in un),
-            "stale_residual_by_cycle": {k: sum(1 for r in R if r["cycle"] == k and r["status"] == "stale") for k in (1, 2, 3)},
-            "wrong_by_cycle": {k: sum(1 for r in R if r["cycle"] == k and r["status"] != "correct") for k in (1, 2, 3)},
+            "stale_residual_by_cycle": {k: sum(1 for r in R if r["cycle"] == k and r["status"] == "stale") for k in cyc},
+            "wrong_by_cycle": {k: sum(1 for r in R if r["cycle"] == k and r["status"] != "correct") for k in cyc},
             "latency_hist": {str(x): lat.count(x) for x in sorted(set(lat), key=lambda v: (v is None, v))},
         }
         if costs:
             C = [v for (sid, a, k), v in costs.items() if a == arm]
+            bytype: dict = {}
+            for v in C:
+                t = bytype.setdefault(v.get("ctype", "F"), {"set_cycles": 0, "agent_runs": 0, "calls": 0, "tokens": 0, "wall_s": 0.0})
+                t["set_cycles"] += 1
+                t["agent_runs"] += int(bool(v["ran"]))
+                t["calls"] += v["calls"] or 0
+                t["tokens"] += (v["tokens_in"] or 0) + (v["tokens_out"] or 0)
+                t["wall_s"] = round(t["wall_s"] + (v["wall_s"] or 0) + (v.get("tool_wall_s") or 0), 1)
+            summ["arms"][arm]["cost_by_cycle_type"] = bytype
             summ["arms"][arm]["cost"] = {
                 "set_cycles": len(C), "agent_runs": sum(1 for v in C if v["ran"]),
                 "calls": sum(v["calls"] or 0 for v in C), "tokens_in": sum(v["tokens_in"] or 0 for v in C),
@@ -188,13 +202,13 @@ def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
         for adir in sorted(p for p in sdir.iterdir() if p.name != "c0"):
             if not (adir / "done.json").exists():
                 continue
-            for k in (1, 2, 3):
+            for k in sorted(int(c.name.split("_")[1]) for c in adir.glob("cycle_*")):
                 cd = adir / f"cycle_{k}"
                 reports[sid][f"{adir.name}/{k}"] = (cd / "report.md").read_text()
                 info = json.loads((cd / "cycle.json").read_text())
                 a = info.get("agent") or {}
                 u = a.get("usage") or {}
-                costs[(sid, adir.name, k)] = {
+                costs[(sid, adir.name, k)] = {"ctype": info.get("ctype", "F"),
                     "ran": bool(a), "calls": u.get("calls") if a else 0,
                     "tokens_in": u.get("input") if a else 0, "tokens_out": u.get("output") if a else 0,
                     "wall_s": a.get("wall_s", 0) if a else 0,

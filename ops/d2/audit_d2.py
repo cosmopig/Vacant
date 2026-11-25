@@ -189,7 +189,8 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                     [json.dumps(e, sort_keys=True) for e in snap.events]:
                 problems.append(f"{sid}/{arm}: chain does not start with the c0 record")
             bounds = [b0]
-            for k in (1, 2, 3):
+            ncyc = len(s["cycles"])
+            for k in range(1, ncyc + 1):
                 info = json.loads((adir / f"cycle_{k}" / "cycle.json").read_text())
                 bounds.append(info["chain_len"])
                 reports[sid][f"{arm}/{k}"] = rec.file_at(info["chain_len"]) or ""
@@ -206,15 +207,15 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                                          "correct_page": bool(url and url.endswith("/" + cl["source_page"])),
                                          "status_cycle1": ents[0]["status"] if ents else None})
             # ---- 每條最終宣稱的來歷
-            final = parse_report(reports[sid][f"{arm}/3"], s["claims"])
+            final = parse_report(reports[sid][f"{arm}/{ncyc}"], s["claims"])
             for cl in s["claims"]:
                 v = final[cl["id"]]
-                w = last_writer_of_line(rec, bounds[3], cl["template_line"].strip().rstrip(":"), v)
+                w = last_writer_of_line(rec, bounds[ncyc], cl["template_line"].strip().rstrip(":"), v)
                 row = {"set": sid, "arm": arm, "claim": cl["id"], "value": v, "write_step": None, "write_cycle": None,
                        "read_step": None, "url": None, "read_sha256": None, "server_saw_read": None}
                 if w:
                     row["write_step"] = w["payload"]["step"]
-                    row["write_cycle"] = next(k for k in range(4) if w["seq"] <= bounds[k])
+                    row["write_cycle"] = next((k for k in range(ncyc + 1) if w["seq"] <= bounds[k]), None)
                     r = reader_before(rec, w["seq"], v or "")
                     if r:
                         out = rec.blob(r["payload"].get("output_blob")) or b""
@@ -233,7 +234,7 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                             row["server_saw_read"] = any(a["host"] == host and a["path"] == path and a["sha256"] == row["read_sha256"] for a in access)
                 prov_rows.append(row)
             # ---- 錯誤歸因
-            for k in (1, 2, 3):
+            for k in range(1, ncyc + 1):
                 pre = parse_report(reports[sid][f"{arm}/{k - 1}"] if k > 1 else reports[sid]["c0"], s["claims"])
                 post = parse_report(reports[sid][f"{arm}/{k}"], s["claims"])
                 sc = rec.source_checks(bounds[k - 1], bounds[k])
@@ -252,7 +253,9 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                     kind = "miss" if changed else "false_mod"
                     ln = next((i + 1 for i, x in enumerate(lines_now) if x.strip().startswith(cl["template_line"].strip())), None)
                     page_url = next((u for u in fetched if u.endswith("/" + cl["source_page"])), None)
-                    if arm == "a":
+                    if pre[cid] is None:
+                        seg = "claim line missing from the report (draft changed or dropped it)"
+                    elif arm == "a":
                         seg = "not maintained (arm a)"
                     elif arm == "c":
                         e = sc_by_line.get(ln) or {}
