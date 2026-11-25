@@ -526,7 +526,8 @@ def cmd_sources(args: argparse.Namespace) -> int:
     if getattr(args, "guard", None) is not None:
         allowed = [int(x) for x in args.guard.split(",") if x.strip()]
         before = pathlib.Path(args.before).read_text(encoding="utf-8", errors="replace")
-        print(json.dumps(_mutate(SRC.guard, ws, rel, allowed, before), ensure_ascii=False, indent=1, default=str))
+        print(json.dumps(_mutate(SRC.guard, ws, rel, allowed, before, keep_labels=bool(getattr(args, "keep_labels", False))),
+                         ensure_ascii=False, indent=1, default=str))
         return 0
     if getattr(args, "reread", None):
         spec = {int(k): v for k, v in json.loads(pathlib.Path(args.reread).read_text()).items()}
@@ -535,7 +536,7 @@ def cmd_sources(args: argparse.Namespace) -> int:
         return 0
     if args.check and getattr(args, "candidates", False):
         res = _mutate(SRC.check_candidates, ws, rel, by_value=bool(getattr(args, "by_value", False)),
-                      egress=bool(getattr(args, "egress", False)))
+                      egress=bool(getattr(args, "egress", False)), by_field=bool(getattr(args, "by_field", False)))
         if args.json:
             print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
             return 0
@@ -608,6 +609,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--by-value", action="store_true",
                    help="with --check --candidates: a line is affected only if the value at its position changed "
                         "(JSON field path / best-matching line), not if surrounding text changed")
+    p.add_argument("--by-field", action="store_true",
+                   help="with --by-value: tables (CSV/TSV/pipe/fixed-width/HTML) by header+row, XML by element path")
+    p.add_argument("--keep-labels", action="store_true",
+                   help="with --guard: on handed lines only the value may change; a changed label is restored")
     p.add_argument("--egress", action="store_true",
                    help="also take candidate sources from the network egress log (pages actually fetched)")
     p.set_defaults(func=cmd_sources)

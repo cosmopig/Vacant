@@ -39,3 +39,39 @@ def test_text_line_and_not_a_source():
     assert S.value_status(a, b, "32 km") == "unchanged"
     assert S.value_status(a, b.replace("32 km", "35 km"), "32 km") == "changed"
     assert S.value_status(a, b, "99 km") is None
+
+
+def test_v5_table_same_value_other_column():
+    a = "| entity | active | backup | ts |\n|---|---|---|---|\n| Coral | v3.14.4 | v3.14.4 | 10:00 |\n| Reef | v2.1.0 | v2.0.9 | 10:00 |\n"
+    b = a.replace("| Coral | v3.14.4 | v3.14.4 | 10:00 |", "| Coral | v4.4.4 | v3.14.4 | 10:07 |").replace("| Reef | v2.1.0 | v2.0.9 | 10:00 |", "| Reef | v2.1.0 | v2.0.9 | 10:07 |")
+    assert S.value_status(a, b, "v3.14.4") == "unchanged"          # 舊做法：最像的一行還有這個值
+    assert S.value_status(a, b, "v3.14.4", by_field=True) == "changed"
+    c = a.replace("10:00", "10:09")
+    assert S.value_status(a, c, "v3.14.4", by_field=True) == "unchanged"
+
+
+def test_v5_csv_reordered_rows_and_xml():
+    a = "code,entity,price,checked\nP1,Kestrel,204.00 USD,10:00\nP2,Sable,99.00 USD,10:00\n"
+    b = "code,entity,price,checked\nP2,Sable,99.00 USD,10:05\nP1,Kestrel,204.00 USD,10:05\n"
+    assert S.value_status(a, b, "204.00 USD", by_field=True) == "unchanged"
+    assert S.value_status(a, b.replace("204.00", "210.00"), "204.00 USD", by_field=True) == "changed"
+    x = "<?xml version='1.0'?><d><item><name>A</name><cap>55 seats</cap><max>55 seats</max></item></d>"
+    y = x.replace("<cap>55 seats</cap>", "<cap>91 seats</cap>")
+    assert S.value_status(x, y, "55 seats", by_field=True) == "changed"
+    assert S.value_status(x, x, "55 seats", by_field=True) == "unchanged"
+
+
+def test_v5_html_table():
+    a = "<html><body><p>Updated 10:00</p><table><tr><th>Name</th><th>Speed</th><th>Max</th></tr><tr><td>Kestrel</td><td>27 knots</td><td>27 knots</td></tr></table></body></html>"
+    b = a.replace("<td>27 knots</td><td>27 knots</td>", "<td>31 knots</td><td>27 knots</td>").replace("10:00", "10:05")
+    assert S.value_status(a, b, "27 knots", by_field=True) == "changed"
+    assert S.value_status(a, a.replace("10:00", "10:05"), "27 knots", by_field=True) == "unchanged"
+
+
+def test_v5_guard_keeps_labels_on_handed_lines(tmp_path):
+    before = "# R\n- Summit Gear 44 — crate capacity: 39 units\n- Summit Gear 44 — stock on hand: 12 units\n"
+    (tmp_path / "report.md").write_text("# R\n- Summit Gear 44 — stock on hand: 63 units\n- Summit Gear 44 — stock on hand: 12 units\n")
+    r = S.guard(tmp_path, "report.md", [2], before, record=False, keep_labels=True)
+    out = (tmp_path / "report.md").read_text().splitlines()
+    assert out[1] == "- Summit Gear 44 — crate capacity: 63 units" and out[2] == "- Summit Gear 44 — stock on hand: 12 units"
+    assert r["relabeled_lines"] == [2]

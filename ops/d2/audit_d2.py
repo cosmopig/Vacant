@@ -503,7 +503,7 @@ def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None, cov
                         if kind == "miss" and ln in handed and nx.get("status") == "unchanged" \
                                 and canon(nx.get("value")) == canon(post[cid]):
                             extra["baseline_refreshed_while_stale"] = True
-                    elif arm in ("cC", "cCG", "cCGR", "cV"):
+                    elif arm in ("cC", "cCG", "cCGR", "cV", "cV5"):
                         # 候選集合臂（第三、四輪）：交辦＝這一週期來源檢查狀態不是 unchanged 的行
                         e = sc_by_line.get(ln) or {}
                         st = e.get("status")

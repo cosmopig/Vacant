@@ -551,7 +551,8 @@ def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] =
 
 
 def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
-                     record: bool = True, by_value: bool = False, egress: bool = False) -> dict[str, Any]:
+                     record: bool = True, by_value: bool = False, egress: bool = False,
+                     by_field: bool = False) -> dict[str, Any]:
     """候選集合版的來源檢查。每條宣稱：拿每個候選網址的「上一次快照」（沒有快照就用 agent 當時讀到的內容）裡帶著這個值的片段，
     和現在的頁面比；任一候選頁的那些片段不在了 ⇒ changed；有候選頁帶著這個值、而且都沒變 ⇒ unchanged；
     沒有任何候選頁帶著這個值 ⇒ no_source；抓不到 ⇒ 當成 changed（寧可多交辦）。檢查完把現在的頁面記成新的快照。"""
@@ -586,7 +587,7 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
             if cur is None:
                 per[u] = "unknown"
             elif by_value:
-                per[u] = value_status(prev, cur, key) or "changed"
+                per[u] = value_status(prev, cur, key, by_field=by_field) or "changed"
             else:
                 per[u] = "unchanged" if car <= _segments(cur) else "changed"
         if not per:
@@ -603,7 +604,8 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
     counts: dict[str, int] = {}
     for e in claims:
         counts[e["status"]] = counts.get(e["status"], 0) + 1
-    res = {"path": path, "mode": "candidates" + ("+value" if by_value else "") + ("+egress" if egress else ""),
+    res = {"path": path, "mode": "candidates" + ("+value" if by_value else "") + ("+field" if by_field else "")
+           + ("+egress" if egress else ""),
            "claims": claims, "counts": counts,
            "affected_lines": sorted({e["line"] for e in claims if e["status"] != "unchanged"}),
            "changed_lines": sorted({e["line"] for e in claims if e["status"] == "changed"})}
@@ -620,7 +622,7 @@ def _line_key(line: str) -> str:
 
 
 def guard(ws: str | pathlib.Path, path: str, allowed_lines: list[int], before_text: str,
-          *, record: bool = True) -> dict[str, Any]:
+          *, record: bool = True, keep_labels: bool = False) -> dict[str, Any]:
     """越界守衛：以改之前的版本為底，交辦的行換成 agent 的新版本（用行首到第一個數字之前的文字對行），
     其他行一律維持原樣；有被改或被刪的就寫回檔案並簽一筆 `source_guard`。"""
     ws = pathlib.Path(ws).resolve()
@@ -628,13 +630,27 @@ def guard(ws: str | pathlib.Path, path: str, allowed_lines: list[int], before_te
     new_text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     old = before_text.splitlines()
     new_map: dict[str, str] = {}
+    new_by_label: dict[str, str] = {}
     for ln in new_text.splitlines():
         new_map.setdefault(_line_key(ln), ln)
+        if ": " in ln:
+            new_by_label.setdefault(ln.rsplit(": ", 1)[0], ln)
     allowed = set(allowed_lines)
-    out, restored = [], []
+    out, restored, relabeled = [], [], []
     for i, ln in enumerate(old, start=1):
         if i in allowed:
-            out.append(new_map.get(_line_key(ln), ln))
+            if keep_labels and ": " in ln:
+                # v5：交辦的行只允許改值——標籤（最後一個「: 」之前）照舊；agent 改了標籤就還原標籤、保留它改的值
+                label = ln.rsplit(": ", 1)[0]
+                cand = new_by_label.get(label)
+                if cand is None:
+                    alt = new_map.get(_line_key(ln))
+                    if alt is not None and alt != ln:
+                        cand = label + ": " + (alt.rsplit(": ", 1)[1] if ": " in alt else alt)
+                        relabeled.append(i)
+                out.append(cand if cand is not None else ln)
+            else:
+                out.append(new_map.get(_line_key(ln), ln))
         else:
             out.append(ln)
             if new_map.get(_line_key(ln)) != ln:
@@ -643,7 +659,8 @@ def guard(ws: str | pathlib.Path, path: str, allowed_lines: list[int], before_te
     changed = result != new_text
     if changed:
         p.write_text(result, encoding="utf-8")
-    res = {"path": path, "allowed": sorted(allowed), "restored_lines": restored, "rewrote_file": changed,
+    res = {"path": path, "allowed": sorted(allowed), "restored_lines": restored, "relabeled_lines": relabeled,
+           "rewrote_file": changed,
            "before_sha256": _sha(before_text), "agent_sha256": _sha(new_text), "after_sha256": _sha(result)}
     if record and changed:
         rec = Recorder(ws)
@@ -775,15 +792,179 @@ def _line_status(prev: str, cur: str, key: str) -> str | None:
     return "unchanged"
 
 
-def value_status(prev: str, cur: str, key: str) -> str | None:
-    """值所在的位置還是不是這個值。None＝prev 裡沒有這個值（這一頁不是它的來源）。"""
+def value_status(prev: str, cur: str, key: str, *, by_field: bool = False) -> str | None:
+    """值所在的位置還是不是這個值。None＝prev 裡沒有這個值（這一頁不是它的來源）。
+    `by_field`（v5）：表格類（CSV／TSV／管線表格／定寬表格／HTML 表格）照「表頭＋列」定位、XML 照元素路徑，
+    不再用「最像的一行」——同一列別的欄位剛好也是這個值時不會被騙。"""
     try:
         pj, cj = _json.loads(prev), _json.loads(cur)
         if isinstance(pj, (dict, list)) and isinstance(cj, (dict, list)):
             return _json_status(pj, cj, key)
     except ValueError:
         pass
+    if by_field:
+        return _field_status(prev, cur, key)
     return _line_status(prev, cur, key)
+
+
+# ---------- v5（2026-11-25 第五輪）：非 JSON 來源也照欄位定位 ----------
+import csv as _csv
+import xml.etree.ElementTree as _ET
+from html.parser import HTMLParser as _HTMLParser
+
+
+def _xml_tree(text: str) -> Any:
+    t = text.lstrip()
+    if not t.startswith("<") or re.match(r"(?is)<!doctype html|<html", t):
+        return None
+    try:
+        root = _ET.fromstring(t.encode("utf-8"))
+    except _ET.ParseError:
+        return None
+
+    def conv(e: Any) -> Any:
+        kids = list(e)
+        d: dict[str, Any] = {f"@{k}": v for k, v in e.attrib.items()}
+        if not kids:
+            txt = (e.text or "").strip()
+            return txt if not d else {**d, "#text": txt}
+        groups: dict[str, list] = {}
+        for k in kids:
+            groups.setdefault(k.tag, []).append(conv(k))
+        for tag, vs in groups.items():
+            d[tag] = vs if len(vs) > 1 else vs[0]
+        return d
+    return {root.tag: conv(root)}
+
+
+class _Tables(_HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.tables: list[list[list[str]]] = []
+        self._stack: list[list[list[str]]] = []
+        self._cell: list[str] | None = None
+        self.outside: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "table":
+            self._stack.append([])
+        elif tag == "tr" and self._stack:
+            self._stack[-1].append([])
+        elif tag in ("td", "th") and self._stack:
+            if not self._stack[-1]:
+                self._stack[-1].append([])
+            self._cell = []
+
+    def handle_endtag(self, tag):
+        if tag in ("td", "th") and self._cell is not None and self._stack:
+            self._stack[-1][-1].append(" ".join("".join(self._cell).split()))
+            self._cell = None
+        elif tag == "table" and self._stack:
+            self.tables.append(self._stack.pop())
+
+    def handle_data(self, data):
+        if self._cell is not None:
+            self._cell.append(data)
+        elif not self._stack:
+            self.outside.append(data)
+
+
+def _split_cells(line: str) -> tuple[str, list[str]] | None:
+    if "\t" in line:
+        return "tab", [c.strip() for c in line.split("\t")]
+    if line.count("|") >= 2:
+        return "pipe", [c.strip() for c in line.strip().strip("|").split("|")]
+    if line.count(",") >= 2:
+        try:
+            row = next(_csv.reader([line]))
+        except Exception:                       # noqa: BLE001
+            row = []
+        if len(row) >= 3:
+            return "csv", [c.strip() for c in row]
+    parts = re.split(r"\s{2,}", line.strip())
+    if len(parts) >= 3:
+        return "fixed", parts
+    return None
+
+
+def _text_tables(text: str) -> list[list[list[str]]]:
+    """純文字裡連續、同一種分隔、同欄數的行＝一張表（第一行當表頭）。"""
+    tables, cur, sig = [], [], None
+    for ln in text.splitlines():
+        if re.fullmatch(r"\s*[-=+| :]{3,}\s*", ln or "-"):
+            continue                            # 分隔線
+        sc = _split_cells(ln)
+        s2 = (sc[0], len(sc[1])) if sc else None
+        if s2 and s2 == sig:
+            cur.append(sc[1])
+        else:
+            if len(cur) >= 2:
+                tables.append(cur)
+            cur, sig = ([sc[1]], s2) if sc else ([], None)
+    if len(cur) >= 2:
+        tables.append(cur)
+    return tables
+
+
+def _table_hits(tables: list[list[list[str]]], key: str) -> list[tuple[int, int, int]]:
+    return [(ti, ri, ci) for ti, t in enumerate(tables) for ri, row in enumerate(t) for ci, c in enumerate(row)
+            if ri > 0 and L.contains(c, key)]
+
+
+def _table_cell_status(pt: list[list[str]], ri: int, ci: int, cts: list[list[list[str]]], key: str) -> str | None:
+    """prev 那一格：在 cur 的表裡找「表頭一樣、其他格相同最多」的那一列，看同名欄還是不是這個值。"""
+    head, row = pt[0], pt[ri]
+    col = head[ci] if ci < len(head) else None
+    best, tied = 0, []
+    for ct in cts:
+        if not ct or len(ct[0]) != len(head):
+            continue
+        cc = ct[0].index(col) if col in ct[0] else ci
+        for crow in ct[1:]:
+            if len(crow) != len(row):
+                continue
+            sc = sum(1 for j, v in enumerate(row) if j != ci and v and j < len(crow) and crow[j] == v)
+            if sc > best:
+                best, tied = sc, [(crow, cc)]
+            elif sc == best and sc > 0:
+                tied.append((crow, cc))
+    if best == 0:
+        return None
+    return "unchanged" if all(cc < len(r) and L.contains(r[cc], key) for r, cc in tied) else "changed"
+
+
+def _field_status(prev: str, cur: str, key: str) -> str | None:
+    px, cx = _xml_tree(prev), _xml_tree(cur)
+    if px is not None and cx is not None:
+        return _json_status(px, cx, key)
+    is_html = bool(re.search(r"(?is)<(table|html|body|div|p)\b", prev))
+    if is_html:
+        hp, hc = _Tables(), _Tables()
+        hp.feed(prev)
+        hc.feed(cur)
+        pts, cts = hp.tables, hc.tables
+        rest_p = " \n".join(hp.outside)
+        rest_c = " \n".join(hc.outside)
+    else:
+        pts, cts = _text_tables(prev), _text_tables(cur)
+        rest_p, rest_c = prev, cur
+    statuses = []
+    for ti, ri, ci in _table_hits(pts, key):
+        st = _table_cell_status(pts[ti], ri, ci, cts, key)
+        statuses.append(st if st is not None else (_line_status(prev, cur, key) or "changed"))
+    if is_html:
+        ls = _line_status(rest_p, rest_c, key)
+    else:
+        # 不在表格裡的出現（表格行以外的文字）用「最像的一行」
+        tbl_lines = {"|".join(r) for t in pts for r in t}
+        others = "\n".join(ln for ln in prev.splitlines()
+                           if not (_split_cells(ln) and "|".join(_split_cells(ln)[1]) in tbl_lines))
+        ls = _line_status(others, rest_c, key) if L.contains(others, key) else None
+    if ls is not None:
+        statuses.append(ls)
+    if not statuses:
+        return None
+    return "changed" if "changed" in statuses else "unchanged"
 
 
 def egress_log_path(rec: Recorder) -> pathlib.Path:

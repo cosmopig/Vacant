@@ -692,12 +692,14 @@ class Run:
                                     merged[key] = (u1.get(key) or 0) + (u2.get(key) or 0)
                             info["agent"] = {**a1, "usage": merged, "wall_s": round((a1.get("wall_s") or 0) + (r2.get("wall_s") or 0), 1),
                                              "includes_verify_run": True}
-                elif arm in ("cC", "cCG", "cCGR", "cV"):
+                elif arm in ("cC", "cCG", "cCGR", "cV", "cV5"):
                     # 第三輪：候選集合（C）＋越界守衛（G）＋沒重讀就改退回一次（R）。沒有出處的行每週期都交（值不在任何已知來源裡）
                     # 第四輪 cV＝cCGR＋受影響看值（--by-value）＋網路出口紀錄（--egress）
-                    v4 = arm == "cV"
+                    v4 = arm in ("cV", "cV5")
+                    v5 = arm == "cV5"     # 第五輪：表格／CSV／TSV／XML 照欄位定位、守衛保留交辦行的標籤
                     eg = ("--egress",) if (v4 and p.get("egress")) else ()
-                    sc = self.sources_check(live, cdir, candidates=True, extra=(("--by-value",) + eg) if v4 else ())
+                    sc = self.sources_check(live, cdir, candidates=True,
+                                            extra=(("--by-value",) + (("--by-field",) if v5 else ()) + eg) if v4 else ())
                     lines = (live / "ws" / "report.md").read_text().splitlines()
                     handed = {e["line"]: e for e in sc["claims"] if e["status"] != "unchanged"}
                     if p.get("nosrc_index"):
@@ -718,10 +720,10 @@ class Run:
                         bf.write_text(before)
                         seq0 = self.chain_len(live) or 0
                         info["agent"] = self.run_agent(live, self.prompt("c", set_id, items="\n".join(items)), cdir / "run")
-                        if arm in ("cCG", "cCGR", "cV"):
+                        if arm in ("cCG", "cCGR", "cV", "cV5"):
                             info["guard"] = self.vacant_sources(live, "--guard", ",".join(map(str, sorted(handed))),
-                                                                "--before", str(bf))
-                        if arm in ("cCGR", "cV"):
+                                                                "--before", str(bf), *(("--keep-labels",) if v5 else ()))
+                        if arm in ("cCGR", "cV", "cV5"):
                             spec = cdir / "reread_spec.json"
                             spec.write_text(json.dumps({str(ln): handed[ln].get("candidates") or [] for ln in handed}))
                             rr = self.vacant_sources(live, "--reread", str(spec), "--since", str(seq0), "--before", str(bf), *eg)
@@ -739,7 +741,7 @@ class Run:
                                 r2 = self.run_agent(live, PROMPTS["c_reread"].format(items="\n".join(items2)), cdir / "run_verify")
                                 info["agent_verify"] = r2
                                 info["guard_retry"] = self.vacant_sources(live, "--guard", ",".join(map(str, rr["not_reread"])),
-                                                                          "--before", str(bf2))
+                                                                          "--before", str(bf2), *(("--keep-labels",) if v5 else ()))
                                 a1 = info["agent"]
                                 u1, u2 = a1.get("usage") or {}, r2.get("usage") or {}
                                 merged = dict(u1)
