@@ -148,7 +148,8 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
                 "usage_unknown": sum(1 for v in C if v["ran"] and v["calls"] is None),
                 "tool_wall_s": round(sum(v.get("tool_wall_s") or 0 for v in C), 1),
                 "source_requests_agent": sum(v.get("src_req_agent") or 0 for v in C),
-                "source_requests_vacant": sum(v.get("src_req_vacant") or 0 for v in C)}
+                "source_requests_vacant": sum(v.get("src_req_vacant") or 0 for v in C),
+                "cost_usd": round(sum(v.get("cost_usd") or 0 for v in C), 6)}
     return {"rows": rows, "summary": summ}
 
 
@@ -190,6 +191,17 @@ def materials_stats(manifest: dict, mat_dir: pathlib.Path, sets: list[str] | Non
             "rate_with_unit": round(hit_key / n, 4) if n else None, "rate_bare_number": round(hit_num / n, 4) if n else None}
 
 
+def _cost_usd(log: pathlib.Path) -> float | None:
+    """Claude Code 的 stream-json 每個 result 事件帶 `total_cost_usd`（照公開牌價，含快取讀寫）；pi 沒有 ⇒ None。
+    輸入 token（tokens_in）對 Claude 一律含快取寫入與讀取——不含的話 Claude 的輸入幾乎都是 0，比值沒有意義。"""
+    try:
+        txt = log.read_text(errors="replace")
+    except OSError:
+        return None
+    vals = [float(m) for m in re.findall(r'"total_cost_usd":\s*([0-9.]+)', txt)]
+    return round(sum(vals), 6) if vals else None
+
+
 def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
     reports: dict = {}
     costs: dict = {}
@@ -210,9 +222,11 @@ def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
                 info = json.loads((cd / "cycle.json").read_text())
                 a = info.get("agent") or {}
                 u = a.get("usage") or {}
-                costs[(sid, adir.name, k)] = {"ctype": info.get("ctype", "F"),
+                cin = (u.get("input") or 0) + (u.get("cache_creation_input_tokens") or 0) + (u.get("cache_read_input_tokens") or 0) \
+                    if a and u.get("input") is not None else None
+                costs[(sid, adir.name, k)] = {"ctype": info.get("ctype", "F"), "cost_usd": _cost_usd(cd / "run" / "agent.log") if a else 0.0,
                     "ran": bool(a), "calls": u.get("calls") if a else 0,
-                    "tokens_in": u.get("input") if a else 0, "tokens_out": u.get("output") if a else 0,
+                    "tokens_in": cin if a else 0, "tokens_out": u.get("output") if a else 0,
                     "wall_s": a.get("wall_s", 0) if a else 0,
                     "tool_wall_s": (info.get("sources_check") or {}).get("wall_s", 0)}
                 if info.get("ts_start") and info.get("ts_end"):

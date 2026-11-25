@@ -299,6 +299,9 @@ def _extract_metric(entry: Mapping[str, Any], metric: str) -> float | None:
     if metric == "calls":
         v = entry.get("calls")
         return None if v is None else float(v)
+    if metric == "cost_usd":
+        v = entry.get("cost_usd")
+        return None if v is None else float(v)
     if metric == "wall_s":
         v = entry.get("wall_s")
         return None if v is None else float(v)
@@ -521,8 +524,10 @@ def analyze(
     expected_arms: Sequence[str] = DEFAULT_ARMS,
     expected_cycles: Sequence[int] = DEFAULT_CYCLES,
     expected_sets: Sequence[str] | None = None,
+    cost_metric: str = "tokens",
 ) -> dict[str, Any]:
-    """執行完整 D2′ 群集 bootstrap 分析並回傳結構化結果。"""
+    """執行完整 D2′ 群集 bootstrap 分析並回傳結構化結果。
+    `cost_metric`：主要成本比值用的量；本機模型用 "tokens"，Claude（有提示快取）用 "cost_usd"（各計畫事前寫定）。"""
     rows: list[dict[str, Any]] = list(score_data.get("rows") or [])
     comp = check_completeness(rows, costs, expected_arms=expected_arms,
                               expected_cycles=expected_cycles, expected_sets=expected_sets)
@@ -533,11 +538,11 @@ def analyze(
     # 兩個確認性家族（vacant-hope 11-25）：c 對 b、c 對 d，各用 α/2＝0.025
     miss_cb = compute_miss_diff(rows, "c", "b", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
                                 upper_q=0.975, pre_correct_both=True)
-    tok_bc = compute_cost_ratio(costs, "b", "c", "tokens", set_ids=set_ids, weights=weights,
+    tok_bc = compute_cost_ratio(costs, "b", "c", cost_metric, set_ids=set_ids, weights=weights,
                                 threshold=RATIO_THRESHOLD, ci_level=0.975)
     miss_cd = compute_miss_diff(rows, "c", "d", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
                                 upper_q=0.975, pre_correct_both=True)
-    tok_dc = compute_cost_ratio(costs, "d", "c", "tokens", set_ids=set_ids, weights=weights,
+    tok_dc = compute_cost_ratio(costs, "d", "c", cost_metric, set_ids=set_ids, weights=weights,
                                 threshold=1.0, ci_level=0.975)
     calls_bc = compute_cost_ratio(costs, "b", "c", "calls", set_ids=set_ids, weights=weights)
     wall_bc = compute_cost_ratio(costs, "b", "c", "wall_s", set_ids=set_ids, weights=weights)
@@ -721,6 +726,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     help=f"Random seed (default {DEFAULT_SEED})")
     ap.add_argument("--out", help="Write JSON result to this path")
     ap.add_argument("--text-out", help="Write human-readable text summary to this path")
+    ap.add_argument("--cost-metric", default="tokens", choices=["tokens", "cost_usd", "calls", "wall_s"],
+                    help="primary cost ratio metric (pre-registered per plan: local models tokens, Claude cost_usd)")
     a = ap.parse_args(argv)
 
     score_data = json.loads(pathlib.Path(a.score).expanduser().read_text(encoding="utf-8"))
@@ -740,6 +747,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         expected_sets=exp_sets,
         expected_cycles=sorted({int(r["cycle"]) for r in score_data.get("rows") or [] if r.get("arm") != "c0"})
         or DEFAULT_CYCLES,
+        cost_metric=a.cost_metric,
     )
     body = json.dumps(res, ensure_ascii=False, indent=1, sort_keys=True)
     text = format_text(res)

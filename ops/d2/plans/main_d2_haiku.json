@@ -1,0 +1,144 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "id": "main_d2_haiku",
+ "seed": 20261132,
+ "purpose": "D2′ 主批次的第三個模型點（確認性，事前登記）：Claude Code＋claude-haiku-5-5（雲端、有提示快取）。",
+ "materials": {
+  "dir": "~/dev/ops/d2_materials/seed20261126_ffnz",
+  "generator": "ops/d2/gen_materials.py --seed 20261126 --sets 60 --cycle-types F,F,N,Z",
+  "manifest_sha256": "9d1afebe6e63792db3c9f83379f268c7c0632d1c659e41c6c2493820156ba8c6",
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09",
+   "s10",
+   "s11",
+   "s12",
+   "s13",
+   "s14",
+   "s15",
+   "s16",
+   "s17",
+   "s18",
+   "s19",
+   "s20",
+   "s21",
+   "s22",
+   "s23",
+   "s24",
+   "s25",
+   "s26",
+   "s27",
+   "s28",
+   "s29",
+   "s30",
+   "s31",
+   "s32",
+   "s33",
+   "s34",
+   "s35",
+   "s36",
+   "s37",
+   "s38",
+   "s39",
+   "s40",
+   "s41",
+   "s42",
+   "s43",
+   "s44",
+   "s45",
+   "s46",
+   "s47",
+   "s48",
+   "s49",
+   "s50"
+  ]
+ },
+ "arms": [
+  "a",
+  "b",
+  "c",
+  "d"
+ ],
+ "jobs": 3,
+ "agent_timeout_s": 600,
+ "server": {
+  "port": 18205
+ },
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5"
+ },
+ "vacant_python": "~/dev/ops/d2main_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2claude_main/.claude",
+  "copy": [
+   "settings.json"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2claude_main/.vacant/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 6dfbb8775",
+  "wheel": "~/dev/ops/d2_release/6dfbb8775/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "8ec7b07977af1b53fe2d97de5c0eba36164cae57ee496fb0ba82c7a68cc2c05b",
+  "venv": "~/dev/ops/d2main_venv（不可編輯安裝）",
+  "pi_extension_sha256_16": "f9d83a7978b30749",
+  "install_json_sha256_16": "1b46dc91ac550624（mode observe；`vacant install --agents pi --mode observe` 在隔離 HOME 真的寫出）",
+  "models_json_sha256_16": "701b346dacaf6fa8"
+ },
+ "prereg": {
+  "registered": "2026-11-25，這一批第一通模型呼叫之前 commit。組＝v2 教材 s01–s50（和 9B、12B 主批次同一批組）；Haiku 小量試用的是 s57（不進分析）。",
+  "authorization": "擁有者 2026-11-25（vacant-hope 轉述原話）：「先用本機試試看你這個驗證是否有效…記錄下來的東西也要確保他自己的可以用和被稽核…一開始你應該要先用最小的最小的模型…三天之內有短期的結果」。本機算力；不推 main、不發版、不寫 README 效果句。",
+  "question": "agent 依網頁填好一份有 20 條數值宣稱的報告之後，來源陸續改變。用 Vacant 的紀錄（產品指令 `vacant trace sources --check`：每條宣稱→讀進它的那一步→來源網址與當時內容；重讀來源、只列出帶著這個值的片段變了的行）只把受影響的宣稱交給 agent 重查（c），和 (b) 每週期叫 agent 整份重查、(d) 只告訴 agent 哪幾頁變了相比：漏掉的過期宣稱有沒有比較多？花的模型 token 少多少？",
+  "why": "既有結論：重做有效；紀錄沒有被證明讓 agent 交得更好。擁有者一直在問「紀錄除了叫它重做還有什麼用」。這個實驗的 b、c、d 做的是同一個重查動作，差別只在交給 agent 的資訊：b 沒有紀錄、d 只有「讀過哪些頁＋頁面雜湊」這種最淺的紀錄（市面上的頁面變動偵測就做得到）、c 有宣稱級的出處。省下的 token 和沒漏掉的過期內容，就是紀錄的價值。",
+  "arms": {
+   "a": "不維護（對照：量過期內容會累積多少）",
+   "b": "每週期叫 agent 對 5 頁整份重查（提示逐字見 run_d2.PROMPTS['b']）",
+   "c": "每週期先跑 `vacant trace sources report.md --check`（0 token；Vacant 自己發 GET 重讀來源），把狀態不是 unchanged 的行逐行列給 agent（提示 PROMPTS['c']＋c_item；沒有出處的行附上全部頁面網址，同一行文字只交辦一次）；沒有任何行受影響 ⇒ 這個週期不叫 agent",
+   "d": "每週期由執行器比對 5 張產品頁的雜湊，只告訴 agent 哪幾頁變了（PROMPTS['d']）；沒有頁面變 ⇒ 不叫 agent"
+  },
+  "common": "四臂共用同一份初稿（c0：同一個 agent 依 PROMPTS['write'] 填好、連同病歷封存成快照），每一臂從快照還原到同一個路徑後各跑 4 個週期；臂的順序每組洗牌（seed 見計畫）。agent＝pi＋掛 `vacant install --agents pi --mode observe` 真的寫出的擴充（記錄每一步，不把交件前檢查的結果退回；理由見 DESIGN_LOG 與 decisions/notes/NOTE_20261125_ZEROCONFIG_FALSE_UNSOURCED.md）。每次 agent 執行上限 600 秒。產品碼＝本計畫 commit 時 auto/redo 的 vacant_network（裝成不可編輯的 wheel，路徑與 sha256 在 product_version）。",
+  "materials": "ops/d2/gen_materials.py --seed 20261126 --sets 60 --cycle-types F,F,N,Z；改動清單封存在 manifest.json（sha256 見 materials.manifest_sha256；不入庫、agent 看不到；執行器每週期只把那一週期的網站複製到來源目錄）。每組 5 張虛構產品頁（散文＋規格表＋版本紀錄），報告問 4 個屬性×5 個產品＝20 條宣稱。每組 4 個週期，類型組合固定 F,F,N,Z、順序洗牌：F＝1 頁改 2 個被問的屬性（2 條宣稱受影響）＋另 1 頁改 1 個沒被問的屬性；N＝1 頁改 1 個沒被問的屬性（頁面變了、宣稱不受影響）；Z＝都沒變。⇒ 每組 4 條宣稱受影響；變動的 5 頁次裡 3 頁次是雜訊（60%）。s01–s50 的數值碰撞率：帶單位的值也出現在同組別頁 32.4%、只看數字 41.6%（值從小的候選池隨機抽，沒有刻意避開或製造重複）。",
+  "primary": {
+   "family_c_vs_b": "(1) 出處覆蓋率＝c 臂第 1 週期的來源檢查裡，指到正確產品頁的宣稱數÷全部宣稱數（1000）；(2) 漏抓差＝c 的漏抓率−b 的漏抓率，對象是真值在該週期改變、且兩臂在該週期開始時都是對的宣稱，以（組、週期、宣稱）配對，以組為單位 cluster bootstrap 10000 次（seed 20261125），取 97.5 分位當單側上界；(3) token 比＝b 的模型 token 總和（輸入＋輸出，pi 回報）÷c 的，以（組、週期）配對，cluster bootstrap 的雙側 97.5% 區間。",
+   "family_c_vs_d": "(1) 同上的覆蓋率；(2) 漏抓差 c−d（同上的定義與上界）；(3) token 比 d÷c（同上的區間）。",
+   "alpha": "兩個家族各 α/2＝0.025。"
+  },
+  "states": {
+   "c_vs_b.EFFECTIVE": "覆蓋率≥80%、漏抓差上界<10 個百分點、token 比區間下界≥3、全部完成。可以說：「在這 50 組虛構產品頁、pi＋qwen3.5-9b（本機、不思考）、每組四個週期（2 個需要改宣稱、1 個只有雜訊、1 個沒變）的條件下，用 Vacant 的紀錄只把受影響的宣稱交給 agent，模型 token 是整份重查的 1/X（區間），漏掉的過期宣稱沒有多 10 個百分點以上」，同時一定要說週期類型的比例是設計參數，並附各類型的分開數字。",
+   "c_vs_b.FAIL": "覆蓋率<80%，或漏抓差點估計≥10 個百分點，或 token 比點估計<3。照實寫：紀錄在這個情境下沒有省到 3 倍，或漏得比整份重查多。",
+   "c_vs_d.EFFECTIVE": "覆蓋率≥80%、漏抓差 c−d 上界<10 個百分點、token 比 d/c 區間下界≥1。可以說：「宣稱級的出處比只知道哪幾頁變了更省，而且沒有多漏」（同樣附條件）。",
+   "c_vs_d.FAIL": "漏抓差點估計≥10 個百分點，或 token 比 d/c 點估計<1。結論必須寫成「宣稱級出處沒有比頁面變動通知多帶來東西」。",
+   "UNRESOLVED": "其餘。只報方向與大小，不加組數、不換題再看一次。",
+   "INCOMPLETE": "有組沒跑完。只能續跑，不能看一半的數字改計畫。"
+  },
+  "secondary": "全部宣稱（不限開始時對的）的漏抓差；誤改率（真值沒變、開始時對、結束時不對）；各週期結束時的過期殘留數；偵測延遲（改動後第幾個週期改對）；呼叫數比、牆鐘比（c 含產品指令自己的牆鐘）；來源伺服器請求數（agent 的、Vacant 重讀的）；按週期類型（F／N／Z）分開的成本；只看 F 週期的 token 比；每組比值的中位數；出處由 blame 選或由同行字選的數量、ambiguous 的數量。",
+  "audit": "ops/d2/audit_d2.py 只讀病歷（鏈＋內容定址庫）、來源伺服器存取紀錄、改動清單，重建每一臂每一週期的 report.md 並重算分數；和執行器的分數逐列比對必須 0 不一致，否則這批不下結論。報告附：每條最終宣稱的寫入步驟、所在週期、讀進它的那一步、網址、讀到的內容 sha256、伺服器存取紀錄是否有對得上的那一次讀取；每一個錯誤的歸因表（出處記錯頁、變動沒偵測到、交辦了但沒改對、改了沒交辦的行、初稿就錯或整行不見）。vacant-hope 另派獨立代理用同一批紀錄重算。",
+  "power": "成本比：小量試只有 1 組，無法估變異；漏抓：同 9B 主批次的估計。",
+  "exclusions": "基礎設施失敗（pi 0 次成功回應＋連線錯誤）不算一次執行，該組停下、續跑時從頭重做沒完成的部分（run_d2.InfraError）。沒有其他排除；agent 逾時（600 秒）照算，成本照計。",
+  "known_limits": [
+   "教材是虛構產品頁、數值宣稱、填空式報告；不是真實網站或自由撰寫的文件。真實文件的數值碰撞率可能更高或更低。",
+   "週期類型的比例（F,F,N,Z）是設計參數；c 對 b 的 token 比主要來自「沒變／只有雜訊時不必叫 agent」，換成每週期都有事實改動時比值會小很多（先導第二輪約 0.8–2 倍）。所以按類型分開報。",
+   "出處是推論層（值比對＋同行字），會被巧合騙；覆蓋率照實報。",
+   "來源經 `*.d2-sources.example` 代理提供；產品的 blame 刻意不把本機網址當來源。",
+   "掛鉤用 observe 模式；產品預設的 evidence 模式在這個情境會誤報（另見 NOTE），沒有量 evidence 模式下的成本。",
+   "只有本機 1003（1004 離線）；模型 qwen3.5-9b，不思考（reasoning_effort none），LM Studio ctx 32768、parallel 4，與 gemma-4-12b 同機載入。",
+   "c 臂的「沒有出處的行只交辦一次」、d 臂「只看產品頁雜湊」都是臂的協定，事前寫定。",
+   "Claude Code 會把檢查頁面和抓網頁寫在同一個指令裡（例如 `ls … && sed … ; curl …`）：那不是「只抓網頁」，產品不給出處，更新過的那一行之後就沒有出處（c 臂只交辦一次、之後不監看）。產品已凍結，不在這一批修；小量試裡發生過一次。"
+  ],
+  "stop_rules": [
+   "任一組基礎設施失敗連續 3 次：停批回報，不改條件。",
+   "1003 的 LM Studio 崩潰：停批、等恢復後續跑（同一個 root）。"
+  ],
+  "models_and_strata": "qwen3.5-9b：只在 1003（LM Studio llama.cpp 2.73.0，ctx 32768、parallel 4，jobs 3，reasoning_effort none），一個分層。gemma-4-12b-it-qat：分兩台——1003（ctx 262144、parallel 4、jobs 3、reasoning_effort none，s01–s25）與 1004（llama.cpp 2.46.0、ctx 262144、parallel 4、jobs 1、這台的 gemma 永遠不思考，s26–s50）。一組的四臂一定在同一台。12B 的結果兩台合併判定、另外分台報；兩台的建置不同，分台結果只描述、不檢定差異。9B 與 12B 各自判定，不合併。",
+  "cost_metric": "主要成本比值改用 Claude Code 每次執行回報的 total_cost_usd（公開牌價，含提示快取寫入與讀取），因為 Claude 的輸入幾乎全是快取讀取，只數 token 會把『提示快取讓整份重查變便宜』這件事蓋掉——vacant-hope 的失敗條件「(b) 本身已經很便宜」就是在量這個。token（輸入含快取讀寫）、呼叫數、牆鐘照樣報。判準和 9B 相同：c 對 b 的成本比區間下界≥3、c 對 d ≥1。分析指令：analyze_d2.py --cost-metric cost_usd。",
+  "haiku_trial_note": "小量試（s57，探索性）：b 臂 4 週期合計 0.0077 美元、c 臂 0.0067、d 臂 0.0066；每次執行約 2–4 次呼叫、每次都帶約 2–3 萬快取 token。⇒ 事前預期：c 對 b 的成本比遠低於 3（每次執行的固定開銷主導，只交辦幾行省不到多少；省的只會來自 N／Z 週期完全不叫 agent）。照實登記，結果若 FAIL 照寫。",
+  "isolation": "使用者的 HOME 不換（走登入的訂閱）；--setting-sources '' --settings <實驗的 settings.json> --strict-mcp-config --disable-slash-commands --no-session-persistence --disallowedTools WebFetch,WebSearch。"
+ }
+}

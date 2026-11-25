@@ -25,3 +25,5 @@
 | 11-25 06:25 | **到此凍結**：主批次用 auto/redo 這一版 commit 的 wheel（不可編輯安裝），之後不再改 `sources.py`／`blame.py`／執行器／評分的判準；再有改動另開批次、不併入 | 預註冊要在看主批次結果之前定案 | — |
 | 11-25 06:20 | `score_d2.py`：manifest 沒有 `cycles` 欄位時（只有合成測試會這樣）週期類型當成 F；真實 manifest 的結果不變。併入 agy 的零設定誤判修正（`evidence.py`）與報告產生器（`report_d2.py`）——兩者都不在主批次凍結的 wheel 裡 | agy 的報告測試用的合成 manifest 沒有 `cycles` | — |
 | 11-25 06:35 | 執行器（不影響已開跑的主批次）：教材可以有自己的頁面清單與索引頁（留出批次用 *_idx 提示，只給索引頁、agent 自己決定怎麼抓；c 臂說 "a website"）；新增 b2／d2（b、d＋`no_rewrite` 一句）。舊教材的四種提示逐字不變（已用程式比對）。評分／稽核支援一條宣稱有好幾個正確來源頁（`source_pages`） | vacant-hope 11-25：(1) 留出檢驗批次；(2) b、d 重寫交件的提示敏感度批次 | 先導第三輪 b 的 d 臂整份重寫 |
+| 11-25 06:45 | 評分：Claude 的輸入 token 含快取寫入與讀取；每週期加 `cost_usd`（Claude Code 的 total_cost_usd，pi 沒有）。分析加 `--cost-metric`（主要成本比值用哪個量，各計畫事前寫定：本機 tokens、Claude cost_usd）。pi 的數字不變 | Haiku 小量試：Claude 回報的 `input` 幾乎是 0（全在快取欄位），原本的 token 比沒有意義 | Haiku 小量試（s57）的 run.json |
+| 11-25 06:45 | Haiku 主批次（s01–s50）事前登記，主要成本量＝美元 | vacant-hope：Haiku 當第三個點、先小量估量再放大；小量試估全量約 1.5 美元 | Haiku 小量試 |
