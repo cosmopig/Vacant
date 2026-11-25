@@ -1,0 +1,50 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "agent_timeout_s": 600,
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2v5_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v5",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v5_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo 555cd0568",
+  "venv": "~/dev/ops/d2v5_venv"
+ },
+ "id": "r5smoke_d2_qwen9b_1003",
+ "seed": 20261177,
+ "jobs": 2,
+ "server": {
+  "port": 18245
+ },
+ "arms": [
+  "b",
+  "cV5",
+  "d_diff_real"
+ ],
+ "snapshot_after_c0": true,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "materials": {
+  "dir": "${D2_PRIVATE}/realrev_sample",
+  "generator": "realrev_gen --seed 7 --sets 2（agy 的範例，不是確認教材）",
+  "manifest_sha256": "fc49127cb6ca0a419d7a7ff73da8cdcdd40b5533ecfd20965b934808afe1fcf7",
+  "sets": [
+   "s01",
+   "s02"
+  ]
+ },
+ "purpose": "冒煙（不是證據）：v5 在真實維基百科修訂頁面上跑得通。",
+ "egress": {
+  "port_base": 18300
+ },
+ "nosrc_index": true
+}
