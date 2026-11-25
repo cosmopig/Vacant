@@ -253,7 +253,7 @@ class Run:
                 cdir.mkdir(parents=True, exist_ok=True)
                 self.install_site(set_id, k, live)
                 self.set_route(host, live / "site")
-                info: dict = {"arm": arm, "cycle": k, "ts_start": now(), "agent": None}
+                info: dict = {"arm": arm, "cycle": k, "ts_start": now(), "t_start": time.time(), "agent": None}
                 if arm == "b":
                     info["agent"] = self.run_agent(live, PROMPTS["b"].format(urls=" ".join(urls)), cdir / "run")
                 elif arm == "c":
@@ -283,6 +283,7 @@ class Run:
                 shutil.copy(live / "ws" / "report.md", cdir / "report.md")
                 info["chain_len"] = self.chain_len(live)
                 info["ts_end"] = now()
+                info["t_end"] = time.time()
                 write_json(cdir / "cycle.json", info)
                 a = info.get("agent") or {}
                 self.log(f"{set_id} {arm} cycle {k} agent={'-' if not a else a['rc']} "

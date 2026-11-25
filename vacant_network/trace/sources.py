@@ -27,12 +27,14 @@
 from __future__ import annotations
 
 import hashlib
+import html as _html
 import pathlib
 import re
 import urllib.request
 from typing import Any, Callable
 
 from . import blame as B
+from . import locate as L
 from .evidence import numbers_in
 from .locate import Location
 from .recorder import Recorder
@@ -70,17 +72,78 @@ def claims_in(text: str) -> list[dict[str, Any]]:
     return out
 
 
+def _segments(text: str) -> set[str]:
+    """來源切成文字片段：拿掉標籤（HTML 的每個文字節點各自一段），再按句號切。比整行細——規格表常常整張寫在一行裡。"""
+    t = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", text)
+    out: set[str] = set()
+    for part in re.split(r"<[^>]+>|\n", t):
+        part = _html.unescape(part).strip()
+        for seg in re.split(r"(?<=[.!?])\s+", part):
+            seg = " ".join(seg.split())
+            if seg:
+                out.add(seg)
+    return out
+
+
+def _carriers(text: str, key: str) -> set[str]:
+    """來源裡帶著這個值的片段。"""
+    return {seg for seg in _segments(text) if L.contains(seg, key)}
+
+
+def _fetch_records(trace: B.Trace, blamer: B.Blamer) -> list[dict[str, Any]]:
+    """病歷裡每一次「抓到某個網址的內容」：只抓網頁的步驟（`blame` 同一個判準，本機網址不算），
+    內容是那一步的輸出；導進檔的（`curl U > f`）是那一步寫出的 f。"""
+    out: list[dict[str, Any]] = []
+    for st in trace.steps:
+        f = blamer._fetch_of(st)
+        if not f or f["local"]:
+            continue
+        if len(f["urls"]) == 1 and not f["outputs"]:
+            txt = trace.output_text(st)
+            if txt:
+                out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": f["urls"][0],
+                            "into": None, "text": txt})
+        for o, us in (f.get("by_output") or {}).items():
+            if len(us) != 1:
+                continue
+            rel = blamer._rel(o) or o
+            txt = trace.file_text(st.post_index, rel)
+            if txt:
+                out.append({"seq": st.seq, "n": st.n, "step": st.id, "ctx": st.ctx, "url": us[0], "into": rel,
+                            "text": txt})
+    return out
+
+
+def _context_score(line: str, key: str, text: str) -> int:
+    """交件那一行的字（產品名、欄名）有幾個也出現在這份來源裡。用來在「好幾個來源都有這個值」時挑一個。"""
+    words = {w.lower() for w in re.findall(r"[A-Za-z][A-Za-z]{2,}", line)} - \
+        {w.lower() for w in re.findall(r"[A-Za-z]+", key)}
+    low = text.lower()
+    return sum(1 for w in words if w in low)
+
+
 def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None,
                contract: Any = None) -> list[dict[str, Any]]:
-    """每個具體值 → 來源。`source` 只在 `blame` 判成外部網址時才有；`seen_sha256` 是那一步當時輸出的雜湊。"""
+    """每個具體值 → 來源（外部網址）、當時讀到的內容雜湊、之後再讀時仍支持它的最後一次（基準）。
+
+    1. `blame` 找寫下這一行的那一步，以及它的出處。
+    2. 同一個工作階段、寫入之前抓過的內容裡含這個值的，都是候選；不只一個網址時，挑和這一行共用字最多的
+       （產品名通常只在自己那一頁），平手照 `blame` 的。`ambiguous` 列出其他也含這個值的網址。⇒ 仍是推論層。
+    3. 基準：寫入之後 agent 又抓了同一個網址、而且帶著這個值的片段**一個都沒變**（＝它看過、來源仍同樣支持這個值）
+       ⇒ 基準換成那一次；否則用寫入前讀到的那一次。
+    """
     ws = pathlib.Path(ws).resolve()
     rec = rec or Recorder(ws)
     trace = B.Trace(rec)
-    by_n = {s.n: s for s in trace.steps}
+    blamer = B.Blamer(trace)
+    by_n = {st.n: st for st in trace.steps}
+    recs = _fetch_records(trace, blamer)
     p = (ws / path)
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
+    lines = text.splitlines()
     out: list[dict[str, Any]] = []
     for c in claims_in(text):
+        line = lines[c["line"] - 1]
         b = B.blame_location(trace, Location(path, c["line"], value=c["key"]), contract=contract)
         matched = c["key"]
         if c["key"] != c["value"] and not (b.get("source") or {}).get("ref"):
@@ -92,20 +155,39 @@ def provenance(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
                              "confidence": b.get("confidence"), "layer": b.get("layer"),
                              "written_by_step": writer.get("step") if writer else None,
                              "source": None}
-        src = b.get("source")
-        if isinstance(src, dict) and src.get("kind") == "url" and src.get("ref"):
-            st = by_n.get(src.get("step"))
-            seen = trace.output_text(st) if st is not None else ""
-            if st is not None and src.get("into"):
-                # 抓回來的內容導進了檔案（`curl U > f`）：agent 看到的是那一步寫出的 f
-                seen = trace.file_text(st.post_index, src["into"]) or ""
-            e["source"] = {"url": src["ref"], "into": src.get("into"), "step": st.id if st else None,
-                           "step_n": src.get("step"),
-                           "observed": bool(src.get("observed")),
-                           "candidates": src.get("candidates"),
-                           "seen_sha256": _sha(seen) if seen else None}
-            e["_seen"] = seen
         out.append(e)
+        w = by_n.get(writer.get("n")) if writer else None
+        bsrc = b.get("source") if isinstance(b.get("source"), dict) else {}
+        if w is None:
+            continue
+        cands = []
+        for key in dict.fromkeys([matched, c["key"], c["value"]]):
+            cands = [r for r in recs if r["seq"] < w.seq and r["ctx"] == w.ctx and L.contains(r["text"], key)]
+            if cands:
+                matched = key
+                break
+        if not cands:
+            continue
+        urls = list(dict.fromkeys(r["url"] for r in cands))
+        score = {u: _context_score(line, matched, next(r["text"] for r in reversed(cands) if r["url"] == u))
+                 for u in urls}
+        best = max(score.values())
+        top = [u for u in urls if score[u] == best]
+        url = bsrc.get("ref") if bsrc.get("ref") in top else max(top, key=lambda u: max(r["seq"] for r in cands if r["url"] == u))
+        origin = max((r for r in cands if r["url"] == url), key=lambda r: r["seq"])
+        carriers = _carriers(origin["text"], matched)
+        base = origin
+        for r in recs:
+            if r["url"] == url and r["seq"] > base["seq"] and carriers and carriers <= _segments(r["text"]):
+                base = r
+        e["matched"] = matched
+        e["source"] = {"url": url, "into": origin["into"], "step": origin["step"], "step_n": origin["n"],
+                       "observed": origin["into"] is None,
+                       "ambiguous": [u for u in urls if u != url] or None,
+                       "picked_by": "blame" if url == bsrc.get("ref") else "context",
+                       "seen_sha256": _sha(origin["text"]),
+                       "baseline_step_n": base["n"], "baseline_sha256": _sha(base["text"])}
+        e["_seen"] = base["text"]
     return out
 
 
@@ -116,7 +198,11 @@ def default_fetch(url: str) -> str:
         return r.read(MAX_BODY).decode("utf-8", "replace")
 
 
-def _still_there(seen: str, now: str) -> bool:
+def _still_there(seen: str, now: str, key: str) -> bool:
+    """基準裡帶著這個值的每一個片段，現在的來源裡都還在。基準裡找不到帶值的片段 ⇒ 退回比整份的每一行。"""
+    car = _carriers(seen, key)
+    if car:
+        return car <= _segments(now)
     lines = [ln.strip() for ln in seen.splitlines() if ln.strip()]
     return bool(lines) and all(ln in now for ln in lines)
 
@@ -148,7 +234,7 @@ def check(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = de
             e["status"], e["error"] = "unknown", err
             continue
         src["now_sha256"] = _sha(body)
-        e["status"] = "unchanged" if seen and _still_there(seen, body) else "changed"
+        e["status"] = "unchanged" if seen and _still_there(seen, body, e["matched"]) else "changed"
     counts: dict[str, int] = {}
     for e in prov:
         counts[e["status"]] = counts.get(e["status"], 0) + 1

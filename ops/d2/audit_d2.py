@@ -138,9 +138,29 @@ def reader_before(rec: Record, write_seq: int, value: str) -> dict | None:
     for e in reversed([x for x in rec.events if x["type"] == "step" and x["seq"] < write_seq]):
         if (e["payload"].get("actor") or {}).get("session") != sess:
             continue
+        if e["payload"].get("tool") in ("edit", "write") or "report.md" in step_cmd(rec, e):
+            continue        # 讀交件自己（之前寫進去的值）不是來源
         out = rec.text(e["payload"].get("output_blob")) or ""
         if cv and any(canon(m) == cv for m in re.findall(r"v?\d+\.\d+\.\d+|\$?\d[\d,]*", out)):
             return e
+    return None
+
+
+def file_url(rec: Record, read_step: dict, path: str) -> tuple[str, str] | None:
+    """`read <檔>` 讀到的檔是哪一個網址抓來的：最近一個寫了這個檔的步驟，它的指令裡 `curl … URL … > 檔`。
+    回（網址、那一步寫出的內容 sha256）。"""
+    name = pathlib.PurePosixPath(path).name
+    for e in reversed([x for x in rec.events if x["type"] == "step" and x["seq"] < read_step["seq"]]):
+        hit = [wr for wr in e["payload"].get("writes") or [] if pathlib.PurePosixPath(wr.get("path", "")).name == name]
+        if not hit:
+            continue
+        cmd = step_cmd(rec, e)
+        for seg in re.split(r"&&|\|\||;|\n", cmd):
+            if re.search(r">\s*\S*" + re.escape(name) + r"\b", seg):
+                u = URL_RE.findall(seg)
+                if len(u) == 1:
+                    return u[0], hit[0].get("after") or ""
+        return None
     return None
 
 
@@ -199,8 +219,14 @@ def audit(root: pathlib.Path, manifest: dict) -> dict:
                     if r:
                         out = rec.blob(r["payload"].get("output_blob")) or b""
                         urls = URL_RE.findall(step_cmd(rec, r))
+                        sha = hashlib.sha256(out).hexdigest()
+                        if not urls and r["payload"].get("tool") == "read":
+                            # 讀的是 agent 自己用 curl 存下來的檔：找寫出這個檔的那一步、同一段裡導進它的網址
+                            fu = file_url(rec, r, step_cmd(rec, r))
+                            if fu:
+                                urls, sha = [fu[0]], fu[1]
                         row.update(read_step=r["payload"]["step"], url=urls[0] if urls else None,
-                                   read_sha256=hashlib.sha256(out).hexdigest())
+                                   read_sha256=sha)
                         if urls:
                             host = urls[0].split("/")[2]
                             path = "/" + urls[0].split("/", 3)[3] if urls[0].count("/") >= 3 else "/"

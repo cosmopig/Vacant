@@ -132,13 +132,54 @@ def score(manifest: dict, reports: dict, costs: dict | None = None, arms: list[s
                 "tokens_out": sum(v["tokens_out"] or 0 for v in C),
                 "wall_s": round(sum(v["wall_s"] or 0 for v in C), 1),
                 "usage_unknown": sum(1 for v in C if v["ran"] and v["calls"] is None),
-                "tool_wall_s": round(sum(v.get("tool_wall_s") or 0 for v in C), 1)}
+                "tool_wall_s": round(sum(v.get("tool_wall_s") or 0 for v in C), 1),
+                "source_requests_agent": sum(v.get("src_req_agent") or 0 for v in C),
+                "source_requests_vacant": sum(v.get("src_req_vacant") or 0 for v in C)}
     return {"rows": rows, "summary": summ}
+
+
+def _epoch(ts: str) -> float:
+    import datetime as _dt
+    return _dt.datetime.strptime(ts, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=_dt.timezone.utc).timestamp()
+
+
+def source_requests(access: list[dict], host: str, t0: str, t1: str) -> dict:
+    """來源伺服器在這個週期（執行器記的開始～結束，秒級、各留 1 秒）收到這一組的請求數：agent 的、Vacant 重讀的。
+    同一組的臂依序跑，所以時間窗不會和別的臂重疊；不同組的主機名不同。"""
+    a, b = (t0, t1) if isinstance(t0, float) else (_epoch(t0), _epoch(t1) + 0.999)
+    hits = [x for x in access if x["host"] == host and a <= x["ts"] <= b]
+    return {"agent": sum(1 for x in hits if x.get("ua") != "vacant-source-check"),
+            "vacant": sum(1 for x in hits if x.get("ua") == "vacant-source-check")}
+
+
+def materials_stats(manifest: dict, mat_dir: pathlib.Path, sets: list[str] | None = None) -> dict:
+    """教材的數值碰撞率（第 0 週期）：一條宣稱的值（帶單位，例如 `30 days`）或只看數字（`30`）也出現在同一組**別的**
+    產品頁上的比例。值是從小的候選池隨機抽的，沒有刻意避開重複，也沒有刻意製造。"""
+    import re as _re
+    n = hit_key = hit_num = 0
+    for s in manifest["sets"]:
+        if sets and s["set"] not in sets:
+            continue
+        site = mat_dir / "sets" / s["set"] / "cycle_0" / "site"
+        texts = {f"p{i}.html": _re.sub(r"<[^>]+>", " ", (site / f"p{i}.html").read_text()) for i in range(1, 6)}
+        for c in s["claims"]:
+            v = s["truth"][0][c["id"]]
+            others = [t for pg, t in texts.items() if pg != c["source_page"]]
+            num = canon(v)
+            n += 1
+            pat = _re.compile(r"(?<![\w$.,])" + _re.escape(v) + r"(?![\w.,]\d|\w)")
+            hit_key += any(pat.search(t) for t in others)
+            hit_num += any(num is not None and any(canon(m) == num for m in _re.findall(r"v?\d+\.\d+\.\d+|\$?\d[\d,]*", t)) for t in others)
+    return {"claims": n, "value_with_unit_on_another_page": hit_key, "bare_number_on_another_page": hit_num,
+            "rate_with_unit": round(hit_key / n, 4) if n else None, "rate_bare_number": round(hit_num / n, 4) if n else None}
 
 
 def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
     reports: dict = {}
     costs: dict = {}
+    access = []
+    if (root / "access.jsonl").exists():
+        access = [json.loads(x) for x in (root / "access.jsonl").read_text().splitlines() if x.strip()]
     for sdir in sorted((root / "cells").iterdir()):
         sid = sdir.name
         if not (sdir / "c0" / "report.md").exists():
@@ -158,7 +199,14 @@ def load_harness(root: pathlib.Path) -> tuple[dict, dict]:
                     "tokens_in": u.get("input") if a else 0, "tokens_out": u.get("output") if a else 0,
                     "wall_s": a.get("wall_s", 0) if a else 0,
                     "tool_wall_s": (info.get("sources_check") or {}).get("wall_s", 0)}
+                rq = source_requests(access, f"{sid}.d2-sources.example", info.get("t_start", info["ts_start"]),
+                                     info.get("t_end", info["ts_end"]))
+                costs[(sid, adir.name, k)].update(src_req_agent=rq["agent"], src_req_vacant=rq["vacant"])
     return reports, costs
+
+
+def manifest_dir(path: str) -> str:
+    return str(pathlib.Path(path).expanduser().resolve().parent)
 
 
 def main() -> int:
@@ -171,6 +219,7 @@ def main() -> int:
     manifest = json.loads(pathlib.Path(a.manifest).read_text())
     reports, costs = load_harness(root)
     res = score(manifest, reports, costs)
+    res["summary"]["materials"] = materials_stats(manifest, pathlib.Path(manifest_dir(a.manifest)), sorted(reports))
     body = json.dumps(res, ensure_ascii=False, indent=1, sort_keys=True, default=str)
     if a.out:
         pathlib.Path(a.out).write_text(body)

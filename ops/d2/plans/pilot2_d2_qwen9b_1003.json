@@ -1,0 +1,11 @@
+{"schema": "vacant.d2.plan/1", "id": "pilot2_d2_qwen9b_1003", "seed": 3102,
+ "purpose": "先導第二輪（探索性；同 6 組，sources 改成：片段層級比對、基準跟著 agent 的重讀更新、撞值時用同行字挑來源。和第一輪比設計改動的效果。原第一輪說明：，不進確認性分析）：最小模型 qwen3.5-9b（不思考）在 6 組來源上跑初稿＋四臂×3 週期。看：出處覆蓋率、c 臂漏抓與成本、d 臂、稽核重算是否一致、執行時間。據此決定主批次設計；改了什麼記在 ops/d2/DESIGN_LOG.md。",
+ "materials": {"dir": "~/dev/ops/d2_materials/seed20261125", "generator": "ops/d2/gen_materials.py --seed 20261125 --sets 40",
+               "manifest_sha256": "2434d465325ec52d8592b4d4c63308489b8a891fbf116e9b67a5bb661c40edbe",
+               "sets": ["s31", "s32", "s33", "s34", "s35", "s36"]},
+ "arms": ["a", "b", "c", "d"], "jobs": 3, "agent_timeout_s": 600,
+ "server": {"port": 18192},
+ "model": {"provider": "lms1003q9", "model": "qwen/qwen3.5-9b"},
+ "vacant_python": "~/dev/ops/d2dev_venv/bin/python",
+ "agentcfg": {"dir": "~/dev/ops/agentcfg/d2dev", "copy": ["models.json", "extensions"],
+              "install_json": "~/dev/ops/agentcfg/d2obs_state/adapters/install.json"}}
