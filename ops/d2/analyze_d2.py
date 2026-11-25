@@ -526,6 +526,7 @@ def analyze(
     expected_sets: Sequence[str] | None = None,
     cost_metric: str = "tokens",
     primary_arm: str = "c",
+    d_arm: str = "d",
 ) -> dict[str, Any]:
     """執行完整 D2′ 群集 bootstrap 分析並回傳結構化結果。
     `cost_metric`：主要成本比值用的量；本機模型用 "tokens"，Claude（有提示快取）用 "cost_usd"（各計畫事前寫定）。"""
@@ -542,9 +543,9 @@ def analyze(
                                 upper_q=0.975, pre_correct_both=True)
     tok_bc = compute_cost_ratio(costs, "b", P, cost_metric, set_ids=set_ids, weights=weights,
                                 threshold=RATIO_THRESHOLD, ci_level=0.975)
-    miss_cd = compute_miss_diff(rows, P, "d", set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
+    miss_cd = compute_miss_diff(rows, P, d_arm, set_ids=set_ids, weights=weights, margin=MISS_MARGIN,
                                 upper_q=0.975, pre_correct_both=True)
-    tok_dc = compute_cost_ratio(costs, "d", P, cost_metric, set_ids=set_ids, weights=weights,
+    tok_dc = compute_cost_ratio(costs, d_arm, P, cost_metric, set_ids=set_ids, weights=weights,
                                 threshold=1.0, ci_level=0.975)
     calls_bc = compute_cost_ratio(costs, "b", P, "calls", set_ids=set_ids, weights=weights)
     wall_bc = compute_cost_ratio(costs, "b", P, "wall_s", set_ids=set_ids, weights=weights)
@@ -609,6 +610,7 @@ def analyze(
 
     return {
         "primary_arm": P,
+        "d_arm": d_arm,
         "c_as_secondary": c_as_secondary,
         "verdict_c_d": overall_cd,
         "verdict_parts_c_d": {"coverage": cov_v, "miss_diff_c_d": mcd, "token_ratio_d_c": tdc},
@@ -742,6 +744,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     help=f"Random seed (default {DEFAULT_SEED})")
     ap.add_argument("--out", help="Write JSON result to this path")
     ap.add_argument("--text-out", help="Write human-readable text summary to this path")
+    ap.add_argument("--d-arm", default="d", help="第二個確認性家族的比較臂（第三輪：d_diff）")
     ap.add_argument("--primary-arm", default="c", help="主要比較的臂（計畫事前寫定；r2heldout_b 是 c_verify）")
     ap.add_argument("--cost-metric", default="tokens", choices=["tokens", "cost_usd", "calls", "wall_s"],
                     help="primary cost ratio metric (pre-registered per plan: local models tokens, Claude cost_usd)")
@@ -766,6 +769,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         or DEFAULT_CYCLES,
         cost_metric=a.cost_metric,
         primary_arm=a.primary_arm,
+        d_arm=a.d_arm,
     )
     body = json.dumps(res, ensure_ascii=False, indent=1, sort_keys=True)
     text = format_text(res)

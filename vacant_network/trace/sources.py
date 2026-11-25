@@ -445,7 +445,8 @@ def _snapshots(rec: Recorder) -> dict[str, str]:
     snap: dict[str, str] = {}
     for e in rec.events():
         if e.get("type") == "source_snapshot":
-            snap.update((e.get("payload") or {}).get("pages") or {})
+            # `Recorder.events()` 把 payload 攤平到最上層；直接讀鏈檔時在 payload 底下——兩種都收
+            snap.update(e.get("pages") or (e.get("payload") or {}).get("pages") or {})
     return snap
 
 
@@ -489,9 +490,12 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
                 if r["seq"] < w.seq and r["ctx"] == w.ctx and r["url"] not in urls and \
                         any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
                     urls.append(r["url"])
+        seen: dict[str, str] = {}
+        for r in recs:                          # 每個網址取「含這個值」的最近一筆（同一頁可能被 grep 過好幾次、各取不同欄）
+            if r["url"] in urls and any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                seen[r["url"]] = r["text"]
         out.append({"line": c["line"], "value": c["value"], "key": c["key"],
-                    "written_by_step": writer.get("step") if writer else None, "candidates": urls,
-                    "_seen": {r["url"]: r["text"] for r in recs if r["url"] in urls}})
+                    "written_by_step": writer.get("step") if writer else None, "candidates": urls, "_seen": seen})
     return out
 
 
