@@ -117,7 +117,16 @@ def build_anchor(root: pathlib.Path) -> dict[str, Any]:
         "root": str(root_p.resolve()),
         "run_json_sha256": _sha256_file(root_p / "RUN.json"),
         "chains": chains,
+        # 第三次獨立稽核 11-25：執行器自己的紀錄（切週期用的 cycle.json、來源伺服器存取紀錄）也錨住
+        "harness_files": harness_files(root_p),
     }
+
+
+def harness_files(root_p: pathlib.Path) -> dict[str, str | None]:
+    out: dict[str, str | None] = {"access.jsonl": _sha256_file(root_p / "access.jsonl")}
+    for f in sorted((root_p / "cells").glob("*/*/cycle_*/cycle.json")) + sorted((root_p / "cells").glob("*/c0/done.json")):
+        out[str(f.relative_to(root_p))] = _sha256_file(f)
+    return out
 
 
 def check_anchor(root: pathlib.Path, anchor: dict[str, Any]) -> dict[str, Any]:
@@ -143,6 +152,14 @@ def check_anchor(root: pathlib.Path, anchor: dict[str, Any]) -> dict[str, Any]:
             "actual": {"run_json_sha256": cur_run_sha},
         })
         problems.append(f"RUN.json sha256 mismatch (expected {exp_run_sha}, got {cur_run_sha})")
+
+    exp_hf = anchor.get("harness_files") or {}
+    if exp_hf:
+        cur_hf = harness_files(root_p)
+        bad_hf = sorted(k for k in set(exp_hf) | set(cur_hf) if exp_hf.get(k) != cur_hf.get(k))
+        if bad_hf:
+            mismatches.append({"chain": "harness_files", "reasons": ["harness_file_changed"], "files": bad_hf[:50]})
+            problems.append(f"{len(bad_hf)} harness files (cycle.json/done.json/access.jsonl) changed since the anchor")
 
     chains_ok = 0
     chains_bad = 0
