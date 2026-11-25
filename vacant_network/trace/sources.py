@@ -621,46 +621,48 @@ def _line_key(line: str) -> str:
     return (line[:m.start()] if m else line).strip()
 
 
+def _label_key(line: str) -> str:
+    """行的鍵：有「: 」就用最後一個「: 」之前的整段標籤（範本行的完整前綴）；沒有才退回「第一個數字之前」。
+    獨立稽核 11-25：只用「第一個數字之前」時，名稱含數字的實體（Hauler H220 → `- Hauler H`）所有行撞成同一個鍵，
+    守衛把 agent 已改對的行用同實體的兄弟行覆蓋。"""
+    return line.rsplit(": ", 1)[0].strip() if ": " in line else _line_key(line)
+
+
 def guard(ws: str | pathlib.Path, path: str, allowed_lines: list[int], before_text: str,
           *, record: bool = True, keep_labels: bool = False) -> dict[str, Any]:
-    """越界守衛：以改之前的版本為底，交辦的行換成 agent 的新版本（用行首到第一個數字之前的文字對行），
-    其他行一律維持原樣；有被改或被刪的就寫回檔案並簽一筆 `source_guard`。"""
+    """越界守衛：以改之前的版本為底，交辦的行換成 agent 的新版本（用改前那一行的整段標籤對行），
+    其他行一律維持原樣；有被改或被刪的就寫回檔案並簽一筆 `source_guard`。
+    `keep_labels` 保留參數相容，不再有作用（v5 那個「交辦行只准改值」的修法建立在錯的診斷上，已撤回）。"""
     ws = pathlib.Path(ws).resolve()
     p = ws / path
     new_text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     old = before_text.splitlines()
-    new_map: dict[str, str] = {}
-    new_by_label: dict[str, str] = {}
+    new_by_key: dict[str, list[str]] = {}
     for ln in new_text.splitlines():
-        new_map.setdefault(_line_key(ln), ln)
-        if ": " in ln:
-            new_by_label.setdefault(ln.rsplit(": ", 1)[0], ln)
+        new_by_key.setdefault(_label_key(ln), []).append(ln)
+    old_keys: dict[str, int] = {}
+    for ln in old:
+        old_keys[_label_key(ln)] = old_keys.get(_label_key(ln), 0) + 1
     allowed = set(allowed_lines)
-    out, restored, relabeled = [], [], []
+    out, restored = [], []
     for i, ln in enumerate(old, start=1):
+        k = _label_key(ln)
+        cands = new_by_key.get(k) or []
+        # 同一個鍵在改前版本只出現一次、改後也只有一行 ⇒ 對得上；重複的鍵（例如空行、重複的標題）照位置不動
+        mine = cands[0] if (len(cands) == 1 and old_keys.get(k) == 1) else None
         if i in allowed:
-            if keep_labels and ": " in ln:
-                # v5：交辦的行只允許改值——標籤（最後一個「: 」之前）照舊；agent 改了標籤就還原標籤、保留它改的值
-                label = ln.rsplit(": ", 1)[0]
-                cand = new_by_label.get(label)
-                if cand is None:
-                    alt = new_map.get(_line_key(ln))
-                    if alt is not None and alt != ln:
-                        cand = label + ": " + (alt.rsplit(": ", 1)[1] if ": " in alt else alt)
-                        relabeled.append(i)
-                out.append(cand if cand is not None else ln)
-            else:
-                out.append(new_map.get(_line_key(ln), ln))
+            out.append(mine if mine is not None else (ln if ln in cands or not cands else ln))
         else:
             out.append(ln)
-            if new_map.get(_line_key(ln)) != ln:
+            if mine is not None and mine != ln:
+                restored.append(i)
+            elif mine is None and ln not in cands:
                 restored.append(i)
     result = "\n".join(out) + ("\n" if before_text.endswith("\n") else "")
     changed = result != new_text
     if changed:
         p.write_text(result, encoding="utf-8")
-    res = {"path": path, "allowed": sorted(allowed), "restored_lines": restored, "relabeled_lines": relabeled,
-           "rewrote_file": changed,
+    res = {"path": path, "allowed": sorted(allowed), "restored_lines": restored, "rewrote_file": changed,
            "before_sha256": _sha(before_text), "agent_sha256": _sha(new_text), "after_sha256": _sha(result)}
     if record and changed:
         rec = Recorder(ws)

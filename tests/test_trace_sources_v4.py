@@ -68,10 +68,32 @@ def test_v5_html_table():
     assert S.value_status(a, a.replace("10:00", "10:05"), "27 knots", by_field=True) == "unchanged"
 
 
-def test_v5_guard_keeps_labels_on_handed_lines(tmp_path):
+def test_guard_label_change_on_handed_line_is_not_rewritten_into_sibling(tmp_path):
+    """撤回的 v5 修法（只准改值）不再做；但標籤被改的交辦行也不能拿兄弟行來頂替。"""
     before = "# R\n- Summit Gear 44 — crate capacity: 39 units\n- Summit Gear 44 — stock on hand: 12 units\n"
     (tmp_path / "report.md").write_text("# R\n- Summit Gear 44 — stock on hand: 63 units\n- Summit Gear 44 — stock on hand: 12 units\n")
-    r = S.guard(tmp_path, "report.md", [2], before, record=False, keep_labels=True)
+    S.guard(tmp_path, "report.md", [2], before, record=False)
     out = (tmp_path / "report.md").read_text().splitlines()
-    assert out[1] == "- Summit Gear 44 — crate capacity: 63 units" and out[2] == "- Summit Gear 44 — stock on hand: 12 units"
-    assert r["relabeled_lines"] == [2]
+    assert out[2] == "- Summit Gear 44 — stock on hand: 12 units"
+
+
+def test_guard_entity_with_digits_does_not_overwrite_sibling_lines(tmp_path):
+    """獨立稽核 11-25：_line_key 取「第一個數字之前」，Hauler H220 的所有行撞成同一個鍵，交辦的行被兄弟行蓋掉。"""
+    before = ("# R\n- Hauler H220 — pallet capacity: 30 pallets\n- Hauler H220 — on-time arrival rate: 84.8%\n"
+              "- Hauler H220 — base lane tariff: 871.75 USD\n")
+    agent = before.replace("on-time arrival rate: 84.8%", "on-time arrival rate: 78%")
+    (tmp_path / "report.md").write_text(agent)
+    r = S.guard(tmp_path, "report.md", [3], before, record=False)
+    out = (tmp_path / "report.md").read_text().splitlines()
+    assert out[2] == "- Hauler H220 — on-time arrival rate: 78%"
+    assert out[1] == "- Hauler H220 — pallet capacity: 30 pallets" and out[3].endswith("871.75 USD")
+    assert r["restored_lines"] == []
+
+
+def test_guard_still_restores_out_of_scope_edit_on_digit_entity(tmp_path):
+    before = "# R\n- Hauler H220 — pallet capacity: 30 pallets\n- Hauler H220 — on-time arrival rate: 84.8%\n"
+    agent = before.replace("30 pallets", "99 pallets").replace("84.8%", "78%")
+    (tmp_path / "report.md").write_text(agent)
+    r = S.guard(tmp_path, "report.md", [3], before, record=False)
+    out = (tmp_path / "report.md").read_text().splitlines()
+    assert out[1].endswith("30 pallets") and out[2].endswith("78%") and r["restored_lines"] == [2]
