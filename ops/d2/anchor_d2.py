@@ -114,7 +114,7 @@ def build_anchor(root: pathlib.Path) -> dict[str, Any]:
     return {
         "schema": ANCHOR_SCHEMA,
         "timestamp": ts,
-        "root": str(root_p.resolve()),
+        "root": root_p.resolve().name,       # 只記 root 的名稱，不記含帳號名的絕對路徑（repo 公開；11-25 最終稽核）
         "run_json_sha256": _sha256_file(root_p / "RUN.json"),
         "chains": chains,
         # 第三次獨立稽核 11-25：執行器自己的紀錄（切週期用的 cycle.json、來源伺服器存取紀錄）也錨住

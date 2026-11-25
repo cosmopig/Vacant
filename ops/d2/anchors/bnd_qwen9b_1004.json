@@ -244,7 +244,7 @@
   "cells/s29/c0/done.json": "58cad4bb795a980bc205c1c720d64c2fd5d58ede26c4bc9da04d656d8d2971bd",
   "cells/s30/c0/done.json": "f81713ef418d464004324e15fdc937b7e2f6cc242e4fc34e2dfb033df9e3db9b"
  },
- "root": "/home/user1/dev/ops/d2_runs/bnd_qwen9b_1004",
+ "root": "bnd_qwen9b_1004",
  "run_json_sha256": "d996ea2c64f7511d83b36ea5672a7093581c747f617e55e5bf43e65fde905320",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T12:59:15Z"

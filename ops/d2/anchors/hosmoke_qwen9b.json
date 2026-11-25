@@ -36,7 +36,7 @@
    "trust_sha256": "b966848ce6362083ed8f08e2b168cb4e1fa87c639899476c0edd665eb98ecb13"
   }
  },
- "root": "/home/user1/dev/ops/d2_runs/hosmoke_qwen9b",
+ "root": "hosmoke_qwen9b",
  "run_json_sha256": "5dfc9c656845b9b2a8622982253c8e5f57ce2ca3cfc248bb0a16385a028e2996",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T10:20:41Z"

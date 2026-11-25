@@ -1484,7 +1484,7 @@
   "cells/s20/d_diff/cycle_3/cycle.json": "e63cddfdc138f6b8a851d6a14ce0b2c0692a7b1e985a0a1c6fc7c85f6fbe06c4",
   "cells/s20/d_diff/cycle_4/cycle.json": "7471299f7c4a5c1e1d869ff275455bbbc061c1d03ded5befe355134ca3dfd0b0"
  },
- "root": "/home/user1/dev/ops/d2_runs/r2heldout_qwen9b_1004",
+ "root": "r2heldout_qwen9b_1004",
  "run_json_sha256": "bc4b7ff6475180f9f986729ace2d067a00c8dcb32cdeab7e19af67724fd06f2b",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T12:56:52Z"

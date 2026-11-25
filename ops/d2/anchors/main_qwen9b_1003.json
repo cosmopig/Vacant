@@ -1751,7 +1751,7 @@
    "trust_sha256": "be7df7211cfa88fe7d2df11101a8709d725c73fff4c6c31273e2f69d43b22681"
   }
  },
- "root": "/home/user1/dev/ops/d2_runs/main_qwen9b_1003",
+ "root": "main_qwen9b_1003",
  "run_json_sha256": "9828e675296052291bec902c2c3ce96232ad2b59815f1de84dfc7524e57dbeae",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T10:20:39Z"

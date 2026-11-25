@@ -3704,7 +3704,7 @@
   "cells/s50/d_diff/cycle_3/cycle.json": "cc6736095b0beeaf491639fd380ba31b7492473704590adbc4bdc0343f77cfab",
   "cells/s50/d_diff/cycle_4/cycle.json": "e37d7d588e886cbe7d9ef6c177ac95ae2f2e381a20706bda86c010713e47e96c"
  },
- "root": "/home/user1/dev/ops/d2_runs/r2main_haiku",
+ "root": "r2main_haiku",
  "run_json_sha256": "3abb5d26c0f8589cb1299e01dfe3f9ca6c3d329df68d25529f23d93e5417b934",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T12:56:50Z"

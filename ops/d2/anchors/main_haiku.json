@@ -1751,7 +1751,7 @@
    "trust_sha256": "4c1027fcff45dcf28a118603b12e85712028894e77b3c446f03a8929f2e4f62d"
   }
  },
- "root": "/home/user1/dev/ops/d2_runs/main_haiku",
+ "root": "main_haiku",
  "run_json_sha256": "d9f2d00ce3759f2e30e91c8101031142941e8779cd448f4ba060e68f7214ee16",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T10:20:40Z"

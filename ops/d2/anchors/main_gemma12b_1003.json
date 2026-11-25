@@ -876,7 +876,7 @@
    "trust_sha256": "237e260484afc93a3d85f6cc69347c273ee21ff14bbdb61909c7961a4def1760"
   }
  },
- "root": "/home/user1/dev/ops/d2_runs/main_gemma12b_1003",
+ "root": "main_gemma12b_1003",
  "run_json_sha256": "eedd7100fc15f32f7e6205dd9403dfdbd4c2b16ca2cc55b701d7a7fefb1351f4",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T10:20:40Z"

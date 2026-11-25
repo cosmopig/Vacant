@@ -3784,7 +3784,7 @@
   "cells/s60/d/cycle_3/cycle.json": "78adca6cf045a91c7cfcfd2cfee8e74566da198a1b88cefacfddba9c58c7cb02",
   "cells/s60/d/cycle_4/cycle.json": "f364485060e122989a90dab0893c8a0d14227168c899c8c6b840b3cf62d05611"
  },
- "root": "/home/user1/dev/ops/d2_runs/r2heldoutb_qwen9b_1003",
+ "root": "r2heldoutb_qwen9b_1003",
  "run_json_sha256": "f51c7730ddd5cb00161600cd3e9115ebbede719b850ce6c04b5d2c59513c42dd",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T15:05:10Z"

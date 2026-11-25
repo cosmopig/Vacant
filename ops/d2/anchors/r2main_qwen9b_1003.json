@@ -3704,7 +3704,7 @@
   "cells/s50/d_diff/cycle_3/cycle.json": "1833c2854c1beada2a0a1d0746d09a354c4ed5761f909c584f0cd175bf5f1156",
   "cells/s50/d_diff/cycle_4/cycle.json": "4234ec3c942d03956a8f5c427e895dd46fe244ece0b1661abb063c53c9a863d3"
  },
- "root": "/home/user1/dev/ops/d2_runs/r2main_qwen9b_1003",
+ "root": "r2main_qwen9b_1003",
  "run_json_sha256": "f86e015064fc11898e51b9c9a1dcc80df029800cc2518911ed1b1912fea65d0a",
  "schema": "vacant.d2.anchor/1",
  "timestamp": "2026-11-25T12:56:48Z"

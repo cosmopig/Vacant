@@ -60,3 +60,9 @@
 ## r2heldoutb_d2_qwen9b_1003（附註）
 - **c_verify 的實際機制**見本檔「2026-11-25 ~11:10 UTC 事前揭露」那一節（commit b79e6708c）：c_verify＝沒出處的行每週期都交辦＋驗收退回一次，不是單純的「c＋驗收」。這一節在批次開跑後約 4 分鐘寫下，當時還沒有任何週期跑完。結論把 c_verify 與 c 的差異歸因給「每週期重交」這個協定；第二輪沒有跑 c_every，兩個因素分不開。
 - c_verify 升為主要臂是看過留出 v2 之後；d_diff 沒有跑（最強的便宜基準不在這一批裡）。
+
+## 2026-11-25 最終稽核後的補記
+- `ops/d2/run_d2.py` 在 r2heldout_b 運行中被改過：commit 151359c09（12:51），為邊界測試加了「只跑初稿、提示變體、初稿後記錄出處」，受計畫的 `write_variants`／`provenance_after_c0` 鍵控制，預設路徑不變。r2heldout_b 載入的是開跑時的舊版（它的 RUN.json 記的 runner_sha256 與現在的檔不同）。
+- `ops/d2/run_d2.py` 的 `NO_PROXY` 原本寫死兩台 GPU 主機的內網位址；最終稽核後改成從環境變數 `D2_MODEL_HOSTS` 讀。在這之前開跑的每一批，RUN.json 記的 runner_sha256 都是寫死位址的舊版。
+- `ops/d2/anchors/*.json` 的 `"root"` 原本是含系統帳號名的絕對家目錄路徑；同一個 commit 起改成只記 root 的名稱（`anchor_d2.py write` 同步改）。舊提交裡的版本留在 git 歷史中，沒有改寫歷史；`check` 不比對 `root` 欄，錨點的雜湊內容不受影響。
+- 邊界測試的抓取寫法分類原本按「指令字串裡有沒有 python 字樣」分，把 `which wget python3` 這種偵測指令誤判成 python（s23、s27）；改成看真的抓了來源網址的指令（`ops/d2/bnd_coverage.py`）。更正後：python urllib 4 組 0/80、wget 6 組 120/120。

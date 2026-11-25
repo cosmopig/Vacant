@@ -41,7 +41,9 @@ from redo import usage_from_log  # noqa: E402
 HOST_FMT = "{set}.d2-sources.example"
 LOCK = threading.Lock()
 #: 只有 `*.d2-sources.example` 走來源伺服器；模型端點（LM Studio）與本機一律直連
-NO_PROXY = "localhost,127.0.0.1,100.119.113.56,100.86.226.21"
+#: 模型端點主機（逗號分隔）從環境變數 D2_MODEL_HOSTS 讀，不寫死在公開的 repo（11-25 最終稽核）。
+#: 這一版之前開跑的批次，RUN.json 記的 runner_sha256 是寫死主機位址的舊版。
+NO_PROXY = ",".join(x for x in ["localhost", "127.0.0.1", *os.environ.get("D2_MODEL_HOSTS", "").split(",")] if x)
 #: Claude Code 額外直連 Anthropic API 與 claude.ai（僅設 http_proxy，HTTPS 不走來源伺服器）
 CLAUDE_NO_PROXY = NO_PROXY + ",api.anthropic.com,.anthropic.com,claude.ai,.claude.ai,platform.claude.com"
 #: Claude Code 允許的工具（自動放行，避免 -p 下卡權限詢問）與禁止的內建抓頁工具（強制用 curl 走 http_proxy）

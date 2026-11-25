@@ -1,1 +1,241 @@
-{"by_variant": {"write": {"sets": 10, "claims": 200, "draft_correct": 200, "with_source": 200, "correct_page": 200}, "notool": {"sets": 10, "claims": 200, "draft_correct": 200, "with_source": 200, "correct_page": 196}, "nocurl": {"sets": 10, "claims": 200, "draft_correct": 200, "with_source": 120, "correct_page": 120}}, "rows": [["s01", "write", "curl", 20, 20, 20], ["s02", "write", "curl", 20, 20, 20], ["s03", "write", "curl", 20, 20, 20], ["s04", "write", "curl", 20, 20, 20], ["s05", "write", "curl", 20, 20, 20], ["s06", "write", "curl", 20, 20, 20], ["s07", "write", "curl", 20, 20, 20], ["s08", "write", "curl", 20, 20, 20], ["s09", "write", "curl", 20, 20, 20], ["s10", "write", "curl", 20, 20, 20], ["s11", "notool", "curl", 20, 20, 20], ["s12", "notool", "curl", 20, 20, 20], ["s13", "notool", "curl", 20, 20, 20], ["s14", "notool", "curl", 20, 20, 20], ["s15", "notool", "curl", 20, 20, 20], ["s16", "notool", "curl", 20, 20, 20], ["s17", "notool", "curl", 20, 20, 20], ["s18", "notool", "curl", 20, 20, 20], ["s19", "notool", "curl", 20, 20, 16], ["s20", "notool", "curl", 20, 20, 20], ["s21", "nocurl", "wget", 20, 20, 20], ["s22", "nocurl", "python", 20, 0, 0], ["s23", "nocurl", "python", 20, 20, 20], ["s24", "nocurl", "python", 20, 0, 0], ["s25", "nocurl", "wget", 20, 20, 20], ["s26", "nocurl", "python", 20, 0, 0], ["s27", "nocurl", "python", 20, 20, 20], ["s28", "nocurl", "python", 20, 0, 0], ["s29", "nocurl", "wget", 20, 20, 20], ["s30", "nocurl", "wget", 20, 20, 20]]}
+{
+ "by_variant_and_fetch": {
+  "nocurl|python urllib": {
+   "sets": 4,
+   "claims": 80,
+   "correct_page": 0,
+   "draft_correct": 80
+  },
+  "nocurl|wget": {
+   "sets": 6,
+   "claims": 120,
+   "correct_page": 120,
+   "draft_correct": 120
+  },
+  "notool|curl": {
+   "sets": 10,
+   "claims": 200,
+   "correct_page": 196,
+   "draft_correct": 200
+  },
+  "write|curl": {
+   "sets": 10,
+   "claims": 200,
+   "correct_page": 200,
+   "draft_correct": 200
+  }
+ },
+ "rows": [
+  {
+   "set": "s01",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s02",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s03",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s04",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s05",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s06",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s07",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s08",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s09",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s10",
+   "variant": "write",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s11",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s12",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s13",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s14",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s15",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s16",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s17",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s18",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s19",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 16
+  },
+  {
+   "set": "s20",
+   "variant": "notool",
+   "fetch": "curl",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s21",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s22",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s23",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s24",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s25",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s26",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s27",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s28",
+   "variant": "nocurl",
+   "fetch": "python urllib",
+   "draft_correct": 20,
+   "correct_page": 0
+  },
+  {
+   "set": "s29",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  },
+  {
+   "set": "s30",
+   "variant": "nocurl",
+   "fetch": "wget",
+   "draft_correct": 20,
+   "correct_page": 20
+  }
+ ],
+ "note": "分類依實際抓取指令（2026-11-25 依最終稽核更正）"
+}
