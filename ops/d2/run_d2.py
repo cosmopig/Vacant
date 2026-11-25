@@ -332,7 +332,53 @@ class Run:
                 return cand
         raise FileNotFoundError(f"claude settings.json not found under {live / 'cfg'}")
 
-    def agent_env(self, live: pathlib.Path) -> dict:
+    def agent_env(self, live: pathlib.Path, for_agent: bool = True) -> dict:
+        """agent 的環境。計畫有 `egress`（第四輪）時，agent 的 http_proxy 指向這一組的 Vacant 網路出口代理
+        （`vacant trace egress`，上游＝來源伺服器）；Vacant 自己的重讀（for_agent=False）照舊直連來源伺服器。"""
+        env = self._agent_env_base(live)
+        if for_agent and self.plan.get("egress"):
+            port = self.ensure_egress(live)
+            for k in ("http_proxy", "HTTP_PROXY"):
+                env[k] = f"http://127.0.0.1:{port}"
+        return env
+
+    def ensure_egress(self, live: pathlib.Path) -> int:
+        if not hasattr(self, "_egress"):
+            self._egress = {}
+        key = str(live)
+        if key in self._egress and self._egress[key][0].poll() is None:
+            return self._egress[key][1]
+        sets = self.plan["materials"]["sets"]
+        sid = next((s for s in sets if self.live_dir(s) == live), None)
+        port = int(self.plan["egress"]["port_base"]) + (sets.index(sid) if sid in sets else 999)
+        ready = live / "egress.ready"
+        ready.unlink(missing_ok=True)
+        env = self._agent_env_base(live)
+        env.pop("PI_CODING_AGENT_DIR", None)
+        proc = subprocess.Popen([os.path.expanduser(self.plan["vacant_python"]), "-I", "-m", "vacant_network", "trace",
+                                 "egress", "--port", str(port), "--upstream-proxy",
+                                 f"http://127.0.0.1:{self.plan['server']['port']}", "--ready-file", str(ready)],
+                                cwd=live / "ws", env=env, stdout=subprocess.DEVNULL,
+                                stderr=open(live / "egress.err", "a"), start_new_session=True)
+        for _ in range(100):
+            if ready.exists():
+                break
+            time.sleep(0.1)
+        else:
+            raise InfraError(f"egress proxy did not start on {port}")
+        self._egress[key] = (proc, port)
+        return port
+
+    def stop_egress(self, live: pathlib.Path) -> None:
+        pr = getattr(self, "_egress", {}).pop(str(live), None)
+        if pr:
+            pr[0].terminate()
+            try:
+                pr[0].wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                pr[0].kill()
+
+    def _agent_env_base(self, live: pathlib.Path) -> dict:
         p = self.plan
         env = {k: v for k, v in os.environ.items() if not k.lower().endswith("_proxy") and not k.startswith("D2_")}
         if self.agent_kind() == "claude":
@@ -475,7 +521,7 @@ class Run:
 
     def vacant_sources(self, live: pathlib.Path, *args: str) -> dict:
         """產品指令 `vacant trace sources report.md <args>`，回 JSON。"""
-        env = self.agent_env(live)
+        env = self.agent_env(live, for_agent=False)
         env.pop("PI_CODING_AGENT_DIR", None)
         r = subprocess.run([os.path.expanduser(self.plan["vacant_python"]), "-I", "-m", "vacant_network", "trace",
                             "sources", "report.md", *args], cwd=live / "ws", env=env,
@@ -484,12 +530,13 @@ class Run:
             raise RuntimeError(f"vacant trace sources {args} rc={r.returncode}: {r.stderr[-300:]}")
         return json.loads(r.stdout)
 
-    def sources_check(self, live: pathlib.Path, out: pathlib.Path, candidates: bool = False) -> dict:
-        env = self.agent_env(live)
+    def sources_check(self, live: pathlib.Path, out: pathlib.Path, candidates: bool = False,
+                      extra: tuple = ()) -> dict:
+        env = self.agent_env(live, for_agent=False)
         env.pop("PI_CODING_AGENT_DIR", None)
         t0 = time.time()
         r = subprocess.run([os.path.expanduser(self.plan["vacant_python"]), "-I", "-m", "vacant_network", "trace",
-                            "sources", "report.md", "--check", "--json", *(["--candidates"] if candidates else [])],
+                            "sources", "report.md", "--check", "--json", *(["--candidates"] if candidates else []), *extra],
                            cwd=live / "ws", env=env, capture_output=True, text=True, timeout=600)
         (out).mkdir(parents=True, exist_ok=True)
         (out / "sources_check.json").write_text(r.stdout)
@@ -508,6 +555,12 @@ class Run:
 
     # ---------- 一組 ----------
     def do_set(self, set_id: str, arms: list[str]) -> None:
+        try:
+            self._do_set(set_id, arms)
+        finally:
+            self.stop_egress(self.live_dir(set_id))
+
+    def _do_set(self, set_id: str, arms: list[str]) -> None:
         p = self.plan
         live = self.live_dir(set_id)
         cells = self.root / "cells" / set_id
@@ -535,7 +588,7 @@ class Run:
             self._nocurl = False
             if p.get("snapshot_after_c0"):
                 # 第三輪：交件後 Vacant 把每條宣稱的候選來源抓一份存成快照（產品指令，0 token；所有臂共用這份初稿，無害）
-                self.vacant_sources(live, "--snapshot")
+                self.vacant_sources(live, "--snapshot", *(["--egress"] if p.get("egress") else []))
             if p.get("provenance_after_c0"):
                 # 只量初稿的出處覆蓋率：產品指令 `vacant trace sources report.md --json`（不重讀來源、不簽事件）
                 env = self.agent_env(live)
@@ -567,6 +620,12 @@ class Run:
                 shutil.copytree(snap / d, live / d, symlinks=True)
             prev_pages = self.page_hashes(set_id, 0)
             handed_nosrc: set[str] = set()
+            if arm == "d_diff_real":
+                self.install_site(set_id, 0, live)
+                self.set_route(host, live / "site", arm, 0)
+                if not hasattr(self, "_notifier_prev"):
+                    self._notifier_prev = {}
+                self._notifier_prev[set_id] = self.notifier_fetch(set_id, adir / "notifier" / "cycle_0")
             for k in range(1, self.n_cycles[set_id] + 1):
                 if self.stop.is_set():
                     return
@@ -628,31 +687,39 @@ class Run:
                                     merged[key] = (u1.get(key) or 0) + (u2.get(key) or 0)
                             info["agent"] = {**a1, "usage": merged, "wall_s": round((a1.get("wall_s") or 0) + (r2.get("wall_s") or 0), 1),
                                              "includes_verify_run": True}
-                elif arm in ("cC", "cCG", "cCGR"):
+                elif arm in ("cC", "cCG", "cCGR", "cV"):
                     # 第三輪：候選集合（C）＋越界守衛（G）＋沒重讀就改退回一次（R）。沒有出處的行每週期都交（值不在任何已知來源裡）
-                    sc = self.sources_check(live, cdir, candidates=True)
+                    # 第四輪 cV＝cCGR＋受影響看值（--by-value）＋網路出口紀錄（--egress）
+                    v4 = arm == "cV"
+                    eg = ("--egress",) if (v4 and p.get("egress")) else ()
+                    sc = self.sources_check(live, cdir, candidates=True, extra=(("--by-value",) + eg) if v4 else ())
                     lines = (live / "ws" / "report.md").read_text().splitlines()
                     handed = {e["line"]: e for e in sc["claims"] if e["status"] != "unchanged"}
+                    if p.get("nosrc_index"):
+                        # 第四輪 harness 修正（ADDENDA）：沒有出處的行不把候選（可能只剩主機名）當來源，改給索引頁
+                        for e in handed.values():
+                            if e["status"] == "no_source":
+                                e["candidates"] = []
                     items = []
                     for ln in sorted(handed):
                         urls = handed[ln].get("candidates") or []
                         src = " or ".join(urls[:4]) if urls else self.nosrc_text(set_id)
                         items.append(PROMPTS["c_item"].format(line=ln, text=lines[ln - 1].strip(), src=src))
                     info["sources_check"] = {"counts": sc["counts"], "affected_lines": sc["affected_lines"],
-                                             "handed_lines": sorted(handed), "wall_s": sc["_wall_s"], "mode": "candidates"}
+                                             "handed_lines": sorted(handed), "wall_s": sc["_wall_s"], "mode": sc.get("mode", "candidates")}
                     if items:
                         before = (live / "ws" / "report.md").read_text()
                         bf = cdir / "before_run.md"
                         bf.write_text(before)
                         seq0 = self.chain_len(live) or 0
                         info["agent"] = self.run_agent(live, self.prompt("c", set_id, items="\n".join(items)), cdir / "run")
-                        if arm in ("cCG", "cCGR"):
+                        if arm in ("cCG", "cCGR", "cV"):
                             info["guard"] = self.vacant_sources(live, "--guard", ",".join(map(str, sorted(handed))),
                                                                 "--before", str(bf))
-                        if arm == "cCGR":
+                        if arm in ("cCGR", "cV"):
                             spec = cdir / "reread_spec.json"
                             spec.write_text(json.dumps({str(ln): handed[ln].get("candidates") or [] for ln in handed}))
-                            rr = self.vacant_sources(live, "--reread", str(spec), "--since", str(seq0), "--before", str(bf))
+                            rr = self.vacant_sources(live, "--reread", str(spec), "--since", str(seq0), "--before", str(bf), *eg)
                             info["reread"] = rr
                             if rr["not_reread"]:
                                 lines2 = (live / "ws" / "report.md").read_text().splitlines()
@@ -677,6 +744,18 @@ class Run:
                                 info["agent"] = {**a1, "usage": merged,
                                                  "wall_s": round((a1.get("wall_s") or 0) + (r2.get("wall_s") or 0), 1),
                                                  "includes_verify_run": True}
+                elif arm == "d_diff_real":
+                    # 第四輪：真實版的頁面變動偵測——執行器每週期經來源伺服器實際抓一次每張頁面，和上一週期抓到的比
+                    # （每次抓取的雜訊會讓它每週期都觸發）；理想版 d_diff（用教材檔）保留當上限
+                    cur_txt = self.notifier_fetch(set_id, adir / "notifier" / f"cycle_{k}")
+                    prev_txt = getattr(self, "_notifier_prev", {}).get(set_id) or {}
+                    changed = [u for u in sorted(cur_txt) if cur_txt[u] != prev_txt.get(u)]
+                    self._notifier_prev[set_id] = cur_txt
+                    info["changed_pages"] = changed
+                    if changed:
+                        info["agent"] = self.run_agent(
+                            live, self.prompt("d_diff", set_id, changed=" ".join(changed))
+                            + self.diff_fetched(prev_txt, cur_txt, changed), cdir / "run")
                 elif arm in ("d", "d2", "d_diff"):
                     cur = self.page_hashes(set_id, k)
                     changed = [f"http://{host}/{f}" for f in sorted(cur) if cur[f] != prev_pages.get(f)]
@@ -717,6 +796,32 @@ class Run:
                 continue
             d = list(difflib.unified_diff(txt(a), txt(b), lineterm="", n=0))
             out.append(f"http://{host}/{pg}:\n" + "\n".join(x for x in d if not x.startswith(("---", "+++"))))
+        return ("\nWhat changed on those pages (text diff, '-' old, '+' new):\n" + "\n".join(out)) if out else ""
+
+    def notifier_fetch(self, set_id: str, out: pathlib.Path) -> dict:
+        """頁面變動偵測工具那樣：經來源伺服器抓每張頁面（User-Agent d2-notifier；不經 agent、不經 Vacant）。"""
+        import urllib.request as _u
+        op = _u.build_opener(_u.ProxyHandler({"http": f"http://127.0.0.1:{self.plan['server']['port']}"}))
+        out.mkdir(parents=True, exist_ok=True)
+        res = {}
+        for u in self.urls(set_id):
+            with op.open(_u.Request(u, headers={"User-Agent": "d2-notifier"}), timeout=30) as r:
+                t = r.read().decode("utf-8", "replace")
+            res[u] = t
+            (out / u.rsplit("/", 1)[1]).write_text(t)
+        return res
+
+    def diff_fetched(self, prev: dict, cur: dict, changed: list) -> str:
+        import difflib
+        import html as _h
+        import re as _re
+        def txt(t: str) -> list[str]:
+            t = _re.sub(r"<[^>]+>", "\n", t)
+            return [ln for ln in (" ".join(_h.unescape(x).split()) for x in t.splitlines()) if ln]
+        out = []
+        for u in changed:
+            d = list(difflib.unified_diff(txt(prev.get(u, "")), txt(cur[u]), lineterm="", n=0))
+            out.append(f"{u}:\n" + "\n".join(x for x in d if not x.startswith(("---", "+++"))))
         return ("\nWhat changed on those pages (text diff, '-' old, '+' new):\n" + "\n".join(out)) if out else ""
 
     def page_hashes(self, set_id: str, k: int) -> dict:

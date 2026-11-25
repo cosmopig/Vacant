@@ -1,0 +1,53 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "agent_timeout_s": 600,
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)"
+ },
+ "vacant_python": "~/dev/ops/d2dev_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v3",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v3_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo HEAD（開發中，editable）",
+  "venv": "~/dev/ops/d2dev_venv（editable）"
+ },
+ "id": "r4smoke_d2_qwen9b_1003",
+ "seed": 20261164,
+ "jobs": 2,
+ "server": {
+  "port": 18227
+ },
+ "arms": [
+  "a",
+  "b",
+  "cV",
+  "d_diff",
+  "d_diff_real"
+ ],
+ "snapshot_after_c0": true,
+ "dynamic_noise": true,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "materials": {
+  "dir": "${D2_PRIVATE}/heldout_v3_sample_seed99",
+  "generator": "ops/d2/heldout_gen3/gen_heldout3.py --seed 99 --sets 2（heldout-v3 範例，不是確認教材）",
+  "manifest_sha256": "a1eb13e117ab5b9fdef8a3325d34e4b87ac6e03dc385f0fadc67f135650af0dd",
+  "sets": [
+   "s01",
+   "s02"
+  ]
+ },
+ "purpose": "冒煙（不是證據）：第四輪 v4（受影响看值＋網路出口紀錄）、真實版 d_diff、沒出處給索引頁，在 heldout-v3 範例上跑得通。",
+ "egress": {
+  "port_base": 18300
+ },
+ "nosrc_index": true
+}

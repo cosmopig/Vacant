@@ -520,7 +520,8 @@ def cmd_sources(args: argparse.Namespace) -> int:
     ws, c = _workspace(args)
     rel = _rel(ws, args.path)
     if getattr(args, "snapshot", False):
-        print(json.dumps(_mutate(SRC.snapshot, ws, rel), ensure_ascii=False, indent=1, default=str))
+        print(json.dumps(_mutate(SRC.snapshot, ws, rel, egress=bool(getattr(args, "egress", False))),
+                         ensure_ascii=False, indent=1, default=str))
         return 0
     if getattr(args, "guard", None) is not None:
         allowed = [int(x) for x in args.guard.split(",") if x.strip()]
@@ -530,10 +531,11 @@ def cmd_sources(args: argparse.Namespace) -> int:
     if getattr(args, "reread", None):
         spec = {int(k): v for k, v in json.loads(pathlib.Path(args.reread).read_text()).items()}
         before = pathlib.Path(args.before).read_text(encoding="utf-8", errors="replace")
-        print(json.dumps(SRC.reread(ws, rel, spec, int(args.since), before), ensure_ascii=False, indent=1, default=str))
+        print(json.dumps(SRC.reread(ws, rel, spec, int(args.since), before, egress=bool(getattr(args, "egress", False))), ensure_ascii=False, indent=1, default=str))
         return 0
     if args.check and getattr(args, "candidates", False):
-        res = _mutate(SRC.check_candidates, ws, rel)
+        res = _mutate(SRC.check_candidates, ws, rel, by_value=bool(getattr(args, "by_value", False)),
+                      egress=bool(getattr(args, "egress", False)))
         if args.json:
             print(json.dumps(res, ensure_ascii=False, indent=1, default=str))
             return 0
@@ -555,6 +557,12 @@ def cmd_sources(args: argparse.Namespace) -> int:
     if args.check:
         print(f"affected lines: {', '.join(map(str, res['affected_lines'])) or 'none'}  {res['counts']}")
     return 0
+
+
+def cmd_egress(args: argparse.Namespace) -> int:
+    from . import egress as EG
+    ws, _c = _workspace(args)
+    return EG.serve(ws, args.port, upstream_proxy=args.upstream_proxy, ready_file=args.ready_file)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -597,7 +605,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--reread", metavar="SPEC_JSON", help="flag handed lines changed without re-reading their sources")
     p.add_argument("--before", metavar="FILE")
     p.add_argument("--since", metavar="SEQ")
+    p.add_argument("--by-value", action="store_true",
+                   help="with --check --candidates: a line is affected only if the value at its position changed "
+                        "(JSON field path / best-matching line), not if surrounding text changed")
+    p.add_argument("--egress", action="store_true",
+                   help="also take candidate sources from the network egress log (pages actually fetched)")
     p.set_defaults(func=cmd_sources)
+    p = sp.add_parser("egress", help="local HTTP proxy for the agent's tools; logs every fetched URL and "
+                                     "response body for this workspace (HTTPS: host only)")
+    p.add_argument("--port", type=int, required=True)
+    p.add_argument("--upstream-proxy", help="forward through this HTTP proxy (default: direct)")
+    p.add_argument("--ready-file", help="write this file once listening")
+    p.set_defaults(func=cmd_egress)
     p = sp.add_parser("rescan",
                       help="re-observe the workspace: revive step-by-step observation that was "
                            "turned off (e.g. after `vacant gc`) — long-running, user-invoked")

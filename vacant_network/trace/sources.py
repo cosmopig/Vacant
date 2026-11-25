@@ -460,14 +460,18 @@ def _blob_text(rec: Recorder, sha: str | None) -> str | None:
         return None
 
 
-def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None) -> list[dict[str, Any]]:
-    """每個具體值 → 候選來源網址（集合）。寫下這一行的那一步之前、同一個工作階段裡，輸入提到網址、輸出含這個值的步驟。"""
+def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None,
+               egress: bool = False) -> list[dict[str, Any]]:
+    """每個具體值 → 候選來源網址（集合）。寫下這一行的那一步之前、同一個工作階段裡，輸入提到網址、輸出含這個值的步驟。
+    `egress`（v4）：另外收網路出口紀錄（`source_fetch` 事件）裡、寫下這一行之前實際抓過、內容含這個值的網址——不靠指令文字。"""
     ws = pathlib.Path(ws).resolve()
     rec = rec or Recorder(ws)
     trace = B.Trace(rec)
     blamer = B.Blamer(trace)
     by_n = {st.n: st for st in trace.steps}
     recs = _fetch_records(trace, blamer)
+    fetched = egress_records(rec) if egress else []
+    ts_of = {int(e["seq"]): int(e.get("ts_ms") or 0) for e in rec.events() if e.get("type") == "step"} if egress else {}
     p = ws / path
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     out: list[dict[str, Any]] = []
@@ -490,23 +494,35 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
                 if r["seq"] < w.seq and r["ctx"] == w.ctx and r["url"] not in urls and \
                         any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
                     urls.append(r["url"])
+        egress_seen: dict[str, str] = {}
+        if egress and w is not None:
+            t_w = ts_of.get(int(w.seq), 0)
+            for f in fetched:                   # 實際抓過的（任何工具）：寫入那一步記下之前抓的、內容含這個值
+                if f["ts_ms"] <= t_w and any(L.contains(f["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                    if f["url"] not in urls:
+                        urls.append(f["url"])
+                    egress_seen[f["url"]] = f["text"]
         seen: dict[str, str] = {}
         for r in recs:                          # 每個網址取「含這個值」的最近一筆（同一頁可能被 grep 過好幾次、各取不同欄）
             if r["url"] in urls and any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
                 seen[r["url"]] = r["text"]
+        for u, t in egress_seen.items():
+            seen.setdefault(u, t)
         out.append({"line": c["line"], "value": c["value"], "key": c["key"],
                     "written_by_step": writer.get("step") if writer else None, "candidates": urls, "_seen": seen})
     return out
 
 
 def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
-             record: bool = True) -> dict[str, Any]:
+             record: bool = True, egress: bool = False) -> dict[str, Any]:
     """把交件裡每條宣稱的候選網址現在的內容抓一份，存進內容定址庫、簽進鏈（`source_snapshot`）。0 token。"""
     ws = pathlib.Path(ws).resolve()
     rec = Recorder(ws)
     rec.checkpoint("source_snapshot")
+    if egress:
+        ingest_egress(rec)
     urls: list[str] = []
-    for e in candidates(ws, path, rec=rec):
+    for e in candidates(ws, path, rec=rec, egress=egress):
         urls += [u for u in e["candidates"] if u not in urls]
     pages: dict[str, str] = {}
     errors: dict[str, str] = {}
@@ -522,15 +538,17 @@ def snapshot(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] =
 
 
 def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str], str] = default_fetch,
-                     record: bool = True) -> dict[str, Any]:
+                     record: bool = True, by_value: bool = False, egress: bool = False) -> dict[str, Any]:
     """候選集合版的來源檢查。每條宣稱：拿每個候選網址的「上一次快照」（沒有快照就用 agent 當時讀到的內容）裡帶著這個值的片段，
     和現在的頁面比；任一候選頁的那些片段不在了 ⇒ changed；有候選頁帶著這個值、而且都沒變 ⇒ unchanged；
     沒有任何候選頁帶著這個值 ⇒ no_source；抓不到 ⇒ 當成 changed（寧可多交辦）。檢查完把現在的頁面記成新的快照。"""
     ws = pathlib.Path(ws).resolve()
     rec = Recorder(ws)
     rec.checkpoint("source_check")
+    if egress:
+        ingest_egress(rec)
     snaps = _snapshots(rec)
-    cands = candidates(ws, path, rec=rec)
+    cands = candidates(ws, path, rec=rec, egress=egress)
     now_cache: dict[str, str | None] = {}
 
     def now(u: str) -> str | None:
@@ -552,7 +570,12 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
             if not car:
                 continue
             cur = now(u)
-            per[u] = "unknown" if cur is None else ("unchanged" if car <= _segments(cur) else "changed")
+            if cur is None:
+                per[u] = "unknown"
+            elif by_value:
+                per[u] = value_status(prev, cur, key) or "changed"
+            else:
+                per[u] = "unchanged" if car <= _segments(cur) else "changed"
         if not per:
             st = "no_source"
         elif any(v in ("changed", "unknown") for v in per.values()):
@@ -567,7 +590,8 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
     counts: dict[str, int] = {}
     for e in claims:
         counts[e["status"]] = counts.get(e["status"], 0) + 1
-    res = {"path": path, "mode": "candidates", "claims": claims, "counts": counts,
+    res = {"path": path, "mode": "candidates" + ("+value" if by_value else "") + ("+egress" if egress else ""),
+           "claims": claims, "counts": counts,
            "affected_lines": sorted({e["line"] for e in claims if e["status"] != "unchanged"}),
            "changed_lines": sorted({e["line"] for e in claims if e["status"] == "changed"})}
     if record:
@@ -616,7 +640,7 @@ def guard(ws: str | pathlib.Path, path: str, allowed_lines: list[int], before_te
 
 
 def reread(ws: str | pathlib.Path, path: str, lines: dict[int, list[str]], since_seq: int,
-           before_text: str) -> dict[str, Any]:
+           before_text: str, egress: bool = False) -> dict[str, Any]:
     """沒重讀就改：交辦的行（行號 → 候選網址）在 `since_seq` 之後被改了，但這段時間裡沒有任何步驟的輸入提到它的任一候選網址
     （候選集合空的行，看有沒有任何抓取網址的步驟）⇒ 列進 `not_reread`。"""
     ws = pathlib.Path(ws).resolve()
@@ -626,6 +650,11 @@ def reread(ws: str | pathlib.Path, path: str, lines: dict[int, list[str]], since
     seen_urls: set[str] = set()
     for st in after:
         seen_urls |= set(_urls_in(trace.input_text(st)))
+    if egress:                                  # v4：實際抓過的網址（網路出口紀錄）也算重讀
+        ingest_egress(rec)
+        t0 = next((int(e.get("ts_ms") or 0) for e in rec.events() if int(e.get("seq") or 0) == int(since_seq)), 0)
+        seen_urls |= {e["url"] for e in rec.events() if e.get("type") == "source_fetch" and e.get("url")
+                      and not e.get("tls") and int(e.get("ts_ms") or 0) >= t0}
     p = ws / path
     cur = (p.read_text(encoding="utf-8", errors="replace") if p.exists() else "").splitlines()
     old = before_text.splitlines()
@@ -640,3 +669,139 @@ def reread(ws: str | pathlib.Path, path: str, lines: dict[int, list[str]], since
         if (urls and not (set(urls) & seen_urls)) or (not urls and not seen_urls):
             flagged.append(ln_no)
     return {"path": path, "since_seq": since_seq, "not_reread": flagged}
+
+
+# ---------- v4（2026-11-25 第四輪）：受影響看值、抓取紀錄看網路出口 ----------
+#
+# 第三輪兩個失敗原因的通用修正：
+# (1) 「帶著這個值的片段變了」會被每次抓取都變的雜訊（時間戳、計數器、請求 id）騙：同一行有雜訊，片段每次都不同。
+#     改成看**值所在的位置還是不是這個值**：JSON 照欄位路徑（陣列元素用「其他欄位相同的最多」對回來，不怕重排）；
+#     其他（CSV、表格、md、html、純文字）找「除了這個值之外最像的那一行」，看那一行還有沒有這個值。
+#     反面風險：值剛好還在最像的那一行（例如同一行另一欄是同一個值）⇒ 漏判。
+# (2) 候選網址只從指令文字找，變數拼出來的網址找不到。改成在 agent 行程的網路出口記錄（`egress.py` 的本機代理寫
+#     `<project>/egress.jsonl`，Vacant 讀進鏈成 `source_fetch` 事件），候選＝寫入之前實際抓過、內容含這個值的網址。
+
+import difflib as _difflib
+import json as _json
+
+_TOK = re.compile(r"[A-Za-z]+|\d+(?:[.,]\d+)*|[^\sA-Za-z\d]")
+
+
+def _text_lines(text: str) -> list[str]:
+    t = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", text)
+    out = []
+    for part in re.split(r"<[^>]+>|\n", t):
+        part = " ".join(_html.unescape(part).split())
+        if part:
+            out.append(part)
+    return out
+
+
+def _json_leaves(obj: Any, path: tuple = ()) -> list[tuple[tuple, Any]]:
+    if isinstance(obj, dict):
+        return [x for k, v in obj.items() for x in _json_leaves(v, path + (k,))]
+    if isinstance(obj, list):
+        return [x for i, v in enumerate(obj) for x in _json_leaves(v, path + (i,))]
+    return [(path, obj)]
+
+
+def _json_follow(prev: Any, cur: Any, path: tuple) -> tuple[bool, Any]:
+    """沿著 prev 的路徑走到 cur 的對應位置；陣列元素用「其餘葉子相同的數量最多」對回來（不怕重排），對不到用同一個索引。"""
+    for step in path:
+        if isinstance(prev, list) and isinstance(cur, list) and isinstance(step, int):
+            el = prev[step] if step < len(prev) else None
+            if el is None:
+                return False, None
+            pl = set((p, _json.dumps(v, sort_keys=True)) for p, v in _json_leaves(el))
+            best, bi = -1, None
+            for i, ce in enumerate(cur):
+                sc = len(pl & set((p, _json.dumps(v, sort_keys=True)) for p, v in _json_leaves(ce)))
+                if sc > best:
+                    best, bi = sc, i
+            if bi is None or best <= 0:
+                bi = step if step < len(cur) else None
+            if bi is None:
+                return False, None
+            prev, cur = el, cur[bi]
+        elif isinstance(prev, dict) and isinstance(cur, dict) and step in cur:
+            prev, cur = prev.get(step), cur[step]
+        else:
+            return False, None
+    return True, cur
+
+
+def _json_status(prev: Any, cur: Any, key: str) -> str | None:
+    hits = [p for p, v in _json_leaves(prev) if v is not None and L.contains(str(v), key)]
+    if not hits:
+        return None
+    for p in hits:
+        ok, v = _json_follow(prev, cur, p)
+        if not ok or v is None or not L.contains(str(v), key):
+            return "changed"
+    return "unchanged"
+
+
+def _line_status(prev: str, cur: str, key: str) -> str | None:
+    plines = [x for x in _text_lines(prev) if L.contains(x, key)]
+    if not plines:
+        return None
+    clines = _text_lines(cur)
+    ktoks = set(_TOK.findall(key))
+    ctoks = [[t for t in _TOK.findall(c) if t not in ktoks] for c in clines]
+    for pl in plines:
+        a = [t for t in _TOK.findall(pl) if t not in ktoks]
+        best, tied = -1.0, []
+        for c, b in zip(clines, ctoks):
+            r = _difflib.SequenceMatcher(None, a, b, autojunk=False).ratio()
+            if r > best + 1e-9:
+                best, tied = r, [c]
+            elif abs(r - best) <= 1e-9:
+                tied.append(c)
+        if best < 0.5 or not tied or not all(L.contains(c, key) for c in tied):
+            return "changed"
+    return "unchanged"
+
+
+def value_status(prev: str, cur: str, key: str) -> str | None:
+    """值所在的位置還是不是這個值。None＝prev 裡沒有這個值（這一頁不是它的來源）。"""
+    try:
+        pj, cj = _json.loads(prev), _json.loads(cur)
+        if isinstance(pj, (dict, list)) and isinstance(cj, (dict, list)):
+            return _json_status(pj, cj, key)
+    except ValueError:
+        pass
+    return _line_status(prev, cur, key)
+
+
+def egress_log_path(rec: Recorder) -> pathlib.Path:
+    return rec.dir / "egress.jsonl"
+
+
+def ingest_egress(rec: Recorder) -> int:
+    """把網路出口代理寫下、還沒進鏈的抓取記成 `source_fetch` 事件（網址、狀態、內容 sha256、抓取時間）。回新增筆數。"""
+    p = egress_log_path(rec)
+    if not p.exists():
+        return 0
+    have = sum(1 for e in rec.events() if e.get("type") == "source_fetch")
+    lines = [ln for ln in p.read_text(encoding="utf-8", errors="replace").splitlines() if ln.strip()]
+    n = 0
+    for ln in lines[have:]:
+        try:
+            r = _json.loads(ln)
+        except ValueError:
+            r = {"bad_line": ln[:200]}
+        rec.append("source_fetch", {"schema": "vacant-source-fetch/1", **r})
+        n += 1
+    return n
+
+
+def egress_records(rec: Recorder) -> list[dict[str, Any]]:
+    out = []
+    for e in rec.events():
+        if e.get("type") != "source_fetch" or not e.get("url") or e.get("tls"):
+            continue
+        t = _blob_text(rec, e.get("sha256"))
+        if t is None:
+            continue
+        out.append({"url": e["url"], "ts_ms": int(e.get("ts_ms") or 0), "text": t})
+    return out

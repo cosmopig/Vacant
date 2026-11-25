@@ -339,7 +339,7 @@ def served(access: list[dict], url: str, before_ts: float, arm: str) -> bool:
         host, path = url.split("/")[2], "/" + url.split("/", 3)[3]
     except IndexError:
         return False
-    return any(a["host"] == host and a["path"] == path and a.get("ua") != "vacant-source-check"
+    return any(a["host"] == host and a["path"] == path and a.get("ua") not in ("vacant-source-check", "d2-notifier")
                and a["ts"] <= before_ts + 1 and (a.get("arm") in (None, arm, "c0")) for a in access)
 
 
@@ -460,6 +460,10 @@ def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None, cov
                 sc_next = rec.source_checks(bounds[k], bounds[k + 1]) if k < ncyc else []
                 next_by_line = {e["line"]: e for e in (sc_next[0]["payload"]["claims"] if sc_next else [])}
                 fetched = {u for st in rec.steps(bounds[k - 1], bounds[k]) for u in URL_RE.findall(step_cmd(rec, st))}
+                # 第四輪：變數拼網址的抓取在指令文字裡看不到——另外收來源伺服器的存取紀錄（這一組、這一臂、這一週期、不是 Vacant／偵測器）
+                fetched |= {f"http://{x['host']}{x['path']}" for x in access
+                            if x.get("arm") == arm and x.get("cycle") == k and x["host"].startswith(sid + ".")
+                            and x.get("ua") not in ("vacant-source-check", "d2-notifier")}
                 lines_now = reports[sid][f"{arm}/{k - 1}"].splitlines() if k > 1 else reports[sid]["c0"].splitlines()
                 for cl in s["claims"]:
                     cid = cl["id"]
@@ -499,6 +503,23 @@ def audit(root: pathlib.Path, manifest: dict, *, anchor: dict | None = None, cov
                         if kind == "miss" and ln in handed and nx.get("status") == "unchanged" \
                                 and canon(nx.get("value")) == canon(post[cid]):
                             extra["baseline_refreshed_while_stale"] = True
+                    elif arm in ("cC", "cCG", "cCGR", "cV"):
+                        # 候選集合臂（第三、四輪）：交辦＝這一週期來源檢查狀態不是 unchanged 的行
+                        e = sc_by_line.get(ln) or {}
+                        st = e.get("status")
+                        mode = (sc[0]["payload"].get("mode") or "") if sc else ""
+                        handed_c = st is not None and st != "unchanged"
+                        if kind == "miss" and not handed_c:
+                            if not e:
+                                seg = "line not checked (no value parsed on this line)"
+                            elif "value" in mode:
+                                seg = "change not detected: value still at its matched position on a candidate page"
+                            else:
+                                seg = "change not detected: candidate snippets unchanged"
+                        elif kind == "miss":
+                            seg = "page not re-read" if not page_url else "page re-read, not corrected"
+                        else:
+                            seg = "agent changed a correct value wrongly" if handed_c else "agent changed a line it was not handed"
                     else:
                         if kind == "miss":
                             seg = "page not re-read" if not page_url else "page re-read, not corrected"
