@@ -1,0 +1,202 @@
+{
+ "arms": {
+  "b": {
+   "changed_claims": 240,
+   "changed_claims_pre_correct": 240,
+   "cost": {
+    "agent_runs": 240,
+    "calls": 1205,
+    "cost_usd": 1.26755,
+    "set_cycles": 240,
+    "source_requests_agent": 2074,
+    "source_requests_vacant": 0,
+    "tokens_in": 26911434,
+    "tokens_out": 567094,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 3622.4
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 120,
+     "calls": 688,
+     "set_cycles": 120,
+     "tokens": 16419317,
+     "wall_s": 1917.7
+    },
+    "N": {
+     "agent_runs": 60,
+     "calls": 263,
+     "set_cycles": 60,
+     "tokens": 5655464,
+     "wall_s": 877.9
+    },
+    "Z": {
+     "agent_runs": 60,
+     "calls": 254,
+     "set_cycles": 60,
+     "tokens": 5403747,
+     "wall_s": 826.8
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "0": 240
+   },
+   "miss_rate": 0.0,
+   "miss_rate_pre_correct": 0.0,
+   "missed": 0,
+   "missed_pre_correct": 0,
+   "stale_residual_by_cycle": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0
+   },
+   "unchanged_correct_claims": 4560,
+   "wrong_by_cycle": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0
+   }
+  },
+  "cCGR": {
+   "changed_claims": 240,
+   "changed_claims_pre_correct": 240,
+   "cost": {
+    "agent_runs": 240,
+    "calls": 901,
+    "cost_usd": 0.572286,
+    "set_cycles": 240,
+    "source_requests_agent": 919,
+    "source_requests_vacant": 4,
+    "tokens_in": 16996716,
+    "tokens_out": 339774,
+    "tool_wall_s": 47.0,
+    "usage_unknown": 0,
+    "wall_s": 2644.9
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 120,
+     "calls": 452,
+     "set_cycles": 120,
+     "tokens": 8699964,
+     "wall_s": 1335.1
+    },
+    "N": {
+     "agent_runs": 60,
+     "calls": 221,
+     "set_cycles": 60,
+     "tokens": 4250883,
+     "wall_s": 672.2
+    },
+    "Z": {
+     "agent_runs": 60,
+     "calls": 228,
+     "set_cycles": 60,
+     "tokens": 4385643,
+     "wall_s": 684.6
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "0": 26,
+    "1": 18,
+    "2": 6,
+    "3": 2,
+    "None": 188
+   },
+   "miss_rate": 0.8917,
+   "miss_rate_pre_correct": 0.8917,
+   "missed": 214,
+   "missed_pre_correct": 214,
+   "stale_residual_by_cycle": {
+    "1": 54,
+    "2": 78,
+    "3": 124,
+    "4": 188
+   },
+   "unchanged_correct_claims": 4304,
+   "wrong_by_cycle": {
+    "1": 54,
+    "2": 78,
+    "3": 124,
+    "4": 188
+   }
+  },
+  "d_diff": {
+   "changed_claims": 240,
+   "changed_claims_pre_correct": 240,
+   "cost": {
+    "agent_runs": 180,
+    "calls": 565,
+    "cost_usd": 0.7275,
+    "set_cycles": 240,
+    "source_requests_agent": 727,
+    "source_requests_vacant": 0,
+    "tokens_in": 12222703,
+    "tokens_out": 332988,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 2047.9
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 120,
+     "calls": 420,
+     "set_cycles": 120,
+     "tokens": 9706877,
+     "wall_s": 1394.6
+    },
+    "N": {
+     "agent_runs": 60,
+     "calls": 145,
+     "set_cycles": 60,
+     "tokens": 2848814,
+     "wall_s": 653.3
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 60,
+     "tokens": 0,
+     "wall_s": 0.0
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "0": 240
+   },
+   "miss_rate": 0.0,
+   "miss_rate_pre_correct": 0.0,
+   "missed": 0,
+   "missed_pre_correct": 0,
+   "stale_residual_by_cycle": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0
+   },
+   "unchanged_correct_claims": 4560,
+   "wrong_by_cycle": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0
+   }
+  }
+ },
+ "c0": {
+  "claims": 1200,
+  "correct": 1200
+ },
+ "materials": {
+  "bare_number_on_another_page": 397,
+  "claims": 1200,
+  "rate_bare_number": 0.3308,
+  "rate_with_unit": 0.4158,
+  "value_with_unit_on_another_page": 499
+ }
+}

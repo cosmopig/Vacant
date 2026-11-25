@@ -1,0 +1,11 @@
+D2' Analysis Verdict: FAIL (sets=60, B=10000, seed=20261125)
+  [1] Coverage: 0/1200 = 0.0% (with_source=0/1200, threshold>=80%) -> FAIL
+  [2] Miss diff (c-b): 0.8917 (95% upper=0.9417, margin<0.10; c=89.2%, b=0.0%, n=240) -> FAIL
+  [3] Token ratio (b/c): 2.21x 95% CI [1.89, 2.59] (n=239/240, excl_unk=1) -> FAIL
+  [3] Calls ratio (b/c): 1.34x 95% CI [1.22, 1.47] (n=240/240)
+  [3] Wall  ratio (b/c): 1.37x 95% CI [1.22, 1.55] (n=240/240)
+  [4] Secondary:
+      c_vs_d: miss(c-d)=n/a (upper95=n/a), tok(d/c)=n/ax [n/a, n/a]
+      d_vs_b: miss(d-b)=n/a (upper95=n/a), tok(b/d)=n/ax [n/a, n/a]
+      false_mod: b=0/4560(0.0% [0.0%, 0.0%]); cCGR=0/4304(0.0% [0.0%, 0.0%]); d_diff=0/4560(0.0% [0.0%, 0.0%])
+      residual_stale: b(c1=0,c2=0,c3=0,c4=0) cCGR(c1=54,c2=78,c3=124,c4=188) d_diff(c1=0,c2=0,c3=0,c4=0)
