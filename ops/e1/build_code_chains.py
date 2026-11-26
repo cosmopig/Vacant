@@ -33,7 +33,7 @@ import pathlib
 import random
 import re
 import sys
-from typing import Any
+from typing import Any, Iterable
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
@@ -208,6 +208,42 @@ def _bindings_compatible(selected: list[dict], cand: dict) -> bool:
     return True
 
 
+def collect_task_ids_from_chain_dir(chain_dir: pathlib.Path) -> set[str]:
+    """從既有的鏈目錄（含子目錄 `*/chain.json` 與 `index.json` 指向的路徑）收集所有 EvalPlus task_id。"""
+    tids: set[str] = set()
+    chain_files: list[pathlib.Path] = []
+    seen_files: set[pathlib.Path] = set()
+
+    def _add_file(p: pathlib.Path) -> None:
+        rp = p.expanduser().resolve()
+        if rp.is_file() and rp not in seen_files:
+            seen_files.add(rp)
+            chain_files.append(rp)
+
+    d = chain_dir.expanduser()
+    for f in sorted(d.glob("*/chain.json")):
+        _add_file(f)
+    idx_p = d / "index.json"
+    if idx_p.is_file():
+        idx = json.loads(idx_p.read_text(encoding="utf-8"))
+        for ch in idx.get("chains") or []:
+            cp = ch.get("path")
+            if cp:
+                _add_file(pathlib.Path(cp) / "chain.json")
+
+    for f in chain_files:
+        c = json.loads(f.read_text(encoding="utf-8"))
+        tids.update(map(str, c.get("initial_task_ids") or []))
+        for r in c.get("rounds") or []:
+            for k in ("task_id", "task_ids", "new_task_id", "added_task_id"):
+                v = r.get(k)
+                if isinstance(v, str):
+                    tids.add(v)
+                elif isinstance(v, list):
+                    tids.update(map(str, v))
+    return tids
+
+
 def build_code_chains(
     *,
     seed: int,
@@ -219,17 +255,22 @@ def build_code_chains(
     max_plus_cases: int | None = None,
     compute_timeout_s: float = 8.0,
     verify_sha256: bool = True,
+    id_prefix: str = "code",
+    exclude_task_ids: Iterable[str] | None = None,
 ) -> dict:
     """建構 `n` 條 E1′ 程式碼鏈，每條具 8–10 支初始函式與 5 回合演進任務。"""
     if min_init < 1 or max_init < min_init:
         raise ValueError("min_init/max_init 不合法")
+    effective_exclude = set(EXCLUDE_TASK_IDS)
+    if exclude_task_ids is not None:
+        effective_exclude.update(map(str, exclude_task_ids))
     rows, hashes = _load_evalplus(evalplus_dir, verify_sha256=verify_sha256)
     parsed_pool: list[dict] = []
     for r in rows:
         p = _parse_problem_source(r)
         if p is not None and len(p["base_input"]) > 0 and len(p["plus_input"]) > 0 \
-                and p["entry_point"] not in _BUILTIN_NAMES and p["task_id"] not in EXCLUDE_TASK_IDS:
-            parsed_pool.append(p)   # 函式名不得遮蔽內建名稱（例：MBPP 的 `sum` 會弄壞同檔其他函式）；排除校準鏈用過的題
+                and p["entry_point"] not in _BUILTIN_NAMES and p["task_id"] not in effective_exclude:
+            parsed_pool.append(p)   # 函式名不得遮蔽內建名稱（例：MBPP 的 `sum` 會弄壞同檔其他函式）；排除指定鏈用過的題
 
     rng = random.Random(seed)
     order = list(range(len(parsed_pool)))
@@ -266,7 +307,7 @@ def build_code_chains(
     cursor = 0
 
     for ci in range(1, n + 1):
-        chain_id = f"code_{ci:03d}"
+        chain_id = f"{id_prefix}_{ci:03d}"
         init_count = rng.randint(min_init, max_init)
         needed = init_count + 3  # initial + r1 + r2 + r3
         selected: list[dict] = []
@@ -455,8 +496,10 @@ def build_code_chains(
         "kind": "code",
         "created_utc": utc_now_iso(),
         "seed": seed,
+        "id_prefix": id_prefix,
         "n_chains": len(chains_summary),
         "pool_parsed": len(parsed_pool),
+        "excluded_task_ids_count": len(effective_exclude),
         "evalplus_sha256": hashes,
         "extension_note": (
             "Derived from public EvalPlus (HumanEval+ v0.1.10 and MBPP+ v0.2.0); "
@@ -480,21 +523,13 @@ def main() -> int:
     ap.add_argument("--max-plus", type=int, default=None, help="選用：每題最多取幾筆 plus_input（預設全部）")
     ap.add_argument("--timeout", type=float, default=8.0, help="單題無網路沙箱計算逾時秒數")
     ap.add_argument("--allow-custom-evalplus", action="store_true", help="僅供單元測試假題庫略過 sha256 驗證")
+    ap.add_argument("--id-prefix", type=str, default="code", help="鏈 ID 前綴（預設 code → code_001..）")
     ap.add_argument("--exclude-chains", type=pathlib.Path, action="append", default=[],
-                    help="排除這些鏈目錄（例如校準鏈）用過的題目 task_id")
+                    help="排除這些鏈目錄（例如校準鏈、既有正式鏈、冒煙鏈）用過的題目 task_id")
     args = ap.parse_args()
-    import json as _json
+    excluded: set[str] = set()
     for d in args.exclude_chains:
-        for f in sorted(pathlib.Path(d).glob("*/chain.json")):
-            c = _json.loads(f.read_text())
-            EXCLUDE_TASK_IDS.update(map(str, c.get("initial_task_ids") or []))
-            for r in c.get("rounds") or []:
-                for k in ("task_id", "task_ids", "new_task_id", "added_task_id"):
-                    v = r.get(k)
-                    if isinstance(v, str):
-                        EXCLUDE_TASK_IDS.add(v)
-                    elif isinstance(v, list):
-                        EXCLUDE_TASK_IDS.update(map(str, v))
+        excluded.update(collect_task_ids_from_chain_dir(d))
 
     idx = build_code_chains(
         seed=args.seed,
@@ -506,6 +541,8 @@ def main() -> int:
         max_plus_cases=args.max_plus,
         compute_timeout_s=args.timeout,
         verify_sha256=not args.allow_custom_evalplus,
+        id_prefix=args.id_prefix,
+        exclude_task_ids=excluded,
     )
     print(f"built {idx['n_chains']} code chains in {args.out}")
     return 0
