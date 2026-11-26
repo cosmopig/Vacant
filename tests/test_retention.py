@@ -1173,14 +1173,30 @@ def test_target_sweep_evicts_historical_versions_and_blame_returns_unknown(env):
         (ws / "app.py").write_text(content)
         rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
 
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    # 預設（allow_breaking_chain_references=False）：預算壓力下絕不刪除鏈引用物件，回報 budget_unmet=True
+    safe_res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    assert safe_res["budget_unmet"] is True
+    assert safe_res["target"]["target_reached"] is False
+    assert safe_res["target"]["budget_unmet"] is True
+    assert safe_res["referenced_bytes_held"] > 60_000
+    assert safe_res["files_removed"] == 0
+
+    # 明確 opt-in（allow_breaking_chain_references=True）：簽寫 objects_evicted 後回收舊版本壓到預算以下
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] is True
+    assert res["target"]["budget_unmet"] is False
     assert res["target"]["bytes_remaining"] <= 60_000
     assert res["target"]["files_removed"] >= 3
+    assert res["evicted_referenced_count"] >= 3
     ok, msg = rec.verify()
     assert ok, msg
+    obj_rep = rec.verify_objects()
+    assert obj_rep["ok"] is True
+    assert obj_rep["missing_count"] == 0
+    assert obj_rep["evicted_count"] >= 3
 
-    # 舊版本被 GC 回收後，追緝 magic = 77777 不可誣賴最後修改 pad 的 s2，必須回 UNKNOWN
+    # 舊版本被明確 GC 驅逐後，追緝 magic = 77777 不可誣賴最後修改 pad 的 s2，必須回 UNKNOWN
     b_after = blame_location(Trace(rec), Location("app.py", line=2, value="77777"))
     assert b_after["state"] == "UNKNOWN" and b_after["fault_class"] == "unattributable"
 
@@ -1198,18 +1214,39 @@ def test_gc_all_and_usage_report_respect_trace_budget_env(env, monkeypatch):
         rec.pre(f"t{i}", s1, "Write", {"file_path": str(ws / "app.py"), "content": f"x={i}"})
         (ws / "app.py").write_text(body)
         rec.post(f"t{i}", s1, "Write", {"file_path": str(ws / "app.py"), "content": f"x={i}"}, "ok")
+    # 另放一個未被引用的孤立物件（40 KB），驗證預算壓力只回收未引用物件
+    orphan_sha = rec.blobs.put_bytes(b"U" * 40_000)
+    os.utime(rec.blobs.path(orphan_sha), (1700000000.0, 1700000000.0))
 
     monkeypatch.setenv("VACANT_TRACE_BUDGET_BYTES", "50000")
     urep = retention.usage_report(vh, env / "work")
     assert urep["budget"]["within_budget"] is False
-    assert urep["reclaimable_estimate"]["bytes"] > 50_000
+    # 預設只估算未引用孤立物件，不把鏈引用物件當成可回收
+    assert urep["reclaimable_estimate"]["bytes"] == 40_000
 
     dry = retention.gc_all(root=vh, work_root=env / "work", dry_run=True)
-    real = retention.gc_all(root=vh, work_root=env / "work", dry_run=False, verify=True)
-    assert dry["bytes_freed"] == real["bytes_freed"] > 50_000
+    real = retention.gc_all(root=vh, work_root=env / "work", dry_run=False, verify=True, verify_objects=True)
+    assert dry["bytes_freed"] == real["bytes_freed"] == 40_000
+    assert not rec.blobs.has(orphan_sha)
     assert real["verify_ok"] is True
-    assert real["trace"]["target"]["target_reached"] is True
-    assert real["trace"]["target"]["bytes_remaining"] <= 50_000
+    assert real["objects_ok"] is True
+    assert real["budget_unmet"] is True
+    assert real["referenced_bytes_held"] > 50_000
+    assert real["trace"]["target"]["target_reached"] is False
+    assert real["trace"]["target"]["budget_unmet"] is True
+
+    # 明確 opt-in（allow_breaking_chain_references=True）才可壓回預算內，並簽記 objects_evicted
+    dry_opt = retention.gc_all(root=vh, work_root=env / "work", dry_run=True,
+                               allow_breaking_chain_references=True)
+    real_opt = retention.gc_all(root=vh, work_root=env / "work", dry_run=False, verify=True,
+                                verify_objects=True, allow_breaking_chain_references=True)
+    assert dry_opt["bytes_freed"] == real_opt["bytes_freed"] > 50_000
+    assert real_opt["verify_ok"] is True
+    assert real_opt["objects_ok"] is True
+    assert real_opt["objects_verify"]["evicted_count"] > 0
+    assert real_opt["objects_verify"]["missing_count"] == 0
+    assert real_opt["trace"]["target"]["target_reached"] is True
+    assert real_opt["trace"]["target"]["bytes_remaining"] <= 50_000
 
 
 def test_target_sweep_evicts_rank2_and_rank3_and_blame_returns_unknown(env):
@@ -1234,12 +1271,19 @@ def test_target_sweep_evicts_rank2_and_rank3_and_blame_returns_unknown(env):
     assert b_before["state"] == "located" and b_before["fault_class"] == "input"
     assert b_before["confidence"] == "lineage_exact"
 
-    # 壓到 10 KB：無 rank 0/1 可刪，必須動用 rank 2（最新檔案版本 app.py 30 KB）
-    # 與 rank 3（提示 text_blob 30 KB、步驟 output_blob 30 KB）
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=10_000)
+    # 預設模式絕不驅逐鏈引用物件
+    safe = retention.compact_trace(vh, dry_run=False, target_bytes=10_000)
+    assert safe["budget_unmet"] is True
+    assert safe["files_removed"] == 0
+
+    # 明確 opt-in 壓到 10 KB：無 rank 0/1 可刪，動用 rank 2（最新檔案版本 app.py 30 KB）
+    # 與 rank 3（提示 text_blob 30 KB、步驟 output_blob 30 KB），並簽記 objects_evicted
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=10_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] is True
     assert res["target"]["bytes_remaining"] <= 10_000
     assert res["target"]["files_removed"] >= 3
+    assert res["evicted_referenced_count"] >= 3
     ok, msg = rec.verify()
     assert ok, msg
 
@@ -2090,8 +2134,18 @@ def test_compact_trace_expires_old_unrecorded_changes_and_prompts_beyond_keep_st
     (ws / "app.py").write_text(app_v4)
     rec.post("t4", s_new, "Edit", {"file_path": str(ws / "app.py"), "new_string": "magic_val = 888888\ninvented_val = 999999"}, "ok")
 
-    dry = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=True)
-    res = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=False)
+    # 預設未加 allow_breaking_chain_references 時，即使給 keep_recent_steps=2 也不刪除鏈引用物件
+    safe = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=False)
+    assert safe["files_removed"] == 0
+    assert rec.blobs.has(old_prompt_sha)
+    assert rec.blobs.has(ext_old_v1_sha)
+    assert rec.blobs.has(app_v1_sha)
+
+    # 明確 opt-in（allow_breaking_chain_references=True）才依視窗過期回收，並簽寫 objects_evicted
+    dry = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=True,
+                                  allow_breaking_chain_references=True)
+    res = retention.compact_trace(vh, keep_recent_steps=2, orphan_grace_s=0.0, dry_run=False,
+                                  allow_breaking_chain_references=True)
     assert dry["bytes_freed"] == res["bytes_freed"] >= 60_000
     assert not rec.blobs.has(old_prompt_sha), "已滑出保留視窗的舊工作階段 prompt 應被回收"
     assert not rec.blobs.has(ext_old_v1_sha), "已滑出保留視窗的舊 unrecorded_change 中間版本應被回收"
@@ -2099,6 +2153,10 @@ def test_compact_trace_expires_old_unrecorded_changes_and_prompts_beyond_keep_st
     assert rec.blobs.has(new_prompt_sha), "保留步驟所屬工作階段的 prompt 必須保留"
     assert rec.blobs.has(app_v3_sha)
     assert rec.blobs.has(app_v4_sha)
+    obj_rep = rec.verify_objects()
+    assert obj_rep["ok"] is True
+    assert obj_rep["missing_count"] == 0
+    assert {old_prompt_sha, ext_old_v1_sha, app_v1_sha} <= {e["sha256"] for e in obj_rep["evicted"]}
 
     ok, msg = rec.verify()
     assert ok, msg

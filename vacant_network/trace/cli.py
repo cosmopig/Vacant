@@ -292,6 +292,10 @@ def cmd_show(args: argparse.Namespace) -> int:
             tok = f"in={it} out={ot}" if (it is not None or ot is not None) else "tokens=unknown"
             print(f"   ·  model_usage ({e.get('scope', '?')}, {e.get('source', '?')}, {comp}): "
                   f"calls={calls if calls is not None else '?'} {tok} models=[{models}]")
+        elif t == "objects_evicted":
+            cnt = e.get("count", len(e.get("evicted_shas") or []))
+            trig = ",".join(e.get("trigger") or []) or e.get("reason") or "explicit_gc"
+            print(f"   ·  objects_evicted ({cnt} objects, {trig})")
         elif t == "restart_receipt":
             acc = e.get("acceptance") or {}
             status_str = ("PASS" if e.get("accepted") is True
@@ -339,14 +343,29 @@ def cmd_verify(args: argparse.Namespace) -> int:
         return 0 if overall_ok else 1
     print(("OK " if ok else "BROKEN ") + why)
     if obj_rep is not None:
-        if obj_rep["ok"]:
+        ev_cnt = obj_rep.get("evicted_count", 0)
+        if obj_rep["ok"] and ev_cnt == 0:
             print(f"OBJECTS OK ({obj_rep['present_count']}/{obj_rep['referenced_count']} referenced objects present)")
+        elif obj_rep["ok"] and ev_cnt > 0:
+            print(f"OBJECTS PARTIAL ({obj_rep['present_count']}/{obj_rep['referenced_count']} referenced objects present, "
+                  f"{ev_cnt} evicted by explicit GC, 0 missing)")
+            for ev in obj_rep.get("evicted", [])[:20]:
+                ref0 = (ev.get("refs") or [{}])[0]
+                print(f"  - evicted by explicit GC {ev['sha256']} "
+                      f"(evicted_at_seq={ev.get('evicted_at_seq')}, "
+                      f"ref seq={ref0.get('seq')} {ref0.get('type')}.{ref0.get('field')})")
         else:
-            print(f"OBJECTS MISSING ({obj_rep['missing_count']} missing, {obj_rep['corrupt_count']} corrupt "
-                  f"out of {obj_rep['referenced_count']} referenced)")
+            ev_note = f", {ev_cnt} evicted by explicit GC" if ev_cnt else ""
+            print(f"OBJECTS MISSING ({obj_rep['missing_count']} missing, {obj_rep['corrupt_count']} corrupt"
+                  f"{ev_note} out of {obj_rep['referenced_count']} referenced)")
             for m in obj_rep["missing"][:20]:
                 ref0 = (m.get("refs") or [{}])[0]
                 print(f"  - missing {m['sha256']} (seq={ref0.get('seq')} {ref0.get('type')}.{ref0.get('field')})")
+            for ev in obj_rep.get("evicted", [])[:20]:
+                ref0 = (ev.get("refs") or [{}])[0]
+                print(f"  - evicted by explicit GC {ev['sha256']} "
+                      f"(evicted_at_seq={ev.get('evicted_at_seq')}, "
+                      f"ref seq={ref0.get('seq')} {ref0.get('type')}.{ref0.get('field')})")
             for cr in obj_rep["corrupt"][:20]:
                 print(f"  - corrupt {cr['sha256']} ({cr.get('error')})")
     for w in key_posture.get("warnings") or []:

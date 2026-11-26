@@ -53,7 +53,8 @@ def test_verify_ok_and_blame_unknown_after_gc(env, monkeypatch, capsys):
         rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
         (ws / "app.py").write_text(content)
         rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 3
     assert res["target"]["bytes_remaining"] <= 60_000
     ok, msg = rec.verify()
@@ -89,7 +90,8 @@ def test_blame_with_explicit_value_unknown_after_gc(env, monkeypatch, capsys):
         rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
         (ws / "app.py").write_text(content)
         rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 3
     assert res["target"]["bytes_remaining"] <= 60_000
     monkeypatch.chdir(ws)
@@ -124,7 +126,8 @@ def test_blame_human_output_unattributable_after_gc(env, monkeypatch, capsys):
         rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
         (ws / "app.py").write_text(f"pad = '{chr(65 + i) * 50_000}'\nmagic = 77777\n")
         rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 3
     assert res["target"]["bytes_remaining"] <= 60_000
     monkeypatch.chdir(ws)
@@ -158,7 +161,8 @@ def test_blame_explicit_value_human_output_unattributable_after_gc(env, monkeypa
         rec.pre(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"})
         (ws / "app.py").write_text(f"pad = '{chr(65 + i) * 50_000}'\nmagic = 77777\n")
         rec.post(f"t{i}", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": f"step_{i}"}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000)
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=60_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 3
     assert res["target"]["bytes_remaining"] <= 60_000
     monkeypatch.chdir(ws)
@@ -219,7 +223,8 @@ def test_blame_recent_step_remains_located_after_gc(env, monkeypatch, capsys):
     (ws / "app.py").write_text(
         f"pad = '{chr(65 + 6) * 50_000}'\nmagic = 77777\nactive_token = \"active_999\"\n")
     rec.post("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000)
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 4
     assert res["target"]["bytes_remaining"] <= 120_000
     ok, msg = rec.verify()
@@ -270,7 +275,8 @@ def test_blame_evicted_step_unknown_contrast_after_gc(env, monkeypatch, capsys):
     (ws / "app.py").write_text(
         f"pad = '{chr(65 + 6) * 50_000}'\nmagic = 77777\nactive_token = \"active_999\"\n")
     rec.post("t6", s2, "Edit", {"file_path": str(ws / "app.py"), "new_string": 'active_token = "active_999"'}, "ok")
-    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000)
+    res = retention.compact_trace(vh, dry_run=False, target_bytes=120_000,
+                                  allow_breaking_chain_references=True)
     assert res["target"]["target_reached"] and res["target"]["files_removed"] >= 4
     assert res["target"]["bytes_remaining"] <= 120_000
     ok, msg = rec.verify()

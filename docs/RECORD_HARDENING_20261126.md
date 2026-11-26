@@ -62,35 +62,55 @@ addressing findings from the independent D2 audit.
     `baseline.index` and `rescanned.index`, `session_closed` `final_index`, `checkpoint_restore`
     `target_index`, spilled `payload_blob`/`writes_blob`/`reads_blob`/`changes_blob` (unpacked
     recursively), all index files + delta `base` indexes, and file blobs referenced inside indexes.
-- Updated `compact_trace()` and `gc_all()` (`vacant gc`):
-  - Default `keep_recent_steps` changed from `50` to `None` (preserve objects referenced by **all**
-    events in every chain; only delete truly unreferenced orphan blobs). Explicit `--keep-steps N`
-    or `--aggressive` still opts into step-window pruning.
-  - `source_snapshot` `pages`, `source_fetch` `sha256`, `source_check` blobs, `egress.jsonl`
-    blobs, `coverage.rescanned.index`, and `payload_blob` refs are now unconditionally added to
-    both `keep_shas` and `structural_shas` (hard floor even under `--target-bytes`).
-- Added referenced-object verification:
+- Hardened `compact_trace()`, `gc_all()`, `auto_gc()`, and `vacant gc` so **no chain-referenced
+  object is ever deleted by default**:
+  - By default (`allow_breaking_chain_references=False`, including `auto_gc`, `gc_all`, `vacant gc`,
+    and even when `VACANT_TRACE_BUDGET_BYTES` / `--target-bytes`, `--keep-steps`, or `--aggressive`
+    is set), **every** object referenced by any chain event (directly or through an index file the
+    chain references) is treated as hard-keep and never deleted.
+  - Under budget pressure, default GC may only evict truly unreferenced orphan objects. If the
+    budget still cannot be met because referenced objects exceed `target_bytes`, GC does not delete
+    them; instead it reports `budget_unmet: true`, `referenced_bytes_held`, and a clear human note.
+- Added explicit destructive opt-in with signed chain accountability:
+  - `vacant gc --allow-breaking-chain-references` (`allow_breaking_chain_references=True` in
+    `compact_trace()` / `gc_all()`; forbidden with `--auto`, exiting `2`).
+  - Before deleting any referenced object under this opt-in, GC appends a signed `"objects_evicted"`
+    event (`EVENT_TYPES` in `vacant_network/trace/recorder.py`, chunked at 400 sha256s per event to
+    stay inline) to every affected project chain listing every evicted sha256. Signing failure
+    (e.g. `MixedSignerRefused`) is fail-closed and blocks deletion of that project's objects.
+  - Even under `--allow-breaking-chain-references`, structural objects (indices, delta bases,
+    `source_snapshot` `pages`, `source_fetch` `sha256`, `source_check`, `egress.jsonl`, and spilled
+    structure blobs) remain protected as hard floor under `--target-bytes`.
+- Added referenced-object verification distinguishing **evicted by explicit GC** vs **missing**:
   - `retention.verify_trace_objects(root, *, project_dir=None, objects_root=None, verify_hashes=False)`
   - `Recorder.verify_objects(verify_hashes=False)`
-  - `vacant trace verify --objects` (and `--verify-hashes`, `--json`), exiting `1` when any
-    chain-referenced object is missing or corrupt.
-  - `vacant gc --verify-objects`, exiting `1` when any referenced object is missing or corrupt.
+  - `vacant trace verify --objects` (and `--verify-hashes`, `--json`) and `vacant gc --verify-objects`:
+    - Unexplained absent objects are reported under `missing` (`ok=False`, exit `1`).
+    - Tampered objects (`--verify-hashes`) are reported under `corrupt` (`ok=False`, exit `1`).
+    - Objects accounted for by a signed `"objects_evicted"` chain event are reported separately under
+      `evicted` with `status: "evicted by explicit GC"` and `evicted_at_seq` (`OBJECTS PARTIAL`
+      when `evicted_count > 0` and `missing_count == 0`, never silently merged into `missing` or
+      falsely reported as `OBJECTS OK`).
 
 ### Tests
-- `tests/test_record_hardening_gc.py`: GC over >55 steps + `source_snapshot` + `source_fetch` +
-  `prompt` + `transcript` + `egress.jsonl` + `rescan` + unreferenced orphans (deletes only
-  orphans, keeps all referenced objects); `source_snapshot`/`source_fetch` survival under tight
-  `target_bytes`; `verify_trace_objects`, `vacant trace verify --objects`, `vacant gc --verify-objects`,
-  and `--verify-hashes` detecting deleted and tampered objects.
+- `tests/test_record_hardening_gc.py`:
+  - Default GC over >55 steps + `source_snapshot` + `source_fetch` + `prompt` + `transcript` +
+    `egress.jsonl` + `rescan` + unreferenced orphans (deletes only orphans, keeps all referenced objects).
+  - Referenced objects (including `input_blob`, `output_blob`, `prompt`, `transcript`, and
+    index-referenced file blobs) survive tight `target_bytes` / `VACANT_TRACE_BUDGET_BYTES` /
+    `auto_gc` / `--keep-steps` / `--aggressive`, reporting `budget_unmet: true` and
+    `referenced_bytes_held` with a clear CLI note; `--auto --allow-breaking-chain-references` is refused.
+  - Explicit `--allow-breaking-chain-references` dry-run writes nothing, real run appends signed
+    `objects_evicted` events verifiable offline, fail-closed blocks deletion if signing fails, and
+    `vacant trace verify --objects` / `vacant gc --verify-objects` cleanly distinguish
+    `evicted by explicit GC` vs unexplained `missing` vs `--verify-hashes` `corrupt`.
 
 ### What is still not possible
-- **Explicit budget/window eviction**: if an operator sets a hard `VACANT_TRACE_BUDGET_BYTES` /
-  `--target-bytes` (default 64 MiB in `gc_all`/`auto_gc`) that is exceeded by non-structural
-  step/file blobs, or explicitly passes `--keep-steps N` / `--aggressive`, older non-structural
-  blobs can still be evicted to respect the disk budget (set `VACANT_TRACE_BUDGET_BYTES=0` to
-  disable budget eviction completely). When eviction occurs, `verify_trace_objects` /
-  `vacant trace verify --objects` will now explicitly report those missing objects rather than
-  staying silent.
+- **Unbounded growth when chains keep growing**: because default GC refuses to delete
+  chain-referenced objects, `trace/objects/` can exceed `VACANT_TRACE_BUDGET_BYTES` (64 MiB
+  default) on long-lived workspaces; Vacant reports `budget_unmet: true` with `referenced_bytes_held`
+  and leaves space reclamation to an explicit operator decision (`--allow-breaking-chain-references`,
+  archiving old projects, or raising `VACANT_TRACE_BUDGET_BYTES`).
 - **Store-on-change initial `before` versions**: unmodified workspace files are not copied into
   `objects/` by `workspace.scan(store=False)`; if such a file is later modified outside Vacant
   or overwritten for the first time, its original pre-change bytes were never stored and are

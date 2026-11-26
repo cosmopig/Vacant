@@ -150,10 +150,20 @@ def test_inactive_project_gc_reclaims_reads_honest_afterward(env):
     # legacy store：把這份 bg 內容直接放進 blob 庫（模擬舊時代的存量）
     assert rec.blobs.put_bytes(original) == star_sha
 
-    # 非活躍（active_window_s=0.0）：gc 回收它
-    res = retention.compact_trace(active_window_s=0.0, dry_run=False)
+    # 預設（allow_breaking_chain_references=False）：即使非活躍，被鏈索引引用的物件也絕不刪除
+    safe_res = retention.compact_trace(active_window_s=0.0, dry_run=False)
+    assert safe_res["files_removed"] == 0
+    assert rec.blobs.path(star_sha).is_file()
+
+    # 明確 opt-in（allow_breaking_chain_references=True）：非活躍專案回收該物件並簽記 objects_evicted
+    res = retention.compact_trace(active_window_s=0.0, dry_run=False,
+                                  allow_breaking_chain_references=True)
     assert res["files_removed"] >= 1
     assert not rec.blobs.path(star_sha).is_file()   # gc 確實回收了它
+    obj_rep = rec.verify_objects()
+    assert obj_rep["ok"] is True
+    assert obj_rep["missing_count"] == 0
+    assert any(ev["sha256"] == star_sha for ev in obj_rep["evicted"])
 
     # 工作區原檔未變動 ⇒ 讀端回退取回逐位元組相同的內容（零磁碟成本）
     from vacant_network.trace.blame import Trace

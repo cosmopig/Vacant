@@ -346,13 +346,18 @@ def _sweep_to_target(
     file_shas: set[str] | None = None,
     latest_file_shas: set[str] | None = None,
     first_seen_order: dict[str, int] | None = None,
+    referenced_shas: set[str] | None = None,
+    grace_protected_shas: set[str] | None = None,
+    defer_delete_shas: set[str] | None = None,
 ) -> dict[str, Any]:
-    """把版本庫壓到 `target_bytes` 以下（2026-10-28 Axis 2）。
+    """把版本庫壓到 `target_bytes` 以下（2026-10-28 Axis 2；2026-11-26 強化）。
 
-    優先序：先回收「与工作區冗餘」的 blob（工作區仍有 bit 相同原檔、讀取端回退取得，
-    內容零損失），再按最舊優先回收其餘非必須保留的舊版本（內容轉為 UNKNOWN：
-    `file_text` 回 None、`materialize` 列進 missing；不崩、不假 PASS）。鏈、事件結構、
-    近期步驟索引（`structural_shas`）＝硬底（hard floor），此機制不動。
+    預設（呼叫端將所有鏈引用 sha 放入 `structural_shas` 且 `redundant_live=set()`）：
+    只允許回收未被任何簽章鏈引用的物件；若受鏈引用的物件總大小仍超出 `target_bytes`，
+    絕不刪除它們，回報 `budget_unmet=True` 與 `referenced_bytes_held`。
+
+    僅當呼叫端明確啟用 `--allow-breaking-chain-references` 時，非結構性鏈引用物件才進入
+    候選（依 `defer_delete_shas` 延後至呼叫端先簽寫 `objects_evicted` 事件後再刪除）。
     """
     excluded = excluded_shas or set()
     structural = (
@@ -363,9 +368,13 @@ def _sweep_to_target(
     files_set = file_shas or set()
     latest_set = latest_file_shas or set()
     order_map = first_seen_order or {}
+    ref_set = referenced_shas if referenced_shas is not None else keep_shas
+    grace_set = grace_protected_shas or set()
+    defer_set = defer_delete_shas or set()
     cands: list[tuple[int, int, int, int, pathlib.Path]] = []
     total = 0          # 整個版本庫（含硬底，排除第一階段已刪孤兒）的位元組數
     hard_keep = 0      # 硬底位元組（本機制不可回收）
+    ref_held = 0       # 仍留在版本庫中、受簽章鏈引用的物件位元組數
     if obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
             if not sub.is_dir():
@@ -380,6 +389,11 @@ def _sweep_to_target(
                 except OSError:
                     continue
                 total += sz
+                if sha in ref_set:
+                    ref_held += sz
+                if sha in grace_set:
+                    hard_keep += sz
+                    continue
                 if sha in structural and sha not in redundant_live:
                     hard_keep += sz
                     continue
@@ -401,24 +415,47 @@ def _sweep_to_target(
     removed = 0
     aborted = False
     remaining = total
-    for _rank, _ord, _mts, _size, bf in cands:
+    deferred_evictions: list[tuple[str, pathlib.Path, int]] = []
+    for _rank, _ord, _mts, sz, bf in cands:
         if remaining <= target_bytes:
             break
         if budget is not None and budget.expired():
             aborted = True
             break
+        sha = bf.name
+        if sha in defer_set:
+            deferred_evictions.append((sha, bf, sz))
+            remaining -= sz
+            freed += sz
+            removed += 1
+            if sha in ref_set:
+                ref_held -= sz
+            continue
         b, c = _remove_path(bf, dry_run=dry_run)
         remaining -= b
         freed += b
         removed += c
+        if c > 0 and sha in ref_set:
+            ref_held -= b
     if not dry_run and obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
             with contextlib.suppress(OSError):
                 if sub.is_dir() and not any(sub.iterdir()):
                     sub.rmdir()
-    return {"target_bytes": target_bytes, "bytes_freed": freed, "files_removed": removed,
-            "bytes_remaining": remaining, "target_reached": remaining <= target_bytes,
-            "hard_keep_bytes": hard_keep, "aborted": aborted}
+    out: dict[str, Any] = {
+        "target_bytes": target_bytes,
+        "bytes_freed": freed,
+        "files_removed": removed,
+        "bytes_remaining": remaining,
+        "target_reached": remaining <= target_bytes,
+        "budget_unmet": remaining > target_bytes,
+        "hard_keep_bytes": hard_keep,
+        "referenced_bytes_held": max(0, ref_held),
+        "aborted": aborted,
+    }
+    if deferred_evictions:
+        out["_deferred_evictions"] = deferred_evictions
+    return out
 
 
 def _remove_path(p: pathlib.Path, *, dry_run: bool) -> tuple[int, int]:
@@ -870,6 +907,7 @@ def collect_project_blob_refs(
     index_shas: set[str] = set()
     index_file_refs: dict[str, list[dict[str, Any]]] = {}
     before_shas: set[str] = set()
+    evicted_refs: dict[str, dict[str, Any]] = {}
     ws_path: pathlib.Path | None = None
 
     def _add_expected(sha: str, seq: int, etype: str, field: str) -> None:
@@ -929,6 +967,28 @@ def collect_project_blob_refs(
             cand = pathlib.Path(str(e["workspace"]))
             if cand.is_dir():
                 ws_path = cand
+        if t == "objects_evicted":
+            pb = e.get("payload_blob")
+            if _is_blob_sha(pb):
+                _add_expected(pb, seq_num, t, "payload_blob")
+            ev_shas = list(e.get("evicted_shas") or [])
+            ev_reason = e.get("reason") or "explicit_gc"
+            ev_trigger = e.get("trigger")
+            if _is_blob_sha(pb) and blobs.has(pb):
+                with contextlib.suppress(OSError, ValueError):
+                    inner = json.loads(blobs.get(pb))
+                    if isinstance(inner, dict):
+                        ev_shas.extend(inner.get("evicted_shas") or [])
+                        ev_reason = inner.get("reason") or ev_reason
+                        ev_trigger = inner.get("trigger") or ev_trigger
+            for esha in ev_shas:
+                if _is_blob_sha(esha):
+                    evicted_refs[esha] = {
+                        "seq": seq_num,
+                        "reason": ev_reason,
+                        "trigger": ev_trigger,
+                    }
+            continue
         direct, idxs, befores = _collect_event_direct_refs(e, blobs)
         for sha, fld in direct:
             _add_expected(sha, seq_num, t, fld)
@@ -965,6 +1025,7 @@ def collect_project_blob_refs(
         "index_shas": index_shas,
         "index_file_refs": index_file_refs,
         "before_shas": before_shas,
+        "evicted_refs": evicted_refs,
         "all_shas": all_shas,
         "workspace": ws_path,
     }
@@ -1016,6 +1077,7 @@ def verify_trace_objects(
 
     blobs = W.Blobs(obj_root)
     base_cache: dict[str, dict[str, W.Entry]] = {}
+    evicted: list[dict[str, Any]] = []
     missing: list[dict[str, Any]] = []
     corrupt: list[dict[str, Any]] = []
     unmat: list[dict[str, Any]] = []
@@ -1031,10 +1093,23 @@ def verify_trace_objects(
         projects_checked += 1
         info = collect_project_blob_refs(pdir, blobs, base_cache=base_cache)
         expected: dict[str, list[dict[str, Any]]] = info["expected_store_refs"]
+        evicted_refs: dict[str, dict[str, Any]] = info.get("evicted_refs") or {}
         referenced_total += len(expected)
         for sha, refs in sorted(expected.items()):
             if not blobs.has(sha):
-                missing.append({"project": pdir.name, "sha256": sha, "refs": refs})
+                if sha in evicted_refs:
+                    ev_meta = evicted_refs[sha]
+                    evicted.append({
+                        "project": pdir.name,
+                        "sha256": sha,
+                        "refs": refs,
+                        "status": "evicted by explicit GC",
+                        "evicted_at_seq": ev_meta.get("seq"),
+                        "reason": ev_meta.get("reason") or "explicit_gc",
+                        "trigger": ev_meta.get("trigger"),
+                    })
+                else:
+                    missing.append({"project": pdir.name, "sha256": sha, "refs": refs})
             else:
                 present_total += 1
                 if verify_hashes:
@@ -1045,6 +1120,23 @@ def verify_trace_objects(
         ws = info["workspace"]
         for sha, irefs in sorted(info["index_file_refs"].items()):
             if sha in expected or blobs.has(sha):
+                continue
+            if sha in evicted_refs:
+                referenced_total += 1
+                ev_meta = evicted_refs[sha]
+                evicted.append({
+                    "project": pdir.name,
+                    "sha256": sha,
+                    "refs": [
+                        {"type": "index", "field": "index_file",
+                         "index": ir["index"], "path": ir["path"]}
+                        for ir in irefs
+                    ],
+                    "status": "evicted by explicit GC",
+                    "evicted_at_seq": ev_meta.get("seq"),
+                    "reason": ev_meta.get("reason") or "explicit_gc",
+                    "trigger": ev_meta.get("trigger"),
+                })
                 continue
             live_ok = False
             if ws is not None:
@@ -1060,15 +1152,66 @@ def verify_trace_objects(
 
     return {
         "ok": len(missing) == 0 and len(corrupt) == 0,
+        "all_present": len(missing) == 0 and len(corrupt) == 0 and len(evicted) == 0,
         "projects_checked": projects_checked,
         "referenced_count": referenced_total,
         "present_count": present_total,
+        "evicted_count": len(evicted),
         "missing_count": len(missing),
         "corrupt_count": len(corrupt),
+        "evicted": evicted,
         "missing": missing,
         "corrupt": corrupt,
         "unmaterializable_index_entries": unmat,
     }
+
+
+#: 單筆 `objects_evicted` 簽章事件最多列出的 sha256 數量（保持事件內聯在鏈上、不溢出至 payload_blob）。
+MAX_EVICTED_PER_EVENT = 400
+
+
+def _record_objects_evicted(
+    proj_root: pathlib.Path,
+    pdir: pathlib.Path,
+    shas: list[str],
+    sha_sizes: dict[str, int],
+    *,
+    triggers: list[str],
+    target_bytes: int | None,
+    keep_recent_steps: int | None,
+) -> tuple[bool, list[dict[str, Any]], str | None]:
+    """在 `pdir` 活動鏈上簽寫一或多筆 `objects_evicted` 事件（先簽再刪；失敗 ⇒ fail-closed 不刪）。"""
+    from .trace.recorder import Recorder
+
+    if not shas:
+        return True, [], None
+    rec = Recorder(pdir, root=proj_root.parent)
+    rec.dir = pdir
+    rec.chain_path = pdir / "chain.ndjson"
+    rec.state_path = pdir / "state.json"
+    refs: list[dict[str, Any]] = []
+    try:
+        with rec._lock():
+            for i in range(0, len(shas), MAX_EVICTED_PER_EVENT):
+                batch = shas[i:i + MAX_EVICTED_PER_EVENT]
+                payload: dict[str, Any] = {
+                    "schema": "vacant-trace/1",
+                    "reason": "explicit_gc",
+                    "trigger": triggers,
+                    "evicted_shas": batch,
+                    "count": len(batch),
+                    "total_evicted": len(shas),
+                    "bytes_evicted": sum(sha_sizes.get(s, 0) for s in batch),
+                    "target_bytes": target_bytes,
+                    "keep_recent_steps": keep_recent_steps,
+                    "allow_breaking_chain_references": True,
+                }
+                ref = rec._append("objects_evicted", payload)
+                refs.append({"project": pdir.name, "seq": ref["seq"], "hash": ref["hash"],
+                             "count": len(batch)})
+        return True, refs, None
+    except Exception as exc:  # noqa: BLE001 — fail-closed：簽不成 ⇒ 不刪除該專案引用物件
+        return False, refs, f"{type(exc).__name__}: {exc}"
 
 
 def compact_trace(
@@ -1083,25 +1226,23 @@ def compact_trace(
     active_window_s: float | None = DEFAULT_ACTIVE_WINDOW_S,
     target_bytes: int | None = None,
     orphan_grace_s: float = 0.0,
+    allow_breaking_chain_references: bool = False,
 ) -> dict[str, Any]:
     """清理 `$VACANT_HOME/trace/` 下未被引用的孤立物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。
 
-    2026-11-26 紀錄強化：`keep_recent_steps` 預設改為 `None`（保留**整條鏈全部事件**引用的物件：
-    含 `input_blob`／`output_blob`／索引與差異基底／`source_snapshot` `pages`／`source_fetch` `sha256`／
-    `source_check`／`prompt`／`transcript`／`coverage` `rescanned.index`／`egress.jsonl`／`payload_blob`
-    與其內容），只刪除真正未被任何鏈引用的孤立物件。
-
-    僅當呼叫端明確給定 `keep_recent_steps=N`（例如 `--aggressive`／`--keep-steps N`）或 `target_bytes`
-    被超出時，才回收舊步驟的非結構性 blob；即使在 `target_bytes` 下，索引檔、`source_snapshot` `pages`、
-    `source_fetch` `sha256` 與溢出結構 blob 仍屬硬底（`structural_shas`）永不刪除。
-
-    `target_bytes`（2026-10-28 Axis 2）：常規回收後若版本庫仍大於此位元組數，再按
-    「工作區冗餘 → 最舊舊版本」的順序回收（見 `_sweep_to_target`）：讀取端回退
-    「工作區＋驗 sha」，取不回誠實回 UNKNOWN；必須保留的結構物件從不動。
-
-    round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在 `active_window_s` 內（預設
-    7 天）的**活躍專案**，其「未變動且工作區原檔 bit 相同」的 live 背景 blob 予以保留；
-    **非活躍專案**（超出窗口）照舊回收。`active_window_s=None` 表示無活躍窗口；`0.0` 等於「無任何專案活躍」。"""
+    2026-11-26 紀錄強化（預設零破壞鏈引用）：
+    - 預設（`allow_breaking_chain_references=False`）：**絕不刪除任何被簽章鏈引用的物件**
+      （包含事件直接引用的 `input_blob`／`output_blob`／`prompt`／`transcript`／`source_snapshot`／
+      `source_fetch`／`source_check`／`reads`／`writes`／`changes`／`egress.jsonl`／`payload_blob`
+      與其內容，以及任何鏈引用索引檔與索引內指向的檔案版本），**無論 `target_bytes`／
+      `VACANT_TRACE_BUDGET_BYTES`／`keep_recent_steps`／`active_window_s` 為何**。
+    - 預算壓力下只能回收真正未被引用的孤立物件；若受鏈引用的物件仍超出 `target_bytes`，
+      回報 `budget_unmet: True` 與 `referenced_bytes_held`（不刪除任何引用物件）。
+    - 僅當呼叫端明確傳入 `allow_breaking_chain_references=True`（CLI `--allow-breaking-chain-references`）
+      時，才允許依 `keep_recent_steps`／`active_window_s`／`target_bytes` 驅逐非結構性鏈引用物件；
+      每次實際驅逐前必先在所有受影響專案的簽章鏈上簽寫 `objects_evicted` 事件（列出每個被驅逐的
+      sha256），簽章失敗則 fail-closed 拒絕刪除，使 `vacant trace verify --objects` 能明確區分
+      「evicted by explicit GC」與未經說明的缺失。"""
     sroot = _resolve_state_dir(root)
     troot = sroot / "trace"
     obj_root = troot / "objects"
@@ -1114,10 +1255,13 @@ def compact_trace(
 
     blobs = W.Blobs(obj_root)
     keep_shas: set[str] = set()
+    all_referenced_shas: set[str] = set()
+    proj_all_refs: dict[pathlib.Path, set[str]] = {}
+    proj_has_chain: dict[pathlib.Path, bool] = {}
     # 已被工作區原位檔案涵蓋、且從未在任何步驟被改寫的純重複檔案 sha256
     redundant_candidates: set[str] = set()
     # 2026-10-28 Axis 2：「工作區仍有 bit 相同原檔」的 blob（含活躍專案的）——
-    # 常規回收保留（取代 round 72 的 whack-a-mole 理由），但超出 target_bytes 時可安全回收
+    # 僅在 allow_breaking_chain_references=True 下參與淘汰
     redundant_live: set[str] = set()
     must_keep_file_shas: set[str] = set()
     structural_shas: set[str] = set()
@@ -1126,6 +1270,7 @@ def compact_trace(
     projects_scanned = 0
     bytes_freed = 0
     files_removed = 0
+    scan_aborted = False
     now = time.time()
 
     base_cache: dict[str, dict[str, W.Entry]] = {}
@@ -1152,6 +1297,7 @@ def compact_trace(
     if proj_root.is_dir():
         for pdir in sorted(x for x in proj_root.iterdir() if x.is_dir()):
             if budget is not None and budget.expired():
+                scan_aborted = True
                 break
             projects_scanned += 1
             # 1) 清理過多的 chain.set-aside.*.ndjson
@@ -1174,6 +1320,18 @@ def compact_trace(
                     b2, c2 = _remove_path(aux, dry_run=dry_run)
                     bytes_freed += b2
                     files_removed += c2
+
+            # 完整收集該專案鏈（含索引與差異基底、state.json、egress.jsonl）引用的全部 sha
+            proj_refs = collect_project_blob_refs(pdir, blobs, base_cache=base_cache)
+            proj_all_refs[pdir] = proj_refs["all_shas"]
+            proj_has_chain[pdir] = bool(_iter_chain_files(pdir))
+            all_referenced_shas |= proj_refs["all_shas"]
+
+            if not allow_breaking_chain_references:
+                # 預設安全模式：所有被任一鏈引用的物件皆不可刪除（連同索引內檔案與硬底）。
+                keep_shas |= proj_refs["all_shas"]
+                structural_shas |= proj_refs["all_shas"]
+                continue
 
             ws_path: pathlib.Path | None = None
             with contextlib.suppress(OSError, ValueError):
@@ -1569,11 +1727,17 @@ def compact_trace(
 
     # 任何在別處被標記必須保留的 sha，不可當成重複副本刪掉
     keep_shas |= must_keep_file_shas
+    if not allow_breaking_chain_references:
+        keep_shas |= all_referenced_shas
+        structural_shas |= all_referenced_shas
     cutoff_ts = (now - max_age_days * 86400.0) if max_age_days is not None else None
 
-    aborted = False
+    aborted = scan_aborted
     phase1_removed: set[str] = set()
-    if obj_root.is_dir():
+    phase1_planned_ref: dict[str, tuple[pathlib.Path, int, str]] = {}
+    grace_protected_orphans: set[str] = set()
+    referenced_bytes_held = 0
+    if not scan_aborted and obj_root.is_dir():
         for sub in sorted(obj_root.iterdir()):
             if budget is not None and budget.expired():
                 aborted = True
@@ -1586,16 +1750,33 @@ def compact_trace(
                     break
                 sha = blob_file.name
                 if sha in keep_shas:
+                    if sha in all_referenced_shas:
+                        referenced_bytes_held += _file_size(blob_file)
                     continue
                 try:
-                    mtime = blob_file.stat().st_mtime
+                    st = blob_file.stat()
+                    mtime = st.st_mtime
+                    sz = st.st_size
                 except OSError:
                     continue
                 if mtime >= now or (orphan_grace_s > 0 and (now - mtime) < orphan_grace_s):
+                    if sha in all_referenced_shas:
+                        referenced_bytes_held += sz
+                    else:
+                        grace_protected_orphans.add(sha)
                     continue
                 if cutoff_ts is not None and sha not in redundant_candidates:
                     if mtime >= cutoff_ts:
+                        if sha in all_referenced_shas:
+                            referenced_bytes_held += sz
                         continue
+                if sha in all_referenced_shas:
+                    if not allow_breaking_chain_references:
+                        referenced_bytes_held += sz
+                        continue
+                    trig = "redundant_workspace" if sha in redundant_candidates else "keep_steps"
+                    phase1_planned_ref[sha] = (blob_file, sz, trig)
+                    continue
                 b, c = _remove_path(blob_file, dry_run=dry_run)
                 bytes_freed += b
                 files_removed += c
@@ -1607,34 +1788,142 @@ def compact_trace(
                         sub.rmdir()
 
     target: dict[str, Any] | None = None
-    if target_bytes is not None and target_bytes >= 0:
+    sweep_deferred: list[tuple[str, pathlib.Path, int]] = []
+    if not scan_aborted and target_bytes is not None and target_bytes >= 0:
         target = _sweep_to_target(
             obj_root,
             keep_shas,
-            redundant_live,
+            redundant_live if allow_breaking_chain_references else set(),
             int(target_bytes),
             dry_run=dry_run,
             budget=budget,
-            excluded_shas=phase1_removed,
-            structural_shas=structural_shas,
+            excluded_shas=phase1_removed | set(phase1_planned_ref),
+            structural_shas=structural_shas if allow_breaking_chain_references else all_referenced_shas,
             file_shas=must_keep_file_shas,
             latest_file_shas=latest_file_shas,
             first_seen_order=first_seen_order,
+            referenced_shas=all_referenced_shas,
+            grace_protected_shas=grace_protected_orphans,
+            defer_delete_shas=all_referenced_shas,
         )
+        sweep_deferred = target.pop("_deferred_evictions", [])
+        referenced_bytes_held = target["referenced_bytes_held"]
         if target["aborted"]:
             aborted = True
+
+    # ── Phase 2b：明確 opt-in（allow_breaking_chain_references=True）的引用物件驅逐 ──
+    # 必須先在每一條引用到這些 sha 的專案鏈上簽寫 `objects_evicted` 事件，成功後才刪檔；
+    # 任一引用鏈簽章失敗 ⇒ fail-closed，絕不刪除該專案引用的物件。
+    all_planned_ref: list[tuple[str, pathlib.Path, int, str, bool]] = [
+        (sha, bf, sz, trig, False)
+        for sha, (bf, sz, trig) in sorted(phase1_planned_ref.items())
+    ]
+    seen_planned = set(phase1_planned_ref)
+    for sha, bf, sz in sweep_deferred:
+        if sha not in seen_planned:
+            seen_planned.add(sha)
+            all_planned_ref.append((sha, bf, sz, "target_bytes", True))
+
+    evicted_ref_shas: list[str] = []
+    would_evict_ref: list[str] = []
+    eviction_events_recorded: list[dict[str, Any]] = []
+    skipped_referenced: list[dict[str, Any]] = []
+
+    if all_planned_ref and allow_breaking_chain_references:
+        if dry_run:
+            would_evict_ref = sorted(sha for sha, *_ in all_planned_ref)
+            for _sha, _bf, sz, _trig, from_sweep in all_planned_ref:
+                if not from_sweep:
+                    bytes_freed += sz
+                    files_removed += 1
+        else:
+            planned_set = {sha for sha, *_ in all_planned_ref}
+            sha_sizes = {sha: sz for sha, _bf, sz, _trig, _fs in all_planned_ref}
+            sha_triggers = {sha: trig for sha, _bf, _sz, trig, _fs in all_planned_ref}
+            failed_projects: set[pathlib.Path] = set()
+            for pdir in sorted(proj_all_refs, key=lambda p: p.name):
+                shas_for_proj = sorted(planned_set & proj_all_refs[pdir])
+                if not shas_for_proj:
+                    continue
+                if not proj_has_chain.get(pdir, False):
+                    failed_projects.add(pdir)
+                    skipped_referenced.append({"project": pdir.name, "count": len(shas_for_proj),
+                                               "why": "no_chain"})
+                    continue
+                proj_trigs = sorted({sha_triggers[s] for s in shas_for_proj})
+                ok_ev, ev_refs, ev_err = _record_objects_evicted(
+                    proj_root,
+                    pdir,
+                    shas_for_proj,
+                    sha_sizes,
+                    triggers=proj_trigs,
+                    target_bytes=target_bytes,
+                    keep_recent_steps=keep_recent_steps,
+                )
+                eviction_events_recorded.extend(ev_refs)
+                if not ok_ev:
+                    failed_projects.add(pdir)
+                    skipped_referenced.append({"project": pdir.name, "count": len(shas_for_proj),
+                                               "why": ev_err or "signing_failed"})
+            blocked_shas: set[str] = set()
+            for fp in failed_projects:
+                blocked_shas |= proj_all_refs.get(fp, set())
+            for sha, bf, sz, _trig, from_sweep in all_planned_ref:
+                if sha in blocked_shas:
+                    if from_sweep and target is not None:
+                        target["bytes_freed"] = max(0, target["bytes_freed"] - sz)
+                        target["files_removed"] = max(0, target["files_removed"] - 1)
+                        target["bytes_remaining"] += sz
+                        target["referenced_bytes_held"] += sz
+                    else:
+                        referenced_bytes_held += sz
+                    continue
+                b, c = _remove_path(bf, dry_run=False)
+                if c > 0:
+                    evicted_ref_shas.append(sha)
+                    if not from_sweep:
+                        bytes_freed += b
+                        files_removed += c
+                else:
+                    if from_sweep and target is not None:
+                        target["bytes_freed"] = max(0, target["bytes_freed"] - sz)
+                        target["files_removed"] = max(0, target["files_removed"] - 1)
+                        target["bytes_remaining"] += sz
+                        target["referenced_bytes_held"] += sz
+                    else:
+                        referenced_bytes_held += sz
+            if target is not None:
+                target["target_reached"] = target["bytes_remaining"] <= target["target_bytes"]
+                target["budget_unmet"] = target["bytes_remaining"] > target["target_bytes"]
+                referenced_bytes_held = target["referenced_bytes_held"]
+            if obj_root.is_dir():
+                for sub in sorted(obj_root.iterdir()):
+                    with contextlib.suppress(OSError):
+                        if sub.is_dir() and not any(sub.iterdir()):
+                            sub.rmdir()
 
     # ── Phase C（L3 預算回收，DECISION_20261103 §3.4）────────────────────────────
     # 僅當有明確預算且 objects 回收後整棵 trace 樹仍超：回收最舊封印卷（活動/卷 1/
     # 最近 N 卷絕不動），每筆先簽 volume_reclaimed 再刪。無預算 ⇒ 不執行（C5 零刪除）。
     reclaim_rep: dict[str, Any] | None = None
-    if target_bytes is not None and target_bytes >= 0 and proj_root.is_dir():
+    if not scan_aborted and target_bytes is not None and target_bytes >= 0 and proj_root.is_dir():
         cur = _tree_size(troot)
         if cur > target_bytes:
             reclaim_rep = _reclaim_sealed_volumes_to_target(
                 proj_root, int(target_bytes), cur, dry_run=dry_run, budget=budget)
 
-    rep = {
+    budget_unmet = bool(target is not None and target["budget_unmet"])
+    budget_note: str | None = None
+    if budget_unmet and target is not None:
+        budget_note = (
+            f"budget_unmet: {_human_bytes(target['bytes_remaining'])} remaining exceeds target "
+            f"{_human_bytes(target['target_bytes'])} ({_human_bytes(referenced_bytes_held)} held by "
+            f"chain-referenced objects; default GC never deletes chain-referenced objects — "
+            f"pass --allow-breaking-chain-references to opt in)"
+        )
+        target["note"] = budget_note
+
+    rep: dict[str, Any] = {
         "bytes_freed": bytes_freed + (target["bytes_freed"] if target else 0)
                        + (reclaim_rep["bytes_freed"] if reclaim_rep else 0),
         "files_removed": files_removed + (target["files_removed"] if target else 0)
@@ -1643,7 +1932,20 @@ def compact_trace(
         "kept_blobs": len(keep_shas),
         "aborted": aborted,
         "volumes_reclaimed": reclaim_rep["volumes_reclaimed"] if reclaim_rep else 0,
+        "budget_unmet": budget_unmet,
+        "referenced_bytes_held": referenced_bytes_held,
+        "allow_breaking_chain_references": allow_breaking_chain_references,
+        "evicted_referenced_count": len(evicted_ref_shas),
+        "evicted_referenced": sorted(evicted_ref_shas),
     }
+    if budget_note is not None:
+        rep["note"] = budget_note
+    if would_evict_ref:
+        rep["would_evict_referenced"] = would_evict_ref
+    if eviction_events_recorded:
+        rep["eviction_events_recorded"] = eviction_events_recorded
+    if skipped_referenced:
+        rep["skipped_referenced"] = skipped_referenced
     if target is not None:
         rep["target"] = target
     if reclaim_rep is not None:
@@ -2182,19 +2484,21 @@ def gc_all(
     budget: _Budget | None = None,
     target_bytes: int | None = None,
     orphan_grace_s: float = 0.0,
+    allow_breaking_chain_references: bool = False,
 ) -> dict[str, Any]:
     """一次清理所有 Vacant 狀態目錄的冗餘資料，回傳結構化報告。
 
-    `target_bytes`：把 trace 版本庫壓到此位元組數以下（2026-10-28 Axis 2；見
-    `compact_trace`）；None＝使用 `_resolve_auto_budget()`（預設 64 MiB，或
-    `VACANT_TRACE_BUDGET_BYTES` 覆寫，0＝不壓目標上限）。"""
+    預設（`allow_breaking_chain_references=False`）：絕不刪除任何被簽章鏈引用的 trace 物件，
+    即使超出 `target_bytes`／`VACANT_TRACE_BUDGET_BYTES` 或啟用 `aggressive=True` 亦然；
+    預算壓力只能回收未被引用的孤立物件，若仍超標則回報 `budget_unmet=True` 與 `referenced_bytes_held`。"""
     if target_bytes is None:
         target_bytes = _resolve_auto_budget()
     if older_than_hours is not None and max_age_days is None:
         max_age_days = older_than_hours / 24.0
 
     if aggressive:
-        keep_recent_steps = 10 if keep_recent_steps is None else min(keep_recent_steps, 10)
+        if allow_breaking_chain_references:
+            keep_recent_steps = 10 if keep_recent_steps is None else min(keep_recent_steps, 10)
         keep_latest_per_task = min(keep_latest_per_task, 1)
         keep_runs_per_task = 0
 
@@ -2207,6 +2511,7 @@ def gc_all(
         budget=budget,
         target_bytes=target_bytes,
         orphan_grace_s=orphan_grace_s,
+        allow_breaking_chain_references=allow_breaking_chain_references,
     )
     qr = compact_quarantine(
         root,
@@ -2250,7 +2555,10 @@ def gc_all(
     rep: dict[str, Any] = {
         "dry_run": dry_run,
         "aggressive": aggressive,
+        "allow_breaking_chain_references": allow_breaking_chain_references,
         "aborted": aborted,
+        "budget_unmet": bool(tr.get("budget_unmet", False)),
+        "referenced_bytes_held": int(tr.get("referenced_bytes_held", 0)),
         "bytes_freed": total_bytes,
         "mb_freed": round(total_bytes / (1024 * 1024), 3),
         "files_removed": total_files,
@@ -2262,6 +2570,8 @@ def gc_all(
         "session_hooks": hooks,
         "vrun": vr,
     }
+    if tr.get("budget_unmet") and tr.get("note"):
+        rep["note"] = tr["note"]
     if verify:
         v_count, v_ok, v_errs = verify_trace_chains(root)
         rep["verified_projects"] = v_count
@@ -2978,25 +3288,27 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--vrun-dir", type=pathlib.Path, action="append", default=[],
                     help="額外清理的 vacant run 輸出目錄（可重複；移除 _frozen_ws/_origin_ws/wire_RUN-ON）")
     ap.add_argument("--keep-steps", type=int, default=None,
-                    help="每個專案保留完整步驟版本的最近步數（預設不設限，保留全部鏈引用物件）")
+                    help="每個專案保留完整步驟版本的最近步數（須搭配 --allow-breaking-chain-references 才會驅逐鏈引用物件）")
     ap.add_argument("--keep-runs", type=int, default=DEFAULT_KEEP_RUNS,
                     help=f"每個任務保留 ~/.vacant-work 的最近執行數（預設 {DEFAULT_KEEP_RUNS}）")
     ap.add_argument("--max-age-days", type=float, default=None,
                     help="只清理早於 N 天的非必要物件（預設立即清理冗餘副本）")
     ap.add_argument("--target-bytes", type=_parse_size, default=None, metavar="N",
-                    help="把 trace 版本庫壓到 N 位元組以下（如 256M／1G）：先回收與工作區"
-                         "冗餘的 blob，再最舊優先回收舊版本；讀取端取不回誠實 UNKNOWN，"
-                         "簽章鏈與必須保留物件不動（2026-10-28 Axis 2）")
+                    help="trace 版本庫預算上限（如 256M／1G）：預設只回收未被引用的孤立物件；"
+                         "若仍超標則回報 budget_unmet（不刪除鏈引用物件），除非明確加上 --allow-breaking-chain-references")
     ap.add_argument("--older-than-hours", type=float, default=None,
                     help="只清理超過指定小時數的非必要物件（例如 0.5 代表 30 分鐘前）")
     ap.add_argument("--verify", action="store_true",
                     help="清理後自動對保留之專案執行 Recorder.verify() 驗簽，確保簽章鏈 100%% 完好")
     ap.add_argument("--verify-objects", action="store_true",
-                    help="清理後檢查所有簽章鏈引用的物件是否仍存在於 trace/objects/，缺失則退出碼 1")
+                    help="清理後檢查所有簽章鏈引用的物件是否仍存在於 trace/objects/，未經說明的缺失或損毀則退出碼 1")
     ap.add_argument("--aggressive", action="store_true",
-                    help="積極模式：只留最近 10 步、1 份候選、清空所有 ~/.vacant-work 舊目錄")
+                    help="積極模式：只留 1 份候選、清空所有 ~/.vacant-work 舊目錄（搭配 --allow-breaking-chain-references 時亦只留最近 10 步物件）")
+    ap.add_argument("--allow-breaking-chain-references", action="store_true",
+                    help="DESTRUCTIVE OPT-IN: 允許 GC 依 --target-bytes／--keep-steps／--aggressive 驅逐仍被簽章鏈引用的非結構物件，"
+                         "並在刪除前於每條受影響的鏈上簽寫 objects_evicted 事件（不可與 --auto 併用）")
     ap.add_argument("--auto", action="store_true",
-                    help="零設定自動 gc：單例鎖＋頻率限制（預設 1h）＋時間預算（預設 30s），fail-open")
+                    help="零設定自動 gc：單例鎖＋頻率限制（預設 1h）＋時間預算（預設 30s），fail-open；絕不刪除鏈引用物件")
     ap.add_argument("--force", action="store_true",
                     help="跳過頻率限制（仍受單例鎖保護）")
     ap.add_argument("--min-interval-s", type=float, default=AUTO_GC_MIN_INTERVAL_S,
@@ -3016,6 +3328,10 @@ def main(argv: list[str] | None = None) -> int:
     if raw[:1] == ["usage"]:
         return usage_main(raw[1:])
     args = build_parser().parse_args(raw)
+    if args.auto and args.allow_breaking_chain_references:
+        print("vacant gc: --allow-breaking-chain-references cannot be combined with --auto",
+              file=sys.stderr)
+        return 2
     if args.auto:
         rep = auto_gc(
             args.state_dir,
@@ -3034,10 +3350,19 @@ def main(argv: list[str] | None = None) -> int:
                 tail = f"（時間預算內未完成，停在安全點）" if st == "ok_partial" else ""
                 print(f"自動 gc {tail}: 釋放 {_human_bytes(rep['bytes_freed'])}"
                       f"（{rep['files_removed']} 個檔案，{rep.get('elapsed_s', '?')}s）")
+                if rep.get("budget_unmet"):
+                    held = rep.get("referenced_bytes_held", 0)
+                    print(f"  NOTE: budget_unmet — {_human_bytes(held)} still held by chain-referenced "
+                          f"objects (auto GC never deletes chain-referenced objects; "
+                          f"run `vacant gc --allow-breaking-chain-references` to opt in)")
                 print("  （簽章鏈完整保留；vacant usage 看用量）")
             elif st == "dry_run":
                 print(f"自動 gc 預覽（--dry-run，未刪除）: 可釋放 {_human_bytes(rep['bytes_freed'])}"
                       f"（{rep['files_removed']} 個檔案）")
+                if rep.get("budget_unmet"):
+                    held = rep.get("referenced_bytes_held", 0)
+                    print(f"  NOTE: budget_unmet — {_human_bytes(held)} held by chain-referenced objects "
+                          f"(not deleted by default)")
             elif st == "skipped_rate_limited":
                 print(f"自動 gc 跳過：{rep.get('reason', 'rate limit')}（--force 可強制）")
             elif st == "skipped_locked":
@@ -3058,6 +3383,7 @@ def main(argv: list[str] | None = None) -> int:
         verify=args.verify,
         verify_objects=args.verify_objects,
         target_bytes=args.target_bytes,
+        allow_breaking_chain_references=args.allow_breaking_chain_references,
     )
     ok_all = rep.get("verify_ok", True) and rep.get("objects_ok", True)
     if args.json:
@@ -3067,14 +3393,32 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{mode_tag} 釋放空間：{_human_bytes(rep['bytes_freed'])}（共處理 {rep['files_removed']} 個檔案／項目）")
     tinfo = rep["trace"].get("target")
     if tinfo is not None:
-        tag = "✓ 已達標" if tinfo["target_reached"] and not tinfo["aborted"] else "（預算內未達標）"
+        if tinfo.get("budget_unmet"):
+            tag = "⚠ 預算未達標（budget_unmet）"
+        elif tinfo["target_reached"] and not tinfo["aborted"]:
+            tag = "✓ 已達標"
+        else:
+            tag = "（預算內未達標）"
         print(f"  · trace 版本庫   : 釋放 {_human_bytes(rep['trace']['bytes_freed'])} "
               f"（掃描 {rep['trace']['projects_scanned']} 個專案，保留 {rep['trace']['kept_blobs']} 個必要物件）")
-        print(f"    └ 目標 {tinfo['target_bytes'] / (1024 * 1024):.0f} MiB {tag}: 現餘 "
-              f"{_human_bytes(tinfo['bytes_remaining'])}")
+        tgt_b = tinfo["target_bytes"]
+        tgt_str = (f"{tgt_b // (1024 * 1024)} MiB"
+                   if tgt_b >= 1024 * 1024 and tgt_b % (1024 * 1024) == 0
+                   else _human_bytes(tgt_b))
+        print(f"    └ 目標 {tgt_str} {tag}: 現餘 {_human_bytes(tinfo['bytes_remaining'])}")
+        if tinfo.get("budget_unmet"):
+            held = tinfo.get("referenced_bytes_held", rep["trace"].get("referenced_bytes_held", 0))
+            print(f"    └ NOTE: budget_unmet — {_human_bytes(held)} still held by chain-referenced "
+                  f"objects (never deleted by default; use --allow-breaking-chain-references to opt in)")
     else:
         print(f"  · trace 版本庫   : 釋放 {_human_bytes(rep['trace']['bytes_freed'])} "
               f"（掃描 {rep['trace']['projects_scanned']} 個專案，保留 {rep['trace']['kept_blobs']} 個必要物件）")
+    if args.keep_steps is not None and not args.allow_breaking_chain_references:
+        print("    └ NOTE: --keep-steps did not evict chain-referenced objects "
+              "(requires --allow-breaking-chain-references)")
+    if args.allow_breaking_chain_references and rep["trace"].get("evicted_referenced_count", 0) > 0:
+        print(f"    └ WARNING: evicted {rep['trace']['evicted_referenced_count']} chain-referenced "
+              f"object(s) under --allow-breaking-chain-references (recorded via signed objects_evicted event)")
     print(f"  · quarantine 隔離: 釋放 {_human_bytes(rep['quarantine']['bytes_freed'])} "
           f"（保留 {rep['quarantine']['candidates_kept']} 份候選清單）")
     print(f"  · vacant-work    : 釋放 {_human_bytes(rep['work']['bytes_freed'])} "
@@ -3099,11 +3443,21 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"    - {err}")
     if args.verify_objects:
         orep = rep.get("objects_verify") or {}
-        o_ok_tag = "完整 ✓" if orep.get("ok") else f"缺失 {orep.get('missing_count', 0)} 損毀 {orep.get('corrupt_count', 0)} ✗"
+        ev_cnt = orep.get("evicted_count", 0)
+        if orep.get("ok") and ev_cnt == 0:
+            o_ok_tag = "完整 ✓"
+        elif orep.get("ok") and ev_cnt > 0:
+            o_ok_tag = f"已明確 GC 驅逐 {ev_cnt} 個（0 缺失）"
+        else:
+            ev_part = f" 明確驅逐 {ev_cnt}" if ev_cnt else ""
+            o_ok_tag = f"缺失 {orep.get('missing_count', 0)} 損毀 {orep.get('corrupt_count', 0)}{ev_part} ✗"
         print(f"  · 物件引用 (--verify-objects): {orep.get('present_count', 0)}/{orep.get('referenced_count', 0)} {o_ok_tag}")
         for m in (orep.get("missing") or [])[:10]:
             ref0 = (m.get("refs") or [{}])[0]
             print(f"    - missing {m['sha256'][:16]}… ({m['project']} seq={ref0.get('seq')} {ref0.get('type')}.{ref0.get('field')})")
+        for ev in (orep.get("evicted") or [])[:10]:
+            ref0 = (ev.get("refs") or [{}])[0]
+            print(f"    - evicted by explicit GC {ev['sha256'][:16]}… ({ev['project']} evicted_at_seq={ev.get('evicted_at_seq')} {ref0.get('type')}.{ref0.get('field')})")
     print("  （簽章鏈 chain.ndjson / ledger.ndjson / receipts_*.ndjson 完整保留，離線驗章不變）")
     return 0 if ok_all else 1
 
