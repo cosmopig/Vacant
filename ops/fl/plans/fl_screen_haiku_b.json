@@ -1,0 +1,28 @@
+{
+ "schema": "vacant.fl.plan/1",
+ "id": "fl_screen_haiku_b",
+ "bank_path": "ops/gain/data/lcb_bank_v3.jsonl",
+ "index_path": "runs/INDEX.json",
+ "seed": 20261127,
+ "arms": [
+  "B0"
+ ],
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5",
+  "exam_model": "claude-haiku-5-5"
+ },
+ "jobs": 4,
+ "attempt_timeout_s": 300,
+ "eval_timeout_s": 45,
+ "per_fn_timeout_s": 20,
+ "per_call_timeout_s": 2.0,
+ "eval_mem_mb": 1024,
+ "max_attempts": 3,
+ "mv_num_inputs": 20,
+ "purpose": "快車道篩題（只跑 B0，不是證據）：LCB v3 全部 medium＋hard 跑兩次（a／b 兩個 root），留下 Haiku 至少失敗一次的題當正式先導題組。依結果挑題 ⇒ 正式先導裡 B0 會往上回歸，各臂之間的比較仍公平；篩題的跑不進分析。",
+ "difficulties": [
+  "medium",
+  "hard"
+ ]
+}
