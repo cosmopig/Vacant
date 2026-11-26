@@ -97,3 +97,22 @@ def test_guard_still_restores_out_of_scope_edit_on_digit_entity(tmp_path):
     r = S.guard(tmp_path, "report.md", [3], before, record=False)
     out = (tmp_path / "report.md").read_text().splitlines()
     assert out[1].endswith("30 pallets") and out[2].endswith("78%") and r["restored_lines"] == [2]
+
+
+INFOBOX = ('<html><body><p>Updated 10:00</p><table class="infobox"><tr><th>Years</th><th>Team</th><th>Apps</th><th>(Gls)</th></tr>'
+           '<tr><td>2021–2023</td><td>Exampletown</td><td>45</td><td>(3)</td></tr>'
+           '<tr><td>2023–</td><td>Otherville</td><td>12</td><td>(1)</td></tr></table></body></html>')
+
+
+def test_v52_value_spanning_adjacent_cells_is_located():
+    """第五輪探索：『45 (3)』由兩個相鄰儲存格拼成，HTML 原文裡沒有這串字——舊版找不到位置（不維護臂的過期全漏）。"""
+    changed = INFOBOX.replace("<td>45</td><td>(3)</td>", "<td>47</td><td>(3)</td>")
+    assert S.value_status(INFOBOX, changed, "45 (3)", by_field=True) == "changed"
+    assert S.value_status(INFOBOX, INFOBOX.replace("10:00", "10:05"), "45 (3)", by_field=True) == "unchanged"
+    assert S.plain_contains(INFOBOX, "45 (3)") and not S.plain_contains(INFOBOX, "46 (3)")
+
+
+def test_v52_expand_loops_backslash_item():
+    """第五輪 Haiku s20：迴圈項目含反斜線（grep 的 \\d）時 re.sub 把它當取代樣板而崩潰。"""
+    out = S._expand_loops(r'for p in a\d b; do curl -s "http://h/$p"; done')
+    assert "http://h/a\\d" in out and "http://h/b" in out

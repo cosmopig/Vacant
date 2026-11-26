@@ -97,8 +97,8 @@ def main() -> int:
     ap.add_argument("--arms", default="a,b,d_diff_real")
     ap.add_argument("--out", required=True)
     ap.add_argument("--boot", type=int, default=2000)
-    ap.add_argument("--f1-normalize", action="store_true",
-                    help="次要（未預註冊，待決定）：F1 比對前把抓取內容的 HTML 標籤換成空白、空白正規化（值由多個儲存格拼成時才找得到）")
+    ap.add_argument("--original-defs", action="store_true",
+                    help="敏感度分析（原預註冊定義 9dff991ec）：F1 拿值比 HTML 原文（不轉純文字）")
     a = ap.parse_args()
     root = pathlib.Path(a.root).expanduser()
     mat = pathlib.Path(a.materials).expanduser()
@@ -133,9 +133,7 @@ def main() -> int:
             if rec is None:
                 continue
             U = fetch_universe(rec)
-            if a.f1_normalize:
-                for u in U:
-                    u["ntext"] = _norm(u["text"])
+
             prev_bound = c0_bound if stage != "c0" else 0
             for k, bound in ks:
                 Uk = [u for u in U if u["seq"] <= bound]
@@ -156,10 +154,10 @@ def main() -> int:
                         f["F4"] = prev_present
                         f["F1"] = True          # 沒有值（沒填或被清掉）＝不可能「有出處」
                     else:
-                        carriers = [u for u in Uk if L.contains(u["text"], v)]
+                        # 主要定義（預註冊修正 1，看過探索性資料、確認性資料還不存在時改的）：以來源轉成純文字後比對
+                        match = (lambda t: L.contains(t, v)) if a.original_defs else (lambda t: S.plain_contains(t, v))
+                        carriers = [u for u in Uk if match(u["text"])]
                         f["F1"] = not carriers
-                        if a.f1_normalize and f["F1"]:
-                            f["F1"] = not any(L.contains(u["ntext"], v) for u in Uk)
                         latest: dict[str, str] = {}
                         for u in sorted(carriers, key=lambda x: x["seq"]):
                             latest[u["url"]] = u["text"]

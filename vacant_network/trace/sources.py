@@ -87,6 +87,17 @@ def _segments(text: str) -> set[str]:
     return out
 
 
+def _plain(text: str) -> str:
+    """來源轉成純文字：標籤換成空白、解開實體、空白正規化（表格相鄰儲存格以空白相接）。v5.2。"""
+    t = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", text or "")
+    return " ".join(_html.unescape(re.sub(r"<[^>]+>", " ", t)).split())
+
+
+def plain_contains(text: str, key: str) -> bool:
+    """原文裡有，或轉成純文字後有（值由相鄰儲存格拼成時，例如『45 (3)』）。v5.2。"""
+    return L.contains(text or "", key) or L.contains(_plain(text), key)
+
+
 def _carriers(text: str, key: str) -> set[str]:
     """來源裡帶著這個值的片段。"""
     return {seg for seg in _segments(text) if L.contains(seg, key)}
@@ -135,7 +146,7 @@ def _expand_loops(cmd: str, known_paths: list[str] | None = None) -> str:
             else:
                 exp.append(it)
         items = exp
-        return " ; ".join(re.sub(r"\$\{?" + var + r"\}?(?!\w)", it, body) for it in items)
+        return " ; ".join(re.sub(r"\$\{?" + var + r"\}?(?!\w)", lambda _m, _it=it: _it, body) for it in items)
     return _LOOP.sub(rep, cmd)
 
 
@@ -501,23 +512,23 @@ def candidates(ws: str | pathlib.Path, path: str, *, rec: Recorder | None = None
                 if not us:
                     continue
                 o = trace.output_text(st) or ""
-                if any(L.contains(o, k) for k in dict.fromkeys([c["key"], c["value"]])):
+                if any(plain_contains(o, k) for k in dict.fromkeys([c["key"], c["value"]])):
                     urls += [u for u in us if u not in urls]
             for r in recs:
                 if r["seq"] < w.seq and r["ctx"] == w.ctx and r["url"] not in urls and \
-                        any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                        any(plain_contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
                     urls.append(r["url"])
         egress_seen: dict[str, str] = {}
         if egress and w is not None:
             t_w = ts_of.get(int(w.seq), 0)
             for f in fetched:                   # 實際抓過的（任何工具）：寫入那一步記下之前抓的、內容含這個值
-                if f["ts_ms"] <= t_w and any(L.contains(f["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+                if f["ts_ms"] <= t_w and any(plain_contains(f["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
                     if f["url"] not in urls:
                         urls.append(f["url"])
                     egress_seen[f["url"]] = f["text"]
         seen: dict[str, str] = {}
         for r in recs:                          # 每個網址取「含這個值」的最近一筆（同一頁可能被 grep 過好幾次、各取不同欄）
-            if r["url"] in urls and any(L.contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
+            if r["url"] in urls and any(plain_contains(r["text"], k) for k in dict.fromkeys([c["key"], c["value"]])):
                 seen[r["url"]] = r["text"]
         for u, t in egress_seen.items():
             seen.setdefault(u, t)
@@ -579,9 +590,9 @@ def check_candidates(ws: str | pathlib.Path, path: str, *, fetch: Callable[[str]
         per: dict[str, str] = {}
         for u in e["candidates"]:
             prev = _blob_text(rec, snaps.get(u)) or seen.get(u) or ""
-            key = e["key"] if _carriers(prev, e["key"]) else e["value"]
+            key = e["key"] if (_carriers(prev, e["key"]) or plain_contains(prev, e["key"])) else e["value"]
             car = _carriers(prev, key)
-            if not car:
+            if not car and not (by_value and plain_contains(prev, key)):
                 continue
             cur = now(u)
             if cur is None:
@@ -956,6 +967,11 @@ def _field_status(prev: str, cur: str, key: str) -> str | None:
         statuses.append(st if st is not None else (_line_status(prev, cur, key) or "changed"))
     if is_html:
         ls = _line_status(rest_p, rest_c, key)
+        if not statuses and ls is None:
+            # v5.2：值跨相鄰儲存格（沒有任何單一格含這個值）⇒ 把每一列的儲存格以空白相接成一行，再用「最像的一行」
+            rp = "\n".join(" ".join(r) for t in pts for r in t)
+            rc = "\n".join(" ".join(r) for t in cts for r in t)
+            ls = _line_status(rp, rc, key)
     else:
         # 不在表格裡的出現（表格行以外的文字）用「最像的一行」
         tbl_lines = {"|".join(r) for t in pts for r in t}
