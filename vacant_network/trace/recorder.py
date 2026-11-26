@@ -52,7 +52,8 @@ EVENT_TYPES = frozenset({"trace_genesis", "session_seen", "step", "unrecorded_ch
                          "transcript", "session_closed", "finding", "flag", "coverage",
                          "consequence", "prompt", "review", "nudge", "ended",
                          "checkpoint_restore", "volume_seal", "volume_reclaimed",
-                         "restart_receipt", "source_check", "source_snapshot", "source_guard", "source_fetch"})
+                         "restart_receipt", "source_check", "source_snapshot", "source_guard",
+                         "source_fetch", "model_usage"})
 #: 分卷封印預設門檻（DECISION_20261103_STEPCHAIN_SEALING.md Phase A）
 DEFAULT_VOLUME_MAX_BYTES = 2 * 1024 * 1024
 DEFAULT_VOLUME_MAX_ENTRIES = 2000
@@ -1321,6 +1322,12 @@ class Recorder:
         if torn:
             return True, f"{len(book)} entries (+{torn} bytes of a torn last line, not counted)"
         return True, f"{len(book)} entries"
+
+    def verify_objects(self, *, verify_hashes: bool = False) -> dict[str, Any]:
+        """核對本專案簽章鏈引用的所有內容定址物件是否仍存在於物件庫（`retention.verify_trace_objects`）。"""
+        from ..retention import verify_trace_objects
+        return verify_trace_objects(project_dir=self.dir, objects_root=self.blobs.root,
+                                    verify_hashes=verify_hashes)
 
     def verify_since(self, mark: dict[str, Any] | None, trust: _keys.Trust | None = None
                      ) -> tuple[bool, str, dict[str, Any] | None]:

@@ -103,7 +103,7 @@ def _event_session(e: dict) -> str | None:
     `actor.session`，prompt／review 在頂層 `session`；專案層事件（coverage／
     unrecorded_change／trace_genesis）沒有工作階段，回 None。"""
     t = e.get("type")
-    if t in ("step", "session_seen", "session_closed"):
+    if t in ("step", "session_seen", "session_closed", "model_usage"):
         s = (e.get("actor") or {}).get("session")
     elif t in ("prompt", "review"):
         s = e.get("session")
@@ -284,6 +284,14 @@ def cmd_show(args: argparse.Namespace) -> int:
                   f"{e.get('confidence', '')}")
         elif t in ("session_closed", "transcript"):
             print(f"   ·  {t} {(e.get('actor') or {}).get('session', '')}")
+        elif t == "model_usage":
+            calls = e.get("calls")
+            it, ot = e.get("input_tokens"), e.get("output_tokens")
+            models = ", ".join(e.get("models_claimed") or []) or "?"
+            comp = "complete" if e.get("complete") else "partial"
+            tok = f"in={it} out={ot}" if (it is not None or ot is not None) else "tokens=unknown"
+            print(f"   ·  model_usage ({e.get('scope', '?')}, {e.get('source', '?')}, {comp}): "
+                  f"calls={calls if calls is not None else '?'} {tok} models=[{models}]")
         elif t == "restart_receipt":
             acc = e.get("acceptance") or {}
             status_str = ("PASS" if e.get("accepted") is True
@@ -318,8 +326,32 @@ def cmd_verify(args: argparse.Namespace) -> int:
         return 0
     from .stopcheck import verify_anchored
     ok, why = verify_anchored(rec, c)
+    check_objs = bool(getattr(args, "objects", False) or getattr(args, "verify_hashes", False))
+    obj_rep = rec.verify_objects(verify_hashes=bool(getattr(args, "verify_hashes", False))) if check_objs else None
+    key_posture = _keys.signing_key_posture("verifier", workspace=ws)
+    overall_ok = ok and (obj_rep["ok"] if obj_rep is not None else True)
+    if getattr(args, "json", False):
+        out: dict[str, Any] = {"ok": overall_ok, "chain_ok": ok, "detail": why,
+                               "signing_key": key_posture}
+        if obj_rep is not None:
+            out["objects"] = obj_rep
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0 if overall_ok else 1
     print(("OK " if ok else "BROKEN ") + why)
-    return 0 if ok else 1
+    if obj_rep is not None:
+        if obj_rep["ok"]:
+            print(f"OBJECTS OK ({obj_rep['present_count']}/{obj_rep['referenced_count']} referenced objects present)")
+        else:
+            print(f"OBJECTS MISSING ({obj_rep['missing_count']} missing, {obj_rep['corrupt_count']} corrupt "
+                  f"out of {obj_rep['referenced_count']} referenced)")
+            for m in obj_rep["missing"][:20]:
+                ref0 = (m.get("refs") or [{}])[0]
+                print(f"  - missing {m['sha256']} (seq={ref0.get('seq')} {ref0.get('type')}.{ref0.get('field')})")
+            for cr in obj_rep["corrupt"][:20]:
+                print(f"  - corrupt {cr['sha256']} ({cr.get('error')})")
+    for w in key_posture.get("warnings") or []:
+        print(f"WARNING: {w}")
+    return 0 if overall_ok else 1
 
 
 def cmd_report(args: argparse.Namespace) -> int:
@@ -566,6 +598,41 @@ def cmd_egress(args: argparse.Namespace) -> int:
     return EG.serve(ws, args.port, upstream_proxy=args.upstream_proxy, ready_file=args.ready_file)
 
 
+def cmd_anchor(args: argparse.Namespace) -> int:
+    """`vacant trace anchor`：產出已驗章的鏈頭錨點 JSON（可選提交至 `--git`），或以 `--check` 驗證目前鏈仍延伸該錨點。"""
+    from . import anchor as AN
+    ws, _c = _workspace(args)
+    rec = Recorder(ws)
+    try:
+        if getattr(args, "check", None):
+            res = AN.check_anchor(rec, pathlib.Path(args.check),
+                                  check_files=bool(getattr(args, "check_files", False)))
+            if getattr(args, "json", False):
+                print(json.dumps(res, ensure_ascii=False, indent=2))
+            else:
+                print(("OK " if res["ok"] else "BROKEN ") + res["reason"])
+            return 0 if res["ok"] else 1
+        doc = AN.create_anchor(rec, extra_files=list(getattr(args, "files", None) or []))
+        out_path = pathlib.Path(args.output) if getattr(args, "output", None) else None
+        git_repo = pathlib.Path(args.git) if getattr(args, "git", None) else None
+        if out_path is not None or git_repo is not None:
+            wres = AN.write_anchor(doc, out_path, git_repo=git_repo)
+            if getattr(args, "json", False):
+                print(json.dumps({**doc, **wres}, ensure_ascii=False, indent=2))
+            else:
+                dest = ", ".join(wres["written"])
+                g = wres.get("git")
+                g_note = f" (git commit {g['commit'][:12]})" if g and g.get("commit") else ""
+                print(f"ANCHORED {doc['project_key']} seq={doc['last_seq']} "
+                      f"head={doc['head_hash'][:12]}… -> {dest}{g_note}")
+        else:
+            print(json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+    except AN.AnchorError as exc:
+        print(f"vacant trace anchor: {exc}", file=sys.stderr)
+        return 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="vacant trace")
     ap.add_argument("--contract")
@@ -582,6 +649,11 @@ def build_parser() -> argparse.ArgumentParser:
                    help="show only steps that failed")
     p.set_defaults(func=cmd_show)
     p = sp.add_parser("verify")
+    p.add_argument("--objects", action="store_true",
+                   help="also verify that every blob referenced by the chain is present in trace/objects/")
+    p.add_argument("--verify-hashes", action="store_true",
+                   help="with --objects (or alone): re-hash every present referenced blob on disk")
+    p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_verify)
     p = sp.add_parser("report")
     p.add_argument("--check", action="store_true")
@@ -627,6 +699,20 @@ def build_parser() -> argparse.ArgumentParser:
                            "turned off (e.g. after `vacant gc`) — long-running, user-invoked")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_rescan)
+    p = sp.add_parser("anchor",
+                      help="write an external chain-head anchor JSON (optionally commit to --git) "
+                           "or verify the current chain still extends an anchor (--check)")
+    p.add_argument("--output", "-o", metavar="FILE", help="write anchor JSON to this path")
+    p.add_argument("--file", dest="files", action="append", default=[], metavar="FILE",
+                   help="include this extra file's sha256 in the anchor (repeatable)")
+    p.add_argument("--git", metavar="REPO_DIR",
+                   help="commit the anchor JSON inside this local git repository (does not push)")
+    p.add_argument("--check", metavar="ANCHOR_FILE",
+                   help="verify the current chain still extends the given anchor file")
+    p.add_argument("--check-files", action="store_true",
+                   help="with --check: also fail if any extra file recorded in the anchor changed")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_anchor)
     return ap
 
 

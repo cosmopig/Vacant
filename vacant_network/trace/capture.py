@@ -53,9 +53,11 @@ ACTIONS = {
     "SubagentStop": "subagent_stop", "SubagentStart": "subagent_start",
     "Stop": "stop", "SessionEnd": "session_end",
     "pre_tool": "pre", "post_tool": "post", "stop": "stop", "session_end": "session_end",
-    "subagent_stop": "subagent_stop",
+    "subagent_stop": "subagent_stop", "turn_end": "turn_end",
 }
 MAX_TRANSCRIPT = 64 * 1024 * 1024
+#: Stop 掛鉤裡讀逐字稿算 model_usage 的大小上限（不阻塞／拖慢回合結束掛鉤）
+MAX_USAGE_STOP_BYTES = 16 * 1024 * 1024
 #: 家目錄底下四個 agent 的設定目錄（`_traceable` 不把它們當工作區）
 AGENT_CONFIG_DIRS = (".pi", ".claude", ".codex", ".config/opencode")
 
@@ -548,16 +550,26 @@ def observe(agent: str, event: str, payload: dict[str, Any], *, cwd: str | None,
                              spawned_by=link.get("spawned_by"))
     elif action == "stop":
         out = rec.settle(actor, "turn_end")      # 已經在裁決之前收過一次（hook.handle）；冪等
+        record_model_usage(rec, actor, agent, payload, scope="turn")
+    elif action == "turn_end":
+        out = record_model_usage(rec, actor, agent, payload, scope="turn")
     elif action == "subagent_start":
         out = rec.subagent_state(actor, running=True)
     elif action == "subagent_stop":
         rec.subagent_state(actor, running=False)
         path = payload.get("agent_transcript_path")
-        out = seal_transcript(rec, actor, agent, path, role="subagent") if path else None
+        out, tdata, trunc = _seal_transcript_with_bytes(rec, actor, agent, path, role="subagent") if path else (None, None, False)
+        record_model_usage(rec, actor, agent, payload, scope="subagent",
+                           transcript_data=tdata, transcript_truncated=trunc)
     elif action == "session_end":
         tp = payload.get("transcript_path")
+        tdata: bytes | None = None
+        trunc = False
         if tp:
-            seal_transcript(rec, actor, agent, tp, role="session")
+            _, tdata, trunc = _seal_transcript_with_bytes(rec, actor, agent, tp, role="session")
+        # 在 session_closed 之前簽進 model_usage，維持 session_closed 為工作階段尾筆事件
+        record_model_usage(rec, actor, agent, payload, scope="session",
+                           transcript_data=tdata, transcript_truncated=trunc)
         reason = _s(payload.get("reason"))
         out = rec.close(actor, reason)
         from ..adapters.hookpolicy import NON_TERMINAL_END_REASONS
@@ -640,20 +652,24 @@ def models_from_transcript(agent: str, data: bytes) -> dict[str, str]:
     return out
 
 
-def seal_transcript(rec: R.Recorder, actor: R.Actor, agent: str, path: Any, *,
-                    role: str) -> dict[str, Any] | None:
+def _seal_transcript_with_bytes(rec: R.Recorder, actor: R.Actor, agent: str, path: Any, *,
+                                role: str) -> tuple[dict[str, Any] | None, bytes | None, bool]:
+    """封存逐字稿並回傳 `(事件, 原始位元組或None, 是否因超過上限略過讀檔)`，避免 `model_usage` 重讀一次。"""
     p = pathlib.Path(str(path)).expanduser()
+    truncated = False
     try:
         size = p.stat().st_size
         if size > MAX_TRANSCRIPT:
             data = None
+            truncated = True
         else:
             data = p.read_bytes()
     except OSError as e:
         with rec._lock():
-            return rec._append("coverage", {"actor": actor.to_json(), "role": role,
-                                            "missing": "transcript", "path": str(p),
-                                            "error": str(e)[:200]})
+            ev = rec._append("coverage", {"actor": actor.to_json(), "role": role,
+                                          "missing": "transcript", "path": str(p),
+                                          "error": str(e)[:200]})
+        return ev, None, False
     payload: dict[str, Any] = {"actor": actor.to_json(), "role": role, "path": str(p),
                                "size": size, "observed_by": "agent_claim"}
     if data is not None:
@@ -661,4 +677,493 @@ def seal_transcript(rec: R.Recorder, actor: R.Actor, agent: str, path: Any, *,
         models = models_from_transcript(agent, data)
         payload["models_claimed"] = models
     with rec._lock():
-        return rec._append("transcript", payload)
+        ev = rec._append("transcript", payload)
+    return ev, data, truncated
+
+
+def seal_transcript(rec: R.Recorder, actor: R.Actor, agent: str, path: Any, *,
+                    role: str) -> dict[str, Any] | None:
+    ev, _data, _trunc = _seal_transcript_with_bytes(rec, actor, agent, path, role=role)
+    return ev
+
+
+# ── 模型呼叫數與 token 用量（2026-11-26 強化：入簽章鏈，非僅留未簽章逐字稿）────────────
+
+def _nonneg_int(v: Any) -> int | None:
+    """嚴格非負整數（踢掉 bool，避免 `isinstance(True, int)` 混進計數）。"""
+    if isinstance(v, bool) or not isinstance(v, int):
+        return None
+    return v if v >= 0 else None
+
+
+def _pick_int(d: dict[str, Any], *keys: str) -> int | None:
+    for k in keys:
+        v = _nonneg_int(d.get(k))
+        if v is not None:
+            return v
+    return None
+
+
+def usage_from_transcript(agent: str, data: bytes) -> dict[str, Any] | None:
+    """從逐字稿原始位元組抽出模型呼叫數、token 用量與自稱模型 id（純函式、best-effort）。
+
+    誠實邊界：逐字稿由 agent 自己寫出，這裡抽出的模型 id、呼叫數與 token 數皆屬
+    `observed_by="agent_claim"`（自稱），不是網路代理獨立量測。缺欄位、畸形行或無
+    token 事件時 `complete=False` 並寫明 `note`，絕不補 0 偽裝完整。"""
+    text = data.decode("utf-8", "replace")
+    malformed = 0
+
+    if agent == "claude":
+        # Claude Code 逐字稿：同一個串流回應可能拆成多行、共用 message.id；
+        # 按 id 取最後一筆避免重複計數；無 id 時每行算一次呼叫。
+        by_id: dict[str, dict[str, Any]] = {}
+        anon: list[dict[str, Any]] = []
+        for raw_ln in text.splitlines():
+            if not raw_ln.strip():
+                continue
+            try:
+                d = json.loads(raw_ln)
+            except ValueError:
+                malformed += 1
+                continue
+            if not isinstance(d, dict) or d.get("type") != "assistant":
+                continue
+            msg = d.get("message")
+            if not isinstance(msg, dict):
+                continue
+            mid = msg.get("id")
+            if isinstance(mid, str) and mid:
+                by_id[mid] = msg
+            else:
+                anon.append(msg)
+        msgs = list(by_id.values()) + anon
+        if not msgs and malformed == 0:
+            return None
+        calls = len(msgs)
+        in_tok = 0
+        out_tok = 0
+        cr_tok = 0
+        cw_tok = 0
+        has_cr = False
+        has_cw = False
+        missing_usage = 0
+        models: set[str] = set()
+        for m in msgs:
+            if isinstance(m.get("model"), str) and m["model"]:
+                models.add(m["model"])
+            u = m.get("usage")
+            if not isinstance(u, dict):
+                missing_usage += 1
+                continue
+            i_v = _pick_int(u, "input_tokens", "input")
+            o_v = _pick_int(u, "output_tokens", "output")
+            if i_v is None or o_v is None:
+                missing_usage += 1
+                continue
+            in_tok += i_v
+            out_tok += o_v
+            cr = _pick_int(u, "cache_read_input_tokens", "cache_read_tokens", "cacheRead")
+            cw = _pick_int(u, "cache_creation_input_tokens", "cache_write_tokens", "cacheWrite")
+            if cr is not None:
+                cr_tok += cr
+                has_cr = True
+            if cw is not None:
+                cw_tok += cw
+                has_cw = True
+        have_any_tokens = (calls - missing_usage) > 0
+        notes: list[str] = []
+        if malformed:
+            notes.append(f"{malformed} malformed JSONL line(s)")
+        if missing_usage:
+            notes.append(f"{missing_usage}/{calls} assistant message(s) lacked token usage")
+        complete = bool(calls > 0 and missing_usage == 0 and malformed == 0)
+        res: dict[str, Any] = {
+            "source": "claude_transcript",
+            "observed_by": "agent_claim",
+            "complete": complete,
+            "calls": calls,
+            "input_tokens": in_tok if have_any_tokens else None,
+            "output_tokens": out_tok if have_any_tokens else None,
+            "models_claimed": sorted(models),
+        }
+        if has_cr:
+            res["cache_read_tokens"] = cr_tok
+        if has_cw:
+            res["cache_write_tokens"] = cw_tok
+        if notes:
+            res["note"] = "; ".join(notes)
+        return res
+
+    if agent == "codex":
+        models: set[str] = set()
+        # 1) Codex rollout JSONL: turn_context + event_msg(token_count)
+        # 2) codex exec --json: turn.completed(usage)
+        token_calls = 0
+        last_total_snap: tuple[Any, ...] | None = None
+        last_total_usage: dict[str, Any] | None = None
+        exec_calls = 0
+        exec_in = 0
+        exec_out = 0
+        exec_cr = 0
+        exec_has_cr = False
+        exec_missing = 0
+        resp_items = 0
+        for raw_ln in text.splitlines():
+            if not raw_ln.strip():
+                continue
+            try:
+                d = json.loads(raw_ln)
+            except ValueError:
+                malformed += 1
+                continue
+            if not isinstance(d, dict):
+                continue
+            dt = d.get("type")
+            pl = d.get("payload") if isinstance(d.get("payload"), dict) else {}
+            if dt == "turn_context" and isinstance(pl.get("model"), str) and pl["model"]:
+                models.add(pl["model"])
+            elif isinstance(d.get("model"), str) and d["model"]:
+                models.add(d["model"])
+            if dt == "event_msg" and pl.get("type") == "token_count":
+                info = pl.get("info")
+                if isinstance(info, dict):
+                    tu = info.get("total_token_usage")
+                    if isinstance(tu, dict):
+                        snap = (tu.get("input_tokens"), tu.get("output_tokens"),
+                                tu.get("cached_input_tokens"), tu.get("total_tokens"))
+                        if snap != last_total_snap:
+                            token_calls += 1
+                            last_total_snap = snap
+                            last_total_usage = tu
+            elif dt == "turn.completed":
+                exec_calls += 1
+                u = d.get("usage")
+                if isinstance(u, dict):
+                    iv = _pick_int(u, "input_tokens", "input")
+                    ov = _pick_int(u, "output_tokens", "output")
+                    if iv is not None and ov is not None:
+                        exec_in += iv
+                        exec_out += ov
+                        cv = _pick_int(u, "cached_input_tokens", "cache_read_tokens")
+                        if cv is not None:
+                            exec_cr += cv
+                            exec_has_cr = True
+                    else:
+                        exec_missing += 1
+                else:
+                    exec_missing += 1
+            elif dt == "response_item" and pl.get("type") in (
+                "message", "function_call", "custom_tool_call", "local_shell_call"
+            ):
+                if pl.get("type") != "message" or pl.get("role") == "assistant":
+                    resp_items += 1
+
+        if last_total_usage is not None:
+            iv = _pick_int(last_total_usage, "input_tokens")
+            ov = _pick_int(last_total_usage, "output_tokens")
+            cv = _pick_int(last_total_usage, "cached_input_tokens")
+            tv = _pick_int(last_total_usage, "total_tokens")
+            notes = [f"{malformed} malformed JSONL line(s)"] if malformed else []
+            complete = bool(token_calls > 0 and iv is not None and ov is not None and malformed == 0)
+            res = {
+                "source": "codex_transcript",
+                "observed_by": "agent_claim",
+                "complete": complete,
+                "calls": token_calls,
+                "input_tokens": iv,
+                "output_tokens": ov,
+                "models_claimed": sorted(models),
+            }
+            if cv is not None:
+                res["cache_read_tokens"] = cv
+            if tv is not None:
+                res["total_tokens"] = tv
+            if notes:
+                res["note"] = "; ".join(notes)
+            return res
+        if exec_calls > 0:
+            have_any = (exec_calls - exec_missing) > 0
+            notes = []
+            if malformed:
+                notes.append(f"{malformed} malformed JSONL line(s)")
+            if exec_missing:
+                notes.append(f"{exec_missing}/{exec_calls} turn.completed event(s) lacked token usage")
+            res = {
+                "source": "codex_transcript",
+                "observed_by": "agent_claim",
+                "complete": bool(exec_missing == 0 and malformed == 0),
+                "calls": exec_calls,
+                "input_tokens": exec_in if have_any else None,
+                "output_tokens": exec_out if have_any else None,
+                "models_claimed": sorted(models),
+            }
+            if exec_has_cr:
+                res["cache_read_tokens"] = exec_cr
+            if notes:
+                res["note"] = "; ".join(notes)
+            return res
+        if resp_items > 0 or models:
+            return {
+                "source": "codex_transcript",
+                "observed_by": "agent_claim",
+                "complete": False,
+                "calls": resp_items if resp_items > 0 else None,
+                "input_tokens": None,
+                "output_tokens": None,
+                "models_claimed": sorted(models),
+                "note": "no token_count events in rollout",
+            }
+        return None
+
+    if agent == "pi":
+        calls = 0
+        in_tok = 0
+        out_tok = 0
+        cr_tok = 0
+        cw_tok = 0
+        has_cr = False
+        has_cw = False
+        missing = 0
+        models = set()
+        for raw_ln in text.splitlines():
+            if not raw_ln.strip():
+                continue
+            try:
+                d = json.loads(raw_ln)
+            except ValueError:
+                malformed += 1
+                continue
+            if not isinstance(d, dict) or d.get("type") != "message":
+                continue
+            m = d.get("message")
+            if not isinstance(m, dict) or m.get("role") != "assistant":
+                continue
+            calls += 1
+            prov = m.get("provider")
+            mid = m.get("model")
+            if isinstance(mid, str) and mid:
+                models.add(f"{prov}/{mid}" if isinstance(prov, str) and prov and "/" not in mid else mid)
+            u = m.get("usage")
+            if not isinstance(u, dict):
+                missing += 1
+                continue
+            iv = _pick_int(u, "input", "input_tokens", "inputTokens")
+            ov = _pick_int(u, "output", "output_tokens", "outputTokens")
+            if iv is None or ov is None:
+                missing += 1
+                continue
+            in_tok += iv
+            out_tok += ov
+            cr = _pick_int(u, "cacheRead", "cache_read_tokens", "cache_read_input_tokens")
+            cw = _pick_int(u, "cacheWrite", "cache_write_tokens", "cache_creation_input_tokens")
+            if cr is not None:
+                cr_tok += cr
+                has_cr = True
+            if cw is not None:
+                cw_tok += cw
+                has_cw = True
+        if calls == 0:
+            return None
+        have_any = (calls - missing) > 0
+        notes = []
+        if malformed:
+            notes.append(f"{malformed} malformed JSONL line(s)")
+        if missing:
+            notes.append(f"{missing}/{calls} assistant message(s) lacked token usage")
+        res = {
+            "source": "pi_transcript",
+            "observed_by": "agent_claim",
+            "complete": bool(missing == 0 and malformed == 0),
+            "calls": calls,
+            "input_tokens": in_tok if have_any else None,
+            "output_tokens": out_tok if have_any else None,
+            "models_claimed": sorted(models),
+        }
+        if has_cr:
+            res["cache_read_tokens"] = cr_tok
+        if has_cw:
+            res["cache_write_tokens"] = cw_tok
+        if notes:
+            res["note"] = "; ".join(notes)
+        return res
+
+    return None
+
+
+def usage_from_payload(agent: str, payload: dict[str, Any]) -> dict[str, Any] | None:
+    """從原生掛鉤 payload 直接抽出模型呼叫數與 token 用量（pi／OpenCode 擴充或直接帶 `usage`）。"""
+    mu = payload.get("model_usage")
+    if isinstance(mu, dict):
+        calls = _pick_int(mu, "calls", "turns", "model_calls")
+        in_tok = _pick_int(mu, "input_tokens", "input", "inputTokens")
+        out_tok = _pick_int(mu, "output_tokens", "output", "outputTokens")
+        cr_tok = _pick_int(mu, "cache_read_tokens", "cacheRead", "cache_read_input_tokens")
+        cw_tok = _pick_int(mu, "cache_write_tokens", "cacheWrite", "cache_creation_input_tokens")
+        tot_tok = _pick_int(mu, "total_tokens", "totalTokens", "total")
+        raw_models = mu.get("models_claimed") or mu.get("models")
+        models: set[str] = set()
+        if isinstance(raw_models, list):
+            models.update(str(x) for x in raw_models if isinstance(x, str) and x)
+        if isinstance(mu.get("model"), str) and mu["model"]:
+            models.add(mu["model"])
+        if isinstance(payload.get("model"), str) and payload["model"]:
+            models.add(payload["model"])
+        if calls is None and in_tok is None and out_tok is None and not models:
+            return None
+        declared_complete = mu.get("complete")
+        have_tokens = in_tok is not None and out_tok is not None
+        complete = bool(declared_complete) if isinstance(declared_complete, bool) else bool(
+            calls is not None and calls > 0 and have_tokens)
+        if not have_tokens:
+            complete = False
+        res: dict[str, Any] = {
+            "source": str(mu.get("source") or f"{agent}_hook"),
+            "observed_by": "agent_claim",
+            "complete": complete,
+            "calls": calls,
+            "input_tokens": in_tok,
+            "output_tokens": out_tok,
+            "models_claimed": sorted(models),
+        }
+        if cr_tok is not None:
+            res["cache_read_tokens"] = cr_tok
+        if cw_tok is not None:
+            res["cache_write_tokens"] = cw_tok
+        if tot_tok is not None:
+            res["total_tokens"] = tot_tok
+        note = mu.get("note")
+        if isinstance(note, str) and note:
+            res["note"] = note[:300]
+        elif not complete and not have_tokens:
+            res["note"] = "hook payload lacked token counts"
+        return res
+
+    # 直接帶單回合 usage（例如 pi turn_end 的 event.message.usage 或 payload.usage）
+    msg = payload.get("message") if isinstance(payload.get("message"), dict) else {}
+    u = payload.get("usage") if isinstance(payload.get("usage"), dict) else (
+        msg.get("usage") if isinstance(msg.get("usage"), dict) else None
+    )
+    if isinstance(u, dict):
+        in_tok = _pick_int(u, "input_tokens", "input", "inputTokens")
+        out_tok = _pick_int(u, "output_tokens", "output", "outputTokens")
+        cr_tok = _pick_int(u, "cache_read_tokens", "cacheRead", "cache_read_input_tokens",
+                           "cached_input_tokens")
+        cw_tok = _pick_int(u, "cache_write_tokens", "cacheWrite", "cache_creation_input_tokens")
+        tot_tok = _pick_int(u, "total_tokens", "totalTokens", "total")
+        calls = _pick_int(payload, "calls", "turn")
+        if calls is None:
+            calls = 1
+        models = set()
+        for mval in (msg.get("model"), payload.get("model")):
+            if isinstance(mval, str) and mval:
+                models.add(mval)
+        have_tokens = in_tok is not None and out_tok is not None
+        res = {
+            "source": f"{agent}_hook",
+            "observed_by": "agent_claim",
+            "complete": bool(calls > 0 and have_tokens),
+            "calls": calls,
+            "input_tokens": in_tok,
+            "output_tokens": out_tok,
+            "models_claimed": sorted(models),
+        }
+        if cr_tok is not None:
+            res["cache_read_tokens"] = cr_tok
+        if cw_tok is not None:
+            res["cache_write_tokens"] = cw_tok
+        if tot_tok is not None:
+            res["total_tokens"] = tot_tok
+        if not have_tokens:
+            res["note"] = "usage object lacked input/output token counts"
+        return res
+
+    # pi 舊版擴充（只帶 turn 計數、沒帶 usage）：標 complete=False，仍將呼叫數上鏈
+    turn_n = _nonneg_int(payload.get("turn"))
+    if turn_n is not None and turn_n > 0:
+        models = {str(payload["model"])} if isinstance(payload.get("model"), str) and payload["model"] else set()
+        return {
+            "source": f"{agent}_hook",
+            "observed_by": "agent_claim",
+            "complete": False,
+            "calls": turn_n,
+            "input_tokens": None,
+            "output_tokens": None,
+            "models_claimed": sorted(models),
+            "note": "hook reported turn count without token usage",
+        }
+    return None
+
+
+def record_model_usage(
+    rec: R.Recorder,
+    actor: R.Actor,
+    agent: str,
+    payload: dict[str, Any],
+    *,
+    scope: str,
+    transcript_data: bytes | None = None,
+    transcript_truncated: bool = False,
+) -> dict[str, Any] | None:
+    """將模型呼叫數與 token 用量（自稱）簽進鏈（`model_usage` 事件）。
+
+    best-effort、永不拋例外、不阻塞掛鉤（Stop 讀逐字稿受 `MAX_USAGE_STOP_BYTES` 上限約束）。
+    若掛鉤與逐字稿都無任何用量／呼叫資訊，回傳 None（不寫空事件污染鏈）。"""
+    try:
+        info: dict[str, Any] | None = None
+        if transcript_data is not None:
+            info = usage_from_transcript(agent, transcript_data)
+        elif transcript_truncated:
+            info = {
+                "source": f"{agent}_transcript",
+                "observed_by": "agent_claim",
+                "complete": False,
+                "calls": None,
+                "input_tokens": None,
+                "output_tokens": None,
+                "models_claimed": [],
+                "note": f"transcript exceeded {MAX_TRANSCRIPT} bytes; counts not extracted",
+            }
+        if info is None:
+            info = usage_from_payload(agent, payload)
+        if info is None and scope == "turn":
+            tp = payload.get("transcript_path")
+            if tp:
+                p = pathlib.Path(str(tp)).expanduser()
+                try:
+                    sz = p.stat().st_size
+                    if sz <= MAX_USAGE_STOP_BYTES:
+                        info = usage_from_transcript(agent, p.read_bytes())
+                    else:
+                        info = {
+                            "source": f"{agent}_transcript",
+                            "observed_by": "agent_claim",
+                            "complete": False,
+                            "calls": None,
+                            "input_tokens": None,
+                            "output_tokens": None,
+                            "models_claimed": [],
+                            "note": f"transcript exceeded {MAX_USAGE_STOP_BYTES} bytes during stop hook",
+                        }
+                except OSError:
+                    info = None
+        if info is None:
+            return None
+        # 若 actor 本身帶模型 id 且清單裡還沒有，補進去
+        if actor.model and actor.model not in info.get("models_claimed", []):
+            info["models_claimed"] = sorted(set(info.get("models_claimed") or []) | {actor.model})
+        ev_payload: dict[str, Any] = {
+            "actor": actor.to_json(),
+            "scope": scope,
+            **info,
+        }
+        with rec._lock():
+            book = rec._tail()
+            last = book.entries[-1] if book.entries else None
+            if last is not None and last.type == "model_usage" and isinstance(last.payload, dict):
+                same_keys = ("actor", "scope", "source", "calls", "input_tokens", "output_tokens",
+                             "cache_read_tokens", "cache_write_tokens", "complete", "models_claimed")
+                if all(last.payload.get(k) == ev_payload.get(k) for k in same_keys):
+                    return dict(last.payload)
+            return rec._append("model_usage", ev_payload)
+    except Exception:  # noqa: BLE001 — best-effort：絕不阻塞或弄死掛鉤
+        return None

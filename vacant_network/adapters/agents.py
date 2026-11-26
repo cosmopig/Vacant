@@ -208,6 +208,51 @@ let ABORTED = false;
 let LAST_FINAL = false;
 let LAST_TEXT = "";
 let LAST_STOP = null;   // how the last real turn ended (pi's stopReason): "error" ⇒ the check runs after a model error
+// Model usage accumulator (in-memory, O(1) per turn_end, never blocks; signed into chain at stop/session_end).
+let USAGE = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0,
+              hasTokens: false, hasCacheRead: false, hasCacheWrite: false, missingTokens: false,
+              models: new Set() };
+
+function addUsage(msg, ctx) {
+  try {
+    USAGE.calls += 1;
+    const m = (msg && msg.model) || mid(ctx);
+    if (m) USAGE.models.add(String(m));
+    const u = msg && msg.usage;
+    const num = (v) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.trunc(v) : null);
+    if (u && typeof u === "object") {
+      const iv = num(u.input ?? u.input_tokens ?? u.inputTokens);
+      const ov = num(u.output ?? u.output_tokens ?? u.outputTokens);
+      if (iv !== null && ov !== null) {
+        USAGE.input += iv;
+        USAGE.output += ov;
+        USAGE.hasTokens = true;
+        const cr = num(u.cacheRead ?? u.cache_read_tokens ?? u.cache_read_input_tokens);
+        const cw = num(u.cacheWrite ?? u.cache_write_tokens ?? u.cache_creation_input_tokens);
+        if (cr !== null) { USAGE.cacheRead += cr; USAGE.hasCacheRead = true; }
+        if (cw !== null) { USAGE.cacheWrite += cw; USAGE.hasCacheWrite = true; }
+        return;
+      }
+    }
+    USAGE.missingTokens = true;
+  } catch (e) {}
+}
+
+function usageSnapshot() {
+  if (USAGE.calls <= 0) return undefined;
+  const out = {
+    source: "pi_hook",
+    calls: USAGE.calls,
+    input_tokens: USAGE.hasTokens ? USAGE.input : null,
+    output_tokens: USAGE.hasTokens ? USAGE.output : null,
+    complete: USAGE.hasTokens && !USAGE.missingTokens,
+    models_claimed: [...USAGE.models].sort(),
+  };
+  if (USAGE.hasCacheRead) out.cache_read_tokens = USAGE.cacheRead;
+  if (USAGE.hasCacheWrite) out.cache_write_tokens = USAGE.cacheWrite;
+  if (!out.complete) out.note = "some or all pi turn_end events lacked token usage";
+  return out;
+}
 
 function readBudget(text) {
   try {
@@ -380,6 +425,7 @@ export default function (pi) {
     if (!synthetic) {
       TURNS += 1;
       const m = (event && event.message) || {};
+      addUsage(m, ctx);
       LAST_STOP = m.stopReason || null;
       LAST_FINAL = !((event && event.toolResults) || []).length && m.stopReason === "stop";
       LAST_TEXT = LAST_FINAL ? String((typeof m.content === "string" ? m.content : text(m.content)) || "")
@@ -404,7 +450,7 @@ export default function (pi) {
   pi.on("agent_before_settle", async (event, ctx) => {
     if (who(ctx).parent_session_id) return undefined;   // a sub-agent's turn end is not the task's end
     const d = await ask("stop", { ...who(ctx), final_text: finalText(event), turn: TURNS, budget: BUDGET,
-                                  last_stop: LAST_STOP || undefined });
+                                  last_stop: LAST_STOP || undefined, model_usage: usageSnapshot() });
     if (d.action === "continue" && d.reason) {
       return { entries: [...((event && event.entries) || []),
                          { type: "custom_message", customType: "vacant-check", content: d.reason, display: true }],
@@ -425,7 +471,8 @@ export default function (pi) {
     await ask(w.parent_session_id ? "subagent_stop" : "session_end",
               { ...w, reason: (event && event.reason) || undefined, turn: TURNS, budget: BUDGET,
                 aborted: ABORTED, final_answer: LAST_FINAL,
-                final_text: late ? LAST_TEXT || undefined : undefined },
+                final_text: late ? LAST_TEXT || undefined : undefined,
+                model_usage: usageSnapshot() },
               !w.parent_session_id && (late || ABORTED) ? TIMEOUT.stop : undefined);
   });
 }
@@ -555,6 +602,7 @@ g.__vacantArgs = g.__vacantArgs || new Map();           // callID -> args (for t
 g.__vacantRoots = g.__vacantRoots || new Set();         // every root session seen (each gets its session_end)
 g.__vacantEndedSessions = g.__vacantEndedSessions || new Set();
 g.__vacantLastText = g.__vacantLastText || new Map();   // session id -> { msg, parts } (2.x events)
+g.__vacantUsage = g.__vacantUsage || new Map();         // session id -> usage snapshot (best-effort)
 
 function noteRoot(sessionID) {
   if (sessionID && !g.__vacantChildSessions.has(sessionID)) g.__vacantRoots.add(sessionID);
@@ -591,7 +639,9 @@ async function endAll(directory) {
   for (const id of roots) {
     g.__vacantEndedSessions.add(id);
     g.__vacantLastText.delete(id);
-    await ask("session_end", { cwd: directory, session_id: id });
+    const mu = g.__vacantUsage.get(id);
+    g.__vacantUsage.delete(id);
+    await ask("session_end", { cwd: directory, session_id: id, ...(mu ? { model_usage: mu } : {}) });
   }
 }
 
@@ -601,6 +651,47 @@ function withTimeout(p, ms) {
   return Promise.race([p, t]).finally(() => clearTimeout(timer));
 }
 
+function usageFromMessagesV1(list) {
+  try {
+    let calls = 0, input = 0, output = 0, cacheRead = 0, cacheWrite = 0;
+    let hasTokens = false, hasCR = false, hasCW = false, missing = false;
+    const models = new Set();
+    const num = (v) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.trunc(v) : null);
+    for (const m of list || []) {
+      if (!m || !m.info || m.info.role !== "assistant") continue;
+      calls += 1;
+      const mid = m.info.modelID || m.info.model;
+      const pid = m.info.providerID;
+      if (mid) models.add(pid && !String(mid).includes("/") ? `${pid}/${mid}` : String(mid));
+      const t = m.info.tokens || m.info.usage;
+      if (t && typeof t === "object") {
+        const iv = num(t.input ?? t.input_tokens);
+        const ov = num(t.output ?? t.output_tokens);
+        if (iv !== null && ov !== null) {
+          input += iv; output += ov; hasTokens = true;
+          const c = t.cache || {};
+          const cr = num(c.read ?? t.cacheRead ?? t.cache_read_tokens);
+          const cw = num(c.write ?? t.cacheWrite ?? t.cache_write_tokens);
+          if (cr !== null) { cacheRead += cr; hasCR = true; }
+          if (cw !== null) { cacheWrite += cw; hasCW = true; }
+          continue;
+        }
+      }
+      missing = true;
+    }
+    if (calls <= 0) return undefined;
+    const out = {
+      source: "opencode_hook", calls,
+      input_tokens: hasTokens ? input : null, output_tokens: hasTokens ? output : null,
+      complete: hasTokens && !missing, models_claimed: [...models].sort(),
+    };
+    if (hasCR) out.cache_read_tokens = cacheRead;
+    if (hasCW) out.cache_write_tokens = cacheWrite;
+    if (!out.complete) out.note = "some or all OpenCode assistant messages lacked token counts";
+    return out;
+  } catch (e) { return undefined; }
+}
+
 // The last assistant message of a session (1.x SDK), best-effort: never throws.
 async function lastTextV1(client, id) {
   try {
@@ -608,6 +699,8 @@ async function lastTextV1(client, id) {
     const res = await withTimeout(client.session.messages({ path: { id } }), 5000);
     const list = (res && (res.data || res)) || [];
     if (!Array.isArray(list)) return undefined;
+    const mu = usageFromMessagesV1(list);
+    if (mu) g.__vacantUsage.set(id, mu);
     for (let i = list.length - 1; i >= 0; i--) {
       const m = list[i] || {};
       if (!m.info || m.info.role !== "assistant") continue;
@@ -627,7 +720,9 @@ async function stopCheck(id, directory, finalText, send, toast) {
   let d = { action: "allow" };
   try {
     const text = await finalText();
-    d = await ask("stop", { cwd: directory, session_id: id, ...(text ? { final_text: text } : {}) });
+    const mu = g.__vacantUsage.get(id);
+    d = await ask("stop", { cwd: directory, session_id: id, ...(text ? { final_text: text } : {}),
+                            ...(mu ? { model_usage: mu } : {}) });
     // the note is for the PERSON (a toast), never for the model; best-effort, never throws
     if (d && d.note && typeof toast === "function") { try { await toast(String(d.note)); } catch (e) {} }
   } catch (e) {

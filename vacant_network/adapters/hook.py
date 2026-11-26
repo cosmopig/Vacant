@@ -61,7 +61,8 @@ EVENT_MAP: dict[str, dict[str, str]] = {
                  "prompt": "other"},
     "pi": {"pre_tool": "pre_tool", "post_tool": "post_tool", "stop": "stop",
            "session_end": "session_end", "session_start": "session_start",
-           "subagent_stop": "other", "prompt": "other", "turn_check": "turn_check"},
+           "subagent_stop": "other", "prompt": "other", "turn_check": "turn_check",
+           "turn_end": "other"},
 }
 AGENTS = tuple(EVENT_MAP)
 
