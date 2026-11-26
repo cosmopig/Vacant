@@ -111,8 +111,9 @@ for _tmpl in (
 
 def build_task_prompt(task: dict[str, Any]) -> str:
     """Identical base task text across all arms."""
+    # KS-1 只管 harness 自己寫的範本（import 時已用佔位名檢查過）；函式名來自題庫原文
+    # （例如 LeetCode 的 punishmentNumber），不是 harness 措辭，不在這裡檢查。
     suffix = _TASK_SUFFIX_FMT.format(entry_point=task["entry_point"])
-    assert_ks1_clean(suffix)
     return f"{task['prompt'].rstrip()}\n\n{suffix}"
 
 
