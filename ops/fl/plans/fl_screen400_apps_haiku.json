@@ -1,0 +1,29 @@
+{
+ "schema": "vacant.fl.plan/1",
+ "id": "fl_screen400_apps_haiku",
+ "task_format": "stdio",
+ "bank_path": "~/dev/ops/ref/apps/apps_fl_bank.jsonl",
+ "bank_sha256": "c9059eeb753617a79df52ffd132e083e6778d72c00d97ca6c7893dcc74adc46d",
+ "seed": 20261128,
+ "difficulties": [
+  "interview",
+  "competition"
+ ],
+ "n_tasks": 400,
+ "arms": [
+  "B0"
+ ],
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5",
+  "exam_model": "claude-haiku-5-5"
+ },
+ "jobs": 4,
+ "attempt_timeout_s": 300,
+ "eval_timeout_s": 60,
+ "per_case_timeout_s": 3.0,
+ "eval_mem_mb": 1024,
+ "max_attempts": 3,
+ "mv_num_inputs": 20,
+ "purpose": "APPS 篩題（只跑 B0，不是證據）：依種子從 interview＋competition 抽 400 題（排除校準用過的 40 題由分析端處理），留下 Haiku 這一次沒過的題當正式先導題組。依結果挑題 ⇒ 正式先導裡 B0 會往上回歸；各臂在同一組題上比較仍公平。篩題的跑不進分析。"
+}
