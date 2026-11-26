@@ -85,3 +85,10 @@
 - **r5seen4 作廢**：22:39Z 開跑、22:45Z 手動停批（SIGTERM）；只完成 2 組初稿與 s01 的一部分。它跑的是 v5（555cd0568），其中守衛的 `--keep-labels` 建立在錯的診斷上（獨立稽核 11-25 查到越界守衛的 `_line_key` 撞鍵 bug，「agent 把欄位名一起改掉」是錯的歸因）。這一批的資料不用、不分析。由 r5seen4b（同一份教材 heldout-v4 種子 20261171、產品 v5.1）取代。
 - **產品 v5.1**（7d574c3d3）：守衛改用改前那一行到「: 」為止的整段標籤對行；撤回 keep_labels 行為。主 checkout（~/dev/Vacant）因 22:48Z 一次下錯的 `git stash pop` 套上一份無關的舊 stash、5 個 reqloop 檔衝突、無法提交，還原動作被權限機制擋下、等擁有者決定（~/dev/ops/STASH_CONFLICT_20261126.md）；v5.1 與第五輪計畫從新的 worktree（~/dev/wt/d2r5，分支 d2/r5-guardfix）提交、推上 auto/redo，runner 也從那裡執行。
 - 真實教材抓取因維基百科 429 限流，目標從 30 組縮成 20 組（照慢速、每秒最多一個請求、不加併發）。
+
+## r5real 9B 兩批重開（2026-11-26 00:50 UTC，新 root 的任何模型呼叫之前寫下並推上遠端）
+
+- 00:38Z 開跑的 r5real_d2_qwen9b_1003／1004（root r5real_1003、r5real_1004）跑了約 8 分鐘就看到大量「Context size has been exceeded.」：1004 有 24 次 agent 執行、1003 有 2 次；1004 的 s14 因此成為 InfraError。原因是基礎設施設定：兩台的 qwen3.5-9b 載入在 ctx 65536、parallel 4（共用 KV），真實維基百科頁面一頁 50–70 KB，agent 讀兩三頁就超過；被截斷的執行會讓「整份重查」這種讀全部頁面的臂吃虧，結果會偏向主要臂。
+- 處置：00:47Z 停掉這兩批（SIGTERM）；兩台都改成 ctx 131072、parallel 2 重新載入（`lms load qwen/qwen3.5-9b -c 131072 --parallel 2`，估計 13.3 GiB，和同機的 gemma 一起放得下）；**兩個舊 root 作廢、不分析**；同一份計畫（7da900d6b，未改一字）以新 root r5real_1003b、r5real_1004b 重新從頭跑（jobs 仍是 2）。這是在看任何結果之前做的。
+- Haiku 那批（Claude Code，200k context）不受影響，照常跑。
+- 兩批描述性對照（r5h3b、r5seen4b，合成教材頁面小）在 ctx 65536 下跑完，各自的超出次數見結論。
