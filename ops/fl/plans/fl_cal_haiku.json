@@ -1,0 +1,28 @@
+{
+ "schema": "vacant.fl.plan/1",
+ "id": "fl_cal_haiku",
+ "bank_path": "ops/gain/data/lcb_bank_v3.jsonl",
+ "index_path": "runs/INDEX.json",
+ "seed": 20261126,
+ "arms": [
+  "B0"
+ ],
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5",
+  "exam_model": "claude-haiku-5-5"
+ },
+ "jobs": 3,
+ "attempt_timeout_s": 300,
+ "eval_timeout_s": 45,
+ "per_fn_timeout_s": 20,
+ "per_call_timeout_s": 2.0,
+ "eval_mem_mb": 1024,
+ "max_attempts": 3,
+ "mv_num_inputs": 20,
+ "purpose": "快車道校準（只跑 B0，不是證據）：從 LCB v3 medium＋hard 依種子抽 30 題，看 Haiku 各難度的原生成功率，用來選正式先導的難度切片（只依難度層選，不依逐題結果選；校準用過的題不進正式先導）。",
+ "difficulties": [
+  "medium",
+  "hard"
+ ]
+}
