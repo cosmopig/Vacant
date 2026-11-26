@@ -26,6 +26,7 @@
 """
 from __future__ import annotations
 
+import ast
 import json
 import math
 import pathlib
@@ -42,7 +43,7 @@ if str(_REPO_ROOT) not in sys.path:
 from vacant_network.trace.sources import plain_contains, value_status  # noqa: E402
 
 from .sandbox import build_eval_bwrap_argv, run_sandboxed  # noqa: E402
-from .units import doc_line_prefix, doc_line_value, extract_doc_units  # noqa: E402
+from .units import commit_code_scoped, doc_line_prefix, doc_line_value, extract_doc_units  # noqa: E402
 
 _PLACEHOLDER_RE = re.compile(r"_{3,}|\bTODO\b|\bTBD\b", re.I)
 
@@ -361,6 +362,139 @@ def evaluate_code_source(
             "functions": funcs,
             "wall_s": res["wall_s"],
         }
+
+
+_LOAD_ONLY_DRIVER_PY = r"""
+import importlib.util, json, math, signal, sys
+
+class _LoadTimeout(Exception):
+    pass
+
+def _alarm_handler(signum, frame):
+    raise _LoadTimeout("module load timeout")
+
+def main():
+    req = json.loads(sys.stdin.read())
+    sol_path = req["solution_path"]
+    timeout_s = max(1, int(math.ceil(float(req.get("timeout_s", 5.0)))))
+    out = {"loads": False, "load_error": None}
+    signal.signal(signal.SIGALRM, _alarm_handler)
+    signal.alarm(timeout_s)
+    try:
+        spec = importlib.util.spec_from_file_location("e1_candidate_solution", sol_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot create module spec for {sol_path}")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["e1_candidate_solution"] = mod
+        spec.loader.exec_module(mod)
+        out["loads"] = True
+    except BaseException as exc:
+        out["loads"] = False
+        out["load_error"] = f"{type(exc).__name__}: {exc}"
+    finally:
+        signal.alarm(0)
+    print("@@E1_LOAD@@" + json.dumps(out))
+
+main()
+"""
+
+
+def check_code_loads_in_sandbox(
+    solution_src: str,
+    *,
+    timeout_s: float = 8.0,
+    total_timeout_s: float = 45.0,
+    mem_limit_mb: int = 1024,
+) -> dict:
+    """在無網路 bwrap 評分沙箱（與 `evaluate_code_source` 相同資源限制）內僅匯入候選模組。
+
+    不執行任何測試、不讀取任何可見或隱藏測資。
+    """
+    with tempfile.TemporaryDirectory(prefix="e1_load_") as tmp:
+        sol_file = pathlib.Path(tmp) / "solution.py"
+        sol_file.write_text(solution_src, encoding="utf-8")
+        argv = build_eval_bwrap_argv(
+            ["python3", "-c", _LOAD_ONLY_DRIVER_PY],
+            ro_binds=[(sol_file, "/work/solution.py")],
+            chdir="/tmp",
+            mem_limit_mb=mem_limit_mb,
+            cpu_limit_s=max(5, int(math.ceil(total_timeout_s)) + 2),
+        )
+        req = {
+            "solution_path": "/work/solution.py",
+            "timeout_s": timeout_s,
+        }
+        res = run_sandboxed(argv, timeout_s=total_timeout_s + 2.0, stdin_bytes=json.dumps(req).encode("utf-8"))
+        parsed = _extract_marker_json(res["stdout"], "@@E1_LOAD@@")
+        if parsed is None:
+            err = "sandbox_timeout" if res["timed_out"] else f"sandbox_rc={res['rc']}: {res['stderr'][:240]}"
+            return {"loads": False, "load_error": err, "wall_s": res["wall_s"]}
+        return {
+            "loads": bool(parsed.get("loads")),
+            "load_error": parsed.get("load_error"),
+            "wall_s": res["wall_s"],
+        }
+
+
+def check_code_z_gate(
+    baseline_src: str,
+    candidate_src: str,
+    allowed_scope: list[str] | tuple[str, ...] | set[str],
+    *,
+    load_timeout_s: float = 8.0,
+    total_timeout_s: float = 45.0,
+    mem_limit_mb: int = 1024,
+) -> dict:
+    """Z 臂（零答案閘門）三合一檢查：ast.parse＋無網路沙箱匯入＋範圍檢查（零測試、零答案）。"""
+    try:
+        ast.parse(candidate_src)
+        parse_ok = True
+        parse_err: str | None = None
+    except SyntaxError as exc:
+        parse_ok = False
+        parse_err = f"SyntaxError: {exc}"
+
+    if not parse_ok:
+        return {
+            "passed": False,
+            "z_check": {
+                "parse": False,
+                "loads": False,
+                "scope_ok": False,
+                "rejected_units": [],
+                "rejected_non_unit_changes": True,
+                "load_error": parse_err,
+            },
+            "committed_units": [],
+        }
+
+    sc_res = commit_code_scoped(baseline_src, candidate_src, allowed_scope)
+    rej_units = list(sc_res["rejected_units"])
+    rej_non_unit = bool(sc_res["rejected_non_unit_changes"])
+    scope_ok = (not sc_res["syntax_error"]) and (rej_units == []) and (rej_non_unit is False)
+
+    load_res = check_code_loads_in_sandbox(
+        candidate_src,
+        timeout_s=load_timeout_s,
+        total_timeout_s=total_timeout_s,
+        mem_limit_mb=mem_limit_mb,
+    )
+    loads_ok = bool(load_res["loads"])
+    load_error = load_res.get("load_error")
+
+    passed = bool(parse_ok and loads_ok and scope_ok)
+    return {
+        "passed": passed,
+        "z_check": {
+            "parse": True,
+            "loads": loads_ok,
+            "scope_ok": scope_ok,
+            "rejected_units": rej_units,
+            "rejected_non_unit_changes": rej_non_unit,
+            "load_error": load_error,
+        },
+        "committed_units": list(sc_res["committed_units"]),
+    }
 
 
 # ── 文件檢查、評分與 S 臂來源範圍計算 ───────────────────────────────────────

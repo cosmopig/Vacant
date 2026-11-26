@@ -60,6 +60,7 @@ from ops.e1 import (
     utc_now_iso,
 )
 from ops.e1.evaluate import (
+    check_code_z_gate,
     check_doc_structural,
     compute_doc_scope_s,
     evaluate_code_source,
@@ -782,6 +783,8 @@ class E1Runner:
         if kind == "doc" and arm == "B0x3":
             self._log(f"skip {cid}/{arm}: B0x3 is code-only")
             return
+        if kind != "code" and arm == "Z":
+            raise SystemExit("Z 臂只定義在程式類")
 
         target_fname = "solution.py" if kind == "code" else "report.md"
         arm_dir = self.root / "cells" / cid / arm
@@ -830,10 +833,10 @@ class E1Runner:
                 new_reqs = list(r_obj["new_requirements"])
                 oracle_units = list(r_obj["oracle_affected_units"])
 
-            # 宿主端計算 S / O 允許範圍（B0/B0x3/B2 不受限）
+            # 宿主端計算 S / Z / O 允許範圍（B0/B0x3/B2/P 不受限）
             allowed_scope: list[str] | None = None
             scope_detail: dict | None = None
-            if arm in ("S", "S+B2"):
+            if arm in ("S", "S+B2", "Z"):
                 if kind == "code":
                     allowed_scope = extract_code_scope_from_task(task_text)
                 else:
@@ -848,7 +851,7 @@ class E1Runner:
             # 決定嘗試上限與各臂迴圈策略
             if arm == "B0x3":
                 max_att = self.max_attempts_b0x3
-            elif arm in ("B2", "S+B2"):
+            elif arm in ("B2", "S+B2", "Z"):
                 max_att = self.max_attempts_b2
             else:
                 max_att = 1
@@ -955,6 +958,38 @@ class E1Runner:
                     attempts_meta.append(att_entry)
                     continue
 
+                if arm == "Z":
+                    # 零答案閘門（ADDENDA 11-26，第七次稽核＋vacant-hope）：
+                    # ast.parse ＋ 無網路評分沙箱匯入（不跑測試、不讀測資）＋ 範圍檢查（同 S）。
+                    # 三項全過就整檔提交；任一不過就回滾至基線，依 B2 同預算／同無回饋策略重試。
+                    assert allowed_scope is not None
+                    z_res = check_code_z_gate(
+                        baseline_text,
+                        cand_text,
+                        allowed_scope,
+                        load_timeout_s=min(8.0, self.eval_timeout_s),
+                        total_timeout_s=self.eval_timeout_s,
+                        mem_limit_mb=self.eval_mem_mb,
+                    )
+                    zc = z_res["z_check"]
+                    z_ok = bool(z_res["passed"])
+                    committed_units = list(z_res["committed_units"])
+                    rejected_units = list(zc["rejected_units"])
+                    rejected_non_unit_changes = bool(zc["rejected_non_unit_changes"])
+                    att_entry["z_check"] = zc
+                    att_entry["committed_units"] = committed_units
+                    att_entry["rejected_units"] = rejected_units
+                    att_entry["rejected_non_unit_changes"] = rejected_non_unit_changes
+                    attempts_meta.append(att_entry)
+                    if z_ok:
+                        gate_passed = True
+                        committed_text = cand_text
+                        break
+                    else:
+                        gate_passed = False
+                        committed_text = baseline_text
+                        continue
+
                 # 若是 S / S+B2 / O，先由宿主端執行範圍提交
                 if arm in ("S", "S+B2", "O"):
                     assert allowed_scope is not None
@@ -1054,14 +1089,14 @@ class E1Runner:
             new_req_passed = [u for u in new_reqs if cur_unit_passed.get(u, False)]
             new_req_completion = (len(new_req_passed) / len(new_reqs)) if new_reqs else None
 
-            # S / S+B2 / O 事後評分：被拒但其實正確的單元（false rejects）與範圍內接受卻錯誤的單元
+            # S / S+B2 / O / Z 事後評分：被拒但其實正確的單元（false rejects）與範圍內接受卻錯誤的單元
             rejected_candidate_correct: list[str] = []
             rejected_but_correct: list[str] = []
             accepted_in_scope_but_wrong: list[str] = []
 
-            if arm in ("S", "S+B2", "O"):
-                # 若 S+B2 最後全部回滾至基線，實際上沒有提交範圍內變更
-                eff_committed = [] if (arm == "S+B2" and gate_passed is False) else committed_units
+            if arm in ("S", "S+B2", "O", "Z"):
+                # 若 S+B2 / Z 最後全部回滾至基線，實際上沒有提交範圍內變更
+                eff_committed = [] if (arm in ("S+B2", "Z") and gate_passed is False) else committed_units
                 accepted_in_scope_but_wrong = [
                     u for u in eff_committed if u in cur_unit_passed and not cur_unit_passed[u]
                 ]

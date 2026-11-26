@@ -90,7 +90,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         for cid in chains:
             chains[cid].sort(key=lambda x: int(x["round"]))
 
-    arms_order = [a for a in ("B0", "B0x3", "B2", "S", "S+B2", "O", "P") if a in by_arm]
+    arms_order = [a for a in ("B0", "B0x3", "B2", "S", "S+B2", "O", "P", "Z") if a in by_arm]
     for a in sorted(by_arm):
         if a not in arms_order:
             arms_order.append(a)
@@ -113,6 +113,8 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         round_pass_counts: dict[int, list[bool]] = {}
 
         chain_any_reg = 0
+        total_reg_events = 0
+        total_rounds = 0
         total_reg_oblig = 0
         total_prev_pass_still_req = 0
 
@@ -139,6 +141,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             final_pass_map[cid] = fp
 
             c_reg = 0
+            c_reg_events = 0
             c_new_t = 0
             c_new_p = 0
             c_wall = 0.0
@@ -152,8 +155,12 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
 
             for r in recs:
                 rn = int(r["round"])
+                total_rounds += 1
                 round_pass_counts.setdefault(rn, []).append(bool((r.get("eval") or {}).get("all_pass")))
                 rc = int(r.get("regression_count") or 0)
+                if rc > 0:
+                    c_reg_events += 1
+                    total_reg_events += 1
                 c_reg += rc
                 total_reg_oblig += rc
                 total_prev_pass_still_req += int(r.get("still_required_prev_passing_count") or 0)
@@ -181,7 +188,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
                 rej_cand_correct_total += len(r.get("rejected_candidate_correct") or [])
                 acc_in_scope_wrong_total += len(r.get("accepted_in_scope_but_wrong") or [])
 
-            if c_reg > 0:
+            if c_reg_events > 0:
                 chain_any_reg += 1
             if c_new_t > 0:
                 chain_new_rates.append(c_new_p / c_new_t)
@@ -216,6 +223,9 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             "per_round_success": per_round,
             "regression_chain_count": chain_any_reg,
             "regression_chain_rate": round(chain_any_reg / n_chains, 4) if n_chains else None,
+            "regression_event_count": total_reg_events,
+            "regression_event_rounds_total": total_rounds,
+            "regression_event_rate": round(total_reg_events / total_rounds, 4) if total_rounds else None,
             "regression_obligation_count": total_reg_oblig,
             "regression_obligation_denom": total_prev_pass_still_req,
             "regression_obligation_rate": round(total_reg_oblig / total_prev_pass_still_req, 4)
@@ -239,7 +249,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             "rejected_units_total": sum(chain_rejected),
             "rejected_units_per_chain_mean": _mean([float(x) for x in chain_rejected]),
         }
-        if arm in ("S", "S+B2", "O"):
+        if arm in ("S", "S+B2", "O", "Z"):
             entry["scope_diagnostics"] = {
                 "rejected_but_correct_harmful": rej_harmful_total,
                 "rejected_candidate_correct_all": rej_cand_correct_total,
@@ -286,18 +296,19 @@ def format_report(summary: dict[str, Any]) -> str:
     lines.append("")
     lines.append("## Primary & Secondary Summary by Arm")
     lines.append(
-        "| Arm | Chains | Final All-Pass | Chain Reg. | Oblig. Reg. | New-Req Comp. | "
+        "| Arm | Chains | Final All-Pass | Chain Reg. | Reg. Events | Oblig. Reg. | New-Req Comp. | "
         "Attempts/Ch | Rejected/Ch | Tokens/Ch | Wall(s)/Ch |"
     )
-    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
     for arm, st in summary["arms"].items():
         fp = f"{st['primary_final_all_pass_count']}/{st['n_chains']} ({st['primary_final_all_pass_rate']})"
         cr = f"{st['regression_chain_count']}/{st['n_chains']} ({st['regression_chain_rate']})"
+        re_s = f"{st['regression_event_count']}/{st['regression_event_rounds_total']}"
         orr = f"{st['regression_obligation_count']}/{st['regression_obligation_denom']} ({st['regression_obligation_rate']})"
         nr = f"{st['new_req_passed']}/{st['new_req_total']} ({st['new_req_completion_rate']})"
         tok = str(st["tokens_total_per_chain_mean"]) if st["tokens_total_per_chain_mean"] is not None else "n/a"
         lines.append(
-            f"| {arm} | {st['n_chains']} | {fp} | {cr} | {orr} | {nr} | "
+            f"| {arm} | {st['n_chains']} | {fp} | {cr} | {re_s} | {orr} | {nr} | "
             f"{st['attempts_per_chain_mean']} | {st['rejected_units_per_chain_mean']} | "
             f"{tok} | {st['wall_s_per_chain_mean']} |"
         )
@@ -311,7 +322,7 @@ def format_report(summary: dict[str, Any]) -> str:
     scope_arms = [(a, st["scope_diagnostics"]) for a, st in summary["arms"].items() if "scope_diagnostics" in st]
     if scope_arms:
         lines.append("")
-        lines.append("## Scope Diagnostics (S / S+B2 / O)")
+        lines.append("## Scope Diagnostics (S / S+B2 / O / Z)")
         lines.append("| Arm | Rejected-but-Correct (Harmful) | Rejected Candidate-Pass (All) | Accepted-in-Scope-but-Wrong |")
         lines.append("|---|---:|---:|---:|")
         for arm, sd in scope_arms:

@@ -110,7 +110,7 @@ def run_selftest(work_dir: pathlib.Path | None = None, *, doc_materials: pathlib
                 "schema": PLAN_SCHEMA,
                 "id": "selftest_code",
                 "chains_dir": str(code_chains_dir),
-                "arms": ["B0", "B0x3", "B2", "S", "S+B2", "O"],
+                "arms": ["B0", "B0x3", "B2", "S", "S+B2", "O", "Z"],
                 "model": {
                     "providers": ["fake"],
                     "model": "fake/selftest",
@@ -140,6 +140,31 @@ def run_selftest(work_dir: pathlib.Path | None = None, *, doc_materials: pathlib
         assert code_summary["arms"]["B0x3"]["primary_final_all_pass_rate"] == 0.0
         assert code_summary["arms"]["B2"]["regression_obligation_count"] == 0
         assert code_summary["arms"]["B2"]["primary_final_all_pass_rate"] == 0.0
+        assert code_summary["arms"]["Z"]["regression_obligation_count"] == 0, f"Z 發生回歸：{code_summary['arms']['Z']}"
+        assert code_summary["arms"]["Z"]["regression_event_count"] == 0, f"Z 發生回歸事件：{code_summary['arms']['Z']}"
+        assert code_summary["arms"]["Z"]["regression_chain_count"] == 0, f"Z 發生鏈回歸：{code_summary['arms']['Z']}"
+        assert code_summary["arms"]["Z"]["primary_final_all_pass_rate"] == 0.0
+        assert code_summary["arms"]["Z"]["attempts_per_chain_mean"] == 10.0, f"Z 應每回合重試 2 次：{code_summary['arms']['Z']}"
+        assert code_summary["arms"]["Z"]["rejected_units_total"] > 0, "Z 應回報被拒單元"
+        assert "scope_diagnostics" in code_summary["arms"]["Z"], "Z 應含 scope_diagnostics"
+        z_recs = [
+            json.loads(ln)
+            for ln in (code_root / "results.jsonl").read_text(encoding="utf-8").splitlines()
+            if ln.strip() and json.loads(ln).get("arm") == "Z"
+        ]
+        assert len(z_recs) == 10, f"預期 2 條鏈 × 5 回合 = 10 筆 Z 紀錄，實得 {len(z_recs)}"
+        for zr in z_recs:
+            assert zr["attempts_count"] == 2
+            assert zr["gate_passed"] is False
+            for att in zr["attempts"]:
+                zc = att.get("z_check")
+                assert isinstance(zc, dict), f"缺少 z_check：{att}"
+                assert set(zc.keys()) == {
+                    "parse", "loads", "scope_ok", "rejected_units", "rejected_non_unit_changes", "load_error"
+                }
+                assert zc["parse"] is True
+                assert zc["loads"] is True
+                assert zc["scope_ok"] is False
         for arm in ("S", "S+B2", "O"):
             assert code_summary["arms"][arm]["primary_final_all_pass_rate"] == 1.0, f"{arm} 未全過：{code_summary['arms'][arm]}"
             assert code_summary["arms"][arm]["regression_obligation_count"] == 0, f"{arm} 發生回歸"

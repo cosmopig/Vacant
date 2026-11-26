@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -17,6 +18,7 @@ from ops.e1.analyze_e1 import analyze_root, format_report, mcnemar_exact
 from ops.e1.build_code_chains import build_code_chains
 from ops.e1.build_doc_chains import build_doc_chains
 from ops.e1.evaluate import (
+    check_code_z_gate,
     check_doc_structural,
     compute_doc_scope_s,
     evaluate_code_source,
@@ -474,12 +476,244 @@ class TestRunnerGuardsAndDiagnostics(unittest.TestCase):
             self.assertEqual(sd["accepted_in_scope_but_wrong"], 1)
 
 
+class TestArmZAndRegressionEvents(unittest.TestCase):
+    def setUp(self) -> None:
+        self.baseline = (
+            "import math\n\n"
+            "CONST = 10\n\n"
+            "def f1(x):\n"
+            "    return x + 1\n\n"
+            "def f2(x):\n"
+            "    return int(math.sqrt(x)) + CONST\n"
+        )
+
+    def test_z_check_syntax_error(self) -> None:
+        res = check_code_z_gate(self.baseline, "def broken(:\n", ["f3"])
+        self.assertFalse(res["passed"])
+        zc = res["z_check"]
+        self.assertFalse(zc["parse"])
+        self.assertFalse(zc["loads"])
+        self.assertFalse(zc["scope_ok"])
+        self.assertEqual(zc["rejected_units"], [])
+        self.assertTrue(zc["rejected_non_unit_changes"])
+        self.assertIn("SyntaxError", zc["load_error"] or "")
+
+    def test_z_check_import_error_missing_typing_list_and_bad_module(self) -> None:
+        # 使用 List 註記卻沒 import List → 可 ast.parse、在範圍內，但沙箱匯入失敗
+        cand_missing_list = self.baseline + "\ndef f3(xs: List[int]) -> int:\n    return len(xs)\n"
+        res = check_code_z_gate(self.baseline, cand_missing_list, ["f3"])
+        self.assertFalse(res["passed"])
+        zc = res["z_check"]
+        self.assertTrue(zc["parse"])
+        self.assertFalse(zc["loads"])
+        self.assertTrue(zc["scope_ok"])
+        self.assertEqual(zc["rejected_units"], [])
+        self.assertFalse(zc["rejected_non_unit_changes"])
+        self.assertIn("NameError", zc["load_error"] or "")
+        self.assertIn("List", zc["load_error"] or "")
+
+        # 匯入不存在模組
+        cand_bad_mod = "import no_such_pkg_e1_z_test\n" + self.baseline + "\ndef f3(x):\n    return x\n"
+        res2 = check_code_z_gate(self.baseline, cand_bad_mod, ["f3"])
+        self.assertFalse(res2["passed"])
+        self.assertTrue(res2["z_check"]["parse"])
+        self.assertFalse(res2["z_check"]["loads"])
+        self.assertTrue(res2["z_check"]["scope_ok"])
+        self.assertIn("ModuleNotFoundError", res2["z_check"]["load_error"] or "")
+
+    def test_z_check_out_of_scope_change_and_non_unit_change(self) -> None:
+        cand_oos = (
+            "import math\n\n"
+            "CONST = 10\n\n"
+            "def f1(x):\n"
+            "    return -999\n\n"
+            "def f2(x):\n"
+            "    return int(math.sqrt(x)) + CONST\n\n"
+            "def f3(x):\n"
+            "    return x * 2\n"
+        )
+        res = check_code_z_gate(self.baseline, cand_oos, ["f3"])
+        self.assertFalse(res["passed"])
+        zc = res["z_check"]
+        self.assertTrue(zc["parse"])
+        self.assertTrue(zc["loads"])
+        self.assertFalse(zc["scope_ok"])
+        self.assertEqual(zc["rejected_units"], ["f1"])
+        self.assertFalse(zc["rejected_non_unit_changes"])
+        self.assertIsNone(zc["load_error"])
+
+        cand_const = self.baseline.replace("CONST = 10", "CONST = 99") + "\ndef f3(x):\n    return x\n"
+        res2 = check_code_z_gate(self.baseline, cand_const, ["f3"])
+        self.assertFalse(res2["passed"])
+        self.assertTrue(res2["z_check"]["parse"])
+        self.assertTrue(res2["z_check"]["loads"])
+        self.assertFalse(res2["z_check"]["scope_ok"])
+        self.assertEqual(res2["z_check"]["rejected_units"], [])
+        self.assertTrue(res2["z_check"]["rejected_non_unit_changes"])
+
+    def test_z_check_clean_pass_with_new_import(self) -> None:
+        cand_ok = (
+            "from typing import List\n"
+            + self.baseline
+            + "\ndef f3(xs: List[int]) -> int:\n    return sum(xs)\n"
+        )
+        res = check_code_z_gate(self.baseline, cand_ok, ["f3"])
+        self.assertTrue(res["passed"])
+        zc = res["z_check"]
+        self.assertEqual(
+            zc,
+            {
+                "parse": True,
+                "loads": True,
+                "scope_ok": True,
+                "rejected_units": [],
+                "rejected_non_unit_changes": False,
+                "load_error": None,
+            },
+        )
+        self.assertEqual(res["committed_units"], ["f3"])
+
+    def test_arm_z_runner_retries_commits_whole_and_tracks_diagnostics(self) -> None:
+        """驗證 Z 臂在執行器中：第 1 次缺 import 回滾重試、第 2 次通過就整檔提交；預算耗盡保留基線並記範圍診斷。"""
+        with tempfile.TemporaryDirectory() as td:
+            tp = pathlib.Path(td)
+            ep_dir = make_synthetic_evalplus(tp / "ep", n_he=10, n_mbpp=10)
+            cdir = tp / "chains"
+            build_code_chains(seed=13, n=1, out_dir=cdir, evalplus_dir=ep_dir, min_init=8, max_init=8, verify_sha256=False)
+            ch = json.loads((cdir / "code_001" / "chain.json").read_text(encoding="utf-8"))
+            r1_fn = ch["rounds"][0]["added_function"]
+            r2_fn = ch["rounds"][1]["added_function"]
+            r3_fn = ch["rounds"][2]["added_function"]
+            existing_fn = ch["initial_functions"][0]
+
+            plan_p = tp / "plan.json"
+            atomic_write_json(
+                plan_p,
+                {
+                    "schema": PLAN_SCHEMA,
+                    "id": "z_retry_test",
+                    "chains_dir": str(cdir),
+                    "arms": ["Z"],
+                    "model": {"providers": ["fake"], "model": "fake", "fake_agent": "ops/e1/fake_agent.py"},
+                    "jobs": 1,
+                    "attempt_timeout_s": 20,
+                    "max_attempts_b2": 2,
+                },
+            )
+            root = tp / "root"
+            runner = E1Runner(plan_p, root, allow_uncommitted=True)
+
+            # 記錄每回合呼叫次數與是否拿到相同任務文字（不洩漏範圍）
+            seen_prompts: dict[str, list[str]] = {}
+
+            def _fake_worker(*, ws_dir, prompt, provider, log_path, is_doc):
+                sol = ws_dir / "solution.py"
+                base = sol.read_text(encoding="utf-8")
+                seen_prompts.setdefault(prompt, []).append(prompt)
+                att_n = len(seen_prompts[prompt])
+
+                if f"def {r1_fn}(" in prompt:
+                    # r1: attempt 1 缺 List 匯入（Z 應擋下回滾），attempt 2 補 import 並加註解（Z 應整檔提交含註解）
+                    if att_n == 1:
+                        sol.write_text(base + f"\ndef {r1_fn}(x: List[int]):\n    return x\n", encoding="utf-8")
+                    else:
+                        # 故意寫錯實作以同時測 accepted_in_scope_but_wrong
+                        sol.write_text(
+                            "from typing import List\n" + base + f"\n# whole-commit-marker\ndef {r1_fn}(x):\n    return -12345\n",
+                            encoding="utf-8",
+                        )
+                elif f"def {r2_fn}(" in prompt:
+                    # r2: 每次嘗試都改動範圍外函式 → 預算耗盡應保留基線
+                    broken = base.replace(f"def {existing_fn}(", f"def {existing_fn}_broken_nope(")
+                    sol.write_text(broken + f"\ndef {r2_fn}(x):\n    return x\n", encoding="utf-8")
+                elif f"def {r3_fn}(" in prompt:
+                    # r3: 一次就過，檢查範圍診斷與整檔提交
+                    sol.write_text(base + f"\ndef {r3_fn}(x):\n    return -999\n", encoding="utf-8")
+                # r4/r5 不改動，直接留基線
+                return {
+                    "rc": 0,
+                    "wall_s": 0.01,
+                    "timed_out": False,
+                    "usage": {"calls": 1, "errors": 0, "input": 10, "output": 5, "final_error": None},
+                    "infra_error": False,
+                }
+
+            with mock.patch.object(runner, "_run_preflight_negative_controls", return_value=None):
+                with mock.patch.object(runner, "_run_worker_once", side_effect=_fake_worker):
+                    runner.run()
+
+            recs = [json.loads(ln) for ln in (root / "results.jsonl").read_text(encoding="utf-8").splitlines() if ln.strip()]
+            self.assertEqual(len(recs), 5)
+            r1, r2, r3 = recs[0], recs[1], recs[2]
+
+            # r1: 2 attempts, attempt 1 failed loads, attempt 2 passed and committed whole (with comment)
+            self.assertEqual(r1["attempts_count"], 2)
+            self.assertTrue(r1["gate_passed"])
+            self.assertFalse(r1["attempts"][0]["z_check"]["loads"])
+            self.assertTrue(r1["attempts"][0]["z_check"]["parse"])
+            self.assertTrue(r1["attempts"][0]["z_check"]["scope_ok"])
+            self.assertTrue(r1["attempts"][1]["z_check"]["loads"])
+            self.assertTrue(r1["attempts"][1]["z_check"]["scope_ok"])
+            r1_state = (root / "cells" / "code_001" / "Z" / "round_1" / "state_solution.py").read_text(encoding="utf-8")
+            self.assertIn("# whole-commit-marker", r1_state)
+            self.assertEqual(r1["accepted_in_scope_but_wrong"], [r1_fn])
+
+            # r2: 2 attempts, both failed scope_ok, baseline preserved
+            self.assertEqual(r2["attempts_count"], 2)
+            self.assertFalse(r2["gate_passed"])
+            self.assertFalse(r2["attempts"][0]["z_check"]["scope_ok"])
+            self.assertFalse(r2["attempts"][1]["z_check"]["scope_ok"])
+            r2_state = (root / "cells" / "code_001" / "Z" / "round_2" / "state_solution.py").read_text(encoding="utf-8")
+            self.assertEqual(r2_state, r1_state)
+            self.assertEqual(r2["regression_count"], 0)
+            self.assertEqual(r2["accepted_in_scope_but_wrong"], [])
+
+            summ = analyze_root(root)
+            self.assertEqual(summ["arms"]["Z"]["regression_event_count"], 0)
+            self.assertEqual(summ["arms"]["Z"]["regression_chain_count"], 0)
+            self.assertEqual(summ["arms"]["Z"]["scope_diagnostics"]["accepted_in_scope_but_wrong"], 2)
+
+    def test_analyze_e1_regression_events_and_z_ordering(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            root = pathlib.Path(td)
+            rows = [
+                # B0 chain 1: round 1 regresses 3 units (= 1 event), round 2 regresses 2 units (= 1 event)
+                {"chain_id": "c1", "arm": "B0", "round": 1, "eval": {"all_pass": False}, "regression_count": 3, "still_required_prev_passing_count": 8, "new_req_total": 1, "new_req_passed": 0, "attempts_count": 1, "wall_s": 1.0},
+                {"chain_id": "c1", "arm": "B0", "round": 2, "eval": {"all_pass": False}, "regression_count": 2, "still_required_prev_passing_count": 5, "new_req_total": 1, "new_req_passed": 1, "attempts_count": 1, "wall_s": 1.0},
+                # B0 chain 2: 0 regressions
+                {"chain_id": "c2", "arm": "B0", "round": 1, "eval": {"all_pass": True}, "regression_count": 0, "still_required_prev_passing_count": 8, "new_req_total": 1, "new_req_passed": 1, "attempts_count": 1, "wall_s": 1.0},
+                {"chain_id": "c2", "arm": "B0", "round": 2, "eval": {"all_pass": True}, "regression_count": 0, "still_required_prev_passing_count": 9, "new_req_total": 1, "new_req_passed": 1, "attempts_count": 1, "wall_s": 1.0},
+                # P and Z arms (out of order in jsonl to check arms_order puts Z after P)
+                {"chain_id": "c1", "arm": "Z", "round": 1, "eval": {"all_pass": True}, "regression_count": 0, "still_required_prev_passing_count": 8, "new_req_total": 1, "new_req_passed": 1, "attempts_count": 2, "wall_s": 1.0, "rejected_but_correct": [], "rejected_candidate_correct": ["f1"], "accepted_in_scope_but_wrong": []},
+                {"chain_id": "c1", "arm": "P", "round": 1, "eval": {"all_pass": False}, "regression_count": 1, "still_required_prev_passing_count": 8, "new_req_total": 1, "new_req_passed": 0, "attempts_count": 1, "wall_s": 1.0},
+            ]
+            (root / "results.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+            summ = analyze_root(root)
+            self.assertEqual(list(summ["arms"].keys()), ["B0", "P", "Z"])
+            b0 = summ["arms"]["B0"]
+            self.assertEqual(b0["regression_chain_count"], 1)
+            self.assertEqual(b0["regression_event_count"], 2)
+            self.assertEqual(b0["regression_event_rounds_total"], 4)
+            self.assertEqual(b0["regression_obligation_count"], 5)
+            self.assertEqual(summ["arms"]["P"]["regression_event_count"], 1)
+            self.assertEqual(summ["arms"]["P"]["regression_chain_count"], 1)
+            self.assertEqual(summ["arms"]["Z"]["regression_event_count"], 0)
+            self.assertEqual(summ["arms"]["Z"]["scope_diagnostics"]["rejected_candidate_correct_all"], 1)
+            rep = format_report(summ)
+            self.assertIn("Reg. Events", rep)
+            self.assertIn("Scope Diagnostics (S / S+B2 / O / Z)", rep)
+
+
 class TestEndToEndSelftest(unittest.TestCase):
     def test_selftest_b0_regresses_and_s_protects(self) -> None:
         res = run_selftest()
         self.assertTrue(res["passed"])
         self.assertTrue(res["resume_lines_unchanged"])
         self.assertEqual(res["code"]["arms"]["B0"]["primary_final_all_pass_rate"], 0.0)
+        self.assertGreater(res["code"]["arms"]["B0"]["regression_event_count"], 0)
+        self.assertEqual(res["code"]["arms"]["Z"]["regression_event_count"], 0)
+        self.assertEqual(res["code"]["arms"]["Z"]["regression_chain_count"], 0)
+        self.assertEqual(res["code"]["arms"]["Z"]["attempts_per_chain_mean"], 10.0)
         self.assertEqual(res["code"]["arms"]["S"]["primary_final_all_pass_rate"], 1.0)
         self.assertEqual(res["code"]["arms"]["S+B2"]["primary_final_all_pass_rate"], 1.0)
         self.assertEqual(res["code"]["arms"]["O"]["primary_final_all_pass_rate"], 1.0)
