@@ -1,0 +1,199 @@
+{
+  "arms": {
+    "B0": {
+      "attempts_per_chain_mean": 5.0,
+      "attempts_total": 30,
+      "cost_usd_per_chain_mean": 0.011593,
+      "cost_usd_total": 0.06956,
+      "infra_void_chains": [],
+      "n_chains": 6,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.8333,
+      "new_req_completion_rate": 0.8333,
+      "new_req_passed": 20,
+      "new_req_total": 24,
+      "per_round_success": {
+        "1": {
+          "passed": 5,
+          "rate": 0.8333,
+          "total": 6
+        },
+        "2": {
+          "passed": 3,
+          "rate": 0.5,
+          "total": 6
+        },
+        "3": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        },
+        "4": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        },
+        "5": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        }
+      },
+      "primary_final_all_pass_count": 2,
+      "primary_final_all_pass_rate": 0.3333,
+      "regression_chain_count": 0,
+      "regression_chain_rate": 0.0,
+      "regression_obligation_count": 0,
+      "regression_obligation_denom": 306,
+      "regression_obligation_rate": 0.0,
+      "rejected_units_per_chain_mean": 0.0,
+      "rejected_units_total": 0,
+      "tokens_in_per_chain_mean": 44.6667,
+      "tokens_out_per_chain_mean": 10689.5,
+      "tokens_total_per_chain_mean": 10734.1667,
+      "tokens_total_per_chain_median": 10480.0,
+      "wall_s_per_chain_mean": 60.309,
+      "wall_s_per_chain_median": 58.4395,
+      "wall_s_total": 361.854
+    },
+    "B2": {
+      "attempts_per_chain_mean": 5.0,
+      "attempts_total": 30,
+      "cost_usd_per_chain_mean": 0.011162,
+      "cost_usd_total": 0.066972,
+      "infra_void_chains": [],
+      "n_chains": 6,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.8333,
+      "new_req_completion_rate": 0.8333,
+      "new_req_passed": 20,
+      "new_req_total": 24,
+      "per_round_success": {
+        "1": {
+          "passed": 5,
+          "rate": 0.8333,
+          "total": 6
+        },
+        "2": {
+          "passed": 3,
+          "rate": 0.5,
+          "total": 6
+        },
+        "3": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        },
+        "4": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        },
+        "5": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        }
+      },
+      "primary_final_all_pass_count": 2,
+      "primary_final_all_pass_rate": 0.3333,
+      "regression_chain_count": 0,
+      "regression_chain_rate": 0.0,
+      "regression_obligation_count": 0,
+      "regression_obligation_denom": 306,
+      "regression_obligation_rate": 0.0,
+      "rejected_units_per_chain_mean": 0.0,
+      "rejected_units_total": 0,
+      "tokens_in_per_chain_mean": 42.0,
+      "tokens_out_per_chain_mean": 11093.6667,
+      "tokens_total_per_chain_mean": 11135.6667,
+      "tokens_total_per_chain_median": 11446.5,
+      "wall_s_per_chain_mean": 60.1948,
+      "wall_s_per_chain_median": 60.902,
+      "wall_s_total": 361.169
+    },
+    "S": {
+      "attempts_per_chain_mean": 5.0,
+      "attempts_total": 30,
+      "cost_usd_per_chain_mean": 0.011303,
+      "cost_usd_total": 0.067821,
+      "infra_void_chains": [],
+      "n_chains": 6,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.8333,
+      "new_req_completion_rate": 0.8333,
+      "new_req_passed": 20,
+      "new_req_total": 24,
+      "per_round_success": {
+        "1": {
+          "passed": 5,
+          "rate": 0.8333,
+          "total": 6
+        },
+        "2": {
+          "passed": 3,
+          "rate": 0.5,
+          "total": 6
+        },
+        "3": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        },
+        "4": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        },
+        "5": {
+          "passed": 2,
+          "rate": 0.3333,
+          "total": 6
+        }
+      },
+      "primary_final_all_pass_count": 2,
+      "primary_final_all_pass_rate": 0.3333,
+      "regression_chain_count": 0,
+      "regression_chain_rate": 0.0,
+      "regression_obligation_count": 0,
+      "regression_obligation_denom": 306,
+      "regression_obligation_rate": 0.0,
+      "rejected_units_per_chain_mean": 0.0,
+      "rejected_units_total": 0,
+      "scope_diagnostics": {
+        "accepted_in_scope_but_wrong": 4,
+        "rejected_but_correct_harmful": 0,
+        "rejected_candidate_correct_all": 0
+      },
+      "tokens_in_per_chain_mean": 43.6667,
+      "tokens_out_per_chain_mean": 11235.6667,
+      "tokens_total_per_chain_mean": 11279.3333,
+      "tokens_total_per_chain_median": 10993.5,
+      "wall_s_per_chain_mean": 60.9712,
+      "wall_s_per_chain_median": 61.111,
+      "wall_s_total": 365.827
+    }
+  },
+  "cluster_unit": "chain_id",
+  "paired_vs_B0": {
+    "B2": {
+      "arm_only_pass": 0,
+      "b0_only_pass": 0,
+      "both_fail": 4,
+      "both_pass": 2,
+      "mcnemar_exact_p": 1.0,
+      "n_paired_chains": 6
+    },
+    "S": {
+      "arm_only_pass": 0,
+      "b0_only_pass": 0,
+      "both_fail": 4,
+      "both_pass": 2,
+      "mcnemar_exact_p": 1.0,
+      "n_paired_chains": 6
+    }
+  },
+  "plan_id": "e1_code_haiku",
+  "root": "~/dev/ops/e1/run_code_haiku",
+  "schema": "vacant.e1.analysis/1"
+}
