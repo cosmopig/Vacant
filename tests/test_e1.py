@@ -342,12 +342,12 @@ class TestNegativeControlsAndSanitizer(unittest.TestCase):
                 {
                     "providers": {
                         "openrouter": {"baseUrl": "https://openrouter.ai/api/v1", "apiKey": "sk-or-secret"},
-                        "lms1003q9": {"baseUrl": "http://100.119.113.56:1234/v1", "apiKey": "lmstudio"},
+                        "lms1003q9": {"baseUrl": "http://198.51.100.7:1234/v1", "apiKey": "lmstudio"},
                     }
                 },
             )
             hosts = prepare_sanitized_pi_cfg(src, dst, allowed_providers=["lms1003q9"])
-            self.assertEqual(hosts, ["100.119.113.56"])
+            self.assertEqual(hosts, ["198.51.100.7"])
             self.assertFalse((dst / "extensions").exists())
             out_txt = (dst / "models.json").read_text(encoding="utf-8")
             self.assertNotIn("sk-or-secret", out_txt)
