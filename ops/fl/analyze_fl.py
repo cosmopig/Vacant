@@ -219,6 +219,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         "schema": ANALYSIS_SCHEMA,
         "root": str(root),
         "plan_id": run_meta.get("plan_id"),
+        "task_format": run_meta.get("task_format", "function"),
         "model": run_meta.get("model"),
         "exam_model": run_meta.get("exam_model"),
         "bank_sha256": run_meta.get("bank_sha256"),

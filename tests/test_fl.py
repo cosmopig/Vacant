@@ -27,10 +27,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from ops.e1.negative_controls import run_claude_negative_controls
-from ops.fl import DEFAULT_BANK_PATH, DEFAULT_INDEX_PATH, PLAN_SCHEMA, atomic_write_json
+from ops.fl import DEFAULT_BANK_PATH, DEFAULT_INDEX_PATH, PLAN_SCHEMA, atomic_write_json, sha256_file
 from ops.fl.analyze_fl import analyze_root, format_report
+from ops.fl.apps_fetch import parse_apps_examples
 from ops.fl.bank import (
     load_bank_tasks,
+    parse_stdio_case,
+    parse_stdio_cases,
     parse_test_case,
     parse_test_cases,
     parse_tests_spec_text,
@@ -41,12 +44,17 @@ from ops.fl.eval_fl import (
     ERR_TAG,
     cluster_mv_outputs,
     collect_outputs_in_sandbox,
+    collect_stdio_outputs_in_sandbox,
     evaluate_solution_on_cases,
+    evaluate_stdio_on_cases,
     normalize_solution_source,
+    normalize_stdio_output,
     run_input_generator_in_sandbox,
+    run_stdio_input_generator_in_sandbox,
     score_ct_solutions,
+    stdio_outputs_equal,
 )
-from ops.fl.run_fl import FLRunner, assert_fl_git_clean
+from ops.fl.run_fl import FLRunner, _STDIO_TASK_SUFFIX, assert_fl_git_clean, build_task_prompt
 
 
 class TestBankAndSplit(unittest.TestCase):
@@ -615,6 +623,356 @@ class TestEndToEndFakeClaude(unittest.TestCase):
             self.assertEqual(fr_rec["attempt_confusion"]["fn"], 3)
             fr_summ = analyze_root(root_fr)
             self.assertEqual(fr_summ["arms"]["XM"]["false_reject_rate"], 1.0)
+
+
+class TestStdioEvaluatorAndAppsBank(unittest.TestCase):
+    def test_stdio_normalization_and_float_tolerance(self) -> None:
+        self.assertEqual(normalize_stdio_output("1 2  \r\n3 4 \t\n\n  \n"), "1 2\n3 4")
+        self.assertEqual(normalize_stdio_output("a\n\nb\n\n"), "a\n\nb")
+        self.assertEqual(normalize_stdio_output("   \n\n"), "")
+
+        # Normalisation & exact matches
+        self.assertTrue(stdio_outputs_equal("1 2  \n3 4 \n\n", "1 2\n3 4"))
+        self.assertFalse(stdio_outputs_equal("a\n\nb", "a\nb"))
+        self.assertFalse(stdio_outputs_equal("YES", "NO"))
+
+        # Float tolerance 1e-6
+        self.assertTrue(stdio_outputs_equal("3.1415926\n", "3.1415920\n"))
+        self.assertFalse(stdio_outputs_equal("3.141594\n", "3.141592\n"))
+        self.assertTrue(stdio_outputs_equal("1.000000", "1"))
+        self.assertTrue(stdio_outputs_equal("1e-7", "0.0"))
+        self.assertTrue(stdio_outputs_equal("ok 2.0000004\nans -0.0", "ok 2.0\nans 0"))
+
+        # Huge integers differing by 1 MUST NOT falsely match due to float precision loss
+        self.assertFalse(
+            stdio_outputs_equal("10000000000000000000000001", "10000000000000000000000002")
+        )
+        # Non-finite tokens
+        self.assertFalse(stdio_outputs_equal("nan", "0"))
+        self.assertFalse(stdio_outputs_equal("inf", "1e308"))
+
+    def test_stdio_sandbox_evaluator_pass_float_fail_exception_timeout(self) -> None:
+        # 1. Passing program with trailing spaces and float tolerance
+        sol_ok = (
+            "import sys\n"
+            "a, b = map(float, sys.stdin.read().split())\n"
+            "print(f'{a / b:.7f}   ')\n"
+            "print()\n"
+        )
+        cases = [
+            {"input": "1 3\n", "output": "0.3333333"},
+            {"input": "10 4\n", "output": "2.5"},
+        ]
+        ev = evaluate_stdio_on_cases(sol_ok, cases, per_case_timeout_s=2.0, total_timeout_s=15.0)
+        self.assertTrue(ev["passed"], ev)
+        self.assertEqual(ev["n_passed"], 2)
+        self.assertEqual(ev["n_total"], 2)
+
+        # 2. Timeout fails cleanly
+        sol_tmo = "import time\ntime.sleep(5)\nprint('42')\n"
+        ev_tmo = evaluate_stdio_on_cases(
+            sol_tmo,
+            [{"input": "1\n", "output": "42"}],
+            per_case_timeout_s=0.4,
+            total_timeout_s=5.0,
+        )
+        self.assertFalse(ev_tmo["passed"])
+        self.assertEqual(ev_tmo["n_passed"], 0)
+        self.assertIn("timeout", ev_tmo["error"] or "")
+
+        # 3. Runtime exception fails cleanly
+        sol_exc = "raise ValueError('boom')\n"
+        ev_exc = evaluate_stdio_on_cases(
+            sol_exc,
+            [{"input": "1\n", "output": "1"}],
+            per_case_timeout_s=2.0,
+            total_timeout_s=10.0,
+        )
+        self.assertFalse(ev_exc["passed"])
+        self.assertEqual(ev_exc["n_passed"], 0)
+        self.assertIn("rc=", ev_exc["error"] or "")
+
+        # 4. Empty solution fails
+        ev_empty = evaluate_stdio_on_cases("", [{"input": "", "output": ""}], per_case_timeout_s=2.0)
+        self.assertFalse(ev_empty["passed"])
+
+    def test_stdio_mv_clustering_err_and_input_gen(self) -> None:
+        gen_src = "def gen_inputs():\n    return [f'{i}\\n' for i in range(5)]\n"
+        gres = run_stdio_input_generator_in_sandbox(gen_src, max_inputs=3)
+        self.assertTrue(gres["ok"])
+        self.assertEqual(gres["inputs"], ["0\n", "1\n", "2\n"])
+
+        # Exception and timeout both map to ERR_TAG; literal printed "ERR" must NOT collide
+        sol_exc = "x = int(input())\nif x == 0: raise RuntimeError()\nprint(x)\n"
+        sol_tmo = "import time\nx = int(input())\nif x == 0: time.sleep(5)\nprint(x)\n"
+        sol_str = "x = int(input())\nprint('ERR' if x == 0 else x)\n"
+        inputs = ["1\n", "0\n"]
+        o_exc = collect_stdio_outputs_in_sandbox(sol_exc, inputs, per_case_timeout_s=0.4, total_timeout_s=5.0)
+        o_tmo = collect_stdio_outputs_in_sandbox(sol_tmo, inputs, per_case_timeout_s=0.4, total_timeout_s=5.0)
+        o_str = collect_stdio_outputs_in_sandbox(sol_str, inputs, per_case_timeout_s=0.4, total_timeout_s=5.0)
+        self.assertEqual(o_exc["tags"][1], ERR_TAG)
+        self.assertEqual(o_tmo["tags"][1], ERR_TAG)
+        self.assertNotEqual(o_str["tags"][1], ERR_TAG)
+        mv = cluster_mv_outputs([o_str["tags"], o_exc["tags"], o_tmo["tags"]])
+        self.assertFalse(mv["undetermined"])
+        self.assertEqual(mv["winning_cluster"], [1, 2])
+        self.assertEqual(mv["delivered_idx"], 1)
+
+    def test_apps_example_parser_on_five_real_statements_and_failures(self) -> None:
+        # 5 real APPS test split statements covering the real statement formats
+        real_statements: list[tuple[str, str, list[dict[str, str]]]] = [
+            # 1. apps_0: -----Examples----- with multiple Input / Output blocks
+            (
+                "apps_0",
+                "An accordion is a string...\n\n-----Input-----\nThe only line contains one string $s$.\n\n"
+                "-----Output-----\nPrint maximum length.\n\n"
+                "-----Examples-----\nInput\n|[a:b:|]\n\nOutput\n4\n\nInput\n|]:[|:]\n\nOutput\n-1",
+                [
+                    {"input": "|[a:b:|]\n", "output": "4"},
+                    {"input": "|]:[|:]\n", "output": "-1"},
+                ],
+            ),
+            # 2. apps_6: -----Example----- (singular) with multiline I/O + -----Note-----
+            (
+                "apps_6",
+                "Zmei Gorynich...\n\n-----Example-----\nInput\n3\n3 10\n6 3\n8 2\n1 4\n\n"
+                "Output\n2\n3\n-1\n\n\n\n-----Note-----\n\nIn the first query you can deal the first blow.",
+                [
+                    {"input": "3\n3 10\n6 3\n8 2\n1 4\n", "output": "2\n3\n-1"},
+                ],
+            ),
+            # 3. apps_117: AtCoder -----Sample Input----- / -----Sample Output----- + trailing prose
+            (
+                "apps_117",
+                "A cow on a plane...\n\n-----Sample Input-----\n5 6\n1 2 0\n0 1 1\n\n"
+                "-----Sample Output-----\n13\n\n"
+                "The area of the region the cow can reach is 13\\ \\mathrm{cm^2}.",
+                [
+                    {"input": "5 6\n1 2 0\n0 1 1\n", "output": "13"},
+                ],
+            ),
+            # 4. apps_2709: -----Examples----- with Sample Input N: / Sample Output N:
+            (
+                "apps_2709",
+                "Solve 6 subtasks...\n\n-----Examples-----\n"
+                "Sample Input 1:\n7 1\n1 2 3 4 5 6 7\nSample Output 1:\n7\n\n"
+                "Sample Input 2:\n7 2\n1 2 3 4 5 6 7\nSample Output 2:\nSmaller\n\n"
+                "Sample Input 3:\n10 6\n7 4 11\nSample Output 3:\nhelloworld",
+                [
+                    {"input": "7 1\n1 2 3 4 5 6 7\n", "output": "7"},
+                    {"input": "7 2\n1 2 3 4 5 6 7\n", "output": "Smaller"},
+                    {"input": "10 6\n7 4 11\n", "output": "helloworld"},
+                ],
+            ),
+            # 5. apps_134: -----Examples----- with -----Note-----[Image]
+            (
+                "apps_134",
+                "Pythagorean triple...\n\n-----Examples-----\nInput\n3\n\nOutput\n4 5\n"
+                "Input\n6\n\nOutput\n8 10\nInput\n1\n\nOutput\n-1\n\n\n"
+                "-----Note-----[Image]\n\nIllustration for the first sample.",
+                [
+                    {"input": "3\n", "output": "4 5"},
+                    {"input": "6\n", "output": "8 10"},
+                    {"input": "1\n", "output": "-1"},
+                ],
+            ),
+        ]
+        for tid, stmt, expected in real_statements:
+            got, err = parse_apps_examples(stmt)
+            self.assertIsNone(err, f"{tid} parse failed: {err}")
+            self.assertEqual(got, expected, f"{tid} mismatch")
+
+        # Parse failure cases
+        for bad_stmt in (
+            "",
+            "-----Примеры-----\nВходные данные\n1\nВыходные данные\n2\n",
+            "-----Examples-----\nInput\n1 2\n",
+            "No example section here at all.",
+        ):
+            got, err = parse_apps_examples(bad_stmt)
+            self.assertEqual(got, [])
+            self.assertIsNotNone(err)
+
+    def test_plan_bank_sha256_verification_and_stdio_spec_parser(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            bank_p = pathlib.Path(td) / "apps_mini.jsonl"
+            row = {
+                "task_id": "apps_test_1",
+                "difficulty": "competition",
+                "prompt": "Read an integer x and print 2*x + 1. Note: no penalty for small x.",
+                "examples": [{"input": "1\n", "output": "3"}, {"input": "2\n", "output": "5"}],
+                "hidden_tests": [{"input": f"{x}\n", "output": f"{2 * x + 1}"} for x in range(3, 11)],
+            }
+            bank_p.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            good_sha = sha256_file(bank_p)
+
+            # Matching plan sha passes
+            self.assertEqual(verify_bank_sha256(bank_p, index_path=None, expected_sha256=good_sha), good_sha)
+            loaded = load_bank_tasks(
+                bank_p,
+                index_path=None,
+                expected_sha256=good_sha,
+                task_format="stdio",
+                seed=123,
+            )
+            self.assertEqual(loaded["bank_sha256"], good_sha)
+            self.assertEqual(loaded["task_format"], "stdio")
+            self.assertEqual(len(loaded["tasks"]), 1)
+            t = loaded["tasks"][0]
+            self.assertEqual(t["entry_point"], None)
+            self.assertEqual(len(t["visible_tests"]), 2)
+            self.assertEqual(len(t["gate_hidden"]), 4)
+            self.assertEqual(len(t["eval_hidden"]), 4)
+
+            # Prompt suffix exactness and KS-1 checks harness template only (statement may say "penalty")
+            prompt_txt = build_task_prompt(t)
+            self.assertTrue(prompt_txt.endswith(_STDIO_TASK_SUFFIX))
+
+            # Mismatched or malformed plan sha raises ValueError
+            bad_sha = ("0" if good_sha[0] != "0" else "1") + good_sha[1:]
+            with self.assertRaises(ValueError):
+                verify_bank_sha256(bank_p, index_path=None, expected_sha256=bad_sha)
+            with self.assertRaises(ValueError):
+                verify_bank_sha256(bank_p, index_path=None, expected_sha256="not-a-sha")
+
+        # Stdio tests_spec.py literal parsing
+        spec_ok = 'TESTS = [{"input": "1\\n", "output": "3"}, {"input": "2\\n", "output": "5"}]\n'
+        cases, err = parse_tests_spec_text(spec_ok, task_format="stdio")
+        self.assertIsNone(err)
+        self.assertEqual(cases, [{"input": "1\n", "output": "3"}, {"input": "2\n", "output": "5"}])
+        self.assertEqual(parse_stdio_case({"input": "a", "output": "b"}), {"input": "a", "output": "b"})
+        self.assertEqual(len(parse_stdio_cases([{"input": "a", "output": "b"}])), 1)
+
+        for bad in (
+            '[{"args": [1], "expected": 3}]',
+            '[{"input": 1, "output": "3"}]',
+            'import os\nTESTS = [{"input": "1", "output": "3"}]',
+        ):
+            c_bad, e_bad = parse_tests_spec_text(bad, task_format="stdio")
+            self.assertEqual(c_bad, [])
+            self.assertIsNotNone(e_bad)
+
+    def test_stdio_all_eight_arms_end_to_end_with_fake_claude(self) -> None:
+        fake_stdio_claude = r"""#!/usr/bin/env python3
+import json, os, pathlib, sys
+
+role = os.environ.get("FL_ROLE", "")
+arm = os.environ.get("FL_ARM", "")
+att = int(os.environ.get("FL_ATTEMPT", "1"))
+prompt = sys.argv[-1]
+
+CORRECT = "x = int(input().strip())\nprint(x * 2 + 1)\n"
+ONLY_EX = "x = int(input().strip())\nprint(3 if x == 1 else (5 if x == 2 else -1))\n"
+WRONG = "x = int(input().strip())\nprint(-999)\n"
+
+if role == "tf_test_writer":
+    pathlib.Path("/work/tests_spec.py").write_text(
+        '[\n'
+        '  {"input": "1\\n", "output": "3"},\n'
+        '  {"input": "10\\n", "output": "21"},\n'
+        ']\n',
+        encoding="utf-8",
+    )
+elif role in ("xm_exam_writer", "ct_exam_writer"):
+    pathlib.Path("/work/tests_spec.py").write_text(
+        'TESTS = [\n'
+        '  {"input": "1\\n", "output": "3"},\n'
+        '  {"input": "7\\n", "output": "15"},\n'
+        ']\n',
+        encoding="utf-8",
+    )
+elif role == "mv_input_gen":
+    pathlib.Path("/work/gen_inputs.py").write_text(
+        "def gen_inputs():\n    return [f'{i}\\n' for i in range(3, 13)]\n",
+        encoding="utf-8",
+    )
+elif role == "coder":
+    assert "Write a Python 3 program in /work/solution.py that reads from standard input and writes to standard output." in prompt
+    sol_p = pathlib.Path("/work/solution.py")
+    if arm == "B0":
+        sol_p.write_text(WRONG, encoding="utf-8")
+    elif arm == "B0x3":
+        sol_p.write_text(WRONG, encoding="utf-8")
+    elif arm == "GT":
+        sol_p.write_text(WRONG if att == 1 else CORRECT, encoding="utf-8")
+    elif arm == "EX":
+        sol_p.write_text(ONLY_EX, encoding="utf-8")
+    elif arm == "TF":
+        assert pathlib.Path("/work/tests_spec.py").is_file()
+        sol_p.write_text(ONLY_EX if att == 1 else CORRECT, encoding="utf-8")
+    elif arm == "XM":
+        assert not pathlib.Path("/work/tests_spec.py").exists()
+        sol_p.write_text(WRONG if att < 3 else CORRECT, encoding="utf-8")
+    elif arm == "MV":
+        sol_p.write_text(WRONG if att == 1 else CORRECT, encoding="utf-8")
+    else:
+        sol_p.write_text(CORRECT, encoding="utf-8")
+
+print(json.dumps({"type": "system", "subtype": "init", "cwd": "/work"}))
+print(json.dumps({
+    "type": "assistant",
+    "message": {"id": f"m_{role}_{arm}_{att}", "model": "claude-haiku-5-5", "usage": {"input_tokens": 50, "output_tokens": 15}},
+}))
+print(json.dumps({
+    "type": "result", "subtype": "success", "is_error": False, "num_turns": 1,
+    "total_cost_usd": 0.0005, "usage": {"input_tokens": 50, "output_tokens": 15},
+}))
+"""
+        with tempfile.TemporaryDirectory() as td:
+            tp = pathlib.Path(td)
+            bank_p = tp / "stdio_bank.jsonl"
+            row = {
+                "task_id": "apps_synth_1",
+                "difficulty": "competition",
+                "prompt": "Read integer x and output 2*x + 1.",
+                "examples": [{"input": "1\n", "output": "3"}, {"input": "2\n", "output": "5"}],
+                "hidden_tests": [{"input": f"{x}\n", "output": f"{2 * x + 1}"} for x in range(3, 11)],
+            }
+            bank_p.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            bank_sha = sha256_file(bank_p)
+
+            fc = tp / "fake_claude_stdio"
+            fc.write_text(fake_stdio_claude, encoding="utf-8")
+            fc.chmod(stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+            creds = tp / ".credentials.json"
+            creds.write_text('{"claudeAiOauth":{"accessToken":"fake"}}\n', encoding="utf-8")
+
+            plan_p = tp / "plan_stdio.json"
+            atomic_write_json(
+                plan_p,
+                {
+                    "schema": PLAN_SCHEMA,
+                    "id": "fl_stdio_fake_e2e",
+                    "task_format": "stdio",
+                    "bank_path": str(bank_p),
+                    "bank_sha256": bank_sha,
+                    "seed": 42,
+                    "arms": ["B0", "B0x3", "GT", "EX", "TF", "XM", "MV", "CT"],
+                    "model": {
+                        "agent": "claude",
+                        "model": "claude-haiku-5-5",
+                        "exam_model": "claude-haiku-5-5",
+                        "claude_bin": str(fc),
+                        "credentials_path": str(creds),
+                    },
+                    "jobs": 1,
+                    "attempt_timeout_s": 30,
+                    "per_case_timeout_s": 2.0,
+                },
+            )
+            root = tp / "run_stdio"
+            FLRunner(plan_p, root, allow_uncommitted=True, verify_bank_sha=True).run()
+
+            summ = analyze_root(root)
+            self.assertEqual(summ["task_format"], "stdio")
+            arms = summ["arms"]
+            self.assertEqual(arms["B0"]["success_rate"], 0.0)
+            self.assertEqual(arms["B0x3"]["success_rate"], 0.0)
+            self.assertEqual(arms["EX"]["success_rate"], 0.0)
+            self.assertEqual(arms["EX"]["false_accept_rate"], 1.0)
+            for arm in ("GT", "TF", "XM", "MV", "CT"):
+                self.assertEqual(arms[arm]["success_rate"], 1.0, f"stdio arm {arm} failed")
+            self.assertEqual(arms["CT"]["incremental_cost_usd_total"], 0.0)
 
 
 if __name__ == "__main__":

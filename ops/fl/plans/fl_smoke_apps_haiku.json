@@ -1,0 +1,35 @@
+{
+  "schema": "vacant.fl.plan/1",
+  "id": "fl_smoke_apps_haiku",
+  "task_format": "stdio",
+  "bank_path": "~/dev/ops/ref/apps/apps_fl_bank.jsonl",
+  "bank_sha256": "c9059eeb753617a79df52ffd132e083e6778d72c00d97ca6c7893dcc74adc46d",
+  "seed": 20261126,
+  "task_ids": [
+    "apps_3890",
+    "apps_3891"
+  ],
+  "arms": [
+    "B0",
+    "B0x3",
+    "GT",
+    "EX",
+    "TF",
+    "XM",
+    "MV",
+    "CT"
+  ],
+  "model": {
+    "agent": "claude",
+    "model": "claude-haiku-5-5",
+    "exam_model": "claude-haiku-5-5"
+  },
+  "jobs": 2,
+  "attempt_timeout_s": 300,
+  "eval_timeout_s": 60,
+  "per_case_timeout_s": 3.0,
+  "eval_mem_mb": 1024,
+  "max_attempts": 3,
+  "mv_num_inputs": 20,
+  "purpose": "Real Claude Haiku stdio smoke (pipeline + cost check only, NOT statistical evidence): 2 APPS competition tasks x all 8 arms."
+}

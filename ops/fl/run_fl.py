@@ -57,14 +57,18 @@ from ops.fl import (
     sha256_bytes,
     utc_now_iso,
 )
-from ops.fl.bank import load_bank_tasks, parse_tests_spec_text
+from ops.fl.bank import TASK_FORMATS, load_bank_tasks, parse_tests_spec_text
 from ops.fl.eval_fl import (
     cluster_mv_outputs,
     collect_outputs_in_sandbox,
+    collect_stdio_outputs_in_sandbox,
     deduplicate_encoded_inputs,
+    deduplicate_stdio_inputs,
     encode_val_host,
     evaluate_solution_on_cases,
+    evaluate_stdio_on_cases,
     run_input_generator_in_sandbox,
+    run_stdio_input_generator_in_sandbox,
     score_ct_solutions,
 )
 
@@ -72,6 +76,9 @@ _LOCK = threading.Lock()
 
 # Harness-authored prompt suffixes (validated against KS-1)
 _TASK_SUFFIX_FMT = "Write the function `{entry_point}` in /work/solution.py."
+_STDIO_TASK_SUFFIX = (
+    "Write a Python 3 program in /work/solution.py that reads from standard input and writes to standard output."
+)
 _B0X3_RETRY_SUFFIX = "Review your solution.py and improve it if needed."
 _TF_RO_SPEC_NOTE = (
     "A read-only test specification file `/work/tests_spec.py` is present in your workspace; "
@@ -88,6 +95,17 @@ _TEST_WRITER_SUFFIX_FMT = (
     "]\n"
     "Use ONLY Python literals (no imports, no function definitions, no function calls, no executable code)."
 )
+_STDIO_TEST_WRITER_SUFFIX = (
+    "Do NOT write a solution or /work/solution.py. "
+    "Write ONLY `/work/tests_spec.py` containing a single Python literal list of 5 to 15 test cases "
+    "(covering statement examples, typical inputs, and edge cases). "
+    "Format: a Python list of dicts, each with keys `'input'` (string passed to standard input) "
+    "and `'output'` (exact expected standard output string), for example:\n"
+    "[\n"
+    "    {\"input\": \"...\\n\", \"output\": \"...\"},\n"
+    "]\n"
+    "Use ONLY Python literals (no imports, no function definitions, no function calls, no executable code)."
+)
 _INPUT_GEN_SUFFIX_FMT = (
     "Do NOT write a solution and do NOT compute expected outputs. "
     "Write ONLY `/work/gen_inputs.py` defining a function `gen_inputs()` that returns a list of {n_inputs} "
@@ -97,23 +115,37 @@ _INPUT_GEN_SUFFIX_FMT = (
     "`{entry_point}(*args)` (even for a 1-argument function, wrap each argument in a 1-element list/tuple). "
     "Use only the Python standard library and deterministic generation (fixed random seed if using random)."
 )
+_STDIO_INPUT_GEN_SUFFIX_FMT = (
+    "Do NOT write a solution and do NOT compute expected outputs. "
+    "Write ONLY `/work/gen_inputs.py` defining a function `gen_inputs()` that returns a list of {n_inputs} "
+    "diverse, valid standard-input strings (covering small, edge, and typical inputs "
+    "within the problem constraints; keep each input small enough to run quickly). "
+    "Each element of the returned list MUST be a Python `str` containing the complete stdin for one test case. "
+    "Use only the Python standard library and deterministic generation (fixed random seed if using random)."
+)
 
-# Verify harness-authored templates are KS-1 clean at import time
+# Verify harness-authored templates are KS-1 clean at import time (never check bank statement text)
 for _tmpl in (
     _TASK_SUFFIX_FMT.format(entry_point="fn"),
+    _STDIO_TASK_SUFFIX,
     _B0X3_RETRY_SUFFIX,
     _TF_RO_SPEC_NOTE,
     _TEST_WRITER_SUFFIX_FMT.format(entry_point="fn"),
+    _STDIO_TEST_WRITER_SUFFIX,
     _INPUT_GEN_SUFFIX_FMT.format(entry_point="fn", n_inputs=20),
+    _STDIO_INPUT_GEN_SUFFIX_FMT.format(n_inputs=20),
 ):
     assert_ks1_clean(_tmpl)
 
 
 def build_task_prompt(task: dict[str, Any]) -> str:
     """Identical base task text across all arms."""
-    # KS-1 只管 harness 自己寫的範本（import 時已用佔位名檢查過）；函式名來自題庫原文
-    # （例如 LeetCode 的 punishmentNumber），不是 harness 措辭，不在這裡檢查。
-    suffix = _TASK_SUFFIX_FMT.format(entry_point=task["entry_point"])
+    # KS-1 checks only harness-authored templates (validated at import time above),
+    # never bank problem statements or bank function names.
+    if task.get("task_format") == "stdio":
+        suffix = _STDIO_TASK_SUFFIX
+    else:
+        suffix = _TASK_SUFFIX_FMT.format(entry_point=task["entry_point"])
     return f"{task['prompt'].rstrip()}\n\n{suffix}"
 
 
@@ -128,14 +160,18 @@ def build_tf_coder_prompt(task: dict[str, Any]) -> str:
 
 
 def build_test_writer_prompt(task: dict[str, Any]) -> str:
-    suffix = _TEST_WRITER_SUFFIX_FMT.format(entry_point=task["entry_point"])
-    assert_ks1_clean(suffix)
+    if task.get("task_format") == "stdio":
+        suffix = _STDIO_TEST_WRITER_SUFFIX
+    else:
+        suffix = _TEST_WRITER_SUFFIX_FMT.format(entry_point=task["entry_point"])
     return f"{task['prompt'].rstrip()}\n\n{suffix}"
 
 
 def build_input_gen_prompt(task: dict[str, Any], *, n_inputs: int = 20) -> str:
-    suffix = _INPUT_GEN_SUFFIX_FMT.format(entry_point=task["entry_point"], n_inputs=n_inputs)
-    assert_ks1_clean(suffix)
+    if task.get("task_format") == "stdio":
+        suffix = _STDIO_INPUT_GEN_SUFFIX_FMT.format(n_inputs=n_inputs)
+    else:
+        suffix = _INPUT_GEN_SUFFIX_FMT.format(entry_point=task["entry_point"], n_inputs=n_inputs)
     return f"{task['prompt'].rstrip()}\n\n{suffix}"
 
 
@@ -219,19 +255,36 @@ def load_fl_plan(plan_path: pathlib.Path) -> dict[str, Any]:
         raise SystemExit("Plan model.model is required (e.g. 'claude-haiku-5-5')")
     model_cfg["exam_model"] = str(model_cfg.get("exam_model") or model_cfg["model"])
 
+    task_format = str(raw.get("task_format") or "function").strip().lower()
+    if task_format not in TASK_FORMATS:
+        raise SystemExit(f"Unsupported task_format={task_format!r}; valid formats: {TASK_FORMATS}")
+
     bank_s = raw.get("bank_path")
     bank_p = pathlib.Path(os.path.expandvars(os.path.expanduser(str(bank_s)))) if bank_s else DEFAULT_BANK_PATH
     if not bank_p.is_absolute():
         bank_p = (REPO_ROOT / bank_p).resolve()
 
+    plan_bank_sha = raw.get("bank_sha256")
+    if plan_bank_sha is not None:
+        plan_bank_sha = str(plan_bank_sha).strip().lower()
+        if len(plan_bank_sha) != 64 or any(c not in "0123456789abcdef" for c in plan_bank_sha):
+            raise SystemExit(f"Invalid plan bank_sha256: {plan_bank_sha!r}")
+
     idx_s = raw.get("index_path")
-    idx_p = pathlib.Path(os.path.expandvars(os.path.expanduser(str(idx_s)))) if idx_s else DEFAULT_INDEX_PATH
-    if not idx_p.is_absolute():
-        idx_p = (REPO_ROOT / idx_p).resolve()
+    if idx_s:
+        idx_p: pathlib.Path | None = pathlib.Path(os.path.expandvars(os.path.expanduser(str(idx_s))))
+        if not idx_p.is_absolute():
+            idx_p = (REPO_ROOT / idx_p).resolve()
+    elif plan_bank_sha is not None:
+        idx_p = None
+    else:
+        idx_p = DEFAULT_INDEX_PATH
 
     raw["_model"] = model_cfg
+    raw["_task_format"] = task_format
     raw["_bank_path"] = str(bank_p)
-    raw["_index_path"] = str(idx_p)
+    raw["_bank_sha256"] = plan_bank_sha
+    raw["_index_path"] = str(idx_p) if idx_p is not None else None
     raw["_sha256"] = sha256_bytes(_canonical_json({k: v for k, v in raw.items() if not k.startswith("_")}))
     raw["_path"] = str(plan_path.resolve())
     return raw
@@ -324,17 +377,26 @@ class FLRunner:
             self.git_head = h or "unknown"
 
         self.seed = int(self.plan["seed"])
+        self.task_format: str = str(self.plan["_task_format"])
         self.bank_path = pathlib.Path(self.plan["_bank_path"])
-        self.index_path = pathlib.Path(self.plan["_index_path"])
+        self.plan_bank_sha256: str | None = self.plan.get("_bank_sha256")
+        self.index_path: pathlib.Path | None = (
+            pathlib.Path(self.plan["_index_path"]) if self.plan.get("_index_path") else None
+        )
 
         if self.calibrate_n is not None:
             if self.calibrate_n <= 0:
                 raise SystemExit(f"--calibrate N must be > 0, got {self.calibrate_n}")
+            cal_diffs = self.plan.get("difficulties") or (
+                ["interview", "competition"] if self.task_format == "stdio" else ["medium", "hard"]
+            )
             loaded = load_bank_tasks(
                 self.bank_path,
                 index_path=self.index_path,
+                expected_sha256=self.plan_bank_sha256,
+                task_format=self.task_format,
                 seed=self.seed,
-                difficulties=["medium", "hard"],
+                difficulties=cal_diffs,
                 n_tasks=self.calibrate_n,
                 verify_sha256=verify_bank_sha,
             )
@@ -343,6 +405,8 @@ class FLRunner:
             loaded = load_bank_tasks(
                 self.bank_path,
                 index_path=self.index_path,
+                expected_sha256=self.plan_bank_sha256,
+                task_format=self.task_format,
                 seed=self.seed,
                 task_ids=self.plan.get("task_ids"),
                 difficulties=self.plan.get("difficulties"),
@@ -364,6 +428,7 @@ class FLRunner:
         self.eval_timeout_s = float(self.plan.get("eval_timeout_s", 45))
         self.per_fn_timeout_s = float(self.plan.get("per_fn_timeout_s", 20))
         self.per_call_timeout_s = float(self.plan.get("per_call_timeout_s", 2.0))
+        self.per_case_timeout_s = float(self.plan.get("per_case_timeout_s", self.per_call_timeout_s))
         self.eval_mem_mb = int(self.plan.get("eval_mem_mb", 1024))
         self.max_attempts = int(self.plan.get("max_attempts", 3))
         self.mv_num_inputs = int(self.plan.get("mv_num_inputs", 20))
@@ -410,6 +475,8 @@ class FLRunner:
                     "plan_sha256": self.plan["_sha256"],
                     "bank_path": str(self.bank_path),
                     "bank_sha256": self.bank_sha256,
+                    "task_format": self.task_format,
+                    "per_case_timeout_s": self.per_case_timeout_s,
                     "seed": self.seed,
                     "git_head": self.git_head,
                     "agent": "claude",
@@ -532,12 +599,40 @@ class FLRunner:
             "infra_error": is_infra,
         }
 
-    def _eval_on_cases(self, sol_src: str, entry_point: str, cases: list[dict[str, Any]]) -> dict[str, Any]:
+    def _eval_on_cases(self, sol_src: str, entry_point: str | None, cases: list[dict[str, Any]]) -> dict[str, Any]:
+        if self.task_format == "stdio":
+            return evaluate_stdio_on_cases(
+                sol_src,
+                cases,
+                per_case_timeout_s=self.per_case_timeout_s,
+                total_timeout_s=self.eval_timeout_s,
+                mem_limit_mb=self.eval_mem_mb,
+            )
+        assert entry_point is not None
         return evaluate_solution_on_cases(
             sol_src,
             entry_point,
             cases,
             per_fn_timeout_s=self.per_fn_timeout_s,
+            total_timeout_s=self.eval_timeout_s,
+            mem_limit_mb=self.eval_mem_mb,
+        )
+
+    def _collect_outputs(self, sol_src: str, entry_point: str | None, mv_inputs: list[Any]) -> dict[str, Any]:
+        if self.task_format == "stdio":
+            return collect_stdio_outputs_in_sandbox(
+                sol_src,
+                mv_inputs,
+                per_case_timeout_s=self.per_case_timeout_s,
+                total_timeout_s=self.eval_timeout_s,
+                mem_limit_mb=self.eval_mem_mb,
+            )
+        assert entry_point is not None
+        return collect_outputs_in_sandbox(
+            sol_src,
+            entry_point,
+            mv_inputs,
+            per_call_timeout_s=self.per_call_timeout_s,
             total_timeout_s=self.eval_timeout_s,
             mem_limit_mb=self.eval_mem_mb,
         )
@@ -567,7 +662,7 @@ class FLRunner:
 
         frozen_path = cell_dir / "frozen_tests_spec.py"
         frozen_sha = atomic_write_text(frozen_path, spec_text)
-        cases, parse_err = parse_tests_spec_text(spec_text)
+        cases, parse_err = parse_tests_spec_text(spec_text, task_format=self.task_format)
         atomic_write_json(
             cell_dir / "frozen_tests_meta.json",
             {
@@ -612,26 +707,41 @@ class FLRunner:
 
         gen_copy = cell_dir / "gen_inputs.py"
         gen_sha = atomic_write_text(gen_copy, gen_text)
-        if gen_text.strip():
-            gen_run = run_input_generator_in_sandbox(
-                gen_text,
-                max_inputs=self.mv_num_inputs,
-                timeout_s=min(15.0, self.eval_timeout_s),
-                mem_limit_mb=self.eval_mem_mb,
-            )
+        if self.task_format == "stdio":
+            if gen_text.strip():
+                gen_run = run_stdio_input_generator_in_sandbox(
+                    gen_text,
+                    max_inputs=self.mv_num_inputs,
+                    timeout_s=min(15.0, self.eval_timeout_s),
+                    mem_limit_mb=self.eval_mem_mb,
+                )
+            else:
+                gen_run = {"ok": False, "inputs": [], "error": "missing_gen_inputs_py", "wall_s": 0.0}
+            # Combine generated stdin strings + statement examples' inputs ONLY (no expected outputs)
+            vis_inputs = [str(c["input"]) for c in task["visible_tests"]]
+            combined_inputs: list[Any] = deduplicate_stdio_inputs(list(gen_run.get("inputs") or []) + vis_inputs)
+            n_vis_inputs = len(vis_inputs)
         else:
-            gen_run = {"ok": False, "inputs": [], "error": "missing_gen_inputs_py", "wall_s": 0.0}
-
-        # Combine generated inputs + visible_tests' args ONLY (no expected outputs)
-        vis_encoded = [encode_val_host(c["args"]) for c in task["visible_tests"]]
-        combined_inputs = deduplicate_encoded_inputs(list(gen_run.get("inputs") or []) + vis_encoded)
+            if gen_text.strip():
+                gen_run = run_input_generator_in_sandbox(
+                    gen_text,
+                    max_inputs=self.mv_num_inputs,
+                    timeout_s=min(15.0, self.eval_timeout_s),
+                    mem_limit_mb=self.eval_mem_mb,
+                )
+            else:
+                gen_run = {"ok": False, "inputs": [], "error": "missing_gen_inputs_py", "wall_s": 0.0}
+            # Combine generated inputs + visible_tests' args ONLY (no expected outputs)
+            vis_encoded = [encode_val_host(c["args"]) for c in task["visible_tests"]]
+            combined_inputs = deduplicate_encoded_inputs(list(gen_run.get("inputs") or []) + vis_encoded)
+            n_vis_inputs = len(vis_encoded)
 
         meta = {
             "role": "mv_input_gen",
             "model": model_id,
             "gen_sha256": gen_sha,
             "n_generated_inputs": len(gen_run.get("inputs") or []),
-            "n_visible_arg_inputs": len(vis_encoded),
+            "n_visible_arg_inputs": n_vis_inputs,
             "n_total_inputs": len(combined_inputs),
             "gen_error": gen_run.get("error"),
             "inputs": combined_inputs,
@@ -831,14 +941,7 @@ class FLRunner:
                 att_e, cand_src, _ = self._run_single_coding_attempt(
                     task=task, arm=arm, att=att, att_dir=cell_dir / f"attempt_{att}", prompt=base_prompt
                 )
-                out_res = collect_outputs_in_sandbox(
-                    cand_src,
-                    ep,
-                    mv_inputs,
-                    per_call_timeout_s=self.per_call_timeout_s,
-                    total_timeout_s=self.eval_timeout_s,
-                    mem_limit_mb=self.eval_mem_mb,
-                )
+                out_res = self._collect_outputs(cand_src, ep, mv_inputs)
                 output_tags.append(out_res["tags"])
                 output_details.append({"load_error": out_res["load_error"], "wall_s": out_res["wall_s"]})
                 attempts_meta.append(att_e)
@@ -921,14 +1024,7 @@ class FLRunner:
                     att_e, cand_src, _ = self._run_single_coding_attempt(
                         task=task, arm=arm, att=att, att_dir=cell_dir / f"attempt_{att}", prompt=base_prompt
                     )
-                    out_res = collect_outputs_in_sandbox(
-                        cand_src,
-                        ep,
-                        mv_inputs,
-                        per_call_timeout_s=self.per_call_timeout_s,
-                        total_timeout_s=self.eval_timeout_s,
-                        mem_limit_mb=self.eval_mem_mb,
-                    )
+                    out_res = self._collect_outputs(cand_src, ep, mv_inputs)
                     output_tags.append(out_res["tags"])
                     attempts_meta.append(att_e)
                     cand_sources.append(cand_src)
@@ -938,7 +1034,7 @@ class FLRunner:
                 reused_from["xm"] = True
                 xm_rec = json.loads((xm_dir / "record.json").read_text(encoding="utf-8"))
                 xm_spec_text = (xm_dir / "frozen_tests_spec.py").read_text(encoding="utf-8", errors="replace")
-                xm_cases, xm_parse_err = parse_tests_spec_text(xm_spec_text)
+                xm_cases, xm_parse_err = parse_tests_spec_text(xm_spec_text, task_format=self.task_format)
                 for ex_s in xm_rec.get("extra_sessions") or []:
                     reused_cost_entries.append(ex_s)
             else:
@@ -1033,6 +1129,7 @@ class FLRunner:
             "ts_utc": utc_now_iso(),
             "plan_id": self.plan["id"],
             "task_id": tid,
+            "task_format": self.task_format,
             "difficulty": task["difficulty"],
             "entry_point": ep,
             "arm": arm,
@@ -1144,7 +1241,12 @@ class FLRunner:
         if self.calibrate_n is not None:
             by_diff: dict[str, dict[str, Any]] = {}
             valid_recs = [r for r in records if not r.get("infra_void")]
-            for diff in ("medium", "hard"):
+            default_diffs = ("interview", "competition") if self.task_format == "stdio" else ("medium", "hard")
+            diff_order = list(dict.fromkeys([
+                *(self.plan.get("difficulties") or default_diffs),
+                *(str(r.get("difficulty") or "unknown") for r in valid_recs),
+            ]))
+            for diff in diff_order:
                 sub = [r for r in valid_recs if r.get("difficulty") == diff]
                 ok = sum(1 for r in sub if r.get("delivered_correct"))
                 by_diff[diff] = {

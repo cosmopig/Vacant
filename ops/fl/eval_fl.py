@@ -6,6 +6,8 @@ and `ops.e1.sandbox` (`build_eval_bwrap_argv`, `run_sandboxed`) directly by impo
 from __future__ import annotations
 
 import ast
+from decimal import Decimal, InvalidOperation
+import hashlib
 import json
 import math
 import pathlib
@@ -514,3 +516,554 @@ def deduplicate_encoded_inputs(encoded_inputs: list[Any]) -> list[Any]:
             seen.add(key)
             out.append(item)
     return out
+
+
+# ── Stdio (APPS) normalization, float-tolerant comparison, and sandboxed evaluator ──
+
+
+def normalize_stdio_output(text: str) -> str:
+    """Normalise stdout/expected text: strip trailing whitespace per line and trailing blank lines."""
+    if not text:
+        return ""
+    lines = [ln.rstrip() for ln in text.splitlines()]
+    while lines and lines[-1] == "":
+        lines.pop()
+    return "\n".join(lines)
+
+
+def _try_parse_finite_decimal(tok: str) -> Decimal | None:
+    if not tok or "_" in tok:
+        return None
+    try:
+        fv = float(tok)
+    except ValueError:
+        return None
+    if not math.isfinite(fv):
+        return None
+    try:
+        return Decimal(tok)
+    except (InvalidOperation, ValueError):
+        return Decimal(str(fv))
+
+
+def stdio_outputs_equal(got: str, expected: str, *, float_tol: float = 1e-6) -> bool:
+    """Compare stdout and expected after normalising, with float token tolerance `float_tol`."""
+    g = normalize_stdio_output(got)
+    e = normalize_stdio_output(expected)
+    if g == e:
+        return True
+    g_lines = g.split("\n")
+    e_lines = e.split("\n")
+    if len(g_lines) != len(e_lines):
+        return False
+    tol_dec = Decimal(str(float_tol))
+    for gl, el in zip(g_lines, e_lines):
+        if gl == el:
+            continue
+        gt = gl.split()
+        et = el.split()
+        if len(gt) != len(et):
+            return False
+        for a, b in zip(gt, et):
+            if a == b:
+                continue
+            da = _try_parse_finite_decimal(a)
+            db = _try_parse_finite_decimal(b)
+            if da is None or db is None:
+                return False
+            if abs(da - db) > tol_dec:
+                return False
+    return True
+
+
+def deduplicate_stdio_inputs(stdin_inputs: list[str]) -> list[str]:
+    """Deduplicate stdin strings while preserving first-seen order."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in stdin_inputs:
+        if item not in seen:
+            seen.add(item)
+            out.append(item)
+    return out
+
+
+_STDIO_HELPER_SRC = r"""
+from decimal import Decimal, InvalidOperation
+import hashlib, json, math, os, signal, subprocess, sys, threading, time
+
+MAX_STDOUT_BYTES = 16 * 1024 * 1024
+MAX_STDERR_BYTES = 64 * 1024
+
+def normalize_stdio_output(text):
+    if not text:
+        return ""
+    lines = [ln.rstrip() for ln in text.splitlines()]
+    while lines and lines[-1] == "":
+        lines.pop()
+    return "\n".join(lines)
+
+def _try_parse_finite_decimal(tok):
+    if not tok or "_" in tok:
+        return None
+    try:
+        fv = float(tok)
+    except ValueError:
+        return None
+    if not math.isfinite(fv):
+        return None
+    try:
+        return Decimal(tok)
+    except (InvalidOperation, ValueError):
+        return Decimal(str(fv))
+
+def stdio_outputs_equal(got, expected, float_tol=1e-6):
+    g = normalize_stdio_output(got)
+    e = normalize_stdio_output(expected)
+    if g == e:
+        return True
+    g_lines = g.split("\n")
+    e_lines = e.split("\n")
+    if len(g_lines) != len(e_lines):
+        return False
+    tol_dec = Decimal(str(float_tol))
+    for gl, el in zip(g_lines, e_lines):
+        if gl == el:
+            continue
+        gt = gl.split()
+        et = el.split()
+        if len(gt) != len(et):
+            return False
+        for a, b in zip(gt, et):
+            if a == b:
+                continue
+            da = _try_parse_finite_decimal(a)
+            db = _try_parse_finite_decimal(b)
+            if da is None or db is None:
+                return False
+            if abs(da - db) > tol_dec:
+                return False
+    return True
+
+def run_one_stdio(sol_path, inp_str, timeout_s, cwd):
+    proc = subprocess.Popen(
+        [sys.executable, sol_path],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=cwd,
+        start_new_session=True,
+        close_fds=True,
+    )
+    inp_bytes = inp_str.encode("utf-8", errors="replace")
+
+    def _feed():
+        try:
+            proc.stdin.write(inp_bytes)
+            proc.stdin.flush()
+        except OSError:
+            pass
+        finally:
+            try:
+                proc.stdin.close()
+            except OSError:
+                pass
+
+    out_buf = bytearray()
+    out_truncated = [False]
+    def _read_out():
+        while True:
+            chunk = proc.stdout.read(65536)
+            if not chunk:
+                break
+            rem = MAX_STDOUT_BYTES - len(out_buf)
+            if rem > 0:
+                out_buf.extend(chunk[:rem])
+            if len(chunk) > rem:
+                out_truncated[0] = True
+
+    err_buf = bytearray()
+    def _read_err():
+        while True:
+            chunk = proc.stderr.read(16384)
+            if not chunk:
+                break
+            rem = MAX_STDERR_BYTES - len(err_buf)
+            if rem > 0:
+                err_buf.extend(chunk[:rem])
+
+    t_in = threading.Thread(target=_feed, daemon=True)
+    t_out = threading.Thread(target=_read_out, daemon=True)
+    t_err = threading.Thread(target=_read_err, daemon=True)
+    t_in.start()
+    t_out.start()
+    t_err.start()
+
+    timed_out = False
+    try:
+        proc.wait(timeout=timeout_s)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except OSError:
+            pass
+        try:
+            proc.wait(timeout=2.0)
+        except subprocess.TimeoutExpired:
+            pass
+    finally:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except OSError:
+            pass
+        t_in.join(timeout=1.0)
+        t_out.join(timeout=1.0)
+        t_err.join(timeout=1.0)
+        for s in (proc.stdin, proc.stdout, proc.stderr):
+            try:
+                if s is not None:
+                    s.close()
+            except OSError:
+                pass
+
+    if timed_out:
+        return {"ok": False, "stdout": "", "err": "timeout"}
+    if out_truncated[0]:
+        return {"ok": False, "stdout": "", "err": "stdout_limit_exceeded"}
+    if proc.returncode != 0:
+        err_lines = err_buf.decode("utf-8", errors="replace").strip().splitlines()
+        tail = err_lines[-1] if err_lines else f"rc={proc.returncode}"
+        return {"ok": False, "stdout": "", "err": f"rc={proc.returncode}: {tail[:160]}"}
+    return {"ok": True, "stdout": out_buf.decode("utf-8", errors="replace"), "err": None}
+"""
+
+
+_STDIO_EVAL_DRIVER_PY = _STDIO_HELPER_SRC + r"""
+def main():
+    req = json.loads(sys.stdin.read())
+    sol_path = req["solution_path"]
+    cases = req["cases"]
+    per_case_s = float(req.get("per_case_timeout_s", 2.0))
+    total_s = float(req.get("total_timeout_s", 45.0))
+    float_tol = float(req.get("float_tol", 1e-6))
+    n_total = len(cases)
+
+    try:
+        with open(sol_path, "r", encoding="utf-8") as fh:
+            code = fh.read()
+        if not code.strip():
+            print("@@FL_STDIO_EVAL@@" + json.dumps({
+                "passed": False, "n_passed": 0, "n_total": n_total,
+                "error": "empty_solution", "load_error": "empty_solution",
+            }))
+            return
+        compile(code, sol_path, "exec")
+    except BaseException as exc:
+        err = f"{type(exc).__name__}: {exc}"
+        print("@@FL_STDIO_EVAL@@" + json.dumps({
+            "passed": False, "n_passed": 0, "n_total": n_total,
+            "error": err, "load_error": err,
+        }))
+        return
+
+    deadline = time.monotonic() + total_s
+    n_passed = 0
+    first_err = None
+
+    for idx, case in enumerate(cases):
+        rem = deadline - time.monotonic()
+        if rem <= 0.05:
+            if first_err is None:
+                first_err = f"case {idx}: total_timeout"
+            break
+        case_dir = f"/tmp/c_{idx}"
+        os.makedirs(case_dir, exist_ok=True)
+        res = run_one_stdio(sol_path, case["input"], min(per_case_s, rem), case_dir)
+        if not res["ok"]:
+            if first_err is None:
+                first_err = f"case {idx}: {res['err']}"
+            continue
+        if stdio_outputs_equal(res["stdout"], case["output"], float_tol=float_tol):
+            n_passed += 1
+        elif first_err is None:
+            got_n = normalize_stdio_output(res["stdout"])
+            exp_n = normalize_stdio_output(case["output"])
+            first_err = f"case {idx}: mismatch got={repr(got_n)[:80]} expected={repr(exp_n)[:80]}"
+
+    passed = bool(n_total > 0 and n_passed == n_total)
+    print("@@FL_STDIO_EVAL@@" + json.dumps({
+        "passed": passed,
+        "n_passed": n_passed,
+        "n_total": n_total,
+        "error": first_err,
+        "load_error": None,
+    }))
+
+main()
+"""
+
+
+def evaluate_stdio_on_cases(
+    solution_src: str,
+    cases: list[dict[str, str]],
+    *,
+    per_case_timeout_s: float = 2.0,
+    total_timeout_s: float = 45.0,
+    mem_limit_mb: int = 1024,
+    float_tol: float = 1e-6,
+) -> dict[str, Any]:
+    """Evaluate a stdin/stdout Python program on `cases` inside `--unshare-net` bwrap sandbox."""
+    if not cases:
+        return {
+            "passed": False,
+            "n_passed": 0,
+            "n_total": 0,
+            "error": "no_cases",
+            "load_error": None,
+            "wall_s": 0.0,
+        }
+    if not (solution_src or "").strip():
+        return {
+            "passed": False,
+            "n_passed": 0,
+            "n_total": len(cases),
+            "error": "empty_solution",
+            "load_error": "empty_solution",
+            "wall_s": 0.0,
+        }
+
+    with tempfile.TemporaryDirectory(prefix="fl_stdio_eval_") as tmp:
+        sol_file = pathlib.Path(tmp) / "solution.py"
+        sol_file.write_text(solution_src, encoding="utf-8")
+        argv = build_eval_bwrap_argv(
+            ["python3", "-c", _STDIO_EVAL_DRIVER_PY],
+            ro_binds=[(sol_file, "/work/solution.py")],
+            chdir="/tmp",
+            mem_limit_mb=mem_limit_mb,
+            cpu_limit_s=max(5, int(math.ceil(total_timeout_s)) + 5),
+        )
+        req = {
+            "solution_path": "/work/solution.py",
+            "cases": [{"input": str(c["input"]), "output": str(c["output"])} for c in cases],
+            "per_case_timeout_s": float(per_case_timeout_s),
+            "total_timeout_s": float(total_timeout_s),
+            "float_tol": float(float_tol),
+        }
+        res = run_sandboxed(
+            argv,
+            timeout_s=total_timeout_s + 5.0,
+            stdin_bytes=json.dumps(req).encode("utf-8"),
+        )
+        parsed = _extract_marker_json(res["stdout"], "@@FL_STDIO_EVAL@@")
+        if parsed is None:
+            err = "sandbox_timeout" if res["timed_out"] else f"sandbox_rc={res['rc']}: {res['stderr'][:240]}"
+            return {
+                "passed": False,
+                "n_passed": 0,
+                "n_total": len(cases),
+                "error": err,
+                "load_error": err,
+                "wall_s": float(res["wall_s"]),
+            }
+        return {
+            "passed": bool(parsed.get("passed")),
+            "n_passed": int(parsed.get("n_passed") or 0),
+            "n_total": int(parsed.get("n_total") or len(cases)),
+            "error": parsed.get("error"),
+            "load_error": parsed.get("load_error"),
+            "wall_s": float(res["wall_s"]),
+        }
+
+
+_STDIO_GEN_INPUTS_DRIVER_PY = r"""
+import json, math, signal, sys
+
+class _GenTimeout(Exception):
+    pass
+
+def _alarm_handler(signum, frame):
+    raise _GenTimeout("gen_inputs timeout")
+
+def main():
+    req = json.loads(sys.stdin.read())
+    gen_path = req["gen_path"]
+    max_inputs = int(req.get("max_inputs", 20))
+    timeout_s = max(1, int(math.ceil(float(req.get("timeout_s", 8.0)))))
+    ns = {"__name__": "fl_gen_stdio_inputs"}
+    signal.signal(signal.SIGALRM, _alarm_handler)
+    signal.alarm(timeout_s)
+    try:
+        with open(gen_path, "r", encoding="utf-8") as fh:
+            code = fh.read()
+        exec(compile(code, gen_path, "exec"), ns)
+        raw_inputs = None
+        for fn_name in ("gen_inputs", "generate_inputs"):
+            fn = ns.get(fn_name)
+            if callable(fn):
+                raw_inputs = fn()
+                break
+        if raw_inputs is None:
+            for var_name in ("INPUTS", "inputs"):
+                if isinstance(ns.get(var_name), (list, tuple)):
+                    raw_inputs = ns[var_name]
+                    break
+        if raw_inputs is None:
+            print("@@FL_STDIO_GEN@@" + json.dumps({"ok": False, "inputs": [], "error": "missing gen_inputs() or INPUTS"}))
+            return
+        if not isinstance(raw_inputs, (list, tuple)):
+            print("@@FL_STDIO_GEN@@" + json.dumps({"ok": False, "inputs": [], "error": f"expected list/tuple, got {type(raw_inputs).__name__}"}))
+            return
+        out = []
+        skipped = 0
+        for item in raw_inputs:
+            if len(out) >= max_inputs:
+                break
+            if isinstance(item, str):
+                out.append(item)
+            else:
+                skipped += 1
+        print("@@FL_STDIO_GEN@@" + json.dumps({
+            "ok": len(out) > 0,
+            "inputs": out,
+            "skipped": skipped,
+            "error": None if out else "no_valid_inputs",
+        }))
+    except BaseException as exc:
+        print("@@FL_STDIO_GEN@@" + json.dumps({"ok": False, "inputs": [], "error": f"{type(exc).__name__}: {exc}"}))
+    finally:
+        signal.alarm(0)
+
+main()
+"""
+
+
+def run_stdio_input_generator_in_sandbox(
+    gen_src: str,
+    *,
+    max_inputs: int = 20,
+    timeout_s: float = 10.0,
+    mem_limit_mb: int = 1024,
+) -> dict[str, Any]:
+    """Execute stdio `gen_inputs.py` in `--unshare-net` bwrap sandbox and return list of stdin strings."""
+    with tempfile.TemporaryDirectory(prefix="fl_sgen_") as tmp:
+        gen_file = pathlib.Path(tmp) / "gen_inputs.py"
+        gen_file.write_text(gen_src, encoding="utf-8")
+        argv = build_eval_bwrap_argv(
+            ["python3", "-c", _STDIO_GEN_INPUTS_DRIVER_PY],
+            ro_binds=[(gen_file, "/work/gen_inputs.py")],
+            chdir="/tmp",
+            mem_limit_mb=mem_limit_mb,
+            cpu_limit_s=max(3, int(math.ceil(timeout_s)) + 2),
+        )
+        req = {
+            "gen_path": "/work/gen_inputs.py",
+            "max_inputs": max_inputs,
+            "timeout_s": max(1.0, timeout_s - 1.0),
+        }
+        res = run_sandboxed(argv, timeout_s=timeout_s + 2.0, stdin_bytes=json.dumps(req).encode("utf-8"))
+        parsed = _extract_marker_json(res["stdout"], "@@FL_STDIO_GEN@@")
+        if parsed is None:
+            err = "sandbox_timeout" if res["timed_out"] else f"sandbox_rc={res['rc']}: {res['stderr'][:240]}"
+            return {"ok": False, "inputs": [], "error": err, "wall_s": res["wall_s"]}
+        parsed["wall_s"] = res["wall_s"]
+        return parsed
+
+
+_STDIO_COLLECT_DRIVER_PY = _STDIO_HELPER_SRC + r"""
+def main():
+    req = json.loads(sys.stdin.read())
+    sol_path = req["solution_path"]
+    inputs = req["inputs"]
+    per_case_s = float(req.get("per_case_timeout_s", 2.0))
+    total_s = float(req.get("total_timeout_s", 45.0))
+
+    try:
+        with open(sol_path, "r", encoding="utf-8") as fh:
+            code = fh.read()
+        if not code.strip():
+            outs = [{"ok": False, "val": "ERR", "err": "empty_solution"} for _ in inputs]
+            print("@@FL_STDIO_OUTS@@" + json.dumps({"load_error": "empty_solution", "outputs": outs}))
+            return
+        compile(code, sol_path, "exec")
+    except BaseException as exc:
+        err = f"{type(exc).__name__}: {exc}"
+        outs = [{"ok": False, "val": "ERR", "err": err} for _ in inputs]
+        print("@@FL_STDIO_OUTS@@" + json.dumps({"load_error": err, "outputs": outs}))
+        return
+
+    deadline = time.monotonic() + total_s
+    outs = []
+    for idx, inp_str in enumerate(inputs):
+        rem = deadline - time.monotonic()
+        if rem <= 0.05:
+            outs.append({"ok": False, "val": "ERR", "err": "total_timeout"})
+            continue
+        case_dir = f"/tmp/mv_{idx}"
+        os.makedirs(case_dir, exist_ok=True)
+        res = run_one_stdio(sol_path, inp_str, min(per_case_s, rem), case_dir)
+        if not res["ok"]:
+            outs.append({"ok": False, "val": "ERR", "err": res["err"]})
+        else:
+            norm = normalize_stdio_output(res["stdout"])
+            if len(norm) <= 4096:
+                outs.append({"ok": True, "val": norm})
+            else:
+                digest = hashlib.sha256(norm.encode("utf-8")).hexdigest()
+                outs.append({"ok": True, "val": f"__SHA256__:{digest}", "sha256": digest})
+
+    print("@@FL_STDIO_OUTS@@" + json.dumps({"load_error": None, "outputs": outs}))
+
+main()
+"""
+
+
+def collect_stdio_outputs_in_sandbox(
+    solution_src: str,
+    stdin_inputs: list[str],
+    *,
+    per_case_timeout_s: float = 2.0,
+    total_timeout_s: float = 45.0,
+    mem_limit_mb: int = 1024,
+) -> dict[str, Any]:
+    """Run stdin/stdout `solution_src` on `stdin_inputs` in `--unshare-net` bwrap sandbox for MV/CT."""
+    if not stdin_inputs:
+        return {"load_error": None, "outputs": [], "tags": [], "wall_s": 0.0}
+    if not (solution_src or "").strip():
+        outs = [{"ok": False, "val": ERR_SENTINEL, "err": "empty_solution"} for _ in stdin_inputs]
+        return {"load_error": "empty_solution", "outputs": outs, "tags": [ERR_TAG for _ in stdin_inputs], "wall_s": 0.0}
+
+    with tempfile.TemporaryDirectory(prefix="fl_souts_") as tmp:
+        sol_file = pathlib.Path(tmp) / "solution.py"
+        sol_file.write_text(solution_src, encoding="utf-8")
+        argv = build_eval_bwrap_argv(
+            ["python3", "-c", _STDIO_COLLECT_DRIVER_PY],
+            ro_binds=[(sol_file, "/work/solution.py")],
+            chdir="/tmp",
+            mem_limit_mb=mem_limit_mb,
+            cpu_limit_s=max(5, int(math.ceil(total_timeout_s)) + 5),
+        )
+        req = {
+            "solution_path": "/work/solution.py",
+            "inputs": [str(x) for x in stdin_inputs],
+            "per_case_timeout_s": float(per_case_timeout_s),
+            "total_timeout_s": float(total_timeout_s),
+        }
+        res = run_sandboxed(
+            argv,
+            timeout_s=total_timeout_s + 5.0,
+            stdin_bytes=json.dumps(req).encode("utf-8"),
+        )
+        parsed = _extract_marker_json(res["stdout"], "@@FL_STDIO_OUTS@@")
+        if parsed is None:
+            err = "sandbox_timeout" if res["timed_out"] else f"sandbox_rc={res['rc']}: {res['stderr'][:240]}"
+            outs = [{"ok": False, "val": ERR_SENTINEL, "err": err} for _ in stdin_inputs]
+            tags = [ERR_TAG for _ in stdin_inputs]
+            return {"load_error": err, "outputs": outs, "tags": tags, "wall_s": float(res["wall_s"])}
+        outs = parsed.get("outputs") or []
+        tags = [canonicalize_output_entry(o) for o in outs]
+        return {
+            "load_error": parsed.get("load_error"),
+            "outputs": outs,
+            "tags": tags,
+            "wall_s": float(res["wall_s"]),
+        }
