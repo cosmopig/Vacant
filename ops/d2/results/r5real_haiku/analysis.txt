@@ -1,0 +1,12 @@
+D2' Analysis Verdict: INCOMPLETE (sets=20, B=10000, seed=20261125)
+  INCOMPLETE missing (4): s20/cV5/c1(both), s20/cV5/c2(both), s20/cV5/c3(both), s20/cV5/c4(both)
+  [1] Coverage: 340/340 = 100.0% (with_source=340/340, threshold>=80%) -> PASS
+  [2] Miss diff (c-b): 0.0088 (95% upper=0.0250, margin<0.10; c=0.9%, b=0.0%, n=113) -> NONINFERIOR
+  [3] Token ratio (b/c): 0.73x 95% CI [0.67, 0.79] (n=76/76) -> FAIL
+  [3] Calls ratio (b/c): 1.00x 95% CI [0.94, 1.07] (n=76/76)
+  [3] Wall  ratio (b/c): 0.99x 95% CI [0.89, 1.10] (n=76/76)
+  [4] Secondary:
+      c_vs_d: miss(c-d)=n/a (upper95=n/a), tok(d/c)=n/ax [n/a, n/a]
+      d_vs_b: miss(d-b)=n/a (upper95=n/a), tok(b/d)=n/ax [n/a, n/a]
+      false_mod: a=0/1248(0.0% [0.0%, 0.0%]); b=0/1322(0.0% [0.0%, 0.0%]); cV5=0/1246(0.0% [0.0%, 0.0%]); d_diff_real=10/1320(0.8% [0.3%, 1.3%])
+      residual_stale: a(c1=23,c2=49,c3=57,c4=63) b(c1=0,c2=0,c3=0,c4=0) cV5(c1=0,c2=1,c3=0,c4=0) d_diff_real(c1=0,c2=0,c3=0,c4=2)

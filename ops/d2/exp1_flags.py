@@ -69,6 +69,12 @@ def fetch_universe(rec: Recorder) -> list[dict]:
     return out
 
 
+def _norm(t: str) -> str:
+    import html as _h
+    import re as _re
+    return " ".join(_h.unescape(_re.sub(r"<[^>]+>", " ", t)).split())
+
+
 def site_text(mat: pathlib.Path, sid: str, k: int, url: str) -> str | None:
     try:
         host, path = url.split("/")[2], url.split("/", 3)[3] if url.count("/") >= 3 else ""
@@ -91,6 +97,8 @@ def main() -> int:
     ap.add_argument("--arms", default="a,b,d_diff_real")
     ap.add_argument("--out", required=True)
     ap.add_argument("--boot", type=int, default=2000)
+    ap.add_argument("--f1-normalize", action="store_true",
+                    help="次要（未預註冊，待決定）：F1 比對前把抓取內容的 HTML 標籤換成空白、空白正規化（值由多個儲存格拼成時才找得到）")
     a = ap.parse_args()
     root = pathlib.Path(a.root).expanduser()
     mat = pathlib.Path(a.materials).expanduser()
@@ -125,6 +133,9 @@ def main() -> int:
             if rec is None:
                 continue
             U = fetch_universe(rec)
+            if a.f1_normalize:
+                for u in U:
+                    u["ntext"] = _norm(u["text"])
             prev_bound = c0_bound if stage != "c0" else 0
             for k, bound in ks:
                 Uk = [u for u in U if u["seq"] <= bound]
@@ -147,6 +158,8 @@ def main() -> int:
                     else:
                         carriers = [u for u in Uk if L.contains(u["text"], v)]
                         f["F1"] = not carriers
+                        if a.f1_normalize and f["F1"]:
+                            f["F1"] = not any(L.contains(u["ntext"], v) for u in Uk)
                         latest: dict[str, str] = {}
                         for u in sorted(carriers, key=lambda x: x["seq"]):
                             latest[u["url"]] = u["text"]

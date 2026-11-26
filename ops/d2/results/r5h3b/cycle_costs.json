@@ -1,0 +1,130 @@
+{
+ "root": "r5h3b",
+ "primary": "cV5",
+ "d_arm": "d_diff_real",
+ "metric": "tokens",
+ "sets": 16,
+ "excluded": [],
+ "by_cycle_type": {
+  "F": {
+   "b": 1757728.0,
+   "cV5": 851570.0,
+   "d_diff_real": 1908156.0,
+   "b/cV5": {
+    "point": 2.064102774874643,
+    "ci": [
+     1.3826751438592388,
+     3.044741873851798
+    ],
+    "n": 32
+   },
+   "d_diff_real/cV5": {
+    "point": 2.240750613572578,
+    "ci": [
+     1.5013386759256435,
+     3.3586291517057574
+    ],
+    "n": 32
+   }
+  },
+  "N+Z": {
+   "b": 1657603.0,
+   "cV5": 0,
+   "d_diff_real": 2287426.0,
+   "b/cV5": {
+    "point": Infinity,
+    "ci": [
+     Infinity,
+     Infinity
+    ],
+    "n": 32
+   },
+   "d_diff_real/cV5": {
+    "point": Infinity,
+    "ci": [
+     Infinity,
+     Infinity
+    ],
+    "n": 32
+   }
+  },
+  "N": {
+   "b": 834265.0,
+   "cV5": 0,
+   "d_diff_real": 1111849.0,
+   "b/cV5": {
+    "point": Infinity,
+    "ci": [
+     Infinity,
+     Infinity
+    ],
+    "n": 16
+   },
+   "d_diff_real/cV5": {
+    "point": Infinity,
+    "ci": [
+     Infinity,
+     Infinity
+    ],
+    "n": 16
+   }
+  },
+  "Z": {
+   "b": 823338.0,
+   "cV5": 0,
+   "d_diff_real": 1175577.0,
+   "b/cV5": {
+    "point": Infinity,
+    "ci": [
+     Infinity,
+     Infinity
+    ],
+    "n": 16
+   },
+   "d_diff_real/cV5": {
+    "point": Infinity,
+    "ci": [
+     Infinity,
+     Infinity
+    ],
+    "n": 16
+   }
+  },
+  "all": {
+   "b": 3415331.0,
+   "cV5": 851570.0,
+   "d_diff_real": 4195582.0,
+   "b/cV5": {
+    "point": 4.010628603637986,
+    "ci": [
+     2.7643153123658064,
+     5.886775392921285
+    ],
+    "n": 64
+   },
+   "d_diff_real/cV5": {
+    "point": 4.926878588959217,
+    "ci": [
+     3.438773686453216,
+     7.261850671277935
+    ],
+    "n": 64
+   }
+  }
+ },
+ "primary_idle_cycles": {
+  "idle": 32,
+  "of": 64,
+  "b_metric_share_in_idle": 0.485341830703964
+ },
+ "candidate_set_size_cycle1": {
+  "claims": 319,
+  "mean": 1.4357366771159874,
+  "share_ge2": 0.31347962382445144
+ },
+ "handed": {
+  "total": 63,
+  "unnecessary": 0,
+  "by_reason": {}
+ }
+}

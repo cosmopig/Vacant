@@ -1,0 +1,214 @@
+{
+ "root": "r3h3",
+ "arms": [
+  "a",
+  "b",
+  "d_diff"
+ ],
+ "overall": {
+  "units": 6500,
+  "flagged": 3343,
+  "flagged_share": 0.5143076923076924,
+  "errors": 677,
+  "recall": 0.96602658788774,
+  "recall_lower95": 0.909952606635071,
+  "recall_ci95": [
+   0.8927835051546392,
+   1.0
+  ],
+  "error_rate_flagged": 0.19563266527071493,
+  "error_rate_unflagged": 0.007285397529299968,
+  "rate_ratio": 26.852709750419436,
+  "random_baseline_recall": 0.5143076923076924,
+  "errors_by_status_flagged": {
+   "missing|flagged": 376,
+   "stale|flagged": 238,
+   "wrong|missed": 23,
+   "wrong|flagged": 40
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 530,
+    "errors_caught": 380
+   },
+   "F2": {
+    "flagged": 2805,
+    "errors_caught": 274
+   },
+   "F3": {
+    "flagged": 84,
+    "errors_caught": 3
+   },
+   "F4": {
+    "flagged": 42,
+    "errors_caught": 42
+   }
+  },
+  "sets": 25
+ },
+ "by_arm": {
+  "a": {
+   "units": 2000,
+   "flagged": 1084,
+   "flagged_share": 0.542,
+   "errors": 404,
+   "recall": 0.9801980198019802,
+   "recall_lower95": 0.9526627218934911,
+   "recall_ci95": [
+    0.9428571428571428,
+    1.0
+   ],
+   "error_rate_flagged": 0.36531365313653136,
+   "error_rate_unflagged": 0.008733624454148471,
+   "rate_ratio": 41.82841328413284,
+   "random_baseline_recall": 0.542,
+   "errors_by_status_flagged": {
+    "missing|flagged": 164,
+    "stale|flagged": 220,
+    "wrong|missed": 8,
+    "wrong|flagged": 12
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 164,
+     "errors_caught": 164
+    },
+    "F2": {
+     "flagged": 920,
+     "errors_caught": 232
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 25
+  },
+  "b": {
+   "units": 2000,
+   "flagged": 1029,
+   "flagged_share": 0.5145,
+   "errors": 111,
+   "recall": 0.990990990990991,
+   "recall_lower95": 0.9333333333333333,
+   "recall_ci95": [
+    0.92,
+    1.0
+   ],
+   "error_rate_flagged": 0.10689990281827016,
+   "error_rate_unflagged": 0.0010298661174047373,
+   "rate_ratio": 103.79980563654033,
+   "random_baseline_recall": 0.5145,
+   "errors_by_status_flagged": {
+    "missing|flagged": 85,
+    "stale|flagged": 12,
+    "wrong|missed": 1,
+    "wrong|flagged": 13
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 90,
+     "errors_caught": 85
+    },
+    "F2": {
+     "flagged": 937,
+     "errors_caught": 25
+    },
+    "F3": {
+     "flagged": 9,
+     "errors_caught": 2
+    },
+    "F4": {
+     "flagged": 1,
+     "errors_caught": 1
+    }
+   },
+   "sets": 25
+  },
+  "c0": {
+   "units": 500,
+   "flagged": 237,
+   "flagged_share": 0.474,
+   "errors": 46,
+   "recall": 0.9565217391304348,
+   "recall_lower95": 0.6363636363636364,
+   "recall_ci95": [
+    0.5454545454545454,
+    1.0
+   ],
+   "error_rate_flagged": 0.18565400843881857,
+   "error_rate_unflagged": 0.0076045627376425855,
+   "rate_ratio": 24.41350210970464,
+   "random_baseline_recall": 0.474,
+   "errors_by_status_flagged": {
+    "missing|flagged": 41,
+    "wrong|missed": 2,
+    "wrong|flagged": 3
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 41,
+     "errors_caught": 41
+    },
+    "F2": {
+     "flagged": 196,
+     "errors_caught": 3
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 40,
+     "errors_caught": 40
+    }
+   },
+   "sets": 25
+  },
+  "d_diff": {
+   "units": 2000,
+   "flagged": 993,
+   "flagged_share": 0.4965,
+   "errors": 116,
+   "recall": 0.896551724137931,
+   "recall_lower95": 0.5454545454545454,
+   "recall_ci95": [
+    0.5102040816326531,
+    1.0
+   ],
+   "error_rate_flagged": 0.10473313192346426,
+   "error_rate_unflagged": 0.011916583912611719,
+   "rate_ratio": 8.788855320577374,
+   "random_baseline_recall": 0.4965,
+   "errors_by_status_flagged": {
+    "missing|flagged": 86,
+    "stale|flagged": 6,
+    "wrong|missed": 12,
+    "wrong|flagged": 12
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 235,
+     "errors_caught": 90
+    },
+    "F2": {
+     "flagged": 752,
+     "errors_caught": 14
+    },
+    "F3": {
+     "flagged": 75,
+     "errors_caught": 1
+    },
+    "F4": {
+     "flagged": 1,
+     "errors_caught": 1
+    }
+   },
+   "sets": 25
+  }
+ }
+}

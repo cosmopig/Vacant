@@ -1,0 +1,210 @@
+{
+ "root": "r5seen4b",
+ "arms": [
+  "a",
+  "b",
+  "d_diff_real"
+ ],
+ "overall": {
+  "units": 4160,
+  "flagged": 1294,
+  "flagged_share": 0.3110576923076923,
+  "errors": 244,
+  "recall": 0.9795081967213115,
+  "recall_lower95": 0.9606299212598425,
+  "recall_ci95": [
+   0.9563492063492064,
+   1.0
+  ],
+  "error_rate_flagged": 0.1846986089644513,
+  "error_rate_unflagged": 0.0017445917655268667,
+  "rate_ratio": 105.86924265842349,
+  "random_baseline_recall": 0.3110576923076923,
+  "errors_by_status_flagged": {
+   "missing|flagged": 48,
+   "stale|missed": 1,
+   "stale|flagged": 176,
+   "wrong|missed": 4,
+   "wrong|flagged": 15
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 809,
+    "errors_caught": 85
+   },
+   "F2": {
+    "flagged": 476,
+    "errors_caught": 146
+   },
+   "F3": {
+    "flagged": 50,
+    "errors_caught": 14
+   },
+   "F4": {
+    "flagged": 13,
+    "errors_caught": 13
+   }
+  },
+  "sets": 16
+ },
+ "by_arm": {
+  "a": {
+   "units": 1280,
+   "flagged": 438,
+   "flagged_share": 0.3421875,
+   "errors": 176,
+   "recall": 1.0,
+   "recall_lower95": 1.0,
+   "recall_ci95": [
+    1.0,
+    1.0
+   ],
+   "error_rate_flagged": 0.4018264840182648,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "random_baseline_recall": 0.3421875,
+   "errors_by_status_flagged": {
+    "missing|flagged": 8,
+    "stale|flagged": 168
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 236,
+     "errors_caught": 36
+    },
+    "F2": {
+     "flagged": 202,
+     "errors_caught": 140
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 16
+  },
+  "b": {
+   "units": 1280,
+   "flagged": 363,
+   "flagged_share": 0.28359375,
+   "errors": 15,
+   "recall": 1.0,
+   "recall_lower95": 1.0,
+   "recall_ci95": [
+    1.0,
+    1.0
+   ],
+   "error_rate_flagged": 0.04132231404958678,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "random_baseline_recall": 0.28359375,
+   "errors_by_status_flagged": {
+    "missing|flagged": 14,
+    "stale|flagged": 1
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 240,
+     "errors_caught": 14
+    },
+    "F2": {
+     "flagged": 123,
+     "errors_caught": 1
+    },
+    "F3": {
+     "flagged": 3,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 5,
+     "errors_caught": 5
+    }
+   },
+   "sets": 16
+  },
+  "c0": {
+   "units": 320,
+   "flagged": 62,
+   "flagged_share": 0.19375,
+   "errors": 2,
+   "recall": 1.0,
+   "recall_lower95": 1.0,
+   "recall_ci95": [
+    1.0,
+    1.0
+   ],
+   "error_rate_flagged": 0.03225806451612903,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "random_baseline_recall": 0.19375,
+   "errors_by_status_flagged": {
+    "missing|flagged": 2
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 59,
+     "errors_caught": 2
+    },
+    "F2": {
+     "flagged": 3,
+     "errors_caught": 0
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 16
+  },
+  "d_diff_real": {
+   "units": 1280,
+   "flagged": 431,
+   "flagged_share": 0.33671875,
+   "errors": 51,
+   "recall": 0.9019607843137255,
+   "recall_lower95": 0.8157894736842105,
+   "recall_ci95": [
+    0.8,
+    1.0
+   ],
+   "error_rate_flagged": 0.10672853828306264,
+   "error_rate_unflagged": 0.005889281507656066,
+   "rate_ratio": 18.122505800464037,
+   "random_baseline_recall": 0.33671875,
+   "errors_by_status_flagged": {
+    "missing|flagged": 24,
+    "stale|missed": 1,
+    "stale|flagged": 7,
+    "wrong|missed": 4,
+    "wrong|flagged": 15
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 274,
+     "errors_caught": 33
+    },
+    "F2": {
+     "flagged": 148,
+     "errors_caught": 5
+    },
+    "F3": {
+     "flagged": 47,
+     "errors_caught": 14
+    },
+    "F4": {
+     "flagged": 8,
+     "errors_caught": 8
+    }
+   },
+   "sets": 16
+  }
+ }
+}

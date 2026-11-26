@@ -1,0 +1,264 @@
+{
+ "arms": {
+  "a": {
+   "changed_claims": 64,
+   "changed_claims_pre_correct": 64,
+   "cost": {
+    "agent_runs": 0,
+    "calls": 0,
+    "cost_usd": 0,
+    "set_cycles": 64,
+    "source_requests_agent": 0,
+    "source_requests_vacant": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 0
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 32,
+     "tokens": 0,
+     "wall_s": 0.0
+    },
+    "N": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 16,
+     "tokens": 0,
+     "wall_s": 0.0
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 16,
+     "tokens": 0,
+     "wall_s": 0.0
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "None": 64
+   },
+   "miss_rate": 1.0,
+   "miss_rate_pre_correct": 1.0,
+   "missed": 64,
+   "missed_pre_correct": 64,
+   "stale_residual_by_cycle": {
+    "1": 20,
+    "2": 32,
+    "3": 50,
+    "4": 64
+   },
+   "unchanged_correct_claims": 1114,
+   "wrong_by_cycle": {
+    "1": 20,
+    "2": 32,
+    "3": 50,
+    "4": 64
+   }
+  },
+  "b": {
+   "changed_claims": 64,
+   "changed_claims_pre_correct": 64,
+   "cost": {
+    "agent_runs": 64,
+    "calls": 658,
+    "cost_usd": 0,
+    "set_cycles": 64,
+    "source_requests_agent": 457,
+    "source_requests_vacant": 0,
+    "tokens_in": 3259241,
+    "tokens_out": 156090,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 2444.0
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 32,
+     "calls": 338,
+     "set_cycles": 32,
+     "tokens": 1757728,
+     "wall_s": 1224.6
+    },
+    "N": {
+     "agent_runs": 16,
+     "calls": 156,
+     "set_cycles": 16,
+     "tokens": 834265,
+     "wall_s": 595.7
+    },
+    "Z": {
+     "agent_runs": 16,
+     "calls": 164,
+     "set_cycles": 16,
+     "tokens": 823338,
+     "wall_s": 623.7
+    }
+   },
+   "false_mod": 6,
+   "latency_hist": {
+    "0": 62,
+    "None": 2
+   },
+   "miss_rate": 0.0312,
+   "miss_rate_pre_correct": 0.0312,
+   "missed": 2,
+   "missed_pre_correct": 2,
+   "stale_residual_by_cycle": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 1
+   },
+   "unchanged_correct_claims": 1206,
+   "wrong_by_cycle": {
+    "1": 0,
+    "2": 4,
+    "3": 6,
+    "4": 8
+   }
+  },
+  "cV5": {
+   "changed_claims": 64,
+   "changed_claims_pre_correct": 64,
+   "cost": {
+    "agent_runs": 32,
+    "calls": 210,
+    "cost_usd": 0,
+    "set_cycles": 64,
+    "source_requests_agent": 108,
+    "source_requests_vacant": 420,
+    "tokens_in": 826705,
+    "tokens_out": 24865,
+    "tool_wall_s": 13.8,
+    "usage_unknown": 0,
+    "wall_s": 478.2
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 32,
+     "calls": 210,
+     "set_cycles": 32,
+     "tokens": 851570,
+     "wall_s": 485.3
+    },
+    "N": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 16,
+     "tokens": 0,
+     "wall_s": 3.5
+    },
+    "Z": {
+     "agent_runs": 0,
+     "calls": 0,
+     "set_cycles": 16,
+     "tokens": 0,
+     "wall_s": 3.2
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "0": 60,
+    "None": 4
+   },
+   "miss_rate": 0.0625,
+   "miss_rate_pre_correct": 0.0625,
+   "missed": 4,
+   "missed_pre_correct": 4,
+   "stale_residual_by_cycle": {
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 4
+   },
+   "unchanged_correct_claims": 1212,
+   "wrong_by_cycle": {
+    "1": 1,
+    "2": 1,
+    "3": 2,
+    "4": 4
+   }
+  },
+  "d_diff_real": {
+   "changed_claims": 64,
+   "changed_claims_pre_correct": 64,
+   "cost": {
+    "agent_runs": 64,
+    "calls": 456,
+    "cost_usd": 0,
+    "set_cycles": 64,
+    "source_requests_agent": 701,
+    "source_requests_vacant": 0,
+    "tokens_in": 4107365,
+    "tokens_out": 88217,
+    "tool_wall_s": 0,
+    "usage_unknown": 0,
+    "wall_s": 1482.9
+   },
+   "cost_by_cycle_type": {
+    "F": {
+     "agent_runs": 32,
+     "calls": 217,
+     "set_cycles": 32,
+     "tokens": 1908156,
+     "wall_s": 564.4
+    },
+    "N": {
+     "agent_runs": 16,
+     "calls": 116,
+     "set_cycles": 16,
+     "tokens": 1111849,
+     "wall_s": 360.2
+    },
+    "Z": {
+     "agent_runs": 16,
+     "calls": 123,
+     "set_cycles": 16,
+     "tokens": 1175577,
+     "wall_s": 558.3
+    }
+   },
+   "false_mod": 0,
+   "latency_hist": {
+    "0": 56,
+    "1": 4,
+    "2": 1,
+    "None": 3
+   },
+   "miss_rate": 0.125,
+   "miss_rate_pre_correct": 0.125,
+   "missed": 8,
+   "missed_pre_correct": 8,
+   "stale_residual_by_cycle": {
+    "1": 2,
+    "2": 3,
+    "3": 2,
+    "4": 3
+   },
+   "unchanged_correct_claims": 1209,
+   "wrong_by_cycle": {
+    "1": 2,
+    "2": 3,
+    "3": 2,
+    "4": 3
+   }
+  }
+ },
+ "c0": {
+  "claims": 320,
+  "correct": 320
+ },
+ "materials": {
+  "bare_number_on_another_page": 89,
+  "claims": 320,
+  "rate_bare_number": 0.2781,
+  "rate_with_unit": 0.0187,
+  "value_with_unit_on_another_page": 6
+ }
+}

@@ -1,0 +1,42 @@
+{
+ "root": "r5h3b",
+ "logs_with_hits": 4,
+ "sets_with_hits": [
+  "s06",
+  "s07",
+  "s09",
+  "s13"
+ ],
+ "rows": [
+  {
+   "set": "s06",
+   "where": "cV5/cycle_3/run_verify",
+   "hits": [
+    "list-ancestor command: find ~/dev/ops/d2_private_live -name \"*.csv\" -o -name \"*.json\" -o -name \"*.md\" 2>/dev/null | head -50",
+    "list-ancestor command: find ~/dev/ops/d2_private_live -type f \\( -name \"*.csv\" -o -name \"*.json\" \\) -exec grep -l \"Biomass Unit BM-4\\|Transformer T40\" {} \\; 2>/dev/null | head -20"
+   ]
+  },
+  {
+   "set": "s07",
+   "where": "b/cycle_1/run",
+   "hits": [
+    "list-ancestor command: find ~/dev/ops/d2_private_live -name \"*.md\" | head -50"
+   ]
+  },
+  {
+   "set": "s09",
+   "where": "b/cycle_2/run",
+   "hits": [
+    "list-ancestor command: cd ~/dev/ops/d2_private_live && find . -name \"index.md\" -o -name \"*.md\" 2>/dev/null | head -50",
+    "list-ancestor command: cd ~/dev/ops/d2_private_live && grep -r \"s09.d2-sources.example\" . 2>/dev/null | head -20"
+   ]
+  },
+  {
+   "set": "s13",
+   "where": "b/cycle_2/run",
+   "hits": [
+    "list-ancestor command: find ~ -name \"index.md\" 2>/dev/null | head -20"
+   ]
+  }
+ ]
+}

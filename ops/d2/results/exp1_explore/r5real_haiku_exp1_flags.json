@@ -1,0 +1,194 @@
+{
+ "root": "r5real_haiku",
+ "arms": [
+  "a",
+  "b",
+  "d_diff_real"
+ ],
+ "overall": {
+  "units": 4680,
+  "flagged": 4386,
+  "flagged_share": 0.9371794871794872,
+  "errors": 204,
+  "recall": 0.946078431372549,
+  "recall_lower95": 0.8390243902439024,
+  "recall_ci95": [
+   0.8206521739130435,
+   1.0
+  ],
+  "error_rate_flagged": 0.04400364797081623,
+  "error_rate_unflagged": 0.03741496598639456,
+  "rate_ratio": 1.1760975003109067,
+  "random_baseline_recall": 0.9371794871794872,
+  "errors_by_status_flagged": {
+   "stale|missed": 11,
+   "stale|flagged": 183,
+   "wrong|flagged": 10
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 4219,
+    "errors_caught": 192
+   },
+   "F2": {
+    "flagged": 166,
+    "errors_caught": 0
+   },
+   "F3": {
+    "flagged": 6,
+    "errors_caught": 1
+   },
+   "F4": {
+    "flagged": 0,
+    "errors_caught": 0
+   }
+  },
+  "sets": 20
+ },
+ "by_arm": {
+  "a": {
+   "units": 1440,
+   "flagged": 1364,
+   "flagged_share": 0.9472222222222222,
+   "errors": 192,
+   "recall": 0.9427083333333334,
+   "recall_lower95": 0.828125,
+   "recall_ci95": [
+    0.8092485549132948,
+    1.0
+   ],
+   "error_rate_flagged": 0.13269794721407624,
+   "error_rate_unflagged": 0.14473684210526316,
+   "rate_ratio": 0.9168221807517994,
+   "random_baseline_recall": 0.9472222222222222,
+   "errors_by_status_flagged": {
+    "stale|missed": 11,
+    "stale|flagged": 181
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 1364,
+     "errors_caught": 181
+    },
+    "F2": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 20
+  },
+  "b": {
+   "units": 1440,
+   "flagged": 1311,
+   "flagged_share": 0.9104166666666667,
+   "errors": 0,
+   "recall": null,
+   "recall_lower95": null,
+   "recall_ci95": null,
+   "error_rate_flagged": 0.0,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "random_baseline_recall": 0.9104166666666667,
+   "errors_by_status_flagged": {},
+   "by_flag": {
+    "F1": {
+     "flagged": 1216,
+     "errors_caught": 0
+    },
+    "F2": {
+     "flagged": 95,
+     "errors_caught": 0
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 20
+  },
+  "c0": {
+   "units": 360,
+   "flagged": 341,
+   "flagged_share": 0.9472222222222222,
+   "errors": 0,
+   "recall": null,
+   "recall_lower95": null,
+   "recall_ci95": null,
+   "error_rate_flagged": 0.0,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "random_baseline_recall": 0.9472222222222222,
+   "errors_by_status_flagged": {},
+   "by_flag": {
+    "F1": {
+     "flagged": 341,
+     "errors_caught": 0
+    },
+    "F2": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 20
+  },
+  "d_diff_real": {
+   "units": 1440,
+   "flagged": 1370,
+   "flagged_share": 0.9513888888888888,
+   "errors": 12,
+   "recall": 1.0,
+   "recall_lower95": 1.0,
+   "recall_ci95": [
+    1.0,
+    1.0
+   ],
+   "error_rate_flagged": 0.008759124087591242,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "random_baseline_recall": 0.9513888888888888,
+   "errors_by_status_flagged": {
+    "stale|flagged": 2,
+    "wrong|flagged": 10
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 1298,
+     "errors_caught": 11
+    },
+    "F2": {
+     "flagged": 71,
+     "errors_caught": 0
+    },
+    "F3": {
+     "flagged": 6,
+     "errors_caught": 1
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 20
+  }
+ }
+}

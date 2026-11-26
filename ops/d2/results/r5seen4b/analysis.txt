@@ -1,0 +1,11 @@
+D2' Analysis Verdict: UNRESOLVED (sets=16, B=10000, seed=20261125)
+  [1] Coverage: 318/320 = 99.4% (with_source=318/320, threshold>=80%) -> PASS
+  [2] Miss diff (c-b): -0.0156 (95% upper=0.0000, margin<0.10; c=0.0%, b=1.6%, n=64) -> NONINFERIOR
+  [3] Token ratio (b/c): 4.53x 95% CI [2.58, 7.97] (n=64/64) -> UNRESOLVED
+  [3] Calls ratio (b/c): 3.11x 95% CI [2.28, 4.17] (n=64/64)
+  [3] Wall  ratio (b/c): 2.82x 95% CI [1.53, 5.39] (n=64/64)
+  [4] Secondary:
+      c_vs_d: miss(c-d)=n/a (upper95=n/a), tok(d/c)=n/ax [n/a, n/a]
+      d_vs_b: miss(d-b)=n/a (upper95=n/a), tok(b/d)=n/ax [n/a, n/a]
+      false_mod: a=0/1104(0.0% [0.0%, 0.0%]); b=5/1204(0.4% [0.0%, 1.2%]); cV5=2/1203(0.2% [0.0%, 0.4%]); d_diff_real=22/1187(1.9% [0.6%, 3.4%])
+      residual_stale: a(c1=16,c2=36,c3=52,c4=64) b(c1=1,c2=0,c3=0,c4=0) cV5(c1=0,c2=0,c3=0,c4=0) d_diff_real(c1=1,c2=2,c3=2,c4=3)

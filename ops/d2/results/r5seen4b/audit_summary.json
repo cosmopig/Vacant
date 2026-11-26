@@ -1,0 +1,214 @@
+{
+ "attribution_table": {
+  "a": {
+   "miss": {
+    "not maintained (arm a)": 64
+   }
+  },
+  "b": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 5
+   },
+   "miss": {
+    "page not re-read": 1
+   }
+  },
+  "c0": {
+   "draft_wrong": {
+    "first draft already wrong": 2
+   }
+  },
+  "cV5": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 2
+   }
+  },
+  "d_diff_real": {
+   "false_mod": {
+    "agent changed a correct value wrongly": 22
+   },
+   "miss": {
+    "page not re-read": 5
+   }
+  }
+ },
+ "baseline_refreshed_while_stale": 0,
+ "chain_verification_summary": {
+  "blobs_bad": 0,
+  "blobs_checked": 13171,
+  "chains": 80,
+  "hash_chain_ok": 80,
+  "index_files_bad": 0,
+  "index_files_checked": 278,
+  "signatures_ok": 80,
+  "signer_trusted": 80
+ },
+ "coverage": {
+  "by_fetch_idiom": {
+   "one url, stdout": {
+    "claims": 300,
+    "correct_page": 300,
+    "sets": 15
+   },
+   "redirect into workspace file": {
+    "claims": 20,
+    "correct_page": 18,
+    "sets": 1
+   }
+  },
+  "claims": 320,
+  "correct_page": 318,
+  "with_source": 318
+ },
+ "harness_match": {
+  "examples": [],
+  "mismatches": 0,
+  "rows": 5440
+ },
+ "provenance_summary": {
+  "a": {
+   "candidates_only": 183,
+   "claims": 320,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 183,
+   "write_step": 320
+  },
+  "b": {
+   "candidates_only": 180,
+   "claims": 320,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 180,
+   "write_step": 315
+  },
+  "cV5": {
+   "candidates_only": 183,
+   "claims": 320,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 183,
+   "write_step": 320
+  },
+  "d_diff_real": {
+   "candidates_only": 140,
+   "claims": 320,
+   "product_provenance": 0,
+   "product_provenance_correct_page": 0,
+   "server_saw_fetch": 140,
+   "write_step": 312
+  }
+ },
+ "record_problems": [],
+ "summary": {
+  "arms": {
+   "a": {
+    "changed_claims": 64,
+    "changed_claims_pre_correct": 64,
+    "false_mod": 0,
+    "latency_hist": {
+     "None": 64
+    },
+    "miss_rate": 1.0,
+    "miss_rate_pre_correct": 1.0,
+    "missed": 64,
+    "missed_pre_correct": 64,
+    "stale_residual_by_cycle": {
+     "1": 16,
+     "2": 36,
+     "3": 52,
+     "4": 64
+    },
+    "unchanged_correct_claims": 1104,
+    "wrong_by_cycle": {
+     "1": 18,
+     "2": 38,
+     "3": 54,
+     "4": 66
+    }
+   },
+   "b": {
+    "changed_claims": 64,
+    "changed_claims_pre_correct": 64,
+    "false_mod": 5,
+    "latency_hist": {
+     "0": 63,
+     "1": 1
+    },
+    "miss_rate": 0.0156,
+    "miss_rate_pre_correct": 0.0156,
+    "missed": 1,
+    "missed_pre_correct": 1,
+    "stale_residual_by_cycle": {
+     "1": 1,
+     "2": 0,
+     "3": 0,
+     "4": 0
+    },
+    "unchanged_correct_claims": 1204,
+    "wrong_by_cycle": {
+     "1": 1,
+     "2": 4,
+     "3": 5,
+     "4": 5
+    }
+   },
+   "cV5": {
+    "changed_claims": 64,
+    "changed_claims_pre_correct": 64,
+    "false_mod": 2,
+    "latency_hist": {
+     "0": 64
+    },
+    "miss_rate": 0.0,
+    "miss_rate_pre_correct": 0.0,
+    "missed": 0,
+    "missed_pre_correct": 0,
+    "stale_residual_by_cycle": {
+     "1": 0,
+     "2": 0,
+     "3": 0,
+     "4": 0
+    },
+    "unchanged_correct_claims": 1203,
+    "wrong_by_cycle": {
+     "1": 3,
+     "2": 4,
+     "3": 4,
+     "4": 4
+    }
+   },
+   "d_diff_real": {
+    "changed_claims": 64,
+    "changed_claims_pre_correct": 64,
+    "false_mod": 22,
+    "latency_hist": {
+     "0": 59,
+     "2": 2,
+     "None": 3
+    },
+    "miss_rate": 0.0781,
+    "miss_rate_pre_correct": 0.0781,
+    "missed": 5,
+    "missed_pre_correct": 5,
+    "stale_residual_by_cycle": {
+     "1": 1,
+     "2": 2,
+     "3": 2,
+     "4": 3
+    },
+    "unchanged_correct_claims": 1187,
+    "wrong_by_cycle": {
+     "1": 3,
+     "2": 9,
+     "3": 15,
+     "4": 24
+    }
+   }
+  },
+  "c0": {
+   "claims": 320,
+   "correct": 318
+  }
+ }
+}
