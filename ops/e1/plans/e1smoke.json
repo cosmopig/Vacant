@@ -1,0 +1,24 @@
+{
+ "schema": "vacant.e1.plan/1",
+ "id": "e1smoke",
+ "chains_dir": "~/dev/ops/e1/cal_smoke_chains",
+ "arms": [
+  "B0",
+  "B0x3",
+  "B2",
+  "S",
+  "S+B2",
+  "O"
+ ],
+ "model": {
+  "providers": [
+   "lms1003q9"
+  ],
+  "model": "qwen/qwen3.5-9b",
+  "pi_cfg_dir": "~/dev/ops/agentcfg/d2v52",
+  "ctx": 131072
+ },
+ "jobs": 2,
+ "attempt_timeout_s": 600,
+ "purpose": "冒煙（不是證據）：六臂在真模型上跑得通（用校準鏈各 1 條）。"
+}

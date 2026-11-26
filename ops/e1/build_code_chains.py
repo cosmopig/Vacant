@@ -184,6 +184,11 @@ def _find_in_file_callers(solution_src: str, target_fn: str) -> list[str]:
     return callers
 
 
+import builtins as _builtins
+_BUILTIN_NAMES = set(dir(_builtins))
+EXCLUDE_TASK_IDS: set[str] = set()
+
+
 def _bindings_compatible(selected: list[dict], cand: dict) -> bool:
     """確認加入 `cand` 不會與既有題目發生函式名或頂層綁定名稱碰撞。"""
     used_eps = {p["entry_point"] for p in selected}
@@ -222,8 +227,9 @@ def build_code_chains(
     parsed_pool: list[dict] = []
     for r in rows:
         p = _parse_problem_source(r)
-        if p is not None and len(p["base_input"]) > 0 and len(p["plus_input"]) > 0:
-            parsed_pool.append(p)
+        if p is not None and len(p["base_input"]) > 0 and len(p["plus_input"]) > 0 \
+                and p["entry_point"] not in _BUILTIN_NAMES and p["task_id"] not in EXCLUDE_TASK_IDS:
+            parsed_pool.append(p)   # 函式名不得遮蔽內建名稱（例：MBPP 的 `sum` 會弄壞同檔其他函式）；排除校準鏈用過的題
 
     rng = random.Random(seed)
     order = list(range(len(parsed_pool)))
@@ -474,7 +480,21 @@ def main() -> int:
     ap.add_argument("--max-plus", type=int, default=None, help="選用：每題最多取幾筆 plus_input（預設全部）")
     ap.add_argument("--timeout", type=float, default=8.0, help="單題無網路沙箱計算逾時秒數")
     ap.add_argument("--allow-custom-evalplus", action="store_true", help="僅供單元測試假題庫略過 sha256 驗證")
+    ap.add_argument("--exclude-chains", type=pathlib.Path, action="append", default=[],
+                    help="排除這些鏈目錄（例如校準鏈）用過的題目 task_id")
     args = ap.parse_args()
+    import json as _json
+    for d in args.exclude_chains:
+        for f in sorted(pathlib.Path(d).glob("*/chain.json")):
+            c = _json.loads(f.read_text())
+            EXCLUDE_TASK_IDS.update(map(str, c.get("initial_task_ids") or []))
+            for r in c.get("rounds") or []:
+                for k in ("task_id", "task_ids", "new_task_id", "added_task_id"):
+                    v = r.get(k)
+                    if isinstance(v, str):
+                        EXCLUDE_TASK_IDS.add(v)
+                    elif isinstance(v, list):
+                        EXCLUDE_TASK_IDS.update(map(str, v))
 
     idx = build_code_chains(
         seed=args.seed,
