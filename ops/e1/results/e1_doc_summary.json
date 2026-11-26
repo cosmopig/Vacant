@@ -1,0 +1,302 @@
+{
+  "arms": {
+    "B0": {
+      "attempts_per_chain_mean": 4.0,
+      "attempts_total": 48,
+      "infra_void_chains": [],
+      "n_chains": 12,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.308,
+      "new_req_completion_rate": 0.2875,
+      "new_req_passed": 23,
+      "new_req_total": 80,
+      "per_round_success": {
+        "1": {
+          "passed": 6,
+          "rate": 0.5,
+          "total": 12
+        },
+        "2": {
+          "passed": 1,
+          "rate": 0.0833,
+          "total": 12
+        },
+        "3": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "4": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        }
+      },
+      "primary_final_all_pass_count": 0,
+      "primary_final_all_pass_rate": 0.0,
+      "regression_chain_count": 12,
+      "regression_chain_rate": 1.0,
+      "regression_obligation_count": 73,
+      "regression_obligation_denom": 855,
+      "regression_obligation_rate": 0.0854,
+      "rejected_units_per_chain_mean": 0.0,
+      "rejected_units_total": 0,
+      "tokens_in_per_chain_mean": 1102073.5,
+      "tokens_out_per_chain_mean": 6355.8333,
+      "tokens_total_per_chain_mean": 1108429.3333,
+      "tokens_total_per_chain_median": 965085.0,
+      "wall_s_per_chain_mean": 271.6319,
+      "wall_s_per_chain_median": 262.808,
+      "wall_s_total": 3259.583
+    },
+    "B2": {
+      "attempts_per_chain_mean": 4.5,
+      "attempts_total": 54,
+      "infra_void_chains": [],
+      "n_chains": 12,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.1486,
+      "new_req_completion_rate": 0.2,
+      "new_req_passed": 16,
+      "new_req_total": 80,
+      "per_round_success": {
+        "1": {
+          "passed": 6,
+          "rate": 0.5,
+          "total": 12
+        },
+        "2": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "3": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "4": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        }
+      },
+      "primary_final_all_pass_count": 0,
+      "primary_final_all_pass_rate": 0.0,
+      "regression_chain_count": 12,
+      "regression_chain_rate": 1.0,
+      "regression_obligation_count": 73,
+      "regression_obligation_denom": 854,
+      "regression_obligation_rate": 0.0855,
+      "rejected_units_per_chain_mean": 0.0,
+      "rejected_units_total": 0,
+      "tokens_in_per_chain_mean": 2115012.25,
+      "tokens_out_per_chain_mean": 13227.4167,
+      "tokens_total_per_chain_mean": 2128239.6667,
+      "tokens_total_per_chain_median": 1677358.5,
+      "wall_s_per_chain_mean": 441.1931,
+      "wall_s_per_chain_median": 355.113,
+      "wall_s_total": 5294.317
+    },
+    "O": {
+      "attempts_per_chain_mean": 4.0,
+      "attempts_total": 48,
+      "infra_void_chains": [],
+      "n_chains": 12,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.2364,
+      "new_req_completion_rate": 0.25,
+      "new_req_passed": 20,
+      "new_req_total": 80,
+      "per_round_success": {
+        "1": {
+          "passed": 6,
+          "rate": 0.5,
+          "total": 12
+        },
+        "2": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "3": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "4": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        }
+      },
+      "primary_final_all_pass_count": 0,
+      "primary_final_all_pass_rate": 0.0,
+      "regression_chain_count": 12,
+      "regression_chain_rate": 1.0,
+      "regression_obligation_count": 50,
+      "regression_obligation_denom": 863,
+      "regression_obligation_rate": 0.0579,
+      "rejected_units_per_chain_mean": 9.75,
+      "rejected_units_total": 117,
+      "scope_diagnostics": {
+        "accepted_in_scope_but_wrong": 13,
+        "rejected_but_correct_harmful": 23,
+        "rejected_candidate_correct_all": 23
+      },
+      "tokens_in_per_chain_mean": 1538660.25,
+      "tokens_out_per_chain_mean": 8594.75,
+      "tokens_total_per_chain_mean": 1547255.0,
+      "tokens_total_per_chain_median": 861744.5,
+      "wall_s_per_chain_mean": 353.9066,
+      "wall_s_per_chain_median": 246.8465,
+      "wall_s_total": 4246.879
+    },
+    "S": {
+      "attempts_per_chain_mean": 4.0,
+      "attempts_total": 48,
+      "infra_void_chains": [],
+      "n_chains": 12,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.3403,
+      "new_req_completion_rate": 0.3625,
+      "new_req_passed": 29,
+      "new_req_total": 80,
+      "per_round_success": {
+        "1": {
+          "passed": 8,
+          "rate": 0.6667,
+          "total": 12
+        },
+        "2": {
+          "passed": 1,
+          "rate": 0.0833,
+          "total": 12
+        },
+        "3": {
+          "passed": 1,
+          "rate": 0.0833,
+          "total": 12
+        },
+        "4": {
+          "passed": 1,
+          "rate": 0.0833,
+          "total": 12
+        }
+      },
+      "primary_final_all_pass_count": 1,
+      "primary_final_all_pass_rate": 0.0833,
+      "regression_chain_count": 12,
+      "regression_chain_rate": 1.0,
+      "regression_obligation_count": 80,
+      "regression_obligation_denom": 836,
+      "regression_obligation_rate": 0.0957,
+      "rejected_units_per_chain_mean": 5.5,
+      "rejected_units_total": 66,
+      "scope_diagnostics": {
+        "accepted_in_scope_but_wrong": 59,
+        "rejected_but_correct_harmful": 0,
+        "rejected_candidate_correct_all": 0
+      },
+      "tokens_in_per_chain_mean": 1174602.5833,
+      "tokens_out_per_chain_mean": 6995.8333,
+      "tokens_total_per_chain_mean": 1181598.4167,
+      "tokens_total_per_chain_median": 922377.5,
+      "wall_s_per_chain_mean": 257.2723,
+      "wall_s_per_chain_median": 257.256,
+      "wall_s_total": 3087.268
+    },
+    "S+B2": {
+      "attempts_per_chain_mean": 4.4167,
+      "attempts_total": 53,
+      "infra_void_chains": [],
+      "n_chains": 12,
+      "n_infra_void_chains": 0,
+      "new_req_chain_mean_rate": 0.4028,
+      "new_req_completion_rate": 0.35,
+      "new_req_passed": 28,
+      "new_req_total": 80,
+      "per_round_success": {
+        "1": {
+          "passed": 5,
+          "rate": 0.4167,
+          "total": 12
+        },
+        "2": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "3": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        },
+        "4": {
+          "passed": 0,
+          "rate": 0.0,
+          "total": 12
+        }
+      },
+      "primary_final_all_pass_count": 0,
+      "primary_final_all_pass_rate": 0.0,
+      "regression_chain_count": 12,
+      "regression_chain_rate": 1.0,
+      "regression_obligation_count": 64,
+      "regression_obligation_denom": 861,
+      "regression_obligation_rate": 0.0743,
+      "rejected_units_per_chain_mean": 0.5833,
+      "rejected_units_total": 7,
+      "scope_diagnostics": {
+        "accepted_in_scope_but_wrong": 29,
+        "rejected_but_correct_harmful": 0,
+        "rejected_candidate_correct_all": 0
+      },
+      "tokens_in_per_chain_mean": 1628398.6667,
+      "tokens_out_per_chain_mean": 11751.5833,
+      "tokens_total_per_chain_mean": 1640150.25,
+      "tokens_total_per_chain_median": 1118766.0,
+      "wall_s_per_chain_mean": 473.681,
+      "wall_s_per_chain_median": 308.115,
+      "wall_s_total": 5684.172
+    }
+  },
+  "cluster_unit": "chain_id",
+  "paired_vs_B0": {
+    "B2": {
+      "arm_only_pass": 0,
+      "b0_only_pass": 0,
+      "both_fail": 12,
+      "both_pass": 0,
+      "mcnemar_exact_p": 1.0,
+      "n_paired_chains": 12
+    },
+    "O": {
+      "arm_only_pass": 0,
+      "b0_only_pass": 0,
+      "both_fail": 12,
+      "both_pass": 0,
+      "mcnemar_exact_p": 1.0,
+      "n_paired_chains": 12
+    },
+    "S": {
+      "arm_only_pass": 1,
+      "b0_only_pass": 0,
+      "both_fail": 11,
+      "both_pass": 0,
+      "mcnemar_exact_p": 1.0,
+      "n_paired_chains": 12
+    },
+    "S+B2": {
+      "arm_only_pass": 0,
+      "b0_only_pass": 0,
+      "both_fail": 12,
+      "both_pass": 0,
+      "mcnemar_exact_p": 1.0,
+      "n_paired_chains": 12
+    }
+  },
+  "plan_id": "e1_doc",
+  "root": "~/dev/ops/e1/run_doc",
+  "schema": "vacant.e1.analysis/1"
+}
