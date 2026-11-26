@@ -118,6 +118,7 @@ def install_status() -> dict[str, Any]:
         rows.append({"name": name, "binary": s.get("binary"), "installed": bool(s.get("installed")),
                      "health": health, "config": s.get("config", []),
                      "installed_at": meta.get("installed_at")})
+    from .intake.keys import signing_key_posture
     return {
         "version": __version__,
         "vacant_home": str(state_dir()),
@@ -127,6 +128,7 @@ def install_status() -> dict[str, Any]:
         "mode": current_mode(),
         "mode_env_override": bool(os.environ.get("VACANT_MODE") or os.environ.get("VACANT_TRACE") == "0"),
         "budget_reminder": budget_reminder_on(),
+        "signing_key": signing_key_posture("verifier"),
         "agents": rows,
         "agents_error": agents_error,
     }

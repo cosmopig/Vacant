@@ -249,8 +249,23 @@ def vacant_state_dir() -> pathlib.Path:
 
 def _protected(contract) -> tuple[list[pathlib.Path], list[pathlib.Path]]:
     """回 `(寫入受保護, 讀取也受保護)`。"""
+    from ..intake import keys as _keys
     write_prot = [vacant_state_dir()]
     read_prot = [vacant_state_dir() / "intake" / "keys"]
+    # 若透過 VACANT_SIGNING_KEY_PATH／VACANT_KEYS_DIR／config.json 將金鑰放在狀態目錄外，
+    # 掛鉤的字串層保護同樣拒絕讀寫該路徑（誠實邊界 1：字串層非隔離保證）。
+    try:
+        vkp = _keys.signing_key_path("verifier")
+        if vkp not in read_prot:
+            read_prot.append(vkp)
+            write_prot.append(vkp)
+        kdir_env = os.environ.get(_keys.KEYS_DIR_ENV, "").strip()
+        if kdir_env:
+            kp = pathlib.Path(kdir_env).expanduser()
+            read_prot.append(kp)
+            write_prot.append(kp)
+    except Exception:  # noqa: BLE001 — fail-open
+        pass
     if contract is not None:
         if contract.path:
             write_prot.append(contract.path)
