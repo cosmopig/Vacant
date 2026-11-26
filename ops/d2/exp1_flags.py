@@ -230,7 +230,10 @@ def main() -> int:
                                           (in_rate / out_rate) if in_rate is not None and out_rate else None, er / n if n else None)}
     res = {"root": root.name, "arms": arms, "overall": summarize(rows),
            "by_arm": {ar: summarize([r for r in rows if r["arm"] == ar]) for ar in sorted({r["arm"] for r in rows})},
-           "by_domain": {dm: summarize([r for r in rows if r["domain"] == dm]) for dm in sorted({r["domain"] for r in rows})}}
+           "by_domain": {dm: summarize([r for r in rows if r["domain"] == dm]) for dm in sorted({r["domain"] for r in rows})},
+           "overall_excl_missing": summarize([r for r in rows if r["status"] != "missing"]),
+           "by_domain_excl_missing": {dm: summarize([r for r in rows if r["domain"] == dm and r["status"] != "missing"])
+                                      for dm in sorted({r["domain"] for r in rows})}}
     pathlib.Path(a.out).expanduser().write_text(json.dumps({**res, "rows": rows}, ensure_ascii=False, indent=1))
     print(json.dumps({k: v for k, v in res.items()}, ensure_ascii=False)[:3000])
     return 0
