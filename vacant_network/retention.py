@@ -662,10 +662,419 @@ def _atomic_write_json(path: pathlib.Path, obj: Any) -> None:
     os.replace(tmp, path)
 
 
+def _is_blob_sha(v: Any) -> bool:
+    """純 64 碼小寫十六進位 sha256（排除 link:/big:/secret: 前綴與畸形字串）。"""
+    return isinstance(v, str) and len(v) == 64 and ":" not in v and all(c in "0123456789abcdef" for c in v)
+
+
+def _iter_chain_files(pdir: pathlib.Path) -> list[pathlib.Path]:
+    """列舉專案所有殘存封印卷（按卷號排序）＋活動卷 `chain.ndjson`。"""
+    vols: list[tuple[int, pathlib.Path]] = []
+    if pdir.is_dir():
+        for q in pdir.iterdir():
+            if q.is_file() and q.name.startswith("chain-"):
+                stem = q.name.removeprefix("chain-")
+                if stem.endswith(".ndjson.gz"):
+                    num_str = stem.removesuffix(".ndjson.gz")
+                elif stem.endswith(".ndjson"):
+                    num_str = stem.removesuffix(".ndjson")
+                else:
+                    continue
+                if num_str.isdigit():
+                    vols.append((int(num_str), q))
+    vols.sort(key=lambda x: x[0])
+    out = [q for _, q in vols]
+    active = pdir / "chain.ndjson"
+    if active.is_file():
+        out.append(active)
+    return out
+
+
+def _read_chain_events(chain_files: list[pathlib.Path]) -> list[dict[str, Any]]:
+    events: list[dict[str, Any]] = []
+    for cf in chain_files:
+        with contextlib.suppress(OSError, EOFError, zlib.error):
+            if cf.name.endswith(".gz"):
+                import gzip
+                with gzip.open(cf, "rt", encoding="utf-8", errors="replace") as gz_f:
+                    lines = gz_f.readlines()
+            else:
+                lines = cf.read_text(encoding="utf-8", errors="replace").splitlines()
+            for ln in lines:
+                if not ln.strip():
+                    continue
+                with contextlib.suppress(ValueError):
+                    row = json.loads(ln)
+                    if isinstance(row, dict):
+                        events.append({"seq": row.get("seq", 0), "type": row.get("type"),
+                                       **(row.get("payload") or {})})
+    return events
+
+
+def _collect_event_direct_refs(
+    e: dict[str, Any],
+    blobs: W.Blobs,
+    *,
+    seen_payload_blobs: set[str] | None = None,
+) -> tuple[list[tuple[str, str]], list[tuple[str, str]], list[tuple[str, str]]]:
+    """從單一事件抽出 `(必須在庫的直接 blob [(sha, field)], 索引 blob [(sha, field)], 變更前/附帶 sha [(sha, field)])`。
+
+    涵蓋全部事件類型：step、unrecorded_change、checkpoint_restore、prompt、transcript、
+    coverage（baseline＋rescanned）、session_closed、source_snapshot（pages）、source_fetch（sha256）、
+    source_check、以及溢出到 `payload_blob`/`writes_blob`/`reads_blob`/`changes_blob` 的內容。"""
+    direct: list[tuple[str, str]] = []
+    indices: list[tuple[str, str]] = []
+    before_shas: list[tuple[str, str]] = []
+    seen_pb = seen_payload_blobs if seen_payload_blobs is not None else set()
+    t = e.get("type")
+
+    # 通用溢出 blob（_fit 寫出的 payload_blob / writes_blob / reads_blob / changes_blob）
+    for bk in ("payload_blob", "writes_blob", "reads_blob", "changes_blob"):
+        bv = e.get(bk)
+        if _is_blob_sha(bv):
+            direct.append((bv, bk))
+
+    pb = e.get("payload_blob")
+    if _is_blob_sha(pb) and pb not in seen_pb and blobs.has(pb):
+        seen_pb.add(pb)
+        with contextlib.suppress(OSError, ValueError):
+            inner = json.loads(blobs.get(pb))
+            if isinstance(inner, dict):
+                sub_e = {"type": t, **inner}
+                d2, i2, b2 = _collect_event_direct_refs(sub_e, blobs, seen_payload_blobs=seen_pb)
+                direct.extend(d2)
+                indices.extend(i2)
+                before_shas.extend(b2)
+
+    if t == "step":
+        for k in ("input_blob", "output_blob"):
+            v = e.get(k)
+            if _is_blob_sha(v):
+                direct.append((v, k))
+        for k in ("pre_index", "post_index"):
+            v = e.get(k)
+            if _is_blob_sha(v):
+                indices.append((v, k))
+        reads = list(e.get("reads") or [])
+        rb = e.get("reads_blob")
+        if _is_blob_sha(rb) and blobs.has(rb):
+            with contextlib.suppress(OSError, ValueError):
+                loaded_r = json.loads(blobs.get(rb))
+                if isinstance(loaded_r, list):
+                    reads = loaded_r
+        for r in reads:
+            if isinstance(r, dict) and _is_blob_sha(r.get("blob")):
+                direct.append((r["blob"], "reads.blob"))
+        writes = list(e.get("writes") or [])
+        wb = e.get("writes_blob")
+        if _is_blob_sha(wb) and blobs.has(wb):
+            with contextlib.suppress(OSError, ValueError):
+                loaded_w = json.loads(blobs.get(wb))
+                if isinstance(loaded_w, list):
+                    writes = loaded_w
+        for w in writes:
+            if isinstance(w, dict):
+                if _is_blob_sha(w.get("after")):
+                    direct.append((w["after"], "writes.after"))
+                if _is_blob_sha(w.get("before")):
+                    before_shas.append((w["before"], "writes.before"))
+    elif t == "unrecorded_change":
+        for k in ("before_index", "after_index"):
+            v = e.get(k)
+            if _is_blob_sha(v):
+                indices.append((v, k))
+        changes = list(e.get("changes") or [])
+        cb = e.get("changes_blob")
+        if _is_blob_sha(cb) and blobs.has(cb):
+            with contextlib.suppress(OSError, ValueError):
+                loaded_c = json.loads(blobs.get(cb))
+                if isinstance(loaded_c, list):
+                    changes = loaded_c
+        for ch in changes:
+            if isinstance(ch, dict):
+                if _is_blob_sha(ch.get("after")):
+                    direct.append((ch["after"], "changes.after"))
+                if _is_blob_sha(ch.get("before")):
+                    before_shas.append((ch["before"], "changes.before"))
+    elif t == "checkpoint_restore":
+        tidx = e.get("target_index")
+        if _is_blob_sha(tidx):
+            indices.append((tidx, "target_index"))
+        for ch in e.get("changes") or []:
+            if isinstance(ch, dict):
+                if _is_blob_sha(ch.get("after")):
+                    direct.append((ch["after"], "changes.after"))
+                if _is_blob_sha(ch.get("before")):
+                    before_shas.append((ch["before"], "changes.before"))
+    elif t == "prompt":
+        tb = e.get("text_blob")
+        if _is_blob_sha(tb):
+            direct.append((tb, "text_blob"))
+    elif t == "transcript":
+        for k in ("blob", "sha256", "transcript_blob"):
+            v = e.get(k)
+            if _is_blob_sha(v):
+                direct.append((v, k))
+    elif t == "coverage":
+        for subk in ("baseline", "rescanned"):
+            sub = e.get(subk)
+            if isinstance(sub, dict) and _is_blob_sha(sub.get("index")):
+                indices.append((sub["index"], f"{subk}.index"))
+    elif t == "session_closed":
+        fidx = e.get("final_index")
+        if _is_blob_sha(fidx):
+            indices.append((fidx, "final_index"))
+    elif t == "source_snapshot":
+        pages = e.get("pages")
+        if isinstance(pages, dict):
+            for u, sha in pages.items():
+                if _is_blob_sha(sha):
+                    direct.append((sha, f"pages[{u}]"))
+    elif t == "source_fetch":
+        sha = e.get("sha256")
+        if _is_blob_sha(sha):
+            direct.append((sha, "sha256"))
+    elif t == "source_check":
+        pages = e.get("pages")
+        if isinstance(pages, dict):
+            for u, sha in pages.items():
+                if _is_blob_sha(sha):
+                    direct.append((sha, f"pages[{u}]"))
+        for cl in e.get("claims") or []:
+            if isinstance(cl, dict):
+                src = cl.get("source")
+                if isinstance(src, dict):
+                    for k in ("blob", "sha256"):
+                        if _is_blob_sha(src.get(k)):
+                            direct.append((src[k], f"claims.source.{k}"))
+    return direct, indices, before_shas
+
+
+def collect_project_blob_refs(
+    pdir: pathlib.Path,
+    blobs: W.Blobs,
+    *,
+    base_cache: dict[str, dict[str, W.Entry]] | None = None,
+) -> dict[str, Any]:
+    """掃描單一專案的全部簽章鏈卷、`state.json` 與 `egress.jsonl`，回傳所有被引用的物件集合。
+
+    回傳：
+      - `expected_store_refs`: `{sha: [{"seq", "type", "field"}, ...]}`（必須存在於 `objects/` 的物件）
+      - `index_shas`: 被引用的所有索引與差異基底索引 sha
+      - `index_file_refs`: `{sha: [{"index", "path"}, ...]}`（索引內指向的工作區檔案版本）
+      - `before_shas`: `writes/changes` 裡的 `before` sha 集合
+      - `all_shas`: 上述全部被引用 sha 的聯集（GC 保護集）
+      - `workspace`: 專案工作區路徑（若找得到且存在）
+    """
+    expected: dict[str, list[dict[str, Any]]] = {}
+    index_shas: set[str] = set()
+    index_file_refs: dict[str, list[dict[str, Any]]] = {}
+    before_shas: set[str] = set()
+    ws_path: pathlib.Path | None = None
+
+    def _add_expected(sha: str, seq: int, etype: str, field: str) -> None:
+        lst = expected.setdefault(sha, [])
+        if len(lst) < 8:
+            lst.append({"seq": seq, "type": etype, "field": field})
+
+    def _add_index(sha: str, seq: int, etype: str, field: str) -> None:
+        _add_expected(sha, seq, etype, field)
+        cur: str | None = sha
+        seen_chain: set[str] = set()
+        while cur and _is_blob_sha(cur) and cur not in seen_chain:
+            seen_chain.add(cur)
+            index_shas.add(cur)
+            base = _index_base_sha(blobs, cur)
+            if base and _is_blob_sha(base):
+                _add_expected(base, seq, etype, f"{field}.base")
+                cur = base
+            else:
+                break
+
+    with contextlib.suppress(OSError, ValueError):
+        pmeta = json.loads((pdir / "project.json").read_text(encoding="utf-8"))
+        if isinstance(pmeta, dict) and pmeta.get("workspace"):
+            cand = pathlib.Path(str(pmeta["workspace"]))
+            if cand.is_dir():
+                ws_path = cand
+
+    with contextlib.suppress(OSError, ValueError):
+        st = json.loads((pdir / "state.json").read_text(encoding="utf-8"))
+        if isinstance(st, dict):
+            if ws_path is None and st.get("workspace"):
+                cand = pathlib.Path(str(st["workspace"]))
+                if cand.is_dir():
+                    ws_path = cand
+            for k in ("last_index", "index_key"):
+                v = st.get(k)
+                if _is_blob_sha(v):
+                    _add_index(v, 0, "state", k)
+            for pend_map in (st.get("pending"), st.get("open")):
+                for pend in (pend_map or {}).values():
+                    if isinstance(pend, dict):
+                        for k in ("pre_index", "bound_index"):
+                            v = pend.get(k)
+                            if _is_blob_sha(v):
+                                _add_index(v, 0, "state.pending", k)
+                        ib = pend.get("input_blob")
+                        if _is_blob_sha(ib):
+                            _add_expected(ib, 0, "state.pending", "input_blob")
+
+    chain_files = _iter_chain_files(pdir)
+    events = _read_chain_events(chain_files)
+    for e in events:
+        t = str(e.get("type") or "")
+        seq_num = int(e.get("seq") or 0)
+        if t == "trace_genesis" and ws_path is None and e.get("workspace"):
+            cand = pathlib.Path(str(e["workspace"]))
+            if cand.is_dir():
+                ws_path = cand
+        direct, idxs, befores = _collect_event_direct_refs(e, blobs)
+        for sha, fld in direct:
+            _add_expected(sha, seq_num, t, fld)
+        for sha, fld in idxs:
+            _add_index(sha, seq_num, t, fld)
+        for sha, _fld in befores:
+            before_shas.add(sha)
+
+    # 未進鏈的網路出口紀錄（egress.jsonl）：先存進 objects/ 再由 ingest_egress 上鏈
+    eg_path = pdir / "egress.jsonl"
+    if eg_path.is_file():
+        with contextlib.suppress(OSError):
+            for ln in eg_path.read_text(encoding="utf-8", errors="replace").splitlines():
+                if not ln.strip():
+                    continue
+                with contextlib.suppress(ValueError):
+                    row = json.loads(ln)
+                    if isinstance(row, dict) and _is_blob_sha(row.get("sha256")):
+                        _add_expected(row["sha256"], 0, "egress_log", "sha256")
+
+    # 展開所有已存在於版本庫的索引，收集它們指向的檔案 sha
+    bc = base_cache if base_cache is not None else {}
+    for idx_sha in sorted(index_shas):
+        idx = _load_project_index(blobs, idx_sha, bc)
+        for rel, ent in idx.items():
+            if _is_blob_sha(ent.sha256):
+                lst = index_file_refs.setdefault(ent.sha256, [])
+                if len(lst) < 4:
+                    lst.append({"index": idx_sha, "path": rel})
+
+    all_shas = set(expected) | set(index_file_refs) | before_shas
+    return {
+        "expected_store_refs": expected,
+        "index_shas": index_shas,
+        "index_file_refs": index_file_refs,
+        "before_shas": before_shas,
+        "all_shas": all_shas,
+        "workspace": ws_path,
+    }
+
+
+def referenced_trace_blobs(root: pathlib.Path | None = None) -> set[str]:
+    """回傳 `$VACANT_HOME/trace/projects/*` 底下所有簽章鏈引用的 blob sha256 聯集。"""
+    sroot = _resolve_state_dir(root)
+    troot = sroot / "trace"
+    pdir = troot / "projects"
+    if not pdir.is_dir():
+        return set()
+    blobs = W.Blobs(troot / "objects")
+    base_cache: dict[str, dict[str, W.Entry]] = {}
+    out: set[str] = set()
+    for proj in sorted(x for x in pdir.iterdir() if x.is_dir()):
+        out |= collect_project_blob_refs(proj, blobs, base_cache=base_cache)["all_shas"]
+    return out
+
+
+def verify_trace_objects(
+    root: pathlib.Path | None = None,
+    *,
+    project_dir: pathlib.Path | None = None,
+    objects_root: pathlib.Path | None = None,
+    verify_hashes: bool = False,
+) -> dict[str, Any]:
+    """核對簽章鏈引用的所有內容定址物件是否仍在 `trace/objects/` 裡（2026-11-26 強化）。
+
+    對應獨立稽核發現（s43/c_verify 有 16 個被鏈引用的物件被舊版 GC 刪掉）：
+    - `missing`：事件直接引用（`input_blob`/`output_blob`/`text_blob`/`transcript`/`source_snapshot` `pages`/
+      `source_fetch` `sha256`/`reads.blob`/`writes.after`/`changes.after`/索引檔與差異基底/`payload_blob` 等）
+      但已不在 `objects/` 的物件。任一筆缺失 ⇒ `ok=False`。
+    - `corrupt`（`verify_hashes=True` 時檢查）：在 `objects/` 裡但位元組 sha256 對不上檔名。
+    - `unmaterializable_index_entries`：索引裡指向的檔案版本既不在 `objects/`、也不與工作區原檔吻合
+      （誠實報告；在 store-on-change 下，從未修改且事後在工作區被改掉的初始檔版本原本就不落盤）。
+    """
+    if project_dir is not None:
+        pdirs = [pathlib.Path(project_dir)]
+        obj_root = pathlib.Path(objects_root) if objects_root is not None else (
+            pathlib.Path(project_dir).parent.parent / "objects"
+        )
+    else:
+        sroot = _resolve_state_dir(root)
+        troot = sroot / "trace"
+        obj_root = pathlib.Path(objects_root) if objects_root is not None else (troot / "objects")
+        proj_root = troot / "projects"
+        pdirs = sorted(x for x in proj_root.iterdir() if x.is_dir()) if proj_root.is_dir() else []
+
+    blobs = W.Blobs(obj_root)
+    base_cache: dict[str, dict[str, W.Entry]] = {}
+    missing: list[dict[str, Any]] = []
+    corrupt: list[dict[str, Any]] = []
+    unmat: list[dict[str, Any]] = []
+    projects_checked = 0
+    referenced_total = 0
+    present_total = 0
+
+    for pdir in pdirs:
+        if not pdir.is_dir():
+            continue
+        if not _iter_chain_files(pdir) and not (pdir / "state.json").is_file():
+            continue
+        projects_checked += 1
+        info = collect_project_blob_refs(pdir, blobs, base_cache=base_cache)
+        expected: dict[str, list[dict[str, Any]]] = info["expected_store_refs"]
+        referenced_total += len(expected)
+        for sha, refs in sorted(expected.items()):
+            if not blobs.has(sha):
+                missing.append({"project": pdir.name, "sha256": sha, "refs": refs})
+            else:
+                present_total += 1
+                if verify_hashes:
+                    try:
+                        blobs.get(sha)
+                    except (OSError, ValueError) as exc:
+                        corrupt.append({"project": pdir.name, "sha256": sha, "error": str(exc)})
+        ws = info["workspace"]
+        for sha, irefs in sorted(info["index_file_refs"].items()):
+            if sha in expected or blobs.has(sha):
+                continue
+            live_ok = False
+            if ws is not None:
+                for ir in irefs:
+                    src = ws / ir["path"]
+                    with contextlib.suppress(OSError):
+                        if src.is_file() and not src.is_symlink() and W._sha_file(src) == sha:
+                            live_ok = True
+                            break
+            if not live_ok:
+                unmat.append({"project": pdir.name, "sha256": sha,
+                              "path": irefs[0]["path"], "index": irefs[0]["index"]})
+
+    return {
+        "ok": len(missing) == 0 and len(corrupt) == 0,
+        "projects_checked": projects_checked,
+        "referenced_count": referenced_total,
+        "present_count": present_total,
+        "missing_count": len(missing),
+        "corrupt_count": len(corrupt),
+        "missing": missing,
+        "corrupt": corrupt,
+        "unmaterializable_index_entries": unmat,
+    }
+
+
 def compact_trace(
     root: pathlib.Path | None = None,
     *,
-    keep_recent_steps: int = DEFAULT_KEEP_STEPS,
+    keep_recent_steps: int | None = None,
     prune_redundant_workspace_blobs: bool = True,
     max_age_days: float | None = None,
     keep_set_aside: int = DEFAULT_KEEP_SET_ASIDE,
@@ -675,17 +1084,24 @@ def compact_trace(
     target_bytes: int | None = None,
     orphan_grace_s: float = 0.0,
 ) -> dict[str, Any]:
-    """清理 `$VACANT_HOME/trace/` 下多餘的物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。
+    """清理 `$VACANT_HOME/trace/` 下未被引用的孤立物件與過期的擱置鏈，不動 `chain.ndjson` 與 `head.json`。
+
+    2026-11-26 紀錄強化：`keep_recent_steps` 預設改為 `None`（保留**整條鏈全部事件**引用的物件：
+    含 `input_blob`／`output_blob`／索引與差異基底／`source_snapshot` `pages`／`source_fetch` `sha256`／
+    `source_check`／`prompt`／`transcript`／`coverage` `rescanned.index`／`egress.jsonl`／`payload_blob`
+    與其內容），只刪除真正未被任何鏈引用的孤立物件。
+
+    僅當呼叫端明確給定 `keep_recent_steps=N`（例如 `--aggressive`／`--keep-steps N`）或 `target_bytes`
+    被超出時，才回收舊步驟的非結構性 blob；即使在 `target_bytes` 下，索引檔、`source_snapshot` `pages`、
+    `source_fetch` `sha256` 與溢出結構 blob 仍屬硬底（`structural_shas`）永不刪除。
 
     `target_bytes`（2026-10-28 Axis 2）：常規回收後若版本庫仍大於此位元組數，再按
     「工作區冗餘 → 最舊舊版本」的順序回收（見 `_sweep_to_target`）：讀取端回退
-    「工作區＋驗 sha」，取不回誠實回 UNKNOWN；必須保留的 blob 從不動。
+    「工作區＋驗 sha」，取不回誠實回 UNKNOWN；必須保留的結構物件從不動。
 
     round 72 設計決定（gc↔rescan whack-a-mole）：鏈上活動在 `active_window_s` 內（預設
-    7 天）的**活躍專案**，其「未變動且工作區原檔 bit 相同」的 live 背景 blob 正是那些
-    檔案下次被修改時所需的 before 版本，對它回收只買回 I/O、超時與失觀（下一次掃描
-    如數重存），故予以保留；**非活躍專案**（超出窗口）照舊回收。`active_window_s=None`
-    表示無活躍窗口（全部照舊回收）；`0.0` 等於「無任何專案活躍」。"""
+    7 天）的**活躍專案**，其「未變動且工作區原檔 bit 相同」的 live 背景 blob 予以保留；
+    **非活躍專案**（超出窗口）照舊回收。`active_window_s=None` 表示無活躍窗口；`0.0` 等於「無任何專案活躍」。"""
     sroot = _resolve_state_dir(root)
     troot = sroot / "trace"
     obj_root = troot / "objects"
@@ -887,12 +1303,15 @@ def compact_trace(
                         v = e.get(k)
                         if isinstance(v, str) and v:
                             aux_index_events.append((seq_num, v))
-                elif t == "coverage" and isinstance(e.get("baseline"), dict):
-                    bidx = e["baseline"].get("index")
-                    if isinstance(bidx, str) and bidx:
-                        if initial_idx is None:
-                            initial_idx = bidx
-                        aux_index_events.append((seq_num, bidx))
+                elif t == "coverage":
+                    for subk in ("baseline", "rescanned"):
+                        sub = e.get(subk)
+                        if isinstance(sub, dict):
+                            bidx = sub.get("index")
+                            if isinstance(bidx, str) and bidx:
+                                if subk == "baseline" and initial_idx is None:
+                                    initial_idx = bidx
+                                aux_index_events.append((seq_num, bidx))
                 elif t == "session_closed" and isinstance(e.get("final_index"), str):
                     fidx = e["final_index"]
                     if fidx:
@@ -906,22 +1325,27 @@ def compact_trace(
                         latest_idx = tidx
                         aux_index_events.append((seq_num, tidx))
 
-            # 保留最近 keep_recent_steps 步 ＋ 目前這個要求（last_user_seq 之後）的所有步驟
-            recent_steps = step_events[-keep_recent_steps:] if keep_recent_steps > 0 else []
-            kept_steps = {id(s): s for s in recent_steps}
-            if last_user_seq >= 0:
-                for s in step_events:
-                    if int(s.get("seq") or 0) > last_user_seq:
-                        kept_steps[id(s)] = s
+            # 預設（keep_recent_steps is None）：保留整條鏈**全部**事件引用的物件（不以步數視窗刪除）。
+            # 僅當呼叫端明確指定 keep_recent_steps=N 時，才按最近 N 步＋目前要求切視窗。
+            if keep_recent_steps is None:
+                kept_steps = {id(s): s for s in step_events}
+                min_kept_seq = 0
+            else:
+                recent_steps = step_events[-keep_recent_steps:] if keep_recent_steps > 0 else []
+                kept_steps = {id(s): s for s in recent_steps}
+                if last_user_seq >= 0:
+                    for s in step_events:
+                        if int(s.get("seq") or 0) > last_user_seq:
+                            kept_steps[id(s)] = s
 
-            min_kept_seq = (
-                min(
-                    (int(s.get("seq") or 0) for s in kept_steps.values()),
-                    default=(max((int(e.get("seq") or 0) for e in events), default=0) + 1),
+                min_kept_seq = (
+                    min(
+                        (int(s.get("seq") or 0) for s in kept_steps.values()),
+                        default=(max((int(e.get("seq") or 0) for e in events), default=0) + 1),
+                    )
+                    if len(step_events) > keep_recent_steps
+                    else 0
                 )
-                if len(step_events) > keep_recent_steps
-                else 0
-            )
             kept_sessions = {
                 str((s.get("actor") or {}).get("session") or "")
                 for s in kept_steps.values()
@@ -942,9 +1366,65 @@ def compact_trace(
                 _keep_index(latest_idx)
                 active_indices.add(latest_idx)
 
+            # 未進鏈的網路出口紀錄（egress.jsonl）：其 sha256 尚未上鏈也不可誤刪
+            eg_path = pdir / "egress.jsonl"
+            if eg_path.is_file():
+                with contextlib.suppress(OSError):
+                    for ln in eg_path.read_text(encoding="utf-8", errors="replace").splitlines():
+                        if not ln.strip():
+                            continue
+                        with contextlib.suppress(ValueError):
+                            row = json.loads(ln)
+                            if isinstance(row, dict) and _is_blob_sha(row.get("sha256")):
+                                keep_shas.add(row["sha256"])
+                                structural_shas.add(row["sha256"])
+
             for e in events:
                 t = e.get("type")
                 seq_num = int(e.get("seq") or 0)
+                # 來源快照／出口抓取／來源檢查與結構溢出 blob：整條鏈一律保護（含 target_bytes 硬底）
+                if t == "source_snapshot":
+                    pages = e.get("pages")
+                    if isinstance(pages, dict):
+                        for sha in pages.values():
+                            if _is_blob_sha(sha):
+                                keep_shas.add(sha)
+                                structural_shas.add(sha)
+                elif t == "source_fetch":
+                    sha = e.get("sha256")
+                    if _is_blob_sha(sha):
+                        keep_shas.add(sha)
+                        structural_shas.add(sha)
+                elif t == "source_check":
+                    pages = e.get("pages")
+                    if isinstance(pages, dict):
+                        for sha in pages.values():
+                            if _is_blob_sha(sha):
+                                keep_shas.add(sha)
+                                structural_shas.add(sha)
+                    for cl in e.get("claims") or []:
+                        if isinstance(cl, dict):
+                            src = cl.get("source")
+                            if isinstance(src, dict):
+                                for k in ("blob", "sha256"):
+                                    if _is_blob_sha(src.get(k)):
+                                        keep_shas.add(src[k])
+                                        structural_shas.add(src[k])
+                pb = e.get("payload_blob")
+                if _is_blob_sha(pb) and (keep_recent_steps is None or seq_num >= min_kept_seq):
+                    keep_shas.add(pb)
+                    structural_shas.add(pb)
+                    if blobs.has(pb):
+                        with contextlib.suppress(OSError, ValueError):
+                            inner = json.loads(blobs.get(pb))
+                            if isinstance(inner, dict):
+                                d2, i2, _b2 = _collect_event_direct_refs({"type": t, **inner}, blobs)
+                                for sha, _f in d2:
+                                    keep_shas.add(sha)
+                                    structural_shas.add(sha)
+                                for sha, _f in i2:
+                                    _keep_index(sha)
+                                    active_indices.add(sha)
                 if t == "transcript":
                     sess = str((e.get("actor") or {}).get("session") or "")
                     if seq_num >= min_kept_seq or (sess and sess in kept_sessions):
@@ -1689,7 +2169,7 @@ def gc_all(
     root: pathlib.Path | None = None,
     work_root: pathlib.Path | None = None,
     vrun_dirs: list[pathlib.Path] | None = None,
-    keep_recent_steps: int = DEFAULT_KEEP_STEPS,
+    keep_recent_steps: int | None = None,
     keep_latest_per_task: int = DEFAULT_KEEP_DECISIONS,
     keep_runs_per_task: int = DEFAULT_KEEP_RUNS,
     max_age_days: float | None = None,
@@ -1698,6 +2178,7 @@ def gc_all(
     aggressive: bool = False,
     dry_run: bool = False,
     verify: bool = False,
+    verify_objects: bool = False,
     budget: _Budget | None = None,
     target_bytes: int | None = None,
     orphan_grace_s: float = 0.0,
@@ -1713,7 +2194,7 @@ def gc_all(
         max_age_days = older_than_hours / 24.0
 
     if aggressive:
-        keep_recent_steps = min(keep_recent_steps, 10)
+        keep_recent_steps = 10 if keep_recent_steps is None else min(keep_recent_steps, 10)
         keep_latest_per_task = min(keep_latest_per_task, 1)
         keep_runs_per_task = 0
 
@@ -1786,6 +2267,10 @@ def gc_all(
         rep["verified_projects"] = v_count
         rep["verify_ok"] = v_ok
         rep["verify_errors"] = v_errs
+    if verify_objects:
+        obj_rep = verify_trace_objects(root)
+        rep["objects_verify"] = obj_rep
+        rep["objects_ok"] = obj_rep["ok"]
     return rep
 
 
@@ -2492,8 +2977,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help="vacant do 工作區根目錄（預設 $VACANT_WORK 或 ~/.vacant-work）")
     ap.add_argument("--vrun-dir", type=pathlib.Path, action="append", default=[],
                     help="額外清理的 vacant run 輸出目錄（可重複；移除 _frozen_ws/_origin_ws/wire_RUN-ON）")
-    ap.add_argument("--keep-steps", type=int, default=DEFAULT_KEEP_STEPS,
-                    help=f"每個專案保留完整步驟版本的最近步數（預設 {DEFAULT_KEEP_STEPS}）")
+    ap.add_argument("--keep-steps", type=int, default=None,
+                    help="每個專案保留完整步驟版本的最近步數（預設不設限，保留全部鏈引用物件）")
     ap.add_argument("--keep-runs", type=int, default=DEFAULT_KEEP_RUNS,
                     help=f"每個任務保留 ~/.vacant-work 的最近執行數（預設 {DEFAULT_KEEP_RUNS}）")
     ap.add_argument("--max-age-days", type=float, default=None,
@@ -2506,6 +2991,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help="只清理超過指定小時數的非必要物件（例如 0.5 代表 30 分鐘前）")
     ap.add_argument("--verify", action="store_true",
                     help="清理後自動對保留之專案執行 Recorder.verify() 驗簽，確保簽章鏈 100%% 完好")
+    ap.add_argument("--verify-objects", action="store_true",
+                    help="清理後檢查所有簽章鏈引用的物件是否仍存在於 trace/objects/，缺失則退出碼 1")
     ap.add_argument("--aggressive", action="store_true",
                     help="積極模式：只留最近 10 步、1 份候選、清空所有 ~/.vacant-work 舊目錄")
     ap.add_argument("--auto", action="store_true",
@@ -2569,11 +3056,13 @@ def main(argv: list[str] | None = None) -> int:
         aggressive=args.aggressive,
         dry_run=args.dry_run,
         verify=args.verify,
+        verify_objects=args.verify_objects,
         target_bytes=args.target_bytes,
     )
+    ok_all = rep.get("verify_ok", True) and rep.get("objects_ok", True)
     if args.json:
         print(json.dumps(rep, ensure_ascii=False, indent=2))
-        return 0 if rep.get("verify_ok", True) else 1
+        return 0 if ok_all else 1
     mode_tag = "（預覽 --dry-run，未刪除）" if rep["dry_run"] else "✓ 已清理"
     print(f"{mode_tag} 釋放空間：{_human_bytes(rep['bytes_freed'])}（共處理 {rep['files_removed']} 個檔案／項目）")
     tinfo = rep["trace"].get("target")
@@ -2608,8 +3097,15 @@ def main(argv: list[str] | None = None) -> int:
         if rep.get("verify_errors"):
             for err in rep["verify_errors"]:
                 print(f"    - {err}")
+    if args.verify_objects:
+        orep = rep.get("objects_verify") or {}
+        o_ok_tag = "完整 ✓" if orep.get("ok") else f"缺失 {orep.get('missing_count', 0)} 損毀 {orep.get('corrupt_count', 0)} ✗"
+        print(f"  · 物件引用 (--verify-objects): {orep.get('present_count', 0)}/{orep.get('referenced_count', 0)} {o_ok_tag}")
+        for m in (orep.get("missing") or [])[:10]:
+            ref0 = (m.get("refs") or [{}])[0]
+            print(f"    - missing {m['sha256'][:16]}… ({m['project']} seq={ref0.get('seq')} {ref0.get('type')}.{ref0.get('field')})")
     print("  （簽章鏈 chain.ndjson / ledger.ndjson / receipts_*.ndjson 完整保留，離線驗章不變）")
-    return 0 if rep.get("verify_ok", True) else 1
+    return 0 if ok_all else 1
 
 
 if __name__ == "__main__":  # pragma: no cover
