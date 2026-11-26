@@ -1,0 +1,35 @@
+{
+  "schema": "vacant.fl.plan/1",
+  "id": "fl_smoke_haiku",
+  "bank_path": "ops/gain/data/lcb_bank_v3.jsonl",
+  "index_path": "runs/INDEX.json",
+  "seed": 20261126,
+  "task_ids": [
+    "lcb_2728",
+    "lcb_2784"
+  ],
+  "arms": [
+    "B0",
+    "B0x3",
+    "GT",
+    "EX",
+    "TF",
+    "XM",
+    "MV",
+    "CT"
+  ],
+  "model": {
+    "agent": "claude",
+    "model": "claude-haiku-5-5",
+    "exam_model": "claude-haiku-5-5"
+  },
+  "jobs": 1,
+  "attempt_timeout_s": 300,
+  "eval_timeout_s": 45,
+  "per_fn_timeout_s": 20,
+  "per_call_timeout_s": 2.0,
+  "eval_mem_mb": 1024,
+  "max_attempts": 3,
+  "mv_num_inputs": 20,
+  "purpose": "Real Claude Haiku smoke (pipeline + cost check only, NOT statistical evidence): 2 LCB v3 tasks x all 8 arms."
+}
