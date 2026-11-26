@@ -24,11 +24,20 @@ VER = re.compile(r"v?(\d+\.\d+\.\d+)")
 NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 
+STRICT = False   # --strict（第六次稽核 11-26）：比對值裡的全部數字（「45 (3)」的進球數也算），不是只比第一個
+
+
 def canon(v: str | None) -> str | None:
-    """值的正規形：版本號 → `v1.2.3`；其他 → 第一個數字（去千分位、去幣別與單位）。讀不出 ⇒ None。"""
+    """值的正規形：版本號 → `v1.2.3`；其他 → 第一個數字（去千分位、去幣別與單位）。讀不出 ⇒ None。
+    STRICT：全部的版本號與數字依序串起來（「45 (3)」→ `45|3`）。"""
     if v is None:
         return None
     s = v.strip().strip("`*").strip()
+    if STRICT:
+        toks = [("v" + t[1:].lstrip("v")) if t.lower().startswith("v") else t.replace(",", "")
+                for t in re.findall(r"v?\d+(?:\.\d+){2,}|\d[\d,]*(?:\.\d+)?", s)]
+        toks = [t[:-2] if t.endswith(".0") else t for t in toks]
+        return "|".join(toks) if toks else None
     m = VER.search(s)
     if m:
         return "v" + m.group(1)
@@ -247,7 +256,10 @@ def main() -> int:
     ap.add_argument("--root", required=True)
     ap.add_argument("--manifest", required=True)
     ap.add_argument("--out")
+    ap.add_argument("--strict", action="store_true", help="比對值裡的全部數字（第六次稽核 11-26）")
     a = ap.parse_args()
+    global STRICT
+    STRICT = a.strict
     root = pathlib.Path(a.root)
     manifest = json.loads(pathlib.Path(a.manifest).read_text())
     reports, costs = load_harness(root)

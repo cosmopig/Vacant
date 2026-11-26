@@ -1,0 +1,11 @@
+{
+ "schema": "vacant.d2.prereg/1",
+ "id": "exp1_flags_amend2",
+ "amends": "ops/d2/plans/exp1_flags_prereg.json＋exp1_flags_prereg_amend1.json",
+ "registered": "2026-11-26，第六次獨立稽核之後、實驗一確認批次 A 已跑完但還沒有算任何評分或標記數字之前寫下並推上遠端（vacant-hope 11-26 轉達稽核要求）。",
+ "changes": {
+  "strict_scoring": "錯誤（對照用）一律用嚴格比對：score_d2.py --strict，比對值裡的全部數字（例：「45 (3)」的進球數也算），不是只比第一個數字。原評分器（只比第一個數字）照算、列為敏感度。理由：稽核發現原評分器在真實頁面上把 189 列判錯（第五輪 r5real 初稿正確應為 190/360 而不是 197/360）。E1′ 的文件類也用嚴格比對。",
+  "excluding_missing_lines": "另報「排除整行沒寫」的數字（9B 的錯誤約七成是整行沒寫，任何規則都幾乎必標）。",
+  "claims_wording": "事前寫明：結論只能說「能指出缺值、捏造與過期」，「讀錯值」（值在來源別處）若召回低就照實寫成已知盲點，不能說「能指出錯在哪」。Haiku 的高召回本質上是「來源變了」的偵測。"
+ }
+}
