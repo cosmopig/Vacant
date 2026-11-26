@@ -1,0 +1,66 @@
+{
+ "schema": "vacant.e1.plan/1",
+ "id": "e1_code36_1004",
+ "chains": [
+  "~/dev/ops/e1/code_chains36/code36_019",
+  "~/dev/ops/e1/code_chains36/code36_020",
+  "~/dev/ops/e1/code_chains36/code36_021",
+  "~/dev/ops/e1/code_chains36/code36_022",
+  "~/dev/ops/e1/code_chains36/code36_023",
+  "~/dev/ops/e1/code_chains36/code36_024",
+  "~/dev/ops/e1/code_chains36/code36_025",
+  "~/dev/ops/e1/code_chains36/code36_026",
+  "~/dev/ops/e1/code_chains36/code36_027",
+  "~/dev/ops/e1/code_chains36/code36_028",
+  "~/dev/ops/e1/code_chains36/code36_029",
+  "~/dev/ops/e1/code_chains36/code36_030",
+  "~/dev/ops/e1/code_chains36/code36_031",
+  "~/dev/ops/e1/code_chains36/code36_032",
+  "~/dev/ops/e1/code_chains36/code36_033",
+  "~/dev/ops/e1/code_chains36/code36_034",
+  "~/dev/ops/e1/code_chains36/code36_035",
+  "~/dev/ops/e1/code_chains36/code36_036"
+ ],
+ "arms": [
+  "B0",
+  "B0x3",
+  "B2",
+  "S",
+  "P",
+  "Z"
+ ],
+ "model": {
+  "providers": [
+   "lms1004q9"
+  ],
+  "model": "qwen/qwen3.5-9b",
+  "pi_cfg_dir": "~/dev/ops/agentcfg/d2v52",
+  "ctx": 131072
+ },
+ "jobs": 2,
+ "attempt_timeout_s": 600,
+ "purpose": "E1′ 程式類擴大批次（探索性）：36 條新鏈的 後 18 條、9B@1004、臂 B0／B0x3／B2／S／P／Z。兩台合併分析。",
+ "prereg": {
+  "registered": "2026-11-26，第一通模型呼叫之前推上遠端。探索性：每臂每鏈 1 次，不做確認性宣稱。方案由 vacant-hope 11-26 指定（第七次稽核之後）；36 條新鏈與先前 12 條及校準鏈的 EvalPlus 題號 0 重疊（新鏈之間有重複使用的題，見 DESIGN_LOG）。",
+  "questions": {
+   "a": "S 的效果來自範圍還是語法檢查：S 對 P（兩者都在候選檔不能解析時保留基線；S 另外只提交點名的函式）。",
+   "b": "不用任何測試或答案的 Z 能拿到 B2 整鏈成功增益的幾成：Z 對 B0x3（同預算對照）、Z 對 B2。比例＝(Z−B0x3)/(B2−B0x3)，以整鏈成功計；B2≤B0x3 時不計算比例、照實寫。",
+   "c": "範圍內改動造成的模組級故障（例如用了沒 import 的名稱）Z 擋不擋得住：數各臂這類事件（回合後模組不能載入）並看 Z 的 z_check.loads 擋下幾次。"
+  },
+  "primary": "整鏈成功率（第 5 輪後全部應存在函式的隱藏 plus 測試全過），以鏈為群集。",
+  "secondary": [
+   "回歸事件數，以鏈計（一個回合裡有任何先前通過的單元變成不過＝一個事件；不把單元數當獨立樣本）",
+   "新需求完成率",
+   "每臂實際 token／牆鐘／嘗試次數"
+  ],
+  "arms": {
+   "B0": "原生一次",
+   "B0x3": "原生最多三次（同預算對照）",
+   "B2": "可見測試閘門＋回滾，最多三次",
+   "S": "範圍提交（語法壞就保留基線）",
+   "P": "只做語法檢查、不限範圍，一次",
+   "Z": "零答案閘門：能解析＋無網路沙箱裡能載入＋範圍檢查，任一不過就回滾、同預算重試最多三次"
+  },
+  "limits": "HumanEval／MBPP 是公開題，9B 可能背過標準解；各臂嘗試次數不同（B0／S／P 一次，B0x3／B2／Z 最多三次）；計畫推送與發射的先後只能以 commit 對遠端的時間證明到秒。"
+ }
+}
