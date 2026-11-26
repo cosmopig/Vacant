@@ -1,0 +1,29 @@
+{
+ "schema": "vacant.e1.plan/1",
+ "id": "e1_code_haiku",
+ "chains": [
+  "~/dev/ops/e1/code_chains/code_001",
+  "~/dev/ops/e1/code_chains/code_002",
+  "~/dev/ops/e1/code_chains/code_003",
+  "~/dev/ops/e1/code_chains/code_004",
+  "~/dev/ops/e1/code_chains/code_005",
+  "~/dev/ops/e1/code_chains/code_006"
+ ],
+ "arms": [
+  "B0",
+  "S",
+  "B2"
+ ],
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5"
+ },
+ "jobs": 2,
+ "attempt_timeout_s": 600,
+ "purpose": "E1′ Haiku（探索性，第二個模型點）：程式類 9B 正式批次的前 6 條鏈（code_001–006，依編號取前 6，不看 9B 逐鏈結果挑），三臂 B0／S／B2；文件類不跑（ADDENDA 11-26：9B 地板效應、S 的範圍來自已否證的來源推斷）。冒煙（e1smoke_haiku）用過 code_001 的 B0，不算證據。",
+ "prereg": {
+  "registered": "2026-11-26，第一通模型呼叫之前推上遠端",
+  "analysis": "同 e1_code 的三條判讀，只比 B0／S／B2；判讀 3（O）不適用。每臂每鏈 1 次，探索性。",
+  "source_prereg": "ops/e1/plans/e1_code.json"
+ }
+}
