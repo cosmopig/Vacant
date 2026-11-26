@@ -1,0 +1,19 @@
+{
+ "schema": "vacant.e1.plan/1",
+ "id": "e1cal_doc",
+ "chains_dir": "~/dev/ops/e1/cal_doc_chains",
+ "arms": [
+  "B0"
+ ],
+ "model": {
+  "providers": [
+   "lms1004q9"
+  ],
+  "model": "qwen/qwen3.5-9b",
+  "pi_cfg_dir": "~/dev/ops/agentcfg/d2v52",
+  "ctx": 131072
+ },
+ "jobs": 2,
+ "attempt_timeout_s": 600,
+ "purpose": "E1′ 難度校準（不進正式批次）：每類 3 條鏈只跑 B0，目標整鏈成功率 30–70%（vacant-hope 11-26）。"
+}

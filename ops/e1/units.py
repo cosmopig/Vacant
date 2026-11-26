@@ -299,11 +299,24 @@ def doc_line_prefix(line: str) -> str | None:
         if s.endswith(":") and len(s) > 1:
             return s[:-1].strip()
         return None
-    return line.rsplit(": ", 1)[0].strip()
+    j = _label_end(line)
+    return line[:j].strip() if j is not None else line.rsplit(": ", 1)[0].strip()
+
+
+def _label_end(line: str) -> int | None:
+    """範本行「- 實體 — 標籤: 值」：標籤在 em dash 之後、第一個「: 」之前（值本身可以含「: 」，例如「Nasdaq: SRPT」）。"""
+    k = line.find(" \u2014 ")
+    if k < 0:
+        return None
+    j = line.find(": ", k)
+    return j if j >= 0 else None
 
 
 def doc_line_value(line: str) -> str:
-    """回傳範本行 `": "` 之後的值（去頭尾空白）。"""
+    """回傳範本行 `": "` 之後的值（去頭尾空白）；值可以含「: 」。"""
+    j = _label_end(line)
+    if j is not None:
+        return line[j + 2:].strip()
     if ": " in line:
         return line.rsplit(": ", 1)[1].strip()
     if ":" in line:
