@@ -1,0 +1,404 @@
+{
+ "root": "exp1cA_merged",
+ "arms": [
+  "a"
+ ],
+ "overall": {
+  "units": 1700,
+  "flagged": 1168,
+  "flagged_share": 0.6870588235294117,
+  "errors": 1092,
+  "recall": 0.7847985347985348,
+  "recall_lower95": 0.6777668952007836,
+  "recall_ci95": [
+   0.6557692307692308,
+   0.8875305623471883
+  ],
+  "error_rate_flagged": 0.7337328767123288,
+  "error_rate_unflagged": 0.4417293233082707,
+  "rate_ratio": 1.6610463421742931,
+  "random_baseline_recall": 0.6870588235294117,
+  "errors_by_status_flagged": {
+   "fabricated|flagged": 119,
+   "missing|missed": 5,
+   "missing|flagged": 565,
+   "stale|flagged": 162,
+   "wrong_read|missed": 230,
+   "wrong_read|flagged": 11
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 1020,
+    "errors_caught": 749
+   },
+   "F2": {
+    "flagged": 148,
+    "errors_caught": 108
+   },
+   "F3": {
+    "flagged": 0,
+    "errors_caught": 0
+   },
+   "F4": {
+    "flagged": 100,
+    "errors_caught": 100
+   }
+  },
+  "sets": 17,
+  "error_rate": 0.6423529411764706,
+  "plain": {
+   "look_share": 0.6870588235294117,
+   "miss_share_of_errors": 0.21520146520146521,
+   "random_same_size_miss_share": 0.3129411764705883
+  },
+  "verdict_amend1": "UNRESOLVED"
+ },
+ "by_arm": {
+  "a": {
+   "units": 1360,
+   "flagged": 954,
+   "flagged_share": 0.7014705882352941,
+   "errors": 906,
+   "recall": 0.7947019867549668,
+   "recall_lower95": 0.6966292134831461,
+   "recall_ci95": [
+    0.6744791666666666,
+    0.8909853249475891
+   ],
+   "error_rate_flagged": 0.7547169811320755,
+   "error_rate_unflagged": 0.458128078817734,
+   "rate_ratio": 1.647392980320552,
+   "random_baseline_recall": 0.7014705882352941,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 97,
+    "missing|missed": 4,
+    "missing|flagged": 452,
+    "stale|flagged": 162,
+    "wrong_read|missed": 182,
+    "wrong_read|flagged": 9
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 816,
+     "errors_caught": 614
+    },
+    "F2": {
+     "flagged": 138,
+     "errors_caught": 106
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 17,
+   "error_rate": 0.6661764705882353,
+   "plain": {
+    "look_share": 0.7014705882352941,
+    "miss_share_of_errors": 0.20529801324503316,
+    "random_same_size_miss_share": 0.29852941176470593
+   },
+   "verdict_amend1": "UNRESOLVED"
+  },
+  "c0": {
+   "units": 340,
+   "flagged": 214,
+   "flagged_share": 0.6294117647058823,
+   "errors": 186,
+   "recall": 0.7365591397849462,
+   "recall_lower95": 0.5761589403973509,
+   "recall_ci95": [
+    0.5411764705882353,
+    0.868421052631579
+   ],
+   "error_rate_flagged": 0.6401869158878505,
+   "error_rate_unflagged": 0.3888888888888889,
+   "rate_ratio": 1.6461949265687583,
+   "random_baseline_recall": 0.6294117647058823,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 22,
+    "missing|missed": 1,
+    "missing|flagged": 113,
+    "wrong_read|missed": 48,
+    "wrong_read|flagged": 2
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 204,
+     "errors_caught": 135
+    },
+    "F2": {
+     "flagged": 10,
+     "errors_caught": 2
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 100,
+     "errors_caught": 100
+    }
+   },
+   "sets": 17,
+   "error_rate": 0.5470588235294118,
+   "plain": {
+    "look_share": 0.6294117647058823,
+    "miss_share_of_errors": 0.26344086021505375,
+    "random_same_size_miss_share": 0.37058823529411766
+   },
+   "verdict_amend1": "UNRESOLVED"
+  }
+ },
+ "by_domain": {
+  "companies (Wikipedia)": {
+   "units": 1000,
+   "flagged": 587,
+   "flagged_share": 0.587,
+   "errors": 516,
+   "recall": 0.6608527131782945,
+   "recall_lower95": 0.5329087048832272,
+   "recall_ci95": [
+    0.5175438596491229,
+    0.8026315789473685
+   ],
+   "error_rate_flagged": 0.5809199318568995,
+   "error_rate_unflagged": 0.423728813559322,
+   "rate_ratio": 1.370971039182283,
+   "random_baseline_recall": 0.587,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 45,
+    "missing|missed": 5,
+    "missing|flagged": 160,
+    "stale|flagged": 126,
+    "wrong_read|missed": 170,
+    "wrong_read|flagged": 10
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 475,
+     "errors_caught": 259
+    },
+    "F2": {
+     "flagged": 112,
+     "errors_caught": 82
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 20,
+     "errors_caught": 20
+    }
+   },
+   "sets": 10,
+   "error_rate": 0.516,
+   "plain": {
+    "look_share": 0.587,
+    "miss_share_of_errors": 0.3391472868217055,
+    "random_same_size_miss_share": 0.41300000000000003
+   },
+   "verdict_amend1": "UNRESOLVED"
+  },
+  "software (Wikipedia)": {
+   "units": 700,
+   "flagged": 581,
+   "flagged_share": 0.83,
+   "errors": 576,
+   "recall": 0.8958333333333334,
+   "recall_lower95": 0.767578125,
+   "recall_ci95": [
+    0.7373358348968105,
+    0.9984375
+   ],
+   "error_rate_flagged": 0.8881239242685026,
+   "error_rate_unflagged": 0.5042016806722689,
+   "rate_ratio": 1.7614457831325303,
+   "random_baseline_recall": 0.83,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 74,
+    "missing|flagged": 405,
+    "stale|flagged": 36,
+    "wrong_read|missed": 60,
+    "wrong_read|flagged": 1
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 545,
+     "errors_caught": 490
+    },
+    "F2": {
+     "flagged": 36,
+     "errors_caught": 26
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 80,
+     "errors_caught": 80
+    }
+   },
+   "sets": 7,
+   "error_rate": 0.8228571428571428,
+   "plain": {
+    "look_share": 0.83,
+    "miss_share_of_errors": 0.10416666666666663,
+    "random_same_size_miss_share": 0.17000000000000004
+   },
+   "verdict_amend1": "UNRESOLVED"
+  }
+ },
+ "overall_excl_missing": {
+  "units": 1130,
+  "flagged": 603,
+  "flagged_share": 0.5336283185840708,
+  "errors": 522,
+  "recall": 0.5593869731800766,
+  "recall_lower95": 0.48031496062992124,
+  "recall_ci95": [
+   0.4669260700389105,
+   0.6702702702702703
+  ],
+  "error_rate_flagged": 0.4842454394693201,
+  "error_rate_unflagged": 0.4364326375711575,
+  "rate_ratio": 1.1095536808710071,
+  "random_baseline_recall": 0.5336283185840708,
+  "errors_by_status_flagged": {
+   "fabricated|flagged": 119,
+   "stale|flagged": 162,
+   "wrong_read|missed": 230,
+   "wrong_read|flagged": 11
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 455,
+    "errors_caught": 184
+   },
+   "F2": {
+    "flagged": 148,
+    "errors_caught": 108
+   },
+   "F3": {
+    "flagged": 0,
+    "errors_caught": 0
+   },
+   "F4": {
+    "flagged": 0,
+    "errors_caught": 0
+   }
+  },
+  "sets": 12,
+  "error_rate": 0.46194690265486726,
+  "plain": {
+   "look_share": 0.5336283185840708,
+   "miss_share_of_errors": 0.4406130268199234,
+   "random_same_size_miss_share": 0.4663716814159292
+  },
+  "verdict_amend1": "UNRESOLVED"
+ },
+ "by_domain_excl_missing": {
+  "companies (Wikipedia)": {
+   "units": 835,
+   "flagged": 427,
+   "flagged_share": 0.511377245508982,
+   "errors": 351,
+   "recall": 0.5156695156695157,
+   "recall_lower95": 0.43342776203966005,
+   "recall_ci95": [
+    0.41761363636363635,
+    0.6341463414634146
+   ],
+   "error_rate_flagged": 0.4238875878220141,
+   "error_rate_unflagged": 0.4166666666666667,
+   "rate_ratio": 1.0173302107728337,
+   "random_baseline_recall": 0.511377245508982,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 45,
+    "stale|flagged": 126,
+    "wrong_read|missed": 170,
+    "wrong_read|flagged": 10
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 315,
+     "errors_caught": 99
+    },
+    "F2": {
+     "flagged": 112,
+     "errors_caught": 82
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 9,
+   "error_rate": 0.42035928143712575,
+   "plain": {
+    "look_share": 0.511377245508982,
+    "miss_share_of_errors": 0.4843304843304843,
+    "random_same_size_miss_share": 0.488622754491018
+   },
+   "verdict_amend1": "UNRESOLVED"
+  },
+  "software (Wikipedia)": {
+   "units": 295,
+   "flagged": 176,
+   "flagged_share": 0.5966101694915255,
+   "errors": 171,
+   "recall": 0.6491228070175439,
+   "recall_lower95": 0.5339805825242718,
+   "recall_ci95": [
+    0.5066666666666667,
+    0.975
+   ],
+   "error_rate_flagged": 0.6306818181818182,
+   "error_rate_unflagged": 0.5042016806722689,
+   "rate_ratio": 1.2508522727272728,
+   "random_baseline_recall": 0.5966101694915255,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 74,
+    "stale|flagged": 36,
+    "wrong_read|missed": 60,
+    "wrong_read|flagged": 1
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 140,
+     "errors_caught": 85
+    },
+    "F2": {
+     "flagged": 36,
+     "errors_caught": 26
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 3,
+   "error_rate": 0.5796610169491525,
+   "plain": {
+    "look_share": 0.5966101694915255,
+    "miss_share_of_errors": 0.3508771929824561,
+    "random_same_size_miss_share": 0.40338983050847455
+   },
+   "verdict_amend1": "UNRESOLVED"
+  }
+ }
+}

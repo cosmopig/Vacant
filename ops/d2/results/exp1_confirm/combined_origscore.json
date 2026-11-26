@@ -1,0 +1,213 @@
+{
+ "combined": {
+  "units": 3475,
+  "sets": 37,
+  "flagged_share": 0.8020143884892086,
+  "errors": 1890,
+  "error_rate": 0.543884892086331,
+  "recall": 0.9825396825396825,
+  "recall_lower95": 0.9674502712477396,
+  "error_rate_flagged": 0.6663078579117331,
+  "error_rate_unflagged": 0.04796511627906977,
+  "rate_ratio": 13.891509280099163,
+  "verdict": "FAIL",
+  "errors_by_type": {
+   "fabricated|flagged": 346,
+   "missing|missed": 5,
+   "missing|flagged": 1215,
+   "stale|missed": 14,
+   "stale|flagged": 212,
+   "wrong_read|missed": 14,
+   "wrong_read|flagged": 84
+  },
+  "recall_by_type": {
+   "fabricated": 1.0,
+   "missing": 0.9959016393442623,
+   "stale": 0.9380530973451328,
+   "wrong_read": 0.8571428571428571
+  },
+  "plain": {
+   "look_share": 0.8020143884892086,
+   "miss_share_of_errors": 0.01746031746031751,
+   "random_same_size_miss_share": 0.19798561151079141
+  }
+ },
+ "software_plus_companies": {
+  "units": 1700,
+  "sets": 17,
+  "flagged_share": 0.6870588235294117,
+  "errors": 750,
+  "error_rate": 0.4411764705882353,
+  "recall": 0.9933333333333333,
+  "recall_lower95": 0.9777777777777777,
+  "error_rate_flagged": 0.6378424657534246,
+  "error_rate_unflagged": 0.009398496240601503,
+  "rate_ratio": 67.86643835616438,
+  "verdict": "UNRESOLVED",
+  "errors_by_type": {
+   "fabricated|flagged": 15,
+   "missing|missed": 5,
+   "missing|flagged": 565,
+   "stale|flagged": 165
+  },
+  "recall_by_type": {
+   "fabricated": 1.0,
+   "missing": 0.9912280701754386,
+   "stale": 1.0
+  },
+  "plain": {
+   "look_share": 0.6870588235294117,
+   "miss_share_of_errors": 0.00666666666666671,
+   "random_same_size_miss_share": 0.3129411764705883
+  }
+ },
+ "by_domain": {
+  "companies (Wikipedia)": {
+   "units": 1000,
+   "sets": 10,
+   "flagged_share": 0.587,
+   "errors": 301,
+   "error_rate": 0.301,
+   "recall": 0.9833887043189369,
+   "recall_lower95": 0.9496644295302014,
+   "error_rate_flagged": 0.504258943781942,
+   "error_rate_unflagged": 0.012106537530266344,
+   "rate_ratio": 41.65178875638841,
+   "verdict": "FAIL",
+   "errors_by_type": {
+    "fabricated|flagged": 10,
+    "missing|missed": 5,
+    "missing|flagged": 160,
+    "stale|flagged": 126
+   },
+   "recall_by_type": {
+    "fabricated": 1.0,
+    "missing": 0.9696969696969697,
+    "stale": 1.0
+   },
+   "plain": {
+    "look_share": 0.587,
+    "miss_share_of_errors": 0.01661129568106312,
+    "random_same_size_miss_share": 0.41300000000000003
+   }
+  },
+  "football biographies (Wikipedia)": {
+   "units": 1775,
+   "sets": 20,
+   "flagged_share": 0.9121126760563381,
+   "errors": 1140,
+   "error_rate": 0.6422535211267606,
+   "recall": 0.9754385964912281,
+   "recall_lower95": 0.9507874015748031,
+   "error_rate_flagged": 0.6868437306979617,
+   "error_rate_unflagged": 0.1794871794871795,
+   "rate_ratio": 3.826700785317215,
+   "verdict": "FAIL",
+   "errors_by_type": {
+    "fabricated|flagged": 331,
+    "missing|flagged": 650,
+    "stale|missed": 14,
+    "stale|flagged": 47,
+    "wrong_read|missed": 14,
+    "wrong_read|flagged": 84
+   },
+   "recall_by_type": {
+    "fabricated": 1.0,
+    "missing": 1.0,
+    "stale": 0.7704918032786885,
+    "wrong_read": 0.8571428571428571
+   },
+   "plain": {
+    "look_share": 0.9121126760563381,
+    "miss_share_of_errors": 0.024561403508771895,
+    "random_same_size_miss_share": 0.08788732394366194
+   }
+  },
+  "software (Wikipedia)": {
+   "units": 700,
+   "sets": 7,
+   "flagged_share": 0.83,
+   "errors": 449,
+   "error_rate": 0.6414285714285715,
+   "recall": 1.0,
+   "recall_lower95": 1.0,
+   "error_rate_flagged": 0.7728055077452668,
+   "error_rate_unflagged": 0.0,
+   "rate_ratio": null,
+   "verdict": "UNRESOLVED",
+   "errors_by_type": {
+    "fabricated|flagged": 5,
+    "missing|flagged": 405,
+    "stale|flagged": 39
+   },
+   "recall_by_type": {
+    "fabricated": 1.0,
+    "missing": 1.0,
+    "stale": 1.0
+   },
+   "plain": {
+    "look_share": 0.83,
+    "miss_share_of_errors": 0.0,
+    "random_same_size_miss_share": 0.17000000000000004
+   }
+  }
+ },
+ "combined_excl_missing": {
+  "units": 2255,
+  "sets": 25,
+  "flagged_share": 0.6971175166297118,
+  "errors": 670,
+  "error_rate": 0.29711751662971175,
+  "recall": 0.9582089552238806,
+  "recall_lower95": 0.9220183486238532,
+  "error_rate_flagged": 0.4083969465648855,
+  "error_rate_unflagged": 0.040995607613469986,
+  "rate_ratio": 9.961968375136314,
+  "verdict": "FAIL",
+  "errors_by_type": {
+   "fabricated|flagged": 346,
+   "stale|missed": 14,
+   "stale|flagged": 212,
+   "wrong_read|missed": 14,
+   "wrong_read|flagged": 84
+  },
+  "recall_by_type": {
+   "fabricated": 1.0,
+   "stale": 0.9380530973451328,
+   "wrong_read": 0.8571428571428571
+  },
+  "plain": {
+   "look_share": 0.6971175166297118,
+   "miss_share_of_errors": 0.04179104477611939,
+   "random_same_size_miss_share": 0.3028824833702882
+  }
+ },
+ "sc_excl_missing": {
+  "units": 1130,
+  "sets": 12,
+  "flagged_share": 0.5336283185840708,
+  "errors": 180,
+  "error_rate": 0.1592920353982301,
+  "recall": 1.0,
+  "recall_lower95": 1.0,
+  "error_rate_flagged": 0.29850746268656714,
+  "error_rate_unflagged": 0.0,
+  "rate_ratio": null,
+  "verdict": "FAIL",
+  "errors_by_type": {
+   "fabricated|flagged": 15,
+   "stale|flagged": 165
+  },
+  "recall_by_type": {
+   "fabricated": 1.0,
+   "stale": 1.0
+  },
+  "plain": {
+   "look_share": 0.5336283185840708,
+   "miss_share_of_errors": 0.0,
+   "random_same_size_miss_share": 0.4663716814159292
+  }
+ },
+ "final_verdict": "FAIL",
+ "rule": "三類合併判定；若合併通過但軟體＋公司單獨不過，結論寫成不過（預註冊修正 1）。"
+}

@@ -1,0 +1,308 @@
+{
+ "root": "exp1cB_merged",
+ "arms": [
+  "a"
+ ],
+ "overall": {
+  "units": 1775,
+  "flagged": 1619,
+  "flagged_share": 0.9121126760563381,
+  "errors": 1140,
+  "recall": 0.9754385964912281,
+  "recall_lower95": 0.9507874015748031,
+  "recall_ci95": [
+   0.9457567804024497,
+   0.9961597542242704
+  ],
+  "error_rate_flagged": 0.6868437306979617,
+  "error_rate_unflagged": 0.1794871794871795,
+  "rate_ratio": 3.826700785317215,
+  "random_baseline_recall": 0.9121126760563381,
+  "errors_by_status_flagged": {
+   "fabricated|flagged": 331,
+   "missing|flagged": 650,
+   "stale|missed": 14,
+   "stale|flagged": 47,
+   "wrong_read|missed": 14,
+   "wrong_read|flagged": 84
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 1535,
+    "errors_caught": 1037
+   },
+   "F2": {
+    "flagged": 84,
+    "errors_caught": 75
+   },
+   "F3": {
+    "flagged": 0,
+    "errors_caught": 0
+   },
+   "F4": {
+    "flagged": 130,
+    "errors_caught": 130
+   }
+  },
+  "sets": 20,
+  "error_rate": 0.6422535211267606,
+  "plain": {
+   "look_share": 0.9121126760563381,
+   "miss_share_of_errors": 0.024561403508771895,
+   "random_same_size_miss_share": 0.08788732394366194
+  },
+  "verdict_amend1": "FAIL"
+ },
+ "by_arm": {
+  "a": {
+   "units": 1420,
+   "flagged": 1296,
+   "flagged_share": 0.9126760563380282,
+   "errors": 924,
+   "recall": 0.9729437229437229,
+   "recall_lower95": 0.9456521739130435,
+   "recall_ci95": [
+    0.9391634980988594,
+    0.9957627118644068
+   ],
+   "error_rate_flagged": 0.6936728395061729,
+   "error_rate_unflagged": 0.20161290322580644,
+   "rate_ratio": 3.4406172839506177,
+   "random_baseline_recall": 0.9126760563380282,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 263,
+    "missing|flagged": 520,
+    "stale|missed": 14,
+    "stale|flagged": 47,
+    "wrong_read|missed": 11,
+    "wrong_read|flagged": 69
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 1228,
+     "errors_caught": 839
+    },
+    "F2": {
+     "flagged": 68,
+     "errors_caught": 60
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 20,
+   "error_rate": 0.6507042253521127,
+   "plain": {
+    "look_share": 0.9126760563380282,
+    "miss_share_of_errors": 0.02705627705627711,
+    "random_same_size_miss_share": 0.08732394366197183
+   },
+   "verdict_amend1": "FAIL"
+  },
+  "c0": {
+   "units": 355,
+   "flagged": 323,
+   "flagged_share": 0.9098591549295775,
+   "errors": 216,
+   "recall": 0.9861111111111112,
+   "recall_lower95": 0.9681818181818181,
+   "recall_ci95": [
+    0.9647058823529412,
+    1.0
+   ],
+   "error_rate_flagged": 0.6594427244582043,
+   "error_rate_unflagged": 0.09375,
+   "rate_ratio": 7.034055727554179,
+   "random_baseline_recall": 0.9098591549295775,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 68,
+    "missing|flagged": 130,
+    "wrong_read|missed": 3,
+    "wrong_read|flagged": 15
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 307,
+     "errors_caught": 198
+    },
+    "F2": {
+     "flagged": 16,
+     "errors_caught": 15
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 130,
+     "errors_caught": 130
+    }
+   },
+   "sets": 20,
+   "error_rate": 0.6084507042253521,
+   "plain": {
+    "look_share": 0.9098591549295775,
+    "miss_share_of_errors": 0.01388888888888884,
+    "random_same_size_miss_share": 0.09014084507042253
+   },
+   "verdict_amend1": "FAIL"
+  }
+ },
+ "by_domain": {
+  "football biographies (Wikipedia)": {
+   "units": 1775,
+   "flagged": 1619,
+   "flagged_share": 0.9121126760563381,
+   "errors": 1140,
+   "recall": 0.9754385964912281,
+   "recall_lower95": 0.9507874015748031,
+   "recall_ci95": [
+    0.9457567804024497,
+    0.9961597542242704
+   ],
+   "error_rate_flagged": 0.6868437306979617,
+   "error_rate_unflagged": 0.1794871794871795,
+   "rate_ratio": 3.826700785317215,
+   "random_baseline_recall": 0.9121126760563381,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 331,
+    "missing|flagged": 650,
+    "stale|missed": 14,
+    "stale|flagged": 47,
+    "wrong_read|missed": 14,
+    "wrong_read|flagged": 84
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 1535,
+     "errors_caught": 1037
+    },
+    "F2": {
+     "flagged": 84,
+     "errors_caught": 75
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 130,
+     "errors_caught": 130
+    }
+   },
+   "sets": 20,
+   "error_rate": 0.6422535211267606,
+   "plain": {
+    "look_share": 0.9121126760563381,
+    "miss_share_of_errors": 0.024561403508771895,
+    "random_same_size_miss_share": 0.08788732394366194
+   },
+   "verdict_amend1": "FAIL"
+  }
+ },
+ "overall_excl_missing": {
+  "units": 1125,
+  "flagged": 969,
+  "flagged_share": 0.8613333333333333,
+  "errors": 490,
+  "recall": 0.9428571428571428,
+  "recall_lower95": 0.8951406649616368,
+  "recall_ci95": [
+   0.8866799204771372,
+   0.9889867841409692
+  ],
+  "error_rate_flagged": 0.47678018575851394,
+  "error_rate_unflagged": 0.1794871794871795,
+  "rate_ratio": 2.656346749226006,
+  "random_baseline_recall": 0.8613333333333333,
+  "errors_by_status_flagged": {
+   "fabricated|flagged": 331,
+   "stale|missed": 14,
+   "stale|flagged": 47,
+   "wrong_read|missed": 14,
+   "wrong_read|flagged": 84
+  },
+  "by_flag": {
+   "F1": {
+    "flagged": 885,
+    "errors_caught": 387
+   },
+   "F2": {
+    "flagged": 84,
+    "errors_caught": 75
+   },
+   "F3": {
+    "flagged": 0,
+    "errors_caught": 0
+   },
+   "F4": {
+    "flagged": 0,
+    "errors_caught": 0
+   }
+  },
+  "sets": 13,
+  "error_rate": 0.43555555555555553,
+  "plain": {
+   "look_share": 0.8613333333333333,
+   "miss_share_of_errors": 0.05714285714285716,
+   "random_same_size_miss_share": 0.13866666666666672
+  },
+  "verdict_amend1": "FAIL"
+ },
+ "by_domain_excl_missing": {
+  "football biographies (Wikipedia)": {
+   "units": 1125,
+   "flagged": 969,
+   "flagged_share": 0.8613333333333333,
+   "errors": 490,
+   "recall": 0.9428571428571428,
+   "recall_lower95": 0.8951406649616368,
+   "recall_ci95": [
+    0.8866799204771372,
+    0.9889867841409692
+   ],
+   "error_rate_flagged": 0.47678018575851394,
+   "error_rate_unflagged": 0.1794871794871795,
+   "rate_ratio": 2.656346749226006,
+   "random_baseline_recall": 0.8613333333333333,
+   "errors_by_status_flagged": {
+    "fabricated|flagged": 331,
+    "stale|missed": 14,
+    "stale|flagged": 47,
+    "wrong_read|missed": 14,
+    "wrong_read|flagged": 84
+   },
+   "by_flag": {
+    "F1": {
+     "flagged": 885,
+     "errors_caught": 387
+    },
+    "F2": {
+     "flagged": 84,
+     "errors_caught": 75
+    },
+    "F3": {
+     "flagged": 0,
+     "errors_caught": 0
+    },
+    "F4": {
+     "flagged": 0,
+     "errors_caught": 0
+    }
+   },
+   "sets": 13,
+   "error_rate": 0.43555555555555553,
+   "plain": {
+    "look_share": 0.8613333333333333,
+    "miss_share_of_errors": 0.05714285714285716,
+    "random_same_size_miss_share": 0.13866666666666672
+   },
+   "verdict_amend1": "FAIL"
+  }
+ }
+}
