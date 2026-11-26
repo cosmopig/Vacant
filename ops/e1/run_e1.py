@@ -65,10 +65,13 @@ from ops.e1.evaluate import (
     evaluate_code_source,
     evaluate_doc_report,
 )
-from ops.e1.negative_controls import run_negative_controls
+from ops.e1.negative_controls import run_claude_negative_controls, run_negative_controls
+from ops.e1.netproxy import DEFAULT_ALLOWED_CONNECT_HOSTS, AllowlistUnixProxy
 from ops.e1.sandbox import (
+    build_claude_worker_bwrap_argv,
     build_worker_bwrap_argv,
     kill_all_live,
+    prepare_claude_credentials,
     prepare_sanitized_pi_cfg,
     run_sandboxed,
 )
@@ -82,6 +85,29 @@ from ops.e1.units import (
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 SOURCE_SERVER_PY = REPO_ROOT / "ops" / "d2" / "source_server.py"
 HOST_FMT = "{chain_id}.e1-sources.example"
+
+CLAUDE_ALLOWED_TOOLS = "Bash,Read,Edit,Write,Glob,Grep"
+CLAUDE_DISALLOWED_TOOLS = "WebFetch,WebSearch"
+
+
+def build_claude_cli_argv(model_id: str, prompt: str) -> list[str]:
+    """組合 Claude Code worker 在沙箱內執行的 CLI 指令列（僅允許 6 項本機工具，禁用 WebFetch/WebSearch）。"""
+    return [
+        "claude",
+        "-p",
+        "--output-format", "stream-json",
+        "--verbose",
+        "--model", model_id,
+        "--permission-mode", "bypassPermissions",
+        "--tools", CLAUDE_ALLOWED_TOOLS,
+        "--allowedTools", CLAUDE_ALLOWED_TOOLS,
+        "--disallowedTools", CLAUDE_DISALLOWED_TOOLS,
+        "--no-session-persistence",
+        "--strict-mcp-config",
+        "--disable-slash-commands",
+        "--",
+        prompt,
+    ]
 
 _LOCK = threading.Lock()
 _INFRA_ERR_RE = re.compile(
@@ -177,6 +203,134 @@ def usage_from_pi_log(log_path: pathlib.Path) -> dict | None:
     }
 
 
+def usage_from_claude_log(log_path: pathlib.Path) -> dict | None:
+    """解析 `claude -p --output-format stream-json --verbose`（亦相容單筆 `result` JSON）的用量與費用。
+
+    回傳與 pi 相同的基礎欄位（`calls`/`errors`/`input`/`output`/`final_error`），
+    並補上 `cache_creation_input_tokens`、`cache_read_input_tokens`、`num_turns`、`cost_usd`。
+    """
+    try:
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+
+    saw_json = False
+    saw_assistant = False
+    msg_usage: dict[str, dict] = {}
+    err_ids: set[str] = set()
+    errors = 0
+    final_error: str | None = None
+    result_obj: dict | None = None
+
+    for idx, raw in enumerate(text.splitlines()):
+        line = raw.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            obj = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(obj, dict) or "type" not in obj:
+            continue
+        saw_json = True
+        etype = obj.get("type")
+        if etype == "assistant":
+            saw_assistant = True
+            msg = obj.get("message") if isinstance(obj.get("message"), dict) else {}
+            is_err = bool(
+                obj.get("is_api_error_message")
+                or obj.get("error")
+                or obj.get("api_error")
+                or msg.get("model") == "<synthetic>"
+            )
+            mid = msg.get("id")
+            if is_err:
+                ekey = str(mid) if mid else f"_err_{idx}"
+                if ekey not in err_ids:
+                    err_ids.add(ekey)
+                    errors += 1
+                err_txt = None
+                content = msg.get("content")
+                if isinstance(content, list):
+                    parts = [str(c.get("text") or "") for c in content if isinstance(c, dict) and c.get("text")]
+                    if parts:
+                        err_txt = " ".join(parts)
+                final_error = str(err_txt or obj.get("api_error") or obj.get("error") or "error")[:300]
+            else:
+                key = str(mid) if mid else f"_anon_{idx}"
+                u = msg.get("usage")
+                msg_usage[key] = u if isinstance(u, dict) else {}
+                final_error = None
+        elif etype == "result":
+            result_obj = obj
+            if obj.get("is_error"):
+                if errors == 0:
+                    errors = 1
+                final_error = str(obj.get("result") or obj.get("api_error") or obj.get("subtype") or "error")[:300]
+
+    if not saw_json:
+        return None
+
+    if saw_assistant:
+        calls = len(msg_usage)
+    elif result_obj is not None:
+        ru_tmp = result_obj.get("usage") if isinstance(result_obj.get("usage"), dict) else {}
+        has_usage = bool(result_obj.get("modelUsage")) or any(
+            int(ru_tmp.get(k) or 0) > 0
+            for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens")
+        )
+        calls = int(result_obj.get("num_turns") or 0) if (not result_obj.get("is_error") and has_usage) else 0
+    else:
+        calls = 0
+
+    ru = result_obj.get("usage") if isinstance(result_obj, dict) and isinstance(result_obj.get("usage"), dict) else None
+    if ru is not None:
+        tin = int(ru.get("input_tokens") or 0)
+        tout = int(ru.get("output_tokens") or 0)
+        cache_create = int(ru.get("cache_creation_input_tokens") or 0)
+        cache_read = int(ru.get("cache_read_input_tokens") or 0)
+    else:
+        tin = sum(int(u.get("input_tokens") or 0) for u in msg_usage.values())
+        tout = sum(int(u.get("output_tokens") or 0) for u in msg_usage.values())
+        cache_create = sum(int(u.get("cache_creation_input_tokens") or 0) for u in msg_usage.values())
+        cache_read = sum(int(u.get("cache_read_input_tokens") or 0) for u in msg_usage.values())
+
+    num_turns = (
+        int(result_obj.get("num_turns"))
+        if isinstance(result_obj, dict) and result_obj.get("num_turns") is not None
+        else calls
+    )
+    raw_cost = result_obj.get("total_cost_usd") if isinstance(result_obj, dict) else None
+    cost_usd = float(raw_cost) if isinstance(raw_cost, (int, float)) else None
+
+    return {
+        "calls": calls,
+        "errors": errors,
+        "input": tin,
+        "output": tout,
+        "cache_creation_input_tokens": cache_create,
+        "cache_read_input_tokens": cache_read,
+        "num_turns": num_turns,
+        "cost_usd": cost_usd,
+        "final_error": final_error,
+    }
+
+
+def _parse_allowed_connect_hosts(raw_list: Any) -> list[tuple[str, int]]:
+    if not raw_list:
+        return list(DEFAULT_ALLOWED_CONNECT_HOSTS)
+    out: list[tuple[str, int]] = []
+    for item in raw_list:
+        if isinstance(item, (list, tuple)) and len(item) == 2:
+            out.append((str(item[0]).strip().lower(), int(item[1])))
+        elif isinstance(item, str) and ":" in item:
+            h, p = item.rsplit(":", 1)
+            out.append((h.strip().lower(), int(p)))
+        else:
+            raise SystemExit(f"不合法的 allowed_connect_hosts 項目：{item!r}")
+    return out
+
+
 def load_plan(plan_path: pathlib.Path) -> dict:
     raw = json.loads(plan_path.read_text(encoding="utf-8"))
     if raw.get("schema") != PLAN_SCHEMA:
@@ -216,11 +370,21 @@ def load_plan(plan_path: pathlib.Path) -> dict:
             raise SystemExit(f"找不到鏈規格檔：{d / 'chain.json'}")
 
     model_cfg = dict(raw["model"])
+    agent = str(model_cfg.get("agent") or "pi")
+    if agent not in ("pi", "claude"):
+        raise SystemExit(f"不支援的 model.agent：{agent!r}（僅支援 'pi' 或 'claude'）")
+    model_cfg["agent"] = agent
     providers = list(model_cfg.get("providers") or [])
     if not providers and model_cfg.get("provider"):
         providers = [str(model_cfg["provider"])]
-    if not providers and not model_cfg.get("fake_agent"):
-        raise SystemExit("計畫檔 model 必須指定 `provider` 或 `providers`（或 `fake_agent`）")
+    if agent == "claude":
+        if not model_cfg.get("model"):
+            raise SystemExit("計畫檔 model.agent='claude' 必須指定 `model.model`（例如 'claude-haiku-5-5'）")
+        if not providers:
+            providers = ["anthropic"]
+    else:
+        if not providers and not model_cfg.get("fake_agent"):
+            raise SystemExit("計畫檔 model 必須指定 `provider` 或 `providers`（或 `fake_agent`）")
     model_cfg["providers"] = providers
 
     raw["_chain_dirs"] = [str(d.resolve()) for d in chain_dirs]
@@ -359,9 +523,13 @@ class E1Runner:
         self.max_attempts_b0x3 = int(self.plan.get("max_attempts_b0x3", 3))
         self.jobs = max(1, int(self.plan.get("jobs", 1)))
 
+        self.agent_kind: str = str(self.plan["_model"]["agent"])
         self.pi_cfg_dst = self.root / "private_cfg"
         self.no_proxy_hosts: list[str] = []
         self.source_server: _SourceServer | None = None
+        self.net_proxy: AllowlistUnixProxy | None = None
+        self._claude_creds_tmp: tempfile.TemporaryDirectory[str] | None = None
+        self.claude_creds_file: pathlib.Path | None = None
         self.results_path = self.root / "results.jsonl"
 
     def _log(self, msg: str) -> None:
@@ -392,6 +560,8 @@ class E1Runner:
                     "plan_path": self.plan["_path"],
                     "plan_sha256": self.plan["_sha256"],
                     "git_head": self.git_head,
+                    "agent": self.agent_kind,
+                    "model": self.plan["_model"].get("model"),
                     "calibrate": self.calibrate,
                     "arms": self.arms,
                     "n_chains": len(self.chains),
@@ -399,15 +569,29 @@ class E1Runner:
                 },
             )
 
-        # 準備去敏後的 pi 設定目錄（只讀掛進 worker 沙箱）
         model_cfg = self.plan["_model"]
-        src_cfg_s = model_cfg.get("pi_cfg_dir")
-        src_cfg = pathlib.Path(os.path.expandvars(os.path.expanduser(src_cfg_s))) if src_cfg_s else DEFAULT_PI_CFG_DIR
-        providers = model_cfg.get("providers") or None
-        if src_cfg.is_dir():
-            self.no_proxy_hosts = prepare_sanitized_pi_cfg(src_cfg, self.pi_cfg_dst, allowed_providers=providers)
+        if self.agent_kind == "claude":
+            # 僅複製 ~/.claude/.credentials.json 到每跑專屬暫存目錄（run 結束即清理）
+            creds_src_s = model_cfg.get("credentials_path")
+            creds_src = (
+                pathlib.Path(os.path.expandvars(os.path.expanduser(str(creds_src_s))))
+                if creds_src_s
+                else None
+            )
+            self._claude_creds_tmp = tempfile.TemporaryDirectory(prefix="e1_claude_creds_")
+            self.claude_creds_file = prepare_claude_credentials(
+                pathlib.Path(self._claude_creds_tmp.name),
+                src_creds_path=creds_src,
+            )
         else:
-            self.pi_cfg_dst.mkdir(parents=True, exist_ok=True)
+            # 準備去敏後的 pi 設定目錄
+            src_cfg_s = model_cfg.get("pi_cfg_dir")
+            src_cfg = pathlib.Path(os.path.expandvars(os.path.expanduser(src_cfg_s))) if src_cfg_s else DEFAULT_PI_CFG_DIR
+            providers = model_cfg.get("providers") or None
+            if src_cfg.is_dir():
+                self.no_proxy_hosts = prepare_sanitized_pi_cfg(src_cfg, self.pi_cfg_dst, allowed_providers=providers)
+            else:
+                self.pi_cfg_dst.mkdir(parents=True, exist_ok=True)
 
     def _run_preflight_negative_controls(self) -> None:
         first_chain = self.chains[0]
@@ -420,6 +604,32 @@ class E1Runner:
         (other_arm_canary / "canary.txt").write_text("other-arm-secret\n", encoding="utf-8")
 
         model_cfg = self.plan["_model"]
+        if self.agent_kind == "claude":
+            creds_src_s = model_cfg.get("credentials_path")
+            creds_src = (
+                pathlib.Path(os.path.expandvars(os.path.expanduser(str(creds_src_s))))
+                if creds_src_s
+                else None
+            )
+            claude_bin_s = model_cfg.get("claude_bin")
+            rep = run_claude_negative_controls(
+                hidden_tests_path=hidden_p,
+                eval_dir=self.root,
+                other_arm_ws=other_arm_canary,
+                materials_dir=mat_dir,
+                credentials_src=creds_src,
+                claude_bin_override=claude_bin_s,
+            )
+            atomic_write_json(self.root / "negative_controls.json", rep)
+            if not rep.get("passed"):
+                raise SystemExit(
+                    f"拒絕啟動：Claude 隔離負控制失敗（見 {self.root / 'negative_controls.json'}）："
+                    f"leaks={rep.get('leaks')} sanity={rep.get('sanity')} "
+                    f"net={rep.get('net')} eval_net={rep.get('eval_net_isolated')}"
+                )
+            self._log("preflight negative_controls (claude) PASS")
+            return
+
         src_cfg_s = model_cfg.get("pi_cfg_dir")
         src_cfg = pathlib.Path(os.path.expandvars(os.path.expanduser(src_cfg_s))) if src_cfg_s else DEFAULT_PI_CFG_DIR
 
@@ -447,12 +657,50 @@ class E1Runner:
         log_path: pathlib.Path,
         is_doc: bool,
     ) -> dict:
-        """在真實 bwrap 沙箱內執行一次 worker（真實 pi 或 selftest 假 agent）。"""
+        """在真實 bwrap 沙箱內執行一次 worker（真實 pi、真實 claude 或 selftest 假 agent）。"""
         assert_ks1_clean(prompt)
         model_cfg = self.plan["_model"]
+
+        if self.agent_kind == "claude":
+            assert self.net_proxy is not None, "claude mode requires allowlist proxy"
+            assert self.claude_creds_file is not None, "claude mode requires credentials file"
+            model_id = str(model_cfg["model"])
+            cmd = build_claude_cli_argv(model_id, prompt)
+            claude_bin_s = model_cfg.get("claude_bin")
+            extra_env: dict[str, str] = {}
+            if model_cfg.get("fake_mode"):
+                extra_env["E1_FAKE_MODE"] = str(model_cfg["fake_mode"])
+            argv = build_claude_worker_bwrap_argv(
+                cmd,
+                workspace_dir=ws_dir,
+                proxy_sock_path=self.net_proxy.sock_path,
+                credentials_file=self.claude_creds_file,
+                claude_bin_override=claude_bin_s,
+                extra_env=extra_env or None,
+            )
+            res = run_sandboxed(argv, timeout_s=self.attempt_timeout_s, log_path=log_path)
+            usage = usage_from_claude_log(log_path)
+            is_infra = False
+            if usage is None:
+                is_infra = True
+            elif usage["calls"] == 0 and (
+                usage["errors"] > 0
+                or res["rc"] != 0
+                or (usage.get("final_error") and _INFRA_ERR_RE.search(usage["final_error"]))
+            ):
+                is_infra = True
+            return {
+                "rc": res["rc"],
+                "wall_s": res["wall_s"],
+                "timed_out": res["timed_out"],
+                "usage": usage,
+                "cost_usd": usage.get("cost_usd") if isinstance(usage, dict) else None,
+                "infra_error": is_infra,
+            }
+
         fake_agent = model_cfg.get("fake_agent")
         extra_ro: list[tuple[pathlib.Path, str]] = []
-        extra_env: dict[str, str] = {}
+        extra_env = {}
 
         if fake_agent:
             fa_path = pathlib.Path(os.path.expandvars(os.path.expanduser(str(fake_agent))))
@@ -610,7 +858,13 @@ class E1Runner:
             total_in = 0
             total_out = 0
             total_calls = 0
+            total_cache_create = 0
+            total_cache_read = 0
+            total_num_turns = 0
+            total_cost_usd = 0.0
             any_usage = False
+            any_cache = False
+            any_cost = False
             infra_void = False
 
             committed_text = baseline_text
@@ -645,6 +899,15 @@ class E1Runner:
                         total_in += int(u.get("input") or 0)
                         total_out += int(u.get("output") or 0)
                         total_calls += int(u.get("calls") or 0)
+                        if "cache_creation_input_tokens" in u or "cache_read_input_tokens" in u:
+                            any_cache = True
+                            total_cache_create += int(u.get("cache_creation_input_tokens") or 0)
+                            total_cache_read += int(u.get("cache_read_input_tokens") or 0)
+                        if "num_turns" in u and u.get("num_turns") is not None:
+                            total_num_turns += int(u.get("num_turns") or 0)
+                        if isinstance(u.get("cost_usd"), (int, float)):
+                            any_cost = True
+                            total_cost_usd += float(u["cost_usd"])
                     if wres.get("infra_error"):
                         infra_void = True
 
@@ -661,6 +924,8 @@ class E1Runner:
                     "usage": wres["usage"],
                     "infra_error": wres["infra_error"],
                 }
+                if "cost_usd" in wres:
+                    att_entry["cost_usd"] = wres["cost_usd"]
 
                 if arm == "B0":
                     committed_text = cand_text
@@ -834,6 +1099,7 @@ class E1Runner:
                 "calls": total_calls if any_usage else None,
                 "tokens_in": total_in if any_usage else None,
                 "tokens_out": total_out if any_usage else None,
+                "cost_usd": round(total_cost_usd, 6) if any_cost else None,
                 "infra_void": infra_void,
                 "eval": eval_summary,
                 "still_required_prev_passing_count": len(prev_pass_still_req),
@@ -846,6 +1112,10 @@ class E1Runner:
                 "rejected_candidate_correct": rejected_candidate_correct,
                 "accepted_in_scope_but_wrong": accepted_in_scope_but_wrong,
             }
+            if any_cache:
+                record["cache_creation_input_tokens"] = total_cache_create
+                record["cache_read_input_tokens"] = total_cache_read
+                record["num_turns"] = total_num_turns
             if scope_detail is not None:
                 record["doc_scope_detail"] = scope_detail
 
@@ -872,15 +1142,29 @@ class E1Runner:
 
     def run(self) -> dict:
         self._init_root_and_check_resume()
-        self._run_preflight_negative_controls()
-
-        if self.has_doc:
-            port = int(self.plan.get("source_server_port") or 0)
-            self.source_server = _SourceServer(self.root, port=port)
-            self.source_server.start()
-            self._log(f"source_server listening on 127.0.0.1:{self.source_server.port}")
-
         try:
+            self._run_preflight_negative_controls()
+
+            if self.has_doc:
+                port = int(self.plan.get("source_server_port") or 0)
+                self.source_server = _SourceServer(self.root, port=port)
+                self.source_server.start()
+                self._log(f"source_server listening on 127.0.0.1:{self.source_server.port}")
+
+            if self.agent_kind == "claude":
+                allowed_connect = _parse_allowed_connect_hosts(self.plan["_model"].get("allowed_connect_hosts"))
+                self.net_proxy = AllowlistUnixProxy(
+                    allowed_connect=allowed_connect,
+                    source_server_port=(self.source_server.port if self.source_server else None),
+                    log_path=self.root / "proxy.jsonl",
+                )
+                self.net_proxy.start()
+                self._log(
+                    f"allowlist_proxy listening on {self.net_proxy.sock_path} "
+                    f"connect={sorted(self.net_proxy.allowed_connect)} "
+                    f"source_port={self.net_proxy.source_server_port}"
+                )
+
             if self.jobs == 1 or len(self.chains) == 1:
                 for i, ch in enumerate(self.chains):
                     self._run_one_chain(i, ch)
@@ -890,8 +1174,16 @@ class E1Runner:
                     for fut in concurrent.futures.as_completed(futs):
                         fut.result()
         finally:
+            if self.net_proxy is not None:
+                self.net_proxy.stop()
+                self.net_proxy = None
             if self.source_server is not None:
                 self.source_server.stop()
+                self.source_server = None
+            if self._claude_creds_tmp is not None:
+                self._claude_creds_tmp.cleanup()
+                self._claude_creds_tmp = None
+                self.claude_creds_file = None
             kill_all_live()
 
         return {

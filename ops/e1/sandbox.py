@@ -38,6 +38,9 @@ from . import atomic_write_json
 
 SYSTEM_RO_DIRS: tuple[str, ...] = ("/usr", "/bin", "/sbin", "/lib", "/lib64", "/etc")
 LOG_CAP_BYTES = 16 * 1024 * 1024
+PROXY_BRIDGE_PY = pathlib.Path(__file__).resolve().parent / "proxy_bridge.py"
+SANDBOX_PROXY_SOCK = "/sandbox_proxy/proxy.sock"
+SANDBOX_CREDS_PATH = "/sandbox_home/.claude/.credentials.json"
 
 _LIVE_PROCS: set[subprocess.Popen] = set()
 _LIVE_LOCK = threading.Lock()
@@ -102,6 +105,82 @@ def resolve_pi_runtime() -> dict[str, pathlib.Path | None]:
         "node_real": node_real,
         "node_root": node_root,
     }
+
+
+def _is_elf_binary(path: pathlib.Path) -> bool:
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(4) == b"\x7fELF"
+    except OSError:
+        return False
+
+
+def resolve_claude_runtime(claude_bin_override: pathlib.Path | str | None = None) -> dict[str, pathlib.Path | bool | None]:
+    """解析宿主上的 claude CLI 與其 node 執行期實際路徑，供只讀掛進沙箱。"""
+    home = pathlib.Path.home()
+    if claude_bin_override is not None:
+        cb = pathlib.Path(os.path.expandvars(os.path.expanduser(str(claude_bin_override))))
+    else:
+        found_c = shutil.which("claude")
+        cb = pathlib.Path(found_c) if found_c else (home / ".local" / "bin" / "claude")
+
+    claude_real: pathlib.Path | None = cb.resolve() if cb.exists() else None
+    claude_is_elf = _is_elf_binary(claude_real) if claude_real is not None else False
+    claude_root: pathlib.Path | None = None
+    if claude_real is not None and not claude_is_elf:
+        # 若是非 ELF 的套件安裝（例如 npm node_modules/@anthropic-ai/claude-code/... 或 prefix/bin/claude）
+        parts = claude_real.parts
+        if "node_modules" in parts:
+            nm_idx = parts.index("node_modules")
+            claude_root = pathlib.Path(*parts[:nm_idx])
+        elif claude_real.parent.name == "bin" and (claude_real.parent.parent / "lib").is_dir():
+            claude_root = claude_real.parent.parent
+
+    # 解析 node 執行期（相容原生 ELF 或 node 腳本安裝）
+    node_bin = home / ".local" / "bin" / "node"
+    node_real: pathlib.Path | None = None
+    if node_bin.exists():
+        node_real = node_bin.resolve()
+    else:
+        found_n = shutil.which("node")
+        if found_n:
+            node_real = pathlib.Path(found_n).resolve()
+    node_root: pathlib.Path | None = None
+    if node_real is not None:
+        node_root = node_real.parent.parent if node_real.parent.name == "bin" else node_real.parent
+
+    return {
+        "claude_bin": cb if cb.exists() else None,
+        "claude_real": claude_real,
+        "claude_is_elf": claude_is_elf,
+        "claude_root": claude_root,
+        "node_real": node_real,
+        "node_root": node_root,
+    }
+
+
+def prepare_claude_credentials(
+    dst_dir: pathlib.Path,
+    src_creds_path: pathlib.Path | None = None,
+) -> pathlib.Path:
+    """只複製 `~/.claude/.credentials.json` 到每跑專屬暫存目錄（0600），不複製 `~/.claude` 任何其他檔案。"""
+    src = (src_creds_path or (pathlib.Path.home() / ".claude" / ".credentials.json")).expanduser().resolve()
+    if not src.is_file():
+        raise FileNotFoundError(f"找不到 Claude 憑證檔：{src}")
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    os.chmod(dst_dir, 0o700)
+    dst = dst_dir / ".credentials.json"
+    data = src.read_bytes()
+    tmp = dst.with_name(f".credentials.json.tmp.{os.getpid()}.{threading.get_ident()}")
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    try:
+        os.write(fd, data)
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    os.replace(tmp, dst)
+    os.chmod(dst, 0o600)
+    return dst
 
 
 def prepare_sanitized_pi_cfg(
@@ -245,6 +324,117 @@ def build_worker_bwrap_argv(
         argv += ["--setenv", k, v]
 
     argv += ["--", *cmd]
+    return argv
+
+
+def build_claude_worker_bwrap_argv(
+    cmd: list[str],
+    *,
+    workspace_dir: pathlib.Path,
+    proxy_sock_path: pathlib.Path,
+    credentials_file: pathlib.Path | None = None,
+    claude_bin_override: pathlib.Path | str | None = None,
+    extra_ro_binds: list[tuple[pathlib.Path, str]] | None = None,
+    extra_env: dict[str, str] | None = None,
+    mount_claude: bool = True,
+) -> list[str]:
+    """組合 Claude Code worker 的 `--unshare-net` bubblewrap 指令列。
+
+    隔離結構：
+    - `--unshare-net`、`--unshare-pid`、`--die-with-parent`、`--clearenv`
+    - 只讀系統目錄（`/usr`、`/bin`、`/sbin`、`/lib`、`/lib64`、`/etc`）
+    - 只讀掛載 claude CLI 安裝（與其 node 執行期）與 `proxy_bridge.py`
+    - 僅把每跑複製的 `.credentials.json` 只讀掛於 `/sandbox_home/.claude/.credentials.json`（不掛載 `~/.claude` 其他檔案）
+    - 綁入宿主白名單代理的單一 UNIX socket（`/sandbox_proxy/proxy.sock`），由沙箱內 `proxy_bridge.py`
+      在 `127.0.0.1:<port>` 轉發並設 `HTTP_PROXY`/`HTTPS_PROXY`、清空 `NO_PROXY`
+    - 僅 `/work` 可寫，`/tmp` 與 `HOME`（`/sandbox_home`）為 tmpfs
+    """
+    bwrap = shutil.which("bwrap")
+    if not bwrap:
+        raise RuntimeError("找不到 bwrap（bubblewrap）；無法建立真實沙箱")
+
+    argv: list[str] = [
+        bwrap,
+        "--unshare-net",
+        "--unshare-pid",
+        "--die-with-parent",
+        "--clearenv",
+    ]
+
+    for sysdir in SYSTEM_RO_DIRS:
+        if os.path.exists(sysdir):
+            argv += ["--ro-bind", sysdir, sysdir]
+
+    argv += [
+        "--dev", "/dev",
+        "--proc", "/proc",
+        "--tmpfs", "/tmp",
+        "--tmpfs", "/sandbox_home",
+    ]
+
+    if credentials_file is not None:
+        argv += ["--ro-bind", str(credentials_file.resolve()), SANDBOX_CREDS_PATH]
+
+    path_parts: list[str] = ["/opt/bin"]
+    argv += ["--ro-bind", str(PROXY_BRIDGE_PY.resolve()), "/opt/bin/e1_proxy_bridge.py"]
+    argv += ["--bind", str(proxy_sock_path.resolve()), SANDBOX_PROXY_SOCK]
+
+    if mount_claude:
+        rt = resolve_claude_runtime(claude_bin_override)
+        c_real = rt["claude_real"]
+        c_root = rt["claude_root"]
+        if isinstance(c_real, pathlib.Path):
+            if isinstance(c_root, pathlib.Path) and not str(c_root).startswith("/usr"):
+                argv += ["--ro-bind", str(c_root), "/opt/claude"]
+                rel_c = c_real.relative_to(c_root).as_posix()
+                argv += ["--symlink", f"/opt/claude/{rel_c}", "/opt/bin/claude"]
+            else:
+                argv += ["--ro-bind", str(c_real), "/opt/bin/claude"]
+        n_root = rt["node_root"]
+        n_real = rt["node_real"]
+        if isinstance(n_root, pathlib.Path) and isinstance(n_real, pathlib.Path):
+            nroot_s = str(n_root)
+            if not nroot_s.startswith("/usr"):
+                argv += ["--ro-bind", nroot_s, "/opt/node"]
+                rel_n = n_real.relative_to(n_root).as_posix()
+                argv += ["--symlink", f"/opt/node/{rel_n}", "/opt/bin/node"]
+
+    for host_p, guest_p in extra_ro_binds or ():
+        argv += ["--ro-bind", str(host_p.resolve()), guest_p]
+
+    argv += [
+        "--bind", str(workspace_dir.resolve()), "/work",
+        "--chdir", "/work",
+    ]
+
+    path_parts += ["/usr/local/bin", "/usr/bin", "/bin"]
+    env: dict[str, str] = {
+        "HOME": "/sandbox_home",
+        "TMPDIR": "/tmp",
+        "PATH": ":".join(path_parts),
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONNOUSERSITE": "1",
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+        "DISABLE_TELEMETRY": "1",
+        "DISABLE_AUTOUPDATER": "1",
+    }
+    if extra_env:
+        env.update(extra_env)
+
+    for k, v in sorted(env.items()):
+        argv += ["--setenv", k, v]
+
+    argv += [
+        "--",
+        "python3",
+        "/opt/bin/e1_proxy_bridge.py",
+        "--sock",
+        SANDBOX_PROXY_SOCK,
+        "--",
+        *cmd,
+    ]
     return argv
 
 

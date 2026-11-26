@@ -1,0 +1,15 @@
+{
+  "schema": "vacant.e1.plan/1",
+  "id": "e1smoke_haiku",
+  "chains_dir": "~/dev/ops/e1/cal_smoke_chains",
+  "arms": [
+    "B0"
+  ],
+  "model": {
+    "agent": "claude",
+    "model": "claude-haiku-5-5"
+  },
+  "jobs": 1,
+  "attempt_timeout_s": 300,
+  "purpose": "Claude Code (claude-haiku-5-5) 冒煙（不是證據）：1 條程式鏈＋1 條文件鏈、僅跑 B0，驗證 --unshare-net 白名單代理、憑證唯讀掛載、用量與費用解析。"
+}

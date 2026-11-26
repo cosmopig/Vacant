@@ -124,6 +124,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         chain_tokens_in: list[int] = []
         chain_tokens_out: list[int] = []
         chain_tokens_total: list[int] = []
+        chain_costs: list[float] = []
         chain_attempts: list[int] = []
         chain_rejected: list[int] = []
 
@@ -144,6 +145,8 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             c_tin = 0
             c_tout = 0
             c_has_tok = True
+            c_cost = 0.0
+            c_has_cost = False
             c_att = 0
             c_rej = 0
 
@@ -168,6 +171,9 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
                 else:
                     c_tin += int(r["tokens_in"])
                     c_tout += int(r["tokens_out"])
+                if isinstance(r.get("cost_usd"), (int, float)):
+                    c_has_cost = True
+                    c_cost += float(r["cost_usd"])
                 c_att += int(r.get("attempts_count") or 0)
                 c_rej += len(r.get("rejected_units") or [])
 
@@ -184,6 +190,8 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
                 chain_tokens_in.append(c_tin)
                 chain_tokens_out.append(c_tout)
                 chain_tokens_total.append(c_tin + c_tout)
+            if c_has_cost:
+                chain_costs.append(c_cost)
             chain_attempts.append(c_att)
             chain_rejected.append(c_rej)
 
@@ -224,6 +232,8 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             "tokens_out_per_chain_mean": _mean([float(x) for x in chain_tokens_out]),
             "tokens_total_per_chain_mean": _mean([float(x) for x in chain_tokens_total]),
             "tokens_total_per_chain_median": _median([float(x) for x in chain_tokens_total]),
+            "cost_usd_total": round(sum(chain_costs), 6) if chain_costs else None,
+            "cost_usd_per_chain_mean": round(sum(chain_costs) / len(chain_costs), 6) if chain_costs else None,
             "attempts_total": sum(chain_attempts),
             "attempts_per_chain_mean": _mean([float(x) for x in chain_attempts]),
             "rejected_units_total": sum(chain_rejected),
