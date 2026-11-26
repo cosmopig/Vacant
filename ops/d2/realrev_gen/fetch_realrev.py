@@ -52,6 +52,9 @@ class QualifyingArticle:
     claims: list[tuple[str, list[str]]]  # [(label, [v0, v1, v2, v3, v4]), ...]
 
 
+EXCLUDE_TITLES: set[str] = set()
+
+
 def collect_candidate_pool(client: WikiClient, seed: int) -> list[str]:
     titles: set[str] = set()
     for cat in CATEGORIES:
@@ -74,6 +77,8 @@ def collect_candidate_pool(client: WikiClient, seed: int) -> list[str]:
             cmcontinue = data.get("continue", {}).get("cmcontinue")
             if not cmcontinue:
                 break
+
+    titles -= EXCLUDE_TITLES   # 執行方加：排除用過的條目（--exclude-from）
 
     pool = sorted(titles)
     random.Random(seed).shuffle(pool)
@@ -499,6 +504,14 @@ def main(argv: list[str] | None = None) -> int:
         default="2026-11-20T00:00:00Z",
         help="Window end timestamp in ISO-8601 UTC (default: 2026-11-20T00:00:00Z)",
     )
+    ap.add_argument("--categories", default=None,
+                    help="'|'-separated category titles (default: the three football categories)")
+    ap.add_argument("--exclude-from", action="append", default=[],
+                    help="manifest.json whose article titles must not be reused (repeatable)")
+    ap.add_argument("--articles-per-set", type=int, default=None, help="articles per set (default 3)")
+    ap.add_argument("--min-claims-set", type=int, default=None, help="min claims per set (default 15)")
+    ap.add_argument("--domain", default=None, help="domain label written into the manifest")
+    ap.add_argument("--title", default=None, help="template title line (without '# ')")
     ap.add_argument(
         "--days",
         type=int,
@@ -506,6 +519,21 @@ def main(argv: list[str] | None = None) -> int:
         help="Window length in days (default: 120)",
     )
     args = ap.parse_args(argv)
+    # 2026-11-26（D2′ 實驗一確認批次，由執行方加的最小改動）：類別、領域名稱、範本標題可由命令列指定；預設不變
+    global CATEGORIES, DOMAIN_NAME, TEMPLATE_TITLE, ARTICLES_PER_SET, MIN_CLAIMS_PER_SET
+    if args.articles_per_set:
+        ARTICLES_PER_SET = args.articles_per_set
+    if args.min_claims_set:
+        MIN_CLAIMS_PER_SET = args.min_claims_set
+    for mp in args.exclude_from:
+        for st in json.loads(Path(mp).read_text())["sets"]:
+            EXCLUDE_TITLES.update(r["title"] for rv in st.get("revisions", []) for r in rv.values())
+    if args.categories:
+        CATEGORIES = tuple(c.strip() for c in args.categories.split("|") if c.strip())
+    if args.domain:
+        DOMAIN_NAME = args.domain
+    if args.title:
+        TEMPLATE_TITLE = "# " + args.title
 
     if args.sets < 1:
         print("ERROR: --sets must be >= 1", file=sys.stderr)

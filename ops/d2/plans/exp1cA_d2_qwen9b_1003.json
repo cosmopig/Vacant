@@ -1,0 +1,62 @@
+{
+ "schema": "vacant.d2.plan/1",
+ "agent_timeout_s": 600,
+ "no_tool_mention": true,
+ "private_live": "~/dev/ops/d2_private_live",
+ "egress": {
+  "mode": "per-set proxy, OS-assigned port"
+ },
+ "id": "exp1cA_d2_qwen9b_1003",
+ "seed": 20261184,
+ "jobs": 2,
+ "server": {
+  "port": 18251
+ },
+ "arms": [
+  "a"
+ ],
+ "model": {
+  "provider": "lms1003q9",
+  "model": "qwen/qwen3.5-9b",
+  "thinking": "off (reasoning_effort none)",
+  "ctx": 131072,
+  "parallel": 2
+ },
+ "vacant_python": "~/dev/ops/d2v52_venv/bin/python",
+ "agentcfg": {
+  "dir": "~/dev/ops/agentcfg/d2v52",
+  "copy": [
+   "models.json",
+   "extensions"
+  ],
+  "install_json": "~/dev/ops/agentcfg/d2v52_state/adapters/install.json"
+ },
+ "product_version": {
+  "commit": "auto/redo ae3db0086",
+  "wheel": "~/dev/ops/d2_release/ae3db0086/vacant_network-0.9.2-py3-none-any.whl",
+  "wheel_sha256": "fccf569cd9cf75b8df595465c44c45e0a8d9a6a4604fbc9e9b9e0ba5ddbf554e",
+  "venv": "~/dev/ops/d2v52_venv（不可編輯安裝）",
+  "hooks": "`vacant install --agents pi --mode observe` 用 d2v52_venv"
+ },
+ "materials": {
+  "dir": "${D2_PRIVATE}/realrev2_sc",
+  "generator": "realrev（agy b8a4651＋執行方加的 CLI 選項：--categories/--domain/--title/--exclude-from/--articles-per-set/--min-claims-set，見 ops/d2/realrev_gen/）：軟體 種子 20261181（6 條/組、≥10 宣稱；候選池 7 組用完）＋公司 種子 20261182（5 條/組、≥10 宣稱），以 merge_sets.py 合併、組號重編",
+  "manifest_sha256": "09b9c5937fadad33e213898b5fc999f5949fdfae8af0908f4fccae0a75e2b58f",
+  "sets": [
+   "s01",
+   "s02",
+   "s03",
+   "s04",
+   "s05",
+   "s06",
+   "s07",
+   "s08",
+   "s09"
+  ]
+ },
+ "purpose": "D2′ 實驗一確認批次 A（軟體＋公司，沒看過的類別）：沒有 Vacant 介入維護的普通交件（初稿＋不維護），標記事後只由紀錄算。",
+ "prereg": {
+  "registered": "2026-11-26，第一通模型呼叫之前推上遠端。分析定義：ops/d2/plans/exp1_flags_prereg.json＋exp1_flags_prereg_amend1.json。",
+  "analysis": "exp1_flags.py（主要：純文字比對）＋--original-defs（敏感度）；兩台以組為單位合併；和批 B 合併判定。"
+ }
+}

@@ -105,6 +105,7 @@ def main() -> int:
     man = json.loads((mat / "manifest.json").read_text())
     templates = {s["set"]: [c["template_line"] for c in s["claims"]] for s in man["sets"]}   # 只用範本行（不是真值）
     cids = {s["set"]: [c["id"] for c in s["claims"]] for s in man["sets"]}
+    domains = {s["set"]: s.get("domain", "") for s in man["sets"]}
     sc = json.loads(pathlib.Path(a.score).expanduser().read_text())
     val = {}
     for r in sc["rows"]:
@@ -171,9 +172,25 @@ def main() -> int:
                             cand = {u["url"] for u in Uprev if L.contains(u["text"], pv)}
                             fetched = {u["url"] for u in cyc}
                             f["F3"] = (not (cand & fetched)) if cand else (not fetched)
-                    rows.append({"set": sid, "arm": stage, "eval": k, "claim": cid, "status": status,
+                    etype = status
+                    if status == "wrong" and v is not None:      # 錯誤型態（只用於對照，不進標記）：讀錯值＝值在這一組某頁上、編造＝哪頁都沒有
+                        pages_k = [(mat / "sets" / sid / f"cycle_{k}" / "site").glob("*")]
+                        etype = "wrong_read" if any(S.plain_contains(pp.read_text(errors="replace"), v)
+                                                    for g in pages_k for pp in g if pp.is_file()) else "fabricated"
+                    rows.append({"set": sid, "arm": stage, "eval": k, "claim": cid, "status": status, "etype": etype,
+                                 "domain": domains.get(sid, ""),
                                  "error": status != "correct", **f, "flagged": any(f.values())})
                 prev_bound = bound
+    def verdict(fs, rc, lo, ratio, erate):
+        """預註冊修正 1（看過探索性資料、確認性資料還不存在時）：被標上限隨該批錯誤率調整。"""
+        if fs is None or rc is None or erate is None:
+            return "n/a"
+        if rc < 0.5 or fs > max(0.5, erate + 0.25):
+            return "FAIL"
+        if rc >= 0.7 and (lo or 0) >= 0.6 and (ratio is None or ratio >= 3) and fs <= max(0.3, erate + 0.15):
+            return "PASS"
+        return "UNRESOLVED"
+
     # 摘要
     def summarize(rs: list[dict]) -> dict:
         n = len(rs)
@@ -182,7 +199,7 @@ def main() -> int:
         tp = sum(r["flagged"] and r["error"] for r in rs)
         in_rate = tp / fl if fl else None
         out_rate = (er - tp) / (n - fl) if n - fl else None
-        by_err = collections.Counter((r["status"], r["flagged"]) for r in rs if r["error"])
+        by_err = collections.Counter((r.get("etype", r["status"]), r["flagged"]) for r in rs if r["error"])
         by_flag = {fk: {"flagged": sum(r[fk] for r in rs), "errors_caught": sum(r[fk] and r["error"] for r in rs)} for fk in ("F1", "F2", "F3", "F4")}
         sets = sorted({r["set"] for r in rs})
         rng = random.Random(20261126)
@@ -204,9 +221,16 @@ def main() -> int:
                 "rate_ratio": (in_rate / out_rate) if in_rate is not None and out_rate else None,
                 "random_baseline_recall": fl / n if n else None,
                 "errors_by_status_flagged": {f"{st}|{'flagged' if fl_ else 'missed'}": c for (st, fl_), c in sorted(by_err.items())},
-                "by_flag": by_flag, "sets": len(sets)}
+                "by_flag": by_flag, "sets": len(sets),
+                "error_rate": er / n if n else None,
+                "plain": {"look_share": fl / n if n else None, "miss_share_of_errors": (1 - tp / er) if er else None,
+                          "random_same_size_miss_share": (1 - fl / n) if n else None},
+                "verdict_amend1": verdict(fl / n if n else None, tp / er if er else None,
+                                          recs[int(0.05 * len(recs))] if recs else None,
+                                          (in_rate / out_rate) if in_rate is not None and out_rate else None, er / n if n else None)}
     res = {"root": root.name, "arms": arms, "overall": summarize(rows),
-           "by_arm": {ar: summarize([r for r in rows if r["arm"] == ar]) for ar in sorted({r["arm"] for r in rows})}}
+           "by_arm": {ar: summarize([r for r in rows if r["arm"] == ar]) for ar in sorted({r["arm"] for r in rows})},
+           "by_domain": {dm: summarize([r for r in rows if r["domain"] == dm]) for dm in sorted({r["domain"] for r in rows})}}
     pathlib.Path(a.out).expanduser().write_text(json.dumps({**res, "rows": rows}, ensure_ascii=False, indent=1))
     print(json.dumps({k: v for k, v in res.items()}, ensure_ascii=False)[:3000])
     return 0

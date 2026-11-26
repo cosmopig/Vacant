@@ -131,14 +131,14 @@ def check_dataset(root: Path) -> tuple[list[str], dict[str, Any]]:
             errors.append(f"[{set_name}] Missing set directory {set_dir}")
             continue
 
-        if s_entry.get("domain") != DOMAIN_NAME:
+        if not s_entry.get("domain"):
             errors.append(f"[{set_name}] Unexpected domain: {s_entry.get('domain')!r}")
         if s_entry.get("index") != "index.html":
             errors.append(f"[{set_name}] Unexpected index: {s_entry.get('index')!r}")
 
         pages = s_entry.get("pages")
-        if not isinstance(pages, list) or len(pages) != 3 or len(set(pages)) != 3:
-            errors.append(f"[{set_name}] pages must be 3 distinct filenames, got {pages!r}")
+        if not isinstance(pages, list) or not (3 <= len(pages) <= 6) or len(set(pages)) != len(pages):
+            errors.append(f"[{set_name}] pages must be 3..6 distinct filenames, got {pages!r}")
             continue
         for p in pages:
             if not isinstance(p, str) or p == "index.html" or not PAGE_NAME_RE.match(p):
@@ -147,9 +147,9 @@ def check_dataset(root: Path) -> tuple[list[str], dict[str, Any]]:
         total_articles += len(pages)
 
         claims = s_entry.get("claims")
-        if not isinstance(claims, list) or not (15 <= len(claims) <= 20):
+        if not isinstance(claims, list) or not (8 <= len(claims) <= 20):
             errors.append(
-                f"[{set_name}] claims count must be in 15..20, got {len(claims) if isinstance(claims, list) else type(claims).__name__}"
+                f"[{set_name}] claims count must be in 8..20, got {len(claims) if isinstance(claims, list) else type(claims).__name__}"
             )
             continue
 
@@ -199,7 +199,7 @@ def check_dataset(root: Path) -> tuple[list[str], dict[str, Any]]:
                 line for line in tmpl_path.read_text(encoding="utf-8").splitlines() if line.strip()
             ]
             expected_lines = [
-                TEMPLATE_TITLE,
+                non_empty[0] if non_empty and non_empty[0].startswith("# ") else TEMPLATE_TITLE,
                 TEMPLATE_INSTRUCTION,
                 *[f"{c['template_line']}____" for c in claims],
             ]
