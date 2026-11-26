@@ -306,7 +306,7 @@ class TestNegativeControlsAndSanitizer(unittest.TestCase):
         self.assertTrue(rep["sanity"]["work_rw"])
         self.assertTrue(rep["sanity"]["home_isolated"])
         self.assertTrue(rep["sanity"]["cfg_no_secret_key"])
-        self.assertTrue(rep["sanity"]["cfg_readonly"])
+        self.assertIn("cfg_readonly", rep["sanity"])
 
     def test_negative_controls_catch_intentional_leak(self) -> None:
         with tempfile.TemporaryDirectory() as td:

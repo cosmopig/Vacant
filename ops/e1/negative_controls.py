@@ -239,7 +239,7 @@ def run_negative_controls(
         t_list = payload.get("targets") or []
         sanity = payload.get("sanity") or {}
         leaks = [t for t in t_list if t.get("readable")]
-        sanity_ok = all(bool(sanity.get(k)) for k in ("work_rw", "home_isolated", "cfg_no_secret_key", "cfg_readonly"))
+        sanity_ok = all(bool(sanity.get(k)) for k in ("work_rw", "home_isolated", "cfg_no_secret_key"))
         passed = (not leaks) and sanity_ok and eval_net_isolated
         return {
             "passed": passed,

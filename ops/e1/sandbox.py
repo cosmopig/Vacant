@@ -207,7 +207,8 @@ def build_worker_bwrap_argv(
                     path_parts.append("/opt/bin")
 
     if pi_cfg_dir is not None:
-        argv += ["--ro-bind", str(pi_cfg_dir.resolve()), "/sandbox_cfg"]
+        # 每一跑自己的去敏副本、可寫（pi 要在設定目錄建立／讀 auth.json；副本裡沒有任何金鑰）
+        argv += ["--bind", str(pi_cfg_dir.resolve()), "/sandbox_cfg"]
 
     for host_p, guest_p in extra_ro_binds or ():
         argv += ["--ro-bind", str(host_p.resolve()), guest_p]
