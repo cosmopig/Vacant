@@ -1,29 +1,29 @@
 {
-  "schema": "vacant.fl.plan/1",
-  "id": "fl_screen_apps_haiku",
-  "task_format": "stdio",
-  "bank_path": "~/dev/ops/ref/apps/apps_fl_bank.jsonl",
-  "bank_sha256": "c9059eeb753617a79df52ffd132e083e6778d72c00d97ca6c7893dcc74adc46d",
-  "seed": 20261126,
-  "difficulties": [
-    "interview",
-    "competition"
-  ],
-  "n_tasks": 30,
-  "arms": [
-    "B0"
-  ],
-  "model": {
-    "agent": "claude",
-    "model": "claude-haiku-5-5",
-    "exam_model": "claude-haiku-5-5"
-  },
-  "jobs": 4,
-  "attempt_timeout_s": 300,
-  "eval_timeout_s": 60,
-  "per_case_timeout_s": 3.0,
-  "eval_mem_mb": 1024,
-  "max_attempts": 3,
-  "mv_num_inputs": 20,
-  "purpose": "APPS stdio calibration plan (B0 only, NOT evidence): sample 30 interview+competition tasks with plan seed to measure Haiku native pass rate by difficulty."
+ "schema": "vacant.fl.plan/1",
+ "id": "fl_screen_apps_haiku",
+ "task_format": "stdio",
+ "bank_path": "~/dev/ops/ref/apps/apps_fl_bank.jsonl",
+ "bank_sha256": "c9059eeb753617a79df52ffd132e083e6778d72c00d97ca6c7893dcc74adc46d",
+ "seed": 20261126,
+ "difficulties": [
+  "interview",
+  "competition"
+ ],
+ "n_tasks": 40,
+ "arms": [
+  "B0"
+ ],
+ "model": {
+  "agent": "claude",
+  "model": "claude-haiku-5-5",
+  "exam_model": "claude-haiku-5-5"
+ },
+ "jobs": 4,
+ "attempt_timeout_s": 300,
+ "eval_timeout_s": 60,
+ "per_case_timeout_s": 3.0,
+ "eval_mem_mb": 1024,
+ "max_attempts": 3,
+ "mv_num_inputs": 20,
+ "purpose": "APPS 校準（只跑 B0，不是證據）：依種子從 interview＋competition 抽 40 題，看 Haiku 各難度的原生成功率，用來選正式先導的難度層（只依難度層選；校準用過的題不進正式先導）。"
 }
