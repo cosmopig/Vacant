@@ -41,7 +41,7 @@ EVALPLUS_SHA256: dict[str, str] = {
     "MbppPlus-v0.2.0.jsonl.gz": "af43697e8791c4c149bdfd6b489d8b5412507551ac20e28a439f650b8225db63",
 }
 
-ARMS_CODE: tuple[str, ...] = ("B0", "B0x3", "B2", "S", "S+B2", "O")
+ARMS_CODE: tuple[str, ...] = ("B0", "B0x3", "B2", "S", "S+B2", "O", "P")  # P：只做語法檢查、不限範圍（ADDENDA 11-26，第七次稽核）
 ARMS_DOC: tuple[str, ...] = ("B0", "B2", "S", "S+B2", "O")
 
 #: KS-1 鐵律防呆：提示文字禁止責任／懲罰類措辭

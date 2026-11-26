@@ -932,6 +932,23 @@ class E1Runner:
                     attempts_meta.append(att_entry)
                     break
 
+                if arm == "P":
+                    # 只做語法檢查、不限範圍（ADDENDA 11-26，第七次稽核）：候選檔不能解析就保留基線，能解析就整檔收。
+                    # 程式類＝ast.parse；與 S 的「候選檔語法不對就保留基線」同一個判準，用來分開「範圍限制」與「語法檢查」的效果。
+                    if kind != "code":
+                        raise SystemExit("P 臂只定義在程式類")
+                    import ast as _ast
+                    try:
+                        _ast.parse(cand_text)
+                        committed_text = cand_text
+                        att_entry["syntax_error"] = False
+                    except SyntaxError as _exc:
+                        committed_text = baseline_text
+                        att_entry["syntax_error"] = True
+                        att_entry["error"] = f"SyntaxError: {_exc}"
+                    attempts_meta.append(att_entry)
+                    break
+
                 if arm == "B0x3":
                     b0x3_carry_text = cand_text
                     committed_text = cand_text

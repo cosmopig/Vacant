@@ -90,7 +90,7 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         for cid in chains:
             chains[cid].sort(key=lambda x: int(x["round"]))
 
-    arms_order = [a for a in ("B0", "B0x3", "B2", "S", "S+B2", "O") if a in by_arm]
+    arms_order = [a for a in ("B0", "B0x3", "B2", "S", "S+B2", "O", "P") if a in by_arm]
     for a in sorted(by_arm):
         if a not in arms_order:
             arms_order.append(a)
