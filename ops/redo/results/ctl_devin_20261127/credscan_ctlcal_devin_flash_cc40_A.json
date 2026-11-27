@@ -1,0 +1,21 @@
+{
+ "files_scanned": 512,
+ "hits": 3,
+ "detail": [
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_devin_flash_cc40_A/cells/cc_1608C/r1/A/attempt_1/logs/devin_export.json",
+   "rule": "b64",
+   "head": "n111"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_devin_flash_cc40_A/cells/cc_1622D/r1/A/attempt_1/workspace/cases.json",
+   "rule": "b64",
+   "head": "n101"
+  },
+  {
+   "file": "/opt/ctlwork/runs/ctlcal_devin_flash_cc40_A/cells/cc_1622D/r1/A/attempt_1/logs/devin_export.json",
+   "rule": "b64",
+   "head": "n101"
+  }
+ ]
+}
