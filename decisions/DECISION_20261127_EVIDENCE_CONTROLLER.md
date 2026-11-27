@@ -108,3 +108,8 @@
 - **題庫**：原題庫（`~/dev/ops/ref/bm_tasks/`）在壞掉的機器上，不在 repo。以 repo 內的建構器（`ops/redo/banks/build_*.py`）從公開 `exercism/python` 重建；config.json 的 sha256 與 11-27 釘住的前綴 ebf067c6e09a6e11 是否一致，記在 `ops/redo/results/` 的重建紀錄（一致或不一致都記）。有效性規則不變：參考解兩半都要過。
 - **沙箱（實際使用的機制）**：`ops/redo/claude_bwrap_agent.py`（bwrap：最小 rootfs、`--unshare-net`＋宿主端 UNIX socket 白名單代理只放行 api.anthropic.com:443、工作區固定掛 `/work`、`--clearenv` 環境白名單、worker 以非 root 使用者身分跑、`--disallowedTools WebFetch,WebSearch`）。能強制與不能強制的邊界、負控制結果寫在 `ops/redo/results/` 的沙箱紀錄，**在任何真實 Haiku 嘗試之前**先跑負控制。
 - **限制（照實寫）**：worker 讀得到自己的認證檔（沒有它打不了模型）；代理不解 TLS，只保證「只連得到 api.anthropic.com」，不檢查內容；Haiku 的訓練資料可能含 Exercism 的參考解（無法排除，公開題庫共同限制）；模型是遠端 API，同一個 `haiku` 別名之後可能指向別的版本。
+
+### 修正 4 實測補記（2026-11-27，Haiku 校準之後；正式批次尚未啟動）
+- 沙箱實際機制與設計時略有不同：**不是**整個 CLI 關進 bwrap（那需要把 CLI 的認證權杖檔掛進沙箱，被自動模式分類器擋下，已移除該草稿）；改為 CLI 在外、worker 的 Bash 走 CLI 內建 bwrap 沙箱（無網路、只讀寫自己的工作區）、檔案工具靠權限規則；`ops/redo/claude_sandbox_agent.py`。Read／Edit／Write 是 CLI 行程內規則、不是作業系統隔離。負控制 21 項全過：`ops/redo/results/ctl_haiku_20261127/negctl_1.json`。
+- 並行度 jobs＝32（`THROUGHPUT.md`，0 限流）。
+- 校準（A 單次、37 題、獨立評分）：**hidden 37/37**，費用 $0.115，平均牆鐘 18 秒（`CALIBRATION_haiku37_A.md`）。Haiku 在天花板；修正 3 的選題規則在這個結果下只湊得出 4 題（<12 的下限）⇒ 依規則先回報、不啟動四臂批次，選題由協調者決定。
