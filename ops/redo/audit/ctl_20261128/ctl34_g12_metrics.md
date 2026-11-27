@@ -1,6 +1,6 @@
 # ctl34_pi_gemma12b — Evidence Controller Metrics
 Plan sha256: `77ce804923be5ece…`  Tasks: 34 × 2 reps
-Note: 這是 16 題的探索，只判斷方向（DECISION_20261127_EVIDENCE_CONTROLLER.md）。
+Note: 這是 34 題 × 2 次的探索，只判斷方向（DECISION_20261127_EVIDENCE_CONTROLLER.md）。
 
 | Arm | Hidden Pass | Hidden Rate | Hidden Sat (macro/micro) | Tokens/Success | Broken-After-Pass | Mean Wall | Mean Attempts | Void |
 |---|---|---|---|---|---|---|---|---|

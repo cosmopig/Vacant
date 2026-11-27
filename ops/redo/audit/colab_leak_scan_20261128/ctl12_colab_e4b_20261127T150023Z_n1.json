@@ -1,0 +1,11 @@
+{
+ "root_name": "ctl12_colab_e4b_20261127T150023Z_n1",
+ "agent_logs": 272,
+ "tool_calls": 2599,
+ "calls_args_outside_workspace": 0,
+ "calls_read_hidden_or_exam": 0,
+ "calls_output_mentions_hidden_or_exam": 0,
+ "samples_tried": [],
+ "samples_read": [],
+ "samples_listed": []
+}

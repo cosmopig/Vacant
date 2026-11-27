@@ -28,3 +28,12 @@
   - XMV 有 3 題退化（luhn 斷言被刪光、say 只剩 1 條、series 收不到）。
   - 追加臂比基本臂早約 1 小時跑。
   - 有些臂是 72／73 對：有幾格考卷收不到測試，沒有可比的格。
+
+## 補充限制：Colab 上沒有沙箱（2026-11-28，依控制器結論的獨立複核補）
+- 這一批在 Colab VM 上跑，計畫的 agent 指令直接是 `pi`，**沒有套 bwrap**。題庫（含隱藏測試 `hidden/` 與考卷）和 agent 在同一台 VM 上，agent 讀得到。本機的批次有 bwrap，這一批沒有。
+- 越界讀取掃描：用 `ops/redo/analysis/scan_redo_leak.py`，口徑同 `ops/d2/scan_leak.py`，看每一次工具呼叫的參數與回傳。結果在 `ops/redo/audit/colab_leak_scan_20261128/`。
+- exam37 part1（`exam37_colab_e4b_part1_20261127T131909Z_n11`）：616 份 agent 紀錄、3,042 次工具呼叫，參數碰到工作區外 2 筆（都是寫檔內容裡的英文字，見下）、讀到 hidden／考卷 0 筆。
+- exam37 part2（`exam37_colab_e4b_part2_20261127T121517Z_n8`）：448 份、2,128 次，0 筆、0 筆。
+- 參數碰到工作區外位置（題庫、hidden、exams、別次嘗試、上層目錄、根目錄掃描）的呼叫、回傳含 hidden／exams 目錄或檔名的呼叫，都是 0。
+- 掃到的 2 筆是 agent 寫進程式註解裡的英文字 hidden（「complexity is hidden in a helper function」「'python' is hidden」），不是路徑。
+- 所以沒有看到讀取的痕跡，但沒有沙箱就不能完全排除。

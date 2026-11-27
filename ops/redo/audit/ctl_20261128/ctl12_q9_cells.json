@@ -5,6 +5,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:04Z",
+  "ended": "2026-11-27T03:17:49Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -20,6 +22,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:04Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -42,6 +45,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:18Z",
+  "ended": "2026-11-27T03:18:41Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -57,6 +62,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:18Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -79,6 +85,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:41Z",
+  "ended": "2026-11-27T03:19:11Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -94,6 +102,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:41Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -116,6 +125,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:49Z",
+  "ended": "2026-11-27T03:18:18Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -131,6 +142,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:49Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -153,6 +165,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:37Z",
+  "ended": "2026-11-27T03:19:09Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -168,6 +182,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:37Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -190,6 +205,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:44Z",
+  "ended": "2026-11-27T03:18:08Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -205,6 +222,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:44Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -227,6 +245,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:08Z",
+  "ended": "2026-11-27T03:18:37Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -242,6 +262,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:08Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -264,6 +285,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:17:44Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -279,6 +302,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -301,6 +325,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:51Z",
+  "ended": "2026-11-27T03:29:21Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -316,6 +342,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:51Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -338,6 +365,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:28:35Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -353,6 +382,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -375,6 +405,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:35Z",
+  "ended": "2026-11-27T03:28:51Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -390,6 +422,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:35Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -412,6 +445,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:29:21Z",
+  "ended": "2026-11-27T03:29:44Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -427,6 +462,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:29:21Z",
     "acc_passed": 10,
     "acc_total": 10,
     "acc_status": "ok",
@@ -449,6 +485,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:24Z",
+  "ended": "2026-11-27T03:18:59Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -464,6 +502,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:24Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -486,6 +525,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:34Z",
+  "ended": "2026-11-27T03:17:58Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -501,6 +542,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:34Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -523,6 +565,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:58Z",
+  "ended": "2026-11-27T03:18:24Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -538,6 +582,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:58Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -560,6 +605,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:17:34Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -575,6 +622,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -597,6 +645,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:32Z",
+  "ended": "2026-11-27T03:19:58Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -612,6 +662,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:32Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -634,6 +685,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:20:23Z",
+  "ended": "2026-11-27T03:20:45Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -649,6 +702,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:23Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -671,6 +725,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:11Z",
+  "ended": "2026-11-27T03:19:32Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -686,6 +742,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:11Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -708,6 +765,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:58Z",
+  "ended": "2026-11-27T03:20:23Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -723,6 +782,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:58Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -745,6 +805,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:24:57Z",
+  "ended": "2026-11-27T03:25:28Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -760,6 +822,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:24:57Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -782,6 +845,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:24:01Z",
+  "ended": "2026-11-27T03:24:25Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -797,6 +862,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:24:01Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -819,6 +885,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:24:25Z",
+  "ended": "2026-11-27T03:24:57Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -834,6 +902,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:24:25Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -856,6 +925,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:25:28Z",
+  "ended": "2026-11-27T03:26:03Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -871,6 +942,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:25:28Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -893,6 +965,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:30Z",
+  "ended": "2026-11-27T03:19:00Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -908,6 +982,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:30Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -930,6 +1005,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:38Z",
+  "ended": "2026-11-27T03:18:03Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -945,6 +1022,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:38Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -967,6 +1045,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:03Z",
+  "ended": "2026-11-27T03:18:30Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -982,6 +1062,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:03Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1004,6 +1085,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:04Z",
+  "ended": "2026-11-27T03:17:38Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1019,6 +1102,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:04Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1041,6 +1125,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:36Z",
+  "ended": "2026-11-27T03:18:02Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1056,6 +1142,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:36Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1078,6 +1165,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:28Z",
+  "ended": "2026-11-27T03:18:49Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1093,6 +1182,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:28Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1115,6 +1205,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:17:36Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1130,6 +1222,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1152,6 +1245,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:02Z",
+  "ended": "2026-11-27T03:18:28Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1167,6 +1262,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:02Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1189,6 +1285,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:10Z",
+  "ended": "2026-11-27T03:26:05Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -1204,6 +1302,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:10Z",
     "acc_passed": 0,
     "acc_total": 1,
     "acc_status": "ok",
@@ -1226,6 +1325,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:26:32Z",
+  "ended": "2026-11-27T03:26:54Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1241,6 +1342,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:26:32Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1263,6 +1365,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:49Z",
+  "ended": "2026-11-27T03:19:10Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1278,6 +1382,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:49Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1300,6 +1405,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:26:05Z",
+  "ended": "2026-11-27T03:26:32Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1315,6 +1422,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:26:05Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -1337,6 +1445,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:30Z",
+  "ended": "2026-11-27T03:18:53Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1352,6 +1462,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:30Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1374,6 +1485,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:46Z",
+  "ended": "2026-11-27T03:18:09Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1389,6 +1502,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:46Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1411,6 +1525,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:09Z",
+  "ended": "2026-11-27T03:18:30Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1426,6 +1542,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:09Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1448,6 +1565,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:04Z",
+  "ended": "2026-11-27T03:17:46Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1463,6 +1582,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:04Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1485,6 +1605,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:20:15Z",
+  "ended": "2026-11-27T03:20:39Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1500,6 +1622,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:15Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1522,6 +1645,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:39Z",
+  "ended": "2026-11-27T03:19:59Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1537,6 +1662,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:39Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1559,6 +1685,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:59Z",
+  "ended": "2026-11-27T03:20:15Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1574,6 +1702,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:59Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1596,6 +1725,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:22Z",
+  "ended": "2026-11-27T03:19:39Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1611,6 +1742,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:22Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1633,6 +1765,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:29Z",
+  "ended": "2026-11-27T03:19:55Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1648,6 +1782,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:29Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1670,6 +1805,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:20:14Z",
+  "ended": "2026-11-27T03:20:45Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1685,6 +1822,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:14Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1707,6 +1845,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:09Z",
+  "ended": "2026-11-27T03:19:29Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1722,6 +1862,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:09Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1744,6 +1885,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:55Z",
+  "ended": "2026-11-27T03:20:14Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -1759,6 +1902,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:55Z",
     "acc_passed": 5,
     "acc_total": 5,
     "acc_status": "ok",
@@ -1781,6 +1925,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:50:07Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -1796,6 +1942,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -1818,6 +1965,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:28:08Z",
+  "ended": "2026-11-27T04:57:58Z",
   "n_attempts": 3,
   "delivered_attempt": 2,
   "accepted": false,
@@ -1833,6 +1982,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:28:08Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -1849,6 +1999,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T04:38:08Z",
     "acc_passed": 3,
     "acc_total": 14,
     "acc_status": "ok",
@@ -1865,6 +2016,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T04:47:57Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -1887,6 +2039,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:57:58Z",
+  "ended": "2026-11-27T05:37:09Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -1902,6 +2056,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:57:58Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -1918,6 +2073,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T05:10:58Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -1934,6 +2090,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T05:23:58Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -1956,6 +2113,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:50:07Z",
+  "ended": "2026-11-27T04:28:08Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -1971,6 +2130,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:50:07Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -1987,6 +2147,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T04:03:07Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2003,6 +2164,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T04:15:08Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2025,6 +2187,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:55:08Z",
+  "ended": "2026-11-27T05:06:24Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -2040,6 +2204,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:55:08Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2062,6 +2227,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:45:07Z",
+  "ended": "2026-11-27T04:18:08Z",
   "n_attempts": 3,
   "delivered_attempt": 2,
   "accepted": false,
@@ -2077,6 +2244,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:45:07Z",
     "acc_passed": null,
     "acc_total": 0,
     "acc_status": "load_error",
@@ -2093,6 +2261,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:55:08Z",
     "acc_passed": 1,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2109,6 +2278,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T04:05:08Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2131,6 +2301,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:18:08Z",
+  "ended": "2026-11-27T04:55:08Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -2146,6 +2318,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:18:08Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2162,6 +2335,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T04:30:08Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2178,6 +2352,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T04:42:08Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2200,6 +2375,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:45:07Z",
   "n_attempts": 3,
   "delivered_attempt": 1,
   "accepted": false,
@@ -2215,6 +2392,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 1,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2231,6 +2409,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:27:07Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2247,6 +2426,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T03:37:07Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2269,6 +2449,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:19:00Z",
+  "ended": "2026-11-27T04:52:00Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -2284,6 +2466,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:19:00Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2306,6 +2489,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:59Z",
+  "ended": "2026-11-27T03:48:59Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -2321,6 +2506,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:59Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2337,6 +2523,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:28:59Z",
     "acc_passed": 1,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2353,6 +2540,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T03:38:59Z",
     "acc_passed": 2,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2375,6 +2563,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:48:59Z",
+  "ended": "2026-11-27T04:19:00Z",
   "n_attempts": 3,
   "delivered_attempt": 1,
   "accepted": false,
@@ -2390,6 +2580,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:48:59Z",
     "acc_passed": 3,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2406,6 +2597,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:58:59Z",
     "acc_passed": 2,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2422,6 +2614,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T04:09:00Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2444,6 +2637,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:52:00Z",
+  "ended": "2026-11-27T05:28:00Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -2459,6 +2654,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:52:00Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2475,6 +2671,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T05:05:00Z",
     "acc_passed": 0,
     "acc_total": 14,
     "acc_status": "ok",
@@ -2491,6 +2688,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T05:15:00Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2513,6 +2711,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:43Z",
+  "ended": "2026-11-27T03:18:17Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2528,6 +2728,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:43Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2550,6 +2751,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:55Z",
+  "ended": "2026-11-27T03:19:22Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2565,6 +2768,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:55Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2587,6 +2791,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:04Z",
+  "ended": "2026-11-27T03:17:43Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2602,6 +2808,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:04Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2624,6 +2831,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:17Z",
+  "ended": "2026-11-27T03:18:55Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2639,6 +2848,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:17Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2661,6 +2871,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:43Z",
+  "ended": "2026-11-27T03:19:19Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2676,6 +2888,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:43Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2698,6 +2911,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:18:08Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2713,6 +2928,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2735,6 +2951,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:08Z",
+  "ended": "2026-11-27T03:18:43Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2750,6 +2968,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:08Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2772,6 +2991,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:19Z",
+  "ended": "2026-11-27T03:20:09Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2787,6 +3008,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:19Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2809,6 +3031,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:28:38Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2824,6 +3048,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2846,6 +3071,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:21:30Z",
+  "ended": "2026-11-27T03:22:28Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2861,6 +3088,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:30Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2883,6 +3111,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:22:28Z",
+  "ended": "2026-11-27T03:23:02Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2898,6 +3128,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:22:28Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2920,6 +3151,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:20:39Z",
+  "ended": "2026-11-27T03:21:30Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -2935,6 +3168,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:39Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -2957,6 +3191,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:41Z",
+  "ended": "2026-11-27T03:52:41Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -2972,6 +3208,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:41Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -2994,6 +3231,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:18:54Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3009,6 +3248,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3031,6 +3271,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:54Z",
+  "ended": "2026-11-27T03:19:41Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3046,6 +3288,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:54Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3068,6 +3311,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:52:41Z",
+  "ended": "2026-11-27T03:53:15Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3083,6 +3328,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:52:41Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3105,6 +3351,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:30:25Z",
+  "ended": "2026-11-27T03:30:53Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3120,6 +3368,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:30:25Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3142,6 +3391,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:54Z",
+  "ended": "2026-11-27T03:29:36Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3157,6 +3408,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:54Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3179,6 +3431,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:29:36Z",
+  "ended": "2026-11-27T03:30:25Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3194,6 +3448,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:29:36Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3216,6 +3471,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:28:54Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3231,6 +3488,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3253,6 +3511,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:28:56Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3268,6 +3528,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3290,6 +3551,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:29:26Z",
+  "ended": "2026-11-27T03:36:17Z",
   "n_attempts": 2,
   "delivered_attempt": 2,
   "accepted": true,
@@ -3305,6 +3568,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:29:26Z",
     "acc_passed": null,
     "acc_total": null,
     "acc_status": "timeout",
@@ -3321,6 +3585,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:35:21Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3343,6 +3608,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:36:17Z",
+  "ended": "2026-11-27T03:36:48Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3358,6 +3625,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:36:17Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3380,6 +3648,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:56Z",
+  "ended": "2026-11-27T03:29:26Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3395,6 +3665,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:56Z",
     "acc_passed": 12,
     "acc_total": 12,
     "acc_status": "ok",
@@ -3417,6 +3688,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:04Z",
+  "ended": "2026-11-27T03:17:56Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3432,6 +3705,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:04Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3454,6 +3728,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:18:44Z",
+  "ended": "2026-11-27T03:19:39Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3469,6 +3745,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:44Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3491,6 +3768,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:39Z",
+  "ended": "2026-11-27T03:20:21Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3506,6 +3785,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:39Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3528,6 +3808,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:56Z",
+  "ended": "2026-11-27T03:18:44Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3543,6 +3825,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:56Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3565,6 +3848,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:24Z",
+  "ended": "2026-11-27T03:19:20Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3580,6 +3865,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:24Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3602,6 +3888,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:50Z",
+  "ended": "2026-11-27T03:21:17Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3617,6 +3905,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:50Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3639,6 +3928,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:18:24Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3654,6 +3945,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3676,6 +3968,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:20Z",
+  "ended": "2026-11-27T03:19:50Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3691,6 +3985,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:20Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3713,6 +4008,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:23:21Z",
+  "ended": "2026-11-27T03:24:01Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3728,6 +4025,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:23:21Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3750,6 +4048,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:21:48Z",
+  "ended": "2026-11-27T03:22:21Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3765,6 +4065,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:48Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3787,6 +4088,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:22:21Z",
+  "ended": "2026-11-27T03:23:21Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3802,6 +4105,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:22:21Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3824,6 +4128,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:21:17Z",
+  "ended": "2026-11-27T03:21:48Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3839,6 +4145,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:17Z",
     "acc_passed": 7,
     "acc_total": 7,
     "acc_status": "ok",
@@ -3861,6 +4168,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T04:04:30Z",
+  "ended": "2026-11-27T04:08:26Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -3876,6 +4185,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:04:30Z",
     "acc_passed": 1,
     "acc_total": 8,
     "acc_status": "ok",
@@ -3898,6 +4208,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:47:53Z",
+  "ended": "2026-11-27T04:01:56Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -3913,6 +4225,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:47:53Z",
     "acc_passed": 4,
     "acc_total": 8,
     "acc_status": "ok",
@@ -3929,6 +4242,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:52:42Z",
     "acc_passed": 1,
     "acc_total": 8,
     "acc_status": "ok",
@@ -3945,6 +4259,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T03:57:07Z",
     "acc_passed": 6,
     "acc_total": 8,
     "acc_status": "ok",
@@ -3967,6 +4282,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T04:01:56Z",
+  "ended": "2026-11-27T04:04:30Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -3982,6 +4299,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:01:56Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4004,6 +4322,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:47:53Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": true,
@@ -4019,6 +4339,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4035,6 +4356,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:38:05Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4051,6 +4373,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T03:43:53Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4073,6 +4396,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:51:27Z",
+  "ended": "2026-11-27T03:55:44Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -4088,6 +4413,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:51:27Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4110,6 +4436,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:58:09Z",
+  "ended": "2026-11-27T04:06:15Z",
   "n_attempts": 2,
   "delivered_attempt": 2,
   "accepted": true,
@@ -4125,6 +4453,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:58:09Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4141,6 +4470,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T04:03:38Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4163,6 +4493,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:51:27Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -4178,6 +4510,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4194,6 +4527,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:37:00Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4210,6 +4544,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T03:41:27Z",
     "acc_passed": 6,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4232,6 +4567,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:55:44Z",
+  "ended": "2026-11-27T03:58:09Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4247,6 +4584,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:55:44Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4269,6 +4607,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:20:45Z",
+  "ended": "2026-11-27T03:31:09Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -4284,6 +4624,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:45Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4306,6 +4647,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:51:55Z",
+  "ended": "2026-11-27T04:01:50Z",
   "n_attempts": 2,
   "delivered_attempt": 2,
   "accepted": true,
@@ -4321,6 +4664,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:51:55Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4337,6 +4681,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:58:57Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4359,6 +4704,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T04:01:50Z",
+  "ended": "2026-11-27T04:18:15Z",
   "n_attempts": 3,
   "delivered_attempt": 3,
   "accepted": false,
@@ -4374,6 +4721,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T04:01:50Z",
     "acc_passed": 1,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4390,6 +4738,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T04:09:00Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4406,6 +4755,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T04:14:12Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4428,6 +4778,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:31:09Z",
+  "ended": "2026-11-27T03:51:55Z",
   "n_attempts": 3,
   "delivered_attempt": 2,
   "accepted": false,
@@ -4443,6 +4795,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:31:09Z",
     "acc_passed": 2,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4459,6 +4812,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:39:52Z",
     "acc_passed": 5,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4475,6 +4829,7 @@
    },
    {
     "k": 3,
+    "started": "2026-11-27T03:44:57Z",
     "acc_passed": 4,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4497,6 +4852,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:30:19Z",
+  "ended": "2026-11-27T03:31:24Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4512,6 +4869,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:30:19Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4534,6 +4892,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:33:34Z",
+  "ended": "2026-11-27T03:36:18Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4549,6 +4909,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:33:34Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4571,6 +4932,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:30:19Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4586,6 +4949,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4608,6 +4972,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:31:24Z",
+  "ended": "2026-11-27T03:33:34Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4623,6 +4989,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:31:24Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4645,6 +5012,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:19:12Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4660,6 +5029,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4682,6 +5052,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:21:06Z",
+  "ended": "2026-11-27T03:27:15Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4697,6 +5069,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:06Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4719,6 +5092,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:27:15Z",
+  "ended": "2026-11-27T03:27:58Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4734,6 +5109,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:27:15Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4756,6 +5132,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:12Z",
+  "ended": "2026-11-27T03:21:06Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4771,6 +5149,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:12Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4793,6 +5172,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:21:53Z",
+  "ended": "2026-11-27T03:23:45Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4808,6 +5189,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:53Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4830,6 +5212,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:26:10Z",
+  "ended": "2026-11-27T03:32:12Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4845,6 +5229,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:26:10Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4867,6 +5252,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:20:09Z",
+  "ended": "2026-11-27T03:21:53Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4882,6 +5269,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:09Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4904,6 +5292,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:23:45Z",
+  "ended": "2026-11-27T03:26:10Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4919,6 +5309,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:23:45Z",
     "acc_passed": 8,
     "acc_total": 8,
     "acc_status": "ok",
@@ -4941,6 +5332,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:17:47Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4956,6 +5349,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -4978,6 +5372,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:21:39Z",
+  "ended": "2026-11-27T03:22:27Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -4993,6 +5389,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:39Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5015,6 +5412,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:22:27Z",
+  "ended": "2026-11-27T03:34:59Z",
   "n_attempts": 2,
   "delivered_attempt": 2,
   "accepted": true,
@@ -5030,6 +5429,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:22:27Z",
     "acc_passed": 0,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5046,6 +5446,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:31:21Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5068,6 +5469,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:47Z",
+  "ended": "2026-11-27T03:21:39Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5083,6 +5486,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:47Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5105,6 +5509,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:23Z",
+  "ended": "2026-11-27T03:18:55Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5120,6 +5526,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:23Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5142,6 +5549,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:17:42Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5157,6 +5566,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5179,6 +5589,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:42Z",
+  "ended": "2026-11-27T03:18:23Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5194,6 +5606,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:43Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5216,6 +5629,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:18:55Z",
+  "ended": "2026-11-27T03:19:42Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5231,6 +5646,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:18:55Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5253,6 +5669,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:28:05Z",
+  "ended": "2026-11-27T03:37:10Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": false,
@@ -5268,6 +5686,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:28:05Z",
     "acc_passed": 0,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5290,6 +5709,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:20:45Z",
+  "ended": "2026-11-27T03:21:36Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5305,6 +5726,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:45Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5327,6 +5749,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:21:36Z",
+  "ended": "2026-11-27T03:22:36Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5342,6 +5766,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:21:36Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5364,6 +5789,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:37:10Z",
+  "ended": "2026-11-27T03:40:32Z",
   "n_attempts": 2,
   "delivered_attempt": 2,
   "accepted": true,
@@ -5379,6 +5806,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:37:10Z",
     "acc_passed": 0,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5395,6 +5823,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:40:13Z",
     "acc_passed": 6,
     "acc_total": 6,
     "acc_status": "ok",
@@ -5417,6 +5846,8 @@
   "rep": 1,
   "arm": "A",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:22:25Z",
+  "ended": "2026-11-27T03:23:06Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5432,6 +5863,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:22:25Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5454,6 +5886,8 @@
   "rep": 1,
   "arm": "B",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:19:47Z",
+  "ended": "2026-11-27T03:20:33Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5469,6 +5903,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:47Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5491,6 +5926,8 @@
   "rep": 1,
   "arm": "C",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:20:33Z",
+  "ended": "2026-11-27T03:22:25Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5506,6 +5943,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:20:33Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5528,6 +5966,8 @@
   "rep": 1,
   "arm": "R",
   "host": "lms1003q9",
+  "started": "2026-11-27T03:17:04Z",
+  "ended": "2026-11-27T03:19:47Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5543,6 +5983,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:04Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5565,6 +6006,8 @@
   "rep": 2,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:28Z",
+  "ended": "2026-11-27T03:22:54Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5580,6 +6023,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:28Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5602,6 +6046,8 @@
   "rep": 2,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:24:18Z",
+  "ended": "2026-11-27T03:27:50Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5617,6 +6063,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:24:18Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5639,6 +6086,8 @@
   "rep": 2,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:17:07Z",
+  "ended": "2026-11-27T03:19:28Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5654,6 +6103,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:17:07Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5676,6 +6126,8 @@
   "rep": 2,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:22:54Z",
+  "ended": "2026-11-27T03:24:18Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5691,6 +6143,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:22:54Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5713,6 +6166,8 @@
   "rep": 3,
   "arm": "A",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:26:39Z",
+  "ended": "2026-11-27T03:27:35Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5728,6 +6183,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:26:39Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5750,6 +6206,8 @@
   "rep": 3,
   "arm": "B",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:24:04Z",
+  "ended": "2026-11-27T03:25:09Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5765,6 +6223,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:24:04Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5787,6 +6246,8 @@
   "rep": 3,
   "arm": "C",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:25:09Z",
+  "ended": "2026-11-27T03:26:39Z",
   "n_attempts": 1,
   "delivered_attempt": 1,
   "accepted": true,
@@ -5802,6 +6263,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:25:09Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5824,6 +6286,8 @@
   "rep": 3,
   "arm": "R",
   "host": "lms1004q9",
+  "started": "2026-11-27T03:19:42Z",
+  "ended": "2026-11-27T03:24:04Z",
   "n_attempts": 2,
   "delivered_attempt": 2,
   "accepted": true,
@@ -5839,6 +6303,7 @@
   "attempts": [
    {
     "k": 1,
+    "started": "2026-11-27T03:19:42Z",
     "acc_passed": 3,
     "acc_total": 14,
     "acc_status": "ok",
@@ -5855,6 +6320,7 @@
    },
    {
     "k": 2,
+    "started": "2026-11-27T03:20:15Z",
     "acc_passed": 14,
     "acc_total": 14,
     "acc_status": "ok",

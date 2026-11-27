@@ -205,3 +205,13 @@
 - 計畫 `ops/d2/plans/expT_qwen9b.json`（推上遠端的 929df323e）。1004 跑完了 ctl34 自己那一半（132/132），**先在 1004 發射 T 的 1004 那一半**（`--provider lms1004`，18 組×2 次）；1003 等 ctl34 跑完再發射它那一半（19 組）。各組由哪台跑照計畫的 sets 分配，不變。
 - 1004 載 qwen3.5-9b、131072／parallel 2、jobs 2（照計畫；9B 在 2 串流時每串流 96 tok/s，約單串流 107 的 90%，符合每串流 ≥70% 的規則）。
 - Haiku（TE／TER）用擁有者給的 API 金鑰：只在 Host 端從環境變數讀，不進小模型沙箱、不落檔；每次呼叫記帳到 `~/dev/ops/ctl/api_credit_ledger.jsonl`。
+
+## ctl12-E4B（Colab）正式批次的發射紀錄（2026-11-28 補記，依獨立複核）
+- 本文件 03:55Z 的提交寫「正式批次未執行」。之後沒有補發射紀錄，這裡補上（資料來源：租用登錄 `~/dev/ops/ctl/colab_registry.jsonl`，不進 repo）。
+- 正式批次 root `ctl12_colab_e4b_20261127T150023Z_n1`：2026-11-27 15:02Z 在 Colab **L4** VM 上發射（`launched` 事件），17:26Z 跑完、佇列清空後釋放。之前在 T4 上的幾次嘗試是 OOM 或中止，那些 root 保留、沒有併入。
+- 和預註冊的偏離：
+  1. 預註冊寫 A100-SXM4-40GB，並行數 12 也是在 A100 上量的；實跑在 L4。
+  2. 實跑的 harness（4c687dca）比預註冊時新。
+  3. Colab VM 上沒有套 bwrap：agent 和題庫的 `hidden/` 在同一台機器上。
+- 越界讀取掃描（`ops/redo/audit/colab_leak_scan_20261128/`）：0 次。
+- 寫進了 `decisions/conclusions/CONCLUSION_20261128_EVIDENCE_CONTROLLER.md` 的限制段。

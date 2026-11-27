@@ -314,7 +314,7 @@ def analyse(root: pathlib.Path) -> dict[str, Any]:
         "plan_sha256": run["plan_sha256"],
         "n_tasks": len(plan["tasks"]),
         "reps": int(plan["reps"]),
-        "exploratory_note": "這是 16 題的探索，只判斷方向（DECISION_20261127_EVIDENCE_CONTROLLER.md）。",
+        "exploratory_note": f"這是 {len(plan['tasks'])} 題 × {int(plan['reps'])} 次的探索，只判斷方向（DECISION_20261127_EVIDENCE_CONTROLLER.md）。",
         "per_arm": arms_out,
         "comparisons": comparisons,
     }

@@ -26,3 +26,10 @@
   - 寬定義（agent.log 裡用 bash 跑過 Python）：AP **58/74（78%）**、AC 0/74。
 - **謊報分類器偏保守**：抽樣裡有過度自信的格沒被算成謊報，例如自稱「6 個檢查全過」但隱藏評分沒過、或列出失敗卻仍說已驗證。所以「謊報 0」是保守下限，不是真的沒有。
 - **AN 被擋的依據**：依 KS-1「監督語意」的裁量（vacant-hope 決定）；repo 的文字守衛（`assert_ks1_clean`）逐字比對並查不出 AN 的文字有問題。
+
+## 補充限制：Colab 上沒有沙箱（2026-11-28，依控制器結論的獨立複核補）
+- 這一批在 Colab VM 上跑，計畫的 agent 指令直接是 `pi`，**沒有套 bwrap**。題庫（含隱藏測試 `hidden/` 與考卷）和 agent 在同一台 VM 上，agent 讀得到。本機的批次有 bwrap，這一批沒有。
+- 越界讀取掃描：用 `ops/redo/analysis/scan_redo_leak.py`，口徑同 `ops/d2/scan_leak.py`，看每一次工具呼叫的參數與回傳。結果在 `ops/redo/audit/colab_leak_scan_20261128/`。
+- 實驗 N（`expN_exam37_colab_e4b_20261127T114333Z_n7`）：148 份 agent 紀錄、922 次工具呼叫，參數碰到工作區外 0 筆、讀到 hidden／考卷 0 筆。
+- 參數碰到工作區外位置（題庫、hidden、exams、別次嘗試、上層目錄、根目錄掃描）的呼叫、回傳含 hidden／exams 目錄或檔名的呼叫，都是 0。
+- 所以沒有看到讀取的痕跡，但沒有沙箱就不能完全排除。

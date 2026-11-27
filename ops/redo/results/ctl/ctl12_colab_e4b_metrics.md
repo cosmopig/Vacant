@@ -1,6 +1,6 @@
 # ctl12_colab_e4b — Evidence Controller Metrics
 Plan sha256: `9e7ca731510a7120…`  Tasks: 12 × 3 reps
-Note: 這是 16 題的探索，只判斷方向（DECISION_20261127_EVIDENCE_CONTROLLER.md）。
+Note: 這是 12 題 × 3 次的探索，只判斷方向（DECISION_20261127_EVIDENCE_CONTROLLER.md）。
 
 | Arm | Hidden Pass | Hidden Rate | Hidden Sat (macro/micro) | Tokens/Success | Broken-After-Pass | Mean Wall | Mean Attempts | Void |
 |---|---|---|---|---|---|---|---|---|

@@ -1,0 +1,11 @@
+{
+ "root_name": "expN_exam37_colab_e4b_20261127T114333Z_n7",
+ "agent_logs": 148,
+ "tool_calls": 922,
+ "calls_args_outside_workspace": 0,
+ "calls_read_hidden_or_exam": 0,
+ "calls_output_mentions_hidden_or_exam": 0,
+ "samples_tried": [],
+ "samples_read": [],
+ "samples_listed": []
+}
