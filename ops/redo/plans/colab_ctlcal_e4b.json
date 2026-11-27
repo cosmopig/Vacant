@@ -1,0 +1,118 @@
+{
+ "id": "colab_ctlcal_e4b",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl_cal37"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  }
+ },
+ "pair": [
+  "A",
+  "A"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-e4b-it-qat",
+   "jobs": 12,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-e4b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "note": "校準用（不是證據），不進正式分析；只算 E4B 的 A 臂在 37 題候選（ctl_cal18 + ctl_hard19）hidden 半數上的成功率。依 DECISION_20261127 凍結規則，落在 25%–70% 才當第二模型。"
+ },
+ "tasks": [
+  "ex_kindergarten_garden",
+  "ex_ocr_numbers",
+  "ex_circular_buffer",
+  "ex_high_scores",
+  "ex_simple_cipher",
+  "ex_binary",
+  "ex_octal",
+  "ex_yacht",
+  "ex_luhn",
+  "ex_sublist",
+  "ex_say",
+  "ex_dnd_character",
+  "ex_twelve_days",
+  "ex_atbash_cipher",
+  "ex_queen_attack",
+  "ex_prime_factors",
+  "ex_scrabble_score",
+  "ex_series",
+  "ex_word_search",
+  "ex_bank_account",
+  "ex_rational_numbers",
+  "ex_custom_set",
+  "ex_camicia",
+  "ex_binary_search_tree",
+  "ex_meetup",
+  "ex_complex_numbers",
+  "ex_linked_list",
+  "ex_all_your_base",
+  "ex_swift_scheduling",
+  "ex_flower_field",
+  "ex_minesweeper",
+  "ex_largest_series_product",
+  "ex_change",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_tournament",
+  "ex_pascals_triangle"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-27，E4B Colab 校準（不是證據）；規則見 decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md 修正 1–4 與凍結（25%–70% 門檻）。",
+  "backend": "Colab A100-SXM4-40GB, vLLM 0.30.0, google/gemma-4-E4B-it-qat-w4a16-ct (--tool-call-parser gemma4 --reasoning-parser gemma4, tool_chat_template_gemma4.jinja, max_model_len 131072, max_num_seqs 16, colab-vllm-nothink).",
+  "concurrency_probe": "A100 probe (probe_e4b_a100_20261127T032042Z, KV cache 1,181,176 tok): ctx=6k mean_s={c1:5.6, c4:7.8, c8:10.3, c12:13.4, c16:16.6}; ctx=24k mean_s={c1:9.9, c4:25.0, c8:45.9, c12:65.9, c16:86.1}; 0 errors across all levels. Chosen jobs=12."
+ }
+}
