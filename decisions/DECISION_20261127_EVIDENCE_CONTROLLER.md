@@ -95,3 +95,16 @@
   - 依 A 臂校準結果挑題，正式批次的 A 會往中間回歸。
   - 校準不併入分析。
 - **E4B**：不在本機修工具呼叫，只放在 Colab 那條平行線（vLLM）。2 題冒煙一小時內不通就放棄，第二模型寫「沒做」。
+
+## 修正 4（2026-11-27，接手的執行者；在任何 Haiku 資料之前）：機器損毀，worker 改成 Claude Haiku（Claude Code headless）
+- **事件**：原機器 vacant-dev（兩台 LM Studio：1003／1004）損毀，只剩 repo 裡最後一次推上來的狀態（`origin/auto/redo` 0ea25989）。擁有者原話：「你先都用haiku去測試，我之後再給你colab，先用haiku給我結果」。本修正在任何 Haiku 校準／小測試／正式資料之前寫下。
+- **worker 改成**：`claude -p --model haiku --output-format …`（Claude Code headless，容器內的 CLI；規範化模型代號 `claude-haiku-5-5`，每次嘗試的 log 第一行記 CLI 版本與模型）。pi 沒有安裝、qwen3.5-9b／gemma 都不再使用。控制器模組、規則表、門檻、四臂政策、五個指標、獨立評分的設計**一個字沒改**。
+- **和 9B 設計可比的**：控制器規則與門檻、四臂的預算形狀（每次 600 秒、總 1800 秒、最多 3 次）、半驗收／半隱藏的切法（固定種子 20261127）、五個指標的定義、判讀規則（探索性、只看方向）。
+- **不可比的**：
+  - 9B 的校準數字（原 18 題 A＝16/18）**不能**當 Haiku 的基準；Haiku 的校準要重量（修正 3 的 hard 19 題 9B 結果沒有留在 repo，已遺失）。
+  - 系統提示、工具集與提示行為是 Claude Code 的（工具限定為 Bash／Read／Edit／Write／Glob／Grep），不是 pi 的；「同模型、同工具」在四臂之間仍成立，但和任何 9B 結果不可互比。
+  - 成本單位改為 total_cost_usd 與 token（含快取讀寫，另列），不再是本機算力的牆鐘；等待時間是 API 牆鐘，受並行與限流影響。
+  - 修正 2 的「兩個模型」「E4B」「1004／1003」相關選模型與吞吐量段落在此失效；修正 3 的「9B 校準 hard 19 題」改成「Haiku 校準 37 題（A 一次、獨立評分）」，**之後是否沿用修正 3 的選題規則由協調者決定**（Haiku 若已在天花板，選題規則會挑到難度不足的題，必須先回報）。
+- **題庫**：原題庫（`~/dev/ops/ref/bm_tasks/`）在壞掉的機器上，不在 repo。以 repo 內的建構器（`ops/redo/banks/build_*.py`）從公開 `exercism/python` 重建；config.json 的 sha256 與 11-27 釘住的前綴 ebf067c6e09a6e11 是否一致，記在 `ops/redo/results/` 的重建紀錄（一致或不一致都記）。有效性規則不變：參考解兩半都要過。
+- **沙箱（實際使用的機制）**：`ops/redo/claude_bwrap_agent.py`（bwrap：最小 rootfs、`--unshare-net`＋宿主端 UNIX socket 白名單代理只放行 api.anthropic.com:443、工作區固定掛 `/work`、`--clearenv` 環境白名單、worker 以非 root 使用者身分跑、`--disallowedTools WebFetch,WebSearch`）。能強制與不能強制的邊界、負控制結果寫在 `ops/redo/results/` 的沙箱紀錄，**在任何真實 Haiku 嘗試之前**先跑負控制。
+- **限制（照實寫）**：worker 讀得到自己的認證檔（沒有它打不了模型）；代理不解 TLS，只保證「只連得到 api.anthropic.com」，不檢查內容；Haiku 的訓練資料可能含 Exercism 的參考解（無法排除，公開題庫共同限制）；模型是遠端 API，同一個 `haiku` 別名之後可能指向別的版本。
