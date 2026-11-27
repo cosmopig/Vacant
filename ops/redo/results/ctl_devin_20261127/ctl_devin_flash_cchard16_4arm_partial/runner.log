@@ -69,3 +69,15 @@
 2026-11-27T14:15:57Z  cc_1580E/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
 2026-11-27T14:18:36Z  cc_1572C/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
 2026-11-27T14:19:23Z  cc_1599A/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T14:36:42Z  cc_1552I/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T14:39:35Z  cc_1553I/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T14:40:32Z  cc_1603E/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T14:41:03Z  cc_1580E/r2/A                                pass=False accepted=True attempts=1 wall=1658.3s
+2026-11-27T14:45:58Z  cc_1580E/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T14:45:59Z  cc_1603E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T14:48:38Z  cc_1608F/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T14:49:25Z  cc_1599A/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T14:56:43Z  cc_1552I/r2/C 第 2 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T14:57:48Z  cc_1548C/r2/A                                pass=True accepted=True attempts=1 wall=500.6s
+2026-11-27T15:02:37Z  cc_1548C/r2/R                                pass=True accepted=True attempts=1 wall=285.8s
+2026-11-27T15:04:28Z  cc_1599A/r2/B                                pass=True accepted=True attempts=2 wall=1105.6s
