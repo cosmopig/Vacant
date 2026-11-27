@@ -41,7 +41,9 @@ def main() -> int:
         for name, rx in RULES.items():
             for m in rx.finditer(t):
                 g = m.group(0)
-                if name == "b64" and (re.fullmatch(r"[0-9a-f]+", g) or "/" in g and g.count("/") > 3):
+                if name == "b64" and m.start() > 0 and t[m.start() - 1] in "/-_.:":   # 路徑／UUID 片段（例如系統提示裡的 skill 快取路徑）
+                    continue
+                if name == "b64" and (re.fullmatch(r"[0-9a-f/]+", g) or "/" in g and g.count("/") > 3):
                     continue
                 hits.append({"file": str(f), "rule": name, "head": g[:4]})
                 break
