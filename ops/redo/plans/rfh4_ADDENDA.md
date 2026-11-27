@@ -62,3 +62,7 @@
 - **做法**：先寫這段並推上遠端，再在 1003 的格與格之間停下（某一格寫出 cell.json 後立刻送 SIGTERM；如果下一格已經開始，那一格依續跑規則重做）。
 - **寫這段時的進度**：1003 完成 55 格、13 個完整對；1004 維持暫停在 53 格／13 對。實際停下時的數字補在下一行。
 - **11/29 之後兩台原樣續跑**：同計畫、同 harness、同 root、原指令（`--only-providers lms1003`／`lms1004`）；機器由對的序號決定，不變；續跑前兩台都換回 gemma-4-12b-it-qat（262144／4）。續跑時間會補記。
+
+## 2026-11-27 01:53Z — 停掉 vacant-gemmawatch（擁有者同意）
+- 擁有者原話（經 vacant-hope）：「實驗室助理可以關掉，現在整台機器都你的，你不要初始化機器就好」。本機的 systemd user 服務 `vacant-gemmawatch` 已 stop（沒有 disable；開機設定不動）。1004 的 gemma 已卸載（模型檔不刪），改載 qwen3.5-9b 393216／12 給控制器實驗。
+- **rfh4 續跑時的恢復步驟**：兩台都把 gemma-4-12b-it-qat 照本批起跑時的設定載回（ctx 262144、parallel 4），確認 `lms ps` 只有它，再照原指令續跑。`vacant-gemmawatch` 要不要 `systemctl --user start` 回去，由 vacant-hope 問過擁有者再定。
