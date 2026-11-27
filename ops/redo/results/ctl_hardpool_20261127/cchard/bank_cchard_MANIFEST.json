@@ -1,0 +1,2529 @@
+{
+ "bank_id": "cchard",
+ "created": "2026-11-27T03:30:34Z",
+ "seed": 20261127,
+ "parquet_sha256": {
+  "valid.parquet": "02e8c1ccedae716f1e43cc813fcb7823c3db666ea92638820aba80e8cef451ab",
+  "test.parquet": "aa426cbdb202bf8703b658bcb31fd1878ca7cfd33ca07d3b703dc94ca6a2b651"
+ },
+ "n_rated_ge_2400_not_cc40": 74,
+ "n_prefilter_ok": 40,
+ "n_qualified_total": 39,
+ "n_tasks": 39,
+ "tasks": [
+  {
+   "task": "cc_1620G",
+   "name": "1620_G. Subsequences Galore",
+   "split": "test",
+   "rating": 2400,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 10.0,
+   "case_limit_s": 22.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 1.441,
+   "dropped_big": 0,
+   "n_dedup_tests": 226,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1548C",
+   "name": "1548_C. The Three Little Pigs",
+   "split": "valid",
+   "rating": 2500,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.076,
+   "dropped_big": 0,
+   "n_dedup_tests": 204,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1558D",
+   "name": "1558_D. Top-Notch Insertions",
+   "split": "valid",
+   "rating": 2600,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.099,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1575E",
+   "name": "1575_E. Eye-Pleasing City Park Tour",
+   "split": "test",
+   "rating": 2600,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.0,
+   "case_limit_s": 10.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.01,
+   "dropped_big": 0,
+   "n_dedup_tests": 204,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1580B",
+   "name": "1580_B. Mathematics Curriculum",
+   "split": "test",
+   "rating": 2600,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.279,
+   "dropped_big": 0,
+   "n_dedup_tests": 246,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1582G",
+   "name": "1582_G. Kuzya and Homework",
+   "split": "test",
+   "rating": 2600,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.091,
+   "dropped_big": 0,
+   "n_dedup_tests": 208,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1599A",
+   "name": "1599_A. Weights",
+   "split": "test",
+   "rating": 2600,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.014,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1613F",
+   "name": "1613_F. Tree Coloring",
+   "split": "test",
+   "rating": 2600,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.5,
+   "case_limit_s": 11.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.006,
+   "dropped_big": 0,
+   "n_dedup_tests": 212,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1555F",
+   "name": "1555_F. Good Graph",
+   "split": "valid",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.008,
+   "dropped_big": 0,
+   "n_dedup_tests": 224,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1567F",
+   "name": "1567_F. One-Four Overload",
+   "split": "valid",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 1,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.004,
+   "dropped_big": 0,
+   "n_dedup_tests": 205,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1572C",
+   "name": "1572_C. Paint",
+   "split": "valid",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.004,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1574F",
+   "name": "1574_F. Occurrences",
+   "split": "valid",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 7.0,
+   "case_limit_s": 16.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.412,
+   "dropped_big": 0,
+   "n_dedup_tests": 236,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1599F",
+   "name": "1599_F. Mars",
+   "split": "test",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.003,
+   "dropped_big": 0,
+   "n_dedup_tests": 203,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1599I",
+   "name": "1599_I. Desert",
+   "split": "test",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.005,
+   "dropped_big": 0,
+   "n_dedup_tests": 210,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1603F",
+   "name": "1603_F. October 18, 2017",
+   "split": "test",
+   "rating": 2700,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.0,
+   "case_limit_s": 10.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.585,
+   "dropped_big": 0,
+   "n_dedup_tests": 207,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1572D",
+   "name": "1572_D. Bridge Club",
+   "split": "valid",
+   "rating": 2800,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.5,
+   "case_limit_s": 7.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.039,
+   "dropped_big": 0,
+   "n_dedup_tests": 204,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1608E",
+   "name": "1608_E. The Cells on the Paper",
+   "split": "test",
+   "rating": 2800,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.013,
+   "dropped_big": 0,
+   "n_dedup_tests": 213,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1553H",
+   "name": "1553_H. XOR and Distance",
+   "split": "valid",
+   "rating": 2900,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.004,
+   "dropped_big": 0,
+   "n_dedup_tests": 205,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1575F",
+   "name": "1575_F. Finding Expected Value",
+   "split": "test",
+   "rating": 2900,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.003,
+   "dropped_big": 0,
+   "n_dedup_tests": 229,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1580D",
+   "name": "1580_D. Subsequence",
+   "split": "test",
+   "rating": 2900,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.003,
+   "dropped_big": 0,
+   "n_dedup_tests": 209,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1601E",
+   "name": "1601_E. Phys Ed Online",
+   "split": "test",
+   "rating": 2900,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.007,
+   "dropped_big": 0,
+   "n_dedup_tests": 204,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1552G",
+   "name": "1552_G. A Serious Referee",
+   "split": "valid",
+   "rating": 3000,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.397,
+   "dropped_big": 0,
+   "n_dedup_tests": 249,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1558E",
+   "name": "1558_E. Down Below",
+   "split": "valid",
+   "rating": 3000,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 5.0,
+   "case_limit_s": 12.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.002,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1569F",
+   "name": "1569_F. Palindromic Hamiltonian Path",
+   "split": "valid",
+   "rating": 3000,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 5.0,
+   "case_limit_s": 12.0,
+   "ref_solution_idx": 1,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.962,
+   "dropped_big": 0,
+   "n_dedup_tests": 322,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1575C",
+   "name": "1575_C. Cyclic Sum",
+   "split": "test",
+   "rating": 3000,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.2,
+   "dropped_big": 0,
+   "n_dedup_tests": 206,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1586G",
+   "name": "1586_G. Omkar and Time Travel",
+   "split": "test",
+   "rating": 3000,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.002,
+   "dropped_big": 0,
+   "n_dedup_tests": 94,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1603D",
+   "name": "1603_D. Artistic Partition",
+   "split": "test",
+   "rating": 3000,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.557,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1566G",
+   "name": "1566_G. Four Vertices",
+   "split": "valid",
+   "rating": 3100,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.014,
+   "dropped_big": 0,
+   "n_dedup_tests": 206,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1599D",
+   "name": "1599_D. Bubble Popping",
+   "split": "test",
+   "rating": 3200,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.5,
+   "case_limit_s": 7.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.009,
+   "dropped_big": 0,
+   "n_dedup_tests": 206,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1599E",
+   "name": "1599_E. Two Arrays",
+   "split": "test",
+   "rating": 3200,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 5.0,
+   "case_limit_s": 12.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.006,
+   "dropped_big": 0,
+   "n_dedup_tests": 204,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1603E",
+   "name": "1603_E. A Perfect Problem",
+   "split": "test",
+   "rating": 3200,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.041,
+   "dropped_big": 0,
+   "n_dedup_tests": 252,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1608F",
+   "name": "1608_F. MEX counting",
+   "split": "test",
+   "rating": 3200,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.0,
+   "case_limit_s": 10.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.008,
+   "dropped_big": 0,
+   "n_dedup_tests": 212,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1580F",
+   "name": "1580_F. Problems for Codeforces",
+   "split": "test",
+   "rating": 3300,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 8.0,
+   "case_limit_s": 18.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 2.641,
+   "dropped_big": 0,
+   "n_dedup_tests": 245,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1552I",
+   "name": "1552_I. Organizing a Music Festival",
+   "split": "valid",
+   "rating": 3400,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.003,
+   "dropped_big": 0,
+   "n_dedup_tests": 225,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1553I",
+   "name": "1553_I. Stairs",
+   "split": "valid",
+   "rating": 3400,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 10.0,
+   "case_limit_s": 22.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.022,
+   "dropped_big": 0,
+   "n_dedup_tests": 205,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1572F",
+   "name": "1572_F. Stations",
+   "split": "valid",
+   "rating": 3400,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.5,
+   "case_limit_s": 7.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.002,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1580E",
+   "name": "1580_E. Railway Construction",
+   "split": "test",
+   "rating": 3400,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.5,
+   "case_limit_s": 7.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.035,
+   "dropped_big": 0,
+   "n_dedup_tests": 203,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1601F",
+   "name": "1601_F. Two Sorts",
+   "split": "test",
+   "rating": 3400,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.0,
+   "case_limit_s": 10.0,
+   "ref_solution_idx": 0,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.364,
+   "dropped_big": 0,
+   "n_dedup_tests": 321,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1608G",
+   "name": "1608_G. Alphabetic Tree",
+   "split": "test",
+   "rating": 3500,
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 1,
+   "ref_lang": "cpp",
+   "ref_max_case_wall_s": 0.088,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  }
+ ],
+ "excluded": [
+  {
+   "name": "1548_D2. Gregor and the Odd Cows (Hard)",
+   "rating": 3300,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1548_E. Gregor and the Two Painters",
+   "rating": 3400,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1553_G. Common Divisor Graph",
+   "rating": 2700,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1554_E. You",
+   "rating": 2600,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_F. Sports Betting",
+   "rating": 2500,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_G. Gates to Another World",
+   "rating": 3300,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_H. DIY Tree",
+   "rating": 3300,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1557_E. Assiut Chess",
+   "rating": 2800,
+   "reason": "description:interact"
+  },
+  {
+   "name": "1559_D2. Mocha and Diana (Hard Version)",
+   "rating": 2500,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1566_F. Points Movement",
+   "rating": 2600,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1566_H. Xor-quiz",
+   "rating": 3200,
+   "reason": "description:interact"
+  },
+  {
+   "name": "1569_E. Playoff Restoration",
+   "rating": 2600,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1572_B. Xor of 3",
+   "rating": 2500,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1572_E. Polygon",
+   "rating": 3000,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1575_M. Managing Telephone Poles",
+   "rating": 2400,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1586_F. Defender of Childhood Dreams",
+   "rating": 2500,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1586_H. Omkar and Tours",
+   "rating": 3300,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1591_E. Frequency Queries",
+   "rating": 2400,
+   "reason": "description:multiple answers"
+  },
+  {
+   "name": "1598_F. RBS",
+   "rating": 2400,
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1598_G. The Sum of Good Numbers",
+   "rating": 3200,
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1599_B. Restaurant Game",
+   "rating": 3100,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1599_G. Shortest path",
+   "rating": 2700,
+   "reason": "float_output"
+  },
+  {
+   "name": "1601_D. Difficult Mountain",
+   "rating": 2700,
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1606_D. Red-Blue Matrix",
+   "rating": 2400,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1606_F. Tree Queries",
+   "rating": 2800,
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1615_E. Purple Crayon",
+   "rating": 2400,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1615_F. LEGOndary Grandmaster",
+   "rating": 2800,
+   "reason": "description:precision"
+  },
+  {
+   "name": "1615_G. Maximum Adjacent Pairs",
+   "rating": 3300,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1615_H. Reindeer Games",
+   "rating": 3000,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1617_D2. Too Many Impostors (hard version)",
+   "rating": 2400,
+   "reason": "description:interact"
+  },
+  {
+   "name": "1617_E. Christmas Chocolates",
+   "rating": 2700,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1620_F. Bipartite Array",
+   "rating": 2800,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1622_F. Quadratic Set",
+   "rating": 2900,
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1623_E. Middle Duplication",
+   "rating": 2500,
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1599_J. Bob's Beautiful Array",
+   "rating": 2600,
+   "reason": "validity:wa@0;wa@0;wa@0;wa@0;wa@0;wa@0;wa@0;wa@0;wa@0;wa@0;wa@0;wa@0"
+  }
+ ],
+ "validation_log": [
+  {
+   "task": "cc_1620G",
+   "rating": 2400,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 1.441
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.601
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1548C",
+   "rating": 2500,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.076
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1558D",
+   "rating": 2600,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.099
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.009
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1575E",
+   "rating": 2600,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.01
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1580B",
+   "rating": 2600,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.279
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.99
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1582G",
+   "rating": 2600,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.091
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "compile_fail",
+     "max_wall": 0
+    },
+    {
+     "idx": 2,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.049
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1599A",
+   "rating": 2600,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.014
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.005
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1599J",
+   "rating": 2600,
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 2,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 3,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 4,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 5,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.003
+    },
+    {
+     "idx": 6,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 7,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 8,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 9,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 10,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 11,
+     "lang": "cpp",
+     "result": "wa@0",
+     "max_wall": 0.004
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1613F",
+   "rating": 2600,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.006
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1555F",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.008
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.027
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1567F",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "wa@10",
+     "max_wall": 0.007
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.004
+    },
+    {
+     "idx": 2,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.014
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1572C",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.004
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1574F",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.412
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.027
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1599F",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1599I",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.005
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.004
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1603F",
+   "rating": 2700,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.585
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.816
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1572D",
+   "rating": 2800,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.039
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1608E",
+   "rating": 2800,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.013
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1553H",
+   "rating": 2900,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.004
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.008
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1575F",
+   "rating": 2900,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1580D",
+   "rating": 2900,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1601E",
+   "rating": 2900,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.007
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.006
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1552G",
+   "rating": 3000,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.397
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.581
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1558E",
+   "rating": 3000,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.023
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1569F",
+   "rating": 3000,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "compile_fail",
+     "max_wall": 0
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.962
+    },
+    {
+     "idx": 2,
+     "lang": "cpp",
+     "result": "compile_fail",
+     "max_wall": 0
+    },
+    {
+     "idx": 3,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.951
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1575C",
+   "rating": 3000,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.2
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.034
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1586G",
+   "rating": 3000,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1603D",
+   "rating": 3000,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.557
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.149
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1566G",
+   "rating": 3100,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.014
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.138
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1599D",
+   "rating": 3200,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.009
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    }
+   ],
+   "n_solutions": 2
+  },
+  {
+   "task": "cc_1599E",
+   "rating": 3200,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.006
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    }
+   ],
+   "n_solutions": 5
+  },
+  {
+   "task": "cc_1603E",
+   "rating": 3200,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.041
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.561
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1608F",
+   "rating": 3200,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.008
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.012
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1580F",
+   "rating": 3300,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 2.641
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 1.321
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1552I",
+   "rating": 3400,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.003
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.005
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1553I",
+   "rating": 3400,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.022
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.004
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1572F",
+   "rating": 3400,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.002
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.014
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1580E",
+   "rating": 3400,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.035
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.041
+    }
+   ],
+   "n_solutions": 5
+  },
+  {
+   "task": "cc_1601F",
+   "rating": 3400,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.364
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.259
+    }
+   ],
+   "n_solutions": 12
+  },
+  {
+   "task": "cc_1608G",
+   "rating": 3500,
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "lang": "cpp",
+     "result": "compile_fail",
+     "max_wall": 0
+    },
+    {
+     "idx": 1,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.088
+    },
+    {
+     "idx": 2,
+     "lang": "cpp",
+     "result": "ok",
+     "max_wall": 0.027
+    }
+   ],
+   "n_solutions": 12
+  }
+ ],
+ "files_sha256": {
+  "cc_1620G/hidden/hidden_cases.json": "6a1b70e0be71386af1a859a7e4fc03d1faf73b8d4532ac290645143f705e8ef5",
+  "cc_1620G/hidden/solution_test.py": "eb7984cfd8c33b354929b0ac524f091026b6a892e1af393b24d6be2fb43b4d34",
+  "cc_1620G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1620G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1620G/workspace/cases.json": "b919f7013c2eb13d7aad55fc7107209e46e9bd71f5647f3222334f34bc6a68a3",
+  "cc_1620G/workspace/contract.md": "a1db6b7b0a9927c62149a8894955871b763d2c0ff8c023796073cc972df53478",
+  "cc_1620G/workspace/goal.md": "cd2cb5b5bd6d851be297a9e7321b467eda5c557c74868dbd1f0658f0e9c1368f",
+  "cc_1620G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1620G/workspace/solution_test.py": "e0d18d3e65095f12d9ebf7274e53f6eea06ba872108c1ecc8483aa4529535c4b",
+  "cc_1548C/hidden/hidden_cases.json": "ced207c30b660746527c4982db0f7af805b2807bfd893eb61457782ca2d4e7fe",
+  "cc_1548C/hidden/solution_test.py": "10c4ee455085da4da76c6d6be653ed84f69c635a4aacf824622c9a30486d48c0",
+  "cc_1548C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1548C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1548C/workspace/cases.json": "eea4deea9b787af7b608ef7d929124cb17736de7ab60928b56d2508444678397",
+  "cc_1548C/workspace/contract.md": "9ad1e784746fda3f6d4a927205e30fd58bf31b4af9f3d100c7359bbd83446977",
+  "cc_1548C/workspace/goal.md": "85f53abd92631e1a696c7cff1c10b5ae56c38866fcd8506a43b2e19ea9c1cbd5",
+  "cc_1548C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1548C/workspace/solution_test.py": "59c013f1a2fd212ce73ca5b3665af134f937d997ce3520a56ac9d719ed314524",
+  "cc_1558D/hidden/hidden_cases.json": "c2a51714baf3334a50aa3e3de1bf6d0cbec7b3a0bc72a5b74a78fc130a9cee63",
+  "cc_1558D/hidden/solution_test.py": "b1758b5628db060f3c66bd2b4e9541ce40f8be854a2b41ea526153e9ad09a9e6",
+  "cc_1558D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1558D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1558D/workspace/cases.json": "4cb94682c2978304f3c2dde53ff2eca176c37b273fa2d2b839f5056e62063107",
+  "cc_1558D/workspace/contract.md": "2fa249292c17ae75fefe8c1b4511879c0242d5da4ced878a047e884704c979a3",
+  "cc_1558D/workspace/goal.md": "996da086996334fa94d8873a1a26b319df7f8df7fb664fbae053d30364a85eb3",
+  "cc_1558D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1558D/workspace/solution_test.py": "16d4fc839c5d732d7abc8e6c06a87b2c550c327bb86d97a317fd1dacf505f6bf",
+  "cc_1575E/hidden/hidden_cases.json": "94c3baff65ffc12bea1ca993089ae1674369caeffb4604b3c70a805a1705892a",
+  "cc_1575E/hidden/solution_test.py": "ea8f81b2fdb6d9c534ecaf9035861f1a9d60d2a551f44a2f3c4f853189efce48",
+  "cc_1575E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1575E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1575E/workspace/cases.json": "7c1b3af42ae9ba92b0098b36b0e8ef8c6312b9f8bcded2cbee7e267c7668f9ca",
+  "cc_1575E/workspace/contract.md": "f825ab620af3642f5d9fd45ff9ab5447eb69f8ab71209ca55c0fce5347a673af",
+  "cc_1575E/workspace/goal.md": "9c12e66e254651da5f94d317e1d529d1e5e87dceeee49291f21b302bfcc3f5f4",
+  "cc_1575E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1575E/workspace/solution_test.py": "034864ba3b1f79e5ec137b7c0b613a65c9b2e32f84ab29b40c3cd571a2f396d8",
+  "cc_1580B/hidden/hidden_cases.json": "154d6a77504eff827baac931638925364d6fa9b52f36dfe911df720e9e8ac91b",
+  "cc_1580B/hidden/solution_test.py": "dcbc387671e1da4a1f18a5472734a537f867e6d8f899b3e37e13cb6733894825",
+  "cc_1580B/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1580B/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1580B/workspace/cases.json": "47e905b6921d05157db8ca75c13107991e02cbb2663bbae75760a74aad7ce7f6",
+  "cc_1580B/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1580B/workspace/goal.md": "5d5b045f2b0bc18d56eedd09c42db1cbbb29be7adacd892461da76eb6f69fbef",
+  "cc_1580B/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1580B/workspace/solution_test.py": "8ff8282f5702a79ed7c4cf5453dec949678358f4e0aad05ed486906f568b3871",
+  "cc_1582G/hidden/hidden_cases.json": "3d52ca8e2850eb2ed7be947728bb2bb02402519b8ddc340973866c19a1da5b6e",
+  "cc_1582G/hidden/solution_test.py": "95e4eca1328c1c02ebf8ffe09ab4823ae25df4fe1327d699f9929c3deb4b7a88",
+  "cc_1582G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1582G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1582G/workspace/cases.json": "b669ee3eb421543b9e79eb52f44e77344eaf44c469409a76ef2d0ac8f28b8a2f",
+  "cc_1582G/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1582G/workspace/goal.md": "282d6524a6db4249ae8a98dc1975835860c9d23e2274c3f2888027aa5f76edf3",
+  "cc_1582G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1582G/workspace/solution_test.py": "1233b5dd37b9faa4db00290895b5c80908208f20f773d21cb7e704b7bf43e4b9",
+  "cc_1599A/hidden/hidden_cases.json": "e833a81a98c6455e4d5c319a21876dd91732897382cd0b8b93c44ad4fbe133a4",
+  "cc_1599A/hidden/solution_test.py": "de7f2cdea67980b5f20572d69c4a3e7902caee5440fdf3d0fec0d347695c2de4",
+  "cc_1599A/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1599A/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1599A/workspace/cases.json": "16d0b2561b9b4b2ce0e884b98db1a7a50fdb1e998ab06cce4c722530dd5ad850",
+  "cc_1599A/workspace/contract.md": "9ad1e784746fda3f6d4a927205e30fd58bf31b4af9f3d100c7359bbd83446977",
+  "cc_1599A/workspace/goal.md": "52197614b7b3f0ac83c79b3dc3392d8bce0d36de6cc3b94755d9cc7244e82e83",
+  "cc_1599A/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1599A/workspace/solution_test.py": "6aa59251d34a6440d458dd07039f7c5f2bfb918c10f632cc82e90b6f495f6941",
+  "cc_1613F/hidden/hidden_cases.json": "48cc0d4f162eb52d1b0ebc04d2397bdc2ad4cebaf39b14a8a87bfbbf925f90a9",
+  "cc_1613F/hidden/solution_test.py": "24379d7d5c54140601390975eb34dda323ec9e6fba227dba4f9fc92c1b3062a6",
+  "cc_1613F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1613F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1613F/workspace/cases.json": "ebe6a95cd86c5bad1358b98550ebb5127c85a90acf33f8497c4ef48495297894",
+  "cc_1613F/workspace/contract.md": "1f3fa3dd1eec229c31357f3e72a0c909fc564211b427882cd1f5012c900ef0e4",
+  "cc_1613F/workspace/goal.md": "ba650aeedd2d57ceefcbcb3f06ca849da443257224318ea289fcbb1d72f20f04",
+  "cc_1613F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1613F/workspace/solution_test.py": "2a5fd5b4b7b48edbaa6764cce8de81a2252120498e0c847a8c1b12f4518b0546",
+  "cc_1555F/hidden/hidden_cases.json": "b09f89662db052744fdf6cc11d43772ef97a1b2091925d3acabf6c8f53b2098c",
+  "cc_1555F/hidden/solution_test.py": "13d0395b48aa75e6a2008c7bd6ea54a21c170505edb5039d9f715ad003ada043",
+  "cc_1555F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1555F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1555F/workspace/cases.json": "4b0d057ee81c7dc6fd3b1bf7e51ee46f069bf1ee68679307c52ac426ae1fade8",
+  "cc_1555F/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1555F/workspace/goal.md": "4357c1c52e98eea3ef93f679c6bbddc3157d256b9f7513842841f221ad72cc9e",
+  "cc_1555F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1555F/workspace/solution_test.py": "6d8e0a3f0080d44b052cbffef0e3e3e3b21a5410e7af368073215185f84bf8d8",
+  "cc_1567F/hidden/hidden_cases.json": "e3fb4e454472bb4c137fc5dbd3b318d2188188f0ae2fb463cba9be6541040e75",
+  "cc_1567F/hidden/solution_test.py": "3973525ac64ce834ea914627de2660a47db5e17593f3396efb58964c06f5eacf",
+  "cc_1567F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1567F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1567F/workspace/cases.json": "535c1e2eba2045c0718dee3839fe2de49e981b717960d96767e762bd36468fbe",
+  "cc_1567F/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1567F/workspace/goal.md": "b98511a1e207b0f0d6f733159293848c5593a3ab62e44d9bd1127ab605b800fe",
+  "cc_1567F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1567F/workspace/solution_test.py": "527232a3c46412b52250cefd5a489769f5c71f856612098ebc0437276deba47b",
+  "cc_1572C/hidden/hidden_cases.json": "d03d16d8f91204b5754b17611a22f960a72ca98d5990050b0c086e92f8153790",
+  "cc_1572C/hidden/solution_test.py": "3def16a17b6d606a977913c06860148fcd192a62c01df41264ee9c47ca7c748f",
+  "cc_1572C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1572C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1572C/workspace/cases.json": "29255ddf5ea168f2d121e5d2c61346fd8fefee1a26debb71d74bad8f089fe02f",
+  "cc_1572C/workspace/contract.md": "9ad1e784746fda3f6d4a927205e30fd58bf31b4af9f3d100c7359bbd83446977",
+  "cc_1572C/workspace/goal.md": "9a3efdc8e3426df11692c917b41e7f142f72f2450ff790cff1c24f9e2dc74bdc",
+  "cc_1572C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1572C/workspace/solution_test.py": "f9a6de5e2eca37b671d6a4596ffaa1e5c93cd79399734e287bc3c315a3601a95",
+  "cc_1574F/hidden/hidden_cases.json": "f5f930ff3b829ef58daf80c502d62f053eebd2d24d4737f5c132435e5cc51a5c",
+  "cc_1574F/hidden/solution_test.py": "3e49f8b9f4b4177f4e6442d48b0157e4ed7985da5050edacbf4a40652c8b8ec8",
+  "cc_1574F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1574F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1574F/workspace/cases.json": "40cc7c644632acb9cd38f2ecdf197e330d4462b0e4e530cb57b8b08eff332478",
+  "cc_1574F/workspace/contract.md": "b1ed69dcc126e7722968584925e88c709ef2c995cde45a6c0801d51a04cb76ee",
+  "cc_1574F/workspace/goal.md": "449bcfa7c8854777e161e53baa5b2106dd25c953d5b302493fbdb05c05753b85",
+  "cc_1574F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1574F/workspace/solution_test.py": "c90ee284d9a01fece06901134a1953b987a0f1030d9ca3b3213d9f454a64ae8d",
+  "cc_1599F/hidden/hidden_cases.json": "95672723814ce28df8c50335ee1d6f2247f9d4e55a698bfde67316eaf9e5815c",
+  "cc_1599F/hidden/solution_test.py": "9a29e85a5f7a9e950f8738df2bbb007ec11269eb566adb0879a2355308839ec4",
+  "cc_1599F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1599F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1599F/workspace/cases.json": "d75e9e5d0deb5fad2bf1876aa880482c4b7d8e95bb06dd72e847f5d58c7ad4c0",
+  "cc_1599F/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1599F/workspace/goal.md": "b4c62430021ea9c76faab1132a21be3713f91cc2441ee65b5d6ef2a863229ec0",
+  "cc_1599F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1599F/workspace/solution_test.py": "e6e609d78edd49b54de5ed9f9b339a183660748d0bc1bc233f74862ef9a5db66",
+  "cc_1599I/hidden/hidden_cases.json": "72d7e0ff913c63fb40b7e95ed1b0601634300d9ace83a220d61dc4b84831c987",
+  "cc_1599I/hidden/solution_test.py": "1ed92062f13e3725d00cc4c6c2ac699e2325c6a86d6a29ee4ba8cc28c6ef6fe1",
+  "cc_1599I/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1599I/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1599I/workspace/cases.json": "7bc80493b5dcfcd128e07c2e0020adccfd675a2bcae6202bf5ab9ffaf92e9ed8",
+  "cc_1599I/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1599I/workspace/goal.md": "d291db2d2086b37bf8aaeb89870450e150b810e1da5bd4a5426d58580d5f3c53",
+  "cc_1599I/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1599I/workspace/solution_test.py": "2fbfb90ba445f14d4a7713a1110c4494f829834d37a5d8c42715bc931daa341e",
+  "cc_1603F/hidden/hidden_cases.json": "2baa6a63d60abb4cd26e0d266cde4d1c278f17173b54204f79adcd272c95c208",
+  "cc_1603F/hidden/solution_test.py": "799bb0ecd126e6464bc80e2f97a996c4dd248aa874cdea34f59b5ead3abbe41d",
+  "cc_1603F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1603F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1603F/workspace/cases.json": "816a7bbcd68b62560c7366ab04241d5f6c7ba38509e2c585b34feff06779aaf1",
+  "cc_1603F/workspace/contract.md": "f825ab620af3642f5d9fd45ff9ab5447eb69f8ab71209ca55c0fce5347a673af",
+  "cc_1603F/workspace/goal.md": "0c210d19b9489afed1062b89d24b447e24db757f80d98f297a0b53e374c28257",
+  "cc_1603F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1603F/workspace/solution_test.py": "1e05f2e2ab1581df666a297bd2ab37c1b1c3156938d64e890fb6a72ecf0f28e8",
+  "cc_1572D/hidden/hidden_cases.json": "c3b771cd740b6ed541667a620dc4be91ed16423af531199f51924f9a3a491686",
+  "cc_1572D/hidden/solution_test.py": "41b56e60510979565d3c531d41687c51b7615cf5f973e3d7ee53f9c673260d2b",
+  "cc_1572D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1572D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1572D/workspace/cases.json": "1f103b20e26e98ff7200ca916262e74bdce6eaa65a4f89a4876db30319b4ac64",
+  "cc_1572D/workspace/contract.md": "ff84e6c197786243c3d2485008cea96f378cda42a232f0f5764ccfdefaede360",
+  "cc_1572D/workspace/goal.md": "1d9fb55c9b5469077713ad38cccefee0fbe2e2b9272130f7c9ba2670cee0ead5",
+  "cc_1572D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1572D/workspace/solution_test.py": "cafdc2deddf41e517e3bf950da1c9b78ee0100fe205964cdfa953257d1753f16",
+  "cc_1608E/hidden/hidden_cases.json": "1addaec99199f98f592aea8e4777572489589253d528208949afb73fe2835dd2",
+  "cc_1608E/hidden/solution_test.py": "a38442dbd5c03f08bd708eb593128fd932682afb2fef61708511651a708397d5",
+  "cc_1608E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1608E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1608E/workspace/cases.json": "2274a084d602ecdc4786f7f54e205beb432c93d1b7a210d4b7d64ae2e77d8f48",
+  "cc_1608E/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1608E/workspace/goal.md": "83be02f59082e3d97afbde749dc1b9a52fc7bc0c74ef18e7fc11a4157479e82a",
+  "cc_1608E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1608E/workspace/solution_test.py": "2640b2786217c5742ef41c7b31d988e68dced1567159c50293b69fa5282d9a18",
+  "cc_1553H/hidden/hidden_cases.json": "dd36deda062cef35d19fa4573785436d761b2a09b3d2278ad6af5f9045ecfea5",
+  "cc_1553H/hidden/solution_test.py": "e29b17398e4be27acf7bbd80386338dd4ea921d4cbe4b5c5a5a2dc63d55c0c72",
+  "cc_1553H/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1553H/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1553H/workspace/cases.json": "b876892c4dfc0546490816e8c2b430153a2933a4f509bdffa671e53a44c71108",
+  "cc_1553H/workspace/contract.md": "2fa249292c17ae75fefe8c1b4511879c0242d5da4ced878a047e884704c979a3",
+  "cc_1553H/workspace/goal.md": "a009bca8f0c918904a59de93540e898d9226600d4fdd09d96d0301e2dcc09495",
+  "cc_1553H/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1553H/workspace/solution_test.py": "6b0bd1421a273a491f4aebbc93c64a153b0099410c2dc95ffc03b5735d13fa43",
+  "cc_1575F/hidden/hidden_cases.json": "f7754e30d40285bc0ca4bcfe16531d632a07b56ccb9a51ec082491a6f05a2200",
+  "cc_1575F/hidden/solution_test.py": "8885bae95071e0b6644e893ce654b6615fe6eb744749bf62156082ee46dbb414",
+  "cc_1575F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1575F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1575F/workspace/cases.json": "187d87ca5023e79c0c1f378fc4f44e2b225ae4793e33a89451f11ac8b20c1683",
+  "cc_1575F/workspace/contract.md": "2fa249292c17ae75fefe8c1b4511879c0242d5da4ced878a047e884704c979a3",
+  "cc_1575F/workspace/goal.md": "739f8f636c0c94a4b30bdcb66507f0f390926912038872cca6f4689056648697",
+  "cc_1575F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1575F/workspace/solution_test.py": "c56b48c1faab4c51a4fec6c6c733b4599945252ec503f2344c96a020ffd1e650",
+  "cc_1580D/hidden/hidden_cases.json": "63a2dfc867659c5ec225f36cd251851b44b7f45c4eb26ecaa2628968f8a5a30d",
+  "cc_1580D/hidden/solution_test.py": "4cf74cdebf586b3ebdcad1e6805716e1e429e7e43cfbb78e839a582e3b33e54b",
+  "cc_1580D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1580D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1580D/workspace/cases.json": "ac4ffccfee3b4ee14befe45cc8a8332aa8e07fd49b8b93ecf55e6a66baa6b064",
+  "cc_1580D/workspace/contract.md": "9ad1e784746fda3f6d4a927205e30fd58bf31b4af9f3d100c7359bbd83446977",
+  "cc_1580D/workspace/goal.md": "06fdf30eef9c6209690e6aaea5b78219842a892d703c63f67219a243c62dca41",
+  "cc_1580D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1580D/workspace/solution_test.py": "cfd4f9e6598c9cc8775f0befd122c492c9b33fa59293ff29f79441800a9607f9",
+  "cc_1601E/hidden/hidden_cases.json": "78523b85a545c2c32cfd8954b0b9f0873e9f5e8b3877ad4bfe47edc61a5883d5",
+  "cc_1601E/hidden/solution_test.py": "418bbc78d8a55157e0f21a1e64776666bf9f47414f62b10a55088dd5d616da9e",
+  "cc_1601E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1601E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1601E/workspace/cases.json": "732fb89ac68afe5b91100cd9ad4c6cc6ef9df0df714745d154ef437d66568fba",
+  "cc_1601E/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1601E/workspace/goal.md": "98406c2f2a857490d414e648c69154974c40040a9681d658944b69a969ed5bdd",
+  "cc_1601E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1601E/workspace/solution_test.py": "61e8c03d3b1af110d7507a252bd3e954a76e3df759ec1c4bdd3517f21daa246a",
+  "cc_1552G/hidden/hidden_cases.json": "fdfae2c4327645121847105367f0cd84e4092817b5b15e0e63a7dd648482b0da",
+  "cc_1552G/hidden/solution_test.py": "d74fc8562e666528fdfb5fa637445e6910f191bad5250aa444dd612ba7ebb436",
+  "cc_1552G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1552G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1552G/workspace/cases.json": "dc00f11d9a5f8df27123c86e068553f34558fc04034bede5b579f16cb770982a",
+  "cc_1552G/workspace/contract.md": "9ad1e784746fda3f6d4a927205e30fd58bf31b4af9f3d100c7359bbd83446977",
+  "cc_1552G/workspace/goal.md": "16ca5185840b7208f584df0eb05b4e329dbdef9a069d5a5513d098773d84dbc2",
+  "cc_1552G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1552G/workspace/solution_test.py": "5697a401fa1eaacdbb2c067a452aa1538c680919104a9d5c23a045dc0f8aaefe",
+  "cc_1558E/hidden/hidden_cases.json": "113e6fa5faf8e3f0018bfca45668f4625d79ce83452b0c64c0ae7c3de3534386",
+  "cc_1558E/hidden/solution_test.py": "d7e51abab972fffc3a04c9fdadeda4bca065819d7d38608f876014e5867383ce",
+  "cc_1558E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1558E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1558E/workspace/cases.json": "652f8330d7f85e202ef03eef513387477a17096e93588049cbb60212286a0ed5",
+  "cc_1558E/workspace/contract.md": "a9536d012b59942537c0ee858181ebcca8e7972cb3da37cbfece2403c7095c1c",
+  "cc_1558E/workspace/goal.md": "83c1618f4efa0da86cb84ed20a8c593b0c485ac58ac08ae0f4b7d7770d9a3d9e",
+  "cc_1558E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1558E/workspace/solution_test.py": "56e765e926a46f36fe9ec7d20ec4dd01394d921a9af7f2bdeb86fbc6d89131ef",
+  "cc_1569F/hidden/hidden_cases.json": "cddeea1da87d8cbd335a24d0ff3881414519484b4bbd0ce9579f7d5292c23dce",
+  "cc_1569F/hidden/solution_test.py": "1d6040f459a24a01ab379c47a7e68c4a526354b5e05a723bf81364f7f8ded231",
+  "cc_1569F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1569F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1569F/workspace/cases.json": "2bd9959eda5ce61aafeb5cdfeba330fe5332210dbbb2bf4aae827bbd9812a326",
+  "cc_1569F/workspace/contract.md": "a9536d012b59942537c0ee858181ebcca8e7972cb3da37cbfece2403c7095c1c",
+  "cc_1569F/workspace/goal.md": "c577be7230275c153bb736f0dc82ebdc1b3a00401d2c2ea15f8e1ad12bbc5217",
+  "cc_1569F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1569F/workspace/solution_test.py": "a419ef917b641ced3a4f41e9ac52c7ad7568f0ec63507dc5ee2b0f7ae59778dd",
+  "cc_1575C/hidden/hidden_cases.json": "a84e2b3a57deb02d8dd97ed5730b17868b1f496a1fed67a02cd073fb4d736948",
+  "cc_1575C/hidden/solution_test.py": "516fb3ad56c853e339ef9cfe73f424a1e7fd0f0c8d13cdc06bbb711bd966508f",
+  "cc_1575C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1575C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1575C/workspace/cases.json": "0528c0e0a0b1f183fa0048a701253e5f670e013af9f2a3877cafc4f29f2e7538",
+  "cc_1575C/workspace/contract.md": "2fa249292c17ae75fefe8c1b4511879c0242d5da4ced878a047e884704c979a3",
+  "cc_1575C/workspace/goal.md": "86cb8f6af0641d519ec298f529f4fe2b5a7ef2ff57554735ee2406d79833bc1c",
+  "cc_1575C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1575C/workspace/solution_test.py": "c4382879a634a06ad5bba091a7b9993a06d9413ff4f11edd1449e803161c4e4b",
+  "cc_1586G/hidden/hidden_cases.json": "2f044b7ebb129dd102e99c30178a0e034db7beff35f47c81d2e5ba2f2a383f90",
+  "cc_1586G/hidden/solution_test.py": "1e2b0c241b3a90f53aef556f1db88345a1b2bd6efbe71c55908dc208a62ab143",
+  "cc_1586G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1586G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1586G/workspace/cases.json": "9d1a12d55b60e5495cb0179e84af56a517c6d623b49bfffac81f56194e33eef7",
+  "cc_1586G/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1586G/workspace/goal.md": "f37e200546c7fb354c1752f5b0adc1390c7b0ab9ee328b60405b74bb0be5a327",
+  "cc_1586G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1586G/workspace/solution_test.py": "b9c4ee5dd7ac1462ae1c46a8bf5e7a94cf4245deb4c3d6b1a82dc393eb2c0f16",
+  "cc_1603D/hidden/hidden_cases.json": "a89b9ade1f3d12a69430355786b5371cde233f962c4e201b79d7fadea71bba0d",
+  "cc_1603D/hidden/solution_test.py": "6111ae32f6cc8806df7db0d5808cddb0ef89334faee0a09a377c26319de166d3",
+  "cc_1603D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1603D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1603D/workspace/cases.json": "554ca2f2fa22933239e83b605bfdf8e95031922799600aa0ada081bc92b5c45d",
+  "cc_1603D/workspace/contract.md": "2fa249292c17ae75fefe8c1b4511879c0242d5da4ced878a047e884704c979a3",
+  "cc_1603D/workspace/goal.md": "93405e32625677ebeb62d05ba0a13094060a3b33d3c70e5f2dc7196d01fdb786",
+  "cc_1603D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1603D/workspace/solution_test.py": "4e552973c07688f1e3287c8101f5ff7c7f0b1e425cab54537097a9eb6faf1d72",
+  "cc_1566G/hidden/hidden_cases.json": "96194352294bd75a13e33447f666630f214290f84a71e2e5d398af59e48a0718",
+  "cc_1566G/hidden/solution_test.py": "c45d817edb2982f5868d8a8f1198d139f14586b8f8f8b49cc8a776cb6c99992d",
+  "cc_1566G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1566G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1566G/workspace/cases.json": "b30fc92ba5e9564d351487992c50a24b4d03c8669bc3a4a86861bc0351991816",
+  "cc_1566G/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1566G/workspace/goal.md": "e1622e54b09be2876a52e5774864887bdbc8aec736926728ffa0e86845903d66",
+  "cc_1566G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1566G/workspace/solution_test.py": "ccc0c51dcc3d2a8dfe0ad93040ecae8811190e7d52c1c822ada5af8914389f4b",
+  "cc_1599D/hidden/hidden_cases.json": "084c4c63a7d2717be33a72264a2bbb2eaec88ec9a6fad623a13897063aa74fe0",
+  "cc_1599D/hidden/solution_test.py": "be26be233b69fcda4de9c04ad2f94922874c9a74bf856ab970861e65351443dc",
+  "cc_1599D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1599D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1599D/workspace/cases.json": "29fdd83e1bbc52865fa1e48049f51a3f4307c8e2f7910386f5fc3d563193178e",
+  "cc_1599D/workspace/contract.md": "ff84e6c197786243c3d2485008cea96f378cda42a232f0f5764ccfdefaede360",
+  "cc_1599D/workspace/goal.md": "dd093981a2880cd2135f4b76549c45f9dee3414e8b5495dde2404f1b2225de89",
+  "cc_1599D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1599D/workspace/solution_test.py": "100f4babefe74306df96697ea600efd7cef6f1db275d6de9974d60c877f23092",
+  "cc_1599E/hidden/hidden_cases.json": "01d3af8d2c8481a2b95d6c23d52a8a0f5d8abc65f50a1004b5af604db374abbd",
+  "cc_1599E/hidden/solution_test.py": "e39fbd30f521e27c755e17f4bfef76ceb84dcd8e746c7bd5103199462d46d874",
+  "cc_1599E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1599E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1599E/workspace/cases.json": "ac9cdd4285343a99a15a3c6c8b590b5a73bf4cf39ddbe8198ae7620eb5f6105d",
+  "cc_1599E/workspace/contract.md": "a9536d012b59942537c0ee858181ebcca8e7972cb3da37cbfece2403c7095c1c",
+  "cc_1599E/workspace/goal.md": "d0de5a1d0544026ff1273aae8272b78fba22602e4105439020a0d0142f8225e4",
+  "cc_1599E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1599E/workspace/solution_test.py": "0dd965b8f3ac5b1fba099f595c3656df6ad8dc53aa74011028ec0649e74256e5",
+  "cc_1603E/hidden/hidden_cases.json": "4d4306fca79ff0c058fee7585c10457741ce09f0e348adaf45f84009d6214293",
+  "cc_1603E/hidden/solution_test.py": "72a0d94f51a608951f93da5adec1e9997a52d83eaac72e0cf829ec1f10d268b0",
+  "cc_1603E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1603E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1603E/workspace/cases.json": "177a3b456966f08dfe9ec307229b4bc8f516559a750eab7e2787edbb202f19c2",
+  "cc_1603E/workspace/contract.md": "07a33dd7649a47399447ab11ef6195442120f9c47dbd344f3d41098de00251bf",
+  "cc_1603E/workspace/goal.md": "1621fd3cbe77b15ff3d0d86db57f50c23952cf1415cd34bcf8b0e8e5e2620f81",
+  "cc_1603E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1603E/workspace/solution_test.py": "aa7211b2ad2d37cee1e2576b67301ad09ae2977b899b5c970ff72411ac37b45b",
+  "cc_1608F/hidden/hidden_cases.json": "77dd8b4282646806b98aca7853d2c751193c44f7ccfb90b1871e063789f470de",
+  "cc_1608F/hidden/solution_test.py": "5c8bc0dbe23fb6b0c68b3d41cee0c1148b994949d924347a73fafda0a1ab0d50",
+  "cc_1608F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1608F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1608F/workspace/cases.json": "ecd3e38e52e50b77b962fa186079d1f356288737168e8aa7c8ec9c7173d340a1",
+  "cc_1608F/workspace/contract.md": "f825ab620af3642f5d9fd45ff9ab5447eb69f8ab71209ca55c0fce5347a673af",
+  "cc_1608F/workspace/goal.md": "a2e52c9b2a245190246ab6fa0e84c68133bb0cb166ced74ade3aa2829be621aa",
+  "cc_1608F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1608F/workspace/solution_test.py": "4c411d61636fa677a2f4067262895aff694bdd7ba2cf33f9e13007581acbc080",
+  "cc_1580F/hidden/hidden_cases.json": "c016237ba87c1ac709471afdcc055b26ca969cc78e4f7fbe4d7c0c84923dd128",
+  "cc_1580F/hidden/solution_test.py": "a20d40e3594e4f419458603e5fa51b56a88a78a385cf1b32162907803e20b1fb",
+  "cc_1580F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1580F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1580F/workspace/cases.json": "db1d4500e903db1c23254ff80a05b5cc24bd18f317780f3a665718eb418b1fd6",
+  "cc_1580F/workspace/contract.md": "e50d739701df919d3d191e8b6411e7187a91cbf735bb62707d7b2db3a702bcf0",
+  "cc_1580F/workspace/goal.md": "f09c3e4e220a5d059f00961ede73f9209102f27f51130d73036380efa8631ca6",
+  "cc_1580F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1580F/workspace/solution_test.py": "c665dd4b9f55789b8f931cf378126f42461316baeffd06157e66dc7de6fabaa3",
+  "cc_1552I/hidden/hidden_cases.json": "3611fca36c510ec01cf3a9fffd5fa4b2ba15b22d22bce6d086e792a6a186fe21",
+  "cc_1552I/hidden/solution_test.py": "2294b88c7d1b6007a07cdaeabb8a6e02493b8e08e70c47795a4727a8401d9f7c",
+  "cc_1552I/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1552I/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1552I/workspace/cases.json": "22164a4a0ede014882768c4254dd910c3b894812f7ff19e75e355928fdd32bfe",
+  "cc_1552I/workspace/contract.md": "9ad1e784746fda3f6d4a927205e30fd58bf31b4af9f3d100c7359bbd83446977",
+  "cc_1552I/workspace/goal.md": "3a43a505f16c518be3f39cd977963a88b8afc2e0b814c5399d392a8dde648f45",
+  "cc_1552I/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1552I/workspace/solution_test.py": "2fbd2d36b3a9208e2346b4f9142966d13ec092f42bfdeb2f242189eb9c7b9994",
+  "cc_1553I/hidden/hidden_cases.json": "ddf2186f2f7bd345f8fecb3e1f1e5b1f98f8962788691844dc2c7b08ce161906",
+  "cc_1553I/hidden/solution_test.py": "18aa0eb48dab1b054e8aa6b186e0f92f37aa028166fcc17fa0f74995091387a3",
+  "cc_1553I/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1553I/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1553I/workspace/cases.json": "b83ea09d9c34a0a12cc8d0902c8da36b5b5203e2bf6805c7d2e2097145a7be12",
+  "cc_1553I/workspace/contract.md": "a1db6b7b0a9927c62149a8894955871b763d2c0ff8c023796073cc972df53478",
+  "cc_1553I/workspace/goal.md": "dd5a84eeb8341428f608c78114177f7365720a065d0417ff19b5568665484853",
+  "cc_1553I/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1553I/workspace/solution_test.py": "2f33e25bfbbc31d4102a26139719d13607f6cdf6d27f0d3268a998300908deb5",
+  "cc_1572F/hidden/hidden_cases.json": "a782b2916756ca31b5d53cdde46b5801c415072f28b82640530b871dc9c5880b",
+  "cc_1572F/hidden/solution_test.py": "36969a85919c9e4a7e74e13aafb379f4a9ff022bef77a1b25b3cba428939abdc",
+  "cc_1572F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1572F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1572F/workspace/cases.json": "3ff97cfe54efbda6a0dd0846a38ea77e4f6ae62b1a60365fbe94bc3969094772",
+  "cc_1572F/workspace/contract.md": "ff84e6c197786243c3d2485008cea96f378cda42a232f0f5764ccfdefaede360",
+  "cc_1572F/workspace/goal.md": "5437d0521a0a8f223100f9c63f8197a21156848a1faa7d747fd51a1a87432466",
+  "cc_1572F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1572F/workspace/solution_test.py": "08f44a2c250ee454161fdf9f23427b499b2d02ba2c4ef971843eadfbd9d2e84c",
+  "cc_1580E/hidden/hidden_cases.json": "84cf93c99daa6cb25588753b39f0c5d7b4f1bb9d2eb366f2277bf90e869f6fee",
+  "cc_1580E/hidden/solution_test.py": "39a8ee28fee1cdad5a2d9210b4b74f8280ab818d91efd86d27090e04b7a02a5f",
+  "cc_1580E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1580E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1580E/workspace/cases.json": "cfade72b0718cd0c234afb57ee30f252d772cb57767faa54436e2156031bd1c0",
+  "cc_1580E/workspace/contract.md": "ff84e6c197786243c3d2485008cea96f378cda42a232f0f5764ccfdefaede360",
+  "cc_1580E/workspace/goal.md": "91be26826dfc13e0f7c3d44b3a41c312a0be221ba654866ea648baf2017a5971",
+  "cc_1580E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1580E/workspace/solution_test.py": "7b3ad3c01420dd6b73b162be92c5d8900e27800c72eccdc21cb17a6408247977",
+  "cc_1601F/hidden/hidden_cases.json": "c8c0d600b1c30570ad0a52d72eba7245c6584246ddef78d43a51d1bb3ef526ee",
+  "cc_1601F/hidden/solution_test.py": "49472acb59047153f6f4229fc0d78bcce3c07eed71f749108761c05b6e719603",
+  "cc_1601F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1601F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1601F/workspace/cases.json": "6310d14bfb0aa70eb527ba2e9ef9030b6b8afbab5a82cdc7f512f6e359ce728d",
+  "cc_1601F/workspace/contract.md": "f825ab620af3642f5d9fd45ff9ab5447eb69f8ab71209ca55c0fce5347a673af",
+  "cc_1601F/workspace/goal.md": "6fb97b8d32f61f153649f389e58a61a253969f3f885a5eef1e7583b0219b6598",
+  "cc_1601F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1601F/workspace/solution_test.py": "39c2c04b93a9607ce44d5d5f9f3e80fb1f98863ee52302082b4b1e136654be81",
+  "cc_1608G/hidden/hidden_cases.json": "949e7f7165622b4db025003626a72372e4add45fe7c489d4827946714b2d6c7f",
+  "cc_1608G/hidden/solution_test.py": "28bbae42eac382651e326117e96fe000b1842d6385fa3814f9cca14f2f3d71d6",
+  "cc_1608G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1608G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1608G/workspace/cases.json": "349642ede48e3059bfebefb4ba177de8169714f7ab05d1b166bfe438bd746384",
+  "cc_1608G/workspace/contract.md": "2fa249292c17ae75fefe8c1b4511879c0242d5da4ced878a047e884704c979a3",
+  "cc_1608G/workspace/goal.md": "18c089c2492eff40a2124b3d75745cc345bacff3b80f1799c6735aaf26f7d56c",
+  "cc_1608G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1608G/workspace/solution_test.py": "b7da54695aed5c0f8b986310798f5f87e499553633c97a543eaaf8357969eb91"
+ }
+}

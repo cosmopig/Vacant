@@ -1,0 +1,5 @@
+{"width": 32, "runs": 64, "fail": 3, "failed_tasks": ["cc_1552G", "cc_1580F"], "max_wall": 127.02, "elapsed": 132.9}
+{"width": 16, "runs": 39, "fail": 0, "failed_tasks": [], "max_wall": 79.31, "elapsed": 94.0}
+{"width": 8, "runs": 39, "fail": 0, "failed_tasks": [], "max_wall": 65.12, "elapsed": 85.5}
+{"width": 4, "runs": 39, "fail": 0, "failed_tasks": [], "max_wall": 46.54, "elapsed": 71.5}
+{"width": 2, "runs": 39, "fail": 0, "failed_tasks": [], "max_wall": 48.35, "elapsed": 143.0}
