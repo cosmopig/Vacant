@@ -1,0 +1,4 @@
+{"width": 32, "runs": 64, "fail": 0, "failed_tasks": [], "max_wall": 32.25, "elapsed": 33.6}
+{"width": 16, "runs": 40, "fail": 0, "failed_tasks": [], "max_wall": 20.47, "elapsed": 24.7}
+{"width": 8, "runs": 40, "fail": 1, "failed_tasks": ["cc_1608C"], "max_wall": 17.64, "elapsed": 22.0}
+{"width": 4, "runs": 40, "fail": 0, "failed_tasks": [], "max_wall": 13.9, "elapsed": 18.5}
