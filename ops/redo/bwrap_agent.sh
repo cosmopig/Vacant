@@ -1,7 +1,7 @@
 #!/bin/bash
 # 控制器實驗用：把 agent 關進 bwrap，只看得到自己的工作區、logs 目錄、agent 設定目錄、pi 與 node（唯讀）與系統目錄（唯讀）。
 # 題庫目錄（含 hidden/ 那一半測試）、~/dev、其他使用者檔案都不掛進來。網路共用（要連本機 LM Studio）。
-# 用法（計畫的 agent.argv）：["ops/redo/bwrap_agent.sh", "{logs}", "pi", "-p", ...]
+# 用法：先 ln -s 本檔 ~/.local/bin/redo-bwrap-agent；計畫的 agent.argv：["redo-bwrap-agent", "{logs}", "pi", "-p", ...]
 set -euo pipefail
 LOGS="$1"; shift
 WS="$PWD"; CFG="${PI_CODING_AGENT_DIR:?}"

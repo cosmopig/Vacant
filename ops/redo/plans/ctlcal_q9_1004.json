@@ -15,7 +15,7 @@
  "attempt_timeout_s": 600,
  "agent": {
   "argv": [
-   "ops/redo/bwrap_agent.sh",
+   "redo-bwrap-agent",
    "{logs}",
    "pi",
    "-p",
