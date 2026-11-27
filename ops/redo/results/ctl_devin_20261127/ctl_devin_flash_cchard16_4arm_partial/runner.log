@@ -325,3 +325,340 @@
 2026-11-27T16:55:56Z  cc_1558E/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
 2026-11-27T16:55:56Z  cc_1558E/r3/B                                infra_void=void×4:infra_marker
 2026-11-27T16:55:59Z  cc_1558E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:56:22Z  cc_1599D/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:56:34Z  cc_1558E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:56:42Z  cc_1601F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:56:42Z  cc_1601F/r3/A                                infra_void=void×4:infra_marker
+2026-11-27T16:56:45Z  cc_1575F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:57:18Z  cc_1575F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:57:20Z  cc_1608F/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:57:20Z  cc_1608F/r3/B                                infra_void=void×4:infra_marker
+2026-11-27T16:57:23Z  cc_1608F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:57:25Z  cc_1599D/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:57:31Z  cc_1603E/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:57:31Z  cc_1603E/r3/B                                infra_void=void×4:infra_marker
+2026-11-27T16:57:34Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:57:37Z  cc_1558E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:57:44Z  cc_1553I/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:57:44Z  cc_1553I/r3/B                                infra_void=void×4:infra_marker
+2026-11-27T16:57:47Z  cc_1599A/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:57:50Z  cc_1552I/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:57:50Z  cc_1552I/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T16:57:52Z  cc_1580F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:57:52Z  cc_1580F/r3/R                                infra_void=void×4:infra_marker
+2026-11-27T16:57:53Z  cc_1552I/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:57:55Z  cc_1608F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:57:56Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:58:07Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:58:20Z  cc_1599A/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:58:21Z  cc_1575F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:58:26Z  cc_1552I/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:58:29Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T16:58:58Z  cc_1608F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:59:10Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:59:23Z  cc_1599A/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:59:28Z  cc_1552I/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:59:29Z  cc_1599D/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:59:29Z  cc_1599D/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T16:59:32Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T16:59:32Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T16:59:40Z  cc_1558E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T16:59:40Z  cc_1558E/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T16:59:42Z  cc_1558E/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:00:33Z  cc_1575F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:00:33Z  cc_1575F/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T17:00:35Z  cc_1575F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:01:01Z  cc_1608F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:01:01Z  cc_1608F/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T17:01:04Z  cc_1608F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:01:08Z  cc_1575F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:01:13Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:01:13Z  cc_1603E/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T17:01:17Z  cc_1553H/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:01:26Z  cc_1599A/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:01:26Z  cc_1599A/r3/R                                infra_void=void×4:infra_marker
+2026-11-27T17:01:29Z  cc_1599A/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:01:31Z  cc_1552I/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:01:31Z  cc_1552I/r3/A                                infra_void=void×4:infra_marker
+2026-11-27T17:01:34Z  cc_1548C/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:01:34Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:01:34Z  cc_1580F/r3/B                                infra_void=void×4:infra_marker
+2026-11-27T17:01:37Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:01:38Z  cc_1608F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:01:50Z  cc_1553H/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:02:01Z  cc_1599A/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:02:07Z  cc_1548C/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:02:10Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:02:11Z  cc_1575F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:02:20Z  cc_1558E/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:02:40Z  cc_1608F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:02:53Z  cc_1553H/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:02:54Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:03:04Z  cc_1599A/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:03:11Z  cc_1548C/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:03:12Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:03:23Z  cc_1558E/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:03:57Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:04:14Z  cc_1575F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:04:14Z  cc_1575F/r3/A                                infra_void=void×4:infra_marker
+2026-11-27T17:04:19Z  cc_1575F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:04:43Z  cc_1608F/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:04:43Z  cc_1608F/r3/A                                infra_void=void×4:infra_marker
+2026-11-27T17:04:46Z  cc_1608F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:04:52Z  cc_1575F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:04:56Z  cc_1553H/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:04:56Z  cc_1553H/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T17:04:58Z  cc_1553H/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:05:07Z  cc_1599A/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:05:07Z  cc_1599A/r3/B                                infra_void=void×4:infra_marker
+2026-11-27T17:05:09Z  cc_1599A/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:05:14Z  cc_1548C/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:05:14Z  cc_1548C/r3/R                                infra_void=void×4:infra_marker
+2026-11-27T17:05:16Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:05:16Z  cc_1580F/r3/C                                infra_void=void×4:infra_marker
+2026-11-27T17:05:17Z  cc_1548C/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:05:18Z  cc_1608F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:05:18Z  cc_1555F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:05:26Z  cc_1558E/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:05:26Z  cc_1558E/r3/A                                infra_void=void×4:infra_marker
+2026-11-27T17:05:29Z  cc_1580E/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:05:32Z  cc_1553H/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:05:42Z  cc_1599A/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:05:49Z  cc_1548C/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:05:51Z  cc_1555F/r3/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:05:55Z  cc_1575F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:06:01Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（4/4）
+2026-11-27T17:06:01Z  cc_1599D/r3/A                                infra_void=void×4:infra_marker
+2026-11-27T17:06:01Z  cc_1580E/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:06:03Z  cc_1599D/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:06:21Z  cc_1608F/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（3/4）
+2026-11-27T17:06:25Z  收到中斷：正在跑的那一格會被丟掉（下次續跑重做），已完成的格保留
+2026-11-27T17:10:15Z  計畫 ctl_devin_flash_cchard16_4arm（5cf5a5d92e16） 題庫 /opt/ctlwork/bm_tasks/cchard  這次要處理 48 對（全計畫 48 對）  harness d5674bfa06e2
+2026-11-27T17:10:15Z  cc_1599D/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1575F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552G/r1/A                                pass=True accepted=True attempts=1 wall=649.4s
+2026-11-27T17:10:15Z  cc_1601F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1608F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599D/r1/R                                pass=False accepted=True attempts=2 wall=1200.0s
+2026-11-27T17:10:15Z  cc_1580F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1575F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552G/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r1/C                                pass=True accepted=True attempts=1 wall=391.1s
+2026-11-27T17:10:15Z  cc_1601F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553I/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1608F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599D/r1/B                                pass=False accepted=True attempts=2 wall=1054.1s
+2026-11-27T17:10:15Z  cc_1580F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1575F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552G/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r1/A                                pass=True accepted=True attempts=1 wall=483.9s
+2026-11-27T17:10:15Z  cc_1601F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553I/r1/C                                pass=True accepted=True attempts=2 wall=807.4s
+2026-11-27T17:10:15Z  cc_1608F/r1/A                                pass=True accepted=True attempts=1 wall=1372.9s
+2026-11-27T17:10:15Z  cc_1599D/r1/C                                pass=False accepted=True attempts=2 wall=954.4s
+2026-11-27T17:10:15Z  cc_1580F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1575F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552G/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r1/R                                pass=True accepted=True attempts=1 wall=568.1s
+2026-11-27T17:10:15Z  cc_1601F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553I/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1608F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r1/B                                pass=True accepted=True attempts=1 wall=166.5s
+2026-11-27T17:10:15Z  cc_1553I/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552I/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1555F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1558E/r1/A                                pass=True accepted=True attempts=1 wall=1239.2s
+2026-11-27T17:10:15Z  cc_1553H/r1/R                                pass=True accepted=True attempts=2 wall=818.1s
+2026-11-27T17:10:15Z  cc_1599A/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552I/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1555F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1572C/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1558E/r1/R                                pass=True accepted=True attempts=1 wall=480.5s
+2026-11-27T17:10:15Z  cc_1553H/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T17:10:15Z  cc_1603E/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599A/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552I/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1555F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1572C/r1/B                                pass=True accepted=True attempts=2 wall=919.5s
+2026-11-27T17:10:15Z  cc_1553H/r1/C                                pass=True accepted=True attempts=3 wall=1753.8s
+2026-11-27T17:10:15Z  cc_1558E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1603E/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599A/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1552I/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1555F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1572C/r1/C                                pass=True accepted=True attempts=2 wall=1041.1s
+2026-11-27T17:10:15Z  cc_1553H/r1/A                                pass=True accepted=True attempts=1 wall=971.5s
+2026-11-27T17:10:15Z  cc_1558E/r1/C                                pass=True accepted=True attempts=2 wall=1025.5s
+2026-11-27T17:10:15Z  cc_1603E/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599A/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1572C/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1603E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553H/r2/B                                pass=True accepted=True attempts=1 wall=332.8s
+2026-11-27T17:10:15Z  cc_1552I/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553I/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1603E/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1608F/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553H/r2/C                                pass=True accepted=True attempts=1 wall=587.2s
+2026-11-27T17:10:15Z  cc_1552I/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599D/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599A/r2/B                                pass=True accepted=True attempts=2 wall=1105.6s
+2026-11-27T17:10:15Z  cc_1553I/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r2/A                                pass=False accepted=True attempts=1 wall=1658.3s
+2026-11-27T17:10:15Z  cc_1603E/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1608F/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553H/r2/A                                pass=True accepted=True attempts=1 wall=818.1s
+2026-11-27T17:10:15Z  cc_1552I/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599D/r2/A                                pass=False accepted=True attempts=1 wall=1772.2s
+2026-11-27T17:10:15Z  cc_1599A/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553I/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1580E/r2/R                                pass=True accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1603E/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1608F/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1553H/r2/R                                pass=True accepted=True attempts=1 wall=324.4s
+2026-11-27T17:10:15Z  cc_1599D/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599A/r2/A                                pass=True accepted=True attempts=1 wall=1383.8s
+2026-11-27T17:10:15Z  cc_1553I/r2/B                                pass=True accepted=True attempts=2 wall=1029.3s
+2026-11-27T17:10:15Z  cc_1608F/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1603E/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1599A/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r2/A                                pass=True accepted=True attempts=1 wall=500.6s
+2026-11-27T17:10:15Z  cc_1601F/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r2/R                                pass=True accepted=True attempts=1 wall=285.8s
+2026-11-27T17:10:15Z  cc_1552G/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1572C/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1601F/r2/A                                pass=True accepted=True attempts=1 wall=1453.5s
+2026-11-27T17:10:15Z  cc_1548C/r2/B                                pass=True accepted=True attempts=2 wall=970.1s
+2026-11-27T17:10:15Z  cc_1601F/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:10:15Z  cc_1548C/r2/C                                pass=True accepted=True attempts=1 wall=413.0s
+2026-11-27T17:10:27Z  cc_1555F/r2/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:10:29Z  cc_1599D/r2/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:10:29Z  cc_1552I/r2/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:10:29Z  cc_1558E/r2/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:10:30Z  cc_1572C/r2/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:12:29Z  cc_1580F/r2/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:12:52Z  cc_1601F/r2/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:14:26Z  cc_1552G/r2/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T17:14:53Z  cc_1552I/r2/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:14:59Z  cc_1599D/r2/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:15:00Z  cc_1572C/r2/C 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:15:02Z  cc_1555F/r2/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:15:04Z  cc_1558E/r2/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:15:13Z  cc_1580F/r2/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:15:17Z  cc_1601F/r2/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:15:26Z  cc_1552G/r2/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（2/4）
+2026-11-27T17:18:39Z  收到中斷：正在跑的那一格會被丟掉（下次續跑重做），已完成的格保留
+2026-11-27T17:19:18Z  計畫 ctl_devin_flash_cchard16_4arm（5cf5a5d92e16） 題庫 /opt/ctlwork/bm_tasks/cchard  這次要處理 48 對（全計畫 48 對）  harness 1d897f5a70b7
+2026-11-27T17:19:18Z  cc_1575F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552G/r1/A                                pass=True accepted=True attempts=1 wall=649.4s
+2026-11-27T17:19:18Z  cc_1575F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599D/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552G/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1575F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599D/r1/R                                pass=False accepted=True attempts=2 wall=1200.0s
+2026-11-27T17:19:18Z  cc_1608F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552G/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1608F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599D/r1/B                                pass=False accepted=True attempts=2 wall=1054.1s
+2026-11-27T17:19:18Z  cc_1575F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552G/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1608F/r1/A                                pass=True accepted=True attempts=1 wall=1372.9s
+2026-11-27T17:19:18Z  cc_1599D/r1/C                                pass=False accepted=True attempts=2 wall=954.4s
+2026-11-27T17:19:18Z  cc_1580F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1601F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1601F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1608F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1580F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1601F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1548C/r1/C                                pass=True accepted=True attempts=1 wall=391.1s
+2026-11-27T17:19:18Z  cc_1548C/r1/A                                pass=True accepted=True attempts=1 wall=483.9s
+2026-11-27T17:19:18Z  cc_1580F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1601F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r1/C                                pass=True accepted=True attempts=2 wall=807.4s
+2026-11-27T17:19:18Z  cc_1548C/r1/R                                pass=True accepted=True attempts=1 wall=568.1s
+2026-11-27T17:19:18Z  cc_1580F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552I/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1548C/r1/B                                pass=True accepted=True attempts=1 wall=166.5s
+2026-11-27T17:19:18Z  cc_1553H/r1/R                                pass=True accepted=True attempts=2 wall=818.1s
+2026-11-27T17:19:18Z  cc_1553H/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T17:19:18Z  cc_1555F/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1558E/r1/A                                pass=True accepted=True attempts=1 wall=1239.2s
+2026-11-27T17:19:18Z  cc_1552I/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553H/r1/C                                pass=True accepted=True attempts=3 wall=1753.8s
+2026-11-27T17:19:18Z  cc_1555F/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1558E/r1/R                                pass=True accepted=True attempts=1 wall=480.5s
+2026-11-27T17:19:18Z  cc_1552I/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553H/r1/A                                pass=True accepted=True attempts=1 wall=971.5s
+2026-11-27T17:19:18Z  cc_1599A/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1555F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1558E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552I/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1555F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599A/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1558E/r1/C                                pass=True accepted=True attempts=2 wall=1025.5s
+2026-11-27T17:19:18Z  cc_1580E/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1572C/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599A/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599A/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1580E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1572C/r1/B                                pass=True accepted=True attempts=2 wall=919.5s
+2026-11-27T17:19:18Z  cc_1580E/r1/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1572C/r1/C                                pass=True accepted=True attempts=2 wall=1041.1s
+2026-11-27T17:19:18Z  cc_1580E/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1580E/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1580E/r2/A                                pass=False accepted=True attempts=1 wall=1658.3s
+2026-11-27T17:19:18Z  cc_1580E/r2/R                                pass=True accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1580E/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1572C/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553H/r2/B                                pass=True accepted=True attempts=1 wall=332.8s
+2026-11-27T17:19:18Z  cc_1552I/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553H/r2/C                                pass=True accepted=True attempts=1 wall=587.2s
+2026-11-27T17:19:18Z  cc_1552I/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553H/r2/A                                pass=True accepted=True attempts=1 wall=818.1s
+2026-11-27T17:19:18Z  cc_1553I/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1552I/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553H/r2/R                                pass=True accepted=True attempts=1 wall=324.4s
+2026-11-27T17:19:18Z  cc_1603E/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1608F/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1553I/r2/B                                pass=True accepted=True attempts=2 wall=1029.3s
+2026-11-27T17:19:18Z  cc_1608F/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1603E/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599D/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1608F/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599A/r2/B                                pass=True accepted=True attempts=2 wall=1105.6s
+2026-11-27T17:19:18Z  cc_1599D/r2/A                                pass=False accepted=True attempts=1 wall=1772.2s
+2026-11-27T17:19:18Z  cc_1608F/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599A/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599D/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1599A/r2/A                                pass=True accepted=True attempts=1 wall=1383.8s
+2026-11-27T17:19:18Z  cc_1548C/r2/A                                pass=True accepted=True attempts=1 wall=500.6s
+2026-11-27T17:19:18Z  cc_1548C/r2/R                                pass=True accepted=True attempts=1 wall=285.8s
+2026-11-27T17:19:18Z  cc_1599A/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1548C/r2/B                                pass=True accepted=True attempts=2 wall=970.1s
+2026-11-27T17:19:18Z  cc_1601F/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1548C/r2/C                                pass=True accepted=True attempts=1 wall=413.0s
+2026-11-27T17:19:18Z  cc_1552G/r2/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:19:18Z  cc_1601F/r2/A                                pass=True accepted=True attempts=1 wall=1453.5s
+2026-11-27T17:19:18Z  cc_1601F/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:49:22Z  cc_1552I/r2/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:49:22Z  cc_1572C/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:49:22Z  cc_1601F/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:49:22Z  cc_1599D/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T17:49:47Z  cc_1552G/r2/A                                pass=False accepted=False attempts=1 wall=1800.0s
