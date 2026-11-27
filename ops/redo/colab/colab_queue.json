@@ -1,0 +1,36 @@
+{
+  "schema": "vacant.redo.colab.queue/1",
+  "description": "Ordered queue of preregistered Colab redo batches for ops/redo/colab/colab_rent_and_run.sh. Copy to $HOME/dev/ops/ctl/colab_queue.json before running so runtime status updates stay outside git.",
+  "defaults": {
+    "preferred_gpus": [
+      "A100",
+      "G4",
+      "L4"
+    ],
+    "high_mem": false,
+    "transport": "ssh",
+    "commit": "HEAD",
+    "max_spend_cu": 180,
+    "balance_floor_cu": 20,
+    "max_concurrent_vms": 2
+  },
+  "batches": [
+    {
+      "id": "ctl12_colab_e4b",
+      "plan": "ops/redo/plans/ctl12_colab_e4b.json",
+      "bank": "$HOME/dev/ops/ref/bm_tasks/ctl12",
+      "vllm_config": "ops/redo/colab/vllm_gemma4_e4b.json",
+      "preferred_gpus": [
+        "A100",
+        "G4",
+        "L4"
+      ],
+      "high_mem": false,
+      "commit": "HEAD",
+      "transport": "ssh",
+      "extra_tars": [],
+      "extra_wheel": null,
+      "status": "pending"
+    }
+  ]
+}

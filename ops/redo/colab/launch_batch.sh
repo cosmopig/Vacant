@@ -29,6 +29,7 @@ Options:
   --gpu <GPU>                Colab GPU type: G4, A100, L4, T4, H100 (default: G4)
   --high-mem                 Pass --high-mem to `colab new`
   --session <name>           Colab session name (default: redo-<plan_id>-<UTC>)
+  --reuse-session <name>     Reuse an existing Colab session (skips `colab new`; isolates remote run root per batch)
   --commit <sha>             Git commit SHA to archive & freeze (default: HEAD)
   --vllm-config <path>       vLLM config JSON (default: ops/redo/colab/vllm_gemma4_12b.json)
   --batch-name <name>        Batch folder name (default: <plan_id>_<UTC>)
@@ -50,6 +51,7 @@ EOF
 GPU="G4"
 HIGH_MEM=0
 SESSION=""
+REUSE_SESSION=0
 COMMIT_REF="HEAD"
 VLLM_CONFIG="${SCRIPT_DIR}/vllm_gemma4_12b.json"
 BATCH_NAME=""
@@ -69,6 +71,7 @@ while [ $# -gt 0 ]; do
     --gpu) GPU="$2"; shift 2 ;;
     --high-mem) HIGH_MEM=1; shift ;;
     --session) SESSION="$2"; shift 2 ;;
+    --reuse-session) SESSION="$2"; REUSE_SESSION=1; shift 2 ;;
     --commit) COMMIT_REF="$2"; shift 2 ;;
     --vllm-config) VLLM_CONFIG="$2"; shift 2 ;;
     --batch-name) BATCH_NAME="$2"; shift 2 ;;
@@ -104,6 +107,11 @@ case "$TRANSPORT" in
   ssh|exec) ;;
   *) echo "error: --transport must be 'ssh' or 'exec'" >&2; exit 2 ;;
 esac
+
+if [ "$REUSE_SESSION" = "1" ] && [ -z "$SESSION" ]; then
+  echo "error: --reuse-session requires a non-empty session name" >&2
+  exit 2
+fi
 
 if [ ! -f "$PLAN_ARG" ]; then
   echo "error: plan file not found: $PLAN_ARG" >&2
@@ -199,7 +207,11 @@ STAGING_DIR="${OUT_DIR}/staging"
 STATE_FILE="${OUT_DIR}/state.json"
 
 REMOTE_WORK="/srv/redo"
-REMOTE_RUN_ROOT="${REMOTE_WORK}/run"
+if [ "$REUSE_SESSION" = "1" ]; then
+  REMOTE_RUN_ROOT="${REMOTE_WORK}/runs/${BATCH_NAME}"
+else
+  REMOTE_RUN_ROOT="${REMOTE_WORK}/run"
+fi
 REMOTE_REPO_TAR="/content/redo_repo_${SHORT_SHA}.tar.gz"
 REMOTE_BANK_TAR="/content/redo_bank_${BATCH_NAME}.tar.gz"
 REMOTE_PLAN="/content/redo_plan_${BATCH_NAME}.json"
@@ -237,14 +249,18 @@ LAUNCH_META_LOCAL="${STAGING_DIR}/launch_meta.json"
 BOOTSTRAP_LOCAL="${STAGING_DIR}/bootstrap.sh"
 
 if [ "$DRY_RUN" = "1" ]; then
-  echo "[dry-run] batch=${BATCH_NAME} session=${SESSION} gpu=${GPU} high_mem=${HIGH_MEM} commit=${COMMIT_SHA}"
+  echo "[dry-run] batch=${BATCH_NAME} session=${SESSION} reuse_session=${REUSE_SESSION} gpu=${GPU} high_mem=${HIGH_MEM} commit=${COMMIT_SHA}"
   echo "[dry-run] plan=${PLAN_ABS} (id=${PLAN_ID}, sha256=${PLAN_SHA256}, tasks=${N_TASKS}, reps=${REPS})"
   echo "[dry-run] bank=${BANK_ABS}"
   echo "[dry-run] vllm_config=${VLLM_CFG_ABS}"
-  echo "[dry-run] local_out_dir=${OUT_DIR} state_file=${STATE_FILE}"
+  echo "[dry-run] local_out_dir=${OUT_DIR} state_file=${STATE_FILE} remote_run_root=${REMOTE_RUN_ROOT}"
   echo "[dry-run] git -C $(printf '%q' "$REPO_ROOT") archive --format=tar.gz --prefix=repo/ -o $(printf '%q' "$REPO_TAR_LOCAL") $(printf '%q' "$COMMIT_SHA") -- ops/redo vacant_network"
   echo "[dry-run] tar -czf $(printf '%q' "$BANK_TAR_LOCAL") -C $(printf '%q' "$BANK_ABS") ."
-  echo "[dry-run] $(fmt_cmd "${NEW_CMD[@]}")"
+  if [ "$REUSE_SESSION" = "1" ]; then
+    echo "[dry-run] --reuse-session set: skipping colab new (reusing session=${SESSION})"
+  else
+    echo "[dry-run] $(fmt_cmd "${NEW_CMD[@]}")"
+  fi
   echo "[dry-run] $(fmt_cmd "${COLAB_CMD[@]}" upload -s "$SESSION" "$REPO_TAR_LOCAL" "$REMOTE_REPO_TAR")"
   echo "[dry-run] $(fmt_cmd "${COLAB_CMD[@]}" upload -s "$SESSION" "$BANK_TAR_LOCAL" "$REMOTE_BANK_TAR")"
   echo "[dry-run] $(fmt_cmd "${COLAB_CMD[@]}" upload -s "$SESSION" "$PLAN_ABS" "$REMOTE_PLAN")"
@@ -271,9 +287,9 @@ tar -czf "$BANK_TAR_LOCAL" -C "$BANK_ABS" .
 BANK_TAR_SHA=$(sha256sum "$BANK_TAR_LOCAL" | cut -d' ' -f1)
 
 # Write launch metadata JSON (uploaded to VM & stored inside run root).
-EXTRA_WHEEL_SHA="$EXTRA_WHEEL_SHA" EXTRA_WHEEL_NAME="$(basename "${EXTRA_WHEEL:-}")" python3 - "$LAUNCH_META_LOCAL" "$BATCH_NAME" "$SESSION" "$GPU" "$HIGH_MEM" "$COMMIT_SHA" \
+EXTRA_WHEEL_SHA="$EXTRA_WHEEL_SHA" EXTRA_WHEEL_NAME="$(basename "${EXTRA_WHEEL:-}")" REUSE_SESSION="$REUSE_SESSION" python3 - "$LAUNCH_META_LOCAL" "$BATCH_NAME" "$SESSION" "$GPU" "$HIGH_MEM" "$COMMIT_SHA" \
   "$PLAN_ID" "$PLAN_SHA256" "$REPO_TAR_SHA" "$BANK_TAR_SHA" "$VLLM_CFG_ABS" "$ALLOW_UNCOMMITTED" <<'PY'
-import json, pathlib, sys, time
+import json, os, pathlib, sys, time
 (out_p, batch, session, gpu, hm, commit, plan_id, plan_sha,
  repo_sha, bank_sha, cfg_p, allow_unc) = sys.argv[1:]
 doc = {
@@ -281,6 +297,7 @@ doc = {
     "launched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     "batch_name": batch,
     "session": session,
+    "reused_session": os.environ.get("REUSE_SESSION") == "1",
     "gpu_requested": gpu,
     "high_mem_requested": hm == "1",
     "git_commit": commit,
@@ -291,18 +308,28 @@ doc = {
     "allow_uncommitted_plan": allow_unc == "1",
     "vllm_config": json.loads(pathlib.Path(cfg_p).read_text(encoding="utf-8")),
 }
-import os as _os
-if _os.environ.get("EXTRA_WHEEL_SHA"):
-    doc["extra_wheel"] = {"name": _os.environ.get("EXTRA_WHEEL_NAME"), "sha256": _os.environ["EXTRA_WHEEL_SHA"],
+if os.environ.get("EXTRA_WHEEL_SHA"):
+    doc["extra_wheel"] = {"name": os.environ.get("EXTRA_WHEEL_NAME"), "sha256": os.environ["EXTRA_WHEEL_SHA"],
                           "venv": "/opt/redo/rc_venv"}
 pathlib.Path(out_p).write_text(json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
 
 # Generate VM bootstrap script (unpacks repo, launches vm_run_batch.sh under setsid nohup).
+REUSE_PREP=""
+if [ "$REUSE_SESSION" = "1" ]; then
+  REUSE_PREP=$(cat <<REOF
+rm -f ${REMOTE_WORK}/VM_READY.json
+if [ -f ${REMOTE_WORK}/bootstrap.log ]; then
+  mv -f ${REMOTE_WORK}/bootstrap.log ${REMOTE_WORK}/bootstrap.prev.${TS}.log || true
+fi
+REOF
+)
+fi
 cat > "$BOOTSTRAP_LOCAL" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 mkdir -p ${REMOTE_WORK}/repo ${REMOTE_RUN_ROOT}
+${REUSE_PREP}
 tar -xzf ${REMOTE_REPO_TAR} -C ${REMOTE_WORK}/repo --strip-components=1
 chmod +x ${REMOTE_WORK}/repo/ops/redo/colab/*.sh ${REMOTE_WORK}/repo/ops/redo/colab/*.py
 $(for et in "${EXTRA_TARS[@]}"; do src=${et%%:*}; dst=${et#*:}; sha=$(sha256sum "$src" | cut -d' ' -f1); echo "echo '${sha}  /content/xtar_$(basename "$src")' | sha256sum -c -"; echo "mkdir -p '${dst}' && tar -xzf '/content/xtar_$(basename "$src")' -C '${dst}' && echo EXTRA_TAR_OK '${dst}'"; done)
@@ -331,8 +358,12 @@ echo "BATCH_STARTED pid=\$PID log=${REMOTE_WORK}/bootstrap.log"
 EOF
 chmod +x "$BOOTSTRAP_LOCAL"
 
-echo "3/6 Provisioning Colab VM: $(fmt_cmd "${NEW_CMD[@]}")"
-"${NEW_CMD[@]}"
+if [ "$REUSE_SESSION" = "1" ]; then
+  echo "3/6 Reusing existing Colab VM session: ${SESSION} (skipping colab new)"
+else
+  echo "3/6 Provisioning Colab VM: $(fmt_cmd "${NEW_CMD[@]}")"
+  "${NEW_CMD[@]}"
+fi
 
 echo "4/6 Uploading repo snapshot, bank tarball, plan, config, metadata, and bootstrap script"
 "${COLAB_CMD[@]}" upload -s "$SESSION" "$REPO_TAR_LOCAL" "$REMOTE_REPO_TAR"
@@ -357,7 +388,7 @@ else
 fi
 
 echo "6/6 Writing local state file -> ${STATE_FILE}"
-python3 - "$STATE_FILE" "$BATCH_NAME" "$SESSION" "$GPU" "$HIGH_MEM" "$COMMIT_SHA" \
+REUSE_SESSION="$REUSE_SESSION" python3 - "$STATE_FILE" "$BATCH_NAME" "$SESSION" "$GPU" "$HIGH_MEM" "$COMMIT_SHA" \
   "$PLAN_ID" "$PLAN_SHA256" "$PLAN_ABS" "$BANK_ABS" "$VLLM_CFG_ABS" "$OUT_DIR" \
   "$REMOTE_WORK" "$REMOTE_RUN_ROOT" "$REMOTE_RESULTS_TAR" "$TRANSPORT" "$COLAB_BIN" "$COLAB_CONFIG" "$COLAB_AUTH" <<'PY'
 import json, os, pathlib, sys, time
@@ -368,6 +399,7 @@ doc = {
     "launched_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     "batch_name": batch,
     "session": session,
+    "reused_session": os.environ.get("REUSE_SESSION") == "1",
     "gpu": gpu,
     "high_mem": hm == "1",
     "git_commit": commit,
