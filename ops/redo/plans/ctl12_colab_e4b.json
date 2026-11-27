@@ -1,0 +1,143 @@
+{
+ "id": "ctl12_colab_e4b",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/srv/redo/bank",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl12"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/.pi/agent",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "colab",
+   "provider": "colab-vllm-nothink",
+   "model": "gemma-4-e4b-it-qat",
+   "jobs": 12,
+   "health_url": "http://127.0.0.1:8000/v1/models",
+   "health_contains": "gemma-4-e4b-it-qat"
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_flower_field",
+  "ex_linked_list",
+  "ex_minesweeper",
+  "ex_ocr_numbers",
+  "ex_swift_scheduling",
+  "ex_tournament",
+  "ex_yacht",
+  "ex_camicia",
+  "ex_all_your_base",
+  "ex_atbash_cipher",
+  "ex_bank_account",
+  "ex_binary"
+ ],
+ "reps": 3,
+ "prereg": {
+  "second_model_note": "second model, Colab vLLM backend, judged separately from the local 9B batch, never merged",
+  "decision_doc": "decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md",
+  "frozen": "2026-11-27，在看任何正式資料之前凍結；規則順序、門檻數值（>=70%、連續 2 次相同失敗簽章且通過數未增加）與 12 題題單皆不再改。",
+  "question": "在同樣的運算預算上限下，小模型能否靠可驗證的執行紀錄與驗收結果，由 Host 決定續做、修復或重開，而比固定重開做得更好？",
+  "calibration_gate": "E4B Colab 校準（colab_ctlcal_e4b，不是證據，不併入分析）：37 題候選（ctl_cal18 8/18 + ctl_hard19 8/19）A 臂 hidden 通過率 16/37（43.24%，infra_void=0），落在凍結門檻 25%–70% 內，依規則作為第二模型。",
+  "split_grading": "每題的測試方法依固定種子 20261127 切為兩半：驗收半放 workspace/（worker 與控制器看得到），隱藏評分半放 hidden/ 並以 scorer.py 獨立評分（worker 與控制器皆看不到）；使用與主模型相同的題庫 ~/dev/ops/ref/bm_tasks/ctl12。",
+  "arms": "A 原生單次 1800 秒；R 三次盲重開（600×3，總 1800）；B 三次重開＋失敗回饋（共用產生器 failing_tests）；C 控制器（同預算、同回饋產生器，只差決策）。每題每臂 3 次（12×4×3＝144 格）。",
+  "model": "google/gemma-4-E4B-it-qat-w4a16-ct（served_model_name: gemma-4-e4b-it-qat），pi 0.87.1，Colab A100-SXM4-40GB 上以 vLLM 0.30.0 服務（VLLM_USE_FLASHINFER_SAMPLER=0，--tool-call-parser gemma4 --reasoning-parser gemma4，tool_chat_template_gemma4.jinja，--enable-prefix-caching --enable-prompt-tokens-details --async-scheduling，--limit-mm-per-prompt '{\"image\": 0, \"audio\": 0, \"video\": 0}'，max_model_len 131072，max_tokens 16384，max_num_seqs 16，provider colab-vllm-nothink，jobs 12）。Colab VM 上不套 bwrap（容器內無 bwrap／非特權 user namespace，且一次性 Colab VM 上沒有本機宿主檔案）。",
+  "concurrency_probe": "A100 probe (probe_e4b_a100_20261127T032042Z, KV cache 1,181,176 tok): ctx=6k mean_s={c1:5.6, c4:7.8, c8:10.3, c12:13.4, c16:16.6}; ctx=24k mean_s={c1:9.9, c4:25.0, c8:45.9, c12:65.9, c16:86.1}; 0 errors across all levels. Chosen jobs=12.",
+  "metrics": "只看五個：hidden 最終成功率；hidden 測試滿足比例；每個成功任務的實際 token；已通過項目被弄壞的比例；等待時間（牆鐘）。分析 ops/redo/analysis/ctl_metrics.py。",
+  "infra_void": "沿用 redo.py：工作區沒動＋0 次成功模型回應或連線類錯誤＝基礎設施失敗，不算嘗試、最多重試 4 次，仍失敗該格 infra_void 不進分母、逐一列出；比較時任一臂 void 的那一對在該比較不計。",
+  "readout": "報 C 對 B、C 對 R 的成功率差（(題,重複) 配對、精確 McNemar）與成本差；明寫『這是 12 題的探索，只判斷方向』；與本機 9B 批次分開判讀，絕不合併；C 沒有比 B、R 好就照實寫，不延伸。",
+  "known_limits": [
+   "second model, Colab vLLM backend, judged separately from the local 9B batch, never merged.",
+   "12 題 × 3 次重複＝36 對，屬探索性檢定力，只判斷方向。",
+   "12 題由主模型（9B）校準規則選出；第二模型沿用同一份 12 題；校準資料不併入正式分析。",
+   "等預算是牆鐘上限（1800 秒），token 照實紀錄與報成本差。"
+  ],
+  "registered": "2026-11-27，正式批次第一通模型呼叫之前 commit（不 push）。設計：decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md（含修正 1–4 與凍結）。"
+ }
+}
