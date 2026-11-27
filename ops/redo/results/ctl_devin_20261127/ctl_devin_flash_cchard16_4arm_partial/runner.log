@@ -1,0 +1,12 @@
+2026-11-27T10:45:26Z  計畫 ctl_devin_flash_cchard16_4arm（5cf5a5d92e16） 題庫 /opt/ctlwork/bm_tasks/cchard  這次要處理 48 對（全計畫 48 對）  harness d5674bfa06e2
+2026-11-27T10:52:04Z  cc_1548C/r1/C                                pass=True accepted=True attempts=1 wall=391.1s
+2026-11-27T10:56:18Z  cc_1552G/r1/A                                pass=True accepted=True attempts=1 wall=649.4s
+2026-11-27T11:00:12Z  cc_1548C/r1/A                                pass=True accepted=True attempts=1 wall=483.9s
+2026-11-27T11:09:43Z  cc_1548C/r1/R                                pass=True accepted=True attempts=1 wall=568.1s
+2026-11-27T11:12:32Z  cc_1548C/r1/B                                pass=True accepted=True attempts=1 wall=166.5s
+2026-11-27T11:15:29Z  cc_1599D/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T11:15:34Z  cc_1580F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T11:15:34Z  cc_1601F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T11:15:34Z  cc_1608F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T11:15:35Z  cc_1575F/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T11:15:35Z  cc_1553I/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
