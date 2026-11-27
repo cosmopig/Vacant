@@ -50,3 +50,14 @@
 2026-11-27T13:27:59Z  cc_1558E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
 2026-11-27T13:31:11Z  cc_1572C/r1/B                                pass=True accepted=True attempts=2 wall=919.5s
 2026-11-27T13:35:52Z  cc_1553H/r1/A                                pass=True accepted=True attempts=1 wall=971.5s
+2026-11-27T13:39:27Z  cc_1555F/r1/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T13:41:29Z  cc_1553H/r2/B                                pass=True accepted=True attempts=1 wall=332.8s
+2026-11-27T13:43:19Z  cc_1580E/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T13:45:07Z  cc_1558E/r1/C                                pass=True accepted=True attempts=2 wall=1025.5s
+2026-11-27T13:45:51Z  cc_1603E/r1/A                                pass=False accepted=False attempts=1 wall=1800.0s
+2026-11-27T13:45:52Z  cc_1580E/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T13:48:35Z  cc_1572C/r1/C                                pass=True accepted=True attempts=2 wall=1041.1s
+2026-11-27T13:49:19Z  cc_1599A/r1/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T13:51:19Z  cc_1553H/r2/C                                pass=True accepted=True attempts=1 wall=587.2s
+2026-11-27T14:05:02Z  cc_1553H/r2/A                                pass=True accepted=True attempts=1 wall=818.1s
+2026-11-27T14:05:09Z  cc_1552I/r2/B 第 2 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
