@@ -589,10 +589,20 @@ class ExpTRun:
         return res
 
     def _checkpoint_and_ingest(self, live: pathlib.Path, label: str) -> tuple[Any, int]:
+        # 寫入病歷鏈要用這一格自己的 VACANT_HOME 金鑰（agent 的掛鉤用 live/vh 的金鑰簽了 genesis）；
+        # 在本行程裡寫會用 ~/.vacant 的金鑰 ⇒ MixedSignerRefused（11-27 實跑發現）。照 run_d2 的做法，
+        # 寫入在子行程裡做、只換那個子行程的環境（本行程兩個執行緒並行，不能改全域 os.environ）。
+        env = dict(os.environ)
+        env["VACANT_HOME"] = str(live / "vh")
+        code = ("import sys, pathlib; sys.path.insert(0, %r); "
+                "from ops.d2 import expT_feedback as FB; from vacant_network.trace import sources as S; "
+                "rec = FB.open_recorder(pathlib.Path(%r), pathlib.Path(%r)); "
+                "S.ingest_egress(rec); rec.checkpoint(%r)") % (str(REPO), str(live / "vh"), str(live / "ws"), label)
+        r = subprocess.run([sys.executable, "-I", "-c", code], env=env, capture_output=True, text=True, timeout=600)
+        if r.returncode != 0:
+            raise RuntimeError(f"checkpoint/ingest in subprocess failed rc={r.returncode}: {r.stderr[-400:]}")
         rec = FB.open_recorder(live / "vh", live / "ws")
         assert rec is not None
-        S.ingest_egress(rec)
-        rec.checkpoint(label)
         evts = rec.events()
         last_seq = max((int(e.get("seq") or 0) for e in evts), default=0)
         return rec, last_seq
