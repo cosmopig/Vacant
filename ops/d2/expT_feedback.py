@@ -1126,7 +1126,7 @@ def call_haiku_messages_api(
     body_obj = {
         "model": str(model),
         "max_tokens": int(max_tokens),
-        "temperature": 0,
+        # 不送 temperature：claude-haiku-5-5 的 API 回 400「`temperature` is deprecated」（11-27 實跑）。
         "system": system_prompt,
         "messages": [{"role": "user", "content": user_prompt}],
     }
