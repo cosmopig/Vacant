@@ -1,14 +1,24 @@
 {
-  "schema": "vacant.d2.expT.plan/1",
+  "schema": "vacant.d2.expT.plan/2",
   "id": "expT_colab_e4b",
   "seed": 20261192,
-  "arms": ["A", "G", "T", "T0"],
+  "arms": ["A", "G", "T", "TB", "TO", "TE", "TER"],
   "reps": 2,
   "max_rounds": 2,
   "agent_timeout_s": 600,
   "budget_s": 1800,
   "no_tool_mention": true,
   "private_live": "/srv/d2/private_live",
+  "haiku_full_root": null,
+  "escalation": {
+    "model": "claude-haiku-5-5",
+    "api_url": "https://api.anthropic.com/v1/messages",
+    "max_tokens": 1024,
+    "timeout_s": 120,
+    "price_per_mtok_in": 1.0,
+    "price_per_mtok_out": 5.0,
+    "ledger_path": "~/dev/ops/ctl/api_credit_ledger.jsonl"
+  },
   "egress": {
     "mode": "per-worker proxy, OS-assigned port"
   },
@@ -91,19 +101,76 @@
     }
   ],
   "colab_requirements": {
-    "repo_archive": "Current ops/redo/colab/launch_batch.sh archives only `ops/redo vacant_network`; running Experiment T on Colab requires also including `ops/d2` in the uploaded repo tarball.",
-    "materials_upload": "Upload tarballs of `${D2_PRIVATE}/realrev2_sc` and `${D2_PRIVATE}/realrev2_football` to e.g. `/srv/d2/materials/{realrev2_sc,realrev2_football}` and export `D2_PRIVATE=/srv/d2/materials` before invoking `run_expT.py`.",
-    "vacant_wheel_and_observe_hook": "Install the pinned vacant_network wheel (v5.2, sha256 fccf569c...) into `/opt/redo/d2v52_venv` on the VM and run `PI_CODING_AGENT_DIR=~/.pi/agent VACANT_HOME=/srv/d2/vacant_state /opt/redo/d2v52_venv/bin/vacant install --agents pi --mode observe` ON THE VM (do not copy local vacant.ts, which embeds the workstation venv path).",
-    "source_server_and_egress": "`source_server.py` (127.0.0.1:18262) and per-worker `vacant trace egress` (127.0.0.1:0 -> upstream 127.0.0.1:18262) bind loopback only and need no root or bwrap. Each (set, rep) uses a unique hostname `<set>-r<rep>.d2-sources.example` and isolated live dir so `jobs=12` workers never collide on routes.json or access.jsonl.",
-    "proxy_bypass_for_vllm": "vLLM listens on `http://127.0.0.1:8000/v1`. `run_expT.py` always puts `localhost,127.0.0.1` in `no_proxy`/`NO_PROXY` so pi model requests hit vLLM directly while `*.d2-sources.example` requests traverse `http_proxy -> vacant trace egress -> source_server.py`.",
-    "invocation": "Invoke `python3 /srv/redo/repo/ops/d2/run_expT.py run --plan /srv/redo/repo/ops/d2/plans/expT_colab_e4b.json --root /srv/d2/run --allow-uncommitted-plan` after `vm_setup.sh --config ops/redo/colab/vllm_gemma4_e4b.json` (git archive omits `.git/`). No bwrap on Colab VM."
+    "note": "Colab VM wiring is deferred (local 9B is the current target); plan arms and prereg are kept synchronized with expT_qwen9b.json.",
+    "repo_archive": "Running Experiment T on Colab requires including `ops/d2` in the uploaded repo tarball.",
+    "materials_upload": "Upload tarballs of `${D2_PRIVATE}/realrev2_sc` and `${D2_PRIVATE}/realrev2_football` to `/srv/d2/materials/{realrev2_sc,realrev2_football}` and export `D2_PRIVATE=/srv/d2/materials` before invoking `run_expT.py`.",
+    "vacant_wheel_and_observe_hook": "Install the pinned vacant_network wheel (v5.2, sha256 fccf569c...) into `/opt/redo/d2v52_venv` on the VM and run `PI_CODING_AGENT_DIR=~/.pi/agent VACANT_HOME=/srv/d2/vacant_state /opt/redo/d2v52_venv/bin/vacant install --agents pi --mode observe` ON THE VM.",
+    "source_server_and_egress": "`source_server.py` (127.0.0.1:18262) and per-worker `vacant trace egress` bind loopback only and serve revision 0's frozen snapshot (`c0/site_frozen/`).",
+    "proxy_bypass_for_vllm": "vLLM listens on `http://127.0.0.1:8000/v1`; `run_expT.py` keeps `localhost,127.0.0.1` in `no_proxy`/`NO_PROXY` and strips `ANTHROPIC_API_KEY` from agent subprocesses."
   },
-  "purpose": "Experiment T (send unsupported claims back for revision, cycle 0 only) second model on Colab vLLM Gemma-4 E4B (37 real Wikipedia revision sets, 4 arms A/G/T/T0 x 2 reps = 296 arm-cells; judged separately from local 9B, never merged).",
+  "purpose": "Experiment T (revised, cycle 0 only) second model on Colab vLLM Gemma-4 E4B (37 real Wikipedia revision sets, 7 arms A/G/T/TB/TO/TE/TER; T0 removed x 2 reps = 518 arm-cells paired on shared c0 drafts; judged separately from local 9B, never merged).",
   "prereg": {
-    "registered": "2026-11-27, frozen before any Experiment T model calls.",
+    "registered": "2026-11-27 (revised per NOTE_20261127_EXPERIMENT_T_N_CRITIQUE.md), frozen before any Experiment T model calls.",
     "second_model_note": "second model, Colab vLLM backend, judged separately from the local 9B batch, never merged.",
     "model": "google/gemma-4-E4B-it-qat-w4a16-ct (served_model_name: gemma-4-e4b-it-qat), pi 0.87.1, Colab A100-SXM4-40GB with vLLM 0.30.0 (VLLM_USE_FLASHINFER_SAMPLER=0, --tool-call-parser gemma4 --reasoning-parser gemma4, tool_chat_template_gemma4.jinja, --enable-prefix-caching --enable-prompt-tokens-details --async-scheduling, --limit-mm-per-prompt '{\"image\": 0, \"audio\": 0, \"video\": 0}', max_model_len 131072, max_tokens 16384, max_num_seqs 16, provider colab-vllm-nothink, jobs 12). No bwrap on Colab VM.",
+    "design": {
+      "scope": "Cycle 0 only (revision 0 initial report; no maintenance cycles). One shared c0 draft per (set, rep) is branched to all 7 arms (A = the shared draft itself) so every arm is paired on the identical draft.",
+      "page_snapshot_pinned": "All arms and all rounds read revision 0's identical frozen snapshot (`c0/site_frozen/`, SHA-256 pinned in `c0/site_snapshot_sha256.json`). `source_server.py` serves static cycle-0 files only (never `--dynamic`, never cycle 1+), verified against `access.jsonl`.",
+      "budget": "Same small model and same total budget cap (600s per round, up to 2 extra rounds after c0, total cap 1800s). TE and TER call host-side Claude Haiku (`claude-haiku-5-5`) once per report without re-calling the small model.",
+      "arms": {
+        "A": "native — shared c0 draft only (0 extra rounds).",
+        "G": "yoked generic review — runs ONLY in cells where T would send feedback on the same shared draft, for the exact same number of rounds T actually ran for that (set, rep); 0 extra rounds if T's c0 flag set is empty. Uses exact fixed generic prompt (no record info).",
+        "T": "record-guided feedback — up to 2 extra rounds; recompute per-line F1 (missing value / value not in any fetched content via plain-text match) and F3 (line changed in a round that read no source) from RECORDS ONLY after each round; reuse `vacant_network.trace.review.line_for` for `unsourced` lines and KS-1 templates (a)/(b) for missing/changed-without-source, plus egress fetched-page URLs; stop early when none flagged.",
+        "TB": "blank-only control — send back ONLY lines with no value using template (a), same rounds and stop rule as T, zero record info and no fetched-page list.",
+        "TO": "oracle upper bound — send back lines that are actually wrong per the audited cycle-0 answer key (including wrong_read) using neutral line-id template, NEVER revealing the correct value; same rounds and stop rule as T.",
+        "TE": "host-side Claude Haiku escalation (`claude-haiku-5-5`) — from the shared draft, take the lines flagged by RECORDS (same flag set as T) and call Haiku once per report with those lines' labels/current values and ONLY the frozen revision-0 page texts this cell actually fetched (from its own egress log). Replace only those lines; all other lines untouched.",
+        "TER": "random escalation control — same number of lines per report as TE, chosen uniformly at random (deterministic per-set-rep seed) among the report's lines, escalated to Claude Haiku in the identical way. Replace only those lines; all other lines untouched."
+      },
+      "removed_arms": "T0 (count-only) is removed from plans and metrics.",
+      "audit_chain_and_api": "Every feedback message (exact text, withheld count) and escalation call (prompt sha256, response sha256, input/output tokens, cost_usd) is appended as an Ed25519-signed event to per-cell `feedback_chain.ndjson` via `vacant_network.logbook`. `ANTHROPIC_API_KEY` is read ONLY from the host environment at call time (stripped from the small-model sandbox, never written or logged). One line per Haiku call is appended to `$HOME/dev/ops/ctl/api_credit_ledger.jsonl`."
+    },
+    "ks1_check": {
+      "status": "所有提示與回饋模板已通過 KS-1 可執行檢查",
+      "command": "python3 ops/d2/expT_feedback.py check-ks1",
+      "output": "所有提示與回饋模板已通過 KS-1 可執行檢查 (vacant_network.memory.assert_ks1_clean + vacant_network.trace.feedback.feedback_ks1_clean):\n  PASS review.REVIEW_HEADER (82 chars)\n  PASS review.PERSONA (164 chars)\n  PASS review.FOOTER (85 chars)\n  PASS review.WITHHELD (38 chars)\n  PASS review.line_for(unsourced) (207 chars)\n  PASS REPORT_REVIEW_HEADER (59 chars)\n  PASS TB_FOOTER (101 chars)\n  PASS TO_FOOTER (86 chars)\n  PASS NO_VALUE_LINE_TEMPLATE (125 chars)\n  PASS NO_VALUE_DELETED_TEMPLATE (128 chars)\n  PASS CHANGED_NO_SOURCE_LINE_TEMPLATE (136 chars)\n  PASS CHANGED_NO_SOURCE_DELETED_TEMPLATE (137 chars)\n  PASS ORACLE_WRONG_LINE_TEMPLATE (110 chars)\n  PASS ORACLE_WRONG_DELETED_TEMPLATE (135 chars)\n  PASS T_FETCHED_HEADER (27 chars)\n  PASS T_FETCHED_NONE (34 chars)\n  PASS GENERIC_REVIEW_PROMPT (115 chars)\n  PASS T0_FEEDBACK_TEMPLATE (128 chars)\n  PASS HAIKU_ESCALATION_SYSTEM_PROMPT (334 chars)\n  PASS HAIKU_ESCALATION_USER_TEMPLATE (327 chars)\n  PASS HAIKU_LINE_WITH_VALUE_TEMPLATE (47 chars)\n  PASS HAIKU_LINE_NO_VALUE_TEMPLATE (44 chars)\n  PASS review.render(unsourced) (537 chars)\nTOTAL: 23/23 PASS",
+      "templates_verbatim": {
+        "review.REVIEW_HEADER": "Before delivery: a review of the recorded steps of this task found points to redo.",
+        "review.PERSONA": "Take the role of a careful reviewer who checks the draft against the materials given for the task. Redo only the parts listed below; leave everything else as it is.",
+        "review.FOOTER": "This review lists what the record shows; it does not say whether the answer is right.",
+        "review.WITHHELD": "- a point was withheld (wording check)",
+        "review.line_for(unsourced)": "- report.md line 1: \"example\" was not found in anything this task read or computed. Recompute it from the given files (inspect them with head, or load them in code), or mark it as an assumption on that line.",
+        "REPORT_REVIEW_HEADER": "Before delivery: a check of report.md found points to redo.",
+        "TB_FOOTER": "This review lists lines in report.md without values; it does not say whether other answers are right.",
+        "TO_FOOTER": "Check the listed lines against the pages for this task; leave other lines as they are.",
+        "NO_VALUE_LINE_TEMPLATE": "- {path} line {n}: no value is given. Look it up in the pages for this task and write it, or mark it as unknown on that line.",
+        "NO_VALUE_DELETED_TEMPLATE": "- {path} ({label}): no value is given (line missing). Look it up in the pages for this task and write it, or mark it as unknown.",
+        "CHANGED_NO_SOURCE_LINE_TEMPLATE": "- {path} line {n}: this line was changed in a step that read no page. Check it against the pages for this task and correct it if needed.",
+        "CHANGED_NO_SOURCE_DELETED_TEMPLATE": "- {path} ({label}): this line was changed in a step that read no page. Check it against the pages for this task and correct it if needed.",
+        "ORACLE_WRONG_LINE_TEMPLATE": "- {path} line {n}: this value may be wrong. Check it against the pages for this task and correct it if needed.",
+        "ORACLE_WRONG_DELETED_TEMPLATE": "- {path} ({label}): this line is missing and its value may be wrong. Check it against the pages for this task and correct it if needed.",
+        "T_FETCHED_HEADER": "Pages fetched in this task:",
+        "T_FETCHED_NONE": "Pages fetched in this task: (none)",
+        "GENERIC_REVIEW_PROMPT": "Re-check report.md for completeness and correctness against the pages for this task and fix anything that is wrong.",
+        "T0_FEEDBACK_TEMPLATE": "{n} line(s) in report.md have no supporting source in the fetched pages. Check and correct them against the pages for this task.",
+        "HAIKU_ESCALATION_SYSTEM_PROMPT": "Extract values for the listed report lines strictly from the provided source page texts. Do not use outside knowledge or guess. If a line's value cannot be found in the provided source page texts, output exactly: not found in sources. Return one line per requested item in the exact format: [CLAIM_ID]: <value or not found in sources>",
+        "HAIKU_ESCALATION_USER_TEMPLATE": "Fill each listed report line using strictly the provided fetched page texts below. If a value is not present in these pages, write: not found in sources.\n\nLines to fill:\n{lines_block}\n\nFetched pages (frozen revision-0 snapshot):\n{pages_block}\n\nOutput one line per item in the format:\n[CLAIM_ID]: <value or not found in sources>",
+        "HAIKU_LINE_WITH_VALUE_TEMPLATE": "- [{claim_id}] {label} (current value: {value})",
+        "HAIKU_LINE_NO_VALUE_TEMPLATE": "- [{claim_id}] {label} (current value: none)"
+      }
+    },
+    "primary_metrics": {
+      "a": "per-set correct-line proportion (strict-scored against audited cycle-0 answer key)",
+      "b": "filled-line precision (correct among lines that have a value)",
+      "c": "harm, reported separately: (1) correct->wrong/deleted count, and (2) blank->wrong-value count",
+      "additional": "error-type breakdown before/after (missing/fabricated/wrong_read/stale), fix rate of sent-back lines, tokens/calls/wall, Haiku USD and tokens per report for TE/TER, and whole-report Haiku A-arm reference point (`haiku_full_root`)"
+    },
     "analysis": "python3 ops/d2/expT_metrics.py <root>",
-    "frozen_readout": "primary T vs G; T counts as useful iff T's correct-line proportion exceeds G's by ≥10 percentage points with paired CI lower bound >0 and harm not more than G's; T≈G with both > A ⇒ 'more rounds help, records don't'; neither > A ⇒ no effect; known blind spot: wrong_read recall ~11–29%; these 37 sets were used in experiment 1 and v5.2 was tuned on football data ⇒ exploratory"
+    "frozen_readout": "Primary comparisons: T vs G, T vs TB, T vs TO, TE vs TER. T vs TB: the record adds value only if filled-line correct count is ≥5 percentage points higher with paired (set-cluster bootstrap) CI lower bound >0; otherwise write that it doesn't. T vs G: ≥10 pp on (a) with CI lower bound >0 and harm not more than G's. TE vs TER: record-guided escalation beats random escalation only if correct-line proportion difference ≥10 pp with paired CI lower bound >0; also report TE's cost saving and correctness gap vs whole-report Haiku (`haiku_full_root`). Harm: if any arm's harm (c) is clearly higher than A's (paired CI lower bound >0), describe it as 'trading errors for fills' even if (a) rises. Indistinguishable if A's correct-line proportion >85% or <10%, or T actually sent feedback in fewer than 1/4 of cells. Known blind spot: wrong_read recall ~11–29%; these 37 sets were used in experiment 1 and v5.2 was tuned on football data ⇒ exploratory.",
+    "recorded_prediction": "Recorded prediction (vacant-cloud, marked as a prediction): T beats A but is indistinguishable from TB.",
+    "budget_fallback": "If time is short, first reduce reps from 2 to 1, then drop TO; never drop G, TB or TER.",
+    "secondary_analysis": "Offline best-of-N draft selection (no new runs): for each set, among available shared drafts across reps/arms, pick one by a RECORD-ONLY evidence score (supported lines count minus blank/unsupported lines count; ties broken by fewer blanks), vs uniform random pick, vs oracle best by answer key; compare strict-scored correctness in expT_metrics.py.",
+    "later": [
+      "Attach the closest passage from fetched content (not implemented in this revision; deferred to later)"
+    ]
   }
 }

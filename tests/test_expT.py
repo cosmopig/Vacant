@@ -1,12 +1,16 @@
-"""Unit and end-to-end tests for Experiment T (feedback builder, signed chains, runner, metrics, plans)."""
+"""Unit and end-to-end tests for Experiment T (KS-1 templates, 7 arms, yoked G, snapshot pin, Haiku escalation, metrics)."""
 from __future__ import annotations
 
 import hashlib
+import http.server
 import io
 import json
+import os
 import pathlib
 import subprocess
 import sys
+import threading
+from typing import Any
 
 import pytest
 
@@ -19,10 +23,11 @@ if str(REPO / "ops" / "d2") not in sys.path:
 import expT_feedback as FB  # noqa: E402
 import expT_metrics as EM  # noqa: E402
 import run_expT as RT  # noqa: E402
-from ops.e1 import assert_ks1_clean as e1_assert_ks1_clean  # noqa: E402
 from vacant_network.identity import Identity  # noqa: E402
 from vacant_network.logbook import ChainError, Logbook  # noqa: E402
 from vacant_network.memory import assert_ks1_clean as mem_assert_ks1_clean  # noqa: E402
+from vacant_network.trace import review as REV  # noqa: E402
+from vacant_network.trace.feedback import feedback_ks1_clean  # noqa: E402
 
 
 def _sample_claims() -> list[dict]:
@@ -35,80 +40,117 @@ def _sample_claims() -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
-# Unit tests: G, T, T0 feedback builders & KS-1 compliance
+# Unit tests: KS-1 templates, review.py reuse, WITHHELD replacement
 # ---------------------------------------------------------------------------
 
 
-def test_G_fixed_text_and_ks1_clean():
-    expected = "Please re-check your report for completeness and correctness and fix anything that is wrong."
-    assert FB.GENERIC_REVIEW_PROMPT == expected
-    msg = FB.build_G_feedback()
-    assert msg == expected
-    assert FB.build_arm_feedback("G") == expected
-    FB.assert_ks1_clean(msg)
-    mem_assert_ks1_clean(msg)
-    e1_assert_ks1_clean(msg)
+def test_all_templates_pass_executable_ks1_and_review_reuse():
+    rows = FB.verify_all_templates_ks1(actor_tokens={"qwen/qwen3.5-9b", "lms1003q9", "claude-haiku-5-5"})
+    assert len(rows) >= 20
+    assert all(r["ok"] for r in rows)
+
+    report = FB.format_ks1_check_report()
+    assert "所有提示與回饋模板已通過 KS-1 可執行檢查" in report
+    assert f"TOTAL: {len(rows)}/{len(rows)} PASS" in report
+
+    for name, tpl in FB.STATIC_TEMPLATES.items():
+        mem_assert_ks1_clean(tpl)
+        feedback_ks1_clean(tpl, {"qwen/qwen3.5-9b", "lms1003q9", "claude-haiku-5-5"})
 
 
-def test_T_feedback_exact_text_flagged_only_and_stop_when_none():
-    assert FB.build_T_feedback([], ["http://s01.d2-sources.example/p1.html"]) is None
+def test_T_feedback_reuses_review_line_for_and_withholds_dirty_lines():
+    assert FB.render_T_feedback([], ["http://s01.d2-sources.example/p1.html"]) == (None, 0)
 
     flagged = [
-        {"claim_id": "c02", "label": "Alpha — Apps (goals)", "problem_kind": FB.PROBLEM_MISSING},
-        {"claim_id": "c03", "label": "Beta — Version", "problem_kind": FB.PROBLEM_NOT_IN_FETCHED},
-        {"claim_id": "c04", "label": "Beta — Seats", "problem_kind": FB.PROBLEM_CHANGED_NO_SOURCE},
+        {"claim_id": "c02", "label": "Alpha — Apps (goals)", "line": 4, "value": None,
+         "reasons": [FB.PROBLEM_MISSING], "problem_kind": FB.PROBLEM_MISSING},
+        {"claim_id": "c03", "label": "Beta — Version", "line": 5, "value": "v9.9.9",
+         "reasons": [FB.PROBLEM_NOT_IN_FETCHED], "problem_kind": FB.PROBLEM_NOT_IN_FETCHED},
+        {"claim_id": "c04", "label": "Beta — Seats", "line": 6, "value": "25",
+         "reasons": [FB.PROBLEM_CHANGED_NO_SOURCE], "problem_kind": FB.PROBLEM_CHANGED_NO_SOURCE},
     ]
     urls = [
         "http://s01.d2-sources.example/p2.html",
         "http://s01.d2-sources.example/p1.html",
-        "http://s01.d2-sources.example/p1.html",  # duplicate deduplicated & sorted
+        "http://s01.d2-sources.example/p1.html",
     ]
-    msg = FB.build_T_feedback(flagged, urls)
+    msg, withheld = FB.render_T_feedback(flagged, urls, actor_tokens={"qwen/qwen3.5-9b"})
     assert msg is not None
-    expected = "\n".join([
-        FB.T_FEEDBACK_HEADER,
-        "- [c02] Alpha — Apps (goals): missing value",
-        "- [c03] Beta — Version: value not in any fetched page",
-        "- [c04] Beta — Seats: changed without reading a source",
-        "",
-        "Pages you fetched:",
-        "- http://s01.d2-sources.example/p1.html",
-        "- http://s01.d2-sources.example/p2.html",
-    ])
-    assert msg == expected
-    assert "c01" not in msg
-    assert "Price" not in msg
-    FB.assert_ks1_clean(msg)
-    mem_assert_ks1_clean(msg)
-    e1_assert_ks1_clean(msg)
+    assert withheld == 0
 
-    # Empty fetched_urls renders explicit "(none)"
-    msg_none = FB.build_T_feedback([flagged[0]], [])
-    assert msg_none is not None
-    assert msg_none.endswith("Pages you fetched: (none)")
+    expected_unsourced = REV.line_for({"kind": "unsourced", "path": "report.md", "line": 5, "value": "v9.9.9"})
+    assert msg.startswith(REV.REVIEW_HEADER + "\n" + REV.PERSONA)
+    assert msg.endswith(REV.FOOTER)
+    assert FB.NO_VALUE_LINE_TEMPLATE.format(path="report.md", n=4) in msg
+    assert expected_unsourced in msg
+    assert FB.CHANGED_NO_SOURCE_LINE_TEMPLATE.format(path="report.md", n=6) in msg
+    assert "Pages fetched in this task:\n- http://s01.d2-sources.example/p1.html\n- http://s01.d2-sources.example/p2.html" in msg
 
-
-def test_T0_feedback_count_only_no_line_ids_and_stop_when_none():
-    assert FB.build_T0_feedback([]) is None
-
-    flagged = [
-        {"claim_id": "c02", "label": "Alpha — Apps (goals)", "problem_kind": FB.PROBLEM_MISSING},
-        {"claim_id": "c03", "label": "Beta — Version", "problem_kind": FB.PROBLEM_NOT_IN_FETCHED},
+    # Dirty value containing actor token or KS-1 banned phrase -> replaced by WITHHELD and counted
+    dirty_flagged = [
+        {"claim_id": "c02", "label": "Alpha — Apps (goals)", "line": 4, "value": None,
+         "reasons": [FB.PROBLEM_MISSING]},
+        {"claim_id": "c03", "label": "Beta — Version", "line": 5, "value": "agent_secret_model_99",
+         "reasons": [FB.PROBLEM_NOT_IN_FETCHED]},
+        {"claim_id": "c04", "label": "Beta — Seats", "line": 6, "value": "you will be punished",
+         "reasons": [FB.PROBLEM_NOT_IN_FETCHED]},
     ]
-    msg = FB.build_T0_feedback(flagged)
-    assert msg == "2 lines in your report have no supporting source in what you fetched; please check and fix them."
-    assert "c02" not in msg
-    assert "c03" not in msg
-    assert "Alpha" not in msg
-    assert "http://" not in msg
-    FB.assert_ks1_clean(msg)
+    dirty_msg, dirty_withheld = FB.render_T_feedback(
+        dirty_flagged, [], actor_tokens={"agent_secret_model_99"},
+    )
+    assert dirty_msg is not None
+    assert dirty_withheld == 2
+    assert "agent_secret_model_99" not in dirty_msg
+    assert "you will be punished" not in dirty_msg
+    assert dirty_msg.count(REV.WITHHELD) == 2
+    assert FB.NO_VALUE_LINE_TEMPLATE.format(path="report.md", n=4) in dirty_msg
+    assert FB.T_FETCHED_NONE in dirty_msg
+
+
+def test_TB_blank_only_and_TO_oracle_never_leaks_truth():
+    claims = _sample_claims()
+    truth_c0 = {"c01": "$40", "c02": "45 (3)", "c03": "v2.1.0", "c04": "25"}
+    report = "\n".join([
+        "# Report",
+        "",
+        "- Alpha — Price: $40",           # line 3: correct
+        "- Alpha — Apps (goals): ____",   # line 4: missing
+        "- Beta — Version: v9.9.9",       # line 5: fabricated
+        "- Beta — Seats: 77",             # line 6: wrong_read
+    ])
+
+    # TB: flags ONLY line 4 (blank), no URLs, template (a)
+    tb_fl = FB.compute_blank_flags(report, claims)
+    assert tb_fl["flagged_ids"] == ["c02"]
+    assert tb_fl["fetched_urls"] == []
+    tb_msg, tb_w = FB.render_TB_feedback(tb_fl["flagged"])
+    assert tb_w == 0 and tb_msg is not None
+    assert FB.NO_VALUE_LINE_TEMPLATE.format(path="report.md", n=4) in tb_msg
+    assert "line 5" not in tb_msg
+    assert "line 6" not in tb_msg
+    assert "Pages fetched" not in tb_msg
+
+    # TO: flags lines 4, 5, 6 (including wrong_read!), NEVER leaks truth values!
+    to_fl = FB.compute_oracle_flags(report, claims, truth_c0)
+    assert to_fl["flagged_ids"] == ["c02", "c03", "c04"]
+    to_fl_json = json.dumps(to_fl)
+    for ans in ("45 (3)", "v2.1.0", "25"):
+        assert ans not in to_fl_json
+    to_msg, to_w = FB.render_TO_feedback(to_fl["flagged"])
+    assert to_w == 0 and to_msg is not None
+    for ln_no in (4, 5, 6):
+        assert FB.ORACLE_WRONG_LINE_TEMPLATE.format(path="report.md", n=ln_no) in to_msg
+    assert "line 3" not in to_msg
+    for ans in ("$40", "45 (3)", "v2.1.0", "25"):
+        assert ans not in to_msg
+
+
+def test_G_fixed_prompt_and_ks1_clean():
+    msg, w = FB.render_G_feedback(actor_tokens={"qwen/qwen3.5-9b"})
+    assert w == 0
+    assert msg == FB.GENERIC_REVIEW_PROMPT
     mem_assert_ks1_clean(msg)
-    e1_assert_ks1_clean(msg)
-
-
-# ---------------------------------------------------------------------------
-# Unit tests: record-only F1 & F3 flag computation
-# ---------------------------------------------------------------------------
+    feedback_ks1_clean(msg, {"qwen/qwen3.5-9b"})
 
 
 def test_compute_line_flags_F1_plaintext_and_F3_no_source_edit():
@@ -119,13 +161,9 @@ def test_compute_line_flags_F1_plaintext_and_F3_no_source_edit():
         {"seq": 2, "url": "http://s01.d2-sources.example/p1.html", "text": html_p1, "source": "egress"},
         {"seq": 3, "url": "http://s01.d2-sources.example/p2.html", "text": html_p2, "source": "egress"},
     ]
-
-    # Round 0 (c0):
-    # - c01: $40 (in p1) -> OK
-    # - c02: 45 (3) (split across adjacent <td> cells in p1 -> plain_contains match per amend1!) -> OK
-    # - c03: ____ (missing) -> F1 missing value
-    # - c04: 999 (not in any page) -> F1 value not in any fetched page
     r0_text = "\n".join([
+        "# Report",
+        "",
         "- Alpha — Price: $40",
         "- Alpha — Apps (goals): 45 (3)",
         "- Beta — Version: ____",
@@ -135,23 +173,15 @@ def test_compute_line_flags_F1_plaintext_and_F3_no_source_edit():
         r0_text, claims, universe, round_idx=0, prev_values=None, prev_bound_seq=0, cur_bound_seq=5,
     )
     assert fr0["flagged_ids"] == ["c03", "c04"]
-    assert fr0["flags_by_claim"]["c01"]["flagged"] is False
-    assert fr0["flags_by_claim"]["c02"]["flagged"] is False
-    assert fr0["flags_by_claim"]["c03"]["F1"] is True
-    assert fr0["flags_by_claim"]["c03"]["problem_kind"] == FB.PROBLEM_MISSING
-    assert fr0["flags_by_claim"]["c04"]["F1"] is True
-    assert fr0["flags_by_claim"]["c04"]["problem_kind"] == FB.PROBLEM_NOT_IN_FETCHED
-    assert fr0["fetched_urls"] == [
-        "http://s01.d2-sources.example/p1.html",
-        "http://s01.d2-sources.example/p2.html",
-    ]
+    assert fr0["flags_by_claim"]["c03"]["line"] == 5
+    assert fr0["flags_by_claim"]["c04"]["line"] == 6
+    assert fr0["supported_count"] == 2
+    assert fr0["blank_count"] == 1
 
-    # Round 1 WITHOUT any new fetch (no entries with seq > 5):
-    # - Agent edits c01 from "$40" to "25" (which happens to be on p2 from c0, so F1 is False,
-    #   but it changed in a round that fetched NO source -> F3 fires!).
-    # - Agent fills c03 with "v2.1.0" (was None, now in p2 -> OK).
-    # - Agent changes c04 from "999" to "25" without fetching -> F3 fires!
+    # Round 1 without fetch -> F3 fires on changed lines
     r1_text = "\n".join([
+        "# Report",
+        "",
         "- Alpha — Price: 25",
         "- Alpha — Apps (goals): 45 (3)",
         "- Beta — Version: v2.1.0",
@@ -163,102 +193,237 @@ def test_compute_line_flags_F1_plaintext_and_F3_no_source_edit():
     )
     assert fr1["round_fetch_count"] == 0
     assert fr1["flagged_ids"] == ["c01", "c04"]
-    assert fr1["flags_by_claim"]["c01"]["F1"] is False
     assert fr1["flags_by_claim"]["c01"]["F3"] is True
-    assert fr1["flags_by_claim"]["c01"]["problem_kind"] == FB.PROBLEM_CHANGED_NO_SOURCE
-    assert fr1["flags_by_claim"]["c04"]["F3"] is True
 
-    # Round 1 WITH a fetch in round 1 (seq 6 > prev_bound_seq 5) -> F3 does NOT fire!
-    universe_with_r1 = [
-        *universe,
-        {"seq": 6, "url": "http://s01.d2-sources.example/p2.html", "text": html_p2, "source": "egress"},
-    ]
+    # Round 1 WITH fetch -> F3 does NOT fire
     fr1_fetched = FB.compute_line_flags(
-        r1_text, claims, universe_with_r1,
+        r1_text, claims,
+        [*universe, {"seq": 6, "url": "http://s01.d2-sources.example/p2.html", "text": html_p2, "source": "egress"}],
         round_idx=1, prev_values=fr0["values"], prev_bound_seq=5, cur_bound_seq=8,
     )
-    assert fr1_fetched["round_fetch_count"] == 1
     assert fr1_fetched["flagged_ids"] == []
-    assert FB.build_T_feedback(fr1_fetched["flagged"], fr1_fetched["fetched_urls"]) is None
 
 
 # ---------------------------------------------------------------------------
-# Unit tests: signed Logbook chain events & reconstruct + tamper detection
+# Unit tests: Signed Logbook chain (feedback & escalation) + tamper detection
 # ---------------------------------------------------------------------------
 
 
-def test_signed_feedback_chain_reconstruct_and_tamper_detection(tmp_path: pathlib.Path):
+def test_signed_feedback_and_escalation_chain_tamper_detection(tmp_path: pathlib.Path):
     ident = Identity.generate()
     book = Logbook()
-    flagged = [{"claim_id": "c02", "label": "Alpha — Apps (goals)", "F1": True, "F3": False,
-                "reasons": [FB.PROBLEM_MISSING], "problem_kind": FB.PROBLEM_MISSING}]
+    flagged = [{"claim_id": "c02", "label": "Alpha — Apps (goals)", "line": 4, "value": None,
+                "F1": True, "F3": False, "reasons": [FB.PROBLEM_MISSING], "problem_kind": FB.PROBLEM_MISSING}]
     urls = ["http://s01.d2-sources.example/p1.html"]
     ev1 = FB.make_trigger_evidence("T", 0, {"flagged": flagged, "fetched_urls": urls, "round_fetch_count": 1})
-    fb1 = FB.build_T_feedback(flagged, urls)
-    FB.feedback_event(book, ident, arm="T", round_idx=1, decision="send_feedback", feedback_text=fb1, evidence=ev1, ts_ms=1000)
-
-    ev2 = FB.make_trigger_evidence("T", 1, {"flagged": [], "fetched_urls": urls, "round_fetch_count": 1})
-    FB.feedback_event(book, ident, arm="T", round_idx=2, decision="stop_no_flags", feedback_text=None, evidence=ev2, ts_ms=2000)
+    fb1, w1 = FB.render_T_feedback(flagged, urls)
+    FB.feedback_event(book, ident, arm="T", round_idx=1, decision="send_feedback", feedback_text=fb1, evidence=ev1, withheld=w1, ts_ms=1000)
+    FB.escalation_event(
+        book, ident, arm="TE", decision="escalate_haiku", model="claude-haiku-5-5",
+        escalated_claim_ids=["c02"], fetched_urls=urls, prompt_sha256="a" * 64, response_sha256="b" * 64,
+        input_tokens=500, output_tokens=50, cost_usd=0.00075, withheld=0, ts_ms=2000,
+    )
 
     chain_path = tmp_path / "feedback_chain.ndjson"
     FB.save_feedback_chain(book, ident, chain_path)
-    assert chain_path.is_file()
-    assert chain_path.with_suffix(".pub.json").is_file()
 
     buf = io.StringIO()
     hist = FB.reconstruct(chain_path, stream=buf)
     assert len(hist) == 2
-    assert hist[0]["arm"] == "T"
-    assert hist[0]["round"] == 1
-    assert hist[0]["decision"] == "send_feedback"
-    assert hist[0]["feedback_text"] == fb1
-    assert hist[0]["evidence"]["flagged_ids"] == ["c02"]
-    assert hist[0]["evidence"]["fetched_urls"] == urls
-    assert hist[1]["decision"] == "stop_no_flags"
-    assert hist[1]["feedback_text"] is None
-    assert "decision=send_feedback" in buf.getvalue()
-    assert "decision=stop_no_flags" in buf.getvalue()
+    assert hist[0]["type"] == FB.EXPT_EVENT_TYPE
+    assert hist[1]["type"] == FB.EXPT_ESCALATION_EVENT_TYPE
+    assert hist[1]["cost_usd"] == 0.00075
+    assert "decision=escalate_haiku" in buf.getvalue()
 
     # Tamper payload -> ChainError
     raw_lines = chain_path.read_text(encoding="utf-8").splitlines()
-    tampered = json.loads(raw_lines[0])
-    tampered["payload"]["feedback_text"] = "TAMPERED"
-    tampered_path = tmp_path / "tampered.ndjson"
-    tampered_path.write_text(json.dumps(tampered) + "\n" + raw_lines[1] + "\n", encoding="utf-8")
-    tampered_path.with_suffix(".pub.json").write_text(chain_path.with_suffix(".pub.json").read_text(encoding="utf-8"), encoding="utf-8")
+    tampered = json.loads(raw_lines[1])
+    tampered["payload"]["cost_usd"] = 999.0
+    tp = tmp_path / "tampered.ndjson"
+    tp.write_text(raw_lines[0] + "\n" + json.dumps(tampered) + "\n", encoding="utf-8")
+    tp.with_suffix(".pub.json").write_text(chain_path.with_suffix(".pub.json").read_text(encoding="utf-8"), encoding="utf-8")
     with pytest.raises(ChainError):
-        FB.reconstruct(tampered_path, emit=False)
-
-    # Delete first entry -> ChainError
-    deleted_path = tmp_path / "deleted.ndjson"
-    deleted_path.write_text(raw_lines[1] + "\n", encoding="utf-8")
-    deleted_path.with_suffix(".pub.json").write_text(chain_path.with_suffix(".pub.json").read_text(encoding="utf-8"), encoding="utf-8")
-    with pytest.raises(ChainError):
-        FB.reconstruct(deleted_path, emit=False)
+        FB.reconstruct(tp, emit=False)
 
 
 # ---------------------------------------------------------------------------
-# End-to-end tests: 1 set x 4 arms (fake_agent.py & flawed-draft fake agent)
+# Unit tests: Haiku escalation HTTP call, line replacement, key hygiene, TER selection
+# ---------------------------------------------------------------------------
+
+
+class _FakeAnthropicServer:
+    """Loopback fake Anthropic Messages API server for offline testing (never touches real API)."""
+
+    def __init__(self, reply_fn):
+        self.reply_fn = reply_fn
+        self.requests: list[dict[str, Any]] = []
+        self._srv: http.server.ThreadingHTTPServer | None = None
+        self._thread: threading.Thread | None = None
+
+    def __enter__(self):
+        parent = self
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def do_POST(self):
+                length = int(self.headers.get("Content-Length") or 0)
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                parent.requests.append({
+                    "path": self.path,
+                    "has_api_key": bool(self.headers.get("x-api-key")),
+                    "api_key_value": self.headers.get("x-api-key"),
+                    "body": body,
+                })
+                resp_text, in_tok, out_tok = parent.reply_fn(body)
+                payload = json.dumps({
+                    "id": "msg_fake_001",
+                    "type": "message",
+                    "role": "assistant",
+                    "model": body.get("model", "claude-haiku-5-5"),
+                    "stop_reason": "end_turn",
+                    "content": [{"type": "text", "text": resp_text}],
+                    "usage": {"input_tokens": in_tok, "output_tokens": out_tok},
+                }).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+        self._srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.port = self._srv.server_address[1]
+        self.url = f"http://127.0.0.1:{self.port}/v1/messages"
+        self._thread = threading.Thread(target=self._srv.serve_forever, daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc):
+        if self._srv:
+            self._srv.shutdown()
+            self._srv.server_close()
+
+
+def test_haiku_escalation_fake_http_key_hygiene_and_strict_line_replacement(monkeypatch, tmp_path: pathlib.Path):
+    fake_secret = "sk-ant-test-NEVER-LOG-THIS-SECRET-987654"
+    monkeypatch.setenv("ANTHROPIC_API_KEY", fake_secret)
+
+    # Haiku tries to return c01 (NOT escalated!), c02 (found), and c03 (not found in sources)
+    def reply_fn(body):
+        assert body["model"] == "claude-haiku-5-5"
+        return "[c01]: $9999\n[c02]: 120\n[c03]: not found in sources", 1200, 80
+
+    with _FakeAnthropicServer(reply_fn) as srv:
+        claims = _sample_claims()
+        report = "\n".join([
+            "# Verification report",
+            "",
+            "- Alpha — Price: $40",
+            "- Alpha — Apps (goals): ____",
+            "- Beta — Version: v9.9.9",
+            "- Beta — Seats: 77",
+        ]) + "\n"
+
+        sys_p, user_p, w = FB.build_haiku_escalation_prompt(
+            [claims[1], claims[2]],
+            {"c01": "$40", "c02": None, "c03": "v9.9.9", "c04": "77"},
+            [{"url": "http://s01.d2-sources.example/p1.html", "text": "Alpha | Apps (goals) | 120"}],
+        )
+        assert w == 0
+        res = FB.call_haiku_messages_api(
+            system_prompt=sys_p, user_prompt=user_p, api_url=srv.url, model="claude-haiku-5-5",
+        )
+        assert len(srv.requests) == 1
+        assert srv.requests[0]["api_key_value"] == fake_secret
+        assert fake_secret not in json.dumps(res)
+        assert res["input_tokens"] == 1200
+        assert res["output_tokens"] == 80
+        assert res["cost_usd"] == pytest.approx(0.0016)
+
+        extracted = FB.parse_haiku_escalation_response(res["text"], ["c02", "c03"])
+        assert "c01" not in extracted
+        assert extracted == {"c02": "120", "c03": None}
+
+        updated = FB.apply_haiku_replacements(report, claims, ["c02", "c03"], extracted)
+        lines = updated.splitlines()
+        # Non-escalated lines c01 and c04 are byte-for-byte untouched!
+        assert lines[2] == "- Alpha — Price: $40"
+        assert lines[3] == "- Alpha — Apps (goals): 120"
+        assert lines[4] == "- Beta — Version: not found in sources"
+        assert lines[5] == "- Beta — Seats: 77"
+
+        # Ledger append contains no key
+        ledger = tmp_path / "credit_ledger.jsonl"
+        FB.append_credit_ledger(
+            ledger, purpose="expT TE/TER", model=res["model"],
+            input_tokens=res["input_tokens"], output_tokens=res["output_tokens"],
+            cost_usd=res["cost_usd"], cell="syn-s01/r1/TE",
+        )
+        txt = ledger.read_text(encoding="utf-8")
+        assert fake_secret not in txt
+        rec = json.loads(txt.strip())
+        assert rec["purpose"] == "expT TE/TER"
+        assert rec["cell"] == "syn-s01/r1/TE"
+        assert rec["cost_usd"] == pytest.approx(0.0016)
+
+    # Deterministic seeded TER sampling
+    s1, seed1 = FB.select_TER_claims(_sample_claims(), 2, seed=42, set_id="syn-s01", rep=1)
+    s2, seed2 = FB.select_TER_claims(_sample_claims(), 2, seed=42, set_id="syn-s01", rep=1)
+    assert seed1 == seed2
+    assert [c["id"] for c in s1] == [c["id"] for c in s2]
+    assert len(s1) == 2
+
+    # Frozen fetched pages loader ONLY includes pages in this cell's egress fetched_urls
+    site_frozen = tmp_path / "site_frozen"
+    site_frozen.mkdir()
+    (site_frozen / "p1.html").write_text("<html><body>Alpha 120</body></html>", encoding="utf-8")
+    (site_frozen / "p2.html").write_text("<html><body>SECRET_UNFETCHED_PAGE 999</body></html>", encoding="utf-8")
+    loaded = FB.load_frozen_fetched_pages(["http://syn-s01-r1.d2-sources.example/p1.html"], site_frozen)
+    assert len(loaded) == 1
+    assert loaded[0]["path"] == "p1.html"
+    assert "Alpha 120" in loaded[0]["text"]
+    assert all("SECRET_UNFETCHED_PAGE" not in pg["text"] for pg in loaded)
+
+
+# ---------------------------------------------------------------------------
+# End-to-end tests: 1 set x 7 arms (clean draft + flawed draft + snapshot pin + metrics)
 # ---------------------------------------------------------------------------
 
 
 def _make_synthetic_materials(mat_dir: pathlib.Path) -> tuple[pathlib.Path, str]:
     sdir = mat_dir / "sets" / "s01"
-    site = sdir / "cycle_0" / "site"
-    site.mkdir(parents=True)
-    (site / "p1.html").write_text(
+    site0 = sdir / "cycle_0" / "site"
+    site0.mkdir(parents=True)
+    (site0 / "p1.html").write_text(
         "<!doctype html><html><body><h1>Alpha</h1>"
         "<table><tr><td>Price</td><td>$40</td></tr>"
         "<tr><td>Users</td><td>120</td></tr></table></body></html>\n",
         encoding="utf-8",
     )
-    (site / "p2.html").write_text(
+    (site0 / "p2.html").write_text(
         "<!doctype html><html><body><h1>Beta</h1>"
         "<table><tr><td>Version</td><td>v2.1.0</td></tr>"
         "<tr><td>Seats</td><td>25</td></tr>"
         "<tr><td>Other</td><td>77</td></tr></table></body></html>\n",
         encoding="utf-8",
     )
+    # Also create cycle_1 with DIFFERENT content to verify revision-0 snapshot pinning!
+    site1 = sdir / "cycle_1" / "site"
+    site1.mkdir(parents=True)
+    (site1 / "p1.html").write_text(
+        "<!doctype html><html><body><h1>Alpha</h1>"
+        "<table><tr><td>Price</td><td>$999</td></tr>"
+        "<tr><td>Users</td><td>888</td></tr></table></body></html>\n",
+        encoding="utf-8",
+    )
+    (site1 / "p2.html").write_text(
+        "<!doctype html><html><body><h1>Beta</h1>"
+        "<table><tr><td>Version</td><td>v8.8.8</td></tr>"
+        "<tr><td>Seats</td><td>88</td></tr></table></body></html>\n",
+        encoding="utf-8",
+    )
+
     template = "\n".join([
         "# Verification report",
         "",
@@ -291,14 +456,22 @@ def _make_synthetic_materials(mat_dir: pathlib.Path) -> tuple[pathlib.Path, str]
     return mat_dir, hashlib.sha256(raw).hexdigest()
 
 
-def test_e2e_with_existing_fake_agent_1set_4arms(tmp_path: pathlib.Path):
-    """End-to-end on 1 set x 4 arms using ops/d2/fake_agent.py, source_server, egress proxy, and expT_metrics."""
+def test_e2e_clean_draft_yoked_G_zero_rounds_and_zero_haiku_calls(monkeypatch, tmp_path: pathlib.Path):
+    """When shared c0 draft has 0 flags: T stops at 0 rounds, G is yoked to 0 rounds, TE/TER make 0 API calls."""
     mat_dir, msha = _make_synthetic_materials(tmp_path / "mat")
+    ledger = tmp_path / "ledger.jsonl"
+
+    called_haiku = []
+
+    def fail_if_called(**kwargs):
+        called_haiku.append(kwargs)
+        raise AssertionError("Haiku must not be called when 0 lines are flagged")
+
     plan = {
-        "schema": "vacant.d2.expT.plan/1",
-        "id": "e2e_fake_agent",
+        "schema": "vacant.d2.expT.plan/2",
+        "id": "e2e_clean_7arms",
         "seed": 42,
-        "arms": ["A", "G", "T", "T0"],
+        "arms": ["A", "G", "T", "TB", "TO", "TE", "TER"],
         "reps": 1,
         "max_rounds": 2,
         "agent_timeout_s": 30,
@@ -306,6 +479,7 @@ def test_e2e_with_existing_fake_agent_1set_4arms(tmp_path: pathlib.Path):
         "egress": True,
         "server": {"port": 0},
         "jobs": 1,
+        "escalation": {"model": "claude-haiku-5-5", "ledger_path": str(ledger)},
         "model": {"provider": "fake", "model": "fake"},
         "materials": [{"prefix": "syn", "dir": str(mat_dir), "manifest_sha256": msha, "sets": ["s01"]}],
     }
@@ -313,55 +487,52 @@ def test_e2e_with_existing_fake_agent_1set_4arms(tmp_path: pathlib.Path):
     plan_path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     root = tmp_path / "run_out"
 
-    rc = RT.ExpTRun(plan_path, root, fake=True).go()
+    rc = RT.ExpTRun(plan_path, root, fake=True, haiku_caller=fail_if_called).go()
     assert rc == 0
+    assert called_haiku == []
+    assert not ledger.exists()
 
-    # Access log recorded agent fetches through source_server
-    access_lines = [json.loads(x) for x in (root / "access.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
-    assert len(access_lines) >= 2
-    assert any(x["path"] == "/p1.html" for x in access_lines)
-    assert any(x["path"] == "/p2.html" for x in access_lines)
+    # T was scheduled before G in arm_orders
+    orders = json.loads((root / "arm_orders.json").read_text(encoding="utf-8"))["syn-s01/r1"]
+    assert orders.index("T") < orders.index("G")
 
-    # Check each arm cell & reconstruct signed feedback chain
-    for arm in ("A", "G", "T", "T0"):
+    for arm in plan["arms"]:
         adir = root / "cells" / "syn-s01" / "r1" / arm
         cell = json.loads((adir / "cell.json").read_text(encoding="utf-8"))
         assert cell["infra_void"] is False
+        assert cell["rounds_run"] == 0
         hist = FB.reconstruct(adir / "feedback_chain.ndjson", emit=False)
         assert len(hist) >= 1
-        if arm == "A":
-            assert cell["rounds_run"] == 0
-            assert hist[0]["decision"] == "native_c0"
-        elif arm == "G":
-            assert cell["rounds_run"] == 2
-            sends = [h for h in hist if h["decision"] == "send_feedback"]
-            assert len(sends) == 2
-            assert all(h["feedback_text"] == FB.GENERIC_REVIEW_PROMPT for h in sends)
-        else:
-            # fake_agent.py filled all 4 lines accurately from fetched pages -> 0 flagged -> immediate stop!
-            assert cell["rounds_run"] == 0
+        if arm == "G":
+            assert cell["stop_reason"] == "stop_yoked_no_flags"
+            assert hist[0]["decision"] == "stop_yoked_no_flags"
+        elif arm in ("T", "TB", "TO", "TE", "TER"):
             assert cell["stop_reason"] == "stop_no_flags"
-            assert hist[0]["decision"] == "stop_no_flags"
-            assert hist[0]["feedback_text"] is None
 
-    # Metrics script runs cleanly
     res = EM.analyze_root(root, n_boot=200, seed=7)
-    for arm in ("A", "G", "T", "T0"):
-        assert res["by_arm"][arm]["all_correct_set_ratio"] == 1.0
-        assert res["by_arm"][arm]["chains_ok"] == 1
-        assert res["by_arm"][arm]["chains_bad"] == 0
+    assert res["snapshot_pin"]["ok"] is True
+    assert res["readout"]["indistinguishable"] is True  # A = 100% > 85% and T sent feedback in 0% < 25%
 
 
-def test_e2e_flawed_draft_fake_agent_4arms_metrics(tmp_path: pathlib.Path):
-    """End-to-end on 1 set x 4 arms x 2 reps where c0 has missing + fabricated + wrong_read errors."""
+def test_e2e_flawed_draft_1set_7arms_snapshot_pin_yoked_G_and_metrics(monkeypatch, tmp_path: pathlib.Path):
+    """Full e2e on 1 set x 7 arms x 2 reps:
+      - Verifies shared draft, revision-0 snapshot pinning, ANTHROPIC_API_KEY stripped from agent sandbox,
+        T (review.py unsourced + template a), yoked G (exact 1 round matching T, triggers harm C->W + B->W),
+        TB (blank-only), TO (oracle catches wrong_read without leaking truth), TE & TER via fake HTTP Haiku server
+        + credit ledger + signed chains, plus whole-report Haiku reference point and offline draft selection.
+    """
+    fake_secret = "sk-ant-e2e-SECRET-MUST-NOT-LEAK-42"
+    monkeypatch.setenv("ANTHROPIC_API_KEY", fake_secret)
     mat_dir, msha = _make_synthetic_materials(tmp_path / "mat")
+    ledger = tmp_path / "credit_ledger.jsonl"
 
-    # Custom deterministic fake agent simulating realistic differences across A, G, T, T0
+    # Fake agent that also asserts ANTHROPIC_API_KEY is NOT in its sandbox environment!
     fake_script = tmp_path / "flawed_fake_agent.py"
     fake_script.write_text(
         """#!/usr/bin/env python3
-import pathlib, re, sys, urllib.request
+import os, pathlib, re, sys, urllib.request
 
+assert "ANTHROPIC_API_KEY" not in os.environ, "ANTHROPIC_API_KEY leaked into agent sandbox!"
 prompt = sys.argv[1]
 rep = pathlib.Path("report.md")
 text = rep.read_text(encoding="utf-8")
@@ -376,9 +547,10 @@ def fetch_all(urls):
     return rows
 
 if "Fill in report.md" in prompt:
-    # c0 draft: fetch both pages, fill c01 correct, leave c02 missing, fabricate c03, wrong_read c04 (77 from p2)
     urls = sorted(set(re.findall(r"http://[a-z0-9.-]+/p\\d\\.html", prompt)))
     rows = fetch_all(urls)
+    # Verify cycle_0 content (never cycle_1 $999!)
+    assert rows[("Alpha", "Price")] == "$40"
     out = [
         "# Verification report",
         "",
@@ -388,37 +560,51 @@ if "Fill in report.md" in prompt:
         f"- Beta — Seats: {rows[('Beta', 'Other')]}",
     ]
     rep.write_text("\\n".join(out) + "\\n", encoding="utf-8")
-elif "The following lines in report.md could not be verified" in prompt:
-    # Arm T: fetch listed pages and fix ONLY the named lines
+elif "review of the recorded steps" in prompt:
+    # Arm T: refetch frozen pages and fix ONLY flagged lines (line 4 missing + line 5 unsourced)
     urls = sorted(set(re.findall(r"http://[a-z0-9.-]+/p\\d\\.html", prompt)))
     rows = fetch_all(urls)
     lines = text.splitlines()
     out = []
-    for ln in lines:
-        if "[c02]" in prompt and ln.startswith("- Alpha — Users:"):
+    for idx, ln in enumerate(lines, start=1):
+        if f"report.md line {idx}:" in prompt and ln.startswith("- Alpha — Users:"):
             ln = f"- Alpha — Users: {rows[('Alpha', 'Users')]}"
-        elif "[c03]" in prompt and ln.startswith("- Beta — Version:"):
+        elif f"report.md line {idx}:" in prompt and ln.startswith("- Beta — Version:"):
             ln = f"- Beta — Version: {rows[('Beta', 'Version')]}"
         out.append(ln)
     rep.write_text("\\n".join(out) + "\\n", encoding="utf-8")
-elif "lines in your report have no supporting source" in prompt:
-    # Arm T0: count-only feedback (no line ids or URLs) -> fixes c02 only on first call, leaves c03 fabricated
+elif "lines in report.md without values" in prompt:
+    # Arm TB: blank-only -> fixes line 4 only (no URLs given)
     lines = text.splitlines()
     out = []
-    for ln in lines:
-        if ln.startswith("- Alpha — Users:") and "____" in ln:
+    for idx, ln in enumerate(lines, start=1):
+        if f"report.md line {idx}:" in prompt and ln.startswith("- Alpha — Users:"):
             ln = "- Alpha — Users: 120"
         out.append(ln)
     rep.write_text("\\n".join(out) + "\\n", encoding="utf-8")
-elif prompt == "Please re-check your report for completeness and correctness and fix anything that is wrong.":
-    # Arm G: generic review -> fixes c02, but breaks c01 (harm!)
+elif "this value may be wrong" in prompt:
+    # Arm TO: oracle flagged lines 4, 5, 6 (including wrong_read line 6!) -> fixes all 3
+    lines = text.splitlines()
+    out = []
+    for idx, ln in enumerate(lines, start=1):
+        if f"report.md line {idx}:" in prompt:
+            if ln.startswith("- Alpha — Users:"):
+                ln = "- Alpha — Users: 120"
+            elif ln.startswith("- Beta — Version:"):
+                ln = "- Beta — Version: v2.1.0"
+            elif ln.startswith("- Beta — Seats:"):
+                ln = "- Beta — Seats: 25"
+        out.append(ln)
+    rep.write_text("\\n".join(out) + "\\n", encoding="utf-8")
+elif "Re-check report.md for completeness and correctness" in prompt:
+    # Arm G: generic review -> breaks c01 (correct->wrong) AND fills blank c02 with wrong value (blank->wrong)!
     lines = text.splitlines()
     out = []
     for ln in lines:
         if ln.startswith("- Alpha — Price:"):
             ln = "- Alpha — Price: $999"
         elif ln.startswith("- Alpha — Users:") and "____" in ln:
-            ln = "- Alpha — Users: 120"
+            ln = "- Alpha — Users: 555"
         out.append(ln)
     rep.write_text("\\n".join(out) + "\\n", encoding="utf-8")
 """,
@@ -426,103 +612,202 @@ elif prompt == "Please re-check your report for completeness and correctness and
     )
     fake_script.chmod(0o755)
 
-    plan = {
-        "schema": "vacant.d2.expT.plan/1",
-        "id": "e2e_flawed_fake",
-        "seed": 123,
-        "arms": ["A", "G", "T", "T0"],
-        "reps": 2,
-        "max_rounds": 2,
-        "agent_timeout_s": 30,
-        "budget_s": 90,
-        "egress": True,
-        "server": {"port": 0},
-        "jobs": 1,
-        "model": {"provider": "fake", "model": "fake"},
-        "materials": [{"prefix": "syn", "dir": str(mat_dir), "manifest_sha256": msha, "sets": ["s01"]}],
-    }
-    plan_path = tmp_path / "plan.json"
-    plan_path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
-    root = tmp_path / "run_out"
+    # Fake Haiku HTTP endpoint parses the requested lines & frozen page texts strictly
+    def haiku_reply(body):
+        user_txt = body["messages"][0]["content"]
+        ans_map = {"c01": "$40", "c02": "120", "c03": "v2.1.0", "c04": "25"}
+        out_lines = []
+        for cid in ("c01", "c02", "c03", "c04"):
+            if f"- [{cid}]" in user_txt:
+                out_lines.append(f"[{cid}]: {ans_map[cid]}")
+        return "\n".join(out_lines), 1000, 100
 
-    rc = RT.ExpTRun(plan_path, root, fake=True, fake_agent_path=fake_script).go()
-    assert rc == 0
+    with _FakeAnthropicServer(haiku_reply) as srv:
+        plan = {
+            "schema": "vacant.d2.expT.plan/2",
+            "id": "e2e_flawed_7arms",
+            "seed": 123,
+            "arms": ["A", "G", "T", "TB", "TO", "TE", "TER"],
+            "reps": 2,
+            "max_rounds": 2,
+            "agent_timeout_s": 30,
+            "budget_s": 90,
+            "egress": True,
+            "server": {"port": 0},
+            "jobs": 1,
+            "escalation": {
+                "model": "claude-haiku-5-5",
+                "api_url": srv.url,
+                "max_tokens": 256,
+                "price_per_mtok_in": 1.0,
+                "price_per_mtok_out": 5.0,
+                "ledger_path": str(ledger),
+            },
+            "model": {"provider": "fake", "model": "fake"},
+            "materials": [{"prefix": "syn", "dir": str(mat_dir), "manifest_sha256": msha, "sets": ["s01"]}],
+        }
+        plan_path = tmp_path / "plan.json"
+        plan_path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+        root = tmp_path / "run_out"
 
-    # Verify Arm T chain and early stop
-    t_dir = root / "cells" / "syn-s01" / "r1" / "T"
-    t_hist = FB.reconstruct(t_dir / "feedback_chain.ndjson", emit=False)
-    assert [h["decision"] for h in t_hist] == ["send_feedback", "stop_no_flags"]
-    assert t_hist[0]["evidence"]["flagged_ids"] == ["c02", "c03"]
-    assert "[c02]" in t_hist[0]["feedback_text"]
-    assert "[c03]" in t_hist[0]["feedback_text"]
-    assert "[c01]" not in t_hist[0]["feedback_text"]
-    assert "[c04]" not in t_hist[0]["feedback_text"]
-    assert "http://syn-s01-r1.d2-sources.example/p1.html" in t_hist[0]["feedback_text"]
-    assert "http://syn-s01-r1.d2-sources.example/p2.html" in t_hist[0]["feedback_text"]
+        rc = RT.ExpTRun(plan_path, root, fake=True, fake_agent_path=fake_script).go()
+        assert rc == 0
 
-    # Verify Arm T0 chain (count-only, no line ids)
-    t0_dir = root / "cells" / "syn-s01" / "r1" / "T0"
-    t0_hist = FB.reconstruct(t0_dir / "feedback_chain.ndjson", emit=False)
-    assert t0_hist[0]["feedback_text"] == (
-        "2 lines in your report have no supporting source in what you fetched; please check and fix them."
-    )
-    assert t0_hist[1]["feedback_text"] == (
-        "1 lines in your report have no supporting source in what you fetched; please check and fix them."
-    )
+        # Haiku called once per TE cell (2 reps) + once per TER cell (2 reps) = 4 calls
+        assert len(srv.requests) == 4
+        ledger_lines = [json.loads(x) for x in ledger.read_text(encoding="utf-8").splitlines() if x.strip()]
+        assert len(ledger_lines) == 4
+        assert all(x["purpose"] == "expT TE/TER" and x["model"] == "claude-haiku-5-5" for x in ledger_lines)
+        assert fake_secret not in ledger.read_text(encoding="utf-8")
 
-    # Verify Arm G chain (exact fixed generic prompt)
-    g_dir = root / "cells" / "syn-s01" / "r1" / "G"
-    g_hist = FB.reconstruct(g_dir / "feedback_chain.ndjson", emit=False)
-    assert [h["decision"] for h in g_hist] == ["send_feedback", "send_feedback", "stop_max_rounds"]
-    assert g_hist[0]["feedback_text"] == FB.GENERIC_REVIEW_PROMPT
-    assert g_hist[1]["feedback_text"] == FB.GENERIC_REVIEW_PROMPT
+    # Verify T ran 1 round & stopped early; G matched T with EXACTLY 1 round (yoked!)
+    t_cell = json.loads((root / "cells" / "syn-s01" / "r1" / "T" / "cell.json").read_text(encoding="utf-8"))
+    g_cell = json.loads((root / "cells" / "syn-s01" / "r1" / "G" / "cell.json").read_text(encoding="utf-8"))
+    assert t_cell["rounds_run"] == 1
+    assert t_cell["stop_reason"] == "stop_no_flags"
+    assert g_cell["rounds_run"] == 1
+    assert g_cell["stop_reason"] == "stop_yoked_rounds_matched"
 
-    # Run expT_metrics.py CLI and inspect full output
+    # Verify TO feedback never leaked any truth value
+    to_fb = (root / "cells" / "syn-s01" / "r1" / "TO" / "round_1" / "feedback.txt").read_text(encoding="utf-8")
+    for ans in ("$40", "120", "v2.1.0", "25"):
+        assert ans not in to_fb
+
+    # Verify API key never leaked into any file in run_out
+    for p in root.rglob("*"):
+        if p.is_file():
+            assert fake_secret not in p.read_text(encoding="utf-8", errors="ignore")
+
+    # Build a synthetic whole-report Haiku reference root (4/4 correct, $0.01/report)
+    hf_root = tmp_path / "haiku_full_ref"
+    for rep in (1, 2):
+        hdir = hf_root / "cells" / "syn-s01" / f"r{rep}" / "A"
+        hdir.mkdir(parents=True)
+        (hdir / "report.md").write_text(
+            "# Verification report\n\n- Alpha — Price: $40\n- Alpha — Users: 120\n- Beta — Version: v2.1.0\n- Beta — Seats: 25\n",
+            encoding="utf-8",
+        )
+        (hdir / "cell.json").write_text(json.dumps({"cost_usd": 0.01, "total_usage": {"input": 5000, "output": 1000}}), encoding="utf-8")
+
     out_json = tmp_path / "metrics.json"
     proc = subprocess.run(
-        [sys.executable, str(REPO / "ops" / "d2" / "expT_metrics.py"), str(root), "--boot", "300", "--json-out", str(out_json)],
+        [
+            sys.executable, str(REPO / "ops" / "d2" / "expT_metrics.py"),
+            str(root), "--haiku-full-root", str(hf_root),
+            "--boot", "300", "--json-out", str(out_json),
+        ],
         capture_output=True, text=True, check=True,
     )
     assert "Experiment T Metrics" in proc.stdout
     assert "T_vs_G [PRIMARY]" in proc.stdout
+    assert "T_vs_TB [PRIMARY]" in proc.stdout
+    assert "T_vs_TO [PRIMARY]" in proc.stdout
+    assert "TE_vs_TER [PRIMARY]" in proc.stdout
+    assert "trading errors for fills" in proc.stdout
 
     m = json.loads(out_json.read_text(encoding="utf-8"))
-    # Across 2 reps (8 total claims per arm):
-    # A: 1/4 correct (0.25), errors: missing=2, fabricated=2, wrong_read=2, stale=0
+    assert m["snapshot_pin"]["ok"] is True
+    assert m["snapshot_pin"]["requests_checked"] >= 4
+
+    # Primary metrics (a), (b), (c)
     assert m["by_arm"]["A"]["correct_line_proportion_per_set"] == pytest.approx(0.25)
-    assert m["by_arm"]["A"]["error_breakdown_before"]["missing"] == 2
-    assert m["by_arm"]["A"]["error_breakdown_before"]["fabricated"] == 2
-    assert m["by_arm"]["A"]["error_breakdown_before"]["wrong_read"] == 2
-    assert m["by_arm"]["A"]["error_breakdown_before"]["stale"] == 0
-    assert m["by_arm"]["A"]["harm"]["broken_after"] == 0
+    assert m["by_arm"]["A"]["filled_precision_per_set"] == pytest.approx(1 / 3, rel=1e-3)
+    assert m["by_arm"]["A"]["harm"]["correct_to_wrong_or_deleted"] == 0
+    assert m["by_arm"]["A"]["harm"]["blank_to_wrong"] == 0
 
-    # T: fixes c02 + c03 -> 3/4 correct (0.75), 0 harm, 100% of c0-flagged fixed, wrong_read remains (blind spot)
     assert m["by_arm"]["T"]["correct_line_proportion_per_set"] == pytest.approx(0.75)
-    assert m["by_arm"]["T"]["error_breakdown_after"]["missing"] == 0
-    assert m["by_arm"]["T"]["error_breakdown_after"]["fabricated"] == 0
-    assert m["by_arm"]["T"]["error_breakdown_after"]["wrong_read"] == 2
-    assert m["by_arm"]["T"]["harm"]["broken_after"] == 0
-    assert m["by_arm"]["T"]["flagged_fixed"]["c0_flagged_fixed_rate"] == pytest.approx(1.0)
-    assert m["by_arm"]["T"]["early_stopped_cells"] == 2
+    assert m["by_arm"]["T"]["filled_precision_per_set"] == pytest.approx(0.75)
+    assert m["by_arm"]["T"]["harm"]["correct_to_wrong_or_deleted"] == 0
+    assert m["by_arm"]["T"]["harm"]["blank_to_wrong"] == 0
 
-    # T0: fixes c02 only -> 2/4 correct (0.50), 50% of c0-flagged fixed, 0 harm
-    assert m["by_arm"]["T0"]["correct_line_proportion_per_set"] == pytest.approx(0.50)
-    assert m["by_arm"]["T0"]["flagged_fixed"]["c0_flagged_fixed_rate"] == pytest.approx(0.50)
-    assert m["by_arm"]["T0"]["harm"]["broken_after"] == 0
+    assert m["by_arm"]["TB"]["correct_line_proportion_per_set"] == pytest.approx(0.50)
+    assert m["by_arm"]["TO"]["correct_line_proportion_per_set"] == pytest.approx(1.00)
 
-    # G: fixes c02 but breaks c01 -> 1/4 correct (0.25), harm = 2/2 (1.0)
-    assert m["by_arm"]["G"]["correct_line_proportion_per_set"] == pytest.approx(0.25)
-    assert m["by_arm"]["G"]["harm"]["broken_after"] == 2
-    assert m["by_arm"]["G"]["harm"]["harm_rate_over_correct_before"] == pytest.approx(1.0)
+    # G caused BOTH harm types: 2 C->W + 2 B->W across 2 reps!
+    assert m["by_arm"]["G"]["correct_line_proportion_per_set"] == pytest.approx(0.0)
+    assert m["by_arm"]["G"]["harm"]["correct_to_wrong_or_deleted"] == 2
+    assert m["by_arm"]["G"]["harm"]["blank_to_wrong"] == 2
+    assert "G" in m["readout"]["harm_warnings"]
+    assert m["readout"]["harm_warnings"]["G"]["label"] == "trading errors for fills"
 
-    # Paired comparisons
-    assert m["comparisons"]["T_vs_G"]["per_set_correct_prop_diff"] == pytest.approx(0.50)
-    assert m["comparisons"]["T_vs_G"]["per_set_correct_prop_diff_ci95"] == [0.5, 0.5]
-    assert m["comparisons"]["T_vs_G"]["harm_not_more_than_control"] is True
-    assert m["comparisons"]["T_vs_A"]["per_set_correct_prop_diff"] == pytest.approx(0.50)
-    assert m["comparisons"]["G_vs_A"]["per_set_correct_prop_diff"] == pytest.approx(0.0)
-    assert m["comparisons"]["T_vs_T0"]["per_set_correct_prop_diff"] == pytest.approx(0.25)
-    assert m["readout"]["verdict"] == "T_useful"
+    # TE fixed c02 & c03 -> 0.75, cost = $0.0015/report vs $0.01 Haiku-full -> 85% cost saving!
+    assert m["by_arm"]["TE"]["correct_line_proportion_per_set"] == pytest.approx(0.75)
+    assert m["by_arm"]["TE"]["haiku"]["cost_usd_mean_per_report"] == pytest.approx(0.0015)
+    assert m["readout"]["TE_vs_haiku_full"]["provided"] is True
+    assert m["readout"]["TE_vs_haiku_full"]["cost_saving_pct"] == pytest.approx(0.85)
+    assert m["readout"]["TE_vs_haiku_full"]["correctness_gap_te_minus_haiku_full"] == pytest.approx(-0.25)
+
+    assert m["readout"]["T_vs_G"]["verdict"] == "T_beats_G"
+    assert m["readout"]["T_vs_TB"]["verdict"] == "record_adds_value"
+    assert m["readout"]["verdict"] == "T_useful_and_record_adds_value"
+
+
+# ---------------------------------------------------------------------------
+# Unit tests: Readout edge cases & secondary offline draft selection
+# ---------------------------------------------------------------------------
+
+
+def test_readout_indistinguishable_and_T_vs_TB_threshold():
+    # A > 85% -> indistinguishable
+    ro1 = EM.evaluate_readout(
+        {"A": {"correct_line_proportion_per_set": 0.90}, "T": {"feedback_sent_rate": 0.80}},
+        {"T_vs_G": {"per_set_correct_prop_diff": 0.12, "per_set_correct_prop_diff_ci95": [0.05, 0.20], "harm_not_more_than_control": True}},
+    )
+    assert ro1["indistinguishable"] is True
+    assert ro1["verdict"] == "indistinguishable"
+
+    # A < 10% -> indistinguishable
+    ro2 = EM.evaluate_readout(
+        {"A": {"correct_line_proportion_per_set": 0.05}, "T": {"feedback_sent_rate": 0.80}},
+        {},
+    )
+    assert ro2["indistinguishable"] is True
+
+    # T sent feedback < 1/4 of cells -> indistinguishable
+    ro3 = EM.evaluate_readout(
+        {"A": {"correct_line_proportion_per_set": 0.50}, "T": {"feedback_sent_rate": 0.20}},
+        {},
+    )
+    assert ro3["indistinguishable"] is True
+
+    # T vs TB < 5pp -> explicitly says record does not add value
+    ro4 = EM.evaluate_readout(
+        {"A": {"correct_line_proportion_per_set": 0.50}, "T": {"feedback_sent_rate": 0.60}},
+        {
+            "T_vs_G": {"per_set_correct_prop_diff": 0.15, "per_set_correct_prop_diff_ci95": [0.05, 0.25], "harm_not_more_than_control": True},
+            "T_vs_TB": {"per_set_correct_prop_diff": 0.03, "per_set_correct_prop_diff_ci95": [-0.01, 0.07]},
+            "TE_vs_TER": {"per_set_correct_prop_diff": 0.08, "per_set_correct_prop_diff_ci95": [0.02, 0.14]},
+        },
+    )
+    assert ro4["T_vs_TB"]["verdict"] == "record_does_not_add_value"
+    assert "does not add value" in ro4["T_vs_TB"]["reason"]
+    assert ro4["TE_vs_TER"]["verdict"] == "TE_does_not_beat_TER"
+    assert ro4["verdict"] == "T_beats_G_but_indistinguishable_from_TB"
+
+
+def test_secondary_offline_draft_selection_evidence_score_and_tiebreak():
+    drafts_by_set = {
+        "s01": [
+            # Higher evidence score (3 - 1 = +2) -> picked (correct_prop=0.75)
+            {"draft_id": "r1", "supported_count": 3, "unsupported_count": 1, "blank_count": 1, "evidence_score": 2, "correct_prop": 0.75},
+            {"draft_id": "r2", "supported_count": 1, "unsupported_count": 3, "blank_count": 2, "evidence_score": -2, "correct_prop": 0.25},
+        ],
+        "s02": [
+            # Exact tie on evidence_score (0 vs 0): tie broken by FEWER BLANKS (0 < 2)!
+            {"draft_id": "r1", "supported_count": 2, "unsupported_count": 2, "blank_count": 2, "evidence_score": 0, "correct_prop": 0.50},
+            {"draft_id": "r2", "supported_count": 2, "unsupported_count": 2, "blank_count": 0, "evidence_score": 0, "correct_prop": 1.00},
+        ],
+    }
+    res = EM.analyze_draft_selection(drafts_by_set, n_boot=300, seed=11)
+    assert res["sets_evaluated"] == 2
+    assert res["record_pick_correct_prop"] == pytest.approx(0.875)
+    assert res["random_pick_correct_prop"] == pytest.approx(0.625)
+    assert res["oracle_best_correct_prop"] == pytest.approx(0.875)
+    assert res["record_vs_random_diff"] == pytest.approx(0.25)
+    assert res["oracle_hit_rate"] == pytest.approx(1.0)
+    by_s = {x["set"]: x for x in res["per_set"]}
+    assert by_s["s01"]["record_pick_draft"] == "r1"
+    assert by_s["s02"]["record_pick_draft"] == "r2"  # fewer blanks won tie!
 
 
 # ---------------------------------------------------------------------------
@@ -530,47 +815,50 @@ elif prompt == "Please re-check your report for completeness and correctness and
 # ---------------------------------------------------------------------------
 
 
-def test_plans_structure_37_sets_and_no_leaks():
+def test_plans_structure_7arms_prereg_ks1_verbatim_and_hygiene():
     q9_path = REPO / "ops" / "d2" / "plans" / "expT_qwen9b.json"
     e4_path = REPO / "ops" / "d2" / "plans" / "expT_colab_e4b.json"
     q9 = json.loads(q9_path.read_text(encoding="utf-8"))
     e4 = json.loads(e4_path.read_text(encoding="utf-8"))
 
+    expected_ks1_out = FB.format_ks1_check_report()
+
     for plan in (q9, e4):
-        assert plan["schema"] == "vacant.d2.expT.plan/1"
-        assert plan["arms"] == ["A", "G", "T", "T0"]
+        assert plan["schema"] == "vacant.d2.expT.plan/2"
+        assert plan["arms"] == ["A", "G", "T", "TB", "TO", "TE", "TER"]
+        assert "T0" not in plan["arms"]
         assert plan["reps"] == 2
         assert plan["max_rounds"] == 2
+        assert "haiku_full_root" in plan
+        assert plan["escalation"]["model"] == "claude-haiku-5-5"
         assert len(plan["materials"]) == 2
-        assert plan["materials"][0]["dir"] == "${D2_PRIVATE}/realrev2_sc"
         assert len(plan["materials"][0]["sets"]) == 17
-        assert plan["materials"][1]["dir"] == "${D2_PRIVATE}/realrev2_football"
         assert len(plan["materials"][1]["sets"]) == 20
-        ro = plan["prereg"]["frozen_readout"]
-        assert "primary T vs G" in ro
-        assert "≥10 percentage points" in ro
-        assert "wrong_read recall" in ro
-        assert "exploratory" in ro
+
+        pr = plan["prereg"]
+        assert pr["ks1_check"]["status"] == "所有提示與回饋模板已通過 KS-1 可執行檢查"
+        assert pr["ks1_check"]["output"] == expected_ks1_out
+        assert pr["ks1_check"]["templates_verbatim"] == FB.STATIC_TEMPLATES
+
+        ro = pr["frozen_readout"]
+        for needle in ("T vs G", "T vs TB", "T vs TO", "TE vs TER", "≥5 percentage points", "≥10 pp", "trading errors for fills", ">85%", "<10%", "1/4"):
+            assert needle in ro
+        assert "vacant-cloud" in pr["recorded_prediction"]
+        assert "TB" in pr["recorded_prediction"]
+        assert "reduce reps from 2 to 1" in pr["budget_fallback"]
+        assert "drop TO" in pr["budget_fallback"]
+        assert "never drop G, TB or TER" in pr["budget_fallback"]
+        assert "RECORD-ONLY evidence score" in pr["secondary_analysis"]
+        assert any("closest passage" in x.lower() for x in pr["later"])
 
     # Check 9B provider split covers all 37 sets disjointly
     p0, p1 = q9["providers"]
     assert p0["provider"] == "lms1003q9"
     assert p1["provider"] == "lms1004q9"
     s0, s1 = set(p0["sets"]), set(p1["sets"])
-    assert len(s0) == 19 and len(s1) == 18
-    assert s0.isdisjoint(s1)
-    assert len(s0 | s1) == 37
+    assert len(s0) == 19 and len(s1) == 18 and s0.isdisjoint(s1) and len(s0 | s1) == 37
 
-    # Check Colab E4B provider matches ctl12_colab_e4b settings & documents requirements
-    ep = e4["providers"][0]
-    assert ep["provider"] == "colab-vllm-nothink"
-    assert ep["model"] == "gemma-4-e4b-it-qat"
-    assert ep["jobs"] == 12
-    assert ep["health_url"] == "http://127.0.0.1:8000/v1/models"
-    assert len(ep["sets"]) == 37
-    assert "colab_requirements" in e4
-
-    # Hygiene check: no absolute home paths or RFC1918/CGNAT internal IPs in any new Experiment T file
+    # Hygiene check: no absolute home paths or RFC1918/CGNAT internal IPs in any Experiment T file
     abs_home_pat = "/" + "home/"
     priv_ip_pats = ("192" + ".168.", "10" + ".0.", "100" + ".64.")
     for p in (
@@ -579,6 +867,7 @@ def test_plans_structure_37_sets_and_no_leaks():
         REPO / "ops" / "d2" / "expT_feedback.py",
         REPO / "ops" / "d2" / "run_expT.py",
         REPO / "ops" / "d2" / "expT_metrics.py",
+        REPO / "tests" / "test_expT.py",
     ):
         txt = p.read_text(encoding="utf-8")
         assert abs_home_pat not in txt, f"absolute home path found in {p}"

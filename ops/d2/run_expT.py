@@ -2,20 +2,30 @@
 """Experiment T runner ("send unsupported claims back for revision", cycle 0 only).
 
 For each (set, rep):
-  1. Run initial cycle-0 draft (`c0`) against revision-0 pages served by `source_server.py`
-     through Vacant's per-worker egress proxy (`vacant trace egress`) and observe-mode hook.
-     Snapshot `ws/` and `vh/`.
-  2. For each arm in shuffled order (`A`, `G`, `T`, `T0`):
-     - Restore `c0` snapshot to the same workspace path (preserving trace chain continuity).
-     - A  : native c0 draft only (0 extra rounds).
-     - G  : up to `max_rounds` (2) extra rounds with fixed generic review prompt
-            (`GENERIC_REVIEW_PROMPT`), no record info.
-     - T  : recompute per-line F1/F3 flags from RECORDS ONLY after each round; send back
-            ONLY flagged lines + problem kind + agent's own egress URLs; stop when 0 flagged.
-     - T0 : same stop rule as T, but count-only feedback (no line ids).
-     - Append every feedback message (exact text) and triggering evidence (flag set,
-       fetched-page list, round) as an Ed25519-signed event to `feedback_chain.ndjson`
-       (`vacant_network.logbook`).
+  1. Freeze revision-0 site snapshot (`c0/site_frozen/`, SHA-256 recorded in
+     `c0/site_snapshot_sha256.json`). Every arm and every round reads ONLY this
+     frozen cycle-0 snapshot via `source_server.py` (never `--dynamic`, never cycle 1+).
+  2. Run ONE shared cycle-0 draft (`c0`) through Vacant's per-worker egress proxy
+     (`vacant trace egress`) and observe-mode hook. Snapshot `ws/` and `vh/`.
+  3. Branch into arms from the identical shared `c0` draft (shuffled per `(set, rep)`
+     with the constraint that `T` always runs before `G` so `G` can match `T`'s rounds):
+       - A   : native shared c0 draft only (0 extra rounds)
+       - T   : up to `max_rounds` (2) extra rounds; record-only F1/F3 flags via
+               `vacant_network.trace.review` (`unsourced`) + KS-1 templates + egress URLs;
+               stop early when 0 flagged
+       - G   : yoked generic review — runs ONLY when T would send feedback on this draft,
+               for the exact same number of rounds T actually ran (`0` if T's c0 flag set is empty)
+       - TB  : blank-only control — send back ONLY lines with no value using template (a),
+               same rounds/stop rule as T, zero record info
+       - TO  : oracle upper bound — send back lines that are actually wrong per audited
+               cycle-0 answer key (including wrong_read) using neutral wording, NEVER the answer
+       - TE  : host-side Claude Haiku escalation (`claude-haiku-5-5`) on RECORD-flagged lines,
+               given ONLY the frozen revision-0 pages this cell actually fetched; replace only those lines
+       - TER : host-side Claude Haiku escalation on the same number of lines chosen uniformly
+               at random (seeded), using the same frozen fetched pages; replace only those lines
+  4. Append every feedback / escalation event to an Ed25519-signed per-cell Logbook chain
+     (`feedback_chain.ndjson`). Append one line per Haiku API call to
+     `$HOME/dev/ops/ctl/api_credit_ledger.jsonl` (no API key).
 
 Usage:
   python3 ops/d2/run_expT.py run --plan ops/d2/plans/expT_qwen9b.json --root <dir>
@@ -43,7 +53,7 @@ import sys
 import threading
 import time
 import urllib.request
-from typing import Any
+from typing import Any, Callable
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
@@ -85,6 +95,27 @@ def sha_file(p: pathlib.Path) -> str:
     return h.hexdigest()
 
 
+def hash_site_dir(site_dir: pathlib.Path) -> dict[str, str]:
+    """Return sorted `{rel_path: sha256}` map for every file in a frozen cycle-0 site directory."""
+    out: dict[str, str] = {}
+    root = site_dir.resolve()
+    for p in sorted(root.rglob("*")):
+        if p.is_file():
+            rel = p.relative_to(root).as_posix()
+            out[rel] = sha_file(p)
+    return out
+
+
+def verify_frozen_site(site_dir: pathlib.Path, expected_shas: dict[str, str]) -> None:
+    """Assert every file in the frozen cycle-0 snapshot still matches its pinned SHA-256."""
+    actual = hash_site_dir(site_dir)
+    if actual != expected_shas:
+        raise InfraError(
+            f"frozen cycle-0 snapshot drifted in {site_dir}: "
+            f"expected_files={len(expected_shas)} actual_files={len(actual)}"
+        )
+
+
 def write_json(p: pathlib.Path, obj: Any) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_name(f".{p.name}.tmp.{os.getpid()}.{threading.get_ident()}")
@@ -92,20 +123,24 @@ def write_json(p: pathlib.Path, obj: Any) -> None:
     os.replace(tmp, p)
 
 
-def load_materials_specs(plan: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+def load_materials_specs(
+    plan: dict[str, Any],
+    *,
+    include_oracle_truth: bool = False,
+) -> tuple[dict[str, dict[str, Any]], dict[str, str], dict[str, dict[str, str]]]:
     """Load one or more material directories from `plan['materials']`.
 
     Returns:
-      sets_meta: qualified_set_id -> {
-          'set_id', 'orig_set', 'mat_dir', 'domain', 'pages', 'index', 'claims'
-      }
-      manifest_shas: label -> sha256
-    Note: Does NOT expose ground-truth answers in `claims`; only template metadata.
+      sets_meta          : qualified_set_id -> template & page metadata (NEVER contains truth)
+      manifest_shas      : label -> sha256
+      oracle_truth_by_set: qualified_set_id -> cycle-0 truth dict (populated ONLY when
+                           `include_oracle_truth=True` for arm TO, never passed to any other arm)
     """
     raw = plan["materials"]
     entries = raw if isinstance(raw, list) else [raw]
     sets_meta: dict[str, dict[str, Any]] = {}
     manifest_shas: dict[str, str] = {}
+    oracle_truth: dict[str, dict[str, str]] = {}
 
     for idx, entry in enumerate(entries):
         prefix = str(entry.get("prefix") or "").strip()
@@ -129,7 +164,7 @@ def load_materials_specs(plan: dict[str, Any]) -> tuple[dict[str, dict[str, Any]
             qid = f"{prefix}-{orig_set}" if prefix else orig_set
             if qid in sets_meta:
                 raise SystemExit(f"duplicate qualified set id {qid!r}")
-            # Strictly strip truth: runner never passes truth to agent or flagger.
+            # Strictly strip truth from sets_meta: only template metadata is exposed generally.
             safe_claims = [
                 {
                     "id": str(c["id"]),
@@ -149,7 +184,9 @@ def load_materials_specs(plan: dict[str, Any]) -> tuple[dict[str, dict[str, Any]
                 "index": s.get("index"),
                 "claims": safe_claims,
             }
-    return sets_meta, manifest_shas
+            if include_oracle_truth:
+                oracle_truth[qid] = {str(k): str(v) for k, v in (s["truth"][0] or {}).items()}
+    return sets_meta, manifest_shas, oracle_truth
 
 
 def _providers_from_plan(plan: dict[str, Any], all_sets: list[str]) -> list[dict[str, Any]]:
@@ -200,6 +237,18 @@ def _merge_usage(usages: list[dict[str, Any] | None]) -> dict[str, Any]:
     return out
 
 
+def _order_arms_for_set_rep(arms: list[str], rng: random.Random) -> list[str]:
+    """Shuffle arms while enforcing `T` before `G` so G can yoke its round count to T."""
+    order = list(arms)
+    rng.shuffle(order)
+    if "T" in order and "G" in order:
+        ti = order.index("T")
+        gi = order.index("G")
+        if gi < ti:
+            order[gi], order[ti] = order[ti], order[gi]
+    return order
+
+
 class ExpTRun:
     def __init__(
         self,
@@ -209,6 +258,7 @@ class ExpTRun:
         fake: bool = False,
         fake_agent_path: pathlib.Path | None = None,
         provider_filter: str | None = None,
+        haiku_caller: Callable[..., dict[str, Any]] | None = None,
     ):
         self.plan_path = plan_path
         self.plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -216,24 +266,42 @@ class ExpTRun:
         self.fake = fake
         self.fake_agent_path = fake_agent_path or (HERE / "fake_agent.py")
         self.provider_filter = provider_filter
-
-        self.sets_meta, self.manifest_shas = load_materials_specs(self.plan)
-        self.all_sets = list(self.sets_meta.keys())
-        self.providers = _providers_from_plan(self.plan, self.all_sets)
-        if self.provider_filter:
-            self.providers = [p for p in self.providers if p["name"] == self.provider_filter or p["provider"] == self.provider_filter]
-            if not self.providers:
-                raise SystemExit(f"no provider matched --provider {self.provider_filter!r}")
+        self.haiku_caller = haiku_caller or FB.call_haiku_messages_api
 
         self.arms = list(self.plan.get("arms") or FB.EXPT_ARMS)
         for a in self.arms:
             if a not in FB.EXPT_ARMS:
-                raise SystemExit(f"unsupported Experiment T arm: {a!r}")
+                raise SystemExit(f"unsupported Experiment T arm: {a!r} (valid: {FB.EXPT_ARMS})")
+
+        need_oracle = "TO" in self.arms
+        self.sets_meta, self.manifest_shas, self._oracle_truth = load_materials_specs(
+            self.plan, include_oracle_truth=need_oracle,
+        )
+        self.all_sets = list(self.sets_meta.keys())
+        self.providers = _providers_from_plan(self.plan, self.all_sets)
+        if self.provider_filter:
+            self.providers = [
+                p for p in self.providers
+                if p["name"] == self.provider_filter or p["provider"] == self.provider_filter
+            ]
+            if not self.providers:
+                raise SystemExit(f"no provider matched --provider {self.provider_filter!r}")
+
+        self.seed = int(self.plan.get("seed") or 20261127)
         self.reps = int(self.plan.get("reps") or 2)
         self.max_rounds = int(self.plan.get("max_rounds") if self.plan.get("max_rounds") is not None else 2)
         self.agent_timeout_s = int(self.plan.get("agent_timeout_s") or 600)
         self.budget_s = float(self.plan.get("budget_s") or (self.agent_timeout_s * (1 + self.max_rounds)))
         self.max_infra_retries = int(self.plan.get("max_infra_retries") or 2)
+
+        esc = self.plan.get("escalation") or {}
+        self.haiku_model = str(esc.get("model") or FB.DEFAULT_HAIKU_MODEL)
+        self.haiku_api_url = str(esc.get("api_url") or FB.DEFAULT_ANTHROPIC_API_URL)
+        self.haiku_max_tokens = int(esc.get("max_tokens") or 1024)
+        self.haiku_timeout_s = float(esc.get("timeout_s") or 120.0)
+        self.haiku_price_in = float(esc.get("price_per_mtok_in") or FB.DEFAULT_HAIKU_PRICE_PER_MTOK_IN)
+        self.haiku_price_out = float(esc.get("price_per_mtok_out") or FB.DEFAULT_HAIKU_PRICE_PER_MTOK_OUT)
+        self.credit_ledger_path = esc.get("ledger_path")  # None -> $HOME/dev/ops/ctl/api_credit_ledger.jsonl
 
         self.routes = root / "routes.json"
         self.routes_meta = root / "routes_meta.json"
@@ -272,12 +340,12 @@ class ExpTRun:
             txt = PROMPTS["write"].format(urls=" ".join(self.urls_for(set_id, rep)))
         if self.plan.get("no_tool_mention"):
             txt = re.sub(r" \(read them with curl -s\)| Read pages with curl -s\.| with curl -s", "", txt)
-        return txt
+        return FB.assert_ks1_clean(txt)
 
-    def set_route(self, host: str, site: pathlib.Path, *, arm: str, rep: int, round_idx: int) -> None:
+    def set_route(self, host: str, frozen_site: pathlib.Path, *, arm: str, rep: int, round_idx: int) -> None:
         with LOCK:
             r = json.loads(self.routes.read_text(encoding="utf-8")) if self.routes.exists() else {}
-            r[host] = str(site)
+            r[host] = str(frozen_site)
             meta = json.loads(self.routes_meta.read_text(encoding="utf-8")) if self.routes_meta.exists() else {}
             meta[host] = {"arm": arm, "cycle": 0, "rep": rep, "round": round_idx}
             tm = self.routes_meta.with_suffix(".tmp")
@@ -313,11 +381,14 @@ class ExpTRun:
     def _agent_env_base(self, live: pathlib.Path, prov: dict[str, Any]) -> dict[str, str]:
         port = self._server_port
         assert port is not None
+        # Security hygiene: NEVER pass ANTHROPIC_API_KEY into the small model's sandbox!
         env = {
             k: v for k, v in os.environ.items()
-            if not k.lower().endswith("_proxy") and not k.startswith("D2_")
+            if not k.lower().endswith("_proxy")
+            and not k.startswith("D2_")
+            and k != "ANTHROPIC_API_KEY"
         }
-        # Always keep localhost/127.0.0.1 direct so local vLLM / LM Studio endpoints never traverse source proxy.
+        # Keep localhost/127.0.0.1 direct so local LM Studio / vLLM endpoints never hit source proxy.
         no_proxy_parts = [x for x in ["localhost", "127.0.0.1", *NO_PROXY.split(",")] if x]
         no_proxy_val = ",".join(dict.fromkeys(no_proxy_parts))
         if prov["agent"] == "claude":
@@ -346,7 +417,6 @@ class ExpTRun:
             "TMPDIR": str(live / "tmp"),
         })
         if self.fake:
-            # Ensure vacant_network is importable when fake mode uses current repo python.
             existing_pp = env.get("PYTHONPATH", "")
             env["PYTHONPATH"] = f"{REPO}:{existing_pp}" if existing_pp else str(REPO)
         return env
@@ -519,7 +589,6 @@ class ExpTRun:
         return res
 
     def _checkpoint_and_ingest(self, live: pathlib.Path, label: str) -> tuple[Any, int]:
-        """Ensure Vacant Recorder exists, ingest egress fetches, checkpoint workspace, return (rec, last_seq)."""
         rec = FB.open_recorder(live / "vh", live / "ws")
         assert rec is not None
         S.ingest_egress(rec)
@@ -527,6 +596,30 @@ class ExpTRun:
         evts = rec.events()
         last_seq = max((int(e.get("seq") or 0) for e in evts), default=0)
         return rec, last_seq
+
+    def _prepare_frozen_site(self, c0_dir: pathlib.Path, set_id: str) -> tuple[pathlib.Path, dict[str, str]]:
+        """Copy cycle_0/site into `c0/site_frozen/` and pin every file's SHA-256."""
+        frozen_dir = c0_dir / "site_frozen"
+        sha_path = c0_dir / "site_snapshot_sha256.json"
+        if frozen_dir.is_dir() and sha_path.is_file():
+            shas = json.loads(sha_path.read_text(encoding="utf-8"))
+            verify_frozen_site(frozen_dir, shas)
+            return frozen_dir, shas
+
+        meta = self.sets_meta[set_id]
+        src_site = meta["mat_dir"] / "sets" / meta["orig_set"] / "cycle_0" / "site"
+        if not src_site.is_dir():
+            raise InfraError(f"cycle_0 site not found: {src_site}")
+        if frozen_dir.exists():
+            rmtree_retry(frozen_dir)
+        shutil.copytree(src_site, frozen_dir)
+        # Mark frozen page files read-only so nothing can accidentally mutate them.
+        for p in frozen_dir.rglob("*"):
+            if p.is_file():
+                os.chmod(p, 0o444)
+        shas = hash_site_dir(frozen_dir)
+        write_json(sha_path, shas)
+        return frozen_dir, shas
 
     def _setup_live_fresh(self, live: pathlib.Path, set_id: str) -> None:
         self.stop_egress(live)
@@ -536,7 +629,6 @@ class ExpTRun:
             (live / d).mkdir(parents=True, exist_ok=True)
         meta = self.sets_meta[set_id]
         shutil.copy(meta["mat_dir"] / "sets" / meta["orig_set"] / "template.md", live / "ws" / "report.md")
-        shutil.copytree(meta["mat_dir"] / "sets" / meta["orig_set"] / "cycle_0" / "site", live / "site")
         if not self.fake:
             acfg = self.plan.get("agentcfg") or {}
             if acfg.get("dir"):
@@ -557,6 +649,15 @@ class ExpTRun:
             if dst.exists():
                 rmtree_retry(dst)
             shutil.copytree(snap / d, dst, symlinks=True)
+
+    def _actor_tokens(self, prov: dict[str, Any], rec: Any = None) -> set[str]:
+        toks = FB.recorder_actor_tokens(rec)
+        for k in ("model", "provider", "agent", "name"):
+            v = prov.get(k)
+            if v:
+                toks.add(str(v))
+        toks.add(self.haiku_model)
+        return toks
 
     # ---------- one (set, rep) ----------
     def do_set_rep(self, set_id: str, rep: int, arms: list[str], prov: dict[str, Any]) -> None:
@@ -581,13 +682,17 @@ class ExpTRun:
         c0_dir = rdir / "c0"
         snap = c0_dir / "snapshot"
 
-        # 1) Cycle-0 draft (shared starting point for A, G, T, T0 within this (set, rep))
+        # 0) Pin revision-0 frozen page snapshot once for all arms & rounds
+        frozen_site, site_shas = self._prepare_frozen_site(c0_dir, set_id)
+
+        # 1) Shared cycle-0 draft (all arms branch from this identical draft)
         if not (c0_dir / "done.json").exists():
             c0_err: Exception | None = None
             for attempt in range(self.max_infra_retries + 1):
                 try:
                     self._setup_live_fresh(live, set_id)
-                    self.set_route(host, live / "site", arm="c0", rep=rep, round_idx=0)
+                    verify_frozen_site(frozen_site, site_shas)
+                    self.set_route(host, frozen_site, arm="c0", rep=rep, round_idx=0)
                     rec0 = FB.open_recorder(live / "vh", live / "ws")
                     assert rec0 is not None
                     rec0.checkpoint("c0_start")
@@ -615,6 +720,7 @@ class ExpTRun:
                             "flagged_count": c0_flags["flagged_count"],
                             "flagged_ids": c0_flags["flagged_ids"],
                             "fetched_urls": c0_flags["fetched_urls"],
+                            "site_snapshot_sha256": site_shas,
                             "provider": prov["provider"],
                             "model": prov["model"],
                             "ts": now_iso(),
@@ -666,51 +772,328 @@ class ExpTRun:
         c0_seq = int(c0_done.get("chain_len") or 0)
         c0_wall = float(c0_done.get("wall_s") or 0.0)
 
-        # Ensure live/site exists if resuming after c0
-        if not (live / "site").exists():
-            (live / "site").parent.mkdir(parents=True, exist_ok=True)
-            shutil.copytree(meta["mat_dir"] / "sets" / meta["orig_set"] / "cycle_0" / "site", live / "site")
-            if not self.fake:
-                (live / "cfg").mkdir(parents=True, exist_ok=True)
-                (live / "tmp").mkdir(parents=True, exist_ok=True)
-                acfg = self.plan.get("agentcfg") or {}
-                if acfg.get("dir"):
-                    cfg_dir = pathlib.Path(os.path.expandvars(os.path.expanduser(str(acfg["dir"]))))
-                    for f in acfg.get("copy") or []:
-                        src = cfg_dir / f
-                        dst = live / "cfg" / f
-                        if src.exists() and not dst.exists():
-                            (shutil.copytree if src.is_dir() else shutil.copy2)(src, dst)
+        # Ensure live/cfg & live/tmp exist when resuming after c0
+        if not self.fake:
+            (live / "cfg").mkdir(parents=True, exist_ok=True)
+            (live / "tmp").mkdir(parents=True, exist_ok=True)
+            acfg = self.plan.get("agentcfg") or {}
+            if acfg.get("dir"):
+                cfg_dir = pathlib.Path(os.path.expandvars(os.path.expanduser(str(acfg["dir"]))))
+                for f in acfg.get("copy") or []:
+                    src = cfg_dir / f
+                    dst = live / "cfg" / f
+                    if src.exists() and not dst.exists():
+                        (shutil.copytree if src.is_dir() else shutil.copy2)(src, dst)
+        else:
+            (live / "tmp").mkdir(parents=True, exist_ok=True)
 
-        # 2) Run each arm from the exact same c0 snapshot
+        # 2) Run each arm from the exact same c0 snapshot (T guaranteed before G)
         for arm in arms:
             if self.stop.is_set():
                 return
             adir = rdir / arm
             if (adir / "done.json").exists():
                 continue
-            self._run_arm_cell(
-                live=live,
-                snap=snap,
-                adir=adir,
-                set_id=set_id,
-                rep=rep,
-                arm=arm,
-                host=host,
-                claims=claims,
-                prov=prov,
-                c0_done=c0_done,
-                c0_text=c0_text,
-                c0_seq=c0_seq,
-                c0_wall=c0_wall,
-                c0_flags=c0_flags_initial,
+            if arm in ("TE", "TER"):
+                self._run_escalation_cell(
+                    snap=snap,
+                    frozen_site=frozen_site,
+                    site_shas=site_shas,
+                    adir=adir,
+                    set_id=set_id,
+                    rep=rep,
+                    arm=arm,
+                    claims=claims,
+                    prov=prov,
+                    c0_done=c0_done,
+                    c0_text=c0_text,
+                    c0_seq=c0_seq,
+                    c0_wall=c0_wall,
+                    c0_flags=c0_flags_initial,
+                )
+            else:
+                self._run_arm_cell(
+                    live=live,
+                    snap=snap,
+                    frozen_site=frozen_site,
+                    site_shas=site_shas,
+                    rdir=rdir,
+                    adir=adir,
+                    set_id=set_id,
+                    rep=rep,
+                    arm=arm,
+                    host=host,
+                    claims=claims,
+                    prov=prov,
+                    c0_done=c0_done,
+                    c0_text=c0_text,
+                    c0_seq=c0_seq,
+                    c0_wall=c0_wall,
+                    c0_flags=c0_flags_initial,
+                )
+
+    def _run_escalation_cell(
+        self,
+        *,
+        snap: pathlib.Path,
+        frozen_site: pathlib.Path,
+        site_shas: dict[str, str],
+        adir: pathlib.Path,
+        set_id: str,
+        rep: int,
+        arm: str,
+        claims: list[dict[str, Any]],
+        prov: dict[str, Any],
+        c0_done: dict[str, Any],
+        c0_text: str,
+        c0_seq: int,
+        c0_wall: float,
+        c0_flags: dict[str, Any],
+    ) -> None:
+        """Host-side Claude Haiku escalation (TE = record-flagged lines; TER = seeded random k lines)."""
+        verify_frozen_site(frozen_site, site_shas)
+        cell_err: Exception | None = None
+        for attempt in range(self.max_infra_retries + 1):
+            if adir.exists():
+                rmtree_retry(adir)
+            adir.mkdir(parents=True, exist_ok=True)
+
+            ident = Identity.generate()
+            book = Logbook()
+            chain_path = adir / "feedback_chain.ndjson"
+            t_arm_start = time.time()
+
+            try:
+                rec_snap = FB.open_recorder(snap / "vh", snap / "ws")
+                actor_toks = self._actor_tokens(prov, rec_snap)
+
+                if arm == "TE":
+                    flagged_ids_set = set(c0_flags["flagged_ids"])
+                    target_claims = [dict(c) for c in claims if str(c["id"]) in flagged_ids_set]
+                    ter_seed = None
+                else:
+                    target_claims, ter_seed = FB.select_TER_claims(
+                        claims,
+                        int(c0_flags["flagged_count"]),
+                        seed=self.seed,
+                        set_id=set_id,
+                        rep=rep,
+                    )
+
+                target_ids = [str(c["id"]) for c in target_claims]
+                fetched_urls = list(c0_flags.get("fetched_urls") or [])
+
+                if not target_ids:
+                    final_text = c0_text
+                    stop_reason = "stop_no_flags"
+                    haiku_meta: dict[str, Any] = {
+                        "called": False,
+                        "model": self.haiku_model,
+                        "escalated_claim_ids": [],
+                        "fetched_urls": fetched_urls,
+                        "input_tokens": 0,
+                        "output_tokens": 0,
+                        "cost_usd": 0.0,
+                        "wall_s": 0.0,
+                        "prompt_sha256": None,
+                        "response_sha256": None,
+                        "withheld": 0,
+                    }
+                    if ter_seed is not None:
+                        haiku_meta["ter_seed"] = ter_seed
+                    FB.escalation_event(
+                        book, ident,
+                        arm=arm,
+                        decision="stop_no_flags",
+                        model=self.haiku_model,
+                        escalated_claim_ids=[],
+                        fetched_urls=fetched_urls,
+                        prompt_sha256=None,
+                        response_sha256=None,
+                        input_tokens=0,
+                        output_tokens=0,
+                        cost_usd=0.0,
+                        withheld=0,
+                        extra={"ter_seed": ter_seed} if ter_seed is not None else None,
+                    )
+                else:
+                    frozen_pages = FB.load_frozen_fetched_pages(fetched_urls, frozen_site, rec=rec_snap)
+                    sys_prompt, user_prompt, withheld = FB.build_haiku_escalation_prompt(
+                        target_claims,
+                        c0_flags["values"],
+                        frozen_pages,
+                        actor_tokens=actor_toks,
+                    )
+                    try:
+                        api_res = self.haiku_caller(
+                            system_prompt=sys_prompt,
+                            user_prompt=user_prompt,
+                            model=self.haiku_model,
+                            api_url=self.haiku_api_url,
+                            max_tokens=self.haiku_max_tokens,
+                            timeout_s=self.haiku_timeout_s,
+                            price_per_mtok_in=self.haiku_price_in,
+                            price_per_mtok_out=self.haiku_price_out,
+                        )
+                    except Exception as exc:  # noqa: BLE001
+                        raise InfraError(f"Haiku escalation call failed: {exc}") from None
+
+                    extracted = FB.parse_haiku_escalation_response(api_res["text"], target_ids)
+                    final_text = FB.apply_haiku_replacements(c0_text, claims, target_ids, extracted)
+                    stop_reason = "escalated_haiku"
+
+                    esc_dir = adir / "escalation"
+                    esc_dir.mkdir(parents=True, exist_ok=True)
+                    (esc_dir / "prompt.txt").write_text(api_res["prompt_text"], encoding="utf-8")
+                    (esc_dir / "response.txt").write_text(api_res["text"] + "\n", encoding="utf-8")
+
+                    haiku_meta = {
+                        "called": True,
+                        "model": api_res["model"],
+                        "stop_reason": api_res.get("stop_reason"),
+                        "escalated_claim_ids": target_ids,
+                        "fetched_urls": fetched_urls,
+                        "fetched_page_shas": {p["url"]: p["sha256"] for p in frozen_pages},
+                        "extracted": extracted,
+                        "input_tokens": int(api_res["input_tokens"]),
+                        "output_tokens": int(api_res["output_tokens"]),
+                        "cache_creation_input_tokens": int(api_res.get("cache_creation_input_tokens") or 0),
+                        "cache_read_input_tokens": int(api_res.get("cache_read_input_tokens") or 0),
+                        "cost_usd": float(api_res["cost_usd"]),
+                        "wall_s": float(api_res.get("wall_s") or 0.0),
+                        "prompt_sha256": api_res["prompt_sha256"],
+                        "response_sha256": api_res["response_sha256"],
+                        "withheld": withheld,
+                    }
+                    if ter_seed is not None:
+                        haiku_meta["ter_seed"] = ter_seed
+                    write_json(esc_dir / "response_meta.json", haiku_meta)
+
+                    FB.escalation_event(
+                        book, ident,
+                        arm=arm,
+                        decision="escalate_haiku",
+                        model=api_res["model"],
+                        escalated_claim_ids=target_ids,
+                        fetched_urls=fetched_urls,
+                        prompt_sha256=api_res["prompt_sha256"],
+                        response_sha256=api_res["response_sha256"],
+                        input_tokens=int(api_res["input_tokens"]),
+                        output_tokens=int(api_res["output_tokens"]),
+                        cost_usd=float(api_res["cost_usd"]),
+                        withheld=withheld,
+                        extra={"ter_seed": ter_seed} if ter_seed is not None else None,
+                    )
+
+                    FB.append_credit_ledger(
+                        self.credit_ledger_path,
+                        purpose="expT TE/TER",
+                        model=api_res["model"],
+                        input_tokens=int(api_res["input_tokens"]),
+                        output_tokens=int(api_res["output_tokens"]),
+                        cost_usd=float(api_res["cost_usd"]),
+                        cell=f"{set_id}/r{rep}/{arm}",
+                    )
+
+                FB.save_feedback_chain(book, ident, chain_path)
+                (adir / "report.md").write_text(final_text, encoding="utf-8")
+
+                # Re-verify frozen snapshot untouched
+                verify_frozen_site(frozen_site, site_shas)
+
+                c0_usage = c0_done.get("usage")
+                extra_wall_s = float(haiku_meta["wall_s"])
+                cell_doc = {
+                    "schema": "vacant.d2.expT.cell/2",
+                    "set": set_id,
+                    "orig_set": self.sets_meta[set_id]["orig_set"],
+                    "domain": self.sets_meta[set_id]["domain"],
+                    "rep": rep,
+                    "arm": arm,
+                    "provider": prov["provider"],
+                    "model": prov["model"],
+                    "infra_void": False,
+                    "rounds_run": 1 if haiku_meta["called"] else 0,
+                    "max_rounds": 1,
+                    "feedback_sent_count": 1 if haiku_meta["called"] else 0,
+                    "withheld_total": int(haiku_meta["withheld"]),
+                    "stop_reason": stop_reason,
+                    "c0_wall_s": c0_wall,
+                    "extra_wall_s": extra_wall_s,
+                    "total_wall_s": round(c0_wall + extra_wall_s, 3),
+                    "arm_wall_s": round(time.time() - t_arm_start, 3),
+                    "c0_usage": c0_usage,
+                    "extra_usage": {
+                        "calls": 1 if haiku_meta["called"] else 0,
+                        "errors": 0,
+                        "input": int(haiku_meta["input_tokens"]),
+                        "output": int(haiku_meta["output_tokens"]),
+                        "cache_creation_input_tokens": int(haiku_meta.get("cache_creation_input_tokens") or 0),
+                        "cache_read_input_tokens": int(haiku_meta.get("cache_read_input_tokens") or 0),
+                    },
+                    "total_usage": _merge_usage([
+                        c0_usage,
+                        {
+                            "calls": 1 if haiku_meta["called"] else 0,
+                            "errors": 0,
+                            "input": int(haiku_meta["input_tokens"]),
+                            "output": int(haiku_meta["output_tokens"]),
+                            "cache_creation_input_tokens": int(haiku_meta.get("cache_creation_input_tokens") or 0),
+                            "cache_read_input_tokens": int(haiku_meta.get("cache_read_input_tokens") or 0),
+                        },
+                    ]),
+                    "c0_flagged_ids": c0_flags["flagged_ids"],
+                    "c0_flagged_count": c0_flags["flagged_count"],
+                    "sent_back_ids": target_ids,
+                    "sent_back_count": len(target_ids),
+                    "haiku_escalation": haiku_meta,
+                    "site_snapshot_sha256": site_shas,
+                    "chain_len": c0_seq,
+                    "feedback_chain_sha256": sha_file(chain_path),
+                    "ts": now_iso(),
+                }
+                write_json(adir / "cell.json", cell_doc)
+                write_json(
+                    adir / "done.json",
+                    {"ts": now_iso(), "stop_reason": stop_reason, "rounds_run": cell_doc["rounds_run"]},
+                )
+                self.log(
+                    f"{set_id} r{rep} {arm} escalated={len(target_ids)} stop={stop_reason} "
+                    f"cost_usd={haiku_meta['cost_usd']:.6f}"
+                )
+                cell_err = None
+                break
+            except InfraError as exc:
+                cell_err = exc
+                self.log(f"{set_id} r{rep} {arm} INFRA attempt={attempt + 1}: {exc}")
+
+        if cell_err is not None:
+            write_json(
+                adir / "cell.json",
+                {
+                    "schema": "vacant.d2.expT.cell/2",
+                    "set": set_id,
+                    "orig_set": self.sets_meta[set_id]["orig_set"],
+                    "domain": self.sets_meta[set_id]["domain"],
+                    "rep": rep,
+                    "arm": arm,
+                    "provider": prov["provider"],
+                    "model": prov["model"],
+                    "infra_void": True,
+                    "error": str(cell_err),
+                    "ts": now_iso(),
+                },
             )
+            write_json(adir / "done.json", {"infra_void": True, "error": str(cell_err), "ts": now_iso()})
 
     def _run_arm_cell(
         self,
         *,
         live: pathlib.Path,
         snap: pathlib.Path,
+        frozen_site: pathlib.Path,
+        site_shas: dict[str, str],
+        rdir: pathlib.Path,
         adir: pathlib.Path,
         set_id: str,
         rep: int,
@@ -724,12 +1107,50 @@ class ExpTRun:
         c0_wall: float,
         c0_flags: dict[str, Any],
     ) -> None:
+        # Determine yoked target rounds for G from T's actual execution on the same draft
+        g_target_rounds: int | None = None
+        yoked_info: dict[str, Any] | None = None
+        if arm == "G":
+            t_cell_path = rdir / "T" / "cell.json"
+            if t_cell_path.is_file():
+                t_cell = json.loads(t_cell_path.read_text(encoding="utf-8"))
+                if t_cell.get("infra_void"):
+                    write_json(
+                        adir / "cell.json",
+                        {
+                            "schema": "vacant.d2.expT.cell/2",
+                            "set": set_id, "orig_set": self.sets_meta[set_id]["orig_set"],
+                            "domain": self.sets_meta[set_id]["domain"], "rep": rep, "arm": arm,
+                            "provider": prov["provider"], "model": prov["model"],
+                            "infra_void": True, "error": "yoked T cell is infra_void", "ts": now_iso(),
+                        },
+                    )
+                    write_json(adir / "done.json", {"infra_void": True, "error": "yoked T cell is infra_void", "ts": now_iso()})
+                    return
+                g_target_rounds = int(t_cell.get("rounds_run") or 0)
+                yoked_info = {
+                    "yoked_to": "T",
+                    "t_c0_flagged_count": int(c0_flags["flagged_count"]),
+                    "t_rounds_run": g_target_rounds,
+                }
+            else:
+                # Standalone G without T: trigger iff T's c0 flag set is non-empty
+                g_target_rounds = self.max_rounds if c0_flags["flagged_count"] > 0 else 0
+                yoked_info = {
+                    "yoked_to": "T_c0_flags",
+                    "t_c0_flagged_count": int(c0_flags["flagged_count"]),
+                    "t_rounds_run": g_target_rounds,
+                }
+
+        truth_c0 = self._oracle_truth.get(set_id) if arm == "TO" else None
+
         cell_err: Exception | None = None
         for attempt in range(self.max_infra_retries + 1):
             if adir.exists():
                 rmtree_retry(adir)
             adir.mkdir(parents=True, exist_ok=True)
             self._restore_c0_snapshot(live, snap)
+            verify_frozen_site(frozen_site, site_shas)
 
             ident = Identity.generate()
             book = Logbook()
@@ -738,38 +1159,132 @@ class ExpTRun:
             rounds_meta: list[dict[str, Any]] = []
             extra_usages: list[dict[str, Any] | None] = []
             extra_wall_s = 0.0
+            withheld_total = 0
+            feedback_sent_count = 0
             stop_reason = "native_c0"
-            cur_flags = c0_flags
+
+            if arm == "TB":
+                arm_c0_flags = FB.compute_blank_flags(c0_text, claims, round_idx=0)
+            elif arm == "TO":
+                assert truth_c0 is not None
+                arm_c0_flags = FB.compute_oracle_flags(c0_text, claims, truth_c0, round_idx=0)
+            else:
+                arm_c0_flags = c0_flags
+
+            cur_flags = arm_c0_flags
+            sent_back_ids = list(arm_c0_flags["flagged_ids"]) if arm in ("T", "TB", "TO") else []
             prev_values = dict(c0_flags["values"])
             prev_seq = c0_seq
             cur_seq = c0_seq
             t_arm_start = time.time()
 
             try:
+                rec_cur = FB.open_recorder(live / "vh", live / "ws")
+                actor_toks = self._actor_tokens(prov, rec_cur)
+
                 if arm == "A":
                     ev = FB.make_trigger_evidence("A", 0, c0_flags)
                     FB.feedback_event(
                         book, ident, arm="A", round_idx=0, decision="native_c0",
-                        feedback_text=None, evidence=ev,
+                        feedback_text=None, evidence=ev, withheld=0,
                     )
                     stop_reason = "native_c0"
+
+                elif arm == "G":
+                    assert g_target_rounds is not None
+                    if g_target_rounds == 0:
+                        ev = FB.make_trigger_evidence("G", 0, None, yoked_info=yoked_info)
+                        FB.feedback_event(
+                            book, ident, arm="G", round_idx=0, decision="stop_yoked_no_flags",
+                            feedback_text=None, evidence=ev, withheld=0,
+                        )
+                        stop_reason = "stop_yoked_no_flags"
+                    else:
+                        for r_idx in range(1, g_target_rounds + 1):
+                            if self.stop.is_set():
+                                return
+                            fb_text, w = FB.render_G_feedback(actor_tokens=actor_toks)
+                            withheld_total += w
+                            ev = FB.make_trigger_evidence("G", r_idx - 1, None, yoked_info=yoked_info)
+
+                            rem_budget = self.budget_s - (c0_wall + extra_wall_s)
+                            if rem_budget <= 1.0:
+                                stop_reason = "stop_budget"
+                                FB.feedback_event(
+                                    book, ident, arm="G", round_idx=r_idx, decision="stop_budget",
+                                    feedback_text=None, evidence=ev, withheld=0,
+                                    extra={"remaining_budget_s": round(rem_budget, 3)},
+                                )
+                                break
+
+                            FB.feedback_event(
+                                book, ident, arm="G", round_idx=r_idx, decision="send_feedback",
+                                feedback_text=fb_text, evidence=ev, withheld=w,
+                            )
+                            FB.save_feedback_chain(book, ident, chain_path)
+                            feedback_sent_count += 1
+
+                            r_out = adir / f"round_{r_idx}"
+                            r_out.mkdir(parents=True, exist_ok=True)
+                            (r_out / "feedback.txt").write_text(fb_text, encoding="utf-8")
+                            verify_frozen_site(frozen_site, site_shas)
+                            self.set_route(host, frozen_site, arm="G", rep=rep, round_idx=r_idx)
+                            run_timeout = min(float(self.agent_timeout_s), rem_budget)
+                            rr = self.run_agent(live, prov, fb_text, r_out / "run", timeout_s=run_timeout)
+                            extra_wall_s = round(extra_wall_s + float(rr.get("wall_s") or 0.0), 3)
+                            extra_usages.append(rr.get("usage"))
+
+                            rec, new_seq = self._checkpoint_and_ingest(live, f"expT_G_r{r_idx}")
+                            actor_toks |= FB.recorder_actor_tokens(rec)
+                            post_text = (live / "ws" / "report.md").read_text(encoding="utf-8", errors="replace")
+                            (r_out / "report.md").write_text(post_text, encoding="utf-8")
+                            post_flags = FB.compute_flags_from_recorder(
+                                rec, post_text, claims,
+                                round_idx=r_idx, prev_values=prev_values,
+                                prev_bound_seq=prev_seq, cur_bound_seq=new_seq,
+                                ingest_egress=False,
+                            )
+                            write_json(r_out / "flags.json", post_flags)
+                            r_info = {
+                                "round": r_idx,
+                                "yoked_target_rounds": g_target_rounds,
+                                "withheld": w,
+                                "post_flagged_ids": post_flags["flagged_ids"],
+                                "post_flagged_count": post_flags["flagged_count"],
+                                "post_fetched_urls": post_flags["fetched_urls"],
+                                "round_fetch_count": post_flags["round_fetch_count"],
+                                "agent": rr,
+                                "chain_len": new_seq,
+                            }
+                            write_json(r_out / "round.json", r_info)
+                            rounds_meta.append(r_info)
+                            prev_values = dict(post_flags["values"])
+                            prev_seq = new_seq
+                            cur_seq = new_seq
+                            cur_flags = post_flags
+                        else:
+                            stop_reason = "stop_yoked_rounds_matched"
+                            final_ev = FB.make_trigger_evidence("G", g_target_rounds, None, yoked_info=yoked_info)
+                            FB.feedback_event(
+                                book, ident, arm="G", round_idx=g_target_rounds,
+                                decision=stop_reason, feedback_text=None, evidence=final_ev, withheld=0,
+                            )
+
                 else:
+                    # T, TB, TO: flag-triggered revision loop up to max_rounds
                     for r_idx in range(1, self.max_rounds + 1):
                         if self.stop.is_set():
                             return
-                        # Decide whether to send feedback and run round r_idx
-                        if arm == "G":
-                            fb_text = FB.build_G_feedback()
-                            ev = FB.make_trigger_evidence("G", r_idx - 1, None)
-                        else:
-                            fb_text = FB.build_arm_feedback(arm, cur_flags)
-                            ev = FB.make_trigger_evidence(arm, r_idx - 1, cur_flags)
+                        fb_text, w = FB.render_arm_feedback(
+                            arm, cur_flags, report_path="report.md", actor_tokens=actor_toks,
+                        )
+                        ev = FB.make_trigger_evidence(arm, r_idx - 1, cur_flags)
 
                         if fb_text is None:
                             stop_reason = "stop_no_flags"
                             FB.feedback_event(
                                 book, ident, arm=arm, round_idx=r_idx, decision="stop_no_flags",
-                                feedback_text=None, evidence=ev,
+                                feedback_text=None, evidence=ev, withheld=0,
                             )
                             break
 
@@ -778,46 +1293,61 @@ class ExpTRun:
                             stop_reason = "stop_budget"
                             FB.feedback_event(
                                 book, ident, arm=arm, round_idx=r_idx, decision="stop_budget",
-                                feedback_text=None, evidence=ev,
+                                feedback_text=None, evidence=ev, withheld=0,
                                 extra={"remaining_budget_s": round(rem_budget, 3)},
                             )
                             break
 
+                        withheld_total += w
                         FB.feedback_event(
                             book, ident, arm=arm, round_idx=r_idx, decision="send_feedback",
-                            feedback_text=fb_text, evidence=ev,
+                            feedback_text=fb_text, evidence=ev, withheld=w,
                         )
                         FB.save_feedback_chain(book, ident, chain_path)
+                        feedback_sent_count += 1
 
                         r_out = adir / f"round_{r_idx}"
                         r_out.mkdir(parents=True, exist_ok=True)
                         (r_out / "feedback.txt").write_text(fb_text, encoding="utf-8")
-                        self.set_route(host, live / "site", arm=arm, rep=rep, round_idx=r_idx)
+                        verify_frozen_site(frozen_site, site_shas)
+                        self.set_route(host, frozen_site, arm=arm, rep=rep, round_idx=r_idx)
                         run_timeout = min(float(self.agent_timeout_s), rem_budget)
                         rr = self.run_agent(live, prov, fb_text, r_out / "run", timeout_s=run_timeout)
                         extra_wall_s = round(extra_wall_s + float(rr.get("wall_s") or 0.0), 3)
                         extra_usages.append(rr.get("usage"))
 
                         rec, new_seq = self._checkpoint_and_ingest(live, f"expT_{arm}_r{r_idx}")
+                        actor_toks |= FB.recorder_actor_tokens(rec)
                         post_text = (live / "ws" / "report.md").read_text(encoding="utf-8", errors="replace")
                         (r_out / "report.md").write_text(post_text, encoding="utf-8")
-                        post_flags = FB.compute_flags_from_recorder(
-                            rec, post_text, claims,
-                            round_idx=r_idx,
-                            prev_values=prev_values,
-                            prev_bound_seq=prev_seq,
-                            cur_bound_seq=new_seq,
-                            ingest_egress=False,
-                        )
+
+                        if arm == "T":
+                            post_flags = FB.compute_flags_from_recorder(
+                                rec, post_text, claims,
+                                round_idx=r_idx,
+                                prev_values=prev_values,
+                                prev_bound_seq=prev_seq,
+                                cur_bound_seq=new_seq,
+                                ingest_egress=False,
+                            )
+                        elif arm == "TB":
+                            post_flags = FB.compute_blank_flags(post_text, claims, round_idx=r_idx)
+                        elif arm == "TO":
+                            assert truth_c0 is not None
+                            post_flags = FB.compute_oracle_flags(post_text, claims, truth_c0, round_idx=r_idx)
+                        else:
+                            raise ValueError(f"unexpected arm {arm!r}")
+
                         write_json(r_out / "flags.json", post_flags)
                         r_info = {
                             "round": r_idx,
                             "trigger_flagged_ids": ev.get("flagged_ids", []),
                             "trigger_flagged_count": ev.get("flagged_count", 0),
+                            "withheld": w,
                             "post_flagged_ids": post_flags["flagged_ids"],
                             "post_flagged_count": post_flags["flagged_count"],
-                            "post_fetched_urls": post_flags["fetched_urls"],
-                            "round_fetch_count": post_flags["round_fetch_count"],
+                            "post_fetched_urls": post_flags.get("fetched_urls", []),
+                            "round_fetch_count": post_flags.get("round_fetch_count"),
                             "agent": rr,
                             "chain_len": new_seq,
                         }
@@ -829,19 +1359,15 @@ class ExpTRun:
                         cur_seq = new_seq
                         cur_flags = post_flags
                     else:
-                        # Completed max_rounds without early stop
-                        if arm == "G":
-                            final_ev = FB.make_trigger_evidence("G", self.max_rounds, None)
-                            stop_reason = "stop_max_rounds"
-                        else:
-                            final_ev = FB.make_trigger_evidence(arm, self.max_rounds, cur_flags)
-                            stop_reason = "stop_no_flags" if cur_flags["flagged_count"] == 0 else "stop_max_rounds"
+                        final_ev = FB.make_trigger_evidence(arm, self.max_rounds, cur_flags)
+                        stop_reason = "stop_no_flags" if cur_flags["flagged_count"] == 0 else "stop_max_rounds"
                         FB.feedback_event(
                             book, ident, arm=arm, round_idx=self.max_rounds,
-                            decision=stop_reason, feedback_text=None, evidence=final_ev,
+                            decision=stop_reason, feedback_text=None, evidence=final_ev, withheld=0,
                         )
 
                 FB.save_feedback_chain(book, ident, chain_path)
+                verify_frozen_site(frozen_site, site_shas)
                 final_text = (live / "ws" / "report.md").read_text(encoding="utf-8", errors="replace")
                 (adir / "report.md").write_text(final_text, encoding="utf-8")
                 self.stop_egress(live)
@@ -856,7 +1382,7 @@ class ExpTRun:
                     "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0,
                 }
                 cell_doc = {
-                    "schema": "vacant.d2.expT.cell/1",
+                    "schema": "vacant.d2.expT.cell/2",
                     "set": set_id,
                     "orig_set": self.sets_meta[set_id]["orig_set"],
                     "domain": self.sets_meta[set_id]["domain"],
@@ -867,6 +1393,8 @@ class ExpTRun:
                     "infra_void": False,
                     "rounds_run": len(rounds_meta),
                     "max_rounds": self.max_rounds,
+                    "feedback_sent_count": feedback_sent_count,
+                    "withheld_total": withheld_total,
                     "stop_reason": stop_reason,
                     "c0_wall_s": c0_wall,
                     "extra_wall_s": extra_wall_s,
@@ -877,19 +1405,25 @@ class ExpTRun:
                     "total_usage": total_usage,
                     "c0_flagged_ids": c0_flags["flagged_ids"],
                     "c0_flagged_count": c0_flags["flagged_count"],
+                    "sent_back_ids": sent_back_ids,
+                    "sent_back_count": len(sent_back_ids),
                     "final_flagged_ids": cur_flags["flagged_ids"],
                     "final_flagged_count": cur_flags["flagged_count"],
+                    "yoked": yoked_info,
                     "rounds": rounds_meta,
+                    "site_snapshot_sha256": site_shas,
                     "chain_len": cur_seq,
                     "feedback_chain_sha256": sha_file(chain_path),
                     "ts": now_iso(),
                 }
                 write_json(adir / "cell.json", cell_doc)
-                write_json(adir / "done.json", {"ts": now_iso(), "stop_reason": stop_reason, "rounds_run": len(rounds_meta)})
+                write_json(
+                    adir / "done.json",
+                    {"ts": now_iso(), "stop_reason": stop_reason, "rounds_run": len(rounds_meta)},
+                )
                 self.log(
                     f"{set_id} r{rep} {arm} rounds={len(rounds_meta)} stop={stop_reason} "
-                    f"flagged={c0_flags['flagged_count']}->{cur_flags['flagged_count']} "
-                    f"wall={cell_doc['total_wall_s']}s"
+                    f"sent={len(sent_back_ids)} withheld={withheld_total} wall={cell_doc['total_wall_s']}s"
                 )
                 cell_err = None
                 break
@@ -901,7 +1435,7 @@ class ExpTRun:
             write_json(
                 adir / "cell.json",
                 {
-                    "schema": "vacant.d2.expT.cell/1",
+                    "schema": "vacant.d2.expT.cell/2",
                     "set": set_id,
                     "orig_set": self.sets_meta[set_id]["orig_set"],
                     "domain": self.sets_meta[set_id]["domain"],
@@ -927,6 +1461,7 @@ class ExpTRun:
         port = cfg_port if cfg_port > 0 else self._pick_free_port()
         self._server_port = port
         err_fh = open(self.root / "server.err", "a", encoding="utf-8")
+        # Never pass --dynamic: revision-0 pages are strictly pinned static files.
         srv = subprocess.Popen(
             [
                 sys.executable, str(HERE / "source_server.py"),
@@ -1001,7 +1536,7 @@ class ExpTRun:
             write_json(
                 runj,
                 {
-                    "schema": "vacant.d2.expT.run/1",
+                    "schema": "vacant.d2.expT.run/2",
                     "plan": str(self.plan_path),
                     "plan_sha256": plan_sha,
                     "plan_body": self.plan,
@@ -1014,13 +1549,11 @@ class ExpTRun:
             )
 
         srv = self.start_server()
-        rng = random.Random(int(self.plan.get("seed") or 20261127))
+        rng = random.Random(self.seed)
         arm_orders: dict[str, list[str]] = {}
         for sid in self.all_sets:
             for rep in range(1, self.reps + 1):
-                o = list(self.arms)
-                rng.shuffle(o)
-                arm_orders[f"{sid}/r{rep}"] = o
+                arm_orders[f"{sid}/r{rep}"] = _order_arms_for_set_rep(self.arms, rng)
         write_json(self.root / "arm_orders.json", arm_orders)
 
         errors: list[tuple[str, int, str]] = []
@@ -1073,7 +1606,7 @@ class ExpTRun:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Experiment T runner (cycle 0 revision loop).")
+    ap = argparse.ArgumentParser(description="Experiment T runner (cycle 0 revision & escalation loop).")
     sp = ap.add_subparsers(dest="cmd", required=True)
     r = sp.add_parser("run", help="Execute an Experiment T plan")
     r.add_argument("--plan", required=True)
@@ -1084,7 +1617,7 @@ def main() -> int:
     r.add_argument(
         "--allow-uncommitted-plan",
         action="store_true",
-        help="Skip git cleanliness check (for Colab git-archive VMs or smoke tests)",
+        help="Skip git cleanliness check (for smoke tests)",
     )
     a = ap.parse_args()
     plan = pathlib.Path(a.plan).resolve()
