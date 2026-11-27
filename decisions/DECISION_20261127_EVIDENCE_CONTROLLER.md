@@ -121,3 +121,10 @@
   - 決策鏈驗證與重建正常，例如 `ex_matrix/r1/C`：「seq=1 attempt=1 rule=1 action=stop_success passed=4/4」。
   - 沒有發現阻斷性缺陷。
 - **凍結**：程式、題庫、計畫 `ops/redo/plans/ctl12_pi_qwen9b.json`（prereg 在檔裡）在第一通模型呼叫之前推上遠端。兩台以 `--only-providers` 各跑自己的對。
+
+## 正式批次紀錄
+- **03:23:28Z**：1003 的單元 `ctl12-1003` 在 4 GB 記憶體上限內被 OOM killer 殺掉（`Failed with result 'oom-kill'`）。
+  - runner 記錄「正在跑的那一格會被丟掉（下次續跑重做），已完成的格保留」。
+  - 處置：照 redo.py 的續跑規則，同計畫、同 root、同 `--only-providers lms1003q9` 續跑。被中斷的格從頭重做（不是重跑到過；已完成的格不動）。
+  - 可能原因：某個解在測試時失控吃記憶體（camicia 的解在校準時就會卡死）。cgroup 上限擋住了，沒有影響 1004 與本機其他行程。
+  - 若再發生，照實記錄次數與當時在跑的格。
