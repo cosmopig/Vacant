@@ -35,7 +35,7 @@
    "name": "claude_haiku",
    "provider": "anthropic",
    "model": "haiku",
-   "jobs": 8
+   "jobs": 32
   }
  ],
  "acceptance": {
