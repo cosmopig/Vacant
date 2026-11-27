@@ -16,18 +16,15 @@ RULES = {"sk": re.compile(r"sk-[A-Za-z0-9_\-]{20,}"), "bearer": re.compile(r"Bea
          "b64": re.compile(r"(?<![A-Za-z0-9+/=])[A-Za-z0-9+/]{60,}={0,2}(?![A-Za-z0-9+/=])")}
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("root")
-    ap.add_argument("--out")
-    a = ap.parse_args()
+def scan(roots) -> dict:
     vals = []
     try:
         vals = re.findall(r"[A-Za-z0-9_\-\.=+/]{20,}", CRED.read_text())
     except OSError:
         pass
     hits, n = [], 0
-    for f in pathlib.Path(a.root).rglob("*"):
+    files = [f for r in roots for f in pathlib.Path(r).rglob("*")]
+    for f in files:
         if not f.is_file() or f.stat().st_size > 8_000_000:
             continue
         try:
@@ -47,7 +44,15 @@ def main() -> int:
                     continue
                 hits.append({"file": str(f), "rule": name, "head": g[:4]})
                 break
-    res = {"files_scanned": n, "hits": len(hits), "detail": hits[:200]}
+    return {"files_scanned": n, "hits": len(hits), "detail": hits[:200]}
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("root")
+    ap.add_argument("--out")
+    a = ap.parse_args()
+    res = scan([a.root])
     if a.out:
         pathlib.Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1))
     print(json.dumps({k: res[k] for k in ("files_scanned", "hits")}))

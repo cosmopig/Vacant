@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""devin_sandbox_agent — 控制器實驗（DECISION_20261127 修正 5）：Devin CLI（免費模型）worker 的隔離包裝。
+"""devin_sandbox_agent — 控制器實驗（DECISION_20261127 雲端修正 C5）：Devin CLI（免費模型）worker 的隔離包裝。
 
 這支在架構裡承重什麼
 ====================
@@ -134,10 +134,17 @@ def main(argv: list[str]) -> int:
     proc = subprocess.Popen(cmd, cwd=str(ws), env=clean_env(),
                             stdin=subprocess.DEVNULL)
     try:
-        return proc.wait()
+        rc = proc.wait()
     except KeyboardInterrupt:
         proc.kill()
-        return 130
+        rc = 130
+    try:        # 憑證衛生（雲端修正 C6）：每次嘗試結束後掃工作區與 logs；被逾時殺掉時 wrapper 也死，那種格靠整批結束後的整根掃描補
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+        import credscan
+        (logs / "credscan.json").write_text(json.dumps(credscan.scan([ws, logs]), ensure_ascii=False))
+    except Exception as e:  # noqa: BLE001
+        (logs / "credscan.json").write_text(json.dumps({"error": str(e)}))
+    return rc
 
 
 if __name__ == "__main__":
