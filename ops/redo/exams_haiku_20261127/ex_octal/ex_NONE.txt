@@ -1,1 +1,0 @@
-extractor found no verbatim example pair in goal.md; no hand-written fallback
