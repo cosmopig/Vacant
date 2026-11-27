@@ -28,3 +28,22 @@
 - 39 份生成器各一次呼叫成功（39/39 第一次就過 edge／max 各一筆的執行檢查；總費用見 `SPEND.jsonl`，約 $0.07）。生成器寫者與受測 worker 同為 Haiku 家族（`claude-haiku-5-5`）；已知偏誤，生成器只決定輸入不決定答案。
 - 建置結果：37 題收錄、2 題排除（cc_1567F、cc_1599D：保留的大測資只有 3 筆 <4）；37/37 參考解兩半皆過、空殼兩半皆不過。manifest sha256 `8490ffbf…99c6`（`ops/redo/results/ctl_haikuband_20261127/cchardL/bank_cchardL_MANIFEST.json`）。
 - 校準計畫 `ops/redo/plans/ctlcal_haiku_cchardL_A.json`（37 題、A×1、jobs 4）。沙箱沒有改動（cchard 時已含 g++／python 正控制 25/25），這一輪**沒有**重跑負控制。
+
+### 候選 1 校準結果
+cchard-L Haiku A×1：hidden 33/37＝**89.2%**（序列評分），帶外 ⇒ 不跑正式批次，轉候選 2。細節 `ops/redo/results/ctl_haikuband_20261127/cchardL/README.md`。
+
+## 候選 2：Aider polyglot（非 Python、非 JS）— 建置與選題規則（凍結，在任何 polyglot 的 Haiku 資料之前）
+
+來源：`Aider-AI/polyglot-benchmark`（commit `7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f`）；內容為 Exercism 練習，每題目錄各有 Exercism 的 MIT LICENSE（README 註明依 Exercism 開源授權使用）。
+本 repo 已用過：Python（`polyglot_py`、`exercism_py_*`）與 JavaScript（`exercism_js*`）⇒ 一律略過。語言只考慮 C++、Go、Rust、Java。
+
+1. **工具鏈正控制**：只收在 worker 沙箱（`claude_sandbox_agent.py` 的 deny 規則）裡能用的語言：由 Haiku 在沙箱裡實際執行該語言的 hello-world／測試命令，看得到預期輸出才算。
+   沙箱原本 PATH 只有 `/usr/local/bin:/usr/bin:/bin`，Rust 工具鏈在被 deny 的 `/root`。處理方式（部署事項，不改共用檔）：把 Rust 穩定版工具鏈複製到 `/opt/polytools/rust`、
+   另寫 `ops/redo/claude_sandbox_agent_poly.py`（只覆寫環境的 PATH／GOCACHE／CARGO 相關變數，其餘 import 原檔）。Java 需要 Maven Central 的 JUnit／AssertJ，沙箱無網路 ⇒ 正控制若失敗則 Java 整個語言排除（記錄實測）。
+2. **資格**（機械判定）：該語言的測試檔恰好一個；原生測試函式數 ≥10（C++：`TEST_CASE`；Go：頂層 `func TestXxx(t *testing.T)`；Rust：`#[test]`；Java：`@Test`）；Rust 的 Cargo.toml 不得有 `[dependencies]`；
+   參考解（`.meta/example.*`）在建置環境過全部測試；空殼（原始 stub）在可見半與 hidden 半**都不過**（通過＝該半全過，同 cchard）。Go 因表驅動多為單一測試函式，這條自然篩掉大部分。
+3. **切分**：測試函式依出現順序編號，以種子 `20261127:<語言>:<題名>` 洗牌，前 `n//2` 個＝可見、其餘＝hidden；非測試函式的輔助程式碼兩半都保留；Rust 的 `#[ignore]` 一律移除。
+   可見半＝工作區裡的測試檔（hidden 的測試函式被刪掉）；hidden 半＝只含 hidden 測試函式的同一份檔，評分時覆蓋進工作區副本。
+   驗收介面：工作區有 `solution_test.py`（unittest；執行該語言原生測試一次、每個測試函式一個 test method），契約說明可用原生命令或這支 Python 包裝器；hidden 評分用同一支包裝器的 hidden 版（經 cchard 的 `scorer.py`）。
+4. **候選規則**：資格題依「語言、題名」排序；總數 ≤40 全收；否則每個語言上限＝使總數 ≤40 的最小均分上限（不足上限的語言全收，餘額分給其他語言），超過上限的語言從排序後清單取等距位置（floor(i·n/cap)）。
+5. 校準同候選 1：Haiku A×1、jobs 4、hidden 序列評分、帶內判準 25–70%。
