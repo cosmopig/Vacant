@@ -13,9 +13,13 @@
  },
  "tools_sha256": {
   "build_manifest.py": "24216b09a03980628ace34521d99fd8384a3eb9ce4d9c9d9fd2f61b333ca2713",
+  "ex_extract.py": "19db10286d9c9eb45eaf236a6e5cc66776ea5bac32febab8c916f7875166cc63",
   "gen_exams.py": "d911a24ee9e2de15a3624eb5fe99e4cb1f597b3e22c16a0fa15199389ee9cda9",
+  "gen_wrong.py": "07d146a755a3ce84e49bf6e556bc09fff5aaf844478f38cfab6d559fe681cbc8",
   "haiku_call.py": "026f283c671bd43d47b747623f1115a0a6b797db5dc2624aad412a69fc81c384",
   "make_prompts.py": "799f21dbe89fa3c6080510c78d2da9c4a82d367c0a01345c484a1dddc8dcb69b",
+  "measure.py": "43ea5732e9f3d4f878e71e57af8168e49435795ab0aac31049f13749ac506215",
+  "report.py": "3e1be809d837df502fdff5ffba43fa8679f95659ca35902476b6dec35cba469b",
   "runner.py": "5357af913a7889b62f17b06bbeebc20b6f71cf5938f99826316a790ce849394c",
   "xmv_post.py": "31ed7f20f2ece94f61f2d7c62e6aa484f14cf8a7ab86c4889a1d0e0011421696"
  },
@@ -50,6 +54,39 @@
      "elapsed_s": 21.3,
      "cost_usd": 0.00286723,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_kindergarten_garden/xmv_test.py",
+     "sha256": "7ffcb4488aefeeec02c72cab49e4d30914a59779a0cfa7cddcd672a8cee01096",
+     "status": "ok",
+     "raw_file": "ex_kindergarten_garden/xmv_raw.py",
+     "raw_sha256": "7ffcb4488aefeeec02c72cab49e4d30914a59779a0cfa7cddcd672a8cee01096",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "e310b942ecec003fc14a67364e5da69b6ee4c556733fb15b69bc4bf5a8e82625",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:09:56+0000",
+     "elapsed_s": 37.74,
+     "cost_usd": 0.004903629999999999,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_kindergarten_garden/pb_test.py",
+     "sha256": "d30ee734df7f327384e4156c2969f283535978b3b0744a11df85e0ad4d393443",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "7f1e496b3ef5032a4a4d6de9433e9c6c32b82aa9432938a06f86041894eae02f",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:09:57+0000",
+     "elapsed_s": 38.94,
+     "cost_usd": 0.00476173,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -80,6 +117,39 @@
      "elapsed_s": 44.6,
      "cost_usd": 0.005497429999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_ocr_numbers/xmv_test.py",
+     "sha256": "ccb90ce2e3ec8223cb562d7b3f5e7bd6d062c39fa025b4b7fad32d7e526ea7ec",
+     "status": "ok",
+     "raw_file": "ex_ocr_numbers/xmv_raw.py",
+     "raw_sha256": "ccb90ce2e3ec8223cb562d7b3f5e7bd6d062c39fa025b4b7fad32d7e526ea7ec",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "107a7ca5b2fd94e9269231511308f169df654c284b86eb795ba5eb0f679c88e3",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:00+0000",
+     "elapsed_s": 42.2,
+     "cost_usd": 0.004941629999999999,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_ocr_numbers/pb_test.py",
+     "sha256": "eff99b16a375d09b6314535dc735fc97eacb783313ca89e843becadf3a780b8f",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "1ff2373063a97f707f8889caf849b061d756d28ace71c97181871ac88ae11532",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:09:51+0000",
+     "elapsed_s": 33.11,
+     "cost_usd": 0.0037295300000000004,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -110,6 +180,39 @@
      "elapsed_s": 17.52,
      "cost_usd": 0.0022608299999999997,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_circular_buffer/xmv_test.py",
+     "sha256": "e97f61baaafc6149e6be4da6527188130800b25bef204c7fb4a004cbc0e6188d",
+     "status": "ok",
+     "raw_file": "ex_circular_buffer/xmv_raw.py",
+     "raw_sha256": "e97f61baaafc6149e6be4da6527188130800b25bef204c7fb4a004cbc0e6188d",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "cfc352d2e3471cc8eca109a5ebe851750997fd14f0205c985dc225e1557f4a57",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:32+0000",
+     "elapsed_s": 35.83,
+     "cost_usd": 0.00490893,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_circular_buffer/pb_test.py",
+     "sha256": "205946829740e4a4fb73f6036087922d2e523abae4516b33279fb1724d9b27d5",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "861516c7fbccdc0666a1ea8c9b47aa2c0accae4bb25abc5594d30a1bfa31bf9b",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:38+0000",
+     "elapsed_s": 47.28,
+     "cost_usd": 0.0064616299999999995,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -140,6 +243,39 @@
      "elapsed_s": 12.05,
      "cost_usd": 0.00145043,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_high_scores/xmv_test.py",
+     "sha256": "7cb4eacf2acbaaaa1b791e25a69e7955bc9c2af82953904148967b51a9ac3e55",
+     "status": "ok",
+     "raw_file": "ex_high_scores/xmv_raw.py",
+     "raw_sha256": "7cb4eacf2acbaaaa1b791e25a69e7955bc9c2af82953904148967b51a9ac3e55",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "4545592c608b37d47a39a7bc57ae1597a931689a2f4c97ef8d9e4fbcee20dad0",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:17+0000",
+     "elapsed_s": 16.85,
+     "cost_usd": 0.00197053,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_high_scores/pb_test.py",
+     "sha256": "d59e5ac47384514e830bcb6369ea2d94edca88ed39b828af7ff09247efd2319d",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "2d237c88008c19a0477fb5381fccf90e6172997e22e26dc6214a49eb33ed9e81",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:25+0000",
+     "elapsed_s": 28.0,
+     "cost_usd": 0.0033987300000000004,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -170,6 +306,39 @@
      "elapsed_s": 12.13,
      "cost_usd": 0.00179273,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_simple_cipher/xmv_test.py",
+     "sha256": "fe934299398ab0cb000cae3831031ada7969d3746d55456cefe765fdb3b2fcc2",
+     "status": "ok",
+     "raw_file": "ex_simple_cipher/xmv_raw.py",
+     "raw_sha256": "51d2d0650792881d99c4129eabfb267e0b44e0768b8e81eff1b481418287f4a7",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "2f13ee6cc80e7551c6c570b559ac33c274d28b3b402e597428a6d71aee4496c1",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:39+0000",
+     "elapsed_s": 21.49,
+     "cost_usd": 0.00301153,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_simple_cipher/pb_test.py",
+     "sha256": "37e3462665ea00c670c3acbb59dfb29763bcdca85e3e4573e80247af6c2fe23f",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "bd00f7a8ea392e3988f73837cb2f594f1326238c3a2a5baf3e7be64db1e54391",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:19+0000",
+     "elapsed_s": 53.96,
+     "cost_usd": 0.006946429999999999,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -200,6 +369,39 @@
      "elapsed_s": 7.67,
      "cost_usd": 0.0011310299999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_binary/xmv_test.py",
+     "sha256": "7a371a6cbb2010b9c5686e3c354fe5774478ebf20012a9ca1d36de01af8b8dec",
+     "status": "ok",
+     "raw_file": "ex_binary/xmv_raw.py",
+     "raw_sha256": "7a371a6cbb2010b9c5686e3c354fe5774478ebf20012a9ca1d36de01af8b8dec",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "368ddf250bd2a467238bec4fe718bfa61065d5ac54e8582eedfec9728fe377bf",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:48+0000",
+     "elapsed_s": 16.58,
+     "cost_usd": 0.00231713,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_binary/pb_test.py",
+     "sha256": "c8f61cd6f4cb277ef817260d6975f2c80d871aad277558987a525674189e4844",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "d15c6c0db0558e02d164cb312551fbb47e43b4d9660326053c40dd01c323f3de",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:57+0000",
+     "elapsed_s": 18.3,
+     "cost_usd": 0.00227483,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -230,6 +432,39 @@
      "elapsed_s": 6.69,
      "cost_usd": 0.0009215299999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_octal/xmv_test.py",
+     "sha256": "3f1e941b4be08d17c28d5a1c755f0edc7e3503f5c2d24cfed9aeae9cb0124e57",
+     "status": "ok",
+     "raw_file": "ex_octal/xmv_raw.py",
+     "raw_sha256": "3f1e941b4be08d17c28d5a1c755f0edc7e3503f5c2d24cfed9aeae9cb0124e57",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "7e39747d7e6aa2e5e54743a962d598050c48389f9cf792538db46296c156f0c3",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:10:52+0000",
+     "elapsed_s": 13.75,
+     "cost_usd": 0.0017244299999999999,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_octal/pb_test.py",
+     "sha256": "49277eb4672b92b12f4f99d34c71113e3a475f9514c5e17f5843f5e37d7ab84d",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "15a19fb8c715b0541685a33d90a311968ff22105c463d1608dd59aae7c1fea3c",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:23+0000",
+     "elapsed_s": 26.79,
+     "cost_usd": 0.0033970300000000005,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -260,6 +495,39 @@
      "elapsed_s": 10.02,
      "cost_usd": 0.0016113299999999998,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_yacht/xmv_test.py",
+     "sha256": "e02144e33c778d3077f293a0e5bf289425abef13249a11205900ea7f9fe80db3",
+     "status": "ok",
+     "raw_file": "ex_yacht/xmv_raw.py",
+     "raw_sha256": "e02144e33c778d3077f293a0e5bf289425abef13249a11205900ea7f9fe80db3",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "4159788bac8a4103ec9252c74963dab4c0404595e8227cd2f4517ac864b48cd6",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:11+0000",
+     "elapsed_s": 22.54,
+     "cost_usd": 0.0031916300000000004,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_yacht/pb_test.py",
+     "sha256": "b5fcd6de2d41d68fdf0cf8344f2a5bd47aeb5c691e62c6b93125a50e479c3c61",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "29b1f4a70cc601669aacd882fa74178e8110d089cca1457a7351dd9f1bd25b50",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:38+0000",
+     "elapsed_s": 19.19,
+     "cost_usd": 0.0029313300000000002,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -290,6 +558,39 @@
      "elapsed_s": 16.06,
      "cost_usd": 0.00202083,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_luhn/xmv_test.py",
+     "sha256": "8554ab494a660eb3cfa31f183e01203ddada0ee826faea172732059cb3186f14",
+     "status": "ok",
+     "raw_file": "ex_luhn/xmv_raw.py",
+     "raw_sha256": "2e43a79890c504c7f3284e2fd652d6dd3107e9226ef73e62bcd87a7398c33cfe",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "785d6248e2e190baba0074f7c4e54ca90e28bdf2e724f4fd27814ba25033e4ce",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:11+0000",
+     "elapsed_s": 18.71,
+     "cost_usd": 0.0025482300000000003,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_luhn/pb_test.py",
+     "sha256": "7c28a3159251ffa1655a9b6ef3b4ebade28c0699305eada719cf62f658850a8d",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "e661883219ce46b78cee342068099a28e9d60fd85c311d9b54e74027df9a99dc",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:48+0000",
+     "elapsed_s": 24.99,
+     "cost_usd": 0.0032558300000000004,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -320,6 +621,39 @@
      "elapsed_s": 11.18,
      "cost_usd": 0.00168513,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_sublist/xmv_test.py",
+     "sha256": "428c50861b301d422230a5e26eb0898fd24f12f1c382c451f8923c5a4416367c",
+     "status": "ok",
+     "raw_file": "ex_sublist/xmv_raw.py",
+     "raw_sha256": "586692fd58934b9021f268fa002ec2090808718fd4bd5e368b3063125231a108",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "9f0da9edd96741188398aab6be3ebe874c35a658a9a475005a0789fb824c52dd",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:28+0000",
+     "elapsed_s": 17.55,
+     "cost_usd": 0.0026334300000000004,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_sublist/pb_test.py",
+     "sha256": "6b86ec404ae31a7dc8d557a0574a20be6cc50a570bd7c50e596be78f99d38338",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "753a66b370b4d02ffd9c78c840650d083f32c94b7ca37afc20645ad3d70fd744",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:57+0000",
+     "elapsed_s": 19.42,
+     "cost_usd": 0.0029410300000000003,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -350,6 +684,39 @@
      "elapsed_s": 7.95,
      "cost_usd": 0.0011189300000000002,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_say/xmv_test.py",
+     "sha256": "d32db9a626cfc8c6ee5093d9fb85d53a800235a1afe85d3b9b0437849f7569fc",
+     "status": "ok",
+     "raw_file": "ex_say/xmv_raw.py",
+     "raw_sha256": "18de6041e9c2bb2c4a6682562c682fe2038c55f2b0bbb693178a59f5b88fc328",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "35cf1ff229fe8b959702988fe69c120ef78bd4ee9f8c2d9c928de3d745ef8765",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:29+0000",
+     "elapsed_s": 17.43,
+     "cost_usd": 0.0021882299999999998,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_say/pb_test.py",
+     "sha256": "78085f2047c29364c7c455a2048f84575f78a53d4f04bf6fe23046b21ac72a30",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "8a28d31ccd4fad47695ed79d82966f055e4a53cca9b49ab9b519376a323c5af7",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:18+0000",
+     "elapsed_s": 29.22,
+     "cost_usd": 0.0036982300000000003,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -380,6 +747,39 @@
      "elapsed_s": 9.67,
      "cost_usd": 0.00135013,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_dnd_character/xmv_test.py",
+     "sha256": "fd65bfddd55c14ec4c1f96f848769a199507dbb20407d9f31d05515633a60630",
+     "status": "ok",
+     "raw_file": "ex_dnd_character/xmv_raw.py",
+     "raw_sha256": "fd65bfddd55c14ec4c1f96f848769a199507dbb20407d9f31d05515633a60630",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "f83f4e532bc3f21a3e9db872c472231608998c70fae4d9dae0480f1eb6167637",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:47+0000",
+     "elapsed_s": 18.45,
+     "cost_usd": 0.00248413,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_dnd_character/pb_test.py",
+     "sha256": "585a21e95d08f68546d782ee9b65349511525cd10b471bce20f71afa5ab78799",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "450d89cbc6e36e684e1e673eeca734d1a45422ab36a20b76cfcb2be145e53cc1",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:20+0000",
+     "elapsed_s": 22.11,
+     "cost_usd": 0.0028481300000000004,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -410,6 +810,39 @@
      "elapsed_s": 17.25,
      "cost_usd": 0.0027479300000000004,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_twelve_days/xmv_test.py",
+     "sha256": "eb71d6c16cd085c50beef6221558920c4104dee55b593716ac200eed58aa8c09",
+     "status": "ok",
+     "raw_file": "ex_twelve_days/xmv_raw.py",
+     "raw_sha256": "eb71d6c16cd085c50beef6221558920c4104dee55b593716ac200eed58aa8c09",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "25a53430002128e69c55f0e942d23c68a7dfc9f9e1e09733406af3dccce38bb6",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:11:55+0000",
+     "elapsed_s": 26.62,
+     "cost_usd": 0.0038740300000000005,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_twelve_days/pb_test.py",
+     "sha256": "8beb28f646d5e03ea51e872eb29ff5dc72ef833dbca607a0839b404c938f8946",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "7690d2de3977edd02ee9a4131e4dfcea39c1dc9a4546abec86739721c1234839",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:13+0000",
+     "elapsed_s": 55.39,
+     "cost_usd": 0.007284429999999999,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -440,6 +873,39 @@
      "elapsed_s": 12.81,
      "cost_usd": 0.0015999299999999998,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_atbash_cipher/xmv_test.py",
+     "sha256": "6541651e4a7c3693458b180c11bd788351b93647859928c6982388a1e751b400",
+     "status": "ok",
+     "raw_file": "ex_atbash_cipher/xmv_raw.py",
+     "raw_sha256": "6541651e4a7c3693458b180c11bd788351b93647859928c6982388a1e751b400",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "863e0fc044a99d06e6d51ebdb4c42d78b0d3dc6e8b8e704b1443173a96714ae7",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:09+0000",
+     "elapsed_s": 22.55,
+     "cost_usd": 0.0028711300000000004,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_atbash_cipher/pb_test.py",
+     "sha256": "dd6683fed154a09ad967ccbda6c25fa79696583b25dc3cc8b612d7692978ae66",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "37dd77fcd9f67bd5a759c56e345cf1e5a42dc8e358aad9b178611be07b6e53e5",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:49+0000",
+     "elapsed_s": 29.85,
+     "cost_usd": 0.003947330000000001,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -470,6 +936,39 @@
      "elapsed_s": 10.17,
      "cost_usd": 0.0014748299999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_queen_attack/xmv_test.py",
+     "sha256": "f8350a80e338f61c111b9c8541a0e39adc0807469164454ac4a3387acfddf95b",
+     "status": "ok",
+     "raw_file": "ex_queen_attack/xmv_raw.py",
+     "raw_sha256": "f8350a80e338f61c111b9c8541a0e39adc0807469164454ac4a3387acfddf95b",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "806487f10025a74cdf48054cc476b121ce0ef17687fbbafc43f906053df842b6",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:14+0000",
+     "elapsed_s": 19.18,
+     "cost_usd": 0.00276843,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_queen_attack/pb_test.py",
+     "sha256": "bb95102599c5a7a80aa078fd13b286797b090f2b2be195eb07c97061b1ca3b92",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "70ffedb7cb3ee16a220da0b1a97ed0abfa53cddc4f290fea70d9194371cf10be",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:17+0000",
+     "elapsed_s": 27.8,
+     "cost_usd": 0.0038425300000000003,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -500,6 +999,39 @@
      "elapsed_s": 5.23,
      "cost_usd": 0.0006704300000000001,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_prime_factors/xmv_test.py",
+     "sha256": "ec66859fd557fa5dd71b9ca5e6a87e0e721e1a6ec3959f5711e5f5c3d319e4c9",
+     "status": "ok",
+     "raw_file": "ex_prime_factors/xmv_raw.py",
+     "raw_sha256": "ec66859fd557fa5dd71b9ca5e6a87e0e721e1a6ec3959f5711e5f5c3d319e4c9",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "599b26461590a7974ca51204f0c313b817b8c3383ccb210307af9562bacc2602",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:21+0000",
+     "elapsed_s": 11.24,
+     "cost_usd": 0.00157723,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_prime_factors/pb_test.py",
+     "sha256": "641266a0d9348d58363b3001744a4c184c0c231e1d71a4505bee6344a050dc3b",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "d25d6e055414270bebf41c4d1075f10ed5277fef198d9d384229075192679e14",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:38+0000",
+     "elapsed_s": 25.2,
+     "cost_usd": 0.0031541300000000006,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -530,6 +1062,39 @@
      "elapsed_s": 8.4,
      "cost_usd": 0.00104753,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_scrabble_score/xmv_test.py",
+     "sha256": "531f43d79f8c39703d6dc426071a724382d4751276dffe6788af9f7e44352590",
+     "status": "ok",
+     "raw_file": "ex_scrabble_score/xmv_raw.py",
+     "raw_sha256": "531f43d79f8c39703d6dc426071a724382d4751276dffe6788af9f7e44352590",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "99709835a1b9c3a1058eed001b15e4be060e2641b7add220fe5f1c144d699b4d",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:29+0000",
+     "elapsed_s": 14.81,
+     "cost_usd": 0.0017740299999999998,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_scrabble_score/pb_test.py",
+     "sha256": "b588c3670516c1c18da7a419dfa2870cda08f1bc10e95a145efa651bcfa60057",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "4d5b794dd977798a865369c7261f531c40ac0945ff8723420872297c506bfa82",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:40+0000",
+     "elapsed_s": 22.85,
+     "cost_usd": 0.00300393,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -560,6 +1125,39 @@
      "elapsed_s": 6.01,
      "cost_usd": 0.00086043,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_series/xmv_test.py",
+     "sha256": "797b1836377856dc749a92f5d0ab57f012fdc88ad70008b2a96a4b32224d9a5b",
+     "status": "ok",
+     "raw_file": "ex_series/xmv_raw.py",
+     "raw_sha256": "797b1836377856dc749a92f5d0ab57f012fdc88ad70008b2a96a4b32224d9a5b",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "3ed03cb03f3d7144d56e9b06123c1cd361019e4515597834f874b007870cd2fe",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:37+0000",
+     "elapsed_s": 16.86,
+     "cost_usd": 0.00232853,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_series/pb_test.py",
+     "sha256": "cee3a32987646be25f719aa0f1839a62b43d95191d3e1738fcb54c41e6fa1f37",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "79ee8f053b207838fc5507c9826be9c9ef2f98f4fe1ad0ef9a52dbdedcdcee7d",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:58+0000",
+     "elapsed_s": 19.34,
+     "cost_usd": 0.0026640300000000004,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -590,6 +1188,39 @@
      "elapsed_s": 14.86,
      "cost_usd": 0.00224973,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_binary_search_tree/xmv_test.py",
+     "sha256": "acecedecbc62e56d1d3dae2d6642d2af919b459c9c22dae18ce7da591e34e4ad",
+     "status": "ok",
+     "raw_file": "ex_binary_search_tree/xmv_raw.py",
+     "raw_sha256": "acecedecbc62e56d1d3dae2d6642d2af919b459c9c22dae18ce7da591e34e4ad",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "72635e476763f556deb0a84f1a426f7639bf751785aea7d57ef5d7d93d6ed65a",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:49+0000",
+     "elapsed_s": 20.25,
+     "cost_usd": 0.0029907300000000005,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_binary_search_tree/pb_test.py",
+     "sha256": "2d8be8b58d5a6cb1af7ec464c6a825608cb5f39c51842b1258620e1e35ea07d2",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "07285c831fbf890abcdb3a8913bf9de1baa1cf6aeedc2de65bf882fe6d355392",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:24+0000",
+     "elapsed_s": 43.71,
+     "cost_usd": 0.00586963,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -620,6 +1251,39 @@
      "elapsed_s": 7.36,
      "cost_usd": 0.0011199299999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_pascals_triangle/xmv_test.py",
+     "sha256": "34638b04e6548808d8a75116ee87893eb270164b77de204f9d21ac8b9313fcba",
+     "status": "ok",
+     "raw_file": "ex_pascals_triangle/xmv_raw.py",
+     "raw_sha256": "34638b04e6548808d8a75116ee87893eb270164b77de204f9d21ac8b9313fcba",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "2fb41869af2a6415ebdf4534be1a83098d1935e5b9781ba0fd1d4804b0975195",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:12:51+0000",
+     "elapsed_s": 13.31,
+     "cost_usd": 0.0019414299999999998,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_pascals_triangle/pb_test.py",
+     "sha256": "5410c32a13ae49887f940753821ecfbbf9087777a4d8665279d759342c8646b3",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "b97a4d7c262102aff38f640b730670d9b70876be46adf8ce20da144165356a52",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:27+0000",
+     "elapsed_s": 28.94,
+     "cost_usd": 0.0041794300000000005,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -650,6 +1314,39 @@
      "elapsed_s": 32.71,
      "cost_usd": 0.004170330000000001,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_tournament/xmv_test.py",
+     "sha256": "dd3092b2b07e10d135e963abc254252dcad9f07da9f6a3d146082159b6ac4efd",
+     "status": "ok",
+     "raw_file": "ex_tournament/xmv_raw.py",
+     "raw_sha256": "dd3092b2b07e10d135e963abc254252dcad9f07da9f6a3d146082159b6ac4efd",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "63cb56987773abc0c1fd2cae16b085dc89f9e03768bdd11fe171998c641cd448",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:22+0000",
+     "elapsed_s": 32.46,
+     "cost_usd": 0.0043411299999999995,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_tournament/pb_test.py",
+     "sha256": "e509d57cfd6e334792244e502fd19f65c8e454616b43167c417810c38f6affd5",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "d356756f6365f422334c07651a7cbc9f0b982f228055d2584ecd62fbad8a02f5",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:15:32+0000",
+     "elapsed_s": 67.63,
+     "cost_usd": 0.008400930000000001,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -680,6 +1377,39 @@
      "elapsed_s": 9.77,
      "cost_usd": 0.0012867299999999998,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_change/xmv_test.py",
+     "sha256": "e78912ef500dfeab52057c0233299bfb6ed2e5a4b422f88faa63fe367f6822ae",
+     "status": "ok",
+     "raw_file": "ex_change/xmv_raw.py",
+     "raw_sha256": "e78912ef500dfeab52057c0233299bfb6ed2e5a4b422f88faa63fe367f6822ae",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "68cd126996d7f26d7d18f43d40884973cd05f4f15d4210627a262415bbbfb8e9",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:12+0000",
+     "elapsed_s": 21.66,
+     "cost_usd": 0.00284323,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_change/pb_test.py",
+     "sha256": "711ac08f407aa5a009ba66dcfff73ad4a6cd47eb4359a520a5baa92bf21c266b",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "eaa436af422a43cd7d457549a077354949d37cf1bff95c3231f4389d2177f8cc",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:41+0000",
+     "elapsed_s": 13.94,
+     "cost_usd": 0.00176283,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -710,6 +1440,39 @@
      "elapsed_s": 10.86,
      "cost_usd": 0.0016589299999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_killer_sudoku_helper/xmv_test.py",
+     "sha256": "9c612879551eaf4b800e5a917be029c1cccecab751706cb2255f37898d7a2624",
+     "status": "ok",
+     "raw_file": "ex_killer_sudoku_helper/xmv_raw.py",
+     "raw_sha256": "9c612879551eaf4b800e5a917be029c1cccecab751706cb2255f37898d7a2624",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "eae098be021033ab357297a963a7b2a5d8f1a05b104c0d4437ccf93400822393",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:35+0000",
+     "elapsed_s": 22.56,
+     "cost_usd": 0.00323563,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_killer_sudoku_helper/pb_test.py",
+     "sha256": "2a1f1154a5f7e43f81cb3789de53a6d9c4cbff1257bbd7939e6c1ce4794038e1",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "34979c529e918e29f499ea81c1e780042349cf5490838cc24d509e37cdf64158",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:15:12+0000",
+     "elapsed_s": 31.54,
+     "cost_usd": 0.00445193,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -740,6 +1503,39 @@
      "elapsed_s": 27.25,
      "cost_usd": 0.0035182300000000002,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_palindrome_products/xmv_test.py",
+     "sha256": "358778f12febffce13fd8e683ac1d05b85bbfdd58cc4fe5822b14036451af222",
+     "status": "ok",
+     "raw_file": "ex_palindrome_products/xmv_raw.py",
+     "raw_sha256": "358778f12febffce13fd8e683ac1d05b85bbfdd58cc4fe5822b14036451af222",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "704f99ddd07e05844b6d8328e560b6e9000573da8a577d965ae22ae3491a1d10",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:13:51+0000",
+     "elapsed_s": 28.84,
+     "cost_usd": 0.00402223,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_palindrome_products/pb_test.py",
+     "sha256": "06f14039c1ed9607ac2339948f0d42078af5775c4e737d969cf5aafa36a00d26",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "b8135ade3679e2bc34b04ed36cdbbc5dd912d44eb2f77c0d9e5e86e4e1680c23",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:15:44+0000",
+     "elapsed_s": 32.02,
+     "cost_usd": 0.0043326300000000005,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -770,6 +1566,39 @@
      "elapsed_s": 8.83,
      "cost_usd": 0.00121743,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_largest_series_product/xmv_test.py",
+     "sha256": "75e6ab7f30d0d764a7f25b57007edbf46050dd598476c67dd0dbaf6cef903e02",
+     "status": "ok",
+     "raw_file": "ex_largest_series_product/xmv_raw.py",
+     "raw_sha256": "75e6ab7f30d0d764a7f25b57007edbf46050dd598476c67dd0dbaf6cef903e02",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "5376bde1b113655c04b8c932aa10f339cccfd4e88a7fe918d3c149f85ebfadba",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:00+0000",
+     "elapsed_s": 24.85,
+     "cost_usd": 0.0034000300000000005,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_largest_series_product/pb_test.py",
+     "sha256": "aca01d7221b4ca2411b2d0bccf53762013c316d46fd1a8e1b6ab3ce28f5de7f7",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "4b14be21a6df81eb88df035ffde4f8aee702b2db3047aaff20f93feb6c8d97d1",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:15:55+0000",
+     "elapsed_s": 23.24,
+     "cost_usd": 0.0031191300000000003,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -800,6 +1629,39 @@
      "elapsed_s": 12.03,
      "cost_usd": 0.00157093,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_minesweeper/xmv_test.py",
+     "sha256": "d4b1184a86a72ee4ac35d78faef2a468b7dc709f886315dd6b2def33b9a088e7",
+     "status": "ok",
+     "raw_file": "ex_minesweeper/xmv_raw.py",
+     "raw_sha256": "d4b1184a86a72ee4ac35d78faef2a468b7dc709f886315dd6b2def33b9a088e7",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "5b4d27256e51411da5a14f17dd5cd93f14e1f38d0b5f28a632b0ec61c0c52383",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:16+0000",
+     "elapsed_s": 24.95,
+     "cost_usd": 0.00345383,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_minesweeper/pb_test.py",
+     "sha256": "c8ee00050a132d89ff73a193f1919b18719e529c94e9de085eed2d2aaf91cc5d",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "80dd2278a005cf330bb01eadd00eff89e704032518fbb1aa439a779a74cc461e",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:16:07+0000",
+     "elapsed_s": 22.4,
+     "cost_usd": 0.00281373,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -830,6 +1692,39 @@
      "elapsed_s": 12.97,
      "cost_usd": 0.00197983,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_bank_account/xmv_test.py",
+     "sha256": "6e53f4eff6b4b20827bfecf467fd19fded6acd168e355c7afcc995d62fb1e8e3",
+     "status": "ok",
+     "raw_file": "ex_bank_account/xmv_raw.py",
+     "raw_sha256": "6e53f4eff6b4b20827bfecf467fd19fded6acd168e355c7afcc995d62fb1e8e3",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "ffc888a96bd37508c3097d541666ac694a331eb9e3d06d0c9fa4291fdfa32972",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:25+0000",
+     "elapsed_s": 24.83,
+     "cost_usd": 0.00347413,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_bank_account/pb_test.py",
+     "sha256": "504fa7547bc90c8c9d825d85e6a1c5a422658a59b7e061349d53038b4ef2eeb5",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "c77f3bcd9c2d66edf286c1a8feb530bb296530d142d41e3b38c11f21fc18f497",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:16:27+0000",
+     "elapsed_s": 31.83,
+     "cost_usd": 0.004571229999999999,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -860,6 +1755,39 @@
      "elapsed_s": 14.21,
      "cost_usd": 0.0018947299999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_flower_field/xmv_test.py",
+     "sha256": "978f4599ec7167701e2962e35efa6d0c3795c2d600b3e30c222518a9f09c3be7",
+     "status": "ok",
+     "raw_file": "ex_flower_field/xmv_raw.py",
+     "raw_sha256": "978f4599ec7167701e2962e35efa6d0c3795c2d600b3e30c222518a9f09c3be7",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "268e1453dabcff99d0e6c0396b5442dc0690e87b081c0143f79312d72db1d6fa",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:39+0000",
+     "elapsed_s": 23.73,
+     "cost_usd": 0.00313843,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_flower_field/pb_test.py",
+     "sha256": "3f16b2ead755797d92364ec93c209c4ccfcab976b4e6c461e8511c3b634a1bbe",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "8aa2ac2d5a2358e0e9c4bf90d81179560f85e1d3fe13ed7df38edf591dce6164",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:16:38+0000",
+     "elapsed_s": 31.77,
+     "cost_usd": 0.0040681300000000005,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -890,6 +1818,39 @@
      "elapsed_s": 16.81,
      "cost_usd": 0.00242733,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_swift_scheduling/xmv_test.py",
+     "sha256": "3e9153e04c56fb89d52785461c916c761f805d27af9dc4d83be26c920f04adab",
+     "status": "ok",
+     "raw_file": "ex_swift_scheduling/xmv_raw.py",
+     "raw_sha256": "3e9153e04c56fb89d52785461c916c761f805d27af9dc4d83be26c920f04adab",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "35ff4bbc0a2d4a291e298a493eda56723f2ea37dc30bac07a7e5ffde60d84d01",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:14:54+0000",
+     "elapsed_s": 29.57,
+     "cost_usd": 0.0040297300000000005,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_swift_scheduling/pb_test.py",
+     "sha256": "695f4b18ce62f56444a2ac476741b7492b1c56b33adae3802408de48566f8911",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "9042976b2f77a9cf8c9ebdaee07ee641dbcdd538cb2b34ba97728aed69706799",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:17:34+0000",
+     "elapsed_s": 67.81,
+     "cost_usd": 0.00942563,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -920,6 +1881,39 @@
      "elapsed_s": 12.17,
      "cost_usd": 0.00169043,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_all_your_base/xmv_test.py",
+     "sha256": "07317a2f2bd4bd5759acad8d249040b073d591ac054b0fbec20dd953771d0d0a",
+     "status": "ok",
+     "raw_file": "ex_all_your_base/xmv_raw.py",
+     "raw_sha256": "d0f202d93ce2973d47736517b819bdd45da9d7683d3ae42c9f4c9e7cf2cd8cfe",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "228e3c9c4d8d8c001d299f83798072fc1f31aa24da4cf13ff24527b219b337d3",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:15:05+0000",
+     "elapsed_s": 25.08,
+     "cost_usd": 0.0033818300000000006,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_all_your_base/pb_test.py",
+     "sha256": "5efd076dd3b687f27e33b6cb74e12646af3c47d9c2e60d88ba63dd127e84198f",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "0521c42c48fc8705ffe2c22deb5c49b892d87c8fdc23b6fd02c63e26f013c8c0",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:17:14+0000",
+     "elapsed_s": 35.59,
+     "cost_usd": 0.004718529999999999,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -950,6 +1944,39 @@
      "elapsed_s": 12.85,
      "cost_usd": 0.00199073,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_linked_list/xmv_test.py",
+     "sha256": "4b67e4a8bcf9c56ad7cbe9d9a6b07f301a7786cc8954a9dc01f997e10036d1ba",
+     "status": "ok",
+     "raw_file": "ex_linked_list/xmv_raw.py",
+     "raw_sha256": "4b67e4a8bcf9c56ad7cbe9d9a6b07f301a7786cc8954a9dc01f997e10036d1ba",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "858dd066af76c4fb37c333a1dc40a8760117949dc2f5ffcb351804d2e86954b7",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:15:20+0000",
+     "elapsed_s": 25.72,
+     "cost_usd": 0.0038550300000000006,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_linked_list/pb_test.py",
+     "sha256": "79dd6123b6e207a1217372d33de275f2cf572dff5d29cbb087b0ebd294055e1e",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "290aa4833e11f7a874b37da28db63fe083a3422a015efb07b29ed25c0c5be725",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:17:44+0000",
+     "elapsed_s": 30.33,
+     "cost_usd": 0.00432873,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -980,6 +2007,39 @@
      "elapsed_s": 54.87,
      "cost_usd": 0.006732729999999999,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_word_search/xmv_test.py",
+     "sha256": "021f39cf3be8ad40a260f2a491340ab6bf27a0d9e20e936f5c3fe34c518a7b3f",
+     "status": "ok",
+     "raw_file": "ex_word_search/xmv_raw.py",
+     "raw_sha256": "021f39cf3be8ad40a260f2a491340ab6bf27a0d9e20e936f5c3fe34c518a7b3f",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "0f83839ec0e3fcf0f12065ed02fd7c2909b74b56d2bcb3b31cf8a68ace6b2eef",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:16:08+0000",
+     "elapsed_s": 63.19,
+     "cost_usd": 0.00733843,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_word_search/pb_test.py",
+     "sha256": "9b08e14babd7f9a44063a8f7389cbaa0516ca7d6c9b1f047d405245685f5ca82",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "0b8d7d543dbd224fb0c95c22d515f6a3aa19fd2daf47dc98560bc425217f981c",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:19:27+0000",
+     "elapsed_s": 112.44,
+     "cost_usd": 0.013952730000000002,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -1010,6 +2070,39 @@
      "elapsed_s": 53.07,
      "cost_usd": 0.00663843,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_camicia/xmv_test.py",
+     "sha256": "743b325b04bd2bf0036e417b68eef5b8bba2fea0d0a003dc2d0e77390abde10d",
+     "status": "ok",
+     "raw_file": "ex_camicia/xmv_raw.py",
+     "raw_sha256": "743b325b04bd2bf0036e417b68eef5b8bba2fea0d0a003dc2d0e77390abde10d",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "322b026def8f28919f88a12964da354274fa64c9352d12e2a417daae51718cfb",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:16:26+0000",
+     "elapsed_s": 66.45,
+     "cost_usd": 0.00858393,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_camicia/pb_test.py",
+     "sha256": "00d5154ff78614a82ee0c6e568ac49f00dc3fec148e605b7552b2bb19292f853",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "c07b44a2c4d0038adaf52265f3bfd92042e77ea439b275941ddf11199bfa462a",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:18:58+0000",
+     "elapsed_s": 73.59,
+     "cost_usd": 0.00874813,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -1040,6 +2133,39 @@
      "elapsed_s": 19.01,
      "cost_usd": 0.0026943300000000004,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_custom_set/xmv_test.py",
+     "sha256": "698a34970cd1739c1607bdf3dd72fbfc07fe786393a0c16cb20ac3e3316cf1a7",
+     "status": "ok",
+     "raw_file": "ex_custom_set/xmv_raw.py",
+     "raw_sha256": "698a34970cd1739c1607bdf3dd72fbfc07fe786393a0c16cb20ac3e3316cf1a7",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "31becf1d33c4ab572bc3b222f74feec8402f74943439349b147a56ad773c4cd0",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:16:31+0000",
+     "elapsed_s": 23.21,
+     "cost_usd": 0.0032721300000000003,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_custom_set/pb_test.py",
+     "sha256": "b4c268a3ae25fd63362674f2e5c8380fb92ea2fac484e89b4a7b466475326926",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "e09b69085c271b7e83cbde58c25f2defc000d6c98693c835e8ff632ffacd277f",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:19:27+0000",
+     "elapsed_s": 28.63,
+     "cost_usd": 0.0038885300000000003,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -1070,6 +2196,39 @@
      "elapsed_s": 22.69,
      "cost_usd": 0.00318153,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_complex_numbers/xmv_test.py",
+     "sha256": "b9dcc9e6cf55516d77c9ca9ced9c7a3ec867dcec468e67e59946919ba8bd7276",
+     "status": "ok",
+     "raw_file": "ex_complex_numbers/xmv_raw.py",
+     "raw_sha256": "b9dcc9e6cf55516d77c9ca9ced9c7a3ec867dcec468e67e59946919ba8bd7276",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "871fd8351e8db222f27eb59770572cd828d9b9ce6b0db34ac132b4ca328c59ea",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:17:12+0000",
+     "elapsed_s": 45.71,
+     "cost_usd": 0.006595729999999999,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_complex_numbers/pb_test.py",
+     "sha256": "5ed19c0a7b767ebb42f4c51b7b090571174132e67d939eaeb632a0c5781fd853",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "7af02308839b1d3bbb45e92e6c47d3967881307d5a1e2f00bc79b7e393fac5fd",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:20:32+0000",
+     "elapsed_s": 65.65,
+     "cost_usd": 0.00883083,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -1100,6 +2259,39 @@
      "elapsed_s": 10.78,
      "cost_usd": 0.00173573,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_rational_numbers/xmv_test.py",
+     "sha256": "8bf84159c2b7c291af40476da8eaab39f87290a351bc5f2966474949ca6fa6e2",
+     "status": "ok",
+     "raw_file": "ex_rational_numbers/xmv_raw.py",
+     "raw_sha256": "8bf84159c2b7c291af40476da8eaab39f87290a351bc5f2966474949ca6fa6e2",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "20445c54815dca4e40acbf777b931689a91a7d8bb122fd03a46015c3815102b2",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:17:01+0000",
+     "elapsed_s": 30.39,
+     "cost_usd": 0.00461813,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_rational_numbers/pb_test.py",
+     "sha256": "56a063b4380304ae14e883eeddc694d843b9d5459b5f76c3c11cfa9a90d17a89",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "1fd33b39b4c1b7384126940f63dcbfd6f5396e4808011193db939852ae2bc9b5",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:20:19+0000",
+     "elapsed_s": 51.87,
+     "cost_usd": 0.00723633,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   },
@@ -1130,10 +2322,43 @@
      "elapsed_s": 20.39,
      "cost_usd": 0.0029236300000000004,
      "attempts": 1
+    },
+    "xmv": {
+     "file": "ex_meetup/xmv_test.py",
+     "sha256": "58ea179b89eff34feaa0e41c829817a2a07ccdbc9e46dd619f3abfd1e22ba7ea",
+     "status": "ok",
+     "raw_file": "ex_meetup/xmv_raw.py",
+     "raw_sha256": "58ea179b89eff34feaa0e41c829817a2a07ccdbc9e46dd619f3abfd1e22ba7ea",
+     "prompt_template": "prompts/xmv_prompt.txt",
+     "prompt_template_sha256": "2c38ffcbb9748c5e30064df4c5f811c212fc8d20592435c8c0b2e975c3b7f8d7",
+     "prompt_sha256": "24fb1f7430b508c7fc9cd588cca054209a03b3f14f8cef466bdd51c41508197d",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:17:25+0000",
+     "elapsed_s": 23.2,
+     "cost_usd": 0.0034812300000000005,
+     "attempts": 1
+    },
+    "pb": {
+     "file": "ex_meetup/pb_test.py",
+     "sha256": "767f4568cb6ade63b0266268281846e79bedc082e0d0f086e205ed4a14f99797",
+     "status": "ok",
+     "prompt_template": "prompts/pb_prompt.txt",
+     "prompt_template_sha256": "21066e37306f1a74a9dd892daabd9110f05f80726f987c8ae25d080c34d1fa40",
+     "prompt_sha256": "6b057b355b99194c7708a2dadd110b8c3247a1219b61a8c3b405d6e745267339",
+     "model": "claude-haiku-5-5",
+     "generated_at": "2026-11-27T06:21:02+0000",
+     "elapsed_s": 42.62,
+     "cost_usd": 0.006048129999999999,
+     "attempts": 1
+    },
+    "ex": {
+     "status": "none",
+     "note": "extractor found no verbatim example pair in goal.md; no hand-written fallback",
+     "generator": "deterministic extractor (no model): tools/ex_extract.py"
     }
    }
   }
  },
- "exam_cost_usd_total": 0.08279,
- "all_haiku_calls_cost_usd_total_incl_failures": 0.08279
+ "exam_cost_usd_total": 0.394092,
+ "all_haiku_calls_cost_usd_total_incl_failures": 0.546837
 }
