@@ -60,7 +60,7 @@
    "name": "lms1004q9",
    "provider": "lms1004q9",
    "model": "qwen/qwen3.5-9b",
-   "jobs": 1
+   "jobs": 8
   }
  ],
  "acceptance": {
@@ -83,8 +83,8 @@
  "tasks": [
   "ex_matrix",
   "ex_point_mutations",
-  "ex_series",
-  "ex_rotational_cipher"
+  "ex_acronym",
+  "ex_bob"
  ],
  "reps": 1,
  "prereg": {
