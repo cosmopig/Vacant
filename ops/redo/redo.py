@@ -365,6 +365,43 @@ def usage_from_log(log_path: pathlib.Path) -> dict | None:
             "final_error": final_error}
 
 
+def usage_from_devin_log(log_path: pathlib.Path) -> dict | None:
+    """Devin CLI（DECISION 修正 5）：用量來自 wrapper 用 `--export` 寫的 ATIF 匯出 `<attempt>/logs/devin_export.json`
+    （`log_path` 是 agent.log，匯出在同一個嘗試目錄的 logs/ 下）。
+
+    匯出**實際含有**的欄位只有：每個 agent 步驟的 `metrics{prompt_tokens, completion_tokens, cached_tokens}`、
+    `final_metrics{total_prompt_tokens, total_completion_tokens, total_cached_tokens, total_steps}`、步驟時間戳、
+    `agent.model_name`／`version`。**沒有費用欄位**（免費模型）⇒ `cost_usd` 固定 None，不編數字。
+    `calls`＝帶 metrics 的 agent 步驟數；`input`＝prompt_tokens 加總（cached 是其中的子集，實測三步加總＝總和）；
+    `cache_read`＝cached_tokens；`uncached_input`＝input−cache_read；`num_turns`＝total_steps。
+    匯出沒有「這一回合以錯誤結束」的欄位 ⇒ `final_error` 恆 None；被逾時殺掉時匯出可能不存在 ⇒ 回 None
+    （redo 把「工作區沒動＋usage None」當成需看 log 尾端的 infra 判斷，見 one_attempt）。
+    另附 `first_ts`／`last_ts`（匯出裡步驟時間戳，ISO 字串）供牆鐘對照。
+    """
+    exp = log_path.parent / "logs" / "devin_export.json"
+    try:
+        d = json.loads(exp.read_text(encoding="utf-8", errors="replace"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(d, dict):
+        return None
+    steps = [x for x in d.get("steps", []) if isinstance(x, dict)]
+    ag = [x for x in steps if x.get("source") == "agent" and isinstance(x.get("metrics"), dict)]
+    fm = d.get("final_metrics") if isinstance(d.get("final_metrics"), dict) else None
+    inp = sum(int(x["metrics"].get("prompt_tokens") or 0) for x in ag)
+    outp = sum(int(x["metrics"].get("completion_tokens") or 0) for x in ag)
+    cr = sum(int(x["metrics"].get("cached_tokens") or 0) for x in ag)
+    if fm:
+        inp = int(fm.get("total_prompt_tokens") or inp)
+        outp = int(fm.get("total_completion_tokens") or outp)
+        cr = int(fm.get("total_cached_tokens") or cr)
+    ts = [x.get("timestamp") for x in steps if x.get("timestamp")]
+    return {"calls": len(ag), "errors": 0, "final_error": None, "cost_usd": None,
+            "num_turns": (fm or {}).get("total_steps"), "input": inp or None, "output": outp or None,
+            "cache_read": cr, "cache_create": None, "uncached_input": inp - cr if inp else None,
+            "terminal_reason": None, "first_ts": ts[0] if ts else None, "last_ts": ts[-1] if ts else None}
+
+
 def usage_from_claude_log(log_path: pathlib.Path) -> dict | None:
     """Claude Code `--output-format stream-json --verbose` 的事件流（DECISION 修正 4，worker 改 Haiku）。
 
@@ -751,7 +788,8 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
         changed = final_snap != origin_snap
         _uk = agent.get("usage", "pi_json")
         usage = (usage_from_log(adir / "agent.log") if _uk == "pi_json" else
-                 usage_from_claude_log(adir / "agent.log") if _uk == "claude_stream_json" else None)
+                 usage_from_claude_log(adir / "agent.log") if _uk == "claude_stream_json" else
+                 usage_from_devin_log(adir / "agent.log") if _uk == "devin_atif" else None)
         try:
             tail = (adir / "agent.log").read_bytes()[-20000:].decode("utf-8", "replace")
         except OSError:

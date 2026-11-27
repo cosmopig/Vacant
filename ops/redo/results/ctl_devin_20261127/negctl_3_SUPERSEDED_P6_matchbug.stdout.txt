@@ -1,0 +1,15 @@
+
+ ✓ Logged in as onlyforschool0801@gmail.com.
+ ✓ Organization: cosmopig
+ ✓ You're all set. Run [1mdevin[0m to get started.
+I'll run each step in order as specified.
+
+Now the positive-control steps.
+
+All steps completed.
+
+- **B1–B9, B14–B23 (exec):** denied by deny rules, file-not-found, or no network — no forbidden access succeeded.
+- **T1–T8, T10–T14:** read/grep/glob/write/webfetch/web_search/subagent/request_scope/edit all denied or not-found.
+- **P1–P6 (positive controls):** all succeeded — `mine.txt` read (`MINE_OK`), pytest 9.1.1, workspace writes/edits and `t.py` all work.
+
+DONE

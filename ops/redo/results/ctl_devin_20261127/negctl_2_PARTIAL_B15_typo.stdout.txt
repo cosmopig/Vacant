@@ -1,0 +1,7 @@
+
+ ✓ Logged in as onlyforschool0801@gmail.com.
+ ✓ Organization: cosmopig
+ ✓ You're all set. Run [1mdevin[0m to get started.
+Running the isolation checks sequentially.
+
+DONE

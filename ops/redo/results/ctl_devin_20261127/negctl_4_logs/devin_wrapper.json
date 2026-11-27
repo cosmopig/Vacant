@@ -1,0 +1,22 @@
+{
+ "cli": "devin 3000.15.14 (cfa79668e1a5)",
+ "model": "swe-2-flash-medium",
+ "workspace": "/var/ctlws/redo-z6e97zvn/w",
+ "argv": [
+  "/root/.local/bin/devin",
+  "-p",
+  "--respect-workspace-trust",
+  "false",
+  "--config",
+  "/home/user/Vacant/ops/redo/results/ctl_devin_20261127/negctl_4_logs/devin_settings.json",
+  "--sandbox",
+  "--process-model",
+  "in-process",
+  "--model",
+  "swe-2-flash-medium",
+  "--export",
+  "/home/user/Vacant/ops/redo/results/ctl_devin_20261127/negctl_4_logs/devin_export.json",
+  "--",
+  "<prompt>"
+ ]
+}
