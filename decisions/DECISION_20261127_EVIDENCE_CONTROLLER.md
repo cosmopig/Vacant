@@ -108,3 +108,16 @@
   - hidden 通過比例＝兩次平均（逾時算 0）。
   - 其餘照修正 3：先取沒過且比例 ≥30% 的；再交替補「沒過且 <30%」與「兩次都過」的；兩次都過的最多 4 題、至少 2 題來自 hard；同類內字典序；不滿 16 就有幾題用幾題，不低於 12，低於 12 照實回報。
 - **1003 的設定**：LM Studio 在 1003 上 ctx 最多到 262144，所以 1003 用 262144／parallel 8（每槽 32768）。吞吐量：單串流 108；12 串流總 421；8 串流總 314。量表 `~/dev/ops/ctl/tps_1003_q9_393k_p12.jsonl`。
+
+## 凍結（11-27 03:25Z）：選題結果、4 案例觸發測試、發射
+- **第 2 次校準**（`ctlcal2_*`）：9B A＝34/37。合併兩次後依修正 3 的規則選出 **12 題**（下限 12）：
+  - 沒過且 hidden ≥30%：flower_field、linked_list、minesweeper、ocr_numbers、swift_scheduling、tournament、yacht。
+  - 沒過且 <30%：camicia。
+  - 兩次都過（上限 4，hard 至少 2）：all_your_base、atbash_cipher、bank_account、binary。
+  - 題庫 `~/dev/ops/ref/bm_tasks/ctl12`（MANIFEST 有每個檔的 sha256）。逐題數字在 `~/dev/ops/ctl/selection.json`。
+  - ⚠ 第 2 次校準的計畫是在推上遠端前約 2 分鐘發射的（本機已 commit、內容沒變；校準不進分析）。
+- **4 案例觸發測試**（`ctl_smoke4`，1004，B 與 C 各 1 次）：8 格全部第 1 次就過，所以真實模型只觸發了規則 1（全部通過就提前結束）。
+  - 規則 2–6 在真實模型上沒有觸發，只由 redo.py selftest（假 agent，46/46，含每條規則各一個觸發案例）與單元測試證明會觸發。
+  - 決策鏈驗證與重建正常，例如 `ex_matrix/r1/C`：「seq=1 attempt=1 rule=1 action=stop_success passed=4/4」。
+  - 沒有發現阻斷性缺陷。
+- **凍結**：程式、題庫、計畫 `ops/redo/plans/ctl12_pi_qwen9b.json`（prereg 在檔裡）在第一通模型呼叫之前推上遠端。兩台以 `--only-providers` 各跑自己的對。

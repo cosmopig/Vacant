@@ -1,0 +1,148 @@
+{
+ "id": "ctl12_pi_qwen9b",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "~/dev/ops/ref/bm_tasks/ctl12",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl12"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "redo-bwrap-agent",
+   "{logs}",
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/dev/ops/agentcfg/ctl",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1003q9",
+   "provider": "lms1003q9",
+   "model": "qwen/qwen3.5-9b",
+   "jobs": 8
+  },
+  {
+   "name": "lms1004q9",
+   "provider": "lms1004q9",
+   "model": "qwen/qwen3.5-9b",
+   "jobs": 12
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_flower_field",
+  "ex_linked_list",
+  "ex_minesweeper",
+  "ex_ocr_numbers",
+  "ex_swift_scheduling",
+  "ex_tournament",
+  "ex_yacht",
+  "ex_camicia",
+  "ex_all_your_base",
+  "ex_atbash_cipher",
+  "ex_bank_account",
+  "ex_binary"
+ ],
+ "reps": 3,
+ "prereg": {
+  "decision_doc": "decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md",
+  "frozen": "2026-11-27，在看任何正式資料之前凍結；規則順序、門檻數值（>=70%、連續 2 次相同失敗簽章且通過數未增加）與 16 題題單皆不再改。",
+  "question": "在同樣的運算預算上限下，小模型能否靠可驗證的執行紀錄與驗收結果，由 Host 決定續做、修復或重開，而比固定重開做得更好？",
+  "task_selection": "取 exercism_py_pool 減去用過的 exercism_py_unused（40）、exercism_py_hard（26）、polyglot_py（34），剩 50 題；依 Exercism 官方 track config.json（抓取於 2026-11-27，sha256 前綴 ebf067c6e09a6e11）取 difficulty >= 2 且測試方法數 >= 10 的題，依 difficulty 由高到低、測試數由多到少排序，取前 16 題。不依量測結果換題。",
+  "split_grading": "每題的測試方法依固定種子 20261127 切為兩半（ops/redo/banks/build_ctl16.py）：驗收半放 workspace/（worker 與控制器看得到），隱藏評分半放 hidden/ 並以 scorer.py 獨立評分（worker 與控制器皆看不到；ex_sublist 保留 test_unique_return_values 為共用不變量，記於 MANIFEST.json）。",
+  "arms": "A 原生單次 1800 秒；R 三次盲重開（600×3，總 1800）；B 三次重開＋失敗回饋（共用產生器 failing_tests）；C 控制器（同預算、同回饋產生器，只差決策）。每題每臂 3 次。",
+  "model": "qwen3.5-9b，pi，本機 LM Studio 兩台（1003：262144／8、jobs 8；1004：393216／12、jobs 12）；對的序號決定機器。agent 在 bwrap 沙箱（redo-bwrap-agent）。",
+  "metrics": "只看五個：hidden 最終成功率；hidden 測試滿足比例；每個成功任務的實際 token；已通過項目被弄壞的比例；等待時間（牆鐘）。分析 ops/redo/analysis/ctl_metrics.py。",
+  "infra_void": "沿用 redo.py：工作區沒動＋0 次成功模型回應或連線類錯誤＝基礎設施失敗，不算嘗試、最多重試 4 次，仍失敗該格 infra_void 不進分母、逐一列出；比較時任一臂 void 的那一對在該比較不計。",
+  "readout": "報 C 對 B、C 對 R 的成功率差（(題,重複) 配對、精確 McNemar）與成本差；明寫『這是 12 題的探索，只判斷方向』；C 沒有比 B、R 好就照實寫，不延伸。",
+  "known_limits": [
+   "官方難度僅 2–3，9B 的原生成功率可能高於三到六成；超出範圍亦照實記錄，不換題。",
+   "16 題 × 3 次重複＝48 對，屬探索性檢定力，只判斷方向。",
+   "等預算是牆鐘上限（1800 秒），token 照實紀錄與報成本差。"
+  ],
+  "registered": "2026-11-27，正式批次第一通模型呼叫之前推上遠端。設計：decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md（含修正 1–4）。",
+  "tasks_rule": "修正 3＋修正 4：37 題候選、9B 校準 A 兩次，依寫死規則選出 12 題（沒過且 hidden≥30% 7 題、沒過且 <30% 1 題、兩次都過 4 題含 hard 2 題）。依 A 校準挑題 ⇒ 正式批次 A 會往中間回歸；四臂同題比較仍公平；校準不併入分析。hard 題 11/21 被 gemma-12b 評測用過一次（非調整）。",
+  "time_cut": "若到 11/28 12:00Z 還沒跑完，以已完成的完整 (題,重複) 組（四臂都完成）分析，未完成的照實列出。"
+ }
+}
