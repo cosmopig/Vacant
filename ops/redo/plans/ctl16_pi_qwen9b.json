@@ -1,0 +1,152 @@
+{
+ "id": "ctl16_pi_qwen9b",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "~/dev/ops/ref/bm_tasks/ctl16",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl16"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/dev/ops/agentcfg/d2v52",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1003q9",
+   "provider": "lms1003q9",
+   "model": "qwen/qwen3.5-9b",
+   "jobs": 2
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_kindergarten_garden",
+  "ex_ocr_numbers",
+  "ex_circular_buffer",
+  "ex_high_scores",
+  "ex_simple_cipher",
+  "ex_binary",
+  "ex_octal",
+  "ex_yacht",
+  "ex_luhn",
+  "ex_sublist",
+  "ex_say",
+  "ex_dnd_character",
+  "ex_twelve_days",
+  "ex_atbash_cipher",
+  "ex_queen_attack",
+  "ex_prime_factors"
+ ],
+ "reps": 3,
+ "prereg": {
+  "decision_doc": "decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md",
+  "frozen": "2026-11-27，在看任何正式資料之前凍結；規則順序、門檻數值（>=70%、連續 2 次相同失敗簽章且通過數未增加）與 16 題題單皆不再改。",
+  "question": "在同樣的運算預算上限下，小模型能否靠可驗證的執行紀錄與驗收結果，由 Host 決定續做、修復或重開，而比固定重開做得更好？",
+  "task_selection": "取 exercism_py_pool 減去用過的 exercism_py_unused（40）、exercism_py_hard（26）、polyglot_py（34），剩 50 題；依 Exercism 官方 track config.json（抓取於 2026-11-27，sha256 前綴 ebf067c6e09a6e11）取 difficulty >= 2 且測試方法數 >= 10 的題，依 difficulty 由高到低、測試數由多到少排序，取前 16 題。不依量測結果換題。",
+  "split_grading": "每題的測試方法依固定種子 20261127 切為兩半（ops/redo/banks/build_ctl16.py）：驗收半放 workspace/（worker 與控制器看得到），隱藏評分半放 hidden/ 並以 scorer.py 獨立評分（worker 與控制器皆看不到；ex_sublist 保留 test_unique_return_values 為共用不變量，記於 MANIFEST.json）。",
+  "arms": {
+   "A": "原生單次跑到底（1800 秒）。",
+   "R": "固定最多 3 次盲重開（每次 600 秒、總 1800 秒，無回饋，每次從原件重開）。",
+   "B": "固定最多 3 次重開＋失敗回饋（每次 600 秒、總 1800 秒，每次從原件重開；使用與 C 共用的失敗回饋產生器 hint=failing_tests，<=400 位元組）。",
+   "C": "證據式決策控制器（最多 3 次、單次 600 秒、總 1800 秒）：依凍結規則 1..6 決定提前結束／預算交付最佳／回到最佳快照／重開原件／保留修復（>=70%）／保留續做；與 B 共用回饋產生器（<=400B）並附加一行 KS-1 乾淨的動作說明；每次決策以 vacant_network.logbook 簽章上鏈。"
+  },
+  "model": "qwen/qwen3.5-9b（pi，本機 LM Studio，ctx 131072；provider 預留 lms1003q9，發射前可視排程確認端點設定並 commit）。",
+  "metrics": [
+   "獨立評分的最終成功率（hidden 半數全過）。",
+   "需求（hidden 測試）滿足比例（tests_passed / tests_total）。",
+   "每個成功任務的實際 token。",
+   "已通過項目被弄壞的比例：曾在某次嘗試通過、交付版卻失敗的驗收測試，占曾通過者的比例。",
+   "等待時間（牆鐘）。"
+  ],
+  "infra_void": "基礎設施失敗不算嘗試（鐵律 3）：agent 啟動失敗、工作區未動且 0 次成功模型回應或連線類錯誤、或做到一半模型因連線類錯誤中斷，皆記為 void 並退避重試（最多 4 次）；仍失敗該格標為 infra_void，不進分母、於報告逐一列出。配對比較時，任一臂為 infra_void 的 (task, rep) 對排除於該比較。",
+  "readout": "報 C 對 B、C 對 R 的成功率差（題×重複配對，精確雙尾 McNemar）與成本差。明寫「這是 16 題的探索，只判斷方向」。C 沒有比 B、R 好就照實寫，不延伸。",
+  "known_limits": [
+   "官方難度僅 2–3，9B 的原生成功率可能高於三到六成；超出範圍亦照實記錄，不換題。",
+   "16 題 × 3 次重複＝48 對，屬探索性檢定力，只判斷方向。",
+   "等預算是牆鐘上限（1800 秒），token 照實紀錄與報成本差。"
+  ]
+ }
+}

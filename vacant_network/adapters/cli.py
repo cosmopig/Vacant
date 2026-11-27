@@ -202,13 +202,17 @@ def _run_restart_and_report(args, build, prompt, agent, pending: list[str]) -> i
         print(f"[vacant] interrupted ({pending[0]}) before the run started; nothing was run, project unchanged.",
               file=sys.stderr)
         return 130
+    extra_kw = {}
+    if getattr(args, "policy", "restart") != "restart":
+        extra_kw["policy"] = args.policy
     res = RS.run(pathlib.Path.cwd(), build, prompt, max_attempts=args.attempts or 3,
                  attempt_timeout_s=args.attempt_timeout, budget_s=args.timeout,
                  check=getattr(args, "check", None),
                  protect=getattr(args, "protect", None) or None,
                  agent=agent,
                  log=lambda m: print(f"[vacant do] {agent}: {m}", flush=True),
-                 stream=bool(getattr(args, "stream", False)))
+                 stream=bool(getattr(args, "stream", False)),
+                 **extra_kw)
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
     else:
@@ -410,6 +414,9 @@ def build_parser() -> argparse.ArgumentParser:
                         "and never write back (repeatable)")
     p.add_argument("--hooks", action="store_true",
                    help="without a contract: also add Vacant's per-step hooks (off by default)")
+    p.add_argument("--policy", choices=("restart", "controller"), default="restart",
+                   help="without a contract: retry policy — restart (default, fresh workspace) "
+                        "or controller (evidence-based keep/repair/restore/restart)")
     p.add_argument("--stream", action="store_true",
                    help="without a contract: stream agent stdout/stderr directly to the terminal while running (off by default)")
     p.add_argument("--json", action="store_true")

@@ -158,10 +158,10 @@ def load_plan(path: pathlib.Path) -> dict:
     if len(plan["pair"]) != 2 or any(a not in plan["arms"] for a in plan["pair"]):
         raise PlanError("pair 必須是 arms 裡的兩個名字 [對照, 處理]")
     for name, arm in plan["arms"].items():
-        if arm.get("policy") not in ("single", "restart"):
-            raise PlanError(f"arm {name}: policy 只能是 single／restart")
-        if arm.get("hint", "none") not in ("none", "first_failure"):
-            raise PlanError(f"arm {name}: hint 只能是 none／first_failure")
+        if arm.get("policy") not in ("single", "restart", "controller"):
+            raise PlanError(f"arm {name}: policy 只能是 single／restart／controller")
+        if arm.get("hint", "none") not in ("none", "first_failure", "failing_tests"):
+            raise PlanError(f"arm {name}: hint 只能是 none／first_failure／failing_tests")
     if len(set(plan["tasks"])) != len(plan["tasks"]):
         raise PlanError("tasks 有重複")
     acfg = plan.get("acceptance", {})
@@ -370,18 +370,37 @@ def usage_from_log(log_path: pathlib.Path) -> dict | None:
 _UNITTEST_RUNNER = r"""
 import json, sys, traceback, unittest
 sys.path.insert(0, ".")
+class _TrackResult(unittest.TestResult):
+    def __init__(self):
+        super().__init__()
+        self.test_results = {}
+    def _tid(self, test):
+        return test.id() if hasattr(test, "id") else str(test)
+    def addSuccess(self, test):
+        super().addSuccess(test); self.test_results[self._tid(test)] = True
+    def addFailure(self, test, err):
+        super().addFailure(test, err); self.test_results[self._tid(test)] = False
+    def addError(self, test, err):
+        super().addError(test, err); self.test_results[self._tid(test)] = False
+    def addSkip(self, test, reason):
+        super().addSkip(test, reason); self.test_results[self._tid(test)] = False
+    def addExpectedFailure(self, test, err):
+        super().addExpectedFailure(test, err); self.test_results[self._tid(test)] = True
+    def addUnexpectedSuccess(self, test):
+        super().addUnexpectedSuccess(test); self.test_results[self._tid(test)] = False
 out = {"run": 0, "failures": 0, "errors": 0, "skipped": 0, "unexpected_successes": 0,
-       "load_error": None, "first_problem": None}
+       "load_error": None, "first_problem": None, "test_results": {}}
 for mod in sys.argv[1:]:
     try:
         suite = unittest.TestLoader().loadTestsFromName(mod)
     except BaseException:
         out["load_error"] = traceback.format_exc(limit=3)[-800:]
         break
-    res = unittest.TestResult()
+    res = _TrackResult()
     suite.run(res)
     out["run"] += res.testsRun; out["failures"] += len(res.failures); out["errors"] += len(res.errors)
     out["skipped"] += len(res.skipped); out["unexpected_successes"] += len(res.unexpectedSuccesses)
+    out["test_results"].update(res.test_results)
     probs = res.failures + res.errors
     if probs and out["first_problem"] is None:
         out["first_problem"] = (str(probs[0][0]) + "\n" + probs[0][1])[-800:]
@@ -442,7 +461,8 @@ def _acceptance_command(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict)
     protect = cfg.get("protect", cfg.get("patterns", []))
     protected = test_files(origin, protect) if protect else []
     base = {"accept": False, "kind": "command", "tests": protected, "passed": None, "run": None,
-            "tests_tampered": [], "status": None, "first_problem": None}
+            "tests_tampered": [], "status": None, "first_problem": None,
+            "test_results": {}, "failing_tests": []}
     if protect and not protected:
         return {**base, "status": "no_tests_in_origin"}
     cmd = cfg.get("cmd")
@@ -498,7 +518,8 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
     patterns = cfg.get("patterns", ["*_test.py", "test_*.py"])
     tests = test_files(origin, patterns)
     base = {"accept": False, "kind": kind, "tests": tests, "passed": None, "run": None,
-            "tests_tampered": [], "status": None, "first_problem": None}
+            "tests_tampered": [], "status": None, "first_problem": None,
+            "test_results": {}, "failing_tests": []}
     if not tests:
         return {**base, "status": "no_tests_in_origin"}
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="redo-acc-"))
@@ -517,6 +538,7 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
             d, _, name = rel.rpartition("/")
             by_dir.setdefault(d, []).append(name[:-3])
         agg = {"run": 0, "failures": 0, "errors": 0, "skipped": 0, "unexpected_successes": 0}
+        test_results: dict[str, bool] = {}
         first = None
         for d, mods in sorted(by_dir.items()):
             rc, out = _run_quiet([sys.executable, "-B", "-c", _UNITTEST_RUNNER, *mods], work / d if d else work,
@@ -529,10 +551,15 @@ def acceptance(origin: pathlib.Path, final_ws: pathlib.Path, cfg: dict) -> dict:
                 return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
             for k in agg:
                 agg[k] += r[k]
+            for tid, passed_flag in (r.get("test_results") or {}).items():
+                key = f"{d}/{tid}" if d else tid
+                test_results[key] = bool(passed_flag)
             first = first or r["first_problem"]
         bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
+        failing_tests = sorted(k for k, ok in test_results.items() if not ok)
         return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
-                "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
+                "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first,
+                "test_results": test_results, "failing_tests": failing_tests}
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -614,15 +641,18 @@ def health_wait(provider: dict, log) -> bool:
 
 
 def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir: pathlib.Path,
-                timeout_s: float, hint: str | None, cell_id: str, attempt_no: int) -> dict:
+                timeout_s: float, hint: str | None, cell_id: str, attempt_no: int,
+                *, start_ws: pathlib.Path | None = None,
+                snapshot_out: pathlib.Path | None = None) -> dict:
     """跑一次嘗試。回傳的 dict 一定有 `void`（基礎設施失敗）或 `acc`＋`grade`。"""
     agent = {**plan["agent"], **arm.get("agent", {})}
     origin = tdir / "workspace"
+    src_ws = start_ws if start_ws is not None else origin
     tmp = pathlib.Path(tempfile.mkdtemp(prefix="redo-"))
     os.chmod(tmp, 0o700)
     ws, logs = tmp / "w", adir / "logs"
     try:
-        shutil.copytree(origin, ws, symlinks=True)
+        shutil.copytree(src_ws, ws, symlinks=True)
         origin_snap = snapshot(ws)
         prompt = task_prompt(tdir)
         if hint:
@@ -681,6 +711,17 @@ def one_attempt(plan: dict, arm: dict, tdir: pathlib.Path, provider: dict, adir:
         acc = acceptance(origin, ws, plan.get("acceptance", {}))
         gr = grade(tdir, origin, ws, plan.get("grader", {}), acc)
         _archive(ws, adir / "workspace")
+        if snapshot_out is not None:
+            if snapshot_out.exists():
+                shutil.rmtree(snapshot_out)
+            shutil.copytree(ws, snapshot_out, symlinks=True, ignore=shutil.ignore_patterns(*SKIP_DIRS))
+            # Restore pristine original test files in the live snapshot so carried-over workspaces stay clean.
+            acfg = plan.get("acceptance", {})
+            if acfg.get("kind", "workspace_tests") == "workspace_tests":
+                for rel in test_files(origin, acfg.get("patterns", ["*_test.py", "test_*.py"])):
+                    dst = snapshot_out / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    dst.write_bytes((origin / rel).read_bytes())
         write_json(adir / "files.json", {"origin": origin_snap, "final": final_snap})
         return {**meta, "void": None, "acc": acc, "grade": gr}
     finally:
@@ -693,6 +734,30 @@ def make_hint(acc: dict) -> str:
     if _KS1_BANNED.search(HINT_HEAD):
         raise AssertionError("KS-1：提示模板含責任／懲罰類措辭")
     return text
+
+
+def _import_controller():
+    """Import vacant_network.controller (and logbook/identity) from the repo root."""
+    repo_root = str(pathlib.Path(__file__).resolve().parents[2])
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
+    from vacant_network import controller as ctl
+    from vacant_network.identity import Identity
+    from vacant_network.logbook import Logbook
+    return ctl, Identity, Logbook
+
+
+def _acc_to_ctl_record(acc: dict) -> dict:
+    """Extract strictly acceptance-only fields for the evidence controller (never reads grade)."""
+    return {
+        "tests": dict(acc.get("test_results") or {}),
+        "failing_tests": list(acc.get("failing_tests") or []),
+        "passed": int(acc["passed"]) if acc.get("passed") is not None else 0,
+        "total": int(acc["run"]) if acc.get("run") is not None else len(acc.get("test_results") or {}),
+        "accepted": bool(acc.get("accept")),
+        "status": acc.get("status"),
+        "first_problem": acc.get("first_problem"),
+    }
 
 
 # ── 一格（一題 × 一次重複 × 一臂）──────────────────────────────────────────
@@ -708,9 +773,11 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
     cdir.mkdir(parents=True)
     arm, tdir = plan["arms"][arm_name], bank / task
     cell_id = f"{task}/r{rep}/{arm_name}"
-    max_attempts = 1 if arm["policy"] == "single" else int(arm.get("max_attempts", 3))
+    policy = arm["policy"]
+    max_attempts = 1 if policy == "single" else int(arm.get("max_attempts", 3))
     T = float(arm.get("attempt_timeout_s", plan["attempt_timeout_s"]))
     budget = float(arm.get("budget_s", T * max_attempts))
+    min_attempt_s = float(arm.get("min_attempt_s", 60))
     t0, spent = time.time(), 0.0
     attempts: list[dict] = []
     voids = 0
@@ -718,45 +785,154 @@ def run_cell(plan: dict, bank: pathlib.Path, task: str, rep: int, arm_name: str,
                             "plan_sha256": plan["_sha256"], "harness_sha256": HARNESS_SHA, "started": now(),
                             "infra_void": None}
     hint: str | None = None
-    while len(attempts) < max_attempts:
-        remaining = budget - spent
-        if attempts and remaining < float(arm.get("min_attempt_s", 60)):
-            break
-        if not health_wait(provider, log):
-            cell["infra_void"] = "endpoint_down"
-            break
-        k = len(attempts) + 1
-        adir = cdir / f"attempt_{k}"
-        if adir.exists():
-            shutil.rmtree(adir)
-        res = one_attempt(plan, arm, tdir, provider, adir, min(T, remaining), hint, cell_id, k)
-        if res["void"]:
-            voids += 1
-            os.replace(adir, cdir / f"void_{voids}_attempt_{k}")
-            log(f"{cell_id} 第 {k} 次嘗試是基礎設施失敗（{res['void']}），不算嘗試（{voids}/{VOID_RETRIES}）")
-            if voids >= VOID_RETRIES:
-                cell["infra_void"] = f"void×{voids}:{res['void']}"
+    is_ctl = policy == "controller"
+    ctl_snap_root: pathlib.Path | None = pathlib.Path(tempfile.mkdtemp(prefix="redo-ctlsnap-")) if is_ctl else None
+    ctl_mod = ctl_id = ctl_book = None
+    chain_path = cdir / "controller_chain.ndjson"
+    if is_ctl:
+        ctl_mod, _Identity, _Logbook = _import_controller()
+        ctl_id = _Identity.generate()
+        ctl_book = _Logbook()
+    ctl_history: list[dict] = []
+    ctl_snaps: list[pathlib.Path] = []
+    best_idx: int | None = None
+    best_rec: dict | None = None
+    next_start_ws: pathlib.Path | None = None
+    start_ws_label = "origin"
+    try:
+        while len(attempts) < max_attempts:
+            remaining = budget - spent
+            if attempts and remaining < min_attempt_s:
                 break
-            time.sleep(VOID_BACKOFF_S[voids - 1] * float(plan.get("backoff_scale", 1.0)))
-            continue
-        spent += res["wall_s"]
-        write_json(adir / "attempt.json", res)
-        attempts.append(res)
-        # ── 政策：只讀 acc，不讀 grade ──
-        if _policy_stop(arm, res["acc"]):
-            break
-        if arm.get("hint", "none") == "first_failure":
-            hint = make_hint(res["acc"])
+            if not health_wait(provider, log):
+                cell["infra_void"] = "endpoint_down"
+                break
+            k = len(attempts) + 1
+            adir = cdir / f"attempt_{k}"
+            if adir.exists():
+                shutil.rmtree(adir)
+            snap_out = (ctl_snap_root / f"attempt_{k}") if is_ctl and ctl_snap_root is not None else None
+            res = one_attempt(plan, arm, tdir, provider, adir, min(T, remaining), hint, cell_id, k,
+                              start_ws=next_start_ws if is_ctl else None,
+                              snapshot_out=snap_out)
+            if res["void"]:
+                voids += 1
+                os.replace(adir, cdir / f"void_{voids}_attempt_{k}")
+                log(f"{cell_id} 第 {k} 次嘗試是基礎設施失敗（{res['void']}），不算嘗試（{voids}/{VOID_RETRIES}）")
+                if voids >= VOID_RETRIES:
+                    cell["infra_void"] = f"void×{voids}:{res['void']}"
+                    break
+                time.sleep(VOID_BACKOFF_S[voids - 1] * float(plan.get("backoff_scale", 1.0)))
+                continue
+            spent += res["wall_s"]
+            attempts.append(res)
+            if is_ctl:
+                assert ctl_mod is not None and ctl_book is not None and ctl_id is not None and snap_out is not None
+                ctl_snaps.append(snap_out)
+                cur_rec = _acc_to_ctl_record(res["acc"])
+                rem_after = budget - spent
+                rem_attempts = max_attempts - len(attempts)
+                dec = ctl_mod.decide(
+                    cur_rec,
+                    ctl_history,
+                    best_rec,
+                    remaining_attempts=rem_attempts,
+                    remaining_budget_s=rem_after,
+                    min_attempt_s=min_attempt_s,
+                )
+                ctl_mod.controller_event(
+                    ctl_book,
+                    ctl_id,
+                    attempt=k,
+                    decision=dec,
+                    extra={"cell": cell_id, "start_workspace": start_ws_label},
+                )
+                ctl_mod.save_controller_chain(ctl_book, ctl_id, chain_path)
+                res["controller"] = {
+                    "action": dec.action,
+                    "rule": dec.rule,
+                    "passed": dec.evidence["passed"],
+                    "total": dec.evidence["total"],
+                    "signature": dec.evidence["failure_signature"],
+                    "reason": dec.reason,
+                    "feedback_source": dec.feedback_source,
+                    "start_workspace": start_ws_label,
+                }
+                write_json(adir / "attempt.json", res)
+                # Update best_idx / best_rec (tie goes to latest, accepted wins).
+                if best_rec is None or cur_rec["accepted"] or (
+                    not best_rec["accepted"] and cur_rec["passed"] >= best_rec["passed"]
+                ):
+                    best_idx = len(attempts) - 1
+                    best_rec = cur_rec
+                ctl_history.append(cur_rec)
+                if dec.action in (ctl_mod.ACTION_STOP_SUCCESS, ctl_mod.ACTION_DELIVER_BEST_BUDGET):
+                    break
+                if dec.action == ctl_mod.ACTION_RESTORE_BEST:
+                    assert best_idx is not None
+                    next_start_ws = ctl_snaps[best_idx]
+                    start_ws_label = f"restore_best:attempt_{best_idx + 1}"
+                    fb_acc = attempts[best_idx]["acc"]
+                elif dec.action == ctl_mod.ACTION_RESTART_FRESH:
+                    next_start_ws = None
+                    start_ws_label = "restart_fresh:origin"
+                    fb_acc = res["acc"]
+                else:
+                    # repair or continue -> keep current workspace
+                    next_start_ws = ctl_snaps[-1]
+                    start_ws_label = f"{dec.action}:attempt_{k}"
+                    fb_acc = res["acc"]
+                hint = ctl_mod.build_controller_feedback(
+                    dec.action,
+                    fb_acc.get("failing_tests") or [],
+                    fb_acc.get("first_problem"),
+                    status=fb_acc.get("status"),
+                )
+            else:
+                write_json(adir / "attempt.json", res)
+                # ── 政策：只讀 acc，不讀 grade ──
+                if _policy_stop(arm, res["acc"]):
+                    break
+                hint_mode = arm.get("hint", "none")
+                if hint_mode == "first_failure":
+                    hint = make_hint(res["acc"])
+                elif hint_mode == "failing_tests":
+                    _ctl, _, _ = _import_controller()
+                    hint = _ctl.build_feedback(
+                        res["acc"].get("failing_tests") or [],
+                        res["acc"].get("first_problem"),
+                        status=res["acc"].get("status"),
+                    )
+    finally:
+        if ctl_snap_root is not None:
+            shutil.rmtree(ctl_snap_root, ignore_errors=True)
     cell["voids"] = voids
     cell["n_attempts"] = len(attempts)
     cell["wall_s"] = round(time.time() - t0, 1)
     cell["agent_wall_s"] = round(spent, 1)
-    cell["attempts"] = [{"k": i + 1, "accept": a["acc"]["accept"], "acc_status": a["acc"]["status"],
-                         "acc_passed": a["acc"]["passed"], "acc_run": a["acc"]["run"],
-                         "tests_tampered": a["acc"]["tests_tampered"], "grade_pass": a["grade"]["pass"],
-                         "grader_kind": a["grade"]["grader_kind"], "wall_s": a["wall_s"], "timed_out": a["timed_out"],
-                         "rc": a["rc"], "usage": a["usage"], "workspace_changed": a["workspace_changed"]}
-                        for i, a in enumerate(attempts)]
+    cell["attempts"] = [
+        {
+            "k": i + 1, "accept": a["acc"]["accept"], "acc_status": a["acc"]["status"],
+            "acc_passed": a["acc"]["passed"], "acc_run": a["acc"]["run"],
+            "tests_tampered": a["acc"]["tests_tampered"], "grade_pass": a["grade"]["pass"],
+            "grader_kind": a["grade"]["grader_kind"], "wall_s": a["wall_s"], "timed_out": a["timed_out"],
+            "rc": a["rc"], "usage": a["usage"], "workspace_changed": a["workspace_changed"],
+            **(
+                {
+                    "action": a["controller"]["action"],
+                    "rule": a["controller"]["rule"],
+                    "passed": a["controller"]["passed"],
+                    "total": a["controller"]["total"],
+                    "signature": a["controller"]["signature"],
+                    "start_workspace": a["controller"]["start_workspace"],
+                }
+                if "controller" in a else {}
+            ),
+        }
+        for i, a in enumerate(attempts)
+    ]
+    if is_ctl and chain_path.is_file():
+        cell["chain_path"] = str(chain_path)
     if cell["infra_void"] is None and not attempts:
         cell["infra_void"] = "no_attempt"
     if cell["infra_void"] is None:
@@ -1482,6 +1658,141 @@ def selftest(verbose: bool = True) -> int:
         chk(rc_s1 == 0 and len(mp_cells) == 8 and all(len(v) == 1 for v in by_pair.values())
             and read_json(mp_root / "REPORT.json")["pairs_complete"] == 4,
             "再跑 s1：同一個 root 補齊 4 對 8 格，每一對兩臂在同一台")
+        # ── controller 政策（規則 1–6）＋ arm B（hint=failing_tests）的 selftest ──
+        ctl_bank = tmp / "ctl_bank"
+        ctl_state = tmp / "ctl_state"
+        ctl_test_4 = (
+            "import unittest\nfrom sol import f\n\nclass T(unittest.TestCase):\n"
+            "    def test_1(self):\n        self.assertEqual(f(1), 1)\n"
+            "    def test_2(self):\n        self.assertEqual(f(2), 2)\n"
+            "    def test_3(self):\n        self.assertEqual(f(3), 3)\n"
+            "    def test_4(self):\n        self.assertEqual(f(4), 4)\n"
+        )
+        ctl_tasks = ["c_r1_pass", "c_r2_budget", "c_r3_restore", "c_r4_stuck", "c_r5_repair", "c_r6_continue"]
+        for t in ctl_tasks:
+            (ctl_bank / t / "workspace").mkdir(parents=True)
+            (ctl_bank / t / "hidden" / "tests").mkdir(parents=True)
+            (ctl_bank / t / "workspace" / "goal.md").write_text(f"task: {t}\n")
+            (ctl_bank / t / "workspace" / "sol_test.py").write_text(ctl_test_4)
+            (ctl_bank / t / "hidden" / "tests" / "sol_test.py").write_text(ctl_test_4)
+            (ctl_bank / t / "scorer.py").write_text(_TOY_SCORER)
+        ctl_stub = tmp / "ctl_stub.py"
+        ctl_stub.write_text(
+            "import json, os, pathlib, sys\n"
+            "state = pathlib.Path(os.environ['STUB_STATE']); state.mkdir(exist_ok=True)\n"
+            "cell = os.environ['REDO_CELL']; task = cell.split('/')[0]\n"
+            "cf = state / (cell.replace('/', '__') + '.n')\n"
+            "n = int(cf.read_text()) + 1 if cf.exists() else 1; cf.write_text(str(n))\n"
+            "(state / (cell.replace('/', '__') + f'.prompt{n}')).write_text(sys.argv[1])\n"
+            "mk = pathlib.Path('marker.txt')\n"
+            "(state / (cell.replace('/', '__') + f'.marker{n}')).write_text(mk.read_text() if mk.is_file() else '<NONE>')\n"
+            "print(json.dumps({'type': 'message_end', 'message': {'role': 'assistant', 'usage': {'input': 50, 'output': 20}}}))\n"
+            "def w(k):\n"
+            "    pathlib.Path('sol.py').write_text(f'def f(x):\\n    return x if x <= {k} else -1\\n')\n"
+            "if task == 'c_r1_pass':\n"
+            "    w(4)\n"
+            "elif task == 'c_r2_budget':\n"
+            "    w({1: 2, 2: 3, 3: 1}[n]); mk.write_text(f'b{n}')\n"
+            "elif task == 'c_r3_restore':\n"
+            "    if n == 1:\n"
+            "        w(2); mk.write_text('from_att1')\n"
+            "    elif n == 2:\n"
+            "        w(1); mk.write_text('from_att2')\n"
+            "    else:\n"
+            "        w(4)\n"
+            "elif task == 'c_r4_stuck':\n"
+            "    if n in (1, 2):\n"
+            "        w(1); mk.write_text(f'stuck{n}')\n"
+            "    else:\n"
+            "        w(4)\n"
+            "elif task == 'c_r5_repair':\n"
+            "    if n == 1:\n"
+            "        w(3); mk.write_text('keep_repair')\n"
+            "    else:\n"
+            "        w(4)\n"
+            "elif task == 'c_r6_continue':\n"
+            "    if n == 1:\n"
+            "        w(1); mk.write_text('keep_continue')\n"
+            "    else:\n"
+            "        w(4)\n"
+        )
+        ctl_plan = {
+            "schema": SCHEMA, "id": "selftest_ctl", "seed": 20261127, "bank": str(ctl_bank),
+            "tasks": ctl_tasks, "reps": 1,
+            "arms": {
+                "B": {"policy": "restart", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                      "min_attempt_s": 0.5, "hint": "failing_tests"},
+                "C": {"policy": "controller", "max_attempts": 3, "attempt_timeout_s": 5, "budget_s": 15,
+                      "min_attempt_s": 0.5},
+            },
+            "pair": ["B", "C"], "attempt_timeout_s": 5, "backoff_scale": 0.0,
+            "agent": {"argv": [sys.executable, str(ctl_stub), "{prompt}"],
+                      "env": {"STUB_STATE": str(ctl_state)},
+                      "export_cell_env": True, "usage": "pi_json"},
+            "providers": [{"name": "stub", "provider": "p", "model": "m", "jobs": 2}],
+            "acceptance": {"kind": "workspace_tests", "timeout_s": 30},
+            "grader": {"timeout_s": 30},
+            "analysis": {"alpha": 0.05},
+        }
+        ctl_pf = tmp / "ctl_plan.json"
+        write_json(ctl_pf, ctl_plan)
+        ctl_root = tmp / "ctl_root"
+        ctl_ns = argparse.Namespace(plan=str(ctl_pf), root=str(ctl_root), bank=None, only_tasks=None,
+                                    only_reps=None, max_pairs=None, only_providers=None, allow_uncommitted_plan=True)
+        sys.stdout = out if not verbose else old
+        try:
+            rc_ctl = cmd_run(ctl_ns)
+        finally:
+            sys.stdout = old
+        ctl_mod, _, _ = _import_controller()
+        cc = lambda t, arm: read_json(ctl_root / "cells" / t / "r1" / arm / "cell.json")  # noqa: E731
+        c1, c2, c3, c4, c5, c6 = (cc(t, "C") for t in ctl_tasks)
+        chk(rc_ctl == 0, "controller selftest 結束碼 0")
+        chk(c1["n_attempts"] == 1 and c1["attempts"][0]["rule"] == 1 and c1["attempts"][0]["action"] == "stop_success"
+            and c1["pass"] is True, "controller 規則 1（stop_success）：第 1 次全過即停")
+        chk(c2["n_attempts"] == 3 and [a["rule"] for a in c2["attempts"]] == [6, 5, 2]
+            and c2["attempts"][2]["action"] == "deliver_best_budget" and c2["delivered_attempt"] == 2,
+            "controller 規則 2（deliver_best_budget）：預算耗盡交最佳版（attempt 2）")
+        chk([a["rule"] for a in c3["attempts"]] == [6, 3, 1]
+            and c3["attempts"][1]["action"] == "restore_best"
+            and (ctl_state / "c_r3_restore__r1__C.marker3").read_text() == "from_att1"
+            and ctl_mod.ACTION_LINE_RESTORE_BEST in (ctl_state / "c_r3_restore__r1__C.prompt3").read_text(),
+            "controller 規則 3（restore_best）：變差時回到最佳快照（marker=from_att1）與最佳回饋")
+        chk([a["rule"] for a in c4["attempts"]] == [6, 4, 1]
+            and c4["attempts"][1]["action"] == "restart_fresh"
+            and (ctl_state / "c_r4_stuck__r1__C.marker3").read_text() == "<NONE>"
+            and ctl_mod.ACTION_LINE_RESTART_FRESH in (ctl_state / "c_r4_stuck__r1__C.prompt3").read_text(),
+            "controller 規則 4（restart_fresh）：連續 2 次同簽章無進展 ⇒ 從原件重開（無 marker）")
+        chk([a["rule"] for a in c5["attempts"]] == [5, 1]
+            and c5["attempts"][0]["action"] == "repair"
+            and (ctl_state / "c_r5_repair__r1__C.marker2").read_text() == "keep_repair"
+            and ctl_mod.ACTION_LINE_REPAIR in (ctl_state / "c_r5_repair__r1__C.prompt2").read_text(),
+            "controller 規則 5（repair）：≥70%（3/4）保留工作區並修復")
+        chk([a["rule"] for a in c6["attempts"]] == [6, 1]
+            and c6["attempts"][0]["action"] == "continue"
+            and (ctl_state / "c_r6_continue__r1__C.marker2").read_text() == "keep_continue"
+            and ctl_mod.ACTION_LINE_CONTINUE in (ctl_state / "c_r6_continue__r1__C.prompt2").read_text(),
+            "controller 規則 6（continue）：<70% 保留工作區續做")
+        # 驗證每一格 C 的簽章鏈都能驗過並重建決策歷史
+        chains_ok = True
+        for t in ctl_tasks:
+            cp = cc(t, "C").get("chain_path")
+            if not cp or not pathlib.Path(cp).is_file():
+                chains_ok = False
+                break
+            hist = ctl_mod.reconstruct(cp, emit=False)
+            if len(hist) != cc(t, "C")["n_attempts"]:
+                chains_ok = False
+                break
+        chk(chains_ok, "controller 每格皆有合法簽章鏈且 reconstruct() 驗過並還原全部決策")
+        # 驗證 arm B（hint=failing_tests）：用共用回饋產生器（≤400B、KS-1 乾淨）且從原件重開
+        b_prompt2 = (ctl_state / "c_r5_repair__r1__B.prompt2").read_text()
+        b_extra = b_prompt2[len(DEFAULT_PROMPT) + len("\n\n---\n"):]
+        chk(b_prompt2.startswith(DEFAULT_PROMPT) and "Failing tests:" in b_extra
+            and len(b_extra.encode("utf-8")) <= ctl_mod.FEEDBACK_MAX_BYTES
+            and not _KS1_BANNED.search(b_extra)
+            and (ctl_state / "c_r5_repair__r1__B.marker2").read_text() == "<NONE>",
+            f"arm B（hint=failing_tests）：共用回饋 ≤400B（{len(b_extra.encode())}B）且從原件重開")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     bad = [m for ok_, m in checks if not ok_]

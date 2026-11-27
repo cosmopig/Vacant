@@ -595,3 +595,596 @@ class VacantFirstController:
         if require_agent_success and completed.returncode != 0:
             raise AgentRunFailed(final)
         return final
+
+
+# =============================================================================
+# Evidence Controller (DECISION_20261127_EVIDENCE_CONTROLLER.md — frozen)
+# Pure deterministic decision module (stdlib only for decision & feedback),
+# shared feedback generator for arms B and C, signed Logbook events & replay.
+# =============================================================================
+
+import re as _re  # noqa: E402
+import sys as _sys  # noqa: E402
+
+#: Frozen thresholds (DECISION_20261127_EVIDENCE_CONTROLLER.md — do not modify).
+REPAIR_PASS_RATIO: float = 0.70
+STUCK_CONSECUTIVE_SIGNATURE: int = 2
+FEEDBACK_MAX_BYTES: int = 400
+
+#: Controller actions (exact string identifiers).
+ACTION_STOP_SUCCESS = "stop_success"
+ACTION_DELIVER_BEST_BUDGET = "deliver_best_budget"
+ACTION_RESTORE_BEST = "restore_best"
+ACTION_RESTART_FRESH = "restart_fresh"
+ACTION_REPAIR = "repair"
+ACTION_CONTINUE = "continue"
+
+CONTROLLER_ACTIONS: frozenset[str] = frozenset({
+    ACTION_STOP_SUCCESS,
+    ACTION_DELIVER_BEST_BUDGET,
+    ACTION_RESTORE_BEST,
+    ACTION_RESTART_FRESH,
+    ACTION_REPAIR,
+    ACTION_CONTINUE,
+})
+
+CONTROLLER_EVENT_TYPE = "CONTROLLER_DECISION"
+
+#: Exact single-line action instructions appended by arm C (KS-1 clean).
+ACTION_LINE_RESTORE_BEST = (
+    "Action: workspace restored to the best prior snapshot; "
+    "continue from this state and fix the remaining failing tests."
+)
+ACTION_LINE_RESTART_FRESH = (
+    "Action: fresh workspace from the original files; "
+    "the prior approach stalled on these failing tests."
+)
+ACTION_LINE_REPAIR = (
+    "Action: workspace kept (most tests pass); "
+    "repair only the remaining failing tests."
+)
+ACTION_LINE_CONTINUE = (
+    "Action: workspace kept; "
+    "continue from the current files to address the failing tests."
+)
+
+CONTROLLER_ACTION_LINES: dict[str, str] = {
+    ACTION_RESTORE_BEST: ACTION_LINE_RESTORE_BEST,
+    ACTION_RESTART_FRESH: ACTION_LINE_RESTART_FRESH,
+    ACTION_REPAIR: ACTION_LINE_REPAIR,
+    ACTION_CONTINUE: ACTION_LINE_CONTINUE,
+}
+
+#: KS-1 guard covering both vacant_network.memory.KS1_FORBIDDEN and ops/e1 KS1_BANNED_RE.
+_CONTROLLER_KS1_BANNED_RE = _re.compile(
+    r"你有責任|你會被懲罰|你將被懲罰|你要負責|後果自負|會被懲罰|負責任|"
+    r"you are responsible|you will be punished|you will be held accountable|"
+    r"responsib|punish|penal|blame|fault of",
+    _re.I,
+)
+
+
+def _assert_ks1_static_strings() -> None:
+    """Verify all controller static feedback/action strings are KS-1 clean."""
+    static_strings = (
+        "Failing tests: ",
+        "Acceptance status: ",
+        "First failure:",
+        *CONTROLLER_ACTION_LINES.values(),
+    )
+    for text in static_strings:
+        m = _CONTROLLER_KS1_BANNED_RE.search(text)
+        if m:
+            raise ValueError(f"KS-1 violation in controller string: {m.group(0)!r}")
+
+
+_assert_ks1_static_strings()
+
+
+@dataclass(frozen=True)
+class Decision:
+    """Output of one deterministic evidence-controller step."""
+
+    action: str
+    rule: int
+    evidence: dict[str, Any]
+    reason: str
+    feedback_source: str = "none"  # "none" | "current" | "best"
+    delivered_index: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "action": self.action,
+            "rule": self.rule,
+            "evidence": self.evidence,
+            "reason": self.reason,
+            "feedback_source": self.feedback_source,
+            "delivered_index": self.delivered_index,
+        }
+
+
+def compute_failure_signature(
+    tests: Mapping[str, bool] | None = None,
+    *,
+    accepted: bool = False,
+    status: str | None = None,
+) -> list[str]:
+    """Canonical sorted list of failing test names (or status sentinel when no tests ran)."""
+    if tests:
+        failing = sorted(str(k) for k, ok in tests.items() if not ok)
+        if failing:
+            return failing
+    if not accepted:
+        return [f"__status__:{status or 'error'}"]
+    return []
+
+
+def normalize_attempt(rec: Mapping[str, Any]) -> dict[str, Any]:
+    """Normalize an attempt acceptance record into canonical stdlib primitives."""
+    raw_tests = rec.get("tests")
+    if raw_tests is None:
+        raw_tests = rec.get("test_results")
+    tests: dict[str, bool] = (
+        {str(k): bool(v) for k, v in raw_tests.items()}
+        if isinstance(raw_tests, Mapping)
+        else {}
+    )
+    raw_total = rec.get("total")
+    if raw_total is None:
+        raw_total = rec.get("run")
+    total = int(raw_total) if raw_total is not None else len(tests)
+
+    raw_passed = rec.get("passed")
+    if raw_passed is not None:
+        passed = int(raw_passed)
+    else:
+        passed = sum(1 for v in tests.values() if v)
+
+    raw_acc = rec.get("accepted")
+    if raw_acc is None:
+        raw_acc = rec.get("accept")
+    status = str(rec["status"]) if rec.get("status") is not None else None
+    if raw_acc is not None:
+        accepted = bool(raw_acc)
+    else:
+        accepted = bool(total > 0 and passed == total and all(tests.values()))
+
+    raw_sig = rec.get("failure_signature")
+    if raw_sig is None and rec.get("failing_tests") is not None:
+        raw_sig = rec.get("failing_tests")
+    if raw_sig is not None:
+        sig = sorted({str(x) for x in raw_sig if str(x)})
+        if not sig and not accepted:
+            sig = compute_failure_signature(tests, accepted=False, status=status)
+    else:
+        sig = compute_failure_signature(tests, accepted=accepted, status=status)
+
+    first_problem = rec.get("first_problem")
+    return {
+        "tests": tests,
+        "passed": passed,
+        "total": total,
+        "accepted": accepted,
+        "status": status,
+        "failure_signature": sig,
+        "first_problem": str(first_problem) if first_problem is not None else None,
+    }
+
+
+def select_best_index(attempts: Sequence[Mapping[str, Any]]) -> int:
+    """Choose best attempt index: first accepted, else highest passed count (ties -> latest)."""
+    if not attempts:
+        raise ValueError("attempts must be non-empty")
+    normed = [normalize_attempt(a) for a in attempts]
+    for i, a in enumerate(normed):
+        if a["accepted"]:
+            return i
+    return max(range(len(normed)), key=lambda i: (normed[i]["passed"], i))
+
+
+def decide(
+    current: Mapping[str, Any],
+    history: Sequence[Mapping[str, Any]],
+    best: Mapping[str, Any] | None = None,
+    *,
+    remaining_attempts: int,
+    remaining_budget_s: float,
+    min_attempt_s: float = 0.0,
+) -> Decision:
+    """Pure, deterministic evidence-controller rule evaluator (rules 1..6 in frozen order).
+
+    Rule order (first match wins):
+      1. All acceptance tests pass -> stop_success
+      2. Budget exhausted (attempts or wall time) -> deliver_best_budget
+      3. Current worse than known best (passed < best.passed) -> restore_best
+      4. No progress: identical failure signature 2 consecutive times with no
+         increase in passed count -> restart_fresh
+      5. Mostly passing (passed >= 70% of total, total > 0) -> repair
+      6. Otherwise -> continue
+    """
+    cur = normalize_attempt(current)
+    hist = [normalize_attempt(h) for h in history]
+    all_attempts = [*hist, cur]
+
+    prior_best: dict[str, Any] | None
+    if best is not None:
+        prior_best = normalize_attempt(best)
+    elif hist:
+        prior_best = hist[select_best_index(hist)]
+    else:
+        prior_best = None
+
+    overall_best_idx = select_best_index(all_attempts)
+    overall_best = all_attempts[overall_best_idx]
+
+    cur_sig = cur["failure_signature"]
+    cur_passed = cur["passed"]
+    cur_total = cur["total"]
+    cur_accepted = cur["accepted"]
+
+    prev = hist[-1] if hist else None
+    consecutive_same_sig = 0
+    if cur_sig:
+        consecutive_same_sig = 1
+        for prev_item in reversed(hist):
+            if prev_item["failure_signature"] == cur_sig:
+                consecutive_same_sig += 1
+            else:
+                break
+
+    worse_than_best = prior_best is not None and cur_passed < prior_best["passed"]
+    no_progress_stuck = (
+        prev is not None
+        and bool(cur_sig)
+        and prev["failure_signature"] == cur_sig
+        and cur_passed <= prev["passed"]
+        and consecutive_same_sig >= STUCK_CONSECUTIVE_SIGNATURE
+    )
+    mostly_passing = cur_total > 0 and (cur_passed * 10 >= cur_total * 7)
+    pass_ratio = (cur_passed / cur_total) if cur_total > 0 else 0.0
+
+    rem_attempts = int(remaining_attempts)
+    rem_budget_s = float(remaining_budget_s)
+    min_att_s = float(min_attempt_s)
+    budget_exhausted = rem_attempts <= 0 or rem_budget_s <= 0.0 or rem_budget_s < min_att_s
+
+    evidence: dict[str, Any] = {
+        "tests": dict(cur["tests"]),
+        "failure_signature": list(cur_sig),
+        "passed": cur_passed,
+        "total": cur_total,
+        "accepted": cur_accepted,
+        "status": cur["status"],
+        "pass_ratio": round(pass_ratio, 6),
+        "prior_best_passed": prior_best["passed"] if prior_best is not None else None,
+        "prior_best_total": prior_best["total"] if prior_best is not None else None,
+        "worse_than_best": worse_than_best,
+        "consecutive_same_signature": consecutive_same_sig,
+        "no_progress_stuck": no_progress_stuck,
+        "mostly_passing": mostly_passing,
+        "remaining_attempts": rem_attempts,
+        "remaining_budget_s": round(rem_budget_s, 3),
+        "min_attempt_s": round(min_att_s, 3),
+        "history_len": len(hist),
+    }
+
+    # Rule 1: All acceptance tests pass -> stop early and deliver current version.
+    if cur_accepted:
+        evidence["delivered_attempt"] = len(hist) + 1
+        evidence["delivered_passed"] = cur_passed
+        evidence["unsatisfied"] = []
+        return Decision(
+            action=ACTION_STOP_SUCCESS,
+            rule=1,
+            evidence=evidence,
+            reason=f"all acceptance tests passed ({cur_passed}/{cur_total})",
+            feedback_source="none",
+            delivered_index=len(hist),
+        )
+
+    # Rule 2: Budget exhausted -> deliver best version and list unsatisfied items.
+    if budget_exhausted:
+        evidence["delivered_attempt"] = overall_best_idx + 1
+        evidence["delivered_passed"] = overall_best["passed"]
+        evidence["unsatisfied"] = list(overall_best["failure_signature"])
+        return Decision(
+            action=ACTION_DELIVER_BEST_BUDGET,
+            rule=2,
+            evidence=evidence,
+            reason=(
+                f"budget exhausted (remaining_attempts={rem_attempts}, "
+                f"remaining_budget_s={round(rem_budget_s, 1)}); "
+                f"delivering attempt {overall_best_idx + 1} "
+                f"({overall_best['passed']}/{overall_best['total']})"
+            ),
+            feedback_source="none",
+            delivered_index=overall_best_idx,
+        )
+
+    # Rule 3: Worse than known best -> restore best snapshot, feedback from best.
+    if worse_than_best:
+        assert prior_best is not None
+        return Decision(
+            action=ACTION_RESTORE_BEST,
+            rule=3,
+            evidence=evidence,
+            reason=(
+                f"regression below best ({cur_passed} < {prior_best['passed']}); "
+                f"restoring best snapshot"
+            ),
+            feedback_source="best",
+            delivered_index=None,
+        )
+
+    # Rule 4: Stuck (same failure signature 2 consecutive times, no increase) -> restart fresh.
+    if no_progress_stuck:
+        return Decision(
+            action=ACTION_RESTART_FRESH,
+            rule=4,
+            evidence=evidence,
+            reason=(
+                f"no progress: identical failure signature {consecutive_same_sig} "
+                f"consecutive times with passed={cur_passed}"
+            ),
+            feedback_source="current",
+            delivered_index=None,
+        )
+
+    # Rule 5: Mostly passing (>= 70%) -> keep workspace and repair failing items.
+    if mostly_passing:
+        return Decision(
+            action=ACTION_REPAIR,
+            rule=5,
+            evidence=evidence,
+            reason=f"mostly passing ({cur_passed}/{cur_total} = {pass_ratio:.1%} >= 70%)",
+            feedback_source="current",
+            delivered_index=None,
+        )
+
+    # Rule 6: Otherwise -> keep workspace and continue.
+    return Decision(
+        action=ACTION_CONTINUE,
+        rule=6,
+        evidence=evidence,
+        reason=f"continuing from current workspace ({cur_passed}/{cur_total})",
+        feedback_source="current",
+        delivered_index=None,
+    )
+
+
+def _truncate_utf8(text: str, max_bytes: int) -> str:
+    """Truncate text so its UTF-8 encoding is at most max_bytes without splitting code points."""
+    if max_bytes <= 0:
+        return ""
+    raw = text.encode("utf-8")
+    if len(raw) <= max_bytes:
+        return text
+    return raw[:max_bytes].decode("utf-8", errors="ignore")
+
+
+def _fit_first_problem(problem: str, max_bytes: int) -> str:
+    """Fit first failure message within max_bytes, preserving assertion/error lines when truncated."""
+    cleaned = problem.strip()
+    if not cleaned or max_bytes <= 0:
+        return ""
+    if len(cleaned.encode("utf-8")) <= max_bytes:
+        return cleaned
+    lines = [ln.rstrip() for ln in cleaned.splitlines() if ln.strip()]
+    if not lines:
+        return ""
+    # Prefer keeping the final error/assertion line (often at the end of a unittest traceback).
+    exc_line = ""
+    for ln in reversed(lines):
+        tok = ln.strip().split(":", 1)[0]
+        if tok and " " not in tok and tok.endswith(("Error", "Exception", "Failure")):
+            exc_line = ln.strip()
+            break
+    if exc_line and len(exc_line.encode("utf-8")) <= max_bytes:
+        head = lines[0].strip()
+        if head != exc_line:
+            combo = f"{head}\n{exc_line}"
+            if len(combo.encode("utf-8")) <= max_bytes:
+                return combo
+        return exc_line
+    # Otherwise keep the tail (where unittest prints the assertion diff/error).
+    raw = cleaned.encode("utf-8")
+    tail = raw[-max_bytes:].decode("utf-8", errors="ignore")
+    return tail
+
+
+def build_feedback(
+    failing_tests: Sequence[str],
+    first_problem: str | None = None,
+    *,
+    status: str | None = None,
+    max_bytes: int = FEEDBACK_MAX_BYTES,
+) -> str:
+    """Shared feedback generator used by BOTH arm B and arm C.
+
+    Includes failing test names and the first failure message, strictly <= max_bytes (400B)
+    in UTF-8. Pure stdlib, KS-1 clean.
+    """
+    names = sorted({
+        str(t).strip()
+        for t in failing_tests
+        if str(t).strip() and not str(t).startswith("__status__:")
+    })
+    prob = (first_problem or "").strip()
+
+    if names:
+        prefix = "Failing tests: "
+        # Reserve room for first failure message when present.
+        name_budget = min(180, max_bytes // 2) if prob else max_bytes
+        name_budget = max(name_budget, min(max_bytes, len(prefix) + 24))
+        kept: list[str] = []
+        for idx, name in enumerate(names):
+            rem = len(names) - (idx + 1)
+            suffix = f" (+{rem} more)" if rem > 0 else ""
+            cand = prefix + ", ".join([*kept, name]) + suffix
+            if len(cand.encode("utf-8")) <= name_budget:
+                kept.append(name)
+            else:
+                break
+        if kept:
+            rem = len(names) - len(kept)
+            header = prefix + ", ".join(kept) + (f" (+{rem} more)" if rem > 0 else "")
+        else:
+            header = _truncate_utf8(prefix + names[0], name_budget)
+    else:
+        header = _truncate_utf8(f"Acceptance status: {status or 'failed'}", max_bytes)
+
+    if not prob:
+        return _truncate_utf8(header, max_bytes)
+
+    sep = "\nFirst failure:\n"
+    rem_bytes = max_bytes - len(header.encode("utf-8")) - len(sep.encode("utf-8"))
+    if rem_bytes <= 8:
+        return _truncate_utf8(header, max_bytes)
+
+    fitted = _fit_first_problem(prob, rem_bytes)
+    out = f"{header}{sep}{fitted}" if fitted else header
+    return _truncate_utf8(out, max_bytes)
+
+
+def build_controller_feedback(
+    action: str,
+    failing_tests: Sequence[str],
+    first_problem: str | None = None,
+    *,
+    status: str | None = None,
+    max_bytes: int = FEEDBACK_MAX_BYTES,
+) -> str:
+    """Arm C feedback: shared base feedback (<=400B) plus one exact KS-1-clean action line."""
+    if action not in CONTROLLER_ACTION_LINES:
+        raise ValueError(f"no feedback action line for action {action!r}")
+    base = build_feedback(
+        failing_tests, first_problem, status=status, max_bytes=max_bytes
+    )
+    return f"{base}\n{CONTROLLER_ACTION_LINES[action]}"
+
+
+def controller_event(
+    logbook: Any,
+    identity: Any,
+    *,
+    attempt: int,
+    decision: Decision,
+    ts_ms: int | None = None,
+    extra: Mapping[str, Any] | None = None,
+) -> Any:
+    """Append a signed CONTROLLER_DECISION event to a vacant_network.logbook.Logbook."""
+    from . import crypto
+
+    ts = int(ts_ms) if ts_ms is not None else (time.time_ns() // 1_000_000)
+    payload: dict[str, Any] = {
+        "attempt": int(attempt),
+        "action": decision.action,
+        "rule": int(decision.rule),
+        "reason": decision.reason,
+        "feedback_source": decision.feedback_source,
+        "delivered_index": decision.delivered_index,
+        "evidence": decision.evidence,
+        "signer": {
+            "vacant_id": identity.vacant_id,
+            "pub_hex": crypto.pub_to_hex(identity.pub),
+        },
+    }
+    if extra:
+        payload["extra"] = dict(extra)
+    return logbook.append(CONTROLLER_EVENT_TYPE, payload, identity, ts_ms=ts)
+
+
+def save_controller_chain(logbook: Any, identity: Any, chain_path: str | Path) -> Path:
+    """Atomically persist a controller Logbook chain and its sidecar public key JSON."""
+    from . import crypto
+
+    path = Path(chain_path)
+    logbook.save(path)
+    pub_path = path.with_suffix(".pub.json")
+    pub_doc = {
+        "vacant_id": identity.vacant_id,
+        "pub_hex": crypto.pub_to_hex(identity.pub),
+    }
+    atomic_write_text(pub_path, json.dumps(pub_doc, ensure_ascii=False, indent=2) + "\n")
+    return path
+
+
+def reconstruct(
+    chain_path: str | Path,
+    *,
+    pub: Any = None,
+    stream: Any = None,
+    emit: bool = True,
+) -> list[dict[str, Any]]:
+    """Verify a signed controller chain and print/return its reconstructed decision history.
+
+    Raises vacant_network.logbook.ChainError if the chain is missing, empty, or fails
+    cryptographic hash-chain / signature verification.
+    """
+    from .identity import PublicIdentity
+    from .logbook import ChainError, Logbook
+
+    path = Path(chain_path)
+    if not path.is_file():
+        raise ChainError(f"controller chain not found: {path}")
+    try:
+        book = Logbook.load(path)
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        raise ChainError(f"failed to load controller chain {path}: {exc}") from exc
+    if not book.entries:
+        raise ChainError(f"controller chain is empty: {path}")
+
+    who = pub
+    if who is None:
+        pub_path = path.with_suffix(".pub.json")
+        if pub_path.is_file():
+            try:
+                pub_doc = json.loads(pub_path.read_text(encoding="utf-8"))
+                who = PublicIdentity.from_hex(pub_doc["vacant_id"], pub_doc["pub_hex"])
+            except Exception as exc:
+                raise ChainError(f"invalid sidecar public key {pub_path}: {exc}") from exc
+        else:
+            genesis_signer = (
+                book.entries[0].payload.get("signer")
+                if isinstance(book.entries[0].payload, dict)
+                else None
+            )
+            if not isinstance(genesis_signer, dict) or "vacant_id" not in genesis_signer or "pub_hex" not in genesis_signer:
+                raise ChainError("no PublicIdentity provided and no signer metadata in chain")
+            who = PublicIdentity.from_hex(genesis_signer["vacant_id"], genesis_signer["pub_hex"])
+
+    if not book.verify_chain(who):
+        raise ChainError(f"controller chain verification failed (tampered or bad signature): {path}")
+
+    history: list[dict[str, Any]] = []
+    out_stream = stream if stream is not None else _sys.stdout
+    for entry in book.entries:
+        if entry.type != CONTROLLER_EVENT_TYPE or not isinstance(entry.payload, dict):
+            continue
+        p = entry.payload
+        ev = p.get("evidence") or {}
+        rec = {
+            "seq": entry.seq,
+            "ts_ms": entry.ts_ms,
+            "attempt": p.get("attempt"),
+            "rule": p.get("rule"),
+            "action": p.get("action"),
+            "reason": p.get("reason"),
+            "feedback_source": p.get("feedback_source"),
+            "delivered_index": p.get("delivered_index"),
+            "evidence": ev,
+            "extra": p.get("extra"),
+        }
+        history.append(rec)
+        if emit:
+            passed = ev.get("passed")
+            total = ev.get("total")
+            sig = ev.get("failure_signature") or []
+            rem_b = ev.get("remaining_budget_s")
+            print(
+                f"seq={entry.seq} attempt={rec['attempt']} rule={rec['rule']} "
+                f"action={rec['action']} passed={passed}/{total} "
+                f"sig={sig} rem_budget={rem_b}s — {rec['reason']}",
+                file=out_stream,
+            )
+    return history

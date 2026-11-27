@@ -296,7 +296,26 @@ def _main():
         "unexpected_successes": 0,
         "load_error": None,
         "first_problem": None,
+        "test_results": {},
     }
+    class _TrackResult(_Result):
+        def __init__(self):
+            super().__init__()
+            self.test_results = {}
+        def _tid(self, test):
+            return test.id() if hasattr(test, "id") else str(test)
+        def addSuccess(self, test):
+            super().addSuccess(test); self.test_results[self._tid(test)] = True
+        def addFailure(self, test, err):
+            super().addFailure(test, err); self.test_results[self._tid(test)] = False
+        def addError(self, test, err):
+            super().addError(test, err); self.test_results[self._tid(test)] = False
+        def addSkip(self, test, reason):
+            super().addSkip(test, reason); self.test_results[self._tid(test)] = False
+        def addExpectedFailure(self, test, err):
+            super().addExpectedFailure(test, err); self.test_results[self._tid(test)] = True
+        def addUnexpectedSuccess(self, test):
+            super().addUnexpectedSuccess(test); self.test_results[self._tid(test)] = False
     use_pkg_prefix = False
     if pkg_chain and pkg_prefix and pkg_chain[0][0] not in _sys.modules:
         try:
@@ -334,13 +353,14 @@ def _main():
             except BaseException:
                 out["load_error"] = _tb.format_exc(limit=3)[-800:]
                 break
-            res = _Result()
+            res = _TrackResult()
             suite.run(res)
             out["run"] += res.testsRun
             out["failures"] += len(res.failures)
             out["errors"] += len(res.errors)
             out["skipped"] += len(res.skipped)
             out["unexpected_successes"] += len(res.unexpectedSuccesses)
+            out["test_results"].update(res.test_results)
             probs = res.failures + res.errors
             if probs and out["first_problem"] is None:
                 out["first_problem"] = _fp(probs[0][0], probs[0][1])
@@ -6078,6 +6098,7 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
     work_res = work.resolve()
     proj_str = str(project_root.resolve()) if project_root is not None else None
     agg = {k: 0 for k in _RESULT_KEYS}
+    test_results: dict[str, bool] = {}
     first: str | None = None
     for idx, (d, mod_entries) in enumerate(sorted(by_dir.items())):
         if deadline - time.monotonic() <= 0:
@@ -6139,14 +6160,20 @@ def _run_python_unittest(base: dict[str, Any], tests: list[str], work: pathlib.P
             return {**base, "status": "load_error", "first_problem": r["load_error"], "run": agg["run"]}
         for k in _RESULT_KEYS:
             agg[k] += r[k]
+        if isinstance(r.get("test_results"), dict):
+            for tid, ok_flag in r["test_results"].items():
+                key = f"{d}/{tid}" if d else str(tid)
+                test_results[key] = bool(ok_flag)
         first = first or r["first_problem"]
 
     bad = agg["failures"] + agg["errors"] + agg["unexpected_successes"]
     if agg["run"] == 0 and bad == 0:
         return {**base, "status": "no_tests_collected", "run": 0, "passed": 0,
                 "accept": None, "first_problem": first}
+    failing_tests = sorted(k for k, ok_flag in test_results.items() if not ok_flag)
     return {**base, "status": "ok", "run": agg["run"], "passed": agg["run"] - bad - agg["skipped"],
-            "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first}
+            "accept": agg["run"] > 0 and bad == 0 and agg["skipped"] == 0, "first_problem": first,
+            "test_results": test_results, "failing_tests": failing_tests}
 
 
 def _run_python_pytest(base: dict[str, Any], tests: list[str], work: pathlib.Path,
@@ -7448,7 +7475,10 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
         protect: Sequence[str] | None = None,
         agent: str | None = None,
         log: Callable[[str], None] | None = None,
-        stream: bool = False) -> dict:
+        stream: bool = False,
+        policy: str = "restart") -> dict:
+    if policy not in ("restart", "controller"):
+        raise ValueError(f"unknown policy {policy!r}; expected 'restart' or 'controller'")
     project = project.resolve()
     _raw_say = log or (lambda m: None)
     say = lambda m: _raw_say(_safe_str(m)[0])  # noqa: E731
@@ -7456,6 +7486,8 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
     run_dir = work_root() / f"restart-{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}-{secrets.token_hex(3)}"
     run_dir.mkdir(parents=True, exist_ok=True)
     run_id = run_dir.name
+    use_controller = policy == "controller"
+    ctl_chain_path = run_dir / "controller_chain.ndjson"
     attempts: list[dict] = []
     snaps: list[_Snapshot | None] = []
     launch_meta: list[tuple[list[str], dict[str, str]]] = []
@@ -7798,6 +7830,20 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             t_sh = time.monotonic()
             nm_sha_start = _nm_cheap_sha_manifest(nm_root, nm_start)
             nm_hash_s += time.monotonic() - t_sh
+        ctl_mod = ctl_id = ctl_book = None
+        if use_controller:
+            from .. import controller as _ctl_mod
+            from ..identity import Identity as _CtlIdentity
+            from ..logbook import Logbook as _CtlLogbook
+            ctl_mod = _ctl_mod
+            ctl_id = _CtlIdentity.generate()
+            ctl_book = _CtlLogbook()
+        ctl_history: list[dict[str, Any]] = []
+        ctl_best_idx: int | None = None
+        ctl_best_rec: dict[str, Any] | None = None
+        ctl_next_src: pathlib.Path = start_copy
+        ctl_prompt: str = prompt
+        ctl_start_label = "origin"
         while len(attempts) < max_attempts:
             remaining = budget_s - (time.monotonic() - t0) - reserve
             if attempts and remaining < min_attempt_s:
@@ -7807,8 +7853,15 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             attempt_dir = run_dir / f"attempt_{k}"
             ws = attempt_dir / "w"
             t_cp = time.monotonic()
-            shutil.copytree(start_copy, ws, symlinks=True)
+            src_tree = ctl_next_src if use_controller else start_copy
+            shutil.copytree(src_tree, ws, symlinks=True)
             _make_tree_writable(ws)
+            if use_controller and src_tree != start_copy:
+                # Ensure protected test/config files remain pristine in carried-over/restored workspaces.
+                for rel, raw_bytes in originals.items():
+                    dst_p = ws / rel
+                    dst_p.parent.mkdir(parents=True, exist_ok=True)
+                    dst_p.write_bytes(raw_bytes)
             nm_c_s, fb = _copy_node_modules_for_agent(project, ws)
             nm_copy_s += nm_c_s
             copy_s += time.monotonic() - t_cp
@@ -7817,7 +7870,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 if not nm_reflink_warned:
                     nm_reflink_warned = True
                     say("warning: node_modules reflink copy is not supported on this filesystem; fell back to plain copy")
-            launch = build(prompt, ws)
+            launch = build(ctl_prompt if use_controller else prompt, ws)
             launch_meta.append((list(launch.argv), dict(launch.env)))
             attempt_launch = dataclasses.replace(launch, env={**launch.env, _DETACHED_MARKER_ENV: run_id})
             attempt_limit_s = min(attempt_timeout_s, remaining)
@@ -7983,7 +8036,9 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 attempts[-1]["node_modules_changed"] = nm_changed[:200]
                 say(f"attempt {k}: node_modules changed during the check; not accepted, stopping, nothing written back")
                 break
-            if acc["accept"] is None or acc["accept"] is True:
+            if acc["accept"] is None:
+                break
+            if not use_controller and acc["accept"] is True:
                 break
             # agent 一啟動就失敗（找不到執行檔、版本不合當場崩潰、沒設定模型就退出）：重開也只會一樣，
             # 停下來把 agent 自己的錯誤講出來，而不是靜靜燒完剩下的嘗試。
@@ -7997,6 +8052,66 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
                 say(f"attempt {k}: the agent exited with an error after {r['wall_ms'] / 1000.0:.1f}s without "
                     f"changing anything; not restarting. agent said: {agent_error.splitlines()[-1] if agent_error else '(nothing)'}")
                 break
+            if use_controller:
+                assert ctl_mod is not None and ctl_book is not None and ctl_id is not None
+                cur_rec = {
+                    "tests": dict(acc.get("test_results") or {}),
+                    "failing_tests": list(acc.get("failing_tests") or []),
+                    "passed": int(acc["passed"]) if acc.get("passed") is not None else 0,
+                    "total": int(acc["run"]) if acc.get("run") is not None else len(acc.get("test_results") or {}),
+                    "accepted": bool(acc.get("accept")),
+                    "status": acc.get("status"),
+                    "first_problem": acc.get("first_problem"),
+                }
+                rem_after = budget_s - (time.monotonic() - t0) - reserve
+                dec = ctl_mod.decide(
+                    cur_rec,
+                    ctl_history,
+                    ctl_best_rec,
+                    remaining_attempts=max_attempts - len(attempts),
+                    remaining_budget_s=rem_after,
+                    min_attempt_s=min_attempt_s,
+                )
+                ctl_mod.controller_event(
+                    ctl_book,
+                    ctl_id,
+                    attempt=k,
+                    decision=dec,
+                    extra={"run_id": run_id, "start_workspace": ctl_start_label},
+                )
+                ctl_mod.save_controller_chain(ctl_book, ctl_id, ctl_chain_path)
+                attempts[-1]["controller_action"] = dec.action
+                attempts[-1]["controller_rule"] = dec.rule
+                attempts[-1]["controller_signature"] = dec.evidence["failure_signature"]
+                attempts[-1]["failing_tests"] = list(acc.get("failing_tests") or [])
+                say(f"attempt {k}: controller rule {dec.rule} -> {dec.action} ({dec.reason})")
+                if ctl_best_rec is None or cur_rec["accepted"] or (
+                    not ctl_best_rec["accepted"] and cur_rec["passed"] >= ctl_best_rec["passed"]
+                ):
+                    ctl_best_idx = len(attempts) - 1
+                    ctl_best_rec = cur_rec
+                ctl_history.append(cur_rec)
+                if dec.action in (ctl_mod.ACTION_STOP_SUCCESS, ctl_mod.ACTION_DELIVER_BEST_BUDGET):
+                    break
+                if dec.action == ctl_mod.ACTION_RESTORE_BEST and ctl_best_idx is not None and snaps[ctl_best_idx] is not None:
+                    ctl_next_src = snaps[ctl_best_idx].root
+                    ctl_start_label = f"restore_best:attempt_{ctl_best_idx + 1}"
+                    fb_att = attempts[ctl_best_idx]
+                elif dec.action == ctl_mod.ACTION_RESTART_FRESH:
+                    ctl_next_src = start_copy
+                    ctl_start_label = "restart_fresh:origin"
+                    fb_att = attempts[-1]
+                else:
+                    ctl_next_src = snap.root if snap is not None else start_copy
+                    ctl_start_label = f"{dec.action}:attempt_{k}"
+                    fb_att = attempts[-1]
+                fb_text = ctl_mod.build_controller_feedback(
+                    dec.action,
+                    fb_att.get("failing_tests") or [],
+                    fb_att.get("first_problem"),
+                    status=fb_att.get("status"),
+                )
+                ctl_prompt = prompt + "\n\n---\n" + fb_text
 
         if nm_start is not None and not nm_changed:
             t_nm = time.monotonic()
@@ -8152,6 +8267,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "agent_wall_s": round(spent, 1),
             "total_wall_s": round(time.monotonic() - t0, 1),
             "run_dir": str(run_dir),
+            **({"policy": "controller", "controller_chain": str(ctl_chain_path)} if use_controller and ctl_chain_path.is_file() else {}),
         }
         raw_changed = changed
         res, res_non_utf8 = _sanitize_json_obj(res)
@@ -8243,6 +8359,7 @@ def run(project: pathlib.Path, build: Callable[[str, pathlib.Path], Launch], pro
             "agent_wall_s": round(spent, 1),
             "total_wall_s": round(time.monotonic() - t0, 1),
             "run_dir": str(run_dir),
+            **({"policy": "controller", "controller_chain": str(ctl_chain_path)} if use_controller and ctl_chain_path.is_file() else {}),
         }
         res, res_non_utf8 = _sanitize_json_obj(res)
         res["non_utf8_paths"] = res_non_utf8

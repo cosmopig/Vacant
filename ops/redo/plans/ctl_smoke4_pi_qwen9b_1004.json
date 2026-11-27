@@ -1,0 +1,94 @@
+{
+ "id": "ctl_smoke4_pi_qwen9b_1004",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "~/dev/ops/ref/bm_tasks/ctl_smoke4",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl_smoke4"
+ ],
+ "arms": {
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/dev/ops/agentcfg/d2v52",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1004q9",
+   "provider": "lms1004q9",
+   "model": "qwen/qwen3.5-9b",
+   "jobs": 1
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "ex_matrix",
+  "ex_point_mutations",
+  "ex_series",
+  "ex_rotational_cipher"
+ ],
+ "reps": 1,
+ "prereg": {
+  "purpose": "冒煙與機制驗證（不進正式 16 題批次）：用 4 題未用過的 exercism_py_pool 題（皆 >=8 測試、與 ctl16 互斥），確認控制器（C）與失敗回饋重開（B）在真模型 qwen/qwen3.5-9b（lms1004q9）上跑通、各規則與簽章鏈正常、0 harness 例外。",
+  "bank_split": "由 ops/redo/banks/build_ctl16.py --smoke4 以固定種子 20261127 切半（驗收半在 workspace/、隱藏評分半在 hidden/ + scorer.py）。",
+  "infra_void": "基礎設施失敗（agent 起不來、工作區未動且 0 次成功模型呼叫或連線錯誤、跑到一半模型連線錯誤）記 void 不算嘗試（最多重試 4 次）；仍失敗該格標 infra_void、不進分母並逐一列出。",
+  "exploratory_only": "本冒煙不作任何效果宣稱，亦不依冒煙結果替換正式 16 題或調整控制器門檻。"
+ }
+}
