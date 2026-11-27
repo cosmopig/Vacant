@@ -200,3 +200,8 @@
 4. **速度的揭露**：ctl12 撞到 600 秒上限的格是 R 9/48、B 8/47、C 10/47；A 的上限是 1800 秒，撞到的有 3/36。幾乎全在 1004（12 串流、每串流約 38 tok/s）。三個重開臂的暴露程度相同；但 A 是單次 1800 秒、其他臂是 3×600 秒，結構不同，慢速對有 600 秒上限的臂不利。
 - **ctl34 OOM（11-27 12:56:55Z）**：1004 的單元 `ctl34-1004` 在 4 GB cgroup 上限內被 OOM killer 殺掉。runner 記錄「正在跑的那一格會被丟掉（下次續跑重做），已完成的格保留」。照續跑規則同計畫、同 root、同 `--only-providers lms1004gemmaN` 續跑（13:0xZ）。當時 ctl34 完成 190/272、infra_void 2。
 - **⚠ ctl34 的 harness 中途變更**：1004 在 12:59:39Z 續跑時，redo.py 的 harness sha 從 `8ce7d87fbfae`（05:30 起跑）變成 `4c687dcaf469`。中間加的是外部考卷的 `acceptance_source`／`acceptance_pass_ratio`、實驗 N 的 `prompt_suffix` 等選用欄位；ctl34 的計畫沒有用到這些欄位，selftest 46/46 確認沒設欄位時行為不變。但依紀錄規則，這仍然是 harness_changed_mid_run，**報告裡照實標出**；1003 的 runner 沒有重啟，仍是舊的 harness。
+
+## 實驗 T 發射（11-27 14:3xZ，1004 先跑）
+- 計畫 `ops/d2/plans/expT_qwen9b.json`（推上遠端的 929df323e）。1004 跑完了 ctl34 自己那一半（132/132），**先在 1004 發射 T 的 1004 那一半**（`--provider lms1004`，18 組×2 次）；1003 等 ctl34 跑完再發射它那一半（19 組）。各組由哪台跑照計畫的 sets 分配，不變。
+- 1004 載 qwen3.5-9b、131072／parallel 2、jobs 2（照計畫；9B 在 2 串流時每串流 96 tok/s，約單串流 107 的 90%，符合每串流 ≥70% 的規則）。
+- Haiku（TE／TER）用擁有者給的 API 金鑰：只在 Host 端從環境變數讀，不進小模型沙箱、不落檔；每次呼叫記帳到 `~/dev/ops/ctl/api_credit_ledger.jsonl`。
