@@ -1,0 +1,3368 @@
+{
+ "bank_id": "cc40",
+ "created": "2026-11-27T02:50:03Z",
+ "seed": 20261127,
+ "parquet_sha256": {
+  "valid.parquet": "02e8c1ccedae716f1e43cc813fcb7823c3db666ea92638820aba80e8cef451ab",
+  "test.parquet": "aa426cbdb202bf8703b658bcb31fd1878ca7cfd33ca07d3b703dc94ca6a2b651"
+ },
+ "bands": [
+  [
+   "B1",
+   1200,
+   1500
+  ],
+  [
+   "B2",
+   1500,
+   1800
+  ],
+  [
+   "B3",
+   1800,
+   2100
+  ],
+  [
+   "B4",
+   2100,
+   2400
+  ],
+  [
+   "B5",
+   2400,
+   1000000000
+  ]
+ ],
+ "per_band": 8,
+ "tasks": [
+  {
+   "task": "cc_1561B",
+   "name": "1561_B. Charmed by the Game",
+   "split": "valid",
+   "rating": 1300,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.011,
+   "dropped_big": 0,
+   "n_dedup_tests": 205,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1561C",
+   "name": "1561_C. Deep Down Below",
+   "split": "valid",
+   "rating": 1300,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.025,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1582C",
+   "name": "1582_C. Grandma Capa Knits a Scarf",
+   "split": "test",
+   "rating": 1200,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.022,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1601A",
+   "name": "1601_A. Array Elimination",
+   "split": "test",
+   "rating": 1300,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.01,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1604C",
+   "name": "1604_C. Di-visible Confusion",
+   "split": "test",
+   "rating": 1300,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.011,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1606C",
+   "name": "1606_C. Banknotes",
+   "split": "test",
+   "rating": 1400,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.019,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1613C",
+   "name": "1613_C. Poisoned Dagger",
+   "split": "test",
+   "rating": 1200,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.012,
+   "dropped_big": 0,
+   "n_dedup_tests": 205,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1615B",
+   "name": "1615_B. And It's Non-Zero",
+   "split": "test",
+   "rating": 1300,
+   "band": "B1",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.01,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1551C",
+   "name": "1551_C. Interesting Story",
+   "split": "valid",
+   "rating": 1500,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.0,
+   "case_limit_s": 10.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.016,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1557C",
+   "name": "1557_C. Moamen and XOR",
+   "split": "valid",
+   "rating": 1700,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.124,
+   "dropped_big": 0,
+   "n_dedup_tests": 261,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1562D1",
+   "name": "1562_D1. Two Hundred Twenty One (easy version)",
+   "split": "valid",
+   "rating": 1700,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.016,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1586C",
+   "name": "1586_C. Omkar and Determination",
+   "split": "test",
+   "rating": 1700,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.021,
+   "dropped_big": 0,
+   "n_dedup_tests": 222,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1608C",
+   "name": "1608_C. Game Master",
+   "split": "test",
+   "rating": 1700,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.053,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1619E",
+   "name": "1619_E. MEX and Increments",
+   "split": "test",
+   "rating": 1700,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.023,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1622C",
+   "name": "1622_C. Set or Decrease",
+   "split": "test",
+   "rating": 1600,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.028,
+   "dropped_big": 0,
+   "n_dedup_tests": 209,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1623C",
+   "name": "1623_C. Balanced Stone Heaps",
+   "split": "test",
+   "rating": 1600,
+   "band": "B2",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.019,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1551E",
+   "name": "1551_E. Fixed Points",
+   "split": "valid",
+   "rating": 2000,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.01,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1560F1",
+   "name": "1560_F1. Nearest Beautiful Number (easy version)",
+   "split": "valid",
+   "rating": 1900,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.011,
+   "dropped_big": 0,
+   "n_dedup_tests": 203,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1575D",
+   "name": "1575_D. Divisible by Twenty-Five",
+   "split": "test",
+   "rating": 1800,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.012,
+   "dropped_big": 0,
+   "n_dedup_tests": 274,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1591D",
+   "name": "1591_D. Yet Another Sorting Problem",
+   "split": "test",
+   "rating": 1900,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.012,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1599C",
+   "name": "1599_C. Bubble Strike",
+   "split": "test",
+   "rating": 2000,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 0.5,
+   "case_limit_s": 3.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.014,
+   "dropped_big": 0,
+   "n_dedup_tests": 236,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1619D",
+   "name": "1619_D. New Year's Problem",
+   "split": "test",
+   "rating": 1800,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.014,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1620E",
+   "name": "1620_E. Replace the Numbers",
+   "split": "test",
+   "rating": 1900,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 1,
+   "ref_max_case_wall_s": 0.051,
+   "dropped_big": 0,
+   "n_dedup_tests": 207,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1622D",
+   "name": "1622_D. Shuffle",
+   "split": "test",
+   "rating": 2000,
+   "band": "B3",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.016,
+   "dropped_big": 0,
+   "n_dedup_tests": 213,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1551F",
+   "name": "1551_F. Equidistant Vertices",
+   "split": "valid",
+   "rating": 2200,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.013,
+   "dropped_big": 0,
+   "n_dedup_tests": 204,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1552F",
+   "name": "1552_F. Telepanting",
+   "split": "valid",
+   "rating": 2200,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.015,
+   "dropped_big": 0,
+   "n_dedup_tests": 206,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1553E",
+   "name": "1553_E. Permutation Shift",
+   "split": "valid",
+   "rating": 2100,
+   "band": "B4",
+   "n_vis": 22,
+   "n_hid": 22,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.012,
+   "dropped_big": 0,
+   "n_dedup_tests": 44,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "22/22"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/22"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1555E",
+   "name": "1555_E. Boring Segments",
+   "split": "valid",
+   "rating": 2100,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 2,
+   "ref_max_case_wall_s": 0.018,
+   "dropped_big": 0,
+   "n_dedup_tests": 210,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1560F2",
+   "name": "1560_F2. Nearest Beautiful Number (hard version)",
+   "split": "valid",
+   "rating": 2100,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.012,
+   "dropped_big": 0,
+   "n_dedup_tests": 206,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1579G",
+   "name": "1579_G. Minimal Coverage",
+   "split": "test",
+   "rating": 2200,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.055,
+   "dropped_big": 0,
+   "n_dedup_tests": 201,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1606E",
+   "name": "1606_E. Arena",
+   "split": "test",
+   "rating": 2100,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.584,
+   "dropped_big": 0,
+   "n_dedup_tests": 286,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1618G",
+   "name": "1618_G. Trader Problem",
+   "split": "test",
+   "rating": 2200,
+   "band": "B4",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.5,
+   "case_limit_s": 11.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.015,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1562E",
+   "name": "1562_E. Rescue Niwen!",
+   "split": "valid",
+   "rating": 2500,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.013,
+   "dropped_big": 0,
+   "n_dedup_tests": 203,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1574E",
+   "name": "1574_E. Coloring",
+   "split": "valid",
+   "rating": 2500,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.017,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1582F2",
+   "name": "1582_F2. Korney Korneevich and XOR (hard version)",
+   "split": "test",
+   "rating": 2400,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.5,
+   "case_limit_s": 5.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 1.31,
+   "dropped_big": 0,
+   "n_dedup_tests": 218,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1586I",
+   "name": "1586_I. Omkar and Mosaic",
+   "split": "test",
+   "rating": 3500,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.01,
+   "dropped_big": 0,
+   "n_dedup_tests": 230,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1591F",
+   "name": "1591_F. Non-equal Neighbours",
+   "split": "test",
+   "rating": 2400,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 3.0,
+   "case_limit_s": 8.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.013,
+   "dropped_big": 0,
+   "n_dedup_tests": 206,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1594F",
+   "name": "1594_F. Ideal Farm",
+   "split": "test",
+   "rating": 2400,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 2.0,
+   "case_limit_s": 6.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.013,
+   "dropped_big": 0,
+   "n_dedup_tests": 202,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1608D",
+   "name": "1608_D. Dominoes",
+   "split": "test",
+   "rating": 2400,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 1.0,
+   "case_limit_s": 4.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.013,
+   "dropped_big": 0,
+   "n_dedup_tests": 207,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  },
+  {
+   "task": "cc_1619H",
+   "name": "1619_H. Permutation and Queries",
+   "split": "test",
+   "rating": 2400,
+   "band": "B5",
+   "n_vis": 30,
+   "n_hid": 30,
+   "time_limit_s": 4.0,
+   "case_limit_s": 10.0,
+   "ref_solution_idx": 0,
+   "ref_max_case_wall_s": 0.011,
+   "dropped_big": 0,
+   "n_dedup_tests": 205,
+   "real_check": {
+    "ref": {
+     "visible_ok": true,
+     "hidden_pass": true,
+     "hidden": "30/30"
+    },
+    "stub": {
+     "visible_ok": false,
+     "hidden_pass": false,
+     "hidden": "0/30"
+    },
+    "ok": true
+   }
+  }
+ ],
+ "n_tasks": 40,
+ "per_band_counts": {
+  "B1": 8,
+  "B2": 8,
+  "B3": 8,
+  "B4": 8,
+  "B5": 8
+ },
+ "excluded": [
+  {
+   "name": "1548_D1. Gregor and the Odd Cows (Easy)",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1548_D2. Gregor and the Odd Cows (Hard)",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1548_E. Gregor and the Two Painters",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1549_C. Web of Lies",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1549_D. Integers Have Friends",
+   "band": "B3",
+   "reason": "description:any possible"
+  },
+  {
+   "name": "1551_B2. Wonderful Coloring - 2",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1551_D1. Domino (easy version)",
+   "band": "B2",
+   "reason": "description:you may print"
+  },
+  {
+   "name": "1551_D2. Domino (hard version)",
+   "band": "B4",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1552_B. Running for Gold",
+   "band": "B2",
+   "reason": "description:print any"
+  },
+  {
+   "name": "1552_C. Maximize the Intersections",
+   "band": "B3",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1552_E. Colors and Intervals",
+   "band": "B4",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1553_B. Reverse String",
+   "band": "B1",
+   "reason": "description:you may print"
+  },
+  {
+   "name": "1553_D. Backspace",
+   "band": "B2",
+   "reason": "description:you may print"
+  },
+  {
+   "name": "1553_G. Common Divisor Graph",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1554_D. Diane",
+   "band": "B3",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1554_E. You",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1555_B. Two Tables",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1555_C. Coin Rows",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_B. Take Your Places!",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_C. Compressed Bracket Sequence",
+   "band": "B3",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_D. Take a Guess",
+   "band": "B3",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_E. Equilibrium",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_F. Sports Betting",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_G. Gates to Another World",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1556_H. DIY Tree",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1557_D. Ezzat and Grid",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1557_E. Assiut Chess",
+   "band": "B5",
+   "reason": "description:interact"
+  },
+  {
+   "name": "1558_C. Bottom-Tier Reversals",
+   "band": "B3",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1559_C. Mocha and Hiking",
+   "band": "B1",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1559_D1. Mocha and Diana (Easy Version)",
+   "band": "B1",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1559_D2. Mocha and Diana (Hard Version)",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1560_D. Make a Power of Two",
+   "band": "B1",
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1560_E. Polycarp and String Transformation",
+   "band": "B3",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1561_D1. Up the Strip (simplified version)",
+   "band": "B2",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1561_D2. Up the Strip",
+   "band": "B3",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1562_C. Rings",
+   "band": "B2",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1562_D2. Two Hundred Twenty One (hard version)",
+   "band": "B4",
+   "reason": "description:print any"
+  },
+  {
+   "name": "1566_D2. Seating Arrangements (hard version) ",
+   "band": "B2",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1566_E. Buds Re-hanging",
+   "band": "B3",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1566_F. Points Movement",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1566_H. Xor-quiz",
+   "band": "B5",
+   "reason": "description:interact"
+  },
+  {
+   "name": "1567_C. Carrying Conundrum",
+   "band": "B2",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1567_D. Expression Evaluation Error",
+   "band": "B3",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1569_D. Inconvenient Pairs",
+   "band": "B3",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1569_E. Playoff Restoration",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1572_B. Xor of 3",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1572_E. Polygon",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1574_D. The Strongest Build",
+   "band": "B3",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1575_B. Building an Amusement Park",
+   "band": "B4",
+   "reason": "description:absolute or relative"
+  },
+  {
+   "name": "1575_I. Illusions of the Desert",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1575_J. Jeopardy of Dropped Balls",
+   "band": "B2",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1575_K. Knitting Batik",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1575_M. Managing Telephone Poles",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1579_C. Ticks",
+   "band": "B2",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1579_D. Productive Meeting",
+   "band": "B1",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1586_B. Omkar and Heavenly Tree",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1586_D. Omkar and the Meaning of Life",
+   "band": "B3",
+   "reason": "description:interact"
+  },
+  {
+   "name": "1586_E. Moment of Bloom",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1586_F. Defender of Childhood Dreams",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1586_H. Omkar and Tours",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1591_E. Frequency Queries",
+   "band": "B5",
+   "reason": "description:multiple answers"
+  },
+  {
+   "name": "1594_C. Make Them Equal",
+   "band": "B1",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1594_E1. Rubik's Cube Coloring (easy version)",
+   "band": "B1",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1594_E2. Rubik's Cube Coloring (hard version)",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1598_E. Staircases",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1598_F. RBS",
+   "band": "B5",
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1598_G. The Sum of Good Numbers",
+   "band": "B5",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1599_B. Restaurant Game",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1599_G. Shortest path",
+   "band": "B5",
+   "reason": "float_output"
+  },
+  {
+   "name": "1599_H. Hidden Fortress",
+   "band": "B4",
+   "reason": "description:interact"
+  },
+  {
+   "name": "1600_F. Party Organization",
+   "band": "B4",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1600_J. Robot Factory",
+   "band": "B1",
+   "reason": "tests<20(9)"
+  },
+  {
+   "name": "1601_B. Frog Traveler",
+   "band": "B3",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1601_C. Optimal Insertion",
+   "band": "B4",
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1601_D. Difficult Mountain",
+   "band": "B5",
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1604_D. Moderate Modular Mode",
+   "band": "B2",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1606_D. Red-Blue Matrix",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1606_F. Tree Queries",
+   "band": "B5",
+   "reason": "description:in any order"
+  },
+  {
+   "name": "1607_E. Robot on the Board 1",
+   "band": "B2",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1607_F. Robot on the Board 2",
+   "band": "B4",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1607_G. Banquet Preparations 1",
+   "band": "B4",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1607_H. Banquet Preparations 2",
+   "band": "B4",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1608_B. Build the Permutation",
+   "band": "B1",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1615_C. Menorah",
+   "band": "B2",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1615_D. X(or)-mas Tree",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1615_E. Purple Crayon",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1615_F. LEGOndary Grandmaster",
+   "band": "B5",
+   "reason": "description:precision"
+  },
+  {
+   "name": "1615_G. Maximum Adjacent Pairs",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1615_H. Reindeer Games",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1617_D2. Too Many Impostors (hard version)",
+   "band": "B5",
+   "reason": "description:interact"
+  },
+  {
+   "name": "1617_E. Christmas Chocolates",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1618_E. Singers' Tour",
+   "band": "B2",
+   "reason": "description:any correct"
+  },
+  {
+   "name": "1619_C. Wrong Addition",
+   "band": "B1",
+   "reason": "description:multiple answers"
+  },
+  {
+   "name": "1619_F. Let's Play the Hat?",
+   "band": "B3",
+   "reason": "description:if there are several"
+  },
+  {
+   "name": "1619_G. Unusual Minesweeper",
+   "band": "B3",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1620_F. Bipartite Array",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1622_E. Math Test",
+   "band": "B4",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1622_F. Quadratic Set",
+   "band": "B5",
+   "reason": "description:if there are multiple"
+  },
+  {
+   "name": "1623_D. Robot Cleaner Revisit",
+   "band": "B4",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1623_E. Middle Duplication",
+   "band": "B5",
+   "reason": "description:<image>"
+  },
+  {
+   "name": "1575_G. GCD Festival",
+   "band": "B4",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1567_E. Non-Decreasing Dilemma",
+   "band": "B4",
+   "reason": "validity:ok"
+  },
+  {
+   "name": "1604_E. Extreme Extension",
+   "band": "B4",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1553_F. Pairwise Modulo",
+   "band": "B4",
+   "reason": "validity:ok"
+  },
+  {
+   "name": "1603_D. Artistic Partition",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1582_G. Kuzya and Homework",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1599_D. Bubble Popping",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1572_F. Stations",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1601_F. Two Sorts",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1575_C. Cyclic Sum",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1580_E. Railway Construction",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1575_H. Holiday Wall Ornaments",
+   "band": "B4",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1559_E. Mocha and Stars",
+   "band": "B4",
+   "reason": "validity:tle@1;tle@1;slow@0(3.21s>3.00);tle@0;slow@0(4.39s>3.00);slow@0(4.50s>3.00);tle@0;tle@1"
+  },
+  {
+   "name": "1601_E. Phys Ed Online",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1569_F. Palindromic Hamiltonian Path",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1580_F. Problems for Codeforces",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1599_A. Weights",
+   "band": "B5",
+   "reason": "validity:ok"
+  },
+  {
+   "name": "1553_I. Stairs",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1558_E. Down Below",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1580_C. Train Maintenance",
+   "band": "B4",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1599_E. Two Arrays",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1558_D. Top-Notch Insertions",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1599_I. Desert",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1553_H. XOR and Distance",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1552_G. A Serious Referee",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1599_F. Mars",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1586_G. Omkar and Time Travel",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1552_I. Organizing a Music Festival",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1548_C. The Three Little Pigs",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1575_F. Finding Expected Value",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1580_D. Subsequence",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1603_E. A Perfect Problem",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1599_J. Bob's Beautiful Array",
+   "band": "B5",
+   "reason": "validity:rte@0"
+  },
+  {
+   "name": "1575_E. Eye-Pleasing City Park Tour",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1566_G. Four Vertices",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1574_F. Occurrences",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1613_F. Tree Coloring",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1608_G. Alphabetic Tree",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1608_E. The Cells on the Paper",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1572_C. Paint",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1608_F. MEX counting",
+   "band": "B5",
+   "reason": "validity:no_python3_solution"
+  },
+  {
+   "name": "1567_F. One-Four Overload",
+   "band": "B5",
+   "reason": "validity:rte@1;rte@0"
+  }
+ ],
+ "validation_log": [
+  {
+   "name": "1582_C. Grandma Capa Knits a Scarf",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.022
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.031
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1561_B. Charmed by the Game",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.011
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.043
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1561_C. Deep Down Below",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.025
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.012
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1601_A. Array Elimination",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.01
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.016
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1615_B. And It's Non-Zero",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.01
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.011
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1613_C. Poisoned Dagger",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.012
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.015
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1606_C. Banknotes",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.019
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.01
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1604_C. Di-visible Confusion",
+   "band": "B1",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.011
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.026
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1619_E. MEX and Increments",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.023
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.018
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1562_D1. Two Hundred Twenty One (easy version)",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.016
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1608_C. Game Master",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.053
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.025
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1622_C. Set or Decrease",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.028
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.02
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1551_C. Interesting Story",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.016
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.024
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1586_C. Omkar and Determination",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.021
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.014
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1623_C. Balanced Stone Heaps",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.019
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.022
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1557_C. Moamen and XOR",
+   "band": "B2",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.124
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.101
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1560_F1. Nearest Beautiful Number (easy version)",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.011
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1591_D. Yet Another Sorting Problem",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.012
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.042
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1575_D. Divisible by Twenty-Five",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.012
+    },
+    {
+     "idx": 1,
+     "result": "slow@9(3.40s>3.00)",
+     "max_wall": 3.403
+    },
+    {
+     "idx": 2,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1619_D. New Year's Problem",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.014
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1622_D. Shuffle",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.016
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.034
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1620_E. Replace the Numbers",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "rte@0",
+     "max_wall": 0.026
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.051
+    },
+    {
+     "idx": 2,
+     "result": "ok",
+     "max_wall": 0.015
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1551_E. Fixed Points",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.01
+    },
+    {
+     "idx": 1,
+     "result": "rte@0",
+     "max_wall": 0.025
+    },
+    {
+     "idx": 2,
+     "result": "ok",
+     "max_wall": 0.014
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1599_C. Bubble Strike",
+   "band": "B3",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.014
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.012
+    }
+   ],
+   "n_py_solutions": 7
+  },
+  {
+   "name": "1553_E. Permutation Shift",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.012
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.012
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1575_G. GCD Festival",
+   "band": "B4",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1567_E. Non-Decreasing Dilemma",
+   "band": "B4",
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.015
+    }
+   ],
+   "n_py_solutions": 1
+  },
+  {
+   "name": "1560_F2. Nearest Beautiful Number (hard version)",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.012
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1618_G. Trader Problem",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.015
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.017
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1579_G. Minimal Coverage",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.055
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.018
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1604_E. Extreme Extension",
+   "band": "B4",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1553_F. Pairwise Modulo",
+   "band": "B4",
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.018
+    }
+   ],
+   "n_py_solutions": 1
+  },
+  {
+   "name": "1603_D. Artistic Partition",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1586_I. Omkar and Mosaic",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.01
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.011
+    }
+   ],
+   "n_py_solutions": 2
+  },
+  {
+   "name": "1582_G. Kuzya and Homework",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1599_D. Bubble Popping",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1572_F. Stations",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1601_F. Two Sorts",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1575_C. Cyclic Sum",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1580_E. Railway Construction",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1606_E. Arena",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.584
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 1.696
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1575_H. Holiday Wall Ornaments",
+   "band": "B4",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1551_F. Equidistant Vertices",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.013
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.02
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1559_E. Mocha and Stars",
+   "band": "B4",
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "tle@1",
+     "max_wall": 6.004
+    },
+    {
+     "idx": 1,
+     "result": "tle@1",
+     "max_wall": 6.01
+    },
+    {
+     "idx": 2,
+     "result": "slow@0(3.21s>3.00)",
+     "max_wall": 3.208
+    },
+    {
+     "idx": 3,
+     "result": "tle@0",
+     "max_wall": 6.008
+    },
+    {
+     "idx": 4,
+     "result": "slow@0(4.39s>3.00)",
+     "max_wall": 4.387
+    },
+    {
+     "idx": 5,
+     "result": "slow@0(4.50s>3.00)",
+     "max_wall": 4.496
+    },
+    {
+     "idx": 6,
+     "result": "tle@0",
+     "max_wall": 6.008
+    },
+    {
+     "idx": 7,
+     "result": "tle@1",
+     "max_wall": 6.008
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1601_E. Phys Ed Online",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1569_F. Palindromic Hamiltonian Path",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1580_F. Problems for Codeforces",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1599_A. Weights",
+   "band": "B5",
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 1
+  },
+  {
+   "name": "1582_F2. Korney Korneevich and XOR (hard version)",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 1.31
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.633
+    }
+   ],
+   "n_py_solutions": 3
+  },
+  {
+   "name": "1553_I. Stairs",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1558_E. Down Below",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1580_C. Train Maintenance",
+   "band": "B4",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1555_E. Boring Segments",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "rte@0",
+     "max_wall": 0.029
+    },
+    {
+     "idx": 1,
+     "result": "rte@0",
+     "max_wall": 0.027
+    },
+    {
+     "idx": 2,
+     "result": "ok",
+     "max_wall": 0.018
+    },
+    {
+     "idx": 3,
+     "result": "rte@0",
+     "max_wall": 0.026
+    },
+    {
+     "idx": 4,
+     "result": "ok",
+     "max_wall": 0.04
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1599_E. Two Arrays",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1558_D. Top-Notch Insertions",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1599_I. Desert",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1553_H. XOR and Distance",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1552_G. A Serious Referee",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1599_F. Mars",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1552_F. Telepanting",
+   "band": "B4",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.015
+    },
+    {
+     "idx": 1,
+     "result": "rte@0",
+     "max_wall": 0.026
+    },
+    {
+     "idx": 2,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1586_G. Omkar and Time Travel",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1552_I. Organizing a Music Festival",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1548_C. The Three Little Pigs",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1591_F. Non-equal Neighbours",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.013
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.011
+    }
+   ],
+   "n_py_solutions": 6
+  },
+  {
+   "name": "1575_F. Finding Expected Value",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1580_D. Subsequence",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1594_F. Ideal Farm",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.013
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.013
+    }
+   ],
+   "n_py_solutions": 8
+  },
+  {
+   "name": "1603_E. A Perfect Problem",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1599_J. Bob's Beautiful Array",
+   "band": "B5",
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "rte@0",
+     "max_wall": 0.027
+    }
+   ],
+   "n_py_solutions": 1
+  },
+  {
+   "name": "1575_E. Eye-Pleasing City Park Tour",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1619_H. Permutation and Queries",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.011
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.011
+    }
+   ],
+   "n_py_solutions": 5
+  },
+  {
+   "name": "1566_G. Four Vertices",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1562_E. Rescue Niwen!",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.013
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.014
+    }
+   ],
+   "n_py_solutions": 4
+  },
+  {
+   "name": "1574_F. Occurrences",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1613_F. Tree Coloring",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1608_G. Alphabetic Tree",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1574_E. Coloring",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.017
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.203
+    }
+   ],
+   "n_py_solutions": 5
+  },
+  {
+   "name": "1608_E. The Cells on the Paper",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1572_C. Paint",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1608_F. MEX counting",
+   "band": "B5",
+   "valid": false,
+   "tried": [],
+   "n_py_solutions": 0
+  },
+  {
+   "name": "1567_F. One-Four Overload",
+   "band": "B5",
+   "valid": false,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "rte@1",
+     "max_wall": 0.026
+    },
+    {
+     "idx": 1,
+     "result": "rte@0",
+     "max_wall": 0.028
+    }
+   ],
+   "n_py_solutions": 2
+  },
+  {
+   "name": "1608_D. Dominoes",
+   "band": "B5",
+   "valid": true,
+   "tried": [
+    {
+     "idx": 0,
+     "result": "ok",
+     "max_wall": 0.013
+    },
+    {
+     "idx": 1,
+     "result": "ok",
+     "max_wall": 0.058
+    }
+   ],
+   "n_py_solutions": 8
+  }
+ ],
+ "files_sha256": {
+  "cc_1561B/hidden/hidden_cases.json": "2450b24c850013377440fcc371817e66317ab804b9ed799e79bf5e3de4ed4c11",
+  "cc_1561B/hidden/solution_test.py": "cbd58c5d0706fa6b8e099eca13b3adbe3c8f1231bd4ee35ec2d33bd74396bf0a",
+  "cc_1561B/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1561B/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1561B/workspace/cases.json": "6b0e40cf3261230a1b754a63f155ceb36ccf3883984cb49e8e3227e896598acd",
+  "cc_1561B/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1561B/workspace/goal.md": "ab6dc4482ce2c6cf221d150cccaf03d9fd541fe0deccb4b32a5b35ffe6cd1c2f",
+  "cc_1561B/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1561B/workspace/solution_test.py": "8dd7069b3691304f68cce87ca3deb65641e34873885c94da55d2e72077d6830a",
+  "cc_1561C/hidden/hidden_cases.json": "6ed0f94f0fcb23222eaf4c06bb900c9d7c712684e60be3d1fa2f2c88546235c1",
+  "cc_1561C/hidden/solution_test.py": "4b556cd28742c5ae434754122816a575fdc840bfb3671605da8499adb26262b8",
+  "cc_1561C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1561C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1561C/workspace/cases.json": "14c65e5833d4075718b21f7acf43288a3d53a60153b1205e931b429e5d58ea09",
+  "cc_1561C/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1561C/workspace/goal.md": "198e880e4dcb4573e42a5c5c11484fcdc5e89895ff69b51835d0e934aba3448a",
+  "cc_1561C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1561C/workspace/solution_test.py": "61233adfa804eda88ff391bed2b88b41fdb980974e8b2541516ad034c2454d79",
+  "cc_1582C/hidden/hidden_cases.json": "41b70ab72f78d9404fe1cbbef7fb73bb0c9b57542ea6ff29dd6dd92b03b7ce58",
+  "cc_1582C/hidden/solution_test.py": "ccaaf3756c11ed0e7292b0040a315a5cb21c7a605ddc0ca8869d9372738b0947",
+  "cc_1582C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1582C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1582C/workspace/cases.json": "d9e36c4686181b41c8e906b39090346da3b1b0f3b323d2587af80eb120b647e5",
+  "cc_1582C/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1582C/workspace/goal.md": "3c05ba0807e7127884a90f5172f658a26fd27a8fc3f5410e377bd59fc859956e",
+  "cc_1582C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1582C/workspace/solution_test.py": "652ee606df04155d685b871e82ad28043c64b933d514c633d2b994877e0168fd",
+  "cc_1601A/hidden/hidden_cases.json": "6cb7177183910841e820f897a994f9b566842f4eaa83289d299b28f5510326f0",
+  "cc_1601A/hidden/solution_test.py": "23336c6588318b46c560c68ed9476830d854dc60807928114aa1ef3cd1c6c512",
+  "cc_1601A/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1601A/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1601A/workspace/cases.json": "50847541e80d90a205343ce709cc180bd1d9a343d0fc2704321a0d4f60a1c7ec",
+  "cc_1601A/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1601A/workspace/goal.md": "d39b8b551012c9dbd6041246d8172acd952c02c2fedd8d3141ff5e9694cf4798",
+  "cc_1601A/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1601A/workspace/solution_test.py": "586bb63eb3330be0b951ebaf7a2b3299046239d2489a613bee8344c501fe486b",
+  "cc_1604C/hidden/hidden_cases.json": "b7888b653ac2ed92883454aa66ddb009ef74bd1ea7d24ffeb11e55b35ba48bfc",
+  "cc_1604C/hidden/solution_test.py": "34be692ec78be120093e3e510dc7e2bcf895ea19ea35a6abd8206277e3f1af32",
+  "cc_1604C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1604C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1604C/workspace/cases.json": "c443bf4ce3766d0d725b93bac3d98de220a1b353924e71d03ca16395aa6e6fc9",
+  "cc_1604C/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1604C/workspace/goal.md": "9de6815d9b86566837a4ba14be364d901eb1b4f9693e95a7b6178a75d29630a2",
+  "cc_1604C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1604C/workspace/solution_test.py": "c5cd4e483745af2b10b5cc37946cc2531e182b5abbb344e64942f6a480185759",
+  "cc_1606C/hidden/hidden_cases.json": "4486a472b3f7b7aaa90d8941f9fba5f10b10760b34c5bb3b5eb6126d5ab17de1",
+  "cc_1606C/hidden/solution_test.py": "cf2c4bb4ec566baf9d1a5460cd9e8c1984e2d2e826617c2680d85ac6d5f24b59",
+  "cc_1606C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1606C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1606C/workspace/cases.json": "25bbd8f3f94254b9451c0ff118d2de1d58f3d84be8c060b903688b0968555626",
+  "cc_1606C/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1606C/workspace/goal.md": "15d5484155b69a194cd9d01dd9932e1da5fb97768b967815f51abf17c8df4f5a",
+  "cc_1606C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1606C/workspace/solution_test.py": "e64b6c8a3d8fb233b80c202c1572cc76fc28f4bf29bfb6fb56e22a589c1a5b92",
+  "cc_1613C/hidden/hidden_cases.json": "3582172e0a6309b0b0e48dd87396ffd79064a95964653757a6475cd7c3973d3f",
+  "cc_1613C/hidden/solution_test.py": "f23a9a1c24945bcf8305765b98ef33fe04e313b82d26cac11257c63c53ab1ceb",
+  "cc_1613C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1613C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1613C/workspace/cases.json": "bf9723a9ab76734905ba5488d55ebc22f1043dbbf7b2d8454025bf110a8bd1b8",
+  "cc_1613C/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1613C/workspace/goal.md": "925b86ac6113553241090cadb939a8b74ce9bfdec8378b2f07faf5a72fdf2f4f",
+  "cc_1613C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1613C/workspace/solution_test.py": "a295ae1ffc87734aff629caf3068c8c1d547ec5b4b4c24e7de6250451c0a0e86",
+  "cc_1615B/hidden/hidden_cases.json": "3e955060badeef5301a2aeb8f3d34a7bffc132d8f2d7667331ccfe7ea8f70dad",
+  "cc_1615B/hidden/solution_test.py": "e488ab19a356b9834f5557c82d07d870a6dd7380a6e65dbadbad9e1ac69b4e29",
+  "cc_1615B/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1615B/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1615B/workspace/cases.json": "fba89f575f79df27d9572212f061abb9534b6d666891ea74b88dd57419658ce8",
+  "cc_1615B/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1615B/workspace/goal.md": "336155cadfba6da9d17eb24038bfe2e17588fd1d8dc6f044224567eb196d1d2b",
+  "cc_1615B/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1615B/workspace/solution_test.py": "599bfaeef53e8ead55868837cabb1ab34e4cd7d04e4e8c3763249ac57685a3ec",
+  "cc_1551C/hidden/hidden_cases.json": "80f87ab9dea0b9edce6cc9b70c463a16ea272655ade324815b1a6efbc943cdec",
+  "cc_1551C/hidden/solution_test.py": "2a42a8c6468a56832256fb3a2113d7c70a8a07cb82234ff60932aeabc89f1690",
+  "cc_1551C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1551C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1551C/workspace/cases.json": "8ecc8781a724d24ba2fc35206fea8089e978e0bc0c6c0aa1fd7738481d668d2f",
+  "cc_1551C/workspace/contract.md": "cb599c577d756ea720ede1c42b6da5f0ada8c887ae9adfcbc8e33764389f282a",
+  "cc_1551C/workspace/goal.md": "eba5e8c8744203d9ecf1914d3bc25cf6eefe0e587accda5a158ea51bfce74458",
+  "cc_1551C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1551C/workspace/solution_test.py": "ffa19d816cf6e123032d0630b76636369da471763e030013093842268fbf1aed",
+  "cc_1557C/hidden/hidden_cases.json": "031b8a135aa3d67b43f47ec0e4b11f31262ec3a62dc2e52a27837669f8a3e92e",
+  "cc_1557C/hidden/solution_test.py": "c494d0252d1391ec877d6fe7d5f064fdf58a5cf72b72201028767ebe8ba5abd8",
+  "cc_1557C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1557C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1557C/workspace/cases.json": "4b61439c1de240254df905c022169dad154cfa1b59ec81ab16e011e3eb1dde1f",
+  "cc_1557C/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1557C/workspace/goal.md": "d90d651ca1ebabf0585910d7377af7644ad8f59dcef1c23365b7ef21c3bcfad5",
+  "cc_1557C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1557C/workspace/solution_test.py": "eec96d838af0e6fef2ee62eb29e712f5a971908cd56c81e090d39e37f7325df9",
+  "cc_1562D1/hidden/hidden_cases.json": "6ce7c27a69279308c3b1948c554f059c0faf8d127c054389e8eb03430c818853",
+  "cc_1562D1/hidden/solution_test.py": "61447117e42906b6c68ad9769cbe8f04c8da1917dc016d8d52a52ed6f0cf1c5d",
+  "cc_1562D1/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1562D1/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1562D1/workspace/cases.json": "aea287e8d2888ed72857658022cc7879c046035dd8f2c8279aa30d67de3c152c",
+  "cc_1562D1/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1562D1/workspace/goal.md": "2b55ad6075e9703c43f138ab7874634e40db14ff6dbf23638bfffc2450abd868",
+  "cc_1562D1/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1562D1/workspace/solution_test.py": "6f3f49d6e408cc851f4189e5331c1bb8681b07db5493084e072d6f4beefc3f18",
+  "cc_1586C/hidden/hidden_cases.json": "c96435e28af5b294829e1b8c0113ed97db495188b8188644a5a62248663b1efb",
+  "cc_1586C/hidden/solution_test.py": "2eabdff9bd4792460e946b40fc42f7666c9bc86231e2ab97f3435ed4f15048f8",
+  "cc_1586C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1586C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1586C/workspace/cases.json": "7c309e50282886d33f156d1643d1758361d0b11a3a7d3ffbfad397562ceddf00",
+  "cc_1586C/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1586C/workspace/goal.md": "a657aafb6bfb138b296702068d80d4eb3130e2a0967187d9648a3dfcda3e3c32",
+  "cc_1586C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1586C/workspace/solution_test.py": "0a9a8793583ce03ce62cc875928dd24a9d4d4b3a52b42061df1b509995415a75",
+  "cc_1608C/hidden/hidden_cases.json": "d49688bf834b2de6a5e8b710ccd0570630ca31ef12e95413f6664bfe5db9b3cf",
+  "cc_1608C/hidden/solution_test.py": "25be7aff79a33f6a8a6608186e2da9672a299f737044d2c552b900e600e8caf8",
+  "cc_1608C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1608C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1608C/workspace/cases.json": "4d6c8710de51e16c10325114d6dbbb7eb9f921d38828d7106a040c7fc67b1edc",
+  "cc_1608C/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1608C/workspace/goal.md": "4a601f6e24741ba2e136a61b18762c9f7e97f38fa55b5f72e6de9c3b39d9a6d3",
+  "cc_1608C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1608C/workspace/solution_test.py": "10a440dc61907b6da66c10978e90dccc7dc5848cf58ce241c6999db1dfeea664",
+  "cc_1619E/hidden/hidden_cases.json": "59d06a5edc26225ece472fee33eb35a0e6c7600cbd8f9f3ccce53f11f7d8dd68",
+  "cc_1619E/hidden/solution_test.py": "50526f2b0454433a67fd77857d231a1341d060b3db09df791072962670d85725",
+  "cc_1619E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1619E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1619E/workspace/cases.json": "fa448788032f6a0f8b09da4c8adc72fce6a828528716c67a3c676787ed5603a2",
+  "cc_1619E/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1619E/workspace/goal.md": "0aee4fccffcf2f3ffa116fb20fcc72d2cdcb350370cdcf457094d4ab23092be9",
+  "cc_1619E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1619E/workspace/solution_test.py": "4a244c7c098f9bd90139d9e543e863dff714f88472bd58d34b352fd095ca8f5a",
+  "cc_1622C/hidden/hidden_cases.json": "5019633baa37dfe540b65c9e2d604356f391dfd1524ea8ff9120cbb9e7d14a05",
+  "cc_1622C/hidden/solution_test.py": "4be13c904a4d8e51c434f94bc82aaf4d3773f0a3ebad1457a500351410ff07af",
+  "cc_1622C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1622C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1622C/workspace/cases.json": "17bdb857895eaf371cbcf6ee811b0034c1f5e418f35b85ca3491678d1a55a61a",
+  "cc_1622C/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1622C/workspace/goal.md": "0da237c03b663984ead374f7101b31bf7e0db5d904d267ca0b8359fba2c41eb6",
+  "cc_1622C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1622C/workspace/solution_test.py": "7d4fa7b370be8fdfa408df52b7b0dc9c7f5c37aafabeb2cb08871ca2d68b87bb",
+  "cc_1623C/hidden/hidden_cases.json": "9e56460f41af0a4d8be42605aeb4b2f47f50c4f9d4c6344fe204d2430801cbee",
+  "cc_1623C/hidden/solution_test.py": "e7daa664a108b8e333e9379b48ea4d501aa8f6de9315b69d3a2c57b91c9c60d0",
+  "cc_1623C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1623C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1623C/workspace/cases.json": "ada17e737d0b7dca89cac23bbd400c9509e5466583e0f78db63bd5902d45b65f",
+  "cc_1623C/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1623C/workspace/goal.md": "f69f27be6bf7d37d0610bfe584e67a35cd8d457a4d119d3f439d4eb7fd30fe88",
+  "cc_1623C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1623C/workspace/solution_test.py": "ca7e2ad5e6b87703e80542868324e466f62ea5d71193ea785e736ad18fdcc1ef",
+  "cc_1551E/hidden/hidden_cases.json": "1dedc81f3f3621499b4d8f7fa48da297165636b8c8773d1f4996c1b76f516e8c",
+  "cc_1551E/hidden/solution_test.py": "41ab3e8095bea3b36ebdbaad6277b27ccaee8b57ccf703faff3166fb80728f5e",
+  "cc_1551E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1551E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1551E/workspace/cases.json": "dee48aa5583615ee62fb3176c4b91f3582f2acf2bae91f57e40595127f9d2400",
+  "cc_1551E/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1551E/workspace/goal.md": "42fdb2f6bb4cc8056868881cfc2d97ccc11b57c9279e56e345e047457a62f80c",
+  "cc_1551E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1551E/workspace/solution_test.py": "92efa52312b4c1a0938af304243899dc24fe4697f7c565e445955d74c06654be",
+  "cc_1560F1/hidden/hidden_cases.json": "1dce3a1fae3ce904a6937d70ac38b59ab4a5ea873043c1b067b957fcde927023",
+  "cc_1560F1/hidden/solution_test.py": "0177c2f456246026bbc6f0491b83122e267eed5150bfe800fe8f1bd08af86706",
+  "cc_1560F1/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1560F1/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1560F1/workspace/cases.json": "8240237127a41b700249528112df48e9c0dccbcb88bd69986302e4b481466583",
+  "cc_1560F1/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1560F1/workspace/goal.md": "9466063b482e1e8d5cceb8c6f407e39a9823f8f396c60fe5db730bc33e071872",
+  "cc_1560F1/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1560F1/workspace/solution_test.py": "6a08cd0745036ac39e1f038da8e30282d3d66632039ce93744ef4629102a613b",
+  "cc_1575D/hidden/hidden_cases.json": "11edd7b72a433118bcc6b369c36913311d62cbc37b4bb2ff264588e2029f6b56",
+  "cc_1575D/hidden/solution_test.py": "e94e2491fb69174222bd0d4bd8296105df2579c6f30b472ed37e3f5d7016ac4c",
+  "cc_1575D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1575D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1575D/workspace/cases.json": "9e735431d3a8f570a22d1d5af0a17a46e0b5165754c3ece4f2648abe9f68a1fa",
+  "cc_1575D/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1575D/workspace/goal.md": "2860ee3eb077f1fa39fc1c1986c958ee3eb168bb617d98d38711a9806b153054",
+  "cc_1575D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1575D/workspace/solution_test.py": "0e681113a8e10b19d6ab80913b3e09aa72ffa4030dc98b94f65b7f01950dd1aa",
+  "cc_1591D/hidden/hidden_cases.json": "9d01daf9194f3ef36a7b54f0e97fafe5ed8f940f07d909afff64abed498ee242",
+  "cc_1591D/hidden/solution_test.py": "432ed02eda01ac34081c29ea044885a11ffeb7bf151f72de2bd681a99f06a3b0",
+  "cc_1591D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1591D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1591D/workspace/cases.json": "4060270caf8a8bcc0792a6e078f51f8e2bc3dd998d47ca3af6ba77d6c6bb14f2",
+  "cc_1591D/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1591D/workspace/goal.md": "3358c9f4bc2098cac358dea52866ff3414ba50347469c9511aa4655b8fca4dde",
+  "cc_1591D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1591D/workspace/solution_test.py": "965d64fe17ec9cd0067f01ba5cc6caf81fb386854e37522f58140c3a38714a59",
+  "cc_1599C/hidden/hidden_cases.json": "7690d50fb37d099302197dc69c6bbed3cebcaef46a8948d920387c9b58990cda",
+  "cc_1599C/hidden/solution_test.py": "6ff00f92576b11e39d7e58039ea43b08766e6aaa925fbfd5ebe9d970fa392b8c",
+  "cc_1599C/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1599C/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1599C/workspace/cases.json": "d441706ef970ead03533badadaa5bb31eaaada80c034d2e9daedec2d303a6664",
+  "cc_1599C/workspace/contract.md": "6e81aa27a46d94a465748b1a14271ac0ed06d0730f3917c69b3f3f84253c5235",
+  "cc_1599C/workspace/goal.md": "641f4e8920d1e1bbd9cd126476a2ec20b7e17d173774ea37456745a80b6dfefa",
+  "cc_1599C/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1599C/workspace/solution_test.py": "730cf1849d3dc643341fbc6b585021696539a38525c8ac217bfe53da151c9dcc",
+  "cc_1619D/hidden/hidden_cases.json": "192efeff0788f37bc8629e4a11d3a630c16dec3464a0793e89451fba30b0770f",
+  "cc_1619D/hidden/solution_test.py": "43e0543c2085b9933c1e546ed9ac8b09d15f2c884593391e14fd179aaa2a8e33",
+  "cc_1619D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1619D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1619D/workspace/cases.json": "e3e4902121d01f0ee4f7969c80478ac287b49b61ca60fae9eb43b3f09fa27a42",
+  "cc_1619D/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1619D/workspace/goal.md": "82c22632b150168addbb7b599167237aa76557cb775385aabee916fdcf9dfdd0",
+  "cc_1619D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1619D/workspace/solution_test.py": "bb300041f622b1cb6cb2c0d54827c87e70421400107e4852e1f5e0fc1946d109",
+  "cc_1620E/hidden/hidden_cases.json": "ff2a28dce061d2eb6c04e56d28fc9474832c79a5faf60255c903731db5c35175",
+  "cc_1620E/hidden/solution_test.py": "fffe41c5f336f1a4aacec9cbf23d8fc0e3279aed720cd3210059b940e468db73",
+  "cc_1620E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1620E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1620E/workspace/cases.json": "ed9f101134d9415eeecd09cc320f780a39af9b39d32aaa608c0b1e029d8f3987",
+  "cc_1620E/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1620E/workspace/goal.md": "4693e5e7242a595e9974112ca39b2b1a2a5a22acfa4c88b864eb16f361ae3a67",
+  "cc_1620E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1620E/workspace/solution_test.py": "4465049a965da160b82c623212b5b670894b23eb21f9ec62603e83dcdd6acaaf",
+  "cc_1622D/hidden/hidden_cases.json": "1cf0ec67f94f4806ef1457d24f90a1b4bcaabc23e9bd433f842e53ba305b94ca",
+  "cc_1622D/hidden/solution_test.py": "9dd45cd0f2a67f66cb5bad01677bc7ea3ed6a597ecf11b453ca3c2110b3684a2",
+  "cc_1622D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1622D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1622D/workspace/cases.json": "8f6f2dbc5b6fe0ef90f36a9db6c95dee9d2132ec05f248cab3bd8dacee763fe0",
+  "cc_1622D/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1622D/workspace/goal.md": "a42864f4af07bf6c557d7f699fa896a62ed79e742f25e5481bcb9ba95f88d0d9",
+  "cc_1622D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1622D/workspace/solution_test.py": "1de73ccdc5a011559977fe17e4ede6ef7f4b8c5213db7ca6abe7edf3411f0125",
+  "cc_1551F/hidden/hidden_cases.json": "f1ac2a79d8c2cf626537723905bd89ec90e853c9d9e83c72f4b692ee925aae91",
+  "cc_1551F/hidden/solution_test.py": "a77715e2b002e8a03098b9a698ad7498b567745fcd2be65c4c40e8325944c8c2",
+  "cc_1551F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1551F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1551F/workspace/cases.json": "7e59dcf40b1b763ef994f3ee233d85e5b1458888b43359c6068d42b71d0b87fa",
+  "cc_1551F/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1551F/workspace/goal.md": "bb923d9db5757321cec877192b13d3572ec07b1cc84627ea8235dcf2119de080",
+  "cc_1551F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1551F/workspace/solution_test.py": "f1b1792439d33f068fced59430099a0c42dd1781556da041837a66a839e3d85e",
+  "cc_1552F/hidden/hidden_cases.json": "7dfcd03a435df2328d96b0ba644cc27bb89ebd92aa1d9e822f8315aefb5537a5",
+  "cc_1552F/hidden/solution_test.py": "bc41ff015c262f428b82020953b84e5e8c17c6ba23b49206ddd5348b1858cf6d",
+  "cc_1552F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1552F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1552F/workspace/cases.json": "f5adc1f7bcc5a02720fec96494babfc48398d55981d63a53fa7098fc52504655",
+  "cc_1552F/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1552F/workspace/goal.md": "064156a36d2530afcfa4638301a638178e27ba1a3e4a381150efa138ef90a4ff",
+  "cc_1552F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1552F/workspace/solution_test.py": "93f601224194dad14cc1f759a78ad28613db0c1059d892e63c05b1cd94c7e675",
+  "cc_1553E/hidden/hidden_cases.json": "f991704650f120fb8e9d6483b727a144c3dd274c5cd500f96875c2e1a43e9fcb",
+  "cc_1553E/hidden/solution_test.py": "8c6bfa771930ddf42856119a526ef26a6b4579eacb83c7132be57d1400c1ca8f",
+  "cc_1553E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1553E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1553E/workspace/cases.json": "2d5414bf1f4f050a88a3260dbb896e4160c7192c858b7d420c1f1b708353efb1",
+  "cc_1553E/workspace/contract.md": "ef6fb007cc6a5c176a769aaa16a6d79a118ba945c4af2ee12e3c5675f4c273f9",
+  "cc_1553E/workspace/goal.md": "71b07e7e21196cc297b50a7b32cfb6e2730f8f5d4c12ff2297039cb3d8a77e33",
+  "cc_1553E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1553E/workspace/solution_test.py": "a23c3650f4647b2fd057c238583da3465facb4af4cfab79a4c8e973dfe5f3ecb",
+  "cc_1555E/hidden/hidden_cases.json": "04e0c9e96105651b674c08cbfc361499eff940dbe5961415224fe7baf2027285",
+  "cc_1555E/hidden/solution_test.py": "a0c868d00fce2228001b0ffce92dfcd9d9128031147d0f5ce2c2f840f5c68736",
+  "cc_1555E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1555E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1555E/workspace/cases.json": "e5c9f13970f09b77d81a0b10562f15624a073cb922cf30db70fbcadbc8d44cb6",
+  "cc_1555E/workspace/contract.md": "ef6fb007cc6a5c176a769aaa16a6d79a118ba945c4af2ee12e3c5675f4c273f9",
+  "cc_1555E/workspace/goal.md": "44b8e027fce37264034cd4c1da1dcd067c166488b0db9460b47b85ebcecce3c6",
+  "cc_1555E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1555E/workspace/solution_test.py": "dac9818b18933979392ed9f6fd71857c9e5c4a9077b44859531ae3fbd41f2c0b",
+  "cc_1560F2/hidden/hidden_cases.json": "8063bb97e007e5c939917c1f719d6dffce47ea5ee46c97d08d58e88bc46c83d7",
+  "cc_1560F2/hidden/solution_test.py": "bad17b47ecfd12bda58bc000b6a63ca005bf9ac459cabe7856f9167e57bcf6ea",
+  "cc_1560F2/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1560F2/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1560F2/workspace/cases.json": "f25902c5cd29554bc126cc4969913d34a0ff11e9ace2e085d45773d5e7dff99a",
+  "cc_1560F2/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1560F2/workspace/goal.md": "2ddcf4cdc2f004b9c8cfb7b12d48296cf9d9d0c915d60345eae1142218c1348a",
+  "cc_1560F2/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1560F2/workspace/solution_test.py": "21dc8e8790f1b945ef00831d1f428df22451d07b869977795b6522736231e85f",
+  "cc_1579G/hidden/hidden_cases.json": "5005789decc5d476ba29e74d0ed6357fdd9fdeaf4e2d780975b58c53b9004045",
+  "cc_1579G/hidden/solution_test.py": "51ca35f898d5be08365b9f3b7c4b28cdcfe02a996a8fcf03158524b29fbc0fdc",
+  "cc_1579G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1579G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1579G/workspace/cases.json": "b32327e41dda203f5927d881afe6a2d76e18790a4097d67f2c7c4258bf289dff",
+  "cc_1579G/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1579G/workspace/goal.md": "59e8d529f62aebbbe5125f38f10457b46d7983b92f8feb979562a1b48e7550fc",
+  "cc_1579G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1579G/workspace/solution_test.py": "03d529821c237060d259bd01f890035bf91a33b930bb5e6a61caf3aa6e2a5e55",
+  "cc_1606E/hidden/hidden_cases.json": "ca1e9e6a79f969393122b075c0cddf7cf0cbad7a6d8aa11461cf213e07d83467",
+  "cc_1606E/hidden/solution_test.py": "678ff1346b4979d19b62e3bc016940376b1aa60204faf75dc41f174869c15850",
+  "cc_1606E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1606E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1606E/workspace/cases.json": "a9a919f285799fb7c2a473d5e2c714790eabee9fc15a0df9f883eff458d503ad",
+  "cc_1606E/workspace/contract.md": "ef6fb007cc6a5c176a769aaa16a6d79a118ba945c4af2ee12e3c5675f4c273f9",
+  "cc_1606E/workspace/goal.md": "690c25a0ae644f792f0e5a701c3b3a3a06a251bce1cb5d7b7f9e0e3b046319a1",
+  "cc_1606E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1606E/workspace/solution_test.py": "3185bf80c7594721f7c881846d7ec8392e32b54e72d39c2cd0387c14e0158520",
+  "cc_1618G/hidden/hidden_cases.json": "6af1a6cf6675fd489407e21aa6f5773cfa62be04423874c47bfc752d63de370d",
+  "cc_1618G/hidden/solution_test.py": "e29cbfcbbbe49f63e133507f3b76b6cf667879609a8344bb5e7a3bf70c1bbd4e",
+  "cc_1618G/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1618G/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1618G/workspace/cases.json": "32b685d1823ea530640c191b0f3b00734898ff9073177bd67df4ee56757299d3",
+  "cc_1618G/workspace/contract.md": "6e3d2a43eb452bc5b23f25b51236adb928a27113e96064a47c6592c47f279fd1",
+  "cc_1618G/workspace/goal.md": "16e4ec2eb051595cc0f9c11659622319df70fb4a505e8c0d82260844d6cbb5ba",
+  "cc_1618G/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1618G/workspace/solution_test.py": "a269d98618264baa45e31b624d13757d74980fabae28c265fd3e4e94dee7a62d",
+  "cc_1562E/hidden/hidden_cases.json": "990cdb750407dee3c323026406c4f4831141fc741c787124bb1eaca27fbb402d",
+  "cc_1562E/hidden/solution_test.py": "cfad8dfc7a06432ca240633ad61c1085c357d4eeb3b2442538ba24078501f056",
+  "cc_1562E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1562E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1562E/workspace/cases.json": "cbdcc7fe93764c65f56b95d208969afb967a3e3fcb9df607628ef9299162d5c3",
+  "cc_1562E/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1562E/workspace/goal.md": "d1b1d4fd56d7d74d1fbd409f9d876deb6691a864709aa230559183b2a2b19e94",
+  "cc_1562E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1562E/workspace/solution_test.py": "e9306b8bc91806f5678ceae2106926636562c010eb271b466c1c83fedacc635c",
+  "cc_1574E/hidden/hidden_cases.json": "cebb2276934efc77f32bfc9850137febcded70239e37c64cb99fb9b1cafda571",
+  "cc_1574E/hidden/solution_test.py": "6c42ea15a2a145de5c6f197c927123f995041c24ea546b768bdc5ba4af1e6948",
+  "cc_1574E/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1574E/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1574E/workspace/cases.json": "7ea803bfe2885d2ff938e15cb9fc81b3d8f1a442ddfeaca80000c25b844e63f5",
+  "cc_1574E/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1574E/workspace/goal.md": "cac4074c552622a99d5003f9a76e21a4b087c27d3e85c364bd51547b44b5541a",
+  "cc_1574E/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1574E/workspace/solution_test.py": "450e8cb9a246cbbe1f567123afba447b7189da2b9049fc976435a42a221f1ca6",
+  "cc_1582F2/hidden/hidden_cases.json": "43a4de2a8a97d2daece18245bb9fa9edf51621217ed70e470af17057f5f9bf37",
+  "cc_1582F2/hidden/solution_test.py": "beee1ca7ce463211a0f9fa1891d09a539e2e9d56797be61f56b461a74ec2e9af",
+  "cc_1582F2/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1582F2/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1582F2/workspace/cases.json": "4ea8d2383366eaa150486b1d868f04efa9b701639373539ac6af4a900d2c4ab4",
+  "cc_1582F2/workspace/contract.md": "ca5471c75a6a2d7eacf6ca3bbfbdda115fe358f8efde1a9e66b3a7280a618d41",
+  "cc_1582F2/workspace/goal.md": "e53f6e1b0d56004392a2d24a16ee6e0c761b6aeefcf1937630301f813a5afa11",
+  "cc_1582F2/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1582F2/workspace/solution_test.py": "ebc31bacce84470f113582cc42b15394d379bb73a917c9635b7fe5f8ec03d406",
+  "cc_1586I/hidden/hidden_cases.json": "7068fb45f2bd7718c854f547256ef3aaf86a2b956eb841d4eb74a53d2a4ebee9",
+  "cc_1586I/hidden/solution_test.py": "d602feb0daa136e31ef8ae7939d5181fc9fa858b26d0fd984f54bc47f6870f72",
+  "cc_1586I/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1586I/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1586I/workspace/cases.json": "beb5575d0b57b639ec2965b97e1c5a3b909d49a7f7a85aef16d15aa8a8734574",
+  "cc_1586I/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1586I/workspace/goal.md": "2b2b085b21e0acf0bc67cd7c5496a30f233d58768d575397f221d7ed8a4e8bef",
+  "cc_1586I/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1586I/workspace/solution_test.py": "b4a396941e4b61dccc0b9439ba0f9affcca57c7d15efd5942c79c5ba856080f6",
+  "cc_1591F/hidden/hidden_cases.json": "c1f0a057032b3d030a7f5ccc6ed56067c5750a26b4c621305d567e9af41b0699",
+  "cc_1591F/hidden/solution_test.py": "fb3f028ee02d71270fecc6ef7a59cf4a237af0caaeaa728c6862c8f80407df6d",
+  "cc_1591F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1591F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1591F/workspace/cases.json": "240619b8bfc2a056cf721e3b837c116d1edf66bd6413ba8fdba1e19c22b8f0f8",
+  "cc_1591F/workspace/contract.md": "ef6fb007cc6a5c176a769aaa16a6d79a118ba945c4af2ee12e3c5675f4c273f9",
+  "cc_1591F/workspace/goal.md": "6d6632ab1d0beae4e5232ee2a08f6fe807d5c852f2f6b2c3d177cc6779af3e6b",
+  "cc_1591F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1591F/workspace/solution_test.py": "0097d2a7651e606a844f9a6464e89a6c85d8674ea4c11066a38adfd448421387",
+  "cc_1594F/hidden/hidden_cases.json": "fd8c9a518b01dd7e1ca371f562eb33901e243a55325ddac160248c53ef42d215",
+  "cc_1594F/hidden/solution_test.py": "b15033671257396a218513ecf95a81a39d3f3e5d1ed8309f68905a3e9bed8208",
+  "cc_1594F/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1594F/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1594F/workspace/cases.json": "75db1bba6787cb26e388436cc7e5dd8d8a99e8649bcab44faa6ddc976614ecdd",
+  "cc_1594F/workspace/contract.md": "0cd138bfe5fa5a5088f4d00cc94b50f7149046b10a695a304a6c369d13a56459",
+  "cc_1594F/workspace/goal.md": "b4b03bd1b6a525162281944800430c4bba12bf5d15d995b2e8bb821cde8ecdf7",
+  "cc_1594F/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1594F/workspace/solution_test.py": "2cb10c77bcf490c1ecdc12e1573256a5cfb2ca8ebb5bc8d8b863c9702a80d52f",
+  "cc_1608D/hidden/hidden_cases.json": "906663ca46441ca605cc19e4b144f83fcc9b00b6e1cae51d088e5648940a0d94",
+  "cc_1608D/hidden/solution_test.py": "211879bc41ac0f7f2febc7f05984c1b30f7c6244853d971bd59dc23ee1511d54",
+  "cc_1608D/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1608D/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1608D/workspace/cases.json": "3479736f3ed9c81a3c5459f61343caf518822aed9f81eb34053c523f58f5a8ab",
+  "cc_1608D/workspace/contract.md": "7f265fcc494ddb2beecd78b0e1864a784f0c20da3acaa06da55aad975aa03af6",
+  "cc_1608D/workspace/goal.md": "e4217bb72961271505e0b57f7c2f1009b180a7013a16540b364343645bd6b815",
+  "cc_1608D/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1608D/workspace/solution_test.py": "644fb1f1483221a8051ce51202c53a9922f5157da46374fc3db47113e56b5402",
+  "cc_1619H/hidden/hidden_cases.json": "c8d39523266db2fb0f502cf83aeff1cf345be4c0ca57ad43338b5214d3ee6ca6",
+  "cc_1619H/hidden/solution_test.py": "fb20ca905322ecc31905f5751d4b34ab7488f0048018946ba7f4683cbdac0dc4",
+  "cc_1619H/instruction.txt": "bd1a2673ce9362d1d65af4007f9d8cf24e330a862675db9e74529c70e1a30772",
+  "cc_1619H/scorer.py": "c111c8bbedc221df87a5a7c80cc265263cf951285f3e21b2bc448c79755bee4a",
+  "cc_1619H/workspace/cases.json": "70b09ab81bc6cf2f05385d04a9ef56c8c16051ebef7fad18b55d75c80609b1b6",
+  "cc_1619H/workspace/contract.md": "cb599c577d756ea720ede1c42b6da5f0ada8c887ae9adfcbc8e33764389f282a",
+  "cc_1619H/workspace/goal.md": "243aabd24e1da4c02de3519a6721101018d2c15b54a56f8267eee438c6efc2ec",
+  "cc_1619H/workspace/solution.py": "e654229c7318f773c5ea2a17d2b551325dbb13c85b1f7f73d048041644bc70ab",
+  "cc_1619H/workspace/solution_test.py": "65f9aff49c1b3fe99907cc954ef019d03cdd007d95bbbd31cbfbb0deffb0150d"
+ }
+}
