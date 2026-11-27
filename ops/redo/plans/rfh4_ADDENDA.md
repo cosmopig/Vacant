@@ -66,3 +66,4 @@
 ## 2026-11-27 01:53Z — 停掉 vacant-gemmawatch（擁有者同意）
 - 擁有者原話（經 vacant-hope）：「實驗室助理可以關掉，現在整台機器都你的，你不要初始化機器就好」。本機的 systemd user 服務 `vacant-gemmawatch` 已 stop（沒有 disable；開機設定不動）。1004 的 gemma 已卸載（模型檔不刪），改載 qwen3.5-9b 393216／12 給控制器實驗。
 - **rfh4 續跑時的恢復步驟**：兩台都把 gemma-4-12b-it-qat 照本批起跑時的設定載回（ctx 262144、parallel 4），確認 `lms ps` 只有它，再照原指令續跑。`vacant-gemmawatch` 要不要 `systemctl --user start` 回去，由 vacant-hope 問過擁有者再定。
+- **1003 實際停下**：2026-11-27T02:06:54Z（`pg_bowling/r1/H` 完成後立刻 SIGTERM；runner 記錄「正在跑的那一格會被丟掉、已完成的格保留」）。停下時 1003 完成 56 格、14 個完整對；1004 是 53 格／13 對。兩台都沒有殘留行程。
