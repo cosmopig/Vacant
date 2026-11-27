@@ -12,6 +12,9 @@ from __future__ import annotations
 import pathlib
 
 from ops.e1 import (
+    DEFAULT_EVALPLUS_DIR,
+    DEFAULT_PI_CFG_DIR,
+    EVALPLUS_SHA256,
     assert_ks1_clean,
     atomic_write_json,
     atomic_write_text,
@@ -29,14 +32,19 @@ RUN_SCHEMA = "vacant.fl.run/1"
 RESULT_SCHEMA = "vacant.fl.task_result/1"
 ANALYSIS_SCHEMA = "vacant.fl.analysis/1"
 
-ARMS_FL: tuple[str, ...] = ("B0", "B0x3", "GT", "EX", "TF", "XM", "MV", "CT")
-JUDGE_ARMS: tuple[str, ...] = ("EX", "TF", "XM", "MV", "CT")
+ARMS_FL: tuple[str, ...] = ("B0", "B0x3", "GT", "EX", "TF", "XM", "XMH", "XMVH", "MV", "CT")
+JUDGE_ARMS: tuple[str, ...] = ("EX", "TF", "XM", "XMH", "XMVH", "MV", "CT")
+GATED_RETRY_ARMS: tuple[str, ...] = ("GT", "EX", "TF", "XM", "XMH", "XMVH")
 
 __all__ = [
     "ANALYSIS_SCHEMA",
     "ARMS_FL",
     "DEFAULT_BANK_PATH",
+    "DEFAULT_EVALPLUS_DIR",
     "DEFAULT_INDEX_PATH",
+    "DEFAULT_PI_CFG_DIR",
+    "EVALPLUS_SHA256",
+    "GATED_RETRY_ARMS",
     "JUDGE_ARMS",
     "PLAN_SCHEMA",
     "REPO_ROOT",

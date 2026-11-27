@@ -140,6 +140,26 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         touts = [int(r["tokens_out"]) for r in valid_recs if r.get("tokens_out") is not None]
         atts = [int(r.get("attempts_count") or 0) for r in valid_recs]
 
+        fb_per_task = [
+            int(
+                r.get("feedback_bytes_total")
+                if r.get("feedback_bytes_total") is not None
+                else sum(int(a.get("feedback_bytes") or 0) for a in (r.get("attempts") or []))
+            )
+            for r in valid_recs
+        ]
+        fb_per_retry = [
+            int(a.get("feedback_bytes") or 0)
+            for r in valid_recs
+            for a in (r.get("attempts") or [])
+            if a.get("feedback_sent")
+        ]
+        exam_costs_arm = [
+            float(r["exam_cost_usd"])
+            for r in valid_recs
+            if isinstance(r.get("exam_cost_usd"), (int, float))
+        ]
+
         fa_rate = round(n_fa / n_tasks, 4) if n_tasks else None
         fr_rate = round(n_fr / n_tasks, 4) if n_tasks else None
         undet_rate = round(n_undet / n_tasks, 4) if n_tasks else None
@@ -172,6 +192,12 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             "qualifies_for_9b": None,  # filled below for judge arms
             "attempts_total": sum(atts),
             "attempts_per_task_mean": _mean([float(x) for x in atts]),
+            "feedback_bytes_total": sum(fb_per_task),
+            "feedback_bytes_per_task_mean": _mean([float(x) for x in fb_per_task]),
+            "feedback_bytes_per_retry_mean": _mean([float(x) for x in fb_per_retry]),
+            "feedback_bytes_max": max(fb_per_retry) if fb_per_retry else 0,
+            "feedback_retry_count": len(fb_per_retry),
+            "exam_cost_usd_per_task_mean": round(sum(exam_costs_arm) / len(exam_costs_arm), 6) if exam_costs_arm else None,
             "wall_s_total": round(sum(walls), 3),
             "wall_s_per_task_mean": _mean(walls),
             "wall_s_per_task_median": _median(walls),
@@ -182,10 +208,27 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             "incremental_cost_usd_total": round(sum(inc_costs), 6) if inc_costs else None,
         }
 
-    # Compute gain_share = (arm - B0x3) / (GT - B0x3) and pre-registered 9B qualification
+    # Compute gain_share = (arm - B0x3) / (GT - B0x3), gt_gain = GT - B0x3, and pre-registered 9B qualification
     b0x3_rate = (arm_stats.get("B0x3") or {}).get("success_rate")
     gt_rate = (arm_stats.get("GT") or {}).get("success_rate")
     gt_fa_rate = (arm_stats.get("GT") or {}).get("false_accept_rate")
+
+    gt_gain: dict[str, Any] | None = None
+    if b0x3_rate is not None and gt_rate is not None:
+        abs_diff = round(gt_rate - b0x3_rate, 4)
+        abs_diff_pp = round((gt_rate - b0x3_rate) * 100.0, 2)
+        gt_gain = {
+            "gt_rate": gt_rate,
+            "b0x3_rate": b0x3_rate,
+            "abs_diff": abs_diff,
+            "abs_diff_pp": abs_diff_pp,
+            "paired_mcnemar": _paired_mcnemar(
+                correct_by_arm_task.get("GT", {}),
+                correct_by_arm_task.get("B0x3", {}),
+                "b0x3",
+            ),
+            "indistinguishable": bool((gt_rate - b0x3_rate) < 0.10),
+        }
 
     for arm, st in arm_stats.items():
         if b0x3_rate is not None and gt_rate is not None and st["success_rate"] is not None:
@@ -197,6 +240,38 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
             fa = st["false_accept_rate"]
             if gs is not None and fa is not None and gt_fa_rate is not None:
                 st["qualifies_for_9b"] = bool((gs >= 0.5) and (fa <= 2.0 * gt_fa_rate))
+
+    # Collect unique per-task Haiku exam cost (cached once per task across XMH/XMVH, or from XM/CT)
+    exam_cost_by_task: dict[str, float] = {}
+    cache_dir = root / "exam_cache"
+    if cache_dir.is_dir():
+        for mp in sorted(cache_dir.glob("*/exam_meta.json")):
+            try:
+                em = json.loads(mp.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            tid = str(em.get("task_id") or mp.parent.name)
+            cval = em.get("cost_usd")
+            if cval is None and isinstance(em.get("session"), dict):
+                cval = em["session"].get("cost_usd")
+            if isinstance(cval, (int, float)):
+                exam_cost_by_task[tid] = float(cval)
+    for r in records:
+        if r.get("infra_void"):
+            continue
+        if r.get("arm") in ("XMH", "XMVH", "XM", "CT"):
+            tid = str(r["task_id"])
+            cval = r.get("exam_cost_usd")
+            if isinstance(cval, (int, float)) and tid not in exam_cost_by_task:
+                exam_cost_by_task[tid] = float(cval)
+
+    haiku_exam_cost: dict[str, Any] = {
+        "n_tasks": len(exam_cost_by_task),
+        "total_usd": round(sum(exam_cost_by_task.values()), 6) if exam_cost_by_task else None,
+        "per_task_mean_usd": (
+            round(sum(exam_cost_by_task.values()) / len(exam_cost_by_task), 6) if exam_cost_by_task else None
+        ),
+    }
 
     # Paired McNemar vs B0x3 (main comparison) and vs B0
     paired_vs_b0x3: dict[str, dict[str, Any]] = {}
@@ -220,10 +295,15 @@ def analyze_root(root: pathlib.Path) -> dict[str, Any]:
         "root": str(root),
         "plan_id": run_meta.get("plan_id"),
         "task_format": run_meta.get("task_format", "function"),
+        "gt_source": run_meta.get("gt_source"),
+        "agent": run_meta.get("agent"),
         "model": run_meta.get("model"),
+        "exam_agent": run_meta.get("exam_agent"),
         "exam_model": run_meta.get("exam_model"),
         "bank_sha256": run_meta.get("bank_sha256"),
         "seed": run_meta.get("seed"),
+        "gt_gain": gt_gain,
+        "haiku_exam_cost": haiku_exam_cost,
         "total_incremental_cost_usd": round(total_incremental_cost, 6) if any_incremental_cost else None,
         "arms": arm_stats,
         "paired_vs_B0x3": paired_vs_b0x3,
@@ -239,26 +319,46 @@ def format_report(summary: dict[str, Any]) -> str:
         f"Seed: `{summary.get('seed')}` | Actual total spend: "
         f"`${summary['total_incremental_cost_usd']}`"
         if summary.get("total_incremental_cost_usd") is not None
-        else f"Model: `{summary.get('model')}` | Seed: `{summary.get('seed')}`"
+        else f"Model: `{summary.get('model')}` | Exam model: `{summary.get('exam_model')}` | Seed: `{summary.get('seed')}`"
     )
+
+    gg = summary.get("gt_gain")
+    if isinstance(gg, dict):
+        pm = gg["paired_mcnemar"]
+        lines.append(
+            f"GT gain (GT - B0x3): `{gg['abs_diff']:+.4f}` (`{gg['abs_diff_pp']:+.2f}` pp) | "
+            f"paired McNemar `p={pm['mcnemar_exact_p']}` "
+            f"(GT-only={pm['arm_only_pass']}, B0x3-only={pm['b0x3_only_pass']}, n={pm['n_paired_tasks']})"
+        )
+        if gg.get("indistinguishable"):
+            lines.append("題組無法區分")
+
+    hec = summary.get("haiku_exam_cost") or {}
+    if hec.get("per_task_mean_usd") is not None:
+        lines.append(
+            f"Haiku exam cost/task: `${hec['per_task_mean_usd']:.6f}` "
+            f"(total `${hec['total_usd']:.6f}` across {hec['n_tasks']} task(s))"
+        )
+
     lines.append("")
     lines.append("## Per-Arm Summary (Scored on `eval_hidden` Only)")
     lines.append(
-        "| Arm | Tasks | Correct | Rate | Gain Share | False Acc | False Rej | Undet | "
-        "Qualifies 9B | Att/Task | Cost($)/Task | Wall(s)/Task |"
+        "| Arm | Tasks | Void | Correct | Rate | Gain Share | False Acc | False Rej | Undet | "
+        "Qualifies 9B | Att/Task | Fb(B)/Task | Cost($)/Task | Wall(s)/Task |"
     )
-    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
     for arm, st in summary["arms"].items():
         gs = str(st["gain_share"]) if st["gain_share"] is not None else "n/a"
         fa = f"{st['false_accept_count']}/{st['n_tasks']} ({st['false_accept_rate']})"
         fr = f"{st['false_reject_count']}/{st['n_tasks']} ({st['false_reject_rate']})"
         un = f"{st['undetermined_count']}/{st['n_tasks']} ({st['undetermined_rate']})"
         q9 = "YES" if st["qualifies_for_9b"] is True else ("NO" if st["qualifies_for_9b"] is False else "-")
+        fb = str(st["feedback_bytes_per_task_mean"]) if st.get("feedback_bytes_per_task_mean") is not None else "0"
         cost = f"{st['cost_usd_per_task_mean']:.5f}" if st["cost_usd_per_task_mean"] is not None else "n/a"
         wall = str(st["wall_s_per_task_mean"]) if st["wall_s_per_task_mean"] is not None else "n/a"
         lines.append(
-            f"| {arm} | {st['n_tasks']} | {st['n_correct']} | {st['success_rate']} | {gs} | "
-            f"{fa} | {fr} | {un} | {q9} | {st['attempts_per_task_mean']} | {cost} | {wall} |"
+            f"| {arm} | {st['n_tasks']} | {st['n_infra_void_tasks']} | {st['n_correct']} | {st['success_rate']} | "
+            f"{gs} | {fa} | {fr} | {un} | {q9} | {st['attempts_per_task_mean']} | {fb} | {cost} | {wall} |"
         )
 
     if summary.get("paired_vs_B0x3"):

@@ -1,0 +1,39 @@
+{
+  "schema": "vacant.fl.plan/1",
+  "id": "fl_cal_9b_evalplus",
+  "task_format": "function",
+  "bank_type": "evalplus",
+  "gt_source": "visible",
+  "bank_path": "~/dev/ops/ref/evalplus",
+  "seed": 20261127,
+  "difficulties": [
+    "humanevalplus",
+    "mbppplus"
+  ],
+  "n_tasks": 40,
+  "arms": [
+    "B0"
+  ],
+  "model": {
+    "agent": "pi",
+    "providers": [
+      "lms1004q9"
+    ],
+    "model": "qwen/qwen3.5-9b",
+    "pi_cfg_dir": "~/dev/ops/agentcfg/d2v52",
+    "ctx": 131072
+  },
+  "exam": {
+    "agent": "claude",
+    "model": "claude-haiku-5-5"
+  },
+  "jobs": 2,
+  "attempt_timeout_s": 300,
+  "eval_timeout_s": 45,
+  "per_fn_timeout_s": 20,
+  "per_call_timeout_s": 2.0,
+  "eval_mem_mb": 1024,
+  "max_attempts": 3,
+  "mv_num_inputs": 20,
+  "purpose": "Fast-lane calibration (B0 only, NOT evidence): 40 tasks sampled from EvalPlus (HumanEval+ U MBPP+, base=visible, plus=hidden) using local 9B (qwen/qwen3.5-9b via pi on lms1004q9)."
+}

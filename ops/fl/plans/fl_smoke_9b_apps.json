@@ -1,0 +1,43 @@
+{
+  "schema": "vacant.fl.plan/1",
+  "id": "fl_smoke_9b_apps",
+  "task_format": "stdio",
+  "gt_source": "gate_hidden",
+  "bank_path": "~/dev/ops/ref/apps/apps_fl_bank_v2.jsonl",
+  "bank_sha256": "152e5a00e5ef147ffdc36ac7a775bff8ef5d64773cad05e841c8c5866a001824",
+  "seed": 20261127,
+  "task_ids": [
+    "apps_4002"
+  ],
+  "arms": [
+    "B0",
+    "B0x3",
+    "GT",
+    "EX",
+    "TF",
+    "XMH",
+    "XMVH",
+    "MV"
+  ],
+  "model": {
+    "agent": "pi",
+    "providers": [
+      "lms1004q9"
+    ],
+    "model": "qwen/qwen3.5-9b",
+    "pi_cfg_dir": "~/dev/ops/agentcfg/d2v52",
+    "ctx": 131072
+  },
+  "exam": {
+    "agent": "claude",
+    "model": "claude-haiku-5-5"
+  },
+  "jobs": 1,
+  "attempt_timeout_s": 300,
+  "eval_timeout_s": 60,
+  "per_case_timeout_s": 3.0,
+  "eval_mem_mb": 1024,
+  "max_attempts": 3,
+  "mv_num_inputs": 20,
+  "purpose": "Real pipeline smoke (NOT statistical evidence): 1 APPS introductory task (apps_4002) x all arms (B0, B0x3, GT, EX, TF, XMH, XMVH, MV) with local 9B worker (pi/lms1004q9) and Claude Haiku exam."
+}

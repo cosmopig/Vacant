@@ -33,6 +33,7 @@ APPS_TEST_URL = "https://huggingface.co/datasets/codeparrot/apps/resolve/main/te
 USER_AGENT = "research-client/1.0"
 DEFAULT_APPS_DIR = pathlib.Path("~/dev/ops/ref/apps").expanduser()
 ALLOWED_DIFFICULTIES = frozenset({"interview", "competition"})
+ALLOWED_DIFFICULTIES_V2 = frozenset({"introductory", "interview", "competition"})
 MIN_HIDDEN_TESTS = 6
 
 # Regex patterns for deterministic APPS statement example parsing
@@ -232,8 +233,11 @@ def download_single_request(url: str, dest: pathlib.Path, *, timeout_s: float = 
 def build_apps_fl_bank(
     raw_test_jsonl: pathlib.Path,
     out_bank_jsonl: pathlib.Path,
+    *,
+    allowed_difficulties: frozenset[str] = ALLOWED_DIFFICULTIES,
 ) -> dict[str, Any]:
-    """Stream `raw_test_jsonl`, filter to interview/competition stdin tasks with >=6 tests & parseable examples."""
+    """Stream `raw_test_jsonl`, filter to allowed difficulties stdin tasks with >=6 tests & parseable examples."""
+    allowed = frozenset(d.strip().lower() for d in allowed_difficulties)
     counts: dict[str, int] = {
         "total_fetched": 0,
         "excluded_difficulty": 0,
@@ -261,7 +265,7 @@ def build_apps_fl_bank(
             pid = row.get("problem_id", row.get("id", line_no - 1))
             tid = f"apps_{pid}"
             diff = str(row.get("difficulty") or "").strip().lower()
-            if diff not in ALLOWED_DIFFICULTIES:
+            if diff not in allowed:
                 counts["excluded_difficulty"] += 1
                 continue
 
@@ -376,11 +380,72 @@ def fetch_and_build(
     return manifest
 
 
+def build_v2_from_existing(
+    out_dir: pathlib.Path = DEFAULT_APPS_DIR,
+) -> dict[str, Any]:
+    """Re-filter already-downloaded `test.jsonl` (no network download) into `apps_fl_bank_v2.jsonl`
+    including `introductory`, `interview`, and `competition`, and record a `v2` entry in `MANIFEST.json`.
+    """
+    out_dir = out_dir.expanduser().resolve()
+    raw_path = out_dir / "test.jsonl"
+    if not raw_path.is_file() or raw_path.stat().st_size == 0:
+        raise FileNotFoundError(f"Already-downloaded APPS test.jsonl not found: {raw_path}")
+
+    bank_v2_path = out_dir / "apps_fl_bank_v2.jsonl"
+    manifest_path = out_dir / "MANIFEST.json"
+
+    build_res = build_apps_fl_bank(
+        raw_path,
+        bank_v2_path,
+        allowed_difficulties=ALLOWED_DIFFICULTIES_V2,
+    )
+
+    if manifest_path.is_file():
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    else:
+        manifest = {
+            "schema": "vacant.fl.apps_manifest/1",
+            "raw_file": str(raw_path),
+            "sha256": sha256_file(raw_path),
+            "raw_size_bytes": raw_path.stat().st_size,
+        }
+
+    v2_entry: dict[str, Any] = {
+        "built_date": utc_now_iso(),
+        "filtered_bank_file": str(bank_v2_path),
+        "filtered_bank_sha256": build_res["bank_sha256"],
+        "filtered_bank_size_bytes": build_res["bank_size_bytes"],
+        "filter_criteria": {
+            "difficulties": sorted(ALLOWED_DIFFICULTIES_V2),
+            "min_hidden_tests": MIN_HIDDEN_TESTS,
+            "stdin_only_no_fn_name": True,
+            "require_parseable_examples": True,
+        },
+        "counts": build_res["counts"],
+        "by_difficulty": build_res["by_difficulty"],
+        "parse_failure_reasons": build_res["parse_failure_reasons"],
+        "parse_failure_task_ids": build_res["parse_failure_task_ids"],
+    }
+    manifest["v2"] = v2_entry
+    atomic_write_json(manifest_path, manifest)
+    return v2_entry
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Fetch APPS test split from HF and build apps_fl_bank.jsonl")
+    ap = argparse.ArgumentParser(description="Fetch APPS test split from HF and build apps_fl_bank[_v2].jsonl")
     ap.add_argument("--out-dir", type=pathlib.Path, default=DEFAULT_APPS_DIR, help="Output directory (default ~/dev/ops/ref/apps)")
     ap.add_argument("--force", action="store_true", help="Re-download test.jsonl even if already present")
+    ap.add_argument(
+        "--v2",
+        action="store_true",
+        help="Re-filter already-downloaded test.jsonl (no download) including introductory -> apps_fl_bank_v2.jsonl",
+    )
     args = ap.parse_args()
+
+    if args.v2:
+        v2_entry = build_v2_from_existing(args.out_dir)
+        print(json.dumps({k: v for k, v in v2_entry.items() if k != "parse_failure_task_ids"}, ensure_ascii=False, indent=2))
+        return 0
 
     manifest = fetch_and_build(args.out_dir, force_download=args.force)
     print(json.dumps({k: v for k, v in manifest.items() if k != "parse_failure_task_ids"}, ensure_ascii=False, indent=2))

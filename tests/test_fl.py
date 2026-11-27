@@ -27,11 +27,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from ops.e1.negative_controls import run_claude_negative_controls
-from ops.fl import DEFAULT_BANK_PATH, DEFAULT_INDEX_PATH, PLAN_SCHEMA, atomic_write_json, sha256_file
+from ops.fl import DEFAULT_BANK_PATH, DEFAULT_EVALPLUS_DIR, DEFAULT_INDEX_PATH, PLAN_SCHEMA, atomic_write_json, sha256_file
 from ops.fl.analyze_fl import analyze_root, format_report
-from ops.fl.apps_fetch import parse_apps_examples
+from ops.fl.apps_fetch import ALLOWED_DIFFICULTIES_V2, build_apps_fl_bank, build_v2_from_existing, parse_apps_examples
 from ops.fl.bank import (
     load_bank_tasks,
+    load_evalplus_tasks,
     parse_stdio_case,
     parse_stdio_cases,
     parse_test_case,
@@ -52,9 +53,18 @@ from ops.fl.eval_fl import (
     run_input_generator_in_sandbox,
     run_stdio_input_generator_in_sandbox,
     score_ct_solutions,
+    self_check_xmvh_exam,
     stdio_outputs_equal,
 )
-from ops.fl.run_fl import FLRunner, _STDIO_TASK_SUFFIX, assert_fl_git_clean, build_task_prompt
+from ops.fl.run_fl import (
+    FEEDBACK_MAX_BYTES,
+    FEEDBACK_PREFIX,
+    FLRunner,
+    _STDIO_TASK_SUFFIX,
+    assert_fl_git_clean,
+    build_retry_feedback,
+    build_task_prompt,
+)
 
 
 class TestBankAndSplit(unittest.TestCase):
@@ -973,6 +983,579 @@ print(json.dumps({
             for arm in ("GT", "TF", "XM", "MV", "CT"):
                 self.assertEqual(arms[arm]["success_rate"], 1.0, f"stdio arm {arm} failed")
             self.assertEqual(arms["CT"]["incremental_cost_usd_total"], 0.0)
+
+
+_FAKE_PI_WORKER_PY = r"""#!/usr/bin/env python3
+import argparse, json, os, pathlib
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--prompt", required=True)
+args = ap.parse_args()
+prompt = args.prompt
+
+assert os.getcwd() == "/work", f"bad cwd: {os.getcwd()}"
+assert os.environ.get("HOME") == "/sandbox_home"
+
+role = os.environ.get("FL_ROLE", "")
+arm = os.environ.get("FL_ARM", "")
+att = int(os.environ.get("FL_ATTEMPT", "1"))
+mode = os.environ.get("FL_FAKE_MODE", "normal")
+
+CORRECT = "x = int(input().strip())\nprint(x * 2 + 1)\n"
+ONLY_EX = "x = int(input().strip())\nprint(3 if x == 1 else (5 if x == 2 else -1))\n"
+WRONG = "x = int(input().strip())\nprint(-999)\n"
+
+if role == "tf_test_writer":
+    pathlib.Path("/work/tests_spec.py").write_text(
+        '[\n'
+        '  {"input": "1\\n", "output": "3"},\n'
+        '  {"input": "10\\n", "output": "21"},\n'
+        ']\n',
+        encoding="utf-8",
+    )
+elif role == "coder":
+    sol_p = pathlib.Path("/work/solution.py")
+    spec_p = pathlib.Path("/work/tests_spec.py")
+
+    if arm == "TF":
+        assert spec_p.is_file(), "TF pi coder must see read-only /work/tests_spec.py"
+        try:
+            spec_p.write_text("[]", encoding="utf-8")
+            raise AssertionError("TF tests_spec.py must be read-only in pi sandbox")
+        except OSError:
+            pass
+    elif arm in ("XMH", "XMVH"):
+        assert not spec_p.exists(), f"{arm} pi coder must NOT see exam tests_spec.py"
+
+    # Check feedback presence on retry for gated arms (never expected output!)
+    if arm in ("GT", "EX", "TF", "XMH", "XMVH") and att >= 2:
+        assert "Your previous solution failed on this input:" in prompt, f"{arm} att {att} missing feedback"
+        assert "21" not in prompt and "15" not in prompt and "19" not in prompt, f"Expected output leaked in feedback: {prompt}"
+
+    if arm == "B0":
+        sol_p.write_text(WRONG, encoding="utf-8")
+    elif arm == "B0x3":
+        assert "Your previous solution failed on this input:" not in prompt
+        sol_p.write_text(WRONG, encoding="utf-8")
+    elif arm == "GT":
+        sol_p.write_text(WRONG if att == 1 else CORRECT, encoding="utf-8")
+    elif arm == "EX":
+        sol_p.write_text(WRONG if att == 1 else ONLY_EX, encoding="utf-8")
+    elif arm == "TF":
+        sol_p.write_text(ONLY_EX if att == 1 else CORRECT, encoding="utf-8")
+    elif arm == "XMH":
+        sol_p.write_text(WRONG if att == 1 else CORRECT, encoding="utf-8")
+    elif arm == "XMVH":
+        if mode == "xmvh_undetermined":
+            sol_p.write_text(WRONG, encoding="utf-8")
+        else:
+            sol_p.write_text(WRONG if att == 1 else CORRECT, encoding="utf-8")
+    elif arm == "MV":
+        assert "Your previous solution failed on this input:" not in prompt
+        sol_p.write_text(WRONG if att == 1 else CORRECT, encoding="utf-8")
+    else:
+        sol_p.write_text(CORRECT, encoding="utf-8")
+
+print(json.dumps({
+    "type": "message_end",
+    "message": {
+        "role": "assistant",
+        "stopReason": "stop",
+        "usage": {"input": 120, "output": 40},
+    },
+}))
+"""
+
+
+_FAKE_CLAUDE_EXAM_PY = r"""#!/usr/bin/env python3
+import json, os, pathlib, sys
+
+role = os.environ.get("FL_ROLE", "")
+mode = os.environ.get("FL_FAKE_MODE", "normal")
+creds_path = pathlib.Path("/sandbox_home/.claude/.credentials.json")
+creds_text = creds_path.read_text(encoding="utf-8") if creds_path.is_file() else ""
+
+if mode == "auth_always_fail":
+    print(json.dumps({
+        "type": "result",
+        "subtype": "error",
+        "is_error": True,
+        "result": "Failed to authenticate: OAuth token revoked (401)",
+    }))
+    sys.exit(1)
+
+if mode == "auth_stale_until_fresh" and "fresh_token" not in creds_text:
+    print(json.dumps({
+        "type": "result",
+        "subtype": "error",
+        "is_error": True,
+        "result": "Failed to authenticate: OAuth token revoked (401)",
+    }))
+    sys.exit(1)
+
+if role in ("xmh_exam_writer", "xm_exam_writer"):
+    if mode == "xmvh_one_disagree":
+        # 2 statement examples: input "1\n"->3 (agrees), input "2\n"->999 (disagrees, 1/2 = half, NOT > half)
+        # Plus extra case "7\n"->15
+        pathlib.Path("/work/tests_spec.py").write_text(
+            '[\n'
+            '  {"input": "1\\n", "output": "3"},\n'
+            '  {"input": "2\\n", "output": "999"},\n'
+            '  {"input": "7\\n", "output": "15"},\n'
+            ']\n',
+            encoding="utf-8",
+        )
+    elif mode == "xmvh_fail_selfcheck":
+        # Both statement examples disagree (2/2 > half) -> XMVH self-check fails -> undetermined!
+        pathlib.Path("/work/tests_spec.py").write_text(
+            '[\n'
+            '  {"input": "1\\n", "output": "999"},\n'
+            '  {"input": "2\\n", "output": "888"},\n'
+            '  {"input": "7\\n", "output": "15"},\n'
+            ']\n',
+            encoding="utf-8",
+        )
+    else:
+        pathlib.Path("/work/tests_spec.py").write_text(
+            '[\n'
+            '  {"input": "1\\n", "output": "3"},\n'
+            '  {"input": "2\\n", "output": "5"},\n'
+            '  {"input": "7\\n", "output": "15"},\n'
+            '  {"input": "9\\n", "output": "19"},\n'
+            ']\n',
+            encoding="utf-8",
+        )
+elif role == "mv_input_gen":
+    pathlib.Path("/work/gen_inputs.py").write_text(
+        "def gen_inputs():\n    return [f'{i}\\n' for i in range(3, 13)]\n",
+        encoding="utf-8",
+    )
+elif role == "coder":
+    pathlib.Path("/work/solution.py").write_text("x = int(input().strip())\nprint(x * 2 + 1)\n", encoding="utf-8")
+
+print(json.dumps({"type": "system", "subtype": "init", "cwd": "/work"}))
+print(json.dumps({
+    "type": "assistant",
+    "message": {"id": f"ex_{role}", "model": "claude-haiku-5-5", "usage": {"input_tokens": 80, "output_tokens": 30}},
+}))
+print(json.dumps({
+    "type": "result",
+    "subtype": "success",
+    "is_error": False,
+    "num_turns": 1,
+    "total_cost_usd": 0.004,
+    "usage": {"input_tokens": 80, "output_tokens": 30},
+}))
+"""
+
+
+class TestPiWorkerHaikuExamAuthFeedbackAndBanks(unittest.TestCase):
+    def test_retry_feedback_format_cap_and_no_expected_leak(self) -> None:
+        stdio_task = {"task_format": "stdio", "entry_point": None}
+        cases_s = [
+            {"input": "10 20\n", "output": "SECRET_EXPECTED_999"},
+            {"input": "30 40\n", "output": "SECRET_EXPECTED_888"},
+        ]
+        fb = build_retry_feedback(stdio_task, cases_s, {"passed": False, "first_failed_idx": 1})
+        self.assertTrue(fb.startswith(FEEDBACK_PREFIX))
+        self.assertIn("30 40", fb)
+        self.assertNotIn("SECRET_EXPECTED", fb)
+        self.assertLessEqual(len(fb.encode("utf-8")), FEEDBACK_MAX_BYTES)
+
+        # Truncation <= 400 bytes even with long UTF-8 input
+        long_cases = [{"input": "あ" * 500 + "\n", "output": "NEVER_SHOWN"}]
+        fb_long = build_retry_feedback(stdio_task, long_cases, {"passed": False, "first_failed_idx": 0})
+        self.assertTrue(fb_long.startswith(FEEDBACK_PREFIX))
+        self.assertLessEqual(len(fb_long.encode("utf-8")), FEEDBACK_MAX_BYTES)
+        self.assertNotIn("NEVER_SHOWN", fb_long)
+
+        # Function task feedback includes entry_point(*args) only, never expected
+        fn_task = {"task_format": "function", "entry_point": "solve"}
+        cases_f = [{"args": [[1, 2, 3], "abc"], "expected": "HIDDEN_ANSWER_42"}]
+        fb_fn = build_retry_feedback(fn_task, cases_f, {"passed": False, "first_failed_idx": 0})
+        self.assertIn("solve([1, 2, 3], 'abc')", fb_fn)
+        self.assertNotIn("HIDDEN_ANSWER_42", fb_fn)
+        self.assertLessEqual(len(fb_fn.encode("utf-8")), FEEDBACK_MAX_BYTES)
+
+    def test_xmvh_self_check_logic(self) -> None:
+        examples = [
+            {"input": "1\n", "output": "3"},
+            {"input": "2\n", "output": "5"},
+            {"input": "3\n", "output": "7"},
+        ]
+        # 1) All 3 agree
+        exam_ok = [
+            {"input": "1\n", "output": "3"},
+            {"input": "2\n", "output": "5"},
+            {"input": "3\n", "output": "7"},
+            {"input": "10\n", "output": "21"},
+        ]
+        sc_ok = self_check_xmvh_exam(exam_ok, examples, task_format="stdio")
+        self.assertFalse(sc_ok["self_check_failed"])
+        self.assertEqual(sc_ok["n_discarded"], 0)
+        self.assertEqual(sc_ok["n_gate_cases"], 4)
+
+        # 2) 1 of 3 disagrees (<= half): discard disagreeing case, union with statement examples restores true output
+        exam_one_bad = [
+            {"input": "1\n", "output": "3"},
+            {"input": "2\n", "output": "WRONG"},
+            {"input": "3\n", "output": "7"},
+            {"input": "10\n", "output": "21"},
+        ]
+        sc_one = self_check_xmvh_exam(exam_one_bad, examples, task_format="stdio")
+        self.assertFalse(sc_one["self_check_failed"])
+        self.assertEqual(sc_one["n_discarded"], 1)
+        self.assertEqual(sc_one["n_disagreed"], 1)
+        self.assertEqual(sc_one["n_gate_cases"], 4)
+        out_for_2 = [c["output"] for c in sc_one["gate_cases"] if c["input"].strip() == "2"]
+        self.assertEqual(out_for_2, ["5"])
+
+        # 3) 2 of 3 disagree (> half): self-check failed -> whole exam discarded
+        exam_two_bad = [
+            {"input": "1\n", "output": "WRONG1"},
+            {"input": "2\n", "output": "WRONG2"},
+            {"input": "3\n", "output": "7"},
+            {"input": "10\n", "output": "21"},
+        ]
+        sc_two = self_check_xmvh_exam(exam_two_bad, examples, task_format="stdio")
+        self.assertTrue(sc_two["self_check_failed"])
+        self.assertEqual(sc_two["n_disagreed"], 2)
+        self.assertEqual(sc_two["gate_cases"], [])
+
+        # 4) 1 of 2 disagrees (exactly half, NOT more than half): discard 1, keep rest U examples
+        sc_half = self_check_xmvh_exam(
+            [{"input": "1\n", "output": "3"}, {"input": "2\n", "output": "WRONG"}, {"input": "8\n", "output": "17"}],
+            examples[:2],
+            task_format="stdio",
+        )
+        self.assertFalse(sc_half["self_check_failed"])
+        self.assertEqual(sc_half["n_discarded"], 1)
+        self.assertEqual(sc_half["n_gate_cases"], 3)
+
+    def test_claude_credential_refresh_and_auth_retry_and_infra_void(self) -> None:
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as td:
+            tp = pathlib.Path(td)
+            bank_p = tp / "mini_stdio.jsonl"
+            row = {
+                "task_id": "apps_auth_1",
+                "difficulty": "introductory",
+                "prompt": "Read integer x and output 2*x + 1.",
+                "examples": [{"input": "1\n", "output": "3"}, {"input": "2\n", "output": "5"}],
+                "hidden_tests": [{"input": f"{x}\n", "output": f"{2 * x + 1}"} for x in range(3, 11)],
+            }
+            bank_p.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            bank_sha = sha256_file(bank_p)
+
+            fc = tp / "fake_claude_auth"
+            fc.write_text(_FAKE_CLAUDE_EXAM_PY, encoding="utf-8")
+            fc.chmod(stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+
+            creds = tp / ".credentials.json"
+            creds.write_text('{"claudeAiOauth":{"accessToken":"stale_token"}}\n', encoding="utf-8")
+
+            # Case A: stale token fails attempt 1, wait 60s called, host token rotates -> retry succeeds!
+            plan_ok = tp / "plan_auth_ok.json"
+            atomic_write_json(
+                plan_ok,
+                {
+                    "schema": PLAN_SCHEMA,
+                    "id": "fl_auth_retry_ok",
+                    "task_format": "stdio",
+                    "bank_path": str(bank_p),
+                    "bank_sha256": bank_sha,
+                    "seed": 7,
+                    "arms": ["B0"],
+                    "model": {
+                        "agent": "claude",
+                        "model": "claude-haiku-5-5",
+                        "claude_bin": str(fc),
+                        "credentials_path": str(creds),
+                        "fake_mode": "auth_stale_until_fresh",
+                    },
+                    "attempt_timeout_s": 20,
+                },
+            )
+
+            import time as _time
+            real_sleep = _time.sleep
+            sleeps_ok: list[float] = []
+
+            def _fake_sleep_rotate(secs: float) -> None:
+                if secs < 10.0:
+                    real_sleep(secs)
+                    return
+                sleeps_ok.append(secs)
+                creds.write_text('{"claudeAiOauth":{"accessToken":"fresh_token"}}\n', encoding="utf-8")
+
+            root_ok = tp / "root_auth_ok"
+            with mock.patch("ops.fl.run_fl.time.sleep", side_effect=_fake_sleep_rotate):
+                FLRunner(plan_ok, root_ok, allow_uncommitted=True, verify_bank_sha=True).run()
+
+            rec_ok = json.loads((root_ok / "cells" / "apps_auth_1" / "B0" / "record.json").read_text(encoding="utf-8"))
+            self.assertFalse(rec_ok["infra_void"])
+            self.assertTrue(rec_ok["delivered_correct"])
+            self.assertEqual(rec_ok["attempts"][0]["auth_retries"], 1)
+            self.assertEqual(sleeps_ok, [60.0])
+            self.assertFalse(rec_ok["attempts"][0]["auth_error"])
+
+            # Case B: persistent auth failure -> retries 2 times (waiting 60s each) then marks infra_void
+            plan_fail = tp / "plan_auth_fail.json"
+            atomic_write_json(
+                plan_fail,
+                {
+                    "schema": PLAN_SCHEMA,
+                    "id": "fl_auth_retry_fail",
+                    "task_format": "stdio",
+                    "bank_path": str(bank_p),
+                    "bank_sha256": bank_sha,
+                    "seed": 7,
+                    "arms": ["B0"],
+                    "model": {
+                        "agent": "claude",
+                        "model": "claude-haiku-5-5",
+                        "claude_bin": str(fc),
+                        "credentials_path": str(creds),
+                        "fake_mode": "auth_always_fail",
+                    },
+                    "attempt_timeout_s": 20,
+                },
+            )
+            sleeps_fail: list[float] = []
+
+            def _fake_sleep_fail(secs: float) -> None:
+                if secs < 10.0:
+                    real_sleep(secs)
+                    return
+                sleeps_fail.append(secs)
+
+            root_fail = tp / "root_auth_fail"
+            with mock.patch("ops.fl.run_fl.time.sleep", side_effect=_fake_sleep_fail):
+                FLRunner(plan_fail, root_fail, allow_uncommitted=True, verify_bank_sha=True).run()
+            rec_fail = json.loads((root_fail / "cells" / "apps_auth_1" / "B0" / "record.json").read_text(encoding="utf-8"))
+            self.assertTrue(rec_fail["infra_void"])
+            self.assertEqual(rec_fail["attempts"][0]["auth_retries"], 2)
+            self.assertEqual(sleeps_fail, [60.0, 60.0])
+            self.assertTrue(rec_fail["attempts"][0]["auth_error"])
+
+            summ_fail = analyze_root(root_fail)
+            self.assertEqual(summ_fail["arms"]["B0"]["n_tasks"], 0)
+            self.assertEqual(summ_fail["arms"]["B0"]["n_infra_void_tasks"], 1)
+            self.assertEqual(summ_fail["arms"]["B0"]["infra_void_tasks"], ["apps_auth_1"])
+
+    def test_pi_worker_and_haiku_exam_all_arms_feedback_cache_and_analyzer(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tp = pathlib.Path(td)
+            bank_p = tp / "apps_v2_mini.jsonl"
+            row = {
+                "task_id": "apps_intro_1",
+                "difficulty": "introductory",
+                "prompt": "Read integer x and output 2*x + 1.",
+                "examples": [{"input": "1\n", "output": "3"}, {"input": "2\n", "output": "5"}],
+                "hidden_tests": [{"input": f"{x}\n", "output": f"{2 * x + 1}"} for x in range(3, 11)],
+            }
+            bank_p.write_text(json.dumps(row) + "\n", encoding="utf-8")
+            bank_sha = sha256_file(bank_p)
+
+            fpi = tp / "fake_pi.py"
+            fpi.write_text(_FAKE_PI_WORKER_PY, encoding="utf-8")
+            fc = tp / "fake_claude_exam"
+            fc.write_text(_FAKE_CLAUDE_EXAM_PY, encoding="utf-8")
+            fc.chmod(stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+            creds = tp / ".credentials.json"
+            creds.write_text('{"claudeAiOauth":{"accessToken":"fresh_token"}}\n', encoding="utf-8")
+
+            # Run 1: full mixed pi + claude across B0, B0x3, GT, EX, TF, XMH, XMVH, MV
+            plan_p = tp / "plan_pi_haiku.json"
+            atomic_write_json(
+                plan_p,
+                {
+                    "schema": PLAN_SCHEMA,
+                    "id": "fl_pi_haiku_e2e",
+                    "task_format": "stdio",
+                    "gt_source": "gate_hidden",
+                    "bank_path": str(bank_p),
+                    "bank_sha256": bank_sha,
+                    "seed": 42,
+                    "arms": ["B0", "B0x3", "GT", "EX", "TF", "XMH", "XMVH", "MV"],
+                    "model": {
+                        "agent": "pi",
+                        "providers": ["fake_lms1004q9"],
+                        "model": "qwen/qwen3.5-9b",
+                        "fake_agent": str(fpi),
+                        "ctx": 131072,
+                    },
+                    "exam": {
+                        "agent": "claude",
+                        "model": "claude-haiku-5-5",
+                        "claude_bin": str(fc),
+                        "credentials_path": str(creds),
+                        "fake_mode": "xmvh_one_disagree",
+                    },
+                    "jobs": 1,
+                    "attempt_timeout_s": 30,
+                },
+            )
+            root = tp / "root_pi_haiku"
+            FLRunner(plan_p, root, allow_uncommitted=True, verify_bank_sha=True).run()
+
+            # Verify XMH cached the exam once and XMVH reused it (0 incremental exam cost) + dropped the 1 disagreeing example
+            xmh_rec = json.loads((root / "cells" / "apps_intro_1" / "XMH" / "record.json").read_text(encoding="utf-8"))
+            xmvh_rec = json.loads((root / "cells" / "apps_intro_1" / "XMVH" / "record.json").read_text(encoding="utf-8"))
+            self.assertFalse(xmh_rec["judge_meta"]["exam_cached_reused"])
+            self.assertTrue(xmvh_rec["judge_meta"]["exam_cached_reused"])
+            self.assertEqual(xmh_rec["incremental_cost_usd"], 0.004)
+            self.assertEqual(xmvh_rec["incremental_cost_usd"], 0.0)
+            self.assertEqual(xmvh_rec["cost_usd"], 0.004)
+            self.assertEqual(xmvh_rec["judge_meta"]["self_check"]["n_discarded"], 1)
+            self.assertFalse(xmvh_rec["judge_meta"]["self_check"]["self_check_failed"])
+            self.assertTrue(xmvh_rec["delivered_correct"])
+
+            # XMH kept the bogus exam case ("2\n"->"999") -> false-rejected CORRECT on att 2 & 3 (3 attempts, gate=False)
+            # whereas XMVH dropped the disagreeing case & restored true example -> passed gate on attempt 2!
+            self.assertEqual(xmh_rec["attempts_count"], 3)
+            self.assertTrue(xmh_rec["false_reject"])
+            self.assertFalse(xmh_rec["gate_passed"])
+            self.assertEqual(xmvh_rec["attempts_count"], 2)
+            self.assertFalse(xmvh_rec["false_reject"])
+            self.assertTrue(xmvh_rec["gate_passed"])
+
+            # Verify feedback was sent & recorded on retry for GT, EX, TF, XMH, XMVH (and 0 for B0, B0x3, MV)
+            for gated_arm in ("GT", "EX", "TF", "XMH", "XMVH"):
+                rec = json.loads((root / "cells" / "apps_intro_1" / gated_arm / "record.json").read_text(encoding="utf-8"))
+                self.assertGreaterEqual(rec["attempts_count"], 2, f"{gated_arm} expected >=2 attempts")
+                self.assertIsNone(rec["attempts"][0]["feedback_sent"])
+                self.assertEqual(rec["attempts"][0]["feedback_bytes"], 0)
+                fb2 = rec["attempts"][1]["feedback_sent"]
+                self.assertIsNotNone(fb2)
+                self.assertTrue(fb2.startswith(FEEDBACK_PREFIX))
+                self.assertGreater(rec["feedback_bytes_total"], 0)
+                self.assertLessEqual(rec["attempts"][1]["feedback_bytes"], FEEDBACK_MAX_BYTES)
+            for ungated_arm in ("B0", "B0x3", "MV"):
+                rec = json.loads((root / "cells" / "apps_intro_1" / ungated_arm / "record.json").read_text(encoding="utf-8"))
+                self.assertEqual(rec["feedback_bytes_total"], 0)
+
+            # Verify analyzer: gt_gain, haiku_exam_cost, feedback bytes, and report formatting
+            summ = analyze_root(root)
+            self.assertEqual(summ["gt_gain"]["abs_diff"], 1.0)
+            self.assertEqual(summ["gt_gain"]["abs_diff_pp"], 100.0)
+            self.assertFalse(summ["gt_gain"]["indistinguishable"])
+            self.assertEqual(summ["haiku_exam_cost"]["n_tasks"], 1)
+            self.assertEqual(summ["haiku_exam_cost"]["per_task_mean_usd"], 0.004)
+            self.assertGreater(summ["arms"]["GT"]["feedback_bytes_per_task_mean"], 0)
+            md = format_report(summ)
+            self.assertIn("GT gain (GT - B0x3)", md)
+            self.assertNotIn("題組無法區分", md)
+            self.assertIn("Haiku exam cost/task", md)
+            self.assertIn("Fb(B)/Task", md)
+
+            # Run 2: XMVH self-check failure (> half disagree -> whole exam discarded -> undetermined -> deliver attempt 1)
+            plan_sc_fail = tp / "plan_xmvh_fail.json"
+            atomic_write_json(
+                plan_sc_fail,
+                {
+                    "schema": PLAN_SCHEMA,
+                    "id": "fl_xmvh_sc_fail",
+                    "task_format": "stdio",
+                    "bank_path": str(bank_p),
+                    "bank_sha256": bank_sha,
+                    "seed": 42,
+                    "arms": ["B0x3", "GT", "XMVH"],
+                    "model": {
+                        "agent": "pi",
+                        "providers": ["fake_lms1004q9"],
+                        "model": "qwen/qwen3.5-9b",
+                        "fake_agent": str(fpi),
+                        "fake_mode": "xmvh_undetermined",
+                    },
+                    "exam": {
+                        "agent": "claude",
+                        "model": "claude-haiku-5-5",
+                        "claude_bin": str(fc),
+                        "credentials_path": str(creds),
+                        "fake_mode": "xmvh_fail_selfcheck",
+                    },
+                    "jobs": 1,
+                    "attempt_timeout_s": 30,
+                },
+            )
+            root_sc = tp / "root_xmvh_fail"
+            FLRunner(plan_sc_fail, root_sc, allow_uncommitted=True, verify_bank_sha=True).run()
+            sc_rec = json.loads((root_sc / "cells" / "apps_intro_1" / "XMVH" / "record.json").read_text(encoding="utf-8"))
+            self.assertTrue(sc_rec["undetermined"])
+            self.assertEqual(sc_rec["undetermined_reason"], "exam_self_check_failed")
+            self.assertEqual(sc_rec["attempts_count"], 1)
+            self.assertEqual(sc_rec["delivered_attempt"], 1)
+            self.assertTrue(sc_rec["judge_meta"]["self_check"]["self_check_failed"])
+
+            # Verify analyzer prints "題組無法區分" when GT - B0x3 < 10pp
+            summ_ind = analyze_root(root_sc)
+            # In root_sc, B0x3=0.0 and GT=1.0 -> let's also check synthetic <10pp directly on format_report
+            summ_low = dict(summ_ind)
+            summ_low["gt_gain"] = {
+                "gt_rate": 0.55,
+                "b0x3_rate": 0.50,
+                "abs_diff": 0.05,
+                "abs_diff_pp": 5.0,
+                "paired_mcnemar": {"n_paired_tasks": 20, "arm_only_pass": 1, "b0x3_only_pass": 0, "mcnemar_exact_p": 1.0},
+                "indistinguishable": True,
+            }
+            self.assertIn("題組無法區分", format_report(summ_low))
+
+    def test_apps_v2_filter_and_evalplus_bank_and_gt_source_visible(self) -> None:
+        # 1) APPS v2 filter keeps introductory + interview + competition without downloading
+        with tempfile.TemporaryDirectory() as td:
+            tp = pathlib.Path(td)
+            raw_p = tp / "test.jsonl"
+            sample_q = "Solve.\n\n-----Examples-----\nInput\n1\n\nOutput\n2\n"
+            io_str = json.dumps({"inputs": [f"{i}\n" for i in range(6)], "outputs": [f"{i + 1}" for i in range(6)]})
+            raw_rows = [
+                {"problem_id": 1, "difficulty": "introductory", "question": sample_q, "input_output": io_str},
+                {"problem_id": 2, "difficulty": "interview", "question": sample_q, "input_output": io_str},
+                {"problem_id": 3, "difficulty": "competition", "question": sample_q, "input_output": io_str},
+            ]
+            raw_p.write_text("\n".join(json.dumps(r) for r in raw_rows) + "\n", encoding="utf-8")
+
+            v2_entry = build_v2_from_existing(tp)
+            self.assertEqual(v2_entry["counts"]["kept"], 3)
+            self.assertEqual(v2_entry["by_difficulty"], {"competition": 1, "interview": 1, "introductory": 1})
+            self.assertTrue((tp / "apps_fl_bank_v2.jsonl").is_file())
+            manifest = json.loads((tp / "MANIFEST.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["v2"]["filtered_bank_sha256"], sha256_file(tp / "apps_fl_bank_v2.jsonl"))
+
+        # 2) EvalPlus HumanEval+/MBPP+ bank loader (pinned sha256, base=visible, plus=hidden)
+        if DEFAULT_EVALPLUS_DIR.is_dir():
+            loaded_ep = load_bank_tasks(
+                DEFAULT_EVALPLUS_DIR,
+                task_format="function",
+                bank_type="evalplus",
+                gt_source="visible",
+                seed=42,
+                n_tasks=2,
+                verify_sha256=True,
+            )
+            self.assertEqual(loaded_ep["bank_type"], "evalplus")
+            self.assertEqual(loaded_ep["gt_source"], "visible")
+            self.assertEqual(len(loaded_ep["tasks"]), 2)
+            for t in loaded_ep["tasks"]:
+                self.assertEqual(t["task_format"], "function")
+                self.assertIn(t["difficulty"], ("humanevalplus", "mbppplus"))
+                self.assertGreater(len(t["visible_tests"]), 0)
+                self.assertGreater(len(t["eval_hidden"]), 0)
+                self.assertEqual(len(t["eval_hidden"]), t["n_hidden_total"])
+
+            # Verify gt_source="gate_hidden" splits plus tests 50/50
+            loaded_split = load_evalplus_tasks(
+                DEFAULT_EVALPLUS_DIR,
+                seed=42,
+                task_ids=[loaded_ep["tasks"][0]["task_id"]],
+                gt_source="gate_hidden",
+                verify_sha256=True,
+            )
+            t_sp = loaded_split["tasks"][0]
+            self.assertGreater(len(t_sp["gate_hidden"]), 0)
+            self.assertEqual(len(t_sp["gate_hidden"]) + len(t_sp["eval_hidden"]), t_sp["n_hidden_total"])
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
-"""ops.fl.bank — Bank verification (LCB v3 function & APPS stdio), AST-literal parsing, and 50/50 split.
+"""ops.fl.bank — Bank verification (LCB v3, APPS stdio, EvalPlus), AST-literal parsing, and hidden-test split.
 
-Verifies bank sha256 against either a plan-pinned `expected_sha256` or `runs/INDEX.json`
-(`banks.lcb.v3.sha256`) and refuses to proceed on mismatch. Parses test literal strings safely
-with `ast.literal_eval` (never `eval`/`exec`) and performs deterministic per-task 50/50
-splitting of `hidden_tests` into `gate_hidden` and `eval_hidden`.
+Verifies bank sha256 against either a plan-pinned `expected_sha256`, `runs/INDEX.json`
+(`banks.lcb.v3.sha256`), or `ops.e1.EVALPLUS_SHA256` (for EvalPlus HumanEval+/MBPP+) and
+refuses to proceed on mismatch. Parses test literal strings safely with `ast.literal_eval`
+(never `eval`/`exec`) and supports both `gt_source="gate_hidden"` (deterministic 50/50 split)
+and `gt_source="visible"` (separate visible set for GT; all hidden tests for evaluation).
 """
 from __future__ import annotations
 
@@ -15,9 +16,42 @@ import pathlib
 import random
 from typing import Any
 
-from ops.fl import DEFAULT_BANK_PATH, DEFAULT_INDEX_PATH, sha256_file
+from ops.e1 import DEFAULT_EVALPLUS_DIR, EVALPLUS_SHA256
+from ops.e1.build_code_chains import _load_evalplus, _parse_problem_source
+from ops.e1.evaluate import compute_expected_outputs_in_sandbox
+from ops.fl import DEFAULT_BANK_PATH, DEFAULT_INDEX_PATH, sha256_bytes, sha256_file
 
 TASK_FORMATS: tuple[str, ...] = ("function", "stdio")
+GT_SOURCES: tuple[str, ...] = ("gate_hidden", "visible")
+
+
+def decode_val_host(v: Any) -> Any:
+    """Host-side inverse of `ops.e1.evaluate._CODEC_AND_CMP_SRC.encode_val`."""
+    if isinstance(v, dict) and "__e1_t__" in v:
+        t = v["__e1_t__"]
+        val = v["v"]
+        if t == "float":
+            return float(val)
+        if t == "tuple":
+            return tuple(decode_val_host(x) for x in val)
+        if t == "set":
+            return set(decode_val_host(x) for x in val)
+        if t == "complex":
+            return complex(val[0], val[1])
+        if t == "bytes":
+            return bytes(val)
+        if t == "dict":
+            return {decode_val_host(k): decode_val_host(vv) for k, vv in val}
+    if isinstance(v, list):
+        return [decode_val_host(x) for x in v]
+    if isinstance(v, dict):
+        return {k: decode_val_host(val) for k, val in v.items()}
+    return v
+
+
+def is_evalplus_bank_dir(path: pathlib.Path) -> bool:
+    p = pathlib.Path(path).expanduser()
+    return p.is_dir() and all((p / fn).is_file() for fn in EVALPLUS_SHA256)
 
 
 def verify_bank_sha256(
@@ -266,15 +300,31 @@ def split_hidden_tests(
     }
 
 
-def _build_task_obj(row: dict[str, Any], *, task_format: str, seed: int) -> dict[str, Any]:
+def _build_task_obj(
+    row: dict[str, Any],
+    *,
+    task_format: str,
+    seed: int,
+    gt_source: str = "gate_hidden",
+) -> dict[str, Any]:
     tid = str(row["task_id"])
     diff = str(row.get("difficulty") or "unknown").strip().lower()
     if task_format == "stdio":
         raw_ex = row.get("examples") if "examples" in row else row.get("visible_tests")
         vis = parse_stdio_cases(raw_ex or [])
         hid = parse_stdio_cases(row.get("hidden_tests") or [])
-        split = split_hidden_tests(hid, task_id=tid, seed=seed)
-        assert split is not None
+        if gt_source == "visible":
+            gate_hid: list[dict[str, Any]] = []
+            eval_hid: list[dict[str, Any]] = hid
+            gate_idx: list[int] = []
+            eval_idx: list[int] = list(range(len(hid)))
+        else:
+            split = split_hidden_tests(hid, task_id=tid, seed=seed)
+            assert split is not None
+            gate_hid = split["gate_hidden"]
+            eval_hid = split["eval_hidden"]
+            gate_idx = split["gate_indices"]
+            eval_idx = split["eval_indices"]
         return {
             "task_id": tid,
             "task_format": "stdio",
@@ -283,17 +333,27 @@ def _build_task_obj(row: dict[str, Any], *, task_format: str, seed: int) -> dict
             "prompt": str(row["prompt"]),
             "examples": vis,
             "visible_tests": vis,
-            "gate_hidden": split["gate_hidden"],
-            "eval_hidden": split["eval_hidden"],
-            "gate_indices": split["gate_indices"],
-            "eval_indices": split["eval_indices"],
+            "gate_hidden": gate_hid,
+            "eval_hidden": eval_hid,
+            "gate_indices": gate_idx,
+            "eval_indices": eval_idx,
             "n_hidden_total": len(hid),
         }
 
     vis = parse_test_cases(row.get("visible_tests") or [])
     hid = parse_test_cases(row.get("hidden_tests") or [])
-    split = split_hidden_tests(hid, task_id=tid, seed=seed)
-    assert split is not None
+    if gt_source == "visible":
+        gate_hid = []
+        eval_hid = hid
+        gate_idx = []
+        eval_idx = list(range(len(hid)))
+    else:
+        split = split_hidden_tests(hid, task_id=tid, seed=seed)
+        assert split is not None
+        gate_hid = split["gate_hidden"]
+        eval_hid = split["eval_hidden"]
+        gate_idx = split["gate_indices"]
+        eval_idx = split["eval_indices"]
     return {
         "task_id": tid,
         "task_format": "function",
@@ -301,11 +361,158 @@ def _build_task_obj(row: dict[str, Any], *, task_format: str, seed: int) -> dict
         "entry_point": str(row["entry_point"]),
         "prompt": str(row["prompt"]),
         "visible_tests": vis,
-        "gate_hidden": split["gate_hidden"],
-        "eval_hidden": split["eval_hidden"],
-        "gate_indices": split["gate_indices"],
-        "eval_indices": split["eval_indices"],
+        "gate_hidden": gate_hid,
+        "eval_hidden": eval_hid,
+        "gate_indices": gate_idx,
+        "eval_indices": eval_idx,
         "n_hidden_total": len(hid),
+        "atol": float(row.get("atol") or 0.0),
+        "cmp_mode": str(row.get("cmp_mode") or "exact"),
+    }
+
+
+def load_evalplus_tasks(
+    evalplus_dir: pathlib.Path = DEFAULT_EVALPLUS_DIR,
+    *,
+    seed: int,
+    task_ids: list[str] | None = None,
+    difficulties: list[str] | None = None,
+    n_tasks: int | None = None,
+    gt_source: str = "visible",
+    expected_sha256: str | None = None,
+    verify_sha256: bool = True,
+    compute_timeout_s: float = 10.0,
+) -> dict[str, Any]:
+    """Load EvalPlus HumanEval+/MBPP+ as a `function` bank (base tests as visible, plus tests as hidden).
+
+    Verifies pinned gzip file sha256 against `ops.e1.EVALPLUS_SHA256` (fail-closed by default)
+    and computes expected outputs for selected tasks in the `--unshare-net` bwrap sandbox.
+    """
+    if gt_source not in GT_SOURCES:
+        raise ValueError(f"Unsupported gt_source={gt_source!r}; expected one of {GT_SOURCES}")
+
+    ep_dir = pathlib.Path(evalplus_dir).expanduser().resolve()
+    rows, hashes = _load_evalplus(ep_dir, verify_sha256=verify_sha256)
+    combined_sha = sha256_bytes(json.dumps(hashes, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+    if verify_sha256 and expected_sha256 is not None:
+        exp = str(expected_sha256).strip().lower()
+        if combined_sha != exp:
+            raise ValueError(f"EvalPlus combined bank sha256 mismatch: expected {exp}, got {combined_sha}")
+
+    diff_set = {d.strip().lower() for d in difficulties} if difficulties else None
+    min_hidden = 1 if gt_source == "visible" else 4
+
+    eligible: list[dict[str, Any]] = []
+    by_id: dict[str, dict[str, Any]] = {}
+    skipped: list[dict[str, Any]] = []
+
+    for r in rows:
+        tid = str(r["task_id"])
+        src = str(r["_source"]).lower()
+        p = _parse_problem_source(r)
+        if p is None:
+            skipped.append({"task_id": tid, "difficulty": src, "reason": "unparseable_source"})
+            continue
+        if len(p["base_input"]) < 1:
+            skipped.append({"task_id": tid, "difficulty": src, "reason": "base_input<1"})
+            continue
+        if len(p["plus_input"]) < min_hidden:
+            skipped.append({"task_id": tid, "difficulty": src, "reason": f"plus_input<{min_hidden} (n={len(p['plus_input'])})"})
+            continue
+        by_id[tid] = p
+        if diff_set is None or src in diff_set:
+            eligible.append(p)
+
+    if task_ids is not None:
+        skipped_ids = {s["task_id"] for s in skipped}
+        candidates: list[dict[str, Any]] = []
+        for tid in task_ids:
+            if tid in by_id:
+                candidates.append(by_id[tid])
+            elif tid in skipped_ids:
+                continue
+            else:
+                raise ValueError(f"Requested EvalPlus task_id not found: {tid!r}")
+        target_count: int | None = None
+    elif n_tasks is not None:
+        if n_tasks <= 0:
+            raise ValueError(f"n_tasks must be > 0, got {n_tasks}")
+        candidates = list(eligible)
+        rng = random.Random(_stable_seed_int(seed, "__sample_tasks__"))
+        rng.shuffle(candidates)
+        target_count = min(n_tasks, len(candidates))
+    else:
+        candidates = eligible
+        target_count = None
+
+    selected: list[dict[str, Any]] = []
+    for prob in candidates:
+        if target_count is not None and len(selected) >= target_count:
+            break
+        comp = compute_expected_outputs_in_sandbox(
+            prob["canonical_full_src"],
+            prob["entry_point"],
+            prob["base_input"],
+            prob["plus_input"],
+            timeout_s=compute_timeout_s,
+        )
+        if not comp.get("ok"):
+            skipped.append({
+                "task_id": prob["task_id"],
+                "difficulty": prob["source"],
+                "reason": f"canonical_compute_failed: {comp.get('error')}",
+            })
+            continue
+
+        vis = [
+            {"args": list(c["args"]), "expected": decode_val_host(c["expected"])}
+            for c in comp["base_cases"]
+        ]
+        hid = [
+            {"args": list(c["args"]), "expected": decode_val_host(c["expected"])}
+            for c in comp["plus_cases"]
+        ]
+        if gt_source == "visible":
+            gate_hid: list[dict[str, Any]] = []
+            eval_hid: list[dict[str, Any]] = hid
+            gate_idx: list[int] = []
+            eval_idx: list[int] = list(range(len(hid)))
+        else:
+            split = split_hidden_tests(hid, task_id=prob["task_id"], seed=seed)
+            assert split is not None
+            gate_hid = split["gate_hidden"]
+            eval_hid = split["eval_hidden"]
+            gate_idx = split["gate_indices"]
+            eval_idx = split["eval_indices"]
+
+        selected.append(
+            {
+                "task_id": prob["task_id"],
+                "task_format": "function",
+                "difficulty": prob["source"],
+                "entry_point": prob["entry_point"],
+                "prompt": prob["prompt_text"],
+                "visible_tests": vis,
+                "gate_hidden": gate_hid,
+                "eval_hidden": eval_hid,
+                "gate_indices": gate_idx,
+                "eval_indices": eval_idx,
+                "n_hidden_total": len(hid),
+                "atol": float(prob["atol"]),
+                "cmp_mode": str(prob["cmp_mode"]),
+            }
+        )
+
+    return {
+        "bank_path": str(ep_dir),
+        "bank_type": "evalplus",
+        "bank_sha256": combined_sha,
+        "evalplus_file_sha256": hashes,
+        "task_format": "function",
+        "gt_source": gt_source,
+        "seed": seed,
+        "tasks": selected,
+        "skipped": skipped,
     }
 
 
@@ -315,21 +522,40 @@ def load_bank_tasks(
     index_path: pathlib.Path | None = DEFAULT_INDEX_PATH,
     expected_sha256: str | None = None,
     task_format: str = "function",
+    bank_type: str | None = None,
+    gt_source: str = "gate_hidden",
     seed: int,
     task_ids: list[str] | None = None,
     difficulties: list[str] | None = None,
     n_tasks: int | None = None,
     verify_sha256: bool = True,
 ) -> dict[str, Any]:
-    """Stream, verify, parse, filter, and deterministically split tasks from a bank JSONL.
+    """Stream, verify, parse, filter, and deterministically split tasks from a bank JSONL or EvalPlus dir.
 
-    Supports both `task_format="function"` (LCB v3) and `task_format="stdio"` (APPS).
-    Uses byte-offset indexing so large banks (e.g. 900 MB APPS) load only selected tasks into memory.
+    Supports `task_format="function"` (LCB v3 or EvalPlus HumanEval+/MBPP+) and `task_format="stdio"` (APPS).
+    Uses byte-offset indexing so large banks (e.g. 1 GB APPS) load only selected tasks into memory.
     """
     if task_format not in TASK_FORMATS:
         raise ValueError(f"Unsupported task_format={task_format!r}; expected one of {TASK_FORMATS}")
+    if gt_source not in GT_SOURCES:
+        raise ValueError(f"Unsupported gt_source={gt_source!r}; expected one of {GT_SOURCES}")
 
     bank_p = pathlib.Path(bank_path).expanduser().resolve()
+    is_ep = (str(bank_type or "").strip().lower() == "evalplus") or is_evalplus_bank_dir(bank_p)
+    if is_ep:
+        if task_format != "function":
+            raise ValueError(f"EvalPlus bank requires task_format='function', got {task_format!r}")
+        return load_evalplus_tasks(
+            bank_p,
+            seed=seed,
+            task_ids=task_ids,
+            difficulties=difficulties,
+            n_tasks=n_tasks,
+            gt_source=gt_source,
+            expected_sha256=expected_sha256,
+            verify_sha256=verify_sha256,
+        )
+
     bank_sha = (
         verify_bank_sha256(bank_p, index_path, expected_sha256=expected_sha256)
         if verify_sha256
@@ -337,6 +563,7 @@ def load_bank_tasks(
     )
 
     diff_set = {d.strip().lower() for d in difficulties} if difficulties else None
+    min_hidden = 1 if gt_source == "visible" else 4
 
     eligible_refs: list[tuple[str, int]] = []
     skipped: list[dict[str, Any]] = []
@@ -363,8 +590,8 @@ def load_bank_tasks(
             diff = str(row.get("difficulty") or "unknown").strip().lower()
             raw_hid = row.get("hidden_tests") or []
             n_hid = len(raw_hid) if isinstance(raw_hid, list) else len(parse_test_cases(raw_hid))
-            if n_hid < 4:
-                skipped.append({"task_id": tid, "difficulty": diff, "reason": f"hidden_tests<4 (n={n_hid})"})
+            if n_hid < min_hidden:
+                skipped.append({"task_id": tid, "difficulty": diff, "reason": f"hidden_tests<{min_hidden} (n={n_hid})"})
                 continue
 
             offset_by_id[tid] = offset
@@ -397,12 +624,14 @@ def load_bank_tasks(
         for _tid, offset in wanted_refs:
             fh.seek(offset)
             row = json.loads(fh.readline().decode("utf-8"))
-            selected.append(_build_task_obj(row, task_format=task_format, seed=seed))
+            selected.append(_build_task_obj(row, task_format=task_format, seed=seed, gt_source=gt_source))
 
     return {
         "bank_path": str(bank_p),
+        "bank_type": "jsonl",
         "bank_sha256": bank_sha,
         "task_format": task_format,
+        "gt_source": gt_source,
         "seed": seed,
         "tasks": selected,
         "skipped": skipped,

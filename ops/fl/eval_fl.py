@@ -11,6 +11,7 @@ import hashlib
 import json
 import math
 import pathlib
+import re
 import tempfile
 from typing import Any
 
@@ -99,6 +100,48 @@ def normalize_solution_source(solution_src: str, entry_point: str) -> str:
     return solution_src.rstrip() + wrapper
 
 
+_CASE_IDX_RE = re.compile(r"^case (\d+):")
+
+
+def _eq_num_host(a: Any, b: Any, atol: float) -> bool:
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    if isinstance(a, float) and math.isnan(a):
+        return isinstance(b, float) and math.isnan(b)
+    if atol and atol > 0:
+        return math.isclose(float(a), float(b), rel_tol=0.0, abs_tol=atol)
+    return bool(a == b)
+
+
+def values_equal_host(got: Any, exp: Any, *, atol: float = 0.0, cmp_mode: str = "exact") -> bool:
+    """Host-side mirror of `ops.e1.evaluate._CODEC_AND_CMP_SRC.values_equal`."""
+    if cmp_mode == "set_equivalent":
+        try:
+            return set(got) == set(exp)
+        except TypeError:
+            return False
+    if isinstance(got, bool) or isinstance(exp, bool):
+        return isinstance(got, bool) and isinstance(exp, bool) and got == exp
+    if isinstance(got, (int, float)) and isinstance(exp, (int, float)):
+        return _eq_num_host(got, exp, atol)
+    if isinstance(got, complex) or isinstance(exp, complex):
+        if isinstance(got, (int, float, complex)) and isinstance(exp, (int, float, complex)):
+            gc, ec = complex(got), complex(exp)
+            return _eq_num_host(gc.real, ec.real, atol) and _eq_num_host(gc.imag, ec.imag, atol)
+        return False
+    if isinstance(got, tuple) and isinstance(exp, tuple):
+        return len(got) == len(exp) and all(values_equal_host(x, y, atol=atol, cmp_mode="exact") for x, y in zip(got, exp))
+    if isinstance(got, list) and isinstance(exp, list):
+        return len(got) == len(exp) and all(values_equal_host(x, y, atol=atol, cmp_mode="exact") for x, y in zip(got, exp))
+    if isinstance(got, set) and isinstance(exp, set):
+        return got == exp
+    if isinstance(got, dict) and isinstance(exp, dict):
+        if set(got.keys()) != set(exp.keys()):
+            return False
+        return all(values_equal_host(got[k], exp[k], atol=atol, cmp_mode="exact") for k in got)
+    return type(got) is type(exp) and bool(got == exp)
+
+
 def evaluate_solution_on_cases(
     solution_src: str,
     entry_point: str,
@@ -107,6 +150,8 @@ def evaluate_solution_on_cases(
     per_fn_timeout_s: float = 20.0,
     total_timeout_s: float = 45.0,
     mem_limit_mb: int = 1024,
+    atol: float = 0.0,
+    cmp_mode: str = "exact",
 ) -> dict[str, Any]:
     """Evaluate `solution_src` on `cases` inside E1's `--unshare-net` bwrap sandbox.
 
@@ -120,6 +165,7 @@ def evaluate_solution_on_cases(
             "n_total": 0,
             "error": "no_cases",
             "load_error": None,
+            "first_failed_idx": None,
             "wall_s": 0.0,
         }
 
@@ -131,8 +177,8 @@ def evaluate_solution_on_cases(
     specs = {
         entry_point: {
             "cases": encoded_cases,
-            "atol": 0.0,
-            "cmp_mode": "exact",
+            "atol": float(atol),
+            "cmp_mode": str(cmp_mode or "exact"),
         }
     }
     raw = evaluate_code_source(
@@ -143,12 +189,23 @@ def evaluate_solution_on_cases(
         mem_limit_mb=mem_limit_mb,
     )
     fn_info = (raw.get("functions") or {}).get(entry_point) or {}
+    passed = bool(raw.get("all_pass") and fn_info.get("passed"))
+    err = fn_info.get("error")
+    first_failed_idx: int | None = None
+    if not passed:
+        if isinstance(err, str):
+            m = _CASE_IDX_RE.match(err)
+            if m:
+                first_failed_idx = int(m.group(1))
+        if first_failed_idx is None:
+            first_failed_idx = 0
     return {
-        "passed": bool(raw.get("all_pass") and fn_info.get("passed")),
+        "passed": passed,
         "n_passed": int(fn_info.get("n_passed") or 0),
         "n_total": int(fn_info.get("n_total") or len(cases)),
-        "error": fn_info.get("error"),
+        "error": err,
         "load_error": raw.get("load_error"),
+        "first_failed_idx": first_failed_idx,
         "wall_s": float(raw.get("wall_s") or 0.0),
     }
 
@@ -755,6 +812,7 @@ def main():
             print("@@FL_STDIO_EVAL@@" + json.dumps({
                 "passed": False, "n_passed": 0, "n_total": n_total,
                 "error": "empty_solution", "load_error": "empty_solution",
+                "first_failed_idx": 0 if n_total > 0 else None,
             }))
             return
         compile(code, sol_path, "exec")
@@ -763,18 +821,21 @@ def main():
         print("@@FL_STDIO_EVAL@@" + json.dumps({
             "passed": False, "n_passed": 0, "n_total": n_total,
             "error": err, "load_error": err,
+            "first_failed_idx": 0 if n_total > 0 else None,
         }))
         return
 
     deadline = time.monotonic() + total_s
     n_passed = 0
     first_err = None
+    first_failed_idx = None
 
     for idx, case in enumerate(cases):
         rem = deadline - time.monotonic()
         if rem <= 0.05:
             if first_err is None:
                 first_err = f"case {idx}: total_timeout"
+                first_failed_idx = idx
             break
         case_dir = f"/tmp/c_{idx}"
         os.makedirs(case_dir, exist_ok=True)
@@ -782,6 +843,7 @@ def main():
         if not res["ok"]:
             if first_err is None:
                 first_err = f"case {idx}: {res['err']}"
+                first_failed_idx = idx
             continue
         if stdio_outputs_equal(res["stdout"], case["output"], float_tol=float_tol):
             n_passed += 1
@@ -789,6 +851,7 @@ def main():
             got_n = normalize_stdio_output(res["stdout"])
             exp_n = normalize_stdio_output(case["output"])
             first_err = f"case {idx}: mismatch got={repr(got_n)[:80]} expected={repr(exp_n)[:80]}"
+            first_failed_idx = idx
 
     passed = bool(n_total > 0 and n_passed == n_total)
     print("@@FL_STDIO_EVAL@@" + json.dumps({
@@ -797,6 +860,7 @@ def main():
         "n_total": n_total,
         "error": first_err,
         "load_error": None,
+        "first_failed_idx": first_failed_idx,
     }))
 
 main()
@@ -820,6 +884,7 @@ def evaluate_stdio_on_cases(
             "n_total": 0,
             "error": "no_cases",
             "load_error": None,
+            "first_failed_idx": None,
             "wall_s": 0.0,
         }
     if not (solution_src or "").strip():
@@ -829,6 +894,7 @@ def evaluate_stdio_on_cases(
             "n_total": len(cases),
             "error": "empty_solution",
             "load_error": "empty_solution",
+            "first_failed_idx": 0,
             "wall_s": 0.0,
         }
 
@@ -863,14 +929,20 @@ def evaluate_stdio_on_cases(
                 "n_total": len(cases),
                 "error": err,
                 "load_error": err,
+                "first_failed_idx": 0,
                 "wall_s": float(res["wall_s"]),
             }
+        passed = bool(parsed.get("passed"))
+        ffi = parsed.get("first_failed_idx")
+        if not passed and ffi is None:
+            ffi = 0
         return {
-            "passed": bool(parsed.get("passed")),
+            "passed": passed,
             "n_passed": int(parsed.get("n_passed") or 0),
             "n_total": int(parsed.get("n_total") or len(cases)),
             "error": parsed.get("error"),
             "load_error": parsed.get("load_error"),
+            "first_failed_idx": ffi,
             "wall_s": float(res["wall_s"]),
         }
 
@@ -1067,3 +1139,90 @@ def collect_stdio_outputs_in_sandbox(
             "tags": tags,
             "wall_s": float(res["wall_s"]),
         }
+
+
+# ── XMVH self-check (exam vs statement examples) ─────────────────────────────
+
+
+def self_check_xmvh_exam(
+    exam_cases: list[dict[str, Any]],
+    examples: list[dict[str, Any]],
+    *,
+    task_format: str = "stdio",
+    atol: float = 0.0,
+    cmp_mode: str = "exact",
+    float_tol: float = 1e-6,
+) -> dict[str, Any]:
+    """Self-check Haiku's exam against statement examples for `XMVH`.
+
+    Rules:
+    - Match exam cases whose normalized input matches a statement example input.
+    - If Haiku's output disagrees with the statement example output, discard that exam case.
+    - If more than half of the checked example cases disagree (`n_disagreed * 2 > n_checked`),
+      mark `self_check_failed = True` and discard the entire exam (`gate_cases = []`).
+    - Otherwise `gate_cases = remaining_exam_cases ∪ statement_examples` (deduplicated by input).
+    """
+    def _norm_key(case: dict[str, Any]) -> str:
+        if task_format == "stdio":
+            return normalize_stdio_output(str(case["input"]))
+        return json.dumps(encode_val_host(case["args"]), sort_keys=True, separators=(",", ":"))
+
+    def _outputs_match(exam_case: dict[str, Any], ex_case: dict[str, Any]) -> bool:
+        if task_format == "stdio":
+            return stdio_outputs_equal(str(exam_case["output"]), str(ex_case["output"]), float_tol=float_tol)
+        return values_equal_host(exam_case["expected"], ex_case["expected"], atol=atol, cmp_mode=cmp_mode)
+
+    ex_by_key: dict[str, dict[str, Any]] = {}
+    for ex in examples:
+        ek = _norm_key(ex)
+        if ek not in ex_by_key:
+            ex_by_key[ek] = ex
+
+    remaining: list[dict[str, Any]] = []
+    discarded: list[dict[str, Any]] = []
+    ex_status: dict[str, str] = {}
+
+    for c in exam_cases:
+        k = _norm_key(c)
+        if k in ex_by_key:
+            if _outputs_match(c, ex_by_key[k]):
+                remaining.append(c)
+                if ex_status.get(k) != "disagreed":
+                    ex_status[k] = "agreed"
+            else:
+                discarded.append(c)
+                ex_status[k] = "disagreed"
+        else:
+            remaining.append(c)
+
+    n_examples = len(ex_by_key)
+    n_agreed = sum(1 for st in ex_status.values() if st == "agreed")
+    n_disagreed = sum(1 for st in ex_status.values() if st == "disagreed")
+    n_checked = n_agreed + n_disagreed
+    n_omitted = n_examples - n_checked
+
+    self_check_failed = bool(n_checked > 0 and (n_disagreed * 2 > n_checked))
+    if self_check_failed:
+        gate_cases: list[dict[str, Any]] = []
+    else:
+        gate_cases = list(remaining)
+        seen_keys = {_norm_key(c) for c in gate_cases}
+        for ex in examples:
+            ek = _norm_key(ex)
+            if ek not in seen_keys:
+                gate_cases.append(ex)
+                seen_keys.add(ek)
+
+    return {
+        "self_check_failed": self_check_failed,
+        "gate_cases": gate_cases,
+        "n_exam_raw": len(exam_cases),
+        "n_discarded": len(discarded),
+        "n_remaining": len(remaining),
+        "n_gate_cases": len(gate_cases),
+        "n_examples": n_examples,
+        "n_checked": n_checked,
+        "n_agreed": n_agreed,
+        "n_disagreed": n_disagreed,
+        "n_omitted": n_omitted,
+    }
