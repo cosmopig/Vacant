@@ -96,7 +96,9 @@
   - 校準不併入分析。
 - **E4B**：不在本機修工具呼叫，只放在 Colab 那條平行線（vLLM）。2 題冒煙一小時內不通就放棄，第二模型寫「沒做」。
 
-## 修正 4（2026-11-27，接手的執行者；在任何 Haiku 資料之前）：機器損毀，worker 改成 Claude Haiku（Claude Code headless）
+> **註（命名）**：下面的雲端修正 C4／C5／C6 是以 commit 0ea25989 為基礎、在雲端容器裡寫的；`auto/redo` 在該 commit 之後有它自己的「修正 4」「修正 5」，與這裡的 C4／C5 **無關**（只是編號撞名）。
+
+## 雲端修正 C4（2026-11-27，接手的執行者；在任何 Haiku 資料之前）：機器損毀，worker 改成 Claude Haiku（Claude Code headless）
 - **事件**：原機器 vacant-dev（兩台 LM Studio：1003／1004）損毀，只剩 repo 裡最後一次推上來的狀態（`origin/auto/redo` 0ea25989）。擁有者原話：「你先都用haiku去測試，我之後再給你colab，先用haiku給我結果」。本修正在任何 Haiku 校準／小測試／正式資料之前寫下。
 - **worker 改成**：`claude -p --model haiku --output-format …`（Claude Code headless，容器內的 CLI；規範化模型代號 `claude-haiku-5-5`，每次嘗試的 log 第一行記 CLI 版本與模型）。pi 沒有安裝、qwen3.5-9b／gemma 都不再使用。控制器模組、規則表、門檻、四臂政策、五個指標、獨立評分的設計**一個字沒改**。
 - **和 9B 設計可比的**：控制器規則與門檻、四臂的預算形狀（每次 600 秒、總 1800 秒、最多 3 次）、半驗收／半隱藏的切法（固定種子 20261127）、五個指標的定義、判讀規則（探索性、只看方向）。
@@ -109,13 +111,13 @@
 - **沙箱（實際使用的機制）**：`ops/redo/claude_bwrap_agent.py`（bwrap：最小 rootfs、`--unshare-net`＋宿主端 UNIX socket 白名單代理只放行 api.anthropic.com:443、工作區固定掛 `/work`、`--clearenv` 環境白名單、worker 以非 root 使用者身分跑、`--disallowedTools WebFetch,WebSearch`）。能強制與不能強制的邊界、負控制結果寫在 `ops/redo/results/` 的沙箱紀錄，**在任何真實 Haiku 嘗試之前**先跑負控制。
 - **限制（照實寫）**：worker 讀得到自己的認證檔（沒有它打不了模型）；代理不解 TLS，只保證「只連得到 api.anthropic.com」，不檢查內容；Haiku 的訓練資料可能含 Exercism 的參考解（無法排除，公開題庫共同限制）；模型是遠端 API，同一個 `haiku` 別名之後可能指向別的版本。
 
-### 修正 4 實測補記（2026-11-27，Haiku 校準之後；正式批次尚未啟動）
+### 雲端修正 C4 實測補記（2026-11-27，Haiku 校準之後；正式批次尚未啟動）
 - 沙箱實際機制與設計時略有不同：**不是**整個 CLI 關進 bwrap（那需要把 CLI 的認證權杖檔掛進沙箱，被自動模式分類器擋下，已移除該草稿）；改為 CLI 在外、worker 的 Bash 走 CLI 內建 bwrap 沙箱（無網路、只讀寫自己的工作區）、檔案工具靠權限規則；`ops/redo/claude_sandbox_agent.py`。Read／Edit／Write 是 CLI 行程內規則、不是作業系統隔離。負控制 21 項全過：`ops/redo/results/ctl_haiku_20261127/negctl_1.json`。
 - 並行度 jobs＝32（`THROUGHPUT.md`，0 限流）。
 - 校準（A 單次、37 題、獨立評分）：**hidden 37/37**，費用 $0.115，平均牆鐘 18 秒（`CALIBRATION_haiku37_A.md`）。Haiku 在天花板；修正 3 的選題規則在這個結果下只湊得出 4 題（<12 的下限）⇒ 依規則先回報、不啟動四臂批次，選題由協調者決定。
 
-## 修正 5（2026-11-27，接手的執行者；在任何 Devin 資料之前）：Haiku 在天花板（37/37）⇒ 協調者決定兩條平行線
-- **觸發**：修正 4 補記的校準——Claude Haiku 當 worker、A 臂在 ctl37 上 hidden 37/37。這個池子對 Haiku 沒有鑑別力。
+## 雲端修正 C5（2026-11-27，接手的執行者；在任何 Devin 資料之前）：Haiku 在天花板（37/37）⇒ 協調者決定兩條平行線
+- **觸發**：雲端修正 C4 補記的校準——Claude Haiku 當 worker、A 臂在 ctl37 上 hidden 37/37。這個池子對 Haiku 沒有鑑別力。
 - **兩條平行線（協調者決定，不是本執行者）**：
   - (a) **本條**：換成較弱的免費模型當 worker——Devin CLI 的 `swe-2-flash-medium` 先上——同一個 ctl37 候選池、同一個半驗收／半隱藏切法（種子 20261127）、同樣四臂、同樣預算形狀（每次 600 秒、總 1800 秒、最多 3 次）。只用免費模型（`swe-2-flash-*`、`swe-2-{medium,high,max}`、`swe-2-1*` 非 lightning）；不用付費 lightning／Claude／adaptive。
   - (b) 給 Haiku 用的更難公開題庫，由另一位執行者寫在 `decisions/DECISION_20261127_EVIDENCE_CONTROLLER_HARDPOOL.md`（本檔不寫、本執行者不寫）。
@@ -129,7 +131,7 @@
   - 遠端模型別名之後可能指向別的版本；Devin 的模型可能見過 Exercism 公開參考解（無法排除）。
 - **限制**：校準只做一次（A 單次、37 題）；這是校準，不是效果量測；選題依 A 結果會有回歸均值。
 
-### 修正 5 實測補記（2026-11-27，Devin 校準之後；四臂批次未啟動）
+### 雲端修正 C5 實測補記（2026-11-27，Devin 校準之後；四臂批次未啟動）
 - 沙箱：mount namespace（bwrap，整個 CLI）＋ deny 規則＋ Devin `--sandbox`；負控制 `ops/redo/results/ctl_devin_20261127/negctl_4.json` 42/42（強制邊界與缺陷見同目錄 `NEGCTL.md`；
   只靠規則時 exec 內 python 讀得到兄弟工作區，已用 mount namespace 修掉）。
 - 並行：jobs＝8（12 起帳號層級限流，`THROUGHPUT.md`）。
@@ -137,8 +139,8 @@
   ≥70% ⇒ 依任務規定**不再試更弱設定、停下回報**。未過：ex_dnd_character 9/10、ex_pascals_triangle 4/5、ex_yacht 14/15。
   修正 3 選題規則在這個結果下只湊得出 7 題（<12 的下限）⇒ 先回報、不啟動批次。落在 25–70% 帶內的 (模型, 題池)：本池沒有。
 
-## 修正 6（2026-11-27，接手的執行者；在任何新的 Devin 資料之前）：Devin flash 在 ctl37 為 91.9%（帶外）⇒ 校準到 cc40 與 cchard
-- **觸發**：修正 5 的校準，`swe-2-flash-medium` 在 ctl37 的 A 臂 hidden 34/37＝91.9%，在 25–70% 之外。協調者指示：把同一個 worker 校準到另一條線建的兩個較難題池
+## 雲端修正 C6（2026-11-27，接手的執行者；在任何新的 Devin 資料之前）：Devin flash 在 ctl37 為 91.9%（帶外）⇒ 校準到 cc40 與 cchard
+- **觸發**：雲端修正 C5 的校準，`swe-2-flash-medium` 在 ctl37 的 A 臂 hidden 34/37＝91.9%，在 25–70% 之外。協調者指示：把同一個 worker 校準到另一條線建的兩個較難題池
   （`decisions/DECISION_20261127_EVIDENCE_CONTROLLER_HARDPOOL.md`：`cc40`＝Codeforces 1200–3500、Python 參考解；`cchard`＝Codeforces ≥2400、C++ oracle，worker 可交 `solution.py` 或 `solution.cpp`）。
   兩個題庫在 `/opt/ctlwork/bm_tasks/{cc40,cchard}`；本檔不改它們。校準＝A 臂每題 1 次，預算形狀同 `ctlcal_haiku37_A`／HARDPOOL 的校準計畫（單次 600、A 臂 1800、驗收 120 秒、`grader.suite_timeout_s` 400／`timeout_s` 600）。
 - **固定規則（在任何新資料之前）**：
@@ -154,7 +156,7 @@
   5. 批次若跑：先看前約 16 格有無 infra 問題才放行其餘；用 harness 的續跑；每約 30 分鐘推緊湊的部分結果；驗證每一條 C 臂決策鏈並回報數量。
      **硬停**：預估完成時間超過 2026-11-28 12:00Z ⇒ 所有臂一律把重複數從 3 降成 2（記錄），不丟臂也不丟題。
 - **cchard 的沙箱**：worker 要在 Devin 的 exec 沙箱裡用 g++。先做正控制（編譯＋執行），並重跑負控制，都在校準之前。
-- **和先前不可比（照實寫）**：與修正 5 同（Devin 的框架／工具、成本單位、遠端服務）；另外 cc40／cchard 的題面、語言（Python 或 C++）、case 級測資與逐案時限（L＝2×time_limit+2）和 Exercism 不同；
+- **和先前不可比（照實寫）**：與雲端修正 C5 同（Devin 的框架／工具、成本單位、遠端服務）；另外 cc40／cchard 的題面、語言（Python 或 C++）、case 級測資與逐案時限（L＝2×time_limit+2）和 Exercism 不同；
   Devin 模型可能見過 Codeforces 題與題解（無法排除）。共用容器上別的批次（Haiku）同時在跑，牆鐘有雜訊（所以序列重評分）。
-- **2026-11-27（修正 6 的保留）：四臂正式批次的啟動暫停，等協調者／擁有者的方向決定**（Devin 是輔助工具、不是被測 worker 的常設規則）。
+- **2026-11-27（雲端修正 C6 的保留）：四臂正式批次的啟動暫停，等協調者／擁有者的方向決定**（Devin 是輔助工具、不是被測 worker 的常設規則）。
   本執行者只完成 cc40／cchard 校準並回報逐題表與修正 3 的挑選；**即使某個配對落在 25–70% 帶內也不啟動批次**。以上是在任何正式批次資料之前寫下。

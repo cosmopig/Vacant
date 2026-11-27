@@ -1,4 +1,4 @@
-# 題庫重建紀錄（2026-11-27，Haiku 接手；DECISION 修正 4）
+# 題庫重建紀錄（2026-11-27，Haiku 接手；DECISION 雲端修正 C4）
 
 - 來源：公開 `https://github.com/exercism/python`，clone 的 HEAD＝`479f11b44b02337b0413e805b948491c2179615a`
   （2026-11-07），**和原 manifest 釘住的 commit 相同**。

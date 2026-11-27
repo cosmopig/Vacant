@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""probe_throughput — 找出 Devin worker 的並行數（DECISION 修正 5 步驟 4）。
+"""probe_throughput — 找出 Devin worker 的並行數（DECISION 雲端修正 C5 步驟 4）。
 
 每個並行度 c 跑 2c 次真實嘗試（輪流用 8 個不同題的工作區副本、經 `redo-devin-agent` 沙箱、不評分），量：
 完成數／分鐘（=吞吐）、API 錯誤（result.is_error）、牆鐘中位數、費用。總吞吐「還在上升且沒有限流錯誤」的最大並行度＝jobs。

@@ -1,4 +1,4 @@
-# Devin swe-2-flash-medium 校準：A 臂單次，ctl37（修正 5；不進正式分析）
+# Devin swe-2-flash-medium 校準：A 臂單次，ctl37（雲端修正 C5；不進正式分析）
 
 | 題 | 可見驗收 | hidden 通過 | hidden 比例 | 牆鐘 s | 呼叫 | 輸入 token（含快取） | 輸出 token | 逾時 | void |
 |---|---|---|---|---|---|---|---|---|---|
