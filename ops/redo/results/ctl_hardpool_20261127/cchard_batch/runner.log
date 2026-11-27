@@ -1,0 +1,1420 @@
+2026-11-27T04:12:39Z  計畫 ctl_haiku_cchard_4arm（d236c169980d） 題庫 /opt/ctlwork/bm_tasks/cchard  這次要處理 117 對（全計畫 117 對）  harness 4a2b3190d0b0
+2026-11-27T04:13:53Z  cc_1558E/r1/A                                pass=True accepted=True attempts=1 wall=71.1s
+2026-11-27T04:14:01Z  cc_1599I/r1/A                                pass=True accepted=True attempts=1 wall=78.6s
+2026-11-27T04:14:13Z  cc_1575F/r1/B                                pass=True accepted=True attempts=1 wall=92.6s
+2026-11-27T04:14:44Z  cc_1558E/r1/R                                pass=True accepted=True attempts=1 wall=46.9s
+2026-11-27T04:14:55Z  cc_1601F/r1/B                                pass=True accepted=True attempts=1 wall=131.5s
+2026-11-27T04:15:05Z  cc_1601E/r1/B                                pass=True accepted=True attempts=1 wall=144.5s
+2026-11-27T04:15:05Z  cc_1608G/r1/B                                pass=True accepted=True attempts=1 wall=145.1s
+2026-11-27T04:15:12Z  cc_1599I/r1/R                                pass=True accepted=True attempts=1 wall=69.9s
+2026-11-27T04:15:56Z  cc_1575F/r1/C                                pass=True accepted=True attempts=1 wall=100.6s
+2026-11-27T04:16:15Z  cc_1601F/r1/C                                pass=True accepted=True attempts=1 wall=68.5s
+2026-11-27T04:17:15Z  cc_1608G/r1/C                                pass=True accepted=True attempts=1 wall=124.4s
+2026-11-27T04:17:25Z  cc_1575F/r1/A                                pass=True accepted=True attempts=1 wall=84.9s
+2026-11-27T04:17:28Z  cc_1601F/r1/A                                pass=True accepted=True attempts=1 wall=63.8s
+2026-11-27T04:17:32Z  cc_1601E/r1/C                                pass=True accepted=True attempts=1 wall=144.1s
+2026-11-27T04:18:06Z  cc_1603E/r1/C                                pass=True accepted=True attempts=1 wall=308.1s
+2026-11-27T04:18:19Z  cc_1601F/r1/R                                pass=True accepted=True attempts=1 wall=48.0s
+2026-11-27T04:18:23Z  cc_1575F/r1/R                                pass=True accepted=True attempts=1 wall=54.8s
+2026-11-27T04:19:39Z  cc_1608G/r1/A                                pass=True accepted=True attempts=1 wall=137.3s
+2026-11-27T04:19:57Z  cc_1603F/r1/C                                pass=True accepted=True attempts=1 wall=57.1s
+2026-11-27T04:20:08Z  cc_1608G/r1/R                                pass=True accepted=True attempts=1 wall=27.6s
+2026-11-27T04:20:13Z  cc_1601E/r1/A                                pass=True accepted=True attempts=1 wall=157.3s
+2026-11-27T04:21:23Z  cc_1580B/r1/R                                pass=True accepted=True attempts=1 wall=68.7s
+2026-11-27T04:21:29Z  cc_1603F/r1/A                                pass=True accepted=True attempts=1 wall=76.6s
+2026-11-27T04:21:42Z  cc_1599I/r1/B                                pass=True accepted=True attempts=1 wall=387.1s
+2026-11-27T04:22:12Z  cc_1580B/r1/B                                pass=True accepted=True attempts=1 wall=43.3s
+2026-11-27T04:22:56Z  cc_1603E/r1/A                                pass=True accepted=True attempts=1 wall=276.8s
+2026-11-27T04:24:00Z  cc_1599I/r1/C                                pass=True accepted=True attempts=1 wall=133.7s
+2026-11-27T04:24:11Z  cc_1586G/r1/A                                pass=True accepted=True attempts=1 wall=345.4s
+2026-11-27T04:24:13Z  cc_1580B/r1/C                                pass=True accepted=True attempts=1 wall=112.8s
+2026-11-27T04:24:48Z  cc_1558E/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T04:24:57Z  cc_1603E/r1/R                                pass=True accepted=True attempts=1 wall=105.6s
+2026-11-27T04:25:14Z  cc_1580B/r1/A                                pass=True accepted=True attempts=1 wall=53.7s
+2026-11-27T04:25:42Z  cc_1558E/r1/C                                pass=True accepted=True attempts=1 wall=51.0s
+2026-11-27T04:26:42Z  cc_1603E/r1/B                                pass=True accepted=True attempts=1 wall=100.5s
+2026-11-27T04:27:11Z  cc_1603F/r1/R                                pass=True accepted=True attempts=1 wall=281.9s
+2026-11-27T04:27:17Z  cc_1572C/r1/R                                pass=True accepted=True attempts=1 wall=31.3s
+2026-11-27T04:27:45Z  cc_1572C/r1/B                                pass=True accepted=True attempts=1 wall=24.9s
+2026-11-27T04:27:49Z  cc_1608F/r1/B                                pass=True accepted=True attempts=1 wall=225.4s
+2026-11-27T04:27:56Z  cc_1603D/r1/R                                pass=True accepted=True attempts=1 wall=130.7s
+2026-11-27T04:28:11Z  cc_1572C/r1/C                                pass=True accepted=True attempts=1 wall=22.8s
+2026-11-27T04:28:38Z  cc_1603F/r1/B                                pass=True accepted=True attempts=1 wall=63.4s
+2026-11-27T04:28:41Z  cc_1572C/r1/A                                pass=True accepted=True attempts=1 wall=26.1s
+2026-11-27T04:29:11Z  cc_1603D/r1/B                                pass=True accepted=True attempts=1 wall=71.3s
+2026-11-27T04:29:20Z  cc_1553H/r1/R                                pass=True accepted=True attempts=1 wall=38.0s
+2026-11-27T04:29:27Z  cc_1586G/r1/R                                pass=True accepted=True attempts=1 wall=315.6s
+2026-11-27T04:30:01Z  cc_1572F/r1/C                                pass=True accepted=True attempts=1 wall=282.8s
+2026-11-27T04:30:14Z  cc_1552I/r1/C                                pass=True accepted=True attempts=1 wall=91.5s
+2026-11-27T04:30:17Z  cc_1601E/r1/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T04:30:25Z  cc_1580E/r1/R                                pass=True accepted=True attempts=2 wall=1059.5s
+2026-11-27T04:30:45Z  cc_1553H/r1/B                                pass=True accepted=True attempts=1 wall=84.0s
+2026-11-27T04:31:08Z  cc_1603D/r1/C                                pass=True accepted=True attempts=1 wall=113.5s
+2026-11-27T04:31:22Z  cc_1553H/r1/C                                pass=True accepted=True attempts=1 wall=33.5s
+2026-11-27T04:31:53Z  cc_1552I/r1/A                                pass=True accepted=True attempts=1 wall=98.1s
+2026-11-27T04:31:57Z  cc_1608F/r1/C                                pass=True accepted=True attempts=1 wall=245.1s
+2026-11-27T04:31:57Z  cc_1553H/r1/A                                pass=True accepted=True attempts=1 wall=32.5s
+2026-11-27T04:33:16Z  cc_1552I/r1/R                                pass=True accepted=True attempts=1 wall=81.4s
+2026-11-27T04:33:21Z  cc_1599E/r1/R                                pass=True accepted=True attempts=1 wall=80.7s
+2026-11-27T04:33:30Z  cc_1572F/r1/A                                pass=True accepted=True attempts=1 wall=206.5s
+2026-11-27T04:34:05Z  cc_1603D/r1/A                                pass=True accepted=True attempts=1 wall=174.3s
+2026-11-27T04:34:28Z  cc_1552I/r1/B                                pass=True accepted=True attempts=1 wall=71.2s
+2026-11-27T04:34:44Z  cc_1599E/r1/B                                pass=True accepted=True attempts=1 wall=80.3s
+2026-11-27T04:35:04Z  cc_1613F/r1/C                                pass=True accepted=True attempts=1 wall=31.9s
+2026-11-27T04:35:19Z  cc_1599E/r1/C                                pass=True accepted=True attempts=1 wall=34.3s
+2026-11-27T04:35:52Z  cc_1608E/r1/B                                pass=True accepted=True attempts=1 wall=103.5s
+2026-11-27T04:35:57Z  cc_1572F/r1/R                                pass=True accepted=True attempts=1 wall=143.7s
+2026-11-27T04:36:04Z  cc_1599E/r1/A                                pass=True accepted=True attempts=1 wall=41.5s
+2026-11-27T04:36:30Z  cc_1548C/r1/C                                pass=True accepted=True attempts=1 wall=23.2s
+2026-11-27T04:36:47Z  cc_1613F/r1/A                                pass=True accepted=True attempts=1 wall=99.5s
+2026-11-27T04:36:57Z  cc_1548C/r1/A                                pass=True accepted=True attempts=1 wall=24.5s
+2026-11-27T04:37:14Z  cc_1608E/r1/C                                pass=True accepted=True attempts=1 wall=78.3s
+2026-11-27T04:37:21Z  cc_1548C/r1/R                                pass=True accepted=True attempts=1 wall=21.7s
+2026-11-27T04:37:39Z  cc_1572F/r1/B                                pass=True accepted=True attempts=1 wall=99.0s
+2026-11-27T04:37:48Z  cc_1613F/r1/R                                pass=True accepted=True attempts=1 wall=59.3s
+2026-11-27T04:37:50Z  cc_1548C/r1/B                                pass=True accepted=True attempts=1 wall=25.5s
+2026-11-27T04:37:58Z  cc_1608F/r1/A                                pass=True accepted=True attempts=1 wall=358.4s
+2026-11-27T04:38:11Z  cc_1586G/r1/B                                pass=True accepted=True attempts=1 wall=520.9s
+2026-11-27T04:38:13Z  cc_1567F/r1/C                                pass=True accepted=True attempts=1 wall=32.7s
+2026-11-27T04:38:46Z  cc_1608E/r1/A                                pass=True accepted=True attempts=1 wall=91.5s
+2026-11-27T04:38:56Z  cc_1567F/r1/A                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T04:39:15Z  cc_1613F/r1/B                                pass=True accepted=True attempts=1 wall=85.8s
+2026-11-27T04:39:41Z  cc_1569F/r1/R                                pass=True accepted=True attempts=1 wall=100.2s
+2026-11-27T04:39:45Z  cc_1553I/r1/B                                pass=True accepted=True attempts=1 wall=566.9s
+2026-11-27T04:39:46Z  cc_1572D/r1/C                                pass=True accepted=True attempts=1 wall=27.3s
+2026-11-27T04:40:22Z  cc_1572D/r1/A                                pass=True accepted=True attempts=1 wall=32.6s
+2026-11-27T04:40:51Z  cc_1567F/r1/R                                pass=True accepted=True attempts=1 wall=113.7s
+2026-11-27T04:41:03Z  cc_1572D/r1/R                                pass=True accepted=True attempts=1 wall=37.6s
+2026-11-27T04:41:20Z  cc_1567F/r1/B                                pass=False accepted=True attempts=1 wall=27.0s
+2026-11-27T04:41:45Z  cc_1572D/r1/B                                pass=True accepted=True attempts=1 wall=38.4s
+2026-11-27T04:42:06Z  cc_1608E/r1/R                                pass=True accepted=True attempts=1 wall=196.4s
+2026-11-27T04:42:25Z  cc_1608F/r1/R                                pass=True accepted=True attempts=1 wall=263.6s
+2026-11-27T04:43:30Z  cc_1555F/r1/C                                pass=True accepted=True attempts=1 wall=78.9s
+2026-11-27T04:43:42Z  cc_1574F/r1/B                                pass=True accepted=True attempts=1 wall=74.2s
+2026-11-27T04:44:15Z  cc_1580F/r1/R                                pass=True accepted=True attempts=1 wall=150.5s
+2026-11-27T04:44:16Z  cc_1586G/r1/C                                pass=True accepted=True attempts=1 wall=361.3s
+2026-11-27T04:45:57Z  cc_1574F/r1/C                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T04:46:19Z  cc_1558D/r1/C                                pass=True accepted=True attempts=2 wall=256.6s
+2026-11-27T04:47:30Z  cc_1580E/r1/B 第 2 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T04:47:46Z  cc_1574F/r1/A                                pass=True accepted=True attempts=1 wall=106.1s
+2026-11-27T04:49:14Z  cc_1574F/r1/R                                pass=True accepted=True attempts=1 wall=83.0s
+2026-11-27T04:49:15Z  cc_1580F/r1/B                                pass=True accepted=True attempts=1 wall=252.9s
+2026-11-27T04:49:45Z  cc_1558D/r1/A                                pass=True accepted=True attempts=1 wall=202.4s
+2026-11-27T04:49:49Z  cc_1553I/r1/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T04:49:52Z  cc_1569F/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T04:50:03Z  cc_1580D/r1/R                                pass=True accepted=True attempts=1 wall=46.2s
+2026-11-27T04:51:01Z  cc_1580D/r1/B                                pass=True accepted=True attempts=1 wall=55.6s
+2026-11-27T04:51:43Z  cc_1580D/r1/C                                pass=True accepted=True attempts=1 wall=37.0s
+2026-11-27T04:51:56Z  cc_1553I/r1/A                                pass=True accepted=True attempts=1 wall=123.3s
+2026-11-27T04:52:07Z  cc_1569F/r1/C                                pass=True accepted=True attempts=1 wall=122.7s
+2026-11-27T04:52:47Z  cc_1580D/r1/A                                pass=True accepted=True attempts=1 wall=59.5s
+2026-11-27T04:53:23Z  cc_1558D/r1/R                                pass=True accepted=True attempts=1 wall=211.6s
+2026-11-27T04:53:36Z  cc_1569F/r1/A                                pass=True accepted=True attempts=1 wall=63.3s
+2026-11-27T04:54:04Z  cc_1555F/r1/A                                pass=True accepted=True attempts=1 wall=630.0s
+2026-11-27T04:54:13Z  cc_1553I/r1/R                                pass=True accepted=True attempts=1 wall=132.2s
+2026-11-27T04:54:15Z  cc_1620G/r1/B                                pass=True accepted=True attempts=1 wall=35.3s
+2026-11-27T04:54:17Z  cc_1599A/r1/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T04:54:17Z  cc_1599F/r1/R                                pass=True accepted=True attempts=1 wall=89.4s
+2026-11-27T04:54:51Z  cc_1620G/r1/C                                pass=True accepted=True attempts=1 wall=33.2s
+2026-11-27T04:55:36Z  cc_1620G/r1/A                                pass=True accepted=True attempts=1 wall=40.4s
+2026-11-27T04:55:38Z  cc_1575E/r1/A                                pass=True accepted=True attempts=1 wall=81.3s
+2026-11-27T04:55:51Z  cc_1599A/r1/B                                pass=True accepted=True attempts=1 wall=92.4s
+2026-11-27T04:55:58Z  cc_1555F/r1/R                                pass=True accepted=True attempts=1 wall=111.7s
+2026-11-27T04:56:07Z  cc_1580E/r1/B                                pass=True accepted=True attempts=2 wall=906.2s
+2026-11-27T04:56:18Z  cc_1620G/r1/R                                pass=True accepted=True attempts=1 wall=38.6s
+2026-11-27T04:56:51Z  cc_1599F/r1/B                                pass=True accepted=True attempts=1 wall=149.9s
+2026-11-27T04:57:40Z  cc_1580F/r1/C                                pass=True accepted=True attempts=1 wall=450.1s
+2026-11-27T04:57:57Z  cc_1575E/r1/R                                pass=True accepted=True attempts=1 wall=137.6s
+2026-11-27T04:58:33Z  cc_1599A/r1/C                                pass=True accepted=True attempts=1 wall=160.6s
+2026-11-27T04:58:33Z  cc_1599F/r1/C                                pass=True accepted=True attempts=1 wall=101.1s
+2026-11-27T04:59:12Z  cc_1555F/r1/B                                pass=True accepted=True attempts=1 wall=192.3s
+2026-11-27T04:59:24Z  cc_1575E/r1/B                                pass=True accepted=True attempts=1 wall=84.0s
+2026-11-27T04:59:43Z  cc_1599F/r1/A                                pass=True accepted=True attempts=1 wall=68.8s
+2026-11-27T05:00:42Z  cc_1599A/r1/A                                pass=True accepted=True attempts=1 wall=127.3s
+2026-11-27T05:01:26Z  cc_1575C/r1/B                                pass=True accepted=True attempts=1 wall=123.5s
+2026-11-27T05:02:10Z  cc_1582G/r1/C                                pass=True accepted=True attempts=1 wall=140.4s
+2026-11-27T05:02:20Z  cc_1552G/r1/A                                pass=True accepted=True attempts=1 wall=91.2s
+2026-11-27T05:02:31Z  cc_1580F/r1/A                                pass=True accepted=True attempts=1 wall=243.4s
+2026-11-27T05:03:31Z  cc_1552G/r1/R                                pass=True accepted=True attempts=1 wall=62.3s
+2026-11-27T05:04:15Z  cc_1582G/r1/A                                pass=True accepted=True attempts=1 wall=117.3s
+2026-11-27T05:04:23Z  cc_1575E/r1/C                                pass=True accepted=True attempts=1 wall=296.7s
+2026-11-27T05:04:36Z  cc_1552G/r1/B                                pass=True accepted=True attempts=1 wall=58.8s
+2026-11-27T05:06:05Z  cc_1582G/r1/R                                pass=True accepted=True attempts=1 wall=99.8s
+2026-11-27T05:06:20Z  cc_1566G/r1/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T05:06:31Z  cc_1599D/r1/A 第 1 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T05:06:33Z  cc_1552G/r1/C 第 1 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T05:06:39Z  cc_1580E/r1/C 第 2 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T05:06:41Z  cc_1566G/r1/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T05:06:41Z  cc_1558D/r1/B 第 3 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T05:06:47Z  cc_1582G/r1/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T05:07:02Z  cc_1599D/r1/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T05:07:04Z  cc_1552G/r1/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T05:07:10Z  cc_1580E/r1/C 第 2 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T05:07:12Z  cc_1566G/r1/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T05:07:13Z  cc_1558D/r1/B 第 3 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T05:07:19Z  cc_1582G/r1/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T05:10:05Z  cc_1582G/r1/B                                pass=True accepted=True attempts=1 wall=100.6s
+2026-11-27T05:10:11Z  cc_1566G/r1/A                                pass=True accepted=True attempts=1 wall=114.7s
+2026-11-27T05:10:21Z  cc_1552G/r1/C                                pass=True accepted=True attempts=1 wall=132.0s
+2026-11-27T05:10:47Z  cc_1558D/r1/B                                pass=True accepted=True attempts=3 wall=556.0s
+2026-11-27T05:11:23Z  cc_1566G/r1/R                                pass=True accepted=True attempts=1 wall=68.7s
+2026-11-27T05:11:26Z  cc_1575C/r1/C 第 1 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T05:11:52Z  cc_1603E/r2/R                                pass=True accepted=True attempts=1 wall=83.6s
+2026-11-27T05:12:32Z  cc_1599D/r1/A                                pass=False accepted=False attempts=1 wall=268.7s
+2026-11-27T05:12:40Z  cc_1580B/r2/R                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T05:13:22Z  cc_1580E/r1/C                                pass=True accepted=True attempts=2 wall=910.3s
+2026-11-27T05:14:04Z  cc_1575C/r1/C                                pass=True accepted=True attempts=1 wall=124.5s
+2026-11-27T05:14:23Z  cc_1599E/r2/B 第 1 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T05:15:24Z  cc_1580B/r2/B                                pass=True accepted=True attempts=1 wall=154.2s
+2026-11-27T05:15:26Z  cc_1599E/r2/B                                pass=True accepted=True attempts=1 wall=32.0s
+2026-11-27T05:15:53Z  cc_1566G/r1/B                                pass=True accepted=True attempts=1 wall=268.5s
+2026-11-27T05:16:41Z  cc_1575C/r1/A                                pass=False accepted=False attempts=1 wall=154.6s
+2026-11-27T05:16:46Z  cc_1580B/r2/C                                pass=True accepted=True attempts=1 wall=76.7s
+2026-11-27T05:16:48Z  cc_1599E/r2/C                                pass=True accepted=True attempts=1 wall=80.7s
+2026-11-27T05:18:46Z  cc_1580B/r2/A                                pass=True accepted=True attempts=1 wall=104.3s
+2026-11-27T05:19:04Z  cc_1575C/r1/R                                pass=True accepted=True attempts=1 wall=140.0s
+2026-11-27T05:19:23Z  cc_1580E/r1/A                                pass=False accepted=False attempts=1 wall=358.1s
+2026-11-27T05:19:57Z  cc_1599D/r1/R                                pass=True accepted=True attempts=1 wall=438.1s
+2026-11-27T05:20:10Z  cc_1620G/r2/C                                pass=True accepted=True attempts=1 wall=40.9s
+2026-11-27T05:20:23Z  cc_1586G/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T05:20:51Z  cc_1620G/r2/A                                pass=False accepted=True attempts=1 wall=36.2s
+2026-11-27T05:21:15Z  cc_1601F/r2/C                                pass=True accepted=True attempts=1 wall=126.1s
+2026-11-27T05:21:32Z  cc_1608G/r2/C                                pass=True accepted=True attempts=1 wall=159.5s
+2026-11-27T05:21:42Z  cc_1620G/r2/R                                pass=True accepted=True attempts=1 wall=47.7s
+2026-11-27T05:21:54Z  cc_1599E/r2/A                                pass=True accepted=True attempts=1 wall=302.3s
+2026-11-27T05:22:24Z  cc_1601F/r2/A                                pass=True accepted=True attempts=1 wall=66.4s
+2026-11-27T05:22:45Z  cc_1599E/r2/R                                pass=True accepted=True attempts=1 wall=47.9s
+2026-11-27T05:23:01Z  cc_1620G/r2/B                                pass=True accepted=True attempts=1 wall=75.1s
+2026-11-27T05:23:50Z  cc_1574F/r2/B                                pass=True accepted=True attempts=1 wall=44.5s
+2026-11-27T05:24:00Z  cc_1608G/r2/A                                pass=True accepted=True attempts=1 wall=143.0s
+2026-11-27T05:24:38Z  cc_1601F/r2/R                                pass=True accepted=True attempts=1 wall=125.6s
+2026-11-27T05:24:42Z  cc_1608G/r2/R                                pass=True accepted=True attempts=1 wall=41.4s
+2026-11-27T05:25:06Z  cc_1574F/r2/C                                pass=True accepted=True attempts=1 wall=72.9s
+2026-11-27T05:26:28Z  cc_1603E/r2/B                                pass=True accepted=True attempts=2 wall=860.4s
+2026-11-27T05:26:29Z  cc_1601F/r2/B                                pass=True accepted=True attempts=1 wall=104.7s
+2026-11-27T05:26:57Z  cc_1599D/r1/B                                pass=True accepted=True attempts=1 wall=414.3s
+2026-11-27T05:27:06Z  cc_1608G/r2/B                                pass=True accepted=True attempts=1 wall=137.3s
+2026-11-27T05:27:37Z  cc_1552I/r2/B                                pass=True accepted=True attempts=1 wall=66.3s
+2026-11-27T05:27:49Z  cc_1599D/r2/C                                pass=True accepted=True attempts=2 wall=708.1s
+2026-11-27T05:28:02Z  cc_1574F/r2/A                                pass=True accepted=True attempts=1 wall=172.5s
+2026-11-27T05:28:47Z  cc_1552I/r2/C                                pass=True accepted=True attempts=1 wall=68.6s
+2026-11-27T05:29:24Z  cc_1574F/r2/R                                pass=True accepted=True attempts=1 wall=77.8s
+2026-11-27T05:29:53Z  cc_1603D/r2/C                                pass=True accepted=True attempts=1 wall=162.2s
+2026-11-27T05:30:06Z  cc_1603E/r2/C                                pass=True accepted=True attempts=1 wall=196.2s
+2026-11-27T05:31:10Z  cc_1552I/r2/A                                pass=True accepted=True attempts=1 wall=141.2s
+2026-11-27T05:32:06Z  cc_1603D/r2/A                                pass=True accepted=True attempts=1 wall=129.3s
+2026-11-27T05:32:42Z  cc_1553I/r2/C                                pass=True accepted=True attempts=1 wall=594.3s
+2026-11-27T05:32:45Z  cc_1552I/r2/R                                pass=True accepted=True attempts=1 wall=93.4s
+2026-11-27T05:34:44Z  cc_1553I/r2/A                                pass=True accepted=True attempts=1 wall=118.0s
+2026-11-27T05:34:59Z  cc_1599D/r2/A                                pass=False accepted=False attempts=1 wall=425.9s
+2026-11-27T05:37:16Z  cc_1553I/r2/R                                pass=True accepted=True attempts=1 wall=143.3s
+2026-11-27T05:38:31Z  cc_1586G/r2/A                                pass=True accepted=True attempts=1 wall=1085.5s
+2026-11-27T05:39:33Z  cc_1553I/r2/B                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T05:40:29Z  cc_1580D/r2/B                                pass=True accepted=True attempts=1 wall=51.3s
+2026-11-27T05:41:36Z  cc_1580D/r2/C                                pass=True accepted=True attempts=1 wall=61.6s
+2026-11-27T05:41:48Z  cc_1580F/r2/B                                pass=True accepted=True attempts=1 wall=496.6s
+2026-11-27T05:41:50Z  cc_1548C/r2/A                                pass=True accepted=True attempts=1 wall=740.7s
+2026-11-27T05:42:11Z  cc_1603D/r2/R                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T05:42:19Z  cc_1548C/r2/R                                pass=True accepted=True attempts=1 wall=25.6s
+2026-11-27T05:42:53Z  cc_1548C/r2/B                                pass=True accepted=True attempts=1 wall=29.9s
+2026-11-27T05:43:35Z  cc_1548C/r2/C                                pass=True accepted=True attempts=1 wall=34.8s
+2026-11-27T05:43:37Z  cc_1580D/r2/A                                pass=True accepted=True attempts=1 wall=113.3s
+2026-11-27T05:43:50Z  cc_1586G/r2/R                                pass=True accepted=True attempts=1 wall=316.6s
+2026-11-27T05:43:53Z  cc_1599D/r1/C                                pass=True accepted=True attempts=3 wall=1004.9s
+2026-11-27T05:45:01Z  cc_1580F/r2/C                                pass=True accepted=True attempts=1 wall=170.4s
+2026-11-27T05:45:23Z  cc_1580D/r2/R                                pass=True accepted=True attempts=1 wall=102.1s
+2026-11-27T05:47:58Z  cc_1603E/r2/A                                pass=True accepted=True attempts=1 wall=1060.3s
+2026-11-27T05:49:30Z  cc_1572F/r2/B                                pass=True accepted=True attempts=1 wall=243.2s
+2026-11-27T05:51:49Z  cc_1599D/r2/R                                pass=False accepted=True attempts=2 wall=997.8s
+2026-11-27T05:51:54Z  cc_1575F/r2/C                                pass=True accepted=True attempts=1 wall=229.7s
+2026-11-27T05:52:02Z  cc_1580F/r2/A                                pass=True accepted=True attempts=1 wall=404.1s
+2026-11-27T05:52:09Z  cc_1586G/r2/B                                pass=True accepted=True attempts=1 wall=496.8s
+2026-11-27T05:52:16Z  cc_1603D/r2/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T05:52:53Z  cc_1572D/r2/C                                pass=True accepted=True attempts=1 wall=32.2s
+2026-11-27T05:52:57Z  cc_1575F/r2/A                                pass=True accepted=True attempts=1 wall=58.8s
+2026-11-27T05:53:55Z  cc_1575F/r2/R                                pass=True accepted=True attempts=1 wall=51.5s
+2026-11-27T05:54:06Z  cc_1566G/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T05:54:48Z  cc_1572D/r2/A                                pass=True accepted=True attempts=1 wall=107.9s
+2026-11-27T05:55:15Z  cc_1566G/r2/A                                pass=True accepted=True attempts=1 wall=67.0s
+2026-11-27T05:55:33Z  cc_1580F/r2/R                                pass=True accepted=True attempts=1 wall=175.3s
+2026-11-27T05:55:34Z  cc_1572D/r2/R                                pass=True accepted=True attempts=1 wall=38.6s
+2026-11-27T05:55:39Z  cc_1601E/r2/B                                pass=True accepted=True attempts=1 wall=206.0s
+2026-11-27T05:56:20Z  cc_1575F/r2/B                                pass=True accepted=True attempts=1 wall=140.9s
+2026-11-27T05:56:44Z  cc_1572D/r2/B                                pass=True accepted=True attempts=1 wall=63.2s
+2026-11-27T05:57:53Z  cc_1555F/r2/A                                pass=True accepted=True attempts=1 wall=855.3s
+2026-11-27T05:58:02Z  cc_1575C/r2/R                                pass=True accepted=True attempts=1 wall=140.8s
+2026-11-27T05:58:22Z  cc_1552G/r2/C                                pass=True accepted=True attempts=1 wall=114.3s
+2026-11-27T05:58:38Z  cc_1553H/r2/B                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T05:59:36Z  cc_1555F/r2/R                                pass=True accepted=True attempts=1 wall=96.8s
+2026-11-27T05:59:37Z  cc_1572F/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T05:59:47Z  cc_1552G/r2/A                                pass=True accepted=True attempts=1 wall=77.5s
+2026-11-27T06:00:31Z  cc_1553H/r2/C                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T06:00:38Z  cc_1601E/r2/C                                pass=True accepted=True attempts=1 wall=293.2s
+2026-11-27T06:00:42Z  cc_1575C/r2/B                                pass=True accepted=True attempts=1 wall=153.0s
+2026-11-27T06:00:52Z  cc_1572F/r2/A                                pass=True accepted=True attempts=1 wall=73.7s
+2026-11-27T06:01:11Z  cc_1552G/r2/R                                pass=True accepted=True attempts=1 wall=75.8s
+2026-11-27T06:01:24Z  cc_1553H/r2/A                                pass=True accepted=True attempts=1 wall=50.2s
+2026-11-27T06:02:09Z  cc_1553H/r2/R                                pass=True accepted=True attempts=1 wall=40.4s
+2026-11-27T06:02:58Z  cc_1555F/r2/B                                pass=True accepted=True attempts=1 wall=200.0s
+2026-11-27T06:03:35Z  cc_1552G/r2/B                                pass=True accepted=True attempts=1 wall=131.4s
+2026-11-27T06:04:45Z  cc_1601E/r2/A                                pass=True accepted=True attempts=1 wall=237.6s
+2026-11-27T06:04:49Z  cc_1555F/r2/C                                pass=True accepted=True attempts=1 wall=103.0s
+2026-11-27T06:05:25Z  cc_1566G/r2/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:05:37Z  cc_1572F/r2/R                                pass=True accepted=True attempts=1 wall=282.6s
+2026-11-27T06:06:00Z  cc_1575E/r2/C                                pass=True accepted=True attempts=1 wall=64.3s
+2026-11-27T06:08:25Z  cc_1599A/r2/B                                pass=True accepted=True attempts=1 wall=164.3s
+2026-11-27T06:09:02Z  cc_1601E/r2/R                                pass=True accepted=True attempts=1 wall=252.4s
+2026-11-27T06:09:45Z  cc_1558D/r2/R                                pass=True accepted=True attempts=2 wall=346.6s
+2026-11-27T06:10:48Z  cc_1567F/r2/B                                pass=True accepted=True attempts=1 wall=515.4s
+2026-11-27T06:10:52Z  cc_1613F/r2/R                                pass=True accepted=True attempts=1 wall=105.8s
+2026-11-27T06:11:03Z  cc_1575C/r2/C                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T06:11:38Z  cc_1575E/r2/A                                pass=True accepted=True attempts=1 wall=332.4s
+2026-11-27T06:11:43Z  cc_1566G/r2/B                                pass=True accepted=True attempts=1 wall=361.9s
+2026-11-27T06:11:52Z  cc_1613F/r2/B                                pass=True accepted=True attempts=1 wall=48.4s
+2026-11-27T06:12:00Z  cc_1599A/r2/C                                pass=True accepted=True attempts=1 wall=205.4s
+2026-11-27T06:12:01Z  cc_1567F/r2/C                                pass=True accepted=True attempts=1 wall=68.5s
+2026-11-27T06:12:37Z  收到中斷：正在跑的那一格會被丟掉（下次續跑重做），已完成的格保留
+2026-11-27T06:14:23Z  計畫 ctl_haiku_cchard_4arm（d236c169980d） 題庫 /opt/ctlwork/bm_tasks/cchard  這次要處理 117 對（全計畫 117 對）  harness d5674bfa06e2
+2026-11-27T06:14:23Z  cc_1599I/r1/A                                pass=True accepted=True attempts=1 wall=78.6s
+2026-11-27T06:14:23Z  cc_1599I/r1/R                                pass=True accepted=True attempts=1 wall=69.9s
+2026-11-27T06:14:23Z  cc_1599I/r1/B                                pass=True accepted=True attempts=1 wall=387.1s
+2026-11-27T06:14:23Z  cc_1599I/r1/C                                pass=True accepted=True attempts=1 wall=133.7s
+2026-11-27T06:14:23Z  cc_1575F/r1/B                                pass=True accepted=True attempts=1 wall=92.6s
+2026-11-27T06:14:23Z  cc_1575F/r1/C                                pass=True accepted=True attempts=1 wall=100.6s
+2026-11-27T06:14:23Z  cc_1575F/r1/A                                pass=True accepted=True attempts=1 wall=84.9s
+2026-11-27T06:14:23Z  cc_1575F/r1/R                                pass=True accepted=True attempts=1 wall=54.8s
+2026-11-27T06:14:23Z  cc_1601F/r1/B                                pass=True accepted=True attempts=1 wall=131.5s
+2026-11-27T06:14:23Z  cc_1601F/r1/C                                pass=True accepted=True attempts=1 wall=68.5s
+2026-11-27T06:14:23Z  cc_1601F/r1/A                                pass=True accepted=True attempts=1 wall=63.8s
+2026-11-27T06:14:23Z  cc_1601F/r1/R                                pass=True accepted=True attempts=1 wall=48.0s
+2026-11-27T06:14:23Z  cc_1580E/r1/R                                pass=True accepted=True attempts=2 wall=1059.5s
+2026-11-27T06:14:23Z  cc_1580E/r1/B                                pass=True accepted=True attempts=2 wall=906.2s
+2026-11-27T06:14:23Z  cc_1580E/r1/C                                pass=True accepted=True attempts=2 wall=910.3s
+2026-11-27T06:14:23Z  cc_1580E/r1/A                                pass=False accepted=False attempts=1 wall=358.1s
+2026-11-27T06:14:23Z  cc_1608G/r1/B                                pass=True accepted=True attempts=1 wall=145.1s
+2026-11-27T06:14:23Z  cc_1608G/r1/C                                pass=True accepted=True attempts=1 wall=124.4s
+2026-11-27T06:14:23Z  cc_1608G/r1/A                                pass=True accepted=True attempts=1 wall=137.3s
+2026-11-27T06:14:23Z  cc_1608G/r1/R                                pass=True accepted=True attempts=1 wall=27.6s
+2026-11-27T06:14:23Z  cc_1601E/r1/B                                pass=True accepted=True attempts=1 wall=144.5s
+2026-11-27T06:14:23Z  cc_1601E/r1/C                                pass=True accepted=True attempts=1 wall=144.1s
+2026-11-27T06:14:23Z  cc_1601E/r1/A                                pass=True accepted=True attempts=1 wall=157.3s
+2026-11-27T06:14:23Z  cc_1601E/r1/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1603E/r1/C                                pass=True accepted=True attempts=1 wall=308.1s
+2026-11-27T06:14:23Z  cc_1603E/r1/A                                pass=True accepted=True attempts=1 wall=276.8s
+2026-11-27T06:14:23Z  cc_1603E/r1/R                                pass=True accepted=True attempts=1 wall=105.6s
+2026-11-27T06:14:23Z  cc_1603E/r1/B                                pass=True accepted=True attempts=1 wall=100.5s
+2026-11-27T06:14:23Z  cc_1558E/r1/A                                pass=True accepted=True attempts=1 wall=71.1s
+2026-11-27T06:14:23Z  cc_1558E/r1/R                                pass=True accepted=True attempts=1 wall=46.9s
+2026-11-27T06:14:23Z  cc_1558E/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1558E/r1/C                                pass=True accepted=True attempts=1 wall=51.0s
+2026-11-27T06:14:23Z  cc_1586G/r1/A                                pass=True accepted=True attempts=1 wall=345.4s
+2026-11-27T06:14:23Z  cc_1586G/r1/R                                pass=True accepted=True attempts=1 wall=315.6s
+2026-11-27T06:14:23Z  cc_1586G/r1/B                                pass=True accepted=True attempts=1 wall=520.9s
+2026-11-27T06:14:23Z  cc_1586G/r1/C                                pass=True accepted=True attempts=1 wall=361.3s
+2026-11-27T06:14:23Z  cc_1603F/r1/C                                pass=True accepted=True attempts=1 wall=57.1s
+2026-11-27T06:14:23Z  cc_1603F/r1/A                                pass=True accepted=True attempts=1 wall=76.6s
+2026-11-27T06:14:23Z  cc_1603F/r1/R                                pass=True accepted=True attempts=1 wall=281.9s
+2026-11-27T06:14:23Z  cc_1603F/r1/B                                pass=True accepted=True attempts=1 wall=63.4s
+2026-11-27T06:14:23Z  cc_1580B/r1/R                                pass=True accepted=True attempts=1 wall=68.7s
+2026-11-27T06:14:23Z  cc_1580B/r1/B                                pass=True accepted=True attempts=1 wall=43.3s
+2026-11-27T06:14:23Z  cc_1580B/r1/C                                pass=True accepted=True attempts=1 wall=112.8s
+2026-11-27T06:14:23Z  cc_1580B/r1/A                                pass=True accepted=True attempts=1 wall=53.7s
+2026-11-27T06:14:23Z  cc_1608F/r1/B                                pass=True accepted=True attempts=1 wall=225.4s
+2026-11-27T06:14:23Z  cc_1608F/r1/C                                pass=True accepted=True attempts=1 wall=245.1s
+2026-11-27T06:14:23Z  cc_1608F/r1/A                                pass=True accepted=True attempts=1 wall=358.4s
+2026-11-27T06:14:23Z  cc_1608F/r1/R                                pass=True accepted=True attempts=1 wall=263.6s
+2026-11-27T06:14:23Z  cc_1572F/r1/C                                pass=True accepted=True attempts=1 wall=282.8s
+2026-11-27T06:14:23Z  cc_1572F/r1/A                                pass=True accepted=True attempts=1 wall=206.5s
+2026-11-27T06:14:23Z  cc_1572F/r1/R                                pass=True accepted=True attempts=1 wall=143.7s
+2026-11-27T06:14:23Z  cc_1572F/r1/B                                pass=True accepted=True attempts=1 wall=99.0s
+2026-11-27T06:14:23Z  cc_1603D/r1/R                                pass=True accepted=True attempts=1 wall=130.7s
+2026-11-27T06:14:23Z  cc_1603D/r1/B                                pass=True accepted=True attempts=1 wall=71.3s
+2026-11-27T06:14:23Z  cc_1603D/r1/C                                pass=True accepted=True attempts=1 wall=113.5s
+2026-11-27T06:14:23Z  cc_1603D/r1/A                                pass=True accepted=True attempts=1 wall=174.3s
+2026-11-27T06:14:23Z  cc_1599E/r1/R                                pass=True accepted=True attempts=1 wall=80.7s
+2026-11-27T06:14:23Z  cc_1572C/r1/R                                pass=True accepted=True attempts=1 wall=31.3s
+2026-11-27T06:14:23Z  cc_1553H/r1/R                                pass=True accepted=True attempts=1 wall=38.0s
+2026-11-27T06:14:23Z  cc_1553I/r1/B                                pass=True accepted=True attempts=1 wall=566.9s
+2026-11-27T06:14:23Z  cc_1553I/r1/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1599E/r1/B                                pass=True accepted=True attempts=1 wall=80.3s
+2026-11-27T06:14:23Z  cc_1599E/r1/C                                pass=True accepted=True attempts=1 wall=34.3s
+2026-11-27T06:14:23Z  cc_1548C/r1/C                                pass=True accepted=True attempts=1 wall=23.2s
+2026-11-27T06:14:23Z  cc_1552I/r1/C                                pass=True accepted=True attempts=1 wall=91.5s
+2026-11-27T06:14:23Z  cc_1608E/r1/B                                pass=True accepted=True attempts=1 wall=103.5s
+2026-11-27T06:14:23Z  cc_1553I/r1/A                                pass=True accepted=True attempts=1 wall=123.3s
+2026-11-27T06:14:23Z  cc_1572C/r1/B                                pass=True accepted=True attempts=1 wall=24.9s
+2026-11-27T06:14:23Z  cc_1599E/r1/A                                pass=True accepted=True attempts=1 wall=41.5s
+2026-11-27T06:14:23Z  cc_1613F/r1/C                                pass=True accepted=True attempts=1 wall=31.9s
+2026-11-27T06:14:23Z  cc_1548C/r1/A                                pass=True accepted=True attempts=1 wall=24.5s
+2026-11-27T06:14:23Z  cc_1553H/r1/B                                pass=True accepted=True attempts=1 wall=84.0s
+2026-11-27T06:14:23Z  cc_1553H/r1/C                                pass=True accepted=True attempts=1 wall=33.5s
+2026-11-27T06:14:23Z  cc_1572C/r1/C                                pass=True accepted=True attempts=1 wall=22.8s
+2026-11-27T06:14:23Z  cc_1572C/r1/A                                pass=True accepted=True attempts=1 wall=26.1s
+2026-11-27T06:14:23Z  cc_1567F/r1/C                                pass=True accepted=True attempts=1 wall=32.7s
+2026-11-27T06:14:23Z  cc_1567F/r1/A                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T06:14:23Z  cc_1567F/r1/R                                pass=True accepted=True attempts=1 wall=113.7s
+2026-11-27T06:14:23Z  cc_1567F/r1/B                                pass=False accepted=True attempts=1 wall=27.0s
+2026-11-27T06:14:23Z  cc_1569F/r1/R                                pass=True accepted=True attempts=1 wall=100.2s
+2026-11-27T06:14:23Z  cc_1569F/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1569F/r1/C                                pass=True accepted=True attempts=1 wall=122.7s
+2026-11-27T06:14:23Z  cc_1569F/r1/A                                pass=True accepted=True attempts=1 wall=63.3s
+2026-11-27T06:14:23Z  cc_1572D/r1/C                                pass=True accepted=True attempts=1 wall=27.3s
+2026-11-27T06:14:23Z  cc_1572D/r1/A                                pass=True accepted=True attempts=1 wall=32.6s
+2026-11-27T06:14:23Z  cc_1572D/r1/R                                pass=True accepted=True attempts=1 wall=37.6s
+2026-11-27T06:14:23Z  cc_1572D/r1/B                                pass=True accepted=True attempts=1 wall=38.4s
+2026-11-27T06:14:23Z  cc_1580F/r1/R                                pass=True accepted=True attempts=1 wall=150.5s
+2026-11-27T06:14:23Z  cc_1580F/r1/B                                pass=True accepted=True attempts=1 wall=252.9s
+2026-11-27T06:14:23Z  cc_1580F/r1/C                                pass=True accepted=True attempts=1 wall=450.1s
+2026-11-27T06:14:23Z  cc_1580F/r1/A                                pass=True accepted=True attempts=1 wall=243.4s
+2026-11-27T06:14:23Z  cc_1558D/r1/C                                pass=True accepted=True attempts=2 wall=256.6s
+2026-11-27T06:14:23Z  cc_1558D/r1/A                                pass=True accepted=True attempts=1 wall=202.4s
+2026-11-27T06:14:23Z  cc_1558D/r1/R                                pass=True accepted=True attempts=1 wall=211.6s
+2026-11-27T06:14:23Z  cc_1558D/r1/B                                pass=True accepted=True attempts=3 wall=556.0s
+2026-11-27T06:14:23Z  cc_1555F/r1/C                                pass=True accepted=True attempts=1 wall=78.9s
+2026-11-27T06:14:23Z  cc_1555F/r1/A                                pass=True accepted=True attempts=1 wall=630.0s
+2026-11-27T06:14:23Z  cc_1555F/r1/R                                pass=True accepted=True attempts=1 wall=111.7s
+2026-11-27T06:14:23Z  cc_1555F/r1/B                                pass=True accepted=True attempts=1 wall=192.3s
+2026-11-27T06:14:23Z  cc_1574F/r1/B                                pass=True accepted=True attempts=1 wall=74.2s
+2026-11-27T06:14:23Z  cc_1574F/r1/C                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T06:14:23Z  cc_1574F/r1/A                                pass=True accepted=True attempts=1 wall=106.1s
+2026-11-27T06:14:23Z  cc_1574F/r1/R                                pass=True accepted=True attempts=1 wall=83.0s
+2026-11-27T06:14:23Z  cc_1553I/r1/R                                pass=True accepted=True attempts=1 wall=132.2s
+2026-11-27T06:14:23Z  cc_1552I/r1/A                                pass=True accepted=True attempts=1 wall=98.1s
+2026-11-27T06:14:23Z  cc_1613F/r1/A                                pass=True accepted=True attempts=1 wall=99.5s
+2026-11-27T06:14:23Z  cc_1608E/r1/C                                pass=True accepted=True attempts=1 wall=78.3s
+2026-11-27T06:14:23Z  cc_1548C/r1/R                                pass=True accepted=True attempts=1 wall=21.7s
+2026-11-27T06:14:23Z  cc_1548C/r1/B                                pass=True accepted=True attempts=1 wall=25.5s
+2026-11-27T06:14:23Z  cc_1599F/r1/R                                pass=True accepted=True attempts=1 wall=89.4s
+2026-11-27T06:14:23Z  cc_1599F/r1/B                                pass=True accepted=True attempts=1 wall=149.9s
+2026-11-27T06:14:23Z  cc_1599F/r1/C                                pass=True accepted=True attempts=1 wall=101.1s
+2026-11-27T06:14:23Z  cc_1599F/r1/A                                pass=True accepted=True attempts=1 wall=68.8s
+2026-11-27T06:14:23Z  cc_1620G/r1/B                                pass=True accepted=True attempts=1 wall=35.3s
+2026-11-27T06:14:23Z  cc_1620G/r1/C                                pass=True accepted=True attempts=1 wall=33.2s
+2026-11-27T06:14:23Z  cc_1620G/r1/A                                pass=True accepted=True attempts=1 wall=40.4s
+2026-11-27T06:14:23Z  cc_1620G/r1/R                                pass=True accepted=True attempts=1 wall=38.6s
+2026-11-27T06:14:23Z  cc_1575E/r1/A                                pass=True accepted=True attempts=1 wall=81.3s
+2026-11-27T06:14:23Z  cc_1575E/r1/R                                pass=True accepted=True attempts=1 wall=137.6s
+2026-11-27T06:14:23Z  cc_1575E/r1/B                                pass=True accepted=True attempts=1 wall=84.0s
+2026-11-27T06:14:23Z  cc_1575E/r1/C                                pass=True accepted=True attempts=1 wall=296.7s
+2026-11-27T06:14:23Z  cc_1566G/r1/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1566G/r1/A                                pass=True accepted=True attempts=1 wall=114.7s
+2026-11-27T06:14:23Z  cc_1566G/r1/R                                pass=True accepted=True attempts=1 wall=68.7s
+2026-11-27T06:14:23Z  cc_1566G/r1/B                                pass=True accepted=True attempts=1 wall=268.5s
+2026-11-27T06:14:23Z  cc_1575C/r1/B                                pass=True accepted=True attempts=1 wall=123.5s
+2026-11-27T06:14:23Z  cc_1575C/r1/C                                pass=True accepted=True attempts=1 wall=124.5s
+2026-11-27T06:14:23Z  cc_1575C/r1/A                                pass=False accepted=False attempts=1 wall=154.6s
+2026-11-27T06:14:23Z  cc_1575C/r1/R                                pass=True accepted=True attempts=1 wall=140.0s
+2026-11-27T06:14:23Z  cc_1582G/r1/C                                pass=True accepted=True attempts=1 wall=140.4s
+2026-11-27T06:14:23Z  cc_1582G/r1/A                                pass=True accepted=True attempts=1 wall=117.3s
+2026-11-27T06:14:23Z  cc_1582G/r1/R                                pass=True accepted=True attempts=1 wall=99.8s
+2026-11-27T06:14:23Z  cc_1582G/r1/B                                pass=True accepted=True attempts=1 wall=100.6s
+2026-11-27T06:14:23Z  cc_1552G/r1/A                                pass=True accepted=True attempts=1 wall=91.2s
+2026-11-27T06:14:23Z  cc_1552G/r1/R                                pass=True accepted=True attempts=1 wall=62.3s
+2026-11-27T06:14:23Z  cc_1552G/r1/B                                pass=True accepted=True attempts=1 wall=58.8s
+2026-11-27T06:14:23Z  cc_1552G/r1/C                                pass=True accepted=True attempts=1 wall=132.0s
+2026-11-27T06:14:23Z  cc_1599D/r1/A                                pass=False accepted=False attempts=1 wall=268.7s
+2026-11-27T06:14:23Z  cc_1599D/r1/R                                pass=True accepted=True attempts=1 wall=438.1s
+2026-11-27T06:14:23Z  cc_1599D/r1/B                                pass=True accepted=True attempts=1 wall=414.3s
+2026-11-27T06:14:23Z  cc_1599D/r1/C                                pass=True accepted=True attempts=3 wall=1004.9s
+2026-11-27T06:14:23Z  cc_1599E/r2/B                                pass=True accepted=True attempts=1 wall=32.0s
+2026-11-27T06:14:23Z  cc_1599E/r2/C                                pass=True accepted=True attempts=1 wall=80.7s
+2026-11-27T06:14:23Z  cc_1599E/r2/A                                pass=True accepted=True attempts=1 wall=302.3s
+2026-11-27T06:14:23Z  cc_1599E/r2/R                                pass=True accepted=True attempts=1 wall=47.9s
+2026-11-27T06:14:23Z  cc_1603E/r2/R                                pass=True accepted=True attempts=1 wall=83.6s
+2026-11-27T06:14:23Z  cc_1603E/r2/B                                pass=True accepted=True attempts=2 wall=860.4s
+2026-11-27T06:14:23Z  cc_1603E/r2/C                                pass=True accepted=True attempts=1 wall=196.2s
+2026-11-27T06:14:23Z  cc_1603E/r2/A                                pass=True accepted=True attempts=1 wall=1060.3s
+2026-11-27T06:14:23Z  cc_1586G/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1586G/r2/A                                pass=True accepted=True attempts=1 wall=1085.5s
+2026-11-27T06:14:23Z  cc_1586G/r2/R                                pass=True accepted=True attempts=1 wall=316.6s
+2026-11-27T06:14:23Z  cc_1586G/r2/B                                pass=True accepted=True attempts=1 wall=496.8s
+2026-11-27T06:14:23Z  cc_1580B/r2/R                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T06:14:23Z  cc_1580B/r2/B                                pass=True accepted=True attempts=1 wall=154.2s
+2026-11-27T06:14:23Z  cc_1580B/r2/C                                pass=True accepted=True attempts=1 wall=76.7s
+2026-11-27T06:14:23Z  cc_1580B/r2/A                                pass=True accepted=True attempts=1 wall=104.3s
+2026-11-27T06:14:23Z  cc_1599D/r2/C                                pass=True accepted=True attempts=2 wall=708.1s
+2026-11-27T06:14:23Z  cc_1599D/r2/A                                pass=False accepted=False attempts=1 wall=425.9s
+2026-11-27T06:14:23Z  cc_1599D/r2/R                                pass=False accepted=True attempts=2 wall=997.8s
+2026-11-27T06:14:23Z  cc_1608E/r1/A                                pass=True accepted=True attempts=1 wall=91.5s
+2026-11-27T06:14:23Z  cc_1608E/r1/R                                pass=True accepted=True attempts=1 wall=196.4s
+2026-11-27T06:14:23Z  cc_1608G/r2/C                                pass=True accepted=True attempts=1 wall=159.5s
+2026-11-27T06:14:23Z  cc_1608G/r2/A                                pass=True accepted=True attempts=1 wall=143.0s
+2026-11-27T06:14:23Z  cc_1608G/r2/R                                pass=True accepted=True attempts=1 wall=41.4s
+2026-11-27T06:14:23Z  cc_1608G/r2/B                                pass=True accepted=True attempts=1 wall=137.3s
+2026-11-27T06:14:23Z  cc_1601F/r2/C                                pass=True accepted=True attempts=1 wall=126.1s
+2026-11-27T06:14:23Z  cc_1601F/r2/A                                pass=True accepted=True attempts=1 wall=66.4s
+2026-11-27T06:14:23Z  cc_1601F/r2/R                                pass=True accepted=True attempts=1 wall=125.6s
+2026-11-27T06:14:23Z  cc_1601F/r2/B                                pass=True accepted=True attempts=1 wall=104.7s
+2026-11-27T06:14:23Z  cc_1620G/r2/C                                pass=True accepted=True attempts=1 wall=40.9s
+2026-11-27T06:14:23Z  cc_1620G/r2/A                                pass=False accepted=True attempts=1 wall=36.2s
+2026-11-27T06:14:23Z  cc_1620G/r2/R                                pass=True accepted=True attempts=1 wall=47.7s
+2026-11-27T06:14:23Z  cc_1620G/r2/B                                pass=True accepted=True attempts=1 wall=75.1s
+2026-11-27T06:14:23Z  cc_1553I/r2/C                                pass=True accepted=True attempts=1 wall=594.3s
+2026-11-27T06:14:23Z  cc_1553I/r2/A                                pass=True accepted=True attempts=1 wall=118.0s
+2026-11-27T06:14:23Z  cc_1553I/r2/R                                pass=True accepted=True attempts=1 wall=143.3s
+2026-11-27T06:14:23Z  cc_1553I/r2/B                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T06:14:23Z  cc_1574F/r2/B                                pass=True accepted=True attempts=1 wall=44.5s
+2026-11-27T06:14:23Z  cc_1574F/r2/C                                pass=True accepted=True attempts=1 wall=72.9s
+2026-11-27T06:14:23Z  cc_1574F/r2/A                                pass=True accepted=True attempts=1 wall=172.5s
+2026-11-27T06:14:23Z  cc_1574F/r2/R                                pass=True accepted=True attempts=1 wall=77.8s
+2026-11-27T06:14:23Z  cc_1552I/r2/B                                pass=True accepted=True attempts=1 wall=66.3s
+2026-11-27T06:14:23Z  cc_1552I/r2/C                                pass=True accepted=True attempts=1 wall=68.6s
+2026-11-27T06:14:23Z  cc_1552I/r2/A                                pass=True accepted=True attempts=1 wall=141.2s
+2026-11-27T06:14:23Z  cc_1552I/r2/R                                pass=True accepted=True attempts=1 wall=93.4s
+2026-11-27T06:14:23Z  cc_1603D/r2/C                                pass=True accepted=True attempts=1 wall=162.2s
+2026-11-27T06:14:23Z  cc_1603D/r2/A                                pass=True accepted=True attempts=1 wall=129.3s
+2026-11-27T06:14:23Z  cc_1603D/r2/R                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T06:14:23Z  cc_1603D/r2/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1548C/r2/A                                pass=True accepted=True attempts=1 wall=740.7s
+2026-11-27T06:14:23Z  cc_1548C/r2/R                                pass=True accepted=True attempts=1 wall=25.6s
+2026-11-27T06:14:23Z  cc_1548C/r2/B                                pass=True accepted=True attempts=1 wall=29.9s
+2026-11-27T06:14:23Z  cc_1548C/r2/C                                pass=True accepted=True attempts=1 wall=34.8s
+2026-11-27T06:14:23Z  cc_1580F/r2/B                                pass=True accepted=True attempts=1 wall=496.6s
+2026-11-27T06:14:23Z  cc_1580F/r2/C                                pass=True accepted=True attempts=1 wall=170.4s
+2026-11-27T06:14:23Z  cc_1580F/r2/A                                pass=True accepted=True attempts=1 wall=404.1s
+2026-11-27T06:14:23Z  cc_1580F/r2/R                                pass=True accepted=True attempts=1 wall=175.3s
+2026-11-27T06:14:23Z  cc_1580D/r2/B                                pass=True accepted=True attempts=1 wall=51.3s
+2026-11-27T06:14:23Z  cc_1580D/r2/C                                pass=True accepted=True attempts=1 wall=61.6s
+2026-11-27T06:14:23Z  cc_1580D/r2/A                                pass=True accepted=True attempts=1 wall=113.3s
+2026-11-27T06:14:23Z  cc_1580D/r2/R                                pass=True accepted=True attempts=1 wall=102.1s
+2026-11-27T06:14:23Z  cc_1555F/r2/A                                pass=True accepted=True attempts=1 wall=855.3s
+2026-11-27T06:14:23Z  cc_1555F/r2/R                                pass=True accepted=True attempts=1 wall=96.8s
+2026-11-27T06:14:23Z  cc_1555F/r2/B                                pass=True accepted=True attempts=1 wall=200.0s
+2026-11-27T06:14:23Z  cc_1555F/r2/C                                pass=True accepted=True attempts=1 wall=103.0s
+2026-11-27T06:14:23Z  cc_1566G/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1566G/r2/A                                pass=True accepted=True attempts=1 wall=67.0s
+2026-11-27T06:14:23Z  cc_1566G/r2/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1566G/r2/B                                pass=True accepted=True attempts=1 wall=361.9s
+2026-11-27T06:14:23Z  cc_1572F/r2/B                                pass=True accepted=True attempts=1 wall=243.2s
+2026-11-27T06:14:23Z  cc_1572F/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1572F/r2/A                                pass=True accepted=True attempts=1 wall=73.7s
+2026-11-27T06:14:23Z  cc_1572F/r2/R                                pass=True accepted=True attempts=1 wall=282.6s
+2026-11-27T06:14:23Z  cc_1575F/r2/C                                pass=True accepted=True attempts=1 wall=229.7s
+2026-11-27T06:14:23Z  cc_1575F/r2/A                                pass=True accepted=True attempts=1 wall=58.8s
+2026-11-27T06:14:23Z  cc_1575F/r2/R                                pass=True accepted=True attempts=1 wall=51.5s
+2026-11-27T06:14:23Z  cc_1575F/r2/B                                pass=True accepted=True attempts=1 wall=140.9s
+2026-11-27T06:14:23Z  cc_1601E/r2/B                                pass=True accepted=True attempts=1 wall=206.0s
+2026-11-27T06:14:23Z  cc_1601E/r2/C                                pass=True accepted=True attempts=1 wall=293.2s
+2026-11-27T06:14:23Z  cc_1601E/r2/A                                pass=True accepted=True attempts=1 wall=237.6s
+2026-11-27T06:14:23Z  cc_1601E/r2/R                                pass=True accepted=True attempts=1 wall=252.4s
+2026-11-27T06:14:23Z  cc_1572D/r2/C                                pass=True accepted=True attempts=1 wall=32.2s
+2026-11-27T06:14:23Z  cc_1572D/r2/A                                pass=True accepted=True attempts=1 wall=107.9s
+2026-11-27T06:14:23Z  cc_1572D/r2/R                                pass=True accepted=True attempts=1 wall=38.6s
+2026-11-27T06:14:23Z  cc_1572D/r2/B                                pass=True accepted=True attempts=1 wall=63.2s
+2026-11-27T06:14:23Z  cc_1575C/r2/R                                pass=True accepted=True attempts=1 wall=140.8s
+2026-11-27T06:14:23Z  cc_1575C/r2/B                                pass=True accepted=True attempts=1 wall=153.0s
+2026-11-27T06:14:23Z  cc_1575C/r2/C                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T06:14:23Z  cc_1613F/r1/R                                pass=True accepted=True attempts=1 wall=59.3s
+2026-11-27T06:14:23Z  cc_1613F/r1/B                                pass=True accepted=True attempts=1 wall=85.8s
+2026-11-27T06:14:23Z  cc_1552G/r2/C                                pass=True accepted=True attempts=1 wall=114.3s
+2026-11-27T06:14:23Z  cc_1552G/r2/A                                pass=True accepted=True attempts=1 wall=77.5s
+2026-11-27T06:14:23Z  cc_1552G/r2/R                                pass=True accepted=True attempts=1 wall=75.8s
+2026-11-27T06:14:23Z  cc_1552G/r2/B                                pass=True accepted=True attempts=1 wall=131.4s
+2026-11-27T06:14:23Z  cc_1553H/r2/B                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T06:14:23Z  cc_1553H/r2/C                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T06:14:23Z  cc_1553H/r2/A                                pass=True accepted=True attempts=1 wall=50.2s
+2026-11-27T06:14:23Z  cc_1553H/r2/R                                pass=True accepted=True attempts=1 wall=40.4s
+2026-11-27T06:14:23Z  cc_1567F/r2/B                                pass=True accepted=True attempts=1 wall=515.4s
+2026-11-27T06:14:23Z  cc_1567F/r2/C                                pass=True accepted=True attempts=1 wall=68.5s
+2026-11-27T06:14:23Z  cc_1553H/r1/A                                pass=True accepted=True attempts=1 wall=32.5s
+2026-11-27T06:14:23Z  cc_1558D/r2/R                                pass=True accepted=True attempts=2 wall=346.6s
+2026-11-27T06:14:23Z  cc_1580D/r1/R                                pass=True accepted=True attempts=1 wall=46.2s
+2026-11-27T06:14:23Z  cc_1580D/r1/B                                pass=True accepted=True attempts=1 wall=55.6s
+2026-11-27T06:14:23Z  cc_1580D/r1/C                                pass=True accepted=True attempts=1 wall=37.0s
+2026-11-27T06:14:23Z  cc_1580D/r1/A                                pass=True accepted=True attempts=1 wall=59.5s
+2026-11-27T06:14:23Z  cc_1575E/r2/C                                pass=True accepted=True attempts=1 wall=64.3s
+2026-11-27T06:14:23Z  cc_1575E/r2/A                                pass=True accepted=True attempts=1 wall=332.4s
+2026-11-27T06:14:23Z  cc_1552I/r1/R                                pass=True accepted=True attempts=1 wall=81.4s
+2026-11-27T06:14:23Z  cc_1552I/r1/B                                pass=True accepted=True attempts=1 wall=71.2s
+2026-11-27T06:14:23Z  cc_1599A/r2/B                                pass=True accepted=True attempts=1 wall=164.3s
+2026-11-27T06:14:23Z  cc_1599A/r2/C                                pass=True accepted=True attempts=1 wall=205.4s
+2026-11-27T06:14:23Z  cc_1613F/r2/R                                pass=True accepted=True attempts=1 wall=105.8s
+2026-11-27T06:14:23Z  cc_1613F/r2/B                                pass=True accepted=True attempts=1 wall=48.4s
+2026-11-27T06:14:23Z  cc_1599A/r1/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:14:23Z  cc_1599A/r1/B                                pass=True accepted=True attempts=1 wall=92.4s
+2026-11-27T06:14:23Z  cc_1599A/r1/C                                pass=True accepted=True attempts=1 wall=160.6s
+2026-11-27T06:14:23Z  cc_1599A/r1/A                                pass=True accepted=True attempts=1 wall=127.3s
+2026-11-27T06:15:20Z  cc_1613F/r2/C                                pass=True accepted=True attempts=1 wall=51.9s
+2026-11-27T06:16:21Z  cc_1613F/r2/A                                pass=True accepted=True attempts=1 wall=57.8s
+2026-11-27T06:16:25Z  cc_1608F/r2/A                                pass=True accepted=True attempts=1 wall=115.1s
+2026-11-27T06:16:27Z  cc_1599A/r2/A                                pass=True accepted=True attempts=1 wall=117.0s
+2026-11-27T06:16:45Z  cc_1575C/r2/A                                pass=True accepted=True attempts=1 wall=131.7s
+2026-11-27T06:17:00Z  cc_1575E/r2/R                                pass=True accepted=True attempts=1 wall=150.4s
+2026-11-27T06:18:37Z  cc_1572C/r2/B                                pass=True accepted=True attempts=1 wall=129.9s
+2026-11-27T06:19:10Z  cc_1572C/r2/C                                pass=True accepted=True attempts=1 wall=25.4s
+2026-11-27T06:19:42Z  cc_1575E/r2/B                                pass=True accepted=True attempts=1 wall=154.5s
+2026-11-27T06:19:47Z  cc_1558D/r2/B                                pass=True accepted=True attempts=1 wall=316.1s
+2026-11-27T06:20:09Z  cc_1608F/r2/R                                pass=True accepted=True attempts=1 wall=217.0s
+2026-11-27T06:20:12Z  cc_1569F/r2/B                                pass=True accepted=True attempts=1 wall=180.6s
+2026-11-27T06:21:47Z  cc_1608E/r2/A                                pass=True accepted=True attempts=1 wall=118.9s
+2026-11-27T06:21:49Z  cc_1572C/r2/A                                pass=True accepted=True attempts=1 wall=152.8s
+2026-11-27T06:22:10Z  cc_1569F/r2/C                                pass=True accepted=True attempts=1 wall=105.5s
+2026-11-27T06:22:24Z  cc_1572C/r2/R                                pass=True accepted=True attempts=1 wall=30.6s
+2026-11-27T06:22:32Z  cc_1558D/r2/C                                pass=False accepted=True attempts=1 wall=159.4s
+2026-11-27T06:22:59Z  cc_1599A/r2/R                                pass=True accepted=True attempts=1 wall=390.2s
+2026-11-27T06:23:11Z  cc_1599F/r2/R                                pass=True accepted=True attempts=1 wall=46.1s
+2026-11-27T06:23:30Z  cc_1608F/r2/B                                pass=True accepted=True attempts=1 wall=195.7s
+2026-11-27T06:24:12Z  cc_1558D/r2/A                                pass=False accepted=True attempts=1 wall=93.4s
+2026-11-27T06:24:12Z  cc_1599F/r2/B                                pass=True accepted=True attempts=1 wall=57.6s
+2026-11-27T06:24:21Z  cc_1599D/r2/B                                pass=True accepted=True attempts=1 wall=596.1s
+2026-11-27T06:25:16Z  cc_1608E/r2/R                                pass=True accepted=True attempts=1 wall=205.8s
+2026-11-27T06:25:16Z  cc_1558E/r2/R                                pass=True accepted=True attempts=1 wall=57.9s
+2026-11-27T06:26:07Z  cc_1599I/r2/R                                pass=True accepted=True attempts=1 wall=186.0s
+2026-11-27T06:26:20Z  cc_1582G/r2/B                                pass=True accepted=True attempts=1 wall=111.9s
+2026-11-27T06:26:24Z  cc_1558E/r2/B                                pass=True accepted=True attempts=1 wall=65.3s
+2026-11-27T06:26:51Z  cc_1569F/r2/A                                pass=True accepted=True attempts=1 wall=268.9s
+2026-11-27T06:27:00Z  cc_1599F/r2/C                                pass=True accepted=True attempts=1 wall=163.7s
+2026-11-27T06:27:09Z  cc_1558E/r2/C                                pass=True accepted=True attempts=1 wall=41.0s
+2026-11-27T06:27:09Z  cc_1567F/r2/A                                pass=True accepted=True attempts=1 wall=764.3s
+2026-11-27T06:27:56Z  cc_1567F/r2/R                                pass=True accepted=True attempts=1 wall=43.6s
+2026-11-27T06:27:59Z  cc_1558E/r2/A                                pass=True accepted=True attempts=1 wall=43.0s
+2026-11-27T06:28:35Z  cc_1569F/r2/R                                pass=True accepted=True attempts=1 wall=85.6s
+2026-11-27T06:28:42Z  cc_1608F/r2/C                                pass=True accepted=True attempts=1 wall=306.9s
+2026-11-27T06:29:04Z  cc_1599I/r2/B                                pass=True accepted=True attempts=1 wall=170.6s
+2026-11-27T06:29:06Z  cc_1608E/r2/B                                pass=True accepted=True attempts=1 wall=222.6s
+2026-11-27T06:29:11Z  cc_1599F/r2/A                                pass=True accepted=True attempts=1 wall=126.2s
+2026-11-27T06:29:24Z  cc_1620G/r3/R                                pass=True accepted=True attempts=1 wall=44.7s
+2026-11-27T06:29:41Z  cc_1603F/r2/B                                pass=True accepted=True attempts=1 wall=79.9s
+2026-11-27T06:29:56Z  cc_1582G/r2/C                                pass=True accepted=True attempts=1 wall=211.3s
+2026-11-27T06:30:15Z  cc_1620G/r3/B                                pass=True accepted=True attempts=1 wall=46.2s
+2026-11-27T06:30:55Z  cc_1603F/r2/C                                pass=True accepted=True attempts=1 wall=50.8s
+2026-11-27T06:30:59Z  cc_1572F/r3/B                                pass=True accepted=True attempts=1 wall=133.5s
+2026-11-27T06:31:01Z  cc_1608E/r2/C                                pass=True accepted=True attempts=1 wall=111.5s
+2026-11-27T06:31:02Z  cc_1620G/r3/C                                pass=True accepted=True attempts=1 wall=43.5s
+2026-11-27T06:31:31Z  cc_1575C/r3/R                                pass=True accepted=True attempts=1 wall=134.8s
+2026-11-27T06:31:50Z  cc_1582G/r2/A                                pass=True accepted=True attempts=1 wall=108.7s
+2026-11-27T06:32:09Z  cc_1620G/r3/A                                pass=True accepted=True attempts=1 wall=62.1s
+2026-11-27T06:32:22Z  cc_1599F/r3/C                                pass=True accepted=True attempts=1 wall=77.3s
+2026-11-27T06:32:24Z  cc_1603F/r2/A                                pass=True accepted=True attempts=1 wall=60.5s
+2026-11-27T06:32:49Z  cc_1599I/r2/C                                pass=True accepted=True attempts=1 wall=221.5s
+2026-11-27T06:32:59Z  cc_1572F/r3/C                                pass=True accepted=True attempts=1 wall=115.7s
+2026-11-27T06:33:26Z  cc_1599F/r3/A                                pass=True accepted=True attempts=1 wall=60.6s
+2026-11-27T06:33:32Z  cc_1603F/r2/R                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T06:33:36Z  cc_1582G/r2/R                                pass=True accepted=True attempts=1 wall=100.7s
+2026-11-27T06:34:15Z  cc_1575C/r3/B                                pass=True accepted=True attempts=1 wall=162.3s
+2026-11-27T06:34:27Z  cc_1599I/r2/A                                pass=True accepted=True attempts=1 wall=96.9s
+2026-11-27T06:34:55Z  cc_1599F/r3/R                                pass=True accepted=True attempts=1 wall=86.9s
+2026-11-27T06:35:06Z  cc_1575E/r3/A                                pass=True accepted=True attempts=1 wall=85.5s
+2026-11-27T06:35:28Z  cc_1558D/r3/R                                pass=True accepted=True attempts=1 wall=110.3s
+2026-11-27T06:36:48Z  cc_1599F/r3/B                                pass=True accepted=True attempts=1 wall=106.8s
+2026-11-27T06:37:23Z  cc_1575E/r3/R                                pass=True accepted=True attempts=1 wall=132.3s
+2026-11-27T06:37:37Z  cc_1575C/r3/C                                pass=True accepted=True attempts=1 wall=186.9s
+2026-11-27T06:37:51Z  cc_1558D/r3/B                                pass=True accepted=True attempts=1 wall=135.4s
+2026-11-27T06:39:44Z  cc_1601F/r3/R                                pass=True accepted=True attempts=1 wall=171.9s
+2026-11-27T06:40:09Z  cc_1575E/r3/B                                pass=True accepted=True attempts=1 wall=163.4s
+2026-11-27T06:40:27Z  cc_1575C/r3/A                                pass=True accepted=True attempts=1 wall=166.4s
+2026-11-27T06:41:55Z  cc_1575E/r3/C                                pass=True accepted=True attempts=1 wall=96.5s
+2026-11-27T06:42:13Z  cc_1566G/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:42:58Z  cc_1603F/r3/A                                pass=True accepted=True attempts=1 wall=125.6s
+2026-11-27T06:43:18Z  cc_1552I/r3/R                                pass=True accepted=True attempts=1 wall=81.8s
+2026-11-27T06:43:36Z  cc_1572F/r3/A                                pass=True accepted=True attempts=1 wall=632.2s
+2026-11-27T06:44:13Z  cc_1566G/r3/A                                pass=True accepted=True attempts=1 wall=117.0s
+2026-11-27T06:44:31Z  cc_1567F/r3/B                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T06:44:33Z  cc_1552I/r3/B                                pass=True accepted=True attempts=1 wall=71.6s
+2026-11-27T06:45:16Z  cc_1603F/r3/R                                pass=True accepted=True attempts=1 wall=81.1s
+2026-11-27T06:45:42Z  cc_1567F/r3/C                                pass=True accepted=True attempts=1 wall=67.6s
+2026-11-27T06:46:05Z  cc_1552I/r3/C                                pass=True accepted=True attempts=1 wall=88.8s
+2026-11-27T06:46:50Z  cc_1567F/r3/A                                pass=True accepted=True attempts=1 wall=64.6s
+2026-11-27T06:47:27Z  cc_1603F/r3/B                                pass=True accepted=True attempts=1 wall=76.0s
+2026-11-27T06:47:36Z  cc_1552I/r3/A                                pass=True accepted=True attempts=1 wall=87.2s
+2026-11-27T06:47:45Z  cc_1567F/r3/R                                pass=True accepted=True attempts=1 wall=53.0s
+2026-11-27T06:47:54Z  cc_1558D/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T06:48:47Z  cc_1603F/r3/C                                pass=True accepted=True attempts=1 wall=56.4s
+2026-11-27T06:49:13Z  cc_1572C/r3/B                                pass=True accepted=True attempts=1 wall=21.9s
+2026-11-27T06:49:30Z  cc_1575F/r3/C                                pass=True accepted=True attempts=1 wall=111.7s
+2026-11-27T06:49:38Z  cc_1572C/r3/C                                pass=True accepted=True attempts=1 wall=21.1s
+2026-11-27T06:49:51Z  cc_1601F/r3/B                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T06:50:08Z  cc_1572C/r3/A                                pass=True accepted=True attempts=1 wall=23.6s
+2026-11-27T06:50:36Z  cc_1572C/r3/R                                pass=True accepted=True attempts=1 wall=25.1s
+2026-11-27T06:51:31Z  cc_1572F/r3/R                                pass=True accepted=True attempts=1 wall=470.4s
+2026-11-27T06:51:36Z  cc_1558D/r3/A                                pass=True accepted=True attempts=1 wall=213.4s
+2026-11-27T06:51:43Z  cc_1575F/r3/A                                pass=True accepted=True attempts=1 wall=127.6s
+2026-11-27T06:52:08Z  cc_1601F/r3/C                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T06:52:14Z  cc_1553H/r3/C                                pass=True accepted=True attempts=1 wall=37.7s
+2026-11-27T06:52:39Z  cc_1613F/r3/A                                pass=True accepted=True attempts=1 wall=54.5s
+2026-11-27T06:52:51Z  cc_1575F/r3/R                                pass=True accepted=True attempts=1 wall=62.5s
+2026-11-27T06:53:01Z  cc_1553H/r3/A                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T06:53:07Z  cc_1599I/r3/A                                pass=True accepted=True attempts=1 wall=145.9s
+2026-11-27T06:53:25Z  cc_1613F/r3/R                                pass=True accepted=True attempts=1 wall=43.1s
+2026-11-27T06:53:58Z  cc_1599A/r3/R                                pass=False accepted=True attempts=1 wall=370.7s
+2026-11-27T06:54:01Z  cc_1575F/r3/B                                pass=True accepted=True attempts=1 wall=66.8s
+2026-11-27T06:54:12Z  cc_1553H/r3/R                                pass=True accepted=True attempts=1 wall=65.4s
+2026-11-27T06:54:15Z  cc_1566G/r3/R                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T06:54:15Z  cc_1613F/r3/B                                pass=True accepted=True attempts=1 wall=43.6s
+2026-11-27T06:54:28Z  cc_1601F/r3/A                                pass=True accepted=True attempts=1 wall=138.3s
+2026-11-27T06:54:30Z  cc_1599E/r3/C                                pass=True accepted=True attempts=1 wall=27.7s
+2026-11-27T06:54:48Z  cc_1553H/r3/B                                pass=True accepted=True attempts=1 wall=32.4s
+2026-11-27T06:54:57Z  cc_1613F/r3/C                                pass=True accepted=True attempts=1 wall=36.7s
+2026-11-27T06:55:07Z  cc_1599I/r3/R                                pass=True accepted=True attempts=1 wall=117.0s
+2026-11-27T06:55:21Z  cc_1580E/r2/B                                pass=True accepted=True attempts=3 wall=1631.8s
+2026-11-27T06:55:54Z  cc_1580B/r3/B                                pass=True accepted=True attempts=1 wall=75.8s
+2026-11-27T06:56:57Z  cc_1599A/r3/B                                pass=True accepted=True attempts=1 wall=177.3s
+2026-11-27T06:57:09Z  cc_1608F/r3/B                                pass=True accepted=True attempts=1 wall=128.4s
+2026-11-27T06:57:31Z  cc_1580B/r3/C                                pass=True accepted=True attempts=1 wall=90.5s
+2026-11-27T06:57:57Z  cc_1566G/r3/B                                pass=True accepted=True attempts=1 wall=220.7s
+2026-11-27T06:58:11Z  cc_1599I/r3/B                                pass=True accepted=True attempts=1 wall=179.7s
+2026-11-27T06:58:52Z  cc_1558E/r3/R                                pass=True accepted=True attempts=1 wall=51.3s
+2026-11-27T06:58:59Z  cc_1580B/r3/A                                pass=True accepted=True attempts=1 wall=82.7s
+2026-11-27T06:59:19Z  cc_1599A/r3/C                                pass=True accepted=True attempts=1 wall=141.2s
+2026-11-27T06:59:43Z  cc_1558E/r3/B                                pass=True accepted=True attempts=1 wall=47.3s
+2026-11-27T07:00:27Z  cc_1580B/r3/R                                pass=True accepted=True attempts=1 wall=81.0s
+2026-11-27T07:00:41Z  cc_1558E/r3/C                                pass=True accepted=True attempts=1 wall=54.2s
+2026-11-27T07:01:06Z  cc_1599I/r3/C                                pass=True accepted=True attempts=1 wall=170.4s
+2026-11-27T07:01:14Z  cc_1608G/r3/C                                pass=True accepted=True attempts=1 wall=43.9s
+2026-11-27T07:01:24Z  cc_1558E/r3/A                                pass=True accepted=True attempts=1 wall=36.8s
+2026-11-27T07:02:38Z  cc_1599A/r3/A                                pass=False accepted=False attempts=1 wall=195.5s
+2026-11-27T07:02:54Z  cc_1555F/r3/C                                pass=True accepted=True attempts=1 wall=101.6s
+2026-11-27T07:03:13Z  cc_1548C/r3/R                                pass=True accepted=True attempts=1 wall=29.3s
+2026-11-27T07:03:49Z  cc_1548C/r3/B                                pass=True accepted=True attempts=1 wall=28.9s
+2026-11-27T07:04:23Z  cc_1548C/r3/C                                pass=True accepted=True attempts=1 wall=27.5s
+2026-11-27T07:04:54Z  cc_1599D/r3/B                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T07:04:58Z  cc_1548C/r3/A                                pass=True accepted=True attempts=1 wall=29.6s
+2026-11-27T07:05:07Z  cc_1555F/r3/A                                pass=True accepted=True attempts=1 wall=129.7s
+2026-11-27T07:05:35Z  cc_1608G/r3/A                                pass=True accepted=True attempts=1 wall=255.5s
+2026-11-27T07:06:13Z  cc_1608F/r3/C                                pass=True accepted=True attempts=1 wall=540.5s
+2026-11-27T07:07:21Z  cc_1599E/r3/A                                pass=True accepted=True attempts=1 wall=767.8s
+2026-11-27T07:07:28Z  cc_1555F/r3/R                                pass=True accepted=True attempts=1 wall=137.0s
+2026-11-27T07:07:44Z  cc_1580E/r2/C                                pass=True accepted=True attempts=3 wall=738.1s
+2026-11-27T07:08:00Z  cc_1608G/r3/R                                pass=True accepted=True attempts=1 wall=140.6s
+2026-11-27T07:08:42Z  cc_1608G/r3/B                                pass=True accepted=True attempts=1 wall=40.0s
+2026-11-27T07:08:46Z  cc_1555F/r3/B                                pass=True accepted=True attempts=1 wall=75.2s
+2026-11-27T07:08:56Z  cc_1608F/r3/A                                pass=True accepted=True attempts=1 wall=160.3s
+2026-11-27T07:09:40Z  cc_1582G/r3/C                                pass=True accepted=True attempts=1 wall=53.2s
+2026-11-27T07:10:54Z  cc_1582G/r3/A                                pass=True accepted=True attempts=1 wall=69.3s
+2026-11-27T07:11:29Z  cc_1553I/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T07:11:39Z  cc_1608F/r3/R                                pass=True accepted=True attempts=1 wall=159.5s
+2026-11-27T07:11:58Z  cc_1580E/r2/A                                pass=True accepted=True attempts=1 wall=249.0s
+2026-11-27T07:12:00Z  cc_1582G/r3/R                                pass=True accepted=True attempts=1 wall=59.2s
+2026-11-27T07:13:37Z  cc_1580F/r3/A                                pass=True accepted=True attempts=1 wall=243.4s
+2026-11-27T07:14:51Z  cc_1553I/r3/A                                pass=True accepted=True attempts=1 wall=198.0s
+2026-11-27T07:15:00Z  cc_1599D/r3/C                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T07:15:30Z  cc_1601E/r3/B                                pass=True accepted=True attempts=1 wall=226.0s
+2026-11-27T07:15:34Z  cc_1582G/r3/B                                pass=True accepted=True attempts=1 wall=207.0s
+2026-11-27T07:16:03Z  cc_1580E/r2/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T07:16:17Z  cc_1580F/r3/R                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T07:16:20Z  cc_1580D/r3/R 第 1 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T07:16:20Z  cc_1580E/r3/R 第 2 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T07:16:34Z  cc_1580E/r2/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:16:51Z  cc_1580E/r3/R 第 2 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:16:52Z  cc_1580D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:17:25Z  cc_1599E/r3/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T07:17:26Z  cc_1599E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:17:34Z  cc_1601E/r3/C 第 1 次嘗試是基礎設施失敗（model_died_mid_run），不算嘗試（1/4）
+2026-11-27T07:17:35Z  cc_1580E/r2/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:17:51Z  cc_1553I/r3/R 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T07:17:52Z  cc_1580E/r3/R 第 2 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:17:53Z  cc_1580D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:17:58Z  cc_1599E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:18:06Z  cc_1601E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:18:18Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T07:18:22Z  cc_1553I/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:18:50Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（infra_marker），不算嘗試（1/4）
+2026-11-27T07:18:50Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:18:59Z  cc_1599E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:19:07Z  cc_1601E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:19:21Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:19:23Z  cc_1553I/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:19:37Z  cc_1580E/r2/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:19:37Z  cc_1580E/r2/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:19:38Z  cc_1552G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:19:51Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:19:54Z  cc_1580E/r3/R 第 2 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:19:54Z  cc_1580E/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:19:54Z  cc_1580D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:19:54Z  cc_1580D/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:19:55Z  cc_1580E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:19:55Z  cc_1580D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:20:09Z  cc_1552G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:20:22Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:20:26Z  cc_1580E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:20:27Z  cc_1580D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:21:00Z  cc_1599E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:21:00Z  cc_1599E/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:21:01Z  cc_1569F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:21:08Z  cc_1601E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:21:08Z  cc_1601E/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:21:09Z  cc_1601E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:21:10Z  cc_1552G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:21:24Z  cc_1553I/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:21:24Z  cc_1553I/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:21:26Z  cc_1553I/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:21:28Z  cc_1580E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:21:28Z  cc_1580D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:21:33Z  cc_1569F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:21:40Z  cc_1601E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:21:52Z  cc_1599D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:21:52Z  cc_1599D/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:21:53Z  cc_1599D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:21:57Z  cc_1553I/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:22:23Z  cc_1580F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:22:23Z  cc_1580F/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:22:25Z  cc_1599D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:22:25Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:22:34Z  cc_1569F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:22:42Z  cc_1601E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:22:56Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:22:58Z  cc_1553I/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:23:11Z  cc_1552G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:23:11Z  cc_1552G/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:23:13Z  cc_1552G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:23:26Z  cc_1599D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:23:29Z  cc_1580E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:23:29Z  cc_1580E/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:23:29Z  cc_1580D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:23:29Z  cc_1580D/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:23:30Z  cc_1580E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:23:30Z  cc_1580D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:23:44Z  cc_1552G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:23:57Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:24:01Z  cc_1580E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:24:02Z  cc_1580D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:24:35Z  cc_1569F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:24:35Z  cc_1569F/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:24:37Z  cc_1569F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:24:43Z  cc_1601E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:24:43Z  cc_1601E/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:24:44Z  cc_1601E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:24:45Z  cc_1552G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:24:59Z  cc_1553I/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:24:59Z  cc_1553I/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:25:01Z  cc_1603E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:25:03Z  cc_1580E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:25:03Z  cc_1580D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:25:08Z  cc_1569F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:25:16Z  cc_1601E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:25:27Z  cc_1599D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:25:27Z  cc_1599D/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:25:29Z  cc_1586G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:25:32Z  cc_1603E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:25:59Z  cc_1580F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:25:59Z  cc_1580F/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:26:00Z  cc_1586G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:26:00Z  cc_1603D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:26:09Z  cc_1569F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:26:17Z  cc_1601E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:26:31Z  cc_1603D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:26:33Z  cc_1603E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:26:47Z  cc_1552G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:26:47Z  cc_1552G/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:26:48Z  cc_1552G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:27:01Z  cc_1586G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:27:04Z  cc_1580E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:27:04Z  cc_1580E/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:27:04Z  cc_1580D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:27:04Z  cc_1580D/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:27:05Z  cc_1580E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:27:06Z  cc_1580D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:27:19Z  cc_1552G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:27:33Z  cc_1603D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:27:36Z  cc_1580E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:27:37Z  cc_1580D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:28:11Z  cc_1569F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:28:11Z  cc_1569F/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:28:12Z  cc_1569F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:28:18Z  cc_1601E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:28:18Z  cc_1601E/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:28:19Z  cc_1608E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:28:21Z  cc_1552G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:28:35Z  cc_1603E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:28:35Z  cc_1603E/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:28:36Z  cc_1603E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:28:38Z  cc_1580E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:28:38Z  cc_1580D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:28:44Z  cc_1569F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:28:51Z  cc_1608E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:29:02Z  cc_1586G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:29:02Z  cc_1586G/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:29:03Z  cc_1586G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:29:07Z  cc_1603E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:29:34Z  cc_1603D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:29:34Z  cc_1603D/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:29:35Z  cc_1586G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:29:35Z  cc_1603D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:29:45Z  cc_1569F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:29:52Z  cc_1608E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:30:07Z  cc_1603D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:30:08Z  cc_1603E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:30:22Z  cc_1552G/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:30:22Z  cc_1552G/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:30:23Z  cc_1552G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:30:36Z  cc_1586G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:30:39Z  cc_1580E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:30:39Z  cc_1580E/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:30:39Z  cc_1580D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:30:39Z  cc_1580D/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:30:40Z  cc_1572D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:30:41Z  cc_1574F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:30:55Z  cc_1552G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:31:08Z  cc_1603D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:31:11Z  cc_1572D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:31:12Z  cc_1574F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:31:46Z  cc_1569F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:31:46Z  cc_1569F/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:31:47Z  cc_1569F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:31:53Z  cc_1608E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:31:53Z  cc_1608E/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:31:54Z  cc_1608E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:31:56Z  cc_1552G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:32:10Z  cc_1603E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:32:10Z  cc_1603E/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:32:11Z  cc_1603E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:32:13Z  cc_1572D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:32:13Z  cc_1574F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:32:19Z  cc_1569F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:32:26Z  cc_1608E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:32:37Z  cc_1586G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:32:37Z  cc_1586G/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:32:38Z  cc_1586G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:32:42Z  cc_1603E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:33:09Z  cc_1603D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:33:09Z  cc_1603D/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:33:10Z  cc_1586G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:33:10Z  cc_1603D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:33:20Z  cc_1569F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:33:27Z  cc_1608E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:33:41Z  cc_1603D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:33:43Z  cc_1603E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:33:57Z  cc_1552G/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:33:57Z  cc_1552G/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:34:11Z  cc_1586G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:34:14Z  cc_1572D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:34:14Z  cc_1572D/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:34:14Z  cc_1574F/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:34:14Z  cc_1574F/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:34:15Z  cc_1572D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:34:16Z  cc_1574F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:34:43Z  cc_1603D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:34:46Z  cc_1572D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:34:47Z  cc_1574F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:35:21Z  cc_1569F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:35:21Z  cc_1569F/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:35:28Z  cc_1608E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:35:28Z  cc_1608E/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:35:29Z  cc_1608E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:35:45Z  cc_1603E/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:35:45Z  cc_1603E/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:35:46Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:35:47Z  cc_1572D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:35:48Z  cc_1574F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:36:00Z  cc_1608E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:36:12Z  cc_1586G/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:36:12Z  cc_1586G/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:36:13Z  cc_1586G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:36:17Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:36:44Z  cc_1603D/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:36:44Z  cc_1603D/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:36:45Z  cc_1586G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:36:45Z  cc_1603D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:37:01Z  cc_1608E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:37:16Z  cc_1603D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:37:18Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:37:46Z  cc_1586G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:37:49Z  cc_1572D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:37:49Z  cc_1572D/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:37:49Z  cc_1574F/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:37:49Z  cc_1574F/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:37:50Z  cc_1572D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:37:50Z  cc_1574F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:38:17Z  cc_1603D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:38:21Z  cc_1572D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:38:21Z  cc_1574F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:39:03Z  cc_1608E/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:39:03Z  cc_1608E/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:39:04Z  cc_1608E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:39:19Z  cc_1603E/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:39:19Z  cc_1603E/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:39:22Z  cc_1572D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:39:23Z  cc_1574F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:39:35Z  cc_1608E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:39:47Z  cc_1586G/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:39:47Z  cc_1586G/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:40:19Z  cc_1603D/r3/C 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:40:19Z  cc_1603D/r3/C                                infra_void=void×4:no_model_calls
+2026-11-27T07:40:36Z  cc_1608E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:41:24Z  cc_1572D/r3/A 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:41:24Z  cc_1572D/r3/A                                infra_void=void×4:no_model_calls
+2026-11-27T07:41:24Z  cc_1574F/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:41:24Z  cc_1574F/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:41:25Z  cc_1572D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:41:25Z  cc_1574F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（1/4）
+2026-11-27T07:41:56Z  cc_1574F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:41:56Z  cc_1572D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（2/4）
+2026-11-27T07:42:38Z  cc_1608E/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:42:38Z  cc_1608E/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:42:57Z  cc_1574F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:42:57Z  cc_1572D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（3/4）
+2026-11-27T07:44:59Z  cc_1574F/r3/B 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:44:59Z  cc_1574F/r3/B                                infra_void=void×4:no_model_calls
+2026-11-27T07:44:59Z  cc_1572D/r3/R 第 1 次嘗試是基礎設施失敗（no_model_calls），不算嘗試（4/4）
+2026-11-27T07:44:59Z  cc_1572D/r3/R                                infra_void=void×4:no_model_calls
+2026-11-27T07:44:59Z  這一輪結束。狀態：UNRESOLVED（完成 117/117 對）
+2026-11-27T10:41:14Z  計畫 ctl_haiku_cchard_4arm（d236c169980d） 題庫 /opt/ctlwork/bm_tasks/cchard  這次要處理 117 對（全計畫 117 對）  harness d5674bfa06e2
+2026-11-27T10:41:14Z  cc_1599I/r1/A                                pass=True accepted=True attempts=1 wall=78.6s
+2026-11-27T10:41:14Z  cc_1599I/r1/R                                pass=True accepted=True attempts=1 wall=69.9s
+2026-11-27T10:41:14Z  cc_1599I/r1/B                                pass=True accepted=True attempts=1 wall=387.1s
+2026-11-27T10:41:14Z  cc_1599I/r1/C                                pass=True accepted=True attempts=1 wall=133.7s
+2026-11-27T10:41:14Z  cc_1575F/r1/B                                pass=True accepted=True attempts=1 wall=92.6s
+2026-11-27T10:41:14Z  cc_1575F/r1/C                                pass=True accepted=True attempts=1 wall=100.6s
+2026-11-27T10:41:14Z  cc_1575F/r1/A                                pass=True accepted=True attempts=1 wall=84.9s
+2026-11-27T10:41:14Z  cc_1575F/r1/R                                pass=True accepted=True attempts=1 wall=54.8s
+2026-11-27T10:41:14Z  cc_1601F/r1/B                                pass=True accepted=True attempts=1 wall=131.5s
+2026-11-27T10:41:14Z  cc_1601F/r1/C                                pass=True accepted=True attempts=1 wall=68.5s
+2026-11-27T10:41:14Z  cc_1601F/r1/A                                pass=True accepted=True attempts=1 wall=63.8s
+2026-11-27T10:41:14Z  cc_1601F/r1/R                                pass=True accepted=True attempts=1 wall=48.0s
+2026-11-27T10:41:14Z  cc_1580E/r1/R                                pass=True accepted=True attempts=2 wall=1059.5s
+2026-11-27T10:41:14Z  cc_1580E/r1/B                                pass=True accepted=True attempts=2 wall=906.2s
+2026-11-27T10:41:14Z  cc_1580E/r1/C                                pass=True accepted=True attempts=2 wall=910.3s
+2026-11-27T10:41:14Z  cc_1580E/r1/A                                pass=False accepted=False attempts=1 wall=358.1s
+2026-11-27T10:41:14Z  cc_1608G/r1/B                                pass=True accepted=True attempts=1 wall=145.1s
+2026-11-27T10:41:14Z  cc_1608G/r1/C                                pass=True accepted=True attempts=1 wall=124.4s
+2026-11-27T10:41:14Z  cc_1608G/r1/A                                pass=True accepted=True attempts=1 wall=137.3s
+2026-11-27T10:41:14Z  cc_1608G/r1/R                                pass=True accepted=True attempts=1 wall=27.6s
+2026-11-27T10:41:14Z  cc_1601E/r1/B                                pass=True accepted=True attempts=1 wall=144.5s
+2026-11-27T10:41:14Z  cc_1601E/r1/C                                pass=True accepted=True attempts=1 wall=144.1s
+2026-11-27T10:41:14Z  cc_1601E/r1/A                                pass=True accepted=True attempts=1 wall=157.3s
+2026-11-27T10:41:14Z  cc_1601E/r1/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1603E/r1/C                                pass=True accepted=True attempts=1 wall=308.1s
+2026-11-27T10:41:14Z  cc_1603E/r1/A                                pass=True accepted=True attempts=1 wall=276.8s
+2026-11-27T10:41:14Z  cc_1603E/r1/R                                pass=True accepted=True attempts=1 wall=105.6s
+2026-11-27T10:41:14Z  cc_1586G/r1/A                                pass=True accepted=True attempts=1 wall=345.4s
+2026-11-27T10:41:14Z  cc_1586G/r1/R                                pass=True accepted=True attempts=1 wall=315.6s
+2026-11-27T10:41:14Z  cc_1558E/r1/A                                pass=True accepted=True attempts=1 wall=71.1s
+2026-11-27T10:41:14Z  cc_1558E/r1/R                                pass=True accepted=True attempts=1 wall=46.9s
+2026-11-27T10:41:14Z  cc_1558E/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1603F/r1/C                                pass=True accepted=True attempts=1 wall=57.1s
+2026-11-27T10:41:14Z  cc_1603E/r1/B                                pass=True accepted=True attempts=1 wall=100.5s
+2026-11-27T10:41:14Z  cc_1608F/r1/B                                pass=True accepted=True attempts=1 wall=225.4s
+2026-11-27T10:41:14Z  cc_1608F/r1/C                                pass=True accepted=True attempts=1 wall=245.1s
+2026-11-27T10:41:14Z  cc_1608F/r1/A                                pass=True accepted=True attempts=1 wall=358.4s
+2026-11-27T10:41:14Z  cc_1608F/r1/R                                pass=True accepted=True attempts=1 wall=263.6s
+2026-11-27T10:41:14Z  cc_1580B/r1/R                                pass=True accepted=True attempts=1 wall=68.7s
+2026-11-27T10:41:14Z  cc_1558E/r1/C                                pass=True accepted=True attempts=1 wall=51.0s
+2026-11-27T10:41:14Z  cc_1603F/r1/A                                pass=True accepted=True attempts=1 wall=76.6s
+2026-11-27T10:41:14Z  cc_1586G/r1/B                                pass=True accepted=True attempts=1 wall=520.9s
+2026-11-27T10:41:14Z  cc_1572F/r1/C                                pass=True accepted=True attempts=1 wall=282.8s
+2026-11-27T10:41:14Z  cc_1552I/r1/C                                pass=True accepted=True attempts=1 wall=91.5s
+2026-11-27T10:41:14Z  cc_1603D/r1/R                                pass=True accepted=True attempts=1 wall=130.7s
+2026-11-27T10:41:14Z  cc_1603F/r1/R                                pass=True accepted=True attempts=1 wall=281.9s
+2026-11-27T10:41:14Z  cc_1586G/r1/C                                pass=True accepted=True attempts=1 wall=361.3s
+2026-11-27T10:41:14Z  cc_1572C/r1/R                                pass=True accepted=True attempts=1 wall=31.3s
+2026-11-27T10:41:14Z  cc_1572F/r1/A                                pass=True accepted=True attempts=1 wall=206.5s
+2026-11-27T10:41:14Z  cc_1553H/r1/R                                pass=True accepted=True attempts=1 wall=38.0s
+2026-11-27T10:41:14Z  cc_1580B/r1/B                                pass=True accepted=True attempts=1 wall=43.3s
+2026-11-27T10:41:14Z  cc_1552I/r1/A                                pass=True accepted=True attempts=1 wall=98.1s
+2026-11-27T10:41:14Z  cc_1552I/r1/R                                pass=True accepted=True attempts=1 wall=81.4s
+2026-11-27T10:41:14Z  cc_1552I/r1/B                                pass=True accepted=True attempts=1 wall=71.2s
+2026-11-27T10:41:14Z  cc_1553I/r1/B                                pass=True accepted=True attempts=1 wall=566.9s
+2026-11-27T10:41:14Z  cc_1553I/r1/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1553I/r1/A                                pass=True accepted=True attempts=1 wall=123.3s
+2026-11-27T10:41:14Z  cc_1553I/r1/R                                pass=True accepted=True attempts=1 wall=132.2s
+2026-11-27T10:41:14Z  cc_1599E/r1/R                                pass=True accepted=True attempts=1 wall=80.7s
+2026-11-27T10:41:14Z  cc_1599E/r1/B                                pass=True accepted=True attempts=1 wall=80.3s
+2026-11-27T10:41:14Z  cc_1599E/r1/C                                pass=True accepted=True attempts=1 wall=34.3s
+2026-11-27T10:41:14Z  cc_1599E/r1/A                                pass=True accepted=True attempts=1 wall=41.5s
+2026-11-27T10:41:14Z  cc_1608E/r1/B                                pass=True accepted=True attempts=1 wall=103.5s
+2026-11-27T10:41:14Z  cc_1608E/r1/C                                pass=True accepted=True attempts=1 wall=78.3s
+2026-11-27T10:41:14Z  cc_1608E/r1/A                                pass=True accepted=True attempts=1 wall=91.5s
+2026-11-27T10:41:14Z  cc_1608E/r1/R                                pass=True accepted=True attempts=1 wall=196.4s
+2026-11-27T10:41:14Z  cc_1613F/r1/C                                pass=True accepted=True attempts=1 wall=31.9s
+2026-11-27T10:41:14Z  cc_1613F/r1/A                                pass=True accepted=True attempts=1 wall=99.5s
+2026-11-27T10:41:14Z  cc_1553H/r1/B                                pass=True accepted=True attempts=1 wall=84.0s
+2026-11-27T10:41:14Z  cc_1603D/r1/B                                pass=True accepted=True attempts=1 wall=71.3s
+2026-11-27T10:41:14Z  cc_1572C/r1/B                                pass=True accepted=True attempts=1 wall=24.9s
+2026-11-27T10:41:14Z  cc_1603F/r1/B                                pass=True accepted=True attempts=1 wall=63.4s
+2026-11-27T10:41:14Z  cc_1572F/r1/R                                pass=True accepted=True attempts=1 wall=143.7s
+2026-11-27T10:41:14Z  cc_1580B/r1/C                                pass=True accepted=True attempts=1 wall=112.8s
+2026-11-27T10:41:14Z  cc_1580B/r1/A                                pass=True accepted=True attempts=1 wall=53.7s
+2026-11-27T10:41:14Z  cc_1569F/r1/R                                pass=True accepted=True attempts=1 wall=100.2s
+2026-11-27T10:41:14Z  cc_1569F/r1/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1569F/r1/C                                pass=True accepted=True attempts=1 wall=122.7s
+2026-11-27T10:41:14Z  cc_1613F/r1/R                                pass=True accepted=True attempts=1 wall=59.3s
+2026-11-27T10:41:14Z  cc_1603D/r1/C                                pass=True accepted=True attempts=1 wall=113.5s
+2026-11-27T10:41:14Z  cc_1548C/r1/C                                pass=True accepted=True attempts=1 wall=23.2s
+2026-11-27T10:41:14Z  cc_1567F/r1/C                                pass=True accepted=True attempts=1 wall=32.7s
+2026-11-27T10:41:14Z  cc_1553H/r1/C                                pass=True accepted=True attempts=1 wall=33.5s
+2026-11-27T10:41:14Z  cc_1572C/r1/C                                pass=True accepted=True attempts=1 wall=22.8s
+2026-11-27T10:41:14Z  cc_1572F/r1/B                                pass=True accepted=True attempts=1 wall=99.0s
+2026-11-27T10:41:14Z  cc_1613F/r1/B                                pass=True accepted=True attempts=1 wall=85.8s
+2026-11-27T10:41:14Z  cc_1580F/r1/R                                pass=True accepted=True attempts=1 wall=150.5s
+2026-11-27T10:41:14Z  cc_1580F/r1/B                                pass=True accepted=True attempts=1 wall=252.9s
+2026-11-27T10:41:14Z  cc_1580F/r1/C                                pass=True accepted=True attempts=1 wall=450.1s
+2026-11-27T10:41:14Z  cc_1580F/r1/A                                pass=True accepted=True attempts=1 wall=243.4s
+2026-11-27T10:41:14Z  cc_1569F/r1/A                                pass=True accepted=True attempts=1 wall=63.3s
+2026-11-27T10:41:14Z  cc_1603D/r1/A                                pass=True accepted=True attempts=1 wall=174.3s
+2026-11-27T10:41:14Z  cc_1548C/r1/A                                pass=True accepted=True attempts=1 wall=24.5s
+2026-11-27T10:41:14Z  cc_1553H/r1/A                                pass=True accepted=True attempts=1 wall=32.5s
+2026-11-27T10:41:14Z  cc_1572C/r1/A                                pass=True accepted=True attempts=1 wall=26.1s
+2026-11-27T10:41:14Z  cc_1572D/r1/C                                pass=True accepted=True attempts=1 wall=27.3s
+2026-11-27T10:41:14Z  cc_1567F/r1/A                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T10:41:14Z  cc_1567F/r1/R                                pass=True accepted=True attempts=1 wall=113.7s
+2026-11-27T10:41:14Z  cc_1567F/r1/B                                pass=False accepted=True attempts=1 wall=27.0s
+2026-11-27T10:41:14Z  cc_1555F/r1/C                                pass=True accepted=True attempts=1 wall=78.9s
+2026-11-27T10:41:14Z  cc_1555F/r1/A                                pass=True accepted=True attempts=1 wall=630.0s
+2026-11-27T10:41:14Z  cc_1599F/r1/R                                pass=True accepted=True attempts=1 wall=89.4s
+2026-11-27T10:41:14Z  cc_1548C/r1/R                                pass=True accepted=True attempts=1 wall=21.7s
+2026-11-27T10:41:14Z  cc_1558D/r1/C                                pass=True accepted=True attempts=2 wall=256.6s
+2026-11-27T10:41:14Z  cc_1558D/r1/A                                pass=True accepted=True attempts=1 wall=202.4s
+2026-11-27T10:41:14Z  cc_1580D/r1/R                                pass=True accepted=True attempts=1 wall=46.2s
+2026-11-27T10:41:14Z  cc_1555F/r1/R                                pass=True accepted=True attempts=1 wall=111.7s
+2026-11-27T10:41:14Z  cc_1555F/r1/B                                pass=True accepted=True attempts=1 wall=192.3s
+2026-11-27T10:41:14Z  cc_1572D/r1/A                                pass=True accepted=True attempts=1 wall=32.6s
+2026-11-27T10:41:14Z  cc_1572D/r1/R                                pass=True accepted=True attempts=1 wall=37.6s
+2026-11-27T10:41:14Z  cc_1572D/r1/B                                pass=True accepted=True attempts=1 wall=38.4s
+2026-11-27T10:41:14Z  cc_1599A/r1/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1599A/r1/B                                pass=True accepted=True attempts=1 wall=92.4s
+2026-11-27T10:41:14Z  cc_1599A/r1/C                                pass=True accepted=True attempts=1 wall=160.6s
+2026-11-27T10:41:14Z  cc_1574F/r1/B                                pass=True accepted=True attempts=1 wall=74.2s
+2026-11-27T10:41:14Z  cc_1548C/r1/B                                pass=True accepted=True attempts=1 wall=25.5s
+2026-11-27T10:41:14Z  cc_1599F/r1/B                                pass=True accepted=True attempts=1 wall=149.9s
+2026-11-27T10:41:14Z  cc_1599F/r1/C                                pass=True accepted=True attempts=1 wall=101.1s
+2026-11-27T10:41:14Z  cc_1558D/r1/R                                pass=True accepted=True attempts=1 wall=211.6s
+2026-11-27T10:41:14Z  cc_1580D/r1/B                                pass=True accepted=True attempts=1 wall=55.6s
+2026-11-27T10:41:14Z  cc_1580D/r1/C                                pass=True accepted=True attempts=1 wall=37.0s
+2026-11-27T10:41:14Z  cc_1580D/r1/A                                pass=True accepted=True attempts=1 wall=59.5s
+2026-11-27T10:41:14Z  cc_1599A/r1/A                                pass=True accepted=True attempts=1 wall=127.3s
+2026-11-27T10:41:14Z  cc_1566G/r1/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1558D/r1/B                                pass=True accepted=True attempts=3 wall=556.0s
+2026-11-27T10:41:14Z  cc_1574F/r1/C                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T10:41:14Z  cc_1620G/r1/B                                pass=True accepted=True attempts=1 wall=35.3s
+2026-11-27T10:41:14Z  cc_1582G/r1/C                                pass=True accepted=True attempts=1 wall=140.4s
+2026-11-27T10:41:14Z  cc_1566G/r1/A                                pass=True accepted=True attempts=1 wall=114.7s
+2026-11-27T10:41:14Z  cc_1599F/r1/A                                pass=True accepted=True attempts=1 wall=68.8s
+2026-11-27T10:41:14Z  cc_1599D/r1/A                                pass=False accepted=False attempts=1 wall=268.7s
+2026-11-27T10:41:14Z  cc_1599D/r1/R                                pass=True accepted=True attempts=1 wall=438.1s
+2026-11-27T10:41:14Z  cc_1575C/r1/B                                pass=True accepted=True attempts=1 wall=123.5s
+2026-11-27T10:41:14Z  cc_1575C/r1/C                                pass=True accepted=True attempts=1 wall=124.5s
+2026-11-27T10:41:14Z  cc_1575C/r1/A                                pass=False accepted=False attempts=1 wall=154.6s
+2026-11-27T10:41:14Z  cc_1552G/r1/A                                pass=True accepted=True attempts=1 wall=91.2s
+2026-11-27T10:41:14Z  cc_1574F/r1/A                                pass=True accepted=True attempts=1 wall=106.1s
+2026-11-27T10:41:14Z  cc_1620G/r1/C                                pass=True accepted=True attempts=1 wall=33.2s
+2026-11-27T10:41:14Z  cc_1575E/r1/A                                pass=True accepted=True attempts=1 wall=81.3s
+2026-11-27T10:41:14Z  cc_1582G/r1/A                                pass=True accepted=True attempts=1 wall=117.3s
+2026-11-27T10:41:14Z  cc_1582G/r1/R                                pass=True accepted=True attempts=1 wall=99.8s
+2026-11-27T10:41:14Z  cc_1566G/r1/R                                pass=True accepted=True attempts=1 wall=68.7s
+2026-11-27T10:41:14Z  cc_1575C/r1/R                                pass=True accepted=True attempts=1 wall=140.0s
+2026-11-27T10:41:14Z  cc_1599E/r2/B                                pass=True accepted=True attempts=1 wall=32.0s
+2026-11-27T10:41:14Z  cc_1599E/r2/C                                pass=True accepted=True attempts=1 wall=80.7s
+2026-11-27T10:41:14Z  cc_1599E/r2/A                                pass=True accepted=True attempts=1 wall=302.3s
+2026-11-27T10:41:14Z  cc_1599E/r2/R                                pass=True accepted=True attempts=1 wall=47.9s
+2026-11-27T10:41:14Z  cc_1599D/r1/B                                pass=True accepted=True attempts=1 wall=414.3s
+2026-11-27T10:41:14Z  cc_1552G/r1/R                                pass=True accepted=True attempts=1 wall=62.3s
+2026-11-27T10:41:14Z  cc_1566G/r1/B                                pass=True accepted=True attempts=1 wall=268.5s
+2026-11-27T10:41:14Z  cc_1599D/r1/C                                pass=True accepted=True attempts=3 wall=1004.9s
+2026-11-27T10:41:14Z  cc_1574F/r1/R                                pass=True accepted=True attempts=1 wall=83.0s
+2026-11-27T10:41:14Z  cc_1620G/r1/A                                pass=True accepted=True attempts=1 wall=40.4s
+2026-11-27T10:41:14Z  cc_1575E/r1/R                                pass=True accepted=True attempts=1 wall=137.6s
+2026-11-27T10:41:14Z  cc_1582G/r1/B                                pass=True accepted=True attempts=1 wall=100.6s
+2026-11-27T10:41:14Z  cc_1586G/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1603E/r2/R                                pass=True accepted=True attempts=1 wall=83.6s
+2026-11-27T10:41:14Z  cc_1603E/r2/B                                pass=True accepted=True attempts=2 wall=860.4s
+2026-11-27T10:41:14Z  cc_1575E/r1/B                                pass=True accepted=True attempts=1 wall=84.0s
+2026-11-27T10:41:14Z  cc_1552G/r1/B                                pass=True accepted=True attempts=1 wall=58.8s
+2026-11-27T10:41:14Z  cc_1580B/r2/R                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T10:41:14Z  cc_1599D/r2/C                                pass=True accepted=True attempts=2 wall=708.1s
+2026-11-27T10:41:14Z  cc_1586G/r2/A                                pass=True accepted=True attempts=1 wall=1085.5s
+2026-11-27T10:41:14Z  cc_1620G/r1/R                                pass=True accepted=True attempts=1 wall=38.6s
+2026-11-27T10:41:14Z  cc_1603E/r2/C                                pass=True accepted=True attempts=1 wall=196.2s
+2026-11-27T10:41:14Z  cc_1575E/r1/C                                pass=True accepted=True attempts=1 wall=296.7s
+2026-11-27T10:41:14Z  cc_1552G/r1/C                                pass=True accepted=True attempts=1 wall=132.0s
+2026-11-27T10:41:14Z  cc_1580B/r2/B                                pass=True accepted=True attempts=1 wall=154.2s
+2026-11-27T10:41:14Z  cc_1599D/r2/A                                pass=False accepted=False attempts=1 wall=425.9s
+2026-11-27T10:41:14Z  cc_1608G/r2/C                                pass=True accepted=True attempts=1 wall=159.5s
+2026-11-27T10:41:14Z  cc_1586G/r2/R                                pass=True accepted=True attempts=1 wall=316.6s
+2026-11-27T10:41:14Z  cc_1603E/r2/A                                pass=True accepted=True attempts=1 wall=1060.3s
+2026-11-27T10:41:14Z  cc_1599D/r2/R                                pass=False accepted=True attempts=2 wall=997.8s
+2026-11-27T10:41:14Z  cc_1580B/r2/C                                pass=True accepted=True attempts=1 wall=76.7s
+2026-11-27T10:41:14Z  cc_1608G/r2/A                                pass=True accepted=True attempts=1 wall=143.0s
+2026-11-27T10:41:14Z  cc_1586G/r2/B                                pass=True accepted=True attempts=1 wall=496.8s
+2026-11-27T10:41:14Z  cc_1620G/r2/C                                pass=True accepted=True attempts=1 wall=40.9s
+2026-11-27T10:41:14Z  cc_1601F/r2/C                                pass=True accepted=True attempts=1 wall=126.1s
+2026-11-27T10:41:14Z  cc_1599D/r2/B                                pass=True accepted=True attempts=1 wall=596.1s
+2026-11-27T10:41:14Z  cc_1580B/r2/A                                pass=True accepted=True attempts=1 wall=104.3s
+2026-11-27T10:41:14Z  cc_1553I/r2/C                                pass=True accepted=True attempts=1 wall=594.3s
+2026-11-27T10:41:14Z  cc_1553I/r2/A                                pass=True accepted=True attempts=1 wall=118.0s
+2026-11-27T10:41:14Z  cc_1620G/r2/A                                pass=False accepted=True attempts=1 wall=36.2s
+2026-11-27T10:41:14Z  cc_1552I/r2/B                                pass=True accepted=True attempts=1 wall=66.3s
+2026-11-27T10:41:14Z  cc_1552I/r2/C                                pass=True accepted=True attempts=1 wall=68.6s
+2026-11-27T10:41:14Z  cc_1552I/r2/A                                pass=True accepted=True attempts=1 wall=141.2s
+2026-11-27T10:41:14Z  cc_1553I/r2/R                                pass=True accepted=True attempts=1 wall=143.3s
+2026-11-27T10:41:14Z  cc_1574F/r2/B                                pass=True accepted=True attempts=1 wall=44.5s
+2026-11-27T10:41:14Z  cc_1601F/r2/A                                pass=True accepted=True attempts=1 wall=66.4s
+2026-11-27T10:41:14Z  cc_1601F/r2/R                                pass=True accepted=True attempts=1 wall=125.6s
+2026-11-27T10:41:14Z  cc_1601F/r2/B                                pass=True accepted=True attempts=1 wall=104.7s
+2026-11-27T10:41:14Z  cc_1553I/r2/B                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T10:41:14Z  cc_1620G/r2/R                                pass=True accepted=True attempts=1 wall=47.7s
+2026-11-27T10:41:14Z  cc_1552I/r2/R                                pass=True accepted=True attempts=1 wall=93.4s
+2026-11-27T10:41:14Z  cc_1574F/r2/C                                pass=True accepted=True attempts=1 wall=72.9s
+2026-11-27T10:41:14Z  cc_1574F/r2/A                                pass=True accepted=True attempts=1 wall=172.5s
+2026-11-27T10:41:14Z  cc_1574F/r2/R                                pass=True accepted=True attempts=1 wall=77.8s
+2026-11-27T10:41:14Z  cc_1580F/r2/B                                pass=True accepted=True attempts=1 wall=496.6s
+2026-11-27T10:41:14Z  cc_1580D/r2/B                                pass=True accepted=True attempts=1 wall=51.3s
+2026-11-27T10:41:14Z  cc_1580D/r2/C                                pass=True accepted=True attempts=1 wall=61.6s
+2026-11-27T10:41:14Z  cc_1555F/r2/A                                pass=True accepted=True attempts=1 wall=855.3s
+2026-11-27T10:41:14Z  cc_1603D/r2/C                                pass=True accepted=True attempts=1 wall=162.2s
+2026-11-27T10:41:14Z  cc_1548C/r2/A                                pass=True accepted=True attempts=1 wall=740.7s
+2026-11-27T10:41:14Z  cc_1566G/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1620G/r2/B                                pass=True accepted=True attempts=1 wall=75.1s
+2026-11-27T10:41:14Z  cc_1608G/r2/R                                pass=True accepted=True attempts=1 wall=41.4s
+2026-11-27T10:41:14Z  cc_1608G/r2/B                                pass=True accepted=True attempts=1 wall=137.3s
+2026-11-27T10:41:14Z  cc_1580D/r2/A                                pass=True accepted=True attempts=1 wall=113.3s
+2026-11-27T10:41:14Z  cc_1555F/r2/R                                pass=True accepted=True attempts=1 wall=96.8s
+2026-11-27T10:41:14Z  cc_1548C/r2/R                                pass=True accepted=True attempts=1 wall=25.6s
+2026-11-27T10:41:14Z  cc_1566G/r2/A                                pass=True accepted=True attempts=1 wall=67.0s
+2026-11-27T10:41:14Z  cc_1580F/r2/C                                pass=True accepted=True attempts=1 wall=170.4s
+2026-11-27T10:41:14Z  cc_1603D/r2/A                                pass=True accepted=True attempts=1 wall=129.3s
+2026-11-27T10:41:14Z  cc_1580D/r2/R                                pass=True accepted=True attempts=1 wall=102.1s
+2026-11-27T10:41:14Z  cc_1572F/r2/B                                pass=True accepted=True attempts=1 wall=243.2s
+2026-11-27T10:41:14Z  cc_1555F/r2/B                                pass=True accepted=True attempts=1 wall=200.0s
+2026-11-27T10:41:14Z  cc_1548C/r2/B                                pass=True accepted=True attempts=1 wall=29.9s
+2026-11-27T10:41:14Z  cc_1566G/r2/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1575F/r2/C                                pass=True accepted=True attempts=1 wall=229.7s
+2026-11-27T10:41:14Z  cc_1580F/r2/A                                pass=True accepted=True attempts=1 wall=404.1s
+2026-11-27T10:41:14Z  cc_1603D/r2/R                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1555F/r2/C                                pass=True accepted=True attempts=1 wall=103.0s
+2026-11-27T10:41:14Z  cc_1572F/r2/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1548C/r2/C                                pass=True accepted=True attempts=1 wall=34.8s
+2026-11-27T10:41:14Z  cc_1566G/r2/B                                pass=True accepted=True attempts=1 wall=361.9s
+2026-11-27T10:41:14Z  cc_1575F/r2/A                                pass=True accepted=True attempts=1 wall=58.8s
+2026-11-27T10:41:14Z  cc_1575F/r2/R                                pass=True accepted=True attempts=1 wall=51.5s
+2026-11-27T10:41:14Z  cc_1575F/r2/B                                pass=True accepted=True attempts=1 wall=140.9s
+2026-11-27T10:41:14Z  cc_1601E/r2/B                                pass=True accepted=True attempts=1 wall=206.0s
+2026-11-27T10:41:14Z  cc_1580F/r2/R                                pass=True accepted=True attempts=1 wall=175.3s
+2026-11-27T10:41:14Z  cc_1603D/r2/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1572F/r2/A                                pass=True accepted=True attempts=1 wall=73.7s
+2026-11-27T10:41:14Z  cc_1572D/r2/C                                pass=True accepted=True attempts=1 wall=32.2s
+2026-11-27T10:41:14Z  cc_1575C/r2/R                                pass=True accepted=True attempts=1 wall=140.8s
+2026-11-27T10:41:14Z  cc_1575C/r2/B                                pass=True accepted=True attempts=1 wall=153.0s
+2026-11-27T10:41:14Z  cc_1553H/r2/B                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T10:41:14Z  cc_1601E/r2/C                                pass=True accepted=True attempts=1 wall=293.2s
+2026-11-27T10:41:14Z  cc_1572F/r2/R                                pass=True accepted=True attempts=1 wall=282.6s
+2026-11-27T10:41:14Z  cc_1572D/r2/A                                pass=True accepted=True attempts=1 wall=107.9s
+2026-11-27T10:41:14Z  cc_1552G/r2/C                                pass=True accepted=True attempts=1 wall=114.3s
+2026-11-27T10:41:14Z  cc_1552G/r2/A                                pass=True accepted=True attempts=1 wall=77.5s
+2026-11-27T10:41:14Z  cc_1552G/r2/R                                pass=True accepted=True attempts=1 wall=75.8s
+2026-11-27T10:41:14Z  cc_1552G/r2/B                                pass=True accepted=True attempts=1 wall=131.4s
+2026-11-27T10:41:14Z  cc_1558D/r2/R                                pass=True accepted=True attempts=2 wall=346.6s
+2026-11-27T10:41:14Z  cc_1558D/r2/B                                pass=True accepted=True attempts=1 wall=316.1s
+2026-11-27T10:41:14Z  cc_1572D/r2/R                                pass=True accepted=True attempts=1 wall=38.6s
+2026-11-27T10:41:14Z  cc_1575C/r2/C                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1567F/r2/B                                pass=True accepted=True attempts=1 wall=515.4s
+2026-11-27T10:41:14Z  cc_1553H/r2/C                                pass=True accepted=True attempts=1 wall=107.3s
+2026-11-27T10:41:14Z  cc_1601E/r2/A                                pass=True accepted=True attempts=1 wall=237.6s
+2026-11-27T10:41:14Z  cc_1575E/r2/C                                pass=True accepted=True attempts=1 wall=64.3s
+2026-11-27T10:41:14Z  cc_1558D/r2/C                                pass=False accepted=True attempts=1 wall=159.4s
+2026-11-27T10:41:14Z  cc_1572D/r2/B                                pass=True accepted=True attempts=1 wall=63.2s
+2026-11-27T10:41:14Z  cc_1575C/r2/A                                pass=True accepted=True attempts=1 wall=131.7s
+2026-11-27T10:41:14Z  cc_1553H/r2/A                                pass=True accepted=True attempts=1 wall=50.2s
+2026-11-27T10:41:14Z  cc_1599A/r2/B                                pass=True accepted=True attempts=1 wall=164.3s
+2026-11-27T10:41:14Z  cc_1601E/r2/R                                pass=True accepted=True attempts=1 wall=252.4s
+2026-11-27T10:41:14Z  cc_1575E/r2/A                                pass=True accepted=True attempts=1 wall=332.4s
+2026-11-27T10:41:14Z  cc_1575E/r2/R                                pass=True accepted=True attempts=1 wall=150.4s
+2026-11-27T10:41:14Z  cc_1567F/r2/C                                pass=True accepted=True attempts=1 wall=68.5s
+2026-11-27T10:41:14Z  cc_1567F/r2/A                                pass=True accepted=True attempts=1 wall=764.3s
+2026-11-27T10:41:14Z  cc_1553H/r2/R                                pass=True accepted=True attempts=1 wall=40.4s
+2026-11-27T10:41:14Z  cc_1558D/r2/A                                pass=False accepted=True attempts=1 wall=93.4s
+2026-11-27T10:41:14Z  cc_1575E/r2/B                                pass=True accepted=True attempts=1 wall=154.5s
+2026-11-27T10:41:14Z  cc_1613F/r2/R                                pass=True accepted=True attempts=1 wall=105.8s
+2026-11-27T10:41:14Z  cc_1613F/r2/B                                pass=True accepted=True attempts=1 wall=48.4s
+2026-11-27T10:41:14Z  cc_1599A/r2/C                                pass=True accepted=True attempts=1 wall=205.4s
+2026-11-27T10:41:14Z  cc_1599A/r2/A                                pass=True accepted=True attempts=1 wall=117.0s
+2026-11-27T10:41:14Z  cc_1608F/r2/A                                pass=True accepted=True attempts=1 wall=115.1s
+2026-11-27T10:41:14Z  cc_1608F/r2/R                                pass=True accepted=True attempts=1 wall=217.0s
+2026-11-27T10:41:14Z  cc_1608F/r2/B                                pass=True accepted=True attempts=1 wall=195.7s
+2026-11-27T10:41:14Z  cc_1608F/r2/C                                pass=True accepted=True attempts=1 wall=306.9s
+2026-11-27T10:41:14Z  cc_1567F/r2/R                                pass=True accepted=True attempts=1 wall=43.6s
+2026-11-27T10:41:14Z  cc_1572C/r2/B                                pass=True accepted=True attempts=1 wall=129.9s
+2026-11-27T10:41:14Z  cc_1572C/r2/C                                pass=True accepted=True attempts=1 wall=25.4s
+2026-11-27T10:41:14Z  cc_1569F/r2/B                                pass=True accepted=True attempts=1 wall=180.6s
+2026-11-27T10:41:14Z  cc_1608E/r2/A                                pass=True accepted=True attempts=1 wall=118.9s
+2026-11-27T10:41:14Z  cc_1613F/r2/C                                pass=True accepted=True attempts=1 wall=51.9s
+2026-11-27T10:41:14Z  cc_1599F/r2/R                                pass=True accepted=True attempts=1 wall=46.1s
+2026-11-27T10:41:14Z  cc_1599A/r2/R                                pass=True accepted=True attempts=1 wall=390.2s
+2026-11-27T10:41:14Z  cc_1572C/r2/A                                pass=True accepted=True attempts=1 wall=152.8s
+2026-11-27T10:41:14Z  cc_1569F/r2/C                                pass=True accepted=True attempts=1 wall=105.5s
+2026-11-27T10:41:14Z  cc_1608E/r2/R                                pass=True accepted=True attempts=1 wall=205.8s
+2026-11-27T10:41:14Z  cc_1558E/r2/R                                pass=True accepted=True attempts=1 wall=57.9s
+2026-11-27T10:41:14Z  cc_1599I/r2/R                                pass=True accepted=True attempts=1 wall=186.0s
+2026-11-27T10:41:14Z  cc_1613F/r2/A                                pass=True accepted=True attempts=1 wall=57.8s
+2026-11-27T10:41:14Z  cc_1599F/r2/B                                pass=True accepted=True attempts=1 wall=57.6s
+2026-11-27T10:41:14Z  cc_1572C/r2/R                                pass=True accepted=True attempts=1 wall=30.6s
+2026-11-27T10:41:14Z  cc_1603F/r2/B                                pass=True accepted=True attempts=1 wall=79.9s
+2026-11-27T10:41:14Z  cc_1558E/r2/B                                pass=True accepted=True attempts=1 wall=65.3s
+2026-11-27T10:41:14Z  cc_1558E/r2/C                                pass=True accepted=True attempts=1 wall=41.0s
+2026-11-27T10:41:14Z  cc_1603F/r2/C                                pass=True accepted=True attempts=1 wall=50.8s
+2026-11-27T10:41:14Z  cc_1608E/r2/B                                pass=True accepted=True attempts=1 wall=222.6s
+2026-11-27T10:41:14Z  cc_1582G/r2/B                                pass=True accepted=True attempts=1 wall=111.9s
+2026-11-27T10:41:14Z  cc_1569F/r2/A                                pass=True accepted=True attempts=1 wall=268.9s
+2026-11-27T10:41:14Z  cc_1599I/r2/B                                pass=True accepted=True attempts=1 wall=170.6s
+2026-11-27T10:41:14Z  cc_1599F/r2/C                                pass=True accepted=True attempts=1 wall=163.7s
+2026-11-27T10:41:14Z  cc_1603F/r2/A                                pass=True accepted=True attempts=1 wall=60.5s
+2026-11-27T10:41:14Z  cc_1558E/r2/A                                pass=True accepted=True attempts=1 wall=43.0s
+2026-11-27T10:41:14Z  cc_1580E/r2/B                                pass=True accepted=True attempts=3 wall=1631.8s
+2026-11-27T10:41:14Z  cc_1608E/r2/C                                pass=True accepted=True attempts=1 wall=111.5s
+2026-11-27T10:41:14Z  cc_1582G/r2/C                                pass=True accepted=True attempts=1 wall=211.3s
+2026-11-27T10:41:14Z  cc_1569F/r2/R                                pass=True accepted=True attempts=1 wall=85.6s
+2026-11-27T10:41:14Z  cc_1599I/r2/C                                pass=True accepted=True attempts=1 wall=221.5s
+2026-11-27T10:41:14Z  cc_1620G/r3/R                                pass=True accepted=True attempts=1 wall=44.7s
+2026-11-27T10:41:14Z  cc_1603F/r2/R                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T10:41:14Z  cc_1580E/r2/C                                pass=True accepted=True attempts=3 wall=738.1s
+2026-11-27T10:41:14Z  cc_1582G/r2/A                                pass=True accepted=True attempts=1 wall=108.7s
+2026-11-27T10:41:14Z  cc_1599F/r2/A                                pass=True accepted=True attempts=1 wall=126.2s
+2026-11-27T10:41:14Z  cc_1599I/r2/A                                pass=True accepted=True attempts=1 wall=96.9s
+2026-11-27T10:41:14Z  cc_1620G/r3/B                                pass=True accepted=True attempts=1 wall=46.2s
+2026-11-27T10:41:14Z  cc_1620G/r3/C                                pass=True accepted=True attempts=1 wall=43.5s
+2026-11-27T10:41:14Z  cc_1620G/r3/A                                pass=True accepted=True attempts=1 wall=62.1s
+2026-11-27T10:41:14Z  cc_1582G/r2/R                                pass=True accepted=True attempts=1 wall=100.7s
+2026-11-27T10:41:14Z  cc_1599F/r3/C                                pass=True accepted=True attempts=1 wall=77.3s
+2026-11-27T10:41:14Z  cc_1572F/r3/B                                pass=True accepted=True attempts=1 wall=133.5s
+2026-11-27T10:41:14Z  cc_1580E/r2/A                                pass=True accepted=True attempts=1 wall=249.0s
+2026-11-27T10:41:14Z  cc_1566G/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1575C/r3/R                                pass=True accepted=True attempts=1 wall=134.8s
+2026-11-27T10:41:14Z  cc_1558D/r3/R                                pass=True accepted=True attempts=1 wall=110.3s
+2026-11-27T10:41:14Z  cc_1599F/r3/A                                pass=True accepted=True attempts=1 wall=60.6s
+2026-11-27T10:41:14Z  cc_1575E/r3/A                                pass=True accepted=True attempts=1 wall=85.5s
+2026-11-27T10:41:14Z  cc_1572F/r3/C                                pass=True accepted=True attempts=1 wall=115.7s
+2026-11-27T10:41:14Z  cc_1567F/r3/B                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1566G/r3/A                                pass=True accepted=True attempts=1 wall=117.0s
+2026-11-27T10:41:14Z  cc_1575C/r3/B                                pass=True accepted=True attempts=1 wall=162.3s
+2026-11-27T10:41:14Z  cc_1558D/r3/B                                pass=True accepted=True attempts=1 wall=135.4s
+2026-11-27T10:41:14Z  cc_1599F/r3/R                                pass=True accepted=True attempts=1 wall=86.9s
+2026-11-27T10:41:14Z  cc_1575E/r3/R                                pass=True accepted=True attempts=1 wall=132.3s
+2026-11-27T10:41:14Z  cc_1572F/r3/A                                pass=True accepted=True attempts=1 wall=632.2s
+2026-11-27T10:41:14Z  cc_1567F/r3/C                                pass=True accepted=True attempts=1 wall=67.6s
+2026-11-27T10:41:14Z  cc_1566G/r3/R                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1575C/r3/C                                pass=True accepted=True attempts=1 wall=186.9s
+2026-11-27T10:41:14Z  cc_1558D/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1599F/r3/B                                pass=True accepted=True attempts=1 wall=106.8s
+2026-11-27T10:41:14Z  cc_1575E/r3/B                                pass=True accepted=True attempts=1 wall=163.4s
+2026-11-27T10:41:14Z  cc_1572F/r3/R                                pass=True accepted=True attempts=1 wall=470.4s
+2026-11-27T10:41:14Z  cc_1567F/r3/A                                pass=True accepted=True attempts=1 wall=64.6s
+2026-11-27T10:41:14Z  cc_1566G/r3/B                                pass=True accepted=True attempts=1 wall=220.7s
+2026-11-27T10:41:14Z  cc_1575C/r3/A                                pass=True accepted=True attempts=1 wall=166.4s
+2026-11-27T10:41:14Z  cc_1558D/r3/A                                pass=True accepted=True attempts=1 wall=213.4s
+2026-11-27T10:41:14Z  cc_1575E/r3/C                                pass=True accepted=True attempts=1 wall=96.5s
+2026-11-27T10:41:14Z  cc_1567F/r3/R                                pass=True accepted=True attempts=1 wall=53.0s
+2026-11-27T10:41:14Z  cc_1601F/r3/R                                pass=True accepted=True attempts=1 wall=171.9s
+2026-11-27T10:41:14Z  cc_1603F/r3/A                                pass=True accepted=True attempts=1 wall=125.6s
+2026-11-27T10:41:14Z  cc_1575F/r3/C                                pass=True accepted=True attempts=1 wall=111.7s
+2026-11-27T10:41:14Z  cc_1552I/r3/R                                pass=True accepted=True attempts=1 wall=81.8s
+2026-11-27T10:41:14Z  cc_1599A/r3/R                                pass=False accepted=True attempts=1 wall=370.7s
+2026-11-27T10:41:14Z  cc_1601F/r3/B                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1603F/r3/R                                pass=True accepted=True attempts=1 wall=81.1s
+2026-11-27T10:41:14Z  cc_1599I/r3/A                                pass=True accepted=True attempts=1 wall=145.9s
+2026-11-27T10:41:14Z  cc_1572C/r3/B                                pass=True accepted=True attempts=1 wall=21.9s
+2026-11-27T10:41:14Z  cc_1552I/r3/B                                pass=True accepted=True attempts=1 wall=71.6s
+2026-11-27T10:41:14Z  cc_1575F/r3/A                                pass=True accepted=True attempts=1 wall=127.6s
+2026-11-27T10:41:14Z  cc_1601F/r3/C                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T10:41:14Z  cc_1599A/r3/B                                pass=True accepted=True attempts=1 wall=177.3s
+2026-11-27T10:41:14Z  cc_1603F/r3/B                                pass=True accepted=True attempts=1 wall=76.0s
+2026-11-27T10:41:14Z  cc_1599I/r3/R                                pass=True accepted=True attempts=1 wall=117.0s
+2026-11-27T10:41:14Z  cc_1572C/r3/C                                pass=True accepted=True attempts=1 wall=21.1s
+2026-11-27T10:41:14Z  cc_1552I/r3/C                                pass=True accepted=True attempts=1 wall=88.8s
+2026-11-27T10:41:14Z  cc_1575F/r3/R                                pass=True accepted=True attempts=1 wall=62.5s
+2026-11-27T10:41:14Z  cc_1601F/r3/A                                pass=True accepted=True attempts=1 wall=138.3s
+2026-11-27T10:41:14Z  cc_1599A/r3/C                                pass=True accepted=True attempts=1 wall=141.2s
+2026-11-27T10:41:14Z  cc_1603F/r3/C                                pass=True accepted=True attempts=1 wall=56.4s
+2026-11-27T10:41:14Z  cc_1599I/r3/B                                pass=True accepted=True attempts=1 wall=179.7s
+2026-11-27T10:41:14Z  cc_1572C/r3/A                                pass=True accepted=True attempts=1 wall=23.6s
+2026-11-27T10:41:14Z  cc_1572C/r3/R                                pass=True accepted=True attempts=1 wall=25.1s
+2026-11-27T10:41:14Z  cc_1552I/r3/A                                pass=True accepted=True attempts=1 wall=87.2s
+2026-11-27T10:41:14Z  cc_1575F/r3/B                                pass=True accepted=True attempts=1 wall=66.8s
+2026-11-27T10:41:14Z  cc_1599A/r3/A                                pass=False accepted=False attempts=1 wall=195.5s
+2026-11-27T10:41:14Z  cc_1613F/r3/A                                pass=True accepted=True attempts=1 wall=54.5s
+2026-11-27T10:41:14Z  cc_1599D/r3/B                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1599D/r3/C                                pass=True accepted=True attempts=1 wall=600.1s
+2026-11-27T10:41:14Z  cc_1599I/r3/C                                pass=True accepted=True attempts=1 wall=170.4s
+2026-11-27T10:41:14Z  cc_1599E/r3/C                                pass=True accepted=True attempts=1 wall=27.7s
+2026-11-27T10:41:14Z  cc_1580B/r3/B                                pass=True accepted=True attempts=1 wall=75.8s
+2026-11-27T10:41:14Z  cc_1613F/r3/R                                pass=True accepted=True attempts=1 wall=43.1s
+2026-11-27T10:41:14Z  cc_1553H/r3/C                                pass=True accepted=True attempts=1 wall=37.7s
+2026-11-27T10:41:14Z  cc_1553H/r3/A                                pass=True accepted=True attempts=1 wall=42.5s
+2026-11-27T10:41:14Z  cc_1558E/r3/R                                pass=True accepted=True attempts=1 wall=51.3s
+2026-11-27T10:41:14Z  cc_1580B/r3/C                                pass=True accepted=True attempts=1 wall=90.5s
+2026-11-27T10:41:14Z  cc_1608F/r3/B                                pass=True accepted=True attempts=1 wall=128.4s
+2026-11-27T10:41:14Z  cc_1608F/r3/C                                pass=True accepted=True attempts=1 wall=540.5s
+2026-11-27T10:41:14Z  cc_1599E/r3/A                                pass=True accepted=True attempts=1 wall=767.8s
+2026-11-27T10:41:14Z  cc_1599E/r3/R                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1558E/r3/B                                pass=True accepted=True attempts=1 wall=47.3s
+2026-11-27T10:41:14Z  cc_1613F/r3/B                                pass=True accepted=True attempts=1 wall=43.6s
+2026-11-27T10:41:14Z  cc_1553H/r3/R                                pass=True accepted=True attempts=1 wall=65.4s
+2026-11-27T10:41:14Z  cc_1558E/r3/C                                pass=True accepted=True attempts=1 wall=54.2s
+2026-11-27T10:41:14Z  cc_1608F/r3/A                                pass=True accepted=True attempts=1 wall=160.3s
+2026-11-27T10:41:14Z  cc_1608F/r3/R                                pass=True accepted=True attempts=1 wall=159.5s
+2026-11-27T10:41:14Z  cc_1580B/r3/A                                pass=True accepted=True attempts=1 wall=82.7s
+2026-11-27T10:41:14Z  cc_1580B/r3/R                                pass=True accepted=True attempts=1 wall=81.0s
+2026-11-27T10:41:14Z  cc_1613F/r3/C                                pass=True accepted=True attempts=1 wall=36.7s
+2026-11-27T10:41:14Z  cc_1558E/r3/A                                pass=True accepted=True attempts=1 wall=36.8s
+2026-11-27T10:41:14Z  cc_1553H/r3/B                                pass=True accepted=True attempts=1 wall=32.4s
+2026-11-27T10:41:14Z  cc_1553I/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:41:14Z  cc_1608G/r3/C                                pass=True accepted=True attempts=1 wall=43.9s
+2026-11-27T10:41:14Z  cc_1555F/r3/C                                pass=True accepted=True attempts=1 wall=101.6s
+2026-11-27T10:41:14Z  cc_1553I/r3/A                                pass=True accepted=True attempts=1 wall=198.0s
+2026-11-27T10:41:14Z  cc_1608G/r3/A                                pass=True accepted=True attempts=1 wall=255.5s
+2026-11-27T10:41:14Z  cc_1548C/r3/R                                pass=True accepted=True attempts=1 wall=29.3s
+2026-11-27T10:41:14Z  cc_1555F/r3/A                                pass=True accepted=True attempts=1 wall=129.7s
+2026-11-27T10:41:14Z  cc_1608G/r3/R                                pass=True accepted=True attempts=1 wall=140.6s
+2026-11-27T10:41:14Z  cc_1548C/r3/B                                pass=True accepted=True attempts=1 wall=28.9s
+2026-11-27T10:41:14Z  cc_1555F/r3/R                                pass=True accepted=True attempts=1 wall=137.0s
+2026-11-27T10:41:14Z  cc_1608G/r3/B                                pass=True accepted=True attempts=1 wall=40.0s
+2026-11-27T10:41:14Z  cc_1555F/r3/B                                pass=True accepted=True attempts=1 wall=75.2s
+2026-11-27T10:41:14Z  cc_1548C/r3/C                                pass=True accepted=True attempts=1 wall=27.5s
+2026-11-27T10:41:14Z  cc_1548C/r3/A                                pass=True accepted=True attempts=1 wall=29.6s
+2026-11-27T10:41:14Z  cc_1601E/r3/B                                pass=True accepted=True attempts=1 wall=226.0s
+2026-11-27T10:41:14Z  cc_1580F/r3/A                                pass=True accepted=True attempts=1 wall=243.4s
+2026-11-27T10:41:14Z  cc_1582G/r3/C                                pass=True accepted=True attempts=1 wall=53.2s
+2026-11-27T10:41:14Z  cc_1582G/r3/A                                pass=True accepted=True attempts=1 wall=69.3s
+2026-11-27T10:41:14Z  cc_1582G/r3/R                                pass=True accepted=True attempts=1 wall=59.2s
+2026-11-27T10:41:14Z  cc_1582G/r3/B                                pass=True accepted=True attempts=1 wall=207.0s
+2026-11-27T10:41:14Z  cc_1580F/r3/R                                pass=True accepted=True attempts=1 wall=130.8s
+2026-11-27T10:42:09Z  cc_1580D/r3/R                                pass=True accepted=True attempts=1 wall=51.0s
+2026-11-27T10:42:57Z  cc_1601E/r3/C                                pass=True accepted=True attempts=1 wall=98.1s
+2026-11-27T10:43:35Z  cc_1580D/r3/B                                pass=True accepted=True attempts=1 wall=82.6s
+2026-11-27T10:44:02Z  cc_1553I/r3/R                                pass=True accepted=True attempts=1 wall=163.3s
+2026-11-27T10:44:18Z  cc_1580D/r3/C                                pass=True accepted=True attempts=1 wall=39.2s
+2026-11-27T10:44:21Z  cc_1599E/r3/B                                pass=True accepted=True attempts=1 wall=182.7s
+2026-11-27T10:44:44Z  cc_1580F/r3/B                                pass=True accepted=True attempts=1 wall=164.8s
+2026-11-27T10:45:03Z  cc_1580D/r3/A                                pass=True accepted=True attempts=1 wall=42.4s
+2026-11-27T10:45:36Z  cc_1552G/r3/A                                pass=True accepted=True attempts=1 wall=69.4s
+2026-11-27T10:46:05Z  cc_1601E/r3/A                                pass=True accepted=True attempts=1 wall=184.3s
+2026-11-27T10:46:33Z  cc_1569F/r3/R                                pass=True accepted=True attempts=1 wall=77.4s
+2026-11-27T10:47:21Z  cc_1580E/r2/R                                pass=True accepted=True attempts=1 wall=362.3s
+2026-11-27T10:47:31Z  cc_1552G/r3/R                                pass=True accepted=True attempts=1 wall=111.4s
+2026-11-27T10:48:15Z  cc_1569F/r3/B                                pass=True accepted=True attempts=1 wall=82.8s
+2026-11-27T10:48:55Z  cc_1552G/r3/B                                pass=True accepted=True attempts=1 wall=78.1s
+2026-11-27T10:48:57Z  cc_1580F/r3/C                                pass=True accepted=True attempts=1 wall=229.6s
+2026-11-27T10:49:40Z  cc_1601E/r3/R                                pass=True accepted=True attempts=1 wall=210.8s
+2026-11-27T10:50:20Z  cc_1603E/r3/A                                pass=True accepted=True attempts=1 wall=146.6s
+2026-11-27T10:50:25Z  cc_1603D/r3/A                                pass=True accepted=True attempts=1 wall=41.9s
+2026-11-27T10:50:39Z  cc_1552G/r3/C                                pass=True accepted=True attempts=1 wall=100.7s
+2026-11-27T10:53:11Z  cc_1603D/r3/R                                pass=True accepted=True attempts=1 wall=159.4s
+2026-11-27T10:54:05Z  cc_1553I/r3/B                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:54:37Z  cc_1603D/r3/B                                pass=True accepted=True attempts=1 wall=82.7s
+2026-11-27T10:54:47Z  cc_1572D/r3/B                                pass=True accepted=True attempts=1 wall=36.8s
+2026-11-27T10:55:41Z  cc_1608E/r3/B                                pass=True accepted=True attempts=1 wall=273.0s
+2026-11-27T10:55:43Z  cc_1572D/r3/C                                pass=True accepted=True attempts=1 wall=50.5s
+2026-11-27T10:56:18Z  cc_1603E/r3/R                                pass=True accepted=True attempts=1 wall=353.1s
+2026-11-27T10:56:22Z  cc_1572D/r3/A                                pass=True accepted=True attempts=1 wall=34.1s
+2026-11-27T10:56:24Z  cc_1580E/r3/R                                pass=True accepted=True attempts=2 wall=902.5s
+2026-11-27T10:56:47Z  cc_1603D/r3/C                                pass=True accepted=True attempts=1 wall=125.2s
+2026-11-27T10:56:56Z  cc_1586G/r3/B                                pass=True accepted=True attempts=1 wall=478.2s
+2026-11-27T10:57:01Z  cc_1608E/r3/C                                pass=True accepted=True attempts=1 wall=75.9s
+2026-11-27T10:57:32Z  cc_1572D/r3/R                                pass=True accepted=True attempts=1 wall=63.8s
+2026-11-27T10:58:45Z  cc_1569F/r3/C                                pass=True accepted=True attempts=1 wall=600.0s
+2026-11-27T10:58:49Z  cc_1574F/r3/C                                pass=True accepted=True attempts=1 wall=118.5s
+2026-11-27T10:58:53Z  cc_1603E/r3/B                                pass=True accepted=True attempts=1 wall=148.8s
+2026-11-27T11:00:26Z  cc_1569F/r3/A                                pass=True accepted=True attempts=1 wall=89.3s
+2026-11-27T11:00:30Z  cc_1574F/r3/A                                pass=True accepted=True attempts=1 wall=97.1s
+2026-11-27T11:00:38Z  cc_1599D/r3/A                                pass=False accepted=True attempts=1 wall=1159.3s
+2026-11-27T11:01:30Z  cc_1603E/r3/C                                pass=True accepted=True attempts=1 wall=131.4s
+2026-11-27T11:01:39Z  cc_1574F/r3/R                                pass=True accepted=True attempts=1 wall=65.1s
+2026-11-27T11:02:58Z  cc_1574F/r3/B                                pass=True accepted=True attempts=1 wall=75.6s
+2026-11-27T11:05:59Z  cc_1586G/r3/C                                pass=True accepted=True attempts=1 wall=541.3s
+2026-11-27T11:10:41Z  cc_1586G/r3/A                                pass=True accepted=True attempts=1 wall=280.3s
+2026-11-27T11:10:43Z  cc_1599D/r3/R                                pass=False accepted=True attempts=1 wall=600.0s
+2026-11-27T11:11:20Z  cc_1608E/r3/A                                pass=True accepted=True attempts=1 wall=857.5s
+2026-11-27T11:12:31Z  cc_1580E/r3/B                                pass=True accepted=True attempts=2 wall=963.3s
+2026-11-27T11:14:18Z  cc_1608E/r3/R                                pass=True accepted=True attempts=1 wall=176.3s
+2026-11-27T11:17:25Z  cc_1580E/r3/C                                pass=True accepted=True attempts=1 wall=292.2s
+2026-11-27T11:18:34Z  cc_1586G/r3/R                                pass=True accepted=True attempts=1 wall=471.6s
+2026-11-27T11:23:10Z  cc_1580E/r3/A                                pass=True accepted=True attempts=1 wall=341.0s
+2026-11-27T11:23:10Z  這一輪結束。狀態：UNRESOLVED（完成 117/117 對）
