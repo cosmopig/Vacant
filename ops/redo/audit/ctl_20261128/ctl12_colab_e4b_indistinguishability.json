@@ -1,0 +1,20 @@
+{
+ "batch": "ctl12_colab_e4b",
+ "cond1_A_rate": [
+  6,
+  36
+ ],
+ "cond2_rbc_ge2_attempts": [
+  72,
+  108
+ ],
+ "cond3_rules": {
+  "1": 20,
+  "2": 16,
+  "3": 1,
+  "4": 10,
+  "5": 3,
+  "6": 33
+ },
+ "cond3_rules_3to6": 47
+}

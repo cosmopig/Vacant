@@ -1,0 +1,82 @@
+[
+ {
+  "arm": "A",
+  "host": "lms1003gemmaN",
+  "cells": 35,
+  "tokens": 133059056,
+  "timeouts": 17,
+  "attempts": 35,
+  "early_stop_pass_at_1": 12,
+  "tokens_per_cell": 3801687
+ },
+ {
+  "arm": "A",
+  "host": "lms1004gemmaN",
+  "cells": 33,
+  "tokens": 16348168,
+  "timeouts": 2,
+  "attempts": 33,
+  "early_stop_pass_at_1": 21,
+  "tokens_per_cell": 495399
+ },
+ {
+  "arm": "B",
+  "host": "lms1003gemmaN",
+  "cells": 35,
+  "tokens": 50711553,
+  "timeouts": 51,
+  "attempts": 74,
+  "early_stop_pass_at_1": 14,
+  "tokens_per_cell": 1448902
+ },
+ {
+  "arm": "B",
+  "host": "lms1004gemmaN",
+  "cells": 33,
+  "tokens": 25252572,
+  "timeouts": 24,
+  "attempts": 57,
+  "early_stop_pass_at_1": 18,
+  "tokens_per_cell": 765229
+ },
+ {
+  "arm": "C",
+  "host": "lms1003gemmaN",
+  "cells": 34,
+  "tokens": 42903755,
+  "timeouts": 47,
+  "attempts": 73,
+  "early_stop_pass_at_1": 12,
+  "tokens_per_cell": 1261875
+ },
+ {
+  "arm": "C",
+  "host": "lms1004gemmaN",
+  "cells": 32,
+  "tokens": 17555081,
+  "timeouts": 17,
+  "attempts": 52,
+  "early_stop_pass_at_1": 21,
+  "tokens_per_cell": 548596
+ },
+ {
+  "arm": "R",
+  "host": "lms1003gemmaN",
+  "cells": 35,
+  "tokens": 53813583,
+  "timeouts": 46,
+  "attempts": 73,
+  "early_stop_pass_at_1": 14,
+  "tokens_per_cell": 1537531
+ },
+ {
+  "arm": "R",
+  "host": "lms1004gemmaN",
+  "cells": 33,
+  "tokens": 18281887,
+  "timeouts": 17,
+  "attempts": 51,
+  "early_stop_pass_at_1": 21,
+  "tokens_per_cell": 553997
+ }
+]

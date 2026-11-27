@@ -1,0 +1,42 @@
+[
+ {
+  "arm": "A",
+  "host": "colab",
+  "cells": 36,
+  "tokens": 708591,
+  "timeouts": 0,
+  "attempts": 36,
+  "early_stop_pass_at_1": 14,
+  "tokens_per_cell": 19683
+ },
+ {
+  "arm": "B",
+  "host": "colab",
+  "cells": 36,
+  "tokens": 1822646,
+  "timeouts": 9,
+  "attempts": 72,
+  "early_stop_pass_at_1": 15,
+  "tokens_per_cell": 50629
+ },
+ {
+  "arm": "C",
+  "host": "colab",
+  "cells": 36,
+  "tokens": 2419994,
+  "timeouts": 6,
+  "attempts": 83,
+  "early_stop_pass_at_1": 8,
+  "tokens_per_cell": 67222
+ },
+ {
+  "arm": "R",
+  "host": "colab",
+  "cells": 36,
+  "tokens": 1980836,
+  "timeouts": 8,
+  "attempts": 81,
+  "early_stop_pass_at_1": 13,
+  "tokens_per_cell": 55023
+ }
+]

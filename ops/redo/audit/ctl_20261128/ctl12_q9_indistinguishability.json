@@ -1,0 +1,19 @@
+{
+ "batch": "ctl12_q9",
+ "cond1_A_rate": [
+  19,
+  36
+ ],
+ "cond2_rbc_ge2_attempts": [
+  20,
+  108
+ ],
+ "cond3_rules": {
+  "1": 31,
+  "2": 5,
+  "3": 1,
+  "4": 3,
+  "6": 7
+ },
+ "cond3_rules_3to6": 11
+}

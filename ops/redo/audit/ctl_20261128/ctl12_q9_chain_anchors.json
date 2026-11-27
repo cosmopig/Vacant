@@ -1,0 +1,254 @@
+[
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_all_your_base/r1/C",
+  "events": 1,
+  "chain_sha256": "6b7c5825b29f65e43cf7f0e47b9270fdf6e3fb091f15561c60c920cf5b22277a",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_all_your_base/r2/C",
+  "events": 1,
+  "chain_sha256": "f4dd2095101990e786dd4adba65c6d5d9178a2228cbe0af54ec2ffdc4ba80fb2",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_all_your_base/r3/C",
+  "events": 1,
+  "chain_sha256": "0834336f11d5057be4c1de7c988cb065f0f4deea52e73806e8571fe4689d5560",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_atbash_cipher/r1/C",
+  "events": 1,
+  "chain_sha256": "e008188c381b5e35f32203762015d328afa00b62bf3d88f5751ee5b15c35bb72",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_atbash_cipher/r2/C",
+  "events": 1,
+  "chain_sha256": "17b703ead05bb605d6e66c5628e0674dcf7b0d49c890a8ab606b15a5ff9c0e2c",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_atbash_cipher/r3/C",
+  "events": 1,
+  "chain_sha256": "7993f9290081c5e6c15079564502ce0b29bcb8c0e62b4760a8fa7fccab66d70b",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_bank_account/r1/C",
+  "events": 1,
+  "chain_sha256": "2889dd14687297e25624b83e86fb9e700f2889a462e8da2f7a161ce5b6331908",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_bank_account/r2/C",
+  "events": 1,
+  "chain_sha256": "dcff807155068fe623c5e8af45c2435d4e76fc961ccc4201962aa3d55f422b32",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_bank_account/r3/C",
+  "events": 1,
+  "chain_sha256": "0d179d36b96e2502c4ea43ac634588e6c45605f808d3986e99139dfc48a51e85",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_binary/r1/C",
+  "events": 1,
+  "chain_sha256": "c9c03a377e4e81f7de95840b9a95fe17a2e5a6b9dd67114e0ce8bb20b9266b39",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_binary/r2/C",
+  "events": 1,
+  "chain_sha256": "dc6067ecb6f14eebccd080f7c72f3ae6c851b92d3c91be43be30c118a082a309",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_binary/r3/C",
+  "events": 1,
+  "chain_sha256": "9610625f27388b8802a7d21c484a1a068d719f6268227d8c9a4409ccdb967281",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_camicia/r1/C",
+  "events": 3,
+  "chain_sha256": "c5f7d135d316fb68e6e4cdb6849fc5622c287b694deca702954172ac3f32a32c",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_camicia/r2/C",
+  "events": 3,
+  "chain_sha256": "b19b62213b16f29bb6a535c6e10e87c197e040d2573d6e918898c4e5cf53e09a",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_camicia/r3/C",
+  "events": 3,
+  "chain_sha256": "e59256a83ecb8a47ae2d66c4b84982d4e3a29316f759e993959c75981ceb8cd3",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_flower_field/r1/C",
+  "events": 1,
+  "chain_sha256": "9ddfc5b74ef2d7897d6af486afd1de209b133b293f1eb804f7f57126bf24777f",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_flower_field/r2/C",
+  "events": 1,
+  "chain_sha256": "5c57089aceabcda53db90e6fb73e15789d9625ed1b234c856247de243f0b9e50",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_flower_field/r3/C",
+  "events": 1,
+  "chain_sha256": "9d39804a86b4f52f2764503d58a4083b8a4f687a9de666a32777f2d50ae8e20e",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_linked_list/r1/C",
+  "events": 1,
+  "chain_sha256": "c3f66c581c0d0093f05d4e0410438456fe07c542aa265115105cb0901ea5b7ed",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_linked_list/r2/C",
+  "events": 1,
+  "chain_sha256": "36c316c8a1e46b4a46799ac665a9d915a1aed471ad27cb78b4b36231ba2eef50",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_linked_list/r3/C",
+  "events": 1,
+  "chain_sha256": "447f3834cd6faa7d7e7c5bb3b752490a2e5a71809b51f0db24d6c76906eeedbd",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_minesweeper/r1/C",
+  "events": 1,
+  "chain_sha256": "e3b274e9a953b703ee718294b5c6e1bd3da98e9d35b63ea69d8ea5bfaad9a632",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_minesweeper/r2/C",
+  "events": 1,
+  "chain_sha256": "84107adb938ded6f60235ea3389db1907a4493ded4138825b0dec3645274ed69",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_minesweeper/r3/C",
+  "events": 1,
+  "chain_sha256": "0014543b4718acdbcb2579054a189fb13540675cf7e5126faeece29a6b6e57c5",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_ocr_numbers/r1/C",
+  "events": 1,
+  "chain_sha256": "80ad05aeab00bb8a630ee9dfb7ec7563c9a99681a396c5424287bdcd67a6f66c",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_ocr_numbers/r2/C",
+  "events": 3,
+  "chain_sha256": "acfc8fa0a8e78e9985956357f7e9f99404afbfe9c1a5df30c34e6ef7ca40fc50",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_ocr_numbers/r3/C",
+  "events": 3,
+  "chain_sha256": "bc8bac643b5b822f7c4f4b2793f12bf9f84c62002e46ab22ff939dbc493fecd0",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_swift_scheduling/r1/C",
+  "events": 1,
+  "chain_sha256": "d05285f4cd7a8125467202aacb787298b9f91edd39329a2cf92b3e66483787de",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_swift_scheduling/r2/C",
+  "events": 1,
+  "chain_sha256": "5a77d43d48616ab07b30cbbaf123be34a184e5aa58265759b29d22ca67765369",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_swift_scheduling/r3/C",
+  "events": 1,
+  "chain_sha256": "9e0f2e12d2d93f0779cfb3cd3bc148805e186883344f95c6172d1b6b9b1dd222",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_tournament/r1/C",
+  "events": 2,
+  "chain_sha256": "551dc541acb96d7faf24fe57aef1782d83766f8b41a0b66a9648cfe45d7eb767",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_tournament/r2/C",
+  "events": 1,
+  "chain_sha256": "fae0c878cb309e3ff5418c9a1315b8b2b27e58e4c193100b3ca13edbf6efe577",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_tournament/r3/C",
+  "events": 1,
+  "chain_sha256": "a0f32e34793ce6e20dee3e0a26dc00bbf0fc1615e2df6f031495edeb3b475a3e",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_yacht/r1/C",
+  "events": 1,
+  "chain_sha256": "2da3b716890ce3547cb1339734adcca27bb1f5ae5deba7f5b06a4b7f551cdce8",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_yacht/r2/C",
+  "events": 1,
+  "chain_sha256": "ae5efb763052ce3a393bd695d6cf819e883e92b590fd49ba9685a33dc19c53a3",
+  "head": null
+ },
+ {
+  "batch": "ctl12_q9",
+  "cell": "ex_yacht/r3/C",
+  "events": 1,
+  "chain_sha256": "058dfd11f7d4bbbe5260ae4559befaf7ab1934692cbe771e4991159571b3b815",
+  "head": null
+ }
+]

@@ -1,0 +1,82 @@
+[
+ {
+  "arm": "A",
+  "host": "lms1003q9",
+  "cells": 16,
+  "tokens": 2522087,
+  "timeouts": 0,
+  "attempts": 16,
+  "early_stop_pass_at_1": 13,
+  "tokens_per_cell": 157630
+ },
+ {
+  "arm": "A",
+  "host": "lms1004q9",
+  "cells": 20,
+  "tokens": 5766285,
+  "timeouts": 3,
+  "attempts": 20,
+  "early_stop_pass_at_1": 14,
+  "tokens_per_cell": 288314
+ },
+ {
+  "arm": "B",
+  "host": "lms1003q9",
+  "cells": 16,
+  "tokens": 3702199,
+  "timeouts": 0,
+  "attempts": 20,
+  "early_stop_pass_at_1": 13,
+  "tokens_per_cell": 231387
+ },
+ {
+  "arm": "B",
+  "host": "lms1004q9",
+  "cells": 20,
+  "tokens": 7472364,
+  "timeouts": 8,
+  "attempts": 27,
+  "early_stop_pass_at_1": 16,
+  "tokens_per_cell": 373618
+ },
+ {
+  "arm": "C",
+  "host": "lms1003q9",
+  "cells": 16,
+  "tokens": 2741387,
+  "timeouts": 1,
+  "attempts": 18,
+  "early_stop_pass_at_1": 15,
+  "tokens_per_cell": 171337
+ },
+ {
+  "arm": "C",
+  "host": "lms1004q9",
+  "cells": 20,
+  "tokens": 5689488,
+  "timeouts": 9,
+  "attempts": 29,
+  "early_stop_pass_at_1": 15,
+  "tokens_per_cell": 284474
+ },
+ {
+  "arm": "R",
+  "host": "lms1003q9",
+  "cells": 16,
+  "tokens": 3360286,
+  "timeouts": 1,
+  "attempts": 19,
+  "early_stop_pass_at_1": 14,
+  "tokens_per_cell": 210018
+ },
+ {
+  "arm": "R",
+  "host": "lms1004q9",
+  "cells": 20,
+  "tokens": 5595409,
+  "timeouts": 8,
+  "attempts": 29,
+  "early_stop_pass_at_1": 15,
+  "tokens_per_cell": 279770
+ }
+]
