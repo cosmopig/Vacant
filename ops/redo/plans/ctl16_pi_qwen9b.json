@@ -39,6 +39,8 @@
  "attempt_timeout_s": 600,
  "agent": {
   "argv": [
+   "ops/redo/bwrap_agent.sh",
+   "{logs}",
    "pi",
    "-p",
    "--mode",
@@ -56,7 +58,7 @@
   },
   "config_dir": {
    "env": "PI_CODING_AGENT_DIR",
-   "from": "~/dev/ops/agentcfg/d2v52",
+   "from": "~/dev/ops/agentcfg/ctl",
    "copy": [
     "models.json"
    ]

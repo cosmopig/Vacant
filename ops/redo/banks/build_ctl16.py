@@ -57,12 +57,21 @@ CTL16_TASKS: list[str] = [
     "ex_prime_factors",
 ]
 
-# 4 unused pool tasks NOT in CTL16 (and not in unused/hard/polyglot), all >= 8 tests
+# 4 unused pool tasks NOT among the 18 calibration candidates (DECISION_20261127_EVIDENCE_CONTROLLER 修正 1)
+# and not in unused/hard/polyglot, >= 8 tests; rule: difficulty desc, then test count desc.
+# (ex_series was in the first draft but is a calibration candidate -> replaced.)
 SMOKE4_TASKS: list[str] = [
     "ex_matrix",
     "ex_point_mutations",
-    "ex_series",
-    "ex_rotational_cipher",
+    "ex_acronym",
+    "ex_bob",
+]
+
+# 18 calibration candidates (修正 1): difficulty >= 2 and >= 10 test methods among the 50 unused.
+CAL18_TASKS: list[str] = [
+    "ex_kindergarten_garden", "ex_ocr_numbers", "ex_circular_buffer", "ex_high_scores", "ex_simple_cipher",
+    "ex_binary", "ex_octal", "ex_yacht", "ex_luhn", "ex_sublist", "ex_say", "ex_dnd_character",
+    "ex_twelve_days", "ex_atbash_cipher", "ex_queen_attack", "ex_prime_factors", "ex_scrabble_score", "ex_series",
 ]
 
 SCORER_TEMPLATE = r'''#!/usr/bin/env python3
