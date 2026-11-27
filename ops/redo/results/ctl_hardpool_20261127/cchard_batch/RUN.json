@@ -1,0 +1,149 @@
+{
+ "created": "2026-11-27T04:12:39Z",
+ "git_head": "b5e0b0aa6a9592325278658f1fc12fc1ecfac070",
+ "plan": {
+  "acceptance": {
+   "kind": "workspace_tests",
+   "patterns": [
+    "*_test.py",
+    "test_*.py"
+   ],
+   "timeout_s": 120
+  },
+  "agent": {
+   "argv": [
+    "redo-claude-agent",
+    "{logs}",
+    "{model}",
+    "{prompt}"
+   ],
+   "env": {
+    "REDO_WS_ROOT": "/var/ctlws"
+   },
+   "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable",
+   "usage": "claude_stream_json"
+  },
+  "analysis": {
+   "alpha": 0.05,
+   "comparisons": [
+    {
+     "control": "B",
+     "name": "C_vs_B",
+     "treatment": "C"
+    },
+    {
+     "control": "R",
+     "name": "C_vs_R",
+     "treatment": "C"
+    }
+   ],
+   "script": "ops/redo/analysis/ctl_metrics.py <root>",
+   "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "arms": {
+   "A": {
+    "attempt_timeout_s": 1800,
+    "policy": "single"
+   },
+   "B": {
+    "attempt_timeout_s": 600,
+    "budget_s": 1800,
+    "hint": "failing_tests",
+    "max_attempts": 3,
+    "policy": "restart"
+   },
+   "C": {
+    "attempt_timeout_s": 600,
+    "budget_s": 1800,
+    "max_attempts": 3,
+    "policy": "controller"
+   },
+   "R": {
+    "attempt_timeout_s": 600,
+    "budget_s": 1800,
+    "hint": "none",
+    "max_attempts": 3,
+    "policy": "restart"
+   }
+  },
+  "attempt_timeout_s": 600,
+  "bank": "/opt/ctlwork/bm_tasks/cchard",
+  "bank_candidates": [
+   "/opt/ctlwork/bm_tasks/cchard"
+  ],
+  "grader": {
+   "suite_timeout_s": 400,
+   "timeout_s": 600,
+   "visible_equals_grader": false
+  },
+  "id": "ctl_haiku_cchard_4arm",
+  "pair": [
+   "B",
+   "C"
+  ],
+  "prereg": {
+   "DEVIATION": "偏離修正 5 的選擇規則：cchard 的 Haiku A 校準 89.7% 在 25–70% 之外，規則說不跑；協調者決定仍然跑。探索性、只判斷方向。",
+   "arms_from": "ops/redo/plans/ctl16_pi_qwen9b.json（A／R／B／C 與預算逐字沿用）",
+   "cost_cap": "Haiku 花費超過 $20 即停下並回報。",
+   "decision_doc": "decisions/DECISION_20261127_EVIDENCE_CONTROLLER_HARDPOOL.md 附錄 2",
+   "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。",
+   "tasks": "cchard 全部 39 題（不依校準結果選）；3 重複×4 臂＝468 格。",
+   "timing_guard": "批次後所有交付工作區的 hidden 半序列重評分，序列分數為正式分數；jobs 8。"
+  },
+  "providers": [
+   {
+    "jobs": 8,
+    "model": "haiku",
+    "name": "claude_haiku",
+    "provider": "anthropic"
+   }
+  ],
+  "reps": 3,
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261127,
+  "tasks": [
+   "cc_1620G",
+   "cc_1548C",
+   "cc_1558D",
+   "cc_1575E",
+   "cc_1580B",
+   "cc_1582G",
+   "cc_1599A",
+   "cc_1613F",
+   "cc_1555F",
+   "cc_1567F",
+   "cc_1572C",
+   "cc_1574F",
+   "cc_1599F",
+   "cc_1599I",
+   "cc_1603F",
+   "cc_1572D",
+   "cc_1608E",
+   "cc_1553H",
+   "cc_1575F",
+   "cc_1580D",
+   "cc_1601E",
+   "cc_1552G",
+   "cc_1558E",
+   "cc_1569F",
+   "cc_1575C",
+   "cc_1586G",
+   "cc_1603D",
+   "cc_1566G",
+   "cc_1599D",
+   "cc_1599E",
+   "cc_1603E",
+   "cc_1608F",
+   "cc_1580F",
+   "cc_1552I",
+   "cc_1553I",
+   "cc_1572F",
+   "cc_1580E",
+   "cc_1601F",
+   "cc_1608G"
+  ]
+ },
+ "plan_id": "ctl_haiku_cchard_4arm",
+ "plan_path": "/home/user/Vacant/.claude/worktrees/agent-a229aeca5f7e97774/ops/redo/plans/ctl_haiku_cchard_4arm.json",
+ "plan_sha256": "d236c169980d711da7f466bc19136ddf844297dd13788014c3e4534739325e87"
+}

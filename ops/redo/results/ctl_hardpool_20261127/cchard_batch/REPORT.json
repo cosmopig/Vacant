@@ -1,0 +1,338 @@
+{
+ "control": "B",
+ "generated": "2026-11-27T11:23:10Z",
+ "harness_changed_mid_run": true,
+ "harness_sha256": [
+  "4a2b3190d0b062318fed27ee1be28157339d7a14434f243c7a775db4996a2d2d",
+  "d5674bfa06e288d78e45309302ec8d5d8146e992e90a9c457d77c331945c84b1"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 115,
+  "control_only_b": 1,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 1,
+  "distinct_tasks_net_positive": 1,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 0,
+  "treatment_only_c": 1
+ },
+ "pairs_complete": 117,
+ "pairs_infra_void": [],
+ "pairs_planned": 117,
+ "pairs_scored": 117,
+ "per_arm": {
+  "A": {
+   "accepted": 112,
+   "accepted_but_wrong": 3,
+   "cells": 117,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 192.2,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 9.4,
+   "model_calls_known_cells": 117,
+   "pass": 109,
+   "rate": 0.9316,
+   "scored": 117,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  },
+  "B": {
+   "accepted": 117,
+   "accepted_but_wrong": 1,
+   "cells": 117,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 211.5,
+   "mean_attempts": 1.06,
+   "mean_model_calls": 10.1,
+   "model_calls_known_cells": 117,
+   "pass": 116,
+   "rate": 0.9915,
+   "scored": 117,
+   "tests_tampered_attempts": 0,
+   "timeouts": 10
+  },
+  "C": {
+   "accepted": 117,
+   "accepted_but_wrong": 1,
+   "cells": 117,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 197.8,
+   "mean_attempts": 1.06,
+   "mean_model_calls": 10.6,
+   "model_calls_known_cells": 117,
+   "pass": 116,
+   "rate": 0.9915,
+   "scored": 117,
+   "tests_tampered_attempts": 0,
+   "timeouts": 12
+  },
+  "R": {
+   "accepted": 117,
+   "accepted_but_wrong": 3,
+   "cells": 117,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 177.5,
+   "mean_attempts": 1.034,
+   "mean_model_calls": 9.1,
+   "model_calls_known_cells": 117,
+   "pass": 114,
+   "rate": 0.9744,
+   "scored": 117,
+   "tests_tampered_attempts": 0,
+   "timeouts": 10
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 1,
+   "ctrl_pass": 38,
+   "p": 1.0,
+   "pairs": 39,
+   "treat_pass": 39
+  },
+  "2": {
+   "b": 1,
+   "c": 0,
+   "ctrl_pass": 39,
+   "p": 1.0,
+   "pairs": 39,
+   "treat_pass": 38
+  },
+  "3": {
+   "b": 0,
+   "c": 0,
+   "ctrl_pass": 39,
+   "p": 1.0,
+   "pairs": 39,
+   "treat_pass": 39
+  }
+ },
+ "per_task": {
+  "cc_1548C": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1552G": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1552I": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1553H": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1553I": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1555F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1558D": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 2
+  },
+  "cc_1558E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1566G": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1567F": {
+   "ctrl": 2,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1569F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1572C": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1572D": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1572F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1574F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1575C": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1575E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1575F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1580B": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1580D": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1580E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1580F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1582G": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1586G": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1599A": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1599D": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1599E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1599F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1599I": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1601E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1601F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1603D": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1603E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1603F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1608E": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1608F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1608G": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1613F": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  },
+  "cc_1620G": {
+   "ctrl": 3,
+   "pairs": 3,
+   "treat": 3
+  }
+ },
+ "plan_id": "ctl_haiku_cchard_4arm",
+ "plan_sha256": "d236c169980d711da7f466bc19136ddf844297dd13788014c3e4534739325e87",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 8,
+  "accept_pass": 455,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 23,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "C"
+}

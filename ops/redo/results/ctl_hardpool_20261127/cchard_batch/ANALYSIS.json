@@ -1,0 +1,271 @@
+{
+ "cells": 468,
+ "infra_void": [],
+ "per_arm": {
+  "A": {
+   "cells": 117,
+   "success": 109,
+   "rate": 0.9316,
+   "mean_hidden_fraction": 0.9758,
+   "tokens_total": 43870035,
+   "tokens_per_success": 402477,
+   "cost_usd_total": 3.226,
+   "cost_per_success": 0.0296,
+   "broken_after_pass": "0/3427",
+   "mean_attempts": 1,
+   "wall_mean_s": 202.4,
+   "wall_median_s": 122.7,
+   "wall_max_s": 1163.8,
+   "n_changed_serial_vs_batch": 0
+  },
+  "R": {
+   "cells": 117,
+   "success": 114,
+   "rate": 0.9744,
+   "mean_hidden_fraction": 0.9983,
+   "tokens_total": 40351112,
+   "tokens_per_success": 353957,
+   "cost_usd_total": 2.379,
+   "cost_per_success": 0.0209,
+   "broken_after_pass": "0/3510",
+   "mean_attempts": 1.034,
+   "wall_mean_s": 184.1,
+   "wall_median_s": 112.6,
+   "wall_max_s": 1066.2,
+   "n_changed_serial_vs_batch": 0
+  },
+  "B": {
+   "cells": 117,
+   "success": 116,
+   "rate": 0.9915,
+   "mean_hidden_fraction": 0.9991,
+   "tokens_total": 47439101,
+   "tokens_per_success": 408958,
+   "cost_usd_total": 2.978,
+   "cost_per_success": 0.0257,
+   "broken_after_pass": "0/3510",
+   "mean_attempts": 1.06,
+   "wall_mean_s": 234.5,
+   "wall_median_s": 137.5,
+   "wall_max_s": 1642.2,
+   "n_changed_serial_vs_batch": 0
+  },
+  "C": {
+   "cells": 117,
+   "success": 116,
+   "rate": 0.9915,
+   "mean_hidden_fraction": 0.9997,
+   "tokens_total": 48491987,
+   "tokens_per_success": 418034,
+   "cost_usd_total": 2.828,
+   "cost_per_success": 0.0244,
+   "broken_after_pass": "0/3510",
+   "mean_attempts": 1.06,
+   "wall_mean_s": 213.0,
+   "wall_median_s": 119.5,
+   "wall_max_s": 1035.0,
+   "n_changed_serial_vs_batch": 0
+  }
+ },
+ "pairs": [
+  {
+   "control": "B",
+   "treatment": "C",
+   "pairs": 117,
+   "both_pass": 115,
+   "only_control": 1,
+   "only_treatment": 1,
+   "neither": 0,
+   "diff_pp": 0.0,
+   "p_exact": 1.0
+  },
+  {
+   "control": "R",
+   "treatment": "C",
+   "pairs": 117,
+   "both_pass": 113,
+   "only_control": 1,
+   "only_treatment": 3,
+   "neither": 0,
+   "diff_pp": 1.71,
+   "p_exact": 0.625
+  },
+  {
+   "control": "A",
+   "treatment": "R",
+   "pairs": 117,
+   "both_pass": 109,
+   "only_control": 0,
+   "only_treatment": 5,
+   "neither": 3,
+   "diff_pp": 4.27,
+   "p_exact": 0.0625
+  },
+  {
+   "control": "A",
+   "treatment": "B",
+   "pairs": 117,
+   "both_pass": 108,
+   "only_control": 1,
+   "only_treatment": 8,
+   "neither": 0,
+   "diff_pp": 5.98,
+   "p_exact": 0.0390625
+  },
+  {
+   "control": "A",
+   "treatment": "C",
+   "pairs": 117,
+   "both_pass": 109,
+   "only_control": 0,
+   "only_treatment": 7,
+   "neither": 1,
+   "diff_pp": 5.98,
+   "p_exact": 0.015625
+  }
+ ],
+ "posthoc_tasks_A_failed_at_least_once": [
+  "cc_1558D",
+  "cc_1575C",
+  "cc_1580E",
+  "cc_1599A",
+  "cc_1599D",
+  "cc_1620G"
+ ],
+ "posthoc_per_arm": {
+  "A": {
+   "cells": 18,
+   "success": 10,
+   "rate": 0.5556,
+   "mean_hidden_fraction": 0.8426,
+   "tokens_total": 13998234,
+   "tokens_per_success": 1399823,
+   "cost_usd_total": 0.872,
+   "cost_per_success": 0.0872,
+   "broken_after_pass": "0/457",
+   "mean_attempts": 1,
+   "wall_mean_s": 264.3,
+   "wall_median_s": 184.8,
+   "wall_max_s": 1163.8,
+   "n_changed_serial_vs_batch": 0
+  },
+  "R": {
+   "cells": 18,
+   "success": 15,
+   "rate": 0.8333,
+   "mean_hidden_fraction": 0.9889,
+   "tokens_total": 17240659,
+   "tokens_per_success": 1149377,
+   "cost_usd_total": 0.713,
+   "cost_per_success": 0.0475,
+   "broken_after_pass": "0/540",
+   "mean_attempts": 1.222,
+   "wall_mean_s": 391.4,
+   "wall_median_s": 368.6,
+   "wall_max_s": 1066.2,
+   "n_changed_serial_vs_batch": 0
+  },
+  "B": {
+   "cells": 18,
+   "success": 18,
+   "rate": 1.0,
+   "mean_hidden_fraction": 1.0,
+   "tokens_total": 19028586,
+   "tokens_per_success": 1057144,
+   "cost_usd_total": 0.842,
+   "cost_per_success": 0.0468,
+   "broken_after_pass": "0/540",
+   "mean_attempts": 1.333,
+   "wall_mean_s": 464.1,
+   "wall_median_s": 173.5,
+   "wall_max_s": 1642.2,
+   "n_changed_serial_vs_batch": 0
+  },
+  "C": {
+   "cells": 18,
+   "success": 17,
+   "rate": 0.9444,
+   "mean_hidden_fraction": 0.9981,
+   "tokens_total": 16788116,
+   "tokens_per_success": 987536,
+   "cost_usd_total": 0.822,
+   "cost_per_success": 0.0484,
+   "broken_after_pass": "0/540",
+   "mean_attempts": 1.389,
+   "wall_mean_s": 426.8,
+   "wall_median_s": 284.4,
+   "wall_max_s": 1035.0,
+   "n_changed_serial_vs_batch": 0
+  }
+ },
+ "posthoc_pairs": [
+  {
+   "control": "B",
+   "treatment": "C",
+   "pairs": 18,
+   "both_pass": 17,
+   "only_control": 1,
+   "only_treatment": 0,
+   "neither": 0,
+   "diff_pp": -5.56,
+   "p_exact": 1.0
+  },
+  {
+   "control": "R",
+   "treatment": "C",
+   "pairs": 18,
+   "both_pass": 14,
+   "only_control": 1,
+   "only_treatment": 3,
+   "neither": 0,
+   "diff_pp": 11.11,
+   "p_exact": 0.625
+  },
+  {
+   "control": "A",
+   "treatment": "R",
+   "pairs": 18,
+   "both_pass": 10,
+   "only_control": 0,
+   "only_treatment": 5,
+   "neither": 3,
+   "diff_pp": 27.78,
+   "p_exact": 0.0625
+  },
+  {
+   "control": "A",
+   "treatment": "B",
+   "pairs": 18,
+   "both_pass": 10,
+   "only_control": 0,
+   "only_treatment": 8,
+   "neither": 0,
+   "diff_pp": 44.44,
+   "p_exact": 0.0078125
+  },
+  {
+   "control": "A",
+   "treatment": "C",
+   "pairs": 18,
+   "both_pass": 10,
+   "only_control": 0,
+   "only_treatment": 7,
+   "neither": 1,
+   "diff_pp": 38.89,
+   "p_exact": 0.015625
+  }
+ ],
+ "controller_rules_fired": {
+  "rule1:stop_success": 117,
+  "rule5:repair": 2,
+  "rule6:continue": 4,
+  "rule4:restart_fresh": 1
+ },
+ "chains": {
+  "verified": 117,
+  "failed": [],
+  "decisions": 124
+ },
+ "attempts_visible_failures_time_limit_only_approx": [],
+ "cells_changed_serial_vs_batch": []
+}

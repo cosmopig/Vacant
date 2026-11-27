@@ -1,0 +1,127 @@
+{
+ "created": "2026-11-27T04:45:34Z",
+ "git_head": "bd0f297a55afaaad73bd43ae1eb4f509a85589a9",
+ "plan": {
+  "acceptance": {
+   "kind": "workspace_tests",
+   "patterns": [
+    "*_test.py",
+    "test_*.py"
+   ],
+   "timeout_s": 120
+  },
+  "agent": {
+   "argv": [
+    "redo-devin-agent",
+    "{logs}",
+    "{model}",
+    "{prompt}"
+   ],
+   "env": {
+    "REDO_WS_ROOT": "/var/ctlws"
+   },
+   "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable|Agent error|Connection error|retryable|unavailable",
+   "usage": "devin_atif"
+  },
+  "analysis": {
+   "alpha": 0.05,
+   "comparisons": [
+    {
+     "control": "B",
+     "name": "C_vs_B",
+     "treatment": "C"
+    },
+    {
+     "control": "R",
+     "name": "C_vs_R",
+     "treatment": "C"
+    }
+   ],
+   "script": "ops/redo/analysis/ctl_metrics.py <root>",
+   "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "arms": {
+   "A": {
+    "attempt_timeout_s": 1800,
+    "policy": "single"
+   }
+  },
+  "attempt_timeout_s": 600,
+  "bank": "/opt/ctlwork/bm_tasks/cc40",
+  "bank_candidates": [
+   "/opt/ctlwork/bm_tasks/cc40"
+  ],
+  "grader": {
+   "suite_timeout_s": 400,
+   "timeout_s": 600,
+   "visible_equals_grader": false
+  },
+  "id": "ctlcal_devin_flash_cc40_A",
+  "pair": [
+   "A",
+   "A"
+  ],
+  "prereg": {
+   "exploratory_only": "不作任何效果宣稱；不依結果調整控制器門檻。",
+   "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。",
+   "purpose": "校準（不進正式分析）：Devin swe-2-flash-medium 單次 A 臂，cc40，hidden 半數獨立評分（修正 6）。",
+   "worker": "Devin CLI（swe-2-flash-medium），DECISION 修正 6；包裝 ops/redo/devin_sandbox_agent.py"
+  },
+  "providers": [
+   {
+    "jobs": 8,
+    "model": "swe-2-flash-medium",
+    "name": "devin_swe2_flash_medium",
+    "provider": "devin"
+   }
+  ],
+  "reps": 1,
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261127,
+  "tasks": [
+   "cc_1561B",
+   "cc_1561C",
+   "cc_1582C",
+   "cc_1601A",
+   "cc_1604C",
+   "cc_1606C",
+   "cc_1613C",
+   "cc_1615B",
+   "cc_1551C",
+   "cc_1557C",
+   "cc_1562D1",
+   "cc_1586C",
+   "cc_1608C",
+   "cc_1619E",
+   "cc_1622C",
+   "cc_1623C",
+   "cc_1551E",
+   "cc_1560F1",
+   "cc_1575D",
+   "cc_1591D",
+   "cc_1599C",
+   "cc_1619D",
+   "cc_1620E",
+   "cc_1622D",
+   "cc_1551F",
+   "cc_1552F",
+   "cc_1553E",
+   "cc_1555E",
+   "cc_1560F2",
+   "cc_1579G",
+   "cc_1606E",
+   "cc_1618G",
+   "cc_1562E",
+   "cc_1574E",
+   "cc_1582F2",
+   "cc_1586I",
+   "cc_1591F",
+   "cc_1594F",
+   "cc_1608D",
+   "cc_1619H"
+  ]
+ },
+ "plan_id": "ctlcal_devin_flash_cc40_A",
+ "plan_path": "/home/user/Vacant/ops/redo/plans/ctlcal_devin_flash_cc40_A.json",
+ "plan_sha256": "0d127c8583fad6b53f52aa17d2f128475ffebe3ed349a2fec8e37b8c7b5faa91"
+}
