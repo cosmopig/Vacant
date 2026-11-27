@@ -694,3 +694,9 @@
 2026-11-27T21:20:12Z  cc_1575F/r2/B                                pass=False accepted=False attempts=3 wall=1800.0s
 2026-11-27T21:44:02Z  cc_1601F/r3/A                                pass=False accepted=False attempts=1 wall=1800.0s
 2026-11-27T21:44:17Z  cc_1553I/r3/B                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T21:49:48Z  cc_1603E/r3/C                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T21:50:20Z  cc_1552I/r3/R                                pass=False accepted=False attempts=3 wall=1800.0s
+2026-11-27T21:52:11Z  cc_1558E/r3/R                                pass=True accepted=True attempts=1 wall=487.6s
+2026-11-27T21:59:29Z  cc_1599D/r3/B                                pass=False accepted=True attempts=1 wall=579.6s
+2026-11-27T22:09:03Z  cc_1558E/r3/B                                pass=True accepted=True attempts=2 wall=1007.2s
+2026-11-27T22:14:18Z  cc_1580F/r3/A                                pass=False accepted=False attempts=1 wall=1800.0s
