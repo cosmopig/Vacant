@@ -1,0 +1,142 @@
+{
+ "id": "ctl_haiku_cchard_4arm",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/opt/ctlwork/bm_tasks/cchard",
+ "bank_candidates": [
+  "/opt/ctlwork/bm_tasks/cchard"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "redo-claude-agent",
+   "{logs}",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "REDO_WS_ROOT": "/var/ctlws"
+  },
+  "usage": "claude_stream_json",
+  "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable"
+ },
+ "providers": [
+  {
+   "name": "claude_haiku",
+   "provider": "anthropic",
+   "model": "haiku",
+   "jobs": 8
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 600,
+  "suite_timeout_s": 400,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "cc_1620G",
+  "cc_1548C",
+  "cc_1558D",
+  "cc_1575E",
+  "cc_1580B",
+  "cc_1582G",
+  "cc_1599A",
+  "cc_1613F",
+  "cc_1555F",
+  "cc_1567F",
+  "cc_1572C",
+  "cc_1574F",
+  "cc_1599F",
+  "cc_1599I",
+  "cc_1603F",
+  "cc_1572D",
+  "cc_1608E",
+  "cc_1553H",
+  "cc_1575F",
+  "cc_1580D",
+  "cc_1601E",
+  "cc_1552G",
+  "cc_1558E",
+  "cc_1569F",
+  "cc_1575C",
+  "cc_1586G",
+  "cc_1603D",
+  "cc_1566G",
+  "cc_1599D",
+  "cc_1599E",
+  "cc_1603E",
+  "cc_1608F",
+  "cc_1580F",
+  "cc_1552I",
+  "cc_1553I",
+  "cc_1572F",
+  "cc_1580E",
+  "cc_1601F",
+  "cc_1608G"
+ ],
+ "reps": 3,
+ "prereg": {
+  "decision_doc": "decisions/DECISION_20261127_EVIDENCE_CONTROLLER_HARDPOOL.md 附錄 2",
+  "DEVIATION": "偏離修正 5 的選擇規則：cchard 的 Haiku A 校準 89.7% 在 25–70% 之外，規則說不跑；協調者決定仍然跑。探索性、只判斷方向。",
+  "tasks": "cchard 全部 39 題（不依校準結果選）；3 重複×4 臂＝468 格。",
+  "arms_from": "ops/redo/plans/ctl16_pi_qwen9b.json（A／R／B／C 與預算逐字沿用）",
+  "timing_guard": "批次後所有交付工作區的 hidden 半序列重評分，序列分數為正式分數；jobs 8。",
+  "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。",
+  "cost_cap": "Haiku 花費超過 $20 即停下並回報。"
+ }
+}

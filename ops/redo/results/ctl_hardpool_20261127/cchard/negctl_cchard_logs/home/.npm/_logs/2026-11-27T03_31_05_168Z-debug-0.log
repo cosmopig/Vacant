@@ -1,0 +1,16 @@
+0 verbose cli /opt/node22/bin/node /usr/local/bin/npm
+1 info using npm@10.9.9
+2 info using node@v22.23.5
+3 silly config load:file:/opt/node22/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/user/Vacant/.claude/worktrees/agent-a229aeca5f7e97774/ops/redo/results/ctl_hardpool_20261127/cchard/negctl_cchard_logs/home/.npmrc
+5 silly config load:file:/opt/node22/etc/npmrc
+6 verbose title npm root
+7 verbose argv "root" "--global"
+8 verbose logfile logs-max:10 dir:/home/user/Vacant/.claude/worktrees/agent-a229aeca5f7e97774/ops/redo/results/ctl_hardpool_20261127/cchard/negctl_cchard_logs/home/.npm/_logs/2026-11-27T03_31_05_168Z-
+9 verbose logfile /home/user/Vacant/.claude/worktrees/agent-a229aeca5f7e97774/ops/redo/results/ctl_hardpool_20261127/cchard/negctl_cchard_logs/home/.npm/_logs/2026-11-27T03_31_05_168Z-debug-0.log
+10 verbose cwd /
+11 verbose os Linux 6.18.44-fc-v880
+12 verbose node v22.23.5
+13 verbose npm  v10.9.9
+14 verbose exit 0
+15 info ok
