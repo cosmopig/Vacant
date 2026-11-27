@@ -45,13 +45,18 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import random
+import re as _re
 import subprocess
 import sys
+import time
 
 DEVIN = os.environ.get("REDO_DEVIN_BIN", "/root/.local/bin/devin")
 PROTECTED = ["/root", "/home", "/opt", "/mnt", "/srv", "/tmp", "/var/tmp"]
 ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789_-"
 FREE_MODELS_RE = r"^(swe-2-flash-(medium|high|max)|swe-2-(medium|high|max)|swe-2-1(-(low|medium|high|xhigh|max))?)$"
+COOLDOWN = pathlib.Path(os.environ.get("REDO_DEVIN_COOLDOWN", "/var/ctlws_devin/.devin_cooldown"))
+RESET_RE = _re.compile(r"reset in (\d+) (second|minute|hour)")
 PROXY_KEYS = ("HTTPS_PROXY", "https_proxy", "SSL_CERT_FILE", "NO_PROXY")
 
 
@@ -130,11 +135,35 @@ def main(argv: list[str]) -> int:
         ver = f"unknown ({e})"
     (logs / "devin_wrapper.json").write_text(json.dumps({"cli": ver, "model": model, "workspace": str(ws),
                                                          "argv": devin_argv(model, "<prompt>", settings, export)}, indent=1))
-    cmd = mount_ns_prefix(ws, logs.resolve()) + devin_argv(model, prompt, settings, export)
-    proc = subprocess.Popen(cmd, cwd=str(ws), env=clean_env(),
-                            stdin=subprocess.DEVNULL)
+    # 限流冷卻（雲端修正 C6 第 3 點）：任一嘗試遇到「Your limit will reset in N …」就把截止時間寫進共用檔；之後起跑的嘗試先睡到截止時間，
+    # 再以限流錯誤結束（⇒ harness 當 infra 失敗、不算嘗試；睡眠發生在 devin 起跑之前，但仍在這次嘗試的牆鐘內，而這次嘗試會被丟棄）。
+    now = time.time()
     try:
+        cool = float(COOLDOWN.read_text())
+    except (OSError, ValueError):
+        cool = 0.0
+    if cool > now:
+        time.sleep(cool - now + random.uniform(2, 20))
+        print(f"Error: Agent error: Reached free model rate limit (wrapper: waited {cool - now:.0f}s for the shared cooldown; no model call made)", flush=True)
+        return 75
+    cmd = mount_ns_prefix(ws, logs.resolve()) + devin_argv(model, prompt, settings, export)
+    proc = subprocess.Popen(cmd, cwd=str(ws), env=clean_env(), stdin=subprocess.DEVNULL,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
+    try:
+        seen = []
+        for line in proc.stdout:            # 原樣轉給 harness 的 agent.log，同時找限流訊息
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            m = RESET_RE.search(line)
+            if m:
+                n = int(m.group(1)) * {"second": 1, "minute": 60, "hour": 3600}[m.group(2)]
+                seen.append(n)
         rc = proc.wait()
+        if seen:
+            try:
+                COOLDOWN.write_text(str(max(float(COOLDOWN.read_text() or 0) if COOLDOWN.exists() else 0, time.time() + max(seen) + 15)))
+            except (OSError, ValueError):
+                pass
     except KeyboardInterrupt:
         proc.kill()
         rc = 130
