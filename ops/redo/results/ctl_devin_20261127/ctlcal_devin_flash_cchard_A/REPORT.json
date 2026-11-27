@@ -1,0 +1,264 @@
+{
+ "control": "A",
+ "generated": "2026-11-27T07:32:36Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "d5674bfa06e288d78e45309302ec8d5d8146e992e90a9c457d77c331945c84b1"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 27,
+  "control_only_b": 0,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 0,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 12,
+  "treatment_only_c": 0
+ },
+ "pairs_complete": 39,
+ "pairs_infra_void": [],
+ "pairs_planned": 39,
+ "pairs_scored": 39,
+ "per_arm": {
+  "A": {
+   "accepted": 28,
+   "accepted_but_wrong": 1,
+   "cells": 39,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 1202.5,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 14.5,
+   "model_calls_known_cells": 26,
+   "pass": 27,
+   "rate": 0.6923,
+   "scored": 39,
+   "tests_tampered_attempts": 0,
+   "timeouts": 13
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 0,
+   "ctrl_pass": 27,
+   "p": 1.0,
+   "pairs": 39,
+   "treat_pass": 27
+  }
+ },
+ "per_task": {
+  "cc_1548C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1552G": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1552I": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1553H": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1553I": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1555F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1558D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1558E": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1566G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1567F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1569F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1572C": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1572D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1572F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1574F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1575C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1575E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1575F": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1580B": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1580D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1580E": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1580F": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1582G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1586G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1599A": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1599D": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1599E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1599F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1599I": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1601E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1601F": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1603D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1603E": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1603F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1608E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1608F": {
+   "ctrl": 0,
+   "pairs": 1,
+   "treat": 0
+  },
+  "cc_1608G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1613F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1620G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  }
+ },
+ "plan_id": "ctlcal_devin_flash_cchard_A",
+ "plan_sha256": "ec1fb138cd82dd29fc968b479dbbfbf9a9495200a8b5af03f86b5ec1526f1c77",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 1,
+  "accept_pass": 27,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 11,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "A"
+}

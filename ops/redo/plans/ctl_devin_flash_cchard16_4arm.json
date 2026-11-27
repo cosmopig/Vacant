@@ -1,0 +1,121 @@
+{
+ "id": "ctl_devin_flash_cchard16_4arm",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "/opt/ctlwork/bm_tasks/cchard",
+ "bank_candidates": [
+  "/opt/ctlwork/bm_tasks/cchard"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  },
+  "R": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "none"
+  },
+  "B": {
+   "policy": "restart",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800,
+   "hint": "failing_tests"
+  },
+  "C": {
+   "policy": "controller",
+   "max_attempts": 3,
+   "attempt_timeout_s": 600,
+   "budget_s": 1800
+  }
+ },
+ "pair": [
+  "B",
+  "C"
+ ],
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "redo-devin-agent",
+   "{logs}",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "REDO_WS_ROOT": "/var/ctlws"
+  },
+  "usage": "devin_atif",
+  "infra_re": "rate.?limit|overloaded|\\b429\\b|\\b529\\b|api_error|API Error|Authentication error|Not logged in|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|ETIMEDOUT|fetch failed|socket hang up|Connection error|Premature close|\\b50[234]\\b|Request timed out|temporarily unavailable|Agent error|retryable|unavailable"
+ },
+ "providers": [
+  {
+   "name": "devin_swe2_flash_medium",
+   "provider": "devin",
+   "model": "swe-2-flash-medium",
+   "jobs": 8
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 600,
+  "suite_timeout_s": 400,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "alpha": 0.05,
+  "test": "exact two-sided McNemar on (task, rep) pairs",
+  "comparisons": [
+   {
+    "name": "C_vs_B",
+    "control": "B",
+    "treatment": "C"
+   },
+   {
+    "name": "C_vs_R",
+    "control": "R",
+    "treatment": "C"
+   }
+  ],
+  "script": "ops/redo/analysis/ctl_metrics.py <root>"
+ },
+ "tasks": [
+  "cc_1552I",
+  "cc_1558E",
+  "cc_1599D",
+  "cc_1552G",
+  "cc_1548C",
+  "cc_1572C",
+  "cc_1553H",
+  "cc_1575F",
+  "cc_1553I",
+  "cc_1580E",
+  "cc_1555F",
+  "cc_1580F",
+  "cc_1599A",
+  "cc_1601F",
+  "cc_1603E",
+  "cc_1608F"
+ ],
+ "reps": 3,
+ "prereg": {
+  "decision_doc": "decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md 雲端修正 C6；分析＝HARDPOOL 附錄 2（凍結）",
+  "worker": "Devin CLI swe-2-flash-medium；ops/redo/devin_sandbox_agent.py",
+  "tasks": "cchard 的 16 題，由雲端修正 C3（修正 3）選題規則依 Devin A 臂校準（27/39＝69.2%）挑出；題單在 ops/redo/results/ctl_devin_20261127/ctlcal_devin_flash_cchard_A/select16.json。依 A 臂結果選題 ⇒ 正式批次 A 率會迴歸均值。",
+  "arms_from": "ops/redo/plans/ctl16_pi_qwen9b.json（逐字）",
+  "reps": "3（若預估完成超過 2026-11-28 12:00Z 則所有臂一律降為 2，記錄）",
+  "timing_guard": "批次後所有交付工作區的 hidden 半序列重評分，序列分數為正式分數；jobs 8",
+  "indistinguishable_if": "A 臂序列成功率 ≥75%；或 R+B+C 走到第 2 次嘗試以上的格不到四分之一；或規則 3–6 在真實執行中合計觸發 <10 次",
+  "infra_void": "限流（Reached request rate limit）等＝infra 失敗，重試 ×4（退避 30/60/120/240 秒），仍失敗標 infra_void、列出；逾時被殺的嘗試用量記缺",
+  "credscan": "每次嘗試後掃描憑證，ops/redo/credscan.py"
+ }
+}
