@@ -55,3 +55,6 @@ cchard-L Haiku A×1：hidden 33/37＝**89.2%**（序列評分），帶外 ⇒ �
   有效性（參考解兩半皆過、空殼兩半皆不過）：C++ 15 題全過；Go 2（paasio 在可見半因刪掉測試後 `runtime` import 未使用而編譯失敗，排除）；Rust 13（alphametics、decimal、doubly-linked-list、pig-latin、poker、macros、wordy 的參考解在這個環境不過，排除）；C++ meetup（需要 boost）排除。
   合計 30 ≤ 40 ⇒ 全收（C++ 15、Go 2、Rust 13）。manifest sha256 `227092e4…c0e0`，排除原因全在 manifest `excluded`。
 - 校準計畫 `ops/redo/plans/ctlcal_haiku_polyglot3_A.json`（30 題、A×1、jobs 4、驗收逾時 400 s）。
+
+### 候選 2 校準結果
+polyglot3 Haiku A×1：hidden 26/30＝**86.7%**（序列重評），帶外 ⇒ 不跑正式批次。兩個候選都在帶外；依授權不再建第三個池，在報告中提出下一步選項（不建置）。細節 `ops/redo/results/ctl_haikuband_20261127/polyglot3/README.md`。總花費約 $1.23（`SPEND.jsonl`）。
