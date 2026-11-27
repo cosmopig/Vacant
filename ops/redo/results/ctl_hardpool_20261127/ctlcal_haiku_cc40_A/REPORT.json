@@ -1,0 +1,269 @@
+{
+ "control": "A",
+ "generated": "2026-11-27T03:09:27Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "b0a98a5b1e59af8a39c3cd106e009083a0679713712c6857e460e5870636ec2e"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 40,
+  "control_only_b": 0,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 0,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 0,
+  "treatment_only_c": 0
+ },
+ "pairs_complete": 40,
+ "pairs_infra_void": [],
+ "pairs_planned": 40,
+ "pairs_scored": 40,
+ "per_arm": {
+  "A": {
+   "accepted": 40,
+   "accepted_but_wrong": 0,
+   "cells": 40,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 81.2,
+   "mean_attempts": 1.0,
+   "mean_model_calls": 5.8,
+   "model_calls_known_cells": 40,
+   "pass": 40,
+   "rate": 1.0,
+   "scored": 40,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 0,
+   "ctrl_pass": 40,
+   "p": 1.0,
+   "pairs": 40,
+   "treat_pass": 40
+  }
+ },
+ "per_task": {
+  "cc_1551C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1551E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1551F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1552F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1553E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1555E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1557C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1560F1": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1560F2": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1561B": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1561C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1562D1": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1562E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1574E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1575D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1579G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1582C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1582F2": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1586C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1586I": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1591D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1591F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1594F": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1599C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1601A": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1604C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1606C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1606E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1608C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1608D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1613C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1615B": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1618G": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1619D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1619E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1619H": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1620E": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1622C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1622D": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  },
+  "cc_1623C": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  }
+ },
+ "plan_id": "ctlcal_haiku_cc40_A",
+ "plan_sha256": "d5b97d02d01b0267e6f9bc9a2dd378aab2f59a24cce6626ce6d4d77e1126f55a",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 40,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 0,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "A"
+}
