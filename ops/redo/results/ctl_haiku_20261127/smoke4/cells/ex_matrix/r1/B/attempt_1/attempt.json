@@ -1,0 +1,54 @@
+{
+ "acc": {
+  "accept": true,
+  "failing_tests": [],
+  "first_problem": null,
+  "kind": "workspace_tests",
+  "passed": 4,
+  "run": 4,
+  "status": "ok",
+  "test_results": {
+   "matrix_test.MatrixTest.test_can_extract_column": true,
+   "matrix_test.MatrixTest.test_extract_column_from_one_number_matrix": true,
+   "matrix_test.MatrixTest.test_extract_row_from_one_number_matrix": true,
+   "matrix_test.MatrixTest.test_extract_row_where_numbers_have_different_widths": true
+  },
+  "tests": [
+   "matrix_test.py"
+  ],
+  "tests_tampered": []
+ },
+ "argv0": "redo-claude-agent",
+ "grade": {
+  "detail": {
+   "status": "ok",
+   "tests_passed": 4,
+   "tests_total": 4
+  },
+  "grader_kind": "staged_scorer",
+  "pass": true
+ },
+ "hint_bytes": 0,
+ "hint_text": null,
+ "provider": "claude_haiku",
+ "rc": 0,
+ "started": "2026-11-27T02:38:31Z",
+ "timed_out": false,
+ "timeout_s": 600.0,
+ "usage": {
+  "cache_create": 7225,
+  "cache_read": 39828,
+  "calls": 4,
+  "cost_usd": 0.00228,
+  "errors": 0,
+  "final_error": null,
+  "input": 47061,
+  "num_turns": 6,
+  "output": 871,
+  "terminal_reason": "completed",
+  "uncached_input": 8
+ },
+ "void": null,
+ "wall_s": 6.8,
+ "workspace_changed": true
+}

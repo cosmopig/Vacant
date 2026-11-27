@@ -1,0 +1,83 @@
+{
+ "acc": {
+  "accept": false,
+  "failing_tests": [
+   "bob_test.BobTest.test_asking_a_numeric_question",
+   "bob_test.BobTest.test_asking_gibberish",
+   "bob_test.BobTest.test_ending_with_whitespace",
+   "bob_test.BobTest.test_forceful_question",
+   "bob_test.BobTest.test_other_whitespace",
+   "bob_test.BobTest.test_prattling_on",
+   "bob_test.BobTest.test_prolonged_silence",
+   "bob_test.BobTest.test_question_with_no_letters",
+   "bob_test.BobTest.test_shouting",
+   "bob_test.BobTest.test_shouting_gibberish"
+  ],
+  "first_problem": "test_asking_a_numeric_question (bob_test.BobTest.test_asking_a_numeric_question)\nTraceback (most recent call last):\n  File \"/var/ctlws/redo-acc-mjae7_ar/w/bob_test.py\", line 28, in test_asking_a_numeric_question\n    self.assertEqual(response(\"You are, what, like 15?\"), \"Sure.\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'Whatever.' != 'Sure.'\n- Whatever.\n+ Sure.\n\n",
+  "kind": "workspace_tests",
+  "passed": 3,
+  "run": 13,
+  "status": "ok",
+  "test_results": {
+   "bob_test.BobTest.test_asking_a_numeric_question": false,
+   "bob_test.BobTest.test_asking_gibberish": false,
+   "bob_test.BobTest.test_ending_with_whitespace": false,
+   "bob_test.BobTest.test_forceful_question": false,
+   "bob_test.BobTest.test_other_whitespace": false,
+   "bob_test.BobTest.test_prattling_on": false,
+   "bob_test.BobTest.test_prolonged_silence": false,
+   "bob_test.BobTest.test_question_with_no_letters": false,
+   "bob_test.BobTest.test_shouting": false,
+   "bob_test.BobTest.test_shouting_gibberish": false,
+   "bob_test.BobTest.test_starting_with_whitespace": true,
+   "bob_test.BobTest.test_stating_something": true,
+   "bob_test.BobTest.test_using_acronyms_in_regular_speech": true
+  },
+  "tests": [
+   "bob_test.py"
+  ],
+  "tests_tampered": []
+ },
+ "argv0": "python3",
+ "controller": {
+  "action": "continue",
+  "feedback_source": "current",
+  "passed": 3,
+  "reason": "continuing from current workspace (3/13)",
+  "rule": 6,
+  "signature": [
+   "bob_test.BobTest.test_asking_a_numeric_question",
+   "bob_test.BobTest.test_asking_gibberish",
+   "bob_test.BobTest.test_ending_with_whitespace",
+   "bob_test.BobTest.test_forceful_question",
+   "bob_test.BobTest.test_other_whitespace",
+   "bob_test.BobTest.test_prattling_on",
+   "bob_test.BobTest.test_prolonged_silence",
+   "bob_test.BobTest.test_question_with_no_letters",
+   "bob_test.BobTest.test_shouting",
+   "bob_test.BobTest.test_shouting_gibberish"
+  ],
+  "start_workspace": "origin",
+  "total": 13
+ },
+ "grade": {
+  "detail": {
+   "status": "ok",
+   "tests_passed": 4,
+   "tests_total": 13
+  },
+  "grader_kind": "staged_scorer",
+  "pass": false
+ },
+ "hint_bytes": 0,
+ "hint_text": null,
+ "provider": "claude_haiku",
+ "rc": 0,
+ "started": "2026-11-27T02:38:58Z",
+ "timed_out": false,
+ "timeout_s": 600.0,
+ "usage": null,
+ "void": null,
+ "wall_s": 0.0,
+ "workspace_changed": true
+}

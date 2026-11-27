@@ -1,0 +1,94 @@
+{
+ "created": "2026-11-27T02:38:57Z",
+ "git_head": "c25c2e526d8f6cd91622044903baa227c24a969c",
+ "plan": {
+  "acceptance": {
+   "kind": "workspace_tests",
+   "patterns": [
+    "*_test.py",
+    "test_*.py"
+   ],
+   "timeout_s": 120
+  },
+  "agent": {
+   "argv": [
+    "python3",
+    "/home/user/Vacant/ops/redo/scripted_worker.py",
+    "/opt/ctlwork/src/exercism-python/exercises/practice/bob/.meta/example.py"
+   ],
+   "env": {},
+   "export_cell_env": true,
+   "usage": "none"
+  },
+  "analysis": {
+   "alpha": 0.05,
+   "comparisons": [
+    {
+     "control": "B",
+     "name": "C_vs_B",
+     "treatment": "C"
+    },
+    {
+     "control": "R",
+     "name": "C_vs_R",
+     "treatment": "C"
+    }
+   ],
+   "script": "ops/redo/analysis/ctl_metrics.py <root>",
+   "test": "exact two-sided McNemar on (task, rep) pairs"
+  },
+  "arms": {
+   "B": {
+    "attempt_timeout_s": 600,
+    "budget_s": 1800,
+    "hint": "failing_tests",
+    "max_attempts": 3,
+    "policy": "restart"
+   },
+   "C": {
+    "attempt_timeout_s": 600,
+    "budget_s": 1800,
+    "max_attempts": 3,
+    "policy": "controller"
+   }
+  },
+  "attempt_timeout_s": 600,
+  "bank": "/opt/ctlwork/bm_tasks/ctl_smoke4",
+  "bank_candidates": [
+   "/opt/ctlwork/bm_tasks/ctl_smoke4"
+  ],
+  "grader": {
+   "suite_timeout_s": 60,
+   "timeout_s": 240,
+   "visible_equals_grader": false
+  },
+  "id": "ctl_smoke4_scripted",
+  "pair": [
+   "B",
+   "C"
+  ],
+  "prereg": {
+   "exploratory_only": "不作任何效果宣稱；不依結果調整控制器門檻。",
+   "infra_void": "基礎設施失敗（agent 起不來、API 錯誤／限流／認證錯誤、工作區未動且 0 次成功呼叫）記 void 不算嘗試，最多重試 4 次；仍失敗標 infra_void、不進分母並列出。",
+   "purpose": "冒煙與機制驗證（不進正式批次）：4 題 B／C 臂，Haiku（修正 4）。",
+   "worker": "Claude Haiku（claude -p --model haiku，Claude Code headless），DECISION 修正 4；沙箱 ops/redo/claude_sandbox_agent.py"
+  },
+  "providers": [
+   {
+    "jobs": 1,
+    "model": "haiku",
+    "name": "claude_haiku",
+    "provider": "anthropic"
+   }
+  ],
+  "reps": 1,
+  "schema": "vacant.redo.plan/1",
+  "seed": 20261127,
+  "tasks": [
+   "ex_bob"
+  ]
+ },
+ "plan_id": "ctl_smoke4_scripted",
+ "plan_path": "/home/user/Vacant/ops/redo/plans/ctl_smoke4_scripted.json",
+ "plan_sha256": "510a5595df781bebe71c8fb070b90667a27f564b91dfdc667c0a923abcbdeca6"
+}

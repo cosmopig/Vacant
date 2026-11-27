@@ -1,0 +1,49 @@
+{
+ "accepted": true,
+ "agent_wall_s": 9.8,
+ "arm": "B",
+ "attempts": [
+  {
+   "acc_passed": 4,
+   "acc_run": 4,
+   "acc_status": "ok",
+   "accept": true,
+   "grade_pass": true,
+   "grader_kind": "staged_scorer",
+   "k": 1,
+   "rc": 0,
+   "tests_tampered": [],
+   "timed_out": false,
+   "usage": {
+    "cache_create": 6612,
+    "cache_read": 38561,
+    "calls": 4,
+    "cost_usd": 0.002394,
+    "errors": 0,
+    "final_error": null,
+    "input": 45181,
+    "num_turns": 6,
+    "output": 1370,
+    "terminal_reason": "completed",
+    "uncached_input": 8
+   },
+   "wall_s": 9.8,
+   "workspace_changed": true
+  }
+ ],
+ "cell": "ex_acronym/r1/B",
+ "delivered_attempt": 1,
+ "ended": "2026-11-27T02:38:34Z",
+ "grader_kind": "staged_scorer",
+ "harness_sha256": "b0a98a5b1e59af8a39c3cd106e009083a0679713712c6857e460e5870636ec2e",
+ "infra_void": null,
+ "n_attempts": 1,
+ "pass": true,
+ "plan_sha256": "17caaf6544890bdd334dc653363672fd19dddb37fced30ab1a1f3bfdba50c1c4",
+ "provider": "claude_haiku",
+ "rep": 1,
+ "started": "2026-11-27T02:38:24Z",
+ "task": "ex_acronym",
+ "voids": 0,
+ "wall_s": 10.0
+}

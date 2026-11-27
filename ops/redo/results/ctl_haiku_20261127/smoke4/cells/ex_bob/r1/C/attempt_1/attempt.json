@@ -1,0 +1,73 @@
+{
+ "acc": {
+  "accept": true,
+  "failing_tests": [],
+  "first_problem": null,
+  "kind": "workspace_tests",
+  "passed": 13,
+  "run": 13,
+  "status": "ok",
+  "test_results": {
+   "bob_test.BobTest.test_asking_a_numeric_question": true,
+   "bob_test.BobTest.test_asking_gibberish": true,
+   "bob_test.BobTest.test_ending_with_whitespace": true,
+   "bob_test.BobTest.test_forceful_question": true,
+   "bob_test.BobTest.test_other_whitespace": true,
+   "bob_test.BobTest.test_prattling_on": true,
+   "bob_test.BobTest.test_prolonged_silence": true,
+   "bob_test.BobTest.test_question_with_no_letters": true,
+   "bob_test.BobTest.test_shouting": true,
+   "bob_test.BobTest.test_shouting_gibberish": true,
+   "bob_test.BobTest.test_starting_with_whitespace": true,
+   "bob_test.BobTest.test_stating_something": true,
+   "bob_test.BobTest.test_using_acronyms_in_regular_speech": true
+  },
+  "tests": [
+   "bob_test.py"
+  ],
+  "tests_tampered": []
+ },
+ "argv0": "redo-claude-agent",
+ "controller": {
+  "action": "stop_success",
+  "feedback_source": "none",
+  "passed": 13,
+  "reason": "all acceptance tests passed (13/13)",
+  "rule": 1,
+  "signature": [],
+  "start_workspace": "origin",
+  "total": 13
+ },
+ "grade": {
+  "detail": {
+   "status": "ok",
+   "tests_passed": 13,
+   "tests_total": 13
+  },
+  "grader_kind": "staged_scorer",
+  "pass": true
+ },
+ "hint_bytes": 0,
+ "hint_text": null,
+ "provider": "claude_haiku",
+ "rc": 0,
+ "started": "2026-11-27T02:38:24Z",
+ "timed_out": false,
+ "timeout_s": 600.0,
+ "usage": {
+  "cache_create": 5709,
+  "cache_read": 26655,
+  "calls": 3,
+  "cost_usd": 0.001888,
+  "errors": 0,
+  "final_error": null,
+  "input": 32370,
+  "num_turns": 5,
+  "output": 958,
+  "terminal_reason": "completed",
+  "uncached_input": 6
+ },
+ "void": null,
+ "wall_s": 6.6,
+ "workspace_changed": true
+}

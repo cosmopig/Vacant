@@ -1,0 +1,61 @@
+{
+ "acc": {
+  "accept": true,
+  "failing_tests": [],
+  "first_problem": null,
+  "kind": "workspace_tests",
+  "passed": 13,
+  "run": 13,
+  "status": "ok",
+  "test_results": {
+   "bob_test.BobTest.test_asking_a_numeric_question": true,
+   "bob_test.BobTest.test_asking_gibberish": true,
+   "bob_test.BobTest.test_ending_with_whitespace": true,
+   "bob_test.BobTest.test_forceful_question": true,
+   "bob_test.BobTest.test_other_whitespace": true,
+   "bob_test.BobTest.test_prattling_on": true,
+   "bob_test.BobTest.test_prolonged_silence": true,
+   "bob_test.BobTest.test_question_with_no_letters": true,
+   "bob_test.BobTest.test_shouting": true,
+   "bob_test.BobTest.test_shouting_gibberish": true,
+   "bob_test.BobTest.test_starting_with_whitespace": true,
+   "bob_test.BobTest.test_stating_something": true,
+   "bob_test.BobTest.test_using_acronyms_in_regular_speech": true
+  },
+  "tests": [
+   "bob_test.py"
+  ],
+  "tests_tampered": []
+ },
+ "argv0": "python3",
+ "controller": {
+  "action": "stop_success",
+  "feedback_source": "none",
+  "passed": 13,
+  "reason": "all acceptance tests passed (13/13)",
+  "rule": 1,
+  "signature": [],
+  "start_workspace": "restart_fresh:origin",
+  "total": 13
+ },
+ "grade": {
+  "detail": {
+   "status": "ok",
+   "tests_passed": 13,
+   "tests_total": 13
+  },
+  "grader_kind": "staged_scorer",
+  "pass": true
+ },
+ "hint_bytes": 393,
+ "hint_text": "Failing tests: bob_test.BobTest.test_asking_a_numeric_question, bob_test.BobTest.test_asking_gibberish, bob_test.BobTest.test_ending_with_whitespace (+7 more)\nFirst failure:\ntest_asking_a_numeric_question (bob_test.BobTest.test_asking_a_numeric_question)\nAssertionError: 'Whatever.' != 'Sure.'\nAction: fresh workspace from the original files; the prior approach stalled on these failing tests.",
+ "provider": "claude_haiku",
+ "rc": 0,
+ "started": "2026-11-27T02:38:58Z",
+ "timed_out": false,
+ "timeout_s": 600.0,
+ "usage": null,
+ "void": null,
+ "wall_s": 0.0,
+ "workspace_changed": true
+}

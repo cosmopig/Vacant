@@ -1,0 +1,47 @@
+ok    run 結束碼 0
+ok    8 對全部完成、沒有 infra_void 對
+ok    A：只有 t_always、t_infra、t_died 過（實得 3）
+ok    R3：t_always、t_second、t_timeout、t_infra、t_died 過（實得 5）
+ok    t_died：寫到一半模型死掉（連線類錯誤）的那一次是 void——A 也會重試，重開不白賺這一題
+ok    t_ctxlen：不是連線類的模型錯誤照算嘗試、計入分母，原文列在報告
+ok    配對 b=0、c=2
+ok    精確 McNemar(0,2)=0.5
+ok    完成但 p≥α ⇒ UNRESOLVED（不是 EFFECTIVE，也不是 INCOMPLETE）
+ok    t_second：R3 第 2 次嘗試驗收通過就停、交第 2 次
+ok    t_never：R3 用完 3 次、沒有驗收通過、照實記沒過
+ok    t_tamper：agent 改寫測試檔也過不了驗收（還原原件後才跑），且記下被改的檔
+ok    t_timeout：A 逾時被殺、只有 1 次嘗試、照實記沒過
+ok    t_timeout：R3 第 1 次逾時被殺（行程群組）、第 2 次過
+ok    t_infra：模型沒起來的那一次記成 void、不算嘗試，重試後照常
+ok    void 的那一次有留檔
+ok    訊號混淆矩陣：玩具題庫上驗收與評分器完全一致
+ok    模型呼叫數讀得到（pi json 事件流）
+ok    R3（不給提示）每一次的提示與 A 逐位元組相同
+ok    R3H 第 2 次的提示＝原提示＋失敗原文（351 位元組）
+ok    KS-1：提示裡沒有責任／懲罰類措辭
+ok    續跑：0 次 agent 呼叫
+ok    同一個 root 換了計畫內容 ⇒ 拒跑（結束碼 2）
+ok    計畫檔沒 commit ⇒ 拒跑（結束碼 2）
+ok    政策函式的程式碼裡沒有出現 grade（只讀驗收）
+ok    mcnemar_exact 與 vacant_network.research 同值
+ok    command 驗收：stub 失敗（accept=False, status=ok, passed=0, run=1）
+ok    command 驗收：正確解答 exit 0 通過，且 origin 的 node_modules symlink 被還原
+ok    command 驗收：竄改 *.spec.js 被還原原件擋下並記 tests_tampered
+ok    command 驗收：逾時回傳 accept=False、status=timeout
+ok    command 驗收：無 Jest 摘要時 passed=None、run=None
+ok    command 驗收端到端（visible_equals_grader=True）：R3 第 2 次過、竄改者被擋下
+ok    attempt.json 記下送出的 hint 原文（RF 截斷率用）
+ok    --only-providers 給了計畫沒有的機器 ⇒ 拒絕啟動
+ok    同一台機器已經有 runner 在跑（鎖被拿著）⇒ 拒絕啟動
+ok    只跑 s2：只產生 s2 的格
+ok    再跑 s1：同一個 root 補齊 4 對 8 格，每一對兩臂在同一台
+ok    controller selftest 結束碼 0
+ok    controller 規則 1（stop_success）：第 1 次全過即停
+ok    controller 規則 2（deliver_best_budget）：預算耗盡交最佳版（attempt 2）
+ok    controller 規則 3（restore_best）：變差時回到最佳快照（marker=from_att1）與最佳回饋
+ok    controller 規則 4（restart_fresh）：連續 2 次同簽章無進展 ⇒ 從原件重開（無 marker）
+ok    controller 規則 5（repair）：≥70%（3/4）保留工作區並修復
+ok    controller 規則 6（continue）：<70% 保留工作區續做
+ok    controller 每格皆有合法簽章鏈且 reconstruct() 驗過並還原全部決策
+ok    arm B（hint=failing_tests）：共用回饋 ≤400B（259B）且從原件重開
+VERDICT: REDO_SELFTEST_OK（46/46）

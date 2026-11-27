@@ -1,0 +1,54 @@
+{
+ "acc": {
+  "accept": true,
+  "failing_tests": [],
+  "first_problem": null,
+  "kind": "workspace_tests",
+  "passed": 4,
+  "run": 4,
+  "status": "ok",
+  "test_results": {
+   "point_mutations_test.PointMutationsTest.test_complete_hamming_distance_in_small_strand": true,
+   "point_mutations_test.PointMutationsTest.test_hamming_distance_in_off_by_one_strand": true,
+   "point_mutations_test.PointMutationsTest.test_no_difference_between_empty_strands": true,
+   "point_mutations_test.PointMutationsTest.test_small_hamming_distance_in_middle_somewhere": true
+  },
+  "tests": [
+   "point_mutations_test.py"
+  ],
+  "tests_tampered": []
+ },
+ "argv0": "redo-claude-agent",
+ "grade": {
+  "detail": {
+   "status": "ok",
+   "tests_passed": 4,
+   "tests_total": 4
+  },
+  "grader_kind": "staged_scorer",
+  "pass": true
+ },
+ "hint_bytes": 0,
+ "hint_text": null,
+ "provider": "claude_haiku",
+ "rc": 0,
+ "started": "2026-11-27T02:38:36Z",
+ "timed_out": false,
+ "timeout_s": 600.0,
+ "usage": {
+  "cache_create": 5831,
+  "cache_read": 38724,
+  "calls": 4,
+  "cost_usd": 0.001848,
+  "errors": 0,
+  "final_error": null,
+  "input": 44563,
+  "num_turns": 5,
+  "output": 587,
+  "terminal_reason": "completed",
+  "uncached_input": 8
+ },
+ "void": null,
+ "wall_s": 5.2,
+ "workspace_changed": true
+}

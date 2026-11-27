@@ -1,0 +1,93 @@
+{
+ "control": "B",
+ "generated": "2026-11-27T02:38:59Z",
+ "harness_changed_mid_run": false,
+ "harness_sha256": [
+  "b0a98a5b1e59af8a39c3cd106e009083a0679713712c6857e460e5870636ec2e"
+ ],
+ "paired": {
+  "alpha": 0.05,
+  "both": 1,
+  "control_only_b": 0,
+  "delta_pp": 0.0,
+  "distinct_tasks_net_negative": 0,
+  "distinct_tasks_net_positive": 0,
+  "mcnemar_exact_p_two_sided": 1.0,
+  "neither": 0,
+  "treatment_only_c": 0
+ },
+ "pairs_complete": 1,
+ "pairs_infra_void": [],
+ "pairs_planned": 1,
+ "pairs_scored": 1,
+ "per_arm": {
+  "B": {
+   "accepted": 1,
+   "accepted_but_wrong": 0,
+   "cells": 1,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 0.0,
+   "mean_attempts": 3.0,
+   "mean_model_calls": null,
+   "model_calls_known_cells": 0,
+   "pass": 1,
+   "rate": 1.0,
+   "scored": 1,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  },
+  "C": {
+   "accepted": 1,
+   "accepted_but_wrong": 0,
+   "cells": 1,
+   "final_errors_counted_as_attempts": {},
+   "grader_kinds": [
+    "staged_scorer"
+   ],
+   "infra_void": 0,
+   "mean_agent_wall_s": 0.0,
+   "mean_attempts": 3.0,
+   "mean_model_calls": null,
+   "model_calls_known_cells": 0,
+   "pass": 1,
+   "rate": 1.0,
+   "scored": 1,
+   "tests_tampered_attempts": 0,
+   "timeouts": 0
+  }
+ },
+ "per_rep": {
+  "1": {
+   "b": 0,
+   "c": 0,
+   "ctrl_pass": 1,
+   "p": 1.0,
+   "pairs": 1,
+   "treat_pass": 1
+  }
+ },
+ "per_task": {
+  "ex_bob": {
+   "ctrl": 1,
+   "pairs": 1,
+   "treat": 1
+  }
+ },
+ "plan_id": "ctl_smoke4_scripted",
+ "plan_sha256": "510a5595df781bebe71c8fb070b90667a27f564b91dfdc667c0a923abcbdeca6",
+ "quoting_rule": "只有 state=EFFECTIVE 且 harness_changed_mid_run=false 的整批數字可以引用；引用時要同時講：模型、agent、題庫、對數、等預算的定義、mean_attempts。INCOMPLETE／UNRESOLVED 不是負結果。",
+ "schema": "vacant.redo.report/1",
+ "signal": {
+  "accept_fail": 0,
+  "accept_pass": 2,
+  "note": "每一次嘗試的驗收（政策看得到）對評分器（政策看不到）。accept_fail＝驗收放行了錯的；這個數字大的題庫，驗收訊號不能當真訊號引用。",
+  "reject_fail": 4,
+  "reject_pass": 0
+ },
+ "state": "UNRESOLVED",
+ "treatment": "C"
+}

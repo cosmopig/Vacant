@@ -1,0 +1,64 @@
+{
+ "acc": {
+  "accept": true,
+  "failing_tests": [],
+  "first_problem": null,
+  "kind": "workspace_tests",
+  "passed": 4,
+  "run": 4,
+  "status": "ok",
+  "test_results": {
+   "acronym_test.AcronymTest.test_all_caps_word": true,
+   "acronym_test.AcronymTest.test_basic": true,
+   "acronym_test.AcronymTest.test_punctuation_without_whitespace": true,
+   "acronym_test.AcronymTest.test_underscore_emphasis": true
+  },
+  "tests": [
+   "acronym_test.py"
+  ],
+  "tests_tampered": []
+ },
+ "argv0": "redo-claude-agent",
+ "controller": {
+  "action": "stop_success",
+  "feedback_source": "none",
+  "passed": 4,
+  "reason": "all acceptance tests passed (4/4)",
+  "rule": 1,
+  "signature": [],
+  "start_workspace": "origin",
+  "total": 4
+ },
+ "grade": {
+  "detail": {
+   "status": "ok",
+   "tests_passed": 5,
+   "tests_total": 5
+  },
+  "grader_kind": "staged_scorer",
+  "pass": true
+ },
+ "hint_bytes": 0,
+ "hint_text": null,
+ "provider": "claude_haiku",
+ "rc": 0,
+ "started": "2026-11-27T02:38:34Z",
+ "timed_out": false,
+ "timeout_s": 600.0,
+ "usage": {
+  "cache_create": 5765,
+  "cache_read": 26739,
+  "calls": 3,
+  "cost_usd": 0.001906,
+  "errors": 0,
+  "final_error": null,
+  "input": 32510,
+  "num_turns": 5,
+  "output": 970,
+  "terminal_reason": "completed",
+  "uncached_input": 6
+ },
+ "void": null,
+ "wall_s": 6.5,
+ "workspace_changed": true
+}
