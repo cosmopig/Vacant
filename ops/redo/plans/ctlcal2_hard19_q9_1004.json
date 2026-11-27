@@ -1,0 +1,98 @@
+{
+ "id": "ctlcal2_hard19_q9_1004",
+ "schema": "vacant.redo.plan/1",
+ "seed": 20261127,
+ "bank": "~/dev/ops/ref/bm_tasks/ctl_hard19",
+ "bank_candidates": [
+  "~/dev/ops/ref/bm_tasks/ctl_hard19"
+ ],
+ "arms": {
+  "A": {
+   "policy": "single",
+   "attempt_timeout_s": 1800
+  }
+ },
+ "attempt_timeout_s": 600,
+ "agent": {
+  "argv": [
+   "redo-bwrap-agent",
+   "{logs}",
+   "pi",
+   "-p",
+   "--mode",
+   "json",
+   "--session-dir",
+   "{logs}/sessions",
+   "--provider",
+   "{provider}",
+   "--model",
+   "{model}",
+   "{prompt}"
+  ],
+  "env": {
+   "PI_SKIP_VERSION_CHECK": "1"
+  },
+  "config_dir": {
+   "env": "PI_CODING_AGENT_DIR",
+   "from": "~/dev/ops/agentcfg/ctl",
+   "copy": [
+    "models.json"
+   ]
+  },
+  "log_drop_re": "\"type\":\"message_update\"",
+  "usage": "pi_json"
+ },
+ "providers": [
+  {
+   "name": "lms1004q9",
+   "provider": "lms1004q9",
+   "model": "qwen/qwen3.5-9b",
+   "jobs": 12
+  }
+ ],
+ "acceptance": {
+  "kind": "workspace_tests",
+  "patterns": [
+   "*_test.py",
+   "test_*.py"
+  ],
+  "timeout_s": 120
+ },
+ "grader": {
+  "timeout_s": 240,
+  "suite_timeout_s": 60,
+  "visible_equals_grader": false
+ },
+ "analysis": {
+  "note": "校準用，不進正式分析；只算 A 在 hidden 半數上的成功率（DECISION 修正 1）"
+ },
+ "tasks": [
+  "ex_word_search",
+  "ex_bank_account",
+  "ex_rational_numbers",
+  "ex_custom_set",
+  "ex_camicia",
+  "ex_binary_search_tree",
+  "ex_meetup",
+  "ex_complex_numbers",
+  "ex_linked_list",
+  "ex_all_your_base",
+  "ex_swift_scheduling",
+  "ex_flower_field",
+  "ex_minesweeper",
+  "ex_largest_series_product",
+  "ex_change",
+  "ex_killer_sudoku_helper",
+  "ex_palindrome_products",
+  "ex_tournament",
+  "ex_pascals_triangle"
+ ],
+ "reps": 1,
+ "prereg": {
+  "registered": "2026-11-27，校準（不是證據）；規則見 decisions/DECISION_20261127_EVIDENCE_CONTROLLER.md 修正 1、修正 2（每模型 1 次）；第 2 次校準（修正 4）"
+ },
+ "pair": [
+  "A",
+  "A"
+ ]
+}
