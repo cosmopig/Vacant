@@ -304,15 +304,17 @@ class TestExpN(unittest.TestCase):
         self.assertEqual(p_ctl["providers"], src_ctl["providers"])
 
         for plan in (p_exam, p_ctl):
-            self.assertEqual(set(plan["arms"].keys()), {"AN", "AC"})
-            self.assertEqual(plan["pair"], ["AC", "AN"])
-            for arm_name in ("AN", "AC"):
+            # 11-27 KS-1 修訂：AN HOLD（移到 prereg.held_arm_AN）、改跑 AP。
+            self.assertEqual(set(plan["arms"].keys()), {"AP", "AC"})
+            self.assertEqual(plan["pair"], ["AC", "AP"])
+            self.assertEqual(plan["prereg"]["held_arm_AN"]["prompt_suffix"], EXACT_AN)
+            self.assertIn("HOLD", plan["prereg"]["held_arm_AN"]["status"])
+            for arm_name in ("AP", "AC"):
                 arm = plan["arms"][arm_name]
                 self.assertEqual(arm["policy"], "single")
                 self.assertEqual(arm["attempt_timeout_s"], 1800)
                 self.assertNotIn("max_attempts", arm)
                 self.assertNotIn("hint", arm)
-            self.assertEqual(plan["arms"]["AN"]["prompt_suffix"], EXACT_AN)
             self.assertEqual(plan["arms"]["AC"]["prompt_suffix"], self.metrics.AC_PROMPT_SUFFIX)
             self.assertIn(
                 "AN vs AC success-rate difference and false-claim-rate difference; exploratory",
