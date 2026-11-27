@@ -166,6 +166,26 @@ log_msg() {
   fi
 }
 
+# Colab reclaims a VM after ~25–30 min of Jupyter-kernel inactivity even while background processes run
+# (COLAB_NOTES §2.7; 11-27: four VMs vanished 20–36 min after launch without this). Touch the kernel every 4 min
+# for as long as the session is listed; exits on its own when the session is gone. Never stops or creates sessions.
+start_kernel_keepalive() {
+  local s="$1"
+  [ "${DRY_RUN:-0}" = "1" ] && { log_msg "[dry-run] would start kernel keepalive for ${s}"; return 0; }
+  (
+    miss=0
+    while true; do
+      out=$(timeout 60 "$COLAB_BIN" sessions 2>/dev/null); rc=$?
+      if [ $rc -eq 0 ] && ! echo "$out" | grep -q "\[${s}\]"; then miss=$((miss+1)); else miss=0; fi
+      [ $miss -ge 3 ] && { log_msg "keepalive: session ${s} gone (3 misses); keepalive exits"; exit 0; }
+      echo 'print("keepalive")' | timeout 120 "$COLAB_BIN" exec -s "$s" >/dev/null 2>&1 || log_msg "keepalive: exec failed for ${s}"
+      sleep 240
+    done
+  ) >/dev/null 2>&1 &
+  KEEPALIVE_PIDS="${KEEPALIVE_PIDS:-} $!"
+  log_msg "kernel keepalive started for ${s} (pid $!)"
+}
+
 write_alert() {
   local ts line
   ts="$(utc_now)"
@@ -589,6 +609,7 @@ printf '[]\n' > "$SLOTS_FILE"
 WATCHDOG_PID=""
 
 cleanup() {
+  for kp in ${KEEPALIVE_PIDS:-}; do kill "$kp" 2>/dev/null || true; done
   if [ -n "$WATCHDOG_PID" ] && kill -0 "$WATCHDOG_PID" 2>/dev/null; then
     kill "$WATCHDOG_PID" 2>/dev/null || true
     wait "$WATCHDOG_PID" 2>/dev/null || true
@@ -1036,6 +1057,7 @@ PY
     [ -n "$reuse_session" ] && ev="reused"
     registry_append "$ev" "active" "$session_name" "$TARGET_ENDPOINT" "$TARGET_GPU" "$batch_name" "$state_file" "$TARGET_RAW"
     log_msg "launch succeeded: session=${session_name} endpoint=${TARGET_ENDPOINT:-unknown} gpu=${TARGET_GPU} state=${state_file}"
+    start_kernel_keepalive "${session_name}"
     LAST_LAUNCH_STATUS="OK"
     LAST_LAUNCH_SESSION="$session_name"
     LAST_LAUNCH_ENDPOINT="$TARGET_ENDPOINT"
